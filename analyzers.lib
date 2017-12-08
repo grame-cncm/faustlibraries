@@ -86,6 +86,20 @@ amp_follower(rel) = abs : env with {
 amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 
 
+//---------------`(an.)amp_follower_ar`----------------
+// Envelope follower with independent attack and release times. The
+// release can be shorter than the attack (unlike in `amp_follower_ud`
+// above).
+//
+// #### Usage
+//
+// ```
+// _ : amp_follower_ar(att,rel) : _;
+// ```
+// * Author Jonatan Liljedahl, revised by RM
+//---------------------------------------------------------
+amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
+
 //=============================Spectrum-Analyzers=========================================
 // Spectrum-analyzers split the input signal into a bank of parallel signals, one for
 // each spectral band. They are related to the Mth-Octave Filter-Banks in `filters.lib`.
@@ -476,17 +490,3 @@ license disposition, if their license choice is not already indicated
 elsewhere among the libraries.  It is expected that all software will be
 released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
-
-//---------------`(an.)amp_follower_ar`----------------
-// Envelope follower with independent attack and release times. The
-// release can be shorter than the attack (unlike in `amp_follower_ud`
-// above).
-//
-// #### Usage
-//
-// ```
-// _ : amp_follower_ar(att,rel) : _;
-// ```
-// * Author Jonatan Liljedahl, revised by RM
-//---------------------------------------------------------
-amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
