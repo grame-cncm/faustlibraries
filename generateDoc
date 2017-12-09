@@ -1,7 +1,7 @@
 #!/bin/sh
 
-LIBFOLDER="libraries"
-DOCFOLDER="documentation"
+LIBFOLDER="."
+DOCFOLDER="doc"
 PLATFORM=$(uname)
 FAUST2MD=$(which faust2md ./tools/faust2appls/faust2md | head -1)
 
@@ -23,10 +23,10 @@ for p in $FILES; do
 done
 
 # Generate the raw html version of the doc
-(pandoc --toc --standalone --mathjax "$LIBFOLDER/README.md" "$LIBFOLDER/doc/standardFunctions.md" tmp/*.md "$LIBFOLDER/doc/licenses.md" -o "$DOCFOLDER/library.html") || exit
+(pandoc --toc --standalone --mathjax "$LIBFOLDER/README.md" "$LIBFOLDER/doc/md/standardFunctions.md" "$LIBFOLDER/doc/md/primitives.md" tmp/*.md "$LIBFOLDER/doc/md/licenses.md" -o "$DOCFOLDER/library.html") || exit
 
 # Generate the PDF doc
-(pandoc --toc tmp/title/title.md "$LIBFOLDER/README.md" "$LIBFOLDER/doc/standardFunctions.md" tmp/*.md "$LIBFOLDER/doc/licenses.md" -s -o "$DOCFOLDER/library.pdf") || exit
+(pandoc --toc tmp/title/title.md "$LIBFOLDER/README.md" "$LIBFOLDER/doc/md/standardFunctions.md" "$LIBFOLDER/doc/md/primitives.md" tmp/*.md "$LIBFOLDER/doc/md/licenses.md" -s -o "$DOCFOLDER/library.pdf") || exit
 
 # Reformatting the html file with the right template
 if [ $PLATFORM = "Darwin" ]; then
