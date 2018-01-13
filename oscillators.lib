@@ -791,24 +791,6 @@ oscrp(f,p) = oscrq(f) : *(cos(p)), *(sin(p)) : + ; // p=0 for sine, p=PI/2 for c
 oscr = oscrs; // default = sine (starts without a pop)
 
 
-//-----------------------`(os.)osc`------------------------
-// Default sine wave oscillator (same as oscrs).
-// `osc` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// osc(freq) : _
-// ```
-//
-// Where:
-//
-// * `freq`: the frequency of the wave (Hz)
-//------------------------------------------------------------
-//osc	= oscsin;
-osc	= oscrs;
-
-
 //--------------------------`(os.)oscs`--------------------------------
 // Sinusoidal oscillator based on the state variable filter
 // = undamped "modified-coupled-form" resonator
@@ -822,6 +804,24 @@ with {
   sint(x) = *(x) : + ~ _ ; // frequency-scaled integrator
   sintp(x,y) = *(x) : +(y): + ~ _ ; // same + state input
 };
+
+
+//-----------------------`(os.)osc`------------------------
+// Default sine wave oscillator (same as oscs).
+// `osc` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// osc(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: the frequency of the wave (Hz)
+//------------------------------------------------------------
+//osc	= oscsin;
+osc	= oscs;
 
 
 //================ Waveguide-Resonator-Based Oscillators ================
