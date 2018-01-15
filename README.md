@@ -1,6 +1,6 @@
 # Faust Libraries
 
-NOTE: this documentation was automatically generated.
+NOTE: this documentation was automatically generated using [pandoc](https://pandoc.org/).
 
 This page provides information on how to use the Faust libraries.
 
