@@ -153,7 +153,7 @@ are(attT60,relT60,gate) = arfe(attT60,relT60,0,gate);
 //
 // Where:
 //
-// * `a`, `s`, `r`: attack (sec), sustain (percentage of g), release (sec)
+// * `a`, `s`, `r`: attack (sec), sustain (percentage of g: 0-1), release (sec)
 // * `g`: trigger signal ( >0 for attack, then release is when g back to 0)
 //-----------------------------------------------------
 // TODO: author RM
@@ -163,7 +163,7 @@ with{
 	off = t==0;
 	attTime = ma.SR*a;
 	relTime = ma.SR*r;
-	sustainGain = t*s*0.01;
+	sustainGain = t*s;
 	as = ba.countup(attTime,off) : ba.bpf.start(0,0) :
 		ba.bpf.end(attTime,sustainGain);
 	rel = _,ba.countup(relTime,on) : ba.bpf.start(0) : ba.bpf.end(relTime,0);
@@ -181,7 +181,7 @@ with{
 //
 // Where:
 //
-// * `a`, `d`, `s`, `r`: attack (sec), decay (sec), sustain level (percentage of max), release (sec)
+// * `a`, `d`, `s`, `r`: attack (sec), decay (sec), sustain level (percentage of max: 0-1), release (sec)
 // * `g`: gate signal ( >0 for attack, then release is when g back to 0)
 //-----------------------------------------------------
 // TODO: author RM
@@ -192,7 +192,7 @@ with{
 	attTime = ma.SR*a;
 	decTime = ma.SR*d;
 	relTime = ma.SR*r;
-	sustainGain = t*s*0.01;
+	sustainGain = t*s;
 	ads = ba.countup(attTime+decTime,off) : ba.bpf.start(0,0) :
 		ba.bpf.point(attTime,1) : ba.bpf.end(attTime+decTime,sustainGain);
 	rel = _,ba.countup(relTime,on) : ba.bpf.start(0) : ba.bpf.end(relTime,0);
@@ -280,7 +280,7 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //
 // Where:
 //
-// * `a`, `d`, `s`, `r`: attack (sec), decay (sec), sustain level (percentage of max), release (sec)
+// * `a`, `d`, `s`, `r`: attack (sec), decay (sec), sustain level (percentage of max: 0-1), release (sec)
 // * `g`: gate signal ( >0 for attack, then release is when g back to 0)
 //-----------------------------------------------------
 // Author: JOS
@@ -290,7 +290,7 @@ adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
   samps = ugate : +~(*(ugate)); // ramp time in samples
   attSamps = int(attT60 * ma.SR);
   target = select2(ugate, 0.0,
-           select2(samps<attSamps, (0.01*susLvl)*float(ugate), ugate));
+           select2(samps<attSamps, (susLvl)*float(ugate), ugate));
   t60 = select2(ugate, relT60, select2(samps<attSamps, decT60, attT60));
   pole = ba.tau2pole(t60/6.91);
   envelope = target : si.smooth(pole);
