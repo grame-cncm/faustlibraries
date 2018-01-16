@@ -168,6 +168,7 @@
 <li><a href="#dm.crybaby_demo"><code>(dm.)crybaby_demo</code></a></li>
 <li><a href="#dm.flanger_demo"><code>(dm.)flanger_demo</code></a></li>
 <li><a href="#dm.phaser2_demo"><code>(dm.)phaser2_demo</code></a></li>
+<li><a href="#dm.freeverb_demo"><code>(dm.)freeverb_demo</code></a></li>
 <li><a href="#dm.stereo_reverb_tester"><code>(dm.)stereo_reverb_tester</code></a></li>
 <li><a href="#dm.fdnrev0_demo"><code>(dm.)fdnrev0_demo</code></a></li>
 <li><a href="#dm.zita_rev_fdn_demo"><code>(dm.)zita_rev_fdn_demo</code></a></li>
@@ -183,7 +184,6 @@
 <li><a href="#dm.envelopes_demo"><code>(dm.)envelopes_demo</code></a></li>
 <li><a href="#dm.exciter"><code>(dm.)exciter</code></a></li>
 <li><a href="#dm.vocoder_demo"><code>(dm.)vocoder_demo</code></a></li>
-<li><a href="#dm.freeverb_demo"><code>(dm.)freeverb_demo</code></a></li>
 </ul></li>
 </ul></li>
 <li><a href="#dx7.lib">dx7.lib</a><ul>
@@ -462,8 +462,8 @@
 <li><a href="#os.oscrq"><code>(os.)oscrq</code></a></li>
 <li><a href="#os.oscrs"><code>(os.)oscrs</code></a></li>
 <li><a href="#os.oscrc"><code>(os.)oscrc</code></a></li>
-<li><a href="#os.osc"><code>(os.)osc</code></a></li>
 <li><a href="#os.oscs"><code>(os.)oscs</code></a></li>
+<li><a href="#os.osc"><code>(os.)osc</code></a></li>
 </ul></li>
 <li><a href="#waveguide-resonator-based-oscillators">Waveguide-Resonator-Based Oscillators</a><ul>
 <li><a href="#os.oscw"><code>(os.)oscw</code></a></li>
@@ -723,7 +723,7 @@
 </ul>
 </div>
 <div class="col-sm-8" style="height: 100%;overflow-y: scroll"><h1 id="faust-libraries">Faust Libraries</h1>
-<p>NOTE: this documentation was automatically generated.</p>
+<p>NOTE: this documentation was automatically generated using <a href="https://pandoc.org/">pandoc</a>.</p>
 <p>This page provides information on how to use the Faust libraries.</p>
 <p>The <code>/libraries</code> folder contains the different Faust libraries. If you wish to add your own functions to this library collection, you can refer to the &quot;Contributing&quot; section providing a set of coding conventions.</p>
 <p>WARNING: These libraries replace the &quot;old&quot; Faust libraries. They are still being beta tested so you might encounter bugs while using them. If your codes still use the &quot;old&quot; Faust libraries, you might want to try to use Bart Brouns' script that automatically makes an old Faust code compatible with the new libraries: <a href="https://github.com/magnetophon/faustCompressors/blob/master/newlib.sh" class="uri">https://github.com/magnetophon/faustCompressors/blob/master/newlib.sh</a>. If you find a bug, please report it at rmichon_at_ccrma_dot_stanford_dot_edu. Thanks ;)!</p>
@@ -2377,14 +2377,19 @@ _ : filterbank_demo : _</code></pre>
 <h4 id="usage-81">Usage</h4>
 <pre><code>_,_ : phaser2_demo : _,_;</code></pre>
 <hr />
+<h3 id="dm.freeverb_demo"><code>(dm.)freeverb_demo</code></h3>
+<p>Freeverb demo application.</p>
+<h4 id="usage-82">Usage</h4>
+<pre><code>_,_ : freeverb_demo : _,_;</code></pre>
+<hr />
 <h3 id="dm.stereo_reverb_tester"><code>(dm.)stereo_reverb_tester</code></h3>
 <p>Handy test inputs for reverberator demos below.</p>
-<h4 id="usage-82">Usage</h4>
+<h4 id="usage-83">Usage</h4>
 <pre><code>_ : stereo_reverb_tester : _</code></pre>
 <hr />
 <h3 id="dm.fdnrev0_demo"><code>(dm.)fdnrev0_demo</code></h3>
 <p>A reverb application using <code>fdnrev0</code>.</p>
-<h4 id="usage-83">Usage</h4>
+<h4 id="usage-84">Usage</h4>
 <pre><code>_,_ : fdnrev0_demo(N,NB,BBSO) : _,_</code></pre>
 <p>Where:</p>
 <ul>
@@ -2395,18 +2400,18 @@ _ : filterbank_demo : _</code></pre>
 <hr />
 <h3 id="dm.zita_rev_fdn_demo"><code>(dm.)zita_rev_fdn_demo</code></h3>
 <p>Reverb demo application based on <code>zita_rev_fdn</code>.</p>
-<h4 id="usage-84">Usage</h4>
+<h4 id="usage-85">Usage</h4>
 <pre><code>si.bus(8) : zita_rev_fdn_demo : si.bus(8)</code></pre>
 <hr />
 <h3 id="dm.zita_light"><code>(dm.)zita_light</code></h3>
 <p>Light version of <code>dm.zita_rev1</code> with only 2 UI elements.</p>
-<h4 id="usage-85">Usage</h4>
+<h4 id="usage-86">Usage</h4>
 <pre><code>_,_ : zita_light : _,_</code></pre>
 <hr />
 <h3 id="dm.zita_rev1"><code>(dm.)zita_rev1</code></h3>
 <p>Example GUI for <code>zita_rev1_stereo</code> (mostly following the Linux <code>zita-rev1</code> GUI).</p>
 <p>Only the dry/wet and output level parameters are &quot;dezippered&quot; here. If parameters are to be varied in real time, use <code>smooth(0.999)</code> or the like in the same way.</p>
-<h4 id="usage-86">Usage</h4>
+<h4 id="usage-87">Usage</h4>
 <pre><code>_,_ : zita_rev1 : _,_</code></pre>
 <h4 id="reference-6">Reference</h4>
 <p><a href="http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html" class="uri">http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html</a></p>
@@ -2414,27 +2419,27 @@ _ : filterbank_demo : _</code></pre>
 <h2 id="generators">Generators</h2>
 <h3 id="dm.sawtooth_demo"><code>(dm.)sawtooth_demo</code></h3>
 <p>An application demonstrating the different sawtooth oscillators of Faust.</p>
-<h4 id="usage-87">Usage</h4>
+<h4 id="usage-88">Usage</h4>
 <pre><code>sawtooth_demo : _</code></pre>
 <hr />
 <h3 id="dm.virtual_analog_oscillator_demo"><code>(dm.)virtual_analog_oscillator_demo</code></h3>
 <p>Virtual analog oscillator demo application.</p>
-<h4 id="usage-88">Usage</h4>
+<h4 id="usage-89">Usage</h4>
 <pre><code>virtual_analog_oscillator_demo : _</code></pre>
 <hr />
 <h3 id="dm.oscrs_demo"><code>(dm.)oscrs_demo</code></h3>
 <p>Simple application demoing filter based oscillators.</p>
-<h4 id="usage-89">Usage</h4>
+<h4 id="usage-90">Usage</h4>
 <pre><code>oscrs_demo : _</code></pre>
 <hr />
 <h3 id="dm.velvet_noise_demo"><code>(dm.)velvet_noise_demo</code></h3>
 <p>Listen to velvet_noise!</p>
-<h4 id="usage-90">Usage</h4>
+<h4 id="usage-91">Usage</h4>
 <pre><code>velvet_noise_demo : _</code></pre>
 <hr />
 <h3 id="dm.latch_demo"><code>(dm.)latch_demo</code></h3>
 <p>Illustrate latch operation</p>
-<h4 id="usage-91">Usage</h4>
+<h4 id="usage-92">Usage</h4>
 <pre><code>echo &#39;import(&quot;stdfaust.lib&quot;);&#39; &gt; latch_demo.dsp
 echo &#39;process = dm.latch_demo;&#39; &gt;&gt; latch_demo.dsp
 faust2octave latch_demo.dsp
@@ -2442,7 +2447,7 @@ Octave:1&gt; plot(faustout);</code></pre>
 <hr />
 <h3 id="dm.envelopes_demo"><code>(dm.)envelopes_demo</code></h3>
 <p>Illustrate various envelopes overlaid, including their gate * 1.1</p>
-<h4 id="usage-92">Usage</h4>
+<h4 id="usage-93">Usage</h4>
 <pre><code>echo &#39;import(&quot;stdfaust.lib&quot;);&#39; &gt; envelopes_demo.dsp
 echo &#39;process = dm.envelopes_demo;&#39; &gt;&gt; envelopes_demo.dsp
 faust2octave envelopes_demo.dsp
@@ -2450,7 +2455,7 @@ Octave:1&gt; plot(faustout);</code></pre>
 <hr />
 <h3 id="dm.exciter"><code>(dm.)exciter</code></h3>
 <p>Psychoacoustic harmonic exciter, with GUI.</p>
-<h4 id="usage-93">Usage</h4>
+<h4 id="usage-94">Usage</h4>
 <pre><code>_ : exciter : _</code></pre>
 <h4 id="references-4">References</h4>
 <ul>
@@ -2460,13 +2465,8 @@ Octave:1&gt; plot(faustout);</code></pre>
 <hr />
 <h3 id="dm.vocoder_demo"><code>(dm.)vocoder_demo</code></h3>
 <p>Use example of the vocoder function where an impulse train is used as excitation.</p>
-<h4 id="usage-94">Usage</h4>
-<pre><code>_ : vocoder_demo : _;</code></pre>
-<hr />
-<h3 id="dm.freeverb_demo"><code>(dm.)freeverb_demo</code></h3>
-<p>Freeverb demo application.</p>
 <h4 id="usage-95">Usage</h4>
-<pre><code>_,_ : freeverb_demo : _,_;</code></pre>
+<pre><code>_ : vocoder_demo : _;</code></pre>
 <hr />
 <h1 id="dx7.lib">dx7.lib</h1>
 <p>Yamaha DX7 emulation library. Its official prefix is <code>dx</code>.</p>
@@ -2682,7 +2682,7 @@ Octave:1&gt; plot(faustout);</code></pre>
 <pre><code>asr(a,s,r,g) : _</code></pre>
 <p>Where:</p>
 <ul>
-<li><code>a</code>, <code>s</code>, <code>r</code>: attack (sec), sustain (percentage of g), release (sec)</li>
+<li><code>a</code>, <code>s</code>, <code>r</code>: attack (sec), sustain (percentage of g: 0-1), release (sec)</li>
 <li><code>g</code>: trigger signal ( &gt;0 for attack, then release is when g back to 0)</li>
 </ul>
 <hr />
@@ -2692,7 +2692,7 @@ Octave:1&gt; plot(faustout);</code></pre>
 <pre><code>adsr(a,d,s,r,g) : _</code></pre>
 <p>Where:</p>
 <ul>
-<li><code>a</code>, <code>d</code>, <code>s</code>, <code>r</code>: attack (sec), decay (sec), sustain level (percentage of max), release (sec)</li>
+<li><code>a</code>, <code>d</code>, <code>s</code>, <code>r</code>: attack (sec), decay (sec), sustain level (percentage of max: 0-1), release (sec)</li>
 <li><code>g</code>: gate signal ( &gt;0 for attack, then release is when g back to 0)</li>
 </ul>
 <hr />
@@ -2713,7 +2713,7 @@ Octave:1&gt; plot(faustout);</code></pre>
 <pre><code>adsre(a,d,s,r,g) : _</code></pre>
 <p>Where:</p>
 <ul>
-<li><code>a</code>, <code>d</code>, <code>s</code>, <code>r</code>: attack (sec), decay (sec), sustain level (percentage of max), release (sec)</li>
+<li><code>a</code>, <code>d</code>, <code>s</code>, <code>r</code>: attack (sec), decay (sec), sustain level (percentage of max: 0-1), release (sec)</li>
 <li><code>g</code>: gate signal ( &gt;0 for attack, then release is when g back to 0)</li>
 </ul>
 <hr />
@@ -4054,6 +4054,13 @@ _ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : fdelay(maxDelay) : _</co
 <li>MINUS the estimated delay at <code>f0</code> of allpass chain in samples, provided in negative form to facilitate subtraction from delay-line length.</li>
 <li>Output signal from allpass chain</li>
 </ul>
+<h4 id="reference-33">Reference</h4>
+<ul>
+<li>&quot;Dispersion Modeling in Waveguide Piano Synthesis Using Tunable Allpass Filters&quot;, by Jukka Rauhala and Vesa Valimaki, DAFX-2006, pp. 71-76</li>
+<li><a href="http://www.dafx.ca/proceedings/papers/p_071.pdf" class="uri">http://www.dafx.ca/proceedings/papers/p_071.pdf</a> (An erratum in Eq. (7) is corrected in Dr. Rauhala's encompassing dissertation (and below).)</li>
+<li><a href="http://www.acoustics.hut.fi/research/asp/piano/" class="uri">http://www.acoustics.hut.fi/research/asp/piano/</a></li>
+</ul>
+<hr />
 <h3 id="ef.stereo_width"><code>(ef.)stereo_width</code></h3>
 <p>Stereo Width effect using the Blumlein Shuffler technique. <code>stereo_width</code> is a standard Faust function.</p>
 <h4 id="usage-229">Usage</h4>
@@ -4063,7 +4070,7 @@ _ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : fdelay(maxDelay) : _</co
 <li><code>w</code>: stereo width between 0 and 1</li>
 </ul>
 <p>At <code>w=0</code>, the output signal is mono ((left+right)/2 in both channels). At <code>w=1</code>, there is no effect (original stereo image). Thus, w between 0 and 1 varies stereo width from 0 to &quot;original&quot;.</p>
-<h4 id="reference-33">Reference</h4>
+<h4 id="reference-34">Reference</h4>
 <ul>
 <li>&quot;Applications of Blumlein Shuffling to Stereo Microphone Techniques&quot; Michael A. Gerzon, JAES vol. 42, no. 6, June 1994</li>
 </ul>
@@ -4102,7 +4109,7 @@ _ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : fdelay(maxDelay) : _</co
 <ul>
 <li><code>N</code>: number of nodes along each edge - a power of two (1,2,4,8,...)</li>
 </ul>
-<h4 id="reference-34">Reference</h4>
+<h4 id="reference-35">Reference</h4>
 <p><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html</a></p>
 <h4 id="signal-order-in-and-out">Signal Order In and Out</h4>
 <p>The mesh is constructed recursively using 2x2 embeddings. Thus, the top level of <code>mesh_square(M)</code> is a block 2x2 mesh, where each block is a <code>mesh(M/2)</code>. Let these blocks be numbered 1,2,3,4 in the geometry NW,NE,SW,SE, i.e., as 1 2 3 4 Each block has four vector inputs and four vector outputs, where the length of each vector is <code>M/2</code>. Label the input vectors as Ni,Ei,Wi,Si, i.e., as the inputs from the North, East South, and West, and similarly for the outputs. Then, for example, the upper left input block of M/2 signals is labeled 1Ni. Most of the connections are internal, such as 1Eo -&gt; 2Wi. The <code>8*(M/2)</code> input signals are grouped in the order 1Ni 2Ni 3Si 4Si 1Wi 3Wi 2Ei 4Ei and the output signals are 1No 1Wo 2No 2Eo 3So 3Wo 4So 4Eo or</p>
@@ -4152,7 +4159,7 @@ process = 1-1&#39; : mesh_square_test(4); // all modes excited forever</code></p
 <p>Pink noise (1/f noise) generator (third-order approximation) <code>pink_noise</code> is a standard Faust function.</p>
 <h4 id="usage-236">Usage</h4>
 <pre><code>pink_noise : _;</code></pre>
-<h4 id="reference-35">Reference:</h4>
+<h4 id="reference-36">Reference:</h4>
 <p><a href="https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html" class="uri">https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html</a></p>
 <hr />
 <h3 id="no.pink_noise_vm"><code>(no.)pink_noise_vm</code></h3>
@@ -4191,7 +4198,7 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 <li><code>f0</code>: average frequency of noise impulses per second</li>
 </ul>
 <p>Random impulses in the amplitude range -1 to 1 are generated at an average rate of f0 impulses per second.</p>
-<h4 id="reference-36">Reference</h4>
+<h4 id="reference-37">Reference</h4>
 <ul>
 <li>See velvet_noise</li>
 </ul>
@@ -4205,7 +4212,7 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 <li><code>amp</code>: amplitude of noise impulses (positive and negative)</li>
 <li><code>f0</code>: average frequency of noise impulses per second</li>
 </ul>
-<h4 id="reference-37">Reference</h4>
+<h4 id="reference-38">Reference</h4>
 <ul>
 <li>Matti Karjalainen and Hanna Jarvelainen, &quot;Reverberation Modeling Using Velvet Noise&quot;, in Proc. 30th Int. Conf. Intelligent Audio Environments (AES07), March 2007.</li>
 </ul>
@@ -4218,7 +4225,7 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 <ul>
 <li><code>N</code>: number of uniform random numbers added to approximate Gaussian white noise</li>
 </ul>
-<h4 id="reference-38">Reference</h4>
+<h4 id="reference-39">Reference</h4>
 <ul>
 <li>See Central Limit Theorem</li>
 </ul>
@@ -4396,7 +4403,7 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 <p><code>sawN(N,freq)</code>, <code>sawNp</code>, <code>saw2dpw(freq)</code>, <code>saw2(freq)</code>, <code>saw3(freq)</code>, <code>saw4(freq)</code>, <code>saw5(freq)</code>, <code>saw6(freq)</code>, <code>sawtooth(freq)</code>, <code>saw2f2(freq)</code> <code>saw2f4(freq)</code></p>
 <h4 id="method-1-saw2">Method 1 (<code>saw2</code>)</h4>
 <p>Polynomial Transition Regions (PTR) (for aliasing suppression)</p>
-<h5 id="reference-39">Reference</h5>
+<h5 id="reference-40">Reference</h5>
 <ul>
 <li>Kleimola, J.; Valimaki, V., &quot;Reducing Aliasing from Synthetic Audio Signals Using Polynomial Transition Regions,&quot; in Signal Processing Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012</li>
 <li><a href="https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9" class="uri">https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9</a></li>
@@ -4404,7 +4411,7 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 </ul>
 <h4 id="method-2-sawn">Method 2 (<code>sawN</code>)</h4>
 <p>Differentiated Polynomial Waves (DPW) (for aliasing suppression)</p>
-<h5 id="reference-40">Reference</h5>
+<h5 id="reference-41">Reference</h5>
 <p>&quot;Alias-Suppressed Oscillators based on Differentiated Polynomial Waveforms&quot;, Vesa Valimaki, Juhan Nam, Julius Smith, and Jonathan Abel, IEEE Tr. Acoustics, Speech, and Language Processing (IEEE-ASLP), Vol. 18, no. 5, May 2010.</p>
 <h4 id="other-cases">Other Cases</h4>
 <p>Correction-filtered versions of <code>saw2</code>: <code>saw2f2</code>, <code>saw2f4</code> The correction filter compensates &quot;droop&quot; near half the sampling rate. See reference for sawN.</p>
@@ -4548,7 +4555,7 @@ triangle : _ // = triangleN(2)</code></pre>
 <ul>
 <li><code>freq</code>: frequency</li>
 </ul>
-<h4 id="reference-41">Reference</h4>
+<h4 id="reference-42">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
 </ul>
@@ -4561,7 +4568,7 @@ triangle : _ // = triangleN(2)</code></pre>
 <ul>
 <li><code>freq</code>: frequency</li>
 </ul>
-<h4 id="reference-42">Reference</h4>
+<h4 id="reference-43">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
 </ul>
@@ -4574,22 +4581,22 @@ triangle : _ // = triangleN(2)</code></pre>
 <ul>
 <li><code>freq</code>: frequency</li>
 </ul>
-<h4 id="reference-43">Reference</h4>
+<h4 id="reference-44">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
 </ul>
 <hr />
+<h3 id="os.oscs"><code>(os.)oscs</code></h3>
+<p>Sinusoidal oscillator based on the state variable filter = undamped &quot;modified-coupled-form&quot; resonator = &quot;magic circle&quot; algorithm used in graphics</p>
+<hr />
 <h3 id="os.osc"><code>(os.)osc</code></h3>
-<p>Default sine wave oscillator (same as oscrs). <code>osc</code> is a standard Faust function.</p>
+<p>Default sine wave oscillator (same as oscs). <code>osc</code> is a standard Faust function.</p>
 <h4 id="usage-272">Usage</h4>
 <pre><code>osc(freq) : _</code></pre>
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: the frequency of the wave (Hz)</li>
 </ul>
-<hr />
-<h3 id="os.oscs"><code>(os.)oscs</code></h3>
-<p>Sinusoidal oscillator based on the state variable filter = undamped &quot;modified-coupled-form&quot; resonator = &quot;magic circle&quot; algorithm used in graphics</p>
 <hr />
 <h2 id="waveguide-resonator-based-oscillators">Waveguide-Resonator-Based Oscillators</h2>
 <p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>.</p>
@@ -4601,7 +4608,7 @@ triangle : _ // = triangleN(2)</code></pre>
 <ul>
 <li><code>freq</code>: frequency</li>
 </ul>
-<h4 id="reference-44">Reference</h4>
+<h4 id="reference-45">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
 </ul>
@@ -4614,7 +4621,7 @@ triangle : _ // = triangleN(2)</code></pre>
 <ul>
 <li><code>freq</code>: frequency</li>
 </ul>
-<h4 id="reference-45">Reference</h4>
+<h4 id="reference-46">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
 </ul>
@@ -4627,7 +4634,7 @@ triangle : _ // = triangleN(2)</code></pre>
 <ul>
 <li><code>freq</code>: frequency</li>
 </ul>
-<h4 id="reference-46">Reference</h4>
+<h4 id="reference-47">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
 </ul>
@@ -4640,7 +4647,7 @@ triangle : _ // = triangleN(2)</code></pre>
 <ul>
 <li><code>freq</code>: frequency</li>
 </ul>
-<h4 id="reference-47">Reference</h4>
+<h4 id="reference-48">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
 </ul>
@@ -4687,7 +4694,7 @@ triangle : _ // = triangleN(2)</code></pre>
 <li><code>fb</code>: feedback gain between 0 and 1 (0 typical)</li>
 <li><code>invert</code>: 0 for normal, 1 to invert sign of flanging sum</li>
 </ul>
-<h4 id="reference-48">Reference</h4>
+<h4 id="reference-49">Reference</h4>
 <p><a href="https://ccrma.stanford.edu/~jos/pasp/Flanging.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Flanging.html</a></p>
 <hr />
 <h3 id="pf.flanger_stereo"><code>(pf.)flanger_stereo</code></h3>
@@ -4702,7 +4709,7 @@ triangle : _ // = triangleN(2)</code></pre>
 <li><code>fb</code>: feedback gain between 0 and 1 (0 typical)</li>
 <li><code>invert</code>: 0 for normal, 1 to invert sign of flanging sum</li>
 </ul>
-<h4 id="reference-49">Reference</h4>
+<h4 id="reference-50">Reference</h4>
 <p><a href="https://ccrma.stanford.edu/~jos/pasp/Flanging.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Flanging.html</a></p>
 <hr />
 <h3 id="pf.phaser2_mono"><code>(pf.)phaser2_mono</code></h3>
@@ -6181,7 +6188,7 @@ fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) :&gt;
 <li><code>loopgainmax</code>: scalar gain between 0 and 1 used to &quot;squelch&quot; the reverb</li>
 <li><code>nonl</code>: nonlinearity (0 to 0.999..., 0 being linear)</li>
 </ul>
-<h4 id="reference-50">Reference</h4>
+<h4 id="reference-51">Reference</h4>
 <p><a href="https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html</a></p>
 <hr />
 <h3 id="re.zita_rev_fdn"><code>(re.)zita_rev_fdn</code></h3>
@@ -6201,7 +6208,7 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\
 <li><code>t60m</code>: desired decay time (t60) at midrange frequencies (sec)</li>
 <li><code>fsmax</code>: maximum sampling rate to be used (Hz)</li>
 </ul>
-<h4 id="reference-51">Reference</h4>
+<h4 id="reference-52">Reference</h4>
 <ul>
 <li><a href="http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html" class="uri">http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Zita_Rev1.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/Zita_Rev1.html</a></li>
@@ -6408,7 +6415,7 @@ bus(4) : _,_,_,_</code></pre>
 <ul>
 <li><code>s</code>: smoothness between 0 and 1. s=0 for no smoothing, s=0.999 is &quot;very smooth&quot;, s&gt;1 is unstable, and s=1 yields the zero signal for all inputs. The exponential time-constant is approximately 1/(1-s) samples, when s is close to (but less than) 1.</li>
 </ul>
-<h4 id="reference-52">Reference:</h4>
+<h4 id="reference-53">Reference:</h4>
 <p><a href="https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html" class="uri">https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html</a></p>
 <hr />
 <h3 id="si.cbus"><code>(si.)cbus</code></h3>
@@ -6581,7 +6588,7 @@ moog_vcf_2bn(res,fr)</code></pre>
 <ul>
 <li><code>fr</code>: resonance frequency in Hz</li>
 </ul>
-<h4 id="reference-53">Reference</h4>
+<h4 id="reference-54">Reference</h4>
 <p><a href="https://ccrma.stanford.edu/~jos/pasp/vegf.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/vegf.html</a></p>
 <hr />
 <h3 id="ve.autowah"><code>(ve.)autowah</code></h3>
@@ -6601,7 +6608,7 @@ moog_vcf_2bn(res,fr)</code></pre>
 <ul>
 <li><code>wah</code>: &quot;pedal angle&quot; from 0 to 1</li>
 </ul>
-<h4 id="reference-54">Reference</h4>
+<h4 id="reference-55">Reference</h4>
 <p><a href="https://ccrma.stanford.edu/~jos/pasp/vegf.html" class="uri">https://ccrma.stanford.edu/~jos/pasp/vegf.html</a></p>
 <hr />
 <h3 id="ve.vocoder"><code>(ve.)vocoder</code></h3>
