@@ -834,12 +834,12 @@ with {
 
 // Catch-all definitions for generality - even order is done:
 
-highpass_plus_lowpass(N,fc) = switch_odd_even(N%2,N,fc) with {
+highpass_plus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
   switch_odd_even(0,N,fc) = highpass_plus_lowpass_even(N,fc);
   switch_odd_even(1,N,fc) = highpass_plus_lowpass_odd(N,fc);
 };
 
-highpass_minus_lowpass(N,fc) = switch_odd_even(N%2,N,fc) with {
+highpass_minus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
   switch_odd_even(0,N,fc) = highpass_minus_lowpass_even(N,fc);
   switch_odd_even(1,N,fc) = highpass_minus_lowpass_odd(N,fc);
 };
