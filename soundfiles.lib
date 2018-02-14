@@ -1,6 +1,6 @@
 //#################################### soundfiles.lib ########################################
 // A library of basic elements to handle signal routing in Faust. Its official
-// prefix is `sf`.
+// prefix is `so`.
 //########################################################################################
 
 /************************************************************************
@@ -43,7 +43,7 @@ ma = library("maths.lib");
 //=============================Functions Reference========================================
 //========================================================================================
 
-//--------------------------------`(sf.)looper`-----------------------------------
+//--------------------------------`(so.)looper`-----------------------------------
 // Play a soundfile in a loop taking into account its sampling rate
 // `looper` is a standard Faust function.
 //
@@ -68,9 +68,9 @@ looper(s) = float(srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
 		bus(n) = par(i,n,_);
 	};
 
-//--------------------------------`(sf.)player`-----------------------------------
+//--------------------------------`(so.)player`-----------------------------------
 // Play a soundfile in a loop taking into account its sampling rate, with speed and level controls
-// `soundfile_looper` is a standard Faust function.
+// `player` is a standard Faust function.
 //
 // #### Usage
 //
