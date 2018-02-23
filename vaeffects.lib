@@ -44,9 +44,9 @@ Michon and Julius O. Smith III, and are released under the
 // ```
 // Where:
 //
-// * `fr`: corner-resonance frequency in Hz ( less than SR/6.3 or so )
-// * `res`: Normalized amount of corner-resonance between 0 and 1 (0 is no
-// 	resonance, 1 is maximum)
+// * `res`: normalized amount of corner-resonance between 0 and 1 
+// (0 is no resonance, 1 is maximum)
+// * `fr`: corner-resonance frequency in Hz (less than SR/6.3 or so)
 //
 // #### References
 // * <https://ccrma.stanford.edu/~stilti/papers/moogvcf.pdf>
@@ -79,9 +79,9 @@ with {
 //
 // Where:
 //
-// * `fr`: corner-resonance frequency in Hz
-// * `res`: Normalized amount of corner-resonance between 0 and 1
+// * `res`: normalized amount of corner-resonance between 0 and 1
 // 	(0 is min resonance, 1 is maximum)
+// * `fr`: corner-resonance frequency in Hz
 //------------------------------------------------------------
 moog_vcf_2b(res,fr) = fi.tf2s(0,0,b0,a11,a01,w1) : fi.tf2s(0,0,b0,a12,a02,w1)
 with {
