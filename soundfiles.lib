@@ -6,7 +6,7 @@
 /************************************************************************
 ************************************************************************
 FAUST library file
-Copyright (C) 2003-2018 GRAME, Centre National de Creation Musicale
+Copyright (C) 2018 GRAME, Centre National de Creation Musicale
 ----------------------------------------------------------------------
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as
@@ -36,21 +36,21 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Soundfile Library";
-declare version "0.1";
+declare version "0.2";
 
 ma = library("maths.lib");
 
 //=============================Functions Reference========================================
 //========================================================================================
 
-//--------------------------------`(so.)looper`-----------------------------------
+//--------------------------------`(so.)loop`-----------------------------------
 // Play a soundfile in a loop taking into account its sampling rate
-// `looper` is a standard Faust function.
+// `loop` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// looper(s)
+// loop(s)
 // ```
 //
 // Where:
@@ -59,7 +59,7 @@ ma = library("maths.lib");
 //
 //-----------------------------------------------------------------------------
 
-looper(s) = float(srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
+loop(s) = float(srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
 	with {
 		length(s) = 0 : s : _,cut(outputs(s)-1);
 		srate(s) = 0 : s : !,_,cut(outputs(s)-2);
@@ -69,25 +69,52 @@ looper(s) = float(srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
 		bus(n) = par(i,n,_);
 	};
 
-//--------------------------------`(so.)player`-----------------------------------
-// Play a soundfile in a loop taking into account its sampling rate, with speed and level controls
-// `player` is a standard Faust function.
+//--------------------------------`(so.)loop_rate`-----------------------------------
+// Play a soundfile in a loop taking into account its sampling rate, with speed control
+// `loop_rate` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// player(s, speed, volume)
+// loop_rate(s, speed)
 // ```
 //
 // Where:
 //
 // * `s`: the soundfile 
 // * `speed`: the speed between 0 and n 
-// * `volume`: the volume between 0 and 1 
 //
 //-----------------------------------------------------------------------------
 
-player(s, speed, volume) = float(speed*srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
+loop_rate(s, speed) = float(speed*srate(s))/ma.SR: (+,length(s):fmod)~_ : int : outs(s)
+	with {
+		length(s) = 0 : s : _,cut(outputs(s)-1);
+		srate(s) = 0 : s : !,_,cut(outputs(s)-2);
+		channels(s) = 0 : s : !,!,_,cut(outputs(s)-3);
+		outs(s) = s : cut(3), bus(outputs(s)-3);
+		cut(n) = par(i,n,!);
+		bus(n) = par(i,n,_);
+	};
+
+//--------------------------------`(so.)loop_rate_speed`-----------------------------------
+// Play a soundfile in a loop taking into account its sampling rate, with speed and level controls
+// `loop_rate_speed` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// loop_rate_speed(s, speed, volume)
+// ```
+//
+// Where:
+//
+// * `s`: the soundfile 
+// * `speed`: the speed between 0 and n 
+// * `volume`: the volume between 0 and n 
+//
+//-----------------------------------------------------------------------------
+
+loop_rate_speed(s, speed, volume) = float(speed*srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
 	with {
 		length(s) = 0 : s : _,cut(outputs(s)-1);
 		srate(s) = 0 : s : !,_,cut(outputs(s)-2);
