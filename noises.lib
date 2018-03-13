@@ -144,6 +144,8 @@ pink_filter = fi.iir((0.049922035, -0.095993537, 0.050612699, -0.004408786),
 
 pink_noise = noise : pink_filter;
 
+pink_noise_m = pink_noise * 12.5; // Equalizes loudness to that of no.noise (thanks Mykle Hansen) - beware of clipping
+
 //-------------------------`(no.)pink_noise_vm`-------------------
 // Multi pink noise generator.
 //
@@ -278,6 +280,8 @@ with {
   sigma = sqrt(N/3.0);    // rms of each uwn channel
   uvgwn = gwn / sigma; // approaches zero-mean, unit-variance Gaussian white noise, for large N
 };
+
+gnoisem(N) = gnoise(N) * 0.625; // Equalizes loudness to that of no.noise (thanks Mykle Hansen)
 
 /*** END jos section ***/
 
