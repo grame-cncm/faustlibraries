@@ -3,7 +3,7 @@
 LIBFOLDER="."
 DOCFOLDER="doc"
 PLATFORM=$(uname)
-FAUST2MD=$(which faust2md ./tools/faust2appls/faust2md | head -1)
+FAUST2MD=$(which faust2md | head -1)
 
 for p in $@; do
 	if [ $p = "-help" ] || [ $p = "-h" ]; then
@@ -23,26 +23,22 @@ for p in $FILES; do
 done
 
 # Generate the raw html version of the doc
-(pandoc --toc --standalone --mathjax "$LIBFOLDER/README.md" "$LIBFOLDER/doc/md/standardFunctions.md" "$LIBFOLDER/doc/md/primitives.md" tmp/*.md "$LIBFOLDER/doc/md/licenses.md" -o "$DOCFOLDER/library.html") || exit
+(pandoc --toc --standalone --metadata pagetitle="Faust Libraries Documentation" --include-in-header="$LIBFOLDER/doc/md/header.html" --mathjax "$LIBFOLDER/README.md" "$LIBFOLDER/doc/md/standardFunctions.md" "$LIBFOLDER/doc/md/primitives.md" tmp/*.md "$LIBFOLDER/doc/md/licenses.md" -o "$DOCFOLDER/library.html") || exit
 
 # Generate the PDF doc
 (pandoc --toc tmp/title/title.md "$LIBFOLDER/README.md" "$LIBFOLDER/doc/md/standardFunctions.md" "$LIBFOLDER/doc/md/primitives.md" tmp/*.md "$LIBFOLDER/doc/md/licenses.md" -s -o "$DOCFOLDER/library.pdf") || exit
 
 # Reformatting the html file with the right template
 if [ $PLATFORM = "Darwin" ]; then
-	(sed -i "" "s/<title>/<title>Faust Libraries Documentation/g" "$DOCFOLDER/library.html") || exit
-	(sed -i "" "s/<style type=\"text\/css\">code{white-space: pre;}<\/style>/<\/style><link rel=\"stylesheet\" href=\"https:\/\/maxcdn.bootstrapcdn.com\/bootstrap\/3.3.7\/css\/bootstrap.min.css\"><script src=\"https:\/\/ajax.googleapis.com\/ajax\/libs\/jquery\/1.12.4\/jquery.min.js\">\n<\/script><script src=\"https:\/\/maxcdn.bootstrapcdn.com\/bootstrap\/3.3.7\/js\/bootstrap.min.js\"><\/script>/g" "$DOCFOLDER/library.html") || exit
-	(sed -i "" "s/<body>/<div class=\"container\"><div class=\"row\" style=\"height: 100vh;\">/g" "$DOCFOLDER/library.html") || exit
+	(sed -i "" "s/<body>/<body><div class=\"container\"><div class=\"row\" style=\"height: 100vh;\">/g" "$DOCFOLDER/library.html") || exit
 	(sed -i "" "s/<\/body>/<\/div><\/div><\/body>/g" "$DOCFOLDER/library.html") || exit
-	(sed -i "" "s/<div id=\"TOC\">/<div class=\"col-sm-4\" id=\"TOC\" style=\"height: 100%;overflow: scroll;\">/g" "$DOCFOLDER/library.html") || exit
+	(sed -i "" "s/<nav id=\"TOC\">/<div class=\"col-sm-4\" id=\"TOC\" style=\"height: 100%;overflow: scroll;\">/g" "$DOCFOLDER/library.html") || exit
 	(sed -i "" "s/<h1 id=\"faust-libraries\">Faust Libraries<\/h1>/<div class=\"col-sm-8\" style=\"height: 100%;overflow-y: scroll\"><h1 id=\"faust-libraries\">Faust Libraries<\/h1>/g" "$DOCFOLDER/library.html") || exit
 else
-	(sed -i 's/<title>/<title>Faust Libraries Documentation/g' "$DOCFOLDER/library.html") || exit
-	(sed -i 's/<style type=\"text\/css\">code{white-space: pre;}<\/style>/<\/style><link rel=\"stylesheet\" href=\"https:\/\/maxcdn.bootstrapcdn.com\/bootstrap\/3.3.7\/css\/bootstrap.min.css\"><script src=\"https:\/\/ajax.googleapis.com\/ajax\/libs\/jquery\/1.12.4\/jquery.min.js\">\n<\/script><script src=\"https:\/\/maxcdn.bootstrapcdn.com\/bootstrap\/3.3.7\/js\/bootstrap.min.js\"><\/script>/g' "$DOCFOLDER/library.html") || exit
-	(sed -i 's/<body>/<div class=\"container\"><div class=\"row\" style=\"height: 100vh;\">/g' "$DOCFOLDER/library.html") || exit
-	(sed -i 's/<\/body>/<\/div><\/div><\/body>/g' "$DOCFOLDER/library.html") || exit
-	(sed -i 's/<div id=\"TOC\">/<div class=\"col-sm-4\" id=\"TOC\" style=\"height: 100%;overflow: scroll;\">/g' "$DOCFOLDER/library.html") || exit
-	(sed -i 's/<h1 id=\"faust-libraries\">Faust Libraries<\/h1>/<div class=\"col-sm-8\" style=\"height: 100%;overflow-y: scroll\"><h1 id=\"faust-libraries\">Faust Libraries<\/h1>/g' "$DOCFOLDER/library.html") || exit
+ 	(sed -i 's/<body>/<body><div class=\"container\"><div class=\"row\" style=\"height: 100vh;\">/g' "$DOCFOLDER/library.html") || exit
+ 	(sed -i 's/<\/body>/<\/div><\/div><\/body>/g' "$DOCFOLDER/library.html") || exit
+ 	(sed -i 's/<nav id=\"TOC\">/<nav class=\"col-sm-4\" id=\"TOC\" style=\"height: 100%;overflow: scroll;\">/g' "$DOCFOLDER/library.html") || exit
+ 	(sed -i 's/<h1 id=\"faust-libraries\">Faust Libraries<\/h1>/<div class=\"col-sm-8\" style=\"height: 100%;overflow-y: scroll\"><h1 id=\"faust-libraries\">Faust Libraries<\/h1>/g' "$DOCFOLDER/library.html") || exit
 fi
 
 rm -r tmp
