@@ -1045,6 +1045,332 @@ with {
 // TODO: author "Vince"
 selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 
+//=================================Sliding Reduce=========================================
+// Provides various operations on the last N samples using a high order 
+// `slidingReduce(op,N,maxN,disabledVal,x)`` fold-like function :
+//
+// * `slidingSumN(n,maxn)`: the sliding sum of the last n input samples
+// * `slidingMaxN(n,maxn)`: the sliding max of the last n input samples
+// * `slidingMinN(n,maxn)`: the sliding min of the last n input samples
+// * `slidingMeanN(n,maxn)`: the sliding mean of the last n input samples
+// * `slidingRMSn(n,maxn)`: the sliding RMS of the last n input samples
+//
+// #### Working Principle
+//
+// If we want the maximum of the last 8 values, we can do that as:
+// 
+// ```
+// simpleMax(x) =
+//  (
+//    (
+//      max(x@0,x@1),
+//      max(x@2,x@3)
+//    ) :max
+//  ),
+//  (
+//    (
+//      max(x@4,x@5),
+//      max(x@6,x@7)
+//    ) :max
+//  )
+//  :max;
+// ```
+//
+// `max(x@2,x@3)` is the same as `max(x@0,x@1)@2` but the latter re-uses a 
+// value we already computed,so is more efficient. Using the same trick for 
+// values 4 trough 7, we can write:
+//
+// ```
+// efficientMax(x)=
+//  (
+//    (
+//      max(x@0,x@1),
+//      max(x@0,x@1)@2
+//    ) :max
+//  ),
+//  (
+//    (
+//      max(x@0,x@1),
+//      max(x@0,x@1)@2
+//    ) :max@4
+//  )
+//  :max;
+// ```
+//
+// We can rewrite it recursively, so it becomes possible to get the maximum at 
+// have any number of values, as long as it's a power of 2.
+//
+// ```
+// recursiveMax =
+//  case {
+//    (1,x) => x;
+//    (N,x) =>  max(recursiveMax(N/2,x) , recursiveMax(N/2,x)@(N/2));
+//  };
+// ```
+//
+// What if we want to look at a number of values that's not a power of 2?
+// For each value, we will have to decide whether to use it or not.
+// If N is bigger than the index of the value, we use it, otherwise we replace 
+// it with (`0-INFINITY`):
+//
+// ```
+// variableMax(N,x) =
+//  max(
+//    max(
+//      (
+//        (x@0 : useVal(0)),
+//        (x@1 : useVal(1))
+//      ):max,
+//      (
+//        (x@2 : useVal(2)),
+//        (x@3 : useVal(3))
+//      ):max
+//    ),
+//    max(
+//      (
+//        (x@4 : useVal(4)),
+//        (x@5 : useVal(5))
+//      ):max,
+//      (
+//        (x@6 : useVal(6)),
+//        (x@7 : useVal(7))
+//      ):max
+//    )
+//  )
+//  with{
+//  useVal(i) = select2( (N>=i) , (0-INFINITY),_);
+// };
+// ```
+//
+// Now it becomes impossible to re-use any values. To fix that let's first look 
+// at how we'd implement it using recursiveMax, but with a fixed N that is not 
+// a power of 2. For example, this is how you'd do it with `N=3`:
+//
+// ```
+// binaryMaxThree(x) =
+//  (
+//    recursiveMax(1,x)@0, // the first x
+//    recursiveMax(2,x)@1  // the second and third x
+//  ):max;
+// ```
+//
+// `N=6`
+//
+// ```
+// binaryMaxSix(x) =
+//  (
+//    recursiveMax(2,x)@0, // first two
+//    recursiveMax(4,x)@2  // third trough sixt
+//  ):max;
+// ```
+//
+// Note that `recursiveMax(2,x)` is used at a different delay then in 
+// `binaryMaxThree`, since it represents 1 and 2, not 2 and 3. Each block is 
+// delayed the combined size of the previous blocks.
+//
+// `N=7`
+//
+// ```
+// binaryMaxSeven(x) =
+//  (
+//    (
+//      recursiveMax(1,x)@0, // first x
+//      recursiveMax(2,x)@1  // second and third
+//    ):max,
+//    (
+//      recursiveMax(4,x)@3  // fourth trough seventh
+//    )
+//  ):max;
+// ```
+//
+// To make a variable version, we need to know which powers of two are used, 
+// and at which delay time.
+//
+// Then it becomes a matter of:
+//
+// * lining up all the different block sizes in parallel:  the first `par()` 
+//  statement
+// * delaying each the appropriate amount: `sumOfPrevBlockSizes()`
+// * turning it on or off: `useVal()`
+// * getting the maximum of all of them: `combine()`
+//
+// In faust, we can only do that for a fixed maximum number of values: `maxN`
+//
+// ```
+// variableBinaryMaxN(N,maxN,x) =
+//  par(i,maxNrBits,recursiveMax(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)  : useVal(i)) : combine(maxNrBits) with {
+//    // The sum of all the sizes of the previous blocks
+//    sumOfPrevBlockSizes(N,maxN,0) = 0;
+//    sumOfPrevBlockSizes(N,maxN,i) = (ba.subseq((allBlockSizes(N,maxN)),0,i):>_);
+//    allBlockSizes(N,maxN) = par(i, maxNrBits, pow2(i) * isUsed(i) );
+//    maxNrBits = int2nrOfBits(maxN);
+//    // get the maximum of all blocks
+//    combine(2) = max;
+//    combine(N) = max(combine(N-1),_);
+//    // Decide wether or not to use a certain value, based on N
+//    useVal(i) = select2( isUsed(i), (0-INFINITY),_);
+//    isUsed(i) = ba.take(i+1,(int2bin(N,maxN)));
+//  };
+// ```
+//========================================================================================
+// Section contributed by Bart Brouns (bart@magnetophon.nl). 
+// SPDX-License-Identifier: GPL-3.0
+// Copyright (C) 2018 Bart Brouns
+
+//-----------------------------`(ba.)slidingReduce`-----------------------------
+// Fold-like high order function. Apply a binary operation `<op>` on the last 
+// `<n>` consecutive samples of a signal `<x>`. For example : 
+// `slidingReduce(max,128,128,-INFINITY)` will compute the maximum of the last 
+// 128 samples. The output is updated each sample, unlike reduce, where the 
+// output is constant for the duration of a block
+//
+// #### Usage
+//
+// ```
+// _ : slidingReduce(op,N,maxN,disabledVal) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+// * `maxN`: the maximum number of values to process, needs to be a power of 2
+// * `op`: the operator
+// * `disabledVal`: the value to use when we want to ignore a value.
+
+// In other words, `op(x,disabledVal)` should equal to `x`. For example, 
+// `+(x,0)` equals `x` and `min(x,INFINITY)` equals `x`. So if we want to 
+// calculate the sum, we need to give 0 as `disabledVal`, and if we want the 
+// minimum, we need to give `INFINITY` as `disabledVal`.
+//------------------------------------------------------------------------------
+slidingReduce(op,N,maxN,disabledVal,x) =
+  par(i,maxNrBits,fixedDelayOp(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)
+    : useVal(i)) : combine(maxNrBits) 
+  with {
+    // apply <op> to the last <N> values of <x>, where <N> is fixed
+    fixedDelayOp = case {
+      (1,x) => x;
+      (N,x) =>  op(fixedDelayOp(N/2,x) , fixedDelayOp(N/2,x)@(N/2));
+    };
+    // The sum of all the sizes of the previous blocks
+    sumOfPrevBlockSizes(N,maxN,0) = 0;
+    sumOfPrevBlockSizes(N,maxN,i) = (subseq((allBlockSizes(N,maxN)),0,i):>_);
+    allBlockSizes(N,maxN) = par(i, maxNrBits, (pow2(i)) * isUsed(i) );
+    maxNrBits = int2nrOfBits(maxN);
+    // Apply <op> to <N> parallel inputsignals
+    combine(2) = op;
+    combine(N) = op(combine(N-1),_);
+    // Decide wether or not to use a certain value, based on N
+    // Basically only the second <select2> is needed,
+    // but this version also works for N == 0
+    // 'works' in this case means 'does the same as reduce
+    useVal(i) =
+      _ <: select2(
+        (i==0) & (N==0) ,
+        select2( isUsed(i) , disabledVal,_),
+        _
+      );
+    // useVal(i) =
+    //     select2( isUsed(i) , disabledVal,_);
+    isUsed(i) = take(i+1,(int2bin(N,maxN)));
+    pow2(i) = 1<<i;
+    // same as:
+    // pow2(i) = int(pow(2,i));
+    // but in the block diagram, it will be displayed as a number, instead of a formula
+
+    // convert N into a list of ones and zeros
+    int2bin(N,maxN) = par(j,int2nrOfBits(maxN),int(floor(N/(pow2(j))))%2);
+    // calculate how many ones and zeros are needed to represent maxN
+    int2nrOfBits(0) = 0;
+    int2nrOfBits(maxN) = int(floor(log(maxN)/log(2))+1);
+  };
+
+
+//------------------------------`(ba.)slidingSumN`------------------------------
+// The sliding sum of the last n input samples.
+//
+// #### Usage
+//
+// ```
+// _ : slidingSumN(N,maxN) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+// * `maxN`: the maximum number of values to process, needs to be a power of 2
+//------------------------------------------------------------------------------
+slidingSumN(n,maxn) = slidingReduce(+,n,maxn,0);
+
+
+//----------------------------`(ba.)slidingMaxN`--------------------------------
+// The sliding maximum of the last n input samples.
+//
+// #### Usage
+//
+// ```
+// _ : slidingMaxN(N,maxN) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+// * `maxN`: the maximum number of values to process, needs to be a power of 2
+//------------------------------------------------------------------------------
+slidingMaxN(n,maxn) = slidingReduce(max,n,maxn,-INFINITY);
+
+
+//---------------------------`(ba.)slidingSumN`---------------------------------
+// The sliding minimum of the last n input samples.
+//
+// #### Usage
+//
+// ```
+// _ : slidingMinN(N,maxN) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+// * `maxN`: the maximum number of values to process, needs to be a power of 2
+//------------------------------------------------------------------------------
+slidingMinN(n,maxn) = slidingReduce(min,n,maxn,INFINITY);
+
+
+//----------------------------`(ba.)slidingMeanN`-------------------------------
+// The sliding mean of the last n input samples.
+//
+// #### Usage
+//
+// ```
+// _ : slidingMeanN(N,maxN) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+// * `maxN`: the maximum number of values to process, needs to be a power of 2
+//------------------------------------------------------------------------------
+slidingMeanN(n,maxn) = slidingSumN(n,maxn)/n;
+
+
+//---------------------------`(ba.)slidingRMSn`---------------------------------
+// The root mean square of the last n input samples.
+//
+// #### Usage
+//
+// ```
+// _ : slidingRMSn(N,maxN) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+// * `maxN`: the maximum number of values to process, needs to be a power of 2
+//------------------------------------------------------------------------------
+slidingRMSn(n,maxn) = pow(2):slidingMeanN(n,maxn) : sqrt;
+
+
+
 //////////////////////////////////Deprecated Functions////////////////////////////////////
 // This section implements functions that used to be in music.lib but that are now
 // considered as "deprecated".
