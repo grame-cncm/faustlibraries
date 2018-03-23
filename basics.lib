@@ -1046,7 +1046,7 @@ with {
 selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 
 //=================================Sliding Reduce=========================================
-// Provides various operations on the last N samples using a high order 
+// Provides various operations on the last N samples using a high order
 // `slidingReduce(op,N,maxN,disabledVal,x)`` fold-like function :
 //
 // * `slidingSumN(n,maxn)`: the sliding sum of the last n input samples
@@ -1058,7 +1058,7 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 // #### Working Principle
 //
 // If we want the maximum of the last 8 values, we can do that as:
-// 
+//
 // ```
 // simpleMax(x) =
 //  (
@@ -1076,8 +1076,8 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 //  :max;
 // ```
 //
-// `max(x@2,x@3)` is the same as `max(x@0,x@1)@2` but the latter re-uses a 
-// value we already computed,so is more efficient. Using the same trick for 
+// `max(x@2,x@3)` is the same as `max(x@0,x@1)@2` but the latter re-uses a
+// value we already computed,so is more efficient. Using the same trick for
 // values 4 trough 7, we can write:
 //
 // ```
@@ -1097,7 +1097,7 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 //  :max;
 // ```
 //
-// We can rewrite it recursively, so it becomes possible to get the maximum at 
+// We can rewrite it recursively, so it becomes possible to get the maximum at
 // have any number of values, as long as it's a power of 2.
 //
 // ```
@@ -1110,8 +1110,8 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 //
 // What if we want to look at a number of values that's not a power of 2?
 // For each value, we will have to decide whether to use it or not.
-// If N is bigger than the index of the value, we use it, otherwise we replace 
-// it with (`0-INFINITY`):
+// If N is bigger than the index of the value, we use it, otherwise we replace
+// it with (`0-(ma.INFINITY)`):
 //
 // ```
 // variableMax(N,x) =
@@ -1138,12 +1138,12 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 //    )
 //  )
 //  with{
-//  useVal(i) = select2( (N>=i) , (0-INFINITY),_);
+//  useVal(i) = select2( (N>=i) , (0-(ma.INFINITY)),_);
 // };
 // ```
 //
-// Now it becomes impossible to re-use any values. To fix that let's first look 
-// at how we'd implement it using recursiveMax, but with a fixed N that is not 
+// Now it becomes impossible to re-use any values. To fix that let's first look
+// at how we'd implement it using recursiveMax, but with a fixed N that is not
 // a power of 2. For example, this is how you'd do it with `N=3`:
 //
 // ```
@@ -1164,8 +1164,8 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 //  ):max;
 // ```
 //
-// Note that `recursiveMax(2,x)` is used at a different delay then in 
-// `binaryMaxThree`, since it represents 1 and 2, not 2 and 3. Each block is 
+// Note that `recursiveMax(2,x)` is used at a different delay then in
+// `binaryMaxThree`, since it represents 1 and 2, not 2 and 3. Each block is
 // delayed the combined size of the previous blocks.
 //
 // `N=7`
@@ -1183,12 +1183,12 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 //  ):max;
 // ```
 //
-// To make a variable version, we need to know which powers of two are used, 
+// To make a variable version, we need to know which powers of two are used,
 // and at which delay time.
 //
 // Then it becomes a matter of:
 //
-// * lining up all the different block sizes in parallel:  the first `par()` 
+// * lining up all the different block sizes in parallel:  the first `par()`
 //  statement
 // * delaying each the appropriate amount: `sumOfPrevBlockSizes()`
 // * turning it on or off: `useVal()`
@@ -1208,20 +1208,20 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 //    combine(2) = max;
 //    combine(N) = max(combine(N-1),_);
 //    // Decide wether or not to use a certain value, based on N
-//    useVal(i) = select2( isUsed(i), (0-INFINITY),_);
+//    useVal(i) = select2( isUsed(i), (0-(ma.INFINITY)),_);
 //    isUsed(i) = ba.take(i+1,(int2bin(N,maxN)));
 //  };
 // ```
 //========================================================================================
-// Section contributed by Bart Brouns (bart@magnetophon.nl). 
+// Section contributed by Bart Brouns (bart@magnetophon.nl).
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (C) 2018 Bart Brouns
 
 //-----------------------------`(ba.)slidingReduce`-----------------------------
-// Fold-like high order function. Apply a binary operation `<op>` on the last 
-// `<n>` consecutive samples of a signal `<x>`. For example : 
-// `slidingReduce(max,128,128,-INFINITY)` will compute the maximum of the last 
-// 128 samples. The output is updated each sample, unlike reduce, where the 
+// Fold-like high order function. Apply a binary operation `<op>` on the last
+// `<n>` consecutive samples of a signal `<x>`. For example :
+// `slidingReduce(max,128,128,-(ma.INFINITY))` will compute the maximum of the last
+// 128 samples. The output is updated each sample, unlike reduce, where the
 // output is constant for the duration of a block
 //
 // #### Usage
@@ -1237,14 +1237,14 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 // * `op`: the operator
 // * `disabledVal`: the value to use when we want to ignore a value.
 
-// In other words, `op(x,disabledVal)` should equal to `x`. For example, 
-// `+(x,0)` equals `x` and `min(x,INFINITY)` equals `x`. So if we want to 
-// calculate the sum, we need to give 0 as `disabledVal`, and if we want the 
-// minimum, we need to give `INFINITY` as `disabledVal`.
+// In other words, `op(x,disabledVal)` should equal to `x`. For example,
+// `+(x,0)` equals `x` and `min(x,ma.INFINITY)` equals `x`. So if we want to
+// calculate the sum, we need to give 0 as `disabledVal`, and if we want the
+// minimum, we need to give `ma.INFINITY` as `disabledVal`.
 //------------------------------------------------------------------------------
 slidingReduce(op,N,maxN,disabledVal,x) =
   par(i,maxNrBits,fixedDelayOp(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)
-    : useVal(i)) : combine(maxNrBits) 
+    : useVal(i)) : combine(maxNrBits)
   with {
     // apply <op> to the last <N> values of <x>, where <N> is fixed
     fixedDelayOp = case {
@@ -1316,7 +1316,7 @@ slidingSumN(n,maxn) = slidingReduce(+,n,maxn,0);
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingMaxN(n,maxn) = slidingReduce(max,n,maxn,-INFINITY);
+slidingMaxN(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
 
 
 //---------------------------`(ba.)slidingSumN`---------------------------------
@@ -1333,7 +1333,7 @@ slidingMaxN(n,maxn) = slidingReduce(max,n,maxn,-INFINITY);
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingMinN(n,maxn) = slidingReduce(min,n,maxn,INFINITY);
+slidingMinN(n,maxn) = slidingReduce(min,n,maxn,ma.INFINITY);
 
 
 //----------------------------`(ba.)slidingMeanN`-------------------------------
