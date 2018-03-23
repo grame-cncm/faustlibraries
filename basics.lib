@@ -1218,8 +1218,8 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 // Copyright (C) 2018 Bart Brouns
 
 //-----------------------------`(ba.)slidingReduce`-----------------------------
-// Fold-like high order function. Apply a binary operation `<op>` on the last
-// `<n>` consecutive samples of a signal `<x>`. For example :
+// Fold-like high order function. Apply a commutative binary operation `<op>` to
+// the last `<n>` consecutive samples of a signal `<x>`. For example :
 // `slidingReduce(max,128,128,-(ma.INFINITY))` will compute the maximum of the last
 // 128 samples. The output is updated each sample, unlike reduce, where the
 // output is constant for the duration of a block
@@ -1234,9 +1234,9 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 //
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
-// * `op`: the operator
+// * `op`: the operator. Needs to be a commutative one.
 // * `disabledVal`: the value to use when we want to ignore a value.
-
+//
 // In other words, `op(x,disabledVal)` should equal to `x`. For example,
 // `+(x,0)` equals `x` and `min(x,ma.INFINITY)` equals `x`. So if we want to
 // calculate the sum, we need to give 0 as `disabledVal`, and if we want the
