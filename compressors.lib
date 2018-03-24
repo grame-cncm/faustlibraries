@@ -37,10 +37,542 @@ closed source license or any other license if you decide so.
 ba = library("basics.lib");
 si = library("signals.lib");
 an = library("analyzers.lib");
-
+ro = library("routes.lib");
 
 declare name "Faust Compressor Effect Library";
 declare version "0.0";
+//=============================Functions Reference========================================
+//========================================================================================
+
+//--------------------`(co.)peak_compression_gain_mono`-------------------
+// Mono dynamic range compressor gain computer.
+// `peak_compression_gain_mono` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// _ : peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+
+// Author: Bart Brouns
+// License: GPLv3
+
+// note: si.lag_ud has a bug where if you compile with standard precision,
+// down is 0 and prePost is 1, you go into infinite GR and stay there
+peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
+  abs:ba.bypass(prePost,si.lag_ud(att,rel)) : ba.linear2db : gain_computer(strength,thresh,knee):ba.bypass((prePost*-1)+1,si.lag_ud(rel,att)) : ba.db2linear
+with {
+  gain_computer(strength,thresh,knee,level) =
+    select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
+            0,
+            ((level-thresh+(knee/2)):pow(2)/(2*knee)) ,
+            (level-thresh)
+           ) : max(0)*-strength;
+};
+
+
+//--------------------`(co.)peak_compression_gain_N_chan`-------------------
+// N channel dynamic range compressor gain computer.
+// `peak_compression_gain_N_chan` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+// * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
+// * `N`: the number of channels of the compressor
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+
+// generalise compression gains for N channels.
+// first we define a mono version:
+peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,1) =
+  peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost);
+
+// The actual N-channel version:
+// Calculate the maximum gain reduction of N channels,
+// and then crossfade between that and each channel's own gain reduction,
+// to link/unlink channels
+peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
+  par(i, N, peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost))
+  <:(si.bus(N),(ba.minimum(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(ba.crossfade(link)));
+
+
+//--------------------`(co.)FFcompressor_N_chan`-------------------
+// feed forward N channel dynamic range compressor.
+// `FFcompressor_N_chan` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+// * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
+// * `meter`: a gain reduction meter. It can be implemented like so:
+// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// * `N`: the number of channels of the compressor
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+
+// feed forward compressor
+FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
+  (si.bus(N) <:
+    (peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N))
+  )
+  :(ro.interleave(N,2):par(i,N,meter*_));
+
+//--------------------`(co.)FBcompressor_N_chan`-------------------
+// feed back N channel dynamic range compressor.
+// `FBcompressor_N_chan` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+// * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
+// * `meter`: a gain reduction meter. It can be implemented like so:
+// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// * `N`: the number of channels of the compressor
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+
+FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
+  (
+    (peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N))
+    :(ro.interleave(N,2):par(i,N,meter*_))
+  )~si.bus(N);
+
+//--------------------`(co.)FFFBcompressor_N_chan`-------------------
+// feed forward / feed back N channel dynamic range compressor.
+// the feedback part has a much higher strength, so they end up sounding similar
+// `FFFBcompressor_N_chan` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : FFFBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+// * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
+// * `FFFB`: fade between feed forward (0) and feed back (1) compression.
+// * `meter`: a gain reduction meter. It can be implemented like so:
+// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// * `N`: the number of channels of the compressor
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+
+FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
+  si.bus(N) <: si.bus(N*2):
+  (
+    ((
+      (par(i, 2, peak_compression_gain_N_chan(strength*(1+((i==0)*2)),thresh,att,rel,knee,prePost,link,N)):ro.interleave(N,2):par(i, N, ba.crossfade(FBFF)))
+      ,si.bus(N))
+      :(ro.interleave(N,2):par(i,N,meter*_))
+    )~si.bus(N)
+  );
+
+
+//--------------------`(co.)RMS_compression_gain_mono`-------------------
+// Mono RMS dynamic range compressor gain computer.
+// `RMS_compression_gain_mono` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// _ : RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+
+RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
+  RMS(rel): ba.bypass(prePost,si.lag_ud(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass((prePost*-1)+1,si.lag_ud(0,att)) : ba.db2linear
+with {
+  gain_computer(strength,thresh,knee,level) =
+    select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
+            0,
+            ((level-thresh+(knee/2)):pow(2)/(2*knee)) ,
+            (level-thresh)
+           ) : max(0)*-strength;
+  RMS(time) = ba.slidingRMS(s) with {
+    s = ba.sec2samp(time):int:max(1);
+};
+};
+
+//--------------------`(co.)RMS_compression_gain_N_chan`-------------------
+// RMS N channel dynamic range compressor gain computer.
+// `RMS_compression_gain_N_chan` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+// * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
+// * `N`: the number of channels of the compressor
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+
+RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,1) =
+  RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost);
+
+RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
+  par(i, N, RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost))
+  <:(si.bus(N),(ba.minimum(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(ba.crossfade(link)));
+
+
+//--------------------`(co.)RMS_FFFBcompressor_N_chan`-------------------
+// RMS feed forward / feed back N channel dynamic range compressor.
+// the feedback part has a much higher strength, so they end up sounding similar
+// `RMS_FFFBcompressor_N_chan` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : RMS_FFFBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+// * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
+// * `FFFB`: fade between feed forward (0) and feed back (1) compression.
+// * `meter`: a gain reduction meter. It can be implemented like so:
+// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// * `N`: the number of channels of the compressor
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// to save CPU we cheat a bit, in a similar way as in the original libs:
+// instead of crosfading between two sets of gain calculators as above,
+// we take the abs of the audio from both the FF and FB, and crossfade between those,
+// and feed that into one set of gain calculators
+// again the strength is much higher when in FB mode, but implemented differently
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+
+RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
+  si.bus(N) <: si.bus(N*2):
+  (
+    (
+      (
+        (ro.interleave(N,2):par(i, N*2, abs) :par(i, N, ba.crossfade(FBFF)) : RMS_compression_gain_N_chan(strength*(1+(((FBFF*-1)+1)*1)),thresh,att,rel,knee,prePost,link,N))
+        ,si.bus(N)
+      )
+    :(ro.interleave(N,2):par(i,N,meter*_))
+    )~si.bus(N)
+  );
+
+
+//--------------------`(co.)RMS_FBcompressor_peak_limiter_N_chan`-------------------
+// N channel RMS feed back compressor into peak limiter feeding back into the FB compressor.
+// By combining them this way, they complement each other optimally:
+// The RMS compressor doesn't have to deal with the peaks,
+// and the peak limiter get's spared from the steady state signal.
+// the feedback part has a much higher strength, so they end up sounding similar
+// `RMS_FBcompressor_peak_limiter_N_chan` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+// * `thresh`: dB level threshold above which compression kicks in
+// * `threshLim`: dB level threshold above which the brick wall limiter kicks in
+// * `att`: attack time = time constant (sec) when level & compression going up
+// this is also used as the release time of the limiter
+// * `rel`: release time = time constant (sec) coming out of compression
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// Below thresh-(knee/2) there is no gain reduction,
+// above thresh+(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction.
+// the limiter uses a knee half this size
+// * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
+// * `meter`: a gain reduction meter. It can be implemented like so:
+// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// * `N`: the number of channels of the compressor
+
+// It uses a strength parameter instead of the traditional ratio, in order to be able to
+// function as a hard limiter.
+// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+
+// Sometimes even bigger ratios are usefull:
+// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * Digital Dynamic Range Compressor Design
+// A Tutorial and Analysis
+// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+// MICHAEL MASSBERG (michael@massberg.org)
+// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+
+RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,N) =
+  (
+    (
+      (
+        (RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,0,link,N))
+        ,si.bus(N)
+      ):(ro.interleave(N,2):par(i,N,meter*_))
+    ):FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meter,N)
+  )~si.bus(N);
+
+
+//=============================Backward compatibility section=============================
+//========================================================================================
+// These functions are superseded by the ones above.
+// They are included for backward compatibility.
 
 //=============================Functions Reference========================================
 //========================================================================================
