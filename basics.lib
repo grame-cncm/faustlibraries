@@ -50,6 +50,7 @@ closed source license or any other license if you decide so.
 ma = library("maths.lib");
 ro = library("routes.lib");
 ba = library("basics.lib"); // so functions here can be copy/pasted out
+fi = library("filters.lib");
 
 declare name "Faust Basic Element Library";
 declare version "0.1";
@@ -1207,11 +1208,14 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 // Provides various operations on the last N samples using a high order
 // `slidingReduce(op,N,maxN,disabledVal,x)`` fold-like function:
 //
-// * `slidingSumN(n,maxn)`: the sliding sum of the last n input samples
-// * `slidingMaxN(n,maxn)`: the sliding max of the last n input samples
-// * `slidingMinN(n,maxn)`: the sliding min of the last n input samples
-// * `slidingMeanN(n,maxn)`: the sliding mean of the last n input samples
-// * `slidingRMSn(n,maxn)`: the sliding RMS of the last n input samples
+// * `slidingSum(n)`: the sliding sum of the last n input samples, CPU-light
+// * `slidingSump(n,maxn)`: the sliding sum of the last n input samples, numerically stable "forever"
+// * `slidingMax(n,maxn)`: the sliding max of the last n input samples
+// * `slidingMin(n,maxn)`: the sliding min of the last n input samples
+// * `slidingMean(n)`: the sliding mean of the last n input samples, CPU-light
+// * `slidingMeanp(n,maxn)`: the sliding mean of the last n input samples, numerically stable "forever"
+// * `slidingRMS(n)`: the sliding RMS of the last n input samples, CPU-light
+// * `slidingRMSp(n,maxn)`: the sliding RMS of the last n input samples, numerically stable "forever"
 //
 // #### Working Principle
 //
@@ -1410,17 +1414,17 @@ with {
       (1,x) => x;
       (N,x) => op(fixedDelayOp(N/2,x), fixedDelayOp(N/2,x)@(N/2));
     };
-    
+
     // The sum of all the sizes of the previous blocks
     sumOfPrevBlockSizes(N,maxN,0) = 0;
     sumOfPrevBlockSizes(N,maxN,i) = (subseq((allBlockSizes(N,maxN)),0,i):>_);
     allBlockSizes(N,maxN) = par(i, maxNrBits, (pow2(i)) * isUsed(i));
     maxNrBits = int2nrOfBits(maxN);
-    
+
     // Apply <op> to <N> parallel input signals
     combine(2) = op;
     combine(N) = op(combine(N-1),_);
-    
+
     // Decide wether or not to use a certain value, based on N
     // Basically only the second <select2> is needed,
     // but this version also works for N == 0
@@ -1431,7 +1435,7 @@ with {
         select2(isUsed(i), disabledVal,_),
         _
       );
-      
+
     // useVal(i) =
     //     select2(isUsed(i), disabledVal,_);
     isUsed(i) = take(i+1,(int2bin(N,maxN)));
@@ -1447,14 +1451,33 @@ with {
     int2nrOfBits(maxN) = int(floor(log(maxN)/log(2))+1);
 };
 
-
-//------------------------------`(ba.)slidingSumN`------------------------------
+//------------------------------`(ba.)slidingSum`------------------------------
 // The sliding sum of the last n input samples.
+//
+// It will eventually run into numerical trouble when there is a persistent dc component.
+// If that matters in your application, use the more CPU-intensive (ba.)slidinSump.
 //
 // #### Usage
 //
 // ```
-// _ : slidingSumN(N,maxN) : _
+// _ : slidingSum(N) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+//------------------------------------------------------------------------------
+slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
+
+//------------------------------`(ba.)slidingSump`------------------------------
+// The sliding sum of the last n input samples.
+//
+// It uses a lot more CPU then (ba.)slidingSum(n,maxn), but is numerically stable "forever" in return.
+//
+// #### Usage
+//
+// ```
+// _ : slidingSump(N,maxN) : _
 // ```
 //
 // Where:
@@ -1462,7 +1485,7 @@ with {
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingSumN(n,maxn) = slidingReduce(+,n,maxn,0);
+slidingSump(n,maxn) = slidingReduce(+,n,maxn,0);
 
 
 //----------------------------`(ba.)slidingMaxN`--------------------------------
@@ -1479,16 +1502,15 @@ slidingSumN(n,maxn) = slidingReduce(+,n,maxn,0);
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingMaxN(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
+slidingMax(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
 
-
-//---------------------------`(ba.)slidingSumN`---------------------------------
+//----------------------------`(ba.)slidingMin`--------------------------------
 // The sliding minimum of the last n input samples.
 //
 // #### Usage
 //
 // ```
-// _ : slidingMinN(N,maxN) : _
+// _ : slidingMin(N,maxN) : _
 // ```
 //
 // Where:
@@ -1496,16 +1518,35 @@ slidingMaxN(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingMinN(n,maxn) = slidingReduce(min,n,maxn,ma.INFINITY);
+slidingMin(n,maxn) = slidingReduce(min,n,maxn,ma.INFINITY);
 
-
-//----------------------------`(ba.)slidingMeanN`-------------------------------
+//----------------------------`(ba.)slidingMean`-------------------------------
 // The sliding mean of the last n input samples.
 //
+// It will eventually run into numerical trouble when there is a persistent dc component.
+// If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
+//
 // #### Usage
 //
 // ```
-// _ : slidingMeanN(N,maxN) : _
+// _ : slidingMean(N,maxN) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+//------------------------------------------------------------------------------
+slidingMean(n) = slidingSum(n)/n;
+
+//----------------------------`(ba.)slidingMeanp`-------------------------------
+// The sliding mean of the last n input samples.
+//
+// It uses a lot more CPU then (ba.)slidingMean(n,maxn), but is numerically stable "forever" in return.
+//
+// #### Usage
+//
+// ```
+// _ : slidingMeanp(N,maxN) : _
 // ```
 //
 // Where:
@@ -1513,16 +1554,37 @@ slidingMinN(n,maxn) = slidingReduce(min,n,maxn,ma.INFINITY);
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingMeanN(n,maxn) = slidingSumN(n,maxn)/n;
+slidingMeanp(n,maxn) = slidingSump(n,maxn)/n;
 
 
-//---------------------------`(ba.)slidingRMSn`---------------------------------
+//---------------------------`(ba.)slidingRMS`---------------------------------
 // The root mean square of the last n input samples.
 //
+// It will eventually run into numerical trouble when there is a persistent dc component.
+// If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
+
+//
 // #### Usage
 //
 // ```
-// _ : slidingRMSn(N,maxN) : _
+// _ : slidingRMS(N) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of values to process
+//------------------------------------------------------------------------------
+slidingRMS(n) = pow(2):slidingMean(n) : sqrt;
+
+//---------------------------`(ba.)slidingRMSp`---------------------------------
+// The root mean square of the last n input samples.
+//
+// It uses a lot more CPU then (ba.)slidingRMS(n,maxn), but is numerically stable "forever" in return.
+//
+// #### Usage
+//
+// ```
+// _ : slidingRMSp(N,maxN) : _
 // ```
 //
 // Where:
@@ -1530,8 +1592,7 @@ slidingMeanN(n,maxn) = slidingSumN(n,maxn)/n;
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingRMSn(n,maxn) = pow(2):slidingMeanN(n,maxn) : sqrt;
-
+slidingRMSp(n,maxn) = pow(2):slidingMeanp(n,maxn) : sqrt;
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
 // This section implements functions that used to be in music.lib but that are now
