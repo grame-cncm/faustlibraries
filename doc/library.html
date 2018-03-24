@@ -2255,7 +2255,7 @@ bar = vbargraph(&quot;v.bargraph&quot;, 0, 1);</code></pre>
    (1,x) =&gt; x;
    (N,x) =&gt;  max(recursiveMax(N/2,x) , recursiveMax(N/2,x)@(N/2));
  };</code></pre>
-<p>What if we want to look at a number of values that’s not a power of 2? For each value, we will have to decide whether to use it or not. If N is bigger than the index of the value, we use it, otherwise we replace it with (<code>0-INFINITY</code>):</p>
+<p>What if we want to look at a number of values that’s not a power of 2? For each value, we will have to decide whether to use it or not. If N is bigger than the index of the value, we use it, otherwise we replace it with (<code>0-(ma.INFINITY)</code>):</p>
 <pre><code>variableMax(N,x) =
  max(
    max(
@@ -2280,7 +2280,7 @@ bar = vbargraph(&quot;v.bargraph&quot;, 0, 1);</code></pre>
    )
  )
  with{
- useVal(i) = select2( (N&gt;=i) , (0-INFINITY),_);
+ useVal(i) = select2( (N&gt;=i) , (0-(ma.INFINITY)),_);
 };</code></pre>
 <p>Now it becomes impossible to re-use any values. To fix that let’s first look at how we’d implement it using recursiveMax, but with a fixed N that is not a power of 2. For example, this is how you’d do it with <code>N=3</code>:</p>
 <pre><code>binaryMaxThree(x) =
@@ -2326,20 +2326,22 @@ bar = vbargraph(&quot;v.bargraph&quot;, 0, 1);</code></pre>
    combine(2) = max;
    combine(N) = max(combine(N-1),_);
    // Decide wether or not to use a certain value, based on N
-   useVal(i) = select2( isUsed(i), (0-INFINITY),_);
+   useVal(i) = select2( isUsed(i), (0-(ma.INFINITY)),_);
    isUsed(i) = ba.take(i+1,(int2bin(N,maxN)));
  };</code></pre>
 <h3 id="ba.slidingreduce"><code>(ba.)slidingReduce</code></h3>
-<p>Fold-like high order function. Apply a binary operation <code>&lt;op&gt;</code> on the last <code>&lt;n&gt;</code> consecutive samples of a signal <code>&lt;x&gt;</code>. For example : <code>slidingReduce(max,128,128,-INFINITY)</code> will compute the maximum of the last 128 samples. The output is updated each sample, unlike reduce, where the output is constant for the duration of a block</p>
+<p>Fold-like high order function. Apply a commutative binary operation <code>&lt;op&gt;</code> to the last <code>&lt;n&gt;</code> consecutive samples of a signal <code>&lt;x&gt;</code>. For example : <code>slidingReduce(max,128,128,-(ma.INFINITY))</code> will compute the maximum of the last 128 samples. The output is updated each sample, unlike reduce, where the output is constant for the duration of a block</p>
 <h4 id="usage-62">Usage</h4>
 <pre><code>_ : slidingReduce(op,N,maxN,disabledVal) : _</code></pre>
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
 <li><code>maxN</code>: the maximum number of values to process, needs to be a power of 2</li>
-<li><code>op</code>: the operator</li>
+<li><code>op</code>: the operator. Needs to be a commutative one.</li>
 <li><code>disabledVal</code>: the value to use when we want to ignore a value.</li>
 </ul>
+<p>In other words, <code>op(x,disabledVal)</code> should equal to <code>x</code>. For example, <code>+(x,0)</code> equals <code>x</code> and <code>min(x,ma.INFINITY)</code> equals <code>x</code>. So if we want to calculate the sum, we need to give 0 as <code>disabledVal</code>, and if we want the minimum, we need to give <code>ma.INFINITY</code> as <code>disabledVal</code>.</p>
+<hr />
 <h3 id="ba.slidingsumn"><code>(ba.)slidingSumN</code></h3>
 <p>The sliding sum of the last n input samples.</p>
 <h4 id="usage-63">Usage</h4>
@@ -3960,7 +3962,7 @@ mth_octave_filterbank_default = mth_octave_filterbank5;</code></pre>
 <pre><code>PI : _</code></pre>
 <hr />
 <h3 id="ma.infinity"><code>(ma.)INFINITY</code></h3>
-<p>Constant INFINITI inherited from <code>math.h</code>.</p>
+<p>Constant INFINITY inherited from <code>math.h</code>.</p>
 <h4 id="usage-194">Usage</h4>
 <pre><code>INFINITY : _</code></pre>
 <hr />
