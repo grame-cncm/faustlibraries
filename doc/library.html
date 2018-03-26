@@ -225,8 +225,8 @@
 <li><a href="#en.are"><code>(en.)are</code></a></li>
 <li><a href="#en.asr"><code>(en.)asr</code></a></li>
 <li><a href="#en.adsr"><code>(en.)adsr</code></a></li>
-<li><a href="#en.dx7envelope"><code>(en.)dx7envelope</code></a></li>
 <li><a href="#en.adsre"><code>(en.)adsre</code></a></li>
+<li><a href="#en.dx7envelope"><code>(en.)dx7envelope</code></a></li>
 </ul></li>
 </ul></li>
 <li><a href="#filters.lib">filters.lib</a><ul>
@@ -2854,7 +2854,7 @@ Octave:1&gt; plot(faustout);</code></pre>
 <pre><code>smoothEnvelope(ar,t) : _</code></pre>
 <ul>
 <li><code>ar</code>: attack and release duration (s)</li>
-<li><code>t</code>: trigger signal (0-1)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered when <code>t=0</code>)</li>
 </ul>
 <hr />
 <h3 id="en.ar"><code>(en.)ar</code></h3>
@@ -2865,69 +2865,78 @@ Octave:1&gt; plot(faustout);</code></pre>
 <ul>
 <li><code>a</code>: attack (sec)</li>
 <li><code>r</code>: release (sec)</li>
-<li><code>t</code>: trigger signal (0 or 1)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered when <code>t=0</code>)</li>
 </ul>
 <hr />
 <h3 id="en.arfe"><code>(en.)arfe</code></h3>
-<p>ARFE (Attack and Release-to-Final-value Exponentially) envelope generator. Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release. <code>arfe</code> is a standard Faust function.</p>
+<p>ARFE (Attack and Release-to-Final-value Exponentially) envelope generator. Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.</p>
 <h4 id="usage-115">Usage</h4>
-<pre><code>arfe(a,r,f,g) : _</code></pre>
+<pre><code>arfe(a,r,f,t) : _</code></pre>
 <p>Where:</p>
 <ul>
 <li><code>a</code>, <code>r</code>: attack (sec), release (sec)</li>
 <li><code>f</code>: final value to approach upon release (such as 0)</li>
-<li><code>g</code>: gate signal ( &gt;0 for attack, release begins when g returns to 0)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered when <code>t=0</code>)</li>
 </ul>
 <hr />
 <h3 id="en.are"><code>(en.)are</code></h3>
-<p>ARE (Attack, Release) envelope generator with Exponential segments. Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release. <code>are</code> is a standard Faust function.</p>
+<p>ARE (Attack, Release) envelope generator with Exponential segments. Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.</p>
 <h4 id="usage-116">Usage</h4>
-<pre><code>are(a,r,g) : _</code></pre>
+<pre><code>are(a,r,t) : _</code></pre>
 <p>Where:</p>
 <ul>
-<li><code>a</code>, <code>r</code>: attack (sec), release (sec)</li>
-<li><code>g</code>: gate signal ( &gt;0 for attack, release begins when g returns to 0)</li>
+<li><code>a</code>: attack (sec)</li>
+<li><code>r</code>: release (sec)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered when <code>t=0</code>)</li>
 </ul>
 <hr />
 <h3 id="en.asr"><code>(en.)asr</code></h3>
 <p>ASR (Attack, Sustain, Release) envelope generator. <code>asr</code> is a standard Faust function.</p>
 <h4 id="usage-117">Usage</h4>
-<pre><code>asr(a,s,r,g) : _</code></pre>
+<pre><code>asr(a,s,r,t) : _</code></pre>
 <p>Where:</p>
 <ul>
-<li><code>a</code>, <code>s</code>, <code>r</code>: attack (sec), sustain (percentage of g: 0-1), release (sec)</li>
-<li><code>g</code>: trigger signal ( &gt;0 for attack, then release is when g back to 0)</li>
+<li><code>a</code>: attack (sec)</li>
+<li><code>s</code>: sustain (percentage of <code>t</code>: 0-1)</li>
+<li><code>r</code>: release (sec)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered when <code>t=0</code>)</li>
 </ul>
 <hr />
 <h3 id="en.adsr"><code>(en.)adsr</code></h3>
 <p>ADSR (Attack, Decay, Sustain, Release) envelope generator. <code>adsr</code> is a standard Faust function.</p>
 <h4 id="usage-118">Usage</h4>
-<pre><code>adsr(a,d,s,r,g) : _</code></pre>
+<pre><code>adsr(a,d,s,r,t) : _</code></pre>
 <p>Where:</p>
 <ul>
-<li><code>a</code>, <code>d</code>, <code>s</code>, <code>r</code>: attack (sec), decay (sec), sustain level (percentage of max: 0-1), release (sec)</li>
-<li><code>g</code>: gate signal ( &gt;0 for attack, then release is when g back to 0)</li>
+<li><code>a</code>: attack (sec)</li>
+<li><code>d</code>: decay (sec)</li>
+<li><code>s</code>: sustain (percentage of <code>t</code>: 0-1)</li>
+<li><code>r</code>: release (sec)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered when <code>t=0</code>)</li>
+</ul>
+<hr />
+<h3 id="en.adsre"><code>(en.)adsre</code></h3>
+<p>ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential segments.</p>
+<h4 id="usage-119">Usage</h4>
+<pre><code>adsre(a,d,s,r,g) : _</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>a</code>: attack (sec)</li>
+<li><code>d</code>: decay (sec)</li>
+<li><code>s</code>: sustain (percentage of <code>t</code>: 0-1)</li>
+<li><code>r</code>: release (sec)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered when <code>t=0</code>)</li>
 </ul>
 <hr />
 <h3 id="en.dx7envelope"><code>(en.)dx7envelope</code></h3>
 <p>DX7 operator envelope generator with 4 independent rates and levels. It is essentially a 4 points BPF.</p>
-<h4 id="usage-119">Usage</h4>
+<h4 id="usage-120">Usage</h4>
 <pre><code>dx7_envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) : _</code></pre>
 <p>Where:</p>
 <ul>
 <li><code>RN</code>: rates in seconds</li>
 <li><code>LN</code>: levels (0-1)</li>
 <li><code>t</code>: trigger signal</li>
-</ul>
-<hr />
-<h3 id="en.adsre"><code>(en.)adsre</code></h3>
-<p>ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential segments. <code>adsre</code> is a standard Faust function.</p>
-<h4 id="usage-120">Usage</h4>
-<pre><code>adsre(a,d,s,r,g) : _</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>a</code>, <code>d</code>, <code>s</code>, <code>r</code>: attack (sec), decay (sec), sustain level (percentage of max: 0-1), release (sec)</li>
-<li><code>g</code>: gate signal ( &gt;0 for attack, then release is when g back to 0)</li>
 </ul>
 <hr />
 <h1 id="filters.lib">filters.lib</h1>

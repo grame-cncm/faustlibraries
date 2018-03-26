@@ -62,8 +62,10 @@ si = library("signals.lib");
 // ```
 //
 // * `ar`: attack and release duration (s)
-// * `t`: trigger signal (0-1)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// when `t=0`)
 //----------------------------------------------------------------
+// Author: RM
 smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 
 //-----------------------`(en.)ar`--------------------------
@@ -80,8 +82,10 @@ smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 //
 // * `a`: attack (sec)
 // * `r`: release (sec)
-// * `t`: trigger signal (0 or 1)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// when `t=0`)
 //-----------------------------------------------------
+// Author: RM
 ar(a,r,t) = cnt(totalTime,totalTime,on) : ba.bpf.start(0,0) :
 	ba.bpf.point(attTime,1) : ba.bpf.end(attTime+relTime,0)
 with{
@@ -95,19 +99,19 @@ with{
 //------------------------`(en.)arfe`----------------------
 // ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
 // Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.
-// `arfe` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// arfe(a,r,f,g) : _
+// arfe(a,r,f,t) : _
 // ```
 //
 // Where:
 //
 // * `a`, `r`: attack (sec), release (sec)
 // * `f`: final value to approach upon release (such as 0)
-// * `g`: gate signal ( >0 for attack, release begins when g returns to 0)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// when `t=0`)
 //-----------------------------------------------------
 // Author: JOS
 // License: STK-4.3
@@ -124,18 +128,19 @@ arfe(attT60,relT60,fv,gate) = envelope with {
 //------------------------`(en.)are`----------------------
 // ARE (Attack, Release) envelope generator with Exponential segments.
 // Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.
-// `are` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// are(a,r,g) : _
+// are(a,r,t) : _
 // ```
 //
 // Where:
 //
-// * `a`, `r`: attack (sec), release (sec)
-// * `g`: gate signal ( >0 for attack, release begins when g returns to 0)
+// * `a`: attack (sec)
+// * `r`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// when `t=0`)
 //-----------------------------------------------------
 // Author: JOS
 // License: STK-4.3
@@ -148,15 +153,18 @@ are(attT60,relT60,gate) = arfe(attT60,relT60,0,gate);
 // #### Usage
 //
 // ```
-// asr(a,s,r,g) : _
+// asr(a,s,r,t) : _
 // ```
 //
 // Where:
 //
-// * `a`, `s`, `r`: attack (sec), sustain (percentage of g: 0-1), release (sec)
-// * `g`: trigger signal ( >0 for attack, then release is when g back to 0)
+// * `a`: attack (sec)
+// * `s`: sustain (percentage of `t`: 0-1) 
+// * `r`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// when `t=0`)
 //-----------------------------------------------------
-// TODO: author RM
+// Author: RM
 asr(a,s,r,t) = on*(as) : ba.sAndH(on) : rel
 with{
 	on = t>0;
@@ -176,15 +184,19 @@ with{
 // #### Usage
 //
 // ```
-// adsr(a,d,s,r,g) : _
+// adsr(a,d,s,r,t) : _
 // ```
 //
 // Where:
 //
-// * `a`, `d`, `s`, `r`: attack (sec), decay (sec), sustain level (percentage of max: 0-1), release (sec)
-// * `g`: gate signal ( >0 for attack, then release is when g back to 0)
+// * `a`: attack (sec)
+// * `d`: decay (sec)
+// * `s`: sustain (percentage of `t`: 0-1) 
+// * `r`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// when `t=0`)
 //-----------------------------------------------------
-// TODO: author RM
+// Author: RM
 adsr(a,d,s,r,t) = on*(ads) : ba.sAndH(on) : rel
 with{
 	on = t>0;
@@ -222,6 +234,38 @@ with {
 };
 */
 
+//------------------------`(en.)adsre`----------------------
+// ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential 
+// segments.
+//
+// #### Usage
+//
+// ```
+// adsre(a,d,s,r,g) : _
+// ```
+//
+// Where:
+//
+// * `a`: attack (sec)
+// * `d`: decay (sec)
+// * `s`: sustain (percentage of `t`: 0-1) 
+// * `r`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// when `t=0`)
+//-----------------------------------------------------
+// Author: JOS
+// License: STK-4.3
+adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
+  ugate = gate>0;
+  samps = ugate : +~(*(ugate)); // ramp time in samples
+  attSamps = int(attT60 * ma.SR);
+  target = select2(ugate, 0.0,
+           select2(samps<attSamps, (susLvl)*float(ugate), ugate));
+  t60 = select2(ugate, relT60, select2(samps<attSamps, decT60, attT60));
+  pole = ba.tau2pole(t60/6.91);
+  envelope = target : si.smooth(pole);
+};
+
 //----------------------`(en.)dx7envelope`----------------------
 // DX7 operator envelope generator with 4 independent rates and levels. It is
 // essentially a 4 points BPF.
@@ -238,6 +282,7 @@ with {
 // * `LN`: levels (0-1)
 // * `t`: trigger signal
 //-----------------------------------------------------
+// Author: RM
 dx7envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) = up*on : ba.sAndH(on) : down
 with{
   on = t>0;
@@ -250,50 +295,3 @@ with{
   ba.bpf.point(rs1+rs2,L2) : ba.bpf.end(rs1+rs2+rs3,L3);
   down = _,ba.countup(rs4,on) : ba.bpf.start(0) : ba.bpf.end(rs4,L4);
 };
-
-////////////////////////////////////////////////////////
-// UNDOCUMENTED/DISMISSED ELEMENTS
-////////////////////////////////////////////////////////
-
-// end GRAME section
-//########################################################################################
-/************************************************************************
-FAUST library file, further contributions section
-
-All contributions below should indicate both the contributor and terms
-of license.  If no such indication is found, "git blame" will say who
-last edited each line, and that person can be emailed to inquire about
-license disposition, if their license choice is not already indicated
-elsewhere among the libraries.  It is expected that all software will be
-released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
-************************************************************************/
-
-//------------------------`(en.)adsre`----------------------
-// ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential segments.
-// `adsre` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// adsre(a,d,s,r,g) : _
-// ```
-//
-// Where:
-//
-// * `a`, `d`, `s`, `r`: attack (sec), decay (sec), sustain level (percentage of max: 0-1), release (sec)
-// * `g`: gate signal ( >0 for attack, then release is when g back to 0)
-//-----------------------------------------------------
-// Author: JOS
-// License: STK-4.3
-adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
-  ugate = gate>0;
-  samps = ugate : +~(*(ugate)); // ramp time in samples
-  attSamps = int(attT60 * ma.SR);
-  target = select2(ugate, 0.0,
-           select2(samps<attSamps, (susLvl)*float(ugate), ugate));
-  t60 = select2(ugate, relT60, select2(samps<attSamps, decT60, attT60));
-  pole = ba.tau2pole(t60/6.91);
-  envelope = target : si.smooth(pole);
-};
-
-// end further further contributions section
