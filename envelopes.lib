@@ -203,7 +203,7 @@ with{
 	off = t==0;
 	attTime = ma.SR*a;
 	decTime = ma.SR*d;
-	relTime = ma.SR*r;
+	relTime = ma.SR*r : max(0.001);
 	sustainGain = t*s;
 	ads = ba.countup(attTime+decTime,off) : ba.bpf.start(0,0) :
 		ba.bpf.point(attTime,1) : ba.bpf.end(attTime+decTime,sustainGain);
