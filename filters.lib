@@ -101,7 +101,7 @@ integrator = + ~ _ ;
 // Derived from the analog transfer function
 // $H(s) = \frac{s}{(s + 2 \pi fb)}$
 // by the low-frequency-matching bilinear transform method
-// (i.e., the standard frequency-scaling constant 2SR).
+// (i.e., the standard frequency-scaling constant 2*SR).
 //
 // #### Usage
 //
@@ -1919,10 +1919,10 @@ peak_eq_rm(Lfx,fx,tanPiBT) = _ <: _,A,_ : +,- : *(0.5),*(K/2.0) : + with {
 // Where:
 //
 // * `N`: desired integer filter order (fixed at compile time)
-// * `f0`: lower frequency limit for desired roll-off band
+// * `f0`: lower frequency limit for desired roll-off band > 0
 // * `bw`: bandwidth of desired roll-off band
-// * `alpha`: slope of roll-off desired in nepers per neper
-//         (ln mag / ln radian freq)
+// * `alpha`: slope of roll-off desired in nepers per neper,
+//         between -1 and 1 (ln mag / ln radian freq)
 //
 // #### Examples
 // See `spectral_tilt_demo`.
