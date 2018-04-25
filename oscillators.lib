@@ -337,6 +337,24 @@ lf_squarewave(freq) = 2*lf_squarewavepos(freq) - 1;
 //------------------------------------------------------------
 lf_trianglepos(freq) = 1-abs(saw1(freq)); // saw1 defined below
 
+//----------`(os.)lf_triangle`----------
+// Positive unit-amplitude LF triangle wave
+// `lf_triangle` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// lf_triangle(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: STK-4.3
+lf_triangle(freq) = 2*lf_trianglepos(freq) - 1;
+
 //================== Low Frequency Sawtooths ====================
 // Sawtooth waveform oscillators for virtual analog synthesis et al.
 // The 'simple' versions (`lf_rawsaw`, `lf_sawpos` and `saw1`), are mere samplings of
@@ -382,6 +400,44 @@ lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 // * `phase`: phase
 //---------------------------------------------------------
 lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac ) ~ +(freq/ma.SR);
+
+//-----------------`(os.)lf_sawpos`--------------------
+// Simple sawtooth waveform oscillator between 0 and 1.
+//
+// #### Usage
+//
+// ```
+// lf_sawpos(freq)
+// ```
+//
+// Where:
+//
+// * `freq`: frequency
+//
+//---------------------------------------------------------
+// Author: Bart Brouns
+// License: STK-4.3
+// MarkDown: Romain Michon
+lf_sawpos(freq) = ma.frac ~ +(freq'/ma.SR);
+
+//-----------------`(os.)lf_saw`--------------------
+// Simple sawtooth waveform.
+// `lf_saw` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// lf_saw(freq)
+// ```
+//
+// Where:
+//
+// * `freq`: frequency
+//---------------------------------------------------------
+// Author: Bart Brouns
+// License: STK-4.3
+saw1(freq) = 2.0 * lf_sawpos(freq) - 1.0;
+lf_saw(freq) = saw1(freq);
 
 //================== Bandlimited Sawtooth ====================
 //------------------`(os.)sawN`--------------------------------
@@ -924,63 +980,9 @@ elsewhere among the libraries.  It is expected that all software will be
 released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
 
-//-----------------`(os.)lf_sawpos`--------------------
-// Simple sawtooth waveform oscillator between 0 and 1.
-//
-// #### Usage
-//
-// ```
-// lf_sawpos(freq)
-// ```
-//
-// Where:
-//
-// * `freq`: frequency
-//
-//---------------------------------------------------------
-// Author: Bart Brouns
-// License: STK-4.3
-// MarkDown: Romain Michon
-lf_sawpos(freq) = ma.frac ~ +(freq'/ma.SR);
-
-//-----------------`(os.)lf_saw`--------------------
-// Simple sawtooth waveform.
-// `lf_saw` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// lf_saw(freq)
-// ```
-//
-// Where:
-//
-// * `freq`: frequency
-//---------------------------------------------------------
-// Author: Bart Brouns
-// License: STK-4.3
-// MarkDown: Romain Michon
-saw1(freq) = 2.0 * lf_sawpos(freq) - 1.0;
-lf_saw(freq) = saw1(freq);
-
-//----------`(os.)lf_triangle`----------
-// Positive unit-amplitude LF triangle wave
-// `lf_triangle` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// lf_triangle(freq) : _
-// ```
-//
-// Where:
-//
-// * `freq`: frequency in Hz
-//------------------------------------------------------------
-// Author: Bart Brouns
-// License: STK-4.3
-// MarkDown: Romain Michon
-lf_triangle(freq) = 2*lf_trianglepos(freq) - 1;
+//===================== Casio CZ Oscillators ==========================
+// Oscillators that mimics some of the Casio CZ oscillators.
+//=====================================================================
 
 //----------`(os.)CZsaw`----------
 // Oscillator that mimics the Casio CZ saw oscillator
