@@ -982,5 +982,197 @@ lf_saw(freq) = saw1(freq);
 // MarkDown: Romain Michon
 lf_triangle(freq) = 2*lf_trianglepos(freq) - 1;
 
+//----------`(os.)CZsaw`----------
+// Oscillator that mimics the Casio CZ saw oscillator
+// `CZsaw` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsaw(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = saw-wave
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+
+CZsaw(fund, index) =
+((
+  (fund*((.5-tmp)/tmp)),
+(-1*fund+1)*((.5-tmp)/(1-tmp))
+):min+fund)
+*2*ma.PI:cos with {
+tmp = (.5-(index*.5)):max(0.01):min(0.5);
+};
+
+//----------`(os.)CZsquare`----------
+// Oscillator that mimics the Casio CZ square oscillator
+// `CZsquare` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsquare(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = square-wave
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+
+CZsquare(fund, index) =
+  (fund>=0.5),
+  (ma.decimal((fund*2)+1)<:_-min(_,(-1*_+1)*((INDEX)/(1-INDEX))))
+  :+ *ma.PI:cos*0.5
+with {INDEX = (index:pow(0.25)) * 0.98;};
+
+
+//----------`(os.)CZpulse`----------
+// Oscillator that mimics the Casio CZ pulse oscillator
+// `CZpulse` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZpulse(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is closer to a pulse
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+
+CZpulse(fund, index) =
+((fund-min(fund,((-1*fund+1)*(INDEX/(1-INDEX)))))*2*ma.PI):cos with
+{INDEX = index:min(0.99):max(0);};
+
+//----------`(os.)CZsinePulse`----------
+// Oscillator that mimics the Casio CZ sine/pulse oscillator
+// `CZsinePulse` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsinePulse(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is a sine minus a pulse
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+
+CZsinePulse(fund, index) =
+  (min(fund*((0.5-INDEX)/INDEX),(-1*fund+1)*((.5-INDEX)/(1-INDEX)))+fund)*4*ma.PI:cos
+with {INDEX = ((index*-0.49)+0.5);};
+
+//----------`(os.)CZhalfSine`----------
+// Oscillator that mimics the Casio CZ half sine oscillator
+// `CZhalfSine` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZhalfSine(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is somewhere between a saw and a square
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+
+CZhalfSine(fund, index) =
+(select2(fund<.5 , .5*(fund-.5)/INDEX+.5 , fund):min(1))*2*ma.PI:cos
+with {
+  INDEX = (.5-(index*0.5)):min(.5):max(.01);
+};
+//----------`(os.)CZresSaw`----------
+// Oscillator that mimics the Casio CZ resonant saw-tooth oscillator
+// `CZresSaw` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZresSaw(fund,res) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `res`: the frequency of resonance as a factor of the fundamental pitch.
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+
+CZresSaw(fund,res) =
+(((-1*(1-fund)) * ((cos((ma.decimal((max(1,res)*fund) +1 ))*2*ma.PI) * -.5) +.5))*2)+1;
+
+//----------`(os.)CZresTriangle`----------
+// Oscillator that mimics the Casio CZ resonant triangle oscillator
+// `CZresTriangle` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZresTriangle(fund,res) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `res`: the frequency of resonance as a factor of the fundamental pitch.
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+
+CZresTriangle(fund,res) =
+select2(fund<.5 , 2-(fund*2) , fund*2)*tmp*2-1 with {
+  tmp = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
+};
+
+//----------`(os.)CZresTrap`----------
+// Oscillator that mimics the Casio CZ resonant trapeze oscillator
+// `CZresTrap` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZresTrap(fund,res) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `res`: the frequency of resonance as a factor of the fundamental pitch.
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+
+CZresTrap(fund, res) =
+  (((1-fund)*2):min(1) *  sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
+
 // end further contributions section
 //########################################################################################
