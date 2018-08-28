@@ -150,8 +150,8 @@ Function Type | Function Name | Description
 [Pulse Train (Low Frequency)](#os.lf_imptrain) | [`os.`](#oscillators.lib)[`lf_imptrain`](#os.lf_imptrain) | Low-frequency pulse train
 [Sawtooth](#os.sawtooth) | [`os.`](#oscillators.lib)[`sawtooth`](#os.sawtooth) | Band-limited sawtooth wave
 [Sawtooth (Low Frequency)](#os.lf_saw) | [`os.`](#oscillators.lib)[`lf_saw`](#os.lf_saw) | Low-frequency sawtooth wave
-[Sine (Filter-Based)](#os.osc) | [`os.`](#oscillators.lib)[`osc`](#os.osc) | Sine oscillator (filter-based)
-[Sine (Table-Based)](#os.oscsin) | [`os.`](#oscillators.lib)[`oscsin`](#os.oscsin) | Sine oscillator (table-based)
+[Sine (Filter-Based)](#os.oscs) | [`os.`](#oscillators.lib)[`oscs`](#os.oscs) | Sine oscillator (filter-based)
+[Sine (Table-Based)](#os.osc) | [`os.`](#oscillators.lib)[`osc`](#os.osc) | Sine oscillator (table-based)
 [Square](#os.square) | [`os.`](#oscillators.lib)[`square`](#os.square) | Band-limited square wave
 [Square (Low Frequency)](#os.lf_squarewave) | [`os.`](#oscillators.lib)[`lf_squarewave`](#os.lf_squarewave) | Low-frequency square wave
 [Triangle](#os.triangle) | [`os.`](#oscillators.lib)[`triangle`](#os.triangle) | Band-limited triangle wave
