@@ -35,7 +35,7 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Soundfile Library";
-declare version "0.3";
+declare version "0.4";
 
 ma = library("maths.lib");
 
@@ -49,24 +49,23 @@ ma = library("maths.lib");
 // #### Usage
 //
 // ```
-// loop(s)
+// loop(s, part)
 // ```
 //
 // Where:
 //
-// * `s`: the soundfile 
+// * `s`: the soundfile
+// * `part`: the part in the soundfile list
 //
 //-----------------------------------------------------------------------------
 
-loop(s) = float(srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
-	with {
-		length(s) = 0 : s : _,cut(outputs(s)-1);
-		srate(s) = 0 : s : !,_,cut(outputs(s)-2);
-		channels(s) = 0 : s : !,!,_,cut(outputs(s)-3);
-		outs(s) = s : cut(3), bus(outputs(s)-3);
-		cut(n) = par(i,n,!);
-		bus(n) = par(i,n,_);
-	};
+loop(s, part) = (part, reader(s)) : outs(s)
+    with {
+        length(s) = part,0 : s : _,si.block(outputs(s)-1);
+        srate(s) = part,0 : s : !,_,si.block(outputs(s)-2);
+        outs(s) = s : si.block(2), si.bus(outputs(s)-2);
+        reader(s) = float(srate(s))/ma.SR : (+,length(s):fmod)~_ : int;
+    };
 
 //--------------------------------`(so.)loop_speed`-----------------------------------
 // Play a soundfile in a loop taking into account its sampling rate, with speed control
@@ -75,25 +74,24 @@ loop(s) = float(srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
 // #### Usage
 //
 // ```
-// loop_speed(s, speed)
+// loop_speed(s, part, speed)
 // ```
 //
 // Where:
 //
-// * `s`: the soundfile 
+// * `s`: the soundfile
+// * `part`: the part in the soundfile list
 // * `speed`: the speed between 0 and n 
 //
 //-----------------------------------------------------------------------------
 
-loop_speed(s, speed) = float(speed*srate(s))/ma.SR: (+,length(s):fmod)~_ : int : outs(s)
-	with {
-		length(s) = 0 : s : _,cut(outputs(s)-1);
-		srate(s) = 0 : s : !,_,cut(outputs(s)-2);
-		channels(s) = 0 : s : !,!,_,cut(outputs(s)-3);
-		outs(s) = s : cut(3), bus(outputs(s)-3);
-		cut(n) = par(i,n,!);
-		bus(n) = par(i,n,_);
-	};
+loop_speed(s, part, speed) = (part, reader(s)) : outs(s)
+    with {
+        length(s) = part,0 : s : _,si.block(outputs(s)-1);
+        srate(s) = part,0 : s : !,_,si.block(outputs(s)-2);
+        outs(s) = s : si.block(2), si.bus(outputs(s)-2);
+        reader(s) = float(speed*srate(s))/ma.SR : (+,length(s):fmod)~_ : int;
+    };
 
 //--------------------------------`(so.)loop_speed_level`-----------------------------------
 // Play a soundfile in a loop taking into account its sampling rate, with speed and level controls
@@ -102,23 +100,24 @@ loop_speed(s, speed) = float(speed*srate(s))/ma.SR: (+,length(s):fmod)~_ : int :
 // #### Usage
 //
 // ```
-// loop_speed_level(s, speed, level)
+// loop_speed_level(s, part, speed, level)
 // ```
 //
 // Where:
 //
-// * `s`: the soundfile 
+// * `s`: the soundfile
+// * `part`: the part in the soundfile list
 // * `speed`: the speed between 0 and n 
 // * `level`: the volume between 0 and n 
 //
 //-----------------------------------------------------------------------------
 
-loop_speed_level(s, speed, level) = float(speed*srate(s))/ma.SR : (+,length(s):fmod)~_ : int : outs(s)
-	with {
-		length(s) = 0 : s : _,cut(outputs(s)-1);
-		srate(s) = 0 : s : !,_,cut(outputs(s)-2);
-		channels(s) = 0 : s : !,!,_,cut(outputs(s)-3);
-		outs(s) = s : cut(3), bus(outputs(s)-3);
-		cut(n) = par(i,n,!);
-		bus(n) = par(i,n,*(level));
-	};
+loop_speed_level(s, part, speed, level) = (part, reader(s)) : outs(s)
+    with {
+        length(s) = part,0 : s : _,si.block(outputs(s)-1);
+        srate(s) = part,0 : s : !,_,si.block(outputs(s)-2);
+        outs(s) = s : si.block(2), bus_level(outputs(s)-2);
+        bus_level(n) = par(i,n,*(level));
+        reader(s) = float(speed*srate(s))/ma.SR : (+,length(s):fmod)~_ : int;
+    };
+
