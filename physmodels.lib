@@ -27,7 +27,7 @@
 // * [Vocal Synthesis](#vocal-synthesis): functions for various vocal synthesis
 // techniques (e.g., fof, source/filter, etc.) and vocal synthesizers.
 // * [Misc Functions](#misc-functions): any other functions that don't fit in
-// the previous category (e.g., nonlinear filters, etc.)
+// the previous category (e.g., nonlinear filters, etc.).
 //
 // This library is part of the Faust Physical Modeling ToolKit.
 // More information on how to use this library can be found on this page:
@@ -756,7 +756,7 @@ guitarNuts = lTermination(-bridgeFilter(0.4,0.5),basicBlock);
 // With:
 // * `length`: the length of the string in meters
 // * `pluckPosition`: the plucking position (0.001-0.999)
-// * `excitation`: the input signal for the excitation
+// * `excitation`: the input signal for the excitation.
 //----------------------------------------------------------
 idealString(length,pluckPosition,excitation) = wg
 with{
@@ -928,7 +928,7 @@ with{
 // by making a polyphonic applications out of this function. Pitch is changed by
 // changing the length of the string and not through a finger model.
 // WARNING: this function doesn't currently implement a body (just strings and
-// bridge)
+// bridge).
 //
 // #### Usage
 //
@@ -1006,7 +1006,7 @@ with{
 // by making a polyphonic applications out of this function. Pitch is changed by
 // changing the length of the string and not through a finger model.
 // WARNING: this function doesn't currently implement a body (just strings and
-// bridge)
+// bridge).
 //
 // #### Usage
 //
@@ -1084,7 +1084,7 @@ with{
 // printed models. The 2D space allowing for the control of the shape and the
 // scale of the model is enabled by interpolating between modes parameters.
 // More information about this technique/project can be found here: 
-// <https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/> 
+// <https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/>.
 //
 // #### Usage
 //
@@ -1285,7 +1285,7 @@ with{
 
 //-------`(pm.)bowTable`----------
 // Extremely basic bow table that can be used to implement a wide range of
-// bow types for many different bowed string instruments (violin, cello, etc.)
+// bow types for many different bowed string instruments (violin, cello, etc.).
 //
 // #### Usage
 //
@@ -1651,7 +1651,7 @@ with{
 //
 // * `pressure`: the pressure of the air flow (DC) created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
-// (e.g., breath noise, etc.)
+// (e.g., breath noise, etc.).
 // * `reedStiffness`: reed stiffness (0-1)
 //----------------------------------
 clarinetMouthPiece(reedStiffness,pressure) = lTermination(reedInteraction,in(pressure))
@@ -1676,7 +1676,7 @@ with{
 // * `lipsTension`: tension of the lips (0-1) (default: 0.5)
 // * `pressure`: the pressure of the air flow (DC) created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
-// (e.g., breath noise, etc.)
+// (e.g., breath noise, etc.).
 //----------------------------------
 brassLips(tubeLength,lipsTension,pressure) = lTermination(mpInteraction,basicBlock)
 with{
@@ -1702,7 +1702,7 @@ with{
 // * `pressure`: the pressure of the air flow (DC) created by the virtual
 // performer (0-1).
 // This can also be any kind of signal that will directly injected in the
-// mouthpiece (e.g., breath noise, etc.)
+// mouthpiece (e.g., breath noise, etc.).
 //----------------------------------
 fluteEmbouchure(pressure) =
 (_ <: _,_),_,_ : _,*(0.5)+(pressure-_*0.5 : fluteJetTable),_;
@@ -1767,7 +1767,7 @@ with{
 // * `tubeLength`: the length of the tube in meters
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
-// (e.g., breath noise, etc.)
+// (e.g., breath noise, etc.).
 // * `reedStiffness`: reed stiffness (0-1)
 // * `bellOpening`: the opening of bell (0-1)
 //----------------------------------
@@ -1798,7 +1798,7 @@ with{
 //
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will be directly injected in the mouthpiece
-// (e.g., breath noise, etc.)
+// (e.g., breath noise, etc.).
 //----------------------------------
 clarinetModel_ui(pressure) = clarinetModel(tubeLength,pressure,reedStiffness,bellOpening)*outGain
 with{
@@ -1882,7 +1882,7 @@ with{
 // * `mute`: mute opening at the end of the instrument (0-1) (default: 0.5)
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
-// (e.g., breath noise, etc.)
+// (e.g., breath noise, etc.).
 //----------------------------------
 brassModel(tubeLength,lipsTension,mute,pressure) = endChain(brassChain)
 with{
@@ -1906,7 +1906,7 @@ with{
 //
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will be directly injected in the mouthpiece
-// (e.g., breath noise, etc.)
+// (e.g., breath noise, etc.).
 //----------------------------------
 brassModel_ui(pressure) = brassModel(tubeLength,lipsTension,mute,pressure)
 with{
@@ -1984,7 +1984,7 @@ with{
 // * `mouthPosition`: position of the mouth on the embouchure (0-1) (default: 0.5)
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
-// (e.g., breath noise, etc.)
+// (e.g., breath noise, etc.).
 //----------------------------------
 // TODO: this model is out of tune and we're not really sure why
 fluteModel(tubeLength,mouthPosition,pressure) = endChain(fluteChain) : fi.dcblocker
@@ -2012,7 +2012,7 @@ with{
 //
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will be directly injected in the mouthpiece
-// (e.g., breath noise, etc.)
+// (e.g., breath noise, etc.).
 //----------------------------------
 fluteModel_ui(pressure) =
 fluteModel(tubeLength,mouthPosition,pressure)*outGain
@@ -3138,7 +3138,7 @@ with {
 // Autobends the center frequencies of formants 1 and 2 based on
 // the fundamental frequency of the excitation signal and leaves
 // all other formant frequencies unchanged. Ported from `chant-lib`.
-// Reference: <https://ccrma.stanford.edu/~rmichon/chantLib/>
+// Reference: <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //
 // #### Usage
 //
@@ -3171,7 +3171,7 @@ with {
 // frequency of the excitation signal. Higher formants are
 // reinforced for higher fundamental frequencies.
 // Ported from `chant-lib`.
-// Reference: <https://ccrma.stanford.edu/~rmichon/chantLib/>
+// Reference: <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //
 // #### Usage
 //
@@ -3192,7 +3192,7 @@ vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),
 
 //-------------------------`(pm.)fof`--------------------------
 // Function to generate a single Formant-Wave-Function.
-// Reference: <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>
+// Reference: <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //
@@ -3227,7 +3227,7 @@ with {
 //-------------------------`(pm.)fofSH`-------------------------
 // FOF with sample and hold used on `bw` and a parameter
 // used in the filter-cycling FOF function `fofCycle`.
-// Reference: <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>
+// Reference: <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //
@@ -3244,7 +3244,7 @@ fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') :
 //----------------------`(pm.)fofCycle`-------------------------
 // FOF implementation where time-varying filter parameter noise is
 // mitigated by using a cycle of `n` sample and hold FOF filters.
-// Reference: <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>
+// Reference: <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //

@@ -255,7 +255,7 @@ declare lf_imptrain license "STK-4.3.0 (see licenses/stk-4.3.0.md)";
 lf_imptrain(freq) = lf_sawpos(freq)<:-(mem)<0; // definition below
 
 //--------`(os.)lf_pulsetrainpos`----------
-// Unit-amplitude nonnegative LF pulse train, duty cycle between 0 and 1
+// Unit-amplitude nonnegative LF pulse train, duty cycle between 0 and 1.
 //
 //
 // #### Usage
@@ -274,7 +274,7 @@ lf_pulsetrainpos(freq,duty) = float(lf_sawpos(freq) <= duty);
 //pulsetrainpos = lf_pulsetrainpos; // for backward compatibility
 
 //--------`(os.)lf_pulsetrain`----------
-// Unit-amplitude zero-mean LF pulse train, duty cycle between 0 and 1
+// Unit-amplitude zero-mean LF pulse train, duty cycle between 0 and 1.
 //
 // #### Usage
 //
@@ -325,7 +325,7 @@ lf_squarewave(freq) = 2*lf_squarewavepos(freq) - 1;
 
 
 //--------`(os.)lf_trianglepos`----------
-// Positive unit-amplitude LF positive triangle wave
+// Positive unit-amplitude LF positive triangle wave.
 //
 // #### Usage
 //
@@ -442,7 +442,7 @@ saw1(freq) = 2.0 * lf_sawpos(freq) - 1.0;
 lf_saw(freq) = saw1(freq);
 
 //================== Bandlimited Sawtooth ====================
-//------------------`(os.)sawN`--------------------------------
+//-----------------`(os.)sawN`--------------------
 // Bandlimited Sawtooth
 //
 // `sawN(N,freq)`, `sawNp`, `saw2dpw(freq)`, `saw2(freq)`, `saw3(freq)`,
@@ -451,7 +451,7 @@ lf_saw(freq) = saw1(freq);
 //
 // #### Method 1 (`saw2`)
 //
-// Polynomial Transition Regions (PTR) (for aliasing suppression)
+// Polynomial Transition Regions (PTR) (for aliasing suppression).
 //
 // ##### Reference
 //
@@ -463,7 +463,7 @@ lf_saw(freq) = saw1(freq);
 //
 // #### Method 2 (`sawN`)
 //
-// Differentiated Polynomial Waves (DPW) (for aliasing suppression)
+// Differentiated Polynomial Waves (DPW) (for aliasing suppression).
 //
 // ##### Reference
 //
@@ -596,7 +596,7 @@ saw2f4 = saw2 : cf4 with {
 
 
 //=========Bandlimited Pulse, Square, and Impulse Trains============
-// Bandlimited Pulse, Square, and Impulse Trains
+// Bandlimited Pulse, Square, and Impulse Trains.
 //
 // `pulsetrainN`, `pulsetrain`, `squareN`, `square`, `imptrain`, `imptrainN`,
 // `triangle`, `triangleN`
@@ -852,7 +852,7 @@ oscr = oscrs; // default = sine (starts without a pop)
 //--------------------------`(os.)oscs`--------------------------------
 // Sinusoidal oscillator based on the state variable filter
 // = undamped "modified-coupled-form" resonator
-// = "magic circle" algorithm used in graphics
+// = "magic circle" algorithm used in graphics.
 //------------------------------------------------------------
 oscs(f) =  (*(-1) : sint(wn) : sintp(wn,impulse)) ~ _
 with {
@@ -908,7 +908,7 @@ oscwc(fr) = impulse : fi.wgr(fr,1) : _,!; // cosine (cheapest at 1 mpy/sample)
 
 //-----------------`(os.)oscws`--------------------
 // Sinusoidal oscillator based on the waveguide resonator `wgr`. Unit-amplitude
-// sine oscillator
+// sine oscillator.
 //
 // #### Usage
 //
@@ -950,7 +950,7 @@ oscq(fr)  = impulse : fi.wgr(fr,1);       // phase quadrature outputs
 
 //-----------------`(os.)oscw`--------------------
 // Sinusoidal oscillator based on the waveguide resonator `wgr`.
-// Unit-amplitude cosine oscillator (default)
+// Unit-amplitude cosine oscillator (default).
 //
 // #### Usage
 //

@@ -609,7 +609,7 @@ take (nn, (xs, xxs)) 	= take (nn-1, xxs);
 // #### Note:
 //
 // Faust doesn't have proper lists. Lists are simulated with parallel
-// compositions and there is no empty list
+// compositions and there is no empty list.
 //-----------------------------------------------------------------------------
 subseq((head, tail), 0, 1)      = head;
 subseq((head, tail), 0, n)      = head, subseq(tail, 0, n-1);
@@ -835,7 +835,7 @@ with {
 
 //-----------------`(ba.)bpf`-------------------
 // bpf is an environment (a group of related definitions) that can be used to
-// create break-point functions. It contains three functions :
+// create break-point functions. It contains three functions:
 //
 // * `start(x,y)` to start a break-point function
 // * `end(x,y)` to end a break-point function
@@ -861,7 +861,7 @@ with {
 // f = bpf.start(x0,y0) : ... : bpf.point(xi,yi) : ... : bpf.end(xn,yn);
 // ```
 //
-// implements a break-point function f such that :
+// implements a break-point function f such that:
 //
 // * `f(x) = y_{0}` when `x < x_{0}`
 // * `f(x) = y_{n}` when `x > x_{n}`
@@ -1047,7 +1047,7 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 
 //=================================Sliding Reduce=========================================
 // Provides various operations on the last N samples using a high order
-// `slidingReduce(op,N,maxN,disabledVal,x)`` fold-like function :
+// `slidingReduce(op,N,maxN,disabledVal,x)`` fold-like function:
 //
 // * `slidingSumN(n,maxn)`: the sliding sum of the last n input samples
 // * `slidingMaxN(n,maxn)`: the sliding max of the last n input samples
@@ -1222,7 +1222,7 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i) ) ;
 // the last `<n>` consecutive samples of a signal `<x>`. For example :
 // `slidingReduce(max,128,128,-(ma.INFINITY))` will compute the maximum of the last
 // 128 samples. The output is updated each sample, unlike reduce, where the
-// output is constant for the duration of a block
+// output is constant for the duration of a block.
 //
 // #### Usage
 //
