@@ -3844,10 +3844,40 @@ with{
 // UNCATEGORIZED FUNCTIONS (TODO)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-// modalModel
-modalModel(n,modeFreqs,modeRes,modeGains) = _ <: par(i,n,gain(i)*modeFilter(freqs(i),res(i))) :> _
+//-------`modalModel`--------------
+//
+// Implement multiple resonance modes using resonant bandpass filters.
+//
+// #### Usage
+//
+// ```
+// _ : modalModel(n, freqs, t60s, gains) : _
+// ```
+//
+// Where:
+//
+// * `n`: number of given modes
+// * `freqs` : list of filter center freqencies
+// * `t60s` : list of mode resonance durations (in seconds)
+// * `gains` : list of mode gains (0-1)
+//
+// For example, to generate a model with 2 modes (440 Hz and 660 Hz, a
+// fifth) where the higher one decays faster and is attenuated:
+//
+// ```
+// os.impulse : modalModel(2, (440, 660),
+//                            (0.5, 0.25),
+//                            (ba.db2linear(-1), ba.db2linear(-6)) : _
+// ```
+//
+// Further reading: [Grumiaux et. al., 2017:
+// Impulse-Response and CAD-Mod// el-Based Physical Modeling in
+// Faust](https://raw.githubusercontent.com/grame-cncm/faust/master-dev/tools/physicalModeling/ir2dsp/lacPaper2017.pdf)
+//
+//--------------------------------------
+modalModel(n,modeFreqs,modeRes,modeGains) = _ <: par(i,n,modeFilter(freqs(i),res(i),gain(i))) :> _
 with{
-	freqs(i) = take(i+1,modeFreqs);
-	res(i) = take(i+1,modeRes);
-	gain(i) = take(i+1,modeGains);
+	freqs(i) = ba.take(i+1,modeFreqs);
+	res(i) = ba.take(i+1,modeRes);
+	gain(i) = ba.take(i+1,modeGains);
 };
