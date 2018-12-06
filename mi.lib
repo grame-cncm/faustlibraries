@@ -1,0 +1,94 @@
+ma = library("maths.lib");
+ba = library("basics.lib");
+
+
+// integrated oscillator (mass-spring-ground system)
+// m, k, z: mass, stiffness, damping (algorithmic values)
+// x0, x1: initial position and delayed position
+osc(m,k,z,x0,x1) = equation
+with{
+  A = 2-(k+z)/m;
+  B = z/m-1;
+  C = 1/m;
+  equation = x 
+	letrec{
+  		'x = A*(x + (x0 : ba.impulsify)) + B*(x' + (x1 : ba.impulsify)) + C*_;
+	};
+};
+
+// punctual mass module
+// m: mass (algorithmic value)
+// x0, x1: initial position and delayed position
+mass(m,x0,x1) = equation
+with{
+  A = 2;
+  B = -1;
+  C = 1/m;
+  equation = x 
+	letrec{
+  		'x = A*(x + (x0 : ba.impulsify)) + B*(x' + (x1 : ba.impulsify) + (x0 : ba.impulsify)') + C*_;
+	};
+};
+
+// punctual ground module
+// x0: initial position
+ground(x0) = equation
+with{
+  // could this term be removed or simlified? Need "unused" input force signal for routing scheme
+  C = 0;
+  equation = x 
+	letrec{
+		'x = x + (x0 : ba.impulsify) + C*_;
+	};
+};
+
+// spring
+// k,z: stiffness and daming (algorithmic values)
+spring(k,z,x1r0,x2r0,x1,x2) = k*(x1-x2) + z*((x1-(x1' + (x1r0 : ba.impulsify)))-(x2 - (x2' + (x2r0 : ba.impulsify)))) <: _*-1,_;
+
+// nlPluck
+// 1D non-linear picking Interaction algorithm
+nlPluck(k,scale,x1,x2) = 
+  select2(
+    absdeltapos>scale,
+    select2(
+      absdeltapos>scale*0.5,
+      k*deltapos,
+      k*(ma.signum(deltapos)*scale*0.5-deltapos)),
+    0) <:  _*-1,_
+with{
+  deltapos = x1 - x2;
+  absdeltapos = abs(deltapos);
+};
+
+// nlBow
+// 1D non-linear bowing Interaction algorithm 
+// JL: corrected error: force = 0 if beyond the scale distance value
+nlBow(z,scale,x1,x2) = 
+	select2(
+	  absspeed < (scale/3),
+  	  z*speed,
+	  select2(
+		absspeed<scale,
+		select2(
+		  speed>0,
+		  (scale/3)*z + (-z/4)*speed,
+		  (-scale/3)*z + (-z/4)*speed
+		  ),
+		0
+		)
+	  ) <:   _*-1,_
+with{
+  speed = (x1-x1') - (x2-x2');
+  absspeed = abs(speed);
+};
+
+// collision
+// k,z: stiffness and daming (algorithmic values)
+// thres: position threshold for the collision to be active
+collision(k,z,thres,x1,x2) = spring(k,z,x1,x2) : (select2(comp,0,_),select2(comp,0,_))
+with{
+  comp = (x2-x1)<thres;
+};
+
+posInput(init) = _,_ : !,_ :+(init : ba.impulsify);
