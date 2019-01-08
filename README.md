@@ -37,6 +37,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `re`: `reverbs.lib`
 * `ro`: `routes.lib`
 * `si`: `signals.lib`
+* `so`: `soundfiles.lib`
 * `sp`: `spats.lib`
 * `sy`: `synths.lib`
 * `ve`: `vaeffects.lib`
