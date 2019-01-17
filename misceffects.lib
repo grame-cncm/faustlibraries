@@ -398,16 +398,84 @@ with {
     : si.bus(16*N);
 };
 
-uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) : (par(i,N,*(i/(N-1))) :> _), (par(i,N,*(1-i/(N-1))) :> _);
+//--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
+// Reverse echo effect
+//
+// #### Usage
+//
+// ```
+// _ : ef.reverseEchoN(N,delay) : si.bus(N)
+// ```
+//
+// Where:
+//
+// *     `N`: Number of channels desired (1 or more)
+// * `delay`: echo delay (integer power of 2)
+//
+// #### Demo
+//
+// ```
+// _ : dm.reverseEchoN(N) : _,_
+// ```
+//
+// #### Description
+//
+// The effect uses N instances of reverseDelayRamped at different phases.
+//
+//------------------------------------------------------------
+reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
 
+//-------------------`(ef.)reverseDelayRamped(delay,phase)`------------------
+// Reverse delay with amplitude ramp
+//
+// #### Usage
+//
+// ```
+// _ : ef.reverseDelayRamped(delay,phase) : _
+// ```
+//
+// Where:
+//
+// * `delay`: echo delay (integer power of 2)
+// * `phase`: float between 0 and 1 giving ramp delay phase*delay
+//
+// #### Demo
+//
+// ```
+// _ : dm.reverseEchoN(N) : _,_
+// ```
+//
+//------------------------------------------------------------
 reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
   rampGain = 4 * (del/delMax) * (1 - del/delMax); // suppress click when delay-line wraps around
   delOffset = int(floor(0.5 + delMax * max(0,min(0.999999,phs)))); // starting point in delay line
-  startPulse = (1-1') * delOffset; // scaled impulse
+  startPulse = (1-1') * delOffset;
   del = int(startPulse : +  ~ +(2)) & (delMax-1);
 };
 
-reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
+//-------------------`(ef.)uniformPanToStereo(nChans)`------------------
+// Pan nChans channels to the stereo field, spread uniformly left to right
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : ef.uniformPanToStereo(N) : _,_
+// ```
+//
+// Where:
+//
+// * `N`: Number of input channels to pan down to stereo
+//
+// #### Demo
+//
+// ```
+// _ : dm.reverseEchoN(N) : _,_
+// ```
+//
+//------------------------------------------------------------
+uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
+		      (par(i,N,*(i/(N-1))) :> _),
+		      (par(i,N,*(1-i/(N-1))) :> _);
 
 // end jos section
 /************************************************************************
