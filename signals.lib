@@ -293,3 +293,23 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 lag_ud(up,dn) = _ <: ((>,ba.tau2pole(up),ba.tau2pole(dn):select2),_:si.smooth) ~ _;
 
 // end further further contributions section
+
+//-------------`(si.)rev`---------------
+// Reverse the input signal by blocks of N>0 samples. `rev(1)` is the indetity
+// function. `rev(N)` has a latency of `N-1` samples.
+//
+// #### Usage
+//
+// ```
+// _ : rev(N) : _;
+// ```
+//
+// Where:
+//
+// * `N`: the block size
+//----------------------------------------------------
+// Author: Yann Orlarey
+rev(N) = @(phase(N)*2) 
+with {
+	phase(n) = 1 : (+ : %(n)) ~ _ : max(0) : min(n-1);
+};
