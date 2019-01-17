@@ -40,10 +40,25 @@ de = library("delays.lib");
 si = library("signals.lib");
 an = library("analyzers.lib");
 fi = library("filters.lib");
-
+ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Math Library";
 declare version "2.0"; // TODO to check
+
+//########################################################################################
+/************************************************************************
+FAUST library file, jos section
+
+Except where noted otherwise, The Faust functions below in this
+section are Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>
+([jos](http://ccrma.stanford.edu/~jos/)), and released under the
+(MIT-style) [STK-4.3](#stk-4.3-license) license.
+
+MarkDown comments in this section are Copyright 2016-2019 by Romain
+Michon and Julius O. Smith III, and are released under the
+[CCA4I](https://creativecommons.org/licenses/by/4.0/) license (TODO: if/when Romain agrees!)
+
+************************************************************************/
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -70,7 +85,6 @@ declare version "2.0"; // TODO to check
 // * <https://ccrma.stanford.edu/~jos/pasp/Cubic_Soft_Clipper.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Nonlinear_Distortion.html>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
 cubicnl(drive,offset) = *(pregain) : +(offset) : clip(-1,1) : cubic
 with {
     pregain = pow(10.0,2*drive);
@@ -105,7 +119,6 @@ cubicnl_nodc(drive,offset) = cubicnl(drive,offset) : fi.dcblocker;
 // * <http://www.soundonsound.com/sos/apr01/articles/advanced.asp>
 // * <http://en.wikipedia.org/wiki/Gating_(sound_engineering)>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
 gate_mono(thresh,att,hold,rel,x) = x * gate_gain_mono(thresh,att,hold,rel,x);
 
 
@@ -132,7 +145,6 @@ gate_mono(thresh,att,hold,rel,x) = x * gate_gain_mono(thresh,att,hold,rel,x);
 // * <http://www.soundonsound.com/sos/apr01/articles/advanced.asp>
 // * <http://en.wikipedia.org/wiki/Gating_(sound_engineering)>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
 gate_stereo(thresh,att,hold,rel,x,y) = ggm*x, ggm*y with {
   ggm = gate_gain_mono(thresh,att,hold,rel,abs(x)+abs(y));
 };
@@ -173,8 +185,8 @@ gate_gain_mono(thresh,att,hold,rel,x) = x : extendedrawgate : an.amp_follower_ar
 // _ : speakerbp(130,5000) : _
 // ```
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
 // TODO: perhaps this should be moved to physmodels.lib
+// [JOS: I don't think so because it's merely a bandpass filter tuned to speaker bandwidth]
 speakerbp(f1,f2) = fi.dcblockerat(f1) : fi.dcblockerat(f1) : fi.lowpass(4,f2);
 
 
@@ -210,8 +222,8 @@ speakerbp(f1,f2) = fi.dcblockerat(f1) : fi.dcblockerat(f1) : fi.lowpass(4,f2);
 // 		is corrected in Dr. Rauhala's encompassing dissertation (and below).)
 // * <http://www.acoustics.hut.fi/research/asp/piano/>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
 // TODO: perhaps this should be moved to physmodels.lib?
+// [JOS: I vote yes when there is a piano model in physmodels.lib.]
 piano_dispersion_filter(M,B,f0) = -Df0*M,seq(i,M,fi.tf1(a1,1,a1))
 with {
  a1 = (1-D)/(1+D); // By Eq. 3, have D >= 0, hence a1 >= 0 also
@@ -233,7 +245,6 @@ with {
  polydel(a) = atan(sin(wT)/(a+cos(wT)))/wT;
  Df0 = polydel(a1) - polydel(1.0/a1);
 };
-
 
 //-------------------------`(ef.)stereo_width`---------------------------
 // Stereo Width effect using the Blumlein Shuffler technique.
@@ -258,7 +269,6 @@ with {
 // * "Applications of Blumlein Shuffling to Stereo Microphone Techniques"
 // Michael A. Gerzon, JAES vol. 42, no. 6, June 1994
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
 stereo_width(w) = shuffle : *(mgain),*(sgain) : shuffle
 with {
      shuffle =  _,_ <: +,-; // normally scaled by 1/sqrt(2) for orthonormality,
@@ -266,70 +276,12 @@ with {
      sgain = w/2;
 };
 
-
-//========================================Time Based======================================
-//========================================================================================
-
-//----------`(ef.)echo`----------
-// A simple echo effect.
-//
-// `echo` is a standard Faust function
-//
-// #### Usage
-//
-// ```
-// _ : echo(maxDuration,duration,feedback) : _
-// ```
-//
-// Where:
-//
-// * `maxDuration`: the max echo duration in seconds
-// * `duration`: the echo duration in seconds
-// * `feedback`: the feedback coefficient
-//----------------------------------------------------
-// TODO: author RM
-echo(maxDuration,duration,feedback) = +~(de.fdelay1(N,n)*feedback)
-with{
-  // compute the next power of 2 of maxDuration
-	N = maxDuration : ba.sec2samp : int : ma.np2 : max(1);
-	n = duration : ba.sec2samp;
-};
-
-// TODO demo function for echo
-
-//=======================================Pitch Shifting===================================
-//========================================================================================
-
-//--------------`(ef.)transpose`----------------
-// A simple pitch shifter based on 2 delay lines.
-// `transpose` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// _ : transpose(w, x, s) : _
-// ```
-//
-// Where:
-//
-// * `w`: the window length (samples)
-// * `x`: crossfade duration duration (samples)
-// * `s`: shift (semitones)
-//-----------------------------------------
-transpose(w, x, s, sig) = de.fdelay(maxDelay,d,sig)*ma.fmin(d/x,1) +
-	de.fdelay(maxDelay,d+w,sig)*(1-ma.fmin(d/x,1))
-with {
-	maxDelay = 65536;
-	i = 1 - pow(2, s/12);
-	d = i : (+ : +(w) : fmod(_,w)) ~ _;
-};
-
-
 //===========================================Meshes=======================================
 //========================================================================================
 
 
 // TODO: the following should be in physmodels.lib when it will be operational
+// [JOS: I think a new "Meshes" section would fit well after Modal Percussions.]
 //----------------------------------`(ef.)mesh_square`------------------------------
 // Square Rectangular Digital Waveguide Mesh.
 //
@@ -400,7 +352,6 @@ with {
 //
 // A routing matrix can be used to obtain other connection geometries.
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
 // four-port scattering junction:
 mesh_square(1) =
           si.bus(4) <: par(i,4,*(-1)), (si.bus(4) :> (*(.5)) <: si.bus(4)) :> si.bus(4);
@@ -447,6 +398,110 @@ with {
     : si.bus(16*N);
 };
 
+uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) : (par(i,N,*(i/(N-1))) :> _), (par(i,N,*(1-i/(N-1))) :> _);
+
+reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
+  rampGain = 4 * (del/delMax) * (1 - del/delMax); // suppress click when delay-line wraps around
+  delOffset = int(floor(0.5 + delMax * max(0,min(0.999999,phs)))); // starting point in delay line
+  startPulse = (1-1') * delOffset; // scaled impulse
+  del = int(startPulse : +  ~ +(2)) & (delMax-1);
+};
+
+reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
+
+// end jos section
+/************************************************************************
+************************************************************************
+FAUST library file, GRAME section
+
+Except where noted otherwise, Copyright (C) 2003-2017 by GRAME,
+Centre National de Creation Musicale.
+----------------------------------------------------------------------
+GRAME LICENSE
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation; either version 2.1 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with the GNU C Library; if not, write to the Free
+Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+02111-1307 USA.
+
+EXCEPTION TO THE LGPL LICENSE : As a special exception, you may create a
+larger FAUST program which directly or indirectly imports this library
+file and still distribute the compiled code generated by the FAUST
+compiler, or a modified version of this compiled code, under your own
+copyright and license. This EXCEPTION TO THE LGPL LICENSE explicitly
+grants you the right to freely choose the license for the resulting
+compiled code. In particular the resulting compiled code has no obligation
+to be LGPL or GPL. For example you are free to choose a commercial or
+closed source license or any other license if you decide so.
+************************************************************************
+************************************************************************/
+
+//========================================Time Based======================================
+//========================================================================================
+
+//----------`(ef.)echo`----------
+// A simple echo effect.
+//
+// `echo` is a standard Faust function
+//
+// #### Usage
+//
+// ```
+// _ : echo(maxDuration,duration,feedback) : _
+// ```
+//
+// Where:
+//
+// * `maxDuration`: the max echo duration in seconds
+// * `duration`: the echo duration in seconds
+// * `feedback`: the feedback coefficient
+//----------------------------------------------------
+// TODO: author RM
+echo(maxDuration,duration,feedback) = +~(de.fdelay1(N,n)*feedback)
+with{
+  // compute the next power of 2 of maxDuration
+	N = maxDuration : ba.sec2samp : int : ma.np2 : max(1);
+	n = duration : ba.sec2samp;
+};
+
+// TODO demo function for echo
+
+//=======================================Pitch Shifting===================================
+//========================================================================================
+
+//--------------`(ef.)transpose`----------------
+// A simple pitch shifter based on 2 delay lines.
+// `transpose` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// _ : transpose(w, x, s) : _
+// ```
+//
+// Where:
+//
+// * `w`: the window length (samples)
+// * `x`: crossfade duration duration (samples)
+// * `s`: shift (semitones)
+//-----------------------------------------
+transpose(w, x, s, sig) = de.fdelay(maxDelay,d,sig)*ma.fmin(d/x,1) +
+	de.fdelay(maxDelay,d+w,sig)*(1-ma.fmin(d/x,1))
+with {
+	maxDelay = 65536;
+	i = 1 - pow(2, s/12);
+	d = i : (+ : +(w) : fmod(_,w)) ~ _;
+};
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
 // This section implements functions that used to be in music.lib but that are now

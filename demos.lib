@@ -59,11 +59,11 @@ en = library("envelopes.lib");
 FAUST library file, jos section
 
 Except where noted otherwise, The Faust functions below in this
-section are Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>
+section are Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>
 ([jos](http://ccrma.stanford.edu/~jos/)), and released under the
 (MIT-style) [STK-4.3](#stk-4.3-license) license.
 
-All MarkDown comments in this section are Copyright 2016-2017 by Romain
+MarkDown comments in this section are Copyright 2016-2019 by Romain
 Michon and Julius O. Smith III, and are released under the
 [CCA4I](https://creativecommons.org/licenses/by/4.0/) license (TODO: if/when Romain agrees!)
 
@@ -1064,6 +1064,25 @@ with{
 	relT60=0.010; // 10 ms release (decay-to-zero) time
 };
 
+//-------------------`(dm.)fft_spectral_level_demo`------------------
+// Make a real-time spectrum analyzer using FFT from analyzers.lib
+//
+// #### Usage
+//
+// ```
+// echo 'import("stdfaust.lib");' > fft_spectral_level_demo.dsp
+// echo 'process = dm.fft_spectral_level_demo;' >> fft_spectral_level_demo.dsp
+// Mac:
+//   faust2caqt fft_spectral_level_demo.dsp
+//   open fft_spectral_level_demo.app
+// Linux GTK:
+//   faust2jack fft_spectral_level_demo.dsp
+//   ./fft_spectral_level_demo
+// Linux QT:
+//   faust2jaqt fft_spectral_level_demo.dsp
+//   ./fft_spectral_level_demo
+// ```
+//-------------------------------------------------------------------
 fft_spectral_level_demo(N) =  an.rfft_spectral_level(N,tau,dB_offset)
 with{
 	ctl_group(x)  = hgroup("[1] FFT SPECTRUM ANALYZER CONTROLS", x);
@@ -1073,6 +1092,31 @@ with{
 	dB_offset = ctl_group(hslider("[1] Level dB Offset [unit:dB]
 		[tooltip: Level offset in decibels]",
 		50,-50,100,1));
+};
+
+//-------------------`(dm.)reverse_echo_demo`------------------
+// Multichannel echo effect with reverse delays
+//
+// #### Usage
+//
+// ```
+// echo 'import("stdfaust.lib");' > reverse_echo_demo.dsp
+// echo 'nChans = 3; // Any integer > 1 should work here' >> reverse_echo_demo.dsp
+// echo 'process = dm.reverse_echo_demo(nChans);' >> reverse_echo_demo.dsp
+// Mac:
+//   faust2caqt reverse_echo_demo.dsp
+//   open reverse_echo_demo.app
+// Linux GTK:
+//   faust2jack reverse_echo_demo.dsp
+//   ./reverse_echo_demo
+// Linux QT:
+//   faust2jaqt reverse_echo_demo.dsp
+//   ./reverse_echo_demo
+// ```
+//-------------------------------------------------------------------
+reverse_echo_demo(nChans) =  ef.reverseEchoN(nChans,delMax) : ef.uniformPanToStereo(nChans) 
+with {
+	delMax = 2^int(nentry("Log2(Delay)",15,5,16,1)); // delay line length
 };
 
 // end jos section
