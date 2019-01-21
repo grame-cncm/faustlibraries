@@ -3847,7 +3847,7 @@ with{
 // modalModel
 modalModel(n,modeFreqs,modeRes,modeGains) = _ <: par(i,n,gain(i)*modeFilter(freqs(i),res(i))) :> _
 with{
-	freqs(i) = take(i+1,modeFreqs);
-	res(i) = take(i+1,modeRes);
-	gain(i) = take(i+1,modeGains);
+	freqs(i) = ba.take(i+1,modeFreqs);
+	res(i) = ba.take(i+1,modeRes);
+	gain(i) = ba.take(i+1,modeGains);
 };
