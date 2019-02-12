@@ -1,18 +1,25 @@
 ma = library("maths.lib");
 ba = library("basics.lib");
 
+// initialize the state of a variable in a letrec system (only first order)
+//initState(init) = +(init : ba.impulsify);
+initState((init)) = R(0,init)
+with{
+  R(n,(initn,init)) = +(initn : ba.impulsify@n) : R(n+1,init);
+  R(n,initn) = +(initn : ba.impulsify@n);
+};
 
 // integrated oscillator (mass-spring-ground system)
 // m, k, z: mass, stiffness, damping (algorithmic values)
 // x0, x1: initial position and delayed position
 osc(m,k,z,x0,x1) = equation
 with{
-  A = 2-(k+z)/m;
-  B = z/m-1;
+  A = 2 - (k + z)/m;
+  B = z/m - 1;
   C = 1/m;
   equation = x 
 	letrec{
-  		'x = A*(x + (x0 : ba.impulsify)) + B*(x' + (x1 : ba.impulsify)) + C*_;
+    'x = A*(x : initState(x0)) + B*(x' : initState(x1)) + *(C);
 	};
 };
 
@@ -26,7 +33,7 @@ with{
   C = 1/m;
   equation = x 
 	letrec{
-  		'x = A*(x + (x0 : ba.impulsify)) + B*(x' + (x1 : ba.impulsify) + (x0 : ba.impulsify)') + C*_;
+    'x = A*(x : initState(x0)) + B*(x' : initState((x1,x0))) + *(C);
 	};
 };
 
@@ -38,13 +45,15 @@ with{
   C = 0;
   equation = x 
 	letrec{
-		'x = x + (x0 : ba.impulsify) + C*_;
+		'x = (x : initState(x0)) + *(C);
 	};
 };
 
 // spring
 // k,z: stiffness and daming (algorithmic values)
-spring(k,z,x1r0,x2r0,x1,x2) = k*(x1-x2) + z*((x1-(x1' + (x1r0 : ba.impulsify)))-(x2 - (x2' + (x2r0 : ba.impulsify)))) <: _*-1,_;
+spring(k,z,x1r0,x2r0,x1,x2) = 
+  k*(x1-x2) + 
+  z*((x1 - (x1' : initState(x1r0))) - (x2 - (x2' : initState(x2r0)))) <: *(-1),_;
 
 // nlPluck
 // 1D non-linear picking Interaction algorithm
@@ -52,10 +61,10 @@ nlPluck(k,scale,x1,x2) =
   select2(
     absdeltapos>scale,
     select2(
-      absdeltapos>scale*0.5,
+      absdeltapos>(scale*0.5),
       k*deltapos,
-      k*(ma.signum(deltapos)*scale*0.5-deltapos)),
-    0) <:  _*-1,_
+      k*(ma.signum(deltapos)*scale*0.5 - deltapos)),
+    0) <:  *(-1),_
 with{
   deltapos = x1 - x2;
   absdeltapos = abs(deltapos);
@@ -63,32 +72,26 @@ with{
 
 // nlBow
 // 1D non-linear bowing Interaction algorithm 
-// JL: corrected error: force = 0 if beyond the scale distance value
-nlBow(z,scale,x1,x2) = 
-	select2(
-	  absspeed < (scale/3),
-  	  z*speed,
-	  select2(
-		absspeed<scale,
-		select2(
-		  speed>0,
-		  (scale/3)*z + (-z/4)*speed,
-		  (-scale/3)*z + (-z/4)*speed
-		  ),
-		0
-		)
-	  ) <:   _*-1,_
+nlBow(z,scale,x1r0,x2r0,x1,x2) = 
+  select2(
+    absspeed>scale,
+    select2(
+      absspeed>(scale*0.333),
+      z*speed,
+      z*(ma.signum(speed)*scale*0.333) - z*0.25*speed),
+    0) <: *(-1),_
 with{
-  speed = (x1-x1') - (x2-x2');
+  speed = ((x1 - x1') - (x2 - x2'));
   absspeed = abs(speed);
 };
 
 // collision
 // k,z: stiffness and daming (algorithmic values)
 // thres: position threshold for the collision to be active
-collision(k,z,thres,x1,x2) = spring(k,z,x1,x2) : (select2(comp,0,_),select2(comp,0,_))
+collision(k,z,thres,x1r0,x2r0,x1,x2) = 
+  spring(k,z,x1r0,x2r0,x1,x2) : (select2(comp,0,_),select2(comp,0,_))
 with{
-  comp = (x2-x1)<thres;
+  comp = (x2-x1) < thres;
 };
 
-posInput(init) = _,_ : !,_ :+(init : ba.impulsify);
+posInput(init) = _,_ : !,_ : initState(init);
