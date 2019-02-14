@@ -493,11 +493,11 @@ with {
 notchw(width,freq) = tf2(b0,b1,b2,a1,a2)
 with {
   fb = 0.5*width; // First design a dcblockerat(width/2)
-  wn = PI*fb/SR;
+  wn = ma.PI*fb/ma.SR;
   b0db = 1.0 / (1 + wn);
   p = (1 - wn) * b0db; // This is our pole radius.
   // Now place unit-circle zeros at desired angles:
-  tn = 2*PI*freq/SR;
+  tn = 2*ma.PI*freq/ma.SR;
   a2 = p * p;
   a2p1 = 1+a2;
   a1 = -a2p1*cos(tn);
