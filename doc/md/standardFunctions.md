@@ -180,9 +180,3 @@ Function Type | Function Name | Description
 <!--
 TODO: potentially say something about demos.lib and demo functions here. Also, not sure what to do with math.lib.
 -->
-
-<script type="text/javascript">
-(function() {
-    $('div.table-begin').nextUntil('div.table-end', 'table').addClass('table table-bordered');
-	})();
-</script>
