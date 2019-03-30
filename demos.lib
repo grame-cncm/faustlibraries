@@ -856,10 +856,10 @@ with{
 	freq = knob_group(vslider("[2] Frequency [unit:PK] [style:knob] [tooltip: Sawtooth
 		frequency as a Piano Key (PK) number (A440 = key 49)]",49,1,88,0.01) : ba.pianokey2hz);
 	detune1 = 1 + 0.01 * knob_group(
-	vslider("[3] Detuning 1 [unit:%%] [style:knob] [tooltip: Percentange frequency-shift
+	vslider("[3] Detuning 1 [unit:%%] [style:knob] [tooltip: Percentage frequency-shift
 	up or down for second oscillator]",-0.1,-10,10,0.01));
 	detune2 = 1 + 0.01 * knob_group(vslider("[4] Detuning 2 [unit:%%] [style:knob] [tooltip:
-		Percentange frequency-shift up or down for third detuned oscillator]",+0.1,-10,10,0.01));
+		Percentage frequency-shift up or down for third detuned oscillator]",+0.1,-10,10,0.01));
 	portamento = knob_group(vslider("[5] Portamento [unit:sec] [style:knob] [scale:log]
 	[tooltip: Portamento (frequency-glide) time-constant in seconds]",0.1,0.001,10,0.001));
 	sfreq = freq : si.smooth(ba.tau2pole(portamento));
@@ -951,11 +951,11 @@ with{
 
 	detune1 = 1 - 0.01 * knob_group(
 		vslider("[3] Detuning 1 [unit:%%] [style:knob]
-	[tooltip: Percentange frequency-shift up or down for second oscillator]",
+	[tooltip: Percentage frequency-shift up or down for second oscillator]",
 	-0.1,-10,10,0.01));
 	detune2 = 1 + 0.01 * knob_group(
 	vslider("[4] Detuning 2 [unit:%%] [style:knob]
-	[tooltip: Percentange frequency-shift up or down for third detuned oscillator]",
+	[tooltip: Percentage frequency-shift up or down for third detuned oscillator]",
 	+0.1,-10,10,0.01));
 	portamento = knob_group(
 	vslider("[5] Portamento [unit:sec] [style:knob] [scale:log]
