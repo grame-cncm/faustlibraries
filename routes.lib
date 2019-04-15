@@ -6,7 +6,7 @@
 /************************************************************************
 ************************************************************************
 FAUST library file
-Copyright (C) 2003-2016 GRAME, Centre National de Creation Musicale
+Copyright (C) 2003-2019 GRAME, Centre National de Creation Musicale
 ----------------------------------------------------------------------
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as
@@ -40,7 +40,7 @@ si = library("signals.lib");
 sp = library("spats.lib");
 
 declare name "Faust Signal Routing Library";
-declare version "0.0";
+declare version "0.1";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -69,7 +69,7 @@ declare version "0.0";
 // ```
 //-----------------------------------------------------------------------------
 // cross n cables : (x1,x2,..,xn) -> (xn,..,x2,x1)
-cross(n) = si.bus(n) <: par(i,n,ba.selector(n-i-1,n));
+cross(n) = route(n,n, par(i,n, (i+1, n-i)));
 cross2 = _,cross(2),_; // for compatibility with some old misceffects.lib functions
 
 
@@ -86,7 +86,7 @@ cross2 = _,cross(2),_; // for compatibility with some old misceffects.lib functi
 //
 // * `n`: the number of signals in the `bus`
 //--------------------------------------
-crossnn(n) = si.bus(n),si.bus(n) <: si.block(n),si.bus(n),si.bus(n),si.block(n);
+crossnn(n) = route(2*n,2*n, par(i,n, ((i+1, n+i+1), (n+i+1, i+1))));
 
 
 //--------------`(ro.)crossn1`--------------
@@ -102,8 +102,7 @@ crossnn(n) = si.bus(n),si.bus(n) <: si.block(n),si.bus(n),si.bus(n),si.block(n);
 //
 // * `n`: the number of signals in the first `bus`
 //--------------------------------------
-crossn1(n) = si.bus(n),(si.bus(1)<:si.bus(n)) <: si.block(n),si.bus(n),si.bus(n),
-	si.block(n):si.bus(1),si.block(n-1),si.bus(n);
+crossn1(n) = route(n+1,n+1, n+1, 1, par(i, n, i+1, i+2));
 
 
 //--------------------------`(ro.)interleave`------------------------------
@@ -122,8 +121,8 @@ crossn1(n) = si.bus(n),(si.bus(1)<:si.bus(n)) <: si.block(n),si.bus(n),si.bus(n)
 // * `row`: the number of row (int, known at compile time)
 // * `column`: the number of column (int, known at compile time)
 //-----------------------------------------------------------------------------
-interleave(row,col) = si.bus(row*col) <: par(r, row, par(c, col, ba.selector(r+c*row,row*col)));
-
+interleave(1,2) = _,_;
+interleave(row,col) = route(row*col, row*col, par(i, row*col, (i+1, (i%row)*col + int(i/row) + 1)));
 
 //-------------------------------`(ro.)butterfly`--------------------------------
 // Addition (first half) then substraction (second half) of interleaved signals.
@@ -138,6 +137,7 @@ interleave(row,col) = si.bus(row*col) <: par(r, row, par(c, col, ba.selector(r+c
 //
 // * `n`: size of the butterfly (n is int, even and known at compile time)
 //-----------------------------------------------------------------------------
+butterfly(2) = si.bus(2) <: +,-;
 butterfly(n) = si.bus(n) <: interleave(n/2,2), interleave(n/2,2) : par(i, n/2, +), par(i, n/2, -);
 
 
