@@ -620,3 +620,19 @@ diffn(x) = x' - x; // negated first-order difference
 // ```
 //--------------------------------------------------------
 signum(x) = (x>0)-(x<0);
+
+//------------------`(ma.)nextpow2`----------------------------
+// The nextpow2(x) returns the lowest integer m such that
+// 2^m >= x.
+//
+// #### Usage
+//
+// ```
+// 2^nextpow2(n)
+// ```
+// Useful for allocating delay lines, e.g., 
+// ```
+// delay(2^nextpow2(maxDelayNeeded), currentDelay);
+// ```
+//--------------------------------------------------------
+nextpow2(x) = ceil(log(x)/log(2.0));
