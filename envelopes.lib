@@ -189,26 +189,48 @@ with{
 //
 // Where:
 //
-// * `a`: attack (sec)
-// * `d`: decay (sec)
-// * `s`: sustain (fraction of `t`: 0-1) 
-// * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
-// when `t=0`)
+// * `at`: attack time (sec)
+// * `dt`: decay time (sec)
+// * `sl`: sustain level (between 0..1) 
+// * `rt`: release time (sec)
+// * `gate`: trigger signal (attack is triggered when `gate>0`, release is triggered 
+// when `gate=0`)
 //-----------------------------------------------------
-// Author: RM
-adsr(a,d,s,r,t) = on*(ads) : ba.sAndH(on) : rel
-with{
-	on = t>0;
-	off = t==0;
-	attTime = ma.SR*a;
-	decTime = ma.SR*d;
-	relTime = ma.SR*r : max(0.001);
-	sustainGain = t*s;
-	ads = ba.countup(attTime+decTime,off) : ba.bpf.start(0,0) :
-		ba.bpf.point(attTime,1) : ba.bpf.end(attTime+decTime,sustainGain);
-	rel = _,ba.countup(relTime,on) : ba.bpf.start(0) : ba.bpf.end(relTime,0);
-};
+declare adsr author "Yann Orlarey";
+adsr(at,dt,sl,rt,gate) = ADS - R : max(0)
+
+    with {
+
+        // durations in samples
+        an = max(1, at*ma.SR);
+        dn = max(1, dt*ma.SR);
+        rn = max(1, rt*ma.SR);
+
+        // deltas per samples
+        adelta = 1/an;
+        ddelta = (1-sl)/dn;
+        rdelta = sl/rn;
+
+        // Envelop time
+        time =  (+(1) : *(gate' >= gate)) ~ _;
+        rime =  (+(1) : *(gate==0)) ~ _;
+
+        // Decay curve
+        D0 = 1 + an * ddelta;
+        D = D0 - time * ddelta;
+
+        // Attack curve
+        A = time * adelta;
+
+        // ADS part
+        ADS = min(A, max(D,sl));
+
+        // Release curve (starts at the end of the trig signal)
+        // with the current value of the envelop
+        // ADS' * (gate==0) : select2(gate) ~ _
+        R = rime*rdelta;
+
+    };
 
 //-----------------------------------------------------
 // Old version of ADSR (originally from music.lib)...
