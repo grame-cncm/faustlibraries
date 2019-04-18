@@ -212,9 +212,8 @@ adsr(at,dt,sl,rt,gate) = ADS - R : max(0)
         rdelta = sl/rn;
 
         // Envelop time
-        started = gate > 0 : | ~ _ : float; // always 0 before first upfront of gate, 1 after
-        time =  (+(started) : *(gate' >= gate)) ~ _;
-        rime =  (+(started) : *(gate==0)) ~ _;
+        time =  +(gate) ~ *(gate' >= gate);
+        rime =  (+(1) : *(gate==0)) ~ _;
 
         // Decay curve
         D0 = 1 + an * ddelta;
@@ -228,7 +227,6 @@ adsr(at,dt,sl,rt,gate) = ADS - R : max(0)
 
         // Release curve (starts at the end of the trig signal)
         // with the current value of the envelop
-        // ADS' * (gate==0) : select2(gate) ~ _
         R = rime*rdelta;
 
     };
