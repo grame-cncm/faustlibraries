@@ -139,6 +139,25 @@ with{
 	tablesize = 1 << 16;
 };
 
+//-----------------------`(os.)oscsinteensy`------------------------
+// Sine wave oscillator.
+// `oscsinteensy` was made for teensy, it's based on `oscsin` with a shorter tablesize.
+//
+// #### Usage
+//
+// ```
+// oscsinteensy(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: the frequency of the wave (Hz)
+//------------------------------------------------------------
+oscsinteensy(freq) = rdtable(tablesize, sinwaveform(tablesize), int(phasor(tablesize,freq)))
+with{
+	tablesize = 1 << 8;
+};
+
 //-----------------------`(os.)hs_oscsin`------------------------
 // Sin lookup table with hardsyncing phase.
 //
