@@ -535,11 +535,10 @@ closed source license or any other license if you decide so.
 // * `feedback`: the feedback coefficient
 //----------------------------------------------------
 // TODO: author RM
-echo(maxDuration,duration,feedback) = +~(de.fdelay1(N,n)*feedback)
+echo(maxDuration,duration,feedback) = +~de.delay(maxDel,del)*feedback
 with{
-  // compute the next power of 2 of maxDuration
-	N = maxDuration : ba.sec2samp : int : ma.np2 : max(1);
-	n = duration : ba.sec2samp;
+  maxDel = ma.SR*maxDuration;
+  del = ma.SR*duration;
 };
 
 // TODO demo function for echo
