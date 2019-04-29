@@ -316,8 +316,10 @@ countup(count, trig)	= \(c).(if(trig>0, 0, min(count, c+1))) ~_;
 
 
 //--------------------`(ba.)sweep`--------------------------
-// Counts from 0 to `period` samples repeatedly, while `run` is 1.
-// Outsputs zero while `run` is 0.
+// Counts from 0 to `period-1` repeatedly, generating a
+// sawtooth waveform, like os.lf_rawsaw,
+// starting at 1 when `run` transitions from 0 to 1.
+// Outputs zero while `run` is 0.
 //
 // #### Usage
 //
@@ -325,7 +327,7 @@ countup(count, trig)	= \(c).(if(trig>0, 0, min(count, c+1))) ~_;
 // sweep(period,run) : _
 // ```
 //-----------------------------------------------------------------
-// Author: Jonatan Liljedahl, markdown by RM
+// Author: Jonatan Liljedahl, markdown by JOS & RM
 sweep = %(int(*:max(1)))~+(1);
 
 
