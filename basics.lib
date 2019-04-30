@@ -325,8 +325,9 @@ countup(count, trig)	= \(c).(if(trig>0, 0, min(count, c+1))) ~_;
 // sweep(period,run) : _
 // ```
 //-----------------------------------------------------------------
-// Author: Jonatan Liljedahl, markdown by RM, revised by Jakob Duebel
-sweep = *:max(1):ba.period;
+// Author: Jonatan Liljedahl, markdown by RM
+sweep = %(int(*:max(1)))~+(1);
+
 
 //-------`(ba.)time`----------
 // A simple timer that counts every samples from the beginning of the process.
