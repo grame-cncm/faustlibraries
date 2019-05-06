@@ -93,7 +93,7 @@ coswaveform(tablesize) = float(ba.time)*(2.0*ma.PI)/float(tablesize) : cos;
 // Where:
 //
 // * `tablesize`: the table size
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency of the phasor (Hz)
 //------------------------------------------------------------
 phasor(tablesize,freq) = freq/float(ma.SR) : (+ : ma.decimal) ~ _ : *(float(tablesize));
 
@@ -103,17 +103,17 @@ phasor(tablesize,freq) = freq/float(ma.SR) : (+ : ma.decimal) ~ _ : *(float(tabl
 // #### Usage
 //
 // ```
-// hs_phasor(ts,freq,c) :  _
+// hs_phasor(tablesize,freq,c) :  _
 // ```
 //
 // Where:
 //
-// * `ts`: the tablesize for the related sine wavetable
-// * `freq`: the fundamental frequency of the phasor
+// * `tablesize`: the table size
+// * `freq`: the frequency of the phasor (Hz)
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
 // Author: Mike Olsen
-hs_phasor(ts,freq,c) = inc : (+ : d)~ (-(_<:(_,*(_,clk)))) : *(ts)
+hs_phasor(tablesize,freq,c) = inc : (+ : d)~ (-(_<:(_,*(_,clk)))) : *(tablesize)
 with {
 	clk = c>0;
 	d   = ma.decimal;
@@ -173,9 +173,9 @@ with{
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
 // Author: Mike Olsen
-hs_oscsin(freq,c) = rdtable(ts, sinwaveform(ts), int(hs_phasor(ts,freq,c)))
+hs_oscsin(freq,c) = rdtable(tablesize, sinwaveform(tablesize), int(hs_phasor(tablesize,freq,c)))
 with {
-        ts = 1 << 16;
+        tablesize = 1 << 16;
 };
 
 //-----------------------`(os.)osccos`------------------------
@@ -526,14 +526,14 @@ with {
   clippedFreq = max(20.0,abs(freq)); // use lf_sawpos(freq) for LFOs (freq < 20 Hz)
   saw1l = 2*lf_sawpos(clippedFreq) - 1; // zero-mean, amplitude +/- 1
   // Also note the availability of lf_sawpos_phase above.
-  poly(1,x) =  x;
-  poly(2,x) =  x*x;
-  poly(3,x) =  x*x*x - x;
-  poly(4,x) =  x*x*(x*x - 2.0);
-  poly(5,x) =  x*(7.0/3 + x*x*(-10.0/3.0 + x*x));
-  poly(6,x) =  x*x*(7.0 + x*x*(-5.0 + x*x));
+  poly(1,x) = x;
+  poly(2,x) = x*x;
+  poly(3,x) = x*x*x - x;
+  poly(4,x) = x*x*(x*x - 2.0);
+  poly(5,x) = x*(7.0/3 + x*x*(-10.0/3.0 + x*x));
+  poly(6,x) = x*x*(7.0 + x*x*(-5.0 + x*x));
   p0n = float(ma.SR)/clippedFreq; // period in samples
-  diff1(x) =  (x - x')/(2.0/p0n);
+  diff1(x) = (x - x')/(2.0/p0n);
   diff(N) = seq(n,N,diff1); // N diff1s in series
   factorial(0) = 1;
   factorial(i) = i * factorial(i-1);
