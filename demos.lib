@@ -196,7 +196,7 @@ with{
 	ftop = 10000;
 	mthoctavefilterbankdemo = chan;
 	chan = fi.mth_octave_filterbank_default(M,ftop,N) : sum(i,N,(*(ba.db2linear(fader(N-i)))));
-	fader(i) = slider_group(vslider("[%2i] [unit:dB] [tooltip: Bandpass filter
+	fader(i) = slider_group(vslider("Band%2i [unit:dB] [tooltip: Bandpass filter
 		gain in dB]", -10, -70, 10, 0.1)) : si.smoo;
 	bp = bypass_group(checkbox("[0] Bypass
 		[tooltip: When this is checked, the filter-bank has no effect]"));
