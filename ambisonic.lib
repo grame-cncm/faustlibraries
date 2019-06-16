@@ -1,0 +1,386 @@
+//################################ ambisonic.lib ###############################
+// Faust Ambisonic library. Its official prefix is `am`.
+//##############################################################################
+// A library of ambisonic elements for Faust organized in 5 sections:
+//
+// * A to B and viceversa matrix
+// * Encoders
+// * Decoders
+// * Tools
+// * 4ch FO Ambisonic displays
+//
+//******************************************************************************
+// written by Giuseppe Silvi - 2019
+// based on Michael Gerzon early works
+//
+//******************************************************************************
+// It should be used using the `[...]` environment:
+//
+// ```
+// [...] = library("libraryName");
+// process = [...].functionCall;
+// ```
+//
+// Another option is to import `stdfaust.lib` which already contains the `[...]`
+// environment:
+//
+// ```
+// import("stdfaust.lib");
+// process = [...].functionCall;
+// ```
+//##############################################################################
+
+am = library("ambisonic.lib");
+ma = library("maths.lib");
+fi = library("filters.lib");
+ba = library("basics.lib"); // so functions here can be copy/pasted out
+
+declare name "Faust Basic Element Library";
+declare version "0.0";
+
+//===================================================== Some stuff not be here =
+//==============================================================================
+//------------------------------------------------------------------------------
+// HILBERT TRANSFORM BASED ON biquad~
+//------------------------------------------------------------------------------
+biquad(a1,a2,b0,b1,b2) = + ~ conv2(a1,a2) : conv3(b0,b1,b2)
+  with{
+    conv3(k0,k1,k2,x) = k0*x + k1*x'+ k2*x'';
+    conv2(k0,k1,x) = k0*x + k1*x';
+  };
+
+hilbertf1 = am.biquad(-0.02569, 0.260502, -0.260502, 0.02569, 1) :
+            am.biquad(1.8685, -0.870686, 0.870686, -1.8685, 1); // f1 advanced 90°
+hilbertf2 = am.biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
+            am.biquad(0.83774, -0.06338, 0.06338, -0.83774, 1); // f2 shifted 90°
+
+hilbert = am.hilbertf1, am.hilbertf2; // f1 advanced 90° - f2 shifted 90°
+
+//================================================ A to B and viceversa matrix =
+//==============================================================================
+//------------------------------------------------------------------------------
+// GENERIC AB MODULE WITHOUT SHELVING
+//------------------------------------------------------------------------------
+// Converts a generic tetrahedral A-Format into Firts Order B-Format
+// `abmodule` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _,_,_,_ : abmodule : _,_,_,_
+// ```
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+abmodule(LFU, RFD, RBU, LBD) =
+	(0.5 * (LFU + RFD + RBU + LBD)),
+	(0.5 * (LFU + RFD - RBU - LBD)),
+	(0.5 * (LFU - RFD - RBU + LBD)),
+	(0.5 * (LFU - RFD + RBU - LBD));
+
+//------------------------------------------------------------------------------
+// GENERIC BA MODULE WITHOUT SHELVING
+//------------------------------------------------------------------------------
+// Converts Firts Order B-Format into a generic tetrahedral A-Format
+// `abmodule` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _,_,_,_ : bamodule : _,_,_,_
+// ```
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+bamodule(W, X, Y, Z) =
+	(0.5 * ( W + X + Y + Z)),
+	(0.5 * ((W + X) - (Y - Z))),
+	(0.5 * ((W - X) - (Y - Z))),
+	(0.5 * ((W - X) - (Y + Z)));
+
+//------------------------------------------------------------------------------
+// GENERIC AB MODULE WITH SHELVING
+//------------------------------------------------------------------------------
+// Converts a generic tetrahedral A-Format into Firts Order B-Format
+// `abmodule` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _,_,_,_ : abmodule : _,_,_,_
+// ```
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+abmodule_hs(LFU, RFD, RBU, LBD) =
+  (0.5 * (LFU + RFD + RBU + LBD)) : fi.highshelf(1,4,2500),
+  (0.5 * (LFU + RFD - RBU - LBD)) : fi.highshelf(1,4,2500),
+  (0.5 * (LFU - RFD - RBU + LBD)) : fi.highshelf(1,4,2500),
+  (0.5 * (LFU - RFD + RBU - LBD)) : fi.highshelf(1,4,2500);
+
+//==============================================================================
+// .................................................................... Encoders
+//==============================================================================
+//------------------------------------------------------------------------------
+// MONO TO FIRST ORDER B-FORMAT ENCODER
+//------------------------------------------------------------------------------
+// Converts a Stereo stream into Firts Order B-Format
+// `lr2b1` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _ : m2b1 : _,_,_,_
+// ```
+//
+// where
+// * x is a mono signal
+// * azi is orizontal angle in radians
+// * elv is elevation angle in radians
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+m2b1(x,azi,elv) = x * 0.707,
+                  x * cos(azi) * cos(elv),
+                  x * sin(azi) * cos(elv),
+                  x * sin(elv);
+
+//------------------------------------------------------------------------------
+// STEREO TO FIRST ORDER B-FORMAT ENCODER
+//------------------------------------------------------------------------------
+// Converts a Stereo stream into Firts Order B-Format
+// `lr2b1` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _,_ : lr2b1 : _,_,_,_
+// ```
+//
+// Where the two inputs are respectively:
+// L,R
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+lr2b1(L,R) = 0.707 * (WL(L) + WR(R)),
+             0.707 * (XL(L) + XR(R)),
+             0.707 * (YL(L) + YR(R)),
+             0.707 * (ZL(L) + ZR(R))
+              with{
+                azi = (30.0 * (ma.PI / 180.0));
+                elv = (00.0 * (ma.PI / 180.0));
+
+                WL(L) = (L) * 0.707;
+                XL(L) = (L) * cos(azi) * cos(elv);
+                YL(L) = (L) * sin(azi) * cos(elv);
+                ZL(L) = (L) * sin(elv);
+
+                WR(R) = (R) * 0.707;
+                XR(R) = (R) * cos(-azi) * cos(elv);
+                YR(R) = (R) * sin(-azi) * cos(elv);
+                ZR(R) = (R) * sin(elv);
+              };
+
+//==============================================================================
+// .................................................................... Decoders
+//==============================================================================
+//------------------------------------------------------------------------------
+// FIRST ORDER B-FORMAT ROTATE
+//------------------------------------------------------------------------------
+// Rotate the Firts Order B-Format armonics set
+// `brotate` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _ : m2b1 : _,_,_,_
+// ```
+//
+// where
+// * x is a mono signal
+// * azi is orizontal angle in radians
+// * elv is elevation angle in radians
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+bfmt2uhj(W,X,Y,Z) = left(W,X,Y,Z), right(W,X,Y,Z)
+  with{
+        sigma(W,X) = 0.9397 * (W) + 0.1856 * (X);
+      delta(W,X,Y) = hilbertf1(-0.3420 * (W) + 0.5099 * (X)) + (0.6555 * (Y));
+        tau(W,X,Y) = hilbertf1(-0.1432 * (W) + 0.6512 * (X)) - (0.7071 * (Y));
+         quelet(Z) = 0.9772 * (Z);
+     left(W,X,Y,Z) = 0.5 * (sigma(W,X) + delta(W,X,Y));
+    right(W,X,Y,Z) = 0.5 * (sigma(W,X) - delta(W,X,Y));
+  };
+
+//------------------------------------------------------------------------------
+// FIRST ORDER B-FORMAT ROTATE
+//------------------------------------------------------------------------------
+// Rotate the Firts Order B-Format armonics set
+// `brotate` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _ : m2b1 : _,_,_,_
+// ```
+//
+// where
+// * x is a mono signal
+// * azi is orizontal angle in radians
+// * elv is elevation angle in radians
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+uhj2bfmt(L,R) = W1(L,R), X1(L,R), Y1(L,R), 0.0
+  with{
+    mid(L,R) = 0.5 * (L + R);
+    sid(L,R) = 0.5 * (L - R);
+
+    W1(L,R) = 0.982 * (sid(L,R)) + hilbertf2(0.164 * (mid(L,R)));
+    X1(L,R) = 0.419 * (sid(L,R)) - hilbertf2(0.828 * (mid(L,R)));
+    Y1(L,R) = 0.763 * (mid(L,R)) + hilbertf2(0.385 * (sid(L,R)));
+  };
+
+//------------------------------------------------------------------------------
+// FIRST ORDER B-FORMAT ROTATE
+//------------------------------------------------------------------------------
+// Rotate the Firts Order B-Format armonics set
+// `brotate` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _,_ : uhj2itu : _,_,_,_,_
+// ```
+//
+// where
+// * x is a mono signal
+// * azi is orizontal angle in radians
+// * elv is elevation angle in radians
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+uhj2itu(L,R,C0,SUB0,L0,R0) = LF(L,R), RF(L,R), CF(L,R), LFE(C0,SUB0,L0,R0), LS(L,R), RS(L,R)
+  with{
+    mid(L,R) = 0.5 * (L + R);
+    sid(L,R) = 0.5 * (L - R);
+
+    W1(L,R) = 0.982 * (sid(L,R)) + hilbertf2(0.164 * (mid(L,R)));
+    X1(L,R) = 0.419 * (sid(L,R)) - hilbertf2(0.828 * (mid(L,R)));
+    Y1(L,R) = 0.763 * (mid(L,R)) + hilbertf2(0.385 * (sid(L,R)));
+
+    //         W-gain                     X-gain                     Y-gain
+    LF(L,R) = (0.21426224 * (W1(L,R))) + (0.19218459 * (X1(L,R))) + (0.20409261 * (Y1(L,R)));
+    RF(L,R) = (0.21426400 * (W1(L,R))) + (0.19218379 * (X1(L,R))) - (0.20409362 * (Y1(L,R)));
+    CF(L,R) = (0.09993309 * (W1(L,R))) + (0.15577050 * (X1(L,R))) + (0.00000000 * (Y1(L,R)));
+    LS(L,R) = (0.44287748 * (W1(L,R))) - (0.27006948 * (X1(L,R))) + (0.30405695 * (Y1(L,R)));
+    RS(L,R) = (0.44287676 * (W1(L,R))) - (0.27006941 * (X1(L,R))) - (0.30405595 * (Y1(L,R)));
+
+    LFE(C0,SUB0,L0,R0) = 0.0;
+  };
+
+//==============================================================================
+// ....................................................................... Tools
+//==============================================================================
+//------------------------------------------------------------------------------
+// FIRST ORDER B-FORMAT ROTATE
+//------------------------------------------------------------------------------
+// Rotate the Firts Order B-Format armonics set
+// `brotate` is a standard Faust function.
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _ : m2b1 : _,_,_,_
+// ```
+//
+// where
+// * x is a mono signal
+// * azi is orizontal angle in radians
+// * elv is elevation angle in radians
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+brotate(W,X,Y,Z) = W1(W), X1(X,Y), Y1(X,Y), Z1(Z)
+  with{
+    W1(W) = W;
+    X1(X,Y) = (X) * cos(azi) - Y * sin(azi);
+    Y1(X,Y) = (Y) * cos(azi) - X * sin(azi);
+    Z1(Z) = Z;
+  };
+
+  // azi = ((nentry("[1]azi[style:knob][unit:deg]", 0.0, 0.0, 359.9, 0.1)) * ma.PI / 180) : si.smoo;
+  // elv = ((nentry("[2]elv[style:knob][unit:deg]", 0.0, 0.0, 359.9, 0.1)) * ma.PI / 180) : si.smoo;
+
+  // brotate(azi,elv) = _,_,_,_ <: _, _ * (cos(azi)) - _ * (sin(azi)), !, !, _ * (cos(azi)) - _ * (sin(azi)) ,_;
+
+//==============================================================================
+// ................................................... 4ch FO Ambisonic displays
+//==============================================================================
+//------------------------------------------------------------------------------
+// GENERIC 4ch preassembled meter
+//------------------------------------------------------------------------------
+// Meter display a 4ch stream
+//
+// #### Reference
+//
+// #### Usage
+//
+// ```
+// _,_,_,_ : abmodule : _,_,_,_
+// ```
+//
+// Where the four outpust are respectively:
+// W,X,Y,Z
+//
+//------------------------------------------------------------------------------
+bvmeter = bmeter
+  with {
+    vmeter(x) = attach(x, envelop(x) : vbargraph("[2][unit:dB]", -70, +5));
+    envelop = abs : max ~ -(1.0/ma.SR) : max(ba.db2linear(-70)) : ba.linear2db;
+    bmeter = par(i, 4, vmeter);
+  };
+
+bhmeter = bmeter
+  with {
+    hmeter(x) = attach(x, envelop(x) : hbargraph("[2][unit:dB]", -70, +5));
+    envelop = abs : max ~ -(1.0/ma.SR) : max(ba.db2linear(-70)) : ba.linear2db;
+    bmeter = par(i, 4, hmeter);
+  };
