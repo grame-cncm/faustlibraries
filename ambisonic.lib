@@ -33,26 +33,23 @@
 am = library("ambisonic.lib");
 ma = library("maths.lib");
 fi = library("filters.lib");
-ba = library("basics.lib"); // so functions here can be copy/pasted out
+ba = library("basics.lib");
+mx = library("maxmsp.lib");
 
-declare name "Faust Basic Element Library";
-declare version "0.0";
+declare name "Faust Ambisonic Element Library";
+declare version "0.1";
+declare author "Giuseppe Silvi";
+declare license "CC4";
 
 //===================================================== Some stuff not be here =
 //==============================================================================
 //------------------------------------------------------------------------------
 // HILBERT TRANSFORM BASED ON biquad~
 //------------------------------------------------------------------------------
-biquad(a1,a2,b0,b1,b2) = + ~ conv2(a1,a2) : conv3(b0,b1,b2)
-  with{
-    conv3(k0,k1,k2,x) = k0*x + k1*x'+ k2*x'';
-    conv2(k0,k1,x) = k0*x + k1*x';
-  };
-
-hilbertf1 = am.biquad(-0.02569, 0.260502, -0.260502, 0.02569, 1) :
-            am.biquad(1.8685, -0.870686, 0.870686, -1.8685, 1); // f1 advanced 90°
-hilbertf2 = am.biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
-            am.biquad(0.83774, -0.06338, 0.06338, -0.83774, 1); // f2 shifted 90°
+hilbertf1 = mx.biquad(-0.02569, 0.260502, -0.260502, 0.02569, 1) :
+            mx.biquad(1.8685, -0.870686, 0.870686, -1.8685, 1); // f1 advanced 90°
+hilbertf2 = mx.biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
+            mx.biquad(0.83774, -0.06338, 0.06338, -0.83774, 1); // f2 shifted 90°
 
 hilbert = am.hilbertf1, am.hilbertf2; // f1 advanced 90° - f2 shifted 90°
 
