@@ -875,7 +875,6 @@ oscs(f) =  (*(-1) : sint(wn) : sintp(wn,impulse)) ~ _
 with {
   wn = 2*ma.PI*f/ma.SR; // approximate
   // wn = 2*sin(PI*f/SR); // exact
-  sub(x,y) = y-x;
   sint(x) = *(x) : + ~ _ ; // frequency-scaled integrator
   sintp(x,y) = *(x) : +(y): + ~ _ ; // same + state input
 };
