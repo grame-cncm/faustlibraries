@@ -267,6 +267,24 @@ cbus(n) = par(i, n, (_,_));
 //-----------------------------------------------------------------------------
 cmul(r1,i1,r2,i2) = (r1*r2 - i1*i2), (r1*i2 + r2*i1);
 
+//--------------------------------`(si.)cconj`-------------------------------------
+// complex conjugation of a (complex) signal.
+// `cconj` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// (r1,i1) : cconj : (_,_);
+// ```
+//
+// Where:
+//
+// * Each complex number is represented by two real signals as (real,imag), so
+// - `(r1,i1)` = real and imaginary parts of the input signal
+// - `(r1,-i1)` = real and imaginary parts of the output signal
+//-----------------------------------------------------------------------------
+cconj = _, *(-1);
+
 // end jos section
 /************************************************************************
 FAUST library file, further contributions section
