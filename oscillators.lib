@@ -470,7 +470,7 @@ lf_saw(freq) = saw1(freq);
 //
 // Polynomial Transition Regions (PTR) (for aliasing suppression).
 //
-// ##### Reference
+// ##### References
 //
 // * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio
 // 	Signals Using Polynomial Transition Regions," in Signal Processing
@@ -1192,6 +1192,35 @@ select2(fund<.5 , 2-(fund*2) , fund*2)*tmp*2-1 with {
 
 CZresTrap(fund, res) =
   (((1-fund)*2):min(1) *  sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
+
+//-----------------`(os.)quadosc`--------------------
+// Sinusoidal oscillator based on QuadOsc by Martin Vicanek
+//
+// #### Usage
+//
+// ```
+// quadosc(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
+//
+// #### Reference
+// * <https://vicanek.de/articles/QuadOsc.pdf>
+//------------------------------------------------------------
+// Author: Dario Sanfilippo <sanfilippo.dario@gmail.com> (jos ed.)
+quadosc(f) = tick ~ (_ , _)
+with {
+  init = 1-1';
+  w = 2*ma.PI*f/ma.SR;
+      k1 = tan(.5*w);
+      k2 = 2*k1/(1+k1*k1);
+  tick(u, v) = omega-k1*(v+k2*omega) , v+k2*omega
+  with {
+    omega = (u+init)-k1*v;
+  };
+};
 
 // end further contributions section
 //########################################################################################
