@@ -1112,11 +1112,43 @@ with{
 // Linux QT:
 //   faust2jaqt reverse_echo_demo.dsp
 //   ./reverse_echo_demo
+// Etc.
 // ```
 //-------------------------------------------------------------------
 reverse_echo_demo(nChans) =  ef.reverseEchoN(nChans,delMax) : ef.uniformPanToStereo(nChans) 
 with {
 	delMax = 2^int(nentry("Log2(Delay)",15,5,16,1)); // delay line length
+};
+
+//-----------------`(dm.)ssbf_demo(nChans)`----------------
+// Multichannel echo effect with reverse delays
+//
+// #### Usage
+//
+// ```
+// echo 'import("stdfaust.lib");' > ssbf_demo.dsp
+// echo 'N = 6; // Any integer > 0 should work here' >> ssbf_demo.dsp
+// echo 'process = dm.ssbf_demo(nChans);' >> ssbf_demo.dsp
+// Mac:
+//   faust2caqt ssbf_demo.dsp
+//   open ssbf_demo.app
+// Linux GTK:
+//   faust2jack ssbf_demo.dsp
+//   ./ssbf_demo
+// Linux QT:
+//   faust2jaqt ssbf_demo.dsp
+//   ./ssbf_demo
+// Etc.
+// ```
+//-------------------------------------------------------------------
+ssbf_demo(N) =  os.oscrs(fc) : fi.ssbf(N), smod : si.cmul with {
+  N=6;
+  fc = ma.SR/4.0; // original frequency
+  fsh = hslider("Frequency Shift (Multiplicative on SR/4)",0.01,0.001,2,0.001) : si.smooth(0.999);
+  fn = fc*fsh; // new freq
+  df = fn-fc; // delta freq
+  // smod(n) = exp(sqrt(-1) * 2 * ma.PI * df * n / ma.SR) // complex version
+  smod = os.oscrq(df) : si.conj; // in-phase and quadrature outputs, CCW
 };
 
 // end jos section

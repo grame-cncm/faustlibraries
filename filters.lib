@@ -1735,6 +1735,64 @@ with { // octave script output:
   w1 = wua - wc^2/wua; // s-plane lowpass cutoff
 };
 
+//------------------------`(fi.)ssbf`---------------------------
+// Single-Side-Band Filter (or PositiveFrequencies-Pass Filter)
+//
+// #### Usage
+//
+// ```
+// _ : ssbf(N) : _,_
+// ```
+//
+// where
+//
+// * `N`: filter order
+//
+// #### Method
+// An easy way to make a single-sideband filter is to make any
+// half-band (or less) lowpass and modulate it up to the
+// positive-frequency range.  Equivalently, down-modulate the input
+// signal, lowpass it, and modulate back up.
+//
+// #### References
+// * <https://ccrma.stanford.edu/~jos/sasp/Bibliography.html#ReillyFrazerAndBoashash94>
+// * <https://ccrma.stanford.edu/~jos/sasp/Comparison_Optimal_Chebyshev_FIR_I.html>
+//------------------------------------------------------------
+
+ssbf(N) = unmodulate : lpf(fc), lpf(fc) : modulate with {
+  unmodulate = _ <: *(c),*(-s);
+  modulate(x,y) = c*x-s*y, c*y + s*x;
+  lpf = fi.lowpass(N); // or fi.lowpass6e, etc.
+  //lpf = fi.lowpass6e; // strongest lowpass filter in filters.lib as of this writing
+  guard = ma.SR/(2*N); // Guard-band to allow for filter roll-off
+  fc = ma.SR/4 - guard;
+  c = 1-1' : +~(*(-1):mem); // ||: 1, 0, -1, 0 :||
+  s = c';
+};
+
+//------------------------`(fi.)hilbert`---------------------------
+// Hilbert-transform filter
+//
+// #### Usage
+//
+// ```
+// _ : hilbert(N) : _
+// ```
+//
+// where
+//
+// * `N`: filter order
+//
+// #### Method
+// The Hilbert transform creates the imaginary part of an
+// "analytic signal" $x(n)+j y(n)$ from its real part $x(n)$.
+//
+// #### Reference
+// * <https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html>
+//------------------------------------------------------------
+hilbert = ssbf : !,_; // Imaginary output of single-sideband filter ssbf
+
+
 //=================Parametric Equalizers (Shelf, Peaking)=================================
 // Parametric Equalizers (Shelf, Peaking).
 //
