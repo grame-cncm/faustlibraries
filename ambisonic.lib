@@ -8,12 +8,11 @@
 //##############################################################################
 // A library of ambisonic elements for Faust organized in 5 sections:
 //
-// * Michael Gerzon early works
+// * Michael Gerzon general works
 // * A to B and viceversa matrix
 // * Encoders
 // * Decoders
 // * Tools
-// * 4ch FO Ambisonic displays
 //
 //******************************************************************************
 // written by Giuseppe Silvi - 2019
@@ -59,13 +58,13 @@ hilbertf2 = mx.biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
 
 hilbert = am.hilbertf1, am.hilbertf2; // f1 advanced 90° - f2 shifted 90°
 
-//================================================= Michael Gerzon early works =
+//=============================================== Michael Gerzon general works =
 //==============================================================================
 //------------------------------------------------------------------------------
 // SURROUND SOUND FROM 2-CHANNEL STEREO
 //------------------------------------------------------------------------------
-// Converts a generic tetrahedral A-Format into Firts Order B-Format
-// `abmodule` is a standard Faust function.
+// ... a method of obtaining a genuine surround stereo effect from suitable
+// conventional two-channel stereo recordings
 //
 // #### Reference
 // Hi-Fi News, August 1970
@@ -83,6 +82,35 @@ hilbert = am.hilbertf1, am.hilbertf2; // f1 advanced 90° - f2 shifted 90°
 //------------------------------------------------------------------------------
 lr2surr(L,R) = 0.5*(L+R), R, 0.5*(L-R), L;
 
+//------------------------------------------------------------------------------
+// THREE CHANNEL STEREO
+//------------------------------------------------------------------------------
+// ... a method of obtaining a genuine surround stereo effect from suitable
+// conventional two-channel stereo recordings
+//
+// #### Reference
+// Studio Sound, June 1990
+// http://www.audiosignal.co.uk/Resources/Three_channels_A4.pdf
+//
+// #### Usage
+//
+// ```
+// _ : lcrpan : _,_,_
+// ```
+//
+// Where the four outpust are respectively:
+// Left,Center,Right
+//
+//------------------------------------------------------------------------------
+lcrpan(x,pot) = l,c,r
+  with{
+    //pot = vslider("[1][style:knob][unit:deg]", 0.0, -45.0, 45.0, 0.1) / (90.0) : si.smoo;
+    plr = (pot) + (0.5);
+    l = x*((1 - (plr)) * (pot) * (-2.0));
+    c = x*(cos(pot * ma.PI));
+    r = x*((plr) * (pot) * (2.0));
+  };
+
 //================================================ A to B and viceversa matrix =
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -92,6 +120,9 @@ lr2surr(L,R) = 0.5*(L+R), R, 0.5*(L-R), L;
 // `abmodule` is a standard Faust function.
 //
 // #### Reference
+// Ambisonics. Part two: Studio techniques
+// Studio Sound, Vol. 17, pp 24-26, 28, 40 (August 1975)
+// https://www.michaelgerzonphotos.org.uk/articles/Ambisonics%202.pdf
 //
 // #### Usage
 //
