@@ -3,15 +3,15 @@
 //##############################################################################
 // A library of ambisonic elements for Faust organized in 5 sections:
 //
-// * Michael Gerzon early works
-// * A to B and viceversa matrix
-// * Encoders
-// * Decoders
-// * Tools
+// * MICHAEL GERZON EARLY WORKS
+// * AB MODULES
+// * ENCODERS
+// * DECODERS
+// * TOOLS
 //
 //******************************************************************************
 // written by Giuseppe Silvi - 2019
-// based on Michael Gerzon early works
+// based on Michael Gerzon works
 //
 //******************************************************************************
 // It should be used using the `[...]` environment:
@@ -155,7 +155,7 @@ lr2surr_rs(L,R,k) = L,R,kL,kR
     kR = k * R - (1 - k) * L;
   };
 
-//================================================================ A B MODULES =
+//================================================================= AB MODULES =
 //==============================================================================
 //------------------------------------------------------------------------------
 // GENERIC AB MODULE WITHOUT SHELVING
@@ -466,7 +466,7 @@ uhj2bfmt(L,R,T,Q) = W,X,Y,Z
 // * azi is orizontal angle in radians
 //
 //------------------------------------------------------------------------------
-brotate(W,X,Y,Z) = W1, X1, Y1, Z1
+brotate(W,X,Y,Z) = W1,X1,Y1,Z1
   with{
     W1 = W;
     X1 = (X) * cos(azi) - Y * sin(azi);
@@ -493,7 +493,7 @@ brotate(W,X,Y,Z) = W1, X1, Y1, Z1
 // Where pot is a number between -0.5 and 0.5
 // pot = vslider("[1][style:knob][unit:deg]", 0.0, -45.0, 45.0, 0.1) / (90.0) : si.smoo;
 //
-// Where the four outpust are respectively:
+// Where the three outpust are respectively:
 // Left,Center,Right
 //
 //------------------------------------------------------------------------------
