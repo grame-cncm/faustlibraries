@@ -61,14 +61,17 @@ hilbert = am.hilbertf1, am.hilbertf2; // f1 advanced 90° - f2 shifted 90°
 //=============================================== Michael Gerzon general works =
 //==============================================================================
 //------------------------------------------------------------------------------
-// SURROUND SOUND FROM 2-CHANNEL STEREO
+// 1970 - SURROUND SOUND FROM 2-CHANNEL STEREO - SUM-AND-DIFFERENCE LAYOUT
 //------------------------------------------------------------------------------
 // ... a method of obtaining a genuine surround stereo effect from suitable
 // conventional two-channel stereo recordings
 //
 // #### Reference
-// Hi-Fi News, August 1970
+// Surround sound from 2-channel stereo - Hi-Fi News, August 1970
 // http://www.audiosignal.co.uk/Resources/Surround_sound_from_2-channel_stereo_A4.pdf
+//
+// A year of surround-sound - Hi-Fi News, August 1971
+// http://www.audiosignal.co.uk/Resources/A_year_of_surround_sound_A4.pdf
 //
 // #### Usage
 //
@@ -79,37 +82,86 @@ hilbert = am.hilbertf1, am.hilbertf2; // f1 advanced 90° - f2 shifted 90°
 // Where the four outpust are respectively:
 // Front,Right,Rear,Left
 //
+//        F
+//     •  |  •
+//   •    |    •
+// L ---- + ---- R
+//   •    |    •
+//     •  |  •
+//        B
+
+
+//
 //------------------------------------------------------------------------------
 lr2surr(L,R) = 0.5*(L+R), R, 0.5*(L-R), L;
 
 //------------------------------------------------------------------------------
-// THREE CHANNEL STEREO
+// 1970 - SURROUND SOUND FROM 2-CHANNEL STEREO - IDEAL LS ARRANGEMENT
 //------------------------------------------------------------------------------
-// ... a method of obtaining a genuine surround stereo effect from suitable
-// conventional two-channel stereo recordings
+// Another, more obvious, defect of ‘sum-and-difference’ four-speaker
+// reproduction is the highly inconvenient seating arrangements, which are
+// hardly suitable for the cosy domestic enjoyment of music.
 //
 // #### Reference
-// Studio Sound, June 1990
-// http://www.audiosignal.co.uk/Resources/Three_channels_A4.pdf
+// Surround sound from 2-channel stereo - Hi-Fi News, August 1970
+// http://www.audiosignal.co.uk/Resources/Surround_sound_from_2-channel_stereo_A4.pdf
+//
+// A year of surround-sound - Hi-Fi News, August 1971
+// http://www.audiosignal.co.uk/Resources/A_year_of_surround_sound_A4.pdf
 //
 // #### Usage
 //
 // ```
-// _ : lcrpan : _,_,_
+// _,_ : lr2surr_ls : _,_,_,_
 // ```
 //
 // Where the four outpust are respectively:
-// Left,Center,Right
+// A,B,C,D
+//
+//  B ---------- C
+//  |            |
+//  |            |
+//  |            |
+//  |            |
+//  A ---------- D
 //
 //------------------------------------------------------------------------------
-lcrpan(x,pot) = l,c,r
-  with{
-    //pot = vslider("[1][style:knob][unit:deg]", 0.0, -45.0, 45.0, 0.1) / (90.0) : si.smoo;
-    plr = (pot) + (0.5);
-    l = x*((1 - (plr)) * (pot) * (-2.0));
-    c = x*(cos(pot * ma.PI));
-    r = x*((plr) * (pot) * (2.0));
-  };
+lr2surr_ls(L,R) = L*(0.924) - R*(0.383),
+                  L*(0.924) + R*(0.383),
+                  L*(0.383) + R*(0.924),
+                  L*(-0.383) + R*(0.924);
+
+//------------------------------------------------------------------------------
+// 1971 - A YEAR OF SURROUND SOUND
+//------------------------------------------------------------------------------
+// What is the precise effect of the rear spread control? With the few set-ups
+// on which it has so far been tried, as one turns the control away from the
+// pure ‘Hafler’ system, the sound seems to gain a subtle life and depth that
+// the Hafler system lacks.
+//
+// #### Reference
+//
+// A year of surround-sound - Hi-Fi News, August 1971
+// http://www.audiosignal.co.uk/Resources/A_year_of_surround_sound_A4.pdf
+//
+// #### Usage
+//
+// ```
+// _,_ : lr2surr_rs : _,_,_,_
+// ```
+//
+// Where:
+// * k is a number bettween 0.5 and 1.0
+//
+//  L ---------- R
+//  |            |
+//  |            |
+//  |            |
+//  |            |
+//  kL -------- kR
+//
+//------------------------------------------------------------------------------
+lr2surr_rs(L,R,k) = L, R, k * L - (1 - k) * R, k * R - (1 - k) * L;
 
 //================================================ A to B and viceversa matrix =
 //==============================================================================
@@ -188,8 +240,7 @@ abmodule_hs(LFU, RFD, RBU, LBD) =
   (0.5 * (LFU - RFD - RBU + LBD)) : fi.highshelf(1,4,2500),
   (0.5 * (LFU - RFD + RBU - LBD)) : fi.highshelf(1,4,2500);
 
-//==============================================================================
-// .................................................................... Encoders
+//=================================================================== ENCODERS =
 //==============================================================================
 //------------------------------------------------------------------------------
 // MONO TO FIRST ORDER B-FORMAT ENCODER
@@ -240,92 +291,176 @@ m2b1(x,azi,elv) = x * 0.707,
 // W,X,Y,Z
 //
 //------------------------------------------------------------------------------
-lr2b1(L,R) = 0.707 * (WL(L) + WR(R)),
-             0.707 * (XL(L) + XR(R)),
-             0.707 * (YL(L) + YR(R)),
-             0.707 * (ZL(L) + ZR(R))
+lr2b1(L,R) = 0.707 * (WL + WR),
+             0.707 * (XL + XR),
+             0.707 * (YL + YR),
+             0.707 * (ZL + ZR)
               with{
                 azi = (30.0 * (ma.PI / 180.0));
                 elv = (00.0 * (ma.PI / 180.0));
 
-                WL(L) = (L) * 0.707;
-                XL(L) = (L) * cos(azi) * cos(elv);
-                YL(L) = (L) * sin(azi) * cos(elv);
-                ZL(L) = (L) * sin(elv);
+                WL = L * 0.707;
+                XL = L * cos(azi) * cos(elv);
+                YL = L * sin(azi) * cos(elv);
+                ZL = L * sin(elv);
 
-                WR(R) = (R) * 0.707;
-                XR(R) = (R) * cos(-azi) * cos(elv);
-                YR(R) = (R) * sin(-azi) * cos(elv);
-                ZR(R) = (R) * sin(elv);
+                WR = R * 0.707;
+                XR = R * cos(-azi) * cos(elv);
+                YR = R * sin(-azi) * cos(elv);
+                ZR = R * sin(elv);
               };
 
-//==============================================================================
-// .................................................................... Decoders
+//=================================================================== DECODERS =
 //==============================================================================
 //------------------------------------------------------------------------------
-// FIRST ORDER B-FORMAT ROTATE
+// THREE CHANNEL FOUR LOUDSPEAKER DECODER
 //------------------------------------------------------------------------------
-// Rotate the Firts Order B-Format armonics set
-// `brotate` is a standard Faust function.
+// Converts planar B-Format to four loudspeaker setup for horizontal studio
+// monitoring
 //
 // #### Reference
+// Ambisonics. Part two: Studio techniques
+// Studio Sound, Vol. 17, pp 24-26, 28, 40 (August 1975)
+// https://www.michaelgerzonphotos.org.uk/articles/Ambisonics%202.pdf
 //
 // #### Usage
 //
 // ```
-// _ : m2b1 : _,_,_,_
+// _,_,_ : bdmodule : _,_,_,_
 // ```
 //
-// where
-// * x is a mono signal
-// * azi is orizontal angle in radians
-// * elv is elevation angle in radians
+// Where the three inputs are respectively:
+// W,X,Y
 //
 // Where the four outpust are respectively:
-// W,X,Y,Z
+// LF,RF,LB,RB
 //
 //------------------------------------------------------------------------------
-bfmt2uhj(W,X,Y,Z) = left(W,X,Y,Z), right(W,X,Y,Z)
+bdmodule = fi.highshelf(2,1.76,350),
+           fi.highshelf(2,-1.25,350),
+           fi.highshelf(2,-1.25,350),
+           * (0.0):
+           am.bamodule;
+
+//------------------------------------------------------------------------------
+// DECODER FOR BMX ENCODED SIGNALS
+//------------------------------------------------------------------------------
+// Converts C-Format Stereo BMX encoded signals to four loudspeaker setup
+//
+// #### Reference
+// Ambisonics. Part two: Studio techniques
+// Studio Sound, Vol. 17, pp 24-26, 28, 40 (August 1975)
+// https://www.michaelgerzonphotos.org.uk/articles/Ambisonics%202.pdf
+//
+// #### Usage
+//
+// ```
+// _,_ : bmxmodule : _,_,_,_
+// ```
+//
+// Where the two inputs are respectively:
+// L,R
+//
+// Where the four outpust are respectively:
+// LF,RF,LB,RB
+//
+//------------------------------------------------------------------------------
+bmxmodule(L,R) = M+S, M, S, 0 : am.bamodule
   with{
-        sigma(W,X) = 0.9397 * (W) + 0.1856 * (X);
-      delta(W,X,Y) = hilbertf1(-0.3420 * (W) + 0.5099 * (X)) + (0.6555 * (Y));
-        tau(W,X,Y) = hilbertf1(-0.1432 * (W) + 0.6512 * (X)) - (0.7071 * (Y));
-         quelet(Z) = 0.9772 * (Z);
-     left(W,X,Y,Z) = 0.5 * (sigma(W,X) + delta(W,X,Y));
-    right(W,X,Y,Z) = 0.5 * (sigma(W,X) - delta(W,X,Y));
+    M = 0.5 * (L + R) : fi.lowshelf(2,-3.98,350);
+    S = 0.5 * (L - R) : fi.lowshelf(2,2.04,350);
   };
 
 //------------------------------------------------------------------------------
-// FIRST ORDER B-FORMAT ROTATE
+// B-FORMAT TO UHJ LRTQ
 //------------------------------------------------------------------------------
-// Rotate the Firts Order B-Format armonics set
-// `brotate` is a standard Faust function.
+// Ambisonic UHJ format is a development of the Ambisonic surround sound system
+// designed to be compatible with mono and stereo media.
 //
 // #### Reference
+// https://en.wikipedia.org/wiki/Ambisonic_UHJ_format
+//
+// S = 0.9396926*W + 0.1855740*X
+// D = j(-0.3420201*W + 0.5098604*X) + 0.6554516*Y
+//
+// Left = (S + D)/2.0
+// Right = (S - D)/2.0
+// T = j(-0.1432*W + 0.6512*X) - 0.7071*Y
+// Q = 0.9772*Z
+//
+//where j is a +90° phase shift
 //
 // #### Usage
 //
 // ```
-// _ : m2b1 : _,_,_,_
+// _,_,_,_ : bfmt2uhj : _,_,_,_
 // ```
 //
-// where
-// * x is a mono signal
-// * azi is orizontal angle in radians
-// * elv is elevation angle in radians
+// where the four inputs are respectively:
+// W,X,Y,Z
 //
 // Where the four outpust are respectively:
+// L,R,T,Q
+//
+//------------------------------------------------------------------------------
+bfmt2uhj(W,X,Y,Z) = L,R,T,Q
+  with{
+    j = mx.biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
+        mx.biquad(0.83774, -0.06338, 0.06338, -0.83774, 1);
+
+    S = 0.9396926 * W + 0.1855740 * X;
+    D = j((-0.3420201 * W) + (0.5098604 * X)) + (0.6554516 * Y);
+
+    L = 0.5 * (S + D);
+    R = 0.5 * (S - D);
+    T = j((-0.1432 * W + 0.6512 * X)) - (0.7071 * Y);
+    Q = 0.9772 * (Z);
+  };
+
+//------------------------------------------------------------------------------
+// FOUR CHANNEL LRTQ UHJ TO B-FORMAT
+//------------------------------------------------------------------------------
+// Ambisonic UHJ format is a development of the Ambisonic surround sound system
+// designed to be compatible with mono and stereo media.
+//
+// #### Reference
+// https://en.wikipedia.org/wiki/Ambisonic_UHJ_format
+//
+// S = (Left + Right)/2.0
+// D = (Left - Right)/2.0
+//
+// W = 0.982*S + j*0.197(0.828*D + 0.768*T)
+// X = 0.419*S - j(0.828*D + 0.768*T)
+// Y = 0.796*D - 0.676*T + j*0.187*S
+// Z = 1.023*Q
+//
+// where j is a +90° phase shift
+//
+// #### Usage
+//
+// ```
+// _,_,_,_ : uhj2bfmt : _,_,_,_
+// ```
+//
+// Where the four inputs are respectively:
+// L,R,T,Q
+//
+// where the four outputs are respectively:
 // W,X,Y,Z
 //
 //------------------------------------------------------------------------------
-uhj2bfmt(L,R) = W1(L,R), X1(L,R), Y1(L,R), 0.0
+uhj2bfmt(L,R,T,Q) = W,X,Y,Z
   with{
-    mid(L,R) = 0.5 * (L + R);
-    sid(L,R) = 0.5 * (L - R);
+    j = mx.biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
+        mx.biquad(0.83774, -0.06338, 0.06338, -0.83774, 1);
 
-    W1(L,R) = 0.982 * (sid(L,R)) + hilbertf2(0.164 * (mid(L,R)));
-    X1(L,R) = 0.419 * (sid(L,R)) - hilbertf2(0.828 * (mid(L,R)));
-    Y1(L,R) = 0.763 * (mid(L,R)) + hilbertf2(0.385 * (sid(L,R)));
+    S = 0.5 * (L + R);
+    D = 0.5 * (L - R);
+
+    W = 0.982 * S + j(0.197 * (0.828 * D + 0.768 * T));
+    X = 0.419 * S - j(0.828 * D + 0.768 * T);
+    Y = 0.796 * D - 0.676 * T + j(0.187 * S);
+    Z = 1.023 * Q;
   };
 
 //------------------------------------------------------------------------------
@@ -402,6 +537,37 @@ brotate(W,X,Y,Z) = W1(W), X1(X,Y), Y1(X,Y), Z1(Z)
     X1(X,Y) = (X) * cos(azi) - Y * sin(azi);
     Y1(X,Y) = (Y) * cos(azi) - X * sin(azi);
     Z1(Z) = Z;
+  };
+
+//------------------------------------------------------------------------------
+// THREE CHANNEL STEREO
+//------------------------------------------------------------------------------
+// ... a method of obtaining a genuine surround stereo effect from suitable
+// conventional two-channel stereo recordings
+//
+// #### Reference
+// Studio Sound, June 1990
+// http://www.audiosignal.co.uk/Resources/Three_channels_A4.pdf
+//
+// #### Usage
+//
+// ```
+// _ : lcrpan : _,_,_
+// ```
+//
+// Where pot is a number between -0.5 and 0.5
+// pot = vslider("[1][style:knob][unit:deg]", 0.0, -45.0, 45.0, 0.1) / (90.0) : si.smoo;
+//
+// Where the four outpust are respectively:
+// Left,Center,Right
+//
+//------------------------------------------------------------------------------
+lcrpan(x,pot) = l,c,r
+  with{
+    plr = (pot) + (0.5);
+    l = x*((1 - (plr)) * (pot) * (-2.0));
+    c = x*(cos(pot * ma.PI));
+    r = x*((plr) * (pot) * (2.0));
   };
 
 //==============================================================================
