@@ -34,14 +34,13 @@ am = library("ambisonic.lib");
 ma = library("maths.lib");
 fi = library("filters.lib");
 ba = library("basics.lib");
-mx = library("maxmsp.lib");
 
 declare name "Faust Ambisonic Element Library";
 declare version "0.1";
 declare author "Giuseppe Silvi";
 declare license "CC4";
 
-//================================================= Michael Gerzon early works =
+//================================================= MICHAEL GERZON EARLY WORKS =
 //==============================================================================
 //------------------------------------------------------------------------------
 // 1970 - SURROUND SOUND FROM 2-CHANNEL STEREO - SUM-AND-DIFFERENCE LAYOUT
@@ -65,13 +64,13 @@ declare license "CC4";
 // Where the four outpust are respectively:
 // Front,Right,Rear,Left
 //
-//        F
-//     •  |  •
-//   •    |    •
-// L ---- + ---- R
-//   •    |    •
-//     •  |  •
-//        B
+//         F
+//      •  |  •
+//   •     |     •
+// L ----- + ----- R
+//   •     |     •
+//      •  |  •
+//         B
 //
 //------------------------------------------------------------------------------
 lr2surr(L,R) = F,R,B,L
@@ -156,7 +155,7 @@ lr2surr_rs(L,R,k) = L,R,kL,kR
     kR = k * R - (1 - k) * L;
   };
 
-//================================================ A to B and viceversa matrix =
+//================================================================ A B MODULES =
 //==============================================================================
 //------------------------------------------------------------------------------
 // GENERIC AB MODULE WITHOUT SHELVING
@@ -378,8 +377,14 @@ bmxmodule(L,R) = M+S, M, S, 0 : am.bamodule
 //------------------------------------------------------------------------------
 bfmt2uhj(W,X,Y,Z) = L,R,T,Q
   with{
-    j = mx.biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
-        mx.biquad(0.83774, -0.06338, 0.06338, -0.83774, 1);
+    biquad(x,a0,a1,a2,b1,b2) = x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
+    	with {
+    		conv2(c0,c1,x) = c0*x+c1*x';
+    		conv3(c0,c1,c2,x) = c0*x+c1*x'+c2*x'';
+    	};
+
+    j = biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
+        biquad(0.83774, -0.06338, 0.06338, -0.83774, 1);
 
     S = 0.9396926 * W + 0.1855740 * X;
     D = j((-0.3420201 * W) + (0.5098604 * X)) + (0.6554516 * Y);
@@ -424,6 +429,12 @@ bfmt2uhj(W,X,Y,Z) = L,R,T,Q
 //------------------------------------------------------------------------------
 uhj2bfmt(L,R,T,Q) = W,X,Y,Z
   with{
+    biquad(x,a0,a1,a2,b1,b2) = x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
+      with {
+        conv2(c0,c1,x) = c0*x+c1*x';
+        conv3(c0,c1,c2,x) = c0*x+c1*x'+c2*x'';
+      };
+
     j = mx.biquad(1.94632, -0.94657, 0.94657, -1.94632, 1) :
         mx.biquad(0.83774, -0.06338, 0.06338, -0.83774, 1);
 
