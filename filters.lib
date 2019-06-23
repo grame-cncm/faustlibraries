@@ -1756,9 +1756,17 @@ with { // octave script output:
 // In Faust/math notation:
 // pospass(N) = $\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})$
 //
+// An approximation to the Hilbert transform is given by the
+// imaginary output signal:
+//
+// ```
+// hilbert(N) = pospass(N) : !,*(2);
+// ```
+//
 // #### References
 // * <https://ccrma.stanford.edu/~jos/sasp/Bibliography.html#ReillyFrazerAndBoashash94>
 // * <https://ccrma.stanford.edu/~jos/sasp/Comparison_Optimal_Chebyshev_FIR_I.html>
+// * <https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html>
 //------------------------------------------------------------
 
 pospass(N) = unmodulate : lpf(fc), lpf(fc) : modulate with {
@@ -1771,29 +1779,6 @@ pospass(N) = unmodulate : lpf(fc), lpf(fc) : modulate with {
   c = 1-1' : +~(*(-1):mem); // ||: 1, 0, -1, 0 :||
   s = c';
 };
-
-//------------------------`(fi.)hilbert`---------------------------
-// Hilbert-transform filter
-//
-// #### Usage
-//
-// ```
-// _ : hilbert(N) : _
-// ```
-//
-// where
-//
-// * `N`: filter order
-//
-// #### Method
-// The Hilbert transform creates the imaginary part of an
-// "analytic signal" $x(n)+j y(n)$ from its real part $x(n)$.
-//
-// #### Reference
-// * <https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html>
-//------------------------------------------------------------
-hilbert(N) = pospass(N) : !,_; // Imaginary output of single-sideband filter pospass
-
 
 //=================Parametric Equalizers (Shelf, Peaking)=================================
 // Parametric Equalizers (Shelf, Peaking).
