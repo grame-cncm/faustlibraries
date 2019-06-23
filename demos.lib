@@ -1120,28 +1120,28 @@ with {
 	delMax = 2^int(nentry("Log2(Delay)",15,5,16,1)); // delay line length
 };
 
-//-----------------`(dm.)ssbf_demo(nChans)`----------------
-// Use Single-SideBand Filter ssbf to frequency-shift a sine tone.
+//-----------------`(dm.)pospass_demo(nChans)`----------------
+// Use Positive-Pass Filter to frequency-shift a sine tone.
 //
 // #### Usage
 //
 // ```
-// echo 'import("stdfaust.lib");' > ssbf_demo.dsp
-// echo 'N = 6; // Any integer > 0 should work here' >> ssbf_demo.dsp
-// echo 'process = dm.ssbf_demo(nChans);' >> ssbf_demo.dsp
+// echo 'import("stdfaust.lib");' > pospass_demo.dsp
+// echo 'N = 6; // Any integer > 0 should work here' >> pospass_demo.dsp
+// echo 'process = dm.pospass_demo(nChans);' >> pospass_demo.dsp
 // Mac:
-//   faust2caqt ssbf_demo.dsp
-//   open ssbf_demo.app
+//   faust2caqt pospass_demo.dsp
+//   open pospass_demo.app
 // Linux GTK:
-//   faust2jack ssbf_demo.dsp
-//   ./ssbf_demo
+//   faust2jack pospass_demo.dsp
+//   ./pospass_demo
 // Linux QT:
-//   faust2jaqt ssbf_demo.dsp
-//   ./ssbf_demo
+//   faust2jaqt pospass_demo.dsp
+//   ./pospass_demo
 // Etc.
 // ```
 //-------------------------------------------------------------------
-ssbf_demo(N) =  os.oscrs(fc) : fi.ssbf(N), smod : si.cmul with {
+pospass_demo(N) =  os.oscrs(fc) : fi.pospass(N), smod : si.cmul with {
   N=6;
   fc = ma.SR/4.0; // original frequency
   fsh = hslider("Frequency Shift (Multiplicative on SR/4)",0.01,0.001,2,0.001) : si.smooth(0.999);

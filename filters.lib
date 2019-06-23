@@ -1735,13 +1735,13 @@ with { // octave script output:
   w1 = wua - wc^2/wua; // s-plane lowpass cutoff
 };
 
-//------------------------`(fi.)ssbf`---------------------------
-// Single-Side-Band Filter (or PositiveFrequencies-Pass Filter)
+//------------------------`(fi.)pospass`---------------------------
+// Positive-Pass Filter (single-side-band filter)
 //
 // #### Usage
 //
 // ```
-// _ : ssbf(N) : _,_
+// _ : pospass(N) : _,_
 // ```
 //
 // where
@@ -1749,17 +1749,19 @@ with { // octave script output:
 // * `N`: filter order
 //
 // #### Method
-// An easy way to make a single-sideband filter is to make any
-// half-band (or less) lowpass and modulate it up to the
-// positive-frequency range.  Equivalently, down-modulate the input
-// signal, lowpass it, and modulate back up.
+// A filter passing only positive frequencies can be made from a
+// half-band lowpass by modulating it up to the positive-frequency range.
+// Equivalently, down-modulate the input signal using a complex sinusoid at -SR/4 Hz,
+// lowpass it with a half-band filter, and modulate back up by SR/4 Hz.
+// In Faust/math notation:
+// pospass(N) = $\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})$
 //
 // #### References
 // * <https://ccrma.stanford.edu/~jos/sasp/Bibliography.html#ReillyFrazerAndBoashash94>
 // * <https://ccrma.stanford.edu/~jos/sasp/Comparison_Optimal_Chebyshev_FIR_I.html>
 //------------------------------------------------------------
 
-ssbf(N) = unmodulate : lpf(fc), lpf(fc) : modulate with {
+pospass(N) = unmodulate : lpf(fc), lpf(fc) : modulate with {
   unmodulate = _ <: *(c),*(-s);
   modulate(x,y) = c*x-s*y, c*y + s*x;
   lpf = fi.lowpass(N); // or fi.lowpass6e, etc.
@@ -1790,7 +1792,7 @@ ssbf(N) = unmodulate : lpf(fc), lpf(fc) : modulate with {
 // #### Reference
 // * <https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html>
 //------------------------------------------------------------
-hilbert = ssbf : !,_; // Imaginary output of single-sideband filter ssbf
+hilbert = pospass : !,_; // Imaginary output of single-sideband filter pospass
 
 
 //=================Parametric Equalizers (Shelf, Peaking)=================================
