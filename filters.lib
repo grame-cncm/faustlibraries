@@ -1792,7 +1792,7 @@ pospass(N) = unmodulate : lpf(fc), lpf(fc) : modulate with {
 // #### Reference
 // * <https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html>
 //------------------------------------------------------------
-hilbert = pospass : !,_; // Imaginary output of single-sideband filter pospass
+hilbert(N) = pospass(N) : !,_; // Imaginary output of single-sideband filter pospass
 
 
 //=================Parametric Equalizers (Shelf, Peaking)=================================
