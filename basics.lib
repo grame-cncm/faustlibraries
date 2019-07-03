@@ -291,7 +291,7 @@ FAUST library file, GRAME section 2
 // * `n`: the starting point of the countdown
 // * `trig`: the trigger signal (1: start at `n`; 0: decrease until 0)
 //-----------------------------------------------------------------------------
-countdown(count, trig)	= \(c).(if(trig>0, count, max(0, c-1))) ~_;
+countdown(n, trig)	= \(c).(if(trig>0, n, max(0, c-1))) ~_;
 
 
 //----------------------------`(ba.)countup`--------------------------------
@@ -311,7 +311,7 @@ countdown(count, trig)	= \(c).(if(trig>0, count, max(0, c-1))) ~_;
 // * `n`: the maximum count value
 // * `trig`: the trigger signal (1: start at 0; 0: increase until `n`)
 //-----------------------------------------------------------------------------
-countup(count, trig) = \(c).(if(trig>0, 0, min(count, c+1))) ~_;
+countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~_;
 
 
 //--------------------`(ba.)sweep`--------------------------
@@ -460,7 +460,7 @@ beat(t) = pulse(tempo(t));
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
 //TODO: author "Vince"
-pulse_countup(t) =  + ~ _ * t;
+pulse_countup(trig) = + ~ _ * trig;
 
 
 //----------------------------`(ba.)pulse_countdown`---------------------------------
@@ -478,7 +478,7 @@ pulse_countup(t) =  + ~ _ * t;
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
 //TODO: author "Vince"
-pulse_countdown(t) =  - ~ _ * t;
+pulse_countdown(trig) = - ~ _ * trig;
 
 
 //----------------------------`(ba.)pulse_countup_loop`------------------------------
@@ -498,9 +498,9 @@ pulse_countdown(t) =  - ~ _ * t;
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
 //TODO: author "Vince"
-pulse_countup_loop(n, t) =  + ~ cond(n)*t
+pulse_countup_loop(n, trig) = + ~ cond(n)*trig
 with {
-  cond(n) =  _ <: _ * (_ <= n);
+  cond(n) = _ <: _ * (_ <= n);
 };
 
 
@@ -540,9 +540,9 @@ resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
 //TODO: author "Vince:
-pulse_countdown_loop(n, t) =  - ~ cond(n)*t
+pulse_countdown_loop(n, trig) = - ~ cond(n)*trig
 with {
-  cond(n) =  _ <: _ * (_ >= n);
+  cond(n) = _ <: _ * (_ >= n);
 };
 
 
@@ -655,7 +655,7 @@ if(cond,thn,els) = select2(cond,els,thn);
 //
 //-----------------------------------------------------------------------------
 selector(i,n) = par(j, n, S(i, j))    with { S(i,i) = _; S(i,j) = !; };
-cselector(i,n) = par(j, n, S(i, j))    with { S(i,i) = (_,_); S(i,j) = (!,!); }; // for complex numbers
+cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; // for complex numbers
 
 
 //-----------------------------`(ba.)selectn`---------------------------------
@@ -1038,7 +1038,7 @@ on_and_off(a, b) = (a : trig) : loop(b)
 // #### Example
 //
 // ```
-// process = 1 : selectoutn(3, sel) : par(i,3,bar) ;
+// process = 1 : selectoutn(3, sel) : par(i,3,bar);
 // sel = hslider("volume",0,0,2,1) : int;
 // bar = vbargraph("v.bargraph", 0, 1);
 // ```
@@ -1369,7 +1369,6 @@ slidingMeanN(n,maxn) = slidingSumN(n,maxn)/n;
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
 slidingRMSn(n,maxn) = pow(2):slidingMeanN(n,maxn) : sqrt;
-
 
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
