@@ -972,6 +972,40 @@ bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : ba.select2stereo(bpc)
     inswitch = select2(bpc,_,0);
   };
 
+
+//-------------------`(ba.)bypass_fade`-------------------------
+// Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. Once bypassed the  
+// effect is replaced by par(i,N,_). Bypassed circuits can be chained.
+//
+// #### Usage
+//
+// ```
+// _ : bypass_fade(n,bpc,e) : _
+// or
+// _,_ : bypass_fade(n,bpc,e) : _,_ 
+// ```
+// * `n`: number of samples for the crossfade
+// * `bpc`: bypass switch (0/1)
+// * `e`: N x N circuit
+//
+// #### Examples
+//
+// ```
+// process = bypass_fade(ma.SR/10, checkbox("bypass echo"), echo);
+// process = bypass_fade(ma.SR/10, checkbox("bypass reverb"), freeverb);
+// ```
+
+bypass_fade(b, s, e) = par(i, inputs(e), _) 
+					<: (par(i, inputs(e), *(1-xb)) : e : par(i, outputs(e), *(1-xb)))
+					, par(i, inputs(e), *(xb))
+					:> par(i, outputs(e), _)
+with {
+	xb = ramp(s, b);
+	ramp(n) = \(y,x).(if (y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
+	if (c,t,e) = select2(c,e,t);
+};
+
+
 //----------------------------`(ba.)toggle`------------------------------------------
 // Triggered by the change of 0 to 1, it toggles the output value
 // between 0 and 1.
