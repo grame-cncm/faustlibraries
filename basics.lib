@@ -995,7 +995,7 @@ bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : ba.select2stereo(bpc)
 // process = bypass_fade(ma.SR/10, checkbox("bypass reverb"), freeverb);
 // ```
 
-bypass_fade(b, s, e) = par(i, inputs(e), _) 
+bypass_fade(s, b, e) = par(i, inputs(e), _) 
 					<: (par(i, inputs(e), *(1-xb)) : e : par(i, outputs(e), *(1-xb)))
 					, par(i, inputs(e), *(xb))
 					:> par(i, outputs(e), _)
