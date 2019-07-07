@@ -1120,8 +1120,19 @@ with {
 	delMax = 2^int(nentry("Log2(Delay)",15,5,16,1)); // delay line length
 };
 
-//-----------------------`(dm.)pospass_demo`----------------------
-// Use Positive-Pass Filter to frequency-shift a sine tone.
+//------------------------`(dm.)pospass_demo`------------------------
+// Use Positive-Pass Filter pospass() to frequency-shift a sine tone.
+// First, a real sinusoid is converted to its analytic-signal form
+// using pospass() to filter out its negative frequency component.
+// Next, it is multiplied by a modulating complex sinusoid at the
+// shifting frequency to create the frequency-shifted result.
+// The real and imaginary parts are output to channels 1 & 2.
+// For a more interesting frequency-shifting example, check the
+// "Use Mic" checkbox to replace the input sinusoid by mic input.
+// Note that frequency shifting is not the same as frequency scaling.
+// A frequency-shifted harmonic signal is usually not harmonic.
+// Very small frequency shifts give interesting chirp effects when
+// there is feedback around the frequency shifter.
 //
 // #### Usage
 //
@@ -1140,16 +1151,19 @@ with {
 // Etc.
 // ```
 //-------------------------------------------------------------------
-pospass_demo =  complex_sinusoid, modulator : si.cmul with {
+pospass_demo(x) =  analytic_signal, modulator : si.cmul with {
   N=6; // pospass filter order
   fc = ma.SR/(2*N); // guard-band for filter roll-off
-  f0 = ma.SR/4.0;   // original frequency to be shifted
-  octavesShift = hslider("Frequency Shift in octaves from SR/4)",
-  	         -5,-9,1,0.01) : si.smooth(0.999);
+  octavesShift = hslider("Frequency Shift in octaves away from SR/16",
+		 -2,-7,3,0.001) : si.smooth(0.999);
+  in_select = checkbox("Use Mic");
+  sine_tone = os.oscrs(f0);
+  f0 = ma.SR/16.0;   // original frequency to be shifted
   fn = f0 * 2.0^octavesShift; // modulated frequency
   df = fn - f0; // frequency-shift as a difference
-  complex_sinusoid = os.oscrs(f0) : fi.pospass6e(fc); // filter out neg freqs
-  //complex_sinusoid = os.oscrs(f0) : fi.pospass(N,fc); // Butterworth case
+  input = select2(in_select, sine_tone, x);
+  analytic_signal = input : fi.pospass6e(fc); // filter out neg freqs
+  //analytic_signal = os.oscrs(f0) : fi.pospass(N,fc); // Butterworth case
   modulator = os.oscrq(df) : si.cconj; // complex modulation sinusoid
   // modulator(n) = exp(sqrt(-1) * 2 * ma.PI * df * n / ma.SR) // if complex ok
 };
