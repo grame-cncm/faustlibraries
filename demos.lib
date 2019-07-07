@@ -1120,15 +1120,14 @@ with {
 	delMax = 2^int(nentry("Log2(Delay)",15,5,16,1)); // delay line length
 };
 
-//-----------------`(dm.)pospass_demo(nChans)`----------------
+//-----------------------`(dm.)pospass_demo`----------------------
 // Use Positive-Pass Filter to frequency-shift a sine tone.
 //
 // #### Usage
 //
 // ```
 // echo 'import("stdfaust.lib");' > pospass_demo.dsp
-// echo 'N = 6; // Any integer > 0 should work here' >> pospass_demo.dsp
-// echo 'process = dm.pospass_demo(nChans);' >> pospass_demo.dsp
+// echo 'process = dm.pospass_demo;' >> pospass_demo.dsp
 // Mac:
 //   faust2caqt pospass_demo.dsp
 //   open pospass_demo.app
@@ -1141,14 +1140,18 @@ with {
 // Etc.
 // ```
 //-------------------------------------------------------------------
-pospass_demo(N) =  os.oscrs(fc) : fi.pospass(N), smod : si.cmul with {
-  N=6;
-  fc = ma.SR/4.0; // original frequency
-  fsh = hslider("Frequency Shift (Multiplicative on SR/4)",0.01,0.001,2,0.001) : si.smooth(0.999);
-  fn = fc*fsh; // new freq
-  df = fn-fc; // delta freq
-  // smod(n) = exp(sqrt(-1) * 2 * ma.PI * df * n / ma.SR) // complex version
-  smod = os.oscrq(df) : si.cconj; // in-phase and quadrature outputs, CCW
+pospass_demo =  complex_sinusoid, modulator : si.cmul with {
+  N=6; // pospass filter order
+  fc = ma.SR/(2*N); // guard-band for filter roll-off
+  f0 = ma.SR/4.0;   // original frequency to be shifted
+  octavesShift = hslider("Frequency Shift in octaves from SR/4)",
+  	         -5,-9,1,0.01) : si.smooth(0.999);
+  fn = f0 * 2.0^octavesShift; // modulated frequency
+  df = fn - f0; // frequency-shift as a difference
+  complex_sinusoid = os.oscrs(f0) : fi.pospass6e(fc); // filter out neg freqs
+  //complex_sinusoid = os.oscrs(f0) : fi.pospass(N,fc); // Butterworth case
+  modulator = os.oscrq(df) : si.cconj; // complex modulation sinusoid
+  // modulator(n) = exp(sqrt(-1) * 2 * ma.PI * df * n / ma.SR) // if complex ok
 };
 
 // end jos section

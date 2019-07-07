@@ -1741,12 +1741,19 @@ with { // octave script output:
 // #### Usage
 //
 // ```
-// _ : pospass(N) : _,_
+// _ : pospass(N,fc) : _,_
 // ```
 //
 // where
 //
-// * `N`: filter order
+// * `N`: filter order (Butterworth bandpass for positive frequencies).
+// * `fc`: lower bandpass cutoff frequency in Hz.
+//   - Highpass cutoff frequency at ma.SR/2 - fc Hz.
+//
+// #### Example
+//
+// * See dm.pospass_demo
+// * Look at frequency response:
 //
 // #### Method
 //
@@ -1770,15 +1777,20 @@ with { // octave script output:
 // * <https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html>
 //------------------------------------------------------------
 
-pospass(N) = unmodulate : lpf(fc), lpf(fc) : modulate with {
-  unmodulate = _ <: *(c),*(-s);
-  modulate(x,y) = c*x-s*y, c*y + s*x;
-  lpf = fi.lowpass(N); // or fi.lowpass6e, etc.
-  //lpf = fi.lowpass6e; // strongest lowpass filter in filters.lib as of this writing
-  guard = ma.SR/(2*N); // Guard-band to allow for filter roll-off
-  fc = ma.SR/4 - guard;
-  c = 1-1' : +~(*(-1):mem); // ||: 1, 0, -1, 0 :||
-  s = c';
+pospass(N,fc) = fi.pospass0(lpf) with {
+  fcs = ma.SR/4 - fc; // Upper lowpass cutoff = (SR/2 - fc) - SR/4
+  lpf = fi.lowpass(N,fcs); // Butterworth lowpass
+};
+
+pospass6e(fc) = fi.pospass0(lpf) with {
+  lpf = fi.lowpass6e(ma.SR/4 - fc); // Elliptic lowpass, order 6
+};
+
+pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
+  c = 1-1' : +~(*(-1):mem); // complex sinusoid rotating at SR/4
+  s = c'; // ||: 0, 1, 0, -1 :||
+  unmodulate = _ <: *(c),*(-s); // subtract SR/4 from all input frequencies
+  modulate(x,y) = c*x-s*y, c*y + s*x; // add SR/4 to all frequencies
 };
 
 //=================Parametric Equalizers (Shelf, Peaking)=================================
