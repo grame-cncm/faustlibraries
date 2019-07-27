@@ -145,14 +145,14 @@ with {
 	//
 	// Please note that the last stage (!,_,_,_) cut <v> because it is only
 	// used internally.
-	ctrl(it, dt) = \(v,ip,d0,d1).( (nv, nip, nd0, nd1)
+	ctrl(it, dt) = \(v,ip,d0,d1).((nv, nip, nd0, nd1)
 	with {
 		// interpolation variation
-		nv = ba.if (v!=0.0, 							// if variation we are interpolating
-			ba.if( (ip>0.0) & (ip<1.0), v , 0),	// 		should we continue or not ?
-			ba.if ((ip==0.0) & (dt!=d0),  1.0/it,		// if true xfade from dl0 to dl1
-			ba.if ((ip==1.0) & (dt!=d1), -1.0/it,		// if true xfade from dl1 to dl0
-					 0)));									// nothing to change
+		nv = ba.if (v!=0.0,                         // if variation we are interpolating
+			ba.if ((ip>0.0) & (ip<1.0), v, 0),      // should we continue or not ?
+			ba.if ((ip==0.0) & (dt!=d0), 1.0/it,    // if true xfade from dl0 to dl1
+			ba.if ((ip==1.0) & (dt!=d1), -1.0/it,   // if true xfade from dl1 to dl0
+					 0)));                  // nothing to change
 		// interpolation value
 		nip = ip+nv : min(1.0) : max(0.0);
 
@@ -191,7 +191,7 @@ prime_power_delays(N,pathmin,pathmax) = par(i,N,delayvals(i)) with {
   prime(n) = primes : ba.selector(n,Np); // math.lib
 
   // Prime Power Bounds [matlab: floor(log(maxdel)./log(primes(53)))]
-  maxdel=8192; // more than 63 meters at 44100 samples/sec & 343 m/s
+  maxdel = 8192; // more than 63 meters at 44100 samples/sec & 343 m/s
   ppbs = 13,8,5,4, 3,3,3,3, 2,2,2,2, 2,2,2,2; // 8192 is enough for all
   ppb(i) = ba.take(i+1,ppbs);
 

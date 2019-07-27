@@ -105,7 +105,7 @@ sec2samp = *(ma.SR);
 //
 // * `l`: loudness in dB
 //-----------------------------
-db2linear(n) = pow(10, n/20.0);
+db2linear(l) = pow(10, l/20.0);
 
 
 //-------`(ba.)linear2db`----------
@@ -122,7 +122,7 @@ db2linear(n) = pow(10, n/20.0);
 //
 // * `g`: a linear gain
 //-----------------------------
-linear2db(n) = 20*log10(n);
+linear2db(g) = 20*log10(g);
 
 
 //----------`(ba.)lin2LogGain`------------------
@@ -131,10 +131,10 @@ linear2db(n) = 20*log10(n);
 // #### Usage
 //
 // ```
-// _ : lin2LogGain : _
+// lin2LogGain(n) : _
 // ```
 //---------------------------------------------
-lin2LogGain = _ <: _*_;
+lin2LogGain(n) = n*n;
 
 
 //----------`(ba.)log2LinGain`------------------
@@ -143,10 +143,10 @@ lin2LogGain = _ <: _*_;
 // #### Usage
 //
 // ```
-// _ : log2LinGain : _
+// log2LinGain(n) : _
 // ```
 //---------------------------------------------
-log2LinGain = sqrt;
+log2LinGain(n) = sqrt(n);
 
 // end GRAME section
 //########################################################################################
@@ -340,7 +340,7 @@ sweep = %(int(*:max(1)))~+(1);
 // time : _
 // ```
 //------------------------
-time = (+(1)~_ ) - 1;
+time = (+(1)~_) - 1;
 
 
 //-------`(ba.)tempo`----------
@@ -531,7 +531,7 @@ resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
 // #### Usage
 //
 // ```
-// _ : pulse_coundown_loop(n,trig) : _
+// _ : pulse_countdown_loop(n,trig) : _
 // ```
 //
 // Where:
@@ -557,15 +557,15 @@ with {
 //
 // ```
 // count(l)
-// count ((10,20,30,40)) -> 4
+// count((10,20,30,40)) -> 4
 // ```
 //
 // Where:
 //
 // * `l`: list of elements
 //-----------------------------------------------------------------------------
-count ((xs, xxs)) = 1 + count(xxs);
-count (xx) = 1;
+count((xs, xxs)) = 1 + count(xxs);
+count(xx) = 1;
 
 
 //-------------------------------`(ba.)take`-----------------------------------
@@ -575,18 +575,18 @@ count (xx) = 1;
 // #### Usage
 //
 // ```
-// take(e,l)
+// take(p,l)
 // take(3,(10,20,30,40)) -> 30
 // ```
 //
 // Where:
 //
-// * `p`: position (starting at 1)
+// * `p`: position (int, known at compile time, p > 0)
 // * `l`: list of elements
 //-----------------------------------------------------------------------------
-take (1, (xs, xxs)) 	= xs;
-take (1, xs) 			= xs;
-take (nn, (xs, xxs)) 	= take (nn-1, xxs);
+take(1, (xs, xxs))  = xs;
+take(1, xs)         = xs;
+take(nn, (xs, xxs)) = take(nn-1, xxs);
 
 
 //----------------------------`(ba.)subseq`--------------------------------
@@ -611,10 +611,10 @@ take (nn, (xs, xxs)) 	= take (nn-1, xxs);
 // Faust doesn't have proper lists. Lists are simulated with parallel
 // compositions and there is no empty list.
 //-----------------------------------------------------------------------------
-subseq((head, tail), 0, 1)      = head;
-subseq((head, tail), 0, n)      = head, subseq(tail, 0, n-1);
-subseq((head, tail), p, n)      = subseq(tail, p-1, n);
-subseq(head, 0, n)              = head;
+subseq((head, tail), 0, 1) = head;
+subseq((head, tail), 0, n) = head, subseq(tail, 0, n-1);
+subseq((head, tail), p, n) = subseq(tail, p-1, n);
+subseq(head, 0, n)         = head;
 
 
 //============================Selectors (Conditions)======================================
@@ -648,8 +648,8 @@ if(cond,thn,els) = select2(cond,els,thn);
 //
 // Where:
 //
-// * `i`: input to select (`int`, numbered from 0, known at compile time)
-// * `n`: number of inputs (`int`, known at compile time, `n > i`)
+// * `i`: input to select (int, numbered from 0, known at compile time)
+// * `n`: number of inputs (int, known at compile time, n > i)
 //
 // There is also cselector for selecting among complex input signals of the form (real,imag).
 //
@@ -676,7 +676,7 @@ cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; 
 // #### Example test program
 //
 // ```
-// N=64;
+// N = 64;
 // process = par(n,N, (par(i,N,i) : selectn(N,n)));
 // ```
 //-----------------------------------------------------------------------------
@@ -842,7 +842,7 @@ with {
 // * `end(x,y)` to end a break-point function
 // * `point(x,y)` to add intermediate points to a break-point function
 //
-// A minimal break-point function must contain at least a start and an end point :
+// A minimal break-point function must contain at least a start and an end point:
 //
 // ```
 // f = bpf.start(x0,y0) : bpf.end(x1,y1);
@@ -878,7 +878,7 @@ bpf = environment
   // Add a break-point
   point(x1,y1) = \(x0,y0,x,y).(x1, y1, x , if (x < x0, y, if (x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
   // End a break-point function
-  end  (x1,y1) = \(x0,y0,x,y).(if (x < x0, y, if (x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
+  end(x1,y1) = \(x0,y0,x,y).(if (x < x0, y, if (x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
 };
 
 
@@ -980,12 +980,12 @@ bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : ba.select2stereo(bpc)
 // #### Usage
 //
 // ```
-// _ : bypass_fade(n,bpc,e) : _
+// _ : bypass_fade(n,b,e) : _
 // or
-// _,_ : bypass_fade(n,bpc,e) : _,_ 
+// _,_ : bypass_fade(n,b,e) : _,_ 
 // ```
 // * `n`: number of samples for the crossfade
-// * `bpc`: bypass switch (0/1)
+// * `b`: bypass switch (0/1)
 // * `e`: N x N circuit
 //
 // #### Examples
@@ -995,15 +995,15 @@ bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : ba.select2stereo(bpc)
 // process = bypass_fade(ma.SR/10, checkbox("bypass reverb"), freeverb);
 // ```
 
-bypass_fade(s, b, e) = par(i, inputs(e), _) 
+bypass_fade(n, b, e) = par(i, inputs(e), _) 
 					<: (par(i, inputs(e), *(1-xb)) : e : par(i, outputs(e), *(1-xb)))
 					, par(i, inputs(e), *(xb))
 					:> par(i, outputs(e), _)
-with {
-	xb = ramp(s, b);
+  with {
+	xb = ramp(n, b);
 	ramp(n) = \(y,x).(if (y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
 	if (c,t,e) = select2(c,e,t);
-};
+  };
 
 
 //----------------------------`(ba.)toggle`------------------------------------------
@@ -1066,7 +1066,7 @@ on_and_off(a, b) = (a : trig) : loop(b)
 //
 // Where:
 //
-// * `n`: number of outputs (int, known at compile time, N > 0)
+// * `n`: number of outputs (int, known at compile time, n > 0)
 // * `s`: output number to route to (int, numbered from 0) (i.e. slider)
 //
 // #### Example

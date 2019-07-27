@@ -321,7 +321,7 @@ with{
 	env_group(x)  = knob_group(hgroup("[4] Compression Response", x));
 
 	attack = env_group(hslider("[1] Attack [unit:ms] [style:knob] [scale:log]
-	tooltip: Time constant in ms (1/e smoothing time) for the compression gain
+	[tooltip: Time constant in ms (1/e smoothing time) for the compression gain
 	to approach (exponentially) a new lower target level (the compression
 	`kicking in')]", 50, 1, 1000, 0.1)) : *(0.001) : max(1/ma.SR);
 
@@ -563,7 +563,7 @@ with{
 // ```
 //------------------------------------------------------------
 stereo_reverb_tester(revin_group,x,y) = reverb_tester(_)
-with{
+with {
 	reverb_tester(revin_group,x,y) = inx,iny with {
 		ck_group(x) = revin_group(vgroup("[1] Input Config",x));
 		mutegain = 1 - ck_group(checkbox("[1] Mute Ext Inputs
@@ -787,9 +787,9 @@ with{
 	// Regalia-Mitra peaking eq with "Q" hard-wired near sqrt(g)/2 (filters.lib):
 	pareq_stereo(eqf,eql,Q) = fi.peak_eq_rm(eql,eqf,tpbt), fi.peak_eq_rm(eql,eqf,tpbt)
 	with {
-	tpbt = wcT/sqrt(max(0,g)); // tan(PI*B/SR), B bw in Hz (Q^2 ~ g/4)
-	wcT = 2*ma.PI*eqf/ma.SR;  // peak frequency in rad/sample
-	g = ba.db2linear(eql); // peak gain
+		tpbt = wcT/sqrt(max(0,g)); // tan(PI*B/SR), B bw in Hz (Q^2 ~ g/4)
+		wcT = 2*ma.PI*eqf/ma.SR;  // peak frequency in rad/sample
+		g = ba.db2linear(eql); // peak gain
 	};
 
 	eq1_group(x) = fdn_group(hgroup("[3] RM Peaking Equalizer 1", x));
@@ -820,7 +820,7 @@ with{
 
 	dry_wet(x,y) = *(wet) + dry*x, *(wet) + dry*y with {
 		wet = 0.5*(drywet+1.0);
-	dry = 1.0-wet;
+		dry = 1.0-wet;
 	};
 
 	drywet = out_group(vslider("[1] Dry/Wet Mix [style:knob] [tooltip: -1 = dry, 1 = wet]",
@@ -913,7 +913,7 @@ with{
 			+ os.pulsetrain(sfreq*detune2,ptd));
 	ptN = (amp/3) * (os.pulsetrainN(N,sfreq,ptd)
 		    + os.pulsetrainN(N,sfreq*detune1,ptd)
-			+ os.pulsetrainN(N,sfreq*detune2,ptd)) with {N=3;};
+			+ os.pulsetrainN(N,sfreq*detune2,ptd)) with { N=3; };
 	pn = amp * no.pink_noise;
 
 	signal = ssaw*saw + ssq*sq + stri*tri
@@ -1151,8 +1151,8 @@ with {
 // Etc.
 // ```
 //-------------------------------------------------------------------
-pospass_demo(x) =  analytic_signal, modulator : si.cmul with {
-  N=6; // pospass filter order
+pospass_demo(x) = analytic_signal, modulator : si.cmul with {
+  N = 6; // pospass filter order
   fc = ma.SR/(2*N); // guard-band for filter roll-off
   octavesShift = hslider("Frequency Shift in octaves away from SR/16",
 		 -2,-7,3,0.001) : si.smooth(0.999);

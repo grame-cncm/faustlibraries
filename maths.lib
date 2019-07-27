@@ -66,7 +66,7 @@ declare license "LGPL with exception";
 // SR : _
 // ```
 //-----------------------------------------------------------------------------
-SR 			= min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
+SR = min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
 
 
 //---------------------------------`(ma.)BS`---------------------------------------
@@ -78,7 +78,7 @@ SR 			= min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
 // BS : _
 // ```
 //-----------------------------------------------------------------------------
-BS          = fvariable(int count, <math.h>);
+BS = fvariable(int count, <math.h>);
 
 
 //---------------------------------`(ma.)PI`---------------------------------------
@@ -90,7 +90,7 @@ BS          = fvariable(int count, <math.h>);
 // PI : _
 // ```
 //-----------------------------------------------------------------------------
-PI          = 3.1415926535897932385;
+PI = 3.1415926535897932385;
 
 //---------------------------------`(ma.)INFINITY`------------------------------
 // Constant INFINITY inherited from `math.h`.
@@ -116,7 +116,7 @@ INFINITY = fconstant(float INFINITY, <math.h>);
 //
 // See : <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
 //-----------------------------------------------------------------------------
-FTZ(x)      = x * (abs(x) > 1.17549435e-38);
+FTZ(x) = x * (abs(x) > 1.17549435e-38);
 
 
 //---------------------------------`(ma.)neg`---------------------------------------
@@ -128,7 +128,7 @@ FTZ(x)      = x * (abs(x) > 1.17549435e-38);
 // _ : neg : _
 // ```
 //-----------------------------------------------------------------------------
-neg(x)      = -x;
+neg(x) = -x;
 
 
 //-------`(ma.)sub(x,y)`------------------
@@ -146,7 +146,7 @@ sub(x,y) = y-x;
 // _ : inv : _
 // ```
 //-----------------------------------------------------------------------------
-inv(x)      = 1/x;
+inv(x) = 1/x;
 
 
 //---------------------------------`(ma.)cbrt`--------------------------------------
@@ -158,7 +158,7 @@ inv(x)      = 1/x;
 // _ : cbrt : _
 // ```
 //-----------------------------------------------------------------------------
-cbrt 		= ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
+cbrt = ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)hypot`-------------------------------------
@@ -171,7 +171,7 @@ cbrt 		= ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
 // _,_ : hypot : _
 // ```
 //-----------------------------------------------------------------------------
-hypot 		= ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
+hypot = ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
 
 
 //---------------------------------`(ma.)ldexp`-------------------------------------
@@ -183,7 +183,7 @@ hypot 		= ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
 // _,_ : ldexp : _
 // ```
 //-----------------------------------------------------------------------------
-ldexp 		= ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
+ldexp = ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
 
 
 //---------------------------------`(ma.)scalb`-------------------------------------
@@ -195,7 +195,7 @@ ldexp 		= ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
 // _,_ : scalb : _
 // ```
 //-----------------------------------------------------------------------------
-scalb 		= ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
+scalb = ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
 
 
 //---------------------------------`(ma.)log1p`----------------------------------
@@ -207,7 +207,7 @@ scalb 		= ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
 // _ : log1p : _
 // ```
 //-----------------------------------------------------------------------------
-log1p 		= ffunction(float log1pf|log1p|log1pl (float), <math.h>,"");
+log1p = ffunction(float log1pf|log1p|log1pl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)logb`---------------------------------------
@@ -219,7 +219,7 @@ log1p 		= ffunction(float log1pf|log1p|log1pl (float), <math.h>,"");
 // _ : logb : _
 // ```
 //-----------------------------------------------------------------------------
-logb 		= ffunction(float logbf|logb|logbl (float), <math.h>,"");
+logb = ffunction(float logbf|logb|logbl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)ilogb`-------------------------------------
@@ -231,7 +231,7 @@ logb 		= ffunction(float logbf|logb|logbl (float), <math.h>,"");
 // _ : ilogb : _
 // ```
 //-----------------------------------------------------------------------------
-ilogb 		= ffunction(int ilogbf|ilogb|ilogbl (float), <math.h>,"");
+ilogb = ffunction(int ilogbf|ilogb|ilogbl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)log2`-------------------------------------
@@ -255,7 +255,7 @@ log2(x) = log(x)/log(2.0);
 // _ : expm1 : _
 // ```
 //-----------------------------------------------------------------------------
-expm1 		= ffunction(float expm1f|expm1|expm1l (float), <math.h>,"");
+expm1 = ffunction(float expm1f|expm1|expm1l (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)acosh`-------------------------------------
@@ -268,7 +268,7 @@ expm1 		= ffunction(float expm1f|expm1|expm1l (float), <math.h>,"");
 // _ : acosh : _
 // ```
 //-----------------------------------------------------------------------------
-acosh		= ffunction(float acoshf|acosh|acoshl (float), <math.h>, "");
+acosh = ffunction(float acoshf|acosh|acoshl (float), <math.h>, "");
 
 
 //--------------------------------`(ma.)asinh`-----------------------------------
@@ -280,7 +280,7 @@ acosh		= ffunction(float acoshf|acosh|acoshl (float), <math.h>, "");
 // _ : asinh : _
 // ```
 //-----------------------------------------------------------------------------
-asinh		= ffunction(float asinhf|asinh|asinhl (float), <math.h>, "");
+asinh = ffunction(float asinhf|asinh|asinhl (float), <math.h>, "");
 
 
 //--------------------------------`(ma.)atanh`-----------------------------------
@@ -292,7 +292,7 @@ asinh		= ffunction(float asinhf|asinh|asinhl (float), <math.h>, "");
 // _ : atanh : _
 // ```
 //-----------------------------------------------------------------------------
-atanh		= ffunction(float atanhf|atanh|atanhl (float), <math.h>, "");
+atanh = ffunction(float atanhf|atanh|atanhl (float), <math.h>, "");
 
 
 //---------------------------------`(ma.)sinh`---------------------------------------
@@ -304,7 +304,7 @@ atanh		= ffunction(float atanhf|atanh|atanhl (float), <math.h>, "");
 // _ : sinh : _
 // ```
 //-----------------------------------------------------------------------------
-sinh		= ffunction(float sinhf|sinh|sinhl (float), <math.h>, "");
+sinh = ffunction(float sinhf|sinh|sinhl (float), <math.h>, "");
 
 
 //---------------------------------`(ma.)cosh`--------------------------------------
@@ -316,7 +316,7 @@ sinh		= ffunction(float sinhf|sinh|sinhl (float), <math.h>, "");
 // _ : cosh : _
 // ```
 //-----------------------------------------------------------------------------
-cosh		= ffunction(float coshf|cosh|coshl (float), <math.h>, "");
+cosh = ffunction(float coshf|cosh|coshl (float), <math.h>, "");
 
 
 //---------------------------------`(ma.)tanh`--------------------------------------
@@ -328,7 +328,7 @@ cosh		= ffunction(float coshf|cosh|coshl (float), <math.h>, "");
 // _ : tanh : _
 // ```
 //-----------------------------------------------------------------------------
-tanh		= ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
+tanh = ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)erf`---------------------------------------
@@ -340,7 +340,7 @@ tanh		= ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
 // _ : erf : _
 // ```
 //-----------------------------------------------------------------------------
-erf			= ffunction(float erff|erf|erfl(float), <math.h>,"");
+erf = ffunction(float erff|erf|erfl(float), <math.h>,"");
 
 
 //---------------------------------`(ma.)erfc`---------------------------------------
@@ -352,7 +352,7 @@ erf			= ffunction(float erff|erf|erfl(float), <math.h>,"");
 // _ : erfc : _
 // ```
 //-----------------------------------------------------------------------------
-erfc		= ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
+erfc = ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
 
 
 //---------------------------------`(ma.)gamma`-------------------------------------
@@ -364,7 +364,7 @@ erfc		= ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
 // _ : gamma : _
 // ```
 //-----------------------------------------------------------------------------
-gamma		= ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
+gamma = ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
 
 
 //---------------------------------`(ma.)lgamma`------------------------------------
@@ -377,7 +377,7 @@ gamma		= ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
 // _ : lgamma : _
 // ```
 //-----------------------------------------------------------------------------
-lgamma		= ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
+lgamma = ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)J0`---------------------------------------
@@ -390,7 +390,7 @@ lgamma		= ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
 // _ : J0 : _
 // ```
 //-----------------------------------------------------------------------------
-J0			= ffunction(float j0(float), <math.h>,"");
+J0 = ffunction(float j0(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)J1`---------------------------------------
@@ -403,7 +403,7 @@ J0			= ffunction(float j0(float), <math.h>,"");
 // _ : J1 : _
 // ```
 //-----------------------------------------------------------------------------
-J1			= ffunction(float j1(float), <math.h>,"");
+J1 = ffunction(float j1(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)Jn`---------------------------------------
@@ -416,7 +416,7 @@ J1			= ffunction(float j1(float), <math.h>,"");
 // _,_ : Jn : _
 // ```
 //-----------------------------------------------------------------------------
-Jn			= ffunction(float jn(int, float), <math.h>,"");
+Jn = ffunction(float jn(int, float), <math.h>,"");
 
 
 //----------------------------------`(ma.)Y0`---------------------------------------
@@ -429,7 +429,7 @@ Jn			= ffunction(float jn(int, float), <math.h>,"");
 // _ : Y0 : _
 // ```
 //-----------------------------------------------------------------------------
-Y0			= ffunction(float y0(float), <math.h>,"");
+Y0 = ffunction(float y0(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)Y1`---------------------------------------
@@ -442,7 +442,7 @@ Y0			= ffunction(float y0(float), <math.h>,"");
 // _ : Y0 : _
 // ```
 //-----------------------------------------------------------------------------
-Y1			= ffunction(float y1(float), <math.h>,"");
+Y1 = ffunction(float y1(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)Yn`---------------------------------------
@@ -455,7 +455,7 @@ Y1			= ffunction(float y1(float), <math.h>,"");
 // _,_ : Yn : _
 // ```
 //-----------------------------------------------------------------------------
-Yn			= ffunction(float yn(int, float), <math.h>,"");
+Yn = ffunction(float yn(int, float), <math.h>,"");
 
 
 //----------------------------`(ma.)fabs`, `(ma.)fmax`, `(ma.)fmin`---------------------------
@@ -505,7 +505,7 @@ decimal = frac;
 // NOTE: decimal does the same thing as frac but using floor instead. JOS uses frac a lot
 // in filters.lib so we decided to keep that one... decimal is declared though for
 // backward compatibility.
-// decimal(n)	= n - floor(n);
+// decimal(n) = n - floor(n);
 
 //-------------------------------`(ma.)modulo`---------------------------------------
 // Modulus operation.
@@ -538,8 +538,9 @@ modulo(x,N) = (x % N + N) % N;
 //
 // * `x`: signal to analyse
 //------------------------------------------
-isnan 		= ffunction(int isnan (float),<math.h>,"");
-nextafter	= ffunction(float nextafter(float, float),<math.h>,"");
+isnan = ffunction(int isnan (float),<math.h>,"");
+
+nextafter = ffunction(float nextafter(float, float),<math.h>,"");
 
 
 //---------------------------`(ma.)chebychev`-------------------------------

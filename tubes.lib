@@ -37,11 +37,11 @@ inverse(x) = abs(x) * invsign(x);
 ccopysign(f, x) = abs(f)*sign(x);
 
 //-- Get sign and reversed sign of a signal x
-sign (x) = x<0, 1, -1 : select2;
-invsign (x) = x<0, -1, 1 : select2;
+sign(x) = x<0, 1, -1 : select2;
+invsign(x) = x<0, -1, 1 : select2;
 
 //-- Interpolate value between i and i+1 in table with coefficient f.
-interpolation (table, f, i) = rtable(table, i)*(1-f) + rtable(table,i+1)*f;
+interpolation(table, f, i) = rtable(table, i)*(1-f) + rtable(table,i+1)*f;
 
 //-- Bound Index with table boundaries
 boundIndex(size, index) = index : floor: min(size-1) : max(0);

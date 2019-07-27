@@ -410,7 +410,7 @@ c_magdb(N) = si.cbus(N) : an.c_magsq(N) : par(i,N,(max(1.0e-7):log10:*(10.0)));
 c_select_pos_freqs(2) = (_,_), (_,_); // both dc and SR/2 included with "positive frequencies"
 c_select_pos_freqs(N) = si.cbus(N) : par(i,N/2+1,(_,_)),par(i,N/2-1,(!,!)) : si.cbus(N/2+1); // for complex spectra
   select_pos_freqs(2) = _,_; // both dc and SR/2 included
-  select_pos_freqs(N) = si. bus(N) : par(i,N/2+1, _),   par(i,N/2-1, !)    : si. bus(N/2+1); // real power spectra etc.
+  select_pos_freqs(N) = si.bus(N) : par(i,N/2+1, _), par(i,N/2-1, !) : si. bus(N/2+1); // real power spectra etc.
 
 rtorv(N,x) = par(i,N,x@i); // convert real scalar signal to length N real vector
 rtocv(N,x) = par(i,N,(x@i,0)); // convert real scalar signal to length N complex vector with 0 imag part

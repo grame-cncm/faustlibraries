@@ -161,6 +161,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `reverbs.lib`
 * `routes.lib`
 * `signals.lib`
+* `soundfiles.lib`
 * `spats.lib`
 * `synths.lib`
 * `tonestacks.lib` (not documented but example in `/examples/misc`)
@@ -208,6 +209,7 @@ re = library("reverbs.lib");
 ro = library("routes.lib");
 sp = library("spats.lib");
 si = library("signals.lib");
+so = library("soundfiles.lib");
 sy = library("synths.lib");
 ve = library("vaeffects.lib");
 ```
