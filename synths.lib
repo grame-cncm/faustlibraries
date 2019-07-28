@@ -84,7 +84,7 @@ popFilterDrum(freq,q,gate) = en.ar(0.001,0.001,gate)*no.noise : fi.resonbp(freq,
 //----------------------------------------------------------------------------------------
 // TODO: author RM
 dubDub(freq,ctFreq,q,gate) = os.sawtooth(freq)*gainEnvelope : fi.resonlp(ctFreq,q,1)
-with{
+with {
 	maxGain = 0.5;
 	gainEnvelope = en.smoothEnvelope(0.01,gate)*maxGain;
 };
@@ -109,7 +109,7 @@ with{
 //----------------------------------------------------------------------------------------
 // TODO: author RM
 sawTrombone(freq,gain,gate) = os.sawtooth(freq)*gainEnvelope : fi.lowpass(3,cutoff)
-with{
+with {
 	// controls both the gain of the instrument and the lowpass frequency
 	gainEnvelope = en.smoothEnvelope(0.01,gate)*gain;
 	cutoff = gainEnvelope*5000+50;
@@ -134,7 +134,7 @@ with{
 //----------------------------------------------------------------------------------------
 // TODO: author RM
 combString(freq,res,gate) = excitation : fi.fb_fcomb(maxDel,N,b0,aN)
-with{
+with {
 	maxDel = 1024;
 	N = ma.SR/freq;
 	b0 = 1;
@@ -169,7 +169,7 @@ with{
 //----------------------------------------------------------------------------------------
 // TODO: author RM
 additiveDrum(freq,freqRatio,gain,modeDec,att,rel,gate) = par(i,N,os.osc(modeFreq(i))*gainEnvelope(i)) :> _
-with{
+with {
 	N = ba.count(freqRatio);
 	modeFreq(i) = freq*ba.take(i+1,freqRatio);
 	modeGain(i) = ba.take(i+1,gain);
@@ -197,7 +197,7 @@ with{
 //----------------------------------------------------------------------------------------
 // TODO: author RM
 fm(freqs,indices) = seq(i,N,fmBlock(i))
-with{
+with {
 	N = ba.count(freqs);
 	freq(i) = ba.take(N-i,freqs);
 	gain(i) = ba.take(N-i,indices);

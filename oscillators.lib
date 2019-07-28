@@ -135,7 +135,7 @@ with {
 // * `freq`: the frequency of the wave (Hz)
 //------------------------------------------------------------
 oscsin(freq) = rdtable(tablesize, sinwaveform(tablesize), int(phasor(tablesize,freq)))
-with{
+with {
 	tablesize = 1 << 16;
 };
 
@@ -154,7 +154,7 @@ with{
 // * `freq`: the frequency of the wave (Hz)
 //------------------------------------------------------------
 oscsinteensy(freq) = rdtable(tablesize, sinwaveform(tablesize), int(phasor(tablesize,freq)))
-with{
+with {
 	tablesize = 1 << 8;
 };
 
@@ -192,7 +192,7 @@ with {
 // * `freq`: the frequency of the wave (Hz)
 //------------------------------------------------------------
 osccos(freq) = rdtable(tablesize, coswaveform(tablesize), int(phasor(tablesize,freq)) )
-with{
+with {
 	tablesize = 1 << 16;
 };
 
@@ -225,7 +225,7 @@ oscp(freq,p) = oscsin(freq) * cos(p) + osccos(freq) * sin(p);
 //
 // * `freq`: the frequency of the wave (Hz)
 //------------------------------------------------------------
-osci(freq)	= s1 + d * (s2 - s1)
+osci(freq) = s1 + d * (s2 - s1)
 with {
 	tablesize = 1 << 16;
 	i = int(phasor(tablesize,freq));
@@ -1221,9 +1221,9 @@ quadosc(f) = tick ~ (_,_) : mem+1,mem with {
   k2 = 2*k1 / (1 + k1 * k1);
 
   tick(u_0,v_0) = u_1,v_1 with {
-    tmp = u_0 - k1 *  v_0;
+    tmp = u_0 - k1 * v_0;
     v_1 = v_0 + k2 * (tmp + 1);
-    u_1 = tmp - k1 *  v_1;
+    u_1 = tmp - k1 * v_1;
   };
 };
 

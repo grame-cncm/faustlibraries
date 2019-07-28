@@ -68,7 +68,7 @@ Michon and Julius O. Smith III, and are released under the
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/filters/One_Zero.html>
 //----------------------------------------------------------
-zero(z) =  _ <: _,mem : _,*(z) : -;
+zero(z) = _ <: _,mem : _,*(z) : -;
 
 //------------------------`(fi.)pole`---------------------------
 // One pole filter. Could also be called a "leaky integrator".
@@ -92,7 +92,7 @@ pole(p) = + ~ *(p);
 //----------------------`(fi.)integrator`--------------------------
 // Same as `pole(1)` [implemented separately for block-diagram clarity].
 //------------------------------------------------------------
-integrator = + ~ _ ;
+integrator = + ~ _;
 
 //-------------------`(fi.)dcblockerat`-----------------------
 // DC blocker with configurable break frequency.
@@ -161,7 +161,7 @@ dcblocker = zero(1) : pole(0.995);
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html>
 //------------------------------------------------------------
-ff_comb (maxdel,M,b0,bM) = _ <: *(b0), bM *  de.delay(maxdel,M) : + ;
+ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : + ;
 
 //------`(fi.)ff_fcomb`--------
 // Feed-Forward Comb Filter. Note that `ff_fcomb` takes floating-point delays
@@ -214,7 +214,7 @@ ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html>
 //------------------------------------------------------------
-fb_comb (maxdel,N,b0,aN) = (+ <:  de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0):mem;
+fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0):mem;
 
 
 //-----------------------`(fi.)fb_fcomb`-----------------------
@@ -284,7 +284,7 @@ ffbcombfilter(maxdel,del,g) = (+ : de.fdelay(maxdel,del)) ~ *(g);
 // #### Usage
 //
 // ```
-// _ : allpass_comb (maxdel,intdel,aN) : _
+// _ : allpass_comb(maxdel,intdel,aN) : _
 // ```
 //
 // Where:
@@ -317,7 +317,7 @@ allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ :
 // #### Usage
 //
 // ```
-// _ : allpass_comb (maxdel,intdel,aN) : _
+// _ : allpass_comb(maxdel,intdel,aN) : _
 // _ : allpass_fcomb(maxdel,del,aN) : _
 // ```
 //
@@ -942,7 +942,7 @@ with {
 // A. Van Duyne, JASA, vol. 101, no. 2, pp. 1120-1126, 1997
 //------------------------------------------------------------
 apnl(a1,a2,x) = nonLinFilter
-with{
+with {
    condition = _>0;
    nonLinFilter = (x - _ <: _*(condition*a1 + (1-condition)*a2),_')~_ :> +;
 };
@@ -1001,7 +1001,7 @@ with { s = ba.take(n,sv); };
 allpassnn(0,tv) = _;
 allpassnn(n,tv) = _ <: *(s), (*(c) : (+
         : allpassnn(n-1,tv))~(*(-s))) : _, mem*c : +
-with { c=cos(ba.take(n,tv));  s=sin(ba.take(n,tv)); };
+with { c = cos(ba.take(n,tv));  s = sin(ba.take(n,tv)); };
 
 //---------------`(fi.)allpasskl`-----------------
 // Kelly-Lochbaum form - four multiplies and two adds per
@@ -1042,9 +1042,9 @@ with { s = ba.take(n,sv); };
 //----------------------------------------------
 // one-multiply:
 allpassn1m(0,sv) = _;
-allpassn1m(n,sv)= _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : cross
+allpassn1m(n,sv) = _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : cross
 		  : allpassn1m(n-1,sv),_)~(*(-1)) : _',_ : +
-with {s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
+with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 
 //===========Digital Filter Sections Specified as Analog Filter Sections==================
 //========================================================================================
@@ -1220,7 +1220,7 @@ tf2sb(b2,b1,b0,a1,a0,w1,wc) =
   b1d = 4*b2*wc^4*T^4+4*b1*wc^2*w1*T^3-16*b1*w1*T-64*b2;
   b2d = 6*b2*wc^4*T^4+(-8*b0*w1^2-16*b2*wc^2)*T^2+96*b2;
   b3d = 4*b2*wc^4*T^4-4*b1*wc^2*w1*T^3+16*b1*w1*T-64*b2;
-  b4d = (b2*wc^4*T^4-2*b1*wc^2*w1*T^3+(4*b0*w1^2+8*b2*wc^2)*T^2-8*b1*w1*T +16*b2)
+  b4d = (b2*wc^4*T^4-2*b1*wc^2*w1*T^3+(4*b0*w1^2+8*b2*wc^2)*T^2-8*b1*w1*T+16*b2)
         + b2*wc^4*T^4+2*b1*wc^2*w1*T^3;
   a0d = wc^4*T^4+2*a1*wc^2*w1*T^3+(4*a0*w1^2+8*wc^2)*T^2+8*a1*w1*T+16;
   a1d = 4*wc^4*T^4+4*a1*wc^2*w1*T^3-16*a1*w1*T-64;

@@ -633,7 +633,7 @@ subseq(head, 0, n)         = head;
 // * `t`: signal selected while c is true
 // * `e`: signal selected while c is false
 //-----------------------------------------------------------------------------
-if(cond,thn,els) = select2(cond,els,thn);
+if(cond,then,else) = select2(cond,else,then);
 // TODO: perhaps it would make more sense to have an if(a,b) and an ifelse(a,b,c)?
 
 //-----------------------------`(ba.)selector`---------------------------------
@@ -1229,7 +1229,7 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i));
 // * turning it on or off: `useVal()`
 // * getting the maximum of all of them: `combine()`
 //
-// In faust, we can only do that for a fixed maximum number of values: `maxN`
+// In Faust, we can only do that for a fixed maximum number of values: `maxN`
 //
 // ```
 // variableBinaryMaxN(N,maxN,x) =

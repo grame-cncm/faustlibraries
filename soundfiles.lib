@@ -5,7 +5,7 @@
 /************************************************************************
 ************************************************************************
 FAUST library file
-Copyright (C) 2018 GRAME, Centre National de Creation Musicale
+Copyright (C) 2018-2019 GRAME, Centre National de Creation Musicale
 ----------------------------------------------------------------------
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as
@@ -35,10 +35,107 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Soundfile Library";
-declare version "0.4";
+declare version "0.5";
 
+ba = library("basics.lib");
 ma = library("maths.lib");
 si = library("signals.lib");
+ro = library("routes.lib");
+
+//=================================================
+// Interpolator: TODO put in a shared location ?
+//=================================================
+
+//=================================================
+// 'gen' has 1 reader input and produce N outputs
+// 'idv' is a fractional read index
+//=================================================
+
+// Generic interpolator
+// N : the interpolation order (only 2 and 4 is implemented for now)
+// gen : a generator circuit taking a read index (usually fractional) and producing outputs (1..M)
+// idv : a read index (usually fractional) 
+
+interpolatorN(N, gen, idv) = par(i, N, gen(id0+i)) : ro.interleave(outputs(gen), N) : par(i, outputs(gen), interpolate(N, dv))
+    with {
+        id0 = int(idv);	// the int part of fractional idv
+        dv = idv - id0;	// fractional index in [0..1]
+        // N order interpolation
+        interpolate(2, dv) = \(v0,v1).(v0*(1-dv)+v1*dv);  // Linear
+        interpolate(3, dv) = \(v0,v1,v2).(v0+v1+v2);      // TODO: quadratic
+        interpolate(4, dv)                                // Cubic
+            = \(v0,v1,v2,v3).(v1 + 0.5 * dv * (v2 - v0 + dv * (2.0*v0 - 5.0*v1 + 4.0*v2 - v3 + dv*(3.0*(v1 - v2) + v3 - v0))));
+    };
+
+//=======================================================================
+// Utility functions added in a 'super' environment (to test the idea...)
+//=======================================================================
+
+super = environment {
+
+    length(sf, part) = part, 0 : sf : _,si.block(outputs(sf)-1);
+    srate(sf, part) = part, 0 : sf : !,_,si.block(outputs(sf)-2) : float;
+    outs(sf, level) = sf : si.block(2), bus(outputs(sf)-2) with { bus(n) = par(i,n,*(level)); };
+
+    // Ramp with a given fractional step, reset when trig is on
+    // sound buffer is internally read in the [0, length-1] range in the generated code
+    raise(trig, step) = (+(step):*(reset(trig))) ~ _
+        with {
+            // Reset when button is pressed (0 on raising front, 1 otherwise)
+            reset(trig) = (trig-trig') <= 0;
+        };
+
+    // Reverse ramp starting at 'length'
+    // sound buffer is internally read in the [0, length-1] range in the generated code
+    decrease(trig, step, length) = raise(trig, -step) + length;
+
+    // Plays a soundfile
+    // 'reader' in a function of type \(sf,part).(body) whih produces the (possibly fractional) read index
+    player(sf, part, reader, level) = (part, reader(sf, part)) : outs(sf, level);
+
+    // Plays a soundfile with linear interpolation
+    player_linear(sf, part, reader, level) = interpolatorN(2, gen, idv)
+        with {
+            // Adapts the (sf, part, reader) parameters as 'idv' and 'gen' types for the generic interpolator
+            idv = reader(sf, part);
+            gen(idv) = (part, idv) : outs(sf, level);
+        };
+
+    // Plays a soundfile with cubic interpolation
+    player_cubic(sf, part, reader, level) = interpolatorN(4, gen, idv)
+        with {
+            // Adapts the (sf, part, reader) parameters as 'idv' and 'gen' types for the generic interpolator
+            idv = reader(sf, part);
+            gen(idv) = (part, idv) : outs(sf, level);
+        };
+
+    // Plays a soundfile with linear interpolation and a reference frequence 'ref'
+    play_linear(sf, part, ref, freq, level, gate) = player_linear(sf, part, reader, level)
+        with {
+            reader(sf, part) = raise(gate, speed*srate(sf, part)/ma.SR) with { speed = freq/ref; };
+        };
+
+    // Plays a soundfile with cubic interpolation and a reference frequence 'ref'
+    play_cubic(sf, part, ref, freq, level, gate) = player_cubic(sf, part, reader, level)
+        with {
+            reader(sf, part) = decrease(gate, speed*srate(sf, part)/ma.SR) with { speed = freq/ref; };
+        };
+
+    // Generic version
+    loop_speed_level(sf, part, speed, level) = player(sf, part, reader, level)
+        with {
+            // A 'reader' which loops the sound with 'speed' and 'level' control
+            reader(sf, part) = speed*srate(sf, part)/ma.SR : (+,length(sf, part):fmod)~_ : int;
+        };
+
+    // Defines 'loop_speed' as a specialized version of loop_speed_level with level = 1
+    loop_speed(sf, part, speed) = loop_speed_level(sf, part, speed, 1);
+
+    // Defines 'loop_speed' as a specialized version of loop_speed_level with speed = 1 and level = 1
+    loop(sf, part) = loop_speed_level(sf, part, 1, 1);
+
+
+}; // End of environment
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -50,23 +147,17 @@ si = library("signals.lib");
 // #### Usage
 //
 // ```
-// loop(s, part)
+// loop(sf, part)
 // ```
 //
 // Where:
 //
-// * `s`: the soundfile
-// * `part`: the part in the soundfile list
+// * `sf`: the soundfile
+// * `part`: the part in the soundfile list of sounds
 //
 //-----------------------------------------------------------------------------
 
-loop(s, part) = (part, reader(s)) : outs(s)
-    with {
-        length(s) = part,0 : s : _,si.block(outputs(s)-1);
-        srate(s) = part,0 : s : !,_,si.block(outputs(s)-2);
-        outs(s) = s : si.block(2), si.bus(outputs(s)-2);
-        reader(s) = float(srate(s))/ma.SR : (+,length(s):fmod)~_ : int;
-    };
+loop(sf, part) = super.loop(sf, part);
 
 //--------------------------------`(so.)loop_speed`-----------------------------------
 // Play a soundfile in a loop taking into account its sampling rate, with speed control
@@ -75,24 +166,18 @@ loop(s, part) = (part, reader(s)) : outs(s)
 // #### Usage
 //
 // ```
-// loop_speed(s, part, speed)
+// loop_speed(sf, part, speed)
 // ```
 //
 // Where:
 //
-// * `s`: the soundfile
-// * `part`: the part in the soundfile list
-// * `speed`: the speed between 0 and n 
+// * `sf`: the soundfile
+// * `part`: the part in the soundfile list of sounds
+// * `speed`: the speed between 0 and n
 //
 //-----------------------------------------------------------------------------
 
-loop_speed(s, part, speed) = (part, reader(s)) : outs(s)
-    with {
-        length(s) = part,0 : s : _,si.block(outputs(s)-1);
-        srate(s) = part,0 : s : !,_,si.block(outputs(s)-2);
-        outs(s) = s : si.block(2), si.bus(outputs(s)-2);
-        reader(s) = float(speed*srate(s))/ma.SR : (+,length(s):fmod)~_ : int;
-    };
+loop_speed(sf, part, speed) = super.loop_speed(sf, part, speed);
 
 //--------------------------------`(so.)loop_speed_level`-----------------------------------
 // Play a soundfile in a loop taking into account its sampling rate, with speed and level controls
@@ -101,24 +186,77 @@ loop_speed(s, part, speed) = (part, reader(s)) : outs(s)
 // #### Usage
 //
 // ```
-// loop_speed_level(s, part, speed, level)
+// loop_speed_level(sf, part, speed, level)
 // ```
 //
 // Where:
 //
-// * `s`: the soundfile
-// * `part`: the part in the soundfile list
-// * `speed`: the speed between 0 and n 
-// * `level`: the volume between 0 and n 
+// * `sf`: the soundfile
+// * `part`: the part in the soundfile list of sounds
+// * `speed`: the speed between 0 and n
+// * `level`: the volume between 0 and n
 //
 //-----------------------------------------------------------------------------
 
-loop_speed_level(s, part, speed, level) = (part, reader(s)) : outs(s)
-    with {
-        length(s) = part,0 : s : _,si.block(outputs(s)-1);
-        srate(s) = part,0 : s : !,_,si.block(outputs(s)-2);
-        outs(s) = s : si.block(2), bus_level(outputs(s)-2);
-        bus_level(n) = par(i,n,*(level));
-        reader(s) = float(speed*srate(s))/ma.SR : (+,length(s):fmod)~_ : int;
-    };
+loop_speed_level(sf, part, speed, level) = super.loop_speed_level(sf, part, speed, level);
 
+//====================================================
+// Environment to handle a given sound in a soundfile
+//====================================================
+
+sound(sf, part) = environment {
+
+    // Looping the sound
+    loop = super.loop(sf, part);
+    loop_speed(speed) = super.loop_speed(sf, part, speed);
+    loop_speed_level(speed, level) = super.loop_speed_level(sf, part, speed, level);
+
+    // Play once
+    play(level, gate) = super.player(sf, part, reader, level)
+        with {
+            reader(sf, part) = super.raise(gate, super.srate(sf, part)/ma.SR);
+        };
+
+    // Play once in reverse
+    play_rev(level, gate) = super.player(sf, part, reader, level)
+        with {
+            reader(sf, part) = super.decrease(gate, super.srate(sf, part)/ma.SR, super.length(sf, part));
+        };
+
+    // Play sound once with linear interpolation and freq control (using a 'ref' value)
+    play_linear(ref, freq, level, gate) = super.play_linear(sf, part, ref, freq, level, gate);
+
+    // Play sound once with cubic interpolation and freq control (using a 'ref' value)
+    play_cubic(ref, freq, level, gate) = super.play_cubic(sf, part, ref, freq, level, gate);
+
+    // Play sound once and alternate between normal play and reverse play
+    play_alt(level, gate, ctrl) = super.player(sf, part, alt(ramp1, ramp2, ctrl), level)
+        with {
+            // High-order function which alternate between 2 'readers' depending of the 'ctrl' signal
+            alt(r1, r2, ctrl) = \(sf, part).(ba.if(ctrl > 0, r1(sf, part), r2(sf, part)));
+            ramp1(sf, part) = super.raise(gate, super.srate(sf, part)/ma.SR);
+            ramp2(sf, part) = super.decrease(gate, super.srate(sf, part)/ma.SR, super.length(sf, part));
+        };
+
+}; // End of environment
+
+/*
+// Using the 'sound' environment allocated with a given 'sf' and 'part'
+
+s1 = soundfile("[url:{'piano-C5.ogg';'piano-G5.ogg';'piano-C6.ogg';'piano-G6.ogg'}]",2);
+sample1 = sound(s1, 0);
+sample2 = sound(s1, 1);
+sample3 = sound(s1, 2);
+
+sample1.loop;
+sample1.loop_speed(0.5);
+sample1.loop_speed_level(0.5, 0.5);
+
+sample2.play(0.5, button("gate"));
+sample2.play_rev(0.5, button("gate"));
+sample2.play_alt(0.5, button("gate"), checkbox("alt"));
+
+sample3.play_linear(440.0, 600.0, 0.5, button("gate"));
+sample3.play_cubic(440.0, 800.0, en.ar(0.1, 0.8, button("gate")), button("gate"));
+
+*/

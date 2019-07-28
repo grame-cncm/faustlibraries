@@ -26,6 +26,7 @@ declare copyright "Grame";
 declare version "0.1";
 declare license "LGPL"; 
 
+ba = library("basics.lib");
 
 //---------------------------------------------------------------
 // Provides various operations on block of samples
@@ -41,7 +42,7 @@ declare license "LGPL";
 
 
 //---------------------------------------------------------------
-// reduce (op, n, x)
+// reduce(op, n, x)
 //---------------------------------------------------------------
 // Fold-like high order function. Apply a binary operation <op> 
 // on a block of <n> consecutive samples of a signal <x>. 
@@ -53,11 +54,10 @@ declare license "LGPL";
 // least one sample (n>0). 
 reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
     with {
-        compute (acc, count, val) =
-            if(count<n, op(acc,x), x), 		// new acc
-            if(count<n, count+1, 1),     	// new count
-            if(count<n, val, acc);      	// new val
-        if (c, then, else) = select2(c, else, then);
+        compute(acc, count, val) =
+            ba.if(count<n, op(acc,x), x), // new acc
+            ba.if(count<n, count+1, 1),   // new count
+            ba.if(count<n, val, acc);     // new val
     };
 
 
@@ -70,11 +70,10 @@ reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
 // but more efficient.
 reducemap(op, foo, n, x) = compute ~ (_,_,_) : (!,!,_)
     with {
-        compute (acc, count, val) =
-            if(count<n, op(acc,x), x), 		// new acc
-            if(count<n, count+1, 1),     	// new count
-            if(count<n, val, foo(acc));     // new val
-        if (c, then, else) = select2(c, else, then);
+        compute(acc, count, val) =
+            ba.if(count<n, op(acc,x), x),   // new acc
+            ba.if(count<n, count+1, 1),     // new count
+            ba.if(count<n, val, foo(acc));  // new val
     };
 
   

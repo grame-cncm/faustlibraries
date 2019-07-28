@@ -48,7 +48,7 @@ filtercoeff(f0, dBgain, Q) = environment
 	// usage : filtercoeff(f0, dBgain, Q).LPF
 	//----------------------------------------
 
-		LPF = rbjcoef( a0, a1, a2, b0, b1, b2 )
+		LPF = rbjcoef(a0, a1, a2, b0, b1, b2)
   				with {
 				    b0 =  (1 - cos(w0))/2;
 				    b1 =   1 - cos(w0);
@@ -58,7 +58,7 @@ filtercoeff(f0, dBgain, Q) = environment
 				    a2 =   1 - alpha;
  				};
 
-		HPF = rbjcoef( a0, a1, a2, b0, b1, b2 )
+		HPF = rbjcoef(a0, a1, a2, b0, b1, b2)
   				with {
 				    b0 =  (1 + cos(w0))/2;
 				    b1 = -1 - cos(w0);
@@ -68,7 +68,7 @@ filtercoeff(f0, dBgain, Q) = environment
 				    a2 =   1 - alpha;
   				};
 
-		BPF = rbjcoef( a0, a1, a2, b0, b1, b2 ) // constant 0 dB peak gain
+		BPF = rbjcoef(a0, a1, a2, b0, b1, b2) // constant 0 dB peak gain
   				with {
 				    b0 =   alpha;
 				    b1 =   0;
@@ -78,7 +78,7 @@ filtercoeff(f0, dBgain, Q) = environment
 				    a2 =   1 - alpha;
  				};
 
-  	  notch = rbjcoef( a0, a1, a2, b0, b1, b2 )
+  	  	snotch = rbjcoef(a0, a1, a2, b0, b1, b2)
   				with {
 				    b0 =   1;
 				    b1 =  -2*cos(w0);
@@ -88,7 +88,7 @@ filtercoeff(f0, dBgain, Q) = environment
 				    a2 =   1 - alpha;
   				};
 
-		APF = rbjcoef( a0, a1, a2, b0, b1, b2 )
+		APF = rbjcoef(a0, a1, a2, b0, b1, b2)
   				with {
 				    b0 =   1 - alpha;
 				    b1 =  -2*cos(w0);
@@ -98,7 +98,7 @@ filtercoeff(f0, dBgain, Q) = environment
 				    a2 =   1 - alpha;
  				};
 
-  peakingEQ	= rbjcoef( a0, a1, a2, b0, b1, b2 )
+  		peakingEQ = rbjcoef(a0, a1, a2, b0, b1, b2)
   				with {
             		b0 =   1 + alpha*A;
             		b1 =  -2*cos(w0);
@@ -108,7 +108,7 @@ filtercoeff(f0, dBgain, Q) = environment
             		a2 =   1 - alpha/A;
   				};
 
-  peakNotch	= rbjcoef( a0, a1, a2, b0, b1, b2 )
+  		peakNotch = rbjcoef(a0, a1, a2, b0, b1, b2)
   				with {
             		b0 =   1 + alpha*G;
             		b1 =  -2*cos(w0);
@@ -118,24 +118,24 @@ filtercoeff(f0, dBgain, Q) = environment
             		a2 =   1 - alpha/G;
   				};
 
-   lowShelf = rbjcoef( a0, a1, a2, b0, b1, b2 )
+   		lowShelf = rbjcoef(a0, a1, a2, b0, b1, b2)
   				with {
-             		b0 =    A*( (A+1) - (A-1)*cos(w0) + 2*sqrt(A)*alpha );
-            		b1 =  2*A*( (A-1) - (A+1)*cos(w0)                   );
-            		b2 =    A*( (A+1) - (A-1)*cos(w0) - 2*sqrt(A)*alpha );
-            		a0 =        (A+1) + (A-1)*cos(w0) + 2*sqrt(A)*alpha;
-            		a1 =   -2*( (A-1) + (A+1)*cos(w0)                   );
-            		a2 =        (A+1) + (A-1)*cos(w0) - 2*sqrt(A)*alpha;
+             		b0 =    A*((A+1) - (A-1)*cos(w0) + 2*sqrt(A)*alpha);
+            		b1 =  2*A*((A-1) - (A+1)*cos(w0));
+            		b2 =    A*((A+1) - (A-1)*cos(w0) - 2*sqrt(A)*alpha);
+            		a0 =       (A+1) + (A-1)*cos(w0) + 2*sqrt(A)*alpha;
+            		a1 =   -2*((A-1) + (A+1)*cos(w0));
+            		a2 =       (A+1) + (A-1)*cos(w0) - 2*sqrt(A)*alpha;
   				};
 
-  highShelf	= rbjcoef( a0, a1, a2, b0, b1, b2 )
+  		highShelf = rbjcoef(a0, a1, a2, b0, b1, b2)
   				with {
-				    b0 =    A*( (A+1) + (A-1)*cos(w0) + 2*sqrt(A)*alpha );
-				    b1 = -2*A*( (A-1) + (A+1)*cos(w0)                   );
-				    b2 =    A*( (A+1) + (A-1)*cos(w0) - 2*sqrt(A)*alpha );
-				    a0 =        (A+1) - (A-1)*cos(w0) + 2*sqrt(A)*alpha;
-				    a1 =    2*( (A-1) - (A+1)*cos(w0)                   );
-				    a2 =        (A+1) - (A-1)*cos(w0) - 2*sqrt(A)*alpha;
+				    b0 =    A*((A+1) + (A-1)*cos(w0) + 2*sqrt(A)*alpha);
+				    b1 = -2*A*((A-1) + (A+1)*cos(w0));
+				    b2 =    A*((A+1) + (A-1)*cos(w0) - 2*sqrt(A)*alpha);
+				    a0 =       (A+1) - (A-1)*cos(w0) + 2*sqrt(A)*alpha;
+				    a1 =    2*((A-1) - (A+1)*cos(w0));
+				    a2 =       (A+1) - (A-1)*cos(w0) - 2*sqrt(A)*alpha;
 				};
 
 	// --------------------- implementation ------------------------------
@@ -159,7 +159,7 @@ filtercoeff(f0, dBgain, Q) = environment
 // y[n] = a0 * x[n] + a1 * x[n-1] + a2 * x[n-2] - b1 * y[n-1] - b2 * y[n-2]
 //-------------------------------------------------------------------------
 
-biquad(x,a0,a1,a2,b1,b2)  =  x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
+biquad(x,a0,a1,a2,b1,b2) =  x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
 	with {
 		conv2(c0,c1,x) = c0*x+c1*x';
 		conv3(c0,c1,c2,x) = c0*x+c1*x'+c2*x'';
@@ -200,7 +200,7 @@ highShelf(x, f0, gain, Q) 	= x , filtercoeff(f0,gain,Q).highShelf : biquad;
 
 
 //-------------------------------------------------------------------------
-// Implementation of Max/MSP line~. Generate signal ramp or envelope
+// Implementation of Max/MSP line~. Generate signal ramp or envelop
 //
 // USAGE : line(value, time)
 // 	value : the desired output value
@@ -210,11 +210,12 @@ highShelf(x, f0, gain, Q) 	= x , filtercoeff(f0,gain,Q).highShelf : biquad;
 // output value changes. The interpolation time is sampled only then.
 //-------------------------------------------------------------------------
 
-line (value, time) = state~(_,_):!,_
+line(value, time) = state~(_,_):!,_
 	with {
-		state (t, c) = nt, ba.if (nt <= 0, value, c+(value - c) / nt)
+		state(t, c) = nt,nc 
 		with {
-			nt = ba.if( value != value', samples, t-1);
+			nt = ba.if(value != value', samples, t-1);
+			nc = ba.if(nt <= 0, value, c + (value - c)/nt);
 			samples = time*ma.SR/1000.0;
 		};
 	};

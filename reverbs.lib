@@ -58,7 +58,7 @@ jcrev = *(0.06) : allpass_chain <: comb_bank : mix_mtx with {
   allpass_chain =
     fi.rev2(512,347,0.7) :
     fi.rev2(128,113,0.7) :
-    fi.rev2( 64, 37,0.7);
+    fi.rev2(64, 37,0.7);
   comb_bank =
     rev12(1601,.802),
     rev12(1867,.773),
@@ -96,15 +96,15 @@ satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
   rev11(len,g) = rev1N(1024,len,g);
   rev12(len,g) = rev1N(2048,len,g);
   comb_bank =
-    rev11( 778,.827),
-    rev11( 901,.805),
+    rev11(778,.827),
+    rev11(901,.805),
     rev11(1011,.783),
     rev12(1123,.764);
   rev2N = fi.rev2;
   allpass_chain =
     rev2N(128,125,0.7) :
-    rev2N( 64, 42,0.7) :
-    rev2N( 16, 12,0.7);
+    rev2N(64, 42,0.7) :
+    rev2N(16, 12,0.7);
 };
 
 //======================Feedback Delay Network (FDN) Reverberators========================
@@ -208,8 +208,8 @@ with {
   // Delay-line lengths in seconds:
   apdelays = (0.020346, 0.024421, 0.031604, 0.027333, 0.022904,
               0.029291, 0.013458, 0.019123); // feedforward delays in seconds
-  tdelays = ( 0.153129, 0.210389, 0.127837, 0.256891, 0.174713,
-              0.192303, 0.125000, 0.219991); // total delays in seconds
+  tdelays = (0.153129, 0.210389, 0.127837, 0.256891, 0.174713,
+             0.192303, 0.125000, 0.219991); // total delays in seconds
   tdelay(i) = floor(0.5 + ma.SR*ba.take(i+1,tdelays)); // samples
   apdelay(i) = floor(0.5 + ma.SR*ba.take(i+1,apdelays));
   fbdelay(i) = tdelay(i) - apdelay(i);
@@ -315,7 +315,7 @@ zita_rev1_ambi(rgxyz,rdel,f1,f2,t60dc,t60m,fsmax) =
  : zita_rev_fdn(f1,f2,t60dc,t60m,fsmax)
  : output4(N) // ambisonics mode
 with {
-  N=8;
+  N = 8;
   output4(N) = select4 : *(t0),*(t1),*(t1),*(t1);
   select4 = _,_,_,!,_,!,!,! : _,_,cross with { cross(x,y) = y,x; };
   t0 = 1.0/sqrt(2.0);
