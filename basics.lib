@@ -691,13 +691,42 @@ selectn(N,i) = S(N,0)
     };
 
 
+//-----------------------------`(ba.)selectmulti`---------------------------------
+// Selects the ith circuit (all should have same number of outputs) among n at run time.
+//
+// #### Usage
+//
+// ```
+// selectmulti(lgen,n)
+// ```
+//
+// Where:
+//
+// * `N`: number of inputs (int, known at compile time, N > 0)
+// * `i`: input to select (int, numbered from 0)
+//
+// #### Example test program
+//
+// ```
+// N = 2;
+// process = selectmulti(((_,_),(1,_),(1,6)), 2);
+// ```
+//-----------------------------------------------------------------------------
+
+selectmulti(lgen, n) = lgen : ro.interleave(outs, N) : par(i, outs, ba.selectn(N, n))
+with {
+	outs = outputs(ba.take(1, lgen));   // Number of output of the first item (all should have the same value)
+	N = outputs(lgen)/outs;             // Number of items in the list
+};
+
+
 //--------------------`(ba.)select2stereo`--------------------
 // Select between 2 stereo signals.
 //
 // #### Usage
 //
 // ```
-// _,_,_,_ : select2stereo(bpc) : _,_,_,_
+// _,_,_,_ : select2stereo(bpc) : _,_    
 // ```
 //
 // Where:
