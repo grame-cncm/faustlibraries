@@ -82,9 +82,9 @@ interpolator_two_points(gen, idv, interpolate_two_points) = (gen(id0), gen(id1))
                                                         : ro.interleave(outputs(gen), 2)
                                                         : par(i, outputs(gen), interpolate_two_points(dv))
 with {
-    id0 = ru.int_part(idv);	// index integer part 
+    id0 = ru.int_part(idv); // index integer part
     id1 = id0 + 1;          // next index
-    dv = ru.frac_part(idv);	// index fractional part in [0..1]
+    dv = ru.frac_part(idv); // index fractional part in [0..1]
 };
 
 // To be used in 'interpolatorSelector'
@@ -101,10 +101,10 @@ interpolator_four_points(gen, idv, interpolate_four_points) = (gen(id0), gen(id1
                                                             : par(i, outputs(gen), interpolate_four_points(dv))
 with {
     id0 = id1 - 1;          // previous index
-    id1 = ru.int_part(idv);	// index integer part 
+    id1 = ru.int_part(idv); // index integer part
     id2 = id1 + 1;          // next index
     id3 = id2 + 1;          // next index
-    dv = ru.frac_part(idv);	// index fractional part in [0..1]
+    dv = ru.frac_part(idv); // index fractional part in [0..1]
 };
 
 interpolator_cubic(gen, idv) = interpolator_four_points(gen, idv, interpolate_cubic);
@@ -125,8 +125,8 @@ nointerp = MAX_INTER-1;
 interpolator_select(gen, idv, sel) = ba.selectmulti(interpolators, sel)
 with {
 	interpolators = (interpolator_linear(gen, idv),
-					interpolator_cosine(gen, idv),
-					interpolator_cubic(gen, idv),
-					interpolator_spline(gen, idv),
-					interpolator_null(gen, idv));
+                    interpolator_cosine(gen, idv),
+                    interpolator_cubic(gen, idv),
+                    interpolator_spline(gen, idv),
+                    interpolator_null(gen, idv));
 };
