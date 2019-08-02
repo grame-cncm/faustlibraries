@@ -1,5 +1,5 @@
 //#################################### interpolators.lib ########################################
-// A library to handle interpolator in Faust. Its official prefix is `in`.
+// A library to handle interpolation in Faust. Its official prefix is `it`.
 //########################################################################################
 
 /************************************************************************
@@ -34,7 +34,7 @@ closed source license or any other license if you decide so.
 ************************************************************************
 ************************************************************************/
 
-declare name "Interpolators Library";
+declare name "Faust Interpolator Library";
 declare version "0.1";
 
 ba = library("basics.lib");
@@ -42,50 +42,142 @@ ro = library("routes.lib");
 ma = library("maths.lib");
 ru = library("runtime.lib");
 
-//=================================================
-// Code taken from Jamona TTInterpolate.h
-// https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h
-//=================================================
-
 // Two points interpolation functions
+
+//-------`(it.)interpolate_linear`----------
+// Linear interpolation between 2 values
+//
+// #### Usage
+//
+// ```
+// interpolate_linear(dv,v0,v1) : _
+// ```
+//
+// Where:
+//
+// * `dv`: in the fractional value in [0..1] range
+// * `v0`: is the first value
+// * `v1`: is the second value
+//
+//
+// #### Reference:
+//
+// <https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h>
+//
+//--------------------------------------------
 
 interpolate_linear(dv,v0,v1) = v0 + dv*(v1-v0);  // (faster than v0*(1-dv)+v1*dv which is currently not optimized...)
 
+
+//-------`(it.)interpolate_cosine`----------
+// Cosine interpolation between 2 values
+//
+// #### Usage
+//
+// ```
+// interpolate_cosine(dv,v0,v1) : _
+// ```
+//
+// Where:
+//
+// * `dv`: in the fractional value in [0..1] range
+// * `v0`: is the first value
+// * `v1`: is the second value
+//
+//
+// #### Reference:
+//
+// <https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h>
+//
+//--------------------------------------------
+
 interpolate_cosine(dv,v0,v1) = v0 + a2*(v1-v0) with { a2 = 0.5 * (1.0 - cos(dv*ma.PI)); };
+
 
 // For points interpolation functions
 
-/*
-See: https://www.paulinternet.nl/?page=bicubic
-*/
+//-------`(it.)interpolate_cubic`----------
+// Cubic interpolation between 4 values
+//
+// #### Usage
+//
+// ```
+// interpolate_cubic(dv,v0,v1,v2,v3) : _
+// ```
+//
+// Where:
+//
+// * `dv`: in the fractional value in [0..1] range
+// * `v0`: is the first value
+// * `v1`: is the second value
+// * `v2`: is the third value
+// * `v3`: is the fourth value
+//
+//
+// #### Reference:
+//
+// <https://www.paulinternet.nl/?page=bicubic>
+//
+//--------------------------------------------
 
 interpolate_cubic(dv,v0,v1,v2,v3) 
 	= v1 + 0.5 *dv*(v2 - v0 + dv*(2.0*v0 - 5.0*v1 + 4.0*v2 - v3 + dv*(3.0*(v1 - v2) + v3 - v0)));
 
-//=================================================
-// 'gen' has 1 reader input and produce N outputs
-// 'idv' is a fractional read index
-//=================================================
 
-// Interpolator on two points (current and next index)
+// Interpolator on two points (current and next index), assuming an increasing index
 
 interpolator_two_points(gen, idv, interpolate_two_points) = (gen(id0), gen(id1))
-                                                        : ro.interleave(outputs(gen), 2)
-                                                        : par(i, outputs(gen), interpolate_two_points(dv))
+                                                            : ro.interleave(outputs(gen), 2)
+                                                            : par(i, outputs(gen), interpolate_two_points(dv))
 with {
     id0 = ru.int_part(idv); // index integer part
     id1 = id0 + 1;          // next index
     dv = ru.frac_part(idv); // index fractional part in [0..1]
 };
 
-// To be used in 'interpolatorSelector'
-interpolator_null(gen, idv) = interpolator_two_points(gen, idv, \(dv,v0,v1).(v0));
+
+//-------`(it.)interpolator_linear`----------
+// Linear interpolator for a 'gen' circuit triggered by an 'idv' input to generate values
+//
+// #### Usage
+//
+// ```
+// interpolator_linear(gen, idv) : _,_... (equal to N = outputs(gen))
+// ```
+//
+// Where:
+//
+// * `gen`: a circuit with an idv' reader input and produce N outputs
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)
+//
+//--------------------------------------------
 
 interpolator_linear(gen, idv) = interpolator_two_points(gen, idv, interpolate_linear);
 
+
+//-------`(it.)interpolator_cosine`----------
+// Cosine interpolator for a 'gen' circuit triggered by an 'idv' input to generate values
+//
+// #### Usage
+//
+// ```
+// interpolator_cosine(gen, idv) : _,_... (equal to N = outputs(gen))
+// ```
+//
+// Where:
+//
+// * `gen`: a circuit with an idv' reader input and produce N outputs
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)
+//
+//--------------------------------------------
+
 interpolator_cosine(gen, idv) = interpolator_two_points(gen, idv, interpolate_cosine);
 
-// Interpolator on four points (previous, current and two next indexes)
+
+// To be used in 'interpolator_select'
+interpolator_null(gen, idv) = interpolator_two_points(gen, idv, \(dv,v0,v1).(v0));
+
+// Interpolator on four points (previous, current and two next indexes), assuming an increasing index
 
 interpolator_four_points(gen, idv, interpolate_four_points) = (gen(id0), gen(id1), gen(id2), gen(id3))
                                                             : ro.interleave(outputs(gen), 4)
@@ -98,9 +190,26 @@ with {
     dv = ru.frac_part(idv); // index fractional part in [0..1]
 };
 
+
+//-------`(it.)interpolator_cubic`----------
+// Cubic interpolator for a 'gen' circuit triggered by an 'idv' input to generate values
+//
+// #### Usage
+//
+// ```
+// interpolator_cubic(gen, idv) : _,_... (equal to N = outputs(gen))
+// ```
+//
+// Where:
+//
+// * `gen`: a circuit with an idv' reader input and produce N outputs
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)
+//
+//--------------------------------------------
+
 interpolator_cubic(gen, idv) = interpolator_four_points(gen, idv, interpolate_cubic);
 
-// Enumeration of interpolation algorithms
+// Enum of interpolation algorithms
 MAX_INTER = 4;
 
 linear = 0;
@@ -108,7 +217,23 @@ cosine = 1;
 cubic  = 2;
 nointerp = MAX_INTER-1;
 
+
+//-------`(it.)interpolator_select`----------
 // Generic configurable interpolator (with selector between in [0..3]). The value 3 is used for no interpolation.
+//
+// #### Usage
+//
+// ```
+// interpolator_select(gen, idv, sel) : _,_... (equal to N = outputs(gen))
+// ```
+//
+// Where:
+//
+// * `gen`: a circuit with an idv' reader input and produce N outputs
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)
+// * `sel`: an interpolation algorithm selector in [0..3] (0 = linear, 1 = cosine, 2 = cubic, 3 = nointerp)
+//
+//--------------------------------------------
 
 interpolator_select(gen, idv, sel) = ba.selectmulti(interpolators, sel)
 with {
@@ -119,48 +244,91 @@ with {
 };
 
 /*
-Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' has the form (idx, dv), see float.lib and double.lib
 
-waveform_linear(wf, step) = in.interpolator_linear(gen, (int(idv),ma.frac(idv)))
+Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' uses the 'idv' model, see float.lib and double.lib
+
+// waveform and index step
+waveform_interpolator(wf, step, interp) = interp(gen, idv)
 with {
-    gen(idx) = wf,idx : rdtable;            
-    index = +(step)~_; 	// starting from 'step'
-    idv = index-step;  	// starting from 0
+    gen(idx) = wf, (idx:max(0):min(size)) : rdtable with { size = wf:(_,!); };   // waveform size
+    index = (+(step)~_)-step;  // starting from 0
+    idv = ru.make_idv(index);  // build the signal for interpolation in a generic way
 };
 
-waveform_cosine(wf, step) = in.interpolator_cosine(gen, (int(idv),ma.frac(idv)))
+waveform_linear(wf, step) = waveform_interpolator(wf, step, it.interpolator_linear);
+waveform_cosine(wf, step) = waveform_interpolator(wf, step, it.interpolator_cosine);
+waveform_cubic(wf, step) = waveform_interpolator(wf, step, it.interpolator_cubic);
+
+waveform_interp(wf, step, selector) = waveform_interpolator(wf, step, interp_select(selector))
 with {
-    gen(idx) = wf,idx : rdtable;            
-    index = +(step)~_; 	// starting from 'step'
-    idv = index-step;  	// starting from 0
+	// adapts the argument order
+	interp_select(sel, gen, idv) = it.interpolator_select(gen, idv, sel);
 };
 
-waveform_cubic(wf, step) = in.interpolator_cubic(gen, (int(idv),ma.frac(idv)))
+// waveform and index 
+waveform_interpolator1(wf, idv, interp) = interp(gen, idv)
 with {
-    gen(idx) = wf,idx : rdtable;            
-    index = +(step)~_; 	// starting from 'step'
-    idv = index-step;  	// starting from 0
+    gen(idx) = wf, (idx:max(0):min(size)) : rdtable with { size = wf:(_,!); };   // waveform size
 };
 
-wf = waveform {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 50.0, 40.0, 30.0, 20.0};
-process = waveform_linear(wf, 0.25), waveform_cosine(wf, 0.25), waveform_cubic(wf, 0.25);
+waveform_linear1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_linear);
+waveform_cosine1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_cosine);
+waveform_cubic1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_cubic);
 
-test1 = in.interpolator_linear(gen, (0,dv))
+waveform_interp1(wf, idv, selector) = waveform_interpolator1(wf, idv, interp_select(selector))
 with {
-    // signal to interpolate
-    gen(id) = waveform {3.0, -1.0}, id : rdtable;              	
-    dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, (index-1) : rdtable;
+	// adapts the argument order
+	interp_select(sel, gen, idv) = it.interpolator_select(gen, idv, sel);
+};
+
+//=======
+// Tests
+//=======
+
+wf = waveform {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 50.0, 40.0, 30.0, 20.0, 10.0, 0.0};
+
+process = waveform_linear(wf, step), waveform_cosine(wf, step), waveform_cubic(wf, step) with { step = 0.25; };
+
+process = waveform_interp(wf, 0.25, nentry("algo", 0, 0, 3, 1));
+
+process = waveform_interp1(wf, idv, nentry("algo", 0, 0, 3, 1))
+with {
+	step = 0.1;
+	idv_aux = (+(step)~_)-step;  // starting from 0
+	idv = ru.make_idv(idv_aux);  // build the signal for interpolation in a generic way
+};
+
+// Test linear interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
+linear_test = (idx,dv), it.interpolator_linear(gen, (idx,dv))
+with {
+    // signal to interpolate (only 2 points here)
+    gen(id) = waveform {3.0, -1.0}, (id:max(0)) : rdtable;
+    dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
+    idx = 0; 
     // test index signal
-    index = +(1)~_; 	// starting from one
+    index = (+(1)~_)-1;   // starting from 0
 };
 
-test2 = in.interpolator_cosine(gen, (0,dv))
+// Test cosine interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
+cosine_test = (idx,dv), it.interpolator_cosine(gen, (idx,dv))
 with {
-    // signal to interpolate
-    gen(id) = waveform {3.0, -1.0}, id : rdtable;            
+    // signal to interpolate (only 2 points here)
+    gen(id) = waveform {3.0, -1.0}, (id:max(0)) : rdtable;
+    dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
+    idx = 0;
     // test index signal
-    dv = waveform {0.0, 0.3333333333, 0.50, 0.6666666666, 1.0}, (index-1) : rdtable;  
-    index = +(1)~_; 	// starting from one
+    index = (+(1)~_)-1;   // starting from 0
+};
+
+// Test cubic interpolation between 4 samples with a '(idx,dv)' signal built using a waveform
+cubic_test = (idx,dv), it.interpolator_cubic(gen, (idx,dv))
+with {
+    // signal to interpolate (only 4 points here)
+    gen(id) = waveform {-1.0, 2.0, 1.0, 4.0}, (id:max(0)) : rdtable;
+    dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
+    idx = 0;
+    // test index signal
+    index = (+(1)~_)-1;   // starting from 0
 };
 
 */

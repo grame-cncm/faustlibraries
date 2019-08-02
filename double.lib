@@ -37,11 +37,16 @@ closed source license or any other license if you decide so.
 declare name "Faust double Library";
 declare version "0.1";
  
-// 'idv' is to be used as a read index. In -double mode, we use the a standard
-// implementation with fractional index.
+/*
+The 'idv' parameter is to be used as a read index. In -double mode, we use 
+a standard implementation with fractional index.
+The following 3 functions allow to adapt a 'single signal' fractional idv in this [idx, dv] model.
+*/
 
 int_part(idv) = int(idv);
 frac_part(idv) = ma.frac(idv);
+make_idv(id) = id;
+
 reset(trig) = (trig-trig') <= 0;
 
 // Infinite raising index

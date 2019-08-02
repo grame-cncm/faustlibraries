@@ -575,13 +575,13 @@ count(xx) = 1;
 // #### Usage
 //
 // ```
-// take(p,l)
+// take(P,l)
 // take(3,(10,20,30,40)) -> 30
 // ```
 //
 // Where:
 //
-// * `p`: position (int, known at compile time, p > 0)
+// * `P`: position (int, known at compile time, P > 0)
 // * `l`: list of elements
 //-----------------------------------------------------------------------------
 take(1, (xs, xxs))  = xs;
@@ -702,21 +702,20 @@ selectn(N,i) = S(N,0)
 //
 // Where:
 //
-// * `N`: number of inputs (int, known at compile time, N > 0)
-// * `i`: input to select (int, numbered from 0)
+// * `lgen`: list of circuits
+// * `n`: circuit to select (int, numbered from 0)
 //
 // #### Example test program
 //
 // ```
-// N = 2;
 // process = selectmulti(((_,_),(1,_),(1,6)), 2);
 // ```
 //-----------------------------------------------------------------------------
 
 selectmulti(lgen, n) = lgen : ro.interleave(outs, N) : par(i, outs, ba.selectn(N, n))
 with {
-	outs = outputs(ba.take(1, lgen));   // Number of output of the first item (all should have the same value)
-	N = outputs(lgen)/outs;             // Number of items in the list
+	outs = outputs(take(1, lgen));   // Number of outputs of the first item (all should have the same value)
+	N = outputs(lgen)/outs;          // Number of items in the list
 };
 
 
@@ -823,7 +822,7 @@ peakhold = (*,_:max) ~ _;
 //----------------------------------------------------------------
 // TODO: author Jonatan Liljedahl
 peakholder(holdtime) = peakhold2 ~ reset : (!,_) with {
-    reset = ba.sweep(holdtime) > 0;
+    reset = sweep(holdtime) > 0;
     // first out is gate that is 1 while holding last peak
     peakhold2 = _,abs <: peakhold,!,_ <: >=,_,!;
 };
@@ -996,7 +995,7 @@ bypass2(bpc,e) = _,_ <: ((inswitch:e),_,_) : select2stereo(bpc)
 //------------------------------------------------------------
 // Author: JOS
 // License: STK-4.3
-bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : ba.select2stereo(bpc)
+bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : select2stereo(bpc)
   with {
     inswitch = select2(bpc,_,0);
   };
@@ -1031,7 +1030,6 @@ bypass_fade(n, b, e) = par(i, inputs(e), _)
   with {
 	xb = ramp(n, b);
 	ramp(n) = \(y,x).(if (y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
-	if (c,t,e) = select2(c,e,t);
   };
 
 
@@ -1090,13 +1088,13 @@ on_and_off(a, b) = (a : trig) : loop(b)
 // #### Usage
 //
 // ```
-// _ : selectoutn(n, s) : _,_,...n
+// _ : selectoutn(N, i) : _,_,...N
 // ```
 //
 // Where:
 //
-// * `n`: number of outputs (int, known at compile time, n > 0)
-// * `s`: output number to route to (int, numbered from 0) (i.e. slider)
+// * `N`: number of outputs (int, known at compile time, N > 0)
+// * `i`: output number to route to (int, numbered from 0) (i.e. slider)
 //
 // #### Example
 //
@@ -1265,7 +1263,7 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i));
 //  par(i,maxNrBits,recursiveMax(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)  : useVal(i)) : combine(maxNrBits) with {
 //    // The sum of all the sizes of the previous blocks
 //    sumOfPrevBlockSizes(N,maxN,0) = 0;
-//    sumOfPrevBlockSizes(N,maxN,i) = (ba.subseq((allBlockSizes(N,maxN)),0,i):>_);
+//    sumOfPrevBlockSizes(N,maxN,i) = (subseq((allBlockSizes(N,maxN)),0,i):>_);
 //    allBlockSizes(N,maxN) = par(i, maxNrBits, pow2(i) * isUsed(i) );
 //    maxNrBits = int2nrOfBits(maxN);
 //    // get the maximum of all blocks
@@ -1273,7 +1271,7 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i));
 //    combine(N) = max(combine(N-1),_);
 //    // Decide wether or not to use a certain value, based on N
 //    useVal(i) = select2( isUsed(i), (0-(ma.INFINITY)),_);
-//    isUsed(i) = ba.take(i+1,(int2bin(N,maxN)));
+//    isUsed(i) = take(i+1,(int2bin(N,maxN)));
 //  };
 // ```
 //========================================================================================

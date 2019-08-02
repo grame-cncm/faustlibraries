@@ -41,7 +41,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 si = library("signals.lib");
 ro = library("routes.lib");
-in = library("interpolators.lib");
+it = library("interpolators.lib");
 ru = library("runtime.lib");
 
 //=======================================================================
@@ -59,7 +59,7 @@ super = environment {
     player(sf, part, reader, level) = (part, ru.int_part(reader(sf, part))) : outs(sf, level);
 
     // Plays a soundfile with configurable interpolation
-    player_interp(sf, part, reader, level, selector) = in.interpolator_select(gen, idv, selector)
+    player_interp(sf, part, reader, level, selector) = it.interpolator_select(gen, idv, selector)
     with {
         // Adapts the (sf, part, reader) parameters as 'idv' and 'gen' types for the generic interpolator
         idv = reader(sf, part);
