@@ -50,8 +50,7 @@ ru = library("runtime.lib");
 
 super = environment {
 
-    length(sf, part) = (part, 0) : sf : (_,si.block(outputs(sf)-1));
-    
+    length(sf, part) = (part, 0) : sf : (_,si.block(outputs(sf)-1));  
     srate(sf, part) = part, 0 : sf : !,_,si.block(outputs(sf)-2) : float;
     outs(sf, level) = sf : si.block(2), bus(outputs(sf)-2) with { bus(n) = par(i,n,*(level)); };
 
@@ -60,7 +59,7 @@ super = environment {
     player(sf, part, reader, level) = (part, ru.int_part(reader(sf, part))) : outs(sf, level);
 
     // Plays a soundfile with configurable interpolation
-    player_interp(selector, sf, part, reader, level) = in.interpolator_select(gen, idv, selector)
+    player_interp(sf, part, reader, level, selector) = in.interpolator_select(gen, idv, selector)
     with {
         // Adapts the (sf, part, reader) parameters as 'idv' and 'gen' types for the generic interpolator
         idv = reader(sf, part);
@@ -68,7 +67,7 @@ super = environment {
     };
 
      // Plays a soundfile with configurable interpolation and a reference frequence 'ref'
-    play_interp(selector, sf, part, ref, freq, level, gate) = player_interp(selector, sf, part, reader, level)
+    play_interp(sf, part, ref, freq, level, gate, selector) = player_interp(sf, part, reader, level, selector)
     with {
         reader(sf, part) = ru.raise(gate, step, length(sf, part)) with { step = freq/ref*srate(sf, part)/ma.SR; };
     };
@@ -176,7 +175,7 @@ sound(sf, part) = environment {
     };
 
     // Play sound once with configurable interpolation and freq control (using a 'ref' value)
-    play_interp(selector, ref, freq, level, gate) = super.play_interp(selector, sf, part, ref, freq, level, gate);
+    play_interp(ref, freq, level, gate, selector) = super.play_interp(sf, part, ref, freq, level, gate, selector);
 
     // Play sound once and alternate between normal play and reverse play
     //play_alt(level, gate, ctrl) = super.player(sf, part, alt2(ramp1, ramp2, ctrl), level)
@@ -219,14 +218,14 @@ sample2.play(0.5, button("gate"));
 sample2.play_rev(0.5, button("gate"));
 sample2.play_alt(0.5, button("gate"), checkbox("alt"));
 
-sample3.play_interp(so.linear, 440.0, 600.0, 0.5, button("gate"));
-sample3.play_interp(so.cubic, 440.0, 800.0, en.ar(0.1, 0.8, button("gate")), button("gate"));
+sample3.play_interp(440.0, 600.0, 0.5, button("gate"), so.linear);
+sample3.play_interp(440.0, 800.0, en.ar(0.1, 0.8, button("gate")), button("gate"), so.cubic);
 
 play = button("gate");
-sample3.play_interp(nentry("interp", 4, 0, 4, 1), 
-                    440.0,
+sample3.play_interp(440.0,
                     hslider("freq", 200, 200, 880, 0.01), 
                     hslider("gain", 0.5, 0, 1, 0.01)*en.ar(0.1, 0.8, play), 
-                    play);
+                    play,
+                    nentry("interp", 4, 0, 4, 1));
 
 */
