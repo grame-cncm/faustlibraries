@@ -62,15 +62,6 @@ See: https://www.paulinternet.nl/?page=bicubic
 interpolate_cubic(dv,v0,v1,v2,v3) 
 	= v1 + 0.5 *dv*(v2 - v0 + dv*(2.0*v0 - 5.0*v1 + 4.0*v2 - v3 + dv*(3.0*(v1 - v2) + v3 - v0)));
 
-interpolate_spline(dv,v0,v1,v2,v3) = f0*dv3 + f1*dv2 + f2*dv + v1
-with {
-    dv2 = dv*dv;
-    dv3 = dv*dv*dv;
-    f0 = -0.5*v0 + 1.5*v1 - 1.5*v2 + 0.5*v3;
-    f1 = v0 - 2.5*v1 + 2.0*v2 - 0.5*v3;
-    f2 = -0.5*v0  + 0.5*v2;
-};
-
 //=================================================
 // 'gen' has 1 reader input and produce N outputs
 // 'idv' is a fractional read index
@@ -109,24 +100,67 @@ with {
 
 interpolator_cubic(gen, idv) = interpolator_four_points(gen, idv, interpolate_cubic);
 
-interpolator_spline(gen, idv) = interpolator_four_points(gen, idv, interpolate_spline);
-
 // Enumeration of interpolation algorithms
-MAX_INTER = 5;
+MAX_INTER = 4;
 
-linear 	 = 0;
-cosine 	 = 1;
-cubic 	 = 2;
-spline 	 = 3;
+linear = 0;
+cosine = 1;
+cubic  = 2;
 nointerp = MAX_INTER-1;
 
-// Generic configurable interpolator (with selector between in [0..4]). The value 4 is used for no interpolation.
+// Generic configurable interpolator (with selector between in [0..3]). The value 3 is used for no interpolation.
 
 interpolator_select(gen, idv, sel) = ba.selectmulti(interpolators, sel)
 with {
 	interpolators = (interpolator_linear(gen, idv),
                     interpolator_cosine(gen, idv),
                     interpolator_cubic(gen, idv),
-                    interpolator_spline(gen, idv),
                     interpolator_null(gen, idv));
 };
+
+/*
+Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' has the form (idx, dv), see float.lib and double.lib
+
+waveform_linear(wf, step) = in.interpolator_linear(gen, (int(idv),ma.frac(idv)))
+with {
+    gen(idx) = wf,idx : rdtable;            
+    index = +(step)~_; 	// starting from 'step'
+    idv = index-step;  	// starting from 0
+};
+
+waveform_cosine(wf, step) = in.interpolator_cosine(gen, (int(idv),ma.frac(idv)))
+with {
+    gen(idx) = wf,idx : rdtable;            
+    index = +(step)~_; 	// starting from 'step'
+    idv = index-step;  	// starting from 0
+};
+
+waveform_cubic(wf, step) = in.interpolator_cubic(gen, (int(idv),ma.frac(idv)))
+with {
+    gen(idx) = wf,idx : rdtable;            
+    index = +(step)~_; 	// starting from 'step'
+    idv = index-step;  	// starting from 0
+};
+
+wf = waveform {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 50.0, 40.0, 30.0, 20.0};
+process = waveform_linear(wf, 0.25), waveform_cosine(wf, 0.25), waveform_cubic(wf, 0.25);
+
+test1 = in.interpolator_linear(gen, (0,dv))
+with {
+    // signal to interpolate
+    gen(id) = waveform {3.0, -1.0}, id : rdtable;              	
+    dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, (index-1) : rdtable;
+    // test index signal
+    index = +(1)~_; 	// starting from one
+};
+
+test2 = in.interpolator_cosine(gen, (0,dv))
+with {
+    // signal to interpolate
+    gen(id) = waveform {3.0, -1.0}, id : rdtable;            
+    // test index signal
+    dv = waveform {0.0, 0.3333333333, 0.50, 0.6666666666, 1.0}, (index-1) : rdtable;  
+    index = +(1)~_; 	// starting from one
+};
+
+*/
