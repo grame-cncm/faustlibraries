@@ -34,6 +34,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `no`: `noises.lib`
 * `pf`: `phaflangers.lib`
 * `pm`: `physmodels.lib`
+* `rm`: `reducemaps.lib`
 * `re`: `reverbs.lib`
 * `ro`: `routes.lib`
 * `si`: `signals.lib`
@@ -158,6 +159,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `noises.lib`
 * `phaflangers.lib`
 * `physmodels.lib`
+* `reducemaps.lib`
 * `reverbs.lib`
 * `routes.lib`
 * `signals.lib`
@@ -205,6 +207,7 @@ os = library("oscillators.lib");
 no = library("noises.lib");
 pf = library("phaflangers.lib");
 pm = library("physmodels.lib");
+rm = library("reducemaps.lib");
 re = library("reverbs.lib");
 ro = library("routes.lib");
 sp = library("spats.lib");
