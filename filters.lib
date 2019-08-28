@@ -54,9 +54,9 @@ declare version "0.0";
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/filters/One_Zero.html>
 //----------------------------------------------------------
-declare zero author "Julius O. Smith III"
-declare zero copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare zero license "MIT-style STK-4.3 license"
+declare zero author "Julius O. Smith III";
+declare zero copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare zero license "MIT-style STK-4.3 license";
 zero(z) = _ <: _,mem : _,*(z) : -;
 
 //------------------------`(fi.)pole`---------------------------
@@ -76,17 +76,17 @@ zero(z) = _ <: _,mem : _,*(z) : -;
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/filters/One_Pole.html>
 //------------------------------------------------------------
-declare pole author "Julius O. Smith III"
-declare pole copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare pole license "MIT-style STK-4.3 license"
+declare pole author "Julius O. Smith III";
+declare pole copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare pole license "MIT-style STK-4.3 license";
 pole(p) = + ~ *(p);
 
 //----------------------`(fi.)integrator`--------------------------
 // Same as `pole(1)` [implemented separately for block-diagram clarity].
 //------------------------------------------------------------
-declare integrator author "Julius O. Smith III"
-declare integrator copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare integrator license "MIT-style STK-4.3 license"
+declare integrator author "Julius O. Smith III";
+declare integrator copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare integrator license "MIT-style STK-4.3 license";
 integrator = + ~ _;
 
 //-------------------`(fi.)dcblockerat`-----------------------
@@ -111,9 +111,9 @@ integrator = + ~ _;
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html>
 //------------------------------------------------------------
-declare dcblockerat author "Julius O. Smith III"
-declare dcblockerat copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare dcblockerat license "MIT-style STK-4.3 license"
+declare dcblockerat author "Julius O. Smith III";
+declare dcblockerat copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare dcblockerat license "MIT-style STK-4.3 license";
 dcblockerat(fb) = *(b0) : zero(1) : pole(p)
 with {
   wn = ma.PI*fb/ma.SR;
@@ -132,9 +132,9 @@ with {
 // _ : dcblocker : _
 // ```
 //------------------------------------------------------------
-declare dcblocker author "Julius O. Smith III"
-declare dcblocker copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare dcblocker license "MIT-style STK-4.3 license"
+declare dcblocker author "Julius O. Smith III";
+declare dcblocker copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare dcblocker license "MIT-style STK-4.3 license";
 dcblocker = zero(1) : pole(0.995);
 
 //=======================================Comb Filters=====================================
@@ -162,9 +162,9 @@ dcblocker = zero(1) : pole(0.995);
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html>
 //------------------------------------------------------------
-declare ff_comb author "Julius O. Smith III"
-declare ff_comb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare ff_comb license "MIT-style STK-4.3 license"
+declare ff_comb author "Julius O. Smith III";
+declare ff_comb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare ff_comb license "MIT-style STK-4.3 license";
 ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : + ;
 
 //------`(fi.)ff_fcomb`--------
@@ -189,17 +189,17 @@ ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : + ;
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html>
 //------------------------------------------------------------
-declare ff_fcomb author "Julius O. Smith III"
-declare ff_fcomb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare ff_fcomb license "MIT-style STK-4.3 license"
+declare ff_fcomb author "Julius O. Smith III";
+declare ff_fcomb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare ff_fcomb license "MIT-style STK-4.3 license";
 ff_fcomb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.fdelay(maxdel,M) : + ;
 
 //-----------`(fi.)ffcombfilter`-------------------
 // Typical special case of `ff_comb()` where: `b0 = 1`.
 //------------------------------------------------------------
-declare ff_combfilter author "Julius O. Smith III"
-declare ff_combfilter copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare ff_combfilter license "MIT-style STK-4.3 license"
+declare ff_combfilter author "Julius O. Smith III";
+declare ff_combfilter copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare ff_combfilter license "MIT-style STK-4.3 license";
 ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 
 
@@ -224,9 +224,9 @@ ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html>
 //------------------------------------------------------------
-declare fb_comb author "Julius O. Smith III"
-declare fb_comb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare fb_comb license "MIT-style STK-4.3 license"
+declare fb_comb author "Julius O. Smith III";
+declare fb_comb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare fb_comb license "MIT-style STK-4.3 license";
 fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0):mem;
 
 
@@ -251,9 +251,9 @@ fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0):mem;
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html>
 //------------------------------------------------------------
-declare fb_fcomb author "Julius O. Smith III"
-declare fb_fcomb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare fb_fcomb license "MIT-style STK-4.3 license"
+declare fb_fcomb author "Julius O. Smith III";
+declare fb_fcomb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare fb_fcomb license "MIT-style STK-4.3 license";
 fb_fcomb(maxdel,N,b0,aN) = (+ <: de.fdelay(maxdel,float(N)-1.0),_) ~ *(-aN) : !,*(b0):mem;
 
 //-----------------------`(fi.)rev1`-----------------------
@@ -261,9 +261,9 @@ fb_fcomb(maxdel,N,b0,aN) = (+ <: de.fdelay(maxdel,float(N)-1.0),_) ~ *(-aN) : !,
 // The "rev1 section" dates back to the 1960s in computer-music reverberation.
 // See the `jcrev` and `brassrev` in `reverbs.lib` for usage examples.
 //------------------------------------------------------------
-declare rev1 author "Julius O. Smith III"
-declare rev1 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare rev1 license "MIT-style STK-4.3 license"
+declare rev1 author "Julius O. Smith III";
+declare rev1 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare rev1 license "MIT-style STK-4.3 license";
 rev1(maxdel,N,g) = fb_comb (maxdel,N,1,-g);
 
 //-----`(fi.)fbcombfilter` and `(fi.)ffbcombfilter`------------
@@ -286,14 +286,14 @@ rev1(maxdel,N,g) = fb_comb (maxdel,N,1,-g);
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html>
 //------------------------------------------------------------
-declare fbcombfilter author "Julius O. Smith III"
-declare fbcombfilter copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare fbcombfilter license "MIT-style STK-4.3 license"
+declare fbcombfilter author "Julius O. Smith III";
+declare fbcombfilter copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare fbcombfilter license "MIT-style STK-4.3 license";
 fbcombfilter(maxdel,intdel,g) = (+ : de.delay(maxdel,intdel)) ~ *(g);
 
-declare ffbcombfilter author "Julius O. Smith III"
-declare ffbcombfilter copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare ffbcombfilter license "MIT-style STK-4.3 license"
+declare ffbcombfilter author "Julius O. Smith III";
+declare ffbcombfilter copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare ffbcombfilter license "MIT-style STK-4.3 license";
 ffbcombfilter(maxdel,del,g) = (+ : de.fdelay(maxdel,del)) ~ *(g);
 
 
@@ -325,9 +325,9 @@ ffbcombfilter(maxdel,del,g) = (+ : de.fdelay(maxdel,del)) ~ *(g);
 // * <https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html>
 // * <https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html>
 //------------------------------------------------------------
-declare allpass_comb author "Julius O. Smith III"
-declare allpass_comb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare allpass_comb license "MIT-style STK-4.3 license"
+declare allpass_comb author "Julius O. Smith III";
+declare allpass_comb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare allpass_comb license "MIT-style STK-4.3 license";
 allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : + ;
 
 
@@ -362,9 +362,9 @@ allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ :
 // * <https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html>
 // * <https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html>
 //------------------------------------------------------------
-declare allpass_fcomb author "Julius O. Smith III"
-declare allpass_fcomb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare allpass_fcomb license "MIT-style STK-4.3 license"
+declare allpass_fcomb author "Julius O. Smith III";
+declare allpass_fcomb copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare allpass_fcomb license "MIT-style STK-4.3 license";
 allpass_fcomb(maxdel,N,aN) = (+ <: de.fdelay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : + ;
 
 
@@ -373,9 +373,9 @@ allpass_fcomb(maxdel,N,aN) = (+ <: de.fdelay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_
 // The "rev2 section" dates back to the 1960s in computer-music reverberation.
 // See the `jcrev` and `brassrev` in `reverbs.lib` for usage examples.
 //------------------------------------------------------------
-declare rev2 author "Julius O. Smith III"
-declare rev2 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare rev2 license "MIT-style STK-4.3 license"
+declare rev2 author "Julius O. Smith III";
+declare rev2 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare rev2 license "MIT-style STK-4.3 license";
 rev2(maxlen,len,g) = allpass_comb(maxlen,len,-g);
 
 //-------------------`(fi.)allpass_fcomb5` and `(fi.)allpass_fcomb1a`-----------------
@@ -386,14 +386,14 @@ rev2(maxlen,len,g) = allpass_comb(maxlen,len,-g);
 // `1-1' <: allpass_fcomb(1024,10.5,0.95), allpass_fcomb5(1024,10.5,0.95);`).
 // ```
 //------------------------------------------------------------
-declare allpass_fcomb5 author "Julius O. Smith III"
-declare allpass_fcomb5 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare allpass_fcomb5 license "MIT-style STK-4.3 license"
+declare allpass_fcomb5 author "Julius O. Smith III";
+declare allpass_fcomb5 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare allpass_fcomb5 license "MIT-style STK-4.3 license";
 allpass_fcomb5(maxdel,N,aN) = (+ <: de.fdelay5(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : + ;
 
-declare allpass_fcomb1a author "Julius O. Smith III"
-declare allpass_fcomb1a copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare allpass_fcomb1a license "MIT-style STK-4.3 license"
+declare allpass_fcomb1a author "Julius O. Smith III";
+declare allpass_fcomb1a copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare allpass_fcomb1a license "MIT-style STK-4.3 license";
 allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : + ;
 
 //========================Direct-Form Digital Filter Sections=============================
@@ -423,9 +423,9 @@ allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : m
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html>
 //------------------------------------------------------------
-declare iir author "Julius O. Smith III"
-declare iir copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare iir license "MIT-style STK-4.3 license"
+declare iir author "Julius O. Smith III";
+declare iir copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare iir license "MIT-style STK-4.3 license";
 iir(bv,av) = ma.sub ~ fir(av) : fir(bv);
 
 //-----------------------------`(fi.)fir`---------------------------------
@@ -464,9 +464,9 @@ iir(bv,av) = ma.sub ~ fir(av) : fir(bv);
 // ```
 //------------------------------------------------------------
 //fir(bv) = conv(bv);
-declare fir author "Julius O. Smith III"
-declare fir copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare fir license "MIT-style STK-4.3 license"
+declare fir author "Julius O. Smith III";
+declare fir copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare fir license "MIT-style STK-4.3 license";
 fir((b0,bv)) = _ <: *(b0), R(1,bv) :> _ with {
 	R(n,(bn,bv)) = (@(n):*(bn)), R(n+1,bv);
 	R(n, bn)     = (@(n):*(bn));              };
@@ -484,15 +484,15 @@ fir(b0) = *(b0);
 //------------------------------------------------------------
 //convN(N,kv,x) = sum(i,N,take(i+1,kv) * x@i); // take() defined in math.lib
 
-declare convN author "Julius O. Smith III"
-declare convN copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare convN license "MIT-style STK-4.3 license"
+declare convN author "Julius O. Smith III";
+declare convN copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare convN license "MIT-style STK-4.3 license";
 convN(N,kv)     = sum(i,N, @(i)*take(i+1,kv)); // take() defined in math.lib
 //conv(kv,x) = sum(i,count(kv),take(i+1,kv) * x@i); // count() from math.lib
 
-declare conv author "Julius O. Smith III"
-declare conv copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare conv license "MIT-style STK-4.3 license"
+declare conv author "Julius O. Smith III";
+declare conv copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare conv license "MIT-style STK-4.3 license";
 conv(kv) = fir(kv);
 
 //----------------`(fi.)tf1`, `(fi.)tf2` and `(fi.)tf3`----------------------
@@ -514,20 +514,20 @@ conv(kv) = fir(kv);
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html>
 //------------------------------------------------------------
-declare tf1 author "Julius O. Smith III"
-declare tf1 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare tf1 license "MIT-style STK-4.3 license"
+declare tf1 author "Julius O. Smith III";
+declare tf1 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare tf1 license "MIT-style STK-4.3 license";
 tf1(b0,b1,a1) = _ <: *(b0), (mem : *(b1)) :> + ~ *(0-a1);
 
-declare tf2 author "Julius O. Smith III"
-declare tf2 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare tf2 license "MIT-style STK-4.3 license"
+declare tf2 author "Julius O. Smith III";
+declare tf2 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare tf2 license "MIT-style STK-4.3 license";
 tf2(b0,b1,b2,a1,a2) = iir((b0,b1,b2),(a1,a2)); // cf. TF2 in music.lib)
 // tf2 is a variant of tf22 below with duplicated mems
 
-declare tf3 author "Julius O. Smith III"
-declare tf3 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare tf3 license "MIT-style STK-4.3 license"
+declare tf3 author "Julius O. Smith III";
+declare tf3 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare tf3 license "MIT-style STK-4.3 license";
 tf3(b0,b1,b2,b3,a1,a2,a3) = iir((b0,b1,b2,b3),(a1,a2,a3));
 
 // "Original" version for music.lib. This is here for comparison but people should
@@ -557,9 +557,9 @@ with {
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/pasp/Phasing_2nd_Order_Allpass_Filters.html>
 //------------------------------------------------------------
-declare notchw author "Julius O. Smith III"
-declare notchw copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare notchw license "MIT-style STK-4.3 license"
+declare notchw author "Julius O. Smith III";
+declare notchw copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare notchw license "MIT-style STK-4.3 license";
 notchw(width,freq) = tf2(b0,b1,b2,a1,a2)
 with {
   fb = 0.5*width; // First design a dcblockerat(width/2)
@@ -608,30 +608,30 @@ with {
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html>
 //------------------------------------------------------------
-declare tf21 author "Julius O. Smith III"
-declare tf21 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare tf21 license "MIT-style STK-4.3 license"
+declare tf21 author "Julius O. Smith III";
+declare tf21 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare tf21 license "MIT-style STK-4.3 license";
 tf21(b0,b1,b2,a1,a2) = // tf2, direct-form 1:
     _ <:(mem<:((mem:*(b2)),*(b1))),*(b0) :>_
     : ((_,_,_:>_) ~(_<:*(-a1),(mem:*(-a2))));
     
-declare tf22 author "Julius O. Smith III"
-declare tf22 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare tf22 license "MIT-style STK-4.3 license"
+declare tf22 author "Julius O. Smith III";
+declare tf22 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare tf22 license "MIT-style STK-4.3 license";
 tf22(b0,b1,b2,a1,a2) = // tf2, direct-form 2:
     _ : (((_,_,_:>_)~*(-a1)<:mem,*(b0))~*(-a2))
       : (_<:mem,*(b1)),_ : *(b2),_,_ :> _;
 
-declare tf22t author "Julius O. Smith III"
-declare tf22t copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare tf22t license "MIT-style STK-4.3 license"
+declare tf22t author "Julius O. Smith III";
+declare tf22t copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare tf22t license "MIT-style STK-4.3 license";
 tf22t(b0,b1,b2,a1,a2) = // tf2, direct-form 2 transposed:
     _ : (_,_,(_ <: *(b2)',*(b1)',*(b0))
       : _,+',_,_ :> _)~*(-a1)~*(-a2) : _;
 
-declare tf21t author "Julius O. Smith III"
-declare tf21t copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare tf21t license "MIT-style STK-4.3 license"
+declare tf21t author "Julius O. Smith III";
+declare tf21t copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare tf21t license "MIT-style STK-4.3 license";
 tf21t(b0,b1,b2,a1,a2) = // tf2, direct-form 1 transposed:
     tf22t(1,0,0,a1,a2) : tf22t(b0,b1,b2,0,0); // or write it out if you want
 
@@ -669,9 +669,9 @@ tf21t(b0,b1,b2,a1,a2) = // tf2, direct-form 1 transposed:
 //   <https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html>
 //   (where reflection coefficients are denoted by k rather than s).
 //------------------------------------------------------------
-declare av2sv author "Julius O. Smith III"
-declare av2sv copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare av2sv license "MIT-style STK-4.3 license"
+declare av2sv author "Julius O. Smith III";
+declare av2sv copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare av2sv license "MIT-style STK-4.3 license";
 av2sv(av) = par(i,M,s(i+1)) with {
   M = ba.count(av);
   s(m) = sr(M-m+1); // m=1..M
@@ -701,9 +701,9 @@ av2sv(av) = par(i,M,s(i+1)) with {
 //       `bi` is the coefficient of `z^(-i)` in the filter numerator,
 //       `ai` is the coefficient of `z^(-i)` in the filter denominator
 //------------------------------------------------------------
-declare bvav2nuv author "Julius O. Smith III"
-declare bvav2nuv copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare bvav2nuv license "MIT-style STK-4.3 license"
+declare bvav2nuv author "Julius O. Smith III";
+declare bvav2nuv copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare bvav2nuv license "MIT-style STK-4.3 license";
 bvav2nuv(bv,av) = par(m,M+1,nu(m)) with {
   M = ba.count(av);
   nu(m) = ba.take(m+1,Pr(M-m)); // m=0..M
@@ -732,9 +732,9 @@ bvav2nuv(bv,av) = par(m,M+1,nu(m)) with {
 // * bv: zeros as a bank of parallel signals
 // * av: poles as a bank of parallel signals
 //------------------------------------------------------------
-declare iir_lat2 author "Julius O. Smith III"
-declare iir_lat2 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare iir_lat2 license "MIT-style STK-4.3 license"
+declare iir_lat2 author "Julius O. Smith III";
+declare iir_lat2 copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare iir_lat2 license "MIT-style STK-4.3 license";
 iir_lat2(bv,av) = allpassnt(M,sv) : sum(i,M+1,*(ba.take(M-i+1,tg)))
 with {
   M = ba.count(av);
@@ -756,9 +756,9 @@ with {
 // * `n`: the order of the filter
 // * `sv`: the reflection coefficients (-1 1)
 //------------------------------------------------------------
-declare allpassnt author "Julius O. Smith III"
-declare allpassnt copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)"
-declare allpassnt license "MIT-style STK-4.3 license"
+declare allpassnt author "Julius O. Smith III";
+declare allpassnt copyright "Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>)";
+declare allpassnt license "MIT-style STK-4.3 license";
 allpassnt(0,sv) = _;
 allpassnt(n,sv) =
 //0:   x <: ((+ <: (allpassnt(n-1,sv)),*(s))~(*(-s))) : _',_ :+
