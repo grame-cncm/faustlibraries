@@ -959,7 +959,7 @@ with {
 //------------------`(fi.)moogLadder`-----------------
 // Virtual analog model of the 4th-order Moog Ladder, which is arguably the 
 // most well-known ladder filter in analog synthesizers. Several 
-// 1st-orderfilters are cascaded in series. Feedback is then used, in part, to 
+// 1st-order filters are cascaded in series. Feedback is then used, in part, to 
 // control the cut-off frequency and the resonance.
 //
 // This filter was implemented in Faust by Eric Tarr during the 
@@ -983,7 +983,7 @@ with {
 //---------------------------------------------------------------------
 declare moogLadder author "Eric Tarr";
 declare moogLadder license "MIT-style STK-4.3 license";
-moogLadder(normFreq,Q) = _<:(s1,s2,s3,s4,y)  : !,!,!,!,_ 
+moogLadder(normFreq,Q) = _<:(s1,s2,s3,s4,y) : !,!,!,!,_ 
 letrec{
    's1 = _-(s4*k):_-(s3*g*k):_-(s2*g*g*k):_-(s1*g*g*g*k):_*A:_-s1:_*(B*2):_+s1;
    's2 = _-(s4*k):_-(s3*g*k):_-(s2*g*g*k):_-(s1*g*g*g*k):_*A:_-s1:_*B:_+s1:_-s2:_*(B*2):_+s2;
@@ -1007,7 +1007,7 @@ with{
 
 //------------------`(fi.)moogHalfLadder`-----------------
 // Virtual analog model of the 2nd-order Moog Half Ladder (simplified version of
-// `(fi.)moogLadder`). Several 1st-orderfilters are cascaded in series. 
+// `(fi.)moogLadder`). Several 1st-order filters are cascaded in series. 
 // Feedback is then used, in part, to control the cut-off frequency and the 
 // resonance.
 //
@@ -1032,7 +1032,7 @@ with{
 //---------------------------------------------------------------------
 declare moogHalfLadder author "Eric Tarr";
 declare moogHalfLadder license "MIT-style STK-4.3 license";
-moogHalfLadder(normFreq,Q) = _ <: (s1,s2,s3,y)  : !,!,!,_ 
+moogHalfLadder(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_ 
 letrec{
   's1 = _-(s3*B3*k):_-(s2*B2*k):_-(s1*B1*k):_*alpha0:_-s1:_*(alpha*2):_+s1;
   's2 = _-(s3*B3*k):_-(s2*B2*k):_-(s1*B1*k):_*alpha0:_-s1:_*alpha:_+s1:_-s2:_*(alpha*2):_+s2;
@@ -1090,34 +1090,34 @@ letrec{
   's1 = _-(s4*B4*SG4*k) : 
     _-((s4*B4*d3+s3)*B3*SG3*k) : 
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
-    _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1 )*B1*SG1*k) :
+    _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1)*B1*SG1*k) :
     _*alpha0: _ *gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ( (((s4*B4*d3+s3)*B3*d2 + s2)*B2)  *d1+s1)*B1*G2 : // _ + (S2 ...
+    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
     _ * a1 : _-s1 :_*alpha*2 : _+s1;
 
   's2 = _-(s4*B4*SG4*k) : 
     _-((s4*B4*d3+s3)*B3*SG3*k) : 
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k):
-    _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1 )*B1*SG1*k) :
+    _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1)*B1*SG1*k) :
     _*alpha0: _ *gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ( (((s4*B4*d3+s3)*B3*d2 + s2)*B2)  *d1+s1)*B1*G2 : // _ + (S2 ...
+    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
     _*a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
     _ + (s4*B4*d3 + s3)*B3 : //_+S3 :
-    _ + (  ((s4*B4*d3 + s3)*B3)  *d2+s2)*B2*G3 : //_+(S3...)
+    _ + (((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
     _*a2 : _-s2 : _*alpha*2 : _+s2;
 		
   's3 = _-(s4*B4*SG4*k) : 
     _-((s4*B4*d3+s3)*B3*SG3*k) : 
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
-    _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1 )*B1*SG1*k) :
+    _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1)*B1*SG1*k) :
     _*alpha0 : _ *gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ( (((s4*B4*d3+s3)*B3*d2 + s2)*B2)  *d1+s1)*B1*G2 : // _ + (S2 ...
+    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1+s1)*B1*G2 : // _ + (S2 ...
     _ * a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
     _ + (s4*B4*d3 + s3)*B3 : //_+S3 :
-    _ + ( ((s4*B4*d3 + s3)*B3)  *d2+s2)*B2*G3 : //_+(S3...)
+    _ + (((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
     _ * a2 : _-s2 : _*alpha : _+s2 : _*gam3:
     _ + s4*B4 : // _ + S4
-    _ + (  (s4*B4) *d3 + s3)*B3*G4: // _ + S4 ...
+    _ + ((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
     _*a3 : _-s3 : _*alpha*2 : _+s3;
   
   's4 = _-(s4*B4*SG4*k) : 
@@ -1125,13 +1125,13 @@ letrec{
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
     _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1 )*B1*SG1*k) :
     _*alpha0 : _ *gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ( (((s4*B4*d3+s3)*B3*d2 + s2)*B2)  *d1+s1)*B1*G2 : // _ + (S2 ...
+    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
     _ * a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
     _ + (s4*B4*d3 + s3)*B3 : //_+S3 :
-    _ + (  ((s4*B4*d3 + s3)*B3)  *d2+s2)*B2*G3 : //_+(S3...)
+    _ + (((s4*B4*d3 + s3)*B3)  *d2+s2)*B2*G3 : //_+(S3...)
     _ * a2 : _-s2 : _*alpha : _+s2 : _*gam3 :
     _ + s4*B4 : // _ + S4
-    _ + (  (s4*B4) *d3 + s3)*B3*G4: // _ + S4 ...
+    _ + ((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
     _*a3 : _-s3 : _*alpha : _+s3 : _*gam4 : _*a4 : _-s4 : _*alpha*2 : _+s4 ;
   
   // Output signal
@@ -1140,13 +1140,13 @@ letrec{
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
     _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1 )*B1*SG1*k) :
     _*alpha0: _*gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ( (((s4*B4*d3+s3)*B3*d2 + s2)*B2)  *d1+s1)*B1*G2 : // _ + (S2 ...
+    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
     _ * a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
     _ + (s4*B4*d3 + s3)*B3 : //_+S3 :
-    _ + (  ((s4*B4*d3 + s3)*B3)  *d2+s2)*B2*G3 : //_+(S3...)
+    _ + (((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
     _ * a2 : _-s2 : _*alpha : _+s2 : _*gam3 :
     _ + s4*B4 : // _ + S4
-    _ + (  (s4*B4) *d3 + s3)*B3*G4: // _ + S4 ...
+    _ + ((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
     _*a3 : _-s3 : _*alpha : _+s3 : _*gam4 : _*a4 : _-s4 : _*alpha : _+s4 ;
 }
 with{
@@ -1737,7 +1737,7 @@ with {
 };
 
 //===================================Korg 35 Filters======================================
-// The following filters are virtual analog models of the  Korg 35 low-pass 
+// The following filters are virtual analog models of the Korg 35 low-pass 
 // filter and high-pass filter found in the MS-10 and MS-20 synthesizers.
 // The virtual analog models for the LPF and HPF are different, making these 
 // filters more interesting than simply tapping different states of the same 
@@ -1858,7 +1858,7 @@ with{
 //---------------------------------------------------------------------
 declare oberheimBSF author "Eric Tarr";
 declare oberheimBSF license "MIT-style STK-4.3 license";
-oberheimBSF(normFreq,Q) = _<:(s1,s2,y)  : !,!,_  
+oberheimBSF(normFreq,Q) = _<:(s1,s2,y) : !,!,_  
 letrec{
   's1 = _-s2 : _- (s1*FBs1):_*alpha0:_*g <:_,(_+s1:ef.cubicnl(0.0,0)):>_;
   's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0) : _*g*2 : _+s2;
@@ -1893,7 +1893,7 @@ with{
 //---------------------------------------------------------------------
 declare oberheimBPF author "Eric Tarr";
 declare oberheimBPF license "MIT-style STK-4.3 license";
-oberheimBPF(normFreq,Q) = _<:(s1,s2,y)  : !,!,_ 
+oberheimBPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_ 
 letrec{
   's1 = _-s2 : _- (s1*FBs1):_*alpha0:_*g <:_,(_+s1:ef.cubicnl(0.0,0)):>_;
   's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0) : _*g*2 : _+s2;
@@ -1928,7 +1928,7 @@ with{
 //---------------------------------------------------------------------
 declare oberheimHPF author "Eric Tarr";
 declare oberheimHPF license "MIT-style STK-4.3 license";
-oberheimHPF(normFreq,Q) = _<:(s1,s2,y)  : !,!,_  
+oberheimHPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_  
 letrec{
   's1 = _-s2 : _- (s1*FBs1):_*alpha0:_*g <:_,(_+s1:ef.cubicnl(0.0,0)):>_;
   's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0) : _*g*2 : _+s2;
@@ -1963,7 +1963,7 @@ with{
 //---------------------------------------------------------------------
 declare oberheimLPF author "Eric Tarr";
 declare oberheimLPF license "MIT-style STK-4.3 license";
-oberheimLPF(normFreq,Q) = _<:(s1,s2,y)  : !,!,_ 
+oberheimLPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_ 
 letrec{
   's1 = _-s2 : _- (s1*FBs1):_*alpha0:_*g <:_,(_+s1:ef.cubicnl(0.0,0)):>_;
   's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0) : _*g*2 : _+s2;
@@ -2040,10 +2040,10 @@ with{
 //--------------------------------------------------------------------- 
 declare sallenKeyOnePoleLPF author "Eric Tarr";
 declare sallenKeyOnePoleLPF license "MIT-style STK-4.3 license";
-sallenKeyOnePoleLPF(normFreq) = _<:(s,y)  : !,_
+sallenKeyOnePoleLPF(normFreq) = _<:(s,y) : !,_
 letrec {  
   's = _ - s : _ * 2*G : _+s; 
-  'y = _ - s : _ * G : _+s ;  
+  'y = _ - s : _ * G : _+s;  
 }
 with{
   freq = 2*(10^(3*normFreq+1));
@@ -2075,7 +2075,7 @@ declare sallenKeyOnePoleHPF license "MIT-style STK-4.3 license";
 sallenKeyOnePoleHPF(normFreq) = _<: ((s,y) : !,_ : _*-1),_ :> _
 letrec {  
   's = _ - s : _ * 2*G : _+s; 
-  'y = _ - s : _ * G : _+s ;  
+  'y = _ - s : _ * G : _+s;  
 }
 with{
   freq = 2*(10^(3*normFreq+1));
@@ -2118,7 +2118,7 @@ with{
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderLPF author "Eric Tarr";
 declare sallenKey2ndOrderLPF license "MIT-style STK-4.3 license";
-sallenKey2ndOrderLPF(normFreq,Q) = _<:(s1,s2,y)  : !,!,_ 
+sallenKey2ndOrderLPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_ 
 letrec{
   's1 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g*2 :_+s1;
   's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1 : _*g*2 : _+s2;
@@ -2168,7 +2168,7 @@ with{
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderBPF author "Eric Tarr";
 declare sallenKey2ndOrderBPF license "MIT-style STK-4.3 license";
-sallenKey2ndOrderBPF(normFreq,Q) = _<:(s1,s2,y)  : !,!,_ 
+sallenKey2ndOrderBPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_ 
 letrec{
   's1 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g*2 :_+s1;
   's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1 : _*g*2 : _+s2;
