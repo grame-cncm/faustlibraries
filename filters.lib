@@ -2314,8 +2314,8 @@ with {
 
 //--------------------`(fi.)lowpass_plus`|`minus_highpass`----------------
 declare highpass_plus_lowpass author "Julius O. Smith III";
-declare highpass_plus_lowpass "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_plus_lowpass "MIT-style STK-4.3 license";
+declare highpass_plus_lowpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare highpass_plus_lowpass license "MIT-style STK-4.3 license";
 highpass_plus_lowpass(1,fc) = _;
 highpass_plus_lowpass(3,fc) = tf2s(1,-1,1,1,1,w1) with { w1 = 2*ma.PI*fc; };
 highpass_plus_lowpass(5,fc) = tf2s(1,-a11,1,a11,1,w1)
@@ -2330,8 +2330,8 @@ highpass_plus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
 };
 
 declare highpass_minus_lowpass author "Julius O. Smith III";
-declare highpass_minus_lowpass "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_minus_lowpass "MIT-style STK-4.3 license";
+declare highpass_minus_lowpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare highpass_minus_lowpass license "MIT-style STK-4.3 license";
 highpass_minus_lowpass(3,fc) = tf1s(-1,1,1,w1) with { w1 = 2*ma.PI*fc; };
 highpass_minus_lowpass(5,fc) = tf1s(1,-1,1,w1) : tf2s(1,-a12,1,a12,1,w1)
 with {
@@ -2345,25 +2345,25 @@ highpass_minus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
 };
 
 declare highpass_plus_lowpass_even author "Julius O. Smith III";
-declare highpass_plus_lowpass_even "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_plus_lowpass_even "MIT-style STK-4.3 license";
+declare highpass_plus_lowpass_even copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare highpass_plus_lowpass_even license "MIT-style STK-4.3 license";
 highpass_plus_lowpass_even(N,fc) = highpass(N,fc) + lowpass(N,fc);
 
 declare highpass_minus_lowpass_even author "Julius O. Smith III";
-declare highpass_minus_lowpass_even "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_plus_lowpass_even "MIT-style STK-4.3 license";
+declare highpass_minus_lowpass_even copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare highpass_plus_lowpass_even license "MIT-style STK-4.3 license";
 highpass_minus_lowpass_even(N,fc) = highpass(N,fc) - lowpass(N,fc);
 
 declare highpass_plus_lowpass_odd author "Julius O. Smith III";
-declare highpass_plus_lowpass_odd "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_plus_lowpass_odd "MIT-style STK-4.3 license";
+declare highpass_plus_lowpass_odd copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare highpass_plus_lowpass_odd license "MIT-style STK-4.3 license";
 // FIXME: Rewrite the following, as for orders 3 and 5 above,
 //        to eliminate pole-zero cancellations:
 highpass_plus_lowpass_odd(N,fc) = highpass(N,fc) + lowpass(N,fc);
 
 declare highpass_minus_lowpass_odd author "Julius O. Smith III";
-declare highpass_minus_lowpass_odd "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_plus_lowpass_odd "MIT-style STK-4.3 license";
+declare highpass_minus_lowpass_odd copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare highpass_plus_lowpass_odd license "MIT-style STK-4.3 license";
 // FIXME: Rewrite the following, as for orders 3 and 5 above,
 //        to eliminate pole-zero cancellations:
 highpass_minus_lowpass_odd(N,fc) = highpass(N,fc) - lowpass(N,fc);
