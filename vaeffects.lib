@@ -388,7 +388,7 @@ declare korg35LPF license "MIT-style STK-4.3 license";
 korg35LPF(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_
 letrec{
   's1 = _-s1:_*(alpha*2):_+s1;
-  's2 = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2):_*alpha0:_-s3:_*alpha:_+s3:_*K:_-s2 : _*(alpha*2):_+s2;
+  's2 = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2):_*alpha0:_-s3:_*alpha:_+s3:_*K:_-s2:_*(alpha*2):_+s2;
   's3 = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2):_*alpha0:_-s3:_*(alpha*2):_+s3;
   'y = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2) :_*alpha0:_-s3:_*alpha:_+s3;
 }
@@ -514,7 +514,7 @@ with{
 //---------------------------------------------------------------------
 declare oberheimBSF author "Eric Tarr";
 declare oberheimBSF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the first BSF output
+// Specialize the generic implementation: keep the first BSF output, the compiler will only generate the needed code 
 oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 
 
@@ -534,7 +534,7 @@ oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 //---------------------------------------------------------------------
 declare oberheimBPF author "Eric Tarr";
 declare oberheimBPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the second BPF output
+// Specialize the generic implementation: keep the second BPF output, the compiler will only generate the needed code
 oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 
 
@@ -554,7 +554,7 @@ oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 //---------------------------------------------------------------------
 declare oberheimHPF author "Eric Tarr";
 declare oberheimHPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the third HPF output
+// Specialize the generic implementation: keep the third HPF output, the compiler will only generate the needed code
 oberheimHPF(normFreq,Q) = oberheim(normFreq,Q):!,!,_,!;
 
 
@@ -666,7 +666,7 @@ with{
 //--------------------------------------------------------------------- 
 declare sallenKeyOnePoleLPF author "Eric Tarr";
 declare sallenKeyOnePoleLPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the first LPF output
+// Specialize the generic implementation: keep the first LPF output, the compiler will only generate the needed code
 sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 
 
@@ -687,7 +687,7 @@ sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 //---------------------------------------------------------------------
 declare sallenKeyOnePoleHPF author "Eric Tarr";
 declare sallenKeyOnePoleHPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the second HPF output
+// Specialize the generic implementation: keep the second HPF output, the compiler will only generate the needed code
 sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 
 
@@ -760,7 +760,7 @@ with{
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderLPF author "Eric Tarr";
 declare sallenKey2ndOrderLPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the first LPF output
+// Specialize the generic implementation: keep the first LPF output, the compiler will only generate the needed code
 sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 
 
@@ -781,7 +781,7 @@ sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderBPF author "Eric Tarr";
 declare sallenKey2ndOrderBPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the second BPF output
+// Specialize the generic implementation: keep the second BPF output, the compiler will only generate the needed code
 sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 
 
@@ -802,7 +802,7 @@ sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderHPF author "Eric Tarr";
 declare sallenKey2ndOrderHPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the third HPF output
+// Specialize the generic implementation: keep the third HPF output, the compiler will only generate the needed code
 sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 
 
