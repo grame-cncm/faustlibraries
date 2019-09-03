@@ -152,11 +152,11 @@ declare moogLadder author "Eric Tarr";
 declare moogLadder license "MIT-style STK-4.3 license";
 moogLadder(normFreq,Q) = _<:(s1,s2,s3,s4,y) : !,!,!,!,_ 
 letrec{
-   's1 = _-(s4*k):_-(s3*g*k):_-(s2*g*g*k):_-(s1*g*g*g*k):_*A:_-s1:_*(B*2):_+s1;
-   's2 = _-(s4*k):_-(s3*g*k):_-(s2*g*g*k):_-(s1*g*g*g*k):_*A:_-s1:_*B:_+s1:_-s2:_*(B*2):_+s2;
-   's3 = _-(s4*k):_-(s3*g*k):_-(s2*g*g*k):_-(s1*g*g*g*k):_*A:_-s1:_*B:_+s1:_-s2:_*B:_+s2:_-s3:_*(B*2):_+s3;
-   's4 = _-(s4*k):_-(s3*g*k):_-(s2*g*g*k):_-(s1*g*g*g*k):_*A:_-s1:_*B:_+s1:_-s2:_*B:_+s2:_-s3:_*B:_+s3:_-s4:_*(B*2):_+s4;
-   'y = _-(s4*k):_-(s3*g*k):_-(s2*g*g*k):_-(s1*g*g*g*k):_*A:_-s1:_*B:_+s1:_-s2:_*B:_+s2:_-s3:_*B:_+s3:_-s4:_*B:_+s4;
+   's1 = -(s4*k):-(s3*g*k):-(s2*g*g*k):-(s1*g*g*g*k):*(A):-(s1):*(B*2):+(s1);
+   's2 = -(s4*k):-(s3*g*k):-(s2*g*g*k):-(s1*g*g*g*k):*(A):-(s1):*(B):+(s1):-(s2):*(B*2):+(s2);
+   's3 = -(s4*k):-(s3*g*k):-(s2*g*g*k):-(s1*g*g*g*k):*(A):-(s1):*(B):+(s1):-(s2):*(B):+(s2):-(s3):*(B*2):+(s3);
+   's4 = -(s4*k):-(s3*g*k):-(s2*g*g*k):-(s1*g*g*g*k):*(A):-(s1):*(B):+(s1):-(s2):*(B):+(s2):-(s3):*(B):+(s3):-(s4):*(B*2):+(s4);
+   'y = -(s4*k):-(s3*g*k):-(s2*g*g*k):-(s1*g*g*g*k):*(A):-(s1):*(B):+(s1):-(s2):*(B):+(s2):-(s3):*(B):+(s3):-(s4):*(B):+(s4);
 }
 with{
     freq = 2*(10^(3*normFreq+1));
@@ -201,10 +201,10 @@ declare moogHalfLadder author "Eric Tarr";
 declare moogHalfLadder license "MIT-style STK-4.3 license";
 moogHalfLadder(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_ 
 letrec{
-  's1 = _-(s3*B3*k):_-(s2*B2*k):_-(s1*B1*k):_*alpha0:_-s1:_*(alpha*2):_+s1;
-  's2 = _-(s3*B3*k):_-(s2*B2*k):_-(s1*B1*k):_*alpha0:_-s1:_*alpha:_+s1:_-s2:_*(alpha*2):_+s2;
-  's3 = _-(s3*B3*k):_-(s2*B2*k):_-(s1*B1*k):_*alpha0:_-s1:_*alpha:_+s1:_-s2:_*alpha:_+s2:_-s3:_*(alpha*2):_+s3;
-  'y = _-(s3*B3*k):_-(s2*B2*k):_-(s1*B1*k):_*alpha0:_-s1:_*alpha:_+s1:_-s2:_*alpha:_+s2 <:_*-1,((_-s3:_*alpha:_+s3)*2):>_;
+  's1 = -(s3*B3*k):-(s2*B2*k):-(s1*B1*k):*(alpha0):-(s1):*(alpha*2):+(s1);
+  's2 = -(s3*B3*k):-(s2*B2*k):-(s1*B1*k):*(alpha0):-(s1):*(alpha):+(s1):-(s2):*(alpha*2):+(s2);
+  's3 = -(s3*B3*k):-(s2*B2*k):-(s1*B1*k):*(alpha0):-(s1):*(alpha):+(s1):-(s2):*(alpha):+(s2):-(s3):*(alpha*2):+(s3);
+  'y = -(s3*B3*k):-(s2*B2*k):-(s1*B1*k):*(alpha0):-(s1):*(alpha):+(s1):-(s2):*(alpha):+(s2) <:_*-1,((-(s3):*(alpha):+(s3))*2):>_;
 }
 with{
   freq = 2*(10^(3*normFreq+1));
@@ -258,48 +258,48 @@ letrec{
     _-((s4*B4*d3+s3)*B3*SG3*k) : 
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
     _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1)*B1*SG1*k) :
-    _*alpha0: _ *gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
-    _ * a1 : _-s1 :_*alpha*2 : _+s1;
+    _*alpha0: _*gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
+    _+((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
+    _*a1 : _-s1 :_*alpha*2 : _+s1;
 
   's2 = _-(s4*B4*SG4*k) : 
     _-((s4*B4*d3+s3)*B3*SG3*k) : 
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k):
     _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1)*B1*SG1*k) :
-    _*alpha0: _ *gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
+    _*alpha0: _*gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
+    _+((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
     _*a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
-    _ + (s4*B4*d3 + s3)*B3 : //_+S3 :
-    _ + (((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
+    _+(s4*B4*d3 + s3)*B3 : //_+S3 :
+    _+(((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
     _*a2 : _-s2 : _*alpha*2 : _+s2;
 		
   's3 = _-(s4*B4*SG4*k) : 
     _-((s4*B4*d3+s3)*B3*SG3*k) : 
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
     _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1)*B1*SG1*k) :
-    _*alpha0 : _ *gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1+s1)*B1*G2 : // _ + (S2 ...
-    _ * a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
-    _ + (s4*B4*d3 + s3)*B3 : //_+S3 :
-    _ + (((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
-    _ * a2 : _-s2 : _*alpha : _+s2 : _*gam3:
-    _ + s4*B4 : // _ + S4
-    _ + ((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
+    _*alpha0 : _*gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
+    _+((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1+s1)*B1*G2 : // _ + (S2 ...
+    _*a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
+    _+(s4*B4*d3 + s3)*B3 : //_+S3 :
+    _+(((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
+    _*a2 : _-s2 : _*alpha : _+s2 : _*gam3:
+    _+s4*B4 : // _ + S4
+    _+((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
     _*a3 : _-s3 : _*alpha*2 : _+s3;
   
   's4 = _-(s4*B4*SG4*k) : 
     _-((s4*B4*d3+s3)*B3*SG3*k) : 
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
     _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1 )*B1*SG1*k) :
-    _*alpha0 : _ *gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
-    _ * a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
-    _ + (s4*B4*d3 + s3)*B3 : //_+S3 :
-    _ + (((s4*B4*d3 + s3)*B3)  *d2+s2)*B2*G3 : //_+(S3...)
-    _ * a2 : _-s2 : _*alpha : _+s2 : _*gam3 :
-    _ + s4*B4 : // _ + S4
-    _ + ((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
-    _*a3 : _-s3 : _*alpha : _+s3 : _*gam4 : _*a4 : _-s4 : _*alpha*2 : _+s4 ;
+    _*alpha0 : _*gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
+    _+((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
+    _*a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
+    _+(s4*B4*d3 + s3)*B3 : //_+S3 :
+    _+(((s4*B4*d3 + s3)*B3)  *d2+s2)*B2*G3 : //_+(S3...)
+    _*a2 : _-s2 : _*alpha : _+s2 : _*gam3 :
+    _+s4*B4 : // _ + S4
+    _+((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
+    _*a3 : _-s3 : _*alpha : _+s3 : _*gam4 : _*a4 : _-s4 : _*alpha*2 : _+s4;
   
   // Output signal
   'y = _-(s4*B4*SG4*k) : 
@@ -307,14 +307,14 @@ letrec{
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
     _-((((s4*B4*d3+s3)*B3*d2 + s2)*B2*d1 + s1 )*B1*SG1*k) :
     _*alpha0: _*gam1 : _+((s4*B4*d3+s3)*B3*d2 + s2)*B2 : //_+S2
-    _ + ((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
-    _ * a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
-    _ + (s4*B4*d3 + s3)*B3 : //_+S3 :
-    _ + (((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
-    _ * a2 : _-s2 : _*alpha : _+s2 : _*gam3 :
-    _ + s4*B4 : // _ + S4
-    _ + ((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
-    _*a3 : _-s3 : _*alpha : _+s3 : _*gam4 : _*a4 : _-s4 : _*alpha : _+s4 ;
+    _+((((s4*B4*d3+s3)*B3*d2 + s2)*B2)*d1 + s1)*B1*G2 : // _ + (S2 ...
+    _*a1 : _-s1 :_*alpha : _+s1 : _*gam2 :
+    _+(s4*B4*d3 + s3)*B3 : //_+S3 :
+    _+(((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
+    _*a2 : _-s2 : _*alpha : _+s2 : _*gam3 :
+    _+s4*B4 : // _ + S4
+    _+((s4*B4)*d3 + s3)*B3*G4: // _ + S4 ...
+    _*a3 : _-s3 : _*alpha : _+s3 : _*gam4 : _*a4 : _-s4 : _*alpha : _+s4;
 }
 with{
   freq = 2*(10^(3*normFreq+1));
@@ -387,10 +387,10 @@ declare korg35LPF author "Eric Tarr";
 declare korg35LPF license "MIT-style STK-4.3 license";
 korg35LPF(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_
 letrec{
-  's1 = _-s1 : _*(alpha*2) : _+s1;
-  's2 = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2): _*alpha0:_-s3:_*alpha:_+s3:_*K : _-s2 : _*(alpha*2) : _+s2;
-  's3 = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2):_*alpha0:_-s3:_*(alpha*2) :_+s3;
-  'y = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2) : _*alpha0:_-s3:_*alpha:_+s3;
+  's1 = _-s1:_*(alpha*2):_+s1;
+  's2 = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2):_*alpha0:_-s3:_*alpha:_+s3:_*K:_-s2 : _*(alpha*2):_+s2;
+  's3 = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2):_*alpha0:_-s3:_*(alpha*2):_+s3;
+  'y = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2) :_*alpha0:_-s3:_*alpha:_+s3;
 }
 with{
   freq = 2*(10^(3*normFreq+1));
@@ -426,10 +426,10 @@ declare korg35HPF author "Eric Tarr";
 declare korg35HPF license "MIT-style STK-4.3 license";
 korg35HPF(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_
 letrec{
-  's1 = _-s1 : _*(alpha*2) : _+s1;
-  's2 = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2) : _*alpha0 :_*K: _-s2:_*alpha*2:_+s2;
-  's3 = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2) : _*alpha0 : _*K:_<:(_-s2:_*alpha:_+s2)*-1,_:>_-s3:_*alpha*2:_+s3;
-  'y = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2) : _*alpha0 ;
+  's1 = _-s1:_*(alpha*2):_+s1;
+  's2 = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2):_*alpha0:_*K:_-s2:_*alpha*2:_+s2;
+  's3 = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2):_*alpha0: _*K:_<:(_-s2:_*alpha:_+s2)*-1,_:>_-s3:_*alpha*2:_+s3;
+  'y = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2):_*alpha0;
 }
 with{
   freq = 2*(10^(3*normFreq+1));
@@ -459,8 +459,47 @@ with{
 // the `(ef.)cubicnl` function.
 //========================================================================================
 
+//------------------`(fi.)oberheim`-----------------
+// Generic multi-outputs Oberheim filter (see description above).
+//
+// #### Usage
+//
+// ```
+// _ : oberheim(normFreq,Q) : _,_,_,_
+// ```
+//
+// Where:
+//
+// * `normFreq`: normalized frequency (0-1)
+// * `Q`: q
+//---------------------------------------------------------------------
+declare oberheim author "Eric Tarr";
+declare oberheim license "MIT-style STK-4.3 license";
+oberheim(normFreq,Q) = _<:(s1,s2,ybsf,ybpf,yhpf,ylpf) : !,!,_,_,_,_  
+letrec{
+  's1 = _-s2:_-(s1*FBs1):_*alpha0:_*g<:_,(_+s1:ef.cubicnl(0.0,0)):>_;
+  's2 = _-s2:_-(s1*FBs1):_*alpha0:_*g:_+s1:ef.cubicnl(0.0,0):_*g*2:_+s2;
+  // Compute the BSF, BPF, HPF, LPF outputs
+  'ybsf = _-s2:_-(s1*FBs1):_*alpha0<:(_*g :_+s1:ef.cubicnl(0.0,0):_*g:_+s2),_:>_;
+  'ybpf = _-s2:_-(s1*FBs1):_*alpha0:_*g:_+s1:ef.cubicnl(0.0,0);
+  'yhpf = _-s2:_-(s1*FBs1):_*alpha0;
+  'ylpf = _-s2:_-(s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0):_*g:_+s2;
+}
+with{
+  freq = 2*(10^(3*normFreq+1));
+  wd = 2*ma.PI*freq;
+  T = 1/ma.SR;
+  wa = (2/T)*tan(wd*T/2);
+  g = wa*T/2; 
+  G = g/(1.0 + g);
+  R = 1/(2*Q);
+  FBs1 = (2*R+g);
+  alpha0 = 1/(1 + 2*R*g + g*g);
+};
+
+
 //------------------`(fi.)oberheimBSF`-----------------
-// Band-stop Oberheim filter (see description above).
+// Band-Stop Oberheim filter (see description above).
 //
 // #### Usage
 //
@@ -475,23 +514,8 @@ with{
 //---------------------------------------------------------------------
 declare oberheimBSF author "Eric Tarr";
 declare oberheimBSF license "MIT-style STK-4.3 license";
-oberheimBSF(normFreq,Q) = _<:(s1,s2,y) : !,!,_  
-letrec{
-  's1 = _-s2 : _- (s1*FBs1):_*alpha0:_*g <:_,(_+s1:ef.cubicnl(0.0,0)):>_;
-  's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0) : _*g*2 : _+s2;
-  'y = _-s2 : _ - (s1*FBs1):_*alpha0 <: (_*g :_+s1:ef.cubicnl(0.0,0) :_*g : _+s2),_:>_;
-}
-with{
-  freq = 2*(10^(3*normFreq+1));
-  wd = 2*ma.PI*freq;
-  T = 1/ma.SR;
-  wa = (2/T)*tan(wd*T/2);
-  g = wa*T/2; 
-  G = g/(1.0 + g);
-  R = 1/(2*Q);
-  FBs1 = (2*R+g);
-  alpha0 = 1/(1 + 2*R*g + g*g);
-};
+// Specialize the generic implementation: keep the first BSF output
+oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 
 
 //------------------`(fi.)oberheimBPF`-----------------
@@ -510,23 +534,8 @@ with{
 //---------------------------------------------------------------------
 declare oberheimBPF author "Eric Tarr";
 declare oberheimBPF license "MIT-style STK-4.3 license";
-oberheimBPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_ 
-letrec{
-  's1 = _-s2 : _- (s1*FBs1):_*alpha0:_*g <:_,(_+s1:ef.cubicnl(0.0,0)):>_;
-  's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0) : _*g*2 : _+s2;
-  'y = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0);
-}
-with{
-  freq = 2*(10^(3*normFreq+1));
-  wd = 2*ma.PI*freq;
-  T = 1/ma.SR;
-  wa = (2/T)*tan(wd*T/2);
-  g = wa*T/2; 
-  G = g/(1.0 + g);
-  R = 1/(2*Q);
-  FBs1 = (2*R+g);
-  alpha0 = 1/(1 + 2*R*g + g*g);
-};
+// Specialize the generic implementation: keep the second BPF output
+oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 
 
 //------------------`(fi.)oberheimHPF`-----------------
@@ -545,23 +554,8 @@ with{
 //---------------------------------------------------------------------
 declare oberheimHPF author "Eric Tarr";
 declare oberheimHPF license "MIT-style STK-4.3 license";
-oberheimHPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_  
-letrec{
-  's1 = _-s2 : _- (s1*FBs1):_*alpha0:_*g <:_,(_+s1:ef.cubicnl(0.0,0)):>_;
-  's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0) : _*g*2 : _+s2;
-  'y = _-s2 : _ - (s1*FBs1):_*alpha0;
-}
-with{
-  freq = 2*(10^(3*normFreq+1));
-  wd = 2*ma.PI*freq;
-  T = 1/ma.SR;
-  wa = (2/T)*tan(wd*T/2);
-  g = wa*T/2; 
-  G = g/(1.0 + g);
-  R = 1/(2*Q);
-  FBs1 = (2*R+g);
-  alpha0 = 1/(1 + 2*R*g + g*g);
-};
+// Specialize the generic implementation: keep the third HPF output
+oberheimHPF(normFreq,Q) = oberheim(normFreq,Q):!,!,_,!;
 
 
 //------------------`(fi.)oberheimLPF`-----------------
@@ -580,23 +574,8 @@ with{
 //---------------------------------------------------------------------
 declare oberheimLPF author "Eric Tarr";
 declare oberheimLPF license "MIT-style STK-4.3 license";
-oberheimLPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_ 
-letrec{
-  's1 = _-s2 : _- (s1*FBs1):_*alpha0:_*g <:_,(_+s1:ef.cubicnl(0.0,0)):>_;
-  's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0) : _*g*2 : _+s2;
-  'y = _-s2 : _ - (s1*FBs1):_*alpha0 :_*g :_+s1:ef.cubicnl(0.0,0) :_*g : _+s2;
-}
-with{
-  freq = 2*(10^(3*normFreq+1));
-  wd = 2*ma.PI*freq;
-  T = 1/ma.SR;
-  wa = (2/T)*tan(wd*T/2);
-  g = wa*T/2; 
-  G = g/(1.0 + g);
-  R = 1/(2*Q);
-  FBs1 = (2*R+g);
-  alpha0 = 1/(1 + 2*R*g + g*g);
-};
+// Specialize the generic implementation: keep the fourth LPF output
+oberheimLPF(normFreq,Q) = oberheim(normFreq,Q):!,!,!,_;
 
 
 //================================Sallen Key Filters======================================
@@ -622,8 +601,8 @@ with{
 // <https://www.willpirkle.com/706-2/>
 //========================================================================================
 
-//------------------`(fi.)sallenKeyOnePoleLPF`-----------------
-// Sallen-Key One Pole Lowpass filter (see description above).
+//------------------`(fi.)sallenKeyOnePole`-----------------
+// Sallen-Key generic One Pole filter (see description above).
 //
 // For the Faust implementation of this filter, recursion (`letrec`) is used 
 // for storing filter "states". The output (e.g. `y`) is calculated by using 
@@ -648,19 +627,19 @@ with{
 // #### Usage
 //
 // ```
-// _ : sallenKeyOnePoleLPF(normFreq) : _
+// _ : sallenKeyOnePole(normFreq) : _,_
 // ```
 //
 // Where:
 //
 // * `normFreq`: normalized frequency (0-1)
 //--------------------------------------------------------------------- 
-declare sallenKeyOnePoleLPF author "Eric Tarr";
-declare sallenKeyOnePoleLPF license "MIT-style STK-4.3 license";
-sallenKeyOnePoleLPF(normFreq) = _<:(s,y) : !,_
+declare sallenKeyOnePole author "Eric Tarr";
+declare sallenKeyOnePole license "MIT-style STK-4.3 license";
+sallenKeyOnePole(normFreq) = _<:(s,ylpf,-(ylpf)) : !,_,_
 letrec {  
-  's = _ - s : _ * 2*G : _+s; 
-  'y = _ - s : _ * G : _+s;  
+  's = -(s):*(2*G):+(s);
+  'ylpf = -(s):*(G):+(s);
 }
 with{
   freq = 2*(10^(3*normFreq+1));
@@ -670,6 +649,25 @@ with{
   g = wa*T/2; 
   G = g/(1.0 + g);
 };
+
+
+//------------------`(fi.)sallenKeyOnePoleLPF`-----------------
+// Sallen-Key One Pole lowpass filter (see description above).
+//
+// #### Usage
+//
+// ```
+// _ : sallenKeyOnePoleLPF(normFreq) : _,_
+// ```
+//
+// Where:
+//
+// * `normFreq`: normalized frequency (0-1)
+//--------------------------------------------------------------------- 
+declare sallenKeyOnePoleLPF author "Eric Tarr";
+declare sallenKeyOnePoleLPF license "MIT-style STK-4.3 license";
+// Specialize the generic implementation: keep the first LPF output
+sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 
 
 //------------------`(fi.)sallenKeyOnePoleHPF`-----------------
@@ -689,23 +687,12 @@ with{
 //---------------------------------------------------------------------
 declare sallenKeyOnePoleHPF author "Eric Tarr";
 declare sallenKeyOnePoleHPF license "MIT-style STK-4.3 license";
-sallenKeyOnePoleHPF(normFreq) = _<: ((s,y) : !,_ : _*-1),_ :> _
-letrec {  
-  's = _ - s : _ * 2*G : _+s; 
-  'y = _ - s : _ * G : _+s;  
-}
-with{
-  freq = 2*(10^(3*normFreq+1));
-  wd = 2*ma.PI*freq;
-  T = 1/ma.SR;
-  wa = (2/T)*tan(wd*T/2);
-  g = wa*T/2; 
-  G = g/(1.0 + g);
-};
+// Specialize the generic implementation: keep the second HPF output
+sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 
 
-//------------------`(fi.)sallenKey2ndOrderLPF`-----------------
-// Sallen-Key 2nd order lowpass filter (see description above). 
+//------------------`(fi.)sallenKey2ndOrder`-----------------
+// Sallen-Key generic multi-outputs 2nd order filter. 
 //
 // This is a 2nd-order Sallen-Key state-variable filter. The idea is that by 
 // "tapping" into different points in the circuit, different filters 
@@ -719,8 +706,46 @@ with{
 //
 // Comparing the LPF to BPF, the output signal (y) is calculated similarly. 
 // Except, the output of the BPF stops earlier in the circuit. Similarly, the 
-// states (s1 and s2) only differ in in that s2 includes a couple more terms 
+// states (s1 and s2) only differ in that s2 includes a couple more terms 
 // beyond what is used for s1. 
+//
+// #### Usage
+//
+// ```
+// _ : sallenKey2ndOrder(normFreq,Q) : _
+// ```
+//
+// Where:
+//
+// * `normFreq`: normalized frequency (0-1)
+// * `Q`: q
+//---------------------------------------------------------------------
+declare sallenKey2ndOrder author "Eric Tarr";
+declare sallenKey2ndOrder license "MIT-style STK-4.3 license";
+sallenKey2ndOrder(normFreq,Q) = _<:(s1,s2,ylpf,ybpf,yhpf) : !,!,_,_,_ 
+letrec{
+  's1 = -(s2):-(s1*FBs1):*(alpha0):*(g*2):+(s1);
+  's2 = -(s2):-(s1*FBs1):*(alpha0):*(g):+(s1):*(g*2):+(s2);
+  // Compute the LPF, BPF, HPF outputs
+  'ylpf = -(s2):-(s1*FBs1):*(alpha0):*(g*2):+(s1):*(g):+(s2);
+  'ybpf = -(s2):-(s1*FBs1):*(alpha0):*(g):+(s1);
+  'yhpf = -(s2):-(s1*FBs1):*(alpha0); 
+}
+with{
+  freq = 2*(10^(3*normFreq+1));
+  wd = 2*ma.PI*freq;
+  T = 1/ma.SR;
+  wa = (2/T)*tan(wd*T/2);
+  g = wa*T/2; 
+  G = g/(1.0 + g);
+  R = 1/(2*Q);
+  FBs1 = (2*R+g);
+  alpha0 = 1/(1 + 2*R*g + g*g);
+};
+
+//------------------`(fi.)sallenKey2ndOrderLPF`-----------------
+// Sallen-Key 2nd order lowpass filter (see description above). 
+//
 //
 // #### Usage
 //
@@ -735,42 +760,13 @@ with{
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderLPF author "Eric Tarr";
 declare sallenKey2ndOrderLPF license "MIT-style STK-4.3 license";
-sallenKey2ndOrderLPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_ 
-letrec{
-  's1 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g*2 :_+s1;
-  's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1 : _*g*2 : _+s2;
-  'y = _-s2 : _ - (s1*FBs1):_*alpha0 :_*g :_+s1 :_*g : _+s2;
-}
-with{
-  freq = 2*(10^(3*normFreq+1));
-  wd = 2*ma.PI*freq;
-  T = 1/ma.SR;
-  wa = (2/T)*tan(wd*T/2);
-  g = wa*T/2; 
-  G = g/(1.0 + g);
-  R = 1/(2*Q);
-  FBs1 = (2*R+g);
-  alpha0 = 1/(1 + 2*R*g + g*g);
-};
+// Specialize the generic implementation: keep the first LPF output
+sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 
 
 //------------------`(fi.)sallenKey2ndOrderBPF`-----------------
 // Sallen-Key 2nd order bandpass filter (see description above). 
 //
-// This is a 2nd-order Sallen-Key state-variable filter. The idea is that by 
-// "tapping" into different points in the circuit, different filters 
-// (LPF,BPF,HPF) can be achieved. See Figure 4.6 of 
-// <https://www.willpirkle.com/706-2/>
-//
-// This is also a good example of the next step for generalizing the Faust 
-// programming approach used for all these VA filters. In this case, there are 
-// three things to calculate each recursive step (y,s1,s2). For each thing, the 
-// circuit is only calculated up to that point. 
-//
-// Comparing the LPF to BPF, the output signal (y) is calculated similarly. 
-// Except, the output of the BPF stops earlier in the circuit. Similarly, the 
-// states (s1 and s2) only differ in in that s2 includes a couple more terms 
-// beyond what is used for s1. 
 //
 // #### Usage
 //
@@ -785,42 +781,13 @@ with{
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderBPF author "Eric Tarr";
 declare sallenKey2ndOrderBPF license "MIT-style STK-4.3 license";
-sallenKey2ndOrderBPF(normFreq,Q) = _<:(s1,s2,y) : !,!,_ 
-letrec{
-  's1 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g*2 :_+s1;
-  's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1 : _*g*2 : _+s2;
-  'y = _-s2 : _ - (s1*FBs1):_*alpha0 :_*g :_+s1 ;//:_*g : _+s2;
-}
-with{
-  freq = 2*(10^(3*normFreq+1));
-  wd = 2*ma.PI*freq;
-  T = 1/ma.SR;
-  wa = (2/T)*tan(wd*T/2);
-  g = wa*T/2; 
-  G = g/(1.0 + g);
-  R = 1/(2*Q);
-  FBs1 = (2*R+g);
-  alpha0 = 1/(1 + 2*R*g + g*g);
-};
+// Specialize the generic implementation: keep the second BPF output
+sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 
 
 //------------------`(fi.)sallenKey2ndOrderHPF`-----------------
 // Sallen-Key 2nd order highpass filter (see description above). 
 //
-// This is a 2nd-order Sallen-Key state-variable filter. The idea is that by 
-// "tapping" into different points in the circuit, different filters 
-// (LPF,BPF,HPF) can be achieved. See Figure 4.6 of 
-// <https://www.willpirkle.com/706-2/>
-//
-// This is also a good example of the next step for generalizing the Faust 
-// programming approach used for all these VA filters. In this case, there are 
-// three things to calculate each recursive step (y,s1,s2). For each thing, the 
-// circuit is only calculated up to that point. 
-//
-// Comparing the LPF to BPF, the output signal (y) is calculated similarly. 
-// Except, the output of the BPF stops earlier in the circuit. Similarly, the 
-// states (s1 and s2) only differ in in that s2 includes a couple more terms 
-// beyond what is used for s1. 
 //
 // #### Usage
 //
@@ -835,23 +802,8 @@ with{
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderHPF author "Eric Tarr";
 declare sallenKey2ndOrderHPF license "MIT-style STK-4.3 license";
-sallenKey2ndOrderHPF(normFreq,Q) = _<:(s1,s2,y)  : !,!,_ 
-letrec{
-  's1 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g*2 :_+s1;
-  's2 = _-s2 : _ - (s1*FBs1):_*alpha0:_*g :_+s1 : _*g*2 : _+s2;
-  'y = _-s2 : _ - (s1*FBs1):_*alpha0 ; //:_*g :_+s1 :_*g : _+s2;
-}
-with{
-  freq = 2*(10^(3*normFreq+1));
-  wd = 2*ma.PI*freq;
-  T = 1/ma.SR;
-  wa = (2/T)*tan(wd*T/2);
-  g = wa*T/2; 
-  G = g/(1.0 + g);
-  R = 1/(2*Q);
-  FBs1 = (2*R+g);
-  alpha0 = 1/(1 + 2*R*g + g*g);
-};
+// Specialize the generic implementation: keep the third HPF output
+sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 
 
 //=========================================Effects========================================
