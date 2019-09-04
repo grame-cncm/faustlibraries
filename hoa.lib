@@ -65,7 +65,6 @@ encoder(0, x, a) = x;
 encoder(n, x, a) = encoder(n-1, x, a), x*sin(n*a), x*cos(n*a);
 
 
-
 //--------------------------`(ho.)decoder`--------------------------------
 // Decodes an ambisonics sound field for a circular array of loudspeakers.
 //
@@ -89,7 +88,6 @@ decoder(n, p) = par(i, 2*n+1, _) <: par(i, p, speaker(n, 2*ma.PI*i/p))
 with {
    speaker(n,a)	= /(2), par(i, 2*n, _), encoder(n,2/(2*n+1),a) : si.dot(2*n+1);
 };
-
 
 
 //-----------------------`(ho.)decoderStereo`------------------------
@@ -232,7 +230,6 @@ with {
 };
 
 
-
 //----------------`(ho.)map`-------------------------
 // It simulate the distance of the source by applying a gain
 // on the signal and a wider processing on the soundfield.
@@ -255,8 +252,6 @@ with {
 	volume(r) = 1. / (r * r * (r > 1) + (r < 1));
 	ouverture(r) = r * (r < 1) + (r > 1);
 };
-
-
 
 
 //----------------`(ho.)rotate`-------------------------

@@ -113,7 +113,7 @@ phasor(tablesize,freq) = freq/float(ma.SR) : (+ : ma.decimal) ~ _ : *(float(tabl
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
 // Author: Mike Olsen
-hs_phasor(tablesize,freq,c) = inc : (+ : d)~ (-(_<:(_,*(_,clk)))) : *(tablesize)
+hs_phasor(tablesize,freq,c) = inc : (+ : d)~(-(_<:(_,*(_,clk)))) : *(tablesize)
 with {
 	clk = c>0;
 	d   = ma.decimal;

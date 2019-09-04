@@ -428,7 +428,7 @@ korg35HPF(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_
 letrec{
   's1 = _-s1:_*(alpha*2):_+s1;
   's2 = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2):_*alpha0:_*K:_-s2:_*alpha*2:_+s2;
-  's3 = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2):_*alpha0: _*K:_<:(_-s2:_*alpha:_+s2)*-1,_:>_-s3:_*alpha*2:_+s3;
+  's3 = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2):_*alpha0:_*K:_<:(_-s2:_*alpha:_+s2)*-1,_:>_-s3:_*alpha*2:_+s3;
   'y = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2):_*alpha0;
 }
 with{
@@ -480,7 +480,7 @@ letrec{
   's1 = _-s2:_-(s1*FBs1):_*alpha0:_*g<:_,(_+s1:ef.cubicnl(0.0,0)):>_;
   's2 = _-s2:_-(s1*FBs1):_*alpha0:_*g:_+s1:ef.cubicnl(0.0,0):_*g*2:_+s2;
   // Compute the BSF, BPF, HPF, LPF outputs
-  'ybsf = _-s2:_-(s1*FBs1):_*alpha0<:(_*g :_+s1:ef.cubicnl(0.0,0):_*g:_+s2),_:>_;
+  'ybsf = _-s2:_-(s1*FBs1):_*alpha0<:(_*g:_+s1:ef.cubicnl(0.0,0):_*g:_+s2),_:>_;
   'ybpf = _-s2:_-(s1*FBs1):_*alpha0:_*g:_+s1:ef.cubicnl(0.0,0);
   'yhpf = _-s2:_-(s1*FBs1):_*alpha0;
   'ylpf = _-s2:_-(s1*FBs1):_*alpha0:_*g :_+s1:ef.cubicnl(0.0,0):_*g:_+s2;

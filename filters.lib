@@ -199,7 +199,7 @@ ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : + ;
 declare ff_fcomb author "Julius O. Smith III";
 declare ff_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare ff_fcomb license "MIT-style STK-4.3 license";
-ff_fcomb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.fdelay(maxdel,M) : + ;
+ff_fcomb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.fdelay(maxdel,M) : +;
 
 //-----------`(fi.)ffcombfilter`-------------------
 // Typical special case of `ff_comb()` where: `b0 = 1`.
@@ -335,7 +335,7 @@ ffbcombfilter(maxdel,del,g) = (+ : de.fdelay(maxdel,del)) ~ *(g);
 declare allpass_comb author "Julius O. Smith III";
 declare allpass_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpass_comb license "MIT-style STK-4.3 license";
-allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : + ;
+allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
 
 //-------------------`(fi.)allpass_fcomb`-----------------
@@ -372,7 +372,7 @@ allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ :
 declare allpass_fcomb author "Julius O. Smith III";
 declare allpass_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpass_fcomb license "MIT-style STK-4.3 license";
-allpass_fcomb(maxdel,N,aN) = (+ <: de.fdelay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : + ;
+allpass_fcomb(maxdel,N,aN) = (+ <: de.fdelay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
 
 //-----------------------`(fi.)rev2`-----------------------
@@ -396,12 +396,12 @@ rev2(maxlen,len,g) = allpass_comb(maxlen,len,-g);
 declare allpass_fcomb5 author "Julius O. Smith III";
 declare allpass_fcomb5 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpass_fcomb5 license "MIT-style STK-4.3 license";
-allpass_fcomb5(maxdel,N,aN) = (+ <: de.fdelay5(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : + ;
+allpass_fcomb5(maxdel,N,aN) = (+ <: de.fdelay5(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
 declare allpass_fcomb1a author "Julius O. Smith III";
 declare allpass_fcomb1a copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpass_fcomb1a license "MIT-style STK-4.3 license";
-allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : + ;
+allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
 //========================Direct-Form Digital Filter Sections=============================
 //========================================================================================
@@ -2544,7 +2544,7 @@ filterbanki(O,lfreqs) = _ <: bsplit(nb) with
    bsplit(0) = *(-1.0);
    bsplit(i) = (hp(i) : delayeq(i-1)), (lp(i) <: bsplit(i-1));
    delayeq(0) = _; // moving the *(-1) here inverts all outputs BUT dc
-   delayeq(i) =  ap(i) : delayeq(i-1);
+   delayeq(i) = ap(i) : delayeq(i-1);
 };
 
 /*******************************************************************************
