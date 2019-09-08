@@ -28,6 +28,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `en`: `envelopes.lib`
 * `fi`: `filters.lib`
 * `ho`: `hoa.lib`
+* `it`: `interpolators.lib`
 * `ma`: `maths.lib`
 * `ef`: `misceffects.lib`
 * `os`: `oscillators.lib`
@@ -153,6 +154,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `envelopes.lib`
 * `filters.lib`
 * `hoa.lib`
+* `interpolators.lib`
 * `maths.lib`
 * `misceffects.lib`
 * `oscillators.lib`
@@ -201,6 +203,7 @@ dx = library("dx7.lib");
 en = library("envelopes.lib");
 fi = library("filters.lib");
 ho = library("hoa.lib");
+it = library("interpolators.lib");
 ma = library("maths.lib");
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
