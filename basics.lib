@@ -692,7 +692,7 @@ selectn(N,i) = S(N,0)
 
 
 //-----------------------------`(ba.)selectmulti`---------------------------------
-// Selects the ith circuit (all should have same number of outputs) among n at run time.
+// Selects the ith circuit among n at run time (all should have the same number of inputs and outputs).
 //
 // #### Usage
 //
@@ -708,14 +708,20 @@ selectn(N,i) = S(N,0)
 // #### Example test program
 //
 // ```
-// process = selectmulti(((_,_),(1,_),(1,6)), 2);
+// process = selectmulti(((3,9),(2,8),(5,7)), nentry("choice", 0, 0, 2, 1));
+// process = selectmulti(((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry("choice", 0, 0, 2, 1));
 // ```
 //-----------------------------------------------------------------------------
-
-selectmulti(lgen, n) = lgen : ro.interleave(outs, N) : par(i, outs, ba.selectn(N, n))
+selectmulti(lgen, n) = selectmultiX(ins, lgen, n)
 with {
-	outs = outputs(take(1, lgen));   // Number of outputs of the first item (all should have the same value)
-	N = outputs(lgen)/outs;          // Number of items in the list
+	selectmultiX(0, lgen, n) = selector;                    // Zero inputs
+	selectmultiX(N, lgen, n) = par(i, ins, _) <: selector;  // General case
+	
+	selector = lgen : ro.interleave(outs, N) : par(i, outs, selectn(N, n));
+	
+	outs = outputs(take(1, lgen));  // Number of outputs of the first item (all should have the same value)
+	ins = inputs(take(1, lgen));    // Number of inputs of the first item (all should have the same value)
+	N = outputs(lgen)/outs;         // Number of items in the list
 };
 
 
@@ -733,6 +739,7 @@ with {
 // * `bpc`: the selector switch (0/1)
 //------------------------------------------------------------
 select2stereo(bpc) = ro.cross2 : select2(bpc), select2(bpc) : _,_;
+
 
 //=====================================Other==============================================
 //========================================================================================
@@ -1022,14 +1029,15 @@ bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : select2stereo(bpc)
 // process = bypass_fade(ma.SR/10, checkbox("bypass echo"), echo);
 // process = bypass_fade(ma.SR/10, checkbox("bypass reverb"), freeverb);
 // ```
-
-bypass_fade(n, b, e) = par(i, inputs(e), _) 
-					<: (par(i, inputs(e), *(1-xb)) : e : par(i, outputs(e), *(1-xb)))
-					, par(i, inputs(e), *(xb))
-					:> par(i, outputs(e), _)
+//---------------------------------------------------------------
+bypass_fade(n, b, e) = par(i, ins, _) 
+			<: (par(i, ins, *(1-xb)) : e : par(i, outs, *(1-xb))), par(i, ins, *(xb))
+			:> par(i, outs, _)
   with {
-	xb = ramp(n, b);
-	ramp(n) = \(y,x).(if (y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
+    ins = inputs(e);
+    outs = outputs(e);
+    xb = ramp(n, b);
+    ramp(n) = \(y,x).(if (y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
   };
 
 
