@@ -214,7 +214,7 @@ pole2tau(pole) = -1.0/(log(pole)*ma.SR);
 //
 // * `mk`: the MIDI key number
 //-----------------------------
-midikey2hz(mk) = 440.0*pow(2.0, (mk-69.0)/12);
+midikey2hz(mk) = 440.0*pow(2.0, (mk-69.0)/12.0);
 
 
 //-------`(ba.)hz2midikey`----------
@@ -231,7 +231,41 @@ midikey2hz(mk) = 440.0*pow(2.0, (mk-69.0)/12);
 //
 // * `f`: frequency in Hz
 //-----------------------------
-hz2midikey(f) = 12*ma.log2(f/440.0) + 69.0;
+hz2midikey(f) = 12.0*ma.log2(f/440.0) + 69.0;
+
+
+//-------`(ba.)semi2ratio`----------
+// Converts semitones in a frequency multiplicative ratio.
+// `semi2ratio` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// semi2ratio(semi) : _
+// ```
+//
+// Where:
+//
+// * `semi`: semitone
+//-----------------------------
+semi2ratio(semi) = pow(2.0, semi/12.0);
+
+
+//-------`(ba.)ratio2semi`----------
+// Converts a frequency multiplicative ratio in semitones.
+// `ratio2semi` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// ratio2semi(ratio) : _
+// ```
+//
+// Where:
+//
+// * `ratio`: a frequency multiplicative ratio
+//-----------------------------
+ratio2semi(ratio) = 12.0*log(ratio)/log(2.0);
 
 
 //-------`(ba.)pianokey2hz`----------
@@ -247,7 +281,7 @@ hz2midikey(f) = 12*ma.log2(f/440.0) + 69.0;
 //
 // * `pk`: the piano key number
 //-----------------------------
-pianokey2hz(pk) = 440.0*pow(2.0, (pk-49.0)/12);
+pianokey2hz(pk) = 440.0*pow(2.0, (pk-49.0)/12.0);
 
 
 //-------`(ba.)hz2pianokey`----------
@@ -263,7 +297,7 @@ pianokey2hz(pk) = 440.0*pow(2.0, (pk-49.0)/12);
 //
 // * `f`: frequency in Hz
 //-----------------------------
-hz2pianokey(f) = 12*ma.log2(f/440.0) + 49.0;
+hz2pianokey(f) = 12.0*ma.log2(f/440.0) + 49.0;
 
 // end jos section
 //########################################################################################
