@@ -52,7 +52,7 @@ ro = library("routes.lib");
 ba = library("basics.lib"); // so functions here can be copy/pasted out
 
 declare name "Faust Basic Element Library";
-declare version "0.0";
+declare version "0.1";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -147,6 +147,7 @@ lin2LogGain(n) = n*n;
 // ```
 //---------------------------------------------
 log2LinGain(n) = sqrt(n);
+
 
 // end GRAME section
 //########################################################################################
@@ -299,6 +300,7 @@ pianokey2hz(pk) = 440.0*pow(2.0, (pk-49.0)/12.0);
 //-----------------------------
 hz2pianokey(f) = 12.0*ma.log2(f/440.0) + 49.0;
 
+
 // end jos section
 //########################################################################################
 /************************************************************************
@@ -375,6 +377,24 @@ sweep = %(int(*:max(1)))~+(1);
 // ```
 //------------------------
 time = (+(1)~_) - 1;
+
+
+//-------`(ba.)ramp`----------
+// An linear ramp of 'n' samples to reach the next value
+//
+// #### Usage
+//
+// ```
+// _ : ramp(n) : _
+// ```
+// Where:
+//
+// * `n`: number of samples to reach the next value
+//------------------------
+ramp = case {
+	(0) => _;
+	(n) => \(y,x).(if(y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
+};
 
 
 //-------`(ba.)tempo`----------
@@ -534,7 +554,7 @@ pulse_countdown(trig) = - ~ _ * trig;
 //TODO: author "Vince"
 pulse_countup_loop(n, trig) = + ~ cond(n)*trig
 with {
-  cond(n) = _ <: _ * (_ <= n);
+  	cond(n) = _ <: _ * (_ <= n);
 };
 
 
@@ -576,7 +596,7 @@ resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
 //TODO: author "Vince:
 pulse_countdown_loop(n, trig) = - ~ cond(n)*trig
 with {
-  cond(n) = _ <: _ * (_ >= n);
+  	cond(n) = _ <: _ * (_ >= n);
 };
 
 
@@ -670,20 +690,21 @@ subseq(head, 0, n)         = head;
 if(cond,then,else) = select2(cond,else,then);
 // TODO: perhaps it would make more sense to have an if(a,b) and an ifelse(a,b,c)?
 
+
 //-----------------------------`(ba.)selector`---------------------------------
 // Selects the ith input among n at compile time.
 //
 // #### Usage
 //
 // ```
-// selector(i,n)
+// selector(I,N)
 // _,_,_,_ : selector(2,4) : _  // selects the 3rd input among 4
 // ```
 //
 // Where:
 //
-// * `i`: input to select (int, numbered from 0, known at compile time)
-// * `n`: number of inputs (int, known at compile time, n > i)
+// * `I`: input to select (int, numbered from 0, known at compile time)
+// * `N`: number of inputs (int, known at compile time, N > I)
 //
 // There is also cselector for selecting among complex input signals of the form (real,imag).
 //
@@ -711,51 +732,70 @@ cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; 
 //
 // ```
 // N = 64;
-// process = par(n,N, (par(i,N,i) : selectn(N,n)));
+// process = par(n, N, (par(i,N,i) : selectn(N,n)));
 // ```
 //-----------------------------------------------------------------------------
-selectn(N,i) = S(N,0)
+selectn(N,i) = selectnX(N,i,selector)
+with {
+    selector(i,j,x,y) = select2((i >= j), x, y);
+};
+
+// The generic version with a 'sel' function to be applied on: 
+// - the channel index as a (possibly) fractional value
+// - the next channel index as an integer value
+// - the 2 signals to be selected between
+
+selectnX(N,i,sel) = S(N,0)
+with {
+    S(1,offset) = _;
+    S(n,offset) = S(left, offset), S(right, offset+left) : sel(i, offset+left)
     with {
-       S(1,offset) = _;
-       S(n,offset) = S(left, offset), S(right, offset+left) : select2(i >= offset+left)
-            with {
-                right = int(n/2);
-                left  = n-right;
-            };
+        right = int(n/2);
+        left  = n-right;
     };
+};
 
 
 //-----------------------------`(ba.)selectmulti`---------------------------------
-// Selects the ith circuit among n at run time (all should have the same number of inputs and outputs).
+// Selects the ith circuit among N at run time (all should have the same number of inputs and outputs)
+// with a crossfade.
 //
 // #### Usage
 //
 // ```
-// selectmulti(lgen,n)
+// selectmulti(n,lgen,id)
 // ```
 //
 // Where:
 //
+// * `n`: number of samples for the crossfade
 // * `lgen`: list of circuits
-// * `n`: circuit to select (int, numbered from 0)
+// * `id`: circuit to select (int, numbered from 0)
 //
 // #### Example test program
 //
 // ```
-// process = selectmulti(((3,9),(2,8),(5,7)), nentry("choice", 0, 0, 2, 1));
-// process = selectmulti(((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry("choice", 0, 0, 2, 1));
+// process = selectmulti(ma.SR/10, ((3,9),(2,8),(5,7)), nentry("choice", 0, 0, 2, 1));
+// process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry("choice", 0, 0, 2, 1));
 // ```
 //-----------------------------------------------------------------------------
-selectmulti(lgen, n) = selectmultiX(ins, lgen, n)
+selectmulti(n, lgen, id) = selectmultiX(ins, lgen, id)
 with {
-	selectmultiX(0, lgen, n) = selector;                    // Zero inputs
-	selectmultiX(N, lgen, n) = par(i, ins, _) <: selector;  // General case
-	
-	selector = lgen : ro.interleave(outs, N) : par(i, outs, selectn(N, n));
-	
-	outs = outputs(take(1, lgen));  // Number of outputs of the first item (all should have the same value)
-	ins = inputs(take(1, lgen));    // Number of inputs of the first item (all should have the same value)
-	N = outputs(lgen)/outs;         // Number of items in the list
+    selectmultiX(0, lgen, id) = selector;                    // Zero inputs
+    selectmultiX(N, lgen, id) = par(i, ins, _) <: selector;  // General case
+
+    selector = lgen : ro.interleave(outs, N) : par(i, outs, selectnX(N, id, xfade))
+    with {
+        // crossfade of 'n' samples between 'x' and 'y' channels when the channel index changes
+        xfade(i, j, x, y) = x*(1-xb) + y*xb
+        with {
+            xb = ramp(n, (i >= j));
+        };
+    };
+
+    outs = outputs(take(1, lgen));  // Number of outputs of the first item (all should have the same value)
+    ins = inputs(take(1, lgen));    // Number of inputs of the first item (all should have the same value)
+    N = outputs(lgen)/outs;         // Number of items in the list
 };
 
 
@@ -830,7 +870,7 @@ sAndH(t) = select2(t,_,_)~_;
 // Author: RM
 downSample(freq) = sAndH(hold)
 with {
-  hold = time%int(ma.SR/freq) == 0;
+  	hold = time%int(ma.SR/freq) == 0;
 };
 
 
@@ -845,8 +885,9 @@ with {
 //
 // Where:
 //
-// `mode` means: 0 - Pass through. A single sample 0 trigger will work as a reset.
-//    1 - Track and hold max value.
+// `mode` means: 
+//	0 - Pass through. A single sample 0 trigger will work as a reset.
+//  1 - Track and hold max value.
 //----------------------------------------------------------------
 // TODO: author Jonatan Liljedahl, revised by RM
 peakhold = (*,_:max) ~ _;
@@ -896,7 +937,7 @@ automat(bps, size, init, input) = rwtable(size+1, init, windex, input, rindex)
 with {
 	clock 	= beat(bps);
 	rindex 	= int(clock) : (+ : %(size)) ~ _;		// each clock read the next entry of the table
-	windex 	= if (timeToRenew, rindex, size);		// we ignore input unless it is time to renew
+	windex 	= if(timeToRenew, rindex, size);		// we ignore input unless it is time to renew
 	timeToRenew 	= int(clock) & (inputHasMoved | (input <= init));
 	inputHasMoved 	= abs(input-input') : countfrom(int(clock)') : >(0);
 	countfrom(reset) = (+ : if(reset, 0, _)) ~ _;
@@ -942,12 +983,12 @@ with {
 //--------------------------------------------------------
 bpf = environment
 {
-  // Start a break-point function
-  start(x0,y0) = \(x).(x0,y0,x,y0);
-  // Add a break-point
-  point(x1,y1) = \(x0,y0,x,y).(x1, y1, x , if (x < x0, y, if (x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
-  // End a break-point function
-  end(x1,y1) = \(x0,y0,x,y).(if (x < x0, y, if (x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
+  	// Start a break-point function
+  	start(x0,y0) = \(x).(x0,y0,x,y0);
+  	// Add a break-point
+  	point(x1,y1) = \(x0,y0,x,y).(x1, y1, x , if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
+  	// End a break-point function
+  	end(x1,y1) = \(x0,y0,x,y).(if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
 };
 
 
@@ -957,9 +998,8 @@ bpf = environment
 // #### Usage
 //
 // ```
-// foo = listInterp((800,400,350,450,325),index);
-// i = 1.69; // range is 0-4
-// process = foo(i);
+// index = 1.69; // range is 0-4
+// process = listInterp((800,400,350,450,325),index);
 // ```
 //
 // Where:
@@ -969,9 +1009,9 @@ bpf = environment
 //------------------------------------------------------------
 // Author: RM
 listInterp(v) =
-  bpf.start(0,take(1,v)) :
-  seq(i,count(v)-2,bpf.point(i+1,take(i+2,v))) :
-  bpf.end(count(v)-1,take(count(v),v));
+  	bpf.start(0,take(1,v)) :
+  	seq(i,count(v)-2,bpf.point(i+1,take(i+2,v))) :
+  	bpf.end(count(v)-1,take(count(v),v));
 
 
 //-------------------`(ba.)bypass1`-------------------------
@@ -992,9 +1032,9 @@ listInterp(v) =
 // Author: JOS
 // License: STK-4.3
 bypass1(bpc,e) = _ <: select2(bpc,(inswitch:e),_)
-  with {
+with {
     inswitch = select2(bpc,_,0);
-  };
+};
 
 //-------------------`(ba.)bypass2`-------------------------
 // Takes a stereo input signal, route it to `e` and bypass it if `bpc = 1`.
@@ -1014,9 +1054,9 @@ bypass1(bpc,e) = _ <: select2(bpc,(inswitch:e),_)
 // Author: JOS
 // License: STK-4.3
 bypass2(bpc,e) = _,_ <: ((inswitch:e),_,_) : select2stereo(bpc)
-  with {
+with {
     inswitch = _,_ : (select2(bpc,_,0), select2(bpc,_,0)) : _,_;
-  };
+};
 
 //-------------------`(ba.)bypass1to2`-------------------------
 // Bypass switch for effect `e` having mono input signal and stereo output.
@@ -1037,9 +1077,9 @@ bypass2(bpc,e) = _,_ <: ((inswitch:e),_,_) : select2stereo(bpc)
 // Author: JOS
 // License: STK-4.3
 bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : select2stereo(bpc)
-  with {
+with {
     inswitch = select2(bpc,_,0);
-  };
+};
 
 
 //-------------------`(ba.)bypass_fade`-------------------------
@@ -1067,12 +1107,11 @@ bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : select2stereo(bpc)
 bypass_fade(n, b, e) = par(i, ins, _) 
 			<: (par(i, ins, *(1-xb)) : e : par(i, outs, *(1-xb))), par(i, ins, *(xb))
 			:> par(i, outs, _)
-  with {
+with {
     ins = inputs(e);
     outs = outputs(e);
     xb = ramp(n, b);
-    ramp(n) = \(y,x).(if (y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
-  };
+};
 
 
 //----------------------------`(ba.)toggle`------------------------------------------
@@ -1094,10 +1133,10 @@ bypass_fade(n, b, e) = par(i, ins, _)
 //------------------------------------------------------------------------------
 // TODO: author "Vince"
 toggle = trig : loop
-  with {
+with {
     trig(x) = (x-x') == 1;
-    loop = (_ != _) ~ _;
-  };
+    loop = != ~ _;
+};
 
 
 //----------------------------`(ba.)on_and_off`------------------------------------------
@@ -1118,10 +1157,10 @@ toggle = trig : loop
 //------------------------------------------------------------------------------
 // TODO: author "Vince"
 on_and_off(a, b) = (a : trig) : loop(b)
-  with {
+with {
     trig(x) = (x-x') == 1;
     loop(b) = + ~ (_ >= 1) * ((b : trig) == 0);
-  };
+};
 
 
 //-----------------------------`(ba.)selectoutn`---------------------------------
@@ -1141,13 +1180,13 @@ on_and_off(a, b) = (a : trig) : loop(b)
 // #### Example
 //
 // ```
-// process = 1 : selectoutn(3, sel) : par(i,3,bar);
-// sel = hslider("volume",0,0,2,1) : int;
-// bar = vbargraph("v.bargraph", 0, 1);
+// process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph("v.bargraph %i", 0, 1));
+// sel = hslider("volume", 0, 0, 2, 1) : int;
 // ```
 //--------------------------------------------------------------------------
 // TODO: author "Vince"
-selectoutn(n, s) = _ <: par(i,n, _* (s==i));
+selectoutn(n, s) = _ <: par(i, n, *(s==i));
+
 
 //=================================Sliding Reduce=========================================
 // Provides various operations on the last N samples using a high order
@@ -1349,7 +1388,7 @@ selectoutn(n, s) = _ <: par(i,n, _* (s==i));
 slidingReduce(op,N,maxN,disabledVal,x) =
   par(i,maxNrBits,fixedDelayOp(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)
     : useVal(i)) : combine(maxNrBits)
-  with {
+with {
     // apply <op> to the last <N> values of <x>, where <N> is fixed
     fixedDelayOp = case {
       (1,x) => x;
@@ -1358,7 +1397,7 @@ slidingReduce(op,N,maxN,disabledVal,x) =
     // The sum of all the sizes of the previous blocks
     sumOfPrevBlockSizes(N,maxN,0) = 0;
     sumOfPrevBlockSizes(N,maxN,i) = (subseq((allBlockSizes(N,maxN)),0,i):>_);
-    allBlockSizes(N,maxN) = par(i, maxNrBits, (pow2(i)) * isUsed(i) );
+    allBlockSizes(N,maxN) = par(i, maxNrBits, (pow2(i)) * isUsed(i));
     maxNrBits = int2nrOfBits(maxN);
     // Apply <op> to <N> parallel inputsignals
     combine(2) = op;
@@ -1369,12 +1408,12 @@ slidingReduce(op,N,maxN,disabledVal,x) =
     // 'works' in this case means 'does the same as reduce
     useVal(i) =
       _ <: select2(
-        (i==0) & (N==0) ,
-        select2( isUsed(i) , disabledVal,_),
+        (i==0) & (N==0),
+        select2(isUsed(i) , disabledVal,_),
         _
       );
     // useVal(i) =
-    //     select2( isUsed(i) , disabledVal,_);
+    //     select2(isUsed(i) , disabledVal,_);
     isUsed(i) = take(i+1,(int2bin(N,maxN)));
     pow2(i) = 1<<i;
     // same as:
@@ -1386,7 +1425,7 @@ slidingReduce(op,N,maxN,disabledVal,x) =
     // calculate how many ones and zeros are needed to represent maxN
     int2nrOfBits(0) = 0;
     int2nrOfBits(maxN) = int(floor(log(maxN)/log(2))+1);
-  };
+};
 
 
 //------------------------------`(ba.)slidingSumN`------------------------------
