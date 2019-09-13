@@ -117,8 +117,6 @@ with{
 // License: STK-4.3
 arfe(attT60,relT60,fv,gate) = envelope with {
   ugate = gate>0;
-  samps = ugate : +~(*(ugate)); // ramp time in samples
-  attSamps = int(attT60 * ma.SR);
   target = select2(ugate, fv, float(gate));
   t60 = select2(ugate, relT60, attT60);
   pole = ba.tau2pole(t60/6.91);
@@ -223,11 +221,11 @@ adsr(at,dt,sl,rt,gate) = ADS - R : max(0)
         A = time * adelta;
 
         // ADS part
-        ADS = min(A, max(D,sl));
+        ADS = min(A, max(D, sl));
 
         // Release curve (starts at the end of the trig signal)
         // with the current value of the envelop
-        R = rime*rdelta;
+        R = rime * rdelta;
 
     };
 
@@ -308,7 +306,6 @@ adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
 // License: STK-4.3
 asre(attT60,susLvl,relT60,gate) = envelope with {
   ugate = gate>0;
-  samps = ugate : +~(*(ugate)); // ramp time in samples
   target = select2(ugate, 0.0, (susLvl)*float(ugate));
   t60 = select2(ugate, relT60, attT60);
   pole = ba.tau2pole(t60/6.91);

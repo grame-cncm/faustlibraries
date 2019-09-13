@@ -247,7 +247,7 @@ hz2midikey(f) = 12.0*ma.log2(f/440.0) + 69.0;
 //
 // Where:
 //
-// * `semi`: semitone
+// * `semi`: number of semitone 
 //-----------------------------
 semi2ratio(semi) = pow(2.0, semi/12.0);
 
@@ -264,7 +264,7 @@ semi2ratio(semi) = pow(2.0, semi/12.0);
 //
 // Where:
 //
-// * `ratio`: a frequency multiplicative ratio
+// * `ratio`: frequency multiplicative ratio
 //-----------------------------
 ratio2semi(ratio) = 12.0*log(ratio)/log(2.0);
 
@@ -458,7 +458,7 @@ pulse(p) = period(p)==0;
 //
 // Where:
 //
-// * `n`: the length of the pulse as a number of samples
+// * `n`: pulse length as a number of samples
 // * `p`: period as a number of samples
 //------------------------
 // NOTE: may be this should go in oscillators.lib
@@ -713,6 +713,22 @@ selector(i,n) = par(j, n, S(i, j))    with { S(i,i) = _; S(i,j) = !; };
 cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; // for complex numbers
 
 
+//--------------------`(ba.)select2stereo`--------------------
+// Select between 2 stereo signals.
+//
+// #### Usage
+//
+// ```
+// _,_,_,_ : select2stereo(bpc) : _,_    
+// ```
+//
+// Where:
+//
+// * `bpc`: the selector switch (0/1)
+//------------------------------------------------------------
+select2stereo(bpc) = ro.cross2 : select2(bpc), select2(bpc) : _,_;
+
+
 //-----------------------------`(ba.)selectn`---------------------------------
 // Selects the ith input among N at run time.
 //
@@ -768,7 +784,7 @@ with {
 //
 // Where:
 //
-// * `n`: number of samples for the crossfade
+// * `n`: crossfade in samples
 // * `lgen`: list of circuits
 // * `id`: circuit to select (int, numbered from 0)
 //
@@ -781,38 +797,19 @@ with {
 //-----------------------------------------------------------------------------
 selectmulti(n, lgen, id) = selectmultiX(ins, lgen, id)
 with {
-    selectmultiX(0, lgen, id) = selector;                    // Zero inputs
+    selectmultiX(0, lgen, id) = selector;                    // No inputs
     selectmultiX(N, lgen, id) = par(i, ins, _) <: selector;  // General case
 
     selector = lgen : ro.interleave(outs, N) : par(i, outs, selectnX(N, id, xfade))
     with {
         // crossfade of 'n' samples between 'x' and 'y' channels when the channel index changes
-        xfade(i, j, x, y) = x*(1-xb) + y*xb
-        with {
-            xb = ramp(n, (i >= j));
-        };
+        xfade(i, j, x, y) = x*(1-xb) + y*xb with { xb = ramp(n, (i >= j)); };
     };
 
     outs = outputs(take(1, lgen));  // Number of outputs of the first item (all should have the same value)
     ins = inputs(take(1, lgen));    // Number of inputs of the first item (all should have the same value)
     N = outputs(lgen)/outs;         // Number of items in the list
 };
-
-
-//--------------------`(ba.)select2stereo`--------------------
-// Select between 2 stereo signals.
-//
-// #### Usage
-//
-// ```
-// _,_,_,_ : select2stereo(bpc) : _,_    
-// ```
-//
-// Where:
-//
-// * `bpc`: the selector switch (0/1)
-//------------------------------------------------------------
-select2stereo(bpc) = ro.cross2 : select2(bpc), select2(bpc) : _,_;
 
 
 //=====================================Other==============================================
@@ -894,17 +891,21 @@ peakhold = (*,_:max) ~ _;
 
 
 //------------------`(ba.)peakholder`---------------------------
-// Tracks abs peak and holds peak for 'holdtime' samples.
+// Tracks abs peak and holds peak for 'n' samples.
 //
 // #### Usage
 //
 // ```
-// _ : peakholder(holdtime) : _;
+// _ : peakholder(n) : _;
 // ```
+//
+// Where:
+//
+// * `n`: number of samples
 //----------------------------------------------------------------
 // TODO: author Jonatan Liljedahl
-peakholder(holdtime) = peakhold2 ~ reset : (!,_) with {
-    reset = sweep(holdtime) > 0;
+peakholder(n) = peakhold2 ~ reset : (!,_) with {
+    reset = sweep(n) > 0;
     // first out is gate that is 1 while holding last peak
     peakhold2 = _,abs <: peakhold,!,_ <: >=,_,!;
 };
@@ -1036,6 +1037,7 @@ with {
     inswitch = select2(bpc,_,0);
 };
 
+
 //-------------------`(ba.)bypass2`-------------------------
 // Takes a stereo input signal, route it to `e` and bypass it if `bpc = 1`.
 // `bypass2` is a standard Faust function.
@@ -1057,6 +1059,7 @@ bypass2(bpc,e) = _,_ <: ((inswitch:e),_,_) : select2stereo(bpc)
 with {
     inswitch = _,_ : (select2(bpc,_,0), select2(bpc,_,0)) : _,_;
 };
+
 
 //-------------------`(ba.)bypass1to2`-------------------------
 // Bypass switch for effect `e` having mono input signal and stereo output.
@@ -1331,7 +1334,7 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 //
 // Then it becomes a matter of:
 //
-// * lining up all the different block sizes in parallel:  the first `par()`
+// * lining up all the different block sizes in parallel: the first `par()`
 //  statement
 // * delaying each the appropriate amount: `sumOfPrevBlockSizes()`
 // * turning it on or off: `useVal()`
@@ -1389,31 +1392,36 @@ slidingReduce(op,N,maxN,disabledVal,x) =
   par(i,maxNrBits,fixedDelayOp(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)
     : useVal(i)) : combine(maxNrBits)
 with {
-    // apply <op> to the last <N> values of <x>, where <N> is fixed
+
+    // Apply <op> to the last <N> values of <x>, where <N> is fixed
     fixedDelayOp = case {
       (1,x) => x;
-      (N,x) =>  op(fixedDelayOp(N/2,x) , fixedDelayOp(N/2,x)@(N/2));
+      (N,x) => op(fixedDelayOp(N/2,x), fixedDelayOp(N/2,x)@(N/2));
     };
+    
     // The sum of all the sizes of the previous blocks
     sumOfPrevBlockSizes(N,maxN,0) = 0;
     sumOfPrevBlockSizes(N,maxN,i) = (subseq((allBlockSizes(N,maxN)),0,i):>_);
     allBlockSizes(N,maxN) = par(i, maxNrBits, (pow2(i)) * isUsed(i));
     maxNrBits = int2nrOfBits(maxN);
-    // Apply <op> to <N> parallel inputsignals
+    
+    // Apply <op> to <N> parallel input signals
     combine(2) = op;
     combine(N) = op(combine(N-1),_);
+    
     // Decide wether or not to use a certain value, based on N
     // Basically only the second <select2> is needed,
     // but this version also works for N == 0
-    // 'works' in this case means 'does the same as reduce
+    // 'works' in this case means 'does the same as reduce'
     useVal(i) =
       _ <: select2(
         (i==0) & (N==0),
-        select2(isUsed(i) , disabledVal,_),
+        select2(isUsed(i), disabledVal,_),
         _
       );
+      
     // useVal(i) =
-    //     select2(isUsed(i) , disabledVal,_);
+    //     select2(isUsed(i), disabledVal,_);
     isUsed(i) = take(i+1,(int2bin(N,maxN)));
     pow2(i) = 1<<i;
     // same as:

@@ -250,7 +250,7 @@ Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' uses the '
 // waveform and index step
 waveform_interpolator(wf, step, interp) = interp(gen, idv)
 with {
-    gen(idx) = wf, (idx:max(0):min(size)) : rdtable with { size = wf:(_,!); };   // waveform size
+    gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(_,!); };   // waveform size
     index = (+(step)~_)-step;  // starting from 0
     idv = ru.make_idv(index);  // build the signal for interpolation in a generic way
 };
@@ -268,7 +268,7 @@ with {
 // waveform and index 
 waveform_interpolator1(wf, idv, interp) = interp(gen, idv)
 with {
-    gen(idx) = wf, (idx:max(0):min(size)) : rdtable with { size = wf:(_,!); };   // waveform size
+    gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(_,!); };   // waveform size
 };
 
 waveform_linear1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_linear);
