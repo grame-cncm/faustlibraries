@@ -68,6 +68,54 @@ si = library("signals.lib");
 // Author: RM
 smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 
+// Generic implementation
+adsrX(at,dt,sl,rt,gate) = environment {
+
+    // durations in samples
+    an = max(2, at*ma.SR);  // At least 2 to make ar(at,rt,gate) works with ar = 0
+    dn = max(1, dt*ma.SR);
+    rn = max(1, rt*ma.SR);
+
+    // deltas per samples
+    adelta = 1/an;
+    ddelta = (1-sl)/dn;
+    rdelta = sl/rn;
+	
+    // Attack curve
+    A = atime * adelta;
+
+    // Decay curve
+    D0 = 1 + an * ddelta;
+    D = D0 - atime * ddelta;
+
+    // ADS part
+    ADS = min(A, max(D, sl));
+
+    // AS part
+    AS = min(A, sl);  
+    
+    // Attack time
+    atime = +(gate) ~ *(gate' >= gate);
+    
+    // Release time starts when gate is 0 (used in 'asr' and 'adsr' cases)
+    rtime1 = (+(1) : *(gate == 0)) ~ _;
+    
+    // Release time starts when gate is 0 or envelope reaches 1 (used in 'ar' case)
+    rtime2 = (+(1) : *((gate == 0) | (AS >= 1))) ~ _;
+    
+    // Release curve starts when gate is 0 with the current value of the envelope
+    R1 = rtime1 * rdelta;
+    
+    // Release curve starts when gate is 0 or envelope reaches 1 with the current value of the envelope
+    R2 = rtime2 * rdelta;
+    
+    // The 3 envelopes
+    ar = AS - R2 : max(0);
+    asr = AS - R1 : max(0);
+    adsr = ADS - R1 : max(0);
+    
+};
+
 //-----------------------`(en.)ar`--------------------------
 // AR (Attack, Release) envelope generator (useful to create percussion envelopes).
 // `ar` is a standard Faust function.
@@ -75,16 +123,20 @@ smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 // #### Usage
 //
 // ```
-// ar(a,r,t) : _
+// ar(at,rt,t) : _
 // ```
 //
 // Where:
 //
-// * `a`: attack (sec)
-// * `r`: release (sec)
+// * `at`: attack (sec)
+// * `rt`: release (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
 // when `t=0`)
 //-----------------------------------------------------
+declare ar author "Yann Orlarey";
+ar(at,rt,gate) = adsrX(at,0.0,1.0,rt,gate).ar;
+
+/*
 // Author: RM
 ar(a,r,t) = cnt(totalTime,totalTime,on) : ba.bpf.start(0,0) :
 	ba.bpf.point(attTime,1) : ba.bpf.end(attTime+relTime,0)
@@ -95,6 +147,7 @@ with{
 	relTime = ma.SR*r;
 	totalTime = attTime+relTime;
 };
+*/
 
 //------------------------`(en.)arfe`----------------------
 // ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
@@ -151,17 +204,21 @@ are(attT60,relT60,gate) = arfe(attT60,relT60,0,gate);
 // #### Usage
 //
 // ```
-// asr(a,s,r,t) : _
+// asr(at,sl,rt,t) : _
 // ```
 //
 // Where:
 //
-// * `a`: attack (sec)
-// * `s`: sustain (fraction of `t`: 0-1) 
+// * `at`: attack (sec)
+// * `sl`: sustain level (between 0..1) 
 // * `r`: release (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
 // when `t=0`)
 //-----------------------------------------------------
+declare asr author "Yann Orlarey";
+asr(at,sl,rt,gate) = adsrX(at,0.0,sl,rt,gate).asr;
+
+/*
 // Author: RM
 asr(a,s,r,t) = on*(as) : ba.sAndH(on) : rel
 with{
@@ -174,6 +231,7 @@ with{
 		ba.bpf.end(attTime,sustainGain);
 	rel = _,ba.countup(relTime,on) : ba.bpf.start(0) : ba.bpf.end(relTime,0);
 };
+*/
 
 //------------------------`(en.)adsr`----------------------
 // ADSR (Attack, Decay, Sustain, Release) envelope generator.
@@ -195,39 +253,8 @@ with{
 // when `gate=0`)
 //-----------------------------------------------------
 declare adsr author "Yann Orlarey";
-adsr(at,dt,sl,rt,gate) = ADS - R : max(0)
+adsr(at,dt,sl,rt,gate) = adsrX(at,dt,sl,rt,gate).adsr;
 
-    with {
-
-        // durations in samples
-        an = max(1, at*ma.SR);
-        dn = max(1, dt*ma.SR);
-        rn = max(1, rt*ma.SR);
-
-        // deltas per samples
-        adelta = 1/an;
-        ddelta = (1-sl)/dn;
-        rdelta = sl/rn;
-
-        // Envelop time
-        time = +(gate) ~ *(gate' >= gate);
-        rime = (+(1) : *(gate==0)) ~ _;
-
-        // Decay curve
-        D0 = 1 + an * ddelta;
-        D = D0 - time * ddelta;
-
-        // Attack curve
-        A = time * adelta;
-
-        // ADS part
-        ADS = min(A, max(D, sl));
-
-        // Release curve (starts at the end of the trig signal)
-        // with the current value of the envelop
-        R = rime * rdelta;
-
-    };
 
 //-----------------------------------------------------
 // Old version of ADSR (originally from music.lib)...
