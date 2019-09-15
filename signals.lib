@@ -157,25 +157,27 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 //-----------------------`(si.)holdOrJoin`--------------------------------
 //
 // This function takes a signal "i" as input and a boolean
-// value representing the state of the function (hold or join).
-// Suppose we start in join mode, the function outputs its
+// value representing the state of the function (0 = hold, 1 = join).
+// Suppose we start in "join" state, the function simply outputs its
 // input signal.
 // When the function goes into "hold" state for the first time
-// it samples, holds and output the input signal value "i0".
+// it samples, holds and output the input sampled value "s0".
 //
-// When going back into join mode,
-// the function outputs "i0" until the input signal
-// joins "i0" (i==i0).
-// The function then outputs "i" again.
+// When going back into "join" state,
+// the function outputs "s0" until the input signal
+// joins "s0".
 //
-// If we go into hold state again and
-// "i" hasn't joined "i0" the function keeps outputting "i0"
+// As soon as the input signal "i" joins the
+// value "s0" the function switch its output to "i".
+//
+// Rem: If we go into "hold" state again and
+// "i" hasn't joined "s0" the function keeps outputting "s0".
 //
 // This function solves the particular use case of controlling
 // Multitimbral synthesizer parameters via midi controllers.
 // As an example:
 // Filter cutoff potentiometer might be
-// shared between the multiples voices of the synth.
+// shared between the multiples voices of a synth.
 // Depending on which synthesizer voice has the focus,
 // the user might move the potentiometer to different positions.
 // When switching between voices, the parameter value 
