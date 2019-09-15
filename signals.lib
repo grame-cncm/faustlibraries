@@ -154,27 +154,37 @@ polySmooth(g,s,d) = smooth(s*((g==(g@d)) | (g == 0)));
 //-------------------------------------------------------------------
 smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 
-//-----------------------`(si.)holdAndJoin`--------------------------------
-// A function that holds its output 
-// signal when a 'off' trigger is sent to it.
-// When a 'on' trigger is received
-// the function waits until the input signal
-// joins the held value. Once the input
-// value joins the held value the function is bypassed.
+//-----------------------`(si.)holdOrJoin`--------------------------------
 //
-// When working with multi-timbral synthesizers, some parameters 
-// might be shared between different synth voices (filter cutoff, resonance, ...).
-// It is common that such a parameter will
-// be controlled by a physical potentiometer sending Midi CC.
-// Depending on which synthesizer voice has the focus, the user might set 
-// the potentiometer to different positions.
-// When switching back to a voice, the parameters values 
-// might jump because the potentiometers physical positions 
-// do not match the parameters values anymore.
+// This function takes a signal "i" as input and a boolean
+// value representing the state of the function (hold or join).
+// Suppose we start in join mode, the function outputs its
+// input signal.
+// When the function goes into "hold" state for the first time
+// it samples, holds and output the input signal value "i0".
+//
+// When going back into join mode,
+// the function outputs "i0" until the input signal
+// joins "i0" (i==i0).
+// The function then outputs "i" again.
+//
+// If we go into hold state again and
+// "i" hasn't joined "i0" the function keeps outputting "i0"
+//
+// This function solves the particular use case of controlling
+// Multitimbral synthesizer parameters via midi controllers.
+// As an example:
+// Filter cutoff potentiometer might be
+// shared between the multiples voices of the synth.
+// Depending on which synthesizer voice has the focus,
+// the user might move the potentiometer to different positions.
+// When switching between voices, the parameter value 
+// might jump because the potentiometer physical position 
+// do not match the parameter value anymore.
 // 
 // Wrong jump example: 
-// Focus on voice 1: setting cutoff to 200 Hz via midi CC 54
-// Focus on voice 2: setting cutoff to 1000 Hz via midi CC 54
+// Focus on voice 1: setting cutoff to 200 Hz
+// Focus on voice 2: setting cutoff to 1000 Hz
 // Focus on voice 1: setting cutoff -> value jumps abruptly to 1000 Hz.
 //
 // On the above example we would prefer to:
@@ -204,7 +214,7 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 //                             acquired
 // ```
 //
-// holdAndjoin, illustration:
+// holdOrjoin, illustration:
 //
 // ```
 // (At time 0, the focus is on voice 1.)
@@ -232,7 +242,7 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 // #### Usage
 //
 // ```
-// hslider(...),g : holdAndJoin : _
+// hslider(...),g : holdOrJoin : _
 // ```
 //
 // #### Usage Example
@@ -240,21 +250,25 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 // ```
 // in = hslider("in", 0, 0, 127, 1);
 // b = checkbox("Hold/Join"); 
-// process = in, b : holdAndJoin : hbargraph("out", 0, 127);
+// process = in, b : holdOrJoin : hbargraph("out", 0, 127);
 // ```
 //
 // Where:
 //
-// * `in`: the input signal
-// * `b`: the hold signal (0 for hold, 1 for Join)
+// * `i`: the input signal
+// * `b`: the function state (0 for hold, 1 for join)
 //-------------------------------------------------------------------
-holdAndJoin(x,g) = (joined_h : _, h), x : select2((g == 1) & (_))
+holdOrJoin(i, b) = (joined_h(i, b) <: _, holder(i)), i : select2((b == 1) & (_))
 with {
-     joined_h = (_, _ :> (joined, joined) :> _, _) ~ ((h, h) :> _, _);
-     joined = \(c).((g == 1) & (x == c)) , (g == 0) : ba.on_and_off;
-     h(j) = x : ba.sAndH((g == 1) & (j == 1));
+     // Ensure we do not sample a new value if the old value hasn't
+     // been joined.
+     joined_h(i,b) = joined(i,b) ~ holder(i)
+     with {
+       joined(i,b,h) = ((b == 1) & (i == h)) , (b == 0) : ba.on_and_off;
+     };
+     // sample if in hold mode AND previous sampled value was joined
+     holder(i,j) = i : ba.sAndH((b == 1) & (j == 1));
 };
-
 
 //-----------------------------`(si.)bsmooth`------------------------------
 // Block smooth linear interpolation during a block of samples.
