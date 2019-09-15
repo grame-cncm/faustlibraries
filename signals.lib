@@ -160,7 +160,7 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 // When a 'on' trigger is received
 // the function waits until the input signal
 // joins the held value. Once the input
-// value joins the output value the function is bypassed.
+// value joins the held value the function is bypassed.
 //
 // When working with multi-timbral synthesizers, some parameters 
 // might be shared between different synth voices (filter cutoff, resonance, ...).
@@ -238,15 +238,15 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 // #### Usage Example
 //
 // ```
-// x = hslider("x[midi:ctrl 30]", 0, 0, 127, 1);
-// focus = (checkbox("focus_lost") + 1) % 2; 
-// process = x, focus : holdAndJoin : hbargraph("y", 0, 127);
+// in = hslider("in", 0, 0, 127, 1);
+// b = checkbox("Hold/Join"); 
+// process = in, b : holdAndJoin : hbargraph("out", 0, 127);
 // ```
 //
 // Where:
 //
-// * `x`: the input signal
-// * `g`: the hold signal (0 for hold, 1 for bypass)
+// * `in`: the input signal
+// * `b`: the hold signal (0 for hold, 1 for Join)
 //-------------------------------------------------------------------
 holdAndJoin(x,g) = (joined_h : _, h), x : select2((g == 1) & (_))
 with {
