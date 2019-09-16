@@ -156,23 +156,16 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 
 //-----------------------`(si.)holdOrJoin`--------------------------------
 //
-// This function takes a signal "i" as input and a boolean
-// value representing the state of the function (0 = hold, 1 = join).
-// Suppose we start in "join" state, the function simply outputs its
-// input signal.
-// When the function goes into "hold" state for the first time
-// it samples, holds and output the input sampled value "s0".
-//
-// When going back into "join" state,
-// the function outputs "s0" until the input signal
-// joins "s0".
-//
-// As soon as the input signal "i" joins the
-// value "s0" the function switch its output to "i".
-//
-// Rem: If we go into "hold" state again and
-// "i" hasn't joined "s0" the function keeps outputting "s0".
-//
+// The simplest way to understand this function is to compare it to
+// the sample and hold function from the basic library (ba.sAndH)
+// sAndH has two states:
+// - In state 1 it holds a value sampled from its input,
+// - In state 2 it releases the value and becomes a pass through.
+// holdOrJoin is basically a sample and hold with a join property:
+// - In one state it holds a value sampled from its input
+// - In the other, it release the value and becomes a pass through
+// but only after the input joined the held value...
+// 
 // This function solves the particular use case of controlling
 // Multitimbral synthesizer parameters via midi controllers.
 // As an example:
@@ -260,16 +253,17 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 // * `i`: the input signal
 // * `b`: the function state (0 for hold, 1 for join)
 //-------------------------------------------------------------------
-holdOrJoin(i, b) = (joined_h(i, b) <: _, holder(i)), i : select2((b == 1) & (_))
+holdOrJoin(i, b) = joined_h(i, b) , i : select2((b == 1) & (_))
 with {
      // Ensure we do not sample a new value if the old value hasn't
      // been joined.
-     joined_h(i,b) = joined(i,b) ~ holder(i)
+     joined_h(i,b) = joined(i,b) ~ holder(i) 
      with {
-       joined(i,b,h) = ((b == 1) & (i == h)) , (b == 0) : ba.on_and_off;
+       joined(i,b,h,thru) =
+       ((b == 1) & (i == h)) , (b == 0) : ba.on_and_off, thru;
      };
      // sample if in hold mode AND previous sampled value was joined
-     holder(i,j) = i : ba.sAndH((b == 1) & (j == 1));
+     holder(i,j) = i : ba.sAndH((b == 1) & (j == 1)) <: _,_;
 };
 
 //-----------------------------`(si.)bsmooth`------------------------------
