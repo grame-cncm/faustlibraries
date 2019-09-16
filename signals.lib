@@ -154,7 +154,7 @@ polySmooth(g,s,d) = smooth(s*((g==(g@d)) | (g == 0)));
 //-------------------------------------------------------------------
 smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 
-//-----------------------`(si.)holdOrJoin`--------------------------------
+//-----------------------`(si.)releaseAfterJoin`--------------------------------
 //
 // The simplest way to understand this function is to compare it to
 // the sample and hold function from the basic library (ba.sAndH)
@@ -169,15 +169,15 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 // #### Usage
 //
 // ```
-// hslider(...),g : holdOrJoin : _
+// hslider(...),g : releaseAfterJoin : _
 // ```
 //
 // #### Usage Example
 //
 // ```
 // in = hslider("in", 0, 0, 127, 1);
-// b = checkbox("Hold/Join"); 
-// process = in, b : holdOrJoin : hbargraph("out", 0, 127);
+// b = checkbox("Hold/Release"); 
+// process = in, b : releaseAfterJoin : hbargraph("out", 0, 127);
 // ```
 //
 // Where:
@@ -185,7 +185,7 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 // * `i`: the input signal
 // * `b`: the function state (0 for hold, 1 for join)
 //-------------------------------------------------------------------
-holdOrJoin(i, b) = joined_h(i, b) , i : select2((b == 1) & (_))
+releaseAfterJoin(i, b) = joined_h(i, b) , i : select2((b == 1) & (_))
 with {
      // Ensure we do not sample a new value if the old value hasn't
      // been joined.
