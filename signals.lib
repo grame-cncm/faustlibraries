@@ -155,21 +155,23 @@ polySmooth(g,s,d) = smooth(s*((g==(g@d)) | (g == 0)));
 smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 
 //-----------------------`(si.)releaseAfterJoin`--------------------------------
+// The simplest way to understand `releaseAfterJoin` is to compare it to
+// `ba.sAndH` (sample and hold).
+// `sAndH` has two states:
 //
-// The simplest way to understand this function is to compare it to
-// the sample and hold function from the basic library (ba.sAndH)
-// sAndH has two states:
-// - In state 1 it holds a value sampled from its input,
-// - In state 2 it releases the value and becomes a pass through.
-// releaseAfterJoin is basically a sample and hold with a join property:
-// - In one state it holds a value sampled from its input
-// - In the other, it release the value and becomes a pass through
-// but only after the input joined the held value...
+// * State 0: holds a value sampled from its input,
+// * State 1: releases the value and becomes a pass through.
+//
+// `releaseAfterJoin` is basically a `sAndH` with a join property:
+//
+// * State 0: holds a value sampled from its input
+// * State 1: releases the value and becomes a pass through
+// **BUT** only after the input joined the held value...
 // 
 // #### Usage
 //
 // ```
-// hslider(...),g : releaseAfterJoin : _
+// _ : releaseAfterJoin(b) : _
 // ```
 //
 // #### Usage Example
