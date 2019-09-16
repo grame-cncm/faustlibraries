@@ -175,17 +175,19 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 // #### Usage Example
 //
 // ```
-// in = hslider("in", 0, 0, 127, 1);
-// b = checkbox("Hold/Release"); 
-// process = in, b : releaseAfterJoin : hbargraph("out", 0, 127);
+// in = hslider("input", 0, 0, 127, 1);
+// b = (checkbox("Release/Hold")+1) %2;// Start from release state
+// out_sAndH = ba.sAndH(b,in);
+// out_releaseAfterJoin = releaseAfterJoin(b,in);
+// process = (out_sAndH : hbargraph("sAndH output", 0, 127)), (out_releaseAfterJoin : hbargraph("releaseAfterJoin output", 0, 127)) ;
 // ```
 //
 // Where:
 //
-// * `i`: the input signal
-// * `b`: the function state (0 for hold, 1 for join)
+// * `in`: the input signal
+// * `b`: the function state (hold, release)
 //-------------------------------------------------------------------
-releaseAfterJoin(i, b) = joined_h(i, b) , i : select2((b == 1) & (_))
+releaseAfterJoin(b, i) = joined_h(i, b) , i : select2((b == 1) & (_))
 with {
      // Ensure we do not sample a new value if the old value hasn't
      // been joined.
