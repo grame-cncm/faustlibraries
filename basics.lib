@@ -987,7 +987,7 @@ bpf = environment
   	// Start a break-point function
   	start(x0,y0) = \(x).(x0,y0,x,y0);
   	// Add a break-point
-  	point(x1,y1) = \(x0,y0,x,y).(x1, y1, x , if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
+  	point(x1,y1) = \(x0,y0,x,y).(x1, y1, x, if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
   	// End a break-point function
   	end(x1,y1) = \(x0,y0,x,y).(if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
 };
