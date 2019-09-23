@@ -72,7 +72,7 @@ smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 adsrX(at,dt,sl,rt,gate) = environment {
 
     // durations in samples
-    an = max(2, at*ma.SR);  // At least 2 to make ar(at,rt,gate) works with ar = 0
+    an = max(1, at*ma.SR);  
     dn = max(1, dt*ma.SR);
     rn = max(1, rt*ma.SR);
 
@@ -94,8 +94,8 @@ adsrX(at,dt,sl,rt,gate) = environment {
     // AS part
     AS = min(A, sl);  
     
-    // Attack time
-    atime = +(gate) ~ *(gate' >= gate);
+    // Attack time (start at 0)
+    atime = (+(gate) ~ *(gate' >= gate)) - 1;
     
     // Release time starts when gate is 0 (used in 'asr' and 'adsr' cases)
     rtime1 = (+(1) : *(gate == 0)) ~ _;
