@@ -85,8 +85,8 @@ smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
 // when `t=0`)
 //-----------------------------------------------------
-declare ar author "Stéphane Letz";
-ar(at,rt,gate) = AR - R : max(0) 
+declare ar author "Yann Orlarey, Stéphane Letz";
+ar(at,rt,gate) = AR : max(0) 
 with {
 
     // Durations in samples
@@ -97,22 +97,21 @@ with {
     adelta = 1/an;
     rdelta = 1/rn;
     
-    // Attack time (starts when gate changes and raises)
-    atime = +(1) ~ *(gate' >= gate);
+    // Attack time (starts at gate upfront and raises infinitely)
+    atime = (\(s).(s + (s > 0)) * (gate <= gate') + (gate > gate')) ~ _;
 	
     // Attack curve
     A = atime * adelta;
     
+    // Release curve
+    D0 = 1 + an * rdelta;
+    D = D0 - atime * rdelta;
+
     // AR part
-    AR = min(A, 1);
-   
-    // Release time starts when envelope reaches 1
-    rtime = (+(1) : *(AR >= 1)) ~ _;
-    
-    // Release curve starts when gate is 0 or envelope reaches 1 with the current value of the envelope
-    R = rtime * rdelta;
+    AR = min(A, D);
     
 };
+
 /*
 // Author: RM
 ar(a,r,t) = cnt(totalTime,totalTime,on) : ba.bpf.start(0,0) :
@@ -192,7 +191,7 @@ are(attT60,relT60,gate) = arfe(attT60,relT60,0,gate);
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
 // when `t=0`)
 //-----------------------------------------------------
-declare asr author "Stéphane Letz";
+declare asr author "Yann Orlarey, Stéphane Letz";
 asr(at,sl,rt,gate) = AS - R : max(0)
 with {
 
@@ -282,7 +281,7 @@ with {
     // ADS part
     ADS = min(A, max(D, sl));
 
-    // Release time starts when gate is 0 (used in 'asr' and 'adsr' cases)
+    // Release time starts when gate is 0
     rtime = (+(1) : *(gate == 0)) ~ _;
 
     // Release curve starts when gate is 0 with the current value of the envelope
