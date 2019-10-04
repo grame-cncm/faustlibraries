@@ -98,8 +98,13 @@ with {
     rdelta = 1/rn;
     
     // Attack time (starts at gate upfront and raises infinitely)
-    atime = (\(s).(s + (s > 0)) * (gate <= gate') + (gate > gate')) ~ _;
-	
+    atime = (raise*reset + upfront) ~ _
+    with {
+        upfront = gate > gate';
+        reset = gate <= gate';
+        raise(x) = (x + (x > 0));
+    };
+
     // Attack curve
     A = atime * adelta;
     
