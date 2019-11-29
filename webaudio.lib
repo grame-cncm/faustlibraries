@@ -26,7 +26,6 @@ declare copyright "GRAME";
 declare version "0.1";
 declare license "LGPL";
 
-ba = library("basics.lib");
 ma = library("maths.lib");
 fi = library("filters.lib");
 
@@ -176,19 +175,17 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a2 = aPlusOne + aMinusOne * k - k2;
     };
 
-	// --------------------- implementation ------------------------------
+    // --------------------- implementation ------------------------------
 
-	// Convert rbj coeffs to fi.tf2 coeffs
-	setNormCoeffs(b0,b1,b2,a0,a1,a2) = (b0/a0, b1/a0, b2/a0, a1/a0, a2/a0);
-	
-	nyquist = ma.SR * 0.5;
-  	normalizedFrequencyAux = f0 / nyquist;
-  	normalizedFrequency = ba.if((aDetune != 0), (normalizedFrequencyAux * exp2(aDetune / 1200)), normalizedFrequencyAux);
- 	exp2(x) = pow(2, x);
- 	
- 	// Limit cutoff between 0.01 and 0.99.
-	cutoff = max(0.01, min(normalizedFrequency, 0.99));
-	
+    // Convert rbj coeffs to fi.tf2 coeffs
+    setNormCoeffs(b0,b1,b2,a0,a1,a2) = (b0/a0, b1/a0, b2/a0, a1/a0, a2/a0);
+
+    nyquist = ma.SR * 0.5;
+    nFreq = (f0 / nyquist) * pow(2, aDetune / 1200);
+  
+    // Limit cutoff between 0.01 and 0.99.
+    cutoff = max(0.01, min(nFreq, 0.99));
+
 };
 
 //-------------------------------------------------------------------------
@@ -196,50 +193,50 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 //-------------------------------------------------------------------------
 
 /*
-	Standard second-order resonant lowpass filter with 12dB/octave rolloff. 
-	Frequencies below the cutoff pass through; frequencies above it are attenuated.
+    Standard second-order resonant lowpass filter with 12dB/octave rolloff.
+    Frequencies below the cutoff pass through; frequencies above it are attenuated.
 */
 lowpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass, x : fi.tf2;
 
 /*
-	Standard second-order resonant highpass filter with 12dB/octave rolloff. 
-	Frequencies below the cutoff are attenuated; frequencies above it pass through.
+    Standard second-order resonant highpass filter with 12dB/octave rolloff.
+    Frequencies below the cutoff are attenuated; frequencies above it pass through.
 */
 highpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass, x : fi.tf2;
 
 /* 
-	Standard second-order bandpass filter. 
-	Frequencies outside the given range of frequencies are attenuated; the frequencies inside it pass through.
+    Standard second-order bandpass filter.
+    Frequencies outside the given range of frequencies are attenuated; the frequencies inside it pass through.
 */
 bandpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass, x : fi.tf2;
 
 /*
-	Standard notch filter, also called a band-stop or band-rejection filter. 
-	It is the opposite of a bandpass filter: frequencies outside the give range of frequencies pass through,
-	frequencies inside it are attenuated.
+    Standard notch filter, also called a band-stop or band-rejection filter.
+    It is the opposite of a bandpass filter: frequencies outside the give range of frequencies pass through,
+    frequencies inside it are attenuated.
 */
 notch(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch, x : fi.tf2;
 
 /*
-	Standard second-order allpass filter. It lets all frequencies through, 
-	but changes the phase-relationship between the various frequencies.
+    Standard second-order allpass filter. It lets all frequencies through,
+    but changes the phase-relationship between the various frequencies.
 */
 allpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass, x : fi.tf2;
 
 /*
-	Frequencies inside the range get a boost or an attenuation; frequencies outside it are unchanged.
+    Frequencies inside the range get a boost or an attenuation; frequencies outside it are unchanged.
 */
 peaking(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking, x : fi.tf2;
 
 /*
-	Standard second-order lowshelf filter. 
-	Frequencies lower than the frequency get a boost, or an attenuation, frequencies over it are unchanged.
+    Standard second-order lowshelf filter.
+    Frequencies lower than the frequency get a boost, or an attenuation, frequencies over it are unchanged.
 */
 lowshelf(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf, x : fi.tf2;
 
 /*
-	Standard second-order highshelf filter. 
-	Frequencies higher than the frequency get a boost or an attenuation, frequencies lower than it are unchanged.
+    Standard second-order highshelf filter.
+    Frequencies higher than the frequency get a boost or an attenuation, frequencies lower than it are unchanged.
 */
 highshelf(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).highshelf, x : fi.tf2;
 
