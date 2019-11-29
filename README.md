@@ -43,6 +43,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `sp`: `spats.lib`
 * `sy`: `synths.lib`
 * `ve`: `vaeffects.lib`
+* `wa`: `webaudio.lib`
 
 Environments can then be used as follows in your Faust code:
 
@@ -171,6 +172,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `tonestacks.lib` (not documented but example in `/examples/misc`)
 * `tubes.lib` (not documented but example in `/examples/misc`)
 * `vaeffects.lib`
+* `webaudio.lib`
 
 Other deprecated libraries such as `music.lib`, etc. are present but are not documented to not confuse new users.
 
@@ -218,6 +220,7 @@ si = library("signals.lib");
 so = library("soundfiles.lib");
 sy = library("synths.lib");
 ve = library("vaeffects.lib");
+wa = library("webaudio.lib");
 ```
 
 For example, if we wanted to use the `smooth` function which is now declared in `signals.lib`, we would do the following:
