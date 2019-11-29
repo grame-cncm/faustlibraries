@@ -675,17 +675,19 @@ subseq(head, 0, n)         = head;
 //========================================================================================
 
 //-----------------------------`(ba.)if`-----------------------------------
-// if-then-else implemented with a select2.
+// if-then-else implemented with a select2. WARNING : since select2 is strict (always evaluating both branches),
+// the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to 
+// protect against forbidden computations like division-by-zero for instance.
 //
 // #### Usage
 //
-// *   `if(c, t, e) : _`
+// *   `if(cond, then, else) : _`
 //
 // Where:
 //
-// * `c`: condition
-// * `t`: signal selected while c is true
-// * `e`: signal selected while c is false
+// * `cond`: condition
+// * `cond`: signal selected while c is true
+// * `else`: signal selected while c is false
 //-----------------------------------------------------------------------------
 if(cond,then,else) = select2(cond,else,then);
 // TODO: perhaps it would make more sense to have an if(a,b) and an ifelse(a,b,c)?
