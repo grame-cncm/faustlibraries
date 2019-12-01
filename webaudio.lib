@@ -103,7 +103,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
     allpass = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         // Don't let Q go negative, which causes an unstable filter.
-        Qaux = max(0.0, Q);
+        Qaux = max(0.01, Q);
         
         w0 = ma.PI * cutoff;
         alpha = sin(w0) / (2 * Qaux);
