@@ -189,54 +189,194 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 };
 
 //-------------------------------------------------------------------------
-// Filters using BiquadFilter and fi.tf2
+// Implementation of filters using BiquadFilter and fi.tf2
 //-------------------------------------------------------------------------
 
-/*
-    Standard second-order resonant lowpass filter with 12dB/octave rolloff.
-    Frequencies below the cutoff pass through; frequencies above it are attenuated.
-*/
+//--------------`(wa.)lowpass`--------------
+// Standard second-order resonant lowpass filter with 12dB/octave rolloff.
+// Frequencies below the cutoff pass through; frequencies above it are attenuated.
+//
+// #### Usage
+//
+// ```
+// _: lowpass(f0, Q, dtune) : _
+// ```
+//
+// Where:
+//
+// * `f0`: cutoff frequency in Hz
+// * `Q`: the quality factor
+// * `dtune`: detuning of the frequency in cents
+//
+// #### Reference
+//
+// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98>
+//--------------------------------------
+
 lowpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass, x : fi.tf2;
 
-/*
-    Standard second-order resonant highpass filter with 12dB/octave rolloff.
-    Frequencies below the cutoff are attenuated; frequencies above it pass through.
-*/
+
+//--------------`(wa.)highpass`--------------
+// Standard second-order resonant highpass filter with 12dB/octave rolloff.
+// Frequencies below the cutoff are attenuated; frequencies above it pass through.
+//
+// #### Usage
+//
+// ```
+// _: highpass(f0, Q, dtune) : _
+// ```
+//
+// Where:
+//
+// * `f0`: cutoff frequency in Hz
+// * `Q`: the quality factor
+// * `dtune`: detuning of the frequency in cents
+//
+// #### Reference
+//
+// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127>
+//--------------------------------------
+
 highpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass, x : fi.tf2;
 
-/* 
-    Standard second-order bandpass filter.
-    Frequencies outside the given range of frequencies are attenuated; the frequencies inside it pass through.
-*/
+
+//--------------`(wa.)bandpass`--------------
+// Standard second-order bandpass filter.
+// Frequencies outside the given range of frequencies are attenuated; the frequencies inside it pass through.
+//
+// #### Usage
+//
+// ```
+// _: bandpass(f0, Q, dtune) : _
+// ```
+//
+// Where:
+//
+// * `f0`: cutoff frequency in Hz
+// * `Q`: the quality factor
+// * `dtune`: detuning of the frequency in cents
+//
+// #### Reference
+//
+// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#334>
+//--------------------------------------
+
 bandpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass, x : fi.tf2;
 
-/*
-    Standard notch filter, also called a band-stop or band-rejection filter.
-    It is the opposite of a bandpass filter: frequencies outside the give range of frequencies pass through,
-    frequencies inside it are attenuated.
-*/
+
+//--------------`(wa.)notch`--------------
+// Standard notch filter, also called a band-stop or band-rejection filter.
+// It is the opposite of a bandpass filter: frequencies outside the give range of frequencies 
+// pass through, frequencies inside it are attenuated.
+//
+// #### Usage
+//
+// ```
+// _: notch(f0, Q, dtune) : _
+// ```
+//
+// Where:
+//
+// * `f0`: cutoff frequency in Hz
+// * `Q`: the quality factor
+// * `dtune`: detuning of the frequency in cents
+//
+// #### Reference
+//
+// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#301>
+//--------------------------------------
+
 notch(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch, x : fi.tf2;
 
-/*
-    Standard second-order allpass filter. It lets all frequencies through,
-    but changes the phase-relationship between the various frequencies.
-*/
+
+//--------------`(wa.)allpass`--------------
+// Standard second-order allpass filter. It lets all frequencies through,
+// but changes the phase-relationship between the various frequencies.
+//
+// #### Usage
+//
+// ```
+// _: allpass(f0, Q, dtune) : _
+// ```
+//
+// Where:
+//
+// * `f0`: cutoff frequency in Hz
+// * `Q`: the quality factor
+// * `dtune`: detuning of the frequency in cents
+//
+// #### Reference
+//
+// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#268>
+//--------------------------------------
+
 allpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass, x : fi.tf2;
 
-/*
-    Frequencies inside the range get a boost or an attenuation; frequencies outside it are unchanged.
-*/
+
+//--------------`(wa.)peaking`--------------
+// Frequencies inside the range get a boost or an attenuation; frequencies outside it are unchanged.
+//
+// #### Usage
+//
+// ```
+// _: peaking(f0, gain, Q, dtune) : _
+// ```
+//
+// Where:
+//
+// * `f0`: cutoff frequency in Hz
+// * `gain`: the gain in dB
+// * `Q`: the quality factor
+// * `dtune`: detuning of the frequency in cents
+//
+// #### Reference
+//
+// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233>
+//--------------------------------------
+
 peaking(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking, x : fi.tf2;
 
-/*
-    Standard second-order lowshelf filter.
-    Frequencies lower than the frequency get a boost, or an attenuation, frequencies over it are unchanged.
-*/
+
+//--------------`(wa.)lowshelf`--------------
+// Standard second-order lowshelf filter.
+// Frequencies lower than the frequency get a boost, or an attenuation, frequencies over it are unchanged.
+//
+// ```
+// _: lowshelf(f0, gain, dtune) : _
+// ```
+//
+// Where:
+//
+// * `f0`: cutoff frequency in Hz
+// * `gain`: the gain in dB
+// * `dtune`: detuning of the frequency in cents
+//
+// #### Reference
+//
+// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#169>
+//--------------------------------------
+
 lowshelf(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf, x : fi.tf2;
 
-/*
-    Standard second-order highshelf filter.
-    Frequencies higher than the frequency get a boost or an attenuation, frequencies lower than it are unchanged.
-*/
+
+//--------------`(wa.)highshelf`--------------
+// Standard second-order highshelf filter.
+// Frequencies higher than the frequency get a boost or an attenuation, frequencies lower than it are unchanged.
+//
+// ```
+// _: highshelf(f0, gain, dtune) : _
+// ```
+//
+// Where:
+//
+// * `f0`: cutoff frequency in Hz
+// * `gain`: the gain in dB
+// * `dtune`: detuning of the frequency in cents
+//
+// #### Reference
+//
+// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#201>
+//--------------------------------------
+
 highshelf(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).highshelf, x : fi.tf2;
 

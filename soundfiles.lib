@@ -51,7 +51,7 @@ ru = library("runtime.lib");
 super = environment {
 
     length(sf, part) = (part, 0) : sf : (_,si.block(outputs(sf)-1));  
-    srate(sf, part) = part, 0 : sf : !,_,si.block(outputs(sf)-2) : float;
+    srate(sf, part) = (part, 0) : sf : (!,_,si.block(outputs(sf)-2)) : float;
     outs(sf, level) = sf : si.block(2), bus(outputs(sf)-2) with { bus(n) = par(i,n,*(level)); };
 
     // Plays a soundfile
