@@ -36,7 +36,7 @@ fi = library("filters.lib");
 	
 BiquadFilter(f0, dBgain, Q, aDetune) = environment
 {
-    lowpass = setNormCoeffs(b0, b1, b2, a0, a1, a2)
+    lowpass2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         g = pow(10.0, -0.05 * Q);
         w0 = ma.PI * cutoff;
@@ -51,7 +51,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a2 = 1.0 - alpha;
     };
  		
-    highpass = setNormCoeffs(b0, b1, b2, a0, a1, a2)
+    highpass2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         g = pow(10.0, -0.05 * Q);
         w0 = ma.PI * cutoff;
@@ -66,7 +66,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a2 = 1.0 - alpha;
     };
 
-    bandpass = setNormCoeffs(b0, b1, b2, a0, a1, a2)
+    bandpass2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         // Don't let Q go negative, which causes an unstable filter.
         Qaux = max(0.01, Q);
@@ -100,7 +100,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a2 = 1 - alpha;
     };
 
-    allpass = setNormCoeffs(b0, b1, b2, a0, a1, a2)
+    allpass2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         // Don't let Q go negative, which causes an unstable filter.
         Qaux = max(0.01, Q);
@@ -117,7 +117,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a2 = 1 - alpha; 
     };
     
-    peaking = setNormCoeffs(b0, b1, b2, a0, a1, a2)
+    peaking2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         // Don't let Q go negative, which causes an unstable filter.
         Qaux = max(0.01, Q);
@@ -135,7 +135,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a2 = 1 - alpha / A;
    };
     
-    lowshelf = setNormCoeffs(b0, b1, b2, a0, a1, a2)
+    lowshelf2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         A = pow(10.0, dBgain / 40);
 
@@ -155,7 +155,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a2 = aPlusOne + aMinusOne * k - k2;
     };
     
-    highshelf = setNormCoeffs(b0, b1, b2, a0, a1, a2)
+    highshelf2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         A = pow(10.0, dBgain / 40);
 
@@ -192,7 +192,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 // Implementation of filters using BiquadFilter and fi.tf2
 //-------------------------------------------------------------------------
 
-//--------------`(wa.)lowpass`--------------
+//--------------`(wa.)lowpass2`--------------
 // Standard second-order resonant lowpass filter with 12dB/octave rolloff.
 // Frequencies below the cutoff pass through; frequencies above it are attenuated.
 //
@@ -213,17 +213,17 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98>
 //--------------------------------------
 
-lowpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass, x : fi.tf2;
+lowpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass2, x : fi.tf2;
 
 
-//--------------`(wa.)highpass`--------------
+//--------------`(wa.)highpass2`--------------
 // Standard second-order resonant highpass filter with 12dB/octave rolloff.
 // Frequencies below the cutoff are attenuated; frequencies above it pass through.
 //
 // #### Usage
 //
 // ```
-// _: highpass(f0, Q, dtune) : _
+// _: highpass2(f0, Q, dtune) : _
 // ```
 //
 // Where:
@@ -237,17 +237,17 @@ lowpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass, x : fi.tf2;
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127>
 //--------------------------------------
 
-highpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass, x : fi.tf2;
+highpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass2, x : fi.tf2;
 
 
-//--------------`(wa.)bandpass`--------------
+//--------------`(wa.)bandpass2`--------------
 // Standard second-order bandpass filter.
 // Frequencies outside the given range of frequencies are attenuated; the frequencies inside it pass through.
 //
 // #### Usage
 //
 // ```
-// _: bandpass(f0, Q, dtune) : _
+// _: bandpass2(f0, Q, dtune) : _
 // ```
 //
 // Where:
@@ -261,7 +261,7 @@ highpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass, x : fi.tf2;
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#334>
 //--------------------------------------
 
-bandpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass, x : fi.tf2;
+bandpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass2, x : fi.tf2;
 
 
 //--------------`(wa.)notch`--------------
@@ -289,14 +289,14 @@ bandpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass, x : fi.tf2;
 notch(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch, x : fi.tf2;
 
 
-//--------------`(wa.)allpass`--------------
+//--------------`(wa.)allpass2`--------------
 // Standard second-order allpass filter. It lets all frequencies through,
 // but changes the phase-relationship between the various frequencies.
 //
 // #### Usage
 //
 // ```
-// _: allpass(f0, Q, dtune) : _
+// _: allpass2(f0, Q, dtune) : _
 // ```
 //
 // Where:
@@ -310,16 +310,16 @@ notch(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch, x : fi.tf2;
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#268>
 //--------------------------------------
 
-allpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass, x : fi.tf2;
+allpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass2, x : fi.tf2;
 
 
-//--------------`(wa.)peaking`--------------
+//--------------`(wa.)peaking2`--------------
 // Frequencies inside the range get a boost or an attenuation; frequencies outside it are unchanged.
 //
 // #### Usage
 //
 // ```
-// _: peaking(f0, gain, Q, dtune) : _
+// _: peaking2(f0, gain, Q, dtune) : _
 // ```
 //
 // Where:
@@ -334,15 +334,15 @@ allpass(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass, x : fi.tf2;
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233>
 //--------------------------------------
 
-peaking(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking, x : fi.tf2;
+peaking2(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking2, x : fi.tf2;
 
 
-//--------------`(wa.)lowshelf`--------------
+//--------------`(wa.)lowshelf2`--------------
 // Standard second-order lowshelf filter.
 // Frequencies lower than the frequency get a boost, or an attenuation, frequencies over it are unchanged.
 //
 // ```
-// _: lowshelf(f0, gain, dtune) : _
+// _: lowshelf2(f0, gain, dtune) : _
 // ```
 //
 // Where:
@@ -356,15 +356,15 @@ peaking(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking, x : f
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#169>
 //--------------------------------------
 
-lowshelf(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf, x : fi.tf2;
+lowshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf2, x : fi.tf2;
 
 
-//--------------`(wa.)highshelf`--------------
+//--------------`(wa.)highshelf2`--------------
 // Standard second-order highshelf filter.
 // Frequencies higher than the frequency get a boost or an attenuation, frequencies lower than it are unchanged.
 //
 // ```
-// _: highshelf(f0, gain, dtune) : _
+// _: highshelf2(f0, gain, dtune) : _
 // ```
 //
 // Where:
@@ -378,5 +378,5 @@ lowshelf(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf, x : fi
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#201>
 //--------------------------------------
 
-highshelf(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).highshelf, x : fi.tf2;
+highshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).highshelf2, x : fi.tf2;
 

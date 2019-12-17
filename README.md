@@ -231,7 +231,7 @@ import("stdfaust.lib");
 process = si.smooth(0.999);
 ```
 
-This standard is only used within the libraries: nothing prevents coders to still import `signals.lib` directly and call `smooth` without `ro.`, etc.
+This standard is only used within the libraries: nothing prevents coders to still import `signals.lib` directly and call `smooth` without `ro.`, etc. It means symbols and functions names defined within a library have to be unique to not collide with symbols of any other libraries.  
 
 ### "Demo" Functions
 
