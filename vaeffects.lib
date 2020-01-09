@@ -123,7 +123,7 @@ with {
 };
 
 
-//------------------`(fi.)moogLadder`-----------------
+//------------------`(ve.)moogLadder`-----------------
 // Virtual analog model of the 4th-order Moog Ladder, which is arguably the 
 // most well-known ladder filter in analog synthesizers. Several 
 // 1st-order filters are cascaded in series. Feedback is then used, in part, to 
@@ -172,9 +172,9 @@ with{
 };
 
 
-//------------------`(fi.)moogHalfLadder`-----------------
+//------------------`(ve.)moogHalfLadder`-----------------
 // Virtual analog model of the 2nd-order Moog Half Ladder (simplified version of
-// `(fi.)moogLadder`). Several 1st-order filters are cascaded in series. 
+// `(ve.)moogLadder`). Several 1st-order filters are cascaded in series. 
 // Feedback is then used, in part, to control the cut-off frequency and the 
 // resonance.
 //
@@ -223,7 +223,7 @@ with{
 };
 
 
-//------------------`(fi.)diodeLadder`-----------------
+//------------------`(ve.)diodeLadder`-----------------
 // 4th order virtual analog diode ladder filter. In addition to the individual 
 // states used within each independent 1st-order filter, there are also additional 
 // feedback paths found in the block diagram. These feedback paths are labeled 
@@ -368,7 +368,7 @@ with{
 // <https://secretlifeofsynthesizers.com/the-korg-35-filter/>
 //========================================================================================
 
-//------------------`(fi.)korg35LPF`-----------------
+//------------------`(ve.)korg35LPF`-----------------
 // Virtual analog models of the Korg 35 low-pass filter found in the MS-10 and 
 // MS-20 synthesizers.
 //
@@ -407,7 +407,7 @@ with{
 };
 
 
-//------------------`(fi.)korg35HPF`-----------------
+//------------------`(ve.)korg35HPF`-----------------
 // Virtual analog models of the Korg 35 high-pass filter found in the MS-10 and 
 // MS-20 synthesizers.
 //
@@ -459,7 +459,7 @@ with{
 // the `(ef.)cubicnl` function.
 //========================================================================================
 
-//------------------`(fi.)oberheim`-----------------
+//------------------`(ve.)oberheim`-----------------
 // Generic multi-outputs Oberheim filter (see description above).
 //
 // #### Usage
@@ -498,7 +498,7 @@ with{
 };
 
 
-//------------------`(fi.)oberheimBSF`-----------------
+//------------------`(ve.)oberheimBSF`-----------------
 // Band-Stop Oberheim filter (see description above).
 //
 // #### Usage
@@ -518,7 +518,7 @@ declare oberheimBSF license "MIT-style STK-4.3 license";
 oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 
 
-//------------------`(fi.)oberheimBPF`-----------------
+//------------------`(ve.)oberheimBPF`-----------------
 // Band-Pass Oberheim filter (see description above).
 //
 // #### Usage
@@ -538,7 +538,7 @@ declare oberheimBPF license "MIT-style STK-4.3 license";
 oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 
 
-//------------------`(fi.)oberheimHPF`-----------------
+//------------------`(ve.)oberheimHPF`-----------------
 // High-Pass Oberheim filter (see description above).
 //
 // #### Usage
@@ -558,7 +558,7 @@ declare oberheimHPF license "MIT-style STK-4.3 license";
 oberheimHPF(normFreq,Q) = oberheim(normFreq,Q):!,!,_,!;
 
 
-//------------------`(fi.)oberheimLPF`-----------------
+//------------------`(ve.)oberheimLPF`-----------------
 // Low-Pass Oberheim filter (see description above).
 //
 // #### Usage
@@ -601,7 +601,7 @@ oberheimLPF(normFreq,Q) = oberheim(normFreq,Q):!,!,!,_;
 // <https://www.willpirkle.com/706-2/>
 //========================================================================================
 
-//------------------`(fi.)sallenKeyOnePole`-----------------
+//------------------`(ve.)sallenKeyOnePole`-----------------
 // Sallen-Key generic One Pole filter (see description above).
 //
 // For the Faust implementation of this filter, recursion (`letrec`) is used 
@@ -651,7 +651,7 @@ with{
 };
 
 
-//------------------`(fi.)sallenKeyOnePoleLPF`-----------------
+//------------------`(ve.)sallenKeyOnePoleLPF`-----------------
 // Sallen-Key One Pole lowpass filter (see description above).
 //
 // #### Usage
@@ -670,7 +670,7 @@ declare sallenKeyOnePoleLPF license "MIT-style STK-4.3 license";
 sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 
 
-//------------------`(fi.)sallenKeyOnePoleHPF`-----------------
+//------------------`(ve.)sallenKeyOnePoleHPF`-----------------
 // Sallen-Key One Pole Highpass filter (see description above). The dry input 
 // signal is routed in parallel to the output. The LPF'd signal is subtracted 
 // from the input so that the HPF remains.
@@ -691,7 +691,7 @@ declare sallenKeyOnePoleHPF license "MIT-style STK-4.3 license";
 sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 
 
-//------------------`(fi.)sallenKey2ndOrder`-----------------
+//------------------`(ve.)sallenKey2ndOrder`-----------------
 // Sallen-Key generic multi-outputs 2nd order filter. 
 //
 // This is a 2nd-order Sallen-Key state-variable filter. The idea is that by 
@@ -743,7 +743,7 @@ with{
   alpha0 = 1/(1 + 2*R*g + g*g);
 };
 
-//------------------`(fi.)sallenKey2ndOrderLPF`-----------------
+//------------------`(ve.)sallenKey2ndOrderLPF`-----------------
 // Sallen-Key 2nd order lowpass filter (see description above). 
 //
 //
@@ -764,7 +764,7 @@ declare sallenKey2ndOrderLPF license "MIT-style STK-4.3 license";
 sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 
 
-//------------------`(fi.)sallenKey2ndOrderBPF`-----------------
+//------------------`(ve.)sallenKey2ndOrderBPF`-----------------
 // Sallen-Key 2nd order bandpass filter (see description above). 
 //
 //
@@ -785,7 +785,7 @@ declare sallenKey2ndOrderBPF license "MIT-style STK-4.3 license";
 sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 
 
-//------------------`(fi.)sallenKey2ndOrderHPF`-----------------
+//------------------`(ve.)sallenKey2ndOrderHPF`-----------------
 // Sallen-Key 2nd order highpass filter (see description above). 
 //
 //
