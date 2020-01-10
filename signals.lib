@@ -41,6 +41,7 @@ closed source license or any other license if you decide so.
 
 ba = library("basics.lib");
 ro = library("routes.lib");
+ma = library("maths.lib");
 si = library("signals.lib");
 
 declare name "Faust Signal Routing Library";
@@ -123,7 +124,7 @@ smoo = si.smooth(0.999);
 // #### Usage
 //
 // ```
-// hslider(...) : polysmooth(g,s,d) : _
+// hslider(...) : polySmooth(g,s,d) : _
 // ```
 //
 // Where:
@@ -166,7 +167,7 @@ smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 bsmooth(c) = +(i) ~ _
 with {
 	i = (c-c@n)/n;
-	n = min(4096, max(1, fvariable(int count, <math.h>)));
+	n = min(4096, max(1, ma.BS));
 };
 
 //-------------------------------`(si.)dot`--------------------------------------
@@ -302,7 +303,7 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // #### Usage
 //
 // ```
-// _ : lag_ud(up, dn, signal) : _;
+// _ : lag_ud(up, dn) : _;
 // ```
 //----------------------------------------------------
 // Author: Jonatan Liljedahl
