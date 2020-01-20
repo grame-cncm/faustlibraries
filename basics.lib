@@ -180,7 +180,17 @@ Michon and Julius O. Smith III, and are released under the
 //
 // * `tau`: time-constant in seconds
 //-----------------------------
-tau2pole(tau) = exp(-1.0/(tau*ma.SR));
+// tau2pole(tau) = exp(-1.0/(tau*ma.SR));
+
+tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) with {
+ clipCond = abs(tau)<1.2e-7;
+ tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
+};
+
+tau2poleDouble(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) with {
+ clipCond = abs(tau)<2.3e-16;
+ tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
+};
 
 
 //-------`(ba.)pole2tau`----------
