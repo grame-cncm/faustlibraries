@@ -1455,7 +1455,7 @@ with {
 // The sliding sum of the last n input samples.
 //
 // It will eventually run into numerical trouble when there is a persistent dc component.
-// If that matters in your application, use the more CPU-intensive (ba.)slidinSump.
+// If that matters in your application, use the more CPU-intensive (ba.)slidingSump.
 //
 // #### Usage
 //
@@ -1488,13 +1488,13 @@ slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
 slidingSump(n,maxn) = slidingReduce(+,n,maxn,0);
 
 
-//----------------------------`(ba.)slidingMaxN`--------------------------------
+//----------------------------`(ba.)slidingMax`--------------------------------
 // The sliding maximum of the last n input samples.
 //
 // #### Usage
 //
 // ```
-// _ : slidingMaxN(N,maxN) : _
+// _ : slidingMax(N,maxN) : _
 // ```
 //
 // Where:

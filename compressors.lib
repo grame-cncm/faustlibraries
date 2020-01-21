@@ -380,9 +380,7 @@ with {
             ((level-thresh+(knee/2)):pow(2)/(2*knee)) ,
             (level-thresh)
            ) : max(0)*-strength;
-  RMS(time) = ba.slidingRMS(s) with {
-    s = ba.sec2samp(time):int:max(1);
-};
+  	RMS(time) = ba.slidingRMS(s) with { s = ba.sec2samp(time):int:max(1); };
 };
 
 //--------------------`(co.)RMS_compression_gain_N_chan`-------------------
