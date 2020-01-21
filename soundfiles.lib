@@ -210,6 +210,7 @@ sample1 = so.sound(s1, 0);
 sample2 = so.sound(s1, 1);
 sample3 = so.sound(s1, 2);
 
+// Plays the sound in various ways
 sample1.loop;
 sample1.loop_speed(0.5);
 sample1.loop_speed_level(0.5, 0.5);
@@ -218,8 +219,8 @@ sample2.play(0.5, button("gate"));
 sample2.play_rev(0.5, button("gate"));
 sample2.play_alt(0.5, button("gate"), checkbox("alt"));
 
-sample3.play_interp(440.0, 600.0, 0.5, button("gate"), so.linear);
-sample3.play_interp(440.0, 800.0, en.ar(0.1, 0.8, button("gate")), button("gate"), so.cubic);
+sample3.play_interp(440.0, 600.0, 0.5, button("gate"), it.linear);
+sample3.play_interp(440.0, 800.0, en.ar(0.1, 0.8, button("gate")), button("gate"), it.cubic);
 
 play = button("gate");
 sample3.play_interp(440.0,
