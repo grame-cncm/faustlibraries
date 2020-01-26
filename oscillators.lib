@@ -1194,6 +1194,92 @@ with {
 
 CZresTrap(fund, res) = (((1-fund)*2):min(1)*sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
 
+//===============================PolyBLEP-Based Oscillators=================================
+
+//----------`(os.)polyblep`----------
+// PolyBLEP residual function - used for smoothing steps in the audio signal.
+//
+// #### Usage
+//
+// ```
+// polyblep(Q, phase) : _
+// ```
+//
+// Where:
+//
+// * `Q`: smoothing factor between 0 and 0.5. Determines how far from the ends of the phase interval the quadratic function is used.
+// * `phase`: normalised phase (between 0 and 1)
+//------------------------------------------------------------
+// Author: Jacek Wieczorek
+polyblep( Q, phase ) = ( 0, L( phase / Q ), R( ( phase - 1 ) / Q ) ) : select3( sel ) 
+with
+{
+	sel = ( phase < Q ) + 2*( phase > 1 - Q );
+	L(x) = 2*x - x*x - 1; // Used near the left end of the interval
+	R(x) = 2*x + x*x + 1; // Used near the right end of the interval
+};
+
+//----------`(os.)polyblep_saw`----------
+// Sawtooth oscillator with suppressed aliasing (using polyBLEP)
+//
+// #### Usage
+//
+// ```
+// polyblep_saw(f) : _
+// ```
+//
+// Where:
+//
+// * `f`: frequency in Hz 
+//------------------------------------------------------------
+// Author: Jacek Wieczorek
+polyblep_saw( f ) = naive - polyblep( Q , phase )
+with
+{
+	phase = os.phasor( 1, f );
+	naive = 2 * phase - 1;
+	Q = f / ma.SR;
+};
+
+//----------`(os.)polyblep_square`----------
+// Square wave oscillator with suppressed aliasing (using polyBLEP)
+//
+// #### Usage
+//
+// ```
+// polyblep_square(f) : _
+// ```
+//
+// Where:
+//
+// * `f`: frequency in Hz 
+//------------------------------------------------------------
+// Author: Jacek Wieczorek
+polyblep_square( f ) = naive - polyblep( Q, phase ) + polyblep( Q, ma.modulo( phase + 0.5, 1 ) )
+with
+{
+	phase = os.phasor( 1, f );
+	naive = 2 * ( phase * 2 : int ) - 1;
+	Q = f / ma.SR;
+};
+
+//----------`(os.)polyblep_triangle`----------
+// Triangle wave oscillator with suppressed aliasing (using polyBLEP)
+//
+// #### Usage
+//
+// ```
+// polyblep_triangle(f) : _
+// ```
+//
+// Where:
+//
+// * `f`: frequency in Hz 
+//------------------------------------------------------------
+// Author: Jacek Wieczorek
+polyblep_triangle( f ) = polyblep_square( f ) : fi.pole( 0.999 ) : *(4 * f / ma.SR);
+
+
 
 //===============================Filter-Based Oscillators=================================
 
