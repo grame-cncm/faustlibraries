@@ -1208,7 +1208,7 @@ with {
 // Author: Jacek Wieczorek
 polyblep_saw(f) = naive - polyblep(Q , phase)
 with {
-	phase = os.phasor(1, f);
+	phase = phasor(1, f);
 	naive = 2 * phase - 1;
 	Q = f / ma.SR;
 };
@@ -1229,7 +1229,7 @@ with {
 // Author: Jacek Wieczorek
 polyblep_square(f) = naive - polyblep(Q, phase) + polyblep(Q, ma.modulo(phase + 0.5, 1))
 with {
-	phase = os.phasor(1, f);
+	phase = phasor(1, f);
 	naive = 2 * (phase * 2 : int) - 1;
 	Q = f / ma.SR;
 };
