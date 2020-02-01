@@ -39,7 +39,7 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Envelope Library";
-declare version "0.0";
+declare version "0.1";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LGPL with exception";
@@ -67,6 +67,7 @@ si = library("signals.lib");
 //----------------------------------------------------------------
 // Author: RM
 smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
+
 
 //-----------------------`(en.)ar`--------------------------
 // AR (Attack, Release) envelope generator (useful to create percussion envelopes).
@@ -117,18 +118,6 @@ with {
     
 };
 
-/*
-// Author: RM
-ar(a,r,t) = cnt(totalTime,totalTime,on) : ba.bpf.start(0,0) :
-	ba.bpf.point(attTime,1) : ba.bpf.end(attTime+relTime,0)
-with{
-	cnt(count,init,trig) = \(c).(ba.if(trig>0,0,min(count, c+1)))~+(init-init');
-	on = (t-t')>0;
-	attTime = ma.SR*a;
-	relTime = ma.SR*r;
-	totalTime = attTime+relTime;
-};
-*/
 
 //------------------------`(en.)arfe`----------------------
 // ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
@@ -157,6 +146,7 @@ arfe(attT60,relT60,fv,gate) = envelope with {
   envelope = target : si.smooth(pole);
 };
 
+
 //------------------------`(en.)are`----------------------
 // ARE (Attack, Release) envelope generator with Exponential segments.
 // Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.
@@ -177,6 +167,7 @@ arfe(attT60,relT60,fv,gate) = envelope with {
 // Author: JOS
 // License: STK-4.3
 are(attT60,relT60,gate) = arfe(attT60,relT60,0,gate);
+
 
 //------------------------`(en.)asr`----------------------
 // ASR (Attack, Sustain, Release) envelope generator.
@@ -225,20 +216,6 @@ with {
 
 };
 
-/*
-// Author: RM
-asr(a,s,r,t) = on*(as) : ba.sAndH(on) : rel
-with{
-	on = t>0;
-	off = t==0;
-	attTime = ma.SR*a;
-	relTime = ma.SR*r;
-	sustainGain = t*s;
-	as = ba.countup(attTime,off) : ba.bpf.start(0,0) :
-		ba.bpf.end(attTime,sustainGain);
-	rel = _,ba.countup(relTime,on) : ba.bpf.start(0) : ba.bpf.end(relTime,0);
-};
-*/
 
 //------------------------`(en.)adsr`----------------------
 // ADSR (Attack, Decay, Sustain, Release) envelope generator.
@@ -295,30 +272,6 @@ with {
 };
 
 
-//-----------------------------------------------------
-// Old version of ADSR (originally from music.lib)...
-/*
-adsr(a,d,s,r,t) = env ~ (_,_) : (!,_) // the 2 'state' signals are fed back
-with {
-    env (p2,y) =
-        (t>0) & (p2|(y>=1)),          // p2 = decay-sustain phase
-        (y + p1*u - (p2&(y>s))*v*y - p3*w*y)	// y  = envelop signal
-	*((p3==0)|(y>=eps)) // cut off tails to prevent denormals
-    with {
-		p1 = (p2==0) & (t>0) & (y<1);         // p1 = attack phase
-		p3 = (t<=0) & (y>0);                  // p3 = release phase
-		// #samples in attack, decay, release, must be >0
-		na = ma.SR*a+(a==0.0); nd = ma.SR*d+(d==0.0); nr = ma.SR*r+(r==0.0);
-		// correct zero sustain level
-		z = s+(s==0.0)*ba.db2linear(-60);
-		// attack, decay and (-60dB) release rates
-		u = 1/na; v = 1-pow(z, 1/nd); w = 1-1/pow(z*ba.db2linear(60), 1/nr);
-		// values below this threshold are considered zero in the release phase
-		eps = ba.db2linear(-120);
-    };
-};
-*/
-
 //------------------------`(en.)adsre`----------------------
 // ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential 
 // segments.
@@ -351,6 +304,7 @@ adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
   envelope = target : si.smooth(pole);
 };
 
+
 //------------------------`(en.)asre`----------------------
 // ASRE (Attack, Sustain, Release) envelope generator with Exponential segments.
 //
@@ -378,6 +332,7 @@ asre(attT60,susLvl,relT60,gate) = envelope with {
   envelope = target : si.smooth(pole);
 };
 
+
 //----------------------`(en.)dx7envelope`----------------------
 // DX7 operator envelope generator with 4 independent rates and levels. It is
 // essentially a 4 points BPF.
@@ -396,7 +351,7 @@ asre(attT60,susLvl,relT60,gate) = envelope with {
 //-----------------------------------------------------
 // Author: RM
 dx7envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) = up*on : ba.sAndH(on) : down
-with{
+with {
   on = t>0;
   off = t==0;
   rs1 = R1*ma.SR;
