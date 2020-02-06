@@ -45,6 +45,8 @@ ma = library("maths.lib");
 ba = library("basics.lib");
 fi = library("filters.lib");
 
+// This library contains platform specific constants 
+pl = library("platform.lib");
 
 //=========================Wave-Table-Based Oscillators===================================
 //========================================================================================
@@ -136,26 +138,7 @@ with {
 //------------------------------------------------------------
 oscsin(freq) = rdtable(tablesize, sinwaveform(tablesize), int(phasor(tablesize,freq)))
 with {
-	tablesize = 1 << 16;
-};
-
-//-----------------------`(os.)oscsinteensy`------------------------
-// Sine wave oscillator.
-// `oscsinteensy` was made for teensy, it's based on `oscsin` with a shorter tablesize.
-//
-// #### Usage
-//
-// ```
-// oscsinteensy(freq) : _
-// ```
-//
-// Where:
-//
-// * `freq`: the frequency of the wave (Hz)
-//------------------------------------------------------------
-oscsinteensy(freq) = rdtable(tablesize, sinwaveform(tablesize), int(phasor(tablesize,freq)))
-with {
-	tablesize = 1 << 8;
+	tablesize = pl.tablesize;
 };
 
 //-----------------------`(os.)hs_oscsin`------------------------
@@ -175,7 +158,7 @@ with {
 // Author: Mike Olsen
 hs_oscsin(freq,c) = rdtable(tablesize, sinwaveform(tablesize), int(hs_phasor(tablesize,freq,c)))
 with {
-        tablesize = 1 << 16;
+	tablesize = pl.tablesize;
 };
 
 //-----------------------`(os.)osccos`------------------------
@@ -193,7 +176,7 @@ with {
 //------------------------------------------------------------
 osccos(freq) = rdtable(tablesize, coswaveform(tablesize), int(phasor(tablesize,freq)) )
 with {
-	tablesize = 1 << 16;
+	tablesize = pl.tablesize;
 };
 
 //-----------------------`(os.)oscp`------------------------
@@ -227,7 +210,7 @@ oscp(freq,p) = oscsin(freq) * cos(p) + osccos(freq) * sin(p);
 //------------------------------------------------------------
 osci(freq) = s1 + d * (s2 - s1)
 with {
-	tablesize = 1 << 16;
+	tablesize = pl.tablesize;
 	i = int(phasor(tablesize,freq));
 	d = ma.decimal(phasor(tablesize,freq));
 	s1 = rdtable(tablesize+1,sinwaveform(tablesize),i);

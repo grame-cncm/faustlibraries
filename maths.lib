@@ -52,12 +52,15 @@ declare author "GRAME";
 declare copyright "GRAME";
 declare license "LGPL with exception";
 
+// This library contains platform specific constants 
+pl = library("platform.lib");
+
 //=============================Functions Reference========================================
 //========================================================================================
 
 
 //---------------------------------`(ma.)SR`---------------------------------------
-// Current sampling rate (between 1000Hz and 192000Hz). Constant during
+// Current sampling rate. Constant during
 // program execution.
 //
 // #### Usage
@@ -66,8 +69,7 @@ declare license "LGPL with exception";
 // SR : _
 // ```
 //-----------------------------------------------------------------------------
-SR = min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
-
+SR = pl.SR;
 
 //---------------------------------`(ma.)BS`---------------------------------------
 // Current block-size. Can change during the execution.
