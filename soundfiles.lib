@@ -5,7 +5,7 @@
 /************************************************************************
 ************************************************************************
 FAUST library file
-Copyright (C) 2018-2019 GRAME, Centre National de Creation Musicale
+Copyright (C) 2018-2020 GRAME, Centre National de Creation Musicale
 ----------------------------------------------------------------------
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as
@@ -35,14 +35,13 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Soundfile Library";
-declare version "0.6";
+declare version "0.7";
 
 ba = library("basics.lib");
 ma = library("maths.lib");
 si = library("signals.lib");
 ro = library("routes.lib");
 it = library("interpolators.lib");
-ru = library("runtime.lib");
 
 //=======================================================================
 // Utility functions added in a 'super' environment (to test the idea...)
@@ -56,7 +55,7 @@ super = environment {
 
     // Plays a soundfile
     // 'reader' in a function of type \(sf,part).(body) whih produces the (possibly fractional) read index
-    player(sf, part, reader, level) = (part, ru.int_part(reader(sf, part))) : outs(sf, level);
+    player(sf, part, reader, level) = (part, it.int_part(reader(sf, part))) : outs(sf, level);
 
     // Plays a soundfile with configurable interpolation
     player_interp(sf, part, reader, level, selector) = it.interpolator_select(gen, idv, selector)
@@ -69,14 +68,14 @@ super = environment {
      // Plays a soundfile with configurable interpolation and a reference frequence 'ref'
     play_interp(sf, part, ref, freq, level, gate, selector) = player_interp(sf, part, reader, level, selector)
     with {
-        reader(sf, part) = ru.raise(gate, step, length(sf, part)) with { step = freq/ref*srate(sf, part)/ma.SR; };
+        reader(sf, part) = it.raise(gate, step, length(sf, part)) with { step = freq/ref*srate(sf, part)/ma.SR; };
     };
 
     // Generic version
     loop_speed_level(sf, part, speed, level) = player(sf, part, reader, level)
     with {
         // A 'reader' which loops the sound with 'speed' and 'level' control
-        reader(sf, part) = ru.raise_modulo(1, step, length(sf, part)) with { step = speed*srate(sf, part)/ma.SR; };
+        reader(sf, part) = it.raise_modulo(1, step, length(sf, part)) with { step = speed*srate(sf, part)/ma.SR; };
     };
 
     // Defines 'loop_speed' as a specialized version of loop_speed_level with level = 1
@@ -165,13 +164,13 @@ sound(sf, part) = environment {
     // Play once
     play(level, gate) = super.player(sf, part, reader, level)
     with {
-        reader(sf, part) = ru.raise(gate, super.srate(sf, part)/ma.SR, super.length(sf, part));
+        reader(sf, part) = it.raise(gate, super.srate(sf, part)/ma.SR, super.length(sf, part));
     };
 
     // Play once in reverse
     play_rev(level, gate) = super.player(sf, part, reader, level)
     with {
-        reader(sf, part) = ru.decrease(gate, super.srate(sf, part)/ma.SR, super.length(sf, part));
+        reader(sf, part) = it.decrease(gate, super.srate(sf, part)/ma.SR, super.length(sf, part));
     };
 
     // Play sound once with configurable interpolation and freq control (using a 'ref' value)
@@ -192,8 +191,8 @@ sound(sf, part) = environment {
         
         step = super.srate(sf, part)/ma.SR;
         
-        ramp1(sf, part) = ru.raise(gate, step, super.length(sf, part));
-        ramp2(sf, part) = ru.decrease(gate, step, super.length(sf, part));
+        ramp1(sf, part) = it.raise(gate, step, super.length(sf, part));
+        ramp2(sf, part) = it.decrease(gate, step, super.length(sf, part));
         
         lramp = (ramp1, ramp2, ramp2, ramp2, ramp1);
     };

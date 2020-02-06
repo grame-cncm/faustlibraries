@@ -94,8 +94,37 @@ BS = fvariable(int count, <math.h>);
 //-----------------------------------------------------------------------------
 PI = 3.1415926535897932385;
 
+
+//---------------------------------`(ma.)EPSILON`---------------------------------------
+// Constant EPSILON in simple/double/quad precision.
+//
+// #### Usage
+//
+// ```
+// EPSILON : _
+// ```
+//-----------------------------------------------------------------------------
+singleprecision EPSILON = 1.192092896e-07;
+doubleprecision EPSILON = 2.2204460492503131e-016;
+quadprecision EPSILON = 2.2204460492503131e-016;
+
+
+//---------------------------------`(ma.)MIN`---------------------------------------
+// Constant MIN in simple/double/quad precision (minimal positive value).
+//
+// #### Usage
+//
+// ```
+// MIN : _
+// ```
+//-----------------------------------------------------------------------------
+singleprecision MIN = 1.175494351e-38;
+doubleprecision MIN = 2.2250738585072014e-308;
+quadprecision MIN = 2.2250738585072014e-308;
+
+
 //---------------------------------`(ma.)INFINITY`------------------------------
-// Constant INFINITY inherited from `math.h`.
+// Constant INFINITY in simple/double/quad precision (maximal positive value).
 //
 // #### Usage
 //
@@ -103,7 +132,10 @@ PI = 3.1415926535897932385;
 // INFINITY : _
 // ```
 //-----------------------------------------------------------------------------
-INFINITY = fconstant(float INFINITY, <math.h>);
+singleprecision INFINITY = 3.402823466e+38;
+doubleprecision INFINITY = 1.7976931348623158e+308;
+quadprecision INFINITY = 1.7976931348623158e+308;
+
 
 //---------------------------------`(ma.)FTZ`---------------------------------------
 // Flush to zero: force samples under the "maximum subnormal number"
@@ -118,7 +150,7 @@ INFINITY = fconstant(float INFINITY, <math.h>);
 //
 // See : <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
 //-----------------------------------------------------------------------------
-FTZ(x) = x * (abs(x) > 1.17549435e-38);
+FTZ(x) = x * (abs(x) > MIN);
 
 
 //---------------------------------`(ma.)neg`---------------------------------------

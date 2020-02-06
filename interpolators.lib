@@ -5,7 +5,7 @@
 /************************************************************************
 ************************************************************************
 FAUST library file
-Copyright (C) 2019 GRAME, Centre National de Creation Musicale
+Copyright (C) 2019-2010 GRAME, Centre National de Creation Musicale
 ----------------------------------------------------------------------
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as
@@ -35,12 +35,72 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Interpolator Library";
-declare version "0.1";
+declare version "0.2";
 
 ba = library("basics.lib");
 ro = library("routes.lib");
 ma = library("maths.lib");
-ru = library("runtime.lib");
+
+reset(trig) = (trig-trig') <= 0;
+ 
+/*
+The 'idv' parameter is to be used as a read index. In float (= singleprecision) mode, we use a technique with a
+pure integer index and a fractional part in the [0,1] range, to avoid accumulating errors.
+The following 3 functions allow to adapt a 'single signal' fractional idv in this [idx, dv] model.
+*/
+
+singleprecision int_part(idv) = idv : _,!;
+singleprecision frac_part(idv) = idv : !,_;
+singleprecision make_idv(id) = int(id), ma.frac(id);
+
+// Infinite raising index
+singleprecision raise(trig, step, length) = id, dv
+letrec {
+    'id = (id + int(step) + int(dv + ma.frac(step))) * reset(trig);
+    'dv = ma.frac(dv + ma.frac(step)) * reset(trig);
+};
+
+// Modulo based raising index
+singleprecision raise_modulo(trig, step, length) = id, dv
+letrec {
+    'id = fmod(id + int(step) + int(dv + ma.frac(step)), length) * reset(trig);
+    'dv = ma.frac(dv + ma.frac(step)) * reset(trig);
+};
+
+// Decreasing index starting at 'length'
+singleprecision decrease(trig, step, length) = raise(trig, -step, length) : (+(length), _);
+
+// Modulo decreasing index starting at 'length'
+singleprecision decrease_modulo(trig, step, length) = raise_modulo(trig, -step, length) : (+(length), _);
+
+/*
+The 'idv' parameter is to be used as a read index. In -double (= doubleprecision)/-quad (= quadprecision) modes, 
+we use a standard implementation with a fractional index.
+The following 3 functions allow to adapt a 'single signal' fractional idv in this [idx, dv] model.
+*/
+
+doubleprecision quadprecision int_part(idv) = int(idv);
+doubleprecision quadprecision frac_part(idv) = ma.frac(idv);
+doubleprecision quadprecision make_idv(id) = id;
+
+// Infinite raising index
+doubleprecision quadprecision raise(trig, step, length) = idv
+letrec {
+    'idv = (idv + step) * reset(trig);
+};
+
+// Modulo based raising index
+doubleprecision quadprecision raise_modulo(trig, step, length) = idv
+letrec {
+    'idv = fmod(idv + step, length) * reset(trig);
+};
+
+// Decreasing index starting at 'length'
+doubleprecision quadprecision decrease(trig, step, length) = raise(trig, -step, length) + length;
+
+// Modulo decreasing index starting at 'length'
+doubleprecision quadprecision decrease_modulo(trig, step, length) = raise_modulo(trig, -step, length) + length;
+ 
 
 // Two points interpolation functions
 
@@ -130,9 +190,9 @@ interpolator_two_points(gen, idv, interpolate_two_points) = (gen(id0), gen(id1))
                                                             : ro.interleave(outputs(gen), 2)
                                                             : par(i, outputs(gen), interpolate_two_points(dv))
 with {
-    id0 = ru.int_part(idv); // index integer part
+    id0 = int_part(idv); // index integer part
     id1 = id0 + 1;          // next index
-    dv = ru.frac_part(idv); // index fractional part in [0..1]
+    dv = frac_part(idv); // index fractional part in [0..1]
 };
 
 
@@ -183,11 +243,11 @@ interpolator_four_points(gen, idv, interpolate_four_points) = (gen(id0), gen(id1
                                                             : ro.interleave(outputs(gen), 4)
                                                             : par(i, outputs(gen), interpolate_four_points(dv))
 with {
-    id0 = id1 - 1;          // previous index
-    id1 = ru.int_part(idv); // index integer part
-    id2 = id1 + 1;          // next index
-    id3 = id2 + 1;          // next index
-    dv = ru.frac_part(idv); // index fractional part in [0..1]
+    id0 = id1 - 1;       // previous index
+    id1 = int_part(idv); // index integer part
+    id2 = id1 + 1;       // next index
+    id3 = id2 + 1;       // next index
+    dv = frac_part(idv); // index fractional part in [0..1]
 };
 
 
@@ -252,7 +312,7 @@ waveform_interpolator(wf, step, interp) = interp(gen, idv)
 with {
     gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(_,!); };   // waveform size
     index = (+(step)~_)-step;  // starting from 0
-    idv = ru.make_idv(index);  // build the signal for interpolation in a generic way
+    idv = it.make_idv(index);  // build the signal for interpolation in a generic way
 };
 
 waveform_linear(wf, step) = waveform_interpolator(wf, step, it.interpolator_linear);
@@ -295,7 +355,7 @@ process = waveform_interp1(wf, idv, nentry("algo", 0, 0, 3, 1))
 with {
 	step = 0.1;
 	idv_aux = (+(step)~_)-step;  // starting from 0
-	idv = ru.make_idv(idv_aux);  // build the signal for interpolation in a generic way
+	idv = it.make_idv(idv_aux);  // build the signal for interpolation in a generic way
 };
 
 // Test linear interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
