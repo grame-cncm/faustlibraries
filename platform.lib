@@ -1,5 +1,5 @@
 //#################################### platform.lib ########################################
-// A library to handle platform specific library code in Faust.
+// A library to handle platform specific code in Faust.
 //########################################################################################
 
 /************************************************************************
@@ -37,14 +37,14 @@ closed source license or any other license if you decide so.
 declare name "Generic Platform Library";
 declare version "0.1";
 
-//---------------------------------`(pl.)SR`---------------------------------------
-// Current sampling rate (between 1000Hz and 192000Hz). Constant during
+//---------------------------------`(pl.)SR`-----------------------------------
+// Current sampling rate (between 1Hz and 192000Hz). Constant during
 // program execution.
 //-----------------------------------------------------------------------------
 SR = min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
 
 
-//---------------------------------`(pl.)tablesize`---------------------------------------
+//---------------------------------`(pl.)tablesize`----------------------------
 // Oscillator table size
 //-----------------------------------------------------------------------------
 tablesize = 1 << 16;

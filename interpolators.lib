@@ -191,7 +191,7 @@ interpolator_two_points(gen, idv, interpolate_two_points) = (gen(id0), gen(id1))
                                                             : par(i, outputs(gen), interpolate_two_points(dv))
 with {
     id0 = int_part(idv); // index integer part
-    id1 = id0 + 1;          // next index
+    id1 = id0 + 1;       // next index
     dv = frac_part(idv); // index fractional part in [0..1]
 };
 
@@ -305,7 +305,7 @@ with {
 
 /*
 
-Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' uses the 'idv' model, see float.lib and double.lib
+Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' uses the 'idv' model.
 
 // waveform and index step
 waveform_interpolator(wf, step, interp) = interp(gen, idv)
