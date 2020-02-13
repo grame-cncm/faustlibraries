@@ -44,6 +44,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `sy`: `synths.lib`
 * `ve`: `vaeffects.lib`
 * `wa`: `webaudio.lib`
+* `vl`: `version.lib`
 
 Environments can then be used as follows in your Faust code:
 
@@ -101,7 +102,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 
 * Every time a new function is added, the documentation should be updated simply by running `make doclib`.
 * The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on *Using the Faust Libraries*).
-* Try to reuse exisiting functions as much as possible.
+* Try to reuse existing functions as much as possible.
 * If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.
 
 ### New Libraries
@@ -173,10 +174,14 @@ Only the libraries that are considered to be "standard" are documented:
 * `tubes.lib` (not documented but example in `/examples/misc`)
 * `vaeffects.lib`
 * `webaudio.lib`
+* `version.lib`
 
 Other deprecated libraries such as `music.lib`, etc. are present but are not documented to not confuse new users.
 
-The doumentation of each library can be found in `/documentation/library.html` or in `/documentation/library.pdf`.
+The documentation of each library can be found in `/documentation/library.html` or in `/documentation/library.pdf`. 
+
+A global `version` number for the standard libraries is defined in `version.lib`. 
+It follows the semantic versioning structure: MAJOR, MINOR, PATCH. The MAJOR number is increased when we make incompatible changes. The MINOR number is increased when we add functionality in a backwards compatible manner, and the PATCH number when we make backwards compatible bug fixes. By looking at the generated code or the diagram of `process = vl.version;` one can see the current version of the libraries.
 
 The `/examples` directory contains all the examples from the `/examples` folder of the Faust distribution as well as new ones. Most of them were updated to reflect the coding conventions described in the next section. Examples are organized by types in different folders. The `/old` folder contains examples that are fully deprecated, probably because they were integrated to the libraries and fully rewritten (see `freeverb.dsp` for example). Examples using deprecated libraries were integrated to the general tree but a warning comment was added at their beginning to point readers to the right library and function.
 
@@ -221,6 +226,7 @@ so = library("soundfiles.lib");
 sy = library("synths.lib");
 ve = library("vaeffects.lib");
 wa = library("webaudio.lib");
+vl = library("version.lib");
 ```
 
 For example, if we wanted to use the `smooth` function which is now declared in `signals.lib`, we would do the following:
