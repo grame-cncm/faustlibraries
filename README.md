@@ -1,6 +1,6 @@
 # Faust Libraries
 
-NOTE: this documentation was automatically generated using [pandoc](https://pandoc.org/).
+NOTE: this documentation was automatically generated using the script `generateDoc`. This script depends on [pandoc](https://pandoc.org/) and [html-xml-utils](https://www.w3.org/Tools/HTML-XML-utils/README).
 
 This page provides information on how to use the Faust libraries.
 
