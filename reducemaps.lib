@@ -1,5 +1,4 @@
 //#################################### reducemaps.lib ########################################
-// Correct documentation in interpolators.lib, typo in reducemaps.lib, cleanup.
 // A library to handle reduce/map kind of operation in Faust. Its official prefix is `rm`.
 //##############################################################################################
 
@@ -55,9 +54,7 @@ ba = library("basics.lib");
 //---------------------------------------------------------------
 
 
-//---------------------------------------------------------------
-// reduce(op, n, x)
-//---------------------------------------------------------------
+//--------------------`(rm.)reduce`------------------------------
 // Fold-like high order function. Apply a binary operation <op> 
 // on a block of <n> consecutive samples of a signal <x>. 
 // For example : reduce(max,128) will compute the maximun of each
@@ -66,6 +63,14 @@ ba = library("basics.lib");
 // the duration of a block. A new value is only produced 
 // at the end of a block. Note also that blocks should be of at
 // least one sample (n>0). 
+//
+// #### Usage
+//
+// ```
+// reduce(op, n, x)
+// ```
+//-----------------------------------------------------------------------------
+
 reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
     with {
         compute(acc, count, val) =
@@ -75,13 +80,19 @@ reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
     };
 
 
-//---------------------------------------------------------------
-// reducemap (op, foo, n, x)
-//---------------------------------------------------------------
+//--------------------`(rm.)reducemap`---------------------------
 // Like reduce but a foo function is applied to the result. From
 // a mathematical point of view :
 // reducemap(op,foo,n) is equivalent to reduce(op,n):foo
 // but more efficient.
+//
+// #### Usage
+//
+// ```
+// reducemap (op, foo, n, x)
+// ```
+//-----------------------------------------------------------------------------
+
 reducemap(op, foo, n, x) = compute ~ (_,_,_) : (!,!,_)
     with {
         compute(acc, count, val) =
