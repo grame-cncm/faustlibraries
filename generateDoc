@@ -1,8 +1,9 @@
 #!/bin/sh
 
-LIBFOLDER="."
-DOCFOLDER="doc"
-PLATFORM=$(uname)
+# Script used to generate the online documentation of the Faust libraries. It uses `faust2md` to convert the xxx.lib files into 
+# markdown index.md file suitable for mkdocs. And it uses mkdocs to generate the html documentation. The documentation is 
+# created inside the ./doc folder. 
+
 FAUST2MD=$(which faust2md | head -1)
 
 for p in $@; do
@@ -15,64 +16,18 @@ done
 FILES="analyzers.lib basics.lib compressors.lib delays.lib demos.lib dx7.lib envelopes.lib filters.lib hoa.lib interpolators.lib maths.lib misceffects.lib noises.lib oscillators.lib phaflangers.lib physmodels.lib platform.lib reducemaps.lib reverbs.lib routes.lib signals.lib soundfiles.lib spats.lib synths.lib vaeffects.lib version.lib webaudio.lib"
 
 
-BUILDFOLDER=`mktemp -d`
+DEST=doc/docs/index.md
 
-echo "Build folder $BUILDFOLDER"
-
-
-# Prepare all the ingredients into $BUILDFOLDER
-
-## the markdown for each .lib file
-for p in $FILES; do
-	("${FAUST2MD}" "$LIBFOLDER/$p" > $BUILDFOLDER/$p.md) || exit
-done
-
-## additional markdown files
-cp "$LIBFOLDER/README.md" "$LIBFOLDER/doc/md/standardFunctions.md" "$LIBFOLDER/doc/md/primitives.md" "$LIBFOLDER/doc/md/licenses.md" $BUILDFOLDER/
-
-cp "$LIBFOLDER/doc/md/header.html" "$LIBFOLDER/doc/md/navbar.html" $BUILDFOLDER/
+cat README.md doc/md/standardFunctions.md doc/md/primitives.md > $DEST
+"${FAUST2MD}" $FILES >> $DEST 
+cat doc/md/licenses.md >> $DEST
 
 
-# Process all the files in $BUILDFOLDER
+(pandoc --toc --standalone --metadata pagetitle="Faust Libraries Documentation" $DEST -o doc/library.pdf) || exit
 
-CURDIR=`pwd`
-cd $BUILDFOLDER
+cd doc
+mkdocs build
 
+cd ..
 
-## Generate the pdf version of the doc using pandoc
-
-(pandoc --toc --standalone --metadata pagetitle="Faust Libraries Documentation" README.md standardFunctions.md primitives.md *.lib.md licenses.md -o $CURDIR/doc/library.pdf) || exit
-
-## Generate the raw html version of the doc using pandoc
-
-(pandoc --toc --standalone --metadata pagetitle="Faust Libraries Documentation" --include-in-header="header.html" --mathjax README.md standardFunctions.md primitives.md *.lib.md licenses.md -o library.html) || exit
-
-
-## Reformatting the html file with the right template
-
-if [ $PLATFORM = "Darwin" ]; then
- 	(sed -i '' 's|<body>|<body><div class="container"><!-- include "navigationbar.html" --><div class="row">|g' library.html) || exit
- 	(sed -i '' 's!</body>!</div></div></body>!g' library.html) || exit
- 	(sed -i '' 's!<nav id="TOC">!<nav class="col-sm-4" id="TOC">!g' library.html) || exit
- 	(sed -i '' 's!<h1 id="faust-libraries">Faust Libraries</h1>!<div class="col-sm-8"><h1 id="faust-libraries">Faust Libraries</h1>!g' library.html) || exit
-else
- 	(sed -i 's|<body>|<body><div class="container"><!-- include "navigationbar.html" --><div class="row">|g' library.html) || exit
- 	(sed -i 's!</body>!</div></div></body>!g' library.html) || exit
- 	(sed -i 's!<nav id="TOC">!<nav class="col-sm-4" id="TOC">!g' library.html) || exit
- 	(sed -i 's!<h1 id="faust-libraries">Faust Libraries</h1>!<div class="col-sm-8"><h1 id="faust-libraries">Faust Libraries</h1>!g' library.html) || exit
-fi
-
-## create the navigation bar content
-echo "" >  navcontent.html
-for p in $FILES; do
-	echo "<a class=\"dropdown-item\" href=\"#$p\">$p</a>" >>  navcontent.html
-done
-
-
-## instanciate the navigation bar with the navigation bar content
-
-hxincl navbar.html > navigationbar.html
-
-## instanciate library.html with the navigation bar and normalize it
-hxincl library.html | hxnormalize -l 120 > $CURDIR/doc/library.html
 
