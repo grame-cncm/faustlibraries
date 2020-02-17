@@ -2,19 +2,23 @@
 
 # Script used to generate the online documentation of the Faust libraries. It uses `faust2md` to convert the xxx.lib files into 
 # markdown index.md file suitable for mkdocs. And it uses mkdocs to generate the html documentation. The documentation is 
-# created inside the ./doc folder. 
+# created inside the ./doc folder. it also uses pandoc to produce a pdf version of the documentation.
 
 FAUST2MD=$(which faust2md | head -1)
 
 for p in $@; do
 	if [ $p = "-help" ] || [ $p = "-h" ]; then
-		echo "Just run it! It will automatically look for all the .lib files and generate the corresponding documentation in /doc."
+		echo "Just run it! It will automatically look for all the .lib files and generate the corresponding documentation in as ./doc/library.pdf and ./doc/site/index.html ."
 		exit 1
 	fi
 done
 
+# Add here more .lib files to be includes into the documentation
+
 FILES="analyzers.lib basics.lib compressors.lib delays.lib demos.lib dx7.lib envelopes.lib filters.lib hoa.lib interpolators.lib maths.lib misceffects.lib noises.lib oscillators.lib phaflangers.lib physmodels.lib platform.lib reducemaps.lib reverbs.lib routes.lib signals.lib soundfiles.lib spats.lib synths.lib vaeffects.lib version.lib webaudio.lib"
 
+
+# produces index.md : the content of the documentation in markdown
 
 DEST=doc/docs/index.md
 
@@ -23,7 +27,11 @@ cat README.md doc/md/standardFunctions.md doc/md/primitives.md > $DEST
 cat doc/md/licenses.md >> $DEST
 
 
+# converts index.md into library.pdf
+
 (pandoc --toc --standalone --metadata pagetitle="Faust Libraries Documentation" $DEST -o doc/library.pdf) || exit
+
+# builds the website using mkdocs
 
 cd doc
 mkdocs build
