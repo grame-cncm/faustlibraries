@@ -1,16 +1,16 @@
 # Standard Functions
 
-Dozens of functions are implemented in the Faust libraries and many of them are very specialized and not useful to beginners or to people who only need to use Faust for basic applications. This section offers an index organized by categories of the "standard Faust functions" (basic filters, effects, synthesizers, etc.). This index only contains functions without a user interface (UI). Faust functions with a built-in UI can be found in [`demos.lib`](#demos.lib).
+Dozens of functions are implemented in the Faust libraries and many of them are very specialized and not useful to beginners or to people who only need to use Faust for basic applications. This section offers an index organized by categories of the "standard Faust functions" (basic filters, effects, synthesizers, etc.). This index only contains functions without a user interface (UI). Faust functions with a built-in UI can be found in [`demos.lib`](#demoslib).
 
 
 ## Analysis Tools
 
 <div class="table-begin"></div>
 
-Function Type | Function Name | Description
---- | --- | ---
-[Amplitude Follower](#an.amp_follower) | [`an.`](#analysis.lib)[`amp_follower`](#an.amp_follower) | Classic analog audio envelope follower
-[Octave Analyzers](#an.mth_octave_analyzer) | [`an.`](#analysis.lib)[`mth_octave_analyzer[N]`](#an.mth_octave_analyzer) | Octave analyzers
+| Function Type                              | Function Name                                                           | Description                            |
+| ------------------------------------------ | ----------------------------------------------------------------------- | -------------------------------------- |
+| [Amplitude Follower](#anamp_follower)      | [`an.`](#analysislib)[`amp_follower`](#anamp_follower)                  | Classic analog audio envelope follower |
+| [Octave Analyzers](#anmth_octave_analyzer) | [`an.`](#analysislib)[`mth_octave_analyzer[N]`](#anmth_octave_analyzer) | Octave analyzers                       |
 
 <div class="table-end"></div>
 
@@ -19,27 +19,27 @@ Function Type | Function Name | Description
 
 <div class="table-begin"></div>
 
-Function Type | Function Name | Description
---- | --- | ---
-[Beats](#ba.beat) | [`ba.`](#basics.lib)[`beat`](#ba.beat) | Pulses at a specific tempo
-[Block](#si.block) | [`si.`](#signals.lib)[`block`](#si.block) | Terminate n signals
-[Break Point Function](#ba.bpf) | [`ba.`](#basics.lib)[`bpf`](#ba.bpf) | Beak Point Function (BPF)
-[Bus](#si.bus) | [`si.`](#signals.lib)[`bus`](#si.bus) | Bus of n signals
-[Bypass (Mono)](#ba.bypass1) | [`ba.`](#basics.lib)[`bypass1`](#ba.bypass1) | Mono bypass
-[Bypass (Stereo)](#ba.bypass2) | [`ba.`](#basics.lib)[`bypass2`](#ba.bypass2) | Stereo bypass
-[Count Elements](#ba.count) | [`ba.`](#basics.lib)[`count`](#ba.count) | Count elements in a list
-[Count Down](#ba.countdown) | [`ba.`](#basics.lib)[`countdown`](#ba.countdown) | Samples count down
-[Count Up](#ba.countup) | [`ba.`](#basics.lib)[`countup`](#ba.countup) | Samples count up
-[Delay (Integer)](#de.delay) | [`de.`](#delays.lib)[`delay`](#de.delay) | Integer delay
-[Delay (Float)](#de.fdelay) | [`de.`](#delays.lib)[`fdelay`](#de.fdelay) | Fractional delay
-[Down Sample](#ba.downsample) | [`ba.`](#basics.lib)[`downSample`](#ba.downsample) | Down sample a signal
-[Impulsify](#ba.impulsify) | [`ba.`](#basics.lib)[`impulsify`](#ba.impulsify) | Turns a signal into an impulse
-[Sample and Hold](#ba.sandh) | [`ba.`](#basics.lib)[`sAndH`](#ba.sandh) | Sample and hold
-[Signal Crossing](#ro.cross) | [`ro.`](#routes.lib)[`cross`](#ro.cross) | Cross n signals
-[Smoother (Default)](#si.smoo) | [`si.`](#signals.lib)[`smoo`](#si.smoo) | Exponential smoothing
-[Smoother](#si.smooth) | [`si.`](#signals.lib)[`smooth`](#si.smooth) | Exponential smoothing with controllable pole
-[Take Element](#ba.take) | [`ba.`](#basics.lib)[`take`](#ba.take) | Take en element from a list
-[Time](#ba.time) | [`ba.`](#basics.lib)[`time`](#ba.time) | A simple timer
+| Function Type                  | Function Name                                    | Description                                  |
+| ------------------------------ | ------------------------------------------------ | -------------------------------------------- |
+| [Beats](#babeat)               | [`ba.`](#basicslib)[`beat`](#babeat)             | Pulses at a specific tempo                   |
+| [Block](#siblock)              | [`si.`](#signalslib)[`block`](#siblock)          | Terminate n signals                          |
+| [Break Point Function](#babpf) | [`ba.`](#basicslib)[`bpf`](#babpf)               | Beak Point Function (BPF)                    |
+| [Bus](#sibus)                  | [`si.`](#signalslib)[`bus`](#sibus)              | Bus of n signals                             |
+| [Bypass (Mono)](#babypass1)    | [`ba.`](#basicslib)[`bypass1`](#babypass1)       | Mono bypass                                  |
+| [Bypass (Stereo)](#babypass2)  | [`ba.`](#basicslib)[`bypass2`](#babypass2)       | Stereo bypass                                |
+| [Count Elements](#bacount)     | [`ba.`](#basicslib)[`count`](#bacount)           | Count elements in a list                     |
+| [Count Down](#bacountdown)     | [`ba.`](#basicslib)[`countdown`](#bacountdown)   | Samples count down                           |
+| [Count Up](#bacountup)         | [`ba.`](#basicslib)[`countup`](#bacountup)       | Samples count up                             |
+| [Delay (Integer)](#dedelay)    | [`de.`](#delayslib)[`delay`](#dedelay)           | Integer delay                                |
+| [Delay (Float)](#defdelay)     | [`de.`](#delayslib)[`fdelay`](#defdelay)         | Fractional delay                             |
+| [Down Sample](#badownsample)   | [`ba.`](#basicslib)[`downSample`](#badownsample) | Down sample a signal                         |
+| [Impulsify](#baimpulsify)      | [`ba.`](#basicslib)[`impulsify`](#baimpulsify)   | Turns a signal into an impulse               |
+| [Sample and Hold](#basandh)    | [`ba.`](#basicslib)[`sAndH`](#basandh)           | Sample and hold                              |
+| [Signal Crossing](#rocross)    | [`ro.`](#routeslib)[`cross`](#rocross)           | Cross n signals                              |
+| [Smoother (Default)](#sismoo)  | [`si.`](#signalslib)[`smoo`](#sismoo)            | Exponential smoothing                        |
+| [Smoother](#sismooth)          | [`si.`](#signalslib)[`smooth`](#sismooth)        | Exponential smoothing with controllable pole |
+| [Take Element](#batake)        | [`ba.`](#basicslib)[`take`](#batake)             | Take en element from a list                  |
+| [Time](#batime)                | [`ba.`](#basicslib)[`time`](#batime)             | A simple timer                               |
 
 <div class="table-end"></div>
 
@@ -48,16 +48,16 @@ Function Type | Function Name | Description
 
 <div class="table-begin"></div>
 
-Function Type | Function Name | Description
---- | --- | ---
-[dB to Linear](#ba.db2linear) | [`ba.`](#basics.lib)[`db2linear`](#ba.db2linear) | Converts dB to linear values
-[Linear to dB](#ba.linear2db) | [`ba.`](#basics.lib)[`linear2db`](#ba.linear2db) | Converts linear values to dB
-[MIDI Key to Hz](#ba.midikey2hz) | [`ba.`](#basics.lib)[`midikey2hz`](#ba.midikey2hz) | Converts a MIDI key number into a frequency
-[Hz to MIDI Key](#ba.hz2midikey) | [`ba.`](#basics.lib)[`hz2midikey`](#ba.hz2midikey) | Converts a frequency into MIDI key number
-[Pole to T60](#ba.pole2tau) | [`ba.`](#basics.lib)[`pole2tau`](#ba.pole2tau) | Converts a pole into a time constant (t60)
-[Samples to Seconds](#ba.samp2sec) | [`ba.`](#basics.lib)[`samp2sec`](#ba.samp2sec) | Converts samples to seconds
-[Seconds to Samples](#ba.sec2samp) | [`ba.`](#basics.lib)[`sec2samp`](#ba.sec2samp) | Converts seconds to samples
-[T60 to Pole](#ba.tau2pole) | [`ba.`](#basics.lib)[`tau2pole`](#ba.tau2pole) | Converts a time constant (t60) into a pole
+| Function Type                     | Function Name                                    | Description                                 |
+| --------------------------------- | ------------------------------------------------ | ------------------------------------------- |
+| [dB to Linear](#badb2linear)      | [`ba.`](#basicslib)[`db2linear`](#badb2linear)   | Converts dB to linear values                |
+| [Linear to dB](#balinear2db)      | [`ba.`](#basicslib)[`linear2db`](#balinear2db)   | Converts linear values to dB                |
+| [MIDI Key to Hz](#bamidikey2hz)   | [`ba.`](#basicslib)[`midikey2hz`](#bamidikey2hz) | Converts a MIDI key number into a frequency |
+| [Hz to MIDI Key](#bahz2midikey)   | [`ba.`](#basicslib)[`hz2midikey`](#bahz2midikey) | Converts a frequency into MIDI key number   |
+| [Pole to T60](#bapole2tau)        | [`ba.`](#basicslib)[`pole2tau`](#bapole2tau)     | Converts a pole into a time constant (t60)  |
+| [Samples to Seconds](#basamp2sec) | [`ba.`](#basicslib)[`samp2sec`](#basamp2sec)     | Converts samples to seconds                 |
+| [Seconds to Samples](#basec2samp) | [`ba.`](#basicslib)[`sec2samp`](#basec2samp)     | Converts seconds to samples                 |
+| [T60 to Pole](#batau2pole)        | [`ba.`](#basicslib)[`tau2pole`](#batau2pole)     | Converts a time constant (t60) into a pole  |
 
 <div class="table-end"></div>
 
@@ -66,28 +66,28 @@ Function Type | Function Name | Description
 
 <div class="table-begin"></div>
 
-Function Type | Function Name | Description
---- | --- | ---
-[Auto Wah](#ve.autowah) | [`ve.`](#vaeffects.lib)[`autowah`](#ve.autowah) | Auto-Wah effect
-[Compressor](#co.compressor_mono) | [`co.`](#compressors.lib)[`compressor_mono`](#co.compressor_mono) | Dynamic range compressor
-[Distortion](#ef.cubicnl) | [`ef.`](#misceffects.lib)[`cubicnl`](#ef.cubicnl) | Cubic nonlinearity distortion
-[Crybaby](#ve.crybaby) | [`ve.`](#vaeffects.lib)[`crybaby`](#ve.crybaby) | Crybaby wah pedal
-[Echo](#ef.echo) | [`ef.`](#misceffects.lib)[`echo`](#ef.echo) | Simple echo
-[Flanger](#pf.flanger_stereo) | [`pf.`](#phaflangers.lib)[`flanger_stereo`](#pf.flanger_stereo) | Flanging effect
-[Gate](#ef.gate_mono) | [`ef.`](#misceffects.lib)[`gate_mono`](#ef.gate_mono) | Mono signal gate
-[Limiter](#co.limiter_1176_R4_mono) | [`co.`](#compressors.lib)[`limiter_1176_R4_mono`](#co.limiter_1176_R4_mono) | Limiter
-[Phaser](#pf.phaser2_stereo) | [`pf.`](#phaflangers.lib)[`phaser2_stereo`](#pf.phaser2_stereo) | Phaser effect
-[Reverb (FDN)](#re.fdnrev0) | [`re.`](#reverbs.lib)[`fdnrev0`](#re.fdnrev0) | Feedback delay network reverberator
-[Reverb (Freeverb)](#re.mono_freeverb) | [`re.`](#reverbs.lib)[`mono_freeverb`](#re.mono_freeverb) | Most "famous" Schroeder reverberator
-[Reverb (Simple)](#re.jcrev) | [`re.`](#reverbs.lib)[`jcrev`](#re.jcrev) | Simple Schroeder reverberator
-[Reverb (Zita)](#re.zita_rev1_stereo) | [`re.`](#reverbs.lib)[`zita_rev1_stereo`](#re.zita_rev1_stereo) | High quality FDN reverberator
-[Panner](#sp.panner) | [`sp.`](#spats.lib)[`panner`](#sp.panner) | Linear stereo panner
-[Pitch Shift](#ef.transpose) | [`ef.`](#misceffects.lib)[`transpose`](#ef.transpose) | Simple pitch shifter
-[Panner](#sp.spat) | [`sp.`](#spats.lib)[`spat`](#sp.spat) | N outputs spatializer
-[Speaker Simulator](#ef.speakerbp) | [`ef.`](#misceffects.lib)[`speakerbp`](#ef.speakerbp) | Simple speaker simulator
-[Stereo Width](#ef.stereo_width) | [`ef.`](#misceffects.lib)[`stereo_width`](#ef.stereo_width) | Stereo width effect
-[Vocoder](#ve.vocoder) | [`ve.`](#vaeffects.lib)[`vocoder`](#ve.vocoder) | Simple vocoder
-[Wah](#ve.wah4) | [`ve.`](#vaeffects.lib)[`wah4`](#ve.wah4) | Wah effect
+| Function Type                         | Function Name                                                             | Description                          |
+| ------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------ |
+| [Auto Wah](#veautowah)                | [`ve.`](#vaeffectslib)[`autowah`](#veautowah)                             | Auto-Wah effect                      |
+| [Compressor](#cocompressor_mono)      | [`co.`](#compressorslib)[`compressor_mono`](#cocompressor_mono)           | Dynamic range compressor             |
+| [Distortion](#efcubicnl)              | [`ef.`](#misceffectslib)[`cubicnl`](#efcubicnl)                           | Cubic nonlinearity distortion        |
+| [Crybaby](#vecrybaby)                 | [`ve.`](#vaeffectslib)[`crybaby`](#vecrybaby)                             | Crybaby wah pedal                    |
+| [Echo](#efecho)                       | [`ef.`](#misceffectslib)[`echo`](#efecho)                                 | Simple echo                          |
+| [Flanger](#pfflanger_stereo)          | [`pf.`](#phaflangerslib)[`flanger_stereo`](#pfflanger_stereo)             | Flanging effect                      |
+| [Gate](#efgate_mono)                  | [`ef.`](#misceffectslib)[`gate_mono`](#efgate_mono)                       | Mono signal gate                     |
+| [Limiter](#colimiter_1176_R4_mono)    | [`co.`](#compressorslib)[`limiter_1176_R4_mono`](#colimiter_1176_R4_mono) | Limiter                              |
+| [Phaser](#pfphaser2_stereo)           | [`pf.`](#phaflangerslib)[`phaser2_stereo`](#pfphaser2_stereo)             | Phaser effect                        |
+| [Reverb (FDN)](#refdnrev0)            | [`re.`](#reverbslib)[`fdnrev0`](#refdnrev0)                               | Feedback delay network reverberator  |
+| [Reverb (Freeverb)](#remono_freeverb) | [`re.`](#reverbslib)[`mono_freeverb`](#remono_freeverb)                   | Most "famous" Schroeder reverberator |
+| [Reverb (Simple)](#rejcrev)           | [`re.`](#reverbslib)[`jcrev`](#rejcrev)                                   | Simple Schroeder reverberator        |
+| [Reverb (Zita)](#rezita_rev1_stereo)  | [`re.`](#reverbslib)[`zita_rev1_stereo`](#rezita_rev1_stereo)             | High quality FDN reverberator        |
+| [Panner](#sppanner)                   | [`sp.`](#spatslib)[`panner`](#sppanner)                                   | Linear stereo panner                 |
+| [Pitch Shift](#eftranspose)           | [`ef.`](#misceffectslib)[`transpose`](#eftranspose)                       | Simple pitch shifter                 |
+| [Panner](#spspat)                     | [`sp.`](#spatslib)[`spat`](#spspat)                                       | N outputs spatializer                |
+| [Speaker Simulator](#efspeakerbp)     | [`ef.`](#misceffectslib)[`speakerbp`](#efspeakerbp)                       | Simple speaker simulator             |
+| [Stereo Width](#efstereo_width)       | [`ef.`](#misceffectslib)[`stereo_width`](#efstereo_width)                 | Stereo width effect                  |
+| [Vocoder](#vevocoder)                 | [`ve.`](#vaeffectslib)[`vocoder`](#vevocoder)                             | Simple vocoder                       |
+| [Wah](#vewah4)                        | [`ve.`](#vaeffectslib)[`wah4`](#vewah4)                                   | Wah effect                           |
 
 <div class="table-end"></div>
 
@@ -96,12 +96,12 @@ Function Type | Function Name | Description
 
 <div class="table-begin"></div>
 
-Function Type | Function Name | Description
---- | --- | ---
-[ADSR](#en.asr) | [`en.`](#envelopes.lib)[`adsr`](#en.adsr) | Attack/Decay/Sustain/Release envelope generator
-[AR](#en.ar) | [`en.`](#envelopes.lib)[`ar`](#en.ar) | Attack/Release envelope generator
-[ASR](#en.asr) | [`en.`](#envelopes.lib)[`asr`](#en.asr) | Attack/Sustain/Release envelope generator
-[Exponential](#en.smoothEvelope) | [`en.`](#envelopes.lib)[`smoothEnvelope`](#en.smoothEnvelope) | Exponential envelope generator
+| Function Type                   | Function Name                                               | Description                                     |
+| ------------------------------- | ----------------------------------------------------------- | ----------------------------------------------- |
+| [ADSR](#enasr)                  | [`en.`](#envelopeslib)[`adsr`](#enadsr)                     | Attack/Decay/Sustain/Release envelope generator |
+| [AR](#enar)                     | [`en.`](#envelopeslib)[`ar`](#enar)                         | Attack/Release envelope generator               |
+| [ASR](#enasr)                   | [`en.`](#envelopeslib)[`asr`](#enasr)                       | Attack/Sustain/Release envelope generator       |
+| [Exponential](#ensmoothEvelope) | [`en.`](#envelopeslib)[`smoothEnvelope`](#ensmoothEnvelope) | Exponential envelope generator                  |
 
 <div class="table-end"></div>
 
@@ -110,28 +110,28 @@ Function Type | Function Name | Description
 
 <div class="table-begin"></div>
 
-Function Type | Function Name | Description
---- | --- | ---
-[Bandpass (Butterworth)](#fi.bandpass) | [`fi.`](#filters.lib)[`bandpass`](#fi.bandpass) | Generic butterworth bandpass
-[Bandpass (Resonant)](#fi.resonbp) | [`fi.`](#filters.lib)[`resonbp`](#fi.resonbp) | Virtual analog resonant bandpass
-[Bandstop (Butterworth)](#fi.bandstop) | [`fi.`](#filters.lib)[`bandstop`](#fi.bandstop) | Generic butterworth bandstop
-[Biquad](#fi.tf2) | [`fi.`](#filters.lib)[`tf2`](#fi.tf2) | "Standard" biquad filter
-[Comb (Allpass)](#fi.allpass_fcomb) | [`fi.`](#filters.lib)[`allpass_fcomb`](#fi.allpass_fcomb) | Schroeder allpass comb filter
-[Comb (Feedback)](#fi.fb_fcomb) | [`fi.`](#filters.lib)[`fb_fcomb`](#fi.fb_fcomb) | Feedback comb filter
-[Comb (Feedforward)](#fi.ff_fcomb) | [`fi.`](#filters.lib)[`ff_fcomb`](#fi.ff_fcomb) | Feed-forward comb filter.
-[DC Blocker](#fi.dcblocker) | [`fi.`](#filters.lib)[`dcblocker`](#fi.dcblocker) | Default dc blocker
-[Filterbank](#fi.filterbank) | [`fi.`](#filters.lib)[`filterbank`](#fi.filterbank) | Generic filter bank
-[FIR (Arbitrary Order)](#fi.fir) | [`fi.`](#filters.lib)[`fir`](#fi.fir) | Nth-order FIR filter
-[High Shelf](#fi.high_shelf) | [`fi.`](#filters.lib)[`high_shelf`](#fi.high_shelf) | High shelf
-[Highpass (Butterworth)](#fi.highpass) | [`fi.`](#filters.lib)[`highpass`](#fi.highpass) | Nth-order Butterworth highpass
-[Highpass (Resonant)](#fi.resonhp) | [`fi.`](#filters.lib)[`resonhp`](#fi.resonhp) | Virtual analog resonant highpass
-[IIR (Arbitrary Order)](#fi.iir) | [`fi.`](#filters.lib)[`iir`](#fi.iir) | Nth-order IIR filter
-[Level Filter](#fi.levelfilter) | [`fi.`](#filters.lib)[`levelfilter`](#fi.levelfilter) | Dynamic level lowpass
-[Low Shelf](#fi.low_shelf) | [`fi.`](#filters.lib)[`low_shelf`](#fi.low_shelf) | Low shelf
-[Lowpass (Butterworth)](#fi.lowpass) | [`fi.`](#filters.lib)[`lowpass`](#fi.lowpass) | Nth-order Butterworth lowpass
-[Lowpass (Resonant)](#fi.resonlp) | [`fi.`](#filters.lib)[`resonlp`](#fi.resonlp) | Virtual analog resonant lowpass
-[Notch Filter](#fi.notchw) | [`fi.`](#filters.lib)[`notchw`](#fi.notchw) | Simple notch filter
-[Peak Equalizer](#fi.peak_eq) | [`fi.`](#filters.lib)[`peak_eq`](#fi.peak_eq) | Peaking equalizer section
+| Function Type                         | Function Name                                           | Description                      |
+| ------------------------------------- | ------------------------------------------------------- | -------------------------------- |
+| [Bandpass (Butterworth)](#fibandpass) | [`fi.`](#filterslib)[`bandpass`](#fibandpass)           | Generic butterworth bandpass     |
+| [Bandpass (Resonant)](#firesonbp)     | [`fi.`](#filterslib)[`resonbp`](#firesonbp)             | Virtual analog resonant bandpass |
+| [Bandstop (Butterworth)](#fibandstop) | [`fi.`](#filterslib)[`bandstop`](#fibandstop)           | Generic butterworth bandstop     |
+| [Biquad](#fitf2)                      | [`fi.`](#filterslib)[`tf2`](#fitf2)                     | "Standard" biquad filter         |
+| [Comb (Allpass)](#fiallpass_fcomb)    | [`fi.`](#filterslib)[`allpass_fcomb`](#fiallpass_fcomb) | Schroeder allpass comb filter    |
+| [Comb (Feedback)](#fifb_fcomb)        | [`fi.`](#filterslib)[`fb_fcomb`](#fifb_fcomb)           | Feedback comb filter             |
+| [Comb (Feedforward)](#fiff_fcomb)     | [`fi.`](#filterslib)[`ff_fcomb`](#fiff_fcomb)           | Feed-forward comb filter.        |
+| [DC Blocker](#fidcblocker)            | [`fi.`](#filterslib)[`dcblocker`](#fidcblocker)         | Default dc blocker               |
+| [Filterbank](#fifilterbank)           | [`fi.`](#filterslib)[`filterbank`](#fifilterbank)       | Generic filter bank              |
+| [FIR (Arbitrary Order)](#fifir)       | [`fi.`](#filterslib)[`fir`](#fifir)                     | Nth-order FIR filter             |
+| [High Shelf](#fihigh_shelf)           | [`fi.`](#filterslib)[`high_shelf`](#fihigh_shelf)       | High shelf                       |
+| [Highpass (Butterworth)](#fihighpass) | [`fi.`](#filterslib)[`highpass`](#fihighpass)           | Nth-order Butterworth highpass   |
+| [Highpass (Resonant)](#firesonhp)     | [`fi.`](#filterslib)[`resonhp`](#firesonhp)             | Virtual analog resonant highpass |
+| [IIR (Arbitrary Order)](#fiiir)       | [`fi.`](#filterslib)[`iir`](#fiiir)                     | Nth-order IIR filter             |
+| [Level Filter](#filevelfilter)        | [`fi.`](#filterslib)[`levelfilter`](#filevelfilter)     | Dynamic level lowpass            |
+| [Low Shelf](#filow_shelf)             | [`fi.`](#filterslib)[`low_shelf`](#filow_shelf)         | Low shelf                        |
+| [Lowpass (Butterworth)](#filowpass)   | [`fi.`](#filterslib)[`lowpass`](#filowpass)             | Nth-order Butterworth lowpass    |
+| [Lowpass (Resonant)](#firesonlp)      | [`fi.`](#filterslib)[`resonlp`](#firesonlp)             | Virtual analog resonant lowpass  |
+| [Notch Filter](#finotchw)             | [`fi.`](#filterslib)[`notchw`](#finotchw)               | Simple notch filter              |
+| [Peak Equalizer](#fipeak_eq)          | [`fi.`](#filterslib)[`peak_eq`](#fipeak_eq)             | Peaking equalizer section        |
 
 <div class="table-end"></div>
 
@@ -140,23 +140,23 @@ Function Type | Function Name | Description
 
 <div class="table-begin"></div>
 
-Function Type | Function Name | Description
---- | --- | ---
-[Impulse](#os.impulse) | [`os.`](#oscillators.lib)[`impulse`](#os.impulse) | Generate an impulse on start-up
-[Impulse Train](#os.imptrain) | [`os.`](#oscillators.lib)[`imptrain`](#os.imptrain) | Band-limited impulse train
-[Phasor](#os.phasor) | [`os.`](#oscillators.lib)[`phasor`](#os.phasor) | Simple phasor
-[Pink Noise](#no.pink_noise) | [`no.`](#noises.lib)[`pink_noise`](#no.pink_noise) | Pink noise generator
-[Pulse Train](#os.pulsetrain) | [`os.`](#oscillators.lib)[`pulsetrain`](#os.pulsetrain) | Band-limited pulse train
-[Pulse Train (Low Frequency)](#os.lf_imptrain) | [`os.`](#oscillators.lib)[`lf_imptrain`](#os.lf_imptrain) | Low-frequency pulse train
-[Sawtooth](#os.sawtooth) | [`os.`](#oscillators.lib)[`sawtooth`](#os.sawtooth) | Band-limited sawtooth wave
-[Sawtooth (Low Frequency)](#os.lf_saw) | [`os.`](#oscillators.lib)[`lf_saw`](#os.lf_saw) | Low-frequency sawtooth wave
-[Sine (Filter-Based)](#os.oscs) | [`os.`](#oscillators.lib)[`oscs`](#os.oscs) | Sine oscillator (filter-based)
-[Sine (Table-Based)](#os.osc) | [`os.`](#oscillators.lib)[`osc`](#os.osc) | Sine oscillator (table-based)
-[Square](#os.square) | [`os.`](#oscillators.lib)[`square`](#os.square) | Band-limited square wave
-[Square (Low Frequency)](#os.lf_squarewave) | [`os.`](#oscillators.lib)[`lf_squarewave`](#os.lf_squarewave) | Low-frequency square wave
-[Triangle](#os.triangle) | [`os.`](#oscillators.lib)[`triangle`](#os.triangle) | Band-limited triangle wave
-[Triangle (Low Frequency)](#os.lf_triangle) | [`os.`](#oscillators.lib)[`lf_triangle`](#os.lf_triangle) | Low-frequency triangle wave
-[White Noise](#no.noise) | [`no.`](#noises.lib)[`noise`](#no.noise) | White noise generator
+| Function Type                                 | Function Name                                               | Description                     |
+| --------------------------------------------- | ----------------------------------------------------------- | ------------------------------- |
+| [Impulse](#osimpulse)                         | [`os.`](#oscillatorslib)[`impulse`](#osimpulse)             | Generate an impulse on start-up |
+| [Impulse Train](#osimptrain)                  | [`os.`](#oscillatorslib)[`imptrain`](#osimptrain)           | Band-limited impulse train      |
+| [Phasor](#osphasor)                           | [`os.`](#oscillatorslib)[`phasor`](#osphasor)               | Simple phasor                   |
+| [Pink Noise](#nopink_noise)                   | [`no.`](#noiseslib)[`pink_noise`](#nopink_noise)            | Pink noise generator            |
+| [Pulse Train](#ospulsetrain)                  | [`os.`](#oscillatorslib)[`pulsetrain`](#ospulsetrain)       | Band-limited pulse train        |
+| [Pulse Train (Low Frequency)](#oslf_imptrain) | [`os.`](#oscillatorslib)[`lf_imptrain`](#oslf_imptrain)     | Low-frequency pulse train       |
+| [Sawtooth](#ossawtooth)                       | [`os.`](#oscillatorslib)[`sawtooth`](#ossawtooth)           | Band-limited sawtooth wave      |
+| [Sawtooth (Low Frequency)](#oslf_saw)         | [`os.`](#oscillatorslib)[`lf_saw`](#oslf_saw)               | Low-frequency sawtooth wave     |
+| [Sine (Filter-Based)](#ososcs)                | [`os.`](#oscillatorslib)[`oscs`](#ososcs)                   | Sine oscillator (filter-based)  |
+| [Sine (Table-Based)](#ososc)                  | [`os.`](#oscillatorslib)[`osc`](#ososc)                     | Sine oscillator (table-based)   |
+| [Square](#ossquare)                           | [`os.`](#oscillatorslib)[`square`](#ossquare)               | Band-limited square wave        |
+| [Square (Low Frequency)](#oslf_squarewave)    | [`os.`](#oscillatorslib)[`lf_squarewave`](#oslf_squarewave) | Low-frequency square wave       |
+| [Triangle](#ostriangle)                       | [`os.`](#oscillatorslib)[`triangle`](#ostriangle)           | Band-limited triangle wave      |
+| [Triangle (Low Frequency)](#oslf_triangle)    | [`os.`](#oscillatorslib)[`lf_triangle`](#oslf_triangle)     | Low-frequency triangle wave     |
+| [White Noise](#nonoise)                       | [`no.`](#noiseslib)[`noise`](#nonoise)                      | White noise generator           |
 
 <div class="table-end"></div>
 
@@ -165,14 +165,14 @@ Function Type | Function Name | Description
 
 <div class="table-begin"></div>
 
-Function Type | Function Name | Description
---- | --- | ---
-[Additive Drum](#sy.additivedrum) | [`sy.`](#synths.lib)[`additiveDrum`](#sy.additivedrum) | Additive synthesis drum
-[Bandpassed Sawtooth](#sy.dubdub) | [`sy.`](#synths.lib)[`dubDub`](#sy.dubdub) | Sawtooth through resonant bandpass
-[Comb String](#sy.combstring) | [`sy.`](#synths.lib)[`combString`](#sy.combstring) | String model based on a comb filter
-[FM](#sy.fm) | [`sy.`](#synths.lib)[`fm`](#sy.fm) | Frequency modulation synthesizer
-[Lowpassed Sawtooth](#sy.sawtrombone) | [`sy.`](#synths.lib)[`sawTrombone`](#sy.sawtrombone) | "Trombone" based on a filtered sawtooth
-[Popping Filter](#sy.popfilterperc) | [`sy.`](#synths.lib)[`popFilterPerc`](#sy.popfilterperc) | Popping filter percussion instrument
+| Function Type                        | Function Name                                          | Description                             |
+| ------------------------------------ | ------------------------------------------------------ | --------------------------------------- |
+| [Additive Drum](#syadditivedrum)     | [`sy.`](#synthslib)[`additiveDrum`](#syadditivedrum)   | Additive synthesis drum                 |
+| [Bandpassed Sawtooth](#sydubdub)     | [`sy.`](#synthslib)[`dubDub`](#sydubdub)               | Sawtooth through resonant bandpass      |
+| [Comb String](#sycombstring)         | [`sy.`](#synthslib)[`combString`](#sycombstring)       | String model based on a comb filter     |
+| [FM](#syfm)                          | [`sy.`](#synthslib)[`fm`](#syfm)                       | Frequency modulation synthesizer        |
+| [Lowpassed Sawtooth](#sysawtrombone) | [`sy.`](#synthslib)[`sawTrombone`](#sysawtrombone)     | "Trombone" based on a filtered sawtooth |
+| [Popping Filter](#sypopfilterperc)   | [`sy.`](#synthslib)[`popFilterPerc`](#sypopfilterperc) | Popping filter percussion instrument    |
 
 <div class="table-end"></div>
 
