@@ -14,6 +14,11 @@
         <link href="css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
         <link href="css/extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
 
         <script src="js/jquery-1.10.2.min.js" defer></script>
         <script src="js/bootstrap-3.0.3.min.js" defer></script>
@@ -444,7 +449,7 @@ process = si.smooth(0.999);
 <p>Note that it is presently possible for a library function released under one license to utilize another library function having some different license.  There is presently no indication of this situation in the Faust compiler output, but such notice is planned.  For now, library contributors should strive to use only library functions having compatible licenses, and concerned end-users must manually determine the union of licenses applicable to the library functions they are using.</p>
 <p>[//]: # Yann says: "I agree, we need to have metadata local to a single definition or a group of definition. This will allow the compiler to be more selective when including metadata in the generated code."</p>
 <h1 id="standard-functions_1">Standard Functions</h1>
-<p>Dozens of functions are implemented in the Faust libraries and many of them are very specialized and not useful to beginners or to people who only need to use Faust for basic applications. This section offers an index organized by categories of the "standard Faust functions" (basic filters, effects, synthesizers, etc.). This index only contains functions without a user interface (UI). Faust functions with a built-in UI can be found in <a href="#demos.lib"><code>demos.lib</code></a>.</p>
+<p>Dozens of functions are implemented in the Faust libraries and many of them are very specialized and not useful to beginners or to people who only need to use Faust for basic applications. This section offers an index organized by categories of the "standard Faust functions" (basic filters, effects, synthesizers, etc.). This index only contains functions without a user interface (UI). Faust functions with a built-in UI can be found in <a href="#demoslib"><code>demos.lib</code></a>.</p>
 <h2 id="analysis-tools">Analysis Tools</h2>
 <div class="table-begin"></div>
 
@@ -458,13 +463,13 @@ process = si.smooth(0.999);
 </thead>
 <tbody>
 <tr>
-<td><a href="#an.amp_follower">Amplitude Follower</a></td>
-<td><a href="#analysis.lib"><code>an.</code></a><a href="#an.amp_follower"><code>amp_follower</code></a></td>
+<td><a href="#anamp_follower">Amplitude Follower</a></td>
+<td><a href="#analysislib"><code>an.</code></a><a href="#anamp_follower"><code>amp_follower</code></a></td>
 <td>Classic analog audio envelope follower</td>
 </tr>
 <tr>
-<td><a href="#an.mth_octave_analyzer">Octave Analyzers</a></td>
-<td><a href="#analysis.lib"><code>an.</code></a><a href="#an.mth_octave_analyzer"><code>mth_octave_analyzer[N]</code></a></td>
+<td><a href="#anmth_octave_analyzer">Octave Analyzers</a></td>
+<td><a href="#analysislib"><code>an.</code></a><a href="#anmth_octave_analyzer"><code>mth_octave_analyzer[N]</code></a></td>
 <td>Octave analyzers</td>
 </tr>
 </tbody>
@@ -484,98 +489,98 @@ process = si.smooth(0.999);
 </thead>
 <tbody>
 <tr>
-<td><a href="#ba.beat">Beats</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.beat"><code>beat</code></a></td>
+<td><a href="#babeat">Beats</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#babeat"><code>beat</code></a></td>
 <td>Pulses at a specific tempo</td>
 </tr>
 <tr>
-<td><a href="#si.block">Block</a></td>
-<td><a href="#signals.lib"><code>si.</code></a><a href="#si.block"><code>block</code></a></td>
+<td><a href="#siblock">Block</a></td>
+<td><a href="#signalslib"><code>si.</code></a><a href="#siblock"><code>block</code></a></td>
 <td>Terminate n signals</td>
 </tr>
 <tr>
-<td><a href="#ba.bpf">Break Point Function</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.bpf"><code>bpf</code></a></td>
+<td><a href="#babpf">Break Point Function</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#babpf"><code>bpf</code></a></td>
 <td>Beak Point Function (BPF)</td>
 </tr>
 <tr>
-<td><a href="#si.bus">Bus</a></td>
-<td><a href="#signals.lib"><code>si.</code></a><a href="#si.bus"><code>bus</code></a></td>
+<td><a href="#sibus">Bus</a></td>
+<td><a href="#signalslib"><code>si.</code></a><a href="#sibus"><code>bus</code></a></td>
 <td>Bus of n signals</td>
 </tr>
 <tr>
-<td><a href="#ba.bypass1">Bypass (Mono)</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.bypass1"><code>bypass1</code></a></td>
+<td><a href="#babypass1">Bypass (Mono)</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#babypass1"><code>bypass1</code></a></td>
 <td>Mono bypass</td>
 </tr>
 <tr>
-<td><a href="#ba.bypass2">Bypass (Stereo)</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.bypass2"><code>bypass2</code></a></td>
+<td><a href="#babypass2">Bypass (Stereo)</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#babypass2"><code>bypass2</code></a></td>
 <td>Stereo bypass</td>
 </tr>
 <tr>
-<td><a href="#ba.count">Count Elements</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.count"><code>count</code></a></td>
+<td><a href="#bacount">Count Elements</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#bacount"><code>count</code></a></td>
 <td>Count elements in a list</td>
 </tr>
 <tr>
-<td><a href="#ba.countdown">Count Down</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.countdown"><code>countdown</code></a></td>
+<td><a href="#bacountdown">Count Down</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#bacountdown"><code>countdown</code></a></td>
 <td>Samples count down</td>
 </tr>
 <tr>
-<td><a href="#ba.countup">Count Up</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.countup"><code>countup</code></a></td>
+<td><a href="#bacountup">Count Up</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#bacountup"><code>countup</code></a></td>
 <td>Samples count up</td>
 </tr>
 <tr>
-<td><a href="#de.delay">Delay (Integer)</a></td>
-<td><a href="#delays.lib"><code>de.</code></a><a href="#de.delay"><code>delay</code></a></td>
+<td><a href="#dedelay">Delay (Integer)</a></td>
+<td><a href="#delayslib"><code>de.</code></a><a href="#dedelay"><code>delay</code></a></td>
 <td>Integer delay</td>
 </tr>
 <tr>
-<td><a href="#de.fdelay">Delay (Float)</a></td>
-<td><a href="#delays.lib"><code>de.</code></a><a href="#de.fdelay"><code>fdelay</code></a></td>
+<td><a href="#defdelay">Delay (Float)</a></td>
+<td><a href="#delayslib"><code>de.</code></a><a href="#defdelay"><code>fdelay</code></a></td>
 <td>Fractional delay</td>
 </tr>
 <tr>
-<td><a href="#ba.downsample">Down Sample</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.downsample"><code>downSample</code></a></td>
+<td><a href="#badownsample">Down Sample</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#badownsample"><code>downSample</code></a></td>
 <td>Down sample a signal</td>
 </tr>
 <tr>
-<td><a href="#ba.impulsify">Impulsify</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.impulsify"><code>impulsify</code></a></td>
+<td><a href="#baimpulsify">Impulsify</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#baimpulsify"><code>impulsify</code></a></td>
 <td>Turns a signal into an impulse</td>
 </tr>
 <tr>
-<td><a href="#ba.sandh">Sample and Hold</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.sandh"><code>sAndH</code></a></td>
+<td><a href="#basandh">Sample and Hold</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#basandh"><code>sAndH</code></a></td>
 <td>Sample and hold</td>
 </tr>
 <tr>
-<td><a href="#ro.cross">Signal Crossing</a></td>
-<td><a href="#routes.lib"><code>ro.</code></a><a href="#ro.cross"><code>cross</code></a></td>
+<td><a href="#rocross">Signal Crossing</a></td>
+<td><a href="#routeslib"><code>ro.</code></a><a href="#rocross"><code>cross</code></a></td>
 <td>Cross n signals</td>
 </tr>
 <tr>
-<td><a href="#si.smoo">Smoother (Default)</a></td>
-<td><a href="#signals.lib"><code>si.</code></a><a href="#si.smoo"><code>smoo</code></a></td>
+<td><a href="#sismoo">Smoother (Default)</a></td>
+<td><a href="#signalslib"><code>si.</code></a><a href="#sismoo"><code>smoo</code></a></td>
 <td>Exponential smoothing</td>
 </tr>
 <tr>
-<td><a href="#si.smooth">Smoother</a></td>
-<td><a href="#signals.lib"><code>si.</code></a><a href="#si.smooth"><code>smooth</code></a></td>
+<td><a href="#sismooth">Smoother</a></td>
+<td><a href="#signalslib"><code>si.</code></a><a href="#sismooth"><code>smooth</code></a></td>
 <td>Exponential smoothing with controllable pole</td>
 </tr>
 <tr>
-<td><a href="#ba.take">Take Element</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.take"><code>take</code></a></td>
+<td><a href="#batake">Take Element</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#batake"><code>take</code></a></td>
 <td>Take en element from a list</td>
 </tr>
 <tr>
-<td><a href="#ba.time">Time</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.time"><code>time</code></a></td>
+<td><a href="#batime">Time</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#batime"><code>time</code></a></td>
 <td>A simple timer</td>
 </tr>
 </tbody>
@@ -595,43 +600,43 @@ process = si.smooth(0.999);
 </thead>
 <tbody>
 <tr>
-<td><a href="#ba.db2linear">dB to Linear</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.db2linear"><code>db2linear</code></a></td>
+<td><a href="#badb2linear">dB to Linear</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#badb2linear"><code>db2linear</code></a></td>
 <td>Converts dB to linear values</td>
 </tr>
 <tr>
-<td><a href="#ba.linear2db">Linear to dB</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.linear2db"><code>linear2db</code></a></td>
+<td><a href="#balinear2db">Linear to dB</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#balinear2db"><code>linear2db</code></a></td>
 <td>Converts linear values to dB</td>
 </tr>
 <tr>
-<td><a href="#ba.midikey2hz">MIDI Key to Hz</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.midikey2hz"><code>midikey2hz</code></a></td>
+<td><a href="#bamidikey2hz">MIDI Key to Hz</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#bamidikey2hz"><code>midikey2hz</code></a></td>
 <td>Converts a MIDI key number into a frequency</td>
 </tr>
 <tr>
-<td><a href="#ba.hz2midikey">Hz to MIDI Key</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.hz2midikey"><code>hz2midikey</code></a></td>
+<td><a href="#bahz2midikey">Hz to MIDI Key</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#bahz2midikey"><code>hz2midikey</code></a></td>
 <td>Converts a frequency into MIDI key number</td>
 </tr>
 <tr>
-<td><a href="#ba.pole2tau">Pole to T60</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.pole2tau"><code>pole2tau</code></a></td>
+<td><a href="#bapole2tau">Pole to T60</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#bapole2tau"><code>pole2tau</code></a></td>
 <td>Converts a pole into a time constant (t60)</td>
 </tr>
 <tr>
-<td><a href="#ba.samp2sec">Samples to Seconds</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.samp2sec"><code>samp2sec</code></a></td>
+<td><a href="#basamp2sec">Samples to Seconds</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#basamp2sec"><code>samp2sec</code></a></td>
 <td>Converts samples to seconds</td>
 </tr>
 <tr>
-<td><a href="#ba.sec2samp">Seconds to Samples</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.sec2samp"><code>sec2samp</code></a></td>
+<td><a href="#basec2samp">Seconds to Samples</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#basec2samp"><code>sec2samp</code></a></td>
 <td>Converts seconds to samples</td>
 </tr>
 <tr>
-<td><a href="#ba.tau2pole">T60 to Pole</a></td>
-<td><a href="#basics.lib"><code>ba.</code></a><a href="#ba.tau2pole"><code>tau2pole</code></a></td>
+<td><a href="#batau2pole">T60 to Pole</a></td>
+<td><a href="#basicslib"><code>ba.</code></a><a href="#batau2pole"><code>tau2pole</code></a></td>
 <td>Converts a time constant (t60) into a pole</td>
 </tr>
 </tbody>
@@ -651,103 +656,103 @@ process = si.smooth(0.999);
 </thead>
 <tbody>
 <tr>
-<td><a href="#ve.autowah">Auto Wah</a></td>
-<td><a href="#vaeffects.lib"><code>ve.</code></a><a href="#ve.autowah"><code>autowah</code></a></td>
+<td><a href="#veautowah">Auto Wah</a></td>
+<td><a href="#vaeffectslib"><code>ve.</code></a><a href="#veautowah"><code>autowah</code></a></td>
 <td>Auto-Wah effect</td>
 </tr>
 <tr>
-<td><a href="#co.compressor_mono">Compressor</a></td>
-<td><a href="#compressors.lib"><code>co.</code></a><a href="#co.compressor_mono"><code>compressor_mono</code></a></td>
+<td><a href="#cocompressor_mono">Compressor</a></td>
+<td><a href="#compressorslib"><code>co.</code></a><a href="#cocompressor_mono"><code>compressor_mono</code></a></td>
 <td>Dynamic range compressor</td>
 </tr>
 <tr>
-<td><a href="#ef.cubicnl">Distortion</a></td>
-<td><a href="#misceffects.lib"><code>ef.</code></a><a href="#ef.cubicnl"><code>cubicnl</code></a></td>
+<td><a href="#efcubicnl">Distortion</a></td>
+<td><a href="#misceffectslib"><code>ef.</code></a><a href="#efcubicnl"><code>cubicnl</code></a></td>
 <td>Cubic nonlinearity distortion</td>
 </tr>
 <tr>
-<td><a href="#ve.crybaby">Crybaby</a></td>
-<td><a href="#vaeffects.lib"><code>ve.</code></a><a href="#ve.crybaby"><code>crybaby</code></a></td>
+<td><a href="#vecrybaby">Crybaby</a></td>
+<td><a href="#vaeffectslib"><code>ve.</code></a><a href="#vecrybaby"><code>crybaby</code></a></td>
 <td>Crybaby wah pedal</td>
 </tr>
 <tr>
-<td><a href="#ef.echo">Echo</a></td>
-<td><a href="#misceffects.lib"><code>ef.</code></a><a href="#ef.echo"><code>echo</code></a></td>
+<td><a href="#efecho">Echo</a></td>
+<td><a href="#misceffectslib"><code>ef.</code></a><a href="#efecho"><code>echo</code></a></td>
 <td>Simple echo</td>
 </tr>
 <tr>
-<td><a href="#pf.flanger_stereo">Flanger</a></td>
-<td><a href="#phaflangers.lib"><code>pf.</code></a><a href="#pf.flanger_stereo"><code>flanger_stereo</code></a></td>
+<td><a href="#pfflanger_stereo">Flanger</a></td>
+<td><a href="#phaflangerslib"><code>pf.</code></a><a href="#pfflanger_stereo"><code>flanger_stereo</code></a></td>
 <td>Flanging effect</td>
 </tr>
 <tr>
-<td><a href="#ef.gate_mono">Gate</a></td>
-<td><a href="#misceffects.lib"><code>ef.</code></a><a href="#ef.gate_mono"><code>gate_mono</code></a></td>
+<td><a href="#efgate_mono">Gate</a></td>
+<td><a href="#misceffectslib"><code>ef.</code></a><a href="#efgate_mono"><code>gate_mono</code></a></td>
 <td>Mono signal gate</td>
 </tr>
 <tr>
-<td><a href="#co.limiter_1176_R4_mono">Limiter</a></td>
-<td><a href="#compressors.lib"><code>co.</code></a><a href="#co.limiter_1176_R4_mono"><code>limiter_1176_R4_mono</code></a></td>
+<td><a href="#colimiter_1176_R4_mono">Limiter</a></td>
+<td><a href="#compressorslib"><code>co.</code></a><a href="#colimiter_1176_R4_mono"><code>limiter_1176_R4_mono</code></a></td>
 <td>Limiter</td>
 </tr>
 <tr>
-<td><a href="#pf.phaser2_stereo">Phaser</a></td>
-<td><a href="#phaflangers.lib"><code>pf.</code></a><a href="#pf.phaser2_stereo"><code>phaser2_stereo</code></a></td>
+<td><a href="#pfphaser2_stereo">Phaser</a></td>
+<td><a href="#phaflangerslib"><code>pf.</code></a><a href="#pfphaser2_stereo"><code>phaser2_stereo</code></a></td>
 <td>Phaser effect</td>
 </tr>
 <tr>
-<td><a href="#re.fdnrev0">Reverb (FDN)</a></td>
-<td><a href="#reverbs.lib"><code>re.</code></a><a href="#re.fdnrev0"><code>fdnrev0</code></a></td>
+<td><a href="#refdnrev0">Reverb (FDN)</a></td>
+<td><a href="#reverbslib"><code>re.</code></a><a href="#refdnrev0"><code>fdnrev0</code></a></td>
 <td>Feedback delay network reverberator</td>
 </tr>
 <tr>
-<td><a href="#re.mono_freeverb">Reverb (Freeverb)</a></td>
-<td><a href="#reverbs.lib"><code>re.</code></a><a href="#re.mono_freeverb"><code>mono_freeverb</code></a></td>
+<td><a href="#remono_freeverb">Reverb (Freeverb)</a></td>
+<td><a href="#reverbslib"><code>re.</code></a><a href="#remono_freeverb"><code>mono_freeverb</code></a></td>
 <td>Most "famous" Schroeder reverberator</td>
 </tr>
 <tr>
-<td><a href="#re.jcrev">Reverb (Simple)</a></td>
-<td><a href="#reverbs.lib"><code>re.</code></a><a href="#re.jcrev"><code>jcrev</code></a></td>
+<td><a href="#rejcrev">Reverb (Simple)</a></td>
+<td><a href="#reverbslib"><code>re.</code></a><a href="#rejcrev"><code>jcrev</code></a></td>
 <td>Simple Schroeder reverberator</td>
 </tr>
 <tr>
-<td><a href="#re.zita_rev1_stereo">Reverb (Zita)</a></td>
-<td><a href="#reverbs.lib"><code>re.</code></a><a href="#re.zita_rev1_stereo"><code>zita_rev1_stereo</code></a></td>
+<td><a href="#rezita_rev1_stereo">Reverb (Zita)</a></td>
+<td><a href="#reverbslib"><code>re.</code></a><a href="#rezita_rev1_stereo"><code>zita_rev1_stereo</code></a></td>
 <td>High quality FDN reverberator</td>
 </tr>
 <tr>
-<td><a href="#sp.panner">Panner</a></td>
-<td><a href="#spats.lib"><code>sp.</code></a><a href="#sp.panner"><code>panner</code></a></td>
+<td><a href="#sppanner">Panner</a></td>
+<td><a href="#spatslib"><code>sp.</code></a><a href="#sppanner"><code>panner</code></a></td>
 <td>Linear stereo panner</td>
 </tr>
 <tr>
-<td><a href="#ef.transpose">Pitch Shift</a></td>
-<td><a href="#misceffects.lib"><code>ef.</code></a><a href="#ef.transpose"><code>transpose</code></a></td>
+<td><a href="#eftranspose">Pitch Shift</a></td>
+<td><a href="#misceffectslib"><code>ef.</code></a><a href="#eftranspose"><code>transpose</code></a></td>
 <td>Simple pitch shifter</td>
 </tr>
 <tr>
-<td><a href="#sp.spat">Panner</a></td>
-<td><a href="#spats.lib"><code>sp.</code></a><a href="#sp.spat"><code>spat</code></a></td>
+<td><a href="#spspat">Panner</a></td>
+<td><a href="#spatslib"><code>sp.</code></a><a href="#spspat"><code>spat</code></a></td>
 <td>N outputs spatializer</td>
 </tr>
 <tr>
-<td><a href="#ef.speakerbp">Speaker Simulator</a></td>
-<td><a href="#misceffects.lib"><code>ef.</code></a><a href="#ef.speakerbp"><code>speakerbp</code></a></td>
+<td><a href="#efspeakerbp">Speaker Simulator</a></td>
+<td><a href="#misceffectslib"><code>ef.</code></a><a href="#efspeakerbp"><code>speakerbp</code></a></td>
 <td>Simple speaker simulator</td>
 </tr>
 <tr>
-<td><a href="#ef.stereo_width">Stereo Width</a></td>
-<td><a href="#misceffects.lib"><code>ef.</code></a><a href="#ef.stereo_width"><code>stereo_width</code></a></td>
+<td><a href="#efstereo_width">Stereo Width</a></td>
+<td><a href="#misceffectslib"><code>ef.</code></a><a href="#efstereo_width"><code>stereo_width</code></a></td>
 <td>Stereo width effect</td>
 </tr>
 <tr>
-<td><a href="#ve.vocoder">Vocoder</a></td>
-<td><a href="#vaeffects.lib"><code>ve.</code></a><a href="#ve.vocoder"><code>vocoder</code></a></td>
+<td><a href="#vevocoder">Vocoder</a></td>
+<td><a href="#vaeffectslib"><code>ve.</code></a><a href="#vevocoder"><code>vocoder</code></a></td>
 <td>Simple vocoder</td>
 </tr>
 <tr>
-<td><a href="#ve.wah4">Wah</a></td>
-<td><a href="#vaeffects.lib"><code>ve.</code></a><a href="#ve.wah4"><code>wah4</code></a></td>
+<td><a href="#vewah4">Wah</a></td>
+<td><a href="#vaeffectslib"><code>ve.</code></a><a href="#vewah4"><code>wah4</code></a></td>
 <td>Wah effect</td>
 </tr>
 </tbody>
@@ -767,23 +772,23 @@ process = si.smooth(0.999);
 </thead>
 <tbody>
 <tr>
-<td><a href="#en.asr">ADSR</a></td>
-<td><a href="#envelopes.lib"><code>en.</code></a><a href="#en.adsr"><code>adsr</code></a></td>
+<td><a href="#enasr">ADSR</a></td>
+<td><a href="#envelopeslib"><code>en.</code></a><a href="#enadsr"><code>adsr</code></a></td>
 <td>Attack/Decay/Sustain/Release envelope generator</td>
 </tr>
 <tr>
-<td><a href="#en.ar">AR</a></td>
-<td><a href="#envelopes.lib"><code>en.</code></a><a href="#en.ar"><code>ar</code></a></td>
+<td><a href="#enar">AR</a></td>
+<td><a href="#envelopeslib"><code>en.</code></a><a href="#enar"><code>ar</code></a></td>
 <td>Attack/Release envelope generator</td>
 </tr>
 <tr>
-<td><a href="#en.asr">ASR</a></td>
-<td><a href="#envelopes.lib"><code>en.</code></a><a href="#en.asr"><code>asr</code></a></td>
+<td><a href="#enasr">ASR</a></td>
+<td><a href="#envelopeslib"><code>en.</code></a><a href="#enasr"><code>asr</code></a></td>
 <td>Attack/Sustain/Release envelope generator</td>
 </tr>
 <tr>
-<td><a href="#en.smoothEvelope">Exponential</a></td>
-<td><a href="#envelopes.lib"><code>en.</code></a><a href="#en.smoothEnvelope"><code>smoothEnvelope</code></a></td>
+<td><a href="#ensmoothEvelope">Exponential</a></td>
+<td><a href="#envelopeslib"><code>en.</code></a><a href="#ensmoothEnvelope"><code>smoothEnvelope</code></a></td>
 <td>Exponential envelope generator</td>
 </tr>
 </tbody>
@@ -803,103 +808,103 @@ process = si.smooth(0.999);
 </thead>
 <tbody>
 <tr>
-<td><a href="#fi.bandpass">Bandpass (Butterworth)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.bandpass"><code>bandpass</code></a></td>
+<td><a href="#fibandpass">Bandpass (Butterworth)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fibandpass"><code>bandpass</code></a></td>
 <td>Generic butterworth bandpass</td>
 </tr>
 <tr>
-<td><a href="#fi.resonbp">Bandpass (Resonant)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.resonbp"><code>resonbp</code></a></td>
+<td><a href="#firesonbp">Bandpass (Resonant)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#firesonbp"><code>resonbp</code></a></td>
 <td>Virtual analog resonant bandpass</td>
 </tr>
 <tr>
-<td><a href="#fi.bandstop">Bandstop (Butterworth)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.bandstop"><code>bandstop</code></a></td>
+<td><a href="#fibandstop">Bandstop (Butterworth)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fibandstop"><code>bandstop</code></a></td>
 <td>Generic butterworth bandstop</td>
 </tr>
 <tr>
-<td><a href="#fi.tf2">Biquad</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.tf2"><code>tf2</code></a></td>
+<td><a href="#fitf2">Biquad</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fitf2"><code>tf2</code></a></td>
 <td>"Standard" biquad filter</td>
 </tr>
 <tr>
-<td><a href="#fi.allpass_fcomb">Comb (Allpass)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.allpass_fcomb"><code>allpass_fcomb</code></a></td>
+<td><a href="#fiallpass_fcomb">Comb (Allpass)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fiallpass_fcomb"><code>allpass_fcomb</code></a></td>
 <td>Schroeder allpass comb filter</td>
 </tr>
 <tr>
-<td><a href="#fi.fb_fcomb">Comb (Feedback)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.fb_fcomb"><code>fb_fcomb</code></a></td>
+<td><a href="#fifb_fcomb">Comb (Feedback)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fifb_fcomb"><code>fb_fcomb</code></a></td>
 <td>Feedback comb filter</td>
 </tr>
 <tr>
-<td><a href="#fi.ff_fcomb">Comb (Feedforward)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.ff_fcomb"><code>ff_fcomb</code></a></td>
+<td><a href="#fiff_fcomb">Comb (Feedforward)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fiff_fcomb"><code>ff_fcomb</code></a></td>
 <td>Feed-forward comb filter.</td>
 </tr>
 <tr>
-<td><a href="#fi.dcblocker">DC Blocker</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.dcblocker"><code>dcblocker</code></a></td>
+<td><a href="#fidcblocker">DC Blocker</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fidcblocker"><code>dcblocker</code></a></td>
 <td>Default dc blocker</td>
 </tr>
 <tr>
-<td><a href="#fi.filterbank">Filterbank</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.filterbank"><code>filterbank</code></a></td>
+<td><a href="#fifilterbank">Filterbank</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fifilterbank"><code>filterbank</code></a></td>
 <td>Generic filter bank</td>
 </tr>
 <tr>
-<td><a href="#fi.fir">FIR (Arbitrary Order)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.fir"><code>fir</code></a></td>
+<td><a href="#fifir">FIR (Arbitrary Order)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fifir"><code>fir</code></a></td>
 <td>Nth-order FIR filter</td>
 </tr>
 <tr>
-<td><a href="#fi.high_shelf">High Shelf</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.high_shelf"><code>high_shelf</code></a></td>
+<td><a href="#fihigh_shelf">High Shelf</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fihigh_shelf"><code>high_shelf</code></a></td>
 <td>High shelf</td>
 </tr>
 <tr>
-<td><a href="#fi.highpass">Highpass (Butterworth)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.highpass"><code>highpass</code></a></td>
+<td><a href="#fihighpass">Highpass (Butterworth)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fihighpass"><code>highpass</code></a></td>
 <td>Nth-order Butterworth highpass</td>
 </tr>
 <tr>
-<td><a href="#fi.resonhp">Highpass (Resonant)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.resonhp"><code>resonhp</code></a></td>
+<td><a href="#firesonhp">Highpass (Resonant)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#firesonhp"><code>resonhp</code></a></td>
 <td>Virtual analog resonant highpass</td>
 </tr>
 <tr>
-<td><a href="#fi.iir">IIR (Arbitrary Order)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.iir"><code>iir</code></a></td>
+<td><a href="#fiiir">IIR (Arbitrary Order)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fiiir"><code>iir</code></a></td>
 <td>Nth-order IIR filter</td>
 </tr>
 <tr>
-<td><a href="#fi.levelfilter">Level Filter</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.levelfilter"><code>levelfilter</code></a></td>
+<td><a href="#filevelfilter">Level Filter</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#filevelfilter"><code>levelfilter</code></a></td>
 <td>Dynamic level lowpass</td>
 </tr>
 <tr>
-<td><a href="#fi.low_shelf">Low Shelf</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.low_shelf"><code>low_shelf</code></a></td>
+<td><a href="#filow_shelf">Low Shelf</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#filow_shelf"><code>low_shelf</code></a></td>
 <td>Low shelf</td>
 </tr>
 <tr>
-<td><a href="#fi.lowpass">Lowpass (Butterworth)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.lowpass"><code>lowpass</code></a></td>
+<td><a href="#filowpass">Lowpass (Butterworth)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#filowpass"><code>lowpass</code></a></td>
 <td>Nth-order Butterworth lowpass</td>
 </tr>
 <tr>
-<td><a href="#fi.resonlp">Lowpass (Resonant)</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.resonlp"><code>resonlp</code></a></td>
+<td><a href="#firesonlp">Lowpass (Resonant)</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#firesonlp"><code>resonlp</code></a></td>
 <td>Virtual analog resonant lowpass</td>
 </tr>
 <tr>
-<td><a href="#fi.notchw">Notch Filter</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.notchw"><code>notchw</code></a></td>
+<td><a href="#finotchw">Notch Filter</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#finotchw"><code>notchw</code></a></td>
 <td>Simple notch filter</td>
 </tr>
 <tr>
-<td><a href="#fi.peak_eq">Peak Equalizer</a></td>
-<td><a href="#filters.lib"><code>fi.</code></a><a href="#fi.peak_eq"><code>peak_eq</code></a></td>
+<td><a href="#fipeak_eq">Peak Equalizer</a></td>
+<td><a href="#filterslib"><code>fi.</code></a><a href="#fipeak_eq"><code>peak_eq</code></a></td>
 <td>Peaking equalizer section</td>
 </tr>
 </tbody>
@@ -919,78 +924,78 @@ process = si.smooth(0.999);
 </thead>
 <tbody>
 <tr>
-<td><a href="#os.impulse">Impulse</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.impulse"><code>impulse</code></a></td>
+<td><a href="#osimpulse">Impulse</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#osimpulse"><code>impulse</code></a></td>
 <td>Generate an impulse on start-up</td>
 </tr>
 <tr>
-<td><a href="#os.imptrain">Impulse Train</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.imptrain"><code>imptrain</code></a></td>
+<td><a href="#osimptrain">Impulse Train</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#osimptrain"><code>imptrain</code></a></td>
 <td>Band-limited impulse train</td>
 </tr>
 <tr>
-<td><a href="#os.phasor">Phasor</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.phasor"><code>phasor</code></a></td>
+<td><a href="#osphasor">Phasor</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#osphasor"><code>phasor</code></a></td>
 <td>Simple phasor</td>
 </tr>
 <tr>
-<td><a href="#no.pink_noise">Pink Noise</a></td>
-<td><a href="#noises.lib"><code>no.</code></a><a href="#no.pink_noise"><code>pink_noise</code></a></td>
+<td><a href="#nopink_noise">Pink Noise</a></td>
+<td><a href="#noiseslib"><code>no.</code></a><a href="#nopink_noise"><code>pink_noise</code></a></td>
 <td>Pink noise generator</td>
 </tr>
 <tr>
-<td><a href="#os.pulsetrain">Pulse Train</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.pulsetrain"><code>pulsetrain</code></a></td>
+<td><a href="#ospulsetrain">Pulse Train</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#ospulsetrain"><code>pulsetrain</code></a></td>
 <td>Band-limited pulse train</td>
 </tr>
 <tr>
-<td><a href="#os.lf_imptrain">Pulse Train (Low Frequency)</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.lf_imptrain"><code>lf_imptrain</code></a></td>
+<td><a href="#oslf_imptrain">Pulse Train (Low Frequency)</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#oslf_imptrain"><code>lf_imptrain</code></a></td>
 <td>Low-frequency pulse train</td>
 </tr>
 <tr>
-<td><a href="#os.sawtooth">Sawtooth</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.sawtooth"><code>sawtooth</code></a></td>
+<td><a href="#ossawtooth">Sawtooth</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#ossawtooth"><code>sawtooth</code></a></td>
 <td>Band-limited sawtooth wave</td>
 </tr>
 <tr>
-<td><a href="#os.lf_saw">Sawtooth (Low Frequency)</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.lf_saw"><code>lf_saw</code></a></td>
+<td><a href="#oslf_saw">Sawtooth (Low Frequency)</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#oslf_saw"><code>lf_saw</code></a></td>
 <td>Low-frequency sawtooth wave</td>
 </tr>
 <tr>
-<td><a href="#os.oscs">Sine (Filter-Based)</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.oscs"><code>oscs</code></a></td>
+<td><a href="#ososcs">Sine (Filter-Based)</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#ososcs"><code>oscs</code></a></td>
 <td>Sine oscillator (filter-based)</td>
 </tr>
 <tr>
-<td><a href="#os.osc">Sine (Table-Based)</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.osc"><code>osc</code></a></td>
+<td><a href="#ososc">Sine (Table-Based)</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#ososc"><code>osc</code></a></td>
 <td>Sine oscillator (table-based)</td>
 </tr>
 <tr>
-<td><a href="#os.square">Square</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.square"><code>square</code></a></td>
+<td><a href="#ossquare">Square</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#ossquare"><code>square</code></a></td>
 <td>Band-limited square wave</td>
 </tr>
 <tr>
-<td><a href="#os.lf_squarewave">Square (Low Frequency)</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.lf_squarewave"><code>lf_squarewave</code></a></td>
+<td><a href="#oslf_squarewave">Square (Low Frequency)</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#oslf_squarewave"><code>lf_squarewave</code></a></td>
 <td>Low-frequency square wave</td>
 </tr>
 <tr>
-<td><a href="#os.triangle">Triangle</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.triangle"><code>triangle</code></a></td>
+<td><a href="#ostriangle">Triangle</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#ostriangle"><code>triangle</code></a></td>
 <td>Band-limited triangle wave</td>
 </tr>
 <tr>
-<td><a href="#os.lf_triangle">Triangle (Low Frequency)</a></td>
-<td><a href="#oscillators.lib"><code>os.</code></a><a href="#os.lf_triangle"><code>lf_triangle</code></a></td>
+<td><a href="#oslf_triangle">Triangle (Low Frequency)</a></td>
+<td><a href="#oscillatorslib"><code>os.</code></a><a href="#oslf_triangle"><code>lf_triangle</code></a></td>
 <td>Low-frequency triangle wave</td>
 </tr>
 <tr>
-<td><a href="#no.noise">White Noise</a></td>
-<td><a href="#noises.lib"><code>no.</code></a><a href="#no.noise"><code>noise</code></a></td>
+<td><a href="#nonoise">White Noise</a></td>
+<td><a href="#noiseslib"><code>no.</code></a><a href="#nonoise"><code>noise</code></a></td>
 <td>White noise generator</td>
 </tr>
 </tbody>
@@ -1010,33 +1015,33 @@ process = si.smooth(0.999);
 </thead>
 <tbody>
 <tr>
-<td><a href="#sy.additivedrum">Additive Drum</a></td>
-<td><a href="#synths.lib"><code>sy.</code></a><a href="#sy.additivedrum"><code>additiveDrum</code></a></td>
+<td><a href="#syadditivedrum">Additive Drum</a></td>
+<td><a href="#synthslib"><code>sy.</code></a><a href="#syadditivedrum"><code>additiveDrum</code></a></td>
 <td>Additive synthesis drum</td>
 </tr>
 <tr>
-<td><a href="#sy.dubdub">Bandpassed Sawtooth</a></td>
-<td><a href="#synths.lib"><code>sy.</code></a><a href="#sy.dubdub"><code>dubDub</code></a></td>
+<td><a href="#sydubdub">Bandpassed Sawtooth</a></td>
+<td><a href="#synthslib"><code>sy.</code></a><a href="#sydubdub"><code>dubDub</code></a></td>
 <td>Sawtooth through resonant bandpass</td>
 </tr>
 <tr>
-<td><a href="#sy.combstring">Comb String</a></td>
-<td><a href="#synths.lib"><code>sy.</code></a><a href="#sy.combstring"><code>combString</code></a></td>
+<td><a href="#sycombstring">Comb String</a></td>
+<td><a href="#synthslib"><code>sy.</code></a><a href="#sycombstring"><code>combString</code></a></td>
 <td>String model based on a comb filter</td>
 </tr>
 <tr>
-<td><a href="#sy.fm">FM</a></td>
-<td><a href="#synths.lib"><code>sy.</code></a><a href="#sy.fm"><code>fm</code></a></td>
+<td><a href="#syfm">FM</a></td>
+<td><a href="#synthslib"><code>sy.</code></a><a href="#syfm"><code>fm</code></a></td>
 <td>Frequency modulation synthesizer</td>
 </tr>
 <tr>
-<td><a href="#sy.sawtrombone">Lowpassed Sawtooth</a></td>
-<td><a href="#synths.lib"><code>sy.</code></a><a href="#sy.sawtrombone"><code>sawTrombone</code></a></td>
+<td><a href="#sysawtrombone">Lowpassed Sawtooth</a></td>
+<td><a href="#synthslib"><code>sy.</code></a><a href="#sysawtrombone"><code>sawTrombone</code></a></td>
 <td>"Trombone" based on a filtered sawtooth</td>
 </tr>
 <tr>
-<td><a href="#sy.popfilterperc">Popping Filter</a></td>
-<td><a href="#synths.lib"><code>sy.</code></a><a href="#sy.popfilterperc"><code>popFilterPerc</code></a></td>
+<td><a href="#sypopfilterperc">Popping Filter</a></td>
+<td><a href="#synthslib"><code>sy.</code></a><a href="#sypopfilterperc"><code>popFilterPerc</code></a></td>
 <td>Popping filter percussion instrument</td>
 </tr>
 </tbody>
@@ -4379,8 +4384,8 @@ _ : lowshelf_other_freq(N,L0,fx) : _
 </code></pre>
 
 <p>Where:
-<em> <code>N</code>: filter order 1, 3, 5, ... (odd only). (default should be 3)
-</em> <code>L0</code>: desired level (dB) between dc and fx (boost <code>L0&gt;0</code> or cut <code>L0&lt;0</code>)
+* <code>N</code>: filter order 1, 3, 5, ... (odd only). (default should be 3)
+* <code>L0</code>: desired level (dB) between dc and fx (boost <code>L0&gt;0</code> or cut <code>L0&lt;0</code>)
 * <code>fx</code>: -3dB frequency of lowpass band (<code>L0&gt;0</code>) or upper band (<code>L0&lt;0</code>)
       (see "SHELF SHAPE" below).</p>
 <p>The gain at SR/2 is constrained to be 1.
@@ -7012,8 +7017,8 @@ string will ring forever.</p>
 </code></pre>
 
 <p>With:
-<em> <code>length</code>: the length of the string in meters
-</em> <code>pluckPosition</code>: the plucking position (0.001-0.999)
+* <code>length</code>: the length of the string in meters
+* <code>pluckPosition</code>: the plucking position (0.001-0.999)
 * <code>excitation</code>: the input signal for the excitation.</p>
 <hr />
 <h3 id="pmks"><code>(pm.)ks</code></h3>
@@ -9914,5 +9919,5 @@ Frequencies higher than the frequency get a boost or an attenuation, frequencies
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2020-02-17 11:03:07
+Build Date UTC : 2020-02-18 17:03:15
 -->
