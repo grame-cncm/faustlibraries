@@ -19,8 +19,6 @@ help:
 	@echo "  install  : install the required components"
 	@echo "  build    : build the web site"
 	@echo "  serve    : launch the mkdoc server"
-	@echo "  all      : generates all the necessary files from the src folder"
-	@echo "             actually call the 'md' target"
 	@echo "Development specific targets are available:"
 	@echo "  md       : build the md files"
 	@echo "  clean    : removes the output of the md target"
@@ -31,14 +29,12 @@ test:
 
 ####################################################################
 build:
+	$(MAKE) md
 	mkdocs build
 
 serve:
 	@echo "you can browse the site at http://localhost:8000"
 	mkdocs serve
-
-all:
-	$(MAKE) md
 
 list:
 	@echo $(foreach e, $(LIST), "        - '" $e "':  libs/"$e.md"\n")
