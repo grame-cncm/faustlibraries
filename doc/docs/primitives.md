@@ -2,13 +2,13 @@
 
 ## User Interface Primitives
 
-### `button`
+## button
 
 Creates a button in the user interface. The `button` is a primitive circuit 
 with one output and no input. The signal produced by the `button` is 0 when not
 pressed and 1 while pressed.
 
-#### Usage
+Usage:
 
 ```
 button("play") : _;
@@ -18,13 +18,13 @@ Where `"play"` is the name of the `button` in the interface.
 
 ---
 
-### `checkbox`
+## checkbox
 
 Creates a checkbox in the user interface. The `checkbox` is a primitive circuit 
 with one output and no input. The signal produced by the checkbox is 0 when not
 checked and 1 when checked.
 
-#### Usage
+Usage:
 
 ```
 checkbox("play") : _;
@@ -34,14 +34,14 @@ Where `"play"` is the name of the `checkbox` in the interface.
 
 ---
 
-### `hslider`
+## hslider
 
 Creates a horizontal slider in the user interface. The `hslider` is a 
 primitive circuit with one output and no input. `hslider` produces a signal
 between a minimum and a maximum value based on the position of the slider 
 cursor. 
 
-#### Usage
+Usage:
 
 ```
 hslider("volume",-10,-70,12,0.1) : _;
@@ -53,13 +53,13 @@ maximum value, and `0.1` the step the determines the precision of the control.
 
 ---
 
-### `nentry`
+## nentry
 
 Creates a numerical entry in the user interface. The `nentry` is a 
 primitive circuit with one output and no input. `nentry` produces a signal
 between a minimum and a maximum value based on the user input. 
 
-#### Usage
+Usage:
 
 ```
 nentry("volume",-10,-70,12,0.1) : _;
@@ -72,14 +72,14 @@ control.
 
 ---
 
-### `vslider`
+## vslider
 
 Creates a vertical slider in the user interface. The `vslider` is a 
 primitive circuit with one output and no input. `vslider` produces a signal
 between a minimum and a maximum value based on the position of the slider 
 cursor. 
 
-#### Usage
+Usage:
 
 ```
 vslider("volume",-10,-70,12,0.1) : _;
