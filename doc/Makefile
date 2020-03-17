@@ -6,7 +6,7 @@ DOCDIR   := docs
 FAUSTLIBS ?= ../../faustlibraries
 
 SRC   	 := $(shell cat ../../faustlibraries/all.lib | grep import | sed -e 's/[^"]*"\(..*\.lib\).*/\1/')
-MD   	 := $(SRC:%.lib=$(DOCDIR)/libs/%.md) $(DOCDIR)/index.md
+MD   	 := $(SRC:%.lib=$(DOCDIR)/libs/%.md)
 LIST   	 := $(SRC:%.lib=%)
 
 ####################################################################
@@ -20,13 +20,11 @@ help:
 	@echo "  build    : build the web site"
 	@echo "  serve    : launch the mkdoc server"
 	@echo "  all      : generates all the necessary files from the src folder"
-	@echo "             actually call the 'md', 'options', 'tools', 'svg' and 'examples' targets"
+	@echo "             actually call the 'md' target"
 	@echo "Development specific targets are available:"
 	@echo "  md       : build the md files"
-	@echo "  list     : list libraries"
-	@echo "Making the current version publicly available:"
-	@echo "  publish  : make all + build, switch to gh-pages and copy to root"
-	@echo "             commit and push are still manual operations"
+	@echo "  clean    : removes the output of the md target"
+	@echo "  list     : list libraries (ready to be included in mkdocs.yml menu)"
 
 test: 
 	@echo MD: $(MD)
@@ -55,9 +53,6 @@ md : $(DOCDIR)/libs $(MD)
 
 $(DOCDIR)/libs :
 	mkdir $(DOCDIR)/libs 
-
-$(DOCDIR)/index.md: ../README.md
-	cat $< > $@
 
 $(DOCDIR)/libs/%.md:$(FAUSTLIBS)/%.lib 
 	@echo ========= building $<
