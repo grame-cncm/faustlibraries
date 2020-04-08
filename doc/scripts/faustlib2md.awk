@@ -21,7 +21,7 @@ function makeurl(arg) {
 function makefunction (arg) {
 	gsub(/\/\//, "", arg);
 	gsub(/-*/, "", arg);
-	return "\n----\n### " arg "\n";
+	return "\n----\n\n### " arg "\n";
 }
 
 function makegroup (arg) {
