@@ -1,77 +1,8 @@
-
-## Using the Faust Libraries
-
-The easiest and most standard way to use the Faust libraries is to import `stdfaust.lib` in your Faust code:
-
-```
-import("stdfaust.lib");
-```
-
-This will give you access to all the Faust libraries through a series of environments:
-
-* `sf`: `all.lib`
-* `an`: `analyzers.lib`
-* `ba`: `basics.lib`
-* `co`: `compressors.lib`
-* `de`: `delays.lib`
-* `dm`: `demos.lib`
-* `dx`: `dx7.lib`
-* `en`: `envelopes.lib`
-* `fi`: `filters.lib`
-* `ho`: `hoa.lib`
-* `it`: `interpolators.lib`
-* `ma`: `maths.lib`
-* `ef`: `misceffects.lib`
-* `os`: `oscillators.lib`
-* `no`: `noises.lib`
-* `pf`: `phaflangers.lib`
-* `pm`: `physmodels.lib`
-* `rm`: `reducemaps.lib`
-* `re`: `reverbs.lib`
-* `ro`: `routes.lib`
-* `si`: `signals.lib`
-* `so`: `soundfiles.lib`
-* `sp`: `spats.lib`
-* `sy`: `synths.lib`
-* `ve`: `vaeffects.lib`
-* `wa`: `webaudio.lib`
-* `vl`: `version.lib`
-
-Environments can then be used as follows in your Faust code:
-
-```
-import("stdfaust.lib");
-process = os.osc(440);
-```
-
-In this case, we're calling the `osc` function from `oscillators.lib`.
-
-You can also access all the functions of all the libraries directly using the `sf` environment:
-
-```
-import("stdfaust.lib");
-process = sf.osc(440);
-```
-
-Alternatively, environments can be created by hand:
-
-```
-os = library("oscillators.lib");
-process = os.osc(440);
-```
-
-Finally, libraries can be simply imported in the Faust code (not recommended):
-
-```
-import("oscillators.lib");
-process = osc(440);
-```
-
-## Contributing
+# Contributing
 
 If you wish to add a function to any of these libraries or if you plan to add a new library, make sure that you follow the following conventions:
 
-### New Functions
+## New Functions
 
 * All functions must be preceded by a markdown documentation header respecting the following format (open the source code of any of the libraries for an example):
 
@@ -91,12 +22,12 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 //-------------------------------------------------
 ```
 
-* Every time a new function is added, the documentation should be updated simply by running `make doclib`.
+* Every time a new function is added, the documentation should be updated simply by running `make doclib`. <!-- TODO -->
 * The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on *Using the Faust Libraries*).
 * Try to reuse existing functions as much as possible.
 * If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.
 
-### New Libraries
+## New Libraries
 
 * Any new "standard" library should be declared in `stdfaust.lib` with its own environment (2 letters - see `stdfaust.lib`).
 * Any new "standard" library must be added to `generateDoc`.
@@ -133,48 +64,6 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 //==============================================
 ```
 * If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.
-
-## General Organization
-
-Only the libraries that are considered to be "standard" are documented:
-
-* `analyzers.lib`
-* `basics.lib`
-* `compressors.lib`
-* `delays.lib`
-* `demos.lib`
-* `dx7.lib`
-* `envelopes.lib`
-* `filters.lib`
-* `hoa.lib`
-* `interpolators.lib`
-* `maths.lib`
-* `misceffects.lib`
-* `oscillators.lib`
-* `noises.lib`
-* `phaflangers.lib`
-* `physmodels.lib`
-* `reducemaps.lib`
-* `reverbs.lib`
-* `routes.lib`
-* `signals.lib`
-* `soundfiles.lib`
-* `spats.lib`
-* `synths.lib`
-* `tonestacks.lib` (not documented but example in `/examples/misc`)
-* `tubes.lib` (not documented but example in `/examples/misc`)
-* `vaeffects.lib`
-* `webaudio.lib`
-* `version.lib`
-
-Other deprecated libraries such as `music.lib`, etc. are present but are not documented to not confuse new users.
-
-The documentation of each library can be found in `/documentation/library.html` or in `/documentation/library.pdf`. 
-
-A global `version` number for the standard libraries is defined in `version.lib`. 
-It follows the semantic versioning structure: MAJOR, MINOR, PATCH. The MAJOR number is increased when we make incompatible changes. The MINOR number is increased when we add functionality in a backwards compatible manner, and the PATCH number when we make backwards compatible bug fixes. By looking at the generated code or the diagram of `process = vl.version;` one can see the current version of the libraries.
-
-The `/examples` directory contains all the examples from the `/examples` folder of the Faust distribution as well as new ones. Most of them were updated to reflect the coding conventions described in the next section. Examples are organized by types in different folders. The `/old` folder contains examples that are fully deprecated, probably because they were integrated to the libraries and fully rewritten (see `freeverb.dsp` for example). Examples using deprecated libraries were integrated to the general tree but a warning comment was added at their beginning to point readers to the right library and function.
 
 ## Coding Conventions
 
@@ -239,11 +128,3 @@ Any function containing UI elements should be placed in this library and respect
 ### "Standard" Functions
 
 "Standard" functions are here to simplify the life of new (or not so new) Faust coders. They are declared in `/libraries/doc/standardFunctions.md` and allow to point programmers to preferred functions to carry out a specific task. For example, there are many different types of lowpass filters declared in `filters.lib` and only one of them is considered to be standard, etc.
-
-## Copyright / License
-
-Now that Faust libraries are less author specific, each function will normally have its own copyright-and-license line in the library source (the `.lib` file, such as `analyzers.lib`). If not, see if the function is defined within a section of the `.lib` file stating the license in source-code comments.  If not, then the copyright and license given at the beginning of the `.lib` file may be assumed, when present.  If not, run `git blame` on the `.lib` file and ask the person who last edited the function!
-
-Note that it is presently possible for a library function released under one license to utilize another library function having some different license.  There is presently no indication of this situation in the Faust compiler output, but such notice is planned.  For now, library contributors should strive to use only library functions having compatible licenses, and concerned end-users must manually determine the union of licenses applicable to the library functions they are using.
-
-[//]: # Yann says: "I agree, we need to have metadata local to a single definition or a group of definition. This will allow the compiler to be more selective when including metadata in the generated code."
