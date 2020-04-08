@@ -12,7 +12,7 @@
         <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/docco.min.css">
         <link href="../../css/extra.css" rel="stylesheet">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -47,15 +47,12 @@
                 <div class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="../..">Home</a>
-                            </li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
 <li >
-    <a href="../../using/"> Overview </a>
+    <a href="../../organization/"> Organization </a>
 </li>
                                     
 <li >
@@ -63,7 +60,11 @@
 </li>
                                     
 <li >
-    <a href="../../primitives/"> Primitives </a>
+    <a href="../../contributing/"> Contributing </a>
+</li>
+                                    
+<li >
+    <a href="../../copyright/"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -212,7 +213,40 @@
 
 <h1 id="physmodelslib">physmodels.lib</h1>
 <p>Faust physical modeling library; Its official prefix is <code>pm</code>.</p>
+<p>This library provides an environment to facilitate physical modeling of musical
+instruments. It contains dozens of functions implementing low and high level
+elements going from a simple waveguide to fully operational models with
+built-in UI, etc.</p>
+<p>It is organized as follows:</p>
+<ul>
+<li><a href="#global-variables">Global Variables</a>: Useful pre-defined variables for
+physical modeling (e.g., speed of sound, etc.).</li>
+<li><a href="#conversion-tools-1">Conversion Tools</a>: Conversion functions specific
+to physical modeling (e.g., length to frequency, etc.).</li>
+<li><a href="#bidirectional-utilities">Bidirectional Utilities</a>: Functions to create
+bidirectional block diagrams for physical modeling.</li>
+<li><a href="#basic-elements-1">Basic Elements</a>: waveguides, specific types of filters, etc.</li>
+<li><a href="#string-instruments">String Instruments</a>: various types of strings
+(e.g., steel, nylon, etc.), bridges, guitars, etc.</li>
+<li><a href="#bowed-string-instruments">Bowed String Instruments</a>: parts and models
+specific to bowed string instruments (e.g., bows, bridges, violins, etc.).</li>
+<li><a href="#wind-instruments">Wind Instrument</a>: parts and models specific to wind
+string instruments (e.g., reeds, mouthpieces, flutes, clarinets, etc.).</li>
+<li><a href="#exciters">Exciters</a>: pluck generators, "blowers", etc.</li>
+<li><a href="#modal-percussions">Modal Percussions</a>: percussion instruments based on
+modal models.</li>
+<li><a href="#vocal-synthesis">Vocal Synthesis</a>: functions for various vocal synthesis
+techniques (e.g., fof, source/filter, etc.) and vocal synthesizers.</li>
+<li><a href="#misc-functions">Misc Functions</a>: any other functions that don't fit in
+the previous category (e.g., nonlinear filters, etc.).</li>
+</ul>
+<p>This library is part of the Faust Physical Modeling ToolKit.
+More information on how to use this library can be found on this page:
+* <a href="https://ccrma.stanford.edu/~rmichon/pmFaust">https://ccrma.stanford.edu/~rmichon/pmFaust</a>. Tutorials on how to make
+physical models of musical instruments using Faust can be found
+<a href="https:ccrma.stanford.edu/~rmichon/faustTutorials/#making-physical-models-of-musical-instruments-with-faust">here</a> as well.</p>
 <h2 id="global-variables">Global Variables</h2>
+<p>Useful pre-defined variables for physical modeling.</p>
 <hr />
 <h3 id="pmspeedofsound"><code>(pm.)speedOfSound</code></h3>
 <p>Speed of sound in meters per second (340m/s).</p>
@@ -221,6 +255,7 @@
 <p>The default maximum length (3) in meters of strings and tubes used in this
 library. This variable should be overriden to allow longer strings or tubes.</p>
 <h2 id="conversion-tools">Conversion Tools</h2>
+<p>Useful conversion tools for physical modeling.</p>
 <hr />
 <h3 id="pmf2l"><code>(pm.)f2l</code></h3>
 <p>Frequency to length in meters.</p>
@@ -255,6 +290,13 @@ library. This variable should be overriden to allow longer strings or tubes.</p>
 <li><code>l</code>: length in meters</li>
 </ul>
 <h2 id="bidirectional-utilities">Bidirectional Utilities</h2>
+<p>Set of fundamental functions to create bi-directional block diagrams in Faust.
+These elements are used as the basis of this library to connect high level
+elements (e.g., mouthpieces, strings, bridge, instrument body, etc.). Each
+block has 3 inputs and 3 outputs. The first input/output carry left going
+waves, the second input/output carry right going waves, and the third
+input/output is used to carry any potential output signal to the end of the
+algorithm.</p>
 <hr />
 <h3 id="pmbasicblock"><code>(pm.)basicBlock</code></h3>
 <p>Empty bidirectional block to be used with <a href="#chain"><code>chain</code></a>: 3 signals ins
@@ -393,6 +435,8 @@ except for the main signal output (3d output).</p>
 </code></pre>
 
 <h2 id="basic-elements">Basic Elements</h2>
+<p>Basic elements for physical modeling (e.g., waveguides, specific filters,
+etc.).</p>
 <hr />
 <h3 id="pmwaveguiden"><code>(pm.)waveguideN</code></h3>
 <p>A series of waveguide functions based on various types of delays (see
@@ -455,6 +499,8 @@ the string plugged to it (0-1) (1 = 20 seconds)</li>
 <li><code>gain</code>: mode gain (0-1)</li>
 </ul>
 <h2 id="string-instruments">String Instruments</h2>
+<p>Low and high level string instruments parts. Most of the elements in
+this section can be used in a bidirectional chain.</p>
 <hr />
 <h3 id="pmstringsegment"><code>(pm.)stringSegment</code></h3>
 <p>A string segment without terminations (just a simple waveguide).</p>
@@ -888,6 +934,8 @@ with built-in UI.</p>
 </code></pre>
 
 <h2 id="bowed-string-instruments">Bowed String Instruments</h2>
+<p>Low and high level basic string instruments parts. Most of the elements in
+this section can be used in a bidirectional chain.</p>
 <hr />
 <h3 id="pmbowtable"><code>(pm.)bowTable</code></h3>
 <p>Extremely basic bow table that can be used to implement a wide range of
@@ -1011,6 +1059,8 @@ bridgeAbsorption,bowPosition) : _
 </code></pre>
 
 <h2 id="wind-instruments">Wind Instruments</h2>
+<p>Low and high level basic wind instruments parts. Most of the elements in
+this section can be used in a bidirectional chain.</p>
 <hr />
 <h3 id="pmopentube"><code>(pm.)openTube</code></h3>
 <p>A tube segment without terminations (same as <a href="#stringsegment"><code>stringSegment</code></a>).</p>
@@ -1291,6 +1341,7 @@ This can also be any kind of signal that will be directly injected in the mouthp
 </code></pre>
 
 <h2 id="exciters">Exciters</h2>
+<p>Various kind of excitation signal generators.</p>
 <hr />
 <h3 id="pmimpulseexcitation"><code>(pm.)impulseExcitation</code></h3>
 <p>Creates an impulse excitation of one sample.</p>
@@ -1373,6 +1424,7 @@ pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
 </code></pre>
 
 <h2 id="modal-percussions">Modal Percussions</h2>
+<p>High and low level functions for modal synthesis of percussion instruments.</p>
 <hr />
 <h3 id="pmdjembemodel"><code>(pm.)djembeModel</code></h3>
 <p>Dirt-simple djembe modal physical model. Mode parameters are empirically
@@ -1833,6 +1885,7 @@ built-in UI.</p>
 </code></pre>
 
 <h2 id="vocal-synthesis">Vocal Synthesis</h2>
+<p>Vocal synthesizer functions (source/filter, fof, etc.).</p>
 <hr />
 <h3 id="pmformantvalues"><code>(pm.)formantValues</code></h3>
 <p>Formant data values.</p>
@@ -2231,6 +2284,7 @@ the frequency range of the synthesized voice to be realistic.</p>
 </code></pre>
 
 <h2 id="misc-functions">Misc Functions</h2>
+<p>Various miscellaneous functions.</p>
 <hr />
 <h3 id="pmallpassnl"><code>(pm.)allpassNL</code></h3>
 <p>Bidirectional block adding nonlinearities in both directions in a chain.

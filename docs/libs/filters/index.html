@@ -12,7 +12,7 @@
         <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/docco.min.css">
         <link href="../../css/extra.css" rel="stylesheet">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -47,15 +47,12 @@
                 <div class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="../..">Home</a>
-                            </li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
 <li >
-    <a href="../../using/"> Overview </a>
+    <a href="../../organization/"> Organization </a>
 </li>
                                     
 <li >
@@ -63,7 +60,11 @@
 </li>
                                     
 <li >
-    <a href="../../primitives/"> Primitives </a>
+    <a href="../../contributing/"> Contributing </a>
+</li>
+                                    
+<li >
+    <a href="../../copyright/"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -219,6 +220,28 @@
 
 <h1 id="filterslib">filters.lib</h1>
 <p>Faust Filters library; Its official prefix is <code>fi</code>.</p>
+<p>The Filters library is organized into 18 sections:</p>
+<ul>
+<li>Basic Filters</li>
+<li>Comb Filters</li>
+<li>Direct-Form Digital Filter Sections</li>
+<li>Direct-Form Second-Order Biquad Sections</li>
+<li>Ladder/Lattice Digital Filters</li>
+<li>Useful Special Cases</li>
+<li>Ladder/Lattice Allpass Filters</li>
+<li>Digital Filter Sections Specified as Analog Filter Sections</li>
+<li>Simple Resonator Filters</li>
+<li>Butterworth Lowpass/Highpass Filters</li>
+<li>Special Filter-Bank Delay-Equalizing Allpass Filters</li>
+<li>Elliptic (Cauer) Lowpass Filters</li>
+<li>Elliptic Highpass Filters</li>
+<li>Butterworth Bandpass/Bandstop Filters</li>
+<li>Elliptic Bandpass Filters</li>
+<li>Parametric Equalizers (Shelf, Peaking)</li>
+<li>Mth-Octave Filter-Banks</li>
+<li>Arbitrary-Crossover Filter-Banks and Spectrum Analyzers</li>
+</ul>
+<p>For more information, see ../documentation/library.pdf</p>
 <h2 id="basic-filters">Basic Filters</h2>
 <hr />
 <h3 id="fizero"><code>(fi.)zero</code></h3>
@@ -548,6 +571,11 @@ _ : tf3(b0,b1,b2,b3,a1,a2,a3) : _
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Phasing_2nd_Order_Allpass_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Phasing_2nd_Order_Allpass_Filters.html</a></li>
 </ul>
 <h2 id="direct-form-second-order-biquad-sections">Direct-Form Second-Order Biquad Sections</h2>
+<p>Direct-Form Second-Order Biquad Sections</p>
+<h4 id="reference_11">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html">https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html</a></li>
+</ul>
 <hr />
 <h3 id="fitf21-fitf22-fitf22t-and-fitf21t"><code>(fi.)tf21</code>, <code>(fi.)tf22</code>, <code>(fi.)tf22t</code> and <code>(fi.)tf21t</code></h3>
 <p>tfN = N'th-order direct-form digital filter where:</p>
@@ -569,11 +597,21 @@ _ : tf21t(b0,b1,b2,a1,a2) : _
 <li><code>a</code>: the poles</li>
 <li><code>b</code>: the zeros</li>
 </ul>
-<h4 id="reference_11">Reference</h4>
+<h4 id="reference_12">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html">https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html</a></li>
 </ul>
 <h2 id="ladderlattice-digital-filters">Ladder/Lattice Digital Filters</h2>
+<p>Ladder and lattice digital filters generally have superior numerical
+properties relative to direct-form digital filters.  They can be derived
+from digital waveguide filters, which gives them a physical interpretation.</p>
+<h4 id="reference_13">Reference</h4>
+<ul>
+<li>F. Itakura and S. Saito: "Digital Filtering Techniques for Speech Analysis and Synthesis",
+    7th Int. Cong. Acoustics, Budapest, 25 C 1, 1971.</li>
+<li>J. D. Markel and A. H. Gray: Linear Prediction of Speech, New York: Springer Verlag, 1976.</li>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Conventional_Ladder_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Conventional_Ladder_Filters.html</a></li>
+</ul>
 <hr />
 <h3 id="fiav2sv"><code>(fi.)av2sv</code></h3>
 <p>Compute reflection coefficients sv from transfer-function denominator av.</p>
@@ -589,7 +627,7 @@ _ : tf21t(b0,b1,b2,a1,a2) : _
 <p>where <code>ro = ith</code> reflection coefficient, and
       <code>ai</code> = coefficient of <code>z^(-i)</code> in the filter
          transfer-function denominator <code>A(z)</code>.</p>
-<h4 id="reference_12">Reference</h4>
+<h4 id="reference_14">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html">https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html</a>
   (where reflection coefficients are denoted by k rather than s).</li>
@@ -759,7 +797,7 @@ _ : tf21t(b0,b1,b2,a1,a2) : _
 <li><code>f</code>: resonance frequency (Hz)</li>
 <li><code>r</code>: loss factor for exponential decay (set to 1 to make a sinusoidal oscillator)</li>
 </ul>
-<h4 id="reference_13">Reference</h4>
+<h4 id="reference_15">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Power_Normalized_Waveguide_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Power_Normalized_Waveguide_Filters.html</a></li>
 </ul>
@@ -775,12 +813,21 @@ Switch between allpass coefficient <code>a1</code> and <code>a2</code> at signal
 <ul>
 <li><code>a1</code> and <code>a2</code>: allpass coefficients</li>
 </ul>
-<h4 id="reference_14">Reference</h4>
+<h4 id="reference_16">Reference</h4>
 <ul>
 <li>"A Passive Nonlinear Digital Filter Design ..." by John R. Pierce and Scott
 A. Van Duyne, JASA, vol. 101, no. 2, pp. 1120-1126, 1997</li>
 </ul>
 <h2 id="ladderlattice-allpass-filters">Ladder/Lattice Allpass Filters</h2>
+<p>An allpass filter has gain 1 at every frequency, but variable phase.
+Ladder/lattice allpass filters are specified by reflection coefficients.
+They are defined here as nested allpass filters, hence the names allpassn*.</p>
+<h4 id="references_5">References</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Conventional_Ladder_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Conventional_Ladder_Filters.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Nested_Allpass_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Nested_Allpass_Filters.html</a></li>
+<li>Linear Prediction of Speech, Markel and Gray, Springer Verlag, 1976</li>
+</ul>
 <hr />
 <h3 id="fiallpassn"><code>(fi.)allpassn</code></h3>
 <p>Two-multiply lattice - each section is two multiply-adds.</p>
@@ -793,7 +840,7 @@ A. Van Duyne, JASA, vol. 101, no. 2, pp. 1120-1126, 1997</li>
 <li><code>n</code>: the order of the filter</li>
 <li><code>sv</code>: the reflection coefficients (-1 1)</li>
 </ul>
-<h4 id="references_5">References</h4>
+<h4 id="references_6">References</h4>
 <ul>
 <li>J. O. Smith and R. Michon, "Nonlinear Allpass Ladder Filters in FAUST", in
 Proceedings of the 14th International Conference on Digital Audio Effects
@@ -872,7 +919,7 @@ H(s) = -----------------
 cutting off at <code>SR/4</code> is specified as <code>tf2s(0,0,1,sqrt(2),1,PI*SR/2);</code></p>
 <h4 id="method">Method</h4>
 <p>Bilinear transform scaled for exact mapping of w1.</p>
-<h4 id="reference_15">Reference</h4>
+<h4 id="reference_17">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html">https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html</a></li>
 </ul>
@@ -917,7 +964,7 @@ Butterworth lowpass with gain -3dB at <code>SR/4</code> is specified as</p>
 
 <h4 id="method_1">Method</h4>
 <p>Bilinear transform scaled for exact mapping of w1.</p>
-<h4 id="reference_16">Reference</h4>
+<h4 id="reference_18">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html">https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html</a></li>
 </ul>
@@ -1010,7 +1057,7 @@ _ : resonbp(fc,Q,gain) : _
 <li><code>N</code>: filter order (number of poles) [nonnegative constant integer]</li>
 <li><code>fc</code>: desired cut-off frequency (-3dB frequency) in Hz</li>
 </ul>
-<h4 id="references_6">References</h4>
+<h4 id="references_7">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html">https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html</a></li>
 <li><code>butter</code> function in Octave <code>("[z,p,g] = butter(N,1,'s');")</code></li>
@@ -1028,7 +1075,7 @@ _ : resonbp(fc,Q,gain) : _
 <li><code>N</code>: filter order (number of poles) [nonnegative constant integer]</li>
 <li><code>fc</code>: desired cut-off frequency (-3dB frequency) in Hz</li>
 </ul>
-<h4 id="references_7">References</h4>
+<h4 id="references_8">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html">https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html</a></li>
 <li><code>butter</code> function in Octave <code>("[z,p,g] = butter(N,1,'s');")</code></li>
@@ -1049,7 +1096,7 @@ FIXME: Rewrite the following, as for orders 3 and 5 above,
        to eliminate pole-zero cancellations:</p>
 <h2 id="elliptic-cauer-lowpass-filters">Elliptic (Cauer) Lowpass Filters</h2>
 <p>Elliptic (Cauer) Lowpass Filters</p>
-<h4 id="references_8">References</h4>
+<h4 id="references_9">References</h4>
 <p>&lt;http:en.wikipedia.org/wiki/Elliptic_filter
 * functions <code>ncauer</code> and <code>ellip</code> in Octave</p>
 <hr />
@@ -1132,7 +1179,7 @@ frequency.  The <code>lowpass(Nh)</code> cutoff <code>w1</code> is half the desi
 Thus, the passband width is <code>fu-fl</code>,
       and its center frequency is <code>(fl+fu)/2</code>.</li>
 </ul>
-<h4 id="reference_17">Reference</h4>
+<h4 id="reference_19">Reference</h4>
 <ul>
 <li><a href="http://cnx.org/content/m16913/latest/">http://cnx.org/content/m16913/latest/</a></li>
 </ul>
@@ -1154,7 +1201,7 @@ frequency.  The <code>highpass(Nh)</code> cutoff <code>w1</code> is half the des
 Thus, the passband (stopband) width is <code>fu-fl</code>,
       and its center frequency is <code>(fl+fu)/2</code>.</li>
 </ul>
-<h4 id="reference_18">Reference</h4>
+<h4 id="reference_20">Reference</h4>
 <ul>
 <li><a href="http://cnx.org/content/m16913/latest/">http://cnx.org/content/m16913/latest/</a></li>
 </ul>
@@ -1195,13 +1242,24 @@ imaginary output signal:</p>
 <pre><code>hilbert(N) = pospass(N) : !,*(2);
 </code></pre>
 
-<h4 id="references_9">References</h4>
+<h4 id="references_10">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Analytic_Signals_Hilbert_Transform.html">https://ccrma.stanford.edu/~jos/mdft/Analytic_Signals_Hilbert_Transform.html</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/sasp/Comparison_Optimal_Chebyshev_FIR_I.html">https://ccrma.stanford.edu/~jos/sasp/Comparison_Optimal_Chebyshev_FIR_I.html</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html">https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html</a></li>
 </ul>
 <h2 id="parametric-equalizers-shelf-peaking">Parametric Equalizers (Shelf, Peaking)</h2>
+<p>Parametric Equalizers (Shelf, Peaking).</p>
+<h4 id="references_11">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Equalization">http://en.wikipedia.org/wiki/Equalization</a></li>
+<li><a href="http://www.musicdsp.org/files/AudioEQCookbook.txt">http://www.musicdsp.org/files/AudioEQCookbook.txt</a></li>
+<li>Digital Audio Signal Processing, Udo Zolzer, Wiley, 1999, p. 124</li>
+<li>https:ccrma.stanford.edu/~jos/filters/Low_High_Shelving_Filters.html&gt;</li>
+<li>https:ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html&gt;</li>
+<li>maxmsp.lib in the Faust distribution</li>
+<li>bandfilter.dsp in the faust2pd distribution</li>
+</ul>
 <hr />
 <h3 id="filow_shelf"><code>(fi.)low_shelf</code></h3>
 <p>First-order "low shelf" filter (gain boost|cut between dc and some frequency)
@@ -1303,7 +1361,7 @@ Also called a "parametric equalizer" section.
 <li><code>tanPiBT</code>: <code>tan(PI*B/SR)</code>, where B = -3dB bandwidth (Hz) when 10^(Lfx/20) = 0
         ~ PI*B/SR for narrow bandwidths B</li>
 </ul>
-<h4 id="reference_19">Reference</h4>
+<h4 id="reference_21">Reference</h4>
 <p>P.A. Regalia, S.K. Mitra, and P.P. Vaidyanathan,
 "The Digital All-Pass Filter: A Versatile Signal Processing Building Block"
 Proceedings of the IEEE, 76(1):19-37, Jan. 1988.  (See pp. 29-30.)</p>
@@ -1330,7 +1388,7 @@ set alpha to -1/2.</p>
 </ul>
 <h4 id="examples">Examples</h4>
 <p>See <code>spectral_tilt_demo</code>.</p>
-<h4 id="reference_20">Reference</h4>
+<h4 id="reference_22">Reference</h4>
 <p>J.O. Smith and H.F. Smith,
 "Closed Form Fractional Integration and Differentiation via Real Exponentially Spaced Pole-Zero Pairs",
 arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
@@ -1349,7 +1407,7 @@ http:arxiv.org/abs/1606.06154</p>
 <li><code>freq</code>: corner frequency (-3dB point) usually set to fundamental freq</li>
 <li><code>N</code>: Number of filters in series where L = L/N</li>
 </ul>
-<h4 id="reference_21">Reference</h4>
+<h4 id="reference_23">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html">https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html</a></li>
 </ul>
@@ -1366,11 +1424,50 @@ http:arxiv.org/abs/1606.06154</p>
 <li><code>freq</code>: corner frequency (-3dB point) usually set to fundamental freq</li>
 <li><code>N</code>: Number of filters in series where L = L/N</li>
 </ul>
-<h4 id="reference_22">Reference</h4>
+<h4 id="reference_24">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html">https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html</a></li>
 </ul>
 <h2 id="mth-octave-filter-banks">Mth-Octave Filter-Banks</h2>
+<p>Mth-octave filter-banks split the input signal into a bank of parallel signals, one
+for each spectral band. They are related to the Mth-Octave Spectrum-Analyzers in
+<code>analysis.lib</code>.
+The documentation of this library contains more details about the implementation.
+The parameters are:</p>
+<ul>
+<li><code>M</code>: number of band-slices per octave (&gt;1)</li>
+<li><code>N</code>: total number of bands (&gt;2)</li>
+<li><code>ftop</code>: upper bandlimit of the Mth-octave bands (&lt;SR/2)</li>
+</ul>
+<p>In addition to the Mth-octave output signals, there is a highpass signal
+containing frequencies from ftop to SR/2, and a "dc band" lowpass signal
+containing frequencies from 0 (dc) up to the start of the Mth-octave bands.
+Thus, the N output signals are</p>
+<pre><code>highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-M*(N-1)))
+</code></pre>
+
+<p>A Filter-Bank is defined here as a signal bandsplitter having the
+property that summing its output signals gives an allpass-filtered
+version of the filter-bank input signal.  A more conventional term for
+this is an "allpass-complementary filter bank".  If the allpass filter
+is a pure delay (and possible scaling), the filter bank is said to be
+a "perfect-reconstruction filter bank" (see Vaidyanathan-1993 cited
+below for details).  A "graphic equalizer", in which band signals
+are scaled by gains and summed, should be based on a filter bank.</p>
+<p>The filter-banks below are implemented as Butterworth or Elliptic
+spectrum-analyzers followed by delay equalizers that make them
+allpass-complementary.</p>
+<h4 id="increasing-channel-isolation">Increasing Channel Isolation</h4>
+<p>Go to higher filter orders - see Regalia et al. or Vaidyanathan (cited
+below) regarding the construction of more aggressive recursive
+filter-banks using elliptic or Chebyshev prototype filters.</p>
+<h4 id="references_12">References</h4>
+<ul>
+<li>"Tree-structured complementary filter banks using all-pass sections",
+  Regalia et al., IEEE Trans. Circuits &amp; Systems, CAS-34:1470-1484, Dec. 1987</li>
+<li>"Multirate Systems and Filter Banks", P. Vaidyanathan, Prentice-Hall, 1993</li>
+<li>Elementary filter theory: https:ccrma.stanford.edu/~jos/filters/</li>
+</ul>
 <hr />
 <h3 id="fimth_octave_filterbankn"><code>(fi.)mth_octave_filterbank[n]</code></h3>
 <p>Allpass-complementary filter banks based on Butterworth band-splitting.
@@ -1394,6 +1491,8 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 <li><code>N</code>: total number of bands (including dc and Nyquist)</li>
 </ul>
 <h2 id="arbitrary-crossover-filter-banks-and-spectrum-analyzers">Arbitrary-Crossover Filter-Banks and Spectrum Analyzers</h2>
+<p>These are similar to the Mth-octave analyzers above, except that the
+band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="fifilterbank"><code>(fi.)filterbank</code></h3>
 <p>Filter bank.

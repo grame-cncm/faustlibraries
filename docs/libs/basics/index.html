@@ -12,7 +12,7 @@
         <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/docco.min.css">
         <link href="../../css/extra.css" rel="stylesheet">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -47,15 +47,12 @@
                 <div class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="../..">Home</a>
-                            </li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
 <li >
-    <a href="../../using/"> Overview </a>
+    <a href="../../organization/"> Organization </a>
 </li>
                                     
 <li >
@@ -63,7 +60,11 @@
 </li>
                                     
 <li >
-    <a href="../../primitives/"> Primitives </a>
+    <a href="../../contributing/"> Contributing </a>
+</li>
+                                    
+<li >
+    <a href="../../copyright/"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -903,6 +904,157 @@ sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 </code></pre>
 
 <h2 id="sliding-reduce">Sliding Reduce</h2>
+<p>Provides various operations on the last N samples using a high order
+`slidingReduce(op,N,maxN,disabledVal,x)`` fold-like function:</p>
+<ul>
+<li><code>slidingSum(n)</code>: the sliding sum of the last n input samples, CPU-light</li>
+<li><code>slidingSump(n,maxn)</code>: the sliding sum of the last n input samples, numerically stable "forever"</li>
+<li><code>slidingMax(n,maxn)</code>: the sliding max of the last n input samples</li>
+<li><code>slidingMin(n,maxn)</code>: the sliding min of the last n input samples</li>
+<li><code>slidingMean(n)</code>: the sliding mean of the last n input samples, CPU-light</li>
+<li><code>slidingMeanp(n,maxn)</code>: the sliding mean of the last n input samples, numerically stable "forever"</li>
+<li><code>slidingRMS(n)</code>: the sliding RMS of the last n input samples, CPU-light</li>
+<li><code>slidingRMSp(n,maxn)</code>: the sliding RMS of the last n input samples, numerically stable "forever"</li>
+</ul>
+<h4 id="working-principle">Working Principle</h4>
+<p>If we want the maximum of the last 8 values, we can do that as:</p>
+<pre><code>simpleMax(x) =
+ (
+   (
+     max(x@0,x@1),
+     max(x@2,x@3)
+   ) :max
+ ),
+ (
+   (
+     max(x@4,x@5),
+     max(x@6,x@7)
+   ) :max
+ )
+ :max;
+</code></pre>
+
+<p><code>max(x@2,x@3)</code> is the same as <code>max(x@0,x@1)@2</code> but the latter re-uses a
+value we already computed,so is more efficient. Using the same trick for
+values 4 trough 7, we can write:</p>
+<pre><code>efficientMax(x)=
+ (
+   (
+     max(x@0,x@1),
+     max(x@0,x@1)@2
+   ) :max
+ ),
+ (
+   (
+     max(x@0,x@1),
+     max(x@0,x@1)@2
+   ) :max@4
+ )
+ :max;
+</code></pre>
+
+<p>We can rewrite it recursively, so it becomes possible to get the maximum at
+have any number of values, as long as it's a power of 2.</p>
+<pre><code>recursiveMax =
+ case {
+   (1,x) =&gt; x;
+   (N,x) =&gt;  max(recursiveMax(N/2,x) , recursiveMax(N/2,x)@(N/2));
+ };
+</code></pre>
+
+<p>What if we want to look at a number of values that's not a power of 2?
+For each value, we will have to decide whether to use it or not.
+If N is bigger than the index of the value, we use it, otherwise we replace
+it with (<code>0-(ma.INFINITY)</code>):</p>
+<pre><code>variableMax(N,x) =
+ max(
+   max(
+     (
+       (x@0 : useVal(0)),
+       (x@1 : useVal(1))
+     ):max,
+     (
+       (x@2 : useVal(2)),
+       (x@3 : useVal(3))
+     ):max
+   ),
+   max(
+     (
+       (x@4 : useVal(4)),
+       (x@5 : useVal(5))
+     ):max,
+     (
+       (x@6 : useVal(6)),
+       (x@7 : useVal(7))
+     ):max
+   )
+ )
+ with {
+ useVal(i) = select2((N&gt;=i) , (0-(ma.INFINITY)),_);
+};
+</code></pre>
+
+<p>Now it becomes impossible to re-use any values. To fix that let's first look
+at how we'd implement it using recursiveMax, but with a fixed N that is not
+a power of 2. For example, this is how you'd do it with <code>N=3</code>:</p>
+<pre><code>binaryMaxThree(x) =
+ (
+   recursiveMax(1,x)@0,  the first x
+   recursiveMax(2,x)@1   the second and third x
+ ):max;
+</code></pre>
+
+<p><code>N=6</code></p>
+<pre><code>binaryMaxSix(x) =
+ (
+   recursiveMax(2,x)@0,  first two
+   recursiveMax(4,x)@2   third trough sixth
+ ):max;
+</code></pre>
+
+<p>Note that <code>recursiveMax(2,x)</code> is used at a different delay then in
+<code>binaryMaxThree</code>, since it represents 1 and 2, not 2 and 3. Each block is
+delayed the combined size of the previous blocks.</p>
+<p><code>N=7</code></p>
+<pre><code>binaryMaxSeven(x) =
+ (
+   (
+     recursiveMax(1,x)@0,  first x
+     recursiveMax(2,x)@1   second and third
+   ):max,
+   (
+     recursiveMax(4,x)@3   fourth trough seventh
+   )
+ ):max;
+</code></pre>
+
+<p>To make a variable version, we need to know which powers of two are used,
+and at which delay time.</p>
+<p>Then it becomes a matter of:</p>
+<ul>
+<li>lining up all the different block sizes in parallel: the first <code>par()</code>
+ statement</li>
+<li>delaying each the appropriate amount: <code>sumOfPrevBlockSizes()</code></li>
+<li>turning it on or off: <code>useVal()</code></li>
+<li>getting the maximum of all of them: <code>combine()</code></li>
+</ul>
+<p>In Faust, we can only do that for a fixed maximum number of values: <code>maxN</code></p>
+<pre><code>variableBinaryMaxN(N,maxN,x) =
+ par(i,maxNrBits,recursiveMax(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)  : useVal(i)) : combine(maxNrBits) with {
+    The sum of all the sizes of the previous blocks
+   sumOfPrevBlockSizes(N,maxN,0) = 0;
+   sumOfPrevBlockSizes(N,maxN,i) = (subseq((allBlockSizes(N,maxN)),0,i):&gt;_);
+   allBlockSizes(N,maxN) = par(i, maxNrBits, pow2(i) * isUsed(i) );
+   maxNrBits = int2nrOfBits(maxN);
+    get the maximum of all blocks
+   combine(2) = max;
+   combine(N) = max(combine(N-1),_);
+    Decide wether or not to use a certain value, based on N
+   useVal(i) = select2( isUsed(i), (0-(ma.INFINITY)),_);
+   isUsed(i) = take(i+1,(int2bin(N,maxN)));
+ };
+</code></pre>
+
 <hr />
 <h3 id="baslidingreduce"><code>(ba.)slidingReduce</code></h3>
 <p>Fold-like high order function. Apply a commutative binary operation <code>&lt;op&gt;</code> to

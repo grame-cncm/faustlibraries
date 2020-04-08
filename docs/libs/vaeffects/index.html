@@ -12,7 +12,7 @@
         <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/docco.min.css">
         <link href="../../css/extra.css" rel="stylesheet">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -47,15 +47,12 @@
                 <div class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="../..">Home</a>
-                            </li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
 <li >
-    <a href="../../using/"> Overview </a>
+    <a href="../../organization/"> Organization </a>
 </li>
                                     
 <li >
@@ -63,7 +60,11 @@
 </li>
                                     
 <li >
-    <a href="../../primitives/"> Primitives </a>
+    <a href="../../contributing/"> Contributing </a>
+</li>
+                                    
+<li >
+    <a href="../../copyright/"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -322,6 +323,17 @@ tracing back to the other states (s1,s2,s3,s4) each recursive step.</p>
 <li><code>Q</code>: q</li>
 </ul>
 <h2 id="korg-35-filters">Korg 35 Filters</h2>
+<p>The following filters are virtual analog models of the Korg 35 low-pass 
+filter and high-pass filter found in the MS-10 and MS-20 synthesizers.
+The virtual analog models for the LPF and HPF are different, making these 
+filters more interesting than simply tapping different states of the same 
+circuit. </p>
+<p>These filters were implemented in Faust by Eric Tarr during the 
+<a href="https:ccrma.stanford.edu/workshops/faust-embedded-19/">2019 Embedded DSP With Faust Workshop</a>.</p>
+<h4 id="filter-history">Filter history:</h4>
+<ul>
+<li><a href="https://secretlifeofsynthesizers.com/thekorg35filter/">https://secretlifeofsynthesizers.com/thekorg35filter/</a></li>
+</ul>
 <hr />
 <h3 id="vekorg35lpf"><code>(ve.)korg35LPF</code></h3>
 <p>Virtual analog models of the Korg 35 low-pass filter found in the MS-10 and 
@@ -349,6 +361,14 @@ MS-20 synthesizers.</p>
 <li><code>Q</code>: q</li>
 </ul>
 <h2 id="oberheim-filters">Oberheim Filters</h2>
+<p>The following filter (4 types) is an implementation of the virtual analog 
+model described in Section 7.2 of the Will Pirkle book, "Designing Software 
+Synthesizer Plug-ins in C++. It is based on the block diagram in Figure 7.5. </p>
+<p>The Oberheim filter is a state-variable filter with soft-clipping distortion 
+within the circuit. </p>
+<p>In many VA filters, distortion is accomplished using the "tanh" function. 
+For this Faust implementation, that distortion function was replaced with 
+the <code>(ef.)cubicnl</code> function.</p>
 <hr />
 <h3 id="veoberheim"><code>(ve.)oberheim</code></h3>
 <p>Generic multi-outputs Oberheim filter (see description above).</p>
@@ -410,6 +430,23 @@ MS-20 synthesizers.</p>
 <li><code>Q</code>: q</li>
 </ul>
 <h2 id="sallen-key-filters">Sallen Key Filters</h2>
+<p>The following filters were implemented based on VA models of synthesizer 
+filters.</p>
+<p>The modeling approach is based on a Topology Preserving Transform (TPT) to 
+resolve the delay-free feedback loop in the corresponding analog filters.  </p>
+<p>The primary processing block used to build other filters (Moog, Korg, etc.) is
+based on a 1st-order Sallen-Key filter. </p>
+<p>The filters included in this script are 1st-order LPF/HPF and 2nd-order 
+state-variable filters capable of LPF, HPF, and BPF.  </p>
+<h4 id="resources">Resources:</h4>
+<ul>
+<li>Vadim Zavalishin (2018) "The Art of VA Filter Design", v2.1.0</li>
+<li><a href="https://www.nativeinstruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.0.pdf">https://www.nativeinstruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.0.pdf</a></li>
+<li>Will Pirkle (2014) "Resolving Delay-Free Loops in Recursive Filters Using </li>
+<li>the Modified Härmä Method", AES 137 <a href="http://www.aes.org/elib/browse.cfm?elib=17517">http://www.aes.org/elib/browse.cfm?elib=17517</a></li>
+<li>Description and diagrams of 1st- and 2nd-order TPT filters: </li>
+<li><a href="https://www.willpirkle.com/7062/">https://www.willpirkle.com/7062/</a></li>
+</ul>
 <hr />
 <h3 id="vesallenkeyonepole"><code>(ve.)sallenKeyOnePole</code></h3>
 <p>Sallen-Key generic One Pole filter (see description above).</p>

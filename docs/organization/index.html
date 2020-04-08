@@ -8,11 +8,11 @@
         
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-        <title> Primitives  - Faust Libraries</title>
+        <title> Organization  - Faust Libraries</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome.min.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/docco.min.css">
         <link href="../css/extra.css" rel="stylesheet">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -47,23 +47,24 @@
                 <div class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="..">Home</a>
-                            </li>
                             <li class="dropdown active">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
-<li >
-    <a href="../using/"> Overview </a>
+<li class="active">
+    <a href="./"> Organization </a>
 </li>
                                     
 <li >
     <a href="../standardFunctions/"> Standard Functions </a>
 </li>
                                     
-<li class="active">
-    <a href="./"> Primitives </a>
+<li >
+    <a href="../contributing/"> Contributing </a>
+</li>
+                                    
+<li >
+    <a href="../copyright/"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -176,13 +177,13 @@
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
-                            <li >
-                                <a rel="next" href="../standardFunctions/">
+                            <li class="disabled">
+                                <a rel="next" >
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li >
-                                <a rel="prev" href="../libs/analyzers/">
+                                <a rel="prev" href="../standardFunctions/">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -194,72 +195,48 @@
         <div class="container">
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#primitives">Primitives</a></li>
-            <li><a href="#user-interface-primitives">User Interface Primitives</a></li>
+        <li class="main active"><a href="#general-organization">General Organization</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="primitives">Primitives</h1>
-<h2 id="user-interface-primitives">User Interface Primitives</h2>
-<h3 id="button"><code>button</code></h3>
-<p>Creates a button in the user interface. The <code>button</code> is a primitive circuit 
-with one output and no input. The signal produced by the <code>button</code> is 0 when not
-pressed and 1 while pressed.</p>
-<h4 id="usage">Usage</h4>
-<pre><code>button(&quot;play&quot;) : _;
-</code></pre>
-
-<p>Where <code>"play"</code> is the name of the <code>button</code> in the interface.</p>
-<hr />
-<h3 id="checkbox"><code>checkbox</code></h3>
-<p>Creates a checkbox in the user interface. The <code>checkbox</code> is a primitive circuit 
-with one output and no input. The signal produced by the checkbox is 0 when not
-checked and 1 when checked.</p>
-<h4 id="usage_1">Usage</h4>
-<pre><code>checkbox(&quot;play&quot;) : _;
-</code></pre>
-
-<p>Where <code>"play"</code> is the name of the <code>checkbox</code> in the interface.</p>
-<hr />
-<h3 id="hslider"><code>hslider</code></h3>
-<p>Creates a horizontal slider in the user interface. The <code>hslider</code> is a 
-primitive circuit with one output and no input. <code>hslider</code> produces a signal
-between a minimum and a maximum value based on the position of the slider 
-cursor. </p>
-<h4 id="usage_2">Usage</h4>
-<pre><code>hslider(&quot;volume&quot;,-10,-70,12,0.1) : _;
-</code></pre>
-
-<p>Where <code>volume</code> is the name of the slider in the interface, <code>-10</code> the default
-value of the slider when the program starts, <code>-70</code> the minimum value, <code>12</code> the
-maximum value, and <code>0.1</code> the step the determines the precision of the control.</p>
-<hr />
-<h3 id="nentry"><code>nentry</code></h3>
-<p>Creates a numerical entry in the user interface. The <code>nentry</code> is a 
-primitive circuit with one output and no input. <code>nentry</code> produces a signal
-between a minimum and a maximum value based on the user input. </p>
-<h4 id="usage_3">Usage</h4>
-<pre><code>nentry(&quot;volume&quot;,-10,-70,12,0.1) : _;
-</code></pre>
-
-<p>Where <code>volume</code> is the name of the numerical entry in the interface, <code>-10</code> the 
-default value of the entry when the program starts, <code>-70</code> the minimum value, 
-<code>12</code> the maximum value, and <code>0.1</code> the step the determines the precision of the 
-control.</p>
-<hr />
-<h3 id="vslider"><code>vslider</code></h3>
-<p>Creates a vertical slider in the user interface. The <code>vslider</code> is a 
-primitive circuit with one output and no input. <code>vslider</code> produces a signal
-between a minimum and a maximum value based on the position of the slider 
-cursor. </p>
-<h4 id="usage_4">Usage</h4>
-<pre><code>vslider(&quot;volume&quot;,-10,-70,12,0.1) : _;
-</code></pre>
-
-<p>Where <code>volume</code> is the name of the slider in the interface, <code>-10</code> the default
-value of the slider when the program starts, <code>-70</code> the minimum value, <code>12</code> the
-maximum value, and <code>0.1</code> the step the determines the precision of the control.</p></div>
+<h1 id="general-organization">General Organization</h1>
+<p>Only the libraries that are considered to be "standard" are documented:</p>
+<ul>
+<li><code>analyzers.lib</code></li>
+<li><code>basics.lib</code></li>
+<li><code>compressors.lib</code></li>
+<li><code>delays.lib</code></li>
+<li><code>demos.lib</code></li>
+<li><code>dx7.lib</code></li>
+<li><code>envelopes.lib</code></li>
+<li><code>filters.lib</code></li>
+<li><code>hoa.lib</code></li>
+<li><code>interpolators.lib</code></li>
+<li><code>maths.lib</code></li>
+<li><code>misceffects.lib</code></li>
+<li><code>oscillators.lib</code></li>
+<li><code>noises.lib</code></li>
+<li><code>phaflangers.lib</code></li>
+<li><code>physmodels.lib</code></li>
+<li><code>reducemaps.lib</code></li>
+<li><code>reverbs.lib</code></li>
+<li><code>routes.lib</code></li>
+<li><code>signals.lib</code></li>
+<li><code>soundfiles.lib</code></li>
+<li><code>spats.lib</code></li>
+<li><code>synths.lib</code></li>
+<li><code>tonestacks.lib</code> (not documented but example in <code>/examples/misc</code>)</li>
+<li><code>tubes.lib</code> (not documented but example in <code>/examples/misc</code>)</li>
+<li><code>vaeffects.lib</code></li>
+<li><code>webaudio.lib</code></li>
+<li><code>version.lib</code></li>
+</ul>
+<p>Other deprecated libraries such as <code>music.lib</code>, etc. are present but are not documented to not confuse new users.</p>
+<p>The documentation of each library can be found in <code>/documentation/library.html</code> or in <code>/documentation/library.pdf</code>. </p>
+<p>A global <code>version</code> number for the standard libraries is defined in <code>version.lib</code>. 
+It follows the semantic versioning structure: MAJOR, MINOR, PATCH. The MAJOR number is increased when we make incompatible changes. The MINOR number is increased when we add functionality in a backwards compatible manner, and the PATCH number when we make backwards compatible bug fixes. By looking at the generated code or the diagram of <code>process = vl.version;</code> one can see the current version of the libraries.</p>
+<p>The <code>/examples</code> directory contains all the examples from the <code>/examples</code> folder of the Faust distribution as well as new ones. Most of them were updated to reflect the coding conventions described in the next section. Examples are organized by types in different folders. The <code>/old</code> folder contains examples that are fully deprecated, probably because they were integrated to the libraries and fully rewritten (see <code>freeverb.dsp</code> for example). Examples using deprecated libraries were integrated to the general tree but a warning comment was added at their beginning to point readers to the right library and function.</p></div>
         </div>
 
         <footer class="col-md-12">

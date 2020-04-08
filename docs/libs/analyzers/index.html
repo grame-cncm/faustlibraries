@@ -12,7 +12,7 @@
         <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/docco.min.css">
         <link href="../../css/extra.css" rel="stylesheet">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -47,15 +47,12 @@
                 <div class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="../..">Home</a>
-                            </li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
 <li >
-    <a href="../../using/"> Overview </a>
+    <a href="../../organization/"> Organization </a>
 </li>
                                     
 <li >
@@ -63,7 +60,11 @@
 </li>
                                     
 <li >
-    <a href="../../primitives/"> Primitives </a>
+    <a href="../../contributing/"> Contributing </a>
+</li>
+                                    
+<li >
+    <a href="../../copyright/"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -177,7 +178,7 @@
                             </a>
                         </li>
                             <li >
-                                <a rel="next" href="../../primitives/">
+                                <a rel="next" href="../../copyright/">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
@@ -262,6 +263,39 @@ above).</p>
 <li>Author Jonatan Liljedahl, revised by RM</li>
 </ul>
 <h2 id="spectrum-analyzers">Spectrum-Analyzers</h2>
+<p>Spectrum-analyzers split the input signal into a bank of parallel signals, one for
+each spectral band. They are related to the Mth-Octave Filter-Banks in <code>filters.lib</code>.
+The documentation of this library contains more details about the implementation.
+The parameters are:</p>
+<ul>
+<li><code>M</code>: number of band-slices per octave (&gt;1)</li>
+<li><code>N</code>: total number of bands (&gt;2)</li>
+<li><code>ftop</code> = upper bandlimit of the Mth-octave bands (&lt;SR/2)</li>
+</ul>
+<p>In addition to the Mth-octave output signals, there is a highpass signal
+containing frequencies from ftop to SR/2, and a "dc band" lowpass signal
+containing frequencies from 0 (dc) up to the start of the Mth-octave bands.
+Thus, the N output signals are</p>
+<pre><code>highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-M*(N-1)))
+</code></pre>
+
+<p>A Spectrum-Analyzer is defined here as any band-split whose bands span
+the relevant spectrum, but whose band-signals do not
+necessarily sum to the original signal, either exactly or to within an
+allpass filtering. Spectrum analyzer outputs are normally at least nearly
+"power complementary", i.e., the power spectra of the individual bands
+sum to the original power spectrum (to within some negligible tolerance).</p>
+<h4 id="increasing-channel-isolation">Increasing Channel Isolation</h4>
+<p>Go to higher filter orders - see Regalia et al. or Vaidyanathan (cited
+below) regarding the construction of more aggressive recursive
+filter-banks using elliptic or Chebyshev prototype filters.</p>
+<h4 id="references">References</h4>
+<ul>
+<li>"Tree-structured complementary filter banks using all-pass sections",
+  Regalia et al., IEEE Trans. Circuits &amp; Systems, CAS-34:1470-1484, Dec. 1987</li>
+<li>"Multirate Systems and Filter Banks", P. Vaidyanathan, Prentice-Hall, 1993</li>
+<li>Elementary filter theory: https:ccrma.stanford.edu/~jos/filters/</li>
+</ul>
 <hr />
 <h3 id="anmth_octave_analyzer"><code>(an.)mth_octave_analyzer</code></h3>
 <p>Octave analyzer.
@@ -285,6 +319,7 @@ mth_octave_analyzer_default = mth_octave_analyzer6e;
 <li><code>N</code>: total number of bands (including dc and Nyquist)</li>
 </ul>
 <h2 id="mth-octave-spectral-level">Mth-Octave Spectral Level</h2>
+<p>Spectral Level: Display (in bar graphs) the average signal level in each spectral band.</p>
 <hr />
 <h3 id="anmth_octave_spectral_level6e"><code>(an.)mth_octave_spectral_level6e</code></h3>
 <p>Spectral level display.</p>
@@ -319,6 +354,8 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 <h4 id="usage_5">Usage</h4>
 <p>See <code>mth_octave_spectral_level_demo</code> in <code>demos.lib</code>.</p>
 <h2 id="arbritary-crossover-filter-banks-and-spectrum-analyzers">Arbritary-Crossover Filter-Banks and Spectrum Analyzers</h2>
+<p>These are similar to the Mth-octave analyzers above, except that the
+band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="ananalyzer"><code>(an.)analyzer</code></h3>
 <p>Analyzer.</p>
@@ -338,6 +375,7 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 </code></pre>
 
 <h2 id="fast-fourier-transform-fft-and-its-inverse-ifft">Fast Fourier Transform (fft) and its Inverse (ifft)</h2>
+<p>Sliding FFTs that compute a rectangularly windowed FFT each sample.</p>
 <hr />
 <h3 id="angortzelopt"><code>(an.)gortzelOpt</code></h3>
 <p>Optimized Goertzel filter. </p>
