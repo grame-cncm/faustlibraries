@@ -3,6 +3,7 @@ MAKE 	?= make
 AWK		?= awk
 
 DOCDIR   := docs
+SITEDIR	 := ../docs
 FAUSTLIBS ?= ../../faustlibraries
 
 SRC   	 := $(shell cat ../../faustlibraries/all.lib | grep import | sed -e 's/[^"]*"\(..*\.lib\).*/\1/')
@@ -31,6 +32,7 @@ test:
 build:
 	$(MAKE) md
 	mkdocs build
+	git checkout $(SITEDIR)/CNAME
 
 serve:
 	@echo "you can browse the site at http://localhost:8000"
