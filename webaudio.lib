@@ -1,6 +1,6 @@
 
 //#################################### webaudio.lib ########################################
-//An implementation of the web audio API filters.  Its official prefix is `wa`.
+//An implementation of the WebAudio API filters.  Its official prefix is `wa`.
 //########################################################################################
 
 /************************************************************************
@@ -209,7 +209,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 
 //--------------`(wa.)lowpass2`--------------
 // Standard second-order resonant lowpass filter with 12dB/octave rolloff.
-// Frequencies below the cutoff pass through; frequencies above it are attenuated.
+// Frequencies below the cutoff pass through, frequencies above it are attenuated.
 //
 // #### Usage
 //
@@ -233,7 +233,7 @@ lowpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass2, x : fi.tf2;
 
 //--------------`(wa.)highpass2`--------------
 // Standard second-order resonant highpass filter with 12dB/octave rolloff.
-// Frequencies below the cutoff are attenuated; frequencies above it pass through.
+// Frequencies below the cutoff are attenuated, frequencies above it pass through.
 //
 // #### Usage
 //
@@ -257,7 +257,7 @@ highpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass2, x : fi.tf2
 
 //--------------`(wa.)bandpass2`--------------
 // Standard second-order bandpass filter.
-// Frequencies outside the given range of frequencies are attenuated; the frequencies inside it pass through.
+// Frequencies outside the given range of frequencies are attenuated, the frequencies inside it pass through.
 //
 // #### Usage
 //
@@ -329,7 +329,7 @@ allpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass2, x : fi.tf2;
 
 
 //--------------`(wa.)peaking2`--------------
-// Frequencies inside the range get a boost or an attenuation; frequencies outside it are unchanged.
+// Frequencies inside the range get a boost or an attenuation, frequencies outside it are unchanged.
 //
 // #### Usage
 //
