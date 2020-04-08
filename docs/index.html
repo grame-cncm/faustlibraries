@@ -8,12 +8,17 @@
         
         
         <link rel="shortcut icon" href="img/favicon.ico">
-        <title>Faust Libraries Documentation</title>
+        <title>Faust Libraries</title>
         <link href="css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="css/font-awesome.min.css" rel="stylesheet">
         <link href="css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
         <link href="css/extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
 
         <script src="js/jquery-1.10.2.min.js" defer></script>
         <script src="js/bootstrap-3.0.3.min.js" defer></script>
@@ -28,11 +33,142 @@
 
                 <!-- Collapsed navigation -->
                 <div class="navbar-header">
-                    <a class="navbar-brand" href=".">Faust Libraries Documentation</a>
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href=".">Faust Libraries</a>
                 </div>
 
                 <!-- Expanded navigation -->
                 <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="active">
+                                <a href=".">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="using/"> Overview </a>
+</li>
+                                    
+<li >
+    <a href="standardFunctions/"> Standard Functions </a>
+</li>
+                                    
+<li >
+    <a href="primitives/"> Primitives </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="libs/analyzers/"> analyzers </a>
+</li>
+                                    
+<li >
+    <a href="libs/basics/"> basics </a>
+</li>
+                                    
+<li >
+    <a href="libs/compressors/"> compressors </a>
+</li>
+                                    
+<li >
+    <a href="libs/delays/"> delays </a>
+</li>
+                                    
+<li >
+    <a href="libs/demos/"> demos </a>
+</li>
+                                    
+<li >
+    <a href="libs/dx7/"> dx7 </a>
+</li>
+                                    
+<li >
+    <a href="libs/envelopes/"> envelopes </a>
+</li>
+                                    
+<li >
+    <a href="libs/filters/"> filters </a>
+</li>
+                                    
+<li >
+    <a href="libs/hoa/"> hoa </a>
+</li>
+                                    
+<li >
+    <a href="libs/interpolators/"> interpolators </a>
+</li>
+                                    
+<li >
+    <a href="libs/maths/"> maths </a>
+</li>
+                                    
+<li >
+    <a href="libs/misceffects/"> misceffects </a>
+</li>
+                                    
+<li >
+    <a href="libs/oscillators/"> oscillators </a>
+</li>
+                                    
+<li >
+    <a href="libs/noises/"> noises </a>
+</li>
+                                    
+<li >
+    <a href="libs/phaflangers/"> phaflangers </a>
+</li>
+                                    
+<li >
+    <a href="libs/physmodels/"> physmodels </a>
+</li>
+                                    
+<li >
+    <a href="libs/reducemaps/"> reducemaps </a>
+</li>
+                                    
+<li >
+    <a href="libs/reverbs/"> reverbs </a>
+</li>
+                                    
+<li >
+    <a href="libs/routes/"> routes </a>
+</li>
+                                    
+<li >
+    <a href="libs/signals/"> signals </a>
+</li>
+                                    
+<li >
+    <a href="libs/soundfiles/"> soundfiles </a>
+</li>
+                                    
+<li >
+    <a href="libs/spats/"> spats </a>
+</li>
+                                    
+<li >
+    <a href="libs/synths/"> synths </a>
+</li>
+                                    
+<li >
+    <a href="libs/vaeffects/"> vaeffects </a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
 
                     <ul class="nav navbar-nav navbar-right">
                         <li>
@@ -40,6 +176,16 @@
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
+                            <li class="disabled">
+                                <a rel="next" >
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="using/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
                     </ul>
                 </div>
             </div>
@@ -4379,8 +4525,8 @@ _ : lowshelf_other_freq(N,L0,fx) : _
 </code></pre>
 
 <p>Where:
-<em> <code>N</code>: filter order 1, 3, 5, ... (odd only). (default should be 3)
-</em> <code>L0</code>: desired level (dB) between dc and fx (boost <code>L0&gt;0</code> or cut <code>L0&lt;0</code>)
+* <code>N</code>: filter order 1, 3, 5, ... (odd only). (default should be 3)
+* <code>L0</code>: desired level (dB) between dc and fx (boost <code>L0&gt;0</code> or cut <code>L0&lt;0</code>)
 * <code>fx</code>: -3dB frequency of lowpass band (<code>L0&gt;0</code>) or upper band (<code>L0&lt;0</code>)
       (see "SHELF SHAPE" below).</p>
 <p>The gain at SR/2 is constrained to be 1.
@@ -7012,8 +7158,8 @@ string will ring forever.</p>
 </code></pre>
 
 <p>With:
-<em> <code>length</code>: the length of the string in meters
-</em> <code>pluckPosition</code>: the plucking position (0.001-0.999)
+* <code>length</code>: the length of the string in meters
+* <code>pluckPosition</code>: the plucking position (0.001-0.999)
 * <code>excitation</code>: the input signal for the excitation.</p>
 <hr />
 <h3 id="pmks"><code>(pm.)ks</code></h3>
@@ -9914,5 +10060,5 @@ Frequencies higher than the frequency get a boost or an attenuation, frequencies
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2020-02-17 11:03:07
+Build Date UTC : 2020-03-02 16:52:51
 -->

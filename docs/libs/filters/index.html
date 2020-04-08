@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> filters  - Faust Libraries</title>
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="../..">Faust Libraries</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../..">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../../using/"> Overview </a>
+</li>
+                                    
+<li >
+    <a href="../../standardFunctions/"> Standard Functions </a>
+</li>
+                                    
+<li >
+    <a href="../../primitives/"> Primitives </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../analyzers/"> analyzers </a>
+</li>
+                                    
+<li >
+    <a href="../basics/"> basics </a>
+</li>
+                                    
+<li >
+    <a href="../compressors/"> compressors </a>
+</li>
+                                    
+<li >
+    <a href="../delays/"> delays </a>
+</li>
+                                    
+<li >
+    <a href="../demos/"> demos </a>
+</li>
+                                    
+<li >
+    <a href="../dx7/"> dx7 </a>
+</li>
+                                    
+<li >
+    <a href="../envelopes/"> envelopes </a>
+</li>
+                                    
+<li class="active">
+    <a href="./"> filters </a>
+</li>
+                                    
+<li >
+    <a href="../hoa/"> hoa </a>
+</li>
+                                    
+<li >
+    <a href="../interpolators/"> interpolators </a>
+</li>
+                                    
+<li >
+    <a href="../maths/"> maths </a>
+</li>
+                                    
+<li >
+    <a href="../misceffects/"> misceffects </a>
+</li>
+                                    
+<li >
+    <a href="../oscillators/"> oscillators </a>
+</li>
+                                    
+<li >
+    <a href="../noises/"> noises </a>
+</li>
+                                    
+<li >
+    <a href="../phaflangers/"> phaflangers </a>
+</li>
+                                    
+<li >
+    <a href="../physmodels/"> physmodels </a>
+</li>
+                                    
+<li >
+    <a href="../reducemaps/"> reducemaps </a>
+</li>
+                                    
+<li >
+    <a href="../reverbs/"> reverbs </a>
+</li>
+                                    
+<li >
+    <a href="../routes/"> routes </a>
+</li>
+                                    
+<li >
+    <a href="../signals/"> signals </a>
+</li>
+                                    
+<li >
+    <a href="../soundfiles/"> soundfiles </a>
+</li>
+                                    
+<li >
+    <a href="../spats/"> spats </a>
+</li>
+                                    
+<li >
+    <a href="../synths/"> synths </a>
+</li>
+                                    
+<li >
+    <a href="../vaeffects/"> vaeffects </a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../envelopes/">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="../hoa/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#filterslib">filters.lib</a></li>
+            <li><a href="#basic-filters">Basic Filters</a></li>
+            <li><a href="#comb-filters">Comb Filters</a></li>
+            <li><a href="#direct-form-digital-filter-sections">Direct-Form Digital Filter Sections</a></li>
+            <li><a href="#direct-form-second-order-biquad-sections">Direct-Form Second-Order Biquad Sections</a></li>
+            <li><a href="#ladderlattice-digital-filters">Ladder/Lattice Digital Filters</a></li>
+            <li><a href="#useful-special-cases">Useful Special Cases</a></li>
+            <li><a href="#ladderlattice-allpass-filters">Ladder/Lattice Allpass Filters</a></li>
+            <li><a href="#digital-filter-sections-specified-as-analog-filter-sections">Digital Filter Sections Specified as Analog Filter Sections</a></li>
+            <li><a href="#simple-resonator-filters">Simple Resonator Filters</a></li>
+            <li><a href="#butterworth-lowpasshighpass-filters">Butterworth Lowpass/Highpass Filters</a></li>
+            <li><a href="#special-filter-bank-delay-equalizing-allpass-filters">Special Filter-Bank Delay-Equalizing Allpass Filters</a></li>
+            <li><a href="#elliptic-cauer-lowpass-filters">Elliptic (Cauer) Lowpass Filters</a></li>
+            <li><a href="#elliptic-highpass-filters">Elliptic Highpass Filters</a></li>
+            <li><a href="#butterworth-bandpassbandstop-filters">Butterworth Bandpass/Bandstop Filters</a></li>
+            <li><a href="#elliptic-bandpass-filters">Elliptic Bandpass Filters</a></li>
+            <li><a href="#parametric-equalizers-shelf-peaking">Parametric Equalizers (Shelf, Peaking)</a></li>
+            <li><a href="#mth-octave-filter-banks">Mth-Octave Filter-Banks</a></li>
+            <li><a href="#arbitrary-crossover-filter-banks-and-spectrum-analyzers">Arbitrary-Crossover Filter-Banks and Spectrum Analyzers</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="filterslib">filters.lib</h1>
+<p>Faust Filters library; Its official prefix is <code>fi</code>.</p>
+<h2 id="basic-filters">Basic Filters</h2>
+<hr />
+<h3 id="fizero"><code>(fi.)zero</code></h3>
+<p>One zero filter. Difference equation: $y(n) = x(n) - zx(n-1)$.</p>
+<h4 id="usage">Usage</h4>
+<pre><code>_ : zero(z) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>z</code>: location of zero along real axis in z-plane</li>
+</ul>
+<h4 id="reference">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/One_Zero.html">https://ccrma.stanford.edu/~jos/filters/One_Zero.html</a></li>
+</ul>
+<hr />
+<h3 id="fipole"><code>(fi.)pole</code></h3>
+<p>One pole filter. Could also be called a "leaky integrator".
+Difference equation: $y(n) = x(n) + py(n-1)$.</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>_ : pole(p) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>p</code>: pole location = feedback coefficient</li>
+</ul>
+<h4 id="reference_1">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/One_Pole.html">https://ccrma.stanford.edu/~jos/filters/One_Pole.html</a></li>
+</ul>
+<hr />
+<h3 id="fiintegrator"><code>(fi.)integrator</code></h3>
+<p>Same as <code>pole(1)</code> [implemented separately for block-diagram clarity].</p>
+<hr />
+<h3 id="fidcblockerat"><code>(fi.)dcblockerat</code></h3>
+<p>DC blocker with configurable break frequency.
+The amplitude response is substantially flat above $fb$,
+and sloped at about +6 dB/octave below $fb$.
+Derived from the analog transfer function
+$H(s) = \frac{s}{(s + 2 \pi fb)}$
+by the low-frequency-matching bilinear transform method
+(i.e., the standard frequency-scaling constant 2*SR).</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>_ : dcblockerat(fb) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fb</code>: "break frequency" in Hz, i.e., -3 dB gain frequency.</li>
+</ul>
+<h4 id="reference_2">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html">https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html</a></li>
+</ul>
+<hr />
+<h3 id="fidcblocker"><code>(fi.)dcblocker</code></h3>
+<p>DC blocker. Default dc blocker has -3dB point near 35 Hz (at 44.1 kHz)
+and high-frequency gain near 1.0025 (due to no scaling).
+<code>dcblocker</code> is as standard Faust function.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>_ : dcblocker : _
+</code></pre>
+
+<h2 id="comb-filters">Comb Filters</h2>
+<hr />
+<h3 id="fiff_comb"><code>(fi.)ff_comb</code></h3>
+<p>Feed-Forward Comb Filter. Note that <code>ff_comb</code> requires integer delays
+(uses <code>delay</code>  internally).
+<code>ff_comb</code> is a standard Faust function.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>_ : ff_comb(maxdel,intdel,b0,bM) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxdel</code>: maximum delay (a power of 2)</li>
+<li><code>intdel</code>: current (integer) comb-filter delay between 0 and maxdel</li>
+<li><code>del</code>: current (float) comb-filter delay between 0 and maxdel</li>
+<li><code>b0</code>: gain applied to delay-line input</li>
+<li><code>bM</code>: gain applied to delay-line output and then summed with input</li>
+</ul>
+<h4 id="reference_3">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html</a></li>
+</ul>
+<hr />
+<h3 id="fiff_fcomb"><code>(fi.)ff_fcomb</code></h3>
+<p>Feed-Forward Comb Filter. Note that <code>ff_fcomb</code> takes floating-point delays
+(uses <code>fdelay</code> internally).
+<code>ff_fcomb</code> is a standard Faust function.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>_ : ff_fcomb(maxdel,del,b0,bM) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxdel</code>: maximum delay (a power of 2)</li>
+<li><code>intdel</code>: current (integer) comb-filter delay between 0 and maxdel</li>
+<li><code>del</code>: current (float) comb-filter delay between 0 and maxdel</li>
+<li><code>b0</code>: gain applied to delay-line input</li>
+<li><code>bM</code>: gain applied to delay-line output and then summed with input</li>
+</ul>
+<h4 id="reference_4">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Feedforward_Comb_Filters.html</a></li>
+</ul>
+<hr />
+<h3 id="fiffcombfilter"><code>(fi.)ffcombfilter</code></h3>
+<p>Typical special case of <code>ff_comb()</code> where: <code>b0 = 1</code>.</p>
+<hr />
+<h3 id="fifb_comb"><code>(fi.)fb_comb</code></h3>
+<p>Feed-Back Comb Filter (integer delay).</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>_ : fb_comb(maxdel,intdel,b0,aN) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxdel</code>: maximum delay (a power of 2)</li>
+<li><code>intdel</code>: current (integer) comb-filter delay between 0 and maxdel</li>
+<li><code>del</code>: current (float) comb-filter delay between 0 and maxdel</li>
+<li><code>b0</code>: gain applied to delay-line input and forwarded to output</li>
+<li><code>aN</code>: minus the gain applied to delay-line output before summing with the input
+    and feeding to the delay line</li>
+</ul>
+<h4 id="reference_5">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html</a></li>
+</ul>
+<hr />
+<h3 id="fifb_fcomb"><code>(fi.)fb_fcomb</code></h3>
+<p>Feed-Back Comb Filter (floating point delay).</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>_ : fb_fcomb(maxdel,del,b0,aN) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxdel</code>: maximum delay (a power of 2)</li>
+<li><code>intdel</code>: current (integer) comb-filter delay between 0 and maxdel</li>
+<li><code>del</code>: current (float) comb-filter delay between 0 and maxdel</li>
+<li><code>b0</code>: gain applied to delay-line input and forwarded to output</li>
+<li><code>aN</code>: minus the gain applied to delay-line output before summing with the input
+    and feeding to the delay line</li>
+</ul>
+<h4 id="reference_6">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html</a></li>
+</ul>
+<hr />
+<h3 id="firev1"><code>(fi.)rev1</code></h3>
+<p>Special case of <code>fb_comb</code> (<code>rev1(maxdel,N,g)</code>).
+The "rev1 section" dates back to the 1960s in computer-music reverberation.
+See the <code>jcrev</code> and <code>brassrev</code> in <code>reverbs.lib</code> for usage examples.</p>
+<hr />
+<h3 id="fifbcombfilter-and-fiffbcombfilter"><code>(fi.)fbcombfilter</code> and <code>(fi.)ffbcombfilter</code></h3>
+<p>Other special cases of Feed-Back Comb Filter.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>_ : fbcombfilter(maxdel,intdel,g) : _
+_ : ffbcombfilter(maxdel,del,g) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxdel</code>: maximum delay (a power of 2)</li>
+<li><code>intdel</code>: current (integer) comb-filter delay between 0 and maxdel</li>
+<li><code>del</code>: current (float) comb-filter delay between 0 and maxdel</li>
+<li><code>g</code>: feedback gain</li>
+</ul>
+<h4 id="reference_7">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html</a></li>
+</ul>
+<hr />
+<h3 id="fiallpass_comb"><code>(fi.)allpass_comb</code></h3>
+<p>Schroeder Allpass Comb Filter. Note that</p>
+<pre><code>allpass_comb(maxlen,len,aN) = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len-1,1,aN);
+</code></pre>
+
+<p>which is a direct-form-1 implementation, requiring two delay lines.
+The implementation here is direct-form-2 requiring only one delay line.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>_ : allpass_comb(maxdel,intdel,aN) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxdel</code>: maximum delay (a power of 2)</li>
+<li><code>intdel</code>: current (integer) comb-filter delay between 0 and maxdel</li>
+<li><code>del</code>: current (float) comb-filter delay between 0 and maxdel</li>
+<li><code>aN</code>: minus the feedback gain</li>
+</ul>
+<h4 id="references">References</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html">https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html">https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html">https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html</a></li>
+</ul>
+<hr />
+<h3 id="fiallpass_fcomb"><code>(fi.)allpass_fcomb</code></h3>
+<p>Schroeder Allpass Comb Filter. Note that</p>
+<pre><code>allpass_comb(maxlen,len,aN) = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len-1,1,aN);
+</code></pre>
+
+<p>which is a direct-form-1 implementation, requiring two delay lines.
+The implementation here is direct-form-2 requiring only one delay line.</p>
+<p><code>allpass_fcomb</code> is a standard Faust library.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>_ : allpass_comb(maxdel,intdel,aN) : _
+_ : allpass_fcomb(maxdel,del,aN) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxdel</code>: maximum delay (a power of 2)</li>
+<li><code>intdel</code>: current (float) comb-filter delay between 0 and maxdel</li>
+<li><code>del</code>: current (float) comb-filter delay between 0 and maxdel</li>
+<li><code>aN</code>: minus the feedback gain</li>
+</ul>
+<h4 id="references_1">References</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html">https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html">https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html">https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html</a></li>
+</ul>
+<hr />
+<h3 id="firev2"><code>(fi.)rev2</code></h3>
+<p>Special case of <code>allpass_comb</code> (<code>rev2(maxlen,len,g)</code>).
+The "rev2 section" dates back to the 1960s in computer-music reverberation.
+See the <code>jcrev</code> and <code>brassrev</code> in <code>reverbs.lib</code> for usage examples.</p>
+<hr />
+<h3 id="fiallpass_fcomb5-and-fiallpass_fcomb1a"><code>(fi.)allpass_fcomb5</code> and <code>(fi.)allpass_fcomb1a</code></h3>
+<p>Same as <code>allpass_fcomb</code> but use <code>fdelay5</code> and <code>fdelay1a</code> internally
+(Interpolation helps - look at an fft of faust2octave on</p>
+<pre><code>`1-1' &lt;: allpass_fcomb(1024,10.5,0.95), allpass_fcomb5(1024,10.5,0.95);`).
+</code></pre>
+
+<h2 id="direct-form-digital-filter-sections">Direct-Form Digital Filter Sections</h2>
+<hr />
+<h3 id="fiiir"><code>(fi.)iir</code></h3>
+<p>Nth-order Infinite-Impulse-Response (IIR) digital filter,
+implemented in terms of the Transfer-Function (TF) coefficients.
+Such filter structures are termed "direct form".</p>
+<p><code>iir</code> is a standard Faust function.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>  _ : iir(bcoeffs,acoeffs) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>order</code>: filter order (int) = max(#poles,#zeros)</li>
+<li><code>bcoeffs</code>: (b0,b1,...,b_order) = TF numerator coefficients</li>
+<li><code>acoeffs</code>: (a1,...,a_order) = TF denominator coeffs (a0=1)</li>
+</ul>
+<h4 id="reference_8">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html">https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html</a></li>
+</ul>
+<hr />
+<h3 id="fifir"><code>(fi.)fir</code></h3>
+<p>FIR filter (convolution of FIR filter coefficients with a signal)</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>_ : fir(bv) : _
+</code></pre>
+
+<p><code>fir</code> is standard Faust function.</p>
+<p>Where:</p>
+<ul>
+<li><code>bv</code> = b0,b1,...,bn is a parallel bank of coefficient signals.</li>
+</ul>
+<h4 id="note">Note</h4>
+<p><code>bv</code> is processed using pattern-matching at compile time,
+      so it must have this normal form (parallel signals).</p>
+<h4 id="example">Example</h4>
+<p>Smoothing white noise with a five-point moving average:</p>
+<pre><code>bv = .2,.2,.2,.2,.2;
+process = noise : fir(bv);
+</code></pre>
+
+<p>Equivalent (note double parens):</p>
+<pre><code>process = noise : fir((.2,.2,.2,.2,.2));
+</code></pre>
+
+<hr />
+<h3 id="ficonv-and-ficonvn"><code>(fi.)conv</code> and <code>(fi.)convN</code></h3>
+<p>Convolution of input signal with given coefficients.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>_ : conv((k1,k2,k3,...,kN)) : _;  Argument = one signal bank
+_ : convN(N,(k1,k2,k3,...)) : _;  Useful when N &lt; count((k1,...))
+</code></pre>
+
+<hr />
+<h3 id="fitf1-fitf2-and-fitf3"><code>(fi.)tf1</code>, <code>(fi.)tf2</code> and <code>(fi.)tf3</code></h3>
+<p>tfN = N'th-order direct-form digital filter.</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>_ : tf1(b0,b1,a1) : _
+_ : tf2(b0,b1,b2,a1,a2) : _
+_ : tf3(b0,b1,b2,b3,a1,a2,a3) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>a</code>: the poles</li>
+<li><code>b</code>: the zeros</li>
+</ul>
+<h4 id="reference_9">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html">https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html</a></li>
+</ul>
+<hr />
+<h3 id="finotchw"><code>(fi.)notchw</code></h3>
+<p>Simple notch filter based on a biquad (<code>tf2</code>).
+<code>notchw</code> is a standard Faust function.</p>
+<h4 id="usage_15">Usage:</h4>
+<pre><code>_ : notchw(width,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>width</code>: "notch width" in Hz (approximate)</li>
+<li><code>freq</code>: "notch frequency" in Hz</li>
+</ul>
+<h4 id="reference_10">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Phasing_2nd_Order_Allpass_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Phasing_2nd_Order_Allpass_Filters.html</a></li>
+</ul>
+<h2 id="direct-form-second-order-biquad-sections">Direct-Form Second-Order Biquad Sections</h2>
+<hr />
+<h3 id="fitf21-fitf22-fitf22t-and-fitf21t"><code>(fi.)tf21</code>, <code>(fi.)tf22</code>, <code>(fi.)tf22t</code> and <code>(fi.)tf21t</code></h3>
+<p>tfN = N'th-order direct-form digital filter where:</p>
+<ul>
+<li><code>tf21</code> is tf2, direct-form 1</li>
+<li><code>tf22</code> is tf2, direct-form 2</li>
+<li><code>tf22t</code> is tf2, direct-form 2 transposed</li>
+<li><code>tf21t</code> is tf2, direct-form 1 transposed</li>
+</ul>
+<h4 id="usage_16">Usage</h4>
+<pre><code>_ : tf21(b0,b1,b2,a1,a2) : _
+_ : tf22(b0,b1,b2,a1,a2) : _
+_ : tf22t(b0,b1,b2,a1,a2) : _
+_ : tf21t(b0,b1,b2,a1,a2) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>a</code>: the poles</li>
+<li><code>b</code>: the zeros</li>
+</ul>
+<h4 id="reference_11">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html">https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html</a></li>
+</ul>
+<h2 id="ladderlattice-digital-filters">Ladder/Lattice Digital Filters</h2>
+<hr />
+<h3 id="fiav2sv"><code>(fi.)av2sv</code></h3>
+<p>Compute reflection coefficients sv from transfer-function denominator av.</p>
+<h4 id="usage_17">Usage</h4>
+<pre><code>sv = av2sv(av)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>av</code>: parallel signal bank <code>a1,...,aN</code></li>
+<li><code>sv</code>: parallel signal bank <code>s1,...,sN</code></li>
+</ul>
+<p>where <code>ro = ith</code> reflection coefficient, and
+      <code>ai</code> = coefficient of <code>z^(-i)</code> in the filter
+         transfer-function denominator <code>A(z)</code>.</p>
+<h4 id="reference_12">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html">https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html</a>
+  (where reflection coefficients are denoted by k rather than s).</li>
+</ul>
+<hr />
+<h3 id="fibvav2nuv"><code>(fi.)bvav2nuv</code></h3>
+<p>Compute lattice tap coefficients from transfer-function coefficients.</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>nuv = bvav2nuv(bv,av)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>av</code>: parallel signal bank <code>a1,...,aN</code></li>
+<li><code>bv</code>: parallel signal bank <code>b0,b1,...,aN</code></li>
+<li><code>nuv</code>: parallel signal bank  <code>nu1,...,nuN</code></li>
+</ul>
+<p>where <code>nui</code> is the i'th tap coefficient,
+      <code>bi</code> is the coefficient of <code>z^(-i)</code> in the filter numerator,
+      <code>ai</code> is the coefficient of <code>z^(-i)</code> in the filter denominator</p>
+<hr />
+<h3 id="fiiir_lat2"><code>(fi.)iir_lat2</code></h3>
+<p>Two-multiply latice IIR filter of arbitrary order.</p>
+<h4 id="usage_19">Usage</h4>
+<pre><code>_ : iir_lat2(bv,av) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li>bv: zeros as a bank of parallel signals</li>
+<li>av: poles as a bank of parallel signals</li>
+</ul>
+<hr />
+<h3 id="fiallpassnt"><code>(fi.)allpassnt</code></h3>
+<p>Two-multiply lattice allpass (nested order-1 direct-form-ii allpasses).</p>
+<h4 id="usage_20">Usage</h4>
+<pre><code>_ : allpassnt(n,sv) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the order of the filter</li>
+<li><code>sv</code>: the reflection coefficients (-1 1)</li>
+</ul>
+<hr />
+<h3 id="fiiir_kl"><code>(fi.)iir_kl</code></h3>
+<p>Kelly-Lochbaum ladder IIR filter of arbitrary order.</p>
+<h4 id="usage_21">Usage</h4>
+<pre><code>_ : iir_kl(bv,av) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li>bv: zeros as a bank of parallel signals</li>
+<li>av: poles as a bank of parallel signals</li>
+</ul>
+<hr />
+<h3 id="fiallpassnklt"><code>(fi.)allpassnklt</code></h3>
+<p>Kelly-Lochbaum ladder allpass.</p>
+<h4 id="usage_22">Usage:</h4>
+<pre><code>_ : allpassklt(n,sv) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the order of the filter</li>
+<li><code>sv</code>: the reflection coefficients (-1 1)</li>
+</ul>
+<hr />
+<h3 id="fiiir_lat1"><code>(fi.)iir_lat1</code></h3>
+<p>One-multiply latice IIR filter of arbitrary order.</p>
+<h4 id="usage_23">Usage</h4>
+<pre><code>_ : iir_lat1(bv,av) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li>bv: zeros as a bank of parallel signals</li>
+<li>av: poles as a bank of parallel signals</li>
+</ul>
+<hr />
+<h3 id="fiallpassn1mt"><code>(fi.)allpassn1mt</code></h3>
+<p>One-multiply lattice allpass with tap lines.</p>
+<h4 id="usage_24">Usage</h4>
+<pre><code>_ : allpassn1mt(n,sv) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the order of the filter</li>
+<li><code>sv</code>: the reflection coefficients (-1 1)</li>
+</ul>
+<hr />
+<h3 id="fiiir_nl"><code>(fi.)iir_nl</code></h3>
+<p>Normalized ladder filter of arbitrary order.</p>
+<h4 id="usage_25">Usage</h4>
+<pre><code>_ : iir_nl(bv,av) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li>bv: zeros as a bank of parallel signals</li>
+<li>av: poles as a bank of parallel signals</li>
+</ul>
+<h4 id="references_2">References</h4>
+<ul>
+<li>J. D. Markel and A. H. Gray, Linear Prediction of Speech, New York: Springer Verlag, 1976.</li>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
+</ul>
+<hr />
+<h3 id="fiallpassnnlt"><code>(fi.)allpassnnlt</code></h3>
+<p>Normalized ladder allpass filter of arbitrary order.</p>
+<h4 id="usage_26">Usage:</h4>
+<pre><code>_ : allpassnnlt(n,sv) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the order of the filter</li>
+<li><code>sv</code>: the reflection coefficients (-1,1)</li>
+</ul>
+<h4 id="references_3">References</h4>
+<ul>
+<li>J. D. Markel and A. H. Gray, Linear Prediction of Speech, New York: Springer Verlag, 1976.</li>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
+</ul>
+<h2 id="useful-special-cases">Useful Special Cases</h2>
+<hr />
+<h3 id="fitf2np"><code>(fi.)tf2np</code></h3>
+<p>Biquad based on a stable second-order Normalized Ladder Filter
+(more robust to modulation than <code>tf2</code> and protected against instability).</p>
+<h4 id="usage_27">Usage</h4>
+<pre><code>_ : tf2np(b0,b1,b2,a1,a2) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>a</code>: the poles</li>
+<li><code>b</code>: the zeros</li>
+</ul>
+<hr />
+<h3 id="fiwgr"><code>(fi.)wgr</code></h3>
+<p>Second-order transformer-normalized digital waveguide resonator.</p>
+<h4 id="usage_28">Usage</h4>
+<pre><code>_ : wgr(f,r) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>f</code>: resonance frequency (Hz)</li>
+<li><code>r</code>: loss factor for exponential decay (set to 1 to make a numerically stable oscillator)</li>
+</ul>
+<h4 id="references_4">References</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Power_Normalized_Waveguide_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Power_Normalized_Waveguide_Filters.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
+</ul>
+<hr />
+<h3 id="finlf2"><code>(fi.)nlf2</code></h3>
+<p>Second order normalized digital waveguide resonator.</p>
+<h4 id="usage_29">Usage</h4>
+<pre><code>_ : nlf2(f,r) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>f</code>: resonance frequency (Hz)</li>
+<li><code>r</code>: loss factor for exponential decay (set to 1 to make a sinusoidal oscillator)</li>
+</ul>
+<h4 id="reference_13">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Power_Normalized_Waveguide_Filters.html">https://ccrma.stanford.edu/~jos/pasp/Power_Normalized_Waveguide_Filters.html</a></li>
+</ul>
+<hr />
+<h3 id="fiapnl"><code>(fi.)apnl</code></h3>
+<p>Passive Nonlinear Allpass based on Pierce switching springs idea.
+Switch between allpass coefficient <code>a1</code> and <code>a2</code> at signal zero crossings.</p>
+<h4 id="usage_30">Usage</h4>
+<pre><code>_ : apnl(a1,a2) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>a1</code> and <code>a2</code>: allpass coefficients</li>
+</ul>
+<h4 id="reference_14">Reference</h4>
+<ul>
+<li>"A Passive Nonlinear Digital Filter Design ..." by John R. Pierce and Scott
+A. Van Duyne, JASA, vol. 101, no. 2, pp. 1120-1126, 1997</li>
+</ul>
+<h2 id="ladderlattice-allpass-filters">Ladder/Lattice Allpass Filters</h2>
+<hr />
+<h3 id="fiallpassn"><code>(fi.)allpassn</code></h3>
+<p>Two-multiply lattice - each section is two multiply-adds.</p>
+<h4 id="usage_31">Usage:</h4>
+<pre><code>_ : allpassn(n,sv) : _
+</code></pre>
+
+<h4 id="where">Where:</h4>
+<ul>
+<li><code>n</code>: the order of the filter</li>
+<li><code>sv</code>: the reflection coefficients (-1 1)</li>
+</ul>
+<h4 id="references_5">References</h4>
+<ul>
+<li>J. O. Smith and R. Michon, "Nonlinear Allpass Ladder Filters in FAUST", in
+Proceedings of the 14th International Conference on Digital Audio Effects
+(DAFx-11), Paris, France, September 19-23, 2011.</li>
+</ul>
+<hr />
+<h3 id="fiallpassnn"><code>(fi.)allpassnn</code></h3>
+<p>Normalized form - four multiplies and two adds per section,
+but coefficients can be time varying and nonlinear without
+"parametric amplification" (modulation of signal energy).</p>
+<h4 id="usage_32">Usage:</h4>
+<pre><code>_ : allpassnn(n,tv) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the order of the filter</li>
+<li><code>tv</code>: the reflection coefficients (-PI PI)</li>
+</ul>
+<hr />
+<h3 id="fiallpasskl"><code>(fi.)allpasskl</code></h3>
+<p>Kelly-Lochbaum form - four multiplies and two adds per
+section, but all signals have an immediate physical
+interpretation as traveling pressure waves, etc.</p>
+<h4 id="usage_33">Usage:</h4>
+<pre><code>_ : allpassnkl(n,sv) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the order of the filter</li>
+<li><code>sv</code>: the reflection coefficients (-1 1)</li>
+</ul>
+<hr />
+<h3 id="fiallpass1m"><code>(fi.)allpass1m</code></h3>
+<p>One-multiply form - one multiply and three adds per section.
+Normally the most efficient in special-purpose hardware.</p>
+<h4 id="usage_34">Usage:</h4>
+<pre><code>_ : allpassn1m(n,sv) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the order of the filter</li>
+<li><code>sv</code>: the reflection coefficients (-1 1)</li>
+</ul>
+<h2 id="digital-filter-sections-specified-as-analog-filter-sections">Digital Filter Sections Specified as Analog Filter Sections</h2>
+<hr />
+<h3 id="fitf2s-and-fitf2snp"><code>(fi.)tf2s</code> and <code>(fi.)tf2snp</code></h3>
+<p>Second-order direct-form digital filter,
+specified by ANALOG transfer-function polynomials B(s)/A(s),
+and a frequency-scaling parameter.  Digitization via the
+bilinear transform is built in.</p>
+<h4 id="usage_35">Usage</h4>
+<pre><code>_ : tf2s(b2,b1,b0,a1,a0,w1) : _
+</code></pre>
+
+<p>Where:</p>
+<pre><code>        b2 s^2 + b1 s + b0
+H(s) = --------------------
+           s^2 + a1 s + a0
+</code></pre>
+
+<p>and <code>w1</code> is the desired digital frequency (in radians/second)
+corresponding to analog frequency 1 rad/sec (i.e., <code>s = j</code>).</p>
+<h4 id="example_1">Example</h4>
+<p>A second-order ANALOG Butterworth lowpass filter,
+         normalized to have cutoff frequency at 1 rad/sec,
+         has transfer function</p>
+<pre><code>             1
+H(s) = -----------------
+        s^2 + a1 s + 1
+</code></pre>
+
+<p>where <code>a1 = sqrt(2)</code>.  Therefore, a DIGITAL Butterworth lowpass
+cutting off at <code>SR/4</code> is specified as <code>tf2s(0,0,1,sqrt(2),1,PI*SR/2);</code></p>
+<h4 id="method">Method</h4>
+<p>Bilinear transform scaled for exact mapping of w1.</p>
+<h4 id="reference_15">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html">https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html</a></li>
+</ul>
+<hr />
+<h3 id="fitf3slf"><code>(fi.)tf3slf</code></h3>
+<p>Analogous to tf2s above, but third order, and using the typical
+low-frequency-matching bilinear-transform constant 2/T ("lf" series)
+instead of the specific-frequency-matching value used in tf2s and tf1s.
+Note the lack of a "w1" argument.</p>
+<h4 id="usage_36">Usage</h4>
+<pre><code>_ : tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) : _
+</code></pre>
+
+<hr />
+<h3 id="fitf1s"><code>(fi.)tf1s</code></h3>
+<p>First-order direct-form digital filter,
+specified by ANALOG transfer-function polynomials B(s)/A(s),
+and a frequency-scaling parameter.</p>
+<h4 id="usage_37">Usage</h4>
+<pre><code>tf1s(b1,b0,a0,w1)
+</code></pre>
+
+<p>Where:</p>
+<pre><code>   b1 s + b0
+</code></pre>
+<p>H(s) = ----------
+          s + a0</p>
+<p>and <code>w1</code> is the desired digital frequency (in radians/second)
+corresponding to analog frequency 1 rad/sec (i.e., <code>s = j</code>).</p>
+<h4 id="example_2">Example</h4>
+<p>A first-order ANALOG Butterworth lowpass filter,
+         normalized to have cutoff frequency at 1 rad/sec,
+         has transfer function</p>
+<pre><code>      1
+</code></pre>
+<p>H(s) = -------
+        s + 1</p>
+<p>so <code>b0 = a0 = 1</code> and <code>b1 = 0</code>.  Therefore, a DIGITAL first-order
+Butterworth lowpass with gain -3dB at <code>SR/4</code> is specified as</p>
+<pre><code>tf1s(0,1,1,PI*SR/2);  digital half-band order 1 Butterworth
+</code></pre>
+
+<h4 id="method_1">Method</h4>
+<p>Bilinear transform scaled for exact mapping of w1.</p>
+<h4 id="reference_16">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html">https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html</a></li>
+</ul>
+<hr />
+<h3 id="fitf2sb"><code>(fi.)tf2sb</code></h3>
+<p>Bandpass mapping of <code>tf2s</code>: In addition to a frequency-scaling parameter
+<code>w1</code> (set to HALF the desired passband width in rad/sec),
+there is a desired center-frequency parameter wc (also in rad/s).
+Thus, <code>tf2sb</code> implements a fourth-order digital bandpass filter section
+specified by the coefficients of a second-order analog lowpass prototype
+section.  Such sections can be combined in series for higher orders.
+The order of mappings is (1) frequency scaling (to set lowpass cutoff w1),
+(2) bandpass mapping to wc, then (3) the bilinear transform, with the
+usual scale parameter <code>2*SR</code>.  Algebra carried out in maxima and pasted here.</p>
+<h4 id="usage_38">Usage</h4>
+<pre><code>_ : tf2sb(b2,b1,b0,a1,a0,w1,wc) : _
+</code></pre>
+
+<hr />
+<h3 id="fitf1sb"><code>(fi.)tf1sb</code></h3>
+<p>First-to-second-order lowpass-to-bandpass section mapping,
+analogous to tf2sb above.</p>
+<h4 id="usage_39">Usage</h4>
+<pre><code>_ : tf1sb(b1,b0,a0,w1,wc) : _
+</code></pre>
+
+<h2 id="simple-resonator-filters">Simple Resonator Filters</h2>
+<hr />
+<h3 id="firesonlp"><code>(fi.)resonlp</code></h3>
+<p>Simple resonant lowpass filter based on <code>tf2s</code> (virtual analog).
+<code>resonlp</code> is a standard Faust function.</p>
+<h4 id="usage_40">Usage</h4>
+<pre><code>_ : resonlp(fc,Q,gain) : _
+_ : resonhp(fc,Q,gain) : _
+_ : resonbp(fc,Q,gain) : _
+
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fc</code>: center frequency (Hz)</li>
+<li><code>Q</code>: q</li>
+<li><code>gain</code>: gain (0-1)</li>
+</ul>
+<hr />
+<h3 id="firesonhp"><code>(fi.)resonhp</code></h3>
+<p>Simple resonant highpass filters based on <code>tf2s</code> (virtual analog).
+<code>resonhp</code> is a standard Faust function.</p>
+<h4 id="usage_41">Usage</h4>
+<pre><code>_ : resonlp(fc,Q,gain) : _
+_ : resonhp(fc,Q,gain) : _
+_ : resonbp(fc,Q,gain) : _
+
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fc</code>: center frequency (Hz)</li>
+<li><code>Q</code>: q</li>
+<li><code>gain</code>: gain (0-1)</li>
+</ul>
+<hr />
+<h3 id="firesonbp"><code>(fi.)resonbp</code></h3>
+<p>Simple resonant bandpass filters based on <code>tf2s</code> (virtual analog).
+<code>resonbp</code> is a standard Faust function.</p>
+<h4 id="usage_42">Usage</h4>
+<pre><code>_ : resonlp(fc,Q,gain) : _
+_ : resonhp(fc,Q,gain) : _
+_ : resonbp(fc,Q,gain) : _
+
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fc</code>: center frequency (Hz)</li>
+<li><code>Q</code>: q</li>
+<li><code>gain</code>: gain (0-1)</li>
+</ul>
+<h2 id="butterworth-lowpasshighpass-filters">Butterworth Lowpass/Highpass Filters</h2>
+<hr />
+<h3 id="filowpass"><code>(fi.)lowpass</code></h3>
+<p>Nth-order Butterworth lowpass filter.
+<code>lowpass</code> is a standard Faust function.</p>
+<h4 id="usage_43">Usage</h4>
+<pre><code>_ : lowpass(N,fc) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>N</code>: filter order (number of poles) [nonnegative constant integer]</li>
+<li><code>fc</code>: desired cut-off frequency (-3dB frequency) in Hz</li>
+</ul>
+<h4 id="references_6">References</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html">https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html</a></li>
+<li><code>butter</code> function in Octave <code>("[z,p,g] = butter(N,1,'s');")</code></li>
+</ul>
+<hr />
+<h3 id="fihighpass"><code>(fi.)highpass</code></h3>
+<p>Nth-order Butterworth highpass filters.
+<code>highpass</code> is a standard Faust function.</p>
+<h4 id="usage_44">Usage</h4>
+<pre><code>_ : highpass(N,fc) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>N</code>: filter order (number of poles) [nonnegative constant integer]</li>
+<li><code>fc</code>: desired cut-off frequency (-3dB frequency) in Hz</li>
+</ul>
+<h4 id="references_7">References</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html">https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html</a></li>
+<li><code>butter</code> function in Octave <code>("[z,p,g] = butter(N,1,'s');")</code></li>
+</ul>
+<hr />
+<h3 id="filowpass0_highpass1"><code>(fi.)lowpass0_highpass1</code></h3>
+<h2 id="special-filter-bank-delay-equalizing-allpass-filters">Special Filter-Bank Delay-Equalizing Allpass Filters</h2>
+<p>These special allpass filters are needed by filterbank et al. below.
+They are equivalent to (<code>lowpass(N,fc)</code> +|- <code>highpass(N,fc))/2</code>, but with
+canceling pole-zero pairs removed (which occurs for odd N).</p>
+<hr />
+<h3 id="filowpass_plusminus_highpass"><code>(fi.)lowpass_plus</code>|<code>minus_highpass</code></h3>
+<p>Catch-all definitions for generality - even order is done:
+Catch-all definitions for generality - even order is done:
+FIXME: Rewrite the following, as for orders 3 and 5 above,
+       to eliminate pole-zero cancellations:
+FIXME: Rewrite the following, as for orders 3 and 5 above,
+       to eliminate pole-zero cancellations:</p>
+<h2 id="elliptic-cauer-lowpass-filters">Elliptic (Cauer) Lowpass Filters</h2>
+<p>Elliptic (Cauer) Lowpass Filters</p>
+<h4 id="references_8">References</h4>
+<p>&lt;http:en.wikipedia.org/wiki/Elliptic_filter
+* functions <code>ncauer</code> and <code>ellip</code> in Octave</p>
+<hr />
+<h3 id="filowpass3e"><code>(fi.)lowpass3e</code></h3>
+<p>Third-order Elliptic (Cauer) lowpass filter.</p>
+<h4 id="usage_45">Usage</h4>
+<pre><code>_ : lowpass3e(fc) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fc</code>: -3dB frequency in Hz</li>
+</ul>
+<h4 id="design">Design</h4>
+<p>For spectral band-slice level display (see <code>octave_analyzer3e</code>):</p>
+<pre><code>[z,p,g] = ncauer(Rp,Rs,3);  % analog zeros, poles, and gain, where
+Rp = 60  % dB ripple in stopband
+Rs = 0.2 % dB ripple in passband
+</code></pre>
+
+<hr />
+<h3 id="filowpass6e"><code>(fi.)lowpass6e</code></h3>
+<p>Sixth-order Elliptic/Cauer lowpass filter.</p>
+<h4 id="usage_46">Usage</h4>
+<pre><code>_ : lowpass6e(fc) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fc</code>: -3dB frequency in Hz</li>
+</ul>
+<h4 id="design_1">Design</h4>
+<p>For spectral band-slice level display (see octave_analyzer6e):</p>
+<pre><code>[z,p,g] = ncauer(Rp,Rs,6);  % analog zeros, poles, and gain, where
+ Rp = 80  % dB ripple in stopband
+ Rs = 0.2 % dB ripple in passband
+</code></pre>
+
+<h2 id="elliptic-highpass-filters">Elliptic Highpass Filters</h2>
+<hr />
+<h3 id="fihighpass3e"><code>(fi.)highpass3e</code></h3>
+<p>Third-order Elliptic (Cauer) highpass filter. Inversion of <code>lowpass3e</code> wrt unit
+circle in s plane (s &lt;- 1/s)</p>
+<h4 id="usage_47">Usage</h4>
+<pre><code>_ : highpass3e(fc) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fc</code>: -3dB frequency in Hz</li>
+</ul>
+<hr />
+<h3 id="fihighpass6e"><code>(fi.)highpass6e</code></h3>
+<p>Sixth-order Elliptic/Cauer highpass filter. Inversion of lowpass3e wrt unit
+circle in s plane (s &lt;- 1/s)</p>
+<h4 id="usage_48">Usage</h4>
+<pre><code>_ : highpass6e(fc) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fc</code>: -3dB frequency in Hz</li>
+</ul>
+<h2 id="butterworth-bandpassbandstop-filters">Butterworth Bandpass/Bandstop Filters</h2>
+<hr />
+<h3 id="fibandpass"><code>(fi.)bandpass</code></h3>
+<p>Order 2*Nh Butterworth bandpass filter made using the transformation
+<code>s &lt;- s + wc^2/s</code> on <code>lowpass(Nh)</code>, where <code>wc</code> is the desired bandpass center
+frequency.  The <code>lowpass(Nh)</code> cutoff <code>w1</code> is half the desired bandpass width.
+<code>bandpass</code> is a standard Faust function.</p>
+<h4 id="usage_49">Usage</h4>
+<pre><code>_ : bandpass(Nh,fl,fu) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>Nh</code>: HALF the desired bandpass order (which is therefore even)</li>
+<li><code>fl</code>: lower -3dB frequency in Hz</li>
+<li><code>fu</code>: upper -3dB frequency in Hz
+Thus, the passband width is <code>fu-fl</code>,
+      and its center frequency is <code>(fl+fu)/2</code>.</li>
+</ul>
+<h4 id="reference_17">Reference</h4>
+<ul>
+<li><a href="http://cnx.org/content/m16913/latest/">http://cnx.org/content/m16913/latest/</a></li>
+</ul>
+<hr />
+<h3 id="fibandstop"><code>(fi.)bandstop</code></h3>
+<p>Order 2*Nh Butterworth bandstop filter made using the transformation
+<code>s &lt;- s + wc^2/s</code> on <code>highpass(Nh)</code>, where <code>wc</code> is the desired bandpass center
+frequency.  The <code>highpass(Nh)</code> cutoff <code>w1</code> is half the desired bandpass width.
+<code>bandstop</code> is a standard Faust function.</p>
+<h4 id="usage_50">Usage</h4>
+<pre><code>_ : bandstop(Nh,fl,fu) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>Nh</code>: HALF the desired bandstop order (which is therefore even)</li>
+<li><code>fl</code>: lower -3dB frequency in Hz</li>
+<li><code>fu</code>: upper -3dB frequency in Hz
+Thus, the passband (stopband) width is <code>fu-fl</code>,
+      and its center frequency is <code>(fl+fu)/2</code>.</li>
+</ul>
+<h4 id="reference_18">Reference</h4>
+<ul>
+<li><a href="http://cnx.org/content/m16913/latest/">http://cnx.org/content/m16913/latest/</a></li>
+</ul>
+<h2 id="elliptic-bandpass-filters">Elliptic Bandpass Filters</h2>
+<hr />
+<h3 id="fibandpass6e"><code>(fi.)bandpass6e</code></h3>
+<p>Order 12 elliptic bandpass filter analogous to <code>bandpass(6)</code>.</p>
+<hr />
+<h3 id="fibandpass12e"><code>(fi.)bandpass12e</code></h3>
+<p>Order 24 elliptic bandpass filter analogous to <code>bandpass(6)</code>.</p>
+<hr />
+<h3 id="fipospass"><code>(fi.)pospass</code></h3>
+<p>Positive-Pass Filter (single-side-band filter)</p>
+<h4 id="usage_51">Usage</h4>
+<pre><code>_ : pospass(N,fc) : _,_
+</code></pre>
+
+<p>where</p>
+<ul>
+<li><code>N</code>: filter order (Butterworth bandpass for positive frequencies).</li>
+<li><code>fc</code>: lower bandpass cutoff frequency in Hz.</li>
+<li>Highpass cutoff frequency at ma.SR/2 - fc Hz.</li>
+</ul>
+<h4 id="example_3">Example</h4>
+<ul>
+<li>See dm.pospass_demo</li>
+<li>Look at frequency response:</li>
+</ul>
+<h4 id="method_2">Method</h4>
+<p>A filter passing only positive frequencies can be made from a
+half-band lowpass by modulating it up to the positive-frequency range.
+Equivalently, down-modulate the input signal using a complex sinusoid at -SR/4 Hz,
+lowpass it with a half-band filter, and modulate back up by SR/4 Hz.
+In Faust/math notation:
+pospass(N) = $\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})$</p>
+<p>An approximation to the Hilbert transform is given by the
+imaginary output signal:</p>
+<pre><code>hilbert(N) = pospass(N) : !,*(2);
+</code></pre>
+
+<h4 id="references_9">References</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/mdft/Analytic_Signals_Hilbert_Transform.html">https://ccrma.stanford.edu/~jos/mdft/Analytic_Signals_Hilbert_Transform.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/sasp/Comparison_Optimal_Chebyshev_FIR_I.html">https://ccrma.stanford.edu/~jos/sasp/Comparison_Optimal_Chebyshev_FIR_I.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html">https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html</a></li>
+</ul>
+<h2 id="parametric-equalizers-shelf-peaking">Parametric Equalizers (Shelf, Peaking)</h2>
+<hr />
+<h3 id="filow_shelf"><code>(fi.)low_shelf</code></h3>
+<p>First-order "low shelf" filter (gain boost|cut between dc and some frequency)
+<code>low_shelf</code> is a standard Faust function.</p>
+<h4 id="usage_52">Usage</h4>
+<pre><code>_ : lowshelf(N,L0,fx) : _
+_ : low_shelf(L0,fx) : _  default case (order 3)
+_ : lowshelf_other_freq(N,L0,fx) : _
+</code></pre>
+
+<p>Where:
+* <code>N</code>: filter order 1, 3, 5, ... (odd only). (default should be 3)
+* <code>L0</code>: desired level (dB) between dc and fx (boost <code>L0&gt;0</code> or cut <code>L0&lt;0</code>)
+* <code>fx</code>: -3dB frequency of lowpass band (<code>L0&gt;0</code>) or upper band (<code>L0&lt;0</code>)
+      (see "SHELF SHAPE" below).</p>
+<p>The gain at SR/2 is constrained to be 1.
+The generalization to arbitrary odd orders is based on the well known
+fact that odd-order Butterworth band-splits are allpass-complementary
+(see filterbank documentation below for references).</p>
+<h4 id="shelf-shape">Shelf Shape</h4>
+<p>The magnitude frequency response is approximately piecewise-linear
+on a log-log plot ("BODE PLOT").  The Bode "stick diagram" approximation
+L(lf) is easy to state in dB versus dB-frequency lf = dB(f):</p>
+<ul>
+<li>L0 &gt; 0:<ul>
+<li>L(lf) = L0, f between 0 and fx = 1st corner frequency;</li>
+<li>L(lf) = L0 - N * (lf - lfx), f between fx and f2 = 2nd corner frequency;</li>
+<li>L(lf) = 0, lf &gt; lf2.</li>
+<li>lf2 = lfx + L0/N = dB-frequency at which level gets back to 0 dB.</li>
+</ul>
+</li>
+<li>L0 &lt; 0:<ul>
+<li>L(lf) = L0, f between 0 and f1 = 1st corner frequency;</li>
+<li>L(lf) = - N * (lfx - lf), f between f1 and lfx = 2nd corner frequency;</li>
+<li>L(lf) = 0, lf &gt; lfx.</li>
+<li>lf1 = lfx + L0/N = dB-frequency at which level goes up from L0.</li>
+</ul>
+</li>
+</ul>
+<p>See <code>lowshelf_other_freq</code>.</p>
+<hr />
+<h3 id="fihigh_shelf"><code>(fi.)high_shelf</code></h3>
+<p>First-order "high shelf" filter (gain boost|cut above some frequency).
+<code>high_shelf</code> is a standard Faust function.</p>
+<h4 id="usage_53">Usage</h4>
+<pre><code>_ : highshelf(N,Lpi,fx) : _
+_ : high_shelf(L0,fx) : _  default case (order 3)
+_ : highshelf_other_freq(N,Lpi,fx) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>N</code>: filter order 1, 3, 5, ... (odd only).</li>
+<li><code>Lpi</code>: desired level (dB) between fx and SR/2 (boost Lpi&gt;0 or cut Lpi&lt;0)</li>
+<li><code>fx</code>: -3dB frequency of highpass band (L0&gt;0) or lower band (L0&lt;0)
+       (Use highshelf_other_freq() below to find the other one.)</li>
+</ul>
+<p>The gain at dc is constrained to be 1.
+See <code>lowshelf</code> documentation above for more details on shelf shape.</p>
+<hr />
+<h3 id="fipeak_eq"><code>(fi.)peak_eq</code></h3>
+<p>Second order "peaking equalizer" section (gain boost or cut near some frequency)
+Also called a "parametric equalizer" section.
+<code>peak_eq</code> is a standard Faust function.</p>
+<h4 id="usage_54">Usage</h4>
+<pre><code>_ : peak_eq(Lfx,fx,B) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>Lfx</code>: level (dB) at fx (boost Lfx&gt;0 or cut Lfx&lt;0)</li>
+<li><code>fx</code>: peak frequency (Hz)</li>
+<li><code>B</code>: bandwidth (B) of peak in Hz</li>
+</ul>
+<hr />
+<h3 id="fipeak_eq_cq"><code>(fi.)peak_eq_cq</code></h3>
+<p>Constant-Q second order peaking equalizer section.</p>
+<h4 id="usage_55">Usage</h4>
+<pre><code>_ : peak_eq_cq(Lfx,fx,Q) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>Lfx</code>: level (dB) at fx</li>
+<li><code>fx</code>: boost or cut frequency (Hz)</li>
+<li><code>Q</code>: "Quality factor" = fx/B where B = bandwidth of peak in Hz</li>
+</ul>
+<hr />
+<h3 id="fipeak_eq_rm"><code>(fi.)peak_eq_rm</code></h3>
+<p>Regalia-Mitra second order peaking equalizer section.</p>
+<h4 id="usage_56">Usage</h4>
+<pre><code>_ : peak_eq_rm(Lfx,fx,tanPiBT) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>Lfx</code>: level (dB) at fx</li>
+<li><code>fx</code>: boost or cut frequency (Hz)</li>
+<li><code>tanPiBT</code>: <code>tan(PI*B/SR)</code>, where B = -3dB bandwidth (Hz) when 10^(Lfx/20) = 0
+        ~ PI*B/SR for narrow bandwidths B</li>
+</ul>
+<h4 id="reference_19">Reference</h4>
+<p>P.A. Regalia, S.K. Mitra, and P.P. Vaidyanathan,
+"The Digital All-Pass Filter: A Versatile Signal Processing Building Block"
+Proceedings of the IEEE, 76(1):19-37, Jan. 1988.  (See pp. 29-30.)</p>
+<hr />
+<h3 id="fispectral_tilt"><code>(fi.)spectral_tilt</code></h3>
+<p>Spectral tilt filter, providing an arbitrary spectral rolloff factor
+alpha in (-1,1), where
+ -1 corresponds to one pole (-6 dB per octave), and
+ +1 corresponds to one zero (+6 dB per octave).
+In other words, alpha is the slope of the ln magnitude versus ln frequency.
+For a "pinking filter" (e.g., to generate 1/f noise from white noise),
+set alpha to -1/2.</p>
+<h4 id="usage_57">Usage</h4>
+<pre><code>_ : spectral_tilt(N,f0,bw,alpha) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>N</code>: desired integer filter order (fixed at compile time)</li>
+<li><code>f0</code>: lower frequency limit for desired roll-off band &gt; 0</li>
+<li><code>bw</code>: bandwidth of desired roll-off band</li>
+<li><code>alpha</code>: slope of roll-off desired in nepers per neper,
+        between -1 and 1 (ln mag / ln radian freq)</li>
+</ul>
+<h4 id="examples">Examples</h4>
+<p>See <code>spectral_tilt_demo</code>.</p>
+<h4 id="reference_20">Reference</h4>
+<p>J.O. Smith and H.F. Smith,
+"Closed Form Fractional Integration and Differentiation via Real Exponentially Spaced Pole-Zero Pairs",
+arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
+http:arxiv.org/abs/1606.06154</p>
+<hr />
+<h3 id="filevelfilter"><code>(fi.)levelfilter</code></h3>
+<p>Dynamic level lowpass filter.
+<code>levelfilter</code> is a standard Faust function.</p>
+<h4 id="usage_58">Usage</h4>
+<pre><code>_ : levelfilter(L,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>L</code>: desired level (in dB) at Nyquist limit (SR/2), e.g., -60</li>
+<li><code>freq</code>: corner frequency (-3dB point) usually set to fundamental freq</li>
+<li><code>N</code>: Number of filters in series where L = L/N</li>
+</ul>
+<h4 id="reference_21">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html">https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html</a></li>
+</ul>
+<hr />
+<h3 id="filevelfiltern"><code>(fi.)levelfilterN</code></h3>
+<p>Dynamic level lowpass filter.</p>
+<h4 id="usage_59">Usage</h4>
+<pre><code>_ : levelfilterN(N,freq,L) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>L</code>: desired level (in dB) at Nyquist limit (SR/2), e.g., -60</li>
+<li><code>freq</code>: corner frequency (-3dB point) usually set to fundamental freq</li>
+<li><code>N</code>: Number of filters in series where L = L/N</li>
+</ul>
+<h4 id="reference_22">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html">https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html</a></li>
+</ul>
+<h2 id="mth-octave-filter-banks">Mth-Octave Filter-Banks</h2>
+<hr />
+<h3 id="fimth_octave_filterbankn"><code>(fi.)mth_octave_filterbank[n]</code></h3>
+<p>Allpass-complementary filter banks based on Butterworth band-splitting.
+For Butterworth band-splits, the needed delay equalizer is easily found.</p>
+<h4 id="usage_60">Usage</h4>
+<pre><code>_ : mth_octave_filterbank(O,M,ftop,N) : par(i,N,_);  Oth-order
+_ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_);  dc-inverted version
+</code></pre>
+
+<p>Also for convenience:</p>
+<pre><code>_ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_);  3rd-order Butterworth
+_ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_);  5th-order Butterworth
+mth_octave_filterbank_default = mth_octave_filterbank5;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>O</code>: order of filter used to split each frequency band into two</li>
+<li><code>M</code>: number of band-slices per octave</li>
+<li><code>ftop</code>: highest band-split crossover frequency (e.g., 20 kHz)</li>
+<li><code>N</code>: total number of bands (including dc and Nyquist)</li>
+</ul>
+<h2 id="arbitrary-crossover-filter-banks-and-spectrum-analyzers">Arbitrary-Crossover Filter-Banks and Spectrum Analyzers</h2>
+<hr />
+<h3 id="fifilterbank"><code>(fi.)filterbank</code></h3>
+<p>Filter bank.
+<code>filterbank</code> is a standard Faust function.</p>
+<h4 id="usage_61">Usage</h4>
+<pre><code>_ : filterbank (O,freqs) : par(i,N,_);  Butterworth band-splits
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>O</code>: band-split filter order (ODD integer required for filterbank[i])</li>
+<li><code>freqs</code>: (fc1,fc2,...,fcNs) [in numerically ascending order], where
+          Ns=N-1 is the number of octave band-splits
+          (total number of bands N=Ns+1).</li>
+</ul>
+<p>If frequencies are listed explicitly as arguments, enclose them in parens:</p>
+<pre><code>_ : filterbank(3,(fc1,fc2)) : _,_,_
+</code></pre>
+
+<hr />
+<h3 id="fifilterbanki"><code>(fi.)filterbanki</code></h3>
+<p>Inverted-dc filter bank.</p>
+<h4 id="usage_62">Usage</h4>
+<pre><code>_ : filterbanki(O,freqs) : par(i,N,_);  Inverted-dc version
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>O</code>: band-split filter order (ODD integer required for <code>filterbank[i]</code>)</li>
+<li><code>freqs</code>: (fc1,fc2,...,fcNs) [in numerically ascending order], where
+          Ns=N-1 is the number of octave band-splits
+          (total number of bands N=Ns+1).</li>
+</ul>
+<p>If frequencies are listed explicitly as arguments, enclose them in parens:</p>
+<pre><code>_ : filterbanki(3,(fc1,fc2)) : _,_,_
+</code></pre></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

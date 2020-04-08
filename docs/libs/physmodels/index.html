@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> physmodels  - Faust Libraries</title>
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="../..">Faust Libraries</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../..">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../../using/"> Overview </a>
+</li>
+                                    
+<li >
+    <a href="../../standardFunctions/"> Standard Functions </a>
+</li>
+                                    
+<li >
+    <a href="../../primitives/"> Primitives </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../analyzers/"> analyzers </a>
+</li>
+                                    
+<li >
+    <a href="../basics/"> basics </a>
+</li>
+                                    
+<li >
+    <a href="../compressors/"> compressors </a>
+</li>
+                                    
+<li >
+    <a href="../delays/"> delays </a>
+</li>
+                                    
+<li >
+    <a href="../demos/"> demos </a>
+</li>
+                                    
+<li >
+    <a href="../dx7/"> dx7 </a>
+</li>
+                                    
+<li >
+    <a href="../envelopes/"> envelopes </a>
+</li>
+                                    
+<li >
+    <a href="../filters/"> filters </a>
+</li>
+                                    
+<li >
+    <a href="../hoa/"> hoa </a>
+</li>
+                                    
+<li >
+    <a href="../interpolators/"> interpolators </a>
+</li>
+                                    
+<li >
+    <a href="../maths/"> maths </a>
+</li>
+                                    
+<li >
+    <a href="../misceffects/"> misceffects </a>
+</li>
+                                    
+<li >
+    <a href="../oscillators/"> oscillators </a>
+</li>
+                                    
+<li >
+    <a href="../noises/"> noises </a>
+</li>
+                                    
+<li >
+    <a href="../phaflangers/"> phaflangers </a>
+</li>
+                                    
+<li class="active">
+    <a href="./"> physmodels </a>
+</li>
+                                    
+<li >
+    <a href="../reducemaps/"> reducemaps </a>
+</li>
+                                    
+<li >
+    <a href="../reverbs/"> reverbs </a>
+</li>
+                                    
+<li >
+    <a href="../routes/"> routes </a>
+</li>
+                                    
+<li >
+    <a href="../signals/"> signals </a>
+</li>
+                                    
+<li >
+    <a href="../soundfiles/"> soundfiles </a>
+</li>
+                                    
+<li >
+    <a href="../spats/"> spats </a>
+</li>
+                                    
+<li >
+    <a href="../synths/"> synths </a>
+</li>
+                                    
+<li >
+    <a href="../vaeffects/"> vaeffects </a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../phaflangers/">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="../reducemaps/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#physmodelslib">physmodels.lib</a></li>
+            <li><a href="#global-variables">Global Variables</a></li>
+            <li><a href="#conversion-tools">Conversion Tools</a></li>
+            <li><a href="#bidirectional-utilities">Bidirectional Utilities</a></li>
+            <li><a href="#basic-elements">Basic Elements</a></li>
+            <li><a href="#string-instruments">String Instruments</a></li>
+            <li><a href="#bowed-string-instruments">Bowed String Instruments</a></li>
+            <li><a href="#wind-instruments">Wind Instruments</a></li>
+            <li><a href="#exciters">Exciters</a></li>
+            <li><a href="#modal-percussions">Modal Percussions</a></li>
+            <li><a href="#vocal-synthesis">Vocal Synthesis</a></li>
+            <li><a href="#misc-functions">Misc Functions</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="physmodelslib">physmodels.lib</h1>
+<p>Faust physical modeling library; Its official prefix is <code>pm</code>.</p>
+<h2 id="global-variables">Global Variables</h2>
+<hr />
+<h3 id="pmspeedofsound"><code>(pm.)speedOfSound</code></h3>
+<p>Speed of sound in meters per second (340m/s).</p>
+<hr />
+<h3 id="pmmaxlength"><code>(pm.)maxLength</code></h3>
+<p>The default maximum length (3) in meters of strings and tubes used in this
+library. This variable should be overriden to allow longer strings or tubes.</p>
+<h2 id="conversion-tools">Conversion Tools</h2>
+<hr />
+<h3 id="pmf2l"><code>(pm.)f2l</code></h3>
+<p>Frequency to length in meters.</p>
+<h4 id="usage">Usage</h4>
+<pre><code>f2l(freq) : distanceInMeters
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the frequency</li>
+</ul>
+<hr />
+<h3 id="pml2f"><code>(pm.)l2f</code></h3>
+<p>Length in meters to frequency.</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>l2f(length) : freq
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: length/distance in meters</li>
+</ul>
+<hr />
+<h3 id="pml2s"><code>(pm.)l2s</code></h3>
+<p>Length in meters to number of samples.</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>l2s(l) : numberOfSamples
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>l</code>: length in meters</li>
+</ul>
+<h2 id="bidirectional-utilities">Bidirectional Utilities</h2>
+<hr />
+<h3 id="pmbasicblock"><code>(pm.)basicBlock</code></h3>
+<p>Empty bidirectional block to be used with <a href="#chain"><code>chain</code></a>: 3 signals ins
+and 3 signals out.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>chain(basicBlock : basicBlock : etc.)
+</code></pre>
+
+<hr />
+<h3 id="pmchain"><code>(pm.)chain</code></h3>
+<p>Creates a chain of bidirectional blocks.
+Blocks must have 3 inputs and outputs. The first input/output carry left
+going waves, the second input/output carry right going waves, and the third
+input/output is used to carry any potential output signal to the end of the
+algorithm. The implied one sample delay created by the <code>~</code> operator is
+generalized to the left and right going waves. Thus, <code>n</code> blocks in <code>chain()</code>
+will add an <code>n</code> samples delay to both left and right going waves.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>leftGoingWaves,rightGoingWaves,mixedOutput : chain( A : B ) : leftGoingWaves,rightGoingWaves,mixedOutput
+with{
+        A = _,_,_;
+};
+</code></pre>
+
+<hr />
+<h3 id="pminleftwave"><code>(pm.)inLeftWave</code></h3>
+<p>Adds a signal to left going waves anywhere in a <a href="#chain"><code>chain</code></a> of blocks.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>model(x) = chain(A : inLeftWave(x) : B)
+</code></pre>
+
+<p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to left
+going waves in that chain.</p>
+<hr />
+<h3 id="pminrightwave"><code>(pm.)inRightWave</code></h3>
+<p>Adds a signal to right going waves anywhere in a <a href="#chain"><code>chain</code></a> of blocks.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>model(x) = chain(A : inRightWave(x) : B)
+</code></pre>
+
+<p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to right
+going waves in that chain.</p>
+<hr />
+<h3 id="pmin"><code>(pm.)in</code></h3>
+<p>Adds a signal to left and right going waves anywhere in a <a href="#chain"><code>chain</code></a>
+of blocks.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>model(x) = chain(A : in(x) : B)
+</code></pre>
+
+<p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to
+left and right going waves in that chain.</p>
+<hr />
+<h3 id="pmoutleftwave"><code>(pm.)outLeftWave</code></h3>
+<p>Sends the signal of left going waves to the output channel of the <a href="#chain"><code>chain</code></a>.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>chain(A : outLeftWave : B)
+</code></pre>
+
+<p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
+<hr />
+<h3 id="pmoutrightwave"><code>(pm.)outRightWave</code></h3>
+<p>Sends the signal of right going waves to the output channel of the <a href="#chain"><code>chain</code></a>.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>chain(A : outRightWave : B)
+</code></pre>
+
+<p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
+<hr />
+<h3 id="pmout"><code>(pm.)out</code></h3>
+<p>Sends the signal of right and left going waves to the output channel of the
+<a href="#chain"><code>chain</code></a>.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>chain(A : out : B)
+</code></pre>
+
+<p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
+<hr />
+<h3 id="pmterminations"><code>(pm.)terminations</code></h3>
+<p>Creates terminations on both sides of a <a href="#chain"><code>chain</code></a> without closing
+the inputs and outputs of the bidirectional signals chain. As for
+<a href="#chain"><code>chain</code></a>, this function adds a 1 sample delay to the bidirectional
+signal, both ways. Of courses, this function can be nested within a
+<a href="#chain"><code>chain</code></a>.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>terminations(a,b,c)
+with{
+};
+</code></pre>
+
+<hr />
+<h3 id="pmltermination"><code>(pm.)lTermination</code></h3>
+<p>Creates a termination on the left side of a <a href="#chain"><code>chain</code></a> without
+closing the inputs and outputs of the bidirectional signals chain. This
+function adds a 1 sample delay near the termination and can be nested
+within another <a href="#chain"><code>chain</code></a>.</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>lTerminations(a,b)
+with{
+};
+</code></pre>
+
+<hr />
+<h3 id="pmrtermination"><code>(pm.)rTermination</code></h3>
+<p>Creates a termination on the right side of a <a href="#chain"><code>chain</code></a> without
+closing the inputs and outputs of the bidirectional signals chain. This
+function adds a 1 sample delay near the termination and can be nested
+within another <a href="#chain"><code>chain</code></a>.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>rTerminations(b,c)
+with{
+};
+</code></pre>
+
+<hr />
+<h3 id="pmcloseins"><code>(pm.)closeIns</code></h3>
+<p>Closes the inputs of a bidirectional chain in all directions.</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>closeIns : chain(...) :     _,_,_
+</code></pre>
+
+<hr />
+<h3 id="pmcloseouts"><code>(pm.)closeOuts</code></h3>
+<p>Closes the outputs of a bidirectional chain in all directions except for the
+main signal output (3d output).</p>
+<h4 id="usage_15">Usage</h4>
+<pre><code>_,_,_ : chain(...) : _
+</code></pre>
+
+<hr />
+<h3 id="pmendchain"><code>(pm.)endChain</code></h3>
+<p>Closes the inputs and outputs of a bidirectional chain in all directions
+except for the main signal output (3d output).</p>
+<h4 id="usage_16">Usage</h4>
+<pre><code>endChain(chain(...)) : _
+</code></pre>
+
+<h2 id="basic-elements">Basic Elements</h2>
+<hr />
+<h3 id="pmwaveguiden"><code>(pm.)waveguideN</code></h3>
+<p>A series of waveguide functions based on various types of delays (see
+<a href="#fdelayn"><code>fdelay[n]</code></a>).</p>
+<h4 id="list-of-functions">List of functions</h4>
+<ul>
+<li><code>waveguideUd</code>: unit delay waveguide</li>
+<li><code>waveguideFd</code>: fractional delay waveguide</li>
+<li><code>waveguideFd2</code>: second order fractional delay waveguide</li>
+<li><code>waveguideFd4</code>: fourth order fractional delay waveguide</li>
+</ul>
+<h4 id="usage_17">Usage</h4>
+<pre><code>chain(A : waveguideUd(nMax,n) : B)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>nMax</code>: the maximum length of the delays in the waveguide</li>
+<li><code>n</code>: the length of the delay lines in samples.</li>
+</ul>
+<hr />
+<h3 id="pmwaveguide"><code>(pm.)waveguide</code></h3>
+<p>Standard <code>pm.lib</code> waveguide (based on <a href="#waveguiden"><code>waveguideFd4</code></a>).</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>chain(A : waveguide(nMax,n) : B)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>nMax</code>: the maximum length of the delays in the waveguide</li>
+<li><code>n</code>: the length of the delay lines in samples.</li>
+</ul>
+<hr />
+<h3 id="pmbridgefilter"><code>(pm.)bridgeFilter</code></h3>
+<p>Generic two zeros bridge FIR filter (as implemented in the
+<a href="https:ccrma.stanford.edu/software/stk/">STK</a>) that can be used to
+implement the reflectance violin, guitar, etc. bridges.</p>
+<h4 id="usage_19">Usage</h4>
+<pre><code>_ : bridge(brightness,absorption) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>brightness</code>: controls the damping of high frequencies (0-1)</li>
+<li><code>absorption</code>: controls the absorption of the brige and thus the t60 of
+the string plugged to it (0-1) (1 = 20 seconds)</li>
+</ul>
+<hr />
+<h3 id="pmmodefilter"><code>(pm.)modeFilter</code></h3>
+<p>Resonant bandpass filter that can be used to implement a single resonance
+(mode).</p>
+<h4 id="usage_20">Usage</h4>
+<pre><code>_ : modeFilter(freq,t60,gain) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: mode frequency</li>
+<li><code>t60</code>: mode resonance duration (in seconds)</li>
+<li><code>gain</code>: mode gain (0-1)</li>
+</ul>
+<h2 id="string-instruments">String Instruments</h2>
+<hr />
+<h3 id="pmstringsegment"><code>(pm.)stringSegment</code></h3>
+<p>A string segment without terminations (just a simple waveguide).</p>
+<h4 id="usage_21">Usage</h4>
+<pre><code>chain(A : stringSegment(maxLength,length) : B)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxLength</code>: the maximum length of the string in meters (should be static)</li>
+<li><code>length</code>: the length of the string in meters</li>
+</ul>
+<hr />
+<h3 id="pmopenstring"><code>(pm.)openString</code></h3>
+<p>A bidirectional block implementing a basic "generic" string with a
+selectable excitation position. Lowpass filters are built-in and
+allow to simulate the effect of dispersion on the sound and thus
+to change the "stiffness" of the string.</p>
+<h4 id="usage_22">Usage</h4>
+<pre><code>chain(... : openString(length,stiffness,pluckPosition,excitation) : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>stiffness</code>: the stiffness of the string (0-1) (1 for max stiffness)</li>
+<li><code>pluckPosition</code>: excitation position (0-1) (1 is bottom)</li>
+<li><code>excitation</code>: the excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmnylonstring"><code>(pm.)nylonString</code></h3>
+<p>A bidirectional block implementing a basic nylon string with selectable
+excitation position. This element is based on <a href="#openstring"><code>openString</code></a>
+and has a fix stiffness corresponding to that of a nylon string.</p>
+<h4 id="usage_23">Usage</h4>
+<pre><code>chain(... : nylonString(length,pluckPosition,excitation) : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: excitation position (0-1) (1 is bottom)</li>
+<li><code>excitation</code>: the excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmsteelstring"><code>(pm.)steelString</code></h3>
+<p>A bidirectional block implementing a basic steel string with selectable
+excitation position. This element is based on <a href="#openstring"><code>openString</code></a>
+and has a fix stiffness corresponding to that of a steel string.</p>
+<h4 id="usage_24">Usage</h4>
+<pre><code>chain(... : steelString(length,pluckPosition,excitation) : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: excitation position (0-1) (1 is bottom)</li>
+<li><code>excitation</code>: the excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmopenstringpick"><code>(pm.)openStringPick</code></h3>
+<p>A bidirectional block implementing a "generic" string with selectable
+excitation position. It also has a built-in pickup whose position is the
+same as the excitation position. Thus, moving the excitation position
+will also move the pickup.</p>
+<h4 id="usage_25">Usage</h4>
+<pre><code>chain(... : openStringPick(length,stiffness,pluckPosition,excitation) : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>stiffness</code>: the stiffness of the string (0-1) (1 for max stiffness)</li>
+<li><code>pluckPosition</code>: excitation position (0-1) (1 is bottom)</li>
+<li><code>excitation</code>: the excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmopenstringpickup"><code>(pm.)openStringPickUp</code></h3>
+<p>A bidirectional block implementing a "generic" string with selectable
+excitation position and stiffness. It also has a built-in pickup whose
+position can be independenly selected. The only constraint is that the
+pickup has to be placed after the excitation position.</p>
+<h4 id="usage_26">Usage</h4>
+<pre><code>chain(... : openStringPickUp(length,stiffness,pluckPosition,excitation) : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>stiffness</code>: the stiffness of the string (0-1) (1 for max stiffness)</li>
+<li><code>pluckPosition</code>: pluck position between the top of the string and the
+pickup (0-1) (1 for same as pickup position)</li>
+<li><code>pickupPosition</code>: position of the pickup on the string (0-1) (1 is bottom)</li>
+<li><code>excitation</code>: the excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmopenstringpickdown"><code>(pm.)openStringPickDown</code></h3>
+<p>A bidirectional block implementing a "generic" string with selectable
+excitation position and stiffness. It also has a built-in pickup whose
+position can be independenly selected. The only constraint is that the
+pickup has to be placed before the excitation position.</p>
+<h4 id="usage_27">Usage</h4>
+<pre><code>chain(... : openStringPickDown(length,stiffness,pluckPosition,excitation) : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>stiffness</code>: the stiffness of the string (0-1) (1 for max stiffness)</li>
+<li><code>pluckPosition</code>: pluck position on the string (0-1) (1 is bottom)</li>
+<li><code>pickupPosition</code>: position of the pickup between the top of the string
+and the excitation position (0-1) (1 is excitation position)</li>
+<li><code>excitation</code>: the excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmksreflexionfilter"><code>(pm.)ksReflexionFilter</code></h3>
+<p>The "typical" one-zero Karplus-strong feedforward reflexion filter. This
+filter will be typically used in a termination (see below).</p>
+<h4 id="usage_28">Usage</h4>
+<pre><code>terminations(_,chain(...),ksReflexionFilter)
+</code></pre>
+
+<hr />
+<h3 id="pmrstringrigidtermination"><code>(pm.)rStringRigidTermination</code></h3>
+<p>Bidirectional block implementing a right rigid string termination (no damping,
+just phase inversion).</p>
+<h4 id="usage_29">Usage</h4>
+<pre><code>chain(rStringRigidTermination : stringSegment : ...)
+</code></pre>
+
+<hr />
+<h3 id="pmlstringrigidtermination"><code>(pm.)lStringRigidTermination</code></h3>
+<p>Bidirectional block implementing a left rigid string termination (no damping,
+just phase inversion).</p>
+<h4 id="usage_30">Usage</h4>
+<pre><code>chain(... : stringSegment : lStringRigidTermination)
+</code></pre>
+
+<hr />
+<h3 id="pmelecguitarbridge"><code>(pm.)elecGuitarBridge</code></h3>
+<p>Bidirectional block implementing a simple electric guitar bridge. This
+block is based on <a href="#bridgeFilter"><code>bridgeFilter</code></a>. The bridge doesn't
+implement transmittance since it is not meant to be connected to a
+body (unlike acoustic guitar). It also partially sets the resonance
+duration of the string with the nuts used on the other side.</p>
+<h4 id="usage_31">Usage</h4>
+<pre><code>chain(... : stringSegment : elecGuitarBridge)
+</code></pre>
+
+<hr />
+<h3 id="pmelecguitarnuts"><code>(pm.)elecGuitarNuts</code></h3>
+<p>Bidirectional block implementing a simple electric guitar nuts. This
+block is based on <a href="#bridgeFilter"><code>bridgeFilter</code></a> and does essentially
+the same thing as <a href="#elecguitarbridge"><code>elecGuitarBridge</code></a>, but on the
+other side of the chain. It also partially sets the resonance duration of
+the string with the bridge used on the other side.</p>
+<h4 id="usage_32">Usage</h4>
+<pre><code>chain(elecGuitarNuts : stringSegment : ...)
+</code></pre>
+
+<hr />
+<h3 id="pmguitarbridge"><code>(pm.)guitarBridge</code></h3>
+<p>Bidirectional block implementing a simple acoustic guitar bridge. This
+bridge damps more hight frequencies than
+<a href="#elecguitarbridge"><code>elecGuitarBridge</code></a> and implements a transmittance
+filter. It also partially sets the resonance duration of the string with
+the nuts used on the other side.</p>
+<h4 id="usage_33">Usage</h4>
+<pre><code>chain(... : stringSegment : guitarBridge)
+</code></pre>
+
+<hr />
+<h3 id="pmguitarnuts"><code>(pm.)guitarNuts</code></h3>
+<p>Bidirectional block implementing a simple acoustic guitar nuts. This
+nuts damps more hight frequencies than
+<a href="#elecguitarnuts"><code>elecGuitarNuts</code></a> and implements a transmittance
+filter. It also partially sets the resonance duration of the string with
+the bridge used on the other side.</p>
+<h4 id="usage_34">Usage</h4>
+<pre><code>chain(guitarNuts : stringSegment : ...)
+</code></pre>
+
+<hr />
+<h3 id="pmidealstring"><code>(pm.)idealString</code></h3>
+<p>An "ideal" string with rigid terminations and where the plucking position
+and the pick-up position are the same. Since terminations are rigid, this
+string will ring forever.</p>
+<h4 id="usage_35">Usage</h4>
+<pre><code>1-1' : idealString(length,reflexion,xPosition,excitation)
+</code></pre>
+
+<p>With:
+* <code>length</code>: the length of the string in meters
+* <code>pluckPosition</code>: the plucking position (0.001-0.999)
+* <code>excitation</code>: the input signal for the excitation.</p>
+<hr />
+<h3 id="pmks"><code>(pm.)ks</code></h3>
+<p>A Karplus-Strong string (in that case, the string is implemented as a
+one dimension waveguide).</p>
+<h4 id="usage_36">Usage</h4>
+<pre><code>ks(length,damping,excitation) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>damping</code>: string damping (0-1)</li>
+<li><code>excitation</code>: excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmks_ui_midi"><code>(pm.)ks_ui_MIDI</code></h3>
+<p>Ready-to-use, MIDI-enabled Karplus-Strong string with buil-in UI.</p>
+<h4 id="usage_37">Usage</h4>
+<pre><code>ks_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmelecguitarmodel"><code>(pm.)elecGuitarModel</code></h3>
+<p>A simple electric guitar model (without audio effects, of course) with
+selectable pluck position.
+This model implements a single string. Additional strings should be created
+by making a polyphonic applications out of this function. Pitch is changed by
+changing the length of the string and not through a finger model.</p>
+<h4 id="usage_38">Usage</h4>
+<pre><code>elecGuitarModel(length,pluckPosition,mute,excitation) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
+<li><code>mute</code>: mute coefficient (1 for no mute and 0 for instant mute)</li>
+<li><code>excitation</code>: excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmelecguitar"><code>(pm.)elecGuitar</code></h3>
+<p>A simple electric guitar model with steel strings (based on
+<a href="#elecguitarmodel"><code>elecGuitarModel</code></a>) implementing an excitation
+model.
+This model implements a single string. Additional strings should be created
+by making a polyphonic applications out of this function.</p>
+<h4 id="usage_39">Usage</h4>
+<pre><code>elecGuitar(length,pluckPosition,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
+<li><code>mute</code>: mute coefficient (1 for no mute and 0 for instant mute)</li>
+<li><code>gain</code>: gain of the pluck (0-1)</li>
+<li><code>trigger</code>: trigger signal (1 for on, 0 for off)</li>
+</ul>
+<hr />
+<h3 id="pmelecguitar_ui_midi"><code>(pm.)elecGuitar_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-enabled electric guitar physical model with built-in UI.</p>
+<h4 id="usage_40">Usage</h4>
+<pre><code>elecGuitar_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmguitarbody"><code>(pm.)guitarBody</code></h3>
+<p>WARNING: not implemented yet!
+Bidirectional block implementing a simple acoustic guitar body.</p>
+<h4 id="usage_41">Usage</h4>
+<pre><code>chain(... : guitarBody)
+</code></pre>
+
+<hr />
+<h3 id="pmguitarmodel"><code>(pm.)guitarModel</code></h3>
+<p>A simple acoustic guitar model with steel strings and selectable excitation
+position. This model implements a single string. Additional strings should be created
+by making a polyphonic applications out of this function. Pitch is changed by
+changing the length of the string and not through a finger model.
+WARNING: this function doesn't currently implement a body (just strings and
+bridge).</p>
+<h4 id="usage_42">Usage</h4>
+<pre><code>guitarModel(length,pluckPosition,excitation) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
+<li><code>excitation</code>: excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmguitar"><code>(pm.)guitar</code></h3>
+<p>A simple acoustic guitar model with steel strings (based on
+<a href="#guitarmodel"><code>guitarModel</code></a>) implementing an excitation model.
+This model implements a single string. Additional strings should be created
+by making a polyphonic applications out of this function.</p>
+<h4 id="usage_43">Usage</h4>
+<pre><code>guitar(length,pluckPosition,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
+<li><code>gain</code>: gain of the excitation</li>
+<li><code>trigger</code>: trigger signal (1 for on, 0 for off)</li>
+</ul>
+<hr />
+<h3 id="pmguitar_ui_midi"><code>(pm.)guitar_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-enabled steel strings acoustic guitar physical model with
+built-in UI.</p>
+<h4 id="usage_44">Usage</h4>
+<pre><code>guitar_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmnylonguitarmodel"><code>(pm.)nylonGuitarModel</code></h3>
+<p>A simple acoustic guitar model with nylon strings and selectable excitation
+position. This model implements a single string. Additional strings should be created
+by making a polyphonic applications out of this function. Pitch is changed by
+changing the length of the string and not through a finger model.
+WARNING: this function doesn't currently implement a body (just strings and
+bridge).</p>
+<h4 id="usage_45">Usage</h4>
+<pre><code>nylonGuitarModel(length,pluckPosition,excitation) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
+<li><code>excitation</code>: excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmnylonguitar"><code>(pm.)nylonGuitar</code></h3>
+<p>A simple acoustic guitar model with steel strings (based on
+<a href="#nylonguitarmodel"><code>nylonGuitarModel</code></a>) implementing an excitation model.
+This model implements a single string. Additional strings should be created
+by making a polyphonic applications out of this function.</p>
+<h4 id="usage_46">Usage</h4>
+<pre><code>nylonGuitar(length,pluckPosition,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
+<li><code>gain</code>: gain of the excitation (0-1)</li>
+<li><code>trigger</code>: trigger signal (1 for on, 0 for off)</li>
+</ul>
+<hr />
+<h3 id="pmnylonguitar_ui_midi"><code>(pm.)nylonGuitar_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-enabled nylon strings acoustic guitar physical model with
+built-in UI.</p>
+<h4 id="usage_47">Usage</h4>
+<pre><code>nylonGuitar_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmmodeinterpres"><code>(pm.)modeInterpRes</code></h3>
+<p>Modular string instrument resonator based on IR measurements made on 3D 
+printed models. The 2D space allowing for the control of the shape and the
+scale of the model is enabled by interpolating between modes parameters.
+More information about this technique/project can be found here: 
+* <a href="https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/">https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/</a>.</p>
+<h4 id="usage_48">Usage</h4>
+<pre><code>_ : modeInterpRes(nModes,x,y) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>nModes</code>: number of modeled modes (40 max)</li>
+<li><code>x</code>: shape of the resonator (0: square, 1: square with rounded corners, 2: round)</li>
+<li><code>y</code>: scale of the resonator (0: small, 1: medium, 2: large)</li>
+</ul>
+<hr />
+<h3 id="pmmodularinterpbody"><code>(pm.)modularInterpBody</code></h3>
+<p>Bidirectional block implementing a modular string instrument resonator 
+(see <a href="#pm.modeinterpres"><code>modeInterpRes</code></a>).</p>
+<h4 id="usage_49">Usage</h4>
+<pre><code>chain(... : modularInterpBody(nModes,shape,scale) : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>nModes</code>: number of modeled modes (40 max)</li>
+<li><code>shape</code>: shape of the resonator (0: square, 1: square with rounded corners, 2: round)</li>
+<li><code>scale</code>: scale of the resonator (0: small, 1: medium, 2: large)</li>
+</ul>
+<hr />
+<h3 id="pmmodularinterpstringmodel"><code>(pm.)modularInterpStringModel</code></h3>
+<p>String instrument model with a modular body (see 
+<a href="#pm.modeinterpres"><code>modeInterpRes</code></a> and 
+* <a href="https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/">https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/</a>).</p>
+<h4 id="usage_50">Usage</h4>
+<pre><code>modularInterpStringModel(length,pluckPosition,shape,scale,bodyExcitation,stringExcitation) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>stringLength</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
+<li><code>shape</code>: shape of the resonator (0: square, 1: square with rounded corners, 2: round)</li>
+<li><code>scale</code>: scale of the resonator (0: small, 1: medium, 2: large)</li>
+<li><code>bodyExcitation</code>: excitation signal for the body</li>
+<li><code>stringExcitation</code>: excitation signal for the string</li>
+</ul>
+<hr />
+<h3 id="pmmodularinterpinstr"><code>(pm.)modularInterpInstr</code></h3>
+<p>String instrument with a modular body (see 
+<a href="#pm.modeinterpres"><code>modeInterpRes</code></a> and 
+* <a href="https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/">https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/</a>).</p>
+<h4 id="usage_51">Usage</h4>
+<pre><code>modularInterpInstr(stringLength,pluckPosition,shape,scale,gain,tapBody,triggerString) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>stringLength</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
+<li><code>shape</code>: shape of the resonator (0: square, 1: square with rounded corners, 2: round)</li>
+<li><code>scale</code>: scale of the resonator (0: small, 1: medium, 2: large)</li>
+<li><code>gain</code>: of the string excitation</li>
+<li><code>tapBody</code>: send an impulse in the body of the instrument where the string is connected (1 for on, 0 for off)</li>
+<li><code>triggerString</code>: trigger signal for the string (1 for on, 0 for off)</li>
+</ul>
+<hr />
+<h3 id="pmmodularinterpinstr_ui_midi"><code>(pm.)modularInterpInstr_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-enabled string instrument with a modular body (see 
+<a href="#pm.modeinterpres"><code>modeInterpRes</code></a> and 
+* <a href="https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/">https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/</a>)
+with built-in UI.</p>
+<h4 id="usage_52">Usage</h4>
+<pre><code>modularInterpInstr_ui_MIDI : _
+</code></pre>
+
+<h2 id="bowed-string-instruments">Bowed String Instruments</h2>
+<hr />
+<h3 id="pmbowtable"><code>(pm.)bowTable</code></h3>
+<p>Extremely basic bow table that can be used to implement a wide range of
+bow types for many different bowed string instruments (violin, cello, etc.).</p>
+<h4 id="usage_53">Usage</h4>
+<pre><code>excitation : bowTable(offeset,slope) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: an excitation signal</li>
+<li><code>offset</code>: table offset</li>
+<li><code>slope</code>: table slope</li>
+</ul>
+<hr />
+<h3 id="pmviolinbowtable"><code>(pm.)violinBowTable</code></h3>
+<p>Violin bow table based on <a href="#bowtable"><code>bowTable</code></a>.</p>
+<h4 id="usage_54">Usage</h4>
+<pre><code>bowVelocity : violinBowTable(bowPressure) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>bowVelocity</code>: velocity of the bow/excitation signal (0-1)</li>
+<li><code>bowPressure</code>: bow pressure on the string (0-1)</li>
+</ul>
+<hr />
+<h3 id="pmbowinteraction"><code>(pm.)bowInteraction</code></h3>
+<p>Bidirectional block implementing the interaction of a bow in a
+<a href="#chain"><code>chain</code></a>.</p>
+<h4 id="usage_55">Usage</h4>
+<pre><code>chain(... : stringSegment : bowInteraction(bowTable) : stringSegment : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>bowTable</code>: the bow table</li>
+</ul>
+<hr />
+<h3 id="pmviolinbow"><code>(pm.)violinBow</code></h3>
+<p>Bidirectional block implementing a violin bow and its interaction with
+a string.</p>
+<h4 id="usage_56">Usage</h4>
+<pre><code>chain(... : stringSegment : violinBow(bowPressure,bowVelocity) : stringSegment : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>bowVelocity</code>: velocity of the bow / excitation signal (0-1)</li>
+<li><code>bowPressure</code>: bow pressure on the string (0-1)</li>
+</ul>
+<hr />
+<h3 id="pmviolinbowedstring"><code>(pm.)violinBowedString</code></h3>
+<p>Violin bowed string bidirectional block with controllable bow position.
+Terminations are not implemented in this model.</p>
+<h4 id="usage_57">Usage</h4>
+<pre><code>chain(nuts : violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) : bridge)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>stringLength</code>: the length of the string in meters</li>
+<li><code>bowVelocity</code>: velocity of the bow / excitation signal (0-1)</li>
+<li><code>bowPressure</code>: bow pressure on the string (0-1)</li>
+<li><code>bowPosition</code>: the position of the bow on the string (0-1)</li>
+</ul>
+<hr />
+<h3 id="pmviolinnuts"><code>(pm.)violinNuts</code></h3>
+<p>Bidirectional block implementing simple violin nuts. This function is
+based on <a href="#bridgefilter"><code>bridgeFilter</code></a>.</p>
+<h4 id="usage_58">Usage</h4>
+<pre><code>chain(violinNuts : stringSegment : ...)
+</code></pre>
+
+<hr />
+<h3 id="pmviolinbridge"><code>(pm.)violinBridge</code></h3>
+<p>Bidirectional block implementing a simple violin bridge. This function is
+based on <a href="#bridgefilter"><code>bridgeFilter</code></a>.</p>
+<h4 id="usage_59">Usage</h4>
+<pre><code>chain(... : stringSegment : violinBridge
+</code></pre>
+
+<hr />
+<h3 id="pmviolinbody"><code>(pm.)violinBody</code></h3>
+<p>Bidirectional block implementing a simple violin body (just a simple
+resonant lowpass filter).</p>
+<h4 id="usage_60">Usage</h4>
+<pre><code>chain(... : stringSegment : violinBridge : violinBody)
+</code></pre>
+
+<hr />
+<h3 id="pmviolinmodel"><code>(pm.)violinModel</code></h3>
+<p>Ready-to-use simple violin physical model. This model implements a single
+string. Additional strings should be created
+by making a polyphonic applications out of this function. Pitch is changed
+by changing the length of the string (and not through a finger model).</p>
+<h4 id="usage_61">Usage</h4>
+<pre><code>violinModel(stringLength,bowPressure,bowVelocity,bridgeReflexion,
+bridgeAbsorption,bowPosition) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>stringLength</code>: the length of the string in meters</li>
+<li><code>bowVelocity</code>: velocity of the bow / excitation signal (0-1)</li>
+<li><code>bowPressure</code>: bow pressure on the string (0-1))</li>
+<li><code>bowPosition</code>: the position of the bow on the string (0-1)</li>
+</ul>
+<hr />
+<h3 id="pmviolin_ui"><code>(pm.)violin_ui</code></h3>
+<p>Ready-to-use violin physical model with built-in UI.</p>
+<h4 id="usage_62">Usage</h4>
+<pre><code>violinModel_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmviolin_ui_midi"><code>(pm.)violin_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-enabled violin physical model with built-in UI.</p>
+<h4 id="usage_63">Usage</h4>
+<pre><code>violin_ui_MIDI : _
+</code></pre>
+
+<h2 id="wind-instruments">Wind Instruments</h2>
+<hr />
+<h3 id="pmopentube"><code>(pm.)openTube</code></h3>
+<p>A tube segment without terminations (same as <a href="#stringsegment"><code>stringSegment</code></a>).</p>
+<h4 id="usage_64">Usage</h4>
+<pre><code>chain(A : openTube(maxLength,length) : B)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>maxLength</code>: the maximum length of the tube in meters (should be static)</li>
+<li><code>length</code>: the length of the tube in meters</li>
+</ul>
+<hr />
+<h3 id="pmreedtable"><code>(pm.)reedTable</code></h3>
+<p>Extremely basic reed table that can be used to implement a wide range of
+single reed types for many different instruments (saxophone, clarinet, etc.).</p>
+<h4 id="usage_65">Usage</h4>
+<pre><code>excitation : reedTable(offeset,slope) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: an excitation signal</li>
+<li><code>offset</code>: table offset</li>
+<li><code>slope</code>: table slope</li>
+</ul>
+<hr />
+<h3 id="pmflutejettable"><code>(pm.)fluteJetTable</code></h3>
+<p>Extremely basic flute jet table.</p>
+<h4 id="usage_66">Usage</h4>
+<pre><code>excitation : fluteJetTable : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: an excitation signal</li>
+</ul>
+<hr />
+<h3 id="pmbrasslipstable"><code>(pm.)brassLipsTable</code></h3>
+<p>Simple brass lips/mouthpiece table. Since this implementation is very basic
+and that the lips and tube of the instrument are coupled to each other, the
+length of that tube must be provided here.</p>
+<h4 id="usage_67">Usage</h4>
+<pre><code>excitation : brassLipsTable(tubeLength,lipsTension) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: an excitation signal (can be DC)</li>
+<li><code>tubeLength</code>: length in meters of the tube connected to the mouthpiece</li>
+<li><code>lipsTension</code>: tension of the lips (0-1) (default: 0.5)</li>
+</ul>
+<hr />
+<h3 id="pmclarinetreed"><code>(pm.)clarinetReed</code></h3>
+<p>Clarinet reed based on <a href="#reedtable"><code>reedTable</code></a> with controllable
+stiffness.</p>
+<h4 id="usage_68">Usage</h4>
+<pre><code>excitation : clarinetReed(stiffness) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: an excitation signal</li>
+<li><code>stiffness</code>: reed stiffness (0-1)</li>
+</ul>
+<hr />
+<h3 id="pmclarinetmouthpiece"><code>(pm.)clarinetMouthPiece</code></h3>
+<p>Bidirectional block implementing a clarinet mouthpiece as well as the various
+interactions happening with traveling waves. This element is ready to be
+plugged to a tube...</p>
+<h4 id="usage_69">Usage</h4>
+<pre><code>chain(clarinetMouthPiece(reedStiffness,pressure) : tube : etc.)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>pressure</code>: the pressure of the air flow (DC) created by the virtual performer (0-1).
+This can also be any kind of signal that will directly injected in the mouthpiece
+(e.g., breath noise, etc.).</li>
+<li><code>reedStiffness</code>: reed stiffness (0-1)</li>
+</ul>
+<hr />
+<h3 id="pmbrasslips"><code>(pm.)brassLips</code></h3>
+<p>Bidirectional block implementing a brass mouthpiece as well as the various
+interactions happening with traveling waves. This element is ready to be
+plugged to a tube...</p>
+<h4 id="usage_70">Usage</h4>
+<pre><code>chain(brassLips(tubeLength,lipsTension,pressure) : tube : etc.)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tubeLength</code>: length in meters of the tube connected to the mouthpiece</li>
+<li><code>lipsTension</code>: tension of the lips (0-1) (default: 0.5)</li>
+<li><code>pressure</code>: the pressure of the air flow (DC) created by the virtual performer (0-1).
+This can also be any kind of signal that will directly injected in the mouthpiece
+(e.g., breath noise, etc.).</li>
+</ul>
+<hr />
+<h3 id="pmfluteembouchure"><code>(pm.)fluteEmbouchure</code></h3>
+<p>Bidirectional block implementing a flute embouchure as well as the various
+interactions happening with traveling waves. This element is ready to be
+plugged between tubes segments...</p>
+<h4 id="usage_71">Usage</h4>
+<pre><code>chain(... : tube : fluteEmbouchure(pressure) : tube : etc.)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>pressure</code>: the pressure of the air flow (DC) created by the virtual
+performer (0-1).
+This can also be any kind of signal that will directly injected in the
+mouthpiece (e.g., breath noise, etc.).</li>
+</ul>
+<hr />
+<h3 id="pmwbell"><code>(pm.)wBell</code></h3>
+<p>Generic wind instrument bell bidirectional block that should be placed at
+the end of a <a href="#chain"><code>chain</code></a>.</p>
+<h4 id="usage_72">Usage</h4>
+<pre><code>chain(... : wBell(opening))
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>opening</code>: the "opening" of bell (0-1)</li>
+</ul>
+<hr />
+<h3 id="pmflutehead"><code>(pm.)fluteHead</code></h3>
+<p>Simple flute head implementing waves reflexion.</p>
+<h4 id="usage_73">Usage</h4>
+<pre><code>chain(fluteHead : tube : ...)
+</code></pre>
+
+<hr />
+<h3 id="pmflutefoot"><code>(pm.)fluteFoot</code></h3>
+<p>Simple flute foot implementing waves reflexion and dispersion.</p>
+<h4 id="usage_74">Usage</h4>
+<pre><code>chain(... : tube : fluteFoot)
+</code></pre>
+
+<hr />
+<h3 id="pmclarinetmodel"><code>(pm.)clarinetModel</code></h3>
+<p>A simple clarinet physical model without tone holes (pitch is changed by
+changing the length of the tube of the instrument).</p>
+<h4 id="usage_75">Usage</h4>
+<pre><code>clarinetModel(length,pressure,reedStiffness,bellOpening) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tubeLength</code>: the length of the tube in meters</li>
+<li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
+This can also be any kind of signal that will directly injected in the mouthpiece
+(e.g., breath noise, etc.).</li>
+<li><code>reedStiffness</code>: reed stiffness (0-1)</li>
+<li><code>bellOpening</code>: the opening of bell (0-1)</li>
+</ul>
+<hr />
+<h3 id="pmclarinetmodel_ui"><code>(pm.)clarinetModel_ui</code></h3>
+<p>Same as <a href="#clarinetModel"><code>clarinetModel</code></a> but with a built-in UI. This function
+doesn't implement a virtual "blower", thus <code>pressure</code> remains an argument here.</p>
+<h4 id="usage_76">Usage</h4>
+<pre><code>clarinetModel_ui(pressure) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
+This can also be any kind of signal that will be directly injected in the mouthpiece
+(e.g., breath noise, etc.).</li>
+</ul>
+<hr />
+<h3 id="pmclarinet_ui"><code>(pm.)clarinet_ui</code></h3>
+<p>Ready-to-use clarinet physical model with built-in UI based on
+<a href="#clarinetmodel"><code>clarinetModel</code></a>.</p>
+<h4 id="usage_77">Usage</h4>
+<pre><code>clarinet_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmclarinet_ui_midi"><code>(pm.)clarinet_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI compliant clarinet physical model with built-in UI.</p>
+<h4 id="usage_78">Usage</h4>
+<pre><code>clarinet_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmbrassmodel"><code>(pm.)brassModel</code></h3>
+<p>A simple generic brass instrument physical model without pistons
+(pitch is changed by changing the length of the tube of the instrument).
+This model is kind of hard to control and might not sound very good if
+bad parameters are given to it...</p>
+<h4 id="usage_79">Usage</h4>
+<pre><code>brassModel(tubeLength,lipsTension,mute,pressure) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tubeLength</code>: the length of the tube in meters</li>
+<li><code>lipsTension</code>: tension of the lips (0-1) (default: 0.5)</li>
+<li><code>mute</code>: mute opening at the end of the instrument (0-1) (default: 0.5)</li>
+<li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
+This can also be any kind of signal that will directly injected in the mouthpiece
+(e.g., breath noise, etc.).</li>
+</ul>
+<hr />
+<h3 id="pmbrassmodel_ui"><code>(pm.)brassModel_ui</code></h3>
+<p>Same as <a href="#brassModel"><code>brassModel</code></a> but with a built-in UI. This function
+doesn't implement a virtual "blower", thus <code>pressure</code> remains an argument here.</p>
+<h4 id="usage_80">Usage</h4>
+<pre><code>brassModel_ui(pressure) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
+This can also be any kind of signal that will be directly injected in the mouthpiece
+(e.g., breath noise, etc.).</li>
+</ul>
+<hr />
+<h3 id="pmbrass_ui"><code>(pm.)brass_ui</code></h3>
+<p>Ready-to-use brass instrument physical model with built-in UI based on
+<a href="#brassmodel"><code>brassModel</code></a>.</p>
+<h4 id="usage_81">Usage</h4>
+<pre><code>brass_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmbrass_ui_midi"><code>(pm.)brass_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-controllable brass instrument physical model with built-in UI.</p>
+<h4 id="usage_82">Usage</h4>
+<pre><code>brass_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmflutemodel"><code>(pm.)fluteModel</code></h3>
+<p>A simple generic flute instrument physical model without tone holes
+(pitch is changed by changing the length of the tube of the instrument).</p>
+<h4 id="usage_83">Usage</h4>
+<pre><code>fluteModel(tubeLength,mouthPosition,pressure) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tubeLength</code>: the length of the tube in meters</li>
+<li><code>mouthPosition</code>: position of the mouth on the embouchure (0-1) (default: 0.5)</li>
+<li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
+This can also be any kind of signal that will directly injected in the mouthpiece
+(e.g., breath noise, etc.).</li>
+</ul>
+<hr />
+<h3 id="pmflutemodel_ui"><code>(pm.)fluteModel_ui</code></h3>
+<p>Same as <a href="#fluteModel"><code>fluteModel</code></a> but with a built-in UI. This function
+doesn't implement a virtual "blower", thus <code>pressure</code> remains an argument here.</p>
+<h4 id="usage_84">Usage</h4>
+<pre><code>fluteModel_ui(pressure) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
+This can also be any kind of signal that will be directly injected in the mouthpiece
+(e.g., breath noise, etc.).</li>
+</ul>
+<hr />
+<h3 id="pmflute_ui"><code>(pm.)flute_ui</code></h3>
+<p>Ready-to-use flute physical model with built-in UI based on
+<a href="#flutemodel"><code>fluteModel</code></a>.</p>
+<h4 id="usage_85">Usage</h4>
+<pre><code>flute_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmflute_ui_midi"><code>(pm.)flute_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-controllable flute physical model with built-in UI.</p>
+<h4 id="usage_86">Usage</h4>
+<pre><code>flute_ui_MIDI : _
+</code></pre>
+
+<h2 id="exciters">Exciters</h2>
+<hr />
+<h3 id="pmimpulseexcitation"><code>(pm.)impulseExcitation</code></h3>
+<p>Creates an impulse excitation of one sample.</p>
+<h4 id="usage_87">Usage</h4>
+<pre><code>gate = button('gate');
+impulseExcitation(gate) : chain;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>gate</code>: a gate button</li>
+</ul>
+<hr />
+<h3 id="pmstrikemodel"><code>(pm.)strikeModel</code></h3>
+<p>Creates a filtered noise excitation.</p>
+<h4 id="usage_88">Usage</h4>
+<pre><code>gate = button('gate');
+strikeModel(LPcutoff,HPcutoff,sharpness,gain,gate) : chain;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>HPcutoff</code>: highpass cutoff frequency</li>
+<li><code>LPcutoff</code>: lowpass cutoff frequency</li>
+<li><code>sharpness</code>: sharpness of the attack and release (0-1)</li>
+<li><code>gain</code>: gain of the excitation</li>
+<li><code>gate</code>: a gate button/trigger signal (0/1)</li>
+</ul>
+<hr />
+<h3 id="pmstrike"><code>(pm.)strike</code></h3>
+<p>Strikes generator with controllable excitation position.</p>
+<h4 id="usage_89">Usage</h4>
+<pre><code>gate = button('gate');
+strike(exPos,sharpness,gain,gate) : chain;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>exPos</code>: excitation position wiht 0: for max low freqs and 1: for max high
+freqs. So, on membrane for example, 0 would be the middle and 1 the edge</li>
+<li><code>sharpness</code>: sharpness of the attack and release (0-1)</li>
+<li><code>gain</code>: gain of the excitation</li>
+<li><code>gate</code>: a gate button/trigger signal (0/1)</li>
+</ul>
+<hr />
+<h3 id="pmpluckstring"><code>(pm.)pluckString</code></h3>
+<p>Creates a plucking excitation signal.</p>
+<h4 id="usage_90">Usage</h4>
+<pre><code>trigger = button('gate');
+pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>stringLength</code>: length of the string to pluck</li>
+<li><code>cutoff</code>: cutoff ratio (1 for default)</li>
+<li><code>maxFreq</code>: max frequency ratio (1 for default)</li>
+<li><code>sharpness</code>: sharpness of the attack and release (1 for default)</li>
+<li><code>gain</code>: gain of the excitation (0-1)</li>
+<li><code>trigger</code>: trigger signal (1 for on, 0 for off)</li>
+</ul>
+<hr />
+<h3 id="pmblower"><code>(pm.)blower</code></h3>
+<p>A virtual blower creating a DC signal with some breath noise in it.</p>
+<h4 id="usage_91">Usage</h4>
+<pre><code>blower(pressure,breathGain,breathCutoff) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>pressure</code>: pressure (0-1)</li>
+<li><code>breathGain</code>: breath noise gain (0-1) (recommended: 0.005)</li>
+<li><code>breathCutoff</code>: breath cuttoff frequency (Hz) (recommended: 2000)</li>
+</ul>
+<hr />
+<h3 id="pmblower_ui"><code>(pm.)blower_ui</code></h3>
+<p>Same as <a href="#blower"><code>blower</code></a> but with a built-in UI.</p>
+<h4 id="usage_92">Usage</h4>
+<pre><code>blower : somethingToBeBlown
+</code></pre>
+
+<h2 id="modal-percussions">Modal Percussions</h2>
+<hr />
+<h3 id="pmdjembemodel"><code>(pm.)djembeModel</code></h3>
+<p>Dirt-simple djembe modal physical model. Mode parameters are empirically
+calculated and don't correspond to any measurements or 3D model. They
+kind of sound good though :).</p>
+<h4 id="usage_93">Usage</h4>
+<pre><code>excitation : djembeModel(freq)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: excitation signal</li>
+<li><code>freq</code>: fundamental frequency of the bar</li>
+</ul>
+<hr />
+<h3 id="pmdjembe"><code>(pm.)djembe</code></h3>
+<p>Dirt-simple djembe modal physical model. Mode parameters are empirically
+calculated and don't correspond to any measurements or 3D model. They
+kind of sound good though :).</p>
+<p>This model also implements a virtual "exciter".</p>
+<h4 id="usage_94">Usage</h4>
+<pre><code>djembe(freq,strikePosition,strikeSharpness,gain,trigger)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: fundamental frequency of the model</li>
+<li><code>strikePosition</code>: strike position (0 for the middle of the membrane and
+1 for the edge)</li>
+<li><code>strikeSharpness</code>: sharpness of the strike (0-1, default: 0.5)</li>
+<li><code>gain</code>: gain of the strike</li>
+<li><code>trigger</code>: trigger signal (0: off, 1: on)</li>
+</ul>
+<hr />
+<h3 id="pmdjembe_ui_midi"><code>(pm.)djembe_ui_MIDI</code></h3>
+<p>Simple MIDI controllable djembe physical model with built-in UI.</p>
+<h4 id="usage_95">Usage</h4>
+<pre><code>djembe_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmmarimbabarmodel"><code>(pm.)marimbaBarModel</code></h3>
+<p>Generic marimba tone bar modal model.</p>
+<p>This model was generated using
+<code>mesh2faust</code> from a 3D CAD model of a marimba tone bar
+(<code>libraries/modalmodels/marimbaBar</code>). The corresponding CAD model is that
+of a C2 tone bar (original fundamental frequency: ~65Hz). While
+<code>marimbaBarModel</code> allows to translate the harmonic content of the generated
+sound by providing a frequency (<code>freq</code>), mode transposition has limits and
+the model will sound less and less like a marimba tone bar as it
+diverges from C2. To make an accurate model of a marimba, we'd want to have
+an independent model for each bar...</p>
+<p>This model contains 5 excitation positions going linearly from the center
+bottom to the center top of the bar. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<h4 id="usage_96">Usage</h4>
+<pre><code>excitation : marimbaBarModel(freq,exPos,t60,t60DecayRatio,t60DecaySlope)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: excitation signal</li>
+<li><code>freq</code>: fundamental frequency of the bar</li>
+<li><code>exPos</code>: excitation position (0-4)</li>
+<li><code>t60</code>: T60 in seconds (recommended value: 0.1)</li>
+<li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
+<li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
+</ul>
+<hr />
+<h3 id="pmmarimbarestube"><code>(pm.)marimbaResTube</code></h3>
+<p>Simple marimba resonance tube.</p>
+<h4 id="usage_97">Usage</h4>
+<pre><code>marimbaResTube(tubeLength,excitation)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tubeLength</code>: the length of the tube in meters</li>
+<li><code>excitation</code>: the excitation signal (audio in)</li>
+</ul>
+<hr />
+<h3 id="pmmarimbamodel"><code>(pm.)marimbaModel</code></h3>
+<p>Simple marimba physical model implementing a single tone bar connected to
+tube. This model is scalable and can be adapted to any size of bar/tube
+(see <a href="#marimbabarmodel"><code>marimbaBarModel</code></a> to know more about the
+limitations of this type of system).</p>
+<h4 id="usage_98">Usage</h4>
+<pre><code>excitation : marimbaModel(freq,exPos) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the frequency of the bar/tube couple</li>
+<li><code>exPos</code>: excitation position (0-4)</li>
+</ul>
+<hr />
+<h3 id="pmmarimba"><code>(pm.)marimba</code></h3>
+<p>Simple marimba physical model implementing a single tone bar connected to
+tube. This model is scalable and can be adapted to any size of bar/tube
+(see <a href="#marimbabarmodel"><code>marimbaBarModel</code></a> to know more about the
+limitations of this type of system).</p>
+<p>This function also implement a virtual exciter to drive the model.</p>
+<h4 id="usage_99">Usage</h4>
+<pre><code>excitation : marimba(freq,strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>freq</code>: the frequency of the bar/tube couple</li>
+<li><code>strikePosition</code>: strike position (0-4)</li>
+<li><code>strikeCutoff</code>: cuttoff frequency of the strike genarator (recommended: ~7000Hz)</li>
+<li><code>strikeSharpness</code>: shaarpness of the strike (recommened: ~0.25)</li>
+<li><code>gain</code>: gain of the strike (0-1)</li>
+<li><code>trigger</code> signal (0: off, 1: on)</li>
+</ul>
+<hr />
+<h3 id="pmmarimba_ui_midi"><code>(pm.)marimba_ui_MIDI</code></h3>
+<p>Simple MIDI controllable marimba physical model with built-in UI
+implementing a single tone bar connected to
+tube. This model is scalable and can be adapted to any size of bar/tube
+(see <a href="#marimbabarmodel"><code>marimbaBarModel</code></a> to know more about the
+limitations of this type of system).</p>
+<h4 id="usage_100">Usage</h4>
+<pre><code>marimba_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmchurchbellmodel"><code>(pm.)churchBellModel</code></h3>
+<p>Generic church bell modal model generated by <code>mesh2faust</code> from
+<code>libraries/modalmodels/churchBell</code>.</p>
+<p>Modeled after T. Rossing and R. Perrin, Vibrations of Bells, Applied
+Acoustics 2, 1987.</p>
+<p>Model height is 301 mm.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<h4 id="usage_101">Usage</h4>
+<pre><code>excitation : churchBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>nModes</code>: number of synthesized modes (max: 50)</li>
+<li><code>exPos</code>: excitation position (0-6)</li>
+<li><code>t60</code>: T60 in seconds (recommended value: 0.1)</li>
+<li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
+<li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
+</ul>
+<hr />
+<h3 id="pmchurchbell"><code>(pm.)churchBell</code></h3>
+<p>Generic church bell modal model.</p>
+<p>Modeled after T. Rossing and R. Perrin, Vibrations of Bells, Applied
+Acoustics 2, 1987.</p>
+<p>Model height is 301 mm.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<p>This function also implement a virtual exciter to drive the model.</p>
+<h4 id="usage_102">Usage</h4>
+<pre><code>excitation : churchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>strikePosition</code>: strike position (0-6)</li>
+<li><code>strikeCutoff</code>: cuttoff frequency of the strike genarator (recommended: ~7000Hz)</li>
+<li><code>strikeSharpness</code>: shaarpness of the strike (recommened: ~0.25)</li>
+<li><code>gain</code>: gain of the strike (0-1)</li>
+<li><code>trigger</code> signal (0: off, 1: on)</li>
+</ul>
+<hr />
+<h3 id="pmchurchbell_ui"><code>(pm.)churchBell_ui</code></h3>
+<p>Church bell physical model based on <a href="#churchbell"><code>churchBell</code></a> with
+built-in UI.</p>
+<h4 id="usage_103">Usage</h4>
+<pre><code>churchBell_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmenglishbellmodel"><code>(pm.)englishBellModel</code></h3>
+<p>English church bell modal model generated by <code>mesh2faust</code> from
+<code>libraries/modalmodels/englishBell</code>.</p>
+<p>Modeled after D. Bartocha and . Baron, Influence of Tin Bronze Melting and
+Pouring Parameters on Its Properties and Bell' Tone, Archives of Foundry
+Engineering, 2016.</p>
+<p>Model height is 1 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<h4 id="usage_104">Usage</h4>
+<pre><code>excitation : englishBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>nModes</code>: number of synthesized modes (max: 50)</li>
+<li><code>exPos</code>: excitation position (0-6)</li>
+<li><code>t60</code>: T60 in seconds (recommended value: 0.1)</li>
+<li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
+<li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
+</ul>
+<hr />
+<h3 id="pmenglishbell"><code>(pm.)englishBell</code></h3>
+<p>English church bell modal model.</p>
+<p>Modeled after D. Bartocha and . Baron, Influence of Tin Bronze Melting and
+Pouring Parameters on Its Properties and Bell' Tone, Archives of Foundry
+Engineering, 2016.</p>
+<p>Model height is 1 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<p>This function also implement a virtual exciter to drive the model.</p>
+<h4 id="usage_105">Usage</h4>
+<pre><code>excitation : englishBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>strikePosition</code>: strike position (0-6)</li>
+<li><code>strikeCutoff</code>: cuttoff frequency of the strike genarator (recommended: ~7000Hz)</li>
+<li><code>strikeSharpness</code>: shaarpness of the strike (recommened: ~0.25)</li>
+<li><code>gain</code>: gain of the strike (0-1)</li>
+<li><code>trigger</code> signal (0: off, 1: on)</li>
+</ul>
+<hr />
+<h3 id="pmenglishbell_ui"><code>(pm.)englishBell_ui</code></h3>
+<p>English church bell physical model based on <a href="#englishbell"><code>englishBell</code></a> with
+built-in UI.</p>
+<h4 id="usage_106">Usage</h4>
+<pre><code>englishBell_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmfrenchbellmodel"><code>(pm.)frenchBellModel</code></h3>
+<p>French church bell modal model generated by <code>mesh2faust</code> from
+<code>libraries/modalmodels/frenchBell</code>.</p>
+<p>Modeled after D. Bartocha and . Baron, Influence of Tin Bronze Melting and
+Pouring Parameters on Its Properties and Bell' Tone, Archives of Foundry
+Engineering, 2016.</p>
+<p>Model height is 1 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<h4 id="usage_107">Usage</h4>
+<pre><code>excitation : frenchBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>nModes</code>: number of synthesized modes (max: 50)</li>
+<li><code>exPos</code>: excitation position (0-6)</li>
+<li><code>t60</code>: T60 in seconds (recommended value: 0.1)</li>
+<li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
+<li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
+</ul>
+<hr />
+<h3 id="pmfrenchbell"><code>(pm.)frenchBell</code></h3>
+<p>French church bell modal model.</p>
+<p>Modeled after D. Bartocha and . Baron, Influence of Tin Bronze Melting and
+Pouring Parameters on Its Properties and Bell' Tone, Archives of Foundry
+Engineering, 2016.</p>
+<p>Model height is 1 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<p>This function also implement a virtual exciter to drive the model.</p>
+<h4 id="usage_108">Usage</h4>
+<pre><code>excitation : frenchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>strikePosition</code>: strike position (0-6)</li>
+<li><code>strikeCutoff</code>: cuttoff frequency of the strike genarator (recommended: ~7000Hz)</li>
+<li><code>strikeSharpness</code>: shaarpness of the strike (recommened: ~0.25)</li>
+<li><code>gain</code>: gain of the strike (0-1)</li>
+<li><code>trigger</code> signal (0: off, 1: on)</li>
+</ul>
+<hr />
+<h3 id="pmfrenchbell_ui"><code>(pm.)frenchBell_ui</code></h3>
+<p>French church bell physical model based on <a href="#frenchbell"><code>frenchBell</code></a> with
+built-in UI.</p>
+<h4 id="usage_109">Usage</h4>
+<pre><code>frenchBell_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmgermanbellmodel"><code>(pm.)germanBellModel</code></h3>
+<p>German church bell modal model generated by <code>mesh2faust</code> from
+<code>libraries/modalmodels/germanBell</code>.</p>
+<p>Modeled after D. Bartocha and . Baron, Influence of Tin Bronze Melting and
+Pouring Parameters on Its Properties and Bell' Tone, Archives of Foundry
+Engineering, 2016.</p>
+<p>Model height is 1 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<h4 id="usage_110">Usage</h4>
+<pre><code>excitation : germanBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>nModes</code>: number of synthesized modes (max: 50)</li>
+<li><code>exPos</code>: excitation position (0-6)</li>
+<li><code>t60</code>: T60 in seconds (recommended value: 0.1)</li>
+<li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
+<li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
+</ul>
+<hr />
+<h3 id="pmgermanbell"><code>(pm.)germanBell</code></h3>
+<p>German church bell modal model.</p>
+<p>Modeled after D. Bartocha and . Baron, Influence of Tin Bronze Melting and
+Pouring Parameters on Its Properties and Bell' Tone, Archives of Foundry
+Engineering, 2016.</p>
+<p>Model height is 1 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<p>This function also implement a virtual exciter to drive the model.</p>
+<h4 id="usage_111">Usage</h4>
+<pre><code>excitation : germanBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>strikePosition</code>: strike position (0-6)</li>
+<li><code>strikeCutoff</code>: cuttoff frequency of the strike genarator (recommended: ~7000Hz)</li>
+<li><code>strikeSharpness</code>: shaarpness of the strike (recommened: ~0.25)</li>
+<li><code>gain</code>: gain of the strike (0-1)</li>
+<li><code>trigger</code> signal (0: off, 1: on)</li>
+</ul>
+<hr />
+<h3 id="pmgermanbell_ui"><code>(pm.)germanBell_ui</code></h3>
+<p>German church bell physical model based on <a href="#germanbell"><code>germanBell</code></a> with
+built-in UI.</p>
+<h4 id="usage_112">Usage</h4>
+<pre><code>germanBell_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmrussianbellmodel"><code>(pm.)russianBellModel</code></h3>
+<p>Russian church bell modal model generated by <code>mesh2faust</code> from
+<code>libraries/modalmodels/russianBell</code>.</p>
+<p>Modeled after D. Bartocha and . Baron, Influence of Tin Bronze Melting and
+Pouring Parameters on Its Properties and Bell' Tone, Archives of Foundry
+Engineering, 2016.</p>
+<p>Model height is 2 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<h4 id="usage_113">Usage</h4>
+<pre><code>excitation : russianBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>nModes</code>: number of synthesized modes (max: 50)</li>
+<li><code>exPos</code>: excitation position (0-6)</li>
+<li><code>t60</code>: T60 in seconds (recommended value: 0.1)</li>
+<li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
+<li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
+</ul>
+<hr />
+<h3 id="pmrussianbell"><code>(pm.)russianBell</code></h3>
+<p>Russian church bell modal model.</p>
+<p>Modeled after D. Bartocha and . Baron, Influence of Tin Bronze Melting and
+Pouring Parameters on Its Properties and Bell' Tone, Archives of Foundry
+Engineering, 2016.</p>
+<p>Model height is 2 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<p>This function also implement a virtual exciter to drive the model.</p>
+<h4 id="usage_114">Usage</h4>
+<pre><code>excitation : russianBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>strikePosition</code>: strike position (0-6)</li>
+<li><code>strikeCutoff</code>: cuttoff frequency of the strike genarator (recommended: ~7000Hz)</li>
+<li><code>strikeSharpness</code>: shaarpness of the strike (recommened: ~0.25)</li>
+<li><code>gain</code>: gain of the strike (0-1)</li>
+<li><code>trigger</code> signal (0: off, 1: on)</li>
+</ul>
+<hr />
+<h3 id="pmrussianbell_ui"><code>(pm.)russianBell_ui</code></h3>
+<p>Russian church bell physical model based on <a href="#russianbell"><code>russianBell</code></a> with
+built-in UI.</p>
+<h4 id="usage_115">Usage</h4>
+<pre><code>russianBell_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmstandardbellmodel"><code>(pm.)standardBellModel</code></h3>
+<p>Standard church bell modal model generated by <code>mesh2faust</code> from
+<code>libraries/modalmodels/standardBell</code>.</p>
+<p>Modeled after T. Rossing and R. Perrin, Vibrations of Bells, Applied
+Acoustics 2, 1987.</p>
+<p>Model height is 1.8 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<h4 id="usage_116">Usage</h4>
+<pre><code>excitation : standardBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>nModes</code>: number of synthesized modes (max: 50)</li>
+<li><code>exPos</code>: excitation position (0-6)</li>
+<li><code>t60</code>: T60 in seconds (recommended value: 0.1)</li>
+<li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
+<li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
+</ul>
+<hr />
+<h3 id="pmstandardbell"><code>(pm.)standardBell</code></h3>
+<p>Standard church bell modal model.</p>
+<p>Modeled after T. Rossing and R. Perrin, Vibrations of Bells, Applied
+Acoustics 2, 1987.</p>
+<p>Model height is 1.8 m.</p>
+<p>This model contains 7 excitation positions going linearly from the
+bottom to the top of the bell. Obviously, a model with more excitation
+position could be regenerated using <code>mesh2faust</code>.</p>
+<p>This function also implement a virtual exciter to drive the model.</p>
+<h4 id="usage_117">Usage</h4>
+<pre><code>excitation : standardBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>excitation</code>: the excitation signal</li>
+<li><code>strikePosition</code>: strike position (0-6)</li>
+<li><code>strikeCutoff</code>: cuttoff frequency of the strike genarator (recommended: ~7000Hz)</li>
+<li><code>strikeSharpness</code>: shaarpness of the strike (recommened: ~0.25)</li>
+<li><code>gain</code>: gain of the strike (0-1)</li>
+<li><code>trigger</code> signal (0: off, 1: on)</li>
+</ul>
+<hr />
+<h3 id="pmstandardbell_ui"><code>(pm.)standardBell_ui</code></h3>
+<p>Standard church bell physical model based on <a href="#standardbell"><code>standardBell</code></a> with
+built-in UI.</p>
+<h4 id="usage_118">Usage</h4>
+<pre><code>standardBell_ui : _
+</code></pre>
+
+<h2 id="vocal-synthesis">Vocal Synthesis</h2>
+<hr />
+<h3 id="pmformantvalues"><code>(pm.)formantValues</code></h3>
+<p>Formant data values.</p>
+<p>The formant data used here come from the CSOUND manual
+* <a href="http://www.csounds.com/manual/html/">http://www.csounds.com/manual/html/</a>.</p>
+<h4 id="usage_119">Usage</h4>
+<pre><code>ba.take(j+1,formantValues.f(i)) : _
+ba.take(j+1,formantValues.g(i)) : _
+ba.take(j+1,formantValues.bw(i)) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: formant number</li>
+<li><code>j</code>: (voiceType*nFormants)+vowel</li>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor, 3:
+soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+</ul>
+<hr />
+<h3 id="pmvoicegender"><code>(pm.)voiceGender</code></h3>
+<p>Calculate the gender for the provided <code>voiceType</code> value. (0: male, 1: female)</p>
+<h4 id="usage_120">Usage</h4>
+<pre><code>voiceGender(voiceType) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+</ul>
+<hr />
+<h3 id="pmskirtwidthmultiplier"><code>(pm.)skirtWidthMultiplier</code></h3>
+<p>Calculates value to multiply bandwidth to obtain <code>skirtwidth</code>
+for a Fof filter.</p>
+<h4 id="usage_121">Usage</h4>
+<pre><code>skirtWidthMultiplier(vowel,freq,gender) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+<li><code>freq</code>: the fundamental frequency of the excitation signal</li>
+<li><code>gender</code>: gender of the voice used in the fof filter (0: male, 1: female)</li>
+</ul>
+<hr />
+<h3 id="pmautobendfreq"><code>(pm.)autobendFreq</code></h3>
+<p>Autobends the center frequencies of formants 1 and 2 based on
+the fundamental frequency of the excitation signal and leaves
+all other formant frequencies unchanged. Ported from <code>chant-lib</code>.
+* Reference: <a href="https://ccrma.stanford.edu/~rmichon/chantLib/">https://ccrma.stanford.edu/~rmichon/chantLib/</a>.</p>
+<h4 id="usage_122">Usage</h4>
+<pre><code>_ : autobendFreq(n,freq,voiceType) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: formant index</li>
+<li><code>freq</code>: the fundamental frequency of the excitation signal</li>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,</li>
+<li>input is the center frequency of the corresponding formant</li>
+</ul>
+<hr />
+<h3 id="pmvocaleffort"><code>(pm.)vocalEffort</code></h3>
+<p>Changes the gains of the formants based on the fundamental
+frequency of the excitation signal. Higher formants are
+reinforced for higher fundamental frequencies.
+Ported from <code>chant-lib</code>.
+* Reference: <a href="https://ccrma.stanford.edu/~rmichon/chantLib/">https://ccrma.stanford.edu/~rmichon/chantLib/</a>.</p>
+<h4 id="usage_123">Usage</h4>
+<pre><code>_ : vocalEffort(freq,gender) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the fundamental frequency of the excitation signal</li>
+<li><code>gender</code>: the gender of the voice type (0: male, 1: female)</li>
+<li>input is the linear amplitude of the formant</li>
+</ul>
+<hr />
+<h3 id="pmfof"><code>(pm.)fof</code></h3>
+<p>Function to generate a single Formant-Wave-Function.
+* Reference: <a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</p>
+<h4 id="usage_124">Usage</h4>
+<pre><code>_ : fof(fc,bw,a,g) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fc</code>: formant center frequency,</li>
+<li><code>bw</code>: formant bandwidth (Hz),</li>
+<li><code>sw</code>: formant skirtwidth (Hz)</li>
+<li><code>g</code>: linear scale factor (g=1 gives 0dB amplitude response at fc)</li>
+<li>input is an impulse signal to excite filter</li>
+</ul>
+<hr />
+<h3 id="pmfofsh"><code>(pm.)fofSH</code></h3>
+<p>FOF with sample and hold used on <code>bw</code> and a parameter
+used in the filter-cycling FOF function <code>fofCycle</code>.
+* Reference: <a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</p>
+<h4 id="usage_125">Usage</h4>
+<pre><code>_ : fofSH(fc,bw,a,g) : _
+</code></pre>
+
+<p>Where: all parameters same as for <a href="#fof"><code>fof</code></a></p>
+<hr />
+<h3 id="pmfofcycle"><code>(pm.)fofCycle</code></h3>
+<p>FOF implementation where time-varying filter parameter noise is
+mitigated by using a cycle of <code>n</code> sample and hold FOF filters.
+* Reference: <a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</p>
+<h4 id="usage_126">Usage</h4>
+<pre><code>_ : fofCycle(fc,bw,a,g,n) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the number of FOF filters to cycle through</li>
+<li>all other parameters are same as for <a href="#fof"><code>fof</code></a></li>
+</ul>
+<hr />
+<h3 id="pmfofsmooth"><code>(pm.)fofSmooth</code></h3>
+<p>FOF implementation where time-varying filter parameter
+noise is mitigated by lowpass filtering the filter
+parameters <code>bw</code> and <code>a</code> with <a href="#smooth">smooth</a>.</p>
+<h4 id="usage_127">Usage</h4>
+<pre><code>_ : fofSmooth(fc,bw,sw,g,tau) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tau</code>: the desired smoothing time constant in seconds</li>
+<li>all other parameters are same as for <a href="#fof"><code>fof</code></a></li>
+</ul>
+<hr />
+<h3 id="pmformantfilterfofcycle"><code>(pm.)formantFilterFofCycle</code></h3>
+<p>Formant filter based on a single FOF filter.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. A cycle of <code>n</code> fof filters with sample-and-hold is
+used so that the fof filter parameters can be varied in realtime.
+This technique is more robust but more computationally expensive than
+<a href="#formantFilterFofSmooth"><code>formantFilterFofSmooth</code></a>.Voice type can be
+selected but must correspond to
+the frequency range of the provided source to be realistic.</p>
+<h4 id="usage_128">Usage</h4>
+<pre><code>_ : formantFilterFofCycle(voiceType,vowel,nFormants,i,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+<li><code>nFormants</code>: number of formant regions in frequency domain, typically 5</li>
+<li><code>i</code>: formant number (i.e. 0 - 4) used to index formant data value arrays</li>
+<li><code>freq</code>: fundamental frequency of excitation signal. Used to calculate
+        rise time of envelope</li>
+</ul>
+<hr />
+<h3 id="pmformantfilterfofsmooth"><code>(pm.)formantFilterFofSmooth</code></h3>
+<p>Formant filter based on a single FOF filter.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Fof filter parameters are lowpass filtered
+to mitigate possible noise from varying them in realtime.
+Voice type can be selected but must correspond to
+the frequency range of the provided source to be realistic.</p>
+<h4 id="usage_129">Usage</h4>
+<pre><code>_ : formantFilterFofSmooth(voiceType,vowel,nFormants,i,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+<li><code>nFormants</code>: number of formant regions in frequency domain, typically 5</li>
+<li><code>i</code>: formant number (i.e. 1 - 5) used to index formant data value arrays</li>
+<li><code>freq</code>: fundamental frequency of excitation signal. Used to calculate
+        rise time of envelope</li>
+</ul>
+<hr />
+<h3 id="pmformantfilterbp"><code>(pm.)formantFilterBP</code></h3>
+<p>Formant filter based on a single resonant bandpass filter.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Voice type can be selected but must correspond to
+the frequency range of the provided source to be realistic.</p>
+<h4 id="usage_130">Usage</h4>
+<pre><code>_ : formantFilterBP(voiceType,vowel,nFormants,i,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+<li><code>nFormants</code>: number of formant regions in frequency domain, typically 5</li>
+<li><code>i</code>: formant index used to index formant data value arrays</li>
+<li><code>freq</code>: fundamental frequency of excitation signal.</li>
+</ul>
+<hr />
+<h3 id="pmformantfilterbank"><code>(pm.)formantFilterbank</code></h3>
+<p>Formant filterbank which can use different types of filterbank
+functions and different excitation signals. Formant parameters are
+linearly interpolated allowing to go smoothly from one vowel to another.
+Voice type can be selected but must correspond to the frequency range
+of the provided source to be realistic.</p>
+<h4 id="usage_131">Usage</h4>
+<pre><code>_ : formantFilterbank(voiceType,vowel,formantGen,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+<li><code>formantGen</code>: the specific formant filterbank function
+                (i.e. FormantFilterbankBP, FormantFilterbankFof,...)</li>
+<li><code>freq</code>: fundamental frequency of excitation signal. Needed for FOF
+        version to calculate rise time of envelope</li>
+</ul>
+<hr />
+<h3 id="pmformantfilterbankfofcycle"><code>(pm.)formantFilterbankFofCycle</code></h3>
+<p>Formant filterbank based on a bank of fof filters.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Voice type can be selected but must correspond to
+the frequency range of the provided source to be realistic.</p>
+<h4 id="usage_132">Usage</h4>
+<pre><code>_ : formantFilterbankFofCycle(voiceType,vowel,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+<li><code>freq</code>: the fundamental frequency of the excitation signal. Needed to</li>
+</ul>
+<hr />
+<h3 id="pmformantfilterbankfofsmooth"><code>(pm.)formantFilterbankFofSmooth</code></h3>
+<p>Formant filterbank based on a bank of fof filters.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Voice type can be selected but must correspond to
+the frequency range of the provided source to be realistic.</p>
+<h4 id="usage_133">Usage</h4>
+<pre><code>_ : formantFilterbankFofSmooth(voiceType,vowel,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+<li><code>freq</code>: the fundamental frequency of the excitation signal. Needed to</li>
+</ul>
+<hr />
+<h3 id="pmformantfilterbankbp"><code>(pm.)formantFilterbankBP</code></h3>
+<p>Formant filterbank based on a bank of resonant bandpass filters.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Voice type can be selected but must correspond to
+the frequency range of the provided source to be realistic.</p>
+<h4 id="usage_134">Usage</h4>
+<pre><code>_ : formantFilterbankBP(voiceType,vowel) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
+<li><code>freq</code>: the fundamental frequency of the excitation signal. Needed</li>
+</ul>
+<hr />
+<h3 id="pmsfformantmodel"><code>(pm.)SFFormantModel</code></h3>
+<p>Simple formant/vocal synthesizer based on a source/filter model. The <code>source</code>
+and <code>filterbank</code> must be specified by the user. <code>filterbank</code> must take the same
+input parameters as <a href="#formantFilterbank"><code>formantFilterbank</code></a> (<code>BP</code>/<code>FofCycle</code>
+/<code>FofSmooth</code>).
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Voice type can be selected but must correspond to
+the frequency range of the synthesized voice to be realistic.</p>
+<h4 id="usage_135">Usage</h4>
+<pre><code>SFFormantModel(voiceType,vowel,exType,freq,gain,source,filterbank,isFof) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u</li>
+<li><code>exType</code>: voice vs. fricative sound ratio (0-1 where 1 is 100% fricative)</li>
+<li><code>freq</code>: the fundamental frequency of the source signal</li>
+<li><code>gain</code>: linear gain multiplier to multiply the source by</li>
+<li><code>isFof</code>: whether model is FOF based (0: no, 1: yes)</li>
+</ul>
+<hr />
+<h3 id="pmsfformantmodelfofcycle"><code>(pm.)SFFormantModelFofCycle</code></h3>
+<p>Simple formant/vocal synthesizer based on a source/filter model. The source
+is just a periodic impulse and the "filter" is a bank of FOF filters.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Voice type can be selected but must correspond to
+the frequency range of the synthesized voice to be realistic. This model
+does not work with noise in the source signal so exType has been removed
+and model does not depend on SFFormantModel function.</p>
+<h4 id="usage_136">Usage</h4>
+<pre><code>SFFormantModelFofCycle(voiceType,vowel,freq,gain) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u</li>
+<li><code>freq</code>: the fundamental frequency of the source signal</li>
+<li><code>gain</code>: linear gain multiplier to multiply the source by</li>
+</ul>
+<hr />
+<h3 id="pmsfformantmodelfofsmooth"><code>(pm.)SFFormantModelFofSmooth</code></h3>
+<p>Simple formant/vocal synthesizer based on a source/filter model. The source
+is just a periodic impulse and the "filter" is a bank of FOF filters.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Voice type can be selected but must correspond to
+the frequency range of the synthesized voice to be realistic.</p>
+<h4 id="usage_137">Usage</h4>
+<pre><code>SFFormantModelFofSmooth(voiceType,vowel,freq,gain) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u</li>
+<li><code>freq</code>: the fundamental frequency of the source signal</li>
+<li><code>gain</code>: linear gain multiplier to multiply the source by</li>
+</ul>
+<hr />
+<h3 id="pmsfformantmodelbp"><code>(pm.)SFFormantModelBP</code></h3>
+<p>Simple formant/vocal synthesizer based on a source/filter model. The source
+is just a sawtooth wave and the "filter" is a bank of resonant bandpass filters.
+Formant parameters are linearly interpolated allowing to go smoothly from
+one vowel to another. Voice type can be selected but must correspond to
+the frequency range of the synthesized voice to be realistic.</p>
+<p>The formant data used here come from the CSOUND manual
+* <a href="http://www.csounds.com/manual/html/">http://www.csounds.com/manual/html/</a>.</p>
+<h4 id="usage_138">Usage</h4>
+<pre><code>SFFormantModelBP(voiceType,vowel,exType,freq,gain) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
+          3: soprano, 4: tenor)</li>
+<li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u</li>
+<li><code>exType</code>: voice vs. fricative sound ratio (0-1 where 1 is 100% fricative)</li>
+<li><code>freq</code>: the fundamental frequency of the source signal</li>
+<li><code>gain</code>: linear gain multiplier to multiply the source by</li>
+</ul>
+<hr />
+<h3 id="pmsfformantmodelfofcycle_ui"><code>(pm.)SFFormantModelFofCycle_ui</code></h3>
+<p>Ready-to-use source-filter vocal synthesizer with built-in user interface.</p>
+<h4 id="usage_139">Usage</h4>
+<pre><code>SFFormantModelFofCycle_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmsfformantmodelfofsmooth_ui"><code>(pm.)SFFormantModelFofSmooth_ui</code></h3>
+<p>Ready-to-use source-filter vocal synthesizer with built-in user interface.</p>
+<h4 id="usage_140">Usage</h4>
+<pre><code>SFFormantModelFofSmooth_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmsfformantmodelbp_ui"><code>(pm.)SFFormantModelBP_ui</code></h3>
+<p>Ready-to-use source-filter vocal synthesizer with built-in user interface.</p>
+<h4 id="usage_141">Usage</h4>
+<pre><code>SFFormantModelBP_ui : _
+</code></pre>
+
+<hr />
+<h3 id="pmsfformantmodelfofcycle_ui_midi"><code>(pm.)SFFormantModelFofCycle_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-controllable source-filter vocal synthesizer.</p>
+<h4 id="usage_142">Usage</h4>
+<pre><code>SFFormantModelFofCycle_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmsfformantmodelfofsmooth_ui_midi"><code>(pm.)SFFormantModelFofSmooth_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-controllable source-filter vocal synthesizer.</p>
+<h4 id="usage_143">Usage</h4>
+<pre><code>SFFormantModelFofSmooth_ui_MIDI : _
+</code></pre>
+
+<hr />
+<h3 id="pmsfformantmodelbp_ui_midi"><code>(pm.)SFFormantModelBP_ui_MIDI</code></h3>
+<p>Ready-to-use MIDI-controllable source-filter vocal synthesizer.</p>
+<h4 id="usage_144">Usage</h4>
+<pre><code>SFFormantModelBP_ui_MIDI : _
+</code></pre>
+
+<h2 id="misc-functions">Misc Functions</h2>
+<hr />
+<h3 id="pmallpassnl"><code>(pm.)allpassNL</code></h3>
+<p>Bidirectional block adding nonlinearities in both directions in a chain.
+Nonlinearities are created by modulating the coefficients of a passive
+allpass filter by the signal it is processing.</p>
+<h4 id="usage_145">Usage</h4>
+<pre><code>chain(... : allpassNL(nonlinearity) : ...)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>nonlinearity</code>: amount of nonlinearity to be added (0-1)</li>
+</ul>
+<hr />
+<h3 id="modalmodel"><code>modalModel</code></h3>
+<p>Implement multiple resonance modes using resonant bandpass filters.</p>
+<h4 id="usage_146">Usage</h4>
+<pre><code>_ : modalModel(n, freqs, t60s, gains) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: number of given modes</li>
+<li><code>freqs</code> : list of filter center freqencies</li>
+<li><code>t60s</code> : list of mode resonance durations (in seconds)</li>
+<li><code>gains</code> : list of mode gains (0-1)</li>
+</ul>
+<p>For example, to generate a model with 2 modes (440 Hz and 660 Hz, a
+fifth) where the higher one decays faster and is attenuated:</p>
+<pre><code>os.impulse : modalModel(2, (440, 660),
+                           (0.5, 0.25),
+                           (ba.db2linear(-1), ba.db2linear(-6)) : _
+</code></pre>
+
+<p>Further reading: <a href="https:raw.githubusercontent.com/grame-cncm/faust/master-dev/tools/physicalModeling/ir2dsp/lacPaper2017.pdf">Grumiaux et. al., 2017:
+Impulse-Response and CAD-Mod el-Based Physical Modeling in
+Faust</a></p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

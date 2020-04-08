@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> compressors  - Faust Libraries</title>
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="../..">Faust Libraries</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../..">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../../using/"> Overview </a>
+</li>
+                                    
+<li >
+    <a href="../../standardFunctions/"> Standard Functions </a>
+</li>
+                                    
+<li >
+    <a href="../../primitives/"> Primitives </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../analyzers/"> analyzers </a>
+</li>
+                                    
+<li >
+    <a href="../basics/"> basics </a>
+</li>
+                                    
+<li class="active">
+    <a href="./"> compressors </a>
+</li>
+                                    
+<li >
+    <a href="../delays/"> delays </a>
+</li>
+                                    
+<li >
+    <a href="../demos/"> demos </a>
+</li>
+                                    
+<li >
+    <a href="../dx7/"> dx7 </a>
+</li>
+                                    
+<li >
+    <a href="../envelopes/"> envelopes </a>
+</li>
+                                    
+<li >
+    <a href="../filters/"> filters </a>
+</li>
+                                    
+<li >
+    <a href="../hoa/"> hoa </a>
+</li>
+                                    
+<li >
+    <a href="../interpolators/"> interpolators </a>
+</li>
+                                    
+<li >
+    <a href="../maths/"> maths </a>
+</li>
+                                    
+<li >
+    <a href="../misceffects/"> misceffects </a>
+</li>
+                                    
+<li >
+    <a href="../oscillators/"> oscillators </a>
+</li>
+                                    
+<li >
+    <a href="../noises/"> noises </a>
+</li>
+                                    
+<li >
+    <a href="../phaflangers/"> phaflangers </a>
+</li>
+                                    
+<li >
+    <a href="../physmodels/"> physmodels </a>
+</li>
+                                    
+<li >
+    <a href="../reducemaps/"> reducemaps </a>
+</li>
+                                    
+<li >
+    <a href="../reverbs/"> reverbs </a>
+</li>
+                                    
+<li >
+    <a href="../routes/"> routes </a>
+</li>
+                                    
+<li >
+    <a href="../signals/"> signals </a>
+</li>
+                                    
+<li >
+    <a href="../soundfiles/"> soundfiles </a>
+</li>
+                                    
+<li >
+    <a href="../spats/"> spats </a>
+</li>
+                                    
+<li >
+    <a href="../synths/"> synths </a>
+</li>
+                                    
+<li >
+    <a href="../vaeffects/"> vaeffects </a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../basics/">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="../delays/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#compressorslib">compressors.lib</a></li>
+            <li><a href="#functions-reference">Functions Reference</a></li>
+            <li><a href="#backward-compatibility-section">Backward compatibility section</a></li>
+            <li><a href="#functions-reference_1">Functions Reference</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="compressorslib">compressors.lib</h1>
+<p>A library of compressor effects. Its official prefix is <code>co</code>.</p>
+<h2 id="functions-reference">Functions Reference</h2>
+<hr />
+<h3 id="copeak_compression_gain_mono"><code>(co.)peak_compression_gain_mono</code></h3>
+<p>Mono dynamic range compressor gain computer.
+<code>peak_compression_gain_mono</code> is a standard Faust function</p>
+<h4 id="usage">Usage</h4>
+<pre><code>_ : peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+</ul>
+<h4 id="references">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<hr />
+<h3 id="copeak_compression_gain_n_chan"><code>(co.)peak_compression_gain_N_chan</code></h3>
+<p>N channel dynamic range compressor gain computer.
+<code>peak_compression_gain_N_chan</code> is a standard Faust function</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>si.bus(N) : peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>N</code>: the number of channels of the compressor
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+</ul>
+<h4 id="references_1">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<hr />
+<h3 id="coffcompressor_n_chan"><code>(co.)FFcompressor_N_chan</code></h3>
+<p>feed forward N channel dynamic range compressor.
+<code>FFcompressor_N_chan</code> is a standard Faust function</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>si.bus(N) : FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) : si.bus(N)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>meter</code>: a gain reduction meter. It can be implemented like so:
+meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<li><code>N</code>: the number of channels of the compressor
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+</ul>
+<h4 id="references_2">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<hr />
+<h3 id="cofbcompressor_n_chan"><code>(co.)FBcompressor_N_chan</code></h3>
+<p>feed back N channel dynamic range compressor.
+<code>FBcompressor_N_chan</code> is a standard Faust function</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>si.bus(N) : FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) : si.bus(N)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>meter</code>: a gain reduction meter. It can be implemented like so:
+meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<li><code>N</code>: the number of channels of the compressor
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+</ul>
+<h4 id="references_3">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<hr />
+<h3 id="cofffbcompressor_n_chan"><code>(co.)FFFBcompressor_N_chan</code></h3>
+<p>feed forward / feed back N channel dynamic range compressor.
+the feedback part has a much higher strength, so they end up sounding similar
+<code>FFFBcompressor_N_chan</code> is a standard Faust function</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>si.bus(N) : FFFBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>FFFB</code>: fade between feed forward (0) and feed back (1) compression.</li>
+<li><code>meter</code>: a gain reduction meter. It can be implemented like so:
+meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<li><code>N</code>: the number of channels of the compressor
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+</ul>
+<h4 id="references_4">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<hr />
+<h3 id="corms_compression_gain_mono"><code>(co.)RMS_compression_gain_mono</code></h3>
+<p>Mono RMS dynamic range compressor gain computer.
+<code>RMS_compression_gain_mono</code> is a standard Faust function</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>_ : RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+</ul>
+<h4 id="references_5">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<hr />
+<h3 id="corms_compression_gain_n_chan"><code>(co.)RMS_compression_gain_N_chan</code></h3>
+<p>RMS N channel dynamic range compressor gain computer.
+<code>RMS_compression_gain_N_chan</code> is a standard Faust function</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>si.bus(N) : RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>N</code>: the number of channels of the compressor
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+</ul>
+<h4 id="references_6">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<hr />
+<h3 id="corms_fffbcompressor_n_chan"><code>(co.)RMS_FFFBcompressor_N_chan</code></h3>
+<p>RMS feed forward / feed back N channel dynamic range compressor.
+the feedback part has a much higher strength, so they end up sounding similar
+<code>RMS_FFFBcompressor_N_chan</code> is a standard Faust function</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>si.bus(N) : RMS_FFFBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>FFFB</code>: fade between feed forward (0) and feed back (1) compression.</li>
+<li><code>meter</code>: a gain reduction meter. It can be implemented like so:
+meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<li><code>N</code>: the number of channels of the compressor
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+to save CPU we cheat a bit, in a similar way as in the original libs:
+instead of crosfading between two sets of gain calculators as above,
+we take the abs of the audio from both the FF and FB, and crossfade between those,
+and feed that into one set of gain calculators
+again the strength is much higher when in FB mode, but implemented differently</li>
+</ul>
+<h4 id="references_7">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<hr />
+<h3 id="corms_fbcompressor_peak_limiter_n_chan"><code>(co.)RMS_FBcompressor_peak_limiter_N_chan</code></h3>
+<p>N channel RMS feed back compressor into peak limiter feeding back into the FB compressor.
+By combining them this way, they complement each other optimally:
+The RMS compressor doesn't have to deal with the peaks,
+and the peak limiter get's spared from the steady state signal.
+the feedback part has a much higher strength, so they end up sounding similar
+<code>RMS_FBcompressor_peak_limiter_N_chan</code> is a standard Faust function</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>si.bus(N) : RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,N) : si.bus(N)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>threshLim</code>: dB level threshold above which the brick wall limiter kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up
+this is also used as the release time of the limiter</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.
+the limiter uses a knee half this size</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>meter</code>: a gain reduction meter. It can be implemented like so:
+meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<li><code>N</code>: the number of channels of the compressor
+It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in faust
+Sometimes even bigger ratios are usefull:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+</ul>
+<h4 id="references_8">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design
+A Tutorial and Analysis
+DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
+MICHAEL MASSBERG (michael@massberg.org)
+AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+</ul>
+<h2 id="backward-compatibility-section">Backward compatibility section</h2>
+<h2 id="functions-reference_1">Functions Reference</h2>
+<hr />
+<h3 id="cocompressor_mono"><code>(co.)compressor_mono</code></h3>
+<p>Mono dynamic range compressors.
+<code>compressor_mono</code> is a standard Faust function.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>_ : compressor_mono(ratio,thresh,att,rel) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>ratio</code>: compression ratio (1 = no compression, &gt;1 means compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in (0 dB = max level)</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+</ul>
+<h4 id="references_9">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html">https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html</a></li>
+<li>Albert Graef's "faust2pd"/examples/synth/compressor_.dsp</li>
+<li>More features: <a href="https://github.com/magnetophon/faustCompressors">https://github.com/magnetophon/faustCompressors</a></li>
+</ul>
+<hr />
+<h3 id="cocompressor_stereo"><code>(co.)compressor_stereo</code></h3>
+<p>Stereo dynamic range compressors.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>_,_ : compressor_stereo(ratio,thresh,att,rel) : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>ratio</code>: compression ratio (1 = no compression, &gt;1 means compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in (0 dB = max level)</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+</ul>
+<h4 id="references_10">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html">https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html</a></li>
+<li>Albert Graef's "faust2pd"/examples/synth/compressor_.dsp</li>
+<li>More features: <a href="https://github.com/magnetophon/faustCompressors">https://github.com/magnetophon/faustCompressors</a></li>
+</ul>
+<hr />
+<h3 id="colimiter_1176_r4_mono"><code>(co.)limiter_1176_R4_mono</code></h3>
+<p>A limiter guards against hard-clipping.  It can be
+implemented as a compressor having a high threshold (near the
+clipping level), fast attack and release, and high ratio.  Since
+the ratio is so high, some knee smoothing is
+desirable ("soft limiting").  This example is intended
+to get you started using compressor_* as a limiter, so all
+parameters are hardwired to nominal values here.
+Ratios: 4 (moderate compression), 8 (severe compression),
+         12 (mild limiting), or 20 to 1 (hard limiting)
+  Att: 20-800 MICROseconds (Note: scaled by ratio in the 1176)
+  Rel: 50-1100 ms (Note: scaled by ratio in the 1176)
+  Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
+    Faster attack gives "more bite" (e.g. on vocals)
+    He hears a bright, clear eq effect as well (not implemented here).
+<code>limiter_1176_R4_mono</code> is a standard Faust function.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code> _ : limiter_1176_R4_mono : _;
+</code></pre>
+
+<h4 id="reference">Reference:</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/1176_Peak_Limiter">http://en.wikipedia.org/wiki/1176_Peak_Limiter</a></li>
+</ul>
+<hr />
+<h3 id="colimiter_1176_r4_stereo"><code>(co.)limiter_1176_R4_stereo</code></h3>
+<p>A limiter guards against hard-clipping.  It can be
+implemented as a compressor having a high threshold (near the
+clipping level), fast attack and release, and high ratio.  Since
+the ratio is so high, some knee smoothing is
+desirable ("soft limiting").  This example is intended
+to get you started using compressor_* as a limiter, so all
+parameters are hardwired to nominal values here.
+Ratios: 4 (moderate compression), 8 (severe compression),
+         12 (mild limiting), or 20 to 1 (hard limiting)
+  Att: 20-800 MICROseconds (Note: scaled by ratio in the 1176)
+  Rel: 50-1100 ms (Note: scaled by ratio in the 1176)
+  Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
+    Faster attack gives "more bite" (e.g. on vocals)
+    He hears a bright, clear eq effect as well (not implemented here)</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code> _,_ : limiter_1176_R4_stereo : _,_;
+</code></pre>
+
+<h4 id="reference_1">Reference:</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/1176_Peak_Limiter">http://en.wikipedia.org/wiki/1176_Peak_Limiter</a></li>
+</ul></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

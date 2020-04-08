@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> oscillators  - Faust Libraries</title>
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="../..">Faust Libraries</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../..">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../../using/"> Overview </a>
+</li>
+                                    
+<li >
+    <a href="../../standardFunctions/"> Standard Functions </a>
+</li>
+                                    
+<li >
+    <a href="../../primitives/"> Primitives </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../analyzers/"> analyzers </a>
+</li>
+                                    
+<li >
+    <a href="../basics/"> basics </a>
+</li>
+                                    
+<li >
+    <a href="../compressors/"> compressors </a>
+</li>
+                                    
+<li >
+    <a href="../delays/"> delays </a>
+</li>
+                                    
+<li >
+    <a href="../demos/"> demos </a>
+</li>
+                                    
+<li >
+    <a href="../dx7/"> dx7 </a>
+</li>
+                                    
+<li >
+    <a href="../envelopes/"> envelopes </a>
+</li>
+                                    
+<li >
+    <a href="../filters/"> filters </a>
+</li>
+                                    
+<li >
+    <a href="../hoa/"> hoa </a>
+</li>
+                                    
+<li >
+    <a href="../interpolators/"> interpolators </a>
+</li>
+                                    
+<li >
+    <a href="../maths/"> maths </a>
+</li>
+                                    
+<li >
+    <a href="../misceffects/"> misceffects </a>
+</li>
+                                    
+<li class="active">
+    <a href="./"> oscillators </a>
+</li>
+                                    
+<li >
+    <a href="../noises/"> noises </a>
+</li>
+                                    
+<li >
+    <a href="../phaflangers/"> phaflangers </a>
+</li>
+                                    
+<li >
+    <a href="../physmodels/"> physmodels </a>
+</li>
+                                    
+<li >
+    <a href="../reducemaps/"> reducemaps </a>
+</li>
+                                    
+<li >
+    <a href="../reverbs/"> reverbs </a>
+</li>
+                                    
+<li >
+    <a href="../routes/"> routes </a>
+</li>
+                                    
+<li >
+    <a href="../signals/"> signals </a>
+</li>
+                                    
+<li >
+    <a href="../soundfiles/"> soundfiles </a>
+</li>
+                                    
+<li >
+    <a href="../spats/"> spats </a>
+</li>
+                                    
+<li >
+    <a href="../synths/"> synths </a>
+</li>
+                                    
+<li >
+    <a href="../vaeffects/"> vaeffects </a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../misceffects/">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="../noises/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#oscillatorslib">oscillators.lib</a></li>
+            <li><a href="#wave-table-based-oscillators">Wave-Table-Based Oscillators</a></li>
+            <li><a href="#lfos">LFOs</a></li>
+            <li><a href="#low-frequency-sawtooths">Low Frequency Sawtooths</a></li>
+            <li><a href="#bandlimited-sawtooth">Bandlimited Sawtooth</a></li>
+            <li><a href="#bandlimited-pulse-square-and-impulse-trains">Bandlimited Pulse, Square, and Impulse Trains</a></li>
+            <li><a href="#filter-based-oscillators">Filter-Based Oscillators</a></li>
+            <li><a href="#waveguide-resonator-based-oscillators">Waveguide-Resonator-Based Oscillators</a></li>
+            <li><a href="#casio-cz-oscillators">Casio CZ Oscillators</a></li>
+            <li><a href="#polyblep-based-oscillators">PolyBLEP-Based Oscillators</a></li>
+            <li><a href="#filter-based-oscillators_1">Filter-Based Oscillators</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="oscillatorslib">oscillators.lib</h1>
+<p>This library contains a collection of sound generators. Its official prefix is <code>os</code>.</p>
+<h2 id="wave-table-based-oscillators">Wave-Table-Based Oscillators</h2>
+<hr />
+<h3 id="ossinwaveform"><code>(os.)sinwaveform</code></h3>
+<p>Sine waveform ready to use with a <code>rdtable</code>.</p>
+<h4 id="usage">Usage</h4>
+<pre><code>sinwaveform(tablesize) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tablesize</code>: the table size</li>
+</ul>
+<hr />
+<h3 id="oscoswaveform"><code>(os.)coswaveform</code></h3>
+<p>Cosine waveform ready to use with a <code>rdtable</code>.</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>coswaveform(tablesize) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tablesize</code>: the table size</li>
+</ul>
+<hr />
+<h3 id="osphasor"><code>(os.)phasor</code></h3>
+<p>A simple phasor to be used with a <code>rdtable</code>.
+<code>phasor</code> is a standard Faust function.</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>phasor(tablesize,freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tablesize</code>: the table size</li>
+<li><code>freq</code>: the frequency of the phasor (Hz)</li>
+</ul>
+<hr />
+<h3 id="oshs_phasor"><code>(os.)hs_phasor</code></h3>
+<p>Hardsyncing phasor to be used with an <code>rdtable</code>.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>hs_phasor(tablesize,freq,c) :  _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>tablesize</code>: the table size</li>
+<li><code>freq</code>: the frequency of the phasor (Hz)</li>
+<li><code>c</code>: a clock signal, <code>c&gt;0</code> resets phase to 0</li>
+</ul>
+<hr />
+<h3 id="ososcsin"><code>(os.)oscsin</code></h3>
+<p>Sine wave oscillator.
+<code>oscsin</code> is a standard Faust function.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>oscsin(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the frequency of the wave (Hz)</li>
+</ul>
+<hr />
+<h3 id="oshs_oscsin"><code>(os.)hs_oscsin</code></h3>
+<p>Sin lookup table with hardsyncing phase.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>hs_oscsin(freq,c) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the fundamental frequency of the phasor</li>
+<li><code>c</code>: a clock signal, <code>c&gt;0</code> resets phase to 0</li>
+</ul>
+<hr />
+<h3 id="ososccos"><code>(os.)osccos</code></h3>
+<p>Cosine wave oscillator.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>osccos(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the frequency of the wave (Hz)</li>
+</ul>
+<hr />
+<h3 id="ososcp"><code>(os.)oscp</code></h3>
+<p>A sine wave generator with controllable phase.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>oscp(freq,p) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the frequency of the wave (Hz)</li>
+<li><code>p</code>: the phase in radian</li>
+</ul>
+<hr />
+<h3 id="ososci"><code>(os.)osci</code></h3>
+<p>Interpolated phase sine wave oscillator.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>osci(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the frequency of the wave (Hz)</li>
+</ul>
+<h2 id="lfos">LFOs</h2>
+<hr />
+<h3 id="oslf_imptrain"><code>(os.)lf_imptrain</code></h3>
+<p>Unit-amplitude low-frequency impulse train.
+<code>lf_imptrain</code> is a standard Faust function.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>lf_imptrain(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
+<hr />
+<h3 id="oslf_pulsetrainpos"><code>(os.)lf_pulsetrainpos</code></h3>
+<p>Unit-amplitude nonnegative LF pulse train, duty cycle between 0 and 1.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>lf_pulsetrainpos(freq,duty) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+<li><code>duty</code>: duty cycle between 0 and 1</li>
+</ul>
+<hr />
+<h3 id="oslf_pulsetrain"><code>(os.)lf_pulsetrain</code></h3>
+<p>Unit-amplitude zero-mean LF pulse train, duty cycle between 0 and 1.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>lf_pulsetrain(freq,duty) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+<li><code>duty</code>: duty cycle between 0 and 1</li>
+</ul>
+<hr />
+<h3 id="oslf_squarewavepos"><code>(os.)lf_squarewavepos</code></h3>
+<p>Positive LF square wave in [0,1]</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>lf_squarewavepos(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
+<hr />
+<h3 id="oslf_squarewave"><code>(os.)lf_squarewave</code></h3>
+<p>Zero-mean unit-amplitude LF square wave.
+<code>lf_squarewave</code> is a standard Faust function.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>lf_squarewave(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
+<hr />
+<h3 id="oslf_trianglepos"><code>(os.)lf_trianglepos</code></h3>
+<p>Positive unit-amplitude LF positive triangle wave.</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>lf_trianglepos(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
+<hr />
+<h3 id="oslf_triangle"><code>(os.)lf_triangle</code></h3>
+<p>Positive unit-amplitude LF triangle wave
+<code>lf_triangle</code> is a standard Faust function.</p>
+<h4 id="usage_15">Usage</h4>
+<pre><code>lf_triangle(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
+<h2 id="low-frequency-sawtooths">Low Frequency Sawtooths</h2>
+<hr />
+<h3 id="oslf_rawsaw"><code>(os.)lf_rawsaw</code></h3>
+<p>Simple sawtooth waveform oscillator between 0 and period in samples.</p>
+<h4 id="usage_16">Usage</h4>
+<pre><code>lf_rawsaw(periodsamps)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>periodsamps</code>: number of periods per samples</li>
+</ul>
+<hr />
+<h3 id="oslf_sawpos_phase"><code>(os.)lf_sawpos_phase</code></h3>
+<p>Simple sawtooth waveform oscillator between 0 and 1
+with phase control.</p>
+<h4 id="usage_17">Usage</h4>
+<pre><code>lf_sawpos_phase(freq,phase)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+<li><code>phase</code>: phase</li>
+</ul>
+<hr />
+<h3 id="oslf_sawpos"><code>(os.)lf_sawpos</code></h3>
+<p>Simple sawtooth waveform oscillator between 0 and 1.</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>lf_sawpos(freq)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<hr />
+<h3 id="oslf_saw"><code>(os.)lf_saw</code></h3>
+<p>Simple sawtooth waveform.
+<code>lf_saw</code> is a standard Faust function.</p>
+<h4 id="usage_19">Usage</h4>
+<pre><code>lf_saw(freq)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h2 id="bandlimited-sawtooth">Bandlimited Sawtooth</h2>
+<hr />
+<h3 id="ossawn"><code>(os.)sawN</code></h3>
+<p>Bandlimited Sawtooth</p>
+<p><code>sawN(N,freq)</code>, <code>sawNp</code>, <code>saw2dpw(freq)</code>, <code>saw2(freq)</code>, <code>saw3(freq)</code>,
+<code>saw4(freq)</code>, <code>saw5(freq)</code>, <code>saw6(freq)</code>, <code>sawtooth(freq)</code>, <code>saw2f2(freq)</code>
+<code>saw2f4(freq)</code></p>
+<h4 id="method-1-saw2">Method 1 (<code>saw2</code>)</h4>
+<p>Polynomial Transition Regions (PTR) (for aliasing suppression).</p>
+<h5 id="references">References</h5>
+<ul>
+<li>Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio
+    Signals Using Polynomial Transition Regions," in Signal Processing
+    Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012</li>
+<li><a href="https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9">https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9</a></li>
+<li><a href="http://research.spa.aalto.fi/publications/papers/splptr/">http://research.spa.aalto.fi/publications/papers/splptr/</a></li>
+</ul>
+<h4 id="method-2-sawn">Method 2 (<code>sawN</code>)</h4>
+<p>Differentiated Polynomial Waves (DPW) (for aliasing suppression).</p>
+<h5 id="reference">Reference</h5>
+<p>"Alias-Suppressed Oscillators based on Differentiated Polynomial Waveforms",
+Vesa Valimaki, Juhan Nam, Julius Smith, and Jonathan Abel,
+IEEE Tr. Acoustics, Speech, and Language Processing (IEEE-ASLP),
+Vol. 18, no. 5, May 2010.</p>
+<h4 id="other-cases">Other Cases</h4>
+<p>Correction-filtered versions of <code>saw2</code>: <code>saw2f2</code>, <code>saw2f4</code>
+The correction filter compensates "droop" near half the sampling rate.
+See reference for sawN.</p>
+<h4 id="usage_20">Usage</h4>
+<pre><code>sawN(N,freq) : _
+sawNp(N,freq,phase) : _
+saw2dpw(freq) : _
+saw2(freq) : _
+saw3(freq) : _  based on sawN
+saw4(freq) : _  based on sawN
+saw5(freq) : _  based on sawN
+saw6(freq) : _  based on sawN
+sawtooth(freq) : _  = saw2
+saw2f2(freq) : _
+saw2f4(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>N</code>: polynomial order</li>
+<li><code>freq</code>: frequency in Hz</li>
+<li><code>phase</code>: phase
+--- sawN for N = 1 to 6 ---</li>
+</ul>
+<hr />
+<h3 id="ossawnp"><code>(os.)sawNp</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<hr />
+<h3 id="ossaw2dpw"><code>(os.)saw2dpw</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<hr />
+<h3 id="ossaw3"><code>(os.)saw3</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<hr />
+<h3 id="ossawtooth"><code>(os.)sawtooth</code></h3>
+<p>Alias-free sawtooth wave. 2nd order interpolation (based
+on <code>saw2</code>).
+<code>sawtooth</code> is a standard Faust function.</p>
+<h4 id="usage_21">Usage</h4>
+<pre><code>sawtooth(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<hr />
+<h3 id="ossaw2f2"><code>(os.)saw2f2</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<hr />
+<h3 id="ossaw2f4"><code>(os.)saw2f4</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<h2 id="bandlimited-pulse-square-and-impulse-trains">Bandlimited Pulse, Square, and Impulse Trains</h2>
+<hr />
+<h3 id="ospulsetrainn"><code>(os.)pulsetrainN</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<hr />
+<h3 id="ospulsetrain"><code>(os.)pulsetrain</code></h3>
+<p>Bandlimited pulse train oscillator. Based on <code>pulsetrainN(2)</code>.
+<code>pulsetrain</code> is a standard Faust function.</p>
+<h4 id="usage_22">Usage</h4>
+<pre><code>pulsetrain(freq, duty) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+<li><code>duty</code>: duty cycle between 0 and 1</li>
+</ul>
+<hr />
+<h3 id="ossquaren"><code>(os.)squareN</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<hr />
+<h3 id="ossquare"><code>(os.)square</code></h3>
+<p>Bandlimited square wave oscillator. Based on <code>squareN(2)</code>.
+<code>square</code> is a standard Faust function.</p>
+<h4 id="usage_23">Usage</h4>
+<pre><code>square(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<hr />
+<h3 id="osimpulse"><code>(os.)impulse</code></h3>
+<p>One-time impulse generated when the Faust process is started.
+<code>impulse</code> is a standard Faust function.</p>
+<h4 id="usage_24">Usage</h4>
+<pre><code>impulse : _
+</code></pre>
+
+<hr />
+<h3 id="osimptrainn"><code>(os.)imptrainN</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<hr />
+<h3 id="osimptrain"><code>(os.)imptrain</code></h3>
+<p>Bandlimited impulse train generator. Based on <code>imptrainN(2)</code>.
+<code>imptrain</code> is a standard Faust function.</p>
+<h4 id="usage_25">Usage</h4>
+<pre><code>imptrain(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<hr />
+<h3 id="ostrianglen"><code>(os.)triangleN</code></h3>
+<p>TODO: MarkDown doc in comments</p>
+<hr />
+<h3 id="ostriangle"><code>(os.)triangle</code></h3>
+<p>Bandlimited triangle wave oscillator. Based on <code>triangleN(2)</code>.
+<code>triangle</code> is a standard Faust function.</p>
+<h4 id="usage_26">Usage</h4>
+<pre><code>triangle(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h2 id="filter-based-oscillators">Filter-Based Oscillators</h2>
+<hr />
+<h3 id="ososcb"><code>(os.)oscb</code></h3>
+<p>Sinusoidal oscillator based on the biquad.</p>
+<h4 id="usage_27">Usage</h4>
+<pre><code>oscb(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<hr />
+<h3 id="ososcrq"><code>(os.)oscrq</code></h3>
+<p>Sinusoidal (sine and cosine) oscillator based on 2D vector rotation,
+ = undamped "coupled-form" resonator
+ = lossless 2nd-order normalized ladder filter.</p>
+<h4 id="usage_28">Usage</h4>
+<pre><code>oscrq(freq) : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h4 id="reference_1">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
+</ul>
+<hr />
+<h3 id="ososcrs"><code>(os.)oscrs</code></h3>
+<p>Sinusoidal (sine) oscillator based on 2D vector rotation,
+ = undamped "coupled-form" resonator
+ = lossless 2nd-order normalized ladder filter.</p>
+<h4 id="usage_29">Usage</h4>
+<pre><code>oscrs(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h4 id="reference_2">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
+</ul>
+<hr />
+<h3 id="ososcrc"><code>(os.)oscrc</code></h3>
+<p>Sinusoidal (cosine) oscillator based on 2D vector rotation,
+ = undamped "coupled-form" resonator
+ = lossless 2nd-order normalized ladder filter.</p>
+<h4 id="usage_30">Usage</h4>
+<pre><code>oscrc(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h4 id="reference_3">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
+</ul>
+<hr />
+<h3 id="ososcs"><code>(os.)oscs</code></h3>
+<p>Sinusoidal oscillator based on the state variable filter
+= undamped "modified-coupled-form" resonator
+= "magic circle" algorithm used in graphics.</p>
+<hr />
+<h3 id="ososc"><code>(os.)osc</code></h3>
+<p>Default sine wave oscillator (same as <a href="#oscsin">oscsin</a>).
+<code>osc</code> is a standard Faust function.</p>
+<h4 id="usage_31">Usage</h4>
+<pre><code>osc(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: the frequency of the wave (Hz)</li>
+</ul>
+<h2 id="waveguide-resonator-based-oscillators">Waveguide-Resonator-Based Oscillators</h2>
+<hr />
+<h3 id="ososcw"><code>(os.)oscw</code></h3>
+<p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>. Unit-amplitude
+cosine oscillator.</p>
+<h4 id="usage_32">Usage</h4>
+<pre><code>oscwc(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h4 id="reference_4">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
+</ul>
+<hr />
+<h3 id="ososcws"><code>(os.)oscws</code></h3>
+<p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>. Unit-amplitude
+sine oscillator.</p>
+<h4 id="usage_33">Usage</h4>
+<pre><code>oscws(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h4 id="reference_5">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
+</ul>
+<hr />
+<h3 id="ososcwq"><code>(os.)oscwq</code></h3>
+<p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>.
+Unit-amplitude cosine and sine (quadrature) oscillator.</p>
+<h4 id="usage_34">Usage</h4>
+<pre><code>oscwq(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h4 id="reference_6">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
+</ul>
+<hr />
+<h3 id="ososcw_1"><code>(os.)oscw</code></h3>
+<p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>.
+Unit-amplitude cosine oscillator (default).</p>
+<h4 id="usage_35">Usage</h4>
+<pre><code>oscw(freq) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency</li>
+</ul>
+<h4 id="reference_7">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
+</ul>
+<h2 id="casio-cz-oscillators">Casio CZ Oscillators</h2>
+<hr />
+<h3 id="osczsaw"><code>(os.)CZsaw</code></h3>
+<p>Oscillator that mimics the Casio CZ saw oscillator
+<code>CZsaw</code> is a standard Faust function.</p>
+<h4 id="usage_36">Usage</h4>
+<pre><code>CZsaw(fund,index) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
+<li><code>index</code>: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = saw-wave</li>
+</ul>
+<hr />
+<h3 id="osczsquare"><code>(os.)CZsquare</code></h3>
+<p>Oscillator that mimics the Casio CZ square oscillator
+<code>CZsquare</code> is a standard Faust function.</p>
+<h4 id="usage_37">Usage</h4>
+<pre><code>CZsquare(fund,index) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
+<li><code>index</code>: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = square-wave</li>
+</ul>
+<hr />
+<h3 id="osczpulse"><code>(os.)CZpulse</code></h3>
+<p>Oscillator that mimics the Casio CZ pulse oscillator
+<code>CZpulse</code> is a standard Faust function.</p>
+<h4 id="usage_38">Usage</h4>
+<pre><code>CZpulse(fund,index) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
+<li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is closer to a pulse</li>
+</ul>
+<hr />
+<h3 id="osczsinepulse"><code>(os.)CZsinePulse</code></h3>
+<p>Oscillator that mimics the Casio CZ sine/pulse oscillator
+<code>CZsinePulse</code> is a standard Faust function.</p>
+<h4 id="usage_39">Usage</h4>
+<pre><code>CZsinePulse(fund,index) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
+<li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is a sine minus a pulse</li>
+</ul>
+<hr />
+<h3 id="osczhalfsine"><code>(os.)CZhalfSine</code></h3>
+<p>Oscillator that mimics the Casio CZ half sine oscillator
+<code>CZhalfSine</code> is a standard Faust function.</p>
+<h4 id="usage_40">Usage</h4>
+<pre><code>CZhalfSine(fund,index) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
+<li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is somewhere between a saw and a square</li>
+</ul>
+<hr />
+<h3 id="osczressaw"><code>(os.)CZresSaw</code></h3>
+<p>Oscillator that mimics the Casio CZ resonant saw-tooth oscillator
+<code>CZresSaw</code> is a standard Faust function.</p>
+<h4 id="usage_41">Usage</h4>
+<pre><code>CZresSaw(fund,res) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
+<li><code>res</code>: the frequency of resonance as a factor of the fundamental pitch.</li>
+</ul>
+<hr />
+<h3 id="osczrestriangle"><code>(os.)CZresTriangle</code></h3>
+<p>Oscillator that mimics the Casio CZ resonant triangle oscillator
+<code>CZresTriangle</code> is a standard Faust function.</p>
+<h4 id="usage_42">Usage</h4>
+<pre><code>CZresTriangle(fund,res) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
+<li><code>res</code>: the frequency of resonance as a factor of the fundamental pitch.</li>
+</ul>
+<hr />
+<h3 id="osczrestrap"><code>(os.)CZresTrap</code></h3>
+<p>Oscillator that mimics the Casio CZ resonant trapeze oscillator
+<code>CZresTrap</code> is a standard Faust function.</p>
+<h4 id="usage_43">Usage</h4>
+<pre><code>CZresTrap(fund,res) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
+<li><code>res</code>: the frequency of resonance as a factor of the fundamental pitch.</li>
+</ul>
+<h2 id="polyblep-based-oscillators">PolyBLEP-Based Oscillators</h2>
+<hr />
+<h3 id="ospolyblep"><code>(os.)polyblep</code></h3>
+<p>PolyBLEP residual function - used for smoothing steps in the audio signal.</p>
+<h4 id="usage_44">Usage</h4>
+<pre><code>polyblep(Q, phase) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>Q</code>: smoothing factor between 0 and 0.5. Determines how far from the ends of the phase interval the quadratic function is used.</li>
+<li><code>phase</code>: normalised phase (between 0 and 1)</li>
+</ul>
+<hr />
+<h3 id="ospolyblep_saw"><code>(os.)polyblep_saw</code></h3>
+<p>Sawtooth oscillator with suppressed aliasing (using polyBLEP)</p>
+<h4 id="usage_45">Usage</h4>
+<pre><code>polyblep_saw(f) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>f</code>: frequency in Hz </li>
+</ul>
+<hr />
+<h3 id="ospolyblep_square"><code>(os.)polyblep_square</code></h3>
+<p>Square wave oscillator with suppressed aliasing (using polyBLEP)</p>
+<h4 id="usage_46">Usage</h4>
+<pre><code>polyblep_square(f) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>f</code>: frequency in Hz </li>
+</ul>
+<hr />
+<h3 id="ospolyblep_triangle"><code>(os.)polyblep_triangle</code></h3>
+<p>Triangle wave oscillator with suppressed aliasing (using polyBLEP)</p>
+<h4 id="usage_47">Usage</h4>
+<pre><code>polyblep_triangle(f) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>f</code>: frequency in Hz </li>
+</ul>
+<h2 id="filter-based-oscillators_1">Filter-Based Oscillators</h2>
+<hr />
+<h3 id="osquadosc"><code>(os.)quadosc</code></h3>
+<p>Sinusoidal oscillator based on QuadOsc by Martin Vicanek</p>
+<h4 id="usage_48">Usage</h4>
+<pre><code>quadosc(freq) : _
+</code></pre>
+
+<p>where</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
+<h4 id="reference_8">Reference</h4>
+<ul>
+<li><a href="https://vicanek.de/articles/QuadOsc.pdf">https://vicanek.de/articles/QuadOsc.pdf</a></li>
+</ul></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

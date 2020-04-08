@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> analyzers  - Faust Libraries</title>
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="../..">Faust Libraries</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../..">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Introduction <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="../../using/"> Overview </a>
+</li>
+                                    
+<li >
+    <a href="../../standardFunctions/"> Standard Functions </a>
+</li>
+                                    
+<li >
+    <a href="../../primitives/"> Primitives </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li class="active">
+    <a href="./"> analyzers </a>
+</li>
+                                    
+<li >
+    <a href="../basics/"> basics </a>
+</li>
+                                    
+<li >
+    <a href="../compressors/"> compressors </a>
+</li>
+                                    
+<li >
+    <a href="../delays/"> delays </a>
+</li>
+                                    
+<li >
+    <a href="../demos/"> demos </a>
+</li>
+                                    
+<li >
+    <a href="../dx7/"> dx7 </a>
+</li>
+                                    
+<li >
+    <a href="../envelopes/"> envelopes </a>
+</li>
+                                    
+<li >
+    <a href="../filters/"> filters </a>
+</li>
+                                    
+<li >
+    <a href="../hoa/"> hoa </a>
+</li>
+                                    
+<li >
+    <a href="../interpolators/"> interpolators </a>
+</li>
+                                    
+<li >
+    <a href="../maths/"> maths </a>
+</li>
+                                    
+<li >
+    <a href="../misceffects/"> misceffects </a>
+</li>
+                                    
+<li >
+    <a href="../oscillators/"> oscillators </a>
+</li>
+                                    
+<li >
+    <a href="../noises/"> noises </a>
+</li>
+                                    
+<li >
+    <a href="../phaflangers/"> phaflangers </a>
+</li>
+                                    
+<li >
+    <a href="../physmodels/"> physmodels </a>
+</li>
+                                    
+<li >
+    <a href="../reducemaps/"> reducemaps </a>
+</li>
+                                    
+<li >
+    <a href="../reverbs/"> reverbs </a>
+</li>
+                                    
+<li >
+    <a href="../routes/"> routes </a>
+</li>
+                                    
+<li >
+    <a href="../signals/"> signals </a>
+</li>
+                                    
+<li >
+    <a href="../soundfiles/"> soundfiles </a>
+</li>
+                                    
+<li >
+    <a href="../spats/"> spats </a>
+</li>
+                                    
+<li >
+    <a href="../synths/"> synths </a>
+</li>
+                                    
+<li >
+    <a href="../vaeffects/"> vaeffects </a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../../primitives/">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="../basics/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#analyzerslib">analyzers.lib</a></li>
+            <li><a href="#amplitude-tracking">Amplitude Tracking</a></li>
+            <li><a href="#spectrum-analyzers">Spectrum-Analyzers</a></li>
+            <li><a href="#mth-octave-spectral-level">Mth-Octave Spectral Level</a></li>
+            <li><a href="#arbritary-crossover-filter-banks-and-spectrum-analyzers">Arbritary-Crossover Filter-Banks and Spectrum Analyzers</a></li>
+            <li><a href="#fast-fourier-transform-fft-and-its-inverse-ifft">Fast Fourier Transform (fft) and its Inverse (ifft)</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="analyzerslib">analyzers.lib</h1>
+<p>Faust Analyzers library. Its official prefix is <code>an</code>.</p>
+<h2 id="amplitude-tracking">Amplitude Tracking</h2>
+<hr />
+<h3 id="anamp_follower"><code>(an.)amp_follower</code></h3>
+<p>Classic analog audio envelope follower with infinitely fast rise and
+exponential decay.  The amplitude envelope instantaneously follows
+the absolute value going up, but then floats down exponentially.</p>
+<p><code>amp_follower</code> is a standard Faust function.</p>
+<h4 id="usage">Usage</h4>
+<pre><code>_ : amp_follower(rel) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>rel</code>: release time = amplitude-envelope time-constant (sec) going down</li>
+</ul>
+<h4 id="reference">Reference</h4>
+<ul>
+<li>Musical Engineer's Handbook, Bernie Hutchins, Ithaca NY, 1975 Electronotes
+Newsletter, Bernie Hutchins</li>
+</ul>
+<hr />
+<h3 id="anamp_follower_ud"><code>(an.)amp_follower_ud</code></h3>
+<p>Envelope follower with different up and down time-constants
+(also called a "peak detector").</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>   _ : amp_follower_ud(att,rel) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>att</code>: attack time = amplitude-envelope time constant (sec) going up</li>
+<li><code>rel</code>: release time = amplitude-envelope time constant (sec) going down</li>
+</ul>
+<h4 id="note">Note</h4>
+<p>We assume rel &gt;&gt; att.  Otherwise, consider rel ~ max(rel,att).
+For audio, att is normally faster (smaller) than rel (e.g., 0.001 and 0.01).
+Use <code>amp_follower_ar</code> below to remove this restriction.</p>
+<h4 id="reference_1">Reference</h4>
+<ul>
+<li>"Digital Dynamic Range Compressor Design --- A Tutorial and Analysis", by
+  Dimitrios Giannoulis, Michael Massberg, and Joshua D. Reiss</li>
+<li><a href="http://www.eecs.qmul.ac.uk/~josh/documents/GiannoulisMassbergReissdynamicrangecompressionJAES2012.pdf">http://www.eecs.qmul.ac.uk/~josh/documents/GiannoulisMassbergReissdynamicrangecompressionJAES2012.pdf</a></li>
+</ul>
+<hr />
+<h3 id="anamp_follower_ar"><code>(an.)amp_follower_ar</code></h3>
+<p>Envelope follower with independent attack and release times. The
+release can be shorter than the attack (unlike in <code>amp_follower_ud</code>
+above).</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>_ : amp_follower_ar(att,rel) : _;
+</code></pre>
+
+<ul>
+<li>Author Jonatan Liljedahl, revised by RM</li>
+</ul>
+<h2 id="spectrum-analyzers">Spectrum-Analyzers</h2>
+<hr />
+<h3 id="anmth_octave_analyzer"><code>(an.)mth_octave_analyzer</code></h3>
+<p>Octave analyzer.
+<code>mth_octave_analyzer[N]</code> are standard Faust functions.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>_ : mth_octave_analyzer(O,M,ftop,N) : par(i,N,_);  Oth-order Butterworth
+_ : mth_octave_analyzer6e(M,ftop,N) : par(i,N,_);  6th-order elliptic
+</code></pre>
+
+<p>Also for convenience:</p>
+<pre><code>_ : mth_octave_analyzer3(M,ftop,N) : par(i,N,_);  3d-order Butterworth
+_ : mth_octave_analyzer5(M,ftop,N) : par(i,N,_);  5th-roder Butterworth
+mth_octave_analyzer_default = mth_octave_analyzer6e;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>O</code>: order of filter used to split each frequency band into two</li>
+<li><code>M</code>: number of band-slices per octave</li>
+<li><code>ftop</code>: highest band-split crossover frequency (e.g., 20 kHz)</li>
+<li><code>N</code>: total number of bands (including dc and Nyquist)</li>
+</ul>
+<h2 id="mth-octave-spectral-level">Mth-Octave Spectral Level</h2>
+<hr />
+<h3 id="anmth_octave_spectral_level6e"><code>(an.)mth_octave_spectral_level6e</code></h3>
+<p>Spectral level display.</p>
+<h4 id="usage_4">Usage:</h4>
+<pre><code>_ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>M</code>: bands per octave</li>
+<li><code>ftop</code>: lower edge frequency of top band</li>
+<li><code>NBands</code>: number of passbands (including highpass and dc bands),</li>
+<li><code>tau</code>: spectral display averaging-time (time constant) in seconds,</li>
+<li><code>dB_offset</code>: constant dB offset in all band level meters.</li>
+</ul>
+<p>Also for convenience:</p>
+<pre><code>mth_octave_spectral_level_default = mth_octave_spectral_level6e;
+spectral_level = mth_octave_spectral_level(2,10000,20);
+</code></pre>
+
+<hr />
+<h3 id="anthirdhalf_octave_analyzerfilterbank"><code>(an.)[third|half]_octave_[analyzer|filterbank]</code></h3>
+<p>A bunch of special cases based on the different analyzer functions described above:</p>
+<pre><code>third_octave_analyzer(N) = mth_octave_analyzer_default(3,10000,N);
+third_octave_filterbank(N) = mth_octave_filterbank_default(3,10000,N);
+half_octave_analyzer(N) = mth_octave_analyzer_default(2,10000,N);
+half_octave_filterbank(N) = mth_octave_filterbank_default(2,10000,N);
+octave_filterbank(N) = mth_octave_filterbank_default(1,10000,N);
+octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
+</code></pre>
+
+<h4 id="usage_5">Usage</h4>
+<p>See <code>mth_octave_spectral_level_demo</code> in <code>demos.lib</code>.</p>
+<h2 id="arbritary-crossover-filter-banks-and-spectrum-analyzers">Arbritary-Crossover Filter-Banks and Spectrum Analyzers</h2>
+<hr />
+<h3 id="ananalyzer"><code>(an.)analyzer</code></h3>
+<p>Analyzer.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>_ : analyzer(O,freqs) : par(i,N,_);  No delay equalizer
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>O</code>: band-split filter order (ODD integer required for filterbank[i])</li>
+<li><code>freqs</code>: (fc1,fc2,...,fcNs) [in numerically ascending order], where
+          Ns=N-1 is the number of octave band-splits
+          (total number of bands N=Ns+1).</li>
+</ul>
+<p>If frequencies are listed explicitly as arguments, enclose them in parens:</p>
+<pre><code>_ : analyzer(3,(fc1,fc2)) : _,_,_
+</code></pre>
+
+<h2 id="fast-fourier-transform-fft-and-its-inverse-ifft">Fast Fourier Transform (fft) and its Inverse (ifft)</h2>
+<hr />
+<h3 id="angortzelopt"><code>(an.)gortzelOpt</code></h3>
+<p>Optimized Goertzel filter. </p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>_ : goertzelOpt(freq,N) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency to be analyzed</li>
+<li><code>N</code>: the Goertzel block size</li>
+</ul>
+<h4 id="reference_2">Reference</h4>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Goertzel_algorithm">https://en.wikipedia.org/wiki/Goertzel_algorithm</a></li>
+</ul>
+<hr />
+<h3 id="angortzelcomp"><code>(an.)gortzelComp</code></h3>
+<p>Complex Goertzel filter. </p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>_ : goertzelComp(freq,N) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency to be analyzed</li>
+<li><code>N</code>: the Goertzel block size</li>
+</ul>
+<h4 id="reference_3">Reference</h4>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Goertzel_algorithm">https://en.wikipedia.org/wiki/Goertzel_algorithm</a></li>
+</ul>
+<hr />
+<h3 id="angoertzel"><code>(an.)goertzel</code></h3>
+<p>Same as <a href="#goertzelopt"><code>goertzelOpt</code></a>. </p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>_ : goertzel(freq,N) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency to be analyzed</li>
+<li><code>N</code>: the Goertzel block size</li>
+</ul>
+<h4 id="reference_4">Reference</h4>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Goertzel_algorithm">https://en.wikipedia.org/wiki/Goertzel_algorithm</a></li>
+</ul>
+<hr />
+<h3 id="anfft"><code>(an.)fft</code></h3>
+<p>Fast Fourier Transform (FFT)</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>si.cbus(N) : fft(N) : si.cbus(N);
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>si.cbus(N)</code> is a bus of N complex signals, each specified by real and imaginary parts:
+  (r0,i0), (r1,i1), (r2,i2), ...</li>
+<li><code>N</code> is the FFT size (must be a power of 2: 2,4,8,16,...)</li>
+<li><code>fft(N)</code> performs a length <code>N</code> FFT for complex signals (radix 2)</li>
+<li>The output is a bank of N complex signals containing the complex spectrum over time:
+  (R0, I0), (R1,I1), ...</li>
+<li>The dc component is (R0,I0), where I0=0 for real input signals.</li>
+</ul>
+<p>FFTs of Real Signals:</p>
+<ul>
+<li>To perform a sliding FFT over a real input signal, you can say</li>
+</ul>
+<pre><code>process = signal : an.rtocv(N) : an.fft(N);
+</code></pre>
+
+<p>where <code>an.rtocv</code> converts a real (scalar) signal to a complex vector signal having a zero imaginary part.</p>
+<ul>
+<li>
+<p>See <code>an.rfft_analyzer_c</code> (in <code>analyzers.lib</code>) and related functions for more detailed usage examples.</p>
+</li>
+<li>
+<p>Use <code>an.rfft_spectral_level(N,tau,dB_offset)</code> to display the power spectrum of a real signal.</p>
+</li>
+<li>
+<p>See <code>dm.fft_spectral_level_demo(N)</code> in <code>demos.lib</code> for an example GUI driving <code>an.rfft_spectral_level()</code>.</p>
+</li>
+</ul>
+<h4 id="reference_5">Reference</h4>
+<ul>
+<li><a href="https:cnx.org/contents/zmcmahhR@7/Decimation-in-time-DIT-Radix-2">Decimation-in-time (DIT) Radix-2 FFT</a></li>
+</ul>
+<hr />
+<h3 id="anifft"><code>(an.)ifft</code></h3>
+<p>Inverse Fast Fourier Transform (IFFT).</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>si.cbus(N) : ifft(N) : si.cbus(N);
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li>N is the IFFT size (power of 2)</li>
+<li>Input is a complex spectrum represented as interleaved real and imaginary parts:
+  (R0, I0), (R1,I1), (R2,I2), ...</li>
+<li>Output is a bank of N complex signals giving the complex signal in the time domain:
+  (r0, i0), (r1,i1), (r2,i2), ...</li>
+</ul></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
