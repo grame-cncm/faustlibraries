@@ -21,27 +21,25 @@ function makeurl(arg) {
 function makefunction (arg) {
 	gsub(/\/\//, "", arg);
 	gsub(/-*/, "", arg);
-	return "\n----\n### " arg;
+	return "\n----\n### " arg "\n";
 }
 
 function makegroup (arg) {
 	gsub(/\/\//, "", arg);
 	gsub(/=*/, "", arg);
-	return "\n## " arg;
+	return "\n## " arg "\n";
 }
 
-function makeheader () {
-	return "# "LIBNAME "\n" SHORTDESC;
+function makeheader (libname) {
+	return "# "libname "\n";
 }
 
 BEGIN {
-	STARTF = 0;
-	INFUN = 0;
-	HEADER = "";
+	STARTF = 0;		# used to start functions analysis
+	PRINTDOC = 0;
+	INGROUP = 0;
 	NAME = "";
 	VERSION = "";
-	LIBNAME = "";
-	SHORTDESC = "";	
 }
 
 END {
@@ -50,46 +48,43 @@ END {
 
 
 /^\/\/====*$/ { }
-/^\/\/####*$/ { }
-/^\/\/----*$/ { INFUN = 0; }
+/^\/\/####*$/ { PRINTDOC = 0; }	# end documentation lines
+/^\/\/====*$/ { PRINTDOC = 0; }	# end function documentation
+/^\/\/----*$/ { PRINTDOC = 0; }	# end function documentation
 /^\/\/ end/   { }
 
 # scan group names)
 /^\/\/====*[^=]+/ {
-	if (STARTF == 0)
-		print  makeheader();
-	STARTF = 1;
 	print makegroup($0);
+	PRINTDOC = 1;
 }
 
-# scan header (library name)
+# scan headers (library name)
 /^\/\/####*[^#]+/ {
 	gsub(/\/\//, "", $0);
 	gsub(/#*/, "", $0);
-	LIBNAME = $0;
+	print  makeheader($0);
+	PRINTDOC = 1;
 }
 
 # scan function names
 /^\/\/----*[^-]+/ {
-	if (STARTF == 0)
-		print  makeheader();
-	STARTF = 1;
-	INFUN = 1;
 	print makefunction($0);
+	PRINTDOC = 1;
 }
 
 # documentation lines
 /^\/\/ / {
-	line = removeComment($0);
-	line = makeurl(line);
-	if (length(SHORTDESC) == 0)
-		SHORTDESC = line;
-	if (STARTF && INFUN) print line;
+	if (PRINTDOC) {
+		line = removeComment($0);
+		line = makeurl(line);
+		print line;
+	}
 }
 
 # preserve empty commented lines
 /^\/\/$/ {
-	print "";
+	if (PRINTDOC) print "";
 }
 
 # is the following really supported (?)
