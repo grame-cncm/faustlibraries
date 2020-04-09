@@ -43,7 +43,7 @@ declare name "Faust Filters Library";
 //========================================================================================
 
 //----------------------`(fi.)zero`--------------------------
-// One zero filter. Difference equation: $y(n) = x(n) - zx(n-1)$.
+// One zero filter. Difference equation: \(y(n) = x(n) - zx(n-1)\).
 //
 // #### Usage
 //
@@ -65,7 +65,7 @@ zero(z) = _ <: _,mem : _,*(z) : -;
 
 //------------------------`(fi.)pole`---------------------------
 // One pole filter. Could also be called a "leaky integrator".
-// Difference equation: $y(n) = x(n) + py(n-1)$.
+// Difference equation: \(y(n) = x(n) + py(n-1)\).
 //
 // #### Usage
 //
@@ -95,10 +95,10 @@ integrator = + ~ _;
 
 //-------------------`(fi.)dcblockerat`-----------------------
 // DC blocker with configurable break frequency.
-// The amplitude response is substantially flat above $fb$,
-// and sloped at about +6 dB/octave below $fb$.
+// The amplitude response is substantially flat above \(fb\),
+// and sloped at about +6 dB/octave below \(fb\).
 // Derived from the analog transfer function
-// $H(s) = \frac{s}{(s + 2 \pi fb)}$
+// \(H(s) = \frac{s}{(s + 2 \pi fb)}\)
 // by the low-frequency-matching bilinear transform method
 // (i.e., the standard frequency-scaling constant 2*SR).
 //
@@ -1988,7 +1988,7 @@ with { // octave script output:
 // Equivalently, down-modulate the input signal using a complex sinusoid at -SR/4 Hz,
 // lowpass it with a half-band filter, and modulate back up by SR/4 Hz.
 // In Faust/math notation:
-// pospass(N) = $\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})$
+// pospass(N) = \(\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})\)
 //
 // An approximation to the Hilbert transform is given by the
 // imaginary output signal:
