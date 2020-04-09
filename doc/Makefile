@@ -82,6 +82,7 @@ install:
 	pip install mkdocs-pdf-export-plugin
 	pip install markdown-include
 	pip install mkdocs-bootswatch
+	pip install python-markdown-math
 
 uninstall:
 	pip uninstall -y mkdocs-material
