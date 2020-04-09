@@ -252,7 +252,7 @@
 <h2 id="basic-filters">Basic Filters</h2>
 <hr />
 <h3 id="fizero"><code>(fi.)zero</code></h3>
-<p>One zero filter. Difference equation: $y(n) = x(n) - zx(n-1)$.</p>
+<p>One zero filter. Difference equation: <script type="math/tex">y(n) = x(n) - zx(n-1)</script>.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>_ : zero(z) : _
 </code></pre>
@@ -268,7 +268,7 @@
 <hr />
 <h3 id="fipole"><code>(fi.)pole</code></h3>
 <p>One pole filter. Could also be called a "leaky integrator".
-Difference equation: $y(n) = x(n) + py(n-1)$.</p>
+Difference equation: <script type="math/tex">y(n) = x(n) + py(n-1)</script>.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>_ : pole(p) : _
 </code></pre>
@@ -287,10 +287,10 @@ Difference equation: $y(n) = x(n) + py(n-1)$.</p>
 <hr />
 <h3 id="fidcblockerat"><code>(fi.)dcblockerat</code></h3>
 <p>DC blocker with configurable break frequency.
-The amplitude response is substantially flat above $fb$,
-and sloped at about +6 dB/octave below $fb$.
+The amplitude response is substantially flat above <script type="math/tex">fb</script>,
+and sloped at about +6 dB/octave below <script type="math/tex">fb</script>.
 Derived from the analog transfer function
-$H(s) = \frac{s}{(s + 2 \pi fb)}$
+<script type="math/tex">H(s) = \frac{s}{(s + 2 \pi fb)}</script>
 by the low-frequency-matching bilinear transform method
 (i.e., the standard frequency-scaling constant 2*SR).</p>
 <h4 id="usage_2">Usage</h4>
@@ -1243,7 +1243,8 @@ half-band lowpass by modulating it up to the positive-frequency range.
 Equivalently, down-modulate the input signal using a complex sinusoid at -SR/4 Hz,
 lowpass it with a half-band filter, and modulate back up by SR/4 Hz.
 In Faust/math notation:
-pospass(N) = $\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})$</p>
+pospass(N) = <script type="math/tex">\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})</script>
+</p>
 <p>An approximation to the Hilbert transform is given by the
 imaginary output signal:</p>
 <pre><code>hilbert(N) = pospass(N) : !,*(2);
@@ -1547,6 +1548,7 @@ band-split frequencies are passed explicitly as arguments.</p>
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
         <script src="../../js/base.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
         <script src="../../search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
