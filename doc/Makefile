@@ -22,6 +22,7 @@ help:
 	@echo "  serve    : launch the mkdoc server"
 	@echo "Development specific targets are available:"
 	@echo "  md       : build the md files"
+	@echo "  index    : build the index file"
 	@echo "  clean    : removes the output of the md target"
 	@echo "  list     : list libraries (ready to be included in mkdocs.yml menu)"
 
@@ -31,6 +32,7 @@ test:
 ####################################################################
 build:
 	$(MAKE) md
+	$(MAKE) index
 	mkdocs build
 	git checkout $(SITEDIR)/CNAME
 
@@ -58,6 +60,13 @@ $(DOCDIR)/libs :
 $(DOCDIR)/libs/%.md:$(FAUSTLIBS)/%.lib 
 	@echo ========= building $<
 	cat $< | $(AWK) -f scripts/faustlib2md.awk > $@
+
+####################################################################
+# building index
+index: $(DOCDIR)/libs/index.md
+$(DOCDIR)/libs/index.md : $(MD)
+	$(AWK) -f scripts/makeindex.awk $(MD) > $@
+	
 
 ####################################################################
 $(FAUSTDIR):
