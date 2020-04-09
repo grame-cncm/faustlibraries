@@ -15,6 +15,7 @@ BEGIN {
 	OUT = "";
 	SECTION = "";
 	PREVSECTION = "";
+	print "# Faust Libraries Index\n\n--------\n";
 }
 
 END {
@@ -34,5 +35,5 @@ END {
 	link = fun;
 	gsub(/[\[\]\|\(\)\.]/, "", link); 	# remove () [] | and .
 	gsub(" ", "-", link);   				# replace space with -
-	print "[" fun "](" SECTION "/#" tolower(link) ") ";
+	print "[" fun "](" SECTION "/#" tolower(link) ") &nbsp; &nbsp;";
 }
