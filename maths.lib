@@ -573,7 +573,7 @@ modulo(x,N) = (x % N + N) % N;
 //
 // * `x`: signal to analyse
 //------------------------------------------
-isnan = ffunction(int isnan (float),<math.h>,"");
+isnan = ffunction(int isnanf|isnan|isnanl (float),<math.h>,"");
 
 
 //---------------`(ma.)isinf`----------------
@@ -590,7 +590,7 @@ isnan = ffunction(int isnan (float),<math.h>,"");
 //
 // * `x`: signal to analyse
 //------------------------------------------
-isinf = ffunction(int isinf (float),<math.h>,"");
+isinf = ffunction(int isinff|isinf|isinfl (float),<math.h>,"");
 
 nextafter = ffunction(float nextafter(float, float),<math.h>,"");
 
@@ -619,9 +619,9 @@ nextafter = ffunction(float nextafter(float, float),<math.h>,"");
 //
 // <http://en.wikipedia.org/wiki/Chebyshev_polynomial>
 //-------------------------------------------------------------------------
-chebychev(0) = !:1;
-chebychev(1) = _;
-chebychev(n) = _ <: *(2)*chebychev(n-1)-chebychev(n-2);
+chebychev(0,x) = 1;
+chebychev(1,x) = x;
+chebychev(n,x) = 2*x*chebychev(n-1, x) - chebychev(n-2, x);
 
 
 //------------------------`(ma.)chebychevpoly`-------------------------------
