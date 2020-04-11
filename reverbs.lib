@@ -392,26 +392,30 @@ closed source license or any other license if you decide so.
 // TODO: author RM
 mono_freeverb(fb1, fb2, damp, spread) = _ <: par(i,8,lbcf(combtuningL(i)+spread,fb1,damp))
 	:> seq(i,4,fi.allpass_comb(1024, allpasstuningL(i)+spread, -fb2))
-with{
-    origSR = 44100;
-
+with {
+ 
     // Filters parameters
-    combtuningL(0) = 1116*ma.SR/origSR : int;
-    combtuningL(1) = 1188*ma.SR/origSR : int;
-    combtuningL(2) = 1277*ma.SR/origSR : int;
-    combtuningL(3) = 1356*ma.SR/origSR : int;
-    combtuningL(4) = 1422*ma.SR/origSR : int;
-    combtuningL(5) = 1491*ma.SR/origSR : int;
-    combtuningL(6) = 1557*ma.SR/origSR : int;
-    combtuningL(7) = 1617*ma.SR/origSR : int;
+    combtuningL(0) = adaptSR(1116);
+    combtuningL(1) = adaptSR(1188);
+    combtuningL(2) = adaptSR(1277);
+    combtuningL(3) = adaptSR(1356);
+    combtuningL(4) = adaptSR(1422);
+    combtuningL(5) = adaptSR(1491);
+    combtuningL(6) = adaptSR(1557);
+    combtuningL(7) = adaptSR(1617);
 
-    allpasstuningL(0) = 556*ma.SR/origSR : int;
-    allpasstuningL(1) = 441*ma.SR/origSR : int;
-    allpasstuningL(2) = 341*ma.SR/origSR : int;
-    allpasstuningL(3) = 225*ma.SR/origSR : int;
-    // Lowpass Feedback Combfiler:
+    allpasstuningL(0) = adaptSR(556);
+    allpasstuningL(1) = adaptSR(441);
+    allpasstuningL(2) = adaptSR(341);
+    allpasstuningL(3) = adaptSR(225);
+    
+    // Lowpass Feedback Combfilter:
     // https://ccrma.stanford.edu/~jos/pasp/Lowpass_Feedback_Comb_Filter.html
     lbcf(dt, fb, damp) = (+:@(dt)) ~ (*(1-damp) : (+ ~ *(damp)) : *(fb));
+     
+    origSR = 44100;
+    adaptSR(val) = val*ma.SR/origSR : int;
+
 };
 
 
@@ -435,7 +439,7 @@ with{
 // * `spread`: spatial spread in number of samples (for stereo)
 //------------------------------------------------------------
 // TODO: author RM
-stereo_freeverb(fb1, fb2, damp, spread) =  + <: mono_freeverb(fb1, fb2, damp,0), mono_freeverb(fb1, fb2, damp, spread);
+stereo_freeverb(fb1, fb2, damp, spread) =  + <: mono_freeverb(fb1, fb2, damp, 0), mono_freeverb(fb1, fb2, damp, spread);
 
 //########################################################################################
 /************************************************************************
