@@ -1,11 +1,20 @@
 //#################################### interpolators.lib ########################################
-// A library to handle interpolation in Faust. Its official prefix is `it`.
+// A library to handle interpolation. Its official prefix is `it`.
+
+// This library provides several basic interpolation functions as well as interpolators 
+// taking a 'gen' circuit of N outputs producing values to be interpolated, triggered
+// by a 'idv' read index signal. Two points and four points interpolation is implemented.
+//
+// The 'idv' parameter is to be used as a read index. In float (= singleprecision) mode, 
+// we use a technique with a pure integer index and a fractional part in the [0,1] range 
+// to avoid accumulating errors. In -double (= doubleprecision)/-quad (= quadprecision) modes, 
+// we use a standard implementation with a fractional index.
 //########################################################################################
 
 /************************************************************************
 ************************************************************************
 FAUST library file
-Copyright (C) 2019-2010 GRAME, Centre National de Creation Musicale
+Copyright (C) 2019-2020 GRAME, Centre National de Creation Musicale
 ----------------------------------------------------------------------
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as
@@ -35,7 +44,7 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Interpolator Library";
-declare version "0.2";
+declare version "0.3";
 
 ba = library("basics.lib");
 ro = library("routes.lib");
@@ -43,11 +52,7 @@ ma = library("maths.lib");
 
 reset(trig) = (trig-trig') <= 0;
  
-/*
-The 'idv' parameter is to be used as a read index. In float (= singleprecision) mode, we use a technique with a
-pure integer index and a fractional part in the [0,1] range, to avoid accumulating errors.
-The following 3 functions allow to adapt a 'single signal' fractional idv in this [idx, dv] model.
-*/
+// The following 3 functions allow to adapt a 'single signal' fractional idv in this [idx, dv] model.
 
 singleprecision int_part(idv) = idv : _,!;
 singleprecision frac_part(idv) = idv : !,_;
@@ -73,11 +78,7 @@ singleprecision decrease(trig, step, length) = raise(trig, -step, length) : (+(l
 // Modulo decreasing index starting at 'length'
 singleprecision decrease_modulo(trig, step, length) = raise_modulo(trig, -step, length) : (+(length), _);
 
-/*
-The 'idv' parameter is to be used as a read index. In -double (= doubleprecision)/-quad (= quadprecision) modes, 
-we use a standard implementation with a fractional index.
-The following 3 functions allow to adapt a 'single signal' fractional idv in this [idx, dv] model.
-*/
+// The following 3 functions allow to adapt a 'single signal' fractional idv in this [idx, dv] model.
 
 doubleprecision quadprecision int_part(idv) = int(idv);
 doubleprecision quadprecision frac_part(idv) = ma.frac(idv);
@@ -101,8 +102,8 @@ doubleprecision quadprecision decrease(trig, step, length) = raise(trig, -step, 
 // Modulo decreasing index starting at 'length'
 doubleprecision quadprecision decrease_modulo(trig, step, length) = raise_modulo(trig, -step, length) + length;
  
-
-// Two points interpolation functions
+//=========================Two points interpolation functions=============================
+//========================================================================================
 
 //-------`(it.)interpolate_linear`----------
 // Linear interpolation between 2 values
@@ -154,7 +155,8 @@ interpolate_linear(dv,v0,v1) = v0 + dv*(v1-v0);  // (faster than v0*(1-dv)+v1*dv
 interpolate_cosine(dv,v0,v1) = v0 + a2*(v1-v0) with { a2 = 0.5 * (1.0 - cos(dv*ma.PI)); };
 
 
-// For points interpolation functions
+//=========================Four points interpolation functions============================
+//========================================================================================
 
 //-------`(it.)interpolate_cubic`----------
 // Cubic interpolation between 4 values
@@ -184,7 +186,25 @@ interpolate_cubic(dv,v0,v1,v2,v3)
 	= v1 + 0.5 *dv*(v2 - v0 + dv*(2.0*v0 - 5.0*v1 + 4.0*v2 - v3 + dv*(3.0*(v1 - v2) + v3 - v0)));
 
 
-// Interpolator on two points (current and next index), assuming an increasing index
+//=========================Two points interpolators=======================================
+//========================================================================================
+
+//-------`(it.)interpolator_two_points`----------
+// Generic interpolator on two points (current and next index), assuming an increasing index
+//
+// #### Usage
+//
+// ```
+// interpolator_two_points(gen, idv, interpolate_two_points) : _,_... (equal to N = outputs(gen))
+// ```
+//
+// Where:
+//
+// * `gen`: a circuit with an 'idv' reader input that produces N outputs
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
+// * `interpolate_two_points`: a two points interpolation function
+//
+//--------------------------------------------
 
 interpolator_two_points(gen, idv, interpolate_two_points) = (gen(id0), gen(id1))
                                                             : ro.interleave(outputs(gen), 2)
@@ -208,7 +228,7 @@ with {
 // Where:
 //
 // * `gen`: a circuit with an 'idv' reader input that produces N outputs
-// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
 //--------------------------------------------
 
@@ -227,7 +247,7 @@ interpolator_linear(gen, idv) = interpolator_two_points(gen, idv, interpolate_li
 // Where:
 //
 // * `gen`: a circuit with an 'idv' reader input that produces N outputs
-// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
 //--------------------------------------------
 
@@ -237,7 +257,26 @@ interpolator_cosine(gen, idv) = interpolator_two_points(gen, idv, interpolate_co
 // To be used in 'interpolator_select'
 interpolator_null(gen, idv) = interpolator_two_points(gen, idv, \(dv,v0,v1).(v0));
 
-// Interpolator on four points (previous, current and two next indexes), assuming an increasing index
+
+//=========================Four points interpolators======================================
+//========================================================================================
+
+//-------`(it.)interpolator_two_points`----------
+// Generic interpolator on interpolator_four_points points (previous, current and two next indexes), assuming an increasing index
+//
+// #### Usage
+//
+// ```
+// interpolator_four_points(gen, idv, interpolate_four_points) : _,_... (equal to N = outputs(gen))
+// ```
+//
+// Where:
+//
+// * `gen`: a circuit with an 'idv' reader input that produces N outputs
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
+// * `interpolate_four_points`: a four points interpolation function
+//
+//--------------------------------------------
 
 interpolator_four_points(gen, idv, interpolate_four_points) = (gen(id0), gen(id1), gen(id2), gen(id3))
                                                             : ro.interleave(outputs(gen), 4)
@@ -263,7 +302,7 @@ with {
 // Where:
 //
 // * `gen`: a circuit with an 'idv' reader input that produces N outputs
-// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
 //--------------------------------------------
 
@@ -290,7 +329,7 @@ nointerp = MAX_INTER-1;
 // Where:
 //
 // * `gen`: a circuit with an 'idv' reader input that produces N outputs
-// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)
+// * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 // * `sel`: an interpolation algorithm selector in [0..3] (0 = linear, 1 = cosine, 2 = cubic, 3 = nointerp)
 //
 //--------------------------------------------
