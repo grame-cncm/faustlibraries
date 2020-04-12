@@ -104,6 +104,22 @@ crossnn(n) = route(2*n,2*n, par(i,n, ((i+1, n+i+1), (n+i+1, i+1))));
 crossn1(n) = route(n+1,n+1, n+1, 1, par(i, n, i+1, i+2));
 
 
+//--------------`(ro.)cross1n`--------------
+// Cross bus(1) and bus(n).
+//
+// #### Usage
+//
+// ```
+// _,_,... : crossn1(n) : _,_,...
+// ```
+//
+// Where:
+//
+// * `n`: the number of signals in the second `bus`
+//--------------------------------------
+cross1n(n) = route(n+1,n+1, par(i, n+1, i+1, (((i+n)%(n+1))+1)));
+
+
 //--------------------------`(ro.)interleave`------------------------------
 // Interleave row*col cables from column order to row order.
 // input : x(0), x(1), x(2) ..., x(row*col-1)
