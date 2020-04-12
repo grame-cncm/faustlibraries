@@ -78,14 +78,14 @@ cross2 = _,cross(2),_; // for compatibility with some old misceffects.lib functi
 // #### Usage
 //
 // ```
-// _,_,... : crossmm(n) : _,_,...
+// (si.bus(2*n)) : crossnn(n) : (si.bus(2*n))
 // ```
 //
 // Where:
 //
 // * `n`: the number of signals in the `bus`
 //--------------------------------------
-crossnn(n) = route(2*n,2*n, par(i,n, ((i+1, n+i+1), (n+i+1, i+1))));
+crossnn(n) = crossNM(n,n);
 
 
 //--------------`(ro.)crossn1`--------------
@@ -94,14 +94,14 @@ crossnn(n) = route(2*n,2*n, par(i,n, ((i+1, n+i+1), (n+i+1, i+1))));
 // #### Usage
 //
 // ```
-// _,_,... : crossn1(n) : _,_,...
+// (si.bus(n),_) : crossn1(n) : (_,si.bus(n))
 // ```
 //
 // Where:
 //
 // * `n`: the number of signals in the first `bus`
 //--------------------------------------
-crossn1(n) = route(n+1,n+1, n+1, 1, par(i, n, i+1, i+2));
+crossn1(n) = crossNM(n,1);
 
 
 //--------------`(ro.)cross1n`--------------
@@ -110,14 +110,31 @@ crossn1(n) = route(n+1,n+1, n+1, 1, par(i, n, i+1, i+2));
 // #### Usage
 //
 // ```
-// _,_,... : crossn1(n) : _,_,...
+// (_,si.bus(n)) : crossn1(n) : (si.bus(n),_)
 // ```
 //
 // Where:
 //
 // * `n`: the number of signals in the second `bus`
 //--------------------------------------
-cross1n(n) = route(n+1,n+1, par(i, n+1, i+1, (((i+n)%(n+1))+1)));
+cross1n(n) = crossNM(1,n);
+
+
+//--------------`(ro.)crossNM`--------------
+// Cross bus(n) and bus(m).
+//
+// #### Usage
+//
+// ```
+// (si.bus(n),si.bus(m)) : crossn1(n) : (si.bus(m),si.bus(n))
+// ```
+//
+// Where:
+//
+// * `n`: the number of signals in the first `bus`
+// * `m`: the number of signals in the second `bus`
+//--------------------------------------
+crossNM(n,m) = route(n+m,n+m, par(i, n+m, i+1, ( (i+m) %(n+m) ) +1 ));
 
 
 //--------------------------`(ro.)interleave`------------------------------
