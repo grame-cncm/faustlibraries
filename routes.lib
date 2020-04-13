@@ -39,7 +39,7 @@ si = library("signals.lib");
 sp = library("spats.lib");
 
 declare name "Faust Signal Routing Library";
-declare version "0.1";
+declare version "0.2";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -68,7 +68,7 @@ declare version "0.1";
 // ```
 //-----------------------------------------------------------------------------
 // cross n cables : (x1,x2,..,xn) -> (xn,..,x2,x1)
-cross(n) = route(n,n, par(i, n, (i+1, n-i)));
+cross(n) = route(n, n, par(i, n, (i+1, n-i)));
 cross2 = _,cross(2),_; // for compatibility with some old misceffects.lib functions
 
 

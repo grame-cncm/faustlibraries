@@ -68,7 +68,6 @@ declare version "0.0";
 bus(2) = _,_; // avoids a lot of "bus(1)" labels in block diagrams
 bus(n) = par(i, n, _);
 
-
 //--------------`(si.)block`--------------
 // Block - terminate n signals.
 // `block` is a standard Faust function.
@@ -83,8 +82,7 @@ bus(n) = par(i, n, _);
 //
 // * `n`: the number of signals to be blocked
 //--------------------------------------
-block(n) = par(i,n,!);
-
+block(n) = par(i, n, !);
 
 //-----------------------------`(si.)interpolate`-------------------------------
 // Linear interpolation between two signals.
@@ -113,7 +111,6 @@ interpolate(i) = *(1.0-i),*(i) : +;
 // ```
 //---------------------------------------------------------------------
 smoo = si.smooth(0.999);
-
 
 //-----------------------`(si.)polySmooth`--------------------------------
 // A smoothing function based on `smooth` that doesn't smooth when a
