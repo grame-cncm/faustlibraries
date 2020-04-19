@@ -122,6 +122,30 @@ with {
 	inc = freq/float(ma.SR);
 };
 
+//-----------------------`(os.)hsp_phasor`------------------------
+// Hardsyncing phasor with selectable phase to be used with an `rdtable`.
+//
+// #### Usage
+//
+// ```
+// hsp_phasor(tablesize,freq,p,c)
+// ```
+//
+// Where:
+//
+// * `tablesize`: the table size
+// * `freq`: the frequency of the phasor (Hz)
+// * `p`: phase init (0 <= `p` <=1)
+// * `c`: a clock signal, `c>0` resets phase to 0
+//---------------------------------------------------------
+// Author: Christophe Lebreton
+hsp_phasor(tablesize,freq,p,c) = inc : (+ : d)~(-(_<:(_,*(_,clk))):+(clk*p)) : *(tablesize)
+with {
+        clk = c>0;
+        d   = ma.decimal;
+        inc = freq/float(ma.SR);
+};
+
 //-----------------------`(os.)oscsin`------------------------
 // Sine wave oscillator.
 // `oscsin` is a standard Faust function.
