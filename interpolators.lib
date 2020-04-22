@@ -12,6 +12,7 @@
 //
 // Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' uses the 'idv' model.
 // 
+// ```
 // waveform and index step
 // waveform_interpolator(wf, step, interp) = interp(gen, idv)
 // with {
@@ -45,9 +46,11 @@
 //    /* adapts the argument order */
 //    interp_select(sel, gen, idv) = it.interpolator_select(gen, idv, sel);
 // };
+// ```
 // 
 // Tests
 // 
+// ```
 // wf = waveform {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 50.0, 40.0, 30.0, 20.0, 10.0, 0.0};
 // 
 // process = waveform_linear(wf, step), waveform_cosine(wf, step), waveform_cubic(wf, step) with { step = 0.25; };
@@ -93,6 +96,7 @@
 //    /* test index signal */
 //    index = (+(1)~_)-1;   /* starting from 0 */
 // };
+// ```
 //########################################################################################
 
 /************************************************************************
