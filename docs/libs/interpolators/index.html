@@ -200,6 +200,22 @@
             
             <li class="nav-item" data-level="1"><a href="#interpolatorslib" class="nav-link">interpolators.lib</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#two-points-interpolation-functions" class="nav-link">Two points interpolation functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#four-points-interpolation-functions" class="nav-link">Four points interpolation functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#two-points-interpolators" class="nav-link">Two points interpolators</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#four-points-interpolators" class="nav-link">Four points interpolators</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -208,10 +224,87 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="interpolatorslib">interpolators.lib</h1>
-<p>A library to handle interpolation in Faust. Its official prefix is <code>it</code>.</p>
+<p>A library to handle interpolation. Its official prefix is <code>it</code>.</p>
+<p>This library provides several basic interpolation functions as well as interpolators 
+taking a 'gen' circuit of N outputs producing values to be interpolated, triggered
+by a 'idv' read index signal. Two points and four points interpolation is implemented.</p>
+<p>The 'idv' parameter is to be used as a read index. In float (= singleprecision) mode, 
+we use a technique with a pure integer index and a fractional part in the [0,1] range 
+to avoid accumulating errors. In -double (= doubleprecision)/-quad (= quadprecision) modes, 
+we use a standard implementation with a fractional index.</p>
+<p>Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' uses the 'idv' model.</p>
+<p>waveform and index step
+waveform_interpolator(wf, step, interp) = interp(gen, idv)
+with {
+   gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(<em>,!); };   /<em> waveform size </em>/
+   index = (+(step)~</em>)-step;  /<em> starting from 0 </em>/
+   idv = it.make_idv(index);  /<em> build the signal for interpolation in a generic way </em>/
+};</p>
+<p>waveform_linear(wf, step) = waveform_interpolator(wf, step, it.interpolator_linear);
+waveform_cosine(wf, step) = waveform_interpolator(wf, step, it.interpolator_cosine);
+waveform_cubic(wf, step) = waveform_interpolator(wf, step, it.interpolator_cubic);</p>
+<p>waveform_interp(wf, step, selector) = waveform_interpolator(wf, step, interp_select(selector))
+with {
+   /<em> adapts the argument order </em>/
+   interp_select(sel, gen, idv) = it.interpolator_select(gen, idv, sel);
+};</p>
+<p>waveform and index 
+waveform_interpolator1(wf, idv, interp) = interp(gen, idv)
+with {
+   gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(_,!); };   /<em> waveform size </em>/
+};</p>
+<p>waveform_linear1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_linear);
+waveform_cosine1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_cosine);
+waveform_cubic1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_cubic);</p>
+<p>waveform_interp1(wf, idv, selector) = waveform_interpolator1(wf, idv, interp_select(selector))
+with {
+   /<em> adapts the argument order </em>/
+   interp_select(sel, gen, idv) = it.interpolator_select(gen, idv, sel);
+};</p>
+<p>Tests</p>
+<p>wf = waveform {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 50.0, 40.0, 30.0, 20.0, 10.0, 0.0};</p>
+<p>process = waveform_linear(wf, step), waveform_cosine(wf, step), waveform_cubic(wf, step) with { step = 0.25; };</p>
+<p>process = waveform_interp(wf, 0.25, nentry("algo", 0, 0, 3, 1));</p>
+<p>process = waveform_interp1(wf, idv, nentry("algo", 0, 0, 3, 1))
+with {
+   step = 0.1;
+   idv_aux = (+(step)~_)-step;  /<em> starting from 0 </em>/
+   idv = it.make_idv(idv_aux);  /<em> build the signal for interpolation in a generic way </em>/
+};</p>
+<p>Test linear interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
+linear_test = (idx,dv), it.interpolator_linear(gen, (idx,dv))
+with {
+   /<em> signal to interpolate (only 2 points here) </em>/
+   gen(id) = waveform {3.0, -1.0}, (id:max(0)) : rdtable;
+   dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
+   idx = 0; 
+   /<em> test index signal </em>/
+   index = (+(1)~_)-1;   /<em> starting from 0 </em>/
+};</p>
+<p>Test cosine interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
+cosine_test = (idx,dv), it.interpolator_cosine(gen, (idx,dv))
+with {
+   /<em> signal to interpolate (only 2 points here) </em>/
+   gen(id) = waveform {3.0, -1.0}, (id:max(0)) : rdtable;
+   dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
+   idx = 0;
+   /<em> test index signal </em>/
+   index = (+(1)~_)-1;   /<em> starting from 0 </em>/
+};</p>
+<p>Test cubic interpolation between 4 samples with a '(idx,dv)' signal built using a waveform
+cubic_test = (idx,dv), it.interpolator_cubic(gen, (idx,dv))
+with {
+   /<em> signal to interpolate (only 4 points here) </em>/
+   gen(id) = waveform {-1.0, 2.0, 1.0, 4.0}, (id:max(0)) : rdtable;
+   dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
+   idx = 0;
+   /<em> test index signal </em>/
+   index = (+(1)~_)-1;   /<em> starting from 0 </em>/
+};</p>
+<h2 id="two-points-interpolation-functions">Two points interpolation functions</h2>
 <hr />
 <h3 id="itinterpolate_linear"><code>(it.)interpolate_linear</code></h3>
-<p>Linear interpolation between 2 values</p>
+<p>Linear interpolation between 2 values.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>interpolate_linear(dv,v0,v1) : _
 </code></pre>
@@ -228,7 +321,7 @@
 </ul>
 <hr />
 <h3 id="itinterpolate_cosine"><code>(it.)interpolate_cosine</code></h3>
-<p>Cosine interpolation between 2 values</p>
+<p>Cosine interpolation between 2 values.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>interpolate_cosine(dv,v0,v1) : _
 </code></pre>
@@ -243,9 +336,10 @@
 <ul>
 <li><a href="https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h">https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h</a></li>
 </ul>
+<h2 id="four-points-interpolation-functions">Four points interpolation functions</h2>
 <hr />
 <h3 id="itinterpolate_cubic"><code>(it.)interpolate_cubic</code></h3>
-<p>Cubic interpolation between 4 values</p>
+<p>Cubic interpolation between 4 values.</p>
 <h4 id="usage_2">Usage</h4>
 <pre><code>interpolate_cubic(dv,v0,v1,v2,v3) : _
 </code></pre>
@@ -262,53 +356,81 @@
 <ul>
 <li><a href="https://www.paulinternet.nl/?page=bicubic">https://www.paulinternet.nl/?page=bicubic</a></li>
 </ul>
+<h2 id="two-points-interpolators">Two points interpolators</h2>
+<hr />
+<h3 id="itinterpolator_two_points"><code>(it.)interpolator_two_points</code></h3>
+<p>Generic interpolator on two points (current and next index), assuming an increasing index.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>interpolator_two_points(gen, idv, interpolate_two_points) : _,_... (equal to N = outputs(gen))
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
+<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
+<li><code>interpolate_two_points</code>: a two points interpolation function</li>
+</ul>
 <hr />
 <h3 id="itinterpolator_linear"><code>(it.)interpolator_linear</code></h3>
-<p>Linear interpolator for a 'gen' circuit triggered by an 'idv' input to generate values</p>
-<h4 id="usage_3">Usage</h4>
+<p>Linear interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.</p>
+<h4 id="usage_4">Usage</h4>
 <pre><code>interpolator_linear(gen, idv) : _,_... (equal to N = outputs(gen))
 </code></pre>
 
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
-<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)</li>
+<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 </ul>
 <hr />
 <h3 id="itinterpolator_cosine"><code>(it.)interpolator_cosine</code></h3>
-<p>Cosine interpolator for a 'gen' circuit triggered by an 'idv' input to generate values</p>
-<h4 id="usage_4">Usage</h4>
+<p>Cosine interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.</p>
+<h4 id="usage_5">Usage</h4>
 <pre><code>interpolator_cosine(gen, idv) : _,_... (equal to N = outputs(gen))
 </code></pre>
 
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
-<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)</li>
+<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
+</ul>
+<h2 id="four-points-interpolators">Four points interpolators</h2>
+<hr />
+<h3 id="itinterpolator_two_points_1"><code>(it.)interpolator_two_points</code></h3>
+<p>Generic interpolator on interpolator_four_points points (previous, current and two next indexes), assuming an increasing index.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>interpolator_four_points(gen, idv, interpolate_four_points) : _,_... (equal to N = outputs(gen))
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
+<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
+<li><code>interpolate_four_points</code>: a four points interpolation function</li>
 </ul>
 <hr />
 <h3 id="itinterpolator_cubic"><code>(it.)interpolator_cubic</code></h3>
 <p>Cubic interpolator for a 'gen' circuit triggered by an 'idv' input to generate values</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>interpolator_cubic(gen, idv) : _,_... (equal to N = outputs(gen))
 </code></pre>
 
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
-<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)</li>
+<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 </ul>
 <hr />
 <h3 id="itinterpolator_select"><code>(it.)interpolator_select</code></h3>
 <p>Generic configurable interpolator (with selector between in [0..3]). The value 3 is used for no interpolation.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>interpolator_select(gen, idv, sel) : _,_... (equal to N = outputs(gen))
 </code></pre>
 
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
-<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair (see float.lib and double.lib)</li>
+<li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 <li><code>sel</code>: an interpolation algorithm selector in [0..3] (0 = linear, 1 = cosine, 2 = cubic, 3 = nointerp)</li>
 </ul></div>
             </div>

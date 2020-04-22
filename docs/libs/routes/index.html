@@ -236,7 +236,7 @@ _,_,_ : cross(3) : _,_,_
 <h3 id="rocrossnn"><code>(ro.)crossnn</code></h3>
 <p>Cross two <code>bus(n)</code>s.</p>
 <h4 id="usage_1">Usage</h4>
-<pre><code>_,_,... : crossmm(n) : _,_,...
+<pre><code>(si.bus(2*n)) : crossnn(n) : (si.bus(2*n))
 </code></pre>
 
 <p>Where:</p>
@@ -247,7 +247,7 @@ _,_,_ : cross(3) : _,_,_
 <h3 id="rocrossn1"><code>(ro.)crossn1</code></h3>
 <p>Cross bus(n) and bus(1).</p>
 <h4 id="usage_2">Usage</h4>
-<pre><code>_,_,... : crossn1(n) : _,_,...
+<pre><code>(si.bus(n),_) : crossn1(n) : (_,si.bus(n))
 </code></pre>
 
 <p>Where:</p>
@@ -255,11 +255,34 @@ _,_,_ : cross(3) : _,_,_
 <li><code>n</code>: the number of signals in the first <code>bus</code></li>
 </ul>
 <hr />
+<h3 id="rocross1n"><code>(ro.)cross1n</code></h3>
+<p>Cross bus(1) and bus(n).</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>(_,si.bus(n)) : crossn1(n) : (si.bus(n),_)
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the number of signals in the second <code>bus</code></li>
+</ul>
+<hr />
+<h3 id="rocrossnm"><code>(ro.)crossNM</code></h3>
+<p>Cross bus(n) and bus(m).</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>(si.bus(n),si.bus(m)) : crossNM(n,m) : (si.bus(m),si.bus(n))
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the number of signals in the first <code>bus</code></li>
+<li><code>m</code>: the number of signals in the second <code>bus</code></li>
+</ul>
+<hr />
 <h3 id="rointerleave"><code>(ro.)interleave</code></h3>
 <p>Interleave row<em>col cables from column order to row order.
 input : x(0), x(1), x(2) ..., x(row</em>col-1)
 output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1<em>row), x(1+2</em>row), ...</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_5">Usage</h4>
 <pre><code>_,_,_,_,_,_ : interleave(row,column) : _,_,_,_,_,_
 </code></pre>
 
@@ -271,7 +294,7 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
 <hr />
 <h3 id="robutterfly"><code>(ro.)butterfly</code></h3>
 <p>Addition (first half) then substraction (second half) of interleaved signals.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_6">Usage</h4>
 <pre><code>_,_,_,_ : butterfly(n) : _,_,_,_
 </code></pre>
 
@@ -282,7 +305,7 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
 <hr />
 <h3 id="rohadamard"><code>(ro.)hadamard</code></h3>
 <p>Hadamard matrix function of size <code>n = 2^k</code>.</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>_,_,_,_ : hadamard(n) : _,_,_,_
 </code></pre>
 
@@ -295,7 +318,7 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
 <hr />
 <h3 id="rorecursivize"><code>(ro.)recursivize</code></h3>
 <p>Create a recursion from two arbitrary processors p and q.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>_,_ : recursivize(p,q) : _,_
 
 </code></pre>
