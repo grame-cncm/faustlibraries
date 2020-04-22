@@ -45,6 +45,8 @@ declare copyright "2012-2013 Guillot, Paris, Colafrancesco, CICM labex art H2H, 
 ma = library("maths.lib");
 si = library("signals.lib");
 
+//============================Encoding/decoding Functions=================================
+//========================================================================================
 
 //----------------------`(ho.)encoder`---------------------------------
 // Ambisonic encoder. Encodes a signal in the circular harmonics domain
@@ -111,16 +113,16 @@ decoderStereo(n) = decoder(n, p) <: (par(i, 2*n+2, gainLeft(360 * i / p)) :> _),
 with {
 	p = 2*n+2;
 
-   	gainLeft(a) =  _ * sin(ratio_minus + ratio_cortex)
+   	gainLeft(a) = _ * sin(ratio_minus + ratio_cortex)
 	with {
-		ratio_minus = ma.PI*.5 * abs( (30 + a) / 60 * ((a <= 30)) + (a - 330) / 60 * (a >= 330) );
-		ratio_cortex= ma.PI*.5 * abs( (120 + a) / 150 * (a > 30) * (a <= 180));
+		ratio_minus = ma.PI*.5 * abs((30 + a) / 60 * ((a <= 30)) + (a - 330) / 60 * (a >= 330));
+		ratio_cortex= ma.PI*.5 * abs((120 + a) / 150 * (a > 30) * (a <= 180));
 	};
 
-	gainRight(a) =  _ * sin(ratio_minus + ratio_cortex)
+	gainRight(a) = _ * sin(ratio_minus + ratio_cortex)
 	with {
-		ratio_minus = ma.PI*.5 * abs( (390 - a) / 60 * (a >= 330) + (30 - a) / 60 * (a <= 30) );
-		ratio_cortex= ma.PI*.5 * abs( (180 - a) / 150 * (a < 330) * (a >= 180));
+		ratio_minus = ma.PI*.5 * abs((390 - a) / 60 * (a >= 330) + (30 - a) / 60 * (a <= 30));
+		ratio_cortex= ma.PI*.5 * abs((180 - a) / 150 * (a < 330) * (a >= 180));
 	};
 };
 
@@ -151,7 +153,7 @@ optimBasic(n) = par(i, 2*n+1, _);
 
 
 //----------------`(ho.)optimMaxRe`-------------------------
-// The maxRe optimization optimize energy vector. It should be used for an
+// The maxRe optimization optimizes energy vector. It should be used for an
 // auditory confined in the center of the loudspeakers array.
 //
 // #### Usage
@@ -175,7 +177,7 @@ optimMaxRe(n) = par(i, 2*n+1, optim(i, n, _))
 
 
 //----------------`(ho.)optimInPhase`-------------------------
-//  The inPhase Optimization optimize energy vector and put all loudspeakers signals
+//  The inPhase Optimization optimizes energy vector and put all loudspeakers signals
 // in phase. It should be used for an auditory.
 //
 // #### Usage
@@ -232,7 +234,7 @@ with {
 
 
 //----------------`(ho.)map`-------------------------
-// It simulate the distance of the source by applying a gain
+// It simulates the distance of the source by applying a gain
 // on the signal and a wider processing on the soundfield.
 //
 // #### Usage
@@ -281,9 +283,8 @@ with {
 };
 
 
-//----------------------------------------------------------------------------//
-//---------------------------- 3D functions ----------------------------------//
-//----------------------------------------------------------------------------//
+//============================3D Functions================================================
+//========================================================================================
 
 //----------------------`(ho.)encoder3D`---------------------------------
 // Ambisonic encoder. Encodes a signal in the circular harmonics domain
@@ -306,9 +307,9 @@ with {
 encoder3D(N, x, theta, phi) = par(i, (N+1) * (N+1), x * y(degree(i), order(i), theta, phi))
 with {
 	// The degree l of the harmonic[l, m]	
-	degree(index)  = int(sqrt(index));
+	degree(index) = int(sqrt(index));
 	// The order m of the harmonic[l, m]	
-	order(index)   = int(index - int(degree(index) * int(degree(index) + 1)));
+	order(index) = int(index - int(degree(index) * int(degree(index) + 1)));
 
 	// The spherical harmonics
 	y(l, m, theta, phi) =  e(m, theta) * k(l, m) * p(l, m, cos(phi + PI * 0.5))
@@ -396,7 +397,7 @@ with {
 
 
 //----------------`(ho.)optimInPhase3D`-------------------------
-//  The inPhase Optimization optimize energy vector and put all loudspeakers signals
+// The inPhase Optimization optimizes energy vector and put all loudspeakers signals
 // in phase. It should be used for an auditory.
 //
 // #### Usage

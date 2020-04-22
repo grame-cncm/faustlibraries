@@ -698,8 +698,8 @@ subseq(head, 0, n)         = head;
 // Where:
 //
 // * `cond`: condition
-// * `cond`: signal selected while c is true
-// * `else`: signal selected while c is false
+// * `cond`: signal selected while cond is true
+// * `else`: signal selected while cond is false
 //-----------------------------------------------------------------------------
 if(cond,then,else) = select2(cond,else,then);
 // TODO: perhaps it would make more sense to have an if(a,b) and an ifelse(a,b,c)?
@@ -712,7 +712,7 @@ if(cond,then,else) = select2(cond,else,then);
 //
 // ```
 // selector(I,N)
-// _,_,_,_ : selector(2,4) : _  // selects the 3rd input among 4
+// _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 // ```
 //
 // Where:
@@ -750,7 +750,7 @@ select2stereo(bpc) = ro.cross2 : select2(bpc), select2(bpc) : _,_;
 //
 // ```
 // selectn(N,i)
-// _,_,_,_ : selectn(4,2) : _  // selects the 3rd input among 4
+// _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 // ```
 //
 // Where:

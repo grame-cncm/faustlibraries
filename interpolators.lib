@@ -190,7 +190,7 @@ doubleprecision quadprecision decrease_modulo(trig, step, length) = raise_modulo
 //========================================================================================
 
 //-------`(it.)interpolate_linear`----------
-// Linear interpolation between 2 values
+// Linear interpolation between 2 values.
 //
 // #### Usage
 //
@@ -215,7 +215,7 @@ interpolate_linear(dv,v0,v1) = v0 + dv*(v1-v0);  // (faster than v0*(1-dv)+v1*dv
 
 
 //-------`(it.)interpolate_cosine`----------
-// Cosine interpolation between 2 values
+// Cosine interpolation between 2 values.
 //
 // #### Usage
 //
@@ -243,7 +243,7 @@ interpolate_cosine(dv,v0,v1) = v0 + a2*(v1-v0) with { a2 = 0.5 * (1.0 - cos(dv*m
 //========================================================================================
 
 //-------`(it.)interpolate_cubic`----------
-// Cubic interpolation between 4 values
+// Cubic interpolation between 4 values.
 //
 // #### Usage
 //
@@ -274,7 +274,7 @@ interpolate_cubic(dv,v0,v1,v2,v3)
 //========================================================================================
 
 //-------`(it.)interpolator_two_points`----------
-// Generic interpolator on two points (current and next index), assuming an increasing index
+// Generic interpolator on two points (current and next index), assuming an increasing index.
 //
 // #### Usage
 //
@@ -301,7 +301,7 @@ with {
 
 
 //-------`(it.)interpolator_linear`----------
-// Linear interpolator for a 'gen' circuit triggered by an 'idv' input to generate values
+// Linear interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.
 //
 // #### Usage
 //
@@ -320,7 +320,7 @@ interpolator_linear(gen, idv) = interpolator_two_points(gen, idv, interpolate_li
 
 
 //-------`(it.)interpolator_cosine`----------
-// Cosine interpolator for a 'gen' circuit triggered by an 'idv' input to generate values
+// Cosine interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.
 //
 // #### Usage
 //
@@ -346,7 +346,7 @@ interpolator_null(gen, idv) = interpolator_two_points(gen, idv, \(dv,v0,v1).(v0)
 //========================================================================================
 
 //-------`(it.)interpolator_two_points`----------
-// Generic interpolator on interpolator_four_points points (previous, current and two next indexes), assuming an increasing index
+// Generic interpolator on interpolator_four_points points (previous, current and two next indexes), assuming an increasing index.
 //
 // #### Usage
 //

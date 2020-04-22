@@ -114,7 +114,7 @@ amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
 // In addition to the Mth-octave output signals, there is a highpass signal
 // containing frequencies from ftop to SR/2, and a "dc band" lowpass signal
 // containing frequencies from 0 (dc) up to the start of the Mth-octave bands.
-// Thus, the N output signals are
+// Thus, the N output signals are:
 // ```
 // highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-M*(N-1)))
 // ```
@@ -431,7 +431,7 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 
 
 //---------------`(an.)fft` --------------------------
-// Fast Fourier Transform (FFT)
+// Fast Fourier Transform (FFT).
 //
 // #### Usage
 //

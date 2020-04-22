@@ -1,5 +1,5 @@
 //##################################### filters.lib ########################################
-// Faust Filters library; Its official prefix is `fi`.
+// Faust Filters library. Its official prefix is `fi`.
 //
 // The Filters library is organized into 18 sections:
 //
@@ -22,7 +22,6 @@
 // * Mth-Octave Filter-Banks
 // * Arbitrary-Crossover Filter-Banks and Spectrum Analyzers
 //
-// For more information, see ../documentation/library.pdf
 //########################################################################################
 
 // NOTE ABOUT LICENSES:
@@ -302,7 +301,7 @@ ffbcombfilter(maxdel,del,g) = (+ : de.fdelay(maxdel,del)) ~ *(g);
 
 
 //-------------------`(fi.)allpass_comb`-----------------
-// Schroeder Allpass Comb Filter. Note that
+// Schroeder Allpass Comb Filter. Note that:
 //
 // ```
 // allpass_comb(maxlen,len,aN) = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len-1,1,aN);
@@ -336,7 +335,7 @@ allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ :
 
 
 //-------------------`(fi.)allpass_fcomb`-----------------
-// Schroeder Allpass Comb Filter. Note that
+// Schroeder Allpass Comb Filter. Note that:
 //
 // ```
 // allpass_comb(maxlen,len,aN) = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len-1,1,aN);
@@ -433,7 +432,7 @@ declare iir license "MIT-style STK-4.3 license";
 iir(bv,av) = ma.sub ~ fir(av) : fir(bv);
 
 //-----------------------------`(fi.)fir`---------------------------------
-// FIR filter (convolution of FIR filter coefficients with a signal)
+// FIR filter (convolution of FIR filter coefficients with a signal).
 //
 // #### Usage
 //

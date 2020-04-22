@@ -69,7 +69,7 @@ declare version "0.0";
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -129,7 +129,7 @@ with {
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -190,7 +190,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -244,7 +244,7 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -299,7 +299,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -353,7 +353,7 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -377,7 +377,7 @@ with {
   gain_computer(strength,thresh,knee,level) =
     select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
             0,
-            ((level-thresh+(knee/2)):pow(2)/(2*knee)) ,
+            ((level-thresh+(knee/2)):pow(2)/(2*knee)),
             (level-thresh)
            ) : max(0)*-strength;
   	RMS(time) = ba.slidingRMS(s) with { s = ba.sec2samp(time):int:max(1); };
@@ -410,7 +410,7 @@ with {
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -467,7 +467,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -538,7 +538,7 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
 // Sometimes even bigger ratios are usefull:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
@@ -568,9 +568,9 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 
 
 //=============================Backward compatibility section=============================
-//========================================================================================
 // These functions are superseded by the ones above.
 // They are included for backward compatibility.
+//========================================================================================
 
 //=============================Functions Reference========================================
 //========================================================================================
