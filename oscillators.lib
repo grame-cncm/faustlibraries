@@ -1279,15 +1279,16 @@ polyblep_triangle(f) = polyblep_square(f) : fi.pole(0.999) : *(4 * f / ma.SR);
 // Authors:
 // Dario Sanfilippo <sanfilippo.dario@gmail.com>
 // and Oleg Nesterov (jos ed.)
-quadosc(f) = tick ~ (_,_) : mem+1,mem with {
-  k1 = tan(f * ma.PI/ma.SR);
-  k2 = 2*k1 / (1 + k1 * k1);
-
-  tick(u_0,v_0) = u_1,v_1 with {
-    tmp = u_0 - k1 * v_0;
-    v_1 = v_0 + k2 * (tmp + 1);
-    u_1 = tmp - k1 * v_1;
-  };
+quadosc(f) = tick ~ (_ , _) 
+with {
+      k1 = tan(f * ma.PI / ma.SR);
+      k2 = 2 * k1 / (1 + k1 * k1);
+      tick(u_0, v_0) = u_1 , v_1 
+      with {
+       tmp = u_0 - k1 * v_0;
+       v_1 = v_0 + k2 * tmp;
+       u_1 = tmp - k1 * v_1 : select2(1', 1);
+      };
 };
 
 // end further contributions section
