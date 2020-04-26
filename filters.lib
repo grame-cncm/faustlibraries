@@ -140,6 +140,58 @@ declare dcblocker copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos
 declare dcblocker license "MIT-style STK-4.3 license";
 dcblocker = zero(1) : pole(0.995);
 
+//-----------------------`(fi.)lp1p`-------------------------------------------
+// Basic one-pole low-pass filter based on Chamberlin's design.
+// 
+// #### Usage
+// 
+// ```
+// _ : lp1p(cf) : _
+// ```
+// 
+// Where:
+//
+// * `cf`: cut-off frequency in Hz
+//
+// #### Reference
+// Hal Chamberlin, Musical Applications of Microprocessor, Sams, 1985.
+//-----------------------------------------------------------------------------
+declare lp1p author "Dario Sanfilippo";
+declare lp1p copyright "Copyright (C) 2020 by Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com>"
+declare lp1p license "MIT-style STK-4.3 license"
+lp1p(cf, x) = x * a0 : pole(b1)
+with {
+      a0 = 1 - b1;
+      b1 = exp(-cf * 2 * ma.PI / ma.SR) : max(0) : min(1);
+};
+
+//-----------------------`(fi.)hp1p`-------------------------------------------
+// Basic one-pole high-pass filter based on Chamberlin's design.
+// 
+// #### Usage
+// 
+// ```
+// _ : hp1p(cf) : _
+// ```
+// 
+// Where:
+//
+// * `cf`: cut-off frequency in Hz
+//
+// #### Reference
+// Hal Chamberlin, Musical Applications of Microprocessor, Sams, 1985.
+//-----------------------------------------------------------------------------
+declare hp1p author "Dario Sanfilippo";
+declare hp1p copyright "Copyright (C) 2020 by Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com>"
+declare hp1p license "MIT-style STK-4.3 license"
+hp1p(cf, x) = x * a0 : pole(b1)
+with {
+      a0 = 1 + b1;
+      b1 = exp((.5 - cf / ma.SR) * -2 * ma.PI) * -1 : max(-1) : min(0);
+};
+
 //=======================================Comb Filters=====================================
 //========================================================================================
 
