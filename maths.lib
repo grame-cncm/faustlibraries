@@ -47,7 +47,7 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Math Library";
-declare version "2.2";
+declare version "2.3";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LGPL with exception";
@@ -594,6 +594,7 @@ isinf = ffunction(int isinff|isinf|isinfl (float),<math.h>,"");
 
 nextafter = ffunction(float nextafter(float, float),<math.h>,"");
 
+
 //---------------------------`(ma.)chebychev`-------------------------------
 // Chebychev transformation of order n.
 //
@@ -660,6 +661,7 @@ chebychevpoly(lcoef) = _ <: L(0,lcoef) :> _
 //--------------------------------------------------------
 diffn(x) = x' - x; // negated first-order difference
 
+
 //------------------`(ma.)signum`----------------------------
 // The signum function signum(x) is defined as
 // -1 for x<0, 0 for x==0, and 1 for x>0.
@@ -671,6 +673,7 @@ diffn(x) = x' - x; // negated first-order difference
 // ```
 //--------------------------------------------------------
 signum(x) = (x>0)-(x<0);
+
 
 //------------------`(ma.)nextpow2`----------------------------
 // The nextpow2(x) returns the lowest integer m such that
@@ -687,6 +690,7 @@ signum(x) = (x>0)-(x<0);
 // ```
 //--------------------------------------------------------
 nextpow2(x) = ceil(log(x)/log(2.0));
+
 
 //--------------------`(ma.)zc`------------------------------------------------
 // Indicator function for zero-crossing: it returns 1 if a zero-crossing

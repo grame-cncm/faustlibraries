@@ -10,7 +10,7 @@ fi = library("filters.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "0.0";
+declare version "0.1";
 
 /************************************************************************
 FAUST library file, jos section
@@ -44,6 +44,7 @@ Michon and Julius O. Smith III, and is released under the
 //-----------------------------------------------------------------------------
 abs_envelope(t60, x) = abs(x) : si.smooth(ba.tau2pole(t60 / 6.91));
 
+
 //------------------`(an.)abs_envelope_rect`-----------------------------------
 // Absolute value with moving-average
 //
@@ -57,11 +58,10 @@ abs_envelope(t60, x) = abs(x) : si.smooth(ba.tau2pole(t60 / 6.91));
 //
 // * `length`: sets the averaging frame in samples
 //-----------------------------------------------------------------------------
-abs_envelope_rect(length, x) = abs(x) : mean(length) 
+abs_envelope_rect(length, x) = abs(x) : mean(int(length)) 
 with {
-      mean(length , x) = x - x@max(1, int(length)) : fi.pole(1.0 - 1.0e-10) : 
-       /(float(int(length))); 
-           // small leakage to avoid possible growing roundoff error
+	mean(length , x) = x - x@max(1, length) : fi.pole(1.0 - 1.0e-10) : /(float(length)); 
+	// small leakage to avoid possible growing roundoff error
 };
 
 
@@ -88,10 +88,12 @@ with {
 // Newsletter, Bernie Hutchins
 //------------------------------------------------------------
 amp_follower(rel) = abs : env with {
- p = ba.tau2pole(rel);
- env(x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
+ 	p = ba.tau2pole(rel);
+ 	env(x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
 };
+
 peak_envelope = amp_follower; // Synonym for more standard naming
+
 
 //---------------------------`(an.)amp_follower_ud`---------------------------
 // Envelope follower with different up and down time-constants
@@ -152,6 +154,7 @@ amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
 //-----------------------------------------------------------------------------
 ms_envelope(t60, x) = x * x : si.smooth(ba.tau2pole(t60 / 6.91));
 
+
 //------------------`(an.)ms_envelope_rect`------------------------------------
 // Mean square with moving-average
 //
@@ -165,12 +168,12 @@ ms_envelope(t60, x) = x * x : si.smooth(ba.tau2pole(t60 / 6.91));
 //
 // * `length`: sets the averaging frame in samples
 //-----------------------------------------------------------------------------
-ms_envelope_rect(length, x) = x * x : mean(length) 
+ms_envelope_rect(length, x) = x * x : mean(int(length))
 with {
-      mean(length , x) = x - x@max(1, int(length)) : fi.pole(1.0 - 1.0e-10) : 
-       /(float(int(length))); 
-           // small leakage to avoid possible growing roundoff error
+	mean(length, x) = x - x@max(1, length) : fi.pole(1.0 - 1.0e-10) : /(float(length)); 
+	// small leakage to avoid possible growing roundoff error
 };
+
 
 //------------------`(an.)rms_envelope`----------------------------------------
 // Root mean square with one-pole lowpass averaging
@@ -187,6 +190,7 @@ with {
 //-----------------------------------------------------------------------------
 rms_envelope(t60, x) = ms_envelope(t60, x) : sqrt;
 
+
 //------------------`(an.)rms_envelope_rect`-----------------------------------
 // Root mean square with moving-average
 //
@@ -201,6 +205,7 @@ rms_envelope(t60, x) = ms_envelope(t60, x) : sqrt;
 // * `length`: sets the averaging frame in samples
 //-----------------------------------------------------------------------------
 rms_envelope_rect(length, x) = ms_envelope_rect(length, x) : sqrt;
+
 
 //=============================Spectrum-Analyzers=========================================
 // Spectrum-analyzers split the input signal into a bank of parallel signals, one for
