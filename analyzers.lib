@@ -29,6 +29,42 @@ Michon and Julius O. Smith III, and is released under the
 //==============================Amplitude Tracking========================================
 //========================================================================================
 
+//------------------`(an.)abs_envelope`-----------------------------------------
+// Absolute value with one-pole lowpass averaging
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope(t60) : _;
+// ```
+//
+//  Where
+//
+// * `t60`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+abs_envelope(t60, x) = abs(x) : si.smooth(ba.tau2pole(t60 / 6.91));
+
+//------------------`(an.)abs_envelope_rect`-----------------------------------
+// Absolute value with moving-average
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope_rect(length) : _;
+// ```
+//
+//  Where
+//
+// * `length`: sets the averaging frame in samples
+//-----------------------------------------------------------------------------
+abs_envelope_rect(length, x) = abs(x) : mean(length) 
+with {
+      mean(length , x) = x - x@max(1, int(length)) : fi.pole(1.0 - 1.0e-10) : 
+       /(float(int(length))); 
+           // small leakage to avoid possible growing roundoff error
+};
+
+
 //---------------------------`(an.)amp_follower`---------------------------
 // Classic analog audio envelope follower with infinitely fast rise and
 // exponential decay.  The amplitude envelope instantaneously follows
@@ -55,7 +91,7 @@ amp_follower(rel) = abs : env with {
  p = ba.tau2pole(rel);
  env(x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
 };
-
+peak_envelope = amp_follower; // Synonym for more standard naming
 
 //---------------------------`(an.)amp_follower_ud`---------------------------
 // Envelope follower with different up and down time-constants
@@ -100,6 +136,71 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 // * Author Jonatan Liljedahl, revised by RM
 //---------------------------------------------------------
 amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
+
+//------------------`(an.)ms_envelope`-----------------------------------------
+// Mean square with one-pole lowpass averaging
+//
+// #### Usage
+//
+// ```
+// _ : ms_envelope(t60) : _;
+// ```
+//
+//  Where
+//
+// * `t60`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+ms_envelope(t60, x) = x * x : si.smooth(ba.tau2pole(t60 / 6.91));
+
+//------------------`(an.)ms_envelope_rect`------------------------------------
+// Mean square with moving-average
+//
+// #### Usage
+//
+// ```
+// _ : ms_envelope_rect(length) : _;
+// ```
+//
+//  Where
+//
+// * `length`: sets the averaging frame in samples
+//-----------------------------------------------------------------------------
+ms_envelope_rect(length, x) = x * x : mean(length) 
+with {
+      mean(length , x) = x - x@max(1, int(length)) : fi.pole(1.0 - 1.0e-10) : 
+       /(float(int(length))); 
+           // small leakage to avoid possible growing roundoff error
+};
+
+//------------------`(an.)rms_envelope`----------------------------------------
+// Root mean square with one-pole lowpass averaging
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope(t60) : _;
+// ```
+//
+//  Where
+//
+// * `t60`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+rms_envelope(t60, x) = ms_envelope(t60, x) : sqrt;
+
+//------------------`(an.)rms_envelope_rect`-----------------------------------
+// Root mean square with moving-average
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope_rect(length) : _;
+// ```
+//
+//  Where
+//
+// * `length`: sets the averaging frame in samples
+//-----------------------------------------------------------------------------
+rms_envelope_rect(length, x) = ms_envelope_rect(length, x) : sqrt;
 
 //=============================Spectrum-Analyzers=========================================
 // Spectrum-analyzers split the input signal into a bank of parallel signals, one for
