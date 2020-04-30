@@ -140,6 +140,34 @@ declare dcblocker copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos
 declare dcblocker license "MIT-style STK-4.3 license";
 dcblocker = zero(1) : pole(0.995);
 
+//----------------------------`(fi.)lptN`--------------------------------------
+// One-pole lowpass filter with arbitrary dis/charging factors set in dB and
+// times set in seconds.
+//
+// #### Usage
+//
+// ```
+// _ : lptN(N, tN) : _
+// ```
+//
+// Where:
+//
+// * `N`: is the attenuation factor in dB
+// * `tN`: is the filter period in seconds, that is, the time for the
+// impulse response to decay by `N` dB
+//
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~jos/mdft/Exponentials.html>
+declare lptN author "Julius O. Smith III";
+declare lptN copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare lptN license "MIT-style STK-4.3 license";
+lptN(N, tN, x) = x : si.smooth(ba.tau2pole(tN / log(10.0^(float(N)/20.0))));
+// Special cases of lptN
+lptau(tN, x) = lptN(8,6858896381, tN, x); // Tau time consant, i.e., 1/e atten. after tN secs
+lpt60(tN, x) = lptN(60, tN, x); // T60 constant, i.e., 1/1000 atten. after tN secs
+lpt19(tN, x) = lptN(19, tN, x); // T19 constant, i.e., 2.2/e atten. after tN secs
+
 //=======================================Comb Filters=====================================
 //========================================================================================
 
