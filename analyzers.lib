@@ -269,7 +269,7 @@ ms_envelope_t60(period, x) = x * x : ma.avg_t60(period);
 //
 //  Where:
 //
-// * `period`: (time to decay by 2.2/e) sets the averaging frame in secs
+// * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
 declare ms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
 declare ms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
@@ -356,7 +356,7 @@ rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
 //
 //  Where:
 //
-// * `period`: (time to decay by 2.2/e) sets the averaging frame in secs
+// * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
 declare rms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
 declare rms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
