@@ -79,6 +79,7 @@ declare copyright "2018-2020 GRAME / GIPSA-Lab";
 //
 // * `x`: position value signal
 // * `x0`: initial value for position
+//---------------------------------------------------------
 initState(init) = R(0,init)
 with{
   R(n,(initn,init)) = +(initn : ba.impulsify@n) : R(n+1,init);
@@ -112,6 +113,7 @@ with{
 // * `grav`: gravity force value
 // * `x0`: initial position
 // * `xr0`: initial delayed position (inferred from initial velocity)
+//---------------------------------------------------------
 mass(m, grav, x0, x1) = equation
 with{
   A = 2;
@@ -143,6 +145,7 @@ with{
 // * `grav`: gravity force value
 // * `x0`: initial position
 // * `xr0`: initial delayed position (inferred from initial velocity)
+//---------------------------------------------------------
 osc(m, k, z, grav, x0, x1) = equation
 with{
   A = 2 - (k + z)/m;
@@ -171,6 +174,7 @@ with{
 // Where:
 //
 // * `x0`: initial position
+//---------------------------------------------------------
 ground(x0) = equation
 with{
   // could this term be removed or simlified? Need "unused" input force signal for the routing scheme to work
@@ -197,6 +201,7 @@ with{
 // Where:
 //
 // * `x0`: initial position
+//---------------------------------------------------------
 posInput(init) = _,_ : !,_ : initState(init);
 
 
@@ -225,6 +230,7 @@ posInput(init) = _,_ : !,_ : initState(init);
 // * `k`: stiffness value
 // * `x1r`: initial delayed position of mass 1 (unused here)
 // * `x2r`: initial delayed position of mass 2 (unused here)
+//---------------------------------------------------------
 spring(k, x1r0, x2r0, x1, x2) = 
   k*deltapos <: *(-1),_
 with{
@@ -247,6 +253,7 @@ with{
 // * `z`: damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 damper(z, x1r0, x2r0, x1, x2) = 
   z*deltavel <: *(-1),_
 with{
@@ -271,6 +278,7 @@ with{
 // * `z`: damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 springDamper(k, z, x1r0, x2r0, x1, x2) = 
   k*deltapos + 
   z*deltavel <: *(-1),_
@@ -300,6 +308,7 @@ with{
 // * `z`: damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 nlSpringDamper2(k, q, z, x1r0, x2r0, x1, x2) =
   k*deltapos + q * ma.signum(deltapos) * pow(deltapos, 2) +
   z*deltavel <: *(-1),_
@@ -329,6 +338,7 @@ with{
 // * `z`: damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 nlSpringDamper3(k, q, z, x1r0, x2r0, x1, x2) =
   k*deltapos + q * pow(deltapos, 3) +
   z*deltavel <: *(-1),_
@@ -366,6 +376,7 @@ with{
 // * `z`: (linear) damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 nlSpringDamperClipped(s, c, k, z, x1r0, x2r0, x1, x2) =
     select2(c == 0,
         select2(s >= k,
@@ -409,6 +420,7 @@ with{
 // * `z`: (linear) damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 nlPluck(k, scale, z, x1r0, x2r0, x1, x2) = 
   select2(absdeltapos < tipdist,
     select2(absdeltapos < scale,
@@ -451,6 +463,7 @@ with{
 // * `type`: interaction profile (0 = piecewise linear, 1 = smooth function)
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 nlBow(z, scale, type, x1r0, x2r0, x1, x2) =
   select2(type > 0,
     select2(absdeltavel < tipvel,
@@ -491,6 +504,7 @@ with{
 // * `thres`: threshold distance for the contact between elements
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 collision(k,z,thres,x1r0,x2r0,x1,x2) = 
   springDamper(k,z,x1r0,x2r0,x1+thres,x2) : (select2(comp,0,_),select2(comp,0,_))
 with{
@@ -521,6 +535,7 @@ with{
 // * `thres`: threshold distance for the contact between elements
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//---------------------------------------------------------
 nlCollisionClipped(s, c, k, z, thres, x1r0, x2r0, x1, x2) = 
   nlSpringDamperClipped(s,c,k,z,x1r0,x2r0,x1+thres,x2) : (select2(comp,0,_),select2(comp,0,_))
 with{
