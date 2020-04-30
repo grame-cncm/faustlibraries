@@ -276,7 +276,7 @@ with {
   uwn = no.multinoise(N); // uniform white noise in [-1,1] on N channels
   gwn = uwn :> _;         // sum of uniform approaches Gaussian by centeral limit thm
   sigma = sqrt(N/3.0);    // rms of each uwn channel
-  uvgwn = gwn / sigma; // approaches zero-mean, unit-variance Gaussian white noise, for large N
+  uvgwn = gwn / sigma;	  // approaches zero-mean, unit-variance Gaussian white noise, for large N
 };
 
 gnoisem(N) = gnoise(N) * 0.625; // Equalizes loudness to that of no.noise (thanks Mykle Hansen)
