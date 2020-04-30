@@ -56,6 +56,7 @@ declare license "LGPL with exception";
 pl = library("platform.lib");
 ba = library("basics.lib");
 si = library("signals.lib");
+fi = library("filters.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
 
 //=============================Functions Reference========================================
@@ -761,7 +762,7 @@ declare avg_tau copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and 
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_tau license "MIT-style STK-4.3 license";
-avg_tau(period, x) = x : si.smooth(ba.tau2pole(period));
+avg_tau(period, x) = fi.lptau(period, x);
 
 
 //----------------------------(ma.)avg_t60-------------------------------------
@@ -788,7 +789,7 @@ declare avg_t60 copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and 
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_t60 license "MIT-style STK-4.3 license";
-avg_t60(period, x) = x : si.smooth(ba.tau2pole(period / 6.907755));
+avg_t60(period, x) = fi.lpt60(period, x);
 
 
 //----------------------------(ma.)avg_t19-------------------------------------
@@ -816,8 +817,4 @@ declare avg_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_t19 license "MIT-style STK-4.3 license";
-avg_t19(period, x) = loop ~ _
-with {
-      loop(fb) = (x - fb) * t19 + fb;
-      t19 = 1 - ba.tau2pole(period / 2.2);
-};
+avg_t19(period, x) = lpt19(period, x); 
