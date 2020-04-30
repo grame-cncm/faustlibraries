@@ -29,40 +29,92 @@ Michon and Julius O. Smith III, and is released under the
 //==============================Amplitude Tracking========================================
 //========================================================================================
 
-//------------------`(an.)abs_envelope`-----------------------------------------
-// Absolute value with one-pole lowpass averaging
-//
-// #### Usage
-//
-// ```
-// _ : abs_envelope(t60) : _;
-// ```
-//
-//  Where
-//
-// * `t60`: (time to decay by 60 dB) sets the averaging frame in secs
-//-----------------------------------------------------------------------------
-abs_envelope(t60, x) = abs(x) : si.smooth(ba.tau2pole(t60 / 6.91));
-
-
 //------------------`(an.)abs_envelope_rect`-----------------------------------
-// Absolute value with moving-average
+// Absolute value average with moving-average algorithm.
 //
 // #### Usage
 //
 // ```
-// _ : abs_envelope_rect(length) : _;
+// _ : abs_envelope_rect(period) : _;
 // ```
 //
-//  Where
+//  Where:
 //
-// * `length`: sets the averaging frame in samples
+// * `period`: sets the averaging frame in seconds
 //-----------------------------------------------------------------------------
-abs_envelope_rect(length, x) = abs(x) : mean(int(length)) 
-with {
-	mean(length , x) = x - x@max(1, length) : fi.pole(1.0 - 1.0e-10) : /(float(length)); 
-	// small leakage to avoid possible growing roundoff error
-};
+declare abs_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
+declare abs_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare abs_envelope_rect license "MIT-style STK-4.3 license";
+abs_envelope_rect(period, x) = abs(x) : ma.avg_rect(period);
+
+
+
+//------------------`(an.)abs_envelope_tau`------------------------------------
+// Absolute value average with one-pole lowpass and tau response. 
+// (See maths.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope_tau(period) : _;
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare abs_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
+declare abs_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare abs_envelope_tau license "MIT-style STK-4.3 license";
+abs_envelope_tau(period, x) = abs(x) : ma.avg_tau(period);
+
+
+//------------------`(an.)abs_envelope_t60`------------------------------------
+// Absolute value average with one-pole lowpass and t60 response.
+// (See maths.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope_t60(period) : _;
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 1/e) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare abs_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
+declare abs_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare abs_envelope_t60 license "MIT-style STK-4.3 license";
+abs_envelope_t60(period, x) = abs(x) : ma.avg_t60(period);
+
+
+//------------------`(an.)abs_envelope_t19`------------------------------------
+// Absolute value average with one-pole lowpass and t19 response. 
+// (See maths.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope_t19(period) : _;
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 2.2/e) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare abs_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
+declare abs_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare abs_envelope_t19 license "MIT-style STK-4.3 license";
+abs_envelope_t19(period, x) = abs(x) : ma.avg_t19(period);
 
 
 //---------------------------`(an.)amp_follower`---------------------------
@@ -139,72 +191,179 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 //---------------------------------------------------------
 amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
 
-//------------------`(an.)ms_envelope`-----------------------------------------
-// Mean square with one-pole lowpass averaging
-//
-// #### Usage
-//
-// ```
-// _ : ms_envelope(t60) : _;
-// ```
-//
-//  Where
-//
-// * `t60`: (time to decay by 60 dB) sets the averaging frame in secs
-//-----------------------------------------------------------------------------
-ms_envelope(t60, x) = x * x : si.smooth(ba.tau2pole(t60 / 6.91));
-
 
 //------------------`(an.)ms_envelope_rect`------------------------------------
-// Mean square with moving-average
+// Mean square with moving-average algorithm.
 //
 // #### Usage
 //
 // ```
-// _ : ms_envelope_rect(length) : _;
+// _ : ms_envelope_rect(period) : _;
 // ```
 //
-//  Where
+//  Where:
 //
-// * `length`: sets the averaging frame in samples
+// * `period`: sets the averaging frame in secs
 //-----------------------------------------------------------------------------
-ms_envelope_rect(length, x) = x * x : mean(int(length))
-with {
-	mean(length, x) = x - x@max(1, length) : fi.pole(1.0 - 1.0e-10) : /(float(length)); 
-	// small leakage to avoid possible growing roundoff error
-};
+declare ms_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
+declare ms_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare ms_envelope_rect license "MIT-style STK-4.3 license";
+ms_envelope_rect(period, x) = x * x : ma.avg_rect(period);
 
 
-//------------------`(an.)rms_envelope`----------------------------------------
-// Root mean square with one-pole lowpass averaging
+//------------------`(an.)ms_envelope_tau`-------------------------------------
+// Mean square average with one-pole lowpass and tau response. 
+// (See maths.lib.)
 //
 // #### Usage
 //
 // ```
-// _ : rms_envelope(t60) : _;
+// _ : ms_envelope_tau(period) : _;
 // ```
 //
-//  Where
+//  Where:
 //
-// * `t60`: (time to decay by 60 dB) sets the averaging frame in secs
+// * `period`: (time to decay by 1/e) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
-rms_envelope(t60, x) = ms_envelope(t60, x) : sqrt;
+declare ms_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
+declare ms_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare ms_envelope_tau license "MIT-style STK-4.3 license";
+ms_envelope_tau(period, x) = x * x : ma.avg_tau(period);
+
+
+//------------------`(an.)ms_envelope_t60`-------------------------------------
+// Mean square with one-pole lowpass and t60 response. 
+// (See maths.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : ms_envelope_t60(period) : _;
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare ms_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
+declare ms_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare ms_envelope_t60 license "MIT-style STK-4.3 license";
+ms_envelope_t60(period, x) = x * x : ma.avg_t60(period);
+
+
+//------------------`(an.)ms_envelope_t19`-------------------------------------
+// Mean square with one-pole lowpass and t19 response. 
+// (See maths.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : ms_envelope_t19(period) : _;
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 2.2/e) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare ms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
+declare ms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare ms_envelope_t19 license "MIT-style STK-4.3 license";
+ms_envelope_t19(period, x) = x * x : ma.avg_t19(period);
 
 
 //------------------`(an.)rms_envelope_rect`-----------------------------------
-// Root mean square with moving-average
+// Root mean square with moving-average algorithm.
 //
 // #### Usage
 //
 // ```
-// _ : rms_envelope_rect(length) : _;
+// _ : rms_envelope_rect(period) : _;
 // ```
 //
-//  Where
+//  Where:
 //
-// * `length`: sets the averaging frame in samples
+// * `period`: sets the averaging frame in secs
 //-----------------------------------------------------------------------------
-rms_envelope_rect(length, x) = ms_envelope_rect(length, x) : sqrt;
+declare rms_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
+declare rms_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare rms_envelope_rect license "MIT-style STK-4.3 license";
+rms_envelope_rect(period, x) = ms_envelope_rect(period, x) : sqrt;
+
+
+//------------------`(an.)rms_envelope_tau`------------------------------------
+// Root mean square with one-pole lowpass and tau response.
+// (See maths.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope_tau(period) : _;
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 1/e) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare rms_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
+declare rms_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare rms_envelope_tau license "MIT-style STK-4.3 license";
+rms_envelope_tau(period, x) = ms_envelope_tau(period, x) : sqrt;
+
+
+//------------------`(an.)rms_envelope_t60`------------------------------------
+// Root mean square with one-pole lowpass and t60 response.
+// (See maths.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope_t60(period) : _;
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare rms_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
+declare rms_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare rms_envelope_t60 license "MIT-style STK-4.3 license";
+rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
+
+
+//------------------`(an.)rms_envelope_t19`------------------------------------
+// Root mean square with one-pole lowpass and t19 response.
+// (See maths.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope_t19(period) : _;
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 2.2/e) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare rms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
+declare rms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare rms_envelope_t19 license "MIT-style STK-4.3 license";
+rms_envelope_t19(period, x) = ms_envelope_t19(period, x) : sqrt;
 
 
 //=============================Spectrum-Analyzers=========================================
