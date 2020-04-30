@@ -107,6 +107,10 @@
 </li>
                                     
 <li>
+    <a href="../mi/" class="dropdown-item"> mass interaction </a>
+</li>
+                                    
+<li>
     <a href="../misceffects/" class="dropdown-item"> misceffects </a>
 </li>
                                     
@@ -156,6 +160,10 @@
                                     
 <li>
     <a href="../vaeffects/" class="dropdown-item"> vaeffects </a>
+</li>
+                                    
+<li>
+    <a href="../webaudio/" class="dropdown-item"> webaudio </a>
 </li>
                                 </ul>
                             </li>
@@ -233,74 +241,89 @@ we use a technique with a pure integer index and a fractional part in the [0,1] 
 to avoid accumulating errors. In -double (= doubleprecision)/-quad (= quadprecision) modes, 
 we use a standard implementation with a fractional index.</p>
 <p>Use-case with 'waveform'. Here the signal given to 'interpolator_XXX' uses the 'idv' model.</p>
-<p>waveform and index step
+<pre><code>waveform and index step
 waveform_interpolator(wf, step, interp) = interp(gen, idv)
 with {
-   gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(<em>,!); };   /<em> waveform size </em>/
-   index = (+(step)~</em>)-step;  /<em> starting from 0 </em>/
-   idv = it.make_idv(index);  /<em> build the signal for interpolation in a generic way </em>/
-};</p>
-<p>waveform_linear(wf, step) = waveform_interpolator(wf, step, it.interpolator_linear);
+   gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(_,!); };   /* waveform size */
+   index = (+(step)~_)-step;  /* starting from 0 */
+   idv = it.make_idv(index);  /* build the signal for interpolation in a generic way */
+};
+
+waveform_linear(wf, step) = waveform_interpolator(wf, step, it.interpolator_linear);
 waveform_cosine(wf, step) = waveform_interpolator(wf, step, it.interpolator_cosine);
-waveform_cubic(wf, step) = waveform_interpolator(wf, step, it.interpolator_cubic);</p>
-<p>waveform_interp(wf, step, selector) = waveform_interpolator(wf, step, interp_select(selector))
+waveform_cubic(wf, step) = waveform_interpolator(wf, step, it.interpolator_cubic);
+
+waveform_interp(wf, step, selector) = waveform_interpolator(wf, step, interp_select(selector))
 with {
-   /<em> adapts the argument order </em>/
+   /* adapts the argument order */
    interp_select(sel, gen, idv) = it.interpolator_select(gen, idv, sel);
-};</p>
-<p>waveform and index 
+};
+
+waveform and index 
 waveform_interpolator1(wf, idv, interp) = interp(gen, idv)
 with {
-   gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(_,!); };   /<em> waveform size </em>/
-};</p>
-<p>waveform_linear1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_linear);
+   gen(idx) = wf, (idx:max(0):min(size-1)) : rdtable with { size = wf:(_,!); };   /* waveform size */
+};
+
+waveform_linear1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_linear);
 waveform_cosine1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_cosine);
-waveform_cubic1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_cubic);</p>
-<p>waveform_interp1(wf, idv, selector) = waveform_interpolator1(wf, idv, interp_select(selector))
+waveform_cubic1(wf, idv) = waveform_interpolator1(wf, idv, it.interpolator_cubic);
+
+waveform_interp1(wf, idv, selector) = waveform_interpolator1(wf, idv, interp_select(selector))
 with {
-   /<em> adapts the argument order </em>/
+   /* adapts the argument order */
    interp_select(sel, gen, idv) = it.interpolator_select(gen, idv, sel);
-};</p>
+};
+</code></pre>
+
 <p>Tests</p>
-<p>wf = waveform {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 50.0, 40.0, 30.0, 20.0, 10.0, 0.0};</p>
-<p>process = waveform_linear(wf, step), waveform_cosine(wf, step), waveform_cubic(wf, step) with { step = 0.25; };</p>
-<p>process = waveform_interp(wf, 0.25, nentry("algo", 0, 0, 3, 1));</p>
-<p>process = waveform_interp1(wf, idv, nentry("algo", 0, 0, 3, 1))
+<pre><code>wf = waveform {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 50.0, 40.0, 30.0, 20.0, 10.0, 0.0};
+
+process = waveform_linear(wf, step), waveform_cosine(wf, step), waveform_cubic(wf, step) with { step = 0.25; };
+
+process = waveform_interp(wf, 0.25, nentry(&quot;algo&quot;, 0, 0, 3, 1));
+
+process = waveform_interp1(wf, idv, nentry(&quot;algo&quot;, 0, 0, 3, 1))
 with {
    step = 0.1;
-   idv_aux = (+(step)~_)-step;  /<em> starting from 0 </em>/
-   idv = it.make_idv(idv_aux);  /<em> build the signal for interpolation in a generic way </em>/
-};</p>
-<p>Test linear interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
+   idv_aux = (+(step)~_)-step;  /* starting from 0 */
+   idv = it.make_idv(idv_aux);  /* build the signal for interpolation in a generic way */
+};
+
+Test linear interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
 linear_test = (idx,dv), it.interpolator_linear(gen, (idx,dv))
 with {
-   /<em> signal to interpolate (only 2 points here) </em>/
+   /* signal to interpolate (only 2 points here) */
    gen(id) = waveform {3.0, -1.0}, (id:max(0)) : rdtable;
    dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
    idx = 0; 
-   /<em> test index signal </em>/
-   index = (+(1)~_)-1;   /<em> starting from 0 </em>/
-};</p>
-<p>Test cosine interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
+   /* test index signal */
+   index = (+(1)~_)-1;   /* starting from 0 */
+};
+
+Test cosine interpolation between 2 samples with a '(idx,dv)' signal built using a waveform
 cosine_test = (idx,dv), it.interpolator_cosine(gen, (idx,dv))
 with {
-   /<em> signal to interpolate (only 2 points here) </em>/
+   /* signal to interpolate (only 2 points here) */
    gen(id) = waveform {3.0, -1.0}, (id:max(0)) : rdtable;
    dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
    idx = 0;
-   /<em> test index signal </em>/
-   index = (+(1)~_)-1;   /<em> starting from 0 </em>/
-};</p>
-<p>Test cubic interpolation between 4 samples with a '(idx,dv)' signal built using a waveform
+   /* test index signal */
+   index = (+(1)~_)-1;   /* starting from 0 */
+};
+
+Test cubic interpolation between 4 samples with a '(idx,dv)' signal built using a waveform
 cubic_test = (idx,dv), it.interpolator_cubic(gen, (idx,dv))
 with {
-   /<em> signal to interpolate (only 4 points here) </em>/
+   /* signal to interpolate (only 4 points here) */
    gen(id) = waveform {-1.0, 2.0, 1.0, 4.0}, (id:max(0)) : rdtable;
    dv = waveform {0.0, 0.25, 0.50, 0.75, 1.0}, index : rdtable;
    idx = 0;
-   /<em> test index signal </em>/
-   index = (+(1)~_)-1;   /<em> starting from 0 </em>/
-};</p>
+   /* test index signal */
+   index = (+(1)~_)-1;   /* starting from 0 */
+};
+</code></pre>
+
 <h2 id="two-points-interpolation-functions">Two points interpolation functions</h2>
 <hr />
 <h3 id="itinterpolate_linear"><code>(it.)interpolate_linear</code></h3>

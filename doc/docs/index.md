@@ -24,6 +24,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `ho`: `hoa.lib`
 * `it`: `interpolators.lib`
 * `ma`: `maths.lib`
+* `mi`: `mi.lib`
 * `ef`: `misceffects.lib`
 * `os`: `oscillators.lib`
 * `no`: `noises.lib`

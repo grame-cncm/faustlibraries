@@ -92,6 +92,7 @@ fi = library("filters.lib");
 ho = library("hoa.lib");
 it = library("interpolators.lib");
 ma = library("maths.lib");
+mi = library("mi.lib");
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");

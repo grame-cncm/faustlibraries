@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> mass interaction  - Faust Libraries</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/docco.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">Faust Libraries</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../organization/" class="dropdown-item"> Organization </a>
+</li>
+                                    
+<li>
+    <a href="../../standardFunctions/" class="dropdown-item"> Standard Functions </a>
+</li>
+                                    
+<li>
+    <a href="../../contributing/" class="dropdown-item"> Contributing </a>
+</li>
+                                    
+<li>
+    <a href="../../copyright/" class="dropdown-item"> Copyright/License </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../" class="nav-link">Index</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../analyzers/" class="dropdown-item"> analyzers </a>
+</li>
+                                    
+<li>
+    <a href="../basics/" class="dropdown-item"> basics </a>
+</li>
+                                    
+<li>
+    <a href="../compressors/" class="dropdown-item"> compressors </a>
+</li>
+                                    
+<li>
+    <a href="../delays/" class="dropdown-item"> delays </a>
+</li>
+                                    
+<li>
+    <a href="../demos/" class="dropdown-item"> demos </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/" class="dropdown-item"> dx7 </a>
+</li>
+                                    
+<li>
+    <a href="../envelopes/" class="dropdown-item"> envelopes </a>
+</li>
+                                    
+<li>
+    <a href="../filters/" class="dropdown-item"> filters </a>
+</li>
+                                    
+<li>
+    <a href="../hoa/" class="dropdown-item"> hoa </a>
+</li>
+                                    
+<li>
+    <a href="../interpolators/" class="dropdown-item"> interpolators </a>
+</li>
+                                    
+<li>
+    <a href="../maths/" class="dropdown-item"> maths </a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active"> mass interaction </a>
+</li>
+                                    
+<li>
+    <a href="../misceffects/" class="dropdown-item"> misceffects </a>
+</li>
+                                    
+<li>
+    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
+</li>
+                                    
+<li>
+    <a href="../noises/" class="dropdown-item"> noises </a>
+</li>
+                                    
+<li>
+    <a href="../phaflangers/" class="dropdown-item"> phaflangers </a>
+</li>
+                                    
+<li>
+    <a href="../physmodels/" class="dropdown-item"> physmodels </a>
+</li>
+                                    
+<li>
+    <a href="../reducemaps/" class="dropdown-item"> reducemaps </a>
+</li>
+                                    
+<li>
+    <a href="../reverbs/" class="dropdown-item"> reverbs </a>
+</li>
+                                    
+<li>
+    <a href="../routes/" class="dropdown-item"> routes </a>
+</li>
+                                    
+<li>
+    <a href="../signals/" class="dropdown-item"> signals </a>
+</li>
+                                    
+<li>
+    <a href="../soundfiles/" class="dropdown-item"> soundfiles </a>
+</li>
+                                    
+<li>
+    <a href="../spats/" class="dropdown-item"> spats </a>
+</li>
+                                    
+<li>
+    <a href="../synths/" class="dropdown-item"> synths </a>
+</li>
+                                    
+<li>
+    <a href="../vaeffects/" class="dropdown-item"> vaeffects </a>
+</li>
+                                    
+<li>
+    <a href="../webaudio/" class="dropdown-item"> webaudio </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../maths/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../misceffects/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#milib" class="nav-link">mi.lib</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#sources" class="nav-link">Sources</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#utility-functions" class="nav-link">Utility Functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#mass-algorithms" class="nav-link">Mass Algorithms</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#interaction-algorithms" class="nav-link">Interaction Algorithms</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="milib">mi.lib</h1>
+<p>This ongoing work is the fruit of a collaboration between GRAME-CNCM and
+the ANIS (Arts Numériques et Immersions Sensorielles) research group from
+GIPSA-Lab (Université Grenoble Alpes).</p>
+<p>This library implements basic 1-DoF mass-interaction physics algorithms,
+allowing to declare and connect physical elements (masses, springs, non
+linear interactions, etc.) together to form topological networks.
+Models can be assembled by hand, however in more complex scenarios it is
+recommended to use a scripting tool (such as MIMS) to generate the FAUST
+signal routing for a given physical network.</p>
+<ul>
+<li><a href="https://github.com/rmichon/mi_faust">https://github.com/rmichon/mi_faust</a></li>
+<li><a href="http://micreative.eu/tool_miFaust.html">http://micreative.eu/tool_miFaust.html</a></li>
+<li><a href="http://micreative.eu/paper_lac19.html">http://micreative.eu/paper_lac19.html</a></li>
+</ul>
+<h2 id="sources">Sources</h2>
+<p>The core mass-interaction algorithms implemented in this library are in the public
+domain and are disclosed in the following scientific publications:</p>
+<ul>
+<li>Claude Cadoz, Annie Luciani, Jean-Loup Florens, Curtis Roads and Françoise
+Chabade. Responsive Input Devices and Sound Synthesis by Stimulation of
+Instrumental Mechanisms: The Cordis System. Computer Music Journal, Vol 8.
+No. 3, 1984.</li>
+<li>Claude Cadoz, Annie Luciani and Jean Loup Florens. CORDIS-ANIMA: A Modeling
+and Simulation System for Sound and Image Synthesis: The General Formalism.
+Computer Music Journal. Vol. 17, No. 1, 1993.</li>
+<li>Alexandros Kontogeorgakopoulos and Claude Cadoz. Cordis Anima Physical
+Modeling and Simulation System Analysis. In Proceedings of the Sound and Music
+Computing Conference (SMC-07), Lefkada, Greece, 2007.</li>
+<li>Nicolas Castagne, Claude Cadoz, Ali Allaoui and Olivier Tache. G3: Genesis
+Software Environment Update. In Proceedings of the International Computer
+Music Conference (ICMC-09), Montreal, Canada, 2009.</li>
+<li>Nicolas Castagné and Claude Cadoz. Genesis 3: Plate-forme pour la création
+musicale à l'aide des modèles physiques Cordis-Anima. In Proceedings of the
+Journée de l'Informatique Musicale, Grenoble, France, 2009.</li>
+<li>Edgar Berdahl and Julius O. Smith. An Introduction to the Synth-A-Modeler
+Compiler: Modular and Open-Source Sound Synthesis using Physical Models. In
+Proceedings of the Linux Audio Conference (LAC-12), Stanford, USA, 2012.</li>
+<li>James Leonard and Claude Cadoz. Physical Modelling Concepts for a Collection
+of Multisensory Virtual Musical Instruments. In Proceedings of the New
+Interfaces for Musical Expression (NIME-15) Conference, Baton Rouge, USA, 2015.</li>
+</ul>
+<h2 id="utility-functions">Utility Functions</h2>
+<p>These utility functions are used to help certain operations (e.g. define initial
+positions and velocities for physical elements).</p>
+<hr />
+<h3 id="miinitstate"><code>(mi.)initState</code></h3>
+<p>Used to set initial delayed position values that must be initialised
+at step 0 of the physics simulation.</p>
+<p>If you develop any of your own modules, you will need to use this (see
+mass and springDamper algorithm codes for examples).</p>
+<h4 id="usage">Usage</h4>
+<pre><code>x: initState(x0) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>x</code>: position value signal</li>
+<li><code>x0</code>: initial value for position</li>
+</ul>
+<h2 id="mass-algorithms">Mass Algorithms</h2>
+<p>All mass-type physical element functions are declared here. They all expect to receive
+a force input signal and produce a position signal.
+All physical parameters are expressed in sample-rate dependant values.</p>
+<hr />
+<h3 id="mimass"><code>(mi.)mass</code></h3>
+<p>Implementation of a punctual mass element.
+Takes an input force and produces output position.</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>mass(m, grav, x0, xr0),_ : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>m</code>: mass value</li>
+<li><code>grav</code>: gravity force value</li>
+<li><code>x0</code>: initial position</li>
+<li><code>xr0</code>: initial delayed position (inferred from initial velocity)</li>
+</ul>
+<hr />
+<h3 id="miosc"><code>(mi.)osc</code></h3>
+<p>Implementation of a simple linear harmonic oscillator.
+Takes an input force and produces output position.</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>osc(m, k, z, grav, x0, xr0),_ : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>m</code>: mass value</li>
+<li><code>k</code>: stiffness value</li>
+<li><code>z</code>: damping value</li>
+<li><code>grav</code>: gravity force value</li>
+<li><code>x0</code>: initial position</li>
+<li><code>xr0</code>: initial delayed position (inferred from initial velocity)</li>
+</ul>
+<hr />
+<h3 id="miground"><code>(mi.)ground</code></h3>
+<p>Implementation of a fixed point element.
+The position output produced by this module never changes, however
+it still expects a force input signal (for compliance with connection
+rules).</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>ground(x0),_ : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>x0</code>: initial position</li>
+</ul>
+<hr />
+<h3 id="miposinput"><code>(mi.)posInput</code></h3>
+<p>Implementation of a position input module (driven by an outside
+signal). Takes two signal inputs: incoming force (which doesn't
+affect position) and the driving position signal.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>posInput(x0),_,_ : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>x0</code>: initial position</li>
+</ul>
+<h2 id="interaction-algorithms">Interaction Algorithms</h2>
+<p>All interaction-type physical element functions are declared here. They each expect to
+receive two position signals (coming from the two mass-elements that they connect) and
+produce two equal and opposite force signals that must be routed back to the mass
+elements' inputs.
+All physical parameters are expressed in sample-rate dependant values.</p>
+<hr />
+<h3 id="mispring"><code>(mi.)spring</code></h3>
+<p>Implementation of a linear elastic spring interaction.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>spring(k, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>k</code>: stiffness value</li>
+<li><code>x1r</code>: initial delayed position of mass 1 (unused here)</li>
+<li><code>x2r</code>: initial delayed position of mass 2 (unused here)</li>
+</ul>
+<hr />
+<h3 id="midamper"><code>(mi.)damper</code></h3>
+<p>Implementation of a linear damper interaction.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>damper(z, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>z</code>: damping value</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul>
+<hr />
+<h3 id="mispringdamper"><code>(mi.)springDamper</code></h3>
+<p>Implementation of a linear viscoelastic spring-damper interaction
+(a combination of the spring and damper modules).</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>springDamper(k, z, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>k</code>: stiffness value</li>
+<li><code>z</code>: damping value</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul>
+<hr />
+<h3 id="minlspringdamper2"><code>(mi.)nlSpringDamper2</code></h3>
+<p>Implementation of a non-linear viscoelastic spring-damper interaction
+containing a quadratic term (function of squared distance).
+Beware: at high displacements, this interaction will break numerical
+stability conditions ! The nlSpringDamperClipped is a safer option.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>nlSpringDamper2(k, q, z, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>k</code>: linear stiffness value</li>
+<li><code>q</code>: quadratic stiffness value</li>
+<li><code>z</code>: damping value</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul>
+<hr />
+<h3 id="minlspringdamper3"><code>(mi.)nlSpringDamper3</code></h3>
+<p>Implementation of a non-linear viscoelastic spring-damper interaction
+containing a cubic term (function of distance^3).
+Beware: at high displacements, this interaction will break numerical
+stability conditions ! The nlSpringDamperClipped is a safer option.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>nlSpringDamper3(k, q, z, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>k</code>: linear stiffness value</li>
+<li><code>q</code>: cubic stiffness value</li>
+<li><code>z</code>: damping value</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul>
+<hr />
+<h3 id="minlspringdamperclipped"><code>(mi.)nlSpringDamperClipped</code></h3>
+<p>Implementation of a non-linear viscoelastic spring-damper interaction
+containing a cubic term (function of distance^3), bound by an
+upper linear stiffness (hard-clipping).</p>
+<p>This bounding means that when faced with strong displacements, the
+interaction profile will "clip" at a given point and never produce
+forces higher than the bounding equivalent linear spring, stopping models
+from becoming unstable.</p>
+<p>So far the interaction clips "hard" (with no soft-knee spline
+interpolation, etc.)</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>nlSpringDamperClipped(s, c, k, z, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>s</code>: linear stiffness value</li>
+<li><code>c</code>: cubic stiffness value</li>
+<li><code>k</code>: upper-bound linear stiffness value</li>
+<li><code>z</code>: (linear) damping value</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul>
+<hr />
+<h3 id="minlpluck"><code>(mi.)nlPluck</code></h3>
+<p>Implementation of a piecewise linear plucking interaction.
+The symmetric function provides a repulsive viscoelastic interaction
+upon contact, until a tipping point is reached (when the plucking occurs).
+The tipping point depends both on the stiffness and the distance scaling
+of the interaction.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>nlPluck(knl, scale, z, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>knl</code>: stiffness scaling parameter (vertical stretch of the NL function)</li>
+<li><code>scale</code>: distance scaling parameter (horizontal stretch of the NL function)</li>
+<li><code>z</code>: (linear) damping value</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul>
+<hr />
+<h3 id="minlbow"><code>(mi.)nlBow</code></h3>
+<p>Implementation of a non-linear friction based interaction
+that allows for stick-slip bowing behaviour.
+Two versions are proposed : a piecewise linear function (very
+similar to the nlPluck) or a mathematical approximation (see
+Stefan Bilbao's book, Numerical Sound Synthesis).</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>nlBow(znl, scale, type, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>znl</code>: friction scaling parameter (vertical stretch of the NL function)</li>
+<li><code>scale</code>: velocity scaling parameter (horizontal stretch of the NL function)</li>
+<li><code>type</code>: interaction profile (0 = piecewise linear, 1 = smooth function)</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul>
+<hr />
+<h3 id="micollision"><code>(mi.)collision</code></h3>
+<p>Implementation of a collision interaction, producing linear visco-elastic
+repulsion forces when two mass elements are interpenetrating.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>collision(k, z, thres, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>k</code>: collision stiffness parameter</li>
+<li><code>z</code>: collision damping parameter</li>
+<li><code>thres</code>: threshold distance for the contact between elements</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul>
+<hr />
+<h3 id="minlcollisionclipped"><code>(mi.)nlCollisionClipped</code></h3>
+<p>Implementation of a collision interaction, producing non-linear
+visco-elastic repulsion forces when two mass elements are interpenetrating.
+Bound by an upper stiffness value to maintain stability.
+This interaction is particularly useful for more realistic contact dynamics
+(greater difference in velocity provides sharper contacts, and reciprocally).</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>nlCollisionClipped(s, c, k, z, thres, x1r, x2r),_,_ : _,_
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>s</code>: collision linear stiffness parameter</li>
+<li><code>c</code>: collision cubic stiffness parameter</li>
+<li><code>k</code>: collision upper-bounding stiffness parameter</li>
+<li><code>z</code>: collision damping parameter</li>
+<li><code>thres</code>: threshold distance for the contact between elements</li>
+<li><code>x1r</code>: initial delayed position of mass 1</li>
+<li><code>x2r</code>: initial delayed position of mass 2</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2019-2020 <a href="http://www.grame.fr">Grame-CNCM</a></p>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

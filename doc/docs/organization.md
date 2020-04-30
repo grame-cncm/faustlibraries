@@ -13,6 +13,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `hoa.lib`
 * `interpolators.lib`
 * `maths.lib`
+* `mi.lib`
 * `misceffects.lib`
 * `oscillators.lib`
 * `noises.lib`

@@ -107,6 +107,10 @@
 </li>
                                     
 <li>
+    <a href="../mi/" class="dropdown-item"> mass interaction </a>
+</li>
+                                    
+<li>
     <a href="../misceffects/" class="dropdown-item"> misceffects </a>
 </li>
                                     
@@ -156,6 +160,10 @@
                                     
 <li>
     <a href="../vaeffects/" class="dropdown-item"> vaeffects </a>
+</li>
+                                    
+<li>
+    <a href="../webaudio/" class="dropdown-item"> webaudio </a>
 </li>
                                 </ul>
                             </li>
@@ -231,12 +239,34 @@
 <p>Analyzers library. Its official prefix is <code>an</code>.</p>
 <h2 id="amplitude-tracking">Amplitude Tracking</h2>
 <hr />
+<h3 id="anabs_envelope"><code>(an.)abs_envelope</code></h3>
+<p>Absolute value with one-pole lowpass averaging</p>
+<h4 id="usage">Usage</h4>
+<pre><code>_ : abs_envelope(t60) : _;
+</code></pre>
+
+<p>Where</p>
+<ul>
+<li><code>t60</code>: (time to decay by 60 dB) sets the averaging frame in secs</li>
+</ul>
+<hr />
+<h3 id="anabs_envelope_rect"><code>(an.)abs_envelope_rect</code></h3>
+<p>Absolute value with moving-average</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>_ : abs_envelope_rect(length) : _;
+</code></pre>
+
+<p>Where</p>
+<ul>
+<li><code>length</code>: sets the averaging frame in samples</li>
+</ul>
+<hr />
 <h3 id="anamp_follower"><code>(an.)amp_follower</code></h3>
 <p>Classic analog audio envelope follower with infinitely fast rise and
 exponential decay.  The amplitude envelope instantaneously follows
 the absolute value going up, but then floats down exponentially.</p>
 <p><code>amp_follower</code> is a standard Faust function.</p>
-<h4 id="usage">Usage</h4>
+<h4 id="usage_2">Usage</h4>
 <pre><code>_ : amp_follower(rel) : _
 </code></pre>
 
@@ -253,7 +283,7 @@ Newsletter, Bernie Hutchins</li>
 <h3 id="anamp_follower_ud"><code>(an.)amp_follower_ud</code></h3>
 <p>Envelope follower with different up and down time-constants
 (also called a "peak detector").</p>
-<h4 id="usage_1">Usage</h4>
+<h4 id="usage_3">Usage</h4>
 <pre><code>   _ : amp_follower_ud(att,rel) : _
 </code></pre>
 
@@ -277,12 +307,56 @@ Use <code>amp_follower_ar</code> below to remove this restriction.</p>
 <p>Envelope follower with independent attack and release times. The
 release can be shorter than the attack (unlike in <code>amp_follower_ud</code>
 above).</p>
-<h4 id="usage_2">Usage</h4>
+<h4 id="usage_4">Usage</h4>
 <pre><code>_ : amp_follower_ar(att,rel) : _;
 </code></pre>
 
 <ul>
 <li>Author Jonatan Liljedahl, revised by RM</li>
+</ul>
+<hr />
+<h3 id="anms_envelope"><code>(an.)ms_envelope</code></h3>
+<p>Mean square with one-pole lowpass averaging</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>_ : ms_envelope(t60) : _;
+</code></pre>
+
+<p>Where</p>
+<ul>
+<li><code>t60</code>: (time to decay by 60 dB) sets the averaging frame in secs</li>
+</ul>
+<hr />
+<h3 id="anms_envelope_rect"><code>(an.)ms_envelope_rect</code></h3>
+<p>Mean square with moving-average</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>_ : ms_envelope_rect(length) : _;
+</code></pre>
+
+<p>Where</p>
+<ul>
+<li><code>length</code>: sets the averaging frame in samples</li>
+</ul>
+<hr />
+<h3 id="anrms_envelope"><code>(an.)rms_envelope</code></h3>
+<p>Root mean square with one-pole lowpass averaging</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>_ : rms_envelope(t60) : _;
+</code></pre>
+
+<p>Where</p>
+<ul>
+<li><code>t60</code>: (time to decay by 60 dB) sets the averaging frame in secs</li>
+</ul>
+<hr />
+<h3 id="anrms_envelope_rect"><code>(an.)rms_envelope_rect</code></h3>
+<p>Root mean square with moving-average</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>_ : rms_envelope_rect(length) : _;
+</code></pre>
+
+<p>Where</p>
+<ul>
+<li><code>length</code>: sets the averaging frame in samples</li>
 </ul>
 <h2 id="spectrum-analyzers">Spectrum-Analyzers</h2>
 <p>Spectrum-analyzers split the input signal into a bank of parallel signals, one for
@@ -322,7 +396,7 @@ filter-banks using elliptic or Chebyshev prototype filters.</p>
 <h3 id="anmth_octave_analyzer"><code>(an.)mth_octave_analyzer</code></h3>
 <p>Octave analyzer.
 <code>mth_octave_analyzer[N]</code> are standard Faust functions.</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>_ : mth_octave_analyzer(O,M,ftop,N) : par(i,N,_);  Oth-order Butterworth
 _ : mth_octave_analyzer6e(M,ftop,N) : par(i,N,_);  6th-order elliptic
 </code></pre>
@@ -345,7 +419,7 @@ mth_octave_analyzer_default = mth_octave_analyzer6e;
 <hr />
 <h3 id="anmth_octave_spectral_level6e"><code>(an.)mth_octave_spectral_level6e</code></h3>
 <p>Spectral level display.</p>
-<h4 id="usage_4">Usage:</h4>
+<h4 id="usage_10">Usage:</h4>
 <pre><code>_ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _;
 </code></pre>
 
@@ -373,7 +447,7 @@ octave_filterbank(N) = mth_octave_filterbank_default(1,10000,N);
 octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 </code></pre>
 
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <p>See <code>mth_octave_spectral_level_demo</code> in <code>demos.lib</code>.</p>
 <h2 id="arbritary-crossover-filter-banks-and-spectrum-analyzers">Arbritary-Crossover Filter-Banks and Spectrum Analyzers</h2>
 <p>These are similar to the Mth-octave analyzers above, except that the
@@ -381,7 +455,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="ananalyzer"><code>(an.)analyzer</code></h3>
 <p>Analyzer.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>_ : analyzer(O,freqs) : par(i,N,_);  No delay equalizer
 </code></pre>
 
@@ -401,7 +475,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="angortzelopt"><code>(an.)gortzelOpt</code></h3>
 <p>Optimized Goertzel filter. </p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>_ : goertzelOpt(freq,N) : _;
 </code></pre>
 
@@ -417,7 +491,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="angortzelcomp"><code>(an.)gortzelComp</code></h3>
 <p>Complex Goertzel filter. </p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>_ : goertzelComp(freq,N) : _;
 </code></pre>
 
@@ -433,7 +507,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="angoertzel"><code>(an.)goertzel</code></h3>
 <p>Same as <a href="#goertzelopt"><code>goertzelOpt</code></a>. </p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>_ : goertzel(freq,N) : _;
 </code></pre>
 
@@ -449,7 +523,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="anfft"><code>(an.)fft</code></h3>
 <p>Fast Fourier Transform (FFT).</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>si.cbus(N) : fft(N) : si.cbus(N);
 </code></pre>
 
@@ -489,7 +563,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="anifft"><code>(an.)ifft</code></h3>
 <p>Inverse Fast Fourier Transform (IFFT).</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_17">Usage</h4>
 <pre><code>si.cbus(N) : ifft(N) : si.cbus(N);
 </code></pre>
 
