@@ -7,7 +7,7 @@ function removeComment (arg) {
 
 function makeurl(arg) {
 	if (index(arg, "<http")) {
-		gsub(/ *[*-]/, "", arg);
+		gsub(/ *[*-][^a-zA-Z0-9]/, "", arg);
 		url = gensub(/[^>]*<(http[^>]+)>.*/, "\\1", 1, arg);
 		if (url == arg) return arg;
 
