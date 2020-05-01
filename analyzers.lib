@@ -63,7 +63,7 @@ abs_envelope_rect(period, x) = abs(x) : ma.avg_rect(period);
 //
 //  Where:
 //
-// * `period`: (time to decay by 60 dB) sets the averaging frame in secs
+// * `period`: (time to decay by 1/e) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
 declare abs_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
 declare abs_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
@@ -85,7 +85,7 @@ abs_envelope_tau(period, x) = abs(x) : ma.avg_tau(period);
 //
 //  Where:
 //
-// * `period`: (time to decay by 1/e) sets the averaging frame in secs
+// * `period`: (time to decay by 60 dB) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
 declare abs_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
 declare abs_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
@@ -107,7 +107,7 @@ abs_envelope_t60(period, x) = abs(x) : ma.avg_t60(period);
 //
 //  Where:
 //
-// * `period`: (time to decay by 2.2/e) sets the averaging frame in secs
+// * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
 declare abs_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
 declare abs_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
