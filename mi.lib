@@ -153,7 +153,7 @@ with{
   C = 1/m;
   equation = x
 	letrec{
-    'x = A*(x : initState(x0)) + B*(x' : initState(x1)) + (_-grav)*(C);
+    'x = A*(x : initState(x0)) + B*(x' : initState((x1, x0))) + (_-grav)*(C);
 	};
 };
 
@@ -241,6 +241,8 @@ with{
 
 //------------------------`(mi.)damper`----------------------
 // Implementation of a linear damper interaction.
+// Beware: in 32bit precision mode, damping forces can become
+// truncated if position values are not centered around zero!
 //
 // #### Usage
 //

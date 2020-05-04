@@ -243,8 +243,8 @@ recommended to use a scripting tool (such as MIMS) to generate the FAUST
 signal routing for a given physical network.</p>
 <ul>
 <li><a href="https://github.com/rmichon/mi_faust">https://github.com/rmichon/mi_faust</a></li>
-<li><a href="http://micreative.eu/tool_miFaust.html">http://micreative.eu/tool_miFaust.html</a></li>
-<li><a href="http://micreative.eu/paper_lac19.html">http://micreative.eu/paper_lac19.html</a></li>
+<li><a href="http://mi-creative.eu/tool_miFaust.html">http://mi-creative.eu/tool_miFaust.html</a></li>
+<li><a href="http://mi-creative.eu/paper_lac19.html">http://mi-creative.eu/paper_lac19.html</a></li>
 </ul>
 <h2 id="sources">Sources</h2>
 <p>The core mass-interaction algorithms implemented in this library are in the public
@@ -375,7 +375,9 @@ All physical parameters are expressed in sample-rate dependant values.</p>
 </ul>
 <hr />
 <h3 id="midamper"><code>(mi.)damper</code></h3>
-<p>Implementation of a linear damper interaction.</p>
+<p>Implementation of a linear damper interaction.
+Beware: in 32bit precision mode, damping forces can become
+truncated if position values are not centered around zero!</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>damper(z, x1r, x2r),_,_ : _,_
 </code></pre>
