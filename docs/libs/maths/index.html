@@ -212,6 +212,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#averaging-functions" class="nav-link">Averaging Functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -275,7 +279,7 @@ file take care of this, but can be useful in JavaScript for instance.</p>
 </code></pre>
 
 <ul>
-<li>See : <a href="http://docs.oracle.com/cd/E1995701/8063568/ncg_math.html">http://docs.oracle.com/cd/E1995701/8063568/ncg_math.html</a></li>
+<li>See : <a href="http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html">http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html</a></li>
 </ul>
 <hr />
 <h3 id="maneg"><code>(ma.)neg</code></h3>
@@ -614,13 +618,81 @@ T[n](x) = 2x*T[n-1](x) - T[n-2](x)
 occurs, 0 otherwise.</p>
 <h4 id="usage_44">Usage</h4>
 <pre><code>_ : zc : _
-</code></pre></div>
+</code></pre>
+
+<h2 id="averaging-functions">Averaging Functions</h2>
+<hr />
+<h3 id="maavg_rect"><code>(ma.)avg_rect</code></h3>
+<p>Moving average.</p>
+<h4 id="usage_45">Usage</h4>
+<pre><code>_ : avg_rect(period) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>period</code> is the averaging frame in seconds</li>
+</ul>
+<hr />
+<h3 id="maavg_tau">(ma.)avg_tau</h3>
+<p>Averaging function based on a one-pole filter and the tau response time.
+Tau represents the effective length of the one-pole impulse response,
+that is, tau is the integral of the filter's impulse response. This
+response is slower to reach the final value but has less ripples in
+non-steady signals.</p>
+<h4 id="usage_46">Usage</h4>
+<pre><code>_ avg_tau(period) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>period</code> is the time, in seconds, for the system to decay by 1/e, 
+or to reach 1-1/e of its final value.</li>
+</ul>
+<h4 id="reference_2">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/mdft/Exponentials.html">https://ccrma.stanford.edu/~jos/mdft/Exponentials.html</a></li>
+</ul>
+<hr />
+<h3 id="maavg_t60">(ma.)avg_t60</h3>
+<p>Averaging function based on a one-pole filter and the t60 response time.
+This response is particularly useful when the system is required to 
+reach the final value after about <code>period</code> seconds.</p>
+<h4 id="usage_47">Usage</h4>
+<pre><code>_ avg_t60(period) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>period</code> is the time, in seconds, for the system to decay by 1/1000, 
+or to reach 1-1/1000 of its final value.</li>
+</ul>
+<h4 id="reference_3">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html">https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html</a></li>
+</ul>
+<hr />
+<h3 id="maavg_t19">(ma.)avg_t19</h3>
+<p>Averaging function based on a one-pole filter and the t19 response time.
+This response is close to the moving-average algorithm as it roughly reaches
+the final value after <code>period</code> seconds and shows about the same
+oscillations for non-steady signals.</p>
+<h4 id="usage_48">Usage</h4>
+<pre><code>_ avg_t19(period) : _
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>period</code> is the time, in seconds, for the system to decay by 1/e^2.2, 
+or to reach 1-1/e^2.2 of its final value.</li>
+</ul>
+<h4 id="reference_4">Reference</h4>
+<p>Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.</p></div>
             </div>
         </div>
 
         <footer class="col-md-12">
             <hr>
-                <p>Copyright &copy; 2019-2020 <a href="http://www.grame.fr">Grame-CNCM</a></p>
+                <p>Copyright &copy; 2019-2020 <a href="https://www.grame.fr">Grame-CNCM</a></p>
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>

@@ -777,9 +777,10 @@ rate of a signal, it just holds samples...
 </ul>
 <hr />
 <h3 id="baimpulsify"><code>(ba.)impulsify</code></h3>
-<p>Turns the signal from a button into an impulse (1,0,0,... when
-button turns on).
-<code>impulsify</code> is a standard Faust function.</p>
+<p>Turns a signal into an impulse with the value of the current sample 
+(0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a 
+<code>button</code> to turn its output into an impulse. <code>impulsify</code> is a standard Faust 
+function.</p>
 <h4 id="usage_43">Usage</h4>
 <pre><code>button(&quot;gate&quot;) : impulsify;
 </code></pre>
@@ -1217,7 +1218,7 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
 
         <footer class="col-md-12">
             <hr>
-                <p>Copyright &copy; 2019-2020 <a href="http://www.grame.fr">Grame-CNCM</a></p>
+                <p>Copyright &copy; 2019-2020 <a href="https://www.grame.fr">Grame-CNCM</a></p>
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
         <script>

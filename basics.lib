@@ -926,9 +926,10 @@ peakholder(n) = peakhold2 ~ reset : (!,_) with {
 
 
 //--------------------------`(ba.)impulsify`---------------------------
-// Turns the signal from a button into an impulse (1,0,0,... when
-// button turns on).
-// `impulsify` is a standard Faust function.
+// Turns a signal into an impulse with the value of the current sample 
+// (0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a 
+// `button` to turn its output into an impulse. `impulsify` is a standard Faust 
+// function.
 //
 // #### Usage
 //
@@ -936,7 +937,7 @@ peakholder(n) = peakhold2 ~ reset : (!,_) with {
 // button("gate") : impulsify;
 // ```
 //----------------------------------------------------------------
-impulsify(x) = x > x';
+impulsify(x) = _ <: _,mem : - <: >(0)*_;
 
 
 //-----------------------`(ba.)automat`------------------------------
