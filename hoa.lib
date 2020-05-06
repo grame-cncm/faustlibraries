@@ -252,7 +252,7 @@ with {
 //-----------------------------------------------------
 map(n, x, r, a)	= encoder(n, x * volume(r), a) : wider(n, ouverture(r))
 with {
-	volume(r) = 1. / (r * r * (r > 1) + (r =< 1));
+	volume(r) = 1. / (r * r * (r > 1) + (r <= 1));
 	ouverture(r) = r * (r < 1) + (r >= 1);
 };
 
