@@ -188,12 +188,6 @@ tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) 
  tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
 };
 
-/*
-tau2poleDouble(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) with {
- clipCond = abs(tau)<2.3e-16;
- tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
-};
-*/
 
 //-------`(ba.)pole2tau`----------
 // Returns the time-constant, in seconds, corresponding to the given real,
@@ -687,7 +681,7 @@ subseq(head, 0, n)         = head;
 //========================================================================================
 
 //-----------------------------`(ba.)if`-----------------------------------
-// if-then-else implemented with a select2. WARNING : since select2 is strict (always evaluating both branches),
+// if-then-else implemented with a select2. WARNING: since select2 is strict (always evaluating both branches),
 // the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to 
 // protect against forbidden computations like division-by-zero for instance.
 //
