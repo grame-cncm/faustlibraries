@@ -710,7 +710,11 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // turn based on the thesis by Peter Falkner "Entwicklung eines digitalen 
 // Stereo-Limiters mit Hilfe des Signalprozessors DSP56001".
 // This version of the limiter simply uses a peak-holder with smoothed
-// attack and release based on e^(-2pi) time constant filters. 
+// attack and release based on e^(-2pi) time constant filters.
+// This time constant allows for the amplitude profile to reach 1 -
+// e^(-2pi) of the final peak after the attack time. Hence, input path
+// is delayed by the same amount as attack time to synchronise input and
+// amplitude profile.
 //
 // #### Usage
 //
@@ -745,3 +749,23 @@ with {
       att_smooth(time, in) = si.smooth(ba.tau2pole(time / (2 * ma.PI)), in);
       rel_smooth(time, in) = an.peak_envelope(time / (2 * ma.PI), in);
 };
+
+//-----------------------`(co.)limiter_basic_stereo`---------------------------
+// Stereo version of the limiter above where the scaling factor for L
+// and R channels is determined by the loudest peak between the two.
+declare limiter_basic_stereo author "Dario Sanfilippo";
+declare limiter_basic_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare limiter_basic_stereo license "GPLv3 license";
+limiter_basic_stereo(threshold, attack, hold, release, x1, x2) =
+      x1@(attack * ma.SR) * scaling ,
+      x2@(attack * ma.SR) * scaling
+with {
+      peakLR = max(abs(x1), abs(x2));
+      scaling = threshold / amp_profile : min(1);
+      amp_profile = ba.peakholder(hold * ma.SR, peakLR) : att_smooth(attack) :
+       rel_smooth(release);
+      att_smooth(time, in) = si.smooth(ba.tau2pole(time / (2 * ma.PI)), in);
+      rel_smooth(time, in) = an.peak_envelope(time / (2 * ma.PI), in);
+};
+
