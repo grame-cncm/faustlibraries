@@ -769,3 +769,41 @@ with {
       rel_smooth(time, in) = an.peak_envelope(time / (2 * ma.PI), in);
 };
 
+//------------------------`limiter_Z_mono`-----------------------------------
+// Mono limiter implementation of the algorithm found in [Zolzer 2008]
+// Inputs are: limiter threshold, limiter slope, attack and release in ms.
+declare limiter_Z_mono author "Dario Sanfilippo";
+declare limiter_Z_mono copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare limiter_Z_mono license "GPLv3 license";
+limiter_Z_mono(LT, LS, t_a, t_r, x) =
+      x@(t_a / 1000 * ma.SR) * g
+with {
+      T_s = 1 / ma.SR;
+      AT = 1 - exp((-2.2 * T_s) / (t_a / 1000));
+      RT = 1 - exp((-2.2 * T_s) / (t_r / 1000));
+      g = ba.if(logpeakLT > LT, logpeakLT * -LS, 1) : pow(2, _) : smooth;
+      smooth(in) = coeff * in :    +
+                                   ~ * (1 - coeff)
+      with {
+       coeff = ba.if(hysteresis(in' - in), AT, RT);
+      };
+      hysteresis(in1) =    loop 
+                           ~ _
+      with {
+       loop(fb) = ba.if(in1 <= alpha, 0, ba.if(in1 >= beta, 1, fb));
+       alpha = -1 / (t_r / 1000) / ma.SR;
+       beta = 1 / (t_a / 1000) / ma.SR;
+      };
+      logpeakLT = ma.log2(peak_a_r) - LT;
+      peak_a_r =   loop
+                   ~ _
+      with {
+       loop(fb) = ba.if(abs(x) > fb, attack(x), release(fb))
+       with {
+           attack = AT * abs : +
+                               ~ * (1 - AT);
+           release = * (1 - RT);
+       };
+      };
+};
