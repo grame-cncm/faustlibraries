@@ -734,7 +734,7 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 //
 // #### Reference:
 //
-// http://iem.at/~zmoelnig/publications/limiter/
+// http://iem.at/~zmoelnig/publications/limiter/.
 //-----------------------------------------------------------------------------
 declare limiter_basic_mono author "Dario Sanfilippo";
 declare limiter_basic_mono copyright "Copyright (C) 2020 Dario Sanfilippo 
@@ -770,8 +770,26 @@ with {
 };
 
 //------------------------`limiter_Z_mono`-----------------------------------
-// Mono limiter implementation of the algorithm found in [Zolzer 2008]
-// Inputs are: limiter threshold, limiter slope, attack and release in ms.
+// Mono limiter implementation of the algorithm found in [Zölzer 2008].
+// Inputs are: limiter threshold, limiter slope, attack, release (in ms).
+//
+// #### Usage 
+//
+// ```
+// _ : limiter_Z_mono(LT, LS, AT, RT) : _;
+// ```
+//
+// Where:
+//
+// * `LT` is the limiting threshold.
+// * `LS` is the limiting slope.
+// * `t_a` is the attack time (ms).
+// * `t_r` is the release time (ms).
+//
+// #### Reference:
+//
+// Zölzer, U., 2008. Digital audio signal processing (Vol. 9). New York: Wiley.
+//-----------------------------------------------------------------------------
 declare limiter_Z_mono author "Dario Sanfilippo";
 declare limiter_Z_mono copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
