@@ -800,7 +800,7 @@ with {
       T_s = 1 / ma.SR;
       AT = 1 - exp((-2.2 * T_s) / (t_a / 1000));
       RT = 1 - exp((-2.2 * T_s) / (t_r / 1000));
-      g = ba.if(logpeakLT > LT, logpeakLT * -LS, 1) : pow(2, _) : smooth;
+      g = ba.if(logpeakLT > 0, logpeakLT * -LS, 1) : pow(2, _) : smooth;
       smooth(in) = coeff * in :    +
                                    ~ * (1 - coeff)
       with {
