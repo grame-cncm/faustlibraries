@@ -791,7 +791,7 @@ declare limiter_basic_stereo author "Dario Sanfilippo";
 declare limiter_basic_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_basic_stereo license "GPLv3 license";
-limiter_basic_stereo(threshold, attack, hold, release, x1, x2) =
+limiter_basic_stereo(threshold, lag, attack, hold, release, x1, x2) =
       x1@(lag * ma.SR) * scaling ,
       x2@(lag * ma.SR) * scaling
 with {
