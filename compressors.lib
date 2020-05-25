@@ -712,25 +712,26 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // This version of the limiter simply uses a peak-holder with smoothed
 // attack and release based on e^(-2pi) time constant filters.
 // This time constant allows for the amplitude profile to reach 1 -
-// e^(-2pi) of the final peak after the attack time. Hence, input path
-// is delayed by the same amount as attack time to synchronise input and
-// amplitude profile.
+// e^(-2pi) of the final peak after the attack time. The input path
+// can be delayed by the same amount as attack time to synchronise input and
+// amplitude profile, or by any other lookahead time specified by the user.
 //
 // #### Usage
 //
 // ```
-// _ : limiter_basic_mono(threshold, attack, hold, release) : _;
+// _ : limiter_basic_mono(threshold, lag, attack, hold, release) : _;
 // ```
 //
 // Where:
 //
 // * `threshold` is the linear amplitude limiting threshold.
+// * `lag` lookahead delay in seconds.
 // * `attack` is the attack time in seconds 
 //     (note that it sets the input delay and it must be known at compile-time).
 // * `hold` is hold time in seconds.
 // * `release` is release time in seconds.
 //
-// Example: limiter_basic_mono(1, .01, .1, 1);
+// Example: limiter_basic_mono(1, .01, .01, .1, 1);
 //
 // #### Reference:
 //
@@ -740,8 +741,8 @@ declare limiter_basic_mono author "Dario Sanfilippo";
 declare limiter_basic_mono copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com>";
 declare limiter_basic_mono license "GPLv3 license";
-limiter_basic_mono(threshold, attack, hold, release, x) = 
-      x@(attack * ma.SR) * scaling
+limiter_basic_mono(threshold, lag, attack, hold, release, x) = 
+      x@(lag * ma.SR) * scaling
 with {
       scaling = threshold / amp_profile : min(1);
       amp_profile = ba.peakholder(hold * ma.SR, x) : att_smooth(attack) : 
@@ -751,15 +752,48 @@ with {
 };
 
 //-----------------------`(co.)limiter_basic_stereo`---------------------------
-// Stereo version of the limiter above where the scaling factor for L
-// and R channels is determined by the loudest peak between the two.
+// Simple stereo lookahead limiter based on IOhannes Zmölnig post, which is in
+// turn based on the thesis by Peter Falkner "Entwicklung eines digitalen
+// Stereo-Limiters mit Hilfe des Signalprozessors DSP56001".
+// This version of the limiter simply uses a peak-holder with smoothed
+// attack and release based on e^(-2pi) time constant filters.
+// This time constant allows for the amplitude profile to reach 1 -
+// e^(-2pi) of the final peak after the attack time. The input path
+// can be delayed by the same amount as attack time to synchronise input and
+// amplitude profile, or by any other lookahead time specified by the user.
+// The scaling factor for L and R channels is determined by the loudest peak 
+// between the two.
+
+//
+// #### Usage
+//
+// ```
+// _ , _ : limiter_basic_stereo(threshold, lag, attack, hold, release) : _ , _;
+// ```
+//
+// Where:
+//
+// * `threshold` is the linear amplitude limiting threshold.
+// * `lag` lookahead delay in seconds.
+// * `attack` is the attack time in seconds
+//     (note that it sets the input delay and it must be known at compile-time).
+// * `hold` is hold time in seconds.
+// * `release` is release time in seconds.
+//
+// Example: limiter_basic_mono(1, .01, .01, .1, 1);
+//
+// #### Reference:
+//
+// http://iem.at/~zmoelnig/publications/limiter/.
+//-----------------------------------------------------------------------------
+
 declare limiter_basic_stereo author "Dario Sanfilippo";
 declare limiter_basic_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_basic_stereo license "GPLv3 license";
 limiter_basic_stereo(threshold, attack, hold, release, x1, x2) =
-      x1@(attack * ma.SR) * scaling ,
-      x2@(attack * ma.SR) * scaling
+      x1@(lag * ma.SR) * scaling ,
+      x2@(lag * ma.SR) * scaling
 with {
       peakLR = max(abs(x1), abs(x2));
       scaling = threshold / amp_profile : min(1);
@@ -767,61 +801,4 @@ with {
        rel_smooth(release);
       att_smooth(time, in) = si.smooth(ba.tau2pole(time / (2 * ma.PI)), in);
       rel_smooth(time, in) = an.peak_envelope(time / (2 * ma.PI), in);
-};
-
-//------------------------`limiter_Z_mono`-----------------------------------
-// Mono limiter implementation of the algorithm found in [Zölzer 2008].
-// Inputs are: limiter threshold, limiter slope, attack, release (in ms).
-//
-// #### Usage 
-//
-// ```
-// _ : limiter_Z_mono(LT, LS, t_a, t_r) : _;
-// ```
-//
-// Where:
-//
-// * `LT` is the limiting threshold.
-// * `LS` is the limiting slope.
-// * `t_a` is the attack time (ms).
-// * `t_r` is the release time (ms).
-//
-// #### Reference:
-//
-// Zölzer, U., 2008. Digital audio signal processing (Vol. 9). New York: Wiley.
-//-----------------------------------------------------------------------------
-declare limiter_Z_mono author "Dario Sanfilippo";
-declare limiter_Z_mono copyright "Copyright (C) 2020 Dario Sanfilippo
-      <sanfilippo.dario@gmail.com>";
-declare limiter_Z_mono license "GPLv3 license";
-limiter_Z_mono(LT, LS, t_a, t_r, x) =
-      x@(t_a / 1000 * ma.SR) * g
-with {
-      T_s = 1 / ma.SR;
-      AT = 1 - exp((-2.2 * T_s) / (t_a / 1000));
-      RT = 1 - exp((-2.2 * T_s) / (t_r / 1000));
-      g = ba.if(logpeakLT > 0, logpeakLT * -LS, 1) : pow(2, _) : smooth;
-      smooth(in) = coeff * in :    +
-                                   ~ * (1 - coeff)
-      with {
-       coeff = ba.if(hysteresis(in' - in), AT, RT);
-      };
-      hysteresis(in1) =    loop 
-                           ~ _
-      with {
-       loop(fb) = ba.if(in1 <= alpha, 0, ba.if(in1 >= beta, 1, fb));
-       alpha = -1 / (t_r / 1000) / ma.SR;
-       beta = 1 / (t_a / 1000) / ma.SR;
-      };
-      logpeakLT = ma.log2(peak_a_r) - LT;
-      peak_a_r =   loop
-                   ~ _
-      with {
-       loop(fb) = ba.if(abs(x) > fb, attack(x), release(fb))
-       with {
-           attack = AT * abs : +
-                               ~ * (1 - AT);
-           release = * (1 - RT);
-       };
-      };
 };
