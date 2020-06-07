@@ -710,28 +710,31 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // turn based on the thesis by Peter Falkner "Entwicklung eines digitalen 
 // Stereo-Limiters mit Hilfe des Signalprozessors DSP56001".
 // This version of the limiter simply uses a peak-holder with smoothed
-// attack and release based on e^(-2pi) time constant filters.
-// This time constant allows for the amplitude profile to reach 1 -
-// e^(-2pi) of the final peak after the attack time. The input path
-// can be delayed by the same amount as attack time to synchronise input and
-// amplitude profile, or by any other lookahead time specified by the user.
+// attack and release based on tau time constant filters.
+//
+// It is also possible to use a time constant that is 2*PI*tau by dividing 
+// the attack and release times by 2*PI. This time constant allows for 
+// the amplitude profile to reach 1 - e^(-2pi) of the final 
+// peak after the attack time. The input path can be delayed by the same 
+// amount as the attack time to synchronise input and amplitude profile, 
+// or by any other lookahead time specified by the user.
 //
 // #### Usage
 //
 // ```
-// _ : limiter_basic_mono(threshold, lag, attack, hold, release) : _;
+// _ : limiter_basic_mono(lag, threshold, attack, hold, release) : _;
 // ```
 //
 // Where:
 //
-// * `threshold` is the linear amplitude limiting threshold.
-// * `lag` lookahead delay in seconds.
-// * `attack` is the attack time in seconds 
-//     (note that it sets the input delay and it must be known at compile-time).
-// * `hold` is hold time in seconds.
-// * `release` is release time in seconds.
+// * `lag` lookahead delay in seconds, known at compile-time.
+// * `threshold` is the linear amplitude limiting threshold:
+//         attenuation if above the threshold, delay-only if below.
+// * `attack` is the attack time in seconds.
+// * `hold` is the hold time in seconds.
+// * `release` is the release time in seconds.
 //
-// Example: limiter_basic_mono(1, .01, .01, .1, 1);
+// Example: limiter_basic_mono(.01, 1, .01, .1, 1);
 //
 // #### Reference:
 //
@@ -741,64 +744,69 @@ declare limiter_basic_mono author "Dario Sanfilippo";
 declare limiter_basic_mono copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com>";
 declare limiter_basic_mono license "GPLv3 license";
-limiter_basic_mono(threshold, lag, attack, hold, release, x) = 
+limiter_basic_mono(lag, threshold, attack, hold, release, x) = 
       x@(lag * ma.SR) * scaling
 with {
       scaling = threshold / amp_profile : min(1);
       amp_profile = ba.peakholder(hold * ma.SR, x) : att_smooth(attack) : 
-       rel_smooth(release);
-      att_smooth(time, in) = si.smooth(ba.tau2pole(time / (2 * ma.PI)), in);
-      rel_smooth(time, in) = an.peak_envelope(time / (2 * ma.PI), in);
+           rel_smooth(release);
+      att_smooth(time, in) = si.smooth(ba.tau2pole(time), in);
+      rel_smooth(time, in) = an.peak_envelope(time, in);
 };
 
-//-----------------------`(co.)limiter_basic_stereo`---------------------------
-// Simple stereo lookahead limiter based on IOhannes Zmölnig post, which is in
-// turn based on the thesis by Peter Falkner "Entwicklung eines digitalen
+//-----------------------`(co.)limiter_basic_N`--------------------------------
+// Simple N-channel lookahead limiter based on IOhannes Zmölnig post, which is 
+// in turn based on the thesis by Peter Falkner "Entwicklung eines digitalen
 // Stereo-Limiters mit Hilfe des Signalprozessors DSP56001".
 // This version of the limiter simply uses a peak-holder with smoothed
-// attack and release based on e^(-2pi) time constant filters.
-// This time constant allows for the amplitude profile to reach 1 -
-// e^(-2pi) of the final peak after the attack time. The input path
-// can be delayed by the same amount as attack time to synchronise input and
-// amplitude profile, or by any other lookahead time specified by the user.
-// The scaling factor for L and R channels is determined by the loudest peak 
-// between the two.
-
+// attack and release based on tau time constant filters.
+//
+// It is also possible to use a time constant that is 2*PI*tau by dividing 
+// the attack and release times by 2*PI. This time constant allows for 
+// the amplitude profile to reach 1 - e^(-2pi) of the final 
+// peak after the attack time. The input path can be delayed by the same 
+// amount as the attack time to synchronise input and amplitude profile, 
+// or by any other lookahead time specified by the user.
+//
+// The scaling factor for all the channels is determined by the loudest peak 
+// between them all, so that amplitude ratios between the signals are kept.
 //
 // #### Usage
 //
 // ```
-// _ , _ : limiter_basic_stereo(threshold, lag, attack, hold, release) : _ , _;
+// si.bus(N) : limiter_basic_stereo(N, lag, threshold, attack, hold, release) : si.bus(N);
 // ```
 //
 // Where:
 //
+// * `N` is the number of channels, known at compile-time.
+// * `lag` is the lookahead delay in seconds, known at compile-time.
 // * `threshold` is the linear amplitude limiting threshold.
-// * `lag` lookahead delay in seconds.
-// * `attack` is the attack time in seconds
-//     (note that it sets the input delay and it must be known at compile-time).
-// * `hold` is hold time in seconds.
-// * `release` is release time in seconds.
+// * `attack` is the attack time in seconds.
+// * `hold` is the hold time in seconds.
+// * `release` is the release time in seconds.
 //
-// Example: limiter_basic_mono(1, .01, .01, .1, 1);
+// Example for a stereo limiter: limiter_basic_mono(2, .01, 1, .01, .1, 1);
 //
 // #### Reference:
 //
 // http://iem.at/~zmoelnig/publications/limiter/.
 //-----------------------------------------------------------------------------
 
-declare limiter_basic_stereo author "Dario Sanfilippo";
-declare limiter_basic_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
+declare limiter_basic_N author "Dario Sanfilippo";
+declare limiter_basic_N copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_basic_stereo license "GPLv3 license";
-limiter_basic_stereo(threshold, lag, attack, hold, release, x1, x2) =
-      x1@(lag * ma.SR) * scaling ,
-      x2@(lag * ma.SR) * scaling
-with {
-      peakLR = max(abs(x1), abs(x2));
-      scaling = threshold / amp_profile : min(1);
-      amp_profile = ba.peakholder(hold * ma.SR, peakLR) : att_smooth(attack) :
-       rel_smooth(release);
-      att_smooth(time, in) = si.smooth(ba.tau2pole(time / (2 * ma.PI)), in);
-      rel_smooth(time, in) = an.peak_envelope(time / (2 * ma.PI), in);
-};
+declare limiter_basic_N license "GPLv3 license";
+limiter_basic_N(N, lag, threshold, attack, hold, release) = 
+      si.bus(N) <: par(i, N, @ (lag * ma.SR)) , 
+                   (scaling <: si.bus(N)) : ro.interleave(N, 2) : par(i, N, *)
+      with {
+           scaling = threshold , amp_profile : / : min(1);
+           amp_profile = par(i, N, abs) : maxN(N) : ba.peakholder(hold * ma.SR) :
+               att_smooth(attack) : rel_smooth(release);
+           att_smooth(time, in) = si.smooth(ba.tau2pole(time), in);
+           rel_smooth(time, in) = an.peak_envelope(time, in);
+           maxN(1) = _;
+           maxN(2) = max;
+           maxN(N) = max(maxN(N - 1));
+      };
