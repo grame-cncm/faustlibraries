@@ -184,7 +184,7 @@ Michon and Julius O. Smith III, and are released under the
 // tau2pole(tau) = exp(-1.0/(tau*ma.SR));
 
 tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) with {
- clipCond = abs(tau) < ma.EPSILON;
+ clipCond = abs(tau)<ma.EPSILON;
  tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
 };
 
@@ -399,7 +399,7 @@ time = (+(1)~_) - 1;
 //------------------------
 ramp = case {
 	(0) => _;
-	(n) => \(y,x).(if(y+x/n < x, y+x/n, if(y-x/n > x, y-x/n, x))) ~ _;
+	(n) => \(y,x).(if(y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
 };
 
 
