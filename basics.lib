@@ -1025,7 +1025,8 @@ listInterp(v) =
 
 
 //-------------------`(ba.)bypass1`-------------------------
-// Takes a mono input signal, route it to `e` and bypass it if `bpc = 1`.
+// Takes a mono input signal, route it to `e` and bypass it if `bpc = 1`. When bypassed, `e` is feed with zeros 
+// so that its state is cleanup up.
 // `bypass1` is a standard Faust function.
 //
 // #### Usage
@@ -1048,7 +1049,8 @@ with {
 
 
 //-------------------`(ba.)bypass2`-------------------------
-// Takes a stereo input signal, route it to `e` and bypass it if `bpc = 1`.
+// Takes a stereo input signal, route it to `e` and bypass it if `bpc = 1`. When bypassed, `e` is feed with zeros 
+// so that its state is cleanup up.
 // `bypass2` is a standard Faust function.
 //
 // #### Usage
@@ -1071,8 +1073,9 @@ with {
 
 
 //-------------------`(ba.)bypass1to2`-------------------------
-// Bypass switch for effect `e` having mono input signal and stereo output.
-// Effect `e` is bypassed if `bpc = 1`.
+// Bypass switch for effect `e` having mono input signal and stereo output. 
+// Effect `e` is bypassed if `bpc = 1`.When bypassed, `e` is feed with zeros 
+// so that its state is cleanup up.
 // `bypass1to2` is a standard Faust function.
 //
 // #### Usage
@@ -1095,8 +1098,9 @@ with {
 
 
 //-------------------`(ba.)bypass_fade`-------------------------
-// Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. Once bypassed the  
-// effect is replaced by par(i,N,_). Bypassed circuits can be chained.
+// Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. Inputs and outputs signals are faded 
+// out when 'e' is bypassed, so that 'e' state is cleanup up.
+// Once bypassed the effect is replaced by par(i,N,_). Bypassed circuits can be chained.
 //
 // #### Usage
 //
