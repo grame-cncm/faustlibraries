@@ -184,7 +184,7 @@ Michon and Julius O. Smith III, and are released under the
 // tau2pole(tau) = exp(-1.0/(tau*ma.SR));
 
 tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) with {
- clipCond = abs(tau) < ma.EPSILON;
+ clipCond = abs(tau)<ma.EPSILON;
  tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
 };
 
@@ -399,7 +399,7 @@ time = (+(1)~_) - 1;
 //------------------------
 ramp = case {
 	(0) => _;
-	(n) => \(y,x).(if(y+x/n < x, y+x/n, if(y-x/n > x, y-x/n, x))) ~ _;
+	(n) => \(y,x).(if(y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
 };
 
 
@@ -814,8 +814,8 @@ with {
         xfade(i, j, x, y) = x*(1-xb) + y*xb with { xb = ramp(n, (i >= j)); };
     };
 
-    outs = outputs(take(1, lgen));  // Number of outputs of the first item (all should have the same value)
-    ins = inputs(take(1, lgen));    // Number of inputs of the first item (all should have the same value)
+    outs = outputs(take(1, lgen));  // Number of outputs of the first circuit (all should have the same value)
+    ins = inputs(take(1, lgen));    // Number of inputs of the first circuit (all should have the same value)
     N = outputs(lgen)/outs;         // Number of items in the list
 };
 
@@ -1078,7 +1078,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : bypass1(bpc,e) : _,_
+// _ : bypass1to2(bpc,e) : _,_
 // ```
 //
 // Where:
@@ -1262,7 +1262,7 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 // recursiveMax =
 //  case {
 //    (1,x) => x;
-//    (N,x) =>  max(recursiveMax(N/2,x) , recursiveMax(N/2,x)@(N/2));
+//    (N,x) => max(recursiveMax(N/2,x), recursiveMax(N/2,x)@(N/2));
 //  };
 // ```
 //
@@ -1295,7 +1295,7 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 //      ):max
 //    )
 //  )
-//  with {
+// with {
 //  useVal(i) = select2((N>=i) , (0-(ma.INFINITY)),_);
 // };
 // ```
@@ -1356,7 +1356,7 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 //
 // ```
 // variableBinaryMaxN(N,maxN,x) =
-//  par(i,maxNrBits,recursiveMax(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)  : useVal(i)) : combine(maxNrBits) with {
+//  par(i,maxNrBits,recursiveMax(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i) : useVal(i)) : combine(maxNrBits) with {
 //    // The sum of all the sizes of the previous blocks
 //    sumOfPrevBlockSizes(N,maxN,0) = 0;
 //    sumOfPrevBlockSizes(N,maxN,i) = (subseq((allBlockSizes(N,maxN)),0,i):>_);
@@ -1366,8 +1366,8 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 //    combine(2) = max;
 //    combine(N) = max(combine(N-1),_);
 //    // Decide wether or not to use a certain value, based on N
-//    useVal(i) = select2( isUsed(i), (0-(ma.INFINITY)),_);
-//    isUsed(i) = take(i+1,(int2bin(N,maxN)));
+//    useVal(i) = select2(isUsed(i), (0-(ma.INFINITY)),_);
+//    isUsed(i) = take(i+1, (int2bin(N,maxN)));
 //  };
 // ```
 //========================================================================================
@@ -1428,20 +1428,20 @@ with {
     useVal(i) =
       _ <: select2(
         (i==0) & (N==0),
-        select2(isUsed(i), disabledVal,_),
+        select2(isUsed(i), disabledVal, _),
         _
       );
 
     // useVal(i) =
     //     select2(isUsed(i), disabledVal,_);
-    isUsed(i) = take(i+1,(int2bin(N,maxN)));
+    isUsed(i) = take(i+1, (int2bin(N,maxN)));
     pow2(i) = 1<<i;
     // same as:
     // pow2(i) = int(pow(2,i));
     // but in the block diagram, it will be displayed as a number, instead of a formula
 
     // convert N into a list of ones and zeros
-    int2bin(N,maxN) = par(j,int2nrOfBits(maxN),int(floor(N/(pow2(j))))%2);
+    int2bin(N,maxN) = par(j, int2nrOfBits(maxN), int(floor(N/(pow2(j))))%2);
     // calculate how many ones and zeros are needed to represent maxN
     int2nrOfBits(0) = 0;
     int2nrOfBits(maxN) = int(floor(log(maxN)/log(2))+1);

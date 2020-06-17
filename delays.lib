@@ -161,7 +161,7 @@ with {
 
 		// update delay time of line 0 if needed
 		nd1 = ba.if ((ip <= 0.0) & (d0!=dt), dt, d1);
-	} ) ~ (_,_,_,_) : (!,_,_,_);
+	}) ~ (_,_,_,_) : (!,_,_,_);
 };
 
 
@@ -307,7 +307,7 @@ fdelay5 = fdelayltv(5);
 // Delay arguments too small will produce an UNSTABLE allpass!
 //
 // Because allpass interpolation is recursive, it is not as robust
-// as Lagrange interpolation under time-varying conditions.
+// as Lagrange interpolation under time-varying conditions
 // (You may hear clicks when changing the delay rapidly.)
 //
 // First-order allpass interpolation, delay d in [0.5,1.5]
