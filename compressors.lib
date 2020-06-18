@@ -590,7 +590,8 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 //
 // Where:
 //
-// * `lad`: lookahead delay in seconds (nonnegative) - gets rounded to nearest sample
+// * `lad`: lookahead delay in seconds (nonnegative) - gets rounded to nearest sample.
+//          The effective attack time is a good setting.
 // * `ratio`: compression ratio (1 = no compression, >1 means compression)
 //            Ratios: 4 is moderate compression, 8 is strong compression,
 //            12 is mild limiting, and 20 is pretty hard limiting at the threshold.
@@ -711,7 +712,7 @@ with {
   // A general 'knee' parameter could be used instead of tying it to att/2:
   kneesmooth(att) = si.smooth(ba.tau2pole(att/2.0));
   // compression gain in dB:
-   outminusindb(ratio,thresh,level) = max(level-thresh,0.0) * (1.0/float(ratio)-1.0);
+   outminusindb(ratio,thresh,level) = max(level-thresh,0.0) * (1.0/max(1.0e-7,float(ratio))-1.0);
   // Note: "float(ratio)" REQUIRED when ratio is an integer > 1!
 };
 
