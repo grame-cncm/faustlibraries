@@ -786,11 +786,11 @@ declare limiter_1176_R4_stereo copyright
 declare limiter_1176_R4_stereo license "MIT-style STK-4.3 license";
 limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 
-//-----------------------`(co.)limiter_basic_N`---------------------------------
-// Simple N-channel lookahead limiter based on IOhannes Zmölnig post, which is 
+//-----------------------`(co.)limiter_lad_N`---------------------------------
+// N-channel lookahead limiter inspired by IOhannes Zmölnig's post, which is 
 // in turn based on the thesis by Peter Falkner "Entwicklung eines digitalen
 // Stereo-Limiters mit Hilfe des Signalprozessors DSP56001".
-// This version of the limiter simply uses a peak-holder with smoothed
+// This version of the limiter uses a peak-holder with smoothed
 // attack and release based on tau time constant filters.
 //
 // It is also possible to use a time constant that is 2*PI*tau by dividing 
@@ -821,7 +821,7 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // #### Usage
 //
 // ```
-// si.bus(N) : limiter_basic_N(N, LD, ceiling, attack, hold, release) : 
+// si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : 
 //    si.bus(N);
 // ```
 //
@@ -834,17 +834,17 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // * `hold` is the hold time in seconds.
 // * `release` is the release time in seconds.
 //
-// Example for a stereo limiter: limiter_basic_N(2, .01, 1, .01, .1, 1);
+// Example for a stereo limiter: limiter_lad_N(2, .01, 1, .01, .1, 1);
 //
 // #### Reference:
 //
 // http://iem.at/~zmoelnig/publications/limiter/.
 //------------------------------------------------------------------------------
-declare limiter_basic_N author "Dario Sanfilippo";
-declare limiter_basic_N copyright "Copyright (C) 2020 Dario Sanfilippo
+declare limiter_lad_N author "Dario Sanfilippo";
+declare limiter_lad_N copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_basic_N license "GPLv3 license";
-limiter_basic_N(N, LD, ceiling, attack, hold, release) = 
+declare limiter_lad_N license "GPLv3 license";
+limiter_lad_N(N, LD, ceiling, attack, hold, release) = 
       si.bus(N) <: par(i, N, @ (LD * ma.SR)) , 
                    (scaling <: si.bus(N)) : ro.interleave(N, 2) : par(i, N, *)
       with {
@@ -858,14 +858,14 @@ limiter_basic_N(N, LD, ceiling, attack, hold, release) =
            maxN(N) = max(maxN(N - 1));
       };
 
-//-------------`(co.)limiter_basic_mono`----------------------------------------
+//-------------`(co.)limiter_lad_mono`----------------------------------------
 //
-// Specialised case of limiter_basic_N: mono limiter.
+// Specialised case of limiter_lad_N: mono limiter.
 //
 // #### Usage
 //
 // ```
-// _ : limiter_basic_mono(LD, ceiling, attack, hold, release) : _;
+// _ : limiter_lad_mono(LD, ceiling, attack, hold, release) : _;
 // ```
 //
 // Where:
@@ -879,20 +879,20 @@ limiter_basic_N(N, LD, ceiling, attack, hold, release) =
 // #### Reference:
 //
 // http://iem.at/~zmoelnig/publications/limiter/.
-declare limiter_basic_mono author "Dario Sanfilippo";
-declare limiter_basic_mono copyright "Copyright (C) 2020 Dario Sanfilippo
+declare limiter_lad_mono author "Dario Sanfilippo";
+declare limiter_lad_mono copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_basic_mono license "GPLv3 license";
-limiter_basic_mono(LD) = limiter_basic_N(1, LD);
+declare limiter_lad_mono license "GPLv3 license";
+limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 
-//-------------`(co.)limiter_basic_stereo`--------------------------------------
+//-------------`(co.)limiter_lad_stereo`--------------------------------------
 //
-// Specialised case of limiter_basic_N: stereo limiter.
+// Specialised case of limiter_lad_N: stereo limiter.
 //
 // #### Usage
 //
 // ```
-// _ , _ : limiter_basic_stereo(LD, ceiling, attack, hold, release) : _ , _;
+// _ , _ : limiter_lad_stereo(LD, ceiling, attack, hold, release) : _ , _;
 // ```
 //
 // Where:
@@ -906,20 +906,20 @@ limiter_basic_mono(LD) = limiter_basic_N(1, LD);
 // #### Reference:
 //
 // http://iem.at/~zmoelnig/publications/limiter/.
-declare limiter_basic_stereo author "Dario Sanfilippo";
-declare limiter_basic_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
+declare limiter_lad_stereo author "Dario Sanfilippo";
+declare limiter_lad_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_basic_stereo license "GPLv3 license";
-limiter_basic_stereo(LD) = limiter_basic_N(2, LD);
+declare limiter_lad_stereo license "GPLv3 license";
+limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 
-//-------------`(co.)limiter_basic_quad`----------------------------------------
+//-------------`(co.)limiter_lad_quad`----------------------------------------
 //
-// Specialised case of limiter_basic_N: quadraphonic limiter.
+// Specialised case of limiter_lad_N: quadraphonic limiter.
 //
 // #### Usage
 //
 // ```
-// si.bus(4) : limiter_basic_quad(LD, ceiling, attack, hold, release) : 
+// si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : 
 //    si.bus(4);
 // ```
 //
@@ -934,15 +934,15 @@ limiter_basic_stereo(LD) = limiter_basic_N(2, LD);
 // #### Reference:
 //
 // http://iem.at/~zmoelnig/publications/limiter/.
-declare limiter_basic_quad author "Dario Sanfilippo";
-declare limiter_basic_quad copyright "Copyright (C) 2020 Dario Sanfilippo
+declare limiter_lad_quad author "Dario Sanfilippo";
+declare limiter_lad_quad copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_basic_quad license "GPLv3 license";
-limiter_basic_quad(LD) = limiter_basic_N(4, LD);
+declare limiter_lad_quad license "GPLv3 license";
+limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 
-//-------------`(co.)limiter_lookahead`-----------------------------------------
+//-------------`(co.)limiter_lad`-----------------------------------------
 //
-// Specialised case of limiter_basic_N and ready-to-use unit-amplitude mono 
+// Specialised case of limiter_lad_N and ready-to-use unit-amplitude mono 
 // limiting function. This implementation, in particular, uses 2pi*tau
 // time constant filters for attack and release smoothing with
 // synchronised input and gain signals. 
@@ -955,17 +955,17 @@ limiter_basic_quad(LD) = limiter_basic_N(4, LD);
 // #### Usage
 //
 // ```
-// _ : limiter_lookahead : _;
+// _ : limiter_lad : _;
 // ```
 //
 // #### Reference:
 //
 // http://iem.at/~zmoelnig/publications/limiter/.
-declare limiter_lookahead author "Dario Sanfilippo";
-declare limiter_lookahead copyright "Copyright (C) 2020 Dario Sanfilippo
+declare limiter_lad author "Dario Sanfilippo";
+declare limiter_lad copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_lookahead license "GPLv3 license";
-limiter_lookahead = limiter_basic_mono(.01, 1, .01 / twopi, .1, 1 / twopi)
+declare limiter_lad license "GPLv3 license";
+limiter_lad = limiter_lad_mono(.01, 1, .01 / twopi, .1, 1 / twopi)
       with {
            twopi = 2 * ma.PI;
       };
