@@ -72,7 +72,7 @@ declare version "0.0";
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -132,7 +132,7 @@ with {
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -193,7 +193,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -241,13 +241,14 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// or it can be omitted by defining 'meter = _'.
 // * `N`: the number of channels of the compressor
 
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -302,7 +303,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -356,7 +357,7 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -413,7 +414,7 @@ with {
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -470,7 +471,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -541,7 +542,7 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 
-// Sometimes even bigger ratios are usefull:
+// Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 
@@ -568,13 +569,49 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
   )~si.bus(N);
 
 
-//=============================Backward compatibility section=============================
-// These functions are superseded by the ones above.
-// They are included for backward compatibility.
+//=============================Original versions section=============================
+// The functions in this section are largely superseded by the limiters above, but we
+// retain them for backward compatibility and for situations in which a more permissive,
+// MIT-style license is required.
 //========================================================================================
 
 //=============================Functions Reference========================================
 //========================================================================================
+
+//--------------------`(co.)compressor_lad_mono`-------------------
+// Mono dynamic range compressor with lookahead delay.
+// `compressor_lad_mono` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// _ : compressor_lad_mono(lad,ratio,thresh,att,rel) : _
+// ```
+//
+// Where:
+//
+// * `lad`: lookahead delay in seconds (nonnegative) - gets rounded to nearest sample.
+//          The effective attack time is a good setting.
+// * `ratio`: compression ratio (1 = no compression, >1 means compression)
+//            Ratios: 4 is moderate compression, 8 is strong compression,
+//            12 is mild limiting, and 20 is pretty hard limiting at the threshold.
+// * `thresh`: dB level threshold above which compression kicks in (0 dB = max level)
+// * `att`: attack time = time constant (sec) when level & compression are going up
+// * `rel`: release time = time constant (sec) coming out of compression
+//
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * <https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html>
+// * Albert Graef's "faust2pd"/examples/synth/compressor_.dsp
+// * More features: <https://github.com/magnetophon/faustCompressors>
+//------------------------------------------------------------
+declare compressor_lad_mono author "Julius O. Smith III";
+declare compressor_lad_mono copyright
+        "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare compressor_lad_mono license "MIT-style STK-4.3 license";
+compressor_lad_mono(lad,ratio,thresh,att,rel,x)
+	= x@max(0,floor(0.5+ma.SR*lad)) * compression_gain_mono(ratio,thresh,att,rel,x);
 
 //--------------------`(co.)compressor_mono`-------------------
 // Mono dynamic range compressors.
@@ -589,8 +626,10 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // Where:
 //
 // * `ratio`: compression ratio (1 = no compression, >1 means compression)
+//            Ratios: 4 is moderate compression, 8 is strong compression,
+//            12 is mild limiting, and 20 is pretty hard limiting at the threshold.
 // * `thresh`: dB level threshold above which compression kicks in (0 dB = max level)
-// * `att`: attack time = time constant (sec) when level & compression going up
+// * `att`: attack time = time constant (sec) when level & compression are going up
 // * `rel`: release time = time constant (sec) coming out of compression
 //
 // #### References
@@ -600,9 +639,11 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // * Albert Graef's "faust2pd"/examples/synth/compressor_.dsp
 // * More features: <https://github.com/magnetophon/faustCompressors>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
-compressor_mono(ratio,thresh,att,rel,x) = x * compression_gain_mono(ratio,thresh,att,rel,x);
-
+declare compressor_mono author "Julius O. Smith III";
+declare compressor_mono copyright
+        "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare compressor_mono license "MIT-style STK-4.3 license";
+compressor_mono = compressor_lad_mono(0);
 
 //--------------------`(co.)compressor_stereo`-------------------
 // Stereo dynamic range compressors.
@@ -627,11 +668,41 @@ compressor_mono(ratio,thresh,att,rel,x) = x * compression_gain_mono(ratio,thresh
 // * Albert Graef's "faust2pd"/examples/synth/compressor_.dsp
 // * More features: <https://github.com/magnetophon/faustCompressors>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
+declare compressor_stereo author "Julius O. Smith III";
+declare compressor_stereo copyright
+        "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare compressor_stereo license "MIT-style STK-4.3 license";
 compressor_stereo(ratio,thresh,att,rel,x,y) = cgm*x, cgm*y with {
   cgm = compression_gain_mono(ratio,thresh,att,rel,abs(x)+abs(y));
 };
 
+//--------------------`(co.)compression_gain_mono`-------------------
+// Compression-gain calculation for dynamic range compressors.
+//
+// #### Usage
+//
+// ```
+// _ : compression_gain_mono(ratio,thresh,att,rel) : _
+// ```
+//
+// Where:
+//
+// * `ratio`: compression ratio (1 = no compression, >1 means compression)
+// * `thresh`: dB level threshold above which compression kicks in (0 dB = max level)
+// * `att`: attack time = time constant (sec) when level & compression going up
+// * `rel`: release time = time constant (sec) coming out of compression
+//
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
+// * <https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html>
+// * Albert Graef's "faust2pd"/examples/synth/compressor_.dsp
+// * More features: <https://github.com/magnetophon/faustCompressors>
+//------------------------------------------------------------
+declare compression_gain_mono author "Julius O. Smith III";
+declare compression_gain_mono copyright
+        "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare compression_gain_mono license "MIT-style STK-4.3 license";
 compression_gain_mono(ratio,thresh,att,rel) =
   an.amp_follower_ar(att,rel) : ba.linear2db : outminusindb(ratio,thresh) :
   kneesmooth(att) : ba.db2linear
@@ -641,26 +712,30 @@ with {
   // A general 'knee' parameter could be used instead of tying it to att/2:
   kneesmooth(att) = si.smooth(ba.tau2pole(att/2.0));
   // compression gain in dB:
-   outminusindb(ratio,thresh,level) = max(level-thresh,0.0) * (1.0/float(ratio)-1.0);
+   outminusindb(ratio,thresh,level) = max(level-thresh,0.0) * (1.0/max(1.0e-7,float(ratio))-1.0);
   // Note: "float(ratio)" REQUIRED when ratio is an integer > 1!
 };
-
 
 //----------------`(co.)limiter_1176_R4_mono`----------------------
 // A limiter guards against hard-clipping.  It can be
 // implemented as a compressor having a high threshold (near the
-// clipping level), fast attack and release, and high ratio.  Since
-// the ratio is so high, some knee smoothing is
-// desirable ("soft limiting").  This example is intended
-// to get you started using compressor_* as a limiter, so all
-// parameters are hardwired to nominal values here.
-// Ratios: 4 (moderate compression), 8 (severe compression),
-//          12 (mild limiting), or 20 to 1 (hard limiting)
-//   Att: 20-800 MICROseconds (Note: scaled by ratio in the 1176)
-//   Rel: 50-1100 ms (Note: scaled by ratio in the 1176)
-//   Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
-//     Faster attack gives "more bite" (e.g. on vocals)
-//     He hears a bright, clear eq effect as well (not implemented here).
+// clipping level), fast attack, and high ratio.  Since
+// the compression ratio is so high, some knee smoothing is
+// desirable (for softer limiting).  This example is intended
+// to get you started using compressors as limiters, so all
+// parameters are hardwired here to nominal values.
+//  Ratio: 4 (moderate compression)
+//        See compressor_mono() comments for a guide to other choices.
+//        Mike Shipley likes this (lowest) setting on the 1176.
+//        (Grammy award-winning mixer for Queen, Tom Petty, etc.)
+// Thresh: -6 dB, meaning 4:1 compression begins at amplitude 1/2.
+//    Att: 800 MICROseconds (Note: scaled by ratio in the 1176)
+//         The 1176 range is said to be 20-800 microseconds.
+//         Faster attack gives "more bite" (e.g. on vocals),
+//         and makes hard-clipping less likely on fast overloads.
+//    Rel: 0.5 s (Note: scaled by ratio in the 1176)
+//         The 1176 range is said to be 50-1100 ms.
+// The 1176 also has a "bright, clear eq effect" (use filters.lib if desired).
 // `limiter_1176_R4_mono` is a standard Faust function.
 //
 // #### Usage
@@ -673,9 +748,11 @@ with {
 //
 // <http://en.wikipedia.org/wiki/1176_Peak_Limiter>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
+declare limiter_1176_R4_mono author "Julius O. Smith III";
+declare limiter_1176_R4_mono copyright
+        "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare limiter_1176_R4_mono license "MIT-style STK-4.3 license";
 limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
-
 
 //-------------------`(co.)limiter_1176_R4_stereo`---------------------
 // A limiter guards against hard-clipping.  It can be
@@ -703,7 +780,10 @@ limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
 //
 // <http://en.wikipedia.org/wiki/1176_Peak_Limiter>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
+declare limiter_1176_R4_stereo author "Julius O. Smith III";
+declare limiter_1176_R4_stereo copyright
+        "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare limiter_1176_R4_stereo license "MIT-style STK-4.3 license";
 limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 
 //-----------------------`(co.)limiter_basic_N`---------------------------------
