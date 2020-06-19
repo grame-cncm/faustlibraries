@@ -940,7 +940,7 @@ declare limiter_lad_quad copyright "Copyright (C) 2020 Dario Sanfilippo
 declare limiter_lad_quad license "GPLv3 license";
 limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 
-//-------------`(co.)limiter_lad`-----------------------------------------
+//-------------`(co.)limiter_lad_bw`-----------------------------------------
 //
 // Specialised case of limiter_lad_N and ready-to-use unit-amplitude mono 
 // limiting function. This implementation, in particular, uses 2pi*tau
@@ -961,11 +961,11 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 // #### Reference:
 //
 // http://iem.at/~zmoelnig/publications/limiter/.
-declare limiter_lad author "Dario Sanfilippo";
-declare limiter_lad copyright "Copyright (C) 2020 Dario Sanfilippo
+declare limiter_lad_bw author "Dario Sanfilippo";
+declare limiter_lad_bw copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_lad license "GPLv3 license";
-limiter_lad = limiter_lad_mono(.01, 1, .01 / twopi, .1, 1 / twopi)
+declare limiter_lad_bw license "GPLv3 license";
+limiter_lad_bw = limiter_lad_mono(.01, 1, .01 / twopi, .1, 1 / twopi)
       with {
            twopi = 2 * ma.PI;
       };
