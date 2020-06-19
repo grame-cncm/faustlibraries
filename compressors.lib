@@ -798,7 +798,22 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // the amplitude profile to reach 1 - e^(-2pi) of the final 
 // peak after the attack time. The input path can be delayed by the same 
 // amount as the attack time to synchronise input and amplitude profile, 
-// or by any other lookahead time specified by the user.
+// realising a system that is particularly effective as a colourless
+// (ideally) brickwall limiter.
+//
+// Note that the effectiveness of the ceiling settings are dependent on
+// the other parameters, especially the time constant used for the
+// smoothing filters and the lookahead delay. 
+//
+// Similarly, the colourless characteristics are also dependent on attack,
+// hold, and release times. Since fluctuations above ~15 Hz are
+// perceived as timbral effects, [Vassilakis and Kendall 2010] it is
+// reasonable to set the attack time to 1/15 seconds for a smooth amplitude
+// modulation. On the other hand, the hold time can be set to the
+// peak-to-peak period of the expected lowest frequency in the signal,
+// which allows for minimal distortion of the low frequencies. The
+// release time can then provide a perceptually linear and gradual gain 
+// increase determined by the user for any specific application.
 //
 // The scaling factor for all the channels is determined by the loudest peak 
 // between them all, so that amplitude ratios between the signals are kept.
@@ -806,7 +821,7 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // #### Usage
 //
 // ```
-// si.bus(N) : limiter_basic_N(N, LD, threshold, attack, hold, release) : 
+// si.bus(N) : limiter_basic_N(N, LD, ceiling, attack, hold, release) : 
 //    si.bus(N);
 // ```
 //
@@ -814,7 +829,7 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 //
 // * `N` is the number of channels, known at compile-time.
 // * `LD` is the lookahead delay in seconds, known at compile-time.
-// * `threshold` is the linear amplitude limiting threshold.
+// * `ceiling` is the linear amplitude output limit.
 // * `attack` is the attack time in seconds.
 // * `hold` is the hold time in seconds.
 // * `release` is the release time in seconds.
@@ -829,11 +844,11 @@ declare limiter_basic_N author "Dario Sanfilippo";
 declare limiter_basic_N copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_basic_N license "GPLv3 license";
-limiter_basic_N(N, LD, threshold, attack, hold, release) = 
+limiter_basic_N(N, LD, ceiling, attack, hold, release) = 
       si.bus(N) <: par(i, N, @ (LD * ma.SR)) , 
                    (scaling <: si.bus(N)) : ro.interleave(N, 2) : par(i, N, *)
       with {
-           scaling = threshold / max(amp_profile, ma.EPSILON) : min(1);
+           scaling = ceiling / max(amp_profile, ma.EPSILON) : min(1);
            amp_profile = par(i, N, abs) : maxN(N) : ba.peakholder(hold * ma.SR) :
                att_smooth(attack) : rel_smooth(release);
            att_smooth(time, in) = si.smooth(ba.tau2pole(time), in);
@@ -850,13 +865,13 @@ limiter_basic_N(N, LD, threshold, attack, hold, release) =
 // #### Usage
 //
 // ```
-// _ : limiter_basic_mono(LD, threshold, attack, hold, release) : _;
+// _ : limiter_basic_mono(LD, ceiling, attack, hold, release) : _;
 // ```
 //
 // Where:
 //
 // * `LD` is the lookahead delay in seconds, known at compile-time.
-// * `threshold` is the linear amplitude limiting threshold.
+// * `ceiling` is the linear amplitude output limit.
 // * `attack` is the attack time in seconds.
 // * `hold` is the hold time in seconds.
 // * `release` is the release time in seconds.
@@ -877,13 +892,13 @@ limiter_basic_mono(LD) = limiter_basic_N(1, LD);
 // #### Usage
 //
 // ```
-// _ , _ : limiter_basic_stereo(LD, threshold, attack, hold, release) : _ , _;
+// _ , _ : limiter_basic_stereo(LD, ceiling, attack, hold, release) : _ , _;
 // ```
 //
 // Where:
 //
 // * `LD` is the lookahead delay in seconds, known at compile-time.
-// * `threshold` is the linear amplitude limiting threshold.
+// * `ceiling` is the linear amplitude output limit.
 // * `attack` is the attack time in seconds.
 // * `hold` is the hold time in seconds.
 // * `release` is the release time in seconds.
@@ -904,14 +919,14 @@ limiter_basic_stereo(LD) = limiter_basic_N(2, LD);
 // #### Usage
 //
 // ```
-// si.bus(4) : limiter_basic_quad(LD, threshold, attack, hold, release) : 
+// si.bus(4) : limiter_basic_quad(LD, ceiling, attack, hold, release) : 
 //    si.bus(4);
 // ```
 //
 // Where:
 //
 // * `LD` is the lookahead delay in seconds, known at compile-time.
-// * `threshold` is the linear amplitude limiting threshold.
+// * `ceiling` is the linear amplitude output limit.
 // * `attack` is the attack time in seconds.
 // * `hold` is the hold time in seconds.
 // * `release` is the release time in seconds.
@@ -929,7 +944,13 @@ limiter_basic_quad(LD) = limiter_basic_N(4, LD);
 //
 // Specialised case of limiter_basic_N and ready-to-use unit-amplitude mono 
 // limiting function. This implementation, in particular, uses 2pi*tau
-// time constant filters for attack and release smoothing.
+// time constant filters for attack and release smoothing with
+// synchronised input and gain signals. 
+//
+// This function's best application is to be used as a brickwall limiter with 
+// the least colouring artefacts while keeping a not-so-slow release curve. 
+// Tests have shown that, given a pop song with 60 dB of amplification
+// and a 0-dB-ceiling, the loudest peak recorded was ~0.38 dB.
 //
 // #### Usage
 //
