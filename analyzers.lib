@@ -365,6 +365,30 @@ declare rms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
 declare rms_envelope_t19 license "MIT-style STK-4.3 license";
 rms_envelope_t19(period, x) = ms_envelope_t19(period, x) : sqrt;
 
+//-----------------------`(an.)zcr`--------------------------------------------
+// Zero-crossing rate (ZCR) with one-pole lowpass averaging based on the tau 
+// constant. It outputs an index between 0 and 1 at a desired analysis frame. 
+// The ZCR of a signal correlates with the noisiness [Gouyon et al. 2000] and 
+// the spectral centroid [Herrera-Boyer et al. 2006] of a signal. 
+// For sinusoidal signals, the ZCR can be multiplied by ma.SR/2 and used
+// as a frequency detector. For example, it can be deployed as a
+// computationally efficient adaptive mechanism for automatic Larsen
+// suppression.
+//
+// #### Usage
+//
+// ```
+// _ : zcr(tau) : _;
+// ```
+//
+// Where:
+//
+// * `tau`: (time to decay by e^-1) sets the averaging frame in seconds.
+declare zcr author "Dario Sanfilippo";
+declare zcr copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare zcr license "MIT-style STK-4.3 license";
+zcr(period, x) = ma.zc(x) : fi.lptau(period);
 
 //=============================Spectrum-Analyzers=========================================
 // Spectrum-analyzers split the input signal into a bank of parallel signals, one for
