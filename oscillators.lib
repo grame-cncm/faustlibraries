@@ -423,7 +423,7 @@ lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 // Where:
 //
 // * `freq`: frequency
-// * `phase`: phase
+// * `phase`: phase between 0 and 1
 //---------------------------------------------------------
 lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac) ~ +(freq/ma.SR);
 
@@ -445,6 +445,47 @@ lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac) ~ +(freq/ma.SR);
 // License: STK-4.3
 // MarkDown: Romain Michon
 lf_sawpos(freq) = ma.frac ~ +(freq/ma.SR);
+
+//-----------------`(os.)lf_sawpos_reset`--------------------
+// Simple sawtooth waveform oscillator between 0 and 1.
+// with reset.
+//
+// #### Usage
+//
+// ```
+// lf_sawpos_reset(freq,reset)
+// ```
+//
+// Where:
+//
+// * `freq`: frequency
+// * `reset`: reset the oscillator to 0
+//
+//---------------------------------------------------------
+// Author: Bart Brouns
+// License: STK-4.3
+lf_sawpos_reset(freq,reset) = ma.frac * (reset == 0) ~ +(freq/ma.SR)
+
+//-----------------`(os.)lf_sawpos_phase_reset`--------------------
+// Simple sawtooth waveform oscillator between 0 and 1.
+// with phase control and reset.
+//
+// #### Usage
+//
+// ```
+// lf_sawpos_phase_reset(freq,phase,reset)
+// ```
+//
+// Where:
+//
+// * `freq`: frequency
+// * `phase`: phase between 0 and 1
+// * `reset`: reset the oscillator to 0
+//
+//---------------------------------------------------------
+// Author: Bart Brouns
+// License: STK-4.3
+lf_sawpos_phase_reset(freq,phase,reset) = lf_sawpos_reset(freq,reset) +phase :ma.frac;
 
 //-----------------`(os.)lf_saw`--------------------
 // Simple sawtooth waveform.
