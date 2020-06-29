@@ -712,7 +712,7 @@ with {
   // A general 'knee' parameter could be used instead of tying it to att/2:
   kneesmooth(att) = si.smooth(ba.tau2pole(att/2.0));
   // compression gain in dB:
-   outminusindb(ratio,thresh,level) = max(level-thresh,0.0) * (1.0/max(1.0e-7,float(ratio))-1.0);
+   outminusindb(ratio,thresh,level) = max(level-thresh,0.0) * (1.0/max(ma.EPSILON,float(ratio))-1.0);
   // Note: "float(ratio)" REQUIRED when ratio is an integer > 1!
 };
 

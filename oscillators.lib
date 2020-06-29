@@ -585,7 +585,7 @@ saw3 = sawN(3); saw4 = sawN(4); saw5 = sawN(5); saw6 = sawN(6);
 // * `freq`: frequency
 //--------------------------------------------------------
 saw2(freq) = y with { // newer PTR version (stateless - freq can vary at any speed)
-  p0 = float(ma.SR)/float(max(1.0e-7,abs(freq))); // period in samples
+  p0 = float(ma.SR)/float(max(ma.EPSILON,abs(freq))); // period in samples
   t0 = 1.0/p0; // phase increment
   p = ((_<:(-(1)<:_,_),_) <: selector1,selector2) ~(+(t0)):!,_;
   selector1 = select2(<(0)); // for feedback

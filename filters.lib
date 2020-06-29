@@ -2310,7 +2310,7 @@ spectral_tilt(N,f0,bw,alpha) = seq(i,N,sec(i)) with {
     prewarp(w,SR,wp) = wp * tan(w*T/2) / tan(wp*T/2) with { T = 1/ma.SR; };
     mz(i) = w0 * r ^ (-alpha+i); // minus zero i in s plane
     mp(i) = w0 * r ^ i; // minus pole i in s plane
-    f0p = max(f0,1.0e-7); // cannot go to zero
+    f0p = max(f0,ma.EPSILON); // cannot go to zero
     w0 = 2 * ma.PI * f0p; // radian frequency of first pole
     f1 = f0p + bw; // upper band limit
     r = (f1/f0p)^(1.0/float(N-1)); // pole ratio (2 => octave spacing)
