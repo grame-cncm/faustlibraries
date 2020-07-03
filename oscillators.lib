@@ -986,7 +986,19 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
 
 //===================== Casio CZ Oscillators ==========================
-// Oscillators that mimics some of the Casio CZ oscillators.
+// Oscillators that mimic some of the Casio CZ oscillators.
+//
+// There are two sets:
+// - A set with an index parameter
+// - A set with a res parameter
+//
+// The "index oscillators" outputs a sine wave at index=0 and gets brighter with a higher index.
+// There are two versions of the "index oscillators":
+// - with P appended to the name: is phase aligned with 'fund:sin'
+// - without P appended to the name: has the phase of the original CZ oscillators
+//
+// The "res oscillators" have a resonant frequency.
+// "res" is the frequency of resonance as a factor of the fundamental pitch.
 //=====================================================================
 
 //----------`(os.)CZsaw`----------
@@ -1006,12 +1018,35 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
 
-CZsaw(fund, index) = (((fund*((.5-tmp)/tmp)),(-1*fund+1)*((.5-tmp)/(1-tmp))):min+fund)*2*ma.PI:cos 
-with {
-	tmp = (.5-(index*.5)):max(0.01):min(0.5);
-};
+CZsaw(fund, index) = CZ.sawChooseP(fund, index, 0);
+
+//----------`(os.)CZsawP`----------
+// Oscillator that mimics the Casio CZ saw oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZsawP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsawP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = saw-wave
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
+
+CZsawP(fund, index) = CZ.sawChooseP(fund, index, 1);
 
 //----------`(os.)CZsquare`----------
 // Oscillator that mimics the Casio CZ square oscillator
@@ -1030,12 +1065,35 @@ with {
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
 
-CZsquare(fund, index) = (fund>=0.5), (ma.decimal((fund*2)+1)<:_-min(_,(-1*_+1)*((INDEX)/(1-INDEX)))) :+ *ma.PI:cos*0.5
-with {
-	INDEX = (index:pow(0.25)) * 0.98;
-};
+CZsquare(fund, index) = CZ.squareChooseP(fund, index, 0);
+
+//----------`(os.)CZsquareP`----------
+// Oscillator that mimics the Casio CZ square oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZsquareP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsquareP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = square-wave
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
+
+CZsquareP(fund, index) = CZ.squareChooseP(fund, index, 1);
 
 //----------`(os.)CZpulse`----------
 // Oscillator that mimics the Casio CZ pulse oscillator
@@ -1054,12 +1112,35 @@ with {
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
 
-CZpulse(fund, index) = ((fund-min(fund,((-1*fund+1)*(INDEX/(1-INDEX)))))*2*ma.PI):cos 
-with {
-	INDEX = index:min(0.99):max(0);
-};
+CZpulse(fund, index) = CZ.pulseChooseP(fund, index, 0);
+
+//----------`(os.)CZpulseP`----------
+// Oscillator that mimics the Casio CZ pulse oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZpulseP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZpulseP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is closer to a pulse
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
+
+CZpulseP(fund, index) = CZ.pulseChooseP(fund, index, 1);
 
 //----------`(os.)CZsinePulse`----------
 // Oscillator that mimics the Casio CZ sine/pulse oscillator
@@ -1078,12 +1159,35 @@ with {
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
 
-CZsinePulse(fund, index) = (min(fund*((0.5-INDEX)/INDEX),(-1*fund+1)*((.5-INDEX)/(1-INDEX)))+fund)*4*ma.PI:cos
-with {
-	INDEX = ((index*-0.49)+0.5);
-};
+CZsinePulse(fund, index) = CZ.sinePulseChooseP(fund, index, 0);
+
+//----------`(os.)CZsinePulseP`----------
+// Oscillator that mimics the Casio CZ sine/pulse oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZsinePulseP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsinePulseP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is a sine minus a pulse
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
+
+CZsinePulseP(fund, index) = CZ.sinePulseChooseP(fund, index, 1);
 
 //----------`(os.)CZhalfSine`----------
 // Oscillator that mimics the Casio CZ half sine oscillator
@@ -1102,12 +1206,35 @@ with {
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
 
-CZhalfSine(fund, index) = (select2(fund<.5, .5*(fund-.5)/INDEX+.5, fund):min(1))*2*ma.PI:cos
-with {
-	INDEX = (.5-(index*0.5)):min(.5):max(.01);
-};
+CZhalfSine(fund, index) = CZ.halfSineChooseP(fund, index, 0);
+
+//----------`(os.)CZhalfSineP`----------
+// Oscillator that mimics the Casio CZ half sine oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZhalfSineP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZhalfSineP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is somewhere between a saw and a square
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
+
+CZhalfSineP(fund, index) = CZ.halfSineChooseP(fund, index, 1);
 
 //----------`(os.)CZresSaw`----------
 // Oscillator that mimics the Casio CZ resonant saw-tooth oscillator
@@ -1126,9 +1253,11 @@ with {
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
 
-CZresSaw(fund,res) = (((-1*(1-fund))*((cos((ma.decimal((max(1,res)*fund)+1))*2*ma.PI)*-.5)+.5))*2)+1;
+CZresSaw(fund,res) = CZ.resSaw(fund,res);
 
 //----------`(os.)CZresTriangle`----------
 // Oscillator that mimics the Casio CZ resonant triangle oscillator
@@ -1147,12 +1276,11 @@ CZresSaw(fund,res) = (((-1*(1-fund))*((cos((ma.decimal((max(1,res)*fund)+1))*2*m
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
 
-CZresTriangle(fund,res) = select2(fund<.5, 2-(fund*2), fund*2)*tmp*2-1 
-with {
-	tmp = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
-};
+CZresTriangle(fund,res) = CZ.resTriangle(fund,res);
 
 //----------`(os.)CZresTrap`----------
 // Oscillator that mimics the Casio CZ resonant trapeze oscillator
@@ -1171,9 +1299,65 @@ with {
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators
+// Ported from pd to Faust by Bart Brouns
 
-CZresTrap(fund, res) = (((1-fund)*2):min(1)*sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
+CZresTrap(fund, res) = CZ.resTrap(fund, res);
+
+CZ =
+  environment {
+    saw(fund, index) = sawChooseP(fund, index, 0);
+    sawP(fund, index) = sawChooseP(fund, index, 1);
+    sawChooseP(fund, index, p) =
+      (((FUND(fund,allign,p)*((.5-INDEX)/INDEX)),(-1*FUND(fund,allign,p)+1)*((.5-INDEX)/(1-INDEX))):min+FUND(fund,allign,p))*2*ma.PI:cos
+    with {
+      INDEX = (.5-(index*.5)):max(0.01):min(0.5);
+      allign = si.interpolate(index, 0.75, 0.5);
+    };
+    square(fund, index) = squareChooseP(fund, index, 0);
+    squareP(fund, index) = squareChooseP(fund, index, 1);
+    squareChooseP(fund, index, p) = (FUND(fund,allign,p)>=0.5), (ma.decimal((FUND(fund,allign,p)*2)+1)<:_-min(_,(-1*_+1)*((INDEX)/(1-INDEX)))) :+ *ma.PI:cos
+    with {
+      INDEX = (index:pow(0.25)):max(0):min(1);
+      allign = si.interpolate(INDEX, -0.25, 0);
+    };
+
+    pulse(fund, index) = pulseChooseP(fund, index, 0);
+    pulseP(fund, index) = pulseChooseP(fund, index, 1);
+    pulseChooseP(fund, index, p) = ((FUND(fund,allign,p)-min(FUND(fund,allign,p),((-1*FUND(fund,allign,p)+1)*(INDEX/(1-INDEX)))))*2*ma.PI):cos
+    with {
+      INDEX = index:min(0.99):max(0);
+      allign = si.interpolate(index, -0.25, 0.0);
+    };
+
+    sinePulse(fund, index) = sinePulseChooseP(fund, index, 0);
+    sinePulseP(fund, index) = sinePulseChooseP(fund, index, 1);
+    sinePulseChooseP(fund, index, p) = (min(FUND(fund,allign,p)*((0.5-INDEX)/INDEX),(-1*FUND(fund,allign,p)+1)*((.5-INDEX)/(1-INDEX)))+FUND(fund,allign,p))*4*ma.PI:cos
+    with {
+      INDEX = ((index*-0.49)+0.5);
+      allign = si.interpolate(index, -0.125, -0.25);
+    };
+
+    halfSine(fund, index) = halfSineChooseP(fund, index, 0);
+    halfSineP(fund, index) = halfSineChooseP(fund, index, 1);
+    halfSineChooseP(fund, index, p) = (select2(FUND(fund,allign,p)<.5, .5*(FUND(fund,allign,p)-.5)/INDEX+.5, FUND(fund,allign,p)):min(1))*2*ma.PI:cos
+    with {
+      INDEX = (.5-(index*0.5)):min(.5):max(.01);
+      allign = si.interpolate(index:min(0.975), -0.25, -0.5);
+    };
+    FUND =
+      case {
+        (fund,allign,0) => fund;
+        (fund,allign,1) => (fund+allign) : ma.frac; // allign phase with fund
+      };
+    resSaw(fund,res) = (((-1*(1-fund))*((cos((ma.decimal((max(1,res)*fund)+1))*2*ma.PI)*-.5)+.5))*2)+1;
+    resTriangle(fund,res) = select2(fund<.5, 2-(fund*2), fund*2)*INDEX*2-1
+    with {
+	    INDEX = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
+    };
+    resTrap(fund, res) = (((1-fund)*2):min(1)*sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
+  };
 
 //===============================PolyBLEP-Based Oscillators=================================
 
