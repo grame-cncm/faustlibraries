@@ -1307,57 +1307,60 @@ CZresTrap(fund, res) = CZ.resTrap(fund, res);
 
 CZ =
   environment {
+  
     saw(fund, index) = sawChooseP(fund, index, 0);
     sawP(fund, index) = sawChooseP(fund, index, 1);
     sawChooseP(fund, index, p) =
-      (((FUND(fund,allign,p)*((.5-INDEX)/INDEX)),(-1*FUND(fund,allign,p)+1)*((.5-INDEX)/(1-INDEX))):min+FUND(fund,allign,p))*2*ma.PI:cos
+      (((FUND(fund,align,p)*((.5-INDEX)/INDEX)),(-1*FUND(fund,align,p)+1)*((.5-INDEX)/(1-INDEX))):min+FUND(fund,align,p))*2*ma.PI:cos
     with {
       INDEX = (.5-(index*.5)):max(0.01):min(0.5);
-      allign = si.interpolate(index, 0.75, 0.5);
+      align = si.interpolate(index, 0.75, 0.5);
     };
+    
     square(fund, index) = squareChooseP(fund, index, 0);
     squareP(fund, index) = squareChooseP(fund, index, 1);
-    squareChooseP(fund, index, p) = (FUND(fund,allign,p)>=0.5), (ma.decimal((FUND(fund,allign,p)*2)+1)<:_-min(_,(-1*_+1)*((INDEX)/(1-INDEX)))) :+ *ma.PI:cos
+    squareChooseP(fund, index, p) = (FUND(fund,align,p)>=0.5), (ma.decimal((FUND(fund,align,p)*2)+1)<:_-min(_,(-1*_+1)*((INDEX)/(1-INDEX)))) :+ *ma.PI:cos
     with {
       INDEX = (index:pow(0.25)):max(0):min(1);
-      allign = si.interpolate(INDEX, -0.25, 0);
+      align = si.interpolate(INDEX, -0.25, 0);
     };
 
     pulse(fund, index) = pulseChooseP(fund, index, 0);
     pulseP(fund, index) = pulseChooseP(fund, index, 1);
-    pulseChooseP(fund, index, p) = ((FUND(fund,allign,p)-min(FUND(fund,allign,p),((-1*FUND(fund,allign,p)+1)*(INDEX/(1-INDEX)))))*2*ma.PI):cos
+    pulseChooseP(fund, index, p) = ((FUND(fund,align,p)-min(FUND(fund,align,p),((-1*FUND(fund,align,p)+1)*(INDEX/(1-INDEX)))))*2*ma.PI):cos
     with {
       INDEX = index:min(0.99):max(0);
-      allign = si.interpolate(index, -0.25, 0.0);
+      align = si.interpolate(index, -0.25, 0.0);
     };
 
     sinePulse(fund, index) = sinePulseChooseP(fund, index, 0);
     sinePulseP(fund, index) = sinePulseChooseP(fund, index, 1);
-    sinePulseChooseP(fund, index, p) = (min(FUND(fund,allign,p)*((0.5-INDEX)/INDEX),(-1*FUND(fund,allign,p)+1)*((.5-INDEX)/(1-INDEX)))+FUND(fund,allign,p))*4*ma.PI:cos
+    sinePulseChooseP(fund, index, p) = (min(FUND(fund,align,p)*((0.5-INDEX)/INDEX),(-1*FUND(fund,align,p)+1)*((.5-INDEX)/(1-INDEX)))+FUND(fund,align,p))*4*ma.PI:cos
     with {
       INDEX = ((index*-0.49)+0.5);
-      allign = si.interpolate(index, -0.125, -0.25);
+      align = si.interpolate(index, -0.125, -0.25);
     };
 
     halfSine(fund, index) = halfSineChooseP(fund, index, 0);
     halfSineP(fund, index) = halfSineChooseP(fund, index, 1);
-    halfSineChooseP(fund, index, p) = (select2(FUND(fund,allign,p)<.5, .5*(FUND(fund,allign,p)-.5)/INDEX+.5, FUND(fund,allign,p)):min(1))*2*ma.PI:cos
+    halfSineChooseP(fund, index, p) = (select2(FUND(fund,align,p)<.5, .5*(FUND(fund,align,p)-.5)/INDEX+.5, FUND(fund,align,p)):min(1))*2*ma.PI:cos
     with {
       INDEX = (.5-(index*0.5)):min(.5):max(.01);
-      allign = si.interpolate(index:min(0.975), -0.25, -0.5);
+      align = si.interpolate(index:min(0.975), -0.25, -0.5);
     };
+    
     FUND =
       case {
-        (fund,allign,0) => fund;
-        (fund,allign,1) => (fund+allign) : ma.frac; // allign phase with fund
+        (fund,align,0) => fund;
+        (fund,align,1) => (fund+align) : ma.frac; // align phase with fund
       };
     resSaw(fund,res) = (((-1*(1-fund))*((cos((ma.decimal((max(1,res)*fund)+1))*2*ma.PI)*-.5)+.5))*2)+1;
     resTriangle(fund,res) = select2(fund<.5, 2-(fund*2), fund*2)*INDEX*2-1
     with {
-	    INDEX = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
+	  INDEX = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
     };
     resTrap(fund, res) = (((1-fund)*2):min(1)*sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
-  };
+};
 
 //===============================PolyBLEP-Based Oscillators=================================
 
