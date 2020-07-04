@@ -297,13 +297,14 @@ adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
   ugate = gate>0;
   samps = ugate : +~(*(ugate)); // ramp time in samples
   attSamps = int(attT60 * ma.SR);
+  // if attSamps==0, go straight into the decay phase
+  attPhase = (samps<attSamps) |  (ugate:ba.impulsify);
   target = select2(ugate, 0.0,
-           select2(samps<attSamps, (susLvl)*float(ugate), ugate));
-  t60 = select2(ugate, relT60, select2(samps<attSamps, decT60, attT60));
+           select2(attPhase, (susLvl)*float(ugate), ugate));
+  t60 = select2(ugate, relT60, select2(attPhase, decT60, attT60));
   pole = ba.tau2pole(t60/6.91);
   envelope = target : si.smooth(pole);
 };
-
 
 //------------------------`(en.)asre`----------------------
 // ASRE (Attack, Sustain, Release) envelope generator with Exponential segments.
