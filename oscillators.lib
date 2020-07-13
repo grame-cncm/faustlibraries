@@ -141,9 +141,9 @@ with {
 // Author: Christophe Lebreton
 hsp_phasor(tablesize,freq,p,c) = inc : (+ : d)~(-(_<:(_,*(_,clk))):+(clk*p)) : *(tablesize)
 with {
-        clk = c>0;
-        d   = ma.decimal;
-        inc = freq/float(ma.SR);
+    clk = c>0;
+    d   = ma.decimal;
+    inc = freq/float(ma.SR);
 };
 
 //-----------------------`(os.)oscsin`------------------------
@@ -198,7 +198,7 @@ with {
 //
 // * `freq`: the frequency of the wave (Hz)
 //------------------------------------------------------------
-osccos(freq) = rdtable(tablesize, coswaveform(tablesize), int(phasor(tablesize,freq)) )
+osccos(freq) = rdtable(tablesize, coswaveform(tablesize), int(phasor(tablesize,freq)))
 with {
 	tablesize = pl.tablesize;
 };
@@ -209,15 +209,15 @@ with {
 // #### Usage
 //
 // ```
-// oscp(freq,p) : _
+// oscp(freq,phase) : _
 // ```
 //
 // Where:
 //
 // * `freq`: the frequency of the wave (Hz)
-// * `p`: the phase in radian
+// * `phase`: the phase in radian
 //------------------------------------------------------------
-oscp(freq,p) = oscsin(freq) * cos(p) + osccos(freq) * sin(p);
+oscp(freq,phase) = oscsin(freq) * cos(phase) + osccos(freq) * sin(phase);
 
 //-----------------------`(os.)osci`------------------------
 // Interpolated phase sine wave oscillator.
@@ -422,8 +422,8 @@ lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 //
 // Where:
 //
-// * `freq`: frequency
 // * `phase`: phase
+// * `freq`: frequency
 //---------------------------------------------------------
 lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac) ~ +(freq/ma.SR);
 
