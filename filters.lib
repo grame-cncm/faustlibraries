@@ -1,7 +1,7 @@
 //##################################### filters.lib ########################################
 // Faust Filters library. Its official prefix is `fi`.
 //
-// The Filters library is organized into 18 sections:
+// The Filters library is organized into 19 sections:
 //
 // * Basic Filters
 // * Comb Filters
@@ -21,6 +21,7 @@
 // * Parametric Equalizers (Shelf, Peaking)
 // * Mth-Octave Filter-Banks
 // * Arbitrary-Crossover Filter-Banks and Spectrum Analyzers
+// * SVF filters
 //
 //########################################################################################
 
@@ -38,6 +39,7 @@ si = library("signals.lib");
 fi = library("filters.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Filters Library";
+declare version "0.2";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2572,6 +2574,84 @@ filterbanki(O,lfreqs) = _ <: bsplit(nb) with
    delayeq(0) = _; // moving the *(-1) here inverts all outputs BUT dc
    delayeq(i) = ap(i) : delayeq(i-1);
 };
+
+
+//===============SVF Filters=========================================================
+// #### References 
+// Solving the continuous SVF equations using trapezoidal integration
+// * <https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf>
+//========================================================================================
+
+//-----------------`(fi.)svf`----------------------
+// An environment with lp, bp, hp, notch, peak, ap, bell, ls, hs SVF based filters
+//
+// #### Usage
+//
+// ```
+// _ : svf.xx(freq, Q, [gain]) : _
+// ```
+//
+// Where:
+//
+// * `freq`: cut frequency
+// * `Q`: quality factor
+// * `[gain]`: gain
+//
+/// ```
+//---------------------------------------------------
+declare svf author "Oleg Nesterov";
+declare svf copyright "Copyright (C) 2020 Oleg Nesterov <oleg@redhat.com>";
+declare svf license "TODO";
+
+svf = environment {
+	svf(T,F,Q,G) = tick ~ (_,_) : !,!,si.dot(3, mix)
+	with {
+		tick(ic1eq, ic2eq, v0) =
+			2*v1 - ic1eq,
+			2*v2 - ic2eq,
+			v0, v1, v2
+		with {
+			v1 = ic1eq + g *(v0-ic2eq) : /(1 + g*(g+k));
+			v2 = ic2eq + g * v1;
+		};
+
+		A = pow(10.0, G/40.0);
+
+		g = tan(F * ma.PI/ma.SR) : case {
+			(7) => /(sqrt(A));
+			(8) => *(sqrt(A));
+			(t) => _;
+		} (T);
+
+		k = case {
+			(6) => 1/(Q*A);
+			(t) => 1/Q;
+		} (T);
+
+		mix = case {
+			(0) => 0, 0, 1;
+			(1) => 0, 1, 0;
+			(2) => 1, -k, -1;
+			(3) => 1, -k, 0;
+			(4) => 1, -k, -2;
+			(5) => 1, -2*k, 0;
+			(6) => 1, k*(A*A-1), 0;
+			(7) => 1, k*(A-1), A*A-1;
+			(8) => A*A, k*(1-A)*A, 1-A*A;
+		} (T);
+	};
+
+	lp(f,q)     = svf(0, f, q, 0);
+	bp(f,q)     = svf(1, f, q, 0);
+	hp(f,q)     = svf(2, f, q, 0);
+	notch(f,q)  = svf(3, f, q, 0);
+	peak(f,q)   = svf(4, f, q, 0);
+	ap(f,q)	    = svf(5, f, q, 0);
+	bell(f,q,g) = svf(6, f, q, g);
+	ls(f,q,g)   = svf(7, f, q, g);
+	hs(f,q,g)   = svf(8, f, q, g);
+};
+
 
 /*******************************************************************************
 # Licenses
