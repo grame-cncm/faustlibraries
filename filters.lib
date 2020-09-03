@@ -2583,7 +2583,8 @@ filterbanki(O,lfreqs) = _ <: bsplit(nb) with
 //========================================================================================
 
 //-----------------`(fi.)svf`----------------------
-// An environment with lp, bp, hp, notch, peak, ap, bell, ls, hs SVF based filters
+// An environment with `lp`, `bp`, `hp`, `notch`, `peak`, `ap`, `bell`, `ls`, `hs` SVF based filters. 
+// All filters have `freq` and `Q` parameters, the `bell`, `ls`, `hs` ones also have a `gain` third parameter.
 //
 // #### Usage
 //
@@ -2595,7 +2596,7 @@ filterbanki(O,lfreqs) = _ <: bsplit(nb) with
 //
 // * `freq`: cut frequency
 // * `Q`: quality factor
-// * `[gain]`: gain
+// * `[gain]`: gain in dB
 //
 /// ```
 //---------------------------------------------------
@@ -2604,6 +2605,8 @@ declare svf copyright "Copyright (C) 2020 Oleg Nesterov <oleg@redhat.com>";
 declare svf license "TODO";
 
 svf = environment {
+
+	// Internal implementation
 	svf(T,F,Q,G) = tick ~ (_,_) : !,!,si.dot(3, mix)
 	with {
 		tick(ic1eq, ic2eq, v0) =
@@ -2641,12 +2644,13 @@ svf = environment {
 		} (T);
 	};
 
+	// External API 
 	lp(f,q)     = svf(0, f, q, 0);
 	bp(f,q)     = svf(1, f, q, 0);
 	hp(f,q)     = svf(2, f, q, 0);
 	notch(f,q)  = svf(3, f, q, 0);
 	peak(f,q)   = svf(4, f, q, 0);
-	ap(f,q)	    = svf(5, f, q, 0);
+	ap(f,q)     = svf(5, f, q, 0);
 	bell(f,q,g) = svf(6, f, q, g);
 	ls(f,q,g)   = svf(7, f, q, g);
 	hs(f,q,g)   = svf(8, f, q, g);
