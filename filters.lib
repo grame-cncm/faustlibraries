@@ -431,6 +431,7 @@ declare allpass_fcomb1a copyright "Copyright (C) 2003-2019 by Julius O. Smith II
 declare allpass_fcomb1a license "MIT-style STK-4.3 license";
 allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
+
 //========================Direct-Form Digital Filter Sections=============================
 //========================================================================================
 
@@ -1604,6 +1605,7 @@ with {
   };
 };
 
+
 //================Special Filter-Bank Delay-Equalizing Allpass Filters====================
 // These special allpass filters are needed by filterbank et al. below.
 // They are equivalent to (`lowpass(N,fc)` +|- `highpass(N,fc))/2`, but with
@@ -1665,6 +1667,7 @@ declare highpass_plus_lowpass_odd license "MIT-style STK-4.3 license";
 // FIXME: Rewrite the following, as for orders 3 and 5 above,
 //        to eliminate pole-zero cancellations:
 highpass_minus_lowpass_odd(N,fc) = highpass(N,fc) - lowpass(N,fc);
+
 
 //==========================Elliptic (Cauer) Lowpass Filters==============================
 // Elliptic (Cauer) Lowpass Filters
@@ -1763,6 +1766,7 @@ with {
   w1 = 2*ma.PI*fc;
 };
 
+
 //=========================Elliptic Highpass Filters======================================
 //========================================================================================
 
@@ -1837,6 +1841,7 @@ with {
   a03 = 1.069358407707312;
   w1 = 2*ma.PI*fc;
 };
+
 
 //========================Butterworth Bandpass/Bandstop Filters===========================
 //========================================================================================
@@ -1921,6 +1926,7 @@ with {
     a1s = -2*cos(-1*ma.PI + (1-parity)*ma.PI/(2*Nh) + (S-1+parity)*ma.PI/Nh);
   };
 };
+
 
 //===========================Elliptic Bandpass Filters====================================
 //========================================================================================
@@ -2057,6 +2063,7 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
   unmodulate = _ <: *(c),*(-s); // subtract SR/4 from all input frequencies
   modulate(x,y) = c*x-s*y, c*y + s*x; // add SR/4 to all frequencies
 };
+
 
 //=================Parametric Equalizers (Shelf, Peaking)=================================
 // Parametric Equalizers (Shelf, Peaking).
@@ -2602,7 +2609,7 @@ filterbanki(O,lfreqs) = _ <: bsplit(nb) with
 //---------------------------------------------------
 declare svf author "Oleg Nesterov";
 declare svf copyright "Copyright (C) 2020 Oleg Nesterov <oleg@redhat.com>";
-declare svf license "TODO";
+declare svf license "MIT-style STK-4.3 license";
 
 svf = environment {
 
