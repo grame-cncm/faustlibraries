@@ -32,6 +32,7 @@
 
 ma = library("maths.lib");
 ba = library("basics.lib");
+ro = library("routes.lib");
 de = library("delays.lib");
 an = library("analyzers.lib");
 ef = library("misceffects.lib");
@@ -200,7 +201,7 @@ lpt19(tN, x) = lptN(19, tN, x); // T19 constant, i.e., 1/e^2.2 atten. after tN s
 declare ff_comb author "Julius O. Smith III";
 declare ff_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare ff_comb license "MIT-style STK-4.3 license";
-ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : + ;
+ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : +;
 
 //------`(fi.)ff_fcomb`--------
 // Feed-Forward Comb Filter. Note that `ff_fcomb` takes floating-point delays
@@ -262,7 +263,7 @@ ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 declare fb_comb author "Julius O. Smith III";
 declare fb_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare fb_comb license "MIT-style STK-4.3 license";
-fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0):mem;
+fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0) : mem;
 
 
 //-----------------------`(fi.)fb_fcomb`-----------------------
@@ -289,7 +290,7 @@ fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0):mem;
 declare fb_fcomb author "Julius O. Smith III";
 declare fb_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare fb_fcomb license "MIT-style STK-4.3 license";
-fb_fcomb(maxdel,N,b0,aN) = (+ <: de.fdelay(maxdel,float(N)-1.0),_) ~ *(-aN) : !,*(b0):mem;
+fb_fcomb(maxdel,N,b0,aN) = (+ <: de.fdelay(maxdel,float(N)-1.0),_) ~ *(-aN) : !,*(b0) : mem;
 
 //-----------------------`(fi.)rev1`-----------------------
 // Special case of `fb_comb` (`rev1(maxdel,N,g)`).
@@ -505,7 +506,7 @@ declare fir copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma
 declare fir license "MIT-style STK-4.3 license";
 fir((b0,bv)) = _ <: *(b0), R(1,bv) :> _ with {
 	R(n,(bn,bv)) = (@(n):*(bn)), R(n+1,bv);
-	R(n, bn)     = (@(n):*(bn));              };
+	R(n, bn)     = (@(n):*(bn)); };
 fir(b0) = *(b0);
 
 //---------------`(fi.)conv` and `(fi.)convN`-------------------------------
@@ -796,9 +797,7 @@ declare allpassnt author "Julius O. Smith III";
 declare allpassnt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpassnt license "MIT-style STK-4.3 license";
 allpassnt(0,sv) = _;
-allpassnt(n,sv) =
-//0:   x <: ((+ <: (allpassnt(n-1,sv)),*(s))~(*(-s))) : _',_ :+
-       _ : ((+ <: (allpassnt(n-1,sv),*(s)))~*(-s)) : fsec(n)
+allpassnt(n,sv) = _ : ((+ <: (allpassnt(n-1,sv),*(s)))~*(-s)) : fsec(n)
 with {
   fsec(1) = ro.crossnn(1) : _, (_<:mem,_) : +,_;
   fsec(n) = ro.crossn1(n) : _, (_<:mem,_),par(i,n-1,_) : +, par(i,n,_);
@@ -895,22 +894,21 @@ with {
 // #### Usage
 //
 // ```
-// _ : allpassn1mt(n,sv) : _
+// _ : allpassn1mt(N,sv) : _
 // ```
 //
 // Where:
 //
-// * `n`: the order of the filter
+// * `N`: the order of the filter (fixed at compile time)
 // * `sv`: the reflection coefficients (-1 1)
 //------------------------------------------------------------
 declare allpassn1mt author "Julius O. Smith III";
 declare allpassn1mt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpassn1mt license "MIT-style STK-4.3 license";
 allpassn1mt(0,sv) = _;
-allpassn1mt(n,sv)= _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : ro.crossnn(1)
+allpassn1mt(n,sv) = _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : ro.crossnn(1)
 		  : allpassn1mt(n-1,sv),_)~(*(-1)) : fsec(n)
 with {
-//0:  fsec(n) = _',_ : +
   fsec(1) = ro.crossnn(1) : _, (_<:mem,_) : +,_;
   fsec(n) = ro.crossn1(n) : _, (_<:mem,_),par(i,n-1,_) : +, par(i,n,_);
   innertaps(n) = par(i,n,_);
@@ -957,12 +955,12 @@ with {
 // #### Usage:
 //
 // ```
-// _ : allpassnnlt(n,sv) : _
+// _ : allpassnnlt(N,sv) : _
 // ```
 //
 // Where:
 //
-// * `n`: the order of the filter
+// * `N`: the order of the filter (fixed at compile time)
 // * `sv`: the reflection coefficients (-1,1)
 //
 // #### References
@@ -1049,7 +1047,7 @@ wgr(f,r,x) = (*(G),_<:_,((+:*(C))<:_,_),_:+,_,_:+(x),-) ~ cross : _,*(0-gi)
 with {
   C = cos(2*ma.PI*f/ma.SR);
   gi = sqrt(max(0,(1+C)/(1-C))); // compensate amplitude (only needed when
-  G = r*(1-1' + gi')/gi;         //   frequency changes substantially)
+  G = r*(1-1' + gi')/gi;         // frequency changes substantially)
   cross = _,_ <: !,_,_,!;
 };
 
@@ -1314,7 +1312,7 @@ declare tf3slf license "MIT-style STK-4.3 license";
 tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
   c   = 2.0 * ma.SR; // bilinear-transform scale-factor ("lf" case)
   csq = c*c;
-  cc = csq*c;
+  cc  = csq*c;
   // Thank you maxima:
   b3d = (b3*c^3-b2*c^2+b1*c-b0)/d;
   b2d = (-3*b3*c^3+b2*c^2+b1*c-3*b0)/d;
@@ -2458,13 +2456,12 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 declare mth_octave_filterbank author "Julius O. Smith III";
 declare mth_octave_filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare mth_octave_filterbank license "MIT-style STK-4.3 license";
-mth_octave_filterbank(O,M,ftop,N) =
-    an.mth_octave_analyzer(O,M,ftop,N) :
-    delayeq(N) with {
-  fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
-  ap(n) = highpass_plus_lowpass(O,fc(n));   // delay-equalizing allpass
-  delayeq(N) = par(i,N-2,apchain(i+1)), _, _;
-  apchain(i) = seq(j,N-1-i,ap(j+1));
+mth_octave_filterbank(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeq(N) 
+with {
+   fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
+   ap(n) = highpass_plus_lowpass(O,fc(n));   // delay-equalizing allpass
+   delayeq(N) = par(i,N-2,apchain(i+1)), _, _;
+   apchain(i) = seq(j,N-1-i,ap(j+1));
 };
 
 // dc-inverted version.  This reduces the delay-equalizer order for odd O.
@@ -2473,12 +2470,12 @@ mth_octave_filterbank(O,M,ftop,N) =
 declare mth_octave_filterbank_alt author "Julius O. Smith III";
 declare mth_octave_filterbank_alt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare mth_octave_filterbank_alt license "MIT-style STK-4.3 license";
-mth_octave_filterbank_alt(O,M,ftop,N) =
-    an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(O,N) with {
-  fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
-  ap(n) = highpass_minus_lowpass(O,fc(n)); // half the order of 'plus' case
-  delayeqi(N) = par(i,N-2,apchain(i+1)), _, *(-1.0);
-  apchain(i) = seq(j,N-1-i,ap(j+1));
+mth_octave_filterbank_alt(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(O,N) 
+with {
+    fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
+    ap(n) = highpass_minus_lowpass(O,fc(n)); // half the order of 'plus' case
+    delayeqi(N) = par(i,N-2,apchain(i+1)), _, *(-1.0);
+    apchain(i) = seq(j,N-1-i,ap(j+1));
 };
 
 // Note that even-order cases require complex coefficients.
@@ -2533,15 +2530,15 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 declare filterbank author "Julius O. Smith III";
 declare filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare filterbank license "MIT-style STK-4.3 license";
-filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb) with
-{
+filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb) 
+with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
    ap(n) = highpass_plus_lowpass(O,fc(n));
    delayeq(1) = _,_; // par(i,0,...) does not fly
    delayeq(nb) = par(i,nb-1,apchain(nb-1-i)),_,_;
    apchain(0) = _;
-   apchain(i) =  ap(i) : apchain(i-1);
+   apchain(i) = ap(i) : apchain(i-1);
 };
 
 //-----------------`(fi.)filterbanki`----------------------
@@ -2569,8 +2566,8 @@ filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb) with
 declare filterbanki author "Julius O. Smith III";
 declare filterbanki copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare filterbanki license "MIT-style STK-4.3 license";
-filterbanki(O,lfreqs) = _ <: bsplit(nb) with
-{
+filterbanki(O,lfreqs) = _ <: bsplit(nb) 
+with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
    lp(n) = lowpass(O,fc(n));
