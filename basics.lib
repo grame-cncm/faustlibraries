@@ -72,7 +72,7 @@ declare version "0.1";
 //
 // * `n`: number of samples
 //----------------------------
-samp2sec = /(ma.SR);
+samp2sec(n) = n/ma.SR;
 
 
 //-------`(ba.)sec2samp`----------
@@ -89,7 +89,7 @@ samp2sec = /(ma.SR);
 //
 // * `d`: duration in seconds
 //----------------------------
-sec2samp = *(ma.SR);
+sec2samp(d) = d*ma.SR;
 
 
 //-------`(ba.)db2linear`----------
@@ -123,7 +123,7 @@ db2linear(l) = pow(10, l/20.0);
 //
 // * `g`: a linear gain
 //-----------------------------
-linear2db(g) = 20*log10(g);
+linear2db(g) = 20.0*log10(g);
 
 
 //----------`(ba.)lin2LogGain`------------------
@@ -1025,8 +1025,8 @@ listInterp(v) =
 
 
 //-------------------`(ba.)bypass1`-------------------------
-// Takes a mono input signal, route it to `e` and bypass it if `bpc = 1`. When bypassed, `e` is feed with zeros 
-// so that its state is cleanup up.
+// Takes a mono input signal, route it to `e` and bypass it if `bpc = 1`. 
+// When bypassed, `e` is feed with zeros so that its state is cleanup up.
 // `bypass1` is a standard Faust function.
 //
 // #### Usage
@@ -1049,8 +1049,8 @@ with {
 
 
 //-------------------`(ba.)bypass2`-------------------------
-// Takes a stereo input signal, route it to `e` and bypass it if `bpc = 1`. When bypassed, `e` is feed with zeros 
-// so that its state is cleanup up.
+// Takes a stereo input signal, route it to `e` and bypass it if `bpc = 1`. 
+// When bypassed, `e` is feed with zeros so that its state is cleanup up.
 // `bypass2` is a standard Faust function.
 //
 // #### Usage
@@ -1098,9 +1098,11 @@ with {
 
 
 //-------------------`(ba.)bypass_fade`-------------------------
-// Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. Inputs and outputs signals are faded 
-// out when 'e' is bypassed, so that 'e' state is cleanup up.
-// Once bypassed the effect is replaced by par(i,N,_). Bypassed circuits can be chained.
+// Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. 
+// Inputs and outputs signals are faded out when 'e' is bypassed, 
+// so that 'e' state is cleanup up. 
+// Once bypassed the effect is replaced by par(i,N,_). 
+// Bypassed circuits can be chained.
 //
 // #### Usage
 //
@@ -1451,6 +1453,7 @@ with {
     int2nrOfBits(maxN) = int(floor(log(maxN)/log(2))+1);
 };
 
+
 //------------------------------`(ba.)slidingSum`------------------------------
 // The sliding sum of the last n input samples.
 //
@@ -1468,6 +1471,7 @@ with {
 // * `N`: the number of values to process
 //------------------------------------------------------------------------------
 slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
+
 
 //------------------------------`(ba.)slidingSump`------------------------------
 // The sliding sum of the last n input samples.
@@ -1504,6 +1508,7 @@ slidingSump(n,maxn) = slidingReduce(+,n,maxn,0);
 //------------------------------------------------------------------------------
 slidingMax(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
 
+
 //----------------------------`(ba.)slidingMin`--------------------------------
 // The sliding minimum of the last n input samples.
 //
@@ -1537,6 +1542,7 @@ slidingMin(n,maxn) = slidingReduce(min,n,maxn,ma.INFINITY);
 // * `N`: the number of values to process
 //------------------------------------------------------------------------------
 slidingMean(n) = slidingSum(n)/n;
+
 
 //----------------------------`(ba.)slidingMeanp`-------------------------------
 // The sliding mean of the last n input samples.
@@ -1574,7 +1580,8 @@ slidingMeanp(n,maxn) = slidingSump(n,maxn)/n;
 //
 // * `N`: the number of values to process
 //------------------------------------------------------------------------------
-slidingRMS(n) = pow(2):slidingMean(n) : sqrt;
+slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
+
 
 //---------------------------`(ba.)slidingRMSp`---------------------------------
 // The root mean square of the last n input samples.
@@ -1592,7 +1599,8 @@ slidingRMS(n) = pow(2):slidingMean(n) : sqrt;
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingRMSp(n,maxn) = pow(2):slidingMeanp(n,maxn) : sqrt;
+slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
+
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
 // This section implements functions that used to be in music.lib but that are now

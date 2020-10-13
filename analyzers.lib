@@ -512,7 +512,7 @@ mth_octave_spectral_level6e(M,ftop,N,tau,dB_offset) = _<:
     _,mth_octave_analyzer6e(M,ftop,N) :
     _,(display:>_):attach with {
   display = par(i,N,dbmeter(i));
-  dbmeter(i) = abs : si.smooth(ba.tau2pole(tau)) : max(1.0e-7) : ba.linear2db : +(dB_offset) :
+  dbmeter(i) = abs : si.smooth(ba.tau2pole(tau)) : max(ma.EPSILON) : ba.linear2db : +(dB_offset) :
      meter(N-i-1);
     meter(i) = speclevel_group(vbargraph("[%2i] [unit:dB]
      [tooltip: Spectral Band Level in dB]", -50, 10));
@@ -696,7 +696,7 @@ goertzel = goertzelOpt;
 
 // Undocumented utility functions used by fft and ifft:
 c_magsq(N) = si.cbus(N) : par(i,N,(par(j,2,abs<:_*_):>_)) :> si.bus(N);
-c_magdb(N) = si.cbus(N) : an.c_magsq(N) : par(i,N,(max(1.0e-7):log10:*(10.0)));
+c_magdb(N) = si.cbus(N) : an.c_magsq(N) : par(i,N,(max(ma.EPSILON):log10:*(10.0)));
 c_select_pos_freqs(2) = (_,_), (_,_); // both dc and SR/2 included with "positive frequencies"
 c_select_pos_freqs(N) = si.cbus(N) : par(i,N/2+1,(_,_)),par(i,N/2-1,(!,!)) : si.cbus(N/2+1); // for complex spectra
   select_pos_freqs(2) = _,_; // both dc and SR/2 included

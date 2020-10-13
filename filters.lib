@@ -1,7 +1,7 @@
 //##################################### filters.lib ########################################
 // Faust Filters library. Its official prefix is `fi`.
 //
-// The Filters library is organized into 18 sections:
+// The Filters library is organized into 19 sections:
 //
 // * Basic Filters
 // * Comb Filters
@@ -21,6 +21,7 @@
 // * Parametric Equalizers (Shelf, Peaking)
 // * Mth-Octave Filter-Banks
 // * Arbitrary-Crossover Filter-Banks and Spectrum Analyzers
+// * SVF filters
 //
 //########################################################################################
 
@@ -31,6 +32,7 @@
 
 ma = library("maths.lib");
 ba = library("basics.lib");
+ro = library("routes.lib");
 de = library("delays.lib");
 an = library("analyzers.lib");
 ef = library("misceffects.lib");
@@ -38,6 +40,7 @@ si = library("signals.lib");
 fi = library("filters.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Filters Library";
+declare version "0.2";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -198,7 +201,7 @@ lpt19(tN, x) = lptN(19, tN, x); // T19 constant, i.e., 1/e^2.2 atten. after tN s
 declare ff_comb author "Julius O. Smith III";
 declare ff_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare ff_comb license "MIT-style STK-4.3 license";
-ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : + ;
+ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : +;
 
 //------`(fi.)ff_fcomb`--------
 // Feed-Forward Comb Filter. Note that `ff_fcomb` takes floating-point delays
@@ -260,7 +263,7 @@ ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 declare fb_comb author "Julius O. Smith III";
 declare fb_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare fb_comb license "MIT-style STK-4.3 license";
-fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0):mem;
+fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0) : mem;
 
 
 //-----------------------`(fi.)fb_fcomb`-----------------------
@@ -287,7 +290,7 @@ fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0):mem;
 declare fb_fcomb author "Julius O. Smith III";
 declare fb_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare fb_fcomb license "MIT-style STK-4.3 license";
-fb_fcomb(maxdel,N,b0,aN) = (+ <: de.fdelay(maxdel,float(N)-1.0),_) ~ *(-aN) : !,*(b0):mem;
+fb_fcomb(maxdel,N,b0,aN) = (+ <: de.fdelay(maxdel,float(N)-1.0),_) ~ *(-aN) : !,*(b0) : mem;
 
 //-----------------------`(fi.)rev1`-----------------------
 // Special case of `fb_comb` (`rev1(maxdel,N,g)`).
@@ -429,6 +432,7 @@ declare allpass_fcomb1a copyright "Copyright (C) 2003-2019 by Julius O. Smith II
 declare allpass_fcomb1a license "MIT-style STK-4.3 license";
 allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
+
 //========================Direct-Form Digital Filter Sections=============================
 //========================================================================================
 
@@ -502,7 +506,7 @@ declare fir copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma
 declare fir license "MIT-style STK-4.3 license";
 fir((b0,bv)) = _ <: *(b0), R(1,bv) :> _ with {
 	R(n,(bn,bv)) = (@(n):*(bn)), R(n+1,bv);
-	R(n, bn)     = (@(n):*(bn));              };
+	R(n, bn)     = (@(n):*(bn)); };
 fir(b0) = *(b0);
 
 //---------------`(fi.)conv` and `(fi.)convN`-------------------------------
@@ -793,9 +797,7 @@ declare allpassnt author "Julius O. Smith III";
 declare allpassnt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpassnt license "MIT-style STK-4.3 license";
 allpassnt(0,sv) = _;
-allpassnt(n,sv) =
-//0:   x <: ((+ <: (allpassnt(n-1,sv)),*(s))~(*(-s))) : _',_ :+
-       _ : ((+ <: (allpassnt(n-1,sv),*(s)))~*(-s)) : fsec(n)
+allpassnt(n,sv) = _ : ((+ <: (allpassnt(n-1,sv),*(s)))~*(-s)) : fsec(n)
 with {
   fsec(1) = ro.crossnn(1) : _, (_<:mem,_) : +,_;
   fsec(n) = ro.crossn1(n) : _, (_<:mem,_),par(i,n-1,_) : +, par(i,n,_);
@@ -892,22 +894,21 @@ with {
 // #### Usage
 //
 // ```
-// _ : allpassn1mt(n,sv) : _
+// _ : allpassn1mt(N,sv) : _
 // ```
 //
 // Where:
 //
-// * `n`: the order of the filter
+// * `N`: the order of the filter (fixed at compile time)
 // * `sv`: the reflection coefficients (-1 1)
 //------------------------------------------------------------
 declare allpassn1mt author "Julius O. Smith III";
 declare allpassn1mt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpassn1mt license "MIT-style STK-4.3 license";
 allpassn1mt(0,sv) = _;
-allpassn1mt(n,sv)= _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : ro.crossnn(1)
+allpassn1mt(n,sv) = _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : ro.crossnn(1)
 		  : allpassn1mt(n-1,sv),_)~(*(-1)) : fsec(n)
 with {
-//0:  fsec(n) = _',_ : +
   fsec(1) = ro.crossnn(1) : _, (_<:mem,_) : +,_;
   fsec(n) = ro.crossn1(n) : _, (_<:mem,_),par(i,n-1,_) : +, par(i,n,_);
   innertaps(n) = par(i,n,_);
@@ -954,12 +955,12 @@ with {
 // #### Usage:
 //
 // ```
-// _ : allpassnnlt(n,sv) : _
+// _ : allpassnnlt(N,sv) : _
 // ```
 //
 // Where:
 //
-// * `n`: the order of the filter
+// * `N`: the order of the filter (fixed at compile time)
 // * `sv`: the reflection coefficients (-1,1)
 //
 // #### References
@@ -1046,7 +1047,7 @@ wgr(f,r,x) = (*(G),_<:_,((+:*(C))<:_,_),_:+,_,_:+(x),-) ~ cross : _,*(0-gi)
 with {
   C = cos(2*ma.PI*f/ma.SR);
   gi = sqrt(max(0,(1+C)/(1-C))); // compensate amplitude (only needed when
-  G = r*(1-1' + gi')/gi;         //   frequency changes substantially)
+  G = r*(1-1' + gi')/gi;         // frequency changes substantially)
   cross = _,_ <: !,_,_,!;
 };
 
@@ -1311,7 +1312,7 @@ declare tf3slf license "MIT-style STK-4.3 license";
 tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
   c   = 2.0 * ma.SR; // bilinear-transform scale-factor ("lf" case)
   csq = c*c;
-  cc = csq*c;
+  cc  = csq*c;
   // Thank you maxima:
   b3d = (b3*c^3-b2*c^2+b1*c-b0)/d;
   b2d = (-3*b3*c^3+b2*c^2+b1*c-3*b0)/d;
@@ -1602,6 +1603,7 @@ with {
   };
 };
 
+
 //================Special Filter-Bank Delay-Equalizing Allpass Filters====================
 // These special allpass filters are needed by filterbank et al. below.
 // They are equivalent to (`lowpass(N,fc)` +|- `highpass(N,fc))/2`, but with
@@ -1663,6 +1665,7 @@ declare highpass_plus_lowpass_odd license "MIT-style STK-4.3 license";
 // FIXME: Rewrite the following, as for orders 3 and 5 above,
 //        to eliminate pole-zero cancellations:
 highpass_minus_lowpass_odd(N,fc) = highpass(N,fc) - lowpass(N,fc);
+
 
 //==========================Elliptic (Cauer) Lowpass Filters==============================
 // Elliptic (Cauer) Lowpass Filters
@@ -1761,6 +1764,7 @@ with {
   w1 = 2*ma.PI*fc;
 };
 
+
 //=========================Elliptic Highpass Filters======================================
 //========================================================================================
 
@@ -1835,6 +1839,7 @@ with {
   a03 = 1.069358407707312;
   w1 = 2*ma.PI*fc;
 };
+
 
 //========================Butterworth Bandpass/Bandstop Filters===========================
 //========================================================================================
@@ -1919,6 +1924,7 @@ with {
     a1s = -2*cos(-1*ma.PI + (1-parity)*ma.PI/(2*Nh) + (S-1+parity)*ma.PI/Nh);
   };
 };
+
 
 //===========================Elliptic Bandpass Filters====================================
 //========================================================================================
@@ -2055,6 +2061,7 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
   unmodulate = _ <: *(c),*(-s); // subtract SR/4 from all input frequencies
   modulate(x,y) = c*x-s*y, c*y + s*x; // add SR/4 to all frequencies
 };
+
 
 //=================Parametric Equalizers (Shelf, Peaking)=================================
 // Parametric Equalizers (Shelf, Peaking).
@@ -2310,7 +2317,7 @@ spectral_tilt(N,f0,bw,alpha) = seq(i,N,sec(i)) with {
     prewarp(w,SR,wp) = wp * tan(w*T/2) / tan(wp*T/2) with { T = 1/ma.SR; };
     mz(i) = w0 * r ^ (-alpha+i); // minus zero i in s plane
     mp(i) = w0 * r ^ i; // minus pole i in s plane
-    f0p = max(f0,1.0e-7); // cannot go to zero
+    f0p = max(f0,ma.EPSILON); // cannot go to zero
     w0 = 2 * ma.PI * f0p; // radian frequency of first pole
     f1 = f0p + bw; // upper band limit
     r = (f1/f0p)^(1.0/float(N-1)); // pole ratio (2 => octave spacing)
@@ -2449,13 +2456,12 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 declare mth_octave_filterbank author "Julius O. Smith III";
 declare mth_octave_filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare mth_octave_filterbank license "MIT-style STK-4.3 license";
-mth_octave_filterbank(O,M,ftop,N) =
-    an.mth_octave_analyzer(O,M,ftop,N) :
-    delayeq(N) with {
-  fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
-  ap(n) = highpass_plus_lowpass(O,fc(n));   // delay-equalizing allpass
-  delayeq(N) = par(i,N-2,apchain(i+1)), _, _;
-  apchain(i) = seq(j,N-1-i,ap(j+1));
+mth_octave_filterbank(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeq(N) 
+with {
+   fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
+   ap(n) = highpass_plus_lowpass(O,fc(n));   // delay-equalizing allpass
+   delayeq(N) = par(i,N-2,apchain(i+1)), _, _;
+   apchain(i) = seq(j,N-1-i,ap(j+1));
 };
 
 // dc-inverted version.  This reduces the delay-equalizer order for odd O.
@@ -2464,12 +2470,12 @@ mth_octave_filterbank(O,M,ftop,N) =
 declare mth_octave_filterbank_alt author "Julius O. Smith III";
 declare mth_octave_filterbank_alt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare mth_octave_filterbank_alt license "MIT-style STK-4.3 license";
-mth_octave_filterbank_alt(O,M,ftop,N) =
-    an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(O,N) with {
-  fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
-  ap(n) = highpass_minus_lowpass(O,fc(n)); // half the order of 'plus' case
-  delayeqi(N) = par(i,N-2,apchain(i+1)), _, *(-1.0);
-  apchain(i) = seq(j,N-1-i,ap(j+1));
+mth_octave_filterbank_alt(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(O,N) 
+with {
+    fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
+    ap(n) = highpass_minus_lowpass(O,fc(n)); // half the order of 'plus' case
+    delayeqi(N) = par(i,N-2,apchain(i+1)), _, *(-1.0);
+    apchain(i) = seq(j,N-1-i,ap(j+1));
 };
 
 // Note that even-order cases require complex coefficients.
@@ -2524,15 +2530,15 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 declare filterbank author "Julius O. Smith III";
 declare filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare filterbank license "MIT-style STK-4.3 license";
-filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb) with
-{
+filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb) 
+with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
    ap(n) = highpass_plus_lowpass(O,fc(n));
    delayeq(1) = _,_; // par(i,0,...) does not fly
    delayeq(nb) = par(i,nb-1,apchain(nb-1-i)),_,_;
    apchain(0) = _;
-   apchain(i) =  ap(i) : apchain(i-1);
+   apchain(i) = ap(i) : apchain(i-1);
 };
 
 //-----------------`(fi.)filterbanki`----------------------
@@ -2560,8 +2566,8 @@ filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb) with
 declare filterbanki author "Julius O. Smith III";
 declare filterbanki copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare filterbanki license "MIT-style STK-4.3 license";
-filterbanki(O,lfreqs) = _ <: bsplit(nb) with
-{
+filterbanki(O,lfreqs) = _ <: bsplit(nb) 
+with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
    lp(n) = lowpass(O,fc(n));
@@ -2572,6 +2578,88 @@ filterbanki(O,lfreqs) = _ <: bsplit(nb) with
    delayeq(0) = _; // moving the *(-1) here inverts all outputs BUT dc
    delayeq(i) = ap(i) : delayeq(i-1);
 };
+
+
+//===============SVF Filters=========================================================
+// #### References 
+// Solving the continuous SVF equations using trapezoidal integration
+// * <https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf>
+//========================================================================================
+
+//-----------------`(fi.)svf`----------------------
+// An environment with `lp`, `bp`, `hp`, `notch`, `peak`, `ap`, `bell`, `ls`, `hs` SVF based filters. 
+// All filters have `freq` and `Q` parameters, the `bell`, `ls`, `hs` ones also have a `gain` third parameter.
+//
+// #### Usage
+//
+// ```
+// _ : svf.xx(freq, Q, [gain]) : _
+// ```
+//
+// Where:
+//
+// * `freq`: cut frequency
+// * `Q`: quality factor
+// * `[gain]`: gain in dB
+//
+/// ```
+//---------------------------------------------------
+declare svf author "Oleg Nesterov";
+declare svf copyright "Copyright (C) 2020 Oleg Nesterov <oleg@redhat.com>";
+declare svf license "MIT-style STK-4.3 license";
+
+svf = environment {
+
+	// Internal implementation
+	svf(T,F,Q,G) = tick ~ (_,_) : !,!,si.dot(3, mix)
+	with {
+		tick(ic1eq, ic2eq, v0) =
+			2*v1 - ic1eq,
+			2*v2 - ic2eq,
+			v0, v1, v2
+		with {
+			v1 = ic1eq + g *(v0-ic2eq) : /(1 + g*(g+k));
+			v2 = ic2eq + g * v1;
+		};
+
+		A = pow(10.0, G/40.0);
+
+		g = tan(F * ma.PI/ma.SR) : case {
+			(7) => /(sqrt(A));
+			(8) => *(sqrt(A));
+			(t) => _;
+		} (T);
+
+		k = case {
+			(6) => 1/(Q*A);
+			(t) => 1/Q;
+		} (T);
+
+		mix = case {
+			(0) => 0, 0, 1;
+			(1) => 0, 1, 0;
+			(2) => 1, -k, -1;
+			(3) => 1, -k, 0;
+			(4) => 1, -k, -2;
+			(5) => 1, -2*k, 0;
+			(6) => 1, k*(A*A-1), 0;
+			(7) => 1, k*(A-1), A*A-1;
+			(8) => A*A, k*(1-A)*A, 1-A*A;
+		} (T);
+	};
+
+	// External API 
+	lp(f,q)     = svf(0, f, q, 0);
+	bp(f,q)     = svf(1, f, q, 0);
+	hp(f,q)     = svf(2, f, q, 0);
+	notch(f,q)  = svf(3, f, q, 0);
+	peak(f,q)   = svf(4, f, q, 0);
+	ap(f,q)     = svf(5, f, q, 0);
+	bell(f,q,g) = svf(6, f, q, g);
+	ls(f,q,g)   = svf(7, f, q, g);
+	hs(f,q,g)   = svf(8, f, q, g);
+};
+
 
 /*******************************************************************************
 # Licenses
