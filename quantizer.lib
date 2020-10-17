@@ -62,7 +62,7 @@ with{
         (_>=0)*(pow(2,_:int));
     nN = ba.count(nl);
     noteRatio(1,oct) = 1;
-    noteRatio(n,oct) = _ <: (ba.take(n,nl)<((_/oct)/rf))*ba.take(n,nl)+
+    noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*ba.take(n,nl)+
                             (ba.take(n,nl)>((_/oct)/rf))*(noteRatio(n-1,oct));
 };
 
@@ -92,7 +92,7 @@ with{
 		(_==0)*2;
     nN = ba.count(nl);
     noteRatio(1,oct) = findValue(1,oct);
-    noteRatio(n,oct) = _ <: (ba.take(n,nl)<((_/oct)/rf))*findValue(n,oct)+
+    noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*findValue(n,oct)+
                             (ba.take(n,nl)>((_/oct)/rf))*(noteRatio(n-1,oct));
 
     findValue(n,oct) =  _<: (n<nN)*
