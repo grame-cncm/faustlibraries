@@ -460,7 +460,7 @@ with{
 //========================================================================================
 
 //------------------`(ve.)oberheim`-----------------
-// Generic multi-outputs Oberheim filter (see description above).
+// Generic multi-outputs Oberheim filter that produces the BSF, BPF, HPF and LPF outputs (see description above).
 //
 // #### Usage
 //
@@ -602,7 +602,7 @@ oberheimLPF(normFreq,Q) = oberheim(normFreq,Q):!,!,!,_;
 //========================================================================================
 
 //------------------`(ve.)sallenKeyOnePole`-----------------
-// Sallen-Key generic One Pole filter (see description above).
+// Sallen-Key generic One Pole filter that produces the LPF and HPF outputs (see description above).
 //
 // For the Faust implementation of this filter, recursion (`letrec`) is used 
 // for storing filter "states". The output (e.g. `y`) is calculated by using 
@@ -692,7 +692,7 @@ sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 
 
 //------------------`(ve.)sallenKey2ndOrder`-----------------
-// Sallen-Key generic multi-outputs 2nd order filter. 
+// Sallen-Key generic 2nd order filter that produces the LPF, BPF and HPF outputs. 
 //
 // This is a 2nd-order Sallen-Key state-variable filter. The idea is that by 
 // "tapping" into different points in the circuit, different filters 
