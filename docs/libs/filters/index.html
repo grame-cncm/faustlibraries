@@ -570,8 +570,8 @@ process = noise : fir(bv);
 <h3 id="ficonv-and-ficonvn"><code>(fi.)conv</code> and <code>(fi.)convN</code></h3>
 <p>Convolution of input signal with given coefficients.</p>
 <h4 id="usage_14">Usage</h4>
-<pre><code>_ : conv((k1,k2,k3,...,kN)) : _;  Argument = one signal bank
-_ : convN(N,(k1,k2,k3,...)) : _;  Useful when N &lt; count((k1,...))
+<pre><code>_ : conv((k1,k2,k3,...,kN)) : _; // Argument = one signal bank
+_ : convN(N,(k1,k2,k3,...)) : _; // Useful when N &lt; count((k1,...))
 </code></pre>
 
 <hr />
@@ -998,7 +998,7 @@ corresponding to analog frequency 1 rad/sec (i.e., <code>s = j</code>).</p>
         s + 1</p>
 <p>so <code>b0 = a0 = 1</code> and <code>b1 = 0</code>.  Therefore, a DIGITAL first-order
 Butterworth lowpass with gain -3dB at <code>SR/4</code> is specified as</p>
-<pre><code>tf1s(0,1,1,PI*SR/2);  digital half-band order 1 Butterworth
+<pre><code>tf1s(0,1,1,PI*SR/2); // digital half-band order 1 Butterworth
 </code></pre>
 
 <h4 id="method_1">Method</h4>
@@ -1136,7 +1136,7 @@ FIXME: Rewrite the following, as for orders 3 and 5 above,
 <h2 id="elliptic-cauer-lowpass-filters">Elliptic (Cauer) Lowpass Filters</h2>
 <p>Elliptic (Cauer) Lowpass Filters</p>
 <h4 id="references_9">References</h4>
-<p>&lt;http:en.wikipedia.org/wiki/Elliptic_filter
+<p>&lt;http://en.wikipedia.org/wiki/Elliptic_filter
 * functions <code>ncauer</code> and <code>ellip</code> in Octave</p>
 <hr />
 <h3 id="filowpass3e"><code>(fi.)lowpass3e</code></h3>
@@ -1293,10 +1293,10 @@ imaginary output signal:</p>
 <h4 id="references_11">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Equalization">http://en.wikipedia.org/wiki/Equalization</a></li>
-<li><a href="http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt">http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt</a></li>
+<li><a href="https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt">https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt</a></li>
 <li>Digital Audio Signal Processing, Udo Zolzer, Wiley, 1999, p. 124</li>
-<li>https:ccrma.stanford.edu/~jos/filters/Low_High_Shelving_Filters.html&gt;</li>
-<li>https:ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html&gt;</li>
+<li>https://ccrma.stanford.edu/~jos/filters/Low_High_Shelving_Filters.html&gt;</li>
+<li>https://ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html&gt;</li>
 <li>maxmsp.lib in the Faust distribution</li>
 <li>bandfilter.dsp in the faust2pd distribution</li>
 </ul>
@@ -1306,7 +1306,7 @@ imaginary output signal:</p>
 <code>low_shelf</code> is a standard Faust function.</p>
 <h4 id="usage_53">Usage</h4>
 <pre><code>_ : lowshelf(N,L0,fx) : _
-_ : low_shelf(L0,fx) : _  default case (order 3)
+_ : low_shelf(L0,fx) : _ // default case (order 3)
 _ : lowshelf_other_freq(N,L0,fx) : _
 </code></pre>
 
@@ -1346,7 +1346,7 @@ L(lf) is easy to state in dB versus dB-frequency lf = dB(f):</p>
 <code>high_shelf</code> is a standard Faust function.</p>
 <h4 id="usage_54">Usage</h4>
 <pre><code>_ : highshelf(N,Lpi,fx) : _
-_ : high_shelf(L0,fx) : _  default case (order 3)
+_ : high_shelf(L0,fx) : _ // default case (order 3)
 _ : highshelf_other_freq(N,Lpi,fx) : _
 </code></pre>
 
@@ -1432,7 +1432,7 @@ set alpha to -1/2.</p>
 <p>J.O. Smith and H.F. Smith,
 "Closed Form Fractional Integration and Differentiation via Real Exponentially Spaced Pole-Zero Pairs",
 arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
-http:arxiv.org/abs/1606.06154</p>
+http://arxiv.org/abs/1606.06154</p>
 <hr />
 <h3 id="filevelfilter"><code>(fi.)levelfilter</code></h3>
 <p>Dynamic level lowpass filter.
@@ -1506,20 +1506,20 @@ filter-banks using elliptic or Chebyshev prototype filters.</p>
 <li>"Tree-structured complementary filter banks using all-pass sections",
   Regalia et al., IEEE Trans. Circuits &amp; Systems, CAS-34:1470-1484, Dec. 1987</li>
 <li>"Multirate Systems and Filter Banks", P. Vaidyanathan, Prentice-Hall, 1993</li>
-<li>Elementary filter theory: https:ccrma.stanford.edu/~jos/filters/</li>
+<li>Elementary filter theory: https://ccrma.stanford.edu/~jos/filters/</li>
 </ul>
 <hr />
 <h3 id="fimth_octave_filterbankn"><code>(fi.)mth_octave_filterbank[n]</code></h3>
 <p>Allpass-complementary filter banks based on Butterworth band-splitting.
 For Butterworth band-splits, the needed delay equalizer is easily found.</p>
 <h4 id="usage_61">Usage</h4>
-<pre><code>_ : mth_octave_filterbank(O,M,ftop,N) : par(i,N,_);  Oth-order
-_ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_);  dc-inverted version
+<pre><code>_ : mth_octave_filterbank(O,M,ftop,N) : par(i,N,_); // Oth-order
+_ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_); // dc-inverted version
 </code></pre>
 
 <p>Also for convenience:</p>
-<pre><code>_ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_);  3rd-order Butterworth
-_ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_);  5th-order Butterworth
+<pre><code>_ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_); // 3rd-order Butterworth
+_ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_); // 5th-order Butterworth
 mth_octave_filterbank_default = mth_octave_filterbank5;
 </code></pre>
 
@@ -1538,7 +1538,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <p>Filter bank.
 <code>filterbank</code> is a standard Faust function.</p>
 <h4 id="usage_62">Usage</h4>
-<pre><code>_ : filterbank (O,freqs) : par(i,N,_);  Butterworth band-splits
+<pre><code>_ : filterbank (O,freqs) : par(i,N,_); // Butterworth band-splits
 </code></pre>
 
 <p>Where:</p>
@@ -1556,7 +1556,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <h3 id="fifilterbanki"><code>(fi.)filterbanki</code></h3>
 <p>Inverted-dc filter bank.</p>
 <h4 id="usage_63">Usage</h4>
-<pre><code>_ : filterbanki(O,freqs) : par(i,N,_);  Inverted-dc version
+<pre><code>_ : filterbanki(O,freqs) : par(i,N,_); // Inverted-dc version
 </code></pre>
 
 <p>Where:</p>

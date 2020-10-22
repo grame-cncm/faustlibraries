@@ -330,8 +330,9 @@ _ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : fdelay(maxDelay) : _
 <ul>
 <li>"Dispersion Modeling in Waveguide Piano Synthesis Using Tunable
 Allpass Filters", by Jukka Rauhala and Vesa Valimaki, DAFX-2006, pp. 71-76</li>
-<li><a href="http://www.dafx.ca/proceedings/papers/p_071.pdf">http://www.dafx.ca/proceedings/papers/p_071.pdf</a> (An erratum in Eq. (7)
-        is corrected in Dr. Rauhala's encompassing dissertation (and below).)</li>
+<li><a href="http://lib.tkk.fi/Diss/2007/isbn9789512290666/article2.pdf">http://lib.tkk.fi/Diss/2007/isbn9789512290666/article2.pdf</a>
+  An erratum in Eq. (7) is corrected in Dr. Rauhala's encompassing
+  dissertation (and below).</li>
 <li><a href="http://www.acoustics.hut.fi/research/asp/piano/">http://www.acoustics.hut.fi/research/asp/piano/</a></li>
 </ul>
 <hr />
@@ -402,9 +403,9 @@ interpreted as directions NW, NE, SW, SE.  A simple program
 illustrating these orderings is <code>process = mesh_square(2);</code>.</p>
 <h4 id="example">Example</h4>
 <p>Reflectively terminated mesh impulsed at one corner:</p>
-<pre><code>mesh_square_test(N,x) = mesh_square(N)~(busi(4*N,x))  input to corner
+<pre><code>mesh_square_test(N,x) = mesh_square(N)~(busi(4*N,x)) // input to corner
 with { busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); };
-process = 1-1' : mesh_square_test(4);  all modes excited forever
+process = 1-1' : mesh_square_test(4); // all modes excited forever
 </code></pre>
 
 <p>In this simple example, the mesh edges are connected as follows:</p>
