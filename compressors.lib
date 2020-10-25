@@ -39,9 +39,10 @@ si = library("signals.lib");
 an = library("analyzers.lib");
 ro = library("routes.lib");
 ma = library("maths.lib");
+it = library("interpolators.lib");
 
 declare name "Faust Compressor Effect Library";
-declare version "0.0";
+declare version "0.1";
 //=============================Functions Reference========================================
 //========================================================================================
 
@@ -159,7 +160,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,1) =
 // to link/unlink channels
 peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
   par(i, N, peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost))
-  <:(si.bus(N),(ba.minimum(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(ba.crossfade(link)));
+  <:(si.bus(N),(ba.parallelMin(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(it.interpolate_linear(link)));
 
 
 //--------------------`(co.)FFcompressor_N_chan`-------------------
@@ -323,8 +324,8 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
   si.bus(N) <: si.bus(N*2):
   (
     ((
-      (par(i, 2, peak_compression_gain_N_chan(strength*(1+((i==0)*2)),thresh,att,rel,knee,prePost,link,N)):ro.interleave(N,2):par(i, N, ba.crossfade(FBFF)))
-      ,si.bus(N))
+      (par(i, 2, peak_compression_gain_N_chan(strength*(1+((i==0)*2)),thresh,att,rel,knee,prePost,link,N)):ro.interleave(N,2):par(i, N, it.interpolate_linear(FBFF)))
+     ,si.bus(N))
       :(ro.interleave(N,2):par(i,N,meter*_))
     )~si.bus(N)
   );
@@ -435,7 +436,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,1) =
 
 RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
   par(i, N, RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost))
-  <:(si.bus(N),(ba.minimum(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(ba.crossfade(link)));
+  <:(si.bus(N),(ba.parallelMin(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(it.interpolate_linear(link)));
 
 
 //--------------------`(co.)RMS_FFFBcompressor_N_chan`-------------------
@@ -498,8 +499,8 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
   (
     (
       (
-        (ro.interleave(N,2):par(i, N*2, abs) :par(i, N, ba.crossfade(FBFF)) : RMS_compression_gain_N_chan(strength*(1+(((FBFF*-1)+1)*1)),thresh,att,rel,knee,prePost,link,N))
-        ,si.bus(N)
+        (ro.interleave(N,2):par(i, N*2, abs) :par(i, N, it.interpolate_linear(FBFF)) : RMS_compression_gain_N_chan(strength*(1+(((FBFF*-1)+1)*1)),thresh,att,rel,knee,prePost,link,N))
+       ,si.bus(N)
       )
     :(ro.interleave(N,2):par(i,N,meter*_))
     )~si.bus(N)
