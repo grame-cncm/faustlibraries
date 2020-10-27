@@ -818,4 +818,78 @@ declare avg_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_t19 license "MIT-style STK-4.3 license";
-avg_t19(period, x) = fi.lpt19(period, x); 
+avg_t19(period, x) = fi.lpt19(period, x);
+
+
+//----------(ma.)lcg------------------------------------------------------------
+// Linear congruential generator for streams of integer values based on
+// the equation: y[n] = (A * y[n - 1] + C) % M.
+// See https://en.wikipedia.org/wiki/Linear_congruential_generator.
+//
+// #### Usage
+//
+// ````
+// lcg(M, A, C, S) : _
+// ````
+//
+// Where:
+//
+// * M is the divisor in the modulo operation.
+// * A is the multiplier.
+// * C is the offset.
+// * S is the seed.
+//
+// #### Reference:
+//
+// L’ecuyer, P. (1999). Tables of linear congruential generators of different 
+// sizes and good lattice structure. Mathematics of Computation, 68(225), 
+// 249-260.
+//
+// Steele, G., & Vigna, S. (2020). Computationally easy, spectrally good 
+// multipliers for congruential pseudorandom number generators. arXiv 
+// preprint arXiv:2001.05304.
+//------------------------------------------------------------------------------
+declare lcg author "Dario Sanfilippo";
+declare lcg copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare lcg license "GPL v3 license";
+lcg(M, A, C, S) =  ((+ (S - S') * A + C) % M) 
+                   ~ _;
+
+//----------(ma.)lcg_par--------------------------------------------------------
+// Linear congruential generator for lists of integer values based on
+// the equation: y[n] = (A * y[n - 1] + C) % M.
+// See https://en.wikipedia.org/wiki/Linear_congruential_generator.
+//
+// #### Usage
+//
+// ````
+// lcg_par(N, M, A, C, S) : _
+// ````
+//
+// Where:
+//
+// * N is the number of values of the sequence in parallel 
+//    (known at compile-time).
+// * M is the divisor in the modulo operation.
+// * A is the multiplier.
+// * C is the offset.
+// * S is the seed.
+//
+// #### Reference:
+//
+// L’ecuyer, P. (1999). Tables of linear congruential generators of different
+// sizes and good lattice structure. Mathematics of Computation, 68(225),
+// 249-260.
+//
+// Steele, G., & Vigna, S. (2020). Computationally easy, spectrally good
+// multipliers for congruential pseudorandom number generators. arXiv
+// preprint arXiv:2001.05304.
+//------------------------------------------------------------------------------
+declare lcg_par author "Dario Sanfilippo";
+declare lcg_par copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare lcg_par license "GPL v3 license";
+lcg_par(1, M, A, C, S) = (A * S + C) % M;
+lcg_par(N, M, A, C, S) = 
+      (A * S + C) % M , lcg_par(N - 1, M, A, C, (A * S + C) % M);
