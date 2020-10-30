@@ -1635,7 +1635,7 @@ slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 
 parallelOp(op,1) = _;
 parallelOp(op,2) = op;
-parallelOp(op,n) = (parallelOp(n-1),_):op;
+parallelOp(op,n) = op(parallelOp(op,n-1));
 
 //---------------------------`(ba.)parallelMax`---------------------------------
 // The maximum of n parallel inputs
