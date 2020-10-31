@@ -1,6 +1,6 @@
 
 function removeComment (arg) {
-	gsub(/\/\//, "", arg);
+	gsub(/^\/\//, "", arg);
 	gsub(/^ /, "", arg);
 	return arg;
 }
@@ -11,7 +11,8 @@ function makeurl(arg) {
 		url = gensub(/[^>]*<(http[^>]+)>.*/, "\\1", 1, arg);
 		if (url == arg) return arg;
 
-		gsub(":", "://", url);
+		gsub(":", "://", url);			# for malformed url
+		gsub(/\/\/\/\//, "//", url);	# to fix redundant //// 
 		gsub(/<http..*>/, "["url"]("url")", arg);
 		return "* "arg;
 	}

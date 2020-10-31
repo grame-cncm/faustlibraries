@@ -1602,6 +1602,102 @@ slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
 slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 
 
+
+//========================================================================================
+// section contributed by Bart Brouns (bart@magnetophon.nl).
+// spdx-license-identifier: gpl-3.0
+// copyright (c) 2020 Bart Brouns
+
+//=================================Parallel Operator=========================================
+// Provides various operations on N parallel inputs using a high order
+// `parallelOp(op,N,x)`` function:
+//
+// * `parallelMax(n)`: the max of n parallel inputs
+// * `parallelMin(n)`: the min of n parallel inputs
+// * `parallelMean(n)`: the mean of n parallel inputs
+// * `parallelRMS(n)`: the RMS of n parallel inputs
+
+//-----------------------------`(ba.)parallelOp`-----------------------------
+// Apply a commutative binary operation `<op>` to n parallel inputs.
+//
+// #### usage
+//
+// ```
+// si.bus(n) : parallelOp(op,n) : _
+// ```
+//
+// where:
+//
+// * `n`: the number of parallel inputs
+// * `op`: the operator. needs to be a commutative one.
+//
+//------------------------------------------------------------------------------
+
+parallelOp(op,1) = _;
+parallelOp(op,2) = op;
+parallelOp(op,n) = op(parallelOp(op,n-1));
+
+//---------------------------`(ba.)parallelMax`---------------------------------
+// The maximum of n parallel inputs
+//
+// #### Usage
+//
+// ```
+// si.bus(n) : parallelMax(n) : _
+// ```
+//
+// Where:
+//
+// * `n`: the number of parallel inputs
+//------------------------------------------------------------------------------
+parallelMax(n) = parallelOp(max,n);
+
+//---------------------------`(ba.)parallelMin`---------------------------------
+// The minimum of n parallel inputs
+//
+// #### Usage
+//
+// ```
+// si.bus(n) : parallelMin(n) : _
+// ```
+//
+// Where:
+//
+// * `n`: the number of parallel inputs
+//------------------------------------------------------------------------------
+parallelMin(n) = parallelOp(min,n);
+
+//---------------------------`(ba.)parallelMean`---------------------------------
+// The mean of n parallel inputs
+//
+// #### Usage
+//
+// ```
+// si.bus(n) : parallelMean(n) : _
+// ```
+//
+// Where:
+//
+// * `n`: the number of parallel inputs
+//------------------------------------------------------------------------------
+parallelMean(n) = si.bus(n):>_/n;
+
+//---------------------------`(ba.)parallelRMS`---------------------------------
+// The RMS of n parallel inputs
+//
+// #### Usage
+//
+// ```
+// si.bus(n) : parallelRMS(n) : _
+// ```
+//
+// Where:
+//
+// * `n`: the number of parallel inputs
+//------------------------------------------------------------------------------
+parallelRMS(n) = par(i, n, pow(2)):parallelMean(n) : sqrt;
+
+
 //////////////////////////////////Deprecated Functions////////////////////////////////////
 // This section implements functions that used to be in music.lib but that are now
 // considered as "deprecated".
