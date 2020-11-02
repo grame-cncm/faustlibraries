@@ -499,7 +499,9 @@ with{
 
 
 //------------------`(ve.)oberheimBSF`-----------------
-// Band-Stop Oberheim filter (see description above).
+// Band-Stop Oberheim filter (see description above). 
+// Specialize the generic implementation: keep the first BSF output, 
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -514,12 +516,13 @@ with{
 //---------------------------------------------------------------------
 declare oberheimBSF author "Eric Tarr";
 declare oberheimBSF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the first BSF output, the compiler will only generate the needed code 
 oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 
 
 //------------------`(ve.)oberheimBPF`-----------------
 // Band-Pass Oberheim filter (see description above).
+// Specialize the generic implementation: keep the second BPF output, 
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -534,12 +537,13 @@ oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 //---------------------------------------------------------------------
 declare oberheimBPF author "Eric Tarr";
 declare oberheimBPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the second BPF output, the compiler will only generate the needed code
 oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 
 
 //------------------`(ve.)oberheimHPF`-----------------
 // High-Pass Oberheim filter (see description above).
+// Specialize the generic implementation: keep the third HPF output, 
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -554,12 +558,13 @@ oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 //---------------------------------------------------------------------
 declare oberheimHPF author "Eric Tarr";
 declare oberheimHPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the third HPF output, the compiler will only generate the needed code
 oberheimHPF(normFreq,Q) = oberheim(normFreq,Q):!,!,_,!;
 
 
 //------------------`(ve.)oberheimLPF`-----------------
-// Low-Pass Oberheim filter (see description above).
+// Low-Pass Oberheim filter (see description above). 
+// Specialize the generic implementation: keep the fourth LPF output,
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -574,7 +579,6 @@ oberheimHPF(normFreq,Q) = oberheim(normFreq,Q):!,!,_,!;
 //---------------------------------------------------------------------
 declare oberheimLPF author "Eric Tarr";
 declare oberheimLPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the fourth LPF output
 oberheimLPF(normFreq,Q) = oberheim(normFreq,Q):!,!,!,_;
 
 
@@ -653,6 +657,8 @@ with{
 
 //------------------`(ve.)sallenKeyOnePoleLPF`-----------------
 // Sallen-Key One Pole lowpass filter (see description above).
+// Specialize the generic implementation: keep the first LPF output, 
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -666,7 +672,6 @@ with{
 //--------------------------------------------------------------------- 
 declare sallenKeyOnePoleLPF author "Eric Tarr";
 declare sallenKeyOnePoleLPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the first LPF output, the compiler will only generate the needed code
 sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 
 
@@ -674,6 +679,8 @@ sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 // Sallen-Key One Pole Highpass filter (see description above). The dry input 
 // signal is routed in parallel to the output. The LPF'd signal is subtracted 
 // from the input so that the HPF remains.
+// Specialize the generic implementation: keep the second HPF output, 
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -687,7 +694,6 @@ sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 //---------------------------------------------------------------------
 declare sallenKeyOnePoleHPF author "Eric Tarr";
 declare sallenKeyOnePoleHPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the second HPF output, the compiler will only generate the needed code
 sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 
 
@@ -745,7 +751,8 @@ with{
 
 //------------------`(ve.)sallenKey2ndOrderLPF`-----------------
 // Sallen-Key 2nd order lowpass filter (see description above). 
-//
+// Specialize the generic implementation: keep the first LPF output,
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -760,13 +767,13 @@ with{
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderLPF author "Eric Tarr";
 declare sallenKey2ndOrderLPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the first LPF output, the compiler will only generate the needed code
 sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 
 
 //------------------`(ve.)sallenKey2ndOrderBPF`-----------------
 // Sallen-Key 2nd order bandpass filter (see description above). 
-//
+// Specialize the generic implementation: keep the second BPF output, 
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -781,13 +788,13 @@ sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderBPF author "Eric Tarr";
 declare sallenKey2ndOrderBPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the second BPF output, the compiler will only generate the needed code
 sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 
 
 //------------------`(ve.)sallenKey2ndOrderHPF`-----------------
 // Sallen-Key 2nd order highpass filter (see description above). 
-//
+// Specialize the generic implementation: keep the third HPF output, 
+// the compiler will only generate the needed code.
 //
 // #### Usage
 //
@@ -802,7 +809,6 @@ sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderHPF author "Eric Tarr";
 declare sallenKey2ndOrderHPF license "MIT-style STK-4.3 license";
-// Specialize the generic implementation: keep the third HPF output, the compiler will only generate the needed code
 sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 
 
