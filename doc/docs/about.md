@@ -1,8 +1,6 @@
 # The Faust Project
 
-The [Faust Project](https://faust.grame.fr) has started in 2004. It is actively developped by the [Grame Research Lab](https://www.grame.fr/recherche)
-
-## Acknowledgments
+The Faust Project has started in 2004. It is actively developped by the [Grame Research Lab](https://www.grame.fr/recherche).
 
 Many persons are contributing to the Faust project, by providing code for the 
 compiler, architecture files, libraries, examples, documentation, scripts, bug 
@@ -27,7 +25,7 @@ Sampo&nbsp;Savolainen, Nicolas&nbsp;Scaringella,
 Anne&nbsp;Sedes, Priyanka&nbsp;Shekar, 
 Stephen&nbsp;Sinclair, Travis&nbsp;Skare, 
 Julius&nbsp;Smith, Mike&nbsp;Solomon, 
-Michael&nbsp;Wilson.
+Michael&nbsp;Wilson, Bart Brouns, Dirk Roosenburg.
 </ul>
 
 as well as our colleagues at [GRAME](http://grame.fr):
@@ -40,10 +38,7 @@ as well as our colleagues at [GRAME](http://grame.fr):
 
 We would like also to thank for their financial support:
 
-- the [French Ministry of Culture](http://www.culture.gouv.fr/)
-- the [Auvergne-Rhône-Alpes Region](https://www.auvergnerhonealpes.fr/)
-- the [City of Lyon](https://www.lyon.fr/)
-- the [French National Research Agency (ANR)](http://www.agence-nationale-recherche.fr/)
-
-
-
+- the [French Ministry of Culture](http://www.culture.gouv.fr/),
+- the [Auvergne-Rhône-Alpes Region](https://www.auvergnerhonealpes.fr/),
+- the [City of Lyon](https://www.lyon.fr/),
+- the [French National Research Agency (ANR)](http://www.agence-nationale-recherche.fr/).
