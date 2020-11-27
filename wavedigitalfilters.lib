@@ -169,7 +169,7 @@ is represented by
 
 `A : B` 
 
-in faust. 
+in Faust. 
 
 To denote a parent element with multiple child elements, simply use a list `(a1, a2, ... an)` of children connected to a single parent. For example the tree
 
@@ -497,7 +497,7 @@ case{
 // Where:
 //
 // * `i`: index used by model-building functions. Should never be user declared.
-// * `R` : Reistance/Impedence of the series resistor in Ohms
+// * `R` : Resistance/Impedence of the series resistor in Ohms
 // * `ein` : Voltage/Potential of the ideal voltage source in Volts
 //
 // Note: 
@@ -538,7 +538,7 @@ case{
 // Where:
 //
 // * `i`: index used by model-building functions. Should never be user declared.
-// * `R` : Reistance/Impedence of the series resistor in Ohms
+// * `R` : Resistance/Impedence of the series resistor in Ohms
 // * `ein` : Voltage/Potential across ideal voltage source in Volts
 //
 // Note: 
@@ -552,7 +552,7 @@ declare resVoltage_output copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk
 declare resVoltage_output license "MIT-style STK-4.3 license";
 resVoltage_output = 
 case{
-    (0, R, ein) => R^(1-p)*ein, _*.5 + R^(1-p)*ein*.5 ;
+    (0, R, ein) => R^(1-p)*ein, _*.5 + R^(1-p)*ein*.5;
     (1, R, ein) => _, !; 
     (2, R, ein) => R0
     with {
@@ -578,7 +578,7 @@ case{
 // Where:
 //
 // * `i`: index used by model-building functions. Should never be user declared.
-// * `R` : Reistance/Impedence of the series resistor in Ohms
+// * `R` : Resistance/Impedence of the series resistor in Ohms
 // * `ein` : Voltage/Potential across ideal voltage source in Volts
 //
 // Note: 
@@ -621,7 +621,7 @@ case {
 // Where:
 //
 // * `i`: index used by model-building functions. Should never be user declared.
-// * `R` : Reistance/Impedence of the parallel resistor in Ohms
+// * `R` : Resistance/Impedence of the parallel resistor in Ohms
 // * `jin` : Current through the ideal current source in Amps
 //
 // Note: 
@@ -661,7 +661,7 @@ case {
 // Where:
 //
 // * `i`: index used by model-building functions. Should never be user declared.
-// * `R` : Reistance/Impedence of the series resistor in Ohms
+// * `R` : Resistance/Impedence of the series resistor in Ohms
 // * `jin` : Current through the ideal current source in Amps
 //
 // Note: 
@@ -801,7 +801,7 @@ capacitor_output =
 case{
     (0, R) => b0
     with{
-        b0(a1) =  a1*1, a1*.5 + (a1')*.5; 
+        b0(a1) = a1*1, a1*.5 + (a1')*.5; 
     };
     (1, R) => _, !; 
     (2, R) => R0
@@ -934,7 +934,7 @@ case{
 //
 // ```
 // chua1(i) = u_chua(i, G1, G2, V0);
-// buildtree( chua1 : B ) ;
+// buildtree( chua1 : B );
 // ```
 //
 // Where:
@@ -1731,12 +1731,10 @@ declare buildtree license "MIT-style STK-4.3 license";
 buildtree((A : B)) = builddown(A : B)~buildup(A : B) : buildout(A : B);
 
 
-
-
 //TODO
 //add input constructor. currently just performed manually. 
 //this will likely include adding additional param options to adaptors. 
-//add comments in faust formating
+//add comments in Faust formating
 
 
 /*******************************************************************************
