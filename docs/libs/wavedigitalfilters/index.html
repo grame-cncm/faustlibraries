@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> wavedigitalfilters  - Faust Libraries</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../.."><img src="../../img/faustText.svg" width="150px"> Libraries</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../organization/" class="dropdown-item"> Organization </a>
+</li>
+                                    
+<li>
+    <a href="../../standardFunctions/" class="dropdown-item"> Standard Functions </a>
+</li>
+                                    
+<li>
+    <a href="../../contributing/" class="dropdown-item"> Contributing </a>
+</li>
+                                    
+<li>
+    <a href="../../copyright/" class="dropdown-item"> Copyright/License </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../" class="nav-link">Index</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../analyzers/" class="dropdown-item"> analyzers </a>
+</li>
+                                    
+<li>
+    <a href="../basics/" class="dropdown-item"> basics </a>
+</li>
+                                    
+<li>
+    <a href="../compressors/" class="dropdown-item"> compressors </a>
+</li>
+                                    
+<li>
+    <a href="../delays/" class="dropdown-item"> delays </a>
+</li>
+                                    
+<li>
+    <a href="../demos/" class="dropdown-item"> demos </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/" class="dropdown-item"> dx7 </a>
+</li>
+                                    
+<li>
+    <a href="../envelopes/" class="dropdown-item"> envelopes </a>
+</li>
+                                    
+<li>
+    <a href="../filters/" class="dropdown-item"> filters </a>
+</li>
+                                    
+<li>
+    <a href="../hoa/" class="dropdown-item"> hoa </a>
+</li>
+                                    
+<li>
+    <a href="../interpolators/" class="dropdown-item"> interpolators </a>
+</li>
+                                    
+<li>
+    <a href="../maths/" class="dropdown-item"> maths </a>
+</li>
+                                    
+<li>
+    <a href="../mi/" class="dropdown-item"> mi </a>
+</li>
+                                    
+<li>
+    <a href="../misceffects/" class="dropdown-item"> misceffects </a>
+</li>
+                                    
+<li>
+    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
+</li>
+                                    
+<li>
+    <a href="../noises/" class="dropdown-item"> noises </a>
+</li>
+                                    
+<li>
+    <a href="../phaflangers/" class="dropdown-item"> phaflangers </a>
+</li>
+                                    
+<li>
+    <a href="../physmodels/" class="dropdown-item"> physmodels </a>
+</li>
+                                    
+<li>
+    <a href="../quantizer/" class="dropdown-item"> quantizer </a>
+</li>
+                                    
+<li>
+    <a href="../reducemaps/" class="dropdown-item"> reducemaps </a>
+</li>
+                                    
+<li>
+    <a href="../reverbs/" class="dropdown-item"> reverbs </a>
+</li>
+                                    
+<li>
+    <a href="../routes/" class="dropdown-item"> routes </a>
+</li>
+                                    
+<li>
+    <a href="../signals/" class="dropdown-item"> signals </a>
+</li>
+                                    
+<li>
+    <a href="../soundfiles/" class="dropdown-item"> soundfiles </a>
+</li>
+                                    
+<li>
+    <a href="../spats/" class="dropdown-item"> spats </a>
+</li>
+                                    
+<li>
+    <a href="../synths/" class="dropdown-item"> synths </a>
+</li>
+                                    
+<li>
+    <a href="../vaeffects/" class="dropdown-item"> vaeffects </a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active"> wavedigitalfilters </a>
+</li>
+                                    
+<li>
+    <a href="../webaudio/" class="dropdown-item"> webaudio </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <div class="container">
+            <div class="row"><div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#wavedigitalfilterslib" class="nav-link">wavedigitalfilters.lib</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#algebraic-one-port-adaptors" class="nav-link">Algebraic One Port Adaptors</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#wdresistor" class="nav-link">(wd.)resistor</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdresistor_output" class="nav-link">(wd.)resistor_output</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdresistor_output_current" class="nav-link">(wd.)resistor_output_current</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_voltage" class="nav-link">(wd.)u_voltage</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_current" class="nav-link">(wd.)u_current</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdresvoltage" class="nav-link">(wd.)resVoltage</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdresvoltage_output" class="nav-link">(wd.)resVoltage_output</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_resvoltage" class="nav-link">(wd.)u_resVoltage</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdrescurrent" class="nav-link">(wd.)resCurrent</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_rescurrent" class="nav-link">(wd.)u_resCurrent</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_switch" class="nav-link">(wd.)u_switch</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#reactive-one-port-adaptors" class="nav-link">Reactive One Port Adaptors</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#wdcapacitor" class="nav-link">(wd.)capacitor</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdcapacitor_output" class="nav-link">(wd.)capacitor_output</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdinductor" class="nav-link">(wd.)inductor</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdinductor_output" class="nav-link">(wd.)inductor_output</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#nonlinear-one-port-adaptors" class="nav-link">Nonlinear One Port Adaptors</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#wdu_idealdiode" class="nav-link">(wd.)u_idealDiode</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_chua" class="nav-link">(wd.)u_chua</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdlambert" class="nav-link">(wd.)lambert</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_diodepair" class="nav-link">(wd.)u_diodePair</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_diodesingle" class="nav-link">(wd.)u_diodeSingle</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_diodeantiparallel" class="nav-link">(wd.)u_diodeAntiparallel</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#two-port-adaptors" class="nav-link">Two Port Adaptors</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#wdu_parallel_2" class="nav-link">(wd.)u_parallel_2</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdparallel_2" class="nav-link">(wd.)parallel_2</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_series_2" class="nav-link">(wd.)u_series_2</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdseries_2" class="nav-link">(wd.)series_2</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdparallel_current" class="nav-link">(wd.)parallel_current</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdseries_voltage" class="nav-link">(wd.)series_voltage</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#three-port-adaptors" class="nav-link">Three Port Adaptors</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#wdparallel" class="nav-link">(wd.)parallel</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdseries" class="nav-link">(wd.)series</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#model-building-functions" class="nav-link">Model Building Functions</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#wdbuilddown" class="nav-link">(wd.)builddown</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdbuildup" class="nav-link">(wd.)buildup</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdgetres" class="nav-link">(wd.)getres</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdparres" class="nav-link">(wd.)parres</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdbuildout" class="nav-link">(wd.)buildout</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdbuildtree" class="nav-link">(wd.)buildtree</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9 main-container" role="main">
+
+<h1 id="wavedigitalfilterslib">wavedigitalfilters.lib</h1>
+<p>A library of basic adaptors and methods to help construct Wave Digital Filter models in Faust. Its official prefix is <code>wd</code>.</p>
+<h2 id="algebraic-one-port-adaptors">Algebraic One Port Adaptors</h2>
+<hr />
+<h3 id="wdresistor"><code>(wd.)resistor</code></h3>
+<p>Resistor
+A basic adaptor implementing a resistor for use within Wave Digital Filter connection trees</p>
+<p>It should be used as a leaf/terminating element of the connection tree</p>
+<h4 id="usage">Usage</h4>
+<pre><code>r1(i) = resistor(i, R);
+buildtree( A : r1 );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Resistance/Impedance of the resistor being modeled in Ohms. </li>
+</ul>
+<p>Note:
+The adaptor must be declared as a separate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.1</p>
+<hr />
+<h3 id="wdresistor_output"><code>(wd.)resistor_output</code></h3>
+<p>Resistor + voltage Out
+A basic adaptor implementing a resistor for use within Wave Digital Filter connection trees</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+The resistor will also pass the voltage across itself as an output of the model</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>rout(i) = resistor_output(i, R);
+buildtree( A : rout ) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Resistance/Impedance of the resistor being modeled in Ohms. </li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a separate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_1">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.1</p>
+<hr />
+<h3 id="wdresistor_output_current"><code>(wd.)resistor_output_current</code></h3>
+<p>Resistor + current Out
+A basic adaptor implementing a resistor for use within Wave Digital Filter connection trees</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+The resistor will also pass the current through itself as an output of the model</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>rout(i) = resistor_output_current(i, R);
+buildtree( A : rout ) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Resistance/Impedance of the resistor being modeled in Ohms. </li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a separate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_2">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.1</p>
+<hr />
+<h3 id="wdu_voltage"><code>(wd.)u_voltage</code></h3>
+<p>Ideal Voltage Source (Unadapted)
+An adaptor implementing an ideal voltage source within Wave Digital Filter connection trees.</p>
+<p>It should be used as the root/top element of the connection tree
+Can be used for either DC (constant) or AC (signal) voltage sources.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>v1(i) = u_Voltage(i, ein);
+buildtree( v1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>ein</code> : Voltage/Potential across ideal voltage source in Volts</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_3">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.2</p>
+<hr />
+<h3 id="wdu_current"><code>(wd.)u_current</code></h3>
+<p>Resistive Current Source (Unadapted)
+An unadapted adaptor implementing an ideal current source within Wave Digital Filter connection trees.</p>
+<p>It should be used as the root/top element of the connection tree
+Can be used for either DC (constant) or AC (signal) current sources.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>i1(i) = u_current(i, jin);
+buildtree( i1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>jin</code> : Current through the ideal current source in Amps</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_4">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.3</p>
+<hr />
+<h3 id="wdresvoltage"><code>(wd.)resVoltage</code></h3>
+<p>Resistive Voltage Source
+An adaptor implementing a resitive voltage source within Wave Digital Filter connection trees.</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+It is comprised of an ideal voltage source in series with a resistor
+Can be used for either DC (constant) or AC (signal) voltage sources.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>v1(i) = resVoltage(i, R, ein);
+buildtree( A : v1 );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Reistance/Impedence of the series resistor in Ohms</li>
+<li><code>ein</code> : Voltage/Potential of the ideal voltage source in Volts</li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_5">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.4</p>
+<hr />
+<h3 id="wdresvoltage_output"><code>(wd.)resVoltage_output</code></h3>
+<p>Resistive Voltage Source + voltage output
+An adaptor implementing a resitive voltage source within Wave Digital Filter connection trees.</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+It is comprised of an ideal voltage source in series with a resistor
+Can be used for either DC (constant) or AC (signal) voltage sources.
+The resistive voltage source will also pass the voltage across it as an output of the model</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>vout(i) = resVoltage_output(i, R, ein);
+buildtree( A : vout ) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Reistance/Impedence of the series resistor in Ohms</li>
+<li><code>ein</code> : Voltage/Potential across ideal voltage source in Volts</li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_6">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.4</p>
+<hr />
+<h3 id="wdu_resvoltage"><code>(wd.)u_resVoltage</code></h3>
+<p>Resistive Voltage Source (Unadapted)
+An unadapted adaptor implementing a resitive voltage source within Wave Digital Filter connection trees.</p>
+<p>It should be used as the root/top element of the connection tree
+It is comprised of an ideal voltage source in series with a resistor
+Can be used for either DC (constant) or AC (signal) voltage sources.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>v1(i) = u_resVoltage(i, R, ein);
+buildtree( v1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Reistance/Impedence of the series resistor in Ohms</li>
+<li><code>ein</code> : Voltage/Potential across ideal voltage source in Volts</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_7">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.4</p>
+<hr />
+<h3 id="wdrescurrent"><code>(wd.)resCurrent</code></h3>
+<p>Resistive Current Source
+An adaptor implementing a resitive current source within Wave Digital Filter connection trees.</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+It is comprised of an ideal current source in parallel with a resistor
+Can be used for either DC (constant) or AC (signal) current sources.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>i1(i) = resCurrent(i, R, jin);
+buildtree( A : i1 );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Reistance/Impedence of the parallel resistor in Ohms</li>
+<li><code>jin</code> : Current through the ideal current source in Amps</li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_8">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.5</p>
+<hr />
+<h3 id="wdu_rescurrent"><code>(wd.)u_resCurrent</code></h3>
+<p>Resistive Current Source (Uadapted)
+An unadapted adaptor implementing a resitive current source within Wave Digital Filter connection trees.</p>
+<p>It should be used as the root/top element of the connection tree
+It is comprised of an ideal current source in parallel with a resistor
+Can be used for either DC (constant) or AC (signal) current sources.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>i1(i) = u_resCurrent(i, R, jin);
+buildtree( i1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Reistance/Impedence of the series resistor in Ohms</li>
+<li><code>jin</code> : Current through the ideal current source in Amps</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_9">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.5</p>
+<hr />
+<h3 id="wdu_switch"><code>(wd.)u_switch</code></h3>
+<p>Ideal Switch (Unadapted)
+An unadapted adaptor implementing an ideal switch for Wave Digital Filter connection trees.</p>
+<p>It should be used as the root/top element of the connection tree</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>s1(i) = u_resCurrent(i, lambda);
+buildtree( s1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>lambda</code> : switch state control. -1 for closed switch, 1 for open switch.</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_10">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.8</p>
+<h2 id="reactive-one-port-adaptors">Reactive One Port Adaptors</h2>
+<hr />
+<h3 id="wdcapacitor"><code>(wd.)capacitor</code></h3>
+<p>Capacitor
+A basic adaptor implementing a capacitor for use within Wave Digital Filter connection trees</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+This capacitor model was digitized using the bi-linear transform</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>c1(i) = capacitor(i, R);
+buildtree( A : c1 ) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Capacitance/Impedence of the capacitor being modeled in Farads. </li>
+</ul>
+<p>Note:
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_11">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.3.1</p>
+<hr />
+<h3 id="wdcapacitor_output"><code>(wd.)capacitor_output</code></h3>
+<p>Capacitor + voltage out
+A basic adaptor implementing a capacitor for use within Wave Digital Filter connection trees</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+The capacitor will also pass the voltage across itself as an output of the model
+This capacitor model was digitized using the bi-linear transform</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>cout(i) = capacitor_output(i, R);
+buildtree( A : cout ) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Capacitance/Impedence of the capacitor being modeled in Farads. </li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_12">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.3.1</p>
+<hr />
+<h3 id="wdinductor"><code>(wd.)inductor</code></h3>
+<p>Inductor
+A basic adaptor implementing an inductor for use within Wave Digital Filter connection trees</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+This inductor model was digitized using the bi-linear transform</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>l1(i) = inductor(i, R);
+buildtree( A : l1 );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Inductance/Impedence of the inductor being modeled in Henries. </li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_13">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.3.2</p>
+<hr />
+<h3 id="wdinductor_output"><code>(wd.)inductor_output</code></h3>
+<p>Inductor + Voltage out
+A basic adaptor implementing an inductor for use within Wave Digital Filter connection trees</p>
+<p>It should be used as a leaf/terminating element of the connection tree
+The inductor will also pass the voltage across itself as an output of the model
+This inductor model was digitized using the bi-linear transform</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>lout(i) = inductor_output(i, R);
+buildtree( A : lout ) : _;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>R</code> : Inductance/Impedence of the inductor being modeled in Henries.</li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_14">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.3.2</p>
+<h2 id="nonlinear-one-port-adaptors">Nonlinear One Port Adaptors</h2>
+<hr />
+<h3 id="wdu_idealdiode"><code>(wd.)u_idealDiode</code></h3>
+<p>Ideal Diode (Unadapted)
+An unadapted adaptor implementing an ideal diode for Wave Digital Filter connection trees.</p>
+<p>It should be used as the root/top element of the connection tree</p>
+<h4 id="usage_15">Usage</h4>
+<pre><code>buildtree( u_idealDiode : B );
+</code></pre>
+
+<p>Note: 
+Only usable as the root of a tree
+Correct implementation is shown above.</p>
+<h4 id="reference_15">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 3.2.3</p>
+<hr />
+<h3 id="wdu_chua"><code>(wd.)u_chua</code></h3>
+<p>Chua Diode (Unadapted)
+An adaptor implementing the chua diode / non-linear resistor within Wave Digital Filter connection trees.</p>
+<p>It should be used as the root/top element of the connection tree</p>
+<h4 id="usage_16">Usage</h4>
+<pre><code>chua1(i) = u_chua(i, G1, G2, V0);
+buildtree( chua1 : B ) ;
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>G1</code> : resistance parameter 1 of the chua diode</li>
+<li><code>G2</code> : resistance parameter 2 of the chua diode</li>
+<li><code>V0</code> : voltage parameter of the chua diode</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+The adaptor must be declared as a seperate function before integration into the connection tree.
+Correct implementation is shown above.</p>
+<h4 id="reference_16">Reference</h4>
+<p>Meerkotter and Scholz, "Digital Simulation of Nonlinear Circuits by Wave Digital Filter Principles"</p>
+<hr />
+<h3 id="wdlambert"><code>(wd.)lambert</code></h3>
+<p>An implementation of the lambert function
+It uses Halley's method of iteration to aproximate the output
+Indluded in the wdf library for use in non-linear diode models
+adapted from  K M Brigg's c++ lambert function approximator</p>
+<h4 id="usage_17">Usage</h4>
+<pre><code>lambert(n, itr) : _;
+</code></pre>
+
+<p>Where:
+* <code>n</code>: value at which the lambert function will be evaluated
+* <code>itr</code>: number of iterations before output</p>
+<hr />
+<h3 id="wdu_diodepair"><code>(wd.)u_diodePair</code></h3>
+<p>A pair of diodes facing in opposite directions
+An unadapted adaptor implementing two antiparallel diodes for Wave Digital Filter connection trees.
+The behavior is approximated using Schottkey's ideal diode law</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>d1 = u_diodePair(i, Is, Vt);
+buildtree( d1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>Is</code> : saturation current of the diodes</li>
+<li><code>Vt</code> : thermal resistances of the diodes</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+Correct implementation is shown above.</p>
+<h4 id="reference_17">Reference</h4>
+<p>K. Werner et al. "An Improved and Generalized Diode Clipper Model for Wave Digital Filters"</p>
+<hr />
+<h3 id="wdu_diodesingle"><code>(wd.)u_diodeSingle</code></h3>
+<p>A single diode
+An unadapted adaptor implementing a single diode for Wave Digital Filter connection trees.
+The behavior is approximated using Schottkey's ideal diode law</p>
+<h4 id="usage_19">Usage</h4>
+<pre><code>d1 = u_diodeSingle(i, Is, Vt);
+buildtree( d1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>Is</code> : saturation current of the diodes</li>
+<li><code>Vt</code> : thermal resistances of the diodes</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+Correct implementation is shown above.</p>
+<h4 id="reference_18">Reference</h4>
+<p>K. Werner et al. "An Improved and Generalized Diode Clipper Model for Wave Digital Filters"</p>
+<hr />
+<h3 id="wdu_diodeantiparallel"><code>(wd.)u_diodeAntiparallel</code></h3>
+<p>A set of antiparallel diodes with M diodes facing forwards and N diodes facing backwards
+An unadapted adaptor implementing antiparallel diodes for Wave Digital Filter connection trees.
+The behavior is approximated using Schottkey's ideal diode law</p>
+<h4 id="usage_20">Usage</h4>
+<pre><code>d1 = u_diodeAntiparallel(i, Is, Vt);
+buildtree( d1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>Is</code> : saturation current of the diodes</li>
+<li><code>Vt</code> : thermal resistances of the diodes</li>
+</ul>
+<p>Note: 
+Only usable as the root of a tree
+Correct implementation is shown above.</p>
+<h4 id="reference_19">Reference</h4>
+<p>K. Werner et al. "An Improved and Generalized Diode Clipper Model for Wave Digital Filters"</p>
+<h2 id="two-port-adaptors">Two Port Adaptors</h2>
+<hr />
+<h3 id="wdu_parallel_2"><code>(wd.)u_parallel_2</code></h3>
+<p>2-port parallel adaptor (Unadapted)
+An unadapted adaptor implementing a 2-port parallel connection between adaptors for Wave Digital Filter connection trees.
+Elements connected to this adaptor will behave as if connected in parallel in circuit</p>
+<h4 id="usage_21">Usage</h4>
+<pre><code>buildtree( u_parallel_2 : (A, B) );
+</code></pre>
+
+<p>Note: 
+Only usable as the root of a tree
+This adaptor has no user-accessible parameters. 
+Correct implementation is shown above.</p>
+<h4 id="reference_20">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.1</p>
+<hr />
+<h3 id="wdparallel_2"><code>(wd.)parallel_2</code></h3>
+<p>2-port parallel adaptor
+An adaptor implementing a 2-port parallel connection between adaptors for Wave Digital Filter connection trees.
+Elements connected to this adaptor will behave as if connected in parallel in circuit</p>
+<h4 id="usage_22">Usage</h4>
+<pre><code>buildtree( A : parallel_2 : B );
+</code></pre>
+
+<p>Note: 
+This adaptor has no user-accessible parameters. 
+It should be used within the connection tree with one previous and one forward adaptor
+Correct implementation is shown above.</p>
+<h4 id="reference_21">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.1</p>
+<hr />
+<h3 id="wdu_series_2"><code>(wd.)u_series_2</code></h3>
+<p>2-port series adaptor (Unadapted)
+An unadapted adaptor implementing a 2-port series connection between adaptors for Wave Digital Filter connection trees.
+Elements connected to this adaptor will behave as if connected in series in circuit</p>
+<h4 id="usage_23">Usage</h4>
+<pre><code>buildtree( u_series_2 : (A, B) );
+</code></pre>
+
+<p>Note: 
+Only usable as the root of a tree
+This adaptor has no user-accessible parameters. 
+Correct implementation is shown above.</p>
+<h4 id="reference_22">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.1</p>
+<hr />
+<h3 id="wdseries_2"><code>(wd.)series_2</code></h3>
+<p>2-port series adaptor
+An adaptor implementing a 2-port series connection between adaptors for Wave Digital Filter connection trees.
+Elements connected to this adaptor will behave as if connected in series in circuit</p>
+<h4 id="usage_24">Usage</h4>
+<pre><code>buildtree( A : series_2 : B );
+</code></pre>
+
+<p>Note: 
+This adaptor has no user-accessible parameters. 
+It should be used within the connection tree with one previous and one forward adaptor
+Correct implementation is shown above.</p>
+<h4 id="reference_23">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.1</p>
+<hr />
+<h3 id="wdparallel_current"><code>(wd.)parallel_current</code></h3>
+<p>2-port parallel adaptor + ideal current source
+An adaptor implementing a 2-port series connection and internal idealized current source between adaptors for Wave Digital Filter connection trees.
+This adaptor connects the two connected elements and an additional ideal current source in parallel</p>
+<h4 id="usage_25">Usage</h4>
+<pre><code>i1 = parallel_current(i, jin);
+buildtree(A : i1 : B);
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>jin</code> :  Current through the ideal current source in Amps</li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a seperate function before integration into the connection tree.
+It should be used within a connection tree with one previous and one forward adaptor
+Correct implementation is shown above.</p>
+<h4 id="reference_24">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.2</p>
+<hr />
+<h3 id="wdseries_voltage"><code>(wd.)series_voltage</code></h3>
+<p>2-port series adaptor + ideal voltage source
+An adaptor implementing a 2-port series connection and internal ideal voltage source between adaptors for Wave Digital Filter connection trees.
+This adaptor connects the two connected adaptors and an additional ideal voltage source in series</p>
+<h4 id="usage_26">Usage</h4>
+<pre><code>v1 = series_voltage(i, vin)
+buildtree( A : v1 : B );
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
+<li><code>vin</code> :  voltage across the ideal current source in Volts</li>
+</ul>
+<p>Note: 
+The adaptor must be declared as a seperate function before integration into the connection tree.
+It should be used within the connection tree with one previous and one forward adaptor</p>
+<h4 id="reference_25">Reference</h4>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.2</p>
+<h2 id="three-port-adaptors">Three Port Adaptors</h2>
+<hr />
+<h3 id="wdparallel"><code>(wd.)parallel</code></h3>
+<p>3-port parallel adaptor
+An adaptor implementing a 3-port parallel connection between adaptors for Wave Digital Filter connection trees.
+This adaptor is used to connect adaptors simulating components connected in parallel in the circuit</p>
+<h4 id="usage_27">Usage</h4>
+<pre><code>buildtree( A : parallel : (B, C) );
+</code></pre>
+
+<p>Note: 
+This adaptor has no user-accessible parameters. 
+It should be used within the connection tree with one previous and two forward adaptors</p>
+<h4 id="reference_26">Reference</h4>
+<p>K. Werner Dissertation, 1.5.1</p>
+<hr />
+<h3 id="wdseries"><code>(wd.)series</code></h3>
+<p>3-port series adaptor
+An adaptor implementing a 3-port series connection between adaptors for Wave Digital Filter connection trees.
+This adaptor is used to connect adaptors simulating components connected in series in the circuit</p>
+<h4 id="usage_28">Usage</h4>
+<pre><code>
+tree =  A : (series : (B, C));
+</code></pre>
+
+<p>Note: 
+This adaptor has no user-accessible parameters. 
+It should be used within the connection tree with one previous and two forward adaptors</p>
+<h4 id="reference_27">Reference</h4>
+<p>K. Werner Dissertation, 1.5.2</p>
+<h2 id="model-building-functions">Model Building Functions</h2>
+<hr />
+<h3 id="wdbuilddown"><code>(wd.)builddown</code></h3>
+<p>function for building the strucutre for calculating waves travling down the WDF connection tree
+It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm
+It is used in conjunction with the buildup() function to create a full structure</p>
+<h4 id="usage_29">Usage</h4>
+<pre><code>builddown(A : B)~buildup(A : B);
+</code></pre>
+
+<p>Where: 
+* <code>(A : B)</code> : is a connection tree composed of WDF adaptors</p>
+<hr />
+<h3 id="wdbuildup"><code>(wd.)buildup</code></h3>
+<p>function for building the strucutre for calculating waves travling up the WDF connection tree
+It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm
+It is used in conjunction with the builddown() function to create a full structure</p>
+<h4 id="usage_30">Usage</h4>
+<pre><code>builddown(A : B)~buildup(A : B);
+</code></pre>
+
+<p>Where: 
+* <code>(A : B)</code> : is a connection tree composed of WDF adaptors</p>
+<hr />
+<h3 id="wdgetres"><code>(wd.)getres</code></h3>
+<p>function for determining the upward-facing port resistance of a partial WDF connection tree
+It recursively steps through the given tree, parametrizes the adaptors, and builds and algorithm
+It is used by the buildup and builddown functions but is also helpful in testing</p>
+<h4 id="usage_31">Usage</h4>
+<pre><code>getres(A : B)~getres(A : B);
+</code></pre>
+
+<p>Where: 
+* <code>(A : B)</code> : is a partial connection tree composed of WDF adaptors</p>
+<p>Note:
+This function cannot be used on a complete WDF tree. When called on an unadapted adaptor (u_ prefix), it will create errors</p>
+<hr />
+<h3 id="wdparres"><code>(wd.)parres</code></h3>
+<p>function for determining the upward-facing port resistance of a partial WDF connection tree
+It recursively steps through the given tree, parametrizes the adaptors, and builds and algorithm
+It is used by the buildup and builddown functions but is also helpful in testing
+this function is a parallelized version of getres</p>
+<h4 id="usage_32">Usage</h4>
+<pre><code>parres((A , B))~parres((A , B));
+</code></pre>
+
+<p>Where: 
+* <code>(A , B)</code> : is a partial connection tree composed of WDF adaptors</p>
+<p>Note:
+This function cannot be used on a complete WDF tree. When called on an unadapted adaptor (u_ prefix), it will create errors</p>
+<hr />
+<h3 id="wdbuildout"><code>(wd.)buildout</code></h3>
+<p>function for creating the output matrix for a WDF connection tree
+It recursively steps through the given tree and creates an output matrix passing only outputs</p>
+<h4 id="usage_33">Usage</h4>
+<pre><code>buildout( A : B );
+</code></pre>
+
+<p>Where: 
+* <code>(A : B)</code> : is a connection tree composed of WDF adaptors</p>
+<hr />
+<h3 id="wdbuildtree"><code>(wd.)buildtree</code></h3>
+<p>function for building the functioning DSP model from a WDF connection tree
+It recursively steps through the given tree, parametrizes the adaptors, and builds the algorithm</p>
+<h4 id="usage_34">Usage</h4>
+<pre><code>buildtree(A : B);
+</code></pre>
+
+<p>Where: 
+* <code>(A : B)</code> : a connection tree composed of WDF adaptors</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2019-2020 <a href="https://www.grame.fr">Grame-CNCM</a></p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
