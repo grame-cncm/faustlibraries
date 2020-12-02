@@ -108,6 +108,7 @@ sy = library("synths.lib");
 ve = library("vaeffects.lib");
 wa = library("webaudio.lib");
 vl = library("version.lib");
+wd = library("wavedigitalfilters.lib");
 ```
 
 For example, if we wanted to use the `smooth` function which is now declared in `signals.lib`, we would do the following:

@@ -98,9 +98,8 @@ with {
   gain_computer(strength,thresh,knee,level) =
     select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
             0,
-            ((level-thresh+(knee/2)):pow(2)/(2*knee)) ,
-            (level-thresh)
-           ) : max(0)*-strength;
+            ((level-thresh+(knee/2)):pow(2)/(2*knee)),
+            (level-thresh)) : max(0)*-strength;
 };
 
 
@@ -846,7 +845,7 @@ declare limiter_lad_N copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_lad_N license "GPLv3 license";
 limiter_lad_N(N, LD, ceiling, attack, hold, release) = 
-      si.bus(N) <: par(i, N, @ (LD * ma.SR)) , 
+      si.bus(N) <: par(i, N, @ (LD * ma.SR)), 
                    (scaling <: si.bus(N)) : ro.interleave(N, 2) : par(i, N, *)
       with {
            scaling = ceiling / max(amp_profile, ma.EPSILON) : min(1);
