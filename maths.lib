@@ -165,7 +165,9 @@ quadprecision INFINITY = 1.7976931348623158e+308;
 // _ : FTZ : _
 // ```
 //
-// See : <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
+// #### Reference
+//
+// <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
 //-----------------------------------------------------------------------------
 FTZ(x) = x * (abs(x) > MIN);
 
@@ -768,6 +770,7 @@ avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
 // or to reach 1-1/e of its final value.
 //
 // #### Reference
+//
 // <https://ccrma.stanford.edu/~jos/mdft/Exponentials.html>
 //-----------------------------------------------------------------------------
 declare avg_tau author "Dario Sanfilippo and Julius O. Smith III";
@@ -795,6 +798,7 @@ avg_tau(period, x) = fi.lptau(period, x);
 // or to reach 1-1/1000 of its final value.
 //
 // #### Reference
+//
 // <https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html>
 //-----------------------------------------------------------------------------
 declare avg_t60 author "Dario Sanfilippo and Julius O. Smith III";

@@ -1225,7 +1225,7 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 //-------------------------`(fi.)tf2s` and `(fi.)tf2snp`--------------------------------
 // Second-order direct-form digital filter,
 // specified by ANALOG transfer-function polynomials B(s)/A(s),
-// and a frequency-scaling parameter.  Digitization via the
+// and a frequency-scaling parameter. Digitization via the
 // bilinear transform is built in.
 //
 // #### Usage
@@ -1247,8 +1247,8 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 // #### Example
 //
 // A second-order ANALOG Butterworth lowpass filter,
-//          normalized to have cutoff frequency at 1 rad/sec,
-//          has transfer function
+// normalized to have cutoff frequency at 1 rad/sec,
+// has transfer function:
 //
 // ```
 //              1
@@ -1345,8 +1345,8 @@ tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
 //
 // #### Example
 // A first-order ANALOG Butterworth lowpass filter,
-//          normalized to have cutoff frequency at 1 rad/sec,
-//          has transfer function
+// normalized to have cutoff frequency at 1 rad/sec,
+// has transfer function:
 //
 //           1
 // H(s) = -------
@@ -1671,8 +1671,8 @@ highpass_minus_lowpass_odd(N,fc) = highpass(N,fc) - lowpass(N,fc);
 // Elliptic (Cauer) Lowpass Filters
 //
 // #### References
-// * <http://en.wikipedia.org/wiki/Elliptic_filter
-// * functions `ncauer` and `ellip` in Octave
+// * <http://en.wikipedia.org/wiki/Elliptic_filter>
+// * functions `ncauer` and `ellip` in Octave.
 //========================================================================================
 
 //-----------------------------`(fi.)lowpass3e`-----------------------------
@@ -2070,8 +2070,8 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 // * <http://en.wikipedia.org/wiki/Equalization>
 // * <https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt>
 // * Digital Audio Signal Processing, Udo Zolzer, Wiley, 1999, p. 124
-// * https://ccrma.stanford.edu/~jos/filters/Low_High_Shelving_Filters.html>
-// * https://ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html>
+// * <https://ccrma.stanford.edu/~jos/filters/Low_High_Shelving_Filters.html>
+// * <https://ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html>
 // * maxmsp.lib in the Faust distribution
 // * bandfilter.dsp in the faust2pd distribution
 //========================================================================================
@@ -2301,7 +2301,7 @@ peak_eq_rm(Lfx,fx,tanPiBT) = _ <: _,A,_ : +,- : *(0.5),*(K/2.0) : + with {
 // J.O. Smith and H.F. Smith,
 // "Closed Form Fractional Integration and Differentiation via Real Exponentially Spaced Pole-Zero Pairs",
 // arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
-// http://arxiv.org/abs/1606.06154
+// <http://arxiv.org/abs/1606.06154>
 //------------------------------------------------------------
 declare spectral_tilt author "Julius O. Smith III";
 declare spectral_tilt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2424,7 +2424,7 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 // * "Tree-structured complementary filter banks using all-pass sections",
 //   Regalia et al., IEEE Trans. Circuits & Systems, CAS-34:1470-1484, Dec. 1987
 // * "Multirate Systems and Filter Banks", P. Vaidyanathan, Prentice-Hall, 1993
-// * Elementary filter theory: https://ccrma.stanford.edu/~jos/filters/
+// * Elementary filter theory: <https://ccrma.stanford.edu/~jos/filters/>
 //========================================================================================
 
 //------------------------`(fi.)mth_octave_filterbank[n]`-------------------------
