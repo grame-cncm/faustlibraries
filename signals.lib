@@ -97,7 +97,7 @@ block(n) = par(i, n, !);
 //
 // * `i`: interpolation control between 0 and 1 (0: first input; 1: second input)
 //-----------------------------------------------------------------------------
-interpolate(i) = *(1.0-i),*(i) : +;
+interpolate(i,x,y) = x + i*(y-x);  
 
 //------------------------`(si.)smoo`---------------------------------------
 // Smoothing function based on `smooth` ideal to smooth UI signals

@@ -8,7 +8,6 @@
 
 // The library itself is written in Faust to maintain portability. 
 
-// Currently the library is in the early testing stages. Eventually, I hope to integrate it into the Faust Libraries project. 
 
 // This library is heavily based on Kurt Werner's Dissertation, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters." I have tried to maintain consistent notation between the adaptors appearing within thesis and my adaptor code. The majority of the adaptors found in chapter 1 and chapter 3 are currently supported. 
 
@@ -16,19 +15,26 @@
 
 // This documentation is taken directly from the readme of https://github.com/droosenb/faust-WD-library. Please refer to it for a more updated version. 
 
-// ### Using this Library
+// Many of the more in depth comments within the library include jargon. I plan to create videos detailing the theory of WD models
+// For now I recommend Kurt Werner's PhD, "Virtual analog modeling of Audio circuitry using Wave Digital Filters", found here: 
+// <https://searchworks.stanford.edu/view/11891203>   
+// I have tried to maintain consistent syntax and notation to the thesis. 
+// This library currently includes the majority of the adaptors covered in chapter 1 and some from chapter 3. 
 
-// Use of this library expects some level of familiarity with WD techniques, especially simplification and decomposition of electronic circuits into WD connection trees. I plan to create video to cover both these techniques and use of the library. 
+
+// ## Using this Library
+
+// Use of this library expects some level of familiarity with WDF techniques, especially simplification and decomposition of electronic circuits into WDF connection trees. I plan to create video to cover both these techniques and use of the library. 
 
 // ### Quick Start
 
-// to get a quick overview of the library, start with the `secondOrderFilters.dsp` code found in `examples`.  This can be achieved within the [online Faust IDE](https://faustide.grame.fr/) by simply downloading and dragging in `wavedigitalfilters.lib` in addition to the example code.
+// to get a quick overview of the library, start with the `secondOrderFilters.dsp` code found in `examples`. Make sure that the `wavedigitalfilters.lib` is within the compile path. This can be achieved within the [online Faust IDE](https://faustide.grame.fr/) by simply downloading and dragging in `wavedigitalfilters.lib` in addition to the example code.
 
 // ### A Simple RC Filter Model
 
 // Creating a model using this library consists fo three steps. First, declare a set of components. Second, model the relationship between them using a tree. Finally, build the tree using the libraries build functions.  
 
-// First, a set of components is declared using adaptors from the library.  This list of components is created based on analysis of the circuit using WD techniques, though generally each circuit element (resistor, capacitor, diode, etc.) can be expected to appear within the component set. For example, first order RC lowpass filter would require an unadapted voltage source, a 47k resistor, and a 10nF capacitor which outputs the voltage across itself. These can be declared with: 
+// First, a set of components is declared using adaptors from the library.  This list of components is created based on analysis of the circuit using WDF techniques, though generally each circuit element (resistor, capacitor, diode, etc.) can be expected to appear within the component set. For example, first order RC lowpass filter would require an unadapted voltage source, a 47k resistor, and a 10nF capacitor which outputs the voltage across itself. These can be declared with: 
 
 // ```
 // vs1(i) = wd.u_voltage(i, no.noise);
