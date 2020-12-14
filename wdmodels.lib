@@ -1,283 +1,243 @@
-//#################################### wavedigitalfilters.lib ####################################################################
+//#################################### wdmodels.lib ##############################################################################
 // A library of basic adaptors and methods to help construct Wave Digital Filter models in Faust. Its official prefix is `wd`.
 //################################################################################################################################
 
-/************************************************************************
-************************************************************************
-FAUST library file
+// ## Library Readme
 
-NOTE ABOUT LICENSES:
-Each function in this library has its own license. Licenses are declared
-before each function. Corresponding license terms can be found at the 
-bottom of this file or in the Faust libraries documentation.
+// This library is intended for use for creating Wave Digital (WD) based models of audio circuitry for real-time audio processing within the Faust programming language. The goal is to provide a framework to create real-time virtual-analog audio effects and synthesizers using WD models without the use of C++. Furthermore, we seek to provide access to the technique of WD modeling to those without extensive knowledge of advanced digital signal processing techniques. Finally, we hope to provide a library which can integrate with all aspects of Faust, thus creating a platform for virtual circuit bending. 
 
-The Wave Digital Filter Library is organized into the following sections
+// The library itself is written in Faust to maintain portability. 
 
-*Algebraic One Port Adaptors
-*Reactive One Port Adaptors
-*Non-Linear One Port Adaptors
-*Two Port Adaptors
-*Three Port Adaptors
-*Model Building Functions
 
-PLANNED ADDITIONS
-*R-type Adaptors
-*Multiport Non-Linear Adaptors
+// This library is heavily based on Kurt Werner's Dissertation, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters." I have tried to maintain consistent notation between the adaptors appearing within thesis and my adaptor code. The majority of the adaptors found in chapter 1 and chapter 3 are currently supported. 
 
+// For inquires about use of this library in a commercial product, please contact dirk [dot] roosenburg [dot] 30 [at] gmail [dot] com
 
-ABOUT THIS LIBRARY
+// This documentation is taken directly from the readme of https://github.com/droosenb/faust-WD-library. Please refer to it for a more updated version. 
 
-This library is intended as a tool to help generating function DSP algorithms using Wave Digital Filters (WDF)
-The library includes both port elements with which to build symbolic WDF trees and the tools to turn those trees into DSP algorithms
+// Many of the more in depth comments within the library include jargon. I plan to create videos detailing the theory of WD models
+// For now I recommend Kurt Werner's PhD, "Virtual analog modeling of Audio circuitry using Wave Digital Filters", found here: 
+// <https://searchworks.stanford.edu/view/11891203>   
+// I have tried to maintain consistent syntax and notation to the thesis. 
+// This library currently includes the majority of the adaptors covered in chapter 1 and some from chapter 3. 
 
-implementation examples can be found at <https://github.com/droosenb/faust-wdf-library>
 
-a description of how adaptors are structured is shown at the head of *Simple One Port Adaptors
+// ## Using this Library
 
-a description of how the library builds the DSP algorithm from the user-given tree is shown at the head of *Model-Building Functions
+// Use of this library expects some level of familiarity with WDF techniques, especially simplification and decomposition of electronic circuits into WDF connection trees. I plan to create video to cover both these techniques and use of the library. 
 
-Many of the more in depth comments within the library include jargon. I plan to create videos detailing the theory of WDF's
-For now I recommend Kurt Werner's PhD, Virtual analog modeling of audio circuitry using wave digital filters, found here: 
-<https://searchworks.stanford.edu/view/11891203>   
-I have tried to maintain consistent syntax and notation to the thesis. 
-This library currently includes the majority of the adaptors covered in chapter 1 and some from chapter 3. 
+// ### Quick Start
 
+// to get a quick overview of the library, start with the `secondOrderFilters.dsp` code found in `examples`. Make sure that the `wavedigitalfilters.lib` is within the compile path. This can be achieved within the [online Faust IDE](https://faustide.grame.fr/) by simply downloading and dragging in `wavedigitalfilters.lib` in addition to the example code.
 
-==================================================Library Readme================================================
+// ### A Simple RC Filter Model
 
-this documentation is taken directly from the readme of <https://github.com/droosenb/faust-wdf-library>. Please refer to it for a more updated version. 
+// Creating a model using this library consists fo three steps. First, declare a set of components. Second, model the relationship between them using a tree. Finally, build the tree using the libraries build functions.  
 
+// First, a set of components is declared using adaptors from the library.  This list of components is created based on analysis of the circuit using WDF techniques, though generally each circuit element (resistor, capacitor, diode, etc.) can be expected to appear within the component set. For example, first order RC lowpass filter would require an unadapted voltage source, a 47k resistor, and a 10nF capacitor which outputs the voltage across itself. These can be declared with: 
 
-# faust-wdf-library
+// ```
+// vs1(i) = wd.u_voltage(i, no.noise);
+// r1(i) = wd.resistor(i, 47*10^3);
+// c1(i) = wd.capacitor_output(i, 10*10^-9);
+// ```
 
-This library is intended for use for creating Wave Digital Filter (WDF) based models of audio circuitry for real-time audio processing within the Faust programming language. The goal is to provide a framework to create real-time virtual-analog audio effects and synthesizers using WDF models without the use of C++. Furthermore, we seek to provide access to the technique of WDF modeling to those without extensive knowledge of advanced digital signal processing techniques. Finally, we hope to provide a library which can integrate with all aspects of Faust, thus creating a platform for virtual circuit bending. 
+// Note that the first argument, i, is left un-parametrized. Components must be declared in this form, as the build algorithm expects to receive adaptors which have exactly one parameter. 
 
-The library itself is written in Faust to maintain portability. 
+// Also note that we have chosen to declare a white noise function as the input to our voltage source. We could potentially declare this as a direct input to our model, but to do so is more complicated process which cannot be covered within this tutorial. For information on how to do this see Declaring Model Parameters as Inputs or see various implementations in `examples`.
 
-Currently the library is in the early testing stages. Eventually, I hope to integrate it into the Faust Libraries project. 
 
-This library is heavily based on Kurt Werner's Dissertation, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters." I have tried to maintain consistent notation between the adaptors appearing within thesis and my adaptor code. The majority of the adaptors found in chapter 1 and chapter 3 are currently supported. 
+// Second, the declared components and interconnection/structural adaptors (i.e. series, parallel, etc) are arranged into the connection tree which is produced from performing WD analysis on the modeled circuit. For example, to produce our first order RC lowpass circuit model, the following tree is declared: 
 
-For inquires about use of this library in a commercial product, please contact dirk [dot] roosenburg [dot] 30 [at] gmail [dot] com
+// `tree_lowpass = vs1(i) : WD.series : (r1, c1)`
 
-## Using this Library
+// For more information on how to represent trees in Faust, see Trees in Faust. 
 
-Use of this library expects some level of familiarity with WDF techniques, especially simplification and decomposition of electronic circuits into WDF connection trees. I plan to create video to cover both these techniques and use of the library. 
+// Finally, the tree is built using the the `buildtree` function. To build and compute our first order RC lowpass circuit model, we use
 
-### Quick Start
+// `process = buildtree(tree_lowpass);`
 
-to get a quick overview of the library, start with the `secondOrderFilters.dsp` code found in `examples`. Make sure that the `wavedigitalfilters.lib` is within the compile path. This can be achieved within the [online Faust IDE](https://faustide.grame.fr/) by simply downloading and dragging in `wavedigitalfilters.lib` in addition to the example code.
+// More information about build functions, see Build Functions. 
 
-### A Simple RC Filter Model
+// ### Building a Model
 
-Creating a model using this library consists fo three steps. First, declare a set of components. Second, model the relationship between them using a tree. Finally, build the tree using the libraries build functions.  
+// After creating a connection tree which consists of WD adaptors, the connection tree must be passed to a build function in order to build the model.
 
-First, a set of components is declared using adaptors from the library.  This list of components is created based on analysis of the circuit using WDF techniques, though generally each circuit element (resistor, capacitor, diode, etc.) can be expected to appear within the component set. For example, first order RC lowpass filter would require an unadapted voltage source, a 47k resistor, and a 10nF capacitor which outputs the voltage across itself. These can be declared with: 
+// ##### Automatic model building 
 
-```
-vs1(i) = wd.u_voltage(i, no.noise);
-r1(i) = wd.resistor(i, 47*10^3);
-c1(i) = wd.capacitor_output(i, 10*10^-9);
-```
+// `buildtree(connection_tree)`
 
-Note that the first argument, i, is left un-parametrized. Components must be declared in this form, as the build algorithm expects to receive adaptors which have exactly one parameter. 
+// The simplest build function for use with basic models. This automatically implements `buildup`, `builddown`, and `buildout` to create a working model. However, it gives minimum control to the user and cannot currently be used on trees which have parameters declared as inputs.
 
-Also note that we have chosen to declare a white noise function as the input to our voltage source. We could potentially declare this as a direct input to our model, but to do so is more complicated process which cannot be covered within this tutorial. For information on how to do this see Declaring Model Parameters as Inputs or see various implementations in `examples`.
+// ##### Manual model building
 
+// Wave Digital Filters are an explicit state-space model, meaning they use a previous system state in order to calculate the current output. This is achieved in Faust by using a single global feedback operator. The models feed-forward terms are generated using `builddown` and the models feedback terms are generated using `buildup`. Thus, the most common model implementation (the method used by `buildtree`) is
 
-Second, the declared components and interconnection/structural adaptors (i.e. series, parallel, etc) are arranged into the connection tree which is produced from performing WDF analysis on the modeled circuit. For example, to produce our first order RC lowpass circuit model, the following tree is declared: 
+// `builddown(connection_tree)~buildup(connection_tree) : buildout(connection_tree)`.
 
-`tree_lowpass = vs1(i) : wdf.series : (r1, c1)`
+// Since the `~` operator in Faust will leave feedback terms hanging as outputs, `buildout` is a function provided for convenience. It automatically truncates the hanging outputs by identifying leaf components which have an intended output and generating an output matrix.
 
-For more information on how to represent trees in Faust, see Trees in Faust. 
+// Building the model manually allows for greater user control and is often very helpful in testing. Also provided for testing are the `getres` and `parres` functions, which can be used to determine the upward-facing port resistance of an element. 
 
-Finally, the tree is built using the the `buildtree` function. To build and compute our first order RC lowpass circuit model, we use
+// ### Declaring Model Parameters as Inputs
 
-`process = buildtree(tree_lowpass);`
+// When possible, parameters of components should be declared explicitly, meaning they are dependent on a function with no inputs. This might be something as simple as integer(declaring a static component), a function dependent on a UI input (declaring a component with variable value), or even a time-dependent function like an oscillator (declaring an audio input or circuit bending). 
 
-More information about build functions, see Build Functions. 
+// However, it is often necessary to declare parameters as input. To achieve this there are two possible methods. The first and recommended option is to create a separate model function and declare parameters which will later be implemented as inputs. This allows inputs to be explicitly declared as component parameters. For example, one might use
 
-### Building a Model
+// ```
+// model(in1) = buildtree(tree)
+// with{
+//    ...
+//    vin(i) = wd.u_voltage(i, in1);
+//    ...
 
-After creating a connection tree which consists of WDF adaptors, the connection tree must be passed to a build function in order to build the model.
+//    tree = vin : ...; 
+// };
+// ```
 
-##### Automatic model building 
+// In order to simulate an audio input to the circuit. 
 
-`buildtree(connection_tree)`
+// Note that the tree and components must be declared inside a `with{...}` statement, or the model's parameters will not be accessible. 
 
-The simplest build function for use with basic models. This automatically implements `buildup`, `builddown`, and `buildout` to create a working model. However, it gives minimum control to the user and cannot currently be used on trees which have parameters declared as inputs.
+// ##### Depreciated Input Method (Not Recommended)
 
-##### Manual model building
+// It is also possible to declare inputs using the signal operator, `_`. For example, one might use
 
-Wave Digital Filters are an explicit state-space model, meaning they use a previous system state in order to calculate the current output. This is achieved in Faust by using a single global feedback operator. The models feed-forward terms are generated using `builddown` and the models feedback terms are generated using `buildup`. Thus, the most common model implementation (the method used by `buildtree`) is
+// `vin(i) = wd.u_voltage(i, _);`
 
-`builddown(connection_tree)~buildup(connection_tree) : buildout(connection_tree)`.
+// in order to simulate an audio input to the circuit.
 
-Since the `~` operator in Faust will leave feedback terms hanging as outputs, `buildout` is a function provided for convenience. It automatically truncates the hanging outputs by identifying leaf components which have an intended output and generating an output matrix.
+// However, since build functions do not have access to individual component parameter details, the task of declaring inputs using this method can quickly become complex and **is not recommended**. 
 
-Building the model manually allows for greater user control and is often very helpful in testing. Also provided for testing are the `getres` and `parres` functions, which can be used to determine the upward-facing port resistance of an element. 
+// Only the root and bottom-most / left-most leaf element can accept a parameter input this way. 
 
-### Declaring Model Parameters as Inputs
+// Additionally, manual routing must be performed within the feedforward term as the function input/output mismatch will cause errors in the model. 
 
-When possible, parameters of components should be declared explicitly, meaning they are dependent on a function with no inputs. This might be something as simple as integer(declaring a static component), a function dependent on a UI input (declaring a component with variable value), or even a time-dependent function like an oscillator (declaring an audio input or circuit bending). 
 
-However, it is often necessary to declare parameters as input. To achieve this there are two possible methods. The first and recommended option is to create a separate model function and declare parameters which will later be implemented as inputs. This allows inputs to be explicitly declared as component parameters. For example, one might use
+// ### Trees in Faust
 
-```
-model(in1) = buildtree(tree)
-with{
-   ...
-   vin(i) = wd.u_voltage(i, in1);
-   ...
+// Since WD models use connection trees to represent relationships of elements, a comprehensive way to represent trees is critical. As there is no current convention for creating trees in Faust, I've developed a method using the existing series and parallel/list methods in Faust.
 
-   tree = vin : ...; 
-};
-```
+// The series operator ` : ` is used to separate parent and child elements. For example the tree
 
-In order to simulate an audio input to the circuit. 
+// ```
+//    A
+//    |
+//    B
+// ```
 
-Note that the tree and components must be declared inside a `with{...}` statement, or the model's parameters will not be accessible. 
+// is represented by
 
-##### Depreciated Input Method (Not Recommended)
+// `A : B` 
 
-It is also possible to declare inputs using the signal operator, `_`. For example, one might use
+// in Faust. 
 
-`vin(i) = wd.u_voltage(i, _);`
+// To denote a parent element with multiple child elements, simply use a list `(a1, a2, ... an)` of children connected to a single parent. For example the tree
 
-in order to simulate an audio input to the circuit.
+// ```
+//    A
+//   / \
+//  B   C
 
-However, since build functions do not have access to individual component parameter details, the task of declaring inputs using this method can quickly become complex and **is not recommended**. 
+// ```
+// is represented by
 
-Only the root and bottom-most / left-most leaf element can accept a parameter input this way. 
+// `A : (B, C)`
 
-Additionally, manual routing must be performed within the feedforward term as the function input/output mismatch will cause errors in the model. 
+// Finally, for a tree with many levels, simply break the tree into subtrees following the above rules and connect the subtree as if it was an individual node. For example the tree
 
+// ```
+//       A
+//      / \
+//     B   C
+//    /   / \
+//   X   Y   Z
+// ```
 
-### Trees in Faust
+// can be represented by
 
-Since WDF models use connection trees to represent relationships of elements, a comprehensive way to represent trees is critical. As there is no current convention for creating trees in Faust, I've developed a method using the existing series and parallel/list methods in Faust.
+// ```
+// B_sub = B : X; //B subtree
+// C_sub = C : (Y, Z); //C subtree
+// tree = A : (B_sub, C_sub); //full tree
+// ```
 
-The series operator ` : ` is used to separate parent and child elements. For example the tree
+// or more simply, using parentheses: 
 
-```
-   A
-   |
-   B
-```
+// `A : ((B : X), (C : (Y, Z)))`
 
-is represented by
+// ### How Adaptors are Structured
 
-`A : B` 
+// In wave digital filters, adaptors can be described by the form 
 
-in Faust. 
+// `b = Sa`
 
-To denote a parent element with multiple child elements, simply use a list `(a1, a2, ... an)` of children connected to a single parent. For example the tree
+// where `b` is a vector of output waves `b = (b0, b1, b2, ... bn)`, `a` is a vector of input waves`a = (a0, a1, a2, ... an)`, and `S` is an n x n scattering matrix. `S` is dependent on `R`, a list of port resistances `(R0, R1, R2, ... Rn)`. 
 
-```
-   A
-  / \
- B   C
+// The output wave vector `b` can be divided into downward-going and upward-going waves (downward-going waves travel down the connection tree, upward-going waves travel up). For adapted adaptors, with the zeroth port being  the upward-facing port, the downward-going wave vector is `(b1, b2, ... bn)` and the upward-going wave vector is `(b0)`. For unadapted adaptors, there are no upward-going waves, so the downward-going wave vector is simply `b = (b0, b1, b2, ... bn)`. 
 
-```
-is represented by
+// In order for adaptors to be interpretable by the compiler, they must be structured in a specific way. 
+// Each adaptor is divided into three cases by their first parameter. This parameter, while accessible by the user, should only be set by the compiler/builder.
 
-`A : (B, C)`
+// All other parameters are value declarations (for components), inputs (for voltage or current ins), or parameter controls (for potentiometers/variable capacitors/variable inductors)
 
-Finally, for a tree with many levels, simply break the tree into subtrees following the above rules and connect the subtree as if it was an individual node. For example the tree
+// ##### first case - downward going waves
 
-```
-      A
-     / \
-    B   C
-   /   / \
-  X   Y   Z
-```
+// `(0, params) => downward-going(R1, ... Rn, a0, a1, ... an)` 
+// outputs : `(b1, b2, ... bn)`
 
-can be represented by
-
-```
-B_sub = B : X; //B subtree
-C_sub = C : (Y, Z); //C subtree
-tree = A : (B_sub, C_sub); //full tree
-```
-
-or more simply, using parentheses: 
-
-`A : ((B : X), (C : (Y, Z)))`
-
-### How Adaptors are Structured
-
-In wave digital filters, adaptors can be described by the form 
-
-`b = Sa`
-
-where `b` is a vector of output waves `b = (b0, b1, b2, ... bn)`, `a` is a vector of input waves`a = (a0, a1, a2, ... an)`, and `S` is an n x n scattering matrix. `S` is dependent on `R`, a list of port resistances `(R0, R1, R2, ... Rn)`. 
-
-The output wave vector `b` can be divided into downward-going and upward-going waves (downward-going waves travel down the connection tree, upward-going waves travel up). For adapted adaptors, with the zeroth port being  the upward-facing port, the downward-going wave vector is `(b1, b2, ... bn)` and the upward-going wave vector is `(b0)`. For unadapted adaptors, there are no upward-going waves, so the downward-going wave vector is simply `b = (b0, b1, b2, ... bn)`. 
-
-In order for adaptors to be interpretable by the compiler, they must be structured in a specific way. 
-Each adaptor is divided into three cases by their first parameter. This parameter, while accessible by the user, should only be set by the compiler/builder.
-
-All other parameters are value declarations (for components), inputs (for voltage or current ins), or parameter controls (for potentiometers/variable capacitors/variable inductors)
-
-##### first case - downward going waves
-
-`(0, params) => downward-going(R1, ... Rn, a0, a1, ... an)` 
-outputs : `(b1, b2, ... bn)`
-
-   this function takes any number of port resistances, the downward going wave, and any number of upward going waves as inputs. 
+//    this function takes any number of port resistances, the downward going wave, and any number of upward going waves as inputs. 
    
-   These values/waves are used to calculate the downward going waves coming from this adaptor
+//    These values/waves are used to calculate the downward going waves coming from this adaptor
 
-##### second case 
+// ##### second case 
 
-`(1, params) =>  upward-going(R1, ... Rn, a1, ... an)`
-outputs : `(b0)`
+// `(1, params) =>  upward-going(R1, ... Rn, a1, ... an)`
+// outputs : `(b0)`
 
-   this function takes any number of port resistances and any number of upward going waves as inputs
+//    this function takes any number of port resistances and any number of upward going waves as inputs
 
-   these values/waves are used to calculate the upward going wave coming from this adaptor
+//    these values/waves are used to calculate the upward going wave coming from this adaptor
 
-##### third case  
+// ##### third case  
 
-`(2, params) => port-resistance(R1, ... Rn)` 
-outputs:  `(R0)`
+// `(2, params) => port-resistance(R1, ... Rn)` 
+// outputs:  `(R0)`
 
-   this function takes any number of port resistances as inputs
+//    this function takes any number of port resistances as inputs
 
-   these values are used to calculate the upward going port resistance of the element
-
-
-##### Unadapted Adaptors
-
-Unadapted adaptor's names will always begin "u_"
-An unadapted adaptor MUST be used as the root of the WDF connection tree.
-Unadapted adaptors can ONLY be used as a root of the WDF connection tree. 
-While unadapted adaptors contain all three cases, the second and third are purely structural. 
-Only the first case should contain computational information. 
-
-### How the Build Functions Work
-
-Expect this section to be added soon! It's currently in progress.
-
-## Acknowledgements
-
-Many thanks to Kurt Werner for helping me to understand wave digital filter models. Without his publications and consultations, the library would not exist. 
-Thanks also to my advisors, Rob Owen and Eli Stine whose input was critical to the development of the library.
-Finally, thanks to Romain Michon, Stephane Letz, and the Faust slack for contributing to testing, development, and inspiration when creating the library. 
+//    these values are used to calculate the upward going port resistance of the element
 
 
+// ##### Unadapted Adaptors
 
-************************************************************************
-************************************************************************/
+// Unadapted adaptor's names will always begin "u_"
+// An unadapted adaptor MUST be used as the root of the WD connection tree.
+// Unadapted adaptors can ONLY be used as a root of the WD connection tree. 
+// While unadapted adaptors contain all three cases, the second and third are purely structural. 
+// Only the first case should contain computational information. 
+
+// ### How the Build Functions Work
+
+// Expect this section to be added soon! It's currently in progress.
+
+// ### Acknowledgements
+
+// Many thanks to Kurt Werner for helping me to understand wave digital filter models. Without his publications and consultations, the library would not exist. 
+// Thanks also to my advisors, Rob Owen and Eli Stine whose input was critical to the development of the library.
+// Finally, thanks to Romain Michon, Stephane Letz, and the Faust slack for contributing to testing, development, and inspiration when creating the library. 
+
+
+
 
 ba = library("basics.lib");
 ro = library("routes.lib");
 ma = library("maths.lib");
 si = library("signals.lib");
 
-declare name "Faust Wave Digital Filter Library";
-declare version "0.1";
+declare name "Faust Wave Digital Model Library";
+declare version "0.1.1";
 
 
 
@@ -973,7 +933,7 @@ case{
 //----------------------`(wd.)lambert`--------------------------
 // An implementation of the lambert function.
 // It uses Halley's method of iteration to aproximate the output.
-// Included in the wdf library for use in non-linear diode models.
+// Included in the WD library for use in non-linear diode models.
 // Adapted from  K M Brigg's c++ lambert function approximator.
 //
 // #### Usage
@@ -1486,7 +1446,7 @@ t = 1/ma.SR; //sampling rate reference for reactive elements
 
 
 //----------------------`(wd.)builddown`--------------------------
-// Function for building the strucutre for calculating waves travling down the WDF connection tree.
+// Function for building the strucutre for calculating waves travling down the WD connection tree.
 // It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 // It is used in conjunction with the buildup() function to create a full structure.
 //
@@ -1497,7 +1457,7 @@ t = 1/ma.SR; //sampling rate reference for reactive elements
 // ```
 //
 // Where: 
-// * `(A : B)` : is a connection tree composed of WDF adaptors
+// * `(A : B)` : is a connection tree composed of WD adaptors
 //----------------------------------------------------------
 declare builddown author "Dirk Roosenburg";
 declare builddown copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -1556,7 +1516,7 @@ builddown(A) = A(0);
 
 
 //----------------------`(wd.)buildup`--------------------------
-// Function for building the strucutre for calculating waves travling up the WDF connection tree.
+// Function for building the strucutre for calculating waves travling up the WD connection tree.
 // It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 // It is used in conjunction with the builddown() function to create a full structure.
 //
@@ -1567,7 +1527,7 @@ builddown(A) = A(0);
 // ```
 //
 // Where: 
-// * `(A : B)` : is a connection tree composed of WDF adaptors
+// * `(A : B)` : is a connection tree composed of WD adaptors
 //----------------------------------------------------------
 declare builddown author "Dirk Roosenburg";
 declare builddown copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -1635,7 +1595,7 @@ with{
 buildup(A) = A(1);
 
 //----------------------`(wd.)getres`--------------------------
-// Function for determining the upward-facing port resistance of a partial WDF connection tree.
+// Function for determining the upward-facing port resistance of a partial WD connection tree.
 // It recursively steps through the given tree, parametrizes the adaptors, and builds and algorithm.
 // It is used by the buildup and builddown functions but is also helpful in testing.
 //
@@ -1646,10 +1606,10 @@ buildup(A) = A(1);
 // ```
 //
 // Where: 
-// * `(A : B)` : is a partial connection tree composed of WDF adaptors
+// * `(A : B)` : is a partial connection tree composed of WD adaptors
 //
 // Note:
-// This function cannot be used on a complete WDF tree. When called on an unadapted adaptor (u_ prefix), it will create errors
+// This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors
 //----------------------------------------------------------
 declare getres author "Dirk Roosenburg";
 declare getres copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -1659,7 +1619,7 @@ getres(A) = A(2);
 
 
 //----------------------`(wd.)parres`--------------------------
-// Function for determining the upward-facing port resistance of a partial WDF connection tree.
+// Function for determining the upward-facing port resistance of a partial WD connection tree.
 // It recursively steps through the given tree, parametrizes the adaptors, and builds and algorithm.
 // It is used by the buildup and builddown functions but is also helpful in testing.
 // This function is a parallelized version of getres.
@@ -1671,10 +1631,10 @@ getres(A) = A(2);
 // ```
 //
 // Where: 
-// * `(A , B)` : is a partial connection tree composed of WDF adaptors
+// * `(A , B)` : is a partial connection tree composed of WD adaptors
 //
 // Note:
-// This function cannot be used on a complete WDF tree. When called on an unadapted adaptor (u_ prefix), it will create errors
+// This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors
 //----------------------------------------------------------
 declare parres author "Dirk Roosenburg";
 declare parres copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -1684,7 +1644,7 @@ parres(Ap) = getres(Ap);
 
 
 //----------------------`(wd.)buildout`--------------------------
-// Function for creating the output matrix for a WDF connection tree.
+// Function for creating the output matrix for a WD connection tree.
 // It recursively steps through the given tree and creates an output matrix passing only outputs.
 //
 // #### Usage
@@ -1694,7 +1654,7 @@ parres(Ap) = getres(Ap);
 // ```
 //
 // Where: 
-// * `(A : B)` : is a connection tree composed of WDF adaptors
+// * `(A : B)` : is a connection tree composed of WD adaptors
 //
 //----------------------------------------------------------
 declare buildout author "Dirk Roosenburg";
@@ -1713,7 +1673,7 @@ with{
 
 
 //----------------------`(wd.)buildtree`--------------------------
-// Function for building the functioning DSP model from a WDF connection tree.
+// Function for building the functioning DSP model from a WD connection tree.
 // It recursively steps through the given tree, parametrizes the adaptors, and builds the algorithm.
 //
 // #### Usage
@@ -1723,7 +1683,7 @@ with{
 // ```
 //
 // Where: 
-// * `(A : B)` : a connection tree composed of WDF adaptors
+// * `(A : B)` : a connection tree composed of WD adaptors
 //----------------------------------------------------------
 declare buildtree author "Dirk Roosenburg";
 declare buildtree copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
