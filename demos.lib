@@ -1341,4 +1341,103 @@ with{
 	gain = excitGroup(vslider("[1] Gain",0.5,0,1,0.01) : si.smoo);
 };
 
+//----------------------`(dm.)tube_screamer`--------------------------
+// A virtual analog simulation of the Ibanez Tube Screamer guitar pedal distortion section.
+// It does not include the input, tone, or output stages of the original circuit. 
+// The model uses wave digital modeling techniques to simulate the circuit, as described in Werner et al. 
+//
+// #### Usage
+//
+// ```
+// _ : tube_screamer : _;
+// ```
+//
+// #### Reference
+// K. Werner et al. "An Improved and Generalized Diode Clipper Model for Wave Digital Filters"
+//----------------------------------------------------------
+// Author: Dirk Roosenburg
+// License: MIT
+declare tube_screamer author "Dirk Roosenburg";
+declare tube_screamer copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
+declare tube_screamer license "MIT-style STK-4.3 license";
+tube_screamer =  _*.015*ingain : inputprotect :  stage_a <: _, stage_b * onState: _, stage_c 
+	: _ - _ - 4.5 : gaincorrect 
+with{
+	stage_a(in1) = wd.buildtree(tree_a)
+	with{
+		vinA(i) = wd.u_resVoltage(i, 1, in1);
+		c2(i) = wd.capacitor(i, 1*10^-6);
+		vB(i) = wd.resVoltage_output(i, 10*10^3, 4.5);
+		rA(i) = wd.resistor(i, 220);
+
+		tree_a = vinA : wd.series : (c2, (wd.series : (rA, vB))); 
+	};
+	stage_b(in1) = wd.buildtree(tree_b)
+	with{
+		vinB(i) = wd.u_voltage(i, in1);
+		c3(i) = wd.capacitor(i, .047*10^-6);
+		r4(i) = wd.resistor_output_current(i, 4.7*10^3);
+
+		tree_b = vinB : wd.series : (c3, r4); 
+	};
+	stage_c(in1) = wd.buildtree(tree_c)
+	with{
+		pot1 = hslider("distortion 0 - 500k", 250, 0, 500, .1);
+		jinC(i) = wd.resCurrent(i, 51*10^3+pot1*10^3, in1);
+		d1(i) = wd.u_diodeAntiparallel(i, 2.52*10^-9, 25.85*10^-3, 1, 1); 
+		c4(i) = wd.capacitor_output(i, 41*10^-12);
+
+		tree_c = d1 : wd.parallel : (c4, jinC); 
+	};
+	ingain = hslider("input gain", 1, 0, 1, .01);
+	inputprotect(in) = in*((in < clip) & (in > -clip)) + clip*(in > clip) + -clip*(in < -clip)
+	with{
+		clip = .016;
+	}; 
+	onState = ba.toggle(button("on"));
+	gaincorrect(in) =  in*(onState*-1 + 1)*12 + in;
+};
+
+//----------------------`(dm.)second_order_RC_WDF`--------------------------
+// A virtual analog simulation of a passive, second order, RC filter
+// It is formed using two resistors and two capacitors in a ladder configuration
+// The circuit is modeled using a wave-digital filter model
+// The input is treated as a voltage input. 
+// R1 and C1 form the first filter, R2 and C2 form the second
+// The first output is the voltage across C2 (lowpass)
+// The second output is the voltage across R2 (highpass)
+//
+// #### Usage
+//
+// ```
+// _ : second_order_RC_WDF(R1, C1, R2, C2) : _, _;
+// ```
+// Where
+// 
+// * `R1`: Impedence of R1 in Ohms
+// * `C1`: Impedence of C1 in Farads
+// * `R2`: Impedence of R2 in Ohms
+// * `C2`: Impedence of C2 in Farads
+
+// #### Reference
+// K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters"
+//----------------------------------------------------------
+// Author: Dirk Roosenburg
+// License: MIT
+declare second_order_RC_WDF author "Dirk Roosenburg";
+declare second_order_RC_WDF copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
+declare second_order_RC_WDF license "MIT-style STK-4.3 license";
+second_order_RC_WDF(R1, C1, R2, C2, in1) = wd.buildtree(tree1)
+with{
+
+    vs1(x) = wd.u_voltage(x, in1);
+
+    c1(x) = wd.capacitor(x, C1); 
+    r1(x) = wd.resistor(x, R1); 
+    c2(x) = wd.capacitor_output(x, C2);
+    r2(x) = wd.resistor_output(x, R2);
+
+    tree1 = vs1: (wd.series : (r1, (wd.parallel : (c1, (wd.series : (c2, r2))))));
+};
+
 // end further contributions section
