@@ -453,7 +453,6 @@ allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : m
 //
 // Where:
 //
-// * `order`: filter order (int) = max(#poles,#zeros)
 // * `bcoeffs`: (b0,b1,...,b_order) = TF numerator coefficients
 // * `acoeffs`: (a1,...,a_order) = TF denominator coeffs (a0=1)
 //
@@ -559,7 +558,7 @@ tf1(b0,b1,a1) = _ <: *(b0), (mem : *(b1)) :> + ~ *(0-a1);
 declare tf2 author "Julius O. Smith III";
 declare tf2 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf2 license "MIT-style STK-4.3 license";
-tf2(b0,b1,b2,a1,a2) = iir((b0,b1,b2),(a1,a2)); // cf. TF2 in music.lib)
+tf2(b0,b1,b2,a1,a2) = iir((b0,b1,b2),(a1,a2));
 // tf2 is a variant of tf22 below with duplicated mems
 
 declare tf3 author "Julius O. Smith III";
@@ -1005,7 +1004,7 @@ declare tf2np copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccr
 declare tf2np license "MIT-style STK-4.3 license";
 tf2np(b0,b1,b2,a1,a2) = allpassnnlt(M,sv) : sum(i,M+1,*(tghr(i)))
 with {
-  smax = 0.9999; // maximum reflection-coefficient magnitude allowed
+  smax = 1.0-ma.EPSILON; // maximum reflection-coefficient magnitude allowed
   s2 = max(-smax, min(smax,a2)); // Project both reflection-coefficients
   s1 = max(-smax, min(smax,a1/(1+a2))); // into the defined stability-region.
   sv = (s1,s2); // vector of sin(theta) reflection coefficients
