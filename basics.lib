@@ -51,6 +51,7 @@ ma = library("maths.lib");
 ro = library("routes.lib");
 ba = library("basics.lib"); // so functions here can be copy/pasted out
 fi = library("filters.lib");
+si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
 declare version "0.1";
@@ -1381,6 +1382,7 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (C) 2018 Bart Brouns
 
+
 //-----------------------------`(ba.)slidingReduce`-----------------------------
 // Fold-like high order function. Apply a commutative binary operation `<op>` to
 // the last `<n>` consecutive samples of a signal `<x>`. For example :
@@ -1525,6 +1527,7 @@ slidingMax(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
 //------------------------------------------------------------------------------
 slidingMin(n,maxn) = slidingReduce(min,n,maxn,ma.INFINITY);
 
+
 //----------------------------`(ba.)slidingMean`-------------------------------
 // The sliding mean of the last n input samples.
 //
@@ -1602,7 +1605,6 @@ slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
 slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 
 
-
 //========================================================================================
 // section contributed by Bart Brouns (bart@magnetophon.nl).
 // spdx-license-identifier: gpl-3.0
@@ -1618,7 +1620,7 @@ slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 // * `parallelRMS(n)`: the RMS of n parallel inputs
 
 //-----------------------------`(ba.)parallelOp`-----------------------------
-// Apply a commutative binary operation `<op>` to n parallel inputs.
+// Apply a commutative binary operation `<op>` to N parallel inputs.
 //
 // #### usage
 //
@@ -1628,8 +1630,8 @@ slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 //
 // where:
 //
-// * `n`: the number of parallel inputs
-// * `op`: the operator which needs to be a commutative
+// * `N`: the number of parallel inputs known at compile time
+// * `op`: the operator which needs to be commutative
 //
 //------------------------------------------------------------------------------
 
@@ -1638,7 +1640,7 @@ parallelOp(op,2) = op;
 parallelOp(op,n) = op(parallelOp(op,n-1));
 
 //---------------------------`(ba.)parallelMax`---------------------------------
-// The maximum of n parallel inputs.
+// The maximum of N parallel inputs.
 //
 // #### Usage
 //
@@ -1648,12 +1650,13 @@ parallelOp(op,n) = op(parallelOp(op,n-1));
 //
 // Where:
 //
-// * `n`: the number of parallel inputs
+// * `N`: the number of parallel inputs known at compile time
 //------------------------------------------------------------------------------
 parallelMax(n) = parallelOp(max,n);
 
+
 //---------------------------`(ba.)parallelMin`---------------------------------
-// The minimum of n parallel inputs.
+// The minimum of N parallel inputs.
 //
 // #### Usage
 //
@@ -1663,12 +1666,13 @@ parallelMax(n) = parallelOp(max,n);
 //
 // Where:
 //
-// * `n`: the number of parallel inputs
+// * `N`: the number of parallel inputs known at compile time
 //------------------------------------------------------------------------------
 parallelMin(n) = parallelOp(min,n);
 
+
 //---------------------------`(ba.)parallelMean`---------------------------------
-// The mean of n parallel inputs.
+// The mean of N parallel inputs.
 //
 // #### Usage
 //
@@ -1678,12 +1682,13 @@ parallelMin(n) = parallelOp(min,n);
 //
 // Where:
 //
-// * `n`: the number of parallel inputs
+// * `N`: the number of parallel inputs known at compile time
 //------------------------------------------------------------------------------
 parallelMean(n) = si.bus(n):>_/n;
 
+
 //---------------------------`(ba.)parallelRMS`---------------------------------
-// The RMS of n parallel inputs.
+// The RMS of N parallel inputs.
 //
 // #### Usage
 //
@@ -1693,7 +1698,7 @@ parallelMean(n) = si.bus(n):>_/n;
 //
 // Where:
 //
-// * `n`: the number of parallel inputs
+// * `N`: the number of parallel inputs known at compile time
 //------------------------------------------------------------------------------
 parallelRMS(n) = par(i, n, pow(2)) : parallelMean(n) : sqrt;
 

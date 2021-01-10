@@ -51,25 +51,25 @@ declare version "0.0";
 //========================================================================================
 
 //--------------------------------`(si.)bus`-------------------------------------
-// n parallel cables.
+// Put n cables in parallel.
 // `bus` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// bus(n)
+// bus(N)
 // bus(4) : _,_,_,_
 // ```
 //
 // Where:
 //
-// * `n`: is an integer known at compile time that indicates the number of parallel cables.
+// * `N`: is an integer known at compile time that indicates the number of parallel cables.
 //-----------------------------------------------------------------------------
 bus(2) = _,_; // avoids a lot of "bus(1)" labels in block diagrams
 bus(n) = par(i, n, _);
 
 //--------------`(si.)block`--------------
-// Block - terminate n signals.
+// Block - terminate N signals.
 // `block` is a standard Faust function.
 //
 // #### Usage
@@ -80,7 +80,7 @@ bus(n) = par(i, n, _);
 //
 // Where:
 //
-// * `n`: the number of signals to be blocked
+// * `N`: the number of signals to be blocked known at compile time. 
 //--------------------------------------
 block(n) = par(i, n, !);
 
