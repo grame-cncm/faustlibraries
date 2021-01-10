@@ -7,7 +7,7 @@ For the time being, it computes only the dependencies between the libraries.
 ~~~~~~~~~~~~~
 make
 ~~~~~~~~~~~~~
-on output, you should find a pdf file containing a graph a the dependencies.
+on output, you should find a pdf file containing a graph of the dependencies.
 
 or 
 ~~~~~~~~~~~~~
