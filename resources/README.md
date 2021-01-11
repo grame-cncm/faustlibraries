@@ -1,7 +1,6 @@
 # Faust Libraries
 
-This folder contains tools to analyse the libraries.  
-For the time being, it computes only the dependencies between the libraries.
+This folder contains tools to analyse the libraries. For the time being, it computes only the dependencies between the libraries.
 
 ### Usage:
 ~~~~~~~~~~~~~
