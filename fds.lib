@@ -2,7 +2,7 @@
 
 // This library allows to build linear, explicit finite difference schemes
 // physical models in 1 or 2 dimensions using an approach based on the cellular
-// automata formalism.
+// automata formalism. Its official prefix is `fd`. 
 // In order to use the library, one needs to discretize the linear partial
 // differential equation of the desired system both at boundaries and in-between
 // them, thus obtaining a set of explicit recursion relations. Each one
@@ -21,14 +21,14 @@
 // Here are listed some works on finite difference schemes and cellular
 // automata thet were the basis for the implementation of this library
 //
-// * S. Bilbao, Numerical Sound Synthesis.Chichester,UK: John Wiley  Sons,
+// * S. Bilbao, Numerical Sound Synthesis.Chichester, UK: John Wiley Sons,
 // Ltd, 2009
 
-// * P.  Narbel, "Qualitative  and  quantitative  cellular  automata from
-// differential equations," Lecture Notes inComputer Science, vol. 4173,
+// * P. Narbel, "Qualitative and quantitative cellular automata from
+// differential equations," Lecture Notes in Computer Science, vol. 4173,
 // pp. 112–121, 10 2006
 
-// * X.-S. Yang and Y. Young,Cellular Automata, PDEs, and Pattern Formation.
+// * X.-S. Yang and Y. Young, Cellular Automata, PDEs, and Pattern Formation.
 // Chapman & Hall/CRC, 092005, ch. 18, pp. 271–282.
 //#############################################################################
 
@@ -43,8 +43,8 @@ declare author "Romain Michon";
 
 /*
 TODO:
-	- In case of big 2-D meshes the generated c++ code is too long, making the
-    causing a compiler crash. Consider introducing data structures support.
+  - In case of big 2-D meshes the generated c++ code is too long, making the
+    compiler crash. Consider introducing data structures support.
   - Implement a way to set nonzero initial conditions.
   - It would be nice to set the length of a mesh directly in meters and not
     in points.
@@ -59,7 +59,7 @@ TODO:
 // desired points, and to get the signal only from a certain area of the mesh.
 //==============================================================================
 
-//--------------------------------`(fds.)model1D`-------------------------------
+//--------------------------------`(fd.)model1D`-------------------------------
 // This function can be used to obtain a physical model in 1 dimension.
 // Takes a force input signal for each point and outputs the state of each
 // point.
@@ -82,7 +82,7 @@ TODO:
 model1D(points,R,T,scheme) =
     (route1D(points,R,T,scheme) : buildScheme1D(points,R,T)) ~ si.bus(points);
 
-//--------------------------------`(fds.)model2D`-------------------------------
+//--------------------------------`(fd.)model2D`-------------------------------
 // This function can be used to obtain a physical model in 2 dimension.
 // Takes a force input signal for each point and outputs the state of each
 // point.
@@ -121,7 +121,7 @@ model2D(pointsX,pointsY,R,T,scheme) =
 // arguments.
 //==============================================================================
 
-//-----------------------------`(fds.)stairsInterp1D`---------------------------
+//-----------------------------`(fd.)stairsInterp1D`---------------------------
 // Stairs interpolator in 1 dimension. Takes a number of signals and outputs
 // the same number of signals, where each one is multiplied by zero except the
 // one specified by the argument. This can vary at run time (i.e. a slider),
@@ -140,7 +140,7 @@ model2D(pointsX,pointsY,R,T,scheme) =
 //------------------------------------------------------------------------------
 stairsInterp1D(points,point) = par(i,points,_*select2(i==point,0,1));
 
-//-----------------------------`(fds.)stairsInterp2D`---------------------------
+//-----------------------------`(fd.)stairsInterp2D`---------------------------
 // Stairs interpolator in 2 dimensions. Similar to the 1-D version.
 //
 // #### Usage
@@ -161,7 +161,7 @@ stairsInterp2D(pointsX,pointsY,pointX,pointY) =
     par(i,pointsX,
         par(j,pointsY,_*select2((i==pointX) & (j==pointY),0,1)));
 
-//-----------------------------`(fds.)linInterp1D`---------------------------
+//-----------------------------`(fd.)linInterp1D`---------------------------
 // Linear interpolator in 1 dimension. Takes a number of signals and outputs
 // the same number of signals, where each one is multiplied by zero except two
 // signals around a floating point index. This is essentially a Faust
@@ -187,7 +187,7 @@ with
     fraction = ma.frac(point);
 };
 
-//-----------------------------`(fds.)linInterp2D`---------------------------
+//-----------------------------`(fd.)linInterp2D`---------------------------
 // Linear interpolator in 2 dimensions. Similar to the 1 D version.
 //
 // #### Usage
@@ -224,7 +224,7 @@ with
     intY = int(pointY);
 };
 
-//---------------------------`(fds.)stairsInterp1DOut`--------------------------
+//---------------------------`(fd.)stairsInterp1DOut`--------------------------
 // Stairs interpolator in 1 dimension. Similar to stairsInterp1D, except it
 // outputs only the desired signal.
 //
@@ -241,7 +241,7 @@ with
 //------------------------------------------------------------------------------
 stairsInterp1DOut(points,point) = ba.selectn(points,point);
 
-//---------------------------`(fds.)stairsInterp2DOut`--------------------------
+//---------------------------`(fd.)stairsInterp2DOut`--------------------------
 // Stairs interpolator in 2 dimensions which outputs only one signal.
 //
 // #### Usage
@@ -260,7 +260,7 @@ stairsInterp1DOut(points,point) = ba.selectn(points,point);
 stairsInterp2DOut(pointsX,pointsY,pointX,pointY) =
     ba.selectn(pointsX*pointsY,pointY+pointX*Y);
 
-//---------------------------`(fds.)linInterp1DOut`--------------------------
+//---------------------------`(fd.)linInterp1DOut`--------------------------
 // Linear interpolator in 1 dimension. Similar to stairsInterp1D, except it
 // sums each output signal and provides only one output value.
 //
@@ -277,7 +277,7 @@ stairsInterp2DOut(pointsX,pointsY,pointX,pointY) =
 //------------------------------------------------------------------------------
 linInterp1DOut(points,point) = linInterp1D(points,point):>_;
 
-//---------------------------`(fds.)stairsInterp2DOut`--------------------------
+//---------------------------`(fd.)stairsInterp2DOut`--------------------------
 // Linear interpolator in 2 dimensions which outputs only one signal.
 //
 // #### Usage
@@ -306,7 +306,7 @@ linInterp2DOut(pointsX,pointsY,pointX,pointY) =
 // signals. These functions are based on the Faust route primitive.
 //==============================================================================
 
-//---------------------------------`(fds.)route1D`------------------------------
+//---------------------------------`(fd.)route1D`------------------------------
 // Routing function for 1 dimensional schemes.
 //
 // #### Usage
@@ -338,7 +338,7 @@ with
     nInputs = nNeighbors+1+nCoeffs;
 };
 
-//--------------------------------`(fds.)route2D`-------------------------------
+//--------------------------------`(fd.)route2D`-------------------------------
 // Routing function for 2 dimensional schemes.
 //
 // #### Usage
@@ -387,7 +387,7 @@ with
 // choosed mesh size.
 //==============================================================================
 
-//------------------------------`(fds.)schemePoint`-----------------------------
+//------------------------------`(fd.)schemePoint`-----------------------------
 // This function calculates the next state for each mesh point, in order to
 // form a scheme, several of these blocks need to be stacked in parallel.
 // This function takes in input, in order, the force, the coefficient matrices
@@ -419,7 +419,7 @@ with
                     par(i,nNeighbors,(_@t),_:*));
 };
 
-//------------------------------`(fds.)buildScheme1D`---------------------------
+//------------------------------`(fd.)buildScheme1D`---------------------------
 // This function is used to stack in parallel several schemePoint functions in
 // 1 dimension, according to the number of points.
 //
@@ -439,7 +439,7 @@ with
 buildScheme1D(points,R,T) =
     par (x, points,schemePoint(R,T,1));
 
-//------------------------------`(fds.)buildScheme2D`---------------------------
+//------------------------------`(fd.)buildScheme2D`---------------------------
 // This function is used to stack in parallel several schemePoint functions in
 // 2 dimensions, according to the number of points in the X and Y directions.
 //
@@ -470,7 +470,7 @@ buildScheme2D(pointsX,pointsY,R,T) =
 // correct scheme points.
 //==============================================================================
 
-//---------------------------------`(fds.)hammer`-------------------------------
+//---------------------------------`(fd.)hammer`-------------------------------
 // Implementation of a nonlinear collision model. The hammer is essentially a
 // finite difference scheme of a linear damped oscillator, which is coupled
 // with the mesh through the collision model (see Stefan Bilbao's book,
@@ -505,7 +505,7 @@ with
     forceCoeff = k^2/(1+sigma0*K);
 };
 
-//---------------------------------`(fds.)bow`-------------------------------
+//---------------------------------`(fd.)bow`-------------------------------
 // Implementation of a nonlinear friction based interaction model that induces
 // Helmholtz motion. (see Stefan Bilbao's book, Numerical Sound Synthesis).
 //
