@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="libs/fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="libs/filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -232,7 +236,6 @@
 <p>The easiest and most standard way to use the Faust libraries is to import <code>stdfaust.lib</code> in your Faust code:</p>
 <pre><code>import(&quot;stdfaust.lib&quot;);
 </code></pre>
-
 <p>This will give you access to all the Faust libraries through a series of environments:</p>
 <ul>
 <li><code>sf</code>: <code>all.lib</code></li>
@@ -243,6 +246,7 @@
 <li><code>dm</code>: <code>demos.lib</code></li>
 <li><code>dx</code>: <code>dx7.lib</code></li>
 <li><code>en</code>: <code>envelopes.lib</code></li>
+<li><code>fd</code>: <code>fds.lib</code></li>
 <li><code>fi</code>: <code>filters.lib</code></li>
 <li><code>ho</code>: <code>hoa.lib</code></li>
 <li><code>it</code>: <code>interpolators.lib</code></li>
@@ -269,23 +273,19 @@
 <pre><code>import(&quot;stdfaust.lib&quot;);
 process = os.osc(440);
 </code></pre>
-
 <p>In this case, we're calling the <code>osc</code> function from <code>oscillators.lib</code>.</p>
 <p>You can also access all the functions of all the libraries directly using the <code>sf</code> environment:</p>
 <pre><code>import(&quot;stdfaust.lib&quot;);
 process = sf.osc(440);
 </code></pre>
-
 <p>Alternatively, environments can be created by hand:</p>
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 process = os.osc(440);
 </code></pre>
-
 <p>Finally, libraries can be simply imported in the Faust code (not recommended):</p>
 <pre><code>import(&quot;oscillators.lib&quot;);
 process = osc(440);
 </code></pre>
-
 <h2 id="organization-of-this-documentation">Organization of This Documentation</h2>
 <p>The <code>Overview</code> tab in the upper menu provides additional information about the general organization of the libraries, licensing/copyright, and guidelines on how to contribute to the Faust libraries. </p>
 <p>The <code>Libraries</code> tab contain the actual documentation of the Faust libraries.</p></div>
@@ -318,7 +318,7 @@ process = osc(440);
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>
@@ -372,6 +372,6 @@ process = osc(440);
 </html>
 
 <!--
-MkDocs version : 1.1
-Build Date UTC : 2020-11-27 07:25:52
+MkDocs version : 1.1.2
+Build Date UTC : 2021-01-13 14:57:21.700588+00:00
 -->

@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -293,7 +297,6 @@
 <pre><code>_ : cubicnl(drive,offset) : _
 _ : cubicnl_nodc(drive,offset) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>drive</code>: distortion amount, between 0 and 1</li>
@@ -312,7 +315,6 @@ _ : cubicnl_nodc(drive,offset) : _
 <h4 id="usage_1">Usage</h4>
 <pre><code>_ : gate_mono(thresh,att,hold,rel) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>thresh</code>: dB level threshold above which gate opens (e.g., -60 dB)</li>
@@ -333,7 +335,6 @@ _ : cubicnl_nodc(drive,offset) : _
 <h4 id="usage_2">Usage</h4>
 <pre><code> _,_ : gate_stereo(thresh,att,hold,rel) : _,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>thresh</code>: dB level threshold above which gate opens (e.g., -60 dB)</li>
@@ -362,7 +363,6 @@ fourth-order Butterworth lowpass.</p>
 <pre><code>speakerbp(f1,f2)
 _ : speakerbp(130,5000) : _
 </code></pre>
-
 <hr />
 <h3 id="efpiano_dispersion_filter"><code>(ef.)piano_dispersion_filter</code></h3>
 <p>Piano dispersion allpass filter in closed form.</p>
@@ -370,7 +370,6 @@ _ : speakerbp(130,5000) : _
 <pre><code>piano_dispersion_filter(M,B,f0)
 _ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : fdelay(maxDelay) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>M</code>: number of first-order allpass sections (compile-time only)
@@ -401,7 +400,6 @@ Allpass Filters", by Jukka Rauhala and Vesa Valimaki, DAFX-2006, pp. 71-76</li>
 <h4 id="usage_5">Usage</h4>
 <pre><code>_,_ : stereo_width(w) : _,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>w</code>: stereo width between 0 and 1</li>
@@ -421,7 +419,6 @@ Michael A. Gerzon, JAES vol. 42, no. 6, June 1994</li>
 <h4 id="usage_6">Usage</h4>
 <pre><code>bus(4*N) : mesh_square(N) : bus(4*N);
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: number of nodes along each edge - a power of two (1,2,4,8,...)</li>
@@ -466,7 +463,6 @@ illustrating these orderings is <code>process = mesh_square(2);</code>.</p>
 with { busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); };
 process = 1-1' : mesh_square_test(4); // all modes excited forever
 </code></pre>
-
 <p>In this simple example, the mesh edges are connected as follows:</p>
 <p>1No -&gt; 1Ni, 1Wo -&gt; 2Ni, 2No -&gt; 3Si, 2Eo -&gt; 4Si,</p>
 <p>3So -&gt; 1Wi, 3Wo -&gt; 3Wi, 4So -&gt; 2Ei, 4Eo -&gt; 4Ei</p>
@@ -477,7 +473,6 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h4 id="usage_7">Usage</h4>
 <pre><code>_ : ef.reverseEchoN(N,delay) : si.bus(N)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: Number of channels desired (1 or more)</li>
@@ -486,7 +481,6 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h4 id="demo">Demo</h4>
 <pre><code>_ : dm.reverseEchoN(N) : _,_
 </code></pre>
-
 <h4 id="description">Description</h4>
 <p>The effect uses N instances of reverseDelayRamped at different phases.</p>
 <hr />
@@ -495,7 +489,6 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h4 id="usage_8">Usage</h4>
 <pre><code>_ : ef.reverseDelayRamped(delay,phase) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>delay</code>: echo delay (integer power of 2)</li>
@@ -504,14 +497,12 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h4 id="demo_1">Demo</h4>
 <pre><code>_ : dm.reverseEchoN(N) : _,_
 </code></pre>
-
 <hr />
 <h3 id="efuniformpantostereonchans"><code>(ef.)uniformPanToStereo(nChans)</code></h3>
 <p>Pan nChans channels to the stereo field, spread uniformly left to right</p>
 <h4 id="usage_9">Usage</h4>
 <pre><code>si.bus(N) : ef.uniformPanToStereo(N) : _,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: Number of input channels to pan down to stereo</li>
@@ -519,7 +510,6 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h4 id="demo_2">Demo</h4>
 <pre><code>_ : dm.reverseEchoN(N) : _,_
 </code></pre>
-
 <h2 id="time-based">Time Based</h2>
 <hr />
 <h3 id="efecho"><code>(ef.)echo</code></h3>
@@ -528,7 +518,6 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h4 id="usage_10">Usage</h4>
 <pre><code>_ : echo(maxDuration,duration,feedback) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>maxDuration</code>: the max echo duration in seconds</li>
@@ -543,7 +532,6 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h4 id="usage_11">Usage</h4>
 <pre><code>_ : transpose(w, x, s) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>w</code>: the window length (samples)</li>
@@ -579,7 +567,7 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

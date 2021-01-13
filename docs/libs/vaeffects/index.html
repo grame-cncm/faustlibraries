@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -349,7 +353,6 @@ See <code>moog_vcf_2b</code> below for a more accurate implementation.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>moog_vcf(res,fr)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>res</code>: normalized amount of corner-resonance between 0 and 1 
@@ -376,7 +379,6 @@ to <code>moog_vcf_2b[n](res^4,fr)</code> (when res and fr are constant).
 <pre><code>moog_vcf_2b(res,fr)
 moog_vcf_2bn(res,fr)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>res</code>: normalized amount of corner-resonance between 0 and 1
@@ -399,7 +401,6 @@ control the cut-off frequency and the resonance.</p>
 <h4 id="usage_2">Usage</h4>
 <pre><code>_ : moogLadder(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -421,7 +422,6 @@ resonance.</p>
 <h4 id="usage_3">Usage</h4>
 <pre><code>_ : moogHalfLadder(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -434,7 +434,7 @@ states used within each independent 1st-order filter, there are also additional
 feedback paths found in the block diagram. These feedback paths are labeled 
 as connecting states. Rather than separately storing these connecting states 
 in the Faust implementation, they are simply implicitly calculated by 
-tracing back to the other states (s1,s2,s3,s4) each recursive step.</p>
+tracing back to the other states (<code>s1</code>,<code>s2</code>,<code>s3</code>,<code>s4</code>) each recursive step.</p>
 <p>This filter was implemented in Faust by Eric Tarr during the 
 <a href="https://ccrma.stanford.edu/workshops/faust-embedded-19/">2019 Embedded DSP With Faust Workshop</a>.</p>
 <h4 id="references_3">References</h4>
@@ -445,7 +445,6 @@ tracing back to the other states (s1,s2,s3,s4) each recursive step.</p>
 <h4 id="usage_4">Usage</h4>
 <pre><code>_ : diodeLadder(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -470,7 +469,6 @@ MS-20 synthesizers.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>_ : korg35LPF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -483,7 +481,6 @@ MS-20 synthesizers.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>_ : korg35HPF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -492,7 +489,7 @@ MS-20 synthesizers.</p>
 <h2 id="oberheim-filters">Oberheim Filters</h2>
 <p>The following filter (4 types) is an implementation of the virtual analog 
 model described in Section 7.2 of the Will Pirkle book, "Designing Software 
-Synthesizer Plug-ins in C++. It is based on the block diagram in Figure 7.5. </p>
+Synthesizer Plug-ins in C++". It is based on the block diagram in Figure 7.5. </p>
 <p>The Oberheim filter is a state-variable filter with soft-clipping distortion 
 within the circuit. </p>
 <p>In many VA filters, distortion is accomplished using the "tanh" function. 
@@ -504,7 +501,6 @@ the <code>(ef.)cubicnl</code> function.</p>
 <h4 id="usage_7">Usage</h4>
 <pre><code>_ : oberheim(normFreq,Q) : _,_,_,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -518,7 +514,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>_ : oberheimBSF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -532,7 +527,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_9">Usage</h4>
 <pre><code>_ : oberheimBPF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -546,7 +540,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_10">Usage</h4>
 <pre><code>_ : oberheimHPF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -560,7 +553,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_11">Usage</h4>
 <pre><code>_ : oberheimLPF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -599,16 +591,15 @@ within the constraints of Faust.
 The simplest example is the 1st-order LPF (shown on the cover of Zavalishin 
 * 2018 and Fig 4.3 of <a href="https://www.willpirkle.com/706-2/">https://www.willpirkle.com/706-2/</a>). Here, the input 
 signal is split in parallel for the calculation of the output signal, <code>y</code>, and 
-the state, s. The value of the state is only used for feedback to the next 
+the state <code>s</code>. The value of the state is only used for feedback to the next 
 step of recursion. It is blocked (!) from also being routed to the output. 
-A trick used for calculating the state, s, is to observe that the input to 
+A trick used for calculating the state <code>s</code> is to observe that the input to 
 the delay block is the sum of two signal: what appears to be a feedforward 
 path and a feedback path. In reality, the signals being summed are identical 
 (signal*2) plus the value of the current state.</p>
 <h4 id="usage_12">Usage</h4>
 <pre><code>_ : sallenKeyOnePole(normFreq) : _,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -623,7 +614,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_13">Usage</h4>
 <pre><code>_ : sallenKeyOnePoleLPF(normFreq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -640,7 +630,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_14">Usage</h4>
 <pre><code>_ : sallenKeyOnePoleHPF(normFreq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -654,16 +643,15 @@ the compiler will only generate the needed code.</p>
 * <a href="https://www.willpirkle.com/706-2/">https://www.willpirkle.com/706-2/</a></p>
 <p>This is also a good example of the next step for generalizing the Faust 
 programming approach used for all these VA filters. In this case, there are 
-three things to calculate each recursive step (y,s1,s2). For each thing, the 
+three things to calculate each recursive step (<code>y</code>,<code>s1</code>,<code>s2</code>). For each thing, the 
 circuit is only calculated up to that point. </p>
-<p>Comparing the LPF to BPF, the output signal (y) is calculated similarly. 
+<p>Comparing the LPF to BPF, the output signal (<code>y</code>) is calculated similarly. 
 Except, the output of the BPF stops earlier in the circuit. Similarly, the 
-states (s1 and s2) only differ in that s2 includes a couple more terms 
-beyond what is used for s1. </p>
+states (<code>s1</code> and <code>s2</code>) only differ in that <code>s2</code> includes a couple more terms 
+beyond what is used for <code>s1</code>. </p>
 <h4 id="usage_15">Usage</h4>
 <pre><code>_ : sallenKey2ndOrder(normFreq,Q) : _,_,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -677,7 +665,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_16">Usage</h4>
 <pre><code>_ : sallenKey2ndOrderLPF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -691,7 +678,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_17">Usage</h4>
 <pre><code>_ : sallenKey2ndOrderBPF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -705,7 +691,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_18">Usage</h4>
 <pre><code>_ : sallenKey2ndOrderHPF(normFreq,Q) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
@@ -719,7 +704,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_19">Usage</h4>
 <pre><code>_ : wah4(fr) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>fr</code>: resonance frequency in Hz</li>
@@ -735,7 +719,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_20">Usage</h4>
 <pre><code>_ : autowah(level) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>level</code>: amount of effect desired (0 to 1).</li>
@@ -747,7 +730,6 @@ the compiler will only generate the needed code.</p>
 <h4 id="usage_21">Usage</h4>
 <pre><code>_ : crybaby(wah) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>wah</code>: "pedal angle" from 0 to 1</li>
@@ -764,7 +746,6 @@ is analyzed using a filter bank.
 <h4 id="usage_22">Usage</h4>
 <pre><code>_ : vocoder(nBands,att,rel,BWRatio,source,excitation) : _;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>nBands</code>: Number of vocoder bands</li>
@@ -803,7 +784,7 @@ is analyzed using a filter bank.
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

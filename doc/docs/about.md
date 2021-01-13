@@ -25,7 +25,8 @@ Sampo&nbsp;Savolainen, Nicolas&nbsp;Scaringella,
 Anne&nbsp;Sedes, Priyanka&nbsp;Shekar, 
 Stephen&nbsp;Sinclair, Travis&nbsp;Skare, 
 Julius&nbsp;Smith, Mike&nbsp;Solomon, 
-Michael&nbsp;Wilson, Bart Brouns, Dirk Roosenburg.
+Michael&nbsp;Wilson, Bart Brouns, Dirk Roosenburg,
+Riccardo Russo.
 </ul>
 
 as well as our colleagues at [GRAME](http://grame.fr):

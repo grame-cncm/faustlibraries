@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -905,7 +909,6 @@ library. This variable should be overriden to allow longer strings or tubes.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>f2l(freq) : distanceInMeters
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: the frequency</li>
@@ -916,7 +919,6 @@ library. This variable should be overriden to allow longer strings or tubes.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>l2f(length) : freq
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: length/distance in meters</li>
@@ -927,7 +929,6 @@ library. This variable should be overriden to allow longer strings or tubes.</p>
 <h4 id="usage_2">Usage</h4>
 <pre><code>l2s(l) : numberOfSamples
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>l</code>: length in meters</li>
@@ -947,7 +948,6 @@ and 3 signals out.</p>
 <h4 id="usage_3">Usage</h4>
 <pre><code>chain(basicBlock : basicBlock : etc.)
 </code></pre>
-
 <hr />
 <h3 id="pmchain"><code>(pm.)chain</code></h3>
 <p>Creates a chain of bidirectional blocks.
@@ -963,14 +963,12 @@ with{
         A = _,_,_;
 };
 </code></pre>
-
 <hr />
 <h3 id="pminleftwave"><code>(pm.)inLeftWave</code></h3>
 <p>Adds a signal to left going waves anywhere in a <a href="#chain"><code>chain</code></a> of blocks.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>model(x) = chain(A : inLeftWave(x) : B)
 </code></pre>
-
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to left
 going waves in that chain.</p>
 <hr />
@@ -979,7 +977,6 @@ going waves in that chain.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>model(x) = chain(A : inRightWave(x) : B)
 </code></pre>
-
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to right
 going waves in that chain.</p>
 <hr />
@@ -989,7 +986,6 @@ of blocks.</p>
 <h4 id="usage_7">Usage</h4>
 <pre><code>model(x) = chain(A : in(x) : B)
 </code></pre>
-
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to
 left and right going waves in that chain.</p>
 <hr />
@@ -998,7 +994,6 @@ left and right going waves in that chain.</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>chain(A : outLeftWave : B)
 </code></pre>
-
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
 <hr />
 <h3 id="pmoutrightwave"><code>(pm.)outRightWave</code></h3>
@@ -1006,7 +1001,6 @@ left and right going waves in that chain.</p>
 <h4 id="usage_9">Usage</h4>
 <pre><code>chain(A : outRightWave : B)
 </code></pre>
-
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
 <hr />
 <h3 id="pmout"><code>(pm.)out</code></h3>
@@ -1015,7 +1009,6 @@ left and right going waves in that chain.</p>
 <h4 id="usage_10">Usage</h4>
 <pre><code>chain(A : out : B)
 </code></pre>
-
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
 <hr />
 <h3 id="pmterminations"><code>(pm.)terminations</code></h3>
@@ -1029,7 +1022,6 @@ signal, both ways. Of course, this function can be nested within a
 with{
 };
 </code></pre>
-
 <hr />
 <h3 id="pmltermination"><code>(pm.)lTermination</code></h3>
 <p>Creates a termination on the left side of a <a href="#chain"><code>chain</code></a> without
@@ -1041,7 +1033,6 @@ within another <a href="#chain"><code>chain</code></a>.</p>
 with{
 };
 </code></pre>
-
 <hr />
 <h3 id="pmrtermination"><code>(pm.)rTermination</code></h3>
 <p>Creates a termination on the right side of a <a href="#chain"><code>chain</code></a> without
@@ -1053,14 +1044,12 @@ within another <a href="#chain"><code>chain</code></a>.</p>
 with{
 };
 </code></pre>
-
 <hr />
 <h3 id="pmcloseins"><code>(pm.)closeIns</code></h3>
 <p>Closes the inputs of a bidirectional chain in all directions.</p>
 <h4 id="usage_14">Usage</h4>
 <pre><code>closeIns : chain(...) :     _,_,_
 </code></pre>
-
 <hr />
 <h3 id="pmcloseouts"><code>(pm.)closeOuts</code></h3>
 <p>Closes the outputs of a bidirectional chain in all directions except for the
@@ -1068,7 +1057,6 @@ main signal output (3d output).</p>
 <h4 id="usage_15">Usage</h4>
 <pre><code>_,_,_ : chain(...) : _
 </code></pre>
-
 <hr />
 <h3 id="pmendchain"><code>(pm.)endChain</code></h3>
 <p>Closes the inputs and outputs of a bidirectional chain in all directions
@@ -1076,7 +1064,6 @@ except for the main signal output (3d output).</p>
 <h4 id="usage_16">Usage</h4>
 <pre><code>endChain(chain(...)) : _
 </code></pre>
-
 <h2 id="basic-elements">Basic Elements</h2>
 <p>Basic elements for physical modeling (e.g., waveguides, specific filters,
 etc.).</p>
@@ -1094,7 +1081,6 @@ etc.).</p>
 <h4 id="usage_17">Usage</h4>
 <pre><code>chain(A : waveguideUd(nMax,n) : B)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>nMax</code>: the maximum length of the delays in the waveguide</li>
@@ -1106,7 +1092,6 @@ etc.).</p>
 <h4 id="usage_18">Usage</h4>
 <pre><code>chain(A : waveguide(nMax,n) : B)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>nMax</code>: the maximum length of the delays in the waveguide</li>
@@ -1120,7 +1105,6 @@ implement the reflectance violin, guitar, etc. bridges.</p>
 <h4 id="usage_19">Usage</h4>
 <pre><code>_ : bridge(brightness,absorption) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>brightness</code>: controls the damping of high frequencies (0-1)</li>
@@ -1134,7 +1118,6 @@ the string plugged to it (0-1) (1 = 20 seconds)</li>
 <h4 id="usage_20">Usage</h4>
 <pre><code>_ : modeFilter(freq,t60,gain) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: mode frequency</li>
@@ -1150,7 +1133,6 @@ this section can be used in a bidirectional chain.</p>
 <h4 id="usage_21">Usage</h4>
 <pre><code>chain(A : stringSegment(maxLength,length) : B)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>maxLength</code>: the maximum length of the string in meters (should be static)</li>
@@ -1165,7 +1147,6 @@ to change the "stiffness" of the string.</p>
 <h4 id="usage_22">Usage</h4>
 <pre><code>chain(... : openString(length,stiffness,pluckPosition,excitation) : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1181,7 +1162,6 @@ and has a fix stiffness corresponding to that of a nylon string.</p>
 <h4 id="usage_23">Usage</h4>
 <pre><code>chain(... : nylonString(length,pluckPosition,excitation) : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1196,7 +1176,6 @@ and has a fix stiffness corresponding to that of a steel string.</p>
 <h4 id="usage_24">Usage</h4>
 <pre><code>chain(... : steelString(length,pluckPosition,excitation) : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1212,7 +1191,6 @@ will also move the pickup.</p>
 <h4 id="usage_25">Usage</h4>
 <pre><code>chain(... : openStringPick(length,stiffness,pluckPosition,excitation) : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1229,7 +1207,6 @@ pickup has to be placed after the excitation position.</p>
 <h4 id="usage_26">Usage</h4>
 <pre><code>chain(... : openStringPickUp(length,stiffness,pluckPosition,excitation) : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1248,7 +1225,6 @@ pickup has to be placed before the excitation position.</p>
 <h4 id="usage_27">Usage</h4>
 <pre><code>chain(... : openStringPickDown(length,stiffness,pluckPosition,excitation) : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1265,7 +1241,6 @@ filter will be typically used in a termination (see below).</p>
 <h4 id="usage_28">Usage</h4>
 <pre><code>terminations(_,chain(...),ksReflexionFilter)
 </code></pre>
-
 <hr />
 <h3 id="pmrstringrigidtermination"><code>(pm.)rStringRigidTermination</code></h3>
 <p>Bidirectional block implementing a right rigid string termination (no damping,
@@ -1273,7 +1248,6 @@ just phase inversion).</p>
 <h4 id="usage_29">Usage</h4>
 <pre><code>chain(rStringRigidTermination : stringSegment : ...)
 </code></pre>
-
 <hr />
 <h3 id="pmlstringrigidtermination"><code>(pm.)lStringRigidTermination</code></h3>
 <p>Bidirectional block implementing a left rigid string termination (no damping,
@@ -1281,7 +1255,6 @@ just phase inversion).</p>
 <h4 id="usage_30">Usage</h4>
 <pre><code>chain(... : stringSegment : lStringRigidTermination)
 </code></pre>
-
 <hr />
 <h3 id="pmelecguitarbridge"><code>(pm.)elecGuitarBridge</code></h3>
 <p>Bidirectional block implementing a simple electric guitar bridge. This
@@ -1292,7 +1265,6 @@ duration of the string with the nuts used on the other side.</p>
 <h4 id="usage_31">Usage</h4>
 <pre><code>chain(... : stringSegment : elecGuitarBridge)
 </code></pre>
-
 <hr />
 <h3 id="pmelecguitarnuts"><code>(pm.)elecGuitarNuts</code></h3>
 <p>Bidirectional block implementing a simple electric guitar nuts. This
@@ -1303,7 +1275,6 @@ the string with the bridge used on the other side.</p>
 <h4 id="usage_32">Usage</h4>
 <pre><code>chain(elecGuitarNuts : stringSegment : ...)
 </code></pre>
-
 <hr />
 <h3 id="pmguitarbridge"><code>(pm.)guitarBridge</code></h3>
 <p>Bidirectional block implementing a simple acoustic guitar bridge. This
@@ -1314,7 +1285,6 @@ the nuts used on the other side.</p>
 <h4 id="usage_33">Usage</h4>
 <pre><code>chain(... : stringSegment : guitarBridge)
 </code></pre>
-
 <hr />
 <h3 id="pmguitarnuts"><code>(pm.)guitarNuts</code></h3>
 <p>Bidirectional block implementing a simple acoustic guitar nuts. This
@@ -1325,7 +1295,6 @@ the bridge used on the other side.</p>
 <h4 id="usage_34">Usage</h4>
 <pre><code>chain(guitarNuts : stringSegment : ...)
 </code></pre>
-
 <hr />
 <h3 id="pmidealstring"><code>(pm.)idealString</code></h3>
 <p>An "ideal" string with rigid terminations and where the plucking position
@@ -1334,7 +1303,6 @@ string will ring forever.</p>
 <h4 id="usage_35">Usage</h4>
 <pre><code>1-1' : idealString(length,reflexion,xPosition,excitation)
 </code></pre>
-
 <p>With:
 * <code>length</code>: the length of the string in meters
 * <code>pluckPosition</code>: the plucking position (0.001-0.999)
@@ -1346,7 +1314,6 @@ one dimension waveguide).</p>
 <h4 id="usage_36">Usage</h4>
 <pre><code>ks(length,damping,excitation) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1359,7 +1326,6 @@ one dimension waveguide).</p>
 <h4 id="usage_37">Usage</h4>
 <pre><code>ks_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmelecguitarmodel"><code>(pm.)elecGuitarModel</code></h3>
 <p>A simple electric guitar model (without audio effects, of course) with
@@ -1370,7 +1336,6 @@ changing the length of the string and not through a finger model.</p>
 <h4 id="usage_38">Usage</h4>
 <pre><code>elecGuitarModel(length,pluckPosition,mute,excitation) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1388,7 +1353,6 @@ by making a polyphonic applications out of this function.</p>
 <h4 id="usage_39">Usage</h4>
 <pre><code>elecGuitar(length,pluckPosition,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1403,7 +1367,6 @@ by making a polyphonic applications out of this function.</p>
 <h4 id="usage_40">Usage</h4>
 <pre><code>elecGuitar_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmguitarbody"><code>(pm.)guitarBody</code></h3>
 <p>WARNING: not implemented yet!
@@ -1411,7 +1374,6 @@ Bidirectional block implementing a simple acoustic guitar body.</p>
 <h4 id="usage_41">Usage</h4>
 <pre><code>chain(... : guitarBody)
 </code></pre>
-
 <hr />
 <h3 id="pmguitarmodel"><code>(pm.)guitarModel</code></h3>
 <p>A simple acoustic guitar model with steel strings and selectable excitation
@@ -1423,7 +1385,6 @@ bridge).</p>
 <h4 id="usage_42">Usage</h4>
 <pre><code>guitarModel(length,pluckPosition,excitation) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1439,7 +1400,6 @@ by making a polyphonic applications out of this function.</p>
 <h4 id="usage_43">Usage</h4>
 <pre><code>guitar(length,pluckPosition,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1454,7 +1414,6 @@ built-in UI.</p>
 <h4 id="usage_44">Usage</h4>
 <pre><code>guitar_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmnylonguitarmodel"><code>(pm.)nylonGuitarModel</code></h3>
 <p>A simple acoustic guitar model with nylon strings and selectable excitation
@@ -1466,7 +1425,6 @@ bridge).</p>
 <h4 id="usage_45">Usage</h4>
 <pre><code>nylonGuitarModel(length,pluckPosition,excitation) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1482,7 +1440,6 @@ by making a polyphonic applications out of this function.</p>
 <h4 id="usage_46">Usage</h4>
 <pre><code>nylonGuitar(length,pluckPosition,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>length</code>: the length of the string in meters</li>
@@ -1497,7 +1454,6 @@ built-in UI.</p>
 <h4 id="usage_47">Usage</h4>
 <pre><code>nylonGuitar_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmmodeinterpres"><code>(pm.)modeInterpRes</code></h3>
 <p>Modular string instrument resonator based on IR measurements made on 3D 
@@ -1508,7 +1464,6 @@ More information about this technique/project can be found here:
 <h4 id="usage_48">Usage</h4>
 <pre><code>_ : modeInterpRes(nModes,x,y) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>nModes</code>: number of modeled modes (40 max)</li>
@@ -1522,7 +1477,6 @@ More information about this technique/project can be found here:
 <h4 id="usage_49">Usage</h4>
 <pre><code>chain(... : modularInterpBody(nModes,shape,scale) : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>nModes</code>: number of modeled modes (40 max)</li>
@@ -1537,7 +1491,6 @@ More information about this technique/project can be found here:
 <h4 id="usage_50">Usage</h4>
 <pre><code>modularInterpStringModel(length,pluckPosition,shape,scale,bodyExcitation,stringExcitation) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>stringLength</code>: the length of the string in meters</li>
@@ -1555,7 +1508,6 @@ More information about this technique/project can be found here:
 <h4 id="usage_51">Usage</h4>
 <pre><code>modularInterpInstr(stringLength,pluckPosition,shape,scale,gain,tapBody,triggerString) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>stringLength</code>: the length of the string in meters</li>
@@ -1575,7 +1527,6 @@ with built-in UI.</p>
 <h4 id="usage_52">Usage</h4>
 <pre><code>modularInterpInstr_ui_MIDI : _
 </code></pre>
-
 <h2 id="bowed-string-instruments">Bowed String Instruments</h2>
 <p>Low and high level basic string instruments parts. Most of the elements in
 this section can be used in a bidirectional chain.</p>
@@ -1586,7 +1537,6 @@ bow types for many different bowed string instruments (violin, cello, etc.).</p>
 <h4 id="usage_53">Usage</h4>
 <pre><code>excitation : bowTable(offeset,slope) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: an excitation signal</li>
@@ -1599,7 +1549,6 @@ bow types for many different bowed string instruments (violin, cello, etc.).</p>
 <h4 id="usage_54">Usage</h4>
 <pre><code>bowVelocity : violinBowTable(bowPressure) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>bowVelocity</code>: velocity of the bow/excitation signal (0-1)</li>
@@ -1612,7 +1561,6 @@ bow types for many different bowed string instruments (violin, cello, etc.).</p>
 <h4 id="usage_55">Usage</h4>
 <pre><code>chain(... : stringSegment : bowInteraction(bowTable) : stringSegment : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>bowTable</code>: the bow table</li>
@@ -1624,7 +1572,6 @@ a string.</p>
 <h4 id="usage_56">Usage</h4>
 <pre><code>chain(... : stringSegment : violinBow(bowPressure,bowVelocity) : stringSegment : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>bowVelocity</code>: velocity of the bow / excitation signal (0-1)</li>
@@ -1637,7 +1584,6 @@ Terminations are not implemented in this model.</p>
 <h4 id="usage_57">Usage</h4>
 <pre><code>chain(nuts : violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) : bridge)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>stringLength</code>: the length of the string in meters</li>
@@ -1652,7 +1598,6 @@ based on <a href="#bridgefilter"><code>bridgeFilter</code></a>.</p>
 <h4 id="usage_58">Usage</h4>
 <pre><code>chain(violinNuts : stringSegment : ...)
 </code></pre>
-
 <hr />
 <h3 id="pmviolinbridge"><code>(pm.)violinBridge</code></h3>
 <p>Bidirectional block implementing a simple violin bridge. This function is
@@ -1660,7 +1605,6 @@ based on <a href="#bridgefilter"><code>bridgeFilter</code></a>.</p>
 <h4 id="usage_59">Usage</h4>
 <pre><code>chain(... : stringSegment : violinBridge
 </code></pre>
-
 <hr />
 <h3 id="pmviolinbody"><code>(pm.)violinBody</code></h3>
 <p>Bidirectional block implementing a simple violin body (just a simple
@@ -1668,7 +1612,6 @@ resonant lowpass filter).</p>
 <h4 id="usage_60">Usage</h4>
 <pre><code>chain(... : stringSegment : violinBridge : violinBody)
 </code></pre>
-
 <hr />
 <h3 id="pmviolinmodel"><code>(pm.)violinModel</code></h3>
 <p>Ready-to-use simple violin physical model. This model implements a single
@@ -1679,7 +1622,6 @@ by changing the length of the string (and not through a finger model).</p>
 <pre><code>violinModel(stringLength,bowPressure,bowVelocity,bridgeReflexion,
 bridgeAbsorption,bowPosition) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>stringLength</code>: the length of the string in meters</li>
@@ -1693,14 +1635,12 @@ bridgeAbsorption,bowPosition) : _
 <h4 id="usage_62">Usage</h4>
 <pre><code>violinModel_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmviolin_ui_midi"><code>(pm.)violin_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-enabled violin physical model with built-in UI.</p>
 <h4 id="usage_63">Usage</h4>
 <pre><code>violin_ui_MIDI : _
 </code></pre>
-
 <h2 id="wind-instruments">Wind Instruments</h2>
 <p>Low and high level basic wind instruments parts. Most of the elements in
 this section can be used in a bidirectional chain.</p>
@@ -1710,7 +1650,6 @@ this section can be used in a bidirectional chain.</p>
 <h4 id="usage_64">Usage</h4>
 <pre><code>chain(A : openTube(maxLength,length) : B)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>maxLength</code>: the maximum length of the tube in meters (should be static)</li>
@@ -1723,7 +1662,6 @@ single reed types for many different instruments (saxophone, clarinet, etc.).</p
 <h4 id="usage_65">Usage</h4>
 <pre><code>excitation : reedTable(offeset,slope) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: an excitation signal</li>
@@ -1736,7 +1674,6 @@ single reed types for many different instruments (saxophone, clarinet, etc.).</p
 <h4 id="usage_66">Usage</h4>
 <pre><code>excitation : fluteJetTable : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: an excitation signal</li>
@@ -1749,7 +1686,6 @@ length of that tube must be provided here.</p>
 <h4 id="usage_67">Usage</h4>
 <pre><code>excitation : brassLipsTable(tubeLength,lipsTension) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: an excitation signal (can be DC)</li>
@@ -1763,7 +1699,6 @@ stiffness.</p>
 <h4 id="usage_68">Usage</h4>
 <pre><code>excitation : clarinetReed(stiffness) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: an excitation signal</li>
@@ -1777,7 +1712,6 @@ plugged to a tube...</p>
 <h4 id="usage_69">Usage</h4>
 <pre><code>chain(clarinetMouthPiece(reedStiffness,pressure) : tube : etc.)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>pressure</code>: the pressure of the air flow (DC) created by the virtual performer (0-1).
@@ -1793,7 +1727,6 @@ plugged to a tube...</p>
 <h4 id="usage_70">Usage</h4>
 <pre><code>chain(brassLips(tubeLength,lipsTension,pressure) : tube : etc.)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>tubeLength</code>: length in meters of the tube connected to the mouthpiece</li>
@@ -1810,7 +1743,6 @@ plugged between tubes segments...</p>
 <h4 id="usage_71">Usage</h4>
 <pre><code>chain(... : tube : fluteEmbouchure(pressure) : tube : etc.)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>pressure</code>: the pressure of the air flow (DC) created by the virtual
@@ -1825,7 +1757,6 @@ the end of a <a href="#chain"><code>chain</code></a>.</p>
 <h4 id="usage_72">Usage</h4>
 <pre><code>chain(... : wBell(opening))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>opening</code>: the "opening" of bell (0-1)</li>
@@ -1836,14 +1767,12 @@ the end of a <a href="#chain"><code>chain</code></a>.</p>
 <h4 id="usage_73">Usage</h4>
 <pre><code>chain(fluteHead : tube : ...)
 </code></pre>
-
 <hr />
 <h3 id="pmflutefoot"><code>(pm.)fluteFoot</code></h3>
 <p>Simple flute foot implementing waves reflexion and dispersion.</p>
 <h4 id="usage_74">Usage</h4>
 <pre><code>chain(... : tube : fluteFoot)
 </code></pre>
-
 <hr />
 <h3 id="pmclarinetmodel"><code>(pm.)clarinetModel</code></h3>
 <p>A simple clarinet physical model without tone holes (pitch is changed by
@@ -1851,7 +1780,6 @@ changing the length of the tube of the instrument).</p>
 <h4 id="usage_75">Usage</h4>
 <pre><code>clarinetModel(length,pressure,reedStiffness,bellOpening) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>tubeLength</code>: the length of the tube in meters</li>
@@ -1868,7 +1796,6 @@ doesn't implement a virtual "blower", thus <code>pressure</code> remains an argu
 <h4 id="usage_76">Usage</h4>
 <pre><code>clarinetModel_ui(pressure) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
@@ -1882,14 +1809,12 @@ This can also be any kind of signal that will be directly injected in the mouthp
 <h4 id="usage_77">Usage</h4>
 <pre><code>clarinet_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmclarinet_ui_midi"><code>(pm.)clarinet_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI compliant clarinet physical model with built-in UI.</p>
 <h4 id="usage_78">Usage</h4>
 <pre><code>clarinet_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmbrassmodel"><code>(pm.)brassModel</code></h3>
 <p>A simple generic brass instrument physical model without pistons
@@ -1899,7 +1824,6 @@ bad parameters are given to it...</p>
 <h4 id="usage_79">Usage</h4>
 <pre><code>brassModel(tubeLength,lipsTension,mute,pressure) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>tubeLength</code>: the length of the tube in meters</li>
@@ -1916,7 +1840,6 @@ doesn't implement a virtual "blower", thus <code>pressure</code> remains an argu
 <h4 id="usage_80">Usage</h4>
 <pre><code>brassModel_ui(pressure) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
@@ -1930,14 +1853,12 @@ This can also be any kind of signal that will be directly injected in the mouthp
 <h4 id="usage_81">Usage</h4>
 <pre><code>brass_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmbrass_ui_midi"><code>(pm.)brass_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable brass instrument physical model with built-in UI.</p>
 <h4 id="usage_82">Usage</h4>
 <pre><code>brass_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmflutemodel"><code>(pm.)fluteModel</code></h3>
 <p>A simple generic flute instrument physical model without tone holes
@@ -1945,7 +1866,6 @@ This can also be any kind of signal that will be directly injected in the mouthp
 <h4 id="usage_83">Usage</h4>
 <pre><code>fluteModel(tubeLength,mouthPosition,pressure) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>tubeLength</code>: the length of the tube in meters</li>
@@ -1961,7 +1881,6 @@ doesn't implement a virtual "blower", thus <code>pressure</code> remains an argu
 <h4 id="usage_84">Usage</h4>
 <pre><code>fluteModel_ui(pressure) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>pressure</code>: the pressure of the air flow created by the virtual performer (0-1).
@@ -1975,14 +1894,12 @@ This can also be any kind of signal that will be directly injected in the mouthp
 <h4 id="usage_85">Usage</h4>
 <pre><code>flute_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmflute_ui_midi"><code>(pm.)flute_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable flute physical model with built-in UI.</p>
 <h4 id="usage_86">Usage</h4>
 <pre><code>flute_ui_MIDI : _
 </code></pre>
-
 <h2 id="exciters">Exciters</h2>
 <p>Various kind of excitation signal generators.</p>
 <hr />
@@ -1992,7 +1909,6 @@ This can also be any kind of signal that will be directly injected in the mouthp
 <pre><code>gate = button('gate');
 impulseExcitation(gate) : chain;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>gate</code>: a gate button</li>
@@ -2004,7 +1920,6 @@ impulseExcitation(gate) : chain;
 <pre><code>gate = button('gate');
 strikeModel(LPcutoff,HPcutoff,sharpness,gain,gate) : chain;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>HPcutoff</code>: highpass cutoff frequency</li>
@@ -2020,7 +1935,6 @@ strikeModel(LPcutoff,HPcutoff,sharpness,gain,gate) : chain;
 <pre><code>gate = button('gate');
 strike(exPos,sharpness,gain,gate) : chain;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>exPos</code>: excitation position wiht 0: for max low freqs and 1: for max high
@@ -2036,7 +1950,6 @@ freqs. So, on membrane for example, 0 would be the middle and 1 the edge</li>
 <pre><code>trigger = button('gate');
 pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>stringLength</code>: length of the string to pluck</li>
@@ -2052,7 +1965,6 @@ pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
 <h4 id="usage_91">Usage</h4>
 <pre><code>blower(pressure,breathGain,breathCutoff) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>pressure</code>: pressure (0-1)</li>
@@ -2065,7 +1977,6 @@ pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
 <h4 id="usage_92">Usage</h4>
 <pre><code>blower : somethingToBeBlown
 </code></pre>
-
 <h2 id="modal-percussions">Modal Percussions</h2>
 <p>High and low level functions for modal synthesis of percussion instruments.</p>
 <hr />
@@ -2076,7 +1987,6 @@ kind of sound good though :).</p>
 <h4 id="usage_93">Usage</h4>
 <pre><code>excitation : djembeModel(freq)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: excitation signal</li>
@@ -2091,7 +2001,6 @@ kind of sound good though :).</p>
 <h4 id="usage_94">Usage</h4>
 <pre><code>djembe(freq,strikePosition,strikeSharpness,gain,trigger)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: fundamental frequency of the model</li>
@@ -2107,7 +2016,6 @@ kind of sound good though :).</p>
 <h4 id="usage_95">Usage</h4>
 <pre><code>djembe_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmmarimbabarmodel"><code>(pm.)marimbaBarModel</code></h3>
 <p>Generic marimba tone bar modal model.</p>
@@ -2126,7 +2034,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_96">Usage</h4>
 <pre><code>excitation : marimbaBarModel(freq,exPos,t60,t60DecayRatio,t60DecaySlope)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: excitation signal</li>
@@ -2142,7 +2049,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_97">Usage</h4>
 <pre><code>marimbaResTube(tubeLength,excitation)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>tubeLength</code>: the length of the tube in meters</li>
@@ -2157,7 +2063,6 @@ limitations of this type of system).</p>
 <h4 id="usage_98">Usage</h4>
 <pre><code>excitation : marimbaModel(freq,exPos) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: the frequency of the bar/tube couple</li>
@@ -2173,7 +2078,6 @@ limitations of this type of system).</p>
 <h4 id="usage_99">Usage</h4>
 <pre><code>excitation : marimba(freq,strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2194,7 +2098,6 @@ limitations of this type of system).</p>
 <h4 id="usage_100">Usage</h4>
 <pre><code>marimba_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmchurchbellmodel"><code>(pm.)churchBellModel</code></h3>
 <p>Generic church bell modal model generated by <code>mesh2faust</code> from
@@ -2208,7 +2111,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_101">Usage</h4>
 <pre><code>excitation : churchBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2231,7 +2133,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_102">Usage</h4>
 <pre><code>excitation : churchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2248,7 +2149,6 @@ built-in UI.</p>
 <h4 id="usage_103">Usage</h4>
 <pre><code>churchBell_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmenglishbellmodel"><code>(pm.)englishBellModel</code></h3>
 <p>English church bell modal model generated by <code>mesh2faust</code> from
@@ -2263,7 +2163,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_104">Usage</h4>
 <pre><code>excitation : englishBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2287,7 +2186,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_105">Usage</h4>
 <pre><code>excitation : englishBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2304,7 +2202,6 @@ built-in UI.</p>
 <h4 id="usage_106">Usage</h4>
 <pre><code>englishBell_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmfrenchbellmodel"><code>(pm.)frenchBellModel</code></h3>
 <p>French church bell modal model generated by <code>mesh2faust</code> from
@@ -2319,7 +2216,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_107">Usage</h4>
 <pre><code>excitation : frenchBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2343,7 +2239,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_108">Usage</h4>
 <pre><code>excitation : frenchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2360,7 +2255,6 @@ built-in UI.</p>
 <h4 id="usage_109">Usage</h4>
 <pre><code>frenchBell_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmgermanbellmodel"><code>(pm.)germanBellModel</code></h3>
 <p>German church bell modal model generated by <code>mesh2faust</code> from
@@ -2375,7 +2269,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_110">Usage</h4>
 <pre><code>excitation : germanBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2399,7 +2292,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_111">Usage</h4>
 <pre><code>excitation : germanBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2416,7 +2308,6 @@ built-in UI.</p>
 <h4 id="usage_112">Usage</h4>
 <pre><code>germanBell_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmrussianbellmodel"><code>(pm.)russianBellModel</code></h3>
 <p>Russian church bell modal model generated by <code>mesh2faust</code> from
@@ -2431,7 +2322,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_113">Usage</h4>
 <pre><code>excitation : russianBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2455,7 +2345,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_114">Usage</h4>
 <pre><code>excitation : russianBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2472,7 +2361,6 @@ built-in UI.</p>
 <h4 id="usage_115">Usage</h4>
 <pre><code>russianBell_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmstandardbellmodel"><code>(pm.)standardBellModel</code></h3>
 <p>Standard church bell modal model generated by <code>mesh2faust</code> from
@@ -2486,7 +2374,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_116">Usage</h4>
 <pre><code>excitation : standardBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2509,7 +2396,6 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <h4 id="usage_117">Usage</h4>
 <pre><code>excitation : standardBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>excitation</code>: the excitation signal</li>
@@ -2526,7 +2412,6 @@ built-in UI.</p>
 <h4 id="usage_118">Usage</h4>
 <pre><code>standardBell_ui : _
 </code></pre>
-
 <h2 id="vocal-synthesis">Vocal Synthesis</h2>
 <p>Vocal synthesizer functions (source/filter, fof, etc.).</p>
 <hr />
@@ -2539,7 +2424,6 @@ built-in UI.</p>
 ba.take(j+1,formantValues.g(i)) : _
 ba.take(j+1,formantValues.bw(i)) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>i</code>: formant number</li>
@@ -2554,7 +2438,6 @@ soprano, 4: tenor)</li>
 <h4 id="usage_120">Usage</h4>
 <pre><code>voiceGender(voiceType) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2567,7 +2450,6 @@ for a Fof filter.</p>
 <h4 id="usage_121">Usage</h4>
 <pre><code>skirtWidthMultiplier(vowel,freq,gender) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
@@ -2583,7 +2465,6 @@ all other formant frequencies unchanged. Ported from <code>chant-lib</code>.
 <h4 id="usage_122">Usage</h4>
 <pre><code>_ : autobendFreq(n,freq,voiceType) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: formant index</li>
@@ -2601,7 +2482,6 @@ Ported from <code>chant-lib</code>.
 <h4 id="usage_123">Usage</h4>
 <pre><code>_ : vocalEffort(freq,gender) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: the fundamental frequency of the excitation signal</li>
@@ -2615,7 +2495,6 @@ Ported from <code>chant-lib</code>.
 <h4 id="usage_124">Usage</h4>
 <pre><code>_ : fof(fc,bw,a,g) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>fc</code>: formant center frequency,</li>
@@ -2632,7 +2511,6 @@ used in the filter-cycling FOF function <code>fofCycle</code>.
 <h4 id="usage_125">Usage</h4>
 <pre><code>_ : fofSH(fc,bw,a,g) : _
 </code></pre>
-
 <p>Where: all parameters same as for <a href="#fof"><code>fof</code></a></p>
 <hr />
 <h3 id="pmfofcycle"><code>(pm.)fofCycle</code></h3>
@@ -2642,7 +2520,6 @@ mitigated by using a cycle of <code>n</code> sample and hold FOF filters.
 <h4 id="usage_126">Usage</h4>
 <pre><code>_ : fofCycle(fc,bw,a,g,n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the number of FOF filters to cycle through</li>
@@ -2656,7 +2533,6 @@ parameters <code>bw</code> and <code>a</code> with <a href="#smooth">smooth</a>.
 <h4 id="usage_127">Usage</h4>
 <pre><code>_ : fofSmooth(fc,bw,sw,g,tau) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>tau</code>: the desired smoothing time constant in seconds</li>
@@ -2675,7 +2551,6 @@ the frequency range of the provided source to be realistic.</p>
 <h4 id="usage_128">Usage</h4>
 <pre><code>_ : formantFilterFofCycle(voiceType,vowel,nFormants,i,freq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2697,7 +2572,6 @@ the frequency range of the provided source to be realistic.</p>
 <h4 id="usage_129">Usage</h4>
 <pre><code>_ : formantFilterFofSmooth(voiceType,vowel,nFormants,i,freq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2717,7 +2591,6 @@ the frequency range of the provided source to be realistic.</p>
 <h4 id="usage_130">Usage</h4>
 <pre><code>_ : formantFilterBP(voiceType,vowel,nFormants,i,freq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2737,7 +2610,6 @@ of the provided source to be realistic.</p>
 <h4 id="usage_131">Usage</h4>
 <pre><code>_ : formantFilterbank(voiceType,vowel,formantGen,freq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2757,7 +2629,6 @@ the frequency range of the provided source to be realistic.</p>
 <h4 id="usage_132">Usage</h4>
 <pre><code>_ : formantFilterbankFofCycle(voiceType,vowel,freq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2774,7 +2645,6 @@ the frequency range of the provided source to be realistic.</p>
 <h4 id="usage_133">Usage</h4>
 <pre><code>_ : formantFilterbankFofSmooth(voiceType,vowel,freq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2791,7 +2661,6 @@ the frequency range of the provided source to be realistic.</p>
 <h4 id="usage_134">Usage</h4>
 <pre><code>_ : formantFilterbankBP(voiceType,vowel) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2811,7 +2680,6 @@ the frequency range of the synthesized voice to be realistic.</p>
 <h4 id="usage_135">Usage</h4>
 <pre><code>SFFormantModel(voiceType,vowel,exType,freq,gain,source,filterbank,isFof) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2834,7 +2702,6 @@ and model does not depend on SFFormantModel function.</p>
 <h4 id="usage_136">Usage</h4>
 <pre><code>SFFormantModelFofCycle(voiceType,vowel,freq,gain) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2853,7 +2720,6 @@ the frequency range of the synthesized voice to be realistic.</p>
 <h4 id="usage_137">Usage</h4>
 <pre><code>SFFormantModelFofSmooth(voiceType,vowel,freq,gain) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2874,7 +2740,6 @@ the frequency range of the synthesized voice to be realistic.</p>
 <h4 id="usage_138">Usage</h4>
 <pre><code>SFFormantModelBP(voiceType,vowel,exType,freq,gain) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
@@ -2890,42 +2755,36 @@ the frequency range of the synthesized voice to be realistic.</p>
 <h4 id="usage_139">Usage</h4>
 <pre><code>SFFormantModelFofCycle_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmsfformantmodelfofsmooth_ui"><code>(pm.)SFFormantModelFofSmooth_ui</code></h3>
 <p>Ready-to-use source-filter vocal synthesizer with built-in user interface.</p>
 <h4 id="usage_140">Usage</h4>
 <pre><code>SFFormantModelFofSmooth_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmsfformantmodelbp_ui"><code>(pm.)SFFormantModelBP_ui</code></h3>
 <p>Ready-to-use source-filter vocal synthesizer with built-in user interface.</p>
 <h4 id="usage_141">Usage</h4>
 <pre><code>SFFormantModelBP_ui : _
 </code></pre>
-
 <hr />
 <h3 id="pmsfformantmodelfofcycle_ui_midi"><code>(pm.)SFFormantModelFofCycle_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable source-filter vocal synthesizer.</p>
 <h4 id="usage_142">Usage</h4>
 <pre><code>SFFormantModelFofCycle_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmsfformantmodelfofsmooth_ui_midi"><code>(pm.)SFFormantModelFofSmooth_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable source-filter vocal synthesizer.</p>
 <h4 id="usage_143">Usage</h4>
 <pre><code>SFFormantModelFofSmooth_ui_MIDI : _
 </code></pre>
-
 <hr />
 <h3 id="pmsfformantmodelbp_ui_midi"><code>(pm.)SFFormantModelBP_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable source-filter vocal synthesizer.</p>
 <h4 id="usage_144">Usage</h4>
 <pre><code>SFFormantModelBP_ui_MIDI : _
 </code></pre>
-
 <h2 id="misc-functions">Misc Functions</h2>
 <p>Various miscellaneous functions.</p>
 <hr />
@@ -2936,7 +2795,6 @@ allpass filter by the signal it is processing.</p>
 <h4 id="usage_145">Usage</h4>
 <pre><code>chain(... : allpassNL(nonlinearity) : ...)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>nonlinearity</code>: amount of nonlinearity to be added (0-1)</li>
@@ -2947,7 +2805,6 @@ allpass filter by the signal it is processing.</p>
 <h4 id="usage_146">Usage</h4>
 <pre><code>_ : modalModel(n, freqs, t60s, gains) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: number of given modes</li>
@@ -2961,9 +2818,8 @@ fifth) where the higher one decays faster and is attenuated:</p>
                            (0.5, 0.25),
                            (ba.db2linear(-1), ba.db2linear(-6)) : _
 </code></pre>
-
 <p>Further reading: <a href="https://raw.githubusercontent.com/grame-cncm/faust/master-dev/tools/physicalModeling/ir2dsp/lacPaper2017.pdf">Grumiaux et. al., 2017:
-Impulse-Response and CAD-Mod// el-Based Physical Modeling in
+Impulse-Response and CAD-Model-Based Physical Modeling in
 Faust</a></p></div>
             </div>
         </div>
@@ -2994,7 +2850,7 @@ Faust</a></p></div>
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

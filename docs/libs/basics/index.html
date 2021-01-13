@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -524,7 +528,6 @@
 <h4 id="usage">Usage</h4>
 <pre><code>samp2sec(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: number of samples</li>
@@ -536,7 +539,6 @@
 <h4 id="usage_1">Usage</h4>
 <pre><code>sec2samp(d) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>d</code>: duration in seconds</li>
@@ -548,7 +550,6 @@
 <h4 id="usage_2">Usage</h4>
 <pre><code>db2linear(l) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>l</code>: loudness in dB</li>
@@ -560,7 +561,6 @@
 <h4 id="usage_3">Usage</h4>
 <pre><code>linear2db(g) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>g</code>: a linear gain</li>
@@ -571,14 +571,12 @@
 <h4 id="usage_4">Usage</h4>
 <pre><code>lin2LogGain(n) : _
 </code></pre>
-
 <hr />
 <h3 id="balog2lingain"><code>(ba.)log2LinGain</code></h3>
 <p>Converts a log gain (0-1) to a linear gain (0-1).</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>log2LinGain(n) : _
 </code></pre>
-
 <hr />
 <h3 id="batau2pole"><code>(ba.)tau2pole</code></h3>
 <p>Returns a real pole giving exponential decay.
@@ -587,7 +585,6 @@ Note that t60 (time to decay 60 dB) is ~6.91 time constants.
 <h4 id="usage_6">Usage</h4>
 <pre><code>_ : smooth(tau2pole(tau)) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>tau</code>: time-constant in seconds</li>
@@ -600,7 +597,6 @@ positive pole in (0,1).
 <h4 id="usage_7">Usage</h4>
 <pre><code>pole2tau(pole) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>pole</code>: the pole</li>
@@ -612,7 +608,6 @@ positive pole in (0,1).
 <h4 id="usage_8">Usage</h4>
 <pre><code>midikey2hz(mk) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>mk</code>: the MIDI key number</li>
@@ -624,7 +619,6 @@ positive pole in (0,1).
 <h4 id="usage_9">Usage</h4>
 <pre><code>hz2midikey(f) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>f</code>: frequency in Hz</li>
@@ -636,7 +630,6 @@ positive pole in (0,1).
 <h4 id="usage_10">Usage</h4>
 <pre><code>semi2ratio(semi) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>semi</code>: number of semitone </li>
@@ -648,7 +641,6 @@ positive pole in (0,1).
 <h4 id="usage_11">Usage</h4>
 <pre><code>ratio2semi(ratio) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>ratio</code>: frequency multiplicative ratio</li>
@@ -659,7 +651,6 @@ positive pole in (0,1).
 <h4 id="usage_12">Usage</h4>
 <pre><code>pianokey2hz(pk) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>pk</code>: the piano key number</li>
@@ -670,7 +661,6 @@ positive pole in (0,1).
 <h4 id="usage_13">Usage</h4>
 <pre><code>hz2pianokey(f) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>f</code>: frequency in Hz</li>
@@ -685,7 +675,6 @@ of the countdown the output value will remain at 0 until the next trig.
 <h4 id="usage_14">Usage</h4>
 <pre><code>countdown(n,trig) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the starting point of the countdown</li>
@@ -700,7 +689,6 @@ of the countup the output value will remain at n until the next trig.
 <h4 id="usage_15">Usage</h4>
 <pre><code>countup(n,trig) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the maximum count value</li>
@@ -715,7 +703,6 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_16">Usage</h4>
 <pre><code>sweep(period,run) : _
 </code></pre>
-
 <hr />
 <h3 id="batime"><code>(ba.)time</code></h3>
 <p>A simple timer that counts every samples from the beginning of the process.
@@ -723,14 +710,12 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_17">Usage</h4>
 <pre><code>time : _
 </code></pre>
-
 <hr />
 <h3 id="baramp"><code>(ba.)ramp</code></h3>
 <p>An linear ramp of 'n' samples to reach the next value</p>
 <h4 id="usage_18">Usage</h4>
 <pre><code>_ : ramp(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: number of samples to reach the next value</li>
@@ -741,7 +726,6 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_19">Usage</h4>
 <pre><code>tempo(t) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>t</code>: tempo in BPM</li>
@@ -752,7 +736,6 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_20">Usage</h4>
 <pre><code>period(p) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>p</code>: period as a number of samples</li>
@@ -763,7 +746,6 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_21">Usage</h4>
 <pre><code>pulse(p) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>p</code>: period as a number of samples</li>
@@ -774,7 +756,6 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_22">Usage</h4>
 <pre><code>pulsen(n,p) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: pulse length as a number of samples</li>
@@ -786,7 +767,6 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_23">Usage</h4>
 <pre><code>_ : cycle(n) &lt;:
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the number of cycles/output signals</li>
@@ -798,7 +778,6 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_24">Usage</h4>
 <pre><code>beat(t) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>t</code>: tempo in BPM</li>
@@ -810,7 +789,6 @@ counting up, while trig is 0 the counter is reset to 0.</p>
 <h4 id="usage_25">Usage</h4>
 <pre><code>_ : pulse_countup(trig) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>trig</code>: the trigger signal (1: start at next pulse; 0: reset to 0)</li>
@@ -822,7 +800,6 @@ counting down, while trig is 0 the counter is reset to 0.</p>
 <h4 id="usage_26">Usage</h4>
 <pre><code>_ : pulse_countdown(trig) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>trig</code>: the trigger signal (1: start at next pulse; 0: reset to 0)</li>
@@ -835,10 +812,9 @@ of the countup (n) the output value will be reset to 0.</p>
 <h4 id="usage_27">Usage</h4>
 <pre><code>_ : pulse_countup_loop(n,trig) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the highest number of the countup (included) before reset to 0.</li>
+<li><code>n</code>: the highest number of the countup (included) before reset to 0</li>
 <li><code>trig</code>: the trigger signal (1: start at next pulse; 0: reset to 0)</li>
 </ul>
 <hr />
@@ -848,7 +824,6 @@ each consecutive group of <code>n</code> impulses.</p>
 <h4 id="usage_28">Usage</h4>
 <pre><code>_ : resetCtr(n,m) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the total number of impulses being split</li>
@@ -862,10 +837,9 @@ of the countdown (n) the output value will be reset to 0.</p>
 <h4 id="usage_29">Usage</h4>
 <pre><code>_ : pulse_countdown_loop(n,trig) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the highest number of the countup (included) before reset to 0.</li>
+<li><code>n</code>: the highest number of the countup (included) before reset to 0</li>
 <li><code>trig</code>: the trigger signal (1: start at next pulse; 0: reset to 0)</li>
 </ul>
 <h2 id="array-processingpattern-matching">Array Processing/Pattern Matching</h2>
@@ -877,7 +851,6 @@ of the countdown (n) the output value will be reset to 0.</p>
 <pre><code>count(l)
 count((10,20,30,40)) -&gt; 4
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>l</code>: list of elements</li>
@@ -890,7 +863,6 @@ count((10,20,30,40)) -&gt; 4
 <pre><code>take(P,l)
 take(3,(10,20,30,40)) -&gt; 30
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>P</code>: position (int, known at compile time, P &gt; 0)</li>
@@ -904,7 +876,6 @@ take(3,(10,20,30,40)) -&gt; 30
 subseq((10,20,30,40,50,60), 1, 3) -&gt; (20,30,40)
 subseq((10,20,30,40,50,60), 4, 1) -&gt; 50
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>l</code>: list</li>
@@ -927,7 +898,7 @@ protect against forbidden computations like division-by-zero for instance.</p>
 <p>Where:</p>
 <ul>
 <li><code>cond</code>: condition</li>
-<li><code>cond</code>: signal selected while cond is true</li>
+<li><code>then</code>: signal selected while cond is true</li>
 <li><code>else</code>: signal selected while cond is false</li>
 </ul>
 <hr />
@@ -937,7 +908,6 @@ protect against forbidden computations like division-by-zero for instance.</p>
 <pre><code>selector(I,N)
 _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>I</code>: input to select (int, numbered from 0, known at compile time)</li>
@@ -950,7 +920,6 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <h4 id="usage_35">Usage</h4>
 <pre><code>_,_,_,_ : select2stereo(bpc) : _,_    
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>bpc</code>: the selector switch (0/1)</li>
@@ -962,7 +931,6 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <pre><code>selectn(N,i)
 _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: number of inputs (int, known at compile time, N &gt; 0)</li>
@@ -972,7 +940,6 @@ _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 <pre><code>N = 64;
 process = par(n, N, (par(i,N,i) : selectn(N,n)));
 </code></pre>
-
 <hr />
 <h3 id="baselectmulti"><code>(ba.)selectmulti</code></h3>
 <p>Selects the ith circuit among N at run time (all should have the same number of inputs and outputs)
@@ -980,7 +947,6 @@ with a crossfade.</p>
 <h4 id="usage_37">Usage</h4>
 <pre><code>selectmulti(n,lgen,id)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: crossfade in samples</li>
@@ -991,7 +957,6 @@ with a crossfade.</p>
 <pre><code>process = selectmulti(ma.SR/10, ((3,9),(2,8),(5,7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 </code></pre>
-
 <h2 id="other">Other</h2>
 <hr />
 <h3 id="balatch"><code>(ba.)latch</code></h3>
@@ -999,7 +964,6 @@ process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;ch
 <h4 id="usage_38">Usage</h4>
 <pre><code>_ : latch(clocksig) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>clocksig</code>: hold trigger (0 for hold, 1 for bypass)</li>
@@ -1011,7 +975,6 @@ process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;ch
 <h4 id="usage_39">Usage</h4>
 <pre><code>_ : sAndH(t) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>t</code>: hold trigger (0 for hold, 1 for bypass)</li>
@@ -1024,7 +987,6 @@ rate of a signal, it just holds samples...
 <h4 id="usage_40">Usage</h4>
 <pre><code>_ : downSample(freq) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: new rate in Hz</li>
@@ -1035,7 +997,6 @@ rate of a signal, it just holds samples...
 <h4 id="usage_41">Usage</h4>
 <pre><code>_ : peakhold(mode) : _;
 </code></pre>
-
 <p>Where:</p>
 <p><code>mode</code> means: 
  1 - Track and hold max value.</p>
@@ -1045,7 +1006,6 @@ rate of a signal, it just holds samples...
 <h4 id="usage_42">Usage</h4>
 <pre><code>_ : peakholder(n) : _;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: number of samples</li>
@@ -1059,14 +1019,12 @@ function.</p>
 <h4 id="usage_43">Usage</h4>
 <pre><code>button(&quot;gate&quot;) : impulsify;
 </code></pre>
-
 <hr />
 <h3 id="baautomat"><code>(ba.)automat</code></h3>
 <p>Record and replay to the values the input signal in a loop.</p>
 <h4 id="usage_44">Usage</h4>
 <pre><code>hslider(...) : automat(bps, size, init) : _
 </code></pre>
-
 <hr />
 <h3 id="babpf"><code>(ba.)bpf</code></h3>
 <p>bpf is an environment (a group of related definitions) that can be used to
@@ -1079,17 +1037,14 @@ create break-point functions. It contains three functions:</p>
 <p>A minimal break-point function must contain at least a start and an end point:</p>
 <pre><code>f = bpf.start(x0,y0) : bpf.end(x1,y1);
 </code></pre>
-
 <p>A more involved break-point function can contains any number of intermediate
 points:</p>
 <pre><code>f = bpf.start(x0,y0) : bpf.point(x1,y1) : bpf.point(x2,y2) : bpf.end(x3,y3);
 </code></pre>
-
 <p>In any case the <code>x_{i}</code> must be in increasing order (for all <code>i</code>, <code>x_{i} &lt; x_{i+1}</code>).
-For example the following definition :</p>
+For example the following definition:</p>
 <pre><code>f = bpf.start(x0,y0) : ... : bpf.point(xi,yi) : ... : bpf.end(xn,yn);
 </code></pre>
-
 <p>implements a break-point function f such that:</p>
 <ul>
 <li><code>f(x) = y_{0}</code> when <code>x &lt; x_{0}</code></li>
@@ -1105,7 +1060,6 @@ and <code>x &lt; x_{i+1}</code></li>
 <pre><code>index = 1.69; // range is 0-4
 process = listInterp((800,400,350,450,325),index);
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>index</code>: the index (float) to interpolate between the different values.
@@ -1119,7 +1073,6 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 <h4 id="usage_46">Usage</h4>
 <pre><code>_ : bypass1(bpc,e) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>bpc</code>: bypass switch (0/1)</li>
@@ -1133,7 +1086,6 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 <h4 id="usage_47">Usage</h4>
 <pre><code>_,_ : bypass2(bpc,e) : _,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>bpc</code>: bypass switch (0/1)</li>
@@ -1148,7 +1100,6 @@ so that its state is cleanup up.
 <h4 id="usage_48">Usage</h4>
 <pre><code>_ : bypass1to2(bpc,e) : _,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>bpc</code>: bypass switch (0/1)</li>
@@ -1166,7 +1117,6 @@ Bypassed circuits can be chained.</p>
 or
 _,_ : bypass_fade(n,b,e) : _,_ 
 </code></pre>
-
 <ul>
 <li><code>n</code>: number of samples for the crossfade</li>
 <li><code>b</code>: bypass switch (0/1)</li>
@@ -1176,7 +1126,6 @@ _,_ : bypass_fade(n,b,e) : _,_
 <pre><code>process = bypass_fade(ma.SR/10, checkbox(&quot;bypass echo&quot;), echo);
 process = bypass_fade(ma.SR/10, checkbox(&quot;bypass reverb&quot;), freeverb);
 </code></pre>
-
 <hr />
 <h3 id="batoggle"><code>(ba.)toggle</code></h3>
 <p>Triggered by the change of 0 to 1, it toggles the output value
@@ -1184,30 +1133,25 @@ between 0 and 1.</p>
 <h4 id="usage_50">Usage</h4>
 <pre><code>_ : toggle : _
 </code></pre>
-
 <h4 id="examples_1">Examples</h4>
 <pre><code>button(&quot;toggle&quot;) : toggle : vbargraph(&quot;output&quot;, 0, 1)
 (an.amp_follower(0.1) &gt; 0.01) : toggle : vbargraph(&quot;output&quot;, 0, 1) // takes audio input
 </code></pre>
-
 <hr />
 <h3 id="baon_and_off"><code>(ba.)on_and_off</code></h3>
 <p>The first channel set the output to 1, the second channel to 0.</p>
 <h4 id="usage_51">Usage</h4>
 <pre><code>_ , _ : on_and_off : _
 </code></pre>
-
 <h4 id="example">Example</h4>
 <pre><code>button(&quot;on&quot;), button(&quot;off&quot;) : on_and_off : vbargraph(&quot;output&quot;, 0, 1)
 </code></pre>
-
 <hr />
 <h3 id="baselectoutn"><code>(ba.)selectoutn</code></h3>
 <p>Route input to the output among N at run time.</p>
 <h4 id="usage_52">Usage</h4>
 <pre><code>_ : selectoutn(N, i) : _,_,...N
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: number of outputs (int, known at compile time, N &gt; 0)</li>
@@ -1217,7 +1161,6 @@ between 0 and 1.</p>
 <pre><code>process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph(&quot;v.bargraph %i&quot;, 0, 1));
 sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 </code></pre>
-
 <h2 id="sliding-reduce">Sliding Reduce</h2>
 <p>Provides various operations on the last N samples using a high order
 `slidingReduce(op,N,maxN,disabledVal,x)`` fold-like function:</p>
@@ -1248,7 +1191,6 @@ sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
  )
  :max;
 </code></pre>
-
 <p><code>max(x@2,x@3)</code> is the same as <code>max(x@0,x@1)@2</code> but the latter re-uses a
 value we already computed,so is more efficient. Using the same trick for
 values 4 trough 7, we can write:</p>
@@ -1267,7 +1209,6 @@ values 4 trough 7, we can write:</p>
  )
  :max;
 </code></pre>
-
 <p>We can rewrite it recursively, so it becomes possible to get the maximum at
 have any number of values, as long as it's a power of 2.</p>
 <pre><code>recursiveMax =
@@ -1276,7 +1217,6 @@ have any number of values, as long as it's a power of 2.</p>
    (N,x) =&gt; max(recursiveMax(N/2,x), recursiveMax(N/2,x)@(N/2));
  };
 </code></pre>
-
 <p>What if we want to look at a number of values that's not a power of 2?
 For each value, we will have to decide whether to use it or not.
 If N is bigger than the index of the value, we use it, otherwise we replace
@@ -1308,7 +1248,6 @@ with {
  useVal(i) = select2((N&gt;=i) , (0-(ma.INFINITY)),_);
 };
 </code></pre>
-
 <p>Now it becomes impossible to re-use any values. To fix that let's first look
 at how we'd implement it using recursiveMax, but with a fixed N that is not
 a power of 2. For example, this is how you'd do it with <code>N=3</code>:</p>
@@ -1318,7 +1257,6 @@ a power of 2. For example, this is how you'd do it with <code>N=3</code>:</p>
    recursiveMax(2,x)@1  // the second and third x
  ):max;
 </code></pre>
-
 <p><code>N=6</code></p>
 <pre><code>binaryMaxSix(x) =
  (
@@ -1326,7 +1264,6 @@ a power of 2. For example, this is how you'd do it with <code>N=3</code>:</p>
    recursiveMax(4,x)@2  // third trough sixth
  ):max;
 </code></pre>
-
 <p>Note that <code>recursiveMax(2,x)</code> is used at a different delay then in
 <code>binaryMaxThree</code>, since it represents 1 and 2, not 2 and 3. Each block is
 delayed the combined size of the previous blocks.</p>
@@ -1342,7 +1279,6 @@ delayed the combined size of the previous blocks.</p>
    )
  ):max;
 </code></pre>
-
 <p>To make a variable version, we need to know which powers of two are used,
 and at which delay time.</p>
 <p>Then it becomes a matter of:</p>
@@ -1369,7 +1305,6 @@ and at which delay time.</p>
    isUsed(i) = take(i+1, (int2bin(N,maxN)));
  };
 </code></pre>
-
 <hr />
 <h3 id="baslidingreduce"><code>(ba.)slidingReduce</code></h3>
 <p>Fold-like high order function. Apply a commutative binary operation <code>&lt;op&gt;</code> to
@@ -1380,7 +1315,6 @@ output is constant for the duration of a block.</p>
 <h4 id="usage_53">Usage</h4>
 <pre><code>_ : slidingReduce(op,N,maxN,disabledVal) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1400,7 +1334,6 @@ If that matters in your application, use the more CPU-intensive (ba.)slidingSump
 <h4 id="usage_54">Usage</h4>
 <pre><code>_ : slidingSum(N) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1412,7 +1345,6 @@ If that matters in your application, use the more CPU-intensive (ba.)slidingSump
 <h4 id="usage_55">Usage</h4>
 <pre><code>_ : slidingSump(N,maxN) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1424,7 +1356,6 @@ If that matters in your application, use the more CPU-intensive (ba.)slidingSump
 <h4 id="usage_56">Usage</h4>
 <pre><code>_ : slidingMax(N,maxN) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1436,7 +1367,6 @@ If that matters in your application, use the more CPU-intensive (ba.)slidingSump
 <h4 id="usage_57">Usage</h4>
 <pre><code>_ : slidingMin(N,maxN) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1450,7 +1380,6 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
 <h4 id="usage_58">Usage</h4>
 <pre><code>_ : slidingMean(N,maxN) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1462,7 +1391,6 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
 <h4 id="usage_59">Usage</h4>
 <pre><code>_ : slidingMeanp(N,maxN) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1476,7 +1404,6 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
 <h4 id="usage_60">Usage</h4>
 <pre><code>_ : slidingRMS(N) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1488,7 +1415,6 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
 <h4 id="usage_61">Usage</h4>
 <pre><code>_ : slidingRMSp(N,maxN) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of values to process</li>
@@ -1496,7 +1422,7 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
 </ul>
 <h2 id="parallel-operator">Parallel Operator</h2>
 <p>Provides various operations on N parallel inputs using a high order
-`parallelOp(op,N,x)`` function:</p>
+<code>parallelOp(op,N,x)</code> function:</p>
 <ul>
 <li><code>parallelMax(n)</code>: the max of n parallel inputs</li>
 <li><code>parallelMin(n)</code>: the min of n parallel inputs</li>
@@ -1505,59 +1431,54 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
 </ul>
 <hr />
 <h3 id="baparallelop"><code>(ba.)parallelOp</code></h3>
-<p>Apply a commutative binary operation <code>&lt;op&gt;</code> to n parallel inputs.</p>
+<p>Apply a commutative binary operation <code>&lt;op&gt;</code> to N parallel inputs.</p>
 <h4 id="usage_62">usage</h4>
 <pre><code>si.bus(n) : parallelOp(op,n) : _
 </code></pre>
-
 <p>where:</p>
 <ul>
-<li><code>n</code>: the number of parallel inputs</li>
-<li><code>op</code>: the operator. needs to be a commutative one.</li>
+<li><code>N</code>: the number of parallel inputs known at compile time</li>
+<li><code>op</code>: the operator which needs to be commutative</li>
 </ul>
 <hr />
 <h3 id="baparallelmax"><code>(ba.)parallelMax</code></h3>
-<p>The maximum of n parallel inputs</p>
+<p>The maximum of N parallel inputs.</p>
 <h4 id="usage_63">Usage</h4>
 <pre><code>si.bus(n) : parallelMax(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of parallel inputs</li>
+<li><code>N</code>: the number of parallel inputs known at compile time</li>
 </ul>
 <hr />
 <h3 id="baparallelmin"><code>(ba.)parallelMin</code></h3>
-<p>The minimum of n parallel inputs</p>
+<p>The minimum of N parallel inputs.</p>
 <h4 id="usage_64">Usage</h4>
 <pre><code>si.bus(n) : parallelMin(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of parallel inputs</li>
+<li><code>N</code>: the number of parallel inputs known at compile time</li>
 </ul>
 <hr />
 <h3 id="baparallelmean"><code>(ba.)parallelMean</code></h3>
-<p>The mean of n parallel inputs</p>
+<p>The mean of N parallel inputs.</p>
 <h4 id="usage_65">Usage</h4>
 <pre><code>si.bus(n) : parallelMean(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of parallel inputs</li>
+<li><code>N</code>: the number of parallel inputs known at compile time</li>
 </ul>
 <hr />
 <h3 id="baparallelrms"><code>(ba.)parallelRMS</code></h3>
-<p>The RMS of n parallel inputs</p>
+<p>The RMS of N parallel inputs.</p>
 <h4 id="usage_66">Usage</h4>
 <pre><code>si.bus(n) : parallelRMS(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of parallel inputs</li>
+<li><code>N</code>: the number of parallel inputs known at compile time</li>
 </ul></div>
             </div>
         </div>
@@ -1588,7 +1509,7 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

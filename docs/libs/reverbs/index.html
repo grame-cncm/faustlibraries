@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -277,7 +281,6 @@ well known and often copied JCREV.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>_ : jcrev : _,_,_,_
 </code></pre>
-
 <hr />
 <h3 id="resatrev"><code>(re.)satrev</code></h3>
 <p>This artificial reverberator take a mono signal and output stereo
@@ -294,7 +297,6 @@ often-heard brass canon sound examples, one of which can be found at
 <h4 id="usage_1">Usage</h4>
 <pre><code>_ : satrev : _,_
 </code></pre>
-
 <h2 id="feedback-delay-network-fdn-reverberators">Feedback Delay Network (FDN) Reverberators</h2>
 <hr />
 <h3 id="refdnrev0"><code>(re.)fdnrev0</code></h3>
@@ -305,7 +307,6 @@ often-heard brass canon sound examples, one of which can be found at
 fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) :&gt;
 &lt;1,2,4,...,N signals&gt;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: 2, 4, 8, ...  (power of 2)</li>
@@ -330,7 +331,6 @@ damping filters.</p>
 <h4 id="usage_3">Usage</h4>
 <pre><code>bus(8) : zita_rev_fdn(f1,f2,t60dc,t60m,fsmax) : bus(8)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>f1</code>: crossover frequency (Hz) separating dc and midrange frequencies</li>
@@ -351,7 +351,6 @@ damping filters.</p>
 <h4 id="usage_4">Usage</h4>
 <pre><code>_,_ : zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax) : _,_
 </code></pre>
-
 <p>Where:</p>
 <p><code>rdel</code>  = delay (in ms) before reverberation begins (e.g., 0 to ~100 ms)
 (remaining args and refs as for <code>zita_rev_fdn</code> above)</p>
@@ -362,7 +361,6 @@ damping filters.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>_,_ : zita_rev1_ambi(rgxyz,rdel,f1,f2,t60dc,t60m,fsmax) : _,_,_,_
 </code></pre>
-
 <p>Where:</p>
 <p><code>rgxyz</code> = relative gain of lanes 1,4,2 to lane 0 in output (e.g., -9 to 9)
   (remaining args and references as for zita_rev1_stereo above)</p>
@@ -377,7 +375,6 @@ audio channel, and is said to be especially well tuned.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>_ : mono_freeverb(fb1, fb2, damp, spread) : _;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>fb1</code>: coefficient of the lowpass comb filters (0-1)</li>
@@ -399,7 +396,6 @@ audio channel, and is said to be especially well tuned.</p>
 <h4 id="usage_7">Usage</h4>
 <pre><code>_,_ : stereo_freeverb(fb1, fb2, damp, spread) : _,_;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>fb1</code>: coefficient of the lowpass comb filters (0-1)</li>
@@ -436,7 +432,7 @@ audio channel, and is said to be especially well tuned.</p>
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

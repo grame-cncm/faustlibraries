@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title> webaudio  - Faust Libraries</title>
+        <title>version.lib - Faust Libraries</title>
         <link href="../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
@@ -58,7 +58,7 @@
                             <li class="navitem">
                                 <a href="../" class="nav-link">Index</a>
                             </li>
-                            <li class="dropdown active">
+                            <li class="dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
@@ -175,7 +175,7 @@
 </li>
                                     
 <li>
-    <a href="./" class="dropdown-item active"> webaudio </a>
+    <a href="../webaudio/" class="dropdown-item"> webaudio </a>
 </li>
                                 </ul>
                             </li>
@@ -209,37 +209,9 @@
     <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
         <ul class="nav flex-column">
             
-            <li class="nav-item" data-level="1"><a href="#webaudiolib" class="nav-link">webaudio.lib</a>
+            <li class="nav-item" data-level="1"><a href="#versionlib" class="nav-link">version.lib</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#walowpass2" class="nav-link">(wa.)lowpass2</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#wahighpass2" class="nav-link">(wa.)highpass2</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#wabandpass2" class="nav-link">(wa.)bandpass2</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#wanotch2" class="nav-link">(wa.)notch2</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#waallpass2" class="nav-link">(wa.)allpass2</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#wapeaking2" class="nav-link">(wa.)peaking2</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#walowshelf2" class="nav-link">(wa.)lowshelf2</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#wahighshelf2" class="nav-link">(wa.)highshelf2</a>
+            <li class="nav-item" data-level="3"><a href="#vlversion" class="nav-link">(vl.)version</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -250,144 +222,14 @@
 </div></div>
                     <div class="col-md-9 main-container" role="main">
 
-<h1 id="webaudiolib">webaudio.lib</h1>
-<p>This library implement WebAudio filters, using their C++ version as a starting point, 
-taken from Mozilla Firefox implementation.</p>
+<h1 id="versionlib">version.lib</h1>
+<p>Semantic versioning for the Faust libraries. Its official prefix is <code>vl</code>.</p>
 <hr />
-<h3 id="walowpass2"><code>(wa.)lowpass2</code></h3>
-<p>Standard second-order resonant lowpass filter with 12dB/octave rolloff.
-Frequencies below the cutoff pass through, frequencies above it are attenuated.</p>
+<h3 id="vlversion"><code>(vl.)version</code></h3>
+<p>Return the version number of the Faust standard libraries. </p>
 <h4 id="usage">Usage</h4>
-<pre><code>_: lowpass2(f0, Q, dtune) :_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>f0</code>: cutoff frequency in Hz</li>
-<li><code>Q</code>: the quality factor</li>
-<li><code>dtune</code>: detuning of the frequency in cents</li>
-</ul>
-<h4 id="reference">Reference</h4>
-<ul>
-<li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98</a></li>
-</ul>
-<hr />
-<h3 id="wahighpass2"><code>(wa.)highpass2</code></h3>
-<p>Standard second-order resonant highpass filter with 12dB/octave rolloff.
-Frequencies below the cutoff are attenuated, frequencies above it pass through.</p>
-<h4 id="usage_1">Usage</h4>
-<pre><code>_: highpass2(f0, Q, dtune) :_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>f0</code>: cutoff frequency in Hz</li>
-<li><code>Q</code>: the quality factor</li>
-<li><code>dtune</code>: detuning of the frequency in cents</li>
-</ul>
-<h4 id="reference_1">Reference</h4>
-<ul>
-<li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127</a></li>
-</ul>
-<hr />
-<h3 id="wabandpass2"><code>(wa.)bandpass2</code></h3>
-<p>Standard second-order bandpass filter.
-Frequencies outside the given range of frequencies are attenuated, the frequencies inside it pass through.</p>
-<h4 id="usage_2">Usage</h4>
-<pre><code>_: bandpass2(f0, Q, dtune) :_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>f0</code>: cutoff frequency in Hz</li>
-<li><code>Q</code>: the quality factor</li>
-<li><code>dtune</code>: detuning of the frequency in cents</li>
-</ul>
-<h4 id="reference_2">Reference</h4>
-<ul>
-<li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#334">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#334</a></li>
-</ul>
-<hr />
-<h3 id="wanotch2"><code>(wa.)notch2</code></h3>
-<p>Standard notch filter, also called a band-stop or band-rejection filter.
-It is the opposite of a bandpass filter: frequencies outside the give range of frequencies 
-pass through, frequencies inside it are attenuated.</p>
-<h4 id="usage_3">Usage</h4>
-<pre><code>_: notch2(f0, Q, dtune) :_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>f0</code>: cutoff frequency in Hz</li>
-<li><code>Q</code>: the quality factor</li>
-<li><code>dtune</code>: detuning of the frequency in cents</li>
-</ul>
-<h4 id="reference_3">Reference</h4>
-<ul>
-<li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#301">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#301</a></li>
-</ul>
-<hr />
-<h3 id="waallpass2"><code>(wa.)allpass2</code></h3>
-<p>Standard second-order allpass filter. It lets all frequencies through,
-but changes the phase-relationship between the various frequencies.</p>
-<h4 id="usage_4">Usage</h4>
-<pre><code>_: allpass2(f0, Q, dtune) :_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>f0</code>: cutoff frequency in Hz</li>
-<li><code>Q</code>: the quality factor</li>
-<li><code>dtune</code>: detuning of the frequency in cents</li>
-</ul>
-<h4 id="reference_4">Reference</h4>
-<ul>
-<li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#268">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#268</a></li>
-</ul>
-<hr />
-<h3 id="wapeaking2"><code>(wa.)peaking2</code></h3>
-<p>Frequencies inside the range get a boost or an attenuation, frequencies outside it are unchanged.</p>
-<h4 id="usage_5">Usage</h4>
-<pre><code>_: peaking2(f0, gain, Q, dtune) :_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>f0</code>: cutoff frequency in Hz</li>
-<li><code>gain</code>: the gain in dB</li>
-<li><code>Q</code>: the quality factor</li>
-<li><code>dtune</code>: detuning of the frequency in cents</li>
-</ul>
-<h4 id="reference_5">Reference</h4>
-<ul>
-<li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233</a></li>
-</ul>
-<hr />
-<h3 id="walowshelf2"><code>(wa.)lowshelf2</code></h3>
-<p>Standard second-order lowshelf filter.
-Frequencies lower than the frequency get a boost, or an attenuation, frequencies over it are unchanged.</p>
-<pre><code>_: lowshelf2(f0, gain, dtune) :_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>f0</code>: cutoff frequency in Hz</li>
-<li><code>gain</code>: the gain in dB</li>
-<li><code>dtune</code>: detuning of the frequency in cents</li>
-</ul>
-<h4 id="reference_6">Reference</h4>
-<ul>
-<li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#169">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#169</a></li>
-</ul>
-<hr />
-<h3 id="wahighshelf2"><code>(wa.)highshelf2</code></h3>
-<p>Standard second-order highshelf filter.
-Frequencies higher than the frequency get a boost or an attenuation, frequencies lower than it are unchanged.</p>
-<pre><code>_: highshelf2(f0, gain, dtune) :_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>f0</code>: cutoff frequency in Hz</li>
-<li><code>gain</code>: the gain in dB</li>
-<li><code>dtune</code>: detuning of the frequency in cents</li>
-</ul>
-<h4 id="reference_7">Reference</h4>
-<ul>
-<li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#201">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#201</a></li>
-</ul></div>
+<pre><code>version : _,_,_
+</code></pre></div>
             </div>
         </div>
 

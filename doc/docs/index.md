@@ -26,6 +26,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `dm`: `demos.lib`
 * `dx`: `dx7.lib`
 * `en`: `envelopes.lib`
+* `fd`: `fds.lib`
 * `fi`: `filters.lib`
 * `ho`: `hoa.lib`
 * `it`: `interpolators.lib`

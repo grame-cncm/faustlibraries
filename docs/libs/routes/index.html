@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -265,7 +269,6 @@
 <pre><code>cross(n)
 _,_,_ : cross(3) : _,_,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: number of signals (int, must be known at compile time)</li>
@@ -274,14 +277,12 @@ _,_,_ : cross(3) : _,_,_
 <p>Special case: <code>cross2</code>:</p>
 <pre><code>cross2 = _,cross(2),_;
 </code></pre>
-
 <hr />
 <h3 id="rocrossnn"><code>(ro.)crossnn</code></h3>
 <p>Cross two <code>bus(n)</code>s.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>(si.bus(2*n)) : crossnn(n) : (si.bus(2*n))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the number of signals in the <code>bus</code></li>
@@ -292,7 +293,6 @@ _,_,_ : cross(3) : _,_,_
 <h4 id="usage_2">Usage</h4>
 <pre><code>(si.bus(n),_) : crossn1(n) : (_,si.bus(n))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the number of signals in the first <code>bus</code></li>
@@ -303,7 +303,6 @@ _,_,_ : cross(3) : _,_,_
 <h4 id="usage_3">Usage</h4>
 <pre><code>(_,si.bus(n)) : crossn1(n) : (si.bus(n),_)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the number of signals in the second <code>bus</code></li>
@@ -314,7 +313,6 @@ _,_,_ : cross(3) : _,_,_
 <h4 id="usage_4">Usage</h4>
 <pre><code>(si.bus(n),si.bus(m)) : crossNM(n,m) : (si.bus(m),si.bus(n))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the number of signals in the first <code>bus</code></li>
@@ -328,7 +326,6 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
 <h4 id="usage_5">Usage</h4>
 <pre><code>_,_,_,_,_,_ : interleave(row,column) : _,_,_,_,_,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>row</code>: the number of row (int, known at compile time)</li>
@@ -340,7 +337,6 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
 <h4 id="usage_6">Usage</h4>
 <pre><code>_,_,_,_ : butterfly(n) : _,_,_,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: size of the butterfly (n is int, even and known at compile time)</li>
@@ -351,7 +347,6 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
 <h4 id="usage_7">Usage</h4>
 <pre><code>_,_,_,_ : hadamard(n) : _,_,_,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: <code>2^k</code>, size of the matrix (int, must be known at compile time)</li>
@@ -365,7 +360,6 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
 <pre><code>_,_ : recursivize(p,q) : _,_
 
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>p</code>: the forward arbitrary processor</li>
@@ -400,7 +394,7 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

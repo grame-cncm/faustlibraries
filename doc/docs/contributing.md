@@ -90,6 +90,7 @@ de = library("delays.lib");
 dm = library("demos.lib");
 dx = library("dx7.lib");
 en = library("envelopes.lib");
+fd = library("fds.lib");
 fi = library("filters.lib");
 ho = library("hoa.lib");
 it = library("interpolators.lib");

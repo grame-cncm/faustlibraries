@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -218,6 +222,10 @@
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#mapi" class="nav-link">(ma.)PI</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#mae" class="nav-link">(ma.)E</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -399,26 +407,6 @@
             </li>
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#averaging-functions" class="nav-link">Averaging Functions</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#maavg_rect" class="nav-link">(ma.)avg_rect</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#maavg_tau" class="nav-link">(ma.)avg_tau</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#maavg_t60" class="nav-link">(ma.)avg_t60</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#maavg_t19" class="nav-link">(ma.)avg_t19</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-              </ul>
-            </li>
               </ul>
             </li>
         </ul>
@@ -436,255 +424,228 @@ program execution.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>SR : _
 </code></pre>
-
 <hr />
 <h3 id="mabs"><code>(ma.)BS</code></h3>
 <p>Current block-size. Can change during the execution.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>BS : _
 </code></pre>
-
 <hr />
 <h3 id="mapi"><code>(ma.)PI</code></h3>
 <p>Constant PI in double precision.</p>
 <h4 id="usage_2">Usage</h4>
 <pre><code>PI : _
 </code></pre>
-
+<hr />
+<h3 id="mae"><code>(ma.)E</code></h3>
+<p>Constant e in double precision.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>E : _
+</code></pre>
 <hr />
 <h3 id="maepsilon"><code>(ma.)EPSILON</code></h3>
 <p>Constant EPSILON in simple/double/quad precision.</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_4">Usage</h4>
 <pre><code>EPSILON : _
 </code></pre>
-
 <hr />
 <h3 id="mamin"><code>(ma.)MIN</code></h3>
 <p>Constant MIN in simple/double/quad precision (minimal positive value).</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_5">Usage</h4>
 <pre><code>MIN : _
 </code></pre>
-
 <hr />
 <h3 id="mainfinity"><code>(ma.)INFINITY</code></h3>
 <p>Constant INFINITY in simple/double/quad precision (maximal positive value).</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_6">Usage</h4>
 <pre><code>INFINITY : _
 </code></pre>
-
 <hr />
 <h3 id="maftz"><code>(ma.)FTZ</code></h3>
 <p>Flush to zero: force samples under the "maximum subnormal number"
 to be zero. Usually not needed in C++ because the architecture
 file take care of this, but can be useful in JavaScript for instance.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>_ : FTZ : _
 </code></pre>
-
+<h4 id="reference">Reference</h4>
 <ul>
-<li>See : <a href="http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html">http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html</a></li>
+<li><a href="http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html">http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html</a></li>
 </ul>
 <hr />
 <h3 id="maneg"><code>(ma.)neg</code></h3>
 <p>Invert the sign (-x) of a signal.</p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>_ : neg : _
 </code></pre>
-
 <hr />
 <h3 id="masubxy"><code>(ma.)sub(x,y)</code></h3>
 <p>Subtract <code>x</code> and <code>y</code>.</p>
 <hr />
 <h3 id="mainv"><code>(ma.)inv</code></h3>
 <p>Compute the inverse (1/x) of the input signal.</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>_ : inv : _
 </code></pre>
-
 <hr />
 <h3 id="macbrt"><code>(ma.)cbrt</code></h3>
 <p>Computes the cube root of of the input signal.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>_ : cbrt : _
 </code></pre>
-
 <hr />
 <h3 id="mahypot"><code>(ma.)hypot</code></h3>
 <p>Computes the euclidian distance of the two input signals
 sqrt(x<em>x+y</em>y) without undue overflow or underflow.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>_,_ : hypot : _
 </code></pre>
-
 <hr />
 <h3 id="maldexp"><code>(ma.)ldexp</code></h3>
 <p>Takes two input signals: x and n, and multiplies x by 2 to the power n.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>_,_ : ldexp : _
 </code></pre>
-
 <hr />
 <h3 id="mascalb"><code>(ma.)scalb</code></h3>
 <p>Takes two input signals: x and n, and multiplies x by 2 to the power n.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>_,_ : scalb : _
 </code></pre>
-
 <hr />
 <h3 id="malog1p"><code>(ma.)log1p</code></h3>
 <p>Computes log(1 + x) without undue loss of accuracy when x is nearly zero.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>_ : log1p : _
 </code></pre>
-
 <hr />
 <h3 id="malogb"><code>(ma.)logb</code></h3>
 <p>Return exponent of the input signal as a floating-point number.</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>_ : logb : _
 </code></pre>
-
 <hr />
 <h3 id="mailogb"><code>(ma.)ilogb</code></h3>
 <p>Return exponent of the input signal as an integer number.</p>
-<h4 id="usage_15">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>_ : ilogb : _
 </code></pre>
-
 <hr />
 <h3 id="malog2"><code>(ma.)log2</code></h3>
 <p>Returns the base 2 logarithm of x.</p>
-<h4 id="usage_16">Usage</h4>
+<h4 id="usage_17">Usage</h4>
 <pre><code>_ : log2 : _
 </code></pre>
-
 <hr />
 <h3 id="maexpm1"><code>(ma.)expm1</code></h3>
 <p>Return exponent of the input signal minus 1 with better precision.</p>
-<h4 id="usage_17">Usage</h4>
+<h4 id="usage_18">Usage</h4>
 <pre><code>_ : expm1 : _
 </code></pre>
-
 <hr />
 <h3 id="maacosh"><code>(ma.)acosh</code></h3>
 <p>Computes the principle value of the inverse hyperbolic cosine
 of the input signal.</p>
-<h4 id="usage_18">Usage</h4>
+<h4 id="usage_19">Usage</h4>
 <pre><code>_ : acosh : _
 </code></pre>
-
 <hr />
 <h3 id="maasinh"><code>(ma.)asinh</code></h3>
 <p>Computes the inverse hyperbolic sine of the input signal.</p>
-<h4 id="usage_19">Usage</h4>
+<h4 id="usage_20">Usage</h4>
 <pre><code>_ : asinh : _
 </code></pre>
-
 <hr />
 <h3 id="maatanh"><code>(ma.)atanh</code></h3>
 <p>Computes the inverse hyperbolic tangent of the input signal.</p>
-<h4 id="usage_20">Usage</h4>
+<h4 id="usage_21">Usage</h4>
 <pre><code>_ : atanh : _
 </code></pre>
-
 <hr />
 <h3 id="masinh"><code>(ma.)sinh</code></h3>
 <p>Computes the hyperbolic sine of the input signal.</p>
-<h4 id="usage_21">Usage</h4>
+<h4 id="usage_22">Usage</h4>
 <pre><code>_ : sinh : _
 </code></pre>
-
 <hr />
 <h3 id="macosh"><code>(ma.)cosh</code></h3>
 <p>Computes the hyperbolic cosine of the input signal.</p>
-<h4 id="usage_22">Usage</h4>
+<h4 id="usage_23">Usage</h4>
 <pre><code>_ : cosh : _
 </code></pre>
-
 <hr />
 <h3 id="matanh"><code>(ma.)tanh</code></h3>
 <p>Computes the hyperbolic tangent of the input signal.</p>
-<h4 id="usage_23">Usage</h4>
+<h4 id="usage_24">Usage</h4>
 <pre><code>_ : tanh : _
 </code></pre>
-
 <hr />
 <h3 id="maerf"><code>(ma.)erf</code></h3>
 <p>Computes the error function of the input signal.</p>
-<h4 id="usage_24">Usage</h4>
+<h4 id="usage_25">Usage</h4>
 <pre><code>_ : erf : _
 </code></pre>
-
 <hr />
 <h3 id="maerfc"><code>(ma.)erfc</code></h3>
 <p>Computes the complementary error function of the input signal.</p>
-<h4 id="usage_25">Usage</h4>
+<h4 id="usage_26">Usage</h4>
 <pre><code>_ : erfc : _
 </code></pre>
-
 <hr />
 <h3 id="magamma"><code>(ma.)gamma</code></h3>
 <p>Computes the gamma function of the input signal.</p>
-<h4 id="usage_26">Usage</h4>
+<h4 id="usage_27">Usage</h4>
 <pre><code>_ : gamma : _
 </code></pre>
-
 <hr />
 <h3 id="malgamma"><code>(ma.)lgamma</code></h3>
 <p>Calculates the natural logorithm of the absolute value of
 the gamma function of the input signal.</p>
-<h4 id="usage_27">Usage</h4>
+<h4 id="usage_28">Usage</h4>
 <pre><code>_ : lgamma : _
 </code></pre>
-
 <hr />
 <h3 id="maj0"><code>(ma.)J0</code></h3>
 <p>Computes the Bessel function of the first kind of order 0
 of the input signal.</p>
-<h4 id="usage_28">Usage</h4>
+<h4 id="usage_29">Usage</h4>
 <pre><code>_ : J0 : _
 </code></pre>
-
 <hr />
 <h3 id="maj1"><code>(ma.)J1</code></h3>
 <p>Computes the Bessel function of the first kind of order 1
 of the input signal.</p>
-<h4 id="usage_29">Usage</h4>
+<h4 id="usage_30">Usage</h4>
 <pre><code>_ : J1 : _
 </code></pre>
-
 <hr />
 <h3 id="majn"><code>(ma.)Jn</code></h3>
 <p>Computes the Bessel function of the first kind of order n
 (first input signal) of the second input signal.</p>
-<h4 id="usage_30">Usage</h4>
+<h4 id="usage_31">Usage</h4>
 <pre><code>_,_ : Jn : _
 </code></pre>
-
 <hr />
 <h3 id="may0"><code>(ma.)Y0</code></h3>
 <p>Computes the linearly independent Bessel function of the second kind
 of order 0 of the input signal.</p>
-<h4 id="usage_31">Usage</h4>
+<h4 id="usage_32">Usage</h4>
 <pre><code>_ : Y0 : _
 </code></pre>
-
 <hr />
 <h3 id="may1"><code>(ma.)Y1</code></h3>
 <p>Computes the linearly independent Bessel function of the second kind
 of order 1 of the input signal.</p>
-<h4 id="usage_32">Usage</h4>
+<h4 id="usage_33">Usage</h4>
 <pre><code>_ : Y0 : _
 </code></pre>
-
 <hr />
 <h3 id="mayn"><code>(ma.)Yn</code></h3>
 <p>Computes the linearly independent Bessel function of the second kind
 of order n (first input signal) of the second input signal.</p>
-<h4 id="usage_33">Usage</h4>
+<h4 id="usage_34">Usage</h4>
 <pre><code>_,_ : Yn : _
 </code></pre>
-
 <hr />
 <h3 id="mafabs-mafmax-mafmin"><code>(ma.)fabs</code>, <code>(ma.)fmax</code>, <code>(ma.)fmin</code></h3>
 <p>Just for compatibility...</p>
@@ -692,14 +653,12 @@ of order n (first input signal) of the second input signal.</p>
 fmax = max
 fmin = min
 </code></pre>
-
 <hr />
 <h3 id="manp2"><code>(ma.)np2</code></h3>
 <p>Gives the next power of 2 of x.</p>
-<h4 id="usage_34">Usage</h4>
+<h4 id="usage_35">Usage</h4>
 <pre><code>np2(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: an integer</li>
@@ -707,10 +666,9 @@ fmin = min
 <hr />
 <h3 id="mafrac"><code>(ma.)frac</code></h3>
 <p>Gives the fractional part of n.</p>
-<h4 id="usage_35">Usage</h4>
+<h4 id="usage_36">Usage</h4>
 <pre><code>frac(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: a decimal number</li>
@@ -718,10 +676,9 @@ fmin = min
 <hr />
 <h3 id="mamodulo"><code>(ma.)modulo</code></h3>
 <p>Modulus operation.</p>
-<h4 id="usage_36">Usage</h4>
+<h4 id="usage_37">Usage</h4>
 <pre><code>modulo(x,N) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>x</code>: the numerator</li>
@@ -730,11 +687,10 @@ fmin = min
 <hr />
 <h3 id="maisnan"><code>(ma.)isnan</code></h3>
 <p>Return non-zero if x is a NaN.</p>
-<h4 id="usage_37">Usage</h4>
+<h4 id="usage_38">Usage</h4>
 <pre><code>isnan(x)
 _ : isnan : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>x</code>: signal to analyse</li>
@@ -742,11 +698,10 @@ _ : isnan : _
 <hr />
 <h3 id="maisinf"><code>(ma.)isinf</code></h3>
 <p>Return non-zero if x is a positive or negative infinity.</p>
-<h4 id="usage_38">Usage</h4>
+<h4 id="usage_39">Usage</h4>
 <pre><code>isinf(x)
 _ : isinf : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>x</code>: signal to analyse</li>
@@ -754,10 +709,9 @@ _ : isinf : _
 <hr />
 <h3 id="machebychev"><code>(ma.)chebychev</code></h3>
 <p>Chebychev transformation of order n.</p>
-<h4 id="usage_39">Usage</h4>
+<h4 id="usage_40">Usage</h4>
 <pre><code>_ : chebychev(n) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the order of the polynomial</li>
@@ -767,129 +721,55 @@ _ : isinf : _
 T[1](x) = x,
 T[n](x) = 2x*T[n-1](x) - T[n-2](x)
 </code></pre>
-
-<h4 id="reference">Reference</h4>
+<h4 id="reference_1">Reference</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Chebyshev_polynomial">http://en.wikipedia.org/wiki/Chebyshev_polynomial</a></li>
 </ul>
 <hr />
 <h3 id="machebychevpoly"><code>(ma.)chebychevpoly</code></h3>
 <p>Linear combination of the first Chebyshev polynomials.</p>
-<h4 id="usage_40">Usage</h4>
+<h4 id="usage_41">Usage</h4>
 <pre><code>_ : chebychevpoly((c0,c1,...,cn)) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>cn</code>: the different Chebychevs polynomials such that:
     chebychevpoly((c0,c1,...,cn)) = Sum of chebychev(i)*ci</li>
 </ul>
-<h4 id="reference_1">Reference</h4>
+<h4 id="reference_2">Reference</h4>
 <ul>
 <li><a href="http://www.csounds.com/manual/html/chebyshevpoly.html">http://www.csounds.com/manual/html/chebyshevpoly.html</a></li>
 </ul>
 <hr />
 <h3 id="madiffn"><code>(ma.)diffn</code></h3>
 <p>Negated first-order difference.</p>
-<h4 id="usage_41">Usage</h4>
+<h4 id="usage_42">Usage</h4>
 <pre><code>_ : diffn : _
 </code></pre>
-
 <hr />
 <h3 id="masignum"><code>(ma.)signum</code></h3>
 <p>The signum function signum(x) is defined as
 -1 for x&lt;0, 0 for x==0, and 1 for x&gt;0.</p>
-<h4 id="usage_42">Usage</h4>
+<h4 id="usage_43">Usage</h4>
 <pre><code>_ : signum : _
 </code></pre>
-
 <hr />
 <h3 id="manextpow2"><code>(ma.)nextpow2</code></h3>
 <p>The nextpow2(x) returns the lowest integer m such that
 2^m &gt;= x.</p>
-<h4 id="usage_43">Usage</h4>
+<h4 id="usage_44">Usage</h4>
 <pre><code>2^nextpow2(n)
 </code></pre>
-
 <p>Useful for allocating delay lines, e.g., </p>
 <pre><code>delay(2^nextpow2(maxDelayNeeded), currentDelay);
 </code></pre>
-
 <hr />
 <h3 id="mazc"><code>(ma.)zc</code></h3>
 <p>Indicator function for zero-crossing: it returns 1 if a zero-crossing
 occurs, 0 otherwise.</p>
-<h4 id="usage_44">Usage</h4>
-<pre><code>_ : zc : _
-</code></pre>
-
-<h2 id="averaging-functions">Averaging Functions</h2>
-<hr />
-<h3 id="maavg_rect"><code>(ma.)avg_rect</code></h3>
-<p>Moving average.</p>
 <h4 id="usage_45">Usage</h4>
-<pre><code>_ : avg_rect(period) : _
-</code></pre>
-
-<p>Where:</p>
-<ul>
-<li><code>period</code> is the averaging frame in seconds</li>
-</ul>
-<hr />
-<h3 id="maavg_tau">(ma.)avg_tau</h3>
-<p>Averaging function based on a one-pole filter and the tau response time.
-Tau represents the effective length of the one-pole impulse response,
-that is, tau is the integral of the filter's impulse response. This
-response is slower to reach the final value but has less ripples in
-non-steady signals.</p>
-<h4 id="usage_46">Usage</h4>
-<pre><code>_ avg_tau(period) : _
-</code></pre>
-
-<p>Where:</p>
-<ul>
-<li><code>period</code> is the time, in seconds, for the system to decay by 1/e, 
-or to reach 1-1/e of its final value.</li>
-</ul>
-<h4 id="reference_2">Reference</h4>
-<ul>
-<li><a href="https://ccrma.stanford.edu/~jos/mdft/Exponentials.html">https://ccrma.stanford.edu/~jos/mdft/Exponentials.html</a></li>
-</ul>
-<hr />
-<h3 id="maavg_t60">(ma.)avg_t60</h3>
-<p>Averaging function based on a one-pole filter and the t60 response time.
-This response is particularly useful when the system is required to 
-reach the final value after about <code>period</code> seconds.</p>
-<h4 id="usage_47">Usage</h4>
-<pre><code>_ avg_t60(period) : _
-</code></pre>
-
-<p>Where:</p>
-<ul>
-<li><code>period</code> is the time, in seconds, for the system to decay by 1/1000, 
-or to reach 1-1/1000 of its final value.</li>
-</ul>
-<h4 id="reference_3">Reference</h4>
-<ul>
-<li><a href="https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html">https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html</a></li>
-</ul>
-<hr />
-<h3 id="maavg_t19">(ma.)avg_t19</h3>
-<p>Averaging function based on a one-pole filter and the t19 response time.
-This response is close to the moving-average algorithm as it roughly reaches
-the final value after <code>period</code> seconds and shows about the same
-oscillations for non-steady signals.</p>
-<h4 id="usage_48">Usage</h4>
-<pre><code>_ avg_t19(period) : _
-</code></pre>
-
-<p>Where:</p>
-<ul>
-<li><code>period</code> is the time, in seconds, for the system to decay by 1/e^2.2, 
-or to reach 1-1/e^2.2 of its final value.</li>
-</ul>
-<h4 id="reference_4">Reference</h4>
-<p>Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.</p></div>
+<pre><code>_ : zc : _
+</code></pre></div>
             </div>
         </div>
 
@@ -919,7 +799,7 @@ or to reach 1-1/e^2.2 of its final value.</li>
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

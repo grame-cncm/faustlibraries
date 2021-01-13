@@ -9,6 +9,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `demos.lib`
 * `dx7.lib`
 * `envelopes.lib`
+* `fds.lib`
 * `filters.lib`
 * `hoa.lib`
 * `interpolators.lib`

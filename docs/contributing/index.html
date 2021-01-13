@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../libs/fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../libs/filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -243,6 +247,7 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="contributing">Contributing</h1>
+<p>In general, libraries are organised in a <em>stacked manner</em>: the base ones define functions or constants without any dependancies, and additional ones are gradually built on top of simpler ones, layer by layer. <strong>Dependency loops must be avoided as much as possible</strong>. The <em>resources</em> folder contains tools to build and visualise the libraries dependencies graphs.</p>
 <p>If you wish to add a function to any of these libraries or if you plan to add a new library, make sure that you follow the following conventions:</p>
 <h2 id="new-functions">New Functions</h2>
 <ul>
@@ -262,7 +267,6 @@
 // * argument1: argument 1 description
 //-------------------------------------------------
 </code></pre>
-
 <ul>
 <li>Every time a new function is added, the documentation should be updated simply by running <code>make doclib</code>. <!-- TODO --></li>
 <li>The environment system (e.g. <code>os.osc</code>) should be used when calling a function declared in another library (see the section on <em>Using the Faust Libraries</em>).</li>
@@ -304,7 +308,6 @@
 // Description
 //==============================================
 </code></pre>
-
 <ul>
 <li>If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.</li>
 </ul>
@@ -326,6 +329,7 @@ de = library(&quot;delays.lib&quot;);
 dm = library(&quot;demos.lib&quot;);
 dx = library(&quot;dx7.lib&quot;);
 en = library(&quot;envelopes.lib&quot;);
+fd = library(&quot;fds.lib&quot;);
 fi = library(&quot;filters.lib&quot;);
 ho = library(&quot;hoa.lib&quot;);
 it = library(&quot;interpolators.lib&quot;);
@@ -348,13 +352,11 @@ wa = library(&quot;webaudio.lib&quot;);
 vl = library(&quot;version.lib&quot;);
 wd = library(&quot;wavedigitalfilters.lib&quot;);
 </code></pre>
-
 <p>For example, if we wanted to use the <code>smooth</code> function which is now declared in <code>signals.lib</code>, we would do the following:</p>
 <pre><code>import(&quot;stdfaust.lib&quot;);
 
 process = si.smooth(0.999);
 </code></pre>
-
 <p>This standard is only used within the libraries: nothing prevents coders to still import <code>signals.lib</code> directly and call <code>smooth</code> without <code>ro.</code>, etc. It means symbols and function names defined within a library have to be unique to not collide with symbols of any other libraries.  </p>
 <h3 id="demo-functions">"Demo" Functions</h3>
 <p>"Demo" functions are placed in <code>demos.lib</code> and have a built-in user interface (UI). Their name ends with the <code>_demo</code> suffix. Each of these function have a <code>.dsp</code> file associated to them in the <code>/examples</code> folder.</p>
@@ -390,7 +392,7 @@ process = si.smooth(0.999);
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -268,14 +272,12 @@
 <h4 id="usage">Usage</h4>
 <pre><code>noise : _
 </code></pre>
-
 <hr />
 <h3 id="nomultirandom"><code>(no.)multirandom</code></h3>
 <p>Generates multiple decorrelated random numbers in parallel.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>multirandom(n) : si.bus(n)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the number of decorrelated random numbers in parallel</li>
@@ -286,7 +288,6 @@
 <h4 id="usage_2">Usage</h4>
 <pre><code>multinoise(n) : si.bus(n)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the number of decorrelated random numbers in parallel</li>
@@ -301,7 +302,6 @@
 <h4 id="usage_3">Usage</h4>
 <pre><code>pink_noise : _;
 </code></pre>
-
 <h4 id="reference">Reference:</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html">https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html</a></li>
@@ -312,7 +312,6 @@
 <h4 id="usage_4">Usage</h4>
 <pre><code>pink_noise_vm(N) : _;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: number of latched white-noise processes to sum,
@@ -331,7 +330,6 @@
 lfnoiseN(N,rate) : _;  same as &quot;lfnoise0(rate) : lowpass(N,rate)&quot; [see filters.lib]
 lfnoise(rate) : _;     same as &quot;lfnoise0(rate) : seq(i,5,lowpass(N,rate))&quot; (no overshoot)
 </code></pre>
-
 <h4 id="example">Example</h4>
 <p>(view waveforms in faust2octave):</p>
 <pre><code>rate = SR/100.0;  new random value every 100 samples (SR from music.lib)
@@ -339,14 +337,12 @@ process = lfnoise0(rate),    sampled/held noise (piecewise constant)
           lfnoiseN(3,rate),  lfnoise0 smoothed by 3rd order Butterworth LPF
           lfnoise(rate);     lfnoise0 smoothed with no overshoot
 </code></pre>
-
 <hr />
 <h3 id="nosparse_noise_vm"><code>(no.)sparse_noise_vm</code></h3>
 <p>sparse noise generator.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>sparse_noise(f0) : _;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>f0</code>: average frequency of noise impulses per second</li>
@@ -363,7 +359,6 @@ at an average rate of f0 impulses per second.</p>
 <h4 id="usage_7">Usage</h4>
 <pre><code>velvet_noise(amp,f0) : _;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>amp</code>: amplitude of noise impulses (positive and negative)</li>
@@ -382,7 +377,6 @@ at an average rate of f0 impulses per second.</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>gnoise(N) : _;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: number of uniform random numbers added to approximate Gaussian white noise</li>
@@ -420,7 +414,7 @@ at an average rate of f0 impulses per second.</p>
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

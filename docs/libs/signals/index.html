@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -279,28 +283,26 @@
 <h2 id="functions-reference">Functions Reference</h2>
 <hr />
 <h3 id="sibus"><code>(si.)bus</code></h3>
-<p>n parallel cables.
+<p>Put n cables in parallel.
 <code>bus</code> is a standard Faust function.</p>
 <h4 id="usage">Usage</h4>
-<pre><code>bus(n)
+<pre><code>bus(N)
 bus(4) : _,_,_,_
 </code></pre>
-
 <p>Where:</p>
 <ul>
-<li><code>n</code>: is an integer known at compile time that indicates the number of parallel cables.</li>
+<li><code>N</code>: is an integer known at compile time that indicates the number of parallel cables</li>
 </ul>
 <hr />
 <h3 id="siblock"><code>(si.)block</code></h3>
-<p>Block - terminate n signals.
+<p>Block - terminate N signals.
 <code>block</code> is a standard Faust function.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>_,_,... : block(n) : _,...
 </code></pre>
-
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of signals to be blocked</li>
+<li><code>N</code>: the number of signals to be blocked known at compile time </li>
 </ul>
 <hr />
 <h3 id="siinterpolate"><code>(si.)interpolate</code></h3>
@@ -308,7 +310,6 @@ bus(4) : _,_,_,_
 <h4 id="usage_2">Usage</h4>
 <pre><code>_,_ : interpolate(i) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>i</code>: interpolation control between 0 and 1 (0: first input; 1: second input)</li>
@@ -321,7 +322,6 @@ bus(4) : _,_,_,_
 <h4 id="usage_3">Usage</h4>
 <pre><code>hslider(...) : smoo;
 </code></pre>
-
 <hr />
 <h3 id="sipolysmooth"><code>(si.)polySmooth</code></h3>
 <p>A smoothing function based on <code>smooth</code> that doesn't smooth when a
@@ -331,7 +331,6 @@ is the right one when the note is started.</p>
 <h4 id="usage_4">Usage</h4>
 <pre><code>hslider(...) : polySmooth(g,s,d) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>g</code>: the gate/trigger signal used when making polyphonic synths</li>
@@ -348,7 +347,6 @@ smoothed parameter to change when a note-off event is sent.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>hslider(...) : smoothAndH(g,s) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>g</code>: the hold signal (0 for hold, 1 for bypass)</li>
@@ -360,14 +358,12 @@ smoothed parameter to change when a note-off event is sent.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>hslider(...) : bsmooth : _
 </code></pre>
-
 <hr />
 <h3 id="sidot"><code>(si.)dot</code></h3>
 <p>Dot product for two vectors of size N.</p>
 <h4 id="usage_7">Usage</h4>
 <pre><code>_,_,_,_,_,_ : dot(N) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: size of the vectors (int, must be known at compile time)</li>
@@ -379,14 +375,12 @@ smoothed parameter to change when a note-off event is sent.</p>
 <h4 id="usage_8">Usage:</h4>
 <pre><code>_ : smooth(tau2pole(tau)) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>tau</code>: desired smoothing time constant in seconds, or</li>
 </ul>
 <pre><code>hslider(...) : smooth(s) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>s</code>: smoothness between 0 and 1. s=0 for no smoothing, s=0.999 is "very smooth",
@@ -406,7 +400,6 @@ The exponential time-constant is approximately 1/(1-s) samples, when s is close 
 <pre><code>cbus(n)
 cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>n</code>: is an integer known at compile time that indicates the number of parallel cables.</li>
@@ -419,7 +412,6 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h4 id="usage_10">Usage</h4>
 <pre><code>(r1,i1) : cmul(r2,i2) : (_,_);
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li>Each complex number is represented by two real signals as (real,imag), so</li>
@@ -433,7 +425,6 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h4 id="usage_11">Usage</h4>
 <pre><code>(r1,i1) : cconj : (_,_);
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li>Each complex number is represented by two real signals as (real,imag), so</li>
@@ -446,7 +437,6 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h4 id="usage_12">Usage</h4>
 <pre><code>_ : lag_ud(up, dn) : _;
 </code></pre>
-
 <hr />
 <h3 id="sirev"><code>(si.)rev</code></h3>
 <p>Reverse the input signal by blocks of N&gt;0 samples. <code>rev(1)</code> is the indentity
@@ -454,7 +444,6 @@ function. <code>rev(N)</code> has a latency of <code>N-1</code> samples.</p>
 <h4 id="usage_13">Usage</h4>
 <pre><code>_ : rev(N) : _;
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the block size</li>
@@ -488,7 +477,7 @@ function. <code>rev(N)</code> has a latency of <code>N-1</code> samples.</p>
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

@@ -91,6 +91,10 @@
 </li>
                                     
 <li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
     <a href="../filters/" class="dropdown-item"> filters </a>
 </li>
                                     
@@ -310,7 +314,6 @@ with {
    interp_select(sel, gen, idv) = it.interpolator_select(gen, idv, sel);
 };
 </code></pre>
-
 <p>Some tests here:</p>
 <pre><code>wf = waveform {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 50.0, 40.0, 30.0, 20.0, 10.0, 0.0};
 
@@ -358,7 +361,6 @@ with {
    index = (+(1)~_)-1;   /* starting from 0 */
 };
 </code></pre>
-
 <h2 id="two-points-interpolation-functions">Two points interpolation functions</h2>
 <hr />
 <h3 id="itinterpolate_linear"><code>(it.)interpolate_linear</code></h3>
@@ -366,7 +368,6 @@ with {
 <h4 id="usage">Usage</h4>
 <pre><code>interpolate_linear(dv,v0,v1) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>dv</code>: in the fractional value in [0..1] range</li>
@@ -383,7 +384,6 @@ with {
 <h4 id="usage_1">Usage</h4>
 <pre><code>interpolate_cosine(dv,v0,v1) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>dv</code>: in the fractional value in [0..1] range</li>
@@ -401,7 +401,6 @@ with {
 <h4 id="usage_2">Usage</h4>
 <pre><code>interpolate_cubic(dv,v0,v1,v2,v3) : _
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>dv</code>: in the fractional value in [0..1] range</li>
@@ -421,7 +420,6 @@ with {
 <h4 id="usage_3">Usage</h4>
 <pre><code>interpolator_two_points(gen, idv, interpolate_two_points) : _,_... (equal to N = outputs(gen))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
@@ -434,7 +432,6 @@ with {
 <h4 id="usage_4">Usage</h4>
 <pre><code>interpolator_linear(gen, idv) : _,_... (equal to N = outputs(gen))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
@@ -446,7 +443,6 @@ with {
 <h4 id="usage_5">Usage</h4>
 <pre><code>interpolator_cosine(gen, idv) : _,_... (equal to N = outputs(gen))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
@@ -459,7 +455,6 @@ with {
 <h4 id="usage_6">Usage</h4>
 <pre><code>interpolator_four_points(gen, idv, interpolate_four_points) : _,_... (equal to N = outputs(gen))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
@@ -472,7 +467,6 @@ with {
 <h4 id="usage_7">Usage</h4>
 <pre><code>interpolator_cubic(gen, idv) : _,_... (equal to N = outputs(gen))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
@@ -484,7 +478,6 @@ with {
 <h4 id="usage_8">Usage</h4>
 <pre><code>interpolator_select(gen, idv, sel) : _,_... (equal to N = outputs(gen))
 </code></pre>
-
 <p>Where:</p>
 <ul>
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
@@ -520,7 +513,7 @@ with {
                 </p>
                 <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>

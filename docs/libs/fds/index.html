@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> fds  - Faust Libraries</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../.."><img src="../../img/faustText.svg" width="150px"> Libraries</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../organization/" class="dropdown-item"> Organization </a>
+</li>
+                                    
+<li>
+    <a href="../../standardFunctions/" class="dropdown-item"> Standard Functions </a>
+</li>
+                                    
+<li>
+    <a href="../../contributing/" class="dropdown-item"> Contributing </a>
+</li>
+                                    
+<li>
+    <a href="../../copyright/" class="dropdown-item"> Copyright/License </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../" class="nav-link">Index</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../analyzers/" class="dropdown-item"> analyzers </a>
+</li>
+                                    
+<li>
+    <a href="../basics/" class="dropdown-item"> basics </a>
+</li>
+                                    
+<li>
+    <a href="../compressors/" class="dropdown-item"> compressors </a>
+</li>
+                                    
+<li>
+    <a href="../delays/" class="dropdown-item"> delays </a>
+</li>
+                                    
+<li>
+    <a href="../demos/" class="dropdown-item"> demos </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/" class="dropdown-item"> dx7 </a>
+</li>
+                                    
+<li>
+    <a href="../envelopes/" class="dropdown-item"> envelopes </a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active"> fds </a>
+</li>
+                                    
+<li>
+    <a href="../filters/" class="dropdown-item"> filters </a>
+</li>
+                                    
+<li>
+    <a href="../hoa/" class="dropdown-item"> hoa </a>
+</li>
+                                    
+<li>
+    <a href="../interpolators/" class="dropdown-item"> interpolators </a>
+</li>
+                                    
+<li>
+    <a href="../maths/" class="dropdown-item"> maths </a>
+</li>
+                                    
+<li>
+    <a href="../mi/" class="dropdown-item"> mi </a>
+</li>
+                                    
+<li>
+    <a href="../misceffects/" class="dropdown-item"> misceffects </a>
+</li>
+                                    
+<li>
+    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
+</li>
+                                    
+<li>
+    <a href="../noises/" class="dropdown-item"> noises </a>
+</li>
+                                    
+<li>
+    <a href="../phaflangers/" class="dropdown-item"> phaflangers </a>
+</li>
+                                    
+<li>
+    <a href="../physmodels/" class="dropdown-item"> physmodels </a>
+</li>
+                                    
+<li>
+    <a href="../quantizer/" class="dropdown-item"> quantizer </a>
+</li>
+                                    
+<li>
+    <a href="../reducemaps/" class="dropdown-item"> reducemaps </a>
+</li>
+                                    
+<li>
+    <a href="../reverbs/" class="dropdown-item"> reverbs </a>
+</li>
+                                    
+<li>
+    <a href="../routes/" class="dropdown-item"> routes </a>
+</li>
+                                    
+<li>
+    <a href="../signals/" class="dropdown-item"> signals </a>
+</li>
+                                    
+<li>
+    <a href="../soundfiles/" class="dropdown-item"> soundfiles </a>
+</li>
+                                    
+<li>
+    <a href="../spats/" class="dropdown-item"> spats </a>
+</li>
+                                    
+<li>
+    <a href="../synths/" class="dropdown-item"> synths </a>
+</li>
+                                    
+<li>
+    <a href="../vaeffects/" class="dropdown-item"> vaeffects </a>
+</li>
+                                    
+<li>
+    <a href="../wavedigitalfilters/" class="dropdown-item"> wavedigitalfilters </a>
+</li>
+                                    
+<li>
+    <a href="../webaudio/" class="dropdown-item"> webaudio </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <div class="container">
+            <div class="row"><div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#fdslib" class="nav-link">fds.lib</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#sources" class="nav-link">Sources</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#model-construction" class="nav-link">Model Construction</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#fdsmodel1d" class="nav-link">(fds.)model1D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsmodel2d" class="nav-link">(fds.)model2D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#interpolation" class="nav-link">Interpolation</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#fdsstairsinterp1d" class="nav-link">(fds.)stairsInterp1D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsstairsinterp2d" class="nav-link">(fds.)stairsInterp2D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdslininterp1d" class="nav-link">(fds.)linInterp1D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdslininterp2d" class="nav-link">(fds.)linInterp2D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsstairsinterp1dout" class="nav-link">(fds.)stairsInterp1DOut</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsstairsinterp2dout" class="nav-link">(fds.)stairsInterp2DOut</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdslininterp1dout" class="nav-link">(fds.)linInterp1DOut</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsstairsinterp2dout_1" class="nav-link">(fds.)stairsInterp2DOut</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#routing" class="nav-link">Routing</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#fdsroute1d" class="nav-link">(fds.)route1D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsroute2d" class="nav-link">(fds.)route2D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#scheme-operations" class="nav-link">Scheme Operations</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#fdsschemepoint" class="nav-link">(fds.)schemePoint</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsbuildscheme1d" class="nav-link">(fds.)buildScheme1D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsbuildscheme2d" class="nav-link">(fds.)buildScheme2D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#interaction-models" class="nav-link">Interaction Models</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#fdshammer" class="nav-link">(fds.)hammer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fdsbow" class="nav-link">(fds.)bow</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9 main-container" role="main">
+
+<h1 id="fdslib">fds.lib</h1>
+<p>This library allows to build linear, explicit finite difference schemes
+physical models in 1 or 2 dimensions using an approach based on the cellular
+automata formalism.
+In order to use the library, one needs to discretize the linear partial
+differential equation of the desired system both at boundaries and in-between
+them, thus obtaining a set of explicit recursion relations. Each one
+of these will provide, for each spatial point the scalar coefficients to be
+multiplied by the states of the current and past neighbour points.
+Coefficients need to be stacked in parallel in order to form a coefficients
+matrix for each point in the mesh. It is necessary to provide one matrix for
+coefficients matrices are defined, they need to be placed in parallel and
+ordered following the desired mesh structure (i.e., coefficients for the top
+left boundaries will come first, while bottom right boundaries will come
+last), to form a <em>coefficients scheme</em>, which can be used with the library
+functions.</p>
+<h2 id="sources">Sources</h2>
+<p>Here are listed some works on finite difference schemes and cellular
+automata thet were the basis for the implementation of this library</p>
+<ul>
+<li>S. Bilbao, Numerical Sound Synthesis.Chichester,UK: John Wiley  Sons,
+Ltd, 2009</li>
+<li>P.  Narbel, "Qualitative  and  quantitative  cellular  automata from
+differential equations," Lecture Notes inComputer Science, vol. 4173,
+pp. 112–121, 10 2006</li>
+<li>X.-S. Yang and Y. Young,Cellular Automata, PDEs, and Pattern Formation.
+Chapman &amp; Hall/CRC, 092005, ch. 18, pp. 271–282.</li>
+</ul>
+<h2 id="model-construction">Model Construction</h2>
+<p>Once the coefficients scheme is defined, the user can simply call one of
+these functions to obtain a fully working physical model. They expect to
+receive a force input signal for each mesh point and output the state of each
+point. Interpolation operators can be used to drive external forces to the
+desired points, and to get the signal only from a certain area of the mesh.</p>
+<hr />
+<h3 id="fdsmodel1d"><code>(fds.)model1D</code></h3>
+<p>This function can be used to obtain a physical model in 1 dimension.
+Takes a force input signal for each point and outputs the state of each
+point.</p>
+<h4 id="usage">Usage</h4>
+<pre><code>si.bus(points) : model1D(points,R,T,scheme) : si.bus(points)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>points</code>: size of the mesh in points</li>
+<li><code>R</code>: neighbourhood radius, indicates how many side points are needed (i.e.
+       if R=1 the mesh depends on one point on the left and one on the right)</li>
+<li><code>T</code>: time coefficient, indicates how much steps back in time are needed (i.
+       e. if T=1 the maximum delay needed for a neighbour state is 1 sample)</li>
+<li><code>scheme</code>: coefficients scheme</li>
+</ul>
+<hr />
+<h3 id="fdsmodel2d"><code>(fds.)model2D</code></h3>
+<p>This function can be used to obtain a physical model in 2 dimension.
+Takes a force input signal for each point and outputs the state of each
+point.
+IMPORTANT: 2D models with more than 30x20 points might crash the c++
+compiler. 2D models need to be compiled with the command line compiler,
+the online one presents some issues.</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>si.bus(pointsX*pointsY) : model2D(pointsX,pointsY,R,T,scheme) :
+   si.bus(pointsX*pointsY)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pointsX</code>: horizontal size of the mesh in points</li>
+<li><code>pointsY</code>: vertical size of the mesh in points</li>
+<li><code>R</code>: neighbourhood radius, indicates how many side points are needed (i.e.
+       if R=1 the mesh depends on one point on the left and one on the right)</li>
+<li><code>T</code>: time coefficient, indicates how much steps back in time are needed (i.
+       e. if T=1 the maximum delay needed for a neighbour state is 1 sample)</li>
+<li><code>scheme</code>: coefficients scheme</li>
+</ul>
+<h2 id="interpolation">Interpolation</h2>
+<p>Interpolation functions can be used to drive the input signals to the
+correct mesh points, or to get the output signal from the
+desired points. All the interpolation functions allow to change the
+input/output points at run time. In general, all these functions get in
+input a number of connections, and output the same number of connections,
+where each signal is multiplied by zero except the ones specified by the
+arguments.</p>
+<hr />
+<h3 id="fdsstairsinterp1d"><code>(fds.)stairsInterp1D</code></h3>
+<p>Stairs interpolator in 1 dimension. Takes a number of signals and outputs
+the same number of signals, where each one is multiplied by zero except the
+one specified by the argument. This can vary at run time (i.e. a slider),
+but must be an integer.</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>si.bus(points) : stairsInterp1D(points,point) : si.bus(points)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>points</code>: total number of points in the mesh</li>
+<li><code>point</code>: number of the desired nonzero signal</li>
+</ul>
+<hr />
+<h3 id="fdsstairsinterp2d"><code>(fds.)stairsInterp2D</code></h3>
+<p>Stairs interpolator in 2 dimensions. Similar to the 1-D version.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>si.bus(pointsX*pointsY) : stairsInterp2D(pointsX,pointsY,pointX,pointY) :
+   si.bus(pointsX*pointsY)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pointsX</code>: total number of points in the X direction</li>
+<li><code>pointsY</code>: total number of points in the Y direction</li>
+<li><code>pointX</code>: horizontal index of the desired nonzero signal</li>
+<li><code>pointY</code>: vertical index of the desired nonzero signal</li>
+</ul>
+<hr />
+<h3 id="fdslininterp1d"><code>(fds.)linInterp1D</code></h3>
+<p>Linear interpolator in 1 dimension. Takes a number of signals and outputs
+the same number of signals, where each one is multiplied by zero except two
+signals around a floating point index. This is essentially a Faust
+implementation of the $J(x_i)$ operator, not scaled by the spatial step.
+(see Stefan Bilbao's book, Numerical Sound Synthesis). The index can vary
+at run time.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>si.bus(points) : linInterp1D(points,point) : si.bus(points)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>points</code>: total number of points in the mesh</li>
+<li><code>point</code>: floating point index</li>
+</ul>
+<hr />
+<h3 id="fdslininterp2d"><code>(fds.)linInterp2D</code></h3>
+<p>Linear interpolator in 2 dimensions. Similar to the 1 D version.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>si.bus(pointsX*pointsY) : linInterp2D(pointsX,pointsY,pointX,pointY) :
+   si.bus(pointsX*pointsY)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pointsX</code>: total number of points in the X direction</li>
+<li><code>pointsY</code>: total number of points in the Y direction</li>
+<li><code>pointX</code>: horizontal float index</li>
+<li><code>pointY</code>: vertical float index</li>
+</ul>
+<hr />
+<h3 id="fdsstairsinterp1dout"><code>(fds.)stairsInterp1DOut</code></h3>
+<p>Stairs interpolator in 1 dimension. Similar to stairsInterp1D, except it
+outputs only the desired signal.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>si.bus(points) : stairsInterp1DOut(points,point) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>points</code>: total number of points in the mesh</li>
+<li><code>point</code>: number of the desired nonzero signal</li>
+</ul>
+<hr />
+<h3 id="fdsstairsinterp2dout"><code>(fds.)stairsInterp2DOut</code></h3>
+<p>Stairs interpolator in 2 dimensions which outputs only one signal.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>si.bus(pointsX*pointsY) : stairsInterp2DOut(pointsX,pointsY,pointX,pointY) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pointsX</code>: total number of points in the X direction</li>
+<li><code>pointsY</code>: total number of points in the Y direction</li>
+<li><code>pointX</code>: horizontal index of the desired nonzero signal</li>
+<li><code>pointY</code>: vertical index of the desired nonzero signal</li>
+</ul>
+<hr />
+<h3 id="fdslininterp1dout"><code>(fds.)linInterp1DOut</code></h3>
+<p>Linear interpolator in 1 dimension. Similar to stairsInterp1D, except it
+sums each output signal and provides only one output value.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>si.bus(points) : linInterp1DOut(points,point) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>points</code>: total number of points in the mesh</li>
+<li><code>point</code>: floating point index</li>
+</ul>
+<hr />
+<h3 id="fdsstairsinterp2dout_1"><code>(fds.)stairsInterp2DOut</code></h3>
+<p>Linear interpolator in 2 dimensions which outputs only one signal.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>si.bus(pointsX*pointsY) : linInterp2DOut(pointsX,pointsY,pointX,pointY) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pointsX</code>: total number of points in the X direction</li>
+<li><code>pointsY</code>: total number of points in the Y direction</li>
+<li><code>pointX</code>: horizontal float index</li>
+<li><code>pointY</code>: vertical float index</li>
+</ul>
+<h2 id="routing">Routing</h2>
+<p>The routing functions are used internally by the model building functions,
+but can also be taken separately. These functions route the forces, the
+coefficients scheme and the neighbours’ signals into the correct scheme
+points and take as input, in this order: the coefficients block, the
+feedback signals and the forces. In output they provide, in order, for each
+scheme point: the force signal, the coefficient matrices and the neighbours’
+signals. These functions are based on the Faust route primitive.</p>
+<hr />
+<h3 id="fdsroute1d"><code>(fds.)route1D</code></h3>
+<p>Routing function for 1 dimensional schemes.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>si.bus((2*R+1)*(T+1)*points),si.bus(points*2) : route1D(points, R, T) :
+   si.bus((1 + ((2*R+1)*(T+1)) + (2*R+1))*points)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>points</code>: total number of points in the mesh</li>
+<li><code>R</code>: neighbourhood radius</li>
+<li><code>T</code>: time coefficient</li>
+</ul>
+<hr />
+<h3 id="fdsroute2d"><code>(fds.)route2D</code></h3>
+<p>Routing function for 2 dimensional schemes.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>si.bus((2*R+1)^2*(T+1)*pointsX*pointsY),si.bus(pointsX*pointsY*2) :
+   route2D(pointsX, pointsY, R, T) :
+       si.bus((1 + ((2*R+1)^2*(T+1)) + (2*R+1)^2)*pointsX*pointsY)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pointsX</code>: total number of points in the X direction</li>
+<li><code>pointsY</code>: total number of points in the Y direction</li>
+<li><code>R</code>: neighbourhood radius</li>
+<li><code>T</code>: time coefficient</li>
+</ul>
+<h2 id="scheme-operations">Scheme Operations</h2>
+<p>The scheme operation functions are used internally by the model building
+functions but can also be taken separately. The schemePoint function is
+where the update equation is actually calculated. The buildScheme functions
+are used to stack in parallel several schemePoint blocks, according to the
+choosed mesh size.</p>
+<hr />
+<h3 id="fdsschemepoint"><code>(fds.)schemePoint</code></h3>
+<p>This function calculates the next state for each mesh point, in order to
+form a scheme, several of these blocks need to be stacked in parallel.
+This function takes in input, in order, the force, the coefficient matrices
+and the neighbours’ signals and outputs the next point state.</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>_,si.bus((2*R+1)^D*(T+1)),si.bus((2*R+1)^D) : schemePoint(R,T,D) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>R</code>: neighbourhood radius</li>
+<li><code>T</code>: time coefficient</li>
+<li><code>D</code>: scheme spatial dimensions (i.e. 1 if 1-D, 2 if 2-D)</li>
+</ul>
+<hr />
+<h3 id="fdsbuildscheme1d"><code>(fds.)buildScheme1D</code></h3>
+<p>This function is used to stack in parallel several schemePoint functions in
+1 dimension, according to the number of points.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>si.bus((1 + ((2*R+1)*(T+1)) + (2*R+1))*points) : buildScheme1D(points,R,T) :
+   si.bus(points)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>points</code>: total number of points in the mesh</li>
+<li><code>R</code>: neighbourhood radius</li>
+<li><code>T</code>: time coefficient</li>
+</ul>
+<hr />
+<h3 id="fdsbuildscheme2d"><code>(fds.)buildScheme2D</code></h3>
+<p>This function is used to stack in parallel several schemePoint functions in
+2 dimensions, according to the number of points in the X and Y directions.</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>si.bus((1 + ((2*R+1)^2*(T+1)) + (2*R+1)^2)*pointsX*pointsY) :
+   buildScheme2D(pointsX,pointsY,R,T) : si.bus(pointsX*pointsY)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pointsX</code>: total number of points in the X direction</li>
+<li><code>pointsY</code>: total number of points in the Y direction</li>
+<li><code>R</code>: neighbourhood radius</li>
+<li><code>T</code>: time coefficient</li>
+</ul>
+<h2 id="interaction-models">Interaction Models</h2>
+<p>Here are defined two physically based interaction algorithms: a hammer and
+a bow. These functions need to be coupled to the mesh pde, in the point
+where the interaction happens: to do so, the mesh output signals can be fed
+back and driven into the force block using the interpolation operators.
+The latters can be also used to drive the single force output signal to the
+correct scheme points.</p>
+<hr />
+<h3 id="fdshammer"><code>(fds.)hammer</code></h3>
+<p>Implementation of a nonlinear collision model. The hammer is essentially a
+finite difference scheme of a linear damped oscillator, which is coupled
+with the mesh through the collision model (see Stefan Bilbao's book,
+Numerical Sound Synthesis).</p>
+<h4 id="usage_15">Usage</h4>
+<pre><code>_ :hammer(coeff,omega0Sqr,sigma0,kH,alpha,k,offset,fIn) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>coeff</code>: output force scaling coefficient</li>
+<li><code>omega0Sqr</code>: squared angular frequency of the hammer oscillator</li>
+<li><code>sigma0</code>: damping coefficient of the hammer oscillator</li>
+<li><code>kH</code>: hammer stiffness coefficient</li>
+<li><code>alpha</code>: nonlinearity parameter</li>
+<li><code>k</code>: time sampling step (the same as for the mesh)</li>
+<li><code>offset</code>: distance between the string and the hammer at rest in meters</li>
+<li><code>fIn</code>: hammer excitation signal (i.e. a button)</li>
+</ul>
+<hr />
+<h3 id="fdsbow"><code>(fds.)bow</code></h3>
+<p>Implementation of a nonlinear friction based interaction model that induces
+Helmholtz motion. (see Stefan Bilbao's book, Numerical Sound Synthesis).</p>
+<h4 id="usage_16">Usage</h4>
+<pre><code>_ :bow(coeff,alpha,k,vb) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>coeff</code>: output force scaling coefficient</li>
+<li><code>alpha</code>: nonlinearity parameter</li>
+<li><code>k</code>: time sampling step (the same as for the mesh)</li>
+<li><code>vb</code>: bow velocity [m/s]</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2019-2020 <a href="https://www.grame.fr">Grame-CNCM</a></p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
