@@ -50,10 +50,9 @@ declare abs_envelope_rect license "MIT-style STK-4.3 license";
 abs_envelope_rect(period, x) = abs(x) : fi.avg_rect(period);
 
 
-
 //------------------`(an.)abs_envelope_tau`------------------------------------
 // Absolute value average with one-pole lowpass and tau response. 
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -75,7 +74,7 @@ abs_envelope_tau(period, x) = abs(x) : fi.avg_tau(period);
 
 //------------------`(an.)abs_envelope_t60`------------------------------------
 // Absolute value average with one-pole lowpass and t60 response.
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -97,7 +96,7 @@ abs_envelope_t60(period, x) = abs(x) : fi.avg_t60(period);
 
 //------------------`(an.)abs_envelope_t19`------------------------------------
 // Absolute value average with one-pole lowpass and t19 response. 
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -215,7 +214,7 @@ ms_envelope_rect(period, x) = x * x : fi.avg_rect(period);
 
 //------------------`(an.)ms_envelope_tau`-------------------------------------
 // Mean square average with one-pole lowpass and tau response. 
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -237,7 +236,7 @@ ms_envelope_tau(period, x) = x * x : fi.avg_tau(period);
 
 //------------------`(an.)ms_envelope_t60`-------------------------------------
 // Mean square with one-pole lowpass and t60 response. 
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -259,7 +258,7 @@ ms_envelope_t60(period, x) = x * x : fi.avg_t60(period);
 
 //------------------`(an.)ms_envelope_t19`-------------------------------------
 // Mean square with one-pole lowpass and t19 response. 
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -302,7 +301,7 @@ rms_envelope_rect(period, x) = ms_envelope_rect(period, x) : sqrt;
 
 //------------------`(an.)rms_envelope_tau`------------------------------------
 // Root mean square with one-pole lowpass and tau response.
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -324,7 +323,7 @@ rms_envelope_tau(period, x) = ms_envelope_tau(period, x) : sqrt;
 
 //------------------`(an.)rms_envelope_t60`------------------------------------
 // Root mean square with one-pole lowpass and t60 response.
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -346,7 +345,7 @@ rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
 
 //------------------`(an.)rms_envelope_t19`------------------------------------
 // Root mean square with one-pole lowpass and t19 response.
-// (See maths.lib.)
+// (See filters.lib.)
 //
 // #### Usage
 //
@@ -364,6 +363,7 @@ declare rms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare rms_envelope_t19 license "MIT-style STK-4.3 license";
 rms_envelope_t19(period, x) = ms_envelope_t19(period, x) : sqrt;
+
 
 //-----------------------`(an.)zcr`--------------------------------------------
 // Zero-crossing rate (ZCR) with one-pole lowpass averaging based on the tau 
@@ -389,6 +389,7 @@ declare zcr copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare zcr license "MIT-style STK-4.3 license";
 zcr(period, x) = ma.zc(x) : fi.lptau(period);
+
 
 //=============================Spectrum-Analyzers=========================================
 // Spectrum-analyzers split the input signal into a bank of parallel signals, one for
@@ -804,6 +805,7 @@ with {
     w(k) = 2.0*ma.PI*float(k)/float(N);
   };
 };
+
 
 // ========== FFT Analyzers ==========
 rfft_analyzer_c(N) = an.rtocv(N) : an.fft(N) : an.c_select_pos_freqs(N); // complex spectral bins 0 to N/2
