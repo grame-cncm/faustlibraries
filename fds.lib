@@ -323,7 +323,7 @@ linInterp2DOut(pointsX,pointsY,pointX,pointY) =
 // * `T`: time coefficient
 //------------------------------------------------------------------------------
 route1D(points, R, T) = route(points*2+points*nCoeffs, points*nInputs,
-                                par(x, nPoints, connections(x)))
+                                par(x, points, connections(x)))
 with
 {
     connections(x) =  par(k,nCoeffs,x*nCoeffs+k+1,C(x,k+1)),
@@ -502,7 +502,7 @@ with
     hammerForce(uh,u)=select2((uh-u)>0,0,((uh-u)^alpha)*(-kH));
     A = (2-omega0Sqr^2*k^2)/(1+sigma0*k);
     B = (-1)*(1-sigma0*k)/(1+sigma0*k);
-    forceCoeff = k^2/(1+sigma0*K);
+    forceCoeff = k^2/(1+sigma0*k);
 };
 
 //---------------------------------`(fd.)bow`-------------------------------
