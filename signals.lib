@@ -101,7 +101,10 @@ interpolate(i,x,y) = x + i*(y-x);
 
 //------------------------`(si.)smoo`---------------------------------------
 // Smoothing function based on `smooth` ideal to smooth UI signals
-// (sliders, etc.) down.
+// (sliders, etc.) down. Approximately, this is a 7 Hz one-pole
+// low-pass considering the coefficient calculation:
+//    exp(-2pi*CF/SR).
+//
 // `smoo` is a standard Faust function.
 //
 // #### Usage
@@ -110,7 +113,7 @@ interpolate(i,x,y) = x + i*(y-x);
 // hslider(...) : smoo;
 // ```
 //---------------------------------------------------------------------
-smoo = si.smooth(0.999);
+smoo = si.smooth(1 - 44.1 / ma.SR);
 
 //-----------------------`(si.)polySmooth`--------------------------------
 // A smoothing function based on `smooth` that doesn't smooth when a
