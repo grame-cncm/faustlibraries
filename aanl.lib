@@ -19,10 +19,7 @@
 // x * f(x) term, particularly because of the necessity of the dilogarithm 
 // function, which requires special implementation.
 //
-// In general, the first-order antialiasing functions are stable
-// for broad range of amplitudes and frequencies in the input
-// signals, whereas the second-order ones may be used for specific
-// cases. Future improvements to this library may include an adaptive
+// Future improvements to this library may include an adaptive
 // mechanism to set the ill-conditioned cases threshold to improve
 // performance in varying cases.
 //
@@ -71,7 +68,7 @@ Rsqrt(x) = sqrt(max(0.0, x));
 
 // ---------- Real-valued log() ------------------------------------------------
 //
-Rlog(x) = log(max(EPS, x));
+Rlog(x) = log(max(ma.EPSILON, x));
 // -----------------------------------------------------------------------------
 
 // ---------- Real-valued tan() ------------------------------------------------
@@ -106,7 +103,7 @@ Rsinh(x) = clip(-MAX, MAX, ma.sinh(x));
 
 // ---------- Real-valued atanh() ----------------------------------------------
 //
-Ratanh(x) = ma.atanh(clip(-1.0 + EPS, 1.0 - EPS, x));
+Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 // -----------------------------------------------------------------------------
 
 // ---------- Generalised first-order ADAA function ----------------------------
