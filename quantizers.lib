@@ -3,9 +3,10 @@
 //########################################################################################
 
 ba = library("basics.lib");
+it = library("interpolators.lib");
 
 declare name "Faust Frequency Quantization Library";
-declare version "0.0";
+declare version "0.1";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -39,6 +40,56 @@ For more information, please refer to <http://unlicense.org/>
 ************************************************************************
 ************************************************************************/
 
+MinFreq = 8;
+MaxFreq = 20000;
+TableSize = 256;
+
+qLog(x) = tabulateLocal(1,log(_),TableSize,MinFreq,MaxFreq,x).cub;
+qSmooth(x) = tabulateLocal(1,0.5*atan(_*20-10)/1.4711+0.5,TableSize,0,1,x).cub;
+
+tabulateLocal(C, fun, size, r0, r1, x) = environment {
+
+    // Maximum index to access
+    mid = size-1;
+
+    // Create the table
+    wf(size) = r0 + float(ba.time)*(r1-r0)/float(mid) : fun;
+
+    // Prepare the 'float' table read index
+    id = (x-r0)/(r1-r0)*mid;
+
+    // Limit the table read index in [0, mid] if C = 1
+    rid(x, 0) = x;
+    rid(x, 1) = max(0, min(x, mid));
+
+    // Tabulate an unary 'fun' function on a range [r0, r1]
+    val = y0 with { y0 = rdtable(size, wf(size), rid(int(id), C)); };
+
+    // Tabulate an unary 'fun' function on a range [r0, r1] with linear interpolation
+    lin = it.interpolate_linear(d,y0,y1)
+    with {
+        x0 = int(id);
+        x1 = x0+1;
+        d  = id-x0;
+        y0 = rdtable(size, wf(size), rid(x0, C));
+        y1 = rdtable(size, wf(size), rid(x1, C));
+    };
+
+    // Tabulate an unary 'fun' function on a range [r0, r1] with cubic interpolation
+    cub = it.interpolate_cubic(d,y0,y1,y2,y3)
+    with {
+        x0 = x1-1;
+        x1 = int(id);
+        x2 = x1+1;
+        x3 = x2+1;
+        d  = id-x1;
+        y0 = rdtable(size, wf(size), rid(x0, C));
+        y1 = rdtable(size, wf(size), rid(x1, C));
+        y2 = rdtable(size, wf(size), rid(x2, C));
+        y3 = rdtable(size, wf(size), rid(x3, C));
+    };
+};
+
 
 //-------`(qu.)quantize`----------
 // Configurable frequency quantization tool. Outputs only the frenquencies that are part of the specified scale.
@@ -55,11 +106,11 @@ For more information, please refer to <http://unlicense.org/>
 // * `rf` : frequency of the root note of the scale.
 // * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency.
 //------------------------
-quantize(rf,nl) = _:min(max(8,_),30000)<: octave, _ <: _, !, noteRatio(nN) : rf * _ * _                       
+quantize(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
 with{
-    octave = log(_/rf)/log(2)<:
-        (_<0)*(1/(pow(2,max(0,(-1*(_-1)):int))))+
-        (_>=0)*(pow(2,_:int));
+    octave = (qLog(_)-log(rf))/log(2)<:
+        (_<0)*(1/(1<<(-1*(_-1)):int))+
+        (_>=0)*(1<<(_:int));
     nN = ba.count(nl);
     noteRatio(1,oct) = 1;
     noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*ba.take(n,nl)+
@@ -84,11 +135,11 @@ with{
 // * `rf` : frequency of the root note of the scale.
 // * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency.
 //------------------------
-quantizeSmoothed(rf,nl) = _:min(max(8,_),30000)<: octave, _ <: _, !, noteRatio(nN) : rf * _ * _                       
+quantizeSmoothed(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
 with{
-    octave = log(_/rf)/log(2)<:
-        (_<0)*(1/(pow(2,max(0,(-1*(_-1)):int))))+
-        (_>0)*(pow(2,_:int))+
+    octave = (qLog(_)-log(rf))/log(2)<:
+        (_<0)*(1/(1<<(-1*(_-1)):int))+
+        (_>0)*(1<<(_:int))+
 		(_==0)*2;
     nN = ba.count(nl);
     noteRatio(1,oct) = findValue(1,oct);
@@ -99,7 +150,7 @@ with{
             (((_/oct)/rf)-ba.take(n,nl))/((ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl)))
                     +(n==nN)*
             (((_/oct)/rf)-ba.take(n,nl))/(2-ba.take(n,nl)):       
-            0.5*atan(_*20-10)/1.4711+0.5 :  //smoothing curve
+            qSmooth :  //smoothing curve
             _*(
                 (n<nN)*(ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl))+
                 (n==nN)*(2-ba.take(n,nl))
