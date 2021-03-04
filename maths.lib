@@ -54,9 +54,6 @@ declare license "LGPL with exception";
 
 // This library contains platform specific constants 
 pl = library("platform.lib");
-ba = library("basics.lib");
-si = library("signals.lib");
-fi = library("filters.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
 
 //=============================Functions Reference========================================
@@ -97,7 +94,19 @@ BS = fvariable(int count, <math.h>);
 // PI : _
 // ```
 //-----------------------------------------------------------------------------
-PI = 3.1415926535897932385;
+PI = 3.14159265358979323846;
+
+
+//---------------------------------`(ma.)E`---------------------------------------
+// Constant e in double precision.
+//
+// #### Usage
+//
+// ```
+// E : _
+// ```
+//-----------------------------------------------------------------------------
+E = 2.71828182845904523536;
 
 
 //---------------------------------`(ma.)EPSILON`---------------------------------------
@@ -153,7 +162,9 @@ quadprecision INFINITY = 1.7976931348623158e+308;
 // _ : FTZ : _
 // ```
 //
-// See : <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
+// #### Reference
+//
+// <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
 //-----------------------------------------------------------------------------
 FTZ(x) = x * (abs(x) > MIN);
 
@@ -709,113 +720,3 @@ nextpow2(x) = ceil(log(x)/log(2.0));
 //-----------------------------------------------------------------------------
 zc(x) = x * x' < 0;
 
-
-//============================Averaging Functions==============================
-//=============================================================================
-//
-// These are a set of samplerate independent averaging functions based on
-// moving-average and one-pole filters with specific response characteristics.
-
-//----------------------------`(ma.)avg_rect`----------------------------------
-// Moving average.
-//
-// #### Usage
-//
-// ```
-// _ : avg_rect(period) : _
-// ```
-//
-// Where:
-//
-// * `period` is the averaging frame in seconds
-//-----------------------------------------------------------------------------
-declare avg_rect author "Dario Sanfilippo and Julius O. Smith III";
-declare avg_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
-      <sanfilippo.dario@gmail.com> and 
-       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare avg_rect license "MIT-style STK-4.3 license";
-avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
-
-
-//----------------------------(ma.)avg_tau-------------------------------------
-// Averaging function based on a one-pole filter and the tau response time.
-// Tau represents the effective length of the one-pole impulse response,
-// that is, tau is the integral of the filter's impulse response. This
-// response is slower to reach the final value but has less ripples in
-// non-steady signals.
-// 
-// #### Usage
-//
-// ```
-// _ avg_tau(period) : _
-// ```
-//
-// Where:
-//
-// * `period` is the time, in seconds, for the system to decay by 1/e, 
-// or to reach 1-1/e of its final value.
-//
-// #### Reference
-// <https://ccrma.stanford.edu/~jos/mdft/Exponentials.html>
-//-----------------------------------------------------------------------------
-declare avg_tau author "Dario Sanfilippo and Julius O. Smith III";
-declare avg_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
-      <sanfilippo.dario@gmail.com> and 
-       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare avg_tau license "MIT-style STK-4.3 license";
-avg_tau(period, x) = fi.lptau(period, x);
-
-
-//----------------------------(ma.)avg_t60-------------------------------------
-// Averaging function based on a one-pole filter and the t60 response time.
-// This response is particularly useful when the system is required to 
-// reach the final value after about `period` seconds.
-// 
-// #### Usage
-//
-// ```
-// _ avg_t60(period) : _
-// ```
-//
-// Where:
-//
-// * `period` is the time, in seconds, for the system to decay by 1/1000, 
-// or to reach 1-1/1000 of its final value.
-//
-// #### Reference
-// <https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html>
-//-----------------------------------------------------------------------------
-declare avg_t60 author "Dario Sanfilippo and Julius O. Smith III";
-declare avg_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
-      <sanfilippo.dario@gmail.com> and 
-       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare avg_t60 license "MIT-style STK-4.3 license";
-avg_t60(period, x) = fi.lpt60(period, x);
-
-
-//----------------------------(ma.)avg_t19-------------------------------------
-// Averaging function based on a one-pole filter and the t19 response time.
-// This response is close to the moving-average algorithm as it roughly reaches
-// the final value after `period` seconds and shows about the same
-// oscillations for non-steady signals.
-//
-// #### Usage
-//
-// ```
-// _ avg_t19(period) : _
-// ```
-//
-// Where:
-//
-// * `period` is the time, in seconds, for the system to decay by 1/e^2.2, 
-// or to reach 1-1/e^2.2 of its final value.
-//
-// #### Reference
-// Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.
-//-----------------------------------------------------------------------------
-declare avg_t19 author "Dario Sanfilippo and Julius O. Smith III";
-declare avg_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
-      <sanfilippo.dario@gmail.com> and
-       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare avg_t19 license "MIT-style STK-4.3 license";
-avg_t19(period, x) = fi.lpt19(period, x); 

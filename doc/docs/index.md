@@ -2,6 +2,12 @@
 
 The Faust libraries implement hundreds of DSP functions for audio processing and synthesis. They are organized by types in a set of `.lib` files (e.g., `envelopes.lib`, `filters.lib`, etc.). 
 
+This website serves as the main documentation of the Faust libraries. The main Faust website can be found at the following URL:
+
+<center>
+<a href="https://faust.grame.fr" style="font-size:16pt; font-weight:bold;">https://faust.grame.fr</a>
+</center> 
+
 ## Using the Faust Libraries
 
 The easiest and most standard way to use the Faust libraries is to import `stdfaust.lib` in your Faust code:
@@ -20,6 +26,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `dm`: `demos.lib`
 * `dx`: `dx7.lib`
 * `en`: `envelopes.lib`
+* `fd`: `fds.lib`
 * `fi`: `filters.lib`
 * `ho`: `hoa.lib`
 * `it`: `interpolators.lib`
@@ -39,6 +46,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `sy`: `synths.lib`
 * `ve`: `vaeffects.lib`
 * `wa`: `webaudio.lib`
+* `wd`: `wavedigitalfilters.lib`
 * `vl`: `version.lib`    
 
 Environments can then be used as follows in your Faust code:

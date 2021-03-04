@@ -49,8 +49,10 @@ closed source license or any other license if you decide so.
 
 ma = library("maths.lib");
 ro = library("routes.lib");
-ba = library("basics.lib"); // so functions here can be copy/pasted out
+ba = library("basics.lib"); // for compatible copy/paste out of this file
 fi = library("filters.lib");
+it = library("interpolators.lib");
+si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
 declare version "0.1";
@@ -106,7 +108,7 @@ sec2samp(d) = d*ma.SR;
 //
 // * `l`: loudness in dB
 //-----------------------------
-db2linear(l) = pow(10, l/20.0);
+db2linear(l) = pow(10.0, l/20.0);
 
 
 //-------`(ba.)linear2db`----------
@@ -554,7 +556,7 @@ pulse_countdown(trig) = - ~ _ * trig;
 //
 // Where:
 //
-// * `n`: the highest number of the countup (included) before reset to 0.
+// * `n`: the highest number of the countup (included) before reset to 0
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
 //TODO: author "Vince"
@@ -596,7 +598,7 @@ resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
 //
 // Where:
 //
-// * `n`: the highest number of the countup (included) before reset to 0.
+// * `n`: the highest number of the countup (included) before reset to 0
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
 //TODO: author "Vince:
@@ -677,6 +679,84 @@ subseq((head, tail), p, n) = subseq(tail, p-1, n);
 subseq(head, 0, n)         = head;
 
 
+//============================Function tabulation=========================================
+//========================================================================================
+
+//-------`(ba.)tabulate`----------
+// Tabulate an unary function on a [r0, r1] range in a table. 
+// The table value can then be read directly or with linear or cubic interpolation.
+//
+// #### Usage
+//
+// ```
+// tabulate(C, fun, size, r0, r1, x).(val | lin | cub)
+// ```
+//
+// Where:
+//
+// * `C`: whether to dynamically force the index in [r0, r1] range: 1 force the check, 0 deactivate it (given at compile time)
+// * `fun`: unary function
+// * `size`: size of the table (integer)
+// * `r0`: range minimal value
+// * `r1`: range maximal value
+// * `x`: input value to compute using the tabulated function
+//
+// ```
+// tabulate(C, fun, size, r0, r1, x).val uses the value in the table
+// ```
+//
+// ```
+// tabulate(C, fun, size, r0, r1, x).lin uses the value in the table with linear interpolation
+// ```
+//
+// ```
+// tabulate(C, fun, size, r0, r1, x).cub uses the value in the table with cubic interpolation
+// ```
+//--------------------------------------------
+tabulate(C, fun, size, r0, r1, x) = environment {
+
+    // Maximum index to access
+    mid = size-1;
+
+    // Create the table
+    wf(size) = r0 + float(ba.time)*(r1-r0)/float(mid) : fun;
+
+    // Prepare the 'float' table read index
+    id = (x-r0)/(r1-r0)*mid;
+
+    // Limit the table read index in [0, mid] if C = 1
+    rid(x, 0) = x;
+    rid(x, 1) = max(0, min(x, mid));
+
+    // Tabulate an unary 'fun' function on a range [r0, r1]
+    val = y0 with { y0 = rdtable(size, wf(size), rid(int(id), C)); };
+
+    // Tabulate an unary 'fun' function on a range [r0, r1] with linear interpolation
+    lin = it.interpolate_linear(d,y0,y1)
+    with {
+        x0 = int(id);
+        x1 = x0+1;
+        d  = id-x0;
+        y0 = rdtable(size, wf(size), rid(x0, C));
+        y1 = rdtable(size, wf(size), rid(x1, C));
+    };
+
+    // Tabulate an unary 'fun' function on a range [r0, r1] with cubic interpolation
+    cub = it.interpolate_cubic(d,y0,y1,y2,y3)
+    with {
+        x0 = x1-1;
+        x1 = int(id);
+        x2 = x1+1;
+        x3 = x2+1;
+        d  = id-x1;
+        y0 = rdtable(size, wf(size), rid(x0, C));
+        y1 = rdtable(size, wf(size), rid(x1, C));
+        y2 = rdtable(size, wf(size), rid(x2, C));
+        y3 = rdtable(size, wf(size), rid(x3, C));
+    };
+};
+
+
 //============================Selectors (Conditions)======================================
 //========================================================================================
 
@@ -692,7 +772,7 @@ subseq(head, 0, n)         = head;
 // Where:
 //
 // * `cond`: condition
-// * `cond`: signal selected while cond is true
+// * `then`: signal selected while cond is true
 // * `else`: signal selected while cond is false
 //-----------------------------------------------------------------------------
 if(cond,then,else) = select2(cond,else,then);
@@ -976,7 +1056,7 @@ with {
 // ```
 //
 // In any case the `x_{i}` must be in increasing order (for all `i`, `x_{i} < x_{i+1}`).
-// For example the following definition :
+// For example the following definition:
 //
 // ```
 // f = bpf.start(x0,y0) : ... : bpf.point(xi,yi) : ... : bpf.end(xn,yn);
@@ -1381,6 +1461,7 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 // SPDX-License-Identifier: GPL-3.0
 // Copyright (C) 2018 Bart Brouns
 
+
 //-----------------------------`(ba.)slidingReduce`-----------------------------
 // Fold-like high order function. Apply a commutative binary operation `<op>` to
 // the last `<n>` consecutive samples of a signal `<x>`. For example :
@@ -1525,6 +1606,7 @@ slidingMax(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
 //------------------------------------------------------------------------------
 slidingMin(n,maxn) = slidingReduce(min,n,maxn,ma.INFINITY);
 
+
 //----------------------------`(ba.)slidingMean`-------------------------------
 // The sliding mean of the last n input samples.
 //
@@ -1602,7 +1684,6 @@ slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
 slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 
 
-
 //========================================================================================
 // section contributed by Bart Brouns (bart@magnetophon.nl).
 // spdx-license-identifier: gpl-3.0
@@ -1610,7 +1691,7 @@ slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 
 //=================================Parallel Operator=========================================
 // Provides various operations on N parallel inputs using a high order
-// `parallelOp(op,N,x)`` function:
+// `parallelOp(op,N,x)` function:
 //
 // * `parallelMax(n)`: the max of n parallel inputs
 // * `parallelMin(n)`: the min of n parallel inputs
@@ -1618,7 +1699,7 @@ slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 // * `parallelRMS(n)`: the RMS of n parallel inputs
 
 //-----------------------------`(ba.)parallelOp`-----------------------------
-// Apply a commutative binary operation `<op>` to n parallel inputs.
+// Apply a commutative binary operation `<op>` to N parallel inputs.
 //
 // #### usage
 //
@@ -1628,8 +1709,8 @@ slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 //
 // where:
 //
-// * `n`: the number of parallel inputs
-// * `op`: the operator. needs to be a commutative one.
+// * `N`: the number of parallel inputs known at compile time
+// * `op`: the operator which needs to be commutative
 //
 //------------------------------------------------------------------------------
 
@@ -1638,7 +1719,7 @@ parallelOp(op,2) = op;
 parallelOp(op,n) = op(parallelOp(op,n-1));
 
 //---------------------------`(ba.)parallelMax`---------------------------------
-// The maximum of n parallel inputs
+// The maximum of N parallel inputs.
 //
 // #### Usage
 //
@@ -1648,12 +1729,13 @@ parallelOp(op,n) = op(parallelOp(op,n-1));
 //
 // Where:
 //
-// * `n`: the number of parallel inputs
+// * `N`: the number of parallel inputs known at compile time
 //------------------------------------------------------------------------------
 parallelMax(n) = parallelOp(max,n);
 
+
 //---------------------------`(ba.)parallelMin`---------------------------------
-// The minimum of n parallel inputs
+// The minimum of N parallel inputs.
 //
 // #### Usage
 //
@@ -1663,12 +1745,13 @@ parallelMax(n) = parallelOp(max,n);
 //
 // Where:
 //
-// * `n`: the number of parallel inputs
+// * `N`: the number of parallel inputs known at compile time
 //------------------------------------------------------------------------------
 parallelMin(n) = parallelOp(min,n);
 
+
 //---------------------------`(ba.)parallelMean`---------------------------------
-// The mean of n parallel inputs
+// The mean of N parallel inputs.
 //
 // #### Usage
 //
@@ -1678,12 +1761,13 @@ parallelMin(n) = parallelOp(min,n);
 //
 // Where:
 //
-// * `n`: the number of parallel inputs
+// * `N`: the number of parallel inputs known at compile time
 //------------------------------------------------------------------------------
 parallelMean(n) = si.bus(n):>_/n;
 
+
 //---------------------------`(ba.)parallelRMS`---------------------------------
-// The RMS of n parallel inputs
+// The RMS of N parallel inputs.
 //
 // #### Usage
 //
@@ -1693,9 +1777,9 @@ parallelMean(n) = si.bus(n):>_/n;
 //
 // Where:
 //
-// * `n`: the number of parallel inputs
+// * `N`: the number of parallel inputs known at compile time
 //------------------------------------------------------------------------------
-parallelRMS(n) = par(i, n, pow(2)):parallelMean(n) : sqrt;
+parallelRMS(n) = par(i, n, pow(2)) : parallelMean(n) : sqrt;
 
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////

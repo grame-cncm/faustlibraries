@@ -110,7 +110,7 @@ bow(offset,slope) = pow(abs(sample) + 0.75, -4) : saturationPos
 //   offset = offset between 0 and 1
 //   slope = slope between 0 and 1
 // REFERENCE:
-//   https://ccrma.stanford.edu/~jos/pasp/View_Single_Reed_Oscillation.html
+//   <https://ccrma.stanford.edu/~jos/pasp/View_Single_Reed_Oscillation.html>
 
 reed(offset,slope) = reedTable : saturationPos : saturationNeg
     with {
@@ -138,7 +138,7 @@ poleZero(b0,b1,a1,x) = (b0*x + b1*x' - a1*_)~_;
 //   _ : oneZero0(b0,b1) : _
 //   _ : oneZero1(b0,b1) : _
 // REFERENCE:
-//   https://ccrma.stanford.edu/~jos/fp2/One_Zero.html
+//   <https://ccrma.stanford.edu/~jos/fp2/One_Zero.html>
 
 oneZero0(b0,b1,x) = (*(b1) + x*b0)~_;
 oneZero1(b0,b1,x) = (x'*b1 + x*b0);
@@ -232,7 +232,7 @@ nonLinearModulator(nonlinearity,env,freq,typeMod,freqMod,order) =
 // where
 //   periodDuration = period duration of the tone being played in number of samples
 // REFERENCE:
-//   https://ccrma.stanford.edu/realsimple/faust_strings/
+//   <https://ccrma.stanford.edu/realsimple/faust_strings/>
 
 stereoizer(periodDuration) = _ <: _,widthdelay : stereopanner
     with {

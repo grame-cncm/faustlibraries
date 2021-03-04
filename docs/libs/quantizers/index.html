@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>quantizers.lib - Faust Libraries</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../.."><img src="../../img/faustText.svg" width="150px"> Libraries</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../organization/" class="dropdown-item"> Organization </a>
+</li>
+                                    
+<li>
+    <a href="../../standardFunctions/" class="dropdown-item"> Standard Functions </a>
+</li>
+                                    
+<li>
+    <a href="../../contributing/" class="dropdown-item"> Contributing </a>
+</li>
+                                    
+<li>
+    <a href="../../copyright/" class="dropdown-item"> Copyright/License </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../" class="nav-link">Index</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../analyzers/" class="dropdown-item"> analyzers </a>
+</li>
+                                    
+<li>
+    <a href="../basics/" class="dropdown-item"> basics </a>
+</li>
+                                    
+<li>
+    <a href="../compressors/" class="dropdown-item"> compressors </a>
+</li>
+                                    
+<li>
+    <a href="../delays/" class="dropdown-item"> delays </a>
+</li>
+                                    
+<li>
+    <a href="../demos/" class="dropdown-item"> demos </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/" class="dropdown-item"> dx7 </a>
+</li>
+                                    
+<li>
+    <a href="../envelopes/" class="dropdown-item"> envelopes </a>
+</li>
+                                    
+<li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
+    <a href="../filters/" class="dropdown-item"> filters </a>
+</li>
+                                    
+<li>
+    <a href="../hoa/" class="dropdown-item"> hoa </a>
+</li>
+                                    
+<li>
+    <a href="../interpolators/" class="dropdown-item"> interpolators </a>
+</li>
+                                    
+<li>
+    <a href="../maths/" class="dropdown-item"> maths </a>
+</li>
+                                    
+<li>
+    <a href="../mi/" class="dropdown-item"> mi </a>
+</li>
+                                    
+<li>
+    <a href="../misceffects/" class="dropdown-item"> misceffects </a>
+</li>
+                                    
+<li>
+    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
+</li>
+                                    
+<li>
+    <a href="../noises/" class="dropdown-item"> noises </a>
+</li>
+                                    
+<li>
+    <a href="../phaflangers/" class="dropdown-item"> phaflangers </a>
+</li>
+                                    
+<li>
+    <a href="../physmodels/" class="dropdown-item"> physmodels </a>
+</li>
+                                    
+<li>
+    <a href="../quantizer/" class="dropdown-item"> quantizer </a>
+</li>
+                                    
+<li>
+    <a href="../reducemaps/" class="dropdown-item"> reducemaps </a>
+</li>
+                                    
+<li>
+    <a href="../reverbs/" class="dropdown-item"> reverbs </a>
+</li>
+                                    
+<li>
+    <a href="../routes/" class="dropdown-item"> routes </a>
+</li>
+                                    
+<li>
+    <a href="../signals/" class="dropdown-item"> signals </a>
+</li>
+                                    
+<li>
+    <a href="../soundfiles/" class="dropdown-item"> soundfiles </a>
+</li>
+                                    
+<li>
+    <a href="../spats/" class="dropdown-item"> spats </a>
+</li>
+                                    
+<li>
+    <a href="../synths/" class="dropdown-item"> synths </a>
+</li>
+                                    
+<li>
+    <a href="../vaeffects/" class="dropdown-item"> vaeffects </a>
+</li>
+                                    
+<li>
+    <a href="../wavedigitalfilters/" class="dropdown-item"> wavedigitalfilters </a>
+</li>
+                                    
+<li>
+    <a href="../webaudio/" class="dropdown-item"> webaudio </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <div class="container">
+            <div class="row"><div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#quantizerslib" class="nav-link">quantizers.lib</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#_1" class="nav-link"></a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#functions-reference" class="nav-link">Functions Reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#_2" class="nav-link"></a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#ququantize" class="nav-link">(qu.)quantize</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_3" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#ququantizesmoothed" class="nav-link">(qu.)quantizeSmoothed</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_4" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#quionian" class="nav-link">(qu.)ionian</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_5" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qudorian" class="nav-link">(qu.)dorian</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_6" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#quphrygian" class="nav-link">(qu.)phrygian</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_7" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qulydian" class="nav-link">(qu.)lydian</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_8" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qumixo" class="nav-link">(qu.)mixo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_9" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#queolian" class="nav-link">(qu.)eolian</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_10" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qulocrian" class="nav-link">(qu.)locrian</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_11" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qupentanat" class="nav-link">(qu.)pentanat</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_12" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qukumoi" class="nav-link">(qu.)kumoi</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_13" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qunatural" class="nav-link">(qu.)natural</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_14" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qudodeca" class="nav-link">(qu.)dodeca</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_15" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qudimin" class="nav-link">(qu.)dimin</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_16" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#qupenta" class="nav-link">(qu.)penta</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#_17" class="nav-link"></a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9 main-container" role="main">
+
+<h1 id="quantizerslib">quantizers.lib</h1>
+<p>Faust Frequency Quantization Library. Its official prefix is <code>qu</code>.</p>
+<h1 id="_1"></h1>
+<h2 id="functions-reference">Functions Reference</h2>
+<h2 id="_2"></h2>
+<hr />
+<h3 id="ququantize"><code>(qu.)quantize</code></h3>
+<p>Configurable frequency quantization tool. Outputs only the frenquencies that are part of the specified scale.
+Works for positive audio frequencies.</p>
+<h4 id="usage">Usage</h4>
+<pre><code>_ : quantize(rf,nl) : _
+</code></pre>
+<p>Where :
+* <code>rf</code> : frequency of the root note of the scale.
+* <code>nl</code> : list of the ratio of the frequencies of each note in relation to the root frequency.</p>
+<hr />
+<h3 id="_3"></h3>
+<hr />
+<h3 id="ququantizesmoothed"><code>(qu.)quantizeSmoothed</code></h3>
+<p>Configurable frequency quantization tool. Outputs frenquencies that are closer to the frequencies of the notes of the specified scale.
+Works for positive audio frequencies.</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>_ : quantizeSmoothed(rf,nl) : _
+nl = (1,1.2,1.4,1.7);
+</code></pre>
+<p>Where :
+* <code>rf</code> : frequency of the root note of the scale.
+* <code>nl</code> : list of the ratio of the frequencies of each note in relation to the root frequency.</p>
+<hr />
+<h3 id="_4"></h3>
+<hr />
+<h3 id="quionian"><code>(qu.)ionian</code></h3>
+<p>List of the frequency ratios of the notes of the ionian mode.</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>_ : quantize(rf,ionian) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_5"></h3>
+<hr />
+<h3 id="qudorian"><code>(qu.)dorian</code></h3>
+<p>List of the frequency ratios of the notes of the dorian mode.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>_ : quantize(rf,dorian) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_6"></h3>
+<hr />
+<h3 id="quphrygian"><code>(qu.)phrygian</code></h3>
+<p>List of the frequency ratios of the notes of the phrygian mode.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>_ : quantize(rf,phrygian) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_7"></h3>
+<hr />
+<h3 id="qulydian"><code>(qu.)lydian</code></h3>
+<p>List of the frequency ratios of the notes of the lydian mode.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>_ : quantize(rf,lydian) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_8"></h3>
+<hr />
+<h3 id="qumixo"><code>(qu.)mixo</code></h3>
+<p>List of the frequency ratios of the notes of the mixolydian mode.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>_ : quantize(rf,mixo) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_9"></h3>
+<hr />
+<h3 id="queolian"><code>(qu.)eolian</code></h3>
+<p>List of the frequency ratios of the notes of the eolian mode.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>_ : quantize(rf,eolian) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_10"></h3>
+<hr />
+<h3 id="qulocrian"><code>(qu.)locrian</code></h3>
+<p>List of the frequency ratios of the notes of the locrian mode.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>_ : quantize(rf,locrian) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_11"></h3>
+<hr />
+<h3 id="qupentanat"><code>(qu.)pentanat</code></h3>
+<p>List of the frequency ratios of the notes of the pythagorean tuning for the minor pentatonic scale.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>_ : quantize(rf,pentanat) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_12"></h3>
+<hr />
+<h3 id="qukumoi"><code>(qu.)kumoi</code></h3>
+<p>List of the frequency ratios of the notes of the kumoijoshi, the japanese pentatonic scale.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>_ : quantize(rf,kumoi) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_13"></h3>
+<hr />
+<h3 id="qunatural"><code>(qu.)natural</code></h3>
+<p>List of the frequency ratios of the notes of the natural major scale.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>_ : quantize(rf,natural) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_14"></h3>
+<hr />
+<h3 id="qudodeca"><code>(qu.)dodeca</code></h3>
+<p>List of the frequency ratios of the notes of the dodecaphonic scale.</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>_ : quantize(rf,dodeca) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_15"></h3>
+<hr />
+<h3 id="qudimin"><code>(qu.)dimin</code></h3>
+<p>List of the frequency ratios of the notes of the diminished scale.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>_ : quantize(rf,dimin) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_16"></h3>
+<hr />
+<h3 id="qupenta"><code>(qu.)penta</code></h3>
+<p>List of the frequency ratios of the notes of the minor pentatonic scale.</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>_ : quantize(rf,penta) : _
+</code></pre>
+<p>Where:
+* <code>rf</code>: frequency of the root note of the scale.</p>
+<hr />
+<h3 id="_17"></h3></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2019-2020 <a href="https://www.grame.fr">Grame-CNCM</a></p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

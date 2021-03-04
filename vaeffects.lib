@@ -229,7 +229,7 @@ with{
 // feedback paths found in the block diagram. These feedback paths are labeled 
 // as connecting states. Rather than separately storing these connecting states 
 // in the Faust implementation, they are simply implicitly calculated by 
-// tracing back to the other states (s1,s2,s3,s4) each recursive step.
+// tracing back to the other states (`s1`,`s2`,`s3`,`s4`) each recursive step.
 //
 // This filter was implemented in Faust by Eric Tarr during the 
 // [2019 Embedded DSP With Faust Workshop](https://ccrma.stanford.edu/workshops/faust-embedded-19/).
@@ -449,7 +449,7 @@ with{
 //==================================Oberheim Filters======================================
 // The following filter (4 types) is an implementation of the virtual analog 
 // model described in Section 7.2 of the Will Pirkle book, "Designing Software 
-// Synthesizer Plug-ins in C++. It is based on the block diagram in Figure 7.5. 
+// Synthesizer Plug-ins in C++". It is based on the block diagram in Figure 7.5. 
 //
 // The Oberheim filter is a state-variable filter with soft-clipping distortion 
 // within the circuit. 
@@ -621,9 +621,9 @@ oberheimLPF(normFreq,Q) = oberheim(normFreq,Q):!,!,!,_;
 // The simplest example is the 1st-order LPF (shown on the cover of Zavalishin 
 // 2018 and Fig 4.3 of <https://www.willpirkle.com/706-2/>). Here, the input 
 // signal is split in parallel for the calculation of the output signal, `y`, and 
-// the state, s. The value of the state is only used for feedback to the next 
+// the state `s`. The value of the state is only used for feedback to the next 
 // step of recursion. It is blocked (!) from also being routed to the output. 
-// A trick used for calculating the state, s, is to observe that the input to 
+// A trick used for calculating the state `s` is to observe that the input to 
 // the delay block is the sum of two signal: what appears to be a feedforward 
 // path and a feedback path. In reality, the signals being summed are identical 
 // (signal*2) plus the value of the current state.
@@ -707,13 +707,13 @@ sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 //
 // This is also a good example of the next step for generalizing the Faust 
 // programming approach used for all these VA filters. In this case, there are 
-// three things to calculate each recursive step (y,s1,s2). For each thing, the 
+// three things to calculate each recursive step (`y`,`s1`,`s2`). For each thing, the 
 // circuit is only calculated up to that point. 
 //
-// Comparing the LPF to BPF, the output signal (y) is calculated similarly. 
+// Comparing the LPF to BPF, the output signal (`y`) is calculated similarly. 
 // Except, the output of the BPF stops earlier in the circuit. Similarly, the 
-// states (s1 and s2) only differ in that s2 includes a couple more terms 
-// beyond what is used for s1. 
+// states (`s1` and `s2`) only differ in that `s2` includes a couple more terms 
+// beyond what is used for `s1`. 
 //
 // #### Usage
 //

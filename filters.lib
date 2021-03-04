@@ -40,7 +40,7 @@ si = library("signals.lib");
 fi = library("filters.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Filters Library";
-declare version "0.2";
+declare version "0.3";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -453,7 +453,6 @@ allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : m
 //
 // Where:
 //
-// * `order`: filter order (int) = max(#poles,#zeros)
 // * `bcoeffs`: (b0,b1,...,b_order) = TF numerator coefficients
 // * `acoeffs`: (a1,...,a_order) = TF denominator coeffs (a0=1)
 //
@@ -559,7 +558,7 @@ tf1(b0,b1,a1) = _ <: *(b0), (mem : *(b1)) :> + ~ *(0-a1);
 declare tf2 author "Julius O. Smith III";
 declare tf2 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf2 license "MIT-style STK-4.3 license";
-tf2(b0,b1,b2,a1,a2) = iir((b0,b1,b2),(a1,a2)); // cf. TF2 in music.lib)
+tf2(b0,b1,b2,a1,a2) = iir((b0,b1,b2),(a1,a2));
 // tf2 is a variant of tf22 below with duplicated mems
 
 declare tf3 author "Julius O. Smith III";
@@ -1005,7 +1004,7 @@ declare tf2np copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccr
 declare tf2np license "MIT-style STK-4.3 license";
 tf2np(b0,b1,b2,a1,a2) = allpassnnlt(M,sv) : sum(i,M+1,*(tghr(i)))
 with {
-  smax = 0.9999; // maximum reflection-coefficient magnitude allowed
+  smax = 1.0-ma.EPSILON; // maximum reflection-coefficient magnitude allowed
   s2 = max(-smax, min(smax,a2)); // Project both reflection-coefficients
   s1 = max(-smax, min(smax,a1/(1+a2))); // into the defined stability-region.
   sv = (s1,s2); // vector of sin(theta) reflection coefficients
@@ -1225,7 +1224,7 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 //-------------------------`(fi.)tf2s` and `(fi.)tf2snp`--------------------------------
 // Second-order direct-form digital filter,
 // specified by ANALOG transfer-function polynomials B(s)/A(s),
-// and a frequency-scaling parameter.  Digitization via the
+// and a frequency-scaling parameter. Digitization via the
 // bilinear transform is built in.
 //
 // #### Usage
@@ -1247,8 +1246,8 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 // #### Example
 //
 // A second-order ANALOG Butterworth lowpass filter,
-//          normalized to have cutoff frequency at 1 rad/sec,
-//          has transfer function
+// normalized to have cutoff frequency at 1 rad/sec,
+// has transfer function:
 //
 // ```
 //              1
@@ -1345,8 +1344,8 @@ tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
 //
 // #### Example
 // A first-order ANALOG Butterworth lowpass filter,
-//          normalized to have cutoff frequency at 1 rad/sec,
-//          has transfer function
+// normalized to have cutoff frequency at 1 rad/sec,
+// has transfer function:
 //
 //           1
 // H(s) = -------
@@ -1671,8 +1670,8 @@ highpass_minus_lowpass_odd(N,fc) = highpass(N,fc) - lowpass(N,fc);
 // Elliptic (Cauer) Lowpass Filters
 //
 // #### References
-// * <http://en.wikipedia.org/wiki/Elliptic_filter
-// * functions `ncauer` and `ellip` in Octave
+// * <http://en.wikipedia.org/wiki/Elliptic_filter>
+// * functions `ncauer` and `ellip` in Octave.
 //========================================================================================
 
 //-----------------------------`(fi.)lowpass3e`-----------------------------
@@ -2070,8 +2069,8 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 // * <http://en.wikipedia.org/wiki/Equalization>
 // * <https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt>
 // * Digital Audio Signal Processing, Udo Zolzer, Wiley, 1999, p. 124
-// * https://ccrma.stanford.edu/~jos/filters/Low_High_Shelving_Filters.html>
-// * https://ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html>
+// * <https://ccrma.stanford.edu/~jos/filters/Low_High_Shelving_Filters.html>
+// * <https://ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html>
 // * maxmsp.lib in the Faust distribution
 // * bandfilter.dsp in the faust2pd distribution
 //========================================================================================
@@ -2301,7 +2300,7 @@ peak_eq_rm(Lfx,fx,tanPiBT) = _ <: _,A,_ : +,- : *(0.5),*(K/2.0) : + with {
 // J.O. Smith and H.F. Smith,
 // "Closed Form Fractional Integration and Differentiation via Real Exponentially Spaced Pole-Zero Pairs",
 // arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
-// http://arxiv.org/abs/1606.06154
+// <http://arxiv.org/abs/1606.06154>
 //------------------------------------------------------------
 declare spectral_tilt author "Julius O. Smith III";
 declare spectral_tilt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2424,7 +2423,7 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 // * "Tree-structured complementary filter banks using all-pass sections",
 //   Regalia et al., IEEE Trans. Circuits & Systems, CAS-34:1470-1484, Dec. 1987
 // * "Multirate Systems and Filter Banks", P. Vaidyanathan, Prentice-Hall, 1993
-// * Elementary filter theory: https://ccrma.stanford.edu/~jos/filters/
+// * Elementary filter theory: <https://ccrma.stanford.edu/~jos/filters/>
 //========================================================================================
 
 //------------------------`(fi.)mth_octave_filterbank[n]`-------------------------
@@ -2583,7 +2582,7 @@ with {
 //===============SVF Filters=========================================================
 // #### References 
 // Solving the continuous SVF equations using trapezoidal integration
-// * <https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf>
+// <https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf>
 //========================================================================================
 
 //-----------------`(fi.)svf`----------------------
@@ -2659,6 +2658,119 @@ svf = environment {
 	ls(f,q,g)   = svf(7, f, q, g);
 	hs(f,q,g)   = svf(8, f, q, g);
 };
+
+
+//============================Averaging Functions==============================
+//=============================================================================
+//
+// These are a set of samplerate independent averaging functions based on
+// moving-average and one-pole filters with specific response characteristics.
+
+//----------------------------`(fi.)avg_rect`----------------------------------
+// Moving average.
+//
+// #### Usage
+//
+// ```
+// _ : avg_rect(period) : _
+// ```
+//
+// Where:
+//
+// * `period` is the averaging frame in seconds
+//-----------------------------------------------------------------------------
+declare avg_rect author "Dario Sanfilippo and Julius O. Smith III";
+declare avg_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare avg_rect license "MIT-style STK-4.3 license";
+avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
+
+
+//----------------------------(fi.)avg_tau-------------------------------------
+// Averaging function based on a one-pole filter and the tau response time.
+// Tau represents the effective length of the one-pole impulse response,
+// that is, tau is the integral of the filter's impulse response. This
+// response is slower to reach the final value but has less ripples in
+// non-steady signals.
+// 
+// #### Usage
+//
+// ```
+// _ avg_tau(period) : _
+// ```
+//
+// Where:
+//
+// * `period` is the time, in seconds, for the system to decay by 1/e, 
+// or to reach 1-1/e of its final value.
+//
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~jos/mdft/Exponentials.html>
+//-----------------------------------------------------------------------------
+declare avg_tau author "Dario Sanfilippo and Julius O. Smith III";
+declare avg_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare avg_tau license "MIT-style STK-4.3 license";
+avg_tau(period, x) = fi.lptau(period, x);
+
+
+//----------------------------(fi.)avg_t60-------------------------------------
+// Averaging function based on a one-pole filter and the t60 response time.
+// This response is particularly useful when the system is required to 
+// reach the final value after about `period` seconds.
+// 
+// #### Usage
+//
+// ```
+// _ avg_t60(period) : _
+// ```
+//
+// Where:
+//
+// * `period` is the time, in seconds, for the system to decay by 1/1000, 
+// or to reach 1-1/1000 of its final value.
+//
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html>
+//-----------------------------------------------------------------------------
+declare avg_t60 author "Dario Sanfilippo and Julius O. Smith III";
+declare avg_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare avg_t60 license "MIT-style STK-4.3 license";
+avg_t60(period, x) = fi.lpt60(period, x);
+
+
+//----------------------------(fi.)avg_t19-------------------------------------
+// Averaging function based on a one-pole filter and the t19 response time.
+// This response is close to the moving-average algorithm as it roughly reaches
+// the final value after `period` seconds and shows about the same
+// oscillations for non-steady signals.
+//
+// #### Usage
+//
+// ```
+// _ avg_t19(period) : _
+// ```
+//
+// Where:
+//
+// * `period` is the time, in seconds, for the system to decay by 1/e^2.2, 
+// or to reach 1-1/e^2.2 of its final value.
+//
+// #### Reference
+// Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.
+//-----------------------------------------------------------------------------
+declare avg_t19 author "Dario Sanfilippo and Julius O. Smith III";
+declare avg_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com> and
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare avg_t19 license "MIT-style STK-4.3 license";
+avg_t19(period, x) = fi.lpt19(period, x); 
 
 
 /*******************************************************************************

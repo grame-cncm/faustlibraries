@@ -288,8 +288,9 @@ with {
 // * `d`: decay (sec)
 // * `s`: sustain (fraction of `t`: 0-1)
 // * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
-// when `t=0`)
+// * `g`: gate signal:
+//        attack is triggered when `g` goes from zero to positive,
+//        release is triggered when `g` returns to 0
 //-----------------------------------------------------
 // Author: JOS
 // License: STK-4.3
@@ -298,7 +299,7 @@ adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
   samps = ugate : +~(*(ugate)); // ramp time in samples
   attSamps = int(attT60 * ma.SR);
   // if attSamps==0, go straight into the decay phase
-  attPhase = (samps<attSamps) |  (ugate:ba.impulsify);
+  attPhase = (samps<attSamps) | (ugate:ba.impulsify);
   target = select2(ugate, 0.0,
            select2(attPhase, (susLvl)*float(ugate), ugate));
   t60 = select2(ugate, relT60, select2(attPhase, decT60, attT60));

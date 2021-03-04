@@ -1,5 +1,7 @@
 # Contributing
 
+In general, libraries are organised in a *stacked manner*: the base ones define functions or constants without any dependancies, and additional ones are gradually built on top of simpler ones, layer by layer. **Dependency loops must be avoided as much as possible**. The *resources* folder contains tools to build and visualise the libraries dependencies graphs.
+
 If you wish to add a function to any of these libraries or if you plan to add a new library, make sure that you follow the following conventions:
 
 ## New Functions
@@ -88,6 +90,7 @@ de = library("delays.lib");
 dm = library("demos.lib");
 dx = library("dx7.lib");
 en = library("envelopes.lib");
+fd = library("fds.lib");
 fi = library("filters.lib");
 ho = library("hoa.lib");
 it = library("interpolators.lib");
@@ -108,6 +111,7 @@ sy = library("synths.lib");
 ve = library("vaeffects.lib");
 wa = library("webaudio.lib");
 vl = library("version.lib");
+wd = library("wavedigitalfilters.lib");
 ```
 
 For example, if we wanted to use the `smooth` function which is now declared in `signals.lib`, we would do the following:

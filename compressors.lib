@@ -48,7 +48,7 @@ declare version "0.1";
 
 //--------------------`(co.)peak_compression_gain_mono`-------------------
 // Mono dynamic range compressor gain computer.
-// `peak_compression_gain_mono` is a standard Faust function
+// `peak_compression_gain_mono` is a standard Faust function.
 //
 // #### Usage
 //
@@ -98,15 +98,14 @@ with {
   gain_computer(strength,thresh,knee,level) =
     select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
             0,
-            ((level-thresh+(knee/2)):pow(2)/(2*knee)) ,
-            (level-thresh)
-           ) : max(0)*-strength;
+            ((level-thresh+(knee/2)):pow(2)/(2*knee)),
+            (level-thresh)) : max(0)*-strength;
 };
 
 
 //--------------------`(co.)peak_compression_gain_N_chan`-------------------
 // N channel dynamic range compressor gain computer.
-// `peak_compression_gain_N_chan` is a standard Faust function
+// `peak_compression_gain_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
@@ -165,7 +164,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 
 //--------------------`(co.)FFcompressor_N_chan`-------------------
 // feed forward N channel dynamic range compressor.
-// `FFcompressor_N_chan` is a standard Faust function
+// `FFcompressor_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
@@ -219,7 +218,7 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 
 //--------------------`(co.)FBcompressor_N_chan`-------------------
 // feed back N channel dynamic range compressor.
-// `FBcompressor_N_chan` is a standard Faust function
+// `FBcompressor_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
@@ -274,7 +273,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 //--------------------`(co.)FFFBcompressor_N_chan`-------------------
 // feed forward / feed back N channel dynamic range compressor.
 // the feedback part has a much higher strength, so they end up sounding similar
-// `FFFBcompressor_N_chan` is a standard Faust function
+// `FFFBcompressor_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
@@ -388,7 +387,7 @@ with {
 
 //--------------------`(co.)RMS_compression_gain_N_chan`-------------------
 // RMS N channel dynamic range compressor gain computer.
-// `RMS_compression_gain_N_chan` is a standard Faust function
+// `RMS_compression_gain_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
@@ -442,7 +441,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 //--------------------`(co.)RMS_FFFBcompressor_N_chan`-------------------
 // RMS feed forward / feed back N channel dynamic range compressor.
 // the feedback part has a much higher strength, so they end up sounding similar
-// `RMS_FFFBcompressor_N_chan` is a standard Faust function
+// `RMS_FFFBcompressor_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
@@ -513,7 +512,7 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // The RMS compressor doesn't have to deal with the peaks,
 // and the peak limiter get's spared from the steady state signal.
 // the feedback part has a much higher strength, so they end up sounding similar
-// `RMS_FBcompressor_peak_limiter_N_chan` is a standard Faust function
+// `RMS_FBcompressor_peak_limiter_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
@@ -839,14 +838,14 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 //
 // #### Reference:
 //
-// http://iem.at/~zmoelnig/publications/limiter/.
+// <http://iem.at/~zmoelnig/publications/limiter/>.
 //------------------------------------------------------------------------------
 declare limiter_lad_N author "Dario Sanfilippo";
 declare limiter_lad_N copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_lad_N license "GPLv3 license";
 limiter_lad_N(N, LD, ceiling, attack, hold, release) = 
-      si.bus(N) <: par(i, N, @ (LD * ma.SR)) , 
+      si.bus(N) <: par(i, N, @ (LD * ma.SR)), 
                    (scaling <: si.bus(N)) : ro.interleave(N, 2) : par(i, N, *)
       with {
            scaling = ceiling / max(amp_profile, ma.EPSILON) : min(1);
@@ -879,7 +878,7 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 //
 // #### Reference:
 //
-// http://iem.at/~zmoelnig/publications/limiter/.
+// <http://iem.at/~zmoelnig/publications/limiter/>.
 declare limiter_lad_mono author "Dario Sanfilippo";
 declare limiter_lad_mono copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -906,7 +905,7 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 //
 // #### Reference:
 //
-// http://iem.at/~zmoelnig/publications/limiter/.
+// <http://iem.at/~zmoelnig/publications/limiter/>.
 declare limiter_lad_stereo author "Dario Sanfilippo";
 declare limiter_lad_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -934,7 +933,7 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 //
 // #### Reference:
 //
-// http://iem.at/~zmoelnig/publications/limiter/.
+// <http://iem.at/~zmoelnig/publications/limiter/>.
 declare limiter_lad_quad author "Dario Sanfilippo";
 declare limiter_lad_quad copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -961,7 +960,7 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 //
 // #### Reference:
 //
-// http://iem.at/~zmoelnig/publications/limiter/.
+// <http://iem.at/~zmoelnig/publications/limiter/>.
 declare limiter_lad_bw author "Dario Sanfilippo";
 declare limiter_lad_bw copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
