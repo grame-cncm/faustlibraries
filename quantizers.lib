@@ -103,13 +103,12 @@ with{
     noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*findValue(n,oct)+
                             (ba.take(n,nl)>((_/oct)/rf))*(noteRatio(n-1,oct));
 
-    findValue(n,oct) =  _<: (n<nN)*
+    findValue(n,oct) = _<: (n<nN)*
             (((_/oct)/rf)-ba.take(n,nl))/((ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl)))
                     +(n==nN)*
             (((_/oct)/rf)-ba.take(n,nl))/(2-ba.take(n,nl)):       
             qSmooth :  //smoothing curve
-            _*(
-                (n<nN)*(ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl))+
+            _*((n<nN)*(ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl))+
                 (n==nN)*(2-ba.take(n,nl))
             )+ba.take(n,nl);
 };
@@ -129,6 +128,7 @@ with{
 //-------------------------------------------------------------
 ionian = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,11/12));
 
+
 //---------------------`(qu.)dorian`--------------------------
 // List of the frequency ratios of the notes of the dorian mode.
 //
@@ -142,6 +142,7 @@ ionian = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,11
 // * `rf`: frequency of the root note of the scale.
 //-------------------------------------------------------------
 dorian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10/12));
+
 
 //---------------------`(qu.)phrygian`--------------------------
 // List of the frequency ratios of the notes of the phrygian mode.
@@ -157,6 +158,7 @@ dorian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10
 //-------------------------------------------------------------
 phrygian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10/12));
 
+
 //---------------------`(qu.)lydian`--------------------------
 // List of the frequency ratios of the notes of the lydian mode.
 //
@@ -170,6 +172,7 @@ phrygian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,
 // * `rf`: frequency of the root note of the scale.
 //-------------------------------------------------------------
 lydian = (1,pow(2,2/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,11/12));
+
 
 //---------------------`(qu.)mixo`--------------------------
 // List of the frequency ratios of the notes of the mixolydian mode.
@@ -185,6 +188,7 @@ lydian = (1,pow(2,2/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,11
 //-------------------------------------------------------------
 mixo = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,10/12));
 
+
 //---------------------`(qu.)eolian`--------------------------
 // List of the frequency ratios of the notes of the eolian mode.
 //
@@ -198,6 +202,7 @@ mixo = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,10/1
 // * `rf`: frequency of the root note of the scale.
 //-------------------------------------------------------------
 eolian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10/12));
+
 
 //---------------------`(qu.)locrian`--------------------------
 // List of the frequency ratios of the notes of the locrian mode.
@@ -273,6 +278,7 @@ natural = (1,9/8,5/4,4/3,3/2,5/3,15/8);
 //-------------------------------------------------------------
 dodeca = (1,pow(2,1/12),pow(2,2/12),pow(2,3/12),pow(2,4/12),pow(2,5/12),pow(2,6/12),pow(2,7/12),pow(2,8/12),pow(2,9/12),pow(2,10/12),pow(2,11/12));
 
+
 //---------------------`(qu.)dimin`--------------------------
 // List of the frequency ratios of the notes of the diminished scale.
 //
@@ -286,6 +292,7 @@ dodeca = (1,pow(2,1/12),pow(2,2/12),pow(2,3/12),pow(2,4/12),pow(2,5/12),pow(2,6/
 // * `rf`: frequency of the root note of the scale.
 //-------------------------------------------------------------
 dimin = (1,pow(2,1/12),pow(2,3/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,10/12));
+
 
 //---------------------`(qu.)penta`--------------------------
 // List of the frequency ratios of the notes of the minor pentatonic scale.
