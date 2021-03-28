@@ -81,7 +81,9 @@ Michon and Julius O. Smith III, and are released under the
 // _ : spectral_level_demo : _; // 2/3 octave
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
 // Coauthor: Yann Orlarey
+// License: MIT
 mth_octave_spectral_level_demo(BPO) =  an.mth_octave_spectral_level_default(M,ftop,N,tau,dB_offset)
 with{
 	M = BPO;
@@ -113,6 +115,8 @@ spectral_level_demo = mth_octave_spectral_level_demo(1.5); // 2/3 octave
 // _ : parametric_eq_demo : _ ;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 parametric_eq_demo = fi.low_shelf(LL,FL) : fi.peak_eq(LP,FP,BP) : fi.high_shelf(LH,FH)
 with{
 	eq_group(x) = hgroup("[0] PARAMETRIC EQ SECTIONS [tooltip: See Faust's filters.lib
@@ -160,6 +164,8 @@ with{
 //
 // All other parameters interactive
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 spectral_tilt_demo(N) = fi.spectral_tilt(O,f0,bw,alpha)
 with{
 	O = N;
@@ -217,6 +223,8 @@ filterbank_demo = mth_octave_filterbank_demo(1); // octave-bands = default
 // _ : cubicnl_demo : _;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 cubicnl_demo = ba.bypass1(bp, ef.cubicnl_nodc(drive:si.smoo,offset:si.smoo))
 with{
 	cnl_group(x)  = vgroup("CUBIC NONLINEARITY cubicnl [tooltip: Reference:
@@ -239,6 +247,8 @@ with{
 // _,_ : gate_demo : _,_;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 gate_demo = ba.bypass2(gbp,gate_stereo_demo)
 with{
 	gate_group(x) = vgroup("GATE  [tooltip: Reference:
@@ -286,6 +296,8 @@ with{
 // _,_ : compressor_demo : _,_;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 compressor_demo = ba.bypass2(cbp,compressor_stereo_demo)
 with{
 	comp_group(x) = vgroup("COMPRESSOR [tooltip: Reference:
@@ -346,6 +358,8 @@ with{
 // _ : moog_vcf_demo : _;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 moog_vcf_demo = ba.bypass1(bp,vcf)
 with{
 	mvcf_group(x) = hgroup("MOOG VCF (Voltage Controlled Filter) [tooltip: See Faust's
@@ -386,6 +400,8 @@ with{
 // _ : wah4_demo : _;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 wah4_demo = ba.bypass1(bp, ve.wah4(fr))
 with{
 	wah4_group(x) = hgroup("WAH4 [tooltip: Fourth-order wah effect made using moog_vcf]", x);
@@ -397,7 +413,6 @@ with{
 	// Also, avoid very high resonance frequencies (e.g., 5kHz or above).
 };
 
-
 //-------------------------`(dm.)crybaby_demo`---------------------------
 // Crybaby effect application.
 //
@@ -407,6 +422,8 @@ with{
 // _ : crybaby_demo : _ ;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 crybaby_demo = ba.bypass1(bp, ve.crybaby(wah))
 with{
 	crybaby_group(x) = hgroup("CRYBABY [tooltip: Reference:
@@ -417,7 +434,6 @@ with{
 		0 (rocked back) and 1 (rocked forward)]",0.8,0,1,0.01));
 };
 
-
 //-------------------------`(dm.)flanger_demo`---------------------------
 // Flanger effect application.
 //
@@ -427,6 +443,8 @@ with{
 // _,_ : flanger_demo : _,_;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 flanger_demo = ba.bypass2(fbp,flanger_stereo_demo)
 with{
 	flanger_group(x) = vgroup("FLANGER
@@ -474,6 +492,8 @@ with{
 // _,_ : phaser2_demo : _,_;
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 phaser2_demo = ba.bypass2(pbp,phaser2_stereo_demo)
 with{
 	phaser2_group(x) = vgroup("PHASER2 [tooltip: Reference:
@@ -562,6 +582,8 @@ with{
 // _ : stereo_reverb_tester : _
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 stereo_reverb_tester(revin_group,x,y) = reverb_tester(_)
 with {
 	reverb_tester(revin_group,x,y) = inx,iny with {
@@ -607,6 +629,8 @@ with {
 // * `bbso` = Butterworth band-split order / order of lowpass/highpass bandsplit
 //	used at each crossover freq / odd positive integer
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 fdnrev0_demo(N,NB,BBSO) = stereo_reverb_tester(revin_group)
 	  <: re.fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl)
 	  :> *(gain),*(gain)
@@ -659,8 +683,6 @@ with{
 	// (can cause infinite loop:) with { db2linear(x) = pow(10, x/20.0); };
 };
 
-
-
 //---------------------------`(dm.)zita_rev_fdn_demo`------------------------------
 // Reverb demo application based on `zita_rev_fdn`.
 //
@@ -670,6 +692,8 @@ with{
 // si.bus(8) : zita_rev_fdn_demo : si.bus(8)
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 zita_rev_fdn_demo = re.zita_rev_fdn(f1,f2,t60dc,t60m,fsmax)
 with{
 	fsmax = 48000.0;
@@ -699,6 +723,8 @@ with{
 // _,_ : zita_light : _,_
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 zita_light = hgroup("Zita Light",(_,_ <: re.zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax),_,_ : 
 	out_eq,_,_ : dry_wet : out_level))
 with{
@@ -750,6 +776,8 @@ with{
 //
 // <http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html>
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 zita_rev1 = _,_ <: re.zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax),_,_ : out_eq,_,_ :
 	dry_wet : out_level
 with{
@@ -845,6 +873,8 @@ with{
 // sawtooth_demo : _
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 sawtooth_demo = signal
 with{
 	osc_group(x) = vgroup("[0] SAWTOOTH OSCILLATOR [tooltip: See Faust's oscillators.lib
@@ -890,6 +920,8 @@ with{
 // virtual_analog_oscillator_demo : _
 // ```
 //------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 virtual_analog_oscillator_demo = signal
 with{
 	osc_group(x) = vgroup("[0] VIRTUAL ANALOG OSCILLATORS
@@ -976,6 +1008,8 @@ with{
 // oscrs_demo : _
 // ```
 //-------------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 oscrs_demo = signal
 with{
 	osc_group(x) = vgroup("[0] SINE WAVE OSCILLATOR oscrs [tooltip: Sine oscillator based
@@ -1007,7 +1041,8 @@ oscr_demo = oscrs_demo; // synonym
 // velvet_noise_demo : _
 // ```
 //-------------------------------------------------------------------
-
+// Author: Julius Smith
+// License: MIT
 velvet_noise_demo = vn
 with{
 	amp = hslider("Amp [unit:dB]",-10,-70,10,0.1) : ba.db2linear;
@@ -1028,6 +1063,8 @@ with{
 // Octave:1> plot(faustout);
 // ```
 //-------------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 latch_demo = x, c, ba.latch(c,x) // plot(faustout) after faust2octave
 with{
 	f = float(ma.SR)/1000.0;
@@ -1048,6 +1085,8 @@ with{
 // Octave:1> plot(faustout);
 // ```
 //-------------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 envelopes_demo = gate <: _*1.1,envSE,envAR,envARFE,envARE,envASR,envADSR,envADSRE
 with{
 	gate = (1-(1@500)) + 0.5*(1@750-(1@1700)); // retrigger at 1/2 amp
@@ -1083,6 +1122,8 @@ with{
 //   ./fft_spectral_level_demo
 // ```
 //-------------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 fft_spectral_level_demo(N) =  an.rfft_spectral_level(N,tau,dB_offset)
 with{
 	ctl_group(x)  = hgroup("[1] FFT SPECTRUM ANALYZER CONTROLS", x);
@@ -1115,6 +1156,8 @@ with{
 // Etc.
 // ```
 //-------------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 reverse_echo_demo(nChans) =  ef.reverseEchoN(nChans,delMax) : ef.uniformPanToStereo(nChans) 
 with {
 	delMax = 2^int(nentry("Log2(Delay)",15,5,16,1)); // delay line length
@@ -1151,6 +1194,8 @@ with {
 // Etc.
 // ```
 //-------------------------------------------------------------------
+// Author: Julius Smith
+// License: MIT
 pospass_demo(x) = analytic_signal, modulator : si.cmul with {
   N = 6; // pospass filter order
   fc = ma.SR/(2*N); // guard-band for filter roll-off
