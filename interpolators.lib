@@ -432,8 +432,8 @@ with {
 
 // ---------- `(it.)lagrange_h(N)` ---------------------------------------------
 //
-// Function to generate N coefficients for an Nth-order Lagrange
-// interpolation filter for an index between 0 and N - 1.
+// Function to generate N + 1 coefficients for an Nth-order Lagrange
+// interpolation filter for an index between 0 and N.
 //
 // #### Usage
 //
@@ -444,7 +444,7 @@ with {
 // Where:
 //
 // * `N`: order of the interpolation filter, known at compile-time;
-// * `idx`: a fractional index between 0 and N - 1.
+// * `idx`: a fractional index between 0 and N.
 //
 // Reference:
 //      https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html.
@@ -453,7 +453,7 @@ declare lagrange_h author "Dario Sanfilippo";
 declare lagrange_h copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare lagrange_h license "LGPL v3.0 license";
-lagrange_h(N, idx) = par(n, N, prod(k, N, f(n, k)))
+lagrange_h(N, idx) = par(n, N + 1, prod(k, N + 1, f(n, k)))
     with {
         f(n, k) = ((idx - k) * (n != k) + (n == k)) / ((n - k) + (n == k));
     };
@@ -461,36 +461,45 @@ lagrange_h(N, idx) = par(n, N, prod(k, N, f(n, k)))
 
 // ---------- `(it.)lagrangeN(N)` ----------------------------------------------
 //
-// Nth-order Lagrange interpolator to interpolate between a set of N points.
+// Nth-order Lagrange interpolator to interpolate between a set of N + 1 points.
 //
 // #### Usage
 //
 // ```
-// lagrangeN(N, idx, si.bus(N)) : _;
+// lagrangeN(N, idx, si.bus(N + 1)) : _;
 // ```
 //
 // Where:
 //
 // * `N`: order of the interpolator, known at compile-time;
-// * `idx`: a fractional index between 0 and N - 1 to interpolate between a set
-//      of N points being crossed at positions 0, 1, ..., N - 1.
+// * `idx`: a fractional index between 0 and N to interpolate between a set
+//      of N + 1 points being crossed at positions 0, 1, 2, ..., N.
 //
 // Reference:
 //      https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html.
+//
+// Example: find the centre position of a set of four points using an order-3
+// Lagrange function fitting the four points [2, 5, -1, 3]:
+//
+// N = 3;
+// process = lagrangeN(N, N / 2, 2, 5, -1, 3);
+//
+// which outputs ~1.938.
 //
 declare lagrangeN author "Dario Sanfilippo";
 declare lagrangeN copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare lagrangeN license "LGPL v3.0 license";
-lagrangeN(N, idx) = lagrange_h(N, idx) ,
-                    si.bus(N) : ro.interleave(N, 2) : par(i, N, *) :> _;
+lagrangeN(N, idx) = 
+    lagrange_h(N, idx) ,
+    si.bus(N + 1) : ro.interleave(N + 1, 2) : par(i, N + 1, *) :> _;
 // -----------------------------------------------------------------------------
 
 // ---------- `(it.)frdtable(N, S)` --------------------------------------------
 //
 // Look-up circular table with Nth-order Lagrange interpolation for fractional
-// indexes. The index is wrapped-around and the table is circular for indexes
-// ranging from 0 to S, which is the table size in samples.
+// indexes. The index is wrapped-around and the table is cycles for an index
+// span of size S, which is the table size in samples.
 //
 // #### Usage
 //
@@ -505,11 +514,11 @@ lagrangeN(N, idx) = lagrange_h(N, idx) ,
 // * `init`: signal for table initialisation;
 // * `idx`: fractional index wrapped-around 0 and S.
 //
-// For an example of the effectiveness of the interpolation scheme,
-// try the following code:
+// Example: test the effectiveness of the 5th-order interpolation scheme by 
+// creating a table look-up oscillator using only 16 points of a sinewave; 
+// compare the result with a non-interpolated version.
 //
-// import("stdfaust.lib");
-// N = 6;
+// N = 5;
 // S = 16;
 // index = os.phasor(S, 1000);
 // process =    rdtable(S, os.sinwaveform(S), int(index)) ,
@@ -520,7 +529,7 @@ declare frdtable copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare frdtable license "LGPL v3.0 license";
 frdtable(N, S, init, idx) =
-    lagrangeN(N, f_idx, par(i, N, table(i_idx - int((N - 1) / 2) + i)))
+    lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int((N - 1) / 2) + i)))
     with {
         table(j) = rdtable(S, init, int(ma.modulo(j, S)));
         f_idx = ma.frac(idx) + int((N - 1) / 2);
@@ -554,7 +563,7 @@ declare frwtable copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare frwtable license "LGPL v3.0 license";
 frwtable(N, S, init, w_idx, x, r_idx) =
-    lagrangeN(N, f_idx, par(i, N, table(i_idx - int((N - 1) / 2) + i)))
+    lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int((N - 1) / 2) + i)))
     with {
         table(j) = rwtable(S, init, w_idx, x, int(ma.modulo(j, S)));
         f_idx = ma.frac(r_idx) + int((N - 1) / 2);
