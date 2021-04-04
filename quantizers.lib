@@ -3,9 +3,10 @@
 //########################################################################################
 
 ba = library("basics.lib");
+it = library("interpolators.lib");
 
 declare name "Faust Frequency Quantization Library";
-declare version "0.0";
+declare version "0.1";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -39,6 +40,13 @@ For more information, please refer to <http://unlicense.org/>
 ************************************************************************
 ************************************************************************/
 
+MinFreq = 8;
+MaxFreq = 20000;
+TableSize = 256;
+
+qLog(x) = ba.tabulate(1,log(_),TableSize,MinFreq,MaxFreq,x).cub;
+qSmooth(x) = ba.tabulate(1,0.5*atan(_*20-10)/1.4711+0.5,TableSize,0,1,x).cub;
+
 
 //-------`(qu.)quantize`----------
 // Configurable frequency quantization tool. Outputs only the frenquencies that are part of the specified scale.
@@ -55,11 +63,11 @@ For more information, please refer to <http://unlicense.org/>
 // * `rf` : frequency of the root note of the scale.
 // * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency.
 //------------------------
-quantize(rf,nl) = _:min(max(8,_),30000)<: octave, _ <: _, !, noteRatio(nN) : rf * _ * _                       
+quantize(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
 with{
-    octave = log(_/rf)/log(2)<:
-        (_<0)*(1/(pow(2,max(0,(-1*(_-1)):int))))+
-        (_>=0)*(pow(2,_:int));
+    octave = (qLog(_)-log(rf))/log(2)<:
+        (_<0)*(1/(1<<(-1*(_-1)):int))+
+        (_>=0)*(1<<(_:int));
     nN = ba.count(nl);
     noteRatio(1,oct) = 1;
     noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*ba.take(n,nl)+
@@ -84,11 +92,11 @@ with{
 // * `rf` : frequency of the root note of the scale.
 // * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency.
 //------------------------
-quantizeSmoothed(rf,nl) = _:min(max(8,_),30000)<: octave, _ <: _, !, noteRatio(nN) : rf * _ * _                       
+quantizeSmoothed(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
 with{
-    octave = log(_/rf)/log(2)<:
-        (_<0)*(1/(pow(2,max(0,(-1*(_-1)):int))))+
-        (_>0)*(pow(2,_:int))+
+    octave = (qLog(_)-log(rf))/log(2)<:
+        (_<0)*(1/(1<<(-1*(_-1)):int))+
+        (_>0)*(1<<(_:int))+
 		(_==0)*2;
     nN = ba.count(nl);
     noteRatio(1,oct) = findValue(1,oct);
@@ -99,7 +107,7 @@ with{
             (((_/oct)/rf)-ba.take(n,nl))/((ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl)))
                     +(n==nN)*
             (((_/oct)/rf)-ba.take(n,nl))/(2-ba.take(n,nl)):       
-            0.5*atan(_*20-10)/1.4711+0.5 :  //smoothing curve
+            qSmooth :  //smoothing curve
             _*(
                 (n<nN)*(ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl))+
                 (n==nN)*(2-ba.take(n,nl))

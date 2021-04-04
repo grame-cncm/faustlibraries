@@ -68,15 +68,15 @@ declare version "0.1";
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust
-
+//
 // Sometimes even bigger ratios are useful:
 // For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -127,15 +127,15 @@ with {
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `N`: the number of channels of the compressor
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-
+//
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -188,15 +188,15 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 // * `N`: the number of channels of the compressor
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-
+//
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -243,15 +243,15 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 // or it can be omitted by defining 'meter = _'.
 // * `N`: the number of channels of the compressor
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-
+//
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -298,15 +298,15 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 // * `N`: the number of channels of the compressor
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-
+//
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -352,15 +352,15 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-
+//
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -409,15 +409,15 @@ with {
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `N`: the number of channels of the compressor
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-
+//
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -466,21 +466,21 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 // * `N`: the number of channels of the compressor
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-
+//
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // to save CPU we cheat a bit, in a similar way as in the original libs:
 // instead of crosfading between two sets of gain calculators as above,
 // we take the abs of the audio from both the FF and FB, and crossfade between those,
 // and feed that into one set of gain calculators
 // again the strength is much higher when in FB mode, but implemented differently
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -537,15 +537,15 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 // * `N`: the number of channels of the compressor
-
+//
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
 // For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-
+//
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -879,6 +879,7 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 // #### Reference:
 //
 // <http://iem.at/~zmoelnig/publications/limiter/>.
+//------------------------------------------------------------------------------
 declare limiter_lad_mono author "Dario Sanfilippo";
 declare limiter_lad_mono copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -906,6 +907,7 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 // #### Reference:
 //
 // <http://iem.at/~zmoelnig/publications/limiter/>.
+//------------------------------------------------------------------------------
 declare limiter_lad_stereo author "Dario Sanfilippo";
 declare limiter_lad_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -934,6 +936,7 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 // #### Reference:
 //
 // <http://iem.at/~zmoelnig/publications/limiter/>.
+//------------------------------------------------------------------------------
 declare limiter_lad_quad author "Dario Sanfilippo";
 declare limiter_lad_quad copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -961,6 +964,7 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 // #### Reference:
 //
 // <http://iem.at/~zmoelnig/publications/limiter/>.
+//------------------------------------------------------------------------------
 declare limiter_lad_bw author "Dario Sanfilippo";
 declare limiter_lad_bw copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
