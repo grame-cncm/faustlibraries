@@ -162,8 +162,8 @@ dcblocker = zero(1) : pole(0.995);
 // impulse response to decay by `N` dB
 //
 // #### Reference
-//
 // <https://ccrma.stanford.edu/~jos/mdft/Exponentials.html>
+//----------------------------------------------------------
 declare lptN author "Julius O. Smith III";
 declare lptN copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare lptN license "MIT-style STK-4.3 license";
@@ -2115,6 +2115,11 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 // 	* lf1 = lfx + L0/N = dB-frequency at which level goes up from L0.
 //
 //  See `lowshelf_other_freq`.
+//
+// #### References
+// See "Parametric Equalizers" above for references regarding
+// `low_shelf`, `high_shelf`, and `peak_eq`.
+//
 //--------------------------------------------------------------
 declare lowshelf author "Julius O. Smith III";
 declare lowshelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2163,6 +2168,11 @@ lowshelf_other_freq(N, L0, fx) = ba.db2linear(ba.linear2db(fx) + L0/N); // conve
 //
 // The gain at dc is constrained to be 1.
 // See `lowshelf` documentation above for more details on shelf shape.
+//
+// #### References
+// See "Parametric Equalizers" above for references regarding
+// `low_shelf`, `high_shelf`, and `peak_eq`.
+//
 //--------------------------------------------------------------
 declare highshelf author "Julius O. Smith III";
 declare highshelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2204,6 +2214,11 @@ highshelf_other_freq(N, Lpi, fx) = ba.db2linear(ba.linear2db(fx) - Lpi/N);
 // * `Lfx`: level (dB) at fx (boost Lfx>0 or cut Lfx<0)
 // * `fx`: peak frequency (Hz)
 // * `B`: bandwidth (B) of peak in Hz
+//
+// #### References
+// See "Parametric Equalizers" above for references regarding
+// `low_shelf`, `high_shelf`, and `peak_eq`.
+//
 //--------------------------------------------------------------
 declare peak_eq author "Julius O. Smith III";
 declare peak_eq copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2233,6 +2248,11 @@ peak_eq(Lfx,fx,B) = tf2s(1,b1s,1,a1s,1,wx) with {
 // * `Lfx`: level (dB) at fx
 // * `fx`: boost or cut frequency (Hz)
 // * `Q`: "Quality factor" = fx/B where B = bandwidth of peak in Hz
+//
+// #### References
+// See "Parametric Equalizers" above for references regarding
+// `low_shelf`, `high_shelf`, and `peak_eq`.
+//
 //------------------------------------------------------------
 declare peak_eq_cq author "Julius O. Smith III";
 declare peak_eq_cq copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2259,6 +2279,9 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 // P.A. Regalia, S.K. Mitra, and P.P. Vaidyanathan,
 // "The Digital All-Pass Filter: A Versatile Signal Processing Building Block"
 // Proceedings of the IEEE, 76(1):19-37, Jan. 1988.  (See pp. 29-30.)
+// See also "Parametric Equalizers" above for references on shelf
+// and peaking equalizers in general.
+//
 //------------------------------------------------------------
 declare peak_eq_rm author "Julius O. Smith III";
 declare peak_eq_rm copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";

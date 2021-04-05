@@ -124,7 +124,7 @@ smoo = si.smooth(1 - 44.1 / ma.SR);
 // #### Usage
 //
 // ```
-// hslider(...) : polySmooth(g,s,d) : _
+// hslider(...) : si.polySmooth(g,s,d) : _
 // ```
 //
 // Where:
@@ -134,7 +134,7 @@ smoo = si.smooth(1 - 44.1 / ma.SR);
 // * `d`: the number of samples to wait before the signal start being
 // 		smoothed after `g` switched to 1
 //-------------------------------------------------------------------
-polySmooth(g,s,d) = smooth(s*((g==(g@d)) | (g == 0)));
+polySmooth(g,s,d) = si.smooth(s*((g==(g@d)) | (g == 0)));
 
 //-----------------------`(si.)smoothAndH`--------------------------------
 // A smoothing function based on `smooth` that holds its output
@@ -153,7 +153,7 @@ polySmooth(g,s,d) = smooth(s*((g==(g@d)) | (g == 0)));
 // * `g`: the hold signal (0 for hold, 1 for bypass)
 // * `s`: the smoothness (see `smooth`)
 //-------------------------------------------------------------------
-smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
+smoothAndH(t,s) = si.smooth(s*t) : ba.sAndH(t);
 
 //-----------------------------`(si.)bsmooth`------------------------------
 // Block smooth linear interpolation during a block of samples.
@@ -207,7 +207,7 @@ Michon and Julius O. Smith III, and are released under the
 // #### Usage:
 //
 // ```
-// _ : smooth(tau2pole(tau)) : _
+// _ : si.smooth(ba.tau2pole(tau)) : _
 // ```
 //
 // Where:
@@ -215,7 +215,7 @@ Michon and Julius O. Smith III, and are released under the
 // * `tau`: desired smoothing time constant in seconds, or
 //
 // ```
-// hslider(...) : smooth(s) : _
+// hslider(...) : si.smooth(s) : _
 // ```
 //
 // Where:
