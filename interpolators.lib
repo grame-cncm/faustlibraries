@@ -529,10 +529,10 @@ declare frdtable copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare frdtable license "LGPL v3.0 license";
 frdtable(N, S, init, idx) =
-    lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int((N - 1) / 2) + i)))
+    lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int(N / 2) + i)))
     with {
         table(j) = rdtable(S, init, int(ma.modulo(j, S)));
-        f_idx = ma.frac(idx) + int((N - 1) / 2);
+        f_idx = ma.frac(idx) + int(N / 2);
         i_idx = int(idx);
     };
 // -----------------------------------------------------------------------------
@@ -563,10 +563,10 @@ declare frwtable copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare frwtable license "LGPL v3.0 license";
 frwtable(N, S, init, w_idx, x, r_idx) =
-    lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int((N - 1) / 2) + i)))
+    lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int(N / 2) + i)))
     with {
         table(j) = rwtable(S, init, w_idx, x, int(ma.modulo(j, S)));
-        f_idx = ma.frac(r_idx) + int((N - 1) / 2);
+        f_idx = ma.frac(r_idx) + int(N / 2);
         i_idx = int(r_idx);
     };
 // -----------------------------------------------------------------------------
