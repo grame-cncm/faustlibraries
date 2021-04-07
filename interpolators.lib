@@ -491,9 +491,7 @@ declare lagrangeN author "Dario Sanfilippo";
 declare lagrangeN copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare lagrangeN license "LGPL v3.0 license";
-lagrangeN(N, idx) = 
-    lagrange_h(N, idx) ,
-    si.bus(N + 1) : si.dot(N + 1);
+lagrangeN(N, idx) = si.dot(N + 1, lagrange_h(N, idx));
 // -----------------------------------------------------------------------------
 
 // ---------- `(it.)frdtable(N, S)` --------------------------------------------
