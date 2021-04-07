@@ -137,6 +137,7 @@ declare version "0.3";
 ba = library("basics.lib");
 ro = library("routes.lib");
 ma = library("maths.lib");
+si = library("signals.lib");
 
 reset(trig) = (trig-trig') <= 0;
  
@@ -492,7 +493,7 @@ declare lagrangeN copyright "Copyright (C) 2021 Dario Sanfilippo
 declare lagrangeN license "LGPL v3.0 license";
 lagrangeN(N, idx) = 
     lagrange_h(N, idx) ,
-    si.bus(N + 1) : ro.interleave(N + 1, 2) : par(i, N + 1, *) :> _;
+    si.bus(N + 1) : ro.interleave(N + 1, 2) : si.dot(N + 1);
 // -----------------------------------------------------------------------------
 
 // ---------- `(it.)frdtable(N, S)` --------------------------------------------
