@@ -65,7 +65,8 @@ pl = library("platform.lib");
 //
 // * `tablesize`: the table size
 //------------------------------------------------------------
-sinwaveform(tablesize) = float(ba.time)*(2.0*ma.PI)/float(tablesize) : sin;
+sinwaveform(tablesize) = 
+    sin(float(ba.period(tablesize)) * (2.0 * ma.PI) / float(tablesize));
 
 //-----------------------`(os.)coswaveform`------------------------
 // Cosine waveform ready to use with a `rdtable`.
@@ -80,7 +81,8 @@ sinwaveform(tablesize) = float(ba.time)*(2.0*ma.PI)/float(tablesize) : sin;
 //
 // * `tablesize`: the table size
 //------------------------------------------------------------
-coswaveform(tablesize) = float(ba.time)*(2.0*ma.PI)/float(tablesize) : cos;
+coswaveform(tablesize) = 
+    cos(float(ba.period(tablesize)) * (2.0 * ma.PI) / float(tablesize));
 
 //-----------------------`(os.)phasor`------------------------
 // A simple phasor to be used with a `rdtable`.
