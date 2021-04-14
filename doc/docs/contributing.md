@@ -143,5 +143,5 @@ Before preparing a pull-request, the new library must be carefully tested:
 
 ```
 import("all.lib");
-prcoess = _;
+process = _;
 ```
