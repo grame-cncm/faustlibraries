@@ -1083,7 +1083,7 @@ u_diodePair =
 case{
     (0, Is, Vt) => b1
     with{
-        b1(R1, a1) = a1 + 2*R1*Is - 2*Vt*lambert((R1*Is/Vt*(a1+R1*Is))/Vt), 3) : exp;
+        b1(R1, a1) = a1 + 2*R1*Is - 2*Vt*lambert((R1*Is/Vt*(((a1+R1*Is)/Vt), 3) : exp));
     };
     (1, Is, Vt) => !, !; 
     (2, Is, Vt) => 0; 
@@ -1578,7 +1578,7 @@ with{
     with{
         s(1,1) =-1*(R0-gamma1*gamma2*R1)/(R0+gamma1*gamma2*R1);
         s(1,2) = (2*gamma1*R0^rho*R1^(1-rho))/(R0+gamma1*gamma2*R1);
-        s(2,1) = ((2*gamma2*R0^(1-rho)*R1^rho/(R0+gamma1*gamma2*R1);
+        s(2,1) = (2*gamma2*R0^(1-rho)*R1^rho)/(R0+gamma1*gamma2*R1);
         s(2,2) = (R0-gamma1*gamma2*R1)/(R0+gamma1*gamma2*R1);
         s(i,j) = 10; 
 
@@ -1627,7 +1627,7 @@ with{
     with{
         s(1,1) =-1*(R0-gamma1*gamma2*R1)/(R0+gamma1*gamma2*R1);
         s(1,2) = (2*gamma1*R0^rho*R1^(1-rho))/(R0+gamma1*gamma2*R1);
-        s(2,1) = ((2*gamma2*R0^(1-rho)*R1^rho/(R0+gamma1*gamma2*R1);
+        s(2,1) = (2*gamma2*R0^(1-rho)*R1^rho)/(R0+gamma1*gamma2*R1);
         s(2,2) = (R0-gamma1*gamma2*R1)/(R0+gamma1*gamma2*R1);
         s(i,j) = 10; 
 
