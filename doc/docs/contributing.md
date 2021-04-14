@@ -69,7 +69,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 
 ## Coding Conventions
 
-In order to have a uniformized library system, we established the following conventions (that hopefully will be followed by others when making modifications to them :-) ).
+In order to have a uniformized library system, we established the following conventions (that hopefully will be followed by others when making modifications to them).
 
 ### Documentation
 
@@ -133,3 +133,15 @@ Any function containing UI elements should be placed in this library and respect
 ### "Standard" Functions
 
 "Standard" functions are here to simplify the life of new (or not so new) Faust coders. They are declared in `/libraries/doc/standardFunctions.md` and allow to point programmers to preferred functions to carry out a specific task. For example, there are many different types of lowpass filters declared in `filters.lib` and only one of them is considered to be standard, etc.
+
+## Testing the library
+
+Before preparing a pull-request, the new library must be carefully tested:
+
+- all functions defined  in the  library must be tested by preparing a DSP test program
+- the  compatibilty library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program:
+
+```
+import("all.lib");
+prcoess = _;
+```
