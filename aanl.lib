@@ -322,11 +322,11 @@ declare hyperbolic copyright "Copyright (C) 2021 Dario Sanfilippo
      <sanfilippo.dario@gmail.com>";
 declare hyperbolic license "LGPL v3.0 license";
 hyperbolic(x) = ADAA1(EPS, f, F1, x)
-      with {
-           EPS = 1.0 / ma.SR;
-           f(x_f) = x_f / (1.0 + abs(x_f));
-           F1(x_F1) = abs(x_F1) - log(1.0 + abs(x_F1));
-      };
+    with {
+        EPS = 1.0 / ma.SR;
+        f(x_f) = x_f / (1.0 + abs(x_f));
+        F1(x_F1) = abs(x_F1) - log(1.0 + abs(x_F1));
+    };
 // -----------------------------------------------------------------------------
 
 // ---------- (aa.)hyperbolic2; ------------------------------------------------
@@ -344,14 +344,13 @@ declare hyperbolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
      <sanfilippo.dario@gmail.com>";
 declare hyperbolic2 license "LGPL v3.0 license";
 hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
-     with {
-           EPS = 1.0 / ma.SR;
-           f(x_f) = x_f / (1.0 + abs(x_f));
-           F1(x_F1) = abs(x_F1) - log(1.0 + abs(x_F1));
-           F2(x_F2) = ma.signum(x_F2) * (.5 * (3.0 - 2.0 * abs(x_F2) +
-                 x_F2 ^ 2.0 + 2.0 * log(1.0 + abs(x_F2))) - 3.0 / 2.0) + 
-                   3.0 / 2.0;
-     };
+    with {
+        EPS = 1.0 / ma.SR;
+        f(x_f) = x_f / (1.0 + abs(x_f));
+        F1(x_F1) = abs(x_F1) - log(1.0 + abs(x_F1));
+        F2(x_F2) = ma.signum(x_F2) * (.5 * (3.0 - 2.0 * abs(x_F2) + x_F2 ^ 2.0 + 
+            2.0 * log(1.0 + abs(x_F2))) - 3.0 / 2.0) + 3.0 / 2.0;
+    };
 // -----------------------------------------------------------------------------
 
 // ---------- (aa.)sinarctan; --------------------------------------------------
