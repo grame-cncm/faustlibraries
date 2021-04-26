@@ -1285,6 +1285,84 @@ with {
 // TODO: author "Vince"
 selectoutn(n, s) = _ <: par(i, n, *(s==i));
 
+//=================================Mixer=========================================
+// A set of functions for building mixers of various kinds.
+// At the moment there is no concept of fader and sends, so there are no pre and post fader sends.
+// IOW: since there is no fader, all sends are pre-fader.
+//
+//--------------------------------`(ba.)monoMixerChannel`-------------------------------------
+// a mono mixer channel with nrSends outputs.
+// `monoMixerChannel` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// (si.bus(nrSends),_) : monoMixerChannel(nrSends) : si.bus(nrSends);
+// ```
+//
+// There are nrSends inputs for level and one for audio
+// The audio is multiplied by the level and sent to it's respective output
+//-----------------------------------------------------------------------------
+//make a channel with nrSends outputs.
+//The inputs are: volumes,audio
+monoMixerChannel(nrSends) =
+  (
+    si.bus(nrSends)
+  , (_<:si.bus(nrSends))
+  )
+  :ro.interleave(nrSends,2)
+  :par(i,nrSends,_*_);
+
+//--------------------------------`(ba.)multiMixerChannel`-------------------------------------
+// a mixer channel with nrOutChan inputs and (nrOutChan* nrSends) outputs.
+// `multiMixerChannel` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// (si.bus(nrSends),si.bus(nrOutChan)) : multiMixerChannel(nrOutChan,nrSends) : par(i, nrSends, si.bus(nrOutChan));
+// ```
+//
+// The first nrSends inputs are for level and the next nrOutChan inputs are for audio.
+// The audio is multiplied by the level and sent to it's respective output.
+// The outputs are grouped in sets of nrOutChan,
+// so the first set of nrOutChan outputs have the audio multiplied by the fist level input,
+// the second set of nrOutChan outputs have the audio multiplied by the second level input,
+// and so forth.
+//-----------------------------------------------------------------------------
+multiMixerChannel(nrOutChan,nrSends) =
+  si.bus(nrOutChan+nrSends)
+  <:par(i,nrOutChan,sel(nrOutChan,nrSends,i))
+  :par(i,nrOutChan,monoMixerChannel(nrSends))
+  :ro.interleave(nrSends,nrOutChan)
+with {
+  sel(nrOutChan,nrSends,i) = (par(i,nrSends,_),par(i,nrOutChan,!),(ba.selector(i+nrSends,nrOutChan+nrSends)));
+};
+
+//--------------------------------`(ba.mixer)`-------------------------------------
+// a mixer with nrInchan inputs, each having nrOutChan channels and (nrOutChan* nrSends) outputs.
+// `mixer` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// par(i, nrInChan, si.bus(nrSends),si.bus(nrOutChan)) : mixer(nrInChan,nrOutChan,nrSends) : par(i, nrSends, si.bus(nrOutChan));
+// ```
+//
+// The first nrSends inputs are for level and the next nrOutChan inputs are for audio.
+// This repeats NrInchan times.
+// The audio is multiplied by the level and sent to it's respective output.
+// The outputs are grouped in sets of nrOutChan,
+// so the first set of nrOutChan outputs have the audio multiplied by the fist level input,
+// the second set of nrOutChan outputs have the audio multiplied by the second level input,
+// and so forth.
+// All the sends are summed, so there are nrOutChan outputs.
+//-----------------------------------------------------------------------------
+mixer(nrInChan,nrOutChan,nrSends) =
+  par(i,nrInChan,multiMixerChannel(nrOutChan,nrSends)):ro.interleave(nrSends*nrOutChan,nrInChan):mix
+with {
+  mix=par(i,nrOutChan*nrSends,(si.bus(nrInChan):>_));
+};
 
 //=================================Sliding Reduce=========================================
 // Provides various operations on the last N samples using a high order
