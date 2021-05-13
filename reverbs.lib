@@ -453,4 +453,54 @@ elsewhere among the libraries.  It is expected that all software will be
 released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
 
+//===============================Dattorro Reverb============================
+//==========================================================================
+
+//-------------------------------`(re.)dattorro`-------------------------------
+// Reverberator based on the Dattorro reverb topology. This implementation does
+// not use modulated delay lengths (excursion)
+//
+// #### Usage
+//
+// ```
+// _,_ : dattorro(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) : _,_
+// ```
+//
+// Where:
+//
+// * `pre_delay`: pre-delay in samples (fixed at compile time)
+// * `bw`: band-width filter (pre filtering); (0 - 1)
+// * `i_diff1`: input diffusion factor 1; (0 - 1)
+// * `i_diff2`: input diffusion factor 2;
+// * `decay`: decay rate; (0 - 1); infinite decay = 1.0
+// * `d_diff1`: decay diffusion factor 1; (0 - 1)
+// * `d_diff2`: decay diffusion factor 2;
+// * `damping`: high-frequency damping; no damping = 0.0
+//
+// #### Reference
+//
+// * <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
+//------------------------------------------------------------
+dattorro(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) = 
+    si.bus(2) : + : *(0.5) : predelay : bw_filter : diffusion_network <: ((si.bus(4) :> _,_) ~ (reverb_network : ro.cross(2)))
+with {
+    //allpass using delay with fixed size
+    allpass_f(t, a) = (+ <: @(t),*(a)) ~ *(-a) : mem,_ : +;
+
+    // input pre-delay and diffusion
+    predelay = @(pre_delay);
+    bw_filter = *(bw) : +~( mem :*(1-bw));
+    diffusion_network = allpass_f(142, i_diff1) : allpass_f(107, i_diff1) : allpass_f(379, i_diff2) : allpass_f(277, i_diff2);
+
+    // reverb loop
+    reverb_network = par(i, 2, block(i)) with {
+        d = (672, 908, 4453, 4217, 1800, 2656, 3720, 3163);
+        block(i) = allpass_f(ba.take(i + 1, d),-d_diff1) : @(ba.take(i + 3, d)) : damp : 
+            allpass_f(ba.take(i + 5, d),d_diff2) : @(ba.take(i + 5, d)) : *(decay)
+        with {
+            damp = *(1-damping) : +~*(damping) : *(decay);
+        };
+    };
+};
+
 // end further further contributions section
