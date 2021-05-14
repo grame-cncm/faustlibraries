@@ -509,4 +509,28 @@ with {
     };
 };
 
+
+//-------------------------------`(re.)dattorro_orig`-------------------------------
+// Reverberator based on the Dattorro reverb topology with reverb paramters from the
+// original paper.
+// This implementation does not use modulated delay lengths (excursion).
+//
+// #### Usage
+//
+// ```
+// _,_ : dattorro_orig : _,_
+// ```
+//
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
+//------------------------------------------------------------
+
+// Author: Jakob Zerbian
+// License: MIT-style STK-4.3 license
+declare dattorro_orig author "Jakob Zerbian";
+declare dattorro_orig license "MIT-style STK-4.3 license";
+
+dattorro_orig = dattorro_rev(0, 0.9995, 0.75, 0.625, 0.5, 0.7, 0.5, 0.0005);
+
 // end further further contributions section
