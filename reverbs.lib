@@ -479,9 +479,15 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //
 // #### Reference
 //
-// * <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
+// <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
 //------------------------------------------------------------
-dattorro(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) = 
+
+// Author: Jakob Zerbian
+// License: MIT-style STK-4.3 license
+declare dattorro_rev author "Jakob Zerbian";
+declare dattorro_rev license "MIT-style STK-4.3 license";
+
+dattorro_rev(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) = 
     si.bus(2) : + : *(0.5) : predelay : bw_filter : diffusion_network <: ((si.bus(4) :> _,_) ~ (reverb_network : ro.cross(2)))
 with {
     //allpass using delay with fixed size
