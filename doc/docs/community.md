@@ -1,6 +1,6 @@
 # Libraries from the community
 
-A lot of libraries have been developed by the commmunity. They are presented in the following sections. 
+A lot of libraries have been developed by the community. They are presented in the following sections. 
 
 ## [abclib library](https://github.com/alainbonardi/abclib/)
 ### 20 years of research, teaching and creation in mixed music using Faust language
