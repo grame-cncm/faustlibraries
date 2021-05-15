@@ -19,6 +19,7 @@ import("stdfaust.lib");
 This will give you access to all the Faust libraries through a series of environments:
 
 * `sf`: `all.lib`
+* `aa`: `aanl.lib`
 * `an`: `analyzers.lib`
 * `ba`: `basics.lib`
 * `co`: `compressors.lib`
@@ -45,9 +46,9 @@ This will give you access to all the Faust libraries through a series of environ
 * `sp`: `spats.lib`
 * `sy`: `synths.lib`
 * `ve`: `vaeffects.lib`
+* `vl`: `version.lib`
 * `wa`: `webaudio.lib`
 * `wd`: `wdmodels.lib`
-* `vl`: `version.lib`    
 
 Environments can then be used as follows in your Faust code:
 
