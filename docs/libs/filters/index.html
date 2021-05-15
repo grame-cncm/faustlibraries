@@ -51,7 +51,11 @@
 </li>
                                     
 <li>
-    <a href="../../copyright/" class="dropdown-item"> Copyright/License </a>
+    <a href="../../community/" class="dropdown-item"> Community </a>
+</li>
+                                    
+<li>
+    <a href="../../about/" class="dropdown-item"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -61,6 +65,10 @@
                             <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../aanl/" class="dropdown-item"> antialiased-nonlinearities </a>
+</li>
                                     
 <li>
     <a href="../analyzers/" class="dropdown-item"> analyzers </a>
@@ -135,7 +143,7 @@
 </li>
                                     
 <li>
-    <a href="../quantizer/" class="dropdown-item"> quantizer </a>
+    <a href="../quantizers/" class="dropdown-item"> quantizers </a>
 </li>
                                     
 <li>
@@ -171,7 +179,11 @@
 </li>
                                     
 <li>
-    <a href="../wavedigitalfilters/" class="dropdown-item"> wavedigitalfilters </a>
+    <a href="../version/" class="dropdown-item"> version </a>
+</li>
+                                    
+<li>
+    <a href="../wdmodels/" class="dropdown-item"> wdmodels </a>
 </li>
                                     
 <li>
@@ -711,8 +723,7 @@ impulse response to decay by <code>N</code> dB</li>
 </ul>
 <h4 id="reference_3">Reference</h4>
 <ul>
-<li><a href="https://ccrma.stanford.edu/~jos/mdft/Exponentials.html">https://ccrma.stanford.edu/~jos/mdft/Exponentials.html</a>
-Special cases of lptN</li>
+<li><a href="https://ccrma.stanford.edu/~jos/mdft/Exponentials.html">https://ccrma.stanford.edu/~jos/mdft/Exponentials.html</a></li>
 </ul>
 <h2 id="comb-filters">Comb Filters</h2>
 <hr />
@@ -1649,6 +1660,9 @@ L(lf) is easy to state in dB versus dB-frequency lf = dB(f):</p>
 </li>
 </ul>
 <p>See <code>lowshelf_other_freq</code>.</p>
+<h4 id="references_12">References</h4>
+<p>See "Parametric Equalizers" above for references regarding
+<code>low_shelf</code>, <code>high_shelf</code>, and <code>peak_eq</code>.</p>
 <hr />
 <h3 id="fihigh_shelf"><code>(fi.)high_shelf</code></h3>
 <p>First-order "high shelf" filter (gain boost|cut above some frequency).
@@ -1667,6 +1681,9 @@ _ : highshelf_other_freq(N,Lpi,fx) : _
 </ul>
 <p>The gain at dc is constrained to be 1.
 See <code>lowshelf</code> documentation above for more details on shelf shape.</p>
+<h4 id="references_13">References</h4>
+<p>See "Parametric Equalizers" above for references regarding
+<code>low_shelf</code>, <code>high_shelf</code>, and <code>peak_eq</code>.</p>
 <hr />
 <h3 id="fipeak_eq"><code>(fi.)peak_eq</code></h3>
 <p>Second order "peaking equalizer" section (gain boost or cut near some frequency)
@@ -1681,6 +1698,9 @@ Also called a "parametric equalizer" section.
 <li><code>fx</code>: peak frequency (Hz)</li>
 <li><code>B</code>: bandwidth (B) of peak in Hz</li>
 </ul>
+<h4 id="references_14">References</h4>
+<p>See "Parametric Equalizers" above for references regarding
+<code>low_shelf</code>, <code>high_shelf</code>, and <code>peak_eq</code>.</p>
 <hr />
 <h3 id="fipeak_eq_cq"><code>(fi.)peak_eq_cq</code></h3>
 <p>Constant-Q second order peaking equalizer section.</p>
@@ -1693,6 +1713,9 @@ Also called a "parametric equalizer" section.
 <li><code>fx</code>: boost or cut frequency (Hz)</li>
 <li><code>Q</code>: "Quality factor" = fx/B where B = bandwidth of peak in Hz</li>
 </ul>
+<h4 id="references_15">References</h4>
+<p>See "Parametric Equalizers" above for references regarding
+<code>low_shelf</code>, <code>high_shelf</code>, and <code>peak_eq</code>.</p>
 <hr />
 <h3 id="fipeak_eq_rm"><code>(fi.)peak_eq_rm</code></h3>
 <p>Regalia-Mitra second order peaking equalizer section.</p>
@@ -1709,7 +1732,9 @@ Also called a "parametric equalizer" section.
 <h4 id="reference_22">Reference</h4>
 <p>P.A. Regalia, S.K. Mitra, and P.P. Vaidyanathan,
 "The Digital All-Pass Filter: A Versatile Signal Processing Building Block"
-Proceedings of the IEEE, 76(1):19-37, Jan. 1988.  (See pp. 29-30.)</p>
+Proceedings of the IEEE, 76(1):19-37, Jan. 1988.  (See pp. 29-30.)
+See also "Parametric Equalizers" above for references on shelf
+and peaking equalizers in general.</p>
 <hr />
 <h3 id="fispectral_tilt"><code>(fi.)spectral_tilt</code></h3>
 <p>Spectral tilt filter, providing an arbitrary spectral rolloff factor
@@ -1802,7 +1827,7 @@ allpass-complementary.</p>
 <p>Go to higher filter orders - see Regalia et al. or Vaidyanathan (cited
 below) regarding the construction of more aggressive recursive
 filter-banks using elliptic or Chebyshev prototype filters.</p>
-<h4 id="references_12">References</h4>
+<h4 id="references_16">References</h4>
 <ul>
 <li>"Tree-structured complementary filter banks using all-pass sections",
   Regalia et al., IEEE Trans. Circuits &amp; Systems, CAS-34:1470-1484, Dec. 1987</li>
@@ -1866,7 +1891,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <pre><code>_ : filterbanki(3,(fc1,fc2)) : _,_,_
 </code></pre>
 <h2 id="svf-filters">SVF Filters</h2>
-<h4 id="references_13">References</h4>
+<h4 id="references_17">References</h4>
 <p>Solving the continuous SVF equations using trapezoidal integration
 * <a href="https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf">https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf</a></p>
 <hr />

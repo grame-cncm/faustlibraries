@@ -51,7 +51,11 @@
 </li>
                                     
 <li>
-    <a href="../../copyright/" class="dropdown-item"> Copyright/License </a>
+    <a href="../../community/" class="dropdown-item"> Community </a>
+</li>
+                                    
+<li>
+    <a href="../../about/" class="dropdown-item"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -61,6 +65,10 @@
                             <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../aanl/" class="dropdown-item"> antialiased-nonlinearities </a>
+</li>
                                     
 <li>
     <a href="../analyzers/" class="dropdown-item"> analyzers </a>
@@ -135,7 +143,7 @@
 </li>
                                     
 <li>
-    <a href="../quantizer/" class="dropdown-item"> quantizer </a>
+    <a href="../quantizers/" class="dropdown-item"> quantizers </a>
 </li>
                                     
 <li>
@@ -171,7 +179,11 @@
 </li>
                                     
 <li>
-    <a href="../wavedigitalfilters/" class="dropdown-item"> wavedigitalfilters </a>
+    <a href="../version/" class="dropdown-item"> version </a>
+</li>
+                                    
+<li>
+    <a href="../wdmodels/" class="dropdown-item"> wdmodels </a>
 </li>
                                     
 <li>
@@ -317,8 +329,10 @@ bus(4) : _,_,_,_
 <hr />
 <h3 id="sismoo"><code>(si.)smoo</code></h3>
 <p>Smoothing function based on <code>smooth</code> ideal to smooth UI signals
-(sliders, etc.) down.
-<code>smoo</code> is a standard Faust function.</p>
+(sliders, etc.) down. Approximately, this is a 7 Hz one-pole
+low-pass considering the coefficient calculation:
+   exp(-2pi*CF/SR).</p>
+<p><code>smoo</code> is a standard Faust function.</p>
 <h4 id="usage_3">Usage</h4>
 <pre><code>hslider(...) : smoo;
 </code></pre>
@@ -329,7 +343,7 @@ trigger signal is given. This is very useful when making
 polyphonic synthesizer to make sure that the value of the parameter
 is the right one when the note is started.</p>
 <h4 id="usage_4">Usage</h4>
-<pre><code>hslider(...) : polySmooth(g,s,d) : _
+<pre><code>hslider(...) : si.polySmooth(g,s,d) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -373,13 +387,13 @@ smoothed parameter to change when a note-off event is sent.</p>
 <p>Exponential smoothing by a unity-dc-gain one-pole lowpass.
 <code>smooth</code> is a standard Faust function.</p>
 <h4 id="usage_8">Usage:</h4>
-<pre><code>_ : smooth(tau2pole(tau)) : _
+<pre><code>_ : si.smooth(ba.tau2pole(tau)) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>tau</code>: desired smoothing time constant in seconds, or</li>
 </ul>
-<pre><code>hslider(...) : smooth(s) : _
+<pre><code>hslider(...) : si.smooth(s) : _
 </code></pre>
 <p>Where:</p>
 <ul>

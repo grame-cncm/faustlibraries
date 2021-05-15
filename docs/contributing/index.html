@@ -51,7 +51,11 @@
 </li>
                                     
 <li>
-    <a href="../copyright/" class="dropdown-item"> Copyright/License </a>
+    <a href="../community/" class="dropdown-item"> Community </a>
+</li>
+                                    
+<li>
+    <a href="../about/" class="dropdown-item"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -61,6 +65,10 @@
                             <li class="dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../libs/aanl/" class="dropdown-item"> antialiased-nonlinearities </a>
+</li>
                                     
 <li>
     <a href="../libs/analyzers/" class="dropdown-item"> analyzers </a>
@@ -135,7 +143,7 @@
 </li>
                                     
 <li>
-    <a href="../libs/quantizer/" class="dropdown-item"> quantizer </a>
+    <a href="../libs/quantizers/" class="dropdown-item"> quantizers </a>
 </li>
                                     
 <li>
@@ -171,7 +179,11 @@
 </li>
                                     
 <li>
-    <a href="../libs/wavedigitalfilters/" class="dropdown-item"> wavedigitalfilters </a>
+    <a href="../libs/version/" class="dropdown-item"> version </a>
+</li>
+                                    
+<li>
+    <a href="../libs/wdmodels/" class="dropdown-item"> wdmodels </a>
 </li>
                                     
 <li>
@@ -237,6 +249,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#testing-the-library" class="nav-link">Testing the library</a>
+              <ul class="nav flex-column">
               </ul>
             </li>
               </ul>
@@ -312,7 +328,7 @@
 <li>If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.</li>
 </ul>
 <h2 id="coding-conventions">Coding Conventions</h2>
-<p>In order to have a uniformized library system, we established the following conventions (that hopefully will be followed by others when making modifications to them :-) ).</p>
+<p>In order to have a uniformized library system, we established the following conventions (that hopefully will be followed by others when making modifications to them).</p>
 <h3 id="documentation">Documentation</h3>
 <ul>
 <li>All the functions that we want to be "public" are documented.</li>
@@ -322,7 +338,9 @@
 </ul>
 <h3 id="library-import">Library Import</h3>
 <p>To prevent cross-references between libraries we generalized the use of the <code>library("")</code> system for function calls in all the libraries. This means that everytime a function declared in another library is called, the environment corresponding to this library needs to be called too. To make things easier, a <code>stdfaust.lib</code> library was created and is imported by all the libraries:</p>
-<pre><code>an = library(&quot;analyzers.lib&quot;);
+<pre><code>aa = library(&quot;aanl.lib&quot;);
+sf = library(&quot;all.lib&quot;);
+an = library(&quot;analyzers.lib&quot;);
 ba = library(&quot;basics.lib&quot;);
 co = library(&quot;compressors.lib&quot;);
 de = library(&quot;delays.lib&quot;);
@@ -348,9 +366,9 @@ si = library(&quot;signals.lib&quot;);
 so = library(&quot;soundfiles.lib&quot;);
 sy = library(&quot;synths.lib&quot;);
 ve = library(&quot;vaeffects.lib&quot;);
-wa = library(&quot;webaudio.lib&quot;);
 vl = library(&quot;version.lib&quot;);
-wd = library(&quot;wavedigitalfilters.lib&quot;);
+wa = library(&quot;webaudio.lib&quot;);
+wd = library(&quot;wdmodels.lib&quot;);
 </code></pre>
 <p>For example, if we wanted to use the <code>smooth</code> function which is now declared in <code>signals.lib</code>, we would do the following:</p>
 <pre><code>import(&quot;stdfaust.lib&quot;);
@@ -362,7 +380,16 @@ process = si.smooth(0.999);
 <p>"Demo" functions are placed in <code>demos.lib</code> and have a built-in user interface (UI). Their name ends with the <code>_demo</code> suffix. Each of these function have a <code>.dsp</code> file associated to them in the <code>/examples</code> folder.</p>
 <p>Any function containing UI elements should be placed in this library and respect these standards.</p>
 <h3 id="standard-functions">"Standard" Functions</h3>
-<p>"Standard" functions are here to simplify the life of new (or not so new) Faust coders. They are declared in <code>/libraries/doc/standardFunctions.md</code> and allow to point programmers to preferred functions to carry out a specific task. For example, there are many different types of lowpass filters declared in <code>filters.lib</code> and only one of them is considered to be standard, etc.</p></div>
+<p>"Standard" functions are here to simplify the life of new (or not so new) Faust coders. They are declared in <code>/libraries/doc/standardFunctions.md</code> and allow to point programmers to preferred functions to carry out a specific task. For example, there are many different types of lowpass filters declared in <code>filters.lib</code> and only one of them is considered to be standard, etc.</p>
+<h2 id="testing-the-library">Testing the library</h2>
+<p>Before preparing a pull-request, the new library must be carefully tested:</p>
+<ul>
+<li>all functions defined  in the  library must be tested by preparing a DSP test program</li>
+<li>the  compatibilty library <code>all.lib</code> imports all libraries in a same namespace, so check functions names collisions using the following test program:</li>
+</ul>
+<pre><code>import(&quot;all.lib&quot;);
+process = _;
+</code></pre></div>
             </div>
         </div>
 

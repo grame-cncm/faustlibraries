@@ -2,6 +2,7 @@
 
 Only the libraries that are considered to be "standard" are documented:
 
+* `aanl.lib`
 * `analyzers.lib`
 * `basics.lib`
 * `compressors.lib`
@@ -30,9 +31,11 @@ Only the libraries that are considered to be "standard" are documented:
 * `tonestacks.lib` (not documented but example in `/examples/misc`)
 * `tubes.lib` (not documented but example in `/examples/misc`)
 * `vaeffects.lib`
-* `wavedigitalfilters.lib`
-* `webaudio.lib`
 * `version.lib`
+* `webaudio.lib`
+* `wdmodels.lib`
+
+
 
 Other deprecated libraries such as `music.lib`, etc. are present but are not documented to not confuse new users.
 

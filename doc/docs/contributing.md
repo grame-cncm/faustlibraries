@@ -83,6 +83,8 @@ In order to have a uniformized library system, we established the following conv
 To prevent cross-references between libraries we generalized the use of the `library("")` system for function calls in all the libraries. This means that everytime a function declared in another library is called, the environment corresponding to this library needs to be called too. To make things easier, a `stdfaust.lib` library was created and is imported by all the libraries:
 
 ```
+aa = library("aanl.lib");
+sf = library("all.lib");
 an = library("analyzers.lib");
 ba = library("basics.lib");
 co = library("compressors.lib");
@@ -109,9 +111,9 @@ si = library("signals.lib");
 so = library("soundfiles.lib");
 sy = library("synths.lib");
 ve = library("vaeffects.lib");
-wa = library("webaudio.lib");
 vl = library("version.lib");
-wd = library("wavedigitalfilters.lib");
+wa = library("webaudio.lib");
+wd = library("wdmodels.lib");
 ```
 
 For example, if we wanted to use the `smooth` function which is now declared in `signals.lib`, we would do the following:

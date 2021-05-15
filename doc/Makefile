@@ -1,6 +1,6 @@
 
 MAKE 	?= make
-AWK		?= awk
+AWK		?= gawk
 
 DOCDIR   := docs
 SITEDIR	 := ../docs

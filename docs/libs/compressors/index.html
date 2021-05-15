@@ -51,7 +51,11 @@
 </li>
                                     
 <li>
-    <a href="../../copyright/" class="dropdown-item"> Copyright/License </a>
+    <a href="../../community/" class="dropdown-item"> Community </a>
+</li>
+                                    
+<li>
+    <a href="../../about/" class="dropdown-item"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -61,6 +65,10 @@
                             <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../aanl/" class="dropdown-item"> antialiased-nonlinearities </a>
+</li>
                                     
 <li>
     <a href="../analyzers/" class="dropdown-item"> analyzers </a>
@@ -135,7 +143,7 @@
 </li>
                                     
 <li>
-    <a href="../quantizer/" class="dropdown-item"> quantizer </a>
+    <a href="../quantizers/" class="dropdown-item"> quantizers </a>
 </li>
                                     
 <li>
@@ -171,7 +179,11 @@
 </li>
                                     
 <li>
-    <a href="../wavedigitalfilters/" class="dropdown-item"> wavedigitalfilters </a>
+    <a href="../version/" class="dropdown-item"> version </a>
+</li>
+                                    
+<li>
+    <a href="../wdmodels/" class="dropdown-item"> wdmodels </a>
 </li>
                                     
 <li>
@@ -331,14 +343,14 @@ Below thresh-(knee/2) there is no gain reduction,
 above thresh+(knee/2) there is the same gain reduction as without a knee,
 and in between there is a gradual increase in gain reduction.</li>
 <li><code>prePost</code>: places the level detector either at the input or after the gain computer;
-this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
-It uses a strength parameter instead of the traditional ratio, in order to be able to
-function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust
-Sometimes even bigger ratios are useful:
-For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
 </ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust</p>
+<p>Sometimes even bigger ratios are useful:
+For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -368,14 +380,14 @@ and in between there is a gradual increase in gain reduction.</li>
 <li><code>prePost</code>: places the level detector either at the input or after the gain computer;
 this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
-<li><code>N</code>: the number of channels of the compressor
-It uses a strength parameter instead of the traditional ratio, in order to be able to
-function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-Sometimes even bigger ratios are useful:
-for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+<li><code>N</code>: the number of channels of the compressor</li>
 </ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references_1">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -407,14 +419,14 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
-<li><code>N</code>: the number of channels of the compressor
-It uses a strength parameter instead of the traditional ratio, in order to be able to
-function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-Sometimes even bigger ratios are useful:
-for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+<li><code>N</code>: the number of channels of the compressor</li>
 </ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references_2">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -447,14 +459,14 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 or it can be omitted by defining 'meter = _'.</li>
-<li><code>N</code>: the number of channels of the compressor
-It uses a strength parameter instead of the traditional ratio, in order to be able to
-function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-Sometimes even bigger ratios are useful:
-for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+<li><code>N</code>: the number of channels of the compressor</li>
 </ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references_3">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -488,14 +500,14 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>FFFB</code>: fade between feed forward (0) and feed back (1) compression.</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
-<li><code>N</code>: the number of channels of the compressor
-It uses a strength parameter instead of the traditional ratio, in order to be able to
-function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-Sometimes even bigger ratios are useful:
-for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+<li><code>N</code>: the number of channels of the compressor</li>
 </ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references_4">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -523,14 +535,14 @@ Below thresh-(knee/2) there is no gain reduction,
 above thresh+(knee/2) there is the same gain reduction as without a knee,
 and in between there is a gradual increase in gain reduction.</li>
 <li><code>prePost</code>: places the level detector either at the input or after the gain computer;
-this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
-It uses a strength parameter instead of the traditional ratio, in order to be able to
-function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-Sometimes even bigger ratios are useful:
-for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
 </ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references_5">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -560,14 +572,14 @@ and in between there is a gradual increase in gain reduction.</li>
 <li><code>prePost</code>: places the level detector either at the input or after the gain computer;
 this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
-<li><code>N</code>: the number of channels of the compressor
-It uses a strength parameter instead of the traditional ratio, in order to be able to
-function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-Sometimes even bigger ratios are useful:
-for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+<li><code>N</code>: the number of channels of the compressor</li>
 </ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references_6">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -601,19 +613,19 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>FFFB</code>: fade between feed forward (0) and feed back (1) compression.</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
-<li><code>N</code>: the number of channels of the compressor
-It uses a strength parameter instead of the traditional ratio, in order to be able to
+<li><code>N</code>: the number of channels of the compressor</li>
+</ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-Sometimes even bigger ratios are useful:
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
-to save CPU we cheat a bit, in a similar way as in the original libs:
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<p>to save CPU we cheat a bit, in a similar way as in the original libs:
 instead of crosfading between two sets of gain calculators as above,
 we take the abs of the audio from both the FF and FB, and crossfade between those,
 and feed that into one set of gain calculators
-again the strength is much higher when in FB mode, but implemented differently</li>
-</ul>
+again the strength is much higher when in FB mode, but implemented differently</p>
 <h4 id="references_7">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -650,14 +662,14 @@ the limiter uses a knee half this size</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
-<li><code>N</code>: the number of channels of the compressor
-It uses a strength parameter instead of the traditional ratio, in order to be able to
-function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
-Sometimes even bigger ratios are useful:
-for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
-and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</li>
+<li><code>N</code>: the number of channels of the compressor</li>
 </ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references_8">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>

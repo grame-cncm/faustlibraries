@@ -51,7 +51,11 @@
 </li>
                                     
 <li>
-    <a href="../../copyright/" class="dropdown-item"> Copyright/License </a>
+    <a href="../../community/" class="dropdown-item"> Community </a>
+</li>
+                                    
+<li>
+    <a href="../../about/" class="dropdown-item"> Copyright/License </a>
 </li>
                                 </ul>
                             </li>
@@ -61,6 +65,10 @@
                             <li class="dropdown active">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../aanl/" class="dropdown-item"> antialiased-nonlinearities </a>
+</li>
                                     
 <li>
     <a href="../analyzers/" class="dropdown-item"> analyzers </a>
@@ -135,7 +143,7 @@
 </li>
                                     
 <li>
-    <a href="../quantizer/" class="dropdown-item"> quantizer </a>
+    <a href="../quantizers/" class="dropdown-item"> quantizers </a>
 </li>
                                     
 <li>
@@ -171,7 +179,11 @@
 </li>
                                     
 <li>
-    <a href="../wavedigitalfilters/" class="dropdown-item"> wavedigitalfilters </a>
+    <a href="../version/" class="dropdown-item"> version </a>
+</li>
+                                    
+<li>
+    <a href="../wdmodels/" class="dropdown-item"> wdmodels </a>
 </li>
                                     
 <li>
@@ -250,6 +262,18 @@
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#restereo_freeverb" class="nav-link">(re.)stereo_freeverb</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#dattorro-reverb" class="nav-link">Dattorro Reverb</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#redattorro_rev" class="nav-link">(re.)dattorro_rev</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#redattorro_rev_default" class="nav-link">(re.)dattorro_rev_default</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -402,6 +426,42 @@ audio channel, and is said to be especially well tuned.</p>
 <li><code>fb2</code>: coefficient of the allpass comb filters (0-1)</li>
 <li><code>damp</code>: damping of the lowpass comb filter (0-1)</li>
 <li><code>spread</code>: spatial spread in number of samples (for stereo)</li>
+</ul>
+<h2 id="dattorro-reverb">Dattorro Reverb</h2>
+<hr />
+<h3 id="redattorro_rev"><code>(re.)dattorro_rev</code></h3>
+<p>Reverberator based on the Dattorro reverb topology. This implementation does
+not use modulated delay lengths (excursion).</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>_,_ : dattorro_rev(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) : _,_
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pre_delay</code>: pre-delay in samples (fixed at compile time)</li>
+<li><code>bw</code>: band-width filter (pre filtering); (0 - 1)</li>
+<li><code>i_diff1</code>: input diffusion factor 1; (0 - 1)</li>
+<li><code>i_diff2</code>: input diffusion factor 2;</li>
+<li><code>decay</code>: decay rate; (0 - 1); infinite decay = 1.0</li>
+<li><code>d_diff1</code>: decay diffusion factor 1; (0 - 1)</li>
+<li><code>d_diff2</code>: decay diffusion factor 2;</li>
+<li><code>damping</code>: high-frequency damping; no damping = 0.0</li>
+</ul>
+<h4 id="reference_2">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf">https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf</a></li>
+</ul>
+<hr />
+<h3 id="redattorro_rev_default"><code>(re.)dattorro_rev_default</code></h3>
+<p>Reverberator based on the Dattorro reverb topology with reverb parameters from the
+original paper.
+This implementation does not use modulated delay lengths (excursion) and
+uses zero length pre-delay.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>_,_ : dattorro_rev_default : _,_
+</code></pre>
+<h4 id="reference_3">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf">https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf</a></li>
 </ul></div>
             </div>
         </div>

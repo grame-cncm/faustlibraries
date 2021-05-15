@@ -46,7 +46,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `sy`: `synths.lib`
 * `ve`: `vaeffects.lib`
 * `wa`: `webaudio.lib`
-* `wd`: `wavedigitalfilters.lib`
+* `wd`: `wdmodels.lib`
 * `vl`: `version.lib`    
 
 Environments can then be used as follows in your Faust code:
