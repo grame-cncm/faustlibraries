@@ -32,9 +32,8 @@ Only the libraries that are considered to be "standard" are documented:
 * `tubes.lib` (not documented but example in `/examples/misc`)
 * `vaeffects.lib`
 * `version.lib`
-* `webaudio.lib`
 * `wdmodels.lib`
-
+* `webaudio.lib`
 
 
 Other deprecated libraries such as `music.lib`, etc. are present but are not documented to not confuse new users.
