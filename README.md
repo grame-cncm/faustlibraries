@@ -46,3 +46,8 @@ The docs folder at rool level contains all files that will be published. To make
 - add all the new files using `git add docs`
 - commit using `git commit -am "message"` (so new files and deleted files will be commited, except docs/CNAME file) 
 - and push the commit
+
+### WARNING!!
+
+- never delete the **docs/CNAME file** (which is mandatory for the final generated site to work)
+- in case it has been removed, restore it using `git checkout docs/CNAME`
