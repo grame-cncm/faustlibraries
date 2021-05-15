@@ -730,6 +730,7 @@ zita_light = hgroup("Zita Light",(_,_ <: re.zita_rev1_stereo(rdel,f1,f2,t60dc,t6
 with{
 	fsmax = 48000.0;  // highest sampling rate that will be used
 	rdel = 60;
+	
 	f1 = 200;
 	t60dc = 3;
 	t60m = 2;
@@ -858,6 +859,51 @@ with{
 
 	gain = out_group(vslider("[2] Level [unit:dB] [style:knob] [tooltip: Output scale
 		factor]", -20, -70, 40, 0.1)) : ba.db2linear : si.smoo;
+};
+
+//----------------------------------`(dm.)dattorro_rev_demo`------------------------------
+// Example GUI for `dattorro_rev` with all parameters exposed. With additional
+// dry/wet and output gain control.
+//
+// #### Usage
+//
+// ```
+// _,_ : dattorro_rev_demo : _,_
+// ```
+//
+//------------------------------------------------------------
+// Author: Jakob Zerbian
+// License: MIT-style STK-4.3 license
+
+declare dattorro_rev_demo author "Jakob Zerbian";
+declare dattorro_rev_demo license "MIT-style STK-4.3 license";
+
+dattorro_rev_demo = _,_ <: dattorro_rev(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping),_,_:
+    dry_wet : out_level
+with {
+    rev_group(x) = hgroup("[0] Dattorro Reverb",x);
+
+    in_group(x) = rev_group(hgroup("[0] Input",x));
+    pre_delay = 0;
+    bw = in_group(vslider("[1] Prefilter [style:knob] [tooltip: lowpass-like filter, 0 = no signal, 1 = no filtering]",0.7,0.0,1.0,0.001) : si.smoo);
+    i_diff1 = in_group(vslider("[2] Diffusion 1 [style:knob] [tooltip: diffusion factor, influences reverb color and density]",0.625,0.0,1.0,0.001) : si.smoo);
+    i_diff2 = in_group(vslider("[3] Diffusion 2 [style:knob] [tooltip: diffusion factor, influences reverb color and density]",0.625,0.0,1.0,0.001) : si.smoo);
+
+    fdb_group(x) = rev_group(hgroup("[1] Feedback", x));
+    d_diff1 = fdb_group(vslider("[1] Diffusion 1 [style:knob] [tooltip: diffusion factor, influences reverb color and density]",0.625,0.0,1.0,0.001) : si.smoo);
+    d_diff2 = fdb_group(vslider("[2] Diffusion 2 [style:knob] [tooltip: diffusion factor, influences reverb color and density]",0.625,0.0,1.0,0.001) : si.smoo);
+    decay = fdb_group(vslider("[3] Decay Rate [style:knob] [tooltip: decay length, 1 = infinite]",0.7,0.0,1.0,0.001) : si.smoo);
+    damping = fdb_group(vslider("[4] Damping [style:knob] [tooltip: dampening in feedback network]",0.625,0.0,1.0,0.001) : si.smoo);
+
+    out_group(x) = rev_group(hgroup("[2] Output",x));
+    dry_wet(x,y) = *(dry) + wet*x, *(dry) + wet*y 
+	with {
+		wet = 0.5*(drywet+1.0);
+		dry = 1.0-wet;
+	};
+	drywet = out_group(vslider("[1] Dry/Wet Mix [style:knob] [tooltip: -1 = dry, 1 = wet]",0,-1.0,1.0,0.01) : si.smoo);
+	gain = out_group(vslider("[2] Level [unit:dB] [style:knob] [tooltip: Output Gain]", -6, -70, 40, 0.1) : ba.db2linear : si.smoo);
+	out_level = *(gain),*(gain);
 };
 
 
