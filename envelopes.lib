@@ -62,7 +62,7 @@ si = library("signals.lib");
 // ```
 //
 // * `ar`: attack and release duration (s)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //----------------------------------------------------------------
 // Author: RM
@@ -83,21 +83,21 @@ smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 //
 // * `at`: attack (sec)
 // * `rt`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
 declare ar author "Yann Orlarey, Stéphane Letz";
-ar(at,rt,gate) = AR : max(0) 
+ar(at,rt,gate) = AR : max(0)
 with {
 
     // Durations in samples
-    an = max(1, at*ma.SR);  
+    an = max(1, at*ma.SR);
     rn = max(1, rt*ma.SR);
 
     // Deltas per samples
     adelta = 1/an;
     rdelta = 1/rn;
-    
+
     // Attack time (starts at gate upfront and raises infinitely)
     atime = (raise*reset + upfront) ~ _
     with {
@@ -108,14 +108,14 @@ with {
 
     // Attack curve
     A = atime * adelta;
-    
+
     // Release curve
     D0 = 1 + an * rdelta;
     D = D0 - atime * rdelta;
 
     // AR part
     AR = min(A, D);
-    
+
 };
 
 
@@ -133,7 +133,7 @@ with {
 //
 // * `a`, `r`: attack (sec), release (sec)
 // * `f`: final value to approach upon release (such as 0)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
 // Author: JOS
@@ -161,7 +161,7 @@ arfe(attT60,relT60,fv,gate) = envelope with {
 //
 // * `a`: attack (sec)
 // * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
 // Author: JOS
@@ -182,9 +182,9 @@ are(attT60,relT60,gate) = arfe(attT60,relT60,0,gate);
 // Where:
 //
 // * `at`: attack (sec)
-// * `sl`: sustain level (between 0..1) 
+// * `sl`: sustain level (between 0..1)
 // * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
 declare asr author "Yann Orlarey, Stéphane Letz";
@@ -192,7 +192,7 @@ asr(at,sl,rt,gate) = AS - R : max(0)
 with {
 
     // Durations in samples
-    an = max(1, at*ma.SR);  
+    an = max(1, at*ma.SR);
     rn = max(1, rt*ma.SR);
 
     // Deltas per samples
@@ -208,7 +208,7 @@ with {
     // AS part
     AS = min(A, sl);
 
-    // Release time starts when gate is 0 
+    // Release time starts when gate is 0
     rtime = (+(1) : *(gate == 0)) ~ _;
 
     // Release curve starts when gate is 0 with the current value of the envelope
@@ -231,24 +231,24 @@ with {
 //
 // * `at`: attack time (sec)
 // * `dt`: decay time (sec)
-// * `sl`: sustain level (between 0..1) 
+// * `sl`: sustain level (between 0..1)
 // * `rt`: release time (sec)
-// * `gate`: trigger signal (attack is triggered when `gate>0`, release is triggered 
+// * `gate`: trigger signal (attack is triggered when `gate>0`, release is triggered
 // when `gate=0`)
 //-----------------------------------------------------
-declare adsr author "Yann Orlarey";
-adsr(at,dt,sl,rt,gate) = ADS - R : max(0)
+declare adsr author "Yann Orlarey and Andrey Bundin";
+adsr(at,dt,sl,rt,gate) = ADS : *(1-R) : max(0)
 with {
 
     // Durations in samples
-    an = max(1, at*ma.SR);  
+    an = max(1, at*ma.SR);
     dn = max(1, dt*ma.SR);
     rn = max(1, rt*ma.SR);
 
     // Deltas per samples
     adelta = 1/an;
     ddelta = (1-sl)/dn;
-    rdelta = sl/rn;
+
 
     // Attack time (starts when gate changes and raises until gate == 0)
     atime = +(gate) ~ *(gate' >= gate);
@@ -267,13 +267,13 @@ with {
     rtime = (+(1) : *(gate == 0)) ~ _;
 
     // Release curve starts when gate is 0 with the current value of the envelope
-    R = rtime * rdelta;
+    R = rtime/rn;
 
 };
 
 
 //------------------------`(en.)adsre`----------------------
-// ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential 
+// ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential
 // segments.
 //
 // #### Usage
@@ -319,9 +319,9 @@ adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
 // Where:
 //
 // * `a`: attack (sec)
-// * `s`: sustain (fraction of `t`: 0-1) 
+// * `s`: sustain (fraction of `t`: 0-1)
 // * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
 // Author: JOS
