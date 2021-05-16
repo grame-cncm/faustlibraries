@@ -495,14 +495,14 @@ with {
 
     // input pre-delay and diffusion
     predelay = @(pre_delay);
-    bw_filter = *(bw) : +~( mem :*(1-bw));
+    bw_filter = *(bw) : +~(mem : *(1-bw));
     diffusion_network = allpass_f(142, i_diff1) : allpass_f(107, i_diff1) : allpass_f(379, i_diff2) : allpass_f(277, i_diff2);
 
     // reverb loop
     reverb_network = par(i, 2, block(i)) with {
         d = (672, 908, 4453, 4217, 1800, 2656, 3720, 3163);
-        block(i) = allpass_f(ba.take(i + 1, d),-d_diff1) : @(ba.take(i + 3, d)) : damp : 
-            allpass_f(ba.take(i + 5, d),d_diff2) : @(ba.take(i + 5, d)) : *(decay)
+        block(i) = allpass_f(ba.take(i+1, d),-d_diff1) : @(ba.take(i+3, d)) : damp : 
+            allpass_f(ba.take(i+5, d), d_diff2) : @(ba.take(i+5, d)) : *(decay)
         with {
             damp = *(1-damping) : +~*(damping) : *(decay);
         };

@@ -50,37 +50,37 @@ MAX = ma.INFINITY;
 
 
 //-------`(aa.)clip`----------
-// Clipping function
+// Clipping function.
 //-----------------------------
 clip(l, h, x) = max(l, min(h, x));
 
 
 //-------`(aa.)Rsqrt`----------
-// Real-valued sqrt()
+// Real-valued sqrt().
 //-----------------------------
 Rsqrt(x) = sqrt(max(0.0, x));
 
 
 //-------`(aa.)Rlog`----------
-// Real-valued log()
+// Real-valued log().
 //-----------------------------
 Rlog(x) = log(max(ma.EPSILON, x));
 
 
 //-------`(aa.)Rtan`----------
-// Real-valued tan()
+// Real-valued tan().
 //-----------------------------
 Rtan(x) = tan(clip(-MAX, MAX, x));
 
 
 //-------`(aa.)Racos`----------
-// Real-valued acos()
+// Real-valued acos().
 //-----------------------------
 Racos(x) = acos(clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Rasin`----------
-// Real-valued asin()
+// Real-valued asin().
 //-----------------------------
 Racos(x) = asin(clip(-1.0, 1.0, x));
 
@@ -92,19 +92,19 @@ Racos(x) = ma.acosh(clip(1.0, MAX, x));
 
 
 //-------`(aa.)Rcosh`----------
-// Real-valued cosh()
+// Real-valued cosh().
 //-----------------------------
 Rcosh(x) = min(MAX, ma.cosh(x));
 
 
 //-------`(aa.)Rsinh`----------
-// Real-valued sinh()
+// Real-valued sinh().
 //------------------------------
 Rsinh(x) = clip(-MAX, MAX, ma.sinh(x));
 
 
 //-------`(aa.)Ratanh`----------
-// Real-valued atanh()
+// Real-valued atanh().
 //------------------------------
 Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 
