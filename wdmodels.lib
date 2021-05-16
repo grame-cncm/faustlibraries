@@ -11,7 +11,7 @@
 // For inquires about use of this library in a commercial product, please contact dirk [dot] roosenburg [dot] 30 [at] gmail [dot] com.
 // This documentation is taken directly from the [readme](https://github.com/droosenb/faust-wdf-library). Please refer to it for a more updated version. 
 //
-// Many of the more in depth comments within the library include jargon. I plan to create videos detailing the theory of WD models
+// Many of the more in depth comments within the library include jargon. I plan to create videos detailing the theory of WD models.
 // For now I recommend Kurt Werner's PhD, [Virtual analog modeling of Audio circuitry using Wave Digital Filters](https://searchworks.stanford.edu/view/11891203).   
 // I have tried to maintain consistent syntax and notation to the thesis. 
 // This library currently includes the majority of the adaptors covered in chapter 1 and some from chapter 3. 
@@ -158,21 +158,21 @@
 //
 // All other parameters are value declarations (for components), inputs (for voltage or current ins), or parameter controls (for potentiometers/variable capacitors/variable inductors)
 //
-// ##### first case - downward going waves
+// ##### First case - downward going waves
 //
 // `(0, params) => downward-going(R1, ... Rn, a0, a1, ... an)` 
 // outputs: `(b1, b2, ... bn)`
 // this function takes any number of port resistances, the downward going wave, and any number of upward going waves as inputs. 
 // These values/waves are used to calculate the downward going waves coming from this adaptor.
 //
-// ##### second case 
+// ##### Second case 
 //
 // `(1, params) =>  upward-going(R1, ... Rn, a1, ... an)`
 // outputs : `(b0)`
 // this function takes any number of port resistances and any number of upward going waves as inputs
 // these values/waves are used to calculate the upward going wave coming from this adaptor.
 //
-// ##### third case  
+// ##### Third case  
 //
 // `(2, params) => port-resistance(R1, ... Rn)` 
 // outputs: `(R0)`
@@ -234,6 +234,7 @@ declare version "0.2.0";
 // Correct implementation is shown above.
 //
 // #### Reference
+//
 // K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.1
 //----------------------------------------------------------
 declare resistor author "Dirk Roosenburg";
@@ -1635,7 +1636,7 @@ with{
 //
 // #### Reference
 //
-// K. Werner Dissertation, 1.5.1
+// K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.5.1
 //----------------------------------------------------------
 declare parallel author "Dirk Roosenburg";
 declare parallel copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -1680,7 +1681,7 @@ case{
 //
 // #### Reference
 //
-// K. Werner Dissertation, 1.5.2
+// K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.5.2
 //----------------------------------------------------------
 declare series author "Dirk Roosenburg";
 declare series copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -1729,7 +1730,7 @@ case{
 //
 // #### Reference
 //
-// K. Werner Dissertation, 2.1.5
+// K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 2.1.5
 //----------------------------------------------------------
 declare u_sixportPassive author "Dirk Roosenburg";
 declare u_sixportPassive copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -2127,7 +2128,7 @@ buildup(A) = A(1);
 //----------------------`(wd.)getres`--------------------------
 // Function for determining the upward-facing port resistance of a partial WD connection tree.
 //
-// It recursively steps through the given tree, parametrizes the adaptors, and builds and algorithm.
+// It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 // It is used by the buildup and builddown functions but is also helpful in testing.
 //
 // #### Usage
@@ -2140,7 +2141,7 @@ buildup(A) = A(1);
 // `(A : B)` : is a partial connection tree composed of WD adaptors
 //
 // Note:
-// This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors
+// This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors.
 //----------------------------------------------------------
 declare getres author "Dirk Roosenburg";
 declare getres copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -2152,7 +2153,7 @@ getres(A) = A(2);
 //----------------------`(wd.)parres`--------------------------
 // Function for determining the upward-facing port resistance of a partial WD connection tree.
 //
-// It recursively steps through the given tree, parametrizes the adaptors, and builds and algorithm.
+// It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 // It is used by the buildup and builddown functions but is also helpful in testing.
 // This function is a parallelized version of getres.
 //
@@ -2166,7 +2167,7 @@ getres(A) = A(2);
 // `(A , B)` : is a partial connection tree composed of WD adaptors
 //
 // Note:
-// This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors
+// This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors.
 //----------------------------------------------------------
 declare parres author "Dirk Roosenburg";
 declare parres copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";

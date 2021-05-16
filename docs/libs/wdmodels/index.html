@@ -486,7 +486,7 @@ The library itself is written in Faust to maintain portability. </p>
 <p>This library is heavily based on Kurt Werner's Dissertation, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters." I have tried to maintain consistent notation between the adaptors appearing within thesis and my adaptor code. The majority of the adaptors found in chapter 1 and chapter 3 are currently supported. </p>
 <p>For inquires about use of this library in a commercial product, please contact dirk [dot] roosenburg [dot] 30 [at] gmail [dot] com.
 This documentation is taken directly from the <a href="https://github.com/droosenb/faust-wdf-library">readme</a>. Please refer to it for a more updated version. </p>
-<p>Many of the more in depth comments within the library include jargon. I plan to create videos detailing the theory of WD models
+<p>Many of the more in depth comments within the library include jargon. I plan to create videos detailing the theory of WD models.
 For now I recommend Kurt Werner's PhD, <a href="https://searchworks.stanford.edu/view/11891203">Virtual analog modeling of Audio circuitry using Wave Digital Filters</a>. <br />
 I have tried to maintain consistent syntax and notation to the thesis. 
 This library currently includes the majority of the adaptors covered in chapter 1 and some from chapter 3. </p>
@@ -571,17 +571,17 @@ tree = A : (B_sub, C_sub); //full tree
 <p>In order for adaptors to be interpretable by the compiler, they must be structured in a specific way. 
 Each adaptor is divided into three cases by their first parameter. This parameter, while accessible by the user, should only be set by the compiler/builder.</p>
 <p>All other parameters are value declarations (for components), inputs (for voltage or current ins), or parameter controls (for potentiometers/variable capacitors/variable inductors)</p>
-<h5 id="first-case-downward-going-waves">first case - downward going waves</h5>
+<h5 id="first-case-downward-going-waves">First case - downward going waves</h5>
 <p><code>(0, params) =&gt; downward-going(R1, ... Rn, a0, a1, ... an)</code> 
 outputs: <code>(b1, b2, ... bn)</code>
 this function takes any number of port resistances, the downward going wave, and any number of upward going waves as inputs. 
 These values/waves are used to calculate the downward going waves coming from this adaptor.</p>
-<h5 id="second-case">second case</h5>
+<h5 id="second-case">Second case</h5>
 <p><code>(1, params) =&gt;  upward-going(R1, ... Rn, a1, ... an)</code>
 outputs : <code>(b0)</code>
 this function takes any number of port resistances and any number of upward going waves as inputs
 these values/waves are used to calculate the upward going wave coming from this adaptor.</p>
-<h5 id="third-case">third case</h5>
+<h5 id="third-case">Third case</h5>
 <p><code>(2, params) =&gt; port-resistance(R1, ... Rn)</code> 
 outputs: <code>(R0)</code>
 this function takes any number of port resistances as inputs
@@ -1211,7 +1211,7 @@ This adaptor is used to connect adaptors simulating components connected in para
 This adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.</p>
 <h4 id="reference_30">Reference</h4>
-<p>K. Werner Dissertation, 1.5.1</p>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.5.1</p>
 <hr />
 <h3 id="wdseries"><code>(wd.)series</code></h3>
 <p>Adapted 3-port series connection.</p>
@@ -1225,7 +1225,7 @@ tree =  A : (series : (B, C));
 This adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.</p>
 <h4 id="reference_31">Reference</h4>
-<p>K. Werner Dissertation, 1.5.2</p>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.5.2</p>
 <h2 id="r-type-adaptors">R-Type Adaptors</h2>
 <hr />
 <h3 id="wdu_sixportpassive"><code>(wd.)u_sixportPassive</code></h3>
@@ -1240,7 +1240,7 @@ tree =  u_sixportPassive : (A, B, C, D, E, F));
 This adaptor has no user-accessible parameters. 
 It should be used within the connection tree with six forward adaptors.</p>
 <h4 id="reference_32">Reference</h4>
-<p>K. Werner Dissertation, 2.1.5</p>
+<p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 2.1.5</p>
 <h2 id="node-creating-functions">Node Creating Functions</h2>
 <hr />
 <h3 id="wdgenericnode"><code>(wd.)genericNode</code></h3>
@@ -1351,7 +1351,7 @@ It is used in conjunction with the builddown() function to create a full structu
 <hr />
 <h3 id="wdgetres"><code>(wd.)getres</code></h3>
 <p>Function for determining the upward-facing port resistance of a partial WD connection tree.</p>
-<p>It recursively steps through the given tree, parametrizes the adaptors, and builds and algorithm.
+<p>It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 It is used by the buildup and builddown functions but is also helpful in testing.</p>
 <h4 id="usage_40">Usage</h4>
 <pre><code>getres(A : B)~getres(A : B);
@@ -1359,11 +1359,11 @@ It is used by the buildup and builddown functions but is also helpful in testing
 <p>Where: 
 <code>(A : B)</code> : is a partial connection tree composed of WD adaptors</p>
 <p>Note:
-This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors</p>
+This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors.</p>
 <hr />
 <h3 id="wdparres"><code>(wd.)parres</code></h3>
 <p>Function for determining the upward-facing port resistance of a partial WD connection tree.</p>
-<p>It recursively steps through the given tree, parametrizes the adaptors, and builds and algorithm.
+<p>It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 It is used by the buildup and builddown functions but is also helpful in testing.
 This function is a parallelized version of getres.</p>
 <h4 id="usage_41">Usage</h4>
@@ -1372,7 +1372,7 @@ This function is a parallelized version of getres.</p>
 <p>Where: 
 <code>(A , B)</code> : is a partial connection tree composed of WD adaptors</p>
 <p>Note:
-This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors</p>
+This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors.</p>
 <hr />
 <h3 id="wdbuildout"><code>(wd.)buildout</code></h3>
 <p>Function for creating the output matrix for a WD model from a WD connection tree.</p>
