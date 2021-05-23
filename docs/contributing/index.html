@@ -67,7 +67,7 @@
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="../libs/aanl/" class="dropdown-item"> antialiased-nonlinearities </a>
+    <a href="../libs/aanl/" class="dropdown-item"> antialiased </a>
 </li>
                                     
 <li>
@@ -255,6 +255,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#library-deployment" class="nav-link">Library deployment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -358,12 +362,13 @@ os = library(&quot;oscillators.lib&quot;);
 no = library(&quot;noises.lib&quot;);
 pf = library(&quot;phaflangers.lib&quot;);
 pm = library(&quot;physmodels.lib&quot;);
+qu = library(&quot;quantizers.lib&quot;);
 rm = library(&quot;reducemaps.lib&quot;);
 re = library(&quot;reverbs.lib&quot;);
 ro = library(&quot;routes.lib&quot;);
-sp = library(&quot;spats.lib&quot;);
 si = library(&quot;signals.lib&quot;);
 so = library(&quot;soundfiles.lib&quot;);
+sp = library(&quot;spats.lib&quot;);
 sy = library(&quot;synths.lib&quot;);
 ve = library(&quot;vaeffects.lib&quot;);
 vl = library(&quot;version.lib&quot;);
@@ -389,7 +394,16 @@ process = si.smooth(0.999);
 </ul>
 <pre><code>import(&quot;all.lib&quot;);
 process = _;
-</code></pre></div>
+</code></pre>
+<h2 id="library-deployment">Library deployment</h2>
+<p>For GRAME maintainers:</p>
+<ul>
+<li>update the library submodule in <a href="https://github.com/grame-cncm/faust">faust</a>, recompile and deploy WebAssembly libfaust in <a href="https://github.com/grame-cncm/fausteditor">fausteditor</a>, <a href="https://github.com/grame-cncm/faustplayground">faustplayground</a> and <a href="https://github.com/grame-cncm/faustide">faustide</a></li>
+<li>update the library submodule in <a href="https://github.com/grame-cncm/faustlive">faustlive</a> </li>
+<li>update the library list in this <a href="https://github.com/grame-cncm/fausteditor/blob/master/scripts/faustlive.js">fausteditor</a> page</li>
+<li>update the library list in this <a href="https://github.com/grame-cncm/faustide/blob/master/src/documentation.ts">fausteide</a> page</li>
+<li>make an update PR for <a href="https://github.com/hellbent/vscode-faust">vscode-faust</a> project</li>
+</ul></div>
             </div>
         </div>
 

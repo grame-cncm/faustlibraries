@@ -38,6 +38,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `no`: `noises.lib`
 * `pf`: `phaflangers.lib`
 * `pm`: `physmodels.lib`
+* `qu`: `quantizers.lib`
 * `rm`: `reducemaps.lib`
 * `re`: `reverbs.lib`
 * `ro`: `routes.lib`

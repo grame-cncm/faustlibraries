@@ -46,8 +46,6 @@ BEGIN {
 END {
 }
 
-
-
 /^\/\/====*$/ { }
 /^\/\/####*$/ { PRINTDOC = 0; }	# end documentation lines
 /^\/\/====*$/ { PRINTDOC = 0; }	# end function documentation

@@ -103,12 +103,13 @@ os = library("oscillators.lib");
 no = library("noises.lib");
 pf = library("phaflangers.lib");
 pm = library("physmodels.lib");
+qu = library("quantizers.lib");
 rm = library("reducemaps.lib");
 re = library("reverbs.lib");
 ro = library("routes.lib");
-sp = library("spats.lib");
 si = library("signals.lib");
 so = library("soundfiles.lib");
+sp = library("spats.lib");
 sy = library("synths.lib");
 ve = library("vaeffects.lib");
 vl = library("version.lib");
@@ -147,3 +148,14 @@ Before preparing a pull-request, the new library must be carefully tested:
 import("all.lib");
 process = _;
 ```
+
+## Library deployment
+
+For GRAME maintainers:
+
+- update the library submodule in [faust](https://github.com/grame-cncm/faust), recompile and deploy WebAssembly libfaust in [fausteditor](https://github.com/grame-cncm/fausteditor), [faustplayground](https://github.com/grame-cncm/faustplayground) and [faustide](https://github.com/grame-cncm/faustide)
+- update the library submodule in [faustlive](https://github.com/grame-cncm/faustlive) 
+- update the library list in this [fausteditor](https://github.com/grame-cncm/fausteditor/blob/master/scripts/faustlive.js) page
+- update the library list in this [fausteide](https://github.com/grame-cncm/faustide/blob/master/src/documentation.ts) page
+- make an update PR for [vscode-faust](https://github.com/hellbent/vscode-faust) project
+
