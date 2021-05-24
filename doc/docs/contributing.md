@@ -35,6 +35,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * Any new "standard" library must be added to `generateDoc`.
 * Functions must be organized by sections.
 * Any new library should at least `declare` a `name` and a `version`.
+* Any new library has to use a prefix declared in the header section with the following kind of syntax: `Its official prefix is 'qu'` (look at an existing library to follow the exact syntax).
 * The comment based markdown documentation of each library must respect the following format (open the source code of any of the libraries for an example):
 
 ```
