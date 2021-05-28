@@ -1293,6 +1293,34 @@ with {
   a2d = (a0 - a1*c + csq)/d;
 };
 
+//-----------------------------`(fi.)tf1s`-------------------------------
+// First-order special case of tf2s above
+//
+// #### Usage
+//
+// ```
+// _ : tf1s(b1,b0,a0) : _
+// ```
+//----------------------------------------------
+declare tf1s author "Julius O. Smith III";
+declare tf1s copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare tf1s license "MIT-style STK-4.3 license";
+tf1s(b1,b0,a0,w1) = fi.tf2s(b1,b0,0,a0,0,w1); // FIXME: Faust compiler does not fully optimize - does C++?
+
+//-----------------------------`(fi.)tf1snp`-------------------------------
+// First-order special case of tf2snp above
+//
+// #### Usage
+//
+// ```
+// _ : tf1snp(b1,b0,a0) : _
+// ```
+//----------------------------------------------
+declare tf1snp author "Julius O. Smith III";
+declare tf1snp copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare tf1snp license "MIT-style STK-4.3 license";
+tf1snp(b1,b0,a0,w1) = fi.tf2snp(b1,b0,0,a0,0,w1); // FIXME: Faust compiler does not fully optimize - does C++?
+
 //-----------------------------`(fi.)tf3slf`-------------------------------
 // Analogous to tf2s above, but third order, and using the typical
 // low-frequency-matching bilinear-transform constant 2/T ("lf" series)
