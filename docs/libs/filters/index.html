@@ -905,7 +905,7 @@ implemented in terms of the Transfer-Function (TF) coefficients.
 Such filter structures are termed "direct form".</p>
 <p><code>iir</code> is a standard Faust function.</p>
 <h4 id="usage_12">Usage</h4>
-<pre><code>  _ : iir(bcoeffs,acoeffs) : _
+<pre><code>_ : iir(bcoeffs,acoeffs) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1336,7 +1336,7 @@ Note the lack of a "w1" argument.</p>
 specified by ANALOG transfer-function polynomials B(s)/A(s),
 and a frequency-scaling parameter.</p>
 <h4 id="usage_40">Usage</h4>
-<pre><code>tf1s(b1,b0,a0,w1)
+<pre><code>_ : tf1s(b1,b0,a0,w1) : _
 </code></pre>
 <p>Where:</p>
 <pre><code>   b1 s + b0
@@ -1946,7 +1946,7 @@ that is, tau is the integral of the filter's impulse response. This
 response is slower to reach the final value but has less ripples in
 non-steady signals.</p>
 <h4 id="usage_68">Usage</h4>
-<pre><code>_ avg_tau(period) : _
+<pre><code>_ : avg_tau(period) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1963,7 +1963,7 @@ or to reach 1-1/e of its final value.</li>
 This response is particularly useful when the system is required to 
 reach the final value after about <code>period</code> seconds.</p>
 <h4 id="usage_69">Usage</h4>
-<pre><code>_ avg_t60(period) : _
+<pre><code>_ : avg_t60(period) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1981,7 +1981,7 @@ This response is close to the moving-average algorithm as it roughly reaches
 the final value after <code>period</code> seconds and shows about the same
 oscillations for non-steady signals.</p>
 <h4 id="usage_70">Usage</h4>
-<pre><code>_ avg_t19(period) : _
+<pre><code>_ : avg_t19(period) : _
 </code></pre>
 <p>Where:</p>
 <ul>
