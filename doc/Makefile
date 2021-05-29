@@ -44,7 +44,7 @@ list:
 	@echo $(foreach e, $(LIST), "        - '" $e "':  libs/"$e.md"\n")
 	
 pdf:
-	pandoc --toc docs/index.md docs/organization.md docs/standardFunctions.md docs/contributing.md docs/copyright.md docs/libs/*.md -o library.pdf
+	pandoc --toc docs/index.md docs/organization.md docs/standardFunctions.md docs/contributing.md docs/about.md docs/libs/*.md -o library.pdf
 
 clean:
 	rm -f $(MD)

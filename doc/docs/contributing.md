@@ -2,7 +2,7 @@
 
 In general, libraries are organised in a *stacked manner*: the base ones define functions or constants without any dependancies, and additional ones are gradually built on top of simpler ones, layer by layer. **Dependency loops must be avoided as much as possible**. The *resources* folder contains tools to build and visualise the libraries dependencies graphs.
 
-If you wish to add a function to any of these libraries or if you plan to add a new library, make sure that you follow the following conventions:
+If you wish to add a function to any of these libraries or if you plan to add a new library, make sure that you observe the following conventions:
 
 ## New Functions
 
