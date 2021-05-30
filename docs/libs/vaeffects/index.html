@@ -127,11 +127,11 @@
 </li>
                                     
 <li>
-    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
+    <a href="../noises/" class="dropdown-item"> noises </a>
 </li>
                                     
 <li>
-    <a href="../noises/" class="dropdown-item"> noises </a>
+    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
 </li>
                                     
 <li>
@@ -355,7 +355,7 @@ This extra delay alters the response, especially at high frequencies
 (see reference [1] for details).
 See <code>moog_vcf_2b</code> below for a more accurate implementation.</p>
 <h4 id="usage">Usage</h4>
-<pre><code>moog_vcf(res,fr)
+<pre><code>_ : moog_vcf(res,fr) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -380,8 +380,8 @@ to <code>moog_vcf_2b[n](res^4,fr)</code> (when res and fr are constant).
 <code>moog_vcf_2b</code> uses two direct-form biquads (<code>tf2</code>).
 <code>moog_vcf_2bn</code> uses two protected normalized-ladder biquads (<code>tf2np</code>).</p>
 <h4 id="usage_1">Usage</h4>
-<pre><code>moog_vcf_2b(res,fr)
-moog_vcf_2bn(res,fr)
+<pre><code>_ : moog_vcf_2b(res,fr) : _
+_ : moog_vcf_2bn(res,fr) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -744,7 +744,7 @@ the compiler will only generate the needed code.</p>
 is analyzed using a filter bank.
 <code>vocoder</code> is a standard Faust function.</p>
 <h4 id="usage_22">Usage</h4>
-<pre><code>_ : vocoder(nBands,att,rel,BWRatio,source,excitation) : _;
+<pre><code>_ : vocoder(nBands,att,rel,BWRatio,source,excitation) : _
 </code></pre>
 <p>Where:</p>
 <ul>

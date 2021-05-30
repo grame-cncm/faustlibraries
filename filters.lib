@@ -2220,7 +2220,7 @@ highshelf_other_freq(N, Lpi, fx) = ba.db2linear(ba.linear2db(fx) - Lpi/N);
 // #### Usage
 //
 // ```
-// _ : peak_eq(Lfx,fx,B) : _;
+// _ : peak_eq(Lfx,fx,B) : _
 // ```
 //
 // Where:
@@ -2254,7 +2254,7 @@ peak_eq(Lfx,fx,B) = tf2s(1,b1s,1,a1s,1,wx) with {
 // #### Usage
 //
 // ```
-// _ : peak_eq_cq(Lfx,fx,Q) : _;
+// _ : peak_eq_cq(Lfx,fx,Q) : _
 // ```
 //
 // Where:
@@ -2279,7 +2279,7 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 // #### Usage
 //
 // ```
-// _ : peak_eq_rm(Lfx,fx,tanPiBT) : _;
+// _ : peak_eq_rm(Lfx,fx,tanPiBT) : _
 // ```
 //
 // Where:
@@ -2470,15 +2470,15 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 // #### Usage
 //
 // ```
-// _ : mth_octave_filterbank(O,M,ftop,N) : par(i,N,_); // Oth-order
-// _ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_); // dc-inverted version
+// _ : mth_octave_filterbank(O,M,ftop,N) : par(i,N,_)     // Oth-order
+// _ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_) // dc-inverted version
 // ```
 //
 // Also for convenience:
 //
 // ```
-// _ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_); // 3rd-order Butterworth
-// _ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_); // 5th-order Butterworth
+// _ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_) // 3rd-order Butterworth
+// _ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_) // 5th-order Butterworth
 // mth_octave_filterbank_default = mth_octave_filterbank5;
 // ```
 //
@@ -2548,7 +2548,7 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 // #### Usage
 //
 // ```
-// _ : filterbank (O,freqs) : par(i,N,_); // Butterworth band-splits
+// _ : filterbank (O,freqs) : par(i,N,_) // Butterworth band-splits
 // ```
 // Where:
 //
@@ -2583,7 +2583,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : filterbanki(O,freqs) : par(i,N,_); // Inverted-dc version
+// _ : filterbanki(O,freqs) : par(i,N,_) // Inverted-dc version
 // ```
 //
 // Where:

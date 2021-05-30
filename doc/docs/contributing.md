@@ -27,6 +27,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * Every time a new function is added, the documentation should be updated simply by running `make doclib`. <!-- TODO -->
 * The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on *Using the Faust Libraries*).
 * Try to reuse existing functions as much as possible.
+* The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen: _` for a mono generator, `_ : filter : _` for a mono effect, etc.
 * If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.
 
 ## New Libraries

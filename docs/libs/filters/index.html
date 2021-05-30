@@ -127,11 +127,11 @@
 </li>
                                     
 <li>
-    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
+    <a href="../noises/" class="dropdown-item"> noises </a>
 </li>
                                     
 <li>
-    <a href="../noises/" class="dropdown-item"> noises </a>
+    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
 </li>
                                     
 <li>
@@ -1700,7 +1700,7 @@ See <code>lowshelf</code> documentation above for more details on shelf shape.</
 Also called a "parametric equalizer" section.
 <code>peak_eq</code> is a standard Faust function.</p>
 <h4 id="usage_56">Usage</h4>
-<pre><code>_ : peak_eq(Lfx,fx,B) : _;
+<pre><code>_ : peak_eq(Lfx,fx,B) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1715,7 +1715,7 @@ Also called a "parametric equalizer" section.
 <h3 id="fipeak_eq_cq"><code>(fi.)peak_eq_cq</code></h3>
 <p>Constant-Q second order peaking equalizer section.</p>
 <h4 id="usage_57">Usage</h4>
-<pre><code>_ : peak_eq_cq(Lfx,fx,Q) : _;
+<pre><code>_ : peak_eq_cq(Lfx,fx,Q) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1730,7 +1730,7 @@ Also called a "parametric equalizer" section.
 <h3 id="fipeak_eq_rm"><code>(fi.)peak_eq_rm</code></h3>
 <p>Regalia-Mitra second order peaking equalizer section.</p>
 <h4 id="usage_58">Usage</h4>
-<pre><code>_ : peak_eq_rm(Lfx,fx,tanPiBT) : _;
+<pre><code>_ : peak_eq_rm(Lfx,fx,tanPiBT) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1849,12 +1849,12 @@ filter-banks using elliptic or Chebyshev prototype filters.</p>
 <p>Allpass-complementary filter banks based on Butterworth band-splitting.
 For Butterworth band-splits, the needed delay equalizer is easily found.</p>
 <h4 id="usage_62">Usage</h4>
-<pre><code>_ : mth_octave_filterbank(O,M,ftop,N) : par(i,N,_); // Oth-order
-_ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_); // dc-inverted version
+<pre><code>_ : mth_octave_filterbank(O,M,ftop,N) : par(i,N,_)     // Oth-order
+_ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_) // dc-inverted version
 </code></pre>
 <p>Also for convenience:</p>
-<pre><code>_ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_); // 3rd-order Butterworth
-_ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_); // 5th-order Butterworth
+<pre><code>_ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_) // 3rd-order Butterworth
+_ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_) // 5th-order Butterworth
 mth_octave_filterbank_default = mth_octave_filterbank5;
 </code></pre>
 <p>Where:</p>
@@ -1872,7 +1872,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <p>Filter bank.
 <code>filterbank</code> is a standard Faust function.</p>
 <h4 id="usage_63">Usage</h4>
-<pre><code>_ : filterbank (O,freqs) : par(i,N,_); // Butterworth band-splits
+<pre><code>_ : filterbank (O,freqs) : par(i,N,_) // Butterworth band-splits
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1888,7 +1888,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <h3 id="fifilterbanki"><code>(fi.)filterbanki</code></h3>
 <p>Inverted-dc filter bank.</p>
 <h4 id="usage_64">Usage</h4>
-<pre><code>_ : filterbanki(O,freqs) : par(i,N,_); // Inverted-dc version
+<pre><code>_ : filterbanki(O,freqs) : par(i,N,_) // Inverted-dc version
 </code></pre>
 <p>Where:</p>
 <ul>

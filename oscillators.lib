@@ -404,7 +404,7 @@ lf_triangle(freq) = 2*lf_trianglepos(freq) - 1;
 // #### Usage
 //
 // ```
-// lf_rawsaw(periodsamps)
+// lf_rawsaw(periodsamps) : _
 // ```
 //
 // Where:
@@ -420,7 +420,7 @@ lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 // #### Usage
 //
 // ```
-// lf_sawpos_phase(phase,freq)
+// lf_sawpos_phase(phase,freq) : _
 // ```
 //
 // Where:
@@ -436,7 +436,7 @@ lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac) ~ +(freq/ma.SR);
 // #### Usage
 //
 // ```
-// lf_sawpos(freq)
+// lf_sawpos(freq) : _
 // ```
 //
 // Where:
@@ -456,7 +456,7 @@ lf_sawpos(freq) = ma.frac ~ +(freq/ma.SR);
 // #### Usage
 //
 // ```
-// lf_sawpos_reset(freq,reset)
+// lf_sawpos_reset(freq,reset) : _
 // ```
 //
 // Where:
@@ -476,7 +476,7 @@ lf_sawpos_reset(freq,reset) = ma.frac * (reset == 0) ~ +(freq/ma.SR);
 // #### Usage
 //
 // ```
-// lf_sawpos_phase_reset(freq,phase,reset)
+// lf_sawpos_phase_reset(freq,phase,reset) : _
 // ```
 //
 // Where:
@@ -497,7 +497,7 @@ lf_sawpos_phase_reset(freq,phase,reset) = lf_sawpos_reset(freq,reset) + phase : 
 // #### Usage
 //
 // ```
-// lf_saw(freq)
+// lf_saw(freq) : _
 // ```
 //
 // Where:
@@ -553,10 +553,10 @@ lf_saw(freq) = saw1(freq);
 // sawNp(N,freq,phase) : _
 // saw2dpw(freq) : _
 // saw2(freq) : _
-// saw3(freq) : _ // based on sawN
-// saw4(freq) : _ // based on sawN
-// saw5(freq) : _ // based on sawN
-// saw6(freq) : _ // based on sawN
+// saw3(freq) : _     // based on sawN
+// saw4(freq) : _     // based on sawN
+// saw5(freq) : _     // based on sawN
+// saw6(freq) : _     // based on sawN
 // sawtooth(freq) : _ // = saw2
 // saw2f2(freq) : _
 // saw2f4(freq) : _
@@ -636,6 +636,7 @@ saw2(freq) = y with { // newer PTR version (stateless - freq can vary at any spe
   selector2 = select2(<(0), (_<:_,(*(1-p0):+(1)):+), _); // for output
   y = 2*p-1;
 };
+
 // --- sawtooth ---
 sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 
@@ -1413,7 +1414,7 @@ CZ = environment {
 // #### Usage
 //
 // ```
-// polyblep(Q, phase) : _
+// polyblep(Q,phase) : _
 // ```
 //
 // Where:

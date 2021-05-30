@@ -127,11 +127,11 @@
 </li>
                                     
 <li>
-    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
+    <a href="../noises/" class="dropdown-item"> noises </a>
 </li>
                                     
 <li>
-    <a href="../noises/" class="dropdown-item"> noises </a>
+    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
 </li>
                                     
 <li>
@@ -795,7 +795,7 @@ Thresh: -6 dB, meaning 4:1 compression begins at amplitude 1/2.
 The 1176 also has a "bright, clear eq effect" (use filters.lib if desired).
 <code>limiter_1176_R4_mono</code> is a standard Faust function.</p>
 <h4 id="usage_13">Usage</h4>
-<pre><code> _ : limiter_1176_R4_mono : _;
+<pre><code> _ : limiter_1176_R4_mono : _
 </code></pre>
 <h4 id="reference">Reference:</h4>
 <ul>
@@ -818,7 +818,7 @@ Ratios: 4 (moderate compression), 8 (severe compression),
     Faster attack gives "more bite" (e.g. on vocals)
     He hears a bright, clear eq effect as well (not implemented here)</p>
 <h4 id="usage_14">Usage</h4>
-<pre><code> _,_ : limiter_1176_R4_stereo : _,_;
+<pre><code> _,_ : limiter_1176_R4_stereo : _,_
 </code></pre>
 <h4 id="reference_1">Reference:</h4>
 <ul>
@@ -854,7 +854,7 @@ increase determined by the user for any specific application.</p>
 between them all, so that amplitude ratios between the signals are kept.</p>
 <h4 id="usage_15">Usage</h4>
 <pre><code>si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : 
-   si.bus(N);
+   si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -874,7 +874,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <h3 id="colimiter_lad_mono"><code>(co.)limiter_lad_mono</code></h3>
 <p>Specialised case of limiter_lad_N: mono limiter.</p>
 <h4 id="usage_16">Usage</h4>
-<pre><code>_ : limiter_lad_mono(LD, ceiling, attack, hold, release) : _;
+<pre><code>_ : limiter_lad_mono(LD, ceiling, attack, hold, release) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -892,7 +892,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <h3 id="colimiter_lad_stereo"><code>(co.)limiter_lad_stereo</code></h3>
 <p>Specialised case of limiter_lad_N: stereo limiter.</p>
 <h4 id="usage_17">Usage</h4>
-<pre><code>_ , _ : limiter_lad_stereo(LD, ceiling, attack, hold, release) : _ , _;
+<pre><code>_,_ : limiter_lad_stereo(LD, ceiling, attack, hold, release) : _,_
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -911,7 +911,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <p>Specialised case of limiter_lad_N: quadraphonic limiter.</p>
 <h4 id="usage_18">Usage</h4>
 <pre><code>si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : 
-   si.bus(4);
+   si.bus(4)
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -936,7 +936,7 @@ the least colouring artefacts while keeping a not-so-slow release curve.
 Tests have shown that, given a pop song with 60 dB of amplification
 and a 0-dB-ceiling, the loudest peak recorded was ~0.38 dB.</p>
 <h4 id="usage_19">Usage</h4>
-<pre><code>_ : limiter_lad_bw : _;
+<pre><code>_ : limiter_lad_bw : _
 </code></pre>
 <h4 id="reference_6">Reference:</h4>
 <ul>

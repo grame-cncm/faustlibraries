@@ -742,7 +742,7 @@ with {
 // #### Usage
 //
 // ```
-//  _ : limiter_1176_R4_mono : _;
+//  _ : limiter_1176_R4_mono : _
 // ```
 //
 // #### Reference:
@@ -774,7 +774,7 @@ limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
 // #### Usage
 //
 // ```
-//  _,_ : limiter_1176_R4_stereo : _,_;
+//  _,_ : limiter_1176_R4_stereo : _,_
 // ```
 //
 // #### Reference:
@@ -823,7 +823,7 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 //
 // ```
 // si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : 
-//    si.bus(N);
+//    si.bus(N)
 // ```
 //
 // Where:
@@ -866,7 +866,7 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 // #### Usage
 //
 // ```
-// _ : limiter_lad_mono(LD, ceiling, attack, hold, release) : _;
+// _ : limiter_lad_mono(LD, ceiling, attack, hold, release) : _
 // ```
 //
 // Where:
@@ -894,7 +894,7 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 // #### Usage
 //
 // ```
-// _ , _ : limiter_lad_stereo(LD, ceiling, attack, hold, release) : _ , _;
+// _,_ : limiter_lad_stereo(LD, ceiling, attack, hold, release) : _,_
 // ```
 //
 // Where:
@@ -923,7 +923,7 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 //
 // ```
 // si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : 
-//    si.bus(4);
+//    si.bus(4)
 // ```
 //
 // Where:
@@ -959,7 +959,7 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 // #### Usage
 //
 // ```
-// _ : limiter_lad_bw : _;
+// _ : limiter_lad_bw : _
 // ```
 //
 // #### Reference:
@@ -971,6 +971,6 @@ declare limiter_lad_bw copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_lad_bw license "GPLv3 license";
 limiter_lad_bw = limiter_lad_mono(.01, 1, .01 / twopi, .1, 1 / twopi)
-      with {
-           twopi = 2 * ma.PI;
-      };
+with {
+    twopi = 2 * ma.PI;
+};

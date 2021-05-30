@@ -127,11 +127,11 @@
 </li>
                                     
 <li>
-    <a href="./" class="dropdown-item active"> oscillators </a>
+    <a href="../noises/" class="dropdown-item"> noises </a>
 </li>
                                     
 <li>
-    <a href="../noises/" class="dropdown-item"> noises </a>
+    <a href="./" class="dropdown-item active"> oscillators </a>
 </li>
                                     
 <li>
@@ -745,7 +745,7 @@ suppression (i.e., <code>saw1</code> is ok).</p>
 <h3 id="oslf_rawsaw"><code>(os.)lf_rawsaw</code></h3>
 <p>Simple sawtooth waveform oscillator between 0 and period in samples.</p>
 <h4 id="usage_17">Usage</h4>
-<pre><code>lf_rawsaw(periodsamps)
+<pre><code>lf_rawsaw(periodsamps) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -756,7 +756,7 @@ suppression (i.e., <code>saw1</code> is ok).</p>
 <p>Simple sawtooth waveform oscillator between 0 and 1
 with phase control.</p>
 <h4 id="usage_18">Usage</h4>
-<pre><code>lf_sawpos_phase(phase,freq)
+<pre><code>lf_sawpos_phase(phase,freq) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -767,7 +767,7 @@ with phase control.</p>
 <h3 id="oslf_sawpos"><code>(os.)lf_sawpos</code></h3>
 <p>Simple sawtooth waveform oscillator between 0 and 1.</p>
 <h4 id="usage_19">Usage</h4>
-<pre><code>lf_sawpos(freq)
+<pre><code>lf_sawpos(freq) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -778,7 +778,7 @@ with phase control.</p>
 <p>Simple sawtooth waveform oscillator between 0 and 1.
 with reset.</p>
 <h4 id="usage_20">Usage</h4>
-<pre><code>lf_sawpos_reset(freq,reset)
+<pre><code>lf_sawpos_reset(freq,reset) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -790,7 +790,7 @@ with reset.</p>
 <p>Simple sawtooth waveform oscillator between 0 and 1.
 with phase control and reset.</p>
 <h4 id="usage_21">Usage</h4>
-<pre><code>lf_sawpos_phase_reset(freq,phase,reset)
+<pre><code>lf_sawpos_phase_reset(freq,phase,reset) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -803,7 +803,7 @@ with phase control and reset.</p>
 <p>Simple sawtooth waveform.
 <code>lf_saw</code> is a standard Faust function.</p>
 <h4 id="usage_22">Usage</h4>
-<pre><code>lf_saw(freq)
+<pre><code>lf_saw(freq) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -842,10 +842,10 @@ See reference for sawN.</p>
 sawNp(N,freq,phase) : _
 saw2dpw(freq) : _
 saw2(freq) : _
-saw3(freq) : _ // based on sawN
-saw4(freq) : _ // based on sawN
-saw5(freq) : _ // based on sawN
-saw6(freq) : _ // based on sawN
+saw3(freq) : _     // based on sawN
+saw4(freq) : _     // based on sawN
+saw5(freq) : _     // based on sawN
+saw6(freq) : _     // based on sawN
 sawtooth(freq) : _ // = saw2
 saw2f2(freq) : _
 saw2f4(freq) : _
@@ -1291,7 +1291,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="ospolyblep"><code>(os.)polyblep</code></h3>
 <p>PolyBLEP residual function - used for smoothing steps in the audio signal.</p>
 <h4 id="usage_54">Usage</h4>
-<pre><code>polyblep(Q, phase) : _
+<pre><code>polyblep(Q,phase) : _
 </code></pre>
 <p>Where:</p>
 <ul>

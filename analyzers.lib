@@ -35,7 +35,7 @@ Michon and Julius O. Smith III, and is released under the
 // #### Usage
 //
 // ```
-// _ : abs_envelope_rect(period) : _;
+// _ : abs_envelope_rect(period) : _
 // ```
 //
 //  Where:
@@ -57,7 +57,7 @@ abs_envelope_rect(period, x) = abs(x) : fi.avg_rect(period);
 // #### Usage
 //
 // ```
-// _ : abs_envelope_tau(period) : _;
+// _ : abs_envelope_tau(period) : _
 // ```
 //
 //  Where:
@@ -79,7 +79,7 @@ abs_envelope_tau(period, x) = abs(x) : fi.avg_tau(period);
 // #### Usage
 //
 // ```
-// _ : abs_envelope_t60(period) : _;
+// _ : abs_envelope_t60(period) : _
 // ```
 //
 //  Where:
@@ -101,7 +101,7 @@ abs_envelope_t60(period, x) = abs(x) : fi.avg_t60(period);
 // #### Usage
 //
 // ```
-// _ : abs_envelope_t19(period) : _;
+// _ : abs_envelope_t19(period) : _
 // ```
 //
 //  Where:
@@ -184,7 +184,7 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 // #### Usage
 //
 // ```
-// _ : amp_follower_ar(att,rel) : _;
+// _ : amp_follower_ar(att,rel) : _
 // ```
 // * Author Jonatan Liljedahl, revised by RM
 //---------------------------------------------------------
@@ -197,7 +197,7 @@ amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
 // #### Usage
 //
 // ```
-// _ : ms_envelope_rect(period) : _;
+// _ : ms_envelope_rect(period) : _
 // ```
 //
 //  Where:
@@ -219,7 +219,7 @@ ms_envelope_rect(period, x) = x * x : fi.avg_rect(period);
 // #### Usage
 //
 // ```
-// _ : ms_envelope_tau(period) : _;
+// _ : ms_envelope_tau(period) : _
 // ```
 //
 //  Where:
@@ -241,7 +241,7 @@ ms_envelope_tau(period, x) = x * x : fi.avg_tau(period);
 // #### Usage
 //
 // ```
-// _ : ms_envelope_t60(period) : _;
+// _ : ms_envelope_t60(period) : _
 // ```
 //
 //  Where:
@@ -263,7 +263,7 @@ ms_envelope_t60(period, x) = x * x : fi.avg_t60(period);
 // #### Usage
 //
 // ```
-// _ : ms_envelope_t19(period) : _;
+// _ : ms_envelope_t19(period) : _
 // ```
 //
 //  Where:
@@ -284,7 +284,7 @@ ms_envelope_t19(period, x) = x * x : fi.avg_t19(period);
 // #### Usage
 //
 // ```
-// _ : rms_envelope_rect(period) : _;
+// _ : rms_envelope_rect(period) : _
 // ```
 //
 //  Where:
@@ -306,7 +306,7 @@ rms_envelope_rect(period, x) = ms_envelope_rect(period, x) : sqrt;
 // #### Usage
 //
 // ```
-// _ : rms_envelope_tau(period) : _;
+// _ : rms_envelope_tau(period) : _
 // ```
 //
 //  Where:
@@ -328,7 +328,7 @@ rms_envelope_tau(period, x) = ms_envelope_tau(period, x) : sqrt;
 // #### Usage
 //
 // ```
-// _ : rms_envelope_t60(period) : _;
+// _ : rms_envelope_t60(period) : _
 // ```
 //
 //  Where:
@@ -350,7 +350,7 @@ rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
 // #### Usage
 //
 // ```
-// _ : rms_envelope_t19(period) : _;
+// _ : rms_envelope_t19(period) : _
 // ```
 //
 //  Where:
@@ -378,7 +378,7 @@ rms_envelope_t19(period, x) = ms_envelope_t19(period, x) : sqrt;
 // #### Usage
 //
 // ```
-// _ : zcr(tau) : _;
+// _ : zcr(tau) : _
 // ```
 //
 // Where:
@@ -437,15 +437,15 @@ zcr(period, x) = ma.zc(x) : fi.lptau(period);
 //
 // #### Usage
 // ```
-// _ : mth_octave_analyzer(O,M,ftop,N) : par(i,N,_); // Oth-order Butterworth
-// _ : mth_octave_analyzer6e(M,ftop,N) : par(i,N,_); // 6th-order elliptic
+// _ : mth_octave_analyzer(O,M,ftop,N) : par(i,N,_) // Oth-order Butterworth
+// _ : mth_octave_analyzer6e(M,ftop,N) : par(i,N,_) // 6th-order elliptic
 // ```
 //
 // Also for convenience:
 //
 // ```
-// _ : mth_octave_analyzer3(M,ftop,N) : par(i,N,_); // 3d-order Butterworth
-// _ : mth_octave_analyzer5(M,ftop,N) : par(i,N,_); // 5th-roder Butterworth
+// _ : mth_octave_analyzer3(M,ftop,N) : par(i,N,_) // 3d-order Butterworth
+// _ : mth_octave_analyzer5(M,ftop,N) : par(i,N,_) // 5th-roder Butterworth
 // mth_octave_analyzer_default = mth_octave_analyzer6e;
 // ```
 //
@@ -491,7 +491,7 @@ mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
 // #### Usage:
 //
 // ```
-// _ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _;
+// _ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _
 // ```
 //
 // Where:
@@ -575,7 +575,7 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 // #### Usage
 //
 // ```
-// _ : analyzer(O,freqs) : par(i,N,_); // No delay equalizer
+// _ : analyzer(O,freqs) : par(i,N,_) // No delay equalizer
 // ```
 //
 // Where:
@@ -611,7 +611,7 @@ analyzer(O,lfreqs) = _ <: bsplit(nb) with
 // #### Usage
 //
 // ```
-// _ : goertzelOpt(freq,N) : _;
+// _ : goertzelOpt(freq,N) : _
 // ```
 //
 // Where:
@@ -644,7 +644,7 @@ with{
 // #### Usage
 //
 // ```
-// _ : goertzelComp(freq,N) : _;
+// _ : goertzelComp(freq,N) : _
 // ```
 //
 // Where:
@@ -681,7 +681,7 @@ with{
 // #### Usage
 //
 // ```
-// _ : goertzel(freq,N) : _;
+// _ : goertzel(freq,N) : _
 // ```
 //
 // Where:
@@ -726,7 +726,7 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 // #### Usage
 //
 // ```
-// si.cbus(N) : fft(N) : si.cbus(N);
+// si.cbus(N) : fft(N) : si.cbus(N)
 // ```
 //
 // Where:
@@ -782,7 +782,7 @@ with {
 // #### Usage
 //
 // ```
-// si.cbus(N) : ifft(N) : si.cbus(N);
+// si.cbus(N) : ifft(N) : si.cbus(N)
 // ```
 //
 // Where:

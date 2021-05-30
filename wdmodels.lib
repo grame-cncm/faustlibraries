@@ -975,7 +975,7 @@ case{
 // An implementation of the lambert function.
 // It uses Halley's method of iteration to approximate the output.
 // Included in the WD library for use in non-linear diode models.
-// Adapted from  K M Brigg's c++ lambert function approximation.
+// Adapted from K M Brigg's c++ lambert function approximation.
 //
 // #### Usage
 //
@@ -1100,7 +1100,7 @@ u_diodeSingle =
 case{
     (0, Is, Vt) => b1
     with{
-        b1(R1, a1) = ma.signum(a1)*( (a1 : abs) + 2*R1*Is - 2*Vt*(lambert((R1*Is/Vt*((((a1 : abs)+R1*Is)/Vt) : exp)),3) + lambert((-R1*Is/Vt*(((-1*(a1 : abs)+R1*Is)/Vt) : exp)),3)));
+        b1(R1, a1) = ma.signum(a1)*((a1 : abs) + 2*R1*Is - 2*Vt*(lambert((R1*Is/Vt*((((a1 : abs)+R1*Is)/Vt) : exp)),3) + lambert((-R1*Is/Vt*(((-1*(a1 : abs)+R1*Is)/Vt) : exp)),3)));
     };
     (1, Is, Vt) => !, !; 
     (2, Is, Vt) => 0; 
