@@ -626,7 +626,7 @@ Correct implementation is shown above.</p>
 The resistor will also pass the voltage across itself as an output of the model.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>rout(i) = resistor_Vout(i, R);
-buildtree( A : rout ) : _;
+buildtree( A : rout ) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -646,7 +646,7 @@ Correct implementation is shown above.</p>
 The resistor will also pass the current through itself as an output of the model.</p>
 <h4 id="usage_2">Usage</h4>
 <pre><code>rout(i) = resistor_Iout(i, R);
-buildtree( A : rout ) : _;
+buildtree( A : rout ) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -732,7 +732,7 @@ Can be used for either DC (constant) or AC (signal) voltage sources.
 The resistive voltage source will also pass the voltage across it as an output of the model.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>vout(i) = resVoltage_Vout(i, R, ein);
-buildtree( A : vout ) : _;
+buildtree( A : vout ) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -842,7 +842,7 @@ Correct implementation is shown above.</p>
 This capacitor model was digitized using the bi-linear transform.</p>
 <h4 id="usage_11">Usage</h4>
 <pre><code>c1(i) = capacitor(i, R);
-buildtree( A : c1 ) : _;
+buildtree( A : c1 ) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -863,7 +863,7 @@ The capacitor will also pass the voltage across itself as an output of the model
 This capacitor model was digitized using the bi-linear transform.</p>
 <h4 id="usage_12">Usage</h4>
 <pre><code>cout(i) = capacitor_Vout(i, R);
-buildtree( A : cout ) : _;
+buildtree( A : cout ) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -904,7 +904,7 @@ The inductor will also pass the voltage across itself as an output of the model.
 This inductor model was digitized using the bi-linear transform.</p>
 <h4 id="usage_14">Usage</h4>
 <pre><code>lout(i) = inductor_Vout(i, R);
-buildtree( A : lout ) : _;
+buildtree( A : lout ) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -959,7 +959,7 @@ It uses Halley's method of iteration to approximate the output.
 Included in the WD library for use in non-linear diode models.
 Adapted from K M Brigg's c++ lambert function approximation.</p>
 <h4 id="usage_17">Usage</h4>
-<pre><code>lambert(n, itr) : _;
+<pre><code>lambert(n, itr) : _
 </code></pre>
 <p>Where:
 * <code>n</code>: value at which the lambert function will be evaluated
