@@ -275,6 +275,26 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#lagrange-based-interpolators" class="nav-link">Lagrange based interpolators</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#itlagrange_hn" class="nav-link">(it.)lagrange_h(N)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#itlagrangenn" class="nav-link">(it.)lagrangeN(N)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#itfrdtablen-s" class="nav-link">(it.)frdtable(N, S)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#itfrwtablen-s" class="nav-link">(it.)frwtable(N, S)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -430,7 +450,7 @@ with {
 <h3 id="itinterpolator_two_points"><code>(it.)interpolator_two_points</code></h3>
 <p>Generic interpolator on two points (current and next index), assuming an increasing index.</p>
 <h4 id="usage_3">Usage</h4>
-<pre><code>interpolator_two_points(gen, idv, interpolate_two_points) : _,_... (equal to N = outputs(gen))
+<pre><code>interpolator_two_points(gen, idv, interpolate_two_points) : si.bus(outputs(gen))
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -442,7 +462,7 @@ with {
 <h3 id="itinterpolator_linear"><code>(it.)interpolator_linear</code></h3>
 <p>Linear interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.</p>
 <h4 id="usage_4">Usage</h4>
-<pre><code>interpolator_linear(gen, idv) : _,_... (equal to N = outputs(gen))
+<pre><code>interpolator_linear(gen, idv) : si.bus(outputs(gen))
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -453,7 +473,7 @@ with {
 <h3 id="itinterpolator_cosine"><code>(it.)interpolator_cosine</code></h3>
 <p>Cosine interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.</p>
 <h4 id="usage_5">Usage</h4>
-<pre><code>interpolator_cosine(gen, idv) : _,_... (equal to N = outputs(gen))
+<pre><code>interpolator_cosine(gen, idv) : si.bus(outputs(gen))
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -465,7 +485,7 @@ with {
 <h3 id="itinterpolator_two_points_1"><code>(it.)interpolator_two_points</code></h3>
 <p>Generic interpolator on interpolator_four_points points (previous, current and two next indexes), assuming an increasing index.</p>
 <h4 id="usage_6">Usage</h4>
-<pre><code>interpolator_four_points(gen, idv, interpolate_four_points) : _,_... (equal to N = outputs(gen))
+<pre><code>interpolator_four_points(gen, idv, interpolate_four_points) : si.bus(outputs(gen))
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -477,7 +497,7 @@ with {
 <h3 id="itinterpolator_cubic"><code>(it.)interpolator_cubic</code></h3>
 <p>Cubic interpolator for a 'gen' circuit triggered by an 'idv' input to generate values</p>
 <h4 id="usage_7">Usage</h4>
-<pre><code>interpolator_cubic(gen, idv) : _,_... (equal to N = outputs(gen))
+<pre><code>interpolator_cubic(gen, idv) : si.bus(outputs(gen))
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -495,6 +515,86 @@ with {
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
 <li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 <li><code>sel</code>: an interpolation algorithm selector in [0..3] (0 = linear, 1 = cosine, 2 = cubic, 3 = nointerp)</li>
+</ul>
+<h2 id="lagrange-based-interpolators">Lagrange based interpolators</h2>
+<hr />
+<h3 id="itlagrange_hn"><code>(it.)lagrange_h(N)</code></h3>
+<p>Function to generate N + 1 coefficients for an Nth-order Lagrange
+interpolation filter for an index between 0 and N.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>lagrange_h(N, idx) : si.bus(N)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: order of the interpolation filter, known at compile-time</li>
+<li><code>idx</code>: a fractional index between 0 and N</li>
+</ul>
+<h4 id="reference_3">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html">https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html</a></li>
+</ul>
+<hr />
+<h3 id="itlagrangenn"><code>(it.)lagrangeN(N)</code></h3>
+<p>Nth-order Lagrange interpolator to interpolate between a set of N + 1 points.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>lagrangeN(N, idx, si.bus(N + 1)) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: order of the interpolator, known at compile-time</li>
+<li><code>idx</code>: a fractional index between 0 and N to interpolate between a set
+     of N + 1 points being crossed at positions 0, 1, 2, ..., N</li>
+</ul>
+<p>Example: find the centre position of a set of four points using an order-3
+Lagrange function fitting the four points [2, 5, -1, 3]:</p>
+<pre><code>N = 3;
+process = it.lagrangeN(N, N / 2, 2, 5, -1, 3);
+</code></pre>
+<p>which outputs ~1.938.</p>
+<h4 id="reference_4">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html">https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html</a></li>
+</ul>
+<hr />
+<h3 id="itfrdtablen-s"><code>(it.)frdtable(N, S)</code></h3>
+<p>Look-up circular table with Nth-order Lagrange interpolation for fractional
+indexes. The index is wrapped-around and the table is cycles for an index
+span of size S, which is the table size in samples.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>frdtable(N, S, init, idx) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: Lagrange interpolation order, known at compile-time</li>
+<li><code>S</code>: table size in samples, known at compile-time</li>
+<li><code>init</code>: signal for table initialisation</li>
+<li><code>idx</code>: fractional index wrapped-around 0 and S</li>
+</ul>
+<p>Example: test the effectiveness of the 5th-order interpolation scheme by 
+creating a table look-up oscillator using only 16 points of a sinewave; 
+compare the result with a non-interpolated version:</p>
+<pre><code>N = 5;
+S = 16;
+index = os.phasor(S, 1000);
+process = rdtable(S, os.sinwaveform(S), int(index)) ,
+          it.frdtable(N, S, os.sinwaveform(S), index);
+</code></pre>
+<hr />
+<h3 id="itfrwtablen-s"><code>(it.)frwtable(N, S)</code></h3>
+<p>Look-up updatable circular table with Nth-order Lagrange interpolation for
+fractional indexes. The index is wrapped-around and the table is circular
+indexes ranging from 0 to S, which is the table size in samples.</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>frwtable(N, S, init, w_idx, x, r_idx) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: Lagrange interpolation order, known at compile-time</li>
+<li><code>S</code>: table size in samples, known at compile-time</li>
+<li><code>init</code>: constant for table initialisation, known at compile-time</li>
+<li><code>w_idx</code>: it should be an INT between 0 and S - 1</li>
+<li><code>x</code>: input signal written on the w_idx positions</li>
+<li><code>r_idx</code>: fractional index wrapped-around 0 and S</li>
 </ul></div>
             </div>
         </div>

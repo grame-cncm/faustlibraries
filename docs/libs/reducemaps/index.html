@@ -242,9 +242,9 @@
 <p>A library to handle reduce/map kind of operation in Faust. Its official prefix is <code>rm</code>.</p>
 <hr />
 <h3 id="rmreduce"><code>(rm.)reduce</code></h3>
-<p>Fold-like high order function. Apply a binary operation <op> 
-on a block of <n> consecutive samples of a signal <x>. 
-For example : reduce(max,128) will compute the maximun of each
+<p>Fold-like high order function. Apply a binary operation <code>op</code>
+on a block of consecutive samples of a signal <code>x</code>. 
+For example: <code>reduce(max,128)</code> will compute the maximun of each
 block of 128 samples. Please note that the resulting
 value, while produced continuously, will be constant for 
 the duration of a block. A new value is only produced 
@@ -255,9 +255,9 @@ least one sample (n&gt;0). </p>
 </code></pre>
 <hr />
 <h3 id="rmreducemap"><code>(rm.)reducemap</code></h3>
-<p>Like reduce but a foo function is applied to the result. From
-a mathematical point of view :
-reducemap(op,foo,n) is equivalent to reduce(op,n):foo
+<p>Like <code>reduce</code> but a <code>foo</code> function is applied to the result. From
+a mathematical point of view:
+<code>reducemap(op,foo,n)</code> is equivalent to <code>reduce(op,n):foo</code>
 but more efficient.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>reducemap(op, foo, n, x)

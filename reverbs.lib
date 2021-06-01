@@ -585,7 +585,7 @@ jp_gh_rev = environment {
             : par(i,2,de.fdelay4(8192, depth + (-1^i)*depth*os.oscrs(mod_freq)+5)
             : de.fdelay1a(8192,(prime_delays(size*(134-100*i))
             : smooth_init(0.995,prime_delays(size*(134-100*i)))) -1))
-            : par(i,2, fi.filterbank(5,(low_cutoff,high_cutoff)):(_*(high),_*(mid),_*(low)) :> _)
+            : par(i,2,fi.filterbank(5,(low_cutoff,high_cutoff)):(_*(high),_*(mid),_*(low)) :> _)
             : par(i,2,*(fb))))
         with {
             depth = 50*mod_depth;
@@ -637,8 +637,6 @@ jp_gh_rev = environment {
 // * `lowcut`: frequency (100..6000 Hz) at which the crossover between the low and mid bands of the reverb occurs
 // * `highcut`: frequency (1000..10000 Hz) at which the crossover between the mid and high bands of the reverb occurs
 //
-// #### Reference
-//
 //------------------------------------------------------------
 
 // Author: Julian Parker, bug fixes and minor interface changes by Till Bovermann
@@ -676,8 +674,6 @@ jpverb(t60, damp, size, early_diff,
 // * `mod_depth`: depth (`[0..1]`) of delay-line modulation. Use in combination with mod_freq to produce chorus and pitch-variations in the echoes
 // * `mod_freq`: frequency (`[0..10]` Hz) of delay-line modulation. Use in combination with mod_depth to produce chorus and pitch-variations in the echoes
 //
-//
-// #### Reference
 //
 //------------------------------------------------------------
 
