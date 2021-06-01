@@ -279,6 +279,18 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#jpverb-and-greyhole-reverbs" class="nav-link">JPverb and Greyhole Reverbs</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#rejpverb" class="nav-link">(re.)jpverb</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#regreyhole" class="nav-link">(re.)greyhole</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -462,7 +474,52 @@ uses zero length pre-delay.</p>
 <h4 id="reference_3">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf">https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf</a></li>
-</ul></div>
+</ul>
+<h2 id="jpverb-and-greyhole-reverbs">JPverb and Greyhole Reverbs</h2>
+<hr />
+<h3 id="rejpverb"><code>(re.)jpverb</code></h3>
+<p>An algorithmic reverb (stereo in/out), inspired by the lush chorused sound 
+of certain vintage Lexicon and Alesis reverberation units. 
+Designed to sound great with synthetic sound sources, rather than sound like a realistic space.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>_,_ : jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff) : _,_
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>t60</code>: approximate reverberation time in seconds (<code>[0.1..60]</code> sec) (T60 - the time for the reverb to decay by 60db when damp == 0 ). Does not effect early reflections</li>
+<li><code>damp</code>: controls damping of high-frequencies as the reverb decays. <code>0</code> is no damping, <code>1</code> is very strong damping. Values should be between (<code>[0..1]</code>)</li>
+<li><code>size</code>: scales size of delay-lines within the reverberator, producing the impression of a larger or smaller space. Values below <code>1</code> can sound metallic. Values should be between `[0.5..5]</li>
+<li><code>early_diff</code>: controls shape of early reflections. Values of <code>0.707</code> or more produce smooth exponential decay. Lower values produce a slower build-up of echoes. Values should be between (<code>[0..1]</code>)</li>
+<li><code>mod_depth</code>: depth (<code>[0..1]</code>) of delay-line modulation. Use in combination with <code>mod_freq</code> to set amount of chorusing within the structure</li>
+<li><code>modFreq</code>: frequency (<code>[0..10]</code> Hz) of delay-line modulation. Use in combination with modDepth to set amount of chorusing within the structure</li>
+<li><code>low</code>: multiplier (<code>[0..1]</code>) for the reverberation time within the low band</li>
+<li><code>mid</code>: multiplier (<code>[0..1]</code>) for the reverberation time within the mid band</li>
+<li><code>high</code>: multiplier (<code>[0..1]</code>) for the reverberation time within the high band</li>
+<li><code>lowcut</code>: frequency (100..6000 Hz) at which the crossover between the low and mid bands of the reverb occurs</li>
+<li><code>highcut</code>: frequency (1000..10000 Hz) at which the crossover between the mid and high bands of the reverb occurs</li>
+</ul>
+<h4 id="reference_4">Reference</h4>
+<hr />
+<h3 id="regreyhole"><code>(re.)greyhole</code></h3>
+<p>A complex echo-like effect (stereo in/out), inspired by the classic Eventide effect of a similar name. 
+The effect consists of a diffuser (like a mini-reverb, structurally similar to the one used in <code>jpverb</code>)
+connected in a feedback system with a long, modulated delay-line. 
+Excels at producing spacey washes of sound.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>_,_ : greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq) : _,_
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>dt</code>: approximate reverberation time in seconds (<code>[0.1..60 sec]</code>)</li>
+<li><code>damp</code>: controls damping of high-frequencies as the reverb decays. <code>0</code> is no damping, <code>1</code> is very strong damping. Values should be between (<code>[0..1]</code>)</li>
+<li><code>size</code>: scales size of delay-lines within the diffusion unit, producing the impression of a larger or smaller space. Values below <code>1</code> can sound metallic. Values should be between (<code>[0.5..5]</code>)</li>
+<li><code>size</code>: control of relative "room size" roughly between (<code>[0.5..3]</code>)</li>
+<li><code>early_diff</code>: controls pattern of echoes produced by the diffuser. At very low values, the diffuser acts like a delay-line whose length is controlled by the 'size' parameter. Medium values produce a slow build-up of echoes, giving the sound a reversed-like quality. Values of <code>0.707</code> or greater than produce smooth exponentially decaying echoes. Values should be in the range (<code>[0..1]</code>)</li>
+<li><code>feedback</code>: amount of feedback through the system. Sets the number of repeating echoes. A setting of <code>1.0</code> produces infinite sustain. Values should be in the range (<code>[0..1]</code>)</li>
+<li><code>mod_depth</code>: depth (<code>[0..1]</code>) of delay-line modulation. Use in combination with mod_freq to produce chorus and pitch-variations in the echoes</li>
+<li><code>mod_freq</code>: frequency (<code>[0..10]</code> Hz) of delay-line modulation. Use in combination with mod_depth to produce chorus and pitch-variations in the echoes</li>
+</ul>
+<h4 id="reference_5">Reference</h4></div>
             </div>
         </div>
 

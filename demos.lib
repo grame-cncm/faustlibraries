@@ -908,6 +908,64 @@ with {
 	out_level = *(gain),*(gain);
 };
 
+//----------------------------------`(dm.)jprev_demo`------------------------------
+// Example GUI for `jprev` with all parameters exposed. 
+//
+// #### Usage
+//
+// ```
+// _,_ : jprev_demo : _,_
+// ```
+//
+//------------------------------------------------------------
+// Author: Till Bovermann
+// License: GPL2+
+
+declare jprev_demo author "Till Bovermann";
+declare jprev_demo license "GPL2+";
+
+jprev_demo = re.jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff)
+with {
+    t60         = hslider("[01]t60",       1.0  , 0.1, 60.000, 0.1000);
+    damp        = hslider("[03]damp",      0.0  , 0.0,  0.999, 0.0001);
+    size        = hslider("[02]size",      1.0  , 0.5,  3.000, 0.0100);
+    early_diff  = hslider("[04]earlyDiff", 0.707, 0.0,  0.990, 0.0010);
+    mod_depth   = hslider("[05]mDepth", 0.1, 0.0,  1.0, 0.001);
+    mod_freq    = hslider("[06]mFreq",  2.0, 0.0, 10.0, 0.010);
+    low         = hslider("[07]lowX",   1.0, 0.0,  1.0, 0.010);
+    mid         = hslider("[08]midX",   1.0, 0.0,  1.0, 0.010);
+    high        = hslider("[09]highX",  1.0, 0.0,  1.0, 0.010);
+    low_cutoff  = hslider("[10]lowBand",  500,  100.0,  6000.0, 0.1);
+    high_cutoff = hslider("[11]highBand",2000, 1000.0, 10000.0, 0.1);
+};
+
+
+//----------------------------------`(dm.)greyhole_demo`------------------------------
+// Example GUI for `greyhole` with all parameters exposed. 
+//
+// #### Usage
+//
+// ```
+// _,_ : greyhole_demo : _,_
+// ```
+//
+//------------------------------------------------------------
+// Author: Till Bovermann
+// License: GPL2+
+
+declare greyhole_demo author "Till Bovermann";
+declare greyhole_demo license "GPL2+";
+
+greyhole_demo = re.greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq)
+with {
+    dt         = hslider("[01]delayTime", 0.2, 0.001,  1.45, 0.0001);
+    damp       = hslider("[02]damping",   0.0, 0.000,  0.99, 0.0010);
+    size       = hslider("[03]size",      1.0, 0.500,  3.00, 0.0001);
+    early_diff = hslider("[04]diffusion", 0.5, 0.000,  0.99, 0.0001);
+    feedback   = hslider("[05]feedback",  0.9, 0.000,  1.00, 0.0100);
+    mod_depth  = hslider("[06]modDepth",  0.1, 0.000,  1.00, 0.0010);
+    mod_freq   = hslider("[07]modFreq",   2.0, 0.000, 10.00, 0.0100);
+};
 
 //====================================Generators==========================================
 //========================================================================================
