@@ -43,13 +43,13 @@
 //
 // Second, the declared components and interconnection/structural adaptors (i.e. series, parallel, etc) are arranged into the connection tree which is produced from performing WD analysis on the modeled circuit. For example, to produce our first order RC lowpass circuit model, the following tree is declared: 
 //
-// `tree_lowpass = vs1(i) : WD.series : (r1, c1)`
+// `tree_lowpass = vs1 : wd.series : (r1, c1);`
 //
 // For more information on how to represent trees in Faust, see Trees in Faust. 
 //
 // Finally, the tree is built using the the `buildtree` function. To build and compute our first order RC lowpass circuit model, we use:
 //
-// `process = buildtree(tree_lowpass);`
+// `process = wd.buildtree(tree_lowpass);`
 //
 // More information about build functions, see Build Functions. 
 //
