@@ -361,6 +361,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#dmpink_noise_demo" class="nav-link">(dm.)pink_noise_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#dmexciter" class="nav-link">(dm.)exciter</a>
               <ul class="nav flex-column">
               </ul>
@@ -646,9 +650,21 @@ Linux QT:
 Etc.
 </code></pre>
 <hr />
+<h3 id="dmpink_noise_demo"><code>(dm.)pink_noise_demo</code></h3>
+<p>Illustrate and compare methods for generating pink noise.</p>
+<h4 id="usage_30">Usage</h4>
+<pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; pink_noise_demo.dsp
+echo 'process = dm.pink_noise_demo;' &gt;&gt; pink_noise_demo.dsp
+faust2octave pink_noise_demo.dsp
+Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
+...
+</code></pre>
+<h4 id="output-figure">Output Figure</h4>
+<p><img alt="pink_noise_demo figure" src="https://ccrma.stanford.edu/wiki/Images/8/86/Tpinkd.jpg" width="400" /></p>
+<hr />
 <h3 id="dmexciter"><code>(dm.)exciter</code></h3>
 <p>Psychoacoustic harmonic exciter, with GUI.</p>
-<h4 id="usage_30">Usage</h4>
+<h4 id="usage_31">Usage</h4>
 <pre><code>_ : exciter : _
 </code></pre>
 <h4 id="references">References</h4>
@@ -660,7 +676,7 @@ Etc.
 <h3 id="dmvocoder_demo"><code>(dm.)vocoder_demo</code></h3>
 <p>Use example of the vocoder function where an impulse train is used
 as excitation.</p>
-<h4 id="usage_31">Usage</h4>
+<h4 id="usage_32">Usage</h4>
 <pre><code>_ : vocoder_demo : _
 </code></pre></div>
             </div>
