@@ -326,7 +326,7 @@
 power spectral density, and can be changed to other real values.</p>
 <h4 id="example">Example</h4>
 <p>// pink_noise_compare.dsp - compare three pinking filters</p>
-<p>process = pink_noises with {
+<pre><code>process = pink_noises with {
     f0 = 35; // Lower bandlimit in Hz
     bw3 = 0.7 * ma.SR/2.0 - f0; // Bandwidth in Hz, 3rd order case
     bw9 = 0.8 * ma.SR/2.0 - f0; // Bandwidth in Hz, 9th order case
@@ -336,7 +336,8 @@ power spectral density, and can be changed to other real values.</p>
       no.pink_filter, // original designed by invfreqz in Octave
       pink_tilt_3,    // newer method using the same filter order
       pink_tilt_9;    // newer method using a higher filter order
-};</p>
+};
+</code></pre>
 <h4 id="output-of-example">Output of Example</h4>
 <pre><code>faust2octave pink_noise_compare.dsp
 Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
