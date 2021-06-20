@@ -309,17 +309,40 @@
 <p>TODO.</p>
 <hr />
 <h3 id="nopink_noise"><code>(no.)pink_noise</code></h3>
-<p>Pink noise (1/f noise) generator (third-order approximation).
-Use fi.spectral_tilt(order,lowerBandLimit,Bandwidth,-0.5)
-to customize the design and adapt to any sampling rate, etc.
+<p>Pink noise (1/f noise) generator (third-order approximation covering the audio band well).
 <code>pink_noise</code> is a standard Faust function.</p>
 <h4 id="usage_3">Usage</h4>
 <pre><code>pink_noise : _
 </code></pre>
-<h4 id="reference">Reference:</h4>
+<h4 id="reference">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html">https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html</a></li>
 </ul>
+<h4 id="alternatives">Alternatives</h4>
+<p>Higher-order approximations covering any frequency band can be obtained using</p>
+<pre><code>no.noise : fi.spectral_tilt(order,lowerBandLimit,Bandwidth,p)
+</code></pre>
+<p>where <code>p=-0.5</code> means filter rolloff <code>f^(-1/2)</code> which gives 1/f rolloff in the
+power spectral density, and can be changed to other real values.</p>
+<h4 id="example">Example</h4>
+<p>// pink_noise_compare.dsp - compare three pinking filters</p>
+<p>process = pink_noises with {
+    f0 = 35; // Lower bandlimit in Hz
+    bw3 = 0.7 * ma.SR/2.0 - f0; // Bandwidth in Hz, 3rd order case
+    bw9 = 0.8 * ma.SR/2.0 - f0; // Bandwidth in Hz, 9th order case
+    pink_tilt_3 = fi.spectral_tilt(3,f0,bw3,-0.5);
+    pink_tilt_9 = fi.spectral_tilt(9,f0,bw9,-0.5);
+    pink_noises = 1-1' &lt;:
+      no.pink_filter, // original designed by invfreqz in Octave
+      pink_tilt_3,    // newer method using the same filter order
+      pink_tilt_9;    // newer method using a higher filter order
+};</p>
+<h4 id="output-of-example">Output of Example</h4>
+<pre><code>faust2octave pink_noise_compare.dsp
+Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
+...
+</code></pre>
+<p><img alt="pink_noise_demo figure" src="https://ccrma.stanford.edu/wiki/Images/8/86/Tpinkd.jpg" width="600" /></p>
 <hr />
 <h3 id="nopink_noise_vm"><code>(no.)pink_noise_vm</code></h3>
 <p>Multi pink noise generator.</p>
@@ -344,7 +367,7 @@ to customize the design and adapt to any sampling rate, etc.
 lfnoiseN(N,rate) : _ // same as &quot;lfnoise0(rate) : lowpass(N,rate)&quot; [see filters.lib]
 lfnoise(rate) : _    // same as &quot;lfnoise0(rate) : seq(i,5,lowpass(N,rate))&quot; (no overshoot)
 </code></pre>
-<h4 id="example">Example</h4>
+<h4 id="example_1">Example</h4>
 <p>(view waveforms in faust2octave):</p>
 <pre><code>rate = SR/100.0; // new random value every 100 samples (SR from music.lib)
 process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
