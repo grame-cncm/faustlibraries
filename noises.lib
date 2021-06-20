@@ -124,20 +124,47 @@ Michon and/or Julius O. Smith III, and are released under the
 ************************************************************************/
 
 //---------------------------`(no.)pink_noise`--------------------------
-// Pink noise (1/f noise) generator (third-order approximation).
-// Use fi.spectral_tilt(order,lowerBandLimit,Bandwidth,-0.5)
-// to customize the design and adapt to any sampling rate, etc.
+// Pink noise (1/f noise) generator (third-order approximation covering the audio band well).
 // `pink_noise` is a standard Faust function.
 //
 // #### Usage
-//
 // ```
 // pink_noise : _
 // ```
 //
-// #### Reference:
-//
+// #### Reference
 // <https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html>
+//
+// #### Alternatives
+// Higher-order approximations covering any frequency band can be obtained using
+// ```
+// no.noise : fi.spectral_tilt(order,lowerBandLimit,Bandwidth,p)
+// ```
+// where `p=-0.5` means filter rolloff `f^(-1/2)` which gives 1/f rolloff in the
+// power spectral density, and can be changed to other real values.
+//
+// #### Example
+// // pink_noise_compare.dsp - compare three pinking filters
+//
+// process = pink_noises with {
+//     f0 = 35; // Lower bandlimit in Hz
+//     bw3 = 0.7 * ma.SR/2.0 - f0; // Bandwidth in Hz, 3rd order case
+//     bw9 = 0.8 * ma.SR/2.0 - f0; // Bandwidth in Hz, 9th order case
+//     pink_tilt_3 = fi.spectral_tilt(3,f0,bw3,-0.5);
+//     pink_tilt_9 = fi.spectral_tilt(9,f0,bw9,-0.5);
+//     pink_noises = 1-1' <:
+//       no.pink_filter, // original designed by invfreqz in Octave
+//       pink_tilt_3,    // newer method using the same filter order
+//       pink_tilt_9;    // newer method using a higher filter order
+// };
+//
+// #### Output of Example
+// ```
+// faust2octave pink_noise_compare.dsp
+// Octave:1> semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
+// ...
+// ```
+// <img alt="pink_noise_demo figure" src="https://ccrma.stanford.edu/wiki/Images/8/86/Tpinkd.jpg" width="600" />
 //------------------------------------------------------------
 pink_filter = fi.iir((0.049922035, -0.095993537, 0.050612699, -0.004408786),
                     (-2.494956002, 2.017265875, -0.522189400));

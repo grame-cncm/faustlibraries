@@ -1332,38 +1332,6 @@ pospass_demo(x) = analytic_signal, modulator : si.cmul with {
   // modulator(n) = exp(sqrt(-1) * 2 * ma.PI * df * n / ma.SR) // if complex ok
 };
 
-//----------------------------`(dm.)pink_noise_demo`-------------------------
-// Illustrate and compare methods for generating pink noise.
-//
-// #### Usage
-//
-// ```
-// echo 'import("stdfaust.lib");' > pink_noise_demo.dsp
-// echo 'process = dm.pink_noise_demo;' >> pink_noise_demo.dsp
-// faust2octave pink_noise_demo.dsp
-// Octave:1> semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
-// ...
-// ```
-//
-// #### Output Figure
-//
-// <img alt="pink_noise_demo figure" src="https://ccrma.stanford.edu/wiki/Images/8/86/Tpinkd.jpg" width="600" />
-//
-//------------------------------------------------------------
-// Author: Julius Smith
-// License: MIT
-pink_noise_demo = pink_noises with {
-    f0 = 35; // Lower bandlimit in Hz
-    bw3 = 0.7 * ma.SR/2.0 - f0; // Bandwidth in Hz, 3rd order case
-    bw9 = 0.8 * ma.SR/2.0 - f0; // Bandwidth in Hz, 9th order case
-    pink_tilt_3 = fi.spectral_tilt(3,f0,bw3,-0.5);
-    pink_tilt_9 = fi.spectral_tilt(9,f0,bw9,-0.5);
-    pink_noises = 1-1' <:
-      no.pink_filter, // original designed by invfreqz in Octave
-      pink_tilt_3,    // newer method using the same filter order
-      pink_tilt_9;    // newer method using a higher filter order
-};
-
 // end jos section
 /************************************************************************
 ************************************************************************
