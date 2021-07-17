@@ -12,15 +12,6 @@ This repository contains libraries including some essential building blocks for 
 
 It includes a set of time-domain algorithms, some of which are original, for the processing of low-level and high-level information as well as the processing of sound using standard and non-conventional techniques. It also includes functions for the realisation of networks with different topologies, linear and nonlinear mapping strategies to render positive and negative feedback relationships, and different kinds of energy-preserving techniques for the stability of self-oscillating systems.
 
-## [Live concatenative granular processing](https://github.com/dariosanfilippo/concatenative_granulation)
-
-This algorithm addresses signal discontinuity and concatenation artefacts in real-time granular processing with rectangular windowing. By combining zero-crossing synchronicity, first-order derivative analysis, and Lagrange polynomials, we can generate streams of uncorrelated and non-overlapping sonic fragments with minimal low-order derivatives discontinuities. 
-
-The resulting open-source algorithm, implemented in the Faust language, provides a versatile real-time software for dynamical looping, wavetable oscillation, and granulation with reduced artefacts due to rectangular windowing and no artefacts from overlap-add-to-one techniques commonly deployed in granular processing.
-
-## [fb_suppression](https://github.com/dariosanfilippo/automatic_larsen_suppression)
-
-ALS - Automatic Larsen Suppression algorithms implementing adaptive filtering through spectral centroid calculation, and adaptive ferquency shifting through RMS calculation.
 
 ## [realfaust](https://github.com/dariosanfilippo/realfaust)
 
