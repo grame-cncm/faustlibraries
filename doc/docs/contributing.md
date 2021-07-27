@@ -28,6 +28,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on *Using the Faust Libraries*).
 * Try to reuse existing functions as much as possible.
 * The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen: _` for a mono generator, `_ : filter : _` for a mono effect, etc.
+* Some functions use parameters that are [constant numerical expressions](https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions). The convention is to label them in *capital letters* and document them preferably to be *constant numerical expressions* (or *known at compile time* in existing libraries).
 * If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.
 
 ## New Libraries
@@ -37,7 +38,6 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * Functions must be organized by sections.
 * Any new library should at least `declare` a `name` and a `version`.
 * Any new library has to use a prefix declared in the header section with the following kind of syntax: `Its official prefix is 'qu'` (look at an existing library to follow the exact syntax).
-* Some functions use parameters that are [constant numerical expressions](https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions). The convention is to label them in *capital letters* and document them preferably to be *constant numerical expressions* (or *known at compile time* in existing libraries).
 * The comment based markdown documentation of each library must respect the following format (open the source code of any of the libraries for an example):
 
 ```
