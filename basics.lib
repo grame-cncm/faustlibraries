@@ -452,7 +452,7 @@ period(p) = %(int(p))~+(1');
 // * `p`: period as a number of samples
 //------------------------
 // NOTE: may be this should go in oscillators.lib
-pulse(p) = period(p)==0;
+pulse(p) = period(p) : \(x).(x <= x');
 
 
 //-------`(ba.)pulsen`----------
