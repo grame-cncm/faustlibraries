@@ -47,7 +47,7 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Faust Math Library";
-declare version "2.3";
+declare version "2.4";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LGPL with exception";
@@ -170,6 +170,18 @@ fixedpointprecision INFINITY = 1.7976931348623158e+308;
 // <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
 //-----------------------------------------------------------------------------
 FTZ(x) = x * (abs(x) > MIN);
+
+
+//---------------------------------`(ma.)copysign`---------------------------------------
+// Changes the sign of x (first input) to that of y (second input).
+//
+// #### Usage
+//
+// ```
+// _,_ : copysign : _
+// ```
+//-----------------------------------------------------------------------------
+copysign = ffunction(float copysignf|copysign|copysignl (float, float), <math.h>,"");
 
 
 //---------------------------------`(ma.)neg`---------------------------------------
