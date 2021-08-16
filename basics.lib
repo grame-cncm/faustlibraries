@@ -55,7 +55,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "0.1";
+declare version "0.2";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -125,7 +125,7 @@ db2linear(l) = pow(10.0, l/20.0);
 //
 // * `g`: a linear gain
 //-----------------------------
-linear2db(g) = 20.0*log10(g);
+linear2db(g) = 20.0*log10(max(ma.MIN, g));
 
 
 //----------`(ba.)lin2LogGain`------------------
@@ -193,7 +193,7 @@ tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) 
 
 //-------`(ba.)pole2tau`----------
 // Returns the time-constant, in seconds, corresponding to the given real,
-// positive pole in (0,1).
+// positive pole in (0-1).
 // `pole2tau` is a standard Faust function.
 //
 // #### Usage
@@ -206,7 +206,7 @@ tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) 
 //
 // * `pole`: the pole
 //-----------------------------
-pole2tau(pole) = -1.0/(log(pole)*ma.SR);
+pole2tau(pole) = -1.0/(log(max(ma.MIN, pole))*ma.SR);
 
 
 //-------`(ba.)midikey2hz`----------
