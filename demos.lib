@@ -54,6 +54,9 @@ pf = library("phaflangers.lib");
 re = library("reverbs.lib");
 en = library("envelopes.lib");
 
+declare name "Faust Demos Library";
+declare version "0.1";
+
 //########################################################################################
 /************************************************************************
 FAUST library file, jos section
@@ -847,7 +850,7 @@ with{
     eq2q = eq2_group(vslider("[3] Eq2 Q [style:knob] [tooltip: Q = centerFrequency/bandwidth
         of second-order peaking equalizer section 2]", 3, 0.1, 10, 0.1));
 
-    out_group(x)  = fdn_group(hgroup("[5] Output", x));
+    out_group(x) = fdn_group(hgroup("[5] Output", x));
 
     dry_wet(x,y) = *(wet) + dry*x, *(wet) + dry*y with {
         wet = 0.5*(drywet+1.0);
@@ -929,21 +932,21 @@ with {
     rev_group(x) = vgroup("[0] JPrev",x);
     
     mix_group(x) = rev_group(hgroup("[0] Mix",x));
-    early_diff = mix_group(hslider("[1]earlyDiff [style:knob]", 0.707, 0.0,  0.990, 0.0010));
-    size = mix_group(hslider("[2]size [style:knob]", 1.0, 0.5, 3.000, 0.0100));
-    t60 = mix_group(hslider("[3]t60 [style:knob]", 1.0, 0.1, 60.000, 0.1000));
-    damp = mix_group(hslider("[4]damp [style:knob]", 0.0, 0.0, 0.999, 0.0001));
+    early_diff = mix_group(hslider("[1]earlyDiff [style:knob]", 0.707, 0, 0.990, 0.001));
+    size = mix_group(hslider("[2]size [style:knob]", 1, 0.5, 3, 0.01));
+    t60 = mix_group(hslider("[3]t60 [style:knob]", 1, 0.1, 60, 0.1));
+    damp = mix_group(hslider("[4]damp [style:knob]", 0, 0, 0.999, 0.0001));
     
     eq_group(x) = rev_group(hgroup("[1] EQ",x));
-    low = eq_group(hslider("[07]lowX [style:knob]", 1.0, 0.0, 1.0, 0.010));
-    mid = eq_group(hslider("[08]midX [style:knob]", 1.0, 0.0, 1.0, 0.010));
-    high = eq_group(hslider("[09]highX [style:knob]", 1.0, 0.0,  1.0, 0.010));
-    low_cutoff = eq_group(hslider("[10]lowBand [style:knob]", 500, 100.0,  6000.0, 0.1));
-    high_cutoff = eq_group(hslider("[11]highBand [style:knob]", 2000, 1000.0, 10000.0, 0.1));
+    low = eq_group(hslider("[07]lowX [style:knob]", 1, 0, 1, 0.01));
+    mid = eq_group(hslider("[08]midX [style:knob]", 1, 0, 1, 0.01));
+    high = eq_group(hslider("[09]highX [style:knob]", 1, 0, 1, 0.01));
+    low_cutoff = eq_group(hslider("[10]lowBand [style:knob]", 500, 100, 6000, 0.1));
+    high_cutoff = eq_group(hslider("[11]highBand [style:knob]", 2000, 1000, 10000, 0.1));
     
     mod_group(x) = rev_group(hgroup("[2] Mod",x));
-    mod_depth = mod_group(hslider("[1]mDepth [style:knob]", 0.1, 0.0,  1.0, 0.001));
-    mod_freq = mod_group(hslider("[2]mFreq [style:knob]",  2.0, 0.0, 10.0, 0.010));  
+    mod_depth = mod_group(hslider("[1]mDepth [style:knob]", 0.1, 0, 1, 0.001));
+    mod_freq = mod_group(hslider("[2]mFreq [style:knob]", 2, 0, 10, 0.010));  
 };
 
 
@@ -969,15 +972,15 @@ with {
     rev_group(x) = vgroup("[0] Greyhole",x);
     
     mix_group(x) = rev_group(hgroup("[0] Mix",x));
-    dt = mix_group(hslider("[01]delayTime [style:knob]", 0.2, 0.001,  1.45, 0.0001));
-    damp = mix_group(hslider("[02]damping [style:knob]", 0.0, 0.000,  0.99, 0.0010));
-    size = mix_group(hslider("[03]size [style:knob]", 1.0, 0.500,  3.00, 0.0001));
-    early_diff = mix_group(hslider("[04]diffusion [style:knob]", 0.5, 0.000,  0.99, 0.0001));
-    feedback = mix_group(hslider("[05]feedback [style:knob]", 0.9, 0.000,  1.00, 0.0100));
+    dt = mix_group(hslider("[01]delayTime [style:knob]", 0.2, 0.001, 1.45, 0.0001));
+    damp = mix_group(hslider("[02]damping [style:knob]", 0, 0, 0.99, 0.001));
+    size = mix_group(hslider("[03]size [style:knob]", 1, 0.5, 3, 0.0001));
+    early_diff = mix_group(hslider("[04]diffusion [style:knob]", 0.5, 0, 0.99, 0.0001));
+    feedback = mix_group(hslider("[05]feedback [style:knob]", 0.9, 0, 1, 0.01));
     
     mod_group(x) = rev_group(hgroup("[1] Mod",x));
-    mod_depth = mod_group(hslider("[06]modDepth [style:knob]", 0.1, 0.000, 1.00, 0.0010));
-    mod_freq = mod_group(hslider("[07]modFreq [style:knob]", 2.0, 0.000, 10.00, 0.0100));
+    mod_depth = mod_group(hslider("[06]modDepth [style:knob]", 0.1, 0, 1, 0.001));
+    mod_freq = mod_group(hslider("[07]modFreq [style:knob]", 2, 0, 10, 0.01));
 };
 
 //====================================Generators==========================================
@@ -1472,7 +1475,7 @@ with{
 
     //Balance - selectable dry/wet mix
     ml = ex_group(hslider("[2] Mix [style:knob] [tooltip: Dry/Wet mix of original signal
-        to excited signal]", 0.50, 0.00, 1.00, 0.01));
+        to excited signal]", 0.5, 0, 1, 0.01));
     balance = (_ * ml), (_ * (1.0 - ml)) :> _;
 };
 
