@@ -46,15 +46,15 @@ closed source license or any other license if you decide so.
 ************************************************************************
 ************************************************************************/
 
-declare name "Faust Math Library";
-declare version "2.4";
-declare author "GRAME";
-declare copyright "GRAME";
-declare license "LGPL with exception";
-
 // This library contains platform specific constants 
 pl = library("platform.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
+
+declare name "Faust Math Library";
+declare version "2.5";
+declare author "GRAME";
+declare copyright "GRAME";
+declare license "LGPL with exception";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -139,8 +139,8 @@ quadprecision MIN = 2.2250738585072014e-308;
 fixedpointprecision MIN = 2.2250738585072014e-308;
 
 
-//---------------------------------`(ma.)INFINITY`------------------------------
-// Constant INFINITY in simple/double/quad precision (maximal positive value).
+//---------------------------------`(ma.)MAX`------------------------------
+// Constant MAX in simple/double/quad precision (maximal positive value).
 //
 // #### Usage
 //
@@ -148,11 +148,13 @@ fixedpointprecision MIN = 2.2250738585072014e-308;
 // INFINITY : _
 // ```
 //-----------------------------------------------------------------------------
-singleprecision INFINITY = 3.402823466e+38;
-doubleprecision INFINITY = 1.7976931348623158e+308;
-quadprecision INFINITY = 1.7976931348623158e+308;
-fixedpointprecision INFINITY = 1.7976931348623158e+308;
+singleprecision MAX = 3.402823466e+38;
+doubleprecision MAX = 1.7976931348623158e+308;
+quadprecision MAX = 1.7976931348623158e+308;
+fixedpointprecision MAX = 1.7976931348623158e+308;
 
+// Obsolete, kept for compatibility reasons
+INFINITY = MAX; 
 
 //---------------------------------`(ma.)FTZ`---------------------------------------
 // Flush to zero: force samples under the "maximum subnormal number"
