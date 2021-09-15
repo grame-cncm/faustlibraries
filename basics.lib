@@ -439,7 +439,7 @@ period(p) = %(int(p))~+(1');
 
 
 //-------`(ba.)pulse`----------
-// Pulses (10000) generated at period `p`.
+// Pulses (like 10000) generated at period `p`.
 //
 // #### Usage
 //
@@ -456,7 +456,7 @@ pulse(p) = period(p) : \(x).(x <= x');
 
 
 //-------`(ba.)pulsen`----------
-// Pulses (11110000) of length `n` generated at period `p`.
+// Pulses (like 11110000) of length `n` generated at period `p`.
 //
 // #### Usage
 //
@@ -479,7 +479,7 @@ pulsen(n,p) = period(p)<n;
 // #### Usage
 //
 // ```
-// _ : cycle(n) <:
+// _ : cycle(n) : si.bus(n)
 // ```
 //
 // Where:
@@ -648,7 +648,7 @@ count(xx) = 1;
 //-----------------------------------------------------------------------------
 take(1, (xs, xxs))  = xs;
 take(1, xs)         = xs;
-take(nn, (xs, xxs)) = take(nn-1, xxs);
+take(N, (xs, xxs)) = take(N-1, xxs);
 
 
 //----------------------------`(ba.)subseq`--------------------------------
@@ -657,7 +657,7 @@ take(nn, (xs, xxs)) = take(nn-1, xxs);
 // #### Usage
 //
 // ```
-// subseq(l, p, n)
+// subseq(l, P, N)
 // subseq((10,20,30,40,50,60), 1, 3) -> (20,30,40)
 // subseq((10,20,30,40,50,60), 4, 1) -> 50
 // ```
@@ -665,8 +665,8 @@ take(nn, (xs, xxs)) = take(nn-1, xxs);
 // Where:
 //
 // * `l`: list
-// * `p`: start point (0: begin of list)
-// * `n`: number of elements
+// * `P`: start point (int, known at compile time, 0: begin of list)
+// * `N`: number of elements (int, known at compile time)
 //
 // #### Note:
 //
@@ -674,9 +674,9 @@ take(nn, (xs, xxs)) = take(nn-1, xxs);
 // compositions and there is no empty list.
 //-----------------------------------------------------------------------------
 subseq((head, tail), 0, 1) = head;
-subseq((head, tail), 0, n) = head, subseq(tail, 0, n-1);
-subseq((head, tail), p, n) = subseq(tail, p-1, n);
-subseq(head, 0, n)         = head;
+subseq((head, tail), 0, N) = head, subseq(tail, 0, N-1);
+subseq((head, tail), P, N) = subseq(tail, P-1, N);
+subseq(head, 0, N)         = head;
 
 
 //============================Function tabulation=========================================

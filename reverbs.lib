@@ -597,7 +597,7 @@ jp_gh_rev = environment {
     greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq)
         = (si.bus(4) :> seq(i,3,diffuser_nested(4,ma.PI/2,(-1^i)*diff,10+19*i,size))
             : par(i,2,si.smooth(damp_interp)))
-        ~((de.fdelay4(512, 10+depth + depth*os.oscrc(freq)),de.fdelay4(512, 10 + depth + depth*os.oscrs(freq)))
+        ~((de.fdelay4(512, 10 + depth + depth*os.oscrc(freq)),de.fdelay4(512, 10 + depth + depth*os.oscrs(freq)))
             : (de.sdelay(65536,44100/2,floor(dt_constrained)),de.sdelay(65536,44100/2,floor(dt_constrained)))
             : par(i,2,*(fb)))
         with {
