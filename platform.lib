@@ -43,8 +43,12 @@ declare version "0.1";
 // Current sampling rate (between 1Hz and 192000Hz). Constant during
 // program execution.
 //-----------------------------------------------------------------------------
-SR = min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
+SR = min(192000.0, max(1.0, fconstant(int fSamplingFreq, <dummy.h>)));
 
+//---------------------------------`(pl.)BS`---------------------------------------
+// Current block-size. Can change during the execution.
+//-----------------------------------------------------------------------------
+BS = fvariable(int count, <dummy.h>);
 
 //---------------------------------`(pl.)tablesize`----------------------------
 // Oscillator table size
