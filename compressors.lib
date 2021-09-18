@@ -271,15 +271,15 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
     :(ro.interleave(N,2):par(i,N,meter*_))
   )~si.bus(N);
 
-//--------------------`(co.)FFFBcompressor_N_chan`-------------------
+//--------------------`(co.)FBFFcompressor_N_chan`-------------------
 // feed forward / feed back N channel dynamic range compressor.
 // the feedback part has a much higher strength, so they end up sounding similar
-// `FFFBcompressor_N_chan` is a standard Faust function.
+// `FBFFcompressor_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// si.bus(N) : FFFBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
+// si.bus(N) : FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
 // ```
 //
 // Where:
@@ -295,7 +295,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * `prePost`: places the level detector either at the input or after the gain computer;
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
-// * `FFFB`: fade between feed forward (0) and feed back (1) compression.
+// * `FBFF`: fade between feed forward (0) and feed back (1) compression.
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 // * `N`: the number of channels of the compressor
@@ -439,15 +439,15 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
   <:(si.bus(N),(ba.parallelMin(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(it.interpolate_linear(link)));
 
 
-//--------------------`(co.)RMS_FFFBcompressor_N_chan`-------------------
+//--------------------`(co.)RMS_FBFFcompressor_N_chan`-------------------
 // RMS feed forward / feed back N channel dynamic range compressor.
 // the feedback part has a much higher strength, so they end up sounding similar
-// `RMS_FFFBcompressor_N_chan` is a standard Faust function.
+// `RMS_FBFFcompressor_N_chan` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// si.bus(N) : RMS_FFFBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
+// si.bus(N) : RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
 // ```
 //
 // Where:
@@ -463,7 +463,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `prePost`: places the level detector either at the input or after the gain computer;
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
-// * `FFFB`: fade between feed forward (0) and feed back (1) compression.
+// * `FBFF`: fade between feed forward (0) and feed back (1) compression.
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 // * `N`: the number of channels of the compressor
