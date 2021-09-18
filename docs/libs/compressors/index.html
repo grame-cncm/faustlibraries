@@ -241,7 +241,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#cofffbcompressor_n_chan" class="nav-link">(co.)FFFBcompressor_N_chan</a>
+            <li class="nav-item" data-level="3"><a href="#cofbffcompressor_n_chan" class="nav-link">(co.)FBFFcompressor_N_chan</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -253,7 +253,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#corms_fffbcompressor_n_chan" class="nav-link">(co.)RMS_FFFBcompressor_N_chan</a>
+            <li class="nav-item" data-level="3"><a href="#corms_fbffcompressor_n_chan" class="nav-link">(co.)RMS_FBFFcompressor_N_chan</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -477,12 +477,12 @@ MICHAEL MASSBERG (michael@massberg.org)
 AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
 </ul>
 <hr />
-<h3 id="cofffbcompressor_n_chan"><code>(co.)FFFBcompressor_N_chan</code></h3>
+<h3 id="cofbffcompressor_n_chan"><code>(co.)FBFFcompressor_N_chan</code></h3>
 <p>feed forward / feed back N channel dynamic range compressor.
 the feedback part has a much higher strength, so they end up sounding similar
-<code>FFFBcompressor_N_chan</code> is a standard Faust function.</p>
+<code>FBFFcompressor_N_chan</code> is a standard Faust function.</p>
 <h4 id="usage_4">Usage</h4>
-<pre><code>si.bus(N) : FFFBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
+<pre><code>si.bus(N) : FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -497,7 +497,7 @@ and in between there is a gradual increase in gain reduction.</li>
 <li><code>prePost</code>: places the level detector either at the input or after the gain computer;
 this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
-<li><code>FFFB</code>: fade between feed forward (0) and feed back (1) compression.</li>
+<li><code>FBFF</code>: fade between feed forward (0) and feed back (1) compression.</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
 <li><code>N</code>: the number of channels of the compressor</li>
@@ -590,12 +590,12 @@ MICHAEL MASSBERG (michael@massberg.org)
 AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
 </ul>
 <hr />
-<h3 id="corms_fffbcompressor_n_chan"><code>(co.)RMS_FFFBcompressor_N_chan</code></h3>
+<h3 id="corms_fbffcompressor_n_chan"><code>(co.)RMS_FBFFcompressor_N_chan</code></h3>
 <p>RMS feed forward / feed back N channel dynamic range compressor.
 the feedback part has a much higher strength, so they end up sounding similar
-<code>RMS_FFFBcompressor_N_chan</code> is a standard Faust function.</p>
+<code>RMS_FBFFcompressor_N_chan</code> is a standard Faust function.</p>
 <h4 id="usage_7">Usage</h4>
-<pre><code>si.bus(N) : RMS_FFFBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
+<pre><code>si.bus(N) : RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -610,7 +610,7 @@ and in between there is a gradual increase in gain reduction.</li>
 <li><code>prePost</code>: places the level detector either at the input or after the gain computer;
 this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
-<li><code>FFFB</code>: fade between feed forward (0) and feed back (1) compression.</li>
+<li><code>FBFF</code>: fade between feed forward (0) and feed back (1) compression.</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
 <li><code>N</code>: the number of channels of the compressor</li>
