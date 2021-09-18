@@ -518,14 +518,14 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // #### Usage
 //
 // ```
-// si.bus(N) : RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,N) : si.bus(N)
+// si.bus(N) : RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) : si.bus(N)
 // ```
 //
 // Where:
 //
 // * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
 // * `thresh`: dB level threshold above which compression kicks in
-// * `threshLim`: dB level threshold above which the brick wall limiter kicks in
+// * `threshLim`: dB level threshold above which the brickwall limiter kicks in
 // * `att`: attack time = time constant (sec) when level & compression going up
 // this is also used as the release time of the limiter
 // * `rel`: release time = time constant (sec) coming out of compression
@@ -535,7 +535,9 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // and in between there is a gradual increase in gain reduction.
 // the limiter uses a knee half this size
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
-// * `meter`: a gain reduction meter. It can be implemented like so:
+// * `meter`: compressor gain reduction meter. It can be implemented like so:
+// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// * `meterLim`: brickwall limiter gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
 // * `N`: the number of channels of the compressor
 //
@@ -559,14 +561,14 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // Author: Bart Brouns
 // License: GPLv3
 
-RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,N) =
+RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) =
   (
     (
       (
         (RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,0,link,N))
         ,si.bus(N)
       ):(ro.interleave(N,2):par(i,N,meter*_))
-    ):FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meter,N)
+    ):FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim,N)
   )~si.bus(N);
 
 
