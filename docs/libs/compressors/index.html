@@ -644,13 +644,13 @@ and the peak limiter get's spared from the steady state signal.
 the feedback part has a much higher strength, so they end up sounding similar
 <code>RMS_FBcompressor_peak_limiter_N_chan</code> is a standard Faust function.</p>
 <h4 id="usage_8">Usage</h4>
-<pre><code>si.bus(N) : RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,N) : si.bus(N)
+<pre><code>si.bus(N) : RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
 <li><code>thresh</code>: dB level threshold above which compression kicks in</li>
-<li><code>threshLim</code>: dB level threshold above which the brick wall limiter kicks in</li>
+<li><code>threshLim</code>: dB level threshold above which the brickwall limiter kicks in</li>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up
 this is also used as the release time of the limiter</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
@@ -660,7 +660,9 @@ above thresh+(knee/2) there is the same gain reduction as without a knee,
 and in between there is a gradual increase in gain reduction.
 the limiter uses a knee half this size</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
-<li><code>meter</code>: a gain reduction meter. It can be implemented like so:
+<li><code>meter</code>: compressor gain reduction meter. It can be implemented like so:
+meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<li><code>meterLim</code>: brickwall limiter gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
 <li><code>N</code>: the number of channels of the compressor</li>
 </ul>

@@ -395,20 +395,20 @@ _ : moog_vcf_2bn(res,fr) : _
 most well-known ladder filter in analog synthesizers. Several 
 1st-order filters are cascaded in series. Feedback is then used, in part, to 
 control the cut-off frequency and the resonance.</p>
-<p>This filter was implemented in Faust by Eric Tarr during the 
-<a href="https://ccrma.stanford.edu/workshops/faust-embedded-19/">2019 Embedded DSP With Faust Workshop</a>.</p>
 <h4 id="references_1">References</h4>
+<p>[Zavalishin 2012] (revision 2.1.2, February 2020): </p>
 <ul>
-<li><a href="https://www.willpirkle.com/706-2/">https://www.willpirkle.com/706-2/</a></li>
-<li><a href="http://www.willpirkle.com/Downloads/AN-4VirtualAnalogFilters.pdf">http://www.willpirkle.com/Downloads/AN-4VirtualAnalogFilters.pdf</a></li>
+<li><a href="https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf">https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf</a></li>
 </ul>
+<p>This fix is based on Lorenzo Della Cioppa's correction to Pirkle's implementation; see this post: 
+https://www.kvraudio.com/forum/viewtopic.php?f=33&amp;t=571909</p>
 <h4 id="usage_2">Usage</h4>
 <pre><code>_ : moogLadder(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
-<li><code>Q</code>: q</li>
+<li><code>Q</code>: quality factor between .707 (0 feedback coefficient) to 25 (feedback = 4, which is the self-oscillating threshold).</li>
 </ul>
 <hr />
 <h3 id="vemooghalfladder"><code>(ve.)moogHalfLadder</code></h3>
