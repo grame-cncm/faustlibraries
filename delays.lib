@@ -248,7 +248,7 @@ with {
 fdelayltv(N,n,d,x) = sum(i, N+1, delay(n,id+i,x) * h(N,fd,i))
 with {
   o = (N-1.00001)/2;  // ~center FIR interpolator
-  dmo = d - o; // assumed >=0 [d > (N-1)/2]
+  dmo = d - o; // assumed nonnegative [d > (N-1)/2]
   id = int(dmo);
   fd = o + ma.frac(dmo);
   h(N,d,n) = facs1(N,d,n) * facs2(N,d,n);
