@@ -900,6 +900,31 @@ with {
 };
 
 
+//-----------------------------`(ba.)selectoutn`---------------------------------
+// Route input to the output among N at run time.
+//
+// #### Usage
+//
+// ```
+// _ : selectoutn(N, i) : _,_,...N
+// ```
+//
+// Where:
+//
+// * `N`: number of outputs (int, known at compile time, N > 0)
+// * `i`: output number to route to (int, numbered from 0) (i.e. slider)
+//
+// #### Example
+//
+// ```
+// process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph("v.bargraph %i", 0, 1));
+// sel = hslider("volume", 0, 0, 2, 1) : int;
+// ```
+//--------------------------------------------------------------------------
+// TODO: author "Vince"
+selectoutn(n, s) = _ <: par(i, n, *(s==i));
+
+
 //=====================================Other==============================================
 //========================================================================================
 
@@ -1259,31 +1284,6 @@ with {
     trig(x) = (x-x') == 1;
     loop(b) = + ~ (_ >= 1) * ((b : trig) == 0);
 };
-
-
-//-----------------------------`(ba.)selectoutn`---------------------------------
-// Route input to the output among N at run time.
-//
-// #### Usage
-//
-// ```
-// _ : selectoutn(N, i) : _,_,...N
-// ```
-//
-// Where:
-//
-// * `N`: number of outputs (int, known at compile time, N > 0)
-// * `i`: output number to route to (int, numbered from 0) (i.e. slider)
-//
-// #### Example
-//
-// ```
-// process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph("v.bargraph %i", 0, 1));
-// sel = hslider("volume", 0, 0, 2, 1) : int;
-// ```
-//--------------------------------------------------------------------------
-// TODO: author "Vince"
-selectoutn(n, s) = _ <: par(i, n, *(s==i));
 
 
 //=================================Sliding Reduce=========================================

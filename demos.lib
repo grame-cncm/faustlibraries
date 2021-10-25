@@ -321,7 +321,7 @@ with{
     displaygain(co.compressor_stereo(ratio,threshold,attack,release)) :
     *(makeupgain), *(makeupgain);
 
-    ctl_group(x)  = knob_group(hgroup("[3] Compression Control", x));
+    ctl_group(x) = knob_group(hgroup("[3] Compression Control", x));
 
     ratio = ctl_group(hslider("[0] Ratio [style:knob]
     [tooltip: A compression Ratio of N means that for each N dB increase in input
@@ -333,7 +333,7 @@ with{
     is compressed according to the Ratio]",
     -30, -100, 10, 0.1));
 
-    env_group(x)  = knob_group(hgroup("[4] Compression Response", x));
+    env_group(x) = knob_group(hgroup("[4] Compression Response", x));
 
     attack = env_group(hslider("[1] Attack [unit:ms] [style:knob] [scale:log]
     [tooltip: Time constant in ms (1/e smoothing time) for the compression gain
@@ -1174,7 +1174,7 @@ with{
 
 
 //--------------------------`(dm.)latch_demo`---------------------------
-// Illustrate latch operation
+// Illustrate latch operation.
 //
 // #### Usage
 //
@@ -1226,7 +1226,7 @@ with{
 };
 
 //-------------------`(dm.)fft_spectral_level_demo`------------------
-// Make a real-time spectrum analyzer using FFT from analyzers.lib
+// Make a real-time spectrum analyzer using FFT from analyzers.lib.
 //
 // #### Usage
 //
@@ -1258,7 +1258,7 @@ with{
 };
 
 //-----------------`(dm.)reverse_echo_demo(nChans)`----------------
-// Multichannel echo effect with reverse delays
+// Multichannel echo effect with reverse delays.
 //
 // #### Usage
 //
@@ -1413,8 +1413,8 @@ with{
         comp_group(x) = vgroup("COMPRESSOR  [tooltip: Reference:
             http://en.wikipedia.org/wiki/Dynamic_range_compression]", x);
 
-    meter_group(x)    = comp_group(hgroup("[0]", x));
-    knob_group(x)  = comp_group(hgroup("[1]", x));
+    meter_group(x) = comp_group(hgroup("[0]", x));
+    knob_group(x) = comp_group(hgroup("[1]", x));
 
     cbp = meter_group(checkbox("[0] Bypass  [tooltip: When this is checked,
         the compressor has no effect]"));
@@ -1427,7 +1427,7 @@ with{
 
     compressorMono = displaygain(co.compressor_mono(ratio,threshold,attack,release));
 
-    ctl_group(x)  = knob_group(hgroup("[3] Compression Control", x));
+    ctl_group(x) = knob_group(hgroup("[3] Compression Control", x));
 
     ratio = ctl_group(hslider("[0] Ratio [style:knob]  [tooltip: A compression Ratio
     of N means that for each N dB increase in input signal level above Threshold, the
@@ -1437,7 +1437,7 @@ with{
     When the signal level exceeds the Threshold (in dB), its level is compressed
     according to the Ratio]", -30, -100, 10, 0.1));
 
-    env_group(x)  = knob_group(hgroup("[4] Compression Response", x));
+    env_group(x) = knob_group(hgroup("[4] Compression Response", x));
 
     attack = env_group(hslider("[1] Attack [unit:ms] [style:knob]  [tooltip:
     Time constant in ms (1/e smoothing time) for the compression gain to approach

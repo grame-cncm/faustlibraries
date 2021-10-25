@@ -397,6 +397,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#baselectoutn" class="nav-link">(ba.)selectoutn</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#other" class="nav-link">Other</a>
@@ -458,10 +462,6 @@
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#baon_and_off" class="nav-link">(ba.)on_and_off</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#baselectoutn" class="nav-link">(ba.)selectoutn</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -1000,11 +1000,26 @@ with a crossfade.</p>
 <pre><code>process = selectmulti(ma.SR/10, ((3,9),(2,8),(5,7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 </code></pre>
+<hr />
+<h3 id="baselectoutn"><code>(ba.)selectoutn</code></h3>
+<p>Route input to the output among N at run time.</p>
+<h4 id="usage_39">Usage</h4>
+<pre><code>_ : selectoutn(N, i) : _,_,...N
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: number of outputs (int, known at compile time, N &gt; 0)</li>
+<li><code>i</code>: output number to route to (int, numbered from 0) (i.e. slider)</li>
+</ul>
+<h4 id="example">Example</h4>
+<pre><code>process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph(&quot;v.bargraph %i&quot;, 0, 1));
+sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
+</code></pre>
 <h2 id="other">Other</h2>
 <hr />
 <h3 id="balatch"><code>(ba.)latch</code></h3>
 <p>Latch input on positive-going transition of "clock" ("sample-and-hold").</p>
-<h4 id="usage_39">Usage</h4>
+<h4 id="usage_40">Usage</h4>
 <pre><code>_ : latch(clocksig) : _
 </code></pre>
 <p>Where:</p>
@@ -1015,7 +1030,7 @@ process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;ch
 <h3 id="basandh"><code>(ba.)sAndH</code></h3>
 <p>Sample And Hold.
 <code>sAndH</code> is a standard Faust function.</p>
-<h4 id="usage_40">Usage</h4>
+<h4 id="usage_41">Usage</h4>
 <pre><code>_ : sAndH(t) : _
 </code></pre>
 <p>Where:</p>
@@ -1027,7 +1042,7 @@ process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;ch
 <p>Down sample a signal. WARNING: this function doesn't change the
 rate of a signal, it just holds samples...
 <code>downSample</code> is a standard Faust function.</p>
-<h4 id="usage_41">Usage</h4>
+<h4 id="usage_42">Usage</h4>
 <pre><code>_ : downSample(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1037,7 +1052,7 @@ rate of a signal, it just holds samples...
 <hr />
 <h3 id="bapeakhold"><code>(ba.)peakhold</code></h3>
 <p>Outputs current max value above zero.</p>
-<h4 id="usage_42">Usage</h4>
+<h4 id="usage_43">Usage</h4>
 <pre><code>_ : peakhold(mode) : _
 </code></pre>
 <p>Where:</p>
@@ -1046,7 +1061,7 @@ rate of a signal, it just holds samples...
 <hr />
 <h3 id="bapeakholder"><code>(ba.)peakholder</code></h3>
 <p>Tracks abs peak and holds peak for 'n' samples.</p>
-<h4 id="usage_43">Usage</h4>
+<h4 id="usage_44">Usage</h4>
 <pre><code>_ : peakholder(n) : _
 </code></pre>
 <p>Where:</p>
@@ -1059,13 +1074,13 @@ rate of a signal, it just holds samples...
 (0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a 
 <code>button</code> to turn its output into an impulse. <code>impulsify</code> is a standard Faust 
 function.</p>
-<h4 id="usage_44">Usage</h4>
+<h4 id="usage_45">Usage</h4>
 <pre><code>button(&quot;gate&quot;) : impulsify;
 </code></pre>
 <hr />
 <h3 id="baautomat"><code>(ba.)automat</code></h3>
 <p>Record and replay to the values the input signal in a loop.</p>
-<h4 id="usage_45">Usage</h4>
+<h4 id="usage_46">Usage</h4>
 <pre><code>hslider(...) : automat(bps, size, init) : _
 </code></pre>
 <hr />
@@ -1099,7 +1114,7 @@ and <code>x &lt; x_{i+1}</code></li>
 <hr />
 <h3 id="balistinterp"><code>(ba.)listInterp</code></h3>
 <p>Linearly interpolates between the elements of a list.</p>
-<h4 id="usage_46">Usage</h4>
+<h4 id="usage_47">Usage</h4>
 <pre><code>index = 1.69; // range is 0-4
 process = listInterp((800,400,350,450,325),index);
 </code></pre>
@@ -1113,7 +1128,7 @@ The range of <code>index</code> depends on the size of the list.</li>
 <p>Takes a mono input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>. 
 When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up.
 <code>bypass1</code> is a standard Faust function.</p>
-<h4 id="usage_47">Usage</h4>
+<h4 id="usage_48">Usage</h4>
 <pre><code>_ : bypass1(bpc,e) : _
 </code></pre>
 <p>Where:</p>
@@ -1126,7 +1141,7 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 <p>Takes a stereo input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>. 
 When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up.
 <code>bypass2</code> is a standard Faust function.</p>
-<h4 id="usage_48">Usage</h4>
+<h4 id="usage_49">Usage</h4>
 <pre><code>_,_ : bypass2(bpc,e) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1140,7 +1155,7 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 Effect <code>e</code> is bypassed if <code>bpc = 1</code>.When bypassed, <code>e</code> is feed with zeros 
 so that its state is cleanup up.
 <code>bypass1to2</code> is a standard Faust function.</p>
-<h4 id="usage_49">Usage</h4>
+<h4 id="usage_50">Usage</h4>
 <pre><code>_ : bypass1to2(bpc,e) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1155,7 +1170,7 @@ Inputs and outputs signals are faded out when 'e' is bypassed,
 so that 'e' state is cleanup up. 
 Once bypassed the effect is replaced by par(i,N,_). 
 Bypassed circuits can be chained.</p>
-<h4 id="usage_50">Usage</h4>
+<h4 id="usage_51">Usage</h4>
 <pre><code>_ : bypass_fade(n,b,e) : _
 or
 _,_ : bypass_fade(n,b,e) : _,_ 
@@ -1173,7 +1188,7 @@ process = bypass_fade(ma.SR/10, checkbox(&quot;bypass reverb&quot;), freeverb);
 <h3 id="batoggle"><code>(ba.)toggle</code></h3>
 <p>Triggered by the change of 0 to 1, it toggles the output value
 between 0 and 1.</p>
-<h4 id="usage_51">Usage</h4>
+<h4 id="usage_52">Usage</h4>
 <pre><code>_ : toggle : _
 </code></pre>
 <h4 id="examples_1">Examples</h4>
@@ -1183,26 +1198,11 @@ between 0 and 1.</p>
 <hr />
 <h3 id="baon_and_off"><code>(ba.)on_and_off</code></h3>
 <p>The first channel set the output to 1, the second channel to 0.</p>
-<h4 id="usage_52">Usage</h4>
+<h4 id="usage_53">Usage</h4>
 <pre><code>_ , _ : on_and_off : _
 </code></pre>
-<h4 id="example">Example</h4>
-<pre><code>button(&quot;on&quot;), button(&quot;off&quot;) : on_and_off : vbargraph(&quot;output&quot;, 0, 1)
-</code></pre>
-<hr />
-<h3 id="baselectoutn"><code>(ba.)selectoutn</code></h3>
-<p>Route input to the output among N at run time.</p>
-<h4 id="usage_53">Usage</h4>
-<pre><code>_ : selectoutn(N, i) : _,_,...N
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>N</code>: number of outputs (int, known at compile time, N &gt; 0)</li>
-<li><code>i</code>: output number to route to (int, numbered from 0) (i.e. slider)</li>
-</ul>
 <h4 id="example_1">Example</h4>
-<pre><code>process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph(&quot;v.bargraph %i&quot;, 0, 1));
-sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
+<pre><code>button(&quot;on&quot;), button(&quot;off&quot;) : on_and_off : vbargraph(&quot;output&quot;, 0, 1)
 </code></pre>
 <h2 id="sliding-reduce">Sliding Reduce</h2>
 <p>Provides various operations on the last N samples using a high order
