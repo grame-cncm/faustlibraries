@@ -55,7 +55,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "0.2";
+declare version "0.3";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -402,6 +402,30 @@ time = (+(1)~_) - 1;
 ramp = case {
 	(0) => _;
 	(n) => \(y,x).(if(y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
+};
+
+
+//-------`(ba.)line`----------
+// A linear ramp to reach a next value in 'n' samples. 
+// Note that the interpolation process is restarted every time 
+// the desired output value changes. The interpolation time is sampled only then.
+//
+// #### Usage
+//
+// ```
+// _ : line(n) : _
+// ```
+// Where:
+//
+// * `n`: number of samples to reach the next value
+//------------------------
+line(n, x) = state ~ (_,_) : !,_
+with {
+    state(t, c) = nt,nc 
+    with {
+        nt = ba.if(x != x', n, t-1);
+        nc = ba.if(nt <= 0, x, c + (x - c)/nt);
+    };
 };
 
 
