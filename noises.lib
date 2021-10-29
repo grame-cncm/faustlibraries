@@ -61,29 +61,31 @@ closed source license or any other license if you decide so.
 // ```
 //------------------------
 noise = random / RANDMAX
-with{
+with {
 	mask = 4294967295; // 2^32-1
 	random = +(12345) ~ *(1103515245) & mask; // "linear congruential"
 	RANDMAX	= 2147483647.0; // = 2^31-1 = MAX_SIGNED_INT in 32 bits
 };
+
 
 //---------------------`(no.)multirandom`--------------------------
 // Generates multiple decorrelated random numbers in parallel.
 //
 // #### Usage
 // ```
-// multirandom(n) : si.bus(n)
+// multirandom(N) : si.bus(N)
 // ```
 //
 // Where:
 //
-// * `n`: the number of decorrelated random numbers in parallel
+// * `N`: the number of decorrelated random numbers in parallel, a constant numerical expression
 //-------------------------------------------------------------
-multirandom(n) = randomize(n) ~_
+multirandom(N) = randomize(N) ~_
 with {
 	randomize(1) = +(12345) : *(1103515245);
-	randomize(n) = randomize(1) <: randomize(n-1),_;
+	randomize(N) = randomize(1) <: randomize(N-1),_;
 };
+
 
 //-----------------------`(no.)multinoise`------------------------
 // Generates multiple decorrelated noises in parallel.
@@ -91,22 +93,35 @@ with {
 // #### Usage
 //
 // ```
-// multinoise(n) : si.bus(n)
+// multinoise(N) : si.bus(N)
 // ```
 //
 // Where:
 //
-// * `n`: the number of decorrelated random numbers in parallel
+// * `N`: the number of decorrelated random numbers in parallel, a constant numerical expression
 //------------------------------------------------------------
-multinoise(n) = multirandom(n) : par(i,n,/(RANDMAX)) : par(i,n,float)
+multinoise(N) = multirandom(N) : par(i, N, /(RANDMAX)) : par(i, N, float)
 with {
 	RANDMAX = 2147483647.0;
 };
 
+
 //-----------------------`(no.)noises`------------------------
-// TODO.
+// A convenient wrapper around multinoise.
+//
+// #### Usage
+//
+// ```
+// noises(N,i) : _
+// ```
+//
+// Where:
+//
+// * `N`: the number of decorrelated random numbers in parallel, a constant numerical expression
+// * `i`: the selected random number (i in [0..N[)
 //----------------------------------------------------------
 noises(N,i) = multinoise(N) : ba.selector(i,N);
+
 
 //########################################################################################
 /************************************************************************
@@ -174,6 +189,7 @@ pink_noise = noise : pink_filter;
 
 pink_noise_m = pink_noise * 12.5; // Equalizes loudness to that of no.noise (thanks Mykle Hansen) - beware of clipping
 
+
 //-------------------------`(no.)pink_noise_vm`-------------------
 // Multi pink noise generator.
 //
@@ -195,8 +211,9 @@ pink_noise_m = pink_noise * 12.5; // Equalizes loudness to that of no.noise (tha
 //------------------------------------------------------------
 pink_noise_vm(N) = noise <: _,par(i,N,ba.latch(clock(i))) :> _
 with {
-  clock(i) = (ba.time>>i)&1; // i'th latch clock signal
+	clock(i) = (ba.time>>i)&1; // i'th latch clock signal
 };
+
 
 //--------------------`(no.)lfnoise`, `(no.)lfnoise0` and `(no.)lfnoiseN`-----------------
 // Low-frequency noise generators (Butterworth-filtered downsampled white noise).
@@ -224,6 +241,7 @@ lfnoise0(freq) = noise : ba.latch(os.oscrs(freq));
 lfnoiseN(N,freq) = lfnoise0(freq) : fi.lowpass(N,freq); // Nth-order Butterworth lowpass
 lfnoise(freq) = lfnoise0(freq) : seq(i,5,fi.lowpass(1,freq)); // non-overshooting lowpass
 
+
 //-------------------------`(no.)sparse_noise_vm`-------------------
 // sparse noise generator.
 //
@@ -246,14 +264,15 @@ lfnoise(freq) = lfnoise0(freq) : seq(i,5,fi.lowpass(1,freq)); // non-overshootin
 //------------------------------------------------------------
 sparse_noise(f0) = sn
 with {
-  saw = os.lf_sawpos(f0);
-  sawdiff = saw - saw';
-  e = float(no.noise); // float() keeps 4.656613e-10f scaling here instead of later
-  eHeld = e : ba.latch(sawdiff);
-  eHeldPos = 0.5 + 0.5 * eHeld;
-  crossed = (saw >= eHeldPos) * (saw' < eHeldPos);
-  sn = e' * float(crossed);
+    saw = os.lf_sawpos(f0);
+    sawdiff = saw - saw';
+    e = float(no.noise); // float() keeps 4.656613e-10f scaling here instead of later
+    eHeld = e : ba.latch(sawdiff);
+    eHeldPos = 0.5 + 0.5 * eHeld;
+    crossed = (saw >= eHeldPos) * (saw' < eHeldPos);
+    sn = e' * float(crossed);
 };
+
 
 //-------------------------`(no.)velvet_noise_vm`-------------------
 // velvet noise generator.
@@ -261,7 +280,7 @@ with {
 // #### Usage
 //
 // ```
-// velvet_noise(amp,f0) : _
+// velvet_noise(amp, f0) : _
 // ```
 //
 // Where:
@@ -277,11 +296,12 @@ with {
 //   March 2007.
 //
 //------------------------------------------------------------
-velvet_noise(amp,f0) = vn
+velvet_noise(amp, f0) = vn
 with {
-  sn = no.sparse_noise(f0);
-  vn = amp * ma.signum(sn);
+    sn = no.sparse_noise(f0);
+    vn = amp * ma.signum(sn);
 };
+
 
 //----------------------------`(no.)gnoise`------------------------
 // approximate zero-mean, unit-variance Gaussian white noise generator.
@@ -303,13 +323,14 @@ with {
 //------------------------------------------------------------
 gnoise(N) = uvgwn
 with {
-  uwn = no.multinoise(N); // uniform white noise in [-1,1] on N channels
-  gwn = uwn :> _;         // sum of uniform approaches Gaussian by centeral limit thm
-  sigma = sqrt(N/3.0);    // rms of each uwn channel
-  uvgwn = gwn / sigma;	  // approaches zero-mean, unit-variance Gaussian white noise, for large N
+    uwn = no.multinoise(N); // uniform white noise in [-1,1] on N channels
+    gwn = uwn :> _;         // sum of uniform approaches Gaussian by centeral limit thm
+    sigma = sqrt(N/3.0);    // rms of each uwn channel
+    uvgwn = gwn / sigma;	// approaches zero-mean, unit-variance Gaussian white noise, for large N
 };
 
 gnoisem(N) = gnoise(N) * 0.625; // Equalizes loudness to that of no.noise (thanks Mykle Hansen)
+
 
 /*** END jos section ***/
 
