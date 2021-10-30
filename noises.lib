@@ -134,12 +134,12 @@ multinoise(N) = noise_env(12345).multinoise(N);
 noises(N,i) = noise_env(12345).noises(N,i);
 
 
-//-----------------------`randomseed`------------------------
-// A random seed based on the foreign function arc4random
-// (see man arc4random). Used in rnoise, rmultirandom, etc. to 
+//-----------------------`(no.)randomseed`------------------------
+// A random seed based on the foreign function `arc4random`
+// (see man arc4random). Used in `rnoise`, `rmultirandom`, etc. to 
 // avoid having the same pseudo random sequence at each run.
 //
-// WARNING: using the foreign 'arc4random' function, so only usable with C/C++ and LLVM backends.
+// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
 //
 // #### Usage
 //
@@ -151,10 +151,10 @@ noises(N,i) = noise_env(12345).noises(N,i);
 randomseed = ffunction(int arc4random(), <math.h>, ""), 12345 : select2(1');
 
 
-//-----------------------`rnoise`-----------------------
+//-----------------------`(no.)rnoise`-----------------------
 // A randomized white noise generator (outputs random number between -1 and 1).
 //
-// WARNING: using the foreign 'arc4random' function, so only usable with C/C++ and LLVM backends.
+// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
 //
 // #### Usage
 //
@@ -165,10 +165,10 @@ randomseed = ffunction(int arc4random(), <math.h>, ""), 12345 : select2(1');
 rnoise = noise_env(randomseed).noise;
 
 
-//---------------------`rmultirandom`--------------------------
+//---------------------`(no.)rmultirandom`--------------------------
 // Generates multiple decorrelated random numbers in parallel.
 //
-// WARNING: using the foreign 'arc4random' function, so only usable with C/C++ and LLVM backends.
+// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
 //
 // #### Usage
 // ```
@@ -182,10 +182,10 @@ rnoise = noise_env(randomseed).noise;
 rmultirandom(N) = noise_env(randomseed).multirandom(N);
 
 
-//-----------------------`rmultinoise`------------------------
+//-----------------------`(no.)rmultinoise`------------------------
 // Generates multiple decorrelated noises in parallel.
 //
-// WARNING: using the foreign 'arc4random' function, so only usable with C/C++ and LLVM backends.
+// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
 //
 // #### Usage
 //
@@ -200,10 +200,10 @@ rmultirandom(N) = noise_env(randomseed).multirandom(N);
 rmultinoise(N) = noise_env(randomseed).multinoise(N);
 
 
-//-----------------------`rnoises`------------------------
+//-----------------------`(no.)rnoises`------------------------
 // A convenient wrapper around rmultinoise.
 //
-// WARNING: using the foreign 'arc4random' function, so only usable with C/C++ and LLVM backends.
+// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
 //
 // #### Usage
 //

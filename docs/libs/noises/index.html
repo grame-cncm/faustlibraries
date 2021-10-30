@@ -241,6 +241,26 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#norandomseed" class="nav-link">(no.)randomseed</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#nornoise" class="nav-link">(no.)rnoise</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#normultirandom" class="nav-link">(no.)rmultirandom</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#normultinoise" class="nav-link">(no.)rmultinoise</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#nornoises" class="nav-link">(no.)rnoises</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#nopink_noise" class="nav-link">(no.)pink_noise</a>
               <ul class="nav flex-column">
               </ul>
@@ -288,30 +308,88 @@
 <h3 id="nomultirandom"><code>(no.)multirandom</code></h3>
 <p>Generates multiple decorrelated random numbers in parallel.</p>
 <h4 id="usage_1">Usage</h4>
-<pre><code>multirandom(n) : si.bus(n)
+<pre><code>multirandom(N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of decorrelated random numbers in parallel</li>
+<li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
 </ul>
 <hr />
 <h3 id="nomultinoise"><code>(no.)multinoise</code></h3>
 <p>Generates multiple decorrelated noises in parallel.</p>
 <h4 id="usage_2">Usage</h4>
-<pre><code>multinoise(n) : si.bus(n)
+<pre><code>multinoise(N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of decorrelated random numbers in parallel</li>
+<li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
 </ul>
 <hr />
 <h3 id="nonoises"><code>(no.)noises</code></h3>
-<p>TODO.</p>
+<p>A convenient wrapper around multinoise.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>noises(N,i) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
+<li><code>i</code>: the selected random number (i in [0..N[)</li>
+</ul>
+<hr />
+<h3 id="norandomseed"><code>(no.)randomseed</code></h3>
+<p>A random seed based on the foreign function <code>arc4random</code>
+(see man arc4random). Used in <code>rnoise</code>, <code>rmultirandom</code>, etc. to 
+avoid having the same pseudo random sequence at each run.</p>
+<p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>randomseed : _
+</code></pre>
+<hr />
+<h3 id="nornoise"><code>(no.)rnoise</code></h3>
+<p>A randomized white noise generator (outputs random number between -1 and 1).</p>
+<p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>rnoise : _
+</code></pre>
+<hr />
+<h3 id="normultirandom"><code>(no.)rmultirandom</code></h3>
+<p>Generates multiple decorrelated random numbers in parallel.</p>
+<p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>rmultirandom(N) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
+</ul>
+<hr />
+<h3 id="normultinoise"><code>(no.)rmultinoise</code></h3>
+<p>Generates multiple decorrelated noises in parallel.</p>
+<p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>rmultinoise(N) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
+</ul>
+<hr />
+<h3 id="nornoises"><code>(no.)rnoises</code></h3>
+<p>A convenient wrapper around rmultinoise.</p>
+<p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>rnoises(N,i) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of decorrelated random numbers in parallel</li>
+<li><code>i</code>: the selected random number (i in [0..N[)</li>
+</ul>
 <hr />
 <h3 id="nopink_noise"><code>(no.)pink_noise</code></h3>
 <p>Pink noise (1/f noise) generator (third-order approximation covering the audio band well).
 <code>pink_noise</code> is a standard Faust function.</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>pink_noise : _
 </code></pre>
 <h4 id="reference">Reference</h4>
@@ -347,7 +425,7 @@ Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
 <hr />
 <h3 id="nopink_noise_vm"><code>(no.)pink_noise_vm</code></h3>
 <p>Multi pink noise generator.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>pink_noise_vm(N) : _
 </code></pre>
 <p>Where:</p>
@@ -363,7 +441,7 @@ Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
 <hr />
 <h3 id="nolfnoise-nolfnoise0-and-nolfnoisen"><code>(no.)lfnoise</code>, <code>(no.)lfnoise0</code> and <code>(no.)lfnoiseN</code></h3>
 <p>Low-frequency noise generators (Butterworth-filtered downsampled white noise).</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>lfnoise0(rate) : _   // new random number every int(SR/rate) samples or so
 lfnoiseN(N,rate) : _ // same as &quot;lfnoise0(rate) : lowpass(N,rate)&quot; [see filters.lib]
 lfnoise(rate) : _    // same as &quot;lfnoise0(rate) : seq(i,5,lowpass(N,rate))&quot; (no overshoot)
@@ -378,7 +456,7 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 <hr />
 <h3 id="nosparse_noise_vm"><code>(no.)sparse_noise_vm</code></h3>
 <p>sparse noise generator.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>sparse_noise(f0) : _
 </code></pre>
 <p>Where:</p>
@@ -394,8 +472,8 @@ at an average rate of f0 impulses per second.</p>
 <hr />
 <h3 id="novelvet_noise_vm"><code>(no.)velvet_noise_vm</code></h3>
 <p>velvet noise generator.</p>
-<h4 id="usage_7">Usage</h4>
-<pre><code>velvet_noise(amp,f0) : _
+<h4 id="usage_13">Usage</h4>
+<pre><code>velvet_noise(amp, f0) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -412,7 +490,7 @@ at an average rate of f0 impulses per second.</p>
 <hr />
 <h3 id="nognoise"><code>(no.)gnoise</code></h3>
 <p>approximate zero-mean, unit-variance Gaussian white noise generator.</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>gnoise(N) : _
 </code></pre>
 <p>Where:</p>
