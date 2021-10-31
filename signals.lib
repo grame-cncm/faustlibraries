@@ -225,11 +225,12 @@ Michon and Julius O. Smith III, and are released under the
 // The exponential time-constant is approximately 1/(1-s) samples, when s is close to
 // (but less than) 1.
 //
-// #### Reference:
+// #### References:
 //
-// <https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html>
+// * <https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html>
+// * <https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html>
 //-------------------------------------------------------------
-smooth(s) = *(1.0 - s) : + ~ *(s);
+smooth(s, x) = fb ~ _ with { fb(y) = s * (y - x) + x; };
 
 //--------------------------------`(si.)cbus`-------------------------------------
 // n parallel cables for complex signals.
