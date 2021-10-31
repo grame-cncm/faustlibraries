@@ -51,7 +51,7 @@ declare version "0.1";
 //========================================================================================
 
 //--------------------------------`(si.)bus`-------------------------------------
-// Put n cables in parallel.
+// Put N cables in parallel.
 // `bus` is a standard Faust function.
 //
 // #### Usage
@@ -66,7 +66,7 @@ declare version "0.1";
 // * `N`: is an integer known at compile time that indicates the number of parallel cables
 //-----------------------------------------------------------------------------
 bus(2) = _,_; // avoids a lot of "bus(1)" labels in block diagrams
-bus(n) = par(i, n, _);
+bus(N) = par(i, N, _);
 
 //--------------`(si.)block`--------------
 // Block - terminate N signals.
@@ -75,14 +75,14 @@ bus(n) = par(i, n, _);
 // #### Usage
 //
 // ```
-// _,_,... : block(n) : _,...
+// _,_,... : block(N) : _,...
 // ```
 //
 // Where:
 //
 // * `N`: the number of signals to be blocked known at compile time 
 //--------------------------------------
-block(n) = par(i, n, !);
+block(N) = par(i, N, !);
 
 //-----------------------------`(si.)interpolate`-------------------------------
 // Linear interpolation between two signals.
@@ -230,12 +230,15 @@ Michon and Julius O. Smith III, and are released under the
 // * <https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html>
 // * <https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html>
 //-------------------------------------------------------------
-smooth(s, x) = fb ~ _ with { fb(y) = s * (y - x) + x; }; // Stéphane Letz, based on
-// Dario Sanfilippo suggestion.
+
+// Stéphane Letz, based on Dario Sanfilippo suggestion, with one less multiply.
 // See [grame-cncm/faustlibraries]: Minor improvement to si.smoo. (Discussion #106)
+smooth(s, x) = fb ~ _ with { fb(y) = s * (y - x) + x; }; 
+
+// older version: smooth(s) = *(1.0 - s) : + ~ *(s); 
 
 //--------------------------------`(si.)cbus`-------------------------------------
-// n parallel cables for complex signals.
+// N parallel cables for complex signals.
 // `cbus` is a standard Faust function.
 //
 // #### Usage
@@ -247,11 +250,11 @@ smooth(s, x) = fb ~ _ with { fb(y) = s * (y - x) + x; }; // Stéphane Letz, base
 //
 // Where:
 //
-// * `n`: is an integer known at compile time that indicates the number of parallel cables.
+// * `N`: is an integer known at compile time that indicates the number of parallel cables.
 // * each complex number is represented by two real signals as (real,imag)
 //-----------------------------------------------------------------------------
 cbus(1) = (_,_);
-cbus(n) = par(i, n, (_,_));
+cbus(N) = par(i, N, (_,_));
 
 //--------------------------------`(si.)cmul`-------------------------------------
 // multiply two complex signals pointwise.
