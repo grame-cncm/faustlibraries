@@ -43,7 +43,7 @@ os = library("oscillators.lib");
 no = library("noises.lib");
 
 declare name "Faust Synthesizer Library";
-declare version "0.0";
+declare version "0.1";
 
 //-----------------------------------`(sy.)popFilterPerc`--------------------------------------
 // A simple percussion instrument based on a "popped" resonant bandpass filter.
@@ -85,8 +85,8 @@ popFilterDrum(freq,q,gate) = en.ar(0.001,0.001,gate)*no.noise : fi.resonbp(freq,
 // TODO: author RM
 dubDub(freq,ctFreq,q,gate) = os.sawtooth(freq)*gainEnvelope : fi.resonlp(ctFreq,q,1)
 with {
-	maxGain = 0.5;
-	gainEnvelope = en.smoothEnvelope(0.01,gate)*maxGain;
+    maxGain = 0.5;
+    gainEnvelope = en.smoothEnvelope(0.01,gate)*maxGain;
 };
 
 
@@ -110,9 +110,9 @@ with {
 // TODO: author RM
 sawTrombone(freq,gain,gate) = os.sawtooth(freq)*gainEnvelope : fi.lowpass(3,cutoff)
 with {
-	// controls both the gain of the instrument and the lowpass frequency
-	gainEnvelope = en.smoothEnvelope(0.01,gate)*gain;
-	cutoff = gainEnvelope*5000+50;
+    // controls both the gain of the instrument and the lowpass frequency
+    gainEnvelope = en.smoothEnvelope(0.01,gate)*gain;
+    cutoff = gainEnvelope*5000+50;
 };
 
 
@@ -135,11 +135,11 @@ with {
 // TODO: author RM
 combString(freq,res,gate) = excitation : fi.fb_fcomb(maxDel,N,b0,aN)
 with {
-	maxDel = 1024;
-	N = ma.SR/freq;
-	b0 = 1;
-	aN = ba.tau2pole(res*0.001)*-1;
-	excitation = no.noise*en.ar(0.001,0.001,gate);
+    maxDel = 1024;
+    N = ma.SR/freq;
+    b0 = 1;
+    aN = ba.tau2pole(res*0.001)*-1;
+    excitation = no.noise*en.ar(0.001,0.001,gate);
 };
 
 
@@ -157,12 +157,12 @@ with {
 //
 // * `freq`: the resonance frequency of the drum
 // * `freqRatio`: a list of ratio to choose the frequency of the mode in
-// 		function of `freq` e.g.(1 1.2 1.5 ...). The first element should always
-//		be one (fundamental).
+//                function of `freq` e.g.(1 1.2 1.5 ...). The first element should always
+//                be one (fundamental).
 // * `gain`: the gain of each mode as a list (1 0.9 0.8 ...). The first element
-//		is the gain of the fundamental.
+//           is the gain of the fundamental.
 // * `harmDec`: harmonic decay ratio (0-1): configure the speed at which
-//		higher modes decay compare to lower modes.
+//              higher modes decay compare to lower modes.
 // * `att`: attack duration in second
 // * `rel`: release duration in second
 // * `gate`: trigger signal (0 or 1)
@@ -170,10 +170,10 @@ with {
 // TODO: author RM
 additiveDrum(freq,freqRatio,gain,modeDec,att,rel,gate) = par(i,N,os.osc(modeFreq(i))*gainEnvelope(i)) :> _
 with {
-	N = ba.count(freqRatio);
-	modeFreq(i) = freq*ba.take(i+1,freqRatio);
-	modeGain(i) = ba.take(i+1,gain);
-	gainEnvelope(i) = modeGain(i)*en.ar(att,rel*(1-(modeDec*(i/N))),gate);
+    N = ba.count(freqRatio);
+    modeFreq(i) = freq*ba.take(i+1,freqRatio);
+    modeGain(i) = ba.take(i+1,gain);
+    gainEnvelope(i) = modeGain(i)*en.ar(att,rel*(1-(modeDec*(i/N))),gate);
 };
 
 
@@ -192,15 +192,123 @@ with {
 // Where:
 //
 // * `freqs`: a list of frequencies where the first one is the frequency of the carrier
-//		and the others, the frequency of the modulator(s)
+//            and the others, the frequency of the modulator(s)
 // * `indices`: the indices of modulation (Nfreqs-1)
 //----------------------------------------------------------------------------------------
 // TODO: author RM
 fm(freqs,indices) = seq(i,N,fmBlock(i))
 with {
-	N = ba.count(freqs);
-	freq(i) = ba.take(N-i,freqs);
-	gain(i) = ba.take(N-i,indices);
-	fmBlock(0) = freq(0) : os.osc;
-	fmBlock(i) = *(gain(i))+freq(i) : os.osc;
+    N = ba.count(freqs);
+    freq(i) = ba.take(N-i,freqs);
+    gain(i) = ba.take(N-i,indices);
+    fmBlock(0) = freq(0) : os.osc;
+    fmBlock(i) = *(gain(i))+freq(i) : os.osc;
+};
+
+
+//===============================Drum Synthesis===================================
+// Drum Synthesis ported in Faust from a version written in [Elementary](https://www.elementary.audio/) 
+// and JavaScript by Nick Thompson. 
+//
+// #### Reference
+//
+// <https://www.nickwritesablog.com/drum-synthesis-in-javascript/>
+//========================================================================================
+
+//-----------------------------------`(sy.)kick`---------------------------------------
+// Kick drum synthesis via a pitched sine sweep.
+// 
+// #### Usage 
+// 
+// ```
+// kick(pitch, click, attack, decay, drive, gate) : _
+// ```
+//
+// Where:
+//
+// * `pitch`: the base frequency of the kick drum in Hz
+// * `click`: the speed of the pitch envelope, tuned for [0.005s, 1s]
+// * `attack`: attack time in seconds, tuned for [0.005s, 0.4s]
+// * `decay`: decay time in seconds, tuned for [0.005s, 4.0s]
+// * `drive`: a gain multiplier going into the saturator. Tuned for [1, 10]
+// * `gate`: the gate which triggers the amp envelope
+// 
+// #### Reference
+//
+// <https://github.com/nick-thompson/drumsynth/blob/master/kick.js>
+//-------------------------------------------------------------------------------------
+kick(pitch, click, attack, decay, drive, gate) = out
+with {
+    env = en.adsr(attack, decay, 0.0, 0.1, gate);
+    pitchenv = en.adsr(0.005, click, 0.0, 0.1, gate);
+    clean = env * os.osc((1 + pitchenv * 4) * pitch);
+    out = ma.tanh(clean * drive);
+};
+
+
+//-----------------------------------`(sy.)clap`---------------------------------------
+// Clap synthesis via filtered white noise.
+// 
+// #### Usage 
+// 
+// ```
+// clap(tone, attack, decay, gate) : _
+// ```
+//
+// Where:
+//
+// * `tone`: bandpass filter cutoff frequency, tuned for [400Hz, 3500Hz]
+// * `attack`: attack time in seconds, tuned for [0s, 0.2s]
+// * `decay`: decay time in seconds, tuned for [0s, 4.0s]
+// * `gate`: the gate which triggers the amp envelope
+//
+// #### Reference
+//
+// <https://github.com/nick-thompson/drumsynth/blob/master/clap.js>
+//-------------------------------------------------------------------------------------
+clap(tone, attack, decay, gate) = out
+with {
+    e1 = en.adsr(0.035 + attack, 0.06 + decay, 0.0, 0.1, gate);
+    e2 = en.adsr(0.025 + attack, 0.05 + decay, 0.0, 0.1, gate);
+    e3 = en.adsr(0.015 + attack, 0.04 + decay, 0.0, 0.1, gate);
+    e4 = en.adsr(0.005 + attack, 0.02 + decay, 0.0, 0.1, gate);
+    out = ma.tanh(((e1 + e2 + e3 + e4) * no.noise) : fi.resonlp(tone, 1.214, 1));
+};
+
+
+//-----------------------------------`(sy.)hat`---------------------------------------
+// Hi hat drum synthesis via phase modulation.
+// 
+// #### Usage 
+// 
+// ```
+// hat(pitch, tone, attack, decay, gate): _
+// ```
+//
+// Where:
+//
+// * `pitch`: base frequency in the range [317Hz, 3170Hz]
+// * `tone`: bandpass filter cutoff frequency, tuned for [800Hz, 18kHz]
+// * `attack`: attack time in seconds, tuned for [0.005s, 0.2s]
+// * `decay`: decay time in seconds, tuned for [0.005s, 4.0s]
+// * `gate`: the gate which triggers the amp envelope
+//
+// #### Reference
+//
+// <https://github.com/nick-thompson/drumsynth/blob/master/hat.js>
+//-------------------------------------------------------------------------------------
+hat(pitch, tone, attack, decay, gate) = out
+with {
+    m2 = no.noise;
+    m1 = cycle(2 * pitch, 2 * m2);
+    m0 = cycle(pitch, 2 * m1);
+    f = m0 : fi.resonlp(tone, 1.214, 1);
+    env = en.adsr(attack, decay, 0.0, 0.1, gate);  
+    out = f * env;  
+    cycle(freq, offset) = sin(2 * ma.PI * p)
+    with {
+        t = phasor(freq) + offset;
+        p = t - floor(t);
+        phasor(f) = f/ma.SR : (+ : decimalpart) ~ _ with { decimalpart(x) = x-int(x); };
+    };
 };
