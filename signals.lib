@@ -231,11 +231,22 @@ Michon and Julius O. Smith III, and are released under the
 // * <https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html>
 //-------------------------------------------------------------
 
-// Stéphane Letz, based on Dario Sanfilippo suggestion, with one less multiply.
 // See [grame-cncm/faustlibraries]: Minor improvement to si.smoo. (Discussion #106)
-smooth(s, x) = fb ~ _ with { fb(y) = s * (y - x) + x; }; 
 
-// older version: smooth(s) = *(1.0 - s) : + ~ *(s); 
+smooth_imp = case { 
+  // y[n] = (1 - s) * x[n] + s * y[n - 1]
+  (0,s) => \(x).(fb ~ _ with { fb(y) = (1.0 - s) * x + s * y; });
+  
+  // y[n] = s * (y[n - 1] - x[n]) + x[n]
+  (1,s) => \(x).(fb ~ _ with { fb(y) = s * (y - x) + x; });
+  
+  // y[n] = y[n - 1] + (1 - s) * (x[n] - y[n - 1])
+  (2,s) => \(x).(fb ~ _ with { fb(y) = y + (1.0 - s) * (x - y); });
+};
+
+// The best compromise on modern CPUs where two independent multiplications can be done in parallel.
+// Other versions could possibly be faster on embedded devices. 
+smooth = smooth_imp(0);
 
 //--------------------------------`(si.)cbus`-------------------------------------
 // N parallel cables for complex signals.
