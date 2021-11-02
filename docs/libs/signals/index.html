@@ -295,7 +295,7 @@
 <h2 id="functions-reference">Functions Reference</h2>
 <hr />
 <h3 id="sibus"><code>(si.)bus</code></h3>
-<p>Put n cables in parallel.
+<p>Put N cables in parallel.
 <code>bus</code> is a standard Faust function.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>bus(N)
@@ -310,7 +310,7 @@ bus(4) : _,_,_,_
 <p>Block - terminate N signals.
 <code>block</code> is a standard Faust function.</p>
 <h4 id="usage_1">Usage</h4>
-<pre><code>_,_,... : block(n) : _,...
+<pre><code>_,_,... : block(N) : _,...
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -402,13 +402,14 @@ s&gt;1 is unstable, and s=1 yields the zero signal for all inputs.
 The exponential time-constant is approximately 1/(1-s) samples, when s is close to
 (but less than) 1.</li>
 </ul>
-<h4 id="reference">Reference:</h4>
+<h4 id="references">References:</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html">https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html">https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html</a></li>
 </ul>
 <hr />
 <h3 id="sicbus"><code>(si.)cbus</code></h3>
-<p>n parallel cables for complex signals.
+<p>N parallel cables for complex signals.
 <code>cbus</code> is a standard Faust function.</p>
 <h4 id="usage_9">Usage</h4>
 <pre><code>cbus(n)
@@ -416,7 +417,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: is an integer known at compile time that indicates the number of parallel cables.</li>
+<li><code>N</code>: is an integer known at compile time that indicates the number of parallel cables.</li>
 <li>each complex number is represented by two real signals as (real,imag)</li>
 </ul>
 <hr />

@@ -247,6 +247,22 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#drum-synthesis" class="nav-link">Drum Synthesis</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#sykick" class="nav-link">(sy.)kick</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#syclap" class="nav-link">(sy.)clap</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#syhat" class="nav-link">(sy.)hat</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -322,9 +338,12 @@ prefix is <code>sy</code>.</p>
 <ul>
 <li><code>freq</code>: the resonance frequency of the drum</li>
 <li><code>freqRatio</code>: a list of ratio to choose the frequency of the mode in
-        function of <code>freq</code> e.g.(1 1.2 1.5 ...). The first element should always</li>
-<li><code>gain</code>: the gain of each mode as a list (1 0.9 0.8 ...). The first element</li>
-<li><code>harmDec</code>: harmonic decay ratio (0-1): configure the speed at which</li>
+               function of <code>freq</code> e.g.(1 1.2 1.5 ...). The first element should always
+               be one (fundamental).</li>
+<li><code>gain</code>: the gain of each mode as a list (1 0.9 0.8 ...). The first element
+          is the gain of the fundamental.</li>
+<li><code>harmDec</code>: harmonic decay ratio (0-1): configure the speed at which
+             higher modes decay compare to lower modes.</li>
 <li><code>att</code>: attack duration in second</li>
 <li><code>rel</code>: release duration in second</li>
 <li><code>gate</code>: trigger signal (0 or 1)</li>
@@ -340,8 +359,70 @@ fm(freqs,indices) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>freqs</code>: a list of frequencies where the first one is the frequency of the carrier</li>
+<li><code>freqs</code>: a list of frequencies where the first one is the frequency of the carrier
+           and the others, the frequency of the modulator(s)</li>
 <li><code>indices</code>: the indices of modulation (Nfreqs-1)</li>
+</ul>
+<h2 id="drum-synthesis">Drum Synthesis</h2>
+<p>Drum Synthesis ported in Faust from a version written in <a href="https://www.elementary.audio/">Elementary</a> 
+and JavaScript by Nick Thompson. </p>
+<h4 id="reference">Reference</h4>
+<ul>
+<li><a href="https://www.nickwritesablog.com/drum-synthesis-in-javascript/">https://www.nickwritesablog.com/drum-synthesis-in-javascript/</a></li>
+</ul>
+<hr />
+<h3 id="sykick"><code>(sy.)kick</code></h3>
+<p>Kick drum synthesis via a pitched sine sweep.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>kick(pitch, click, attack, decay, drive, gate) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pitch</code>: the base frequency of the kick drum in Hz</li>
+<li><code>click</code>: the speed of the pitch envelope, tuned for [0.005s, 1s]</li>
+<li><code>attack</code>: attack time in seconds, tuned for [0.005s, 0.4s]</li>
+<li><code>decay</code>: decay time in seconds, tuned for [0.005s, 4.0s]</li>
+<li><code>drive</code>: a gain multiplier going into the saturator. Tuned for [1, 10]</li>
+<li><code>gate</code>: the gate which triggers the amp envelope</li>
+</ul>
+<h4 id="reference_1">Reference</h4>
+<ul>
+<li><a href="https://github.com/nick-thompson/drumsynth/blob/master/kick.js">https://github.com/nick-thompson/drumsynth/blob/master/kick.js</a></li>
+</ul>
+<hr />
+<h3 id="syclap"><code>(sy.)clap</code></h3>
+<p>Clap synthesis via filtered white noise.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>clap(tone, attack, decay, gate) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>tone</code>: bandpass filter cutoff frequency, tuned for [400Hz, 3500Hz]</li>
+<li><code>attack</code>: attack time in seconds, tuned for [0s, 0.2s]</li>
+<li><code>decay</code>: decay time in seconds, tuned for [0s, 4.0s]</li>
+<li><code>gate</code>: the gate which triggers the amp envelope</li>
+</ul>
+<h4 id="reference_2">Reference</h4>
+<ul>
+<li><a href="https://github.com/nick-thompson/drumsynth/blob/master/clap.js">https://github.com/nick-thompson/drumsynth/blob/master/clap.js</a></li>
+</ul>
+<hr />
+<h3 id="syhat"><code>(sy.)hat</code></h3>
+<p>Hi hat drum synthesis via phase modulation.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>hat(pitch, tone, attack, decay, gate): _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pitch</code>: base frequency in the range [317Hz, 3170Hz]</li>
+<li><code>tone</code>: bandpass filter cutoff frequency, tuned for [800Hz, 18kHz]</li>
+<li><code>attack</code>: attack time in seconds, tuned for [0.005s, 0.2s]</li>
+<li><code>decay</code>: decay time in seconds, tuned for [0.005s, 4.0s]</li>
+<li><code>gate</code>: the gate which triggers the amp envelope</li>
+</ul>
+<h4 id="reference_3">Reference</h4>
+<ul>
+<li><a href="https://github.com/nick-thompson/drumsynth/blob/master/hat.js">https://github.com/nick-thompson/drumsynth/blob/master/hat.js</a></li>
 </ul></div>
             </div>
         </div>
