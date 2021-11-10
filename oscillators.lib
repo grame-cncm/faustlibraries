@@ -108,7 +108,7 @@ with {
 // Where:
 //
 // * `tablesize`: the table size
-// * `freq`: the frequency of the phasor (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
 phasor(tablesize, freq) = phasor_imp(tablesize, freq, 0, 0);
 
@@ -127,7 +127,7 @@ phasor(tablesize, freq) = phasor_imp(tablesize, freq, 0, 0);
 // Where:
 //
 // * `tablesize`: the table size
-// * `freq`: the frequency of the phasor (Hz)
+// * `freq`: the frequency in Hz
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
 // Author: Mike Olsen, revised by Stéphane Letz
@@ -145,7 +145,7 @@ hs_phasor(tablesize, freq, c) = phasor_imp(tablesize, freq, c, 0);
 // Where:
 //
 // * `tablesize`: the table size
-// * `freq`: the frequency of the phasor (Hz)
+// * `freq`: the frequency in Hz
 // * `p`: phase init (0 <= `p` <=1)
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
@@ -164,7 +164,7 @@ hsp_phasor(tablesize, freq, c, p) = phasor_imp(tablesize, freq, c, p);
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
 oscsin(freq) = rdtable(tablesize, sinwaveform(tablesize), int(phasor(tablesize,freq)))
 with {
@@ -182,7 +182,7 @@ with {
 //
 // Where:
 //
-// * `freq`: the fundamental frequency of the phasor
+// * `freq`: the frequency in Hz
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
 // Author: Mike Olsen
@@ -202,7 +202,7 @@ with {
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
 osccos(freq) = rdtable(tablesize, coswaveform(tablesize), int(phasor(tablesize,freq)))
 with {
@@ -220,7 +220,7 @@ with {
 //
 // Where:
 //
-// * `freq`: the fundamental frequency of the phasor
+// * `freq`: the frequency in Hz
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
 // Author: Stéphane Letz
@@ -240,7 +240,7 @@ with {
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 // * `phase`: the phase in radian
 //------------------------------------------------------------
 oscp(freq,phase) = oscsin(freq) * cos(phase) + osccos(freq) * sin(phase);
@@ -256,7 +256,7 @@ oscp(freq,phase) = oscsin(freq) * cos(phase) + osccos(freq) * sin(phase);
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
 osci(freq) = s1 + d * (s2 - s1)
 with {
@@ -449,7 +449,7 @@ lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 // Where:
 //
 // * `phase`: phase
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //---------------------------------------------------------
 lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac) ~ +(freq/ma.SR);
 
@@ -464,7 +464,7 @@ lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac) ~ +(freq/ma.SR);
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 //---------------------------------------------------------
 // Author: Bart Brouns
@@ -484,7 +484,7 @@ lf_sawpos(freq) = ma.frac ~ +(freq/ma.SR);
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 // * `reset`: reset the oscillator to 0
 //
 //---------------------------------------------------------
@@ -504,7 +504,7 @@ lf_sawpos_reset(freq,reset) = ma.frac * (reset == 0) ~ +(freq/ma.SR);
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 // * `phase`: phase between 0 and 1
 // * `reset`: reset the oscillator to 0
 //
@@ -525,7 +525,7 @@ lf_sawpos_phase_reset(freq,phase,reset) = lf_sawpos_reset(freq,reset) + phase : 
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //---------------------------------------------------------
 // Author: Bart Brouns
 // License: STK-4.3
@@ -649,7 +649,7 @@ saw3 = sawN(3); saw4 = sawN(4); saw5 = sawN(5); saw6 = sawN(6);
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 saw2(freq) = y with { // newer PTR version (stateless - freq can vary at any speed)
   p0 = float(ma.SR)/float(max(ma.EPSILON,abs(freq))); // period in samples
@@ -743,7 +743,7 @@ pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 // * `duty`: duty cycle between 0 and 1
 //--------------------------------------------------------
 pulsetrain = pulsetrainN(2);
@@ -765,7 +765,7 @@ squareN(N,freq) = pulsetrainN(N,freq,0.5);
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 square = squareN(2);
 
@@ -799,7 +799,7 @@ imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq));
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 imptrain = imptrainN(2); // default based on saw2
 
@@ -823,7 +823,7 @@ triangleN(N,freq) = squareN(N,freq) : fi.pole(p) : *(gain) with {
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 triangle = triangleN(2); // default based on saw2
 
@@ -853,7 +853,7 @@ triangle = triangleN(2); // default based on saw2
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //------------------------------------------------------------
 oscb(f) = impulse : fi.tf2(1,0,0,a1,1)
 with {
@@ -874,7 +874,7 @@ with {
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -895,7 +895,7 @@ oscrq(f) = impulse : fi.nlf2(f,1); // sine and cosine outputs
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -916,7 +916,7 @@ oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -925,19 +925,61 @@ oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
 oscrc(f) = impulse : fi.nlf2(f,1) : !,_; // cosine
 
 oscrp(f,p) = oscrq(f) : *(cos(p)), *(sin(p)) : + ; // p=0 for sine, p=PI/2 for cosine, etc.
+
 oscr = oscrs; // default = sine (starts without a pop)
 
 //--------------------------`(os.)oscs`--------------------------------
 // Sinusoidal oscillator based on the state variable filter
 // = undamped "modified-coupled-form" resonator
 // = "magic circle" algorithm used in graphics.
+//
+// #### Usage
+//
+// ```
+// oscs(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
 //------------------------------------------------------------
 oscs(f) = (*(-1) : sint(wn) : sintp(wn,impulse)) ~ _
 with {
   wn = 2*ma.PI*f/ma.SR; // approximate
   // wn = 2*sin(PI*f/SR); // exact
   sint(x) = *(x) : + ~ _ ; // frequency-scaled integrator
-  sintp(x,y) = *(x) : +(y): + ~ _ ; // same + state input
+  sintp(x,y) = *(x) : +(y): + ~ _; // same + state input
+};
+
+//-----------------`(os.)quadosc`--------------------
+// Sinusoidal oscillator based on QuadOsc by Martin Vicanek.
+//
+// #### Usage
+//
+// ```
+// quadosc(freq) : _
+// ```
+//
+// where
+//
+// * `freq`: frequency in Hz
+//
+// #### Reference
+// * <https://vicanek.de/articles/QuadOsc.pdf>
+//------------------------------------------------------------
+// Authors:
+// Dario Sanfilippo <sanfilippo.dario@gmail.com>
+// and Oleg Nesterov (jos ed.)
+quadosc(f) = tick ~ (_,_) 
+with {
+    k1 = tan(f * ma.PI / ma.SR);
+    k2 = 2 * k1 / (1 + k1 * k1);
+    tick(u_0,v_0) = u_1,v_1 
+    with {
+        tmp = u_0 - k1 * v_0;
+        v_1 = v_0 + k2 * tmp;
+        u_1 = tmp - k1 * v_1 : select2(1',1);
+    };
 };
 
 //-----------------------`(os.)osc`------------------------
@@ -952,9 +994,9 @@ with {
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
-osc    = oscsin;
+osc = oscsin;
 
 //================ Waveguide-Resonator-Based Oscillators ================
 // Sinusoidal oscillator based on the waveguide resonator `wgr`.
@@ -972,7 +1014,7 @@ osc    = oscsin;
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -992,7 +1034,7 @@ oscwc(fr) = impulse : fi.wgr(fr,1) : _,!; // cosine (cheapest at 1 mpy/sample)
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -1012,7 +1054,7 @@ oscws(fr) = impulse : fi.wgr(fr,1) : !,_; // sine (needs a 2nd scaling mpy)
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -1032,7 +1074,7 @@ oscq(fr) = impulse : fi.wgr(fr,1);       // phase quadrature outputs
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -1510,40 +1552,6 @@ with {
 //------------------------------------------------------------
 // Author: Jacek Wieczorek
 polyblep_triangle(f) = polyblep_square(f) : fi.pole(0.999) : *(4 * f / ma.SR);
-
-
-//===============================Filter-Based Oscillators=================================
-
-//-----------------`(os.)quadosc`--------------------
-// Sinusoidal oscillator based on QuadOsc by Martin Vicanek.
-//
-// #### Usage
-//
-// ```
-// quadosc(freq) : _
-// ```
-//
-// where
-//
-// * `freq`: frequency in Hz
-//
-// #### Reference
-// * <https://vicanek.de/articles/QuadOsc.pdf>
-//------------------------------------------------------------
-// Authors:
-// Dario Sanfilippo <sanfilippo.dario@gmail.com>
-// and Oleg Nesterov (jos ed.)
-quadosc(f) = tick ~ (_,_) 
-with {
-    k1 = tan(f * ma.PI / ma.SR);
-    k2 = 2 * k1 / (1 + k1 * k1);
-    tick(u_0,v_0) = u_1,v_1 
-    with {
-        tmp = u_0 - k1 * v_0;
-        v_1 = v_0 + k2 * tmp;
-        u_1 = tmp - k1 * v_1 : select2(1',1);
-    };
-};
 
 // end further contributions section
 //########################################################################################
