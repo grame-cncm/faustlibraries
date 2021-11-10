@@ -44,7 +44,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "0.1";
+declare version "0.2";
 
 // This library contains platform specific constants 
 pl = library("platform.lib");
@@ -84,6 +84,16 @@ sinwaveform(tablesize) =
 //------------------------------------------------------------
 coswaveform(tablesize) = 
     cos(float(ba.period(tablesize)) * (2.0 * ma.PI) / float(tablesize));
+    
+    
+// Phasor to be used with a `rdtable` with a generic `reset`, to be specialised in concrete use-cases.
+// `mem` is used at last operation to correctly start at 0.
+phasor_imp(tablesize, freq, c, p) = inc : (+ : ma.decimal) ~ reset(clk, p) : *(float(tablesize)) : mem
+with {
+    clk = c > 0;
+    inc = freq/float(ma.SR);
+    reset(clk, p, x) = x * (1 - clk) + clk * p;
+};
 
 //-----------------------`(os.)phasor`------------------------
 // A simple phasor to be used with a `rdtable`.
@@ -100,7 +110,10 @@ coswaveform(tablesize) =
 // * `tablesize`: the table size
 // * `freq`: the frequency of the phasor (Hz)
 //------------------------------------------------------------
-phasor(tablesize,freq) = freq/float(ma.SR) : (+ : ma.decimal) ~ _ : *(float(tablesize));
+phasor(tablesize, freq) = phasor_imp(tablesize, freq, 0, 0);
+
+// Old explicit version:
+// phasor(tablesize,freq) = freq/float(ma.SR) : (+ : ma.decimal) ~ _ : *(float(tablesize));
 
 //-----------------------`(os.)hs_phasor`------------------------
 // Hardsyncing phasor to be used with an `rdtable`.
@@ -117,13 +130,8 @@ phasor(tablesize,freq) = freq/float(ma.SR) : (+ : ma.decimal) ~ _ : *(float(tabl
 // * `freq`: the frequency of the phasor (Hz)
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
-// Author: Mike Olsen
-hs_phasor(tablesize,freq,c) = inc : (+ : d)~(-(_<:(_,*(_,clk)))) : *(tablesize)
-with {
-	clk = c>0;
-	d   = ma.decimal;
-	inc = freq/float(ma.SR);
-};
+// Author: Mike Olsen, revised by Stéphane Letz
+hs_phasor(tablesize, freq, c) = phasor_imp(tablesize, freq, c, 0);
 
 //-----------------------`(os.)hsp_phasor`------------------------
 // Hardsyncing phasor with selectable phase to be used with an `rdtable`.
@@ -141,13 +149,8 @@ with {
 // * `p`: phase init (0 <= `p` <=1)
 // * `c`: a clock signal, `c>0` resets phase to 0
 //---------------------------------------------------------
-// Author: Christophe Lebreton
-hsp_phasor(tablesize,freq,p,c) = inc : (+ : d)~(-(_<:(_,*(_,clk))):+(clk*p)) : *(tablesize)
-with {
-    clk = c>0;
-    d   = ma.decimal;
-    inc = freq/float(ma.SR);
-};
+// Author: Christophe Lebreton, revised by Stéphane Letz
+hsp_phasor(tablesize, freq, c, p) = phasor_imp(tablesize, freq, c, p);
 
 //-----------------------`(os.)oscsin`------------------------
 // Sine wave oscillator.
@@ -165,7 +168,7 @@ with {
 //------------------------------------------------------------
 oscsin(freq) = rdtable(tablesize, sinwaveform(tablesize), int(phasor(tablesize,freq)))
 with {
-	tablesize = pl.tablesize;
+    tablesize = pl.tablesize;
 };
 
 //-----------------------`(os.)hs_oscsin`------------------------
@@ -185,7 +188,7 @@ with {
 // Author: Mike Olsen
 hs_oscsin(freq,c) = rdtable(tablesize, sinwaveform(tablesize), int(hs_phasor(tablesize,freq,c)))
 with {
-	tablesize = pl.tablesize;
+    tablesize = pl.tablesize;
 };
 
 //-----------------------`(os.)osccos`------------------------
@@ -203,7 +206,27 @@ with {
 //------------------------------------------------------------
 osccos(freq) = rdtable(tablesize, coswaveform(tablesize), int(phasor(tablesize,freq)))
 with {
-	tablesize = pl.tablesize;
+    tablesize = pl.tablesize;
+};
+
+//-----------------------`(os.)hs_osccos`------------------------
+// Cos lookup table with hardsyncing phase.
+//
+// #### Usage
+//
+// ```
+// hs_osccos(freq,c) : _
+// ```
+//
+// Where:
+//
+// * `freq`: the fundamental frequency of the phasor
+// * `c`: a clock signal, `c>0` resets phase to 0
+//---------------------------------------------------------
+// Author: Stéphane Letz
+hs_osccos(freq,c) = rdtable(tablesize, coswaveform(tablesize), int(hs_phasor(tablesize,freq,c)))
+with {
+    tablesize = pl.tablesize;
 };
 
 //-----------------------`(os.)oscp`------------------------
@@ -237,11 +260,11 @@ oscp(freq,phase) = oscsin(freq) * cos(phase) + osccos(freq) * sin(phase);
 //------------------------------------------------------------
 osci(freq) = s1 + d * (s2 - s1)
 with {
-	tablesize = pl.tablesize;
-	i = int(phasor(tablesize,freq));
-	d = ma.decimal(phasor(tablesize,freq));
-	s1 = rdtable(tablesize+1,sinwaveform(tablesize),i);
-	s2 = rdtable(tablesize+1,sinwaveform(tablesize),i+1);
+    tablesize = pl.tablesize;
+    i = int(phasor(tablesize,freq));
+    d = ma.decimal(phasor(tablesize,freq));
+    s1 = rdtable(tablesize+1,sinwaveform(tablesize),i);
+    s2 = rdtable(tablesize+1,sinwaveform(tablesize),i+1);
 };
 
 // end GRAME section
@@ -524,8 +547,8 @@ lf_saw(freq) = saw1(freq);
 // ##### References
 //
 // * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio
-// 	Signals Using Polynomial Transition Regions," in Signal Processing
-// 	Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012
+//     Signals Using Polynomial Transition Regions," in Signal Processing
+//     Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012
 // * <https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9>
 // * <http://research.spa.aalto.fi/publications/papers/spl-ptr/>
 //
@@ -931,7 +954,7 @@ with {
 //
 // * `freq`: the frequency of the wave (Hz)
 //------------------------------------------------------------
-osc	= oscsin;
+osc    = oscsin;
 
 //================ Waveguide-Resonator-Based Oscillators ================
 // Sinusoidal oscillator based on the waveguide resonator `wgr`.
@@ -1401,7 +1424,7 @@ CZ = environment {
     resSaw(fund,res) = (((-1*(1-fund))*((cos((ma.decimal((max(1,res)*fund)+1))*2*ma.PI)*-.5)+.5))*2)+1;
     resTriangle(fund,res) = select2(fund<.5, 2-(fund*2), fund*2)*INDEX*2-1
     with {
-	  INDEX = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
+      INDEX = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
     };
     resTrap(fund, res) = (((1-fund)*2):min(1)*sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
 };
@@ -1425,9 +1448,9 @@ CZ = environment {
 // Author: Jacek Wieczorek
 polyblep(Q, phase) = (0, L(phase / Q), R((phase - 1) / Q)) : select3(sel) 
 with {
-	sel = (phase < Q) + 2*(phase > 1 - Q);
-	L(x) = 2*x - x*x - 1; // Used near the left end of the interval
-	R(x) = 2*x + x*x + 1; // Used near the right end of the interval
+    sel = (phase < Q) + 2*(phase > 1 - Q);
+    L(x) = 2*x - x*x - 1; // Used near the left end of the interval
+    R(x) = 2*x + x*x + 1; // Used near the right end of the interval
 };
 
 //----------`(os.)polyblep_saw`----------
@@ -1446,9 +1469,9 @@ with {
 // Author: Jacek Wieczorek
 polyblep_saw(f) = naive - polyblep(Q , phase)
 with {
-	phase = phasor(1, f);
-	naive = 2 * phase - 1;
-	Q = f / ma.SR;
+    phase = phasor(1, f);
+    naive = 2 * phase - 1;
+    Q = f / ma.SR;
 };
 
 //----------`(os.)polyblep_square`----------
@@ -1467,9 +1490,9 @@ with {
 // Author: Jacek Wieczorek
 polyblep_square(f) = naive - polyblep(Q, phase) + polyblep(Q, ma.modulo(phase + 0.5, 1))
 with {
-	phase = phasor(1, f);
-	naive = 2 * (phase * 2 : int) - 1;
-	Q = f / ma.SR;
+    phase = phasor(1, f);
+    naive = 2 * (phase * 2 : int) - 1;
+    Q = f / ma.SR;
 };
 
 //----------`(os.)polyblep_triangle`----------
