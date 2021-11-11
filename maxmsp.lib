@@ -222,7 +222,7 @@ line(value, time) = state~(_,_):!,_
         state(t, c) = nt,nc 
         with {
             nt = ba.if(value != value', samples, t-1);
-            nc = ba.if(nt <= 0, value, c + (value - c)/nt);
+            nc = ba.if(nt > 0, c + (value - c)/nt, value);
             samples = time*ma.SR/1000.0;
         };
     };

@@ -424,7 +424,7 @@ with {
     state(t, c) = nt,nc 
     with {
         nt = ba.if(x != x', n, t-1);
-        nc = ba.if(nt <= 0, x, c + (x - c)/nt);
+        nc = ba.if(nt > 0, c + (x - c)/nt, x);
     };
 };
 
