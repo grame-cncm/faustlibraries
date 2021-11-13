@@ -53,7 +53,6 @@ qSmooth(x) = ba.tabulate(1,0.5*atan(_*20-10)/1.4711+0.5,TableSize,0,1,x).cub;
 
 //-------`(qu.)quantize`----------
 // Configurable frequency quantization tool. Output only the frequencies that are part of the specified scale.
-//
 // Works for positive audio frequencies.
 //
 // #### Usage
@@ -63,8 +62,8 @@ qSmooth(x) = ba.tabulate(1,0.5*atan(_*20-10)/1.4711+0.5,TableSize,0,1,x).cub;
 // ```
 // Where :
 //
-// * `rf` : frequency of the root note of the scale.
-// * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency.
+// * `rf` : frequency of the root note of the scale
+// * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency
 //------------------------
 quantize(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
 with{
@@ -80,7 +79,6 @@ with{
 
 //-------`(qu.)quantizeSmoothed`----------
 // Configurable frequency quantization tool. Output frequencies that are closer to the frequencies of the specified scale notes.
-//
 // Works for positive audio frequencies.
 //
 //
@@ -92,8 +90,8 @@ with{
 // ```
 // Where :
 //
-// * `rf` : frequency of the root note of the scale.
-// * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency.
+// * `rf` : frequency of the root note of the scale
+// * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency
 //------------------------
 quantizeSmoothed(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
 with{
@@ -127,7 +125,7 @@ with{
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 ionian = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,11/12));
 
@@ -142,7 +140,7 @@ ionian = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,11
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 dorian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10/12));
 
@@ -157,7 +155,7 @@ dorian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 phrygian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10/12));
 
@@ -172,7 +170,7 @@ phrygian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 lydian = (1,pow(2,2/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,11/12));
 
@@ -187,7 +185,7 @@ lydian = (1,pow(2,2/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,11
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 mixo = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,10/12));
 
@@ -202,7 +200,7 @@ mixo = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,10/1
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 eolian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10/12));
 
@@ -217,7 +215,7 @@ eolian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 locrian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,6/12),pow(2,8/12),pow(2,10/12));
 
@@ -232,7 +230,7 @@ locrian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,6/12),pow(2,8/12),pow(2,1
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 pentanat = (1,32/27,4/3,3/2,16/9);
 
@@ -247,7 +245,7 @@ pentanat = (1,32/27,4/3,3/2,16/9);
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 kumoi = (1,16/15,4/3,3/2,8/5);
 
@@ -262,7 +260,7 @@ kumoi = (1,16/15,4/3,3/2,8/5);
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 natural = (1,9/8,5/4,4/3,3/2,5/3,15/8);
 
@@ -277,7 +275,7 @@ natural = (1,9/8,5/4,4/3,3/2,5/3,15/8);
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 dodeca = (1,pow(2,1/12),pow(2,2/12),pow(2,3/12),pow(2,4/12),pow(2,5/12),pow(2,6/12),pow(2,7/12),pow(2,8/12),pow(2,9/12),pow(2,10/12),pow(2,11/12));
 
@@ -292,7 +290,7 @@ dodeca = (1,pow(2,1/12),pow(2,2/12),pow(2,3/12),pow(2,4/12),pow(2,5/12),pow(2,6/
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 dimin = (1,pow(2,1/12),pow(2,3/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,10/12));
 
@@ -307,6 +305,6 @@ dimin = (1,pow(2,1/12),pow(2,3/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/1
 //
 // Where:
 //
-// * `rf`: frequency of the root note of the scale.
+// * `rf`: frequency of the root note of the scale
 //-------------------------------------------------------------
 penta = (1,pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,10/12));
