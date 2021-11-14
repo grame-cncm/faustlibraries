@@ -498,7 +498,7 @@ lagrange_h(N, x) = LagrangeCoeffs(N, xCoord, x)
 // xCoordsList = (0, 1, 2, 3);
 // x = N / 2.0;
 // yCoords = 2 , 5 , -1 , 3;
-// process = x , yCoords : it.LagrangeInterpolation(N, xCoordsList);
+// process = x , yCoords : LagrangeInterpolation(N, xCoordsList);
 // ```
 //
 // which outputs ~1.938.
@@ -524,8 +524,7 @@ declare LagrangeInterpolation author "Dario Sanfilippo";
 declare LagrangeInterpolation copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare LagrangeInterpolation license "MIT license";
-LagrangeInterpolation(N, xCoords, yCoords, x) = 
-    si.dot(N + 1, LagrangeCoeffs(N, xCoords, x), yCoords);
+LagrangeInterpolation(N, xCoords, x) = si.dot(N + 1, LagrangeCoeffs(N, xCoords, x));
 // The following definition for uniformely-spaced points interpolation is kept for back-compatibility
 lagrangeN(N, x) = si.dot(N + 1, lagrange_h(N, x));
 
