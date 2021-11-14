@@ -277,11 +277,11 @@
             </li>
             <li class="nav-item" data-level="2"><a href="#lagrange-based-interpolators" class="nav-link">Lagrange based interpolators</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#itlagrange_hn" class="nav-link">(it.)lagrange_h(N)</a>
+            <li class="nav-item" data-level="3"><a href="#itlagrangecoeffsn-xcoordslist" class="nav-link">(it.)lagrangeCoeffs(N, xCoordsList)</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#itlagrangenn" class="nav-link">(it.)lagrangeN(N)</a>
+            <li class="nav-item" data-level="3"><a href="#itlagrangeinterpolationn-xcoordslist" class="nav-link">(it.)lagrangeInterpolation(N, xCoordsList)</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -518,42 +518,57 @@ with {
 </ul>
 <h2 id="lagrange-based-interpolators">Lagrange based interpolators</h2>
 <hr />
-<h3 id="itlagrange_hn"><code>(it.)lagrange_h(N)</code></h3>
-<p>Function to generate N + 1 coefficients for an Nth-order Lagrange
-interpolation filter for an index between 0 and N.</p>
+<h3 id="itlagrangecoeffsn-xcoordslist"><code>(it.)lagrangeCoeffs(N, xCoordsList)</code></h3>
+<p>This is a function to generate N + 1 coefficients for an Nth-order Lagrange
+basis polynomial with arbitrary spacing of the points.</p>
 <h4 id="usage_9">Usage</h4>
-<pre><code>lagrange_h(N, idx) : si.bus(N)
+<pre><code>lagrangeCoeffs(N, xCoordsList, x) : si.bus(N + 1)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: order of the interpolation filter, known at compile-time</li>
-<li><code>idx</code>: a fractional index between 0 and N</li>
+<li><code>N</code>: order of the interpolation filter, known at compile-time;</li>
+<li><code>xCoordsList</code>: a list of N + 1 elements determining the x-axis coordinates of N + 1 values, known at compile-time;</li>
+<li><code>x</code>: a fractional position on the x-axis to obtain the interpolated y-value.</li>
 </ul>
 <h4 id="reference_3">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html">https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Lagrange_polynomial">https://en.wikipedia.org/wiki/Lagrange_polynomial</a></li>
 </ul>
 <hr />
-<h3 id="itlagrangenn"><code>(it.)lagrangeN(N)</code></h3>
-<p>Nth-order Lagrange interpolator to interpolate between a set of N + 1 points.</p>
+<h3 id="itlagrangeinterpolationn-xcoordslist"><code>(it.)lagrangeInterpolation(N, xCoordsList)</code></h3>
+<p>Nth-order Lagrange interpolator to interpolate between a set of arbitrarily spaced N + 1 points.</p>
 <h4 id="usage_10">Usage</h4>
-<pre><code>lagrangeN(N, idx, si.bus(N + 1)) : _
+<pre><code>x , yCoords : lagrangeInterpolation(N, xCoordsList) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: order of the interpolator, known at compile-time</li>
-<li><code>idx</code>: a fractional index between 0 and N to interpolate between a set
-     of N + 1 points being crossed at positions 0, 1, 2, ..., N</li>
+<li><code>N</code>: order of the interpolator, known at compile-time;</li>
+<li><code>xCoordsList</code>: a list of N + 1 elements determining the x-axis spacing of the points, known at compile-time;</li>
+<li><code>x</code>: an x-axis position to interpolate between the y-values.</li>
+<li><code>yCoords</code>: N + 1 elements determining the values of the interpolation points</li>
 </ul>
-<p>Example: find the centre position of a set of four points using an order-3
-Lagrange function fitting the four points [2, 5, -1, 3]:</p>
+<p>Example: find the centre position of a four-point set using an order-3
+Lagrange function fitting the equally-spaced points [2, 5, -1, 3]:</p>
 <pre><code>N = 3;
-process = it.lagrangeN(N, N / 2, 2, 5, -1, 3);
+xCoordsList = (0, 1, 2, 3);
+x = N / 2.0;
+yCoords = 2 , 5 , -1 , 3;
+process = x , yCoords : lagrangeInterpolation(N, xCoordsList);
 </code></pre>
 <p>which outputs ~1.938.</p>
+<p>Example: output the dashed curve showed on the Wikipedia page (top figure, https://en.wikipedia.org/wiki/Lagrange_polynomial):</p>
+<pre><code>N = 3;
+xCoordsList = (-9, -4, -1, 7);
+x = os.phasor(16, 1) - 9;
+yCoords = 5 , 2 , -2 , 9;
+process = x , yCoords : lagrangeInterpolation(N, xCoordsList);
+</code></pre>
 <h4 id="reference_4">Reference</h4>
 <ul>
-<li><a href="https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html">https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html</a></li>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html">https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html</a>
+Sanfilippo and Parker 2021, "Combining zeroth and first‐order analysis with Lagrange polynomials to reduce artefacts in live concatenative granular processing." Proceedings of the DAFx conference 2021, Vienna, Austria.</li>
+<li><a href="https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in21_paper_38.pdf">https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in21_paper_38.pdf</a></li>
 </ul>
 <hr />
 <h3 id="itfrdtablen-s"><code>(it.)frdtable(N, S)</code></h3>
@@ -595,7 +610,17 @@ indexes ranging from 0 to S, which is the table size in samples.</p>
 <li><code>w_idx</code>: it should be an INT between 0 and S - 1</li>
 <li><code>x</code>: input signal written on the w_idx positions</li>
 <li><code>r_idx</code>: fractional index wrapped-around 0 and S</li>
-</ul></div>
+</ul>
+<p>Example: test the effectiveness of the 5th-order interpolation scheme by
+creating a table look-up oscillator using only 16 points of a sinewave;
+compare the result with a non-interpolated version:</p>
+<pre><code>N = 5;
+S = 16;
+rIdx = os.phasor(S, 300);
+wIdx = ba.period(S);
+process =   rwtable(S, os.sinwaveform(S), wIdx, os.sinwaveform(S), int(rIdx)) ,
+            frwtable(N, S, os.sinwaveform(S), wIdx, os.sinwaveform(S), rIdx);
+</code></pre></div>
             </div>
         </div>
 
