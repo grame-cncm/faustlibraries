@@ -434,73 +434,100 @@ with {
 //=========================Lagrange based interpolators====================================
 //========================================================================================
 
-//-------`(it.)lagrange_h(N)` ---------------------------------------------
+//-------`(it.)LagrangeCoeffs(N, xCoordsList)` ---------------------------------------------
 //
-// Function to generate N + 1 coefficients for an Nth-order Lagrange
-// interpolation filter for an index between 0 and N.
+// This is a function to generate N + 1 coefficients for an Nth-order Lagrange
+// basis polynomial with arbitrary spacing of the points.
 //
 // #### Usage
 //
 // ```
-// lagrange_h(N, idx) : si.bus(N)
+// LagrangeCoeffs(N, xCoordsList, x) : si.bus(N)
 // ```
 //
 // Where:
 //
-// * `N`: order of the interpolation filter, known at compile-time
-// * `idx`: a fractional index between 0 and N
+// * `N`: order of the interpolation filter, known at compile-time;
+// * `xCoordsList`: a list of N + 1 elements determining the x-axis coordinates of N + 1 values, known at compile-time;
+// * `x`: a fractional position on the x-axis to obtain the interpolated y-value.
 //
 // #### Reference
 //
 // <https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html>
+// <https://en.wikipedia.org/wiki/Lagrange_polynomial>
 //------------------------------------------------------------
 
-declare lagrange_h author "Dario Sanfilippo";
-declare lagrange_h copyright "Copyright (C) 2021 Dario Sanfilippo
+declare LagrangeCoeffs author "Dario Sanfilippo";
+declare LagrangeCoeffs copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare lagrange_h license "LGPL v3.0 license";
-lagrange_h(N, idx) = par(n, N + 1, prod(k, N + 1, f(n, k)))
+declare LagrangeCoeffs license "MIT license";
+LagrangeCoeffs(N, xCoords, x) = par(n, N + 1, prod(k, N + 1, f(n, k)))
     with {
-        f(n, k) = ((idx - k) * (n != k) + (n == k)) / ((n - k) + (n == k));
+        xVals(i) = ba.take(i + 1, xCoords);
+        f(n, k) =   ((x - xVals(k)) * (n != k) + (n == k)) / 
+                    ((xVals(n) - xVals(k)) + (n == k));
+    };
+// The following definition for uniformely-spaced points interpolation is kept for back-compatibility
+lagrange_h(N, x) = LagrangeCoeffs(N, xCoord, x)
+    with {
+        xCoord = par(i, N + 1, i);
     };
 
-
-//-------`(it.)lagrangeN(N)` ----------------------------------------------
+//-------`(it.)LagrangeInterpolation(N, xCoordsList)` --------------------------------------
 //
-// Nth-order Lagrange interpolator to interpolate between a set of N + 1 points.
+// Nth-order Lagrange interpolator to interpolate between a set of arbitrarily spaced N + 1 points.
 //
 // #### Usage
 //
 // ```
-// lagrangeN(N, idx, si.bus(N + 1)) : _
+// x , yCoords : LagrangeInterpolation(N, xCoordsList) : _
 // ```
 //
 // Where:
 //
-// * `N`: order of the interpolator, known at compile-time
-// * `idx`: a fractional index between 0 and N to interpolate between a set
-//      of N + 1 points being crossed at positions 0, 1, 2, ..., N
+// * `N`: order of the interpolator, known at compile-time;
+// * `xCoordsList`: a list of N + 1 elements determining the x-axis spacing of the points, known at compile-time;
+// * `x`: an x-axis position to interpolate between the y-values.
+// * `yCoords`: N + 1 elements determining the values of the interpolation points
 //
-// Example: find the centre position of a set of four points using an order-3
-// Lagrange function fitting the four points [2, 5, -1, 3]:
+// Example: find the centre position of a four-point set using an order-3
+// Lagrange function fitting the equally-spaced points [2, 5, -1, 3]:
 //
 // ```
 // N = 3;
-// process = it.lagrangeN(N, N / 2, 2, 5, -1, 3);
+// xCoordsList = (0, 1, 2, 3);
+// x = N / 2.0;
+// yCoords = 2 , 5 , -1 , 3;
+// process = x , yCoords : it.LagrangeInterpolation(N, xCoordsList);
 // ```
 //
 // which outputs ~1.938.
 //
+// Example: output the dashed curve showed on the Wikipedia page (top figure, https://en.wikipedia.org/wiki/Lagrange_polynomial):
+//
+// ```
+// N = 3;
+// xCoordsList = (-9, -4, -1, 7);
+// x = os.phasor(16, 1) - 9;
+// yCoords = 5 , 2 , -2 , 9;
+// process = x , yCoords : LagrangeInterpolation(N, xCoordsList);
+// ```
+//
 // #### Reference
+// 
 // <https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html>
+// Sanfilippo and Parker 2021, "Combining zeroth and first‐order analysis with Lagrange polynomials to reduce artefacts in live concatenative granular processing." Proceedings of the DAFx conference 2021, Vienna, Austria.
+// <https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in21_paper_38.pdf>
 //------------------------------------------------------------
 
-declare lagrangeN author "Dario Sanfilippo";
-declare lagrangeN copyright "Copyright (C) 2021 Dario Sanfilippo
+declare LagrangeInterpolation author "Dario Sanfilippo";
+declare LagrangeInterpolation copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare lagrangeN license "LGPL v3.0 license";
-lagrangeN(N, idx) = si.dot(N + 1, lagrange_h(N, idx));
-
+declare LagrangeInterpolation license "MIT license";
+LagrangeInterpolation(N, xCoords, yCoords, x) = 
+    si.dot(N + 1, LagrangeCoeffs(N, xCoords, x), yCoords);
+// The following definition for uniformely-spaced points interpolation is kept for back-compatibility
+lagrangeN(N, x) = si.dot(N + 1, lagrange_h(N, x));
 
 //-------`(it.)frdtable(N, S)` --------------------------------------------
 //
@@ -567,6 +594,19 @@ frdtable(N, S, init, idx) =
 // * `w_idx`: it should be an INT between 0 and S - 1
 // * `x`: input signal written on the w_idx positions
 // * `r_idx`: fractional index wrapped-around 0 and S
+//
+// Example: test the effectiveness of the 5th-order interpolation scheme by
+// creating a table look-up oscillator using only 16 points of a sinewave;
+// compare the result with a non-interpolated version:
+//
+// ```
+// N = 5;
+// S = 16;
+// rIdx = os.phasor(S, 300);
+// wIdx = ba.period(S);
+// process =   rwtable(S, os.sinwaveform(S), wIdx, os.sinwaveform(S), int(rIdx)) ,
+//             frwtable(N, S, os.sinwaveform(S), wIdx, os.sinwaveform(S), rIdx);
+// ```
 //------------------------------------------------------------
 
 declare frwtable author "Dario Sanfilippo";
