@@ -1562,7 +1562,7 @@ with {
 //
 // Where:
 //
-// * `N`: filter order (number of poles) [nonnegative constant integer]
+// * `N`: filter order (number of poles) [nonnegative constant numerical expression]
 // * `fc`: desired cut-off frequency (-3dB frequency) in Hz
 //
 // #### References
@@ -1587,7 +1587,7 @@ lowpass(N,fc) = lowpass0_highpass1(0,N,fc);
 //
 // Where:
 //
-// * `N`: filter order (number of poles) [nonnegative constant integer]
+// * `N`: filter order (number of poles) [nonnegative constant numerical expression]
 // * `fc`: desired cut-off frequency (-3dB frequency) in Hz
 //
 // #### References
@@ -1634,6 +1634,7 @@ with {
   a11 = 1.618033988749895;
   w1 = 2*ma.PI*fc;
 };
+
 // Catch-all definitions for generality - even order is done:
 highpass_plus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
   switch_odd_even(0,N,fc) = highpass_plus_lowpass_even(N,fc);
@@ -1649,6 +1650,7 @@ with {
   a12 = 0.618033988749895;
   w1 = 2*ma.PI*fc;
 };
+
 // Catch-all definitions for generality - even order is done:
 highpass_minus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
   switch_odd_even(0,N,fc) = highpass_minus_lowpass_even(N,fc);
@@ -2102,7 +2104,7 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 // ```
 //
 // Where:
-// * `N`: filter order 1, 3, 5, ... (odd only). (default should be 3)
+// * `N`: filter order 1, 3, 5, ... (odd only, default should be 3, a constant numerical expression)
 // * `L0`: desired level (dB) between dc and fx (boost `L0>0` or cut `L0<0`)
 // * `fx`: -3dB frequency of lowpass band (`L0>0`) or upper band (`L0<0`)
 //       (see "SHELF SHAPE" below).
@@ -2175,7 +2177,7 @@ lowshelf_other_freq(N, L0, fx) = ba.db2linear(ba.linear2db(fx) + L0/N); // conve
 //
 // Where:
 //
-// * `N`: filter order 1, 3, 5, ... (odd only).
+// * `N`: filter order 1, 3, 5, ... (odd only, a constant numerical expression).
 // * `Lpi`: desired level (dB) between fx and SR/2 (boost Lpi>0 or cut Lpi<0)
 // * `fx`: -3dB frequency of highpass band (L0>0) or lower band (L0<0)
 //        (Use highshelf_other_freq() below to find the other one.)
@@ -2405,9 +2407,9 @@ with {
 //
 // Where:
 //
-// * `L`: desired level (in dB) at Nyquist limit (SR/2), e.g., -60
+// * `N`: Number of filters in series where L = L/N, a constant numerical expression
 // * `freq`: corner frequency (-3dB point) usually set to fundamental freq
-// * `N`: Number of filters in series where L = L/N
+// * `L`: desired level (in dB) at Nyquist limit (SR/2), e.g., -60
 //
 // #### Reference
 // <https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html>
@@ -2425,8 +2427,8 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 // The documentation of this library contains more details about the implementation.
 // The parameters are:
 //
-// * `M`: number of band-slices per octave (>1)
-// * `N`: total number of bands (>2)
+// * `M`: number of band-slices per octave (>1), a constant numerical expression
+// * `N`: total number of bands (>2), a constant numerical expression
 // * `ftop`: upper bandlimit of the Mth-octave bands (<SR/2)
 //
 // In addition to the Mth-octave output signals, there is a highpass signal
@@ -2485,10 +2487,10 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 //
 // Where:
 //
-// * `O`: order of filter used to split each frequency band into two
-// * `M`: number of band-slices per octave
+// * `O`: order of filter used to split each frequency band into two, a constant numerical expression
+// * `M`: number of band-slices per octave, a constant numerical expression
 // * `ftop`: highest band-split crossover frequency (e.g., 20 kHz)
-// * `N`: total number of bands (including dc and Nyquist)
+// * `N`: total number of bands (including dc and Nyquist), a constant numerical expression
 //------------------------------------------------------------
 declare mth_octave_filterbank author "Julius O. Smith III";
 declare mth_octave_filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2501,9 +2503,9 @@ with {
    apchain(i) = seq(j,N-1-i,ap(j+1));
 };
 
-// dc-inverted version.  This reduces the delay-equalizer order for odd O.
-   // Negating the input signal makes the dc band noninverting
-//   and all higher bands sign-inverted (if preferred).
+// dc-inverted version. This reduces the delay-equalizer order for odd O.
+// Negating the input signal makes the dc band noninverting
+// and all higher bands sign-inverted (if preferred).
 declare mth_octave_filterbank_alt author "Julius O. Smith III";
 declare mth_octave_filterbank_alt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare mth_octave_filterbank_alt license "MIT-style STK-4.3 license";
@@ -2553,7 +2555,7 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 // ```
 // Where:
 //
-// * `O`: band-split filter order (ODD integer required for filterbank[i])
+// * `O`: band-split filter order (odd integer required for filterbank[i], a constant numerical expression)
 // * `freqs`: (fc1,fc2,...,fcNs) [in numerically ascending order], where
 //           Ns=N-1 is the number of octave band-splits
 //           (total number of bands N=Ns+1).
@@ -2589,7 +2591,7 @@ with {
 //
 // Where:
 //
-// * `O`: band-split filter order (ODD integer required for `filterbank[i]`)
+// * `O`: band-split filter order (odd integer required for `filterbank[i]`, a constant numerical expression)
 // * `freqs`: (fc1,fc2,...,fcNs) [in numerically ascending order], where
 //           Ns=N-1 is the number of octave band-splits
 //           (total number of bands N=Ns+1).
