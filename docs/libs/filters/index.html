@@ -1433,7 +1433,7 @@ _ : resonbp(fc,Q,gain) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: filter order (number of poles) [nonnegative constant integer]</li>
+<li><code>N</code>: filter order (number of poles) [nonnegative constant numerical expression]</li>
 <li><code>fc</code>: desired cut-off frequency (-3dB frequency) in Hz</li>
 </ul>
 <h4 id="references_7">References</h4>
@@ -1450,7 +1450,7 @@ _ : resonbp(fc,Q,gain) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: filter order (number of poles) [nonnegative constant integer]</li>
+<li><code>N</code>: filter order (number of poles) [nonnegative constant numerical expression]</li>
 <li><code>fc</code>: desired cut-off frequency (-3dB frequency) in Hz</li>
 </ul>
 <h4 id="references_8">References</h4>
@@ -1641,7 +1641,7 @@ _ : low_shelf(L0,fx) : _ // default case (order 3)
 _ : lowshelf_other_freq(N,L0,fx) : _
 </code></pre>
 <p>Where:
-* <code>N</code>: filter order 1, 3, 5, ... (odd only). (default should be 3)
+* <code>N</code>: filter order 1, 3, 5, ... (odd only, default should be 3, a constant numerical expression)
 * <code>L0</code>: desired level (dB) between dc and fx (boost <code>L0&gt;0</code> or cut <code>L0&lt;0</code>)
 * <code>fx</code>: -3dB frequency of lowpass band (<code>L0&gt;0</code>) or upper band (<code>L0&lt;0</code>)
       (see "SHELF SHAPE" below).</p>
@@ -1684,7 +1684,7 @@ _ : highshelf_other_freq(N,Lpi,fx) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: filter order 1, 3, 5, ... (odd only).</li>
+<li><code>N</code>: filter order 1, 3, 5, ... (odd only, a constant numerical expression).</li>
 <li><code>Lpi</code>: desired level (dB) between fx and SR/2 (boost Lpi&gt;0 or cut Lpi&lt;0)</li>
 <li><code>fx</code>: -3dB frequency of highpass band (L0&gt;0) or lower band (L0&lt;0)
        (Use highshelf_other_freq() below to find the other one.)</li>
@@ -1797,9 +1797,9 @@ arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>L</code>: desired level (in dB) at Nyquist limit (SR/2), e.g., -60</li>
+<li><code>N</code>: Number of filters in series where L = L/N, a constant numerical expression</li>
 <li><code>freq</code>: corner frequency (-3dB point) usually set to fundamental freq</li>
-<li><code>N</code>: Number of filters in series where L = L/N</li>
+<li><code>L</code>: desired level (in dB) at Nyquist limit (SR/2), e.g., -60</li>
 </ul>
 <h4 id="reference_25">Reference</h4>
 <ul>
@@ -1812,8 +1812,8 @@ for each spectral band. They are related to the Mth-Octave Spectrum-Analyzers in
 The documentation of this library contains more details about the implementation.
 The parameters are:</p>
 <ul>
-<li><code>M</code>: number of band-slices per octave (&gt;1)</li>
-<li><code>N</code>: total number of bands (&gt;2)</li>
+<li><code>M</code>: number of band-slices per octave (&gt;1), a constant numerical expression</li>
+<li><code>N</code>: total number of bands (&gt;2), a constant numerical expression</li>
 <li><code>ftop</code>: upper bandlimit of the Mth-octave bands (&lt;SR/2)</li>
 </ul>
 <p>In addition to the Mth-octave output signals, there is a highpass signal
@@ -1859,10 +1859,10 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>O</code>: order of filter used to split each frequency band into two</li>
-<li><code>M</code>: number of band-slices per octave</li>
+<li><code>O</code>: order of filter used to split each frequency band into two, a constant numerical expression</li>
+<li><code>M</code>: number of band-slices per octave, a constant numerical expression</li>
 <li><code>ftop</code>: highest band-split crossover frequency (e.g., 20 kHz)</li>
-<li><code>N</code>: total number of bands (including dc and Nyquist)</li>
+<li><code>N</code>: total number of bands (including dc and Nyquist), a constant numerical expression</li>
 </ul>
 <h2 id="arbitrary-crossover-filter-banks-and-spectrum-analyzers">Arbitrary-Crossover Filter-Banks and Spectrum Analyzers</h2>
 <p>These are similar to the Mth-octave analyzers above, except that the
@@ -1876,7 +1876,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>O</code>: band-split filter order (ODD integer required for filterbank[i])</li>
+<li><code>O</code>: band-split filter order (odd integer required for filterbank[i], a constant numerical expression)</li>
 <li><code>freqs</code>: (fc1,fc2,...,fcNs) [in numerically ascending order], where
           Ns=N-1 is the number of octave band-splits
           (total number of bands N=Ns+1).</li>
@@ -1892,7 +1892,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>O</code>: band-split filter order (ODD integer required for <code>filterbank[i]</code>)</li>
+<li><code>O</code>: band-split filter order (odd integer required for <code>filterbank[i]</code>, a constant numerical expression)</li>
 <li><code>freqs</code>: (fc1,fc2,...,fcNs) [in numerically ascending order], where
           Ns=N-1 is the number of octave band-splits
           (total number of bands N=Ns+1).</li>
