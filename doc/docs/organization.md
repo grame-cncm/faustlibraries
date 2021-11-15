@@ -35,7 +35,6 @@ Only the libraries that are considered to be "standard" are documented:
 * `wdmodels.lib`
 * `webaudio.lib`
 
-
 Other deprecated libraries such as `music.lib`, etc. are present but are not documented to not confuse new users.
 
 The documentation of each library can be found in `/documentation/library.html` or in `/documentation/library.pdf`. 
