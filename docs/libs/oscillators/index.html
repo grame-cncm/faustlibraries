@@ -313,11 +313,11 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#oslf_sawpos_phase" class="nav-link">(os.)lf_sawpos_phase</a>
+            <li class="nav-item" data-level="3"><a href="#oslf_sawpos" class="nav-link">(os.)lf_sawpos</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#oslf_sawpos" class="nav-link">(os.)lf_sawpos</a>
+            <li class="nav-item" data-level="3"><a href="#oslf_sawpos_phase" class="nav-link">(os.)lf_sawpos_phase</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -579,28 +579,28 @@
 </ul>
 <hr />
 <h3 id="oshs_phasor"><code>(os.)hs_phasor</code></h3>
-<p>Hardsyncing phasor to be used with an <code>rdtable</code>.</p>
+<p>Hardsyncing phasor to be used with a <code>rdtable</code>.</p>
 <h4 id="usage_3">Usage</h4>
-<pre><code>hs_phasor(tablesize,freq,c) :  _
+<pre><code>hs_phasor(tablesize,freq,reset) :  _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>tablesize</code>: the table size</li>
 <li><code>freq</code>: the frequency in Hz</li>
-<li><code>c</code>: a clock signal, <code>c&gt;0</code> resets phase to 0</li>
+<li><code>reset</code>: a reset signal, reset phase to 0 when equal to 1</li>
 </ul>
 <hr />
 <h3 id="oshsp_phasor"><code>(os.)hsp_phasor</code></h3>
-<p>Hardsyncing phasor with selectable phase to be used with an <code>rdtable</code>.</p>
+<p>Hardsyncing phasor with selectable phase to be used with a <code>rdtable</code>.</p>
 <h4 id="usage_4">Usage</h4>
-<pre><code>hsp_phasor(tablesize,freq,p,c)
+<pre><code>hsp_phasor(tablesize,freq,reset,phase)
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>tablesize</code>: the table size</li>
 <li><code>freq</code>: the frequency in Hz</li>
-<li><code>p</code>: phase init (0 &lt;= <code>p</code> &lt;=1)</li>
-<li><code>c</code>: a clock signal, <code>c&gt;0</code> resets phase to 0</li>
+<li><code>reset</code>: reset the oscillator to phase when equal to 1</li>
+<li><code>phase</code>: phase between 0 and 1</li>
 </ul>
 <hr />
 <h3 id="ososcsin"><code>(os.)oscsin</code></h3>
@@ -617,12 +617,12 @@
 <h3 id="oshs_oscsin"><code>(os.)hs_oscsin</code></h3>
 <p>Sin lookup table with hardsyncing phase.</p>
 <h4 id="usage_6">Usage</h4>
-<pre><code>hs_oscsin(freq,c) : _
+<pre><code>hs_oscsin(freq,reset) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
-<li><code>c</code>: a clock signal, <code>c&gt;0</code> resets phase to 0</li>
+<li><code>reset</code>: reset the oscillator to 0 when equal to 1</li>
 </ul>
 <hr />
 <h3 id="ososccos"><code>(os.)osccos</code></h3>
@@ -638,12 +638,12 @@
 <h3 id="oshs_osccos"><code>(os.)hs_osccos</code></h3>
 <p>Cos lookup table with hardsyncing phase.</p>
 <h4 id="usage_8">Usage</h4>
-<pre><code>hs_osccos(freq,c) : _
+<pre><code>hs_osccos(freq,reset) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
-<li><code>c</code>: a clock signal, <code>c&gt;0</code> resets phase to 0</li>
+<li><code>reset</code>: reset the oscillator to 0 when equal to 1</li>
 </ul>
 <hr />
 <h3 id="ososcp"><code>(os.)oscp</code></h3>
@@ -695,7 +695,7 @@
 <h3 id="oslf_pulsetrainpos"><code>(os.)lf_pulsetrainpos</code></h3>
 <p>Unit-amplitude nonnegative LF pulse train, duty cycle between 0 and 1.</p>
 <h4 id="usage_13">Usage</h4>
-<pre><code>lf_pulsetrainpos(freq,duty) : _
+<pre><code>lf_pulsetrainpos(freq, duty) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -746,7 +746,7 @@
 </ul>
 <hr />
 <h3 id="oslf_triangle"><code>(os.)lf_triangle</code></h3>
-<p>Positive unit-amplitude LF triangle wave
+<p>Positive unit-amplitude LF triangle wave.
 <code>lf_triangle</code> is a standard Faust function.</p>
 <h4 id="usage_18">Usage</h4>
 <pre><code>lf_triangle(freq) : _
@@ -778,21 +778,9 @@ suppression (i.e., <code>saw1</code> is ok).</p>
 <li><code>periodsamps</code>: number of periods per samples</li>
 </ul>
 <hr />
-<h3 id="oslf_sawpos_phase"><code>(os.)lf_sawpos_phase</code></h3>
-<p>Simple sawtooth waveform oscillator between 0 and 1
-with phase control.</p>
-<h4 id="usage_20">Usage</h4>
-<pre><code>lf_sawpos_phase(phase,freq) : _
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>phase</code>: phase</li>
-<li><code>freq</code>: frequency in Hz</li>
-</ul>
-<hr />
 <h3 id="oslf_sawpos"><code>(os.)lf_sawpos</code></h3>
 <p>Simple sawtooth waveform oscillator between 0 and 1.</p>
-<h4 id="usage_21">Usage</h4>
+<h4 id="usage_20">Usage</h4>
 <pre><code>lf_sawpos(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -800,8 +788,20 @@ with phase control.</p>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
 <hr />
+<h3 id="oslf_sawpos_phase"><code>(os.)lf_sawpos_phase</code></h3>
+<p>Simple sawtooth waveform oscillator between 0 and 1
+with phase control.</p>
+<h4 id="usage_21">Usage</h4>
+<pre><code>lf_sawpos_phase(freq, phase) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: frequency in Hz</li>
+<li><code>phase</code>: phase between 0 and 1</li>
+</ul>
+<hr />
 <h3 id="oslf_sawpos_reset"><code>(os.)lf_sawpos_reset</code></h3>
-<p>Simple sawtooth waveform oscillator between 0 and 1.
+<p>Simple sawtooth waveform oscillator between 0 and 1
 with reset.</p>
 <h4 id="usage_22">Usage</h4>
 <pre><code>lf_sawpos_reset(freq,reset) : _
@@ -809,11 +809,11 @@ with reset.</p>
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
-<li><code>reset</code>: reset the oscillator to 0</li>
+<li><code>reset</code>: reset the oscillator to 0 when equal to 1</li>
 </ul>
 <hr />
 <h3 id="oslf_sawpos_phase_reset"><code>(os.)lf_sawpos_phase_reset</code></h3>
-<p>Simple sawtooth waveform oscillator between 0 and 1.
+<p>Simple sawtooth waveform oscillator between 0 and 1
 with phase control and reset.</p>
 <h4 id="usage_23">Usage</h4>
 <pre><code>lf_sawpos_phase_reset(freq,phase,reset) : _
@@ -822,11 +822,11 @@ with phase control and reset.</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>phase</code>: phase between 0 and 1</li>
-<li><code>reset</code>: reset the oscillator to 0</li>
+<li><code>reset</code>: reset the oscillator to phase when equal to 1</li>
 </ul>
 <hr />
 <h3 id="oslf_saw"><code>(os.)lf_saw</code></h3>
-<p>Simple sawtooth waveform.
+<p>Simple sawtooth waveform oscillator between -1 and 1.
 <code>lf_saw</code> is a standard Faust function.</p>
 <h4 id="usage_24">Usage</h4>
 <pre><code>lf_saw(freq) : _
@@ -878,9 +878,9 @@ saw2f4(freq) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: polynomial order</li>
+<li><code>N</code>: polynomial order, known at compile time</li>
 <li><code>freq</code>: frequency in Hz</li>
-<li><code>phase</code>: phase</li>
+<li><code>phase</code>: phase between 0 and 1</li>
 </ul>
 <hr />
 <h3 id="ossawnp"><code>(os.)sawNp</code></h3>
@@ -893,8 +893,7 @@ saw2f4(freq) : _
 <p>TODO: MarkDown doc in comments</p>
 <hr />
 <h3 id="ossawtooth"><code>(os.)sawtooth</code></h3>
-<p>Alias-free sawtooth wave. 2nd order interpolation (based
-on <code>saw2</code>).
+<p>Alias-free sawtooth wave. 2nd order interpolation (based on <code>saw2</code>).
 <code>sawtooth</code> is a standard Faust function.</p>
 <h4 id="usage_26">Usage</h4>
 <pre><code>sawtooth(freq) : _
@@ -910,7 +909,7 @@ on <code>saw2</code>).
 <h3 id="ossaw2f4"><code>(os.)saw2f4</code></h3>
 <p>TODO: MarkDown doc in comments</p>
 <h2 id="bandlimited-pulse-square-and-impulse-trains">Bandlimited Pulse, Square, and Impulse Trains</h2>
-<p>Bandlimited Pulse, Square, and Impulse Trains.</p>
+<p>Bandlimited Pulse, Square and Impulse Trains.</p>
 <p><code>pulsetrainN</code>, <code>pulsetrain</code>, <code>squareN</code>, <code>square</code>, <code>imptrain</code>, <code>imptrainN</code>,
 <code>triangle</code>, <code>triangleN</code></p>
 <p>All are zero-mean and meant to oscillate in the audio frequency range.
@@ -1163,7 +1162,7 @@ There are two versions of the "index oscillators":
 "res" is the frequency of resonance as a factor of the fundamental pitch.</p>
 <hr />
 <h3 id="osczsaw"><code>(os.)CZsaw</code></h3>
-<p>Oscillator that mimics the Casio CZ saw oscillator
+<p>Oscillator that mimics the Casio CZ saw oscillator.
 <code>CZsaw</code> is a standard Faust function.</p>
 <h4 id="usage_44">Usage</h4>
 <pre><code>CZsaw(fund,index) : _
@@ -1213,7 +1212,7 @@ with it's phase aligned to <code>fund:sin</code>.
 </ul>
 <hr />
 <h3 id="osczpulse"><code>(os.)CZpulse</code></h3>
-<p>Oscillator that mimics the Casio CZ pulse oscillator
+<p>Oscillator that mimics the Casio CZ pulse oscillator.
 <code>CZpulse</code> is a standard Faust function.</p>
 <h4 id="usage_48">Usage</h4>
 <pre><code>CZpulse(fund,index) : _
@@ -1238,7 +1237,7 @@ with it's phase aligned to <code>fund:sin</code>.
 </ul>
 <hr />
 <h3 id="osczsinepulse"><code>(os.)CZsinePulse</code></h3>
-<p>Oscillator that mimics the Casio CZ sine/pulse oscillator
+<p>Oscillator that mimics the Casio CZ sine/pulse oscillator.
 <code>CZsinePulse</code> is a standard Faust function.</p>
 <h4 id="usage_50">Usage</h4>
 <pre><code>CZsinePulse(fund,index) : _
@@ -1263,7 +1262,7 @@ with it's phase aligned to <code>fund:sin</code>.
 </ul>
 <hr />
 <h3 id="osczhalfsine"><code>(os.)CZhalfSine</code></h3>
-<p>Oscillator that mimics the Casio CZ half sine oscillator
+<p>Oscillator that mimics the Casio CZ half sine oscillator.
 <code>CZhalfSine</code> is a standard Faust function.</p>
 <h4 id="usage_52">Usage</h4>
 <pre><code>CZhalfSine(fund,index) : _
@@ -1288,7 +1287,7 @@ with it's phase aligned to <code>fund:sin</code>.
 </ul>
 <hr />
 <h3 id="osczressaw"><code>(os.)CZresSaw</code></h3>
-<p>Oscillator that mimics the Casio CZ resonant saw-tooth oscillator
+<p>Oscillator that mimics the Casio CZ resonant sawtooth oscillator.
 <code>CZresSaw</code> is a standard Faust function.</p>
 <h4 id="usage_54">Usage</h4>
 <pre><code>CZresSaw(fund,res) : _
@@ -1300,7 +1299,7 @@ with it's phase aligned to <code>fund:sin</code>.
 </ul>
 <hr />
 <h3 id="osczrestriangle"><code>(os.)CZresTriangle</code></h3>
-<p>Oscillator that mimics the Casio CZ resonant triangle oscillator
+<p>Oscillator that mimics the Casio CZ resonant triangle oscillator.
 <code>CZresTriangle</code> is a standard Faust function.</p>
 <h4 id="usage_55">Usage</h4>
 <pre><code>CZresTriangle(fund,res) : _
@@ -1325,7 +1324,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h2 id="polyblep-based-oscillators">PolyBLEP-Based Oscillators</h2>
 <hr />
 <h3 id="ospolyblep"><code>(os.)polyblep</code></h3>
-<p>PolyBLEP residual function - used for smoothing steps in the audio signal.</p>
+<p>PolyBLEP residual function, used for smoothing steps in the audio signal.</p>
 <h4 id="usage_57">Usage</h4>
 <pre><code>polyblep(Q,phase) : _
 </code></pre>
@@ -1338,31 +1337,31 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="ospolyblep_saw"><code>(os.)polyblep_saw</code></h3>
 <p>Sawtooth oscillator with suppressed aliasing (using polyBLEP).</p>
 <h4 id="usage_58">Usage</h4>
-<pre><code>polyblep_saw(f) : _
+<pre><code>polyblep_saw(freq) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>f</code>: frequency in Hz </li>
+<li><code>freq</code>: frequency in Hz </li>
 </ul>
 <hr />
 <h3 id="ospolyblep_square"><code>(os.)polyblep_square</code></h3>
 <p>Square wave oscillator with suppressed aliasing (using polyBLEP).</p>
 <h4 id="usage_59">Usage</h4>
-<pre><code>polyblep_square(f) : _
+<pre><code>polyblep_square(freq) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>f</code>: frequency in Hz </li>
+<li><code>freq</code>: frequency in Hz </li>
 </ul>
 <hr />
 <h3 id="ospolyblep_triangle"><code>(os.)polyblep_triangle</code></h3>
 <p>Triangle wave oscillator with suppressed aliasing (using polyBLEP).</p>
 <h4 id="usage_60">Usage</h4>
-<pre><code>polyblep_triangle(f) : _
+<pre><code>polyblep_triangle(freq) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>f</code>: frequency in Hz </li>
+<li><code>freq</code>: frequency in Hz </li>
 </ul></div>
             </div>
         </div>

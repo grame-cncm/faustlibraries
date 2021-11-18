@@ -374,7 +374,7 @@ flat near f1. Implemented using two dc blockers in series.</p>
 <p>High-frequency model = -24 dB/octave slope implemented using a
 fourth-order Butterworth lowpass.</p>
 <p>Example based on measured Celestion G12 (12" speaker):</p>
-<p><code>speakerbp</code> is a standard Faust function</p>
+<p><code>speakerbp</code> is a standard Faust function.</p>
 <h4 id="usage_3">Usage</h4>
 <pre><code>speakerbp(f1,f2)
 _ : speakerbp(130,5000) : _
@@ -444,9 +444,9 @@ Michael A. Gerzon, JAES vol. 42, no. 6, June 1994</li>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html</a></li>
 </ul>
 <h4 id="signal-order-in-and-out">Signal Order In and Out</h4>
-<p>The mesh is constructed recursively using 2x2 embeddings.  Thus,
+<p>The mesh is constructed recursively using 2x2 embeddings. Thus,
 the top level of <code>mesh_square(M)</code> is a block 2x2 mesh, where each
-block is a <code>mesh(M/2)</code>.  Let these blocks be numbered 1,2,3,4 in the
+block is a <code>mesh(M/2)</code>. Let these blocks be numbered 1,2,3,4 in the
 geometry NW,NE,SW,SE, i.e., as
         1 2
         3 4
@@ -485,7 +485,7 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <p>A routing matrix can be used to obtain other connection geometries.</p>
 <hr />
 <h3 id="efreverseechonnchansdelay"><code>(ef.)reverseEchoN(nChans,delay)</code></h3>
-<p>Reverse echo effect</p>
+<p>Reverse echo effect.</p>
 <h4 id="usage_7">Usage</h4>
 <pre><code>_ : ef.reverseEchoN(N,delay) : si.bus(N)
 </code></pre>
@@ -501,7 +501,7 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <p>The effect uses N instances of reverseDelayRamped at different phases.</p>
 <hr />
 <h3 id="efreversedelayrampeddelayphase"><code>(ef.)reverseDelayRamped(delay,phase)</code></h3>
-<p>Reverse delay with amplitude ramp</p>
+<p>Reverse delay with amplitude ramp.</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>_ : ef.reverseDelayRamped(delay,phase) : _
 </code></pre>
@@ -515,7 +515,7 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 </code></pre>
 <hr />
 <h3 id="efuniformpantostereonchans"><code>(ef.)uniformPanToStereo(nChans)</code></h3>
-<p>Pan nChans channels to the stereo field, spread uniformly left to right</p>
+<p>Pan nChans channels to the stereo field, spread uniformly left to right.</p>
 <h4 id="usage_9">Usage</h4>
 <pre><code>si.bus(N) : ef.uniformPanToStereo(N) : _,_
 </code></pre>
