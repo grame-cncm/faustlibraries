@@ -1,5 +1,8 @@
 //#################################### compressors.lib ###################################
 // A library of compressor effects. Its official prefix is `co`.
+//
+// #### References
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/compressors.lib>
 //########################################################################################
 
 /************************************************************************
@@ -94,12 +97,12 @@ declare version "0.1";
 // note: si.lag_ud has a bug where if you compile with standard precision,
 // down is 0 and prePost is 1, you go into infinite GR and stay there
 peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
-  abs:ba.bypass1(prePost,si.lag_ud(att,rel)) : ba.linear2db : gain_computer(strength,thresh,knee):ba.bypass1((prePost*-1)+1,si.lag_ud(rel,att)) : ba.db2linear
+  abs : ba.bypass1(prePost,si.lag_ud(att,rel)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1)+1,si.lag_ud(rel,att)) : ba.db2linear
 with {
   gain_computer(strength,thresh,knee,level) =
     select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
             0,
-            ((level-thresh+(knee/2)):pow(2)/(2*knee)),
+            ((level-thresh+(knee/2)) : pow(2)/(2*knee)),
             (level-thresh)) : max(0)*-strength;
 };
 
@@ -160,7 +163,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,1) =
 // to link/unlink channels
 peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
   par(i, N, peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost))
-  <:(si.bus(N),(ba.parallelMin(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(it.interpolate_linear(link)));
+  <:(si.bus(N),(ba.parallelMin(N) <: si.bus(N))) : ro.interleave(N,2) : par(i,N,(it.interpolate_linear(link)));
 
 
 //--------------------`(co.)FFcompressor_N_chan`-------------------
@@ -212,10 +215,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 
 // feed forward compressor
 FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
-  (si.bus(N) <:
-    (peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N))
-  )
-  :(ro.interleave(N,2):par(i,N,meter*_));
+  si.bus(N) <: (peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N)) : ro.interleave(N,2) : par(i,N,meter*_);
 
 //--------------------`(co.)FBcompressor_N_chan`-------------------
 // feed back N channel dynamic range compressor.
@@ -266,10 +266,7 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // License: GPLv3
 
 FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
-  (
-    (peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N))
-    :(ro.interleave(N,2):par(i,N,meter*_))
-  )~si.bus(N);
+  (peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N) : (ro.interleave(N,2) : par(i,N,meter*_))) ~ si.bus(N);
 
 //--------------------`(co.)FBFFcompressor_N_chan`-------------------
 // feed forward / feed back N channel dynamic range compressor.
@@ -321,14 +318,12 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // License: GPLv3
 
 FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
-  si.bus(N) <: si.bus(N*2):
+  si.bus(N) <: si.bus(N*2) :
   (
-    ((
-      (par(i, 2, peak_compression_gain_N_chan(strength*(1+((i==0)*2)),thresh,att,rel,knee,prePost,link,N)):ro.interleave(N,2):par(i, N, it.interpolate_linear(FBFF)))
-     ,si.bus(N))
-      :(ro.interleave(N,2):par(i,N,meter*_))
-    )~si.bus(N)
-  );
+    ((par(i,2,peak_compression_gain_N_chan(strength*(1+((i ==0)*2)),thresh,att,rel,knee,prePost,link,N)) : ro.interleave(N,2) : par(i,N,it.interpolate_linear(FBFF))),si.bus(N))
+    : (ro.interleave(N,2) : par(i,N,meter*_))
+  )
+  ~ si.bus(N);
 
 
 //--------------------`(co.)RMS_compression_gain_mono`-------------------
@@ -375,14 +370,13 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // License: GPLv3
 
 RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
-  RMS(rel): ba.bypass1(prePost,si.lag_ud(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost*-1)+1,si.lag_ud(0,att)) : ba.db2linear
+  RMS(rel) : ba.bypass1(prePost,si.lag_ud(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1)+1,si.lag_ud(0,att)) : ba.db2linear
 with {
   gain_computer(strength,thresh,knee,level) =
     select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
             0,
             ((level-thresh+(knee/2)):pow(2)/(2*knee)),
-            (level-thresh)
-           ) : max(0)*-strength;
+            (level-thresh)) : max(0)*-strength;
   	RMS(time) = ba.slidingRMS(s) with { s = ba.sec2samp(time):int:max(1); };
 };
 
@@ -435,8 +429,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,1) =
   RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost);
 
 RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
-  par(i, N, RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost))
-  <:(si.bus(N),(ba.parallelMin(N)<:si.bus(N))):ro.interleave(N,2):par(i,N,(it.interpolate_linear(link)));
+  par(i,N,RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost)) <: (si.bus(N),(ba.parallelMin(N) <: si.bus(N))) : ro.interleave(N,2) : par(i,N,(it.interpolate_linear(link)));
 
 
 //--------------------`(co.)RMS_FBFFcompressor_N_chan`-------------------
@@ -497,14 +490,10 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
   si.bus(N) <: si.bus(N*2):
   (
-    (
-      (
-        (ro.interleave(N,2):par(i, N*2, abs) :par(i, N, it.interpolate_linear(FBFF)) : RMS_compression_gain_N_chan(strength*(1+(((FBFF*-1)+1)*1)),thresh,att,rel,knee,prePost,link,N))
-       ,si.bus(N)
-      )
-    :(ro.interleave(N,2):par(i,N,meter*_))
-    )~si.bus(N)
-  );
+    ((ro.interleave(N,2) : par(i,N*2,abs) :par(i,N,it.interpolate_linear(FBFF)) : RMS_compression_gain_N_chan(strength*(1+((FBFF*-1)+1)),thresh,att,rel,knee,prePost,link,N)),si.bus(N))
+    : (ro.interleave(N,2) : par(i,N,meter*_))
+  )
+  ~ si.bus(N);
 
 
 //--------------------`(co.)RMS_FBcompressor_peak_limiter_N_chan`-------------------
@@ -562,14 +551,8 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // License: GPLv3
 
 RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) =
-  (
-    (
-      (
-        (RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,0,link,N))
-        ,si.bus(N)
-      ):(ro.interleave(N,2):par(i,N,meter*_))
-    ):FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim,N)
-  )~si.bus(N);
+  (((RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,0,link,N)),si.bus(N)) : ro.interleave(N,2) : par(i,N,meter*_) : FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim,N))
+  ~ si.bus(N);
 
 
 //=============================Original versions section=============================
