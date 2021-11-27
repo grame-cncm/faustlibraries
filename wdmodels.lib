@@ -569,7 +569,7 @@ case {
 
 
 //----------------------`(wd.)resCurrent`--------------------------
-// Unadapted Resistive Current Source.
+// Adapted Resistive Current Source.
 //
 // An adaptor implementing a resistive current source within Wave Digital Filter connection trees.
 //
@@ -603,7 +603,7 @@ declare resCurrent copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosen
 declare resCurrent license "MIT-style STK-4.3 license";
 resCurrent =
 case {
-    (0, R, jin) => !, 2*R^(rho)*jin;
+    (0, R, jin) => !, R^(rho)*jin;
     (1, R, jin) => _; 
     (2, R, jin) => R0
     with {
