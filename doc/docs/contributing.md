@@ -25,7 +25,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 ```
 
 * Every time a new function is added, the documentation should be updated simply by running `make doclib`. <!-- TODO -->
-* The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on *Using the Faust Libraries*).
+* The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on [library-import](#library-import)).
 * Try to reuse existing functions as much as possible.
 * The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen: _` for a mono generator, `_ : filter : _` for a mono effect, etc.
 * Some functions use parameters that are [constant numerical expressions](https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions). The convention is to label them in *capital letters* and document them preferably to be *constant numerical expressions* (or *known at compile time* in existing libraries).
