@@ -25,7 +25,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 ```
 
 * Every time a new function is added, the documentation should be updated simply by running `make doclib`. <!-- TODO -->
-* The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on [library-import](#library-import)).
+* The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on [Library Import](#library-import)).
 * Try to reuse existing functions as much as possible.
 * The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen: _` for a mono generator, `_ : filter : _` for a mono effect, etc.
 * Some functions use parameters that are [constant numerical expressions](https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions). The convention is to label them in *capital letters* and document them preferably to be *constant numerical expressions* (or *known at compile time* in existing libraries).
@@ -83,7 +83,7 @@ In order to have a uniformized library system, we established the following conv
 
 ### Library Import
 
-To prevent cross-references between libraries we generalized the use of the `library("")` system for function calls in all the libraries. This means that everytime a function declared in another library is called, the environment corresponding to this library needs to be called too. To make things easier, a `stdfaust.lib` library was created and is imported by all the libraries:
+To prevent cross-references between libraries, we generalized the use of the `library("")` system for function calls in all the libraries. This means that everytime a function declared in another library is called, the environment corresponding to this library needs to be called too. To make things easier, a `stdfaust.lib` library was created and is imported by all the libraries:
 
 ```
 aa = library("aanl.lib");
@@ -128,7 +128,7 @@ import("stdfaust.lib");
 process = si.smooth(0.999);
 ```
 
-This standard is only used within the libraries: nothing prevents coders to still import `signals.lib` directly and call `smooth` without `ro.`, etc. It means symbols and function names defined within a library have to be unique to not collide with symbols of any other libraries.  
+This standard is only used within the libraries: nothing prevents coders to still import `signals.lib` directly and call `smooth` without `ro.`, etc. It means symbols and function names defined within a library **have to be unique to not collide with symbols of any other libraries**.  
 
 ### "Demo" Functions
 

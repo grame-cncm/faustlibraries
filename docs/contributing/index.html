@@ -289,7 +289,7 @@
 </code></pre>
 <ul>
 <li>Every time a new function is added, the documentation should be updated simply by running <code>make doclib</code>. <!-- TODO --></li>
-<li>The environment system (e.g. <code>os.osc</code>) should be used when calling a function declared in another library (see the section on <a href="#library-import">library-import</a>).</li>
+<li>The environment system (e.g. <code>os.osc</code>) should be used when calling a function declared in another library (see the section on <a href="#library-import">Library Import</a>).</li>
 <li>Try to reuse existing functions as much as possible.</li>
 <li>The <code>Usage</code> line must show the <em>input/output shape</em> (the number of inputs and outputs) of the function, like <code>gen: _</code> for a mono generator, <code>_ : filter : _</code> for a mono effect, etc.</li>
 <li>Some functions use parameters that are <a href="https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions">constant numerical expressions</a>. The convention is to label them in <em>capital letters</em> and document them preferably to be <em>constant numerical expressions</em> (or <em>known at compile time</em> in existing libraries).</li>
@@ -344,7 +344,7 @@
 <li>Each function documentation provides a "Usage" section (see <code>basics.lib</code>).</li>
 </ul>
 <h3 id="library-import">Library Import</h3>
-<p>To prevent cross-references between libraries we generalized the use of the <code>library("")</code> system for function calls in all the libraries. This means that everytime a function declared in another library is called, the environment corresponding to this library needs to be called too. To make things easier, a <code>stdfaust.lib</code> library was created and is imported by all the libraries:</p>
+<p>To prevent cross-references between libraries, we generalized the use of the <code>library("")</code> system for function calls in all the libraries. This means that everytime a function declared in another library is called, the environment corresponding to this library needs to be called too. To make things easier, a <code>stdfaust.lib</code> library was created and is imported by all the libraries:</p>
 <pre><code>aa = library(&quot;aanl.lib&quot;);
 sf = library(&quot;all.lib&quot;);
 an = library(&quot;analyzers.lib&quot;);
@@ -383,7 +383,7 @@ wd = library(&quot;wdmodels.lib&quot;);
 
 process = si.smooth(0.999);
 </code></pre>
-<p>This standard is only used within the libraries: nothing prevents coders to still import <code>signals.lib</code> directly and call <code>smooth</code> without <code>ro.</code>, etc. It means symbols and function names defined within a library have to be unique to not collide with symbols of any other libraries.  </p>
+<p>This standard is only used within the libraries: nothing prevents coders to still import <code>signals.lib</code> directly and call <code>smooth</code> without <code>ro.</code>, etc. It means symbols and function names defined within a library <strong>have to be unique to not collide with symbols of any other libraries</strong>.  </p>
 <h3 id="demo-functions">"Demo" Functions</h3>
 <p>"Demo" functions are placed in <code>demos.lib</code> and have a built-in user interface (UI). Their name ends with the <code>_demo</code> suffix. Each of these function have a <code>.dsp</code> file associated to them in the <code>/examples</code> folder.</p>
 <p>Any function containing UI elements should be placed in this library and respect these standards.</p>
