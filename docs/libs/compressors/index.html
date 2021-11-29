@@ -265,10 +265,6 @@
             </li>
             <li class="nav-item" data-level="2"><a href="#original-versions-section" class="nav-link">Original versions section</a>
               <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#functions-reference_1" class="nav-link">Functions Reference</a>
-              <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#cocompressor_lad_mono" class="nav-link">(co.)compressor_lad_mono</a>
               <ul class="nav flex-column">
               </ul>
@@ -293,6 +289,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#lookahead-limiters" class="nav-link">Lookahead Limiters</a>
+              <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#colimiter_lad_n" class="nav-link">(co.)limiter_lad_N</a>
               <ul class="nav flex-column">
               </ul>
@@ -351,9 +351,9 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
-For that you'd need a ratio of infinity:1, and you cannot express that in Faust</p>
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
 <p>Sometimes even bigger ratios are useful:
-For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
 <h4 id="references_1">References</h4>
 <ul>
@@ -461,8 +461,8 @@ and in between there is a gradual increase in gain reduction.</li>
 this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
-meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
-or it can be omitted by defining 'meter = _'.</li>
+<code>meter = _ &lt;: (_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code>
+or it can be omitted by defining <code>meter = _;</code>.</li>
 <li><code>N</code>: the number of channels of the compressor</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -483,7 +483,7 @@ AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
 <hr />
 <h3 id="cofbffcompressor_n_chan"><code>(co.)FBFFcompressor_N_chan</code></h3>
 <p>feed forward / feed back N channel dynamic range compressor.
-the feedback part has a much higher strength, so they end up sounding similar
+The feedback part has a much higher strength, so they end up sounding similar.
 <code>FBFFcompressor_N_chan</code> is a standard Faust function.</p>
 <h4 id="usage_4">Usage</h4>
 <pre><code>si.bus(N) : FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
@@ -503,7 +503,7 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>FBFF</code>: fade between feed forward (0) and feed back (1) compression.</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
-meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<code>meter = _&lt;:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
 <li><code>N</code>: the number of channels of the compressor</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -616,7 +616,7 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>FBFF</code>: fade between feed forward (0) and feed back (1) compression.</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
-meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<code>meter = _&lt;:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
 <li><code>N</code>: the number of channels of the compressor</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -625,11 +625,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
-<p>to save CPU we cheat a bit, in a similar way as in the original libs:
+<p>To save CPU we cheat a bit, in a similar way as in the original libs:
 instead of crosfading between two sets of gain calculators as above,
 we take the abs of the audio from both the FF and FB, and crossfade between those,
 and feed that into one set of gain calculators
-again the strength is much higher when in FB mode, but implemented differently</p>
+again the strength is much higher when in FB mode, but implemented differently.</p>
 <h4 id="references_8">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -643,9 +643,9 @@ AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
 <h3 id="corms_fbcompressor_peak_limiter_n_chan"><code>(co.)RMS_FBcompressor_peak_limiter_N_chan</code></h3>
 <p>N channel RMS feed back compressor into peak limiter feeding back into the FB compressor.
 By combining them this way, they complement each other optimally:
-The RMS compressor doesn't have to deal with the peaks,
+the RMS compressor doesn't have to deal with the peaks,
 and the peak limiter get's spared from the steady state signal.
-the feedback part has a much higher strength, so they end up sounding similar
+The feedback part has a much higher strength, so they end up sounding similar.
 <code>RMS_FBcompressor_peak_limiter_N_chan</code> is a standard Faust function.</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>si.bus(N) : RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) : si.bus(N)
@@ -665,9 +665,9 @@ and in between there is a gradual increase in gain reduction.
 the limiter uses a knee half this size</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>meter</code>: compressor gain reduction meter. It can be implemented like so:
-meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<code>meter = _&lt;:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
 <li><code>meterLim</code>: brickwall limiter gain reduction meter. It can be implemented like so:
-meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
+<code>meter = _&lt;:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
 <li><code>N</code>: the number of channels of the compressor</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -689,7 +689,6 @@ AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
 <p>The functions in this section are largely superseded by the limiters above, but we
 retain them for backward compatibility and for situations in which a more permissive,
 MIT-style license is required.</p>
-<h2 id="functions-reference_1">Functions Reference</h2>
 <hr />
 <h3 id="cocompressor_lad_mono"><code>(co.)compressor_lad_mono</code></h3>
 <p>Mono dynamic range compressor with lookahead delay.
@@ -786,19 +785,19 @@ clipping level), fast attack, and high ratio.  Since
 the compression ratio is so high, some knee smoothing is
 desirable (for softer limiting).  This example is intended
 to get you started using compressors as limiters, so all
-parameters are hardwired here to nominal values.
- Ratio: 4 (moderate compression)
-       See compressor_mono() comments for a guide to other choices.
+parameters are hardwired here to nominal values.</p>
+<p>Ratio: 4 (moderate compression)
+       See <code>compressor_mono</code> comments for a guide to other choices.
        Mike Shipley likes this (lowest) setting on the 1176.
-       (Grammy award-winning mixer for Queen, Tom Petty, etc.)
-Thresh: -6 dB, meaning 4:1 compression begins at amplitude 1/2.
-   Att: 800 MICROseconds (Note: scaled by ratio in the 1176)
+       (Grammy award-winning mixer for Queen, Tom Petty, etc.).</p>
+<p>Thresh: -6 dB, meaning 4:1 compression begins at amplitude 1/2.</p>
+<p>Att: 800 MICROseconds (Note: scaled by ratio in the 1176)
         The 1176 range is said to be 20-800 microseconds.
         Faster attack gives "more bite" (e.g. on vocals),
-        and makes hard-clipping less likely on fast overloads.
-   Rel: 0.5 s (Note: scaled by ratio in the 1176)
-        The 1176 range is said to be 50-1100 ms.
-The 1176 also has a "bright, clear eq effect" (use filters.lib if desired).
+        and makes hard-clipping less likely on fast overloads.</p>
+<p>Rel: 0.5 s (Note: scaled by ratio in the 1176)
+        The 1176 range is said to be 50-1100 ms.</p>
+<p>The 1176 also has a "bright, clear eq effect" (use filters.lib if desired).
 <code>limiter_1176_R4_mono</code> is a standard Faust function.</p>
 <h4 id="usage_13">Usage</h4>
 <pre><code> _ : limiter_1176_R4_mono : _
@@ -815,14 +814,14 @@ clipping level), fast attack and release, and high ratio.  Since
 the ratio is so high, some knee smoothing is
 desirable ("soft limiting").  This example is intended
 to get you started using compressor_* as a limiter, so all
-parameters are hardwired to nominal values here.
-Ratios: 4 (moderate compression), 8 (severe compression),
-         12 (mild limiting), or 20 to 1 (hard limiting)
-  Att: 20-800 MICROseconds (Note: scaled by ratio in the 1176)
-  Rel: 50-1100 ms (Note: scaled by ratio in the 1176)
-  Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
-    Faster attack gives "more bite" (e.g. on vocals)
-    He hears a bright, clear eq effect as well (not implemented here)</p>
+parameters are hardwired to nominal values here.</p>
+<p>Ratios: 4 (moderate compression), 8 (severe compression),
+         12 (mild limiting), or 20 to 1 (hard limiting).</p>
+<p>Att: 20-800 MICROseconds (Note: scaled by ratio in the 1176).</p>
+<p>Rel: 50-1100 ms (Note: scaled by ratio in the 1176).</p>
+<p>Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
+Faster attack gives "more bite" (e.g. on vocals).
+He hears a bright, clear eq effect as well (not implemented here).</p>
 <h4 id="usage_14">Usage</h4>
 <pre><code> _,_ : limiter_1176_R4_stereo : _,_
 </code></pre>
@@ -830,16 +829,17 @@ Ratios: 4 (moderate compression), 8 (severe compression),
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/1176_Peak_Limiter">http://en.wikipedia.org/wiki/1176_Peak_Limiter</a></li>
 </ul>
+<h2 id="lookahead-limiters">Lookahead Limiters</h2>
 <hr />
 <h3 id="colimiter_lad_n"><code>(co.)limiter_lad_N</code></h3>
-<p>N-channel lookahead limiter inspired by IOhannes Zmölnig's post, which is 
+<p>N-channels lookahead limiter inspired by IOhannes Zmölnig's post, which is 
 in turn based on the thesis by Peter Falkner "Entwicklung eines digitalen
 Stereo-Limiters mit Hilfe des Signalprozessors DSP56001".
 This version of the limiter uses a peak-holder with smoothed
 attack and release based on tau time constant filters.</p>
-<p>It is also possible to use a time constant that is 2<em>PI</em>tau by dividing 
-the attack and release times by 2*PI. This time constant allows for 
-the amplitude profile to reach 1 - e^(-2pi) of the final 
+<p>It is also possible to use a time constant that is 2PI*tau by dividing 
+the attack and release times by 2PI. This time constant allows for 
+the amplitude profile to reach 1 - e^(-2PI) of the final 
 peak after the attack time. The input path can be delayed by the same 
 amount as the attack time to synchronise input and amplitude profile, 
 realising a system that is particularly effective as a colourless
@@ -859,22 +859,21 @@ increase determined by the user for any specific application.</p>
 <p>The scaling factor for all the channels is determined by the loudest peak 
 between them all, so that amplitude ratios between the signals are kept.</p>
 <h4 id="usage_15">Usage</h4>
-<pre><code>si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : 
-   si.bus(N)
+<pre><code>si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code> is the number of channels, known at compile-time.</li>
-<li><code>LD</code> is the lookahead delay in seconds, known at compile-time.</li>
-<li><code>ceiling</code> is the linear amplitude output limit.</li>
-<li><code>attack</code> is the attack time in seconds.</li>
-<li><code>hold</code> is the hold time in seconds.</li>
-<li><code>release</code> is the release time in seconds.</li>
+<li><code>N</code> is the number of channels, known at compile-time</li>
+<li><code>LD</code> is the lookahead delay in seconds, known at compile-time</li>
+<li><code>ceiling</code> is the linear amplitude output limit</li>
+<li><code>attack</code> is the attack time in seconds</li>
+<li><code>hold</code> is the hold time in seconds</li>
+<li><code>release</code> is the release time in seconds</li>
 </ul>
-<p>Example for a stereo limiter: limiter_lad_N(2, .01, 1, .01, .1, 1);</p>
+<p>Example for a stereo limiter: <code>limiter_lad_N(2, .01, 1, .01, .1, 1);</code></p>
 <h4 id="reference_2">Reference:</h4>
 <ul>
-<li><a href="http://iem.at/~zmoelnig/publications/limiter/">http://iem.at/~zmoelnig/publications/limiter/</a>.</li>
+<li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
 </ul>
 <hr />
 <h3 id="colimiter_lad_mono"><code>(co.)limiter_lad_mono</code></h3>
@@ -884,15 +883,15 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>LD</code> is the lookahead delay in seconds, known at compile-time.</li>
-<li><code>ceiling</code> is the linear amplitude output limit.</li>
-<li><code>attack</code> is the attack time in seconds.</li>
-<li><code>hold</code> is the hold time in seconds.</li>
-<li><code>release</code> is the release time in seconds.</li>
+<li><code>LD</code> is the lookahead delay in seconds, known at compile-time</li>
+<li><code>ceiling</code> is the linear amplitude output limit</li>
+<li><code>attack</code> is the attack time in seconds</li>
+<li><code>hold</code> is the hold time in seconds</li>
+<li><code>release</code> is the release time in seconds</li>
 </ul>
 <h4 id="reference_3">Reference:</h4>
 <ul>
-<li><a href="http://iem.at/~zmoelnig/publications/limiter/">http://iem.at/~zmoelnig/publications/limiter/</a>.</li>
+<li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
 </ul>
 <hr />
 <h3 id="colimiter_lad_stereo"><code>(co.)limiter_lad_stereo</code></h3>
@@ -902,39 +901,38 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>LD</code> is the lookahead delay in seconds, known at compile-time.</li>
-<li><code>ceiling</code> is the linear amplitude output limit.</li>
-<li><code>attack</code> is the attack time in seconds.</li>
-<li><code>hold</code> is the hold time in seconds.</li>
-<li><code>release</code> is the release time in seconds.</li>
+<li><code>LD</code> is the lookahead delay in seconds, known at compile-time</li>
+<li><code>ceiling</code> is the linear amplitude output limit</li>
+<li><code>attack</code> is the attack time in seconds</li>
+<li><code>hold</code> is the hold time in seconds</li>
+<li><code>release</code> is the release time in seconds</li>
 </ul>
 <h4 id="reference_4">Reference:</h4>
 <ul>
-<li><a href="http://iem.at/~zmoelnig/publications/limiter/">http://iem.at/~zmoelnig/publications/limiter/</a>.</li>
+<li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
 </ul>
 <hr />
 <h3 id="colimiter_lad_quad"><code>(co.)limiter_lad_quad</code></h3>
 <p>Specialised case of limiter_lad_N: quadraphonic limiter.</p>
 <h4 id="usage_18">Usage</h4>
-<pre><code>si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : 
-   si.bus(4)
+<pre><code>si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : si.bus(4)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>LD</code> is the lookahead delay in seconds, known at compile-time.</li>
-<li><code>ceiling</code> is the linear amplitude output limit.</li>
-<li><code>attack</code> is the attack time in seconds.</li>
-<li><code>hold</code> is the hold time in seconds.</li>
-<li><code>release</code> is the release time in seconds.</li>
+<li><code>LD</code> is the lookahead delay in seconds, known at compile-time</li>
+<li><code>ceiling</code> is the linear amplitude output limit</li>
+<li><code>attack</code> is the attack time in seconds</li>
+<li><code>hold</code> is the hold time in seconds</li>
+<li><code>release</code> is the release time in seconds</li>
 </ul>
 <h4 id="reference_5">Reference:</h4>
 <ul>
-<li><a href="http://iem.at/~zmoelnig/publications/limiter/">http://iem.at/~zmoelnig/publications/limiter/</a>.</li>
+<li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
 </ul>
 <hr />
 <h3 id="colimiter_lad_bw"><code>(co.)limiter_lad_bw</code></h3>
 <p>Specialised case of limiter_lad_N and ready-to-use unit-amplitude mono 
-limiting function. This implementation, in particular, uses 2pi*tau
+limiting function. This implementation, in particular, uses 2PI*tau
 time constant filters for attack and release smoothing with
 synchronised input and gain signals. </p>
 <p>This function's best application is to be used as a brickwall limiter with 
@@ -946,7 +944,7 @@ and a 0-dB-ceiling, the loudest peak recorded was ~0.38 dB.</p>
 </code></pre>
 <h4 id="reference_6">Reference:</h4>
 <ul>
-<li><a href="http://iem.at/~zmoelnig/publications/limiter/">http://iem.at/~zmoelnig/publications/limiter/</a>.</li>
+<li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
 </ul></div>
             </div>
         </div>

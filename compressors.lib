@@ -75,10 +75,10 @@ declare version "0.2";
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
-// For that you'd need a ratio of infinity:1, and you cannot express that in Faust
+// For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 //
 // Sometimes even bigger ratios are useful:
-// For example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+// for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
 // #### References
@@ -157,7 +157,7 @@ with {
 peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,1) =
   peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost);
 
-// The actual N-channel version:
+// The actual N-channels version:
 // Calculate the maximum gain reduction of N channels,
 // and then crossfade between that and each channel's own gain reduction,
 // to link/unlink channels
@@ -241,8 +241,8 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `meter`: a gain reduction meter. It can be implemented like so:
-// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
-// or it can be omitted by defining 'meter = _'.
+// `meter = _ <: (_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
+// or it can be omitted by defining `meter = _;`.
 // * `N`: the number of channels of the compressor
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -270,7 +270,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 
 //--------------------`(co.)FBFFcompressor_N_chan`-------------------
 // feed forward / feed back N channel dynamic range compressor.
-// the feedback part has a much higher strength, so they end up sounding similar
+// The feedback part has a much higher strength, so they end up sounding similar.
 // `FBFFcompressor_N_chan` is a standard Faust function.
 //
 // #### Usage
@@ -294,7 +294,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `FBFF`: fade between feed forward (0) and feed back (1) compression.
 // * `meter`: a gain reduction meter. It can be implemented like so:
-// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// `meter = _<:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
 // * `N`: the number of channels of the compressor
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -460,7 +460,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `FBFF`: fade between feed forward (0) and feed back (1) compression.
 // * `meter`: a gain reduction meter. It can be implemented like so:
-// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// `meter = _<:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
 // * `N`: the number of channels of the compressor
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -471,11 +471,11 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
-// to save CPU we cheat a bit, in a similar way as in the original libs:
+// To save CPU we cheat a bit, in a similar way as in the original libs:
 // instead of crosfading between two sets of gain calculators as above,
 // we take the abs of the audio from both the FF and FB, and crossfade between those,
 // and feed that into one set of gain calculators
-// again the strength is much higher when in FB mode, but implemented differently
+// again the strength is much higher when in FB mode, but implemented differently.
 //
 // #### References
 //
@@ -501,9 +501,9 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 //--------------------`(co.)RMS_FBcompressor_peak_limiter_N_chan`-------------------
 // N channel RMS feed back compressor into peak limiter feeding back into the FB compressor.
 // By combining them this way, they complement each other optimally:
-// The RMS compressor doesn't have to deal with the peaks,
+// the RMS compressor doesn't have to deal with the peaks,
 // and the peak limiter get's spared from the steady state signal.
-// the feedback part has a much higher strength, so they end up sounding similar
+// The feedback part has a much higher strength, so they end up sounding similar.
 // `RMS_FBcompressor_peak_limiter_N_chan` is a standard Faust function.
 //
 // #### Usage
@@ -527,9 +527,9 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // the limiter uses a knee half this size
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `meter`: compressor gain reduction meter. It can be implemented like so:
-// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// `meter = _<:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
 // * `meterLim`: brickwall limiter gain reduction meter. It can be implemented like so:
-// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// `meter = _<:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
 // * `N`: the number of channels of the compressor
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -561,9 +561,6 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // The functions in this section are largely superseded by the limiters above, but we
 // retain them for backward compatibility and for situations in which a more permissive,
 // MIT-style license is required.
-//========================================================================================
-
-//=============================Functions Reference========================================
 //========================================================================================
 
 //--------------------`(co.)compressor_lad_mono`-------------------
@@ -712,17 +709,22 @@ with {
 // desirable (for softer limiting).  This example is intended
 // to get you started using compressors as limiters, so all
 // parameters are hardwired here to nominal values.
-//  Ratio: 4 (moderate compression)
-//        See compressor_mono() comments for a guide to other choices.
+//
+// Ratio: 4 (moderate compression)
+//        See `compressor_mono` comments for a guide to other choices.
 //        Mike Shipley likes this (lowest) setting on the 1176.
-//        (Grammy award-winning mixer for Queen, Tom Petty, etc.)
+//        (Grammy award-winning mixer for Queen, Tom Petty, etc.).
+//
 // Thresh: -6 dB, meaning 4:1 compression begins at amplitude 1/2.
-//    Att: 800 MICROseconds (Note: scaled by ratio in the 1176)
+//
+// Att: 800 MICROseconds (Note: scaled by ratio in the 1176)
 //         The 1176 range is said to be 20-800 microseconds.
 //         Faster attack gives "more bite" (e.g. on vocals),
 //         and makes hard-clipping less likely on fast overloads.
-//    Rel: 0.5 s (Note: scaled by ratio in the 1176)
+//
+// Rel: 0.5 s (Note: scaled by ratio in the 1176)
 //         The 1176 range is said to be 50-1100 ms.
+//
 // The 1176 also has a "bright, clear eq effect" (use filters.lib if desired).
 // `limiter_1176_R4_mono` is a standard Faust function.
 //
@@ -750,13 +752,17 @@ limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
 // desirable ("soft limiting").  This example is intended
 // to get you started using compressor_* as a limiter, so all
 // parameters are hardwired to nominal values here.
+// 
 // Ratios: 4 (moderate compression), 8 (severe compression),
-//          12 (mild limiting), or 20 to 1 (hard limiting)
-//   Att: 20-800 MICROseconds (Note: scaled by ratio in the 1176)
-//   Rel: 50-1100 ms (Note: scaled by ratio in the 1176)
-//   Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
-//     Faster attack gives "more bite" (e.g. on vocals)
-//     He hears a bright, clear eq effect as well (not implemented here)
+//          12 (mild limiting), or 20 to 1 (hard limiting).
+//
+// Att: 20-800 MICROseconds (Note: scaled by ratio in the 1176).
+//
+// Rel: 50-1100 ms (Note: scaled by ratio in the 1176).
+//
+// Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
+// Faster attack gives "more bite" (e.g. on vocals).
+// He hears a bright, clear eq effect as well (not implemented here).
 //
 // #### Usage
 //
@@ -774,16 +780,20 @@ declare limiter_1176_R4_stereo copyright
 declare limiter_1176_R4_stereo license "MIT-style STK-4.3 license";
 limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 
+
+//=============================Lookahead Limiters========================================
+//========================================================================================
+
 //-----------------------`(co.)limiter_lad_N`---------------------------------
-// N-channel lookahead limiter inspired by IOhannes Zmölnig's post, which is 
+// N-channels lookahead limiter inspired by IOhannes Zmölnig's post, which is 
 // in turn based on the thesis by Peter Falkner "Entwicklung eines digitalen
 // Stereo-Limiters mit Hilfe des Signalprozessors DSP56001".
 // This version of the limiter uses a peak-holder with smoothed
 // attack and release based on tau time constant filters.
 //
-// It is also possible to use a time constant that is 2*PI*tau by dividing 
-// the attack and release times by 2*PI. This time constant allows for 
-// the amplitude profile to reach 1 - e^(-2pi) of the final 
+// It is also possible to use a time constant that is 2PI*tau by dividing 
+// the attack and release times by 2PI. This time constant allows for 
+// the amplitude profile to reach 1 - e^(-2PI) of the final 
 // peak after the attack time. The input path can be delayed by the same 
 // amount as the attack time to synchronise input and amplitude profile, 
 // realising a system that is particularly effective as a colourless
@@ -809,31 +819,30 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // #### Usage
 //
 // ```
-// si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : 
-//    si.bus(N)
+// si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : si.bus(N)
 // ```
 //
 // Where:
 //
-// * `N` is the number of channels, known at compile-time.
-// * `LD` is the lookahead delay in seconds, known at compile-time.
-// * `ceiling` is the linear amplitude output limit.
-// * `attack` is the attack time in seconds.
-// * `hold` is the hold time in seconds.
-// * `release` is the release time in seconds.
+// * `N` is the number of channels, known at compile-time
+// * `LD` is the lookahead delay in seconds, known at compile-time
+// * `ceiling` is the linear amplitude output limit
+// * `attack` is the attack time in seconds
+// * `hold` is the hold time in seconds
+// * `release` is the release time in seconds
 //
-// Example for a stereo limiter: limiter_lad_N(2, .01, 1, .01, .1, 1);
+// Example for a stereo limiter: `limiter_lad_N(2, .01, 1, .01, .1, 1);`
 //
 // #### Reference:
 //
-// <http://iem.at/~zmoelnig/publications/limiter/>.
+// <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_N author "Dario Sanfilippo";
 declare limiter_lad_N copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_lad_N license "GPLv3 license";
 limiter_lad_N(N, LD, ceiling, attack, hold, release) = 
-      si.bus(N) <: par(i, N, @ (LD * ma.SR)), 
+      si.bus(N) <: par(i, N, @(LD * ma.SR)), 
                    (scaling <: si.bus(N)) : ro.interleave(N, 2) : par(i, N, *)
       with {
            scaling = ceiling / max(amp_profile, ma.EPSILON) : min(1);
@@ -858,15 +867,15 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 //
 // Where:
 //
-// * `LD` is the lookahead delay in seconds, known at compile-time.
-// * `ceiling` is the linear amplitude output limit.
-// * `attack` is the attack time in seconds.
-// * `hold` is the hold time in seconds.
-// * `release` is the release time in seconds.
+// * `LD` is the lookahead delay in seconds, known at compile-time
+// * `ceiling` is the linear amplitude output limit
+// * `attack` is the attack time in seconds
+// * `hold` is the hold time in seconds
+// * `release` is the release time in seconds
 //
 // #### Reference:
 //
-// <http://iem.at/~zmoelnig/publications/limiter/>.
+// <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_mono author "Dario Sanfilippo";
 declare limiter_lad_mono copyright "Copyright (C) 2020 Dario Sanfilippo
@@ -886,15 +895,15 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 //
 // Where:
 //
-// * `LD` is the lookahead delay in seconds, known at compile-time.
-// * `ceiling` is the linear amplitude output limit.
-// * `attack` is the attack time in seconds.
-// * `hold` is the hold time in seconds.
-// * `release` is the release time in seconds.
+// * `LD` is the lookahead delay in seconds, known at compile-time
+// * `ceiling` is the linear amplitude output limit
+// * `attack` is the attack time in seconds
+// * `hold` is the hold time in seconds
+// * `release` is the release time in seconds
 //
 // #### Reference:
 //
-// <http://iem.at/~zmoelnig/publications/limiter/>.
+// <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_stereo author "Dario Sanfilippo";
 declare limiter_lad_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
@@ -909,21 +918,20 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 // #### Usage
 //
 // ```
-// si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : 
-//    si.bus(4)
+// si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : si.bus(4)
 // ```
 //
 // Where:
 //
-// * `LD` is the lookahead delay in seconds, known at compile-time.
-// * `ceiling` is the linear amplitude output limit.
-// * `attack` is the attack time in seconds.
-// * `hold` is the hold time in seconds.
-// * `release` is the release time in seconds.
+// * `LD` is the lookahead delay in seconds, known at compile-time
+// * `ceiling` is the linear amplitude output limit
+// * `attack` is the attack time in seconds
+// * `hold` is the hold time in seconds
+// * `release` is the release time in seconds
 //
 // #### Reference:
 //
-// <http://iem.at/~zmoelnig/publications/limiter/>.
+// <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_quad author "Dario Sanfilippo";
 declare limiter_lad_quad copyright "Copyright (C) 2020 Dario Sanfilippo
@@ -934,7 +942,7 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 //-------------`(co.)limiter_lad_bw`-----------------------------------------
 //
 // Specialised case of limiter_lad_N and ready-to-use unit-amplitude mono 
-// limiting function. This implementation, in particular, uses 2pi*tau
+// limiting function. This implementation, in particular, uses 2PI*tau
 // time constant filters for attack and release smoothing with
 // synchronised input and gain signals. 
 //
@@ -951,13 +959,13 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 //
 // #### Reference:
 //
-// <http://iem.at/~zmoelnig/publications/limiter/>.
+// <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_bw author "Dario Sanfilippo";
 declare limiter_lad_bw copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_lad_bw license "GPLv3 license";
-limiter_lad_bw = limiter_lad_mono(.01, 1, .01 / twopi, .1, 1 / twopi)
+limiter_lad_bw = limiter_lad_mono(.01, 1, .01/twopi, .1, 1/twopi)
 with {
     twopi = 2 * ma.PI;
 };
