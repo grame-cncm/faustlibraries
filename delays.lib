@@ -384,3 +384,20 @@ fdelay5s(d) = fdelay(262144,d);
 fdelay10s(d) = fdelay(524288,d);
 fdelay21s(d) = fdelay(1048576,d);
 fdelay43s(d) = fdelay(2097152,d);
+
+
+//------------------`(de.)odelay[n]`----------------------------
+// Documentation de odelay 
+//------------------------------------------------------------
+
+odelay(nsamp, nmax, freq) = thisdoubledelay
+	with {
+			pdPhasor(f) = os.phasor(1, f);
+			env1 = freq : pdPhasor : *(ma.PI) : sin : *(0.5) : +(0.5);
+			env1c = 1 - env1;
+			th1 = (env1 > 0.001) * (env1@1 <= 0.001); //env1 threshold crossing
+			th2 = (env1c > 0.001) * (env1c@1 <= 0.001); //env1c threshold crossing
+			nsamp1 = nsamp : ba.sAndH(th1);
+			nsamp2 = nsamp : ba.sAndH(th2);
+			thisdoubledelay =	_ <: (de.delay(nmax, nsamp1), de.delay(nmax,nsamp2)) : (*(env1), *(env1c)) : + ;
+		};
