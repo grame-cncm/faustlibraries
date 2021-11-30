@@ -79,7 +79,8 @@ In order to have a uniformized library system, we established the following conv
 * All the functions that we want to be "public" are documented.
 * We used the `faust2md` "standards" for each library: `//###` for main title (library name - equivalent to `#` in markdown), `//===` for section declarations (equivalent to `##` in markdown) and `//---` for function declarations (equivalent to `####` in markdown - see `basics.lib` for an example).
 * Sections in function documentation should be declared as `####` markdown title.
-* Each function documentation provides a "Usage" section (see `basics.lib`).
+* Each function documentation provides a "Usage" section (see `basics.lib`). 
+* The full documentation can be generated using the doc/Makefile script. Use `make help` to see all possible commands. If you plan to create a pull-request, *do not commit the full generated code* but only the modified .lib files.
 
 ### Library Import
 
