@@ -717,12 +717,12 @@ fmin = min
 <h3 id="mamodulo"><code>(ma.)modulo</code></h3>
 <p>Modulus operation.</p>
 <h4 id="usage_40">Usage</h4>
-<pre><code>modulo(x,N) : _
+<pre><code>modulo(x,y) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>x</code>: the numerator</li>
-<li><code>N</code>: the denominator</li>
+<li><code>y</code>: the denominator</li>
 </ul>
 <hr />
 <h3 id="maisnan"><code>(ma.)isnan</code></h3>
@@ -748,13 +748,13 @@ _ : isinf : _
 </ul>
 <hr />
 <h3 id="machebychev"><code>(ma.)chebychev</code></h3>
-<p>Chebychev transformation of order n.</p>
+<p>Chebychev transformation of order N.</p>
 <h4 id="usage_43">Usage</h4>
-<pre><code>_ : chebychev(n) : _
+<pre><code>_ : chebychev(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order of the polynomial</li>
+<li><code>N</code>: the order of the polynomial, a constant numerical expression</li>
 </ul>
 <h4 id="semantics">Semantics</h4>
 <pre><code>T[0](x) = 1,
@@ -798,7 +798,7 @@ T[n](x) = 2x*T[n-1](x) - T[n-2](x)
 <p>The nextpow2(x) returns the lowest integer m such that
 2^m &gt;= x.</p>
 <h4 id="usage_47">Usage</h4>
-<pre><code>2^nextpow2(n)
+<pre><code>2^nextpow2(n) : _
 </code></pre>
 <p>Useful for allocating delay lines, e.g., </p>
 <pre><code>delay(2^nextpow2(maxDelayNeeded), currentDelay);

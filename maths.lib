@@ -589,6 +589,7 @@ np2 = -(1) <: >>(1)|_ <: >>(2)|_ <: >>(4)|_ <: >>(8)|_ <: >>(16)|_ : +(1);
 //------------------------------------------------------------------------------
 frac(n) = n - floor(n);
 decimal = frac;
+
 // NOTE: decimal does the same thing as frac but using floor instead. JOS uses frac a lot
 // in filters.lib so we decided to keep that one... decimal is declared though for
 // backward compatibility.
@@ -601,15 +602,15 @@ decimal = frac;
 // #### Usage
 //
 // ```
-// modulo(x,N) : _
+// modulo(x,y) : _
 // ```
 //
 // Where:
 //
 // * `x`: the numerator
-// * `N`: the denominator
+// * `y`: the denominator
 //------------------------------------------------------------------------------
-modulo(x,N) = (x % N + N) % N;
+modulo(x,y) = (x % y + y) % y;
 
 
 //---------------`(ma.)isnan`----------------
@@ -649,17 +650,17 @@ nextafter = ffunction(float nextafter(float, float),<math.h>,"");
 
 
 //---------------------------`(ma.)chebychev`-------------------------------
-// Chebychev transformation of order n.
+// Chebychev transformation of order N.
 //
 // #### Usage
 //
 // ```
-// _ : chebychev(n) : _
+// _ : chebychev(N) : _
 // ```
 //
 // Where:
 //
-// * `n`: the order of the polynomial
+// * `N`: the order of the polynomial, a constant numerical expression
 //
 // #### Semantics
 //
@@ -735,7 +736,7 @@ signum(x) = (x>0)-(x<0);
 // #### Usage
 //
 // ```
-// 2^nextpow2(n)
+// 2^nextpow2(n) : _
 // ```
 // Useful for allocating delay lines, e.g., 
 // ```
