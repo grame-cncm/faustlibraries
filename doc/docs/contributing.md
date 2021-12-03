@@ -162,5 +162,6 @@ For GRAME maintainers:
 - update the library list in this [fausteditor](https://github.com/grame-cncm/fausteditor/blob/master/scripts/faustlive.js) page as well as the [snippets](https://github.com/grame-cncm/fausteditor/blob/master/codemirror/mode/faust/faustsnippets.js) (using the `faust2atomsnippets` tool).
 - update the library list in this [fausteide](https://github.com/grame-cncm/faustide/blob/master/src/documentation.ts) page
 - update the library list in the [faustgen~](https://github.com/grame-cncm/faust/blob/master-dev/embedded/faustgen/src/faustgen%7E.cpp) code
+- update the [Faust Syntax Highlighting Files](https://github.com/grame-cncm/faust/tree/master-dev/syntax-highlighting)
 - make an update PR for [vscode-faust](https://github.com/hellbent/vscode-faust) project
 
