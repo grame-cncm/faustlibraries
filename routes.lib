@@ -214,3 +214,50 @@ hadamard(n) = butterfly(n) : (hadamard(n/2) , hadamard(n/2));
 // * `q`: the feedback arbitrary processor
 //----------------------------------------
 recursivize(p,q) = (_,_,_,_ :> sp.stereoize(p)) ~ sp.stereoize(q);
+
+
+//--------------------`(ro.)bubbleSort`-----------------------------------------
+//
+// Sort a set of N parallel signals in ascending order on-the-fly through
+// the Bubble Sort algorithm.
+//
+// Mechanism: having a set of N parallel signals indexed from 0 to N - 1,
+// compare the first pair of signals and swap them if sig[0] > sig[1];
+// repeate the pair comparison for the signals sig[1] and sig[2], then again
+// and again until reaching the signals sig[N - 2] and sig[N - 1]; by the end,
+// the largest element in the set will be placed last; repeate the process for
+// the remaining N - 1 signals until there is a single pair left.
+//
+// Note that this implementation will always perform the worst-case
+// computation, O(n^2).
+//
+// Even though the Bubble Sort algorithm is one of the least efficient ones,
+// it is a useful example of how automatic sorting can be implemented at the
+// signal level.
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : ro.bubbleSort(N) : si.bus(N)
+//
+// ```
+//
+// Where:
+//
+// * `N`: the number of signals to be sorted; it must be an int >= 0
+//
+// #### Reference: https://en.wikipedia.org/wiki/Bubble_sort
+//------------------------------------------------------------------------------
+declare bubbleSort author "Dario Sanfilippo";
+declare bubbleSort copyright "Copyright (C) 2021 Dario Sanfilippo
+    <sanfilippo.dario@gmail.com>";
+declare bubbleSort license "MIT License";
+bubbleSort(0) = 0 : !;
+bubbleSort(1) = _;
+bubbleSort(N) = seq(i, N - 1, pairSortN(N - i) , bus(i))
+    with {
+        bus(0) = 0 : !;
+        bus(N) = si.bus(N);
+        pairSort = bus(2) <: select2(>) , select2(<);
+        pairSortN(N) = seq(i, N - 1, bus(i) , pairSort , bus(N - i - 2));
+    };
