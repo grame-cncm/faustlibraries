@@ -45,7 +45,7 @@ declare version "0.3";
 //==============================Auxiliary Functions=======================================
 //========================================================================================
 
-//-------`(aa.)clip`----------
+//-------`(aa.)clip`-----------
 // Clipping function.
 //-----------------------------
 clip(l, h, x) = max(l, min(h, x));
@@ -57,13 +57,13 @@ clip(l, h, x) = max(l, min(h, x));
 Rsqrt(x) = sqrt(max(0.0, x));
 
 
-//-------`(aa.)Rlog`----------
+//-------`(aa.)Rlog`-----------
 // Real-valued log().
 //-----------------------------
 Rlog(x) = log(max(ma.EPSILON, x));
 
 
-//-------`(aa.)Rtan`----------
+//-------`(aa.)Rtan`-----------
 // Real-valued tan().
 //-----------------------------
 Rtan(x) = tan(clip(-ma.MAX, ma.MAX, x));
@@ -83,7 +83,7 @@ Rasin(x) = asin(clip(-1.0, 1.0, x));
 
 //-------`(aa.)Racosh`----------
 // Real-valued acosh()
-//-----------------------------
+//------------------------------
 Racosh(x) = ma.acosh(clip(1.0, ma.MAX, x));
 
 
@@ -93,7 +93,7 @@ Racosh(x) = ma.acosh(clip(1.0, ma.MAX, x));
 Rcosh(x) = min(ma.MAX, ma.cosh(x));
 
 
-//-------`(aa.)Rsinh`----------
+//-------`(aa.)Rsinh`-----------
 // Real-valued sinh().
 //------------------------------
 Rsinh(x) = clip(-ma.MAX, ma.MAX, ma.sinh(x));
@@ -176,7 +176,7 @@ ADAA2(EPS, f, F1, F2, x) = T1 + T2
 // ```
 // _ : aa.hardclip : _
 // ```
-
+//---------------------------------------------
 declare hardclip author "Dario Sanfilippo";
 declare hardclip copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -201,7 +201,7 @@ hardclip(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.hardclip2 : _
 // ```
-
+//---------------------------------------------
 declare hardclip2 author "Dario Sanfilippo";
 declare hardclip2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -231,7 +231,7 @@ hardclip2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.cubic1 : _
 // ```
-
+//-------------------------------------------
 declare cubic1 author "Dario Sanfilippo";
 declare cubic1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -260,7 +260,7 @@ cubic1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.parabolic : _
 // ```
-
+//--------------------------------------------
 declare parabolic author "Dario Sanfilippo";
 declare parabolic copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -288,7 +288,7 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.parabolic : _
 // ```
-
+//---------------------------------------------
 declare parabolic2 author "Dario Sanfilippo";
 declare parabolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -320,6 +320,7 @@ parabolic2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.hyperbolic : _
 // ```
+//---------------------------------------------
 declare hyperbolic author "Dario Sanfilippo";
 declare hyperbolic copyright "Copyright (C) 2021 Dario Sanfilippo
      <sanfilippo.dario@gmail.com>";
@@ -342,6 +343,7 @@ hyperbolic(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.hyperbolic2 : _
 // ```
+//----------------------------------------------
 declare hyperbolic2 author "Dario Sanfilippo";
 declare hyperbolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
      <sanfilippo.dario@gmail.com>";
@@ -366,6 +368,7 @@ hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.sinatan : _
 // ```
+//----------------------------------------------
 declare sinarctan author "Dario Sanfilippo";
 declare sinarctan copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -391,6 +394,7 @@ sinarctan(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.sinarctan2 : _
 // ```
+//----------------------------------------------
 declare sinarctan2 author "Dario Sanfilippo";
 declare sinarctan2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -417,6 +421,7 @@ sinarctan2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.tanh1 : _
 // ```
+//----------------------------------------------
 declare tanh1 author "Dario Sanfilippo";
 declare tanh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -439,6 +444,7 @@ tanh1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.arctan : _
 // ```
+//-------------------------------------------
 declare arctan author "Dario Sanfilippo";
 declare arctan copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -461,6 +467,7 @@ arctan(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.arctan2 : _
 // ```
+//-------------------------------------------
 declare arctan2 author "Dario Sanfilippo";
 declare arctan2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -484,6 +491,7 @@ arctan2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.asinh1 : _
 // ```
+//-------------------------------------------
 declare asinh1 author "Dario Sanfilippo";
 declare asinh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -496,7 +504,6 @@ asinh1(x) = ADAA1(EPS, f, F1, x)
                with {
                    const = 1.0; // for F1(0) = 0 to minimise precision loss
                };
-
       };
 
 
@@ -510,6 +517,7 @@ asinh1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.asinh2 : _
 // ```
+//-------------------------------------------
 declare asinh2 author "Dario Sanfilippo";
 declare asinh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -524,7 +532,6 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
                };
            F2(x_F2) = .25 * (2.0 * x_F2 ^ 2.0 * f(x_F2) + f(x_F2) - 
                sqrt(x_F2 ^ 2.0 + 1.0) * x_F2);
-
       };
 
 
@@ -543,6 +550,7 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.cosine1 : _
 // ```
+//-------------------------------------------
 declare cosine1 author "Dario Sanfilippo";
 declare cosine1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -565,6 +573,7 @@ cosine1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.cosine2 : _
 // ```
+//-------------------------------------------
 declare cosine2 author "Dario Sanfilippo";
 declare cosine2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -578,7 +587,6 @@ cosine2(x) = ADAA2(EPS, f, F1, F2, x)
       };
 
 
-
 //-------`(aa.)arccos`---------------------
 //
 // First-order ADAA acos().
@@ -590,6 +598,7 @@ cosine2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.arccos : _
 // ```
+//------------------------------------------
 declare arccos author "Dario Sanfilippo";
 declare arccos copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -619,6 +628,7 @@ arccos(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.arccos2 : _
 // ```
+//--------------------------------------------
 declare arccos2 author "Dario Sanfilippo";
 declare arccos2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -646,6 +656,7 @@ arccos2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.acosh1 : _
 // ```
+//------------------------------------------
 declare acosh1 author "Dario Sanfilippo";
 declare acosh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -671,6 +682,7 @@ acosh1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.acosh2 : _
 // ```
+//-------------------------------------------
 declare acosh2 author "Dario Sanfilippo";
 declare acosh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -696,6 +708,7 @@ acosh2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.sine : _
 // ```
+//----------------------------------------
 declare sine author "Dario Sanfilippo";
 declare sine copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -718,6 +731,7 @@ sine(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.sine2 : _
 // ```
+//----------------------------------------
 declare sine2 author "Dario Sanfilippo";
 declare sine2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -742,6 +756,7 @@ sine2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.arcsin : _
 // ```
+//------------------------------------------
 declare arcsin author "Dario Sanfilippo";
 declare arcsin copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -771,6 +786,7 @@ arcsin(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.arcsin2 : _
 // ```
+//------------------------------------------
 declare arcsin2 author "Dario Sanfilippo";
 declare arcsin2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -798,6 +814,7 @@ arcsin2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // _ : aa.tangent : _
 // ```
+//------------------------------------------
 declare tangent author "Dario Sanfilippo";
 declare tangent copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -820,6 +837,7 @@ tangent(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.atanh1 : _
 // ```
+//------------------------------------------
 declare atanh1 author "Dario Sanfilippo";
 declare atanh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -842,6 +860,7 @@ atanh1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // _ : aa.atanh2 : _
 // ```
+//------------------------------------------
 declare atanh2 author "Dario Sanfilippo";
 declare atanh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
