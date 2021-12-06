@@ -261,6 +261,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#robubblesort" class="nav-link">(ro.)bubbleSort</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
               </ul>
@@ -279,15 +283,15 @@
 <h2 id="functions-reference">Functions Reference</h2>
 <hr />
 <h3 id="rocross"><code>(ro.)cross</code></h3>
-<p>Cross n signals: <code>(x1,x2,..,xn) -&gt; (xn,..,x2,x1)</code>.
+<p>Cross N signals: <code>(x1,x2,..,xn) -&gt; (xn,..,x2,x1)</code>.
 <code>cross</code> is a standard Faust function.</p>
 <h4 id="usage">Usage</h4>
-<pre><code>cross(n)
+<pre><code>cross(N)
 _,_,_ : cross(3) : _,_,_
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: number of signals (int, must be known at compile time)</li>
+<li><code>N</code>: number of signals (int, as a constant numerical expression)</li>
 </ul>
 <h4 id="note">Note</h4>
 <p>Special case: <code>cross2</code>:</p>
@@ -295,83 +299,81 @@ _,_,_ : cross(3) : _,_,_
 </code></pre>
 <hr />
 <h3 id="rocrossnn"><code>(ro.)crossnn</code></h3>
-<p>Cross two <code>bus(n)</code>s.</p>
+<p>Cross two <code>bus(N)</code>s.</p>
 <h4 id="usage_1">Usage</h4>
-<pre><code>(si.bus(2*n)) : crossnn(n) : (si.bus(2*n))
+<pre><code>(si.bus(2*N)) : crossnn(N) : (si.bus(2*N))
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of signals in the <code>bus</code></li>
+<li><code>N</code>: the number of signals in the <code>bus</code> (int, as a constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="rocrossn1"><code>(ro.)crossn1</code></h3>
-<p>Cross bus(n) and bus(1).</p>
+<p>Cross <code>bus(N)</code> and <code>bus(1)</code>.</p>
 <h4 id="usage_2">Usage</h4>
-<pre><code>(si.bus(n),_) : crossn1(n) : (_,si.bus(n))
+<pre><code>(si.bus(N),_) : crossn1(N) : (_,si.bus(N))
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of signals in the first <code>bus</code></li>
+<li><code>N</code>: the number of signals in the first <code>bus</code> (int, as a constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="rocross1n"><code>(ro.)cross1n</code></h3>
-<p>Cross bus(1) and bus(n).</p>
+<p>Cross <code>bus(1)</code> and <code>bus(N)</code>.</p>
 <h4 id="usage_3">Usage</h4>
-<pre><code>(_,si.bus(n)) : crossn1(n) : (si.bus(n),_)
+<pre><code>(_,si.bus(N)) : crossn1(N) : (si.bus(N),_)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of signals in the second <code>bus</code></li>
+<li><code>N</code>: the number of signals in the second <code>bus</code> (int, as a constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="rocrossnm"><code>(ro.)crossNM</code></h3>
-<p>Cross bus(n) and bus(m).</p>
+<p>Cross <code>bus(N)</code> and <code>bus(M)</code>.</p>
 <h4 id="usage_4">Usage</h4>
-<pre><code>(si.bus(n),si.bus(m)) : crossNM(n,m) : (si.bus(m),si.bus(n))
+<pre><code>(si.bus(N),si.bus(M)) : crossNM(N,M) : (si.bus(M),si.bus(N))
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the number of signals in the first <code>bus</code></li>
-<li><code>m</code>: the number of signals in the second <code>bus</code></li>
+<li><code>N</code>: the number of signals in the first <code>bus</code> (int, as a constant numerical expression)</li>
+<li><code>M</code>: the number of signals in the second <code>bus</code> (int, as a constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="rointerleave"><code>(ro.)interleave</code></h3>
-<p>Interleave row<em>col cables from column order to row order.
-input : x(0), x(1), x(2) ..., x(row</em>col-1)
-output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1<em>row), x(1+2</em>row), ...</p>
+<p>Interleave R x C cables from column order to row order.
+input : x(0), x(1), x(2) ..., x(row<em>col-1)
+output: x(0+0</em>row), x(0+1<em>row), x(0+2</em>row), ..., x(1+0<em>row), x(1+1</em>row), x(1+2*row), ...</p>
 <h4 id="usage_5">Usage</h4>
-<pre><code>_,_,_,_,_,_ : interleave(row,column) : _,_,_,_,_,_
+<pre><code>si.bus(R*C) : interleave(R,C) : si.bus(R*C)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>row</code>: the number of row (int, known at compile time)</li>
-<li><code>column</code>: the number of column (int, known at compile time)</li>
+<li><code>R</code>: the number of row (int, as a constant numerical expression)</li>
+<li><code>C</code>: the number of column (int, as a constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="robutterfly"><code>(ro.)butterfly</code></h3>
 <p>Addition (first half) then substraction (second half) of interleaved signals.</p>
 <h4 id="usage_6">Usage</h4>
-<pre><code>_,_,_,_ : butterfly(n) : _,_,_,_
+<pre><code>si.bus(N) : butterfly(N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: size of the butterfly (n is int, even and known at compile time)</li>
+<li><code>N</code>: size of the butterfly (N is int, even and as a constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="rohadamard"><code>(ro.)hadamard</code></h3>
-<p>Hadamard matrix function of size <code>n = 2^k</code>.</p>
+<p>Hadamard matrix function of size <code>N = 2^k</code>.</p>
 <h4 id="usage_7">Usage</h4>
-<pre><code>_,_,_,_ : hadamard(n) : _,_,_,_
+<pre><code>si.bus(N) : hadamard(N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: <code>2^k</code>, size of the matrix (int, must be known at compile time)</li>
+<li><code>N</code>: <code>2^k</code>, size of the matrix (int, as a constant numerical expression)</li>
 </ul>
-<h4 id="note_1">Note:</h4>
-<p>Implementation contributed by Remy Muller.</p>
 <hr />
 <h3 id="rorecursivize"><code>(ro.)recursivize</code></h3>
-<p>Create a recursion from two arbitrary processors p and q.</p>
+<p>Create a recursion from two arbitrary processors <code>p</code> and <code>q</code>.</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>_,_ : recursivize(p,q) : _,_
 
@@ -380,6 +382,33 @@ output: x(0+0<em>row), x(0+1</em>row), x(0+2<em>row), ..., x(1+0</em>row), x(1+1
 <ul>
 <li><code>p</code>: the forward arbitrary processor</li>
 <li><code>q</code>: the feedback arbitrary processor</li>
+</ul>
+<hr />
+<h3 id="robubblesort"><code>(ro.)bubbleSort</code></h3>
+<p>Sort a set of N parallel signals in ascending order on-the-fly through
+the Bubble Sort algorithm.</p>
+<p>Mechanism: having a set of N parallel signals indexed from 0 to N - 1,
+compare the first pair of signals and swap them if sig[0] &gt; sig[1];
+repeate the pair comparison for the signals sig[1] and sig[2], then again
+and again until reaching the signals sig[N - 2] and sig[N - 1]; by the end,
+the largest element in the set will be placed last; repeate the process for
+the remaining N - 1 signals until there is a single pair left.</p>
+<p>Note that this implementation will always perform the worst-case
+computation, O(n^2).</p>
+<p>Even though the Bubble Sort algorithm is one of the least efficient ones,
+it is a useful example of how automatic sorting can be implemented at the
+signal level.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>si.bus(N) : bubbleSort(N) : si.bus(N)
+
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of signals to be sorted (must be an int &gt;= 0, as a constant numerical expression)</li>
+</ul>
+<h4 id="reference">Reference</h4>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Bubble_sort">https://en.wikipedia.org/wiki/Bubble_sort</a></li>
 </ul></div>
             </div>
         </div>
