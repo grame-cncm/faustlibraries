@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "0.3";
+declare version "0.4";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -321,6 +321,26 @@ FAUST library file, GRAME section 2
 //==============================Counters and Time/Tempo Tools=============================
 //========================================================================================
 
+
+//----------------------------`(ba.)counter`------------------------------
+// Starts counting 0, 1, 2, 3..., and raise the current integer value 
+// at each upfront of the trigger. 
+//
+// #### Usage
+//
+// ```
+// counter(trig) : _
+// ```
+//
+// Where:
+//
+// * `trig`: the trigger signal, each upfront will move the counter to the next integer
+//-----------------------------------------------------------------------------
+declare counter author "Stephane Letz";
+
+counter(trig) = upfront(trig) : + ~ _ with { upfront(x) = x > x'; };
+
+
 //----------------------------`(ba.)countdown`------------------------------
 // Starts counting down from n included to 0. While trig is 1 the output is n.
 // The countdown starts with the transition of trig from 1 to 0. At the end
@@ -373,7 +393,8 @@ countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~_;
 // sweep(period,run) : _
 // ```
 //-----------------------------------------------------------------
-// Author: Jonatan Liljedahl, markdown by JOS & RM
+declare sweep author "Jonatan Liljedahl";
+
 sweep = %(int(*:max(1)))~+(1);
 
 
@@ -513,7 +534,8 @@ pulsen(n,p) = period(p)<n;
 //
 // * `n`: the number of cycles/output signals
 //---------------------------------------------------------
-// Author: Mike Olsen
+declare cycle author "Mike Olsen";
+
 cycle(n) = _ <: par(i,n,resetCtr(n,(i+1)));
 
 
@@ -548,7 +570,8 @@ beat(t) = pulse(tempo(t));
 //
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
-//TODO: author "Vince"
+declare pulse_countup author "Vince";
+
 pulse_countup(trig) = + ~ _ * trig;
 
 
@@ -566,7 +589,8 @@ pulse_countup(trig) = + ~ _ * trig;
 //
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
-//TODO: author "Vince"
+declare pulse_countdown author "Vince";
+
 pulse_countdown(trig) = - ~ _ * trig;
 
 
@@ -586,30 +610,12 @@ pulse_countdown(trig) = - ~ _ * trig;
 // * `n`: the highest number of the countup (included) before reset to 0
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
-//TODO: author "Vince"
+declare pulse_countup_loop author "Vince";
+
 pulse_countup_loop(n, trig) = + ~ cond(n)*trig
 with {
-  	cond(n) = _ <: _ * (_ <= n);
+  	cond(n, x) = x * (x <= n);
 };
-
-
-//-----------------------`(ba.)resetCtr`------------------------
-// Function that lets through the mth impulse out of
-// each consecutive group of `n` impulses.
-//
-// #### Usage
-//
-// ```
-// _ : resetCtr(n,m) : _
-// ```
-//
-// Where:
-//
-// * `n`: the total number of impulses being split
-// * `m`: index of impulse to allow to be output
-//---------------------------------------------------------
-// Author: Mike Olsen
-resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
 
 
 //----------------------------`(ba.)pulse_countdown_loop`----------------------------
@@ -628,11 +634,32 @@ resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
 // * `n`: the highest number of the countup (included) before reset to 0
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 //------------------------------------------------------------------------------
-//TODO: author "Vince:
+declare pulse_countdown_loop author "Vince";
+
 pulse_countdown_loop(n, trig) = - ~ cond(n)*trig
 with {
-  	cond(n) = _ <: _ * (_ >= n);
+  	cond(n, x) = x * (x >= n);
 };
+
+
+//-----------------------`(ba.)resetCtr`------------------------
+// Function that lets through the mth impulse out of
+// each consecutive group of `n` impulses.
+//
+// #### Usage
+//
+// ```
+// _ : resetCtr(n,m) : _
+// ```
+//
+// Where:
+//
+// * `n`: the total number of impulses being split
+// * `m`: index of impulse to allow to be output
+//---------------------------------------------------------
+declare resetCtr author " Mike Olsen";
+
+resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
 
 
 //===============================Array Processing/Pattern Matching========================
@@ -933,7 +960,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : selectoutn(N, i) : _,_,...N
+// _ : selectoutn(N, i) : si.bus(N)
 // ```
 //
 // Where:
@@ -948,8 +975,9 @@ with {
 // sel = hslider("volume", 0, 0, 2, 1) : int;
 // ```
 //--------------------------------------------------------------------------
-// TODO: author "Vince"
-selectoutn(n, s) = _ <: par(i, n, *(s==i));
+declare selectoutn author "Vince";
+
+selectoutn(N, s) = _ <: par(i, N, *(s==i));
 
 
 //=====================================Other==============================================
@@ -961,14 +989,14 @@ selectoutn(n, s) = _ <: par(i, n, *(s==i));
 // #### Usage
 //
 // ```
-// _ : latch(clocksig) : _
+// _ : latch(trig) : _
 // ```
 //
 // Where:
 //
-// * `clocksig`: hold trigger (0 for hold, 1 for bypass)
+// * `trig`: hold trigger (0 for hold, 1 for bypass)
 //------------------------------------------------------------
-latch(c,x) = x * s : + ~ *(1-s) with { s = ((c'<=0)&(c>0)); };
+latch(trig, x) = x * s : + ~ *(1-s) with { s = trig > trig'; };
 
 
 //--------------------------`(ba.)sAndH`-------------------------------
@@ -978,15 +1006,16 @@ latch(c,x) = x * s : + ~ *(1-s) with { s = ((c'<=0)&(c>0)); };
 // #### Usage
 //
 // ```
-// _ : sAndH(t) : _
+// _ : sAndH(trig) : _
 // ```
 //
 // Where:
 //
-// * `t`: hold trigger (0 for hold, 1 for bypass)
+// * `trig`: hold trigger (0 for hold, 1 for bypass)
 //----------------------------------------------------------------
-// Author: RM
-sAndH(t) = select2(t,_,_)~_;
+declare sAndH author "Romain Michon";
+
+sAndH(trig) = select2(trig,_,_) ~ _;
 
 
 //--------------------------`(ba.)downSample`-------------------------------
@@ -1004,7 +1033,8 @@ sAndH(t) = select2(t,_,_)~_;
 //
 // * `freq`: new rate in Hz
 //----------------------------------------------------------------
-// Author: RM
+declare downSample author "Romain Michon";
+
 downSample(freq) = sAndH(hold)
 with {
   	hold = time%int(ma.SR/freq) == 0;
@@ -1026,8 +1056,9 @@ with {
 //	0 - Pass through. A single sample 0 trigger will work as a reset.
 //  1 - Track and hold max value.
 //----------------------------------------------------------------
-// TODO: author Jonatan Liljedahl, revised by RM
-peakhold = (*,_:max) ~ _;
+declare peakhold author "Jonatan Liljedahl, revised by Romain Michon";
+
+peakhold = (*,_ : max) ~ _;
 
 
 //------------------`(ba.)peakholder`---------------------------
@@ -1043,7 +1074,8 @@ peakhold = (*,_:max) ~ _;
 //
 // * `n`: number of samples
 //----------------------------------------------------------------
-// TODO: author Jonatan Liljedahl
+declare peakholder author "Jonatan Liljedahl";
+
 peakholder(n) = peakhold2 ~ reset : (!,_) with {
     reset = sweep(n) > 0;
     // first out is gate that is 1 while holding last peak
@@ -1155,7 +1187,8 @@ bpf = environment
 // * `index`: the index (float) to interpolate between the different values.
 // The range of `index` depends on the size of the list.
 //------------------------------------------------------------
-// Author: RM
+declare listInterp author "Romain Michon";
+
 listInterp(v) =
   	bpf.start(0,take(1,v)) :
   	seq(i,count(v)-2,bpf.point(i+1,take(i+2,v))) :
@@ -1178,8 +1211,9 @@ listInterp(v) =
 // * `bpc`: bypass switch (0/1)
 // * `e`: a mono effect
 //------------------------------------------------------------
-// Author: JOS
+declare bypass1 author "Julius Smith";
 // License: STK-4.3
+
 bypass1(bpc,e) = _ <: select2(bpc,(inswitch:e),_)
 with {
     inswitch = select2(bpc,_,0);
@@ -1202,8 +1236,9 @@ with {
 // * `bpc`: bypass switch (0/1)
 // * `e`: a stereo effect
 //------------------------------------------------------------
-// Author: JOS
+declare bypass2 author "Julius Smith";
 // License: STK-4.3
+
 bypass2(bpc,e) = _,_ <: ((inswitch:e),_,_) : select2stereo(bpc)
 with {
     inswitch = _,_ : (select2(bpc,_,0), select2(bpc,_,0)) : _,_;
@@ -1227,8 +1262,9 @@ with {
 // * `bpc`: bypass switch (0/1)
 // * `e`: a mono-to-stereo effect
 //------------------------------------------------------------
-// Author: JOS
+declare bypass1to2 author "Julius Smith";
 // License: STK-4.3
+
 bypass1to2(bpc,e) = _ <: ((inswitch:e),_,_) : select2stereo(bpc)
 with {
     inswitch = select2(bpc,_,0);
@@ -1287,7 +1323,8 @@ with {
 // ```
 //
 //------------------------------------------------------------------------------
-// TODO: author "Vince"
+declare toggle author "Vince";
+
 toggle = trig : loop
 with {
     trig(x) = (x-x') == 1;
@@ -1311,7 +1348,8 @@ with {
 // ```
 //
 //------------------------------------------------------------------------------
-// TODO: author "Vince"
+declare on_and_off author "Vince";
+
 on_and_off(a, b) = (a : trig) : loop(b)
 with {
     trig(x) = (x-x') == 1;
