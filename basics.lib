@@ -1115,7 +1115,7 @@ impulsify = _ <: _,mem : - <: >(0)*_;
 //-----------------------------------------------------------------------
 automat(t, size, init, input) = rwtable(size+1, init, windex, input, rindex)
 with {
-	clock 	= beat(bps);
+	clock 	= beat(t);
 	rindex 	= int(clock) : (+ : %(size)) ~ _;		// each clock read the next entry of the table
 	windex 	= if(timeToRenew, rindex, size);		// we ignore input unless it is time to renew
 	timeToRenew 	= int(clock) & (inputHasMoved | (input <= init));
