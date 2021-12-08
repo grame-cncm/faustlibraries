@@ -726,8 +726,8 @@ saw2f4 = saw2 : cf4 with {
 //=========Bandlimited Pulse, Square, and Impulse Trains============
 // Bandlimited Pulse, Square and Impulse Trains.
 //
-// `pulsetrainN`, `pulsetrain`, `squareN`, `square`, `imptrain`, `imptrainN`,
-// `triangle`, `triangleN`
+// `pulsetrainN`, `pulsetrain`, `squareN`, `square`, `imptrainN`, `imptrain`,
+// `triangleN`, `triangle`
 //
 // All are zero-mean and meant to oscillate in the audio frequency range.
 // Use simpler sample-rounded lf_* versions above for LFOs.
@@ -737,10 +737,13 @@ saw2f4 = saw2 : cf4 with {
 // ```
 // pulsetrainN(N,freq,duty) : _
 // pulsetrain(freq, duty) : _ // = pulsetrainN(2)
-// squareN(N, freq) : _
+//
+// squareN(N,freq) : _
 // square : _ // = squareN(2)
+//
 // imptrainN(N,freq) : _
 // imptrain : _ // = imptrainN(2)
+//
 // triangleN(N,freq) : _
 // triangle : _ // = triangleN(2)
 // ```
@@ -751,8 +754,35 @@ saw2f4 = saw2 : cf4 with {
 // * `freq`: frequency in Hz
 //====================================================================
 
+
+//------------------`(os.)impulse`--------------------------------
+// One-time impulse generated when the Faust process is started.
+// `impulse` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// impulse : _
+// ```
+//--------------------------------------------------------
+impulse = 1-1';
+
+
 //------------------`(os.)pulsetrainN`--------------------------------
-// TODO: MarkDown doc in comments
+// Bandlimited pulse train oscillator. 
+//
+// #### Usage
+//
+// ```
+// pulsetrainN(N,freq,duty) : _
+// ```
+//
+// Where:
+//
+// * `N`: order, as a constant numerical expression
+// * `freq`: frequency in Hz
+// * `duty`: duty cycle between 0 and 1
+
 //--------------------------------------------------------
 pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
  // non-interpolated-delay version: diffdel(x,del) = x - x@int(del+0.5);
@@ -770,6 +800,7 @@ pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
  del = max(0,min(delmax,ddel));
 };
 
+
 //------------------`(os.)pulsetrain`--------------------------------
 // Bandlimited pulse train oscillator. Based on `pulsetrainN(2)`.
 // `pulsetrain` is a standard Faust function.
@@ -777,7 +808,7 @@ pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
 // #### Usage
 //
 // ```
-// pulsetrain(freq, duty) : _
+// pulsetrain(freq,duty) : _
 // ```
 //
 // Where:
@@ -787,10 +818,23 @@ pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
 //--------------------------------------------------------
 pulsetrain = pulsetrainN(2);
 
+
 //------------------`(os.)squareN`--------------------------------
-// TODO: MarkDown doc in comments
+// Bandlimited square wave oscillator. 
+//
+// #### Usage
+//
+// ```
+// squareN(N,freq) : _
+// ```
+//
+// Where:
+//
+// * `N`: order, as a constant numerical expression
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 squareN(N,freq) = pulsetrainN(N,freq,0.5);
+
 
 //------------------`(os.)square`--------------------------------
 // Bandlimited square wave oscillator. Based on `squareN(2)`.
@@ -808,20 +852,20 @@ squareN(N,freq) = pulsetrainN(N,freq,0.5);
 //--------------------------------------------------------
 square = squareN(2);
 
-//------------------`(os.)impulse`--------------------------------
-// One-time impulse generated when the Faust process is started.
-// `impulse` is a standard Faust function.
+
+//------------------`(os.)imptrainN`--------------------------------
+// Bandlimited impulse train generator. 
 //
 // #### Usage
 //
 // ```
-// impulse : _
+// imptrainN(N,freq) : _
 // ```
-//--------------------------------------------------------
-impulse = 1-1';
-
-//------------------`(os.)imptrainN`--------------------------------
-// TODO: MarkDown doc in comments
+//
+// Where:
+//
+// * `N`: order, as a constant numerical expression
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq));
 
@@ -842,13 +886,26 @@ imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq));
 //--------------------------------------------------------
 imptrain = imptrainN(2); // default based on saw2
 
+
 //------------------`(os.)triangleN`--------------------------------
-// TODO: MarkDown doc in comments
+// Bandlimited triangle wave oscillator. 
+//
+// #### Usage
+//
+// ```
+// triangleN(N,freq) : _
+// ```
+//
+// Where:
+//
+// * `N`: order, as a constant numerical expression
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 triangleN(N,freq) = squareN(N,freq) : fi.pole(p) : *(gain) with {
   gain = 4.0*freq/ma.SR; // for aproximate unit peak amplitude
   p = 0.999;
 };
+
 
 //------------------`(os.)triangle`--------------------------------
 // Bandlimited triangle wave oscillator. Based on `triangleN(2)`.
@@ -866,13 +923,14 @@ triangleN(N,freq) = squareN(N,freq) : fi.pole(p) : *(gain) with {
 //--------------------------------------------------------
 triangle = triangleN(2); // default based on saw2
 
+
 //===============================Filter-Based Oscillators=================================
-// Filter-Based Oscillators
+// Filter-Based Oscillators.
 //
 // #### Usage
 //
 // ```
-// osc[b|r|rs|rc|s|w](f), where f = frequency in Hz.
+// osc[b|rq|rs|rc|s](freq), where freq = frequency in Hz.
 // ```
 //
 // #### References

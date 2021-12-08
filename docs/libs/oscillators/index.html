@@ -369,6 +369,10 @@
             </li>
             <li class="nav-item" data-level="2"><a href="#bandlimited-pulse-square-and-impulse-trains" class="nav-link">Bandlimited Pulse, Square, and Impulse Trains</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#osimpulse" class="nav-link">(os.)impulse</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#ospulsetrainn" class="nav-link">(os.)pulsetrainN</a>
               <ul class="nav flex-column">
               </ul>
@@ -382,10 +386,6 @@
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#ossquare" class="nav-link">(os.)square</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#osimpulse" class="nav-link">(os.)impulse</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -910,17 +910,20 @@ saw2f4(freq) : _
 <p>TODO: MarkDown doc in comments</p>
 <h2 id="bandlimited-pulse-square-and-impulse-trains">Bandlimited Pulse, Square, and Impulse Trains</h2>
 <p>Bandlimited Pulse, Square and Impulse Trains.</p>
-<p><code>pulsetrainN</code>, <code>pulsetrain</code>, <code>squareN</code>, <code>square</code>, <code>imptrain</code>, <code>imptrainN</code>,
-<code>triangle</code>, <code>triangleN</code></p>
+<p><code>pulsetrainN</code>, <code>pulsetrain</code>, <code>squareN</code>, <code>square</code>, <code>imptrainN</code>, <code>imptrain</code>,
+<code>triangleN</code>, <code>triangle</code></p>
 <p>All are zero-mean and meant to oscillate in the audio frequency range.
 Use simpler sample-rounded lf_* versions above for LFOs.</p>
 <h4 id="usage_27">Usage</h4>
 <pre><code>pulsetrainN(N,freq,duty) : _
 pulsetrain(freq, duty) : _ // = pulsetrainN(2)
-squareN(N, freq) : _
+
+squareN(N,freq) : _
 square : _ // = squareN(2)
+
 imptrainN(N,freq) : _
 imptrain : _ // = imptrainN(2)
+
 triangleN(N,freq) : _
 triangle : _ // = triangleN(2)
 </code></pre>
@@ -930,14 +933,30 @@ triangle : _ // = triangleN(2)
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
 <hr />
+<h3 id="osimpulse"><code>(os.)impulse</code></h3>
+<p>One-time impulse generated when the Faust process is started.
+<code>impulse</code> is a standard Faust function.</p>
+<h4 id="usage_28">Usage</h4>
+<pre><code>impulse : _
+</code></pre>
+<hr />
 <h3 id="ospulsetrainn"><code>(os.)pulsetrainN</code></h3>
-<p>TODO: MarkDown doc in comments</p>
+<p>Bandlimited pulse train oscillator. </p>
+<h4 id="usage_29">Usage</h4>
+<pre><code>pulsetrainN(N,freq,duty) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: order, as a constant numerical expression</li>
+<li><code>freq</code>: frequency in Hz</li>
+<li><code>duty</code>: duty cycle between 0 and 1</li>
+</ul>
 <hr />
 <h3 id="ospulsetrain"><code>(os.)pulsetrain</code></h3>
 <p>Bandlimited pulse train oscillator. Based on <code>pulsetrainN(2)</code>.
 <code>pulsetrain</code> is a standard Faust function.</p>
-<h4 id="usage_28">Usage</h4>
-<pre><code>pulsetrain(freq, duty) : _
+<h4 id="usage_30">Usage</h4>
+<pre><code>pulsetrain(freq,duty) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -946,12 +965,20 @@ triangle : _ // = triangleN(2)
 </ul>
 <hr />
 <h3 id="ossquaren"><code>(os.)squareN</code></h3>
-<p>TODO: MarkDown doc in comments</p>
+<p>Bandlimited square wave oscillator. </p>
+<h4 id="usage_31">Usage</h4>
+<pre><code>squareN(N,freq) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: order, as a constant numerical expression</li>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
 <hr />
 <h3 id="ossquare"><code>(os.)square</code></h3>
 <p>Bandlimited square wave oscillator. Based on <code>squareN(2)</code>.
 <code>square</code> is a standard Faust function.</p>
-<h4 id="usage_29">Usage</h4>
+<h4 id="usage_32">Usage</h4>
 <pre><code>square(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -959,20 +986,21 @@ triangle : _ // = triangleN(2)
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
 <hr />
-<h3 id="osimpulse"><code>(os.)impulse</code></h3>
-<p>One-time impulse generated when the Faust process is started.
-<code>impulse</code> is a standard Faust function.</p>
-<h4 id="usage_30">Usage</h4>
-<pre><code>impulse : _
-</code></pre>
-<hr />
 <h3 id="osimptrainn"><code>(os.)imptrainN</code></h3>
-<p>TODO: MarkDown doc in comments</p>
+<p>Bandlimited impulse train generator. </p>
+<h4 id="usage_33">Usage</h4>
+<pre><code>imptrainN(N,freq) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: order, as a constant numerical expression</li>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
 <hr />
 <h3 id="osimptrain"><code>(os.)imptrain</code></h3>
 <p>Bandlimited impulse train generator. Based on <code>imptrainN(2)</code>.
 <code>imptrain</code> is a standard Faust function.</p>
-<h4 id="usage_31">Usage</h4>
+<h4 id="usage_34">Usage</h4>
 <pre><code>imptrain(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -981,12 +1009,20 @@ triangle : _ // = triangleN(2)
 </ul>
 <hr />
 <h3 id="ostrianglen"><code>(os.)triangleN</code></h3>
-<p>TODO: MarkDown doc in comments</p>
+<p>Bandlimited triangle wave oscillator. </p>
+<h4 id="usage_35">Usage</h4>
+<pre><code>triangleN(N,freq) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: order, as a constant numerical expression</li>
+<li><code>freq</code>: frequency in Hz</li>
+</ul>
 <hr />
 <h3 id="ostriangle"><code>(os.)triangle</code></h3>
 <p>Bandlimited triangle wave oscillator. Based on <code>triangleN(2)</code>.
 <code>triangle</code> is a standard Faust function.</p>
-<h4 id="usage_32">Usage</h4>
+<h4 id="usage_36">Usage</h4>
 <pre><code>triangle(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -994,9 +1030,9 @@ triangle : _ // = triangleN(2)
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
 <h2 id="filter-based-oscillators">Filter-Based Oscillators</h2>
-<p>Filter-Based Oscillators</p>
-<h4 id="usage_33">Usage</h4>
-<pre><code>osc[b|r|rs|rc|s|w](f), where f = frequency in Hz.
+<p>Filter-Based Oscillators.</p>
+<h4 id="usage_37">Usage</h4>
+<pre><code>osc[b|rq|rs|rc|s](freq), where freq = frequency in Hz.
 </code></pre>
 <h4 id="references_2">References</h4>
 <ul>
@@ -1006,7 +1042,7 @@ triangle : _ // = triangleN(2)
 <hr />
 <h3 id="ososcb"><code>(os.)oscb</code></h3>
 <p>Sinusoidal oscillator based on the biquad.</p>
-<h4 id="usage_34">Usage</h4>
+<h4 id="usage_38">Usage</h4>
 <pre><code>oscb(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1018,7 +1054,7 @@ triangle : _ // = triangleN(2)
 <p>Sinusoidal (sine and cosine) oscillator based on 2D vector rotation,
  = undamped "coupled-form" resonator
  = lossless 2nd-order normalized ladder filter.</p>
-<h4 id="usage_35">Usage</h4>
+<h4 id="usage_39">Usage</h4>
 <pre><code>oscrq(freq) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1034,7 +1070,7 @@ triangle : _ // = triangleN(2)
 <p>Sinusoidal (sine) oscillator based on 2D vector rotation,
  = undamped "coupled-form" resonator
  = lossless 2nd-order normalized ladder filter.</p>
-<h4 id="usage_36">Usage</h4>
+<h4 id="usage_40">Usage</h4>
 <pre><code>oscrs(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1050,7 +1086,7 @@ triangle : _ // = triangleN(2)
 <p>Sinusoidal (cosine) oscillator based on 2D vector rotation,
  = undamped "coupled-form" resonator
  = lossless 2nd-order normalized ladder filter.</p>
-<h4 id="usage_37">Usage</h4>
+<h4 id="usage_41">Usage</h4>
 <pre><code>oscrc(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1066,7 +1102,7 @@ triangle : _ // = triangleN(2)
 <p>Sinusoidal oscillator based on the state variable filter
 = undamped "modified-coupled-form" resonator
 = "magic circle" algorithm used in graphics.</p>
-<h4 id="usage_38">Usage</h4>
+<h4 id="usage_42">Usage</h4>
 <pre><code>oscs(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1076,7 +1112,7 @@ triangle : _ // = triangleN(2)
 <hr />
 <h3 id="osquadosc"><code>(os.)quadosc</code></h3>
 <p>Sinusoidal oscillator based on QuadOsc by Martin Vicanek.</p>
-<h4 id="usage_39">Usage</h4>
+<h4 id="usage_43">Usage</h4>
 <pre><code>quadosc(freq) : _
 </code></pre>
 <p>where</p>
@@ -1093,7 +1129,7 @@ triangle : _ // = triangleN(2)
 <h3 id="ososcwc"><code>(os.)oscwc</code></h3>
 <p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>. Unit-amplitude
 cosine oscillator.</p>
-<h4 id="usage_40">Usage</h4>
+<h4 id="usage_44">Usage</h4>
 <pre><code>oscwc(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1108,7 +1144,7 @@ cosine oscillator.</p>
 <h3 id="ososcws"><code>(os.)oscws</code></h3>
 <p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>. Unit-amplitude
 sine oscillator.</p>
-<h4 id="usage_41">Usage</h4>
+<h4 id="usage_45">Usage</h4>
 <pre><code>oscws(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1123,7 +1159,7 @@ sine oscillator.</p>
 <h3 id="ososcq"><code>(os.)oscq</code></h3>
 <p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>.
 Unit-amplitude cosine and sine (quadrature) oscillator.</p>
-<h4 id="usage_42">Usage</h4>
+<h4 id="usage_46">Usage</h4>
 <pre><code>oscq(freq) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1138,7 +1174,7 @@ Unit-amplitude cosine and sine (quadrature) oscillator.</p>
 <h3 id="ososcw"><code>(os.)oscw</code></h3>
 <p>Sinusoidal oscillator based on the waveguide resonator <code>wgr</code>.
 Unit-amplitude cosine oscillator (default).</p>
-<h4 id="usage_43">Usage</h4>
+<h4 id="usage_47">Usage</h4>
 <pre><code>oscw(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1164,7 +1200,7 @@ There are two versions of the "index oscillators":
 <h3 id="osczsaw"><code>(os.)CZsaw</code></h3>
 <p>Oscillator that mimics the Casio CZ saw oscillator.
 <code>CZsaw</code> is a standard Faust function.</p>
-<h4 id="usage_44">Usage</h4>
+<h4 id="usage_48">Usage</h4>
 <pre><code>CZsaw(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1177,7 +1213,7 @@ There are two versions of the "index oscillators":
 <p>Oscillator that mimics the Casio CZ saw oscillator,
 with it's phase aligned to <code>fund:sin</code>.
 <code>CZsawP</code> is a standard Faust function.</p>
-<h4 id="usage_45">Usage</h4>
+<h4 id="usage_49">Usage</h4>
 <pre><code>CZsawP(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1189,7 +1225,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="osczsquare"><code>(os.)CZsquare</code></h3>
 <p>Oscillator that mimics the Casio CZ square oscillator
 <code>CZsquare</code> is a standard Faust function.</p>
-<h4 id="usage_46">Usage</h4>
+<h4 id="usage_50">Usage</h4>
 <pre><code>CZsquare(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1202,7 +1238,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <p>Oscillator that mimics the Casio CZ square oscillator,
 with it's phase aligned to <code>fund:sin</code>.
 <code>CZsquareP</code> is a standard Faust function.</p>
-<h4 id="usage_47">Usage</h4>
+<h4 id="usage_51">Usage</h4>
 <pre><code>CZsquareP(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1214,7 +1250,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="osczpulse"><code>(os.)CZpulse</code></h3>
 <p>Oscillator that mimics the Casio CZ pulse oscillator.
 <code>CZpulse</code> is a standard Faust function.</p>
-<h4 id="usage_48">Usage</h4>
+<h4 id="usage_52">Usage</h4>
 <pre><code>CZpulse(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1227,7 +1263,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <p>Oscillator that mimics the Casio CZ pulse oscillator,
 with it's phase aligned to <code>fund:sin</code>.
 <code>CZpulseP</code> is a standard Faust function.</p>
-<h4 id="usage_49">Usage</h4>
+<h4 id="usage_53">Usage</h4>
 <pre><code>CZpulseP(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1239,7 +1275,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="osczsinepulse"><code>(os.)CZsinePulse</code></h3>
 <p>Oscillator that mimics the Casio CZ sine/pulse oscillator.
 <code>CZsinePulse</code> is a standard Faust function.</p>
-<h4 id="usage_50">Usage</h4>
+<h4 id="usage_54">Usage</h4>
 <pre><code>CZsinePulse(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1252,7 +1288,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <p>Oscillator that mimics the Casio CZ sine/pulse oscillator,
 with it's phase aligned to <code>fund:sin</code>.
 <code>CZsinePulseP</code> is a standard Faust function.</p>
-<h4 id="usage_51">Usage</h4>
+<h4 id="usage_55">Usage</h4>
 <pre><code>CZsinePulseP(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1264,7 +1300,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="osczhalfsine"><code>(os.)CZhalfSine</code></h3>
 <p>Oscillator that mimics the Casio CZ half sine oscillator.
 <code>CZhalfSine</code> is a standard Faust function.</p>
-<h4 id="usage_52">Usage</h4>
+<h4 id="usage_56">Usage</h4>
 <pre><code>CZhalfSine(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1277,7 +1313,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <p>Oscillator that mimics the Casio CZ half sine oscillator,
 with it's phase aligned to <code>fund:sin</code>.
 <code>CZhalfSineP</code> is a standard Faust function.</p>
-<h4 id="usage_53">Usage</h4>
+<h4 id="usage_57">Usage</h4>
 <pre><code>CZhalfSineP(fund,index) : _
 </code></pre>
 <p>Where:</p>
@@ -1289,7 +1325,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="osczressaw"><code>(os.)CZresSaw</code></h3>
 <p>Oscillator that mimics the Casio CZ resonant sawtooth oscillator.
 <code>CZresSaw</code> is a standard Faust function.</p>
-<h4 id="usage_54">Usage</h4>
+<h4 id="usage_58">Usage</h4>
 <pre><code>CZresSaw(fund,res) : _
 </code></pre>
 <p>Where:</p>
@@ -1301,7 +1337,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="osczrestriangle"><code>(os.)CZresTriangle</code></h3>
 <p>Oscillator that mimics the Casio CZ resonant triangle oscillator.
 <code>CZresTriangle</code> is a standard Faust function.</p>
-<h4 id="usage_55">Usage</h4>
+<h4 id="usage_59">Usage</h4>
 <pre><code>CZresTriangle(fund,res) : _
 </code></pre>
 <p>Where:</p>
@@ -1313,7 +1349,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <h3 id="osczrestrap"><code>(os.)CZresTrap</code></h3>
 <p>Oscillator that mimics the Casio CZ resonant trapeze oscillator
 <code>CZresTrap</code> is a standard Faust function.</p>
-<h4 id="usage_56">Usage</h4>
+<h4 id="usage_60">Usage</h4>
 <pre><code>CZresTrap(fund,res) : _
 </code></pre>
 <p>Where:</p>
@@ -1325,7 +1361,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <hr />
 <h3 id="ospolyblep"><code>(os.)polyblep</code></h3>
 <p>PolyBLEP residual function, used for smoothing steps in the audio signal.</p>
-<h4 id="usage_57">Usage</h4>
+<h4 id="usage_61">Usage</h4>
 <pre><code>polyblep(Q,phase) : _
 </code></pre>
 <p>Where:</p>
@@ -1336,7 +1372,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <hr />
 <h3 id="ospolyblep_saw"><code>(os.)polyblep_saw</code></h3>
 <p>Sawtooth oscillator with suppressed aliasing (using polyBLEP).</p>
-<h4 id="usage_58">Usage</h4>
+<h4 id="usage_62">Usage</h4>
 <pre><code>polyblep_saw(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1346,7 +1382,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <hr />
 <h3 id="ospolyblep_square"><code>(os.)polyblep_square</code></h3>
 <p>Square wave oscillator with suppressed aliasing (using polyBLEP).</p>
-<h4 id="usage_59">Usage</h4>
+<h4 id="usage_63">Usage</h4>
 <pre><code>polyblep_square(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1356,7 +1392,7 @@ with it's phase aligned to <code>fund:sin</code>.
 <hr />
 <h3 id="ospolyblep_triangle"><code>(os.)polyblep_triangle</code></h3>
 <p>Triangle wave oscillator with suppressed aliasing (using polyBLEP).</p>
-<h4 id="usage_60">Usage</h4>
+<h4 id="usage_64">Usage</h4>
 <pre><code>polyblep_triangle(freq) : _
 </code></pre>
 <p>Where:</p>
