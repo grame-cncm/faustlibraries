@@ -1067,15 +1067,21 @@ impulsify = _ <: _,mem : - <: >(0)*_;
 
 
 //-----------------------`(ba.)automat`------------------------------
-// Record and replay to the values the input signal in a loop.
+// Record and replay in a loop the successives values of the input signal.
 //
 // #### Usage
 //
 // ```
-// hslider(...) : automat(bps, size, init) : _
+// hslider(...) : automat(t, size, init) : _
 // ```
+//
+// Where:
+//
+// * `t`: tempo in BPM
+// * `size`: number of items in the loop
+// * `init`: init value in the loop
 //-----------------------------------------------------------------------
-automat(bps, size, init, input) = rwtable(size+1, init, windex, input, rindex)
+automat(t, size, init, input) = rwtable(size+1, init, windex, input, rindex)
 with {
 	clock 	= beat(bps);
 	rindex 	= int(clock) : (+ : %(size)) ~ _;		// each clock read the next entry of the table
