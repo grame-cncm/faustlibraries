@@ -225,19 +225,7 @@
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#functions-reference" class="nav-link">Functions Reference</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#ensmoothenvelope" class="nav-link">(en.)smoothEnvelope</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
             <li class="nav-item" data-level="3"><a href="#enar" class="nav-link">(en.)ar</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#enarfe" class="nav-link">(en.)arfe</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#enare" class="nav-link">(en.)are</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -249,11 +237,23 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#enadsre" class="nav-link">(en.)adsre</a>
+            <li class="nav-item" data-level="3"><a href="#ensmoothenvelope" class="nav-link">(en.)smoothEnvelope</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#enarfe" class="nav-link">(en.)arfe</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#enare" class="nav-link">(en.)are</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#enasre" class="nav-link">(en.)asre</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#enadsre" class="nav-link">(en.)adsre</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -278,22 +278,10 @@
 </ul>
 <h2 id="functions-reference">Functions Reference</h2>
 <hr />
-<h3 id="ensmoothenvelope"><code>(en.)smoothEnvelope</code></h3>
-<p>An envelope with an exponential attack and release.
-<code>smoothEnvelope</code> is a standard Faust function.</p>
-<h4 id="usage">Usage</h4>
-<pre><code>smoothEnvelope(ar,t) : _
-</code></pre>
-<ul>
-<li><code>ar</code>: attack and release duration (s)</li>
-<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
-when <code>t=0</code>)</li>
-</ul>
-<hr />
 <h3 id="enar"><code>(en.)ar</code></h3>
 <p>AR (Attack, Release) envelope generator (useful to create percussion envelopes).
 <code>ar</code> is a standard Faust function.</p>
-<h4 id="usage_1">Usage</h4>
+<h4 id="usage">Usage</h4>
 <pre><code>ar(at,rt,t) : _
 </code></pre>
 <p>Where:</p>
@@ -304,45 +292,17 @@ when <code>t=0</code>)</li>
 when <code>t=0</code>)</li>
 </ul>
 <hr />
-<h3 id="enarfe"><code>(en.)arfe</code></h3>
-<p>ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
-Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.</p>
-<h4 id="usage_2">Usage</h4>
-<pre><code>arfe(a,r,f,t) : _
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>a</code>, <code>r</code>: attack (sec), release (sec)</li>
-<li><code>f</code>: final value to approach upon release (such as 0)</li>
-<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
-when <code>t=0</code>)</li>
-</ul>
-<hr />
-<h3 id="enare"><code>(en.)are</code></h3>
-<p>ARE (Attack, Release) envelope generator with Exponential segments.
-Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.</p>
-<h4 id="usage_3">Usage</h4>
-<pre><code>are(a,r,g) : _
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>a</code>: attack (sec)</li>
-<li><code>r</code>: release (sec)</li>
-<li><code>g</code>: gate signal (attack is triggered when <code>g&gt;0</code>, release is triggered
-   when <code>g</code> returns to 0).</li>
-</ul>
-<hr />
 <h3 id="enasr"><code>(en.)asr</code></h3>
 <p>ASR (Attack, Sustain, Release) envelope generator.
 <code>asr</code> is a standard Faust function.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_1">Usage</h4>
 <pre><code>asr(at,sl,rt,t) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>at</code>: attack (sec)</li>
 <li><code>sl</code>: sustain level (between 0..1)</li>
-<li><code>r</code>: release (sec)</li>
+<li><code>rt</code>: release (sec)</li>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
@@ -350,8 +310,8 @@ when <code>t=0</code>)</li>
 <h3 id="enadsr"><code>(en.)adsr</code></h3>
 <p>ADSR (Attack, Decay, Sustain, Release) envelope generator.
 <code>adsr</code> is a standard Faust function.</p>
-<h4 id="usage_5">Usage</h4>
-<pre><code>adsr(at,dt,sl,rt,gate) : _
+<h4 id="usage_2">Usage</h4>
+<pre><code>adsr(at,dt,sl,rt,t) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -359,37 +319,77 @@ when <code>t=0</code>)</li>
 <li><code>dt</code>: decay time (sec)</li>
 <li><code>sl</code>: sustain level (between 0..1)</li>
 <li><code>rt</code>: release time (sec)</li>
-<li><code>gate</code>: trigger signal (attack is triggered when <code>gate&gt;0</code>, release is triggered
-when <code>gate=0</code>)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
+<h3 id="ensmoothenvelope"><code>(en.)smoothEnvelope</code></h3>
+<p>An envelope with an exponential attack and release.
+<code>smoothEnvelope</code> is a standard Faust function.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>smoothEnvelope(ar,t) : _
+</code></pre>
+<ul>
+<li><code>ar</code>: attack and release duration (s)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
+<h3 id="enarfe"><code>(en.)arfe</code></h3>
+<p>ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
+Approximately equal to <code>smoothEnvelope(Attack/6.91)</code> when Attack == Release.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>arfe(at,rt,fl,t) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>at</code>: attack (sec)</li>
+<li><code>rt</code>: release (sec)</li>
+<li><code>fl</code>: final level to approach upon release (such as 0)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
+<h3 id="enare"><code>(en.)are</code></h3>
+<p>ARE (Attack, Release) envelope generator with Exponential segments.
+Approximately equal to <code>smoothEnvelope(Attack/6.91)</code> when Attack == Release.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>are(at,rt,t) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>at</code>: attack (sec)</li>
+<li><code>rt</code>: release (sec)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
+<h3 id="enasre"><code>(en.)asre</code></h3>
+<p>ASRE (Attack, Sustain, Release) envelope generator with Exponential segments.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>asre(at,sl,rt,t) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>at</code>: attack (sec)</li>
+<li><code>sl</code>: sustain level (between 0..1)</li>
+<li><code>rt</code>: release (sec)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
 </ul>
 <hr />
 <h3 id="enadsre"><code>(en.)adsre</code></h3>
 <p>ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential
 segments.</p>
-<h4 id="usage_6">Usage</h4>
-<pre><code>adsre(a,d,s,r,g) : _
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>a</code>: attack (sec)</li>
-<li><code>d</code>: decay (sec)</li>
-<li><code>s</code>: sustain (fraction of <code>t</code>: 0-1)</li>
-<li><code>r</code>: release (sec)</li>
-<li><code>g</code>: gate signal:
-       attack is triggered when <code>g</code> goes from zero to positive,
-       release is triggered when <code>g</code> returns to 0</li>
-</ul>
-<hr />
-<h3 id="enasre"><code>(en.)asre</code></h3>
-<p>ASRE (Attack, Sustain, Release) envelope generator with Exponential segments.</p>
 <h4 id="usage_7">Usage</h4>
-<pre><code>asre(a,s,r,g) : _
+<pre><code>adsre(at,dt,sl,rt,t) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>a</code>: attack (sec)</li>
-<li><code>s</code>: sustain (fraction of <code>t</code>: 0-1)</li>
-<li><code>r</code>: release (sec)</li>
+<li><code>at</code>: attack (sec)</li>
+<li><code>dt</code>: decay (sec)</li>
+<li><code>sl</code>: sustain level (between 0..1)</li>
+<li><code>rt</code>: release (sec)</li>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
