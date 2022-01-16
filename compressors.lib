@@ -97,7 +97,7 @@ declare version "0.2";
 // note: si.lag_ud has a bug where if you compile with standard precision,
 // down is 0 and prePost is 1, you go into infinite GR and stay there
 peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
-  abs : ba.bypass1(prePost,si.lag_ud(att,rel)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1)+1,si.lag_ud(rel,att)) : ba.db2linear
+  abs : ba.bypass1(prePost,si.lag_ud(att,rel)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.lag_ud(rel,att)) : ba.db2linear
 with {
   gain_computer(strength,thresh,knee,level) =
     select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
@@ -371,7 +371,7 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // License: GPLv3
 
 RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
-  RMS(rel) : ba.bypass1(prePost,si.lag_ud(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1)+1,si.lag_ud(0,att)) : ba.db2linear with {
+  RMS(rel) : ba.bypass1(prePost,si.lag_ud(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.lag_ud(0,att)) : ba.db2linear with {
     gain_computer(strength,thresh,knee,level) =
       select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
               0,
