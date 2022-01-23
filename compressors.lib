@@ -102,7 +102,7 @@ with {
   gain_computer(strength,thresh,knee,level) =
     select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
             0,
-            ((level-thresh+(knee/2)) : pow(2)/(2*max(ma.EPSILON,min(knee,(thresh*-2))))),
+            ((level-thresh+(knee/2)) : pow(2)/(2*max(ma.EPSILON,knee))),
             (level-thresh))
     : max(0)*-strength;
 };
@@ -375,7 +375,7 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
     gain_computer(strength,thresh,knee,level) =
       select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
               0,
-              ((level-thresh+(knee/2)) : pow(2)/(2*max(ma.EPSILON,min(knee,(thresh*-2))))),
+              ((level-thresh+(knee/2)) : pow(2)/(2*max(ma.EPSILON,knee))),
               (level-thresh))
     : max(0)*-strength;
     RMS(time) = ba.slidingRMS(s) with {
