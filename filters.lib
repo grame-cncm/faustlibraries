@@ -2700,8 +2700,8 @@ svf = environment {
 	hs(f,q,g)   = svf(8, f, q, g);
 };
 
+
 //=========== Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers =====
-//=============================================================================
 //
 // The Linkwitz-Riley (LR) crossovers are designed to produce a fully-flat
 // magnitude response when their outputs are combined. The 4th-order
@@ -2713,6 +2713,7 @@ svf = environment {
 // filter implemented above by setting the Q-factor to 1.0 / sqrt(2.0).
 // These will be cascaded in pairs to build the LR4 highpass and lowpass.
 // For the phase correction, we will use the 2nd-order Butterworth allpass.
+//=============================================================================
 
 
 //----------`(fi.)lowpassLR4`---------------------------------------------------
@@ -2726,13 +2727,13 @@ svf = environment {
 //
 // Where:
 //
-// * `cf` is the lowpass cutoff in Hz.
+// * `cf` is the lowpass cutoff in Hz
 //------------------------------------------------------------------------------
 declare lowpassLR4 author "Dario Sanfilippo";
 declare lowpassLR4 copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
 declare lowpassLR4 license "MIT-style STK-4.3 license";
-lowpassLR4(cf, x) = x : seq(i, 2, svf.lp(cf, 1.0 / sqrt(2.0));
+lowpassLR4(cf, x) = x : seq(i, 2, svf.lp(cf, 1.0 / sqrt(2.0)));
 
 
 //----------`(fi.)highpassLR4`--------------------------------------------------
@@ -2746,13 +2747,13 @@ lowpassLR4(cf, x) = x : seq(i, 2, svf.lp(cf, 1.0 / sqrt(2.0));
 //
 // Where:
 //
-// * `cf` is the highpass cutoff in Hz.
+// * `cf` is the highpass cutoff in Hz
 //------------------------------------------------------------------------------
 declare highpassLR4 author "Dario Sanfilippo";
 declare highpassLR4 copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
 declare highpassLR4 license "MIT-style STK-4.3 license";
-highpassLR4(cf, x) = x : seq(i, 2, svf.hp(cf, 1.0 / sqrt(2.0));
+highpassLR4(cf, x) = x : seq(i, 2, svf.hp(cf, 1.0 / sqrt(2.0)));
 
 
 //----------`(fi.)crossover2LR4`------------------------------------------------
@@ -2766,7 +2767,7 @@ highpassLR4(cf, x) = x : seq(i, 2, svf.hp(cf, 1.0 / sqrt(2.0));
 //
 // Where:
 //
-// * `cf` is the crossover split cutoff in Hz.
+// * `cf` is the crossover split cutoff in Hz
 //------------------------------------------------------------------------------
 declare crossover2LR4 author "Dario Sanfilippo";
 declare crossover2LR4 copyright
@@ -2786,8 +2787,8 @@ crossover2LR4(cf, x) = lowpassLR4(cf, x) , highpassLR4(cf, x);
 //
 // Where:
 //
-// * `cf1` is the crossover lower split cutoff in Hz.
-// * `cf2` is the crossover upper split cutoff in Hz.
+// * `cf1` is the crossover lower split cutoff in Hz
+// * `cf2` is the crossover upper split cutoff in Hz
 //------------------------------------------------------------------------------
 declare crossover3LR4 author "Dario Sanfilippo";
 declare crossover3LR4 copyright
@@ -2803,14 +2804,14 @@ crossover3LR4(cf1, cf2, x) =
 // #### Usage
 //
 // ```
-// _ : crossover4LR4(cf1, cf2) : si.bus(4)
+// _ : crossover4LR4(cf1, cf2, cf3) : si.bus(4)
 // ```
 //
 // Where:
 //
-// * `cf1` is the crossover lower split cutoff in Hz.
-// * `cf2` is the crossover mid split cutoff in Hz.
-// * `cf3` is the crossover upper split cutoff in Hz.
+// * `cf1` is the crossover lower split cutoff in Hz
+// * `cf2` is the crossover mid split cutoff in Hz
+// * `cf3` is the crossover upper split cutoff in Hz
 //------------------------------------------------------------------------------
 declare crossover4LR4 author "Dario Sanfilippo";
 declare crossover4LR4 copyright

@@ -599,6 +599,30 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers" class="nav-link">Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#filowpasslr4" class="nav-link">(fi.)lowpassLR4</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fihighpasslr4" class="nav-link">(fi.)highpassLR4</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#ficrossover2lr4" class="nav-link">(fi.)crossover2LR4</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#ficrossover3lr4" class="nav-link">(fi.)crossover3LR4</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#ficrossover4lr4" class="nav-link">(fi.)crossover4LR4</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#averaging-functions" class="nav-link">Averaging Functions</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#fiavg_rect" class="nav-link">(fi.)avg_rect</a>
@@ -1920,11 +1944,74 @@ All filters have <code>freq</code> and <code>Q</code> parameters, the <code>bell
 <li><code>Q</code>: quality factor</li>
 <li><code>[gain]</code>: gain in dB</li>
 </ul>
+<h2 id="linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers">Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers</h2>
+<p>The Linkwitz-Riley (LR) crossovers are designed to produce a fully-flat
+magnitude response when their outputs are combined. The 4th-order
+LR filters (LR4) have a 24dB/octave slope and they are rather popular audio
+crossovers used in multi-band processing.</p>
+<p>The LR4 can be constructed by cascading two second-order Butterworth
+filters. For the second-order Butterworth filters, we will use the SVF
+filter implemented above by setting the Q-factor to 1.0 / sqrt(2.0).
+These will be cascaded in pairs to build the LR4 highpass and lowpass.
+For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
+<hr />
+<h3 id="filowpasslr4"><code>(fi.)lowpassLR4</code></h3>
+<p>4th-order Linkwitz-Riley lowpass.</p>
+<h4 id="usage_66">Usage</h4>
+<pre><code>_ : lowpassLR4(cf) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>cf</code> is the lowpass cutoff in Hz</li>
+</ul>
+<hr />
+<h3 id="fihighpasslr4"><code>(fi.)highpassLR4</code></h3>
+<p>4th-order Linkwitz-Riley highpass.</p>
+<h4 id="usage_67">Usage</h4>
+<pre><code>_ : highpassLR4(cf) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>cf</code> is the highpass cutoff in Hz</li>
+</ul>
+<hr />
+<h3 id="ficrossover2lr4"><code>(fi.)crossover2LR4</code></h3>
+<p>Two-way 4th-order Linkwitz-Riley crossover.</p>
+<h4 id="usage_68">Usage</h4>
+<pre><code>_ : crossover2LR4(cf) : si.bus(2)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>cf</code> is the crossover split cutoff in Hz</li>
+</ul>
+<hr />
+<h3 id="ficrossover3lr4"><code>(fi.)crossover3LR4</code></h3>
+<p>Three-way 4th-order Linkwitz-Riley crossover.</p>
+<h4 id="usage_69">Usage</h4>
+<pre><code>_ : crossover3LR4(cf1, cf2) : si.bus(3)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>cf1</code> is the crossover lower split cutoff in Hz</li>
+<li><code>cf2</code> is the crossover upper split cutoff in Hz</li>
+</ul>
+<hr />
+<h3 id="ficrossover4lr4"><code>(fi.)crossover4LR4</code></h3>
+<p>Four-way 4th-order Linkwitz-Riley crossover.</p>
+<h4 id="usage_70">Usage</h4>
+<pre><code>_ : crossover4LR4(cf1, cf2, cf3) : si.bus(4)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>cf1</code> is the crossover lower split cutoff in Hz</li>
+<li><code>cf2</code> is the crossover mid split cutoff in Hz</li>
+<li><code>cf3</code> is the crossover upper split cutoff in Hz</li>
+</ul>
 <h2 id="averaging-functions">Averaging Functions</h2>
 <hr />
 <h3 id="fiavg_rect"><code>(fi.)avg_rect</code></h3>
 <p>Moving average.</p>
-<h4 id="usage_66">Usage</h4>
+<h4 id="usage_71">Usage</h4>
 <pre><code>_ : avg_rect(period) : _
 </code></pre>
 <p>Where:</p>
@@ -1938,7 +2025,7 @@ Tau represents the effective length of the one-pole impulse response,
 that is, tau is the integral of the filter's impulse response. This
 response is slower to reach the final value but has less ripples in
 non-steady signals.</p>
-<h4 id="usage_67">Usage</h4>
+<h4 id="usage_72">Usage</h4>
 <pre><code>_ : avg_tau(period) : _
 </code></pre>
 <p>Where:</p>
@@ -1955,7 +2042,7 @@ or to reach 1-1/e of its final value.</li>
 <p>Averaging function based on a one-pole filter and the t60 response time.
 This response is particularly useful when the system is required to 
 reach the final value after about <code>period</code> seconds.</p>
-<h4 id="usage_68">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>_ : avg_t60(period) : _
 </code></pre>
 <p>Where:</p>
@@ -1973,7 +2060,7 @@ or to reach 1-1/1000 of its final value.</li>
 This response is close to the moving-average algorithm as it roughly reaches
 the final value after <code>period</code> seconds and shows about the same
 oscillations for non-steady signals.</p>
-<h4 id="usage_69">Usage</h4>
+<h4 id="usage_74">Usage</h4>
 <pre><code>_ : avg_t19(period) : _
 </code></pre>
 <p>Where:</p>
