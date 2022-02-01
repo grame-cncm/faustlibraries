@@ -25,18 +25,17 @@
  **       };
  **/
 
-declare name      "Tonestack Emulation Library";
-declare author    "Guitarix project (http://guitarix.sourceforge.net/)";
+ma = library("maths.lib");
+fi = library("filters.lib");
+
+declare name      "Faust Tonestack Emulation Library";
+declare author    "Guitarix project (<http://guitarix.sourceforge.net/>)";
 declare copyright "Guitarix project";
 declare version   "0.28";
 declare license   "LGPL";
 
-ma = library("maths.lib");
-fi = library("filters.lib");
-
-
 /****************************************************************
- **           Equalisation 3 bandes
+ **           Equalisation 3 bands
  **                    C1
  **       IN >---------||---------
  **            |                 |
@@ -375,54 +374,54 @@ ts = environment {
 
 };
 
-bassman(T,M,L)  = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+bassman(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.bassman;};
-mesa(T,M,L)     = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+mesa(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.mesa;};
-twin(T,M,L)     = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+twin(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.twin;};
-princeton(T,M,L)= tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+princeton(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.princeton;};
-jcm800(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+jcm800(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.jcm800;};
-jcm2000(T,M,L)  = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+jcm2000(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.jcm2000;};
-jtm45(T,M,L)    = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+jtm45(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.jtm45;};
-mlead(T,M,L)    = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+mlead(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.mlead;};
-m2199(T,M,L)    = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+m2199(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.m2199;};
-ac30(T,M,L)     = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+ac30(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.ac30;};
-ac15(T,M,L)     = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+ac15(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.ac15;};
-soldano(T,M,L)  = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+soldano(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.soldano;};
-sovtek(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+sovtek(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.sovtek;};
-peavey(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+peavey(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.peavey;};
-ibanez(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+ibanez(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.ibanez;};
-roland(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+roland(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.roland;};
-ampeg(T,M,L)    = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+ampeg(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.ampeg;};
-ampeg_rev(T,M,L)= tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+ampeg_rev(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.ampeg_rev;};
-bogner(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+bogner(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.bogner;};
-groove(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+groove(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.groove;};
-crunch(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+crunch(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.crunch;};
-fender_blues(T,M,L)= tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+fender_blues(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.fender_blues;};
 fender_default(T,M,L)= tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.fender_default;};
-fender_deville(T,M,L)= tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+fender_deville(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.fender_deville;};
-gibsen(T,M,L)   = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
+gibsen(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.gibsen;};
 

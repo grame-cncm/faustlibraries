@@ -1,5 +1,8 @@
 //#################################### phaflangers.lib ########################################
 // A library of phasor and flanger effects. Its official prefix is `pf`.
+//
+// #### References
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/phaflangers.lib>
 //########################################################################################
 
 ma = library("maths.lib");
@@ -9,7 +12,7 @@ os = library("oscillators.lib");
 pf = library("phaflangers.lib");
 
 declare name "Faust Phaser and Flanger Library";
-declare version "0.0";
+declare version "0.1";
 
 //########################################################################################
 /************************************************************************
@@ -35,7 +38,7 @@ Michon and Julius O. Smith III, and are released under the
 // #### Usage:
 //
 // ```
-// _ : flanger_mono(dmax,curdel,depth,fb,invert) : _;
+// _ : flanger_mono(dmax,curdel,depth,fb,invert) : _
 // ```
 //
 // Where:
@@ -62,7 +65,7 @@ flanger_mono(dmax,curdel,depth,fb,invert)
 // #### Usage:
 //
 // ```
-// _,_ : flanger_stereo(dmax,curdel1,curdel2,depth,fb,invert) : _,_;
+// _,_ : flanger_stereo(dmax,curdel1,curdel2,depth,fb,invert) : _,_
 // ```
 //
 // Where:
@@ -110,7 +113,7 @@ with {
 // #### Phaser
 //
 // ```
-// _ : phaser2_mono(Notches,phase,width,frqmin,fratio,frqmax,speed,depth,fb,invert) : _;
+// _ : phaser2_mono(Notches,phase,width,frqmin,fratio,frqmax,speed,depth,fb,invert) : _
 // ```
 //
 // Where:
@@ -151,13 +154,12 @@ with {               // depth=0 => direct-signal only
 // #### Phaser
 //
 // ```
-// _ : phaser2_stereo(Notches,phase,width,frqmin,fratio,frqmax,speed,depth,fb,invert) : _;
+// _,_ : phaser2_stereo(Notches,width,frqmin,fratio,frqmax,speed,depth,fb,invert) : _,_
 // ```
 //
 // Where:
 //
 // * `Notches`: number of spectral notches (MACRO ARGUMENT - not a signal)
-// * `phase`: phase of the oscillator (0-1)
 // * `width`: approximate width of spectral notches in Hz
 // * `frqmin`: approximate minimum frequency of first spectral notch in Hz
 // * `fratio`: ratio of adjacent notch frequencies

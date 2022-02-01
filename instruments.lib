@@ -1,11 +1,5 @@
 //instruments.lib - Faust function of various types useful for building physical model instruments
 
-declare name "Faust-STK Tools Library";
-declare author "Romain Michon (rmichon@ccrma.stanford.edu)";
-declare copyright "Romain Michon";
-declare version "1.0";
-declare licence "STK-4.3"; // Synthesis Tool Kit 4.3 (MIT style license);
-
 no = library("noises.lib");
 en = library("envelopes.lib");
 ma = library("maths.lib");
@@ -15,6 +9,13 @@ si = library("signals.lib");
 fi = library("filters.lib");
 os = library("oscillators.lib");
 re = library("reverbs.lib");
+
+declare name "Faust-STK Tools Library";
+declare author "Romain Michon (rmichon@ccrma.stanford.edu)";
+declare copyright "Romain Michon";
+declare version "1.0";
+declare licence "STK-4.3"; // Synthesis Tool Kit 4.3 (MIT style license);
+
 
 //========================= ENVELOPE GENERATORS ===============================
 
@@ -32,22 +33,22 @@ re = library("reverbs.lib");
 
 envVibrato(b,a,s,r,t) = env ~ (_,_,_) : (!,!,_) // the 3 'state' signals are fed back
     with {
-        env (p2,cnt,y) =
+        env(p2,cnt,y) =
             (t>0) & (p2|(y>=1)),
             (cnt + 1)*(t>0), // counter for the first step "b"
             (y + p1*p3*u*(s/100) - p4*w*y)*((p4==0)|(y>=eps))	// y  = envelop signal
             //*(y>=eps) // cut off tails to prevent denormals
         with {
-        p1 = (p2==0) & (t>0) & (y<1) & (cnt>(b*ma.SR)); // p1 = attack phase
-        p3 = 1-(cnt<(nb)); // p3 = beginning phase
-        p4 = (t<=0) & (y>0);  // p4 = release phase
-        // #samples in attack, release, must be >0
-        nb = ma.SR*b+(b==0.0) ; na = ma.SR*a+(a==0.0); nr = ma.SR*r+(r==0.0);
-        // attack and (-60dB) release rates
-        z = s+(s==0.0)*ba.db2linear(-60);
-        u = 1/na; w = 1-1/pow(z*ba.db2linear(60), 1/nr);
-        // values below this threshold are considered zero in the release phase
-        eps = ba.db2linear(-120);
+        	p1 = (p2==0) & (t>0) & (y<1) & (cnt>(b*ma.SR)); // p1 = attack phase
+        	p3 = 1-(cnt<(nb)); // p3 = beginning phase
+        	p4 = (t<=0) & (y>0);  // p4 = release phase
+        	// #samples in attack, release, must be >0
+        	nb = ma.SR*b+(b==0.0) ; na = ma.SR*a+(a==0.0); nr = ma.SR*r+(r==0.0);
+        	// attack and (-60dB) release rates
+        	z = s+(s==0.0)*ba.db2linear(-60);
+        	u = 1/na; w = 1-1/pow(z*ba.db2linear(60), 1/nr);
+        	// values below this threshold are considered zero in the release phase
+        	eps = ba.db2linear(-120);
         };
     };
 
@@ -102,7 +103,7 @@ bow(offset,slope) = pow(abs(sample) + 0.75, -4) : saturationPos
     };
 
 //----------------------- REED TABLE ----------------------------
-// Simple reed table to be used with waveguide models of clanrinet, saxophone, etc.
+// Simple reed table to be used with waveguide models of clarinet, saxophone, etc.
 //
 // USAGE:
 //   _ : reed(offset,slope) : _
@@ -110,7 +111,7 @@ bow(offset,slope) = pow(abs(sample) + 0.75, -4) : saturationPos
 //   offset = offset between 0 and 1
 //   slope = slope between 0 and 1
 // REFERENCE:
-//   https://ccrma.stanford.edu/~jos/pasp/View_Single_Reed_Oscillation.html
+//   <https://ccrma.stanford.edu/~jos/pasp/View_Single_Reed_Oscillation.html>
 
 reed(offset,slope) = reedTable : saturationPos : saturationNeg
     with {
@@ -138,7 +139,7 @@ poleZero(b0,b1,a1,x) = (b0*x + b1*x' - a1*_)~_;
 //   _ : oneZero0(b0,b1) : _
 //   _ : oneZero1(b0,b1) : _
 // REFERENCE:
-//   https://ccrma.stanford.edu/~jos/fp2/One_Zero.html
+//   <https://ccrma.stanford.edu/~jos/fp2/One_Zero.html>
 
 oneZero0(b0,b1,x) = (*(b1) + x*b0)~_;
 oneZero1(b0,b1,x) = (x'*b1 + x*b0);
@@ -178,7 +179,7 @@ bandPassH(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
 jetTable(x) = x <: _*(_*_-1) : saturationPos : saturationNeg;
 
 //----------------------- NON LINEAR MODULATOR ----------------------------
-// nonLinearModulator adapts the function allpassnn from filter.lib for using it with waveguide instruments
+// nonLinearModulator adapts the function allpassnn from filter.lib for using it with waveguide instruments (see the corresponding DAFx paper: <https://ccrma.stanford.edu/~rmichon/publications/doc/DAFx11-Faust-STK.pdf> (Faust-STK: a Set of Linear and Nonlinear Physical Models for the Faust Programming Language) for more details).
 //
 // USAGE:
 //   _ : nonLinearModulator(nonlinearity,env,freq,typeMod,freqMod,order) : _
@@ -232,7 +233,7 @@ nonLinearModulator(nonlinearity,env,freq,typeMod,freqMod,order) =
 // where
 //   periodDuration = period duration of the tone being played in number of samples
 // REFERENCE:
-//   https://ccrma.stanford.edu/realsimple/faust_strings/
+//   <https://ccrma.stanford.edu/realsimple/faust_strings/>
 
 stereoizer(periodDuration) = _ <: _,widthdelay : stereopanner
     with {

@@ -1,5 +1,8 @@
 //################################### maths.lib ##########################################
 //  Mathematic library for Faust. Its official prefix is `ma`.
+//
+// #### References
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/maths.lib>
 //########################################################################################
 // Some functions are implemented as Faust foreign functions of `math.h` functions
 // that are not part of Faust's primitives. Defines also various constants and several
@@ -9,7 +12,6 @@
 // ## History
 // * 06/13/2016 [RM]	normalizing and integrating to new libraries
 // * 07/08/2015	[YO]	documentation comments
-// * 20/06/2014	[SL]	added FTZ function
 // * 20/06/2014	[SL]	added FTZ function
 // * 22/06/2013	[YO]	added float|double|quad variants of some foreign functions
 // * 28/06/2005	[YO]	postfixed functions with 'f' to force float version instead of double
@@ -47,8 +49,12 @@ closed source license or any other license if you decide so.
 ************************************************************************
 ************************************************************************/
 
+// This library contains platform specific constants 
+pl = library("platform.lib");
+ma = library("maths.lib"); // for compatible copy/paste out of this file
+
 declare name "Faust Math Library";
-declare version "2.1";
+declare version "2.5";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LGPL with exception";
@@ -58,7 +64,7 @@ declare license "LGPL with exception";
 
 
 //---------------------------------`(ma.)SR`---------------------------------------
-// Current sampling rate (between 1000Hz and 192000Hz). Constant during
+// Current sampling rate. Constant during
 // program execution.
 //
 // #### Usage
@@ -67,8 +73,19 @@ declare license "LGPL with exception";
 // SR : _
 // ```
 //-----------------------------------------------------------------------------
-SR 			= min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
+SR = pl.SR;
 
+//---------------------------------`(ma.)T`---------------------------------------
+// Current sampling period. Constant during
+// program execution.
+//
+// #### Usage
+//
+// ```
+// T : _
+// ```
+//-----------------------------------------------------------------------------
+T = 1.0 / SR;
 
 //---------------------------------`(ma.)BS`---------------------------------------
 // Current block-size. Can change during the execution.
@@ -79,7 +96,7 @@ SR 			= min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
 // BS : _
 // ```
 //-----------------------------------------------------------------------------
-BS          = fvariable(int count, <math.h>);
+BS = pl.BS;
 
 
 //---------------------------------`(ma.)PI`---------------------------------------
@@ -91,18 +108,67 @@ BS          = fvariable(int count, <math.h>);
 // PI : _
 // ```
 //-----------------------------------------------------------------------------
-PI          = 3.1415926535897932385;
+PI = 3.14159265358979323846;
 
-//---------------------------------`(ma.)INFINITY`------------------------------
-// Constant INFINITY inherited from `math.h`.
+
+//---------------------------------`(ma.)E`---------------------------------------
+// Constant e in double precision.
 //
 // #### Usage
 //
 // ```
-// INFINITY : _
+// E : _
 // ```
 //-----------------------------------------------------------------------------
-INFINITY = fconstant(float INFINITY, <math.h>);
+E = 2.71828182845904523536;
+
+
+//---------------------------------`(ma.)EPSILON`---------------------------------------
+// Constant EPSILON in simple/double/quad precision.
+//
+// #### Usage
+//
+// ```
+// EPSILON : _
+// ```
+//-----------------------------------------------------------------------------
+singleprecision EPSILON = 1.192092896e-07;
+doubleprecision EPSILON = 2.2204460492503131e-016;
+quadprecision EPSILON = 2.2204460492503131e-016;
+fixedpointprecision EPSILON = 2.2204460492503131e-016;
+
+
+//---------------------------------`(ma.)MIN`---------------------------------------
+// Constant MIN in simple/double/quad precision (minimal positive value).
+//
+// #### Usage
+//
+// ```
+// MIN : _
+// ```
+//-----------------------------------------------------------------------------
+singleprecision MIN = 1.175494351e-38;
+doubleprecision MIN = 2.2250738585072014e-308;
+quadprecision MIN = 2.2250738585072014e-308;
+fixedpointprecision MIN = 2.2250738585072014e-308;
+
+
+//---------------------------------`(ma.)MAX`------------------------------
+// Constant MAX in simple/double/quad precision (maximal positive value).
+//
+// #### Usage
+//
+// ```
+// MAX : _
+// ```
+//-----------------------------------------------------------------------------
+singleprecision MAX = 3.402823466e+38;
+doubleprecision MAX = 1.7976931348623158e+308;
+quadprecision MAX = 1.7976931348623158e+308;
+fixedpointprecision MAX = 1.7976931348623158e+308;
+
+// Obsolete, kept for compatibility reasons
+INFINITY = MAX; 
 
 //---------------------------------`(ma.)FTZ`---------------------------------------
 // Flush to zero: force samples under the "maximum subnormal number"
@@ -112,12 +178,26 @@ INFINITY = fconstant(float INFINITY, <math.h>);
 // #### Usage
 //
 // ```
-// _ : ftz : _
+// _ : FTZ : _
 // ```
 //
-// See : <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
+// #### Reference
+//
+// <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
 //-----------------------------------------------------------------------------
-FTZ(x)      = x * (abs(x) > 1.17549435e-38);
+FTZ(x) = x * (abs(x) > MIN);
+
+
+//---------------------------------`(ma.)copysign`---------------------------------------
+// Changes the sign of x (first input) to that of y (second input).
+//
+// #### Usage
+//
+// ```
+// _,_ : copysign : _
+// ```
+//-----------------------------------------------------------------------------
+copysign = ffunction(float copysignf|copysign|copysignl (float, float), <math.h>,"");
 
 
 //---------------------------------`(ma.)neg`---------------------------------------
@@ -129,11 +209,17 @@ FTZ(x)      = x * (abs(x) > 1.17549435e-38);
 // _ : neg : _
 // ```
 //-----------------------------------------------------------------------------
-neg(x)      = -x;
+neg(x) = -x;
 
 
 //-------`(ma.)sub(x,y)`------------------
 // Subtract `x` and `y`.
+//
+// #### Usage
+//
+// ```
+// _,_ : sub : _
+// ```
 //------------------------------
 sub(x,y) = y-x;
 
@@ -147,7 +233,7 @@ sub(x,y) = y-x;
 // _ : inv : _
 // ```
 //-----------------------------------------------------------------------------
-inv(x)      = 1/x;
+inv(x) = 1/x;
 
 
 //---------------------------------`(ma.)cbrt`--------------------------------------
@@ -159,7 +245,7 @@ inv(x)      = 1/x;
 // _ : cbrt : _
 // ```
 //-----------------------------------------------------------------------------
-cbrt 		= ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
+cbrt = ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)hypot`-------------------------------------
@@ -172,7 +258,7 @@ cbrt 		= ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
 // _,_ : hypot : _
 // ```
 //-----------------------------------------------------------------------------
-hypot 		= ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
+hypot = ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
 
 
 //---------------------------------`(ma.)ldexp`-------------------------------------
@@ -184,7 +270,7 @@ hypot 		= ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
 // _,_ : ldexp : _
 // ```
 //-----------------------------------------------------------------------------
-ldexp 		= ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
+ldexp = ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
 
 
 //---------------------------------`(ma.)scalb`-------------------------------------
@@ -196,7 +282,7 @@ ldexp 		= ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
 // _,_ : scalb : _
 // ```
 //-----------------------------------------------------------------------------
-scalb 		= ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
+scalb = ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
 
 
 //---------------------------------`(ma.)log1p`----------------------------------
@@ -208,7 +294,7 @@ scalb 		= ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
 // _ : log1p : _
 // ```
 //-----------------------------------------------------------------------------
-log1p 		= ffunction(float log1pf|log1p|log1pl (float), <math.h>,"");
+log1p = ffunction(float log1pf|log1p|log1pl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)logb`---------------------------------------
@@ -220,7 +306,7 @@ log1p 		= ffunction(float log1pf|log1p|log1pl (float), <math.h>,"");
 // _ : logb : _
 // ```
 //-----------------------------------------------------------------------------
-logb 		= ffunction(float logbf|logb|logbl (float), <math.h>,"");
+logb = ffunction(float logbf|logb|logbl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)ilogb`-------------------------------------
@@ -232,7 +318,7 @@ logb 		= ffunction(float logbf|logb|logbl (float), <math.h>,"");
 // _ : ilogb : _
 // ```
 //-----------------------------------------------------------------------------
-ilogb 		= ffunction(int ilogbf|ilogb|ilogbl (float), <math.h>,"");
+ilogb = ffunction(int ilogbf|ilogb|ilogbl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)log2`-------------------------------------
@@ -256,7 +342,7 @@ log2(x) = log(x)/log(2.0);
 // _ : expm1 : _
 // ```
 //-----------------------------------------------------------------------------
-expm1 		= ffunction(float expm1f|expm1|expm1l (float), <math.h>,"");
+expm1 = ffunction(float expm1f|expm1|expm1l (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)acosh`-------------------------------------
@@ -269,7 +355,7 @@ expm1 		= ffunction(float expm1f|expm1|expm1l (float), <math.h>,"");
 // _ : acosh : _
 // ```
 //-----------------------------------------------------------------------------
-acosh		= ffunction(float acoshf|acosh|acoshl (float), <math.h>, "");
+acosh = ffunction(float acoshf|acosh|acoshl (float), <math.h>, "");
 
 
 //--------------------------------`(ma.)asinh`-----------------------------------
@@ -281,7 +367,7 @@ acosh		= ffunction(float acoshf|acosh|acoshl (float), <math.h>, "");
 // _ : asinh : _
 // ```
 //-----------------------------------------------------------------------------
-asinh		= ffunction(float asinhf|asinh|asinhl (float), <math.h>, "");
+asinh = ffunction(float asinhf|asinh|asinhl (float), <math.h>, "");
 
 
 //--------------------------------`(ma.)atanh`-----------------------------------
@@ -293,7 +379,7 @@ asinh		= ffunction(float asinhf|asinh|asinhl (float), <math.h>, "");
 // _ : atanh : _
 // ```
 //-----------------------------------------------------------------------------
-atanh		= ffunction(float atanhf|atanh|atanhl (float), <math.h>, "");
+atanh = ffunction(float atanhf|atanh|atanhl (float), <math.h>, "");
 
 
 //---------------------------------`(ma.)sinh`---------------------------------------
@@ -305,7 +391,7 @@ atanh		= ffunction(float atanhf|atanh|atanhl (float), <math.h>, "");
 // _ : sinh : _
 // ```
 //-----------------------------------------------------------------------------
-sinh		= ffunction(float sinhf|sinh|sinhl (float), <math.h>, "");
+sinh = ffunction(float sinhf|sinh|sinhl (float), <math.h>, "");
 
 
 //---------------------------------`(ma.)cosh`--------------------------------------
@@ -317,7 +403,7 @@ sinh		= ffunction(float sinhf|sinh|sinhl (float), <math.h>, "");
 // _ : cosh : _
 // ```
 //-----------------------------------------------------------------------------
-cosh		= ffunction(float coshf|cosh|coshl (float), <math.h>, "");
+cosh = ffunction(float coshf|cosh|coshl (float), <math.h>, "");
 
 
 //---------------------------------`(ma.)tanh`--------------------------------------
@@ -329,7 +415,7 @@ cosh		= ffunction(float coshf|cosh|coshl (float), <math.h>, "");
 // _ : tanh : _
 // ```
 //-----------------------------------------------------------------------------
-tanh		= ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
+tanh = ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
 
 
 //---------------------------------`(ma.)erf`---------------------------------------
@@ -341,7 +427,7 @@ tanh		= ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
 // _ : erf : _
 // ```
 //-----------------------------------------------------------------------------
-erf			= ffunction(float erff|erf|erfl(float), <math.h>,"");
+erf = ffunction(float erff|erf|erfl(float), <math.h>,"");
 
 
 //---------------------------------`(ma.)erfc`---------------------------------------
@@ -353,7 +439,7 @@ erf			= ffunction(float erff|erf|erfl(float), <math.h>,"");
 // _ : erfc : _
 // ```
 //-----------------------------------------------------------------------------
-erfc		= ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
+erfc = ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
 
 
 //---------------------------------`(ma.)gamma`-------------------------------------
@@ -365,7 +451,7 @@ erfc		= ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
 // _ : gamma : _
 // ```
 //-----------------------------------------------------------------------------
-gamma		= ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
+gamma = ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
 
 
 //---------------------------------`(ma.)lgamma`------------------------------------
@@ -378,7 +464,7 @@ gamma		= ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
 // _ : lgamma : _
 // ```
 //-----------------------------------------------------------------------------
-lgamma		= ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
+lgamma = ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)J0`---------------------------------------
@@ -391,7 +477,7 @@ lgamma		= ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
 // _ : J0 : _
 // ```
 //-----------------------------------------------------------------------------
-J0			= ffunction(float j0(float), <math.h>,"");
+J0 = ffunction(float j0(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)J1`---------------------------------------
@@ -404,7 +490,7 @@ J0			= ffunction(float j0(float), <math.h>,"");
 // _ : J1 : _
 // ```
 //-----------------------------------------------------------------------------
-J1			= ffunction(float j1(float), <math.h>,"");
+J1 = ffunction(float j1(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)Jn`---------------------------------------
@@ -417,7 +503,7 @@ J1			= ffunction(float j1(float), <math.h>,"");
 // _,_ : Jn : _
 // ```
 //-----------------------------------------------------------------------------
-Jn			= ffunction(float jn(int, float), <math.h>,"");
+Jn = ffunction(float jn(int, float), <math.h>,"");
 
 
 //----------------------------------`(ma.)Y0`---------------------------------------
@@ -430,7 +516,7 @@ Jn			= ffunction(float jn(int, float), <math.h>,"");
 // _ : Y0 : _
 // ```
 //-----------------------------------------------------------------------------
-Y0			= ffunction(float y0(float), <math.h>,"");
+Y0 = ffunction(float y0(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)Y1`---------------------------------------
@@ -443,7 +529,7 @@ Y0			= ffunction(float y0(float), <math.h>,"");
 // _ : Y0 : _
 // ```
 //-----------------------------------------------------------------------------
-Y1			= ffunction(float y1(float), <math.h>,"");
+Y1 = ffunction(float y1(float), <math.h>,"");
 
 
 //----------------------------------`(ma.)Yn`---------------------------------------
@@ -456,7 +542,7 @@ Y1			= ffunction(float y1(float), <math.h>,"");
 // _,_ : Yn : _
 // ```
 //-----------------------------------------------------------------------------
-Yn			= ffunction(float yn(int, float), <math.h>,"");
+Yn = ffunction(float yn(int, float), <math.h>,"");
 
 
 //----------------------------`(ma.)fabs`, `(ma.)fmax`, `(ma.)fmin`---------------------------
@@ -503,10 +589,12 @@ np2 = -(1) <: >>(1)|_ <: >>(2)|_ <: >>(4)|_ <: >>(8)|_ <: >>(16)|_ : +(1);
 //------------------------------------------------------------------------------
 frac(n) = n - floor(n);
 decimal = frac;
+
 // NOTE: decimal does the same thing as frac but using floor instead. JOS uses frac a lot
 // in filters.lib so we decided to keep that one... decimal is declared though for
 // backward compatibility.
-// decimal(n)	= n - floor(n);
+// decimal(n) = n - floor(n);
+
 
 //-------------------------------`(ma.)modulo`---------------------------------------
 // Modulus operation.
@@ -514,19 +602,19 @@ decimal = frac;
 // #### Usage
 //
 // ```
-// modulo(x,N) : _
+// modulo(x,y) : _
 // ```
 //
 // Where:
 //
 // * `x`: the numerator
-// * `N`: the denominator
+// * `y`: the denominator
 //------------------------------------------------------------------------------
-modulo(x,N) = (x % N + N) % N;
+modulo(x,y) = (x % y + y) % y;
 
 
 //---------------`(ma.)isnan`----------------
-// Return non-zero if and only if x is a NaN.
+// Return non-zero if x is a NaN.
 //
 // #### Usage
 //
@@ -539,22 +627,40 @@ modulo(x,N) = (x % N + N) % N;
 //
 // * `x`: signal to analyse
 //------------------------------------------
-isnan 		= ffunction(int isnan (float),<math.h>,"");
-nextafter	= ffunction(float nextafter(float, float),<math.h>,"");
+isnan = ffunction(int isnanf|isnan|isnanl (float),<math.h>,"");
 
 
-//---------------------------`(ma.)chebychev`-------------------------------
-// Chebychev transformation of order n.
+//---------------`(ma.)isinf`----------------
+// Return non-zero if x is a positive or negative infinity.
 //
 // #### Usage
 //
 // ```
-// _ : chebychev(n) : _
+// isinf(x)
+// _ : isinf : _
 // ```
 //
 // Where:
 //
-// * `n`: the order of the polynomial
+// * `x`: signal to analyse
+//------------------------------------------
+isinf = ffunction(int isinff|isinf|isinfl (float),<math.h>,"");
+
+nextafter = ffunction(float nextafter(float, float),<math.h>,"");
+
+
+//---------------------------`(ma.)chebychev`-------------------------------
+// Chebychev transformation of order N.
+//
+// #### Usage
+//
+// ```
+// _ : chebychev(N) : _
+// ```
+//
+// Where:
+//
+// * `N`: the order of the polynomial, a constant numerical expression
 //
 // #### Semantics
 //
@@ -568,10 +674,9 @@ nextafter	= ffunction(float nextafter(float, float),<math.h>,"");
 //
 // <http://en.wikipedia.org/wiki/Chebyshev_polynomial>
 //-------------------------------------------------------------------------
-chebychev(0) = !:1;
-chebychev(1) = _;
-chebychev(n) = _ <: *(2)*chebychev(n-1)-chebychev(n-2);
-
+chebychev(0,x) = 1;
+chebychev(1,x) = x;
+chebychev(n,x) = 2*x*chebychev(n-1, x) - chebychev(n-2, x);
 
 
 //------------------------`(ma.)chebychevpoly`-------------------------------
@@ -610,6 +715,7 @@ chebychevpoly(lcoef) = _ <: L(0,lcoef) :> _
 //--------------------------------------------------------
 diffn(x) = x' - x; // negated first-order difference
 
+
 //------------------`(ma.)signum`----------------------------
 // The signum function signum(x) is defined as
 // -1 for x<0, 0 for x==0, and 1 for x>0.
@@ -621,3 +727,34 @@ diffn(x) = x' - x; // negated first-order difference
 // ```
 //--------------------------------------------------------
 signum(x) = (x>0)-(x<0);
+
+
+//------------------`(ma.)nextpow2`----------------------------
+// The nextpow2(x) returns the lowest integer m such that
+// 2^m >= x.
+//
+// #### Usage
+//
+// ```
+// 2^nextpow2(n) : _
+// ```
+// Useful for allocating delay lines, e.g., 
+// ```
+// delay(2^nextpow2(maxDelayNeeded), currentDelay);
+// ```
+//--------------------------------------------------------
+nextpow2(x) = ceil(log(x)/log(2.0));
+
+
+//--------------------`(ma.)zc`------------------------------------------------
+// Indicator function for zero-crossing: it returns 1 if a zero-crossing
+// occurs, 0 otherwise.
+//
+// #### Usage
+//
+// ```
+// _ : zc : _
+// ```
+//-----------------------------------------------------------------------------
+zc(x) = x * x' < 0;
+

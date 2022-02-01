@@ -1,5 +1,8 @@
 //#################################### reverbs.lib ########################################
 // A library of reverb effects. Its official prefix is `re`.
+//
+// #### References
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/reverbs.lib>
 //########################################################################################
 
 ma = library("maths.lib");
@@ -8,9 +11,10 @@ de = library("delays.lib");
 ro = library("routes.lib");
 si = library("signals.lib");
 fi = library("filters.lib");
+os = library("oscillators.lib");
 
 declare name "Faust Reverb Library";
-declare version "0.0";
+declare version "0.2";
 
 //########################################################################################
 /************************************************************************
@@ -43,7 +47,7 @@ Michon and Julius O. Smith III, and are released under the
 // John Chowning thinks this might be the one that became the
 // well known and often copied JCREV.
 //
-// `jcrev` is a standard Faust function
+// `jcrev` is a standard Faust function.
 //
 // #### Usage
 //
@@ -58,7 +62,7 @@ jcrev = *(0.06) : allpass_chain <: comb_bank : mix_mtx with {
   allpass_chain =
     fi.rev2(512,347,0.7) :
     fi.rev2(128,113,0.7) :
-    fi.rev2( 64, 37,0.7);
+    fi.rev2(64, 37,0.7);
   comb_bank =
     rev12(1601,.802),
     rev12(1867,.773),
@@ -83,7 +87,7 @@ jcrev = *(0.06) : allpass_chain <: comb_bank : mix_mtx with {
 // which was recovered from an old SAIL DART backup tape.
 // John Chowning thinks this might be the one used on his
 // often-heard brass canon sound examples, one of which can be found at
-// <https://ccrma.stanford.edu/~jos/wav/FM_BrassCanon2.wav>.
+// <https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav>.
 //
 // #### Usage
 //
@@ -96,15 +100,15 @@ satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
   rev11(len,g) = rev1N(1024,len,g);
   rev12(len,g) = rev1N(2048,len,g);
   comb_bank =
-    rev11( 778,.827),
-    rev11( 901,.805),
+    rev11(778,.827),
+    rev11(901,.805),
     rev11(1011,.783),
     rev12(1123,.764);
   rev2N = fi.rev2;
   allpass_chain =
     rev2N(128,125,0.7) :
-    rev2N( 64, 42,0.7) :
-    rev2N( 16, 12,0.7);
+    rev2N(64, 42,0.7) :
+    rev2N(16, 12,0.7);
 };
 
 //======================Feedback Delay Network (FDN) Reverberators========================
@@ -183,7 +187,7 @@ with {
 // #### Usage
 //
 // ```
-// bus(8) : zita_rev_fdn(f1,f2,t60dc,t60m,fsmax) : bus(8)
+// si.bus(8) : zita_rev_fdn(f1,f2,t60dc,t60m,fsmax) : si.bus(8)
 // ```
 //
 // Where:
@@ -208,8 +212,8 @@ with {
   // Delay-line lengths in seconds:
   apdelays = (0.020346, 0.024421, 0.031604, 0.027333, 0.022904,
               0.029291, 0.013458, 0.019123); // feedforward delays in seconds
-  tdelays = ( 0.153129, 0.210389, 0.127837, 0.256891, 0.174713,
-              0.192303, 0.125000, 0.219991); // total delays in seconds
+  tdelays = (0.153129, 0.210389, 0.127837, 0.256891, 0.174713,
+             0.192303, 0.125000, 0.219991); // total delays in seconds
   tdelay(i) = floor(0.5 + ma.SR*ba.take(i+1,tdelays)); // samples
   apdelay(i) = floor(0.5 + ma.SR*ba.take(i+1,apdelays));
   fbdelay(i) = tdelay(i) - apdelay(i);
@@ -315,7 +319,7 @@ zita_rev1_ambi(rgxyz,rdel,f1,f2,t60dc,t60m,fsmax) =
  : zita_rev_fdn(f1,f2,t60dc,t60m,fsmax)
  : output4(N) // ambisonics mode
 with {
-  N=8;
+  N = 8;
   output4(N) = select4 : *(t0),*(t1),*(t1),*(t1);
   select4 = _,_,_,!,_,!,!,! : _,_,cross with { cross(x,y) = y,x; };
   t0 = 1.0/sqrt(2.0);
@@ -373,7 +377,7 @@ closed source license or any other license if you decide so.
 // #### Usage
 //
 // ```
-// _ : mono_freeverb(fb1, fb2, damp, spread) : _;
+// _ : mono_freeverb(fb1, fb2, damp, spread) : _
 // ```
 //
 // Where:
@@ -392,26 +396,30 @@ closed source license or any other license if you decide so.
 // TODO: author RM
 mono_freeverb(fb1, fb2, damp, spread) = _ <: par(i,8,lbcf(combtuningL(i)+spread,fb1,damp))
 	:> seq(i,4,fi.allpass_comb(1024, allpasstuningL(i)+spread, -fb2))
-with{
-    origSR = 44100;
-
+with {
+ 
     // Filters parameters
-    combtuningL(0) = 1116*ma.SR/origSR : int;
-    combtuningL(1) = 1188*ma.SR/origSR : int;
-    combtuningL(2) = 1277*ma.SR/origSR : int;
-    combtuningL(3) = 1356*ma.SR/origSR : int;
-    combtuningL(4) = 1422*ma.SR/origSR : int;
-    combtuningL(5) = 1491*ma.SR/origSR : int;
-    combtuningL(6) = 1557*ma.SR/origSR : int;
-    combtuningL(7) = 1617*ma.SR/origSR : int;
+    combtuningL(0) = adaptSR(1116);
+    combtuningL(1) = adaptSR(1188);
+    combtuningL(2) = adaptSR(1277);
+    combtuningL(3) = adaptSR(1356);
+    combtuningL(4) = adaptSR(1422);
+    combtuningL(5) = adaptSR(1491);
+    combtuningL(6) = adaptSR(1557);
+    combtuningL(7) = adaptSR(1617);
 
-    allpasstuningL(0) = 556*ma.SR/origSR : int;
-    allpasstuningL(1) = 441*ma.SR/origSR : int;
-    allpasstuningL(2) = 341*ma.SR/origSR : int;
-    allpasstuningL(3) = 225*ma.SR/origSR : int;
-    // Lowpass Feedback Combfiler:
-    // https://ccrma.stanford.edu/~jos/pasp/Lowpass_Feedback_Comb_Filter.html
+    allpasstuningL(0) = adaptSR(556);
+    allpasstuningL(1) = adaptSR(441);
+    allpasstuningL(2) = adaptSR(341);
+    allpasstuningL(3) = adaptSR(225);
+    
+    // Lowpass Feedback Combfilter:
+    // <https://ccrma.stanford.edu/~jos/pasp/Lowpass_Feedback_Comb_Filter.html>
     lbcf(dt, fb, damp) = (+:@(dt)) ~ (*(1-damp) : (+ ~ *(damp)) : *(fb));
+     
+    origSR = 44100;
+    adaptSR(val) = val*ma.SR/origSR : int;
+
 };
 
 
@@ -424,7 +432,7 @@ with{
 // #### Usage
 //
 // ```
-// _,_ : stereo_freeverb(fb1, fb2, damp, spread) : _,_;
+// _,_ : stereo_freeverb(fb1, fb2, damp, spread) : _,_
 // ```
 //
 // Where:
@@ -435,7 +443,7 @@ with{
 // * `spread`: spatial spread in number of samples (for stereo)
 //------------------------------------------------------------
 // TODO: author RM
-stereo_freeverb(fb1, fb2, damp, spread) =  + <: mono_freeverb(fb1, fb2, damp,0), mono_freeverb(fb1, fb2, damp, spread);
+stereo_freeverb(fb1, fb2, damp, spread) = + <: mono_freeverb(fb1, fb2, damp, 0), mono_freeverb(fb1, fb2, damp, spread);
 
 //########################################################################################
 /************************************************************************
@@ -448,5 +456,241 @@ license disposition, if their license choice is not already indicated
 elsewhere among the libraries.  It is expected that all software will be
 released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
+
+//===============================Dattorro Reverb============================
+//==========================================================================
+
+//-------------------------------`(re.)dattorro_rev`-------------------------------
+// Reverberator based on the Dattorro reverb topology. This implementation does
+// not use modulated delay lengths (excursion).
+//
+// #### Usage
+//
+// ```
+// _,_ : dattorro_rev(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) : _,_
+// ```
+//
+// Where:
+//
+// * `pre_delay`: pre-delay in samples (fixed at compile time)
+// * `bw`: band-width filter (pre filtering); (0 - 1)
+// * `i_diff1`: input diffusion factor 1; (0 - 1)
+// * `i_diff2`: input diffusion factor 2;
+// * `decay`: decay rate; (0 - 1); infinite decay = 1.0
+// * `d_diff1`: decay diffusion factor 1; (0 - 1)
+// * `d_diff2`: decay diffusion factor 2;
+// * `damping`: high-frequency damping; no damping = 0.0
+//
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
+//------------------------------------------------------------
+
+// Author: Jakob Zerbian
+// License: MIT-style STK-4.3 license
+declare dattorro_rev author "Jakob Zerbian";
+declare dattorro_rev license "MIT-style STK-4.3 license";
+
+dattorro_rev(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) = 
+    si.bus(2) : + : *(0.5) : predelay : bw_filter : diffusion_network <: ((si.bus(4) :> _,_) ~ (reverb_network : ro.cross(2)))
+with {
+    // allpass using delay with fixed size
+    allpass_f(t, a) = (+ <: @(t),*(a)) ~ *(-a) : mem,_ : +;
+
+    // input pre-delay and diffusion
+    predelay = @(pre_delay);
+    bw_filter = *(bw) : +~(mem : *(1-bw));
+    diffusion_network = allpass_f(142, i_diff1) : allpass_f(107, i_diff1) : allpass_f(379, i_diff2) : allpass_f(277, i_diff2);
+
+    // reverb loop
+    reverb_network = par(i, 2, block(i)) with {
+        d = (672, 908, 4453, 4217, 1800, 2656, 3720, 3163);
+        block(i) = allpass_f(ba.take(i+1, d),-d_diff1) : @(ba.take(i+3, d)) : damp : 
+            allpass_f(ba.take(i+5, d), d_diff2) : @(ba.take(i+5, d)) : *(decay)
+        with {
+            damp = *(1-damping) : +~*(damping) : *(decay);
+        };
+    };
+};
+
+
+//-------------------------------`(re.)dattorro_rev_default`-------------------------------
+// Reverberator based on the Dattorro reverb topology with reverb parameters from the
+// original paper.
+// This implementation does not use modulated delay lengths (excursion) and
+// uses zero length pre-delay.
+//
+// #### Usage
+//
+// ```
+// _,_ : dattorro_rev_default : _,_
+// ```
+//
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
+//------------------------------------------------------------
+
+// Author: Jakob Zerbian
+// License: MIT-style STK-4.3 license
+declare dattorro_rev_default author "Jakob Zerbian";
+declare dattorro_rev_default license "MIT-style STK-4.3 license";
+
+dattorro_rev_default = dattorro_rev(0, 0.9995, 0.75, 0.625, 0.5, 0.7, 0.5, 0.0005);
+
+//===============================JPverb and Greyhole Reverbs============================
+//======================================================================================
+
+jp_gh_rev = environment {
+
+    diffuser_aux(angle, g, scale1, scale2, size, block) = si.bus(2) <: ((si.bus(2):par(i,2,*(c_norm))
+        : ((si.bus(4) :> si.bus(2)
+            : block
+            : rotator(angle)
+            : (de.fdelay1a(8192, prime_delays(size*scale1):smooth_init(0.9999,prime_delays(size*scale1)) -1),
+               de.fdelay1a(8192, prime_delays(size*scale2):smooth_init(0.9999,prime_delays(size*scale2)) -1)))
+        ~ par(i,2,*(-s_norm))) : par(i,2,mem:*(c_norm)))
+        ,
+        par(i,2,*(s_norm)))
+        :> si.bus(2)
+        with {
+            rotator(angle) = si.bus(2) <: (*(c),*(-s),*(s),*(c)) :(+,+) : si.bus(2)
+            with {
+                c = cos(angle);
+                s = sin(angle);
+            };
+            c_norm = cos(g);
+            s_norm = sin(g);
+        };
+
+    diffuser(angle, g, scale1, scale2, size) = diffuser_aux(angle,g,scale1,scale2,size,si.bus(2));
+
+    // Nested version
+    diffuser_nested(1, angle, g, scale, size) = diffuser_aux(angle,g,scale,scale+10,size,si.bus(2));
+    diffuser_nested(N, angle, g, scale, size) = diffuser_aux(angle,g,scale,scale+10,size,diffuser_nested(N-1,angle,g,scale+13,size));
+
+    prime_delays(x) = (waveform {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223, 1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297, 1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373, 1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499, 1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597, 1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637, 1657, 1663, 1667, 1669, 1693, 1697, 1699, 1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801, 1811, 1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889, 1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987, 1993, 1997, 1999, 2003, 2011, 2017, 2027, 2029, 2039, 2053, 2063, 2069, 2081, 2083, 2087, 2089, 2099, 2111, 2113, 2129, 2131, 2137, 2141, 2143, 2153, 2161, 2179, 2203, 2207, 2213, 2221, 2237, 2239, 2243, 2251, 2267, 2269, 2273, 2281, 2287, 2293, 2297, 2309, 2311, 2333, 2339, 2341, 2347, 2351, 2357, 2371, 2377, 2381, 2383, 2389, 2393, 2399, 2411, 2417, 2423, 2437, 2441, 2447, 2459, 2467, 2473, 2477, 2503, 2521, 2531, 2539, 2543, 2549, 2551, 2557, 2579, 2591, 2593, 2609, 2617, 2621, 2633, 2647, 2657, 2659, 2663, 2671, 2677, 2683, 2687, 2689, 2693, 2699, 2707, 2711, 2713, 2719, 2729, 2731, 2741, 2749, 2753, 2767, 2777, 2789, 2791, 2797, 2801, 2803, 2819, 2833, 2837, 2843, 2851, 2857, 2861, 2879, 2887, 2897, 2903, 2909, 2917, 2927, 2939, 2953, 2957, 2963, 2969, 2971, 2999, 3001, 3011, 3019, 3023, 3037, 3041, 3049, 3061, 3067, 3079, 3083, 3089, 3109, 3119, 3121, 3137, 3163, 3167, 3169, 3181, 3187, 3191, 3203, 3209, 3217, 3221, 3229, 3251, 3253, 3257, 3259, 3271, 3299, 3301, 3307, 3313, 3319, 3323, 3329, 3331, 3343, 3347, 3359, 3361, 3371, 3373, 3389, 3391, 3407, 3413, 3433, 3449, 3457, 3461, 3463, 3467, 3469, 3491, 3499, 3511, 3517, 3527, 3529, 3533, 3539, 3541, 3547, 3557, 3559, 3571, 3581, 3583, 3593, 3607, 3613, 3617, 3623, 3631, 3637, 3643, 3659, 3671, 3673, 3677, 3691, 3697, 3701, 3709, 3719, 3727, 3733, 3739, 3761, 3767, 3769, 3779, 3793, 3797, 3803, 3821, 3823, 3833, 3847, 3851, 3853, 3863, 3877, 3881, 3889, 3907, 3911, 3917, 3919, 3923, 3929, 3931, 3943, 3947, 3967, 3989, 4001, 4003, 4007, 4013, 4019, 4021, 4027, 4049, 4051, 4057, 4073, 4079, 4091, 4093, 4099, 4111, 4127, 4129, 4133, 4139, 4153, 4157, 4159, 4177, 4201, 4211, 4217, 4219, 4229, 4231, 4241, 4243, 4253, 4259, 4261, 4271, 4273, 4283, 4289, 4297, 4327, 4337, 4339, 4349, 4357, 4363, 4373, 4391, 4397, 4409, 4421, 4423, 4441, 4447, 4451, 4457, 4463, 4481, 4483, 4493, 4507, 4513, 4517, 4519, 4523, 4547, 4549, 4561, 4567, 4583, 4591, 4597, 4603, 4621, 4637, 4639, 4643, 4649, 4651, 4657, 4663, 4673, 4679, 4691, 4703, 4721, 4723, 4729, 4733, 4751, 4759, 4783, 4787, 4789, 4793, 4799, 4801, 4813, 4817, 4831, 4861, 4871, 4877, 4889, 4903, 4909, 4919, 4931, 4933, 4937, 4943, 4951, 4957, 4967, 4969, 4973, 4987, 4993, 4999, 5003, 5009, 5011, 5021, 5023, 5039, 5051, 5059, 5077, 5081, 5087, 5099, 5101, 5107, 5113, 5119, 5147, 5153, 5167, 5171, 5179, 5189, 5197, 5209, 5227, 5231, 5233, 5237, 5261, 5273, 5279, 5281, 5297, 5303, 5309, 5323, 5333, 5347, 5351, 5381, 5387, 5393, 5399, 5407, 5413, 5417, 5419, 5431, 5437, 5441, 5443, 5449, 5471, 5477, 5479, 5483, 5501, 5503, 5507, 5519, 5521, 5527, 5531, 5557, 5563, 5569, 5573, 5581, 5591, 5623, 5639, 5641, 5647, 5651, 5653, 5657, 5659, 5669, 5683, 5689, 5693, 5701, 5711, 5717, 5737, 5741, 5743, 5749, 5779, 5783, 5791, 5801, 5807, 5813, 5821, 5827, 5839, 5843, 5849, 5851, 5857, 5861, 5867, 5869, 5879, 5881, 5897, 5903, 5923, 5927, 5939, 5953, 5981, 5987, 6007, 6011, 6029, 6037, 6043, 6047, 6053, 6067, 6073, 6079, 6089, 6091, 6101, 6113, 6121, 6131, 6133, 6143, 6151, 6163, 6173, 6197, 6199, 6203, 6211, 6217, 6221, 6229, 6247, 6257, 6263, 6269, 6271, 6277, 6287, 6299, 6301, 6311, 6317, 6323, 6329, 6337, 6343, 6353, 6359, 6361, 6367, 6373, 6379, 6389, 6397, 6421, 6427, 6449, 6451, 6469, 6473, 6481, 6491, 6521, 6529, 6547, 6551, 6553, 6563, 6569, 6571, 6577, 6581, 6599, 6607, 6619, 6637, 6653, 6659, 6661, 6673, 6679, 6689, 6691, 6701, 6703, 6709, 6719, 6733, 6737, 6761, 6763, 6779, 6781, 6791, 6793, 6803, 6823, 6827, 6829, 6833, 6841, 6857, 6863, 6869, 6871, 6883, 6899, 6907, 6911, 6917, 6947, 6949, 6959, 6961, 6967, 6971, 6977, 6983, 6991, 6997, 7001, 7013, 7019, 7027, 7039, 7043, 7057, 7069, 7079, 7103, 7109, 7121, 7127, 7129, 7151, 7159, 7177, 7187, 7193, 7207, 7211, 7213, 7219, 7229, 7237, 7243, 7247, 7253, 7283, 7297, 7307, 7309, 7321, 7331, 7333, 7349, 7351, 7369, 7393, 7411, 7417, 7433, 7451, 7457, 7459, 7477, 7481, 7487, 7489, 7499, 7507, 7517, 7523, 7529, 7537, 7541, 7547, 7549, 7559, 7561, 7573, 7577, 7583, 7589, 7591, 7603, 7607, 7621, 7639, 7643, 7649, 7669, 7673, 7681, 7687, 7691, 7699, 7703, 7717, 7723, 7727, 7741, 7753, 7757, 7759, 7789, 7793, 7817, 7823, 7829, 7841, 7853, 7867, 7873, 7877, 7879, 7883, 7901, 7907, 7919, 7927, 7933, 7937, 7949, 7951, 7963, 7993, 8009, 8011, 8017, 8039, 8053, 8059, 8069, 8081, 8087, 8089, 8093, 8101, 8111, 8117, 8123, 8147, 8161, 8167, 8171, 8179, 8191, 8209, 8219, 8221, 8231, 8233, 8237, 8243, 8263, 8269, 8273, 8287, 8291, 8293, 8297, 8311, 8317, 8329, 8353, 8363, 8369, 8377, 8387, 8389, 8419, 8423, 8429, 8431, 8443, 8447, 8461, 8467, 8501, 8513, 8521, 8527, 8537, 8539, 8543, 8563, 8573, 8581, 8597, 8599, 8609, 8623, 8627, 8629, 8641, 8647, 8663, 8669, 8677, 8681, 8689, 8693, 8699, 8707, 8713, 8719, 8731, 8737, 8741, 8747, 8753, 8761, 8779, 8783, 8803, 8807, 8819, 8821, 8831, 8837, 8839, 8849, 8861, 8863, 8867, 8887, 8893, 8923, 8929, 8933, 8941, 8951, 8963, 8969, 8971, 8999, 9001, 9007, 9011, 9013, 9029, 9041, 9043, 9049, 9059, 9067, 9091, 9103, 9109, 9127, 9133, 9137, 9151, 9157, 9161, 9173, 9181, 9187, 9199, 9203, 9209, 9221, 9227, 9239, 9241, 9257, 9277, 9281, 9283, 9293, 9311, 9319, 9323, 9337, 9341, 9343, 9349, 9371, 9377, 9391, 9397, 9403, 9413, 9419, 9421, 9431, 9433, 9437, 9439, 9461, 9463, 9467, 9473, 9479, 9491, 9497, 9511, 9521, 9533, 9539, 9547, 9551, 9587, 9601, 9613, 9619, 9623, 9629, 9631, 9643, 9649, 9661, 9677, 9679, 9689, 9697, 9719, 9721, 9733, 9739, 9743, 9749, 9767, 9769, 9781, 9787, 9791, 9803, 9811, 9817, 9829, 9833, 9839, 9851, 9857, 9859, 9871, 9883, 9887, 9901, 9907, 9923, 9929, 9931, 9941, 9949, 9967, 9973, 10007, 10009, 10037, 10039, 10061, 10067, 10069, 10079, 10091, 10093, 10099, 10103, 10111, 10133, 10139, 10141, 10151, 10159, 10163, 10169, 10177, 10181, 10193, 10211, 10223, 10243, 10247, 10253, 10259, 10267, 10271, 10273, 10289, 10301, 10303, 10313, 10321, 10331, 10333, 10337, 10343, 10357, 10369, 10391, 10399, 10427, 10429, 10433, 10453, 10457, 10459, 10463, 10477, 10487, 10499, 10501, 10513, 10529, 10531, 10559, 10567, 10589, 10597, 10601, 10607, 10613, 10627, 10631, 10639, 10651, 10657, 10663, 10667}, int(x)) : rdtable;
+
+    smooth_init(s,default) = *(1.0 - s) : + ~ (+(default*init(1)):*(s)) with { init(value) = value - value'; };
+
+    jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff)
+        = ((si.bus(4) :> (de.fdelay4(512, depth + depth*os.oscrs(mod_freq) + 5),de.fdelay4(512, depth + depth*os.oscrc(mod_freq) + 5))
+            : par(i,2,si.smooth(damp))
+            : diffuser(ma.PI/4,early_diff,55,240,size)
+            : diffuser(ma.PI/4,early_diff,215,85,size)
+            : diffuser(ma.PI/4,early_diff,115,190,size)
+            : diffuser(ma.PI/4,early_diff,175,145,size)
+        )~(seq(i,5,diffuser(ma.PI/4,0.707,10+30*i,110+30*i,size))
+            : par(i,2,de.fdelay4(512, depth + (-1^i)*depth*os.oscrc(mod_freq)+5)
+            : de.fdelay1a(8192,(prime_delays(size*(54+150*i))
+            : smooth_init(0.995,prime_delays(size*(54+150*i)))) -1))
+            : seq(i,5,diffuser(ma.PI/4,0.707,125+30*i,25+30*i,size))
+            : par(i,2,de.fdelay4(8192, depth + (-1^i)*depth*os.oscrs(mod_freq)+5)
+            : de.fdelay1a(8192,(prime_delays(size*(134-100*i))
+            : smooth_init(0.995,prime_delays(size*(134-100*i)))) -1))
+            : par(i,2,fi.filterbank(5,(low_cutoff,high_cutoff)):(_*(high),_*(mid),_*(low)) :> _)
+            : par(i,2,*(fb))))
+        with {
+            depth = 50*mod_depth;
+            calib = 1.7; // Calibration constant given by t60 in seconds when fb = 0.5
+            total_length = calib*0.1*(size*5/4 -1/4);
+            fb = 10^(-3/((t60)/(total_length)));
+        };
+
+    greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq)
+        = (si.bus(4) :> seq(i,3,diffuser_nested(4,ma.PI/2,(-1^i)*diff,10+19*i,size))
+            : par(i,2,si.smooth(damp_interp)))
+        ~((de.fdelay4(512, 10 + depth + depth*os.oscrc(freq)),de.fdelay4(512, 10 + depth + depth*os.oscrs(freq)))
+            : (de.sdelay(65536,44100/2,floor(dt_constrained)),de.sdelay(65536,44100/2,floor(dt_constrained)))
+            : par(i,2,*(fb)))
+        with {
+            fb = feedback:linear_interp;
+            depth = ((ma.SR/44100)*50*mod_depth):linear_interp;
+            freq = mod_freq:linear_interp;
+            diff = early_diff:linear_interp;
+            dt_constrained = min(65533,ma.SR*dt);
+            damp_interp = damp:linear_interp;
+            linear_interp(x) = (x+x')/2;
+        };
+
+};
+
+//-------------------------------`(re.)jpverb`-------------------------------
+// An algorithmic reverb (stereo in/out), inspired by the lush chorused sound 
+// of certain vintage Lexicon and Alesis reverberation units. 
+// Designed to sound great with synthetic sound sources, rather than sound like a realistic space.
+//
+// #### Usage
+//
+// ```
+// _,_ : jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff) : _,_
+// ```
+//
+// Where:
+//
+// * `t60`: approximate reverberation time in seconds (`[0.1..60]` sec) (T60 - the time for the reverb to decay by 60db when damp == 0 ). Does not effect early reflections
+// * `damp`: controls damping of high-frequencies as the reverb decays. `0` is no damping, `1` is very strong damping. Values should be between (`[0..1]`)
+// * `size`: scales size of delay-lines within the reverberator, producing the impression of a larger or smaller space. Values below `1` can sound metallic. Values should be between `[0.5..5]
+// * `early_diff`: controls shape of early reflections. Values of `0.707` or more produce smooth exponential decay. Lower values produce a slower build-up of echoes. Values should be between (`[0..1]`)
+// * `mod_depth`: depth (`[0..1]`) of delay-line modulation. Use in combination with `mod_freq` to set amount of chorusing within the structure
+// * `modFreq`: frequency (`[0..10]` Hz) of delay-line modulation. Use in combination with modDepth to set amount of chorusing within the structure
+// * `low`: multiplier (`[0..1]`) for the reverberation time within the low band
+// * `mid`: multiplier (`[0..1]`) for the reverberation time within the mid band
+// * `high`: multiplier (`[0..1]`) for the reverberation time within the high band
+// * `lowcut`: frequency (100..6000 Hz) at which the crossover between the low and mid bands of the reverb occurs
+// * `highcut`: frequency (1000..10000 Hz) at which the crossover between the mid and high bands of the reverb occurs
+//
+// #### Reference
+//
+// <https://doc.sccode.org/Overviews/DEIND.html>
+//------------------------------------------------------------
+
+// Author: Julian Parker, bug fixes and minor interface changes by Till Bovermann
+// License: GPL2+
+declare jpverb author "Julian Parker, bug fixes and minor interface changes by Till Bovermann";
+declare jpverb license "GPL2+";
+
+jpverb(t60, damp, size, early_diff, 
+		mod_depth, mod_freq, 
+		low, mid, high, 
+		low_cutoff, high_cutoff)
+    = jp_gh_rev.jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff);
+
+
+//-------------------------------`(re.)greyhole`-------------------------------
+// A complex echo-like effect (stereo in/out), inspired by the classic Eventide effect of a similar name. 
+// The effect consists of a diffuser (like a mini-reverb, structurally similar to the one used in `jpverb`)
+// connected in a feedback system with a long, modulated delay-line. 
+// Excels at producing spacey washes of sound.
+//
+// #### Usage
+//
+// ```
+// _,_ : greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq) : _,_
+// ```
+//
+// Where:
+//
+// * `dt`: approximate reverberation time in seconds (`[0.1..60 sec]`)
+// * `damp`: controls damping of high-frequencies as the reverb decays. `0` is no damping, `1` is very strong damping. Values should be between (`[0..1]`)
+// * `size`: scales size of delay-lines within the diffusion unit, producing the impression of a larger or smaller space. Values below `1` can sound metallic. Values should be between (`[0.5..5]`)
+// * `size`: control of relative "room size" roughly between (`[0.5..3]`)
+// * `early_diff`: controls pattern of echoes produced by the diffuser. At very low values, the diffuser acts like a delay-line whose length is controlled by the 'size' parameter. Medium values produce a slow build-up of echoes, giving the sound a reversed-like quality. Values of `0.707` or greater than produce smooth exponentially decaying echoes. Values should be in the range (`[0..1]`)
+// * `feedback`: amount of feedback through the system. Sets the number of repeating echoes. A setting of `1.0` produces infinite sustain. Values should be in the range (`[0..1]`)
+// * `mod_depth`: depth (`[0..1]`) of delay-line modulation. Use in combination with mod_freq to produce chorus and pitch-variations in the echoes
+// * `mod_freq`: frequency (`[0..10]` Hz) of delay-line modulation. Use in combination with mod_depth to produce chorus and pitch-variations in the echoes
+//
+// #### Reference
+//
+// <https://doc.sccode.org/Overviews/DEIND.html>
+//------------------------------------------------------------
+
+// Author: Julian Parker, bug fixes and minor interface changes by Till Bovermann
+// License: GPL2+
+declare greyhole author "Julian Parker, bug fixes and minor interface changes by Till Bovermann";
+declare greyhole license "GPL2+";
+
+greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq) 
+	= jp_gh_rev.greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq);
 
 // end further further contributions section

@@ -1,5 +1,8 @@
 //################################ analyzers.lib ##########################################
-// Faust Analyzers library. Its official prefix is `an`.
+// Analyzers library. Its official prefix is `an`.
+//
+// #### References
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/analyzers.lib>
 //########################################################################################
 
 ma = library("maths.lib");
@@ -10,7 +13,7 @@ fi = library("filters.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "0.0";
+declare version "0.1";
 
 /************************************************************************
 FAUST library file, jos section
@@ -29,10 +32,98 @@ Michon and Julius O. Smith III, and is released under the
 //==============================Amplitude Tracking========================================
 //========================================================================================
 
+//------------------`(an.)abs_envelope_rect`-----------------------------------
+// Absolute value average with moving-average algorithm.
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope_rect(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: sets the averaging frame in seconds
+//-----------------------------------------------------------------------------
+declare abs_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
+declare abs_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare abs_envelope_rect license "MIT-style STK-4.3 license";
+abs_envelope_rect(period, x) = abs(x) : fi.avg_rect(period);
+
+
+//------------------`(an.)abs_envelope_tau`------------------------------------
+// Absolute value average with one-pole lowpass and tau response. 
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope_tau(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 1/e) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare abs_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
+declare abs_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare abs_envelope_tau license "MIT-style STK-4.3 license";
+abs_envelope_tau(period, x) = abs(x) : fi.avg_tau(period);
+
+
+//------------------`(an.)abs_envelope_t60`------------------------------------
+// Absolute value average with one-pole lowpass and t60 response.
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope_t60(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare abs_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
+declare abs_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare abs_envelope_t60 license "MIT-style STK-4.3 license";
+abs_envelope_t60(period, x) = abs(x) : fi.avg_t60(period);
+
+
+//------------------`(an.)abs_envelope_t19`------------------------------------
+// Absolute value average with one-pole lowpass and t19 response. 
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : abs_envelope_t19(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare abs_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
+declare abs_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare abs_envelope_t19 license "MIT-style STK-4.3 license";
+abs_envelope_t19(period, x) = abs(x) : fi.avg_t19(period);
+
+
 //---------------------------`(an.)amp_follower`---------------------------
 // Classic analog audio envelope follower with infinitely fast rise and
 // exponential decay.  The amplitude envelope instantaneously follows
 // the absolute value going up, but then floats down exponentially.
+// 
 // `amp_follower` is a standard Faust function.
 //
 // #### Usage
@@ -45,15 +136,17 @@ Michon and Julius O. Smith III, and is released under the
 //
 // * `rel`: release time = amplitude-envelope time-constant (sec) going down
 //
-// #### Reference
+// #### References
 //
-// * Musical Engineer's Handbook, Bernie Hutchins, Ithaca NY, 1975 Electronotes
-// Newsletter, Bernie Hutchins
+// * Musical Engineer's Handbook, Bernie Hutchins, Ithaca NY
+// * 1975 Electronotes Newsletter, Bernie Hutchins
 //------------------------------------------------------------
 amp_follower(rel) = abs : env with {
- p = ba.tau2pole(rel);
- env(x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
+ 	p = ba.tau2pole(rel);
+ 	env(x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
 };
+
+peak_envelope = amp_follower; // Synonym for more standard naming
 
 
 //---------------------------`(an.)amp_follower_ud`---------------------------
@@ -81,7 +174,7 @@ amp_follower(rel) = abs : env with {
 //
 // * "Digital Dynamic Range Compressor Design --- A Tutorial and Analysis", by
 //   Dimitrios Giannoulis, Michael Massberg, and Joshua D. Reiss
-//   <http://www.eecs.qmul.ac.uk/~josh/documents/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf>
+//   <https://www.eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf>
 //------------------------------------------------------------
 amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 
@@ -94,11 +187,212 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 // #### Usage
 //
 // ```
-// _ : amp_follower_ar(att,rel) : _;
+// _ : amp_follower_ar(att,rel) : _
 // ```
 // * Author Jonatan Liljedahl, revised by RM
 //---------------------------------------------------------
 amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
+
+
+//------------------`(an.)ms_envelope_rect`------------------------------------
+// Mean square with moving-average algorithm.
+//
+// #### Usage
+//
+// ```
+// _ : ms_envelope_rect(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare ms_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
+declare ms_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare ms_envelope_rect license "MIT-style STK-4.3 license";
+ms_envelope_rect(period, x) = x * x : fi.avg_rect(period);
+
+
+//------------------`(an.)ms_envelope_tau`-------------------------------------
+// Mean square average with one-pole lowpass and tau response. 
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : ms_envelope_tau(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 1/e) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare ms_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
+declare ms_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare ms_envelope_tau license "MIT-style STK-4.3 license";
+ms_envelope_tau(period, x) = x * x : fi.avg_tau(period);
+
+
+//------------------`(an.)ms_envelope_t60`-------------------------------------
+// Mean square with one-pole lowpass and t60 response. 
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : ms_envelope_t60(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare ms_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
+declare ms_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare ms_envelope_t60 license "MIT-style STK-4.3 license";
+ms_envelope_t60(period, x) = x * x : fi.avg_t60(period);
+
+
+//------------------`(an.)ms_envelope_t19`-------------------------------------
+// Mean square with one-pole lowpass and t19 response. 
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : ms_envelope_t19(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare ms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
+declare ms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare ms_envelope_t19 license "MIT-style STK-4.3 license";
+ms_envelope_t19(period, x) = x * x : fi.avg_t19(period);
+
+
+//------------------`(an.)rms_envelope_rect`-----------------------------------
+// Root mean square with moving-average algorithm.
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope_rect(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare rms_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
+declare rms_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare rms_envelope_rect license "MIT-style STK-4.3 license";
+rms_envelope_rect(period, x) = ms_envelope_rect(period, x) : sqrt;
+
+
+//------------------`(an.)rms_envelope_tau`------------------------------------
+// Root mean square with one-pole lowpass and tau response.
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope_tau(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 1/e) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare rms_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
+declare rms_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare rms_envelope_tau license "MIT-style STK-4.3 license";
+rms_envelope_tau(period, x) = ms_envelope_tau(period, x) : sqrt;
+
+
+//------------------`(an.)rms_envelope_t60`------------------------------------
+// Root mean square with one-pole lowpass and t60 response.
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope_t60(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 60 dB) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare rms_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
+declare rms_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare rms_envelope_t60 license "MIT-style STK-4.3 license";
+rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
+
+
+//------------------`(an.)rms_envelope_t19`------------------------------------
+// Root mean square with one-pole lowpass and t19 response.
+// (See filters.lib.)
+//
+// #### Usage
+//
+// ```
+// _ : rms_envelope_t19(period) : _
+// ```
+//
+//  Where:
+//
+// * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
+//-----------------------------------------------------------------------------
+declare rms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
+declare rms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
+      <sanfilippo.dario@gmail.com> and 
+       2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare rms_envelope_t19 license "MIT-style STK-4.3 license";
+rms_envelope_t19(period, x) = ms_envelope_t19(period, x) : sqrt;
+
+
+//-----------------------`(an.)zcr`--------------------------------------------
+// Zero-crossing rate (ZCR) with one-pole lowpass averaging based on the tau 
+// constant. It outputs an index between 0 and 1 at a desired analysis frame. 
+// The ZCR of a signal correlates with the noisiness [Gouyon et al. 2000] and 
+// the spectral centroid [Herrera-Boyer et al. 2006] of a signal. 
+// For sinusoidal signals, the ZCR can be multiplied by ma.SR/2 and used
+// as a frequency detector. For example, it can be deployed as a
+// computationally efficient adaptive mechanism for automatic Larsen
+// suppression.
+//
+// #### Usage
+//
+// ```
+// _ : zcr(tau) : _
+// ```
+//
+// Where:
+//
+// * `tau`: (time to decay by e^-1) sets the averaging frame in seconds.
+declare zcr author "Dario Sanfilippo";
+declare zcr copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare zcr license "MIT-style STK-4.3 license";
+zcr(period, x) = ma.zc(x) : fi.lptau(period);
+
 
 //=============================Spectrum-Analyzers=========================================
 // Spectrum-analyzers split the input signal into a bank of parallel signals, one for
@@ -113,7 +407,7 @@ amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
 // In addition to the Mth-octave output signals, there is a highpass signal
 // containing frequencies from ftop to SR/2, and a "dc band" lowpass signal
 // containing frequencies from 0 (dc) up to the start of the Mth-octave bands.
-// Thus, the N output signals are
+// Thus, the N output signals are:
 // ```
 // highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-M*(N-1)))
 // ```
@@ -136,7 +430,7 @@ amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
 // * "Tree-structured complementary filter banks using all-pass sections",
 //   Regalia et al., IEEE Trans. Circuits & Systems, CAS-34:1470-1484, Dec. 1987
 // * "Multirate Systems and Filter Banks", P. Vaidyanathan, Prentice-Hall, 1993
-// * Elementary filter theory: https://ccrma.stanford.edu/~jos/filters/
+// * Elementary filter theory: <https://ccrma.stanford.edu/~jos/filters/>
 //========================================================================================
 
 
@@ -146,15 +440,15 @@ amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
 //
 // #### Usage
 // ```
-// _ : mth_octave_analyzer(O,M,ftop,N) : par(i,N,_); // Oth-order Butterworth
-// _ : mth_octave_analyzer6e(M,ftop,N) : par(i,N,_); // 6th-order elliptic
+// _ : mth_octave_analyzer(O,M,ftop,N) : par(i,N,_) // Oth-order Butterworth
+// _ : mth_octave_analyzer6e(M,ftop,N) : par(i,N,_) // 6th-order elliptic
 // ```
 //
 // Also for convenience:
 //
 // ```
-// _ : mth_octave_analyzer3(M,ftop,N) : par(i,N,_); // 3d-order Butterworth
-// _ : mth_octave_analyzer5(M,ftop,N) : par(i,N,_); // 5th-roder Butterworth
+// _ : mth_octave_analyzer3(M,ftop,N) : par(i,N,_) // 3d-order Butterworth
+// _ : mth_octave_analyzer5(M,ftop,N) : par(i,N,_) // 5th-order Butterworth
 // mth_octave_analyzer_default = mth_octave_analyzer6e;
 // ```
 //
@@ -200,7 +494,7 @@ mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
 // #### Usage:
 //
 // ```
-// _ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _;
+// _ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _
 // ```
 //
 // Where:
@@ -222,7 +516,7 @@ mth_octave_spectral_level6e(M,ftop,N,tau,dB_offset) = _<:
     _,mth_octave_analyzer6e(M,ftop,N) :
     _,(display:>_):attach with {
   display = par(i,N,dbmeter(i));
-  dbmeter(i) = abs : si.smooth(ba.tau2pole(tau)) : max(1.0e-7) : ba.linear2db : +(dB_offset) :
+  dbmeter(i) = abs : si.smooth(ba.tau2pole(tau)) : max(ma.EPSILON) : ba.linear2db : +(dB_offset) :
      meter(N-i-1);
     meter(i) = speclevel_group(vbargraph("[%2i] [unit:dB]
      [tooltip: Spectral Band Level in dB]", -50, 10));
@@ -258,7 +552,7 @@ third_octave_filterbank(N) = mth_octave_filterbank_default(3,10000,N);
 // See, e.g.,
 //   Acoustics [the book], by L. L. Beranek
 //   Amer. Inst. Physics for the Acoustical Soc. America,
-//   http://asa.aip.org/publications.html, 1986 (1st ed.1954)
+//   <http://asa.aip.org/publications.html, 1986 (1st ed.1954)>
 
 // Third-octave bands across the audio spectrum are too wide for current
 // typical computer screens, so half-octave bands are the default:
@@ -284,7 +578,7 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 // #### Usage
 //
 // ```
-// _ : analyzer(O,freqs) : par(i,N,_); // No delay equalizer
+// _ : analyzer(O,freqs) : par(i,N,_) // No delay equalizer
 // ```
 //
 // Where:
@@ -314,14 +608,103 @@ analyzer(O,lfreqs) = _ <: bsplit(nb) with
 // Sliding FFTs that compute a rectangularly windowed FFT each sample.
 //========================================================================================
 
-// Undocumented utility functions used by fft and ifft:
+//---------------`(an.)gortzelOpt` --------------------------
+// Optimized Goertzel filter. 
+//
+// #### Usage
+//
+// ```
+// _ : goertzelOpt(freq,N) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency to be analyzed
+// * `N`: the Goertzel block size
+//
+// #### Reference
+//
+// * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
+//---------------------------------------------------
+goertzelOpt(freq,N,x) = mg 
+with{
+  mg = sqrt(eq^2 + eq'^2-eq*eq'*c) : ba.sAndH(reset0); // magnitude
+  cnt = ba.time%N; // counter for windowing
+  reset0 = cnt == (N-1); // reset when end of window
+  reset1 = 1-(cnt == 0); // reset when beginning of window
+  k = 0.5 + N*freq/ma.SR;
+  w = (2*ma.PI/N)*k;
+  c = 2*cos(w);
+  eq = s // equation
+  letrec{
+    's = c*s*reset1 - s'*reset1*reset1' + x;
+  };
+};
 
+//---------------`(an.)gortzelComp` --------------------------
+// Complex Goertzel filter. 
+//
+// #### Usage
+//
+// ```
+// _ : goertzelComp(freq,N) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency to be analyzed
+// * `N`: the Goertzel block size
+//
+// #### Reference
+//
+// * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
+//---------------------------------------------------
+goertzelComp(freq,N,x) = mg 
+with{
+  mg = sqrt(real^2 + imag^2); // magnitude
+  cnt = ba.time%N; // counter for windowing
+  reset0 = cnt == (N-1); // reset when end of window
+  reset1 = 1-(cnt == 0); // reset when beginning of window
+  k = 0.5 + N*freq/ma.SR;
+  w = (2*ma.PI/N)*k;
+  sine = sin(w);
+  cosine = cos(w);
+  c = 2*cosine;
+  eq = s
+  letrec{
+    's = c*s*reset1 - s'*reset1*reset1' + x;
+  };
+  real = eq - eq'*cosine;
+  imag = eq'*sine;
+};
+
+//---------------`(an.)goertzel` --------------------------
+// Same as [`goertzelOpt`](#goertzelopt). 
+//
+// #### Usage
+//
+// ```
+// _ : goertzel(freq,N) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency to be analyzed
+// * `N`: the Goertzel block size
+//
+// #### Reference
+//
+// * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
+//---------------------------------------------------
+goertzel = goertzelOpt;
+
+// Undocumented utility functions used by fft and ifft:
 c_magsq(N) = si.cbus(N) : par(i,N,(par(j,2,abs<:_*_):>_)) :> si.bus(N);
-c_magdb(N) = si.cbus(N) : an.c_magsq(N) : par(i,N,(max(1.0e-7):log10:*(10.0)));
+c_magdb(N) = si.cbus(N) : an.c_magsq(N) : par(i,N,(max(ma.EPSILON):log10:*(10.0)));
 c_select_pos_freqs(2) = (_,_), (_,_); // both dc and SR/2 included with "positive frequencies"
 c_select_pos_freqs(N) = si.cbus(N) : par(i,N/2+1,(_,_)),par(i,N/2-1,(!,!)) : si.cbus(N/2+1); // for complex spectra
   select_pos_freqs(2) = _,_; // both dc and SR/2 included
-  select_pos_freqs(N) = si. bus(N) : par(i,N/2+1, _),   par(i,N/2-1, !)    : si. bus(N/2+1); // real power spectra etc.
+  select_pos_freqs(N) = si.bus(N) : par(i,N/2+1, _), par(i,N/2-1, !) : si. bus(N/2+1); // real power spectra etc.
 
 rtorv(N,x) = par(i,N,x@i); // convert real scalar signal to length N real vector
 rtocv(N,x) = par(i,N,(x@i,0)); // convert real scalar signal to length N complex vector with 0 imag part
@@ -341,12 +724,12 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 
 
 //---------------`(an.)fft` --------------------------
-// Fast Fourier Transform (FFT)
+// Fast Fourier Transform (FFT).
 //
 // #### Usage
 //
 // ```
-// si.cbus(N) : fft(N) : si.cbus(N);
+// si.cbus(N) : fft(N) : si.cbus(N)
 // ```
 //
 // Where:
@@ -402,7 +785,7 @@ with {
 // #### Usage
 //
 // ```
-// si.cbus(N) : ifft(N) : si.cbus(N);
+// si.cbus(N) : ifft(N) : si.cbus(N)
 // ```
 //
 // Where:
@@ -425,6 +808,7 @@ with {
     w(k) = 2.0*ma.PI*float(k)/float(N);
   };
 };
+
 
 // ========== FFT Analyzers ==========
 rfft_analyzer_c(N) = an.rtocv(N) : an.fft(N) : an.c_select_pos_freqs(N); // complex spectral bins 0 to N/2

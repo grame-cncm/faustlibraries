@@ -1,6 +1,9 @@
 //#################################### spats.lib ##########################################
 // This library contains a collection of tools for sound spatialization.
 // Its official prefix is `sp`.
+//
+// #### References
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/spats.lib>
 //########################################################################################
 
 /************************************************************************
@@ -40,7 +43,6 @@ si = library("signals.lib");
 
 declare name "Faust Spatialization Library";
 declare version "0.0";
-
 
 //-----------------------`(sp.)panner`------------------------
 // A simple linear stereo panner.
@@ -99,7 +101,6 @@ with {
 //
 // * `p`: the arbitrary processor
 //----------------------------------------
-// NOTE: where are inputs and outputs declared?
 stereoize(p) = S(inputs(p), outputs(p))
 with {
 	// degenerated processor with no outputs

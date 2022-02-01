@@ -1,5 +1,8 @@
 //############################## oscillators.lib ######################################
 // This library contains a collection of sound generators. Its official prefix is `os`.
+//
+// #### References
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/oscillators.lib>
 //########################################################################################
 
 /************************************************************************
@@ -38,13 +41,16 @@ closed source license or any other license if you decide so.
 ************************************************************************
 ************************************************************************/
 
-declare name "Faust Oscillator Library";
-declare version "0.0";
-
 ma = library("maths.lib");
 ba = library("basics.lib");
 fi = library("filters.lib");
+si = library("signals.lib");
 
+declare name "Faust Oscillator Library";
+declare version "0.3";
+
+// This library contains platform specific constants 
+pl = library("platform.lib");
 
 //=========================Wave-Table-Based Oscillators===================================
 //========================================================================================
@@ -63,7 +69,9 @@ fi = library("filters.lib");
 //
 // * `tablesize`: the table size
 //------------------------------------------------------------
-sinwaveform(tablesize) = float(ba.time)*(2.0*ma.PI)/float(tablesize) : sin;
+sinwaveform(tablesize) = 
+    sin(float(ba.period(tablesize)) * (2.0 * ma.PI) / float(tablesize));
+
 
 //-----------------------`(os.)coswaveform`------------------------
 // Cosine waveform ready to use with a `rdtable`.
@@ -78,7 +86,16 @@ sinwaveform(tablesize) = float(ba.time)*(2.0*ma.PI)/float(tablesize) : sin;
 //
 // * `tablesize`: the table size
 //------------------------------------------------------------
-coswaveform(tablesize) = float(ba.time)*(2.0*ma.PI)/float(tablesize) : cos;
+coswaveform(tablesize) = 
+    cos(float(ba.period(tablesize)) * (2.0 * ma.PI) / float(tablesize));
+    
+
+// Generic phasor with `reset` and `phase` parameters to be specialised in concrete use-cases.
+// The `reset` must be 1 on first sample for the `phase` to be properly initialized.
+phasor_imp(freq, reset, phase) = (select2(reset, +(freq/ma.SR), phase) : ma.decimal) ~ _;
+
+// Version to be used with tables
+phasor_table(tablesize, freq, reset, phase) = phasor_imp(freq, reset, phase) : *(float(tablesize));
 
 //-----------------------`(os.)phasor`------------------------
 // A simple phasor to be used with a `rdtable`.
@@ -93,32 +110,49 @@ coswaveform(tablesize) = float(ba.time)*(2.0*ma.PI)/float(tablesize) : cos;
 // Where:
 //
 // * `tablesize`: the table size
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
-phasor(tablesize,freq) = freq/float(ma.SR) : (+ : ma.decimal) ~ _ : *(float(tablesize));
+phasor(tablesize, freq) = phasor_table(tablesize, freq, 0, 0);
+
 
 //-----------------------`(os.)hs_phasor`------------------------
-// Hardsyncing phasor to be used with an `rdtable`.
+// Hardsyncing phasor to be used with a `rdtable`.
 //
 // #### Usage
 //
 // ```
-// hs_phasor(ts,freq,c) :  _
+// hs_phasor(tablesize,freq,reset) :  _
 // ```
 //
 // Where:
 //
-// * `ts`: the tablesize for the related sine wavetable
-// * `freq`: the fundamental frequency of the phasor
-// * `c`: a clock signal, `c>0` resets phase to 0
+// * `tablesize`: the table size
+// * `freq`: the frequency in Hz
+// * `reset`: a reset signal, reset phase to 0 when equal to 1
 //---------------------------------------------------------
-// Author: Mike Olsen
-hs_phasor(ts,freq,c) = inc : (+ : d)~ (-(_<:(_,*(_,clk)))) : *(ts)
-with {
-	clk = c>0;
-	d   = ma.decimal;
-	inc = freq/float(ma.SR);
-};
+// Author: Mike Olsen, revised by Stéphane Letz
+hs_phasor(tablesize, freq, reset) = phasor_table(tablesize, freq, reset, 0);
+
+
+//-----------------------`(os.)hsp_phasor`------------------------
+// Hardsyncing phasor with selectable phase to be used with a `rdtable`.
+//
+// #### Usage
+//
+// ```
+// hsp_phasor(tablesize,freq,reset,phase)
+// ```
+//
+// Where:
+//
+// * `tablesize`: the table size
+// * `freq`: the frequency in Hz
+// * `reset`: reset the oscillator to phase when equal to 1
+// * `phase`: phase between 0 and 1
+//---------------------------------------------------------
+// Author: Christophe Lebreton, revised by Stéphane Letz
+hsp_phasor(tablesize, freq, reset, phase) = phasor_table(tablesize, freq, reset, phase);
+
 
 //-----------------------`(os.)oscsin`------------------------
 // Sine wave oscillator.
@@ -132,12 +166,13 @@ with {
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
 oscsin(freq) = rdtable(tablesize, sinwaveform(tablesize), int(phasor(tablesize,freq)))
-with{
-	tablesize = 1 << 16;
+with {
+    tablesize = pl.tablesize;
 };
+
 
 //-----------------------`(os.)hs_oscsin`------------------------
 // Sin lookup table with hardsyncing phase.
@@ -145,19 +180,20 @@ with{
 // #### Usage
 //
 // ```
-// hs_oscsin(freq,c) : _
+// hs_oscsin(freq,reset) : _
 // ```
 //
 // Where:
 //
-// * `freq`: the fundamental frequency of the phasor
-// * `c`: a clock signal, `c>0` resets phase to 0
+// * `freq`: the frequency in Hz
+// * `reset`: reset the oscillator to 0 when equal to 1
 //---------------------------------------------------------
 // Author: Mike Olsen
-hs_oscsin(freq,c) = rdtable(ts, sinwaveform(ts), int(hs_phasor(ts,freq,c)))
+hs_oscsin(freq,reset) = rdtable(tablesize, sinwaveform(tablesize), int(hs_phasor(tablesize,freq,reset)))
 with {
-        ts = 1 << 16;
+    tablesize = pl.tablesize;
 };
+
 
 //-----------------------`(os.)osccos`------------------------
 // Cosine wave oscillator.
@@ -170,12 +206,34 @@ with {
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
-osccos(freq) = rdtable(tablesize, coswaveform(tablesize), int(phasor(tablesize,freq)) )
-with{
-	tablesize = 1 << 16;
+osccos(freq) = rdtable(tablesize, coswaveform(tablesize), int(phasor(tablesize,freq)))
+with {
+    tablesize = pl.tablesize;
 };
+
+
+//-----------------------`(os.)hs_osccos`------------------------
+// Cos lookup table with hardsyncing phase.
+//
+// #### Usage
+//
+// ```
+// hs_osccos(freq,reset) : _
+// ```
+//
+// Where:
+//
+// * `freq`: the frequency in Hz
+// * `reset`: reset the oscillator to 0 when equal to 1
+//---------------------------------------------------------
+// Author: Stéphane Letz
+hs_osccos(freq,reset) = rdtable(tablesize, coswaveform(tablesize), int(hs_phasor(tablesize,freq,reset)))
+with {
+    tablesize = pl.tablesize;
+};
+
 
 //-----------------------`(os.)oscp`------------------------
 // A sine wave generator with controllable phase.
@@ -183,15 +241,16 @@ with{
 // #### Usage
 //
 // ```
-// oscp(freq,p) : _
+// oscp(freq,phase) : _
 // ```
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
-// * `p`: the phase in radian
+// * `freq`: the frequency in Hz
+// * `phase`: the phase in radian
 //------------------------------------------------------------
-oscp(freq,p) = oscsin(freq) * cos(p) + osccos(freq) * sin(p);
+oscp(freq,phase) = oscsin(freq) * cos(phase) + osccos(freq) * sin(phase);
+
 
 //-----------------------`(os.)osci`------------------------
 // Interpolated phase sine wave oscillator.
@@ -204,16 +263,34 @@ oscp(freq,p) = oscsin(freq) * cos(p) + osccos(freq) * sin(p);
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: the frequency in Hz
 //------------------------------------------------------------
-osci(freq)	= s1 + d * (s2 - s1)
+osci(freq) = s1 + d * (s2 - s1)
 with {
-	tablesize = 1 << 16;
-	i = int(phasor(tablesize,freq));
-	d = ma.decimal(phasor(tablesize,freq));
-	s1 = rdtable(tablesize+1,sinwaveform(tablesize),i);
-	s2 = rdtable(tablesize+1,sinwaveform(tablesize),i+1);
+    tablesize = pl.tablesize;
+    i = int(phasor(tablesize,freq));
+    d = ma.decimal(phasor(tablesize,freq));
+    s1 = rdtable(tablesize+1,sinwaveform(tablesize),i);
+    s2 = rdtable(tablesize+1,sinwaveform(tablesize),i+1);
 };
+
+
+//-----------------------`(os.)osc`------------------------
+// Default sine wave oscillator (same as [oscsin](#oscsin)).
+// `osc` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// osc(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: the frequency in Hz
+//------------------------------------------------------------
+osc = oscsin;
+
 
 // end GRAME section
 //########################################################################################
@@ -250,9 +327,8 @@ Michon and Julius O. Smith III, and are released under the
 //
 // * `freq`: frequency in Hz
 //------------------------------------------------------------
-declare lf_imptrain copyright "Julius O. Smith";
-declare lf_imptrain license "STK-4.3.0 (see licenses/stk-4.3.0.md)";
 lf_imptrain(freq) = lf_sawpos(freq)<:-(mem)<0; // definition below
+
 
 //--------`(os.)lf_pulsetrainpos`----------
 // Unit-amplitude nonnegative LF pulse train, duty cycle between 0 and 1.
@@ -261,7 +337,7 @@ lf_imptrain(freq) = lf_sawpos(freq)<:-(mem)<0; // definition below
 // #### Usage
 //
 // ```
-// lf_pulsetrainpos(freq,duty) : _
+// lf_pulsetrainpos(freq, duty) : _
 // ```
 //
 // Where:
@@ -272,6 +348,7 @@ lf_imptrain(freq) = lf_sawpos(freq)<:-(mem)<0; // definition below
 lf_pulsetrainpos(freq,duty) = float(lf_sawpos(freq) <= duty);
 
 //pulsetrainpos = lf_pulsetrainpos; // for backward compatibility
+
 
 //--------`(os.)lf_pulsetrain`----------
 // Unit-amplitude zero-mean LF pulse train, duty cycle between 0 and 1.
@@ -288,6 +365,7 @@ lf_pulsetrainpos(freq,duty) = float(lf_sawpos(freq) <= duty);
 // * `duty`: duty cycle between 0 and 1
 //------------------------------------------------------------
 lf_pulsetrain(freq,duty) = 2.0*lf_pulsetrainpos(freq,duty) - 1.0;
+
 
 //--------`(os.)lf_squarewavepos`----------
 // Positive LF square wave in [0,1]
@@ -320,7 +398,7 @@ lf_squarewavepos(freq) = lf_pulsetrainpos(freq,0.5);
 //
 // * `freq`: frequency in Hz
 //------------------------------------------------------------
-lf_squarewave(freq) = 2*lf_squarewavepos(freq) - 1;
+lf_squarewave(freq) = 2.0*lf_squarewavepos(freq) - 1.0;
 // squarewave = lf_squarewave; // for backward compatibility
 
 
@@ -337,10 +415,11 @@ lf_squarewave(freq) = 2*lf_squarewavepos(freq) - 1;
 //
 // * `freq`: frequency in Hz
 //------------------------------------------------------------
-lf_trianglepos(freq) = 1-abs(saw1(freq)); // saw1 defined below
+lf_trianglepos(freq) = 1.0-abs(saw1(freq)); // saw1 defined below
+
 
 //----------`(os.)lf_triangle`----------
-// Positive unit-amplitude LF triangle wave
+// Positive unit-amplitude LF triangle wave.
 // `lf_triangle` is a standard Faust function.
 //
 // #### Usage
@@ -355,7 +434,8 @@ lf_trianglepos(freq) = 1-abs(saw1(freq)); // saw1 defined below
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: STK-4.3
-lf_triangle(freq) = 2*lf_trianglepos(freq) - 1;
+lf_triangle(freq) = 2.0*lf_trianglepos(freq) - 1.0;
+
 
 //================== Low Frequency Sawtooths ====================
 // Sawtooth waveform oscillators for virtual analog synthesis et al.
@@ -377,7 +457,7 @@ lf_triangle(freq) = 2*lf_trianglepos(freq) - 1;
 // #### Usage
 //
 // ```
-// lf_rawsaw(periodsamps)
+// lf_rawsaw(periodsamps) : _
 // ```
 //
 // Where:
@@ -386,22 +466,6 @@ lf_triangle(freq) = 2*lf_trianglepos(freq) - 1;
 //---------------------------------------------------------
 lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 
-//-----------------`(os.)lf_sawpos_phase`--------------------
-// Simple sawtooth waveform oscillator between 0 and 1
-// with phase control.
-//
-// #### Usage
-//
-// ```
-// lf_sawpos_phase(freq,phase)
-// ```
-//
-// Where:
-//
-// * `freq`: frequency
-// * `phase`: phase
-//---------------------------------------------------------
-lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac ) ~ +(freq/ma.SR);
 
 //-----------------`(os.)lf_sawpos`--------------------
 // Simple sawtooth waveform oscillator between 0 and 1.
@@ -409,32 +473,96 @@ lf_sawpos_phase(phase,freq) = (+(phase-phase') : ma.frac ) ~ +(freq/ma.SR);
 // #### Usage
 //
 // ```
-// lf_sawpos(freq)
+// lf_sawpos(freq) : _
 // ```
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 //---------------------------------------------------------
-// Author: Bart Brouns
+// Author: Bart Brouns, revised by Stéphane Letz
 // License: STK-4.3
-// MarkDown: Romain Michon
-lf_sawpos(freq) = ma.frac ~ +(freq'/ma.SR);
+lf_sawpos(freq) = phasor_imp(freq, 0, 0);
+
+
+//-----------------`(os.)lf_sawpos_phase`--------------------
+// Simple sawtooth waveform oscillator between 0 and 1
+// with phase control.
+//
+// #### Usage
+//
+// ```
+// lf_sawpos_phase(freq, phase) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
+// * `phase`: phase between 0 and 1
+//---------------------------------------------------------
+// Author: Bart Brouns, revised by Stéphane Letz
+// License: STK-4.3
+// Using an initial '1' to reset to `phase`
+lf_sawpos_phase(freq,phase) = phasor_imp(freq, (1-1'), phase);
+
+
+//-----------------`(os.)lf_sawpos_reset`--------------------
+// Simple sawtooth waveform oscillator between 0 and 1
+// with reset.
+//
+// #### Usage
+//
+// ```
+// lf_sawpos_reset(freq,reset) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
+// * `reset`: reset the oscillator to 0 when equal to 1
+//
+//---------------------------------------------------------
+// Author: Bart Brouns, revised by Stéphane Letz
+// License: STK-4.3
+lf_sawpos_reset(freq,reset) = phasor_imp(freq, reset, 0);
+
+
+//-----------------`(os.)lf_sawpos_phase_reset`--------------------
+// Simple sawtooth waveform oscillator between 0 and 1
+// with phase control and reset.
+//
+// #### Usage
+//
+// ```
+// lf_sawpos_phase_reset(freq,phase,reset) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
+// * `phase`: phase between 0 and 1
+// * `reset`: reset the oscillator to phase when equal to 1
+//
+//---------------------------------------------------------
+// Author: Bart Brouns, revised by Stéphane Letz
+// License: STK-4.3
+lf_sawpos_phase_reset(freq,phase,reset) = phasor_imp(freq, reset, phase);
+
 
 //-----------------`(os.)lf_saw`--------------------
-// Simple sawtooth waveform.
+// Simple sawtooth waveform oscillator between -1 and 1.
 // `lf_saw` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// lf_saw(freq)
+// lf_saw(freq) : _
 // ```
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //---------------------------------------------------------
 // Author: Bart Brouns
 // License: STK-4.3
@@ -453,11 +581,11 @@ lf_saw(freq) = saw1(freq);
 //
 // Polynomial Transition Regions (PTR) (for aliasing suppression).
 //
-// ##### Reference
+// ##### References
 //
 // * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio
-// 	Signals Using Polynomial Transition Regions," in Signal Processing
-// 	Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012
+//     Signals Using Polynomial Transition Regions," in Signal Processing
+//     Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012
 // * <https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9>
 // * <http://research.spa.aalto.fi/publications/papers/spl-ptr/>
 //
@@ -485,10 +613,10 @@ lf_saw(freq) = saw1(freq);
 // sawNp(N,freq,phase) : _
 // saw2dpw(freq) : _
 // saw2(freq) : _
-// saw3(freq) : _ // based on sawN
-// saw4(freq) : _ // based on sawN
-// saw5(freq) : _ // based on sawN
-// saw6(freq) : _ // based on sawN
+// saw3(freq) : _     // based on sawN
+// saw4(freq) : _     // based on sawN
+// saw5(freq) : _     // based on sawN
+// saw6(freq) : _     // based on sawN
 // sawtooth(freq) : _ // = saw2
 // saw2f2(freq) : _
 // saw2f4(freq) : _
@@ -496,9 +624,9 @@ lf_saw(freq) = saw1(freq);
 //
 // Where:
 //
-// * `N`: polynomial order
+// * `N`: polynomial order, known at compile time
 // * `freq`: frequency in Hz
-// * `phase`: phase
+// * `phase`: phase between 0 and 1
 //===================================================================
 // --- sawN for N = 1 to 6 ---
 //We can do 6, but 5 and 6 have noise at low fundamentals: MAX_SAW_ORDER = 6; MAX_SAW_ORDER_NEXTPOW2 = 8;
@@ -509,14 +637,14 @@ with {
   clippedFreq = max(20.0,abs(freq)); // use lf_sawpos(freq) for LFOs (freq < 20 Hz)
   saw1l = 2*lf_sawpos(clippedFreq) - 1; // zero-mean, amplitude +/- 1
   // Also note the availability of lf_sawpos_phase above.
-  poly(1,x) =  x;
-  poly(2,x) =  x*x;
-  poly(3,x) =  x*x*x - x;
-  poly(4,x) =  x*x*(x*x - 2.0);
-  poly(5,x) =  x*(7.0/3 + x*x*(-10.0/3.0 + x*x));
-  poly(6,x) =  x*x*(7.0 + x*x*(-5.0 + x*x));
+  poly(1,x) = x;
+  poly(2,x) = x*x;
+  poly(3,x) = x*x*x - x;
+  poly(4,x) = x*x*(x*x - 2.0);
+  poly(5,x) = x*(7.0/3 + x*x*(-10.0/3.0 + x*x));
+  poly(6,x) = x*x*(7.0 + x*x*(-5.0 + x*x));
   p0n = float(ma.SR)/clippedFreq; // period in samples
-  diff1(x) =  (x - x')/(2.0/p0n);
+  diff1(x) = (x - x')/(2.0/p0n);
   diff(N) = seq(n,N,diff1); // N diff1s in series
   factorial(0) = 1;
   factorial(i) = i * factorial(i-1);
@@ -543,12 +671,13 @@ saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freq); // inferior to 
 //------------------`(os.)saw3`--------------------------------
 // TODO: MarkDown doc in comments
 //--------------------------------------------------------
-saw3 = sawN(3); saw4 = sawN(4); saw5 = sawN(5); saw6 = sawN(6);
-
+saw3 = sawN(3); 
+saw4 = sawN(4); 
+saw5 = sawN(5); 
+saw6 = sawN(6);
 
 //------------------`(os.)sawtooth`--------------------------------
-// Alias-free sawtooth wave. 2nd order interpolation (based
-// on `saw2`).
+// Alias-free sawtooth wave. 2nd order interpolation (based on `saw2`).
 // `sawtooth` is a standard Faust function.
 //
 // #### Usage
@@ -559,23 +688,24 @@ saw3 = sawN(3); saw4 = sawN(4); saw5 = sawN(5); saw6 = sawN(6);
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 saw2(freq) = y with { // newer PTR version (stateless - freq can vary at any speed)
-  p0 = float(ma.SR)/float(max(1.0e-7,abs(freq))); // period in samples
+  p0 = float(ma.SR)/float(max(ma.EPSILON,abs(freq))); // period in samples
   t0 = 1.0/p0; // phase increment
   p = ((_<:(-(1)<:_,_),_) <: selector1,selector2) ~(+(t0)):!,_;
   selector1 = select2(<(0)); // for feedback
   selector2 = select2(<(0), (_<:_,(*(1-p0):+(1)):+), _); // for output
   y = 2*p-1;
 };
+
 // --- sawtooth ---
 sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 
 //------------------`(os.)saw2f2`--------------------------------
 // TODO: MarkDown doc in comments
-//--------------------------------------------------------
-// --- Correction-filtered versions of saw2: saw2f2, saw2f4 ----
+//---------------------------------------------------------------
+// --- Correction-filtered versions of saw2: saw2f2, saw2f4 -----
 // The correction filter compensates "droop" near half the sampling rate.
 // See reference for sawN.
 saw2f2 = saw2 : cf2 with {
@@ -583,10 +713,9 @@ saw2f2 = saw2 : cf2 with {
         0.823765146386639, 0.117420665547108);
 };
 
-
 //------------------`(os.)saw2f4`--------------------------------
 // TODO: MarkDown doc in comments
-//--------------------------------------------------------
+//---------------------------------------------------------------
 saw2f4 = saw2 : cf4 with {
   cf4 = fi.iir((1.155727435125014, 2.285861038554662,
         1.430915027294021, 0.290713280893317, 0.008306401748854),
@@ -594,12 +723,11 @@ saw2f4 = saw2 : cf4 with {
         0.032080681130972));
 };
 
-
 //=========Bandlimited Pulse, Square, and Impulse Trains============
-// Bandlimited Pulse, Square, and Impulse Trains.
+// Bandlimited Pulse, Square and Impulse Trains.
 //
-// `pulsetrainN`, `pulsetrain`, `squareN`, `square`, `imptrain`, `imptrainN`,
-// `triangle`, `triangleN`
+// `pulsetrainN`, `pulsetrain`, `squareN`, `square`, `imptrainN`, `imptrain`,
+// `triangleN`, `triangle`
 //
 // All are zero-mean and meant to oscillate in the audio frequency range.
 // Use simpler sample-rounded lf_* versions above for LFOs.
@@ -609,10 +737,13 @@ saw2f4 = saw2 : cf4 with {
 // ```
 // pulsetrainN(N,freq,duty) : _
 // pulsetrain(freq, duty) : _ // = pulsetrainN(2)
-// squareN(N, freq) : _
+//
+// squareN(N,freq) : _
 // square : _ // = squareN(2)
+//
 // imptrainN(N,freq) : _
 // imptrain : _ // = imptrainN(2)
+//
 // triangleN(N,freq) : _
 // triangle : _ // = triangleN(2)
 // ```
@@ -623,8 +754,35 @@ saw2f4 = saw2 : cf4 with {
 // * `freq`: frequency in Hz
 //====================================================================
 
+
+//------------------`(os.)impulse`--------------------------------
+// One-time impulse generated when the Faust process is started.
+// `impulse` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// impulse : _
+// ```
+//--------------------------------------------------------
+impulse = 1-1';
+
+
 //------------------`(os.)pulsetrainN`--------------------------------
-// TODO: MarkDown doc in comments
+// Bandlimited pulse train oscillator. 
+//
+// #### Usage
+//
+// ```
+// pulsetrainN(N,freq,duty) : _
+// ```
+//
+// Where:
+//
+// * `N`: order, as a constant numerical expression
+// * `freq`: frequency in Hz
+// * `duty`: duty cycle between 0 and 1
+
 //--------------------------------------------------------
 pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
  // non-interpolated-delay version: diffdel(x,del) = x - x@int(del+0.5);
@@ -650,19 +808,30 @@ pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
 // #### Usage
 //
 // ```
-// pulsetrain(freq, duty) : _
+// pulsetrain(freq,duty) : _
 // ```
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 // * `duty`: duty cycle between 0 and 1
 //--------------------------------------------------------
 pulsetrain = pulsetrainN(2);
 
 
 //------------------`(os.)squareN`--------------------------------
-// TODO: MarkDown doc in comments
+// Bandlimited square wave oscillator. 
+//
+// #### Usage
+//
+// ```
+// squareN(N,freq) : _
+// ```
+//
+// Where:
+//
+// * `N`: order, as a constant numerical expression
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 squareN(N,freq) = pulsetrainN(N,freq,0.5);
 
@@ -679,26 +848,24 @@ squareN(N,freq) = pulsetrainN(N,freq,0.5);
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 square = squareN(2);
 
 
-//------------------`(os.)impulse`--------------------------------
-// One-time impulse generated when the Faust process is started.
-// `impulse` is a standard Faust function.
+//------------------`(os.)imptrainN`--------------------------------
+// Bandlimited impulse train generator. 
 //
 // #### Usage
 //
 // ```
-// impulse : _
+// imptrainN(N,freq) : _
 // ```
-//--------------------------------------------------------
-impulse = 1-1';
-
-
-//------------------`(os.)imptrainN`--------------------------------
-// TODO: MarkDown doc in comments
+//
+// Where:
+//
+// * `N`: order, as a constant numerical expression
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq));
 
@@ -715,13 +882,24 @@ imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq));
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 imptrain = imptrainN(2); // default based on saw2
 
 
 //------------------`(os.)triangleN`--------------------------------
-// TODO: MarkDown doc in comments
+// Bandlimited triangle wave oscillator. 
+//
+// #### Usage
+//
+// ```
+// triangleN(N,freq) : _
+// ```
+//
+// Where:
+//
+// * `N`: order, as a constant numerical expression
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 triangleN(N,freq) = squareN(N,freq) : fi.pole(p) : *(gain) with {
   gain = 4.0*freq/ma.SR; // for aproximate unit peak amplitude
@@ -741,18 +919,18 @@ triangleN(N,freq) = squareN(N,freq) : fi.pole(p) : *(gain) with {
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //--------------------------------------------------------
 triangle = triangleN(2); // default based on saw2
 
 
 //===============================Filter-Based Oscillators=================================
-// Filter-Based Oscillators
+// Filter-Based Oscillators.
 //
 // #### Usage
 //
 // ```
-// osc[b|r|rs|rc|s|w](f), where f = frequency in Hz.
+// osc[b|rq|rs|rc|s](freq), where freq = frequency in Hz.
 // ```
 //
 // #### References
@@ -772,7 +950,7 @@ triangle = triangleN(2); // default based on saw2
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //------------------------------------------------------------
 oscb(f) = impulse : fi.tf2(1,0,0,a1,1)
 with {
@@ -793,14 +971,13 @@ with {
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
 //------------------------------------------------------------
 oscrq(f) = impulse : fi.nlf2(f,1); // sine and cosine outputs
-
 
 //--------------------------`(os.)oscrs`---------------------------
 // Sinusoidal (sine) oscillator based on 2D vector rotation,
@@ -815,14 +992,13 @@ oscrq(f) = impulse : fi.nlf2(f,1); // sine and cosine outputs
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
 //------------------------------------------------------------
 oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
-
 
 //--------------------------`(os.)oscrc`---------------------------
 // Sinusoidal (cosine) oscillator based on 2D vector rotation,
@@ -837,7 +1013,7 @@ oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -846,46 +1022,69 @@ oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
 oscrc(f) = impulse : fi.nlf2(f,1) : !,_; // cosine
 
 oscrp(f,p) = oscrq(f) : *(cos(p)), *(sin(p)) : + ; // p=0 for sine, p=PI/2 for cosine, etc.
-oscr = oscrs; // default = sine (starts without a pop)
 
+oscr = oscrs; // default = sine (starts without a pop)
 
 //--------------------------`(os.)oscs`--------------------------------
 // Sinusoidal oscillator based on the state variable filter
 // = undamped "modified-coupled-form" resonator
 // = "magic circle" algorithm used in graphics.
-//------------------------------------------------------------
-oscs(f) =  (*(-1) : sint(wn) : sintp(wn,impulse)) ~ _
-with {
-  wn = 2*ma.PI*f/ma.SR; // approximate
-  // wn = 2*sin(PI*f/SR); // exact
-  sub(x,y) = y-x;
-  sint(x) = *(x) : + ~ _ ; // frequency-scaled integrator
-  sintp(x,y) = *(x) : +(y): + ~ _ ; // same + state input
-};
-
-
-//-----------------------`(os.)osc`------------------------
-// Default sine wave oscillator (same as [oscsin](#oscsin)).
-// `osc` is a standard Faust function.
 //
 // #### Usage
 //
 // ```
-// osc(freq) : _
+// oscs(freq) : _
 // ```
 //
 // Where:
 //
-// * `freq`: the frequency of the wave (Hz)
+// * `freq`: frequency in Hz
 //------------------------------------------------------------
-osc	= oscsin;
+oscs(f) = (*(-1) : sint(wn) : sintp(wn,impulse)) ~ _
+with {
+  wn = 2*ma.PI*f/ma.SR; // approximate
+  // wn = 2*sin(PI*f/SR); // exact
+  sint(x) = *(x) : + ~ _ ; // frequency-scaled integrator
+  sintp(x,y) = *(x) : +(y): + ~ _; // same + state input
+};
+
+//-----------------`(os.)quadosc`--------------------
+// Sinusoidal oscillator based on QuadOsc by Martin Vicanek.
+//
+// #### Usage
+//
+// ```
+// quadosc(freq) : _
+// ```
+//
+// where
+//
+// * `freq`: frequency in Hz
+//
+// #### Reference
+// * <https://vicanek.de/articles/QuadOsc.pdf>
+//------------------------------------------------------------
+// Authors:
+// Dario Sanfilippo <sanfilippo.dario@gmail.com>
+// and Oleg Nesterov (jos ed.)
+quadosc(f) = tick ~ (_,_) 
+with {
+    k1 = tan(f * ma.PI / ma.SR);
+    k2 = 2 * k1 / (1 + k1 * k1);
+    tick(u_0,v_0) = u_1,v_1 
+    with {
+        tmp = u_0 - k1 * v_0;
+        v_1 = v_0 + k2 * tmp;
+        u_1 = tmp - k1 * v_1 : select2(1',1);
+    };
+};
 
 
 //================ Waveguide-Resonator-Based Oscillators ================
 // Sinusoidal oscillator based on the waveguide resonator `wgr`.
 //=======================================================================
 
-//-----------------`(os.)oscw`--------------------
+//-----------------`(os.)oscwc`--------------------
 // Sinusoidal oscillator based on the waveguide resonator `wgr`. Unit-amplitude
 // cosine oscillator.
 //
@@ -897,14 +1096,13 @@ osc	= oscsin;
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html>
 //------------------------------------------------------------
 oscwc(fr) = impulse : fi.wgr(fr,1) : _,!; // cosine (cheapest at 1 mpy/sample)
-
 
 //-----------------`(os.)oscws`--------------------
 // Sinusoidal oscillator based on the waveguide resonator `wgr`. Unit-amplitude
@@ -918,7 +1116,7 @@ oscwc(fr) = impulse : fi.wgr(fr,1) : _,!; // cosine (cheapest at 1 mpy/sample)
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -926,27 +1124,25 @@ oscwc(fr) = impulse : fi.wgr(fr,1) : _,!; // cosine (cheapest at 1 mpy/sample)
 //------------------------------------------------------------
 oscws(fr) = impulse : fi.wgr(fr,1) : !,_; // sine (needs a 2nd scaling mpy)
 
-
-//-----------------`(os.)oscwq`--------------------
+//-----------------`(os.)oscq`--------------------
 // Sinusoidal oscillator based on the waveguide resonator `wgr`.
 // Unit-amplitude cosine and sine (quadrature) oscillator.
 //
 // #### Usage
 //
 // ```
-// oscwq(freq) : _
+// oscq(freq) : _,_
 // ```
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html>
 //------------------------------------------------------------
-oscq(fr)  = impulse : fi.wgr(fr,1);       // phase quadrature outputs
-
+oscq(fr) = impulse : fi.wgr(fr,1);       // phase quadrature outputs
 
 //-----------------`(os.)oscw`--------------------
 // Sinusoidal oscillator based on the waveguide resonator `wgr`.
@@ -960,7 +1156,7 @@ oscq(fr)  = impulse : fi.wgr(fr,1);       // phase quadrature outputs
 //
 // Where:
 //
-// * `freq`: frequency
+// * `freq`: frequency in Hz
 //
 // #### Reference
 //
@@ -982,11 +1178,23 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
 
 //===================== Casio CZ Oscillators ==========================
-// Oscillators that mimics some of the Casio CZ oscillators.
+// Oscillators that mimic some of the Casio CZ oscillators.
+//
+// There are two sets:
+// - A set with an index parameter
+// - A set with a res parameter
+//
+// The "index oscillators" outputs a sine wave at index=0 and gets brighter with a higher index.
+// There are two versions of the "index oscillators":
+// - with P appended to the name: is phase aligned with 'fund:sin'
+// - without P appended to the name: has the phase of the original CZ oscillators
+//
+// The "res oscillators" have a resonant frequency.
+// "res" is the frequency of resonance as a factor of the fundamental pitch.
 //=====================================================================
 
 //----------`(os.)CZsaw`----------
-// Oscillator that mimics the Casio CZ saw oscillator
+// Oscillator that mimics the Casio CZ saw oscillator.
 // `CZsaw` is a standard Faust function.
 //
 // #### Usage
@@ -1002,16 +1210,35 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
 
-CZsaw(fund, index) =
-((
-  (fund*((.5-tmp)/tmp)),
-(-1*fund+1)*((.5-tmp)/(1-tmp))
-):min+fund)
-*2*ma.PI:cos with {
-tmp = (.5-(index*.5)):max(0.01):min(0.5);
-};
+CZsaw(fund, index) = CZ.sawChooseP(fund, index, 0);
+
+//----------`(os.)CZsawP`----------
+// Oscillator that mimics the Casio CZ saw oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZsawP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsawP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = saw-wave
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
+
+CZsawP(fund, index) = CZ.sawChooseP(fund, index, 1);
 
 //----------`(os.)CZsquare`----------
 // Oscillator that mimics the Casio CZ square oscillator
@@ -1030,17 +1257,38 @@ tmp = (.5-(index*.5)):max(0.01):min(0.5);
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
 
-CZsquare(fund, index) =
-  (fund>=0.5),
-  (ma.decimal((fund*2)+1)<:_-min(_,(-1*_+1)*((INDEX)/(1-INDEX))))
-  :+ *ma.PI:cos*0.5
-with {INDEX = (index:pow(0.25)) * 0.98;};
+CZsquare(fund, index) = CZ.squareChooseP(fund, index, 0);
 
+//----------`(os.)CZsquareP`----------
+// Oscillator that mimics the Casio CZ square oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZsquareP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsquareP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = square-wave
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
+
+CZsquareP(fund, index) = CZ.squareChooseP(fund, index, 1);
 
 //----------`(os.)CZpulse`----------
-// Oscillator that mimics the Casio CZ pulse oscillator
+// Oscillator that mimics the Casio CZ pulse oscillator.
 // `CZpulse` is a standard Faust function.
 //
 // #### Usage
@@ -1056,14 +1304,38 @@ with {INDEX = (index:pow(0.25)) * 0.98;};
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
 
-CZpulse(fund, index) =
-((fund-min(fund,((-1*fund+1)*(INDEX/(1-INDEX)))))*2*ma.PI):cos with
-{INDEX = index:min(0.99):max(0);};
+CZpulse(fund, index) = CZ.pulseChooseP(fund, index, 0);
+
+//----------`(os.)CZpulseP`----------
+// Oscillator that mimics the Casio CZ pulse oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZpulseP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZpulseP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is closer to a pulse
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
+
+CZpulseP(fund, index) = CZ.pulseChooseP(fund, index, 1);
 
 //----------`(os.)CZsinePulse`----------
-// Oscillator that mimics the Casio CZ sine/pulse oscillator
+// Oscillator that mimics the Casio CZ sine/pulse oscillator.
 // `CZsinePulse` is a standard Faust function.
 //
 // #### Usage
@@ -1079,14 +1351,38 @@ CZpulse(fund, index) =
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
 
-CZsinePulse(fund, index) =
-  (min(fund*((0.5-INDEX)/INDEX),(-1*fund+1)*((.5-INDEX)/(1-INDEX)))+fund)*4*ma.PI:cos
-with {INDEX = ((index*-0.49)+0.5);};
+CZsinePulse(fund, index) = CZ.sinePulseChooseP(fund, index, 0);
+
+//----------`(os.)CZsinePulseP`----------
+// Oscillator that mimics the Casio CZ sine/pulse oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZsinePulseP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZsinePulseP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is a sine minus a pulse
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
+
+CZsinePulseP(fund, index) = CZ.sinePulseChooseP(fund, index, 1);
 
 //----------`(os.)CZhalfSine`----------
-// Oscillator that mimics the Casio CZ half sine oscillator
+// Oscillator that mimics the Casio CZ half sine oscillator.
 // `CZhalfSine` is a standard Faust function.
 //
 // #### Usage
@@ -1102,15 +1398,38 @@ with {INDEX = ((index*-0.49)+0.5);};
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
 
-CZhalfSine(fund, index) =
-(select2(fund<.5 , .5*(fund-.5)/INDEX+.5 , fund):min(1))*2*ma.PI:cos
-with {
-  INDEX = (.5-(index*0.5)):min(.5):max(.01);
-};
+CZhalfSine(fund, index) = CZ.halfSineChooseP(fund, index, 0);
+
+//----------`(os.)CZhalfSineP`----------
+// Oscillator that mimics the Casio CZ half sine oscillator,
+// with it's phase aligned to `fund:sin`.
+// `CZhalfSineP` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// CZhalfSineP(fund,index) : _
+// ```
+//
+// Where:
+//
+// * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
+// * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is somewhere between a saw and a square
+//------------------------------------------------------------
+// Author: Bart Brouns
+// License: GPLv3
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
+
+CZhalfSineP(fund, index) = CZ.halfSineChooseP(fund, index, 1);
+
 //----------`(os.)CZresSaw`----------
-// Oscillator that mimics the Casio CZ resonant saw-tooth oscillator
+// Oscillator that mimics the Casio CZ resonant sawtooth oscillator.
 // `CZresSaw` is a standard Faust function.
 //
 // #### Usage
@@ -1126,13 +1445,14 @@ with {
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
 
-CZresSaw(fund,res) =
-(((-1*(1-fund)) * ((cos((ma.decimal((max(1,res)*fund) +1 ))*2*ma.PI) * -.5) +.5))*2)+1;
+CZresSaw(fund,res) = CZ.resSaw(fund,res);
 
 //----------`(os.)CZresTriangle`----------
-// Oscillator that mimics the Casio CZ resonant triangle oscillator
+// Oscillator that mimics the Casio CZ resonant triangle oscillator.
 // `CZresTriangle` is a standard Faust function.
 //
 // #### Usage
@@ -1148,12 +1468,11 @@ CZresSaw(fund,res) =
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
 
-CZresTriangle(fund,res) =
-select2(fund<.5 , 2-(fund*2) , fund*2)*tmp*2-1 with {
-  tmp = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
-};
+CZresTriangle(fund,res) = CZ.resTriangle(fund,res);
 
 //----------`(os.)CZresTrap`----------
 // Oscillator that mimics the Casio CZ resonant trapeze oscillator
@@ -1172,10 +1491,149 @@ select2(fund<.5 , 2-(fund*2) , fund*2)*tmp*2-1 with {
 //------------------------------------------------------------
 // Author: Bart Brouns
 // License: GPLv3
-// CZ oscilators by Mike Moser-Booth. ported from pd to Faust by Bart Brouns
+// CZ oscillators by Mike Moser-Booth:
+// <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
+// Ported from pd to Faust by Bart Brouns
 
-CZresTrap(fund, res) =
-  (((1-fund)*2):min(1) *  sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
+CZresTrap(fund, res) = CZ.resTrap(fund, res);
+
+CZ = environment {
+  
+    saw(fund, index) = sawChooseP(fund, index, 0);
+    sawP(fund, index) = sawChooseP(fund, index, 1);
+    sawChooseP(fund, index, p) =
+      (((FUND(fund,align,p)*((.5-INDEX)/INDEX)),(-1*FUND(fund,align,p)+1)*((.5-INDEX)/(1-INDEX))):min+FUND(fund,align,p))*2*ma.PI:cos
+    with {
+      INDEX = (.5-(index*.5)):max(0.01):min(0.5);
+      align = si.interpolate(index, 0.75, 0.5);
+    };
+    
+    square(fund, index) = squareChooseP(fund, index, 0);
+    squareP(fund, index) = squareChooseP(fund, index, 1);
+    squareChooseP(fund, index, p) = (FUND(fund,align,p)>=0.5), (ma.decimal((FUND(fund,align,p)*2)+1)<:_-min(_,(-1*_+1)*((INDEX)/(1-INDEX)))) :+ *ma.PI:cos
+    with {
+      INDEX = (index:pow(0.25)):max(0):min(1);
+      align = si.interpolate(INDEX, -0.25, 0);
+    };
+
+    pulse(fund, index) = pulseChooseP(fund, index, 0);
+    pulseP(fund, index) = pulseChooseP(fund, index, 1);
+    pulseChooseP(fund, index, p) = ((FUND(fund,align,p)-min(FUND(fund,align,p),((-1*FUND(fund,align,p)+1)*(INDEX/(1-INDEX)))))*2*ma.PI):cos
+    with {
+      INDEX = index:min(0.99):max(0);
+      align = si.interpolate(index, -0.25, 0.0);
+    };
+
+    sinePulse(fund, index) = sinePulseChooseP(fund, index, 0);
+    sinePulseP(fund, index) = sinePulseChooseP(fund, index, 1);
+    sinePulseChooseP(fund, index, p) = (min(FUND(fund,align,p)*((0.5-INDEX)/INDEX),(-1*FUND(fund,align,p)+1)*((.5-INDEX)/(1-INDEX)))+FUND(fund,align,p))*4*ma.PI:cos
+    with {
+      INDEX = ((index*-0.49)+0.5);
+      align = si.interpolate(index, -0.125, -0.25);
+    };
+
+    halfSine(fund, index) = halfSineChooseP(fund, index, 0);
+    halfSineP(fund, index) = halfSineChooseP(fund, index, 1);
+    halfSineChooseP(fund, index, p) = (select2(FUND(fund,align,p)<.5, .5*(FUND(fund,align,p)-.5)/INDEX+.5, FUND(fund,align,p)):min(1))*2*ma.PI:cos
+    with {
+      INDEX = (.5-(index*0.5)):min(.5):max(.01);
+      align = si.interpolate(index:min(0.975), -0.25, -0.5);
+    };
+    
+    FUND =
+      case {
+        (fund,align,0) => fund;
+        (fund,align,1) => (fund+align) : ma.frac; // align phase with fund
+      };
+    resSaw(fund,res) = (((-1*(1-fund))*((cos((ma.decimal((max(1,res)*fund)+1))*2*ma.PI)*-.5)+.5))*2)+1;
+    resTriangle(fund,res) = select2(fund<.5, 2-(fund*2), fund*2)*INDEX*2-1
+    with {
+      INDEX = ((fund*(res:max(1)))+1:ma.decimal)*2*ma.PI:cos*.5+.5;
+    };
+    resTrap(fund, res) = (((1-fund)*2):min(1)*sin(ma.decimal(fund*(res:max(1)))*2*ma.PI));
+};
+
+//===============================PolyBLEP-Based Oscillators=================================
+
+//----------`(os.)polyblep`----------
+// PolyBLEP residual function, used for smoothing steps in the audio signal.
+//
+// #### Usage
+//
+// ```
+// polyblep(Q,phase) : _
+// ```
+//
+// Where:
+//
+// * `Q`: smoothing factor between 0 and 0.5. Determines how far from the ends of the phase interval the quadratic function is used.
+// * `phase`: normalised phase (between 0 and 1)
+//------------------------------------------------------------
+// Author: Jacek Wieczorek
+polyblep(Q, phase) = (0, L(phase / Q), R((phase - 1) / Q)) : select3(sel) 
+with {
+    sel = (phase < Q) + 2*(phase > 1 - Q);
+    L(x) = 2*x - x*x - 1; // Used near the left end of the interval
+    R(x) = 2*x + x*x + 1; // Used near the right end of the interval
+};
+
+//----------`(os.)polyblep_saw`----------
+// Sawtooth oscillator with suppressed aliasing (using polyBLEP).
+//
+// #### Usage
+//
+// ```
+// polyblep_saw(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz 
+//------------------------------------------------------------
+// Author: Jacek Wieczorek
+polyblep_saw(freq) = naive - polyblep(Q , phase)
+with {
+    phase = phasor(1, freq);
+    naive = 2 * phase - 1;
+    Q = freq / ma.SR;
+};
+
+//----------`(os.)polyblep_square`----------
+// Square wave oscillator with suppressed aliasing (using polyBLEP).
+//
+// #### Usage
+//
+// ```
+// polyblep_square(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz 
+//------------------------------------------------------------
+// Author: Jacek Wieczorek
+polyblep_square(freq) = naive - polyblep(Q, phase) + polyblep(Q, ma.modulo(phase + 0.5, 1))
+with {
+    phase = phasor(1, freq);
+    naive = 2 * (phase * 2 : int) - 1;
+    Q = freq / ma.SR;
+};
+
+//----------`(os.)polyblep_triangle`----------
+// Triangle wave oscillator with suppressed aliasing (using polyBLEP).
+//
+// #### Usage
+//
+// ```
+// polyblep_triangle(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz 
+//------------------------------------------------------------
+// Author: Jacek Wieczorek
+polyblep_triangle(freq) = polyblep_square(freq) : fi.pole(0.999) : *(4 * freq / ma.SR);
 
 // end further contributions section
 //########################################################################################

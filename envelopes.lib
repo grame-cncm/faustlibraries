@@ -1,5 +1,8 @@
 //################################ envelopes.lib ##########################################
 // This library contains a collection of envelope generators. Its official prefix is `en`.
+//
+// #### References
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/envelopes.lib>
 //########################################################################################
 
 /************************************************************************
@@ -38,18 +41,170 @@ closed source license or any other license if you decide so.
 ************************************************************************
 ************************************************************************/
 
-declare name "Faust Envelope Library";
-declare version "0.0";
-declare author "GRAME";
-declare copyright "GRAME";
-declare license "LGPL with exception";
-
 ma = library("maths.lib");
 ba = library("basics.lib");
 si = library("signals.lib");
 
+declare name "Faust Envelope Library";
+declare version "0.1";
+declare author "GRAME";
+declare copyright "GRAME";
+declare license "LGPL with exception";
+
 //=============================Functions Reference========================================
 //========================================================================================
+
+//-----------------------`(en.)ar`--------------------------
+// AR (Attack, Release) envelope generator (useful to create percussion envelopes).
+// `ar` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// ar(at,rt,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `rt`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+declare ar author "Yann Orlarey, Stéphane Letz";
+ar(at,rt,gate) = AR : max(0)
+with {
+
+    // Durations in samples
+    an = max(1, at*ma.SR);
+    rn = max(1, rt*ma.SR);
+
+    // Deltas per samples
+    adelta = 1/an;
+    rdelta = 1/rn;
+
+    // Attack time (starts at gate upfront and raises infinitely)
+    atime = (raise*reset + upfront) ~ _
+    with {
+        upfront = gate > gate';
+        reset = gate <= gate';
+        raise(x) = (x + (x > 0));
+    };
+
+    // Attack curve
+    A = atime * adelta;
+
+    // Release curve
+    D0 = 1 + an * rdelta;
+    D = D0 - atime * rdelta;
+
+    // AR part
+    AR = min(A, D);
+
+};
+
+
+//------------------------`(en.)asr`----------------------
+// ASR (Attack, Sustain, Release) envelope generator.
+// `asr` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// asr(at,sl,rt,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+declare asr author "Yann Orlarey, Stéphane Letz";
+asr(at,sl,rt,gate) = AS - R : max(0)
+with {
+
+    // Durations in samples
+    an = max(1, at*ma.SR);
+    rn = max(1, rt*ma.SR);
+
+    // Deltas per samples
+    adelta = sl/an;
+    rdelta = sl/rn;
+
+    // Attack time (starts when gate changes and raises until gate == 0)
+    atime = +(gate) ~ *(gate' >= gate);
+
+    // Attack curve
+    A = atime * adelta;
+
+    // AS part
+    AS = min(A, sl);
+
+    // Release time starts when gate is 0
+    rtime = (+(1) : *(gate == 0)) ~ _;
+
+    // Release curve starts when gate is 0 with the current value of the envelope
+    R = rtime * rdelta;
+
+};
+
+
+//------------------------`(en.)adsr`----------------------
+// ADSR (Attack, Decay, Sustain, Release) envelope generator.
+// `adsr` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// adsr(at,dt,sl,rt,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack time (sec)
+// * `dt`: decay time (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release time (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+declare adsr author "Yann Orlarey and Andrey Bundin";
+adsr(at,dt,sl,rt,gate) = ADS : *(1-R) : max(0)
+with {
+
+    // Durations in samples
+    an = max(1, at*ma.SR);
+    dn = max(1, dt*ma.SR);
+    rn = max(1, rt*ma.SR);
+
+    // Deltas per samples
+    adelta = 1/an;
+    ddelta = (1-sl)/dn;
+
+    // Attack time (starts when gate changes and raises until gate == 0)
+    atime = +(gate) ~ *(gate' >= gate);
+
+    // Attack curve
+    A = atime * adelta;
+
+    // Decay curve
+    D0 = 1 + an * ddelta;
+    D = D0 - atime * ddelta;
+
+    // ADS part
+    ADS = min(A, max(D, sl));
+
+    // Release time starts when gate is 0
+    rtime = (+(1) : *(gate == 0)) ~ _;
+
+    // Release curve starts when gate is 0 with the current value of the envelope
+    R = rtime/rn;
+
+};
+
 
 //------------------------`(en.)smoothEnvelope`------------------------
 // An envelope with an exponential attack and release.
@@ -62,209 +217,68 @@ si = library("signals.lib");
 // ```
 //
 // * `ar`: attack and release duration (s)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //----------------------------------------------------------------
 // Author: RM
 smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 
-//-----------------------`(en.)ar`--------------------------
-// AR (Attack, Release) envelope generator (useful to create percussion envelopes).
-// `ar` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// ar(a,r,t) : _
-// ```
-//
-// Where:
-//
-// * `a`: attack (sec)
-// * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
-// when `t=0`)
-//-----------------------------------------------------
-// Author: RM
-ar(a,r,t) = cnt(totalTime,totalTime,on) : ba.bpf.start(0,0) :
-	ba.bpf.point(attTime,1) : ba.bpf.end(attTime+relTime,0)
-with{
-	cnt(count,init,trig) = \(c).(ba.if(trig>0,0,min(count, c+1)))~+(init-init');
-	on = (t-t')>0;
-	attTime = ma.SR*a;
-	relTime = ma.SR*r;
-	totalTime = attTime+relTime;
-};
-
-//------------------------`(en.)arfe`----------------------
-// ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
-// Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.
-//
-// #### Usage
-//
-// ```
-// arfe(a,r,f,t) : _
-// ```
-//
-// Where:
-//
-// * `a`, `r`: attack (sec), release (sec)
-// * `f`: final value to approach upon release (such as 0)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
-// when `t=0`)
-//-----------------------------------------------------
-// Author: JOS
-// License: STK-4.3
-arfe(attT60,relT60,fv,gate) = envelope with {
+// Generic form to be specialized
+// Author: JOS, revised by Stephane Letz 
+asrfe(attT60,susLvl,relT60,finLvl,gate) = envelope 
+with {
   ugate = gate>0;
-  samps = ugate : +~(*(ugate)); // ramp time in samples
-  attSamps = int(attT60 * ma.SR);
-  target = select2(ugate, fv, float(gate));
+  target = select2(ugate, finLvl, susLvl*float(ugate));
   t60 = select2(ugate, relT60, attT60);
   pole = ba.tau2pole(t60/6.91);
   envelope = target : si.smooth(pole);
 };
 
-//------------------------`(en.)are`----------------------
-// ARE (Attack, Release) envelope generator with Exponential segments.
-// Approximately equal to smoothEnvelope(Attack/6.91) when Attack == Release.
+
+//------------------------`(en.)arfe`----------------------
+// ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
+// Approximately equal to `smoothEnvelope(Attack/6.91)` when Attack == Release.
 //
 // #### Usage
 //
 // ```
-// are(a,r,t) : _
+// arfe(at,rt,fl,t) : _
 // ```
 //
 // Where:
 //
-// * `a`: attack (sec)
-// * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
-// when `t=0`)
-//-----------------------------------------------------
-// Author: JOS
-// License: STK-4.3
-are(attT60,relT60,gate) = arfe(attT60,relT60,0,gate);
-
-//------------------------`(en.)asr`----------------------
-// ASR (Attack, Sustain, Release) envelope generator.
-// `asr` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// asr(a,s,r,t) : _
-// ```
-//
-// Where:
-//
-// * `a`: attack (sec)
-// * `s`: sustain (fraction of `t`: 0-1) 
-// * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
-// when `t=0`)
-//-----------------------------------------------------
-// Author: RM
-asr(a,s,r,t) = on*(as) : ba.sAndH(on) : rel
-with{
-	on = t>0;
-	off = t==0;
-	attTime = ma.SR*a;
-	relTime = ma.SR*r;
-	sustainGain = t*s;
-	as = ba.countup(attTime,off) : ba.bpf.start(0,0) :
-		ba.bpf.end(attTime,sustainGain);
-	rel = _,ba.countup(relTime,on) : ba.bpf.start(0) : ba.bpf.end(relTime,0);
-};
-
-//------------------------`(en.)adsr`----------------------
-// ADSR (Attack, Decay, Sustain, Release) envelope generator.
-// `adsr` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// adsr(a,d,s,r,t) : _
-// ```
-//
-// Where:
-//
-// * `a`: attack (sec)
-// * `d`: decay (sec)
-// * `s`: sustain (fraction of `t`: 0-1) 
-// * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
-// when `t=0`)
-//-----------------------------------------------------
-// Author: RM
-adsr(a,d,s,r,t) = on*(ads) : ba.sAndH(on) : rel
-with{
-	on = t>0;
-	off = t==0;
-	attTime = ma.SR*a;
-	decTime = ma.SR*d;
-	relTime = ma.SR*r : max(0.001);
-	sustainGain = t*s;
-	ads = ba.countup(attTime+decTime,off) : ba.bpf.start(0,0) :
-		ba.bpf.point(attTime,1) : ba.bpf.end(attTime+decTime,sustainGain);
-	rel = _,ba.countup(relTime,on) : ba.bpf.start(0) : ba.bpf.end(relTime,0);
-};
-
-//-----------------------------------------------------
-// Old version of ADSR (originally from music.lib)...
-/*
-adsr(a,d,s,r,t) = env ~ (_,_) : (!,_) // the 2 'state' signals are fed back
-with {
-    env (p2,y) =
-        (t>0) & (p2|(y>=1)),          // p2 = decay-sustain phase
-        (y + p1*u - (p2&(y>s))*v*y - p3*w*y)	// y  = envelop signal
-	*((p3==0)|(y>=eps)) // cut off tails to prevent denormals
-    with {
-		p1 = (p2==0) & (t>0) & (y<1);         // p1 = attack phase
-		p3 = (t<=0) & (y>0);                  // p3 = release phase
-		// #samples in attack, decay, release, must be >0
-		na = ma.SR*a+(a==0.0); nd = ma.SR*d+(d==0.0); nr = ma.SR*r+(r==0.0);
-		// correct zero sustain level
-		z = s+(s==0.0)*ba.db2linear(-60);
-		// attack, decay and (-60dB) release rates
-		u = 1/na; v = 1-pow(z, 1/nd); w = 1-1/pow(z*ba.db2linear(60), 1/nr);
-		// values below this threshold are considered zero in the release phase
-		eps = ba.db2linear(-120);
-    };
-};
-*/
-
-//------------------------`(en.)adsre`----------------------
-// ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential 
-// segments.
-//
-// #### Usage
-//
-// ```
-// adsre(a,d,s,r,g) : _
-// ```
-//
-// Where:
-//
-// * `a`: attack (sec)
-// * `d`: decay (sec)
-// * `s`: sustain (fraction of `t`: 0-1)
-// * `r`: release (sec)
+// * `at`: attack (sec)
+// * `rt`: release (sec)
+// * `fl`: final level to approach upon release (such as 0)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
-// Author: JOS
+// Author: JOS, revised by Stephane Letz 
 // License: STK-4.3
-adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
-  ugate = gate>0;
-  samps = ugate : +~(*(ugate)); // ramp time in samples
-  attSamps = int(attT60 * ma.SR);
-  target = select2(ugate, 0.0,
-           select2(samps<attSamps, (susLvl)*float(ugate), ugate));
-  t60 = select2(ugate, relT60, select2(samps<attSamps, decT60, attT60));
-  pole = ba.tau2pole(t60/6.91);
-  envelope = target : si.smooth(pole);
-};
+arfe(attT60,relT60,fv,gate) = asrfe(attT60,1.0,relT60,fv,gate);
+
+
+//------------------------`(en.)are`----------------------
+// ARE (Attack, Release) envelope generator with Exponential segments.
+// Approximately equal to `smoothEnvelope(Attack/6.91)` when Attack == Release.
+//
+// #### Usage
+//
+// ```
+// are(at,rt,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `rt`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+// Author: JOS, revised by Stephane Letz 
+// License: STK-4.3
+are(attT60,relT60,gate) = asrfe(attT60,1.0,relT60,0.0,gate);
+
 
 //------------------------`(en.)asre`----------------------
 // ASRE (Attack, Sustain, Release) envelope generator with Exponential segments.
@@ -272,27 +286,57 @@ adsre(attT60,decT60,susLvl,relT60,gate) = envelope with {
 // #### Usage
 //
 // ```
-// asre(a,s,r,g) : _
+// asre(at,sl,rt,t) : _
 // ```
 //
 // Where:
 //
-// * `a`: attack (sec)
-// * `s`: sustain (fraction of `t`: 0-1) 
-// * `r`: release (sec)
-// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered 
+// * `at`: attack (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+// Author: JOS, revised by Stephane Letz 
+// License: STK-4.3
+asre(attT60,susLvl,relT60,gate) = asrfe(attT60,susLvl,relT60,0.0,gate);
+
+
+//------------------------`(en.)adsre`----------------------
+// ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential
+// segments.
+//
+// #### Usage
+//
+// ```
+// adsre(at,dt,sl,rt,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `dt`: decay (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
 // Author: JOS
 // License: STK-4.3
-asre(attT60,susLvl,relT60,gate) = envelope with {
+adsre(attT60,decT60,susLvl,relT60,gate) = envelope 
+with {
   ugate = gate>0;
   samps = ugate : +~(*(ugate)); // ramp time in samples
-  target = select2(ugate, 0.0, (susLvl)*float(ugate));
-  t60 = select2(ugate, relT60, attT60);
+  attSamps = int(attT60 * ma.SR);
+  // if attSamps==0, go straight into the decay phase
+  attPhase = (samps<attSamps) | (ugate:ba.impulsify);
+  target = select2(ugate, 0.0,
+           select2(attPhase, susLvl*float(ugate), ugate));
+  t60 = select2(ugate, relT60, select2(attPhase, decT60, attT60));
   pole = ba.tau2pole(t60/6.91);
   envelope = target : si.smooth(pole);
 };
+
 
 //----------------------`(en.)dx7envelope`----------------------
 // DX7 operator envelope generator with 4 independent rates and levels. It is
@@ -312,7 +356,7 @@ asre(attT60,susLvl,relT60,gate) = envelope with {
 //-----------------------------------------------------
 // Author: RM
 dx7envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) = up*on : ba.sAndH(on) : down
-with{
+with {
   on = t>0;
   off = t==0;
   rs1 = R1*ma.SR;

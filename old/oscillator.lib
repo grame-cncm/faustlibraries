@@ -133,7 +133,7 @@ saw3 = sawN(3); saw4 = sawN(4); saw5 = sawN(5); saw6 = sawN(6);
 
 
 saw2(freq) = y with { // newer PTR version (stateless - freq can vary at any speed)
-  p0 = float(ml.SR)/float(max(1.0e-7,abs(freq))); // period in samples
+  p0 = float(ml.SR)/float(max(ma.EPSILON,abs(freq))); // period in samples
   t0 = 1.0/p0; // phase increment
   p = ((_<:(-(1)<:_,_),_) <: selector1,selector2) ~(+(t0)):!,_;
   selector1 = select2(<(0)); // for feedback
@@ -179,11 +179,11 @@ sawtooth_demo = signal with {
   pianokey2hz(x) = 440.0*pow(2.0, (x-49.0)/12); // piano key 49 = A440 (also defined in effect.lib)
   detune1 = 1 + 0.01 * knob_group(
     vslider("[3] Detuning 1 [unit:%%] [style:knob]
-      [tooltip: Percentange frequency-shift up or down for second oscillator]",
+      [tooltip: Percentage frequency-shift up or down for second oscillator]",
       -0.1,-10,10,0.01));
   detune2 = 1 + 0.01 * knob_group(
     vslider("[4] Detuning 2 [unit:%%] [style:knob]
-[tooltip: Percentange frequency-shift up or down for third detuned oscillator]",
+[tooltip: Percentage frequency-shift up or down for third detuned oscillator]",
     +0.1,-10,10,0.01));
   portamento = knob_group(
     vslider("[5] Portamento [unit:sec] [style:knob] [scale:log]
@@ -304,11 +304,11 @@ virtual_analog_oscillator_demo = signal with {
 
   detune1 = 1 - 0.01 * knob_group(
     vslider("[3] Detuning 1 [unit:%%] [style:knob]
-      [tooltip: Percentange frequency-shift up or down for second oscillator]",
+      [tooltip: Percentage frequency-shift up or down for second oscillator]",
       -0.1,-10,10,0.01));
   detune2 = 1 + 0.01 * knob_group(
     vslider("[4] Detuning 2 [unit:%%] [style:knob]
-      [tooltip: Percentange frequency-shift up or down for third detuned oscillator]",
+      [tooltip: Percentage frequency-shift up or down for third detuned oscillator]",
     +0.1,-10,10,0.01));
   portamento = knob_group(
     vslider("[5] Portamento [unit:sec] [style:knob] [scale:log]
