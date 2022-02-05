@@ -6,25 +6,27 @@
 //
 // The Filters library is organized into 19 sections:
 //
-// * Basic Filters
-// * Comb Filters
-// * Direct-Form Digital Filter Sections
-// * Direct-Form Second-Order Biquad Sections
-// * Ladder/Lattice Digital Filters
-// * Useful Special Cases
-// * Ladder/Lattice Allpass Filters
-// * Digital Filter Sections Specified as Analog Filter Sections
-// * Simple Resonator Filters
-// * Butterworth Lowpass/Highpass Filters
-// * Special Filter-Bank Delay-Equalizing Allpass Filters
-// * Elliptic (Cauer) Lowpass Filters
-// * Elliptic Highpass Filters
-// * Butterworth Bandpass/Bandstop Filters
-// * Elliptic Bandpass Filters
-// * Parametric Equalizers (Shelf, Peaking)
-// * Mth-Octave Filter-Banks
-// * Arbitrary-Crossover Filter-Banks and Spectrum Analyzers
-// * SVF filters
+// * [Basic Filters](#basic-filters)
+// * [Comb Filters](#comb-filters)
+// * [Direct-Form Digital Filter Sections](#direct-form-digital-filter-sections)
+// * [Direct-Form Second-Order Biquad Sections](#direct-form-second-order-biquad-sections)
+// * [Ladder/Lattice Digital Filters](#ladderlattice-digital-filters)
+// * [Useful Special Cases](#useful-special-cases)
+// * [Ladder/Lattice Allpass Filters](#ladderlattice-allpass-filters)
+// * [Digital Filter Sections Specified as Analog Filter Sections](#digital-filter-sections-specified-as-analog-filter-sections)
+// * [Simple Resonator Filters](#simple-resonator-filters)
+// * [Butterworth Lowpass/Highpass Filters](#butterworth-lowpasshighpass-filters)
+// * [Special Filter-Bank Delay-Equalizing Allpass Filters](#special-filter-bank-delay-equalizing-allpass-filters)
+// * [Elliptic (Cauer) Lowpass Filters](#elliptic-cauer-lowpass-filters)
+// * [Elliptic Highpass Filters](#elliptic-highpass-filters)
+// * [Butterworth Bandpass/Bandstop Filters](#butterworth-bandpassbandstop-filters)
+// * [Elliptic Bandpass Filters](#elliptic-bandpass-filters)
+// * [Parametric Equalizers (Shelf, Peaking)](#parametric-equalizers-shelf-peaking)
+// * [Mth-Octave Filter-Banks](#mth-octave-filter-banks)
+// * [Arbitrary-Crossover Filter-Banks and Spectrum Analyzers](#arbitrary-crossover-filter-banks-and-spectrum-analyzers)
+// * [State Variable Filters (SVF)](#state-variable-filters)
+// * [Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers](#linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers)
+// * [Averaging Functions](#averaging-functions)
 //
 //########################################################################################
 
@@ -2620,9 +2622,10 @@ with {
 };
 
 
-//===============SVF Filters=========================================================
+//===============State Variable Filters=========================================================
 // #### References 
 // Solving the continuous SVF equations using trapezoidal integration
+//
 // <https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf>
 //========================================================================================
 
@@ -2701,7 +2704,7 @@ svf = environment {
 };
 
 
-//=========== Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers =====
+//===========Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers=====
 //
 // The Linkwitz-Riley (LR) crossovers are designed to produce a fully-flat
 // magnitude response when their outputs are combined. The 4th-order
