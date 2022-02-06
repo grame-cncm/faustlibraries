@@ -511,7 +511,7 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <li><code>phase</code>: float between 0 and 1 giving ramp delay phase*delay</li>
 </ul>
 <h4 id="demo_1">Demo</h4>
-<pre><code>_ : dm.reverseEchoN(N) : _,_
+<pre><code>_ : ef.reverseDelayRamped(32,0.6) : _,_
 </code></pre>
 <hr />
 <h3 id="efuniformpantostereonchans"><code>(ef.)uniformPanToStereo(nChans)</code></h3>
@@ -524,7 +524,7 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <li><code>N</code>: Number of input channels to pan down to stereo</li>
 </ul>
 <h4 id="demo_2">Demo</h4>
-<pre><code>_ : dm.reverseEchoN(N) : _,_
+<pre><code>_,_,_ : ef.uniformPanToStereo(3) : _,_
 </code></pre>
 <h2 id="time-based">Time Based</h2>
 <hr />
