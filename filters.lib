@@ -25,7 +25,7 @@
 // * [Mth-Octave Filter-Banks](#mth-octave-filter-banks)
 // * [Arbitrary-Crossover Filter-Banks and Spectrum Analyzers](#arbitrary-crossover-filter-banks-and-spectrum-analyzers)
 // * [State Variable Filters (SVF)](#state-variable-filters)
-// * [Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers](#linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers)
+// * [Linkwitz-Riley 4th-order 2-way, 3-way, 4-way, and 8-way crossovers](#linkwitz-riley-4th-order-2-way-3-way-4-way-and-8-way-crossovers)
 // * [Averaging Functions](#averaging-functions)
 //
 //########################################################################################
@@ -2830,6 +2830,41 @@ crossover4LR4(cf1, cf2, cf3, x) =
             crossover2LR4(cf1) ,
             crossover2LR4(cf3);
 
+
+//----------`(fi.)crossover8LR4`------------------------------------------------
+// Eight-way 4th-order Linkwitz-Riley crossover.
+//
+// #### Usage
+//
+// ```
+// _ : crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7) : si.bus(8)
+// ```
+//
+// Where:
+//
+// * `cf1-cf7` are the crossover cutoff frequencies in Hz
+//------------------------------------------------------------------------------
+declare crossover8LR4 author "Dario Sanfilippo";
+declare crossover8LR4 copyright
+    "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
+declare crossover8LR4 license "MIT-style STK-4.3 license";
+crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7, x) =
+    crossover2LR4(cf4, x) :
+        (ap(cf6) : ap(cf5) : ap(cf7)) ,
+        (ap(cf2) : ap(cf1) : ap(cf3)) :
+            crossover2LR4(cf2) ,
+            crossover2LR4(cf6) :
+                ap(cf3) ,
+                ap(cf1) ,
+                ap(cf7) ,
+                ap(cf5) :
+                    crossover2LR4(cf1) ,
+                    crossover2LR4(cf3) ,
+                    crossover2LR4(cf5) ,
+                    crossover2LR4(cf7)
+    with {
+        ap(cf) = svf.ap(cf, 1.0 / sqrt(2.0));
+    };
 
 //============================Averaging Functions==============================
 //=============================================================================
