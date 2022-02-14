@@ -621,6 +621,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#ficrossover8lr4" class="nav-link">(fi.)crossover8LR4</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#averaging-functions" class="nav-link">Averaging Functions</a>
@@ -2013,11 +2017,21 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <li><code>cf2</code> is the crossover mid split cutoff in Hz</li>
 <li><code>cf3</code> is the crossover upper split cutoff in Hz</li>
 </ul>
+<hr />
+<h3 id="ficrossover8lr4"><code>(fi.)crossover8LR4</code></h3>
+<p>Eight-way 4th-order Linkwitz-Riley crossover.</p>
+<h4 id="usage_71">Usage</h4>
+<pre><code>_ : crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7) : si.bus(8)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>cf1-cf7</code> are the crossover cutoff frequencies in Hz</li>
+</ul>
 <h2 id="averaging-functions">Averaging Functions</h2>
 <hr />
 <h3 id="fiavg_rect"><code>(fi.)avg_rect</code></h3>
 <p>Moving average.</p>
-<h4 id="usage_71">Usage</h4>
+<h4 id="usage_72">Usage</h4>
 <pre><code>_ : avg_rect(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2031,7 +2045,7 @@ Tau represents the effective length of the one-pole impulse response,
 that is, tau is the integral of the filter's impulse response. This
 response is slower to reach the final value but has less ripples in
 non-steady signals.</p>
-<h4 id="usage_72">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>_ : avg_tau(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2048,7 +2062,7 @@ or to reach 1-1/e of its final value.</li>
 <p>Averaging function based on a one-pole filter and the t60 response time.
 This response is particularly useful when the system is required to 
 reach the final value after about <code>period</code> seconds.</p>
-<h4 id="usage_73">Usage</h4>
+<h4 id="usage_74">Usage</h4>
 <pre><code>_ : avg_t60(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2066,7 +2080,7 @@ or to reach 1-1/1000 of its final value.</li>
 This response is close to the moving-average algorithm as it roughly reaches
 the final value after <code>period</code> seconds and shows about the same
 oscillations for non-steady signals.</p>
-<h4 id="usage_74">Usage</h4>
+<h4 id="usage_75">Usage</h4>
 <pre><code>_ : avg_t19(period) : _
 </code></pre>
 <p>Where:</p>
