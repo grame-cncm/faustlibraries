@@ -29,6 +29,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * Try to reuse existing functions as much as possible.
 * The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen: _` for a mono generator, `_ : filter : _` for a mono effect, etc.
 * Some functions use parameters that are [constant numerical expressions](https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions). The convention is to label them in *capital letters* and document them preferably to be *constant numerical expressions* (or *known at compile time* in existing libraries).
+*  Functions with several parameters should better be written by putting the *more constant parameters* (like control, setup...) at the beginning of the parameter list, and *audio signals to be processed* at the end. This allows to do partial-application. So prefer the following  `clip(low, high, x) = min(max(x, low), high);` form where `clip(-1, 1)` partially applied version can be used, better than `clip(x, low, high) = min(max(x, low), high);` version.
 * If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.
 
 ## New Libraries
