@@ -293,8 +293,7 @@
 <li>Try to reuse existing functions as much as possible.</li>
 <li>The <code>Usage</code> line must show the <em>input/output shape</em> (the number of inputs and outputs) of the function, like <code>gen: _</code> for a mono generator, <code>_ : filter : _</code> for a mono effect, etc.</li>
 <li>Some functions use parameters that are <a href="https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions">constant numerical expressions</a>. The convention is to label them in <em>capital letters</em> and document them preferably to be <em>constant numerical expressions</em> (or <em>known at compile time</em> in existing libraries).</li>
-<li>Functions with several parameters should better be written by putting the <em>more constant parameters</em> (like control, setup...) at the beginning of the parameter list, and <em>audio signals to be processed</em> at the end. This allows to do partial-application. So prefer the following  <code>clip(low, high, x) = min(max(x, low), high);</code> form where <code>clip(-1, 1)</code> partially applied version can be used later on, better than <code>clip(x, low, high) = min(max(x, low), high);</code> version.</li>
-<li>If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.</li>
+<li>Functions with several parameters should better be written by putting the <em>more constant parameters</em> (like control, setup...) at the beginning of the parameter list, and <em>audio signals to be processed</em> at the end. This allows to do partial-application. So prefer the following  <code>clip(low, high, x) = min(max(x, low), high);</code> form where <code>clip(-1, 1)</code> partially applied version can be used later on in different contexts, better than <code>clip(x, low, high) = min(max(x, low), high);</code> version.</li>
 </ul>
 <h2 id="new-libraries">New Libraries</h2>
 <ul>
@@ -332,9 +331,6 @@
 // Description
 //==============================================
 </code></pre>
-<ul>
-<li>If you have any question, send an e-mail to rmichon_at_ccrma_dot_stanford_dot_edu.</li>
-</ul>
 <h2 id="coding-conventions">Coding Conventions</h2>
 <p>In order to have a uniformized library system, we established the following conventions (that hopefully will be followed by others when making modifications to them).</p>
 <h3 id="documentation">Documentation</h3>
