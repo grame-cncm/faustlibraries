@@ -1060,28 +1060,54 @@ declare peakhold author "Jonatan Liljedahl, revised by Romain Michon";
 
 peakhold = (*,_ : max) ~ _;
 
-
-//------------------`(ba.)peakholder`---------------------------
-// Tracks abs peak and holds peak for 'n' samples.
+//------------------`(ba.)peakholder`-------------------------------------------
+//
+// While peak-holder functions are scarcely discussed in the literature
+// (please do send me an email if you know otherwise), common sense
+// tells that the expected behaviour should be as follows: the absolute
+// value of the input signal is compared with the output of the peak-holder;
+// if the input is greater or equal to the output, a new peak is detected
+// and sent to the output; otherwise, a timer starts and the current peak
+// is held for N samples; once the timer is out and no new peaks have been
+// detected, the absolute value of the current input becomes the new peak.
 //
 // #### Usage
 //
 // ```
-// _ : peakholder(n) : _
+// _ : peakholder(N) : _
 // ```
 //
 // Where:
 //
-// * `n`: number of samples
-//----------------------------------------------------------------
-declare peakholder author "Jonatan Liljedahl";
-
-peakholder(n) = peakhold2 ~ reset : (!,_) with {
-    reset = sweep(n) > 0;
-    // first out is gate that is 1 while holding last peak
-    peakhold2 = _,abs <: peakhold,!,_ <: >=,_,!;
-};
-
+// * `N`: hold time in samples
+//------------------------------------------------------------------------------
+declare peakholder author "Dario Sanfilippo";
+declare peakholder copyright
+    "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
+declare peakholder license "MIT-style STK-4.3 license";
+peakholder(t, x) = loop ~ si.bus(2) : ! , _
+    with {
+        loop(timerState, outState) = timer , output
+            with {
+                isNewPeak = abs(x) >= outState;
+                isTimeOut = timerState >= rint(t * ma.SR);
+                bypass = isNewPeak | isTimeOut;
+                timer = (1 - bypass) * (timerState + 1);
+                output = bypass * (abs(x) - outState) + outState;
+            };
+    };
+// The function below is kept for back-compatibility in case any user relies
+// on it for their software. However, the function behaves 
+// differently than expected: currently, the timer is not reset when
+// a new peak is detected.
+//------------------------------------------------------------------------------
+//declare peakholder author "Jonatan Liljedahl";
+//
+//peakholder(n) = peakhold2 ~ reset : (!,_) with {
+//    reset = sweep(n) > 0;
+//    // first out is gate that is 1 while holding last peak
+//    peakhold2 = _,abs <: peakhold,!,_ <: >=,_,!;
+//};
 
 //--------------------------`(ba.)impulsify`---------------------------
 // Turns a signal into an impulse with the value of the current sample 
