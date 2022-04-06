@@ -1079,18 +1079,18 @@ peakhold = (*,_ : max) ~ _;
 //
 // Where:
 //
-// * `N`: hold time in samples
+// * `holdTime`: hold time in samples
 //------------------------------------------------------------------------------
 declare peakholder author "Dario Sanfilippo";
 declare peakholder copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
 declare peakholder license "MIT-style STK-4.3 license";
-peakholder(N, x) = loop ~ si.bus(2) : ! , _
+peakholder(holdTime, x) = loop ~ si.bus(2) : ! , _
     with {
         loop(timerState, outState) = timer , output
             with {
                 isNewPeak = abs(x) >= outState;
-                isTimeOut = timerState >= N;
+                isTimeOut = timerState >= holdTime;
                 bypass = isNewPeak | isTimeOut;
                 timer = (1 - bypass) * (timerState + 1);
                 output = bypass * (abs(x) - outState) + outState;
