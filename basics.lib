@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "0.5";
+declare version "0.6";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -188,9 +188,10 @@ Michon and Julius O. Smith III, and are released under the
 //-----------------------------
 // tau2pole(tau) = exp(-1.0/(tau*ma.SR));
 
-tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) with {
- clipCond = abs(tau)<ma.EPSILON;
- tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
+tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) 
+with {
+    clipCond = abs(tau)<ma.EPSILON;
+    tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
 };
 
 
@@ -321,7 +322,6 @@ FAUST library file, GRAME section 2
 //==============================Counters and Time/Tempo Tools=============================
 //========================================================================================
 
-
 //----------------------------`(ba.)counter`------------------------------
 // Starts counting 0, 1, 2, 3..., and raise the current integer value 
 // at each upfront of the trigger. 
@@ -358,7 +358,7 @@ counter(trig) = upfront(trig) : + ~ _ with { upfront(x) = x > x'; };
 // * `n`: the starting point of the countdown
 // * `trig`: the trigger signal (1: start at `n`; 0: decrease until 0)
 //-----------------------------------------------------------------------------
-countdown(n, trig) = \(c).(if(trig>0, n, max(0, c-1))) ~_;
+countdown(n, trig) = \(c).(if(trig>0, n, max(0, c-1))) ~ _;
 
 
 //----------------------------`(ba.)countup`--------------------------------
@@ -378,7 +378,7 @@ countdown(n, trig) = \(c).(if(trig>0, n, max(0, c-1))) ~_;
 // * `n`: the maximum count value
 // * `trig`: the trigger signal (1: start at 0; 0: increase until `n`)
 //-----------------------------------------------------------------------------
-countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~_;
+countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~ _;
 
 
 //--------------------`(ba.)sweep`--------------------------
@@ -898,6 +898,7 @@ with {
     selector(i,j,x,y) = select2((i >= j), x, y);
 };
 
+
 // The generic version with a 'sel' function to be applied on: 
 // - the channel index as a (possibly) fractional value
 // - the next channel index as an integer value
@@ -1060,27 +1061,55 @@ declare peakhold author "Jonatan Liljedahl, revised by Romain Michon";
 
 peakhold = (*,_ : max) ~ _;
 
-
-//------------------`(ba.)peakholder`---------------------------
-// Tracks abs peak and holds peak for 'n' samples.
+//------------------`(ba.)peakholder`-------------------------------------------
+//
+// While peak-holder functions are scarcely discussed in the literature
+// (please do send me an email if you know otherwise), common sense
+// tells that the expected behaviour should be as follows: the absolute
+// value of the input signal is compared with the output of the peak-holder;
+// if the input is greater or equal to the output, a new peak is detected
+// and sent to the output; otherwise, a timer starts and the current peak
+// is held for N samples; once the timer is out and no new peaks have been
+// detected, the absolute value of the current input becomes the new peak.
 //
 // #### Usage
 //
 // ```
-// _ : peakholder(n) : _
+// _ : peakholder(N) : _
 // ```
 //
 // Where:
 //
-// * `n`: number of samples
-//----------------------------------------------------------------
-declare peakholder author "Jonatan Liljedahl";
-
-peakholder(n) = peakhold2 ~ reset : (!,_) with {
-    reset = sweep(n) > 0;
-    // first out is gate that is 1 while holding last peak
-    peakhold2 = _,abs <: peakhold,!,_ <: >=,_,!;
-};
+// * `holdTime`: hold time in samples
+//------------------------------------------------------------------------------
+declare peakholder author "Dario Sanfilippo";
+declare peakholder copyright
+    "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
+declare peakholder license "MIT-style STK-4.3 license";
+peakholder(holdTime, x) = loop ~ si.bus(2) : ! , _
+    with {
+        loop(timerState, outState) = timer , output
+            with {
+                isNewPeak = abs(x) >= outState;
+                isTimeOut = timerState >= holdTime;
+                bypass = isNewPeak | isTimeOut;
+                timer = (1 - bypass) * (timerState + 1);
+                output = bypass * (abs(x) - outState) + outState;
+            };
+    };
+    
+// The function below is kept for back-compatibility in case any user relies
+// on it for their software. However, the function behaves 
+// differently than expected: currently, the timer is not reset when
+// a new peak is detected.
+//------------------------------------------------------------------------------
+//declare peakholder author "Jonatan Liljedahl";
+//
+//peakholder(n) = peakhold2 ~ reset : (!,_) with {
+//    reset = sweep(n) > 0;
+//    // first out is gate that is 1 while holding last peak
+//    peakhold2 = _,abs <: peakhold,!,_ <: >=,_,!;
+//};
 
 
 //--------------------------`(ba.)impulsify`---------------------------
