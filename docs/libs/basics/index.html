@@ -1095,13 +1095,20 @@ rate of a signal, it just holds samples...
  1 - Track and hold max value.</p>
 <hr />
 <h3 id="bapeakholder"><code>(ba.)peakholder</code></h3>
-<p>Tracks abs peak and holds peak for 'n' samples.</p>
+<p>While peak-holder functions are scarcely discussed in the literature
+(please do send me an email if you know otherwise), common sense
+tells that the expected behaviour should be as follows: the absolute
+value of the input signal is compared with the output of the peak-holder;
+if the input is greater or equal to the output, a new peak is detected
+and sent to the output; otherwise, a timer starts and the current peak
+is held for N samples; once the timer is out and no new peaks have been
+detected, the absolute value of the current input becomes the new peak.</p>
 <h4 id="usage_46">Usage</h4>
-<pre><code>_ : peakholder(n) : _
+<pre><code>_ : peakholder(holdTime) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: number of samples</li>
+<li><code>holdTime</code>: hold time in samples</li>
 </ul>
 <hr />
 <h3 id="baimpulsify"><code>(ba.)impulsify</code></h3>
