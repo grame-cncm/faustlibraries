@@ -1472,7 +1472,7 @@ with {
 // What if we want to look at a number of values that's not a power of 2?
 // For each value, we will have to decide whether to use it or not.
 // If N is bigger than the index of the value, we use it, otherwise we replace
-// it with (`0-(ma.INFINITY)`):
+// it with (`0-(ma.MAX)`):
 //
 // ```
 // variableMax(N,x) =
@@ -1499,7 +1499,7 @@ with {
 //    )
 //  )
 // with {
-//  useVal(i) = select2((N>=i) , (0-(ma.INFINITY)),_);
+//  useVal(i) = select2((N>=i) , (0-(ma.MAX)),_);
 // };
 // ```
 //
@@ -1569,7 +1569,7 @@ with {
 //    combine(2) = max;
 //    combine(N) = max(combine(N-1),_);
 //    // Decide wether or not to use a certain value, based on N
-//    useVal(i) = select2(isUsed(i), (0-(ma.INFINITY)),_);
+//    useVal(i) = select2(isUsed(i), (0-(ma.MAX)),_);
 //    isUsed(i) = take(i+1, (int2bin(N,maxN)));
 //  };
 // ```
@@ -1582,7 +1582,7 @@ with {
 //-----------------------------`(ba.)slidingReduce`-----------------------------
 // Fold-like high order function. Apply a commutative binary operation `<op>` to
 // the last `<n>` consecutive samples of a signal `<x>`. For example :
-// `slidingReduce(max,128,128,-(ma.INFINITY))` will compute the maximum of the last
+// `slidingReduce(max,128,128,-(ma.MAX))` will compute the maximum of the last
 // 128 samples. The output is updated each sample, unlike reduce, where the
 // output is constant for the duration of a block.
 //
@@ -1600,9 +1600,9 @@ with {
 // * `disabledVal`: the value to use when we want to ignore a value.
 //
 // In other words, `op(x,disabledVal)` should equal to `x`. For example,
-// `+(x,0)` equals `x` and `min(x,ma.INFINITY)` equals `x`. So if we want to
+// `+(x,0)` equals `x` and `min(x,ma.MAX)` equals `x`. So if we want to
 // calculate the sum, we need to give 0 as `disabledVal`, and if we want the
-// minimum, we need to give `ma.INFINITY` as `disabledVal`.
+// minimum, we need to give `ma.MAX` as `disabledVal`.
 //------------------------------------------------------------------------------
 slidingReduce(op,N,maxN,disabledVal,x) =
   par(i,maxNrBits,fixedDelayOp(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i)
@@ -1704,7 +1704,7 @@ slidingSump(n,maxn) = slidingReduce(+,n,maxn,0);
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingMax(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
+slidingMax(n,maxn) = slidingReduce(max,n,maxn,-(ma.MAX));
 
 
 //----------------------------`(ba.)slidingMin`--------------------------------
@@ -1721,7 +1721,7 @@ slidingMax(n,maxn) = slidingReduce(max,n,maxn,-(ma.INFINITY));
 // * `N`: the number of values to process
 // * `maxN`: the maximum number of values to process, needs to be a power of 2
 //------------------------------------------------------------------------------
-slidingMin(n,maxn) = slidingReduce(min,n,maxn,ma.INFINITY);
+slidingMin(n,maxn) = slidingReduce(min,n,maxn,ma.MAX);
 
 
 //----------------------------`(ba.)slidingMean`-------------------------------
