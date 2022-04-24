@@ -338,6 +338,44 @@ with {
 };
 
 
+//------------------------`(en.)ahdsre`----------------------
+// AHDSRE (Attack, Hold, Decay, Sustain, Release) envelope generator with Exponential
+// segments.
+//
+// #### Usage
+//
+// ```
+// ahdsre(at,ht,dt,sl,rt,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `ht`: hold (sec)
+// * `dt`: decay (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release (sec)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+// Author: JOS, David Braun
+// License: STK-4.3
+ahdsre(attT60,htT60,decT60,susLvl,relT60,gate) = envelope 
+with {
+  ugate = gate>0;
+  samps = ugate : +~(*(ugate)); // ramp time in samples
+  attSamps = int(attT60 * ma.SR);
+  holdSamps = int((attT60+htT60)*ma.SR);
+  attPhase = (samps<attSamps) | (ugate:ba.impulsify);
+  holdPhase = (samps<holdSamps) & ugate;
+  target = select2(ugate, 0.0,
+           select2(holdPhase, susLvl*float(ugate), ugate));
+  t60 = select2(ugate, relT60, select2(holdPhase, decT60, attT60));
+  pole = ba.tau2pole(t60/6.91);
+  envelope = target : si.smooth(pole);
+};
+
+
 //----------------------`(en.)dx7envelope`----------------------
 // DX7 operator envelope generator with 4 independent rates and levels. It is
 // essentially a 4 points BPF.
