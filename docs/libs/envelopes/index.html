@@ -257,6 +257,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#enahdsre" class="nav-link">(en.)ahdsre</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#endx7envelope" class="nav-link">(en.)dx7envelope</a>
               <ul class="nav flex-column">
               </ul>
@@ -394,10 +398,27 @@ segments.</p>
 when <code>t=0</code>)</li>
 </ul>
 <hr />
+<h3 id="enahdsre"><code>(en.)ahdsre</code></h3>
+<p>AHDSRE (Attack, Hold, Decay, Sustain, Release) envelope generator with Exponential
+segments.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>ahdsre(at,ht,dt,sl,rt,t) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>at</code>: attack (sec)</li>
+<li><code>ht</code>: hold (sec)</li>
+<li><code>dt</code>: decay (sec)</li>
+<li><code>sl</code>: sustain level (between 0..1)</li>
+<li><code>rt</code>: release (sec)</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
 <h3 id="endx7envelope"><code>(en.)dx7envelope</code></h3>
 <p>DX7 operator envelope generator with 4 independent rates and levels. It is
 essentially a 4 points BPF.</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>dx7_envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) : _
 </code></pre>
 <p>Where:</p>
