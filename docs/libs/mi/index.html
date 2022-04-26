@@ -360,9 +360,9 @@ positions and velocities for physical elements).</p>
 <p>Used to set initial delayed position values that must be initialised
 at step 0 of the physics simulation.</p>
 <p>If you develop any of your own modules, you will need to use this (see
-mass and springDamper algorithm codes for examples).</p>
+<code>mass</code> and <code>springDamper</code> algorithm codes for examples).</p>
 <h4 id="usage">Usage</h4>
-<pre><code>x: initState(x0) : _
+<pre><code>x : initState(x0) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -479,7 +479,7 @@ truncated if position values are not centered around zero!</p>
 <p>Implementation of a non-linear viscoelastic spring-damper interaction
 containing a quadratic term (function of squared distance).
 Beware: at high displacements, this interaction will break numerical
-stability conditions ! The nlSpringDamperClipped is a safer option.</p>
+stability conditions ! The <code>nlSpringDamperClipped</code> is a safer option.</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>nlSpringDamper2(k, q, z, x1r, x2r),_,_ : _,_
 </code></pre>
@@ -496,7 +496,7 @@ stability conditions ! The nlSpringDamperClipped is a safer option.</p>
 <p>Implementation of a non-linear viscoelastic spring-damper interaction
 containing a cubic term (function of distance^3).
 Beware: at high displacements, this interaction will break numerical
-stability conditions ! The nlSpringDamperClipped is a safer option.</p>
+stability conditions ! The <code>nlSpringDamperClipped</code> is a safer option.</p>
 <h4 id="usage_9">Usage</h4>
 <pre><code>nlSpringDamper3(k, q, z, x1r, x2r),_,_ : _,_
 </code></pre>
@@ -554,7 +554,7 @@ of the interaction.</p>
 <p>Implementation of a non-linear friction based interaction
 that allows for stick-slip bowing behaviour.
 Two versions are proposed : a piecewise linear function (very
-similar to the nlPluck) or a mathematical approximation (see
+similar to the <code>nlPluck</code>) or a mathematical approximation (see
 Stefan Bilbao's book, Numerical Sound Synthesis).</p>
 <h4 id="usage_12">Usage</h4>
 <pre><code>nlBow(znl, scale, type, x1r, x2r),_,_ : _,_
