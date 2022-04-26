@@ -182,7 +182,7 @@ with{
 
 
 //---------`(dm.)mth_octave_filterbank_demo` and `(dm.)filterbank_demo`-------------
-// Graphic Equalizer: Each filter-bank output signal routes through a fader.
+// Graphic Equalizer: each filter-bank output signal routes through a fader.
 //
 // #### Usage
 //
@@ -202,7 +202,7 @@ with{
     mofb_group(x) = vgroup("CONSTANT-Q FILTER BANK (Butterworth dyadic tree)
         [tooltip: See Faust's filters.lib for documentation and references]", x);
     bypass_group(x) = mofb_group(hgroup("[0]", x));
-    slider_group(x)     = mofb_group(hgroup("[1]", x));
+    slider_group(x) = mofb_group(hgroup("[1]", x));
 
     N = 10*M; // total number of bands (highpass band, octave-bands, dc band)
     ftop = 10000;
@@ -309,8 +309,8 @@ with{
     comp_group(x) = vgroup("COMPRESSOR [tooltip: Reference:
         http://en.wikipedia.org/wiki/Dynamic_range_compression]", x);
 
-    meter_group(x)    = comp_group(hgroup("[0]", x));
-    knob_group(x)  = comp_group(hgroup("[1]", x));
+    meter_group(x) = comp_group(hgroup("[0]", x));
+    knob_group(x) = comp_group(hgroup("[1]", x));
 
     cbp = meter_group(checkbox("[0] Bypass    [tooltip: When this is checked, the compressor
         has no effect]"));
@@ -456,9 +456,9 @@ with{
     flanger_group(x) = vgroup("FLANGER
         [tooltip: Reference: https://ccrma.stanford.edu/~jos/pasp/Flanging.html]", x);
     meter_group(x) = flanger_group(hgroup("[0]", x));
-    ctl_group(x)  = flanger_group(hgroup("[1]", x));
-    del_group(x)  = flanger_group(hgroup("[2] Delay Controls", x));
-    lvl_group(x)  = flanger_group(hgroup("[3]", x));
+    ctl_group(x) = flanger_group(hgroup("[1]", x));
+    del_group(x) = flanger_group(hgroup("[2] Delay Controls", x));
+    lvl_group(x) = flanger_group(hgroup("[3]", x));
 
     fbp = meter_group(checkbox("[0] Bypass    [tooltip: When this is checked, the flanger
         has no effect]"));
@@ -505,9 +505,9 @@ with{
     phaser2_group(x) = vgroup("PHASER2 [tooltip: Reference:
         https://ccrma.stanford.edu/~jos/pasp/Flanging.html]", x);
     meter_group(x) = phaser2_group(hgroup("[0]", x));
-    ctl_group(x)  = phaser2_group(hgroup("[1]", x));
-    nch_group(x)  = phaser2_group(hgroup("[2]", x));
-    lvl_group(x)  = phaser2_group(hgroup("[3]", x));
+    ctl_group(x) = phaser2_group(hgroup("[1]", x));
+    nch_group(x) = phaser2_group(hgroup("[2]", x));
+    lvl_group(x) = phaser2_group(hgroup("[3]", x));
 
     pbp = meter_group(checkbox("[0] Bypass    [tooltip: When this is checked, the phaser
         has no effect]"));
@@ -525,8 +525,8 @@ with{
 
     // FIXME: Add tooltips
     speed  = ctl_group(hslider("[1] Speed [unit:Hz] [style:knob]", 0.5, 0, 10, 0.001));
-    depth  = ctl_group(hslider("[2] Notch Depth (Intensity) [style:knob]", 1, 0, 1, 0.001));
-    fb     = ctl_group(hslider("[3] Feedback Gain [style:knob]", 0, -0.999, 0.999, 0.001));
+    depth = ctl_group(hslider("[2] Notch Depth (Intensity) [style:knob]", 1, 0, 1, 0.001));
+    fb  = ctl_group(hslider("[3] Feedback Gain [style:knob]", 0, -0.999, 0.999, 0.001));
 
     width  = nch_group(hslider("[1] Notch width [unit:Hz] [style:knob] [scale:log]",
         1000, 10, 5000, 1));
@@ -605,9 +605,9 @@ with {
         the EQ sections)]"));
 
         imp_group(x) = revin_group(hgroup("[2] Impulse Selection",x));
-        pulseL =  imp_group(button("[1] Left
+        pulseL = imp_group(button("[1] Left
         [tooltip: Send impulse into LEFT channel]")) : ba.impulsify;
-        pulseC =  imp_group(button("[2] Center
+        pulseC = imp_group(button("[2] Center
         [tooltip: Send impulse into LEFT and RIGHT channels]")) : ba.impulsify;
         pulseR = imp_group(button("[3] Right
         [tooltip: Send impulse into RIGHT channel]")) : ba.impulsify;
@@ -649,13 +649,13 @@ with{
     deffreqs = (500,1000,2000,4000); // NB-1 default crossover frequencies (Hz)
     deflens = (56.3,63.0); // 2 default min and max path lengths
 
-    fdn_group(x)  = vgroup("FEEDBACK DELAY NETWORK (FDN) REVERBERATOR, ORDER 16
+    fdn_group(x) = vgroup("FEEDBACK DELAY NETWORK (FDN) REVERBERATOR, ORDER 16
     [tooltip: See Faust's reverbs.lib for documentation and references]", x);
 
-    freq_group(x)  = fdn_group(vgroup("[1] Band Crossover Frequencies", x));
-    t60_group(x)  = fdn_group(hgroup("[2] Band Decay Times (T60)", x));
-    path_group(x)  = fdn_group(vgroup("[3] Room Dimensions", x));
-    revin_group(x)    = fdn_group(hgroup("[4] Input Controls", x));
+    freq_group(x) = fdn_group(vgroup("[1] Band Crossover Frequencies", x));
+    t60_group(x) = fdn_group(hgroup("[2] Band Decay Times (T60)", x));
+    path_group(x) = fdn_group(vgroup("[3] Room Dimensions", x));
+    revin_group(x) = fdn_group(hgroup("[4] Input Controls", x));
     nonl_group(x) = revin_group(vgroup("[4] Nonlinearity",x));
     quench_group(x) = revin_group(vgroup("[3] Reverb State",x));
 
@@ -676,7 +676,7 @@ with{
     durvals(i) = t60_group(vslider("[%i] %i [unit:s] [scale:log][tooltip: T60 is the 60dB
         decay-time in seconds. For concert halls, an overall reverberation time (T60) near
         1.9 seconds is typical [Beranek 2004]. Here we may set T60 independently in each
-        frequency band.     In real rooms, higher frequency bands generally decay faster due
+        frequency band. In real rooms, higher frequency bands generally decay faster due
         to absorption and scattering.]",ba.take(i+1,defdurs), 0.1, 100, 0.1));
     durs = par(i,NB,durvals(NB-1-i));
 

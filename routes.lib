@@ -221,9 +221,9 @@ recursivize(p,q) = (_,_,_,_ :> sp.stereoize(p)) ~ sp.stereoize(q);
 //
 // Mechanism: having a set of N parallel signals indexed from 0 to N - 1,
 // compare the first pair of signals and swap them if sig[0] > sig[1];
-// repeate the pair comparison for the signals sig[1] and sig[2], then again
-// and again until reaching the signals sig[N - 2] and sig[N - 1]; by the end,
-// the largest element in the set will be placed last; repeate the process for
+// repeat the pair comparison for the signals sig[1] and sig[2], then again
+// recursively until reaching the signals sig[N - 2] and sig[N - 1]; by the end,
+// the largest element in the set will be placed last; repeat the process for
 // the remaining N - 1 signals until there is a single pair left.
 //
 // Note that this implementation will always perform the worst-case
@@ -253,10 +253,10 @@ declare bubbleSort copyright "Copyright (C) 2021 Dario Sanfilippo
 declare bubbleSort license "MIT License";
 bubbleSort(0) = 0 : !;
 bubbleSort(1) = _;
-bubbleSort(N) = seq(i, N - 1, pairSortN(N - i) , bus(i))
+bubbleSort(N) = seq(i, N - 1, pairSortN(N - i), bus(i))
     with {
         bus(0) = 0 : !;
         bus(N) = si.bus(N);
-        pairSort = bus(2) <: select2(>) , select2(<);
+        pairSort = bus(2) <: select2(>), select2(<);
         pairSortN(N) = seq(i, N - 1, bus(i), pairSort, bus(N - i - 2));
     };
