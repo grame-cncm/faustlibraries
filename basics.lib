@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "0.6";
+declare version "0.7";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -279,6 +279,40 @@ semi2ratio(semi) = pow(2.0, semi/12.0);
 // * `ratio`: frequency multiplicative ratio
 //-----------------------------
 ratio2semi(ratio) = 12.0*log(ratio)/log(2.0);
+
+
+//-------`(ba.)cent2ratio`----------
+// Converts cents in a frequency multiplicative ratio.
+// `cent2ratio` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// cent2ratio(cent) : _
+// ```
+//
+// Where:
+//
+// * `cent`: number of cents 
+//-----------------------------
+cent2ratio(cent) = pow(2.0, semi/1200.0);
+
+
+//-------`(ba.)ratio2cent`----------
+// Converts a frequency multiplicative ratio in cents.
+// `ratio2cent` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// ratio2cent(ratio) : _
+// ```
+//
+// Where:
+//
+// * `ratio`: frequency multiplicative ratio
+//-----------------------------
+ratio2cent(ratio) = 1200.0*log(ratio)/log(2.0);
 
 
 //-------`(ba.)pianokey2hz`----------
