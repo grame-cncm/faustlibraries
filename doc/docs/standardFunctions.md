@@ -55,10 +55,11 @@ Function Type | Function Name | Description
 [MIDI Key to Hz](../libs/basics/#bamidikey2hz) | [`ba.`](../libs/basics)[`midikey2hz`](../libs/basics/#bamidikey2hz) | Converts a MIDI key number into a frequency
 [Hz to MIDI Key](../libs/basics/#bahz2midikey) | [`ba.`](../libs/basics)[`hz2midikey`](../libs/basics/#bahz2midikey) | Converts a frequency into MIDI key number
 [Pole to T60](../libs/basics/#bapole2tau) | [`ba.`](../libs/basics)[`pole2tau`](../libs/basics/#bapole2tau) | Converts a pole into a time constant (t60)
+[T60 to Pole](../libs/basics/#batau2pole) | [`ba.`](../libs/basics)[`tau2pole`](../libs/basics/#batau2pole) | Converts a time constant (t60) into a pole
 [Samples to Seconds](../libs/basics/#basamp2sec) | [`ba.`](../libs/basics)[`samp2sec`](../libs/basics/#basamp2sec) | Converts samples to seconds
 [Seconds to Samples](../libs/basics/#basec2samp) | [`ba.`](../libs/basics)[`sec2samp`](../libs/basics/#basec2samp) | Converts seconds to samples
-[T60 to Pole](../libs/basics/#batau2pole) | [`ba.`](../libs/basics)[`tau2pole`](../libs/basics/#batau2pole) | Converts a time constant (t60) into a pole
-
+[Semitones to Frequency ratio](../libs/basics/#semi2ratio) | [`ba.`](../libs/basics)[`semi2ratio`](../libs/basics/#semi2ratio) | Converts semitones in a frequency multiplicative ratio
+[Frequency ratio to semintones](../libs/basics/#ratio2semi) | [`ba.`](../libs/basics)[`ratio2semi`](../libs/basics/#ratio2semi) | Converts a frequency multiplicative ratio in semitones
 <div class="table-end"></div>
 
 

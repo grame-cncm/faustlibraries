@@ -64,7 +64,7 @@ declare version "0.7";
 //========================================================================================
 
 //-------`(ba.)samp2sec`----------
-// Converts a number of samples to a duration in seconds.
+// Converts a number of samples to a duration in seconds at the current sampling rate (see `ma.SR`).
 // `samp2sec` is a standard Faust function.
 //
 // #### Usage
@@ -81,7 +81,7 @@ samp2sec(n) = n/ma.SR;
 
 
 //-------`(ba.)sec2samp`----------
-// Converts a duration in seconds to a number of samples.
+// Converts a duration in seconds to a number of samples at the current sampling rate (see `ma.SR`).
 // `samp2sec` is a standard Faust function.
 //
 // #### Usage
@@ -283,7 +283,6 @@ ratio2semi(ratio) = 12.0*log(ratio)/log(2.0);
 
 //-------`(ba.)cent2ratio`----------
 // Converts cents in a frequency multiplicative ratio.
-// `cent2ratio` is a standard Faust function.
 //
 // #### Usage
 //
@@ -300,7 +299,6 @@ cent2ratio(cent) = pow(2.0, cent/1200.0);
 
 //-------`(ba.)ratio2cent`----------
 // Converts a frequency multiplicative ratio in cents.
-// `ratio2cent` is a standard Faust function.
 //
 // #### Usage
 //
