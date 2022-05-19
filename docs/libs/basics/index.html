@@ -776,7 +776,7 @@ of the countup the output value will remain at n until the next trig.
 <hr />
 <h3 id="basweep"><code>(ba.)sweep</code></h3>
 <p>Counts from 0 to <code>period-1</code> repeatedly, generating a
-sawtooth waveform, like os.lf_rawsaw,
+sawtooth waveform, like <code>os.lf_rawsaw</code>,
 starting at 1 when <code>run</code> transitions from 0 to 1.
 Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_19">Usage</h4>
@@ -912,7 +912,7 @@ of the countup (n) the output value will be reset to 0.</p>
 <h3 id="bapulse_countdown_loop"><code>(ba.)pulse_countdown_loop</code></h3>
 <p>Starts counting down pulses from 0 to n included. While trig is 1 the output
 is counting down, while trig is 0 the counter is reset to 0. At the end
-of the countdown (n) the output value will be reset to 0.</p>
+of the countdown(n) the output value will be reset to 0.</p>
 <h4 id="usage_32">Usage</h4>
 <pre><code>_ : pulse_countdown_loop(n,trig) : _
 </code></pre>
@@ -1002,7 +1002,7 @@ The table value can then be read directly or with linear or cubic interpolation.
 <h2 id="selectors-conditions">Selectors (Conditions)</h2>
 <hr />
 <h3 id="baif"><code>(ba.)if</code></h3>
-<p>if-then-else implemented with a select2. WARNING: since select2 is strict (always evaluating both branches),
+<p>if-then-else implemented with a select2. WARNING: since <code>select2</code> is strict (always evaluating both branches),
 the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to 
 protect against forbidden computations like division-by-zero for instance.</p>
 <h4 id="usage_38">Usage</h4>
@@ -1252,7 +1252,7 @@ so that its state is cleanup up.
 <p>Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. 
 Inputs and outputs signals are faded out when 'e' is bypassed, 
 so that 'e' state is cleanup up. 
-Once bypassed the effect is replaced by par(i,N,_). 
+Once bypassed the effect is replaced by <code>par(i,N,_)</code>. 
 Bypassed circuits can be chained.</p>
 <h4 id="usage_55">Usage</h4>
 <pre><code>_ : bypass_fade(n,b,e) : _
@@ -1468,7 +1468,7 @@ If that matters in your application, use the more CPU-intensive (ba.)slidingSump
 <hr />
 <h3 id="baslidingsump"><code>(ba.)slidingSump</code></h3>
 <p>The sliding sum of the last n input samples.</p>
-<p>It uses a lot more CPU then (ba.)slidingSum(n,maxn), but is numerically stable "forever" in return.</p>
+<p>It uses a lot more CPU then <code>ba.slidingSum(n,maxn)</code>, but is numerically stable "forever" in return.</p>
 <h4 id="usage_60">Usage</h4>
 <pre><code>_ : slidingSump(N,maxN) : _
 </code></pre>
@@ -1503,7 +1503,7 @@ If that matters in your application, use the more CPU-intensive (ba.)slidingSump
 <h3 id="baslidingmean"><code>(ba.)slidingMean</code></h3>
 <p>The sliding mean of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
-If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.</p>
+If that matters in your application, use the more CPU-intensive <code>ba.</code>slidingRMSp`.</p>
 <h4 id="usage_63">Usage</h4>
 <pre><code>_ : slidingMean(N,maxN) : _
 </code></pre>
@@ -1527,7 +1527,7 @@ If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
 <h3 id="baslidingrms"><code>(ba.)slidingRMS</code></h3>
 <p>The root mean square of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
-If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.</p>
+If that matters in your application, use the more CPU-intensive <code>ba.slidingRMSp</code>.</p>
 <h4 id="usage_65">Usage</h4>
 <pre><code>_ : slidingRMS(N) : _
 </code></pre>

@@ -423,7 +423,7 @@ countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~ _;
 
 //--------------------`(ba.)sweep`--------------------------
 // Counts from 0 to `period-1` repeatedly, generating a
-// sawtooth waveform, like os.lf_rawsaw,
+// sawtooth waveform, like `os.lf_rawsaw`,
 // starting at 1 when `run` transitions from 0 to 1.
 // Outputs zero while `run` is 0.
 //
@@ -661,7 +661,7 @@ with {
 //----------------------------`(ba.)pulse_countdown_loop`----------------------------
 // Starts counting down pulses from 0 to n included. While trig is 1 the output
 // is counting down, while trig is 0 the counter is reset to 0. At the end
-// of the countdown (n) the output value will be reset to 0.
+// of the countdown(n) the output value will be reset to 0.
 //
 // #### Usage
 //
@@ -855,7 +855,7 @@ tabulate(C, fun, size, r0, r1, x) = environment {
 //========================================================================================
 
 //-----------------------------`(ba.)if`-----------------------------------
-// if-then-else implemented with a select2. WARNING: since select2 is strict (always evaluating both branches),
+// if-then-else implemented with a select2. WARNING: since `select2` is strict (always evaluating both branches),
 // the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to 
 // protect against forbidden computations like division-by-zero for instance.
 //
@@ -1361,7 +1361,7 @@ with {
 // Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. 
 // Inputs and outputs signals are faded out when 'e' is bypassed, 
 // so that 'e' state is cleanup up. 
-// Once bypassed the effect is replaced by par(i,N,_). 
+// Once bypassed the effect is replaced by `par(i,N,_)`. 
 // Bypassed circuits can be chained.
 //
 // #### Usage
@@ -1714,7 +1714,7 @@ slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
 //------------------------------`(ba.)slidingSump`------------------------------
 // The sliding sum of the last n input samples.
 //
-// It uses a lot more CPU then (ba.)slidingSum(n,maxn), but is numerically stable "forever" in return.
+// It uses a lot more CPU then `ba.slidingSum(n,maxn)`, but is numerically stable "forever" in return.
 //
 // #### Usage
 //
@@ -1768,7 +1768,7 @@ slidingMin(n,maxn) = slidingReduce(min,n,maxn,ma.MAX);
 // The sliding mean of the last n input samples.
 //
 // It will eventually run into numerical trouble when there is a persistent dc component.
-// If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
+// If that matters in your application, use the more CPU-intensive `ba.`slidingRMSp`.
 //
 // #### Usage
 //
@@ -1806,7 +1806,7 @@ slidingMeanp(n,maxn) = slidingSump(n,maxn)/n;
 // The root mean square of the last n input samples.
 //
 // It will eventually run into numerical trouble when there is a persistent dc component.
-// If that matters in your application, use the more CPU-intensive (ba.)slidinRMSp.
+// If that matters in your application, use the more CPU-intensive `ba.slidingRMSp`.
 
 //
 // #### Usage

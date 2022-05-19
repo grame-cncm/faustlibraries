@@ -329,7 +329,7 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 
 //--------------------`(co.)RMS_compression_gain_mono`-------------------
 // Mono RMS dynamic range compressor gain computer.
-// `RMS_compression_gain_mono` is a standard Faust function
+// `RMS_compression_gain_mono` is a standard Faust function.
 //
 // #### Usage
 //
@@ -859,7 +859,7 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 
 //-------------`(co.)limiter_lad_mono`----------------------------------------
 //
-// Specialised case of limiter_lad_N: mono limiter.
+// Specialised case of `limiter_lad_N` mono limiter.
 //
 // #### Usage
 //
@@ -887,7 +887,7 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 
 //-------------`(co.)limiter_lad_stereo`--------------------------------------
 //
-// Specialised case of limiter_lad_N: stereo limiter.
+// Specialised case of `limiter_lad_N` stereo limiter.
 //
 // #### Usage
 //
@@ -915,7 +915,7 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 
 //-------------`(co.)limiter_lad_quad`----------------------------------------
 //
-// Specialised case of limiter_lad_N: quadraphonic limiter.
+// Specialised case of `limiter_lad_N` quadraphonic limiter.
 //
 // #### Usage
 //
@@ -967,7 +967,7 @@ declare limiter_lad_bw author "Dario Sanfilippo";
 declare limiter_lad_bw copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare limiter_lad_bw license "GPLv3 license";
-limiter_lad_bw = limiter_lad_mono(.01, 1, .01/twopi, .1, 1/twopi)
+limiter_lad_bw = limiter_lad_mono(.01, 1, 0.01/twopi, .1, 1/twopi)
 with {
     twopi = 2 * ma.PI;
 };
