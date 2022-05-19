@@ -139,6 +139,10 @@ linear2db(g) = 20.0*log10(max(ma.MIN, g));
 // ```
 // lin2LogGain(n) : _
 // ```
+//
+// Where:
+//
+// * `n`: the linear gain
 //---------------------------------------------
 lin2LogGain(n) = n*n;
 
@@ -151,6 +155,10 @@ lin2LogGain(n) = n*n;
 // ```
 // log2LinGain(n) : _
 // ```
+//
+// Where:
+//
+// * `n`: the log gain
 //---------------------------------------------
 log2LinGain(n) = sqrt(n);
 
@@ -335,14 +343,14 @@ pianokey2hz(pk) = 440.0*pow(2.0, (pk-49.0)/12.0);
 // #### Usage
 //
 // ```
-// hz2pianokey(f) : _
+// hz2pianokey(freq) : _
 // ```
 //
 // Where:
 //
-// * `f`: frequency in Hz
+// * `freq`: frequency in Hz
 //-----------------------------
-hz2pianokey(f) = 12.0*ma.log2(f/440.0) + 49.0;
+hz2pianokey(freq) = 12.0*ma.log2(freq/440.0) + 49.0;
 
 
 // end jos section
