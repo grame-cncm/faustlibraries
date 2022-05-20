@@ -70,7 +70,6 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 //==============================================
 ```
 
-
 ## Coding Conventions
 
 In order to have a uniformized library system, we established the following conventions (that hopefully will be followed by others when making modifications to them).
@@ -82,6 +81,7 @@ In order to have a uniformized library system, we established the following conv
 * Sections in function documentation should be declared as `####` markdown title.
 * Each function documentation provides a "Usage" section (see `basics.lib`). 
 * The full documentation can be generated using the doc/Makefile script. Use `make help` to see all possible commands. If you plan to create a pull-request, *do not commit the full generated code* but only the modified .lib files.
+* Each library has a `declare version "xx.yy";` version number to be raised each time a modification is done. The global `version` number in `version.lib` also has to be adapted according to the change.  
 
 ### Library Import
 

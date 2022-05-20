@@ -189,6 +189,12 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 // ```
 // _ : amp_follower_ar(att,rel) : _
 // ```
+//
+// Where:
+//
+// * `att`: attack time = amplitude-envelope time constant (sec) going up
+// * `rel`: release time = amplitude-envelope time constant (sec) going down
+//
 // * Author Jonatan Liljedahl, revised by RM
 //---------------------------------------------------------
 amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
