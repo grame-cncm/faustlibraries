@@ -195,8 +195,8 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 // * `att`: attack time = amplitude-envelope time constant (sec) going up
 // * `rel`: release time = amplitude-envelope time constant (sec) going down
 //
-// * Author Jonatan Liljedahl, revised by RM
 //---------------------------------------------------------
+declare amp_follower_ar author "Jonatan Liljedahl, revised by Romain Michon";
 amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
 
 
@@ -223,7 +223,7 @@ ms_envelope_rect(period, x) = x * x : fi.avg_rect(period);
 
 //------------------`(an.)ms_envelope_tau`-------------------------------------
 // Mean square average with one-pole lowpass and tau response. 
-// (See filters.lib.)
+// (see `filters.lib`)
 //
 // #### Usage
 //
@@ -245,7 +245,7 @@ ms_envelope_tau(period, x) = x * x : fi.avg_tau(period);
 
 //------------------`(an.)ms_envelope_t60`-------------------------------------
 // Mean square with one-pole lowpass and t60 response. 
-// (See filters.lib.)
+// (see `filters.lib`)
 //
 // #### Usage
 //
@@ -267,7 +267,7 @@ ms_envelope_t60(period, x) = x * x : fi.avg_t60(period);
 
 //------------------`(an.)ms_envelope_t19`-------------------------------------
 // Mean square with one-pole lowpass and t19 response. 
-// (See filters.lib.)
+// (see `filters.lib`)
 //
 // #### Usage
 //
@@ -310,7 +310,7 @@ rms_envelope_rect(period, x) = ms_envelope_rect(period, x) : sqrt;
 
 //------------------`(an.)rms_envelope_tau`------------------------------------
 // Root mean square with one-pole lowpass and tau response.
-// (See filters.lib.)
+// (see `filters.lib`)
 //
 // #### Usage
 //
@@ -332,7 +332,7 @@ rms_envelope_tau(period, x) = ms_envelope_tau(period, x) : sqrt;
 
 //------------------`(an.)rms_envelope_t60`------------------------------------
 // Root mean square with one-pole lowpass and t60 response.
-// (See filters.lib.)
+// (see `filters.lib`)
 //
 // #### Usage
 //
@@ -354,7 +354,7 @@ rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
 
 //------------------`(an.)rms_envelope_t19`------------------------------------
 // Root mean square with one-pole lowpass and t19 response.
-// (See filters.lib.)
+// (see `filters.lib`)
 //
 // #### Usage
 //

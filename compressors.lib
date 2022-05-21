@@ -91,8 +91,8 @@ declare version "0.2";
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
 
-// Author: Bart Brouns
-// License: GPLv3
+declare peak_compression_gain_mono author "Bart Brouns";
+declare peak_compression_gain_mono license "GPLv3";
 
 // note: si.lag_ud has a bug where if you compile with standard precision,
 // down is 0 and prePost is 1, you go into infinite GR and stay there
@@ -150,8 +150,9 @@ with {
 // MICHAEL MASSBERG (michael@massberg.org)
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+
+declare peak_compression_gain_N_chan author "Bart Brouns";
+declare peak_compression_gain_N_chan license "GPLv3";
 
 // generalise compression gains for N channels.
 // first we define a mono version:
@@ -211,8 +212,9 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // MICHAEL MASSBERG (michael@massberg.org)
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+
+declare FFcompressor_N_chan author "Bart Brouns";
+declare FFcompressor_N_chan license "GPLv3";
 
 // feed forward compressor
 FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
@@ -263,8 +265,9 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // MICHAEL MASSBERG (michael@massberg.org)
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+
+declare FBcompressor_N_chan author "Bart Brouns";
+declare FBcompressor_N_chan license "GPLv3";
 
 FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
   (peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N) : (ro.interleave(N,2) : par(i,N,meter*_))) ~ si.bus(N);
@@ -315,8 +318,9 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // MICHAEL MASSBERG (michael@massberg.org)
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+
+declare FBFFcompressor_N_chan author "Bart Brouns";
+declare FBFFcompressor_N_chan license "GPLv3";
 
 FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
   si.bus(N) <: si.bus(N*2) :
@@ -367,8 +371,9 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // MICHAEL MASSBERG (michael@massberg.org)
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+
+declare RMS_compression_gain_mono author "Bart Brouns";
+declare RMS_compression_gain_mono license "GPLv3";
 
 RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
   RMS(rel) : ba.bypass1(prePost,si.lag_ud(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.lag_ud(0,att)) : ba.db2linear with {
@@ -425,8 +430,9 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // MICHAEL MASSBERG (michael@massberg.org)
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+
+declare RMS_compression_gain_N_chan author "Bart Brouns";
+declare RMS_compression_gain_N_chan license "GPLv3";
 
 RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,1) =
   RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost);
@@ -488,8 +494,9 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // MICHAEL MASSBERG (michael@massberg.org)
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+
+declare RMS_FBFFcompressor_N_chan author "Bart Brouns";
+declare RMS_FBFFcompressor_N_chan license "GPLv3";
 
 RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
   si.bus(N) <: si.bus(N*2):
@@ -551,8 +558,9 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // MICHAEL MASSBERG (michael@massberg.org)
 // AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+
+declare RMS_FBcompressor_peak_limiter_N_chan author "Bart Brouns";
+declare RMS_FBcompressor_peak_limiter_N_chan license "GPLv3";
 
 RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) =
   (((RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,0,link,N)),si.bus(N)) : ro.interleave(N,2) : par(i,N,meter*_) : FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim,N))

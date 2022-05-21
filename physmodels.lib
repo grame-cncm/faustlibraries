@@ -3184,7 +3184,8 @@ maxGenderFreq = (523.25,1046.5);
 //
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
 //---------------------------------------------
-// Author: Mike Olsen
+declare voiceGender author "Mike Olsen";
+
 voiceGender(voiceType) = ba.if(voiceType == 0,1,ba.if(voiceType == 3,1,0));
 
 
@@ -3204,7 +3205,8 @@ voiceGender(voiceType) = ba.if(voiceType == 0,1,ba.if(voiceType == 3,1,0));
 // * `freq`: the fundamental frequency of the excitation signal
 // * `gender`: gender of the voice used in the fof filter (0: male, 1: female)
 //---------------------------------------------
-// Author: Mike Olsen
+declare skirtWidthMultiplier author "Mike Olsen";
+
 skirtWidthMultiplier(vowel,freq,gender) = (multMax-multMin)*skirtParam+multMin
 with {
 	nVowels = 5;
@@ -3237,7 +3239,8 @@ with {
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
 // * input is the center frequency of the corresponding formant
 //---------------------------------------------
-// Author: Mike Olsen
+declare autobendFreq author "Mike Olsen";
+
 autobendFreq(n,freq,voiceType) = autobend(n)
 with {
 	autobend(0) = _ <: ba.if(_ <= freq,freq,_);
@@ -3268,7 +3271,8 @@ with {
 // * `gender`: the gender of the voice type (0: male, 1: female)
 // * input is the linear amplitude of the formant
 //---------------------------------------------
-// Author: Mike Olsen
+declare vocalEffort author "Mike Olsen";
+
 vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),*(0.8+1.05*(1000-freq)/1250));
 
 
@@ -3290,7 +3294,8 @@ vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),*(0.8+
 // * `g`: linear scale factor (g=1 gives 0dB amplitude response at fc)
 // * input is an impulse signal to excite filter
 //---------------------------------------------------------
-// Author: Mike Olsen
+declare fof author "Mike Olsen";
+
 fof(fc,bw,sw,g) = _ <: (_',_) : (f * s)
 with {
 	T = 1/ma.SR; 	      	// sample period
@@ -3319,7 +3324,8 @@ with {
 //
 // Where: all parameters same as for [`fof`](#fof)
 //---------------------------------------------------------
-// Author: Mike Olsen
+declare fofSH author "Mike Olsen";
+
 fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') : fof;
 
 
@@ -3339,7 +3345,8 @@ fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') :
 // * `n`: the number of FOF filters to cycle through
 // * all other parameters are same as for [`fof`](#fof)
 //---------------------------------------------------------
-// Author: Mike Olsen
+declare fofCycle author "Mike Olsen";
+
 fofCycle(fc,bw,a,g,n) = _ : ba.cycle(n) : par(i,n,fofSH(fc,bw,a,g)) :> _;
 
 
@@ -3359,7 +3366,8 @@ fofCycle(fc,bw,a,g,n) = _ : ba.cycle(n) : par(i,n,fofSH(fc,bw,a,g)) :> _;
 // * `tau`: the desired smoothing time constant in seconds
 // * all other parameters are same as for [`fof`](#fof)
 //---------------------------------------------------------
-// Author: Mike Olsen
+declare fofSmooth author "Mike Olsen";
+
 fofSmooth(fc,bw,sw,g,tau) = fof(fc,bw2,sw2,g)
 with{
     sw2 = sw : si.smooth(ba.tau2pole(tau));
@@ -3393,7 +3401,8 @@ with{
 // * `freq`: fundamental frequency of excitation signal. Used to calculate
 //         rise time of envelope
 //--------------------------------------
-// Author: Mike Olsen
+declare formantFilterFofCycle author "Mike Olsen";
+
 formantFilterFofCycle(voiceType,vowel,nFormants,i,freq) =
 	fofCycle(formantFreq(i),formantBw(i),formantSw(i),formantGain(i),n)
 with{
@@ -3434,7 +3443,8 @@ with{
 // * `freq`: fundamental frequency of excitation signal. Used to calculate
 //         rise time of envelope
 //--------------------------------------
-// Author: Mike Olsen
+declare formantFilterFofSmooth author "Mike Olsen";
+
 formantFilterFofSmooth(voiceType,vowel,nFormants,i,freq) =
 	fofSmooth(formantFreq(i),formantBw(i),formantSw(i),formantGain(i),tau)
 with{
@@ -3507,7 +3517,8 @@ with{
 // * `freq`: fundamental frequency of excitation signal. Needed for FOF
 //  version to calculate rise time of envelope
 //--------------------------------------
-// Author: Mike Olsen
+declare formantFilterbank author "Mike Olsen";
+
 formantFilterbank(voiceType,vowel,formantGen,freq) =
 	_ <: par(i,nFormants,formantGen(voiceType,vowel,nFormants,i,freq)) :> _
 with{
@@ -3534,7 +3545,8 @@ with{
 // * `freq`: the fundamental frequency of the excitation signal. Needed to calculate the skirtwidth 
 // of the FOF envelopes and for the autobendFreq and vocalEffort functions
 //-------------------------------------
-// Author: Mike Olsen
+declare formantFilterbankFofCycle author "Mike Olsen";
+
 formantFilterbankFofCycle(voiceType,vowel,freq) =
 formantFilterbank(voiceType,vowel,formantFilterFofCycle,freq);
 
@@ -3559,7 +3571,8 @@ formantFilterbank(voiceType,vowel,formantFilterFofCycle,freq);
 // calculate the skirtwidth of the FOF envelopes and for the
 // autobendFreq and vocalEffort functions
 //-------------------------------------
-// Author: Mike Olsen
+declare formantFilterbankFofSmooth author "Mike Olsen";
+
 formantFilterbankFofSmooth(voiceType,vowel,freq) =
 formantFilterbank(voiceType,vowel,formantFilterFofSmooth,freq);
 
@@ -3610,7 +3623,8 @@ formantFilterbank(voiceType,vowel,formantFilterBP,freq);
 // * `gain`: linear gain multiplier to multiply the source by
 // * `isFof`: whether model is FOF based (0: no, 1: yes)
 //--------------------------------------
-// Author: Mike Olsen
+declare SFFormantModel author "Mike Olsen";
+
 SFFormantModel(voiceType,vowel,exType,freq,gain,source,filterbank,isFof) =
 	excitation : resonance
 with{
@@ -3643,7 +3657,8 @@ with{
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
 //---------------------------------------
-// Author: Mike Olsen
+declare SFFormantModelFofCycle author "Mike Olsen";
+
 SFFormantModelFofCycle(voiceType,vowel,freq,gain) =
 SFFormantModel(voiceType,vowel,0,freq,gain,os.lf_imptrain(freq),
 formantFilterbankFofCycle,1);
@@ -3669,7 +3684,8 @@ formantFilterbankFofCycle,1);
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
 //---------------------------------------
-// Author: Mike Olsen
+declare SFFormantModelFofSmooth author "Mike Olsen";
+
 SFFormantModelFofSmooth(voiceType,vowel,freq,gain) =
 SFFormantModel(voiceType,vowel,0,freq,gain,os.lf_imptrain(freq),
 formantFilterbankFofSmooth,1);
@@ -3713,7 +3729,8 @@ formantFilterbankBP,0);
 // SFFormantModelFofCycle_ui : _
 // ```
 //----------------------------------
-// Author: Mike Olsen
+declare SFFormantModelFofCycle_ui author "Mike Olsen";
+
 SFFormantModelFofCycle_ui = SFFormantModelFofCycle(voiceType,vowel,freq2,gain*corrFactor)
 with{
 	freq1 = hslider("v:vocal/[0]freq",440,50,1000,0.01);
@@ -3736,7 +3753,8 @@ with{
 // SFFormantModelFofSmooth_ui : _
 // ```
 //----------------------------------
-// Author: Mike Olsen
+declare SFFormantModelFofSmooth_ui author "Mike Olsen";
+
 SFFormantModelFofSmooth_ui = SFFormantModelFofSmooth(voiceType,vowel,freq2,gain*corrFactor)
 with{
 	freq1 = hslider("v:vocal/[0]freq",440,50,1000,0.01);

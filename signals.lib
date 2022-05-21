@@ -326,9 +326,9 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // _ : lag_ud(up,dn) : _
 // ```
 //----------------------------------------------------
-// Author: Jonatan Liljedahl
-// License: STK-4.3
-// MarkDown: Romain Michon
+declare lag_ud author "Jonatan Liljedahl";
+declare lag_ud licence "STK-4.3";
+
 lag_ud(up,dn) = _ <: ((>,ba.tau2pole(up),ba.tau2pole(dn):select2),_:si.smooth) ~ _;
 
 // end further further contributions section
@@ -347,7 +347,8 @@ lag_ud(up,dn) = _ <: ((>,ba.tau2pole(up),ba.tau2pole(dn):select2),_:si.smooth) ~
 //
 // * `N`: the block size in samples
 //----------------------------------------------------
-// Author: Yann Orlarey
+declare rev author "Yann Orlarey";
+
 rev(N) = @(phase(N)*2) 
 with {
     phase(n) = 1 : (+ : %(n)) ~ _ : max(0) : min(n-1);

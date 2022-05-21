@@ -217,6 +217,8 @@ doubleprecision quadprecision decrease_modulo(trig, step, length) = raise_modulo
 // <https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h>
 //
 //--------------------------------------------
+declare interpolate_linear author "Stéphane Letz";
+declare interpolate_linear licence "MIT";
 
 interpolate_linear(dv,v0,v1) = v0 + dv*(v1-v0);  // (faster than v0*(1-dv)+v1*dv which is currently not optimized...)
 
@@ -242,6 +244,8 @@ interpolate_linear(dv,v0,v1) = v0 + dv*(v1-v0);  // (faster than v0*(1-dv)+v1*dv
 // <https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h>
 //
 //--------------------------------------------
+declare interpolate_cosine author "Stéphane Letz";
+declare interpolate_cosine licence "MIT";
 
 interpolate_cosine(dv,v0,v1) = v0 + a2*(v1-v0) with { a2 = 0.5 * (1.0 - cos(dv*ma.PI)); };
 
@@ -272,6 +276,8 @@ interpolate_cosine(dv,v0,v1) = v0 + a2*(v1-v0) with { a2 = 0.5 * (1.0 - cos(dv*m
 // <https://www.paulinternet.nl/?page=bicubic>
 //
 //--------------------------------------------
+declare interpolate_cubic author "Stéphane Letz";
+declare interpolate_cubic licence "MIT";
 
 interpolate_cubic(dv,v0,v1,v2,v3) 
 	= v1 + 0.5*dv*(v2 - v0 + dv*(2.0*v0 - 5.0*v1 + 4.0*v2 - v3 + dv*(3.0*(v1 - v2) + v3 - v0)));
@@ -296,6 +302,8 @@ interpolate_cubic(dv,v0,v1,v2,v3)
 // * `interpolate_two_points`: a two points interpolation function
 //
 //--------------------------------------------
+declare interpolator_two_points author "Stéphane Letz";
+declare interpolator_two_points licence "MIT";
 
 interpolator_two_points(gen, idv, interpolate_two_points) = (gen(id0), gen(id1))
                                                             : ro.interleave(outputs(gen), 2)
@@ -322,6 +330,8 @@ with {
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
 //--------------------------------------------
+declare interpolator_linear author "Stéphane Letz";
+declare interpolator_linear licence "MIT";
 
 interpolator_linear(gen, idv) = interpolator_two_points(gen, idv, interpolate_linear);
 
@@ -341,6 +351,8 @@ interpolator_linear(gen, idv) = interpolator_two_points(gen, idv, interpolate_li
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
 //--------------------------------------------
+declare interpolator_cosine author "Stéphane Letz";
+declare interpolator_cosine licence "MIT";
 
 interpolator_cosine(gen, idv) = interpolator_two_points(gen, idv, interpolate_cosine);
 
@@ -368,6 +380,8 @@ interpolator_null(gen, idv) = interpolator_two_points(gen, idv, \(dv,v0,v1).(v0)
 // * `interpolate_four_points`: a four points interpolation function
 //
 //--------------------------------------------
+declare interpolator_four_points author "Stéphane Letz";
+declare interpolator_four_points licence "MIT";
 
 interpolator_four_points(gen, idv, interpolate_four_points) = (gen(id0), gen(id1), gen(id2), gen(id3))
                                                             : ro.interleave(outputs(gen), 4)
@@ -396,6 +410,8 @@ with {
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
 //--------------------------------------------
+declare interpolator_cubic author "Stéphane Letz";
+declare interpolator_cubic licence "MIT";
 
 interpolator_cubic(gen, idv) = interpolator_four_points(gen, idv, interpolate_cubic);
 
@@ -424,6 +440,8 @@ nointerp = MAX_INTER-1;
 // * `sel`: an interpolation algorithm selector in [0..3] (0 = linear, 1 = cosine, 2 = cubic, 3 = nointerp)
 //
 //--------------------------------------------
+declare interpolator_select author "Stéphane Letz";
+declare interpolator_select licence "MIT";
 
 interpolator_select(gen, idv, sel) = ba.selectmulti(ma.SR/10, interpolators, sel)
 with {

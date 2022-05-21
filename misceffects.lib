@@ -46,7 +46,7 @@ fi = library("filters.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.0"; // TODO to check
+declare version "2.0"; 
 
 //########################################################################################
 /************************************************************************
@@ -228,6 +228,7 @@ speakerbp(f1,f2) = fi.dcblockerat(f1) : fi.dcblockerat(f1) : fi.lowpass(4,f2);
 //------------------------------------------------------------
 // TODO: perhaps this should be moved to physmodels.lib?
 // [JOS: I vote yes when there is a piano model in physmodels.lib.]
+
 piano_dispersion_filter(M,B,f0) = -Df0*M,seq(i,M,fi.tf1(a1,1,a1))
 with {
  a1 = (1-D)/(1+D); // By Eq. 3, have D >= 0, hence a1 >= 0 also
@@ -537,7 +538,8 @@ closed source license or any other license if you decide so.
 // * `duration`: the echo duration in seconds
 // * `feedback`: the feedback coefficient
 //----------------------------------------------------
-// TODO: author RM
+declare echo author "Romain Michon";
+
 echo(maxDuration,duration,feedback) = +~de.delay(maxDel,del)*feedback
 with{
   maxDel = ma.SR*maxDuration;

@@ -959,7 +959,7 @@ closed source license or any other license if you decide so.
 // * `source`: Modulation signal
 // * `excitation`: Excitation/Carrier signal
 //------------------------------------------------------------
-// TODO: author RM
+declare oneVocoderBand author "Romain Michon";
 oneVocoderBand(band,bandsNumb,bwRatio,bandGain,x) = x : fi.resonbp(bandFreq,bandQ,bandGain) with {
         bandFreq = 25*pow(2,(band+1)*(9/bandsNumb));
         BW = (bandFreq - 25*pow(2,(band)*(9/bandsNumb)))*bwRatio;

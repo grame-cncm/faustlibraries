@@ -393,7 +393,8 @@ closed source license or any other license if you decide so.
 // Faust distributions, such as faust-0.9.85, was released under the BSD license,
 // which is less restrictive.
 //------------------------------------------------------------
-// TODO: author RM
+declare mono_freeverb author "Romain Michon";
+
 mono_freeverb(fb1, fb2, damp, spread) = _ <: par(i,8,lbcf(combtuningL(i)+spread,fb1,damp))
 	:> seq(i,4,fi.allpass_comb(1024, allpasstuningL(i)+spread, -fb2))
 with {
@@ -442,7 +443,8 @@ with {
 // * `damp`: damping of the lowpass comb filter (0-1)
 // * `spread`: spatial spread in number of samples (for stereo)
 //------------------------------------------------------------
-// TODO: author RM
+declare stereo_freeverb author "Romain Michon";
+
 stereo_freeverb(fb1, fb2, damp, spread) = + <: mono_freeverb(fb1, fb2, damp, 0), mono_freeverb(fb1, fb2, damp, spread);
 
 //########################################################################################
@@ -485,11 +487,8 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //
 // <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
 //------------------------------------------------------------
-
-// Author: Jakob Zerbian
-// License: MIT-style STK-4.3 license
 declare dattorro_rev author "Jakob Zerbian";
-declare dattorro_rev license "MIT-style STK-4.3 license";
+declare dattorro_rev licence "MIT-style STK-4.3 license";
 
 dattorro_rev(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) = 
     si.bus(2) : + : *(0.5) : predelay : bw_filter : diffusion_network <: ((si.bus(4) :> _,_) ~ (reverb_network : ro.cross(2)))
@@ -530,9 +529,6 @@ with {
 //
 // <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
 //------------------------------------------------------------
-
-// Author: Jakob Zerbian
-// License: MIT-style STK-4.3 license
 declare dattorro_rev_default author "Jakob Zerbian";
 declare dattorro_rev_default license "MIT-style STK-4.3 license";
 
@@ -644,9 +640,6 @@ jp_gh_rev = environment {
 //
 // <https://doc.sccode.org/Overviews/DEIND.html>
 //------------------------------------------------------------
-
-// Author: Julian Parker, bug fixes and minor interface changes by Till Bovermann
-// License: GPL2+
 declare jpverb author "Julian Parker, bug fixes and minor interface changes by Till Bovermann";
 declare jpverb license "GPL2+";
 
@@ -684,9 +677,6 @@ jpverb(t60, damp, size, early_diff,
 //
 // <https://doc.sccode.org/Overviews/DEIND.html>
 //------------------------------------------------------------
-
-// Author: Julian Parker, bug fixes and minor interface changes by Till Bovermann
-// License: GPL2+
 declare greyhole author "Julian Parker, bug fixes and minor interface changes by Till Bovermann";
 declare greyhole license "GPL2+";
 

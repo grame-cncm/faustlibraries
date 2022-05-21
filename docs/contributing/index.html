@@ -340,6 +340,8 @@
 <li>Sections in function documentation should be declared as <code>####</code> markdown title.</li>
 <li>Each function documentation provides a "Usage" section (see <code>basics.lib</code>). </li>
 <li>The full documentation can be generated using the doc/Makefile script. Use <code>make help</code> to see all possible commands. If you plan to create a pull-request, <em>do not commit the full generated code</em> but only the modified .lib files.</li>
+<li>Each function can have <code>declare author "name";</code>, <code>declare copyright "XXX";</code> and <code>declare licence "YYY";</code> declarations.</li>
+<li>Each library has a <code>declare version "xx.yy";</code> version number to be raised each time a modification is done. The global <code>version</code> number in <code>version.lib</code> also has to be adapted according to the change.  </li>
 </ul>
 <h3 id="library-import">Library Import</h3>
 <p>To prevent cross-references between libraries, we generalized the use of the <code>library("")</code> system for function calls in all the libraries. This means that everytime a function declared in another library is called, the environment corresponding to this library needs to be called too. To make things easier, a <code>stdfaust.lib</code> library was created and is imported by all the libraries:</p>

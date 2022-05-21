@@ -79,7 +79,8 @@ panner(g) = _ <: *(1-g), *(g);
 // * `r`: rotation (between 0 et 1)
 // * `d`: distance of the source (between 0 et 1)
 //------------------------------------------------------
-// TODO: author Laurent Pottier, revised by RM
+declare spat author "Laurent Pottier, revised by Romain Michon";
+
 spat(n,a,d)	= _ <: par(i, n, *( scaler(i, n, a, d) : si.smooth(0.9999) ))
 with {
 	scaler(i,n,a,d) = (d/2.0+0.5)

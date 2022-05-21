@@ -130,7 +130,8 @@ phasor(tablesize, freq) = phasor_table(tablesize, freq, 0, 0);
 // * `freq`: the frequency in Hz
 // * `reset`: a reset signal, reset phase to 0 when equal to 1
 //---------------------------------------------------------
-// Author: Mike Olsen, revised by Stéphane Letz
+declare hs_phasor author "Mike Olsen, revised by Stéphane Letz";
+
 hs_phasor(tablesize, freq, reset) = phasor_table(tablesize, freq, reset, 0);
 
 
@@ -150,7 +151,8 @@ hs_phasor(tablesize, freq, reset) = phasor_table(tablesize, freq, reset, 0);
 // * `reset`: reset the oscillator to phase when equal to 1
 // * `phase`: phase between 0 and 1
 //---------------------------------------------------------
-// Author: Christophe Lebreton, revised by Stéphane Letz
+declare hsp_phasor author "Christophe Lebreton, revised by Stéphane Letz";
+
 hsp_phasor(tablesize, freq, reset, phase) = phasor_table(tablesize, freq, reset, phase);
 
 
@@ -188,7 +190,8 @@ with {
 // * `freq`: the frequency in Hz
 // * `reset`: reset the oscillator to 0 when equal to 1
 //---------------------------------------------------------
-// Author: Mike Olsen
+declare hs_oscsin author "Mike Olsen";
+
 hs_oscsin(freq,reset) = rdtable(tablesize, sinwaveform(tablesize), int(hs_phasor(tablesize,freq,reset)))
 with {
     tablesize = pl.tablesize;
@@ -228,7 +231,8 @@ with {
 // * `freq`: the frequency in Hz
 // * `reset`: reset the oscillator to 0 when equal to 1
 //---------------------------------------------------------
-// Author: Stéphane Letz
+declare hs_osccos author "Stéphane Letz";
+
 hs_osccos(freq,reset) = rdtable(tablesize, coswaveform(tablesize), int(hs_phasor(tablesize,freq,reset)))
 with {
     tablesize = pl.tablesize;
@@ -432,8 +436,9 @@ lf_trianglepos(freq) = 1.0-abs(saw1(freq)); // saw1 defined below
 //
 // * `freq`: frequency in Hz
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: STK-4.3
+declare lf_triangle author "Bart Brouns";
+declare lf_triangle licence "STK-4.3";
+
 lf_triangle(freq) = 2.0*lf_trianglepos(freq) - 1.0;
 
 
@@ -481,8 +486,9 @@ lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 // * `freq`: frequency in Hz
 //
 //---------------------------------------------------------
-// Author: Bart Brouns, revised by Stéphane Letz
-// License: STK-4.3
+declare lf_sawpos author "Bart Brouns, revised by Stéphane Letz";
+declare lf_sawpos licence "STK-4.3";
+
 lf_sawpos(freq) = phasor_imp(freq, 0, 0);
 
 
@@ -501,8 +507,9 @@ lf_sawpos(freq) = phasor_imp(freq, 0, 0);
 // * `freq`: frequency in Hz
 // * `phase`: phase between 0 and 1
 //---------------------------------------------------------
-// Author: Bart Brouns, revised by Stéphane Letz
-// License: STK-4.3
+declare lf_sawpos_phase author "Bart Brouns, revised by Stéphane Letz";
+declare lf_sawpos_phase licence "STK-4.3";
+
 // Using an initial '1' to reset to `phase`
 lf_sawpos_phase(freq,phase) = phasor_imp(freq, (1-1'), phase);
 
@@ -523,8 +530,9 @@ lf_sawpos_phase(freq,phase) = phasor_imp(freq, (1-1'), phase);
 // * `reset`: reset the oscillator to 0 when equal to 1
 //
 //---------------------------------------------------------
-// Author: Bart Brouns, revised by Stéphane Letz
-// License: STK-4.3
+declare lf_sawpos_reset author "Bart Brouns, revised by Stéphane Letz";
+declare lf_sawpos_reset licence "STK-4.3";
+
 lf_sawpos_reset(freq,reset) = phasor_imp(freq, reset, 0);
 
 
@@ -545,8 +553,9 @@ lf_sawpos_reset(freq,reset) = phasor_imp(freq, reset, 0);
 // * `reset`: reset the oscillator to phase when equal to 1
 //
 //---------------------------------------------------------
-// Author: Bart Brouns, revised by Stéphane Letz
-// License: STK-4.3
+declare lf_sawpos_phase_reset author "Bart Brouns, revised by Stéphane Letz";
+declare lf_sawpos_phase_reset licence "STK-4.3";
+
 lf_sawpos_phase_reset(freq,phase,reset) = phasor_imp(freq, reset, phase);
 
 
@@ -564,8 +573,9 @@ lf_sawpos_phase_reset(freq,phase,reset) = phasor_imp(freq, reset, phase);
 //
 // * `freq`: frequency in Hz
 //---------------------------------------------------------
-// Author: Bart Brouns
-// License: STK-4.3
+declare saw1 author "Bart Brouns";
+declare saw1 licence "STK-4.3";
+
 saw1(freq) = 2.0 * lf_sawpos(freq) - 1.0;
 lf_saw(freq) = saw1(freq);
 
@@ -1208,8 +1218,9 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = saw-wave
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZsaw author "Bart Brouns";
+declare CZsaw licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1232,8 +1243,9 @@ CZsaw(fund, index) = CZ.sawChooseP(fund, index, 0);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = saw-wave
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZsawP author "Bart Brouns";
+declare CZsawP licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1255,8 +1267,9 @@ CZsawP(fund, index) = CZ.sawChooseP(fund, index, 1);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = square-wave
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZsquare author "Bart Brouns";
+declare CZsquare licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1279,8 +1292,9 @@ CZsquare(fund, index) = CZ.squareChooseP(fund, index, 0);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = square-wave
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZsquareP author "Bart Brouns";
+declare CZsquareP licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1302,8 +1316,9 @@ CZsquareP(fund, index) = CZ.squareChooseP(fund, index, 1);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is closer to a pulse
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZpulse author "Bart Brouns";
+declare CZpulse licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1326,8 +1341,9 @@ CZpulse(fund, index) = CZ.pulseChooseP(fund, index, 0);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is closer to a pulse
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZpulseP author "Bart Brouns";
+declare CZpulseP licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1349,8 +1365,9 @@ CZpulseP(fund, index) = CZ.pulseChooseP(fund, index, 1);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is a sine minus a pulse
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZsinePulse author "Bart Brouns";
+declare CZsinePulse licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1373,8 +1390,9 @@ CZsinePulse(fund, index) = CZ.sinePulseChooseP(fund, index, 0);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is a sine minus a pulse
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZsinePulseP author "Bart Brouns";
+declare CZsinePulseP licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1396,8 +1414,9 @@ CZsinePulseP(fund, index) = CZ.sinePulseChooseP(fund, index, 1);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is somewhere between a saw and a square
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZhalfSine author "Bart Brouns";
+declare CZhalfSine licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1420,8 +1439,9 @@ CZhalfSine(fund, index) = CZ.halfSineChooseP(fund, index, 0);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `index`: the brightness of the oscillator, 0 gives a sine-wave, 1 is somewhere between a saw and a square
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZhalfSineP author "Bart Brouns";
+declare CZhalfSineP licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1443,8 +1463,9 @@ CZhalfSineP(fund, index) = CZ.halfSineChooseP(fund, index, 1);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `res`: the frequency of resonance as a factor of the fundamental pitch.
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZresSaw author "Bart Brouns";
+declare CZresSaw licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1466,8 +1487,9 @@ CZresSaw(fund,res) = CZ.resSaw(fund,res);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `res`: the frequency of resonance as a factor of the fundamental pitch.
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZresTriangle author "Bart Brouns";
+declare CZresTriangle licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1489,8 +1511,9 @@ CZresTriangle(fund,res) = CZ.resTriangle(fund,res);
 // * `fund`: a saw-tooth waveform between 0 and 1 that the oscillator slaves to
 // * `res`: the frequency of resonance as a factor of the fundamental pitch.
 //------------------------------------------------------------
-// Author: Bart Brouns
-// License: GPLv3
+declare CZresTrap author "Bart Brouns";
+declare CZresTrap licence "STK-4.3";
+
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
 // Ported from pd to Faust by Bart Brouns
@@ -1569,7 +1592,8 @@ CZ = environment {
 // * `Q`: smoothing factor between 0 and 0.5. Determines how far from the ends of the phase interval the quadratic function is used.
 // * `phase`: normalised phase (between 0 and 1)
 //------------------------------------------------------------
-// Author: Jacek Wieczorek
+declare polyblep author "Jacek Wieczorek";
+
 polyblep(Q, phase) = (0, L(phase / Q), R((phase - 1) / Q)) : select3(sel) 
 with {
     sel = (phase < Q) + 2*(phase > 1 - Q);
@@ -1590,7 +1614,8 @@ with {
 //
 // * `freq`: frequency in Hz 
 //------------------------------------------------------------
-// Author: Jacek Wieczorek
+declare polyblep_saw author "Jacek Wieczorek";
+
 polyblep_saw(freq) = naive - polyblep(Q , phase)
 with {
     phase = phasor(1, freq);
@@ -1611,7 +1636,8 @@ with {
 //
 // * `freq`: frequency in Hz 
 //------------------------------------------------------------
-// Author: Jacek Wieczorek
+declare polyblep_square author "Jacek Wieczorek";
+
 polyblep_square(freq) = naive - polyblep(Q, phase) + polyblep(Q, ma.modulo(phase + 0.5, 1))
 with {
     phase = phasor(1, freq);
@@ -1632,7 +1658,8 @@ with {
 //
 // * `freq`: frequency in Hz 
 //------------------------------------------------------------
-// Author: Jacek Wieczorek
+declare polyblep_triangle author "Jacek Wieczorek";
+
 polyblep_triangle(freq) = polyblep_square(freq) : fi.pole(0.999) : *(4 * freq / ma.SR);
 
 // end further contributions section

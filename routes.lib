@@ -191,7 +191,7 @@ butterfly(N) = si.bus(N) <: interleave(N/2,2), interleave(N/2,2) : par(i, N/2, +
 // * `N`: `2^k`, size of the matrix (int, as a constant numerical expression)
 //
 //-----------------------------------------------------------------------------
-declare hadamard author "Remy Muller, revised by RM";
+declare hadamard author "Remy Muller, revised by Romain Michon";
 hadamard(2) = butterfly(2);
 hadamard(N) = butterfly(N) : (hadamard(N/2), hadamard(N/2));
 

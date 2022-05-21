@@ -186,7 +186,8 @@ with {
 //
 // <https://ccrma.stanford.edu/~jos/pasp/Prime_Power_Delay_Line.html>
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
+declare prime_power_delays author "Julius O. Smith III, revised by Romain Michon";
+
 prime_power_delays(N,pathmin,pathmax) = par(i,N,delayvals(i)) with {
   Np = 16;
   primes = 2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53;
@@ -237,7 +238,8 @@ prime_power_delays(N,pathmin,pathmax) = par(i,N,delayvals(i)) with {
 // * Philippe Depalle and Stephan Tassart, "Fractional Delay Lines using
 //         Lagrange Interpolators", ICMC Proceedings, pp. 341-343, 1996.
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
+declare fdelaylti author "Julius O. Smith III, revised by Romain Michon";
+
 fdelaylti(N,n,d,x)  = delay(n,id,x) <: seq(i,N,section(i)) : !,_
 with {
   o = (N-1.00001)/2; // offset to ~center FIR interpolator
@@ -247,6 +249,8 @@ with {
   section(i,x,y) = (x-x') * c(i) <: _,+(y);
   c(i) = (i - fd)/(i+1);
 };
+
+declare fdelayltv author "Julius O. Smith III, revised by Romain Michon";
 
 fdelayltv(N,n,d,x) = sum(i, N+1, delay(n,id+i,x) * h(N,fd,i))
 with {
@@ -266,7 +270,12 @@ with {
 // For convenience, `fdelay1`, `fdelay2`, `fdelay3`, `fdelay4`, `fdelay5`
 // are also available where n is the order of the interpolation.
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
+declare fdelay1 author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay2 author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay3 author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay4 author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay5 author "Julius O. Smith III, revised by Romain Michon";
+
 fdelay1 = fdelayltv(1);
 fdelay2 = fdelayltv(2);
 fdelay3 = fdelayltv(3);
@@ -314,8 +323,9 @@ fdelay5 = fdelayltv(5);
 //
 // First-order allpass interpolation, delay d in [0.5,1.5]
 //------------------------------------------------------------
-// TODO: author JOS, revised by RM
-fdelay1a(n,d,x)  = delay(n,id,x) : fi.tf1(eta,1,eta)
+declare fdelay1a author "Julius O. Smith III, revised by Romain Michon";
+
+fdelay1a(n,d,x) = delay(n,id,x) : fi.tf1(eta,1,eta)
 with {
   o = 0.49999; // offset to make life easy for allpass
   dmo = d - o; // assumed nonnegative
@@ -325,6 +335,8 @@ with {
 };
 
 // second-order allpass delay in [1.5,2.5]
+declare fdelay2a author "Julius O. Smith III, revised by Romain Michon";
+
 fdelay2a(n,d,x) = delay(n,id,x) : fi.tf2(a2,a1,1,a1,a2)
 with {
   o = 1.49999;
@@ -336,8 +348,11 @@ with {
   a2 = a1o2*(1-fd)/(2+fd);
 };
 
+
 // third-order allpass delay in [2.5,3.5]
 // delay d should be at least 2.5
+declare fdelay3a author "Julius O. Smith III, revised by Romain Michon";
+
 fdelay3a(n,d,x) = delay(n,id,x) : fi.iir((a3,a2,a1,1),(a1,a2,a3))
 with {
   o = 2.49999;
@@ -353,6 +368,8 @@ with {
 
 // fourth-order allpass delay in [3.5,4.5]
 // delay d should be at least 3.5
+declare fdelay4a author "Julius O. Smith III, revised by Romain Michon";
+
 fdelay4a(n,d,x) = delay(n,id,x) : fi.iir((a4,a3,a2,a1,1),(a1,a2,a3,a4))
 with {
   o = 3.49999;

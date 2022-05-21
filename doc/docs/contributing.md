@@ -81,6 +81,7 @@ In order to have a uniformized library system, we established the following conv
 * Sections in function documentation should be declared as `####` markdown title.
 * Each function documentation provides a "Usage" section (see `basics.lib`). 
 * The full documentation can be generated using the doc/Makefile script. Use `make help` to see all possible commands. If you plan to create a pull-request, *do not commit the full generated code* but only the modified .lib files.
+* Each function can have `declare author "name";`, `declare copyright "XXX";` and `declare licence "YYY";` declarations.
 * Each library has a `declare version "xx.yy";` version number to be raised each time a modification is done. The global `version` number in `version.lib` also has to be adapted according to the change.  
 
 ### Library Import

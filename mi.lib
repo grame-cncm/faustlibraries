@@ -56,12 +56,10 @@ declare author "James Leonard";
 declare author "Romain Michon";
 declare copyright "2018-2020 GRAME / GIPSA-Lab";
 
-
 //===============================Utility Functions========================================
 // These utility functions are used to help certain operations (e.g. define initial
 // positions and velocities for physical elements).
 //========================================================================================
-
 
 
 //------------------------`(mi.)initState`----------------------
@@ -89,14 +87,11 @@ with{
 };
 
 
-
-
 //=================================Mass Algorithms========================================
 // All mass-type physical element functions are declared here. They all expect to receive
 // a force input signal and produce a position signal.
 // All physical parameters are expressed in sample-rate dependant values.
 //========================================================================================
-
 
 
 //------------------------`(mi.)mass`----------------------
@@ -126,7 +121,6 @@ with{
     'x = A*(x : initState(x0)) + B*(x' : initState((x1,x0))) + (_-grav)*(C);
 	};
 };
-
 
 
 //------------------------`(mi.)oscil`----------------------
@@ -160,7 +154,6 @@ with{
 };
 
 
-
 //------------------------`(mi.)ground`----------------------
 // Implementation of a fixed point element.
 // The position output produced by this module never changes, however
@@ -188,7 +181,6 @@ with{
 };
 
 
-
 //------------------------`(mi.)posInput`----------------------
 // Implementation of a position input module (driven by an outside
 // signal). Takes two signal inputs: incoming force (which doesn't
@@ -207,7 +199,6 @@ with{
 posInput(init) = _,_ : !,_ : initState(init);
 
 
-
 //===============================Interaction Algorithms====================================
 // All interaction-type physical element functions are declared here. They each expect to
 // receive two position signals (coming from the two mass-elements that they connect) and
@@ -215,7 +206,6 @@ posInput(init) = _,_ : !,_ : initState(init);
 // elements' inputs.
 // All physical parameters are expressed in sample-rate dependant values.
 //=========================================================================================
-
 
 
 //------------------------`(mi.)spring`----------------------
@@ -238,7 +228,6 @@ spring(k, x1r0, x2r0, x1, x2) =
 with{
     deltapos = x1-x2;
 };
-
 
 
 //------------------------`(mi.)damper`----------------------
@@ -265,7 +254,6 @@ with{
 };
 
 
-
 //------------------------`(mi.)springDamper`----------------------
 // Implementation of a linear viscoelastic spring-damper interaction
 // (a combination of the spring and damper modules).
@@ -290,7 +278,6 @@ with{
     deltapos = x1-x2;
     deltavel = (x1 - x1' : initState(x1r0)) - (x2 - x2' : initState(x2r0));
 };
-
 
 
 //------------------------`(mi.)nlSpringDamper2`----------------------
@@ -322,7 +309,6 @@ with{
 };
 
 
-
 //------------------------`(mi.)nlSpringDamper3`----------------------
 // Implementation of a non-linear viscoelastic spring-damper interaction
 // containing a cubic term (function of distance^3).
@@ -350,7 +336,6 @@ with{
     deltapos = x1-x2;
     deltavel = (x1 - x1' : initState(x1r0)) - (x2 - x2' : initState(x2r0));
 };
-
 
 
 //------------------------`(mi.)nlSpringDamperClipped`----------------------
@@ -402,7 +387,6 @@ with{
 };
 
 
-
 //------------------------`(mi.)nlPluck`----------------------
 // Implementation of a piecewise linear plucking interaction.
 // The symmetric function provides a repulsive viscoelastic interaction
@@ -443,7 +427,6 @@ with{
   tipdist = scale / sharpness;
   Kend = k / sharpness;
 };
-
 
 
 //------------------------`(mi.)nlBow`----------------------
@@ -489,7 +472,6 @@ with{
 };
 
 
-
 //------------------------`(mi.)collision`----------------------
 // Implementation of a collision interaction, producing linear visco-elastic
 // repulsion forces when two mass elements are interpenetrating.
@@ -514,7 +496,6 @@ collision(k,z,thres,x1r0,x2r0,x1,x2) =
 with{
   comp = (x2-x1) < thres;
 };
-
 
 
 //------------------------`(mi.)nlCollisionClipped`----------------------

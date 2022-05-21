@@ -220,7 +220,7 @@ with {
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //----------------------------------------------------------------
-// Author: RM
+declare smoothEnvelope author "Romain Michon";
 smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 
 // Generic form to be specialized
@@ -253,8 +253,9 @@ with {
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
-// Author: JOS, revised by Stephane Letz 
-// License: STK-4.3
+declare arfe author "Julius O. Smith III, revised by Stephane Letz";
+declare arfe licence "STK-4.3";
+
 arfe(attT60,relT60,fv,gate) = asrfe(attT60,1.0,relT60,fv,gate);
 
 
@@ -275,8 +276,9 @@ arfe(attT60,relT60,fv,gate) = asrfe(attT60,1.0,relT60,fv,gate);
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
-// Author: JOS, revised by Stephane Letz 
-// License: STK-4.3
+declare are author "Julius O. Smith III, revised by Stephane Letz";
+declare are licence "STK-4.3";
+
 are(attT60,relT60,gate) = asrfe(attT60,1.0,relT60,0.0,gate);
 
 
@@ -297,8 +299,9 @@ are(attT60,relT60,gate) = asrfe(attT60,1.0,relT60,0.0,gate);
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
-// Author: JOS, revised by Stephane Letz 
-// License: STK-4.3
+declare asre author "Julius O. Smith III, revised by Stephane Letz";
+declare asre licence "STK-4.3";
+
 asre(attT60,susLvl,relT60,gate) = asrfe(attT60,susLvl,relT60,0.0,gate);
 
 
@@ -321,8 +324,9 @@ asre(attT60,susLvl,relT60,gate) = asrfe(attT60,susLvl,relT60,0.0,gate);
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
-// Author: JOS
-// License: STK-4.3
+declare adsre author "Julius O. Smith III";
+declare adsre licence "STK-4.3";
+
 adsre(attT60,decT60,susLvl,relT60,gate) = envelope 
 with {
   ugate = gate>0;
@@ -358,8 +362,9 @@ with {
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-----------------------------------------------------
-// Author: JOS, David Braun
-// License: STK-4.3
+declare ahdsre author "Julius O. Smith III, David Braun";
+declare ahdsre licence "STK-4.3";
+
 ahdsre(attT60,htT60,decT60,susLvl,relT60,gate) = envelope 
 with {
   ugate = gate>0;
@@ -392,7 +397,8 @@ with {
 // * `LN`: levels (0-1)
 // * `t`: trigger signal
 //-----------------------------------------------------
-// Author: RM
+declare dx7envelope author "Romain Michon";
+
 dx7envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) = up*on : ba.sAndH(on) : down
 with {
   on = t>0;
