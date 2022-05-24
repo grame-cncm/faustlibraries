@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "0.7";
+declare version "0.8";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -1440,6 +1440,29 @@ on_and_off(a, b) = (a : trig) : loop(b)
 with {
     trig(x) = (x-x') == 1;
     loop(b) = + ~ (_ >= 1) * ((b : trig) == 0);
+};
+
+
+//----------------------------`(ba.)bitcrusher`------------------------------------------
+// Produce distortion by reduction of the signal resolution.
+//
+// #### Usage
+//
+// ```
+// _ : bitcrusher(nbits) : _
+// ```
+//
+// Where:
+//
+// * `nbits`: the number of bits of the wanted resolution
+//
+//------------------------------------------------------------------------------
+declare bitcrusher author "Julius O. Smith III, revised by Stephane Letz";
+
+bitcrusher(nbits,x) = round(x * scaler) / scaler
+with {
+	scaler = float(2^nbits - 1);
+	round(x) = floor(x + 0.5);
 };
 
 
