@@ -229,11 +229,39 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#horencoder" class="nav-link">(ho.)rEncoder</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hostereoencoder" class="nav-link">(ho.)stereoEncoder</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#homultiencoder" class="nav-link">(ho.)multiEncoder</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#hodecoder" class="nav-link">(ho.)decoder</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#hodecoderstereo" class="nav-link">(ho.)decoderStereo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hoibasicdecoder" class="nav-link">(ho.)iBasicDecoder</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hocircularscaledvbap" class="nav-link">(ho.)circularScaledVBAP</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hoimlsdecoder" class="nav-link">(ho.)imlsDecoder</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hoidecoder" class="nav-link">(ho.)iDecoder</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -253,7 +281,15 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#hooptim" class="nav-link">(ho.)optim</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#howider" class="nav-link">(ho.)wider</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#homirror" class="nav-link">(ho.)mirror</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -265,11 +301,39 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#hoscope" class="nav-link">(ho.)scope</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#spatial-sound-processes" class="nav-link">Spatial Sound Processes</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#hofxdecorrelation" class="nav-link">(ho.).fxDecorrelation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hosyndecorrelation" class="nav-link">(ho.).synDecorrelation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hofxringmod" class="nav-link">(ho.).fxRingMod</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hosynringmod" class="nav-link">(ho.).synRingMod</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#3d-functions" class="nav-link">3D Functions</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#hoencoder3d" class="nav-link">(ho.)encoder3D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#horencoder3d" class="nav-link">(ho.)rEncoder3D</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -282,6 +346,10 @@
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#hooptiminphase3d" class="nav-link">(ho.)optimInPhase3D</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#hooptim3d" class="nav-link">(ho.)optim3D</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -306,40 +374,134 @@
 <p>Ambisonic encoder. Encodes a signal in the circular harmonics domain
 depending on an order of decomposition and an angle.</p>
 <h4 id="usage">Usage</h4>
-<pre><code>encoder(n, x, a) : _
+<pre><code>encoder(N, x, a) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>x</code>: the signal</li>
 <li><code>a</code>: the angle</li>
 </ul>
 <hr />
-<h3 id="hodecoder"><code>(ho.)decoder</code></h3>
-<p>Decodes an ambisonics sound field for a circular array of loudspeakers.</p>
+<h3 id="horencoder"><code>(ho.)rEncoder</code></h3>
+<p>Ambisonic encoder in 2D including source rotation. A mono signal is encoded at a certain ambisonic order
+with two possible modes: either rotation with an angular speed, or static with a fixed angle (when speed is zero).</p>
 <h4 id="usage_1">Usage</h4>
-<pre><code>_ : decoder(n, p) : _
+<pre><code>_ : rEncoder(N, sp, a, it) : _,_, ...
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
-<li><code>p</code>: the number of speakers</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>sp</code>: the azimuth speed expressed as angular speed (2PI/sec), positive or negative</li>
+<li><code>a</code>: the fixed azimuth when the rotation stops (sp = 0) in radians</li>
+<li><code>it</code> : interpolation time (in milliseconds) between the rotation and the fixed modes</li>
+</ul>
+<hr />
+<h3 id="hostereoencoder"><code>(ho.)stereoEncoder</code></h3>
+<p>Encoding of a stereo pair of channels with symetric angles (a/2, -a/2).</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>_,_ : stereoEncoder(N, a) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>a</code> : opening angle in radians, left channel at a/2 angle, right channel at -a/2 angle</li>
+</ul>
+<hr />
+<h3 id="homultiencoder"><code>(ho.)multiEncoder</code></h3>
+<p>Encoding of a set of P signals distributed on the unit circle according to a list of P speeds and P angles.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>_,_, ... : multiEncoder(N, lspeed, langle, it) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>lspeed</code> : a list of P speeds in turns by second (one speed per input signal, positive or negative)</li>
+<li><code>langle</code> : a list of P angles in radians on the unit circle to localize the sources (one angle per input signal)</li>
+<li><code>it</code> : interpolation time (in milliseconds) between the rotation and the fixed modes.</li>
+</ul>
+<hr />
+<h3 id="hodecoder"><code>(ho.)decoder</code></h3>
+<p>Decodes an ambisonics sound field for a circular array of loudspeakers.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>_ : decoder(N, P) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>P</code>: the number of speakers (constant numerical expression)</li>
 </ul>
 <h4 id="note">Note</h4>
-<p>Number of loudspeakers must be greater or equal to 2n+1. It's preferable
-to use 2n+2 loudspeakers.</p>
+<p>The number of loudspeakers must be greater or equal to 2n+1.
+It's preferable to use 2n+2 loudspeakers.</p>
 <hr />
 <h3 id="hodecoderstereo"><code>(ho.)decoderStereo</code></h3>
 <p>Decodes an ambisonic sound field for stereophonic configuration.
 An "home made" ambisonic decoder for stereophonic restitution
 (30° - 330°) : Sound field lose energy around 180°. You should
 use <code>inPhase</code> optimization with ponctual sources.</p>
-<h4 id="usage_2">Usage</h4>
-<pre><code>_ : decoderStereo(n) : _
+<h4 id="usage_5">Usage</h4>
+<pre><code>_ : decoderStereo(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+</ul>
+<hr />
+<h3 id="hoibasicdecoder"><code>(ho.)iBasicDecoder</code></h3>
+<p>The irregular basic decoder is a simple decoder that projects the incoming ambisonic situation
+to the loudspeaker situation (P loudspeakers) whatever it is, without compensation.
+When there is a strong irregularity, there can be some discontinuity in the sound field.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>_,_, ... : iBasicDecoder(N,la, direct, shift) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (there are 2*N+1 inputs to this function)</li>
+<li><code>la</code> : the list of P angles in degrees, for instance (0, 85, 182, 263) for four loudspeakers</li>
+<li><code>direct</code>: 1 for direct mode, -1 for the indirect mode (changes the rotation direction)</li>
+<li><code>shift</code> : angular shift in degrees to easily adjust angles</li>
+</ul>
+<hr />
+<h3 id="hocircularscaledvbap"><code>(ho.)circularScaledVBAP</code></h3>
+<p>The function provides a circular scaled VBAP with all loudspeakers and the virtual source on the unit-circle.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>_ : circularScaledVBAP(l, t) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>l</code> : the list of angles of the loudspeakers in degrees, for instance (0, 85, 182, 263) for four loudspeakers</li>
+<li><code>t</code> : the current angle of the virtual source in degrees</li>
+</ul>
+<hr />
+<h3 id="hoimlsdecoder"><code>(ho.)imlsDecoder</code></h3>
+<p>Irregular decoder in 2D for an irregular configuration of P loudspeakers
+using 2D VBAP for compensation.</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>_,_, ... : imlsDecoder(N,la, direct, shift) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>la</code> : the list of P angles in degrees, for instance (0, 85, 182, 263) for four loudspeakers</li>
+<li><code>direct</code>: 1 for direct mode, -1 for the indirect mode (changes the rotation direction)</li>
+<li><code>shift</code> : angular shift in degrees to easily adjust angles</li>
+</ul>
+<hr />
+<h3 id="hoidecoder"><code>(ho.)iDecoder</code></h3>
+<p>General decoder in 2D enabling an irregular multi-loudspeaker configuration
+and to switch between multi-channel and stereo.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>_,_, ... : iDecoder(N, la, direct, st, g) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>la</code>: the list of angles in degrees</li>
+<li><code>direct</code>: 1 for direct mode, -1 for the indirect mode (changes the rotation direction)</li>
+<li><code>shift</code> : angular shift in degrees to easily adjust angles</li>
+<li><code>st</code>: 1 for stereo, 0 for multi-loudspeaker configuration. When 1, stereo sounds goes through the first two channels</li>
+<li><code>g</code> : gain between 0 and 1</li>
 </ul>
 <h2 id="optimization-functions">Optimization Functions</h2>
 <p>Functions to weight the circular harmonics signals depending to the
@@ -350,58 +512,81 @@ It can be <code>basic</code> for no optimization, <code>maxRe</code> or <code>in
 <p>The basic optimization has no effect and should be used for a perfect
 circle of loudspeakers with one listener at the perfect center loudspeakers
 array.</p>
-<h4 id="usage_3">Usage</h4>
-<pre><code>_ : optimBasic(n) : _
+<h4 id="usage_10">Usage</h4>
+<pre><code>_ : optimBasic(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="hooptimmaxre"><code>(ho.)optimMaxRe</code></h3>
 <p>The maxRe optimization optimizes energy vector. It should be used for an
 auditory confined in the center of the loudspeakers array.</p>
-<h4 id="usage_4">Usage</h4>
-<pre><code>_ : optimMaxRe(n) : _
+<h4 id="usage_11">Usage</h4>
+<pre><code>_ : optimMaxRe(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="hooptiminphase"><code>(ho.)optimInPhase</code></h3>
-<p>The inPhase Optimization optimizes energy vector and put all loudspeakers signals
+<p>The inPhase optimization optimizes energy vector and put all loudspeakers signals
 in phase. It should be used for an auditory.</p>
-<h4 id="usage_5">Usage</h4>
-<pre><code>_ : optimInPhase(n) : _
+<h4 id="usage_12">Usage</h4>
+<pre><code>_ : optimInPhase(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+</ul>
+<hr />
+<h3 id="hooptim"><code>(ho.)optim</code></h3>
+<p>Ambisonic optimizer including the three elementary optimizers:
+<code>(ho).optimBasic</code>, <code>(ho).optimMaxRe</code> and <code>(ho.)optimInPhase</code>.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>_,_, ... : optim(N, ot) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>ot</code> : optimization type (0 for optimBasic, 1 for optimMaxRe, 2 for optimInPhase)</li>
 </ul>
 <hr />
 <h3 id="howider"><code>(ho.)wider</code></h3>
 <p>Can be used to wide the diffusion of a localized sound. The order
 depending signals are weighted and appear in a logarithmic way to
 have linear changes.</p>
-<h4 id="usage_6">Usage</h4>
-<pre><code>_ : wider(n,w) : _
+<h4 id="usage_14">Usage</h4>
+<pre><code>_ : wider(N,w) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>w</code>: the width value between 0 - 1</li>
+</ul>
+<hr />
+<h3 id="homirror"><code>(ho.)mirror</code></h3>
+<p>Mirroring effect on the sound field.</p>
+<h4 id="usage_15">Usage</h4>
+<pre><code>_,_, ... : mirror(N, fa) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>fa</code> : mirroring type (1 = original sound field; 0 = original+mirrored sound field; -1 = mirrored sound field)</li>
 </ul>
 <hr />
 <h3 id="homap"><code>(ho.)map</code></h3>
 <p>It simulates the distance of the source by applying a gain
 on the signal and a wider processing on the soundfield.</p>
-<h4 id="usage_7">Usage</h4>
-<pre><code>map(n, x, r, a)
+<h4 id="usage_16">Usage</h4>
+<pre><code>map(N, x, r, a)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>x</code>: the signal</li>
 <li><code>r</code>: the radius</li>
 <li><code>a</code>: the angle in radian</li>
@@ -409,62 +594,207 @@ on the signal and a wider processing on the soundfield.</p>
 <hr />
 <h3 id="horotate"><code>(ho.)rotate</code></h3>
 <p>Rotates the sound field.</p>
-<h4 id="usage_8">Usage</h4>
-<pre><code>_ : rotate(n, a) : _
+<h4 id="usage_17">Usage</h4>
+<pre><code>_ : rotate(N, a) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>a</code>: the angle in radian</li>
+</ul>
+<hr />
+<h3 id="hoscope"><code>(ho.)scope</code></h3>
+<p>Produces an XY pair of signals representing the ambisonic sound field.</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>_,_, ... : scope(N, rt) : _,_
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>rt</code> : refreshment time in milliseconds</li>
+</ul>
+<h2 id="spatial-sound-processes">Spatial Sound Processes</h2>
+<p>We propose implementations of processes intricated to the ambisonic model
+The process is implemented using as many instances as the number of harmonics at at certain order.
+The key control parameters of these instances are computed thanks to distribution functions
+(th functions below) and to a global driving factor.</p>
+<hr />
+<h3 id="hofxdecorrelation"><code>(ho.).fxDecorrelation</code></h3>
+<p>Spatial ambisonic decorrelation in fx mode.</p>
+<p>fxDecorrelation applies decorrelations to spatial components already created.
+The decorrelation is defined for each #i spatial component among P=2*N+1 at the ambisonic order N
+as a delay of 0 if factor fa is under a certain value 1-(i+1)/P and d*F((i+1)/p) in the contrary case,
+where d is the maximum delay applied (in samples) and F is a distribution function for durations.
+The user can choose this delay time distribution among 22 different ones.
+The delay increases according to the index of ambisonic components.
+But it increases at each step and it is modulated by a threshold.
+Therefore, delays are progressively revealed when the factor increases:</p>
+<ul>
+<li>when the factor is close to 0, only upper components are delayed;</li>
+<li>when the factor increases, more and more components are delayed.</li>
+</ul>
+<h4 id="usage_19">Usage</h4>
+<pre><code>_,_, ... : fxDecorrelation(N, d, wf, fa, fd, tf) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>d</code>: the maximum delay applied (in samples)</li>
+<li><code>wf</code>: window frequency (in Hz) for the overlapped delay</li>
+<li><code>fa</code>: decorrelation factor (between 0 and 1)</li>
+<li><code>fd</code>: feedback / level of reinjection (between 0 and 1)</li>
+<li><code>tf</code>: type of function of delay distribution (integer, between 0 and 21)</li>
+</ul>
+<hr />
+<h3 id="hosyndecorrelation"><code>(ho.).synDecorrelation</code></h3>
+<p>Spatial ambisonic decorrelation in syn mode.</p>
+<p><code>synDecorrelation</code> generates spatial decorrelated components in ambisonics from one mono signal.
+The decorrelation is defined for each #i spatial component among P=2*N+1 at the ambisonic order <code>N</code>
+as a delay of 0 if factor <code>fa</code> is under a certain value 1-(i+1)/P and d*F((i+1)/p) in the contrary case,
+where <code>d</code> is the maximum delay applied (in samples) and F is a distribution function for durations.
+The user can choose this delay time distribution among 22 different ones.
+The delay increases according to the index of ambisonic components.
+But it increases at each step and it is modulated by a threshold.
+Therefore, delays are progressively revealed when the factor increases:</p>
+<ul>
+<li>when the factor is close to 0, only upper components are delayed;</li>
+<li>when the factor increases, more and more components are delayed.</li>
+</ul>
+<p>When the factor is between [0; 1/P], upper harmonics are progressively faded and the level of the H0 component is compensated
+to avoid source localization and to produce a large mono.</p>
+<h4 id="usage_20">Usage</h4>
+<pre><code>_,_, ... : synDecorrelation(N, d, wf, fa, fd, tf) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li>'d': the maximum delay applied (in samples)</li>
+<li><code>wf</code>: window frequency (in Hz) for the overlapped delay</li>
+<li><code>fa</code>: decorrelation factor (between 0 and 1)</li>
+<li><code>fd</code>: feedback / level of reinjection (between 0 and 1)</li>
+<li><code>tf</code>: type of function of delay distribution (integer, between 0 and 21)</li>
+</ul>
+<hr />
+<h3 id="hofxringmod"><code>(ho.).fxRingMod</code></h3>
+<p>Spatial ring modulation in syn mode.</p>
+<p><code>fxRingMod</code> applies ring modulation to spatial components already created.
+The ring modulation is defined for each spatial component among P=2*n+1 at the ambisonic order <code>N</code>.
+For each spatial component #i, the result is either the original signal or a ring modulated signal
+according to a threshold that is i/P.</p>
+<p>The general process is drive by a factor <code>fa</code> between 0 and 1 and a modulation frequency <code>f0</code>.
+If <code>fa</code> is greater than theshold (P-i-1)/P, the ith ring modulator is on with carrier frequency of f0*(i+1)/P.
+On the contrary, it provides the original signal.</p>
+<p>Therefore ring modulators are progressively revealed when fa increases.</p>
+<h4 id="usage_21">Usage</h4>
+<pre><code>_,_, ... : fxRingMod(N, f0, fa, tf) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>f0</code>: the maximum delay applied (in samples)</li>
+<li><code>fa</code>: decorrelation factor (between 0 and 1)</li>
+<li><code>tf</code>: type of function of delay distribution (integer, between 0 and 21)</li>
+</ul>
+<hr />
+<h3 id="hosynringmod"><code>(ho.).synRingMod</code></h3>
+<p>Spatial ring modulation in syn mode.</p>
+<p><code>synRingMod</code> generates spatial components in amibsonics from one mono signal thanks to ring modulation.
+The ring modulation is defined for each spatial component among P=2*n+1 at the ambisonic order <code>N</code>.
+For each spatial component #i, the result is either the original signal or a ring modulated signal
+according to a threshold that is i/P.</p>
+<p>The general process is drive by a factor <code>fa</code> between 0 and 1 and a modulation frequency <code>f0</code>.
+If <code>fa</code> is greater than theshold (P-i-1)/P, the ith ring modulator is on with carrier frequency of f0*(i+1)/P.
+On the contrary, it provides the original signal.</p>
+<p>Therefore ring modulators are progressively revealed when fa increases.
+When the factor is between [0; 1/P], upper harmonics are progressively faded and the level of the H0 component is compensated
+to avoid source localization and to produce a large mono.</p>
+<h4 id="usage_22">Usage</h4>
+<pre><code>_,_, ... : synRingMod(N, f0, fa, tf) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>f0</code>: the maximum delay applied (in samples)</li>
+<li><code>fa</code>: decorrelation factor (between 0 and 1)</li>
+<li><code>tf</code>: type of function of delay distribution (integer, between 0 and 21)</li>
 </ul>
 <h2 id="3d-functions">3D Functions</h2>
 <hr />
 <h3 id="hoencoder3d"><code>(ho.)encoder3D</code></h3>
 <p>Ambisonic encoder. Encodes a signal in the circular harmonics domain
 depending on an order of decomposition, an angle and an elevation.</p>
-<h4 id="usage_9">Usage</h4>
-<pre><code>encoder3D(n, x, a, e) : _
+<h4 id="usage_23">Usage</h4>
+<pre><code>encoder3D(N, x, a, e) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>x</code>: the signal</li>
 <li><code>a</code>: the angle</li>
 <li><code>e</code>: the elevation</li>
+</ul>
+<hr />
+<h3 id="horencoder3d"><code>(ho.)rEncoder3D</code></h3>
+<p>Ambisonic encoder in 3D including source rotation. A mono signal is encoded at at certain ambisonic order
+with two possible modes: either rotation with 2 angular speeds (azimuth and elevation), or static with a fixed pair of angles.</p>
+<p><code>rEncoder3D</code> is a standard Faust function.</p>
+<h4 id="usage_24">Usage</h4>
+<pre><code>_ : rEncoder3D(N, azsp, elsp, az, el, it) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>azsp</code>: the azimuth speed expressed as angular speed (2PI/sec), positive or negative</li>
+<li><code>elsp</code>: the elevation speed expressed as angular speed (2PI/sec), positive or negative</li>
+<li><code>az</code>: the fixed azimuth when the azimuth rotation stops (azsp = 0) in radians</li>
+<li><code>el</code>: the fixed elevation when the elevation rotation stops (elsp = 0) in radians</li>
+<li><code>it</code> : interpolation time (in milliseconds) between the rotation and the fixed modes.</li>
 </ul>
 <hr />
 <h3 id="hooptimbasic3d"><code>(ho.)optimBasic3D</code></h3>
 <p>The basic optimization has no effect and should be used for a perfect
 sphere of loudspeakers with one listener at the perfect center loudspeakers
 array.</p>
-<h4 id="usage_10">Usage</h4>
-<pre><code>_ : optimBasic3D(n) : _
+<h4 id="usage_25">Usage</h4>
+<pre><code>_ : optimBasic3D(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="hooptimmaxre3d"><code>(ho.)optimMaxRe3D</code></h3>
 <p>The maxRe optimization optimize energy vector. It should be used for an
 auditory confined in the center of the loudspeakers array.</p>
-<h4 id="usage_11">Usage</h4>
-<pre><code>_ : optimMaxRe3D(n) : _
+<h4 id="usage_26">Usage</h4>
+<pre><code>_ : optimMaxRe3D(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="hooptiminphase3d"><code>(ho.)optimInPhase3D</code></h3>
 <p>The inPhase Optimization optimizes energy vector and put all loudspeakers signals
 in phase. It should be used for an auditory.</p>
-<h4 id="usage_12">Usage</h4>
-<pre><code>_ : optimInPhase3D(n) : _
+<h4 id="usage_27">Usage</h4>
+<pre><code>_ : optimInPhase3D(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: the order</li>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+</ul>
+<hr />
+<h3 id="hooptim3d"><code>(ho.)optim3D</code></h3>
+<p>Ambisonic optimizer including the three elementary optimizers:
+<code>(ho).optimBasic3D</code>, <code>(ho).optimMaxRe3D</code> and <code>(ho.)optimInPhase3D</code>.</p>
+<h4 id="usage_28">Usage</h4>
+<pre><code>_,_, ... : optim3D(N, ot) : _,_, ...
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the ambisonic order (constant numerical expression)</li>
+<li><code>ot</code> : optimization type (0 for optimBasic, 1 for optimMaxRe, 2 for optimInPhase)</li>
 </ul></div>
             </div>
         </div>
