@@ -181,7 +181,7 @@ with {
 //-------------------------------------------------------------------
 decoder(N, P) = par(i, 2*N+1, _) <: par(i, P, speaker(N, 2 * ma.PI*i/P))
 with {
-   speaker(N,a)	= /(2), par(i, 2*N, _), encoder(N, 2/P, a) : si.dot(2*N+1);
+    speaker(N,a) = /(2), par(i, 2*N, _), encoder(N, 2/P, a) : si.dot(2*N+1);
 };
 
 
@@ -201,21 +201,21 @@ with {
 // * `N`: the ambisonic order (constant numerical expression)
 //--------------------------------------------------------------
 decoderStereo(N) = decoder(N, P) <: (par(i, 2*N+2, gainLeft(360 * i / P)) :> _),
-	(par(i, 2*N+2, gainRight(360 * i / P)) :> _)
+    (par(i, 2*N+2, gainRight(360 * i / P)) :> _)
 with {
-	P = 2*N+2;
+    P = 2*N+2;
 
-   	gainLeft(a) = _ * sin(ratio_minus + ratio_cortex)
-	with {
-		ratio_minus = ma.PI*.5 * abs((30 + a) / 60 * ((a <= 30)) + (a - 330) / 60 * (a >= 330));
-		ratio_cortex= ma.PI*.5 * abs((120 + a) / 150 * (a > 30) * (a <= 180));
-	};
+    gainLeft(a) = _ * sin(ratio_minus + ratio_cortex)
+    with {
+        ratio_minus = ma.PI*.5 * abs((30 + a) / 60 * ((a <= 30)) + (a - 330) / 60 * (a >= 330));
+        ratio_cortex= ma.PI*.5 * abs((120 + a) / 150 * (a > 30) * (a <= 180));
+    };
 
-	gainRight(a) = _ * sin(ratio_minus + ratio_cortex)
-	with {
-		ratio_minus = ma.PI*.5 * abs((390 - a) / 60 * (a >= 330) + (30 - a) / 60 * (a <= 30));
-		ratio_cortex= ma.PI*.5 * abs((180 - a) / 150 * (a < 330) * (a >= 180));
-	};
+    gainRight(a) = _ * sin(ratio_minus + ratio_cortex)
+    with {
+        ratio_minus = ma.PI*.5 * abs((390 - a) / 60 * (a >= 330) + (30 - a) / 60 * (a <= 30));
+        ratio_cortex= ma.PI*.5 * abs((180 - a) / 150 * (a < 330) * (a >= 180));
+    };
 };
 
 
@@ -398,11 +398,11 @@ optimBasic(N) = par(i, 2*N+1, _);
 //-----------------------------------------------------
 optimMaxRe(N) = par(i, 2*N+1, optim(i, N, _))
 with {
-   	optim(i, N, _)= _ * cos(indexabs / (2*N+1) * ma.PI)
-	with {
-		numberOfharmonics = 2 * N + 1;
-		indexabs = (int)((i - 1) / 2 + 1);
-	};
+    optim(i, N, _)= _ * cos(indexabs / (2*N+1) * ma.PI)
+    with {
+        numberOfharmonics = 2 * N + 1;
+        indexabs = (int)((i - 1) / 2 + 1);
+    };
 };
 
 
@@ -420,14 +420,14 @@ with {
 //
 // * `N`: the ambisonic order (constant numerical expression)
 //-----------------------------------------------------
-optimInPhase(N)	= par(i, 2*N+1, optim(i, N, _))
+optimInPhase(N) = par(i, 2*N+1, optim(i, N, _))
 with {
-   	optim(i, N, _)= _ * (fact(N)^2.) / (fact(N+indexabs) * fact(N-indexabs))
-	with {
-		indexabs = (int)((i - 1) / 2 + 1);
-		fact(0) = 1;
-		fact(n) = n * fact(n-1);
-	};
+    optim(i, N, _)= _ * (fact(N)^2.) / (fact(N+indexabs) * fact(N-indexabs))
+    with {
+        indexabs = (int)((i - 1) / 2 + 1);
+        fact(0) = 1;
+        fact(n) = n * fact(n-1);
+    };
 };
 
 
@@ -471,19 +471,19 @@ with {
 // * `N`: the ambisonic order (constant numerical expression)
 // * `w`: the width value between 0 - 1
 //-----------------------------------------------------
-wider(N, w)	= par(i, 2*N+1, perform(N, w, i, _))
+wider(N, w) = par(i, 2*N+1, perform(N, w, i, _))
 with {
-	perform(N, w, i, _) = _ * (log(N+1) * (1 - w) + 1) * clipweight
-	with {
-		clipweight = weighter(N, w, i) * (weighter(N, w, i) > 0) * (weighter(N, w, i) <= 1) + (weighter(N, w, i) > 1)
-		with {
-			weighter(N, w, 0) = 1.;
-			weighter(N, w, i) = (((w * log(N+1)) - log(indexabs)) / (log(indexabs+1) - log(indexabs)))
-			with {
-				indexabs = (int)((i - 1) / 2 + 1);
-			};
-		};
-	};
+    perform(N, w, i, _) = _ * (log(N+1) * (1 - w) + 1) * clipweight
+    with {
+        clipweight = weighter(N, w, i) * (weighter(N, w, i) > 0) * (weighter(N, w, i) <= 1) + (weighter(N, w, i) > 1)
+        with {
+            weighter(N, w, 0) = 1.;
+            weighter(N, w, i) = (((w * log(N+1)) - log(indexabs)) / (log(indexabs+1) - log(indexabs)))
+            with {
+                indexabs = (int)((i - 1) / 2 + 1);
+            };
+        };
+    };
 };
 
 
@@ -521,10 +521,10 @@ mirror(N, fa) = (*(1), par(i, N, (*(fa), *(1))));
 // * `r`: the radius
 // * `a`: the angle in radian
 //-----------------------------------------------------
-map(N, x, r, a)	= encoder(N, x * volume(r), a) : wider(N, ouverture(r))
+map(N, x, r, a) = encoder(N, x * volume(r), a) : wider(N, ouverture(r))
 with {
-	volume(r) = 1. / (r * r * (r > 1) + (r <= 1));
-	ouverture(r) = r * (r < 1) + (r >= 1);
+    volume(r) = 1. / (r * r * (r > 1) + (r <= 1));
+    ouverture(r) = r * (r < 1) + (r >= 1);
 };
 
 
@@ -544,13 +544,13 @@ with {
 //-----------------------------------------------------
 rotate(N, a) = par(i, 2*N+1, _) <: par(i, 2*N+1, rotation(i, a))
 with {
-	rotation(i, a) = (par(j, 2*N+1, gain1(i, j, a)), par(j, 2*N+1, gain2(i, j, a)), par(j, 2*N+1, gain3(i, j, a)) :> _)
-	with {
-		indexabs = (int)((i - 1) / 2 + 1);
-		gain1(i, j, a) = _ * cos(a * indexabs) * (j == i);
-		gain2(i, j, a) = _ * sin(a * indexabs) * (j-1 == i) * (j != 0) * (i%2 == 1);
-		gain3(i, j, a) = (_ * sin(a * indexabs)) * (j+1 == i) * (j != 0) * (i%2 == 0) * (-1);
-	};
+    rotation(i, a) = (par(j, 2*N+1, gain1(i, j, a)), par(j, 2*N+1, gain2(i, j, a)), par(j, 2*N+1, gain3(i, j, a)) :> _)
+    with {
+        indexabs = (int)((i - 1) / 2 + 1);
+        gain1(i, j, a) = _ * cos(a * indexabs) * (j == i);
+        gain2(i, j, a) = _ * sin(a * indexabs) * (j-1 == i) * (j != 0) * (i%2 == 1);
+        gain3(i, j, a) = (_ * sin(a * indexabs)) * (j+1 == i) * (j != 0) * (i%2 == 0) * (-1);
+    };
 };
 
 
@@ -610,17 +610,17 @@ with {
 // * when the factor is close to 0, only upper components are delayed;
 // * when the factor increases, more and more components are delayed.
 //
-//H					THRESHOLD			DELAY
-//0					1-1/P				0 OR DELAY*F(1/P)
-//-1				1-2/P				0 OR DELAY*F(2/P)
-//1					1-3/P				0 OR DELAY*F(3/P)
-//-2				1-4/P				0 OR DELAY*F(4/P)
-//2					1-5/P				0 OR DELAY*F(5/P)
+//H                 THRESHOLD            DELAY
+//0                 1-1/P                0 OR DELAY*F(1/P)
+//-1                1-2/P                0 OR DELAY*F(2/P)
+//1                 1-3/P                0 OR DELAY*F(3/P)
+//-2                1-4/P                0 OR DELAY*F(4/P)
+//2                 1-5/P                0 OR DELAY*F(5/P)
 //...
-//-(N-1)			1-(P-3)/P			0 OR DELAY*F((P-3)/P)
-//(N-1)				1-(P-2)/P			0 OR DELAY*F((P-2)/P)
-//-N				1-(P-1)/P			0 OR DELAY*F((P-1)/P)
-//N					1-P/P				0 OR DELAY*F(P/P)
+//-(N-1)            1-(P-3)/P            0 OR DELAY*F((P-3)/P)
+//(N-1)             1-(P-2)/P            0 OR DELAY*F((P-2)/P)
+//-N                1-(P-1)/P            0 OR DELAY*F((P-1)/P)
+//N                 1-P/P                0 OR DELAY*F(P/P)
 //
 //
 // #### Usage
@@ -674,17 +674,17 @@ with {
 // When the factor is between [0; 1/P], upper harmonics are progressively faded and the level of the H0 component is compensated
 // to avoid source localization and to produce a large mono.
 //
-//H					THRESHOLD			DELAY
-//0					1-1/P				0 OR DELAY*F(1/P)
-//-1				1-2/P				0 OR DELAY*F(2/P)
-//1					1-3/P				0 OR DELAY*F(3/P)
-//-2				1-4/P				0 OR DELAY*F(4/P)
-//2					1-5/P				0 OR DELAY*F(5/P)
+//H                THRESHOLD            DELAY
+//0                1-1/P                0 OR DELAY*F(1/P)
+//-1               1-2/P                0 OR DELAY*F(2/P)
+//1                1-3/P                0 OR DELAY*F(3/P)
+//-2               1-4/P                0 OR DELAY*F(4/P)
+//2                1-5/P                0 OR DELAY*F(5/P)
 //...
-//-(N-1)			1-(P-3)/P			0 OR DELAY*F((P-3)/P)
-//(N-1)				1-(P-2)/P			0 OR DELAY*F((P-2)/P)
-//-N				1-(P-1)/P			0 OR DELAY*F((P-1)/P)
-//N					1-P/P				0 OR DELAY*F(P/P)
+//-(N-1)           1-(P-3)/P            0 OR DELAY*F((P-3)/P)
+//(N-1)            1-(P-2)/P            0 OR DELAY*F((P-2)/P)
+//-N               1-(P-1)/P            0 OR DELAY*F((P-1)/P)
+//N                1-P/P                0 OR DELAY*F(P/P)
 //
 //
 // #### Usage
@@ -735,17 +735,17 @@ with {
 //
 // Therefore ring modulators are progressively revealed when fa increases.
 //
-//H					THRESHOLD			    OUTPUT
-//0					(P-1)/P					ORIGINAL OR RING MODULATION BY F0*1/P
-//-1				(P-2)/P					ORIGINAL OR RING MODULATION BY F0*2/P
-//1					(P-3)/P			        ORIGINAL OR RING MODULATION BY F0*3/P
-//-2				(P-4)/P			        ORIGINAL OR RING MODULATION BY F0*4/P
-//2					(P-5)/P			        ORIGINAL OR RING MODULATION BY F0*5/P
+//H                THRESHOLD                OUTPUT
+//0                (P-1)/P                  ORIGINAL OR RING MODULATION BY F0*1/P
+//-1               (P-2)/P                  ORIGINAL OR RING MODULATION BY F0*2/P
+//1                (P-3)/P                  ORIGINAL OR RING MODULATION BY F0*3/P
+//-2               (P-4)/P                  ORIGINAL OR RING MODULATION BY F0*4/P
+//2                (P-5)/P                  ORIGINAL OR RING MODULATION BY F0*5/P
 //...
-//-(N-1)			3/P				        ORIGINAL OR RING MODULATION BY F0*(P-3)/P
-//(N-1)				2/P				        ORIGINAL OR RING MODULATION BY F0*(P-2)/P
-//-N				1/P				        ORIGINAL OR RING MODULATION BY F0*(P-1)/P
-//N					0				        ORIGINAL OR RING MODULATION BY F0*P/P=F0
+//-(N-1)           3/P                      ORIGINAL OR RING MODULATION BY F0*(P-3)/P
+//(N-1)            2/P                      ORIGINAL OR RING MODULATION BY F0*(P-2)/P
+//-N               1/P                      ORIGINAL OR RING MODULATION BY F0*(P-1)/P
+//N                0                        ORIGINAL OR RING MODULATION BY F0*P/P=F0
 //
 //
 // #### Usage
@@ -767,7 +767,7 @@ with {
     env1(fa, i, N) = (fa > ((N-i-1)/N)) : si.smooth(ba.tau2pole(0.005));
     env1c(fa, i, N) = 1 - env1(fa, i, N);
     //
-    gate_ringmod(f, i, N, fa, tf) = _ <: _ * os.osccos(freq(f, i, N, tf)) * env1(fa, i, N), _ * env1c(fa, i, N) : +	;
+    gate_ringmod(f, i, N, fa, tf) = _ <: _ * os.osccos(freq(f, i, N, tf)) * env1(fa, i, N), _ * env1c(fa, i, N) : +;
     //
     ringmodfreq(f, i, N, tf, ind) = (tf == ind) * f * x * coef
     with {
@@ -794,17 +794,17 @@ with {
 // When the factor is between [0; 1/P], upper harmonics are progressively faded and the level of the H0 component is compensated
 // to avoid source localization and to produce a large mono.
 //
-//H					THRESHOLD			    OUTPUT
-//0					(P-1)/P					ORIGINAL OR RING MODULATION BY F0*1/P
-//-1				(P-2)/P					ORIGINAL OR RING MODULATION BY F0*2/P
-//1					(P-3)/P			        ORIGINAL OR RING MODULATION BY F0*3/P
-//-2				(P-4)/P			        ORIGINAL OR RING MODULATION BY F0*4/P
-//2					(P-5)/P			        ORIGINAL OR RING MODULATION BY F0*5/P
+//H                 THRESHOLD                OUTPUT
+//0                 (P-1)/P                  ORIGINAL OR RING MODULATION BY F0*1/P
+//-1                (P-2)/P                  ORIGINAL OR RING MODULATION BY F0*2/P
+//1                 (P-3)/P                  ORIGINAL OR RING MODULATION BY F0*3/P
+//-2                (P-4)/P                  ORIGINAL OR RING MODULATION BY F0*4/P
+//2                 (P-5)/P                  ORIGINAL OR RING MODULATION BY F0*5/P
 //...
-//-(N-1)			3/P				        ORIGINAL OR RING MODULATION BY F0*(P-3)/P
-//(N-1)				2/P				        ORIGINAL OR RING MODULATION BY F0*(P-2)/P
-//-N				1/P				        ORIGINAL OR RING MODULATION BY F0*(P-1)/P
-//N					0				        ORIGINAL OR RING MODULATION BY F0*P/P=F0
+//-(N-1)            3/P                      ORIGINAL OR RING MODULATION BY F0*(P-3)/P
+//(N-1)             2/P                      ORIGINAL OR RING MODULATION BY F0*(P-2)/P
+//-N                1/P                      ORIGINAL OR RING MODULATION BY F0*(P-1)/P
+//N                 0                        ORIGINAL OR RING MODULATION BY F0*P/P=F0
 //
 //
 // #### Usage
@@ -890,48 +890,48 @@ th(21, i, p) = sqrt(1 - ((i+1) / p - 1)^2);
 //----------------------------------------------------------------
 encoder3D(N, x, theta, phi) = par(i, (N+1) * (N+1), x * y(degree(i), order(i), theta, phi))
 with {
-	// The degree l of the harmonic[l, m]	
-	degree(index) = int(sqrt(index));
-	// The order m of the harmonic[l, m]	
-	order(index) = int(index - int(degree(index) * int(degree(index) + 1)));
+    // The degree l of the harmonic[l, m]
+    degree(index) = int(sqrt(index));
+    // The order m of the harmonic[l, m]
+    order(index) = int(index - int(degree(index) * int(degree(index) + 1)));
 
-	// The spherical harmonics
-	y(l, m, theta, phi) =  e(m, theta2) * k(l, m) * p(l, m, cos(phi + ma.PI * 0.5))
-	with {	
-		//theta2 enables a continuous movement of elevation (when phi becomes greater than Pi/2)
-		theta2 = theta + (1 - int(fmod(fmod(phi / ma.PI - 0.5, 2) + 2, 2))) * ma.PI;
-		//
-		// The associated Legendre polynomial
-		// If l = 0   => p = 1
-		// If l = m   => p = -1 * (2 * (l-1) + 1) * sqrt(1 - cphi*cphi) * p(l-1, l-1, cphi)
-		// If l = m+1 => p = phi * (2 * (l-1) + 1) * p(l-1, l-1, cphi)
-		// Else => p = (cphi * (2 * (l-1) + 1) * p(l-1, abs(m), cphi) - ((l-1) + abs(m)) * p(l-2, abs(m), cphi)) / ((l-1) - abs(m) + 1)
-		p(l, m, cphi) = pcalcul(((l != 0) & (l == abs(m))) + ((l != 0) & (l == abs(m)+1)) * 2 + ((l != 0) & (l != abs(m)) & (l != abs(m)+1)) * 3, l, m, cphi)
-		with {
-			pcalcul(0, l, m, cphi) = 1;
-			pcalcul(1, l, m, cphi) = -1 * (2 * (l-1) + 1) * sqrt(1 - cphi*cphi) * p(l-1, l-1, cphi);
-			pcalcul(2, l, m, cphi) = cphi * (2 * (l-1) + 1) * p(l-1, l-1, cphi);
-			pcalcul(s, l, m, cphi) = (cphi * (2 * (l-1) + 1) * p(l-1, abs(m), cphi) - ((l-1) + abs(m)) * p(l-2, abs(m), cphi)) / ((l-1) - abs(m) + 1);
-		};	
+    // The spherical harmonics
+    y(l, m, theta, phi) =  e(m, theta2) * k(l, m) * p(l, m, cos(phi + ma.PI * 0.5))
+    with {
+        //theta2 enables a continuous movement of elevation (when phi becomes greater than Pi/2)
+        theta2 = theta + (1 - int(fmod(fmod(phi / ma.PI - 0.5, 2) + 2, 2))) * ma.PI;
+        //
+        // The associated Legendre polynomial
+        // If l = 0   => p = 1
+        // If l = m   => p = -1 * (2 * (l-1) + 1) * sqrt(1 - cphi*cphi) * p(l-1, l-1, cphi)
+        // If l = m+1 => p = phi * (2 * (l-1) + 1) * p(l-1, l-1, cphi)
+        // Else => p = (cphi * (2 * (l-1) + 1) * p(l-1, abs(m), cphi) - ((l-1) + abs(m)) * p(l-2, abs(m), cphi)) / ((l-1) - abs(m) + 1)
+        p(l, m, cphi) = pcalcul(((l != 0) & (l == abs(m))) + ((l != 0) & (l == abs(m)+1)) * 2 + ((l != 0) & (l != abs(m)) & (l != abs(m)+1)) * 3, l, m, cphi)
+        with {
+            pcalcul(0, l, m, cphi) = 1;
+            pcalcul(1, l, m, cphi) = -1 * (2 * (l-1) + 1) * sqrt(1 - cphi*cphi) * p(l-1, l-1, cphi);
+            pcalcul(2, l, m, cphi) = cphi * (2 * (l-1) + 1) * p(l-1, l-1, cphi);
+            pcalcul(s, l, m, cphi) = (cphi * (2 * (l-1) + 1) * p(l-1, abs(m), cphi) - ((l-1) + abs(m)) * p(l-2, abs(m), cphi)) / ((l-1) - abs(m) + 1);
+        };
 
-		// The exponential imaginary
-		// If m > 0 => e^i*m*theta = cos(m * theta)
-		// If m < 0 => e^i*m*theta = sin(-m * theta)
-		// If m = 0 => e^i*m*theta = 1
-		e(m, theta) = ecalcul((m > 0) * 2 + (m < 0), m, theta)
-		with {
-			ecalcul(2, m, theta) = cos(m * theta);
-			ecalcul(1, m, theta) = sin(abs(m) * theta);
-			ecalcul(s, m, theta) = 1;
-		}; 
-		
-		// The normalization
-		// If m  = 0 => k(l, m) = 1
-		// If m != 0 => k(l, m) = sqrt((l - abs(m))! / l + abs(m))!) * sqrt(2)
-		k(l, m) = kcalcul((m != 0), l, m)
-		with {	
-			kcalcul(0, l, m) = 1;
-			kcalcul(1, l, m) = sqrt(2) / sqrtFactQuotient(l+abs(m), l-abs(m))
+        // The exponential imaginary
+        // If m > 0 => e^i*m*theta = cos(m * theta)
+        // If m < 0 => e^i*m*theta = sin(-m * theta)
+        // If m = 0 => e^i*m*theta = 1
+        e(m, theta) = ecalcul((m > 0) * 2 + (m < 0), m, theta)
+        with {
+            ecalcul(2, m, theta) = cos(m * theta);
+            ecalcul(1, m, theta) = sin(abs(m) * theta);
+            ecalcul(s, m, theta) = 1;
+        }; 
+        
+        // The normalization
+        // If m  = 0 => k(l, m) = 1
+        // If m != 0 => k(l, m) = sqrt((l - abs(m))! / l + abs(m))!) * sqrt(2)
+        k(l, m) = kcalcul((m != 0), l, m)
+        with {
+            kcalcul(0, l, m) = 1;
+            kcalcul(1, l, m) = sqrt(2) / sqrtFactQuotient(l+abs(m), l-abs(m))
             with {
                 //factorial quotient fq(n, p)=n! / p! = n(n-1)...(p+1) when n > p
                 //enables factor simplification
@@ -944,8 +944,8 @@ with {
                         sqrtProd(n, p) = sqrt(p+n) * sqrtProd(n-1, p);
                 };
             };
-		};		
-	};
+        };
+    };
 };
 
 
@@ -1019,9 +1019,9 @@ optimBasic3D(N) = par(i, (N+1) * (N+1), _);
 //-----------------------------------------------------
 optimMaxRe3D(N) = par(i, (N+1) * (N+1), MaxRe(N, degree(i), _))
 with {
-	// The degree l of the harmonic[l, m]	
-	degree(index)  = int(sqrt(index));
-   	MaxRe(N, l, _)= _ * cos(l  / (2*N+2) * ma.PI);
+    // The degree l of the harmonic[l, m]
+    degree(index)  = int(sqrt(index));
+    MaxRe(N, l, _)= _ * cos(l / (2*N+2) * ma.PI);
 };
 
 
@@ -1041,13 +1041,13 @@ with {
 //-----------------------------------------------------
 optimInPhase3D(N) = par(i, (N+1) * (N+1), InPhase(N, degree(i), _))
 with {
-	// The degree l of the harmonic[l, m]	
-	degree(index)  = int(sqrt(index));
-   	InPhase(N, l, _)= _ * (fact(N) * fact(N)) / (fact(N - l) * fact(N + l))
-	with {
-		fact(0) = 1;
-		fact(n) = n * fact(n-1);
-	};
+    // The degree l of the harmonic[l, m]
+    degree(index)  = int(sqrt(index));
+    InPhase(N, l, _)= _ * (fact(N) * fact(N)) / (fact(N - l) * fact(N + l))
+    with {
+        fact(0) = 1;
+        fact(n) = n * fact(n-1);
+    };
 };
 
 
