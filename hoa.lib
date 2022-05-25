@@ -938,10 +938,10 @@ with {
                 //and considering the square root of a product as a product of square roots
                 sqrtFactQuotient(n, p) = sqrtProd(n-p, p)
                 with {
-                        //sqrtProd(n, p) computes the product sqrt(p+1) x sqrt(p+2) x ... x sqrt(n)
-                        //to enable factorial quotient simplification
-                        sqrtProd(1, p) = sqrt(p+1);
-                        sqrtProd(n, p) = sqrt(p+n) * sqrtProd(n-1, p);
+                    //sqrtProd(n, p) computes the product sqrt(p+1) x sqrt(p+2) x ... x sqrt(n)
+                    //to enable factorial quotient simplification
+                    sqrtProd(1, p) = sqrt(p+1);
+                    sqrtProd(n, p) = sqrt(p+n) * sqrtProd(n-1, p);
                 };
             };
         };
