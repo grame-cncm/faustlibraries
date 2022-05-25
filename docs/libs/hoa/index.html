@@ -438,7 +438,7 @@ It's preferable to use 2n+2 loudspeakers.</p>
 <h3 id="hodecoderstereo"><code>(ho.)decoderStereo</code></h3>
 <p>Decodes an ambisonic sound field for stereophonic configuration.
 An "home made" ambisonic decoder for stereophonic restitution
-(30° - 330°) : Sound field lose energy around 180°. You should
+(30° - 330°): Sound field lose energy around 180°. You should
 use <code>inPhase</code> optimization with ponctual sources.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>_ : decoderStereo(N) : _
@@ -614,17 +614,17 @@ on the signal and a wider processing on the soundfield.</p>
 <li><code>rt</code> : refreshment time in milliseconds</li>
 </ul>
 <h2 id="spatial-sound-processes">Spatial Sound Processes</h2>
-<p>We propose implementations of processes intricated to the ambisonic model
+<p>We propose implementations of processes intricated to the ambisonic model.
 The process is implemented using as many instances as the number of harmonics at at certain order.
 The key control parameters of these instances are computed thanks to distribution functions
 (th functions below) and to a global driving factor.</p>
 <hr />
 <h3 id="hofxdecorrelation"><code>(ho.).fxDecorrelation</code></h3>
 <p>Spatial ambisonic decorrelation in fx mode.</p>
-<p>fxDecorrelation applies decorrelations to spatial components already created.
-The decorrelation is defined for each #i spatial component among P=2*N+1 at the ambisonic order N
-as a delay of 0 if factor fa is under a certain value 1-(i+1)/P and d*F((i+1)/p) in the contrary case,
-where d is the maximum delay applied (in samples) and F is a distribution function for durations.
+<p><code>fxDecorrelation</code> applies decorrelations to spatial components already created.
+The decorrelation is defined for each #i spatial component among P=2*N+1 at the ambisonic order <code>N</code>
+as a delay of 0 if factor <code>fa</code> is under a certain value 1-(i+1)/P and d*F((i+1)/p) in the contrary case,
+where <code>d</code> is the maximum delay applied (in samples) and F is a distribution function for durations.
 The user can choose this delay time distribution among 22 different ones.
 The delay increases according to the index of ambisonic components.
 But it increases at each step and it is modulated by a threshold.
@@ -684,7 +684,7 @@ according to a threshold that is i/P.</p>
 <p>The general process is drive by a factor <code>fa</code> between 0 and 1 and a modulation frequency <code>f0</code>.
 If <code>fa</code> is greater than theshold (P-i-1)/P, the ith ring modulator is on with carrier frequency of f0*(i+1)/P.
 On the contrary, it provides the original signal.</p>
-<p>Therefore ring modulators are progressively revealed when fa increases.</p>
+<p>Therefore ring modulators are progressively revealed when <code>fa</code> increases.</p>
 <h4 id="usage_21">Usage</h4>
 <pre><code>_,_, ... : fxRingMod(N, f0, fa, tf) : _,_, ...
 </code></pre>
@@ -698,14 +698,14 @@ On the contrary, it provides the original signal.</p>
 <hr />
 <h3 id="hosynringmod"><code>(ho.).synRingMod</code></h3>
 <p>Spatial ring modulation in syn mode.</p>
-<p><code>synRingMod</code> generates spatial components in amibsonics from one mono signal thanks to ring modulation.
+<p><code>synRingMod</code> generates spatial components in ambisonics from one mono signal thanks to ring modulation.
 The ring modulation is defined for each spatial component among P=2*n+1 at the ambisonic order <code>N</code>.
 For each spatial component #i, the result is either the original signal or a ring modulated signal
 according to a threshold that is i/P.</p>
 <p>The general process is drive by a factor <code>fa</code> between 0 and 1 and a modulation frequency <code>f0</code>.
 If <code>fa</code> is greater than theshold (P-i-1)/P, the ith ring modulator is on with carrier frequency of f0*(i+1)/P.
 On the contrary, it provides the original signal.</p>
-<p>Therefore ring modulators are progressively revealed when fa increases.
+<p>Therefore ring modulators are progressively revealed when <code>fa</code> increases.
 When the factor is between [0; 1/P], upper harmonics are progressively faded and the level of the H0 component is compensated
 to avoid source localization and to produce a large mono.</p>
 <h4 id="usage_22">Usage</h4>
@@ -748,7 +748,7 @@ with two possible modes: either rotation with 2 angular speeds (azimuth and elev
 <li><code>elsp</code>: the elevation speed expressed as angular speed (2PI/sec), positive or negative</li>
 <li><code>az</code>: the fixed azimuth when the azimuth rotation stops (azsp = 0) in radians</li>
 <li><code>el</code>: the fixed elevation when the elevation rotation stops (elsp = 0) in radians</li>
-<li><code>it</code> : interpolation time (in milliseconds) between the rotation and the fixed modes.</li>
+<li><code>it</code> : interpolation time (in milliseconds) between the rotation and the fixed modes</li>
 </ul>
 <hr />
 <h3 id="hooptimbasic3d"><code>(ho.)optimBasic3D</code></h3>
