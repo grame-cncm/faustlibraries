@@ -188,7 +188,7 @@ with {
 //-----------------------`(ho.)decoderStereo`------------------------
 // Decodes an ambisonic sound field for stereophonic configuration.
 // An "home made" ambisonic decoder for stereophonic restitution
-// (30° - 330°) : Sound field lose energy around 180°. You should
+// (30° - 330°): Sound field lose energy around 180°. You should
 // use `inPhase` optimization with ponctual sources.
 // #### Usage
 //
@@ -589,7 +589,7 @@ with {
 
 
 //============================Spatial Sound Processes ====================================
-// We propose implementations of processes intricated to the ambisonic model
+// We propose implementations of processes intricated to the ambisonic model.
 // The process is implemented using as many instances as the number of harmonics at at certain order.
 // The key control parameters of these instances are computed thanks to distribution functions
 // (th functions below) and to a global driving factor.
@@ -598,10 +598,10 @@ with {
 //-------`(ho.).fxDecorrelation`----------
 // Spatial ambisonic decorrelation in fx mode.
 //
-// fxDecorrelation applies decorrelations to spatial components already created.
-// The decorrelation is defined for each #i spatial component among P=2\*N+1 at the ambisonic order N
-// as a delay of 0 if factor fa is under a certain value 1-(i+1)/P and d\*F((i+1)/p) in the contrary case,
-// where d is the maximum delay applied (in samples) and F is a distribution function for durations.
+// `fxDecorrelation` applies decorrelations to spatial components already created.
+// The decorrelation is defined for each #i spatial component among P=2\*N+1 at the ambisonic order `N`
+// as a delay of 0 if factor `fa` is under a certain value 1-(i+1)/P and d\*F((i+1)/p) in the contrary case,
+// where `d` is the maximum delay applied (in samples) and F is a distribution function for durations.
 // The user can choose this delay time distribution among 22 different ones.
 // The delay increases according to the index of ambisonic components.
 // But it increases at each step and it is modulated by a threshold.
@@ -733,7 +733,7 @@ with {
 // If `fa` is greater than theshold (P-i-1)/P, the ith ring modulator is on with carrier frequency of f0\*(i+1)/P.
 // On the contrary, it provides the original signal.
 //
-// Therefore ring modulators are progressively revealed when fa increases.
+// Therefore ring modulators are progressively revealed when `fa` increases.
 //
 //H                THRESHOLD                OUTPUT
 //0                (P-1)/P                  ORIGINAL OR RING MODULATION BY F0*1/P
@@ -790,7 +790,7 @@ with {
 // If `fa` is greater than theshold (P-i-1)/P, the ith ring modulator is on with carrier frequency of f0\*(i+1)/P.
 // On the contrary, it provides the original signal.
 //
-// Therefore ring modulators are progressively revealed when fa increases.
+// Therefore ring modulators are progressively revealed when `fa` increases.
 // When the factor is between [0; 1/P], upper harmonics are progressively faded and the level of the H0 component is compensated
 // to avoid source localization and to produce a large mono.
 //
@@ -968,7 +968,7 @@ with {
 // * `elsp`: the elevation speed expressed as angular speed (2PI/sec), positive or negative
 // * `az`: the fixed azimuth when the azimuth rotation stops (azsp = 0) in radians
 // * `el`: the fixed elevation when the elevation rotation stops (elsp = 0) in radians
-// * `it` : interpolation time (in milliseconds) between the rotation and the fixed modes.
+// * `it` : interpolation time (in milliseconds) between the rotation and the fixed modes
 //-----------------------------
 rEncoder3D(N, azsp, elsp, az, el, it) = this3DEncoder
 with {
