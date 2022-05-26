@@ -65,7 +65,7 @@ declare version "0.1";
 // Where:
 //
 // * `n`: the max delay length in samples
-// * `d`: the delay length as a number of samples (integer)
+// * `d`: the delay length in samples (integer)
 //-----------------------------
 // TODO: add MBH np2
 delay(n,d,x) = x @ min(n, max(0,d));
@@ -86,7 +86,7 @@ delay(n,d,x) = x @ min(n, max(0,d));
 // Where:
 //
 // * `n`: the max delay length in samples
-// * `d`: the delay length as a number of samples (float)
+// * `d`: the delay length in samples (float)
 //-----------------------------
 fdelay(n,d,x) = delay(n+1,int(d),x)*(1 - ma.frac(d)) + delay(n+1,int(d)+1,x)*ma.frac(d);
 
@@ -98,72 +98,72 @@ fdelay(n,d,x) = delay(n+1,int(d),x)*(1 - ma.frac(d)) + delay(n+1,int(d)+1,x)*ma.
 // #### Usage
 //
 // ```
-// _ : sdelay(n,it,dt) : _
+// _ : sdelay(n,it,d) : _
 // ```
 //
 // Where :
 //
 // * `n`: the max delay length in samples
-// * `it`: interpolation time (in samples) for example 1024
-// * `dt`: delay time (in samples)
+// * `it`: interpolation time (in samples), for example 1024
+// * `d`: the delay length in samples (float)
 //--------------------------------------------------------------------------
-sdelay(n, it, dt) = ctrl(it,dt),_ : ddi(n)
+sdelay(n, it, d) = ctrl(it,d),_ : ddi(n)
 with {
-	// ddi(n,i,d0,d1)
-	// DDI (Double Delay with Interpolation) : the input signal is sent to two
-	// delay lines. The outputs of these delay lines are crossfaded with
-	// an interpolation stage. By acting on this interpolation value one
-	// can move smoothly from one delay to another. When <i> is 0 we can
-	// freely change the delay time <d1> of line 1, when it is 1 we can freely change
-	// the delay time <d0> of line 0.
-	//
-	// <n>  = maximal delay in samples
-	// <i>  = interpolation value between 0 and 1 used to crossfade the outputs of the
-	// 		two delay lines (0.0: first delay line, 1.0: second delay line)
-	// <d0> = delay time of delay line 0 in samples between 0 and <N>-1
-	// <d1> = delay time of delay line 1 in samples between 0 and <N>-1
-	// <  > = the input signal we want to delay
-	ddi(n, i, d0, d1) = _ <: delay(n,d0), delay(n,d1) : si.interpolate(i);
+....// ddi(n,i,d0,d1)
+....// DDI (Double Delay with Interpolation) : the input signal is sent to two
+....// delay lines. The outputs of these delay lines are crossfaded with
+....// an interpolation stage. By acting on this interpolation value one
+....// can move smoothly from one delay to another. When <i> is 0 we can
+....// freely change the delay time <d1> of line 1, when it is 1 we can freely change
+....// the delay time <d0> of line 0.
+....//
+....// <n>  = maximal delay in samples
+....// <i>  = interpolation value between 0 and 1 used to crossfade the outputs of the
+....// ....two delay lines (0.0: first delay line, 1.0: second delay line)
+....// <d0> = delay time of delay line 0 in samples between 0 and <N>-1
+....// <d1> = delay time of delay line 1 in samples between 0 and <N>-1
+....// <  > = the input signal we want to delay
+....ddi(n, i, d0, d1) = _ <: delay(n,d0), delay(n,d1) : si.interpolate(i);
 
-	// ctrl(it,dt)
-	// Control logic for a Double Delay with Interpolation according to two
-	//
-	// USAGE : ctrl(it,dt)
-	// where :
-	// <it> an interpolation time (in samples, for example 256)
-	// <dt> a delay time (in samples)
-	//
-	// ctrl produces 3 outputs : an interpolation value <i> and two delay
-	// times <d0> and <d1>. These signals are used to control a ddi (Double Delay with Interpolation).
-	// The principle is to detect changes in the input delay time dt, then to
-	// change the delay time of the delay line currently unused and then by a
-	// smooth crossfade to remove the first delay line and activate the second one.
-	//
-	// The control logic has an internal state controlled by 4 elements
-	// <v> : the interpolation variation (0, 1/it, -1/it)
-	// <i> : the interpolation value (between 0 and 1)
-	// <d0>: the delay time of line 0
-	// <d1>: the delay time of line 1
-	//
-	// Please note that the last stage (!,_,_,_) cut <v> because it is only
-	// used internally.
-	ctrl(it, dt) = \(v,ip,d0,d1).((nv, nip, nd0, nd1)
-	with {
-		// interpolation variation
-		nv = ba.if (v!=0.0,                         // if variation we are interpolating
-			ba.if ((ip>0.0) & (ip<1.0), v, 0),      // should we continue or not ?
-			ba.if ((ip==0.0) & (dt!=d0), 1.0/it,    // if true xfade from dl0 to dl1
-			ba.if ((ip==1.0) & (dt!=d1), -1.0/it,   // if true xfade from dl1 to dl0
-					 0)));                  		// nothing to change
-		// interpolation value
-		nip = ip+nv : min(1.0) : max(0.0);
+....// ctrl(it,d)
+....// Control logic for a Double Delay with Interpolation according to two
+....//
+....// USAGE : ctrl(it,d)
+....// where :
+....// <it> an interpolation time (in samples, for example 256)
+....// <d> a delay time (in samples)
+....//
+....// ctrl produces 3 outputs : an interpolation value <i> and two delay
+....// times <d0> and <d1>. These signals are used to control a ddi (Double Delay with Interpolation).
+....// The principle is to detect changes in the input delay time d, then to
+....// change the delay time of the delay line currently unused and then by a
+....// smooth crossfade to remove the first delay line and activate the second one.
+....//
+....// The control logic has an internal state controlled by 4 elements
+....// <v> : the interpolation variation (0, 1/it, -1/it)
+....// <i> : the interpolation value (between 0 and 1)
+....// <d0>: the delay time of line 0
+....// <d1>: the delay time of line 1
+....//
+....// Please note that the last stage (!,_,_,_) cut <v> because it is only
+....// used internally.
+....ctrl(it, d) = \(v,ip,d0,d1).((nv, nip, nd0, nd1)
+....with {
+........// interpolation variation
+........nv = ba.if (v!=0.0,                        // if variation we are interpolating
+............ba.if ((ip>0.0) & (ip<1.0), v, 0),     // should we continue or not ?
+............ba.if ((ip==0.0) & (d!=d0), 1.0/it,    // if true xfade from dl0 to dl1
+............ba.if ((ip==1.0) & (d!=d1), -1.0/it,   // if true xfade from dl1 to dl0
+............0)));                  ........        // nothing to change
+........// interpolation value
+........nip = ip+nv : min(1.0) : max(0.0);
 
-		// update delay time of line 0 if needed
-		nd0 = ba.if ((ip >= 1.0) & (d1!=dt), dt, d0);
+........// update delay time of line 0 if needed
+........nd0 = ba.if ((ip >= 1.0) & (d1!=d), d, d0);
 
-		// update delay time of line 0 if needed
-		nd1 = ba.if ((ip <= 0.0) & (d0!=dt), dt, d1);
-	}) ~ (_,_,_,_) : (!,_,_,_);
+........// update delay time of line 0 if needed
+........nd1 = ba.if ((ip <= 0.0) & (d0!=d), d, d1);
+....}) ~ (_,_,_,_) : (!,_,_,_);
 };
 
 
@@ -217,15 +217,19 @@ prime_power_delays(N,pathmin,pathmax) = par(i,N,delayvals(i)) with {
 // #### Usage
 //
 // ```
-// _ : fdelaylt[i|v](order, maxdelay, delay, inputsignal) : _
+// _ : fdelaylt[i|v](N, n, d) : _
 // ```
 //
-// Where `order=1,2,3,...` is the order of the Lagrange interpolation polynomial.
+// Where:
+//
+// * `N=1,2,3,...` is the order of the Lagrange interpolation polynomial (constant numerical expression)
+// * `n`: the max delay length in samples
+// * `d`: the delay length in samples
 //
 // `fdelaylti` is most efficient, but designed for constant/slowly-varying delay.
 // `fdelayltv` is more expensive and more robust when the delay varies rapidly.
 //
-// NOTE: The requested delay should not be less than `(order-1)/2`.
+// Note: the requested delay should not be less than `(N-1)/2`.
 //
 // #### References
 //
@@ -240,7 +244,7 @@ prime_power_delays(N,pathmin,pathmax) = par(i,N,delayvals(i)) with {
 //------------------------------------------------------------
 declare fdelaylti author "Julius O. Smith III, revised by Romain Michon";
 
-fdelaylti(N,n,d,x)  = delay(n,id,x) <: seq(i,N,section(i)) : !,_
+fdelaylti(N,n,d,x) = delay(n,id,x) <: seq(i,N,section(i)) : !,_
 with {
   o = (N-1.00001)/2; // offset to ~center FIR interpolator
   dmo = d - o; // assumed nonnegative [d > (N-1)/2]
@@ -266,9 +270,9 @@ with {
   // h_d(n) = \prod_{\stackrel{k=0}{k\neq n}}^N \frac{d-k}{n-k}, n=0:N
 };
 
-//------------------`(de.)fdelay[n]`----------------------------
+//------------------`(de.)fdelay[N]`----------------------------
 // For convenience, `fdelay1`, `fdelay2`, `fdelay3`, `fdelay4`, `fdelay5`
-// are also available where n is the order of the interpolation.
+// are also available where `N` is the order of the interpolation, built using `fdelayltv`.
 //------------------------------------------------------------
 declare fdelay1 author "Julius O. Smith III, revised by Romain Michon";
 declare fdelay2 author "Julius O. Smith III, revised by Romain Michon";
@@ -290,38 +294,40 @@ fdelay5 = fdelayltv(5);
 // <https://ccrma.stanford.edu/~jos/pasp/Thiran_Allpass_Interpolators.html>
 //========================================================================================
 
-//----------------`(de.)fdelay[n]a`-------------
+//----------------`(de.)fdelay[N]a`-------------
 // Delay lines interpolated using Thiran allpass interpolation.
 //
 // #### Usage
 //
 // ```
-// _ : fdelay[N]a(maxdelay, delay, inputsignal) : _
+// _ : fdelay[N]a(n, d) : _
 // ```
 //
 // (exactly like `fdelay`)
 //
 // Where:
 //
-// * `N`=1,2,3, or 4 is the order of the Thiran interpolation filter,
-// and the delay argument is at least N - 1/2.
+// * `N=1,2,3, or 4` is the order of the Thiran interpolation filter (constant numerical expression),
+// and the delay argument is at least `N-1/2`. First-order: `d` at least 0.5, second-order: `d` at least 1.5,
+// third-order: `d` at least 2.5, fourth-order: `d` at least 3.5.
+// * `n`: the max delay length in samples
+// * `d`: the delay length in samples
 //
 // #### Note
 //
-// The interpolated delay should not be less than `N - 1/2`.
-// (The allpass delay ranges from `N - 1/2` to `N + 1/2`.)
+// The interpolated delay should not be less than `N-1/2`.
+// (The allpass delay ranges from `N-1/2` to `N+1/2`).
 // This constraint can be alleviated by altering the code,
 // but be aware that allpass filters approach zero delay
 // by means of pole-zero cancellations.
-// The delay range `[N-1/2`,`N+1/2]` is not optimal. What is?
+// The delay range `[N-1/2`,`N+1/2]` is not optimal.
 //
 // Delay arguments too small will produce an UNSTABLE allpass!
 //
 // Because allpass interpolation is recursive, it is not as robust
 // as Lagrange interpolation under time-varying conditions
-// (You may hear clicks when changing the delay rapidly.)
+// (you may hear clicks when changing the delay rapidly).
 //
-// First-order allpass interpolation, delay d in [0.5,1.5]
 //------------------------------------------------------------
 declare fdelay1a author "Julius O. Smith III, revised by Romain Michon";
 
@@ -334,9 +340,7 @@ with {
   eta = (1-fd)/(1+fd); // allpass coefficient
 };
 
-// second-order allpass delay in [1.5,2.5]
 declare fdelay2a author "Julius O. Smith III, revised by Romain Michon";
-
 fdelay2a(n,d,x) = delay(n,id,x) : fi.tf2(a2,a1,1,a1,a2)
 with {
   o = 1.49999;
@@ -348,11 +352,7 @@ with {
   a2 = a1o2*(1-fd)/(2+fd);
 };
 
-
-// third-order allpass delay in [2.5,3.5]
-// delay d should be at least 2.5
 declare fdelay3a author "Julius O. Smith III, revised by Romain Michon";
-
 fdelay3a(n,d,x) = delay(n,id,x) : fi.iir((a3,a2,a1,1),(a1,a2,a3))
 with {
   o = 2.49999;
@@ -366,10 +366,7 @@ with {
   a3 = a2o3*(1-fd)/(3+fd);
 };
 
-// fourth-order allpass delay in [3.5,4.5]
-// delay d should be at least 3.5
 declare fdelay4a author "Julius O. Smith III, revised by Romain Michon";
-
 fdelay4a(n,d,x) = delay(n,id,x) : fi.iir((a4,a3,a2,a1,1),(a1,a2,a3,a4))
 with {
   o = 3.49999;

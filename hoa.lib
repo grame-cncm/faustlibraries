@@ -444,14 +444,14 @@ with {
 // Where:
 //
 // * `N`: the ambisonic order (constant numerical expression)
-// * `ot` : optimization type (0 for optimBasic, 1 for optimMaxRe, 2 for optimInPhase)
+// * `ot` : optimization type (0 for `optimBasic`, 1 for `optimMaxRe`, 2 for `optimInPhase`)
 //-----------------------------
 optim(N, ot) = thisOptimizer
 with {
     optb = (ot == 0) : si.smoo;
     optm = (ot == 1) : si.smoo;
     opti = (ot == 2) : si.smoo;
-    thisOptimizer = ((si.bus(2*N+1)  <: ((si.bus(2*N+1):ho.optimBasic(N)), (si.bus(2*N+1):ho.optimMaxRe(N)), (si.bus(2*N+1):ho.optimInPhase(N)))), ((optb <: si.bus(2*N+1)), (optm <: si.bus(2*N+1)), (opti <: si.bus(2*N+1)))) : ro.interleave(6*N+3, 2) : par(i, 6*N+3, *) :> si.bus(2*N+1);
+    thisOptimizer = ((si.bus(2*N+1) <: ((si.bus(2*N+1):ho.optimBasic(N)), (si.bus(2*N+1):ho.optimMaxRe(N)), (si.bus(2*N+1):ho.optimInPhase(N)))), ((optb <: si.bus(2*N+1)), (optm <: si.bus(2*N+1)), (opti <: si.bus(2*N+1)))) : ro.interleave(6*N+3, 2) : par(i, 6*N+3, *) :> si.bus(2*N+1);
 };
 
 
@@ -499,7 +499,7 @@ with {
 // Where:
 //
 // * `N`: the ambisonic order (constant numerical expression)
-// * `fa` : mirroring type (1 = original sound field; 0 = original+mirrored sound field; -1 = mirrored sound field)
+// * `fa` : mirroring type (1 = original sound field, 0 = original+mirrored sound field, -1 = mirrored sound field)
 //-----------------------------
 mirror(N, fa) = (*(1), par(i, N, (*(fa), *(1))));
 
@@ -696,7 +696,7 @@ with {
 // Where:
 //
 // * `N`: the ambisonic order (constant numerical expression)
-// * 'd': the maximum delay applied (in samples)
+// * `d`: the maximum delay applied (in samples)
 // * `wf`: window frequency (in Hz) for the overlapped delay
 // * `fa`: decorrelation factor (between 0 and 1)
 // * `fd`: feedback / level of reinjection (between 0 and 1)
