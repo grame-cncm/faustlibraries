@@ -70,7 +70,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a1 = -2.0 * cos_w0;
         a2 = 1.0 - alpha;
     };
- 		
+    
     highpass2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         g = pow(10.0, -0.05 * Q);
@@ -136,7 +136,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         a1 = -2 * k;
         a2 = 1 - alpha; 
     };
-    
+
     peaking2 = setNormCoeffs(b0, b1, b2, a0, a1, a2)
     with {
         // Don't let Q go negative, which causes an unstable filter.
