@@ -119,7 +119,7 @@ with {
 ....//
 ....// <n>  = maximal delay in samples
 ....// <i>  = interpolation value between 0 and 1 used to crossfade the outputs of the
-....// ....two delay lines (0.0: first delay line, 1.0: second delay line)
+....//        two delay lines (0.0: first delay line, 1.0: second delay line)
 ....// <d0> = delay time of delay line 0 in samples between 0 and <N>-1
 ....// <d1> = delay time of delay line 1 in samples between 0 and <N>-1
 ....// <  > = the input signal we want to delay
@@ -154,7 +154,7 @@ with {
 ............ba.if ((ip>0.0) & (ip<1.0), v, 0),     // should we continue or not ?
 ............ba.if ((ip==0.0) & (d!=d0), 1.0/it,    // if true xfade from dl0 to dl1
 ............ba.if ((ip==1.0) & (d!=d1), -1.0/it,   // if true xfade from dl1 to dl0
-............0)));                  ........        // nothing to change
+............0)));                                  // nothing to change
 ........// interpolation value
 ........nip = ip+nv : min(1.0) : max(0.0);
 
@@ -308,8 +308,8 @@ fdelay5 = fdelayltv(5);
 // Where:
 //
 // * `N=1,2,3, or 4` is the order of the Thiran interpolation filter (constant numerical expression),
-// and the delay argument is at least `N-1/2`. First-order: `d` at least 0.5, second-order: `d` at least 1.5,
-// third-order: `d` at least 2.5, fourth-order: `d` at least 3.5.
+//    and the delay argument is at least `N-1/2`. First-order: `d` at least 0.5, second-order: `d` at least 1.5,
+//    third-order: `d` at least 2.5, fourth-order: `d` at least 3.5.
 // * `n`: the max delay length in samples
 // * `d`: the delay length in samples
 //
@@ -320,7 +320,6 @@ fdelay5 = fdelayltv(5);
 // This constraint can be alleviated by altering the code,
 // but be aware that allpass filters approach zero delay
 // by means of pole-zero cancellations.
-// The delay range `[N-1/2`,`N+1/2]` is not optimal.
 //
 // Delay arguments too small will produce an UNSTABLE allpass!
 //
