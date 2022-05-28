@@ -186,7 +186,7 @@ with {
 //
 // <https://ccrma.stanford.edu/~jos/pasp/Prime_Power_Delay_Line.html>
 //------------------------------------------------------------
-declare prime_power_delays author "Julius O. Smith III, revised by Romain Michon";
+declare prime_power_delays author "Julius O. Smith III";
 
 prime_power_delays(N,pathmin,pathmax) = par(i,N,delayvals(i)) with {
   Np = 16;
@@ -242,7 +242,7 @@ prime_power_delays(N,pathmin,pathmax) = par(i,N,delayvals(i)) with {
 // * Philippe Depalle and Stephan Tassart, "Fractional Delay Lines using
 //         Lagrange Interpolators", ICMC Proceedings, pp. 341-343, 1996.
 //------------------------------------------------------------
-declare fdelaylti author "Julius O. Smith III, revised by Romain Michon";
+declare fdelaylti author "Julius O. Smith III";
 
 fdelaylti(N,n,d,x) = delay(n,id,x) <: seq(i,N,section(i)) : !,_
 with {
@@ -254,7 +254,7 @@ with {
   c(i) = (i - fd)/(i+1);
 };
 
-declare fdelayltv author "Julius O. Smith III, revised by Romain Michon";
+declare fdelayltv author "Julius O. Smith III";
 
 fdelayltv(N,n,d,x) = sum(i, N+1, delay(n,id+i,x) * h(N,fd,i))
 with {
@@ -274,11 +274,11 @@ with {
 // For convenience, `fdelay1`, `fdelay2`, `fdelay3`, `fdelay4`, `fdelay5`
 // are also available where `N` is the order of the interpolation, built using `fdelayltv`.
 //------------------------------------------------------------
-declare fdelay1 author "Julius O. Smith III, revised by Romain Michon";
-declare fdelay2 author "Julius O. Smith III, revised by Romain Michon";
-declare fdelay3 author "Julius O. Smith III, revised by Romain Michon";
-declare fdelay4 author "Julius O. Smith III, revised by Romain Michon";
-declare fdelay5 author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay1 author "Julius O. Smith III";
+declare fdelay2 author "Julius O. Smith III";
+declare fdelay3 author "Julius O. Smith III";
+declare fdelay4 author "Julius O. Smith III";
+declare fdelay5 author "Julius O. Smith III";
 
 fdelay1 = fdelayltv(1);
 fdelay2 = fdelayltv(2);
@@ -328,7 +328,7 @@ fdelay5 = fdelayltv(5);
 // (you may hear clicks when changing the delay rapidly).
 //
 //------------------------------------------------------------
-declare fdelay1a author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay1a author "Julius O. Smith III";
 
 fdelay1a(n,d,x) = delay(n,id,x) : fi.tf1(eta,1,eta)
 with {
@@ -339,7 +339,7 @@ with {
   eta = (1-fd)/(1+fd); // allpass coefficient
 };
 
-declare fdelay2a author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay2a author "Julius O. Smith III";
 fdelay2a(n,d,x) = delay(n,id,x) : fi.tf2(a2,a1,1,a1,a2)
 with {
   o = 1.49999;
@@ -351,7 +351,7 @@ with {
   a2 = a1o2*(1-fd)/(2+fd);
 };
 
-declare fdelay3a author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay3a author "Julius O. Smith III";
 fdelay3a(n,d,x) = delay(n,id,x) : fi.iir((a3,a2,a1,1),(a1,a2,a3))
 with {
   o = 2.49999;
@@ -365,7 +365,7 @@ with {
   a3 = a2o3*(1-fd)/(3+fd);
 };
 
-declare fdelay4a author "Julius O. Smith III, revised by Romain Michon";
+declare fdelay4a author "Julius O. Smith III";
 fdelay4a(n,d,x) = delay(n,id,x) : fi.iir((a4,a3,a2,a1,1),(a1,a2,a3,a4))
 with {
   o = 3.49999;
