@@ -109,61 +109,61 @@ fdelay(n,d,x) = delay(n+1,int(d),x)*(1 - ma.frac(d)) + delay(n+1,int(d)+1,x)*ma.
 //--------------------------------------------------------------------------
 sdelay(n, it, d) = ctrl(it,d),_ : ddi(n)
 with {
-....// ddi(n,i,d0,d1)
-....// DDI (Double Delay with Interpolation) : the input signal is sent to two
-....// delay lines. The outputs of these delay lines are crossfaded with
-....// an interpolation stage. By acting on this interpolation value one
-....// can move smoothly from one delay to another. When <i> is 0 we can
-....// freely change the delay time <d1> of line 1, when it is 1 we can freely change
-....// the delay time <d0> of line 0.
-....//
-....// <n>  = maximal delay in samples
-....// <i>  = interpolation value between 0 and 1 used to crossfade the outputs of the
-....//        two delay lines (0.0: first delay line, 1.0: second delay line)
-....// <d0> = delay time of delay line 0 in samples between 0 and <N>-1
-....// <d1> = delay time of delay line 1 in samples between 0 and <N>-1
-....// <  > = the input signal we want to delay
-....ddi(n, i, d0, d1) = _ <: delay(n,d0), delay(n,d1) : si.interpolate(i);
+    // ddi(n,i,d0,d1)
+    // DDI (Double Delay with Interpolation) : the input signal is sent to two
+    // delay lines. The outputs of these delay lines are crossfaded with
+    // an interpolation stage. By acting on this interpolation value one
+    // can move smoothly from one delay to another. When <i> is 0 we can
+    // freely change the delay time <d1> of line 1, when it is 1 we can freely change
+    // the delay time <d0> of line 0.
+    //
+    // <n>  = maximal delay in samples
+    // <i>  = interpolation value between 0 and 1 used to crossfade the outputs of the
+    //        two delay lines (0.0: first delay line, 1.0: second delay line)
+    // <d0> = delay time of delay line 0 in samples between 0 and <N>-1
+    // <d1> = delay time of delay line 1 in samples between 0 and <N>-1
+    // <  > = the input signal we want to delay
+    ddi(n, i, d0, d1) = _ <: delay(n,d0), delay(n,d1) : si.interpolate(i);
 
-....// ctrl(it,d)
-....// Control logic for a Double Delay with Interpolation according to two
-....//
-....// USAGE : ctrl(it,d)
-....// where :
-....// <it> an interpolation time (in samples, for example 256)
-....// <d> a delay time (in samples)
-....//
-....// ctrl produces 3 outputs : an interpolation value <i> and two delay
-....// times <d0> and <d1>. These signals are used to control a ddi (Double Delay with Interpolation).
-....// The principle is to detect changes in the input delay time d, then to
-....// change the delay time of the delay line currently unused and then by a
-....// smooth crossfade to remove the first delay line and activate the second one.
-....//
-....// The control logic has an internal state controlled by 4 elements
-....// <v> : the interpolation variation (0, 1/it, -1/it)
-....// <i> : the interpolation value (between 0 and 1)
-....// <d0>: the delay time of line 0
-....// <d1>: the delay time of line 1
-....//
-....// Please note that the last stage (!,_,_,_) cut <v> because it is only
-....// used internally.
-....ctrl(it, d) = \(v,ip,d0,d1).((nv, nip, nd0, nd1)
-....with {
-........// interpolation variation
-........nv = ba.if (v!=0.0,                        // if variation we are interpolating
-............ba.if ((ip>0.0) & (ip<1.0), v, 0),     // should we continue or not ?
-............ba.if ((ip==0.0) & (d!=d0), 1.0/it,    // if true xfade from dl0 to dl1
-............ba.if ((ip==1.0) & (d!=d1), -1.0/it,   // if true xfade from dl1 to dl0
-............0)));                                  // nothing to change
-........// interpolation value
-........nip = ip+nv : min(1.0) : max(0.0);
+    // ctrl(it,d)
+    // Control logic for a Double Delay with Interpolation according to two
+    //
+    // USAGE : ctrl(it,d)
+    // where :
+    // <it> an interpolation time (in samples, for example 256)
+    // <d> a delay time (in samples)
+    //
+    // ctrl produces 3 outputs : an interpolation value <i> and two delay
+    // times <d0> and <d1>. These signals are used to control a ddi (Double Delay with Interpolation).
+    // The principle is to detect changes in the input delay time d, then to
+    // change the delay time of the delay line currently unused and then by a
+    // smooth crossfade to remove the first delay line and activate the second one.
+    //
+    // The control logic has an internal state controlled by 4 elements
+    // <v> : the interpolation variation (0, 1/it, -1/it)
+    // <i> : the interpolation value (between 0 and 1)
+    // <d0>: the delay time of line 0
+    // <d1>: the delay time of line 1
+    //
+    // Please note that the last stage (!,_,_,_) cut <v> because it is only
+    // used internally.
+    ctrl(it, d) = \(v,ip,d0,d1).((nv, nip, nd0, nd1)
+    with {
+        // interpolation variation
+        nv = ba.if (v!=0.0,                        // if variation we are interpolating
+            ba.if ((ip>0.0) & (ip<1.0), v, 0),     // should we continue or not ?
+            ba.if ((ip==0.0) & (d!=d0), 1.0/it,    // if true xfade from dl0 to dl1
+            ba.if ((ip==1.0) & (d!=d1), -1.0/it,   // if true xfade from dl1 to dl0
+            0)));                                  // nothing to change
+        // interpolation value
+        nip = ip+nv : min(1.0) : max(0.0);
 
-........// update delay time of line 0 if needed
-........nd0 = ba.if ((ip >= 1.0) & (d1!=d), d, d0);
+        // update delay time of line 0 if needed
+        nd0 = ba.if ((ip >= 1.0) & (d1!=d), d, d0);
 
-........// update delay time of line 0 if needed
-........nd1 = ba.if ((ip <= 0.0) & (d0!=d), d, d1);
-....}) ~ (_,_,_,_) : (!,_,_,_);
+        // update delay time of line 0 if needed
+        nd1 = ba.if ((ip <= 0.0) & (d0!=d), d, d1);
+    }) ~ (_,_,_,_) : (!,_,_,_);
 };
 
 
