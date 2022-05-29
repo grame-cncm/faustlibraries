@@ -493,35 +493,63 @@ This library currently includes the majority of the adaptors covered in chapter 
 <h2 id="using-this-library">Using this Library</h2>
 <p>Use of this library expects some level of familiarity with WDF techniques, especially simplification and decomposition of electronic circuits into WDF connection trees. I plan to create video to cover both these techniques and use of the library. </p>
 <h3 id="quick-start">Quick Start</h3>
-<p>to get a quick overview of the library, start with the <code>secondOrderFilters.dsp</code> code found in <code>examples</code>. Make sure that the <code>wdmodels.lib</code> is within the compile path. This can be achieved within the <a href="https://faustide.grame.fr/">online Faust IDE</a> by simply downloading and dragging in <code>wdmodels.lib</code> in addition to the example code.</p>
+<p>To get a quick overview of the library, start with the <code>secondOrderFilters.dsp</code> code found in <a href="https://github.com/droosenb/faust-wdf-library/tree/main/examples">examples</a>. 
+Note that the <code>wdmodels.lib</code> library is now embedded in the <a href="https://faustide.grame.fr/">online Faust IDE</a>.</p>
 <h3 id="a-simple-rc-filter-model">A Simple RC Filter Model</h3>
-<p>Creating a model using this library consists fo three steps. First, declare a set of components. Second, model the relationship between them using a tree. Finally, build the tree using the libraries build functions.  </p>
-<p>First, a set of components is declared using adaptors from the library. This list of components is created based on analysis of the circuit using WDF techniques, though generally each circuit element (resistor, capacitor, diode, etc.) can be expected to appear within the component set. For example, first order RC lowpass filter would require an unadapted voltage source, a 47k resistor, and a 10nF capacitor which outputs the voltage across itself. These can be declared with: </p>
+<p>Creating a model using this library consists fo three steps. First, declare a set of components. 
+Second, model the relationship between them using a tree. Finally, build the tree using the libraries build functions.  </p>
+<p>First, a set of components is declared using adaptors from the library. 
+This list of components is created based on analysis of the circuit using WDF techniques, 
+though generally each circuit element (resistor, capacitor, diode, etc.) can be expected to appear 
+within the component set. For example, first order RC lowpass filter would require an unadapted voltage source, 
+a 47k resistor, and a 10nF capacitor which outputs the voltage across itself. These can be declared with: </p>
 <pre><code>vs1(i) = wd.u_voltage(i, no.noise);
 r1(i) = wd.resistor(i, 47*10^3);
 c1(i) = wd.capacitor_Vout(i, 10*10^-9);
 </code></pre>
 <p>Note that the first argument, i, is left un-parametrized. Components must be declared in this form, as the build algorithm expects to receive adaptors which have exactly one parameter. </p>
-<p>Also note that we have chosen to declare a white noise function as the input to our voltage source. We could potentially declare this as a direct input to our model, but to do so is more complicated process which cannot be covered within this tutorial. For information on how to do this see Declaring Model Parameters as Inputs or see various implementations in <code>examples</code>.</p>
-<p>Second, the declared components and interconnection/structural adaptors (i.e. series, parallel, etc) are arranged into the connection tree which is produced from performing WD analysis on the modeled circuit. For example, to produce our first order RC lowpass circuit model, the following tree is declared: </p>
+<p>Also note that we have chosen to declare a white noise function as the input to our voltage source. 
+We could potentially declare this as a direct input to our model, but to do so is more complicated 
+process which cannot be covered within this tutorial. For information on how to do this see 
+<a href="#declaring-model-parameters-as-inputs">Declaring Model Parameters as Inputs</a> or see various implementations 
+in <a href="https://github.com/droosenb/faust-wdf-library/tree/main/examples">examples</a>.</p>
+<p>Second, the declared components and interconnection/structural adaptors (i.e. series, parallel, etc) are arranged 
+into the connection tree which is produced from performing WD analysis on the modeled circuit. 
+For example, to produce our first order RC lowpass circuit model, the following tree is declared: </p>
 <p><code>tree_lowpass = vs1 : wd.series : (r1, c1);</code></p>
-<p>For more information on how to represent trees in Faust, see Trees in Faust. </p>
-<p>Finally, the tree is built using the the <code>buildtree</code> function. To build and compute our first order RC lowpass circuit model, we use:</p>
+<p>For more information on how to represent trees in Faust, see <a href="#trees-in-faust">Trees in Faust</a>. </p>
+<p>Finally, the tree is built using the the <code>buildtree</code> function. To build and compute our first order 
+RC lowpass circuit model, we use:</p>
 <p><code>process = wd.buildtree(tree_lowpass);</code></p>
-<p>More information about build functions, see Build Functions. </p>
+<p>More information about build functions, see <a href="#model-building-functions">Model Building Functions</a>. </p>
 <h3 id="building-a-model">Building a Model</h3>
-<p>After creating a connection tree which consists of WD adaptors, the connection tree must be passed to a build function in order to build the model.</p>
+<p>After creating a connection tree which consists of WD adaptors, the connection tree must be passed 
+to a build function in order to build the model.</p>
 <h5 id="automatic-model-building">Automatic model building</h5>
 <p><code>buildtree(connection_tree)</code></p>
-<p>The simplest build function for use with basic models. This automatically implements <code>buildup</code>, <code>builddown</code>, and <code>buildout</code> to create a working model. However, it gives minimum control to the user and cannot currently be used on trees which have parameters declared as inputs.</p>
+<p>The simplest build function for use with basic models. This automatically implements <code>buildup</code>, <code>builddown</code>, 
+and <code>buildout</code> to create a working model. However, it gives minimum control to the user and cannot 
+currently be used on trees which have parameters declared as inputs.</p>
 <h5 id="manual-model-building">Manual model building</h5>
-<p>Wave Digital Filters are an explicit state-space model, meaning they use a previous system state in order to calculate the current output. This is achieved in Faust by using a single global feedback operator. The models feed-forward terms are generated using <code>builddown</code> and the models feedback terms are generated using <code>buildup</code>. Thus, the most common model implementation (the method used by <code>buildtree</code>) is:</p>
+<p>Wave Digital Filters are an explicit state-space model, meaning they use a previous system state 
+in order to calculate the current output. This is achieved in Faust by using a single global feedback operator.
+The models feed-forward terms are generated using <code>builddown</code> and the models feedback terms are generated 
+using <code>buildup</code>. Thus, the most common model implementation (the method used by <code>buildtree</code>) is:</p>
 <p><code>builddown(connection_tree)~buildup(connection_tree) : buildout(connection_tree)</code></p>
-<p>Since the <code>~</code> operator in Faust will leave feedback terms hanging as outputs, <code>buildout</code> is a function provided for convenience. It automatically truncates the hanging outputs by identifying leaf components which have an intended output and generating an output matrix.</p>
-<p>Building the model manually allows for greater user control and is often very helpful in testing. Also provided for testing are the <code>getres</code> and <code>parres</code> functions, which can be used to determine the upward-facing port resistance of an element. </p>
+<p>Since the <code>~</code> operator in Faust will leave feedback terms hanging as outputs, <code>buildout</code> is a function provided for convenience. 
+It automatically truncates the hanging outputs by identifying leaf components which have an intended output 
+and generating an output matrix.</p>
+<p>Building the model manually allows for greater user control and is often very helpful in testing. 
+Also provided for testing are the <code>getres</code> and <code>parres</code> functions, which can be used to determine 
+the upward-facing port resistance of an element. </p>
 <h3 id="declaring-model-parameters-as-inputs">Declaring Model Parameters as Inputs</h3>
-<p>When possible, parameters of components should be declared explicitly, meaning they are dependent on a function with no inputs. This might be something as simple as integer(declaring a static component), a function dependent on a UI input (declaring a component with variable value), or even a time-dependent function like an oscillator (declaring an audio input or circuit bending). </p>
-<p>However, it is often necessary to declare parameters as input. To achieve this there are two possible methods. The first and recommended option is to create a separate model function and declare parameters which will later be implemented as inputs. This allows inputs to be explicitly declared as component parameters. For example, one might use</p>
+<p>When possible, parameters of components should be declared explicitly, meaning they are dependent on a function with no inputs. 
+This might be something as simple as integer(declaring a static component), a function dependent on a UI input (declaring a component with variable value), 
+or even a time-dependent function like an oscillator (declaring an audio input or circuit bending). </p>
+<p>However, it is often necessary to declare parameters as input. To achieve this there are two possible methods. 
+The first and recommended option is to create a separate model function and declare parameters which will later 
+be implemented as inputs. This allows inputs to be explicitly declared as component parameters. 
+For example, one might use:</p>
 <pre><code>model(in1) = buildtree(tree)
 with {
    ...
@@ -534,16 +562,20 @@ with {
 <p>Note that the tree and components must be declared inside a <code>with {...}</code> statement, or the model's parameters will not be accessible. </p>
 <h5 id="the-empty-signal-operator">The Empty Signal Operator</h5>
 <p>The Empty signal operator, <code>_</code> should NEVER be used to declare a parameter as in input in a wave-digital model. </p>
-<p>Using it will result on breaking the internal routing of the model and thus breaks the model. Instead, use explicit declaration as shown directly above. </p>
+<p>Using it will result on breaking the internal routing of the model and thus breaks the model. 
+Instead, use explicit declaration as shown directly above. </p>
 <h3 id="trees-in-faust">Trees in Faust</h3>
-<p>Since WD models use connection trees to represent relationships of elements, a comprehensive way to represent trees is critical. As there is no current convention for creating trees in Faust, I've developed a method using the existing series and parallel/list methods in Faust.</p>
-<p>The series operator <code>:</code> is used to separate parent and child elements. For example the tree</p>
+<p>Since WD models use connection trees to represent relationships of elements, a comprehensive way to represent trees is critical.
+ As there is no current convention for creating trees in Faust, I've developed a method using the existing series and parallel/list 
+methods in Faust.</p>
+<p>The series operator <code>:</code> is used to separate parent and child elements. For example the tree:</p>
 <pre><code>   A
    |
    B
 </code></pre>
 <p>is represented by <code>A : B</code> in Faust. </p>
-<p>To denote a parent element with multiple child elements, simply use a list <code>(a1, a2, ... an)</code> of children connected to a single parent. For example the tree:</p>
+<p>To denote a parent element with multiple child elements, simply use a list <code>(a1, a2, ... an)</code> of children connected to a single parent. `
+For example the tree:</p>
 <pre><code>   A
   / \
  B   C
@@ -551,7 +583,8 @@ with {
 </code></pre>
 <p>is represented by:</p>
 <p><code>A : (B, C)</code></p>
-<p>Finally, for a tree with many levels, simply break the tree into subtrees following the above rules and connect the subtree as if it was an individual node. For example the tree:</p>
+<p>Finally, for a tree with many levels, simply break the tree into subtrees following the above rules and connect 
+the subtree as if it was an individual node. For example the tree:</p>
 <pre><code>      A
      / \
     B   C
@@ -566,26 +599,30 @@ tree = A : (B_sub, C_sub); //full tree
 <p>or more simply, using parentheses: </p>
 <p><code>A : ((B : X), (C : (Y, Z)))</code></p>
 <h3 id="how-adaptors-are-structured">How Adaptors are Structured</h3>
-<p>In wave digital filters, adaptors can be described by the form <code>b = Sa</code> where <code>b</code> is a vector of output waves <code>b = (b0, b1, b2, ... bn)</code>, <code>a</code> is a vector of input waves<code>a = (a0, a1, a2, ... an)</code>, and <code>S</code> is an n x n scattering matrix. <code>S</code> is dependent on <code>R</code>, a list of port resistances <code>(R0, R1, R2, ... Rn)</code>. </p>
-<p>The output wave vector <code>b</code> can be divided into downward-going and upward-going waves (downward-going waves travel down the connection tree, upward-going waves travel up). For adapted adaptors, with the zeroth port being  the upward-facing port, the downward-going wave vector is <code>(b1, b2, ... bn)</code> and the upward-going wave vector is <code>(b0)</code>. For unadapted adaptors, there are no upward-going waves, so the downward-going wave vector is simply <code>b = (b0, b1, b2, ... bn)</code>. </p>
+<p>In wave digital filters, adaptors can be described by the form <code>b = Sa</code> where <code>b</code> is a vector of output waves <code>b = (b0, b1, b2, ... bn)</code>, <code>a</code> is a vector of input waves<code>a = (a0, a1, a2, ... an)</code>, and <code>S</code> is an n x n scattering matrix. 
+<code>S</code> is dependent on <code>R</code>, a list of port resistances <code>(R0, R1, R2, ... Rn)</code>. </p>
+<p>The output wave vector <code>b</code> can be divided into downward-going and upward-going waves 
+(downward-going waves travel down the connection tree, upward-going waves travel up). 
+For adapted adaptors, with the zeroth port being the upward-facing port, the downward-going wave vector is <code>(b1, b2, ... bn)</code> and the upward-going wave vector is <code>(b0)</code>. 
+For unadapted adaptors, there are no upward-going waves, so the downward-going wave vector is simply <code>b = (b0, b1, b2, ... bn)</code>. </p>
 <p>In order for adaptors to be interpretable by the compiler, they must be structured in a specific way. 
 Each adaptor is divided into three cases by their first parameter. This parameter, while accessible by the user, should only be set by the compiler/builder.</p>
-<p>All other parameters are value declarations (for components), inputs (for voltage or current ins), or parameter controls (for potentiometers/variable capacitors/variable inductors)</p>
+<p>All other parameters are value declarations (for components), inputs (for voltage or current ins), or parameter controls (for potentiometers/variable capacitors/variable inductors).</p>
 <h5 id="first-case-downward-going-waves">First case - downward going waves</h5>
 <p><code>(0, params) =&gt; downward-going(R1, ... Rn, a0, a1, ... an)</code> 
 outputs: <code>(b1, b2, ... bn)</code>
 this function takes any number of port resistances, the downward going wave, and any number of upward going waves as inputs. 
 These values/waves are used to calculate the downward going waves coming from this adaptor.</p>
 <h5 id="second-case">Second case</h5>
-<p><code>(1, params) =&gt;  upward-going(R1, ... Rn, a1, ... an)</code>
+<p><code>(1, params) =&gt; upward-going(R1, ... Rn, a1, ... an)</code>
 outputs : <code>(b0)</code>
-this function takes any number of port resistances and any number of upward going waves as inputs
-these values/waves are used to calculate the upward going wave coming from this adaptor.</p>
+this function takes any number of port resistances and any number of upward going waves as inputs.
+These values/waves are used to calculate the upward going wave coming from this adaptor.</p>
 <h5 id="third-case">Third case</h5>
 <p><code>(2, params) =&gt; port-resistance(R1, ... Rn)</code> 
 outputs: <code>(R0)</code>
-this function takes any number of port resistances as inputs
-these values are used to calculate the upward going port resistance of the element.</p>
+this function takes any number of port resistances as inputs.
+These values are used to calculate the upward going port resistance of the element.</p>
 <h5 id="unadapted-adaptors">Unadapted Adaptors</h5>
 <p>Unadapted adaptor's names will always begin <code>u_</code>
 An unadapted adaptor MUST be used as the root of the WD connection tree.
@@ -597,7 +634,7 @@ Only the first case should contain computational information. </p>
 <h3 id="acknowledgements">Acknowledgements</h3>
 <p>Many thanks to Kurt Werner for helping me to understand wave digital filter models. Without his publications and consultations, the library would not exist. 
 Thanks also to my advisors, Rob Owen and Eli Stine whose input was critical to the development of the library.
-Finally, thanks to Romain Michon, Stephane Letz, and the Faust slack for contributing to testing, development, and inspiration when creating the library. </p>
+Finally, thanks to Romain Michon, Stephane Letz, and the Faust Slack for contributing to testing, development, and inspiration when creating the library. </p>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/wdmodels.lib">https://github.com/grame-cncm/faustlibraries/blob/master/wdmodels.lib</a></li>
@@ -617,8 +654,7 @@ buildtree( A : r1 );
 <li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
 <li><code>R</code> : Resistance/Impedance of the resistor being modeled in Ohms. </li>
 </ul>
-<p>Note:
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.1</p>
@@ -637,8 +673,7 @@ buildtree( A : rout ) : _
 <li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
 <li><code>R</code> : Resistance/Impedance of the resistor being modeled in Ohms. </li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_1">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.1</p>
@@ -657,8 +692,7 @@ buildtree( A : rout ) : _
 <li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
 <li><code>R</code> : Resistance/Impedance of the resistor being modeled in Ohms. </li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_2">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.1</p>
@@ -677,8 +711,7 @@ buildtree( v1 : B );
 <li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
 <li><code>ein</code> : Voltage/Potential across ideal voltage source in Volts</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree
+<p>Note: only usable as the root of a tree.
 The adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_3">Reference</h4>
@@ -698,8 +731,7 @@ buildtree( i1 : B );
 <li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
 <li><code>jin</code> : Current through the ideal current source in Amps</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree.
+<p>Note: only usable as the root of a tree.
 The adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_4">Reference</h4>
@@ -721,8 +753,7 @@ buildtree( A : v1 );
 <li><code>R</code> : Resistance/Impedance of the series resistor in Ohms</li>
 <li><code>ein</code> : Voltage/Potential of the ideal voltage source in Volts</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_5">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.4</p>
@@ -744,8 +775,7 @@ buildtree( A : vout ) : _
 <li><code>R</code> : Resistance/Impedance of the series resistor in Ohms</li>
 <li><code>ein</code> : Voltage/Potential across ideal voltage source in Volts</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_6">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.4</p>
@@ -766,8 +796,7 @@ buildtree( v1 : B );
 <li><code>R</code> : Resistance/Impedance of the series resistor in Ohms</li>
 <li><code>ein</code> : Voltage/Potential across ideal voltage source in Volts</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree.
+<p>Note: only usable as the root of a tree.
 The adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_7">Reference</h4>
@@ -789,8 +818,7 @@ buildtree( A : i1 );
 <li><code>R</code> : Resistance/Impedance of the parallel resistor in Ohms</li>
 <li><code>jin</code> : Current through the ideal current source in Amps</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_8">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.2.5</p>
@@ -811,8 +839,7 @@ buildtree( i1 : B );
 <li><code>R</code> : Resistance/Impedance of the series resistor in Ohms</li>
 <li><code>jin</code> : Current through the ideal current source in Amps</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree.
+<p>Note: only usable as the root of a tree.
 The adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_9">Reference</h4>
@@ -831,8 +858,7 @@ buildtree( s1 : B );
 <li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
 <li><code>lambda</code> : switch state control. -1 for closed switch, 1 for open switch.</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree
+<p>Note: only usable as the root of a tree.
 The adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_10">Reference</h4>
@@ -853,8 +879,7 @@ buildtree( A : c1 ) : _
 <li><code>i</code>: index used by model-building functions. Should never be user declared.</li>
 <li><code>R</code> : Capacitance/Impedance of the capacitor being modeled in Farads. </li>
 </ul>
-<p>Note:
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_11">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.3.1</p>
@@ -874,8 +899,7 @@ buildtree( A : cout ) : _
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>R</code> : Capacitance/Impedence of the capacitor being modeled in Farads</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a seperate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a seperate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_12">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.3.1</p>
@@ -894,8 +918,7 @@ buildtree( A : l1 );
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>R</code> : Inductance/Impedance of the inductor being modeled in Henries</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_13">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.3.2</p>
@@ -915,8 +938,7 @@ buildtree( A : lout ) : _
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>R</code> : Inductance/Impedance of the inductor being modeled in Henries</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_14">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.3.2</p>
@@ -929,8 +951,7 @@ Correct implementation is shown above.</p>
 <h4 id="usage_15">Usage</h4>
 <pre><code>buildtree( u_idealDiode : B );
 </code></pre>
-<p>Note: 
-Only usable as the root of a tree
+<p>Note: only usable as the root of a tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_15">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 3.2.3</p>
@@ -950,8 +971,7 @@ buildtree( chua1 : B );
 <li><code>G2</code> : resistance parameter 2 of the chua diode</li>
 <li><code>V0</code> : voltage parameter of the chua diode</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree.
+<p>Note: only usable as the root of a tree.
 The adaptor must be declared as a separate function before integration into the connection tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_16">Reference</h4>
@@ -983,8 +1003,7 @@ buildtree( d1 : B );
 <li><code>Is</code> : saturation current of the diodes</li>
 <li><code>Vt</code> : thermal resistances of the diodes</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree.
+<p>Note: only usable as the root of a tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_17">Reference</h4>
 <p>K. Werner et al. "An Improved and Generalized Diode Clipper Model for Wave Digital Filters"</p>
@@ -1003,8 +1022,7 @@ buildtree( d1 : B );
 <li><code>Is</code> : saturation current of the diodes</li>
 <li><code>Vt</code> : thermal resistances of the diodes</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree
+<p>Note: only usable as the root of a tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_18">Reference</h4>
 <p>K. Werner et al. "An Improved and Generalized Diode Clipper Model for Wave Digital Filters"</p>
@@ -1023,8 +1041,7 @@ buildtree( d1 : B );
 <li><code>Is</code> : saturation current of the diodes</li>
 <li><code>Vt</code> : thermal resistances of the diodes</li>
 </ul>
-<p>Note: 
-Only usable as the root of a tree
+<p>Note: only usable as the root of a tree.
 Correct implementation is shown above.</p>
 <h4 id="reference_19">Reference</h4>
 <p>K. Werner et al. "An Improved and Generalized Diode Clipper Model for Wave Digital Filters"</p>
@@ -1037,8 +1054,7 @@ Elements connected to this adaptor will behave as if connected in parallel in ci
 <h4 id="usage_21">Usage</h4>
 <pre><code>buildtree( u_parallel2Port : (A, B) );
 </code></pre>
-<p>Note: 
-Only usable as the root of a tree.
+<p>Note: only usable as the root of a tree.
 This adaptor has no user-accessible parameters. 
 Correct implementation is shown above.</p>
 <h4 id="reference_20">Reference</h4>
@@ -1051,8 +1067,7 @@ Elements connected to this adaptor will behave as if connected in parallel in ci
 <h4 id="usage_22">Usage</h4>
 <pre><code>buildtree( A : parallel2Port : B );
 </code></pre>
-<p>Note: 
-This adaptor has no user-accessible parameters. 
+<p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and one forward adaptor.
 Correct implementation is shown above.</p>
 <h4 id="reference_21">Reference</h4>
@@ -1065,8 +1080,7 @@ Elements connected to this adaptor will behave as if connected in series in circ
 <h4 id="usage_23">Usage</h4>
 <pre><code>buildtree( u_series2Port : (A, B) );
 </code></pre>
-<p>Note: 
-Only usable as the root of a tree.
+<p>Note: only usable as the root of a tree.
 This adaptor has no user-accessible parameters. 
 Correct implementation is shown above.</p>
 <h4 id="reference_22">Reference</h4>
@@ -1079,8 +1093,7 @@ Elements connected to this adaptor will behave as if connected in series in circ
 <h4 id="usage_24">Usage</h4>
 <pre><code>buildtree( A : series2Port : B );
 </code></pre>
-<p>Note: 
-This adaptor has no user-accessible parameters. 
+<p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and one forward adaptor.
 Correct implementation is shown above.</p>
 <h4 id="reference_23">Reference</h4>
@@ -1099,8 +1112,7 @@ buildtree(A : i1 : B);
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>jin</code> :  Current through the ideal current source in Amps</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 It should be used within a connection tree with one previous and one forward adaptor.
 Correct implementation is shown above.</p>
 <h4 id="reference_24">Reference</h4>
@@ -1119,8 +1131,7 @@ buildtree( A : v1 : B );
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>vin</code> :  voltage across the ideal current source in Volts</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 It should be used within the connection tree with one previous and one forward adaptor.</p>
 <h4 id="reference_25">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.2</p>
@@ -1138,8 +1149,7 @@ buildtree(t1 : (A , B));
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>tr</code> :  the turn ratio between the windings on the primary and secondary coils</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 It may only be used as the root of the connection tree with two forward nodes.</p>
 <h4 id="reference_26">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.3</p>
@@ -1157,8 +1167,7 @@ buildtree(A : t1 : B);
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>tr</code> :  the turn ratio between the windings on the primary and secondary coils</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 It should be used within the connection tree with one backward and one forward nodes.</p>
 <h4 id="reference_27">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.3</p>
@@ -1177,8 +1186,7 @@ buildtree(t1 : (A , B));
 <li><code>gamma1</code> :  the turn ratio describing the voltage relationship between the primary and secondary coils</li>
 <li><code>gamma2</code> :  the turn ratio describing the current relationship between the primary and secondary coils</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 It may only be used as the root of the connection tree with two forward nodes.</p>
 <h4 id="reference_28">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.3</p>
@@ -1197,8 +1205,7 @@ buildtree(A : t1 : B);
 <li><code>gamma1</code> :  the turn ratio describing the voltage relationship between the primary and secondary coils</li>
 <li><code>gamma2</code> :  the turn ratio describing the current relationship between the primary and secondary coils</li>
 </ul>
-<p>Note: 
-The adaptor must be declared as a separate function before integration into the connection tree.
+<p>Note: the adaptor must be declared as a separate function before integration into the connection tree.
 It should be used within the connection tree with two forward nodes.</p>
 <h4 id="reference_29">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.4.3</p>
@@ -1211,8 +1218,7 @@ This adaptor is used to connect adaptors simulating components connected in para
 <h4 id="usage_31">Usage</h4>
 <pre><code>buildtree( A : parallel : (B, C) );
 </code></pre>
-<p>Note: 
-This adaptor has no user-accessible parameters. 
+<p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.</p>
 <h4 id="reference_30">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.5.1</p>
@@ -1223,10 +1229,9 @@ It should be used within the connection tree with one previous and two forward a
 This adaptor is used to connect adaptors simulating components connected in series in the circuit.</p>
 <h4 id="usage_32">Usage</h4>
 <pre><code>
-tree =  A : (series : (B, C));
+tree = A : (series : (B, C));
 </code></pre>
-<p>Note: 
-This adaptor has no user-accessible parameters. 
+<p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.</p>
 <h4 id="reference_31">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 1.5.2</p>
@@ -1238,19 +1243,18 @@ It should be used within the connection tree with one previous and two forward a
 It implements the simplest possible rigid connection found in the Fender Bassman Tonestack circuit.</p>
 <h4 id="usage_33">Usage</h4>
 <pre><code>
-tree =  u_sixportPassive : (A, B, C, D, E, F));
+tree = u_sixportPassive : (A, B, C, D, E, F));
 </code></pre>
-<p>Note: 
-This adaptor has no user-accessible parameters. 
+<p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with six forward adaptors.</p>
 <h4 id="reference_32">Reference</h4>
 <p>K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters", 2.1.5</p>
 <h2 id="node-creating-functions">Node Creating Functions</h2>
 <hr />
 <h3 id="wdgenericnode"><code>(wd.)genericNode</code></h3>
-<p>Function for generating an adapted node from another faust function or scattering matrix</p>
+<p>Function for generating an adapted node from another faust function or scattering matrix.</p>
 <p>This function generates a node which is suitable for use in the connection tree structure. 
-genericNode separates the function that it is passed into upward-going and downward-going waves. </p>
+<code>genericNode</code> separates the function that it is passed into upward-going and downward-going waves. </p>
 <h4 id="usage_34">Usage</h4>
 <pre><code>n1(i) = genericNode(i, scatter, upRes);
 </code></pre>
@@ -1260,14 +1264,13 @@ genericNode separates the function that it is passed into upward-going and downw
 <li><code>scatter</code> : the function which describes the the node's scattering behavior</li>
 <li><code>upRes</code> : the function which describes the node's upward-facing port-resistance</li>
 </ul>
-<p>Note: 
-<code>scatter</code> must be a function with n inputs, n outputs, and n-1 parameter inputs. 
+<p>Note: <code>scatter</code> must be a function with n inputs, n outputs, and n-1 parameter inputs. 
  input/output 1 will be used as the adapted upward-facing port of the node, ports 2 to n will all be downward-facing. 
- the first input/output pair is assumed to already be adapted - i.e. the output 1 is not dependent on input 1. 
- the parameter inputs will receive the port resistances of the downward-facing ports.</p>
+ The first input/output pair is assumed to already be adapted - i.e. the output 1 is not dependent on input 1. 
+ The parameter inputs will receive the port resistances of the downward-facing ports.</p>
 <p><code>upRes</code> must be a function with n-1 parameter inputs and 1 output.
- the parameter inputs will receive the port resistances of the downward-facing ports.
- the output should give the upward-facing port resistance of the node based on the upward-facing port resistances of the </p>
+ The parameter inputs will receive the port resistances of the downward-facing ports.
+ The output should give the upward-facing port resistance of the node based on the upward-facing port resistances of the input.</p>
 <p>If used on a leaf element (n=1), the model will automatically introduce a one-sample delay. 
  Thus, the output of the node at sample t based on the input, a[t], should be the output one sample ahead, b[t+1]. 
  This may require transformation of the output signal. </p>
@@ -1285,14 +1288,13 @@ It also calculates the voltage across the element and gives it as a model output
 <li><code>scatter</code> : the function which describes the the node's scattering behavior</li>
 <li><code>upRes</code> : the function which describes the node's upward-facing port-resistance</li>
 </ul>
-<p>Note: 
-<code>scatter</code> must be a function with 1 input and 1 output. 
- it should give the output from the node based on the incident wave. </p>
+<p>Note: <code>scatter</code> must be a function with 1 input and 1 output. 
+ It should give the output from the node based on the incident wave. </p>
 <p>The model will automatically introduce a one-sample delay to the output of the function
  Thus, the output of the node at sample t based on the input, a[t], should be the output one sample ahead, b[t+1]. 
  This may require transformation of the output signal. </p>
 <p><code>upRes</code> must be a function with no inputs and 1 output.
- the output should give the upward-facing port resistance of the node</p>
+ The output should give the upward-facing port resistance of the node.</p>
 <hr />
 <h3 id="wdgenericnode_iout"><code>(wd.)genericNode_Iout</code></h3>
 <p>Function for generating a terminating/leaf node which gives the current through itself as a model output.</p>
@@ -1307,14 +1309,13 @@ It also calculates the current through the element and gives it as a model outpu
 <li><code>scatter</code> : the function which describes the the node's scattering behavior</li>
 <li><code>upRes</code> : the function which describes the node's upward-facing port-resistance</li>
 </ul>
-<p>Note: 
-<code>scatter</code> must be a function with 1 input and 1 output. 
- it should give the output from the node based on the incident wave. </p>
-<p>The model will automatically introduce a one-sample delay to the output of the function
+<p>Note: <code>scatter</code> must be a function with 1 input and 1 output. 
+ It should give the output from the node based on the incident wave. </p>
+<p>The model will automatically introduce a one-sample delay to the output of the function.
  Thus, the output of the node at sample t based on the input, a[t], should be the output one sample ahead, b[t+1]. 
  This may require transformation of the output signal. </p>
 <p><code>upRes</code> must be a function with no inputs and 1 output.
- the output should give the upward-facing port resistance of the node</p>
+ The output should give the upward-facing port resistance of the node.</p>
 <hr />
 <h3 id="wdu_genericnode"><code>(wd.)u_genericNode</code></h3>
 <p>Function for generating an unadapted node from another Faust function or scattering matrix.</p>
@@ -1375,8 +1376,7 @@ This function is a parallelized version of <code>getres</code>.</p>
 </code></pre>
 <p>Where: 
 <code>(A , B)</code> : is a partial connection tree composed of WD adaptors</p>
-<p>Note:
-This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors.</p>
+<p>Note: this function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors.</p>
 <hr />
 <h3 id="wdbuildout"><code>(wd.)buildout</code></h3>
 <p>Function for creating the output matrix for a WD model from a WD connection tree.</p>

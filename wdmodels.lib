@@ -23,13 +23,19 @@
 //
 // ### Quick Start
 //
-// to get a quick overview of the library, start with the `secondOrderFilters.dsp` code found in `examples`. Make sure that the `wdmodels.lib` is within the compile path. This can be achieved within the [online Faust IDE](https://faustide.grame.fr/) by simply downloading and dragging in `wdmodels.lib` in addition to the example code.
+// To get a quick overview of the library, start with the `secondOrderFilters.dsp` code found in [examples](https://github.com/droosenb/faust-wdf-library/tree/main/examples). 
+// Note that the `wdmodels.lib` library is now embedded in the [online Faust IDE](https://faustide.grame.fr/).
 //
 // ### A Simple RC Filter Model
 //
-// Creating a model using this library consists fo three steps. First, declare a set of components. Second, model the relationship between them using a tree. Finally, build the tree using the libraries build functions.  
+// Creating a model using this library consists fo three steps. First, declare a set of components. 
+// Second, model the relationship between them using a tree. Finally, build the tree using the libraries build functions.  
 //
-// First, a set of components is declared using adaptors from the library. This list of components is created based on analysis of the circuit using WDF techniques, though generally each circuit element (resistor, capacitor, diode, etc.) can be expected to appear within the component set. For example, first order RC lowpass filter would require an unadapted voltage source, a 47k resistor, and a 10nF capacitor which outputs the voltage across itself. These can be declared with: 
+// First, a set of components is declared using adaptors from the library. 
+// This list of components is created based on analysis of the circuit using WDF techniques, 
+// though generally each circuit element (resistor, capacitor, diode, etc.) can be expected to appear 
+// within the component set. For example, first order RC lowpass filter would require an unadapted voltage source, 
+// a 47k resistor, and a 10nF capacitor which outputs the voltage across itself. These can be declared with: 
 //
 // ```
 // vs1(i) = wd.u_voltage(i, no.noise);
@@ -39,45 +45,67 @@
 //
 // Note that the first argument, i, is left un-parametrized. Components must be declared in this form, as the build algorithm expects to receive adaptors which have exactly one parameter. 
 //
-// Also note that we have chosen to declare a white noise function as the input to our voltage source. We could potentially declare this as a direct input to our model, but to do so is more complicated process which cannot be covered within this tutorial. For information on how to do this see Declaring Model Parameters as Inputs or see various implementations in `examples`.
+// Also note that we have chosen to declare a white noise function as the input to our voltage source. 
+// We could potentially declare this as a direct input to our model, but to do so is more complicated 
+// process which cannot be covered within this tutorial. For information on how to do this see 
+// [Declaring Model Parameters as Inputs](#declaring-model-parameters-as-inputs) or see various implementations 
+// in [examples](https://github.com/droosenb/faust-wdf-library/tree/main/examples).
 //
-// Second, the declared components and interconnection/structural adaptors (i.e. series, parallel, etc) are arranged into the connection tree which is produced from performing WD analysis on the modeled circuit. For example, to produce our first order RC lowpass circuit model, the following tree is declared: 
+// Second, the declared components and interconnection/structural adaptors (i.e. series, parallel, etc) are arranged 
+// into the connection tree which is produced from performing WD analysis on the modeled circuit. 
+// For example, to produce our first order RC lowpass circuit model, the following tree is declared: 
 //
 // `tree_lowpass = vs1 : wd.series : (r1, c1);`
 //
-// For more information on how to represent trees in Faust, see Trees in Faust. 
+// For more information on how to represent trees in Faust, see [Trees in Faust](#trees-in-faust). 
 //
-// Finally, the tree is built using the the `buildtree` function. To build and compute our first order RC lowpass circuit model, we use:
+// Finally, the tree is built using the the `buildtree` function. To build and compute our first order 
+// RC lowpass circuit model, we use:
 //
 // `process = wd.buildtree(tree_lowpass);`
 //
-// More information about build functions, see Build Functions. 
+// More information about build functions, see [Model Building Functions](#model-building-functions). 
 //
 // ### Building a Model
 //
-// After creating a connection tree which consists of WD adaptors, the connection tree must be passed to a build function in order to build the model.
+// After creating a connection tree which consists of WD adaptors, the connection tree must be passed 
+// to a build function in order to build the model.
 //
 // ##### Automatic model building 
 //
 // `buildtree(connection_tree)`
 //
-// The simplest build function for use with basic models. This automatically implements `buildup`, `builddown`, and `buildout` to create a working model. However, it gives minimum control to the user and cannot currently be used on trees which have parameters declared as inputs.
+// The simplest build function for use with basic models. This automatically implements `buildup`, `builddown`, 
+// and `buildout` to create a working model. However, it gives minimum control to the user and cannot 
+// currently be used on trees which have parameters declared as inputs.
 //
 // ##### Manual model building
 //
-// Wave Digital Filters are an explicit state-space model, meaning they use a previous system state in order to calculate the current output. This is achieved in Faust by using a single global feedback operator. The models feed-forward terms are generated using `builddown` and the models feedback terms are generated using `buildup`. Thus, the most common model implementation (the method used by `buildtree`) is:
+// Wave Digital Filters are an explicit state-space model, meaning they use a previous system state 
+// in order to calculate the current output. This is achieved in Faust by using a single global feedback operator.
+// The models feed-forward terms are generated using `builddown` and the models feedback terms are generated 
+// using `buildup`. Thus, the most common model implementation (the method used by `buildtree`) is:
 //
 // `builddown(connection_tree)~buildup(connection_tree) : buildout(connection_tree)`
 //
-// Since the `~` operator in Faust will leave feedback terms hanging as outputs, `buildout` is a function provided for convenience. It automatically truncates the hanging outputs by identifying leaf components which have an intended output and generating an output matrix.
+// Since the `~` operator in Faust will leave feedback terms hanging as outputs, `buildout` is a function provided for convenience. 
+// It automatically truncates the hanging outputs by identifying leaf components which have an intended output 
+// and generating an output matrix.
 //
-// Building the model manually allows for greater user control and is often very helpful in testing. Also provided for testing are the `getres` and `parres` functions, which can be used to determine the upward-facing port resistance of an element. 
+// Building the model manually allows for greater user control and is often very helpful in testing. 
+// Also provided for testing are the `getres` and `parres` functions, which can be used to determine 
+// the upward-facing port resistance of an element. 
 //
 // ### Declaring Model Parameters as Inputs
 //
-// When possible, parameters of components should be declared explicitly, meaning they are dependent on a function with no inputs. This might be something as simple as integer(declaring a static component), a function dependent on a UI input (declaring a component with variable value), or even a time-dependent function like an oscillator (declaring an audio input or circuit bending). 
+// When possible, parameters of components should be declared explicitly, meaning they are dependent on a function with no inputs. 
+// This might be something as simple as integer(declaring a static component), a function dependent on a UI input (declaring a component with variable value), 
+// or even a time-dependent function like an oscillator (declaring an audio input or circuit bending). 
 //
-// However, it is often necessary to declare parameters as input. To achieve this there are two possible methods. The first and recommended option is to create a separate model function and declare parameters which will later be implemented as inputs. This allows inputs to be explicitly declared as component parameters. For example, one might use
+// However, it is often necessary to declare parameters as input. To achieve this there are two possible methods. 
+// The first and recommended option is to create a separate model function and declare parameters which will later 
+// be implemented as inputs. This allows inputs to be explicitly declared as component parameters. 
+// For example, one might use:
 //
 // ```
 // model(in1) = buildtree(tree)
@@ -97,13 +125,16 @@
 //
 // The Empty signal operator, `_` should NEVER be used to declare a parameter as in input in a wave-digital model. 
 //
-// Using it will result on breaking the internal routing of the model and thus breaks the model. Instead, use explicit declaration as shown directly above. 
+// Using it will result on breaking the internal routing of the model and thus breaks the model. 
+// Instead, use explicit declaration as shown directly above. 
 //
 // ### Trees in Faust
 //
-// Since WD models use connection trees to represent relationships of elements, a comprehensive way to represent trees is critical. As there is no current convention for creating trees in Faust, I've developed a method using the existing series and parallel/list methods in Faust.
+// Since WD models use connection trees to represent relationships of elements, a comprehensive way to represent trees is critical.
+//  As there is no current convention for creating trees in Faust, I've developed a method using the existing series and parallel/list 
+// methods in Faust.
 //
-// The series operator ` : ` is used to separate parent and child elements. For example the tree
+// The series operator ` : ` is used to separate parent and child elements. For example the tree:
 //
 // ```
 //    A
@@ -113,7 +144,8 @@
 //
 // is represented by `A : B` in Faust. 
 //
-// To denote a parent element with multiple child elements, simply use a list `(a1, a2, ... an)` of children connected to a single parent. For example the tree:
+// To denote a parent element with multiple child elements, simply use a list `(a1, a2, ... an)` of children connected to a single parent. `
+// For example the tree:
 //
 // ```
 //    A
@@ -125,7 +157,8 @@
 //
 // `A : (B, C)`
 //
-// Finally, for a tree with many levels, simply break the tree into subtrees following the above rules and connect the subtree as if it was an individual node. For example the tree:
+// Finally, for a tree with many levels, simply break the tree into subtrees following the above rules and connect 
+// the subtree as if it was an individual node. For example the tree:
 //
 // ```
 //       A
@@ -149,14 +182,18 @@
 
 // ### How Adaptors are Structured
 
-// In wave digital filters, adaptors can be described by the form `b = Sa` where `b` is a vector of output waves `b = (b0, b1, b2, ... bn)`, `a` is a vector of input waves`a = (a0, a1, a2, ... an)`, and `S` is an n x n scattering matrix. `S` is dependent on `R`, a list of port resistances `(R0, R1, R2, ... Rn)`. 
+// In wave digital filters, adaptors can be described by the form `b = Sa` where `b` is a vector of output waves `b = (b0, b1, b2, ... bn)`, `a` is a vector of input waves`a = (a0, a1, a2, ... an)`, and `S` is an n x n scattering matrix. 
+// `S` is dependent on `R`, a list of port resistances `(R0, R1, R2, ... Rn)`. 
 //
-// The output wave vector `b` can be divided into downward-going and upward-going waves (downward-going waves travel down the connection tree, upward-going waves travel up). For adapted adaptors, with the zeroth port being  the upward-facing port, the downward-going wave vector is `(b1, b2, ... bn)` and the upward-going wave vector is `(b0)`. For unadapted adaptors, there are no upward-going waves, so the downward-going wave vector is simply `b = (b0, b1, b2, ... bn)`. 
+// The output wave vector `b` can be divided into downward-going and upward-going waves 
+// (downward-going waves travel down the connection tree, upward-going waves travel up). 
+// For adapted adaptors, with the zeroth port being the upward-facing port, the downward-going wave vector is `(b1, b2, ... bn)` and the upward-going wave vector is `(b0)`. 
+// For unadapted adaptors, there are no upward-going waves, so the downward-going wave vector is simply `b = (b0, b1, b2, ... bn)`. 
 //
 // In order for adaptors to be interpretable by the compiler, they must be structured in a specific way. 
 // Each adaptor is divided into three cases by their first parameter. This parameter, while accessible by the user, should only be set by the compiler/builder.
 //
-// All other parameters are value declarations (for components), inputs (for voltage or current ins), or parameter controls (for potentiometers/variable capacitors/variable inductors)
+// All other parameters are value declarations (for components), inputs (for voltage or current ins), or parameter controls (for potentiometers/variable capacitors/variable inductors).
 //
 // ##### First case - downward going waves
 //
@@ -167,17 +204,17 @@
 //
 // ##### Second case 
 //
-// `(1, params) =>  upward-going(R1, ... Rn, a1, ... an)`
+// `(1, params) => upward-going(R1, ... Rn, a1, ... an)`
 // outputs : `(b0)`
-// this function takes any number of port resistances and any number of upward going waves as inputs
-// these values/waves are used to calculate the upward going wave coming from this adaptor.
+// this function takes any number of port resistances and any number of upward going waves as inputs.
+// These values/waves are used to calculate the upward going wave coming from this adaptor.
 //
 // ##### Third case  
 //
 // `(2, params) => port-resistance(R1, ... Rn)` 
 // outputs: `(R0)`
-// this function takes any number of port resistances as inputs
-// these values are used to calculate the upward going port resistance of the element.
+// this function takes any number of port resistances as inputs.
+// These values are used to calculate the upward going port resistance of the element.
 //
 // ##### Unadapted Adaptors
 //
@@ -195,7 +232,7 @@
 //
 // Many thanks to Kurt Werner for helping me to understand wave digital filter models. Without his publications and consultations, the library would not exist. 
 // Thanks also to my advisors, Rob Owen and Eli Stine whose input was critical to the development of the library.
-// Finally, thanks to Romain Michon, Stephane Letz, and the Faust slack for contributing to testing, development, and inspiration when creating the library. 
+// Finally, thanks to Romain Michon, Stephane Letz, and the Faust Slack for contributing to testing, development, and inspiration when creating the library. 
 //
 // #### References
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/wdmodels.lib>
@@ -232,8 +269,7 @@ declare version "0.2.1";
 // * `i`: index used by model-building functions. Should never be user declared.
 // * `R` : Resistance/Impedance of the resistor being modeled in Ohms. 
 //
-// Note:
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -274,8 +310,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared.
 // * `R` : Resistance/Impedance of the resistor being modeled in Ohms. 
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -318,8 +353,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared.
 // * `R` : Resistance/Impedance of the resistor being modeled in Ohms. 
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -360,8 +394,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared.
 // * `ein` : Voltage/Potential across ideal voltage source in Volts
 //
-// Note: 
-// Only usable as the root of a tree
+// Note: only usable as the root of a tree.
 // The adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
@@ -405,8 +438,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared.
 // * `jin` : Current through the ideal current source in Amps
 //
-// Note: 
-// Only usable as the root of a tree.
+// Note: only usable as the root of a tree.
 // The adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
@@ -451,8 +483,7 @@ case{
 // * `R` : Resistance/Impedance of the series resistor in Ohms
 // * `ein` : Voltage/Potential of the ideal voltage source in Volts
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -497,8 +528,7 @@ case{
 // * `R` : Resistance/Impedance of the series resistor in Ohms
 // * `ein` : Voltage/Potential across ideal voltage source in Volts
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -542,8 +572,7 @@ case{
 // * `R` : Resistance/Impedance of the series resistor in Ohms
 // * `ein` : Voltage/Potential across ideal voltage source in Volts
 //
-// Note: 
-// Only usable as the root of a tree.
+// Note: only usable as the root of a tree.
 // The adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
@@ -590,8 +619,7 @@ case {
 // * `R` : Resistance/Impedance of the parallel resistor in Ohms
 // * `jin` : Current through the ideal current source in Amps
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -635,8 +663,7 @@ case {
 // * `R` : Resistance/Impedance of the series resistor in Ohms
 // * `jin` : Current through the ideal current source in Amps
 //
-// Note: 
-// Only usable as the root of a tree.
+// Note: only usable as the root of a tree.
 // The adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
@@ -682,8 +709,7 @@ case {
 // * `i`: index used by model-building functions. Should never be user declared.
 // * `lambda` : switch state control. -1 for closed switch, 1 for open switch.
 //
-// Note: 
-// Only usable as the root of a tree
+// Note: only usable as the root of a tree.
 // The adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
@@ -728,8 +754,7 @@ case {
 // * `i`: index used by model-building functions. Should never be user declared.
 // * `R` : Capacitance/Impedance of the capacitor being modeled in Farads. 
 //
-// Note:
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -772,8 +797,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared
 // * `R` : Capacitance/Impedence of the capacitor being modeled in Farads
 //
-// Note: 
-// The adaptor must be declared as a seperate function before integration into the connection tree.
+// Note: the adaptor must be declared as a seperate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -818,8 +842,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared
 // * `R` : Inductance/Impedance of the inductor being modeled in Henries
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -862,8 +885,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared
 // * `R` : Inductance/Impedance of the inductor being modeled in Henries
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -904,8 +926,7 @@ case{
 // buildtree( u_idealDiode : B );
 // ```
 //
-// Note: 
-// Only usable as the root of a tree
+// Note: only usable as the root of a tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -946,8 +967,7 @@ case{
 // * `G2` : resistance parameter 2 of the chua diode
 // * `V0` : voltage parameter of the chua diode
 //
-// Note: 
-// Only usable as the root of a tree.
+// Note: only usable as the root of a tree.
 // The adaptor must be declared as a separate function before integration into the connection tree.
 // Correct implementation is shown above.
 //
@@ -1047,8 +1067,7 @@ with{
 // * `Is` : saturation current of the diodes
 // * `Vt` : thermal resistances of the diodes
 //
-// Note: 
-// Only usable as the root of a tree.
+// Note: only usable as the root of a tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -1088,8 +1107,7 @@ case{
 // * `Is` : saturation current of the diodes
 // * `Vt` : thermal resistances of the diodes
 //
-// Note: 
-// Only usable as the root of a tree
+// Note: only usable as the root of a tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -1128,8 +1146,7 @@ case{
 // * `Is` : saturation current of the diodes
 // * `Vt` : thermal resistances of the diodes
 //
-// Note: 
-// Only usable as the root of a tree
+// Note: only usable as the root of a tree.
 // Correct implementation is shown above.
 //
 // #### Reference
@@ -1172,8 +1189,7 @@ case{
 // buildtree( u_parallel2Port : (A, B) );
 // ```
 //
-// Note: 
-// Only usable as the root of a tree.
+// Note: only usable as the root of a tree.
 // This adaptor has no user-accessible parameters. 
 // Correct implementation is shown above.
 //
@@ -1211,8 +1227,7 @@ case{
 // buildtree( A : parallel2Port : B );
 // ```
 //
-// Note: 
-// This adaptor has no user-accessible parameters. 
+// Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and one forward adaptor.
 // Correct implementation is shown above.
 //
@@ -1253,8 +1268,7 @@ case{
 // buildtree( u_series2Port : (A, B) );
 // ```
 //
-// Note: 
-// Only usable as the root of a tree.
+// Note: only usable as the root of a tree.
 // This adaptor has no user-accessible parameters. 
 // Correct implementation is shown above.
 //
@@ -1292,8 +1306,7 @@ case{
 // buildtree( A : series2Port : B );
 // ```
 //
-// Note: 
-// This adaptor has no user-accessible parameters. 
+// Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and one forward adaptor.
 // Correct implementation is shown above.
 //
@@ -1341,8 +1354,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared
 // * `jin` :  Current through the ideal current source in Amps
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // It should be used within a connection tree with one previous and one forward adaptor.
 // Correct implementation is shown above.
 //
@@ -1392,8 +1404,7 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared
 // * `vin` :  voltage across the ideal current source in Volts
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // It should be used within the connection tree with one previous and one forward adaptor.
 //
 // #### Reference
@@ -1441,10 +1452,8 @@ case{
 // * `i`: index used by model-building functions. Should never be user declared
 // * `tr` :  the turn ratio between the windings on the primary and secondary coils
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // It may only be used as the root of the connection tree with two forward nodes.
-//
 //
 // #### Reference
 //
@@ -1487,8 +1496,7 @@ with{
 // * `i`: index used by model-building functions. Should never be user declared
 // * `tr` :  the turn ratio between the windings on the primary and secondary coils
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // It should be used within the connection tree with one backward and one forward nodes.
 //
 // #### Reference
@@ -1538,8 +1546,7 @@ with{
 // * `gamma1` :  the turn ratio describing the voltage relationship between the primary and secondary coils
 // * `gamma2` :  the turn ratio describing the current relationship between the primary and secondary coils
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // It may only be used as the root of the connection tree with two forward nodes.
 //
 // #### Reference
@@ -1585,8 +1592,7 @@ with{
 // * `gamma1` :  the turn ratio describing the voltage relationship between the primary and secondary coils
 // * `gamma2` :  the turn ratio describing the current relationship between the primary and secondary coils
 //
-// Note: 
-// The adaptor must be declared as a separate function before integration into the connection tree.
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
 // It should be used within the connection tree with two forward nodes.
 //
 // #### Reference
@@ -1633,8 +1639,7 @@ with{
 // buildtree( A : parallel : (B, C) );
 // ```
 //
-// Note: 
-// This adaptor has no user-accessible parameters. 
+// Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and two forward adaptors.
 //
 // #### Reference
@@ -1675,11 +1680,10 @@ case{
 //
 // ```
 //
-// tree =  A : (series : (B, C));
+// tree = A : (series : (B, C));
 // ```
 //
-// Note: 
-// This adaptor has no user-accessible parameters. 
+// Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and two forward adaptors.
 //
 // #### Reference
@@ -1689,7 +1693,7 @@ case{
 declare series author "Dirk Roosenburg";
 declare series copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
 declare series license "MIT-style STK-4.3 license";
-series= 
+series = 
 case{
 
     (0) => ser_down
@@ -1724,11 +1728,10 @@ case{
 //
 // ```
 //
-// tree =  u_sixportPassive : (A, B, C, D, E, F));
+// tree = u_sixportPassive : (A, B, C, D, E, F));
 // ```
 //
-// Note: 
-// This adaptor has no user-accessible parameters. 
+// Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with six forward adaptors.
 //
 // #### Reference
@@ -1790,10 +1793,10 @@ with{
 //========================================================================================
 
 //----------------------`(wd.)genericNode`--------------------------
-// Function for generating an adapted node from another faust function or scattering matrix
+// Function for generating an adapted node from another faust function or scattering matrix.
 //
 // This function generates a node which is suitable for use in the connection tree structure. 
-// genericNode separates the function that it is passed into upward-going and downward-going waves. 
+// `genericNode` separates the function that it is passed into upward-going and downward-going waves. 
 //
 // #### Usage
 //
@@ -1807,15 +1810,14 @@ with{
 // * `scatter` : the function which describes the the node's scattering behavior
 // * `upRes` : the function which describes the node's upward-facing port-resistance
 //
-// Note: 
-// `scatter` must be a function with n inputs, n outputs, and n-1 parameter inputs. 
+// Note: `scatter` must be a function with n inputs, n outputs, and n-1 parameter inputs. 
 //  input/output 1 will be used as the adapted upward-facing port of the node, ports 2 to n will all be downward-facing. 
-//  the first input/output pair is assumed to already be adapted - i.e. the output 1 is not dependent on input 1. 
-//  the parameter inputs will receive the port resistances of the downward-facing ports.
+//  The first input/output pair is assumed to already be adapted - i.e. the output 1 is not dependent on input 1. 
+//  The parameter inputs will receive the port resistances of the downward-facing ports.
 //
 // `upRes` must be a function with n-1 parameter inputs and 1 output.
-//  the parameter inputs will receive the port resistances of the downward-facing ports.
-//  the output should give the upward-facing port resistance of the node based on the upward-facing port resistances of the 
+//  The parameter inputs will receive the port resistances of the downward-facing ports.
+//  The output should give the upward-facing port resistance of the node based on the upward-facing port resistances of the input.
 //
 //  If used on a leaf element (n=1), the model will automatically introduce a one-sample delay. 
 //  Thus, the output of the node at sample t based on the input, a[t], should be the output one sample ahead, b[t+1]. 
@@ -1865,16 +1867,15 @@ with{
 // * `scatter` : the function which describes the the node's scattering behavior
 // * `upRes` : the function which describes the node's upward-facing port-resistance
 //
-// Note: 
-// `scatter` must be a function with 1 input and 1 output. 
-//  it should give the output from the node based on the incident wave. 
+// Note: `scatter` must be a function with 1 input and 1 output. 
+//  It should give the output from the node based on the incident wave. 
 //  
 //  The model will automatically introduce a one-sample delay to the output of the function
 //  Thus, the output of the node at sample t based on the input, a[t], should be the output one sample ahead, b[t+1]. 
 //  This may require transformation of the output signal. 
 //
 // `upRes` must be a function with no inputs and 1 output.
-//  the output should give the upward-facing port resistance of the node
+//  The output should give the upward-facing port resistance of the node.
 //
 //----------------------------------------------------------
 declare genericNode_Vout author "Dirk Roosenburg";
@@ -1909,16 +1910,15 @@ case{
 // * `scatter` : the function which describes the the node's scattering behavior
 // * `upRes` : the function which describes the node's upward-facing port-resistance
 //
-// Note: 
-// `scatter` must be a function with 1 input and 1 output. 
-//  it should give the output from the node based on the incident wave. 
+// Note: `scatter` must be a function with 1 input and 1 output. 
+//  It should give the output from the node based on the incident wave. 
 //  
-//  The model will automatically introduce a one-sample delay to the output of the function
+//  The model will automatically introduce a one-sample delay to the output of the function.
 //  Thus, the output of the node at sample t based on the input, a[t], should be the output one sample ahead, b[t+1]. 
 //  This may require transformation of the output signal. 
 //
 // `upRes` must be a function with no inputs and 1 output.
-//  the output should give the upward-facing port resistance of the node
+//  The output should give the upward-facing port resistance of the node.
 //
 //----------------------------------------------------------
 declare genericNode_Iout author "Dirk Roosenburg";
@@ -2169,8 +2169,7 @@ getres(A) = A(2);
 // Where: 
 // `(A , B)` : is a partial connection tree composed of WD adaptors
 //
-// Note:
-// This function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors.
+// Note: this function cannot be used on a complete WD tree. When called on an unadapted adaptor (u_ prefix), it will create errors.
 //----------------------------------------------------------
 declare parres author "Dirk Roosenburg";
 declare parres copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
@@ -2227,7 +2226,6 @@ declare buildtree author "Dirk Roosenburg";
 declare buildtree copyright "Copyright (C) 2020 by Dirk Roosenburg <dirk.roosenburg.30@gmail.com>";
 declare buildtree license "MIT-style STK-4.3 license";
 buildtree((A : B)) = builddown(A : B)~buildup(A : B) : buildout(A : B);
-
 
 
 /*******************************************************************************
