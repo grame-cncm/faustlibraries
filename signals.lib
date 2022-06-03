@@ -68,7 +68,9 @@ declare version "0.1";
 //
 // * `N`: is an integer known at compile time that indicates the number of parallel cables
 //-----------------------------------------------------------------------------
-bus(2) = _,_; // avoids a lot of "bus(1)" labels in block diagrams
+bus(0) = 0:! ;
+bus(1) = _; // avoids a lot of "bus(1)" labels in block diagrams
+bus(2) = _,_; // avoids a lot of "bus(2)" labels in block diagrams
 bus(N) = par(i, N, _);
 
 //--------------`(si.)block`--------------
