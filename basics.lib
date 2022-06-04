@@ -1654,42 +1654,32 @@ with {
 slidingReduce(op,n,0,disabledVal) = 0:!;
 slidingReduce(op,n,1,disabledVal) = _;
 slidingReduce(op,n,maxN,disabledVal) =
-sequentialOperatorParOut(maxNrBits(maxN)-1,op)
-:
-par(i,maxNrBits(maxN)
-    , _@sumOfPrevBlockSizes(i)
-      : useVal(i)
-   ) : parallelOp(op,maxNrBits(maxN))
-with {
-    sequentialOperatorParOut(N,op) =
-seq(i, N, operator(i));
-    operator(i) =
-si.bus(i) ,
-(_<:
- _ , op(_,_@(pow2(i) ))
-) ;
-    // The sum of all the sizes of the previous blocks
-    sumOfPrevBlockSizes(0) = 0;
-    sumOfPrevBlockSizes(i) = (ba.subseq((allBlockSizes),0,i):>_);
-    allBlockSizes = par(i, maxNrBits(maxN-1), (pow2(i)) * isUsed(i));
-    maxNrBits(n) = int2nrOfBits(n);
+    sequentialOperatorParOut(maxNrBits(maxN)-1,op) : par(i, maxNrBits(maxN), _@sumOfPrevBlockSizes(i) : useVal(i)) : parallelOp(op, maxNrBits(maxN))
+    with {
+       sequentialOperatorParOut(N,op) = seq(i, N, operator(i));
+        operator(i) = si.bus(i), (_<: _ , op(_,_@(pow2(i))));
+        
+        // The sum of all the sizes of the previous blocks
+        sumOfPrevBlockSizes(0) = 0;
+        sumOfPrevBlockSizes(i) = (ba.subseq((allBlockSizes),0,i):>_);
+        
+        allBlockSizes = par(i, maxNrBits(maxN-1), (pow2(i)) * isUsed(i));
+        maxNrBits(n) = int2nrOfBits(n);
 
-    // Decide wether or not to use a certain value, based on n
-    useVal(i) =
-select2(isUsed(i), disabledVal, _)
-    ;
+        // Decide wether or not to use a certain value, based on n
+        useVal(i) = select2(isUsed(i), disabledVal, _);
 
-    isUsed(i) = ba.take(i+1, (int2bin(n,(maxN-1)*2+1)));
-    pow2(i) = 1<<i;
-    // same as:
-    // pow2(i) = int(pow(2,i));
-    // but in the block diagram, it will be displayed as a number, instead of a formula
+        isUsed(i) = ba.take(i+1, (int2bin(n,(maxN-1)*2+1)));
+        pow2(i) = 1<<i;
+        // same as:
+        // pow2(i) = int(pow(2,i));
+        // but in the block diagram, it will be displayed as a number, instead of a formula
 
-    // convert n into a list of ones and zeros
-    int2bin(n,maxN) = par(j, maxNrBits(maxN-1), int(floor((n)/(pow2(j))))%2);
-    // calculate how many ones and zeros are needed to represent maxN
-    int2nrOfBits(n) = int(floor(log(n)/log(2))+1);
-};
+        // convert n into a list of ones and zeros
+        int2bin(n,maxN) = par(j, maxNrBits(maxN-1), int(floor((n)/(pow2(j))))%2);
+        // calculate how many ones and zeros are needed to represent maxN
+        int2nrOfBits(n) = int(floor(log(n)/log(2))+1);
+    };
 
 
 //------------------------------`(ba.)slidingSum`------------------------------
