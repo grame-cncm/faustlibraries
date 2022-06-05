@@ -527,7 +527,7 @@
             </li>
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#parallel-operator" class="nav-link">Parallel Operator</a>
+            <li class="nav-item" data-level="2"><a href="#parallel-operators" class="nav-link">Parallel Operators</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#baparallelop" class="nav-link">(ba.)parallelOp</a>
               <ul class="nav flex-column">
@@ -1132,6 +1132,7 @@ rate of a signal, it just holds samples...
 </code></pre>
 <p>Where:</p>
 <p><code>mode</code> means: 
+   0 - Pass through. A single sample 0 trigger will work as a reset.
  1 - Track and hold max value.</p>
 <hr />
 <h3 id="bapeakholder"><code>(ba.)peakholder</code></h3>
@@ -1545,20 +1546,20 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <li><code>n</code>: the number of values to process</li>
 <li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
-<h2 id="parallel-operator">Parallel Operator</h2>
+<h2 id="parallel-operators">Parallel Operators</h2>
 <p>Provides various operations on N parallel inputs using a high order
 <code>parallelOp(op,N,x)</code> function:</p>
 <ul>
-<li><code>parallelMax(n)</code>: the max of n parallel inputs</li>
-<li><code>parallelMin(n)</code>: the min of n parallel inputs</li>
-<li><code>parallelMean(n)</code>: the mean of n parallel inputs</li>
-<li><code>parallelRMS(n)</code>: the RMS of n parallel inputs</li>
+<li><code>parallelMax(N)</code>: the max of n parallel inputs</li>
+<li><code>parallelMin(N)</code>: the min of n parallel inputs</li>
+<li><code>parallelMean(N)</code>: the mean of n parallel inputs</li>
+<li><code>parallelRMS(N)</code>: the RMS of n parallel inputs</li>
 </ul>
 <hr />
 <h3 id="baparallelop"><code>(ba.)parallelOp</code></h3>
-<p>Apply a commutative binary operation <code>&lt;op&gt;</code> to N parallel inputs.</p>
+<p>Apply a commutative binary operation <code>op</code> to N parallel inputs.</p>
 <h4 id="usage_68">usage</h4>
-<pre><code>si.bus(n) : parallelOp(op,n) : _
+<pre><code>si.bus(N) : parallelOp(op,N) : _
 </code></pre>
 <p>where:</p>
 <ul>
@@ -1569,7 +1570,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baparallelmax"><code>(ba.)parallelMax</code></h3>
 <p>The maximum of N parallel inputs.</p>
 <h4 id="usage_69">Usage</h4>
-<pre><code>si.bus(n) : parallelMax(n) : _
+<pre><code>si.bus(N) : parallelMax(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1579,7 +1580,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baparallelmin"><code>(ba.)parallelMin</code></h3>
 <p>The minimum of N parallel inputs.</p>
 <h4 id="usage_70">Usage</h4>
-<pre><code>si.bus(n) : parallelMin(n) : _
+<pre><code>si.bus(N) : parallelMin(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1589,7 +1590,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baparallelmean"><code>(ba.)parallelMean</code></h3>
 <p>The mean of N parallel inputs.</p>
 <h4 id="usage_71">Usage</h4>
-<pre><code>si.bus(n) : parallelMean(n) : _
+<pre><code>si.bus(N) : parallelMean(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1599,7 +1600,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baparallelrms"><code>(ba.)parallelRMS</code></h3>
 <p>The RMS of N parallel inputs.</p>
 <h4 id="usage_72">Usage</h4>
-<pre><code>si.bus(n) : parallelRMS(n) : _
+<pre><code>si.bus(N) : parallelRMS(N) : _
 </code></pre>
 <p>Where:</p>
 <ul>

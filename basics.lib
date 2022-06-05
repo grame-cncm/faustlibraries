@@ -464,8 +464,8 @@ time = (+(1)~_) - 1;
 // * `n`: number of samples to reach the next value 
 //------------------------
 ramp = case {
-	(0) => _;
-	(n) => \(y,x).(if(y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
+    (0) => _;
+    (n) => \(y,x).(if(y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
 };
 
 
@@ -654,7 +654,7 @@ declare pulse_countup_loop author "Vince";
 
 pulse_countup_loop(n, trig) = + ~ cond(n)*trig
 with {
-  	cond(n, x) = x * (x <= n);
+    cond(n, x) = x * (x <= n);
 };
 
 
@@ -678,7 +678,7 @@ declare pulse_countdown_loop author "Vince";
 
 pulse_countdown_loop(n, trig) = - ~ cond(n)*trig
 with {
-  	cond(n, x) = x * (x >= n);
+    cond(n, x) = x * (x >= n);
 };
 
 
@@ -1078,7 +1078,7 @@ declare downSample author "Romain Michon";
 
 downSample(freq) = sAndH(hold)
 with {
-  	hold = time%int(ma.SR/freq) == 0;
+    hold = time%int(ma.SR/freq) == 0;
 };
 
 
@@ -1094,7 +1094,7 @@ with {
 // Where:
 //
 // `mode` means: 
-//	0 - Pass through. A single sample 0 trigger will work as a reset.
+//    0 - Pass through. A single sample 0 trigger will work as a reset.
 //  1 - Track and hold max value.
 //----------------------------------------------------------------
 declare peakhold author "Jonatan Liljedahl, revised by Romain Michon";
@@ -1201,12 +1201,12 @@ impulsify = _ <: _,mem : - <: >(0)*_;
 //-----------------------------------------------------------------------
 automat(t, size, init, input) = rwtable(size+1, init, windex, input, rindex)
 with {
-	clock 	= beat(t);
-	rindex 	= int(clock) : (+ : %(size)) ~ _;		// each clock read the next entry of the table
-	windex 	= if(timeToRenew, rindex, size);		// we ignore input unless it is time to renew
-	timeToRenew 	= int(clock) & (inputHasMoved | (input <= init));
-	inputHasMoved 	= abs(input-input') : countfrom(int(clock)') : >(0);
-	countfrom(reset) = (+ : if(reset, 0, _)) ~ _;
+    clock = beat(t);
+    rindex = int(clock) : (+ : %(size)) ~ _;    // each clock read the next entry of the table
+    windex = if(timeToRenew, rindex, size);     // we ignore input unless it is time to renew
+    timeToRenew = int(clock) & (inputHasMoved | (input <= init));
+    inputHasMoved = abs(input-input') : countfrom(int(clock)') : >(0);
+    countfrom(reset) = (+ : if(reset, 0, _)) ~ _;
 };
 
 
@@ -1249,12 +1249,12 @@ with {
 //--------------------------------------------------------
 bpf = environment
 {
-  	// Start a break-point function
-  	start(x0,y0) = \(x).(x0,y0,x,y0);
-  	// Add a break-point
-  	point(x1,y1) = \(x0,y0,x,y).(x1, y1, x, if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
-  	// End a break-point function
-  	end(x1,y1) = \(x0,y0,x,y).(if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
+    // Start a break-point function
+    start(x0,y0) = \(x).(x0,y0,x,y0);
+    // Add a break-point
+    point(x1,y1) = \(x0,y0,x,y).(x1, y1, x, if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
+    // End a break-point function
+    end(x1,y1) = \(x0,y0,x,y).(if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
 };
 
 
@@ -1276,9 +1276,9 @@ bpf = environment
 declare listInterp author "Romain Michon";
 
 listInterp(v) =
-  	bpf.start(0,take(1,v)) :
-  	seq(i,count(v)-2,bpf.point(i+1,take(i+2,v))) :
-  	bpf.end(count(v)-1,take(count(v),v));
+    bpf.start(0,take(1,v)) :
+    seq(i,count(v)-2,bpf.point(i+1,take(i+2,v))) :
+    bpf.end(count(v)-1,take(count(v),v));
 
 
 //-------------------`(ba.)bypass1`-------------------------
@@ -1383,8 +1383,8 @@ with {
 // ```
 //---------------------------------------------------------------
 bypass_fade(n, b, e) = par(i, ins, _) 
-			<: (par(i, ins, *(1-xb)) : e : par(i, outs, *(1-xb))), par(i, ins, *(xb))
-			:> par(i, outs, _)
+            <: (par(i, ins, *(1-xb)) : e : par(i, outs, *(1-xb))), par(i, ins, *(xb))
+            :> par(i, outs, _)
 with {
     ins = inputs(e);
     outs = outputs(e);
@@ -1461,8 +1461,8 @@ declare bitcrusher author "Julius O. Smith III, revised by Stephane Letz";
 
 bitcrusher(nbits,x) = round(x * scaler) / scaler
 with {
-	scaler = float(2^nbits - 1);
-	round(x) = floor(x + 0.5);
+    scaler = float(2^nbits - 1);
+    round(x) = floor(x + 0.5);
 };
 
 
@@ -1834,22 +1834,22 @@ slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 // spdx-license-identifier: gpl-3.0
 // copyright (c) 2020 Bart Brouns
 
-//=================================Parallel Operator=========================================
+//=================================Parallel Operators=========================================
 // Provides various operations on N parallel inputs using a high order
 // `parallelOp(op,N,x)` function:
 //
-// * `parallelMax(n)`: the max of n parallel inputs
-// * `parallelMin(n)`: the min of n parallel inputs
-// * `parallelMean(n)`: the mean of n parallel inputs
-// * `parallelRMS(n)`: the RMS of n parallel inputs
+// * `parallelMax(N)`: the max of n parallel inputs
+// * `parallelMin(N)`: the min of n parallel inputs
+// * `parallelMean(N)`: the mean of n parallel inputs
+// * `parallelRMS(N)`: the RMS of n parallel inputs
 
 //-----------------------------`(ba.)parallelOp`-----------------------------
-// Apply a commutative binary operation `<op>` to N parallel inputs.
+// Apply a commutative binary operation `op` to N parallel inputs.
 //
 // #### usage
 //
 // ```
-// si.bus(n) : parallelOp(op,n) : _
+// si.bus(N) : parallelOp(op,N) : _
 // ```
 //
 // where:
@@ -1863,13 +1863,18 @@ parallelOp(op,1) = _;
 parallelOp(op,2) = op;
 parallelOp(op,n) = op(parallelOp(op,n-1));
 
+declare parallelOp author "Bart Brouns";
+declare parallelOp licence "GPL-3.0";
+declare parallelOp copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
+
+
 //---------------------------`(ba.)parallelMax`---------------------------------
 // The maximum of N parallel inputs.
 //
 // #### Usage
 //
 // ```
-// si.bus(n) : parallelMax(n) : _
+// si.bus(N) : parallelMax(N) : _
 // ```
 //
 // Where:
@@ -1878,6 +1883,10 @@ parallelOp(op,n) = op(parallelOp(op,n-1));
 //------------------------------------------------------------------------------
 parallelMax(n) = parallelOp(max,n);
 
+declare parallelMax author "Bart Brouns";
+declare parallelMax licence "GPL-3.0";
+declare parallelMax copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
+
 
 //---------------------------`(ba.)parallelMin`---------------------------------
 // The minimum of N parallel inputs.
@@ -1885,7 +1894,7 @@ parallelMax(n) = parallelOp(max,n);
 // #### Usage
 //
 // ```
-// si.bus(n) : parallelMin(n) : _
+// si.bus(N) : parallelMin(N) : _
 // ```
 //
 // Where:
@@ -1894,6 +1903,10 @@ parallelMax(n) = parallelOp(max,n);
 //------------------------------------------------------------------------------
 parallelMin(n) = parallelOp(min,n);
 
+declare parallelMin author "Bart Brouns";
+declare parallelMin licence "GPL-3.0";
+declare parallelMin copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
+
 
 //---------------------------`(ba.)parallelMean`---------------------------------
 // The mean of N parallel inputs.
@@ -1901,7 +1914,7 @@ parallelMin(n) = parallelOp(min,n);
 // #### Usage
 //
 // ```
-// si.bus(n) : parallelMean(n) : _
+// si.bus(N) : parallelMean(N) : _
 // ```
 //
 // Where:
@@ -1910,6 +1923,9 @@ parallelMin(n) = parallelOp(min,n);
 //------------------------------------------------------------------------------
 parallelMean(n) = si.bus(n):>_/n;
 
+declare parallelMean author "Bart Brouns";
+declare parallelMean licence "GPL-3.0";
+declare parallelMean copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
 
 //---------------------------`(ba.)parallelRMS`---------------------------------
 // The RMS of N parallel inputs.
@@ -1917,7 +1933,7 @@ parallelMean(n) = si.bus(n):>_/n;
 // #### Usage
 //
 // ```
-// si.bus(n) : parallelRMS(n) : _
+// si.bus(N) : parallelRMS(N) : _
 // ```
 //
 // Where:
@@ -1926,6 +1942,9 @@ parallelMean(n) = si.bus(n):>_/n;
 //------------------------------------------------------------------------------
 parallelRMS(n) = par(i, n, pow(2)) : parallelMean(n) : sqrt;
 
+declare parallelRMS author "Bart Brouns";
+declare parallelRMS licence "GPL-3.0";
+declare parallelRMS copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
 // This section implements functions that used to be in music.lib but that are now
@@ -1934,9 +1953,9 @@ parallelRMS(n) = par(i, n, pow(2)) : parallelMean(n) : sqrt;
 
 millisec = ma.SR/1000.0;
 
-time1s 	= hslider("time", 0, 0,  1000, 0.1)*millisec;
-time2s 	= hslider("time", 0, 0,  2000, 0.1)*millisec;
-time5s 	= hslider("time", 0, 0,  5000, 0.1)*millisec;
+time1s = hslider("time", 0, 0,  1000, 0.1)*millisec;
+time2s = hslider("time", 0, 0,  2000, 0.1)*millisec;
+time5s = hslider("time", 0, 0,  5000, 0.1)*millisec;
 time10s = hslider("time", 0, 0, 10000, 0.1)*millisec;
 time21s = hslider("time", 0, 0, 21000, 0.1)*millisec;
 time43s = hslider("time", 0, 0, 43000, 0.1)*millisec;
