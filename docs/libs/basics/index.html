@@ -1303,17 +1303,17 @@ between 0 and 1.</p>
 <li><code>nbits</code>: the number of bits of the wanted resolution</li>
 </ul>
 <h2 id="sliding-reduce">Sliding Reduce</h2>
-<p>Provides various operations on the last N samples using a high order
-<code>slidingReduce(op,N,maxN,disabledVal,x)</code> fold-like function:</p>
+<p>Provides various operations on the last n samples using a high order
+<code>slidingReduce(op,n,maxN,disabledVal,x)</code> fold-like function:</p>
 <ul>
 <li><code>slidingSum(n)</code>: the sliding sum of the last n input samples, CPU-light</li>
-<li><code>slidingSump(n,maxn)</code>: the sliding sum of the last n input samples, numerically stable "forever"</li>
-<li><code>slidingMax(n,maxn)</code>: the sliding max of the last n input samples</li>
-<li><code>slidingMin(n,maxn)</code>: the sliding min of the last n input samples</li>
+<li><code>slidingSump(n,maxN)</code>: the sliding sum of the last n input samples, numerically stable "forever"</li>
+<li><code>slidingMax(n,maxN)</code>: the sliding max of the last n input samples</li>
+<li><code>slidingMin(n,maxN)</code>: the sliding min of the last n input samples</li>
 <li><code>slidingMean(n)</code>: the sliding mean of the last n input samples, CPU-light</li>
-<li><code>slidingMeanp(n,maxn)</code>: the sliding mean of the last n input samples, numerically stable "forever"</li>
+<li><code>slidingMeanp(n,maxN)</code>: the sliding mean of the last n input samples, numerically stable "forever"</li>
 <li><code>slidingRMS(n)</code>: the sliding RMS of the last n input samples, CPU-light</li>
-<li><code>slidingRMSp(n,maxn)</code>: the sliding RMS of the last n input samples, numerically stable "forever"</li>
+<li><code>slidingRMSp(n,maxN)</code>: the sliding RMS of the last n input samples, numerically stable "forever"</li>
 </ul>
 <h4 id="working-principle">Working Principle</h4>
 <p>If we want the maximum of the last 8 values, we can do that as:</p>
@@ -1360,9 +1360,9 @@ have any number of values, as long as it's a power of 2.</p>
 </code></pre>
 <p>What if we want to look at a number of values that's not a power of 2?
 For each value, we will have to decide whether to use it or not.
-If N is bigger than the index of the value, we use it, otherwise we replace
+If n is bigger than the index of the value, we use it, otherwise we replace
 it with (<code>0-(ma.MAX)</code>):</p>
-<pre><code>variableMax(N,x) =
+<pre><code>variableMax(n,x) =
  max(
    max(
      (
@@ -1386,19 +1386,19 @@ it with (<code>0-(ma.MAX)</code>):</p>
    )
  )
 with {
- useVal(i) = select2((N&gt;=i) , (0-(ma.MAX)),_);
+ useVal(i) = select2((n&gt;=i) , (0-(ma.MAX)),_);
 };
 </code></pre>
 <p>Now it becomes impossible to re-use any values. To fix that let's first look
-at how we'd implement it using recursiveMax, but with a fixed N that is not
-a power of 2. For example, this is how you'd do it with <code>N=3</code>:</p>
+at how we'd implement it using recursiveMax, but with a fixed n that is not
+a power of 2. For example, this is how you'd do it with <code>n=3</code>:</p>
 <pre><code>binaryMaxThree(x) =
  (
    recursiveMax(1,x)@0, // the first x
    recursiveMax(2,x)@1  // the second and third x
  ):max;
 </code></pre>
-<p><code>N=6</code></p>
+<p><code>n=6</code></p>
 <pre><code>binaryMaxSix(x) =
  (
    recursiveMax(2,x)@0, // first two
@@ -1408,7 +1408,7 @@ a power of 2. For example, this is how you'd do it with <code>N=3</code>:</p>
 <p>Note that <code>recursiveMax(2,x)</code> is used at a different delay then in
 <code>binaryMaxThree</code>, since it represents 1 and 2, not 2 and 3. Each block is
 delayed the combined size of the previous blocks.</p>
-<p><code>N=7</code></p>
+<p><code>n=7</code></p>
 <pre><code>binaryMaxSeven(x) =
  (
    (
@@ -1424,42 +1424,27 @@ delayed the combined size of the previous blocks.</p>
 and at which delay time.</p>
 <p>Then it becomes a matter of:</p>
 <ul>
-<li>lining up all the different block sizes in parallel: the first <code>par()</code>
- statement</li>
+<li>lining up all the different block sizes in parallel:
+ sequentialOperatorParOut()</li>
 <li>delaying each the appropriate amount: <code>sumOfPrevBlockSizes()</code></li>
 <li>turning it on or off: <code>useVal()</code></li>
-<li>getting the maximum of all of them: <code>combine()</code></li>
+<li>getting the maximum of all of them: <code>parallelOp(()</code></li>
 </ul>
 <p>In Faust, we can only do that for a fixed maximum number of values: <code>maxN</code></p>
-<pre><code>variableBinaryMaxN(N,maxN,x) =
- par(i,maxNrBits,recursiveMax(pow2(i),x)@sumOfPrevBlockSizes(N,maxN,i) : useVal(i)) : combine(maxNrBits) with {
-   // The sum of all the sizes of the previous blocks
-   sumOfPrevBlockSizes(N,maxN,0) = 0;
-   sumOfPrevBlockSizes(N,maxN,i) = (subseq((allBlockSizes(N,maxN)),0,i):&gt;_);
-   allBlockSizes(N,maxN) = par(i, maxNrBits, pow2(i) * isUsed(i) );
-   maxNrBits = int2nrOfBits(maxN);
-   // get the maximum of all blocks
-   combine(2) = max;
-   combine(N) = max(combine(N-1),_);
-   // Decide wether or not to use a certain value, based on N
-   useVal(i) = select2(isUsed(i), (0-(ma.MAX)),_);
-   isUsed(i) = take(i+1, (int2bin(N,maxN)));
- };
-</code></pre>
 <hr />
 <h3 id="baslidingreduce"><code>(ba.)slidingReduce</code></h3>
 <p>Fold-like high order function. Apply a commutative binary operation <code>&lt;op&gt;</code> to
 the last <code>&lt;n&gt;</code> consecutive samples of a signal <code>&lt;x&gt;</code>. For example :
-<code>slidingReduce(max,128,128,-(ma.MAX))</code> will compute the maximum of the last
+<code>slidingReduce(max,128,128,0-(ma.MAX))</code> will compute the maximum of the last
 128 samples. The output is updated each sample, unlike reduce, where the
 output is constant for the duration of a block.</p>
 <h4 id="usage_59">Usage</h4>
-<pre><code>_ : slidingReduce(op,N,maxN,disabledVal) : _
+<pre><code>_ : slidingReduce(op,n,maxN,disabledVal) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
-<li><code>maxN</code>: the maximum number of values to process, needs to be a power of 2</li>
+<li><code>n</code>: the number of values to process</li>
+<li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 <li><code>op</code>: the operator. Needs to be a commutative one.</li>
 <li><code>disabledVal</code>: the value to use when we want to ignore a value.</li>
 </ul>
@@ -1471,71 +1456,71 @@ minimum, we need to give <code>ma.MAX</code> as <code>disabledVal</code>.</p>
 <h3 id="baslidingsum"><code>(ba.)slidingSum</code></h3>
 <p>The sliding sum of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
-If that matters in your application, use the more CPU-intensive (ba.)slidingSump.</p>
+If that matters in your application, use the more CPU-intensive <code>ba.slidingSump</code>.</p>
 <h4 id="usage_60">Usage</h4>
-<pre><code>_ : slidingSum(N) : _
+<pre><code>_ : slidingSum(n) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
+<li><code>n</code>: the number of values to process</li>
 </ul>
 <hr />
 <h3 id="baslidingsump"><code>(ba.)slidingSump</code></h3>
 <p>The sliding sum of the last n input samples.</p>
-<p>It uses a lot more CPU then <code>ba.slidingSum(n,maxn)</code>, but is numerically stable "forever" in return.</p>
+<p>It uses a lot more CPU than <code>ba.slidingSum</code>, but is numerically stable "forever" in return.</p>
 <h4 id="usage_61">Usage</h4>
-<pre><code>_ : slidingSump(N,maxN) : _
+<pre><code>_ : slidingSump(n,maxN) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
-<li><code>maxN</code>: the maximum number of values to process, needs to be a power of 2</li>
+<li><code>n</code>: the number of values to process</li>
+<li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
 <hr />
 <h3 id="baslidingmax"><code>(ba.)slidingMax</code></h3>
 <p>The sliding maximum of the last n input samples.</p>
 <h4 id="usage_62">Usage</h4>
-<pre><code>_ : slidingMax(N,maxN) : _
+<pre><code>_ : slidingMax(n,maxN) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
-<li><code>maxN</code>: the maximum number of values to process, needs to be a power of 2</li>
+<li><code>n</code>: the number of values to process</li>
+<li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
 <hr />
 <h3 id="baslidingmin"><code>(ba.)slidingMin</code></h3>
 <p>The sliding minimum of the last n input samples.</p>
 <h4 id="usage_63">Usage</h4>
-<pre><code>_ : slidingMin(N,maxN) : _
+<pre><code>_ : slidingMin(n,maxN) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
-<li><code>maxN</code>: the maximum number of values to process, needs to be a power of 2</li>
+<li><code>n</code>: the number of values to process</li>
+<li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
 <hr />
 <h3 id="baslidingmean"><code>(ba.)slidingMean</code></h3>
 <p>The sliding mean of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
-If that matters in your application, use the more CPU-intensive <code>ba.</code>slidingRMSp`.</p>
+If that matters in your application, use the more CPU-intensive <code>ba.slidingRMSp</code>.</p>
 <h4 id="usage_64">Usage</h4>
-<pre><code>_ : slidingMean(N,maxN) : _
+<pre><code>_ : slidingMean(n) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
+<li><code>n</code>: the number of values to process</li>
 </ul>
 <hr />
 <h3 id="baslidingmeanp"><code>(ba.)slidingMeanp</code></h3>
 <p>The sliding mean of the last n input samples.</p>
-<p>It uses a lot more CPU then (ba.)slidingMean(n,maxn), but is numerically stable "forever" in return.</p>
+<p>It uses a lot more CPU than <code>ba.slidingMean</code>, but is numerically stable "forever" in return.</p>
 <h4 id="usage_65">Usage</h4>
-<pre><code>_ : slidingMeanp(N,maxN) : _
+<pre><code>_ : slidingMeanp(n,maxN) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
-<li><code>maxN</code>: the maximum number of values to process, needs to be a power of 2</li>
+<li><code>n</code>: the number of values to process</li>
+<li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
 <hr />
 <h3 id="baslidingrms"><code>(ba.)slidingRMS</code></h3>
@@ -1543,23 +1528,23 @@ If that matters in your application, use the more CPU-intensive <code>ba.</code>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingRMSp</code>.</p>
 <h4 id="usage_66">Usage</h4>
-<pre><code>_ : slidingRMS(N) : _
+<pre><code>_ : slidingRMS(n) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
+<li><code>n</code>: the number of values to process</li>
 </ul>
 <hr />
 <h3 id="baslidingrmsp"><code>(ba.)slidingRMSp</code></h3>
 <p>The root mean square of the last n input samples.</p>
-<p>It uses a lot more CPU then (ba.)slidingRMS(n,maxn), but is numerically stable "forever" in return.</p>
+<p>It uses a lot more CPU than <code>ba.slidingRMS</code>, but is numerically stable "forever" in return.</p>
 <h4 id="usage_67">Usage</h4>
-<pre><code>_ : slidingRMSp(N,maxN) : _
+<pre><code>_ : slidingRMSp(n,maxN) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the number of values to process</li>
-<li><code>maxN</code>: the maximum number of values to process, needs to be a power of 2</li>
+<li><code>n</code>: the number of values to process</li>
+<li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
 <h2 id="parallel-operator">Parallel Operator</h2>
 <p>Provides various operations on N parallel inputs using a high order

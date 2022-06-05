@@ -1686,7 +1686,7 @@ slidingReduce(op,n,maxN,disabledVal) =
 // The sliding sum of the last n input samples.
 //
 // It will eventually run into numerical trouble when there is a persistent dc component.
-// If that matters in your application, use the more CPU-intensive (ba.)slidingSump.
+// If that matters in your application, use the more CPU-intensive `ba.slidingSump`.
 //
 // #### Usage
 //
@@ -1704,7 +1704,7 @@ slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
 //------------------------------`(ba.)slidingSump`------------------------------
 // The sliding sum of the last n input samples.
 //
-// It uses a lot more CPU then `ba.slidingSum(n)`, but is numerically stable "forever" in return.
+// It uses a lot more CPU than `ba.slidingSum`, but is numerically stable "forever" in return.
 //
 // #### Usage
 //
@@ -1757,7 +1757,7 @@ slidingMin(n,maxN) = slidingReduce(min,n,maxN,ma.MAX);
 // The sliding mean of the last n input samples.
 //
 // It will eventually run into numerical trouble when there is a persistent dc component.
-// If that matters in your application, use the more CPU-intensive `ba.`slidingRMSp`.
+// If that matters in your application, use the more CPU-intensive `ba.slidingRMSp`.
 //
 // #### Usage
 //
@@ -1775,7 +1775,7 @@ slidingMean(n) = slidingSum(n)/n;
 //----------------------------`(ba.)slidingMeanp`-------------------------------
 // The sliding mean of the last n input samples.
 //
-// It uses a lot more CPU then (ba.)slidingMean(n), but is numerically stable "forever" in return.
+// It uses a lot more CPU than `ba.slidingMean`, but is numerically stable "forever" in return.
 //
 // #### Usage
 //
@@ -1814,7 +1814,7 @@ slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
 //---------------------------`(ba.)slidingRMSp`---------------------------------
 // The root mean square of the last n input samples.
 //
-// It uses a lot more CPU then (ba.)slidingRMS(n), but is numerically stable "forever" in return.
+// It uses a lot more CPU than `ba.slidingRMS`, but is numerically stable "forever" in return.
 //
 // #### Usage
 //
