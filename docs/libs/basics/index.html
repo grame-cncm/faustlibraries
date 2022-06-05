@@ -1424,17 +1424,16 @@ delayed the combined size of the previous blocks.</p>
 and at which delay time.</p>
 <p>Then it becomes a matter of:</p>
 <ul>
-<li>lining up all the different block sizes in parallel:
- sequentialOperatorParOut()</li>
+<li>lining up all the different block sizes in parallel: <code>sequentialOperatorParOut()</code></li>
 <li>delaying each the appropriate amount: <code>sumOfPrevBlockSizes()</code></li>
 <li>turning it on or off: <code>useVal()</code></li>
-<li>getting the maximum of all of them: <code>parallelOp(()</code></li>
+<li>getting the maximum of all of them: <code>parallelOp()</code></li>
 </ul>
-<p>In Faust, we can only do that for a fixed maximum number of values: <code>maxN</code></p>
+<p>In Faust, we can only do that for a fixed maximum number of values: <code>maxN</code>, known at compile time. </p>
 <hr />
 <h3 id="baslidingreduce"><code>(ba.)slidingReduce</code></h3>
-<p>Fold-like high order function. Apply a commutative binary operation <code>&lt;op&gt;</code> to
-the last <code>&lt;n&gt;</code> consecutive samples of a signal <code>&lt;x&gt;</code>. For example :
+<p>Fold-like high order function. Apply a commutative binary operation <code>op</code> to
+the last <code>n</code> consecutive samples of a signal <code>x</code>. For example :
 <code>slidingReduce(max,128,128,0-(ma.MAX))</code> will compute the maximum of the last
 128 samples. The output is updated each sample, unlike reduce, where the
 output is constant for the duration of a block.</p>

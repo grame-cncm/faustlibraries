@@ -1612,13 +1612,12 @@ with {
 //
 // Then it becomes a matter of:
 //
-// * lining up all the different block sizes in parallel:
-//  sequentialOperatorParOut()
+// * lining up all the different block sizes in parallel: `sequentialOperatorParOut()`
 // * delaying each the appropriate amount: `sumOfPrevBlockSizes()`
 // * turning it on or off: `useVal()`
-// * getting the maximum of all of them: `parallelOp(()`
+// * getting the maximum of all of them: `parallelOp()`
 //
-// In Faust, we can only do that for a fixed maximum number of values: `maxN`
+// In Faust, we can only do that for a fixed maximum number of values: `maxN`, known at compile time. 
 
 //========================================================================================
 // Section contributed by Bart Brouns (bart@magnetophon.nl).
@@ -1627,8 +1626,8 @@ with {
 
 
 //-----------------------------`(ba.)slidingReduce`-----------------------------
-// Fold-like high order function. Apply a commutative binary operation `<op>` to
-// the last `<n>` consecutive samples of a signal `<x>`. For example :
+// Fold-like high order function. Apply a commutative binary operation `op` to
+// the last `n` consecutive samples of a signal `x`. For example :
 // `slidingReduce(max,128,128,0-(ma.MAX))` will compute the maximum of the last
 // 128 samples. The output is updated each sample, unlike reduce, where the
 // output is constant for the duration of a block.
