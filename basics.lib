@@ -788,32 +788,32 @@ subseq(head, 0, N)         = head;
 //
 // Where:
 //
-// * `C`: whether to dynamically force the index in [r0, r1] range: 1 force the check, 0 deactivate it (given at compile time)
+// * `C`: whether to dynamically force the index in [r0, r1] range: 1 force the check, 0 deactivate it (a constant numerical expression)
 // * `fun`: unary function
-// * `size`: size of the table (integer)
+// * `S`: size of the table (a constant numerical expression)
 // * `r0`: range minimal value
 // * `r1`: range maximal value
 // * `x`: input value to compute using the tabulated function
 //
 // ```
-// tabulate(C, fun, size, r0, r1, x).val uses the value in the table
+// tabulate(C, fun, S, r0, r1, x).val uses the value in the table
 // ```
 //
 // ```
-// tabulate(C, fun, size, r0, r1, x).lin uses the value in the table with linear interpolation
+// tabulate(C, fun, S, r0, r1, x).lin uses the value in the table with linear interpolation
 // ```
 //
 // ```
-// tabulate(C, fun, size, r0, r1, x).cub uses the value in the table with cubic interpolation
+// tabulate(C, fun, S, r0, r1, x).cub uses the value in the table with cubic interpolation
 // ```
 //--------------------------------------------
-tabulate(C, fun, size, r0, r1, x) = environment {
+tabulate(C, fun, S, r0, r1, x) = environment {
 
     // Maximum index to access
-    mid = size-1;
+    mid = S-1;
 
     // Create the table
-    wf(size) = r0 + float(ba.time)*(r1-r0)/float(mid) : fun;
+    wf = r0 + float(ba.time)*(r1-r0)/float(mid) : fun;
 
     // Prepare the 'float' table read index
     id = (x-r0)/(r1-r0)*mid;
@@ -823,7 +823,7 @@ tabulate(C, fun, size, r0, r1, x) = environment {
     rid(x, 1) = max(0, min(x, mid));
 
     // Tabulate an unary 'fun' function on a range [r0, r1]
-    val = y0 with { y0 = rdtable(size, wf(size), rid(int(id), C)); };
+    val = y0 with { y0 = rdtable(S, wf, rid(int(id), C)); };
 
     // Tabulate an unary 'fun' function on a range [r0, r1] with linear interpolation
     lin = it.interpolate_linear(d,y0,y1)
@@ -831,8 +831,8 @@ tabulate(C, fun, size, r0, r1, x) = environment {
         x0 = int(id);
         x1 = x0+1;
         d  = id-x0;
-        y0 = rdtable(size, wf(size), rid(x0, C));
-        y1 = rdtable(size, wf(size), rid(x1, C));
+        y0 = rdtable(S, wf, rid(x0, C));
+        y1 = rdtable(S, wf, rid(x1, C));
     };
 
     // Tabulate an unary 'fun' function on a range [r0, r1] with cubic interpolation
@@ -843,13 +843,14 @@ tabulate(C, fun, size, r0, r1, x) = environment {
         x2 = x1+1;
         x3 = x2+1;
         d  = id-x1;
-        y0 = rdtable(size, wf(size), rid(x0, C));
-        y1 = rdtable(size, wf(size), rid(x1, C));
-        y2 = rdtable(size, wf(size), rid(x2, C));
-        y3 = rdtable(size, wf(size), rid(x3, C));
+        y0 = rdtable(S, wf, rid(x0, C));
+        y1 = rdtable(S, wf, rid(x1, C));
+        y2 = rdtable(S, wf, rid(x2, C));
+        y3 = rdtable(S, wf, rid(x3, C));
     };
 };
 
+declare tabulate author "Stephane Letz";
 
 //============================Selectors (Conditions)======================================
 //========================================================================================

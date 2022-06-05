@@ -990,18 +990,18 @@ The table value can then be read directly or with linear or cubic interpolation.
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>C</code>: whether to dynamically force the index in [r0, r1] range: 1 force the check, 0 deactivate it (given at compile time)</li>
+<li><code>C</code>: whether to dynamically force the index in [r0, r1] range: 1 force the check, 0 deactivate it (a constant numerical expression)</li>
 <li><code>fun</code>: unary function</li>
-<li><code>size</code>: size of the table (integer)</li>
+<li><code>S</code>: size of the table (a constant numerical expression)</li>
 <li><code>r0</code>: range minimal value</li>
 <li><code>r1</code>: range maximal value</li>
 <li><code>x</code>: input value to compute using the tabulated function</li>
 </ul>
-<pre><code>tabulate(C, fun, size, r0, r1, x).val uses the value in the table
+<pre><code>tabulate(C, fun, S, r0, r1, x).val uses the value in the table
 </code></pre>
-<pre><code>tabulate(C, fun, size, r0, r1, x).lin uses the value in the table with linear interpolation
+<pre><code>tabulate(C, fun, S, r0, r1, x).lin uses the value in the table with linear interpolation
 </code></pre>
-<pre><code>tabulate(C, fun, size, r0, r1, x).cub uses the value in the table with cubic interpolation
+<pre><code>tabulate(C, fun, S, r0, r1, x).cub uses the value in the table with cubic interpolation
 </code></pre>
 <h2 id="selectors-conditions">Selectors (Conditions)</h2>
 <hr />
