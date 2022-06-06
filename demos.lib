@@ -1531,4 +1531,26 @@ with{
     gain = excitGroup(vslider("[1] Gain",0.5,0,1,0.01) : si.smoo);
 };
 
+//-----------------`(no.)colored_noise`--------------------
+// A coloured noise signal generator.
+//
+// #### Usage
+//
+// ```
+// colored_noise_demo : _
+// ```
+//
+//-------------------------------------------------
+declare colored_noise author "Constantinos Odysseas Economou";
+declare colored_noise license "MIT";
+
+colored_noise_demo = no.colored_noise(N,alpha) : *(ampdb) : *(gate)
+with {
+    N = 12;
+
+    alpha = hslider("[0] Alpha [style:knob] [tooltip: Spectral roll-off factor]", 0.0, -1.0, 1.0, 0.001) : si.smoo;
+    ampdb = hslider("[1] Amplitude [unit:dB] [style:knob] [tooltip: Noise amplitude]", -20, -120, 10, 0.1) : ba.db2linear : si.smoo;
+    gate = checkbox("[2] Gate");
+};
+
 // end further contributions section
