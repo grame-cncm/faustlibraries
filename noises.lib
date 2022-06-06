@@ -443,3 +443,45 @@ license disposition, if their license choice is not already indicated
 elsewhere among the libraries.  It is expected that all software will be
 released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
+
+//-----------------`(no.)colored_noise`--------------------
+// Generates a colored noise signal with an arbitrary spectral
+// rollofff factor (alpha) over the entire audible frequency range
+// (20-20000 Hz). The output is normalized so that an equal RMS
+// level is maintained for different values of alpha.
+//
+// #### Usage
+//
+// ```
+// colored_noise(N,alpha) : _
+// ```
+//
+// Where:
+//
+// * `N`: desired integer filter order (fixed at compile time)
+// * `alpha`: slope of roll-off, between -1 and 1. -1 corresponds to 
+// brown/red noise, -1/2 pink noise, 0 white noise, 1/2 blue noise,
+// and 1 violet/azure noise.
+//
+// #### Examples
+// See `dm.colored_noise_demo`.
+//
+//-------------------------------------------------
+declare colored_noise author "Constantinos Odysseas Economou";
+declare colored_noise copyright "Copyright (C) 2022 Constantinos Odysseas Economou <c.economou@sirenfx.io>";
+declare colored_noise license "MIT-style STK-4.3 license";
+
+colored_noise(N,alpha) = no.noise : fi.dcblocker : fi.spectral_tilt(N,fmin,bw,alpha) : *(uniNorm(alpha * 2)) : max(-1.0) : min(1.0)
+with {
+    fmin = 20.0;
+    fmax = 20000.0;
+    bw = fmax - fmin;
+
+    uniNorm(alpha) = (a*exp(-alpha*b))+(c*exp(-alpha*d)) : pow(-1)
+    with{
+        a = ba.if(ma.signum(alpha) > 0, 1, 0.8016);
+        b = ba.if(ma.signum(alpha) > 0, -4.28, -2.633);
+        c = ba.if(ma.signum(alpha) > 0, 0, 0.1984);
+        d = ba.if(ma.signum(alpha) > 0, 0, -0.7196);
+    };
+};
