@@ -452,16 +452,16 @@ pitchTracker(N, t, x) = loop ~ _
 // #### Usage
 //
 // ```
-// _ : spectralCentroid(NL, tau) : _
+// _ : spectralCentroid(nonlinearity, tau) : _
 //
 // Where:
 //
 // * `tau`: response time in seconds based on exponentially-weighted averaging
 //  with tau time-constant. See https://ccrma.stanford.edu/~jos/st/Exponentials.html.
 //
-// * `NL`: a boolean to activate or deactivate nonlinear integration; the nonlinear
-//  function is useful to improve stability with very short response times such as
-//  .001 <= tau <= .01 , otherwise, the nonlinearity may reduce precision.
+// * `nonlinearity`: a Boolean to activate or deactivate nonlinear integration; the 
+//  nonlinear function is useful to improve stability with very short response times 
+//  such as .001 <= tau <= .005 , otherwise, the nonlinearity may reduce precision.
 //
 // #### Reference:
 //  Sanfilippo, D. (2021). Time-Domain Adaptive Algorithms for Low- and High-Level 
@@ -475,12 +475,12 @@ declare spectralCentroid author "Dario Sanfilippo";
 declare spectralCentroid copyright "Copyright (C) 2022 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
 declare spectralCentroid license "MIT License";
-spectralCentroid(NL, t, x) = loop ~ _
+spectralCentroid(nonlinearity, t, x) = loop ~ _
     with {
         loop(fb) = centroid
             with {
                 w(cf) = 2.0 * ma.PI * cf * ma.T;
-                integrator(t, x) = fi.pole(1.0, x * (1.0 / t) * ma.T);
+                integrator(t, x) = fi.pole(1.0, x * (1.0 / max(ma.EPSILON, t)) * ma.T);
                 lowpass(cf, x) = y
                     letrec {
                         'y = (x - s) * G + s;
@@ -494,8 +494,8 @@ spectralCentroid(NL, t, x) = loop ~ _
                 xLRMS = an.rms_envelope_tau(t, lowpass(fb, x));
                 xHRMS = an.rms_envelope_tau(t, highpass(fb, x));
                 diffRMS = (xHRMS - xLRMS) / max(ma.EPSILON, xRMS);
-                nonlinearity = ba.if(NL, 3.0, 1.0);
-                diffInt = max(.0, min(1.0, integrator(t, pow(diffRMS, nonlinearity))));
+                exponent = ba.if(nonlinearity, 3.0, 1.0);
+                diffInt = max(.0, min(1.0, integrator(t, pow(diffRMS, exponent))));
                 centroid = max(20.0, diffInt * ma.SR * .5);
             };
     };
