@@ -494,8 +494,8 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
                 xLRMS = an.rms_envelope_tau(t, lowpass(fb, x));
                 xHRMS = an.rms_envelope_tau(t, highpass(fb, x));
                 diffRMS = (xHRMS - xLRMS) / max(ma.EPSILON, xRMS);
-                exponent = ba.if(nonlinearity, 3.0, 1.0);
-                diffInt = max(.0, min(1.0, integrator(t, pow(diffRMS, exponent))));
+                nonlinearIntegration = ba.if(nonlinearity, pow(diffRMS, 3), diffRMS);
+                diffInt = max(.0, min(1.0, integrator(t, nonlinearIntegration)));
                 centroid = max(20.0, diffInt * ma.SR * .5);
             };
     };
