@@ -400,6 +400,106 @@ declare zcr license "MIT-style STK-4.3 license";
 zcr(period, x) = ma.zc(x) : fi.lptau(period);
 
 
+//==============================================================================
+//  Adaptive Frequency Analysis
+//==============================================================================
+
+//--------------------`(an.)pitchTracker`---------------------------------------
+//
+// This function implements a pitch-tracking algorithm by means of 
+// zero-crossing rate analysis and adaptive low-pass filtering. The design
+// is based on the algorithm described in this tutorial (section 2.2):
+// https://pdfslide.net/documents/faust-tutorial2.html.
+//
+// #### Usage
+//
+// ```
+// _ : pitchTracker(N, tau) : _
+// ```
+//
+// Where:
+//
+// * `tau`: response time in seconds based on exponentially-weighted averaging
+//  with tau time-constant. See https://ccrma.stanford.edu/~jos/st/Exponentials.html.
+// * `N`: compile-time constant, sets the order of the low-pass filter, which
+//  determines the sensitivity of the algorithm for signals where partials are
+//  stronger than the fundamental frequency.
+declare pitchTracker author "Dario Sanfilippo";
+declare pitchTracker copyright "Copyright (C) 2022 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare pitchTracker license "MIT License";
+pitchTracker(N, t, x) = loop ~ _
+    with {
+        xHighpassed = fi.highpass(1, 20.0, x);
+        loop(y) = an.zcr(t, fi.lowpass(N, max(20.0, y), xHighpassed)) * ma.SR * .5;
+    };
+
+//--------------------`(an.)spectralCentroid`-----------------------------------
+//
+// This function implements a time-domain spectral centroid by means of RMS 
+// measurements and adaptive crossover filtering. The weight difference of the
+// upper and lower spectral powers are used to recursively adjust the crossover
+// cutoff so that the system (minimally) oscillates around a balancing point.
+//
+// Unlike block processing techniques such as FFT, this algorithm provides
+// continuous measurements and fast response times. Furthermore, when providing
+// input signals that are spectrally sparse, the algorithm will output a 
+// logarithmic measure of the centroid, which is perceptually desirable for
+// musical applications. For example, if the input signal is the combination
+// of three tones at 1000, 2000, and 4000 Hz, the centroid will be the middle
+// octave.
+//
+// #### Usage
+//
+// ```
+// _ : spectralCentroid(NL, tau) : _
+//
+// Where:
+//
+// * `tau`: response time in seconds based on exponentially-weighted averaging
+//  with tau time-constant. See https://ccrma.stanford.edu/~jos/st/Exponentials.html.
+//
+// * `NL`: a boolean to activate or deactivate nonlinear integration; the nonlinear
+//  function is useful to improve stability with very short response times such as
+//  .001 <= tau <= .01 , otherwise, the nonlinearity may reduce precision.
+//
+// #### Reference:
+//  Sanfilippo, D. (2021). Time-Domain Adaptive Algorithms for Low- and High-Level 
+//  Audio Information Processing. Computer Music Journal, 45(1), 24-38.
+//
+// #### Example:
+//
+//  process = os.osc(500) + os.osc(1000) + os.osc(2000) + os.osc(4000) + os.osc(8000) : spectralCentroid(1, .001);
+//
+declare spectralCentroid author "Dario Sanfilippo";
+declare spectralCentroid copyright "Copyright (C) 2022 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare spectralCentroid license "MIT License";
+spectralCentroid(NL, t, x) = loop ~ _
+    with {
+        loop(fb) = centroid
+            with {
+                w(cf) = 2.0 * ma.PI * cf * ma.T;
+                integrator(t, x) = fi.pole(1.0, x * (1.0 / t) * ma.T);
+                lowpass(cf, x) = y
+                    letrec {
+                        'y = (x - s) * G + s;
+                        's = 2 * (x - s) * G + s;
+                    }
+                        with {
+                            G = tan(w(cf) / 2.0) / (1.0 + tan(w(cf) / 2.0));
+                        };
+                highpass(cf, x) = x - lowpass(cf, x);
+                xRMS = an.rms_envelope_tau(t, x);
+                xLRMS = an.rms_envelope_tau(t, lowpass(fb, x));
+                xHRMS = an.rms_envelope_tau(t, highpass(fb, x));
+                diffRMS = (xHRMS - xLRMS) / max(ma.EPSILON, xRMS);
+                nonlinearity = ba.if(NL, 3.0, 1.0);
+                diffInt = max(.0, min(1.0, integrator(t, pow(diffRMS, nonlinearity))));
+                centroid = max(20.0, diffInt * ma.SR * .5);
+            };
+    };
+
 //=============================Spectrum-Analyzers=========================================
 // Spectrum-analyzers split the input signal into a bank of parallel signals, one for
 // each spectral band. They are related to the Mth-Octave Filter-Banks in `filters.lib`.
