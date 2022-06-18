@@ -364,7 +364,7 @@ fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) :&gt;
 </ul>
 <hr />
 <h3 id="rezita_rev_fdn"><code>(re.)zita_rev_fdn</code></h3>
-<p>Internal 8x8 late-reverberation FDN used in the FOSS Linux reverb zita-rev1
+<p>Internal 8x8 late-reverberation FDN used in the FOSS Linux reverb <code>zita-rev1</code>
 by Fons Adriaensen <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#102;&#111;&#110;&#115;&#64;&#108;&#105;&#110;&#117;&#120;&#97;&#117;&#100;&#105;&#111;&#46;&#111;&#114;&#103;">&#102;&#111;&#110;&#115;&#64;&#108;&#105;&#110;&#117;&#120;&#97;&#117;&#100;&#105;&#111;&#46;&#111;&#114;&#103;</a>.  This is an FDN reverb with
 allpass comb filters in each feedback delay in addition to the
 damping filters.</p>
@@ -396,7 +396,7 @@ damping filters.</p>
 (remaining args and refs as for <code>zita_rev_fdn</code> above)</p>
 <hr />
 <h3 id="rezita_rev1_ambi"><code>(re.)zita_rev1_ambi</code></h3>
-<p>Extend zita_rev_fdn to include zita_rev1 input/output mapping in
+<p>Extend <code>zita_rev_fdn</code> to include <code>zita_rev1</code> input/output mapping in
 "ambisonics mode", as provided in the Linux C++ version.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>_,_ : zita_rev1_ambi(rgxyz,rdel,f1,f2,t60dc,t60m,fsmax) : _,_,_,_
@@ -490,15 +490,15 @@ Designed to sound great with synthetic sound sources, rather than sound like a r
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>t60</code>: approximate reverberation time in seconds (<code>[0.1..60]</code> sec) (T60 - the time for the reverb to decay by 60db when damp == 0 ). Does not effect early reflections</li>
-<li><code>damp</code>: controls damping of high-frequencies as the reverb decays. <code>0</code> is no damping, <code>1</code> is very strong damping. Values should be between (<code>[0..1]</code>)</li>
-<li><code>size</code>: scales size of delay-lines within the reverberator, producing the impression of a larger or smaller space. Values below <code>1</code> can sound metallic. Values should be between `[0.5..5]</li>
-<li><code>early_diff</code>: controls shape of early reflections. Values of <code>0.707</code> or more produce smooth exponential decay. Lower values produce a slower build-up of echoes. Values should be between (<code>[0..1]</code>)</li>
-<li><code>mod_depth</code>: depth (<code>[0..1]</code>) of delay-line modulation. Use in combination with <code>mod_freq</code> to set amount of chorusing within the structure</li>
-<li><code>modFreq</code>: frequency (<code>[0..10]</code> Hz) of delay-line modulation. Use in combination with modDepth to set amount of chorusing within the structure</li>
-<li><code>low</code>: multiplier (<code>[0..1]</code>) for the reverberation time within the low band</li>
-<li><code>mid</code>: multiplier (<code>[0..1]</code>) for the reverberation time within the mid band</li>
-<li><code>high</code>: multiplier (<code>[0..1]</code>) for the reverberation time within the high band</li>
+<li><code>t60</code>: approximate reverberation time in seconds ([0.1..60] sec) (T60 - the time for the reverb to decay by 60db when damp == 0 ). Does not effect early reflections</li>
+<li><code>damp</code>: controls damping of high-frequencies as the reverb decays. 0 is no damping, 1 is very strong damping. Values should be between ([0..1])</li>
+<li><code>size</code>: scales size of delay-lines within the reverberator, producing the impression of a larger or smaller space. Values below 1 can sound metallic. Values should be between [0.5..5]</li>
+<li><code>early_diff</code>: controls shape of early reflections. Values of 0.707 or more produce smooth exponential decay. Lower values produce a slower build-up of echoes. Values should be between ([0..1])</li>
+<li><code>mod_depth</code>: depth ([0..1]) of delay-line modulation. Use in combination with mod_freq to set amount of chorusing within the structure</li>
+<li><code>modFreq</code>: frequency ([0..10] Hz) of delay-line modulation. Use in combination with modDepth to set amount of chorusing within the structure</li>
+<li><code>low</code>: multiplier ([0..1]) for the reverberation time within the low band</li>
+<li><code>mid</code>: multiplier ([0..1]) for the reverberation time within the mid band</li>
+<li><code>high</code>: multiplier ([0..1]) for the reverberation time within the high band</li>
 <li><code>lowcut</code>: frequency (100..6000 Hz) at which the crossover between the low and mid bands of the reverb occurs</li>
 <li><code>highcut</code>: frequency (1000..10000 Hz) at which the crossover between the mid and high bands of the reverb occurs</li>
 </ul>
@@ -517,14 +517,14 @@ Excels at producing spacey washes of sound.</p>
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>dt</code>: approximate reverberation time in seconds (<code>[0.1..60 sec]</code>)</li>
-<li><code>damp</code>: controls damping of high-frequencies as the reverb decays. <code>0</code> is no damping, <code>1</code> is very strong damping. Values should be between (<code>[0..1]</code>)</li>
-<li><code>size</code>: scales size of delay-lines within the diffusion unit, producing the impression of a larger or smaller space. Values below <code>1</code> can sound metallic. Values should be between (<code>[0.5..5]</code>)</li>
-<li><code>size</code>: control of relative "room size" roughly between (<code>[0.5..3]</code>)</li>
-<li><code>early_diff</code>: controls pattern of echoes produced by the diffuser. At very low values, the diffuser acts like a delay-line whose length is controlled by the 'size' parameter. Medium values produce a slow build-up of echoes, giving the sound a reversed-like quality. Values of <code>0.707</code> or greater than produce smooth exponentially decaying echoes. Values should be in the range (<code>[0..1]</code>)</li>
-<li><code>feedback</code>: amount of feedback through the system. Sets the number of repeating echoes. A setting of <code>1.0</code> produces infinite sustain. Values should be in the range (<code>[0..1]</code>)</li>
-<li><code>mod_depth</code>: depth (<code>[0..1]</code>) of delay-line modulation. Use in combination with mod_freq to produce chorus and pitch-variations in the echoes</li>
-<li><code>mod_freq</code>: frequency (<code>[0..10]</code> Hz) of delay-line modulation. Use in combination with mod_depth to produce chorus and pitch-variations in the echoes</li>
+<li><code>dt</code>: approximate reverberation time in seconds ([0.1..60 sec])</li>
+<li><code>damp</code>: controls damping of high-frequencies as the reverb decays. 0 is no damping, 1 is very strong damping. Values should be between ([0..1])</li>
+<li><code>size</code>: scales size of delay-lines within the diffusion unit, producing the impression of a larger or smaller space. Values below 1 can sound metallic. Values should be between ([0.5..5])</li>
+<li><code>size</code>: control of relative "room size" roughly between ([0.5..3])</li>
+<li><code>early_diff</code>: controls pattern of echoes produced by the diffuser. At very low values, the diffuser acts like a delay-line whose length is controlled by the 'size' parameter. Medium values produce a slow build-up of echoes, giving the sound a reversed-like quality. Values of 0.707 or greater than produce smooth exponentially decaying echoes. Values should be in the range ([0..1])</li>
+<li><code>feedback</code>: amount of feedback through the system. Sets the number of repeating echoes. A setting of 1.0 produces infinite sustain. Values should be in the range ([0..1])</li>
+<li><code>mod_depth</code>: depth ([0..1]) of delay-line modulation. Use in combination with mod_freq to produce chorus and pitch-variations in the echoes</li>
+<li><code>mod_freq</code>: frequency ([0..10] Hz) of delay-line modulation. Use in combination with mod_depth to produce chorus and pitch-variations in the echoes</li>
 </ul>
 <h4 id="reference_5">Reference</h4>
 <ul>
