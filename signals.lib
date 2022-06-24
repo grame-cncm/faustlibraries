@@ -355,3 +355,105 @@ rev(N) = @(phase(N)*2)
 with {
     phase(n) = 1 : (+ : %(n)) ~ _ : max(0) : min(n-1);
 };
+
+//--------------------`(si.)vecOp`----------------------------------------------
+//
+// This function is a generalisation of Faust's iterators such as "prod" and
+// "sum", and it allows to perform operations on an arbitrary number of
+// vectors, provided that they all have the same length. Unlike Faust's
+// iterators where the vector size must be specified, this function will infer
+// the vector space dimension and vector size based on the vectors list that
+// we provide.
+//
+// The outputs of the function are equal to the vector size, whereas the
+// number of inputs is dependent on whether the elements of the vectors
+// provided expect an incoming signal themselves or not. We will see a
+// clarifying example later; in general, the number of total inputs will
+// be the sum of the inputs in each input vector.
+//
+// #### Usage
+//
+// ```
+//      vecOp((vectorsList), op) : si.bus(outputs(ba.take(1, vectorsList)));
+// ```
+//
+// #### Where
+//
+// * `vectorsList`: is a list of vectors;
+// * `op`: is a two-input, one-output operator.
+//
+// For example, consider the following vectors lists:
+//
+//      v0 = (0 , 1 , 2 , 3);
+//      v1 = (4 , 5 , 6 , 7);
+//      v2 = (8 , 9 , 10 , 11);
+//      v3 = (12 , 13 , 14 , 15);
+//      v4 = (+(16) , _ , 18 , *(19));
+//      vv = (v0 , v1 , v2 , v3);
+//
+// Although Faust has limitations for list processing, these vectors can be
+// combined or processed individually.
+//
+// If we do:
+// 
+//      process = vecOp(v0, +);
+//
+// the function will deduce a vector space of dimension = 4 and a vector 
+// length = 1. Note that this is equivalent to writing:
+//
+//      process = v0 : sum(i, 4, _);
+//
+// Similarly, we can write:
+//
+//      process = vecOp((v0 , v1), *) :> _;
+//
+// and we have a dimension-2 space and length-4 vectors. This is the dot 
+// product between vectors v0 and v1, which is equivalent to writing:
+//
+//      process = v0 , v1 : dot(4);
+//
+// The examples above have no inputs, as none of the elements of the vectors
+// expect inputs. On the other hand, we can write:
+//
+//      process = vecOp((v4 , v4), +);
+//
+// and the function will have six inputs and four outputs, as each vector
+// has three of the four elements expecting an input, times two, as the two
+// input vectors are identical.
+//
+// Finally, we can write:
+//
+//      process = vecOp(vv, &);
+//
+// to perform the bitwise AND on all the elements at the same position in 
+// each vector, having dimension equal to the vector lenght equal to four.
+// 
+// Or even:
+//
+//      process = vecOp((vv , vv), &);
+//
+// which gives us a dimension equal to two, and a vector size equal to sixteen.
+//
+// For a more practical use-case, this is how we can implement a time-invariant
+// feedback delay network with Hadamard matrix:
+//
+//      N = 4;
+//      coeffVec = par(i, N, .9);
+//      delVec = par(i, N, (i + 1) * 3);
+//      process = vecOp((si.bus(N) , si.bus(N)), +) ~ 
+//          vecOp((vecOp((ro.hadamard(N) , coeffVec), *) , delVec), @);
+//
+//------------------------------------------------------------------------------
+declare vecOp author "Dario Sanfilippo";
+declare vecOp copyright "Copyright (C) 2022 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com>";
+declare vecOp license "MIT License";
+vecOp(vectorsList, op) =
+    vectorsList : seq(i, vecDim - 1, vecOp2D , vecBus(vecDim - 2 - i))
+    with {
+        vecBus(0) = par(i, vecLen, 0 : !);
+        vecBus(dim) = par(i, dim, si.bus(vecLen));
+        vecOp2D = ro.interleave(vecLen, 2) : par(i, vecLen, op);
+        vecDim = outputs(vectorsList) / vecLen;
+        vecLen = outputs(ba.take(1, vectorsList));
+    };
