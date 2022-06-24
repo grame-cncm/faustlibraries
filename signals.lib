@@ -371,10 +371,13 @@ with {
 // clarifying example later; in general, the number of total inputs will
 // be the sum of the inputs in each input vector.
 //
+// Note that we must provide a list of at least two vectors, each with a size 
+// that is greater or equal to one.
+//
 // #### Usage
 //
 // ```
-//      vecOp((vectorsList), op) : si.bus(outputs(ba.take(1, vectorsList)));
+//      si.bus(inputs(vectorsList)) : vecOp((vectorsList), op) : si.bus(outputs(ba.take(1, vectorsList)));
 // ```
 //
 // #### Where
@@ -398,8 +401,8 @@ with {
 // 
 //      process = vecOp(v0, +);
 //
-// the function will deduce a vector space of dimension = 4 and a vector 
-// length = 1. Note that this is equivalent to writing:
+// the function will deduce a vector space of dimension equal to four and 
+// a vector length equal to one. Note that this is equivalent to writing:
 //
 //      process = v0 : sum(i, 4, _);
 //
@@ -407,7 +410,7 @@ with {
 //
 //      process = vecOp((v0 , v1), *) :> _;
 //
-// and we have a dimension-2 space and length-4 vectors. This is the dot 
+// and we have a dimension-two space and length-four vectors. This is the dot 
 // product between vectors v0 and v1, which is equivalent to writing:
 //
 //      process = v0 , v1 : dot(4);
