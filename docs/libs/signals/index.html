@@ -538,7 +538,8 @@ each vector, having dimension equal to the vector length equal to four.</p>
 <p>For a more practical use-case, this is how we can implement a time-invariant
 feedback delay network with Hadamard matrix:</p>
 <pre><code> N = 4;
- coeffVec = par(i, N, .9);
+ normalisation = 1.0 / sqrt(N);
+ coeffVec = par(i, N, .99 * normalisation);
  delVec = par(i, N, (i + 1) * 3);
  process = vecOp((si.bus(N) , si.bus(N)), +) ~ 
      vecOp((vecOp((ro.hadamard(N) , coeffVec), *) , delVec), @);
