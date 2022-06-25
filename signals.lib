@@ -442,7 +442,8 @@ with {
 // feedback delay network with Hadamard matrix:
 //
 //      N = 4;
-//      coeffVec = par(i, N, .9);
+//      normalisation = 1.0 / sqrt(N);
+//      coeffVec = par(i, N, .99 * normalisation);
 //      delVec = par(i, N, (i + 1) * 3);
 //      process = vecOp((si.bus(N) , si.bus(N)), +) ~ 
 //          vecOp((vecOp((ro.hadamard(N) , coeffVec), *) , delVec), @);
