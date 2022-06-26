@@ -273,7 +273,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#silag_ud" class="nav-link">(si.)lag_ud</a>
+            <li class="nav-item" data-level="3"><a href="#sionepoleswitching" class="nav-link">(si.)onePoleSwitching</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -376,7 +376,7 @@ smoothed parameter to change when a note-off event is sent.</p>
 </ul>
 <hr />
 <h3 id="sibsmooth"><code>(si.)bsmooth</code></h3>
-<p>Block smooth linear interpolation during a block of samples.</p>
+<p>Block smooth linear interpolation during a block of samples (given by the <code>ma.BS</code> value).</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>hslider(...) : bsmooth : _
 </code></pre>
@@ -420,7 +420,7 @@ The exponential time-constant is approximately 1/(1-s) samples, when s is close 
 <p>N parallel cables for complex signals.
 <code>cbus</code> is a standard Faust function.</p>
 <h4 id="usage_9">Usage</h4>
-<pre><code>cbus(n)
+<pre><code>cbus(N)
 cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 </code></pre>
 <p>Where:</p>
@@ -430,7 +430,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 </ul>
 <hr />
 <h3 id="sicmul"><code>(si.)cmul</code></h3>
-<p>multiply two complex signals pointwise.
+<p>Multiply two complex signals pointwise.
 <code>cmul</code> is a standard Faust function.</p>
 <h4 id="usage_10">Usage</h4>
 <pre><code>(r1,i1) : cmul(r2,i2) : (_,_)
@@ -443,7 +443,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 </ul>
 <hr />
 <h3 id="sicconj"><code>(si.)cconj</code></h3>
-<p>complex conjugation of a (complex) signal.
+<p>Complex conjugation of a (complex) signal.
 <code>cconj</code> is a standard Faust function.</p>
 <h4 id="usage_11">Usage</h4>
 <pre><code>(r1,i1) : cconj : (_,_)
@@ -455,21 +455,26 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <li><code>(r1,-i1)</code> = real and imaginary parts of the output signal</li>
 </ul>
 <hr />
-<h3 id="silag_ud"><code>(si.)lag_ud</code></h3>
-<p>Lag filter with separate times for up and down.</p>
+<h3 id="sionepoleswitching"><code>(si.)onePoleSwitching</code></h3>
+<p>One pole filter with independent attack and release times.</p>
 <h4 id="usage_12">Usage</h4>
-<pre><code>_ : lag_ud(up,dn) : _
-</code></pre>
-<hr />
-<h3 id="sirev"><code>(si.)rev</code></h3>
-<p>Reverse the input signal by blocks of N&gt;0 samples. <code>rev(1)</code> is the indentity
-function. <code>rev(N)</code> has a latency of <code>N-1</code> samples.</p>
-<h4 id="usage_13">Usage</h4>
-<pre><code>_ : rev(N) : _
+<pre><code>_ : onePoleSwitching(attack,release) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: the block size in samples</li>
+<li><code>attack</code>: the attack tau time constant in second</li>
+<li><code>release</code>: the release tau time constant in second</li>
+</ul>
+<hr />
+<h3 id="sirev"><code>(si.)rev</code></h3>
+<p>Reverse the input signal by blocks of n&gt;0 samples. <code>rev(1)</code> is the indentity
+function. <code>rev(n)</code> has a latency of <code>n-1</code> samples.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>_ : rev(n) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>n</code>: the block size in samples</li>
 </ul>
 <hr />
 <h3 id="sivecop"><code>(si.)vecOp</code></h3>

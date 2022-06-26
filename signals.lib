@@ -161,7 +161,7 @@ polySmooth(g,s,d) = si.smooth(s*((g==(g@d)) | (g == 0)));
 smoothAndH(t,s) = si.smooth(s*t) : ba.sAndH(t);
 
 //-----------------------------`(si.)bsmooth`------------------------------
-// Block smooth linear interpolation during a block of samples.
+// Block smooth linear interpolation during a block of samples (given by the `ma.BS` value).
 //
 // #### Usage
 //
@@ -260,7 +260,7 @@ smooth = smooth_imp(0);
 // #### Usage
 //
 // ```
-// cbus(n)
+// cbus(N)
 // cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 // ```
 //
@@ -273,7 +273,7 @@ cbus(1) = (_,_);
 cbus(N) = par(i, N, (_,_));
 
 //--------------------------------`(si.)cmul`-------------------------------------
-// multiply two complex signals pointwise.
+// Multiply two complex signals pointwise.
 // `cmul` is a standard Faust function.
 //
 // #### Usage
@@ -291,7 +291,7 @@ cbus(N) = par(i, N, (_,_));
 cmul(r1,i1,r2,i2) = (r1*r2 - i1*i2), (r1*i2 + r2*i1);
 
 //--------------------------------`(si.)cconj`-------------------------------------
-// complex conjugation of a (complex) signal.
+// Complex conjugation of a (complex) signal.
 // `cconj` is a standard Faust function.
 //
 // #### Usage
@@ -319,39 +319,55 @@ elsewhere among the libraries.  It is expected that all software will be
 released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
 
-//-------------`(si.)lag_ud`---------------
-// Lag filter with separate times for up and down.
+//-------------`(si.)onePoleSwitching`---------------
+// One pole filter with independent attack and release times.
 //
 // #### Usage
 //
 // ```
-// _ : lag_ud(up,dn) : _
+// _ : onePoleSwitching(attack,release) : _
 // ```
+// 
+// Where:
+//
+// * `attack`: the attack tau time constant in second
+// * `release`: the release tau time constant in second
+//
 //----------------------------------------------------
-declare lag_ud author "Jonatan Liljedahl";
-declare lag_ud licence "STK-4.3";
+declare onePoleSwitching author "Jonatan Liljedahl, revised by Dario Sanfilippo";
+declare onePoleSwitching licence "STK-4.3";
 
-lag_ud(up,dn) = _ <: ((>,ba.tau2pole(up),ba.tau2pole(dn):select2),_:si.smooth) ~ _;
+onePoleSwitching(attack, release, x) = loop ~ _
+    with {
+        loop(yState) = (1.0 - coeff) * x + coeff * yState
+            with {
+                coeff = ba.if(x > yState, ba.tau2pole(attack), ba.tau2pole(release));
+            };
+    };
+    
+// Kept for backward compatibility
+lag_ud = onePoleSwitching;
+
 
 // end further further contributions section
 
 //-------------`(si.)rev`---------------
-// Reverse the input signal by blocks of N>0 samples. `rev(1)` is the indentity
-// function. `rev(N)` has a latency of `N-1` samples.
+// Reverse the input signal by blocks of n>0 samples. `rev(1)` is the indentity
+// function. `rev(n)` has a latency of `n-1` samples.
 //
 // #### Usage
 //
 // ```
-// _ : rev(N) : _
+// _ : rev(n) : _
 // ```
 //
 // Where:
 //
-// * `N`: the block size in samples
+// * `n`: the block size in samples
 //----------------------------------------------------
 declare rev author "Yann Orlarey";
 
-rev(N) = @(phase(N)*2) 
+rev(n) = @(phase(n)*2) 
 with {
     phase(n) = 1 : (+ : %(n)) ~ _ : max(0) : min(n-1);
 };
