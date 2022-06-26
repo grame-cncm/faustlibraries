@@ -325,23 +325,23 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // #### Usage
 //
 // ```
-// _ : onePoleSwitching(attack,release) : _
+// _ : onePoleSwitching(att,rel) : _
 // ```
 // 
 // Where:
 //
-// * `attack`: the attack tau time constant in second
-// * `release`: the release tau time constant in second
+// * `att`: the attack tau time constant in second
+// * `rel`: the release tau time constant in second
 //
 //----------------------------------------------------
 declare onePoleSwitching author "Jonatan Liljedahl, revised by Dario Sanfilippo";
 declare onePoleSwitching licence "STK-4.3";
 
-onePoleSwitching(attack, release, x) = loop ~ _
+onePoleSwitching(att, rel, x) = loop ~ _
     with {
         loop(yState) = (1.0 - coeff) * x + coeff * yState
             with {
-                coeff = ba.if(x > yState, ba.tau2pole(attack), ba.tau2pole(release));
+                coeff = ba.if(x > yState, ba.tau2pole(att), ba.tau2pole(rel));
             };
     };
     

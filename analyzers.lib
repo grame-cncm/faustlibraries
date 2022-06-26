@@ -197,7 +197,7 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 //
 //---------------------------------------------------------
 declare amp_follower_ar author "Jonatan Liljedahl, revised by Romain Michon";
-amp_follower_ar(att,rel) = abs : si.lag_ud(att,rel);
+amp_follower_ar(att,rel) = abs : si.onePoleSwitching(att,rel);
 
 
 //------------------`(an.)ms_envelope_rect`------------------------------------

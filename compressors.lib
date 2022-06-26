@@ -94,10 +94,10 @@ declare version "0.2";
 declare peak_compression_gain_mono author "Bart Brouns";
 declare peak_compression_gain_mono license "GPLv3";
 
-// note: si.lag_ud has a bug where if you compile with standard precision,
+// note: si.onePoleSwitching has a bug where if you compile with standard precision,
 // down is 0 and prePost is 1, you go into infinite GR and stay there
 peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
-  abs : ba.bypass1(prePost,si.lag_ud(att,rel)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.lag_ud(rel,att)) : ba.db2linear
+  abs : ba.bypass1(prePost,si.onePoleSwitching(att,rel)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.onePoleSwitching(rel,att)) : ba.db2linear
 with {
   gain_computer(strength,thresh,knee,level) =
     select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
@@ -376,7 +376,7 @@ declare RMS_compression_gain_mono author "Bart Brouns";
 declare RMS_compression_gain_mono license "GPLv3";
 
 RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
-  RMS(rel) : ba.bypass1(prePost,si.lag_ud(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.lag_ud(0,att)) : ba.db2linear with {
+  RMS(rel) : ba.bypass1(prePost,si.onePoleSwitching(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.onePoleSwitching(0,att)) : ba.db2linear with {
     gain_computer(strength,thresh,knee,level) =
       select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
               0,
