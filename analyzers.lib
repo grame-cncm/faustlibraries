@@ -41,7 +41,7 @@ Michon and Julius O. Smith III, and is released under the
 // _ : abs_envelope_rect(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: sets the averaging frame in seconds
 //-----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ abs_envelope_rect(period, x) = abs(x) : fi.avg_rect(period);
 // _ : abs_envelope_tau(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 1/e) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -85,7 +85,7 @@ abs_envelope_tau(period, x) = abs(x) : fi.avg_tau(period);
 // _ : abs_envelope_t60(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 60 dB) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -107,7 +107,7 @@ abs_envelope_t60(period, x) = abs(x) : fi.avg_t60(period);
 // _ : abs_envelope_t19(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -209,7 +209,7 @@ amp_follower_ar(att,rel) = abs : si.onePoleSwitching(att,rel);
 // _ : ms_envelope_rect(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -231,7 +231,7 @@ ms_envelope_rect(period, x) = x * x : fi.avg_rect(period);
 // _ : ms_envelope_tau(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 1/e) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -253,7 +253,7 @@ ms_envelope_tau(period, x) = x * x : fi.avg_tau(period);
 // _ : ms_envelope_t60(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 60 dB) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -275,7 +275,7 @@ ms_envelope_t60(period, x) = x * x : fi.avg_t60(period);
 // _ : ms_envelope_t19(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -296,7 +296,7 @@ ms_envelope_t19(period, x) = x * x : fi.avg_t19(period);
 // _ : rms_envelope_rect(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -318,7 +318,7 @@ rms_envelope_rect(period, x) = ms_envelope_rect(period, x) : sqrt;
 // _ : rms_envelope_tau(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 1/e) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -340,7 +340,7 @@ rms_envelope_tau(period, x) = ms_envelope_tau(period, x) : sqrt;
 // _ : rms_envelope_t60(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 60 dB) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
@@ -362,7 +362,7 @@ rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
 // _ : rms_envelope_t19(period) : _
 // ```
 //
-//  Where:
+// Where:
 //
 // * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
 //-----------------------------------------------------------------------------
