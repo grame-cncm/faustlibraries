@@ -329,11 +329,11 @@
             </li>
             <li class="nav-item" data-level="2"><a href="#fast-fourier-transform-fft-and-its-inverse-ifft" class="nav-link">Fast Fourier Transform (fft) and its Inverse (ifft)</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#angortzelopt" class="nav-link">(an.)gortzelOpt</a>
+            <li class="nav-item" data-level="3"><a href="#angoertzelopt" class="nav-link">(an.)goertzelOpt</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#angortzelcomp" class="nav-link">(an.)gortzelComp</a>
+            <li class="nav-item" data-level="3"><a href="#angoertzelcomp" class="nav-link">(an.)goertzelComp</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -714,30 +714,30 @@ band-split frequencies are passed explicitly as arguments.</p>
 <h2 id="fast-fourier-transform-fft-and-its-inverse-ifft">Fast Fourier Transform (fft) and its Inverse (ifft)</h2>
 <p>Sliding FFTs that compute a rectangularly windowed FFT each sample.</p>
 <hr />
-<h3 id="angortzelopt"><code>(an.)gortzelOpt</code></h3>
+<h3 id="angoertzelopt"><code>(an.)goertzelOpt</code></h3>
 <p>Optimized Goertzel filter. </p>
 <h4 id="usage_22">Usage</h4>
-<pre><code>_ : goertzelOpt(freq,N) : _
+<pre><code>_ : goertzelOpt(freq,n) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: frequency to be analyzed</li>
-<li><code>N</code>: the Goertzel block size</li>
+<li><code>n</code>: the Goertzel block size</li>
 </ul>
 <h4 id="reference_2">Reference</h4>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Goertzel_algorithm">https://en.wikipedia.org/wiki/Goertzel_algorithm</a></li>
 </ul>
 <hr />
-<h3 id="angortzelcomp"><code>(an.)gortzelComp</code></h3>
+<h3 id="angoertzelcomp"><code>(an.)goertzelComp</code></h3>
 <p>Complex Goertzel filter. </p>
 <h4 id="usage_23">Usage</h4>
-<pre><code>_ : goertzelComp(freq,N) : _
+<pre><code>_ : goertzelComp(freq,n) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: frequency to be analyzed</li>
-<li><code>N</code>: the Goertzel block size</li>
+<li><code>n</code>: the Goertzel block size</li>
 </ul>
 <h4 id="reference_3">Reference</h4>
 <ul>
@@ -747,12 +747,12 @@ band-split frequencies are passed explicitly as arguments.</p>
 <h3 id="angoertzel"><code>(an.)goertzel</code></h3>
 <p>Same as <a href="#goertzelopt"><code>goertzelOpt</code></a>. </p>
 <h4 id="usage_24">Usage</h4>
-<pre><code>_ : goertzel(freq,N) : _
+<pre><code>_ : goertzel(freq,n) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: frequency to be analyzed</li>
-<li><code>N</code>: the Goertzel block size</li>
+<li><code>n</code>: the Goertzel block size</li>
 </ul>
 <h4 id="reference_4">Reference</h4>
 <ul>
@@ -768,7 +768,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <ul>
 <li><code>si.cbus(N)</code> is a bus of N complex signals, each specified by real and imaginary parts:
   (r0,i0), (r1,i1), (r2,i2), ...</li>
-<li><code>N</code> is the FFT size (must be a power of 2: 2,4,8,16,...)</li>
+<li><code>N</code> is the FFT size (must be a power of 2: 2,4,8,16,... known at compile time) </li>
 <li><code>fft(N)</code> performs a length <code>N</code> FFT for complex signals (radix 2)</li>
 <li>The output is a bank of N complex signals containing the complex spectrum over time:
   (R0, I0), (R1,I1), ...</li>

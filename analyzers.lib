@@ -713,32 +713,32 @@ with {
 // Sliding FFTs that compute a rectangularly windowed FFT each sample.
 //========================================================================================
 
-//---------------`(an.)gortzelOpt` --------------------------
+//---------------`(an.)goertzelOpt` --------------------------
 // Optimized Goertzel filter. 
 //
 // #### Usage
 //
 // ```
-// _ : goertzelOpt(freq,N) : _
+// _ : goertzelOpt(freq,n) : _
 // ```
 //
 // Where:
 //
 // * `freq`: frequency to be analyzed
-// * `N`: the Goertzel block size
+// * `n`: the Goertzel block size
 //
 // #### Reference
 //
 // * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
 //---------------------------------------------------
-goertzelOpt(freq,N,x) = mg 
+goertzelOpt(freq,n,x) = mg 
 with {
   mg = sqrt(eq^2 + eq'^2-eq*eq'*c) : ba.sAndH(reset0); // magnitude
-  cnt = ba.time%N; // counter for windowing
-  reset0 = cnt == (N-1); // reset when end of window
+  cnt = ba.time%n; // counter for windowing
+  reset0 = cnt == (n-1); // reset when end of window
   reset1 = 1-(cnt == 0); // reset when beginning of window
-  k = 0.5 + N*freq/ma.SR;
-  w = (2*ma.PI/N)*k;
+  k = 0.5 + n*freq/ma.SR;
+  w = (2*ma.PI/n)*k;
   c = 2*cos(w);
   eq = s // equation
   letrec{
@@ -746,32 +746,32 @@ with {
   };
 };
 
-//---------------`(an.)gortzelComp` --------------------------
+//---------------`(an.)goertzelComp` --------------------------
 // Complex Goertzel filter. 
 //
 // #### Usage
 //
 // ```
-// _ : goertzelComp(freq,N) : _
+// _ : goertzelComp(freq,n) : _
 // ```
 //
 // Where:
 //
 // * `freq`: frequency to be analyzed
-// * `N`: the Goertzel block size
+// * `n`: the Goertzel block size
 //
 // #### Reference
 //
 // * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
 //---------------------------------------------------
-goertzelComp(freq,N,x) = mg 
+goertzelComp(freq,n,x) = mg 
 with {
   mg = sqrt(real^2 + imag^2); // magnitude
-  cnt = ba.time%N; // counter for windowing
-  reset0 = cnt == (N-1); // reset when end of window
+  cnt = ba.time%n; // counter for windowing
+  reset0 = cnt == (n-1); // reset when end of window
   reset1 = 1-(cnt == 0); // reset when beginning of window
-  k = 0.5 + N*freq/ma.SR;
-  w = (2*ma.PI/N)*k;
+  k = 0.5 + n*freq/ma.SR;
+  w = (2*ma.PI/n)*k;
   sine = sin(w);
   cosine = cos(w);
   c = 2*cosine;
@@ -789,13 +789,13 @@ with {
 // #### Usage
 //
 // ```
-// _ : goertzel(freq,N) : _
+// _ : goertzel(freq,n) : _
 // ```
 //
 // Where:
 //
 // * `freq`: frequency to be analyzed
-// * `N`: the Goertzel block size
+// * `n`: the Goertzel block size
 //
 // #### Reference
 //
@@ -841,7 +841,7 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 //
 // * `si.cbus(N)` is a bus of N complex signals, each specified by real and imaginary parts:
 //   (r0,i0), (r1,i1), (r2,i2), ...
-// * `N` is the FFT size (must be a power of 2: 2,4,8,16,...)
+// * `N` is the FFT size (must be a power of 2: 2,4,8,16,... known at compile time) 
 // * `fft(N)` performs a length `N` FFT for complex signals (radix 2)
 // * The output is a bank of N complex signals containing the complex spectrum over time:
 //   (R0, I0), (R1,I1), ...
