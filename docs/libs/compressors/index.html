@@ -225,11 +225,11 @@
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#functions-reference" class="nav-link">Functions Reference</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#copeak_compression_gain_mono" class="nav-link">(co.)peak_compression_gain_mono</a>
+            <li class="nav-item" data-level="3"><a href="#copeak_compression_gain_mono_db" class="nav-link">(co.)peak_compression_gain_mono_db</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#copeak_compression_gain_n_chan" class="nav-link">(co.)peak_compression_gain_N_chan</a>
+            <li class="nav-item" data-level="3"><a href="#copeak_compression_gain_n_chan_db" class="nav-link">(co.)peak_compression_gain_N_chan_db</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -245,11 +245,11 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#corms_compression_gain_mono" class="nav-link">(co.)RMS_compression_gain_mono</a>
+            <li class="nav-item" data-level="3"><a href="#corms_compression_gain_mono_db" class="nav-link">(co.)RMS_compression_gain_mono_db</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#corms_compression_gain_n_chan" class="nav-link">(co.)RMS_compression_gain_N_chan</a>
+            <li class="nav-item" data-level="3"><a href="#corms_compression_gain_n_chan_db" class="nav-link">(co.)RMS_compression_gain_N_chan_db</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -258,6 +258,26 @@
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#corms_fbcompressor_peak_limiter_n_chan" class="nav-link">(co.)RMS_FBcompressor_peak_limiter_N_chan</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#linear-gain-computer-section" class="nav-link">linear gain computer section</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#copeak_compression_gain_mono" class="nav-link">(co.)peak_compression_gain_mono</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#copeak_compression_gain_n_chan" class="nav-link">(co.)peak_compression_gain_N_chan</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#corms_compression_gain_mono" class="nav-link">(co.)RMS_compression_gain_mono</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#corms_compression_gain_n_chan" class="nav-link">(co.)RMS_compression_gain_N_chan</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -330,11 +350,11 @@
 </ul>
 <h2 id="functions-reference">Functions Reference</h2>
 <hr />
-<h3 id="copeak_compression_gain_mono"><code>(co.)peak_compression_gain_mono</code></h3>
-<p>Mono dynamic range compressor gain computer.
-<code>peak_compression_gain_mono</code> is a standard Faust function.</p>
+<h3 id="copeak_compression_gain_mono_db"><code>(co.)peak_compression_gain_mono_db</code></h3>
+<p>Mono dynamic range compressor gain computer with dB output.
+<code>peak_compression_gain_mono_db</code> is a standard Faust function.</p>
 <h4 id="usage">Usage</h4>
-<pre><code>_ : peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
+<pre><code>_ : peak_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -347,7 +367,7 @@ Below thresh-(knee/2) there is no gain reduction,
 above thresh+(knee/2) there is the same gain reduction as without a knee,
 and in between there is a gradual increase in gain reduction.</li>
 <li><code>prePost</code>: places the level detector either at the input or after the gain computer;
-this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+this turns it from a linear return-to-zero detector into a log domain return-to-threshold detector</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
@@ -358,18 +378,18 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 <h4 id="references_1">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <hr />
-<h3 id="copeak_compression_gain_n_chan"><code>(co.)peak_compression_gain_N_chan</code></h3>
-<p>N channel dynamic range compressor gain computer.
-<code>peak_compression_gain_N_chan</code> is a standard Faust function.</p>
+<h3 id="copeak_compression_gain_n_chan_db"><code>(co.)peak_compression_gain_N_chan_db</code></h3>
+<p>N channel dynamic range compressor gain computer with dB output.
+<code>peak_compression_gain_N_chan_db</code> is a standard Faust function.</p>
 <h4 id="usage_1">Usage</h4>
-<pre><code>si.bus(N) : peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
+<pre><code>si.bus(N) : peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -384,7 +404,7 @@ and in between there is a gradual increase in gain reduction.</li>
 <li><code>prePost</code>: places the level detector either at the input or after the gain computer;
 this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
-<li><code>N</code>: the number of channels of the compressor</li>
+<li><code>N</code>: the number of channels of the compressor, known at compile time</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
@@ -395,11 +415,11 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 <h4 id="references_2">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <hr />
 <h3 id="coffcompressor_n_chan"><code>(co.)FFcompressor_N_chan</code></h3>
@@ -423,7 +443,7 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 meter = <em>&lt;:(</em>, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</li>
-<li><code>N</code>: the number of channels of the compressor</li>
+<li><code>N</code>: the number of channels of the compressor, known at compile time</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
@@ -434,11 +454,11 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 <h4 id="references_3">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <hr />
 <h3 id="cofbcompressor_n_chan"><code>(co.)FBcompressor_N_chan</code></h3>
@@ -463,7 +483,7 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
 <code>meter = _ &lt;: (_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code>
 or it can be omitted by defining <code>meter = _;</code>.</li>
-<li><code>N</code>: the number of channels of the compressor</li>
+<li><code>N</code>: the number of channels of the compressor, known at compile time</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
@@ -474,11 +494,11 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 <h4 id="references_4">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <hr />
 <h3 id="cofbffcompressor_n_chan"><code>(co.)FBFFcompressor_N_chan</code></h3>
@@ -503,8 +523,8 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>FBFF</code>: fade between feed forward (0) and feed back (1) compression.</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
-<code>meter = _&lt;:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
-<li><code>N</code>: the number of channels of the compressor</li>
+<code>meter = _&lt;:(_,(max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
+<li><code>N</code>: the number of channels of the compressor, known at compile time</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
@@ -515,18 +535,18 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 <h4 id="references_5">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <hr />
-<h3 id="corms_compression_gain_mono"><code>(co.)RMS_compression_gain_mono</code></h3>
-<p>Mono RMS dynamic range compressor gain computer.
-<code>RMS_compression_gain_mono</code> is a standard Faust function.</p>
+<h3 id="corms_compression_gain_mono_db"><code>(co.)RMS_compression_gain_mono_db</code></h3>
+<p>Mono RMS dynamic range compressor gain computer with dB output.
+<code>RMS_compression_gain_mono_db</code> is a standard Faust function.</p>
 <h4 id="usage_5">Usage</h4>
-<pre><code>_ : RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
+<pre><code>_ : RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -550,18 +570,18 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 <h4 id="references_6">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <hr />
-<h3 id="corms_compression_gain_n_chan"><code>(co.)RMS_compression_gain_N_chan</code></h3>
-<p>RMS N channel dynamic range compressor gain computer.
-<code>RMS_compression_gain_N_chan</code> is a standard Faust function.</p>
+<h3 id="corms_compression_gain_n_chan_db"><code>(co.)RMS_compression_gain_N_chan_db</code></h3>
+<p>RMS N channel dynamic range compressor gain computer with dB output.
+<code>RMS_compression_gain_N_chan_db</code> is a standard Faust function.</p>
 <h4 id="usage_6">Usage</h4>
-<pre><code>si.bus(N) : RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
+<pre><code>si.bus(N) : RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -587,11 +607,11 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 <h4 id="references_7">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <hr />
 <h3 id="corms_fbffcompressor_n_chan"><code>(co.)RMS_FBFFcompressor_N_chan</code></h3>
@@ -616,8 +636,8 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>FBFF</code>: fade between feed forward (0) and feed back (1) compression.</li>
 <li><code>meter</code>: a gain reduction meter. It can be implemented like so:
-<code>meter = _&lt;:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
-<li><code>N</code>: the number of channels of the compressor</li>
+<code>meter = _&lt;:(_,(max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
+<li><code>N</code>: the number of channels of the compressor, known at compile time</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
@@ -633,11 +653,11 @@ again the strength is much higher when in FB mode, but implemented differently.<
 <h4 id="references_8">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <hr />
 <h3 id="corms_fbcompressor_peak_limiter_n_chan"><code>(co.)RMS_FBcompressor_peak_limiter_N_chan</code></h3>
@@ -665,10 +685,10 @@ and in between there is a gradual increase in gain reduction.
 the limiter uses a knee half this size</li>
 <li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
 <li><code>meter</code>: compressor gain reduction meter. It can be implemented like so:
-<code>meter = _&lt;:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
+<code>meter = _&lt;:(_,(max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
 <li><code>meterLim</code>: brickwall limiter gain reduction meter. It can be implemented like so:
-<code>meter = _&lt;:(_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
-<li><code>N</code>: the number of channels of the compressor</li>
+<code>meterLim = _&lt;:(_,(max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;</code></li>
+<li><code>N</code>: the number of channels of the compressor, known at compile time</li>
 </ul>
 <p>It uses a strength parameter instead of the traditional ratio, in order to be able to
 function as a hard limiter.
@@ -679,11 +699,158 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 <h4 id="references_9">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
-<li>Digital Dynamic Range Compressor Design
-A Tutorial and Analysis
-DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-MICHAEL MASSBERG (michael@massberg.org)
-AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)</li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
+</ul>
+<h2 id="linear-gain-computer-section">linear gain computer section</h2>
+<p>The gain computer functions in this section have been replaced by a version that outputs dBs,
+but we retain the linear output version for backward compatibility.</p>
+<hr />
+<h3 id="copeak_compression_gain_mono"><code>(co.)peak_compression_gain_mono</code></h3>
+<p>Mono dynamic range compressor gain computer with linear output.
+<code>peak_compression_gain_mono</code> is a standard Faust function.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>_ : peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+</ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="references_10">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
+</ul>
+<hr />
+<h3 id="copeak_compression_gain_n_chan"><code>(co.)peak_compression_gain_N_chan</code></h3>
+<p>N channel dynamic range compressor gain computer with linear output.
+<code>peak_compression_gain_N_chan</code> is a standard Faust function.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>si.bus(N) : peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>N</code>: the number of channels of the compressor, known at compile time</li>
+</ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="references_11">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
+</ul>
+<hr />
+<h3 id="corms_compression_gain_mono"><code>(co.)RMS_compression_gain_mono</code></h3>
+<p>Mono RMS dynamic range compressor gain computer with linear output.
+<code>RMS_compression_gain_mono</code> is a standard Faust function.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>_ : RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+</ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="references_12">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
+</ul>
+<hr />
+<h3 id="corms_compression_gain_n_chan"><code>(co.)RMS_compression_gain_N_chan</code></h3>
+<p>RMS N channel dynamic range compressor gain computer with linear output.
+<code>RMS_compression_gain_N_chan</code> is a standard Faust function.</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>si.bus(N) : RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+<li><code>thresh</code>: dB level threshold above which compression kicks in</li>
+<li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
+<li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
+<li><code>knee</code>: a gradual increase in gain reduction around the threshold:
+Below thresh-(knee/2) there is no gain reduction,
+above thresh+(knee/2) there is the same gain reduction as without a knee,
+and in between there is a gradual increase in gain reduction.</li>
+<li><code>prePost</code>: places the level detector either at the input or after the gain computer;
+this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector</li>
+<li><code>link</code>: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction</li>
+<li><code>N</code>: the number of channels of the compressor, known at compile time</li>
+</ul>
+<p>It uses a strength parameter instead of the traditional ratio, in order to be able to
+function as a hard limiter.
+For that you'd need a ratio of infinity:1, and you cannot express that in Faust.</p>
+<p>Sometimes even bigger ratios are useful:
+for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
+and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="references_13">References</h4>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
+<li>Digital Dynamic Range Compressor Design,
+A Tutorial and Analysis,
+Dimitrios GIANNOULIS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#68;&#105;&#109;&#105;&#116;&#114;&#105;&#111;&#115;&#46;&#71;&#105;&#97;&#110;&#110;&#111;&#117;&#108;&#105;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>),
+Michael MASSBERG (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;">&#109;&#105;&#99;&#104;&#97;&#101;&#108;&#64;&#109;&#97;&#115;&#115;&#98;&#101;&#114;&#103;&#46;&#111;&#114;&#103;</a>),
+and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;">&#106;&#111;&#115;&#104;&#46;&#114;&#101;&#105;&#115;&#115;&#64;&#101;&#101;&#99;&#115;&#46;&#113;&#109;&#117;&#108;&#46;&#97;&#99;&#46;&#117;&#107;</a>)</li>
 </ul>
 <h2 id="original-versions-section">Original versions section</h2>
 <p>The functions in this section are largely superseded by the limiters above, but we
@@ -693,7 +860,7 @@ MIT-style license is required.</p>
 <h3 id="cocompressor_lad_mono"><code>(co.)compressor_lad_mono</code></h3>
 <p>Mono dynamic range compressor with lookahead delay.
 <code>compressor_lad_mono</code> is a standard Faust function.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>_ : compressor_lad_mono(lad,ratio,thresh,att,rel) : _
 </code></pre>
 <p>Where:</p>
@@ -707,7 +874,7 @@ MIT-style license is required.</p>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression are going up</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
 </ul>
-<h4 id="references_10">References</h4>
+<h4 id="references_14">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html">https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html</a></li>
@@ -718,7 +885,7 @@ MIT-style license is required.</p>
 <h3 id="cocompressor_mono"><code>(co.)compressor_mono</code></h3>
 <p>Mono dynamic range compressors.
 <code>compressor_mono</code> is a standard Faust function.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>_ : compressor_mono(ratio,thresh,att,rel) : _
 </code></pre>
 <p>Where:</p>
@@ -730,7 +897,7 @@ MIT-style license is required.</p>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression are going up</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
 </ul>
-<h4 id="references_11">References</h4>
+<h4 id="references_15">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html">https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html</a></li>
@@ -740,7 +907,7 @@ MIT-style license is required.</p>
 <hr />
 <h3 id="cocompressor_stereo"><code>(co.)compressor_stereo</code></h3>
 <p>Stereo dynamic range compressors.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>_,_ : compressor_stereo(ratio,thresh,att,rel) : _,_
 </code></pre>
 <p>Where:</p>
@@ -750,7 +917,7 @@ MIT-style license is required.</p>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
 </ul>
-<h4 id="references_12">References</h4>
+<h4 id="references_16">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html">https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html</a></li>
@@ -760,7 +927,7 @@ MIT-style license is required.</p>
 <hr />
 <h3 id="cocompression_gain_mono"><code>(co.)compression_gain_mono</code></h3>
 <p>Compression-gain calculation for dynamic range compressors.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>_ : compression_gain_mono(ratio,thresh,att,rel) : _
 </code></pre>
 <p>Where:</p>
@@ -770,7 +937,7 @@ MIT-style license is required.</p>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
 </ul>
-<h4 id="references_13">References</h4>
+<h4 id="references_17">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html">https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html</a></li>
@@ -799,7 +966,7 @@ parameters are hardwired here to nominal values.</p>
         The 1176 range is said to be 50-1100 ms.</p>
 <p>The 1176 also has a "bright, clear eq effect" (use filters.lib if desired).
 <code>limiter_1176_R4_mono</code> is a standard Faust function.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_17">Usage</h4>
 <pre><code> _ : limiter_1176_R4_mono : _
 </code></pre>
 <h4 id="reference">Reference:</h4>
@@ -822,7 +989,7 @@ parameters are hardwired to nominal values here.</p>
 <p>Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
 Faster attack gives "more bite" (e.g. on vocals).
 He hears a bright, clear eq effect as well (not implemented here).</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_18">Usage</h4>
 <pre><code> _,_ : limiter_1176_R4_stereo : _,_
 </code></pre>
 <h4 id="reference_1">Reference:</h4>
@@ -858,7 +1025,7 @@ release time can then provide a perceptually linear and gradual gain
 increase determined by the user for any specific application.</p>
 <p>The scaling factor for all the channels is determined by the loudest peak 
 between them all, so that amplitude ratios between the signals are kept.</p>
-<h4 id="usage_15">Usage</h4>
+<h4 id="usage_19">Usage</h4>
 <pre><code>si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -878,7 +1045,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <hr />
 <h3 id="colimiter_lad_mono"><code>(co.)limiter_lad_mono</code></h3>
 <p>Specialised case of <code>limiter_lad_N</code> mono limiter.</p>
-<h4 id="usage_16">Usage</h4>
+<h4 id="usage_20">Usage</h4>
 <pre><code>_ : limiter_lad_mono(LD, ceiling, attack, hold, release) : _
 </code></pre>
 <p>Where:</p>
@@ -896,7 +1063,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <hr />
 <h3 id="colimiter_lad_stereo"><code>(co.)limiter_lad_stereo</code></h3>
 <p>Specialised case of <code>limiter_lad_N</code> stereo limiter.</p>
-<h4 id="usage_17">Usage</h4>
+<h4 id="usage_21">Usage</h4>
 <pre><code>_,_ : limiter_lad_stereo(LD, ceiling, attack, hold, release) : _,_
 </code></pre>
 <p>Where:</p>
@@ -914,7 +1081,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <hr />
 <h3 id="colimiter_lad_quad"><code>(co.)limiter_lad_quad</code></h3>
 <p>Specialised case of <code>limiter_lad_N</code> quadraphonic limiter.</p>
-<h4 id="usage_18">Usage</h4>
+<h4 id="usage_22">Usage</h4>
 <pre><code>si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : si.bus(4)
 </code></pre>
 <p>Where:</p>
@@ -939,7 +1106,7 @@ synchronised input and gain signals. </p>
 the least colouring artefacts while keeping a not-so-slow release curve. 
 Tests have shown that, given a pop song with 60 dB of amplification
 and a 0-dB-ceiling, the loudest peak recorded was ~0.38 dB.</p>
-<h4 id="usage_19">Usage</h4>
+<h4 id="usage_23">Usage</h4>
 <pre><code>_ : limiter_lad_bw : _
 </code></pre>
 <h4 id="reference_6">Reference:</h4>
