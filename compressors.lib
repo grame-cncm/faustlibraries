@@ -67,7 +67,7 @@ declare version "0.3";
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -123,7 +123,7 @@ with {
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -183,14 +183,14 @@ peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `meter`: a gain reduction meter. It can be implemented like so:
-// meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
+// `meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
 // * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
@@ -236,7 +236,7 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -290,7 +290,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -348,7 +348,7 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -406,7 +406,7 @@ RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -461,7 +461,7 @@ RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -531,7 +531,7 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // this is also used as the release time of the limiter
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // the limiter uses a knee half this size
@@ -568,7 +568,7 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
   ~ si.bus(N);
 
 
-//===========================linear gain computer section=================================
+//===========================Linear gain computer section=================================
 // The gain computer functions in this section have been replaced by a version that outputs dBs,
 // but we retain the linear output version for backward compatibility.
 //========================================================================================
@@ -590,7 +590,7 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -638,7 +638,7 @@ peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -690,7 +690,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
@@ -738,7 +738,7 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
 // * `knee`: a gradual increase in gain reduction around the threshold:
-// Below thresh-(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is no gain reduction,
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
