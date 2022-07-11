@@ -71,7 +71,7 @@ declare version "0.2";
 // above thresh+(knee/2) there is the same gain reduction as without a knee,
 // and in between there is a gradual increase in gain reduction.
 // * `prePost`: places the level detector either at the input or after the gain computer;
-// this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
+// this turns it from a linear return-to-zero detector into a log domain return-to-threshold detector
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -84,11 +84,11 @@ declare version "0.2";
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare peak_compression_gain_mono_db author "Bart Brouns";
@@ -129,7 +129,7 @@ with {
 // * `prePost`: places the level detector either at the input or after the gain computer;
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
-// * `N`: the number of channels of the compressor
+// * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -142,11 +142,11 @@ with {
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare peak_compression_gain_N_chan_db author "Bart Brouns";
@@ -191,7 +191,7 @@ peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // meter = _<:(_, (ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;
-// * `N`: the number of channels of the compressor
+// * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -204,11 +204,11 @@ peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare FFcompressor_N_chan author "Bart Brouns";
@@ -217,6 +217,7 @@ declare FFcompressor_N_chan license "GPLv3";
 // feed forward compressor
 FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
   si.bus(N) <: (peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N)) : ro.interleave(N,2) : par(i,N,(meter: ba.db2linear)*_);
+
 
 //--------------------`(co.)FBcompressor_N_chan`-------------------
 // feed back N channel dynamic range compressor.
@@ -244,7 +245,7 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // `meter = _ <: (_,(ba.linear2db:max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
 // or it can be omitted by defining `meter = _;`.
-// * `N`: the number of channels of the compressor
+// * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -257,18 +258,19 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare FBcompressor_N_chan author "Bart Brouns";
 declare FBcompressor_N_chan license "GPLv3";
 
 FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
-  (peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N) : (ro.interleave(N,2) : par(i,N,(meter: ba.db2linear)*_))) ~ si.bus(N);
+  (peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N) : (ro.interleave(N,2) : par(i,N,(meter : ba.db2linear)*_))) ~ si.bus(N);
+
 
 //--------------------`(co.)FBFFcompressor_N_chan`-------------------
 // feed forward / feed back N channel dynamic range compressor.
@@ -297,7 +299,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * `FBFF`: fade between feed forward (0) and feed back (1) compression.
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // `meter = _<:(_,(max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
-// * `N`: the number of channels of the compressor
+// * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -310,11 +312,11 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare FBFFcompressor_N_chan author "Bart Brouns";
@@ -323,8 +325,8 @@ declare FBFFcompressor_N_chan license "GPLv3";
 FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
   si.bus(N) <: si.bus(N*2) :
   (
-    ((par(i,2,peak_compression_gain_N_chan_db(strength*(1+((i ==0)*2)),thresh,att,rel,knee,prePost,link,N)) : ro.interleave(N,2) : par(i,N,it.interpolate_linear(FBFF))),si.bus(N))
-    : (ro.interleave(N,2) : par(i,N,(meter: ba.db2linear)*_))
+    ((par(i,2,peak_compression_gain_N_chan_db(strength*(1+((i==0)*2)),thresh,att,rel,knee,prePost,link,N)) : ro.interleave(N,2) : par(i,N,it.interpolate_linear(FBFF))),si.bus(N))
+    : (ro.interleave(N,2) : par(i,N,(meter : ba.db2linear)*_))
   )
   ~ si.bus(N);
 
@@ -363,27 +365,28 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare RMS_compression_gain_mono_db author "Bart Brouns";
 declare RMS_compression_gain_mono_db license "GPLv3";
 
 RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
-  RMS(rel) : ba.bypass1(prePost,si.onePoleSwitching(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.onePoleSwitching(0,att))  with {
-  gain_computer(strength,thresh,knee,level) =
-    select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
+  RMS(rel) : ba.bypass1(prePost,si.onePoleSwitching(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost!=1),si.onePoleSwitching(0,att))  
+  with {
+    gain_computer(strength,thresh,knee,level) =
+      select3((level>(thresh-(knee/2)))+(level>(thresh+(knee/2))),
             0,
             ((level-thresh+(knee/2)) : pow(2)/(2*max(ma.EPSILON,knee))),
             (level-thresh))
-    : max(0)*-strength;
-  RMS(time) = ba.slidingRMS(s) with {
-    s = ba.sec2samp(time):int:max(1);
-  };
+      : max(0)*-strength;
+    RMS(time) = ba.slidingRMS(s) with {
+      s = ba.sec2samp(time):int:max(1);
+    };
   };
 
 //--------------------`(co.)RMS_compression_gain_N_chan_db`-------------------
@@ -422,11 +425,11 @@ RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare RMS_compression_gain_N_chan_db author "Bart Brouns";
@@ -467,7 +470,7 @@ RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `FBFF`: fade between feed forward (0) and feed back (1) compression.
 // * `meter`: a gain reduction meter. It can be implemented like so:
 // `meter = _<:(_,(max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
-// * `N`: the number of channels of the compressor
+// * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -486,11 +489,11 @@ RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare RMS_FBFFcompressor_N_chan author "Bart Brouns";
@@ -537,7 +540,7 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // `meter = _<:(_,(max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
 // * `meterLim`: brickwall limiter gain reduction meter. It can be implemented like so:
 // `meterLim = _<:(_,(max(maxGR):meter_group((hbargraph("[1][unit:dB][tooltip: gain reduction in dB]", maxGR, 0))))):attach;`
-// * `N`: the number of channels of the compressor
+// * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -550,18 +553,18 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare RMS_FBcompressor_peak_limiter_N_chan author "Bart Brouns";
 declare RMS_FBcompressor_peak_limiter_N_chan license "GPLv3";
 
 RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) =
-  (((RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,0,link,N)),si.bus(N)) : ro.interleave(N,2) : par(i,N,(meter: ba.db2linear)*_) : FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim: ba.db2linear,N))
+  (((RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,0,link,N)),si.bus(N)) : ro.interleave(N,2) : par(i,N,(meter : ba.db2linear)*_) : FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim : ba.db2linear,N))
   ~ si.bus(N);
 
 
@@ -569,8 +572,7 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // The gain computer functions in this section have been replaced by a version that outputs dBs,
 // but we retain the linear output version for backward compatibility.
 //========================================================================================
- //
- //
+//
 //--------------------`(co.)peak_compression_gain_mono`-------------------
 // Mono dynamic range compressor gain computer with linear output.
 // `peak_compression_gain_mono` is a standard Faust function.
@@ -605,11 +607,11 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare peak_compression_gain_mono author "Bart Brouns";
@@ -617,6 +619,7 @@ declare peak_compression_gain_mono license "GPLv3";
 
 peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
   peak_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost):ba.db2linear;
+
 
 //--------------------`(co.)peak_compression_gain_N_chan`-------------------
 // N channel dynamic range compressor gain computer with linear output.
@@ -641,7 +644,7 @@ peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // * `prePost`: places the level detector either at the input or after the gain computer;
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
-// * `N`: the number of channels of the compressor
+// * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -654,11 +657,11 @@ peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare peak_compression_gain_N_chan author "Bart Brouns";
@@ -704,11 +707,11 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare RMS_compression_gain_mono author "Bart Brouns";
@@ -716,6 +719,7 @@ declare RMS_compression_gain_mono license "GPLv3";
 
 RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
   RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost):ba.db2linear;
+
 
 //--------------------`(co.)RMS_compression_gain_N_chan`-------------------
 // RMS N channel dynamic range compressor gain computer with linear output.
@@ -740,7 +744,7 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // * `prePost`: places the level detector either at the input or after the gain computer;
 // this turns it from a linear return-to-zero detector into a log  domain return-to-threshold detector
 // * `link`: the amount of linkage between the channels. 0 = each channel is independent, 1 = all channels have the same amount of gain reduction
-// * `N`: the number of channels of the compressor
+// * `N`: the number of channels of the compressor, known at compile time
 //
 // It uses a strength parameter instead of the traditional ratio, in order to be able to
 // function as a hard limiter.
@@ -753,11 +757,11 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
-// * Digital Dynamic Range Compressor Design
-// A Tutorial and Analysis
-// DIMITRIOS GIANNOULIS (Dimitrios.Giannoulis@eecs.qmul.ac.uk)
-// MICHAEL MASSBERG (michael@massberg.org)
-// AND JOSHUA D. REISS (josh.reiss@eecs.qmul.ac.uk)
+// * Digital Dynamic Range Compressor Design,
+// A Tutorial and Analysis,
+// Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>),
+// Michael MASSBERG (<michael@massberg.org>),
+// and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 
 declare RMS_compression_gain_N_chan author "Bart Brouns";
@@ -766,6 +770,7 @@ declare RMS_compression_gain_N_chan license "GPLv3";
 RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
   RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N)
   : par(i, N, ba.db2linear);
+
 
 //=============================Original versions section=============================
 // The functions in this section are largely superseded by the limiters above, but we
