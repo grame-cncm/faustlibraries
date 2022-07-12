@@ -2893,7 +2893,7 @@ declare avg_rect license "MIT-style STK-4.3 license";
 avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
 
 
-//----------------------------(fi.)avg_tau-------------------------------------
+//----------------------------`(fi.)avg_tau`-------------------------------------
 // Averaging function based on a one-pole filter and the tau response time.
 // Tau represents the effective length of the one-pole impulse response,
 // that is, tau is the integral of the filter's impulse response. This
@@ -2923,7 +2923,7 @@ declare avg_tau license "MIT-style STK-4.3 license";
 avg_tau(period, x) = fi.lptau(period, x);
 
 
-//----------------------------(fi.)avg_t60-------------------------------------
+//----------------------------`(fi.)avg_t60`-------------------------------------
 // Averaging function based on a one-pole filter and the t60 response time.
 // This response is particularly useful when the system is required to 
 // reach the final value after about `period` seconds.
@@ -2951,7 +2951,7 @@ declare avg_t60 license "MIT-style STK-4.3 license";
 avg_t60(period, x) = fi.lpt60(period, x);
 
 
-//----------------------------(fi.)avg_t19-------------------------------------
+//----------------------------`(fi.)avg_t19`-------------------------------------
 // Averaging function based on a one-pole filter and the t19 response time.
 // This response is close to the moving-average algorithm as it roughly reaches
 // the final value after `period` seconds and shows about the same
