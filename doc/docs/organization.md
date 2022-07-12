@@ -46,6 +46,6 @@ It follows the semantic versioning structure: MAJOR, MINOR, PATCH. The MAJOR num
 
 ### Examples
 
-The Faust distribution `/examples` directory contains a lot og DSP examples. They are organized by types in different folders. The `/old` folder contains examples that are fully deprecated, probably because they were integrated to the libraries and fully rewritten (see `freeverb.dsp` for example). 
+The Faust distribution `/examples` directory contains a lot of DSP examples. They are organized by types in different folders. The `/examples/old` folder contains examples that are fully deprecated, probably because they were integrated to the libraries and fully rewritten (see `freeverb.dsp` for example). 
 
 Examples using deprecated libraries were integrated to the general tree, but a warning comment was added at their beginning to point readers to the right library and function.
