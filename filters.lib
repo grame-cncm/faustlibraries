@@ -105,8 +105,8 @@ integrator = + ~ _;
 // DC blocker with configurable break frequency.
 // The amplitude response is substantially flat above \(fb\),
 // and sloped at about +6 dB/octave below \(fb\).
-// Derived from the analog transfer function
-// \(H(s) = \frac{s}{(s + 2 \pi fb)}\)
+// Derived from the analog transfer function:
+// $$H(s) = \frac{s}{(s + 2 \pi fb)}$$
 // (which can be seen as a 1st-order Butterworth highpass filter)
 // by the low-frequency-matching bilinear transform method
 // (i.e., the standard frequency-scaling constant 2*SR).
@@ -2031,7 +2031,7 @@ with { // octave script output:
 //
 // #### Example
 //
-// * See dm.pospass_demo
+// * See `dm.pospass_demo`
 // * Look at frequency response
 //
 // #### Method
@@ -2041,7 +2041,7 @@ with { // octave script output:
 // Equivalently, down-modulate the input signal using a complex sinusoid at -SR/4 Hz,
 // lowpass it with a half-band filter, and modulate back up by SR/4 Hz.
 // In Faust/math notation:
-// pospass(N) = \(\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})\)
+// $$pospass(N) = \ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})$$
 //
 // An approximation to the Hilbert transform is given by the
 // imaginary output signal:

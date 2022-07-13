@@ -722,8 +722,8 @@ Difference equation: <script type="math/tex">y(n) = x(n) + py(n-1)</script>.</p>
 <p>DC blocker with configurable break frequency.
 The amplitude response is substantially flat above <script type="math/tex">fb</script>,
 and sloped at about +6 dB/octave below <script type="math/tex">fb</script>.
-Derived from the analog transfer function
-<script type="math/tex">H(s) = \frac{s}{(s + 2 \pi fb)}</script>
+Derived from the analog transfer function:
+<script type="math/tex; mode=display">H(s) = \frac{s}{(s + 2 \pi fb)}</script>
 (which can be seen as a 1st-order Butterworth highpass filter)
 by the low-frequency-matching bilinear transform method
 (i.e., the standard frequency-scaling constant 2*SR).</p>
@@ -1631,7 +1631,7 @@ Thus, the passband (stopband) width is <code>fu-fl</code>,
 </ul>
 <h4 id="example_3">Example</h4>
 <ul>
-<li>See dm.pospass_demo</li>
+<li>See <code>dm.pospass_demo</code></li>
 <li>Look at frequency response</li>
 </ul>
 <h4 id="method_2">Method</h4>
@@ -1640,7 +1640,7 @@ half-band lowpass by modulating it up to the positive-frequency range.
 Equivalently, down-modulate the input signal using a complex sinusoid at -SR/4 Hz,
 lowpass it with a half-band filter, and modulate back up by SR/4 Hz.
 In Faust/math notation:
-pospass(N) = <script type="math/tex">\ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})</script>
+<script type="math/tex; mode=display">pospass(N) = \ast(e^{-j\frac{\pi}{2}n}) : \mbox{lowpass(N,SR/4)} : \ast(e^{j\frac{\pi}{2}n})</script>
 </p>
 <p>An approximation to the Hilbert transform is given by the
 imaginary output signal:</p>

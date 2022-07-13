@@ -22,6 +22,7 @@ help:
 	@echo "  serve    : launch the mkdoc server"
 	@echo "Development specific targets are available:"
 	@echo "  md       : build the md files"
+	@echo "  pdf      : build the PDF documentation"
 	@echo "  index    : build the index file"
 	@echo "  clean    : removes the output of the md target"
 	@echo "  list     : list libraries (ready to be included in mkdocs.yml menu)"
@@ -44,7 +45,7 @@ list:
 	@echo $(foreach e, $(LIST), "        - '" $e "':  libs/"$e.md"\n")
 	
 pdf:
-	pandoc --toc docs/index.md docs/organization.md docs/standardFunctions.md docs/contributing.md docs/about.md docs/libs/*.md -o library.pdf
+	pandoc --pdf-engine=xelatex --toc docs/index.md docs/organization.md docs/standardFunctions.md docs/contributing.md docs/about.md docs/libs/*.md -o library.pdf
 
 clean:
 	rm -f $(MD)

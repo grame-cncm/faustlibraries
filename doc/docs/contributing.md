@@ -159,6 +159,7 @@ process = _;
 
 For GRAME maintainers:
 
+- regenerate the PDF documentation using `make pdf` target in the `doc` folder
 - update the library submodule in [faust](https://github.com/grame-cncm/faust), recompile and deploy WebAssembly libfaust in [fausteditor](https://github.com/grame-cncm/fausteditor), [faustplayground](https://github.com/grame-cncm/faustplayground) and [faustide](https://github.com/grame-cncm/faustide)
 - update the library submodule in [faustlive](https://github.com/grame-cncm/faustlive) 
 - update the library list in this [fausteditor](https://github.com/grame-cncm/fausteditor/blob/master/scripts/faustlive.js) page as well as the [snippets](https://github.com/grame-cncm/fausteditor/blob/master/codemirror/mode/faust/faustsnippets.js) (using the `faust2atomsnippets` tool).
