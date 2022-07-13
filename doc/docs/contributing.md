@@ -39,6 +39,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * Functions must be organized by sections.
 * Any new library should at least `declare` a `name` and a `version`.
 * Any new library has to use a prefix declared in the header section with the following kind of syntax: `Its official prefix is 'qu'` (look at an existing library to follow the exact syntax).
+* Be sure to add the appropriate kind of `ma = library("maths.lib");`  import library line, for each external library function used in the new library (for instance `ma.foo` that would be used somewhre in the code).
 * The comment based markdown documentation of each library must respect the following format (open the source code of any of the libraries for an example):
 
 ```
