@@ -43,9 +43,9 @@ For more information, please refer to <http://unlicense.org/>
 ************************************************************************
 ************************************************************************/
 
-MinFreq = 8;
+MinFreq = 10;
 MaxFreq = 20000;
-TableSize = 256;
+TableSize = 1024;
 
 qLog(x) = ba.tabulate(1,log(_),TableSize,MinFreq,MaxFreq,x).cub;
 qSmooth(x) = ba.tabulate(1,0.5*atan(_*20-10)/1.4711+0.5,TableSize,0,1,x).cub;
