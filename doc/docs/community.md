@@ -17,6 +17,7 @@ It includes a set of time-domain algorithms, some of which are original, for the
 This library contains a set of functions representing domain-limited versions of all Faust primitives and math functions that can potentially generate INF or NaN values. The goal of the library is to be able to implement DSP networks that, structurally, are free from INF and NaN values. Hence, the resulting programs should be rock-solid during real-time performance and virtually immune to crashes regardless of how mercilessly a network is modulated or how unstable a recursive system is made.
 
 ## [bitDSP-faust](https://github.com/rottingsounds/bitDSP-faust)
+
 BitDSP is a set of Faust library functions aimed to help explore and research artistic possibilities of bit-based algorithms. BitDSP currently includes implementations of bit-based functions ranging from simple bit operations over classic delta-sigma modulations to more experimental approaches like cellular automata, recursive Boolean networks, and linear feedback shift registers.
 
 A detailed overview of the functionality is in the [paper](https://ifc20.sciencesconf.org/332745/document) "Creative use of bit-stream DSP in Faust" presented at [IFC 2020](https://ifc20.sciencesconf.org/).
@@ -28,6 +29,10 @@ Sustained Electro-Acoustic Music is a project inspired by [Alvise Vidolin and Ni
 ## [Ambitools library](http://sekisushai.net/ambitools/)
 
  Ambitools is an implementation of several Ambisonic tools with the FAUST language. The code is designed to be scalable and flexible, offering tools working at various Ambisonic order and compiled for various architectures. The implementation of the spherical harmonics for an efficient computation is detailed. See the [Ambitools : Tools For Sound Field Synthesis With Higher Order Ambisonic - V1.0](https://hal.archives-ouvertes.fr/hal-03162948/document) paper. 
+ 
+## [Faust Tap Library](https://github.com/nuchi/faust-tap-library/)
+Tap a complicated expression to pull out specific outputs, without having to manually route those outputs, just like how named function parameters remove the need to manually route inputs.
+
 
 ## Awesome library
 Feel free to contribute by [forking this project](https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks) and [creating a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request), or by mailing the library description [here](mailto:research@grame.fr).
