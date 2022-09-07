@@ -627,6 +627,14 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#standardized-filters" class="nav-link">Standardized Filters</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#fiitu_r_bs_1770_4_kfilter" class="nav-link">(fi.)itu_r_bs_1770_4_kfilter</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#averaging-functions" class="nav-link">Averaging Functions</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#fiavg_rect" class="nav-link">(fi.)avg_rect</a>
@@ -660,7 +668,7 @@
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/filters.lib">https://github.com/grame-cncm/faustlibraries/blob/master/filters.lib</a></li>
 </ul>
-<p>The Filters library is organized into 19 sections:</p>
+<p>The Filters library is organized into 22 sections:</p>
 <ul>
 <li><a href="#basic-filters">Basic Filters</a></li>
 <li><a href="#comb-filters">Comb Filters</a></li>
@@ -682,6 +690,7 @@
 <li><a href="#arbitrary-crossover-filter-banks-and-spectrum-analyzers">Arbitrary-Crossover Filter-Banks and Spectrum Analyzers</a></li>
 <li><a href="#state-variable-filters">State Variable Filters (SVF)</a></li>
 <li><a href="#linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers">Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers</a></li>
+<li><a href="#standardized-filters">Standardized Filters</a></li>
 <li><a href="#averaging-functions">Averaging Functions</a></li>
 </ul>
 <h2 id="basic-filters">Basic Filters</h2>
@@ -2027,11 +2036,35 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <ul>
 <li><code>cf1-cf7</code> are the crossover cutoff frequencies in Hz</li>
 </ul>
+<h2 id="standardized-filters">Standardized Filters</h2>
+<hr />
+<h3 id="fiitu_r_bs_1770_4_kfilter"><code>(fi.)itu_r_bs_1770_4_kfilter</code></h3>
+<p>The prefilter from Recommendation ITU-R BS.1770-4 for loudness
+measurement. Also known as "K-filter". The recommendation defines
+biquad filter coefficients for a fixed sample rate of 48kHz (page
+4-5). Here, we construct biquads for arbitrary samplerates.  The
+resulting filter is normalized, such that the magnitude at 997Hz is
+unity gain 1.0.</p>
+<p>Please note, the ITU-recommendation handles the normalization in
+equation (2) by subtracting 0.691dB, which is not needed with
+<code>itu_r_bs_1770_4_kfilter</code>.</p>
+<p>One option for future improvement might be, to round those filter
+coefficients, that are almost equal to one. Second, the maximum
+magnitude difference at 48kHz between the ITU-defined filter and
+<code>itu_r_bs_1770_4_kfilter</code> is 0.001dB, which obviously could be
+less.</p>
+<h4 id="usage_72">Usage</h4>
+<pre><code>_ : itu_r_bs_1770_4_kfilter : _
+</code></pre>
+<h4 id="reference_27">Reference</h4>
+<ul>
+<li><a href="https://www.itu.int/rec/R-REC-BS.1770">https://www.itu.int/rec/R-REC-BS.1770</a></li>
+</ul>
 <h2 id="averaging-functions">Averaging Functions</h2>
 <hr />
 <h3 id="fiavg_rect"><code>(fi.)avg_rect</code></h3>
 <p>Moving average.</p>
-<h4 id="usage_72">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>_ : avg_rect(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2045,7 +2078,7 @@ Tau represents the effective length of the one-pole impulse response,
 that is, tau is the integral of the filter's impulse response. This
 response is slower to reach the final value but has less ripples in
 non-steady signals.</p>
-<h4 id="usage_73">Usage</h4>
+<h4 id="usage_74">Usage</h4>
 <pre><code>_ : avg_tau(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2053,7 +2086,7 @@ non-steady signals.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/e, 
 or to reach 1-1/e of its final value.</li>
 </ul>
-<h4 id="reference_27">Reference</h4>
+<h4 id="reference_28">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Exponentials.html">https://ccrma.stanford.edu/~jos/mdft/Exponentials.html</a></li>
 </ul>
@@ -2062,7 +2095,7 @@ or to reach 1-1/e of its final value.</li>
 <p>Averaging function based on a one-pole filter and the t60 response time.
 This response is particularly useful when the system is required to 
 reach the final value after about <code>period</code> seconds.</p>
-<h4 id="usage_74">Usage</h4>
+<h4 id="usage_75">Usage</h4>
 <pre><code>_ : avg_t60(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2070,7 +2103,7 @@ reach the final value after about <code>period</code> seconds.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/1000, 
 or to reach 1-1/1000 of its final value.</li>
 </ul>
-<h4 id="reference_28">Reference</h4>
+<h4 id="reference_29">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html">https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html</a></li>
 </ul>
@@ -2080,7 +2113,7 @@ or to reach 1-1/1000 of its final value.</li>
 This response is close to the moving-average algorithm as it roughly reaches
 the final value after <code>period</code> seconds and shows about the same
 oscillations for non-steady signals.</p>
-<h4 id="usage_75">Usage</h4>
+<h4 id="usage_76">Usage</h4>
 <pre><code>_ : avg_t19(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2088,7 +2121,7 @@ oscillations for non-steady signals.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/e^2.2, 
 or to reach 1-1/e^2.2 of its final value.</li>
 </ul>
-<h4 id="reference_29">Reference</h4>
+<h4 id="reference_30">Reference</h4>
 <p>Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.</p></div>
             </div>
         </div>
