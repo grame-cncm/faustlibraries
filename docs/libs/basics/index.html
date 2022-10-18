@@ -1093,7 +1093,8 @@ sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 <h2 id="other">Other</h2>
 <hr />
 <h3 id="balatch"><code>(ba.)latch</code></h3>
-<p>Latch input on positive-going transition of "clock" ("sample-and-hold").</p>
+<p>Latch input on positive-going transition of trig:"records" the input when trig 
+switches from 0 to 1, outputs a frozen values everytime else.</p>
 <h4 id="usage_44">Usage</h4>
 <pre><code>_ : latch(trig) : _
 </code></pre>
@@ -1103,7 +1104,7 @@ sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 </ul>
 <hr />
 <h3 id="basandh"><code>(ba.)sAndH</code></h3>
-<p>Sample And Hold.
+<p>Sample And Hold: "records" the input when trig is 1, outputs a frozen value when trig is 0.
 <code>sAndH</code> is a standard Faust function.</p>
 <h4 id="usage_45">Usage</h4>
 <pre><code>_ : sAndH(trig) : _

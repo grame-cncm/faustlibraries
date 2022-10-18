@@ -1026,7 +1026,8 @@ selectoutn(N, s) = _ <: par(i, N, *(s==i));
 //========================================================================================
 
 //----------------------------`(ba.)latch`--------------------------------
-// Latch input on positive-going transition of "clock" ("sample-and-hold").
+// Latch input on positive-going transition of trig:"records" the input when trig 
+// switches from 0 to 1, outputs a frozen values everytime else.
 //
 // #### Usage
 //
@@ -1042,7 +1043,7 @@ latch(trig, x) = x * s : + ~ *(1-s) with { s = (trig' <= 0) & (trig > 0); };
 
 
 //--------------------------`(ba.)sAndH`-------------------------------
-// Sample And Hold.
+// Sample And Hold: "records" the input when trig is 1, outputs a frozen value when trig is 0.
 // `sAndH` is a standard Faust function.
 //
 // #### Usage
