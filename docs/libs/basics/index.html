@@ -1090,7 +1090,7 @@ process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;ch
 <li><code>N</code>: number of outputs (int, known at compile time, N &gt; 0)</li>
 <li><code>i</code>: output number to route to (int, numbered from 0) (i.e. slider)</li>
 </ul>
-<h4 id="example">Example</h4>
+<h4 id="example-test-program_3">Example test program</h4>
 <pre><code>process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph(&quot;v.bargraph %i&quot;, 0, 1));
 sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 </code></pre>
@@ -1274,7 +1274,7 @@ _,_ : bypass_fade(n,b,e) : _,_
 <li><code>b</code>: bypass switch (0/1)</li>
 <li><code>e</code>: N x N circuit</li>
 </ul>
-<h4 id="examples">Examples</h4>
+<h4 id="example-test-program_4">Example test program</h4>
 <pre><code>process = bypass_fade(ma.SR/10, checkbox(&quot;bypass echo&quot;), echo);
 process = bypass_fade(ma.SR/10, checkbox(&quot;bypass reverb&quot;), freeverb);
 </code></pre>
@@ -1285,7 +1285,7 @@ between 0 and 1.</p>
 <h4 id="usage_56">Usage</h4>
 <pre><code>_ : toggle : _
 </code></pre>
-<h4 id="examples_1">Examples</h4>
+<h4 id="example-test-program_5">Example test program</h4>
 <pre><code>button(&quot;toggle&quot;) : toggle : vbargraph(&quot;output&quot;, 0, 1)
 (an.amp_follower(0.1) &gt; 0.01) : toggle : vbargraph(&quot;output&quot;, 0, 1) // takes audio input
 </code></pre>
@@ -1295,7 +1295,7 @@ between 0 and 1.</p>
 <h4 id="usage_57">Usage</h4>
 <pre><code>_,_ : on_and_off : _
 </code></pre>
-<h4 id="example_1">Example</h4>
+<h4 id="example-test-program_6">Example test program</h4>
 <pre><code>button(&quot;on&quot;), button(&quot;off&quot;) : on_and_off : vbargraph(&quot;output&quot;, 0, 1)
 </code></pre>
 <hr />

@@ -488,7 +488,7 @@ iir(bv,av) = ma.sub ~ fir(av) : fir(bv);
 // `bv` is processed using pattern-matching at compile time,
 //       so it must have this normal form (parallel signals).
 //
-// #### Example
+// #### Example test program
 //
 // Smoothing white noise with a five-point moving average:
 //
@@ -1247,7 +1247,7 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 // and `w1` is the desired digital frequency (in radians/second)
 // corresponding to analog frequency 1 rad/sec (i.e., `s = j`).
 //
-// #### Example
+// #### Example test program
 //
 // A second-order ANALOG Butterworth lowpass filter,
 // normalized to have cutoff frequency at 1 rad/sec,
@@ -1360,7 +1360,8 @@ tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
 // and `w1` is the desired digital frequency (in radians/second)
 // corresponding to analog frequency 1 rad/sec (i.e., `s = j`).
 //
-// #### Example
+// #### Example test program
+//
 // A first-order ANALOG Butterworth lowpass filter,
 // normalized to have cutoff frequency at 1 rad/sec,
 // has transfer function:
@@ -2030,7 +2031,7 @@ with { // octave script output:
 // * `fc`: lower bandpass cutoff frequency in Hz.
 //   - Highpass cutoff frequency at ma.SR/2 - fc Hz.
 //
-// #### Example
+// #### Example test program
 //
 // * See `dm.pospass_demo`
 // * Look at frequency response
@@ -2336,7 +2337,8 @@ peak_eq_rm(Lfx,fx,tanPiBT) = _ <: _,A,_ : +,- : *(0.5),*(K/2.0) : + with {
 // * `alpha`: slope of roll-off desired in nepers per neper,
 //         between -1 and 1 (ln mag / ln radian freq)
 //
-// #### Examples
+// #### Example test program
+//
 // See `dm.spectral_tilt_demo` and the documentation for `no.pink_noise`.
 //
 // #### Reference
