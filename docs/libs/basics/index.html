@@ -1003,6 +1003,10 @@ The table value can then be read directly or with linear or cubic interpolation.
 </code></pre>
 <pre><code>tabulate(C, fun, S, r0, r1, x).cub uses the value in the table with cubic interpolation
 </code></pre>
+<h4 id="example-test-program">Example test program</h4>
+<pre><code>midikey2hz(mk) = ba.tabulate(0, ba.midikey2hz, 8192, 0, 127, mk).lin;
+process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
+</code></pre>
 <h2 id="selectors-conditions">Selectors (Conditions)</h2>
 <hr />
 <h3 id="baif"><code>(ba.)if</code></h3>
@@ -1054,7 +1058,7 @@ _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 <li><code>N</code>: number of inputs (int, known at compile time, N &gt; 0)</li>
 <li><code>i</code>: input to select (int, numbered from 0)</li>
 </ul>
-<h4 id="example-test-program">Example test program</h4>
+<h4 id="example-test-program_1">Example test program</h4>
 <pre><code>N = 64;
 process = par(n, N, (par(i,N,i) : selectn(N,n)));
 </code></pre>
@@ -1071,7 +1075,7 @@ with a crossfade.</p>
 <li><code>lgen</code>: list of circuits</li>
 <li><code>id</code>: circuit to select (int, numbered from 0)</li>
 </ul>
-<h4 id="example-test-program_1">Example test program</h4>
+<h4 id="example-test-program_2">Example test program</h4>
 <pre><code>process = selectmulti(ma.SR/10, ((3,9),(2,8),(5,7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 </code></pre>
