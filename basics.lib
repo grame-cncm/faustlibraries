@@ -806,6 +806,14 @@ subseq(head, 0, N)         = head;
 // ```
 // tabulate(C, fun, S, r0, r1, x).cub uses the value in the table with cubic interpolation
 // ```
+//
+// #### Example test program: tabulate the `ba.midikey2hz` function 
+//
+// ```
+// midikey2hz(mk) = ba.tabulate(0, ba.midikey2hz, 8192, 0, 127, mk).lin;
+// process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
+// ```
+//
 //--------------------------------------------
 tabulate(C, fun, S, r0, r1, x) = environment {
 
