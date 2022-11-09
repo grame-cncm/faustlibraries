@@ -40,18 +40,18 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Generic Platform Library";
-declare version "0.2";
+declare version "0.3";
 
 //---------------------------------`(pl.)SR`-----------------------------------
-// Current sampling rate (between 1Hz and 192000Hz). Constant during
+// Current sampling rate (between 1 and 192000Hz). Constant during
 // program execution.
 //-----------------------------------------------------------------------------
 SR = min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
 
 //---------------------------------`(pl.)BS`---------------------------------------
-// Current block-size. Can change during the execution.
+// Current block-size (between 1 and 16384 frames). Can change during the execution.
 //-----------------------------------------------------------------------------
-BS = fvariable(int count, <math.h>);
+BS = min(16384.0, max(1.0, fvariable(int count, <math.h>)));
 
 //---------------------------------`(pl.)tablesize`----------------------------
 // Oscillator table size
