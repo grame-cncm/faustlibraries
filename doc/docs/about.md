@@ -1,6 +1,6 @@
 # The Faust Project
 
-The Faust Project has started in 2002. It is actively developed by the [Grame Research Lab](https://www.grame.fr/recherche).
+The Faust Project has started in 2002. It is actively developed by the [GRAME-CNCM Research Department](https://www.grame.fr/recherche).
 
 Many persons are contributing to the Faust project, by providing code for the 
 compiler, architecture files, libraries, examples, documentation, scripts, bug 
