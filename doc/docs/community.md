@@ -3,7 +3,9 @@
 A lot of libraries have been developed by the community. They are presented in the following sections. 
 
 ## [abclib library](https://github.com/alainbonardi/abclib/)
-### 20 years of research, teaching and creation in mixed music using Faust language
+
+20 years of research, teaching and creation in mixed music using Faust language.
+
 abclib library is released by the CICM / MUSIDANSE (Centre de Recherches Informatique et Création Musicale, Paris 8 University) and is the result of 20 years of research, teaching and creation in mixed music, expressed as a set of codes in Faust language. The main topics addressed are: spatial sound processing and synthesis using ambisonics, multi-channel sound processing, utility objects for mixed music.
 
 ## [Edge of Chaos](https://github.com/dariosanfilippo/edgeofchaos)
@@ -37,3 +39,28 @@ Tap a complicated expression to pull out specific outputs, without having to man
 ## Awesome library
 Feel free to contribute by [forking this project](https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks) and [creating a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request), or by mailing the library description [here](mailto:research@grame.fr).
 
+# Additional DSP resources
+
+Heres is a list of additional DSP resources.
+
+## Granulation
+
+### A list of projects related to granulation:
+
+- Dario Sanfilippo [Live concatenative granular processing](https://github.com/dariosanfilippo/concatenative_granulation) project
+
+- Mykle Hansen [Weather Organ](https://github.com/myklemykle/weather_organ) project
+
+- [Granola]( https://github.com/jlp6k/faust-things) monophonic granular live feed processor
+
+- Mayank Sanganeria [granulator.dsp]( https://github.com/e7mac/faust-code/blob/master/granulator.dsp) project
+
+-  Henrik von Coler [material on granulation](https://hvc.berlin/Processed_Recording/granular-introduction/) with [Faust code](https://hvc.berlin/synthesis_algorithms/granular-faust-example/)
+
+###  Material in the [abclib library](https://github.com/alainbonardi/abclib/)
+
+- basic granulator in Faust [based on a delay line](https://github.com/alainbonardi/abclib/blob/master/faustCodes/library/mm.lib), with the `granulator` function
+
+-  [spatial granulation in ambisonics](https://github.com/alainbonardi/abclib/blob/master/faustCodes/library/abc.lib) in `abc_2d_fx_grain_ui` and `abc_2d_syn_grain_ui` functions
+
+-  [multichannel granulation](https://github.com/alainbonardi/abclib/blob/master/faustCodes/library/abc.lib) in `abc_multigrain_ui` function
