@@ -51,7 +51,7 @@ Heres is a list of additional DSP resources.
 
 - Mykle Hansen [Weather Organ](https://github.com/myklemykle/weather_organ) project
 
-- [Granola]( https://github.com/jlp6k/faust-things) monophonic granular live feed processor
+- Jean-Louis Paquelin [Granola](https://github.com/jlp6k/faust-things) monophonic granular live feed processor
 
 - Mayank Sanganeria [granulator.dsp]( https://github.com/e7mac/faust-code/blob/master/granulator.dsp) project
 
