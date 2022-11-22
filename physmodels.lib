@@ -3224,7 +3224,9 @@ with {
 // the fundamental frequency of the excitation signal and leaves
 // all other formant frequencies unchanged. Ported from `chant-lib`.
 //
-// Reference: * <https://ccrma.stanford.edu/~rmichon/chantLib/>.
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //
 // #### Usage
 //
@@ -3258,7 +3260,9 @@ with {
 // reinforced for higher fundamental frequencies.
 // Ported from `chant-lib`.
 //
-// Reference: * <https://ccrma.stanford.edu/~rmichon/chantLib/>.
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //
 // #### Usage
 //
@@ -3280,7 +3284,9 @@ vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),*(0.8+
 //-------------------------`(pm.)fof`--------------------------
 // Function to generate a single Formant-Wave-Function.
 // 
-// Reference: * <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //
@@ -3317,7 +3323,9 @@ with {
 // FOF with sample and hold used on `bw` and a parameter
 // used in the filter-cycling FOF function `fofCycle`.
 // 
-// Reference: * <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //
@@ -3336,7 +3344,9 @@ fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') :
 // FOF implementation where time-varying filter parameter noise is
 // mitigated by using a cycle of `n` sample and hold FOF filters.
 // 
-// Reference: * <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //
