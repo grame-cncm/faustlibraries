@@ -777,34 +777,33 @@ subseq(head, 0, N)         = head;
 //========================================================================================
 
 //-------`(ba.)tabulate`----------
-// Tabulate an unary function on a [r0, r1] range in a table. 
+// Tabulate an unary function on a [R0, R1] range in a table. 
 // The table value can then be read directly or with linear or cubic interpolation.
 //
 // #### Usage
 //
 // ```
-// tabulate(C, fun, size, r0, r1, x).(val|lin|cub) : _
+// _ : tabulate(C, FX, S, R0, R1).(val|lin|cub) : _
 // ```
 //
 // Where:
 //
-// * `C`: whether to dynamically force the index in [r0, r1] range: 1 force the check, 0 deactivate it (a constant numerical expression)
-// * `fun`: unary function
+// * `C`: whether to dynamically force the index in [R0, R1] range: 1 force the check, 0 deactivate it (a constant numerical expression)
+// * `FX`: unary function (known at compile time)
 // * `S`: size of the table (a constant numerical expression)
-// * `r0`: range minimal value
-// * `r1`: range maximal value
-// * `x`: input value to compute using the tabulated function
+// * `R0`: range minimal value (a constant numerical expression)
+// * `R1`: range maximal value (a constant numerical expression)
 //
 // ```
-// tabulate(C, fun, S, r0, r1, x).val uses the value in the table
-// ```
-//
-// ```
-// tabulate(C, fun, S, r0, r1, x).lin uses the value in the table with linear interpolation
+// tabulate(C, FX, S, R0, R1, x).val uses the value in the table
 // ```
 //
 // ```
-// tabulate(C, fun, S, r0, r1, x).cub uses the value in the table with cubic interpolation
+// tabulate(C, FX, S, R0, R1, x).lin uses the value in the table with linear interpolation
+// ```
+//
+// ```
+// tabulate(C, FX, S, R0, R1, x).cub uses the value in the table with cubic interpolation
 // ```
 //
 // #### Example test program
@@ -815,25 +814,25 @@ subseq(head, 0, N)         = head;
 // ```
 //
 //--------------------------------------------
-tabulate(C, fun, S, r0, r1, x) = environment {
+tabulate(C, FX, S, R0, R1, x) = environment {
 
     // Maximum index to access
     mid = S-1;
 
     // Create the table
-    wf = r0 + float(ba.time)*(r1-r0)/float(mid) : fun;
+    wf = R0 + float(ba.time)*(R1-R0)/float(mid) : FX;
 
     // Prepare the 'float' table read index
-    id = (x-r0)/(r1-r0)*mid;
+    id = (x-R0)/(R1-R0)*mid;
 
     // Limit the table read index in [0, mid] if C = 1
     rid(x, 0) = x;
     rid(x, 1) = max(0, min(x, mid));
 
-    // Tabulate an unary 'fun' function on a range [r0, r1]
+    // Tabulate an unary 'FX' function on a range [R0, R1]
     val = y0 with { y0 = rdtable(S, wf, rid(int(id), C)); };
 
-    // Tabulate an unary 'fun' function on a range [r0, r1] with linear interpolation
+    // Tabulate an unary 'FX' function on a range [R0, R1] with linear interpolation
     lin = it.interpolate_linear(d,y0,y1)
     with {
         x0 = int(id);
@@ -843,7 +842,7 @@ tabulate(C, fun, S, r0, r1, x) = environment {
         y1 = rdtable(S, wf, rid(x1, C));
     };
 
-    // Tabulate an unary 'fun' function on a range [r0, r1] with cubic interpolation
+    // Tabulate an unary 'FX' function on a range [R0, R1] with cubic interpolation
     cub = it.interpolate_cubic(d,y0,y1,y2,y3)
     with {
         x0 = x1-1;
@@ -859,6 +858,62 @@ tabulate(C, fun, S, r0, r1, x) = environment {
 };
 
 declare tabulate author "Stephane Letz";
+
+
+//-------`(ba.)tabulate_chebychev`----------
+// Approximate an unary function on a [R0, R1] range using chebyshev
+// polynomials. tabulate_chebychev() splits [R0, R1] into NX segments to improve
+// the accuracy and approximates the function on each segment independently.
+//
+// #### Usage
+//
+// ```
+// _ : tabulate_chebychev(C, FX, NX, CD, R0, R1) : _
+// ```
+//
+// Where:
+//
+// * `C`: whether to dynamically check if the input fits into [R0, R1] range, 1 force the check, 0 deactivate it (a constant numerical expression)
+// * `FX`: unary function  (known at compile time)
+// * `NX`: number of segments (a constant numerical expression)
+// * `CD`: max degree of chebyshev polynomials (a constant numerical expression)
+// * `R0`: range minimal value 
+// * `R1`: range maximal value
+//--------------------------------------------
+tabulate_chebychev(C, FX, NX, CD, R0, R1, x) = y with {
+	ck(0) = _;
+	ck(1) = max(0) : min(NX-1);
+
+	// number of chebyshev coefficients
+	NC = CD + 1;
+	// length of the segments
+	DX = (R1 - R0) / NX;
+	// number of segment 'x' falls in
+	nx = (x  - R0) / DX : int : ck(C);
+	// center of n's segment
+	xc(n) = R0 + DX * (n + 1/2);
+	// so ch(0) .. ch(NC) are the coeffs we use for approximation
+	// on nx's segment
+	ch(i) = chtab(NC * nx + i);
+
+	// map the input in segment [nx*DX, (nx+1)*DX] to [-1,1]
+	y = (x - xc(nx)) * 2/DX <: sum(i, NC, ch(i) * ma.chebychev(i));
+
+	// map [-1,1] to the segment [nx*DX, (nx+1)*DX] so mapfx(nx)
+	// is simply the "renormalized" FX defined on [-1,1]
+	mapfx(nx, x) = FX(xc(nx) + DX/2 * x);
+
+	// calculate the nc's chebyshev coefficient we use on nx's segment
+	gench(nx, nc) = (1+(nc!=0))/NC * sum(k,NC,
+		mapfx(nx, cos(ma.PI*(k+1/2)/NC)) * cos(ma.PI*nc*(k+1/2)/NC));
+
+	// record gench(nx, nc) in rdtable() to avoid the run-time calculations
+	chtab = rdtable(NX*NC, (ba.time <: int(/(NC)), %(NC) : gench));
+};
+
+declare tabulate_chebychev author "Oleg Nesterov";
+declare tabulate_chebychev copyright "Copyright (C) 2022 Oleg Nesterov <oleg@redhat.com>";
+declare tabulate_chebychev license "MIT-style STK-4.3 license";s
 
 //============================Selectors (Conditions)======================================
 //========================================================================================
