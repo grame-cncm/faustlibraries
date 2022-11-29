@@ -389,6 +389,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#batabulate_chebychev" class="nav-link">(ba.)tabulate_chebychev</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#selectors-conditions" class="nav-link">Selectors (Conditions)</a>
@@ -983,29 +987,49 @@ compositions and there is no empty list.</p>
 <h2 id="function-tabulation">Function tabulation</h2>
 <hr />
 <h3 id="batabulate"><code>(ba.)tabulate</code></h3>
-<p>Tabulate an unary function on a [r0, r1] range in a table. 
+<p>Tabulate an unary function on a [R0, R1] range in a table. 
 The table value can then be read directly or with linear or cubic interpolation.</p>
 <h4 id="usage_37">Usage</h4>
-<pre><code>tabulate(C, fun, size, r0, r1, x).(val|lin|cub) : _
+<pre><code>_ : tabulate(C, FX, S, R0, R1).(val|lin|cub) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>C</code>: whether to dynamically force the index in [r0, r1] range: 1 force the check, 0 deactivate it (a constant numerical expression)</li>
-<li><code>fun</code>: unary function</li>
+<li><code>C</code>: whether to dynamically force the index in [R0, R1] range: 1 force the check, 0 deactivate it (a constant numerical expression)</li>
+<li><code>FX</code>: unary function (known at compile time)</li>
 <li><code>S</code>: size of the table (a constant numerical expression)</li>
-<li><code>r0</code>: range minimal value</li>
-<li><code>r1</code>: range maximal value</li>
-<li><code>x</code>: input value to compute using the tabulated function</li>
+<li><code>R0</code>: range minimal value (a constant numerical expression)</li>
+<li><code>R1</code>: range maximal value (a constant numerical expression)</li>
 </ul>
-<pre><code>tabulate(C, fun, S, r0, r1, x).val uses the value in the table
+<pre><code>tabulate(C, FX, S, R0, R1, x).val uses the value in the table
 </code></pre>
-<pre><code>tabulate(C, fun, S, r0, r1, x).lin uses the value in the table with linear interpolation
+<pre><code>tabulate(C, FX, S, R0, R1, x).lin uses the value in the table with linear interpolation
 </code></pre>
-<pre><code>tabulate(C, fun, S, r0, r1, x).cub uses the value in the table with cubic interpolation
+<pre><code>tabulate(C, FX, S, R0, R1, x).cub uses the value in the table with cubic interpolation
 </code></pre>
 <h4 id="example-test-program">Example test program</h4>
 <pre><code>midikey2hz(mk) = ba.tabulate(0, ba.midikey2hz, 8192, 0, 127, mk).lin;
 process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
+</code></pre>
+<hr />
+<h3 id="batabulate_chebychev"><code>(ba.)tabulate_chebychev</code></h3>
+<p>Approximate an unary function on a [R0, R1] range using chebyshev
+polynomials. <code>tabulate_chebychev</code> splits [R0, R1] into NX segments to improve
+the accuracy and approximates the function on each segment independently.</p>
+<h4 id="usage_38">Usage</h4>
+<pre><code>_ : tabulate_chebychev(C, FX, NX, CD, R0, R1) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>C</code>: whether to dynamically check if the input fits into [R0, R1] range, 1 force the check, 0 deactivate it (a constant numerical expression)</li>
+<li><code>FX</code>: unary function  (known at compile time)</li>
+<li><code>NX</code>: number of segments (a constant numerical expression)</li>
+<li><code>CD</code>: max degree of chebyshev polynomials (a constant numerical expression)</li>
+<li><code>R0</code>: range minimal value (a constant numerical expression)</li>
+<li><code>R1</code>: range maximal value (a constant numerical expression)</li>
+</ul>
+<h4 id="example-test-program_1">Example test program</h4>
+<pre><code>midikey2hz_chebychev(mk) = ba.tabulate_chebychev(0, ba.midikey2hz, 50, 4, 0, 127, mk);
+process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
 </code></pre>
 <h2 id="selectors-conditions">Selectors (Conditions)</h2>
 <hr />
@@ -1013,7 +1037,7 @@ process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 <p>if-then-else implemented with a select2. WARNING: since <code>select2</code> is strict (always evaluating both branches),
 the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to 
 protect against forbidden computations like division-by-zero for instance.</p>
-<h4 id="usage_38">Usage</h4>
+<h4 id="usage_39">Usage</h4>
 <ul>
 <li><code>if(cond, then, else) : _</code></li>
 </ul>
@@ -1026,7 +1050,7 @@ protect against forbidden computations like division-by-zero for instance.</p>
 <hr />
 <h3 id="baselector"><code>(ba.)selector</code></h3>
 <p>Selects the ith input among n at compile time.</p>
-<h4 id="usage_39">Usage</h4>
+<h4 id="usage_40">Usage</h4>
 <pre><code>selector(I,N)
 _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 </code></pre>
@@ -1039,7 +1063,7 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <hr />
 <h3 id="baselect2stereo"><code>(ba.)select2stereo</code></h3>
 <p>Select between 2 stereo signals.</p>
-<h4 id="usage_40">Usage</h4>
+<h4 id="usage_41">Usage</h4>
 <pre><code>_,_,_,_ : select2stereo(bpc) : _,_    
 </code></pre>
 <p>Where:</p>
@@ -1049,7 +1073,7 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <hr />
 <h3 id="baselectn"><code>(ba.)selectn</code></h3>
 <p>Selects the ith input among N at run time.</p>
-<h4 id="usage_41">Usage</h4>
+<h4 id="usage_42">Usage</h4>
 <pre><code>selectn(N,i)
 _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 </code></pre>
@@ -1058,7 +1082,7 @@ _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 <li><code>N</code>: number of inputs (int, known at compile time, N &gt; 0)</li>
 <li><code>i</code>: input to select (int, numbered from 0)</li>
 </ul>
-<h4 id="example-test-program_1">Example test program</h4>
+<h4 id="example-test-program_2">Example test program</h4>
 <pre><code>N = 64;
 process = par(n, N, (par(i,N,i) : selectn(N,n)));
 </code></pre>
@@ -1066,7 +1090,7 @@ process = par(n, N, (par(i,N,i) : selectn(N,n)));
 <h3 id="baselectmulti"><code>(ba.)selectmulti</code></h3>
 <p>Selects the ith circuit among N at run time (all should have the same number of inputs and outputs)
 with a crossfade.</p>
-<h4 id="usage_42">Usage</h4>
+<h4 id="usage_43">Usage</h4>
 <pre><code>selectmulti(n,lgen,id)
 </code></pre>
 <p>Where:</p>
@@ -1075,14 +1099,14 @@ with a crossfade.</p>
 <li><code>lgen</code>: list of circuits</li>
 <li><code>id</code>: circuit to select (int, numbered from 0)</li>
 </ul>
-<h4 id="example-test-program_2">Example test program</h4>
+<h4 id="example-test-program_3">Example test program</h4>
 <pre><code>process = selectmulti(ma.SR/10, ((3,9),(2,8),(5,7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 </code></pre>
 <hr />
 <h3 id="baselectoutn"><code>(ba.)selectoutn</code></h3>
 <p>Route input to the output among N at run time.</p>
-<h4 id="usage_43">Usage</h4>
+<h4 id="usage_44">Usage</h4>
 <pre><code>_ : selectoutn(N, i) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -1090,7 +1114,7 @@ process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;ch
 <li><code>N</code>: number of outputs (int, known at compile time, N &gt; 0)</li>
 <li><code>i</code>: output number to route to (int, numbered from 0) (i.e. slider)</li>
 </ul>
-<h4 id="example-test-program_3">Example test program</h4>
+<h4 id="example-test-program_4">Example test program</h4>
 <pre><code>process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph(&quot;v.bargraph %i&quot;, 0, 1));
 sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 </code></pre>
@@ -1099,7 +1123,7 @@ sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 <h3 id="balatch"><code>(ba.)latch</code></h3>
 <p>Latch input on positive-going transition of trig:"records" the input when trig 
 switches from 0 to 1, outputs a frozen values everytime else.</p>
-<h4 id="usage_44">Usage</h4>
+<h4 id="usage_45">Usage</h4>
 <pre><code>_ : latch(trig) : _
 </code></pre>
 <p>Where:</p>
@@ -1110,7 +1134,7 @@ switches from 0 to 1, outputs a frozen values everytime else.</p>
 <h3 id="basandh"><code>(ba.)sAndH</code></h3>
 <p>Sample And Hold: "records" the input when trig is 1, outputs a frozen value when trig is 0.
 <code>sAndH</code> is a standard Faust function.</p>
-<h4 id="usage_45">Usage</h4>
+<h4 id="usage_46">Usage</h4>
 <pre><code>_ : sAndH(trig) : _
 </code></pre>
 <p>Where:</p>
@@ -1122,7 +1146,7 @@ switches from 0 to 1, outputs a frozen values everytime else.</p>
 <p>Down sample a signal. WARNING: this function doesn't change the
 rate of a signal, it just holds samples...
 <code>downSample</code> is a standard Faust function.</p>
-<h4 id="usage_46">Usage</h4>
+<h4 id="usage_47">Usage</h4>
 <pre><code>_ : downSample(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1132,7 +1156,7 @@ rate of a signal, it just holds samples...
 <hr />
 <h3 id="bapeakhold"><code>(ba.)peakhold</code></h3>
 <p>Outputs current max value above zero.</p>
-<h4 id="usage_47">Usage</h4>
+<h4 id="usage_48">Usage</h4>
 <pre><code>_ : peakhold(mode) : _
 </code></pre>
 <p>Where:</p>
@@ -1149,7 +1173,7 @@ if the input is greater or equal to the output, a new peak is detected
 and sent to the output; otherwise, a timer starts and the current peak
 is held for N samples; once the timer is out and no new peaks have been
 detected, the absolute value of the current input becomes the new peak.</p>
-<h4 id="usage_48">Usage</h4>
+<h4 id="usage_49">Usage</h4>
 <pre><code>_ : peakholder(holdTime) : _
 </code></pre>
 <p>Where:</p>
@@ -1162,13 +1186,13 @@ detected, the absolute value of the current input becomes the new peak.</p>
 (0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a 
 <code>button</code> to turn its output into an impulse. <code>impulsify</code> is a standard Faust 
 function.</p>
-<h4 id="usage_49">Usage</h4>
+<h4 id="usage_50">Usage</h4>
 <pre><code>button(&quot;gate&quot;) : impulsify;
 </code></pre>
 <hr />
 <h3 id="baautomat"><code>(ba.)automat</code></h3>
 <p>Record and replay in a loop the successives values of the input signal.</p>
-<h4 id="usage_50">Usage</h4>
+<h4 id="usage_51">Usage</h4>
 <pre><code>hslider(...) : automat(t, size, init) : _
 </code></pre>
 <p>Where:</p>
@@ -1208,7 +1232,7 @@ and <code>x &lt; x_{i+1}</code></li>
 <hr />
 <h3 id="balistinterp"><code>(ba.)listInterp</code></h3>
 <p>Linearly interpolates between the elements of a list.</p>
-<h4 id="usage_51">Usage</h4>
+<h4 id="usage_52">Usage</h4>
 <pre><code>index = 1.69; // range is 0-4
 process = listInterp((800,400,350,450,325),index);
 </code></pre>
@@ -1222,7 +1246,7 @@ The range of <code>index</code> depends on the size of the list.</li>
 <p>Takes a mono input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>. 
 When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up.
 <code>bypass1</code> is a standard Faust function.</p>
-<h4 id="usage_52">Usage</h4>
+<h4 id="usage_53">Usage</h4>
 <pre><code>_ : bypass1(bpc,e) : _
 </code></pre>
 <p>Where:</p>
@@ -1235,7 +1259,7 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 <p>Takes a stereo input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>. 
 When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up.
 <code>bypass2</code> is a standard Faust function.</p>
-<h4 id="usage_53">Usage</h4>
+<h4 id="usage_54">Usage</h4>
 <pre><code>_,_ : bypass2(bpc,e) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1249,7 +1273,7 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 Effect <code>e</code> is bypassed if <code>bpc = 1</code>.When bypassed, <code>e</code> is feed with zeros 
 so that its state is cleanup up.
 <code>bypass1to2</code> is a standard Faust function.</p>
-<h4 id="usage_54">Usage</h4>
+<h4 id="usage_55">Usage</h4>
 <pre><code>_ : bypass1to2(bpc,e) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1264,7 +1288,7 @@ Inputs and outputs signals are faded out when 'e' is bypassed,
 so that 'e' state is cleanup up. 
 Once bypassed the effect is replaced by <code>par(i,N,_)</code>. 
 Bypassed circuits can be chained.</p>
-<h4 id="usage_55">Usage</h4>
+<h4 id="usage_56">Usage</h4>
 <pre><code>_ : bypass_fade(n,b,e) : _
 or
 _,_ : bypass_fade(n,b,e) : _,_ 
@@ -1274,7 +1298,7 @@ _,_ : bypass_fade(n,b,e) : _,_
 <li><code>b</code>: bypass switch (0/1)</li>
 <li><code>e</code>: N x N circuit</li>
 </ul>
-<h4 id="example-test-program_4">Example test program</h4>
+<h4 id="example-test-program_5">Example test program</h4>
 <pre><code>process = bypass_fade(ma.SR/10, checkbox(&quot;bypass echo&quot;), echo);
 process = bypass_fade(ma.SR/10, checkbox(&quot;bypass reverb&quot;), freeverb);
 </code></pre>
@@ -1282,26 +1306,26 @@ process = bypass_fade(ma.SR/10, checkbox(&quot;bypass reverb&quot;), freeverb);
 <h3 id="batoggle"><code>(ba.)toggle</code></h3>
 <p>Triggered by the change of 0 to 1, it toggles the output value
 between 0 and 1.</p>
-<h4 id="usage_56">Usage</h4>
+<h4 id="usage_57">Usage</h4>
 <pre><code>_ : toggle : _
 </code></pre>
-<h4 id="example-test-program_5">Example test program</h4>
+<h4 id="example-test-program_6">Example test program</h4>
 <pre><code>button(&quot;toggle&quot;) : toggle : vbargraph(&quot;output&quot;, 0, 1)
 (an.amp_follower(0.1) &gt; 0.01) : toggle : vbargraph(&quot;output&quot;, 0, 1) // takes audio input
 </code></pre>
 <hr />
 <h3 id="baon_and_off"><code>(ba.)on_and_off</code></h3>
 <p>The first channel set the output to 1, the second channel to 0.</p>
-<h4 id="usage_57">Usage</h4>
+<h4 id="usage_58">Usage</h4>
 <pre><code>_,_ : on_and_off : _
 </code></pre>
-<h4 id="example-test-program_6">Example test program</h4>
+<h4 id="example-test-program_7">Example test program</h4>
 <pre><code>button(&quot;on&quot;), button(&quot;off&quot;) : on_and_off : vbargraph(&quot;output&quot;, 0, 1)
 </code></pre>
 <hr />
 <h3 id="babitcrusher"><code>(ba.)bitcrusher</code></h3>
 <p>Produce distortion by reduction of the signal resolution.</p>
-<h4 id="usage_58">Usage</h4>
+<h4 id="usage_59">Usage</h4>
 <pre><code>_ : bitcrusher(nbits) : _
 </code></pre>
 <p>Where:</p>
@@ -1443,7 +1467,7 @@ the last <code>n</code> consecutive samples of a signal <code>x</code>. For exam
 <code>slidingReduce(max,128,128,0-(ma.MAX))</code> will compute the maximum of the last
 128 samples. The output is updated each sample, unlike reduce, where the
 output is constant for the duration of a block.</p>
-<h4 id="usage_59">Usage</h4>
+<h4 id="usage_60">Usage</h4>
 <pre><code>_ : slidingReduce(op,n,maxN,disabledVal) : _
 </code></pre>
 <p>Where:</p>
@@ -1462,7 +1486,7 @@ minimum, we need to give <code>ma.MAX</code> as <code>disabledVal</code>.</p>
 <p>The sliding sum of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingSump</code>.</p>
-<h4 id="usage_60">Usage</h4>
+<h4 id="usage_61">Usage</h4>
 <pre><code>_ : slidingSum(n) : _
 </code></pre>
 <p>Where:</p>
@@ -1473,7 +1497,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingsump"><code>(ba.)slidingSump</code></h3>
 <p>The sliding sum of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingSum</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_61">Usage</h4>
+<h4 id="usage_62">Usage</h4>
 <pre><code>_ : slidingSump(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1484,7 +1508,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baslidingmax"><code>(ba.)slidingMax</code></h3>
 <p>The sliding maximum of the last n input samples.</p>
-<h4 id="usage_62">Usage</h4>
+<h4 id="usage_63">Usage</h4>
 <pre><code>_ : slidingMax(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1495,7 +1519,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baslidingmin"><code>(ba.)slidingMin</code></h3>
 <p>The sliding minimum of the last n input samples.</p>
-<h4 id="usage_63">Usage</h4>
+<h4 id="usage_64">Usage</h4>
 <pre><code>_ : slidingMin(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1508,7 +1532,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <p>The sliding mean of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingMeanp</code>.</p>
-<h4 id="usage_64">Usage</h4>
+<h4 id="usage_65">Usage</h4>
 <pre><code>_ : slidingMean(n) : _
 </code></pre>
 <p>Where:</p>
@@ -1519,7 +1543,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingmeanp"><code>(ba.)slidingMeanp</code></h3>
 <p>The sliding mean of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingMean</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_65">Usage</h4>
+<h4 id="usage_66">Usage</h4>
 <pre><code>_ : slidingMeanp(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1532,7 +1556,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <p>The root mean square of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingRMSp</code>.</p>
-<h4 id="usage_66">Usage</h4>
+<h4 id="usage_67">Usage</h4>
 <pre><code>_ : slidingRMS(n) : _
 </code></pre>
 <p>Where:</p>
@@ -1543,7 +1567,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingrmsp"><code>(ba.)slidingRMSp</code></h3>
 <p>The root mean square of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingRMS</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_67">Usage</h4>
+<h4 id="usage_68">Usage</h4>
 <pre><code>_ : slidingRMSp(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1563,7 +1587,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelop"><code>(ba.)parallelOp</code></h3>
 <p>Apply a commutative binary operation <code>op</code> to N parallel inputs.</p>
-<h4 id="usage_68">usage</h4>
+<h4 id="usage_69">usage</h4>
 <pre><code>si.bus(N) : parallelOp(op,N) : _
 </code></pre>
 <p>where:</p>
@@ -1574,7 +1598,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmax"><code>(ba.)parallelMax</code></h3>
 <p>The maximum of N parallel inputs.</p>
-<h4 id="usage_69">Usage</h4>
+<h4 id="usage_70">Usage</h4>
 <pre><code>si.bus(N) : parallelMax(N) : _
 </code></pre>
 <p>Where:</p>
@@ -1584,7 +1608,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmin"><code>(ba.)parallelMin</code></h3>
 <p>The minimum of N parallel inputs.</p>
-<h4 id="usage_70">Usage</h4>
+<h4 id="usage_71">Usage</h4>
 <pre><code>si.bus(N) : parallelMin(N) : _
 </code></pre>
 <p>Where:</p>
@@ -1594,7 +1618,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmean"><code>(ba.)parallelMean</code></h3>
 <p>The mean of N parallel inputs.</p>
-<h4 id="usage_71">Usage</h4>
+<h4 id="usage_72">Usage</h4>
 <pre><code>si.bus(N) : parallelMean(N) : _
 </code></pre>
 <p>Where:</p>
@@ -1604,7 +1628,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelrms"><code>(ba.)parallelRMS</code></h3>
 <p>The RMS of N parallel inputs.</p>
-<h4 id="usage_72">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>si.bus(N) : parallelRMS(N) : _
 </code></pre>
 <p>Where:</p>

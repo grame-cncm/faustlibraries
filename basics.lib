@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "0.8";
+declare version "0.9";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -862,7 +862,7 @@ declare tabulate author "Stephane Letz";
 
 //-------`(ba.)tabulate_chebychev`----------
 // Approximate an unary function on a [R0, R1] range using chebyshev
-// polynomials. tabulate_chebychev() splits [R0, R1] into NX segments to improve
+// polynomials. `tabulate_chebychev` splits [R0, R1] into NX segments to improve
 // the accuracy and approximates the function on each segment independently.
 //
 // #### Usage
@@ -877,38 +877,47 @@ declare tabulate author "Stephane Letz";
 // * `FX`: unary function  (known at compile time)
 // * `NX`: number of segments (a constant numerical expression)
 // * `CD`: max degree of chebyshev polynomials (a constant numerical expression)
-// * `R0`: range minimal value 
-// * `R1`: range maximal value
+// * `R0`: range minimal value (a constant numerical expression)
+// * `R1`: range maximal value (a constant numerical expression)
+//
+//
+// #### Example test program
+//
+// ```
+// midikey2hz_chebychev(mk) = ba.tabulate_chebychev(0, ba.midikey2hz, 50, 4, 0, 127, mk);
+// process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
+// ```
+//
 //--------------------------------------------
 tabulate_chebychev(C, FX, NX, CD, R0, R1, x) = y with {
-	ck(0) = _;
-	ck(1) = max(0) : min(NX-1);
+    ck(0) = _;
+    ck(1) = max(0) : min(NX-1);
 
-	// number of chebyshev coefficients
-	NC = CD + 1;
-	// length of the segments
-	DX = (R1 - R0) / NX;
-	// number of segment 'x' falls in
-	nx = (x  - R0) / DX : int : ck(C);
-	// center of n's segment
-	xc(n) = R0 + DX * (n + 1/2);
-	// so ch(0) .. ch(NC) are the coeffs we use for approximation
-	// on nx's segment
-	ch(i) = chtab(NC * nx + i);
+    // number of chebyshev coefficients
+    NC = CD + 1;
+    // length of the segments
+    DX = (R1 - R0) / NX;
+    // number of segment 'x' falls in
+    nx = (x  - R0) / DX : int : ck(C);
+    // center of n's segment
+    xc(n) = R0 + DX * (n + 1/2);
+    // so ch(0) .. ch(NC) are the coeffs we use for approximation
+    // on nx's segment
+    ch(i) = chtab(NC * nx + i);
 
-	// map the input in segment [nx*DX, (nx+1)*DX] to [-1,1]
-	y = (x - xc(nx)) * 2/DX <: sum(i, NC, ch(i) * ma.chebychev(i));
+    // map the input in segment [nx*DX, (nx+1)*DX] to [-1,1]
+    y = (x - xc(nx)) * 2/DX <: sum(i, NC, ch(i) * ma.chebychev(i));
 
-	// map [-1,1] to the segment [nx*DX, (nx+1)*DX] so mapfx(nx)
-	// is simply the "renormalized" FX defined on [-1,1]
-	mapfx(nx, x) = FX(xc(nx) + DX/2 * x);
+    // map [-1,1] to the segment [nx*DX, (nx+1)*DX] so mapfx(nx)
+    // is simply the "renormalized" FX defined on [-1,1]
+    mapfx(nx, x) = FX(xc(nx) + DX/2 * x);
 
-	// calculate the nc's chebyshev coefficient we use on nx's segment
-	gench(nx, nc) = (1+(nc!=0))/NC * sum(k,NC,
-		mapfx(nx, cos(ma.PI*(k+1/2)/NC)) * cos(ma.PI*nc*(k+1/2)/NC));
+    // calculate the nc's chebyshev coefficient we use on nx's segment
+    gench(nx, nc) = (1+(nc!=0))/NC * sum(k,NC,
+        mapfx(nx, cos(ma.PI*(k+1/2)/NC)) * cos(ma.PI*nc*(k+1/2)/NC));
 
-	// record gench(nx, nc) in rdtable() to avoid the run-time calculations
-	chtab = rdtable(NX*NC, (ba.time <: int(/(NC)), %(NC) : gench));
+    // record gench(nx, nc) in rdtable() to avoid the run-time calculations
+    chtab = rdtable(NX*NC, (ba.time <: int(/(NC)), %(NC) : gench));
 };
 
 declare tabulate_chebychev author "Oleg Nesterov";
