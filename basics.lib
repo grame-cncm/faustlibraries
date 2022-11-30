@@ -196,7 +196,7 @@ Michon and Julius O. Smith III, and are released under the
 //-----------------------------
 // tau2pole(tau) = exp(-1.0/(tau*ma.SR));
 
-tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR)))) 
+tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR))))
 with {
     clipCond = abs(tau)<ma.EPSILON;
     tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
@@ -267,7 +267,7 @@ hz2midikey(freq) = 12.0*ma.log2(freq/440.0) + 69.0;
 //
 // Where:
 //
-// * `semi`: number of semitone 
+// * `semi`: number of semitone
 //-----------------------------
 semi2ratio(semi) = pow(2.0, semi/12.0);
 
@@ -300,7 +300,7 @@ ratio2semi(ratio) = 12.0*log(ratio)/log(2.0);
 //
 // Where:
 //
-// * `cent`: number of cents 
+// * `cent`: number of cents
 //-----------------------------
 cent2ratio(cent) = pow(2.0, cent/1200.0);
 
@@ -363,8 +363,8 @@ FAUST library file, GRAME section 2
 //========================================================================================
 
 //----------------------------`(ba.)counter`------------------------------
-// Starts counting 0, 1, 2, 3..., and raise the current integer value 
-// at each upfront of the trigger. 
+// Starts counting 0, 1, 2, 3..., and raise the current integer value
+// at each upfront of the trigger.
 //
 // #### Usage
 //
@@ -470,8 +470,8 @@ ramp = case {
 
 
 //-------`(ba.)line`----------
-// A linear ramp to reach a next value in 'n' samples. 
-// Note that the interpolation process is restarted every time 
+// A linear ramp to reach a next value in 'n' samples.
+// Note that the interpolation process is restarted every time
 // the desired output value changes, the interpolation time is sampled only then.
 //
 // #### Usage
@@ -485,7 +485,7 @@ ramp = case {
 //------------------------
 line(n, x) = state ~ (_,_) : !,_
 with {
-    state(t, c) = nt,nc 
+    state(t, c) = nt,nc
     with {
         nt = ba.if(x != x', n, t-1);
         nc = ba.if(nt > 0, c + (x - c)/nt, x);
@@ -777,8 +777,8 @@ subseq(head, 0, N)         = head;
 //========================================================================================
 
 //-------`(ba.)tabulate`----------
-// Tabulate an unary function on a [R0, R1] range in a table. 
-// The table value can then be read directly or with linear or cubic interpolation.
+// Tabulate a 1D function over the range [R0, R1] for access via nearest-value, linear, cubic interpolation.
+// In other words, the uniformly tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).
 //
 // #### Usage
 //
@@ -786,24 +786,24 @@ subseq(head, 0, N)         = head;
 // _ : tabulate(C, FX, S, R0, R1).(val|lin|cub) : _
 // ```
 //
-// Where:
+// where all arguments must be available at compile time (constant numerical expressions):
 //
-// * `C`: whether to dynamically force the index in [R0, R1] range: 1 force the check, 0 deactivate it (a constant numerical expression)
-// * `FX`: unary function (known at compile time)
-// * `S`: size of the table (a constant numerical expression)
-// * `R0`: range minimal value (a constant numerical expression)
-// * `R1`: range maximal value (a constant numerical expression)
-//
-// ```
-// tabulate(C, FX, S, R0, R1, x).val uses the value in the table
-// ```
+// * `C`: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it
+// * `FX`: unary function Y=F(X) with one output (scalar function of one variable), X in samples
+// * `S`: size of the table in samples
+// * `R0`: minimum value of argument X
+// * `R1`: maximum value of argument X
 //
 // ```
-// tabulate(C, FX, S, R0, R1, x).lin uses the value in the table with linear interpolation
+// tabulate(C, FX, S, R0, R1, X).val uses the value in the table closest to X
 // ```
 //
 // ```
-// tabulate(C, FX, S, R0, R1, x).cub uses the value in the table with cubic interpolation
+// tabulate(C, FX, S, R0, R1, X).lin evaluates at X using linear interpolation between the closest stored values
+// ```
+//
+// ```
+// tabulate(C, FX, S, R0, R1, X).cub evaluates at X using cubic interpolation between the closest stored values
 // ```
 //
 // #### Example test program
@@ -861,9 +861,11 @@ declare tabulate author "Stephane Letz";
 
 
 //-------`(ba.)tabulate_chebychev`----------
-// Approximate an unary function on a [R0, R1] range using chebyshev
-// polynomials. `tabulate_chebychev` splits [R0, R1] into NX segments to improve
-// the accuracy and approximates the function on each segment independently.
+// Tabulate a 1D function over the range [R0, R1] for access via Chebyshev polynomial approximation.
+// In contrast to `(ba.)tabulate`, which interpolates only between tabulated samples, `(ba.)tabulate_chebychev`
+// stores coefficients of Chebyshev polynomials that are evaluated to provide better approximations in many cases.
+// Two new arguments controlling this are NX, the number of segments into which [R0,R1] is divided, and CD,
+// the maximum Chebyshev polynomial degree to use for each segment.
 //
 // #### Usage
 //
@@ -871,15 +873,14 @@ declare tabulate author "Stephane Letz";
 // _ : tabulate_chebychev(C, FX, NX, CD, R0, R1) : _
 // ```
 //
-// Where:
+// where all arguments must be available at compile time (constant numerical expressions):
 //
-// * `C`: whether to dynamically check if the input fits into [R0, R1] range, 1 force the check, 0 deactivate it (a constant numerical expression)
-// * `FX`: unary function  (known at compile time)
-// * `NX`: number of segments (a constant numerical expression)
-// * `CD`: max degree of chebyshev polynomials (a constant numerical expression)
-// * `R0`: range minimal value (a constant numerical expression)
-// * `R1`: range maximal value (a constant numerical expression)
-//
+// * `C`: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it
+// * `FX`: unary function Y=F(X) with one output (scalar function of one variable), X in samples
+// * `NX`: number of segments for uniformly partitioning [R0,R1]
+// * `CD`: maximum polynomial degree for each Chebyshev polynomial
+// * `R0`: minimum value of argument X
+// * `R1`: maximum value of argument X
 //
 // #### Example test program
 //
@@ -929,7 +930,7 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";s
 
 //-----------------------------`(ba.)if`-----------------------------------
 // if-then-else implemented with a select2. WARNING: since `select2` is strict (always evaluating both branches),
-// the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to 
+// the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to
 // protect against forbidden computations like division-by-zero for instance.
 //
 // #### Usage
@@ -974,7 +975,7 @@ cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; 
 // #### Usage
 //
 // ```
-// _,_,_,_ : select2stereo(bpc) : _,_    
+// _,_,_,_ : select2stereo(bpc) : _,_
 // ```
 //
 // Where:
@@ -1012,7 +1013,7 @@ with {
 };
 
 
-// The generic version with a 'sel' function to be applied on: 
+// The generic version with a 'sel' function to be applied on:
 // - the channel index as a (possibly) fractional value
 // - the next channel index as an integer value
 // - the 2 signals to be selected between
@@ -1098,7 +1099,7 @@ selectoutn(N, s) = _ <: par(i, N, *(s==i));
 //========================================================================================
 
 //----------------------------`(ba.)latch`--------------------------------
-// Latch input on positive-going transition of trig:"records" the input when trig 
+// Latch input on positive-going transition of trig:"records" the input when trig
 // switches from 0 to 1, outputs a frozen values everytime else.
 //
 // #### Usage
@@ -1167,7 +1168,7 @@ with {
 //
 // Where:
 //
-// `mode` means: 
+// `mode` means:
 //    0 - Pass through. A single sample 0 trigger will work as a reset.
 //  1 - Track and hold max value.
 //----------------------------------------------------------------
@@ -1211,7 +1212,7 @@ peakholder(holdTime, x) = loop ~ si.bus(2) : ! , _
                 output = ba.if(bypass, abs(x), outState);
             };
     };
-    
+
 
 /*
 // Alternate version with branchless code
@@ -1231,7 +1232,7 @@ peakholder(holdTime, x) = loop ~ si.bus(2) : ! , _
 
 /*
 // The function below is kept for back-compatibility in case any user relies
-// on it for their software. However, the function behaves differently than 
+// on it for their software. However, the function behaves differently than
 // expected: currently, the timer is not reset when a new peak is detected.
 //------------------------------------------------------------------------------
 declare peakholder author "Jonatan Liljedahl";
@@ -1244,9 +1245,9 @@ peakholder(n) = peakhold2 ~ reset : (!,_) with {
 
 
 //--------------------------`(ba.)impulsify`---------------------------
-// Turns a signal into an impulse with the value of the current sample 
-// (0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a 
-// `button` to turn its output into an impulse. `impulsify` is a standard Faust 
+// Turns a signal into an impulse with the value of the current sample
+// (0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a
+// `button` to turn its output into an impulse. `impulsify` is a standard Faust
 // function.
 //
 // #### Usage
@@ -1356,7 +1357,7 @@ listInterp(v) =
 
 
 //-------------------`(ba.)bypass1`-------------------------
-// Takes a mono input signal, route it to `e` and bypass it if `bpc = 1`. 
+// Takes a mono input signal, route it to `e` and bypass it if `bpc = 1`.
 // When bypassed, `e` is feed with zeros so that its state is cleanup up.
 // `bypass1` is a standard Faust function.
 //
@@ -1381,7 +1382,7 @@ with {
 
 
 //-------------------`(ba.)bypass2`-------------------------
-// Takes a stereo input signal, route it to `e` and bypass it if `bpc = 1`. 
+// Takes a stereo input signal, route it to `e` and bypass it if `bpc = 1`.
 // When bypassed, `e` is feed with zeros so that its state is cleanup up.
 // `bypass2` is a standard Faust function.
 //
@@ -1406,8 +1407,8 @@ with {
 
 
 //-------------------`(ba.)bypass1to2`-------------------------
-// Bypass switch for effect `e` having mono input signal and stereo output. 
-// Effect `e` is bypassed if `bpc = 1`.When bypassed, `e` is feed with zeros 
+// Bypass switch for effect `e` having mono input signal and stereo output.
+// Effect `e` is bypassed if `bpc = 1`.When bypassed, `e` is feed with zeros
 // so that its state is cleanup up.
 // `bypass1to2` is a standard Faust function.
 //
@@ -1432,10 +1433,10 @@ with {
 
 
 //-------------------`(ba.)bypass_fade`-------------------------
-// Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. 
-// Inputs and outputs signals are faded out when 'e' is bypassed, 
-// so that 'e' state is cleanup up. 
-// Once bypassed the effect is replaced by `par(i,N,_)`. 
+// Bypass an arbitrary (N x N) circuit with 'n' samples crossfade.
+// Inputs and outputs signals are faded out when 'e' is bypassed,
+// so that 'e' state is cleanup up.
+// Once bypassed the effect is replaced by `par(i,N,_)`.
 // Bypassed circuits can be chained.
 //
 // #### Usage
@@ -1443,7 +1444,7 @@ with {
 // ```
 // _ : bypass_fade(n,b,e) : _
 // or
-// _,_ : bypass_fade(n,b,e) : _,_ 
+// _,_ : bypass_fade(n,b,e) : _,_
 // ```
 // * `n`: number of samples for the crossfade
 // * `b`: bypass switch (0/1)
@@ -1456,7 +1457,7 @@ with {
 // process = bypass_fade(ma.SR/10, checkbox("bypass reverb"), freeverb);
 // ```
 //---------------------------------------------------------------
-bypass_fade(n, b, e) = par(i, ins, _) 
+bypass_fade(n, b, e) = par(i, ins, _)
             <: (par(i, ins, *(1-xb)) : e : par(i, outs, *(1-xb))), par(i, ins, *(xb))
             :> par(i, outs, _)
 with {
@@ -1691,7 +1692,7 @@ with {
 // * turning it on or off: `useVal()`
 // * getting the maximum of all of them: `parallelOp()`
 //
-// In Faust, we can only do that for a fixed maximum number of values: `maxN`, known at compile time. 
+// In Faust, we can only do that for a fixed maximum number of values: `maxN`, known at compile time.
 
 //========================================================================================
 // Section contributed by Bart Brouns (bart@magnetophon.nl).
@@ -1731,11 +1732,11 @@ slidingReduce(op,n,maxN,disabledVal) =
     with {
        sequentialOperatorParOut(N,op) = seq(i, N, operator(i));
         operator(i) = si.bus(i), (_<: _ , op(_,_@(pow2(i))));
-        
+
         // The sum of all the sizes of the previous blocks
         sumOfPrevBlockSizes(0) = 0;
         sumOfPrevBlockSizes(i) = (ba.subseq((allBlockSizes),0,i):>_);
-        
+
         allBlockSizes = par(i, maxNrBits(maxN-1), (pow2(i)) * isUsed(i));
         maxNrBits(n) = int2nrOfBits(n);
 
