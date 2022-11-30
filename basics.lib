@@ -786,7 +786,7 @@ subseq(head, 0, N)         = head;
 // _ : tabulate(C, FX, S, R0, R1).(val|lin|cub) : _
 // ```
 //
-// where all arguments must be available at compile time (constant numerical expressions):
+// where all arguments must be available at compile time (constant numerical expressions and *known at compile time* FX):
 //
 // * `C`: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it
 // * `FX`: unary function Y=F(X) with one output (scalar function of one variable), X in samples
@@ -873,7 +873,7 @@ declare tabulate author "Stephane Letz";
 // _ : tabulate_chebychev(C, FX, NX, CD, R0, R1) : _
 // ```
 //
-// where all arguments must be available at compile time (constant numerical expressions):
+// where all arguments must be available at compile time (constant numerical expressions and *known at compile time* FX):
 //
 // * `C`: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it
 // * `FX`: unary function Y=F(X) with one output (scalar function of one variable), X in samples

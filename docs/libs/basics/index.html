@@ -992,7 +992,7 @@ In other words, the uniformly tabulated function can be evaluated using interpol
 <h4 id="usage_37">Usage</h4>
 <pre><code>_ : tabulate(C, FX, S, R0, R1).(val|lin|cub) : _
 </code></pre>
-<p>where all arguments must be available at compile time (constant numerical expressions):</p>
+<p>where all arguments must be available at compile time (constant numerical expressions and <em>known at compile time</em> FX):</p>
 <ul>
 <li><code>C</code>: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it</li>
 <li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable), X in samples</li>
@@ -1020,7 +1020,7 @@ the maximum Chebyshev polynomial degree to use for each segment.</p>
 <h4 id="usage_38">Usage</h4>
 <pre><code>_ : tabulate_chebychev(C, FX, NX, CD, R0, R1) : _
 </code></pre>
-<p>where all arguments must be available at compile time (constant numerical expressions):</p>
+<p>where all arguments must be available at compile time (constant numerical expressions and <em>known at compile time</em> FX):</p>
 <ul>
 <li><code>C</code>: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it</li>
 <li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable), X in samples</li>
