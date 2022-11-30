@@ -774,67 +774,65 @@ subseq(head, 0, N)         = head;
 
 
 //============================Function tabulation=========================================
-// The purpose of function tabulation is to speed up the computation of heavy functions over an interval 
-// (known at compile time), so that the computation at runtime can be faster than directly using the function. 
+// The purpose of function tabulation is to speed up the computation of heavy functions over an interval, 
+// so that the computation at runtime can be faster than directly using the function. 
 // Different techniques are possible.
 //
 //-------`(ba.)tabulate`----------
-// Tabulate a 1D function over the range [R0, R1] for access via nearest-value, linear, cubic interpolation.
+// Tabulate a 1D function over the range [r0, r1] for access via nearest-value, linear, cubic interpolation.
 // In other words, the uniformly tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).
 //
 // #### Usage
 //
 // ```
-// _ : tabulate(C, FX, S, R0, R1).(val|lin|cub) : _
+// tabulate(C, FX, S, r0, r1, x).(val|lin|cub) : _
 // ```
 //
-// where all arguments must be available at compile time (constant numerical expressions and *known at compile time* FX):
-//
-// * `C`: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it
-// * `FX`: unary function Y=F(X) with one output (scalar function of one variable)
-// * `S`: size of the table in samples
-// * `R0`: minimum value of argument X
-// * `R1`: maximum value of argument X
+// * `C`: whether to dynamically force the index to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
+// * `FX`: unary function Y=F(X) with one output (scalar function of one variable) 
+// * `S`: size of the table in samples (constant numerical expression)
+// * `r0`: minimum value of argument x
+// * `r1`: maximum value of argument x
 //
 // ```
-// tabulate(C, FX, S, R0, R1, X).val uses the value in the table closest to X
+// tabulate(C, FX, S, r0, r1, x).val uses the value in the table closest to x
 // ```
 //
 // ```
-// tabulate(C, FX, S, R0, R1, X).lin evaluates at X using linear interpolation between the closest stored values
+// tabulate(C, FX, S, r0, r1, x).lin evaluates at x using linear interpolation between the closest stored values
 // ```
 //
 // ```
-// tabulate(C, FX, S, R0, R1, X).cub evaluates at X using cubic interpolation between the closest stored values
+// tabulate(C, FX, S, r0, r1, x).cub evaluates at x using cubic interpolation between the closest stored values
 // ```
 //
 // #### Example test program
 //
 // ```
-// midikey2hz(mk) = ba.tabulate(0, ba.midikey2hz, 8192, 0, 127, mk).lin;
+// midikey2hz(mk) = ba.tabulate(1, ba.midikey2hz, 8192, 0, 127, mk).lin;
 // process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 // ```
 //
 //--------------------------------------------
-tabulate(C, FX, S, R0, R1, x) = environment {
+tabulate(C, FX, S, r0, r1, x) = environment {
 
     // Maximum index to access
     mid = S-1;
 
     // Create the table
-    wf = R0 + float(ba.time)*(R1-R0)/float(mid) : FX;
+    wf = r0 + float(ba.time)*(r1-r0)/float(mid) : FX;
 
     // Prepare the 'float' table read index
-    id = (x-R0)/(R1-R0)*mid;
+    id = (x-r0)/(r1-r0)*mid;
 
     // Limit the table read index in [0, mid] if C = 1
     rid(x, 0) = x;
     rid(x, 1) = max(0, min(x, mid));
 
-    // Tabulate an unary 'FX' function on a range [R0, R1]
+    // Tabulate an unary 'FX' function on a range [r0, r1]
     val = y0 with { y0 = rdtable(S, wf, rid(int(id), C)); };
 
-    // Tabulate an unary 'FX' function on a range [R0, R1] with linear interpolation
+    // Tabulate an unary 'FX' function on a range [r0, r1] with linear interpolation
     lin = it.interpolate_linear(d,y0,y1)
     with {
         x0 = int(id);
@@ -844,7 +842,7 @@ tabulate(C, FX, S, R0, R1, x) = environment {
         y1 = rdtable(S, wf, rid(x1, C));
     };
 
-    // Tabulate an unary 'FX' function on a range [R0, R1] with cubic interpolation
+    // Tabulate an unary 'FX' function on a range [r0, r1] with cubic interpolation
     cub = it.interpolate_cubic(d,y0,y1,y2,y3)
     with {
         x0 = x1-1;
@@ -863,47 +861,45 @@ declare tabulate author "Stephane Letz";
 
 
 //-------`(ba.)tabulate_chebychev`----------
-// Tabulate a 1D function over the range [R0, R1] for access via Chebyshev polynomial approximation.
+// Tabulate a 1D function over the range [r0, r1] for access via Chebyshev polynomial approximation.
 // In contrast to `(ba.)tabulate`, which interpolates only between tabulated samples, `(ba.)tabulate_chebychev`
 // stores coefficients of Chebyshev polynomials that are evaluated to provide better approximations in many cases.
-// Two new arguments controlling this are NX, the number of segments into which [R0,R1] is divided, and CD,
+// Two new arguments controlling this are NX, the number of segments into which [r0, r1] is divided, and CD,
 // the maximum Chebyshev polynomial degree to use for each segment.
 //
 // #### Usage
 //
 // ```
-// _ : tabulate_chebychev(C, FX, NX, CD, R0, R1) : _
+// _ : tabulate_chebychev(C, FX, NX, CD, r0, r1) : _
 // ```
 //
-// where all arguments must be available at compile time (constant numerical expressions and *known at compile time* FX):
-//
-// * `C`: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it
+// * `C`: whether to dynamically force the index to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
 // * `FX`: unary function Y=F(X) with one output (scalar function of one variable)
-// * `NX`: number of segments for uniformly partitioning [R0,R1]
-// * `CD`: maximum polynomial degree for each Chebyshev polynomial
-// * `R0`: minimum value of argument X
-// * `R1`: maximum value of argument X
+// * `NX`: number of segments for uniformly partitioning [r0, r1] (constant numerical expression)
+// * `CD`: maximum polynomial degree for each Chebyshev polynomial (constant numerical expression)
+// * `r0`: minimum value of argument x
+// * `r1`: maximum value of argument x
 //
 // #### Example test program
 //
 // ```
-// midikey2hz_chebychev(mk) = ba.tabulate_chebychev(0, ba.midikey2hz, 50, 4, 0, 127, mk);
+// midikey2hz_chebychev(mk) = ba.tabulate_chebychev(1, ba.midikey2hz, 50, 4, 0, 127, mk);
 // process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
 // ```
 //
 //--------------------------------------------
-tabulate_chebychev(C, FX, NX, CD, R0, R1, x) = y with {
+tabulate_chebychev(C, FX, NX, CD, r0, r1, x) = y with {
     ck(0) = _;
     ck(1) = max(0) : min(NX-1);
 
     // number of chebyshev coefficients
     NC = CD + 1;
     // length of the segments
-    DX = (R1 - R0) / NX;
+    DX = (r1 - r0) / NX;
     // number of segment 'x' falls in
-    nx = (x  - R0) / DX : int : ck(C);
+    nx = (x  - r0) / DX : int : ck(C);
     // center of n's segment
-    xc(n) = R0 + DX * (n + 1/2);
+    xc(n) = r0 + DX * (n + 1/2);
     // so ch(0) .. ch(NC) are the coeffs we use for approximation
     // on nx's segment
     ch(i) = chtab(NC * nx + i);
