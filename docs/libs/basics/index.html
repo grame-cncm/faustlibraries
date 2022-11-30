@@ -688,7 +688,7 @@ positive pole in (0-1).
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>semi</code>: number of semitone </li>
+<li><code>semi</code>: number of semitone</li>
 </ul>
 <hr />
 <h3 id="baratio2semi"><code>(ba.)ratio2semi</code></h3>
@@ -709,7 +709,7 @@ positive pole in (0-1).
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>cent</code>: number of cents </li>
+<li><code>cent</code>: number of cents</li>
 </ul>
 <hr />
 <h3 id="baratio2cent"><code>(ba.)ratio2cent</code></h3>
@@ -744,8 +744,8 @@ positive pole in (0-1).
 <h2 id="counters-and-timetempo-tools">Counters and Time/Tempo Tools</h2>
 <hr />
 <h3 id="bacounter"><code>(ba.)counter</code></h3>
-<p>Starts counting 0, 1, 2, 3..., and raise the current integer value 
-at each upfront of the trigger. </p>
+<p>Starts counting 0, 1, 2, 3..., and raise the current integer value
+at each upfront of the trigger.</p>
 <h4 id="usage_16">Usage</h4>
 <pre><code>counter(trig) : _
 </code></pre>
@@ -809,8 +809,8 @@ Outputs zero while <code>run</code> is 0.</p>
 </ul>
 <hr />
 <h3 id="baline"><code>(ba.)line</code></h3>
-<p>A linear ramp to reach a next value in 'n' samples. 
-Note that the interpolation process is restarted every time 
+<p>A linear ramp to reach a next value in 'n' samples.
+Note that the interpolation process is restarted every time
 the desired output value changes, the interpolation time is sampled only then.</p>
 <h4 id="usage_22">Usage</h4>
 <pre><code>_ : line(n) : _
@@ -987,24 +987,24 @@ compositions and there is no empty list.</p>
 <h2 id="function-tabulation">Function tabulation</h2>
 <hr />
 <h3 id="batabulate"><code>(ba.)tabulate</code></h3>
-<p>Tabulate an unary function on a [R0, R1] range in a table. 
-The table value can then be read directly or with linear or cubic interpolation.</p>
+<p>Tabulate a 1D function over the range [R0, R1] for access via nearest-value, linear, cubic interpolation.
+In other words, the uniformly tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).</p>
 <h4 id="usage_37">Usage</h4>
 <pre><code>_ : tabulate(C, FX, S, R0, R1).(val|lin|cub) : _
 </code></pre>
-<p>Where:</p>
+<p>where all arguments must be available at compile time (constant numerical expressions):</p>
 <ul>
-<li><code>C</code>: whether to dynamically force the index in [R0, R1] range: 1 force the check, 0 deactivate it (a constant numerical expression)</li>
-<li><code>FX</code>: unary function (known at compile time)</li>
-<li><code>S</code>: size of the table (a constant numerical expression)</li>
-<li><code>R0</code>: range minimal value (a constant numerical expression)</li>
-<li><code>R1</code>: range maximal value (a constant numerical expression)</li>
+<li><code>C</code>: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it</li>
+<li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable), X in samples</li>
+<li><code>S</code>: size of the table in samples</li>
+<li><code>R0</code>: minimum value of argument X</li>
+<li><code>R1</code>: maximum value of argument X</li>
 </ul>
-<pre><code>tabulate(C, FX, S, R0, R1, x).val uses the value in the table
+<pre><code>tabulate(C, FX, S, R0, R1, X).val uses the value in the table closest to X
 </code></pre>
-<pre><code>tabulate(C, FX, S, R0, R1, x).lin uses the value in the table with linear interpolation
+<pre><code>tabulate(C, FX, S, R0, R1, X).lin evaluates at X using linear interpolation between the closest stored values
 </code></pre>
-<pre><code>tabulate(C, FX, S, R0, R1, x).cub uses the value in the table with cubic interpolation
+<pre><code>tabulate(C, FX, S, R0, R1, X).cub evaluates at X using cubic interpolation between the closest stored values
 </code></pre>
 <h4 id="example-test-program">Example test program</h4>
 <pre><code>midikey2hz(mk) = ba.tabulate(0, ba.midikey2hz, 8192, 0, 127, mk).lin;
@@ -1012,20 +1012,22 @@ process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 </code></pre>
 <hr />
 <h3 id="batabulate_chebychev"><code>(ba.)tabulate_chebychev</code></h3>
-<p>Approximate an unary function on a [R0, R1] range using chebyshev
-polynomials. <code>tabulate_chebychev</code> splits [R0, R1] into NX segments to improve
-the accuracy and approximates the function on each segment independently.</p>
+<p>Tabulate a 1D function over the range [R0, R1] for access via Chebyshev polynomial approximation.
+In contrast to <code>(ba.)tabulate</code>, which interpolates only between tabulated samples, <code>(ba.)tabulate_chebychev</code>
+stores coefficients of Chebyshev polynomials that are evaluated to provide better approximations in many cases.
+Two new arguments controlling this are NX, the number of segments into which [R0,R1] is divided, and CD,
+the maximum Chebyshev polynomial degree to use for each segment.</p>
 <h4 id="usage_38">Usage</h4>
 <pre><code>_ : tabulate_chebychev(C, FX, NX, CD, R0, R1) : _
 </code></pre>
-<p>Where:</p>
+<p>where all arguments must be available at compile time (constant numerical expressions):</p>
 <ul>
-<li><code>C</code>: whether to dynamically check if the input fits into [R0, R1] range, 1 force the check, 0 deactivate it (a constant numerical expression)</li>
-<li><code>FX</code>: unary function  (known at compile time)</li>
-<li><code>NX</code>: number of segments (a constant numerical expression)</li>
-<li><code>CD</code>: max degree of chebyshev polynomials (a constant numerical expression)</li>
-<li><code>R0</code>: range minimal value (a constant numerical expression)</li>
-<li><code>R1</code>: range maximal value (a constant numerical expression)</li>
+<li><code>C</code>: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it</li>
+<li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable), X in samples</li>
+<li><code>NX</code>: number of segments for uniformly partitioning [R0,R1]</li>
+<li><code>CD</code>: maximum polynomial degree for each Chebyshev polynomial</li>
+<li><code>R0</code>: minimum value of argument X</li>
+<li><code>R1</code>: maximum value of argument X</li>
 </ul>
 <h4 id="example-test-program_1">Example test program</h4>
 <pre><code>midikey2hz_chebychev(mk) = ba.tabulate_chebychev(0, ba.midikey2hz, 50, 4, 0, 127, mk);
@@ -1035,7 +1037,7 @@ process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
 <hr />
 <h3 id="baif"><code>(ba.)if</code></h3>
 <p>if-then-else implemented with a select2. WARNING: since <code>select2</code> is strict (always evaluating both branches),
-the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to 
+the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to
 protect against forbidden computations like division-by-zero for instance.</p>
 <h4 id="usage_39">Usage</h4>
 <ul>
@@ -1064,7 +1066,7 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <h3 id="baselect2stereo"><code>(ba.)select2stereo</code></h3>
 <p>Select between 2 stereo signals.</p>
 <h4 id="usage_41">Usage</h4>
-<pre><code>_,_,_,_ : select2stereo(bpc) : _,_    
+<pre><code>_,_,_,_ : select2stereo(bpc) : _,_
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1121,7 +1123,7 @@ sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 <h2 id="other">Other</h2>
 <hr />
 <h3 id="balatch"><code>(ba.)latch</code></h3>
-<p>Latch input on positive-going transition of trig:"records" the input when trig 
+<p>Latch input on positive-going transition of trig:"records" the input when trig
 switches from 0 to 1, outputs a frozen values everytime else.</p>
 <h4 id="usage_45">Usage</h4>
 <pre><code>_ : latch(trig) : _
@@ -1160,7 +1162,7 @@ rate of a signal, it just holds samples...
 <pre><code>_ : peakhold(mode) : _
 </code></pre>
 <p>Where:</p>
-<p><code>mode</code> means: 
+<p><code>mode</code> means:
    0 - Pass through. A single sample 0 trigger will work as a reset.
  1 - Track and hold max value.</p>
 <hr />
@@ -1182,9 +1184,9 @@ detected, the absolute value of the current input becomes the new peak.</p>
 </ul>
 <hr />
 <h3 id="baimpulsify"><code>(ba.)impulsify</code></h3>
-<p>Turns a signal into an impulse with the value of the current sample 
-(0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a 
-<code>button</code> to turn its output into an impulse. <code>impulsify</code> is a standard Faust 
+<p>Turns a signal into an impulse with the value of the current sample
+(0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a
+<code>button</code> to turn its output into an impulse. <code>impulsify</code> is a standard Faust
 function.</p>
 <h4 id="usage_50">Usage</h4>
 <pre><code>button(&quot;gate&quot;) : impulsify;
@@ -1243,7 +1245,7 @@ The range of <code>index</code> depends on the size of the list.</li>
 </ul>
 <hr />
 <h3 id="babypass1"><code>(ba.)bypass1</code></h3>
-<p>Takes a mono input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>. 
+<p>Takes a mono input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>.
 When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up.
 <code>bypass1</code> is a standard Faust function.</p>
 <h4 id="usage_53">Usage</h4>
@@ -1256,7 +1258,7 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 </ul>
 <hr />
 <h3 id="babypass2"><code>(ba.)bypass2</code></h3>
-<p>Takes a stereo input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>. 
+<p>Takes a stereo input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>.
 When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up.
 <code>bypass2</code> is a standard Faust function.</p>
 <h4 id="usage_54">Usage</h4>
@@ -1269,8 +1271,8 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 </ul>
 <hr />
 <h3 id="babypass1to2"><code>(ba.)bypass1to2</code></h3>
-<p>Bypass switch for effect <code>e</code> having mono input signal and stereo output. 
-Effect <code>e</code> is bypassed if <code>bpc = 1</code>.When bypassed, <code>e</code> is feed with zeros 
+<p>Bypass switch for effect <code>e</code> having mono input signal and stereo output.
+Effect <code>e</code> is bypassed if <code>bpc = 1</code>.When bypassed, <code>e</code> is feed with zeros
 so that its state is cleanup up.
 <code>bypass1to2</code> is a standard Faust function.</p>
 <h4 id="usage_55">Usage</h4>
@@ -1283,15 +1285,15 @@ so that its state is cleanup up.
 </ul>
 <hr />
 <h3 id="babypass_fade"><code>(ba.)bypass_fade</code></h3>
-<p>Bypass an arbitrary (N x N) circuit with 'n' samples crossfade. 
-Inputs and outputs signals are faded out when 'e' is bypassed, 
-so that 'e' state is cleanup up. 
-Once bypassed the effect is replaced by <code>par(i,N,_)</code>. 
+<p>Bypass an arbitrary (N x N) circuit with 'n' samples crossfade.
+Inputs and outputs signals are faded out when 'e' is bypassed,
+so that 'e' state is cleanup up.
+Once bypassed the effect is replaced by <code>par(i,N,_)</code>.
 Bypassed circuits can be chained.</p>
 <h4 id="usage_56">Usage</h4>
 <pre><code>_ : bypass_fade(n,b,e) : _
 or
-_,_ : bypass_fade(n,b,e) : _,_ 
+_,_ : bypass_fade(n,b,e) : _,_
 </code></pre>
 <ul>
 <li><code>n</code>: number of samples for the crossfade</li>
@@ -1459,7 +1461,7 @@ and at which delay time.</p>
 <li>turning it on or off: <code>useVal()</code></li>
 <li>getting the maximum of all of them: <code>parallelOp()</code></li>
 </ul>
-<p>In Faust, we can only do that for a fixed maximum number of values: <code>maxN</code>, known at compile time. </p>
+<p>In Faust, we can only do that for a fixed maximum number of values: <code>maxN</code>, known at compile time.</p>
 <hr />
 <h3 id="baslidingreduce"><code>(ba.)slidingReduce</code></h3>
 <p>Fold-like high order function. Apply a commutative binary operation <code>op</code> to
