@@ -985,55 +985,53 @@ subseq((10,20,30,40,50,60), 4, 1) -&gt; 50
 <p>Faust doesn't have proper lists. Lists are simulated with parallel
 compositions and there is no empty list.</p>
 <h2 id="function-tabulation">Function tabulation</h2>
-<p>The purpose of function tabulation is to speed up the computation of heavy functions over an interval 
-(known at compile time), so that the computation at runtime can be faster than directly using the function. 
+<p>The purpose of function tabulation is to speed up the computation of heavy functions over an interval, 
+so that the computation at runtime can be faster than directly using the function. 
 Different techniques are possible.</p>
 <hr />
 <h3 id="batabulate"><code>(ba.)tabulate</code></h3>
-<p>Tabulate a 1D function over the range [R0, R1] for access via nearest-value, linear, cubic interpolation.
+<p>Tabulate a 1D function over the range [r0, r1] for access via nearest-value, linear, cubic interpolation.
 In other words, the uniformly tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).</p>
 <h4 id="usage_37">Usage</h4>
-<pre><code>_ : tabulate(C, FX, S, R0, R1).(val|lin|cub) : _
+<pre><code>tabulate(C, FX, S, r0, r1, x).(val|lin|cub) : _
 </code></pre>
-<p>where all arguments must be available at compile time (constant numerical expressions and <em>known at compile time</em> FX):</p>
 <ul>
-<li><code>C</code>: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it</li>
-<li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable)</li>
-<li><code>S</code>: size of the table in samples</li>
-<li><code>R0</code>: minimum value of argument X</li>
-<li><code>R1</code>: maximum value of argument X</li>
+<li><code>C</code>: whether to dynamically force the index to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)</li>
+<li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable) </li>
+<li><code>S</code>: size of the table in samples (constant numerical expression)</li>
+<li><code>r0</code>: minimum value of argument x</li>
+<li><code>r1</code>: maximum value of argument x</li>
 </ul>
-<pre><code>tabulate(C, FX, S, R0, R1, X).val uses the value in the table closest to X
+<pre><code>tabulate(C, FX, S, r0, r1, x).val uses the value in the table closest to x
 </code></pre>
-<pre><code>tabulate(C, FX, S, R0, R1, X).lin evaluates at X using linear interpolation between the closest stored values
+<pre><code>tabulate(C, FX, S, r0, r1, x).lin evaluates at x using linear interpolation between the closest stored values
 </code></pre>
-<pre><code>tabulate(C, FX, S, R0, R1, X).cub evaluates at X using cubic interpolation between the closest stored values
+<pre><code>tabulate(C, FX, S, r0, r1, x).cub evaluates at x using cubic interpolation between the closest stored values
 </code></pre>
 <h4 id="example-test-program">Example test program</h4>
-<pre><code>midikey2hz(mk) = ba.tabulate(0, ba.midikey2hz, 8192, 0, 127, mk).lin;
+<pre><code>midikey2hz(mk) = ba.tabulate(1, ba.midikey2hz, 8192, 0, 127, mk).lin;
 process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 </code></pre>
 <hr />
 <h3 id="batabulate_chebychev"><code>(ba.)tabulate_chebychev</code></h3>
-<p>Tabulate a 1D function over the range [R0, R1] for access via Chebyshev polynomial approximation.
+<p>Tabulate a 1D function over the range [r0, r1] for access via Chebyshev polynomial approximation.
 In contrast to <code>(ba.)tabulate</code>, which interpolates only between tabulated samples, <code>(ba.)tabulate_chebychev</code>
 stores coefficients of Chebyshev polynomials that are evaluated to provide better approximations in many cases.
-Two new arguments controlling this are NX, the number of segments into which [R0,R1] is divided, and CD,
+Two new arguments controlling this are NX, the number of segments into which [r0, r1] is divided, and CD,
 the maximum Chebyshev polynomial degree to use for each segment.</p>
 <h4 id="usage_38">Usage</h4>
-<pre><code>_ : tabulate_chebychev(C, FX, NX, CD, R0, R1) : _
+<pre><code>_ : tabulate_chebychev(C, FX, NX, CD, r0, r1) : _
 </code></pre>
-<p>where all arguments must be available at compile time (constant numerical expressions and <em>known at compile time</em> FX):</p>
 <ul>
-<li><code>C</code>: whether to dynamically force the index to the range [R0, R1]: 1 forces the check, 0 deactivates it</li>
+<li><code>C</code>: whether to dynamically force the index to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)</li>
 <li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable)</li>
-<li><code>NX</code>: number of segments for uniformly partitioning [R0,R1]</li>
-<li><code>CD</code>: maximum polynomial degree for each Chebyshev polynomial</li>
-<li><code>R0</code>: minimum value of argument X</li>
-<li><code>R1</code>: maximum value of argument X</li>
+<li><code>NX</code>: number of segments for uniformly partitioning [r0, r1] (constant numerical expression)</li>
+<li><code>CD</code>: maximum polynomial degree for each Chebyshev polynomial (constant numerical expression)</li>
+<li><code>r0</code>: minimum value of argument x</li>
+<li><code>r1</code>: maximum value of argument x</li>
 </ul>
 <h4 id="example-test-program_1">Example test program</h4>
-<pre><code>midikey2hz_chebychev(mk) = ba.tabulate_chebychev(0, ba.midikey2hz, 50, 4, 0, 127, mk);
+<pre><code>midikey2hz_chebychev(mk) = ba.tabulate_chebychev(1, ba.midikey2hz, 50, 4, 0, 127, mk);
 process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
 </code></pre>
 <h2 id="selectors-conditions">Selectors (Conditions)</h2>
