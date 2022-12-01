@@ -614,7 +614,7 @@ lf_saw(freq) = saw1(freq);
 //
 // Correction-filtered versions of `saw2`: `saw2f2`, `saw2f4`
 // The correction filter compensates "droop" near half the sampling rate.
-// See reference for sawN.
+// See reference for `sawN`.
 //
 // #### Usage
 //
@@ -634,7 +634,7 @@ lf_saw(freq) = saw1(freq);
 //
 // Where:
 //
-// * `N`: polynomial order, known at compile time
+// * `N`: polynomial order, a constant numerical expression     
 // * `freq`: frequency in Hz
 // * `phase`: phase between 0 and 1
 //===================================================================
@@ -740,7 +740,7 @@ saw2f4 = saw2 : cf4 with {
 // `triangleN`, `triangle`
 //
 // All are zero-mean and meant to oscillate in the audio frequency range.
-// Use simpler sample-rounded lf_* versions above for LFOs.
+// Use simpler sample-rounded `lf_*` versions above for LFOs.
 //
 // #### Usage
 //
@@ -760,7 +760,7 @@ saw2f4 = saw2 : cf4 with {
 //
 // Where:
 //
-// * `N`: polynomial order
+// * `N`: polynomial order, a constant numerical expression      
 // * `freq`: frequency in Hz
 //====================================================================
 
@@ -1191,13 +1191,17 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // Oscillators that mimic some of the Casio CZ oscillators.
 //
 // There are two sets:
-// - A set with an index parameter
-// - A set with a res parameter
+//
+// * a set with an index parameter
+//
+// * a set with a res parameter
 //
 // The "index oscillators" outputs a sine wave at index=0 and gets brighter with a higher index.
 // There are two versions of the "index oscillators":
-// - with P appended to the name: is phase aligned with 'fund:sin'
-// - without P appended to the name: has the phase of the original CZ oscillators
+//
+// * with P appended to the name: is phase aligned with `fund:sin`
+//
+// * without P appended to the name: has the phase of the original CZ oscillators
 //
 // The "res oscillators" have a resonant frequency.
 // "res" is the frequency of resonance as a factor of the fundamental pitch.
@@ -1602,7 +1606,7 @@ with {
 };
 
 //----------`(os.)polyblep_saw`----------
-// Sawtooth oscillator with suppressed aliasing (using polyBLEP).
+// Sawtooth oscillator with suppressed aliasing (using `polyblep`).
 //
 // #### Usage
 //
@@ -1624,7 +1628,7 @@ with {
 };
 
 //----------`(os.)polyblep_square`----------
-// Square wave oscillator with suppressed aliasing (using polyBLEP).
+// Square wave oscillator with suppressed aliasing (using `polyblep`).
 //
 // #### Usage
 //
@@ -1646,7 +1650,7 @@ with {
 };
 
 //----------`(os.)polyblep_triangle`----------
-// Triangle wave oscillator with suppressed aliasing (using polyBLEP).
+// Triangle wave oscillator with suppressed aliasing (using `polyblep`).
 //
 // #### Usage
 //

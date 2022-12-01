@@ -862,7 +862,7 @@ Vol. 18, no. 5, May 2010.</p>
 <h4 id="other-cases">Other Cases</h4>
 <p>Correction-filtered versions of <code>saw2</code>: <code>saw2f2</code>, <code>saw2f4</code>
 The correction filter compensates "droop" near half the sampling rate.
-See reference for sawN.</p>
+See reference for <code>sawN</code>.</p>
 <h4 id="usage_25">Usage</h4>
 <pre><code>sawN(N,freq) : _
 sawNp(N,freq,phase) : _
@@ -878,7 +878,7 @@ saw2f4(freq) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: polynomial order, known at compile time</li>
+<li><code>N</code>: polynomial order, a constant numerical expression     </li>
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>phase</code>: phase between 0 and 1</li>
 </ul>
@@ -913,7 +913,7 @@ saw2f4(freq) : _
 <p><code>pulsetrainN</code>, <code>pulsetrain</code>, <code>squareN</code>, <code>square</code>, <code>imptrainN</code>, <code>imptrain</code>,
 <code>triangleN</code>, <code>triangle</code></p>
 <p>All are zero-mean and meant to oscillate in the audio frequency range.
-Use simpler sample-rounded lf_* versions above for LFOs.</p>
+Use simpler sample-rounded <code>lf_*</code> versions above for LFOs.</p>
 <h4 id="usage_27">Usage</h4>
 <pre><code>pulsetrainN(N,freq,duty) : _
 pulsetrain(freq, duty) : _ // = pulsetrainN(2)
@@ -929,7 +929,7 @@ triangle : _ // = triangleN(2)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>N</code>: polynomial order</li>
+<li><code>N</code>: polynomial order, a constant numerical expression      </li>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
 <hr />
@@ -1187,13 +1187,25 @@ Unit-amplitude cosine oscillator (default).</p>
 </ul>
 <h2 id="casio-cz-oscillators">Casio CZ Oscillators</h2>
 <p>Oscillators that mimic some of the Casio CZ oscillators.</p>
-<p>There are two sets:
-- A set with an index parameter
-- A set with a res parameter</p>
+<p>There are two sets:</p>
+<ul>
+<li>
+<p>a set with an index parameter</p>
+</li>
+<li>
+<p>a set with a res parameter</p>
+</li>
+</ul>
 <p>The "index oscillators" outputs a sine wave at index=0 and gets brighter with a higher index.
-There are two versions of the "index oscillators":
-- with P appended to the name: is phase aligned with 'fund:sin'
-- without P appended to the name: has the phase of the original CZ oscillators</p>
+There are two versions of the "index oscillators":</p>
+<ul>
+<li>
+<p>with P appended to the name: is phase aligned with <code>fund:sin</code></p>
+</li>
+<li>
+<p>without P appended to the name: has the phase of the original CZ oscillators</p>
+</li>
+</ul>
 <p>The "res oscillators" have a resonant frequency.
 "res" is the frequency of resonance as a factor of the fundamental pitch.</p>
 <hr />
@@ -1371,7 +1383,7 @@ with it's phase aligned to <code>fund:sin</code>.
 </ul>
 <hr />
 <h3 id="ospolyblep_saw"><code>(os.)polyblep_saw</code></h3>
-<p>Sawtooth oscillator with suppressed aliasing (using polyBLEP).</p>
+<p>Sawtooth oscillator with suppressed aliasing (using <code>polyblep</code>).</p>
 <h4 id="usage_62">Usage</h4>
 <pre><code>polyblep_saw(freq) : _
 </code></pre>
@@ -1381,7 +1393,7 @@ with it's phase aligned to <code>fund:sin</code>.
 </ul>
 <hr />
 <h3 id="ospolyblep_square"><code>(os.)polyblep_square</code></h3>
-<p>Square wave oscillator with suppressed aliasing (using polyBLEP).</p>
+<p>Square wave oscillator with suppressed aliasing (using <code>polyblep</code>).</p>
 <h4 id="usage_63">Usage</h4>
 <pre><code>polyblep_square(freq) : _
 </code></pre>
@@ -1391,7 +1403,7 @@ with it's phase aligned to <code>fund:sin</code>.
 </ul>
 <hr />
 <h3 id="ospolyblep_triangle"><code>(os.)polyblep_triangle</code></h3>
-<p>Triangle wave oscillator with suppressed aliasing (using polyBLEP).</p>
+<p>Triangle wave oscillator with suppressed aliasing (using <code>polyblep</code>).</p>
 <h4 id="usage_64">Usage</h4>
 <pre><code>polyblep_triangle(freq) : _
 </code></pre>
