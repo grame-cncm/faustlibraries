@@ -776,7 +776,30 @@ subseq(head, 0, N)         = head;
 //============================Function tabulation=========================================
 // The purpose of function tabulation is to speed up the computation of heavy functions over an interval, 
 // so that the computation at runtime can be faster than directly using the function. 
-// Different techniques are possible.
+// Two techniques are implemented: 
+//
+// * `tabulate` computes the function in a table and read the points using interpolation
+//
+// * `tabulate_chebychev` uses Chebyshev polynomial approximation
+//
+// #### Example comparison program
+// ```
+///* Both tabulate() and tabulate_chebychev() create rdtable of size = 200, both use */
+///* cubic polynomials, so this comparison is more or less fair. */
+// process = line(50000, r0, r1) <: FX-tb,FX-ch : par(i, 2, maxerr)
+// with {
+//    C = 0;
+//    FX = sin; 
+//    NX = 50; 
+//    CD = 3;
+//    r0 = 0;
+//    r1 = ma.PI;
+//    tb(x) = ba.tabulate(C, FX, NX*(CD+1), r0, r1, x).cub;
+//    ch(x) = ba.tabulate_chebychev(C, FX, NX, CD, r0, r1, x);
+//    maxerr = abs : max ~ _;
+//    line(n, x0, x1) = x0 + (ba.time%n)/n * (x1-x0);
+// };
+// ```
 //
 //-------`(ba.)tabulate`----------
 // Tabulate a 1D function over the range [r0, r1] for access via nearest-value, linear, cubic interpolation.
@@ -809,7 +832,7 @@ subseq(head, 0, N)         = head;
 // #### Example test program
 //
 // ```
-// midikey2hz(mk) = ba.tabulate(1, ba.midikey2hz, 8192, 0, 127, mk).lin;
+// midikey2hz(mk) = ba.tabulate(1, ba.midikey2hz, 512, 0, 127, mk).lin;
 // process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 // ```
 //
@@ -832,7 +855,7 @@ tabulate(C, FX, S, r0, r1, x) = environment {
     // Tabulate an unary 'FX' function on a range [r0, r1]
     val = y0 with { y0 = rdtable(S, wf, rid(int(id), C)); };
 
-    // Tabulate an unary 'FX' function on a range [r0, r1] with linear interpolation
+    // Tabulate an unary 'FX' function over the range [r0, r1] with linear interpolation
     lin = it.interpolate_linear(d,y0,y1)
     with {
         x0 = int(id);
@@ -842,7 +865,7 @@ tabulate(C, FX, S, r0, r1, x) = environment {
         y1 = rdtable(S, wf, rid(x1, C));
     };
 
-    // Tabulate an unary 'FX' function on a range [r0, r1] with cubic interpolation
+    // Tabulate an unary 'FX' function over the range [r0, r1] with cubic interpolation
     cub = it.interpolate_cubic(d,y0,y1,y2,y3)
     with {
         x0 = x1-1;
@@ -865,7 +888,7 @@ declare tabulate author "Stephane Letz";
 // In contrast to `(ba.)tabulate`, which interpolates only between tabulated samples, `(ba.)tabulate_chebychev`
 // stores coefficients of Chebyshev polynomials that are evaluated to provide better approximations in many cases.
 // Two new arguments controlling this are NX, the number of segments into which [r0, r1] is divided, and CD,
-// the maximum Chebyshev polynomial degree to use for each segment.
+// the maximum Chebyshev polynomial degree to use for each segment. A `rdtable` of size NX*(CD+1) is internally used.
 //
 // #### Usage
 //
@@ -883,7 +906,7 @@ declare tabulate author "Stephane Letz";
 // #### Example test program
 //
 // ```
-// midikey2hz_chebychev(mk) = ba.tabulate_chebychev(1, ba.midikey2hz, 50, 4, 0, 127, mk);
+// midikey2hz_chebychev(mk) = ba.tabulate_chebychev(1, ba.midikey2hz, 100, 4, 0, 127, mk);
 // process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
 // ```
 //
