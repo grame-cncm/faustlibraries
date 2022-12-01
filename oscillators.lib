@@ -664,11 +664,32 @@ with {
 };
 
 //------------------`(os.)sawNp`--------------------------------
-// TODO: MarkDown doc in comments
+// Bandlimited Sawtooth with Phase Offset
+//
+// #### Usage
+//
+// ```
+// sawNp(N,freq,phase) : _
+// ```
+//
+// where
+//
+// * `N`: waveform interpolation polynomial order (constant integer expression)
+// * `freq`: frequency in Hz
+// * `phase`: waveform phase as a fraction of one period (rounded to nearest sample)
+//
+// #### Implementation Notes
+//
+// The phase offset is implemented by delaying sawN(N,freq) by
+// round(phase*ma.SR/freq) samples, for up to 8191 samples.
+// The minimum sawtooth frequency that can be delayed a whole period
+// is therefore ma.SR/8191, which is well below audibility for normal
+// audio sampling rates.
+//
 //--------------------------------------------------------
 // --- sawNp for N = 1 to 6 ---
 // Phase offset = delay (max 8191 samples is more than one period of audio):
-sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(phase*ma.SR/freq))));
+sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))));
 
 // Special named cases:
 
