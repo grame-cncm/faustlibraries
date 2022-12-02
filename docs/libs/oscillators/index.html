@@ -275,7 +275,7 @@
             </li>
               </ul>
             </li>
-            <li class="nav-item" data-level="2"><a href="#lfos" class="nav-link">LFOs</a>
+            <li class="nav-item" data-level="2"><a href="#low-frequency-oscillators" class="nav-link">Low Frequency Oscillators</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#oslf_imptrain" class="nav-link">(os.)lf_imptrain</a>
               <ul class="nav flex-column">
@@ -540,6 +540,18 @@
 
 <h1 id="oscillatorslib">oscillators.lib</h1>
 <p>This library contains a collection of sound generators. Its official prefix is <code>os</code>.</p>
+<p>The oscillators library is organized into 9 sections:</p>
+<ul>
+<li><a href="#wave-table-based-oscillators">Wave-Table-Based Oscillators</a></li>
+<li><a href="#low-frequency-oscillators">Low Frequency Oscillators</a></li>
+<li><a href="#low-frequency-sawtooths">Low Frequency Sawtooths</a></li>
+<li><a href="#alias-suppressed-sawtooth">Alias-Suppressed Sawtooth</a></li>
+<li><a href="#alias-suppressed-pulse-square-and-impulse-trains">Alias-Suppressed Pulse, Square, and Impulse Trains</a></li>
+<li><a href="#filter-based-oscillators">Filter-Based Oscillators</a></li>
+<li><a href="#waveguide-resonator-based-oscillators">Waveguide-Resonator-Based Oscillators</a></li>
+<li><a href="#casio-cz-oscillators">Casio CZ Oscillators</a></li>
+<li><a href="#polyblep-based-oscillators">PolyBLEP-Based Oscillators</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/oscillators.lib">https://github.com/grame-cncm/faustlibraries/blob/master/oscillators.lib</a></li>
@@ -677,8 +689,8 @@
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
 </ul>
-<h2 id="lfos">LFOs</h2>
-<p>Low-Frequency Oscillators (LFOs) have prefix <code>lf_</code>
+<h2 id="low-frequency-oscillators">Low Frequency Oscillators</h2>
+<p>Low Frequency Oscillators (LFOs) have prefix <code>lf_</code>
 (no aliasing suppression, since it is inaudible at LF).
 Use <code>sawN</code> and its derivatives for audio oscillators with suppressed aliasing.</p>
 <hr />
@@ -870,10 +882,9 @@ IEEE Tr. Audio, Speech, and Language Processing (IEEE-ASLP),
 Vol. 18, no. 5, pp 786-798, May 2010.
 10.1109/TASL.2009.2026507.</p>
 <h4 id="notes">Notes</h4>
-<p>The PTR polynomial order <code>N</code> is limited to 4 because noise has been
-observed at very low <code>freq</code> values.  (Low-Frequency Oscillators
-(LFOs) should of course be implemented by using <code>lf_sawpos</code>
-instead).</p>
+<p>The polynomial order <code>N</code> is limited to 4 because noise has been
+observed at very low <code>freq</code> values.  (LFO sawtooths should of course
+be generated using <code>lf_sawpos</code> instead.)</p>
 <hr />
 <h3 id="ossawnp"><code>(os.)sawNp</code></h3>
 <p>Same as <code>(os.)sawN</code> but with a controllable waveform phase.</p>
@@ -931,10 +942,10 @@ using Polynomial Transition Regions (PTR) for order 2.</p>
 <li><a href="http://research.spa.aalto.fi/publications/papers/spl-ptr/">http://research.spa.aalto.fi/publications/papers/spl-ptr/</a></li>
 </ul>
 <h5 id="notes_1">Notes</h5>
-<p>Method PTR is often preferred because it requires less
+<p>Method PTR may be preferred because it requires less
 computation and is stateless which means that the frequency <code>freq</code>
 can be modulated arbitrarily fast over time without filtering
-artifacts.</p>
+artifacts.  For this reason, <code>saw2</code> is presently defined as <code>saw2ptr</code>.</p>
 <hr />
 <h3 id="ossaw2dpw"><code>(os.)saw2dpw</code></h3>
 <p>Alias-Suppressed Sawtooth Audio-Frequency Oscillator
@@ -946,7 +957,9 @@ using the Differentiated Polynomial Waveform (DWP) method.</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
-<p>This is the original Faust <code>saw2</code> function using the DPW method.</p>
+<p>This is the original Faust <code>saw2</code> function using the DPW method.
+Since <code>saw2</code> is now defined as <code>saw2ptr</code>, the DPW version
+is now available as <code>saw2dwp</code>.</p>
 <hr />
 <h3 id="ossawtooth"><code>(os.)sawtooth</code></h3>
 <p>Alias-suppressed aliasing-suppressed sawtooth oscillator, presently defined as <code>saw2</code>.
@@ -960,7 +973,7 @@ using the Differentiated Polynomial Waveform (DWP) method.</p>
 </ul>
 <hr />
 <h3 id="ossaw2f2-ossaw2f4"><code>(os.)saw2f2, (os.)saw2f4</code></h3>
-<p>Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 2nd or 4th-order Droop Correction Filtering.</p>
+<p>Alias-Suppressed Sawtooth Audio-Frequency Oscillator with Order 2 or 4 Droop Correction Filtering.</p>
 <h4 id="usage_31">Usage</h4>
 <pre><code>saw2f2(freq) : _
 saw2f4(freq) : _
