@@ -632,10 +632,9 @@ lf_saw(freq) = saw1(freq);
 // 10.1109/TASL.2009.2026507.
 //
 // #### Notes
-// The PTR polynomial order `N` is limited to 4 because noise has been
-// observed at very low `freq` values.  (Low-Frequency Oscillators
-// (LFOs) should of course be implemented by using `lf_sawpos`
-// instead).
+// The polynomial order `N` is limited to 4 because noise has been
+// observed at very low `freq` values.  (LFO sawtooths should of course
+// be generated using `lf_sawpos` instead.)
 //-----------------------------------------------------------------
 declare sawN author "Julius O. Smith III";
 declare sawN license "STK-4.3";
@@ -750,10 +749,10 @@ saw4 = sawN(4); // only choice available right now
 //
 // ##### Notes
 //
-// Method PTR is often preferred because it requires less
+// Method PTR may be preferred because it requires less
 // computation and is stateless which means that the frequency `freq`
 // can be modulated arbitrarily fast over time without filtering
-// artifacts.
+// artifacts.  For this reason, `saw2` is presently defined as `saw2ptr`.
 //
 //--------------------------------------------------------
 declare saw2ptr author "Julius O. Smith III";
@@ -783,6 +782,8 @@ saw2ptr(freq) = y with { // newer PTR version (stateless - freq can vary at any 
 // * `freq`: frequency in Hz
 //
 // This is the original Faust `saw2` function using the DPW method.
+// Since `saw2` is now defined as `saw2ptr`, the DPW version
+// is now available as `saw2dwp`.
 //--------------------------------------------------------
 declare saw2dpw author "Julius O. Smith III";
 declare saw2dpw license "STK-4.3";
@@ -805,7 +806,7 @@ saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freq);
 sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 
 //------------------`(os.)saw2f2, (os.)saw2f4`--------------------------------
-// Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 2nd or 4th-order Droop Correction Filtering.
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator with Order 2 or 4 Droop Correction Filtering.
 //
 // #### Usage
 //
