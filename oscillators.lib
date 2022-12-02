@@ -610,7 +610,7 @@ lf_saw(freq) = saw1(freq);
 // * `phase`: phase between 0 and 1
 //
 // #### Method
-// Differentiated Polynomial Wave (DPW)
+// Differentiated Polynomial Wave (DPW).
 //
 // ##### Reference
 // "Alias-Suppressed Oscillators based on Differentiated Polynomial Waveforms",
@@ -623,7 +623,7 @@ lf_saw(freq) = saw1(freq);
 // The PTR polynomial order `N` is limited to 4 because noise has been
 // observed at very low `freq` values.  (Low-Frequency Oscillators
 // (LFOs) should of course be implemented by using `lf_sawpos`
-// instead.)
+// instead).
 //-----------------------------------------------------------------
 declare sawN author "Julius O. Smith III";
 declare sawN license "STK-4.3";
@@ -793,7 +793,7 @@ saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freq);
 sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 
 //------------------`(os.)saw2f2, (os.)saw2f4`--------------------------------
-// Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 2nd- or 4th-order Droop Correction Filtering
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 2nd or 4th-order Droop Correction Filtering.
 //
 // #### Usage
 //
