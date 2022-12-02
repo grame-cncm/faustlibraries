@@ -49,7 +49,7 @@ si = library("signals.lib");
 declare name "Faust Oscillator Library";
 declare version "0.3";
 
-// This library contains platform specific constants 
+// This library contains platform specific constants
 pl = library("platform.lib");
 
 //=========================Wave-Table-Based Oscillators===================================
@@ -69,7 +69,7 @@ pl = library("platform.lib");
 //
 // * `tablesize`: the table size
 //------------------------------------------------------------
-sinwaveform(tablesize) = 
+sinwaveform(tablesize) =
     sin(float(ba.period(tablesize)) * (2.0 * ma.PI) / float(tablesize));
 
 
@@ -86,9 +86,9 @@ sinwaveform(tablesize) =
 //
 // * `tablesize`: the table size
 //------------------------------------------------------------
-coswaveform(tablesize) = 
+coswaveform(tablesize) =
     cos(float(ba.period(tablesize)) * (2.0 * ma.PI) / float(tablesize));
-    
+
 
 // Generic phasor with `reset` and `phase` parameters to be specialised in concrete use-cases.
 // The `reset` must be 1 on first sample for the `phase` to be properly initialized.
@@ -302,7 +302,7 @@ osc = oscsin;
 FAUST library file, jos section
 
 Except where noted otherwise, The Faust functions below in this
-section are Copyright (C) 2003-2017 by Julius O. Smith III <jos@ccrma.stanford.edu>
+section are Copyright (C) 2003-2022 by Julius O. Smith III <jos@ccrma.stanford.edu>
 ([jos](http://ccrma.stanford.edu/~jos/)), and released under the
 (MIT-style) [STK-4.3](#stk-4.3-license) license.
 
@@ -314,19 +314,20 @@ Michon and Julius O. Smith III, and are released under the
 
 //===============================LFOs===============================
 // Low-Frequency Oscillators (LFOs) have prefix `lf_`
-// (no aliasing suppression, which is not audible at LF).
+// (no aliasing suppression, since it is inaudible at LF).
+// Use `sawN` and its derivatives for audio oscillators with suppressed aliasing.
 //==================================================================
 
 //--------`(os.)lf_imptrain`----------
 // Unit-amplitude low-frequency impulse train.
 // `lf_imptrain` is a standard Faust function.
-//
+
 // #### Usage
 //
 // ```
 // lf_imptrain(freq) : _
 // ```
-//
+
 // Where:
 //
 // * `freq`: frequency in Hz
@@ -579,74 +580,62 @@ declare saw1 licence "STK-4.3";
 saw1(freq) = 2.0 * lf_sawpos(freq) - 1.0;
 lf_saw(freq) = saw1(freq);
 
-//================== Bandlimited Sawtooth ====================
+//================== Alias-Suppressed Sawtooth ====================
 //-----------------`(os.)sawN`--------------------
-// Bandlimited Sawtooth
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator using Nth-order polynomial transitions
+// to reduce aliasing.
 //
-// `sawN(N,freq)`, `sawNp`, `saw2dpw(freq)`, `saw2(freq)`, `saw3(freq)`,
-// `saw4(freq)`, `saw5(freq)`, `saw6(freq)`, `sawtooth(freq)`, `saw2f2(freq)`
-// `saw2f4(freq)`
-//
-// #### Method 1 (`saw2`)
-//
-// Polynomial Transition Regions (PTR) (for aliasing suppression).
-//
-// ##### References
-//
-// * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio
-//     Signals Using Polynomial Transition Regions," in Signal Processing
-//     Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012
-// * <https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9>
-// * <http://research.spa.aalto.fi/publications/papers/spl-ptr/>
-//
-// #### Method 2 (`sawN`)
-//
-// Differentiated Polynomial Waves (DPW) (for aliasing suppression).
-//
-// ##### Reference
-//
-// "Alias-Suppressed Oscillators based on Differentiated Polynomial Waveforms",
-// Vesa Valimaki, Juhan Nam, Julius Smith, and Jonathan Abel,
-// IEEE Tr. Acoustics, Speech, and Language Processing (IEEE-ASLP),
-// Vol. 18, no. 5, May 2010.
-//
-// #### Other Cases
-//
-// Correction-filtered versions of `saw2`: `saw2f2`, `saw2f4`
-// The correction filter compensates "droop" near half the sampling rate.
-// See reference for `sawN`.
+// `sawN(N,freq)`, `sawNp(N,freq,phase)`, `saw2dpw(freq)`, `saw2(freq)`, `saw3(freq)`,
+// `saw4(freq)`, `sawtooth(freq)`, `saw2f2(freq)`, `saw2f4(freq)`
 //
 // #### Usage
 //
 // ```
-// sawN(N,freq) : _
-// sawNp(N,freq,phase) : _
-// saw2dpw(freq) : _
-// saw2(freq) : _
-// saw3(freq) : _     // based on sawN
-// saw4(freq) : _     // based on sawN
-// saw5(freq) : _     // based on sawN
-// saw6(freq) : _     // based on sawN
-// sawtooth(freq) : _ // = saw2
-// saw2f2(freq) : _
-// saw2f4(freq) : _
+// sawN(N,freq) : _        // Nth-order aliasing-suppressed sawtooth using DPW method (see below)
+// sawNp(N,freq,phase) : _ // sawN with phase offset feature
+// saw2dpw(freq) : _       // saw2 using DPW
+// saw2ptr(freq) : _       // saw2 using the faster, stateless PTR method
+// saw2(freq) : _          // DPW method, but subject to change if a better method emerges
+// saw3(freq) : _          // sawN(3)
+// saw4(freq) : _          // sawN(4)
+// sawtooth(freq) : _      // saw2
+// saw2f2(freq) : _        // saw2dpw with 2nd-order droop-correction filtering
+// saw2f4(freq) : _        // saw2dpw with 4th-order droop-correction filtering
 // ```
 //
 // Where:
 //
-// * `N`: polynomial order, a constant numerical expression     
+// * `N`: polynomial order, a constant numerical expression between 1 and 4
 // * `freq`: frequency in Hz
 // * `phase`: phase between 0 and 1
-//===================================================================
-// --- sawN for N = 1 to 6 ---
-//We can do 6, but 5 and 6 have noise at low fundamentals: MAX_SAW_ORDER = 6; MAX_SAW_ORDER_NEXTPOW2 = 8;
-MAX_SAW_ORDER = 4; MAX_SAW_ORDER_NEXTPOW2 = 8; // par cannot handle the case of 0 elements
+//
+// #### Method
+// Differentiated Polynomial Wave (DPW)
+//
+// ##### Reference
+// "Alias-Suppressed Oscillators based on Differentiated Polynomial Waveforms",
+// Vesa Valimaki, Juhan Nam, Julius Smith, and Jonathan Abel,
+// IEEE Tr. Audio, Speech, and Language Processing (IEEE-ASLP),
+// Vol. 18, no. 5, pp 786-798, May 2010.
+// 10.1109/TASL.2009.2026507.
+//
+// #### Notes
+// The PTR polynomial order `N` is limited to 4 because noise has been
+// observed at very low `freq` values.  (Low-Frequency Oscillators
+// (LFOs) should of course be implemented by using `lf_sawpos`
+// instead.)
+//-----------------------------------------------------------------
+declare sawN author "Julius O. Smith III";
+declare sawN license "STK-4.3";
+// --- sawN for N = 1 to 4 ---
+// Orders 5 and 6 have noise at low fundamentals: MAX_SAW_ORDER = 6; MAX_SAW_ORDER_NEXTPOW2 = 8;
+MAX_SAW_ORDER = 4;
+MAX_SAW_ORDER_NEXTPOW2 = 8; // par cannot handle the case of 0 elements
 sawN(N,freq) = saw1l : poly(Nc) : D(Nc-1) : gate(Nc-1)
 with {
   Nc = max(1,min(N,MAX_SAW_ORDER));
   clippedFreq = max(20.0,abs(freq)); // use lf_sawpos(freq) for LFOs (freq < 20 Hz)
   saw1l = 2*lf_sawpos(clippedFreq) - 1; // zero-mean, amplitude +/- 1
-  // Also note the availability of lf_sawpos_phase above.
   poly(1,x) = x;
   poly(2,x) = x*x;
   poly(3,x) = x*x*x - x;
@@ -664,7 +653,7 @@ with {
 };
 
 //------------------`(os.)sawNp`--------------------------------
-// Bandlimited Sawtooth with Phase Offset.
+// Same as `(os.)sawN` but with a controllable waveform phase.
 //
 // #### Usage
 //
@@ -674,54 +663,91 @@ with {
 //
 // where
 //
-// * `N`: waveform interpolation polynomial order (constant integer expression)
+// * `N`: waveform interpolation polynomial order 1 to 4 (constant integer expression)
 // * `freq`: frequency in Hz
 // * `phase`: waveform phase as a fraction of one period (rounded to nearest sample)
 //
 // #### Implementation Notes
 //
 // The phase offset is implemented by delaying `sawN(N,freq)` by
-// round(phase*ma.SR/freq) samples, for up to 8191 samples.
+// `round(phase*ma.SR/freq)` samples, for up to 8191 samples.
 // The minimum sawtooth frequency that can be delayed a whole period
-// is therefore ma.SR/8191, which is well below audibility for normal
+// is therefore `ma.SR/8191`, which is well below audibility for normal
 // audio sampling rates.
 //
-//--------------------------------------------------------
-// --- sawNp for N = 1 to 6 ---
+//-----------------------------------------------------------------
+declare sawNp author "Julius O. Smith III";
+declare sawNp license "STK-4.3";
+// --- sawNp for N = 1 to 4 ---
 // Phase offset = delay (max 8191 samples is more than one period of audio):
 sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))));
 
-// Special named cases:
-
-//------------------`(os.)saw2dpw`--------------------------------
-// TODO: MarkDown doc in comments
-//--------------------------------------------------------
-// --- sawN ---
-saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freq); // inferior to saw2 below
-
-//------------------`(os.)saw3`--------------------------------
-// TODO: MarkDown doc in comments
-//--------------------------------------------------------
-saw3 = sawN(3); 
-saw4 = sawN(4); 
-saw5 = sawN(5); 
-saw6 = sawN(6);
-
-//------------------`(os.)sawtooth`--------------------------------
-// Alias-free sawtooth wave. 2nd order interpolation (based on `saw2`).
-// `sawtooth` is a standard Faust function.
+//------------------`(os.)saw2, (os.)saw3, (os.)saw4`--------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillators of order 2, 3, 4.
 //
 // #### Usage
 //
 // ```
-// sawtooth(freq) : _
+// saw2(freq) : _
+// saw3(freq) : _
+// saw4(freq) : _
 // ```
 //
-// Where:
+// where
 //
 // * `freq`: frequency in Hz
+//
+// ##### References
+// See `sawN` above.
+//
+// #### Implementation Notes
+//
+// Presently, only `saw2` uses the PTR method, while `saw3` and `saw4` use DPW.
+// This is because PTR has been implemented and tested for the 2nd-order case only.
+//
+//------------------------------------------------------------------
+saw2 = saw2ptr; // "faustlibraries choice"
+saw3 = sawN(3); // only choice available right now
+saw4 = sawN(4); // only choice available right now
+
+//---------------------------`(os.)saw2ptr`---------------------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator
+// using Polynomial Transition Regions (PTR) for order 2.
+//
+// #### Usage
+//
+// ```
+// saw2ptr(freq) : _
+// ```
+//
+// where
+//
+// * `freq`: frequency in Hz
+//
+// ##### Implementation
+//
+// Polynomial Transition Regions (PTR) method for aliasing suppression.
+//
+// ##### References
+//
+// * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio
+//     Signals Using Polynomial Transition Regions," in Signal Processing
+//     Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012
+// * <https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9>
+// * <http://research.spa.aalto.fi/publications/papers/spl-ptr/>
+//
+// ##### Notes
+//
+// Method PTR is often preferred because it requires less
+// computation and is stateless which means that the frequency `freq`
+// can be modulated arbitrarily fast over time without filtering
+// artifacts.
+//
 //--------------------------------------------------------
-saw2(freq) = y with { // newer PTR version (stateless - freq can vary at any speed)
+declare saw2ptr author "Julius O. Smith III";
+declare saw2ptr license "STK-4.3";
+// specialized reimplementation:
+saw2ptr(freq) = y with { // newer PTR version (stateless - freq can vary at any speed)
   p0 = float(ma.SR)/float(max(ma.EPSILON,abs(freq))); // period in samples
   t0 = 1.0/p0; // phase increment
   p = ((_<:(-(1)<:_,_),_) <: selector1,selector2) ~(+(t0)):!,_;
@@ -730,32 +756,80 @@ saw2(freq) = y with { // newer PTR version (stateless - freq can vary at any spe
   y = 2*p-1;
 };
 
-// --- sawtooth ---
+//----------------------`(os.)saw2dpw`---------------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator
+// using the Differentiated Polynomial Waveform (DWP) method.
+//
+// #### Usage
+//
+// ```
+// saw2dpw(freq) : _
+// ```
+//
+// where
+//
+// * `freq`: frequency in Hz
+//
+// This is the original Faust `saw2` function using the DPW method.
+//--------------------------------------------------------
+declare saw2dpw author "Julius O. Smith III";
+declare saw2dpw license "STK-4.3";
+saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freq);
+
+//------------------`(os.)sawtooth`--------------------------------
+// Alias-suppressed aliasing-suppressed sawtooth oscillator, presently defined as `saw2`.
+// `sawtooth` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// sawtooth(freq) : _
+// ```
+//
+// with
+//
+// * `freq`: frequency in Hz
+//--------------------------------------------------------
 sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 
-//------------------`(os.)saw2f2`--------------------------------
-// TODO: MarkDown doc in comments
-//---------------------------------------------------------------
+//------------------`(os.)saw2f2, (os.)saw2f4`--------------------------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 2nd- or 4th-order Droop Correction Filtering
+//
+// #### Usage
+//
+// ```
+// saw2f2(freq) : _
+// saw2f4(freq) : _
+// ```
+//
+// with
+//
+// * `freq`: frequency in Hz
+//
+// In return for aliasing suppression, there is some attenuation near half the sampling rate.
+// This can be considered as beneficial, or it can be compensated with a high-frequency boost.
+// The boost filter is second-order for `saw2f2` and fourth-order for `saw2f4`, and both are designed
+// for the DWP case and therefore use `saw2dpw`.
+// See Figure 4(b) in the DPW reference for a plot of the slight droop in the DPW case.
+//--------------------------------------------------------
+declare saw2f2 author "Julius O. Smith III";
+declare saw2f2 license "STK-4.3";
 // --- Correction-filtered versions of saw2: saw2f2, saw2f4 -----
-// The correction filter compensates "droop" near half the sampling rate.
-// See reference for sawN.
-saw2f2 = saw2 : cf2 with {
+saw2f2 = saw2dpw : cf2 with {
   cf2 = fi.tf2(1.155704605878911, 0.745184288225518,0.040305967265900,
         0.823765146386639, 0.117420665547108);
 };
-
-//------------------`(os.)saw2f4`--------------------------------
-// TODO: MarkDown doc in comments
-//---------------------------------------------------------------
-saw2f4 = saw2 : cf4 with {
+declare saw2f4 author "Julius O. Smith III";
+declare saw2f4 license "STK-4.3";
+saw2f4 = saw2dpw : cf4 with {
   cf4 = fi.iir((1.155727435125014, 2.285861038554662,
         1.430915027294021, 0.290713280893317, 0.008306401748854),
         (2.156834679164532, 1.559532244409321, 0.423036498118354,
         0.032080681130972));
 };
 
-//=========Bandlimited Pulse, Square, and Impulse Trains============
-// Bandlimited Pulse, Square and Impulse Trains.
+//=========Alias-Suppressed Pulse, Square, and Impulse Trains============
+// Alias-Suppressed Pulse, Square and Impulse Trains.
 //
 // `pulsetrainN`, `pulsetrain`, `squareN`, `square`, `imptrainN`, `imptrain`,
 // `triangleN`, `triangle`
@@ -781,7 +855,7 @@ saw2f4 = saw2 : cf4 with {
 //
 // Where:
 //
-// * `N`: polynomial order, a constant numerical expression      
+// * `N`: polynomial order, a constant numerical expression
 // * `freq`: frequency in Hz
 //====================================================================
 
@@ -800,7 +874,7 @@ impulse = 1-1';
 
 
 //------------------`(os.)pulsetrainN`--------------------------------
-// Bandlimited pulse train oscillator. 
+// Alias-suppressed pulse train oscillator.
 //
 // #### Usage
 //
@@ -833,7 +907,7 @@ pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
 
 
 //------------------`(os.)pulsetrain`--------------------------------
-// Bandlimited pulse train oscillator. Based on `pulsetrainN(2)`.
+// Alias-suppressed pulse train oscillator. Based on `pulsetrainN(2)`.
 // `pulsetrain` is a standard Faust function.
 //
 // #### Usage
@@ -851,7 +925,7 @@ pulsetrain = pulsetrainN(2);
 
 
 //------------------`(os.)squareN`--------------------------------
-// Bandlimited square wave oscillator. 
+// Alias-suppressed square wave oscillator.
 //
 // #### Usage
 //
@@ -868,7 +942,7 @@ squareN(N,freq) = pulsetrainN(N,freq,0.5);
 
 
 //------------------`(os.)square`--------------------------------
-// Bandlimited square wave oscillator. Based on `squareN(2)`.
+// Alias-suppressed square wave oscillator. Based on `squareN(2)`.
 // `square` is a standard Faust function.
 //
 // #### Usage
@@ -885,7 +959,7 @@ square = squareN(2);
 
 
 //------------------`(os.)imptrainN`--------------------------------
-// Bandlimited impulse train generator. 
+// Alias-suppressed impulse train generator.
 //
 // #### Usage
 //
@@ -902,7 +976,7 @@ imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq));
 
 
 //------------------`(os.)imptrain`--------------------------------
-// Bandlimited impulse train generator. Based on `imptrainN(2)`.
+// Alias-suppressed impulse train generator. Based on `imptrainN(2)`.
 // `imptrain` is a standard Faust function.
 //
 // #### Usage
@@ -919,7 +993,7 @@ imptrain = imptrainN(2); // default based on saw2
 
 
 //------------------`(os.)triangleN`--------------------------------
-// Bandlimited triangle wave oscillator. 
+// Alias-suppressed triangle wave oscillator.
 //
 // #### Usage
 //
@@ -939,7 +1013,7 @@ triangleN(N,freq) = squareN(N,freq) : fi.pole(p) : *(gain) with {
 
 
 //------------------`(os.)triangle`--------------------------------
-// Bandlimited triangle wave oscillator. Based on `triangleN(2)`.
+// Alias-suppressed triangle wave oscillator. Based on `triangleN(2)`.
 // `triangle` is a standard Faust function.
 //
 // #### Usage
@@ -1098,11 +1172,11 @@ with {
 // Authors:
 // Dario Sanfilippo <sanfilippo.dario@gmail.com>
 // and Oleg Nesterov (jos ed.)
-quadosc(f) = tick ~ (_,_) 
+quadosc(f) = tick ~ (_,_)
 with {
     k1 = tan(f * ma.PI / ma.SR);
     k2 = 2 * k1 / (1 + k1 * k1);
-    tick(u_0,v_0) = u_1,v_1 
+    tick(u_0,v_0) = u_1,v_1
     with {
         tmp = u_0 - k1 * v_0;
         v_1 = v_0 + k2 * tmp;
@@ -1546,7 +1620,7 @@ declare CZresTrap licence "STK-4.3";
 CZresTrap(fund, res) = CZ.resTrap(fund, res);
 
 CZ = environment {
-  
+
     saw(fund, index) = sawChooseP(fund, index, 0);
     sawP(fund, index) = sawChooseP(fund, index, 1);
     sawChooseP(fund, index, p) =
@@ -1555,7 +1629,7 @@ CZ = environment {
       INDEX = (.5-(index*.5)):max(0.01):min(0.5);
       align = si.interpolate(index, 0.75, 0.5);
     };
-    
+
     square(fund, index) = squareChooseP(fund, index, 0);
     squareP(fund, index) = squareChooseP(fund, index, 1);
     squareChooseP(fund, index, p) = (FUND(fund,align,p)>=0.5), (ma.decimal((FUND(fund,align,p)*2)+1)<:_-min(_,(-1*_+1)*((INDEX)/(1-INDEX)))) :+ *ma.PI:cos
@@ -1587,7 +1661,7 @@ CZ = environment {
       INDEX = (.5-(index*0.5)):min(.5):max(.01);
       align = si.interpolate(index:min(0.975), -0.25, -0.5);
     };
-    
+
     FUND =
       case {
         (fund,align,0) => fund;
@@ -1619,7 +1693,7 @@ CZ = environment {
 //------------------------------------------------------------
 declare polyblep author "Jacek Wieczorek";
 
-polyblep(Q, phase) = (0, L(phase / Q), R((phase - 1) / Q)) : select3(sel) 
+polyblep(Q, phase) = (0, L(phase / Q), R((phase - 1) / Q)) : select3(sel)
 with {
     sel = (phase < Q) + 2*(phase > 1 - Q);
     L(x) = 2*x - x*x - 1; // Used near the left end of the interval
@@ -1637,7 +1711,7 @@ with {
 //
 // Where:
 //
-// * `freq`: frequency in Hz 
+// * `freq`: frequency in Hz
 //------------------------------------------------------------
 declare polyblep_saw author "Jacek Wieczorek";
 
@@ -1659,7 +1733,7 @@ with {
 //
 // Where:
 //
-// * `freq`: frequency in Hz 
+// * `freq`: frequency in Hz
 //------------------------------------------------------------
 declare polyblep_square author "Jacek Wieczorek";
 
@@ -1681,7 +1755,7 @@ with {
 //
 // Where:
 //
-// * `freq`: frequency in Hz 
+// * `freq`: frequency in Hz
 //------------------------------------------------------------
 declare polyblep_triangle author "Jacek Wieczorek";
 
