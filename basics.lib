@@ -782,7 +782,7 @@ subseq(head, 0, N)         = head;
 //
 // * `tabulate_chebychev` uses Chebyshev polynomial approximation
 //
-// #### Comparison example program
+// #### Comparison program example 
 // ```
 ///* Both tabulate() and tabulate_chebychev() create rdtable of size = 200, both use */
 ///* cubic polynomials, so this comparison is more or less fair. */
@@ -811,7 +811,7 @@ subseq(head, 0, N)         = head;
 // tabulate(C, FX, S, r0, r1, x).(val|lin|cub) : _
 // ```
 //
-// * `C`: whether to dynamically force the index to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
+// * `C`: whether to dynamically force the `x` value to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
 // * `FX`: unary function Y=F(X) with one output (scalar function of one variable) 
 // * `S`: size of the table in samples (constant numerical expression)
 // * `r0`: minimum value of argument x
@@ -890,13 +890,16 @@ declare tabulate author "Stephane Letz";
 // Two new arguments controlling this are NX, the number of segments into which [r0, r1] is divided, and CD,
 // the maximum Chebyshev polynomial degree to use for each segment. A `rdtable` of size NX*(CD+1) is internally used.
 //
+// Note that processing `r1` the last point in the interval is not safe. So either be sure the input stays in [r0, r1[ 
+// or use `C = 1`.
+//
 // #### Usage
 //
 // ```
 // _ : tabulate_chebychev(C, FX, NX, CD, r0, r1) : _
 // ```
 //
-// * `C`: whether to dynamically force the index to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
+// * `C`: whether to dynamically force the value to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
 // * `FX`: unary function Y=F(X) with one output (scalar function of one variable)
 // * `NX`: number of segments for uniformly partitioning [r0, r1] (constant numerical expression)
 // * `CD`: maximum polynomial degree for each Chebyshev polynomial (constant numerical expression)
@@ -945,6 +948,7 @@ tabulate_chebychev(C, FX, NX, CD, r0, r1, x) = y with {
 declare tabulate_chebychev author "Oleg Nesterov";
 declare tabulate_chebychev copyright "Copyright (C) 2022 Oleg Nesterov <oleg@redhat.com>";
 declare tabulate_chebychev license "MIT-style STK-4.3 license";s
+
 
 //============================Selectors (Conditions)======================================
 //========================================================================================

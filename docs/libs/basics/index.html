@@ -996,7 +996,7 @@ Two techniques are implemented: </p>
 <p><code>tabulate_chebychev</code> uses Chebyshev polynomial approximation</p>
 </li>
 </ul>
-<h4 id="comparison-example-program">Comparison example program</h4>
+<h4 id="comparison-program-example">Comparison program example</h4>
 <pre><code>process = line(50000, r0, r1) &lt;: FX-tb,FX-ch : par(i, 2, maxerr)
 with {
    C = 0;
@@ -1019,7 +1019,7 @@ In other words, the uniformly tabulated function can be evaluated using interpol
 <pre><code>tabulate(C, FX, S, r0, r1, x).(val|lin|cub) : _
 </code></pre>
 <ul>
-<li><code>C</code>: whether to dynamically force the index to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)</li>
+<li><code>C</code>: whether to dynamically force the <code>x</code> value to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)</li>
 <li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable) </li>
 <li><code>S</code>: size of the table in samples (constant numerical expression)</li>
 <li><code>r0</code>: minimum value of argument x</li>
@@ -1042,11 +1042,13 @@ In contrast to <code>(ba.)tabulate</code>, which interpolates only between tabul
 stores coefficients of Chebyshev polynomials that are evaluated to provide better approximations in many cases.
 Two new arguments controlling this are NX, the number of segments into which [r0, r1] is divided, and CD,
 the maximum Chebyshev polynomial degree to use for each segment. A <code>rdtable</code> of size NX*(CD+1) is internally used.</p>
+<p>Note that processing <code>r1</code> the last point in the interval is not safe. So either be sure the input stays in [r0, r1[ 
+or use <code>C = 1</code>.</p>
 <h4 id="usage_38">Usage</h4>
 <pre><code>_ : tabulate_chebychev(C, FX, NX, CD, r0, r1) : _
 </code></pre>
 <ul>
-<li><code>C</code>: whether to dynamically force the index to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)</li>
+<li><code>C</code>: whether to dynamically force the value to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)</li>
 <li><code>FX</code>: unary function Y=F(X) with one output (scalar function of one variable)</li>
 <li><code>NX</code>: number of segments for uniformly partitioning [r0, r1] (constant numerical expression)</li>
 <li><code>CD</code>: maximum polynomial degree for each Chebyshev polynomial (constant numerical expression)</li>
