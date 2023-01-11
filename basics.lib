@@ -98,7 +98,7 @@ sec2samp(d) = d*ma.SR;
 
 
 //-------`(ba.)db2linear`----------
-// Converts a loudness in dB to a linear gain (0-1).
+// dB-to-linear value converter. It can be used to convert an amplitude in dB to a linear gain ]0-N].
 // `db2linear` is a standard Faust function.
 //
 // #### Usage
@@ -115,7 +115,7 @@ db2linear(l) = pow(10.0, l/20.0);
 
 
 //-------`(ba.)linear2db`----------
-// Converts a linear gain (0-1) to a loudness in dB.
+// linea-to-dB value converter. It can be used to convert a linear gain ]0-N] to an amplitude in dB.
 // `linear2db` is a standard Faust function.
 //
 // #### Usage
