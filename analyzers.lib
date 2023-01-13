@@ -417,7 +417,7 @@ zcr(period, x) = ma.zc(x) : fi.lptau(period);
 //
 // Where:
 //
-// * `N`: compile-time constant, sets the order of the low-pass filter, which
+// * `N`: a constant numerical expression, sets the order of the low-pass filter, which
 //  determines the sensitivity of the algorithm for signals where partials are
 //  stronger than the fundamental frequency.
 // * `tau`: response time in seconds based on exponentially-weighted averaging with tau time-constant. See <https://ccrma.stanford.edu/~jos/st/Exponentials.html>.
@@ -483,9 +483,9 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
                         'y = (x - s) * G + s;
                         's = 2 * (x - s) * G + s;
                     }
-                        with {
-                            G = tan(w(cf) / 2.0) / (1.0 + tan(w(cf) / 2.0));
-                        };
+                    with {
+                        G = tan(w(cf) / 2.0) / (1.0 + tan(w(cf) / 2.0));
+                    };
                 highpass(cf, x) = x - lowpass(cf, x);
                 xRMS = an.rms_envelope_tau(t, x);
                 xLRMS = an.rms_envelope_tau(t, lowpass(fb, x));
@@ -588,7 +588,7 @@ mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
 
 
 //============================Mth-Octave Spectral Level===================================
-// Spectral Level: Display (in bar graphs) the average signal level in each spectral band.
+// Spectral Level: display (in bargraphs) the average signal level in each spectral band.
 //========================================================================================
 
 
