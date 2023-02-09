@@ -81,8 +81,8 @@ In order to have a uniformized library system, we established the following conv
 
 JOS proposal: using terms used in the field of digital signal processing, as follows:
 
- * `impulse`: ...,0,1,0,...
- * `pulse`: ...,0,1,1,0,... or longer
+* `impulse`: ...,0,1,0,...
+* `pulse`: ...,0,1,1,0,... or longer
 * `impulse_train`
 * `pulse_train`
 * `gate` = pulse controlled externally (e.g., by NoteOn,NoteOff)
