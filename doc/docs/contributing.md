@@ -75,6 +75,21 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 
 In order to have a uniformized library system, we established the following conventions (that hopefully will be followed by others when making modifications to them).
 
+### Function Naming
+
+[WIP]
+
+JOS proposal: using terms used in the field of digital signal processing, as follows:
+
+`impulse`: ...,0,1,0,...
+`pulse`: ...,0,1,1,0,... or longer
+`impulse_train`
+`pulse_train`
+`gate` = pulse controlled externally (e.g., by NoteOn,NoteOff)
+`trigger` = impulse controlled externally (gate - gate' > 0) == gate rising edge
+
+[/WIP]
+
 ### Documentation
 
 * All the functions that we want to be "public" are documented.
