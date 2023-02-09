@@ -233,6 +233,10 @@
             </li>
             <li class="nav-item" data-level="2"><a href="#coding-conventions" class="nav-link">Coding Conventions</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#function-naming" class="nav-link">Function Naming</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#documentation" class="nav-link">Documentation</a>
               <ul class="nav flex-column">
               </ul>
@@ -334,6 +338,18 @@
 </code></pre>
 <h2 id="coding-conventions">Coding Conventions</h2>
 <p>In order to have a uniformized library system, we established the following conventions (that hopefully will be followed by others when making modifications to them).</p>
+<h3 id="function-naming">Function Naming</h3>
+<p>[WIP]</p>
+<p>JOS proposal: using terms used in the field of digital signal processing, as follows:</p>
+<ul>
+<li><code>impulse</code>: ...,0,1,0,...</li>
+<li><code>pulse</code>: ...,0,1,1,0,... or longer</li>
+<li><code>impulse_train</code></li>
+<li><code>pulse_train</code></li>
+<li><code>gate</code> = pulse controlled externally (e.g., by NoteOn,NoteOff)</li>
+<li><code>trigger</code> = impulse controlled externally (gate - gate' &gt; 0) == gate rising edge</li>
+</ul>
+<p>[/WIP]</p>
 <h3 id="documentation">Documentation</h3>
 <ul>
 <li>All the functions that we want to be "public" are documented.</li>
