@@ -46,7 +46,7 @@ fi = library("filters.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.0"; 
+declare version "2.1"; 
 
 //########################################################################################
 /************************************************************************
@@ -537,6 +537,8 @@ closed source license or any other license if you decide so.
 // * `wetAmount`: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal
 // * `stereoFx`: a stereo effect (two inputs and two outputs) to apply to the input bus
 //------------------------------------------------------------
+declare dryWetMixer author "David Braun";
+
 dryWetMixer(wetAmount, stereoFx) = si.bus(2) <: wet, dry :> si.bus(2)
 with {
     wetGain = wetAmount;
@@ -560,6 +562,8 @@ with {
 // * `wetAmount`: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal
 // * `stereoFx`: a stereo effect (two inputs and two outputs) to apply to the input bus
 //------------------------------------------------------------
+declare dryWetMixerConstantPower author "David Braun";
+
 dryWetMixerConstantPower(wetAmount, stereoFx) = si.bus(2) <: wet, dry :> si.bus(2)
 with {
     theta = ma.PI*wetAmount/2.;
