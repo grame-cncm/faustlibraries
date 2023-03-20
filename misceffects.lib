@@ -519,6 +519,57 @@ closed source license or any other license if you decide so.
 ************************************************************************
 ************************************************************************/
 
+//=====================================Mixing=============================================
+//========================================================================================
+
+
+//---------------`(ef.)dryWetMixer`-------------
+// Linear dry-wet mixer
+//
+// #### Usage
+//
+// ```
+// _,_ : dryWetMixer(wetAmount, stereoEffect) : _,_
+// ```
+//
+// Where:
+//
+// * `wetAmount`: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal
+// * `stereoFx`: a stereo effect (two inputs and two outputs) to apply to the input bus
+//------------------------------------------------------------
+dryWetMixer(wetAmount, stereoFx) = si.bus(2) <: wet, dry :> si.bus(2)
+with {
+    wetGain = wetAmount;
+    dryGain = 1.-wetGain;
+    wet = stereoFx : _*wetGain, _*wetGain;
+    dry = _*dryGain, _*dryGain;
+};
+
+
+//---------------`(ef.)dryWetMixerConstantPower`-------------
+// Constant-power dry-wet mixer
+//
+// #### Usage
+//
+// ```
+// _,_ : dryWetMixerConstantPower(wetAmount, stereoFx) : _,_
+// ```
+//
+// Where:
+//
+// * `wetAmount`: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal
+// * `stereoFx`: a stereo effect (two inputs and two outputs) to apply to the input bus
+//------------------------------------------------------------
+dryWetMixerConstantPower(wetAmount, stereoFx) = si.bus(2) <: wet, dry :> si.bus(2)
+with {
+    theta = ma.PI*wetAmount/2.;
+    dryGain = cos(theta)/sqrt(2.);
+    wetGain = sin(theta)/sqrt(2.);
+    wet = stereoFx : _*wetGain, _*wetGain;
+    dry = _*dryGain, _*dryGain;
+};
+
+
 //========================================Time Based======================================
 //========================================================================================
 
