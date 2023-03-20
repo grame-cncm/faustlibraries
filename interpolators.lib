@@ -250,6 +250,37 @@ declare interpolate_cosine licence "MIT";
 interpolate_cosine(dv,v0,v1) = v0 + a2*(v1-v0) with { a2 = 0.5 * (1.0 - cos(dv*ma.PI)); };
 
 
+//---------------`(it.)remap` ---------------------------------------------
+// Linearly map from an input domain to an output range.
+//
+// #### Usage
+//
+// ```
+// _ : remap(from1, from2, to1, to2) : _
+// ```
+//
+// Where:
+//
+// * `from1`: The domain's lower bound.
+// * `from2`: The domain's upper bound.
+// * `to1`: The range's lower bound.
+// * `to2`: The range's upper bound.
+//
+// Example: An oscillator remapped from [-1., 1.] to [100., 1000.]
+// ```
+// os.osc(440) : remap(-1., 1., 100., 1000.)
+// ```
+//------------------------------------------------------------
+
+remap(from1, from2, to1, to2, x) = result
+with {
+    remappedVal = to1 + (x-from1)*(to2-to1)/(from2-from1);
+    skippedVal = 0.5*(to1+to2); // calculated to avoid a divide by zero in line above
+    doSkip = from1 == from2;
+    result = select2(doSkip, remappedVal, skippedVal);
+};
+
+
 //=========================Four points interpolation functions============================
 //========================================================================================
 
