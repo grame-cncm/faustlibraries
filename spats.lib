@@ -43,7 +43,7 @@ si = library("signals.lib");
 ma = library("maths.lib");
 
 declare name "Faust Spatialization Library";
-declare version "0.0";
+declare version "0.1";
 
 //-----------------------`(sp.)panner`------------------------
 // A simple linear stereo panner.
@@ -81,6 +81,8 @@ panner(g) = _ <: *(1-g), *(g);
 //
 // * `p`: the panning (0-1)
 //------------------------------------------------------------
+declare dryWetMixer author "David Braun";
+
 constantPowerPan(p, x, y) = x*gainLeft, y*gainRight
 with {
     theta = ma.PI*p/2.;
