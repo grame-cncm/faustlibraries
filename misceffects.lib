@@ -425,7 +425,7 @@ with {
 //
 // #### Description
 //
-// The effect uses N instances of reverseDelayRamped at different phases.
+// The effect uses N instances of `reverseDelayRamped` at different phases.
 //
 //------------------------------------------------------------
 reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
@@ -457,6 +457,7 @@ reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
   startPulse = (1-1') * delOffset;
   del = int(startPulse : + ~ +(2)) & (delMax-1);
 };
+
 
 //-------------------`(ef.)uniformPanToStereo(nChans)`------------------
 // Pan nChans channels to the stereo field, spread uniformly left to right.
@@ -546,7 +547,7 @@ dwmEnv(wetAmount, FX) = environment
 
 
 //---------------`(ef.)dryWetMixer`-------------
-// Linear dry-wet mixer.
+// Linear dry-wet mixer for a N inputs and N outputs effect.
 //
 // #### Usage
 //
@@ -565,7 +566,7 @@ dryWetMixer(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixer;
 
 
 //---------------`(ef.)dryWetMixerConstantPower`-------------
-// Constant-power dry-wet mixer.
+// Constant-power dry-wet mixer for a N inputs and N outputs effect.
 //
 // #### Usage
 //
