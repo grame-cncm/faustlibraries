@@ -522,56 +522,65 @@ closed source license or any other license if you decide so.
 //=====================================Mixing=============================================
 //========================================================================================
 
+// Implementation to share common code
+dwmEnv(wetAmount, FX) = environment
+{
+	N = inputs(FX);
+    wet(wg) = FX : par(i, N, *(wg));
+    dry(dg) = par(i, N, *(dg));
+    out(wg, dg) = si.bus(N) <: wet(wg), dry(dg) :> si.bus(N);
+    
+    dryWetMixer = out(wetGain, dryGain) 
+    with { 
+    	wetGain = wetAmount; 
+    	dryGain = 1. - wetGain; 
+    };
+    
+    dryWetMixerConstantPower = out(wetGain, dryGain)  
+    with {
+    	theta = ma.PI*wetAmount/2.;
+    	dryGain = cos(theta)/sqrt(2.);
+    	wetGain = sin(theta)/sqrt(2.);
+    };
+};
+
 
 //---------------`(ef.)dryWetMixer`-------------
-// Linear dry-wet mixer
+// Linear dry-wet mixer.
 //
 // #### Usage
 //
 // ```
-// _,_ : dryWetMixer(wetAmount, stereoEffect) : _,_
+// si.bus(inputs(FX)) : dryWetMixer(wetAmount, FX) : si.bus(inputs(FX))
 // ```
 //
 // Where:
 //
 // * `wetAmount`: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal
-// * `stereoFx`: a stereo effect (two inputs and two outputs) to apply to the input bus
+// * `FX`: an arbitrary effect (N inputs and N outputs) to apply to the input bus
 //------------------------------------------------------------
-declare dryWetMixer author "David Braun";
+declare dryWetMixer author "David Braun, revised by Stéphane Letz";
 
-dryWetMixer(wetAmount, stereoFx) = si.bus(2) <: wet, dry :> si.bus(2)
-with {
-    wetGain = wetAmount;
-    dryGain = 1.-wetGain;
-    wet = stereoFx : _*wetGain, _*wetGain;
-    dry = _*dryGain, _*dryGain;
-};
+dryWetMixer(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixer;
 
 
 //---------------`(ef.)dryWetMixerConstantPower`-------------
-// Constant-power dry-wet mixer
+// Constant-power dry-wet mixer.
 //
 // #### Usage
 //
 // ```
-// _,_ : dryWetMixerConstantPower(wetAmount, stereoFx) : _,_
+// si.bus(inputs(FX)) : dryWetMixerConstantPower(wetAmount, FX) :si.bus(inputs(FX))
 // ```
 //
 // Where:
 //
 // * `wetAmount`: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal
-// * `stereoFx`: a stereo effect (two inputs and two outputs) to apply to the input bus
+// * `FX`: an arbitrary effect (N inputs and N outputs) to apply to the input bus
 //------------------------------------------------------------
-declare dryWetMixerConstantPower author "David Braun";
+declare dryWetMixerConstantPower author "David Braun, revised by Stéphane Letz";
 
-dryWetMixerConstantPower(wetAmount, stereoFx) = si.bus(2) <: wet, dry :> si.bus(2)
-with {
-    theta = ma.PI*wetAmount/2.;
-    dryGain = cos(theta)/sqrt(2.);
-    wetGain = sin(theta)/sqrt(2.);
-    wet = stereoFx : _*wetGain, _*wetGain;
-    dry = _*dryGain, _*dryGain;
-};
+dryWetMixerConstantPower(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixerConstantPower;
 
 
 //========================================Time Based======================================

@@ -227,6 +227,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#spconstantpowerpan" class="nav-link">(sp.)constantPowerPan</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#spspat" class="nav-link">(sp.)spat</a>
               <ul class="nav flex-column">
               </ul>
@@ -261,10 +265,24 @@ Its official prefix is <code>sp</code>.</p>
 <li><code>g</code>: the panning (0-1)</li>
 </ul>
 <hr />
+<h3 id="spconstantpowerpan"><code>(sp.)constantPowerPan</code></h3>
+<p>Apply the constant power pan rule to a stereo signal.
+The channels are not respatialized. Their gains are simply
+adjusted. A pan of 0 preserves the left channel and silences
+the right channel. A pan of 1 has the opposite effect.
+A pan value of 0.5 applies a gain of 0.5 to both channels. </p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>_,_ : constantPowerPan(p) : _,_
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>p</code>: the panning (0-1)</li>
+</ul>
+<hr />
 <h3 id="spspat"><code>(sp.)spat</code></h3>
 <p>GMEM SPAT: n-outputs spatializer.
 <code>spat</code> is a standard Faust function.</p>
-<h4 id="usage_1">Usage</h4>
+<h4 id="usage_2">Usage</h4>
 <pre><code>_ : spat(n,r,d) : _,_,...
 </code></pre>
 <p>Where:</p>
@@ -277,7 +295,7 @@ Its official prefix is <code>sp</code>.</p>
 <h3 id="spstereoize"><code>(sp.)stereoize</code></h3>
 <p>Transform an arbitrary processor <code>p</code> into a stereo processor with 2 inputs
 and 2 outputs.</p>
-<h4 id="usage_2">Usage</h4>
+<h4 id="usage_3">Usage</h4>
 <pre><code>_,_ : stereoize(p) : _,_
 </code></pre>
 <p>Where:</p>

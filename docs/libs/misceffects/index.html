@@ -275,6 +275,18 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#mixing" class="nav-link">Mixing</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#efdrywetmixer" class="nav-link">(ef.)dryWetMixer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#efdrywetmixerconstantpower" class="nav-link">(ef.)dryWetMixerConstantPower</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#time-based" class="nav-link">Time Based</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#efecho" class="nav-link">(ef.)echo</a>
@@ -526,12 +538,35 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h4 id="demo_2">Demo</h4>
 <pre><code>_,_,_ : ef.uniformPanToStereo(3) : _,_
 </code></pre>
+<h2 id="mixing">Mixing</h2>
+<hr />
+<h3 id="efdrywetmixer"><code>(ef.)dryWetMixer</code></h3>
+<p>Linear dry-wet mixer.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>si.bus(inputs(FX)) : dryWetMixer(wetAmount, FX) : si.bus(inputs(FX))
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>wetAmount</code>: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal</li>
+<li><code>FX</code>: an arbitrary effect (N inputs and N outputs) to apply to the input bus</li>
+</ul>
+<hr />
+<h3 id="efdrywetmixerconstantpower"><code>(ef.)dryWetMixerConstantPower</code></h3>
+<p>Constant-power dry-wet mixer.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>si.bus(inputs(FX)) : dryWetMixerConstantPower(wetAmount, FX) :si.bus(inputs(FX))
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>wetAmount</code>: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal</li>
+<li><code>FX</code>: an arbitrary effect (N inputs and N outputs) to apply to the input bus</li>
+</ul>
 <h2 id="time-based">Time Based</h2>
 <hr />
 <h3 id="efecho"><code>(ef.)echo</code></h3>
 <p>A simple echo effect.
 <code>echo</code> is a standard Faust function.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>_ : echo(maxDuration,duration,feedback) : _
 </code></pre>
 <p>Where:</p>
@@ -545,7 +580,7 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h3 id="eftranspose"><code>(ef.)transpose</code></h3>
 <p>A simple pitch shifter based on 2 delay lines.
 <code>transpose</code> is a standard Faust function.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>_ : transpose(w, x, s) : _
 </code></pre>
 <p>Where:</p>
