@@ -81,7 +81,7 @@ Michon and Julius O. Smith III, and are released under the
 //
 // * `drive`: distortion amount, between 0 and 1
 // * `offset`: constant added before nonlinearity to give even harmonics. Note: offset
-// 	can introduce a nonzero mean - feed cubicnl output to dcblocker to remove this.
+//    can introduce a nonzero mean - feed cubicnl output to dcblocker to remove this.
 //
 // #### References:
 //
@@ -206,7 +206,7 @@ speakerbp(f1,f2) = fi.dcblockerat(f1) : fi.dcblockerat(f1) : fi.lowpass(4,f2);
 // Where:
 //
 // * `M`: number of first-order allpass sections (compile-time only)
-//  	Keep below 20. 8 is typical for medium-sized piano strings.
+//    Keep below 20. 8 is typical for medium-sized piano strings.
 // * `B`: string inharmonicity coefficient (0.0001 is typical)
 // * `f0`: fundamental frequency in Hz
 //
@@ -479,8 +479,8 @@ reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
 //
 //------------------------------------------------------------
 uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
-		      (par(i,N,*(i/(N-1))) :> _),
-		      (par(i,N,*(1-i/(N-1))) :> _);
+              (par(i,N,*(i/(N-1))) :> _),
+              (par(i,N,*(1-i/(N-1))) :> _);
 
 // end jos section
 /************************************************************************
@@ -525,22 +525,22 @@ closed source license or any other license if you decide so.
 // Implementation to share common code
 dwmEnv(wetAmount, FX) = environment
 {
-	N = inputs(FX);
+    N = inputs(FX);
     wet(wg) = FX : par(i, N, *(wg));
     dry(dg) = par(i, N, *(dg));
     out(wg, dg) = si.bus(N) <: wet(wg), dry(dg) :> si.bus(N);
     
     dryWetMixer = out(wetGain, dryGain) 
     with { 
-    	wetGain = wetAmount; 
-    	dryGain = 1. - wetGain; 
+        wetGain = wetAmount; 
+        dryGain = 1. - wetGain; 
     };
     
     dryWetMixerConstantPower = out(wetGain, dryGain)  
     with {
-    	theta = ma.PI*wetAmount/2.;
-    	dryGain = cos(theta)/sqrt(2.);
-    	wetGain = sin(theta)/sqrt(2.);
+        theta = ma.PI*wetAmount/2.;
+        dryGain = cos(theta)/sqrt(2.);
+        wetGain = sin(theta)/sqrt(2.);
     };
 };
 
@@ -632,11 +632,11 @@ with{
 // * `s`: shift (semitones)
 //-----------------------------------------
 transpose(w, x, s, sig) = de.fdelay(maxDelay,d,sig)*ma.fmin(d/x,1) +
-	de.fdelay(maxDelay,d+w,sig)*(1-ma.fmin(d/x,1))
+    de.fdelay(maxDelay,d+w,sig)*(1-ma.fmin(d/x,1))
 with {
-	maxDelay = 65536;
-	i = 1 - pow(2, s/12);
-	d = i : (+ : +(w) : fmod(_,w)) ~ _;
+    maxDelay = 65536;
+    i = 1 - pow(2, s/12);
+    d = i : (+ : +(w) : fmod(_,w)) ~ _;
 };
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
