@@ -40,6 +40,7 @@ closed source license or any other license if you decide so.
  ************************************************************************/
 
 si = library("signals.lib");
+ma = library("maths.lib");
 
 declare name "Faust Spatialization Library";
 declare version "0.0";
@@ -61,6 +62,31 @@ declare version "0.0";
 panner(g) = _ <: *(1-g), *(g);
 
 // TODO: need demo function for panner here
+
+
+//---------------`(sp.)constantPowerPan`----------------------
+// Apply the constant power pan rule to a stereo signal.
+// The channels are not respatialized. Their gains are simply
+// adjusted. A pan of 0 preserves the left channel and silences
+// the right channel. A pan of 1 has the opposite effect.
+// A pan value of 0.5 applies a gain of 0.5 to both channels. 
+//
+// #### Usage
+//
+// ```
+// _,_ : constantPowerPan(p) : _,_
+// ```
+//
+// Where:
+//
+// * `p`: the panning (0-1)
+//------------------------------------------------------------
+constantPowerPan(p, x, y) = x*gainLeft, y*gainRight
+with {
+    theta = ma.PI*p/2.;
+    gainLeft = cos(theta)/sqrt(2.);
+    gainRight = sin(theta)/sqrt(2.);
+};
 
 
 //-----------------------`(sp.)spat`------------------------
