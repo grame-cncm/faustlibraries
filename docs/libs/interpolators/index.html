@@ -295,6 +295,14 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#misc-functions" class="nav-link">Misc functions</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#itremap" class="nav-link">(it.)remap</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -625,6 +633,24 @@ rIdx = os.phasor(S, 300);
 wIdx = ba.period(S);
 process = rwtable(S, os.sinwaveform(S), wIdx, os.sinwaveform(S), int(rIdx)) ,
           frwtable(N, S, os.sinwaveform(S), wIdx, os.sinwaveform(S), rIdx);
+</code></pre>
+<h2 id="misc-functions">Misc functions</h2>
+<hr />
+<h3 id="itremap"><code>(it.)remap</code></h3>
+<p>Linearly map from an input domain to an output range.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>_ : remap(from1, from2, to1, to2) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>from1</code>: the domain's lower bound.</li>
+<li><code>from2</code>: the domain's upper bound.</li>
+<li><code>to1</code>: the range's lower bound.</li>
+<li><code>to2</code>: the range's upper bound.</li>
+</ul>
+<p>Note that having <code>from1</code> == <code>from2</code> in the mapping will cause a division by zero that has to be taken in account.</p>
+<p>Example: An oscillator remapped from [-1., 1.] to [100., 1000.]</p>
+<pre><code>os.osc(440) : it.remap(-1., 1., 100., 1000.)
 </code></pre></div>
             </div>
         </div>
