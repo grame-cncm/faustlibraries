@@ -98,21 +98,21 @@ with {
 // #### Usage
 //
 // ```
-// _ : spat(n,r,d) : _,_,...
+// _ : spat(N,r,d) : si.bus(N)
 // ```
 //
 // Where:
 //
-// * `n`: number of outputs
+// * `N`: number of outputs (a constant numerical expression)
 // * `r`: rotation (between 0 et 1)
 // * `d`: distance of the source (between 0 et 1)
 //------------------------------------------------------
 declare spat author "Laurent Pottier, revised by Romain Michon";
 
-spat(n,a,d)	= _ <: par(i, n, *( scaler(i, n, a, d) : si.smooth(0.9999) ))
+spat(N,a,d)	= _ <: par(i, N, *(scaler(i, N, a, d) : si.smooth(0.9999)))
 with {
-	scaler(i,n,a,d) = (d/2.0+0.5)
-		* sqrt( max(0.0, 1.0 - abs(fmod(a+0.5+float(n-i)/n, 1.0) - 0.5) * n * d) );
+	scaler(i,N,a,d) = (d/2.0+0.5)
+		* sqrt(max(0.0, 1.0 - abs(fmod(a+0.5+float(N-i)/N, 1.0) - 0.5) * N * d));
 };
 
 
