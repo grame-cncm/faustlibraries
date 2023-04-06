@@ -101,6 +101,29 @@ sinwaveform(tablesize) =
 coswaveform(tablesize) =
     cos(float(ba.period(tablesize)) * (2.0 * ma.PI) / float(tablesize));
 
+// Possibly faster version using integer arithmetic
+phasor_env(freq, N) = environment {
+
+    //——————— GLOBAL PARAMS
+    nbits = 31;
+    tablesize = 1<<N;
+    accuracy = int(nbits - N);
+    mask = (1<<nbits)-1;
+    inc(step) = int(tablesize * step * (1<<accuracy));
+
+    //——————— LAMBDA DSP CASE 
+    lambda(inc_op) = (inc_op : &(mask)) ~ _ : >>(accuracy) : /(tablesize);
+
+    //——————— MINIMAL CASE
+    hsp(0,0) = lambda(+(inc(freq/ma.SR)'));
+    
+    //——————— GENERAL CASE
+    hsp(reset,phase) = lambda(select2(hard_reset,+(inc(freq/ma.SR)),inc(phase)))
+    with {
+        hard_reset = (1-1')|reset;
+    };
+};
+declare phasor_env author "Pierre Mascarade Relaño, Maxime Sirbu, Stéphane Letz";
 
 // Generic phasor with `reset` and `phase` parameters to be specialised in concrete use-cases.
 phasor_imp(freq, reset, phase) = (select2(hard_reset, +(freq/ma.SR), phase) : ma.decimal) ~ _
@@ -108,8 +131,12 @@ with {
     hard_reset = (1-1')|reset; // To correctly start at `phase` at the first sample
 };
 
+// Possibly faster version using integer arithmetic
+// phasor_imp(freq, reset, phase) = phasor_env(freq, 16).hsp(reset, phase);
+
 // Version to be used with tables
 phasor_table(tablesize, freq, reset, phase) = phasor_imp(freq, reset, phase) : *(float(tablesize));
+
 
 //-----------------------`(os.)phasor`------------------------
 // A simple phasor to be used with a `rdtable`.
