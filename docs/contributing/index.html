@@ -237,6 +237,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#variable-argument-list" class="nav-link">Variable Argument List</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#documentation" class="nav-link">Documentation</a>
               <ul class="nav flex-column">
               </ul>
@@ -350,6 +354,9 @@
 <li><code>trigger</code> = impulse controlled externally (gate - gate' &gt; 0) == gate rising edge</li>
 </ul>
 <p>[/WIP]</p>
+<h3 id="variable-argument-list">Variable Argument List</h3>
+<p>Strictly speaking, there are no lists in Faust. But list operations <a href="https://faustdoc.grame.fr/manual/faq/#pattern-matching-and-lists">can be simulated</a> (in part) using the parallel binary composition operation <code>,</code> and pattern matching.</p>
+<p>Thus functions expecting a variable number of arguments can use this mechanism, like a <code>foo</code> function that would be used this way: <code>foo((a,b,c,d))</code>. See <a href="https://faustlibraries.grame.fr/libs/filters/#fiiir">fi.iir</a> and <a href="https://faustlibraries.grame.fr/libs/filters/#fifir">fi.fir</a> examples.</p>
 <h3 id="documentation">Documentation</h3>
 <ul>
 <li>All the functions that we want to be "public" are documented.</li>
