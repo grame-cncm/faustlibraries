@@ -90,6 +90,13 @@ JOS proposal: using terms used in the field of digital signal processing, as fol
 
 [/WIP]
 
+### Variable Argument List 
+
+ Strictly speaking, there are no lists in Faust. But list operations [can be simulated](https://faustdoc.grame.fr/manual/faq/#pattern-matching-and-lists) (in part) using the parallel binary composition operation `,` and pattern matching.
+
+Thus functions expecting a variable number of arguments can use this mechanism, like a `foo` function that would be used this way: `foo((a,b,c,d))`. See [fi.iir](https://faustlibraries.grame.fr/libs/filters/#fiiir) and [fi.fir](https://faustlibraries.grame.fr/libs/filters/#fifir) examples.
+
+
 ### Documentation
 
 * All the functions that we want to be "public" are documented.
