@@ -854,7 +854,7 @@ tabulate(C, FX, S, r0, r1, x) = environment {
     rid(x, 1) = max(0, min(x, mid));
 
     // Tabulate an unary 'FX' function on a range [r0, r1]
-    val = y0 with { y0 = rdtable(S, wf, rid(int(id), C)); };
+    val = y0 with { y0 = rdtable(S, wf, rid(int(id+0.5), C)); };
 
     // Tabulate an unary 'FX' function over the range [r0, r1] with linear interpolation
     lin = it.interpolate_linear(d,y0,y1)
