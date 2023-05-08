@@ -952,13 +952,17 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 
 
 //-------`(ba.)tabulateNd`----------
-// Tabulate an nD function for access via nearest-value or linear or cubic interpolation.
-// In other words, the tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).
-// The table size and parameter range of each dimension can and must be separately specified.
-// You can use it anywhere you have an expensive function with multiple parameters with known ranges.
+// Tabulate an nD function for access via nearest-value or linear or cubic interpolation.  
+// In other words, the tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).  
+// The table size and parameter range of each dimension can and must be separately specified.  
+// You can use it anywhere you have an expensive function with multiple parameters with known ranges.  
 // You could use it to build a wavetable synth, for example.
 //
 // The number of dimensions is deduced from the number of parameters you give, see below.
+//
+// Note that processing the last point in each interval is not safe.  
+// So either be sure the inputs stay in their respective ranges, or use `C = 1`.  
+// Similarly for the first point when doing cubic interpolation.
 //
 // #### Usage
 //
@@ -968,16 +972,14 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //
 // * `C`: whether to dynamically force the parameter values for each dimension to the ranges specified in parameters: 1 forces the check, 0 deactivates it (constant numerical expression)
 // * `function`: the function we want to tabulate. Can have any number of inputs, but needs to have just one output.
-// * `(parameters)`: sizes, ranges and read values.
-//
-// Note: these need to be in brackets, to make them one entity.
-//
-// If N is the number of dimensions, we need:
+// * `(parameters)`: sizes, ranges and read values.  
+//   Note: these need to be in brackets, to make them one entity.  
+//   If N is the number of dimensions, we need:
 // 
-// * N times `S`: number of values to store for this dimension (constant numerical expression)
-// * N times `r0`: minimum value of this dimension
-// * N times `r1`: maximum value of this dimension
-// * N times `x`: read value of this dimension
+//   * N times `S`: number of values to store for this dimension (constant numerical expression)
+//   * N times `r0`: minimum value of this dimension
+//   * N times `r1`: maximum value of this dimension
+//   * N times `x`: read value of this dimension
 //
 // By providing these parameters, you indirectly specify the number of dimensions; it's the number of parameters divided by 4.
 //
@@ -1021,12 +1023,13 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //
 // To understand what it means to interpolate in N dimensions, here's a quick reminder on the general principle of 2D linear interpolation:
 //
-// * We have a grid of values, and we want to find the value at a point (x, y) within this grid.
-// * We first find the four closest points (A, B, C, D) in the grid surrounding the point (x, y).
-// Then, we perform linear interpolation in the x-direction between points A and B, and between points C and D.
-// This gives us two new points E and F.
+// * We have a grid of values, and we want to find the value at a point (x, y) within this grid.  
+// * We first find the four closest points (A, B, C, D) in the grid surrounding the point (x, y).  
+// Then, we perform linear interpolation in the x-direction between points A and B, and between points C and D.  
+// This gives us two new points E and F.  
 // Finally, we perform linear interpolation in the y-direction between points E and F to get our value.
-// * To implement this in Faust, we need N sequential groups of interpolators, where N is the number of dimensions.
+//
+// To implement this in Faust, we need N sequential groups of interpolators, where N is the number of dimensions.  
 // Each group feeds into the next, with the last "group" being a single interpolator, and the group before it containing one interpolator for each input of the group it's feeding.
 //
 // Some examples:
@@ -1067,12 +1070,12 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //
 // This is what the ``mixers`` function does.
 //
-// Besides the values, each interpolator also needs to know the weight of each value in it's output.
-// Let's call this `d`, like in ``ba.interpolate``.
-// It is the same for each group of interpolators, since it correlates to a dimension.
+// Besides the values, each interpolator also needs to know the weight of each value in it's output.  
+// Let's call this `d`, like in ``ba.interpolate``.  
+// It is the same for each group of interpolators, since it correlates to a dimension.  
 // It's value is calculated the similarly to ``ba.interpolate``:
 // 
-// * First we prepare a ``float`` table read-index for that dimension (``id`` in ``ba.tabulate``)
+// * First we prepare a "float table read-index" for that dimension (``id`` in ``ba.tabulate``)
 // * If the table only had that dimension and it could read a float index, what would it be.
 // * Then we ``int`` the float index to get the value we have stored that is closest to, but lower than the input value; the actual index for that dimension.
 // Our ``d`` is the difference between the float index and the actual index.
@@ -1115,26 +1118,26 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //
 // To get the float read index (``id``) corresponding to a particular dimension, we scale the function input value to be between 0 and 1, and multiply it by the size of that dimension minus one.
 //
-// To understand how we get the ``readIndex``for ``.val``, let's work trough how we'd do it in our 2D linear example.
-// For simplicity's sake, the ranges of the inputs to our ``function`` are both 0 to 1.
-// Say we wanted to read the value closest to ``x=0.5`` and ``y=0``, so the ``id`` of ``x`` is ``1`` (the second value) and the ``id`` of ``y`` is 0 (first value).
+// To understand how we get the ``readIndex``for ``.val``, let's work trough how we'd do it in our 2D linear example.  
+// For simplicity's sake, the ranges of the inputs to our ``function`` are both 0 to 1.  
+// Say we wanted to read the value closest to ``x=0.5`` and ``y=0``, so the ``id`` of ``x`` is ``1`` (the second value) and the ``id`` of ``y`` is 0 (first value).  
 // In this case, the read index is just the ``id`` of ``x``, rounded to the nearest integer, just like in ``ba.tabulate``.
 // 
-// If we want to read the value belonging to ``x=0.5`` and ``y=2/3``, things get more complicated.
-// The ``id`` for ``y`` is now ``2``, the third value.
-// For each step in the ``y`` direction, we need to increase the index by ``3``, the number of values that are stored for ``x``.
-// So the influence of the ``y`` is:  the size of ``x`` times the rounded ``id`` of ``y``.
+// If we want to read the value belonging to ``x=0.5`` and ``y=2/3``, things get more complicated.  
+// The ``id`` for ``y`` is now ``2``, the third value.  
+// For each step in the ``y`` direction, we need to increase the index by ``3``, the number of values that are stored for ``x``.  
+// So the influence of the ``y`` is:  the size of ``x`` times the rounded ``id`` of ``y``.  
 // The final read index is the rounded ``id`` of ``x`` plus the influence of ``y``.
 //
-// For the general nD case, we need to do the same operation N times, each feeding into the next.
-// This operation is the ``riN`` function.
-// We take four parameters: the size of the dimension before it ``prevSize``, the index of the previous dimension ``prevIX``, the current size ``sizeX`` and the current id ``idX``.
-// ``riN`` has 2 outputs, the size, for feeding into the next dimension's ``prevSize``, and the read index feeding into the next dimension's prevIX.
-// The size is the ``sizeX`` times ``prevSize``.
-// The read index is the rounded ``idX`` times ``prevSize`` added to the ``prevIX``.
+// For the general nD case, we need to do the same operation N times, each feeding into the next.  
+// This operation is the ``riN`` function.  
+// We take four parameters: the size of the dimension before it ``prevSize``, the index of the previous dimension ``prevIX``, the current size ``sizeX`` and the current id ``idX``.  
+// ``riN`` has 2 outputs, the size, for feeding into the next dimension's ``prevSize``, and the read index feeding into the next dimension's prevIX.  
+// The size is the ``sizeX`` times ``prevSize``.  
+// The read index is the rounded ``idX`` times ``prevSize`` added to the ``prevIX``.  
 // Our final ``readIndex`` is the read index output of the last dimension.
 //
-// All ``rdtable`` for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest.
+// To get the read values for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest.  
 // These offsets are best explained by looking at the code of ``tabulate2d``, the hardcoded 2D version:
 // ```faust
 // tabulate2d(C,function, sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) =
