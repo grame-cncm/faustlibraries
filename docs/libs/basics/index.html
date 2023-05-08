@@ -1122,13 +1122,15 @@ process = powSinTable(x,y), powSin(x,y);
 The <code>.lin</code> and <code>.cub</code> functions interpolate in N dimensions.</p>
 <h5 id="multi-dimensional-interpolation">Multi dimensional interpolation</h5>
 <p>To understand what it means to interpolate in N dimensions, here's a quick reminder on the general principle of 2D linear interpolation:</p>
-<p>We have a grid of values, and we want to find the value at a point (x, y) within this grid.
-We first find the four closest points (A, B, C, D) in the grid surrounding the point (x, y).
+<ul>
+<li>We have a grid of values, and we want to find the value at a point (x, y) within this grid.</li>
+<li>We first find the four closest points (A, B, C, D) in the grid surrounding the point (x, y).
 Then, we perform linear interpolation in the x-direction between points A and B, and between points C and D.
 This gives us two new points E and F.
-Finally, we perform linear interpolation in the y-direction between points E and F to get our value.</p>
-<p>To implement this in Faust, we need N sequential groups of interpolators, where N is the number of dimensions.
-Each group feeds into the next, with the last "group" being a single interpolator, and the group before it containing one interpolator for each input of the group it's feeding.</p>
+Finally, we perform linear interpolation in the y-direction between points E and F to get our value.</li>
+<li>To implement this in Faust, we need N sequential groups of interpolators, where N is the number of dimensions.
+Each group feeds into the next, with the last "group" being a single interpolator, and the group before it containing one interpolator for each input of the group it's feeding.</li>
+</ul>
 <p>Some examples:</p>
 <ul>
 <li>Our 2D linear example has two interpolators feeding into one.</li>
@@ -1155,7 +1157,7 @@ In other words: the interpolated x values and, respectively, the following y val
 <li>One step forward in the y dimension</li>
 </ul>
 <p>The last interpolator takes these two values and interpolates them in the y dimension.</p>
-<p>To generalize for N dimensions, linear interpolation:</p>
+<p>To generalize for N dimensions and linear interpolation:</p>
 <ul>
 <li>The first group has 2^(n-1) parallel interpolators interpolating in the first dimension.</li>
 <li>The second group has 2^(n-2) parallel interpolators interpolating in the second dimension.</li>
@@ -1168,9 +1170,9 @@ Let's call this <code>d</code>, like in <code>ba.interpolate</code>.
 It is the same for each group of interpolators, since it correlates to a dimension.
 It's value is calculated the similarly to <code>ba.interpolate</code>:</p>
 <ul>
-<li>first we prepare a 'float' table read-index for that dimension (<code>id</code> in <code>ba.tabulate</code>):</li>
+<li>First we prepare a <code>float</code> table read-index for that dimension (<code>id</code> in <code>ba.tabulate</code>)</li>
 <li>If the table only had that dimension and it could read a float index, what would it be.</li>
-<li>then we <code>int</code> the float index to get the value we have stored that is closest to, but lower than the input value; the actual index for that dimension.
+<li>Then we <code>int</code> the float index to get the value we have stored that is closest to, but lower than the input value; the actual index for that dimension.
 Our <code>d</code> is the difference between the float index and the actual index.</li>
 </ul>
 <p>The <code>ids</code> function calculates the <code>id</code> for each dimension and inside the <code>mixer</code> function they get turned into <code>d</code>s.</p>
@@ -1204,20 +1206,20 @@ The total size will be 3 * 4 * 2 = 24.</p>
 <p>To understand how we get the <code>readIndex</code>for <code>.val</code>, let's work trough how we'd do it in our 2D linear example.
 For simplicity's sake, the ranges of the inputs to our <code>function</code> are both 0 to 1.
 Say we wanted to read the value closest to <code>x=0.5</code> and <code>y=0</code>, so the <code>id</code> of <code>x</code> is <code>1</code> (the second value) and the <code>id</code> of <code>y</code> is 0 (first value).
-In this case, the read index is just the <code>id</code> of <code>x</code>, rounded to the nearest integer, just like in <code>ba.tabulate</code>.
-If we want to read the value belonging to <code>x=0.5</code> and <code>y=2/3</code>, things get more complicated.
+In this case, the read index is just the <code>id</code> of <code>x</code>, rounded to the nearest integer, just like in <code>ba.tabulate</code>.</p>
+<p>If we want to read the value belonging to <code>x=0.5</code> and <code>y=2/3</code>, things get more complicated.
 The <code>id</code> for <code>y</code> is now <code>2</code>, the third value.
 For each step in the <code>y</code> direction, we need to increase the index by <code>3</code>, the number of values that are stored for <code>x</code>.
 So the influence of the <code>y</code> is:  the size of <code>x</code> times the rounded <code>id</code> of <code>y</code>.
 The final read index is the rounded <code>id</code> of <code>x</code> plus the influence of <code>y</code>.</p>
-<p>For the general nD case, we take need to do the same operation N times, each feeding into the next.
+<p>For the general nD case, we need to do the same operation N times, each feeding into the next.
 This operation is the <code>riN</code> function.
-We take four parameters:  the size of the dimension before it <code>prevSize</code>, the index of the previous dimension <code>prevIX</code>, the current size <code>sizeX</code> and the current id <code>idX</code>.
+We take four parameters: the size of the dimension before it <code>prevSize</code>, the index of the previous dimension <code>prevIX</code>, the current size <code>sizeX</code> and the current id <code>idX</code>.
 <code>riN</code> has 2 outputs, the size, for feeding into the next dimension's <code>prevSize</code>, and the read index feeding into the next dimension's prevIX.
 The size is the <code>sizeX</code> times <code>prevSize</code>.
 The read index is the rounded <code>idX</code> times <code>prevSize</code> added to the <code>prevIX</code>.
 Our final <code>readIndex</code> is the read index output of the last dimension.</p>
-<p>The <code>rdtable</code>s for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest.
+<p>All <code>rdtable</code> for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest.
 These offsets are best explained by looking at the code of <code>tabulate2d</code>, the hardcoded 2D version:</p>
 <pre><code class="language-faust">tabulate2d(C,function, sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) =
   environment {
