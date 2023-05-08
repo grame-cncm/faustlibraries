@@ -778,7 +778,7 @@ subseq(head, 0, N)         = head;
 // so that the computation at runtime can be faster than directly using the function. 
 // Two techniques are implemented: 
 //
-// * `tabulate` computes the function in a table and read the points using interpolation
+// * `tabulate` computes the function in a table and read the points using interpolation. `tabulateNd` is the N dimensions version of `tabulate`
 //
 // * `tabulate_chebychev` uses Chebyshev polynomial approximation
 //
@@ -950,6 +950,7 @@ declare tabulate_chebychev author "Oleg Nesterov";
 declare tabulate_chebychev copyright "Copyright (C) 2022 Oleg Nesterov <oleg@redhat.com>";
 declare tabulate_chebychev license "MIT-style STK-4.3 license";
 
+
 //-------`(ba.)tabulateNd`----------
 // Tabulate an nD function for access via nearest-value or linear or cubic interpolation.
 // In other words, the tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).
@@ -968,8 +969,11 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 // * `C`: whether to dynamically force the parameter values for each dimension to the ranges specified in parameters: 1 forces the check, 0 deactivates it (constant numerical expression)
 // * `function`: the function we want to tabulate. Can have any number of inputs, but needs to have just one output.
 // * `(parameters)`: sizes, ranges and read values.
-// NOTE: These need to be in brackets, to make them one entity.
+//
+// Note: these need to be in brackets, to make them one entity.
+//
 // If N is the number of dimensions, we need:
+// 
 //   * N times `S`: number of values to store for this dimension (constant numerical expression)
 //   * N times `r0`: minimum value of this dimension
 //   * N times `r1`: maximum value of this dimension
@@ -998,14 +1002,14 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 // powSin(x,y) = sin(pow(x,y)); // The function we want to tabulate
 // powSinTable(x,y) = ba.tabulateNd(1, powSin, (sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) ).lin;
 // sizeX = 512; // table size of the first parameter
-// sizeY = 512; // of the size of the second parameter
-// rx0 = 0; // start of the range of the first parameter
-// ry0 = 0; // start of the range of the second parameter
+// sizeY = 512; // table size of the second parameter
+// rx0 = 2; // start of the range of the first parameter
+// ry0 = 2; // start of the range of the second parameter
 // rx1 = 10; // end of the range of the first parameter
 // ry1 = 10; // end of the range of the second parameter
-// x= hslider("x", rx0, rx0, rx1, 0.001):si.smoo;
-// y= hslider("y", ry0, ry0, ry1, 0.001):si.smoo;
-// process = powSinTable(x,y), powSin(y,y);
+// x = hslider("x", rx0, rx0, rx1, 0.001):si.smoo;
+// y = hslider("y", ry0, ry0, ry1, 0.001):si.smoo;
+// process = powSinTable(x,y), powSin(x,y);
 // ```
 //
 // #### Working principle
@@ -1027,6 +1031,7 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 // Each group feeds into the next, with the last "group" being a single interpolator, and the group before it containing one interpolator for each input of the group it's feeding.
 //
 // Some examples:
+//
 // * Our 2D linear example has two interpolators feeding into one.
 // * A 3D linear interpolator has four interpolators feeding into two, feeding into one.
 // * A 2D cubic interpolater has four interpolators feeding into one.
@@ -1036,24 +1041,28 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 // The four values going into the first group represent the four closest points (A, B, C, D) mentioned above.
 //
 // 1) The first interpolator gets:
+//
 // * The closest value that is stored (A)
 // * The next value in the x dimension, keeping y fixed (B)
 //
 // 2) The second interpolator gets:
+//
 // * One step over in the y dimension, keeping x fixed (C)
 // * One step over in both the x dimension and the y dimension (D)
 //
 // The outputs of these two interpolators are points E and F.
 // In other words: the interpolated x values and, respectively, the following y values:
+//
 // * The closest stored value of the y dimension
 // * One step forward in the y dimension
 //
 // The last interpolator takes these two values and interpolates them in the y dimension.
 //
 // To generalize for N dimensions, linear interpolation:
-// The first group has 2^(n-1) parallel interpolators interpolating in the first dimension.
-// The second group has 2^(n-2) parallel interpolators interpolating in the second dimension.
-// The process continues until the n-th group, which has a single interpolator interpolating in the n-th dimension.
+//
+// * The first group has 2^(n-1) parallel interpolators interpolating in the first dimension.
+// * The second group has 2^(n-2) parallel interpolators interpolating in the second dimension.
+// * The process continues until the n-th group, which has a single interpolator interpolating in the n-th dimension.
 //
 // The same principle applies to the cubic interpolation in nD. The only difference is that there would be 4^(n-1) parallel interpolators in the first group, compared to 2^(n-1) for linear interpolation.
 //
@@ -1063,18 +1072,17 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 // Let's call this `d`, like in ``ba.interpolate``.
 // It is the same for each group of interpolators, since it correlates to a dimension.
 // It's value is calculated the similarly to ``ba.interpolate``:
-// First we prepare a 'float' table read-index for that dimension (``id`` in ``ba.tabulate``):
-// If the table only had that dimension and it could read a float index, what would it be.
-// Then we ``int`` the float index to get the value we have stored that is closest to, but lower than the input value; the actual index for that dimension.
+// 
+// * first we prepare a 'float' table read-index for that dimension (``id`` in ``ba.tabulate``):
+// * If the table only had that dimension and it could read a float index, what would it be.
+// * then we ``int`` the float index to get the value we have stored that is closest to, but lower than the input value; the actual index for that dimension.
 // Our ``d`` is the difference between the float index and the actual index.
 //
 // The ``ids`` function calculates the ``id`` for each dimension and inside the ``mixer`` function they get turned into ``d``s.
 //
 // ##### Storage method
 //
-// The elephant in the room is: how do we get these indexes?
-//
-// For that we need to know how the values are stored.
+// The elephant in the room is: how do we get these indexes? For that we need to know how the values are stored.
 // We use one big table to store everything.
 //
 // To understand the concept, let's look at the 2D example again, and then we'll extend it to 3d and the general nD case.
@@ -1129,7 +1137,7 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 // The ``rdtable``s for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest.
 // These offsets are best explained by looking at the code of ``tabulate2d``, the hardcoded 2D version:
 // ```faust
-// tabulate2d(C,function,sizeX,sizeY, rx0, ry0, rx1, ry1,x,y) =
+// tabulate2d(C,function, sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) =
 //   environment {
 //     size = sizeX*sizeY;
 //     // Maximum X index to access
@@ -1153,16 +1161,14 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //       ry0+
 //       ((float(ba.time-(ba.time%sizeX))
 //         /float(sizeX))
-//        *(ry1-ry0)
-//       )
-//       /float(midY)
-//     ;
+//        *(ry1-ry0))
+//       /float(midY);
 //
 //     // Limit the table read index in [0, mid] if C = 1
 //     rid(x,mid, 0) = x;
 //     rid(x,mid, 1) = max(0, min(x, mid));
 //
-//     // Tabulate an unary 'FX' function on a range [rx0, rx1] [ry0, ry1]
+//     // Tabulate a binary 'FX' function on a range [rx0, rx1] [ry0, ry1]
 //     val(x,y) =
 //       rdtable(size, wf, readIndex);
 //     readIndex =
@@ -1170,10 +1176,9 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //         rid(int(idX+0.5),midX, C)
 //         +yOffset
 //       , mid, C);
-//     yOffset =
-//       sizeX*rid(int(idY),midY,C);
+//     yOffset = sizeX*rid(int(idY),midY,C);
 //
-//     // Tabulate an unary 'FX' function over the range [rx0, rx1] [ry0, ry1] with linear interpolation
+//     // Tabulate a binary 'FX' function over the range [rx0, rx1] [ry0, ry1] with linear interpolation
 //     lin =
 //       it.interpolate_linear(
 //         dy
@@ -1191,7 +1196,8 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //       v2 = rdtable(size, wf, rid(i2, mid, C));
 //       v3 = rdtable(size, wf, rid(i3, mid, C));
 //     };
-//     // Tabulate an unary 'FX' function over the range [rx0, rx1] [ry0, ry1] with cubic interpolation
+// 
+//     // Tabulate a binary 'FX' function over the range [rx0, rx1] [ry0, ry1] with cubic interpolation
 //     cub =
 //       it.interpolate_cubic(
 //         dy
@@ -1243,8 +1249,7 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //   };
 // ```
 //
-// In the intrest of brevity, we'll stop explaining here.
-// If you have any more questions, feel free to open an issue on https://github.com/grame-cncm/faustlibraries/ and tag @magnetophon.
+// In the interest of brevity, we'll stop explaining here. If you have any more questions, feel free to open an issue on [faustlibraries](https://github.com/grame-cncm/faustlibraries) and tag @magnetophon.
 //
 //--------------------------------------------
 tabulateNd(C,function,parameters) =
@@ -1263,7 +1268,7 @@ tabulateNd(C,function,parameters) =
             // table sizes and ids for each dimension
             sizesIds:
             (bs,par(i, N, _+0.5));
-    };
+        };
 
         lin =
             parameters
@@ -1330,8 +1335,7 @@ tabulateNd(C,function,parameters) =
                 : ro.interleave(len*4,2)
                 :par(i, 4,
                      par(j, len, off(i)+_))
-            with
-            {
+            with {
                 // the hardcoded numbers are the same offsets as in ``ba.tabulate``
                 // but they get multiplied by the step size of the current dimension
                 off(0,stepSize) = -1*stepSize;
@@ -1419,11 +1423,8 @@ tabulateNd(C,function,parameters) =
         // one waveform parameter write value:
         wfp(prevSize,sizeX,r0,r1) =
             r0+
-            ((float(
-                     int(ba.time%(prevSize*sizeX)/prevSize)
-                 )*(r1-r0)
-             )
-             /float(sizeX-1))
+            ((float(int(ba.time%(prevSize*sizeX)/prevSize))*(r1-r0))
+            /float(sizeX-1))
            ,(prevSize*sizeX);
 
         // all waveform parameters write values:
@@ -1431,8 +1432,7 @@ tabulateNd(C,function,parameters) =
             ro.interleave(N,3)
             : (1,si.bus(3*N))
             : seq(i, N, si.bus(i),wfp, si.bus(3*N-(3*(i+1))))
-            : (si.bus(N),!)
-        ;
+            : (si.bus(N),!);
 
         // Create the table
         wf = (wfps,par(i, N, !)):function;
@@ -1499,7 +1499,7 @@ tabulateNd(C,function,parameters) =
         int2bin(i,n,maxN) = int(int((n)/(1<<i))%int(2));
         // shortcut
         bs = si.bus(N);
-    };
+};
 
 declare tabulateNd author "Bart Brouns";
 declare tabulateNd "Copyright (C) 2023 Bart Brouns <bart@magnetophon.nl>";
