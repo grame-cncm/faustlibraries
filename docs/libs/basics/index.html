@@ -393,6 +393,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#batabulatend" class="nav-link">(ba.)tabulateNd</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#selectors-conditions" class="nav-link">Selectors (Conditions)</a>
@@ -990,7 +994,7 @@ so that the computation at runtime can be faster than directly using the functio
 Two techniques are implemented: </p>
 <ul>
 <li>
-<p><code>tabulate</code> computes the function in a table and read the points using interpolation</p>
+<p><code>tabulate</code> computes the function in a table and read the points using interpolation. <code>tabulateNd</code> is the N dimensions version of <code>tabulate</code></p>
 </li>
 <li>
 <p><code>tabulate_chebychev</code> uses Chebyshev polynomial approximation</p>
@@ -1059,13 +1063,281 @@ or use <code>C = 1</code>.</p>
 <pre><code>midikey2hz_chebychev(mk) = ba.tabulate_chebychev(1, ba.midikey2hz, 100, 4, 0, 127, mk);
 process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
 </code></pre>
+<hr />
+<h3 id="batabulatend"><code>(ba.)tabulateNd</code></h3>
+<p>Tabulate an nD function for access via nearest-value or linear or cubic interpolation.
+In other words, the tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).
+The table size and parameter range of each dimension can and must be separately specified.
+You can use it anywhere you have an expensive function with multiple parameters with known ranges.
+You could use it to build a wavetable synth, for example.</p>
+<p>The number of dimensions is deduced from the number of parameters you give, see below.</p>
+<h4 id="usage_39">Usage</h4>
+<pre><code>tabulateNd(C, function, (parameters) ).(val|lin|cub) : _
+</code></pre>
+<ul>
+<li><code>C</code>: whether to dynamically force the parameter values for each dimension to the ranges specified in parameters: 1 forces the check, 0 deactivates it (constant numerical expression)</li>
+<li><code>function</code>: the function we want to tabulate. Can have any number of inputs, but needs to have just one output.</li>
+<li><code>(parameters)</code>: sizes, ranges and read values.</li>
+</ul>
+<p>Note: these need to be in brackets, to make them one entity.</p>
+<p>If N is the number of dimensions, we need:</p>
+<ul>
+<li>N times <code>S</code>: number of values to store for this dimension (constant numerical expression)</li>
+<li>N times <code>r0</code>: minimum value of this dimension</li>
+<li>N times <code>r1</code>: maximum value of this dimension</li>
+<li>N times <code>x</code>: read value of this dimension</li>
+</ul>
+<p>By providing these parameters, you indirectly specify the number of dimensions; it's the number of parameters divided by 4.</p>
+<p>The user facing functions are:</p>
+<pre><code>tabulateNd(C, function, S, parameters).val
+</code></pre>
+<ul>
+<li>Uses the value in the table closest to x.</li>
+</ul>
+<pre><code>tabulateNd(C, function, S, parameters).lin
+</code></pre>
+<ul>
+<li>Evaluates at x using linear interpolation between the closest stored values.</li>
+</ul>
+<pre><code>tabulateNd(C, function, S, parameters).cub
+</code></pre>
+<ul>
+<li>Evaluates at x using cubic interpolation between the closest stored values.</li>
+</ul>
+<h4 id="example-test-program_2">Example test program</h4>
+<pre><code class="language-faust">powSin(x,y) = sin(pow(x,y)); // The function we want to tabulate
+powSinTable(x,y) = ba.tabulateNd(1, powSin, (sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) ).lin;
+sizeX = 512; // table size of the first parameter
+sizeY = 512; // table size of the second parameter
+rx0 = 2; // start of the range of the first parameter
+ry0 = 2; // start of the range of the second parameter
+rx1 = 10; // end of the range of the first parameter
+ry1 = 10; // end of the range of the second parameter
+x = hslider(&quot;x&quot;, rx0, rx0, rx1, 0.001):si.smoo;
+y = hslider(&quot;y&quot;, ry0, ry0, ry1, 0.001):si.smoo;
+process = powSinTable(x,y), powSin(x,y);
+</code></pre>
+<h4 id="working-principle">Working principle</h4>
+<p>The <code>.val</code> function just outputs the closest stored value.
+The <code>.lin</code> and <code>.cub</code> functions interpolate in N dimensions.</p>
+<h5 id="multi-dimensional-interpolation">Multi dimensional interpolation</h5>
+<p>To understand what it means to interpolate in N dimensions, here's a quick reminder on the general principle of 2D linear interpolation:</p>
+<p>We have a grid of values, and we want to find the value at a point (x, y) within this grid.
+We first find the four closest points (A, B, C, D) in the grid surrounding the point (x, y).
+Then, we perform linear interpolation in the x-direction between points A and B, and between points C and D.
+This gives us two new points E and F.
+Finally, we perform linear interpolation in the y-direction between points E and F to get our value.</p>
+<p>To implement this in Faust, we need N sequential groups of interpolators, where N is the number of dimensions.
+Each group feeds into the next, with the last "group" being a single interpolator, and the group before it containing one interpolator for each input of the group it's feeding.</p>
+<p>Some examples:</p>
+<ul>
+<li>Our 2D linear example has two interpolators feeding into one.</li>
+<li>A 3D linear interpolator has four interpolators feeding into two, feeding into one.</li>
+<li>A 2D cubic interpolater has four interpolators feeding into one.</li>
+<li>A 3D cubic interpolator has sixteen interpolators feeding into four, feeding into one.</li>
+</ul>
+<p>To understand which values we need to look up, let's consider the 2D linear example again.
+The four values going into the first group represent the four closest points (A, B, C, D) mentioned above.</p>
+<p>1) The first interpolator gets:</p>
+<ul>
+<li>The closest value that is stored (A)</li>
+<li>The next value in the x dimension, keeping y fixed (B)</li>
+</ul>
+<p>2) The second interpolator gets:</p>
+<ul>
+<li>One step over in the y dimension, keeping x fixed (C)</li>
+<li>One step over in both the x dimension and the y dimension (D)</li>
+</ul>
+<p>The outputs of these two interpolators are points E and F.
+In other words: the interpolated x values and, respectively, the following y values:</p>
+<ul>
+<li>The closest stored value of the y dimension</li>
+<li>One step forward in the y dimension</li>
+</ul>
+<p>The last interpolator takes these two values and interpolates them in the y dimension.</p>
+<p>To generalize for N dimensions, linear interpolation:</p>
+<ul>
+<li>The first group has 2^(n-1) parallel interpolators interpolating in the first dimension.</li>
+<li>The second group has 2^(n-2) parallel interpolators interpolating in the second dimension.</li>
+<li>The process continues until the n-th group, which has a single interpolator interpolating in the n-th dimension.</li>
+</ul>
+<p>The same principle applies to the cubic interpolation in nD. The only difference is that there would be 4^(n-1) parallel interpolators in the first group, compared to 2^(n-1) for linear interpolation.</p>
+<p>This is what the <code>mixers</code> function does.</p>
+<p>Besides the values, each interpolator also needs to know the weight of each value in it's output.
+Let's call this <code>d</code>, like in <code>ba.interpolate</code>.
+It is the same for each group of interpolators, since it correlates to a dimension.
+It's value is calculated the similarly to <code>ba.interpolate</code>:</p>
+<ul>
+<li>first we prepare a 'float' table read-index for that dimension (<code>id</code> in <code>ba.tabulate</code>):</li>
+<li>If the table only had that dimension and it could read a float index, what would it be.</li>
+<li>then we <code>int</code> the float index to get the value we have stored that is closest to, but lower than the input value; the actual index for that dimension.
+Our <code>d</code> is the difference between the float index and the actual index.</li>
+</ul>
+<p>The <code>ids</code> function calculates the <code>id</code> for each dimension and inside the <code>mixer</code> function they get turned into <code>d</code>s.</p>
+<h5 id="storage-method">Storage method</h5>
+<p>The elephant in the room is: how do we get these indexes? For that we need to know how the values are stored.
+We use one big table to store everything.</p>
+<p>To understand the concept, let's look at the 2D example again, and then we'll extend it to 3d and the general nD case.</p>
+<p>Let's say we have a 2D table with dimensions A and B where:
+A has 3 values between 0 and 5 and B has 4 values between 0 and 1.
+The 1D array representation of this 2D table will have a size of 3 * 4 = 12.</p>
+<p>The values are stored in the following way:</p>
+<ul>
+<li>First 3 values: A is 0, then 3, then 5 while B is at 0.</li>
+<li>Next 3 values: A changes from 0 to 5 while B is at 1/3.</li>
+<li>Next 3 values: A changes from 0 to 5 while B is at 2/3.</li>
+<li>Last 3 values: A changes from 0 to 5 while B is at 1.</li>
+</ul>
+<p>For the 3D example, let's extend the 2D example with an additional dimension C having 2 values between 0 and 2.
+The total size will be 3 * 4 * 2 = 24.</p>
+<p>The values are stored like so:</p>
+<ul>
+<li>First 3 values: A changes from 0 to 5, B is at 0, and C is at 0.</li>
+<li>Next 3 values: A changes from 0 to 5, B is at 1/3, and C is at 0.</li>
+<li>Next 3 values: A changes from 0 to 5, B is at 2/3, and C is at 0.</li>
+<li>Next 3 values: A changes from 0 to 5, B is at 1, and C is at 0.</li>
+</ul>
+<p>The last 12 values are the same as the first 12, but with C at 2.</p>
+<p>For the general n-dimensional case, we iterate through all dimensions, changing the values of the innermost dimension first, then moving towards the outer dimensions.</p>
+<h5 id="read-indexes">Read indexes</h5>
+<p>To get the float read index (<code>id</code>) corresponding to a particular dimension, we scale the function input value to be between 0 and 1, and multiply it by the size of that dimension minus one.</p>
+<p>To understand how we get the <code>readIndex</code>for <code>.val</code>, let's work trough how we'd do it in our 2D linear example.
+For simplicity's sake, the ranges of the inputs to our <code>function</code> are both 0 to 1.
+Say we wanted to read the value closest to <code>x=0.5</code> and <code>y=0</code>, so the <code>id</code> of <code>x</code> is <code>1</code> (the second value) and the <code>id</code> of <code>y</code> is 0 (first value).
+In this case, the read index is just the <code>id</code> of <code>x</code>, rounded to the nearest integer, just like in <code>ba.tabulate</code>.
+If we want to read the value belonging to <code>x=0.5</code> and <code>y=2/3</code>, things get more complicated.
+The <code>id</code> for <code>y</code> is now <code>2</code>, the third value.
+For each step in the <code>y</code> direction, we need to increase the index by <code>3</code>, the number of values that are stored for <code>x</code>.
+So the influence of the <code>y</code> is:  the size of <code>x</code> times the rounded <code>id</code> of <code>y</code>.
+The final read index is the rounded <code>id</code> of <code>x</code> plus the influence of <code>y</code>.</p>
+<p>For the general nD case, we take need to do the same operation N times, each feeding into the next.
+This operation is the <code>riN</code> function.
+We take four parameters:  the size of the dimension before it <code>prevSize</code>, the index of the previous dimension <code>prevIX</code>, the current size <code>sizeX</code> and the current id <code>idX</code>.
+<code>riN</code> has 2 outputs, the size, for feeding into the next dimension's <code>prevSize</code>, and the read index feeding into the next dimension's prevIX.
+The size is the <code>sizeX</code> times <code>prevSize</code>.
+The read index is the rounded <code>idX</code> times <code>prevSize</code> added to the <code>prevIX</code>.
+Our final <code>readIndex</code> is the read index output of the last dimension.</p>
+<p>The <code>rdtable</code>s for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest.
+These offsets are best explained by looking at the code of <code>tabulate2d</code>, the hardcoded 2D version:</p>
+<pre><code class="language-faust">tabulate2d(C,function, sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) =
+  environment {
+    size = sizeX*sizeY;
+    // Maximum X index to access
+    midX = sizeX-1;
+    // Maximum Y index to access
+    midY = sizeY-1;
+    // Maximum total index to access
+    mid = size-1;
+    // Create the table
+    wf = function(wfX,wfY);
+    // Prepare the 'float' table read index for X
+    idX = (x-rx0)/(rx1-rx0)*midX;
+    // Prepare the 'float' table read index for Y
+    idY = ((y-ry0)/(ry1-ry0))*midY;
+    // table creation X:
+    wfX =
+      rx0+float(ba.time%sizeX)*(rx1-rx0)
+      /float(midX);
+    // table creation Y:
+    wfY =
+      ry0+
+      ((float(ba.time-(ba.time%sizeX))
+        /float(sizeX))
+       *(ry1-ry0))
+      /float(midY);
+
+    // Limit the table read index in [0, mid] if C = 1
+    rid(x,mid, 0) = x;
+    rid(x,mid, 1) = max(0, min(x, mid));
+
+    // Tabulate a binary 'FX' function on a range [rx0, rx1] [ry0, ry1]
+    val(x,y) =
+      rdtable(size, wf, readIndex);
+    readIndex =
+      rid(
+        rid(int(idX+0.5),midX, C)
+        +yOffset
+      , mid, C);
+    yOffset = sizeX*rid(int(idY),midY,C);
+
+    // Tabulate a binary 'FX' function over the range [rx0, rx1] [ry0, ry1] with linear interpolation
+    lin =
+      it.interpolate_linear(
+        dy
+      , it.interpolate_linear(dx,v0,v1)
+      , it.interpolate_linear(dx,v2,v3))
+    with {
+      i0 = rid(int(idX), midX, C)+yOffset;
+      i1 = i0+1;
+      i2 = i0+sizeX;
+      i3 = i1+sizeX;
+      dx  = idX-int(idX);
+      dy  = idY-int(idY);
+      v0 = rdtable(size, wf, rid(i0, mid, C));
+      v1 = rdtable(size, wf, rid(i1, mid, C));
+      v2 = rdtable(size, wf, rid(i2, mid, C));
+      v3 = rdtable(size, wf, rid(i3, mid, C));
+    };
+
+    // Tabulate a binary 'FX' function over the range [rx0, rx1] [ry0, ry1] with cubic interpolation
+    cub =
+      it.interpolate_cubic(
+        dy
+      , it.interpolate_cubic(dx,v0,v1,v2,v3)
+      , it.interpolate_cubic(dx,v4,v5,v6,v7)
+      , it.interpolate_cubic(dx,v8,v9,v10,v11)
+      , it.interpolate_cubic(dx,v12,v13,v14,v15)
+      )
+    with {
+      i0  = i4-sizeX;
+      i1  = i5-sizeX;
+      i2  = i6-sizeX;
+      i3  = i7-sizeX;
+
+      i4  = i5-1;
+      i5  = rid(int(idX), midX, C)+yOffset;
+      i6  = i5+1;
+      i7  = i6+1;
+
+      i8  = i4+sizeX;
+      i9  = i5+sizeX;
+      i10 = i6+sizeX;
+      i11 = i7+sizeX;
+
+      i12 = i4+(2*sizeX);
+      i13 = i5+(2*sizeX);
+      i14 = i6+(2*sizeX);
+      i15 = i7+(2*sizeX);
+
+      dx  = idX-int(idX);
+      dy  = idY-int(idY);
+      v0  = rdtable(size, wf, rid(i0 , mid, C));
+      v1  = rdtable(size, wf, rid(i1 , mid, C));
+      v2  = rdtable(size, wf, rid(i2 , mid, C));
+      v3  = rdtable(size, wf, rid(i3 , mid, C));
+      v4  = rdtable(size, wf, rid(i4 , mid, C));
+      v5  = rdtable(size, wf, rid(i5 , mid, C));
+      v6  = rdtable(size, wf, rid(i6 , mid, C));
+      v7  = rdtable(size, wf, rid(i7 , mid, C));
+      v8  = rdtable(size, wf, rid(i8 , mid, C));
+      v9  = rdtable(size, wf, rid(i9 , mid, C));
+      v10 = rdtable(size, wf, rid(i10, mid, C));
+      v11 = rdtable(size, wf, rid(i11, mid, C));
+      v12 = rdtable(size, wf, rid(i12, mid, C));
+      v13 = rdtable(size, wf, rid(i13, mid, C));
+      v14 = rdtable(size, wf, rid(i14, mid, C));
+      v15 = rdtable(size, wf, rid(i15, mid, C));
+    };
+  };
+</code></pre>
+<p>In the interest of brevity, we'll stop explaining here. If you have any more questions, feel free to open an issue on <a href="https://github.com/grame-cncm/faustlibraries">faustlibraries</a> and tag @magnetophon.</p>
 <h2 id="selectors-conditions">Selectors (Conditions)</h2>
 <hr />
 <h3 id="baif"><code>(ba.)if</code></h3>
 <p>if-then-else implemented with a select2. WARNING: since <code>select2</code> is strict (always evaluating both branches),
 the resulting if does not have the usual "lazy" semantic of the C if form, and thus cannot be used to
 protect against forbidden computations like division-by-zero for instance.</p>
-<h4 id="usage_39">Usage</h4>
+<h4 id="usage_40">Usage</h4>
 <ul>
 <li><code>if(cond, then, else) : _</code></li>
 </ul>
@@ -1078,7 +1350,7 @@ protect against forbidden computations like division-by-zero for instance.</p>
 <hr />
 <h3 id="baselector"><code>(ba.)selector</code></h3>
 <p>Selects the ith input among n at compile time.</p>
-<h4 id="usage_40">Usage</h4>
+<h4 id="usage_41">Usage</h4>
 <pre><code>selector(I,N)
 _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 </code></pre>
@@ -1091,7 +1363,7 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <hr />
 <h3 id="baselect2stereo"><code>(ba.)select2stereo</code></h3>
 <p>Select between 2 stereo signals.</p>
-<h4 id="usage_41">Usage</h4>
+<h4 id="usage_42">Usage</h4>
 <pre><code>_,_,_,_ : select2stereo(bpc) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1101,7 +1373,7 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <hr />
 <h3 id="baselectn"><code>(ba.)selectn</code></h3>
 <p>Selects the ith input among N at run time.</p>
-<h4 id="usage_42">Usage</h4>
+<h4 id="usage_43">Usage</h4>
 <pre><code>selectn(N,i)
 _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 </code></pre>
@@ -1110,7 +1382,7 @@ _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 <li><code>N</code>: number of inputs (int, known at compile time, N &gt; 0)</li>
 <li><code>i</code>: input to select (int, numbered from 0)</li>
 </ul>
-<h4 id="example-test-program_2">Example test program</h4>
+<h4 id="example-test-program_3">Example test program</h4>
 <pre><code>N = 64;
 process = par(n, N, (par(i,N,i) : selectn(N,n)));
 </code></pre>
@@ -1118,7 +1390,7 @@ process = par(n, N, (par(i,N,i) : selectn(N,n)));
 <h3 id="baselectmulti"><code>(ba.)selectmulti</code></h3>
 <p>Selects the ith circuit among N at run time (all should have the same number of inputs and outputs)
 with a crossfade.</p>
-<h4 id="usage_43">Usage</h4>
+<h4 id="usage_44">Usage</h4>
 <pre><code>selectmulti(n,lgen,id)
 </code></pre>
 <p>Where:</p>
@@ -1127,14 +1399,14 @@ with a crossfade.</p>
 <li><code>lgen</code>: list of circuits</li>
 <li><code>id</code>: circuit to select (int, numbered from 0)</li>
 </ul>
-<h4 id="example-test-program_3">Example test program</h4>
+<h4 id="example-test-program_4">Example test program</h4>
 <pre><code>process = selectmulti(ma.SR/10, ((3,9),(2,8),(5,7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 </code></pre>
 <hr />
 <h3 id="baselectoutn"><code>(ba.)selectoutn</code></h3>
 <p>Route input to the output among N at run time.</p>
-<h4 id="usage_44">Usage</h4>
+<h4 id="usage_45">Usage</h4>
 <pre><code>_ : selectoutn(N, i) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -1142,7 +1414,7 @@ process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;ch
 <li><code>N</code>: number of outputs (int, known at compile time, N &gt; 0)</li>
 <li><code>i</code>: output number to route to (int, numbered from 0) (i.e. slider)</li>
 </ul>
-<h4 id="example-test-program_4">Example test program</h4>
+<h4 id="example-test-program_5">Example test program</h4>
 <pre><code>process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph(&quot;v.bargraph %i&quot;, 0, 1));
 sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 </code></pre>
@@ -1151,7 +1423,7 @@ sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 <h3 id="balatch"><code>(ba.)latch</code></h3>
 <p>Latch input on positive-going transition of trig:"records" the input when trig
 switches from 0 to 1, outputs a frozen values everytime else.</p>
-<h4 id="usage_45">Usage</h4>
+<h4 id="usage_46">Usage</h4>
 <pre><code>_ : latch(trig) : _
 </code></pre>
 <p>Where:</p>
@@ -1162,7 +1434,7 @@ switches from 0 to 1, outputs a frozen values everytime else.</p>
 <h3 id="basandh"><code>(ba.)sAndH</code></h3>
 <p>Sample And Hold: "records" the input when trig is 1, outputs a frozen value when trig is 0.
 <code>sAndH</code> is a standard Faust function.</p>
-<h4 id="usage_46">Usage</h4>
+<h4 id="usage_47">Usage</h4>
 <pre><code>_ : sAndH(trig) : _
 </code></pre>
 <p>Where:</p>
@@ -1174,7 +1446,7 @@ switches from 0 to 1, outputs a frozen values everytime else.</p>
 <p>Down sample a signal. WARNING: this function doesn't change the
 rate of a signal, it just holds samples...
 <code>downSample</code> is a standard Faust function.</p>
-<h4 id="usage_47">Usage</h4>
+<h4 id="usage_48">Usage</h4>
 <pre><code>_ : downSample(freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1184,7 +1456,7 @@ rate of a signal, it just holds samples...
 <hr />
 <h3 id="bapeakhold"><code>(ba.)peakhold</code></h3>
 <p>Outputs current max value above zero.</p>
-<h4 id="usage_48">Usage</h4>
+<h4 id="usage_49">Usage</h4>
 <pre><code>_ : peakhold(mode) : _
 </code></pre>
 <p>Where:</p>
@@ -1201,7 +1473,7 @@ if the input is greater or equal to the output, a new peak is detected
 and sent to the output; otherwise, a timer starts and the current peak
 is held for N samples; once the timer is out and no new peaks have been
 detected, the absolute value of the current input becomes the new peak.</p>
-<h4 id="usage_49">Usage</h4>
+<h4 id="usage_50">Usage</h4>
 <pre><code>_ : peakholder(holdTime) : _
 </code></pre>
 <p>Where:</p>
@@ -1214,13 +1486,13 @@ detected, the absolute value of the current input becomes the new peak.</p>
 (0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a
 <code>button</code> to turn its output into an impulse. <code>impulsify</code> is a standard Faust
 function.</p>
-<h4 id="usage_50">Usage</h4>
+<h4 id="usage_51">Usage</h4>
 <pre><code>button(&quot;gate&quot;) : impulsify;
 </code></pre>
 <hr />
 <h3 id="baautomat"><code>(ba.)automat</code></h3>
 <p>Record and replay in a loop the successives values of the input signal.</p>
-<h4 id="usage_51">Usage</h4>
+<h4 id="usage_52">Usage</h4>
 <pre><code>hslider(...) : automat(t, size, init) : _
 </code></pre>
 <p>Where:</p>
@@ -1260,7 +1532,7 @@ and <code>x &lt; x_{i+1}</code></li>
 <hr />
 <h3 id="balistinterp"><code>(ba.)listInterp</code></h3>
 <p>Linearly interpolates between the elements of a list.</p>
-<h4 id="usage_52">Usage</h4>
+<h4 id="usage_53">Usage</h4>
 <pre><code>index = 1.69; // range is 0-4
 process = listInterp((800,400,350,450,325),index);
 </code></pre>
@@ -1274,7 +1546,7 @@ The range of <code>index</code> depends on the size of the list.</li>
 <p>Takes a mono input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>.
 When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up.
 <code>bypass1</code> is a standard Faust function.</p>
-<h4 id="usage_53">Usage</h4>
+<h4 id="usage_54">Usage</h4>
 <pre><code>_ : bypass1(bpc,e) : _
 </code></pre>
 <p>Where:</p>
@@ -1287,7 +1559,7 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 <p>Takes a stereo input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>.
 When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up.
 <code>bypass2</code> is a standard Faust function.</p>
-<h4 id="usage_54">Usage</h4>
+<h4 id="usage_55">Usage</h4>
 <pre><code>_,_ : bypass2(bpc,e) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1301,7 +1573,7 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 Effect <code>e</code> is bypassed if <code>bpc = 1</code>.When bypassed, <code>e</code> is feed with zeros
 so that its state is cleanup up.
 <code>bypass1to2</code> is a standard Faust function.</p>
-<h4 id="usage_55">Usage</h4>
+<h4 id="usage_56">Usage</h4>
 <pre><code>_ : bypass1to2(bpc,e) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1316,7 +1588,7 @@ Inputs and outputs signals are faded out when 'e' is bypassed,
 so that 'e' state is cleanup up.
 Once bypassed the effect is replaced by <code>par(i,N,_)</code>.
 Bypassed circuits can be chained.</p>
-<h4 id="usage_56">Usage</h4>
+<h4 id="usage_57">Usage</h4>
 <pre><code>_ : bypass_fade(n,b,e) : _
 or
 _,_ : bypass_fade(n,b,e) : _,_
@@ -1326,7 +1598,7 @@ _,_ : bypass_fade(n,b,e) : _,_
 <li><code>b</code>: bypass switch (0/1)</li>
 <li><code>e</code>: N x N circuit</li>
 </ul>
-<h4 id="example-test-program_5">Example test program</h4>
+<h4 id="example-test-program_6">Example test program</h4>
 <pre><code>process = bypass_fade(ma.SR/10, checkbox(&quot;bypass echo&quot;), echo);
 process = bypass_fade(ma.SR/10, checkbox(&quot;bypass reverb&quot;), freeverb);
 </code></pre>
@@ -1334,26 +1606,26 @@ process = bypass_fade(ma.SR/10, checkbox(&quot;bypass reverb&quot;), freeverb);
 <h3 id="batoggle"><code>(ba.)toggle</code></h3>
 <p>Triggered by the change of 0 to 1, it toggles the output value
 between 0 and 1.</p>
-<h4 id="usage_57">Usage</h4>
+<h4 id="usage_58">Usage</h4>
 <pre><code>_ : toggle : _
 </code></pre>
-<h4 id="example-test-program_6">Example test program</h4>
+<h4 id="example-test-program_7">Example test program</h4>
 <pre><code>button(&quot;toggle&quot;) : toggle : vbargraph(&quot;output&quot;, 0, 1)
 (an.amp_follower(0.1) &gt; 0.01) : toggle : vbargraph(&quot;output&quot;, 0, 1) // takes audio input
 </code></pre>
 <hr />
 <h3 id="baon_and_off"><code>(ba.)on_and_off</code></h3>
 <p>The first channel set the output to 1, the second channel to 0.</p>
-<h4 id="usage_58">Usage</h4>
+<h4 id="usage_59">Usage</h4>
 <pre><code>_,_ : on_and_off : _
 </code></pre>
-<h4 id="example-test-program_7">Example test program</h4>
+<h4 id="example-test-program_8">Example test program</h4>
 <pre><code>button(&quot;on&quot;), button(&quot;off&quot;) : on_and_off : vbargraph(&quot;output&quot;, 0, 1)
 </code></pre>
 <hr />
 <h3 id="babitcrusher"><code>(ba.)bitcrusher</code></h3>
 <p>Produce distortion by reduction of the signal resolution.</p>
-<h4 id="usage_59">Usage</h4>
+<h4 id="usage_60">Usage</h4>
 <pre><code>_ : bitcrusher(nbits) : _
 </code></pre>
 <p>Where:</p>
@@ -1373,7 +1645,7 @@ between 0 and 1.</p>
 <li><code>slidingRMS(n)</code>: the sliding RMS of the last n input samples, CPU-light</li>
 <li><code>slidingRMSp(n,maxN)</code>: the sliding RMS of the last n input samples, numerically stable "forever"</li>
 </ul>
-<h4 id="working-principle">Working Principle</h4>
+<h4 id="working-principle_1">Working Principle</h4>
 <p>If we want the maximum of the last 8 values, we can do that as:</p>
 <pre><code>simpleMax(x) =
  (
@@ -1495,7 +1767,7 @@ the last <code>n</code> consecutive samples of a signal <code>x</code>. For exam
 <code>slidingReduce(max,128,128,0-(ma.MAX))</code> will compute the maximum of the last
 128 samples. The output is updated each sample, unlike reduce, where the
 output is constant for the duration of a block.</p>
-<h4 id="usage_60">Usage</h4>
+<h4 id="usage_61">Usage</h4>
 <pre><code>_ : slidingReduce(op,n,maxN,disabledVal) : _
 </code></pre>
 <p>Where:</p>
@@ -1514,7 +1786,7 @@ minimum, we need to give <code>ma.MAX</code> as <code>disabledVal</code>.</p>
 <p>The sliding sum of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingSump</code>.</p>
-<h4 id="usage_61">Usage</h4>
+<h4 id="usage_62">Usage</h4>
 <pre><code>_ : slidingSum(n) : _
 </code></pre>
 <p>Where:</p>
@@ -1525,7 +1797,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingsump"><code>(ba.)slidingSump</code></h3>
 <p>The sliding sum of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingSum</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_62">Usage</h4>
+<h4 id="usage_63">Usage</h4>
 <pre><code>_ : slidingSump(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1536,7 +1808,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baslidingmax"><code>(ba.)slidingMax</code></h3>
 <p>The sliding maximum of the last n input samples.</p>
-<h4 id="usage_63">Usage</h4>
+<h4 id="usage_64">Usage</h4>
 <pre><code>_ : slidingMax(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1547,7 +1819,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baslidingmin"><code>(ba.)slidingMin</code></h3>
 <p>The sliding minimum of the last n input samples.</p>
-<h4 id="usage_64">Usage</h4>
+<h4 id="usage_65">Usage</h4>
 <pre><code>_ : slidingMin(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1560,7 +1832,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <p>The sliding mean of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingMeanp</code>.</p>
-<h4 id="usage_65">Usage</h4>
+<h4 id="usage_66">Usage</h4>
 <pre><code>_ : slidingMean(n) : _
 </code></pre>
 <p>Where:</p>
@@ -1571,7 +1843,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingmeanp"><code>(ba.)slidingMeanp</code></h3>
 <p>The sliding mean of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingMean</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_66">Usage</h4>
+<h4 id="usage_67">Usage</h4>
 <pre><code>_ : slidingMeanp(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1584,7 +1856,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <p>The root mean square of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingRMSp</code>.</p>
-<h4 id="usage_67">Usage</h4>
+<h4 id="usage_68">Usage</h4>
 <pre><code>_ : slidingRMS(n) : _
 </code></pre>
 <p>Where:</p>
@@ -1595,7 +1867,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingrmsp"><code>(ba.)slidingRMSp</code></h3>
 <p>The root mean square of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingRMS</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_68">Usage</h4>
+<h4 id="usage_69">Usage</h4>
 <pre><code>_ : slidingRMSp(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1615,7 +1887,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelop"><code>(ba.)parallelOp</code></h3>
 <p>Apply a commutative binary operation <code>op</code> to N parallel inputs.</p>
-<h4 id="usage_69">usage</h4>
+<h4 id="usage_70">usage</h4>
 <pre><code>si.bus(N) : parallelOp(op,N) : _
 </code></pre>
 <p>where:</p>
@@ -1626,7 +1898,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmax"><code>(ba.)parallelMax</code></h3>
 <p>The maximum of N parallel inputs.</p>
-<h4 id="usage_70">Usage</h4>
+<h4 id="usage_71">Usage</h4>
 <pre><code>si.bus(N) : parallelMax(N) : _
 </code></pre>
 <p>Where:</p>
@@ -1636,7 +1908,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmin"><code>(ba.)parallelMin</code></h3>
 <p>The minimum of N parallel inputs.</p>
-<h4 id="usage_71">Usage</h4>
+<h4 id="usage_72">Usage</h4>
 <pre><code>si.bus(N) : parallelMin(N) : _
 </code></pre>
 <p>Where:</p>
@@ -1646,7 +1918,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmean"><code>(ba.)parallelMean</code></h3>
 <p>The mean of N parallel inputs.</p>
-<h4 id="usage_72">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>si.bus(N) : parallelMean(N) : _
 </code></pre>
 <p>Where:</p>
@@ -1656,7 +1928,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelrms"><code>(ba.)parallelRMS</code></h3>
 <p>The RMS of N parallel inputs.</p>
-<h4 id="usage_73">Usage</h4>
+<h4 id="usage_74">Usage</h4>
 <pre><code>si.bus(N) : parallelRMS(N) : _
 </code></pre>
 <p>Where:</p>
