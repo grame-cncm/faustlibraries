@@ -564,7 +564,7 @@ declare RMS_FBcompressor_peak_limiter_N_chan author "Bart Brouns";
 declare RMS_FBcompressor_peak_limiter_N_chan license "GPLv3";
 
 RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) =
-  (((RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,0,link,N)),si.bus(N)) : ro.interleave(N,2) : par(i,N,(meter : ba.db2linear)*_) : FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim : ba.db2linear,N))
+  (((RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,0,link,N)),si.bus(N)) : ro.interleave(N,2) : par(i,N,(meter : ba.db2linear)*_) : FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim,N))
   ~ si.bus(N);
 
 
