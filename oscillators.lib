@@ -336,6 +336,41 @@ with {
 //------------------------------------------------------------
 osc = oscsin;
 
+//=========================Wave-Table-Based Oscillators===================================
+// Oscillators based on mathematical functions.
+//========================================================================================
+
+//-----------------------`(os.)m_oscsin`------------------------
+// Sine wave oscillator based on the `sin` mathematical function.
+//
+// #### Usage
+//
+// ```
+// m_oscsin(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: the frequency in Hz
+//------------------------------------------------------------
+m_oscsin(freq) = lf_sawpos(freq) : *(2*ma.PI) : sin;
+
+
+//-----------------------`(os.)m_osccos`------------------------
+// Sine wave oscillator based on the `sin` mathematical function.
+//
+// #### Usage
+//
+// ```
+// m_osccos(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: the frequency in Hz
+//------------------------------------------------------------
+m_osccos(freq) = lf_sawpos(freq) : *(2*ma.PI) : cos;
+
 
 // end GRAME section
 //########################################################################################
