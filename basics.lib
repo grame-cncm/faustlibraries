@@ -452,7 +452,7 @@ time = (+(1)~_) - 1;
 
 
 //-------`(ba.)ramp`----------
-// A linear ramp with a slope of '(+/-)1/n' samples to reach the next value.
+// A linear ramp with a slope of '(+/-)1/n' samples to reach the next target value.
 //
 // #### Usage
 //
@@ -470,9 +470,11 @@ ramp = case {
 
 
 //-------`(ba.)line`----------
-// A linear ramp to reach a next value in 'n' samples.
-// Note that the interpolation process is restarted every time
-// the desired output value changes, the interpolation time is sampled only then.
+// A ramp interpolator that generates a linear transition to reach a target value:
+//
+//  - the interpolation process restarts each time a new and distinct input value is received
+//  - it utilizes 'n' samples to achieve the transition to the target value
+//  - after reaching the target value, the output value is maintained.
 //
 // #### Usage
 //
@@ -481,7 +483,7 @@ ramp = case {
 // ```
 // Where:
 //
-// * `n`: number of samples to reach the next value
+// * `n`: number of samples to reach the new target received at its input
 //------------------------
 line(n, x) = state ~ (_,_) : !,_
 with {

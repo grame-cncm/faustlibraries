@@ -803,7 +803,7 @@ Outputs zero while <code>run</code> is 0.</p>
 </code></pre>
 <hr />
 <h3 id="baramp"><code>(ba.)ramp</code></h3>
-<p>A linear ramp with a slope of '(+/-)1/n' samples to reach the next value.</p>
+<p>A linear ramp with a slope of '(+/-)1/n' samples to reach the next target value.</p>
 <h4 id="usage_21">Usage</h4>
 <pre><code>_ : ramp(n) : _
 </code></pre>
@@ -813,15 +813,18 @@ Outputs zero while <code>run</code> is 0.</p>
 </ul>
 <hr />
 <h3 id="baline"><code>(ba.)line</code></h3>
-<p>A linear ramp to reach a next value in 'n' samples.
-Note that the interpolation process is restarted every time
-the desired output value changes, the interpolation time is sampled only then.</p>
+<p>A ramp interpolator that generates a linear transition to reach a target value:</p>
+<ul>
+<li>the interpolation process restarts each time a new and distinct input value is received</li>
+<li>it utilizes 'n' samples to achieve the transition to the target value</li>
+<li>after reaching the target value, the output value is maintained.</li>
+</ul>
 <h4 id="usage_22">Usage</h4>
 <pre><code>_ : line(n) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>n</code>: number of samples to reach the next value</li>
+<li><code>n</code>: number of samples to reach the new target received at its input</li>
 </ul>
 <hr />
 <h3 id="batempo"><code>(ba.)tempo</code></h3>
