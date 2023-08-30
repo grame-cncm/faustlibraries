@@ -35,6 +35,14 @@ Sustained Electro-Acoustic Music is a project inspired by [Alvise Vidolin and Ni
 ## [Faust Tap Library](https://github.com/nuchi/faust-tap-library/)
 Tap a complicated expression to pull out specific outputs, without having to manually route those outputs, just like how named function parameters remove the need to manually route inputs.
 
+## [MoreFilters library](https://codeberg.org/obsoleszenz/morefilters.lib)
+
+A Faust library implementing following highpass/lowpass filters using `fi.svf`:
+
+- Biquad
+- Butterworth (2nd, 4th, 6th, 8th order)
+- Bessel (2nd, 4th, 6th, 8th order)
+- Linkwitz Riley (4th, 8th, 12th and 16th order)
 
 ## Awesome library
 Feel free to contribute by [forking this project](https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks) and [creating a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request), or by mailing the library description [here](mailto:research@grame.fr).
