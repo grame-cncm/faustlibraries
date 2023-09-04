@@ -1532,6 +1532,75 @@ declare tabulateNd license "AGPL-3.0";
 if(cond,then,else) = select2(cond,else,then);
 // TODO: perhaps it would make more sense to have an if(a,b) and an ifelse(a,b,c)?
 
+//-----------------------------`(ba.)ifNc`--------------------------------------
+// if-then-elseif-then-...elsif-then-else implemented on top of ba.if.
+//
+// #### Usage
+//
+// ```
+//    ifNc((cond1,then1, cond2,then2, ... condN,thenN, else)) : _
+// or
+//    ifNc(Nc, cond1,then1, cond2,then2, ... condN,thenN, else) : _
+// or
+//    cond1,then1, cond2,then2, ... condN,thenN, else : ifNc(Nc) : _
+// ```
+//
+// Where:
+//
+// * `Nc` : number of branches/conditions (constant numerical expression)
+// * `condX`: condition
+// * `thenX`: signal selected if condX is the 1st true condition
+// * `else`: signal selected if all the cond1-condN conditions are false
+//
+// #### Example test program
+//
+// ```
+//    process(x,y) = ifNc((x<y,-1, x>y,+1, 0));
+// or
+//    process(x,y) = ifNc(2, x<y,-1, x>y,+1, 0);
+// or
+//    process(x,y) = x<y,-1, x>y,+1, 0 : ifNc(2);
+// ```
+//
+// outputs -1 if x<y, +1 if x>y, 0 otherwise.
+//-----------------------------------------------------------------------------
+ifNc((c,r)) = c,r : ifNc(outputs(r)/2);
+ifNc(1) = if;
+ifNc(n) = _,_,ifNc(n-1) : ifNc(1);
+
+//-----------------------------`(ba.)ifNcNo`-------------------------------------
+// ifNcNo(Nc,No) is similar to ifNc(Nc) above but then/else branches have No outputs.
+//
+// #### Usage
+//
+// ```
+//    ifNcNo(Nc,No, cond1,then1, cond2,then2, ... condN,thenN, else) : sig.bus(No)
+// ```
+//
+// Where:
+//
+// * `Nc` : number of branches/conditions (constant numerical expression)
+// * `No' : number of outputs (constant numerical expression)
+// * `condX`: condition
+// * `thenX`: list of No signals selected if condX is the 1st true condition
+// * `else`: list of No signals selected if all the cond1-condN conditions are false
+//
+// #### Example test program
+//
+// ```
+//    process(x) = ifNcNo(2,3, x<0, -1,-1,-1, x>0, 1,1,1, 0,0,0);
+// ```
+//
+// outputs -1,-1,-1 if x<0, 1,1,1 if x>0, 0,0,0 otherwise.
+//-----------------------------------------------------------------------------
+ifNcNo(Nc,No) = si.bus(Ni) <: par(no,No, slice(no) : ifNc(Nc))
+with {
+    Ni = Nc*No + Nc+No;
+    slice(no) = route(Ni,2*Nc+1, (par(nc,Nc, ct(nc,no)),else(no)));
+    ct(nc,no) = nc*(No+1)+1,    2*nc+1,    // cond[nc]
+                nc*(No+1)+2+no, 2*nc+2;    // then[nc][no]
+    else(no)  = Nc*(No+1)+1+no, 2*Nc+1;    // else[no]
+};
 
 //-----------------------------`(ba.)selector`---------------------------------
 // Selects the ith input among n at compile time.
