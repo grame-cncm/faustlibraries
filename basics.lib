@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.11.0";
+declare version "1.11.1";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -1533,7 +1533,7 @@ if(cond,then,else) = select2(cond,else,then);
 // TODO: perhaps it would make more sense to have an if(a,b) and an ifelse(a,b,c)?
 
 //-----------------------------`(ba.)ifNc`--------------------------------------
-// if-then-elseif-then-...elsif-then-else implemented on top of ba.if.
+// if-then-elseif-then-...elsif-then-else implemented on top of `ba.if`.
 //
 // #### Usage
 //
@@ -1562,14 +1562,18 @@ if(cond,then,else) = select2(cond,else,then);
 //    process(x,y) = x<y,-1, x>y,+1, 0 : ifNc(2);
 // ```
 //
-// outputs -1 if x<y, +1 if x>y, 0 otherwise.
+// outputs `-1` if `x<y`, `+1` if `x>y`, `0` otherwise.
 //-----------------------------------------------------------------------------
 ifNc((c,r)) = c,r : ifNc(outputs(r)/2);
 ifNc(1) = if;
 ifNc(n) = _,_,ifNc(n-1) : ifNc(1);
 
+declare ifNc author "Oleg Nesterov";
+declare ifNc copyright "Copyright (C) 2023 Oleg Nesterov <oleg@redhat.com>";
+declare ifNc license "MIT-style STK-4.3 license";
+
 //-----------------------------`(ba.)ifNcNo`-------------------------------------
-// ifNcNo(Nc,No) is similar to ifNc(Nc) above but then/else branches have No outputs.
+// `ifNcNo(Nc,No)` is similar to `ifNc(Nc)` above but then/else branches have `No` outputs.
 //
 // #### Usage
 //
@@ -1580,7 +1584,7 @@ ifNc(n) = _,_,ifNc(n-1) : ifNc(1);
 // Where:
 //
 // * `Nc` : number of branches/conditions (constant numerical expression)
-// * `No' : number of outputs (constant numerical expression)
+// * `No` : number of outputs (constant numerical expression)
 // * `condX`: condition
 // * `thenX`: list of No signals selected if condX is the 1st true condition
 // * `else`: list of No signals selected if all the cond1-condN conditions are false
@@ -1591,7 +1595,7 @@ ifNc(n) = _,_,ifNc(n-1) : ifNc(1);
 //    process(x) = ifNcNo(2,3, x<0, -1,-1,-1, x>0, 1,1,1, 0,0,0);
 // ```
 //
-// outputs -1,-1,-1 if x<0, 1,1,1 if x>0, 0,0,0 otherwise.
+// outputs `-1,-1,-1` if `x<0`, `1,1,1` if `x>0`, `0,0,0` otherwise.
 //-----------------------------------------------------------------------------
 ifNcNo(Nc,No) = si.bus(Ni) <: par(no,No, slice(no) : ifNc(Nc))
 with {
@@ -1601,6 +1605,10 @@ with {
                 nc*(No+1)+2+no, 2*nc+2;    // then[nc][no]
     else(no)  = Nc*(No+1)+1+no, 2*Nc+1;    // else[no]
 };
+
+declare ifNcNo author "Oleg Nesterov";
+declare ifNcNo copyright "Copyright (C) 2023 Oleg Nesterov <oleg@redhat.com>";
+declare ifNcNo license "MIT-style STK-4.3 license";
 
 //-----------------------------`(ba.)selector`---------------------------------
 // Selects the ith input among n at compile time.
