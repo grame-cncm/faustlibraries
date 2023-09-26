@@ -292,6 +292,57 @@ smooth_imp = case {
 // Other versions could possibly be faster on embedded devices. 
 smooth = smooth_imp(0);
 
+
+//--------------------------------`(si.)smoothq`-------------------------------------
+// Smoothing with continuously variable curves from Exponential to Linear, with a constant time
+//
+// #### Usage
+//
+// ```
+// _ : smoothq(time, q) : _;
+// ```
+//
+// Where:
+//
+// * `time`: Seconds to reach target
+// * `q`: curve shape (between 1..20, 1 is Exponential, 20 is Linear)
+//-----------------------------------------------------------------------------
+declare smoothq author "Andrew John March";
+declare smoothq licence "STK-4.3";
+
+smoothq(time, q, tar) = envelope 
+    with {
+        ratio = pow(q, 5) / 100000 + 0.001;
+        coef = exp((-1 * log((1.0 + ratio) / ratio)) / (ma.SR * time));
+        fb(cBase, cTar, cSrc, cDistance, cDir, cY, cOut) = base, tar, src, distance, dir, y, out
+            with {
+                trig = cTar != tar;
+                src = select2(trig, cSrc, cOut);
+                dir = select2(trig, cDir, tar > src);
+                base = select2(trig, cBase, select2(dir,
+                    (0.0 - ratio) * (1.0 - coef),
+                    (1.0 + ratio) * (1.0 - coef)
+                ));
+                distance = select2(trig, cDistance, abs(tar - src));
+                y = select2(dir,
+                    select2(trig, 
+                        max( 0, base + cY * coef),
+                        1
+                    ),
+                    select2(trig,
+                        min( 1, base + cY * coef),
+                        0
+                    )
+                );
+                out = select2(dir,
+                    tar + y * distance,
+                    src + y * distance
+                );
+            };
+        envelope = fb ~ (_,_,_,_,_,_,_) : !,!,!,!,!,!,_;
+    };
+
+
 //--------------------------------`(si.)cbus`-------------------------------------
 // N parallel cables for complex signals.
 // `cbus` is a standard Faust function.
