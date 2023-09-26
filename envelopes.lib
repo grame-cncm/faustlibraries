@@ -381,6 +381,197 @@ with {
 };
 
 
+//------------------------`(en.)adsrfq`----------------------
+// ADSRFQ (Attack, Decay, Sustain, Release, Final, Ratio) envelope generator with 
+// segments continuosly variable from Exponential to Linear.
+//
+// Inspired by blog posts by Nigel Redmon https://www.earlevel.com/main/2013/06/01/envelope-generators/
+//
+// #### Usage
+//
+// ```
+// adsrfq(at,dt,sl,rt,fl,k,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `dt`: decay (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release (sec)
+// * `fl`: final level (between 0..1)
+// * `k`: curve shape (between 1..20, 1 is Exponential, 20 is Linear)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+declare adsrfq author "Andrew John March";
+declare adsrfq licence "STK-4.3";
+
+adsrfq(att, dec, sus, rel, fin, k, gate) = envelope 
+    with {
+        ugate = gate>0;
+        ratio = pow(k, 5) / 100000 + 0.001;
+        calc_coef(rate, target) = exp((-1 * log((1.0 + target) / target)) / rate);
+
+        att_rate = ma.SR * att;
+        att_coef = calc_coef(att_rate, ratio);
+        att_base = (1.0 + ratio) * (1.0 - att_coef);
+
+        dec_rate = ma.SR * dec;
+        dec_coef = calc_coef(dec_rate, ratio);
+        dec_base = (sus - ratio) * (1.0 - dec_coef);
+
+        rel_rate = ma.SR * rel;
+        rel_coef = calc_coef(rel_rate, ratio);
+        rel_base = (fin - ratio) * (1.0 - rel_coef);
+
+        fb(state, y) = nextState, nextY 
+            with {
+                base = select3(state, rel_base, att_base, dec_base);
+                coef = select3(state, rel_coef, att_coef, dec_coef);
+                minimum = select3(state, fin, fin, sus);
+                nextY = max(minimum, min(1, base + y * coef));
+                nextState = select2(ugate,
+                    0,
+                    select3(state,
+                        1,
+                        select2(y < 1.0, 2, 1),
+                        2
+                    )
+                );
+            };
+        envelope = fb ~ (_,_) : !, _;
+    };
+
+
+//------------------------`(en.)asrfq`----------------------
+// ASRFQ (Attack, Sustain, Release, Final, Ratio) envelope generator with 
+// segments continuosly variable from Exponential to Linear.
+//
+// Inspired by blog posts by Nigel Redmon https://www.earlevel.com/main/2013/06/01/envelope-generators/
+//
+// #### Usage
+//
+// ```
+// asrfq(at,sl,rt,fl,k,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release (sec)
+// * `fl`: final level (between 0..1)
+// * `k`: curve shape (between 1..20, 1 is Exponential, 20 is Linear)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+declare asrfq author "Andrew John March";
+declare asrfq licence "STK-4.3";
+
+asrfq(att, sus, rel, fin, k, gate) = envelope 
+    with {
+        ugate = gate>0;
+        ratio = pow(k, 5) / 100000;
+        calc_coef(rate, target, magnitude) = exp((-1 * log((1.0 + target) / target)) / rate);
+
+        att_rate = ma.SR * att;
+        att_coef = calc_coef(att_rate, ratio);
+        att_base = (sus + ratio) * (1.0 - att_coef);
+
+        rel_rate = ma.SR * rel;
+        rel_coef = calc_coef(rel_rate, ratio);
+        rel_base = (fin - ratio) * (1.0 - rel_coef);
+
+        base = select2(ugate, rel_base, att_base );
+        coef = select2(ugate, rel_coef, att_coef );
+
+        fb(y) = max(fin, min(sus, base + y * coef));
+        envelope = fb ~ _;
+    };
+
+
+//------------------------`(en.)arq`----------------------
+// ARQ (Attack, Release, Ratio) envelope generator with 
+// segments continuosly variable from Exponential to Linear.
+//
+// Inspired by blog posts by Nigel Redmon https://www.earlevel.com/main/2013/06/01/envelope-generators/
+//
+// #### Usage
+//
+// ```
+// arq(at,rt,k,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `rt`: release (sec)
+// * `k`: curve shape (between 1..20, 1 is Exponential, 20 is Linear)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+declare arq author "Andrew John March";
+declare arq licence "STK-4.3";
+
+arq(att, rel, k, gate) = asrfq(att, 1.0, rel, 0.0, k, gate);
+
+
+//------------------------`(en.)asrq`----------------------
+// ASRQ (Attack, Sustain, Release, Ratio) envelope generator with 
+// segments continuosly variable from Exponential to Linear.
+//
+// Inspired by blog posts by Nigel Redmon https://www.earlevel.com/main/2013/06/01/envelope-generators/
+//
+// #### Usage
+//
+// ```
+// asrq(at,sl,rt,k,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release (sec)
+// * `k`: curve shape (between 1..20, 1 is Exponential, 20 is Linear)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+declare asrq author "Andrew John March";
+declare asrq licence "STK-4.3";
+
+asrq(att, sus, rel, k, gate) = asrfq(att, sus, rel, 0.0, k, gate);
+
+
+//------------------------`(en.)adsrq`----------------------
+// ADSRQ (Attack, Decay, Sustain, Release, Ratio) envelope generator with 
+// segments continuosly variable from Exponential to Linear.
+//
+// Inspired by blog posts by Nigel Redmon https://www.earlevel.com/main/2013/06/01/envelope-generators/
+//
+// #### Usage
+//
+// ```
+// adsrq(at,dt,sl,rt,k,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack (sec)
+// * `dt`: decay (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release (sec)
+// * `k`: curve shape (between 1..15, 1 is Exponential, 15 is Linear)
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-----------------------------------------------------
+declare adsrq author "Andrew John March";
+declare adsrq licence "STK-4.3";
+
+adsrq(att, dec, sus, rel, k, gate) = adsrfq(att, dec, sus, rel, 0.0, k, gate);
+
+
 //----------------------`(en.)dx7envelope`----------------------
 // DX7 operator envelope generator with 4 independent rates and levels. It is
 // essentially a 4 points BPF.
