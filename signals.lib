@@ -266,14 +266,14 @@ smooth = smooth_imp(0);
 // Where:
 //
 // * `time`: Seconds to reach target
-// * `q`: curve shape (between 1..20, 1 is Exponential, 20 is Linear)
+// * `q`: curve shape (between 0..1, 0 is Exponential, 1 is Linear)
 //-----------------------------------------------------------------------------
 declare smoothq author "Andrew John March";
 declare smoothq licence "STK-4.3";
 
 smoothq(time, q, tar) = envelope 
     with {
-        ratio = pow(q, 5) / 100000 + 0.001;
+        ratio = pow(q, 5) * 32 : max(0.001);
         coef = exp((-1 * log((1.0 + ratio) / ratio)) / (ma.SR * time));
         fb(cBase, cTar, cSrc, cDistance, cDir, cY, cOut) = base, tar, src, distance, dir, y, out
             with {
