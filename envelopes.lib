@@ -415,8 +415,7 @@ ahdsrfqqq(att, hold, dec, sus, rel, fin, k_att, k_dec, k_rel, gate) = envelope
         ugate = gate>0;
         sustain = max(sus, final);
         final = max(0, fin);
-
-        calc_coef(rate, target, magnitude) = exp((-1 * log((magnitude + target) / target)) / rate);
+        calc_coef(rate, target, magnitude) = (target/(magnitude + target))^(1/rate);
         to_ratio(k) = pow(k, 5) * 32 : max(0.001);
 
         hold_time = ma.SR * hold;
@@ -493,7 +492,7 @@ ahdsrfq(att, hold, dec, sus, rel, fin, k, gate) = envelope
         sustain = max(sus, final);
         final = max(0, fin);
 
-        calc_coef(rate, target, magnitude) = exp((-1 * log((magnitude + target) / target)) / rate);
+        calc_coef(rate, target, magnitude) = (target/(magnitude + target))^(1/rate);
         ratio = pow(k, 5) * 32 : max(0.001);
 
         hold_time = ma.SR * hold;
@@ -569,7 +568,7 @@ adsrfqqq(att, dec, sus, rel, fin, k_att, k_dec, k_rel, gate) = envelope
         final = max(0, fin);
 
         to_ratio(k) = pow(k, 5) * 32 : max(0.001);
-        calc_coef(rate, target, magnitude) = exp((-1 * log((magnitude + target) / target)) / rate);
+        calc_coef(rate, target, magnitude) = (target/(magnitude + target))^(1/rate);
 
         att_ratio = to_ratio(k_att);
         att_rate = ma.SR * att;
@@ -638,7 +637,7 @@ adsrfq(att, dec, sus, rel, fin, k, gate) = envelope
         final = max(0, fin);
         ratio = pow(k, 5) * 32 : max(0.001);
 
-        calc_coef(rate, target, magnitude) = exp((-1 * log((magnitude + target) / target)) / rate);
+        calc_coef(rate, target, magnitude) = (target/(magnitude + target))^(1/rate);
 
         att_rate = ma.SR * att;
         att_coef = calc_coef(att_rate, ratio, 1 - final);
@@ -704,7 +703,7 @@ asrfqq(att, sus, rel, fin, k_att, k_rel, gate) = envelope
         final = max(0, fin);
 
         to_ratio(k) = pow(k, 5) * 32 : max(0.001);
-        calc_coef(rate, target, magnitude) = exp((-1 * log((magnitude + target) / target)) / rate);
+        calc_coef(rate, target, magnitude) = (target/(magnitude + target))^(1/rate);
 
         att_ratio = to_ratio(k_att);
         att_rate = ma.SR * att;
@@ -756,7 +755,7 @@ asrfq(att, sus, rel, fin, k, gate) = envelope
         final = max(0, fin);
         ratio = pow(k, 5) * 32 : max(0.001);
 
-        calc_coef(rate, target, magnitude) = exp((-1 * log((magnitude + target) / target)) / rate);
+        calc_coef(rate, target, magnitude) = (target/(magnitude + target))^(1/rate);
 
         att_rate = ma.SR * att;
         att_coef = calc_coef(att_rate, ratio, 1 - final);
