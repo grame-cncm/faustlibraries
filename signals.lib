@@ -313,7 +313,7 @@ declare smoothq licence "STK-4.3";
 smoothq(time, q, tar) = envelope 
     with {
         ratio = pow(q, 5) * 32 : max(0.001);
-        coef = exp((-1 * log((1.0 + ratio) / ratio)) / (ma.SR * time));
+        coef = (ratio / (1 + ratio))^(1 / (ma.SR * time));
         fb(cBase, cTar, cSrc, cDistance, cDir, cY, cOut) = base, tar, src, distance, dir, y, out
             with {
                 trig = cTar != tar;
