@@ -267,8 +267,11 @@ with {
 
     k = bias_rel, bias_att, bias_dec : select3(state) : aa.clip(.03, .97);
 
-    // this looks hacky because it.remap needs safe inputs
-    pct = ba.if(state==2, it.remap(min(.999,sus),1,0,1,y), ba.if(state==0, it.remap(0,max(.001,y_at_release),0,1,y),y)) : bias_curve_inverse(k);
+    from1 = ba.if(state==2, sus, 0);
+    from2 = ba.if(state==0, y_at_release, 1);
+
+    // prevent divide-by-zero in it.remap
+    pct = it.remap(from1, from2, 0, 1, y), 0.5 : select2(from1==from2) : bias_curve_inverse(k);
     
     slope = rel_slope, att_slope, dec_slope : select3(state) : _*bias_curve_d_dx(k, pct);
 
@@ -353,8 +356,11 @@ with {
     // release, attack, hold, decay
     k = bias_rel, bias_att, .5, bias_dec : ba.selectn(4, state) : aa.clip(.03, .97);
 
-    // this looks hacky because it.remap needs safe inputs
-    pct = ba.if(state==3, it.remap(min(.999,sus),1,0,1,y), ba.if(state==0, it.remap(0,max(.001,y_at_release),0,1,y),y)) : bias_curve_inverse(k);
+    from1 = ba.if(state==3, sus, 0);
+    from2 = ba.if(state==0, y_at_release, 1);
+
+    // prevent divide-by-zero in it.remap
+    pct = it.remap(from1, from2, 0, 1, y), 0.5 : select2(from1==from2) : bias_curve_inverse(k);
     
     slope = rel_slope, att_slope, hold_slope, dec_slope : ba.selectn(4, state) : _*bias_curve_d_dx(k, pct);
 
