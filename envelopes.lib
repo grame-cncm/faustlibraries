@@ -206,7 +206,156 @@ with {
 };
 
 
-//------------------------`(en.)adsr_bias`---------------------------
+adsr_bias_env = environment
+{
+  // In the functions below, we use the equation `y=bias_curve(b,x)`.
+  // `b`: bias between 0 and 1. Bias of 0.5 results in `y=x`. Bias above 0.5 pulls y upward.
+  // `x`: input between 0 and 1 that needs to be remapped/biased into `y`
+  // `y`: `x` after it has been biased. Note that `(y==0 iff x==0) AND (y==1 iff x==1)`.
+  bias_curve(b,x) = (x / ((((1.0/b) - 2.0)*(1.0 - x))+1.0));
+
+  // d/dx of bias_curve(b,x)
+  bias_curve_d_dx(b, x) = 0-(-1+b)*b/((1-x+b*(-1+2*x))^2);
+
+  // Solve for x in y=bias_curve(b,x)
+  bias_curve_inverse(b,y) = (b-1)*y / (2*b*y-b-y);
+
+  // We don't allow the bias to be too close to 0 or 1 because it leads to slopes too
+  // close to positive or negative infinity.
+  bias_clip = aa.clip(.03, .97);
+
+  adsr_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = envelope 
+  with {
+    ugate = gate>0;
+
+    fb(_state, _y) = nextState, nextY
+    with {
+      // Legato control
+      onset = ba.impulsify(ugate);
+      state = select2(onset, _state, 0), _state : select2(legato);
+      y = select2(onset, _y, 0), _y : select2(legato);
+
+      // State 0: release
+      // State 1: attack
+      // State 2: decay 
+
+      y_at_release = y : ba.latch(ugate==0);
+
+      // Slope is a y-distance divided by a number of samples
+      att_slope = (1-final) / max(1,(att*ma.SR));
+      dec_slope = 0-(1-sus) / max(1,(dec*ma.SR));
+      rel_slope = 0-(y_at_release-final) / max(1,(rel*ma.SR));
+
+      // Get bias based on the state, then clip for safety.
+      b = bias_rel, bias_att, bias_dec : select3(state) : bias_clip;
+
+      // We will remap from an input domain to [0..1] based on the current state.
+      from1 = ba.if(state==2, sus, final);
+      from2 = ba.if(state==0, y_at_release, 1);
+
+      // Prevent divide-by-zero in it.remap
+      pct = it.remap(from1, from2, 0, 1, y), 0.5 : select2(from1==from2) : bias_curve_inverse(b);
+      
+      slope = rel_slope, att_slope, dec_slope : select3(state) : _*bias_curve_d_dx(b, pct);
+          
+      nextY = y + slope : aa.clip(from1, 1);
+      nextState = select2(ugate,
+        0,
+        select3(state,
+          1,
+          select2(y < 1.0, 2, 1),
+          2
+        )
+      );
+    };
+    envelope = fb ~ (_,_) : !, _;
+  };
+
+  ahdsr_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = envelope 
+  with {
+    ugate = gate>0;
+
+    fb(_state, _y) = nextState, nextY
+    with {
+      // Legato control
+      onset = ba.impulsify(ugate);
+      state = select2(onset, _state, 0), _state : select2(legato);
+      y = select2(onset, _y, 0), _y : select2(legato);
+
+      // State 0: release
+      // State 1: attack
+      // State 2: hold
+      // State 3: decay 
+
+      y_at_release = y : ba.latch(gate==0);
+
+      // Slope is a y-distance divided by a number of samples
+      att_slope = (1-final) / max(1,(att*ma.SR));
+      hold_slope = ba.if(gate, att_slope, rel_slope);
+      dec_slope = 0-(1-sus) / max(1,(dec*ma.SR));
+      rel_slope = 0-(y_at_release-final) / max(1,(rel*ma.SR));
+
+      // Get bias based on the state, then clip for safety.
+      // Note that for the hold state, we choose a bias of 0.5 (the middle value).
+      b = bias_rel, bias_att, .5, bias_dec : ba.selectn(4, state) : bias_clip;
+
+      from1 = ba.if(state==3, sus, final);
+      from2 = ba.if(state==0, y_at_release, 1);
+
+      // Prevent divide-by-zero in it.remap
+      pct = it.remap(from1, from2, 0, 1, y), 0.5 : select2(from1==from2) : bias_curve_inverse(b);
+      
+      slope = rel_slope, att_slope, hold_slope, dec_slope : ba.selectn(4, state) : _*bias_curve_d_dx(b, pct);
+
+      hold_time = ma.SR * hol;
+      hold_timer = ugate : +~(*(ugate * (state != 1)));
+          
+      nextY = y + slope : aa.clip(from1, 1);
+      nextState = select2(ugate,
+        0,
+        ba.selectn(4, state,
+          1,
+          select2(y < 1.0, 2, 1),
+          select2(hold_timer < hold_time, 3, 2),
+          3
+        )
+      );
+    };
+    envelope = fb ~ (_,_) : !, _;
+  };
+};
+
+
+//------------------------`(en.)adsr_bias_final`------------------------------
+// ADSR (Attack, Decay, Sustain, Release) envelope generator with
+// control over bias on each segment, and toggle for legato.
+//
+// #### Usage
+//
+// ```
+// adsr_bias_final(at,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack time (sec)
+// * `dt`: decay time (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release time (sec)
+// * `final`: final level (between 0..1) but less than or equal to `sl`
+// * `b_att`: bias during attack (between 0..1) where 0.5 is no bias.
+// * `b_dec`: bias during decay (between 0..1) where 0.5 is no bias.
+// * `b_rel`: bias during release (between 0..1) where 0.5 is no bias.
+// * `legato`: toggle for legato. If disabled, envelopes "re-trigger" from zero.
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//-------------------------------------------------------------------------------
+declare adsr_bias_final author "Andrew John March and David Braun";
+declare adsr_bias_final licence "STK-4.3";
+adsr_bias_final(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.adsr_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate);
+
+
+//------------------------`(en.)adsr_bias`------------------------------
 // ADSR (Attack, Decay, Sustain, Release) envelope generator with
 // control over bias on each segment, and toggle for legato.
 //
@@ -228,77 +377,20 @@ with {
 // * `legato`: toggle for legato. If disabled, envelopes "re-trigger" from zero.
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
-//-------------------------------------------------------------
+//-------------------------------------------------------------------------------
 declare adsr_bias author "Andrew John March and David Braun";
 declare adsr_bias licence "STK-4.3";
-adsr_bias(att, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) = envelope 
-with {
-  ugate = gate>0;
-
-  // In the functions below, we use the equation `y=bias_curve(b,x)`.
-  // b: bias between 0 and 1. Bias of 0.5 results in `y=x`. Bias above 0.5 pulls y upward.
-  // x: input between 0 and 1 that needs to be remapped/biased into `y`
-  // y: `x` after it has been biased. (y==0 iff x==0) AND (y==1 iff x==1)
-  bias_curve(b,x) = (x / ((((1.0/b) - 2.0)*(1.0 - x))+1.0));
-
-  // d/dx of bias_curve(b,x)
-  bias_curve_d_dx(b, x) = 0-(-1+b)*b/((1-x+b*(-1+2*x))^2);
-
-  // Solve for x in y=bias_curve(b,x)
-  bias_curve_inverse(b,y) = (b-1)*y / (2*b*y-b-y);
-
-  fb(_state, _y) = nextState, nextY
-  with {
-    // Legato control
-    onset = ba.impulsify(ugate);
-    state = select2(onset, _state, 0), _state : select2(legato);
-    y = select2(onset, _y, 0), _y : select2(legato);
-
-    // State 0: release
-    // State 1: attack
-    // State 2: decay 
-
-    y_at_release = y : ba.latch(ugate==0);
-
-    // Slope is a y-distance divided by a number of samples
-    att_slope = 1 / max(1,(att*ma.SR));
-    dec_slope = -(1-sus) / max(1,(dec*ma.SR));
-    rel_slope = -y_at_release / max(1,(rel*ma.SR));
-
-    // Get bias based on the state, then clip for safety.
-    b = bias_rel, bias_att, bias_dec : select3(state) : aa.clip(.03, .97);
-
-    // We will remap from an input domain to [0..1] based on the current state.
-    from1 = ba.if(state==2, sus, 0);
-    from2 = ba.if(state==0, y_at_release, 1);
-
-    // Prevent divide-by-zero in it.remap
-    pct = it.remap(from1, from2, 0, 1, y), 0.5 : select2(from1==from2) : bias_curve_inverse(b);
-    
-    slope = rel_slope, att_slope, dec_slope : select3(state) : _*bias_curve_d_dx(b, pct);
-        
-    nextY = y + slope : aa.clip(from1, 1);
-    nextState = select2(ugate,
-      0,
-      select3(state,
-        1,
-        select2(y < 1.0, 2, 1),
-        2
-      )
-    );
-  };
-  envelope = fb ~ (_,_) : !, _;
-};
+adsr_bias(      att, dec, sus, rel,        bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.adsr_bias(att, dec, sus, rel, 0,     bias_att, bias_dec, bias_rel, legato, gate);
 
 
-//------------------------`(en.)ahdsr_bias`---------------------------
+//------------------------`(en.)ahdsr_bias_final`---------------------------
 // AHDSR (Attack, Hold, Decay, Sustain, Release) envelope generator
 // with control over bias on each segment, and toggle for legato.
 //
 // #### Usage
 //
 // ```
-// ahdsr_bias(at,ht,dt,sl,rt,b_att,b_dec,b_rel,legato,t) : _
+// ahdsr_bias_final(at,ht,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
 // ```
 //
 // Where:
@@ -308,79 +400,47 @@ with {
 // * `dt`: decay time (sec)
 // * `sl`: sustain level (between 0..1)
 // * `rt`: release time (sec)
+// * `final`: final level (between 0..1) but less than or equal to `sl`
 // * `b_att`: bias during attack (between 0..1) where 0.5 is no bias.
 // * `b_dec`: bias during decay (between 0..1) where 0.5 is no bias.
 // * `b_rel`: bias during release (between 0..1) where 0.5 is no bias.
 // * `legato`: toggle for legato. If disabled, envelopes "re-trigger" from zero.
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
-//----------------------------------------------------------------
+//---------------------------------------------------------------------
+declare ahdsr_bias_final author "Andrew John March and David Braun";
+declare ahdsr_bias_final licence "STK-4.3";
+ahdsr_bias_final(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.ahdsr_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate);
+
+
+//------------------------`(en.)ahdsr_bias`---------------------------
+// AHDSR (Attack, Hold, Decay, Sustain, Release) envelope generator
+// with control over bias on each segment, and toggle for legato.
+//
+// #### Usage
+//
+// ```
+// ahdsr_bias(at,ht,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
+// ```
+//
+// Where:
+//
+// * `at`: attack time (sec)
+// * `ht`: hold time (sec)
+// * `dt`: decay time (sec)
+// * `sl`: sustain level (between 0..1)
+// * `rt`: release time (sec)
+// * `final`: final level (between 0..1) but less than or equal to `sl`
+// * `b_att`: bias during attack (between 0..1) where 0.5 is no bias.
+// * `b_dec`: bias during decay (between 0..1) where 0.5 is no bias.
+// * `b_rel`: bias during release (between 0..1) where 0.5 is no bias.
+// * `legato`: toggle for legato. If disabled, envelopes "re-trigger" from zero.
+// * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
+// when `t=0`)
+//---------------------------------------------------------------------
 declare ahdsr_bias author "Andrew John March and David Braun";
 declare ahdsr_bias licence "STK-4.3";
-ahdsr_bias(att, hol, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) = envelope 
-with {
-  ugate = gate>0;
-
-  // In the functions below, we use the equation `y=bias_curve(b,x)`.
-  // b: bias between 0 and 1. Bias of 0.5 results in `y=x`. Bias above 0.5 pulls y upward.
-  // x: input between 0 and 1 that needs to be remapped/biased into `y`
-  // y: `x` after it has been biased. (y==0 iff x==0) AND (y==1 iff x==1)
-  bias_curve(b,x) = (x / ((((1.0/b) - 2.0)*(1.0 - x))+1.0));
-
-  // d/dx of bias_curve(b,x)
-  bias_curve_d_dx(b, x) = 0-(-1+b)*b/((1-x+b*(-1+2*x))^2);
-
-  // Solve for x in y=bias_curve(b,x)
-  bias_curve_inverse(b,y) = (b-1)*y / (2*b*y-b-y);
-
-  fb(_state, _y) = nextState, nextY
-  with {
-    // Legato control
-    onset = ba.impulsify(ugate);
-    state = select2(onset, _state, 0), _state : select2(legato);
-    y = select2(onset, _y, 0), _y : select2(legato);
-
-    // State 0: release
-    // State 1: attack
-    // State 2: hold
-    // State 3: decay 
-
-    y_at_release = y : ba.latch(gate==0);
-
-    // Slope is a y-distance divided by a number of samples
-    att_slope = 1 / max(1,(att*ma.SR));
-    hold_slope = ba.if(gate, att_slope, rel_slope);
-    dec_slope = -(1-sus) / max(1,(dec*ma.SR));
-    rel_slope = -y_at_release / max(1,(rel*ma.SR));
-
-    // Get bias based on the state, then clip for safety.
-    // Note that for the hold state, we choose a bias of 0.5 (the middle value).
-    b = bias_rel, bias_att, .5, bias_dec : ba.selectn(4, state) : aa.clip(.03, .97);
-
-    from1 = ba.if(state==3, sus, 0);
-    from2 = ba.if(state==0, y_at_release, 1);
-
-    // Prevent divide-by-zero in it.remap
-    pct = it.remap(from1, from2, 0, 1, y), 0.5 : select2(from1==from2) : bias_curve_inverse(b);
-    
-    slope = rel_slope, att_slope, hold_slope, dec_slope : ba.selectn(4, state) : _*bias_curve_d_dx(b, pct);
-
-    hold_time = ma.SR * hol;
-    hold_timer = ugate : +~(*(ugate * (state != 1)));
-        
-    nextY = y + slope : aa.clip(from1, 1);
-    nextState = select2(ugate,
-      0,
-      ba.selectn(4, state,
-        1,
-        select2(y < 1.0, 2, 1),
-        select2(hold_timer < hold_time, 3, 2),
-        3
-      )
-    );
-  };
-  envelope = fb ~ (_,_) : !, _;
-};
+ahdsr_bias(      att, hol, dec, sus, rel,        bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.ahdsr_bias(att, hol, dec, sus, rel, 0,     bias_att, bias_dec, bias_rel, legato, gate);
 
 
 //------------------------`(en.)smoothEnvelope`------------------------
