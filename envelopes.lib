@@ -261,8 +261,8 @@ with {
     y_at_release = y : ba.latch(ugate==0);
 
     // slope is a y-distance divided by a number of samples
-    att_slope = 1. / max(1,(att*ma.SR));
-    dec_slope = -(1.-sus) / max(1,(dec*ma.SR));
+    att_slope = 1 / max(1,(att*ma.SR));
+    dec_slope = -(1-sus) / max(1,(dec*ma.SR));
     rel_slope = -y_at_release / max(1,(rel*ma.SR));
 
     k = bias_rel, bias_att, bias_dec : select3(state) : aa.clip(.03, .97);
@@ -274,10 +274,8 @@ with {
     pct = it.remap(from1, from2, 0, 1, y), 0.5 : select2(from1==from2) : bias_curve_inverse(k);
     
     slope = rel_slope, att_slope, dec_slope : select3(state) : _*bias_curve_d_dx(k, pct);
-
-    low = 0, 0, sus : select3(state);
         
-    nextY = y + slope : aa.clip(low, 1.);
+    nextY = y + slope : aa.clip(from1, 1);
     nextState = select2(ugate,
       0,
       select3(state,
@@ -348,9 +346,9 @@ with {
     y_at_release = y : ba.latch(gate==0);
 
     // slope is a y-distance divided by a number of samples
-    att_slope = 1. / max(1,(att*ma.SR));
+    att_slope = 1 / max(1,(att*ma.SR));
     hold_slope = ba.if(gate, att_slope, rel_slope);
-    dec_slope = -(1.-sus) / max(1,(dec*ma.SR));
+    dec_slope = -(1-sus) / max(1,(dec*ma.SR));
     rel_slope = -y_at_release / max(1,(rel*ma.SR));
 
     // release, attack, hold, decay
@@ -364,12 +362,10 @@ with {
     
     slope = rel_slope, att_slope, hold_slope, dec_slope : ba.selectn(4, state) : _*bias_curve_d_dx(k, pct);
 
-    low = select2(state==3, 0, sus);
-
     hold_time = ma.SR * hol;
     hold_timer = ugate : +~(*(ugate * (state != 1)));
         
-    nextY = y + slope : aa.clip(low, 1.);
+    nextY = y + slope : aa.clip(from1, 1);
     nextState = select2(ugate,
       0,
       ba.selectn(4, state,
