@@ -233,13 +233,20 @@ adsr_bias_env = environment
       // Legato control
       onset = ba.impulsify(ugate);
       state = select2(onset, _state, 0), _state : select2(legato);
-      y = select2(onset, _y, final), _y : select2(legato);
+
+      // two conditions in which we want to hard-reset the `y` to `final`
+      // instead of using the previous `_y`.
+      y = ba.if((onset & (legato<0.5)) | (ba.time==0), final, _y);
+      // note that if final is a constant zero then this could simply be
+      // y = ba.if(onset & (legato<0.5), 0, _y);
 
       // State 0: release
       // State 1: attack
       // State 2: decay 
 
-      y_at_release = y : ba.latch(ugate==0);
+      y_at_release = ba.if(ba.time==0,1,y) : ba.latch(gate==0);
+      // note that if final is a constant zero then this could simply be
+      // y_at_release = y : ba.latch(gate==0);
 
       // Slope is a y-distance divided by a number of samples
       att_slope = (1-final) / max(1,(att*ma.SR));
@@ -280,14 +287,21 @@ adsr_bias_env = environment
       // Legato control
       onset = ba.impulsify(ugate);
       state = select2(onset, _state, 0), _state : select2(legato);
-      y = select2(onset, _y, final), _y : select2(legato);
+
+      // two conditions in which we want to hard-reset the `y` to `final`
+      // instead of using the previous `_y`.
+      y = ba.if((onset & (legato<0.5)) | (ba.time==0), final, _y);
+      // note that if final is a constant zero then this could simply be
+      // y = ba.if(onset & (legato<0.5), 0, _y);
 
       // State 0: release
       // State 1: attack
       // State 2: hold
       // State 3: decay 
 
-      y_at_release = y : ba.latch(gate==0);
+      y_at_release = ba.if(ba.time==0,1,y) : ba.latch(gate==0);
+      // note that if final is a constant zero then this could simply be
+      // y_at_release = y : ba.latch(gate==0);
 
       // Slope is a y-distance divided by a number of samples
       att_slope = (1-final) / max(1,(att*ma.SR));
