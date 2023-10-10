@@ -233,7 +233,7 @@ adsr_bias_env = environment
       // Legato control
       onset = ba.impulsify(ugate);
       state = select2(onset, _state, 0), _state : select2(legato);
-      y = select2(onset, _y, 0), _y : select2(legato);
+      y = select2(onset, _y, final), _y : select2(legato);
 
       // State 0: release
       // State 1: attack
@@ -280,7 +280,7 @@ adsr_bias_env = environment
       // Legato control
       onset = ba.impulsify(ugate);
       state = select2(onset, _state, 0), _state : select2(legato);
-      y = select2(onset, _y, 0), _y : select2(legato);
+      y = select2(onset, _y, final), _y : select2(legato);
 
       // State 0: release
       // State 1: attack
