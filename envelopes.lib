@@ -326,14 +326,14 @@ adsr_bias_env = environment
 };
 
 
-//------------------------`(en.)adsr_bias_final`------------------------------
-// ADSR (Attack, Decay, Sustain, Release) envelope generator with
+//------------------------`(en.)adsrf_bias`------------------------------
+// ADSR (Attack, Decay, Sustain, Release, Final) envelope generator with
 // control over bias on each segment, and toggle for legato.
 //
 // #### Usage
 //
 // ```
-// adsr_bias_final(at,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
+// adsrf_bias(at,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
 // ```
 //
 // Where:
@@ -350,9 +350,9 @@ adsr_bias_env = environment
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //-------------------------------------------------------------------------------
-declare adsr_bias_final author "Andrew John March and David Braun";
-declare adsr_bias_final licence "STK-4.3";
-adsr_bias_final(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.adsr_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate);
+declare adsrf_bias author "Andrew John March and David Braun";
+declare adsrf_bias licence "STK-4.3";
+adsrf_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.adsr_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate);
 
 
 //------------------------`(en.)adsr_bias`------------------------------
@@ -383,14 +383,14 @@ declare adsr_bias licence "STK-4.3";
 adsr_bias(      att, dec, sus, rel,        bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.adsr_bias(att, dec, sus, rel, 0,     bias_att, bias_dec, bias_rel, legato, gate);
 
 
-//------------------------`(en.)ahdsr_bias_final`---------------------------
-// AHDSR (Attack, Hold, Decay, Sustain, Release) envelope generator
+//------------------------`(en.)ahdsrf_bias`---------------------------
+// AHDSR (Attack, Hold, Decay, Sustain, Release, Final) envelope generator
 // with control over bias on each segment, and toggle for legato.
 //
 // #### Usage
 //
 // ```
-// ahdsr_bias_final(at,ht,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
+// ahdsrf_bias(at,ht,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
 // ```
 //
 // Where:
@@ -408,9 +408,9 @@ adsr_bias(      att, dec, sus, rel,        bias_att, bias_dec, bias_rel, legato,
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
 //---------------------------------------------------------------------
-declare ahdsr_bias_final author "Andrew John March and David Braun";
-declare ahdsr_bias_final licence "STK-4.3";
-ahdsr_bias_final(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.ahdsr_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate);
+declare ahdsrf_bias author "Andrew John March and David Braun";
+declare ahdsrf_bias licence "STK-4.3";
+ahdsrf_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.ahdsr_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate);
 
 
 //------------------------`(en.)ahdsr_bias`---------------------------
