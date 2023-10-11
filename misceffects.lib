@@ -640,6 +640,79 @@ with {
     d = i : (+ : +(w) : fmod(_,w)) ~ _;
 };
 
+//=======================================Saturators=======================================
+//========================================================================================
+
+nonlinearityEnv = environment
+{
+  // Turn a function f(x) into a odd function g(x) such that
+  // g(x)==f(x) for x>=0, AND g(x)==-g(-x).
+  makeOdd(f, x) = x : optionalNegate : f : optionalNegate
+  with {
+    optionalNegate(y) = ba.if(x<0, -y, y);
+  };
+
+  // Quadratic Soft-Clip
+  // coded by David Braun
+  // Reference:
+  // M. Schetzen: The Volterra and Wiener Theories of Nonlinear Systems. Robert Krieger Publishing, 1980.
+  softclipQuadratic(x) = makeOdd(f, x)
+  with {
+    f(x) = ba.if(x <= 1./3., 2*x, ba.if(x <= 2./3.,y,1))
+    with {
+      y = (3-(2-3*x)^2)/3;
+    };
+  };
+
+  // Wavefolder/Wavefolding
+  // coded by David Braun
+  // Reference: Chapter 10: Nonlinear Processing. Figure 10.7
+  // U. Zölzer: Digital Audio Signal Processing. John Wiley & Sons Ltd, 2022.
+  wavefold(width, x) = makeOdd(f, x)
+  with {
+    f(x) = ba.if(x>(1-2*a), tri, x) : _*g
+    with {
+      // a is the adjusted width.
+      a = width : aa.clip(0, 1) : _ * .4;
+      g = 1/(1-2*a); // peak-level normalization
+
+      // triangle-like function
+      tri = 1 - 2.5*a + a*abs(ma.frac((x-(1-2*a))/(2*a))-.5);
+    };
+  };
+};
+
+//---------------`(ef.)softclipQuadratic`-------------------------------------------------
+// Quadratic softclip nonlinearity.
+//
+// #### Usage
+//
+// ```
+// _ : softclipQuadratic : _;
+// ```
+//---------------------------------------------------------------------------------------
+declare softclipQuadratic author "David Braun";
+
+softclipQuadratic = nonlinearityEnv.softclipQuadratic;
+
+//---------------`(ef.)wavefold`-------------------------------------------------
+// Wavefolding nonlinearity.
+//
+// #### Usage
+//
+// ```
+// _ : wavefold(width) : _;
+// ```
+//
+// Where:
+//
+// * `width`: The width of the folded section [0..1] (float).
+//---------------------------------------------------------------------------------------
+declare wavefold author "David Braun";
+
+wavefold = nonlinearityEnv.wavefold;
+
+
 //////////////////////////////////Deprecated Functions////////////////////////////////////
 // This section implements functions that used to be in music.lib but that are now
 // considered as "deprecated".
