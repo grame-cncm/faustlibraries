@@ -471,28 +471,32 @@ Michael A. Gerzon, JAES vol. 42, no. 6, June 1994</li>
 <p>The mesh is constructed recursively using 2x2 embeddings. Thus,
 the top level of <code>mesh_square(M)</code> is a block 2x2 mesh, where each
 block is a <code>mesh(M/2)</code>. Let these blocks be numbered 1,2,3,4 in the
-geometry NW,NE,SW,SE, i.e., as
-        1 2
-        3 4
-Each block has four vector inputs and four vector outputs, where the
-length of each vector is <code>M/2</code>.  Label the input vectors as Ni,Ei,Wi,Si,
+geometry NW,NE,SW,SE, i.e., as:</p>
+<pre><code>    1 2
+    3 4
+</code></pre>
+<p>Each block has four vector inputs and four vector outputs, where the
+length of each vector is <code>M/2</code>. Label the input vectors as Ni,Ei,Wi,Si,
 i.e., as the inputs from the North, East South, and West,
-and similarly for the outputs.  Then, for example, the upper
-left input block of M/2 signals is labeled 1Ni.  Most of the
-connections are internal, such as 1Eo -&gt; 2Wi.  The <code>8*(M/2)</code> input
-signals are grouped in the order
-       1Ni 2Ni
-       3Si 4Si
-       1Wi 3Wi
-       2Ei 4Ei
-and the output signals are
-       1No 1Wo
-       2No 2Eo
-       3So 3Wo
-       4So 4Eo
-or</p>
-<p>In: 1No 1Wo 2No 2Eo 3So 3Wo 4So 4Eo</p>
-<p>Out: 1Ni 2Ni 3Si 4Si 1Wi 3Wi 2Ei 4Ei</p>
+and similarly for the outputs. Then, for example, the upper
+left input block of M/2 signals is labeled 1Ni. Most of the
+connections are internal, such as 1Eo -&gt; 2Wi. The <code>8*(M/2)</code> input
+signals are grouped in the order:</p>
+<pre><code>   1Ni 2Ni
+   3Si 4Si
+   1Wi 3Wi
+   2Ei 4Ei
+</code></pre>
+<p>and the output signals are:</p>
+<pre><code>   1No 1Wo
+   2No 2Eo
+   3So 3Wo
+   4So 4Eo
+</code></pre>
+<p>or:</p>
+<pre><code>   In: 1No 1Wo 2No 2Eo 3So 3Wo 4So 4Eo
+   Out: 1Ni 2Ni 3Si 4Si 1Wi 3Wi 2Ei 4Ei
+</code></pre>
 <p>Thus, the inputs are grouped by direction N,S,W,E, while the
 outputs are grouped by block number 1,2,3,4, which can also be
 interpreted as directions NW, NE, SW, SE.  A simple program
@@ -500,12 +504,15 @@ illustrating these orderings is <code>process = mesh_square(2);</code>.</p>
 <h4 id="example">Example</h4>
 <p>Reflectively terminated mesh impulsed at one corner:</p>
 <pre><code>mesh_square_test(N,x) = mesh_square(N)~(busi(4*N,x)) // input to corner
-with { busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); };
+with { 
+    busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); 
+};
 process = 1-1' : mesh_square_test(4); // all modes excited forever
 </code></pre>
 <p>In this simple example, the mesh edges are connected as follows:</p>
-<p>1No -&gt; 1Ni, 1Wo -&gt; 2Ni, 2No -&gt; 3Si, 2Eo -&gt; 4Si,</p>
-<p>3So -&gt; 1Wi, 3Wo -&gt; 3Wi, 4So -&gt; 2Ei, 4Eo -&gt; 4Ei</p>
+<pre><code>   1No -&gt; 1Ni, 1Wo -&gt; 2Ni, 2No -&gt; 3Si, 2Eo -&gt; 4Si,
+   3So -&gt; 1Wi, 3Wo -&gt; 3Wi, 4So -&gt; 2Ei, 4Eo -&gt; 4Ei
+</code></pre>
 <p>A routing matrix can be used to obtain other connection geometries.</p>
 <hr />
 <h3 id="efreverseechonnchansdelay"><code>(ef.)reverseEchoN(nChans,delay)</code></h3>

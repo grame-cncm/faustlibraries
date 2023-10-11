@@ -309,30 +309,34 @@ with {
 // The mesh is constructed recursively using 2x2 embeddings. Thus,
 // the top level of `mesh_square(M)` is a block 2x2 mesh, where each
 // block is a `mesh(M/2)`. Let these blocks be numbered 1,2,3,4 in the
-// geometry NW,NE,SW,SE, i.e., as
+// geometry NW,NE,SW,SE, i.e., as:
+//
 //         1 2
 //         3 4
+// 
 // Each block has four vector inputs and four vector outputs, where the
-// length of each vector is `M/2`.  Label the input vectors as Ni,Ei,Wi,Si,
+// length of each vector is `M/2`. Label the input vectors as Ni,Ei,Wi,Si,
 // i.e., as the inputs from the North, East South, and West,
-// and similarly for the outputs.  Then, for example, the upper
-// left input block of M/2 signals is labeled 1Ni.  Most of the
-// connections are internal, such as 1Eo -> 2Wi.  The `8*(M/2)` input
-// signals are grouped in the order
+// and similarly for the outputs. Then, for example, the upper
+// left input block of M/2 signals is labeled 1Ni. Most of the
+// connections are internal, such as 1Eo -> 2Wi. The `8*(M/2)` input
+// signals are grouped in the order:
+// 
 //        1Ni 2Ni
 //        3Si 4Si
 //        1Wi 3Wi
 //        2Ei 4Ei
-// and the output signals are
+// 
+// and the output signals are:
+//
 //        1No 1Wo
 //        2No 2Eo
 //        3So 3Wo
 //        4So 4Eo
-// or
+// or:
 //
-// In: 1No 1Wo 2No 2Eo 3So 3Wo 4So 4Eo
-//
-// Out: 1Ni 2Ni 3Si 4Si 1Wi 3Wi 2Ei 4Ei
+//        In: 1No 1Wo 2No 2Eo 3So 3Wo 4So 4Eo
+//        Out: 1Ni 2Ni 3Si 4Si 1Wi 3Wi 2Ei 4Ei
 //
 // Thus, the inputs are grouped by direction N,S,W,E, while the
 // outputs are grouped by block number 1,2,3,4, which can also be
@@ -345,15 +349,16 @@ with {
 //
 // ```
 // mesh_square_test(N,x) = mesh_square(N)~(busi(4*N,x)) // input to corner
-// with { busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); };
+// with { 
+//     busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); 
+// };
 // process = 1-1' : mesh_square_test(4); // all modes excited forever
 // ```
 //
 // In this simple example, the mesh edges are connected as follows:
 //
-// 1No -> 1Ni, 1Wo -> 2Ni, 2No -> 3Si, 2Eo -> 4Si,
-//
-// 3So -> 1Wi, 3Wo -> 3Wi, 4So -> 2Ei, 4Eo -> 4Ei
+//        1No -> 1Ni, 1Wo -> 2Ni, 2No -> 3Si, 2Eo -> 4Si,
+//        3So -> 1Wi, 3Wo -> 3Wi, 4So -> 2Ei, 4Eo -> 4Ei
 //
 // A routing matrix can be used to obtain other connection geometries.
 //------------------------------------------------------------
