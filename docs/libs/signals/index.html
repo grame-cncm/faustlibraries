@@ -237,6 +237,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#sirepeat" class="nav-link">(si.)repeat</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#sismoo" class="nav-link">(si.)smoo</a>
               <ul class="nav flex-column">
               </ul>
@@ -335,13 +339,38 @@ bus(4) : _,_,_,_
 <li><code>i</code>: interpolation control between 0 and 1 (0: first input; 1: second input)</li>
 </ul>
 <hr />
+<h3 id="sirepeat"><code>(si.)repeat</code></h3>
+<p>Repeat an effect N time(s) and take the parallel sum of all
+intermediate buses.</p>
+<h4 id="references_1">References</h4>
+<ul>
+<li><a href="https://github.com/orlarey/presentation-compilateur-faust/blob/master/slides.pdf">https://github.com/orlarey/presentation-compilateur-faust/blob/master/slides.pdf</a></li>
+</ul>
+<h4 id="usage_3">Usage</h4>
+<pre><code>si.bus(inputs(FX)) : repeat(N, FX) : si.bus(outputs(FX))
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: Number of repetitions, minimum of 1, a constant numerical expression </li>
+<li><code>FX</code>: an arbitrary effect (N inputs and N outputs) that will be repeated</li>
+</ul>
+<p>Example 1:</p>
+<pre><code>process = repeat(2, dm.zita_light) : _*.5,_*.5;
+</code></pre>
+<p>Example 2:</p>
+<pre><code>N = 4;
+C = 2;
+fx(i) = i+1, par(j, C, @(i*5000));
+process = 0, si.bus(C) : repeat(N, fx) : !, par(i, C, _*.2/N);
+</code></pre>
+<hr />
 <h3 id="sismoo"><code>(si.)smoo</code></h3>
 <p>Smoothing function based on <code>smooth</code> ideal to smooth UI signals
 (sliders, etc.) down. Approximately, this is a 7 Hz one-pole
 low-pass considering the coefficient calculation:
    exp(-2pi*CF/SR).</p>
 <p><code>smoo</code> is a standard Faust function.</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_4">Usage</h4>
 <pre><code>hslider(...) : smoo;
 </code></pre>
 <hr />
@@ -350,7 +379,7 @@ low-pass considering the coefficient calculation:
 trigger signal is given. This is very useful when making
 polyphonic synthesizer to make sure that the value of the parameter
 is the right one when the note is started.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_5">Usage</h4>
 <pre><code>hslider(...) : polySmooth(g,s,d) : _
 </code></pre>
 <p>Where:</p>
@@ -366,7 +395,7 @@ is the right one when the note is started.</p>
 signal when a trigger is sent to it. This feature is convenient
 when implementing polyphonic instruments to prevent some
 smoothed parameter to change when a note-off event is sent.</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_6">Usage</h4>
 <pre><code>hslider(...) : smoothAndH(g,s) : _
 </code></pre>
 <p>Where:</p>
@@ -377,13 +406,13 @@ smoothed parameter to change when a note-off event is sent.</p>
 <hr />
 <h3 id="sibsmooth"><code>(si.)bsmooth</code></h3>
 <p>Block smooth linear interpolation during a block of samples (given by the <code>ma.BS</code> value).</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>hslider(...) : bsmooth : _
 </code></pre>
 <hr />
 <h3 id="sidot"><code>(si.)dot</code></h3>
 <p>Dot product for two vectors of size N.</p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>si.bus(N), si.bus(N) : dot(N) : _
 </code></pre>
 <p>Where:</p>
@@ -394,7 +423,7 @@ smoothed parameter to change when a note-off event is sent.</p>
 <h3 id="sismooth"><code>(si.)smooth</code></h3>
 <p>Exponential smoothing by a unity-dc-gain one-pole lowpass.
 <code>smooth</code> is a standard Faust function.</p>
-<h4 id="usage_8">Usage:</h4>
+<h4 id="usage_9">Usage:</h4>
 <pre><code>_ : si.smooth(ba.tau2pole(tau)) : _
 </code></pre>
 <p>Where:</p>
@@ -410,7 +439,7 @@ s&gt;1 is unstable, and s=1 yields the zero signal for all inputs.
 The exponential time-constant is approximately 1/(1-s) samples, when s is close to
 (but less than) 1.</li>
 </ul>
-<h4 id="references_1">References:</h4>
+<h4 id="references_2">References:</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html">https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html">https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html</a></li>
@@ -419,7 +448,7 @@ The exponential time-constant is approximately 1/(1-s) samples, when s is close 
 <h3 id="sicbus"><code>(si.)cbus</code></h3>
 <p>N parallel cables for complex signals.
 <code>cbus</code> is a standard Faust function.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>cbus(N)
 cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 </code></pre>
@@ -432,7 +461,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h3 id="sicmul"><code>(si.)cmul</code></h3>
 <p>Multiply two complex signals pointwise.
 <code>cmul</code> is a standard Faust function.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>(r1,i1) : cmul(r2,i2) : (_,_)
 </code></pre>
 <p>Where:</p>
@@ -445,7 +474,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h3 id="sicconj"><code>(si.)cconj</code></h3>
 <p>Complex conjugation of a (complex) signal.
 <code>cconj</code> is a standard Faust function.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>(r1,i1) : cconj : (_,_)
 </code></pre>
 <p>Where:</p>
@@ -457,7 +486,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <hr />
 <h3 id="sionepoleswitching"><code>(si.)onePoleSwitching</code></h3>
 <p>One pole filter with independent attack and release times.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>_ : onePoleSwitching(att,rel) : _
 </code></pre>
 <p>Where:</p>
@@ -469,7 +498,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h3 id="sirev"><code>(si.)rev</code></h3>
 <p>Reverse the input signal by blocks of n&gt;0 samples. <code>rev(1)</code> is the indentity
 function. <code>rev(n)</code> has a latency of <code>n-1</code> samples.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>_ : rev(n) : _
 </code></pre>
 <p>Where:</p>
@@ -492,7 +521,7 @@ clarifying example later; in general, the number of total inputs will
 be the sum of the inputs in each input vector.</p>
 <p>Note that we must provide a list of at least two vectors, each with a size 
 that is greater or equal to one.</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>     si.bus(inputs(vectorsList)) : vecOp((vectorsList), op) : si.bus(outputs(ba.take(1, vectorsList)));
 </code></pre>
 <h4 id="where">Where</h4>
