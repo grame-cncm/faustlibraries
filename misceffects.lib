@@ -57,7 +57,7 @@ fi = library("filters.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.2.0"; 
+declare version "2.4.0"; 
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -574,6 +574,196 @@ dryWetMixer(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixer;
 declare dryWetMixerConstantPower author "David Braun, revised by Stéphane Letz";
 
 dryWetMixerConstantPower(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixerConstantPower;
+
+
+mixingEnv = environment
+{
+  // Note that i goes from 0 to N-1.
+  // m goes from 0 to N-1 typically, but the output should be periodic with size N.
+  // In other words the output with m=-4*N is the same as -2*N, -1*N, 0, 1*N, 2*N etc.
+  phaseLoop(N, m, i) = select2(abs(phase1)<abs(phase2), phase2, phase1)
+  with {
+    phase1 = fmod(i-m,N);
+    phase2 = phase1+ba.if(phase1<0,N,-N);
+  };
+
+  phaseClamp(N, m, i) = i-aa.clip(0,N-1,m);
+
+  // We divide by sqrt(2) at the end so that for m=0.5,1.5,2.5 etc,
+  // the total gain is 1.0, matching phase2LinearWeight. However,
+  // this means for m=0,1,2,3, etc, the gain is (1./sqrt(2)~=0.7071).
+  phase2PowerWeight = aa.clip(-1, 1) : cos(_*ma.PI*.5) / sqrt(2.);
+
+  phase2LinearWeight = aa.clip(-1, 1) : 1-abs(_);
+
+  //------------------------`weightsPowerLoop`---------------------------
+  // "Fan out" an index into N weights between 0 and 1. At any given
+  // moment, two weights may be non-zero. Suppose they are N_m and N_{m+1}.
+  // Then `cos(N_m)^2+sin(N_{m+1})^2==0.5`. 
+  //
+  // #### Usage
+  //
+  // ```
+  // _ : weightsPowerLoop(N) : si.bus(N)
+  // ```
+  // Where:
+  //
+  // * `N`: number of output weights
+  // * `m`: [0;N-1] (float) blend index. If m is outside [0;N-1], the behavior will loop.
+  //.       So m=-N, m=0, and m=N should give the same output.
+  weightsPowerLoop(N, m) = par(i, N, gain(i))
+  with {
+    gain(i) = phaseLoop(N, m, i) : phase2PowerWeight;
+  };
+
+  // Same as above, but the two weights being blended at any moment SUM to 1.
+  weightsLinearLoop(N, m) = par(i, N, gain(i))
+  with {
+    gain(i) = phaseLoop(N, m, i) : phase2LinearWeight;
+  };
+
+  // Same as weightsPowerLoop, but m is clamped to [0;N-1]
+  weightsPowerClamp(N, m) = par(i, N, gain(i))
+  with {
+    gain(i) = phaseClamp(N, m, i) : phase2PowerWeight;
+  };
+
+  // Same as weightsLinearLoop, but m is clamped to [0;N-1]
+  weightsLinearClamp(N, m) = par(i, N, gain(i))
+  with {
+    gain(i) = phaseClamp(N, m, i) : phase2LinearWeight;
+  };
+
+  dryWetMixer(wetAmount, FX) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  with {
+    N = 2; // We know in advance that there are 2 sounds (the dry and wet).
+    C = inputs(FX);
+    weights = weightsLinearClamp(N, wetAmount) <: ro.interleave(N, C);
+    sounds = si.bus(C) <: si.bus(C), FX;
+  };
+
+  dryWetMixerConstantPower(wetAmount, FX) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  with {
+    N = 2; // We know in advance that there are 2 sounds (the dry and wet).
+    C = inputs(FX);
+    weights = weightsPowerClamp(N, wetAmount) <: ro.interleave(N, C);
+    sounds = si.bus(C) <: si.bus(C), FX;
+  };
+
+  // Suppose `sounds` is N buses, each of C channels.
+  // We want to linearly mix the buses using index `m` [0;N-1]
+  mixLinearClamp(N, C, m, sounds) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  with {
+    weights = weightsLinearClamp(N, m) <: ro.interleave(N, C);
+  };
+
+  mixLinearLoop(N, C, m, sounds) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  with {
+    weights = weightsLinearLoop(N, m) <: ro.interleave(N, C);
+  };
+
+  mixPowerClamp(N, C, m, sounds) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  with {
+    weights = weightsPowerClamp(N, m) <: ro.interleave(N, C);
+  };
+
+  mixPowerLoop(N, C, m, sounds) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  with {
+    weights = weightsPowerLoop(N, m) <: ro.interleave(N, C);
+  };
+};
+
+
+//---------------`(ef.)mixLinearClamp`-------------------------------------------------
+// Linear mixer for `N` buses, each with `C` channels. The output will be a sum of 2 buses
+// determined by the mixing index `mix`. 0 produces the first bus, 1 produces the
+// second, and so on. `mix` is clamped automatically. For example, `mixLinearClamp(4, 1, 1)`
+// will weight its 4 inputs by `(0, 1, 0, 0)`. Similarly, `mixLinearClamp(4, 1, 1.1)`
+// will weight its 4 inputs by `(0,.9,.1,0)`.
+//
+// #### Usage
+//
+// ```
+// si.bus(N*C) : mixLinearClamp(N, C, mix) : si.bus(C)
+// ```
+//
+// Where:
+//
+// * `N`: the number of input buses
+// * `C`: the number of channels in each bus
+// * `mix`: the mixing index, continuous in [0;N-1].
+//---------------------------------------------------------------------------------------
+declare mixLinearClamp author "David Braun";
+
+mixLinearClamp = mixingEnv.mixLinearClamp;
+
+
+//---------------`(ef.)mixLinearLoop`-------------------------------------------------
+// Linear mixer for `N` buses, each with `C` channels. Refer to `mixLinearClamp`. `mix`
+// will loop for multiples of `N`. For example, `mixLinearLoop(4, 1, 0)` has the same
+// effect as `mixLinearLoop(4, 1, -4)` and `mixLinearLoop(4, 1, 4)`.
+//
+// #### Usage
+//
+// ```
+// si.bus(N*C) : mixLinearLoop(N, C, mix) : si.bus(C)
+// ```
+//
+// Where:
+//
+// * `N`: the number of input buses
+// * `C`: the number of channels in each bus
+// * `mix`: the mixing index (N-1) selects the last bus, and 0 or N selects the 0th bus.
+//---------------------------------------------------------------------------------------
+declare mixLinearLoop author "David Braun";
+
+mixLinearLoop = mixingEnv.mixLinearLoop;
+
+
+//---------------`(ef.)mixPowerClamp`-------------------------------------------------
+// Constant-power mixer for `N` buses, each with `C` channels. The output will be a sum of 2 buses
+// determined by the mixing index `mix`. 0 produces the first bus, 1 produces the
+// second, and so on. `mix` is clamped automatically. `mixPowerClamp(4, 1, 1)`
+// will weight its 4 inputs by `(0, 1./sqrt(2), 0, 0)`. Similarly, `mixPowerClamp(4, 1, 1.5)`
+// will weight its 4 inputs by `(0,.5,.5,0)`.
+//
+// #### Usage
+//
+// ```
+// si.bus(N*C) : mixPowerClamp(N, C, mix) : si.bus(C)
+// ```
+//
+// Where:
+//
+// * `N`: the number of input buses
+// * `C`: the number of channels in each bus
+// * `mix`: the mixing index, continuous in [0;N-1].
+//---------------------------------------------------------------------------------------
+declare mixPowerClamp author "David Braun";
+
+mixPowerClamp = mixingEnv.mixPowerClamp;
+
+
+//---------------`(ef.)mixPowerLoop`-----------------------------------------------------
+// Constant-power mixer for `N` buses, each with `C` channels. Refer to `mixPowerClamp`. `mix`
+// will loop for multiples of `N`. For example, `mixPowerLoop(4, 1, 0)` has the same effect
+// as `mixPowerLoop(4, 1, -4)` and `mixPowerLoop(4, 1, 4)`.
+//
+// #### Usage
+//
+// ```
+// si.bus(N*C) : mixPowerLoop(N, C, mix) : si.bus(C)
+// ```
+//
+// Where:
+//
+// * `N`: the number of input buses
+// * `C`: the number of channels in each bus
+// * `mix`: the mixing index (N-1) selects the last bus, and 0 or N selects the 0th bus.
+//---------------------------------------------------------------------------------------
+declare mixPowerLoop author "David Braun";
+
+mixPowerLoop = mixingEnv.mixPowerLoop;
 
 
 //-------------------`(ef.)uniformPanToStereo(nChans)`------------------
