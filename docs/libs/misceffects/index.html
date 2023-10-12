@@ -285,6 +285,22 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#efmixlinearclamp" class="nav-link">(ef.)mixLinearClamp</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#efmixlinearloop" class="nav-link">(ef.)mixLinearLoop</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#efmixpowerclamp" class="nav-link">(ef.)mixPowerClamp</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#efmixpowerloop" class="nav-link">(ef.)mixPowerLoop</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#time-based" class="nav-link">Time Based</a>
@@ -590,12 +606,72 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <li><code>wetAmount</code>: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal</li>
 <li><code>FX</code>: an arbitrary effect (N inputs and N outputs) to apply to the input bus</li>
 </ul>
+<hr />
+<h3 id="efmixlinearclamp"><code>(ef.)mixLinearClamp</code></h3>
+<p>Linear mixer for <code>N</code> buses, each with <code>C</code> channels. The output will be a sum of 2 buses
+determined by the mixing index <code>mix</code>. 0 produces the first bus, 1 produces the
+second, and so on. <code>mix</code> is clamped automatically. For example, <code>mixLinearClamp(4, 1, 1)</code>
+will weight its 4 inputs by <code>(0, 1, 0, 0)</code>. Similarly, <code>mixLinearClamp(4, 1, 1.1)</code>
+will weight its 4 inputs by <code>(0,.9,.1,0)</code>.</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>si.bus(N*C) : mixLinearClamp(N, C, mix) : si.bus(C)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of input buses</li>
+<li><code>C</code>: the number of channels in each bus</li>
+<li><code>mix</code>: the mixing index, continuous in [0;N-1].</li>
+</ul>
+<hr />
+<h3 id="efmixlinearloop"><code>(ef.)mixLinearLoop</code></h3>
+<p>Linear mixer for <code>N</code> buses, each with <code>C</code> channels. Refer to <code>mixLinearClamp</code>. <code>mix</code>
+will loop for multiples of <code>N</code>. For example, <code>mixLinearLoop(4, 1, 0)</code> has the same
+effect as <code>mixLinearLoop(4, 1, -4)</code> and <code>mixLinearLoop(4, 1, 4)</code>.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>si.bus(N*C) : mixLinearLoop(N, C, mix) : si.bus(C)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of input buses</li>
+<li><code>C</code>: the number of channels in each bus</li>
+<li><code>mix</code>: the mixing index (N-1) selects the last bus, and 0 or N selects the 0th bus.</li>
+</ul>
+<hr />
+<h3 id="efmixpowerclamp"><code>(ef.)mixPowerClamp</code></h3>
+<p>Constant-power mixer for <code>N</code> buses, each with <code>C</code> channels. The output will be a sum of 2 buses
+determined by the mixing index <code>mix</code>. 0 produces the first bus, 1 produces the
+second, and so on. <code>mix</code> is clamped automatically. <code>mixPowerClamp(4, 1, 1)</code>
+will weight its 4 inputs by <code>(0, 1./sqrt(2), 0, 0)</code>. Similarly, <code>mixPowerClamp(4, 1, 1.5)</code>
+will weight its 4 inputs by <code>(0,.5,.5,0)</code>.</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>si.bus(N*C) : mixPowerClamp(N, C, mix) : si.bus(C)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of input buses</li>
+<li><code>C</code>: the number of channels in each bus</li>
+<li><code>mix</code>: the mixing index, continuous in [0;N-1].</li>
+</ul>
+<hr />
+<h3 id="efmixpowerloop"><code>(ef.)mixPowerLoop</code></h3>
+<p>Constant-power mixer for <code>N</code> buses, each with <code>C</code> channels. Refer to <code>mixPowerClamp</code>. <code>mix</code>
+will loop for multiples of <code>N</code>. For example, <code>mixPowerLoop(4, 1, 0)</code> has the same effect
+as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</p>
+<h4 id="usage_15">Usage</h4>
+<pre><code>si.bus(N*C) : mixPowerLoop(N, C, mix) : si.bus(C)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the number of input buses</li>
+<li><code>C</code>: the number of channels in each bus</li>
+<li><code>mix</code>: the mixing index (N-1) selects the last bus, and 0 or N selects the 0th bus.</li>
+</ul>
 <h2 id="time-based">Time Based</h2>
 <hr />
 <h3 id="efecho"><code>(ef.)echo</code></h3>
 <p>A simple echo effect.
 <code>echo</code> is a standard Faust function.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>_ : echo(maxDuration,duration,feedback) : _
 </code></pre>
 <p>Where:</p>
@@ -609,7 +685,7 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <h3 id="eftranspose"><code>(ef.)transpose</code></h3>
 <p>A simple pitch shifter based on 2 delay lines.
 <code>transpose</code> is a standard Faust function.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_17">Usage</h4>
 <pre><code>_ : transpose(w, x, s) : _
 </code></pre>
 <p>Where:</p>
@@ -622,13 +698,13 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
 <hr />
 <h3 id="efsoftclipquadratic"><code>(ef.)softclipQuadratic</code></h3>
 <p>Quadratic softclip nonlinearity.</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_18">Usage</h4>
 <pre><code>_ : softclipQuadratic : _;
 </code></pre>
 <hr />
 <h3 id="efwavefold"><code>(ef.)wavefold</code></h3>
 <p>Wavefolding nonlinearity.</p>
-<h4 id="usage_15">Usage</h4>
+<h4 id="usage_19">Usage</h4>
 <pre><code>_ : wavefold(width) : _;
 </code></pre>
 <p>Where:</p>
