@@ -502,30 +502,6 @@ with {
 };
 
 
-//-------------------`(ef.)uniformPanToStereo(nChans)`------------------
-// Pan nChans channels to the stereo field, spread uniformly left to right.
-//
-// #### Usage
-//
-// ```
-// si.bus(N) : ef.uniformPanToStereo(N) : _,_
-// ```
-//
-// Where:
-//
-// * `N`: Number of input channels to pan down to stereo
-//
-// #### Demo
-//
-// ```
-// _,_,_ : ef.uniformPanToStereo(3) : _,_
-// ```
-//
-//------------------------------------------------------------
-uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
-              (par(i,N,*(i/(N-1))) :> _),
-              (par(i,N,*(1-i/(N-1))) :> _);
-
 // end jos section
 /************************************************************************
 ************************************************************************
@@ -625,6 +601,31 @@ dryWetMixer(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixer;
 declare dryWetMixerConstantPower author "David Braun, revised by Stéphane Letz";
 
 dryWetMixerConstantPower(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixerConstantPower;
+
+
+//-------------------`(ef.)uniformPanToStereo(nChans)`------------------
+// Pan nChans channels to the stereo field, spread uniformly left to right.
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : ef.uniformPanToStereo(N) : _,_
+// ```
+//
+// Where:
+//
+// * `N`: Number of input channels to pan down to stereo
+//
+// #### Demo
+//
+// ```
+// _,_,_ : ef.uniformPanToStereo(3) : _,_
+// ```
+//
+//------------------------------------------------------------
+uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
+              (par(i,N,*(i/(N-1))) :> _),
+              (par(i,N,*(1-i/(N-1))) :> _);
 
 
 //=======================================Pitch Shifting===================================
