@@ -502,62 +502,6 @@ with {
 };
 
 
-//--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
-// Reverse echo effect.
-//
-// #### Usage
-//
-// ```
-// _ : ef.reverseEchoN(N,delay) : si.bus(N)
-// ```
-//
-// Where:
-//
-// *     `N`: Number of output channels desired (1 or more)
-// * `delay`: echo delay (integer power of 2)
-//
-// #### Demo
-//
-// ```
-// _ : dm.reverseEchoN(N) : _,_
-// ```
-//
-// #### Description
-//
-// The effect uses N instances of `reverseDelayRamped` at different phases.
-//
-//------------------------------------------------------------
-reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
-
-//-------------------`(ef.)reverseDelayRamped(delay,phase)`------------------
-// Reverse delay with amplitude ramp.
-//
-// #### Usage
-//
-// ```
-// _ : ef.reverseDelayRamped(delay,phase) : _
-// ```
-//
-// Where:
-//
-// * `delay`: echo delay (integer power of 2)
-// * `phase`: float between 0 and 1 giving ramp delay phase*delay
-//
-// #### Demo
-//
-// ```
-// _ : ef.reverseDelayRamped(32,0.6) : _,_
-// ```
-//
-//------------------------------------------------------------
-reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
-  rampGain = 4 * (del/delMax) * (1 - del/delMax); // suppress click when delay-line wraps around
-  delOffset = int(floor(0.5 + delMax * max(0,min(0.999999,phs)))); // starting point in delay line
-  startPulse = (1-1') * delOffset;
-  del = int(startPulse : + ~ +(2)) & (delMax-1);
-};
-
-
 //-------------------`(ef.)uniformPanToStereo(nChans)`------------------
 // Pan nChans channels to the stereo field, spread uniformly left to right.
 //
@@ -811,6 +755,62 @@ with{
 };
 
 // TODO demo function for echo
+
+
+//--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
+// Reverse echo effect.
+//
+// #### Usage
+//
+// ```
+// _ : ef.reverseEchoN(N,delay) : si.bus(N)
+// ```
+//
+// Where:
+//
+// *     `N`: Number of output channels desired (1 or more)
+// * `delay`: echo delay (integer power of 2)
+//
+// #### Demo
+//
+// ```
+// _ : dm.reverseEchoN(N) : _,_
+// ```
+//
+// #### Description
+//
+// The effect uses N instances of `reverseDelayRamped` at different phases.
+//
+//------------------------------------------------------------
+reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
+
+//-------------------`(ef.)reverseDelayRamped(delay,phase)`------------------
+// Reverse delay with amplitude ramp.
+//
+// #### Usage
+//
+// ```
+// _ : ef.reverseDelayRamped(delay,phase) : _
+// ```
+//
+// Where:
+//
+// * `delay`: echo delay (integer power of 2)
+// * `phase`: float between 0 and 1 giving ramp delay phase*delay
+//
+// #### Demo
+//
+// ```
+// _ : ef.reverseDelayRamped(32,0.6) : _,_
+// ```
+//
+//------------------------------------------------------------
+reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
+  rampGain = 4 * (del/delMax) * (1 - del/delMax); // suppress click when delay-line wraps around
+  delOffset = int(floor(0.5 + delMax * max(0,min(0.999999,phs)))); // starting point in delay line
+  startPulse = (1-1') * delOffset;
+  del = int(startPulse : + ~ +(2)) & (delMax-1);
+};
 
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
