@@ -418,6 +418,46 @@ with {
     : si.bus(16*N);
 };
 
+
+//---------------`(mi.)repeat`----------------------------------------------
+// Repeat an effect N time(s) and take the parallel sum of all
+// intermediate buses.
+// #### References
+// * <https://github.com/orlarey/presentation-compilateur-faust/blob/master/slides.pdf>
+//
+// #### Usage
+//
+// ```
+// si.bus(inputs(FX)) : repeat(N, FX) : si.bus(inputs(FX))
+// ```
+//
+// Where:
+//
+// * `N`: Number of repetitions, minimum of 1, compile-time constant.
+// * `FX`: an arbitrary effect (N inputs and N outputs) that will be repeated.
+//
+// Example 1:
+// ```
+// process = repeat(2, dm.zita_light) : _*.5,_*.5;
+// ```
+//
+// Example 2:
+// ```
+// N = 4;
+// C = 2;
+// fx(i) = i+1, par(j, C, @(i*5000));
+// process = 0, si.bus(C) : repeat(N, fx) : !, par(i, C, _*.2/N);
+// ```
+//---------------------------------------------------------------------------
+declare repeat author "Yann Orlarey and Stéphane Letz, revised by David Braun";
+
+repeat(1, FX) = FX;
+repeat(n, FX) = FX <: si.bus(N), repeat(n-1, FX) :> si.bus(N)
+with {
+    N = outputs(FX);
+};
+
+
 //--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
 // Reverse echo effect.
 //
