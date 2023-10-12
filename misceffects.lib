@@ -7,9 +7,9 @@
 // * [Filtering](#filtering)
 // * [Meshes](#meshes)
 // * [Mixing](#mixing)
-// * [Time Based](#time-based)
 // * [Pitch Shifting](#pitch-shifting)
 // * [Saturators](#saturators)
+// * [Time Based](#time-based)
 //
 // #### References
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/misceffects.lib>
@@ -679,35 +679,6 @@ declare dryWetMixerConstantPower author "David Braun, revised by Stéphane Letz"
 dryWetMixerConstantPower(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixerConstantPower;
 
 
-//========================================Time Based======================================
-//========================================================================================
-
-//----------`(ef.)echo`----------
-// A simple echo effect.
-// `echo` is a standard Faust function.
-//
-// #### Usage
-//
-// ```
-// _ : echo(maxDuration,duration,feedback) : _
-// ```
-//
-// Where:
-//
-// * `maxDuration`: the max echo duration in seconds
-// * `duration`: the echo duration in seconds
-// * `feedback`: the feedback coefficient
-//----------------------------------------------------
-declare echo author "Romain Michon";
-
-echo(maxDuration,duration,feedback) = +~de.delay(maxDel,del)*feedback
-with{
-  maxDel = ma.SR*maxDuration;
-  del = ma.SR*duration;
-};
-
-// TODO demo function for echo
-
 //=======================================Pitch Shifting===================================
 //========================================================================================
 
@@ -806,6 +777,36 @@ softclipQuadratic = nonlinearityEnv.softclipQuadratic;
 declare wavefold author "David Braun";
 
 wavefold = nonlinearityEnv.wavefold;
+
+
+//========================================Time Based======================================
+//========================================================================================
+
+//----------`(ef.)echo`----------
+// A simple echo effect.
+// `echo` is a standard Faust function.
+//
+// #### Usage
+//
+// ```
+// _ : echo(maxDuration,duration,feedback) : _
+// ```
+//
+// Where:
+//
+// * `maxDuration`: the max echo duration in seconds
+// * `duration`: the echo duration in seconds
+// * `feedback`: the feedback coefficient
+//----------------------------------------------------
+declare echo author "Romain Michon";
+
+echo(maxDuration,duration,feedback) = +~de.delay(maxDel,del)*feedback
+with{
+  maxDel = ma.SR*maxDuration;
+  del = ma.SR*duration;
+};
+
+// TODO demo function for echo
 
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
