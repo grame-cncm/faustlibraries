@@ -475,6 +475,29 @@ with {
 };
 
 
+//-------------------`(mi.)fibonacciSeq`---------------------------------
+// First N numbers of the Fibonacci sequence [1, 1, 2, 3, 5, 8, ...]
+// as parallel channels.
+//
+// #### Usage
+//
+// ```
+// fibonacciSeq(N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: The number of Fibonacci numbers to generate as channels.
+// ----------------------------------------------------------------------
+fibonacciSeq(N) = iterate(N, (1, 1))
+with {
+  iterate(1, (A0, A1)) = A0;
+  iterate(N, (A0, A1)) = A0 , iterate(N - 1, (A1, A0 + A1));
+};
+
+declare fibonacciSeq author "Dario Sanfilippo";
+
+
 //--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
 // Reverse echo effect.
 //
