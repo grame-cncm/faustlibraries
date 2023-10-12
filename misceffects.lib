@@ -59,21 +59,6 @@ ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 declare name "Misc Effects Library";
 declare version "2.2.0"; 
 
-//########################################################################################
-/************************************************************************
-FAUST library file, jos section
-
-Except where noted otherwise, The Faust functions below in this
-section are Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>
-([jos](http://ccrma.stanford.edu/~jos/)), and released under the
-(MIT-style) [STK-4.3](#stk-4.3-license) license.
-
-MarkDown comments in this section are Copyright 2016-2019 by Romain
-Michon and Julius O. Smith III, and are released under the
-[CCA4I](https://creativecommons.org/licenses/by/4.0/) license (TODO: if/when Romain agrees!)
-
-************************************************************************/
-
 //======================================Dynamic===========================================
 //========================================================================================
 
@@ -109,6 +94,10 @@ with {
 
 cubicnl_nodc(drive,offset) = cubicnl(drive,offset) : fi.dcblocker;
 
+declare cubicnl author "Julius O. Smith III";
+declare cubicnl license "STK-4.3";
+declare cubicnl_nodc author "Julius O. Smith III";
+declare cubicnl_nodc license "STK-4.3";
 
 //-----------------`(ef.)gate_mono`-------------------
 // Mono signal gate.
@@ -134,6 +123,9 @@ cubicnl_nodc(drive,offset) = cubicnl(drive,offset) : fi.dcblocker;
 // * <http://en.wikipedia.org/wiki/Gating_(sound_engineering)>
 //------------------------------------------------------------
 gate_mono(thresh,att,hold,rel,x) = x * gate_gain_mono(thresh,att,hold,rel,x);
+
+declare gate_mono author "Julius O. Smith III";
+declare gate_mono license "STK-4.3";
 
 
 //-----------------`(ef.)gate_stereo`-------------------
@@ -173,6 +165,11 @@ gate_gain_mono(thresh,att,hold,rel,x) = x : extendedrawgate : an.amp_follower_ar
   holdreset(x) = rawgatesig(x) < rawgatesig(x)'; // reset hold when raw gate falls
   holdsamps = int(hold*ma.SR);
 };
+
+declare gate_stereo author "Julius O. Smith III";
+declare gate_stereo license "STK-4.3";
+declare gate_gain_mono author "Julius O. Smith III";
+declare gate_gain_mono license "STK-4.3";
 
 
 //=====================================Fibonacci==========================================
@@ -285,6 +282,9 @@ declare fibonacciSeq author "Dario Sanfilippo";
 // [JOS: I don't think so because it's merely a bandpass filter tuned to speaker bandwidth]
 speakerbp(f1,f2) = fi.dcblockerat(f1) : fi.dcblockerat(f1) : fi.lowpass(4,f2);
 
+declare speakerbp author "Julius O. Smith III";
+declare speakerbp license "STK-4.3";
+
 
 //------------`(ef.)piano_dispersion_filter`---------------
 // Piano dispersion allpass filter in closed form.
@@ -344,6 +344,10 @@ with {
  Df0 = polydel(a1) - polydel(1.0/a1);
 };
 
+declare piano_dispersion_filter author "Julius O. Smith III";
+declare piano_dispersion_filter license "STK-4.3";
+
+
 //-------------------------`(ef.)stereo_width`---------------------------
 // Stereo Width effect using the Blumlein Shuffler technique.
 // `stereo_width` is a standard Faust function.
@@ -373,6 +377,10 @@ with {
      mgain = 1-w/2;  // but we pick up the needed normalization here.
      sgain = w/2;
 };
+
+declare stereo_width author "Julius O. Smith III";
+declare stereo_width license "STK-4.3";
+
 
 //===========================================Meshes=======================================
 //========================================================================================
@@ -501,43 +509,8 @@ with {
     : si.bus(16*N);
 };
 
-
-// end jos section
-/************************************************************************
-************************************************************************
-FAUST library file, GRAME section
-
-Except where noted otherwise, Copyright (C) 2003-2017 by GRAME,
-Centre National de Creation Musicale.
-----------------------------------------------------------------------
-GRAME LICENSE
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as
-published by the Free Software Foundation; either version 2.1 of the
-License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with the GNU C Library; if not, write to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-02111-1307 USA.
-
-EXCEPTION TO THE LGPL LICENSE : As a special exception, you may create a
-larger FAUST program which directly or indirectly imports this library
-file and still distribute the compiled code generated by the FAUST
-compiler, or a modified version of this compiled code, under your own
-copyright and license. This EXCEPTION TO THE LGPL LICENSE explicitly
-grants you the right to freely choose the license for the resulting
-compiled code. In particular the resulting compiled code has no obligation
-to be LGPL or GPL. For example you are free to choose a commercial or
-closed source license or any other license if you decide so.
-************************************************************************
-************************************************************************/
+declare mesh_square author "Julius O. Smith III";
+declare mesh_square license "STK-4.3";
 
 //=====================================Mixing=============================================
 //========================================================================================
@@ -626,6 +599,9 @@ dryWetMixerConstantPower(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixerConst
 uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
               (par(i,N,*(i/(N-1))) :> _),
               (par(i,N,*(1-i/(N-1))) :> _);
+
+declare uniformPanToStereo author "Julius O. Smith III";
+declare uniformPanToStereo license "STK-4.3";
 
 
 //=======================================Pitch Shifting===================================
@@ -785,6 +761,9 @@ with{
 //------------------------------------------------------------
 reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
 
+declare reverseEchoN author "Julius O. Smith III";
+declare reverseEchoN license "STK-4.3";
+
 //-------------------`(ef.)reverseDelayRamped(delay,phase)`------------------
 // Reverse delay with amplitude ramp.
 //
@@ -812,6 +791,9 @@ reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
   startPulse = (1-1') * delOffset;
   del = int(startPulse : + ~ +(2)) & (delMax-1);
 };
+
+declare reverseDelayRamped author "Julius O. Smith III";
+declare reverseDelayRamped license "STK-4.3";
 
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
