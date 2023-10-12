@@ -4,6 +4,7 @@
 // The library is organized into 7 sections:
 //
 // * [Dynamic](#Dynamic)
+// * [Fibonacci](#fibonacci)
 // * [Filtering](#filtering)
 // * [Meshes](#meshes)
 // * [Mixing](#mixing)
@@ -172,6 +173,88 @@ gate_gain_mono(thresh,att,hold,rel,x) = x : extendedrawgate : an.amp_follower_ar
   holdreset(x) = rawgatesig(x) < rawgatesig(x)'; // reset hold when raw gate falls
   holdsamps = int(hold*ma.SR);
 };
+
+
+//=====================================Fibonacci==========================================
+//========================================================================================
+
+//---------------`(mi.)fibonacci`---------------------------
+// Fibonacci system where the current output is the current
+// input plus the sum of the previous N outputs.
+//
+// #### Usage
+//
+// ```
+// _ : fibonacci(N) : _
+// ```
+//
+// Where:
+//
+// * `N`: the Fibonacci system's order, where 2 is standard
+//
+// #### Example
+// Generate the famous series: [1, 1, 2, 3, 5, 8, 13, ...]
+//
+// ```
+// 1. : ba.impulsify : fibonacci(2)
+// ```
+//------------------------------------------------------------
+declare fibonacci author "Dario Sanfilippo";
+
+fibonacci(order) = +~(_<:sum(i, order, @(i)):>_);
+
+
+//---------------`(mi.)fibonacciGeneral`----------------------
+// Fibonacci system with customizable coefficients.
+// The order of the system is inferred from the number of coefficients.
+//
+// #### Usage
+//
+// ```
+// _ : fibonacciGeneral(wave) : _
+// ```
+//
+// Where:
+//
+// * `wave`: a waveform such as `waveform{1, 1}`
+//
+// #### Example:
+// Use the update equation `y = 2*y' + 3*y'' + 4*y'''`
+//
+// ```
+// 1. : ba.impulsify : fibonacciGeneral(waveform{2, 3, 4})
+// ```
+//------------------------------------------------------------
+declare fibonacciGeneral author "Dario Sanfilippo and David Braun";
+
+fibonacciGeneral(wave) = +~(_<:sum(i, N, func(i)):>_)
+with {
+    N = wave : _, !;
+    func(i) = @(i) : _ * (wave, i : rdtable);
+};
+
+
+//-------------------`(mi.)fibonacciSeq`---------------------------------
+// First N numbers of the Fibonacci sequence [1, 1, 2, 3, 5, 8, ...]
+// as parallel channels.
+//
+// #### Usage
+//
+// ```
+// fibonacciSeq(N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: The number of Fibonacci numbers to generate as channels.
+// ----------------------------------------------------------------------
+fibonacciSeq(N) = iterate(N, (1, 1))
+with {
+  iterate(1, (A0, A1)) = A0;
+  iterate(N, (A0, A1)) = A0 , iterate(N - 1, (A1, A0 + A1));
+};
+
+declare fibonacciSeq author "Dario Sanfilippo";
 
 
 //=====================================Filtering==========================================
@@ -417,85 +500,6 @@ with {
     s(2,N,16),s(11,N,16), s(5,N,16),s(15,N,16)
     : si.bus(16*N);
 };
-
-
-//---------------`(mi.)fibonacci`---------------------------
-// Fibonacci system where the current output is the current
-// input plus the sum of the previous N outputs.
-//
-// #### Usage
-//
-// ```
-// _ : fibonacci(N) : _
-// ```
-//
-// Where:
-//
-// * `N`: the Fibonacci system's order, where 2 is standard
-//
-// #### Example
-// Generate the famous series: [1, 1, 2, 3, 5, 8, 13, ...]
-//
-// ```
-// 1. : ba.impulsify : fibonacci(2)
-// ```
-//------------------------------------------------------------
-declare fibonacci author "Dario Sanfilippo";
-
-fibonacci(order) = +~(_<:sum(i, order, @(i)):>_);
-
-
-//---------------`(mi.)fibonacciGeneral`----------------------
-// Fibonacci system with customizable coefficients.
-// The order of the system is inferred from the number of coefficients.
-//
-// #### Usage
-//
-// ```
-// _ : fibonacciGeneral(wave) : _
-// ```
-//
-// Where:
-//
-// * `wave`: a waveform such as `waveform{1, 1}`
-//
-// #### Example:
-// Use the update equation `y = 2*y' + 3*y'' + 4*y'''`
-//
-// ```
-// 1. : ba.impulsify : fibonacciGeneral(waveform{2, 3, 4})
-// ```
-//------------------------------------------------------------
-declare fibonacciGeneral author "Dario Sanfilippo and David Braun";
-
-fibonacciGeneral(wave) = +~(_<:sum(i, N, func(i)):>_)
-with {
-    N = wave : _, !;
-    func(i) = @(i) : _ * (wave, i : rdtable);
-};
-
-
-//-------------------`(mi.)fibonacciSeq`---------------------------------
-// First N numbers of the Fibonacci sequence [1, 1, 2, 3, 5, 8, ...]
-// as parallel channels.
-//
-// #### Usage
-//
-// ```
-// fibonacciSeq(N) : si.bus(N)
-// ```
-//
-// Where:
-//
-// * `N`: The number of Fibonacci numbers to generate as channels.
-// ----------------------------------------------------------------------
-fibonacciSeq(N) = iterate(N, (1, 1))
-with {
-  iterate(1, (A0, A1)) = A0;
-  iterate(N, (A0, A1)) = A0 , iterate(N - 1, (A1, A0 + A1));
-};
-
-declare fibonacciSeq author "Dario Sanfilippo";
 
 
 //--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
