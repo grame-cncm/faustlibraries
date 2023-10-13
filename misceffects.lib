@@ -5,6 +5,7 @@
 //
 // * [Dynamic](#Dynamic)
 // * [Filtering](#filtering)
+// * [Fibonacci](#fibonacci)
 // * [Meshes](#meshes)
 // * [Mixing](#mixing)
 // * [Time Based](#time-based)
@@ -56,22 +57,7 @@ fi = library("filters.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.3.0"; 
-
-//########################################################################################
-/************************************************************************
-FAUST library file, jos section
-
-Except where noted otherwise, The Faust functions below in this
-section are Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>
-([jos](http://ccrma.stanford.edu/~jos/)), and released under the
-(MIT-style) [STK-4.3](#stk-4.3-license) license.
-
-MarkDown comments in this section are Copyright 2016-2019 by Romain
-Michon and Julius O. Smith III, and are released under the
-[CCA4I](https://creativecommons.org/licenses/by/4.0/) license (TODO: if/when Romain agrees!)
-
-************************************************************************/
+declare version "2.4.0"; 
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -108,6 +94,10 @@ with {
 
 cubicnl_nodc(drive,offset) = cubicnl(drive,offset) : fi.dcblocker;
 
+declare cubicnl author "Julius O. Smith III";
+declare cubicnl license "STK-4.3";
+declare cubicnl_nodc author "Julius O. Smith III";
+declare cubicnl_nodc license "STK-4.3";
 
 //-----------------`(ef.)gate_mono`-------------------
 // Mono signal gate.
@@ -134,6 +124,8 @@ cubicnl_nodc(drive,offset) = cubicnl(drive,offset) : fi.dcblocker;
 //------------------------------------------------------------
 gate_mono(thresh,att,hold,rel,x) = x * gate_gain_mono(thresh,att,hold,rel,x);
 
+declare gate_mono author "Julius O. Smith III";
+declare gate_mono license "STK-4.3";
 
 //-----------------`(ef.)gate_stereo`-------------------
 // Stereo signal gates.
@@ -173,6 +165,91 @@ gate_gain_mono(thresh,att,hold,rel,x) = x : extendedrawgate : an.amp_follower_ar
   holdsamps = int(hold*ma.SR);
 };
 
+declare gate_stereo author "Julius O. Smith III";
+declare gate_stereo license "STK-4.3";
+declare gate_gain_mono author "Julius O. Smith III";
+declare gate_gain_mono license "STK-4.3";
+
+//=====================================Fibonacci==========================================
+//========================================================================================
+
+//---------------`(mi.)fibonacci`---------------------------
+// Fibonacci system where the current output is the current
+// input plus the sum of the previous N outputs.
+//
+// #### Usage
+//
+// ```
+// _ : fibonacci(N) : _
+// ```
+//
+// Where:
+//
+// * `N`: the Fibonacci system's order, where 2 is standard
+//
+// #### Example
+// Generate the famous series: [1, 1, 2, 3, 5, 8, 13, ...]
+//
+// ```
+// 1. : ba.impulsify : fibonacci(2)
+// ```
+//------------------------------------------------------------
+declare fibonacci author "Dario Sanfilippo";
+
+fibonacci(order) = +~(_<:sum(i, order, @(i)):>_);
+
+
+//---------------`(mi.)fibonacciGeneral`----------------------
+// Fibonacci system with customizable coefficients.
+// The order of the system is inferred from the number of coefficients.
+//
+// #### Usage
+//
+// ```
+// _ : fibonacciGeneral(wave) : _
+// ```
+//
+// Where:
+//
+// * `wave`: a waveform such as `waveform{1, 1}`
+//
+// #### Example:
+// Use the update equation `y = 2*y' + 3*y'' + 4*y'''`
+//
+// ```
+// 1. : ba.impulsify : fibonacciGeneral(waveform{2, 3, 4})
+// ```
+//------------------------------------------------------------
+declare fibonacciGeneral author "Dario Sanfilippo and David Braun";
+
+fibonacciGeneral(wave) = +~(_<:sum(i, N, func(i)):>_)
+with {
+    N = wave : _, !;
+    func(i) = @(i) : _ * (wave, i : rdtable);
+};
+
+
+//-------------------`(mi.)fibonacciSeq`---------------------------------
+// First N numbers of the Fibonacci sequence [1, 1, 2, 3, 5, 8, ...]
+// as parallel channels.
+//
+// #### Usage
+//
+// ```
+// fibonacciSeq(N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: The number of Fibonacci numbers to generate as channels.
+// ----------------------------------------------------------------------
+fibonacciSeq(N) = iterate(N, (1, 1))
+with {
+  iterate(1, (A0, A1)) = A0;
+  iterate(N, (A0, A1)) = A0 , iterate(N - 1, (A1, A0 + A1));
+};
+
+declare fibonacciSeq author "Dario Sanfilippo";
 
 //=====================================Filtering==========================================
 //========================================================================================
@@ -202,6 +279,8 @@ gate_gain_mono(thresh,att,hold,rel,x) = x : extendedrawgate : an.amp_follower_ar
 // [JOS: I don't think so because it's merely a bandpass filter tuned to speaker bandwidth]
 speakerbp(f1,f2) = fi.dcblockerat(f1) : fi.dcblockerat(f1) : fi.lowpass(4,f2);
 
+declare speakerbp author "Julius O. Smith III";
+declare speakerbp license "STK-4.3";
 
 //------------`(ef.)piano_dispersion_filter`---------------
 // Piano dispersion allpass filter in closed form.
@@ -261,6 +340,9 @@ with {
  Df0 = polydel(a1) - polydel(1.0/a1);
 };
 
+declare piano_dispersion_filter author "Julius O. Smith III";
+declare piano_dispersion_filter license "STK-4.3";
+
 //-------------------------`(ef.)stereo_width`---------------------------
 // Stereo Width effect using the Blumlein Shuffler technique.
 // `stereo_width` is a standard Faust function.
@@ -290,6 +372,9 @@ with {
      mgain = 1-w/2;  // but we pick up the needed normalization here.
      sgain = w/2;
 };
+
+declare stereo_width author "Julius O. Smith III";
+declare stereo_width license "STK-4.3";
 
 //===========================================Meshes=======================================
 //========================================================================================
@@ -418,122 +503,9 @@ with {
     : si.bus(16*N);
 };
 
-//--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
-// Reverse echo effect.
-//
-// #### Usage
-//
-// ```
-// _ : ef.reverseEchoN(N,delay) : si.bus(N)
-// ```
-//
-// Where:
-//
-// *     `N`: Number of output channels desired (1 or more)
-// * `delay`: echo delay (integer power of 2)
-//
-// #### Demo
-//
-// ```
-// _ : dm.reverseEchoN(N) : _,_
-// ```
-//
-// #### Description
-//
-// The effect uses N instances of `reverseDelayRamped` at different phases.
-//
-//------------------------------------------------------------
-reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
+declare mesh_square author "Julius O. Smith III";
+declare mesh_square license "STK-4.3";
 
-//-------------------`(ef.)reverseDelayRamped(delay,phase)`------------------
-// Reverse delay with amplitude ramp.
-//
-// #### Usage
-//
-// ```
-// _ : ef.reverseDelayRamped(delay,phase) : _
-// ```
-//
-// Where:
-//
-// * `delay`: echo delay (integer power of 2)
-// * `phase`: float between 0 and 1 giving ramp delay phase*delay
-//
-// #### Demo
-//
-// ```
-// _ : ef.reverseDelayRamped(32,0.6) : _,_
-// ```
-//
-//------------------------------------------------------------
-reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
-  rampGain = 4 * (del/delMax) * (1 - del/delMax); // suppress click when delay-line wraps around
-  delOffset = int(floor(0.5 + delMax * max(0,min(0.999999,phs)))); // starting point in delay line
-  startPulse = (1-1') * delOffset;
-  del = int(startPulse : + ~ +(2)) & (delMax-1);
-};
-
-
-//-------------------`(ef.)uniformPanToStereo(nChans)`------------------
-// Pan nChans channels to the stereo field, spread uniformly left to right.
-//
-// #### Usage
-//
-// ```
-// si.bus(N) : ef.uniformPanToStereo(N) : _,_
-// ```
-//
-// Where:
-//
-// * `N`: Number of input channels to pan down to stereo
-//
-// #### Demo
-//
-// ```
-// _,_,_ : ef.uniformPanToStereo(3) : _,_
-// ```
-//
-//------------------------------------------------------------
-uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
-              (par(i,N,*(i/(N-1))) :> _),
-              (par(i,N,*(1-i/(N-1))) :> _);
-
-// end jos section
-/************************************************************************
-************************************************************************
-FAUST library file, GRAME section
-
-Except where noted otherwise, Copyright (C) 2003-2017 by GRAME,
-Centre National de Creation Musicale.
-----------------------------------------------------------------------
-GRAME LICENSE
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as
-published by the Free Software Foundation; either version 2.1 of the
-License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with the GNU C Library; if not, write to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-02111-1307 USA.
-
-EXCEPTION TO THE LGPL LICENSE : As a special exception, you may create a
-larger FAUST program which directly or indirectly imports this library
-file and still distribute the compiled code generated by the FAUST
-compiler, or a modified version of this compiled code, under your own
-copyright and license. This EXCEPTION TO THE LGPL LICENSE explicitly
-grants you the right to freely choose the license for the resulting
-compiled code. In particular the resulting compiled code has no obligation
-to be LGPL or GPL. For example you are free to choose a commercial or
-closed source license or any other license if you decide so.
-************************************************************************
-************************************************************************/
 
 //=====================================Mixing=============================================
 //========================================================================================
@@ -817,6 +789,95 @@ with{
 };
 
 // TODO demo function for echo
+
+//--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
+// Reverse echo effect.
+//
+// #### Usage
+//
+// ```
+// _ : ef.reverseEchoN(N,delay) : si.bus(N)
+// ```
+//
+// Where:
+//
+// *     `N`: Number of output channels desired (1 or more)
+// * `delay`: echo delay (integer power of 2)
+//
+// #### Demo
+//
+// ```
+// _ : dm.reverseEchoN(N) : _,_
+// ```
+//
+// #### Description
+//
+// The effect uses N instances of `reverseDelayRamped` at different phases.
+//
+//------------------------------------------------------------
+reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
+
+declare reverseEchoN author "Julius O. Smith III";
+declare reverseEchoN license "STK-4.3";
+
+
+//-------------------`(ef.)reverseDelayRamped(delay,phase)`------------------
+// Reverse delay with amplitude ramp.
+//
+// #### Usage
+//
+// ```
+// _ : ef.reverseDelayRamped(delay,phase) : _
+// ```
+//
+// Where:
+//
+// * `delay`: echo delay (integer power of 2)
+// * `phase`: float between 0 and 1 giving ramp delay phase*delay
+//
+// #### Demo
+//
+// ```
+// _ : ef.reverseDelayRamped(32,0.6) : _,_
+// ```
+//
+//------------------------------------------------------------
+reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
+  rampGain = 4 * (del/delMax) * (1 - del/delMax); // suppress click when delay-line wraps around
+  delOffset = int(floor(0.5 + delMax * max(0,min(0.999999,phs)))); // starting point in delay line
+  startPulse = (1-1') * delOffset;
+  del = int(startPulse : + ~ +(2)) & (delMax-1);
+};
+
+declare reverseDelayRamped author "Julius O. Smith III";
+declare reverseDelayRamped license "STK-4.3";
+
+//-------------------`(ef.)uniformPanToStereo(nChans)`------------------
+// Pan nChans channels to the stereo field, spread uniformly left to right.
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : ef.uniformPanToStereo(N) : _,_
+// ```
+//
+// Where:
+//
+// * `N`: Number of input channels to pan down to stereo
+//
+// #### Demo
+//
+// ```
+// _,_,_ : ef.uniformPanToStereo(3) : _,_
+// ```
+//
+//------------------------------------------------------------
+uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
+              (par(i,N,*(i/(N-1))) :> _),
+              (par(i,N,*(1-i/(N-1))) :> _);
+
+declare uniformPanToStereo author "Julius O. Smith III";
+declare uniformPanToStereo license "STK-4.3";
 
 //=======================================Pitch Shifting===================================
 //========================================================================================
