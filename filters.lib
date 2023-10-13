@@ -2633,8 +2633,10 @@ with {
 //========================================================================================
 
 //-----------------`(fi.)svf`----------------------
-// An environment with `lp`, `bp`, `hp`, `notch`, `peak`, `ap`, `bell`, `ls`, `hs` SVF based filters. 
-// All filters have `freq` and `Q` parameters, the `bell`, `ls`, `hs` ones also have a `gain` third parameter.
+// An environment with `lp`, `bp`, `hp`, `notch`, `peak`, `ap`, `bell`, `ls`, `hs`, `morph` SVF based filters. 
+// All filters have `freq` and `Q` parameters. The `bell`, `ls`, `hs` ones also have a `gain` third parameter.
+// The `morph` filter has a `blend` third parameter [0..2] continuous, where 0 is `lp`, 1 is `bp`, and
+// 2 is `hp`. This allows seamless blending between those three filter types.
 //
 // #### Usage
 //
@@ -2657,7 +2659,7 @@ declare svf license "MIT-style STK-4.3 license";
 svf = environment {
 
 	// Internal implementation
-	svf(T,F,Q,G) = tick ~ (_,_) : !,!,si.dot(3, mix)
+	svf(T,F,Q,G,B) = tick ~ (_,_) : !,!,si.dot(3, mix(T))
 	with {
 		tick(ic1eq, ic2eq, v0) =
 			2*v1 - ic1eq,
@@ -2691,19 +2693,22 @@ svf = environment {
 			(6) => 1, k*(A*A-1), 0;
 			(7) => 1, k*(A-1), A*A-1;
 			(8) => A*A, k*(1-A)*A, 1-A*A;
-		} (T);
+			// blend among the weights of LP, BP, HP:
+			(9) => ef.mixLinearClamp(3, 3, B, (mix(0), mix(1), mix(2)));
+		};
 	};
 
 	// External API 
-	lp(f,q)     = svf(0, f, q, 0);
-	bp(f,q)     = svf(1, f, q, 0);
-	hp(f,q)     = svf(2, f, q, 0);
-	notch(f,q)  = svf(3, f, q, 0);
-	peak(f,q)   = svf(4, f, q, 0);
-	ap(f,q)     = svf(5, f, q, 0);
-	bell(f,q,g) = svf(6, f, q, g);
-	ls(f,q,g)   = svf(7, f, q, g);
-	hs(f,q,g)   = svf(8, f, q, g);
+	lp(f,q)      = svf(0, f, q, 0, 0);
+	bp(f,q)      = svf(1, f, q, 0, 0);
+	hp(f,q)      = svf(2, f, q, 0, 0);
+	notch(f,q)   = svf(3, f, q, 0, 0);
+	peak(f,q)    = svf(4, f, q, 0, 0);
+	ap(f,q)      = svf(5, f, q, 0, 0);
+	bell(f,q,g)  = svf(6, f, q, g, 0);
+	ls(f,q,g)    = svf(7, f, q, g, 0);
+	hs(f,q,g)    = svf(8, f, q, 0, 0);
+	morph(f,q,b) = svf(9, f, q, 0, b);
 };
 
 
