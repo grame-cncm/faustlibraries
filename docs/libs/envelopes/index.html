@@ -237,6 +237,22 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#enadsrf_bias" class="nav-link">(en.)adsrf_bias</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#enadsr_bias" class="nav-link">(en.)adsr_bias</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#enahdsrf_bias" class="nav-link">(en.)ahdsrf_bias</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#enahdsr_bias" class="nav-link">(en.)ahdsr_bias</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#ensmoothenvelope" class="nav-link">(en.)smoothEnvelope</a>
               <ul class="nav flex-column">
               </ul>
@@ -327,10 +343,95 @@ when <code>t=0</code>)</li>
 when <code>t=0</code>)</li>
 </ul>
 <hr />
+<h3 id="enadsrf_bias"><code>(en.)adsrf_bias</code></h3>
+<p>ADSR (Attack, Decay, Sustain, Release, Final) envelope generator with
+control over bias on each segment, and toggle for legato.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>adsrf_bias(at,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>at</code>: attack time (sec)</li>
+<li><code>dt</code>: decay time (sec)</li>
+<li><code>sl</code>: sustain level (between 0..1)</li>
+<li><code>rt</code>: release time (sec)</li>
+<li><code>final</code>: final level (between 0..1) but less than or equal to <code>sl</code></li>
+<li><code>b_att</code>: bias during attack (between 0..1) where 0.5 is no bias.</li>
+<li><code>b_dec</code>: bias during decay (between 0..1) where 0.5 is no bias.</li>
+<li><code>b_rel</code>: bias during release (between 0..1) where 0.5 is no bias.</li>
+<li><code>legato</code>: toggle for legato. If disabled, envelopes "re-trigger" from zero.</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
+<h3 id="enadsr_bias"><code>(en.)adsr_bias</code></h3>
+<p>ADSR (Attack, Decay, Sustain, Release) envelope generator with
+control over bias on each segment, and toggle for legato.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>adsr_bias(at,dt,sl,rt,b_att,b_dec,b_rel,legato,t) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>at</code>: attack time (sec)</li>
+<li><code>dt</code>: decay time (sec)</li>
+<li><code>sl</code>: sustain level (between 0..1)</li>
+<li><code>rt</code>: release time (sec)</li>
+<li><code>b_att</code>: bias during attack (between 0..1) where 0.5 is no bias.</li>
+<li><code>b_dec</code>: bias during decay (between 0..1) where 0.5 is no bias.</li>
+<li><code>b_rel</code>: bias during release (between 0..1) where 0.5 is no bias.</li>
+<li><code>legato</code>: toggle for legato. If disabled, envelopes "re-trigger" from zero.</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
+<h3 id="enahdsrf_bias"><code>(en.)ahdsrf_bias</code></h3>
+<p>AHDSR (Attack, Hold, Decay, Sustain, Release, Final) envelope generator
+with control over bias on each segment, and toggle for legato.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>ahdsrf_bias(at,ht,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>at</code>: attack time (sec)</li>
+<li><code>ht</code>: hold time (sec)</li>
+<li><code>dt</code>: decay time (sec)</li>
+<li><code>sl</code>: sustain level (between 0..1)</li>
+<li><code>rt</code>: release time (sec)</li>
+<li><code>final</code>: final level (between 0..1) but less than or equal to <code>sl</code></li>
+<li><code>b_att</code>: bias during attack (between 0..1) where 0.5 is no bias.</li>
+<li><code>b_dec</code>: bias during decay (between 0..1) where 0.5 is no bias.</li>
+<li><code>b_rel</code>: bias during release (between 0..1) where 0.5 is no bias.</li>
+<li><code>legato</code>: toggle for legato. If disabled, envelopes "re-trigger" from zero.</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
+<h3 id="enahdsr_bias"><code>(en.)ahdsr_bias</code></h3>
+<p>AHDSR (Attack, Hold, Decay, Sustain, Release) envelope generator
+with control over bias on each segment, and toggle for legato.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>ahdsr_bias(at,ht,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>at</code>: attack time (sec)</li>
+<li><code>ht</code>: hold time (sec)</li>
+<li><code>dt</code>: decay time (sec)</li>
+<li><code>sl</code>: sustain level (between 0..1)</li>
+<li><code>rt</code>: release time (sec)</li>
+<li><code>final</code>: final level (between 0..1) but less than or equal to <code>sl</code></li>
+<li><code>b_att</code>: bias during attack (between 0..1) where 0.5 is no bias.</li>
+<li><code>b_dec</code>: bias during decay (between 0..1) where 0.5 is no bias.</li>
+<li><code>b_rel</code>: bias during release (between 0..1) where 0.5 is no bias.</li>
+<li><code>legato</code>: toggle for legato. If disabled, envelopes "re-trigger" from zero.</li>
+<li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
+when <code>t=0</code>)</li>
+</ul>
+<hr />
 <h3 id="ensmoothenvelope"><code>(en.)smoothEnvelope</code></h3>
 <p>An envelope with an exponential attack and release.
 <code>smoothEnvelope</code> is a standard Faust function.</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>smoothEnvelope(ar,t) : _
 </code></pre>
 <ul>
@@ -342,7 +443,7 @@ when <code>t=0</code>)</li>
 <h3 id="enarfe"><code>(en.)arfe</code></h3>
 <p>ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
 Approximately equal to <code>smoothEnvelope(Attack/6.91)</code> when Attack == Release.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>arfe(at,rt,fl,t) : _
 </code></pre>
 <p>Where:</p>
@@ -357,7 +458,7 @@ when <code>t=0</code>)</li>
 <h3 id="enare"><code>(en.)are</code></h3>
 <p>ARE (Attack, Release) envelope generator with Exponential segments.
 Approximately equal to <code>smoothEnvelope(Attack/6.91)</code> when Attack == Release.</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>are(at,rt,t) : _
 </code></pre>
 <p>Where:</p>
@@ -370,7 +471,7 @@ when <code>t=0</code>)</li>
 <hr />
 <h3 id="enasre"><code>(en.)asre</code></h3>
 <p>ASRE (Attack, Sustain, Release) envelope generator with Exponential segments.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>asre(at,sl,rt,t) : _
 </code></pre>
 <p>Where:</p>
@@ -385,7 +486,7 @@ when <code>t=0</code>)</li>
 <h3 id="enadsre"><code>(en.)adsre</code></h3>
 <p>ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential
 segments.</p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>adsre(at,dt,sl,rt,t) : _
 </code></pre>
 <p>Where:</p>
@@ -401,7 +502,7 @@ when <code>t=0</code>)</li>
 <h3 id="enahdsre"><code>(en.)ahdsre</code></h3>
 <p>AHDSRE (Attack, Hold, Decay, Sustain, Release) envelope generator with Exponential
 segments.</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>ahdsre(at,ht,dt,sl,rt,t) : _
 </code></pre>
 <p>Where:</p>
@@ -418,7 +519,7 @@ when <code>t=0</code>)</li>
 <h3 id="endx7envelope"><code>(en.)dx7envelope</code></h3>
 <p>DX7 operator envelope generator with 4 independent rates and levels. It is
 essentially a 4 points BPF.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>dx7_envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) : _
 </code></pre>
 <p>Where:</p>
