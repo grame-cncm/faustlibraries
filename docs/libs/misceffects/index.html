@@ -239,6 +239,22 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#fibonacci" class="nav-link">Fibonacci</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#effibonacci" class="nav-link">(ef.)fibonacci</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#effibonaccigeneral" class="nav-link">(ef.)fibonacciGeneral</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#effibonacciseq" class="nav-link">(ef.)fibonacciSeq</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#filtering" class="nav-link">Filtering</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#efspeakerbp" class="nav-link">(ef.)speakerbp</a>
@@ -258,18 +274,6 @@
             <li class="nav-item" data-level="2"><a href="#meshes" class="nav-link">Meshes</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#efmesh_square" class="nav-link">(ef.)mesh_square</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#efreverseechonnchansdelay" class="nav-link">(ef.)reverseEchoN(nChans,delay)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#efreversedelayrampeddelayphase" class="nav-link">(ef.)reverseDelayRamped(delay,phase)</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="3"><a href="#efuniformpantostereonchans" class="nav-link">(ef.)uniformPanToStereo(nChans)</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -309,6 +313,18 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#efreverseechonnchansdelay" class="nav-link">(ef.)reverseEchoN(nChans,delay)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#efreversedelayrampeddelayphase" class="nav-link">(ef.)reverseDelayRamped(delay,phase)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#efuniformpantostereonchans" class="nav-link">(ef.)uniformPanToStereo(nChans)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#pitch-shifting" class="nav-link">Pitch Shifting</a>
@@ -343,6 +359,7 @@
 <p>The library is organized into 7 sections:</p>
 <ul>
 <li><a href="#Dynamic">Dynamic</a></li>
+<li><a href="#fibonacci">Fibonacci</a></li>
 <li><a href="#filtering">Filtering</a></li>
 <li><a href="#meshes">Meshes</a></li>
 <li><a href="#mixing">Mixing</a></li>
@@ -414,25 +431,68 @@ _ : cubicnl_nodc(drive,offset) : _
 <li><a href="http://www.soundonsound.com/sos/apr01/articles/advanced.asp">http://www.soundonsound.com/sos/apr01/articles/advanced.asp</a></li>
 <li><a href="http://en.wikipedia.org/wiki/Gating_(sound_engineering)">http://en.wikipedia.org/wiki/Gating_(sound_engineering)</a></li>
 </ul>
+<h2 id="fibonacci">Fibonacci</h2>
+<hr />
+<h3 id="effibonacci"><code>(ef.)fibonacci</code></h3>
+<p>Fibonacci system where the current output is the current
+input plus the sum of the previous N outputs.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>_ : fibonacci(N) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: the Fibonacci system's order, where 2 is standard</li>
+</ul>
+<h4 id="example">Example</h4>
+<p>Generate the famous series: [1, 1, 2, 3, 5, 8, 13, ...]</p>
+<pre><code>1. : ba.impulsify : fibonacci(2)
+</code></pre>
+<hr />
+<h3 id="effibonaccigeneral"><code>(ef.)fibonacciGeneral</code></h3>
+<p>Fibonacci system with customizable coefficients.
+The order of the system is inferred from the number of coefficients.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>_ : fibonacciGeneral(wave) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>wave</code>: a waveform such as <code>waveform{1, 1}</code></li>
+</ul>
+<h4 id="example_1">Example:</h4>
+<p>Use the update equation <code>y = 2*y' + 3*y'' + 4*y'''</code></p>
+<pre><code>1. : ba.impulsify : fibonacciGeneral(waveform{2, 3, 4})
+</code></pre>
+<hr />
+<h3 id="effibonacciseq"><code>(ef.)fibonacciSeq</code></h3>
+<p>First N numbers of the Fibonacci sequence [1, 1, 2, 3, 5, 8, ...]
+as parallel channels.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>fibonacciSeq(N) : si.bus(N)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: The number of Fibonacci numbers to generate as channels.</li>
+</ul>
 <h2 id="filtering">Filtering</h2>
 <hr />
 <h3 id="efspeakerbp"><code>(ef.)speakerbp</code></h3>
 <p>Dirt-simple speaker simulator (overall bandpass eq with observed
-roll-offs above and below the passband).</p>
+roll-offs above and below the passband). <code>speakerbp</code> is a standard Faust function.</p>
 <p>Low-frequency speaker model = +12 dB/octave slope breaking to
 flat near f1. Implemented using two dc blockers in series.</p>
 <p>High-frequency model = -24 dB/octave slope implemented using a
 fourth-order Butterworth lowpass.</p>
-<p>Example based on measured Celestion G12 (12" speaker):</p>
-<p><code>speakerbp</code> is a standard Faust function.</p>
-<h4 id="usage_3">Usage</h4>
-<pre><code>speakerbp(f1,f2)
-_ : speakerbp(130,5000) : _
+<h4 id="usage_6">Usage</h4>
+<pre><code>_ : speakerbp(f1,f2) : _
+</code></pre>
+<h4 id="example_2">Example</h4>
+<p>Based on measured Celestion G12 (12" speaker):</p>
+<pre><code>speakerbp(130,5000)
 </code></pre>
 <hr />
 <h3 id="efpiano_dispersion_filter"><code>(ef.)piano_dispersion_filter</code></h3>
 <p>Piano dispersion allpass filter in closed form.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>piano_dispersion_filter(M,B,f0)
 _ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : fdelay(maxDelay) : _
 </code></pre>
@@ -463,7 +523,7 @@ Allpass Filters", by Jukka Rauhala and Vesa Valimaki, DAFX-2006, pp. 71-76</li>
 <h3 id="efstereo_width"><code>(ef.)stereo_width</code></h3>
 <p>Stereo Width effect using the Blumlein Shuffler technique.
 <code>stereo_width</code> is a standard Faust function.</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>_,_ : stereo_width(w) : _,_
 </code></pre>
 <p>Where:</p>
@@ -482,7 +542,7 @@ Michael A. Gerzon, JAES vol. 42, no. 6, June 1994</li>
 <hr />
 <h3 id="efmesh_square"><code>(ef.)mesh_square</code></h3>
 <p>Square Rectangular Digital Waveguide Mesh.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>bus(4*N) : mesh_square(N) : bus(4*N)
 </code></pre>
 <p>Where:</p>
@@ -527,7 +587,7 @@ signals are grouped in the order:</p>
 outputs are grouped by block number 1,2,3,4, which can also be
 interpreted as directions NW, NE, SW, SE.  A simple program
 illustrating these orderings is <code>process = mesh_square(2);</code>.</p>
-<h4 id="example">Example</h4>
+<h4 id="example_3">Example</h4>
 <p>Reflectively terminated mesh impulsed at one corner:</p>
 <pre><code>mesh_square_test(N,x) = mesh_square(N)~(busi(4*N,x)) // input to corner
 with { 
@@ -540,49 +600,6 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
    3So -&gt; 1Wi, 3Wo -&gt; 3Wi, 4So -&gt; 2Ei, 4Eo -&gt; 4Ei
 </code></pre>
 <p>A routing matrix can be used to obtain other connection geometries.</p>
-<hr />
-<h3 id="efreverseechonnchansdelay"><code>(ef.)reverseEchoN(nChans,delay)</code></h3>
-<p>Reverse echo effect.</p>
-<h4 id="usage_7">Usage</h4>
-<pre><code>_ : ef.reverseEchoN(N,delay) : si.bus(N)
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>N</code>: Number of output channels desired (1 or more)</li>
-<li><code>delay</code>: echo delay (integer power of 2)</li>
-</ul>
-<h4 id="demo">Demo</h4>
-<pre><code>_ : dm.reverseEchoN(N) : _,_
-</code></pre>
-<h4 id="description">Description</h4>
-<p>The effect uses N instances of <code>reverseDelayRamped</code> at different phases.</p>
-<hr />
-<h3 id="efreversedelayrampeddelayphase"><code>(ef.)reverseDelayRamped(delay,phase)</code></h3>
-<p>Reverse delay with amplitude ramp.</p>
-<h4 id="usage_8">Usage</h4>
-<pre><code>_ : ef.reverseDelayRamped(delay,phase) : _
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>delay</code>: echo delay (integer power of 2)</li>
-<li><code>phase</code>: float between 0 and 1 giving ramp delay phase*delay</li>
-</ul>
-<h4 id="demo_1">Demo</h4>
-<pre><code>_ : ef.reverseDelayRamped(32,0.6) : _,_
-</code></pre>
-<hr />
-<h3 id="efuniformpantostereonchans"><code>(ef.)uniformPanToStereo(nChans)</code></h3>
-<p>Pan nChans channels to the stereo field, spread uniformly left to right.</p>
-<h4 id="usage_9">Usage</h4>
-<pre><code>si.bus(N) : ef.uniformPanToStereo(N) : _,_
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>N</code>: Number of input channels to pan down to stereo</li>
-</ul>
-<h4 id="demo_2">Demo</h4>
-<pre><code>_,_,_ : ef.uniformPanToStereo(3) : _,_
-</code></pre>
 <h2 id="mixing">Mixing</h2>
 <hr />
 <h3 id="efdrywetmixer"><code>(ef.)dryWetMixer</code></h3>
@@ -680,12 +697,55 @@ as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</
 <li><code>duration</code>: the echo duration in seconds</li>
 <li><code>feedback</code>: the feedback coefficient</li>
 </ul>
+<hr />
+<h3 id="efreverseechonnchansdelay"><code>(ef.)reverseEchoN(nChans,delay)</code></h3>
+<p>Reverse echo effect.</p>
+<h4 id="usage_17">Usage</h4>
+<pre><code>_ : ef.reverseEchoN(N,delay) : si.bus(N)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: Number of output channels desired (1 or more), a constant numerical expression</li>
+<li><code>delay</code>: echo delay (integer power of 2)</li>
+</ul>
+<h4 id="demo">Demo</h4>
+<pre><code>_ : dm.reverseEchoN(N) : _,_
+</code></pre>
+<h4 id="description">Description</h4>
+<p>The effect uses N instances of <code>reverseDelayRamped</code> at different phases.</p>
+<hr />
+<h3 id="efreversedelayrampeddelayphase"><code>(ef.)reverseDelayRamped(delay,phase)</code></h3>
+<p>Reverse delay with amplitude ramp.</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>_ : ef.reverseDelayRamped(delay,phase) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>delay</code>: echo delay (integer power of 2)</li>
+<li><code>phase</code>: float between 0 and 1 giving ramp delay phase*delay</li>
+</ul>
+<h4 id="demo_1">Demo</h4>
+<pre><code>_ : ef.reverseDelayRamped(32,0.6) : _,_
+</code></pre>
+<hr />
+<h3 id="efuniformpantostereonchans"><code>(ef.)uniformPanToStereo(nChans)</code></h3>
+<p>Pan nChans channels to the stereo field, spread uniformly left to right.</p>
+<h4 id="usage_19">Usage</h4>
+<pre><code>si.bus(N) : ef.uniformPanToStereo(N) : _,_
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: Number of input channels to pan down to stereo, a constant numerical expression</li>
+</ul>
+<h4 id="demo_2">Demo</h4>
+<pre><code>_,_,_ : ef.uniformPanToStereo(3) : _,_
+</code></pre>
 <h2 id="pitch-shifting">Pitch Shifting</h2>
 <hr />
 <h3 id="eftranspose"><code>(ef.)transpose</code></h3>
 <p>A simple pitch shifter based on 2 delay lines.
 <code>transpose</code> is a standard Faust function.</p>
-<h4 id="usage_17">Usage</h4>
+<h4 id="usage_20">Usage</h4>
 <pre><code>_ : transpose(w, x, s) : _
 </code></pre>
 <p>Where:</p>
@@ -698,13 +758,13 @@ as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</
 <hr />
 <h3 id="efsoftclipquadratic"><code>(ef.)softclipQuadratic</code></h3>
 <p>Quadratic softclip nonlinearity.</p>
-<h4 id="usage_18">Usage</h4>
+<h4 id="usage_21">Usage</h4>
 <pre><code>_ : softclipQuadratic : _;
 </code></pre>
 <hr />
 <h3 id="efwavefold"><code>(ef.)wavefold</code></h3>
 <p>Wavefolding nonlinearity.</p>
-<h4 id="usage_19">Usage</h4>
+<h4 id="usage_22">Usage</h4>
 <pre><code>_ : wavefold(width) : _;
 </code></pre>
 <p>Where:</p>

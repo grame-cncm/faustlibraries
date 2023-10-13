@@ -4,8 +4,8 @@
 // The library is organized into 7 sections:
 //
 // * [Dynamic](#Dynamic)
-// * [Filtering](#filtering)
 // * [Fibonacci](#fibonacci)
+// * [Filtering](#filtering)
 // * [Meshes](#meshes)
 // * [Mixing](#mixing)
 // * [Time Based](#time-based)
@@ -173,7 +173,7 @@ declare gate_gain_mono license "STK-4.3";
 //=====================================Fibonacci==========================================
 //========================================================================================
 
-//---------------`(mi.)fibonacci`---------------------------
+//---------------`(ef.)fibonacci`---------------------------
 // Fibonacci system where the current output is the current
 // input plus the sum of the previous N outputs.
 //
@@ -199,7 +199,7 @@ declare fibonacci author "Dario Sanfilippo";
 fibonacci(order) = +~(_<:sum(i, order, @(i)):>_);
 
 
-//---------------`(mi.)fibonacciGeneral`----------------------
+//---------------`(ef.)fibonacciGeneral`----------------------
 // Fibonacci system with customizable coefficients.
 // The order of the system is inferred from the number of coefficients.
 //
@@ -228,8 +228,7 @@ with {
     func(i) = @(i) : _ * (wave, i : rdtable);
 };
 
-
-//-------------------`(mi.)fibonacciSeq`---------------------------------
+//---------------`(ef.)fibonacciSeq`---------------------------
 // First N numbers of the Fibonacci sequence [1, 1, 2, 3, 5, 8, ...]
 // as parallel channels.
 //
@@ -242,7 +241,9 @@ with {
 // Where:
 //
 // * `N`: The number of Fibonacci numbers to generate as channels.
-// ----------------------------------------------------------------------
+// 
+//------------------------------------------------------------
+
 fibonacciSeq(N) = iterate(N, (1, 1))
 with {
   iterate(1, (A0, A1)) = A0;
@@ -251,28 +252,31 @@ with {
 
 declare fibonacciSeq author "Dario Sanfilippo";
 
+
 //=====================================Filtering==========================================
 //========================================================================================
 
 //-------------------------`(ef.)speakerbp`-------------------------------
 // Dirt-simple speaker simulator (overall bandpass eq with observed
-// roll-offs above and below the passband).
+// roll-offs above and below the passband). `speakerbp` is a standard Faust function.
 //
 // Low-frequency speaker model = +12 dB/octave slope breaking to
 // flat near f1. Implemented using two dc blockers in series.
 //
 // High-frequency model = -24 dB/octave slope implemented using a
 // fourth-order Butterworth lowpass.
+
 //
-// Example based on measured Celestion G12 (12" speaker):
-//
-// `speakerbp` is a standard Faust function.
 //
 // #### Usage
-//
 // ```
-// speakerbp(f1,f2)
-// _ : speakerbp(130,5000) : _
+// _ : speakerbp(f1,f2) : _
+// ```
+// #### Example
+//
+// Based on measured Celestion G12 (12" speaker):
+// ```
+// speakerbp(130,5000)
 // ```
 //------------------------------------------------------------
 // TODO: perhaps this should be moved to physmodels.lib
@@ -801,7 +805,7 @@ with{
 //
 // Where:
 //
-// *     `N`: Number of output channels desired (1 or more)
+// *  `N`: Number of output channels desired (1 or more), a constant numerical expression
 // * `delay`: echo delay (integer power of 2)
 //
 // #### Demo
@@ -863,7 +867,7 @@ declare reverseDelayRamped license "STK-4.3";
 //
 // Where:
 //
-// * `N`: Number of input channels to pan down to stereo
+// * `N`: Number of input channels to pan down to stereo, a constant numerical expression
 //
 // #### Demo
 //
