@@ -2659,7 +2659,7 @@ declare svf license "MIT-style STK-4.3 license";
 svf = environment {
 
 	// Internal implementation
-	svf(T,F,Q,G) = tick ~ (_,_) : !,!,si.dot(3, mix)
+	svf(T,F,Q,G,B) = tick ~ (_,_) : !,!,si.dot(3, mix(T))
 	with {
 		tick(ic1eq, ic2eq, v0) =
 			2*v1 - ic1eq,
@@ -2693,7 +2693,9 @@ svf = environment {
 			(6) => 1, k*(A*A-1), 0;
 			(7) => 1, k*(A-1), A*A-1;
 			(8) => A*A, k*(1-A)*A, 1-A*A;
-		} (T);
+			// blend among the weights of LP, BP, HP:
+			(9) => ef.mixLinearClamp(3, 3, B, (mix(0), mix(1), mix(2)));
+		};
 	};
 
 	// External API 
