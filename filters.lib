@@ -22,6 +22,7 @@
 // * [Mth-Octave Filter-Banks](#mth-octave-filter-banks)
 // * [Arbitrary-Crossover Filter-Banks and Spectrum Analyzers](#arbitrary-crossover-filter-banks-and-spectrum-analyzers)
 // * [State Variable Filters (SVF)](#state-variable-filters)
+// * [Topology-Preserving Transform Filters](#topology-preserving-transform-filters)
 // * [Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers](#linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers)
 // * [Standardized Filters](#standardized-filters)
 // * [Averaging Functions](#averaging-functions)
@@ -2633,10 +2634,8 @@ with {
 //========================================================================================
 
 //-----------------`(fi.)svf`----------------------
-// An environment with `lp`, `bp`, `hp`, `notch`, `peak`, `ap`, `bell`, `ls`, `hs`, `morph` SVF based filters. 
-// All filters have `freq` and `Q` parameters. The `bell`, `ls`, `hs` ones also have a `gain` third parameter.
-// The `morph` filter has a `blend` third parameter [0..2] continuous, where 0 is `lp`, 1 is `bp`, and
-// 2 is `hp`. This allows seamless blending between those three filter types.
+// An environment with `lp`, `bp`, `hp`, `notch`, `peak`, `ap`, `bell`, `ls`, `hs` SVF based filters. 
+// All filters have `freq` and `Q` parameters, the `bell`, `ls`, `hs` ones also have a `gain` third parameter.
 //
 // #### Usage
 //
@@ -2706,33 +2705,86 @@ svf = environment {
 	bell(f,q,g) = svf(6, f, q, g);
 	ls(f,q,g)   = svf(7, f, q, g);
 	hs(f,q,g)   = svf(8, f, q, g);
-	morph(f,q,b) = lpw * lpc , bpw * bpc , hpw * hpc :> _
-	with {
-		onePoleTPT(cf, x) = loop ~ _ : ! , si.bus(3)
-		with {
-			g = tan(cf * ma.PI * ma.T);
-			G = g / (1.0 + g);
-			loop(s) = v + lp , lp , hp , ap
-			with {
-				v = (x - s) * G;
-				lp = v + s;
-				hp = x - lp;
-				ap = lp - hp;
-			};
-		};
-		AP1(cf, x) = onePoleTPT(cf, x) : ! , ! , _;
-		// calculate weights
-		lpw = max(0, 1 - b);
-		bpw = min(1, b) - hpw;
-		hpw = max(0, b - 1);
+};
 
-		lpc = svf.lp(1000, q);
-		// shift the phase of the BP by 90deg at `cf` with a one-pole allpass to make it match the other filters' phases
-		bpc = svf.bp(1000, q) : AP1(1000);
-		// invert the sign of the HP output to make its phase match the LP's phase perfectly
-		hpc = -1 * svf.hp(1000, q);
+
+//-----------------`(fi.)svf_morph`----------------------
+// A SVF-based filter than can smoothly morph between being lowpass, bandpass, and highpass.
+//
+// #### Usage
+//
+// ```
+// _ : svf_morph(freq, Q, blend) : _
+// ```
+//
+// Where:
+//
+// * `freq`: cut frequency
+// * `Q`: quality factor
+// * `blend`: [0..2] continuous, where 0 is `lowpass`, 1 is `bandpass`, and 2 is `highpass`
+//
+//---------------------------------------------------
+declare svf_morph author "Dario Sanfilippo";
+declare svf_morph copyright "Copyright (C) 2023 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
+declare svf_morph license "MIT-style STK-4.3 license";
+
+svf_morph(f,q,b) = lpw * lpc , bpw * bpc , hpw * hpc :> _
+with {
+	// calculate weights
+	lpw = max(0, 1 - b);
+	bpw = min(1, b) - hpw;
+	hpw = max(0, b - 1);
+
+	lpc = svf.lp(f, q);
+	// shift the phase of the BP by 90deg at `cf` with a one-pole allpass to make it match the other filters' phases
+	bpc = svf.bp(f, q) : AP1(f);
+	// invert the sign of the HP output to make its phase match the LP's phase perfectly
+	hpc = -1 * svf.hp(f, q);
+};
+
+
+//==================Topology-preserving Transform Filters======================
+//
+// Topology-preserving transform (TPT) filters. These are useful when the
+// frequency is modulating quickly.
+// 
+// #### Reference
+// Zavalishin, Vadim. "The art of VA filter design." Native Instruments, Berlin, Germany (2012). 
+//=============================================================================
+
+//-----------------`(fi.)onePoleTPT`-------------------------
+// One-pole topology-preserving transform (TPT). The three
+// outputs are the lowpass, highpass, and allpass signals.
+// 
+// #### Usage
+//
+// ```
+// _ : onePoleTPT(freq) : si.bus(3)
+// ```
+//
+// Where:
+//
+// * `freq`: cut frequency
+//
+//-----------------------------------------------------------
+declare onePoleTPT author "Dario Sanfilippo";
+declare onePoleTPT copyright "Copyright (C) 2023 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
+declare onePoleTPT license "MIT-style STK-4.3 license";
+
+onePoleTPT(cf, x) = loop ~ _ : ! , si.bus(3)
+with {
+	g = tan(cf * ma.PI * ma.T);
+	G = g / (1.0 + g);
+	loop(s) = v + lp , lp , hp , ap
+	with {
+		v = (x - s) * G;
+		lp = v + s;
+		hp = x - lp;
+		ap = lp - hp;
 	};
 };
+
+AP1(cf, x) = onePoleTPT(cf, x) : ! , ! , _;
 
 
 //===========Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers=====
