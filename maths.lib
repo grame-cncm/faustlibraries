@@ -54,7 +54,7 @@ pl = library("platform.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Math Library";
-declare version "2.6.0";
+declare version "2.7.0";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LGPL with exception";
@@ -232,6 +232,19 @@ copysign = ffunction(float copysignf|copysign|copysignl (float, float), <math.h>
 // ```
 //-----------------------------------------------------------------------------
 neg(x) = -x;
+
+
+//---------------------------------`(ma.)not`---------------------------------------
+// Bitwise `not` implemented with [xor](https://faustdoc.grame.fr/manual/syntax/#xor-primitive) as `not(x) = x xor -1;`.
+// So working regardless of the size of the integer, assuming negative numbers in two's complement.
+//
+// #### Usage
+//
+// ```
+// _ : not : _
+// ```
+//-----------------------------------------------------------------------------
+not(x) = x xor -1;
 
 
 //-------`(ma.)sub(x,y)`------------------
