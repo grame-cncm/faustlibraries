@@ -265,6 +265,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#sismoothq" class="nav-link">(si.)smoothq</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#sicbus" class="nav-link">(si.)cbus</a>
               <ul class="nav flex-column">
               </ul>
@@ -445,10 +449,21 @@ The exponential time-constant is approximately 1/(1-s) samples, when s is close 
 <li><a href="https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html">https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html</a></li>
 </ul>
 <hr />
+<h3 id="sismoothq"><code>(si.)smoothq</code></h3>
+<p>Smoothing with continuously variable curves from Exponential to Linear, with a constant time.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>_ : smoothq(time, q) : _;
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>time</code>: seconds to reach target</li>
+<li><code>q</code>: curve shape (between 0..1, 0 is Exponential, 1 is Linear)</li>
+</ul>
+<hr />
 <h3 id="sicbus"><code>(si.)cbus</code></h3>
 <p>N parallel cables for complex signals.
 <code>cbus</code> is a standard Faust function.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>cbus(N)
 cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 </code></pre>
@@ -461,7 +476,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h3 id="sicmul"><code>(si.)cmul</code></h3>
 <p>Multiply two complex signals pointwise.
 <code>cmul</code> is a standard Faust function.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>(r1,i1) : cmul(r2,i2) : (_,_)
 </code></pre>
 <p>Where:</p>
@@ -474,7 +489,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h3 id="sicconj"><code>(si.)cconj</code></h3>
 <p>Complex conjugation of a (complex) signal.
 <code>cconj</code> is a standard Faust function.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>(r1,i1) : cconj : (_,_)
 </code></pre>
 <p>Where:</p>
@@ -486,7 +501,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <hr />
 <h3 id="sionepoleswitching"><code>(si.)onePoleSwitching</code></h3>
 <p>One pole filter with independent attack and release times.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>_ : onePoleSwitching(att,rel) : _
 </code></pre>
 <p>Where:</p>
@@ -498,7 +513,7 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <h3 id="sirev"><code>(si.)rev</code></h3>
 <p>Reverse the input signal by blocks of n&gt;0 samples. <code>rev(1)</code> is the indentity
 function. <code>rev(n)</code> has a latency of <code>n-1</code> samples.</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>_ : rev(n) : _
 </code></pre>
 <p>Where:</p>
@@ -521,7 +536,7 @@ clarifying example later; in general, the number of total inputs will
 be the sum of the inputs in each input vector.</p>
 <p>Note that we must provide a list of at least two vectors, each with a size 
 that is greater or equal to one.</p>
-<h4 id="usage_15">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>     si.bus(inputs(vectorsList)) : vecOp((vectorsList), op) : si.bus(outputs(ba.take(1, vectorsList)));
 </code></pre>
 <h4 id="where">Where</h4>
