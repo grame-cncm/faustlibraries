@@ -1,6 +1,6 @@
 # Faust Libraries
 
-The Faust libraries implement hundreds of DSP functions for audio processing and synthesis. They are organized by types in a set of `.lib` files (e.g., `envelopes.lib`, `filters.lib`, etc.). 
+The Faust libraries implement hundreds of DSP functions for audio processing and synthesis. They are organized by types in a set of `.lib` files (e.g., `envelopes.lib`, `filters.lib`, etc.). Librairies use [semantic versioning](https://semver.org), so may evolve in a manner where never versions break compatibility with older ones. The recommended way to solve this issue is to keep *self-contained versions of the DSP code*  (that is the DSP program with all needed libraries) as explained in [Goals of the Mathdoc](https://faustdoc.grame.fr/manual/mathdoc/#goals-of-the-mathdoc). 
 
 This website serves as the main documentation of the [Faust libraries](https://github.com/grame-cncm/faustlibraries). The main Faust website can be found at the following URL:
 
