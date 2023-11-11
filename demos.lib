@@ -58,7 +58,7 @@ re = library("reverbs.lib");
 en = library("envelopes.lib");
 
 declare name "Faust Demos Library";
-declare version "1.1.0";
+declare version "1.1.1";
 
 //########################################################################################
 /************************************************************************
@@ -946,9 +946,9 @@ declare jprev_demo license "GPL2+";
 jprev_demo = re.jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff)
 with {
     rev_group(x) = vgroup("[0] JPrev",x);
-    
+    invSqrt2 = 1/sqrt(2);
     mix_group(x) = rev_group(hgroup("[0] Mix",x));
-    early_diff = mix_group(hslider("[1]earlyDiff [style:knob]", 0.707, 0, 0.990, 0.001));
+    early_diff = mix_group(hslider("[1]earlyDiff [style:knob]", invSqrt2, 0, 0.990, 0.001));
     size = mix_group(hslider("[2]size [style:knob]", 1, 0.5, 3, 0.01));
     t60 = mix_group(hslider("[3]t60 [style:knob]", 1, 0.1, 60, 0.1));
     damp = mix_group(hslider("[4]damp [style:knob]", 0, 0, 0.999, 0.0001));

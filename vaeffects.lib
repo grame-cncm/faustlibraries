@@ -12,7 +12,7 @@ fi = library("filters.lib");
 ef = library("misceffects.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.2.0";
+declare version "1.2.1";
 
 //########################################################################################
 /************************************************************************
@@ -162,9 +162,10 @@ with {
                             v4 + lp4 , // define s4
                             lp4 // system output
         with {
+            invSqrt2 = 1/sqrt(2);
             T = 1.0 / ma.SR;
             cf = normFreq * .5 * ma.SR;
-            k = 4.0 * (Q - 0.707) / (25.0 - 0.707);
+            k = 4.0 * (Q - invSqrt2) / (25.0 - invSqrt2);
             omegaWarp = tan(ma.PI * cf * T);
             g = omegaWarp / (1.0 + omegaWarp);
             G = g * g * g * g; // ladder's G in generalised form y = G * xi + S
@@ -217,8 +218,9 @@ letrec{
   'y = -(s3*B3*k):-(s2*B2*k):-(s1*B1*k):*(alpha0):-(s1):*(alpha):+(s1):-(s2):*(alpha):+(s2) <:_*-1,((-(s3):*(alpha):+(s3))*2):>_;
 }
 with{
+  invSqrt2 = 1/sqrt(2);
   freq = 2*(10^(3*normFreq+1));
-  k = 2.0*(Q - 0.707)/(25.0 - 0.707);
+  k = 2.0*(Q - invSqrt2)/(25.0 - invSqrt2);
   wd = 2*ma.PI*freq;
   T = 1/ma.SR;
   wa = (2/T)*tan(wd*T/2);
@@ -328,7 +330,8 @@ letrec{
 }
 with{
   freq = 2*(10^(3*normFreq+1));
-  k = (17 - (normFreq^10)*9.7)*(Q - 0.707)/(25.0 - 0.707);
+  invSqrt2 = 1/sqrt(2);
+  k = (17 - (normFreq^10)*9.7)*(Q - invSqrt2)/(25.0 - invSqrt2);
   wd = 2*ma.PI*freq;
   T = 1/ma.SR;
   wa = (2/T)*tan(wd*T/2);
@@ -403,8 +406,9 @@ letrec{
   'y = _-s1:_*alpha:_+s1:_+(s3*B3):_+(s2*B2) :_*alpha0:_-s3:_*alpha:_+s3;
 }
 with{
+  invSqrt2 = 1/sqrt(2);
   freq = 2*(10^(3*normFreq+1));
-  K = 2.0*(Q - 0.707)/(10.0 - 0.707);
+  K = 2.0*(Q - invSqrt2)/(10.0 - invSqrt2);
   wd = 2*ma.PI*freq;
   T = 1/ma.SR;
   wa = (2/T)*tan(wd*T/2);
@@ -442,8 +446,9 @@ letrec{
   'y = _<:(_-s1:_*alpha:_+s1)*-1,_:>_+(s3*B3):_+(s2*B2):_*alpha0;
 }
 with{
+  invSqrt2 = 1/sqrt(2);
   freq = 2*(10^(3*normFreq+1));
-  K = 2.0*(Q - 0.707)/(10.0 - 0.707);
+  K = 2.0*(Q - invSqrt2)/(10.0 - invSqrt2);
   wd = 2*ma.PI*freq;
   T = 1/ma.SR;
   wa = (2/T)*tan(wd*T/2);

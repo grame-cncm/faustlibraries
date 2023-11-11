@@ -14,7 +14,7 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 
 declare name "Faust Reverb Library";
-declare version "1.2.0";
+declare version "1.2.1";
 
 //########################################################################################
 /************************************************************************
@@ -569,6 +569,7 @@ jp_gh_rev = environment {
 
     smooth_init(s,default) = *(1.0 - s) : + ~ (+(default*init(1)):*(s)) with { init(value) = value - value'; };
 
+    invSqrt2 = 1/sqrt(2);
     jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff)
         = ((si.bus(4) :> (de.fdelay4(512, depth + depth*os.oscrs(mod_freq) + 5),de.fdelay4(512, depth + depth*os.oscrc(mod_freq) + 5))
             : par(i,2,si.smooth(damp))
@@ -576,11 +577,11 @@ jp_gh_rev = environment {
             : diffuser(ma.PI/4,early_diff,215,85,size)
             : diffuser(ma.PI/4,early_diff,115,190,size)
             : diffuser(ma.PI/4,early_diff,175,145,size)
-        )~(seq(i,5,diffuser(ma.PI/4,0.707,10+30*i,110+30*i,size))
+        )~(seq(i,5,diffuser(ma.PI/4,invSqrt2,10+30*i,110+30*i,size))
             : par(i,2,de.fdelay4(512, depth + (-1^i)*depth*os.oscrc(mod_freq)+5)
             : de.fdelay1a(8192,(prime_delays(size*(54+150*i))
             : smooth_init(0.995,prime_delays(size*(54+150*i)))) -1))
-            : seq(i,5,diffuser(ma.PI/4,0.707,125+30*i,25+30*i,size))
+            : seq(i,5,diffuser(ma.PI/4,invSqrt2,125+30*i,25+30*i,size))
             : par(i,2,de.fdelay4(8192, depth + (-1^i)*depth*os.oscrs(mod_freq)+5)
             : de.fdelay1a(8192,(prime_delays(size*(134-100*i))
             : smooth_init(0.995,prime_delays(size*(134-100*i)))) -1))
