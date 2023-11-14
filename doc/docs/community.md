@@ -63,7 +63,7 @@ Heres is a list of additional DSP resources.
 
 - Mayank Sanganeria [granulator.dsp]( https://github.com/e7mac/faust-code/blob/master/granulator.dsp) project
 
--  Henrik von Coler [material on granulation](https://hvc.berlin/Processed_Recording/granular-introduction/) with [Faust code](https://hvc.berlin/synthesis_algorithms/granular-faust-example/)
+- Henrik von Coler [material on granulation](http://ringbuffer.org/faust/synthesis_algorithms/granular-faust-example/)
 
 ###  Material in the [abclib library](https://github.com/alainbonardi/abclib/)
 
