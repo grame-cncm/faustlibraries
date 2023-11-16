@@ -59,7 +59,7 @@ aa = library("aanl.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.4.0"; 
+declare version "2.4.1"; 
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -381,6 +381,41 @@ with {
 
 declare stereo_width author "Julius O. Smith III";
 declare stereo_width license "STK-4.3";
+
+//-------------------------`(ef.)stereo_widener`---------------------------
+// Stereo Width effect that can widen beyond the source's original
+// stereo image.
+//
+// #### Usage
+//
+// ```
+// _,_ : stereo_widener(w) : _,_
+// ```
+//
+// Where:
+//
+// * `w`: stereo width between 0 and 1.
+//
+// At `w=0`, the output signal is mono ((L+R) in both channels).
+// At `w=.5`, there is no effect (original stereo image).
+// At `w=1`, the output signal is (L-R), (R-L) and retains only the input's "side".
+// Note that if the input is mono and `w=1`, then the output will be silent.
+//
+// #### Reference
+//
+// <https://www.kvraudio.com/forum/viewtopic.php?p=2838482#p2838482>
+//
+//------------------------------------------------------------
+stereo_widener(w) = invSqrt2 : shuffle : *(midGain),*(stereoGain) : shuffle : invSqrt2
+with {
+    invSqrt2 = _/sqrt(2), _/sqrt(2);
+    shuffle = _,_ <: +,-;
+    midGain = 2*(1-w);
+    stereoGain = 2*w;
+};
+
+declare stereo_widener author "David Braun";
+declare stereo_widener license "STK-4.3";
 
 //===========================================Meshes=======================================
 //========================================================================================
