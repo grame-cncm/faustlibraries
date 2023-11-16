@@ -1227,12 +1227,12 @@ with {
 };
 
 //-----------------`(os.)quadosc`--------------------
-// Sinusoidal oscillator based on QuadOsc by Martin Vicanek.
+// Quadrature (cosine and sine) oscillator based on QuadOsc by Martin Vicanek.
 //
 // #### Usage
 //
 // ```
-// quadosc(freq) : _
+// quadosc(freq) : _,_
 // ```
 //
 // where
@@ -1257,6 +1257,122 @@ with {
     };
 };
 
+//-----------------------------`(os.)sidebands`--------------------------------------
+// adds harmonics to quad oscillator.
+//
+// #### Usage
+//
+// ```
+//    cos(x),sin(x) : sidebands(vs) : _,_
+// ```
+//
+// Where:
+//
+// * `vs` : list of amplitudes
+//
+// #### Example test program
+//
+// ```
+//    cos(x),sin(x) : sidebands((10,20,30))
+// ```
+//
+// outputs
+//
+//    10*cos(x) + 20*cos(2*x) + 30*cos(3*x),
+//    10*sin(x) + 20*sin(2*x) + 30*sin(3*x);
+//
+// ```
+//    process = os.quadosc(F) : sidebands((10,20,30))
+// ```
+//
+// is (modulo floating point issues) the same as
+//
+//    c = os.quadosc : _,!;
+//    s = os.quadosc : !,_;
+//    process =
+//        10*c(F) + 20*c(2*F) + 30*c(F),
+//        10*s(F) + 20*s(2*F) + 30*s(F);
+//
+// but much more efficient.
+//
+// #### Implementation Notes
+//
+// This is based on the trivial trigonometric identities:
+//
+//    cos((n + 1) x) = 2 cos(x) cos(n x) - cos((n - 1) x)
+//    sin((n + 1) x) = 2 cos(x) sin(n x) - sin((n - 1) x)
+//
+// note that the calculation of the cosine/sine parts do not depend
+// on each other, so if you only need the sine part you can do
+//
+//    process = os.quadosc(F) : sidebands(vs) : !,_;
+//
+// and compiler will discard the half of the calculations.
+//-----------------------------------------------------------------------------
+sidebands(vs, c0,s0)
+	= c0*vn(0),s0*vn(0), 1,c0, 0,s0
+	: seq(n, outputs(vs)-1, add(vn(n+1)))
+	: _,_, !,!, !,!
+with {
+	// ba.take(n+1, vs)
+	vn(n) = vs : route(outputs(vs),1, n+1,1);
+
+	add(vn, co,so, cn_2,cn_1, sn_2,sn_1) =
+		co+cn*vn, so+sn*vn, cn_1,cn, sn_1,sn
+	with {
+		cn = 2*c0*cn_1 - cn_2;
+		sn = 2*c0*sn_1 - sn_2;
+	};
+};
+
+//-----------------------------`(os.)__sidebands`--------------------------------------
+// creates the list of complex harmonics from quad oscillator.
+//
+// Similar to `sidebands` but doesn't sum the harmonics, so it is more
+// generic but less convenient for immediate usage.
+//
+// #### Usage
+//
+// ```
+//    cos(x),sin(x) : __sidebands(N) : si.bus(2*N)
+// ```
+//
+// Where:
+//
+// * `N` : number of harmonics, compile time constant > 1
+//
+// #### Example test program
+//
+// ```
+//    cos(x),sin(x) : __sidebands(3)
+// ```
+//
+// outputs
+//
+//    cos(x),sin(x),  cos(2*x),sin(2*x),  cos(3*x),sin(3*x);
+//
+// ```
+//    process = os.quadosc(F) : __sidebands(3)
+// ```
+//
+// is (modulo floating point issues) the same as
+//
+//    process = os.quadosc(F), os.quadosc(2*F), os.quadosc(3*F);
+//
+// but much more efficient.
+//-----------------------------------------------------------------------------
+__sidebands(N, c0,s0)
+	= c0,s0, 1,c0, 0,s0
+	: seq(n, N-1, si.bus(2*(n+1)), add)
+	: si.bus(2*N), !,!, !,!
+with {
+	add(cn_2,cn_1, sn_2,sn_1) =
+		cn,sn, cn_1,cn, sn_1,sn
+	with {
+		cn = 2*c0*cn_1 - cn_2;
+		sn = 2*c0*sn_1 - sn_2;
+	};
+};
 
 //================ Waveguide-Resonator-Based Oscillators ================
 // Sinusoidal oscillator based on the waveguide resonator `wgr`.
