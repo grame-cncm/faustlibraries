@@ -50,6 +50,7 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 // This library contains platform specific constants 
+ba = library("basics.lib");
 pl = library("platform.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
 
@@ -794,5 +795,4 @@ nextpow2(x) = ceil(log(x)/log(2.0));
 // _ : zc : _
 // ```
 //-----------------------------------------------------------------------------
-zc(x) = x * x' < 0;
-
+zc = ba.tAndH(!=(0)) <: *(mem) < 0;
