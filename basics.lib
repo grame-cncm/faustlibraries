@@ -448,7 +448,7 @@ sweep = %(int(*:max(1)))~+(1);
 // time : _
 // ```
 //------------------------
-time = (+(1)~_) - 1;
+time = +(1)~_ : mem;
 
 
 //-------`(ba.)ramp`----------
@@ -1853,8 +1853,22 @@ latch(trig, x) = x * s : + ~ *(1-s) with { s = (trig' <= 0) & (trig > 0); };
 //----------------------------------------------------------------
 declare sAndH author "Romain Michon";
 
-sAndH(trig) = select2(trig,_,_) ~ _;
+sAndH(trig) = select2(trig) ~ _;
 
+//--------------------------`(ba.)tAndH`-------------------------------
+// Test And Hold: "records" the input when pred(input) is true, outputs a frozen value otherwise.
+//
+// #### Usage
+//
+// ```
+// _ : tAndH(pred) : _
+// ```
+//
+// Where:
+//
+// * `pred`: predicate to test the input
+//----------------------------------------------------------------
+tAndH(pred) = _ <: pred,_ : sAndH;
 
 //--------------------------`(ba.)downSample`-------------------------------
 // Down sample a signal. WARNING: this function doesn't change the
