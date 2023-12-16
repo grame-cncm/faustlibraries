@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.11.1";
+declare version "1.12.0";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -1888,6 +1888,17 @@ peakholder(n) = peakhold2 ~ reset : (!,_) with {
     peakhold2 = _,abs <: peakhold,!,_ <: >=,_,!;
 };
 */
+
+//--------------------------`(ba.)kr2ar`---------------------------
+// Force a control rate signal to be used as an audio rate signal.
+//
+// #### Usage
+//
+// ```
+// hslider("freq", 200, 200, 2000, 0.1) : kr2ar;
+// ```
+//----------------------------------------------------------------
+kr2ar = + ~ *(0); 
 
 
 //--------------------------`(ba.)impulsify`---------------------------
