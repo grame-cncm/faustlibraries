@@ -45,7 +45,65 @@ ma = library("maths.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Compressor Effect Library";
-declare version "1.5.0";
+declare version "1.6.0";
+
+//================================Conversion Tools=======================================
+// Useful conversion tools for physical modeling.
+//========================================================================================
+
+//--------------------`(co.)ratio2strength `-------------------
+// Most compressors have a ratio parameter to define the amount of compression.
+// A ratio of 1 means no compression, a ratio of 2 means that for every dB the input goes above the threshold,
+// the output gets turned down half a dB.
+// To use a compressor as a brick wall limiter, the ratio needs to be infinity.
+// This is hard to express in a faust UI element, and overcompression can not be expressed at all,
+// therefore most compressors in this library use a strength parameter instead, where
+// 0 means no compression, 1 means hard limiting and  bigger than 1 means over-compression.
+//
+// This utility converts a ratio to a strength.
+//
+// #### Usage
+//
+// ```
+// ratio2strength(ratio) : _
+// ```
+//
+// Where:
+//
+// * `ratio`:  compression ratio, between 1 and infinity (1=no compression, infinity means hard limiting)
+//------------------------------------------------------------
+
+declare ratio2strength author "Bart Brouns";
+declare ratio2strength license "GPLv3";
+
+ratio2strength(ratio) = 1-(1/ratio);
+
+//--------------------`(co.)strength2ratio `-------------------
+// Most compressors have a ratio parameter to define the amount of compression.
+// A ratio of 1 means no compression, a ratio of 2 means that for every dB the input goes above the threshold,
+// the output gets turned down half a dB.
+// To use a compressor as a brick wall limiter, the ratio needs to be infinity.
+// This is hard to express in a faust UI element, and overcompression can not be expressed at all,
+// therefore most compressors in this library use a strength parameter instead, where
+// 0 means no compression, 1 means hard limiting and bigger than 1 means over-compression.
+//
+// This utility converts a strength to a ratio.
+//
+// #### Usage
+//
+// ```
+// strength2ratio(strength) : _
+// ```
+//
+// Where:
+//
+// * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+//------------------------------------------------------------
+
+declare strength2ratio author "Bart Brouns";
+declare strength2ratio license "GPLv3";
+
+strength2ratio(strength) = 1/(1-strength);
 
 //=============================Functions Reference========================================
 //========================================================================================
