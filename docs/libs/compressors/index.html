@@ -223,6 +223,18 @@
             
             <li class="nav-item" data-level="1"><a href="#compressorslib" class="nav-link">compressors.lib</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#conversion-tools" class="nav-link">Conversion Tools</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#coratio2strength" class="nav-link">(co.)ratio2strength</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#costrength2ratio" class="nav-link">(co.)strength2ratio</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#functions-reference" class="nav-link">Functions Reference</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#copeak_compression_gain_mono_db" class="nav-link">(co.)peak_compression_gain_mono_db</a>
@@ -364,12 +376,48 @@
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/compressors.lib">https://github.com/grame-cncm/faustlibraries/blob/master/compressors.lib</a></li>
 </ul>
+<h2 id="conversion-tools">Conversion Tools</h2>
+<p>Useful conversion tools for compressors.</p>
+<hr />
+<h3 id="coratio2strength"><code>(co.)ratio2strength</code></h3>
+<p>Most compressors have a ratio parameter to define the amount of compression.
+A ratio of 1 means no compression, a ratio of 2 means that for every dB the input goes above the threshold,
+the output gets turned down half a dB.
+To use a compressor as a brick wall limiter, the ratio needs to be infinity.
+This is hard to express in a faust UI element, and overcompression can not be expressed at all,
+therefore most compressors in this library use a strength parameter instead, where
+0 means no compression, 1 means hard limiting and  bigger than 1 means over-compression.</p>
+<p>This utility converts a ratio to a strength.</p>
+<h4 id="usage">Usage</h4>
+<pre><code>ratio2strength(ratio) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ratio</code>:  compression ratio, between 1 and infinity (1=no compression, infinity means hard limiting)</li>
+</ul>
+<hr />
+<h3 id="costrength2ratio"><code>(co.)strength2ratio</code></h3>
+<p>Most compressors have a ratio parameter to define the amount of compression.
+A ratio of 1 means no compression, a ratio of 2 means that for every dB the input goes above the threshold,
+the output gets turned down half a dB.
+To use a compressor as a brick wall limiter, the ratio needs to be infinity.
+This is hard to express in a faust UI element, and overcompression can not be expressed at all,
+therefore most compressors in this library use a strength parameter instead, where
+0 means no compression, 1 means hard limiting and bigger than 1 means over-compression.</p>
+<p>This utility converts a strength to a ratio.</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>strength2ratio(strength) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
+</ul>
 <h2 id="functions-reference">Functions Reference</h2>
 <hr />
 <h3 id="copeak_compression_gain_mono_db"><code>(co.)peak_compression_gain_mono_db</code></h3>
 <p>Mono dynamic range compressor gain computer with dB output.
 <code>peak_compression_gain_mono_db</code> is a standard Faust function.</p>
-<h4 id="usage">Usage</h4>
+<h4 id="usage_2">Usage</h4>
 <pre><code>_ : peak_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) : _
 </code></pre>
 <p>Where:</p>
@@ -404,7 +452,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <h3 id="copeak_compression_gain_n_chan_db"><code>(co.)peak_compression_gain_N_chan_db</code></h3>
 <p>N channels dynamic range compressor gain computer with dB output.
 <code>peak_compression_gain_N_chan_db</code> is a standard Faust function.</p>
-<h4 id="usage_1">Usage</h4>
+<h4 id="usage_3">Usage</h4>
 <pre><code>si.bus(N) : peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -441,7 +489,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <h3 id="coffcompressor_n_chan"><code>(co.)FFcompressor_N_chan</code></h3>
 <p>Feed forward N channels dynamic range compressor.
 <code>FFcompressor_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_2">Usage</h4>
+<h4 id="usage_4">Usage</h4>
 <pre><code>si.bus(N) : FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -480,7 +528,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <h3 id="cofbcompressor_n_chan"><code>(co.)FBcompressor_N_chan</code></h3>
 <p>Feed back N channels dynamic range compressor.
 <code>FBcompressor_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_5">Usage</h4>
 <pre><code>si.bus(N) : FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -521,7 +569,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <p>Feed forward / feed back N channels dynamic range compressor.
 The feedback part has a much higher strength, so they end up sounding similar.
 <code>FBFFcompressor_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_6">Usage</h4>
 <pre><code>si.bus(N) : FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -561,7 +609,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <h3 id="corms_compression_gain_mono_db"><code>(co.)RMS_compression_gain_mono_db</code></h3>
 <p>Mono RMS dynamic range compressor gain computer with dB output.
 <code>RMS_compression_gain_mono_db</code> is a standard Faust function.</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>_ : RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) : _
 </code></pre>
 <p>Where:</p>
@@ -596,7 +644,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <h3 id="corms_compression_gain_n_chan_db"><code>(co.)RMS_compression_gain_N_chan_db</code></h3>
 <p>RMS N channels dynamic range compressor gain computer with dB output.
 <code>RMS_compression_gain_N_chan_db</code> is a standard Faust function.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>si.bus(N) : RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -634,7 +682,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <p>RMS feed forward / feed back N channels dynamic range compressor.
 The feedback part has a much higher strength, so they end up sounding similar.
 <code>RMS_FBFFcompressor_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>si.bus(N) : RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -683,7 +731,7 @@ the RMS compressor doesn't have to deal with the peaks,
 and the peak limiter get's spared from the steady state signal.
 The feedback part has a much higher strength, so they end up sounding similar.
 <code>RMS_FBcompressor_peak_limiter_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>si.bus(N) : RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -728,7 +776,7 @@ but we retain the linear output version for backward compatibility.</p>
 <h3 id="copeak_compression_gain_mono"><code>(co.)peak_compression_gain_mono</code></h3>
 <p>Mono dynamic range compressor gain computer with linear output.
 <code>peak_compression_gain_mono</code> is a standard Faust function.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>_ : peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
 </code></pre>
 <p>Where:</p>
@@ -763,7 +811,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <h3 id="copeak_compression_gain_n_chan"><code>(co.)peak_compression_gain_N_chan</code></h3>
 <p>N channels dynamic range compressor gain computer with linear output.
 <code>peak_compression_gain_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>si.bus(N) : peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -800,7 +848,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <h3 id="corms_compression_gain_mono"><code>(co.)RMS_compression_gain_mono</code></h3>
 <p>Mono RMS dynamic range compressor gain computer with linear output.
 <code>RMS_compression_gain_mono</code> is a standard Faust function.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>_ : RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) : _
 </code></pre>
 <p>Where:</p>
@@ -835,7 +883,7 @@ and Josuah D.REISS (<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#106;&#111
 <h3 id="corms_compression_gain_n_chan"><code>(co.)RMS_compression_gain_N_chan</code></h3>
 <p>RMS N channels dynamic range compressor gain computer with linear output.
 <code>RMS_compression_gain_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>si.bus(N) : RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -876,7 +924,7 @@ MIT-style license is required.</p>
 <h3 id="cocompressor_lad_mono"><code>(co.)compressor_lad_mono</code></h3>
 <p>Mono dynamic range compressor with lookahead delay.
 <code>compressor_lad_mono</code> is a standard Faust function.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>_ : compressor_lad_mono(lad,ratio,thresh,att,rel) : _
 </code></pre>
 <p>Where:</p>
@@ -901,7 +949,7 @@ MIT-style license is required.</p>
 <h3 id="cocompressor_mono"><code>(co.)compressor_mono</code></h3>
 <p>Mono dynamic range compressors.
 <code>compressor_mono</code> is a standard Faust function.</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>_ : compressor_mono(ratio,thresh,att,rel) : _
 </code></pre>
 <p>Where:</p>
@@ -923,7 +971,7 @@ MIT-style license is required.</p>
 <hr />
 <h3 id="cocompressor_stereo"><code>(co.)compressor_stereo</code></h3>
 <p>Stereo dynamic range compressors.</p>
-<h4 id="usage_15">Usage</h4>
+<h4 id="usage_17">Usage</h4>
 <pre><code>_,_ : compressor_stereo(ratio,thresh,att,rel) : _,_
 </code></pre>
 <p>Where:</p>
@@ -943,7 +991,7 @@ MIT-style license is required.</p>
 <hr />
 <h3 id="cocompression_gain_mono"><code>(co.)compression_gain_mono</code></h3>
 <p>Compression-gain calculation for dynamic range compressors.</p>
-<h4 id="usage_16">Usage</h4>
+<h4 id="usage_18">Usage</h4>
 <pre><code>_ : compression_gain_mono(ratio,thresh,att,rel) : _
 </code></pre>
 <p>Where:</p>
@@ -982,7 +1030,7 @@ parameters are hardwired here to nominal values.</p>
         The 1176 range is said to be 50-1100 ms.</p>
 <p>The 1176 also has a "bright, clear eq effect" (use filters.lib if desired).
 <code>limiter_1176_R4_mono</code> is a standard Faust function.</p>
-<h4 id="usage_17">Usage</h4>
+<h4 id="usage_19">Usage</h4>
 <pre><code> _ : limiter_1176_R4_mono : _
 </code></pre>
 <h4 id="reference">Reference:</h4>
@@ -1005,7 +1053,7 @@ parameters are hardwired to nominal values here.</p>
 <p>Mike Shipley likes 4:1 (Grammy-winning mixer for Queen, Tom Petty, etc.)
 Faster attack gives "more bite" (e.g. on vocals).
 He hears a bright, clear eq effect as well (not implemented here).</p>
-<h4 id="usage_18">Usage</h4>
+<h4 id="usage_20">Usage</h4>
 <pre><code> _,_ : limiter_1176_R4_stereo : _,_
 </code></pre>
 <h4 id="reference_1">Reference:</h4>
@@ -1017,7 +1065,7 @@ He hears a bright, clear eq effect as well (not implemented here).</p>
 <h3 id="copeak_expansion_gain_n_chan_db"><code>(co.)peak_expansion_gain_N_chan_db</code></h3>
 <p>N channels dynamic range expander gain computer.
 <code>peak_expansion_gain_N_chan_db</code> is a standard Faust function.</p>
-<h4 id="usage_19">Usage</h4>
+<h4 id="usage_21">Usage</h4>
 <pre><code>si.bus(N) : peak_expansion_gain_N_chan_db(strength,thresh,range,att,hold,rel,knee,prePost,link,maxHold,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -1042,7 +1090,7 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <h3 id="coexpander_n_chan"><code>(co.)expander_N_chan</code></h3>
 <p>Feed forward N channels dynamic range expander.
 <code>expander_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_20">Usage</h4>
+<h4 id="usage_22">Usage</h4>
 <pre><code>si.bus(N) : expander_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,maxHold,N) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -1069,7 +1117,7 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <h3 id="coexpandersc_n_chan"><code>(co.)expanderSC_N_chan</code></h3>
 <p>Feed forward N channels dynamic range expander with sidechain.
 <code>expanderSC_N_chan</code> is a standard Faust function.</p>
-<h4 id="usage_21">Usage</h4>
+<h4 id="usage_23">Usage</h4>
 <pre><code>si.bus(N) : expanderSC_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,maxHold,N,SCfunction,SCswitch,SCsignal) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -1124,7 +1172,7 @@ release time can then provide a perceptually linear and gradual gain
 increase determined by the user for any specific application.</p>
 <p>The scaling factor for all the channels is determined by the loudest peak 
 between them all, so that amplitude ratios between the signals are kept.</p>
-<h4 id="usage_22">Usage</h4>
+<h4 id="usage_24">Usage</h4>
 <pre><code>si.bus(N) : limiter_lad_N(N, LD, ceiling, attack, hold, release) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -1144,7 +1192,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <hr />
 <h3 id="colimiter_lad_mono"><code>(co.)limiter_lad_mono</code></h3>
 <p>Specialised case of <code>limiter_lad_N</code> mono limiter.</p>
-<h4 id="usage_23">Usage</h4>
+<h4 id="usage_25">Usage</h4>
 <pre><code>_ : limiter_lad_mono(LD, ceiling, attack, hold, release) : _
 </code></pre>
 <p>Where:</p>
@@ -1162,7 +1210,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <hr />
 <h3 id="colimiter_lad_stereo"><code>(co.)limiter_lad_stereo</code></h3>
 <p>Specialised case of <code>limiter_lad_N</code> stereo limiter.</p>
-<h4 id="usage_24">Usage</h4>
+<h4 id="usage_26">Usage</h4>
 <pre><code>_,_ : limiter_lad_stereo(LD, ceiling, attack, hold, release) : _,_
 </code></pre>
 <p>Where:</p>
@@ -1180,7 +1228,7 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <hr />
 <h3 id="colimiter_lad_quad"><code>(co.)limiter_lad_quad</code></h3>
 <p>Specialised case of <code>limiter_lad_N</code> quadraphonic limiter.</p>
-<h4 id="usage_25">Usage</h4>
+<h4 id="usage_27">Usage</h4>
 <pre><code>si.bus(4) : limiter_lad_quad(LD, ceiling, attack, hold, release) : si.bus(4)
 </code></pre>
 <p>Where:</p>
@@ -1205,7 +1253,7 @@ synchronised input and gain signals. </p>
 the least colouring artefacts while keeping a not-so-slow release curve. 
 Tests have shown that, given a pop song with 60 dB of amplification
 and a 0-dB-ceiling, the loudest peak recorded was ~0.38 dB.</p>
-<h4 id="usage_26">Usage</h4>
+<h4 id="usage_28">Usage</h4>
 <pre><code>_ : limiter_lad_bw : _
 </code></pre>
 <h4 id="reference_6">Reference:</h4>
