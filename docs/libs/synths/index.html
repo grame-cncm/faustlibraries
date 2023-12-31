@@ -285,7 +285,7 @@
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>freq</code>: the resonance frequency of the instrument</li>
+<li><code>freq</code>: the resonance frequency of the instrument in Hz</li>
 <li><code>q</code>: the q of the res filter (typically, 5 is a good value)</li>
 <li><code>gate</code>: the trigger signal (0 or 1)</li>
 </ul>
@@ -298,7 +298,7 @@
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>freq</code>: frequency of the sawtooth</li>
+<li><code>freq</code>: frequency of the sawtooth in Hz</li>
 <li><code>ctFreq</code>: cutoff frequency of the filter</li>
 <li><code>q</code>: Q of the filter</li>
 <li><code>gate</code>: the trigger signal (0 or 1)</li>
@@ -308,12 +308,11 @@
 <p>A simple trombone based on a lowpassed sawtooth wave.
 <code>sawTrombone</code> is a standard Faust function.</p>
 <h4 id="usage_2">Usage</h4>
-<pre><code>sawTrombone(att,freq,gain,gate) : _
+<pre><code>sawTrombone(freq,gain,gate) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>att</code>: exponential attack duration in s (typically 0.01)</li>
-<li><code>freq</code>: the frequency</li>
+<li><code>freq</code>: the frequency in Hz</li>
 <li><code>gain</code>: the gain (0-1)</li>
 <li><code>gate</code>: the gate (0 or 1)</li>
 </ul>
@@ -326,7 +325,7 @@
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>freq</code>: the frequency of the string</li>
+<li><code>freq</code>: the frequency of the string in Hz</li>
 <li><code>res</code>: string T60 (resonance time) in second</li>
 <li><code>gate</code>: trigger signal (0 or 1)</li>
 </ul>
@@ -339,7 +338,7 @@
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>freq</code>: the resonance frequency of the drum</li>
+<li><code>freq</code>: the resonance frequency of the drum in Hz</li>
 <li><code>freqRatio</code>: a list of ratio to choose the frequency of the mode in
                function of <code>freq</code> e.g.(1 1.2 1.5 ...). The first element should always
                be one (fundamental).</li>

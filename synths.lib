@@ -59,7 +59,7 @@ declare version "1.1.0";
 //
 // Where:
 //
-// * `freq`: the resonance frequency of the instrument
+// * `freq`: the resonance frequency of the instrument in Hz
 // * `q`: the q of the res filter (typically, 5 is a good value)
 // * `gate`: the trigger signal (0 or 1)
 //----------------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ popFilterDrum(freq,q,gate) = en.ar(0.001,0.001,gate)*no.noise : fi.resonbp(freq,
 //
 // Where:
 //
-// * `freq`: frequency of the sawtooth
+// * `freq`: frequency of the sawtooth in Hz
 // * `ctFreq`: cutoff frequency of the filter
 // * `q`: Q of the filter
 // * `gate`: the trigger signal (0 or 1)
@@ -101,13 +101,12 @@ with {
 // #### Usage
 //
 // ```
-// sawTrombone(att,freq,gain,gate) : _
+// sawTrombone(freq,gain,gate) : _
 // ```
 //
 // Where:
 //
-// * `att`: exponential attack duration in s (typically 0.01)
-// * `freq`: the frequency
+// * `freq`: the frequency in Hz
 // * `gain`: the gain (0-1)
 // * `gate`: the gate (0 or 1)
 //----------------------------------------------------------------------------------------
@@ -133,7 +132,7 @@ with {
 //
 // Where:
 //
-// * `freq`: the frequency of the string
+// * `freq`: the frequency of the string in Hz
 // * `res`: string T60 (resonance time) in second
 // * `gate`: trigger signal (0 or 1)
 //----------------------------------------------------------------------------------------
@@ -161,7 +160,7 @@ with {
 //
 // Where:
 //
-// * `freq`: the resonance frequency of the drum
+// * `freq`: the resonance frequency of the drum in Hz
 // * `freqRatio`: a list of ratio to choose the frequency of the mode in
 //                function of `freq` e.g.(1 1.2 1.5 ...). The first element should always
 //                be one (fundamental).
@@ -175,12 +174,12 @@ with {
 //----------------------------------------------------------------------------------------
 declare additiveDrum author "Romain Michon";
 
-additiveDrum(freq,freqRatio,gain,modeDec,att,rel,gate) = par(i,N,os.osc(modeFreq(i))*gainEnvelope(i)) :> _
+additiveDrum(freq,freqRatio,gain,harmDec,att,rel,gate) = par(i,N,os.osc(modeFreq(i))*gainEnvelope(i)) :> _
 with {
     N = ba.count(freqRatio);
     modeFreq(i) = freq*ba.take(i+1,freqRatio);
     modeGain(i) = ba.take(i+1,gain);
-    gainEnvelope(i) = modeGain(i)*en.ar(att,rel*(1-(modeDec*(i/N))),gate);
+    gainEnvelope(i) = modeGain(i)*en.ar(att,rel*(1-(harmDec*(i/N))),gate);
 };
 
 
