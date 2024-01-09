@@ -1,6 +1,11 @@
 # Libraries from the community
 
-A lot of libraries have been developed by the community. They are presented in the following sections. 
+A lot of libraries have been developed by the community. They can be used when developing DSP programs:
+
+- when used in [Faust IDE](https://faustide.grame.fr), by adding them in the [project files](https://github.com/grame-cncm/faustide#project-files) section
+- when used in a local Faust installation on macOS or Linux, by adding them in the `/usr/share/faust`, or `/usr/local/share/faust` folders
+
+They are presented in the following sections. 
 
 ## [abclib library](https://github.com/alainbonardi/abclib/)
 
