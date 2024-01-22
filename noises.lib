@@ -12,7 +12,7 @@ os = library("oscillators.lib");
 no = library("noises.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Noise Generator Library";
-declare version "1.4.0";
+declare version "1.4.1";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -150,7 +150,7 @@ noises(N,i) = noise_env(12345).noises(N,i);
 // ```
 //
 //------------------------------------------------------------
-randomseed = ffunction(int arc4random(), <math.h>, ""), 12345 : select2(1');
+randomseed = ffunction(int arc4random(), <stdlib.h>, ""), 12345 : select2(1');
 
 
 //-----------------------`(no.)rnoise`-----------------------
