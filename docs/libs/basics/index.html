@@ -1577,6 +1577,16 @@ For example the following definition:</p>
 <li><code>f(x) = y_{i} + (y_{i+1}-y_{i})*(x-x_{i})/(x_{i+1}-x_{i})</code> when <code>x_{i} &lt;= x</code>
 and <code>x &lt; x_{i+1}</code></li>
 </ul>
+<p>There are also two <code>curve</code> functions:</p>
+<ul>
+<li><code>curve(B,x,y)</code> to add a curved section</li>
+<li><code>curve_end(B,x,y)</code> to end with a curved section</li>
+</ul>
+<p>These functions can be combined with the other <code>bpf</code> functions. <code>B</code> (compile-time constant)
+is a "bias" value strictly greater than zero and less than or equal to 1. When <code>B</code> is 0.5, the curve
+is exactly linear. When <code>B</code> is less than 0.5, it's biased downwards. When <code>b</code> is greater than 0.5,
+it's biased upwards. Here's an example:</p>
+<p><code>f = bpf.start(0,0) : bpf.curve(.15,.5,.5) : bpf.curve_end(.85,1,1);</code></p>
 <p><code>bpf</code> is a standard Faust function.</p>
 <hr />
 <h3 id="balistinterp"><code>(ba.)listInterp</code></h3>
