@@ -1983,11 +1983,17 @@ with {
 // * `curve_end(B,x,y)` to end with a curved section
 //
 // These functions can be combined with the other `bpf` functions. `B` (compile-time constant)
-// is a "bias" value strictly greater than zero and less than or equal to 1. When `B` is 0.5, the curve
-// is exactly linear. When `B` is less than 0.5, it's biased downwards. When `b` is greater than 0.5,
-// it's biased upwards. Here's an example:
+// is a "bias" value strictly greater than zero and less than or equal to 1. When `B` is 0.5, the
+// output curve is exactly linear and equivalent to `bpf.point`. When `B` is less than 0.5, the
+// output is biased towards the `y` value of the previous breakpoint. When `B` is greater than 0.5,
+// the output is biased towards the `y` value of the curve breakpoint. Here's an example:
 //
 // `f = bpf.start(0,0) : bpf.curve(.15,.5,.5) : bpf.curve_end(.85,1,1);`
+//
+// In the following example, the output is biased towards zero (the latter y value) instead of
+// being a linear ramp from 1 to 0.
+//
+// `f = bpf.start(0,1) : bpf.curve_end(.9,1,0);`
 //
 // `bpf` is a standard Faust function.
 //--------------------------------------------------------
@@ -2008,7 +2014,7 @@ bpf = environment
     /*
     In the functions below, we use the equation `y=bias_curve(b,x)`.
     * `b`: bias in range (0,1]. Bias of 0.5 results in `y=x`. Bias above 0.5 pulls y upward. Bias below 0.5 pulls y downward.
-    * `x`: input between 0 and 1 that needs to be remapped/biased into `y`
+    * `x`: input in range [0,1] that needs to be remapped/biased into `y`
     * `y`: `x` after it has been biased. Note that `(y==0 iff x==0) AND (y==1 iff x==1)`.
     */
 
