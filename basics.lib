@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.13.0";
+declare version "1.14.0";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -1948,7 +1948,7 @@ with {
 //
 // * `start(x,y)` to start a break-point function
 // * `end(x,y)` to end a break-point function
-// * `point(x,y)` to add intermediate points to a break-point function
+// * `point(x,y)` to add intermediate points to a break-point function, using linear interpolation
 //
 // A minimal break-point function must contain at least a start and an end point:
 //
@@ -1977,12 +1977,26 @@ with {
 // * `f(x) = y_{i} + (y_{i+1}-y_{i})*(x-x_{i})/(x_{i+1}-x_{i})` when `x_{i} <= x`
 // and `x < x_{i+1}`
 //
-// There are also two `curve` functions:
+// In addition to `bpf.point`, there are also `step` and `curve` functions:
 //
+// * `step(x,y)` to add a flat section
+// * `step_end(x,y)` to end with a flat section
 // * `curve(B,x,y)` to add a curved section
 // * `curve_end(B,x,y)` to end with a curved section
 //
-// These functions can be combined with the other `bpf` functions. `B` (compile-time constant)
+// These functions can be combined with the other `bpf` functions.
+//
+// Here's an example using `bpf.step`:
+//
+// `f(x) = x : bpf.start(0,0) : bpf.step(.2,.3) : bpf.step(.4,.6) : bpf.step_end(1,1);`
+//
+// For `x < 0.0`, the output is 0.0.
+// For `0.0 <= x < 0.2`, the output is 0.0.
+// For `0.2 <= x < 0.4`, the output is 0.3.
+// For `0.4 <= x < 1.0`, the output is 0.6.
+// For `1.0 <= x`, the output is 1.0
+//
+// For the `curve` functions, `B` (compile-time constant)
 // is a "bias" value strictly greater than zero and less than or equal to 1. When `B` is 0.5, the
 // output curve is exactly linear and equivalent to `bpf.point`. When `B` is less than 0.5, the
 // output is biased towards the `y` value of the previous breakpoint. When `B` is greater than 0.5,
@@ -2005,6 +2019,11 @@ bpf = environment
     point(x1,y1) = \(x0,y0,x,y).(x1, y1, x, if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
     // End a break-point function
     end(x1,y1) = \(x0,y0,x,y).(if(x < x0, y, if(x < x1, y0 + (x-x0)*(y1-y0)/(x1-x0), y1)));
+
+    // Add a stepped "flat" section
+    step(x1,y1) = \(x0,y0,x,y).(x1, y1, x, if(x < x0, y, if(x < x1, y0, y1)));
+    // End with a stepped "flat" section
+    step_end(x1,y1) = \(x0,y0,x,y).(if(x < x0, y, if(x < x1, y0, y1)));
 
     // Add a curve-point. `B` (compile-time constant) must be in range (0,1]
     curve(B,x1,y1) = \(x0,y0,x,y).(x1, y1, x, if(x < x0, y, if(x < x1, _curve_util(x0,x1,y0,y1,B,x), y1)));
