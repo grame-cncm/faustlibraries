@@ -1557,7 +1557,7 @@ create break-point functions. It contains three functions:</p>
 <ul>
 <li><code>start(x,y)</code> to start a break-point function</li>
 <li><code>end(x,y)</code> to end a break-point function</li>
-<li><code>point(x,y)</code> to add intermediate points to a break-point function</li>
+<li><code>point(x,y)</code> to add intermediate points to a break-point function, using linear interpolation</li>
 </ul>
 <p>A minimal break-point function must contain at least a start and an end point:</p>
 <pre><code>f = bpf.start(x0,y0) : bpf.end(x1,y1);
@@ -1577,12 +1577,22 @@ For example the following definition:</p>
 <li><code>f(x) = y_{i} + (y_{i+1}-y_{i})*(x-x_{i})/(x_{i+1}-x_{i})</code> when <code>x_{i} &lt;= x</code>
 and <code>x &lt; x_{i+1}</code></li>
 </ul>
-<p>There are also two <code>curve</code> functions:</p>
+<p>In addition to <code>bpf.point</code>, there are also <code>step</code> and <code>curve</code> functions:</p>
 <ul>
+<li><code>step(x,y)</code> to add a flat section</li>
+<li><code>step_end(x,y)</code> to end with a flat section</li>
 <li><code>curve(B,x,y)</code> to add a curved section</li>
 <li><code>curve_end(B,x,y)</code> to end with a curved section</li>
 </ul>
-<p>These functions can be combined with the other <code>bpf</code> functions. <code>B</code> (compile-time constant)
+<p>These functions can be combined with the other <code>bpf</code> functions.</p>
+<p>Here's an example using <code>bpf.step</code>:</p>
+<p><code>f(x) = x : bpf.start(0,0) : bpf.step(.2,.3) : bpf.step(.4,.6) : bpf.step_end(1,1);</code></p>
+<p>For <code>x &lt; 0.0</code>, the output is 0.0.
+For <code>0.0 &lt;= x &lt; 0.2</code>, the output is 0.0.
+For <code>0.2 &lt;= x &lt; 0.4</code>, the output is 0.3.
+For <code>0.4 &lt;= x &lt; 1.0</code>, the output is 0.6.
+For <code>1.0 &lt;= x</code>, the output is 1.0</p>
+<p>For the <code>curve</code> functions, <code>B</code> (compile-time constant)
 is a "bias" value strictly greater than zero and less than or equal to 1. When <code>B</code> is 0.5, the
 output curve is exactly linear and equivalent to <code>bpf.point</code>. When <code>B</code> is less than 0.5, the
 output is biased towards the <code>y</code> value of the previous breakpoint. When <code>B</code> is greater than 0.5,
