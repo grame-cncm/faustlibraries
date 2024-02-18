@@ -139,12 +139,15 @@ ma = library("maths.lib");
 si = library("signals.lib");
 
 declare name "Faust Interpolator Library";
-declare version "1.3.0";
+declare version "1.3.1";
 
-reset(trig) = (trig-trig') <= 0;
+// Produces 0 until the first trig, then 1 until the next trig (which outputs a 0 sample to reset), and so on
+reset(trig) = hold * (trig <= trig')
+with {
+    hold = select2(trig,_,trig) ~ _;
+};
  
 // The following 3 functions allow to adapt a 'single signal' fractional idv in this [idx, dv] model.
-
 singleprecision int_part(idv) = idv : _,!;
 singleprecision frac_part(idv) = idv : !,_;
 singleprecision make_idv(id) = int(id), ma.frac(id);
