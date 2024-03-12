@@ -126,8 +126,13 @@ phasor_env(freq, N) = environment {
 declare phasor_env author "Pierre Mascarade Relano, Maxime Sirbu, Stéphane Letz";
 
 // Generic phasor with `reset` and `phase` parameters to be specialised in concrete use-cases.
-phasor_imp(freq, reset, phase) = (select2(hard_reset, +(freq/ma.SR), phase) : ma.decimal) ~ _
+phasor_imp(freq, reset, phase) = (select2(hard_reset, +(incrSafe), phase) : ma.decimal) ~ _
 with {
+	incr = freq * ma.T;
+	// incrSafe will make sure that the incremental step is greater or equal to EPSILON or 
+	// less than or equal to -EPSILON to avoid numerical problems. 
+	// A frequency of 0Hz can still be used to freeze the phasor.
+	incrSafe = (freq != 0) * ba.if(freq < 0, min(-1.0 * ma.EPSILON, incr), max(ma.EPSILON, incr));
     hard_reset = (1-1')|reset; // To correctly start at `phase` at the first sample
 };
 
@@ -141,15 +146,6 @@ phasor_table(tablesize, freq, reset, phase) = phasor_imp(freq, reset, phase) : *
 //-----------------------`(os.)phasor`------------------------
 // A simple phasor to be used with a `rdtable`.
 // `phasor` is a standard Faust function.
-//
-// Note that there is a numerical problem with the os.phasor function. For example, if you run 
-// process = os.phasor(1.0, -.001); you get the sequence 1, 0, 1, 0, 1, 0, 1... The reason is 
-// that the incremental step is smaller than EPS, so it will have no effect when summed to 1, 
-// but it will be enough to make the fractional function wrap around when summed to 0.
-//
-// You may want to consider clipping the incremental step to guarantee that the phasor will 
-// always run correctly for its full cycle. Otherwise, for increments smaller than EPS, 
-// phasor would initially run but it'd eventually get stuck once the output gets big enough.
 //
 // #### Usage
 //
