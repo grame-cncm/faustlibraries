@@ -142,6 +142,15 @@ phasor_table(tablesize, freq, reset, phase) = phasor_imp(freq, reset, phase) : *
 // A simple phasor to be used with a `rdtable`.
 // `phasor` is a standard Faust function.
 //
+// Note that there is a numerical problem with the os.phasor function. For example, if you run 
+// process = os.phasor(1.0, -.001); you get the sequence 1, 0, 1, 0, 1, 0, 1... The reason is 
+// that the incremental step is smaller than EPS, so it will have no effect when summed to 1, 
+// but it will be enough to make the fractional function wrap around when summed to 0.
+//
+// You may want to consider clipping the incremental step to guarantee that the phasor will 
+// always run correctly for its full cycle. Otherwise, for increments smaller than EPS, 
+// phasor would initially run but it'd eventually get stuck once the output gets big enough.
+//
 // #### Usage
 //
 // ```
@@ -152,6 +161,7 @@ phasor_table(tablesize, freq, reset, phase) = phasor_imp(freq, reset, phase) : *
 //
 // * `tablesize`: the table size
 // * `freq`: the frequency in Hz
+//
 //------------------------------------------------------------
 phasor(tablesize, freq) = phasor_table(tablesize, freq, 0, 0);
 
