@@ -574,6 +574,15 @@
 </ul>
 <h2 id="wave-table-based-oscillators">Wave-Table-Based Oscillators</h2>
 <p>Oscillators based on mathematical functions.</p>
+<p>Note that there is a numerical problem with several phasor functions built using the internal
+<code>phasor_imp</code>. The reason is that the incremental step is smaller than <code>ma.EPSILON</code>, so it will 
+have no effect when summed to 1, but it will be enough to make the fractional function wrap 
+around when summed to 0.</p>
+<p>You may want to consider clipping the incremental step to guarantee that the phasor will 
+always run correctly for its full cycle. Otherwise, for increments smaller than <code>ma.EPSILON</code>, 
+phasor would initially run but it'd eventually get stuck once the output gets big enough.</p>
+<p>The internal <code>phasor_imp</code> function has to be modified setting <code>OPTIMIZE</code> to 1 to use the
+slower but more accurate version of the phasor.</p>
 <hr />
 <h3 id="ossinwaveform"><code>(os.)sinwaveform</code></h3>
 <p>Sine waveform ready to use with a <code>rdtable</code>.</p>

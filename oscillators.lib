@@ -66,6 +66,18 @@ pl = library("platform.lib");
 
 //=========================Wave-Table-Based Oscillators===================================
 // Oscillators based on mathematical functions.
+//
+// Note that there is a numerical problem with several phasor functions built using the internal
+// `phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, so it will 
+// have no effect when summed to 1, but it will be enough to make the fractional function wrap 
+// around when summed to 0.
+//
+// You may want to consider clipping the incremental step to guarantee that the phasor will 
+// always run correctly for its full cycle. Otherwise, for increments smaller than `ma.EPSILON`, 
+// phasor would initially run but it'd eventually get stuck once the output gets big enough.
+// 
+// The internal `phasor_imp` function has to be modified setting `OPTIMIZE` to 1 to use the
+// slower but more accurate version of the phasor.
 //========================================================================================
 
 //-----------------------`(os.)sinwaveform`------------------------
@@ -126,14 +138,23 @@ phasor_env(freq, N) = environment {
 declare phasor_env author "Pierre Mascarade Relano, Maxime Sirbu, Stéphane Letz";
 
 // Generic phasor with `reset` and `phase` parameters to be specialised in concrete use-cases.
-phasor_imp(freq, reset, phase) = (select2(hard_reset, +(incrSafe), phase) : ma.decimal) ~ _
+phasor_imp(freq, reset, phase) = (select2(hard_reset, +(incr(OPTIMIZE)), phase) : ma.decimal) ~ _
 with {
-	incr = freq * ma.T;
-	// incrSafe will make sure that the incremental step is greater or equal to EPSILON or 
-	// less than or equal to -EPSILON to avoid numerical problems. 
-	// A frequency of 0Hz can still be used to freeze the phasor.
-	incrSafe = (freq != 0) * ba.if(freq < 0, min(-1.0 * ma.EPSILON, incr), max(ma.EPSILON, incr));
-    hard_reset = (1-1')|reset; // To correctly start at `phase` at the first sample
+    incr_aux = freq/ma.SR;
+
+    // Change this to 1 to use the slower but more accurate version
+    OPTIMIZE = 0;
+
+    // Faster but less accurate version
+    incr(0) = incr_aux;
+
+    // To make sure that the incremental step is greater or equal to EPSILON or 
+    // less than or equal to -EPSILON to avoid numerical problems. 
+    // A frequency of 0Hz can still be used to freeze the phasor.
+    incr(1)= (freq != 0) * ba.if(freq < 0, min(-1.0 * ma.EPSILON, incr_aux), max(ma.EPSILON, incr_aux));
+
+    // To correctly start at `phase` at the first sample
+    hard_reset = (1-1')|reset; 
 };
 
 // Possibly faster version using integer arithmetic
