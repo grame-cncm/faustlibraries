@@ -70,7 +70,13 @@ pl = library("platform.lib");
 // Note that there is a numerical problem with several phasor functions built using the internal
 // `phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, so it will 
 // have no effect when summed to 1, but it will be enough to make the fractional function wrap 
-// around when summed to 0.
+// around when summed to 0. An example of this problem can be observed when running the following code:
+//
+// `process = os.phasor(1.0, -.001);`
+//
+// The output of this program is the sequence 1, 0, 1, 0, 1... This happens because the negative incremental 
+// step is greater than `-ma.EPSILON`, which will have no effect when summed to 1, but it will be significant 
+// enough to make the fractional function  wrap around when summed to 0.
 //
 // You may want to consider clipping the incremental step to guarantee that the phasor will 
 // always run correctly for its full cycle. Otherwise, for increments smaller than `ma.EPSILON`, 
@@ -179,6 +185,8 @@ phasor_table(tablesize, freq, reset, phase) = phasor_imp(freq, reset, phase) : *
 // * `tablesize`: the table size
 // * `freq`: the frequency in Hz
 //
+// Note that `tablesize` is just a multiplier for the output of a unit-amp phasor
+// so `phasor(1.0, freq)` can be used to generate a phasor output in the range [0, 1[.
 //------------------------------------------------------------
 phasor(tablesize, freq) = phasor_table(tablesize, freq, 0, 0);
 
@@ -381,7 +389,7 @@ m_oscsin(freq) = lf_sawpos(freq) : *(2*ma.PI) : sin;
 
 
 //-----------------------`(os.)m_osccos`------------------------
-// Sine wave oscillator based on the `sin` mathematical function.
+// Sine wave oscillator based on the `cos` mathematical function.
 //
 // #### Usage
 //

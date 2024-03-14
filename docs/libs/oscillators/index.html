@@ -577,7 +577,11 @@
 <p>Note that there is a numerical problem with several phasor functions built using the internal
 <code>phasor_imp</code>. The reason is that the incremental step is smaller than <code>ma.EPSILON</code>, so it will 
 have no effect when summed to 1, but it will be enough to make the fractional function wrap 
-around when summed to 0.</p>
+around when summed to 0. An example of this problem can be observed when running the following code:</p>
+<p><code>process = os.phasor(1.0, -.001);</code></p>
+<p>The output of this program is the sequence 1, 0, 1, 0, 1... This happens because the negative incremental 
+step is greater than <code>-ma.EPSILON</code>, which will have no effect when summed to 1, but it will be significant 
+enough to make the fractional function  wrap around when summed to 0.</p>
 <p>You may want to consider clipping the incremental step to guarantee that the phasor will 
 always run correctly for its full cycle. Otherwise, for increments smaller than <code>ma.EPSILON</code>, 
 phasor would initially run but it'd eventually get stuck once the output gets big enough.</p>
@@ -615,6 +619,8 @@ slower but more accurate version of the phasor.</p>
 <li><code>tablesize</code>: the table size</li>
 <li><code>freq</code>: the frequency in Hz</li>
 </ul>
+<p>Note that <code>tablesize</code> is just a multiplier for the output of a unit-amp phasor
+so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the range [0, 1[.</p>
 <hr />
 <h3 id="oshs_phasor"><code>(os.)hs_phasor</code></h3>
 <p>Hardsyncing phasor to be used with a <code>rdtable</code>.</p>
@@ -727,7 +733,7 @@ slower but more accurate version of the phasor.</p>
 </ul>
 <hr />
 <h3 id="osm_osccos"><code>(os.)m_osccos</code></h3>
-<p>Sine wave oscillator based on the <code>sin</code> mathematical function.</p>
+<p>Sine wave oscillator based on the <code>cos</code> mathematical function.</p>
 <h4 id="usage_13">Usage</h4>
 <pre><code>m_osccos(freq) : _
 </code></pre>
