@@ -76,7 +76,7 @@ pl = library("platform.lib");
 // always run correctly for its full cycle. Otherwise, for increments smaller than `ma.EPSILON`, 
 // phasor would initially run but it'd eventually get stuck once the output gets big enough.
 // 
-// The internal `phasor_imp` function has to be modified setting `OPTIMIZE` to 1 to use the
+// The internal `phasor_imp` function has to be modified setting `OPTIMIZE` to 0 to use the
 // slower but more accurate version of the phasor.
 //========================================================================================
 
@@ -145,13 +145,13 @@ with {
     // Change this to 1 to use the slower but more accurate version
     OPTIMIZE = 0;
 
-    // Faster but less accurate version
-    incr(0) = incr_aux;
-
     // To make sure that the incremental step is greater or equal to EPSILON or 
     // less than or equal to -EPSILON to avoid numerical problems. 
     // A frequency of 0Hz can still be used to freeze the phasor.
-    incr(1)= (freq != 0) * ba.if(freq < 0, min(-1.0 * ma.EPSILON, incr_aux), max(ma.EPSILON, incr_aux));
+    incr(0)= (freq != 0) * ba.if(freq < 0, min(-1.0 * ma.EPSILON, incr_aux), max(ma.EPSILON, incr_aux));
+
+    // Faster but less accurate version
+    incr(1) = incr_aux;
 
     // To correctly start at `phase` at the first sample
     hard_reset = (1-1')|reset; 
