@@ -223,6 +223,10 @@
             
             <li class="nav-item" data-level="1"><a href="#oscillatorslib" class="nav-link">oscillators.lib</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#oscillators-based-on-mathematical-functions" class="nav-link">Oscillators based on mathematical functions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#wave-table-based-oscillators" class="nav-link">Wave-Table-Based Oscillators</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#ossinwaveform" class="nav-link">(os.)sinwaveform</a>
@@ -572,8 +576,7 @@
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/oscillators.lib">https://github.com/grame-cncm/faustlibraries/blob/master/oscillators.lib</a></li>
 </ul>
-<h2 id="wave-table-based-oscillators">Wave-Table-Based Oscillators</h2>
-<p>Oscillators based on mathematical functions.</p>
+<h2 id="oscillators-based-on-mathematical-functions">Oscillators based on mathematical functions</h2>
 <p>Note that there is a numerical problem with several phasor functions built using the internal
 <code>phasor_imp</code>. The reason is that the incremental step is smaller than <code>ma.EPSILON</code>, so it will 
 have no effect when summed to 1, but it will be enough to make the fractional function wrap 
@@ -587,6 +590,9 @@ always run correctly for its full cycle. Otherwise, for increments smaller than 
 phasor would initially run but it'd eventually get stuck once the output gets big enough.</p>
 <p>The internal <code>phasor_imp</code> function has to be modified setting <code>OPTIMIZE</code> to 0 to use the
 slower but more accurate version of the phasor.</p>
+<h2 id="wave-table-based-oscillators">Wave-Table-Based Oscillators</h2>
+<p>Oscillators using tables. The table size is set by the 
+<a href="https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib">pl.tablesize</a> constant.</p>
 <hr />
 <h3 id="ossinwaveform"><code>(os.)sinwaveform</code></h3>
 <p>Sine waveform ready to use with a <code>rdtable</code>.</p>

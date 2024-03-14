@@ -64,8 +64,7 @@ declare version "1.5.1";
 // This library contains platform specific constants
 pl = library("platform.lib");
 
-//=========================Wave-Table-Based Oscillators===================================
-// Oscillators based on mathematical functions.
+//======================Oscillators based on mathematical functions===============
 //
 // Note that there is a numerical problem with several phasor functions built using the internal
 // `phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, so it will 
@@ -84,6 +83,11 @@ pl = library("platform.lib");
 // 
 // The internal `phasor_imp` function has to be modified setting `OPTIMIZE` to 0 to use the
 // slower but more accurate version of the phasor.
+//=================================================================================
+
+//=========================Wave-Table-Based Oscillators===================================
+// Oscillators using tables. The table size is set by the 
+// [pl.tablesize](https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib) constant.
 //========================================================================================
 
 //-----------------------`(os.)sinwaveform`------------------------
