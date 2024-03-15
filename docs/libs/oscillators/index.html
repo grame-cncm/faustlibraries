@@ -578,18 +578,20 @@
 </ul>
 <h2 id="oscillators-based-on-mathematical-functions">Oscillators based on mathematical functions</h2>
 <p>Note that there is a numerical problem with several phasor functions built using the internal
-<code>phasor_imp</code>. The reason is that the incremental step is smaller than <code>ma.EPSILON</code>, so it will 
-have no effect when summed to 1, but it will be enough to make the fractional function wrap 
+<code>phasor_imp</code>. The reason is that the incremental step is smaller than <code>ma.EPSILON</code>, which happens with very small frequencies, 
+so it will have no effect when summed to 1, but it will be enough to make the fractional function wrap 
 around when summed to 0. An example of this problem can be observed when running the following code:</p>
 <p><code>process = os.phasor(1.0, -.001);</code></p>
 <p>The output of this program is the sequence 1, 0, 1, 0, 1... This happens because the negative incremental 
 step is greater than <code>-ma.EPSILON</code>, which will have no effect when summed to 1, but it will be significant 
 enough to make the fractional function  wrap around when summed to 0.</p>
-<p>You may want to consider clipping the incremental step to guarantee that the phasor will 
-always run correctly for its full cycle. Otherwise, for increments smaller than <code>ma.EPSILON</code>, 
+<p>The incremental step can be clipped to guarantee that the phasor will 
+always run correctly for its full cycle, otherwise, for increments smaller than <code>ma.EPSILON</code>, 
 phasor would initially run but it'd eventually get stuck once the output gets big enough.</p>
-<p>The internal <code>phasor_imp</code> function has to be modified setting <code>OPTIMIZE</code> to 0 to use the
-slower but more accurate version of the phasor.</p>
+<p>All functions using <code>phasor_imp</code> are affected by this problem, but a safer
+version is implemented, and can be used alternatively by setting <code>SAFE=1</code> in the environment using 
+<a href="https://faustdoc.grame.fr/manual/syntax/#explicit-substitution">explicit sustitution</a> syntax.</p>
+<p>For example: <code>process = os[SAFE=1;].phasor(1.0, -.001);</code> will use the safer implementation of <code>phasor_imp</code>.</p>
 <h2 id="wave-table-based-oscillators">Wave-Table-Based Oscillators</h2>
 <p>Oscillators using tables. The table size is set by the 
 <a href="https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib">pl.tablesize</a> constant.</p>

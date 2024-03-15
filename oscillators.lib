@@ -67,8 +67,8 @@ pl = library("platform.lib");
 //======================Oscillators based on mathematical functions===============
 //
 // Note that there is a numerical problem with several phasor functions built using the internal
-// `phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, so it will 
-// have no effect when summed to 1, but it will be enough to make the fractional function wrap 
+// `phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, which happens with very small frequencies, 
+// so it will have no effect when summed to 1, but it will be enough to make the fractional function wrap 
 // around when summed to 0. An example of this problem can be observed when running the following code:
 //
 // `process = os.phasor(1.0, -.001);`
@@ -77,18 +77,26 @@ pl = library("platform.lib");
 // step is greater than `-ma.EPSILON`, which will have no effect when summed to 1, but it will be significant 
 // enough to make the fractional function  wrap around when summed to 0.
 //
-// You may want to consider clipping the incremental step to guarantee that the phasor will 
-// always run correctly for its full cycle. Otherwise, for increments smaller than `ma.EPSILON`, 
+// The incremental step can be clipped to guarantee that the phasor will 
+// always run correctly for its full cycle, otherwise, for increments smaller than `ma.EPSILON`, 
 // phasor would initially run but it'd eventually get stuck once the output gets big enough.
 // 
-// The internal `phasor_imp` function has to be modified setting `OPTIMIZE` to 0 to use the
-// slower but more accurate version of the phasor.
+// All functions using `phasor_imp` are affected by this problem, but a safer
+// version is implemented, and can be used alternatively by setting `SAFE=1` in the environment using 
+// [explicit sustitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution) syntax.
+// 
+// For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer implementation of `phasor_imp`.
 //=================================================================================
 
 //=========================Wave-Table-Based Oscillators===================================
 // Oscillators using tables. The table size is set by the 
 // [pl.tablesize](https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib) constant.
 //========================================================================================
+
+// Global parameter to use the safer version of `phasor_imp`, but which
+// could be used in other functions as well.
+
+SAFE = 0; // 0: use the faster version, 1: use the safer version
 
 //-----------------------`(os.)sinwaveform`------------------------
 // Sine waveform ready to use with a `rdtable`.
@@ -148,20 +156,17 @@ phasor_env(freq, N) = environment {
 declare phasor_env author "Pierre Mascarade Relano, Maxime Sirbu, Stéphane Letz";
 
 // Generic phasor with `reset` and `phase` parameters to be specialised in concrete use-cases.
-phasor_imp(freq, reset, phase) = (select2(hard_reset, +(incr(OPTIMIZE)), phase) : ma.decimal) ~ _
+phasor_imp(freq, reset, phase) = (select2(hard_reset, +(incr(SAFE)), phase) : ma.decimal) ~ _
 with {
     incr_aux = freq/ma.SR;
 
-    // Change this to 1 to use the slower but more accurate version
-    OPTIMIZE = 0;
+    // Faster but less accurate version
+    incr(0) = incr_aux;
 
     // To make sure that the incremental step is greater or equal to EPSILON or 
     // less than or equal to -EPSILON to avoid numerical problems. 
     // A frequency of 0Hz can still be used to freeze the phasor.
-    incr(0)= (freq != 0) * ba.if(freq < 0, min(-1.0 * ma.EPSILON, incr_aux), max(ma.EPSILON, incr_aux));
-
-    // Faster but less accurate version
-    incr(1) = incr_aux;
+    incr(1)= (freq != 0) * ba.if(freq < 0, min(-1.0 * ma.EPSILON, incr_aux), max(ma.EPSILON, incr_aux));
 
     // To correctly start at `phase` at the first sample
     hard_reset = (1-1')|reset; 
