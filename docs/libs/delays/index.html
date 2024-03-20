@@ -237,6 +237,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#deprime_power_delays" class="nav-link">(de.)prime_power_delays</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#lagrange-interpolation" class="nav-link">Lagrange Interpolation</a>
@@ -308,17 +312,33 @@ transpose when the delay time is changed.</p>
 <h4 id="usage_2">Usage</h4>
 <pre><code>_ : sdelay(n,it,d) : _
 </code></pre>
-<p>Where :</p>
+<p>Where:</p>
 <ul>
 <li><code>n</code>: the max delay length in samples</li>
 <li><code>it</code>: interpolation time (in samples), for example 1024</li>
 <li><code>d</code>: the delay length in samples (float)</li>
 </ul>
+<hr />
+<h3 id="deprime_power_delays"><code>(de.)prime_power_delays</code></h3>
+<p>Prime Power Delay Line Lengths.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>si.bus(N) : prime_power_delays(N,pathmin,pathmax) : si.bus(N);
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: positive integer up to 16 (for higher powers of 2, extend 'primes' array below)</li>
+<li><code>pathmin</code>: minimum acoustic ray length in the reverberator (in meters)</li>
+<li><code>pathmax</code>: maximum acoustic ray length (meters) - think "room size"</li>
+</ul>
+<h4 id="reference">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Prime_Power_Delay_Line.html">https://ccrma.stanford.edu/~jos/pasp/Prime_Power_Delay_Line.html</a></li>
+</ul>
 <h2 id="lagrange-interpolation">Lagrange Interpolation</h2>
 <hr />
 <h3 id="defdelaylti-and-defdelayltv"><code>(de.)fdelaylti</code> and <code>(de.)fdelayltv</code></h3>
 <p>Fractional delay line using Lagrange interpolation.</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_4">Usage</h4>
 <pre><code>_ : fdelaylt[i|v](N, n, d) : _
 </code></pre>
 <p>Where:</p>
@@ -347,14 +367,14 @@ transpose when the delay time is changed.</p>
 are also available where <code>N</code> is the order of the interpolation, built using <code>fdelayltv</code>.</p>
 <h2 id="thiran-allpass-interpolation">Thiran Allpass Interpolation</h2>
 <p>Thiran Allpass Interpolation.</p>
-<h4 id="reference">Reference</h4>
+<h4 id="reference_1">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Thiran_Allpass_Interpolators.html">https://ccrma.stanford.edu/~jos/pasp/Thiran_Allpass_Interpolators.html</a></li>
 </ul>
 <hr />
 <h3 id="defdelayna"><code>(de.)fdelay[N]a</code></h3>
 <p>Delay lines interpolated using Thiran allpass interpolation.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_5">Usage</h4>
 <pre><code>_ : fdelay[N]a(n, d) : _
 </code></pre>
 <p>(exactly like <code>fdelay</code>)</p>
