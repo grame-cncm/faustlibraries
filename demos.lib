@@ -556,6 +556,37 @@ with{
     mdepth = select2(vibr,depth,2); // Improve "ease of use"
 };
 
+//-------------------------`(dm.)tapeStop_demo`---------------------------
+// Stereo tape-stop effect.
+//
+// #### Usage
+//
+// ```
+// _,_ : tapeStop_demo : _,_
+// ```
+//------------------------------------------------------------
+declare tapeStop_demo author "David Braun";
+declare tapeStop_demo copyright "Copyright (C) 2024 by David Braun <braun@ccrma.stanford.edu>";
+declare tapeStop_demo license "MIT-style STK-4.3 license";
+
+tapeStop_demo = hgroup("Tape Stop", ef.tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop))
+with {
+    LAGRANGE_ORDER = 3;
+    MAX_TIME_SEC = 4;
+    MIN_TIME_SEC = 0.01;
+    MIN_ALPHA = .01;
+    MAX_ALPHA = 2;
+
+    MAX_TIME_SAMP = MAX_TIME_SEC : ba.sec2samp;
+    msec2samp = _/1000 : ba.sec2samp;
+
+    stop = checkbox("[0] Stop");
+    stopTime = hslider("[1] Stop Time [style:knob][unit:ms]", 100, MIN_TIME_SEC*1000, MAX_TIME_SEC*1000, 1) : msec2samp;
+    stopAlpha = hslider("[2] Stop Alpha [style:knob][tooltip:Alpha==1 represents a linear deceleration (constant force). Alpha<1 represents an initially weaker, then stronger force. Alpha>1 represents an initially stronger, then weaker force.]", 1, MIN_ALPHA, MAX_ALPHA, .01);
+    gainAlpha = hslider("[3] Gain Alpha [style:knob][tooltip:During the tape-stop, lower alpha stays louder longer]", 1, MIN_ALPHA, MAX_ALPHA, .01);
+    crossfade = hslider("[4] Crossfade [style:knob][unit:ms][tooltip:Crossfade to apply when resuming normal playback.]", 3, 0, 125, 1) : msec2samp;
+};
+
 //======================================Reverbs===========================================
 //========================================================================================
 
