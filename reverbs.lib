@@ -363,6 +363,254 @@ closed source license or any other license if you decide so.
 ************************************************************************
 ************************************************************************/
 
+//-------------------`(re.)vital_rev`------------------------------------------
+// A port of the reverb from the Vital synthesizer. All input parameters
+// have been normalized to a continuous [0,1] range, making them easy to modulate.
+// The scaling of the parameters happens inside the function.
+//
+// #### Usage
+//
+// ```
+// _,_ : vital_rev(prelow, prehigh, lowcutoff, highcutoff, lowgain, highgain, chorus_amt, chorus_freq, predelay, time, size, mix) : _,_ 
+// ```
+//
+// Where:
+//
+// * `prelow`: In the pre-filter, this is the cutoff frequency of a high-pass filter (hence a low value).
+// * `prehigh`: In the pre-filter, this is the cutoff frequency of a low-pass filter (hence a high value).
+// * `lowcutoff`: In the feedback filter stage, this is the cutoff frequency of a low-shelf filter.
+// * `highcutoff`: In the feedback filter stage, this is the cutoff frequency of a high-shelf filter.
+// * `lowgain`: In the feedback filter stage, this is the gain of a low-shelf filter.
+// * `highgain`: In the feedback filter stage, this is the gain of a high-shelf filter.
+// * `chorus_amt`: The amount of chorus modulation in the main delay lines.
+// * `chorus_freq`: The LFO rate of chorus modulation in the main delay lines.
+// * `predelay`: The amount of pre-delay time.
+// * `time`: The decay time of the reverb.
+// * `size`: The size of the room.
+// * `mix`: A wetness value to use in a final dry/wet mixer.
+//-----------------------------------------------------------------------------
+vital_rev(_prelow, _prehigh, _lowcutoff, _highcutoff, _lowgain, _highgain, _chorus_amt, _chorus_freq, _predelay, _time, _size, _mix) = ef.dryWetMixerConstantPower(wetAmount, reverb)
+with {
+    /* Copyright 2013-2019 Matt Tytel
+    *
+    * vital is free software: you can redistribute it and/or modify
+    * it under the terms of the GNU General Public License as published by
+    * the Free Software Foundation, either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * vital is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    * GNU General Public License for more details.
+    *
+    * You should have received a copy of the GNU General Public License
+    * along with vital. If not, see <http://www.gnu.org/licenses/>.
+    */
+
+    /*
+    Adapted from https://github.com/mtytel/vital/blob/main/src/synthesis/effects/reverb.cpp
+    C++ author: Matt Tytel
+    Faust/Python author: David Braun
+    This is not an official product related to Vital.
+
+    David's analysis of the code:
+    This technique is an example of a Feedback Delay Network (FDN) (https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html).
+    Specifically, the feedback matrix is a 16x16 Hadamard matrix that has been efficiently implemented.
+
+    This matrix is the sum of three matrices:
+    * an identity matrix
+    * other_feedback
+    * adjacent_feedback
+
+    Although other_feedback and adjacent_feedback are not orthogonal,
+    when all three matrices are summed together, they are orthogonal and form a Hadamard matrix (ignoring a gain factor).
+    The orthogonality makes it a valid FDN matrix.
+
+    Note that other_feedback and adjacent_feedback are both 16x16 matrices.
+    Each is cleverly factorized into the product of a 16x4 matrix and a 4x16 matrix,
+    resulting in a 16x16 matrix.
+
+    Let's use numpy to explain the matrices and eventually show that the final result is Hadamard:
+
+    ```python
+    import numpy as np
+    from scipy.linalg import block_diag
+
+    # Make identity matrix
+    identity = np.eye(16)
+
+    # Make adjacent_matrix matrix
+    x = np.ones((4,))
+    A = block_diag(x,x,x,x)
+    assert A.shape == (4,16)
+    adjacent_matrix = (A.T @ A)*-.5
+    assert adjacent_matrix.shape == (16,16)
+
+    # Make other_feedback
+    A = np.eye(4)
+    A = np.concatenate([A,A,A,A], axis=1)
+    assert A.shape == (4,16)
+    other_feedback = (A.T @ A)*-.5 + np.full((16,16), 1/4)
+    assert other_feedback.shape == (16,16)
+
+    final_matrix = identity + adjacent_matrix + other_feedback
+
+    # assert that final_matrix is orthogonal
+    assert ((final_matrix @ final_matrix.T) == identity).all()
+
+    # assert that (final_matrix*4) is a Hadamard matrix (see Wikipedia)
+    N = 16
+    assert np.round(np.linalg.det(final_matrix*4)) == N**(N/2)
+    ```
+
+    Other notes:
+    Vital's reverb is similar to dm.zita_rev1.
+    In this Faust port of Vital, I placed the allpasses and delay in the "forward" stage.
+    I placed the decay, filters, and matrix in the "feedback" stage.
+    In Zita Rev, the forward stage has the allpasses and matrix.
+    The feedback stage has the delay and filters.
+
+    I'm not certain what choice Vital made, but it might be ok to move these things around.
+    If you can prove that Vital did it a certain way, or you can explain that
+    one way is better than another, please make a PR to improve this code.
+    */
+
+    DELAY_QUALITY = 3; // [1-3] where 3 is best, and 1 is linear interpolation
+
+    kBaseSampleRate = 44100; // it's ok if ma.SR is not 44100, but don't change this
+    kT60Amplitude = 0.001;
+    kAllpassFeedback = 0.6;
+
+    kMaxChorusDrift = 2500.0; // samples
+    kMinDecayTime = 0.1; // seconds
+    kMaxDecayTime = 100.0; // seconds
+    kMaxChorusFrequency = 16.0; // Hz
+
+    kPreDelayMaxSec = 0.3; // seconds
+
+    kNetworkContainers = 4; // the number of rdtables used for allpassDelay
+    kContainerSize = 4; // how long the allpassDelay waveforms below are
+
+    kMinSizePower = -3;
+    kMaxSizePower = 1;
+
+    clampremap(from1, from2, to1, to2) = aa.clip(from1, from2) : it.remap(from1, from2, to1, to2);
+
+    low_pre_cutoff_frequency = _prelow : clampremap(0, 1, 16, 135) : ba.midikey2hz;
+    high_pre_cutoff_frequency = _prehigh : clampremap(0, 1, 16, 135) : ba.midikey2hz;
+
+    low_cutoff_frequency = _lowcutoff : clampremap(0, 1, 16, 135) : ba.midikey2hz;
+    high_cutoff_frequency = _highcutoff : clampremap(0, 1, 16, 135) : ba.midikey2hz;
+    low_gain = _lowgain : clampremap(0, 1, -24, 0);
+    high_gain = _highgain : clampremap(0, 1, -24, 0);
+
+    chorus_amount = _chorus_amt : aa.clip(0,1) : quadScale : _*kMaxChorusDrift*sample_rate_ratio*size_mult;
+    chorus_frequency = _chorus_freq : exp(it.remap(0, 1, -8, 3)) : min(kMaxChorusFrequency);
+
+    pre_delay_samples = _predelay : clampremap(0, 1, 0, kPreDelayMaxSec) : _*ma.SR;
+    decay_samples = _time : exp(it.remap(0, 1, -6, 6)) : aa.clip(kMinDecayTime, kMaxDecayTime) : _*kBaseSampleRate;
+    size = _size : aa.clip(0, 1);
+
+    wetAmount = _mix : aa.clip(0, 1);
+
+    quadScale(x) = x*x;
+
+    kNetworkSize = kNetworkContainers * kContainerSize;
+
+    containerBus = si.bus(kContainerSize);
+    networkBus = si.bus(kNetworkSize);
+
+    size_mult = pow(2, it.interpolate_linear(size, kMinSizePower, kMaxSizePower));
+
+    sample_rate_ratio = ma.SR/kBaseSampleRate;
+
+    kAllpassMaxDelay = 1001; // manually inspect rdtables below and take max value
+    allpassDelay(j, i) = i <: rdtable(waveform{1001, 799, 933, 876}),
+                              rdtable(waveform{895, 807, 907, 853}),
+                              rdtable(waveform{957, 1019, 711, 567}),
+                              rdtable(waveform{833, 779, 663, 997})
+                              : ba.selector(j, kNetworkContainers);
+
+    kFeedbackMaxDelay = (11329 + kMaxChorusDrift)*sample_rate_ratio*pow(2, kMaxSizePower); // pow(2, kMaxSizePower) is the max size_mult
+    feedbackDelay(j, i) = i <: rdtable(waveform{6753.2, 9278.4, 7704.5, 11328.5}),
+                               rdtable(waveform{9701.12, 5512.5, 8480.45, 5638.65}),
+                               rdtable(waveform{3120.73, 3429.5, 3626.37, 7713.52}),
+                               rdtable(waveform{4521.54, 6518.97, 5265.56, 5630.25})
+                               : ba.selector(j, kNetworkContainers)
+                               : _ * size_mult * sample_rate_ratio;
+
+    getDecay(i, j) = pow(kT60Amplitude, feedbackDelay(i, j) / decay_samples);
+
+    pre_delay = sp.stereoize(de.fdelayltv(N, kPreDelayMaxSec*ma.SR, safe_delay_samples))
+    with {
+        safe_delay_samples = pre_delay_samples : max((N-1)/2);
+        N = DELAY_QUALITY;
+    };
+
+    pre_filter = sp.stereoize(fi.highpass(1, low_pre_cutoff_frequency) : fi.lowpass(1, high_pre_cutoff_frequency) : _/kNetworkContainers);
+
+    // mathematical hard-syncing phasor (see `phasor_imp` in `faustlibraries/oscillators.lib`)
+    m_lfo_sine(freq, phase) = ((select2(hard_reset, +(freq/ma.SR), phase) : ma.decimal) ~ _) : sin(_*2*ma.PI)
+    with {
+        hard_reset = (1-1'); // To correctly start at `phase` at the first sample
+    };
+
+    phase_offset(i) = i / kNetworkSize;
+    real_part(phase_offset) = m_lfo_sine(chorus_frequency, phase_offset + .25);  // "real" cosine part
+    imag_part(phase_offset) = m_lfo_sine(chorus_frequency, phase_offset);  // "imaginary" sine part
+
+    lfo1(i) = phase_offset(i) : real_part;
+    lfo2(i) = phase_offset(i) : imag_part;
+
+    mydelay(delay_samples) = de.fdelayltv(N, kFeedbackMaxDelay, safe_delay_samples)
+    with {
+        safe_delay_samples = delay_samples : max((N-1)/2);
+        N = DELAY_QUALITY;
+    };
+
+    delay = par(i, kContainerSize, mydelay(feedbackDelay(0, i) + lfo1(i)*chorus_amount)),
+            par(i, kContainerSize, mydelay(feedbackDelay(1, i) - lfo1(i)*chorus_amount)),
+            par(i, kContainerSize, mydelay(feedbackDelay(2, i) + lfo2(i)*chorus_amount)),
+            par(i, kContainerSize, mydelay(feedbackDelay(3, i) - lfo2(i)*chorus_amount));
+
+    allpass(j) = par(i, kContainerSize, fi.allpass_comb(kAllpassMaxDelay, allpassDelay(j, i), kAllpassFeedback));
+    allpasses = par(i, kNetworkContainers, allpass(i));
+
+    filters = par(i, kNetworkSize,
+        (fi.lowshelf(1, low_gain, low_cutoff_frequency) : fi.highshelf(1, high_gain, high_cutoff_frequency))
+    );
+
+    other_feedback = total_rows <: (containerBus :> _/kContainerSize <: containerBus), par(i, kContainerSize, _*-.5) :> containerBus <: networkBus
+    with {
+        total_rows = networkBus :> containerBus;
+    };
+
+    adjacent_feedback = par(i, kNetworkContainers, containerBus :>_) : par(i, kNetworkContainers, _*s) <: par(i, kNetworkContainers, _<: containerBus)
+    with {
+        s = 0-.5*kNetworkContainers/kContainerSize;
+    };
+
+    decay = par(i, kNetworkContainers, par(j, kContainerSize, _*getDecay(i, j)));
+
+    matrix =  networkBus <: networkBus, other_feedback, adjacent_feedback :> networkBus;
+
+    reverb =
+    // PRE
+    pre_delay : pre_filter <:
+
+    // BODY
+    (networkBus, networkBus :> allpasses : delay)
+    ~
+    // FEEDBACK
+    (decay : filters : matrix)
+
+    // POST
+    :> par(i, 2, _*2/kNetworkContainers);
+};
+
+declare vital_rev author "David Braun";
+declare vital_rev license "GPL-3.0";
+
 //===============================Freeverb===================================
 //==========================================================================
 

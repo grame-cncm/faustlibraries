@@ -888,6 +888,48 @@ with{
         factor]", -20, -70, 40, 0.1)) : ba.db2linear : si.smoo;
 };
 
+
+//----------------------------------`(dm.)vital_rev_demo`------------------------------
+// Example GUI for `vital_rev` with all parameters exposed.
+//
+// #### Usage
+//
+// ```
+// _,_ : vital_rev_demo : _,_
+// ```
+//
+//------------------------------------------------------------
+vital_rev_demo = hgroup("Reverb", re.vital_rev(prelow, prehigh, lowcutoff, highcutoff, lowgain, highgain, chorus_amt, chorus_freq, predelay, time, size, mix))
+with {
+    // SMOO = _; 
+    SMOO = si.smoo; // optionally turn on smoo of hsliders
+
+    Prefilter(x) = hgroup("[0] Pre-filter", x:SMOO);
+    Filter(x) = hgroup("[1] Filter", x:SMOO);
+    Chorus(x) = hgroup("[2] Chorus", x:SMOO);
+    Space(x) = hgroup("[3] Space", x:SMOO);
+
+    prelow = Prefilter(hslider("[0] Low Cutoff [style:knob]", it.remap(16,135,0,1,16), 0, 1, .01));
+    prehigh = Prefilter(hslider("[1] High Cutoff [style:knob]", it.remap(16,135,0,1,110), 0, 1, .01));
+
+    lowcutoff = Filter(hslider("[0] Low Shelf [style:knob]", it.remap(16,135,0,1,16), 0, 1, .01));
+    highcutoff = Filter(hslider("[2] High Shelf [style:knob]", it.remap(16,135,0,1,90), 0, 1, .01));
+
+    lowgain = Filter(hslider("[1] Low Gain [style:knob]", it.remap(-6,0,0,1,0), 0, 1, .01));
+    highgain = Filter(hslider("[3] High Gain [style:knob]", it.remap(-6,0,0,1,-1), 0, 1, .01));
+
+    chorus_amt = Chorus(hslider("[0] Amount [style:knob]", .01, 0, 1, .01));
+    chorus_freq = Chorus(hslider("[1] Rate [style:knob]", 0.1, 0, 1, .01));
+
+    predelay = Space(hslider("[0] Pre-Delay [style:knob]", 0, 0, 1, .01));
+    time = Space(hslider("[1] Decay Time [style:knob]", 0.5, 0, 1, .01));
+    size = Space(hslider("[2] Size [style:knob]", .5, 0, 1, .01)) : aa.clip(0, 1);
+
+    mix = hslider("[4] Mix [style:knob]",  1, 0, 1, .01) : SMOO : aa.clip(0, 1);
+};
+declare vital_rev_demo author "David Braun";
+declare vital_rev_demo license "GPL-3.0";
+
 //----------------------------------`(dm.)dattorro_rev_demo`------------------------------
 // Example GUI for `dattorro_rev` with all parameters exposed. With additional
 // dry/wet and output gain control.
