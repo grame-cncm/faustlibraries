@@ -253,6 +253,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#revital_rev" class="nav-link">(re.)vital_rev</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#freeverb" class="nav-link">Freeverb</a>
@@ -404,6 +408,29 @@ damping filters.</p>
 <p>Where:</p>
 <p><code>rgxyz</code> = relative gain of lanes 1,4,2 to lane 0 in output (e.g., -9 to 9)
   (remaining args and references as for zita_rev1_stereo above)</p>
+<hr />
+<h3 id="revital_rev"><code>(re.)vital_rev</code></h3>
+<p>A port of the reverb from the Vital synthesizer. All input parameters
+have been normalized to a continuous [0,1] range, making them easy to modulate.
+The scaling of the parameters happens inside the function.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>_,_ : vital_rev(prelow, prehigh, lowcutoff, highcutoff, lowgain, highgain, chorus_amt, chorus_freq, predelay, time, size, mix) : _,_ 
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>prelow</code>: In the pre-filter, this is the cutoff frequency of a high-pass filter (hence a low value).</li>
+<li><code>prehigh</code>: In the pre-filter, this is the cutoff frequency of a low-pass filter (hence a high value).</li>
+<li><code>lowcutoff</code>: In the feedback filter stage, this is the cutoff frequency of a low-shelf filter.</li>
+<li><code>highcutoff</code>: In the feedback filter stage, this is the cutoff frequency of a high-shelf filter.</li>
+<li><code>lowgain</code>: In the feedback filter stage, this is the gain of a low-shelf filter.</li>
+<li><code>highgain</code>: In the feedback filter stage, this is the gain of a high-shelf filter.</li>
+<li><code>chorus_amt</code>: The amount of chorus modulation in the main delay lines.</li>
+<li><code>chorus_freq</code>: The LFO rate of chorus modulation in the main delay lines.</li>
+<li><code>predelay</code>: The amount of pre-delay time.</li>
+<li><code>time</code>: The decay time of the reverb.</li>
+<li><code>size</code>: The size of the room.</li>
+<li><code>mix</code>: A wetness value to use in a final dry/wet mixer.</li>
+</ul>
 <h2 id="freeverb">Freeverb</h2>
 <hr />
 <h3 id="remono_freeverb"><code>(re.)mono_freeverb</code></h3>
@@ -412,7 +439,7 @@ is extensively used in the free-software world. It uses four Schroeder allpasses
 series and eight parallel Schroeder-Moorer filtered-feedback comb-filters for each
 audio channel, and is said to be especially well tuned.</p>
 <p><code>mono_freeverb</code> is a standard Faust function.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>_ : mono_freeverb(fb1, fb2, damp, spread) : _
 </code></pre>
 <p>Where:</p>
@@ -433,7 +460,7 @@ which is less restrictive.</p>
 is extensively used in the free-software world. It uses four Schroeder allpasses in
 series and eight parallel Schroeder-Moorer filtered-feedback comb-filters for each
 audio channel, and is said to be especially well tuned.</p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>_,_ : stereo_freeverb(fb1, fb2, damp, spread) : _,_
 </code></pre>
 <p>Where:</p>
@@ -448,7 +475,7 @@ audio channel, and is said to be especially well tuned.</p>
 <h3 id="redattorro_rev"><code>(re.)dattorro_rev</code></h3>
 <p>Reverberator based on the Dattorro reverb topology. This implementation does
 not use modulated delay lengths (excursion).</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>_,_ : dattorro_rev(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) : _,_
 </code></pre>
 <p>Where:</p>
@@ -472,7 +499,7 @@ not use modulated delay lengths (excursion).</p>
 original paper.
 This implementation does not use modulated delay lengths (excursion) and
 uses zero length pre-delay.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>_,_ : dattorro_rev_default : _,_
 </code></pre>
 <h4 id="reference_3">Reference</h4>
@@ -485,7 +512,7 @@ uses zero length pre-delay.</p>
 <p>An algorithmic reverb (stereo in/out), inspired by the lush chorused sound 
 of certain vintage Lexicon and Alesis reverberation units. 
 Designed to sound great with synthetic sound sources, rather than sound like a realistic space.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>_,_ : jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff) : _,_
 </code></pre>
 <p>Where:</p>
@@ -512,7 +539,7 @@ Designed to sound great with synthetic sound sources, rather than sound like a r
 The effect consists of a diffuser (like a mini-reverb, structurally similar to the one used in <code>jpverb</code>)
 connected in a feedback system with a long, modulated delay-line. 
 Excels at producing spacey washes of sound.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>_,_ : greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq) : _,_
 </code></pre>
 <p>Where:</p>
