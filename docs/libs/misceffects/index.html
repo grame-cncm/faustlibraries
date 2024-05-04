@@ -325,6 +325,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#eftapestop" class="nav-link">(ef.)tapeStop</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#pitch-shifting" class="nav-link">Pitch Shifting</a>
@@ -740,12 +744,30 @@ as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</
 <h4 id="demo_2">Demo</h4>
 <pre><code>_,_,_ : ef.uniformPanToStereo(3) : _,_
 </code></pre>
+<hr />
+<h3 id="eftapestop"><code>(ef.)tapeStop</code></h3>
+<p>A tape-stop effect, like putting a finger on a vinyl record player.</p>
+<h4 id="usage_20">Usage:</h4>
+<pre><code>_,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
+_ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>C</code>: The number of input and output channels.</li>
+<li><code>LAGRANGE_ORDER</code>: The order of the Lagrange interpolation on the delay line. [2-3] recommended.</li>
+<li><code>MAX_TIME_SAMP</code>: Maximum stop time in samples</li>
+<li><code>crossfade</code>: A crossfade in samples to apply when resuming normal playback. Crossfade is not applied during the enabling of the tape-stop.</li>
+<li><code>gainAlpha</code>: During the tape-stop, lower alpha stays louder longer. Safe values are in the range [.01,2].</li>
+<li><code>stopAlpha</code>: <code>stopAlpha==1</code> represents a linear deceleration (constant force). <code>stopAlpha&lt;1</code> represents an initially weaker, then stronger force. <code>stopAlpha&gt;1</code> represents an initially stronger, then weaker force. Safe values are in the range [.01,2].</li>
+<li><code>stopTime</code>: Desired duration of the stop time, in samples.</li>
+<li><code>stop</code>: When <code>stop</code> becomes positive, the tape-stop effect will start. When <code>stop</code> becomes zero, normal audio will resume via crossfade.</li>
+</ul>
 <h2 id="pitch-shifting">Pitch Shifting</h2>
 <hr />
 <h3 id="eftranspose"><code>(ef.)transpose</code></h3>
 <p>A simple pitch shifter based on 2 delay lines.
 <code>transpose</code> is a standard Faust function.</p>
-<h4 id="usage_20">Usage</h4>
+<h4 id="usage_21">Usage</h4>
 <pre><code>_ : transpose(w, x, s) : _
 </code></pre>
 <p>Where:</p>
@@ -758,13 +780,13 @@ as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</
 <hr />
 <h3 id="efsoftclipquadratic"><code>(ef.)softclipQuadratic</code></h3>
 <p>Quadratic softclip nonlinearity.</p>
-<h4 id="usage_21">Usage</h4>
+<h4 id="usage_22">Usage</h4>
 <pre><code>_ : softclipQuadratic : _;
 </code></pre>
 <hr />
 <h3 id="efwavefold"><code>(ef.)wavefold</code></h3>
 <p>Wavefolding nonlinearity.</p>
-<h4 id="usage_22">Usage</h4>
+<h4 id="usage_23">Usage</h4>
 <pre><code>_ : wavefold(width) : _;
 </code></pre>
 <p>Where:</p>
