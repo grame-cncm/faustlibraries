@@ -1803,6 +1803,33 @@ with {
 };
 
 
+//--------------------------`(ba.)downSampleCV`---------------------------
+//
+// A version of `ba.downSample` where the frequency parameter has
+// been replaced by an `amount` parameter that is in the range zero
+// to one. WARNING: this function doesn't change the rate of a
+// signal, it just holds samples...
+//
+// #### Usage
+// ```
+// _ : downSampleCV(amount) : _
+// ```
+// Where:
+//
+// * `amount`: The amount of down-sampling to perform [0..1]
+//-----------------------------------------------------------------------
+downSampleCV(amt) = sAndH(hold)
+with {
+    // If amt is 0, then freq should be ma.SR/2.
+    // If amt is 1, then freq should be 491.
+    // 491 is derived from listening to the Serum synthesizer.
+    freq = amt : it.remap(0, 1, hz2midikey(ma.SR/2), hz2midikey(491)) : midikey2hz;
+    hold = time%int(ma.SR/freq) == 0;
+};
+
+declare downSampleCV author "Romain Michon/David Braun";
+
+
 //------------------`(ba.)peakhold`---------------------------
 // Outputs current max value above zero.
 //
