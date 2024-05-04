@@ -885,6 +885,78 @@ uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
 declare uniformPanToStereo author "Julius O. Smith III";
 declare uniformPanToStereo license "STK-4.3";
 
+//---------------------`(ef.)tapeStop`-----------------------------------------
+// A tape-stop effect, like putting a finger on a vinyl record player.
+//
+// #### Usage:
+//
+// ```
+// _,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
+// _ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
+// ```
+//
+// Where:
+//
+// * `C`: The number of input and output channels.
+// * `LAGRANGE_ORDER`: The order of the Lagrange interpolation on the delay line. [2-3] recommended.
+// * `MAX_TIME_SAMP`: Maximum stop time in samples
+// * `crossfade`: A crossfade in samples to apply when resuming normal playback. Crossfade is not applied during the enabling of the tape-stop.
+// * `gainAlpha`: During the tape-stop, lower alpha stays louder longer. Safe values are in the range [.01,2].
+// * `stopAlpha`: `stopAlpha`==1 represents a linear deceleration (constant force). `stopAlpha`<1 represents an initially weaker, then stronger force. `stopAlpha`>1 represents an initially stronger, then weaker force. Safe values are in the range [.01,2].
+// * `stopTime`: Desired duration of the stop time, in samples.
+// * `stop`: When `stop` becomes positive, the tape-stop effect will start. When `stop` becomes zero, normal audio will resume via crossfade.
+//-----------------------------------------------------------------------------
+tapeStop(C, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) = 
+(tapeStopTick(C) ~ _) : !,si.bus(C)
+with {
+    tapeStopTick(C, _delaySamples) = delaySamples, circuitFinal
+    with {
+        // Where `stopCounter` goes from 0 to stopTime (or higher)
+        // When `stopCounter` is 0, curve's output is 1.
+        // When `stopCounter` is stopTime, curve's output is 0.
+        curve(alpha) = 1-stopCounter/stopTime : max(0) : pow(_, alpha)
+        with {
+            // when stop is pulsed, count samples starting at 0
+            stopCounter = *(ba.if(stop&(1-stop'),0,1))+1~_ : -(1);
+        };
+        minDelay = (LAGRANGE_ORDER-1)/2;
+        delayFunc(curDel) = par(i, C, de.fdelayltv(LAGRANGE_ORDER, MAX_TIME_SAMP, max(curDel, minDelay)));
+
+        delaySamples = ba.if(stop&(1-stop'), minDelay, _delaySamples) + delayDelta
+        with {
+            /*
+            Velocity describes the velocity of the read-index in units of samples per sample.
+            If the velocity is 1, then the read-index is moving as fast as the write-index
+            is moving, and there is no delay. If the velocity is 0, then the read-index is "stuck"
+            on a particular location. During a tape-stop, our technique is to animate velocity
+            from 1 to 0 according to a curve based on stopAlpha. We discretize the accumulated
+            delay with delayDelta. Note that when velocity is zero, then delayDelta is 1. At this
+            moment the delay line wrote 1 new sample (as always), but our delayDelta INCREASED by one.
+            This means it's playing same sample twice in a row, and the record player is motionless.
+            When `stop` triggers by becoming 1, then delaySamples is reset to `minDelay`. At this moment
+            we should have already been listening to the circuitNormal which is using `minDelay`.
+            Therefore, there isn't a click.
+            */
+            velocity = curve(stopAlpha);
+            delayDelta = 1-velocity;
+        };
+
+        circuitNormal = delayFunc(0); // Don't use si.bus(C) because of minDelay
+        circuitSlowdown = delayFunc(delaySamples) : par(i, C, _*g)
+        with {
+            g = curve(gainAlpha);
+        };
+        circuitFinal = ba.selectmulti(actualCrossfade, (circuitNormal, circuitSlowdown), stop)
+        with {
+            actualCrossfade = ba.if(stop,0,crossfade); // only crossfade when resuming normal playback
+        };
+    };
+};
+
+declare tapeStop author "David Braun";
+declare tapeStop copyright "Copyright (C) 2024 by David Braun <braun@ccrma.stanford.edu>";
+declare tapeStop license "MIT-style STK-4.3 license";
+
 //=======================================Pitch Shifting===================================
 //========================================================================================
 
