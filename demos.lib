@@ -58,6 +58,7 @@ re = library("reverbs.lib");
 en = library("envelopes.lib");
 it = library("interpolators.lib");
 aa = library("aanl.lib");
+sp = library("spats.lib");
 
 declare name "Faust Demos Library";
 declare version "1.1.1";
@@ -962,6 +963,229 @@ with {
 };
 declare vital_rev_demo author "David Braun";
 declare vital_rev_demo license "GPL-3.0";
+
+
+//--------------------------`(dm.)reverbTank_demo`---------------------------
+//
+// This is a stereo reverb following the "ReverbTank" example in [1],
+// although some parameter ranges and scaling have been adjusted.
+// It is an unofficial version of the Spin Semiconductor® Reverb.
+// Other relevant instructional material can be found in [2-4].
+//
+// #### Usage
+// ```
+// _, _ : reverbTank_demo : _,_
+// ```
+//
+// #### References
+// [1] Pirkle, W. C. (2019). Designing audio effect plugins in C++ (2nd ed.). Chapter 17.14.
+// [2] Spin Semiconductor. (n.d.). Reverberation. Retrieved 2024-04-16, from http://www.spinsemi.com/knowledge_base/effects.html#Reverberation
+// [3] Zölzer, U. (2022). Digital audio signal processing (3rd ed.). Chapter 7, Figure 7.39.
+// [4] Valhalla DSP. (2010, August 25). RIP Keith Barr. Retrieved 2024-04-16, from https://valhalladsp.com/2010/08/25/rip-keith-barr/
+//-----------------------------------------------------------------------
+reverbTank_demo = hgroup("Reverb", ef.dryWetMixer(wet, 
+    (preDelay : preFilter : avg : ((si.bus(2) :> branches) ~ selectLastBranchDelay) : selectLR :> shelves)
+))
+with {
+    /*
+    All-capitalized signals are compile-time constant.
+    All other signals can be modulated in real-time, although you may not necessarily want to modulate them.
+    */
+
+    // SMOO = _; // If you don't want to smooth parameters.
+    SMOO = si.smoo;
+
+    PRE_DELAY_MAX_MSEC = 100;
+    OUTER_DELAY_MAX_MSEC = 100;
+    INNER_DELAY_MAX_MSEC = 100;
+    FIXED_DELAY_MAX_MSEC = 100;
+
+    OUTER_DELAY_MAX_SAMPS = OUTER_DELAY_MAX_MSEC : msec2samp;
+    INNER_DELAY_MAX_SAMPS = INNER_DELAY_MAX_MSEC : msec2samp;
+    FIXED_DELAY_MAX_SAMPS = FIXED_DELAY_MAX_MSEC : msec2samp;
+
+    enableLFO = 1; // set to zero if you don't want LFO, which is used for the chorus
+    LFO_MAX_MODULATION_MS = 0.3;
+
+    outerG = 0.5;
+    innerG = -outerG;
+    lfoRates = 0.15, 0.33, 0.57, 0.73; // [NUM_BRANCHES]. Measured in Hz
+
+    // Note that fixedDelayWeights and apfDelayWeights are not volume weights.
+    // They get multiplied by globalFixedMaxDelay and globalAPFMaxDelay respectively
+    // to current tap lengths (for the fixed delays) and current delays (for APF delays).
+
+    // Note that if you turn `fixedDelayWeights` into something changing in real-time,
+    // then you need to remove an optimization related to `DELAY_MAX_SAMPS` in `multiTapDelay`
+    fixedDelayWeights = 1.0, 0.873, 0.707, 0.667;  // [NUM_BRANCHES]
+
+    // Thick mode:
+    TAPS_PER_BRANCH = 2;
+    tapPctsLeft = 23, 31, 41, 47, 59, 67, 73, 83;  // [NUM_TAPS]
+    tapPctsRght = 29, 37, 43, 53, 61, 71, 79, 89;  // [NUM_TAPS]
+    apfDelayWeights = 0.317, 0.873, 0.477, 0.291, 0.993, 0.757, 0.179, 0.575;  // [NUM_TAPS]
+
+    // Sparse mode:
+    // TAPS_PER_BRANCH = 1;
+    // tapPctsLeft = (23, 41, 59, 73);  // [NUM_TAPS]
+    // tapPctsRght = (29, 43, 61, 79);  // [NUM_TAPS]
+    // apfDelayWeights = 0.317, 0.873, 0.477, 0.291;  // [NUM_TAPS]
+
+    NUM_BRANCHES = 4;
+    NUM_TAPS = NUM_BRANCHES * TAPS_PER_BRANCH;
+
+    PreUI(x) = hgroup("[0] Pre", x:SMOO);
+    DelayUI(x) = hgroup("[1] Delay", x:SMOO);
+    Filter(x) = hgroup("[2] Post-Filter", x:SMOO);
+    wet = hslider("[3] Wet [style:knob]", 1, 0, 1, .01) : SMOO;
+
+    preDelayTime = PreUI(hslider("[0] Delay [style:knob][unit:ms]", 0, 0, PRE_DELAY_MAX_MSEC, 1)) : msec2samp;
+    preFilterCutoff = PreUI(hslider("[1] LPF Cutoff [style:knob][unit:KHz]", 16, 1, 20, .1))*1000;
+
+    globalAPFMaxDelay = DelayUI(hslider("[0] APF Delay [style:knob][unit:ms]", 33*.85, 0, INNER_DELAY_MAX_MSEC, .01)) : msec2samp;
+    globalFixedMaxDelay = DelayUI(hslider("[1] Fixed Delay [style:knob][unit:ms]", 81.0, 0, OUTER_DELAY_MAX_MSEC, .01)) : msec2samp;
+    kRT = DelayUI(hslider("[2] Reverb Time [style:knob]", .5, 0, 1, .01)) : it.remap(0, 1, -72, -6) : ba.db2linear;
+    lfoDepth = DelayUI(hslider("[3] LFO Depth [style:knob][unit:ms]", LFO_MAX_MODULATION_MS*.1, 0, LFO_MAX_MODULATION_MS, .01)) : msec2samp;
+    lpfCutoff = DelayUI(hslider("[4] LPF Cutoff [style:knob][unit:KHz]", 15, 1, 20, .1))*1000;
+
+    lowCutoffFrequency = Filter(hslider("[0] Low Shelf [style:knob][unit:midi]", 16, 16, 135, .1)) : aa.clip(16, 135) : ba.midikey2hz;
+    highCutoffFrequency = Filter(hslider("[2] High Shelf [style:knob][unit:midi]", 90, 16, 135, .1)) : aa.clip(16, 135) : ba.midikey2hz;
+    lowGain = Filter(hslider("[1] Low Gain [style:knob][unit:dB]", -20, -20, 20, .1)) : aa.clip(-20, 20);
+    highGain = Filter(hslider("[3] High Gain [style:knob][unit:dB]", -6, -20, 20, .1)) : aa.clip(-20, 20);
+
+    msec2samp(ms) = ms*ma.SR/1000; 
+
+    // -------------`nestedDelayAPF`-----------------
+    // Nested Allpass Filter, as described in [1].
+    // The user can pass an `outerDelay` function whose delay length
+    // is modulated by an LFO. The user can also put an LTI filter such
+    // as a low-pass filter on the outerDelay function.
+    //
+    // #### Usage
+    // ```
+    // _ : nestedDelayAPF(outerDelay, MAXLEN, curDel, outerG, innerG) : _
+    // ```
+    // Where:
+    // * `outerDelay`: a delay function with one input and one output
+    // * `MAXLEN`: constant maximum delay in samples of the inner allpass filter
+    // * `curDel`: current delay in samples of the inner allpass filter
+    // * `outerG`: allpass minus-gain coefficient [-1..1]
+    // * `innerG`: allpass minus-gain coefficient [-1..1]
+    //
+    // #### References
+    // [1] Pirkle, W. C. (2019). Designing audio effect plugins in C++ (2nd ed.). Chapter 17.13.17.
+    //------------------------------------------------------------
+    nestedDelayAPF(outerDelay, MAXLEN, curDel, outerG, innerG) =
+    (+ <: (innerAPF:outerDelay),*(outerG)) ~ *(-outerG) : mem,_ : +
+    with {
+        innerAPF = fi.allpass_fcomb(MAXLEN, curDel, innerG);
+    };
+
+    // inputs:
+    // * `i`: the branch index
+    // * `x`: input signal (sum of pre-delay and output of previous branch)
+    //
+    // outputs:
+    // * `i`: previous branch index plus 1
+    // * `preBranchSig`: passthrough preBranchSig
+    // * Delayed value to be used for next branch
+    // * Sum of left channel tap(s)
+    // * Sum of right channel tap(s)
+    branch(i, x) = x : nestedAllpass : lpf : multiTapDelay
+    with {
+        nestedAllpass = nestedDelayAPF(outerDelay, INNER_DELAY_MAX_SAMPS, innerDelaySamps, outerG, innerG)
+        with {
+            outerDelay = lpf : de.fdelayltv(DELAY_ORDER, OUTER_DELAY_MAX_SAMPS, safeDelaySamps) // todo: is fdelayltv worth it?
+            with {
+                DELAY_ORDER = 2;
+                minDelaySamps = (DELAY_ORDER-1)/2;
+                delaySampsWithLFO = os.osc(lfoRate) : it.remap(-1, 1, outerDelaySamps, max(minDelaySamps, outerDelaySamps-lfoDepth));
+                safeDelaySamps = ba.if(enableLFO, delaySampsWithLFO, outerDelaySamps) : max(minDelaySamps);
+            };
+            outerDelaySamps = globalAPFMaxDelay*(ba.selectn(NUM_TAPS, i*2  , apfDelayWeights));
+            innerDelaySamps = globalAPFMaxDelay*(ba.selectn(NUM_TAPS, i*2+1, apfDelayWeights));
+            lfoRate = ba.selectn(NUM_BRANCHES, i, lfoRates);
+        };
+        // note that the same LPF is used in two places (inside the nested APF and outside it but in the branch)
+        lpf = fi.lowpass(1, lpfCutoff);
+
+        // Here we rely on Faust's compiler to only use one delay line!
+        multiTapDelay = _ <: delayLine(fixedDelaySamps)*kRT, getChannel(0), getChannel(1)
+        with {
+            // Note that we use fdelaylti instead of fdelayltv because we assume the delay lengths
+            // aren't being changed rapidly
+            delayLine(delaySamps) = de.fdelaylti(DELAY_ORDER, DELAY_MAX_SAMPS, safeDelaySamps)
+            with {
+                // If `fixedDelayWeights` is constant then we can use this memory optimization:
+                DELAY_MAX_SAMPS = OUTER_DELAY_MAX_SAMPS*fixedDelayWeight;
+                // Otherwise, we'd have to use this:
+                // DELAY_MAX_SAMPS = FIXED_DELAY_MAX_SAMPS;
+
+                DELAY_ORDER = 2;
+                safeDelaySamps = max(delaySamps, (DELAY_ORDER-1)/2);
+            };
+
+            fixedDelayWeight = ba.selectn(NUM_BRANCHES, i, fixedDelayWeights);
+            fixedDelaySamps = globalFixedMaxDelay*fixedDelayWeight;
+
+            getChannel(c) = sum(k, TAPS_PER_BRANCH, getTap(c, k));
+            // Note that the tap positions scale with fixedDelaySamps rather than globalFixedMaxDelay or OUTER_DELAY_MAX_SAMPS
+            getTap(c, k) = delayLine(fixedDelaySamps*delayPct) * ((-1)^(i+c))
+            with {
+                delayPct = tap_left, tap_rght : select2(c) : _/100
+                with {
+                    tap_left = ba.selectn(NUM_TAPS, i*TAPS_PER_BRANCH+k, tapPctsLeft);
+                    tap_rght = ba.selectn(NUM_TAPS, i*TAPS_PER_BRANCH+k, tapPctsRght);
+                };
+            };
+        };
+    };
+
+    repeatpar(1, FX) = FX;
+    repeatpar(n, FX) = FX <: (si.bus(iC), si.block(oC-iC):repeatpar(n-1, FX)), si.bus(oC)
+    with {
+        iC = inputs(FX);
+        oC = outputs(FX);
+    };
+
+    branches = (0, _, 0 : repeatpar(NUM_BRANCHES, fx)) : keepBranchChannels
+    with {
+        // inputs:
+        // * `i`: branch index, starting at 0
+        // * `x`: the signal before all of the branches
+        // * `y`: the delayed signal from the previous branch, if any
+        //
+        // outputs:
+        // * increment `i` so that the next fx has i+1 in the same arg slot
+        // * passthrough `x` so it stays as the signal before all of the branches
+        // * the output(s) of the next branch, by passing `x+y` as input
+        fx(i, x, y) = i+1, x, branch(i, x+y);
+
+        // For each branch, cut the integer `i` and `x` channels, but keep the remaining channels:
+        // * the local branch's "delayed" output
+        // * the left tap(s)
+        // * the right tap(s)
+        keepBranchChannels = par(b, NUM_BRANCHES, (!, !, si.bus(outputs(fx)-2)));
+    };
+
+    // use fdelaylti instead of fdelayltv because the user probably isn't changing the predelay quickly
+    preDelay = sp.stereoize(de.fdelaylti(DELAY_ORDER, preDelayMaxSamp, safeDelaySamps))
+    with {
+        DELAY_ORDER = 1;
+        safeDelaySamps = max(preDelayTime, (DELAY_ORDER-1)/2);
+        preDelayMaxSamp = PRE_DELAY_MAX_MSEC : msec2samp;
+    };
+    preFilter = sp.stereoize(fi.lowpass(1, preFilterCutoff));
+    avg = _,_:> _*.5;
+    selectLastBranchDelay = ba.selector(0, 3*NUM_BRANCHES);
+    selectLR = par(i, NUM_BRANCHES, (!, _, _)); // for each branch, cut the "delayed" output and keep the left-right outputs
+    shelves = sp.stereoize(_/NUM_TAPS:(fi.lowshelf(1, lowGain, lowCutoffFrequency) : fi.highshelf(1, highGain, highCutoffFrequency)));
+};
+
+declare reverbTank_demo author "David Braun";
+declare reverbTank_demo copyright "Copyright (C) 2024 by David Braun <braun@ccrma.stanford.edu>";
+declare reverbTank_demo license "MIT-style STK-4.3 license";
+
 
 //----------------------------------`(dm.)dattorro_rev_demo`------------------------------
 // Example GUI for `dattorro_rev` with all parameters exposed and additional
