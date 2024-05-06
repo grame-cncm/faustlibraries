@@ -317,6 +317,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#dmreverbtank_demo" class="nav-link">(dm.)reverbTank_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#dmdattorro_rev_demo" class="nav-link">(dm.)dattorro_rev_demo</a>
               <ul class="nav flex-column">
               </ul>
@@ -550,53 +554,77 @@ in the same way.</p>
 <pre><code>_,_ : vital_rev_demo : _,_
 </code></pre>
 <hr />
+<h3 id="dmreverbtank_demo"><code>(dm.)reverbTank_demo</code></h3>
+<p>This is a stereo reverb following the "ReverbTank" example in [1],
+although some parameter ranges and scaling have been adjusted.
+It is an unofficial version of the Spin Semiconductor® Reverb.
+Other relevant instructional material can be found in [2-4].</p>
+<h4 id="usage_20">Usage</h4>
+<pre><code>_,_ : reverbTank_demo : _,_
+</code></pre>
+<h4 id="references_1">References</h4>
+<ul>
+<li>
+<p>[1] Pirkle, W. C. (2019). Designing audio effect plugins in C++ (2nd ed.). Chapter 17.14.</p>
+</li>
+<li>
+<p>[2] Spin Semiconductor. (n.d.). Reverberation. Retrieved 2024-04-16, from <a href="http://www.spinsemi.com/knowledge_base/effects.html#Reverberation">http://www.spinsemi.com/knowledge_base/effects.html#Reverberation</a></p>
+</li>
+<li>
+<p>[3] Zölzer, U. (2022). Digital audio signal processing (3rd ed.). Chapter 7, Figure 7.39.</p>
+</li>
+<li>
+<p>[4] Valhalla DSP. (2010, August 25). RIP Keith Barr. Retrieved 2024-04-16, from <a href="https://valhalladsp.com/2010/08/25/rip-keith-barr/">https://valhalladsp.com/2010/08/25/rip-keith-barr/</a></p>
+</li>
+</ul>
+<hr />
 <h3 id="dmdattorro_rev_demo"><code>(dm.)dattorro_rev_demo</code></h3>
 <p>Example GUI for <code>dattorro_rev</code> with all parameters exposed and additional
 dry/wet and output gain control.</p>
-<h4 id="usage_20">Usage</h4>
+<h4 id="usage_21">Usage</h4>
 <pre><code>_,_ : dattorro_rev_demo : _,_
 </code></pre>
 <hr />
 <h3 id="dmjprev_demo"><code>(dm.)jprev_demo</code></h3>
 <p>Example GUI for <code>jprev</code> with all parameters exposed. </p>
-<h4 id="usage_21">Usage</h4>
+<h4 id="usage_22">Usage</h4>
 <pre><code>_,_ : jprev_demo : _,_
 </code></pre>
 <hr />
 <h3 id="dmgreyhole_demo"><code>(dm.)greyhole_demo</code></h3>
 <p>Example GUI for <code>greyhole</code> with all parameters exposed. </p>
-<h4 id="usage_22">Usage</h4>
+<h4 id="usage_23">Usage</h4>
 <pre><code>_,_ : greyhole_demo : _,_
 </code></pre>
 <h2 id="generators">Generators</h2>
 <hr />
 <h3 id="dmsawtooth_demo"><code>(dm.)sawtooth_demo</code></h3>
 <p>An application demonstrating the different sawtooth oscillators of Faust.</p>
-<h4 id="usage_23">Usage</h4>
+<h4 id="usage_24">Usage</h4>
 <pre><code>sawtooth_demo : _
 </code></pre>
 <hr />
 <h3 id="dmvirtual_analog_oscillator_demo"><code>(dm.)virtual_analog_oscillator_demo</code></h3>
 <p>Virtual analog oscillator demo application.</p>
-<h4 id="usage_24">Usage</h4>
+<h4 id="usage_25">Usage</h4>
 <pre><code>virtual_analog_oscillator_demo : _
 </code></pre>
 <hr />
 <h3 id="dmoscrs_demo"><code>(dm.)oscrs_demo</code></h3>
 <p>Simple application demoing filter based oscillators.</p>
-<h4 id="usage_25">Usage</h4>
+<h4 id="usage_26">Usage</h4>
 <pre><code>oscrs_demo : _
 </code></pre>
 <hr />
 <h3 id="dmvelvet_noise_demo"><code>(dm.)velvet_noise_demo</code></h3>
 <p>Listen to velvet_noise!</p>
-<h4 id="usage_26">Usage</h4>
+<h4 id="usage_27">Usage</h4>
 <pre><code>velvet_noise_demo : _
 </code></pre>
 <hr />
 <h3 id="dmlatch_demo"><code>(dm.)latch_demo</code></h3>
 <p>Illustrate latch operation.</p>
-<h4 id="usage_27">Usage</h4>
+<h4 id="usage_28">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; latch_demo.dsp
 echo 'process = dm.latch_demo;' &gt;&gt; latch_demo.dsp
 faust2octave latch_demo.dsp
@@ -605,7 +633,7 @@ Octave:1&gt; plot(faustout);
 <hr />
 <h3 id="dmenvelopes_demo"><code>(dm.)envelopes_demo</code></h3>
 <p>Illustrate various envelopes overlaid, including their gate * 1.1.</p>
-<h4 id="usage_28">Usage</h4>
+<h4 id="usage_29">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; envelopes_demo.dsp
 echo 'process = dm.envelopes_demo;' &gt;&gt; envelopes_demo.dsp
 faust2octave envelopes_demo.dsp
@@ -614,7 +642,7 @@ Octave:1&gt; plot(faustout);
 <hr />
 <h3 id="dmfft_spectral_level_demo"><code>(dm.)fft_spectral_level_demo</code></h3>
 <p>Make a real-time spectrum analyzer using FFT from analyzers.lib.</p>
-<h4 id="usage_29">Usage</h4>
+<h4 id="usage_30">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; fft_spectral_level_demo.dsp
 echo 'process = dm.fft_spectral_level_demo;' &gt;&gt; fft_spectral_level_demo.dsp
 Mac:
@@ -630,7 +658,7 @@ Linux QT:
 <hr />
 <h3 id="dmreverse_echo_demonchans"><code>(dm.)reverse_echo_demo(nChans)</code></h3>
 <p>Multichannel echo effect with reverse delays.</p>
-<h4 id="usage_30">Usage</h4>
+<h4 id="usage_31">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; reverse_echo_demo.dsp
 echo 'nChans = 3; // Any integer &gt; 1 should work here' &gt;&gt; reverse_echo_demo.dsp
 echo 'process = dm.reverse_echo_demo(nChans);' &gt;&gt; reverse_echo_demo.dsp
@@ -659,7 +687,7 @@ Note that frequency shifting is not the same as frequency scaling.
 A frequency-shifted harmonic signal is usually not harmonic.
 Very small frequency shifts give interesting chirp effects when
 there is feedback around the frequency shifter.</p>
-<h4 id="usage_31">Usage</h4>
+<h4 id="usage_32">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; pospass_demo.dsp
 echo 'process = dm.pospass_demo;' &gt;&gt; pospass_demo.dsp
 Mac:
@@ -676,10 +704,10 @@ Etc.
 <hr />
 <h3 id="dmexciter"><code>(dm.)exciter</code></h3>
 <p>Psychoacoustic harmonic exciter, with GUI.</p>
-<h4 id="usage_32">Usage</h4>
+<h4 id="usage_33">Usage</h4>
 <pre><code>_ : exciter : _
 </code></pre>
-<h4 id="references_1">References</h4>
+<h4 id="references_2">References</h4>
 <ul>
 <li><a href="https://secure.aes.org/forum/pubs/ebriefs/?elib=16939">https://secure.aes.org/forum/pubs/ebriefs/?elib=16939</a></li>
 <li><a href="https://www.researchgate.net/publication/258333577_Modeling_the_Harmonic_Exciter">https://www.researchgate.net/publication/258333577_Modeling_the_Harmonic_Exciter</a></li>
@@ -688,13 +716,13 @@ Etc.
 <h3 id="dmvocoder_demo"><code>(dm.)vocoder_demo</code></h3>
 <p>Use example of the vocoder function where an impulse train is used
 as excitation.</p>
-<h4 id="usage_33">Usage</h4>
+<h4 id="usage_34">Usage</h4>
 <pre><code>_ : vocoder_demo : _
 </code></pre>
 <hr />
 <h3 id="dmcolored_noise_demo"><code>(dm.)colored_noise_demo</code></h3>
 <p>A coloured noise signal generator.</p>
-<h4 id="usage_34">Usage</h4>
+<h4 id="usage_35">Usage</h4>
 <pre><code>colored_noise_demo : _
 </code></pre></div>
             </div>
