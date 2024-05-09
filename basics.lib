@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.16.0";
+declare version "1.17.0";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -526,6 +526,30 @@ tempo(t) = (60*ma.SR)/t;
 //------------------------
 // NOTE: may be this should go in oscillators.lib
 period(p) = %(int(p))~+(1');
+
+
+//-------`(ba.)spulse`----------
+// Produces a single pulse of n samples when trig goes from 0 to 1.
+//
+// #### Usage
+//
+// ```
+// spulse(n,trig) : _
+// ```
+//
+// Where:
+//
+// * `n`: pulse length as a number of samples
+// * `trig`: the trigger signal (1: start the pulse)
+//------------------------
+
+spulse(n, trig) = trig : trigger(n)
+with {
+    upfront(x) = x > x';
+    decay(n,x) = x - (x>0.0)/n;
+    release(n) = + ~ decay(n);
+    trigger(n) = upfront : release(n) : >(0.0);
+};
 
 
 //-------`(ba.)pulse`----------
