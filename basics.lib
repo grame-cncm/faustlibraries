@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.17.0";
+declare version "1.17.1";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -542,15 +542,14 @@ period(p) = %(int(p))~+(1');
 // * `n`: pulse length as a number of samples
 // * `trig`: the trigger signal (1: start the pulse)
 //------------------------
-
 spulse(n, trig) = trig : trigger(n)
 with {
-    upfront(x) = x > x';
-    decay(n,x) = x - (x>0.0)/n;
-    release(n) = + ~ decay(n);
-    trigger(n) = upfront : release(n) : >(0.0);
+    upfront(x) = x > x';    // detect rising edge
+    reset = upfront(trig);  // reset signal
+    decay(n, x) = ba.if(reset, 0, x - (x>0.0)/n);   // decay the pulse, possibly using reset to restart the pulse
+    release(n) = + ~ decay(n);                      
+    trigger(n) = upfront : release(n) : >(0.0);    
 };
-
 
 //-------`(ba.)pulse`----------
 // Pulses (like 10000) generated at period `p`.
