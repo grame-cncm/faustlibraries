@@ -529,21 +529,21 @@ with {
     sample_rate_ratio = ma.SR/kBaseSampleRate;
 
     kAllpassMaxDelay = 1001; // manually inspect rdtables below and take max value
-    allpassDelay(j, i) = i <: rdtable(waveform{1001, 799, 933, 876}),
-                              rdtable(waveform{895, 807, 907, 853}),
-                              rdtable(waveform{957, 1019, 711, 567}),
-                              rdtable(waveform{833, 779, 663, 997})
-                              : ba.selector(j, kNetworkContainers);
+    // allpassDelay(i) where `i` corresponds to 0 to (kNetworkContainers-1)
+    allpassDelay(0) = rdtable(waveform{1001, 799, 933, 876});
+    allpassDelay(1) = rdtable(waveform{895, 807, 907, 853});
+    allpassDelay(2) = rdtable(waveform{957, 1019, 711, 567});
+    allpassDelay(3) = rdtable(waveform{833, 779, 663, 997});
 
     kFeedbackMaxDelay = (11329 + kMaxChorusDrift)*sample_rate_ratio*pow(2, kMaxSizePower); // pow(2, kMaxSizePower) is the max size_mult
-    feedbackDelay(j, i) = i <: rdtable(waveform{6753.2, 9278.4, 7704.5, 11328.5}),
-                               rdtable(waveform{9701.12, 5512.5, 8480.45, 5638.65}),
-                               rdtable(waveform{3120.73, 3429.5, 3626.37, 7713.52}),
-                               rdtable(waveform{4521.54, 6518.97, 5265.56, 5630.25})
-                               : ba.selector(j, kNetworkContainers)
-                               : _ * size_mult * sample_rate_ratio;
+    // feedbackDelayHelp(i) where `i` corresponds to 0 to (kNetworkContainers-1)
+    feedbackDelayHelp(0) = rdtable(waveform{6753.2, 9278.4, 7704.5, 11328.5});
+    feedbackDelayHelp(1) = rdtable(waveform{9701.12, 5512.5, 8480.45, 5638.65});
+    feedbackDelayHelp(2) = rdtable(waveform{3120.73, 3429.5, 3626.37, 7713.52});
+    feedbackDelayHelp(3) = rdtable(waveform{4521.54, 6518.97, 5265.56, 5630.25});
+    feedbackDelay(i) = feedbackDelayHelp(i) : _ * size_mult * sample_rate_ratio;
 
-    getDecay(i, j) = pow(kT60Amplitude, feedbackDelay(i, j) / decay_samples);
+    getDecay(i, j) = pow(kT60Amplitude, feedbackDelay(i, j) / (decay_samples*sample_rate_ratio));
 
     pre_delay = sp.stereoize(de.fdelayltv(N, kPreDelayMaxSec*ma.SR, safe_delay_samples))
     with {
@@ -591,7 +591,7 @@ with {
 
     adjacent_feedback = par(i, kNetworkContainers, containerBus :>_) : par(i, kNetworkContainers, _*s) <: par(i, kNetworkContainers, _<: containerBus)
     with {
-        s = 0-.5*kNetworkContainers/kContainerSize;
+        s = -.5*kNetworkContainers/kContainerSize;
     };
 
     decay = par(i, kNetworkContainers, par(j, kContainerSize, _*getDecay(i, j)));
@@ -603,10 +603,10 @@ with {
     pre_delay : pre_filter <:
 
     // BODY
-    (networkBus, networkBus :> allpasses : delay)
+    (networkBus, networkBus :> allpasses : filters : matrix)
     ~
     // FEEDBACK
-    (decay : filters : matrix)
+    (delay : decay)
 
     // POST
     :> par(i, 2, _*2/kNetworkContainers);
