@@ -393,7 +393,7 @@ closed source license or any other license if you decide so.
 // * `size`: The size of the room.
 // * `mix`: A wetness value to use in a final dry/wet mixer.
 //-----------------------------------------------------------------------------
-vital_rev(_prelow, _prehigh, _lowcutoff, _highcutoff, _lowgain, _highgain, _chorus_amt, _chorus_freq, _predelay, _time, _size, _mix) = ef.dryWetMixerConstantPower(wetAmount, reverb)
+vital_rev(_prelow, _prehigh, _lowcutoff, _highcutoff, _lowgain, _highgain, _chorus_amt, _chorus_freq, _predelay, _time, _size, _mix) = ef.dryWetMixerConstantPower(wetAmount, reverb) : gainMakeup
 with {
     /* Copyright 2013-2019 Matt Tytel
     *
@@ -609,7 +609,14 @@ with {
     (delay : decay)
 
     // POST
-    :> par(i, 2, _*2/kNetworkContainers);
+    // todo: It's odd that we have to swap the channels with ro.crossnn.
+    // This might be covering up some other mistake.
+    :> par(i, 2, _*2/kNetworkContainers) : ro.crossnn(1);
+
+    // dryWetMixerConstantPower causes an "insertion loss" when wet is not 50%.
+    // So a choice of 0% wet would actually have less volume than not using the reverb at all.
+    // We can makeup for this insertion loss by undoing the sqrt(2) division inside dryWetMixerConstantPower.
+    gainMakeup = _*sqrt(2), _*sqrt(2);
 };
 
 declare vital_rev author "David Braun";
