@@ -469,14 +469,10 @@ with {
 
     Other notes:
     Vital's reverb is similar to dm.zita_rev1.
-    In this Faust port of Vital, I placed the allpasses and delay in the "forward" stage.
-    I placed the decay, filters, and matrix in the "feedback" stage.
-    In Zita Rev, the forward stage has the allpasses and matrix.
-    The feedback stage has the delay and filters.
-
-    I'm not certain what choice Vital made, but it might be ok to move these things around.
-    If you can prove that Vital did it a certain way, or you can explain that
-    one way is better than another, please make a PR to improve this code.
+    In this Faust port of Vital, I placed the allpasses, and matrix in the
+    "forward" stage. I placed the filters, decay and delay in the "feedback" stage.
+    Similarly, in Zita Rev, the forward stage has the allpasses and matrix, while the
+    feedback stage has the filters and delay.
     */
 
     DELAY_QUALITY = 3; // [1-3] where 3 is best, and 1 is linear interpolation
@@ -603,10 +599,10 @@ with {
     pre_delay : pre_filter <:
 
     // BODY
-    (networkBus, networkBus :> allpasses : filters : matrix)
+    (networkBus, networkBus :> allpasses : matrix)
     ~
     // FEEDBACK
-    (delay : decay)
+    (filters : decay : delay)
 
     // POST
     // todo: It's odd that we have to swap the channels with ro.crossnn.
