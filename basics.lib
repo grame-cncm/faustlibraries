@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.18.0";
+declare version "1.19.0";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -1706,24 +1706,24 @@ with {
 // #### Usage
 //
 // ```
-// process = si.bus(BUS_SIZE*NUM_BUSES) : selectbus(BUS_SIZE, NUM_BUSES, i) : si.bus(BUS_SIZE);
+// process = si.bus(BUS_SIZE*NUM_BUSES) : selectbus(BUS_SIZE, NUM_BUSES, id) : si.bus(BUS_SIZE);
 // ```
 //
 // Where:
 //
-// * `BUS_SIZE`: The number of outputs from each bus (int, known at compile time).
-// * `NUM_BUSES`: The number of buses (int, known at compile time).
-// * `i`: The index of the bus to select (int, `0<=i<NUM_BUSES`)
+// * `BUS_SIZE`: number of outputs from each bus (int, known at compile time).
+// * `NUM_BUSES`: number of buses (int, known at compile time).
+// * `id`: index of the bus to select (int, `0<=id<NUM_BUSES`)
 //
 //-------------------------------------------------------------------
-selectbus(BUS_SIZE, NUM_BUSES, i) = ro.interleave(BUS_SIZE, NUM_BUSES) : par(j, BUS_SIZE, selectn(NUM_BUSES, i));
+selectbus(BUS_SIZE, NUM_BUSES, id) = ro.interleave(BUS_SIZE, NUM_BUSES) : par(j, BUS_SIZE, selectn(NUM_BUSES, id));
 declare selectbus author "David Braun";
 declare selectbus license "MIT";
 
 
 //----------------------`(ba.)selectxbus`-----------------------------------------
-// Like (ba.)selectbus, but with a cross-fade when selecting the bus
-// using the same technique than (ba.)selectmulti
+// Like `ba.selectbus`, but with a cross-fade when selecting the bus using the same 
+// technique than `ba.selectmulti`.
 //
 // #### Usage
 //
@@ -1733,18 +1733,18 @@ declare selectbus license "MIT";
 //
 // Where:
 //
-// * `BUS_SIZE`: The number of outputs from each bus (int, known at compile time).
-// * `NUM_BUSES`: The number of buses (int, known at compile time).
-// * `FADE`:  The number of samples for the crossfade.
-// * `id`: The index of the bus to select (int, `0<=id<NUM_BUSES`)
+// * `BUS_SIZE`: number of outputs from each bus (int, known at compile time).
+// * `NUM_BUSES`: number of buses (int, known at compile time).
+// * `fade`: number of samples for the crossfade.
+// * `id`: index of the bus to select (int, `0<=id<NUM_BUSES`)
 //
 //-------------------------------------------------------------------
-selectxbus(BUS_SIZE, NUM_BUSES, FADE, id) =
+selectxbus(BUS_SIZE, NUM_BUSES, fade, id) =
     ro.interleave(BUS_SIZE, NUM_BUSES):
     par(i, BUS_SIZE, selectnX(NUM_BUSES, id, xfade))
     with {
         xfade(i, j, x, y) = x*(1-xb) + y*xb with {
-            xb = ramp(FADE, (i >= j));
+            xb = ramp(fade, (i >= j));
         };
     };
 declare selectxbus author "Marc Lavallée";
