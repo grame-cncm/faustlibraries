@@ -293,6 +293,18 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#sibpar" class="nav-link">(si.)bpar</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#sibsum" class="nav-link">(si.)bsum</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#sibprod" class="nav-link">(si.)bprod</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
               </ul>
@@ -592,6 +604,56 @@ feedback delay network with Hadamard matrix:</p>
  delVec = par(i, N, (i + 1) * 3);
  process = vecOp((si.bus(N) , si.bus(N)), +) ~ 
      vecOp((vecOp((ro.hadamard(N) , coeffVec), *) , delVec), @);
+</code></pre>
+<hr />
+<h3 id="sibpar"><code>(si.)bpar</code></h3>
+<p>Balanced <code>par</code> where the repeated expression doesn't depend on a variable.
+The built-in <code>par</code> is implemented as an unbalanced tree, and also has
+to substitute the variable into the repeated expression, which is expensive
+even when the variable doesn't appear. This version is implemented as a
+balanced tree (which allows node reuse during tree traversal) and also
+doesn't search for the variable. This can be much faster than <code>par</code> to compile.</p>
+<h4 id="usage_17">Usage</h4>
+<pre><code>si.bus(N * inputs(f)) : bpar(N, f) : si.bus(N * outputs(f))
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: number of repetitions, minimum 1, a constant numerical expression</li>
+<li><code>f</code>: an arbitrary expression</li>
+</ul>
+<p>Example:</p>
+<pre><code>// square each of 4000 inputs
+process = si.bpar(4000, (_ &lt;: _, _ : *));
+</code></pre>
+<hr />
+<h3 id="sibsum"><code>(si.)bsum</code></h3>
+<p>Balanced <code>sum</code>, see <code>si.bpar</code>.</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>si.bus(N * inputs(f)) : bsum(N, f) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: number of repetitions, minimum 1, a constant numerical expression</li>
+<li><code>f</code>: an arbitrary expression with 1 output.</li>
+</ul>
+<p>Example:</p>
+<pre><code>// square each of 1000 inputs and add the results
+process = si.bsum(1000, (_ &lt;: _, _ : *));
+</code></pre>
+<hr />
+<h3 id="sibprod"><code>(si.)bprod</code></h3>
+<p>Balanced <code>prod</code>, see <code>si.bpar</code>.</p>
+<h4 id="usage_19">Usage</h4>
+<pre><code>si.bus(N * inputs(f)) : bprod(N, f) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: number of repetitions, minimum 1, a constant numerical expression</li>
+<li><code>f</code>: an arbitrary expression with 1 output.</li>
+</ul>
+<p>Example:</p>
+<pre><code>// Add 8000 consecutive inputs (in pairs) and multiply the results
+process = si.bprod(4000, +);
 </code></pre></div>
             </div>
         </div>
