@@ -568,3 +568,101 @@ vecOp(vectorsList, op) =
         vecDim = outputs(vectorsList) / vecLen;
         vecLen = outputs(ba.take(1, vectorsList));
     };
+
+
+/*
+Balanced par, sum, and prod, faster versions of built-in par, sum, prod
+when the repeated expression doesn't depend on the variable.
+*/
+
+// -----------------------------`(si.)bpar`---------------------------------
+//
+// Balanced `par` where the repeated expression doesn't depend on a variable.
+// The built-in `par` is implemented as an unbalanced tree, and also has
+// to substitute the variable into the repeated expression, which is expensive
+// even when the variable doesn't appear. This version is implemented as a
+// balanced tree (which allows node reuse during tree traversal) and also
+// doesn't search for the variable. This can be much faster than `par` to compile.
+//
+// #### Usage
+//
+// ```
+// si.bus(N * inputs(f)) : bpar(N, f) : si.bus(N * outputs(f))
+// ```
+//
+// Where:
+//
+// * `N`: number of repetitions, minimum 1, a constant numerical expression
+// * `f`: an arbitrary expression
+//
+// Example:
+// ```
+// // square each of 4000 inputs
+// process = si.bpar(4000, (_ <: _, _ : *));
+// ```
+declare bpar author "Haggai Nuchi";
+declare bpar copyright "Copyright (C) 2024 Haggai Nuchi <haggai@haggainuchi.com>";
+declare bpar license "MIT License";
+bpar(1, f) = f;
+bpar(N, f) = bpar(left, f), bpar(right, f) with {
+    left = ma.np2(N) >> 1; // biggest power of 2 less than N
+    right = N - left;
+};
+
+// -----------------------------`(si.)bsum`---------------------------------
+//
+// Balanced `sum`, see `si.bpar`.
+//
+// #### Usage
+//
+// ```
+// si.bus(N * inputs(f)) : bsum(N, f) : _
+// ```
+//
+// Where:
+//
+// * `N`: number of repetitions, minimum 1, a constant numerical expression
+// * `f`: an arbitrary expression with 1 output.
+//
+// Example:
+// ```
+// // square each of 1000 inputs and add the results
+// process = si.bsum(1000, (_ <: _, _ : *));
+// ```
+declare bsum author "Haggai Nuchi";
+declare bsum copyright "Copyright (C) 2024 Haggai Nuchi <haggai@haggainuchi.com>";
+declare bsum license "MIT License";
+bsum(1, f) = f;
+bsum(N, f) = bsum(left, f) + bsum(right, f) with {
+    left = ma.np2(N) >> 1; // biggest power of 2 less than N
+    right = N - left;
+};
+
+// -----------------------------`(si.)bprod`--------------------------------
+//
+// Balanced `prod`, see `si.bpar`.
+//
+// #### Usage
+//
+// ```
+// si.bus(N * inputs(f)) : bprod(N, f) : _
+// ```
+//
+// Where:
+//
+// * `N`: number of repetitions, minimum 1, a constant numerical expression
+// * `f`: an arbitrary expression with 1 output.
+//
+// Example:
+// ```
+// // Add 8000 consecutive inputs (in pairs) and multiply the results
+// process = si.bprod(4000, +);
+// ```
+declare bprod author "Haggai Nuchi";
+declare bprod copyright "Copyright (C) 2024 Haggai Nuchi <haggai@haggainuchi.com>";
+declare bprod license "MIT License";
+bprod(1, f) = f;
+bprod(N, f) = bprod(left, f) * bprod(right, f) with {
+    left = ma.np2(N) >> 1; // biggest power of 2 less than N
+    right = N - left;
+};
