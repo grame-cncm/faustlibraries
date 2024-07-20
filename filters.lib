@@ -783,18 +783,23 @@ with {
 };
 
 //-----------------------`(fi.)allpassnt`--------------------------
-// Two-multiply lattice allpass (nested order-1 direct-form-ii allpasses).
+// Two-multiply lattice allpass (nested order-1 direct-form-ii allpasses), with taps.
 //
 // #### Usage
 //
 // ```
-// _ : allpassnt(n,sv) : _
+// _ : allpassnt(n,sv) : si.bus(n+1)
 // ```
 //
 // Where:
 //
 // * `n`: the order of the filter
 // * `sv`: the reflection coefficients (-1 1)
+//
+// The first output is the n-th order allpass output,
+// while the remaining outputs are taps taken from the
+// input of each delay element from the input to the output.
+// See (fi.)allpassn for the single-output case.
 //------------------------------------------------------------
 declare allpassnt author "Julius O. Smith III";
 declare allpassnt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -1135,6 +1140,8 @@ with {
 //
 // * `n`: the order of the filter
 // * `sv`: the reflection coefficients (-1 1)
+//
+// Equivalent to fi.allpassnt(n,sv) : _, par(i,n,!);
 //
 // #### References
 // * J. O. Smith and R. Michon, "Nonlinear Allpass Ladder Filters in FAUST", in
