@@ -548,8 +548,8 @@ conv(kv) = fir(kv);
 //
 // Where:
 //
-// * `a`: the poles
-// * `b`: the zeros
+// * `b`: transfer-function numerator
+// * `a`: transfer-function denominator (monic)
 //
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html>
@@ -642,8 +642,8 @@ with {
 //
 // Where:
 //
-// * `a`: the poles
-// * `b`: the zeros
+// * `b`: transfer-function numerator
+// * `a`: transfer-function denominator (monic)
 //
 // #### Reference
 // <https://ccrma.stanford.edu/~jos/fp/Direct_Form_I.html>
@@ -769,8 +769,8 @@ bvav2nuv(bv,av) = par(m,M+1,nu(m)) with {
 //
 // Where:
 //
-// * bv: zeros as a bank of parallel signals
-// * av: poles as a bank of parallel signals
+// * `bv`: transfer-function numerator
+// * `av`: transfer-function denominator (monic)
 //------------------------------------------------------------
 declare iir_lat2 author "Julius O. Smith III";
 declare iir_lat2 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -819,8 +819,8 @@ with {
 //
 // Where:
 //
-// * bv: zeros as a bank of parallel signals
-// * av: poles as a bank of parallel signals
+// * `bv`: transfer-function numerator
+// * `av`: transfer-function denominator (monic)
 //------------------------------------------------------------
 declare iir_kl author "Julius O. Smith III";
 declare iir_kl copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -874,8 +874,8 @@ with {
 //
 // Where:
 //
-// * bv: zeros as a bank of parallel signals
-// * av: poles as a bank of parallel signals
+// * bv: transfer-function numerator as a bank of parallel signals
+// * av: transfer-function denominator as a bank of parallel signals
 //------------------------------------------------------------
 declare iir_lat1 author "Julius O. Smith III";
 declare iir_lat1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -929,8 +929,8 @@ with {
 //
 // Where:
 //
-// * bv: zeros as a bank of parallel signals
-// * av: poles as a bank of parallel signals
+// * `bv`: transfer-function numerator
+// * `av`: transfer-function denominator (monic)
 //
 // #### References
 // * J. D. Markel and A. H. Gray, Linear Prediction of Speech, New York: Springer Verlag, 1976.
@@ -1000,8 +1000,8 @@ with {
 //
 // Where:
 //
-// * `a`: the poles
-// * `b`: the zeros
+// * `b`: transfer-function numerator
+// * `a`: transfer-function denominator (monic)
 //------------------------------------------------------------
 declare tf2np author "Julius O. Smith III";
 declare tf2np copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
