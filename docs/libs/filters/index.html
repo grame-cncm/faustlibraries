@@ -1104,15 +1104,19 @@ from digital waveguide filters, which gives them a physical interpretation.</p>
 </ul>
 <hr />
 <h3 id="fiallpassnt"><code>(fi.)allpassnt</code></h3>
-<p>Two-multiply lattice allpass (nested order-1 direct-form-ii allpasses).</p>
+<p>Two-multiply lattice allpass (nested order-1 direct-form-ii allpasses), with taps.</p>
 <h4 id="usage_21">Usage</h4>
-<pre><code>_ : allpassnt(n,sv) : _
+<pre><code>_ : allpassnt(n,sv) : si.bus(n+1)
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>n</code>: the order of the filter</li>
 <li><code>sv</code>: the reflection coefficients (-1 1)</li>
 </ul>
+<p>The first output is the n-th order allpass output,
+while the remaining outputs are taps taken from the
+input of each delay element from the input to the output.
+See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="fiiir_kl"><code>(fi.)iir_kl</code></h3>
 <p>Kelly-Lochbaum ladder IIR filter of arbitrary order.</p>
@@ -1270,6 +1274,7 @@ They are defined here as nested allpass filters, hence the names allpassn*.</p>
 <li><code>n</code>: the order of the filter</li>
 <li><code>sv</code>: the reflection coefficients (-1 1)</li>
 </ul>
+<p>Equivalent to fi.allpassnt(n,sv) : _, par(i,n,!);</p>
 <h4 id="references_7">References</h4>
 <ul>
 <li>J. O. Smith and R. Michon, "Nonlinear Allpass Ladder Filters in FAUST", in
