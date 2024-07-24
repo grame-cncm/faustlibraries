@@ -33,7 +33,7 @@
 
 // NOTE ABOUT LICENSES:
 // Each function in this library has its own license. Licenses are declared
-// before each function. Corresponding license terms can be found at the 
+// before each function. Corresponding license terms can be found at the
 // bottom of this file or in the Faust libraries documentation.
 
 ma = library("maths.lib");
@@ -654,7 +654,7 @@ declare tf21 license "MIT-style STK-4.3 license";
 tf21(b0,b1,b2,a1,a2) = // tf2, direct-form 1:
     _ <:(mem<:((mem:*(b2)),*(b1))),*(b0) :>_
     : ((_,_,_:>_) ~(_<:*(-a1),(mem:*(-a2))));
-    
+
 declare tf22 author "Julius O. Smith III";
 declare tf22 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf22 license "MIT-style STK-4.3 license";
@@ -1128,8 +1128,36 @@ with {
 // * Linear Prediction of Speech, Markel and Gray, Springer Verlag, 1976
 //========================================================================================
 
+//---------------`(fi.)scat`-----------------
+// Scatter off of reflectance r with reflection coefficient s.
+//
+// #### Usage:
+//
+// ```
+// _ : scat(s,r) : _
+// ```
+// #### Where:
+//
+// * `s`: reflection coefficient between -1 and 1 for stability
+// * `r`: single-input, single-output block diagram,
+//        having gain less than 1 at all frequencies for stability.
+//
+// #### Example:  The following program should produce all zeros:
+//
+// process = fi.allpassn(3,(.3,.2,.1)), fi.scat(.1, fi.scat(.2, fi.scat(.3, _)))
+//           :> - : ^(2) : +~_;
+//
+// #### Reference:
+// * <https://ccrma.stanford.edu/~jos/pasp/Scattering_Impedance_Changes.html>
+//----------------------------------------------
+declare scat author "Julius O. Smith III";
+declare scat copyright "Copyright (C) 2024 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare scat license "MIT-style STK-4.3 license";
+
+scat(s,r) = _ <: ((+ <: (r,*(s)))~(*(-s))) : _',_ :+;
+
 //---------------`(fi.)allpassn`-----------------
-// Two-multiply lattice - each section is two multiply-adds.
+// Two-multiply lattice filter.
 //
 // #### Usage:
 //
@@ -1140,16 +1168,19 @@ with {
 //
 // * `n`: the order of the filter
 // * `sv`: the reflection coefficients (-1 1)
+// * `sv`: the reflection coefficients  (s1,s2,...,sN), each between -1 and 1.
 //
-// Equivalent to fi.allpassnt(n,sv) : _, par(i,n,!);
+// Equivalent to `fi.allpassnt(n,sv) : _, par(i,n,!);`
+// Equivalent to `fi.scat( s(n), fi.scat( s(n-1), ..., fi.scat( s(1), _ )))
+//               with { s(k) = ba.take(k,sv); } ;`
+// Identical to `allpassn` in `old/filter.lib`.
 //
 // #### References
-// * J. O. Smith and R. Michon, "Nonlinear Allpass Ladder Filters in FAUST", in
-// Proceedings of the 14th International Conference on Digital Audio Effects
-// (DAFx-11), Paris, France, September 19-23, 2011.
+// * J. D. Markel and A. H. Gray: Linear Prediction of Speech, New York: Springer Verlag, 1976.
+// * <https://ccrma.stanford.edu/~jos/pasp/Conventional_Ladder_Filters.html>
 //----------------------------------------------
-declare allpassn author "Julius O. Smith III and Romain Michon";
-declare allpassn copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu> and Romain Michon <rmichon@ccrma.stanford.edu>";
+declare allpassn author "Julius O. Smith III";
+declare allpassn copyright "Copyright (c) 2003-2024 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare allpassn license "MIT-style STK-4.3 license";
 allpassn(0,sv) = _;
 allpassn(n,sv) = _ <: ((+ <: (allpassn(n-1,sv)),*(s))~(*(-s))) : _',_ :+
@@ -2508,7 +2539,7 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 declare mth_octave_filterbank author "Julius O. Smith III";
 declare mth_octave_filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare mth_octave_filterbank license "MIT-style STK-4.3 license";
-mth_octave_filterbank(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeq(N) 
+mth_octave_filterbank(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeq(N)
 with {
    fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
    ap(n) = highpass_plus_lowpass(O,fc(n));   // delay-equalizing allpass
@@ -2522,7 +2553,7 @@ with {
 declare mth_octave_filterbank_alt author "Julius O. Smith III";
 declare mth_octave_filterbank_alt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare mth_octave_filterbank_alt license "MIT-style STK-4.3 license";
-mth_octave_filterbank_alt(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(O,N) 
+mth_octave_filterbank_alt(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(O,N)
 with {
     fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
     ap(n) = highpass_minus_lowpass(O,fc(n)); // half the order of 'plus' case
@@ -2582,7 +2613,7 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 declare filterbank author "Julius O. Smith III";
 declare filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare filterbank license "MIT-style STK-4.3 license";
-filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb) 
+filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb)
 with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
@@ -2618,7 +2649,7 @@ with {
 declare filterbanki author "Julius O. Smith III";
 declare filterbanki copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare filterbanki license "MIT-style STK-4.3 license";
-filterbanki(O,lfreqs) = _ <: bsplit(nb) 
+filterbanki(O,lfreqs) = _ <: bsplit(nb)
 with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
@@ -2633,14 +2664,14 @@ with {
 
 
 //===============State Variable Filters=========================================================
-// #### References 
+// #### References
 // Solving the continuous SVF equations using trapezoidal integration
 //
 // <https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf>
 //========================================================================================
 
 //-----------------`(fi.)svf`----------------------
-// An environment with `lp`, `bp`, `hp`, `notch`, `peak`, `ap`, `bell`, `ls`, `hs` SVF based filters. 
+// An environment with `lp`, `bp`, `hp`, `notch`, `peak`, `ap`, `bell`, `ls`, `hs` SVF based filters.
 // All filters have `freq` and `Q` parameters, the `bell`, `ls`, `hs` ones also have a `gain` third parameter.
 //
 // #### Usage
@@ -2701,7 +2732,7 @@ svf = environment {
 		} (T);
 	};
 
-	// External API 
+	// External API
 	lp(f,q)     = svf(0, f, q, 0);
 	bp(f,q)     = svf(1, f, q, 0);
 	hp(f,q)     = svf(2, f, q, 0);
@@ -2728,7 +2759,7 @@ svf = environment {
 // For the phase correction, we will use the 2nd-order Butterworth allpass.
 //
 // #### Reference
-// Zavalishin, Vadim. "The art of VA filter design." Native Instruments, Berlin, Germany (2012). 
+// Zavalishin, Vadim. "The art of VA filter design." Native Instruments, Berlin, Germany (2012).
 //=============================================================================
 
 
@@ -2974,8 +3005,8 @@ with {
 // * `period` is the averaging frame in seconds
 //-----------------------------------------------------------------------------
 declare avg_rect author "Dario Sanfilippo and Julius O. Smith III";
-declare avg_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
-      <sanfilippo.dario@gmail.com> and 
+declare avg_rect copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_rect license "MIT-style STK-4.3 license";
 avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
@@ -2987,7 +3018,7 @@ avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
 // that is, tau is the integral of the filter's impulse response. This
 // response is slower to reach the final value but has less ripples in
 // non-steady signals.
-// 
+//
 // #### Usage
 //
 // ```
@@ -2996,7 +3027,7 @@ avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
 //
 // Where:
 //
-// * `period` is the time, in seconds, for the system to decay by 1/e, 
+// * `period` is the time, in seconds, for the system to decay by 1/e,
 // or to reach 1-1/e of its final value.
 //
 // #### Reference
@@ -3004,8 +3035,8 @@ avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
 // <https://ccrma.stanford.edu/~jos/mdft/Exponentials.html>
 //-----------------------------------------------------------------------------
 declare avg_tau author "Dario Sanfilippo and Julius O. Smith III";
-declare avg_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
-      <sanfilippo.dario@gmail.com> and 
+declare avg_tau copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_tau license "MIT-style STK-4.3 license";
 avg_tau(period, x) = fi.lptau(period, x);
@@ -3013,9 +3044,9 @@ avg_tau(period, x) = fi.lptau(period, x);
 
 //----------------------------`(fi.)avg_t60`-------------------------------------
 // Averaging function based on a one-pole filter and the t60 response time.
-// This response is particularly useful when the system is required to 
+// This response is particularly useful when the system is required to
 // reach the final value after about `period` seconds.
-// 
+//
 // #### Usage
 //
 // ```
@@ -3024,7 +3055,7 @@ avg_tau(period, x) = fi.lptau(period, x);
 //
 // Where:
 //
-// * `period` is the time, in seconds, for the system to decay by 1/1000, 
+// * `period` is the time, in seconds, for the system to decay by 1/1000,
 // or to reach 1-1/1000 of its final value.
 //
 // #### Reference
@@ -3032,8 +3063,8 @@ avg_tau(period, x) = fi.lptau(period, x);
 // <https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html>
 //-----------------------------------------------------------------------------
 declare avg_t60 author "Dario Sanfilippo and Julius O. Smith III";
-declare avg_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
-      <sanfilippo.dario@gmail.com> and 
+declare avg_t60 copyright "Copyright (C) 2020 Dario Sanfilippo
+      <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_t60 license "MIT-style STK-4.3 license";
 avg_t60(period, x) = fi.lpt60(period, x);
@@ -3053,7 +3084,7 @@ avg_t60(period, x) = fi.lpt60(period, x);
 //
 // Where:
 //
-// * `period` is the time, in seconds, for the system to decay by 1/e^2.2, 
+// * `period` is the time, in seconds, for the system to decay by 1/e^2.2,
 // or to reach 1-1/e^2.2 of its final value.
 //
 // #### Reference
@@ -3064,7 +3095,7 @@ declare avg_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_t19 license "MIT-style STK-4.3 license";
-avg_t19(period, x) = fi.lpt19(period, x); 
+avg_t19(period, x) = fi.lpt19(period, x);
 
 
 /*******************************************************************************
@@ -3072,45 +3103,45 @@ avg_t19(period, x) = fi.lpt19(period, x);
 
 ## STK 4.3 License
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to deal in 
-the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
 so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all 
+The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-Any person wishing to distribute modifications to the Software is asked to send 
-the modifications to the original developer so that they can be incorporated 
-into the canonical version.  For software copyrighted by Julius O. Smith III, 
-email your modifications to <jos@ccrma.stanford.edu>.  This is, however, not a 
+Any person wishing to distribute modifications to the Software is asked to send
+the modifications to the original developer so that they can be incorporated
+into the canonical version.  For software copyrighted by Julius O. Smith III,
+email your modifications to <jos@ccrma.stanford.edu>.  This is, however, not a
 binding provision of this license.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --------------------------------------------------------------------------------
 
 ## LGPL License
 
-This program is free software; you can redistribute it and/or modify it under 
-the terms of the GNU Lesser General Public License as published by the Free 
-Software Foundation; either version 2.1 of the License, or (at your option) any 
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation; either version 2.1 of the License, or (at your option) any
 later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along 
-with the GNU C Library; if not, write to the Free Software Foundation, Inc., 
+You should have received a copy of the GNU Lesser General Public License along
+with the GNU C Library; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 
 --------------------------------------------------------------------------------
