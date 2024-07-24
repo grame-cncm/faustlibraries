@@ -103,14 +103,14 @@ declare integrator license "MIT-style STK-4.3 license";
 integrator = + ~ _;
 
 //-------------------`(fi.)dcblockerat`-----------------------
-// DC blocker with configurable break frequency.
-// The amplitude response is substantially flat above \(fb\),
-// and sloped at about +6 dB/octave below \(fb\).
+// DC blocker with configurable "break frequency".
+// The amplitude response is substantially flat above `fb`,
+// and sloped at about +6 dB/octave below `fb`.
 // Derived from the analog transfer function:
-// $$H(s) = \frac{s}{(s + 2 \pi fb)}$$
+// $$H(s) = \frac{s}{(s + 2 \pi f_b)}$$
 // (which can be seen as a 1st-order Butterworth highpass filter)
 // by the low-frequency-matching bilinear transform method
-// (i.e., the standard frequency-scaling constant 2*SR).
+// (i.e., using the typical frequency-scaling constant `2*SR`).
 //
 // #### Usage
 //
@@ -120,10 +120,11 @@ integrator = + ~ _;
 //
 // Where:
 //
-// * `fb`: "break frequency" in Hz, i.e., -3 dB gain frequency.
+// * `fb`: "break frequency" in Hz, i.e., -3 dB gain frequency (see 2nd reference below)
 //
-// #### Reference
-// <https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html>
+// #### References
+// * <https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html>
+// * <https://ccrma.stanford.edu/~jos/spectilt/Bode_Plots.html>
 //------------------------------------------------------------
 declare dcblockerat author "Julius O. Smith III";
 declare dcblockerat copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
