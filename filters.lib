@@ -1129,6 +1129,60 @@ with {
 // * Linear Prediction of Speech, Markel and Gray, Springer Verlag, 1976
 //========================================================================================
 
+//-----------------------`(fi.)scatN`--------------------------
+// N-port scattering junction.
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : scatN(N,av,filter) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: number of incoming/outgoing waves
+// * `av`: vector (list) of `N` alpha parameters (each between 0 and 2, and normally summing to 2):
+//    <https://ccrma.stanford.edu/~jos/pasp/Alpha_Parameters.html>
+// * `filter` : optional junction filter to apply (_ for none, see below)
+//
+// With no filter:
+// - The junction is _lossless_ when the alpha parameters sum to 2 ("allpass").
+// - The junction is _passive_ but lossy when the alpha parameters sum to less than 2 ("resistive loss").
+// - Dynamic and reactive junctions are obtained using the `filter` argument.
+//   For guaranteed stability, the filter should be _positive real_. (See 2nd ref. below).
+//
+// For \(N=2\) (two-port scattering), the reflection coefficient \(\rho\) corresponds
+// to alpha parameters \(1\pm\rho\).
+//
+// #### Example: Whacky echo chamber made of 16 lossless "acoustic tubes":
+//
+// ```
+// process = _ : *(1.0/sqrt(N)) <: daisyRev(16,2,0.9999) :> _,_ with { 
+//   daisyRev(N,Dp2,G) = si.bus(N) : (si.bus(2*N) :> si.bus(N)
+//     : fi.scatN(N, par(i,N,2*G/float(N)), fi.lowpass(1,5000.0))
+//     : par(i,N,de.delay(DS(i),DS(i)-1))) ~ si.bus(N) with { DS(i) = 2^(Dp2+i); };
+// };
+// ```
+//
+// #### References
+// * <https://ccrma.stanford.edu/~jos/pasp/Loaded_Waveguide_Junctions.html>
+// * <https://ccrma.stanford.edu/~jos/pasp/Passive_String_Terminations.html>
+// * <https://ccrma.stanford.edu/~jos/pasp/Unloaded_Junctions_Alpha_Parameters.html>
+//------------------------------------------------------------
+declare scatN author "Julius O. Smith III";
+declare scatN copyright "Copyright (C) 2024 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare scatN license "MIT-style STK-4.3 license";
+
+scatN(0,av,filter) = !;
+scatN(N,av,filter) = incomingWaves <: (junctionSum : filter <: si.bus(N)), par(i,N,*(-1)) :> si.bus(N)
+with {
+  incomingWaves = si.bus(N);
+  alpha(i) = ba.take(i+1,av);
+  junctionSum = par(i,N,*(alpha(i))) :> _; // Junction velocity/pressure for series/parallel junction
+  outgoingWaves = junctionSum <: si.bus(N), negatedIncoming :> si.bus(N);
+  alphaSum = sum(i,N,alpha(i));
+};
+
 //---------------`(fi.)scat`-----------------
 // Scatter off of reflectance r with reflection coefficient s.
 //
@@ -1145,8 +1199,10 @@ with {
 //
 // #### Example:  The following program should produce all zeros:
 //
+// ```
 // process = fi.allpassn(3,(.3,.2,.1)), fi.scat(.1, fi.scat(.2, fi.scat(.3, _)))
 //           :> - : ^(2) : +~_;
+// ```
 //
 // #### Reference:
 // * <https://ccrma.stanford.edu/~jos/pasp/Scattering_Impedance_Changes.html>
