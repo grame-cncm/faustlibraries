@@ -869,7 +869,7 @@ tabulate(C, FX, S, r0, r1, x) = environment {
     mid = S-1;
 
     // Create the table
-    wf = r0 + float(max(0, min(mid, ba.time)))*(r1-r0)/float(mid) : FX;
+    wf = r0 + float(rid(ba.time, 1))*(r1-r0)/float(mid) : FX;
 
     // Prepare the 'float' table read index
     id = (x-r0)/(r1-r0)*mid;
