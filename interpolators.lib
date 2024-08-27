@@ -457,7 +457,7 @@ with {
 //=========================Lagrange based interpolators====================================
 //========================================================================================
 
-//-------`(it.)lagrangeCoeffs(N, xCoordsList)` ---------------------------------------------
+//-------`(it.)lagrangeCoeffs` ---------------------------------------------
 //
 // This is a function to generate N + 1 coefficients for an Nth-order Lagrange
 // basis polynomial with arbitrary spacing of the points.
@@ -496,7 +496,8 @@ lagrange_h(N, x) = lagrangeCoeffs(N, xCoord, x)
         xCoord = par(i, N + 1, i);
     };
 
-//-------`(it.)lagrangeInterpolation(N, xCoordsList)` --------------------------------------
+
+//-------`(it.)lagrangeInterpolation` --------------------------------------
 //
 // Nth-order Lagrange interpolator to interpolate between a set of arbitrarily spaced N + 1 points.
 //
@@ -551,7 +552,8 @@ lagrangeInterpolation(N, xCoords, x) = si.dot(N + 1, lagrangeCoeffs(N, xCoords, 
 // The following definition for uniformely-spaced points interpolation is kept for back-compatibility
 lagrangeN(N, x) = si.dot(N + 1, lagrange_h(N, x));
 
-//-------`(it.)frdtable(N, S)` --------------------------------------------
+
+//-------`(it.)frdtable` --------------------------------------------
 //
 // Look-up circular table with Nth-order Lagrange interpolation for fractional
 // indexes. The index is wrapped-around and the table is cycles for an index
@@ -597,7 +599,7 @@ frdtable(N, S, init, idx) =
     };
 
 
-//-------`(it.)frwtable(N, S)` --------------------------------------------
+//-------`(it.)frwtable` --------------------------------------------
 //
 // Look-up updatable circular table with Nth-order Lagrange interpolation for
 // fractional indexes. The index is wrapped-around and the table is circular

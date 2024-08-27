@@ -277,19 +277,19 @@
             </li>
             <li class="nav-item" data-level="2"><a href="#lagrange-based-interpolators" class="nav-link">Lagrange based interpolators</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#itlagrangecoeffsn-xcoordslist" class="nav-link">(it.)lagrangeCoeffs(N, xCoordsList)</a>
+            <li class="nav-item" data-level="3"><a href="#itlagrangecoeffs" class="nav-link">(it.)lagrangeCoeffs</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#itlagrangeinterpolationn-xcoordslist" class="nav-link">(it.)lagrangeInterpolation(N, xCoordsList)</a>
+            <li class="nav-item" data-level="3"><a href="#itlagrangeinterpolation" class="nav-link">(it.)lagrangeInterpolation</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#itfrdtablen-s" class="nav-link">(it.)frdtable(N, S)</a>
+            <li class="nav-item" data-level="3"><a href="#itfrdtable" class="nav-link">(it.)frdtable</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#itfrwtablen-s" class="nav-link">(it.)frwtable(N, S)</a>
+            <li class="nav-item" data-level="3"><a href="#itfrwtable" class="nav-link">(it.)frwtable</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -529,7 +529,7 @@ with {
 </ul>
 <h2 id="lagrange-based-interpolators">Lagrange based interpolators</h2>
 <hr />
-<h3 id="itlagrangecoeffsn-xcoordslist"><code>(it.)lagrangeCoeffs(N, xCoordsList)</code></h3>
+<h3 id="itlagrangecoeffs"><code>(it.)lagrangeCoeffs</code></h3>
 <p>This is a function to generate N + 1 coefficients for an Nth-order Lagrange
 basis polynomial with arbitrary spacing of the points.</p>
 <h4 id="usage_9">Usage</h4>
@@ -547,7 +547,7 @@ basis polynomial with arbitrary spacing of the points.</p>
 <li><a href="https://en.wikipedia.org/wiki/Lagrange_polynomial">https://en.wikipedia.org/wiki/Lagrange_polynomial</a></li>
 </ul>
 <hr />
-<h3 id="itlagrangeinterpolationn-xcoordslist"><code>(it.)lagrangeInterpolation(N, xCoordsList)</code></h3>
+<h3 id="itlagrangeinterpolation"><code>(it.)lagrangeInterpolation</code></h3>
 <p>Nth-order Lagrange interpolator to interpolate between a set of arbitrarily spaced N + 1 points.</p>
 <h4 id="usage_10">Usage</h4>
 <pre><code>x , yCoords : lagrangeInterpolation(N, xCoordsList) : _
@@ -582,7 +582,7 @@ Sanfilippo and Parker 2021, "Combining zeroth and first‐order analysis with La
 <li><a href="https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in21_paper_38.pdf">https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in21_paper_38.pdf</a></li>
 </ul>
 <hr />
-<h3 id="itfrdtablen-s"><code>(it.)frdtable(N, S)</code></h3>
+<h3 id="itfrdtable"><code>(it.)frdtable</code></h3>
 <p>Look-up circular table with Nth-order Lagrange interpolation for fractional
 indexes. The index is wrapped-around and the table is cycles for an index
 span of size S, which is the table size in samples.</p>
@@ -607,7 +607,7 @@ process = rdtable(S, os.sinwaveform(S), int(index)) ,
           it.frdtable(N, S, os.sinwaveform(S), index);
 </code></pre>
 <hr />
-<h3 id="itfrwtablen-s"><code>(it.)frwtable(N, S)</code></h3>
+<h3 id="itfrwtable"><code>(it.)frwtable</code></h3>
 <p>Look-up updatable circular table with Nth-order Lagrange interpolation for
 fractional indexes. The index is wrapped-around and the table is circular
 indexes ranging from 0 to S, which is the table size in samples.</p>
