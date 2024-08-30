@@ -2453,6 +2453,7 @@ with{
 //
 // Where:
 //
+// * `excitation`: the excitation signal
 // * `freq`: the frequency of the bar/tube couple
 // * `exPos`: excitation position (0-4)
 //----------------------------------
@@ -2477,12 +2478,11 @@ with{
 // #### Usage
 //
 // ```
-// excitation : marimba(freq,strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+// marimba(freq,strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 // ```
 //
 // Where:
 //
-// * `excitation`: the excitation signal
 // * `freq`: the frequency of the bar/tube couple
 // * `strikePosition`: strike position (0-4)
 // * `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
@@ -2579,12 +2579,11 @@ with{
 // #### Usage
 //
 // ```
-// excitation : churchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+// churchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 // ```
 //
 // Where:
 //
-// * `excitation`: the excitation signal
 // * `strikePosition`: strike position (0-6)
 // * `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
@@ -2597,7 +2596,7 @@ churchBellModel(50,strikePosition,30,1,2.5);
 
 
 //-------`(pm.)churchBell_ui`----------
-// Church bell physical model based on [`churchBell`](#churchbell) with
+// Church bell physical model based on [`churchBell`](#pmchurchbell) with
 // built-in UI.
 //
 // #### Usage
@@ -2676,12 +2675,11 @@ with{
 // #### Usage
 //
 // ```
-// excitation : englishBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+// englishBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 // ```
 //
 // Where:
 //
-// * `excitation`: the excitation signal
 // * `strikePosition`: strike position (0-6)
 // * `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
@@ -2694,7 +2692,7 @@ englishBellModel(50,strikePosition,30,1,3);
 
 
 //-------`(pm.)englishBell_ui`----------
-// English church bell physical model based on [`englishBell`](#englishbell) with
+// English church bell physical model based on [`englishBell`](#pmenglishbell) with
 // built-in UI.
 //
 // #### Usage
@@ -2770,12 +2768,11 @@ with{
 // #### Usage
 //
 // ```
-// excitation : frenchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+//frenchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 // ```
 //
 // Where:
 //
-// * `excitation`: the excitation signal
 // * `strikePosition`: strike position (0-6)
 // * `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
@@ -2788,7 +2785,7 @@ frenchBellModel(50,strikePosition,30,1,3);
 
 
 //-------`(pm.)frenchBell_ui`----------
-// French church bell physical model based on [`frenchBell`](#frenchbell) with
+// French church bell physical model based on [`frenchBell`](#pmfrenchbell) with
 // built-in UI.
 //
 // #### Usage
@@ -2864,12 +2861,11 @@ with{
 // #### Usage
 //
 // ```
-// excitation : germanBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+// germanBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 // ```
 //
 // Where:
 //
-// * `excitation`: the excitation signal
 // * `strikePosition`: strike position (0-6)
 // * `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
@@ -2882,7 +2878,7 @@ germanBellModel(50,strikePosition,30,1,2.5);
 
 
 //-------`(pm.)germanBell_ui`----------
-// German church bell physical model based on [`germanBell`](#germanbell) with
+// German church bell physical model based on [`germanBell`](#pmgermanbell) with
 // built-in UI.
 //
 // #### Usage
@@ -2958,12 +2954,11 @@ with{
 // #### Usage
 //
 // ```
-// excitation : russianBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+// russianBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 // ```
 //
 // Where:
 //
-// * `excitation`: the excitation signal
 // * `strikePosition`: strike position (0-6)
 // * `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
@@ -2976,7 +2971,7 @@ russianBellModel(50,strikePosition,30,1,3);
 
 
 //-------`(pm.)russianBell_ui`----------
-// Russian church bell physical model based on [`russianBell`](#russianbell) with
+// Russian church bell physical model based on [`russianBell`](#pmrussianbell) with
 // built-in UI.
 //
 // #### Usage
@@ -3049,12 +3044,11 @@ with{
 // #### Usage
 //
 // ```
-// excitation : standardBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
+// standardBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 // ```
 //
 // Where:
 //
-// * `excitation`: the excitation signal
 // * `strikePosition`: strike position (0-6)
 // * `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
@@ -3067,7 +3061,7 @@ standardBellModel(50,strikePosition,30,1,2.5);
 
 
 //-------`(pm.)standardBell_ui`----------
-// Standard church bell physical model based on [`standardBell`](#standardbell) with
+// Standard church bell physical model based on [`standardBell`](#pmstandardbell) with
 // built-in UI.
 //
 // #### Usage
