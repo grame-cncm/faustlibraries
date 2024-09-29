@@ -35,5 +35,5 @@ END {
 	link = fun;
 	gsub(/[\[\]\|\(\)\.]/, "", link); 	# remove () [] | and .
 	gsub(" ", "-", link);   				# replace space with -
-	print "[" fun "](" SECTION "/#" tolower(link) ") &nbsp; &nbsp;";
+	print "[" fun "](" SECTION ".md#" tolower(link) ") &nbsp; &nbsp;";
 }
