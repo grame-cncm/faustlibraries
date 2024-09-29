@@ -454,6 +454,77 @@ with {
                     interpolator_null(gen, idv));
 };
 
+//======= Generic piecewise linear interpolation ===============================
+//==============================================================================
+//------------------------------------------------------------------------------
+//
+//------- (it.)lerp ------------------------------------------------------------
+// Linear interpolation between two points -------------------------------------
+//------------------------------------------------------------------------------
+//
+// #### Usage
+//
+// ```
+// lerp(x0, x1, y0, y1, x) : si.bus(1);
+// ```
+//
+// Where:
+//
+// * `x0`: x-coordinate origin
+// * `x1`: x-coordinate destination
+// * `y0`: y-coordinate origin
+// * `y1`: y-coordinate destination
+// * `x`: x-coordinate input
+//------------------------------------------------------------------------------
+declare interpolator_select author "Dario Sanfilippo";
+declare interpolator_select licence "MIT";
+lerp(x0, x1, y0, y1, x) = y
+    with {
+        xRange = x1 - x0;
+        yRange = y1 - y0;
+        nonZeroDomain(x) = ba.if(x >= 0, max(ma.EPSILON, x), min(0 - ma.EPSILON, x));
+        c = (x - x0) / nonZeroDomain(xRange);
+        y = c * yRange + y0;
+    };
+//------------------------------------------------------------------------------
+
+//------- (it.)piecewise -------------------------------------------------------
+// Linear piecewise interpolation between N points -----------------------------
+//------------------------------------------------------------------------------
+//
+// #### Usage
+//
+// ```
+// piecewise(xList, yList, x) : si.bus(1);
+// ```
+//
+// Where:
+//
+// * `xList`: x-coordinates list
+// * `yList`: y-coordinates list
+// * `x`: x-coordinate input
+//
+// #### Example:
+//
+// x = hslider("x", -5, -5.0, 5.0, .001);
+// process = piecewise((-5, -3, 0, 3, 5), (2, 0, 3, -3, -2), x);
+//
+// The code above will output the values of linear segments going through the
+// y coordinates as the input goes from -5 to 5.
+//------------------------------------------------------------------------------
+declare interpolator_select author "Dario Sanfilippo";
+declare interpolator_select licence "MIT";
+piecewise(xList, yList, x) = y , assert
+    with {
+        N = outputs(xList);
+        M = outputs(yList);
+        assert = par(i, N, 0) : si.block(M);
+        xPoint(i) = ba.selectn(N, i, xList);
+        yPoint(i) = ba.selectn(M, i, yList);
+        pieceSel = par(i, N - 2, (xPoint(i) <= x) & (x < xPoint(i + 1))) , x >= xPoint(N - 2) : par(i, N - 1, *(i)) :> _;
+        y = lerp(xPoint(pieceSel), xPoint(pieceSel + 1), yPoint(pieceSel), yPoint(pieceSel + 1), x);
+    };
+
 //=========================Lagrange based interpolators====================================
 //========================================================================================
 
