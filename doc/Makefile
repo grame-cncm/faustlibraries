@@ -79,7 +79,7 @@ $(FAUSTDIR):
 
 ####################################################################
 install:
-	pip install mkdocs
+	pip install mkdocs==1.5.3
 	pip install mkdocs-pdf-export-plugin
 	pip install markdown-include
 	pip install mkdocs-bootswatch
