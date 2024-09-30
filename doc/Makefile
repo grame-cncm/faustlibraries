@@ -6,7 +6,7 @@ DOCDIR   := docs
 SITEDIR	 := ../docs
 FAUSTLIBS ?= ../../faustlibraries
 
-SRC   	 := $(shell cat ../../faustlibraries/all.lib | grep import | sed -e 's/[^"]*"\(..*\.lib\).*/\1/')
+SRC   	 := $(shell cat $(FAUSTLIBS)/all.lib | grep import | sed -e 's/[^"]*"\(..*\.lib\).*/\1/')
 MD   	 := $(SRC:%.lib=$(DOCDIR)/libs/%.md)
 LIST   	 := $(SRC:%.lib=%)
 
