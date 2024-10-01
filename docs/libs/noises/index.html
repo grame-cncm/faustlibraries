@@ -450,13 +450,13 @@ Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
 <h3 id="nolfnoise-nolfnoise0-and-nolfnoisen"><code>(no.)lfnoise</code>, <code>(no.)lfnoise0</code> and <code>(no.)lfnoiseN</code></h3>
 <p>Low-frequency noise generators (Butterworth-filtered downsampled white noise).</p>
 <h4 id="usage_11">Usage</h4>
-<pre><code>lfnoise0(rate) : _   // new random number every int(SR/rate) samples or so
-lfnoiseN(N,rate) : _ // same as &quot;lfnoise0(rate) : lowpass(N,rate)&quot; [see filters.lib]
-lfnoise(rate) : _    // same as &quot;lfnoise0(rate) : seq(i,5,lowpass(N,rate))&quot; (no overshoot)
+<pre><code>lfnoise0(rate) : _   // new random number every int(ma.SR/rate) samples or so
+lfnoiseN(N,rate) : _ // same as &quot;lfnoise0(rate) : fi.lowpass(N,rate)&quot; [see filters.lib]
+lfnoise(rate) : _    // same as &quot;lfnoise0(rate) : seq(i,5,fi.lowpass(N,rate))&quot; (no overshoot)
 </code></pre>
 <h4 id="example_1">Example</h4>
 <p>(view waveforms in faust2octave):</p>
-<pre><code>rate = SR/100.0; // new random value every 100 samples (SR from music.lib)
+<pre><code>rate = ma.SR/100.0; // new random value every 100 samples (ma.SR from maths.lib)
 process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
           lfnoiseN(3,rate), // lfnoise0 smoothed by 3rd order Butterworth LPF
           lfnoise(rate);    // lfnoise0 smoothed with no overshoot

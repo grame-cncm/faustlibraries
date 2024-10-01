@@ -319,9 +319,9 @@ with {
 // #### Usage
 //
 // ```
-// lfnoise0(rate) : _   // new random number every int(SR/rate) samples or so
-// lfnoiseN(N,rate) : _ // same as "lfnoise0(rate) : lowpass(N,rate)" [see filters.lib]
-// lfnoise(rate) : _    // same as "lfnoise0(rate) : seq(i,5,lowpass(N,rate))" (no overshoot)
+// lfnoise0(rate) : _   // new random number every int(ma.SR/rate) samples or so
+// lfnoiseN(N,rate) : _ // same as "lfnoise0(rate) : fi.lowpass(N,rate)" [see filters.lib]
+// lfnoise(rate) : _    // same as "lfnoise0(rate) : seq(i,5,fi.lowpass(N,rate))" (no overshoot)
 // ```
 //
 // #### Example
@@ -329,14 +329,14 @@ with {
 // (view waveforms in faust2octave):
 //
 // ```
-// rate = SR/100.0; // new random value every 100 samples (SR from music.lib)
+// rate = ma.SR/100.0; // new random value every 100 samples (ma.SR from maths.lib)
 // process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 //           lfnoiseN(3,rate), // lfnoise0 smoothed by 3rd order Butterworth LPF
 //           lfnoise(rate);    // lfnoise0 smoothed with no overshoot
 // ```
 //------------------------------------------------------------
 lfnoise0(freq) = noise : ba.latch(os.oscrs(freq));
-lfnoiseN(N,freq) = lfnoise0(freq) : fi.lowpass(N,freq); // Nth-order Butterworth lowpass
+lfnoiseN(N,freq) = lfnoise0(freq) : fi.lowpass(N,freq);       // Nth-order Butterworth lowpass
 lfnoise(freq) = lfnoise0(freq) : seq(i,5,fi.lowpass(1,freq)); // non-overshooting lowpass
 
 
