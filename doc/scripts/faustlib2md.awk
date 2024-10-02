@@ -13,7 +13,7 @@ function makeurl(arg) {
 
 		gsub(":", "://", url);			# for malformed url
 		gsub(/\/\/\/\//, "//", url);	# to fix redundant //// 
-		gsub(/<http..*>/, "["url"]("url".md)", arg);
+		gsub(/<http..*>/, "["url"]("url")", arg);
 		return "* "arg;
 	}
 	return arg;
