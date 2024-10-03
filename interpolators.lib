@@ -640,7 +640,7 @@ lagrangeN(N, x) = si.dot(N + 1, lagrange_h(N, x));
 //
 // * `N`: Lagrange interpolation order, known at compile-time
 // * `S`: table size in samples, known at compile-time
-// * `init`: signal for table initialisation
+// * `init`: the initial table content, known at compile-time
 // * `idx`: fractional index wrapped-around 0 and S
 //
 // #### Example test program
@@ -686,7 +686,7 @@ frdtable(N, S, init, idx) =
 //
 // * `N`: Lagrange interpolation order, known at compile-time
 // * `S`: table size in samples, known at compile-time
-// * `init`: constant for table initialisation, known at compile-time
+// * `init`: the initial table content, known at compile-time
 // * `w_idx`: it should be an INT between 0 and S - 1
 // * `x`: input signal written on the w_idx positions
 // * `r_idx`: fractional index wrapped-around 0 and S
@@ -717,7 +717,6 @@ frwtable(N, S, init, w_idx, x, r_idx) =
         f_idx = ma.frac(r_idx) + int(N / 2);
         i_idx = int(r_idx);
     };
-
 
 //=========================Misc functions=================================================
 //========================================================================================

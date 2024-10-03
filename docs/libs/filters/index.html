@@ -1665,10 +1665,6 @@ frequency.  The <code>lowpass(Nh)</code> cutoff <code>w1</code> is half the desi
 Thus, the passband width is <code>fu-fl</code>,
       and its center frequency is <code>(fl+fu)/2</code>.</li>
 </ul>
-<h4 id="reference_20">Reference</h4>
-<ul>
-<li><a href="http://cnx.org/content/m16913/latest/">http://cnx.org/content/m16913/latest/</a></li>
-</ul>
 <hr />
 <h3 id="fibandstop"><code>(fi.)bandstop</code></h3>
 <p>Order 2*Nh Butterworth bandstop filter made using the transformation
@@ -1685,10 +1681,6 @@ frequency.  The <code>highpass(Nh)</code> cutoff <code>w1</code> is half the des
 <li><code>fu</code>: upper -3dB frequency in Hz
 Thus, the passband (stopband) width is <code>fu-fl</code>,
       and its center frequency is <code>(fl+fu)/2</code>.</li>
-</ul>
-<h4 id="reference_21">Reference</h4>
-<ul>
-<li><a href="http://cnx.org/content/m16913/latest/">http://cnx.org/content/m16913/latest/</a></li>
 </ul>
 <h2 id="elliptic-bandpass-filters">Elliptic Bandpass Filters</h2>
 <hr />
@@ -1852,7 +1844,7 @@ Also called a "parametric equalizer" section.
 <li><code>tanPiBT</code>: <code>tan(PI*B/SR)</code>, where B = -3dB bandwidth (Hz) when 10^(Lfx/20) = 0
         ~ PI*B/SR for narrow bandwidths B</li>
 </ul>
-<h4 id="reference_22">Reference</h4>
+<h4 id="reference_20">Reference</h4>
 <p>P.A. Regalia, S.K. Mitra, and P.P. Vaidyanathan,
 "The Digital All-Pass Filter: A Versatile Signal Processing Building Block"
 Proceedings of the IEEE, 76(1):19-37, Jan. 1988.  (See pp. 29-30.)
@@ -1880,7 +1872,7 @@ set alpha to -1/2.</p>
 </ul>
 <h4 id="example-test-program_4">Example test program</h4>
 <p>See <code>dm.spectral_tilt_demo</code> and the documentation for <code>no.pink_noise</code>.</p>
-<h4 id="reference_23">Reference</h4>
+<h4 id="reference_21">Reference</h4>
 <p>J.O. Smith and H.F. Smith,
 "Closed Form Fractional Integration and Differentiation via Real Exponentially Spaced Pole-Zero Pairs",
 arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
@@ -1898,7 +1890,7 @@ arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
 <li><code>freq</code>: corner frequency (-3dB point) usually set to fundamental freq</li>
 <li><code>N</code>: Number of filters in series where L = L/N</li>
 </ul>
-<h4 id="reference_24">Reference</h4>
+<h4 id="reference_22">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html">https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html</a></li>
 </ul>
@@ -1914,7 +1906,7 @@ arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
 <li><code>freq</code>: corner frequency (-3dB point) usually set to fundamental freq</li>
 <li><code>L</code>: desired level (in dB) at Nyquist limit (SR/2), e.g., -60</li>
 </ul>
-<h4 id="reference_25">Reference</h4>
+<h4 id="reference_23">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html">https://ccrma.stanford.edu/realsimple/faust_strings/Dynamic_Level_Lowpass_Filter.html</a></li>
 </ul>
@@ -2042,7 +2034,7 @@ filters. For the second-order Butterworth filters, we will use the SVF
 filter implemented above by setting the Q-factor to 1.0 / sqrt(2.0).
 These will be cascaded in pairs to build the LR4 highpass and lowpass.
 For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
-<h4 id="reference_26">Reference</h4>
+<h4 id="reference_24">Reference</h4>
 <p>Zavalishin, Vadim. "The art of VA filter design." Native Instruments, Berlin, Germany (2012).</p>
 <hr />
 <h3 id="filowpasslr4"><code>(fi.)lowpassLR4</code></h3>
@@ -2127,7 +2119,7 @@ less.</p>
 <h4 id="usage_74">Usage</h4>
 <pre><code>_ : itu_r_bs_1770_4_kfilter : _
 </code></pre>
-<h4 id="reference_27">Reference</h4>
+<h4 id="reference_25">Reference</h4>
 <ul>
 <li><a href="https://www.itu.int/rec/R-REC-BS.1770">https://www.itu.int/rec/R-REC-BS.1770</a></li>
 <li><a href="https://gist.github.com/jkbd/07521a98f7873a2dc3dbe16417930791">https://gist.github.com/jkbd/07521a98f7873a2dc3dbe16417930791</a></li>
@@ -2158,7 +2150,7 @@ non-steady signals.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/e,
 or to reach 1-1/e of its final value.</li>
 </ul>
-<h4 id="reference_28">Reference</h4>
+<h4 id="reference_26">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Exponentials.html">https://ccrma.stanford.edu/~jos/mdft/Exponentials.html</a></li>
 </ul>
@@ -2175,7 +2167,7 @@ reach the final value after about <code>period</code> seconds.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/1000,
 or to reach 1-1/1000 of its final value.</li>
 </ul>
-<h4 id="reference_29">Reference</h4>
+<h4 id="reference_27">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html">https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html</a></li>
 </ul>
@@ -2193,7 +2185,7 @@ oscillations for non-steady signals.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/e^2.2,
 or to reach 1-1/e^2.2 of its final value.</li>
 </ul>
-<h4 id="reference_30">Reference</h4>
+<h4 id="reference_28">Reference</h4>
 <p>Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.</p></div>
             </div>
         </div>
