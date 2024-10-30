@@ -42,7 +42,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Antialiased Nonlinearities";
-declare version "1.3.0";
+declare version "1.4.0";
 
 //==============================Auxiliary Functions=======================================
 //========================================================================================
@@ -436,7 +436,7 @@ sinarctan2(x) = ADAA2(EPS, f, F1, F2, x)
       };
 
 
-//-------`(aa.)softclipQuadratic`---------------------
+//-------`(aa.)softclipQuadratic2`---------------------
 //
 // First-order ADAA quadratic softclip.
 //
@@ -444,14 +444,14 @@ sinarctan2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.softclipQuadratic : _
+// _ : aa.softclipQuadratic2 : _
 // ```
 //----------------------------------------------
-declare softclipQuadratic author "David Braun";
-declare softclipQuadratic copyright "Copyright (C) 2024 David Braun";
-declare softclipQuadratic license "MIT license";
+declare softclipQuadratic2 author "David Braun";
+declare softclipQuadratic2 copyright "Copyright (C) 2024 David Braun";
+declare softclipQuadratic2 license "MIT license";
 
-softclipQuadratic(x) = ADAA1(EPS, softclip, F1, x)
+softclipQuadratic2(x) = ADAA1(EPS, softclip, F1, x)
 with {
     // this non anti-aliased version exists in misceffects.lib
     softclip(x) = ba.ifNcNo(2, 1, 
