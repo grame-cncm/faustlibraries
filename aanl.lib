@@ -436,7 +436,7 @@ sinarctan2(x) = ADAA2(EPS, f, F1, F2, x)
       };
 
 
-//-------`(aa.)softclipQuadratic2`---------------------
+//-------`(aa.)softclipQuadratic1`---------------------
 //
 // First-order ADAA quadratic softclip.
 //
@@ -444,14 +444,14 @@ sinarctan2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.softclipQuadratic2 : _
+// _ : aa.softclipQuadratic1 : _
 // ```
 //----------------------------------------------
-declare softclipQuadratic2 author "David Braun";
-declare softclipQuadratic2 copyright "Copyright (C) 2024 David Braun";
-declare softclipQuadratic2 license "MIT license";
+declare softclipQuadratic1 author "David Braun";
+declare softclipQuadratic1 copyright "Copyright (C) 2024 David Braun";
+declare softclipQuadratic1 license "MIT license";
 
-softclipQuadratic2(x) = ADAA1(EPS, softclip, F1, x)
+softclipQuadratic1(x) = ADAA1(EPS, softclip, F1, x)
 with {
     // this non anti-aliased version exists in misceffects.lib
     softclip(x) = ba.ifNcNo(2, 1, 
