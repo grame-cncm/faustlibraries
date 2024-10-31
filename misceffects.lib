@@ -1033,7 +1033,7 @@ declare softclipQuadratic license "MIT license";
 
 softclipQuadratic(x) = ba.ifNcNo(2, 1, 
     absX < 1/3, 2*x,
-    absX <= 2/3, ma.signum(x)*(3-(2-abs(3*x))^2)/3,
+    absX <= 2/3, ma.signum(x)*(3-(2-absX*3)^2)/3,
     ma.signum(x)
     )
 with {
