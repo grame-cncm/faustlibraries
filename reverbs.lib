@@ -671,7 +671,7 @@ with {
     
     // Lowpass Feedback Combfilter:
     // <https://ccrma.stanford.edu/~jos/pasp/Lowpass_Feedback_Comb_Filter.html>
-    lbcf(dt, fb, damp) = (+:@(dt)) ~ (*(1-damp) : (+ ~ *(damp)) : *(fb));
+    lbcf(dt, fb, damp) = (+ : @ (max(0, (dt - 1)))) ~ (*(1-damp) : (+ ~ *(damp)) : *(fb)) : mem;
      
     origSR = 44100;
     adaptSR(val) = val*ma.SR/origSR : int;
