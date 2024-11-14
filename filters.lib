@@ -2804,33 +2804,34 @@ svf = environment {
 // Outputs: lowpass, highpass, bandpass, normalised bandpass, notch, allpass, 
 // peaking.
 //
-// Each individual ouptput can be recalled with its name in the environment, for example:
-//      `SVFTPT.LP2(.707, 1000.0)`
+// Each individual output can be recalled with its name in the environment as in:
+//      `SVFTPT.LP2(1000.0, .707)`.
 //
-// The 7 outputs can be recalled by specifying the environment, for example:
-//      `SVFTPT.SVF(.707, 1000.0)`
+// The 7 outputs can be recalled by using `SVF` name as in:
+//      `SVFTPT.SVF(1000.0, .707)`.
 //
 // Even though the implementation is different, the characteristics of this
-// filter are comparable to those of the "svf" environment in this library.
+// filter are comparable to those of the `svf` environment in this library.
 //
 // #### Usage:
 //
 // ```
-// _ : SVFTPT.xxx(Q, CF) : _
+// _ : SVFTPT.xxx(CF, Q) : _
 // ```
 //
-// #### Where:
+// Where:
 //
-// * `xxx` can be one of the following: `LP2`, `HP2`, `BP2`, `BP2Norm`, `Notch2`, `AP2`, `Peaking2`.
-// * `Q`: resonance.
-// * `CF`: cutoff in Hz.
+// * `xxx` can be one of the following: `LP2`, `HP2`, `BP2`, `BP2Norm`, `Notch2`, `AP2`, `Peaking2`
+// * `CF`: cutoff in Hz
+// * `Q`: resonance
+// 
 //------------------------------------------------------------------------------
 declare SVFTPT author "Dario Sanfilippo";
 declare SVFTPT copyright
     "Copyright (C) 2024 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
 declare SVFTPT license "MIT License";
 SVFTPT = environment {
-    SVF(Q, CF, x) = f ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _ , _ , _)
+    SVF(CF, Q, x) = f ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _ , _ , _)
         with {
             g = tan(CF * ma.PI * ma.T);
             R2 = 1.0 / Q;
@@ -2850,13 +2851,13 @@ SVFTPT = environment {
                     u1 = v1 + LP;
                 };
         };
-    LP2(Q, CF, x) = SVF(Q, CF, x) : ba.selectn(7, 0);
-    HP2(Q, CF, x) = SVF(Q, CF, x) : ba.selectn(7, 1);
-    BP2(Q, CF, x) = SVF(Q, CF, x) : ba.selectn(7, 2);
-    BP2Norm(Q, CF, x) = SVF(Q, CF, x) : ba.selectn(7, 3);
-    Notch2(Q, CF, x) = SVF(Q, CF, x) : ba.selectn(7, 4);
-    AP2(Q, CF, x) = SVF(Q, CF, x) : ba.selectn(7, 5);
-    Peaking2(Q, CF, x) = SVF(Q, CF, x) : ba.selectn(7, 6);
+    LP2(CF, Q, x) = SVF(CF, Q, x) : ba.selectn(7, 0);
+    HP2(CF, Q, x) = SVF(CF, Q, x) : ba.selectn(7, 1);
+    BP2(CF, Q, x) = SVF(CF, Q, x) : ba.selectn(7, 2);
+    BP2Norm(CF, Q, x) = SVF(CF, Q, x) : ba.selectn(7, 3);
+    Notch2(CF, Q, x) = SVF(CF, Q, x) : ba.selectn(7, 4);
+    AP2(CF, Q, x) = SVF(CF, Q, x) : ba.selectn(7, 5);
+    Peaking2(CF, Q, x) = SVF(CF, Q, x) : ba.selectn(7, 6);
 };
 
 //----------`(fi.)dynamicSmoother`------------------------------------------------
@@ -2891,6 +2892,7 @@ SVFTPT = environment {
 //
 // #### Reference
 //  <https://cytomic.com/files/dsp/DynamicSmoothing.pdf>
+//
 //------------------------------------------------------------------------------
 declare dynamicSmoothing author "Dario Sanfilippo";
 declare dynamicSmoothing copyright
@@ -2898,7 +2900,7 @@ declare dynamicSmoothing copyright
 declare dynamicSmoothing license "MIT License";
 dynamicSmoothing(sensitivity, baseCF, x) = f ~ _ : ! , _
     with {
-        f(s) = SVFTPT.BP2(.5, CF, x) , SVFTPT.LP2(.5, CF, x)
+        f(s) = SVFTPT.BP2(CF, .5 , x) , SVFTPT.LP2(CF, .5, x)
             with {
                 CF = min(ma.SR * .125, baseCF + sensitivity * abs(s) * ma.SR * .5);
             };
