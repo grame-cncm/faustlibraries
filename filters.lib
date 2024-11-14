@@ -2797,6 +2797,85 @@ svf = environment {
 	hs(f,q,g)   = svf(8, f, q, g);
 };
 
+//----------(fi.)SVFTPT---------------------------------------------------------
+//
+// Topology-preserving transform implementation following Zavalishin's method.
+//
+// Outputs: lowpass, highpass, bandpass, normalised bandpass, notch, allpass,
+// peaking.
+//
+// #### Usage:
+//
+// _ : SVFTPT(Q, CF) : si.bus(7)
+//
+// #### Where:
+//
+// * `Q`: resonance.
+// * `CF`: cutoff in Hz.
+//------------------------------------------------------------------------------
+declare SVFTPT author "Dario Sanfilippo";
+declare SVFTPT copyright
+    "Copyright (C) 2024 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
+declare SVFTPT license "MIT License";
+SVFTPT(Q, CF, x) = f ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _ , _ , _)
+    with {
+        g = tan(CF * ma.PI * ma.T);
+        R2 = 1.0 / Q;
+        gPlusR2 = g + R2;
+        f(s0, s1) = u0 , u1 , LP , HP , BP , BPNorm , Notch , AP , Peaking
+            with {
+                HP = (x - s0 * gPlusR2 - s1) / (1.0 + g * gPlusR2);
+                v0 = HP * g;
+                BP = s0 + v0;
+                v1 = BP * g;
+                LP = s1 + v1;
+                BPNorm = BP * R2;
+                Notch = x - BPNorm;
+                AP = x - BP * (R2 + R2);
+                Peaking = LP - HP;
+                u0 = v0 + BP;
+                u1 = v1 + LP;
+            };
+    };
+
+//----------(fi.)dynamicSmoother------------------------------------------------
+//
+// Adaptive smoother based on Andy Simper's paper:
+//      https://cytomic.com/files/dsp/DynamicSmoothing.pdf
+//
+// This filter uses both the lowpass and bandpass outputs of a
+// state-variable filter. The lowpass is used to smooth out the input signal,
+// the bandpass, which is a smoothed out version of the highpass, provides
+// information on the rate of change of the input. Hence, the bandpass signal
+// can be used to adjust the cutoff of the filter to quickly follow the input's
+// fast and large variations while effectively filtering out local
+// perturbations.
+//
+// This implementation does not use an approximation for the CF computation,
+// and it deploys guards to prevent overshooting with extreme sensitivity
+// values.
+//
+// #### Usage:
+//
+// _ : dynamicSmoother(sensitivity, baseCF) : _
+//
+// #### Where:
+//
+// * `sensitivity`: sensitivity to changes in the input signal.
+// * `baseCF`: cutoff frequency, in Hz, when there is no variation in the
+//      input signal.
+//------------------------------------------------------------------------------
+declare dynamicSmoothing author "Dario Sanfilippo";
+declare dynamicSmoothing copyright
+    "Copyright (C) 2024 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
+declare dynamicSmoothing license "MIT License";
+dynamicSmoothing(sensitivity, baseCF, x) = f ~ _ : ! , _
+    with {
+        f(s) = (SVFTPT(.5, CF, x) : ba.selectn(7, 2)) , (SVFTPT(.5, CF, x) : ba.selectn(7, 0))
+            with {
+                CF = min(ma.SR * .125, baseCF + sensitivity * abs(s) * ma.SR * .5);
+            };
+    };
 
 //===========Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers=====
 //
