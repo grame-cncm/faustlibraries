@@ -46,7 +46,7 @@ si = library("signals.lib");
 fi = library("filters.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Filters Library";
-declare version "1.3.0";
+declare version "1.4.0";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2797,25 +2797,31 @@ svf = environment {
 	hs(f,q,g)   = svf(8, f, q, g);
 };
 
-//----------(fi.)SVFTPT---------------------------------------------------------
+//----------`(fi.)SVFTPT`---------------------------------------------------------
 //
 // Topology-preserving transform implementation following Zavalishin's method.
 //
 // Outputs: lowpass, highpass, bandpass, normalised bandpass, notch, allpass, 
 // peaking.
 //
-// The ouptputs can be recalled by specifying the environment; for example:
-//      SVFTPT.LP2(.707, 1000.0)
+// Each individual ouptput can be recalled with its name in the environment, for example:
+//      `SVFTPT.LP2(.707, 1000.0)`
+//
+// The 7 outputs can be recalled by specifying the environment, for example:
+//      `SVFTPT.SVF(.707, 1000.0)`
 //
 // Even though the implementation is different, the characteristics of this
 // filter are comparable to those of the "svf" environment in this library.
 //
 // #### Usage:
 //
-// _ : SVFTPT(Q, CF).xxx : _
+// ```
+// _ : SVFTPT.xxx(Q, CF) : _
+// ```
 //
 // #### Where:
 //
+// * `xxx` can be one of the following: `LP2`, `HP2`, `BP2`, `BP2Norm`, `Notch2`, `AP2`, `Peaking2`.
 // * `Q`: resonance.
 // * `CF`: cutoff in Hz.
 //------------------------------------------------------------------------------
@@ -2853,11 +2859,10 @@ SVFTPT = environment {
     Peaking2(Q, CF, x) = SVF(Q, CF, x) : ba.selectn(7, 6);
 };
 
-//----------(fi.)dynamicSmoother------------------------------------------------
+//----------`(fi.)dynamicSmoother`------------------------------------------------
 //
-// Adaptive smoother based on Andy Simper's paper:
-//      https://cytomic.com/files/dsp/DynamicSmoothing.pdf
-//
+// Adaptive smoother based on Andy Simper's paper.
+// 
 // This filter uses both the lowpass and bandpass outputs of a 
 // state-variable filter. The lowpass is used to smooth out the input signal,
 // the bandpass, which is a smoothed out version of the highpass, provides
@@ -2872,15 +2877,20 @@ SVFTPT = environment {
 //
 // #### Usage:
 //
+// ```
 // _ : dynamicSmoother(sensitivity, baseCF) : _
+// ```
 //
 // #### Where:
 //
 // * `sensitivity`: sensitivity to changes in the input signal.
 //      The range is, theoretically, from 0 to INF, though anything between
-//      0.0 and 1.0 should be reasonable. 
+//      0.0 and 1.0 should be reasonable
 // * `baseCF`: cutoff frequency, in Hz, when there is no variation in the 
-//      input signal.
+//      input signal
+//
+// #### Reference
+//  <https://cytomic.com/files/dsp/DynamicSmoothing.pdf>
 //------------------------------------------------------------------------------
 declare dynamicSmoothing author "Dario Sanfilippo";
 declare dynamicSmoothing copyright
