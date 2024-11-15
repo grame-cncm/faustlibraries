@@ -377,16 +377,15 @@
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/compressors.lib">https://github.com/grame-cncm/faustlibraries/blob/master/compressors.lib</a></li>
 </ul>
 <h2 id="conversion-tools">Conversion Tools</h2>
-<p>Useful conversion tools for compressors.</p>
-<hr />
-<h3 id="coratio2strength"><code>(co.)ratio2strength</code></h3>
 <p>Most compressors have a ratio parameter to define the amount of compression.
-A ratio of 1 means no compression, a ratio of 2 means that for every dB the input goes above the threshold,
-the output gets turned down half a dB.
+A ratio of 1 means no compression, a ratio of 2 means that for every dB the input 
+goes above the threshold, the output gets turned down half a dB.
 To use a compressor as a brick wall limiter, the ratio needs to be infinity.
-This is hard to express in a faust UI element, and overcompression can not be expressed at all,
+This is hard to express in a Faust UI element, and overcompression can not be expressed at all,
 therefore most compressors in this library use a strength parameter instead, where
 0 means no compression, 1 means hard limiting and  bigger than 1 means over-compression.</p>
+<hr />
+<h3 id="coratio2strength"><code>(co.)ratio2strength</code></h3>
 <p>This utility converts a ratio to a strength.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>ratio2strength(ratio) : _
@@ -397,13 +396,6 @@ therefore most compressors in this library use a strength parameter instead, whe
 </ul>
 <hr />
 <h3 id="costrength2ratio"><code>(co.)strength2ratio</code></h3>
-<p>Most compressors have a ratio parameter to define the amount of compression.
-A ratio of 1 means no compression, a ratio of 2 means that for every dB the input goes above the threshold,
-the output gets turned down half a dB.
-To use a compressor as a brick wall limiter, the ratio needs to be infinity.
-This is hard to express in a faust UI element, and overcompression can not be expressed at all,
-therefore most compressors in this library use a strength parameter instead, where
-0 means no compression, 1 means hard limiting and bigger than 1 means over-compression.</p>
 <p>This utility converts a strength to a ratio.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>strength2ratio(strength) : _
