@@ -1,6 +1,40 @@
 //######################## linearalgebra.lib ######################################
 // A library of linear algebra functions. Its official prefix is `la`.
 //
+// This library adds some new linear algebra functions:
+// 
+// `determinant`
+//
+// `minor`
+//
+// `inverse`
+//
+// `transpose`
+//
+// `matMul` matrix multiplication
+//
+// `identity`
+// 
+// How does it work? An `NxM` matrix can be flattened into a bus `si.bus(N*M)`. These buses can be passed to functions as long as `N` and sometimes `M` (if the matrix need not be square) are passed too.
+// 
+// #### Some things to think about going forward
+// 
+// ##### Implications for ML in Faust
+// 
+// Next step of making a "Dense"/"Linear" layer from machine learning
+// Where in the libraries should `ReLU` go?
+// What about 3D tensors instead of 2D matrices? Image convolutions take place on 3D tensors shaped `HxWxC`.
+//
+// #####Design of matMul
+// 
+// Currently the design is `matMul(J, K, L, M, leftHandMat, rightHandMat)` where `leftHandMat` is `JxK` and `rightHandMat` is `LxM`.
+// 
+// It would also be neat to have `matMul(J, K, rightHandMat, L, M, leftHandMat)`.
+// 
+// Then a "packed" matrix could be consistently stored as a combination of a 2-channel "header" `N, M` and the values `si.bus(N*M)`.
+// 
+// This would ultimately enable `result = packedLeftHand : matMul(packedRightHand);` for the equivalent numpy code: `result = packedLeftHand @ packedRightHand;`.
+// 
 // #### References
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/linearalgebra.lib>
 //#################################################################################
@@ -134,13 +168,13 @@ declare inverse author "David Braun";
 declare inverse copyright "MIT License";
 
 
-//--------------`(la.)transpose`-----------------------------------
+//--------------`(la.)transpose2`-----------------------------------
 // Transposes an `NxM` matrix stored in row-major order, resulting
 // in an `MxN` matrix stored in row-major order.
 //
 // #### Usage
 // ```
-// si.bus(N*M) : transpose(N, M) : si.bus(M*N)
+// si.bus(N*M) : transpose2(N, M) : si.bus(M*N)
 // ```
 // 
 // Where:
@@ -148,9 +182,9 @@ declare inverse copyright "MIT License";
 // * `N`: the number of rows in the input matrix
 // * `M`: the number of columns in the input matrix
 //-----------------------------------------------------------------
-transpose(N, M) = si.bus(N*M) <: par(m, M, par(n, N, ba.selector(M*n+m, N*M)));
-declare transpose author "David Braun";
-declare transpose copyright "MIT License";
+transpose2(N, M) = si.bus(N*M) <: par(m, M, par(n, N, ba.selector(M*n+m, N*M)));
+declare transpose2 author "David Braun";
+declare transpose2 copyright "MIT License";
 
 
 //--------------`(la.)matMul`---------------------------------------------
