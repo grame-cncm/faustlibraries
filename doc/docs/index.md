@@ -31,6 +31,7 @@ This will give you access to all the Faust libraries through a series of environ
 * `fi`: `filters.lib`
 * `ho`: `hoa.lib`
 * `it`: `interpolators.lib`
+* `la`: `linearalgebra.lib`
 * `ma`: `maths.lib`
 * `mi`: `mi.lib`
 * `ef`: `misceffects.lib`

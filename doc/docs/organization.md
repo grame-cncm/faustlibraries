@@ -14,6 +14,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `filters.lib`
 * `hoa.lib`
 * `interpolators.lib`
+* `linearalgebra.lib`
 * `maths.lib`
 * `mi.lib`
 * `misceffects.lib`
