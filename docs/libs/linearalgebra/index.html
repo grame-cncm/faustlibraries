@@ -239,7 +239,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#latranspose" class="nav-link">(la.)transpose</a>
+            <li class="nav-item" data-level="3"><a href="#latranspose2" class="nav-link">(la.)transpose2</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -270,7 +270,7 @@
 <p>How does it work? An <code>NxM</code> matrix can be flattened into a bus <code>si.bus(N*M)</code>. These buses can be passed to functions as long as <code>N</code> and sometimes <code>M</code> (if the matrix need not be square) are passed too.</p>
 <h4 id="some-things-to-think-about-going-forward">Some things to think about going forward</h4>
 <h5 id="implications-for-ml-in-faust">Implications for ML in Faust</h5>
-<p>Next step of making a "Dense"/"Linear" layer from machine learning
+<p>Next step of making a "Dense"/"Linear" layer from machine learning.
 Where in the libraries should <code>ReLU</code> go?
 What about 3D tensors instead of 2D matrices? Image convolutions take place on 3D tensors shaped <code>HxWxC</code>.</p>
 <h5 id="design-of-matmul">Design of matMul</h5>
@@ -324,11 +324,11 @@ Note, this is an unsafe operation since not all matrices are invertible.</p>
 <li><code>N</code>: the size of each axis of the matrix.</li>
 </ul>
 <hr />
-<h3 id="latranspose"><code>(la.)transpose</code></h3>
+<h3 id="latranspose2"><code>(la.)transpose2</code></h3>
 <p>Transposes an <code>NxM</code> matrix stored in row-major order, resulting
 in an <code>MxN</code> matrix stored in row-major order.</p>
 <h4 id="usage_3">Usage</h4>
-<pre><code>si.bus(N*M) : transpose(N, M) : si.bus(M*N)
+<pre><code>si.bus(N*M) : transpose2(N, M) : si.bus(M*N)
 </code></pre>
 <p>Where:</p>
 <ul>
