@@ -2279,6 +2279,48 @@ reading them much easier.</p>
 <li><code>z</code>: Measurement signal (Mx1)</li>
 <li><code>reset</code>: Trigger to reset. Reset whenever <code>reset&gt;0</code></li>
 </ul>
+<h4 id="example-test-programs">Example test programs</h4>
+<p>Demo 1 <code>(N=1, M=1)</code> (don't listen, just use oscilloscope):</p>
+<pre><code>process = u, z : fi.kalman(N, M, B, R, H, Q, F, reset) : it.interpolate_linear(filteredAmt, z)
+with {
+   B = 1.;
+   R = 0.1;
+   H = 1;
+   Q = .01; 
+   F = la.identity(N);
+   reset = button(&quot;reset&quot;);
+
+   // Dimensions
+   N = 1; // State size
+   M = 1; // Measurement size
+
+   freq = hslider(&quot;Freq&quot;, 1, 0.01, 10, .01);
+   u = 0.; // constant input
+   trueState = os.osc(freq)*.5 + u;
+   noiseGain = hslider(&quot;Noise Gain&quot;, .1, 0, 1, .01);
+
+   filteredAmt = hslider(&quot;Filter Amount&quot;, 1, 0, 1, .01) : si.smoo;
+
+   measurementNoise = no.noise*noiseGain;
+   z = trueState + measurementNoise; // Observed state
+</code></pre>
+<p>Demo 2 <code>(N=2, M=1)</code> (don't listen, just use oscilloscope)</p>
+<pre><code>process = u, z : fi.kalman(N, M, B, R, H, Q, F, reset)
+with {
+    B = par(i, N, 0);
+    R = (0.1);
+    H = (1, 0);
+    Q = la.diag(2, par(i, N, .1));
+    F = la.identity(N);
+    reset = 0;
+    u = si.bus(M);
+    z = si.bus(M);
+
+    // Dimensions
+    N = 2; // State size
+    M = 1; // Measurement size
+};
+</code></pre>
 <h4 id="references_21">References</h4>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Kalman_filter">https://en.wikipedia.org/wiki/Kalman_filter</a></li>

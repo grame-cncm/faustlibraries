@@ -3427,6 +3427,54 @@ kalmanEnv = environment {
 // * `z`: Measurement signal (Mx1)
 // * `reset`: Trigger to reset. Reset whenever `reset>0`
 //
+// #### Example test programs
+// Demo 1 `(N=1, M=1)` (don't listen, just use oscilloscope):
+//
+// ```
+// process = u, z : fi.kalman(N, M, B, R, H, Q, F, reset) : it.interpolate_linear(filteredAmt, z)
+// with {
+//    B = 1.;
+//    R = 0.1;
+//    H = 1;
+//    Q = .01; 
+//    F = la.identity(N);
+//    reset = button("reset");
+//
+//    // Dimensions
+//    N = 1; // State size
+//    M = 1; // Measurement size
+//
+//    freq = hslider("Freq", 1, 0.01, 10, .01);
+//    u = 0.; // constant input
+//    trueState = os.osc(freq)*.5 + u;
+//    noiseGain = hslider("Noise Gain", .1, 0, 1, .01);
+//
+//    filteredAmt = hslider("Filter Amount", 1, 0, 1, .01) : si.smoo;
+//
+//    measurementNoise = no.noise*noiseGain;
+//    z = trueState + measurementNoise; // Observed state
+//};
+// ```
+//
+// Demo 2 `(N=2, M=1)` (don't listen, just use oscilloscope)
+//
+// ```
+// process = u, z : fi.kalman(N, M, B, R, H, Q, F, reset)
+// with {
+//     B = par(i, N, 0);
+//     R = (0.1);
+//     H = (1, 0);
+//     Q = la.diag(2, par(i, N, .1));
+//     F = la.identity(N);
+//     reset = 0;
+//     u = si.bus(M);
+//     z = si.bus(M);
+// 
+//     // Dimensions
+//     N = 2; // State size
+//     M = 1; // Measurement size
+// };
+// ```
 // #### References
 // * <https://en.wikipedia.org/wiki/Kalman_filter>
 // * <https://www.cs.unc.edu/~welch/kalman/index.html>
