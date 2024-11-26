@@ -245,6 +245,6 @@ declare identity copyright "MIT License";
 //
 // * `N`: The size of each axis of the matrix.
 //---------------------------------------------------------
-diag(N) = si.bus(N) <: par(i, N, par(j, N, _*(select2(i == j,0,1))));
+diag(N) = route(N, N*N, par(i,N, (i+1, (N+1)*i+1)));
 declare diag author "David Braun";
 declare diag copyright "MIT License";
