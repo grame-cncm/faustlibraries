@@ -1,7 +1,7 @@
 //##################################### filters.lib ########################################
 // Filters library. Its official prefix is `fi`.
 //
-// The Filters library is organized into 22 sections:
+// The Filters library is organized into 23 sections:
 //
 // * [Basic Filters](#basic-filters)
 // * [Comb Filters](#comb-filters)
@@ -25,6 +25,7 @@
 // * [Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers](#linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers)
 // * [Standardized Filters](#standardized-filters)
 // * [Averaging Functions](#averaging-functions)
+// * [Kalman Filters](#kalman-filters)
 //
 // #### References
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/filters.lib>
@@ -44,9 +45,10 @@ an = library("analyzers.lib");
 ef = library("misceffects.lib");
 si = library("signals.lib");
 fi = library("filters.lib"); // for compatible copy/paste out of this file
+la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.4.0";
+declare version "1.5.0";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -3257,6 +3259,181 @@ declare avg_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_t19 license "MIT-style STK-4.3 license";
 avg_t19(period, x) = fi.lpt19(period, x);
+
+
+//============================Kalman Filters===================================
+//=============================================================================
+//
+// Functions related to the Kalman filter.
+
+kalmanEnv = environment {
+
+    matMul = la.matMul;
+
+    // Predicts the next state.
+    // * `N`: State size
+    // * `M`: Measurement size
+    // * `F`: State transition matrix (NxN)
+    // * `B`: Control input matrix (NxM)
+    // Implicit arguments:
+    // * `x`: Current state (Nx1)
+    // * `u`: Control input (Mx1)
+    predictState(N, M, F, B) = si.vecOp((Fx, Bu), +)
+    with {
+        // Fx = F @ x, where F is NxN and x is Nx1
+        Fx = matMul(N, N, N, 1, F, si.bus(N));
+        
+        // Bu = B @ u, where B is NxM and u is Mx1
+        Bu = matMul(N, M, M, 1, B, si.bus(M));
+    };
+
+    // Predicts the covariance matrix for the next state.
+    // * `N`: State size
+    // * `F`: State transition matrix (NxN)
+    // * `Q`: Process noise covariance matrix (NxN)
+    // * `P`: Current state covariance matrix (NxN)
+    // No implict arguments.
+    predictCovariance(N, F, Q, P) = si.vecOp((FPF_T, Q), +)
+    with {
+        // FP = F @ P
+        FP = matMul(N, N, N, N, F, P);
+        
+        // FPF_T = FP @ F^T, where FP is NxN and F^T is NxN
+        FPF_T = matMul(N, N, N, N, FP, la.transpose2(N, N, F));
+    };
+
+    // Calculates the Kalman gain (NxM).
+    // * `N`: State size
+    // * `M`: Measurement size
+    // * `H`: Observation matrix (MxN)
+    // * `R`: Measurement noise covariance matrix (MxM)
+    // Implict arguments:
+    // * `P_pred`: Predicted covariance matrix (NxN)
+    kalmanGain(N, M, H, R) = P_pred <: 
+        matMul(N, M, M, M, matMul(N, N, N, M, P_pred, H_T), S_inv)
+    with {
+        P_pred = si.bus(N*N);
+        // H_T = Transpose of H
+        H_T = la.transpose2(M, N, H);
+        
+        // HP = H * P_pred, where H is MxN and P_pred is NxN
+        HP = matMul(M, N, N, N, H, P_pred);
+        
+        // HPH_T = HP @ H^T, where HP is MxN and H^T is NxM, resulting in MxM
+        HPH_T = matMul(M, N, N, M, HP, H_T);
+        
+        // S_inv = inverse(HPH_T + R)
+        S_inv = si.vecOp((HPH_T, R), +) : la.inverse(M);
+    };
+
+    // Updates the state estimate based on the Kalman gain and measurement.
+    // * `N`: State size
+    // * `M`: Measurement size
+    // * `H`: Observation matrix (MxN)
+    // Implicit arguments:
+    // * `K`: Kalman gain matrix (NxM)
+    // * `x_pred`: (Nx1)
+    // * `z`: (Mx1)
+    updateState(N, M, H) = si.bus(N*M), si.bus(N), si.bus(M) <: 
+        si.vecOp((get_x_pred, K_mul_residual(N, M, H)), +)
+    with {
+        get_x_pred = par(i, N*M, !), par(i, N, _), par(i, M, !);
+    };
+
+    // todo: find a way to not use mySwap
+    mySwap(N, M) = si.bus(N*M), si.bus(N), si.bus(M) <: 
+        select_K, select_z, select_x_pred
+    with {
+        select_K = par(i, N*M, _), par(i, N, !), par(i, M, !);
+        select_x_pred = par(i, N*M, !), par(i, N, _), par(i, M, !);
+        select_z = par(i, N*M, !), par(i, N, !), par(i, M, _);
+    };
+
+    K_mul_residual(N, M, H) = mySwap(N, M) : matMul(N, M, M, 1, si.bus(N*M), residual)
+    with {
+        // residual = z - H @ x_pred, where z is Mx1 and H @ x_pred is Mx1
+        residual = si.vecOp((si.bus(M), matMul(M, N, N, 1, H, si.bus(N))), -);
+    };
+
+    // Updates the covariance matrix based on the Kalman gain and observation matrix.
+    // * `N`: State size
+    // * `M`: Measurement size
+    // * `H`: Observation matrix (MxN)
+    // * `K`: Kalman gain matrix (NxM)
+    // * `P_pred`: Predicted covariance matrix (NxN)
+    // No implict arguments.
+    updateCovariance(N, M, H, K, P_pred) = 
+        matMul(N, N, N, N, I_minus_KH, P_pred)
+    with {
+        // KH = K @ H, where K is NxM and H is MxN
+        KH = matMul(N, M, M, N, K, H);
+            
+        // I_minus_KH = I - K @ H, where both are NxN
+        I_minus_KH = si.vecOp((la.identity(N), KH), -);
+    };
+
+    kalmanFilter(N, M, B, R, H, Q, F, reset) = (tick ~ (P_bus, x_bus)) : P_cut, x_bus
+    with {
+        doReset = reset > 0;
+
+        P_bus = si.bus(N*N);
+        P_cut = par(i, N*N, !);
+        P_init = la.diag(N, par(i, N, 100));  // large value for initial uncertainty in P.
+        P = P_bus, P_init : ba.selectbus(N*N, 2, doReset);
+
+        x_bus = si.bus(N);
+        x_init = par(i, N, 0);  // initialize with zeros.
+        x = x_bus, x_init : ba.selectbus(N, 2, doReset);
+
+        tick = P, x, u, z <: P_updated, x_updated
+        with {
+            u = si.bus(M);
+            z = si.bus(M);
+
+            // Prediction phase
+            x_pred = predictState(N, M, F, B, x_bus, u);
+            P_pred = predictCovariance(N, F, Q, P);
+
+            // Update phase
+            K = P_pred : kalmanGain(N, M, H, R);
+            x_updated = K, x_pred, z : updateState(N, M, H);
+            // The first part of this expression lets through the P and cuts (x, u, z).
+            P_updated = par(i, N*N, _), par(i, N+M+M, !) <: updateCovariance(N, M, H, K, P_pred);
+        };
+    };
+};
+
+//-----------`(fi.)kalman`----------------------------------------------------
+// The Kalman filter. It returns the state (a bus of size `N`).
+// Note that the only compile-time constant arguments are `N` and `M`.
+// Other arguments are capitalized because they're matrices, and it makes
+// reading them much easier.
+//
+// #### Usage
+// ```
+// kalman(N, M, B, R, H, Q, F, u, z, reset) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: State size (constant int)
+// * `M`: Measurement size (constant int)
+// * `B`: Control input matrix (NxM)
+// * `R`: Measurement noise covariance matrix (MxM)
+// * `H`: Observation matrix (MxN)
+// * `Q`: Process noise covariance matrix (NxN)
+// * `F`: State transition matrix (NxN)
+// * `u`: Control input (Mx1)
+// * `z`: Measurement signal (Mx1)
+// * `reset`: Trigger to reset. Reset whenever `reset>0`
+//
+// #### References
+// * <https://en.wikipedia.org/wiki/Kalman_filter>
+// * <https://www.cs.unc.edu/~welch/kalman/index.html>
+//----------------------------------------------------------------------------
+declare kalman author "David Braun";
+declare kalman license "MIT License";
+kalman = kalmanEnv.kalmanFilter;
 
 
 /*******************************************************************************

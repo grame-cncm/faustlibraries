@@ -14,6 +14,8 @@
 // `matMul` matrix multiplication
 //
 // `identity`
+//
+// `diag`
 // 
 // How does it work? An `NxM` matrix can be flattened into a bus `si.bus(N*M)`. These buses can be passed to functions as long as `N` and sometimes `M` (if the matrix need not be square) are passed too.
 // 
@@ -76,7 +78,7 @@ si = library("signals.lib");
 ro = library("routes.lib");
 
 declare name "Faust Linear Algebra Library";
-declare version "0.0.1";
+declare version "0.1.0";
 
 
 //-----------`(la.)determinant`-------------------------
@@ -228,3 +230,21 @@ declare matMul copyright "MIT License";
 identity(N) = par(i, N, par(j, N, i == j));
 declare identity author "David Braun";
 declare identity copyright "MIT License";
+
+
+//---------------`(la.)diag`-------------------------------
+// Creates a diagonal matrix of size `NxN` with specified
+// values along the diagonal.
+//
+// #### Usage
+// ```
+// si.bus(N) : diag(N) : si.bus(N*N)
+// ```
+// 
+// Where:
+//
+// * `N`: The size of each axis of the matrix.
+//---------------------------------------------------------
+diag(N) = si.bus(N) <: par(i, N, par(j, N, _*(select2(i == j,0,1))));
+declare diag author "David Braun";
+declare diag copyright "MIT License";
