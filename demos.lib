@@ -815,7 +815,7 @@ with{
         wet = 0.5*(drywet+1.0);
         dry = 1.0-wet;
     };
-    drywet = vslider("[1] Dry/Wet Mix [style:knob] [tooltip: -1 = dry, 1 = wet]",
+    drywet = vslider("[1] Dry/Wet Mix [style:knob] [tooltip: Ratio of dry and wet signal. -1 = fully wet, +1 = fully dry]",
         0,-1.0,1.0,0.01) : si.smoo;
     gain = vslider("[2] Level [unit:dB] [style:knob] [tooltip: Output scale
         factor]", -6, -70, 40, 0.1) : ba.db2linear : si.smoo;
