@@ -9,7 +9,7 @@
 //
 // `inverse`
 //
-// `transpose`
+// `transpose2`
 //
 // `matMul` matrix multiplication
 //
@@ -73,6 +73,7 @@ closed source license or any other license if you decide so.
 
 ba = library("basics.lib");
 si = library("signals.lib");
+ro = library("routes.lib");
 
 declare name "Faust Linear Algebra Library";
 declare version "0.0.1";
@@ -182,7 +183,7 @@ declare inverse copyright "MIT License";
 // * `N`: the number of rows in the input matrix
 // * `M`: the number of columns in the input matrix
 //-----------------------------------------------------------------
-transpose2(N, M) = si.bus(N*M) <: par(m, M, par(n, N, ba.selector(M*n+m, N*M)));
+transpose2(N, M) = ro.interleave(M,N);
 declare transpose2 author "David Braun";
 declare transpose2 copyright "MIT License";
 
@@ -205,7 +206,7 @@ declare transpose2 copyright "MIT License";
 // * `L`: the number of rows in `mat2`
 // * `M`: the number of columns in `mat2`
 //-----------------------------------------------------------------
-matMul(J, K, L, M) = si.bus(J*K), transpose(L, M) <: par(j, J, par(m, M,
+matMul(J, K, L, M) = si.bus(J*K), transpose2(L, M) <: par(j, J, par(m, M,
     si.dot(K, (ba.selectbus(K, J, j)), (ba.selectbus(L, M, m)))
 ));
 declare matMul author "David Braun";
