@@ -121,7 +121,7 @@ declare determinant copyright "MIT License";
 // * `ROW`: the selected position on 0th dimension of the matrix (`0 <= ROW < N`)
 // * `COL`: the selected position on the 1st dimension of the matrix (`0 <= COL < N`)
 //
-// References:
+// #### References
 // * <https://en.wikipedia.org/wiki/Minor_(linear_algebra)#First_minor>
 //----------------------------------------------------------------------------
 minor(N, ROW, COL) = par(i, ROW, deleteColumn), deleteRow, par(i, N-1-ROW, deleteColumn) : determinant(N-1)
