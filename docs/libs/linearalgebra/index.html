@@ -251,6 +251,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#ladiag" class="nav-link">(la.)diag</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -267,6 +271,7 @@
 <p><code>transpose2</code></p>
 <p><code>matMul</code> matrix multiplication</p>
 <p><code>identity</code></p>
+<p><code>diag</code></p>
 <p>How does it work? An <code>NxM</code> matrix can be flattened into a bus <code>si.bus(N*M)</code>. These buses can be passed to functions as long as <code>N</code> and sometimes <code>M</code> (if the matrix need not be square) are passed too.</p>
 <h4 id="some-things-to-think-about-going-forward">Some things to think about going forward</h4>
 <h5 id="implications-for-ml-in-faust">Implications for ML in Faust</h5>
@@ -362,6 +367,17 @@ In terms of numpy, this function is <code>mat1 @ mat2</code>.</p>
 <p>Where:</p>
 <ul>
 <li><code>N</code>: The size of each axis of the identity matrix.</li>
+</ul>
+<hr />
+<h3 id="ladiag"><code>(la.)diag</code></h3>
+<p>Creates a diagonal matrix of size <code>NxN</code> with specified
+values along the diagonal.</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>si.bus(N) : diag(N) : si.bus(N*N)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: The size of each axis of the matrix.</li>
 </ul></div>
             </div>
         </div>

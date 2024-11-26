@@ -675,6 +675,14 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#kalman-filters" class="nav-link">Kalman Filters</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#fikalman" class="nav-link">(fi.)kalman</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -684,7 +692,7 @@
 
 <h1 id="filterslib">filters.lib</h1>
 <p>Filters library. Its official prefix is <code>fi</code>.</p>
-<p>The Filters library is organized into 22 sections:</p>
+<p>The Filters library is organized into 23 sections:</p>
 <ul>
 <li><a href="#basic-filters">Basic Filters</a></li>
 <li><a href="#comb-filters">Comb Filters</a></li>
@@ -708,6 +716,7 @@
 <li><a href="#linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers">Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers</a></li>
 <li><a href="#standardized-filters">Standardized Filters</a></li>
 <li><a href="#averaging-functions">Averaging Functions</a></li>
+<li><a href="#kalman-filters">Kalman Filters</a></li>
 </ul>
 <h4 id="references">References</h4>
 <ul>
@@ -2246,7 +2255,35 @@ oscillations for non-steady signals.</p>
 or to reach 1-1/e^2.2 of its final value.</li>
 </ul>
 <h4 id="reference_29">Reference</h4>
-<p>Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.</p></div>
+<p>Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.</p>
+<h2 id="kalman-filters">Kalman Filters</h2>
+<hr />
+<h3 id="fikalman"><code>(fi.)kalman</code></h3>
+<p>The Kalman filter. It returns the state (a bus of size <code>N</code>).
+Note that the only compile-time constant arguments are <code>N</code> and <code>M</code>.
+Other arguments are capitalized because they're matrices, and it makes
+reading them much easier.</p>
+<h4 id="usage_81">Usage</h4>
+<pre><code>kalman(N, M, B, R, H, Q, F, u, z, reset) : si.bus(N)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: State size (constant int)</li>
+<li><code>M</code>: Measurement size (constant int)</li>
+<li><code>B</code>: Control input matrix (NxM)</li>
+<li><code>R</code>: Measurement noise covariance matrix (MxM)</li>
+<li><code>H</code>: Observation matrix (MxN)</li>
+<li><code>Q</code>: Process noise covariance matrix (NxN)</li>
+<li><code>F</code>: State transition matrix (NxN)</li>
+<li><code>u</code>: Control input (Mx1)</li>
+<li><code>z</code>: Measurement signal (Mx1)</li>
+<li><code>reset</code>: Trigger to reset. Reset whenever <code>reset&gt;0</code></li>
+</ul>
+<h4 id="references_21">References</h4>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Kalman_filter">https://en.wikipedia.org/wiki/Kalman_filter</a></li>
+<li><a href="https://www.cs.unc.edu/~welch/kalman/index.html">https://www.cs.unc.edu/~welch/kalman/index.html</a></li>
+</ul></div>
             </div>
         </div>
 
