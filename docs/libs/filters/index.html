@@ -2281,7 +2281,7 @@ reading them much easier.</p>
 </ul>
 <h4 id="example-test-programs">Example test programs</h4>
 <p>Demo 1 <code>(N=1, M=1)</code> (don't listen, just use oscilloscope):</p>
-<pre><code>process = u, z : fi.kalman(N, M, B, R, H, Q, F, reset) : it.interpolate_linear(filteredAmt, z)
+<pre><code>process = u, z, reset : fi.kalman(N, M, B, R, H, Q, F) : it.interpolate_linear(filteredAmt, z)
 with {
    B = 1.;
    R = 0.1;
@@ -2303,9 +2303,10 @@ with {
 
    measurementNoise = no.noise*noiseGain;
    z = trueState + measurementNoise; // Observed state
+};
 </code></pre>
 <p>Demo 2 <code>(N=2, M=1)</code> (don't listen, just use oscilloscope)</p>
-<pre><code>process = u, z : fi.kalman(N, M, B, R, H, Q, F, reset)
+<pre><code>process = u, z, reset : fi.kalman(N, M, B, R, H, Q, F)
 with {
     B = par(i, N, 0);
     R = (0.1);
