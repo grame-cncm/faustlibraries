@@ -3372,6 +3372,9 @@ kalmanEnv = environment {
         I_minus_KH = si.vecOp((la.identity(N), KH), -);
     };
 
+    // implict arguments:
+    // * `u`: Control input (Mx1)
+    // * `z`: Measurement signal (Mx1)
     kalmanFilter(N, M, B, R, H, Q, F, reset) = (tick ~ (P_bus, x_bus)) : P_cut, x_bus
     with {
         doReset = reset > 0;
@@ -3411,7 +3414,7 @@ kalmanEnv = environment {
 //
 // #### Usage
 // ```
-// kalman(N, M, B, R, H, Q, F, u, z, reset) : si.bus(N)
+// kalman(N, M, B, R, H, Q, F, reset, u, z) : si.bus(N)
 // ```
 //
 // Where:
@@ -3423,15 +3426,15 @@ kalmanEnv = environment {
 // * `H`: Observation matrix (MxN)
 // * `Q`: Process noise covariance matrix (NxN)
 // * `F`: State transition matrix (NxN)
+// * `reset`: Reset trigger. Whenever `reset>0`, the internal state `x` and covariance matrix `P` are reset.
 // * `u`: Control input (Mx1)
 // * `z`: Measurement signal (Mx1)
-// * `reset`: Trigger to reset. Reset whenever `reset>0`
 //
 // #### Example test programs
 // Demo 1 `(N=1, M=1)` (don't listen, just use oscilloscope):
 //
 // ```
-// process = u, z, reset : fi.kalman(N, M, B, R, H, Q, F) : it.interpolate_linear(filteredAmt, z)
+// process = fi.kalman(N, M, B, R, H, Q, F, reset u, z) : it.interpolate_linear(filteredAmt, z)
 // with {
 //    B = 1.;
 //    R = 0.1;
@@ -3459,7 +3462,7 @@ kalmanEnv = environment {
 // Demo 2 `(N=2, M=1)` (don't listen, just use oscilloscope)
 //
 // ```
-// process = u, z, reset : fi.kalman(N, M, B, R, H, Q, F)
+// process = fi.kalman(N, M, B, R, H, Q, F, reset, u, z)
 // with {
 //     B = par(i, N, 0);
 //     R = (0.1);
