@@ -2264,7 +2264,7 @@ Note that the only compile-time constant arguments are <code>N</code> and <code>
 Other arguments are capitalized because they're matrices, and it makes
 reading them much easier.</p>
 <h4 id="usage_81">Usage</h4>
-<pre><code>kalman(N, M, B, R, H, Q, F, u, z, reset) : si.bus(N)
+<pre><code>kalman(N, M, B, R, H, Q, F, reset, u, z) : si.bus(N)
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -2275,13 +2275,13 @@ reading them much easier.</p>
 <li><code>H</code>: Observation matrix (MxN)</li>
 <li><code>Q</code>: Process noise covariance matrix (NxN)</li>
 <li><code>F</code>: State transition matrix (NxN)</li>
+<li><code>reset</code>: Reset trigger. Whenever <code>reset&gt;0</code>, the internal state <code>x</code> and covariance matrix <code>P</code> are reset.</li>
 <li><code>u</code>: Control input (Mx1)</li>
 <li><code>z</code>: Measurement signal (Mx1)</li>
-<li><code>reset</code>: Trigger to reset. Reset whenever <code>reset&gt;0</code></li>
 </ul>
 <h4 id="example-test-programs">Example test programs</h4>
 <p>Demo 1 <code>(N=1, M=1)</code> (don't listen, just use oscilloscope):</p>
-<pre><code>process = u, z, reset : fi.kalman(N, M, B, R, H, Q, F) : it.interpolate_linear(filteredAmt, z)
+<pre><code>process = fi.kalman(N, M, B, R, H, Q, F, reset u, z) : it.interpolate_linear(filteredAmt, z)
 with {
    B = 1.;
    R = 0.1;
@@ -2306,7 +2306,7 @@ with {
 };
 </code></pre>
 <p>Demo 2 <code>(N=2, M=1)</code> (don't listen, just use oscilloscope)</p>
-<pre><code>process = u, z, reset : fi.kalman(N, M, B, R, H, Q, F)
+<pre><code>process = fi.kalman(N, M, B, R, H, Q, F, reset, u, z)
 with {
     B = par(i, N, 0);
     R = (0.1);
