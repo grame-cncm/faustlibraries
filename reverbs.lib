@@ -18,7 +18,7 @@ sp = library("spats.lib");
 aa = library("aanl.lib");
 
 declare name "Faust Reverb Library";
-declare version "1.3.1";
+declare version "1.3.2";
 
 //########################################################################################
 /************************************************************************
@@ -488,11 +488,11 @@ with {
 
     kPreDelayMaxSec = 0.3; // seconds
 
-    kNetworkContainers = 4; // the number of rdtables used for allpassDelay
+    kNetworkContainers = 4; // the number of delay lines used for allpassDelay
     kContainerSize = 4; // how long the allpassDelay waveforms below are
 
     kMinSizePower = -3;
-    kMaxSizePower = 1;
+    kMaxSizePower = 1; // decrease this to shorten the delay lines and reduce memory cost.
 
     clampremap(from1, from2, to1, to2) = aa.clip(from1, from2) : it.remap(from1, from2, to1, to2);
 
@@ -524,20 +524,21 @@ with {
 
     sample_rate_ratio = ma.SR/kBaseSampleRate;
 
-    kAllpassMaxDelay = 1001; // manually inspect rdtables below and take max value
+    kAllpassMaxDelay = 1001; // manually inspect values below and take max value
     // allpassDelay(i) where `i` corresponds to 0 to (kNetworkContainers-1)
-    allpassDelay(0) = rdtable(waveform{1001, 799, 933, 876});
-    allpassDelay(1) = rdtable(waveform{895, 807, 907, 853});
-    allpassDelay(2) = rdtable(waveform{957, 1019, 711, 567});
-    allpassDelay(3) = rdtable(waveform{833, 779, 663, 997});
+    allpassDelay(0, i) = ba.take(i+1, (1001, 799, 933, 876));
+    allpassDelay(1, i) = ba.take(i+1, (895, 807, 907, 853));
+    allpassDelay(2, i) = ba.take(i+1, (957, 1019, 711, 567));
+    allpassDelay(3, i) = ba.take(i+1, (833, 779, 663, 997));
 
     kFeedbackMaxDelay = (11329 + kMaxChorusDrift)*sample_rate_ratio*pow(2, kMaxSizePower); // pow(2, kMaxSizePower) is the max size_mult
     // feedbackDelayHelp(i) where `i` corresponds to 0 to (kNetworkContainers-1)
-    feedbackDelayHelp(0) = rdtable(waveform{6753.2, 9278.4, 7704.5, 11328.5});
-    feedbackDelayHelp(1) = rdtable(waveform{9701.12, 5512.5, 8480.45, 5638.65});
-    feedbackDelayHelp(2) = rdtable(waveform{3120.73, 3429.5, 3626.37, 7713.52});
-    feedbackDelayHelp(3) = rdtable(waveform{4521.54, 6518.97, 5265.56, 5630.25});
-    feedbackDelay(i) = feedbackDelayHelp(i) : _ * size_mult * sample_rate_ratio;
+    feedbackDelayHelp(0, i) = ba.take(i+1, (6753.2, 9278.4, 7704.5, 11328.5));
+    feedbackDelayHelp(1, i) = ba.take(i+1, (9701.12, 5512.5, 8480.45, 5638.65));
+    feedbackDelayHelp(2, i) = ba.take(i+1, (3120.73, 3429.5, 3626.37, 7713.52));
+    feedbackDelayHelp(3, i) = ba.take(i+1, (4521.54, 6518.97, 5265.56, 5630.25));
+
+    feedbackDelay(i, j) = feedbackDelayHelp(i, j) : _ * size_mult * sample_rate_ratio;
 
     getDecay(i, j) = pow(kT60Amplitude, feedbackDelay(i, j) / (decay_samples*sample_rate_ratio));
 
