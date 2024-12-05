@@ -48,7 +48,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.5.0";
+declare version "1.5.1";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -3340,7 +3340,8 @@ kalmanEnv = environment {
         get_x_pred = par(i, N*M, !), par(i, N, _), par(i, M, !);
     };
 
-    // todo: find a way to not use mySwap
+    // todo: find a way to not use mySwap.
+    // Its purpose is to route K, x, z into K, z, x
     mySwap(N, M) = si.bus(N*M), si.bus(N), si.bus(M) <: 
         select_K, select_z, select_x_pred
     with {
@@ -3375,34 +3376,31 @@ kalmanEnv = environment {
     // implict arguments:
     // * `u`: Control input (Mx1)
     // * `z`: Measurement signal (Mx1)
-    kalmanFilter(N, M, B, R, H, Q, F, reset) = (tick ~ (P_bus, x_bus)) : P_cut, x_bus
+    kalmanFilter(N, M, B, R, H, Q, F, reset) = (p, x, u, z <: pNew, xNew) ~ (pBus, xBus) : pCut, xBus
     with {
         doReset = reset > 0;
 
-        P_bus = si.bus(N*N);
-        P_cut = par(i, N*N, !);
-        P_init = la.diag(N, par(i, N, 100));  // large value for initial uncertainty in P.
-        P = P_bus, P_init : ba.selectbus(N*N, 2, doReset);
+        pBus = si.bus(N*N);
+        pCut = par(i, N*N, !);
+        pInit = la.diag(N, par(i, N, 100));  // large value for initial uncertainty in P.
+        p = pBus, pInit : ba.selectbus(N*N, 2, doReset);
 
-        x_bus = si.bus(N);
-        x_init = par(i, N, 0);  // initialize with zeros.
-        x = x_bus, x_init : ba.selectbus(N, 2, doReset);
+        xBus = si.bus(N);
+        xCut = par(i, N, !);
+        xInit = par(i, N, 0);  // initialize with zeros.
+        x = xBus, xInit : ba.selectbus(N, 2, doReset);
 
-        tick = P, x, u, z <: P_updated, x_updated
-        with {
-            u = si.bus(M);
-            z = si.bus(M);
+        u = si.bus(M);
+        z = si.bus(M);
 
-            // Prediction phase
-            x_pred = predictState(N, M, F, B, x_bus, u);
-            P_pred = predictCovariance(N, F, Q, P);
+        uCut = par(i, M, !);
+        zCut = par(i, M, !);
 
-            // Update phase
-            K = P_pred : kalmanGain(N, M, H, R);
-            x_updated = K, x_pred, z : updateState(N, M, H);
-            // The first part of this expression lets through the P and cuts (x, u, z).
-            P_updated = par(i, N*N, _), par(i, N+M+M, !) <: updateCovariance(N, M, H, K, P_pred);
-        };
+        predCov = predictCovariance(N, F, Q, pBus);
+        gain = kalmanGain(N, M, H, R);
+
+        xNew = pBus, xBus, u, z : updateState(N, M, H, gain(predCov), predictState(N, M, F, B, xBus, u), z);        
+        pNew = pBus, xCut, uCut, zCut : predCov <: updateCovariance(N, M, H, gain(pBus), pBus);
     };
 };
 
