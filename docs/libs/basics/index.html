@@ -529,6 +529,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#bamulaw_bitcrusher" class="nav-link">(ba.)mulaw_bitcrusher</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#sliding-reduce" class="nav-link">Sliding Reduce</a>
@@ -1791,6 +1795,46 @@ between 0 and 1.</p>
 <ul>
 <li><code>nbits</code>: the number of bits of the wanted resolution</li>
 </ul>
+<hr />
+<h3 id="bamulaw_bitcrusher"><code>(ba.)mulaw_bitcrusher</code></h3>
+<p>Produce distortion by reducing the signal resolution using μ-law compression.</p>
+<h4 id="usage_69">Usage</h4>
+<pre><code>_ : mulaw_bitcrusher(mu,nbits) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>mu</code>: controls the degree of μ-law compression, larger values result in stronger compression</li>
+<li><code>nbits</code>: the number of bits of the wanted resolution</li>
+</ul>
+<h4 id="description">Description</h4>
+<p>The <code>mulaw_bitcrusher</code> applies a combination of μ-law compression, quantization, and expansion 
+to create a non-linear bitcrushed effect. This method retains finer detail in lower-amplitude signals 
+compared to linear bitcrushing, making it suitable for creative sound design.</p>
+<h4 id="theory">Theory</h4>
+<ol>
+<li><strong>μ-law Compression</strong>:
+   emphasizes lower-amplitude signals by applying a logarithmic curve to the signal.
+   The formula used is:
+   <code>F(x) = ma.signum(x) * log(1 + mu * abs(x)) / log(1 + mu);</code></li>
+<li>
+<p><strong>Quantization</strong>:
+   reduces the signal resolution to <code>nbits</code> by rounding values to the nearest step within the specified bit depth.</p>
+</li>
+<li>
+<p><strong>μ-law Expansion</strong>:
+   reverses the compression applied earlier to restore the signal to its original dynamic range:
+   <code>F⁻¹(y) = ma.signum(y) * (pow(1 + mu, abs(y)) - 1) / mu;</code></p>
+</li>
+</ol>
+<h4 id="example-test-program_11">Example test program</h4>
+<pre><code>process = os.osc(440) : mulaw_bitcrusher(255, 8);
+</code></pre>
+<p>In this example, a sine wave at 440 Hz is passed through the μ-law bitcrusher, with a compression
+parameter <code>mu</code> of 255 and 8-bit quantization. This creates a distorted, "lo-fi" effect.</p>
+<h4 id="references_1">References</h4>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Μ-law_algorithm">https://en.wikipedia.org/wiki/Μ-law_algorithm</a></li>
+</ul>
 <h2 id="sliding-reduce">Sliding Reduce</h2>
 <p>Provides various operations on the last n samples using a high order
 <code>slidingReduce(op,n,maxN,disabledVal,x)</code> fold-like function:</p>
@@ -1926,7 +1970,7 @@ the last <code>n</code> consecutive samples of a signal <code>x</code>. For exam
 <code>slidingReduce(max,128,128,0-(ma.MAX))</code> will compute the maximum of the last
 128 samples. The output is updated each sample, unlike reduce, where the
 output is constant for the duration of a block.</p>
-<h4 id="usage_69">Usage</h4>
+<h4 id="usage_70">Usage</h4>
 <pre><code>_ : slidingReduce(op,n,maxN,disabledVal) : _
 </code></pre>
 <p>Where:</p>
@@ -1945,7 +1989,7 @@ minimum, we need to give <code>ma.MAX</code> as <code>disabledVal</code>.</p>
 <p>The sliding sum of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingSump</code>.</p>
-<h4 id="usage_70">Usage</h4>
+<h4 id="usage_71">Usage</h4>
 <pre><code>_ : slidingSum(n) : _
 </code></pre>
 <p>Where:</p>
@@ -1956,7 +2000,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingsump"><code>(ba.)slidingSump</code></h3>
 <p>The sliding sum of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingSum</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_71">Usage</h4>
+<h4 id="usage_72">Usage</h4>
 <pre><code>_ : slidingSump(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1967,7 +2011,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baslidingmax"><code>(ba.)slidingMax</code></h3>
 <p>The sliding maximum of the last n input samples.</p>
-<h4 id="usage_72">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>_ : slidingMax(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1978,7 +2022,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baslidingmin"><code>(ba.)slidingMin</code></h3>
 <p>The sliding minimum of the last n input samples.</p>
-<h4 id="usage_73">Usage</h4>
+<h4 id="usage_74">Usage</h4>
 <pre><code>_ : slidingMin(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -1991,7 +2035,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <p>The sliding mean of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingMeanp</code>.</p>
-<h4 id="usage_74">Usage</h4>
+<h4 id="usage_75">Usage</h4>
 <pre><code>_ : slidingMean(n) : _
 </code></pre>
 <p>Where:</p>
@@ -2002,7 +2046,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingmeanp"><code>(ba.)slidingMeanp</code></h3>
 <p>The sliding mean of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingMean</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_75">Usage</h4>
+<h4 id="usage_76">Usage</h4>
 <pre><code>_ : slidingMeanp(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -2015,7 +2059,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <p>The root mean square of the last n input samples.</p>
 <p>It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive <code>ba.slidingRMSp</code>.</p>
-<h4 id="usage_76">Usage</h4>
+<h4 id="usage_77">Usage</h4>
 <pre><code>_ : slidingRMS(n) : _
 </code></pre>
 <p>Where:</p>
@@ -2026,7 +2070,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <h3 id="baslidingrmsp"><code>(ba.)slidingRMSp</code></h3>
 <p>The root mean square of the last n input samples.</p>
 <p>It uses a lot more CPU than <code>ba.slidingRMS</code>, but is numerically stable "forever" in return.</p>
-<h4 id="usage_77">Usage</h4>
+<h4 id="usage_78">Usage</h4>
 <pre><code>_ : slidingRMSp(n,maxN) : _
 </code></pre>
 <p>Where:</p>
@@ -2046,7 +2090,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelop"><code>(ba.)parallelOp</code></h3>
 <p>Apply a commutative binary operation <code>op</code> to N parallel inputs.</p>
-<h4 id="usage_78">usage</h4>
+<h4 id="usage_79">usage</h4>
 <pre><code>si.bus(N) : parallelOp(op,N) : _
 </code></pre>
 <p>where:</p>
@@ -2057,7 +2101,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmax"><code>(ba.)parallelMax</code></h3>
 <p>The maximum of N parallel inputs.</p>
-<h4 id="usage_79">Usage</h4>
+<h4 id="usage_80">Usage</h4>
 <pre><code>si.bus(N) : parallelMax(N) : _
 </code></pre>
 <p>Where:</p>
@@ -2067,7 +2111,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmin"><code>(ba.)parallelMin</code></h3>
 <p>The minimum of N parallel inputs.</p>
-<h4 id="usage_80">Usage</h4>
+<h4 id="usage_81">Usage</h4>
 <pre><code>si.bus(N) : parallelMin(N) : _
 </code></pre>
 <p>Where:</p>
@@ -2077,7 +2121,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelmean"><code>(ba.)parallelMean</code></h3>
 <p>The mean of N parallel inputs.</p>
-<h4 id="usage_81">Usage</h4>
+<h4 id="usage_82">Usage</h4>
 <pre><code>si.bus(N) : parallelMean(N) : _
 </code></pre>
 <p>Where:</p>
@@ -2087,7 +2131,7 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <hr />
 <h3 id="baparallelrms"><code>(ba.)parallelRMS</code></h3>
 <p>The RMS of N parallel inputs.</p>
-<h4 id="usage_82">Usage</h4>
+<h4 id="usage_83">Usage</h4>
 <pre><code>si.bus(N) : parallelRMS(N) : _
 </code></pre>
 <p>Where:</p>

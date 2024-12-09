@@ -58,7 +58,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.20.0";
+declare version "1.21.0";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -2373,6 +2373,68 @@ with {
     scaler = float(2^nbits - 1);
 };
 
+//----------------------------`(ba.)mulaw_bitcrusher`------------------------------------------
+// Produce distortion by reducing the signal resolution using μ-law compression.
+//
+// #### Usage
+//
+// ```
+// _ : mulaw_bitcrusher(mu,nbits) : _
+// ```
+//
+// Where:
+//
+// * `mu`: controls the degree of μ-law compression, larger values result in stronger compression
+// * `nbits`: the number of bits of the wanted resolution
+//
+// #### Description
+//
+// The `mulaw_bitcrusher` applies a combination of μ-law compression, quantization, and expansion 
+// to create a non-linear bitcrushed effect. This method retains finer detail in lower-amplitude signals 
+// compared to linear bitcrushing, making it suitable for creative sound design.
+//
+// #### Theory
+//
+// 1. **μ-law Compression**:
+//    emphasizes lower-amplitude signals by applying a logarithmic curve to the signal.
+//    The formula used is:
+//    ```
+//    F(x) = ma.signum(x) * log(1 + mu * abs(x)) / log(1 + mu);
+//    ```
+// 2. **Quantization**:
+//    reduces the signal resolution to `nbits` by rounding values to the nearest step within the specified bit depth.
+//
+// 3. **μ-law Expansion**:
+//    reverses the compression applied earlier to restore the signal to its original dynamic range:
+//    ```
+//    F⁻¹(y) = ma.signum(y) * (pow(1 + mu, abs(y)) - 1) / mu;
+//    ```
+//
+// #### Example test program
+//
+// ```
+// process = os.osc(440) : mulaw_bitcrusher(255, 8);
+// ```
+//
+// In this example, a sine wave at 440 Hz is passed through the μ-law bitcrusher, with a compression
+// parameter `mu` of 255 and 8-bit quantization. This creates a distorted, "lo-fi" effect.
+//
+// #### References
+//
+// * <https://en.wikipedia.org/wiki/Μ-law_algorithm>
+
+//------------------------------------------------------------------------------
+declare mulaw_bitcrusher author "Stephane Letz";
+
+mulaw_bitcrusher(mu,nbits,x) =  x : muLawCompress(mu) : bitcrusher(nbits) : muLawExpand(mu)
+with {
+    // μ-law compression
+    muLawCompress(mu, x) = ma.signum(x) * log(1 + mu * abs(x)) / log(1 + mu);
+
+    // μ-law expansion (decompression)
+    muLawExpand(mu, x) = ma.signum(x) * (pow(1 + mu, abs(x)) - 1) / mu;
+};
+   
 
 //=================================Sliding Reduce=========================================
 // Provides various operations on the last n samples using a high order
