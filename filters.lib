@@ -2911,9 +2911,6 @@ dynamicSmoothing(sensitivity, baseCF, x) = f ~ _ : ! , _
 
 //-----------------`(fi.)oneEuro`----------------------------------
 // The One Euro Filter (1€ Filter) is an adaptive lowpass filter.
-// The input signal is smoothed according to an exponential
-// moving average (EMA) whose alpha value is determined
-// according to an EMA of the input's first-order derivative.
 // This kind of filter is commonly used in object-tracking,
 // not necessarily audio processing.
 // 
@@ -2925,21 +2922,9 @@ dynamicSmoothing(sensitivity, baseCF, x) = f ~ _ : ! , _
 //
 // Where:
 //
-// * `derivativeCutoff`: Used to filter the first derivative of the input. 1 Hz is a good default
-// * `beta`: "Speed" parameter where higher values reduce latency. Range is [0-1]
-// * `minCutoff`: Minimum cutoff frequency in Hz. Lower values remove more jitter
-//
-// #### Example test program
-//
-// ```
-// process = x : hgroup("One Euro", oneEuro(derivativeCutoff, beta, minCutoff))
-// with {
-//    x = os.osc(200) + no.noise*.5; // test signal
-//    derivativeCutoff = hslider("[0] Deriv Cutoff [unit:Hz][style:knob]", 1.0, 0.1, 100.0, 0.01);
-//    beta = hslider("[1] Beta [style:knob]", 0.0, 0.0, 2.0, 0.01);
-//    minCutoff = hslider("[2] Min Cutoff [unit:Hz][style:knob]", 200.0, 0.1, 1000.0, 0.01); 
-// };
-// ```
+// * `derivativeCutoff`: Used to filter the first derivative of the input. 1 Hz is a good default.
+// * `beta`: "Speed" parameter where higher values reduce latency.
+// * `minCutoff`: Minimum cutoff frequency in Hz. Lower values remove more jitter.
 //
 // #### References
 // * <https://gery.casiez.net/1euro/>
@@ -2947,19 +2932,22 @@ dynamicSmoothing(sensitivity, baseCF, x) = f ~ _ : ! , _
 declare oneEuro author "David Braun";
 declare oneEuro copyright "Copyright (C) 2024 by David Braun <braun@ccrma.stanford.edu>";
 declare oneEuro license "MIT";
-oneEuro(derivativeCutoff, beta, minCutoff, x) = x : ema(adaptiveCutoff)
+oneEuro(derivativeCutoff, beta, minCutoff) = _oneEuro ~ _
 with {
     // exponential moving average that calculates its own alpha from a cutoff in Hz
     // _ : ema(cutoff) : _
     ema(cutoff) = tick ~ _
     with {
         alpha = 1.0 / (1.0 + ma.SR / (2 * ma.PI * cutoff));
-        tick(prev, y) = prev*(1-alpha) + y*alpha;
+        tick(prev, x) = prev*(1-alpha) + x*alpha;
     };
 
-    derivative = x - x';
-    derivativeFiltered = derivative : ema(derivativeCutoff);
-    adaptiveCutoff =  minCutoff + beta * abs(derivativeFiltered);    
+    _oneEuro(prev, x) = x : ema(adaptiveCutoff)
+    with {
+        derivative = (x - prev)*ma.SR;
+        derivativeFiltered = derivative : ema(derivativeCutoff);
+        adaptiveCutoff =  minCutoff + beta * abs(derivativeFiltered);  
+    };
 };
 
 
