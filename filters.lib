@@ -48,7 +48,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.5.1";
+declare version "1.6.0";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2925,9 +2925,21 @@ dynamicSmoothing(sensitivity, baseCF, x) = f ~ _ : ! , _
 //
 // Where:
 //
-// * `derivativeCutoff`: Used to filter the first derivative of the input. 1 Hz is a good default.
-// * `beta`: "Speed" parameter where higher values reduce latency. Range is [0-1].
-// * `minCutoff`: Minimum cutoff frequency in Hz. Lower values remove more jitter.
+// * `derivativeCutoff`: Used to filter the first derivative of the input. 1 Hz is a good default
+// * `beta`: "Speed" parameter where higher values reduce latency. Range is [0-1]
+// * `minCutoff`: Minimum cutoff frequency in Hz. Lower values remove more jitter
+//
+// #### Example test program
+//
+// ```
+// process = x : hgroup("One Euro", oneEuro(derivativeCutoff, beta, minCutoff))
+// with {
+//    x = os.osc(200) + no.noise*.5; // test signal
+//    derivativeCutoff = hslider("[0] Deriv Cutoff [unit:Hz][style:knob]", 1.0, 0.1, 100.0, 0.01);
+//    beta = hslider("[1] Beta [style:knob]", 0.0, 0.0, 2.0, 0.01);
+//    minCutoff = hslider("[2] Min Cutoff [unit:Hz][style:knob]", 200.0, 0.1, 1000.0, 0.01); 
+// };
+// ```
 //
 // #### References
 // * <https://gery.casiez.net/1euro/>

@@ -617,6 +617,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#fioneeuro" class="nav-link">(fi.)oneEuro</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers" class="nav-link">Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers</a>
@@ -2093,6 +2097,36 @@ values.</p>
 <ul>
 <li><a href="https://cytomic.com/files/dsp/DynamicSmoothing.pdf">https://cytomic.com/files/dsp/DynamicSmoothing.pdf</a></li>
 </ul>
+<hr />
+<h3 id="fioneeuro"><code>(fi.)oneEuro</code></h3>
+<p>The One Euro Filter (1€ Filter) is an adaptive lowpass filter.
+The input signal is smoothed according to an exponential
+moving average (EMA) whose alpha value is determined
+according to an EMA of the input's first-order derivative.
+This kind of filter is commonly used in object-tracking,
+not necessarily audio processing.</p>
+<h4 id="usage_70">Usage</h4>
+<pre><code>_ : oneEuro(derivativeCutoff, beta, minCutoff) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>derivativeCutoff</code>: Used to filter the first derivative of the input. 1 Hz is a good default</li>
+<li><code>beta</code>: "Speed" parameter where higher values reduce latency. Range is [0-1]</li>
+<li><code>minCutoff</code>: Minimum cutoff frequency in Hz. Lower values remove more jitter</li>
+</ul>
+<h4 id="example-test-program_5">Example test program</h4>
+<pre><code>process = x : hgroup(&quot;One Euro&quot;, oneEuro(derivativeCutoff, beta, minCutoff))
+with {
+   x = os.osc(200) + no.noise*.5; // test signal
+   derivativeCutoff = hslider(&quot;[0] Deriv Cutoff [unit:Hz][style:knob]&quot;, 1.0, 0.1, 100.0, 0.01);
+   beta = hslider(&quot;[1] Beta [style:knob]&quot;, 0.0, 0.0, 2.0, 0.01);
+   minCutoff = hslider(&quot;[2] Min Cutoff [unit:Hz][style:knob]&quot;, 200.0, 0.1, 1000.0, 0.01); 
+};
+</code></pre>
+<h4 id="references_21">References</h4>
+<ul>
+<li><a href="https://gery.casiez.net/1euro/">https://gery.casiez.net/1euro/</a></li>
+</ul>
 <h2 id="linkwitz-riley-4th-order-2-way-3-way-and-4-way-crossovers">Linkwitz-Riley 4th-order 2-way, 3-way, and 4-way crossovers</h2>
 <p>The Linkwitz-Riley (LR) crossovers are designed to produce a fully-flat
 magnitude response when their outputs are combined. The 4th-order
@@ -2108,7 +2142,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="filowpasslr4"><code>(fi.)lowpassLR4</code></h3>
 <p>4th-order Linkwitz-Riley lowpass.</p>
-<h4 id="usage_70">Usage</h4>
+<h4 id="usage_71">Usage</h4>
 <pre><code>_ : lowpassLR4(cf) : _
 </code></pre>
 <p>Where:</p>
@@ -2118,7 +2152,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="fihighpasslr4"><code>(fi.)highpassLR4</code></h3>
 <p>4th-order Linkwitz-Riley highpass.</p>
-<h4 id="usage_71">Usage</h4>
+<h4 id="usage_72">Usage</h4>
 <pre><code>_ : highpassLR4(cf) : _
 </code></pre>
 <p>Where:</p>
@@ -2128,7 +2162,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover2lr4"><code>(fi.)crossover2LR4</code></h3>
 <p>Two-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_72">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>_ : crossover2LR4(cf) : si.bus(2)
 </code></pre>
 <p>Where:</p>
@@ -2138,7 +2172,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover3lr4"><code>(fi.)crossover3LR4</code></h3>
 <p>Three-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_73">Usage</h4>
+<h4 id="usage_74">Usage</h4>
 <pre><code>_ : crossover3LR4(cf1, cf2) : si.bus(3)
 </code></pre>
 <p>Where:</p>
@@ -2149,7 +2183,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover4lr4"><code>(fi.)crossover4LR4</code></h3>
 <p>Four-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_74">Usage</h4>
+<h4 id="usage_75">Usage</h4>
 <pre><code>_ : crossover4LR4(cf1, cf2, cf3) : si.bus(4)
 </code></pre>
 <p>Where:</p>
@@ -2161,7 +2195,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover8lr4"><code>(fi.)crossover8LR4</code></h3>
 <p>Eight-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_75">Usage</h4>
+<h4 id="usage_76">Usage</h4>
 <pre><code>_ : crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7) : si.bus(8)
 </code></pre>
 <p>Where:</p>
@@ -2185,7 +2219,7 @@ coefficients, that are almost equal to one. Second, the maximum
 magnitude difference at 48kHz between the ITU-defined filter and
 <code>itu_r_bs_1770_4_kfilter</code> is 0.001dB, which obviously could be
 less.</p>
-<h4 id="usage_76">Usage</h4>
+<h4 id="usage_77">Usage</h4>
 <pre><code>_ : itu_r_bs_1770_4_kfilter : _
 </code></pre>
 <h4 id="reference_26">Reference</h4>
@@ -2197,7 +2231,7 @@ less.</p>
 <hr />
 <h3 id="fiavg_rect"><code>(fi.)avg_rect</code></h3>
 <p>Moving average.</p>
-<h4 id="usage_77">Usage</h4>
+<h4 id="usage_78">Usage</h4>
 <pre><code>_ : avg_rect(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2211,7 +2245,7 @@ Tau represents the effective length of the one-pole impulse response,
 that is, tau is the integral of the filter's impulse response. This
 response is slower to reach the final value but has less ripples in
 non-steady signals.</p>
-<h4 id="usage_78">Usage</h4>
+<h4 id="usage_79">Usage</h4>
 <pre><code>_ : avg_tau(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2228,7 +2262,7 @@ or to reach 1-1/e of its final value.</li>
 <p>Averaging function based on a one-pole filter and the t60 response time.
 This response is particularly useful when the system is required to
 reach the final value after about <code>period</code> seconds.</p>
-<h4 id="usage_79">Usage</h4>
+<h4 id="usage_80">Usage</h4>
 <pre><code>_ : avg_t60(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2246,7 +2280,7 @@ or to reach 1-1/1000 of its final value.</li>
 This response is close to the moving-average algorithm as it roughly reaches
 the final value after <code>period</code> seconds and shows about the same
 oscillations for non-steady signals.</p>
-<h4 id="usage_80">Usage</h4>
+<h4 id="usage_81">Usage</h4>
 <pre><code>_ : avg_t19(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2263,7 +2297,7 @@ or to reach 1-1/e^2.2 of its final value.</li>
 Note that the only compile-time constant arguments are <code>N</code> and <code>M</code>.
 Other arguments are capitalized because they're matrices, and it makes
 reading them much easier.</p>
-<h4 id="usage_81">Usage</h4>
+<h4 id="usage_82">Usage</h4>
 <pre><code>kalman(N, M, B, R, H, Q, F, reset, u, z) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -2322,7 +2356,7 @@ with {
     M = 1; // Measurement size
 };
 </code></pre>
-<h4 id="references_21">References</h4>
+<h4 id="references_22">References</h4>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Kalman_filter">https://en.wikipedia.org/wiki/Kalman_filter</a></li>
 <li><a href="https://www.cs.unc.edu/~welch/kalman/index.html">https://www.cs.unc.edu/~welch/kalman/index.html</a></li>
