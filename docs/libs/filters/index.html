@@ -2100,9 +2100,6 @@ values.</p>
 <hr />
 <h3 id="fioneeuro"><code>(fi.)oneEuro</code></h3>
 <p>The One Euro Filter (1€ Filter) is an adaptive lowpass filter.
-The input signal is smoothed according to an exponential
-moving average (EMA) whose alpha value is determined
-according to an EMA of the input's first-order derivative.
 This kind of filter is commonly used in object-tracking,
 not necessarily audio processing.</p>
 <h4 id="usage_70">Usage</h4>
@@ -2110,19 +2107,10 @@ not necessarily audio processing.</p>
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>derivativeCutoff</code>: Used to filter the first derivative of the input. 1 Hz is a good default</li>
-<li><code>beta</code>: "Speed" parameter where higher values reduce latency. Range is [0-1]</li>
-<li><code>minCutoff</code>: Minimum cutoff frequency in Hz. Lower values remove more jitter</li>
+<li><code>derivativeCutoff</code>: Used to filter the first derivative of the input. 1 Hz is a good default.</li>
+<li><code>beta</code>: "Speed" parameter where higher values reduce latency.</li>
+<li><code>minCutoff</code>: Minimum cutoff frequency in Hz. Lower values remove more jitter.</li>
 </ul>
-<h4 id="example-test-program_5">Example test program</h4>
-<pre><code>process = x : hgroup(&quot;One Euro&quot;, oneEuro(derivativeCutoff, beta, minCutoff))
-with {
-   x = os.osc(200) + no.noise*.5; // test signal
-   derivativeCutoff = hslider(&quot;[0] Deriv Cutoff [unit:Hz][style:knob]&quot;, 1.0, 0.1, 100.0, 0.01);
-   beta = hslider(&quot;[1] Beta [style:knob]&quot;, 0.0, 0.0, 2.0, 0.01);
-   minCutoff = hslider(&quot;[2] Min Cutoff [unit:Hz][style:knob]&quot;, 200.0, 0.1, 1000.0, 0.01); 
-};
-</code></pre>
 <h4 id="references_21">References</h4>
 <ul>
 <li><a href="https://gery.casiez.net/1euro/">https://gery.casiez.net/1euro/</a></li>
