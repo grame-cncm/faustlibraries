@@ -67,9 +67,7 @@ qSmooth(x) = ba.tabulate(1,0.5*atan(_*20-10)/1.4711+0.5,TableSize,0,1,x).cub;
 //------------------------
 quantize(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
 with{
-    octave = (qLog(_)-log(rf))/log(2)<:
-        (_<0)*(1/(1<<(-1*(_-1)):int))+
-        (_>=0)*(1<<(_:int));
+    octave = (qLog(_)-log(rf))/log(2) <: select2(_<0, 1<<int(_), 1/(1<<int(1-_)));
     nN = ba.count(nl);
     noteRatio(1,oct) = 1;
     noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*ba.take(n,nl)+
@@ -95,10 +93,11 @@ with{
 //------------------------
 quantizeSmoothed(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
 with{
-    octave = (qLog(_)-log(rf))/log(2)<:
-        (_<0)*(1/(1<<(-1*(_-1)):int))+
-        (_>0)*(1<<(_:int))+
-		(_==0)*2;
+    octave = (qLog(_)-log(rf))/log(2)<: select3((_>0)+(_>=0),
+        (1/(1<<int(1-_))),
+        2,
+        1<<int(_)
+    );
     nN = ba.count(nl);
     noteRatio(1,oct) = findValue(1,oct);
     noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*findValue(n,oct)+
