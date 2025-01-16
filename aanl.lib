@@ -125,7 +125,7 @@ Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 declare ADAA1 author "Dario Sanfilippo";
 declare ADAA1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare ADAA1 license "LGPL v3.0 license";
+declare ADAA1 license "MIT License";
 ADAA1(EPS, f, F1, x) = D1q 
       with {
            D1q = ba.if(abs(x - x') <= EPS, ill_D1q, safe_D1q)
@@ -156,7 +156,7 @@ ADAA1(EPS, f, F1, x) = D1q
 declare ADAA2 author "Dario Sanfilippo";
 declare ADAA2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare ADAA2 license "LGPL v3.0 license";
+declare ADAA2 license "MIT License";
 ADAA2(EPS, f, F1, F2, x) = T1 + T2 
       with {
            T1 = ba.if((x - x') ^ 2.0 <= EPS, ill_T1, safe_T1)
@@ -205,10 +205,10 @@ ADAA2(EPS, f, F1, F2, x) = T1 + T2
 declare hardclip author "Dario Sanfilippo";
 declare hardclip copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare hardclip license "LGPL v3.0 license";
+declare hardclip license "MIT License";
 hardclip(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = clip(-1.0, 1.0, x_f);
            F1(x_F1) = ba.if(   (x_F1 <= 1.0) & (x_F1 >= -1.0), 
                                .5 * x_F1 ^ 2.0, 
@@ -230,10 +230,10 @@ hardclip(x) = ADAA1(EPS, f, F1, x)
 declare hardclip2 author "Dario Sanfilippo";
 declare hardclip2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare hardclip2 license "LGPL v3.0 license";
+declare hardclip2 license "MIT License";
 hardclip2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = clip(-1.0, 1.0, x_f);
            F1(x_F1) = ba.if(   (x_F1 <= 1.0) & (x_F1 >= -1.0), 
                                .5 * x_F1 ^ 2.0, 
@@ -260,10 +260,10 @@ hardclip2(x) = ADAA2(EPS, f, F1, F2, x)
 declare cubic1 author "Dario Sanfilippo";
 declare cubic1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare cubic1 license "LGPL v3.0 license";
+declare cubic1 license "MIT License";
 cubic1(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = ba.if( (x_f < 1.0) & (x_f > -1.0), 
                            x_f - x_f ^ 3.0 / 3.0, 
                            (2.0 / 3.0) * ma.signum(x_f));
@@ -289,10 +289,10 @@ cubic1(x) = ADAA1(EPS, f, F1, x)
 declare parabolic author "Dario Sanfilippo";
 declare parabolic copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare parabolic license "LGPL v3.0 license";
+declare parabolic license "MIT License";
 parabolic(x) = ADAA1(EPS, f, F1, x) 
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = ba.if( abs(x_f) <= 2.0, 
                            x_f * (1.0 - abs(x_f) / 4.0), 
                            ma.signum(x_f));
@@ -317,10 +317,10 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
 declare parabolic2 author "Dario Sanfilippo";
 declare parabolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare parabolic2 license "LGPL v3.0 license";
+declare parabolic2 license "MIT License";
 parabolic2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = ba.if( abs(x_f) <= 2.0,
                            x_f * (1.0 - abs(x_f) / 4.0),
                            ma.signum(x_f));
@@ -349,10 +349,10 @@ parabolic2(x) = ADAA2(EPS, f, F1, F2, x)
 declare hyperbolic author "Dario Sanfilippo";
 declare hyperbolic copyright "Copyright (C) 2021 Dario Sanfilippo
      <sanfilippo.dario@gmail.com>";
-declare hyperbolic license "LGPL v3.0 license";
+declare hyperbolic license "MIT License";
 hyperbolic(x) = ADAA1(EPS, f, F1, x)
     with {
-        EPS = 1.0 / ma.SR;
+        EPS = .001; 
         f(x_f) = x_f / (1.0 + abs(x_f));
         F1(x_F1) = abs(x_F1) - log(1.0 + abs(x_F1));
     };
@@ -372,10 +372,10 @@ hyperbolic(x) = ADAA1(EPS, f, F1, x)
 declare hyperbolic2 author "Dario Sanfilippo";
 declare hyperbolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
      <sanfilippo.dario@gmail.com>";
-declare hyperbolic2 license "LGPL v3.0 license";
+declare hyperbolic2 license "MIT License";
 hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
     with {
-        EPS = 1.0 / ma.SR;
+        EPS = .001; 
         f(x_f) = x_f / (1.0 + abs(x_f));
         F1(x_F1) = abs(x_F1) - log(1.0 + abs(x_F1));
         F2(x_F2) = ma.signum(x_F2) * (.5 * (3.0 - 2.0 * abs(x_F2) + x_F2 ^ 2.0 + 
@@ -397,10 +397,10 @@ hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
 declare sinarctan author "Dario Sanfilippo";
 declare sinarctan copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare sinarctan license "LGPL v3.0 license";
+declare sinarctan license "MIT License";
 sinarctan(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = x_f / sqrt(1.0 + x_f ^ 2.0);
            F1(x_F1) = sqrt(x_F1 ^ 2.0 + 1.0) + const
                with {
@@ -423,10 +423,10 @@ sinarctan(x) = ADAA1(EPS, f, F1, x)
 declare sinarctan2 author "Dario Sanfilippo";
 declare sinarctan2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare sinarctan2 license "LGPL v3.0 license";
+declare sinarctan2 license "MIT License";
 sinarctan2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = x_f / sqrt(1.0 + x_f ^ 2.0);
            F1(x_F1) = sqrt(x_F1 ^ 2.0 + 1.0) + const
                with {
@@ -447,7 +447,7 @@ softclipEnv = environment {
         s = ba.if(x>0, 1, -1); // faster than ma.signum(x)
         absX = abs(x);
     };
-    EPS = 1.0 / ma.SR;
+    EPS = .001; 
 
     F1(x) = ba.ifNcNo(2, 1,
         absX < 1/3, x^2,
@@ -523,10 +523,10 @@ softclipQuadratic2 = softclipEnv.softclipQuadratic2;
 declare tanh1 author "Dario Sanfilippo";
 declare tanh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare tanh1 license "LGPL v3.0 license";
+declare tanh1 license "MIT License";
 tanh1(x) = ADAA1(EPS, f, F1, x) 
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = ma.tanh(x_f);
            F1(x_F1) = log(Rcosh(x_F1));
       };
@@ -546,10 +546,10 @@ tanh1(x) = ADAA1(EPS, f, F1, x)
 declare arctan author "Dario Sanfilippo";
 declare arctan copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arctan license "LGPL v3.0 license";
+declare arctan license "MIT License";
 arctan(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = atan(x_f);
            F1(x_F1) = x_F1 * f(x_F1) - .5 * log(x_F1 ^ 2.0 + 1.0);
       };
@@ -569,10 +569,10 @@ arctan(x) = ADAA1(EPS, f, F1, x)
 declare arctan2 author "Dario Sanfilippo";
 declare arctan2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arctan2 license "LGPL v3.0 license";
+declare arctan2 license "MIT License";
 arctan2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = atan(x_f);
            F1(x_F1) = x_F1 * f(x_F1) - .5 * log(x_F1 ^ 2.0 + 1.0);
            F2(x_F2) = .5 * x_F2 ^ 2.0 * f(x_F2) - x_F2 / 2.0 + .5 * f(x_F2);
@@ -593,10 +593,10 @@ arctan2(x) = ADAA2(EPS, f, F1, F2, x)
 declare asinh1 author "Dario Sanfilippo";
 declare asinh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare asinh1 license "LGPL v3.0 license";
+declare asinh1 license "MIT License";
 asinh1(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = ma.asinh(x_f);
            F1(x_F1) = x_F1 * f(x_F1) - sqrt(1.0 + x_F1 ^ 2.0) + const
                with {
@@ -619,10 +619,10 @@ asinh1(x) = ADAA1(EPS, f, F1, x)
 declare asinh2 author "Dario Sanfilippo";
 declare asinh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare asinh2 license "LGPL v3.0 license";
+declare asinh2 license "MIT License";
 asinh2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = ma.asinh(x_f);
            F1(x_F1) = x_F1 * f(x_F1) - sqrt(1.0 + x_F1 ^ 2.0) + const
                with {
@@ -652,10 +652,10 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
 declare cosine1 author "Dario Sanfilippo";
 declare cosine1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare cosine1 license "LGPL v3.0 license";
+declare cosine1 license "MIT License";
 cosine1(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = cos(x_f);
            F1(x_F1) = sin(x_F1);
       };
@@ -675,10 +675,10 @@ cosine1(x) = ADAA1(EPS, f, F1, x)
 declare cosine2 author "Dario Sanfilippo";
 declare cosine2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare cosine2 license "LGPL v3.0 license";
+declare cosine2 license "MIT License";
 cosine2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = cos(x_f);
            F1(x_F1) = sin(x_F1);
            F2(x_F2) = x_F2 * sin(x_F2) + cos(x_F2);
@@ -700,10 +700,10 @@ cosine2(x) = ADAA2(EPS, f, F1, F2, x)
 declare arccos author "Dario Sanfilippo";
 declare arccos copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arccos license "LGPL v3.0 license";
+declare arccos license "MIT License";
 arccos(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = Racos(x_f);
            F1(x_F1) = x_F1 * f(x_F1) - Rsqrt(1.0 - x_F1 ^ 2.0) + const
                with {
@@ -730,10 +730,10 @@ arccos(x) = ADAA1(EPS, f, F1, x)
 declare arccos2 author "Dario Sanfilippo";
 declare arccos2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arccos2 license "LGPL v3.0 license";
+declare arccos2 license "MIT License";
 arccos2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = Racos(x_f);
            F1(x_F1) = x_F1 * f(x_F1) - Rsqrt(1.0 - x_F1 ^ 2.0) + const
                with {
@@ -758,10 +758,10 @@ arccos2(x) = ADAA2(EPS, f, F1, F2, x)
 declare acosh1 author "Dario Sanfilippo";
 declare acosh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare acosh1 license "LGPL v3.0 license";
+declare acosh1 license "MIT License";
 acosh1(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001; 
            f(x_f) = Racosh(x_f);
            F1(x_F1) = x_F1 * f(x_F1) - Rsqrt(x_F1 - 1.0) * Rsqrt(x_F1 + 1.0);
       };
@@ -784,10 +784,10 @@ acosh1(x) = ADAA1(EPS, f, F1, x)
 declare acosh2 author "Dario Sanfilippo";
 declare acosh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare acosh2 license "LGPL v3.0 license";
+declare acosh2 license "MIT License";
 acosh2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = Racosh(x_f);
            F1(x_F1) = x_F1 * f(x_F1) - Rsqrt(x_F1 - 1.0) * Rsqrt(x_F1 + 1.0);
            F2(x_F2) = .5 * x_F2 ^ 2.0 * f(x_F2) - .25 * 
@@ -810,10 +810,10 @@ acosh2(x) = ADAA2(EPS, f, F1, F2, x)
 declare sine author "Dario Sanfilippo";
 declare sine copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare sine license "LGPL v3.0 license";
+declare sine license "MIT License";
 sine(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = sin(x_f);
            F1(x_F1) = -1.0 * cos(x_F1);
       };
@@ -833,10 +833,10 @@ sine(x) = ADAA1(EPS, f, F1, x)
 declare sine2 author "Dario Sanfilippo";
 declare sine2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare sine2 license "LGPL v3.0 license";
+declare sine2 license "MIT License";
 sine2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = sin(x_f);
            F1(x_F1) = 1.0 - cos(x_F1);
            F2(x_F2) = sin(x_F2) - x_F2 * cos(x_F2);
@@ -858,10 +858,10 @@ sine2(x) = ADAA2(EPS, f, F1, F2, x)
 declare arcsin author "Dario Sanfilippo";
 declare arcsin copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arcsin license "LGPL v3.0 license";
+declare arcsin license "MIT License";
 arcsin(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = Rasin(x_f);
            F1(x_F1) = x_F1 * f(x_F1) + Rsqrt(1.0 - x_F1 ^ 2.0) + const
                with {
@@ -888,10 +888,10 @@ arcsin(x) = ADAA1(EPS, f, F1, x)
 declare arcsin2 author "Dario Sanfilippo";
 declare arcsin2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arcsin2 license "LGPL v3.0 license";
+declare arcsin2 license "MIT License";
 arcsin2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = Rasin(x_f);
            F1(x_F1) = x_F1 * f(x_F1) + Rsqrt(1.0 - x_F1 ^ 2.0) + const
                with {
@@ -916,10 +916,10 @@ arcsin2(x) = ADAA2(EPS, f, F1, F2, x)
 declare tangent author "Dario Sanfilippo";
 declare tangent copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare tangent license "LGPL v3.0 license";
+declare tangent license "MIT License";
 tangent(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = Rtan(x_f);
            F1(x_F1) = -1.0 * Rlog(cos(x_F1));
       };
@@ -939,10 +939,10 @@ tangent(x) = ADAA1(EPS, f, F1, x)
 declare atanh1 author "Dario Sanfilippo";
 declare atanh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare atanh1 license "LGPL v3.0 license";
+declare atanh1 license "MIT License";
 atanh1(x) = ADAA1(EPS, f, F1, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = Ratanh(x_f);
            F1(x_F1) = .5 * Rlog(1.0 - x_F1 ^ 2.0) + x_F1 * f(x_F1);
       };
@@ -962,10 +962,10 @@ atanh1(x) = ADAA1(EPS, f, F1, x)
 declare atanh2 author "Dario Sanfilippo";
 declare atanh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare atanh2 license "LGPL v3.0 license";
+declare atanh2 license "MIT License";
 atanh2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
-           EPS = 1.0 / ma.SR;
+           EPS = .001;
            f(x_f) = Ratanh(x_f);
            F1(x_F1) = .5 * Rlog(1.0 - x_F1 ^ 2.0) + x_F1 * f(x_F1);
            F2(x_F2) = .5 * x_F2 ^ 2.0 * f(x_F2) + x_F2 / 2.0 + .25 * 
