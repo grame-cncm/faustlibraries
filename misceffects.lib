@@ -59,7 +59,7 @@ aa = library("aanl.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.5.0"; 
+declare version "2.5.1"; 
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -653,22 +653,22 @@ mixingEnv = environment
 
   // Suppose `sounds` is N buses, each of C channels.
   // We want to linearly mix the buses using index `m` [0;N-1]
-  mixLinearClamp(N, C, m, sounds) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  mixLinearClamp(N, C, m) = si.vecOp((weights, si.bus(N)), *) :> si.bus(C)
   with {
     weights = weightsLinearClamp(N, m) <: ro.interleave(N, C);
   };
 
-  mixLinearLoop(N, C, m, sounds) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  mixLinearLoop(N, C, m) = si.vecOp((weights, si.bus(N)), *) :> si.bus(C)
   with {
     weights = weightsLinearLoop(N, m) <: ro.interleave(N, C);
   };
 
-  mixPowerClamp(N, C, m, sounds) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  mixPowerClamp(N, C, m) = si.vecOp((weights, si.bus(N)), *) :> si.bus(C)
   with {
     weights = weightsPowerClamp(N, m) <: ro.interleave(N, C);
   };
 
-  mixPowerLoop(N, C, m, sounds) = si.vecOp((weights, sounds), *) :> si.bus(C)
+  mixPowerLoop(N, C, m) = si.vecOp((weights, si.bus(N)), *) :> si.bus(C)
   with {
     weights = weightsPowerLoop(N, m) <: ro.interleave(N, C);
   };
