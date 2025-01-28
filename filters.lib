@@ -2799,6 +2799,68 @@ svf = environment {
 	hs(f,q,g)   = svf(8, f, q, g);
 };
 
+
+//-----------------`(fi.)svf_morph`--------------------
+// An SVF-based filter that can smoothly morph between
+// being lowpass, bandpass, and highpass.
+//
+// #### Usage
+//
+// ```
+// _ : svf_morph(freq, Q, blend) : _
+// ```
+//
+// Where:
+//
+// * `freq`: cutoff frequency
+// * `Q`: quality factor
+// * `blend`: [0..2] continuous, where 0 is `lowpass`, 1 is `bandpass`, and 2 is `highpass`. For performance, the value is not clamped to [0..2].
+//
+// Reference:
+// <https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/filters/digital_svf.cpp#L292-L295>
+//-----------------------------------------------------
+declare svf_morph author "David Braun";
+declare svf_morph copyright "Copyright (C) 2024 David Braun <braun@ccrma.stanford.edu>";
+declare svf_morph license "MIT-style STK-4.3 license";
+svf_morph(f, q, _b, x) = svf.lp(f,q,x)*w_LP + svf.bp(f,q,x)*w_BP + svf.hp(f,q,x)*w_HP
+with {
+  b = _b - 1; // b is now -1 to 1.
+  w_LP = max(-b, 0);
+  w_BP = sqrt(1 - b^2);
+  w_HP = max(b, 0);
+};
+
+
+//-----------------`(fi.)svf_notch_morph`--------------------
+// An SVF-based notch-filter that can smoothly morph between
+// being lowpass, notch, and highpass.
+//
+// #### Usage
+//
+// ```
+// _ : svf_notch_morph(freq, Q, blend) : _
+// ```
+//
+// Where:
+//
+// * `freq`: cutoff frequency
+// * `Q`: quality factor
+// * `blend`: [0..2] continuous, where 0 is `lowpass`, 1 is `notch`, and 2 is `highpass`. For performance, the value is not clamped to [0..2].
+//
+// Reference:
+// <https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/filters/digital_svf.cpp#L256C36-L263>
+//-----------------------------------------------------------
+declare svf_notch_morph author "David Braun";
+declare svf_notch_morph copyright "Copyright (C) 2024 David Braun <braun@ccrma.stanford.edu>";
+declare svf_notch_morph license "MIT-style STK-4.3 license";
+svf_notch_morph(f, q, _b, x) = svf.lp(f,q,x)*w_LP + svf.hp(f,q,x)*w_HP
+with {
+  b = _b - 1; // b is now -1 to 1.
+  w_LP = min(1-b, 1);
+  w_HP = min(1+b, 1);
+};
+
+
 //----------`(fi.)SVFTPT`---------------------------------------------------------
 //
 // Topology-preserving transform implementation following Zavalishin's method.
