@@ -48,7 +48,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.6.0";
+declare version "1.7.0";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2816,7 +2816,19 @@ svf = environment {
 // * `Q`: quality factor
 // * `blend`: [0..2] continuous, where 0 is `lowpass`, 1 is `bandpass`, and 2 is `highpass`. For performance, the value is not clamped to [0..2].
 //
-// Reference:
+//
+// #### Example test program
+// 
+// ```
+// process = no.noise : svf_morph(freq, q, blend)
+// with {
+//   blend = hslider("Blend", 0, 0, 2, .01) : si.smoo;
+//   q = hslider("Q", 1, 0.1, 10, .01) : si.smoo;
+//   freq = hslider("freq", 5000, 100, 18000, 1) : si.smoo;
+// };
+// ```
+//
+// #### Reference
 // <https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/filters/digital_svf.cpp#L292-L295>
 //-----------------------------------------------------
 declare svf_morph author "David Braun";
@@ -2847,7 +2859,19 @@ with {
 // * `Q`: quality factor
 // * `blend`: [0..2] continuous, where 0 is `lowpass`, 1 is `notch`, and 2 is `highpass`. For performance, the value is not clamped to [0..2].
 //
-// Reference:
+//
+// #### Example test program
+// 
+// ```
+// process = no.noise : svf_notch_morph(freq, q, blend)
+// with {
+//   blend = hslider("Blend", 0, 0, 2, .01) : si.smoo;
+//   q = hslider("Q", 1, 0.1, 10, .01) : si.smoo;
+//   freq = hslider("freq", 5000, 100, 18000, 1) : si.smoo;
+// };
+// ```
+//
+// #### Reference
 // <https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/filters/digital_svf.cpp#L256C36-L263>
 //-----------------------------------------------------------
 declare svf_notch_morph author "David Braun";
@@ -3299,7 +3323,6 @@ avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
 // or to reach 1-1/e of its final value.
 //
 // #### Reference
-//
 // <https://ccrma.stanford.edu/~jos/mdft/Exponentials.html>
 //-----------------------------------------------------------------------------
 declare avg_tau author "Dario Sanfilippo and Julius O. Smith III";
@@ -3327,7 +3350,6 @@ avg_tau(period, x) = fi.lptau(period, x);
 // or to reach 1-1/1000 of its final value.
 //
 // #### Reference
-//
 // <https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html>
 //-----------------------------------------------------------------------------
 declare avg_t60 author "Dario Sanfilippo and Julius O. Smith III";

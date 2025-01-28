@@ -609,6 +609,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#fisvf_morph" class="nav-link">(fi.)svf_morph</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#fisvf_notch_morph" class="nav-link">(fi.)svf_notch_morph</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#fisvftpt" class="nav-link">(fi.)SVFTPT</a>
               <ul class="nav flex-column">
               </ul>
@@ -2050,6 +2058,56 @@ All filters have <code>freq</code> and <code>Q</code> parameters, the <code>bell
 <li><code>[gain]</code>: gain in dB</li>
 </ul>
 <hr />
+<h3 id="fisvf_morph"><code>(fi.)svf_morph</code></h3>
+<p>An SVF-based filter that can smoothly morph between
+being lowpass, bandpass, and highpass.</p>
+<h4 id="usage_68">Usage</h4>
+<pre><code>_ : svf_morph(freq, Q, blend) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: cutoff frequency</li>
+<li><code>Q</code>: quality factor</li>
+<li><code>blend</code>: [0..2] continuous, where 0 is <code>lowpass</code>, 1 is <code>bandpass</code>, and 2 is <code>highpass</code>. For performance, the value is not clamped to [0..2].</li>
+</ul>
+<h4 id="example-test-program_5">Example test program</h4>
+<pre><code>process = no.noise : svf_morph(freq, q, blend)
+with {
+  blend = hslider(&quot;Blend&quot;, 0, 0, 2, .01) : si.smoo;
+  q = hslider(&quot;Q&quot;, 1, 0.1, 10, .01) : si.smoo;
+  freq = hslider(&quot;freq&quot;, 5000, 100, 18000, 1) : si.smoo;
+};
+</code></pre>
+<h4 id="reference_24">Reference</h4>
+<ul>
+<li><a href="https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/filters/digital_svf.cpp#L292-L295">https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/filters/digital_svf.cpp#L292-L295</a></li>
+</ul>
+<hr />
+<h3 id="fisvf_notch_morph"><code>(fi.)svf_notch_morph</code></h3>
+<p>An SVF-based notch-filter that can smoothly morph between
+being lowpass, notch, and highpass.</p>
+<h4 id="usage_69">Usage</h4>
+<pre><code>_ : svf_notch_morph(freq, Q, blend) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: cutoff frequency</li>
+<li><code>Q</code>: quality factor</li>
+<li><code>blend</code>: [0..2] continuous, where 0 is <code>lowpass</code>, 1 is <code>notch</code>, and 2 is <code>highpass</code>. For performance, the value is not clamped to [0..2].</li>
+</ul>
+<h4 id="example-test-program_6">Example test program</h4>
+<pre><code>process = no.noise : svf_notch_morph(freq, q, blend)
+with {
+  blend = hslider(&quot;Blend&quot;, 0, 0, 2, .01) : si.smoo;
+  q = hslider(&quot;Q&quot;, 1, 0.1, 10, .01) : si.smoo;
+  freq = hslider(&quot;freq&quot;, 5000, 100, 18000, 1) : si.smoo;
+};
+</code></pre>
+<h4 id="reference_25">Reference</h4>
+<ul>
+<li><a href="https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/filters/digital_svf.cpp#L256C36-L263">https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/filters/digital_svf.cpp#L256C36-L263</a></li>
+</ul>
+<hr />
 <h3 id="fisvftpt"><code>(fi.)SVFTPT</code></h3>
 <p>Topology-preserving transform implementation following Zavalishin's method.</p>
 <p>Outputs: lowpass, highpass, bandpass, normalised bandpass, notch, allpass, 
@@ -2060,7 +2118,7 @@ peaking.</p>
      <code>SVFTPT.SVF(1000.0, .707)</code>.</p>
 <p>Even though the implementation is different, the characteristics of this
 filter are comparable to those of the <code>svf</code> environment in this library.</p>
-<h4 id="usage_68">Usage:</h4>
+<h4 id="usage_70">Usage:</h4>
 <pre><code>_ : SVFTPT.xxx(CF, Q) : _
 </code></pre>
 <p>Where:</p>
@@ -2082,7 +2140,7 @@ perturbations.</p>
 <p>This implementation does not use an approximation for the CF computation,
 and it deploys guards to prevent overshooting with extreme sensitivity 
 values.</p>
-<h4 id="usage_69">Usage:</h4>
+<h4 id="usage_71">Usage:</h4>
 <pre><code>_ : dynamicSmoother(sensitivity, baseCF) : _
 </code></pre>
 <p>Where:</p>
@@ -2093,7 +2151,7 @@ values.</p>
 <li><code>baseCF</code>: cutoff frequency, in Hz, when there is no variation in the 
      input signal</li>
 </ul>
-<h4 id="reference_24">Reference</h4>
+<h4 id="reference_26">Reference</h4>
 <ul>
 <li><a href="https://cytomic.com/files/dsp/DynamicSmoothing.pdf">https://cytomic.com/files/dsp/DynamicSmoothing.pdf</a></li>
 </ul>
@@ -2102,7 +2160,7 @@ values.</p>
 <p>The One Euro Filter (1€ Filter) is an adaptive lowpass filter.
 This kind of filter is commonly used in object-tracking,
 not necessarily audio processing.</p>
-<h4 id="usage_70">Usage</h4>
+<h4 id="usage_72">Usage</h4>
 <pre><code>_ : oneEuro(derivativeCutoff, beta, minCutoff) : _
 </code></pre>
 <p>Where:</p>
@@ -2125,12 +2183,12 @@ filters. For the second-order Butterworth filters, we will use the SVF
 filter implemented above by setting the Q-factor to 1.0 / sqrt(2.0).
 These will be cascaded in pairs to build the LR4 highpass and lowpass.
 For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
-<h4 id="reference_25">Reference</h4>
+<h4 id="reference_27">Reference</h4>
 <p>Zavalishin, Vadim. "The art of VA filter design." Native Instruments, Berlin, Germany (2012).</p>
 <hr />
 <h3 id="filowpasslr4"><code>(fi.)lowpassLR4</code></h3>
 <p>4th-order Linkwitz-Riley lowpass.</p>
-<h4 id="usage_71">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>_ : lowpassLR4(cf) : _
 </code></pre>
 <p>Where:</p>
@@ -2140,7 +2198,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="fihighpasslr4"><code>(fi.)highpassLR4</code></h3>
 <p>4th-order Linkwitz-Riley highpass.</p>
-<h4 id="usage_72">Usage</h4>
+<h4 id="usage_74">Usage</h4>
 <pre><code>_ : highpassLR4(cf) : _
 </code></pre>
 <p>Where:</p>
@@ -2150,7 +2208,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover2lr4"><code>(fi.)crossover2LR4</code></h3>
 <p>Two-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_73">Usage</h4>
+<h4 id="usage_75">Usage</h4>
 <pre><code>_ : crossover2LR4(cf) : si.bus(2)
 </code></pre>
 <p>Where:</p>
@@ -2160,7 +2218,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover3lr4"><code>(fi.)crossover3LR4</code></h3>
 <p>Three-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_74">Usage</h4>
+<h4 id="usage_76">Usage</h4>
 <pre><code>_ : crossover3LR4(cf1, cf2) : si.bus(3)
 </code></pre>
 <p>Where:</p>
@@ -2171,7 +2229,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover4lr4"><code>(fi.)crossover4LR4</code></h3>
 <p>Four-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_75">Usage</h4>
+<h4 id="usage_77">Usage</h4>
 <pre><code>_ : crossover4LR4(cf1, cf2, cf3) : si.bus(4)
 </code></pre>
 <p>Where:</p>
@@ -2183,7 +2241,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover8lr4"><code>(fi.)crossover8LR4</code></h3>
 <p>Eight-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_76">Usage</h4>
+<h4 id="usage_78">Usage</h4>
 <pre><code>_ : crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7) : si.bus(8)
 </code></pre>
 <p>Where:</p>
@@ -2207,10 +2265,10 @@ coefficients, that are almost equal to one. Second, the maximum
 magnitude difference at 48kHz between the ITU-defined filter and
 <code>itu_r_bs_1770_4_kfilter</code> is 0.001dB, which obviously could be
 less.</p>
-<h4 id="usage_77">Usage</h4>
+<h4 id="usage_79">Usage</h4>
 <pre><code>_ : itu_r_bs_1770_4_kfilter : _
 </code></pre>
-<h4 id="reference_26">Reference</h4>
+<h4 id="reference_28">Reference</h4>
 <ul>
 <li><a href="https://www.itu.int/rec/R-REC-BS.1770">https://www.itu.int/rec/R-REC-BS.1770</a></li>
 <li><a href="https://gist.github.com/jkbd/07521a98f7873a2dc3dbe16417930791">https://gist.github.com/jkbd/07521a98f7873a2dc3dbe16417930791</a></li>
@@ -2219,7 +2277,7 @@ less.</p>
 <hr />
 <h3 id="fiavg_rect"><code>(fi.)avg_rect</code></h3>
 <p>Moving average.</p>
-<h4 id="usage_78">Usage</h4>
+<h4 id="usage_80">Usage</h4>
 <pre><code>_ : avg_rect(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2233,7 +2291,7 @@ Tau represents the effective length of the one-pole impulse response,
 that is, tau is the integral of the filter's impulse response. This
 response is slower to reach the final value but has less ripples in
 non-steady signals.</p>
-<h4 id="usage_79">Usage</h4>
+<h4 id="usage_81">Usage</h4>
 <pre><code>_ : avg_tau(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2241,7 +2299,7 @@ non-steady signals.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/e,
 or to reach 1-1/e of its final value.</li>
 </ul>
-<h4 id="reference_27">Reference</h4>
+<h4 id="reference_29">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Exponentials.html">https://ccrma.stanford.edu/~jos/mdft/Exponentials.html</a></li>
 </ul>
@@ -2250,7 +2308,7 @@ or to reach 1-1/e of its final value.</li>
 <p>Averaging function based on a one-pole filter and the t60 response time.
 This response is particularly useful when the system is required to
 reach the final value after about <code>period</code> seconds.</p>
-<h4 id="usage_80">Usage</h4>
+<h4 id="usage_82">Usage</h4>
 <pre><code>_ : avg_t60(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2258,7 +2316,7 @@ reach the final value after about <code>period</code> seconds.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/1000,
 or to reach 1-1/1000 of its final value.</li>
 </ul>
-<h4 id="reference_28">Reference</h4>
+<h4 id="reference_30">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html">https://ccrma.stanford.edu/~jos/mdft/Audio_Decay_Time_T60.html</a></li>
 </ul>
@@ -2268,7 +2326,7 @@ or to reach 1-1/1000 of its final value.</li>
 This response is close to the moving-average algorithm as it roughly reaches
 the final value after <code>period</code> seconds and shows about the same
 oscillations for non-steady signals.</p>
-<h4 id="usage_81">Usage</h4>
+<h4 id="usage_83">Usage</h4>
 <pre><code>_ : avg_t19(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2276,7 +2334,7 @@ oscillations for non-steady signals.</p>
 <li><code>period</code> is the time, in seconds, for the system to decay by 1/e^2.2,
 or to reach 1-1/e^2.2 of its final value.</li>
 </ul>
-<h4 id="reference_29">Reference</h4>
+<h4 id="reference_31">Reference</h4>
 <p>Zölzer, U. (2008). Digital audio signal processing (Vol. 9). New York: Wiley.</p>
 <h2 id="kalman-filters">Kalman Filters</h2>
 <hr />
@@ -2285,7 +2343,7 @@ or to reach 1-1/e^2.2 of its final value.</li>
 Note that the only compile-time constant arguments are <code>N</code> and <code>M</code>.
 Other arguments are capitalized because they're matrices, and it makes
 reading them much easier.</p>
-<h4 id="usage_82">Usage</h4>
+<h4 id="usage_84">Usage</h4>
 <pre><code>kalman(N, M, B, R, H, Q, F, reset, u, z) : si.bus(N)
 </code></pre>
 <p>Where:</p>
