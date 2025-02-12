@@ -349,32 +349,37 @@ with{
 // ```
 // dx7_algo(algN,egR1,egR2,egR3,egR4,egL1,egL2,egL3,egL4,outLevel,keyVelSens,ampModSens,opMode,opFreq,opDetune,opRateScale,feedback,lfoDelay,lfoDepth,lfoSpeed,freq,gain,gate) : _
 // ```
-//
+// 
 // Where:
-//
+// 
 // * `algN`: algorithm number (0-31, should be an int...)
-// * `egR1`: preset envelope rates 1 (a list of 6 values between 0-99)
-// * `egR2`: preset envelope rates 2 (a list of 6 values between 0-99)
-// * `egR3`: preset envelope rates 3 (a list of 6 values between 0-99)
-// * `egR4`: preset envelope rates 4 (a list of 6 values between 0-99)
-// * `egL1`: preset envelope levels 1 (a list of 6 values between 0-99)
-// * `egL2`: preset envelope levels 2 (a list of 6 values between 0-99)
-// * `egL3`: preset envelope levels 3 (a list of 6 values between 0-99)
-// * `egL4`: preset envelope levels 4 (a list of 6 values between 0-99)
-// * `outLev`: preset output levels (a list of 6 values between 0-99)
-// * `keyVel`: preset key velocity sensitivities (a list of 6 values between 0-99)
-// * `ampModSens`: preset amplitude sensitivities (a list of 6 values between 0-99)
-// * `opMode`: preset operator mode (a list of 6 values between 0-1)
-// * `opFreq`: preset operator frequencies (a list of 6 values between 0-99)
-// * `opDetune`: preset operator detuning (a list of 6 values between 0-99)
-// * `opRateScale`: preset operator rate scale (a list of 6 values between 0-99)
-// * `feedback`: preset operator feedback (a list of 6 values between 0-99)
-// * `lfoDelay`: preset LFO delay (a list of 6 values between 0-99)
-// * `lfoDepth`: preset LFO depth (a list of 6 values between 0-99)
-// * `lfoSpeed`: preset LFO speed (a list of 6 values between 0-99)
+// * `egR1`: preset envelope rates 1 (a `funVal1` function)
+// * `egR2`: preset envelope rates 2 (a `funVal1` function)
+// * `egR3`: preset envelope rates 3 (a `funVal1` function)
+// * `egR4`: preset envelope rates 4 (a `funVal1` function)
+// * `egL1`: preset envelope levels 1 (a `funVal1` function)
+// * `egL2`: preset envelope levels 2 (a `funVal1` function)
+// * `egL3`: preset envelope levels 3 (a `funVal1` function)
+// * `egL4`: preset envelope levels 4 (a `funVal1` function)
+// * `outLev`: preset output levels (a `funVal1` function)
+// * `keyVel`: preset key velocity sensitivities (a `funVal1` function)
+// * `ampModSens`: preset amplitude sensitivities (a `funVal1`  )
+// * `opMode`: preset operator mode (a `funVal2` function)
+// * `opFreq`: preset operator frequencies (a `funVal1` function)
+// * `opDetune`: preset operator detuning (a `funVal1` function)
+// * `opRateScale`: preset operator rate scale (a `funVal1` function)
+// * `feedback`: preset operator feedback (a `funfunVal1Val` function)
+// * `lfoDelay`: preset LFO delay (a `funVal1` function)
+// * `lfoDepth`: preset LFO depth (a `funVal1` function)
+// * `lfoSpeed`: preset LFO speed (a `funVal1` function)
 // * `freq`: fundamental frequency
 // * `gain`: general gain
 // * `gate`: trigger signal
+//
+// `funVal1` : is a function of the form `\(id).(val)` taking an id in [0,5] and returning a value in[0,99], to be used to generate 6 values.
+//
+// `funVal2` : is a function of the form `\(id).(val)` taking an id in [0,5] and returning a value in[0,1], to be used to generate 6 values.
+//
 //-----------------------------------------------------------------
 
 // Alg 1

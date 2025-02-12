@@ -436,29 +436,31 @@ should give your more details on this). Each algorithm uses 6 operators.</p>
 <p>Where:</p>
 <ul>
 <li><code>algN</code>: algorithm number (0-31, should be an int...)</li>
-<li><code>egR1</code>: preset envelope rates 1 (a list of 6 values between 0-99)</li>
-<li><code>egR2</code>: preset envelope rates 2 (a list of 6 values between 0-99)</li>
-<li><code>egR3</code>: preset envelope rates 3 (a list of 6 values between 0-99)</li>
-<li><code>egR4</code>: preset envelope rates 4 (a list of 6 values between 0-99)</li>
-<li><code>egL1</code>: preset envelope levels 1 (a list of 6 values between 0-99)</li>
-<li><code>egL2</code>: preset envelope levels 2 (a list of 6 values between 0-99)</li>
-<li><code>egL3</code>: preset envelope levels 3 (a list of 6 values between 0-99)</li>
-<li><code>egL4</code>: preset envelope levels 4 (a list of 6 values between 0-99)</li>
-<li><code>outLev</code>: preset output levels (a list of 6 values between 0-99)</li>
-<li><code>keyVel</code>: preset key velocity sensitivities (a list of 6 values between 0-99)</li>
-<li><code>ampModSens</code>: preset amplitude sensitivities (a list of 6 values between 0-99)</li>
-<li><code>opMode</code>: preset operator mode (a list of 6 values between 0-1)</li>
-<li><code>opFreq</code>: preset operator frequencies (a list of 6 values between 0-99)</li>
-<li><code>opDetune</code>: preset operator detuning (a list of 6 values between 0-99)</li>
-<li><code>opRateScale</code>: preset operator rate scale (a list of 6 values between 0-99)</li>
-<li><code>feedback</code>: preset operator feedback (a list of 6 values between 0-99)</li>
-<li><code>lfoDelay</code>: preset LFO delay (a list of 6 values between 0-99)</li>
-<li><code>lfoDepth</code>: preset LFO depth (a list of 6 values between 0-99)</li>
-<li><code>lfoSpeed</code>: preset LFO speed (a list of 6 values between 0-99)</li>
+<li><code>egR1</code>: preset envelope rates 1 (a <code>funVal1</code> function)</li>
+<li><code>egR2</code>: preset envelope rates 2 (a <code>funVal1</code> function)</li>
+<li><code>egR3</code>: preset envelope rates 3 (a <code>funVal1</code> function)</li>
+<li><code>egR4</code>: preset envelope rates 4 (a <code>funVal1</code> function)</li>
+<li><code>egL1</code>: preset envelope levels 1 (a <code>funVal1</code> function)</li>
+<li><code>egL2</code>: preset envelope levels 2 (a <code>funVal1</code> function)</li>
+<li><code>egL3</code>: preset envelope levels 3 (a <code>funVal1</code> function)</li>
+<li><code>egL4</code>: preset envelope levels 4 (a <code>funVal1</code> function)</li>
+<li><code>outLev</code>: preset output levels (a <code>funVal1</code> function)</li>
+<li><code>keyVel</code>: preset key velocity sensitivities (a <code>funVal1</code> function)</li>
+<li><code>ampModSens</code>: preset amplitude sensitivities (a <code>funVal1</code>  )</li>
+<li><code>opMode</code>: preset operator mode (a <code>funVal2</code> function)</li>
+<li><code>opFreq</code>: preset operator frequencies (a <code>funVal1</code> function)</li>
+<li><code>opDetune</code>: preset operator detuning (a <code>funVal1</code> function)</li>
+<li><code>opRateScale</code>: preset operator rate scale (a <code>funVal1</code> function)</li>
+<li><code>feedback</code>: preset operator feedback (a <code>funfunVal1Val</code> function)</li>
+<li><code>lfoDelay</code>: preset LFO delay (a <code>funVal1</code> function)</li>
+<li><code>lfoDepth</code>: preset LFO depth (a <code>funVal1</code> function)</li>
+<li><code>lfoSpeed</code>: preset LFO speed (a <code>funVal1</code> function)</li>
 <li><code>freq</code>: fundamental frequency</li>
 <li><code>gain</code>: general gain</li>
 <li><code>gate</code>: trigger signal</li>
 </ul>
+<p><code>funVal1</code> : is a function of the form <code>\(id).(val)</code> taking an id in [0,5] and returning a value in[0,99], to be used to generate 6 values.</p>
+<p><code>funVal2</code> : is a function of the form <code>\(id).(val)</code> taking an id in [0,5] and returning a value in[0,1], to be used to generate 6 values.</p>
 <hr />
 <h3 id="dxdx7_ui"><code>(dx.)dx7_ui</code></h3>
 <p>Generic DX7 function where all parameters are controllable using UI elements.
