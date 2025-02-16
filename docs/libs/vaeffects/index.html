@@ -241,6 +241,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#velowpassladder4" class="nav-link">(ve.)lowpassLadder4</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#vemooghalfladder" class="nav-link">(ve.)moogHalfLadder</a>
               <ul class="nav flex-column">
               </ul>
@@ -399,7 +403,7 @@ _ : moog_vcf_2bn(res,fr) : _
 </ul>
 <hr />
 <h3 id="vemoogladder"><code>(ve.)moogLadder</code></h3>
-<p>Virtual analog model of the 4th-order Moog Ladder, which is arguably the 
+<p>Virtual analog model of the 4th-order Moog Ladder (without any nonlinearities), which is arguably the 
 most well-known ladder filter in analog synthesizers. Several 
 1st-order filters are cascaded in series. Feedback is then used, in part, to 
 control the cut-off frequency and the resonance.</p>
@@ -419,6 +423,33 @@ https://www.kvraudio.com/forum/viewtopic.php?f=33&amp;t=571909</p>
 <li><code>Q</code>: quality factor between .707 (0 feedback coefficient) to 25 (feedback = 4, which is the self-oscillating threshold).</li>
 </ul>
 <hr />
+<h3 id="velowpassladder4"><code>(ve.)lowpassLadder4</code></h3>
+<p>Topology-preserving transform implementation of a four-pole ladder lowpass.
+This is essentially the same filter as the moogLadder above except for 
+the parameters, which will be expressed in Hz, for the cutoff, and as a
+raw feedback coefficient, for the resonance. 
+Also, note that the parameter order has changed.</p>
+<h4 id="references_3">References</h4>
+<p>[Zavalishin 2012] (revision 2.1.2, February 2020): </p>
+<ul>
+<li><a href="https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf">https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf</a></li>
+</ul>
+<h4 id="usage_3">Usage</h4>
+<pre><code>_ : lowpassLadder4(k, CF) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>k</code>: feedback coefficient between 0 and 4, which is the stability threshold.</li>
+<li><code>CF</code>: the filter's cutoff in Hz.</li>
+</ul>
+<p>Notes:</p>
+<p>If you want to express the feedback coefficient as the resonance peak, you can use the formula: </p>
+<pre><code> k = 4.0 - 1.0 / Q;
+</code></pre>
+<p>where Q, between .25 and infinity, corresponds to the peak of the filter at cutoff. 
+I.e., if you feed the filter with a sine whose frequency is the same as the cutoff, the output 
+peak corresponds exactly to that set via the Q-param.</p>
+<hr />
 <h3 id="vemooghalfladder"><code>(ve.)moogHalfLadder</code></h3>
 <p>Virtual analog model of the 2nd-order Moog Half Ladder (simplified version of
 <code>(ve.)moogLadder</code>). Several 1st-order filters are cascaded in series. 
@@ -426,12 +457,12 @@ Feedback is then used, in part, to control the cut-off frequency and the
 resonance.</p>
 <p>This filter was implemented in Faust by Eric Tarr during the 
 <a href="https://ccrma.stanford.edu/workshops/faust-embedded-19/">2019 Embedded DSP With Faust Workshop</a>.</p>
-<h4 id="references_3">References</h4>
+<h4 id="references_4">References</h4>
 <ul>
 <li><a href="https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter">https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter</a></li>
 <li><a href="http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf">http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf</a></li>
 </ul>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_4">Usage</h4>
 <pre><code>_ : moogHalfLadder(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -449,12 +480,12 @@ in the Faust implementation, they are simply implicitly calculated by
 tracing back to the other states (<code>s1</code>,<code>s2</code>,<code>s3</code>,<code>s4</code>) each recursive step.</p>
 <p>This filter was implemented in Faust by Eric Tarr during the 
 <a href="https://ccrma.stanford.edu/workshops/faust-embedded-19/">2019 Embedded DSP With Faust Workshop</a>.</p>
-<h4 id="references_4">References</h4>
+<h4 id="references_5">References</h4>
 <ul>
 <li><a href="https://www.willpirkle.com/virtual-analog-diode-ladder-filter/">https://www.willpirkle.com/virtual-analog-diode-ladder-filter/</a></li>
 <li><a href="http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf">http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf</a></li>
 </ul>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_5">Usage</h4>
 <pre><code>_ : diodeLadder(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -478,7 +509,7 @@ circuit. </p>
 <h3 id="vekorg35lpf"><code>(ve.)korg35LPF</code></h3>
 <p>Virtual analog models of the Korg 35 low-pass filter found in the MS-10 and 
 MS-20 synthesizers.</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_6">Usage</h4>
 <pre><code>_ : korg35LPF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -490,7 +521,7 @@ MS-20 synthesizers.</p>
 <h3 id="vekorg35hpf"><code>(ve.)korg35HPF</code></h3>
 <p>Virtual analog models of the Korg 35 high-pass filter found in the MS-10 and 
 MS-20 synthesizers.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>_ : korg35HPF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -510,7 +541,7 @@ the <code>(ef.)cubicnl</code> function.</p>
 <hr />
 <h3 id="veoberheim"><code>(ve.)oberheim</code></h3>
 <p>Generic multi-outputs Oberheim filter that produces the BSF, BPF, HPF and LPF outputs (see description above).</p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>_ : oberheim(normFreq,Q) : _,_,_,_
 </code></pre>
 <p>Where:</p>
@@ -523,7 +554,7 @@ the <code>(ef.)cubicnl</code> function.</p>
 <p>Band-Stop Oberheim filter (see description above). 
 Specialize the generic implementation: keep the first BSF output, 
 the compiler will only generate the needed code.</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>_ : oberheimBSF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -536,7 +567,7 @@ the compiler will only generate the needed code.</p>
 <p>Band-Pass Oberheim filter (see description above).
 Specialize the generic implementation: keep the second BPF output, 
 the compiler will only generate the needed code.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>_ : oberheimBPF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -549,7 +580,7 @@ the compiler will only generate the needed code.</p>
 <p>High-Pass Oberheim filter (see description above).
 Specialize the generic implementation: keep the third HPF output, 
 the compiler will only generate the needed code.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>_ : oberheimHPF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -562,7 +593,7 @@ the compiler will only generate the needed code.</p>
 <p>Low-Pass Oberheim filter (see description above). 
 Specialize the generic implementation: keep the fourth LPF output,
 the compiler will only generate the needed code.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>_ : oberheimLPF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -609,7 +640,7 @@ A trick used for calculating the state <code>s</code> is to observe that the inp
 the delay block is the sum of two signal: what appears to be a feedforward 
 path and a feedback path. In reality, the signals being summed are identical 
 (signal*2) plus the value of the current state.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>_ : sallenKeyOnePole(normFreq) : _,_
 </code></pre>
 <p>Where:</p>
@@ -621,7 +652,7 @@ path and a feedback path. In reality, the signals being summed are identical
 <p>Sallen-Key One Pole lowpass filter (see description above).
 Specialize the generic implementation: keep the first LPF output, 
 the compiler will only generate the needed code.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>_ : sallenKeyOnePoleLPF(normFreq) : _
 </code></pre>
 <p>Where:</p>
@@ -635,7 +666,7 @@ signal is routed in parallel to the output. The LPF'd signal is subtracted
 from the input so that the HPF remains.
 Specialize the generic implementation: keep the second HPF output, 
 the compiler will only generate the needed code.</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>_ : sallenKeyOnePoleHPF(normFreq) : _
 </code></pre>
 <p>Where:</p>
@@ -657,7 +688,7 @@ circuit is only calculated up to that point. </p>
 Except, the output of the BPF stops earlier in the circuit. Similarly, the 
 states (<code>s1</code> and <code>s2</code>) only differ in that <code>s2</code> includes a couple more terms 
 beyond what is used for <code>s1</code>. </p>
-<h4 id="usage_15">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>_ : sallenKey2ndOrder(normFreq,Q) : _,_,_
 </code></pre>
 <p>Where:</p>
@@ -670,7 +701,7 @@ beyond what is used for <code>s1</code>. </p>
 <p>Sallen-Key 2nd order lowpass filter (see description above). 
 Specialize the generic implementation: keep the first LPF output,
 the compiler will only generate the needed code.</p>
-<h4 id="usage_16">Usage</h4>
+<h4 id="usage_17">Usage</h4>
 <pre><code>_ : sallenKey2ndOrderLPF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -683,7 +714,7 @@ the compiler will only generate the needed code.</p>
 <p>Sallen-Key 2nd order bandpass filter (see description above). 
 Specialize the generic implementation: keep the second BPF output, 
 the compiler will only generate the needed code.</p>
-<h4 id="usage_17">Usage</h4>
+<h4 id="usage_18">Usage</h4>
 <pre><code>_ : sallenKey2ndOrderBPF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -696,7 +727,7 @@ the compiler will only generate the needed code.</p>
 <p>Sallen-Key 2nd order highpass filter (see description above). 
 Specialize the generic implementation: keep the third HPF output, 
 the compiler will only generate the needed code.</p>
-<h4 id="usage_18">Usage</h4>
+<h4 id="usage_19">Usage</h4>
 <pre><code>_ : sallenKey2ndOrderHPF(normFreq,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -709,7 +740,7 @@ the compiler will only generate the needed code.</p>
 <h3 id="vewah4"><code>(ve.)wah4</code></h3>
 <p>Wah effect, 4th order.
 <code>wah4</code> is a standard Faust function.</p>
-<h4 id="usage_19">Usage</h4>
+<h4 id="usage_20">Usage</h4>
 <pre><code>_ : wah4(fr) : _
 </code></pre>
 <p>Where:</p>
@@ -724,7 +755,7 @@ the compiler will only generate the needed code.</p>
 <h3 id="veautowah"><code>(ve.)autowah</code></h3>
 <p>Auto-wah effect.
 <code>autowah</code> is a standard Faust function.</p>
-<h4 id="usage_20">Usage</h4>
+<h4 id="usage_21">Usage</h4>
 <pre><code>_ : autowah(level) : _
 </code></pre>
 <p>Where:</p>
@@ -735,7 +766,7 @@ the compiler will only generate the needed code.</p>
 <h3 id="vecrybaby"><code>(ve.)crybaby</code></h3>
 <p>Digitized CryBaby wah pedal.
 <code>crybaby</code> is a standard Faust function.</p>
-<h4 id="usage_21">Usage</h4>
+<h4 id="usage_22">Usage</h4>
 <pre><code>_ : crybaby(wah) : _
 </code></pre>
 <p>Where:</p>
@@ -751,7 +782,7 @@ the compiler will only generate the needed code.</p>
 <p>A very simple vocoder where the spectrum of the modulation signal
 is analyzed using a filter bank.
 <code>vocoder</code> is a standard Faust function.</p>
-<h4 id="usage_22">Usage</h4>
+<h4 id="usage_23">Usage</h4>
 <pre><code>_ : vocoder(nBands,att,rel,BWRatio,source,excitation) : _
 </code></pre>
 <p>Where:</p>
