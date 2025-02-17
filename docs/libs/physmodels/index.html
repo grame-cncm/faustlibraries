@@ -865,6 +865,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#pmrk_solve" class="nav-link">(pm.)rk_solve</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
               </ul>
@@ -978,8 +982,9 @@ generalized to the left and right going waves. Thus, <code>n</code> blocks in <c
 will add an <code>n</code> samples delay to both left and right going waves.</p>
 <h4 id="usage_4">Usage</h4>
 <pre><code>leftGoingWaves,rightGoingWaves,mixedOutput : chain( A : B ) : leftGoingWaves,rightGoingWaves,mixedOutput
-with{
-        A = _,_,_;
+with {
+   A = _,_,_;
+   B = _,_,_;
 };
 </code></pre>
 <hr />
@@ -1038,7 +1043,10 @@ signal, both ways. Of course, this function can be nested within a
 <a href="#chain"><code>chain</code></a>.</p>
 <h4 id="usage_11">Usage</h4>
 <pre><code>terminations(a,b,c)
-with{
+with {
+   a = *(-1); // left termination
+   b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
+   c = *(-1); // right termination
 };
 </code></pre>
 <hr />
@@ -1049,7 +1057,9 @@ function adds a 1 sample delay near the termination and can be nested
 within another <a href="#chain"><code>chain</code></a>.</p>
 <h4 id="usage_12">Usage</h4>
 <pre><code>lTerminations(a,b)
-with{
+with {
+   a = *(-1); // left termination
+   b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
 };
 </code></pre>
 <hr />
@@ -1060,7 +1070,9 @@ function adds a 1 sample delay near the termination and can be nested
 within another <a href="#chain"><code>chain</code></a>.</p>
 <h4 id="usage_13">Usage</h4>
 <pre><code>rTerminations(b,c)
-with{
+with {
+   b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
+   c = *(-1); // right termination
 };
 </code></pre>
 <hr />
@@ -2580,7 +2592,7 @@ the frequency range of the provided source to be realistic.</p>
 <p>Where:</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor,
-          3: soprano, 4: tenor)</li>
+   3: soprano, 4: tenor)</li>
 <li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
 <li><code>nFormants</code>: number of formant regions in frequency domain, typically 5</li>
 <li><code>i</code>: formant number (i.e. 0 - 4) used to index formant data value arrays</li>
@@ -2840,7 +2852,79 @@ fifth) where the higher one decays faster and is attenuated:</p>
 </code></pre>
 <p>Further reading: <a href="https://raw.githubusercontent.com/grame-cncm/faust/master-dev/tools/physicalModeling/ir2dsp/lacPaper2017.pdf">Grumiaux et. al., 2017:
 Impulse-Response and CAD-Model-Based Physical Modeling in
-Faust</a></p></div>
+Faust</a></p>
+<hr />
+<h3 id="pmrk_solve"><code>(pm.)rk_solve</code></h3>
+<p>Solves the system of ordinary differential equations of any order using
+the explicit Runge-Kutta methods.</p>
+<h4 id="usage_147">Usage</h4>
+<pre><code>rk_solve(ts,ks, ni,h, eq,iv) : si.bus(outputs(eq))
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ts,ks</code> : the Butcher tableau (see below)</li>
+<li><code>ni</code> : number of iterations at each tick, compile time constant
+         ni &gt; 1 can improve accuracy but will degrade performance</li>
+<li><code>h</code>  : time step, run time constant, e.g. 1/ma.SR</li>
+<li><code>eq</code> : list of derivative functions</li>
+<li><code>iv</code> : list of initial values</li>
+</ul>
+<p><code>rk_solve()</code> with the "standard" 1-4 tableaux and ni = 1:</p>
+<pre><code>rk_solve_1 = rk_solve((0), (1), 1);
+rk_solve_2 = rk_solve((0,1/2), (1/2, 0,1), 1);
+rk_solve_3 = rk_solve((0,1/2,1), (1/2,-1,2, 1/6,2/3,1/6), 1);
+rk_solve_4 = rk_solve((0,1/2,1/2,1), (1/2,0,1/2,0,0,1, 1/6,1/3,1/3,1/6), 1);
+</code></pre>
+<h4 id="example-test-program">Example test program</h4>
+<p>Suppose we have a system of differential equations:</p>
+<pre><code>dx/dt = dx_dt(t,x,y,z)
+dy/dt = dy_dt(t,x,y,z)
+dz/dt = dz_dt(t,x,y,z)
+</code></pre>
+<p>with initial conditions:</p>
+<pre><code>   x(0) = x0
+   y(0) = y0
+   z(0) = z0
+</code></pre>
+<p>and we want to solve it using this Butcher tableau:</p>
+<pre><code> 0 |
+c2 | a21
+c3 | a31 a32
+c4 | a41 a42 a43
+-------------------
+   | b1  b1  b3  b4
+</code></pre>
+<pre><code>EQ(t,x,y,z) = dx_dt(t,x,y,z),
+              dy_dt(t,x,y,z),
+              dz_dt(t,x,y,z);
+
+IV = x0, y0, z0;
+
+TS = 0, c2, c3, c4;
+KS = a21,
+     a31, a32,
+     a41, a42, a43,
+     b1,  b2,  b3,  b4;
+
+process = rk_solve(TS,KS, 1,1/ma.SR, EQ,IV);
+</code></pre>
+<p>Less abstract example which can actually be compiled/tested:</p>
+<pre><code>// Lotka-Volterra equations parameterized by a,b,c,d:
+LV(a,b,c,d, t,x,y) =
+    a*x - b*x*y,
+    c*x*y - d*y;
+
+// Solved using the &quot;standard&quot; fourth-order method:
+process = rk_solve_4(
+    0.01,                  // time step
+    LV(0.1,0.02,0.03,0.4), // LV() with random parameters
+    (3,4)                  // initial values
+);
+</code></pre>
+<h4 id="references_1">References</h4>
+<ul>
+<li><a href="https://wikipedia.org/wiki/Runge%E2%80%93Kutta_methods">https://wikipedia.org/wiki/Runge%E2%80%93Kutta_methods</a></li>
+</ul></div>
             </div>
         </div>
 
