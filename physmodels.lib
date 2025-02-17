@@ -3982,3 +3982,138 @@ with{
 	res(i) = ba.take(i+1,modeRes);
 	gain(i) = ba.take(i+1,modeGains);
 };
+
+//-----------------------------`(pm.)rk_solve`----------------------------
+// Solves the system of ordinary differential equations of any order using
+// the explicit Runge-Kutta methods.
+//
+// #### Usage
+//
+// ```
+// rk_solve(ts,ks, ni,h, eq,iv); : si.bus(outputs(eq))
+// ```
+//
+// Where:
+//
+// * `ts,ks` : the Butcher tableau (see below)
+// * `ni` : number of iterations at each tick, compile time constant
+//          ni > 1 can improve accuracy but will degrade performance
+// * `h`  : time step, run time constant, e.g. 1/ma.SR
+// * `eq` : list of derivative functions
+// * `iv` : list of initial values
+//
+// #### Example test program
+//
+// Suppose we have a system of differential equations
+//
+//	dx
+//	-- = dx_dt(t,x,y,z)
+//	dt
+//
+//	dy
+//	-- = dy_dt(t,x,y,z)
+//	dt
+//
+//	dz
+//	-- = dz_dt(t,x,y,z)
+//	dt
+//
+// with initial conditions
+//
+//	x(0) = x0
+//	y(0) = y0
+//	z(0) = z0
+//
+// and we want to solve it using this Butcher tableau
+//
+//	 0 |
+//	c2 | a21
+//	c3 | a31 a32
+//	c4 | a41 a42 a43
+//	-------------------
+//	   | b1  b1  b3  b4
+//
+// ```
+//	EQ(t,x,y,z) = dx_dt(t,x,y,z),
+//	              dy_dt(t,x,y,z),
+//	              dz_dt(t,x,y,z);
+//
+//	IV = x0, y0, z0;
+//
+//	TS = 0, c2, c3, c4;
+//	KS = a21,
+//	     a31, a32,
+//	     a41, a42, a43,
+//	     b1,  b2,  b3,  b4;
+//
+//	process = rk_solve(TS,KS, 1,1/ma.SR, EQ,IV);
+// ```
+// Less abstract example which can actually be compiled/tested:
+//
+// ```
+//	// Lotka-Volterra equations parameterized by a,b,c,d
+//	LV(a,b,c,d, t,x,y) =
+//		a*x - b*x*y,
+//		c*x*y - d*y;
+//
+//	// solve using the "standard" fourth-order method
+//	process = rk_solve_4(
+//		0.01,                  // time step
+//		LV(0.1,0.02,0.03,0.4), // LV() with random parameters
+//		(3,4)                  // initial values
+//	);
+// ```
+//
+// #### References
+//
+// * https://wikipedia.org/wiki/Runge%E2%80%93Kutta_methods
+//------------------------------------------------------------------------
+rk_solve(ts,ks, ni,h, eq,iv) = doit
+with {
+	T = ba.time * h;
+	O = outputs(ts);
+	N = outputs(eq);
+
+	// same as ba.take(n+1,l) but more efficient
+	take(l,n) = l : route(outputs(l),1, n+1, 1);
+
+	// solution for the current tick, calculated at the previous
+	// tick or `iv` if T == 0 (first tick).
+	curr = par(i,N, ck_iv(take(iv,i))) with {
+		ck_iv = case {
+			(0) => _; (0.0) => _; // optimization
+			(x) => select2(ba.time, x);
+		};
+	};
+
+	// Why not simply `doit = tick ~ curr` ? This would output the
+	// solution for T+h time. And we can't just add `: par(i,N,mem)`,
+	// this won't work at T == 0 time if iv != 0, see ck_iv above.
+	doit = (si.bus(N) <: tick, si.bus(N)) ~ curr :
+		si.block(N), si.bus(N);
+
+	// repeat `step` `ni` times using the `h/ni` time step, outputs
+	// the solution for T+h time (next tick).
+	tick = seq(i,ni, step(ts,ks, T+i*h/ni, h/ni, eq));
+
+	// main function, outputs the solution for t+h time.
+	step(ts,ks, t,h, eq) =
+		seq(i,O, push_k(i+1, vec(i), eqt(i))) :
+		ro.interleave(N,O+1) : par(i,N, vec(O))
+	with {
+		push_k(K, vec, eqt) = si.bus(N*K) <: si.bus(N*K), push
+		with {
+			push = ro.interleave(N,K) : par(i,N, vec) : eqt;
+		};
+
+		vec(K) = _, par(i,K, *(take(ks, K*(K-1)/2 + i))) :> _;
+
+		eqt(K) = eq(t + h * take(ts, K)) : par(i,N, *(h));
+	};
+};
+
+// rk_solve() with the "standard" 1-4 tableaus and ni=1
+rk_solve_1 = rk_solve((0), (1), 1);
+rk_solve_2 = rk_solve((0,1/2), (1/2, 0,1), 1);
+rk_solve_3 = rk_solve((0,1/2,1), (1/2,-1,2, 1/6,2/3,1/6), 1);
+rk_solve_4 = rk_solve((0,1/2,1/2,1), (1/2,0,1/2,0,0,1, 1/6,1/3,1/3,1/6), 1);
