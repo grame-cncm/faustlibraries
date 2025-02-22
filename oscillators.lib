@@ -59,7 +59,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "1.5.1";
+declare version "1.6.0";
 
 // This library contains platform specific constants
 pl = library("platform.lib");
@@ -1451,6 +1451,26 @@ with {
 // * `a`: decaying factor != 1
 // * `n`: total number of harmonics (osccN/oscsN only)
 //
+// #### Variants
+//
+// - infinite number of harmonics, implies aliasing
+// ```
+// oscc(f0,df,a) : _;
+// oscs(f0,df,a) : _;
+// ```
+//
+// - n harmonics, f0, f0 + df, f0 + 2*df, ..., f0 + (n-1)*df
+// ```
+// osccN(f0,df,a,n) : _;
+// oscsN(f0,df,a,n) : _;
+// ```
+//
+// - finite number of harmonics, from f0 to Nyquist
+// ```
+// osccNq(f0,df,a) : _;
+// oscsNq(f0,df,a) : _;
+// ```
+// 
 // #### Example test program
 //
 // ```
@@ -1469,6 +1489,7 @@ with {
 // #### Reference
 //
 // * <https://ccrma.stanford.edu/STANM/stanms/stanm5/stanm5.pdf>
+//
 // -----------------------------------------------------------------------
 dsf = environment {
 	qo = quadosc;
@@ -1485,7 +1506,7 @@ dsf = environment {
 	osccN(f0,df,a,n) = oscc(f0,df,a) - a^n * oscc(f0 + n*df, df,a);
 	oscsN(f0,df,a,n) = oscs(f0,df,a) - a^n * oscs(f0 + n*df, df,a);
 
-	// finite number of harmonics, from f0 to nyquist
+	// finite number of harmonics, from f0 to Nyquist
 	osccNq(f0,df,a) = osccN(f0,df,a, Nq(f0,df));
 	oscsNq(f0,df,a) = oscsN(f0,df,a, Nq(f0,df));
 };
