@@ -1434,6 +1434,62 @@ with {
 	};
 };
 
+//------------------------------`(os.)dsf`--------------------------------
+// An environment with sine/cosine oscsillators with exponentially decaying
+// harmonics based on direct summation formula.
+//
+// #### Usage
+//
+// ```
+// dsf.xxx(f0, df, a, [n]) : _;
+// ```
+//
+// Where:
+//
+// * `f0`: base frequency
+// * `df`: step frequency
+// * `a`: decaying factor != 1
+// * `n`: total number of harmonics (osccN/oscsN only)
+//
+// #### Example test program
+//
+// ```
+// process = dsf.osccN(F0,DF,A,N),
+//           dsf.oscsN(F0,DF,A,N);
+// ```
+// if `N` is an integer constant, the same (modulo fp issues) as:
+// ```
+// c = os.quadosc : _,!;
+// s = os.quadosc : !,_;
+// process = sum(k,N, A^k * c(F0 + k*DF)),
+//           sum(k,N, A^k * s(F0 + k*DF));
+// ```
+// but much more efficient.
+//
+// #### Reference
+//
+// * <https://ccrma.stanford.edu/STANM/stanms/stanm5/stanm5.pdf>
+// -----------------------------------------------------------------------
+dsf = environment {
+	qo = quadosc;
+	co = qo : _,!;
+	so = qo : !,_;
+
+	Nq(f0,df) = (ma.SR/2 - f0) / df : int;
+
+	// infinite number of harmonics, implies aliasing
+	oscc(f0,df,a) = (co(f0) - a*co(f0-df)) / (1 + a^2 - 2*a*co(df));
+	oscs(f0,df,a) = (so(f0) - a*so(f0-df)) / (1 + a^2 - 2*a*co(df));
+
+	// n harmonics, f0, f0 + df, f0 + 2*df, ..., f0 + (n-1)*df
+	osccN(f0,df,a,n) = oscc(f0,df,a) - a^n * oscc(f0 + n*df, df,a);
+	oscsN(f0,df,a,n) = oscs(f0,df,a) - a^n * oscs(f0 + n*df, df,a);
+
+	// finite number of harmonics, from f0 to nyquist
+	osccNq(f0,df,a) = osccN(f0,df,a, Nq(f0,df));
+	oscsNq(f0,df,a) = oscsN(f0,df,a, Nq(f0,df));
+};
+
 //================ Waveguide-Resonator-Based Oscillators ================
 // Sinusoidal oscillator based on the waveguide resonator `wgr`.
 //=======================================================================
