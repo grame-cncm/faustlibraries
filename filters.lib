@@ -247,6 +247,33 @@ declare ff_combfilter copyright "Copyright (C) 2003-2019 by Julius O. Smith III 
 declare ff_combfilter license "MIT-style STK-4.3 license";
 ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 
+//---------------------`(fi.)_fb_comb`---------------------
+// A generic feed-back comb filter
+//
+// #### Usage
+//
+// ```
+// _ : _fb_comb(dop,N,b0,aN) : _
+// ```
+//
+// Where
+//
+// * `dop`: delay operator, e.g. `@` or `de.fdelay4a(2048)`
+// * `N`: current delay
+// * `b0`: gain applied to input
+// * `aN`: gain applied to delay-line output
+//
+// #### Example test program
+//
+// ```
+// process = _fb_comb(@,N,b0,aN);
+// ```
+// implements the following difference equation:
+// ```
+// y[n] = b0 x[n] + aN y[n - N]
+// ```
+// --------------------------------------------------------
+_fb_comb(dop,N,b0,aN) = + ~ aN * dop(N-1) : *(b0);
 
 //-----------------------`(fi.)fb_comb`-----------------------
 // Feed-Back Comb Filter (integer delay).
