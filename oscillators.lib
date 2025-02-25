@@ -1288,7 +1288,7 @@ with {
 //------------------------------------------------------------
 // Authors:
 // Dario Sanfilippo <sanfilippo.dario@gmail.com>
-// and Oleg Nesterov (jos ed.)
+// and Oleg Nesterov (JOS ed.)
 quadosc(f) = tick ~ (_,_)
 with {
     k1 = tan(f * ma.PI / ma.SR);
@@ -1441,7 +1441,7 @@ with {
 // #### Usage
 //
 // ```
-// dsf.xxx(f0, df, a, [n]) : _;
+// dsf.xxx(f0, df, a, [n]) : _
 // ```
 //
 // Where:
@@ -1490,6 +1490,7 @@ with {
 //
 // * <https://ccrma.stanford.edu/STANM/stanms/stanm5/stanm5.pdf>
 //
+declare dsf author "Oleg Nesterov";
 dsf = environment {
 	qo = quadosc;
 	co = qo : _,!;

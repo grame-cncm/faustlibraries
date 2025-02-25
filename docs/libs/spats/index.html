@@ -239,6 +239,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#spwfs" class="nav-link">(sp.)wfs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#spwfs_ui" class="nav-link">(sp.)wfs_ui</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#spstereoize" class="nav-link">(sp.)stereoize</a>
               <ul class="nav flex-column">
               </ul>
@@ -296,10 +304,57 @@ A pan value of 0.5 applies a gain of 0.5 to both channels. </p>
 <li><code>d</code>: distance of the source (between 0 et 1)</li>
 </ul>
 <hr />
+<h3 id="spwfs"><code>(sp.)wfs</code></h3>
+<p>Wave Field Synthesis algorithm for multiple sound sources. 
+Implementation generalized starting from Pierre Lecomte version. </p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inGain, xs, ys, zs) : si.bus(nSpeakers)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>xref</code>: x-coordinate of the reference listening point</li>
+<li><code>yref</code>: y-coordinate of the reference listening point</li>
+<li><code>zref</code>: z-coordinate of the reference listening point</li>
+<li><code>speakersDist</code>: distance between speakers</li>
+<li><code>nSources</code>: number of sound sources</li>
+<li><code>nSpeakers</code>: number of speakers</li>
+<li><code>inGain</code>: input gain (0-1)</li>
+<li><code>xs</code>: x-coordinate of the sound source as a function of the source index</li>
+<li><code>ys</code>: y-coordinate of the sound source as a function of the source index</li>
+<li><code>zs</code>: z-coordinate of the sound source as a function of the source index</li>
+</ul>
+<hr />
+<h3 id="spwfs_ui"><code>(sp.)wfs_ui</code></h3>
+<p>Wave Field Synthesis algorithm for multiple sound sources with a built-in UI.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>wfs_ui(xref, yref, zref, speakersDist, nSources, nSpeaker) : si.bus(nSpeakers)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>xref</code>: x-coordinate of the reference listening point</li>
+<li><code>yref</code>: y-coordinate of the reference listening point</li>
+<li><code>zref</code>: z-coordinate of the reference listening point</li>
+<li><code>speakersDist</code>: distance between speakers</li>
+<li><code>nSources</code>: number of sound sources</li>
+<li><code>nSpeakers</code>: number of speakers</li>
+</ul>
+<h4 id="example-test-program">Example test program</h4>
+<pre><code>// Distance between speakers in meters
+speakersDist = 0.0783;  
+
+// Reference listening point (central position for WFS)
+xref = 0;
+yref = 1;
+zref = 0;
+
+Spatialize 4 sound sources on 16 speakers
+process = wfs_ui(xref,yref,zref,speakersDist,4,16);
+</code></pre>
+<hr />
 <h3 id="spstereoize"><code>(sp.)stereoize</code></h3>
 <p>Transform an arbitrary processor <code>p</code> into a stereo processor with 2 inputs
 and 2 outputs.</p>
-<h4 id="usage_3">Usage</h4>
+<h4 id="usage_5">Usage</h4>
 <pre><code>_,_ : stereoize(p) : _,_
 </code></pre>
 <p>Where:</p>
