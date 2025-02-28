@@ -937,4 +937,90 @@ declare greyhole license "MIT license";
 greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq) 
 	= jp_gh_rev.greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq);
 
+//===============================Keith Barr Allpass Loop Reverb=======================
+//======================================================================================
+
+//----------------------------`(re.)kb_rom_rev1`---------------------------
+// Reverberator based on Keith Barr's all-pass single feedback loop reverb topology.  
+// Originally designed for the Spin Semiconductor FV-1 chip, this code is an adaptation of the rom_rev1.spn file,  
+// part of the Spin Semiconductor Free DSP Programs available on the Spin Semiconductor website.  
+// It was submitted by Keith Barr himself and written in Spin Semiconductor Assembly,  
+// a dedicated assembly language for programming the FV-1 chip.  
+//
+// In this topology, when multiple delays and all-pass filters are placed in a loop,  
+// sound injected into the loop will recirculate, increasing the density of any impulse  
+// as the signal successively passes through the all-pass filters.  
+// The result, after a short period of time, is a wash of sound,  
+// completely diffused into a natural reverb tail.  
+//
+// The reverb typically has a mono input (as from a single source)  
+// but benefits from a stereo output, providing the listener with a fuller,  
+// more immersive reverberant image.
+//
+// #### Usage
+//
+// ```
+// _,_ : kb_rom_rev1(rt, damp, L, R) : _,_
+// ```
+//
+// Where:
+//
+// * `rt`: coefficent of the decay of the reverb (0-1)
+// * `damp`: coefficient of the lowpass filters (0-1)
+// * `l`: left input signal
+// * `r`: right input signal
+//
+// #### Reference
+//
+// * <https://www.spinsemi.com/programs.php#:~:text=Keith%20Barr-,rom_rev1.spn,-ROM%20reverb%202>
+// * <https://www.spinsemi.com/knowledge_base/effects.html#Reverberation>
+// * <https://www.spinsemi.com/knowledge_base/inst_syntax.html>
+//------------------------------------------------------------
+declare kb_rom_rev1 author "Luca Spanedda";
+declare kb_rom_rev1 license "GPL-3.0";
+
+kb_rom_rev1(rt, damp, L, R) = aploop
+with{
+    // Allpass
+    // (t,g) = give: delay in samples, feedback gain 0-1
+    apf(t, g) =    _ : (+ : _ <: @ (t  - 1), * (- g)) ~ * (g) : mem, _ : + : _; 
+
+    // modulated Allpass filter
+    apfMod(mod, t, tMod, g) = _ : (+ : _ <: delaymod(mod, t - 1, tMod), * (- g)) ~ * (g) : mem, _ : + : _;
+
+    // from Original Sample Rate (origSR), (samples) to current Sample Rate
+    adaptSR(origSR, samples) = (samples * ma.SR / origSR) : max(ma.EPSILON, int); 
+
+    // delay modulated : mod = mod source +/- 1, t = del in samps, tMod = mod in samps
+    delaymod(mod, t, tMod) = de.fdelay(tMax, modIndx)
+    with{
+        tMax = t + tMod;
+        modIndx = t + mod * tMod;
+    };
+
+    // Onepole, g = give amplitude 0 to +/- 1 (open - close) to the delayed signal 
+    op(b1) = _ * (1 - abs(b1)) : + ~ * (b1);
+
+    // input allpass sections
+    apSec(0) = apf(adaptSR(32768, 156), 0.5) : apf(adaptSR(32768, 223), 0.5) : apf(adaptSR(32768, 332), 0.5) : apf(adaptSR(32768, 548), 0.5);
+    apSec(1) = apf(adaptSR(32768, 186), 0.5) : apf(adaptSR(32768, 253), 0.5) : apf(adaptSR(32768, 302), 0.5) : apf(adaptSR(32768, 498), 0.5);
+
+    // allpass loop sections
+    loopSec(0) = _ @ (adaptSR(32768, 4568) - 1) : _ * rt : _ + (L : apSec(0)) : apfMod(os.osc(0.5), adaptSR(32768, 1251), adaptSR(32768, 20), 0.6) : 
+	apf(adaptSR(32768, 1751), 0.6) : op(damp) : op(- 0.05);
+    loopSec(1) = _ @ adaptSR(32768, 5859) : _ * rt : apf(adaptSR(32768, 1443), 0.6) : apf(adaptSR(32768, 1343), 0.6) : op(damp) : op(- 0.05);
+    loopSec(2) = _ @ adaptSR(32768, 4145) : _ * rt : _ + (R : apSec(1)) : apfMod(os.osc(0.5), adaptSR(32768, 1582), adaptSR(32768, 20), 0.6) : 
+	apf(adaptSR(32768, 1981), 0.6) : op(damp) : op(- 0.05);
+    loopSec(3) = _ @ adaptSR(32768, 3476) : _ * rt : apf(adaptSR(32768, 1274), 0.6) : apf(adaptSR(32768, 1382), 0.6) : op(damp) : op(- 0.05);
+
+    // output delay taps
+    outTaps = ((_ * 1.5 @ adaptSR(32768, 2630), _ * 1.2 @ adaptSR(32768, 1943), _ * 1.0 @ adaptSR(32768, 3200), 
+	_ * 0.8 @ adaptSR(32768, 4016)) :> +),
+    	((_ * 1.0 @ adaptSR(32768, 2420), _ * 0.8 @ adaptSR(32768, 2631), _ * 1.5 @ adaptSR(32768, 1163), 
+	_ * 1.2 @ adaptSR(32768, 3330)) :> +);
+
+    // complete allpass loop
+    aploop = (_ : loopSec(0) <: ((loopSec(1) <: ((_ : loopSec(2) <: loopSec(3), _), _)), _)) ~ _ : ro.cross(4) <: outTaps; 
+};
+
 // end further further contributions section
