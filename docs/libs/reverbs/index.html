@@ -299,6 +299,14 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#keith-barr-allpass-loop-reverb" class="nav-link">Keith Barr Allpass Loop Reverb</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#rekb_rom_rev1" class="nav-link">(re.)kb_rom_rev1</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -559,6 +567,28 @@ Excels at producing spacey washes of sound.</p>
 <h4 id="reference_5">Reference</h4>
 <ul>
 <li><a href="https://doc.sccode.org/Overviews/DEIND.html">https://doc.sccode.org/Overviews/DEIND.html</a></li>
+</ul>
+<h2 id="keith-barr-allpass-loop-reverb">Keith Barr Allpass Loop Reverb</h2>
+<hr />
+<h3 id="rekb_rom_rev1"><code>(re.)kb_rom_rev1</code></h3>
+<p>Reverberator based on Keith Barr's all-pass single feedback loop reverb topology. Originally designed for the Spin Semiconductor FV-1 chip, this code is an adaptation of the rom_rev1.spn file, part of the Spin Semiconductor Free DSP Programs available on the Spin Semiconductor website.<br />
+It was submitted by Keith Barr himself and written in Spin Semiconductor Assembly, a dedicated assembly language for programming the FV-1 chip.  </p>
+<p>In this topology, when multiple delays and all-pass filters are placed in a loop, sound injected into the loop will recirculate, increasing the density of any impulse as the signal successively passes through the all-pass filters. 
+The result, after a short period of time, is a wash of sound, completely diffused into a natural reverb tail.  </p>
+<p>The reverb typically has a mono input (as from a single source) but benefits from a stereo output, providing the listener with a fuller, more immersive reverberant image.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>_,_ : kb_rom_rev1(rt, damp) : _,_
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>rt</code>: coefficent of the decay of the reverb (0-1)</li>
+<li><code>damp</code>: coefficient of the lowpass filters (0-1)</li>
+</ul>
+<h4 id="reference_6">Reference</h4>
+<ul>
+<li><a href="https://www.spinsemi.com/programs.php#://~://text=Keith%20Barrrom_rev1.spn,-ROM%20reverb%202">https://www.spinsemi.com/programs.php#://~://text=Keith%20Barrrom_rev1.spn,-ROM%20reverb%202</a></li>
+<li><a href="https://www.spinsemi.com/knowledge_base/effects.html#Reverberation">https://www.spinsemi.com/knowledge_base/effects.html#Reverberation</a></li>
+<li><a href="https://www.spinsemi.com/knowledge_base/inst_syntax.html">https://www.spinsemi.com/knowledge_base/inst_syntax.html</a></li>
 </ul></div>
             </div>
         </div>
