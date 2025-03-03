@@ -269,6 +269,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#fifb_comb_common" class="nav-link">(fi.)fb_comb_common</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#see-more-examples-in-filterslib-below" class="nav-link">See more examples in filters.lib below.</a>
+              <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#fifb_comb" class="nav-link">(fi.)fb_comb</a>
               <ul class="nav flex-column">
               </ul>
@@ -859,9 +867,29 @@ impulse response to decay by <code>N</code> dB</li>
 <h3 id="fiffcombfilter"><code>(fi.)ffcombfilter</code></h3>
 <p>Typical special case of <code>ff_comb()</code> where: <code>b0 = 1</code>.</p>
 <hr />
+<h3 id="fifb_comb_common"><code>(fi.)fb_comb_common</code></h3>
+<p>A generic feedback comb filter.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>_ : fb_comb_common(dop,N,b0,aN) : _
+</code></pre>
+<p>Where</p>
+<ul>
+<li><code>dop</code>: delay operator, e.g. <code>@</code> or <code>de.fdelay4a(2048)</code></li>
+<li><code>N</code>: current delay</li>
+<li><code>b0</code>: gain applied to input</li>
+<li><code>aN</code>: gain applied to delay-line output</li>
+</ul>
+<h4 id="example-test-program">Example test program</h4>
+<pre><code>process = fb_comb_common(@,N,b0,aN);
+</code></pre>
+<p>implements the following difference equation:</p>
+<pre><code>y[n] = b0 x[n] + aN y[n - N]
+</code></pre>
+<h2 id="see-more-examples-in-filterslib-below">See more examples in <code>filters.lib</code> below.</h2>
+<hr />
 <h3 id="fifb_comb"><code>(fi.)fb_comb</code></h3>
 <p>Feed-Back Comb Filter (integer delay).</p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>_ : fb_comb(maxdel,intdel,b0,aN) : _
 </code></pre>
 <p>Where:</p>
@@ -880,7 +908,7 @@ impulse response to decay by <code>N</code> dB</li>
 <hr />
 <h3 id="fifb_fcomb"><code>(fi.)fb_fcomb</code></h3>
 <p>Feed-Back Comb Filter (floating point delay).</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>_ : fb_fcomb(maxdel,del,b0,aN) : _
 </code></pre>
 <p>Where:</p>
@@ -904,7 +932,7 @@ See the <code>jcrev</code> and <code>brassrev</code> in <code>reverbs.lib</code>
 <hr />
 <h3 id="fifbcombfilter-and-fiffbcombfilter"><code>(fi.)fbcombfilter</code> and <code>(fi.)ffbcombfilter</code></h3>
 <p>Other special cases of Feed-Back Comb Filter.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>_ : fbcombfilter(maxdel,intdel,g) : _
 _ : ffbcombfilter(maxdel,del,g) : _
 </code></pre>
@@ -926,7 +954,7 @@ _ : ffbcombfilter(maxdel,del,g) : _
 </code></pre>
 <p>which is a direct-form-1 implementation, requiring two delay lines.
 The implementation here is direct-form-2 requiring only one delay line.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>_ : allpass_comb(maxdel,intdel,aN) : _
 </code></pre>
 <p>Where:</p>
@@ -950,7 +978,7 @@ The implementation here is direct-form-2 requiring only one delay line.</p>
 <p>which is a direct-form-1 implementation, requiring two delay lines.
 The implementation here is direct-form-2 requiring only one delay line.</p>
 <p><code>allpass_fcomb</code> is a standard Faust library.</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>_ : allpass_comb(maxdel,intdel,aN) : _
 _ : allpass_fcomb(maxdel,del,aN) : _
 </code></pre>
@@ -985,7 +1013,7 @@ See the <code>jcrev</code> and <code>brassrev</code> in <code>reverbs.lib</code>
 implemented in terms of the Transfer-Function (TF) coefficients.
 Such filter structures are termed "direct form".</p>
 <p><code>iir</code> is a standard Faust function.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>_ : iir(bcoeffs,acoeffs) : _
 </code></pre>
 <p>Where:</p>
@@ -1000,7 +1028,7 @@ Such filter structures are termed "direct form".</p>
 <hr />
 <h3 id="fifir"><code>(fi.)fir</code></h3>
 <p>FIR filter (convolution of FIR filter coefficients with a signal). <code>fir</code> is standard Faust function.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>_ : fir(bv) : _
 </code></pre>
 <p>Where:</p>
@@ -1010,7 +1038,7 @@ Such filter structures are termed "direct form".</p>
 <h4 id="note">Note</h4>
 <p><code>bv</code> is processed using pattern-matching at compile time,
       so it must have this normal form (parallel signals).</p>
-<h4 id="example-test-program">Example test program</h4>
+<h4 id="example-test-program_1">Example test program</h4>
 <p>Smoothing white noise with a five-point moving average:</p>
 <pre><code>bv = .2,.2,.2,.2,.2;
 process = noise : fir(bv);
@@ -1021,14 +1049,14 @@ process = noise : fir(bv);
 <hr />
 <h3 id="ficonv-and-ficonvn"><code>(fi.)conv</code> and <code>(fi.)convN</code></h3>
 <p>Convolution of input signal with given coefficients.</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>_ : conv((k1,k2,k3,...,kN)) : _ // Argument = one signal bank
 _ : convN(N,(k1,k2,k3,...)) : _ // Useful when N &lt; count((k1,...))
 </code></pre>
 <hr />
 <h3 id="fitf1-fitf2-and-fitf3"><code>(fi.)tf1</code>, <code>(fi.)tf2</code> and <code>(fi.)tf3</code></h3>
 <p>tfN = N'th-order direct-form digital filter.</p>
-<h4 id="usage_15">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>_ : tf1(b0,b1,a1) : _
 _ : tf2(b0,b1,b2,a1,a2) : _
 _ : tf3(b0,b1,b2,b3,a1,a2,a3) : _
@@ -1046,7 +1074,7 @@ _ : tf3(b0,b1,b2,b3,a1,a2,a3) : _
 <h3 id="finotchw"><code>(fi.)notchw</code></h3>
 <p>Simple notch filter based on a biquad (<code>tf2</code>).
 <code>notchw</code> is a standard Faust function.</p>
-<h4 id="usage_16">Usage:</h4>
+<h4 id="usage_17">Usage:</h4>
 <pre><code>_ : notchw(width,freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1073,7 +1101,7 @@ _ : tf3(b0,b1,b2,b3,a1,a2,a3) : _
 <li><code>tf22t</code> is tf2, direct-form 2 transposed</li>
 <li><code>tf21t</code> is tf2, direct-form 1 transposed</li>
 </ul>
-<h4 id="usage_17">Usage</h4>
+<h4 id="usage_18">Usage</h4>
 <pre><code>_ : tf21(b0,b1,b2,a1,a2) : _
 _ : tf22(b0,b1,b2,a1,a2) : _
 _ : tf22t(b0,b1,b2,a1,a2) : _
@@ -1102,7 +1130,7 @@ from digital waveguide filters, which gives them a physical interpretation.</p>
 <hr />
 <h3 id="fiav2sv"><code>(fi.)av2sv</code></h3>
 <p>Compute reflection coefficients sv from transfer-function denominator av.</p>
-<h4 id="usage_18">Usage</h4>
+<h4 id="usage_19">Usage</h4>
 <pre><code>sv = av2sv(av)
 </code></pre>
 <p>Where:</p>
@@ -1121,7 +1149,7 @@ from digital waveguide filters, which gives them a physical interpretation.</p>
 <hr />
 <h3 id="fibvav2nuv"><code>(fi.)bvav2nuv</code></h3>
 <p>Compute lattice tap coefficients from transfer-function coefficients.</p>
-<h4 id="usage_19">Usage</h4>
+<h4 id="usage_20">Usage</h4>
 <pre><code>nuv = bvav2nuv(bv,av)
 </code></pre>
 <p>Where:</p>
@@ -1136,7 +1164,7 @@ from digital waveguide filters, which gives them a physical interpretation.</p>
 <hr />
 <h3 id="fiiir_lat2"><code>(fi.)iir_lat2</code></h3>
 <p>Two-multiply lattice IIR filter of arbitrary order.</p>
-<h4 id="usage_20">Usage</h4>
+<h4 id="usage_21">Usage</h4>
 <pre><code>_ : iir_lat2(bv,av) : _
 </code></pre>
 <p>Where:</p>
@@ -1147,7 +1175,7 @@ from digital waveguide filters, which gives them a physical interpretation.</p>
 <hr />
 <h3 id="fiallpassnt"><code>(fi.)allpassnt</code></h3>
 <p>Two-multiply lattice allpass (nested order-1 direct-form-ii allpasses), with taps.</p>
-<h4 id="usage_21">Usage</h4>
+<h4 id="usage_22">Usage</h4>
 <pre><code>_ : allpassnt(n,sv) : si.bus(n+1)
 </code></pre>
 <p>Where:</p>
@@ -1162,7 +1190,7 @@ See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="fiiir_kl"><code>(fi.)iir_kl</code></h3>
 <p>Kelly-Lochbaum ladder IIR filter of arbitrary order.</p>
-<h4 id="usage_22">Usage</h4>
+<h4 id="usage_23">Usage</h4>
 <pre><code>_ : iir_kl(bv,av) : _
 </code></pre>
 <p>Where:</p>
@@ -1173,7 +1201,7 @@ See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="fiallpassnklt"><code>(fi.)allpassnklt</code></h3>
 <p>Kelly-Lochbaum ladder allpass.</p>
-<h4 id="usage_23">Usage:</h4>
+<h4 id="usage_24">Usage:</h4>
 <pre><code>_ : allpassnklt(n,sv) : _
 </code></pre>
 <p>Where:</p>
@@ -1184,7 +1212,7 @@ See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="fiiir_lat1"><code>(fi.)iir_lat1</code></h3>
 <p>One-multiply lattice IIR filter of arbitrary order.</p>
-<h4 id="usage_24">Usage</h4>
+<h4 id="usage_25">Usage</h4>
 <pre><code>_ : iir_lat1(bv,av) : _
 </code></pre>
 <p>Where:</p>
@@ -1195,7 +1223,7 @@ See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="fiallpassn1mt"><code>(fi.)allpassn1mt</code></h3>
 <p>One-multiply lattice allpass with tap lines.</p>
-<h4 id="usage_25">Usage</h4>
+<h4 id="usage_26">Usage</h4>
 <pre><code>_ : allpassn1mt(N,sv) : _
 </code></pre>
 <p>Where:</p>
@@ -1206,7 +1234,7 @@ See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="fiiir_nl"><code>(fi.)iir_nl</code></h3>
 <p>Normalized ladder filter of arbitrary order.</p>
-<h4 id="usage_26">Usage</h4>
+<h4 id="usage_27">Usage</h4>
 <pre><code>_ : iir_nl(bv,av) : _
 </code></pre>
 <p>Where:</p>
@@ -1222,7 +1250,7 @@ See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="fiallpassnnlt"><code>(fi.)allpassnnlt</code></h3>
 <p>Normalized ladder allpass filter of arbitrary order.</p>
-<h4 id="usage_27">Usage:</h4>
+<h4 id="usage_28">Usage:</h4>
 <pre><code>_ : allpassnnlt(N,sv) : _
 </code></pre>
 <p>Where:</p>
@@ -1240,7 +1268,7 @@ See (fi.)allpassn for the single-output case.</p>
 <h3 id="fitf2np"><code>(fi.)tf2np</code></h3>
 <p>Biquad based on a stable second-order Normalized Ladder Filter
 (more robust to modulation than <code>tf2</code> and protected against instability).</p>
-<h4 id="usage_28">Usage</h4>
+<h4 id="usage_29">Usage</h4>
 <pre><code>_ : tf2np(b0,b1,b2,a1,a2) : _
 </code></pre>
 <p>Where:</p>
@@ -1251,7 +1279,7 @@ See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="fiwgr"><code>(fi.)wgr</code></h3>
 <p>Second-order transformer-normalized digital waveguide resonator.</p>
-<h4 id="usage_29">Usage</h4>
+<h4 id="usage_30">Usage</h4>
 <pre><code>_ : wgr(f,r) : _
 </code></pre>
 <p>Where:</p>
@@ -1267,7 +1295,7 @@ See (fi.)allpassn for the single-output case.</p>
 <hr />
 <h3 id="finlf2"><code>(fi.)nlf2</code></h3>
 <p>Second order normalized digital waveguide resonator.</p>
-<h4 id="usage_30">Usage</h4>
+<h4 id="usage_31">Usage</h4>
 <pre><code>_ : nlf2(f,r) : _
 </code></pre>
 <p>Where:</p>
@@ -1283,7 +1311,7 @@ See (fi.)allpassn for the single-output case.</p>
 <h3 id="fiapnl"><code>(fi.)apnl</code></h3>
 <p>Passive Nonlinear Allpass based on Pierce switching springs idea.
 Switch between allpass coefficient <code>a1</code> and <code>a2</code> at signal zero crossings.</p>
-<h4 id="usage_31">Usage</h4>
+<h4 id="usage_32">Usage</h4>
 <pre><code>_ : apnl(a1,a2) : _
 </code></pre>
 <p>Where:</p>
@@ -1308,7 +1336,7 @@ They are defined here as nested allpass filters, hence the names <code>allpassn*
 <hr />
 <h3 id="fiscatn"><code>(fi.)scatN</code></h3>
 <p>N-port scattering junction.</p>
-<h4 id="usage_32">Usage</h4>
+<h4 id="usage_33">Usage</h4>
 <pre><code>si.bus(N) : scatN(N,av,filter) : si.bus(N)
 </code></pre>
 <p>Where:</p>
@@ -1342,7 +1370,7 @@ to alpha parameters <script type="math/tex">1\pm\rho</script>.</p>
 <hr />
 <h3 id="fiscat"><code>(fi.)scat</code></h3>
 <p>Scatter off of reflectance r with reflection coefficient s.</p>
-<h4 id="usage_33">Usage:</h4>
+<h4 id="usage_34">Usage:</h4>
 <pre><code>_ : scat(s,r) : _
 </code></pre>
 <h4 id="where">Where:</h4>
@@ -1362,7 +1390,7 @@ to alpha parameters <script type="math/tex">1\pm\rho</script>.</p>
 <hr />
 <h3 id="fiallpassn"><code>(fi.)allpassn</code></h3>
 <p>Two-multiply lattice filter.</p>
-<h4 id="usage_34">Usage:</h4>
+<h4 id="usage_35">Usage:</h4>
 <pre><code>_ : allpassn(n,sv) : _
 </code></pre>
 <h4 id="where_1">Where:</h4>
@@ -1385,7 +1413,7 @@ Identical to <code>allpassn</code> in <code>old/filter.lib</code>.</p>
 <p>Normalized form - four multiplies and two adds per section,
 but coefficients can be time varying and nonlinear without
 "parametric amplification" (modulation of signal energy).</p>
-<h4 id="usage_35">Usage:</h4>
+<h4 id="usage_36">Usage:</h4>
 <pre><code>_ : allpassnn(n,tv) : _
 </code></pre>
 <p>Where:</p>
@@ -1398,7 +1426,7 @@ but coefficients can be time varying and nonlinear without
 <p>Kelly-Lochbaum form - four multiplies and two adds per
 section, but all signals have an immediate physical
 interpretation as traveling pressure waves, etc.</p>
-<h4 id="usage_36">Usage:</h4>
+<h4 id="usage_37">Usage:</h4>
 <pre><code>_ : allpassnkl(n,sv) : _
 </code></pre>
 <p>Where:</p>
@@ -1410,7 +1438,7 @@ interpretation as traveling pressure waves, etc.</p>
 <h3 id="fiallpass1m"><code>(fi.)allpass1m</code></h3>
 <p>One-multiply form - one multiply and three adds per section.
 Normally the most efficient in special-purpose hardware.</p>
-<h4 id="usage_37">Usage:</h4>
+<h4 id="usage_38">Usage:</h4>
 <pre><code>_ : allpassn1m(n,sv) : _
 </code></pre>
 <p>Where:</p>
@@ -1425,7 +1453,7 @@ Normally the most efficient in special-purpose hardware.</p>
 specified by ANALOG transfer-function polynomials B(s)/A(s),
 and a frequency-scaling parameter. Digitization via the
 bilinear transform is built in.</p>
-<h4 id="usage_38">Usage</h4>
+<h4 id="usage_39">Usage</h4>
 <pre><code>_ : tf2s(b2,b1,b0,a1,a0,w1) : _
 </code></pre>
 <p>Where:</p>
@@ -1435,7 +1463,7 @@ H(s) = --------------------
 </code></pre>
 <p>and <code>w1</code> is the desired digital frequency (in radians/second)
 corresponding to analog frequency 1 rad/sec (i.e., <code>s = j</code>).</p>
-<h4 id="example-test-program_1">Example test program</h4>
+<h4 id="example-test-program_2">Example test program</h4>
 <p>A second-order ANALOG Butterworth lowpass filter,
 normalized to have cutoff frequency at 1 rad/sec,
 has transfer function:</p>
@@ -1454,7 +1482,7 @@ cutting off at <code>SR/4</code> is specified as <code>tf2s(0,0,1,sqrt(2),1,PI*S
 <hr />
 <h3 id="fitf1snp"><code>(fi.)tf1snp</code></h3>
 <p>First-order special case of tf2snp above.</p>
-<h4 id="usage_39">Usage</h4>
+<h4 id="usage_40">Usage</h4>
 <pre><code>_ : tf1snp(b1,b0,a0) : _
 </code></pre>
 <hr />
@@ -1463,7 +1491,7 @@ cutting off at <code>SR/4</code> is specified as <code>tf2s(0,0,1,sqrt(2),1,PI*S
 low-frequency-matching bilinear-transform constant 2/T ("lf" series)
 instead of the specific-frequency-matching value used in <code>tf2s</code> and <code>tf1s</code>.
 Note the lack of a "w1" argument.</p>
-<h4 id="usage_40">Usage</h4>
+<h4 id="usage_41">Usage</h4>
 <pre><code>_ : tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) : _
 </code></pre>
 <hr />
@@ -1471,7 +1499,7 @@ Note the lack of a "w1" argument.</p>
 <p>First-order direct-form digital filter,
 specified by ANALOG transfer-function polynomials B(s)/A(s),
 and a frequency-scaling parameter.</p>
-<h4 id="usage_41">Usage</h4>
+<h4 id="usage_42">Usage</h4>
 <pre><code>_ : tf1s(b1,b0,a0,w1) : _
 </code></pre>
 <p>Where:</p>
@@ -1481,7 +1509,7 @@ and a frequency-scaling parameter.</p>
           s + a0</p>
 <p>and <code>w1</code> is the desired digital frequency (in radians/second)
 corresponding to analog frequency 1 rad/sec (i.e., <code>s = j</code>).</p>
-<h4 id="example-test-program_2">Example test program</h4>
+<h4 id="example-test-program_3">Example test program</h4>
 <p>A first-order ANALOG Butterworth lowpass filter,
 normalized to have cutoff frequency at 1 rad/sec,
 has transfer function:</p>
@@ -1510,14 +1538,14 @@ section.  Such sections can be combined in series for higher orders.
 The order of mappings is (1) frequency scaling (to set lowpass cutoff w1),
 (2) bandpass mapping to wc, then (3) the bilinear transform, with the
 usual scale parameter <code>2*SR</code>.  Algebra carried out in maxima and pasted here.</p>
-<h4 id="usage_42">Usage</h4>
+<h4 id="usage_43">Usage</h4>
 <pre><code>_ : tf2sb(b2,b1,b0,a1,a0,w1,wc) : _
 </code></pre>
 <hr />
 <h3 id="fitf1sb"><code>(fi.)tf1sb</code></h3>
 <p>First-to-second-order lowpass-to-bandpass section mapping,
 analogous to tf2sb above.</p>
-<h4 id="usage_43">Usage</h4>
+<h4 id="usage_44">Usage</h4>
 <pre><code>_ : tf1sb(b1,b0,a0,w1,wc) : _
 </code></pre>
 <h2 id="simple-resonator-filters">Simple Resonator Filters</h2>
@@ -1525,7 +1553,7 @@ analogous to tf2sb above.</p>
 <h3 id="firesonlp"><code>(fi.)resonlp</code></h3>
 <p>Simple resonant lowpass filter based on <code>tf2s</code> (virtual analog).
 <code>resonlp</code> is a standard Faust function.</p>
-<h4 id="usage_44">Usage</h4>
+<h4 id="usage_45">Usage</h4>
 <pre><code>_ : resonlp(fc,Q,gain) : _
 _ : resonhp(fc,Q,gain) : _
 _ : resonbp(fc,Q,gain) : _
@@ -1541,7 +1569,7 @@ _ : resonbp(fc,Q,gain) : _
 <h3 id="firesonhp"><code>(fi.)resonhp</code></h3>
 <p>Simple resonant highpass filters based on <code>tf2s</code> (virtual analog).
 <code>resonhp</code> is a standard Faust function.</p>
-<h4 id="usage_45">Usage</h4>
+<h4 id="usage_46">Usage</h4>
 <pre><code>_ : resonlp(fc,Q,gain) : _
 _ : resonhp(fc,Q,gain) : _
 _ : resonbp(fc,Q,gain) : _
@@ -1557,7 +1585,7 @@ _ : resonbp(fc,Q,gain) : _
 <h3 id="firesonbp"><code>(fi.)resonbp</code></h3>
 <p>Simple resonant bandpass filters based on <code>tf2s</code> (virtual analog).
 <code>resonbp</code> is a standard Faust function.</p>
-<h4 id="usage_46">Usage</h4>
+<h4 id="usage_47">Usage</h4>
 <pre><code>_ : resonlp(fc,Q,gain) : _
 _ : resonhp(fc,Q,gain) : _
 _ : resonbp(fc,Q,gain) : _
@@ -1574,7 +1602,7 @@ _ : resonbp(fc,Q,gain) : _
 <h3 id="filowpass"><code>(fi.)lowpass</code></h3>
 <p>Nth-order Butterworth lowpass filter.
 <code>lowpass</code> is a standard Faust function.</p>
-<h4 id="usage_47">Usage</h4>
+<h4 id="usage_48">Usage</h4>
 <pre><code>_ : lowpass(N,fc) : _
 </code></pre>
 <p>Where:</p>
@@ -1591,7 +1619,7 @@ _ : resonbp(fc,Q,gain) : _
 <h3 id="fihighpass"><code>(fi.)highpass</code></h3>
 <p>Nth-order Butterworth highpass filter.
 <code>highpass</code> is a standard Faust function.</p>
-<h4 id="usage_48">Usage</h4>
+<h4 id="usage_49">Usage</h4>
 <pre><code>_ : highpass(N,fc) : _
 </code></pre>
 <p>Where:</p>
@@ -1628,7 +1656,7 @@ FIXME: Rewrite the following, as for orders 3 and 5 above,
 <hr />
 <h3 id="filowpass3e"><code>(fi.)lowpass3e</code></h3>
 <p>Third-order Elliptic (Cauer) lowpass filter.</p>
-<h4 id="usage_49">Usage</h4>
+<h4 id="usage_50">Usage</h4>
 <pre><code>_ : lowpass3e(fc) : _
 </code></pre>
 <p>Where:</p>
@@ -1644,7 +1672,7 @@ Rs = 0.2 % dB ripple in passband
 <hr />
 <h3 id="filowpass6e"><code>(fi.)lowpass6e</code></h3>
 <p>Sixth-order Elliptic/Cauer lowpass filter.</p>
-<h4 id="usage_50">Usage</h4>
+<h4 id="usage_51">Usage</h4>
 <pre><code>_ : lowpass6e(fc) : _
 </code></pre>
 <p>Where:</p>
@@ -1662,7 +1690,7 @@ Rs = 0.2 % dB ripple in passband
 <h3 id="fihighpass3e"><code>(fi.)highpass3e</code></h3>
 <p>Third-order Elliptic (Cauer) highpass filter. Inversion of <code>lowpass3e</code> wrt unit
 circle in s plane (s &lt;- 1/s).</p>
-<h4 id="usage_51">Usage</h4>
+<h4 id="usage_52">Usage</h4>
 <pre><code>_ : highpass3e(fc) : _
 </code></pre>
 <p>Where:</p>
@@ -1673,7 +1701,7 @@ circle in s plane (s &lt;- 1/s).</p>
 <h3 id="fihighpass6e"><code>(fi.)highpass6e</code></h3>
 <p>Sixth-order Elliptic/Cauer highpass filter. Inversion of <code>lowpass3e</code> wrt unit
 circle in s plane (s &lt;- 1/s).</p>
-<h4 id="usage_52">Usage</h4>
+<h4 id="usage_53">Usage</h4>
 <pre><code>_ : highpass6e(fc) : _
 </code></pre>
 <p>Where:</p>
@@ -1687,7 +1715,7 @@ circle in s plane (s &lt;- 1/s).</p>
 <code>s &lt;- s + wc^2/s</code> on <code>lowpass(Nh)</code>, where <code>wc</code> is the desired bandpass center
 frequency.  The <code>lowpass(Nh)</code> cutoff <code>w1</code> is half the desired bandpass width.
 <code>bandpass</code> is a standard Faust function.</p>
-<h4 id="usage_53">Usage</h4>
+<h4 id="usage_54">Usage</h4>
 <pre><code>_ : bandpass(Nh,fl,fu) : _
 </code></pre>
 <p>Where:</p>
@@ -1704,7 +1732,7 @@ Thus, the passband width is <code>fu-fl</code>,
 <code>s &lt;- s + wc^2/s</code> on <code>highpass(Nh)</code>, where <code>wc</code> is the desired bandpass center
 frequency.  The <code>highpass(Nh)</code> cutoff <code>w1</code> is half the desired bandpass width.
 <code>bandstop</code> is a standard Faust function.</p>
-<h4 id="usage_54">Usage</h4>
+<h4 id="usage_55">Usage</h4>
 <pre><code>_ : bandstop(Nh,fl,fu) : _
 </code></pre>
 <p>Where:</p>
@@ -1725,7 +1753,7 @@ Thus, the passband (stopband) width is <code>fu-fl</code>,
 <hr />
 <h3 id="fipospass"><code>(fi.)pospass</code></h3>
 <p>Positive-Pass Filter (single-side-band filter).</p>
-<h4 id="usage_55">Usage</h4>
+<h4 id="usage_56">Usage</h4>
 <pre><code>_ : pospass(N,fc) : _,_
 </code></pre>
 <p>where</p>
@@ -1734,7 +1762,7 @@ Thus, the passband (stopband) width is <code>fu-fl</code>,
 <li><code>fc</code>: lower bandpass cutoff frequency in Hz.</li>
 <li>Highpass cutoff frequency at ma.SR/2 - fc Hz.</li>
 </ul>
-<h4 id="example-test-program_3">Example test program</h4>
+<h4 id="example-test-program_4">Example test program</h4>
 <ul>
 <li>See <code>dm.pospass_demo</code></li>
 <li>Look at frequency response</li>
@@ -1773,7 +1801,7 @@ imaginary output signal:</p>
 <h3 id="filow_shelf"><code>(fi.)low_shelf</code></h3>
 <p>First-order "low shelf" filter (gain boost|cut between dc and some frequency)
 <code>low_shelf</code> is a standard Faust function.</p>
-<h4 id="usage_56">Usage</h4>
+<h4 id="usage_57">Usage</h4>
 <pre><code>_ : lowshelf(N,L0,fx) : _
 _ : low_shelf(L0,fx) : _ // default case (order 3)
 _ : lowshelf_other_freq(N,L0,fx) : _
@@ -1815,7 +1843,7 @@ L(lf) is easy to state in dB versus dB-frequency lf = dB(f):</p>
 <h3 id="fihigh_shelf"><code>(fi.)high_shelf</code></h3>
 <p>First-order "high shelf" filter (gain boost|cut above some frequency).
 <code>high_shelf</code> is a standard Faust function.</p>
-<h4 id="usage_57">Usage</h4>
+<h4 id="usage_58">Usage</h4>
 <pre><code>_ : highshelf(N,Lpi,fx) : _
 _ : high_shelf(L0,fx) : _ // default case (order 3)
 _ : highshelf_other_freq(N,Lpi,fx) : _
@@ -1837,7 +1865,7 @@ See <code>lowshelf</code> documentation above for more details on shelf shape.</
 <p>Second order "peaking equalizer" section (gain boost or cut near some frequency)
 Also called a "parametric equalizer" section.
 <code>peak_eq</code> is a standard Faust function.</p>
-<h4 id="usage_58">Usage</h4>
+<h4 id="usage_59">Usage</h4>
 <pre><code>_ : peak_eq(Lfx,fx,B) : _
 </code></pre>
 <p>Where:</p>
@@ -1852,7 +1880,7 @@ Also called a "parametric equalizer" section.
 <hr />
 <h3 id="fipeak_eq_cq"><code>(fi.)peak_eq_cq</code></h3>
 <p>Constant-Q second order peaking equalizer section.</p>
-<h4 id="usage_59">Usage</h4>
+<h4 id="usage_60">Usage</h4>
 <pre><code>_ : peak_eq_cq(Lfx,fx,Q) : _
 </code></pre>
 <p>Where:</p>
@@ -1867,7 +1895,7 @@ Also called a "parametric equalizer" section.
 <hr />
 <h3 id="fipeak_eq_rm"><code>(fi.)peak_eq_rm</code></h3>
 <p>Regalia-Mitra second order peaking equalizer section.</p>
-<h4 id="usage_60">Usage</h4>
+<h4 id="usage_61">Usage</h4>
 <pre><code>_ : peak_eq_rm(Lfx,fx,tanPiBT) : _
 </code></pre>
 <p>Where:</p>
@@ -1892,7 +1920,7 @@ alpha in (-1,1), where
 In other words, alpha is the slope of the ln magnitude versus ln frequency.
 For a "pinking filter" (e.g., to generate 1/f noise from white noise),
 set alpha to -1/2.</p>
-<h4 id="usage_61">Usage</h4>
+<h4 id="usage_62">Usage</h4>
 <pre><code>_ : spectral_tilt(N,f0,bw,alpha) : _
 </code></pre>
 <p>Where:</p>
@@ -1903,7 +1931,7 @@ set alpha to -1/2.</p>
 <li><code>alpha</code>: slope of roll-off desired in nepers per neper,
         between -1 and 1 (ln mag / ln radian freq)</li>
 </ul>
-<h4 id="example-test-program_4">Example test program</h4>
+<h4 id="example-test-program_5">Example test program</h4>
 <p>See <code>dm.spectral_tilt_demo</code> and the documentation for <code>no.pink_noise</code>.</p>
 <h4 id="reference_21">Reference</h4>
 <p>J.O. Smith and H.F. Smith,
@@ -1914,7 +1942,7 @@ arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
 <h3 id="filevelfilter"><code>(fi.)levelfilter</code></h3>
 <p>Dynamic level lowpass filter.
 <code>levelfilter</code> is a standard Faust function.</p>
-<h4 id="usage_62">Usage</h4>
+<h4 id="usage_63">Usage</h4>
 <pre><code>_ : levelfilter(L,freq) : _
 </code></pre>
 <p>Where:</p>
@@ -1930,7 +1958,7 @@ arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016,
 <hr />
 <h3 id="filevelfiltern"><code>(fi.)levelfilterN</code></h3>
 <p>Dynamic level lowpass filter.</p>
-<h4 id="usage_63">Usage</h4>
+<h4 id="usage_64">Usage</h4>
 <pre><code>_ : levelfilterN(N,freq,L) : _
 </code></pre>
 <p>Where:</p>
@@ -1986,7 +2014,7 @@ filter-banks using elliptic or Chebyshev prototype filters.</p>
 <h3 id="fimth_octave_filterbankn"><code>(fi.)mth_octave_filterbank[n]</code></h3>
 <p>Allpass-complementary filter banks based on Butterworth band-splitting.
 For Butterworth band-splits, the needed delay equalizer is easily found.</p>
-<h4 id="usage_64">Usage</h4>
+<h4 id="usage_65">Usage</h4>
 <pre><code>_ : mth_octave_filterbank(O,M,ftop,N) : par(i,N,_)     // Oth-order
 _ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_) // dc-inverted version
 </code></pre>
@@ -2009,7 +2037,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <h3 id="fifilterbank"><code>(fi.)filterbank</code></h3>
 <p>Filter bank.
 <code>filterbank</code> is a standard Faust function.</p>
-<h4 id="usage_65">Usage</h4>
+<h4 id="usage_66">Usage</h4>
 <pre><code>_ : filterbank (O,freqs) : par(i,N,_) // Butterworth band-splits
 </code></pre>
 <p>Where:</p>
@@ -2025,7 +2053,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <hr />
 <h3 id="fifilterbanki"><code>(fi.)filterbanki</code></h3>
 <p>Inverted-dc filter bank.</p>
-<h4 id="usage_66">Usage</h4>
+<h4 id="usage_67">Usage</h4>
 <pre><code>_ : filterbanki(O,freqs) : par(i,N,_) // Inverted-dc version
 </code></pre>
 <p>Where:</p>
@@ -2048,7 +2076,7 @@ band-split frequencies are passed explicitly as arguments.</p>
 <h3 id="fisvf"><code>(fi.)svf</code></h3>
 <p>An environment with <code>lp</code>, <code>bp</code>, <code>hp</code>, <code>notch</code>, <code>peak</code>, <code>ap</code>, <code>bell</code>, <code>ls</code>, <code>hs</code> SVF based filters.
 All filters have <code>freq</code> and <code>Q</code> parameters, the <code>bell</code>, <code>ls</code>, <code>hs</code> ones also have a <code>gain</code> third parameter.</p>
-<h4 id="usage_67">Usage</h4>
+<h4 id="usage_68">Usage</h4>
 <pre><code>_ : svf.xx(freq, Q, [gain]) : _
 </code></pre>
 <p>Where:</p>
@@ -2061,7 +2089,7 @@ All filters have <code>freq</code> and <code>Q</code> parameters, the <code>bell
 <h3 id="fisvf_morph"><code>(fi.)svf_morph</code></h3>
 <p>An SVF-based filter that can smoothly morph between
 being lowpass, bandpass, and highpass.</p>
-<h4 id="usage_68">Usage</h4>
+<h4 id="usage_69">Usage</h4>
 <pre><code>_ : svf_morph(freq, Q, blend) : _
 </code></pre>
 <p>Where:</p>
@@ -2070,7 +2098,7 @@ being lowpass, bandpass, and highpass.</p>
 <li><code>Q</code>: quality factor</li>
 <li><code>blend</code>: [0..2] continuous, where 0 is <code>lowpass</code>, 1 is <code>bandpass</code>, and 2 is <code>highpass</code>. For performance, the value is not clamped to [0..2].</li>
 </ul>
-<h4 id="example-test-program_5">Example test program</h4>
+<h4 id="example-test-program_6">Example test program</h4>
 <pre><code>process = no.noise : svf_morph(freq, q, blend)
 with {
   blend = hslider(&quot;Blend&quot;, 0, 0, 2, .01) : si.smoo;
@@ -2086,7 +2114,7 @@ with {
 <h3 id="fisvf_notch_morph"><code>(fi.)svf_notch_morph</code></h3>
 <p>An SVF-based notch-filter that can smoothly morph between
 being lowpass, notch, and highpass.</p>
-<h4 id="usage_69">Usage</h4>
+<h4 id="usage_70">Usage</h4>
 <pre><code>_ : svf_notch_morph(freq, Q, blend) : _
 </code></pre>
 <p>Where:</p>
@@ -2095,7 +2123,7 @@ being lowpass, notch, and highpass.</p>
 <li><code>Q</code>: quality factor</li>
 <li><code>blend</code>: [0..2] continuous, where 0 is <code>lowpass</code>, 1 is <code>notch</code>, and 2 is <code>highpass</code>. For performance, the value is not clamped to [0..2].</li>
 </ul>
-<h4 id="example-test-program_6">Example test program</h4>
+<h4 id="example-test-program_7">Example test program</h4>
 <pre><code>process = no.noise : svf_notch_morph(freq, q, blend)
 with {
   blend = hslider(&quot;Blend&quot;, 0, 0, 2, .01) : si.smoo;
@@ -2118,7 +2146,7 @@ peaking.</p>
      <code>SVFTPT.SVF(1000.0, .707)</code>.</p>
 <p>Even though the implementation is different, the characteristics of this
 filter are comparable to those of the <code>svf</code> environment in this library.</p>
-<h4 id="usage_70">Usage:</h4>
+<h4 id="usage_71">Usage:</h4>
 <pre><code>_ : SVFTPT.xxx(CF, Q) : _
 </code></pre>
 <p>Where:</p>
@@ -2140,7 +2168,7 @@ perturbations.</p>
 <p>This implementation does not use an approximation for the CF computation,
 and it deploys guards to prevent overshooting with extreme sensitivity 
 values.</p>
-<h4 id="usage_71">Usage:</h4>
+<h4 id="usage_72">Usage:</h4>
 <pre><code>_ : dynamicSmoother(sensitivity, baseCF) : _
 </code></pre>
 <p>Where:</p>
@@ -2160,7 +2188,7 @@ values.</p>
 <p>The One Euro Filter (1€ Filter) is an adaptive lowpass filter.
 This kind of filter is commonly used in object-tracking,
 not necessarily audio processing.</p>
-<h4 id="usage_72">Usage</h4>
+<h4 id="usage_73">Usage</h4>
 <pre><code>_ : oneEuro(derivativeCutoff, beta, minCutoff) : _
 </code></pre>
 <p>Where:</p>
@@ -2188,7 +2216,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="filowpasslr4"><code>(fi.)lowpassLR4</code></h3>
 <p>4th-order Linkwitz-Riley lowpass.</p>
-<h4 id="usage_73">Usage</h4>
+<h4 id="usage_74">Usage</h4>
 <pre><code>_ : lowpassLR4(cf) : _
 </code></pre>
 <p>Where:</p>
@@ -2198,7 +2226,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="fihighpasslr4"><code>(fi.)highpassLR4</code></h3>
 <p>4th-order Linkwitz-Riley highpass.</p>
-<h4 id="usage_74">Usage</h4>
+<h4 id="usage_75">Usage</h4>
 <pre><code>_ : highpassLR4(cf) : _
 </code></pre>
 <p>Where:</p>
@@ -2208,7 +2236,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover2lr4"><code>(fi.)crossover2LR4</code></h3>
 <p>Two-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_75">Usage</h4>
+<h4 id="usage_76">Usage</h4>
 <pre><code>_ : crossover2LR4(cf) : si.bus(2)
 </code></pre>
 <p>Where:</p>
@@ -2218,7 +2246,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover3lr4"><code>(fi.)crossover3LR4</code></h3>
 <p>Three-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_76">Usage</h4>
+<h4 id="usage_77">Usage</h4>
 <pre><code>_ : crossover3LR4(cf1, cf2) : si.bus(3)
 </code></pre>
 <p>Where:</p>
@@ -2229,7 +2257,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover4lr4"><code>(fi.)crossover4LR4</code></h3>
 <p>Four-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_77">Usage</h4>
+<h4 id="usage_78">Usage</h4>
 <pre><code>_ : crossover4LR4(cf1, cf2, cf3) : si.bus(4)
 </code></pre>
 <p>Where:</p>
@@ -2241,7 +2269,7 @@ For the phase correction, we will use the 2nd-order Butterworth allpass.</p>
 <hr />
 <h3 id="ficrossover8lr4"><code>(fi.)crossover8LR4</code></h3>
 <p>Eight-way 4th-order Linkwitz-Riley crossover.</p>
-<h4 id="usage_78">Usage</h4>
+<h4 id="usage_79">Usage</h4>
 <pre><code>_ : crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7) : si.bus(8)
 </code></pre>
 <p>Where:</p>
@@ -2265,7 +2293,7 @@ coefficients, that are almost equal to one. Second, the maximum
 magnitude difference at 48kHz between the ITU-defined filter and
 <code>itu_r_bs_1770_4_kfilter</code> is 0.001dB, which obviously could be
 less.</p>
-<h4 id="usage_79">Usage</h4>
+<h4 id="usage_80">Usage</h4>
 <pre><code>_ : itu_r_bs_1770_4_kfilter : _
 </code></pre>
 <h4 id="reference_28">Reference</h4>
@@ -2277,7 +2305,7 @@ less.</p>
 <hr />
 <h3 id="fiavg_rect"><code>(fi.)avg_rect</code></h3>
 <p>Moving average.</p>
-<h4 id="usage_80">Usage</h4>
+<h4 id="usage_81">Usage</h4>
 <pre><code>_ : avg_rect(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2291,7 +2319,7 @@ Tau represents the effective length of the one-pole impulse response,
 that is, tau is the integral of the filter's impulse response. This
 response is slower to reach the final value but has less ripples in
 non-steady signals.</p>
-<h4 id="usage_81">Usage</h4>
+<h4 id="usage_82">Usage</h4>
 <pre><code>_ : avg_tau(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2308,7 +2336,7 @@ or to reach 1-1/e of its final value.</li>
 <p>Averaging function based on a one-pole filter and the t60 response time.
 This response is particularly useful when the system is required to
 reach the final value after about <code>period</code> seconds.</p>
-<h4 id="usage_82">Usage</h4>
+<h4 id="usage_83">Usage</h4>
 <pre><code>_ : avg_t60(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2326,7 +2354,7 @@ or to reach 1-1/1000 of its final value.</li>
 This response is close to the moving-average algorithm as it roughly reaches
 the final value after <code>period</code> seconds and shows about the same
 oscillations for non-steady signals.</p>
-<h4 id="usage_83">Usage</h4>
+<h4 id="usage_84">Usage</h4>
 <pre><code>_ : avg_t19(period) : _
 </code></pre>
 <p>Where:</p>
@@ -2343,7 +2371,7 @@ or to reach 1-1/e^2.2 of its final value.</li>
 Note that the only compile-time constant arguments are <code>N</code> and <code>M</code>.
 Other arguments are capitalized because they're matrices, and it makes
 reading them much easier.</p>
-<h4 id="usage_84">Usage</h4>
+<h4 id="usage_85">Usage</h4>
 <pre><code>kalman(N, M, B, R, H, Q, F, reset, u, z) : si.bus(N)
 </code></pre>
 <p>Where:</p>
