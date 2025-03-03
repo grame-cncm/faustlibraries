@@ -48,7 +48,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.7.0";
+declare version "1.7.1";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -247,6 +247,36 @@ declare ff_combfilter copyright "Copyright (C) 2003-2019 by Julius O. Smith III 
 declare ff_combfilter license "MIT-style STK-4.3 license";
 ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 
+//---------------------`(fi.)gen_fb_comb`---------------------
+// A generic feedback comb filter.
+//
+// #### Usage
+//
+// ```
+// _ : gen_fb_comb(dop,N,b0,aN) : _
+// ```
+//
+// Where
+//
+// * `dop`: delay operator, e.g. `@` or `de.fdelay4a(2048)`
+// * `N`: current delay
+// * `b0`: gain applied to input
+// * `aN`: gain applied to delay-line output
+//
+// #### Example test program
+//
+// ```
+// process = gen_fb_comb(@,N,b0,aN);
+// ```
+// implements the following difference equation:
+// ```
+// y[n] = b0 x[n] + aN y[n - N]
+// ```
+//
+// See more examples in `filters.lib` below.
+// --------------------------------------------------------
+declare gen_fb_comb author "Oleg Nesterov";
+gen_fb_comb(dop,N,b0,aN) = + ~ aN * dop(N-1) : *(b0);
 
 //-----------------------`(fi.)fb_comb`-----------------------
 // Feed-Back Comb Filter (integer delay).
@@ -270,10 +300,9 @@ ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 // <https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html>
 //------------------------------------------------------------
 declare fb_comb author "Julius O. Smith III";
-declare fb_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare fb_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>, revised by Oleg Nesterov";
 declare fb_comb license "MIT-style STK-4.3 license";
-fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0) : mem;
-
+fb_comb(maxdel,N,b0,aN) = gen_fb_comb(de.delay(maxdel),N,b0,-aN) : mem;
 
 //-----------------------`(fi.)fb_fcomb`-----------------------
 // Feed-Back Comb Filter (floating point delay).
@@ -297,9 +326,9 @@ fb_comb(maxdel,N,b0,aN) = (+ <: de.delay(maxdel,N-1),_) ~ *(-aN) : !,*(b0) : mem
 // <https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html>
 //------------------------------------------------------------
 declare fb_fcomb author "Julius O. Smith III";
-declare fb_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare fb_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>, revised by Oleg Nesterov";
 declare fb_fcomb license "MIT-style STK-4.3 license";
-fb_fcomb(maxdel,N,b0,aN) = (+ <: de.fdelay(maxdel,float(N)-1.0),_) ~ *(-aN) : !,*(b0) : mem;
+fb_fcomb(maxdel,N,b0,aN) = gen_fb_comb(de.fdelay(maxdel),N,b0,-aN) : mem;
 
 //-----------------------`(fi.)rev1`-----------------------
 // Special case of `fb_comb` (`rev1(maxdel,N,g)`).
