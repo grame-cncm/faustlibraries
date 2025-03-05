@@ -49,6 +49,9 @@ A Faust library implementing following highpass/lowpass filters using `fi.svf`:
 - Bessel (2nd, 4th, 6th, 8th order)
 - Linkwitz Riley (4th, 8th, 12th and 16th order)
 
+## [lsfaustlibraries](https://github.com/LucaSpanedda/lsfaustlibraries)
+Luca Spanedda's Faust libraries.
+
 ## Awesome library
 Feel free to contribute by [forking this project](https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks) and [creating a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request), or by mailing the library description [here](mailto:research@grame.fr).
 
