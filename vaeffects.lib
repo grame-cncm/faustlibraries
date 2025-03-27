@@ -804,7 +804,7 @@ sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 // Where:
 //
 // * `normFreq`: normalized frequency (0-1)
-// * `Q`: q
+// * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
 //---------------------------------------------------------------------
 declare sallenKey2ndOrder author "Eric Tarr";
 declare sallenKey2ndOrder license "MIT-style STK-4.3 license";
@@ -843,7 +843,7 @@ with{
 // Where:
 //
 // * `normFreq`: normalized frequency (0-1)
-// * `Q`: q
+// * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderLPF author "Eric Tarr";
 declare sallenKey2ndOrderLPF license "MIT-style STK-4.3 license";
@@ -864,7 +864,7 @@ sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 // Where:
 //
 // * `normFreq`: normalized frequency (0-1)
-// * `Q`: q
+// * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderBPF author "Eric Tarr";
 declare sallenKey2ndOrderBPF license "MIT-style STK-4.3 license";
@@ -885,7 +885,7 @@ sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 // Where:
 //
 // * `normFreq`: normalized frequency (0-1)
-// * `Q`: q
+// * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderHPF author "Eric Tarr";
 declare sallenKey2ndOrderHPF license "MIT-style STK-4.3 license";
