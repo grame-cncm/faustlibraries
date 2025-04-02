@@ -1192,6 +1192,35 @@ declare reverbTank_demo copyright "Copyright (C) 2024 by David Braun <braun@ccrm
 declare reverbTank_demo license "MIT-style STK-4.3 license";
 
 
+//--------------------------`(dm.)kb_rom_rev1_demo`--------------------------
+// Keith Barr reverb effect rom_rev1 demo application.
+//
+// #### Usage
+//
+// ```
+// _,_ : kb_rom_rev1_demo : _,_
+// ```
+//------------------------------------------------------------
+declare kb_rom_rev1_demo author "Luca Spanedda";
+declare kb_rom_rev1_demo licence "GPL-3.0";
+
+kb_rom_rev1_demo = hgroup("Reverb", dryWetMix(re.kb_rom_rev1(rt, damp)))
+with {
+    // Smooth
+    SMOO = si.smoo; 
+    // GUI sections
+    Filter(x) = hgroup("[1] Filter", x:SMOO);
+    Space(x) = hgroup("[0] Space", x:SMOO);
+    Output(x) = hgroup("[2] Output", x:SMOO);
+    // GUI controls
+    rt =   Space(hslider("[0] Decay Time [style:knob]", 0.8, 0.0, 1.0, 0.001));
+    damp = 1 - Filter(hslider("[1] High Cutoff [style:knob]", 0.5, 0.0, 1.0, 0.001));
+    drywet(x) = Output(abs(x - vslider("[2] Dry/Wet Mix [style:knob]", 1, 0.0, 1.0, 0.001)));
+    // Dry/Wet mixer
+    dryWetMix(x) = si.bus(2) <: ((x : par(i, 2, _ * drywet(0))), par(i, 2, _ * drywet(1))) :> si.bus(2);
+};
+
+
 //----------------------------------`(dm.)dattorro_rev_demo`------------------------------
 // Example GUI for `dattorro_rev` with all parameters exposed and additional
 // dry/wet and output gain control.
