@@ -108,8 +108,11 @@ Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 
 
 //-------`(aa.)ADAA1`---------------------
-//  Generalised first-order ADAA function.
+// Generalised first-order Antiderivative Anti-Aliasing (ADAA) function.
 //
+// Implements a first-order ADAA approximation to reduce aliasing
+// in nonlinear audio processing.
+// 
 // #### Usage
 //
 // ```
@@ -118,7 +121,7 @@ Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 // 
 // Where:
 //
-// * `EPS`: a threshold to handle ill-conditioned cases
+// * `EPS`: a threshold for switching between safe and ill-conditioned paths
 // * `f`: a function that we want to process with ADAA
 // * `F1`: f's first antiderivative
 
@@ -138,8 +141,11 @@ ADAA1(EPS, f, F1, x) = D1q
 
 
 //-------`(aa.)ADAA2`---------------------
-//  Generalised second-order ADAA function.
+// Generalised second-order Antiderivative Anti-Aliasing (ADAA) function.
 //
+// Implements a second-order ADAA approximation for even better aliasing reduction
+// at the cost of additional computation.
+
 // #### Usage
 //
 // ```
@@ -148,7 +154,7 @@ ADAA1(EPS, f, F1, x) = D1q
 //
 // Where:
 //
-// * `EPS`: a threshold to handle ill-conditioned cases
+// * `EPS`: a threshold for switching between safe and ill-conditioned paths
 // * `f`: a function that we want to process with ADAA
 // * `F1`: f's first antiderivative
 // * `F2`: f's second antiderivative

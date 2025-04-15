@@ -479,25 +479,29 @@ Julian Parker, Vadim Zavalishin, Efflam Le Bivic, DAFX, 2016</li>
 <p>Real-valued atanh().</p>
 <hr />
 <h3 id="aaadaa1"><code>(aa.)ADAA1</code></h3>
-<p>Generalised first-order ADAA function.</p>
+<p>Generalised first-order Antiderivative Anti-Aliasing (ADAA) function.</p>
+<p>Implements a first-order ADAA approximation to reduce aliasing
+in nonlinear audio processing.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>_ : ADAA1(EPS, f, F1) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>EPS</code>: a threshold to handle ill-conditioned cases</li>
+<li><code>EPS</code>: a threshold for switching between safe and ill-conditioned paths</li>
 <li><code>f</code>: a function that we want to process with ADAA</li>
 <li><code>F1</code>: f's first antiderivative</li>
 </ul>
 <hr />
 <h3 id="aaadaa2"><code>(aa.)ADAA2</code></h3>
-<p>Generalised second-order ADAA function.</p>
+<p>Generalised second-order Antiderivative Anti-Aliasing (ADAA) function.</p>
+<p>Implements a second-order ADAA approximation for even better aliasing reduction
+at the cost of additional computation.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>_ : ADAA2(EPS, f, F1, F2) : _
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>EPS</code>: a threshold to handle ill-conditioned cases</li>
+<li><code>EPS</code>: a threshold for switching between safe and ill-conditioned paths</li>
 <li><code>f</code>: a function that we want to process with ADAA</li>
 <li><code>F1</code>: f's first antiderivative</li>
 <li><code>F2</code>: f's second antiderivative</li>
