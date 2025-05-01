@@ -323,6 +323,30 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#vicaneks-matched-decramped-second-order-filters" class="nav-link">Vicanek's Matched (Decramped) Second-Order Filters</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#vebiquad" class="nav-link">(ve.)biquad</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#velowpass2matched" class="nav-link">(ve.)lowpass2Matched</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#vehighpass2matched" class="nav-link">(ve.)highpass2Matched</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#vebandpass2matched" class="nav-link">(ve.)bandpass2Matched</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#vepeaking2matched" class="nav-link">(ve.)peaking2Matched</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#effects" class="nav-link">Effects</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#vewah4" class="nav-link">(ve.)wah4</a>
@@ -352,6 +376,16 @@
 
 <h1 id="vaeffectslib">vaeffects.lib</h1>
 <p>A library of virtual analog filter effects. Its official prefix is <code>ve</code>.</p>
+<p>The virtual analog filter library is organized into 6 sections:</p>
+<ul>
+<li><a href="#moog-filters">Moog Filters</a></li>
+<li><a href="#korg-35-filters">Korg 35 Filters</a></li>
+<li><a href="#oberheim-filters">Oberheim Filters</a></li>
+<li><a href="#sallen-key-filters">Sallen Key Filters</a></li>
+<li><a href="#korg-35-filters">Korg 35 Filters</a></li>
+<li><a href="#vicaneks-matched-decramped-second-order-filters">Vicanek's matched (decramped) second-order filters</a></li>
+<li><a href="#effects">Effects</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/vaeffects.lib">https://github.com/grame-cncm/faustlibraries/blob/master/vaeffects.lib</a></li>
@@ -735,12 +769,96 @@ the compiler will only generate the needed code.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range <code>[ma.EPSILON, ma.MAX]</code></li>
 </ul>
+<h2 id="vicaneks-matched-decramped-second-order-filters">Vicanek's Matched (Decramped) Second-Order Filters</h2>
+<p>Vicanek's Matched (Decramped) Second-Order Filters.</p>
+<p>This collection implements high-quality, double-precision second-order filters
+based on the work of Vicanek, offering improved frequency accuracy and dynamic
+response over traditional biquads—especially near Nyquist.</p>
+<p>Standard digital filter designs (like bilinear-transformed biquads) suffer from
+frequency warping, which distorts the placement of poles and zeros. Vicanek's
+method, detailed in his paper <em>"Matched Second Order Digital Filters"</em>, proposes
+a set of matched filter formulas that eliminate such warping, preserving the
+intended analog-like behavior and frequency response.</p>
+<p>The filters provided here include:</p>
+<p>• <code>biquad</code>            — generic difference equation implementation<br />
+  • <code>lowpass2Matched</code>   — second-order lowpass with resonance<br />
+  • <code>highpass2Matched</code>  — second-order highpass with resonance<br />
+  • <code>bandpass2Matched</code>  — second-order bandpass with resonance<br />
+  • <code>peaking2Matched</code>   — second-order peaking EQ  </p>
+<p>Each filter relies on carefully derived coefficient formulas that guarantee
+accurate placement of the frequency response peak and preserve Q and gain behavior.</p>
+<p>⚠️ <strong>Note:</strong> These filters require <strong>double-precision</strong> support.</p>
+<h4 id="references_6">References:</h4>
+<p>Vicanek, M. (2016) <em>Matched Second Order Digital Filters</em> </p>
+<ul>
+<li><a href="https://www.vicanek.de/articles/BiquadFits.pdf">https://www.vicanek.de/articles/BiquadFits.pdf</a></li>
+</ul>
+<hr />
+<h3 id="vebiquad">(ve.)biquad</h3>
+<p>Basic biquad section implementing the difference equation:
+<code>y[n] = b0 * x[n] + b1 * x[n-1] + b2 * x[n-2] - a1 * y[n-1] - a2 * y[n-2]</code></p>
+<h4 id="usage_20">Usage:</h4>
+<pre><code>_ : biquad(b0, b1, b2, a1, a2) : _
+</code></pre>
+<h4 id="where">Where:</h4>
+<ul>
+<li><code>b0, b1, b2, a1, a2</code> are the coefficients of the difference equation above</li>
+</ul>
+<hr />
+<h3 id="velowpass2matched">(ve.)lowpass2Matched</h3>
+<p>Vicanek's decramped second-order resonant lowpass filter.</p>
+<p>⚠️ <strong>Note:</strong> These filters require <strong>double-precision</strong> support.</p>
+<h4 id="usage_21">Usage:</h4>
+<pre><code>_ : lowpass2Matched(CF, Q) : _
+</code></pre>
+<h4 id="where_1">Where:</h4>
+<ul>
+<li><code>CF</code>: cutoff frequency in Hz</li>
+<li><code>Q</code>: resonance linear amplitude</li>
+</ul>
+<hr />
+<h3 id="vehighpass2matched">(ve.)highpass2Matched</h3>
+<p>Vicanek's decramped second-order resonant highpass filter.</p>
+<p>⚠️ <strong>Note:</strong> These filters require <strong>double-precision</strong> support.</p>
+<h4 id="usage_22">Usage:</h4>
+<pre><code>_ : highpass2Matched(CF, Q) : _
+</code></pre>
+<h4 id="where_2">Where:</h4>
+<ul>
+<li><code>CF</code>: cutoff frequency in Hz</li>
+<li><code>Q</code>: resonance linear amplitude</li>
+</ul>
+<hr />
+<h3 id="vebandpass2matched">(ve.)bandpass2Matched</h3>
+<p>Vicanek's decramped second-order resonant bandpass filter.</p>
+<p>⚠️ <strong>Note:</strong> These filters require <strong>double-precision</strong> support.</p>
+<h4 id="usage_23">Usage:</h4>
+<pre><code>_ : bandpass2Matched(CF, Q) : _
+</code></pre>
+<h4 id="where_3">Where:</h4>
+<ul>
+<li><code>CF</code>: cutoff frequency in Hz</li>
+<li><code>Q</code>: resonance linear amplitude</li>
+</ul>
+<hr />
+<h3 id="vepeaking2matched">(ve.)peaking2Matched</h3>
+<p>Vicanek's decramped second-order resonant bandpass filter.</p>
+<p>⚠️ <strong>Note:</strong> These filters require <strong>double-precision</strong> support.</p>
+<h4 id="usage_24">Usage:</h4>
+<pre><code>_ : bandpass2Matched(G, CF, Q) : _
+</code></pre>
+<h4 id="where_4">Where:</h4>
+<ul>
+<li><code>G</code>: peak linear amplitude</li>
+<li><code>CF</code>: cutoff frequency in Hz</li>
+<li><code>Q</code>: peak width</li>
+</ul>
 <h2 id="effects">Effects</h2>
 <hr />
 <h3 id="vewah4"><code>(ve.)wah4</code></h3>
 <p>Wah effect, 4th order.
 <code>wah4</code> is a standard Faust function.</p>
-<h4 id="usage_20">Usage</h4>
+<h4 id="usage_25">Usage</h4>
 <pre><code>_ : wah4(fr) : _
 </code></pre>
 <p>Where:</p>
@@ -755,7 +873,7 @@ the compiler will only generate the needed code.</p>
 <h3 id="veautowah"><code>(ve.)autowah</code></h3>
 <p>Auto-wah effect.
 <code>autowah</code> is a standard Faust function.</p>
-<h4 id="usage_21">Usage</h4>
+<h4 id="usage_26">Usage</h4>
 <pre><code>_ : autowah(level) : _
 </code></pre>
 <p>Where:</p>
@@ -766,7 +884,7 @@ the compiler will only generate the needed code.</p>
 <h3 id="vecrybaby"><code>(ve.)crybaby</code></h3>
 <p>Digitized CryBaby wah pedal.
 <code>crybaby</code> is a standard Faust function.</p>
-<h4 id="usage_22">Usage</h4>
+<h4 id="usage_27">Usage</h4>
 <pre><code>_ : crybaby(wah) : _
 </code></pre>
 <p>Where:</p>
@@ -782,7 +900,7 @@ the compiler will only generate the needed code.</p>
 <p>A very simple vocoder where the spectrum of the modulation signal
 is analyzed using a filter bank.
 <code>vocoder</code> is a standard Faust function.</p>
-<h4 id="usage_23">Usage</h4>
+<h4 id="usage_28">Usage</h4>
 <pre><code>_ : vocoder(nBands,att,rel,BWRatio,source,excitation) : _
 </code></pre>
 <p>Where:</p>
