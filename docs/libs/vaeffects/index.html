@@ -658,22 +658,22 @@ state-variable filters capable of LPF, HPF, and BPF.  </p>
 <p>Sallen-Key generic One Pole filter that produces the LPF and HPF outputs (see description above).</p>
 <p>For the Faust implementation of this filter, recursion (<code>letrec</code>) is used 
 for storing filter "states". The output (e.g. <code>y</code>) is calculated by using 
-the input signal and the previous states of the filter.
-During the current recursive step, the states of the filter (e.g. <code>s</code>) for 
-the next step are also calculated.
-Admittedly, this is not an efficient way to implement a filter because it 
+the input signal and the previous states of the filter.</p>
+<p>During the current recursive step, the states of the filter (e.g. <code>s</code>) for 
+the next step are also calculated.</p>
+<p>Admittedly, this is not an efficient way to implement a filter because it 
 requires independently calculating the output and each state during each 
 recursive step. However, it works as a way to store and use "states"
 within the constraints of Faust. 
 The simplest example is the 1st-order LPF (shown on the cover of Zavalishin 
-* 2018 and Fig 4.3 of <a href="https://www.willpirkle.com/706-2/">https://www.willpirkle.com/706-2/</a>). Here, the input 
-signal is split in parallel for the calculation of the output signal, <code>y</code>, and 
-the state <code>s</code>. The value of the state is only used for feedback to the next 
-step of recursion. It is blocked (!) from also being routed to the output. 
-A trick used for calculating the state <code>s</code> is to observe that the input to 
+* 2018 and Fig 4.3 of <a href="https://www.willpirkle.com/706-2/">https://www.willpirkle.com/706-2/</a>).</p>
+<p>Here, the input signal is split in parallel for the calculation of the output signal, <code>y</code>, 
+and the state <code>s</code>. The value of the state is only used for feedback to the next 
+step of recursion. It is blocked (!) from also being routed to the output. </p>
+<p>A trick used for calculating the state <code>s</code> is to observe that the input to 
 the delay block is the sum of two signal: what appears to be a feedforward 
 path and a feedback path. In reality, the signals being summed are identical 
-(signal*2) plus the value of the current state.</p>
+<code>(signal*2)</code> plus the value of the current state.</p>
 <h4 id="usage_13">Usage</h4>
 <pre><code>_ : sallenKeyOnePole(normFreq) : _,_
 </code></pre>
