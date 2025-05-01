@@ -938,7 +938,7 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 //
 //================================================================================
 
-//---------- (ve.)biquad -------------------------------------------------------
+//----------`(ve.)biquad`-------------------------------------------------------
 // Basic biquad section implementing the difference equation:
 // `y[n] = b0 * x[n] + b1 * x[n-1] + b2 * x[n-2] - a1 * y[n-1] - a2 * y[n-2]`
 //
@@ -958,7 +958,7 @@ biquad(b0, b1, b2, a1, a2, x) = f ~ _
         f(s) = b0 * x + b1 * x' + b2 * x'' - a1 * s - a2 * s';
     };
 
-//---------- (ve.)lowpass2Matched ----------------------------------------------
+//----------`(ve.)lowpass2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant lowpass filter.
 //
 // ⚠️ **Note:** These filters require **double-precision** support.
@@ -997,7 +997,7 @@ lowpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
         b2 = .0;
     };
 
-//---------- (ve.)highpass2Matched ----------------------------------------------
+//----------`(ve.)highpass2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant highpass filter.
 //
 // ⚠️ **Note:** These filters require **double-precision** support.
@@ -1033,7 +1033,7 @@ highpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
         b2 = b0;
     };
 
-//---------- (ve.)bandpass2Matched ----------------------------------------------
+//----------`(ve.)bandpass2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant bandpass filter.
 //
 // ⚠️ **Note:** These filters require **double-precision** support.
@@ -1073,7 +1073,7 @@ bandpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
         b2 = -1.0 * (b0 + b1);
     };
 
-//---------- (ve.)peaking2Matched ----------------------------------------------
+//----------`(ve.)peaking2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant bandpass filter.
 //
 // ⚠️ **Note:** These filters require **double-precision** support.
