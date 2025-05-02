@@ -796,7 +796,7 @@ with{
 
 // TODO demo function for echo
 
-//--------------------`(ef.)reverseEchoN(nChans,delay)`-------------------
+//--------------------`(ef.)reverseEchoN`-------------------
 // Reverse echo effect.
 //
 // #### Usage
@@ -807,7 +807,7 @@ with{
 //
 // Where:
 //
-// *  `N`: Number of output channels desired (1 or more), a constant numerical expression
+// * `N`: Number of output channels desired (1 or more), a constant numerical expression
 // * `delay`: echo delay (integer power of 2)
 //
 // #### Demo
@@ -827,7 +827,7 @@ declare reverseEchoN author "Julius O. Smith III";
 declare reverseEchoN license "STK-4.3";
 
 
-//-------------------`(ef.)reverseDelayRamped(delay,phase)`------------------
+//-------------------`(ef.)reverseDelayRamped`------------------
 // Reverse delay with amplitude ramp.
 //
 // #### Usage
@@ -858,7 +858,7 @@ reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
 declare reverseDelayRamped author "Julius O. Smith III";
 declare reverseDelayRamped license "STK-4.3";
 
-//-------------------`(ef.)uniformPanToStereo(nChans)`------------------
+//-------------------`(ef.)uniformPanToStereo`------------------
 // Pan nChans channels to the stereo field, spread uniformly left to right.
 //
 // #### Usage
@@ -891,8 +891,13 @@ declare uniformPanToStereo license "STK-4.3";
 // #### Usage:
 //
 // ```
-// _,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
-// _ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
+// _,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, 
+//               crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
+// ```
+//
+// ```
+// _ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP, 
+//              crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
 // ```
 //
 // Where:

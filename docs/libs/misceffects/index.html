@@ -317,15 +317,15 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#efreverseechonnchansdelay" class="nav-link">(ef.)reverseEchoN(nChans,delay)</a>
+            <li class="nav-item" data-level="3"><a href="#efreverseechon" class="nav-link">(ef.)reverseEchoN</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#efreversedelayrampeddelayphase" class="nav-link">(ef.)reverseDelayRamped(delay,phase)</a>
+            <li class="nav-item" data-level="3"><a href="#efreversedelayramped" class="nav-link">(ef.)reverseDelayRamped</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#efuniformpantostereonchans" class="nav-link">(ef.)uniformPanToStereo(nChans)</a>
+            <li class="nav-item" data-level="3"><a href="#efuniformpantostereo" class="nav-link">(ef.)uniformPanToStereo</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -706,7 +706,7 @@ as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</
 <li><code>feedback</code>: the feedback coefficient</li>
 </ul>
 <hr />
-<h3 id="efreverseechonnchansdelay"><code>(ef.)reverseEchoN(nChans,delay)</code></h3>
+<h3 id="efreverseechon"><code>(ef.)reverseEchoN</code></h3>
 <p>Reverse echo effect.</p>
 <h4 id="usage_17">Usage</h4>
 <pre><code>_ : ef.reverseEchoN(N,delay) : si.bus(N)
@@ -722,7 +722,7 @@ as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</
 <h4 id="description">Description</h4>
 <p>The effect uses N instances of <code>reverseDelayRamped</code> at different phases.</p>
 <hr />
-<h3 id="efreversedelayrampeddelayphase"><code>(ef.)reverseDelayRamped(delay,phase)</code></h3>
+<h3 id="efreversedelayramped"><code>(ef.)reverseDelayRamped</code></h3>
 <p>Reverse delay with amplitude ramp.</p>
 <h4 id="usage_18">Usage</h4>
 <pre><code>_ : ef.reverseDelayRamped(delay,phase) : _
@@ -736,7 +736,7 @@ as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</
 <pre><code>_ : ef.reverseDelayRamped(32,0.6) : _,_
 </code></pre>
 <hr />
-<h3 id="efuniformpantostereonchans"><code>(ef.)uniformPanToStereo(nChans)</code></h3>
+<h3 id="efuniformpantostereo"><code>(ef.)uniformPanToStereo</code></h3>
 <p>Pan nChans channels to the stereo field, spread uniformly left to right.</p>
 <h4 id="usage_19">Usage</h4>
 <pre><code>si.bus(N) : ef.uniformPanToStereo(N) : _,_
@@ -752,8 +752,11 @@ as <code>mixPowerLoop(4, 1, -4)</code> and <code>mixPowerLoop(4, 1, 4)</code>.</
 <h3 id="eftapestop"><code>(ef.)tapeStop</code></h3>
 <p>A tape-stop effect, like putting a finger on a vinyl record player.</p>
 <h4 id="usage_20">Usage:</h4>
-<pre><code>_,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
-_ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP, crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
+<pre><code>_,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, 
+              crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
+</code></pre>
+<pre><code>_ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP, 
+             crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
 </code></pre>
 <p>Where:</p>
 <ul>
