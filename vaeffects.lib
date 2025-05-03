@@ -15,6 +15,7 @@
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/vaeffects.lib>
 //########################################################################################
 
+ba = library("basics.lib");
 ma = library("maths.lib");
 si = library("signals.lib");
 an = library("analyzers.lib");
@@ -1137,7 +1138,7 @@ declare lowshelf2Matched author "Dario Sanfilippo";
 declare lowshelf2Matched license "MIT License";
 lowshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
     with {
-        safeG = ba.if(G < 1.0, min(1.0 - EPS, G), max(1.0 + EPS, G));
+        safeG = ba.if(G < 1.0, min(1.0 - ma.EPSILON, G), max(1.0 + ma.EPSILON, G));
         g = 1.0 / safeG;
         halfPi = ma.PI * .5;
         f = CF / (ma.SR * .5);
@@ -1193,7 +1194,7 @@ declare highshelf2Matched author "Dario Sanfilippo";
 declare highshelf2Matched license "MIT License";
 highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
     with {
-        safeG = ba.if(G < 1.0, min(1.0 - EPS, G), max(1.0 + EPS, G));
+        safeG = ba.if(G < 1.0, min(1.0 - ma.EPSILON, G), max(1.0 + ma.EPSILON, G));
         g = safeG;
         gInv = 1.0 / g;
         halfPi = ma.PI * .5;
