@@ -345,6 +345,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#velowshelf2matched" class="nav-link">(ve.)lowshelf2Matched</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#vehighshelf2matched" class="nav-link">(ve.)highshelf2Matched</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#effects" class="nav-link">Effects</a>
@@ -780,11 +788,15 @@ method, detailed in his paper <em>"Matched Second Order Digital Filters"</em>, p
 a set of matched filter formulas that eliminate such warping, preserving the
 intended analog-like behavior and frequency response.</p>
 <p>The filters provided here include:</p>
-<p>• <code>biquad</code>            — generic difference equation implementation<br />
-  • <code>lowpass2Matched</code>   — second-order lowpass with resonance<br />
-  • <code>highpass2Matched</code>  — second-order highpass with resonance<br />
-  • <code>bandpass2Matched</code>  — second-order bandpass with resonance<br />
-  • <code>peaking2Matched</code>   — second-order peaking EQ  </p>
+<ul>
+<li><code>biquad</code>            — generic difference equation implementation  </li>
+<li><code>lowpass2Matched</code>   — second-order lowpass with resonance  </li>
+<li><code>highpass2Matched</code>  — second-order highpass with resonance  </li>
+<li><code>bandpass2Matched</code>  — second-order bandpass with resonance  </li>
+<li><code>peaking2Matched</code>   — second-order peaking EQ</li>
+<li><code>lowshelf2Macthed</code>  – second-order Butterworth lowshelf</li>
+<li><code>highshelf2Macthed</code> – second-order Butterworth highshelf</li>
+</ul>
 <p>Each filter relies on carefully derived coefficient formulas that guarantee
 accurate placement of the frequency response peak and preserve Q and gain behavior.</p>
 <p>⚠️ <strong>Note:</strong> These filters require <strong>double-precision</strong> support.</p>
@@ -853,12 +865,36 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <li><code>CF</code>: cutoff frequency in Hz</li>
 <li><code>Q</code>: peak width</li>
 </ul>
+<hr />
+<h3 id="velowshelf2matched"><code>(ve.)lowshelf2Matched</code></h3>
+<p>Vicanek's decramped second-order Butterworth lowshelf filter.</p>
+<p>⚠️ <strong>Note:</strong> These filters require <strong>double-precision</strong> support.</p>
+<h4 id="usage_25">Usage:</h4>
+<pre><code>_ : lowshelf2Matched(G, CF) : _
+</code></pre>
+<h4 id="where_5">Where:</h4>
+<ul>
+<li><code>G</code>: shelf linear amplitude</li>
+<li><code>CF</code>: cutoff frequency in Hz</li>
+</ul>
+<hr />
+<h3 id="vehighshelf2matched"><code>(ve.)highshelf2Matched</code></h3>
+<p>Vicanek's decramped second-order Butterworth highshelf filter.</p>
+<p>⚠️ <strong>Note:</strong> These filters require <strong>double-precision</strong> support.</p>
+<h4 id="usage_26">Usage:</h4>
+<pre><code>_ : highshelf2Matched(G, CF) : _
+</code></pre>
+<h4 id="where_6">Where:</h4>
+<ul>
+<li><code>G</code>: shelf linear amplitude</li>
+<li><code>CF</code>: cutoff frequency in Hz</li>
+</ul>
 <h2 id="effects">Effects</h2>
 <hr />
 <h3 id="vewah4"><code>(ve.)wah4</code></h3>
 <p>Wah effect, 4th order.
 <code>wah4</code> is a standard Faust function.</p>
-<h4 id="usage_25">Usage</h4>
+<h4 id="usage_27">Usage</h4>
 <pre><code>_ : wah4(fr) : _
 </code></pre>
 <p>Where:</p>
@@ -873,7 +909,7 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h3 id="veautowah"><code>(ve.)autowah</code></h3>
 <p>Auto-wah effect.
 <code>autowah</code> is a standard Faust function.</p>
-<h4 id="usage_26">Usage</h4>
+<h4 id="usage_28">Usage</h4>
 <pre><code>_ : autowah(level) : _
 </code></pre>
 <p>Where:</p>
@@ -884,7 +920,7 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h3 id="vecrybaby"><code>(ve.)crybaby</code></h3>
 <p>Digitized CryBaby wah pedal.
 <code>crybaby</code> is a standard Faust function.</p>
-<h4 id="usage_27">Usage</h4>
+<h4 id="usage_29">Usage</h4>
 <pre><code>_ : crybaby(wah) : _
 </code></pre>
 <p>Where:</p>
@@ -900,7 +936,7 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <p>A very simple vocoder where the spectrum of the modulation signal
 is analyzed using a filter bank.
 <code>vocoder</code> is a standard Faust function.</p>
-<h4 id="usage_28">Usage</h4>
+<h4 id="usage_30">Usage</h4>
 <pre><code>_ : vocoder(nBands,att,rel,BWRatio,source,excitation) : _
 </code></pre>
 <p>Where:</p>
