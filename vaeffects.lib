@@ -924,7 +924,9 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 //   • `lowpass2Matched`   — second-order lowpass with resonance  
 //   • `highpass2Matched`  — second-order highpass with resonance  
 //   • `bandpass2Matched`  — second-order bandpass with resonance  
-//   • `peaking2Matched`   — second-order peaking EQ  
+//   • `peaking2Matched`   — second-order peaking EQ
+//   • `lowshelf2Macthed`  – second-order Butterworth lowshelf
+//   • `highshelf2Macthed` – second-order Butterworth highshelf
 //
 // Each filter relies on carefully derived coefficient formulas that guarantee
 // accurate placement of the frequency response peak and preserve Q and gain behavior.
@@ -1116,6 +1118,117 @@ peaking2Matched(G, CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
         b2 = (-1.0 * B2) / (4.0 * b0);
     };
 
+//----------`(ve.)lowshelf2Matched`---------------------------------------------
+// Vicanek's decramped second-order Butterworth lowshelf filter.
+//
+// ⚠️ **Note:** These filters require **double-precision** support.
+//
+// #### Usage:
+// ```
+// _ : lowshelf2Matched(G, CF) : _
+// ```
+//
+// #### Where:
+//
+// * `G`: shelf linear amplitude
+// * `CF`: cutoff frequency in Hz
+//
+declare lowshelf2Matched author "Dario Sanfilippo";
+declare lowshelf2Matched license "MIT License";
+lowshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
+    with {
+        safeG = ba.if(G < 1.0, min(1.0 - EPS, G), max(1.0 + EPS, G));
+        g = 1.0 / safeG;
+        halfPi = ma.PI * .5;
+        f = CF / (ma.SR * .5);
+        f4 = f ^ 4.0;
+        hny = (f4 + g) / (f4 + safeG);
+        f1 = f / sqrt(.160 + 1.543 * f * f);
+        f14 = f1 ^ 4.0;
+        h1 = (f4 + f14 * g) / (f4 + f14 * safeG);
+        phi1 = sin(halfPi * f1) ^ 2.0;
+        f2 = f / sqrt(.947 + 3.806 * f * f);
+        f24 = f2 ^ 4.0;
+        h2 = (f4 + f24 * g) / (f4 + f24 * safeG);
+        phi2 = sin(halfPi * f2) ^ 2.0;
+        d1 = (h1 - 1.0) * (1.0 - phi1);
+        c11 = -1.0 * phi1 * d1;
+        c12 = phi1 * phi1 * (hny - h1);
+        d2 = (h2 - 1.0) * (1.0 - phi2);
+        c21 = -1.0 * phi2 * d2;
+        c22 = phi2 * phi2 * (hny - h2);
+        alpha1 = (c22 * d1 - c12 * d2) / (c11 * c22 - c12 * c21);
+        aa1 = (d1 - c11 * alpha1) / c12;
+        bb1 = hny * aa1;
+        aa2 = .25 * (alpha1 - aa1);
+        bb2 = .25 * (alpha1 - bb1);
+        v = .5 * (1.0 + sqrt(aa1));
+        w = .5 * (1.0 + sqrt(bb1));
+        a0 = .5 * (v + sqrt(v * v + aa2));
+        a0Inv = 1.0 / a0;
+        a1 = (1.0 - v) * a0Inv;
+        a2 = -.25 * aa2 * a0Inv * a0Inv;
+        b0Temp = .5 * (w + sqrt(w * w + bb2)) * a0Inv;
+        b1 = safeG * (1.0 - w) * a0Inv;
+        b2 = safeG * (-.25 * bb2 / b0Temp) * a0Inv * a0Inv;
+        b0 = safeG * b0Temp;
+    };
+
+//----------`(ve.)highshelf2Matched`--------------------------------------------
+// Vicanek's decramped second-order Butterworth highshelf filter.
+//
+// ⚠️ **Note:** These filters require **double-precision** support.
+//
+// #### Usage:
+// ```
+// _ : highshelf2Matched(G, CF) : _
+// ```
+//
+// #### Where:
+//
+// * `G`: shelf linear amplitude
+// * `CF`: cutoff frequency in Hz
+//
+declare highshelf2Matched author "Dario Sanfilippo";
+declare highshelf2Matched license "MIT License";
+highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
+    with {
+        safeG = ba.if(G < 1.0, min(1.0 - EPS, G), max(1.0 + EPS, G));
+        g = safeG;
+        gInv = 1.0 / g;
+        halfPi = ma.PI * .5;
+        f = CF / (ma.SR * .5);
+        f4 = f ^ 4.0;
+        hny = (f4 + g) / (f4 + gInv);
+        f1 = f / sqrt(.160 + 1.543 * f * f);
+        f14 = f1 ^ 4.0;
+        h1 = (f4 + f14 * g) / (f4 + f14 * gInv);
+        phi1 = sin(halfPi * f1) ^ 2.0;
+        f2 = f / sqrt(.947 + 3.806 * f * f);
+        f24 = f2 ^ 4.0;
+        h2 = (f4 + f24 * g) / (f4 + f24 * gInv);
+        phi2 = sin(halfPi * f2) ^ 2.0;
+        d1 = (h1 - 1.0) * (1.0 - phi1);
+        c11 = -1.0 * phi1 * d1;
+        c12 = phi1 * phi1 * (hny - h1);
+        d2 = (h2 - 1.0) * (1.0 - phi2);
+        c21 = -1.0 * phi2 * d2;
+        c22 = phi2 * phi2 * (hny - h2);
+        alpha1 = (c22 * d1 - c12 * d2) / (c11 * c22 - c12 * c21);
+        aa1 = (d1 - c11 * alpha1) / c12;
+        bb1 = hny * aa1;
+        aa2 = .25 * (alpha1 - aa1);
+        bb2 = .25 * (alpha1 - bb1);
+        v = .5 * (1.0 + sqrt(aa1));
+        w = .5 * (1.0 + sqrt(bb1));
+        a0 = .5 * (v + sqrt(v * v + aa2));
+        a0Inv = 1.0 / a0;
+        a1 = (1.0 - v) * a0Inv;
+        a2 = -.25 * aa2 * a0Inv * a0Inv;
+        b0 = .5 * (w + sqrt(w * w + bb2)) * a0Inv;
+        b1 = (1.0 - w) * a0Inv;
+        b2 = (-.25 * bb2 / b0) * a0Inv * a0Inv;
+    };
 
 //=========================================Effects========================================
 //========================================================================================
