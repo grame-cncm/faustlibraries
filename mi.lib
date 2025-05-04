@@ -116,9 +116,9 @@ with{
   B = -1;
   C = 1/m;
   equation = x 
-	letrec{
+    letrec{
     'x = A*(x : initState(x0)) + B*(x' : initState((x1,x0))) + (_-grav)*(C);
-	};
+    };
 };
 
 
@@ -147,9 +147,9 @@ with{
   B = z/m - 1;
   C = 1/m;
   equation = x
-	letrec{
+    letrec{
     'x = A*(x : initState(x0)) + B*(x' : initState((x1, x0))) + (_-grav)*(C);
-	};
+    };
 };
 
 
@@ -174,9 +174,9 @@ with{
   // could this term be removed or simlified? Need "unused" input force signal for the routing scheme to work
   C = 0;
   equation = x 
-	letrec{
-		'x = (x : initState(x0)) + *(C);
-	};
+    letrec{
+        'x = (x : initState(x0)) + *(C);
+    };
 };
 
 
@@ -411,12 +411,12 @@ with{
 nlPluck(k, scale, z, x1r0, x2r0, x1, x2) = 
   select2(absdeltapos < tipdist,
     select2(absdeltapos < scale,
-	  		0,
-	  		ma.signum(deltapos)* -tipdist * k + Kend * deltapos + 
+            0,
+            ma.signum(deltapos)* -tipdist * k + Kend * deltapos + 
               z* deltavel
-	  		),
-	(k - Kend) * -deltapos + z* deltavel
-	) <:  *(-1),_
+           ),
+    (k - Kend) * -deltapos + z* deltavel
+    ) <:  *(-1),_
 with{
   deltapos = x1 - x2;
   deltavel = (x1 - x1' : initState(x1r0)) - (x2 - x2' : initState(x2r0));
@@ -454,11 +454,11 @@ nlBow(z, scale, type, x1r0, x2r0, x1, x2) =
   select2(type > 0,
     select2(absdeltavel < tipvel,
         select2(absdeltavel < scale,
-	  		0,
-	  		ma.signum(deltavel)* tipvel * z - Zend * deltavel
-	  		),
-	    (z - Zend) * deltavel
-	),
+           0,
+           ma.signum(deltavel)* tipvel * z - Zend * deltavel
+           ),
+        (z - Zend) * deltavel
+    ),
     0.63 * z * deltavel *exp(-4*pow(deltavel/scale, 2) + 1/2)
   )
    <:  *(-1),_

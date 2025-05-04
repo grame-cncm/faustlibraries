@@ -142,8 +142,8 @@ abs_envelope_t19(period, x) = abs(x) : fi.avg_t19(period);
 // * 1975 Electronotes Newsletter, Bernie Hutchins
 //------------------------------------------------------------
 amp_follower(rel) = abs : env with {
- 	p = ba.tau2pole(rel);
- 	env(x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
+    p = ba.tau2pole(rel);
+    env(x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
 };
 
 peak_envelope = amp_follower; // Synonym for more standard naming
@@ -626,7 +626,7 @@ mth_octave_spectral_level6e(M,ftop,N,tau,dB_offset) = _<:
      [tooltip: Spectral Band Level in dB]", -50, 10));
   O = int(((N-2)/M)+0.4999);
   speclevel_group(x)  = hgroup("[0] CONSTANT-Q SPECTRUM ANALYZER (6E), %N bands spanning
-  	LP, %O octaves below %ftop Hz, HP
+      LP, %O octaves below %ftop Hz, HP
      [tooltip: See Faust's filters.lib for documentation and references]", x);
 };
 
@@ -868,7 +868,7 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 fft(N) = si.cbus(N) : an.c_bit_reverse_shuffle(N) : an.fftb(N); // shuffle off to the butterflies:
 fftb(1) = _,_; // each complex number is represented as (real,imag)
 fftb(N) = si.cbus(N) : (fftb(No2) <: (si.cbus(No2), si.cbus(No2))), (fftb(No2)
-	  <: (si.cbus(N):twiddleOdd(N))) :> si.cbus(N)
+      <: (si.cbus(N):twiddleOdd(N))) :> si.cbus(N)
 with {
   No2 = int(N)>>1;
   // Half of these multiplies can go away since w(k) = - w(k+N/2), and others as well (1,j,-j,-1,...)
@@ -903,7 +903,7 @@ with {
 ifft(N) = si.cbus(N) : an.c_bit_reverse_shuffle(N) : an.ifftb(N); // input is shuffled off to the butterflies:
 ifftb(1) = _,_;
 ifftb(N) = si.cbus(N) : (ifftb(No2) <: (si.cbus(No2), si.cbus(No2))), (ifftb(No2)
-	<: (si.cbus(N):twiddleOddConj(N))) :> si.cbus(N) : par(i,2*N,/(2.0))
+    <: (si.cbus(N):twiddleOddConj(N))) :> si.cbus(N) : par(i,2*N,/(2.0))
 with {
   No2 = int(N)>>1;
   // Half of these multiplies can go away since w(k) = - w(k+N/2), and others as well (1,j,-j,-1,...)
@@ -923,9 +923,9 @@ rfft_spectral_level(N,tau,dB_offset) = _<: _, an.rfft_analyzer_db(N) : _,(displa
   display = par(i,N/2+1,dbmeter(i));
   dbmeter(i) = si.smooth(ba.tau2pole(tau)) : +(dB_offset) : meter(i);
     meter(i) = speclevel_group(vbargraph("[%2i] [unit:dB]
-	       [tooltip: FFT Spectral Band Level in dB]", -50, 10));
+           [tooltip: FFT Spectral Band Level in dB]", -50, 10));
   speclevel_group(x)  = hgroup("[0] FFT SPECTRUM ANALYZER, %N bands
-			[tooltip: fft_spectral_level in Faust's analyzers.lib]", x);
+            [tooltip: fft_spectral_level in Faust's analyzers.lib]", x);
 };
 
 // end jos section

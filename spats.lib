@@ -248,20 +248,20 @@ with {
 //----------------------------------------
 stereoize(p) = S(inputs(p), outputs(p))
 with {
-	// degenerated processor with no outputs
-	S(n,0) = !,! : 0,0; 		// just in case, probably a rare case
-	// processors with no inputs
-	S(0,1) = !,! : p <: _,_; 	// add two fake inputs and split output
-	S(0,2) = !,! : p;
-	S(0,n) = !,! : p,p :> _,_;	// we are sure this will work if n is odd
-	// processors with one input
-	S(1,1) = p,p; 				// add two fake inputs and split output
-	S(1,n) = p,p :> _,_;		// we are sure this will work if n is odd
-	// processors with two inputs
-	S(2,1) = p <: _,_; 			// split the output
-	S(2,2) = p; 				// nothing to do, p is already stereo
-	// processors with inputs > 2 and outputs > 2
-	S(n,m) = _,_ <: p,p :> _,_;	// we are sure this works if n or p are odd
+    // degenerated processor with no outputs
+    S(n,0) = !,! : 0,0;           // just in case, probably a rare case
+    // processors with no inputs
+    S(0,1) = !,! : p <: _,_;      // add two fake inputs and split output
+    S(0,2) = !,! : p;
+    S(0,n) = !,! : p,p :> _,_;    // we are sure this will work if n is odd
+    // processors with one input
+    S(1,1) = p,p;                 // add two fake inputs and split output
+    S(1,n) = p,p :> _,_;          // we are sure this will work if n is odd
+    // processors with two inputs
+    S(2,1) = p <: _,_;             // split the output
+    S(2,2) = p;                    // nothing to do, p is already stereo
+    // processors with inputs > 2 and outputs > 2
+    S(n,m) = _,_ <: p,p :> _,_;    // we are sure this works if n or p are odd
 };
 
 // TODO: need demo function of spat here
@@ -271,19 +271,19 @@ with {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 // music.lib:
-	// The following functions could remain available but they would have to be
-	// factorized and reimplemented using the `par` function...
-	// bus2 = _,_;
-	// bus3 = _,_,_;
-	// bus4 = _,_,_,_;
-	// bus5 = _,_,_,_,_;
-	// bus6 = _,_,_,_,_,_;
-	// bus7 = _,_,_,_,_,_,_;
-	// bus8 = _,_,_,_,_,_,_,_;
-	// gain2(g) = *(g),*(g);
-	// gain3(g) = *(g),*(g),*(g);
-	// gain4(g) = *(g),*(g),*(g),*(g);
-	// gain5(g) = *(g),*(g),*(g),*(g),*(g);
-	// gain6(g) = *(g),*(g),*(g),*(g),*(g),*(g);
-	// gain7(g) = *(g),*(g),*(g),*(g),*(g),*(g),*(g);
-	// gain8(g) = *(g),*(g),*(g),*(g),*(g),*(g),*(g),*(g);
+    // The following functions could remain available but they would have to be
+    // factorized and reimplemented using the `par` function...
+    // bus2 = _,_;
+    // bus3 = _,_,_;
+    // bus4 = _,_,_,_;
+    // bus5 = _,_,_,_,_;
+    // bus6 = _,_,_,_,_,_;
+    // bus7 = _,_,_,_,_,_,_;
+    // bus8 = _,_,_,_,_,_,_,_;
+    // gain2(g) = *(g),*(g);
+    // gain3(g) = *(g),*(g),*(g);
+    // gain4(g) = *(g),*(g),*(g),*(g);
+    // gain5(g) = *(g),*(g),*(g),*(g),*(g);
+    // gain6(g) = *(g),*(g),*(g),*(g),*(g),*(g);
+    // gain7(g) = *(g),*(g),*(g),*(g),*(g),*(g),*(g);
+    // gain8(g) = *(g),*(g),*(g),*(g),*(g),*(g),*(g),*(g);

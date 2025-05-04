@@ -285,7 +285,7 @@ declare interpolate_cubic author "Stéphane Letz";
 declare interpolate_cubic licence "MIT";
 
 interpolate_cubic(dv,v0,v1,v2,v3) 
-	= v1 + 0.5*dv*(v2 - v0 + dv*(2.0*v0 - 5.0*v1 + 4.0*v2 - v3 + dv*(3.0*(v1 - v2) + v3 - v0)));
+    = v1 + 0.5*dv*(v2 - v0 + dv*(2.0*v0 - 5.0*v1 + 4.0*v2 - v3 + dv*(3.0*(v1 - v2) + v3 - v0)));
 
 
 //=========================Two points interpolators=======================================
@@ -450,7 +450,7 @@ declare interpolator_select licence "MIT";
 
 interpolator_select(gen, idv, sel) = ba.selectmulti(ma.SR/10, interpolators, sel)
 with {
-	interpolators = (interpolator_linear(gen, idv),
+    interpolators = (interpolator_linear(gen, idv),
                     interpolator_cosine(gen, idv),
                     interpolator_cubic(gen, idv),
                     interpolator_null(gen, idv));

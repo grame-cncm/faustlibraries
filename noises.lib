@@ -55,22 +55,22 @@ closed source license or any other license if you decide so.
 
 noise_env(seed) = environment {
 
-	RANDMAX	= 2147483647.0; // = 2^31-1 = MAX_SIGNED_INT in 32 bits
-	
-	noise = random / RANDMAX
-	with {
-		random = +(seed) ~ *(1103515245); // "linear congruential"
-	};	
-	
-	multirandom(N) = randomize(N) ~_
-	with {
-		randomize(1) = +(seed) : *(1103515245);
-		randomize(N) = randomize(1) <: randomize(N-1),_;
-	};
-	
-	multinoise(N) = multirandom(N) : par(i, N, /(RANDMAX)) : par(i, N, float);
-	
-	noises(N,i) = multinoise(N) : ba.selector(i,N);
+    RANDMAX = 2147483647.0; // = 2^31-1 = MAX_SIGNED_INT in 32 bits
+    
+    noise = random / RANDMAX
+    with {
+        random = +(seed) ~ *(1103515245); // "linear congruential"
+    };    
+    
+    multirandom(N) = randomize(N) ~_
+    with {
+        randomize(1) = +(seed) : *(1103515245);
+        randomize(N) = randomize(1) <: randomize(N-1),_;
+    };
+    
+    multinoise(N) = multirandom(N) : par(i, N, /(RANDMAX)) : par(i, N, float);
+    
+    noises(N,i) = multinoise(N) : ba.selector(i,N);
 
 };
 
@@ -300,7 +300,7 @@ pink_noise_m = pink_noise * 12.5; // Equalizes loudness to that of no.noise (tha
 // Where:
 //
 // * `N`: number of latched white-noise processes to sum,
-// 	not to exceed sizeof(int) in C++ (typically 32).
+// not to exceed sizeof(int) in C++ (typically 32).
 //
 // #### References
 //
@@ -309,7 +309,7 @@ pink_noise_m = pink_noise * 12.5; // Equalizes loudness to that of no.noise (tha
 //------------------------------------------------------------
 pink_noise_vm(N) = noise <: _,par(i,N,ba.latch(clock(i))) :> _
 with {
-	clock(i) = (ba.time>>i)&1; // i'th latch clock signal
+    clock(i) = (ba.time>>i)&1; // i'th latch clock signal
 };
 
 
@@ -424,7 +424,7 @@ with {
     uwn = no.multinoise(N); // uniform white noise in [-1,1] on N channels
     gwn = uwn :> _;         // sum of uniform approaches Gaussian by centeral limit thm
     sigma = sqrt(N/3.0);    // rms of each uwn channel
-    uvgwn = gwn / sigma;	// approaches zero-mean, unit-variance Gaussian white noise, for large N
+    uvgwn = gwn / sigma;    // approaches zero-mean, unit-variance Gaussian white noise, for large N
 };
 
 gnoisem(N) = gnoise(N) * 0.625; // Equalizes loudness to that of no.noise (thanks Mykle Hansen)

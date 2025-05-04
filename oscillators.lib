@@ -1364,19 +1364,19 @@ with {
 // and the compiler will discard the half of the calculations.
 //-----------------------------------------------------------------------------
 sidebands(vs, c0,s0)
-	= c0*vn(0),s0*vn(0), 1,c0, 0,s0
-	: seq(n, outputs(vs)-1, add(vn(n+1)))
-	: _,_, !,!, !,!
+    = c0*vn(0),s0*vn(0), 1,c0, 0,s0
+    : seq(n, outputs(vs)-1, add(vn(n+1)))
+    : _,_, !,!, !,!
 with {
-	// ba.take(n+1, vs)
-	vn(n) = vs : route(outputs(vs),1, n+1,1);
+    // ba.take(n+1, vs)
+    vn(n) = vs : route(outputs(vs),1, n+1,1);
 
-	add(vn, co,so, cn_2,cn_1, sn_2,sn_1) =
-		co+cn*vn, so+sn*vn, cn_1,cn, sn_1,sn
-	with {
-		cn = 2*c0*cn_1 - cn_2;
-		sn = 2*c0*sn_1 - sn_2;
-	};
+    add(vn, co,so, cn_2,cn_1, sn_2,sn_1) =
+        co+cn*vn, so+sn*vn, cn_1,cn, sn_1,sn
+    with {
+        cn = 2*c0*cn_1 - cn_2;
+        sn = 2*c0*sn_1 - sn_2;
+    };
 };
 
 //-----------------------------`(os.)sidebands_list`--------------------------------------
@@ -1422,16 +1422,16 @@ with {
 // but much more efficient.
 //-----------------------------------------------------------------------------
 sidebands_list(N, c0,s0)
-	= c0,s0, 1,c0, 0,s0
-	: seq(n, N-1, si.bus(2*(n+1)), add)
-	: si.bus(2*N), !,!, !,!
+    = c0,s0, 1,c0, 0,s0
+    : seq(n, N-1, si.bus(2*(n+1)), add)
+    : si.bus(2*N), !,!, !,!
 with {
-	add(cn_2,cn_1, sn_2,sn_1) =
-		cn,sn, cn_1,cn, sn_1,sn
-	with {
-		cn = 2*c0*cn_1 - cn_2;
-		sn = 2*c0*sn_1 - sn_2;
-	};
+    add(cn_2,cn_1, sn_2,sn_1) =
+        cn,sn, cn_1,cn, sn_1,sn
+    with {
+        cn = 2*c0*cn_1 - cn_2;
+        sn = 2*c0*sn_1 - sn_2;
+    };
 };
 
 //------------------------------`(os.)dsf`--------------------------------
@@ -1492,23 +1492,23 @@ with {
 //
 declare dsf author "Oleg Nesterov";
 dsf = environment {
-	qo = quadosc;
-	co = qo : _,!;
-	so = qo : !,_;
+    qo = quadosc;
+    co = qo : _,!;
+    so = qo : !,_;
 
-	Nq(f0,df) = (ma.SR/2 - f0) / df : int;
+    Nq(f0,df) = (ma.SR/2 - f0) / df : int;
 
-	// infinite number of harmonics, implies aliasing
-	oscc(f0,df,a) = (co(f0) - a*co(f0-df)) / (1 + a^2 - 2*a*co(df));
-	oscs(f0,df,a) = (so(f0) - a*so(f0-df)) / (1 + a^2 - 2*a*co(df));
+    // infinite number of harmonics, implies aliasing
+    oscc(f0,df,a) = (co(f0) - a*co(f0-df)) / (1 + a^2 - 2*a*co(df));
+    oscs(f0,df,a) = (so(f0) - a*so(f0-df)) / (1 + a^2 - 2*a*co(df));
 
-	// n harmonics, f0, f0 + df, f0 + 2*df, ..., f0 + (n-1)*df
-	osccN(f0,df,a,n) = oscc(f0,df,a) - a^n * oscc(f0 + n*df, df,a);
-	oscsN(f0,df,a,n) = oscs(f0,df,a) - a^n * oscs(f0 + n*df, df,a);
+    // n harmonics, f0, f0 + df, f0 + 2*df, ..., f0 + (n-1)*df
+    osccN(f0,df,a,n) = oscc(f0,df,a) - a^n * oscc(f0 + n*df, df,a);
+    oscsN(f0,df,a,n) = oscs(f0,df,a) - a^n * oscs(f0 + n*df, df,a);
 
-	// finite number of harmonics, from f0 to Nyquist
-	osccNq(f0,df,a) = osccN(f0,df,a, Nq(f0,df));
-	oscsNq(f0,df,a) = oscsN(f0,df,a, Nq(f0,df));
+    // finite number of harmonics, from f0 to Nyquist
+    osccNq(f0,df,a) = osccN(f0,df,a, Nq(f0,df));
+    oscsNq(f0,df,a) = oscsN(f0,df,a, Nq(f0,df));
 };
 
 //================ Waveguide-Resonator-Based Oscillators ================

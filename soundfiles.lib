@@ -184,12 +184,12 @@ sound(sf, part) = environment {
     play_alt(level, gate, ctrl) = super.player(sf, part, altN(lramp, ctrl), level)
     with {
         // High-order function which alternate between 2 'readers' depending of the 'ctrl' signal
-       	alt2(r1, r2, ctrl) = \(sf, part).(ba.selectmulti(ma.SR/100, lr, ctrl) with { lr = r1(sf, part), r2(sf, part); });
+        alt2(r1, r2, ctrl) = \(sf, part).(ba.selectmulti(ma.SR/100, lr, ctrl) with { lr = r1(sf, part), r2(sf, part); });
         
         altN(lrs, ctrl) = \(sf, part).(ba.selectmulti(ma.SR/100, mapper(lrs), ctrl) 
         with { 
-        	mapper((xs, xxs)) = xs(sf, part), mapper(xxs); 
-        	mapper(xs) = xs(sf, part); 
+            mapper((xs, xxs)) = xs(sf, part), mapper(xxs); 
+            mapper(xs) = xs(sf, part); 
         });
         
         step = super.srate(sf, part)/ma.SR;
@@ -201,7 +201,7 @@ sound(sf, part) = environment {
     };
 
 }; // End of environment
-							  
+                              
 /*
 // Using the `sound` environment allocated with a given `sf` and `part`
 

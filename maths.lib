@@ -10,12 +10,12 @@
 //########################################################################################
 
 // ## History
-// * 06/13/2016 [RM]	normalizing and integrating to new libraries
-// * 07/08/2015	[YO]	documentation comments
-// * 20/06/2014	[SL]	added FTZ function
-// * 22/06/2013	[YO]	added float|double|quad variants of some foreign functions
-// * 28/06/2005	[YO]	postfixed functions with 'f' to force float version instead of double
-// * 28/06/2005	[YO]	removed 'modf' because it requires a pointer as argument
+// * 06/13/2016 [RM]  normalizing and integrating to new libraries
+// * 07/08/2015 [YO]  documentation comments
+// * 20/06/2014 [SL]  added FTZ function
+// * 22/06/2013 [YO]  added float|double|quad variants of some foreign functions
+// * 28/06/2005 [YO]  postfixed functions with 'f' to force float version instead of double
+// * 28/06/2005 [YO]  removed 'modf' because it requires a pointer as argument
 
 /************************************************************************
 ************************************************************************
@@ -730,17 +730,17 @@ chebychev(n,x) = 2*x*chebychev(n-1, x) - chebychev(n-2, x);
 // Where:
 //
 // * `cn`: the different Chebychevs polynomials such that:
-// 	chebychevpoly((c0,c1,...,cn)) = Sum of chebychev(i)*ci
+// chebychevpoly((c0,c1,...,cn)) = Sum of chebychev(i)*ci
 //
 // #### Reference
 //
 // <http://www.csounds.com/manual/html/chebyshevpoly.html>
 //-------------------------------------------------------------------------
 chebychevpoly(lcoef) = _ <: L(0,lcoef) :> _
-	with {
-		L(n,(c,cs)) = chebychev(n)*c, L(n+1,cs);
-		L(n,c)      = chebychev(n)*c;
-	};
+    with {
+        L(n,(c,cs)) = chebychev(n)*c, L(n+1,cs);
+        L(n,c)      = chebychev(n)*c;
+    };
 
 
 //------------------`(ma.)diffn`----------------------------

@@ -652,7 +652,7 @@ declare vital_rev license "GPL-3.0";
 declare mono_freeverb author "Romain Michon";
 
 mono_freeverb(fb1, fb2, damp, spread) = _ <: par(i,8,lbcf(combtuningL(i)+spread,fb1,damp))
-	:> seq(i,4,fi.allpass_comb(1024, allpasstuningL(i)+spread, -fb2))
+    :> seq(i,4,fi.allpass_comb(1024, allpasstuningL(i)+spread, -fb2))
 with {
  
     // Filters parameters
@@ -899,9 +899,9 @@ declare jpverb author "Julian Parker, bug fixes and minor interface changes by T
 declare jpverb license "MIT license";
 
 jpverb(t60, damp, size, early_diff, 
-		mod_depth, mod_freq, 
-		low, mid, high, 
-		low_cutoff, high_cutoff)
+        mod_depth, mod_freq, 
+        low, mid, high, 
+        low_cutoff, high_cutoff)
     = jp_gh_rev.jpverb(t60, damp, size, early_diff, mod_depth, mod_freq, low, mid, high, low_cutoff, high_cutoff);
 
 
@@ -935,7 +935,7 @@ declare greyhole author "Julian Parker, bug fixes and minor interface changes by
 declare greyhole license "MIT license";
 
 greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq) 
-	= jp_gh_rev.greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq);
+    = jp_gh_rev.greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq);
 
 //===============================Keith Barr Allpass Loop Reverb=======================
 //======================================================================================
@@ -1000,17 +1000,17 @@ with {
 
         // allpass loop sections
         loopSec(0) = _ @ (adaptSR(32768, 4568) - 1) : _ * rt : _ + (l : apSec(0)) : apfMod(os.osc(0.5), adaptSR(32768, 1251), adaptSR(32768, 20), 0.6) : 
-	    apf(adaptSR(32768, 1751), 0.6) : op(damp) : op(- 0.05);
+        apf(adaptSR(32768, 1751), 0.6) : op(damp) : op(- 0.05);
         loopSec(1) = _ @ adaptSR(32768, 5859) : _ * rt : apf(adaptSR(32768, 1443), 0.6) : apf(adaptSR(32768, 1343), 0.6) : op(damp) : op(- 0.05);
         loopSec(2) = _ @ adaptSR(32768, 4145) : _ * rt : _ + (r : apSec(1)) : apfMod(os.osc(0.5), adaptSR(32768, 1582), adaptSR(32768, 20), 0.6) : 
-	    apf(adaptSR(32768, 1981), 0.6) : op(damp) : op(- 0.05);
+        apf(adaptSR(32768, 1981), 0.6) : op(damp) : op(- 0.05);
         loopSec(3) = _ @ adaptSR(32768, 3476) : _ * rt : apf(adaptSR(32768, 1274), 0.6) : apf(adaptSR(32768, 1382), 0.6) : op(damp) : op(- 0.05);
 
         // output delay taps
         outTaps = ((_ * 1.5 @ adaptSR(32768, 2630), _ * 1.2 @ adaptSR(32768, 1943), _ * 1.0 @ adaptSR(32768, 3200), 
-	    _ * 0.8 @ adaptSR(32768, 4016)) :> +),
-    	((_ * 1.0 @ adaptSR(32768, 2420), _ * 0.8 @ adaptSR(32768, 2631), _ * 1.5 @ adaptSR(32768, 1163), 
-	    _ * 1.2 @ adaptSR(32768, 3330)) :> +);
+        _ * 0.8 @ adaptSR(32768, 4016)) :> +),
+        ((_ * 1.0 @ adaptSR(32768, 2420), _ * 0.8 @ adaptSR(32768, 2631), _ * 1.5 @ adaptSR(32768, 1163), 
+        _ * 1.2 @ adaptSR(32768, 3330)) :> +);
     };
 };
 

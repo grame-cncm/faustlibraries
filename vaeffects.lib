@@ -98,7 +98,7 @@ with {
 // Where:
 //
 // * `res`: normalized amount of corner-resonance between 0 and 1
-// 	(0 is min resonance, 1 is maximum)
+// (0 is min resonance, 1 is maximum)
 // * `fr`: corner-resonance frequency in Hz
 //------------------------------------------------------------
 declare moog_vcf_2b author "Julius O. Smith III";
@@ -359,7 +359,7 @@ letrec{
     _+(s4*B4*d3 + s3)*B3 : //_+S3 :
     _+(((s4*B4*d3 + s3)*B3)*d2 + s2)*B2*G3 : //_+(S3...)
     _*a2 : _-s2 : _*alpha*2 : _+s2;
-		
+
   's3 = _-(s4*B4*SG4*k) : 
     _-((s4*B4*d3+s3)*B3*SG3*k) : 
     _-(((s4*B4*d3+s3)*B3*d2 + s2)*B2*SG3*k) :
@@ -1375,7 +1375,7 @@ oneVocoderBand(band,bandsNumb,bwRatio,bandGain,x) = x : fi.resonbp(bandFreq,band
 };
 
 vocoder(nBands,att,rel,BWRatio,source,excitation) = source <: par(i,nBands,oneVocoderBand(i,nBands,BWRatio,1) :
-	an.amp_follower_ar(att,rel) : _,excitation : oneVocoderBand(i,nBands,BWRatio)) :> _ ;
+    an.amp_follower_ar(att,rel) : _,excitation : oneVocoderBand(i,nBands,BWRatio)) :> _ ;
 
 //########################################################################################
 /************************************************************************
