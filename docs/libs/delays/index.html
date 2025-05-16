@@ -267,6 +267,14 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#others" class="nav-link">Others</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#demultitapsincdelay" class="nav-link">(de.)multiTapSincDelay</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -299,8 +307,8 @@ if the interval of d can't be computed by the compiler.
 <hr />
 <h3 id="defdelay"><code>(de.)fdelay</code></h3>
 <p>Simple <code>d</code> samples fractional delay based on 2 interpolated delay lines where <code>n</code> is
-the maximum delay length as a number of samples.
-<code>fdelay</code> is a standard Faust function.</p>
+the maximum delay length as a number of samples.</p>
+<p><code>fdelay</code> is a standard Faust function.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>_ : fdelay(n,d) : _
 </code></pre>
@@ -399,7 +407,49 @@ by means of pole-zero cancellations.</p>
 <p>Delay arguments too small will produce an UNSTABLE allpass!</p>
 <p>Because allpass interpolation is recursive, it is not as robust
 as Lagrange interpolation under time-varying conditions
-(you may hear clicks when changing the delay rapidly).</p></div>
+(you may hear clicks when changing the delay rapidly).</p>
+<h2 id="others">Others</h2>
+<hr />
+<h3 id="demultitapsincdelay"><code>(de.)multiTapSincDelay</code></h3>
+<p>Variable delay line using multi-tap sinc interpolation.</p>
+<p>This function implements a continuously variable delay line by superposing (2K+2) auxiliary delayed signals
+whose positions and gains are determined by a sinc-based interpolation method. It extends the traditional
+crossfade delay technique to significantly reduce spectral coloration artifacts, which are problematic in
+applications like Wave Field Synthesis (WFS) and auralization.</p>
+<p>Operation:</p>
+<ul>
+<li>If tau1 and tau2 are very close (|tau2 - tau1| ≈ 0), a simple fixed fractional delay is applied</li>
+<li>
+<p>Otherwise, a variable delay is synthesized by:</p>
+<ul>
+<li>Computing (2K+2) taps symmetrically distributed around tau1 and tau2</li>
+<li>Applying sinc-based weighting to each tap, based on its offset from the target interpolated delay tau</li>
+<li>Summing all the weighted taps to produce the output</li>
+</ul>
+</li>
+</ul>
+<p>Features:</p>
+<ul>
+<li>Smooth delay variation without introducing Doppler pitch shifts</li>
+<li>Significant reduction of comb-filter coloration compared to classical crossfading</li>
+<li>Switching between fixed and variable delay modes to ensure stability</li>
+</ul>
+<h4 id="usage_6">Usage</h4>
+<pre><code> _ : multiTapSincDelay(K, MaxDelay, tau1, tau2, alpha) : _
+
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>K (integer)</code>: number of auxiliary tap pairs (a constant numerical expression). Total number of taps = 2*K + 2</li>
+<li><code>MaxDelay</code>: maximum allowable delay in samples (buffer size)</li>
+<li><code>tau1</code>: initial delay in samples (can be fractional)</li>
+<li><code>tau2</code>: target delay in samples (can be fractional)</li>
+<li><code>alpha</code>: interpolation factor between tau1 and tau2 (in [0,1] with 0 = tau1, 1 = tau2)</li>
+</ul>
+<h4 id="reference_2">Reference</h4>
+<ul>
+<li>T. Carpentier, "Implementation of a continuously variable delay line by crossfading between several tap delays", 2024: <a href="https://hal.science/hal-04646939">https://hal.science/hal-04646939</a></li>
+</ul></div>
             </div>
         </div>
 
