@@ -226,7 +226,6 @@ ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : +;
 // Where:
 //
 // * `maxdel`: maximum delay (a power of 2)
-// * `intdel`: current (integer) comb-filter delay between 0 and maxdel
 // * `del`: current (float) comb-filter delay between 0 and maxdel
 // * `b0`: gain applied to delay-line input
 // * `bM`: gain applied to delay-line output and then summed with input
@@ -237,7 +236,7 @@ ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : +;
 declare ff_fcomb author "Julius O. Smith III";
 declare ff_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare ff_fcomb license "MIT-style STK-4.3 license";
-ff_fcomb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.fdelay(maxdel,M) : +;
+ff_fcomb(maxdel,del,b0,bM) = _ <: *(b0), bM * de.fdelay(maxdel,del) : +;
 
 //-----------`(fi.)ffcombfilter`-------------------
 // Typical special case of `ff_comb()` where: `b0 = 1`.
@@ -284,13 +283,12 @@ fb_comb_common(dop,N,b0,aN) = + ~ aN * dop(N-1) : *(b0);
 // #### Usage
 //
 // ```
-// _ : fb_comb(maxdel,intdel,b0,aN) : _
+// _ : fb_comb(maxdel,del,b0,aN) : _
 // ```
 //
 // Where:
 //
 // * `maxdel`: maximum delay (a power of 2)
-// * `intdel`: current (integer) comb-filter delay between 0 and maxdel
 // * `del`: current (float) comb-filter delay between 0 and maxdel
 // * `b0`: gain applied to delay-line input and forwarded to output
 // * `aN`: minus the gain applied to delay-line output before summing with the input
@@ -302,7 +300,7 @@ fb_comb_common(dop,N,b0,aN) = + ~ aN * dop(N-1) : *(b0);
 declare fb_comb author "Julius O. Smith III";
 declare fb_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>, revised by Oleg Nesterov";
 declare fb_comb license "MIT-style STK-4.3 license";
-fb_comb(maxdel,N,b0,aN) = fb_comb_common(de.delay(maxdel),N,b0,-aN) : mem;
+fb_comb(maxdel,del,b0,aN) = fb_comb_common(de.delay(maxdel),del,b0,-aN) : mem;
 
 //-----------------------`(fi.)fb_fcomb`-----------------------
 // Feed-Back Comb Filter (floating point delay).
@@ -316,7 +314,6 @@ fb_comb(maxdel,N,b0,aN) = fb_comb_common(de.delay(maxdel),N,b0,-aN) : mem;
 // Where:
 //
 // * `maxdel`: maximum delay (a power of 2)
-// * `intdel`: current (integer) comb-filter delay between 0 and maxdel
 // * `del`: current (float) comb-filter delay between 0 and maxdel
 // * `b0`: gain applied to delay-line input and forwarded to output
 // * `aN`: minus the gain applied to delay-line output before summing with the input
@@ -328,7 +325,7 @@ fb_comb(maxdel,N,b0,aN) = fb_comb_common(de.delay(maxdel),N,b0,-aN) : mem;
 declare fb_fcomb author "Julius O. Smith III";
 declare fb_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>, revised by Oleg Nesterov";
 declare fb_fcomb license "MIT-style STK-4.3 license";
-fb_fcomb(maxdel,N,b0,aN) = fb_comb_common(de.fdelay(maxdel),N,b0,-aN) : mem;
+fb_fcomb(maxdel,del,b0,aN) = fb_comb_common(de.fdelay(maxdel),del,b0,-aN) : mem;
 
 //-----------------------`(fi.)rev1`-----------------------
 // Special case of `fb_comb` (`rev1(maxdel,N,g)`).
@@ -338,7 +335,7 @@ fb_fcomb(maxdel,N,b0,aN) = fb_comb_common(de.fdelay(maxdel),N,b0,-aN) : mem;
 declare rev1 author "Julius O. Smith III";
 declare rev1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare rev1 license "MIT-style STK-4.3 license";
-rev1(maxdel,N,g) = fb_comb (maxdel,N,1,-g);
+rev1(maxdel,N,g) = fb_comb(maxdel,N,1,-g);
 
 //-----`(fi.)fbcombfilter` and `(fi.)ffbcombfilter`------------
 // Other special cases of Feed-Back Comb Filter.
