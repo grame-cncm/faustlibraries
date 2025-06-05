@@ -245,6 +245,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#nodnoise" class="nav-link">(no.)dnoise</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#norandomseed" class="nav-link">(no.)randomseed</a>
               <ul class="nav flex-column">
               </ul>
@@ -348,26 +352,41 @@
 <li><code>i</code>: the selected random number (i in [0..N[)</li>
 </ul>
 <hr />
+<h3 id="nodnoise"><code>(no.)dnoise</code></h3>
+<p>A deterministic noise burst with a dynamically adjustable seed, enabling consistent recall.
+Useful for noise variation sensitive applications like replicable/recallable percussion sounds and waveguide excitation.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>dnoise(t,sx) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>t</code>: is a noise burst trigger</li>
+<li><code>sx</code>: defines the range of integer seed multipliers. </li>
+</ul>
+<h4 id="example">Example</h4>
+<p>This expression <code>sx = hslider("seed multiplier",1,1,1000,1)</code> allows 1000 distinct seed variations.
+To generate a burst with a fixed length, use <code>ba.spulse(bLength, t)</code> (as trigger for the <code>t</code> parameter), where <code>bLength</code> is the burst duration in samples and <code>t</code> is a trigger.</p>
+<hr />
 <h3 id="norandomseed"><code>(no.)randomseed</code></h3>
 <p>A random seed based on the foreign function <code>arc4random</code>
 (see man arc4random). Used in <code>rnoise</code>, <code>rmultirandom</code>, etc. to 
 avoid having the same pseudo random sequence at each run.</p>
 <p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
-<h4 id="usage_4">Usage</h4>
+<h4 id="usage_5">Usage</h4>
 <pre><code>randomseed : _
 </code></pre>
 <hr />
 <h3 id="nornoise"><code>(no.)rnoise</code></h3>
 <p>A randomized white noise generator (outputs random number between -1 and 1).</p>
 <p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
-<h4 id="usage_5">Usage</h4>
+<h4 id="usage_6">Usage</h4>
 <pre><code>rnoise : _
 </code></pre>
 <hr />
 <h3 id="normultirandom"><code>(no.)rmultirandom</code></h3>
 <p>Generates multiple decorrelated random numbers in parallel.</p>
 <p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
-<h4 id="usage_6">Usage</h4>
+<h4 id="usage_7">Usage</h4>
 <pre><code>rmultirandom(N) : _
 </code></pre>
 <p>Where:</p>
@@ -378,7 +397,7 @@ avoid having the same pseudo random sequence at each run.</p>
 <h3 id="normultinoise"><code>(no.)rmultinoise</code></h3>
 <p>Generates multiple decorrelated noises in parallel.</p>
 <p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
-<h4 id="usage_7">Usage</h4>
+<h4 id="usage_8">Usage</h4>
 <pre><code>rmultinoise(N) : _
 </code></pre>
 <p>Where:</p>
@@ -389,7 +408,7 @@ avoid having the same pseudo random sequence at each run.</p>
 <h3 id="nornoises"><code>(no.)rnoises</code></h3>
 <p>A convenient wrapper around rmultinoise.</p>
 <p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
-<h4 id="usage_8">Usage</h4>
+<h4 id="usage_9">Usage</h4>
 <pre><code>rnoises(N,i) : _
 </code></pre>
 <p>Where:</p>
@@ -401,7 +420,7 @@ avoid having the same pseudo random sequence at each run.</p>
 <h3 id="nopink_noise"><code>(no.)pink_noise</code></h3>
 <p>Pink noise (1/f noise) generator (third-order approximation covering the audio band well).
 <code>pink_noise</code> is a standard Faust function.</p>
-<h4 id="usage_9">Usage</h4>
+<h4 id="usage_10">Usage</h4>
 <pre><code>pink_noise : _
 </code></pre>
 <h4 id="reference">Reference</h4>
@@ -414,7 +433,7 @@ avoid having the same pseudo random sequence at each run.</p>
 </code></pre>
 <p>where <code>p=-0.5</code> means filter rolloff <code>f^(-1/2)</code> which gives 1/f rolloff in the
 power spectral density, and can be changed to other real values.</p>
-<h4 id="example">Example</h4>
+<h4 id="example_1">Example</h4>
 <p>// pink_noise_compare.dsp - compare three pinking filters</p>
 <pre><code>process = pink_noises with {
     f0 = 35; // Lower bandlimit in Hz
@@ -437,7 +456,7 @@ Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
 <hr />
 <h3 id="nopink_noise_vm"><code>(no.)pink_noise_vm</code></h3>
 <p>Multi pink noise generator.</p>
-<h4 id="usage_10">Usage</h4>
+<h4 id="usage_11">Usage</h4>
 <pre><code>pink_noise_vm(N) : _
 </code></pre>
 <p>Where:</p>
@@ -453,12 +472,12 @@ not to exceed sizeof(int) in C++ (typically 32).</li>
 <hr />
 <h3 id="nolfnoise-nolfnoise0-and-nolfnoisen"><code>(no.)lfnoise</code>, <code>(no.)lfnoise0</code> and <code>(no.)lfnoiseN</code></h3>
 <p>Low-frequency noise generators (Butterworth-filtered downsampled white noise).</p>
-<h4 id="usage_11">Usage</h4>
+<h4 id="usage_12">Usage</h4>
 <pre><code>lfnoise0(rate) : _   // new random number every int(ma.SR/rate) samples or so
 lfnoiseN(N,rate) : _ // same as &quot;lfnoise0(rate) : fi.lowpass(N,rate)&quot; [see filters.lib]
 lfnoise(rate) : _    // same as &quot;lfnoise0(rate) : seq(i,5,fi.lowpass(N,rate))&quot; (no overshoot)
 </code></pre>
-<h4 id="example_1">Example</h4>
+<h4 id="example_2">Example</h4>
 <p>(view waveforms in faust2octave):</p>
 <pre><code>rate = ma.SR/100.0; // new random value every 100 samples (ma.SR from maths.lib)
 process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
@@ -468,7 +487,7 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 <hr />
 <h3 id="nosparse_noise"><code>(no.)sparse_noise</code></h3>
 <p>Sparse noise generator.</p>
-<h4 id="usage_12">Usage</h4>
+<h4 id="usage_13">Usage</h4>
 <pre><code>sparse_noise(f0) : _
 </code></pre>
 <p>Where:</p>
@@ -484,7 +503,7 @@ at an average rate of f0 impulses per second.</p>
 <hr />
 <h3 id="novelvet_noise_vm"><code>(no.)velvet_noise_vm</code></h3>
 <p>Velvet noise generator.</p>
-<h4 id="usage_13">Usage</h4>
+<h4 id="usage_14">Usage</h4>
 <pre><code>velvet_noise(amp, f0) : _
 </code></pre>
 <p>Where:</p>
@@ -502,7 +521,7 @@ at an average rate of f0 impulses per second.</p>
 <hr />
 <h3 id="nognoise"><code>(no.)gnoise</code></h3>
 <p>Approximate zero-mean, unit-variance Gaussian white noise generator.</p>
-<h4 id="usage_14">Usage</h4>
+<h4 id="usage_15">Usage</h4>
 <pre><code>gnoise(N) : _
 </code></pre>
 <p>Where:</p>
@@ -519,7 +538,7 @@ at an average rate of f0 impulses per second.</p>
 roll-off factor (alpha) over the entire audible frequency range
 (20-20000 Hz). The output is normalized so that an equal RMS
 level is maintained for different values of alpha.</p>
-<h4 id="usage_15">Usage</h4>
+<h4 id="usage_16">Usage</h4>
 <pre><code>colored_noise(N,alpha) : _
 </code></pre>
 <p>Where:</p>

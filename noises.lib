@@ -12,7 +12,7 @@ os = library("oscillators.lib");
 no = library("noises.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Noise Generator Library";
-declare version "1.4.1";
+declare version "1.5.0";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -142,8 +142,8 @@ noises(N,i) = noise_env(12345).noises(N,i);
 
 
 //-----------------------`(no.)dnoise`------------------------
-// A deterministic noise burst with a dynamically adjustable seed, enabling consistent recall
-// Useful for noise variation sensitive applications like replicable/recallable percussion sounds and waveguide excitation
+// A deterministic noise burst with a dynamically adjustable seed, enabling consistent recall.
+// Useful for noise variation sensitive applications like replicable/recallable percussion sounds and waveguide excitation.
 //
 // #### Usage
 //
@@ -154,8 +154,12 @@ noises(N,i) = noise_env(12345).noises(N,i);
 // Where:
 //
 // * `t`: is a noise burst trigger
-// * `sx`: defines the range of integer seed multipliers. For example `sx = hslider("seed multiplier",1,1,1000,1) allows 1000 distinct seed variations
-// To generate a burst with a fixed length, use ba.spulse(bLength, t) (as trigger for dnoise `t`), where bLength is the burst duration in samples and `t` is a trigger
+// * `sx`: defines the range of integer seed multipliers. 
+//
+// #### Example 
+// This expression `sx = hslider("seed multiplier",1,1,1000,1)` allows 1000 distinct seed variations.
+// To generate a burst with a fixed length, use `ba.spulse(bLength, t)` (as trigger for the `t` parameter), where `bLength` is the burst duration in samples and `t` is a trigger.
+//----------------------------------------------------------
 dnoise(t,sx) = noise_env(12345).dnoise(t,sx);
 
 //-----------------------`(no.)randomseed`------------------------
