@@ -72,6 +72,11 @@ noise_env(seed) = environment {
     
     noises(N,i) = multinoise(N) : ba.selector(i,N);
 
+    dnoise(t,sx) = random / RANDMAX
+    with {
+        random = +(int(seed*sx)*int(t)) ~ *(1103515245*int(t));
+    }; 
+
 };
 
 
@@ -135,6 +140,24 @@ multinoise(N) = noise_env(12345).multinoise(N);
 //----------------------------------------------------------
 noises(N,i) = noise_env(12345).noises(N,i);
 
+
+//-----------------------`(no.)dnoise`------------------------
+// A deterministic noise burst with a dynamically adjustable seed, enabling consistent recall
+// Useful for noise variation sensitive applications like replicable/recallable percussion sounds and waveguide excitation
+//
+//
+// #### Usage
+//
+// ```
+// dnoise(t,sx) : _
+// ```
+//
+// Where:
+//
+// * `t`: is a noise burst trigger
+// * `sx`: defines the range of integer seed multipliers. For example `sx = hslider("seed multiplier",1,1,1000,1) allows 1000 distinct seed variations
+// To generate a burst with a fixed length, use ba.spulse(bLength, t) (as trigger for dnoise `t`), where bLength is the burst duration in samples and `t` is a trigger
+dnoise(t,sx) = noise_env(12345).dnoise(t,sx);
 
 //-----------------------`(no.)randomseed`------------------------
 // A random seed based on the foreign function `arc4random`
