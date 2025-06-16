@@ -344,16 +344,17 @@ _,_,_ : cross(3) : _,_,_
 </ul>
 <hr />
 <h3 id="rointerleave"><code>(ro.)interleave</code></h3>
-<p>Interleave R x C cables from column order to row order.
-input : x(0), x(1), x(2) ..., x(row<em>col-1)
-output: x(0+0</em>row), x(0+1<em>row), x(0+2</em>row), ..., x(1+0<em>row), x(1+1</em>row), x(1+2*row), ...</p>
+<p>Interleave R x C cables from column order to row order. That is, transpose the input CxR matrix, 
+the first R inputs is the first row.</p>
+<p>input : <code>x(0), x(1), x(2) ..., x(row*col-1)</code></p>
+<p>output: <code>x(0+0*row), x(0+1*row), x(0+2*row), ..., x(1+0*row), x(1+1*row), x(1+2*row), ...</code></p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>si.bus(R*C) : interleave(R,C) : si.bus(R*C)
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>R</code>: the number of row (int, as a constant numerical expression)</li>
-<li><code>C</code>: the number of column (int, as a constant numerical expression)</li>
+<li><code>R</code>: row length (int, as a constant numerical expression)</li>
+<li><code>C</code>: column length (int, as a constant numerical expression)</li>
 </ul>
 <hr />
 <h3 id="robutterfly"><code>(ro.)butterfly</code></h3>

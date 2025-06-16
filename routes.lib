@@ -141,9 +141,14 @@ crossNM(N,M) = route(N+M, N+M, par(i, N+M, i+1, ((i+M)%(N+M))+1));
 
 
 //--------------------------`(ro.)interleave`------------------------------
-// Interleave R x C cables from column order to row order.
-// input : x(0), x(1), x(2) ..., x(row*col-1)
-// output: x(0+0*row), x(0+1*row), x(0+2*row), ..., x(1+0*row), x(1+1*row), x(1+2*row), ...
+// Interleave R x C cables from column order to row order. That is, transpose the input CxR matrix, 
+// the first R inputs is the first row.
+//
+// input : `x(0), x(1), x(2) ..., x(row*col-1)`
+//
+// output: `x(0+0*row), x(0+1*row), x(0+2*row), ..., x(1+0*row), x(1+1*row), x(1+2*row), ...`
+// 
+// 
 //
 // #### Usage
 //
@@ -153,8 +158,8 @@ crossNM(N,M) = route(N+M, N+M, par(i, N+M, i+1, ((i+M)%(N+M))+1));
 //
 // Where:
 //
-// * `R`: the number of row (int, as a constant numerical expression)
-// * `C`: the number of column (int, as a constant numerical expression)
+// * `R`: row length (int, as a constant numerical expression)
+// * `C`: column length (int, as a constant numerical expression)
 //-----------------------------------------------------------------------------
 interleave(1,2) = _,_;
 interleave(R,C) = route(R*C, R*C, par(i, R*C, (i+1, (i%R)*C + int(i/R) + 1)));
