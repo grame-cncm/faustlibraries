@@ -65,9 +65,9 @@ quantizer = environment {
     with {
         ratio = normalizedRatio(freq, rf);
         findRatio(1) = ba.take(1, nl);
-        findRatio(n) = select2(ratio <= ba.take(n, nl),
-            findRatio(n-1),
-            ba.take(n, nl)
+        findRatio(n) = select2(ratio < ba.take(n, nl),
+            ba.take(n, nl),
+            findRatio(n-1)
         );
     };
     
@@ -77,17 +77,16 @@ quantizer = environment {
         ratio = normalizedRatio(freq, rf);
         smoothRatio(1) = interpolateBetween(ba.take(1, nl), ba.take(2, nl));
         smoothRatio(n) = select2(ratio <= ba.take(n, nl),
-            smoothRatio(n-1),
             select2(n < ba.count(nl),
                 interpolateBetween(ba.take(n, nl), 2),  // Last note to octave
-                interpolateBetween(ba.take(n-1, nl), ba.take(n, nl))
-            )
+                interpolateBetween(
+                    ba.take(n, nl), 
+                    ba.take(select2(n == ba.count(nl), n+1, n-1), nl))
+            ),
+            smoothRatio(n-1)
         );
         
-        interpolateBetween(ratio1, ratio2) = ratio1 + smoothCurve(t) * (ratio2 - ratio1)
-        with {
-            t = max(0, min(1, (ratio - ratio1) / (ratio2 - ratio1)));
-        };
+        interpolateBetween(ratio1, ratio2) = ratio1 + smoothCurve((ratio - ratio1) / (ratio2 - ratio1)) * (ratio2 - ratio1);
     };
 };
 
