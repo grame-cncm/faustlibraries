@@ -43,16 +43,56 @@ For more information, please refer to <http://unlicense.org/>
 ************************************************************************
 ************************************************************************/
 
-MinFreq = 10;
-MaxFreq = 20000;
-TableSize = 1024;
+quantizer = environment {
 
-qLog(x) = ba.tabulate(1,log(_),TableSize,MinFreq,MaxFreq,x).cub;
-qSmooth(x) = ba.tabulate(1,0.5*atan(_*20-10)/1.4711+0.5,TableSize,0,1,x).cub;
-
+    // Constants for tabulation functions
+    MinFreq = 10;
+    MaxFreq = 20000;
+    TableSize = 1024;
+  
+    // Smoothing function for gradual transitions
+    smoothCurve(x) = ba.tabulate(1, \(v).(0.5 * atan(v * 20 - 10) / 1.4711 + 0.5), TableSize, 0, 1, x).cub;
+    
+    // Calculate which octave the frequency belongs to
+    // Returns the octave multiplier: 2^floor(log2(freq/rf))
+    getOctave(freq, rf) = pow(2, floor(log(freq/rf) / log(2)));
+    
+    // Calculate normalized frequency ratio (frequency within base octave relative to root)
+    normalizedRatio(freq, rf) = freq / (rf * getOctave(freq, rf));
+    
+    // Find the closest scale note ratio for a given frequency
+    findClosestRatio(freq, rf, nl) = findRatio(ba.count(nl))
+    with {
+        ratio = normalizedRatio(freq, rf);
+        findRatio(1) = ba.take(1, nl);
+        findRatio(n) = select2(ratio <= ba.take(n, nl),
+            findRatio(n-1),
+            ba.take(n, nl)
+        );
+    };
+    
+    // Calculate smooth interpolation between adjacent scale notes
+    smoothInterpolation(freq, rf, nl) = smoothRatio(ba.count(nl))
+    with {
+        ratio = normalizedRatio(freq, rf);
+        smoothRatio(1) = interpolateBetween(ba.take(1, nl), ba.take(2, nl));
+        smoothRatio(n) = select2(ratio <= ba.take(n, nl),
+            smoothRatio(n-1),
+            select2(n < ba.count(nl),
+                interpolateBetween(ba.take(n, nl), 2),  // Last note to octave
+                interpolateBetween(ba.take(n-1, nl), ba.take(n, nl))
+            )
+        );
+        
+        interpolateBetween(ratio1, ratio2) = ratio1 + smoothCurve(t) * (ratio2 - ratio1)
+        with {
+            t = max(0, min(1, (ratio - ratio1) / (ratio2 - ratio1)));
+        };
+    };
+};
 
 //-------`(qu.)quantize`----------
-// Configurable frequency quantization tool. Output only the frequencies that are part of the specified scale.
+// Configurable frequency quantization tool. Snaps input frequencies to exact scale notes.
 // Works for positive audio frequencies.
 //
 // #### Usage
@@ -60,58 +100,39 @@ qSmooth(x) = ba.tabulate(1,0.5*atan(_*20-10)/1.4711+0.5,TableSize,0,1,x).cub;
 // ```
 // _ : quantize(rf,nl) : _
 // ```
-// Where :
 //
+// Where:
 // * `rf` : frequency of the root note of the scale
-// * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency
+// * `nl` : list of frequency ratios for each note relative to root
+//
+// #### Example
+// ```
+// process = quantize(440, (1, 1.125, 1.25, 1.333, 1.5));
+// ```
 //------------------------
-quantize(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
-with{
-    octave = (qLog(_)-log(rf))/log(2) <: select2(_<0, 1<<int(_), 1/(1<<int(1-_)));
-    nN = ba.count(nl);
-    noteRatio(1,oct) = 1;
-    noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*ba.take(n,nl)+
-                            (ba.take(n,nl)>((_/oct)/rf))*(noteRatio(n-1,oct));
-};
+quantize(rf, nl, x) = rf * quantizer.getOctave(x, rf) * quantizer.findClosestRatio(x, rf, nl);
 
 
 //-------`(qu.)quantizeSmoothed`----------
-// Configurable frequency quantization tool. Output frequencies that are closer to the frequencies of the specified scale notes.
+// Configurable frequency quantization tool. Smoothly transitions between scale notes.
 // Works for positive audio frequencies.
-//
 //
 // #### Usage
 //
 // ```
 // _ : quantizeSmoothed(rf,nl) : _
-// nl = (1,1.2,1.4,1.7);
 // ```
-// Where :
 //
+// Where:
 // * `rf` : frequency of the root note of the scale
-// * `nl` : list of the ratio of the frequencies of each note in relation to the root frequency
+// * `nl` : list of frequency ratios for each note relative to root
+//
+// #### Example
+// ```
+// process = quantizeSmoothed(440, dodeca);
+// ```
 //------------------------
-quantizeSmoothed(rf,nl) = _<: octave,_ <: _,!,noteRatio(nN) : rf*_*_
-with{
-    octave = (qLog(_)-log(rf))/log(2)<: select3((_>0)+(_>=0),
-        (1/(1<<int(1-_))),
-        2,
-        1<<int(_)
-    );
-    nN = ba.count(nl);
-    noteRatio(1,oct) = findValue(1,oct);
-    noteRatio(n,oct) = _ <: (ba.take(n,nl)<=((_/oct)/rf))*findValue(n,oct)+
-                            (ba.take(n,nl)>((_/oct)/rf))*(noteRatio(n-1,oct));
-
-    findValue(n,oct) = _<: (n<nN)*
-            (((_/oct)/rf)-ba.take(n,nl))/((ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl)))
-                    +(n==nN)*
-            (((_/oct)/rf)-ba.take(n,nl))/(2-ba.take(n,nl)):       
-            qSmooth :  //smoothing curve
-            _*((n<nN)*(ba.take(min(n+1,nN)-(n==nN),nl)-ba.take(n,nl))+
-                (n==nN)*(2-ba.take(n,nl))
-            )+ba.take(n,nl);
-};
+quantizeSmoothed(rf, nl, x) = rf * quantizer.getOctave(x, rf) * quantizer.smoothInterpolation(x, rf, nl);
 
 
 //---------------------`(qu.)ionian`--------------------------
