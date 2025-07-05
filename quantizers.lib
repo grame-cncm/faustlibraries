@@ -9,7 +9,7 @@ ba = library("basics.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Frequency Quantization Library";
-declare version "1.1.1";
+declare version "1.1.2";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -101,6 +101,7 @@ quantizer = environment {
 // ```
 //
 // Where:
+//
 // * `rf` : frequency of the root note of the scale
 // * `nl` : list of frequency ratios for each note relative to root
 //
@@ -123,6 +124,7 @@ quantize(rf, nl, x) = rf * quantizer.getOctave(x, rf) * quantizer.findClosestRat
 // ```
 //
 // Where:
+//
 // * `rf` : frequency of the root note of the scale
 // * `nl` : list of frequency ratios for each note relative to root
 //

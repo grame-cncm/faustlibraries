@@ -307,29 +307,34 @@
 <h2 id="functions-reference">Functions Reference</h2>
 <hr />
 <h3 id="ququantize"><code>(qu.)quantize</code></h3>
-<p>Configurable frequency quantization tool. Output only the frequencies that are part of the specified scale.
+<p>Configurable frequency quantization tool. Snaps input frequencies to exact scale notes.
 Works for positive audio frequencies.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>_ : quantize(rf,nl) : _
 </code></pre>
-<p>Where :</p>
+<p>Where:</p>
 <ul>
 <li><code>rf</code> : frequency of the root note of the scale</li>
-<li><code>nl</code> : list of the ratio of the frequencies of each note in relation to the root frequency</li>
+<li><code>nl</code> : list of frequency ratios for each note relative to root</li>
 </ul>
+<h4 id="example">Example</h4>
+<pre><code>process = quantize(440, (1, 1.125, 1.25, 1.333, 1.5));
+</code></pre>
 <hr />
 <h3 id="ququantizesmoothed"><code>(qu.)quantizeSmoothed</code></h3>
-<p>Configurable frequency quantization tool. Output frequencies that are closer to the frequencies of the specified scale notes.
+<p>Configurable frequency quantization tool. Smoothly transitions between scale notes.
 Works for positive audio frequencies.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>_ : quantizeSmoothed(rf,nl) : _
-nl = (1,1.2,1.4,1.7);
 </code></pre>
-<p>Where :</p>
+<p>Where:</p>
 <ul>
 <li><code>rf</code> : frequency of the root note of the scale</li>
-<li><code>nl</code> : list of the ratio of the frequencies of each note in relation to the root frequency</li>
+<li><code>nl</code> : list of frequency ratios for each note relative to root</li>
 </ul>
+<h4 id="example_1">Example</h4>
+<pre><code>process = quantizeSmoothed(440, dodeca);
+</code></pre>
 <hr />
 <h3 id="quionian"><code>(qu.)ionian</code></h3>
 <p>List of the frequency ratios of the notes of the ionian mode.</p>
