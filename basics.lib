@@ -769,6 +769,72 @@ take(1, (xs, xxs))  = xs;
 take(1, xs)         = xs;
 take(N, (xs, xxs)) = take(N-1, xxs);
 
+//-------------------------------`(ba.)pick`-----------------------------------
+// Pick the nth element from a list.
+// Similar to ba.take(n+1,l) but faster and more powerful.
+//
+// #### Usage
+//
+// ```
+// pick(l,n) : _
+// ```
+//
+// Where:
+//
+// * `l`: list of elements
+// * `n`: index of element to pick, compile time constant.
+//        if n < 0 or n >= length of `l`, pick() outputs 0.
+//
+// #### Example test program
+//
+// ```
+// pick((10,20,30,40), 2) -> 30
+// ```
+//
+// ```
+// pick(si.bus(3), 1) // same as !,_,!
+// ```
+//
+// while ba.take(2, si.bus(3)) acts as `_`.
+//
+// Unlike take(), pick() always flattens the list, so
+// `pick((10,(20,30),40), 1)` outputs `20`, not `20,30`.
+//-----------------------------------------------------------------------------
+pick(l,n) = l : route(outputs(l),1, n+1, 1);
+
+//-------------------------------`(ba.)pickN`----------------------------------
+// Select the inputs listed in `O` among `N` at compile time.
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : pickN(N,O) : si.bus(outputs(O))
+// ```
+//
+// Where:
+//
+// * `N`: number of inputs, compile time constant
+// * `O`: list of the inputs to select, compile time constants
+//
+// #### Example test program
+//
+// ```
+// pickN(4,2) : _  // same as selector(2,4) but faster
+// ```
+//
+// ```
+// pick(4,(1,3)) : _,_ // same as !,_,!,_
+// ```
+//
+// ```
+// pickN(4,(1,3), (10,20,30,40)) -> (20,40)
+// ```
+//
+// ```
+// process = pickN(2, (1,0,0,1)) // same as process(x,y) = y,x,x,y
+// ```
+//-----------------------------------------------------------------------------
+pickN(N,O) = route(N,outputs(O), par(o,outputs(O), pick(O,o)+1, o+1));
 
 //----------------------------`(ba.)subseq`--------------------------------
 // Extract a part of a list.
