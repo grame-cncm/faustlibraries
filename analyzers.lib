@@ -13,7 +13,7 @@ fi = library("filters.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "1.2.0";
+declare version "1.3.0";
 
 /************************************************************************
 FAUST library file, jos section
@@ -802,46 +802,78 @@ with {
 //---------------------------------------------------
 goertzel = goertzelOpt;
 
-// ----------------------------`(an.)resonator`--------------------------------
-// Efficient low latency resonator.
+//---------------`(an.)resonator` --------------------------
+// Efficient low-latency single-frequency resonator. It estimates 
+// the magnitude and phase of a single target frequency `f`
+// in real time, with minimal memory and CPU usage, without the need for
+// FFT or windowing.
 //
 // #### Usage
 //
-// ```
+// ```faust
 // _ : resonator(N,f) : _,_ // magnitude, phase
 // ```
 //
 // Where:
 //
-// * `N`: smoothing filter order, compile time constant.
-//        N > 1 makes the output more smooth and robust, but slows the
-//        response at lower frequencies.
-// * `f': frequency to be analyzed.
+// * `N`: smoothing filter order (compile-time constant).
+//        - N > 1: smoother magnitude/phase estimates, but slower response at low f
+//        - N = 1: faster response at low f, less stable at any f
+// * `f`: frequency to be analyzed (Hz).
 //
-// #### Example test program
+// #### Algorithm
+//
+// Internally, the resonator maintains a quadrature oscillator at `f`
+// and accumulates the projection of the input signal onto its sine and
+// cosine components. These projections are smoothed using an exponential
+// moving average (EWMA) whose decay factor depends on `f`:
 //
 // ```
-// F = nentry("F", 1000, 0,10000,.001);
+// sf(f) = 1 − exp(−f / (log(1+f) * SR))
+// ```
+//
+// Magnitude and phase are then computed from the smoothed projections:
+//
+// ```
+// magnitude = sqrt(so² + co²) * 2
+// phase     = atan2(so, co)
+// ```
+// #### Example
+//
+// ```faust
+// F = nentry("F", 1000, 0, 10000, 0.001);
 // process = ba.line(ma.SR, ma.SR/2) : os.oscrs
-//          <: par(i,4, resonator(i+1,F) : _,!);
+//          <: par(i, 4, resonator(i+1, F) : _,!);
 // ```
+//
+// #### Advantages
+// * Ultra-low latency: single-sample recursive update
+// * No FFT or windowing required
+// * Frequency-dependent smoothing for better stability at low f
+// * Scales linearly with the number of resonators
 //
 // #### Reference
 //
-// https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf
-//-----------------------------------------------------------------------------
+// * <https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf>
+//---------------------------------------------------
 resonator(N,f) = _ <: *(so),*(co) : par(i,2,sm) <: mag,ang
 with {
+    // Quadrature oscillator at target frequency f
     qo = os.quadosc(f);
     co = qo : _,!;
     so = qo : !,_;
 
+    // Frequency-dependent smoothing factor
     sf = 1 - exp(-f / (log(1+f) * ma.SR));
+
+    // Apply N-stage exponential smoothing
     sm = seq(n, N, si.smooth((1 - N*sf)));
 
+    // Magnitude and phase computation
     mag = ^(2) + ^(2) : sqrt * 2;
     ang = atan2;
 };
+
 
 // Undocumented utility functions used by fft and ifft:
 c_magsq(N) = si.cbus(N) : par(i,N,(par(j,2,abs<:_*_):>_)) :> si.bus(N);

@@ -349,6 +349,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#anresonator" class="nav-link">(an.)resonator</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#anfft" class="nav-link">(an.)fft</a>
               <ul class="nav flex-column">
               </ul>
@@ -768,9 +772,54 @@ band-split frequencies are passed explicitly as arguments.</p>
 <li><a href="https://en.wikipedia.org/wiki/Goertzel_algorithm">https://en.wikipedia.org/wiki/Goertzel_algorithm</a></li>
 </ul>
 <hr />
+<h3 id="anresonator"><code>(an.)resonator</code></h3>
+<p>Efficient low-latency single-frequency resonator. It estimates 
+the magnitude and phase of a single target frequency <code>f</code>
+in real time, with minimal memory and CPU usage, without the need for
+FFT or windowing.</p>
+<h4 id="usage_25">Usage</h4>
+<pre><code class="language-faust">_ : resonator(N,f) : _,_ // magnitude, phase
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: smoothing filter order (compile-time constant).<ul>
+<li>N &gt; 1: smoother magnitude/phase estimates, but slower response at low f</li>
+<li>N = 1: faster response at low f, less stable at any f</li>
+</ul>
+</li>
+<li><code>f</code>: frequency to be analyzed (Hz).</li>
+</ul>
+<h4 id="algorithm">Algorithm</h4>
+<p>Internally, the resonator maintains a quadrature oscillator at <code>f</code>
+and accumulates the projection of the input signal onto its sine and
+cosine components. These projections are smoothed using an exponential
+moving average (EWMA) whose decay factor depends on <code>f</code>:</p>
+<pre><code>sf(f) = 1 − exp(−f / (log(1+f) * SR))
+</code></pre>
+<p>Magnitude and phase are then computed from the smoothed projections:</p>
+<pre><code>magnitude = sqrt(so² + co²) * 2
+phase     = atan2(so, co)
+</code></pre>
+<h4 id="example_1">Example</h4>
+<pre><code class="language-faust">F = nentry(&quot;F&quot;, 1000, 0, 10000, 0.001);
+process = ba.line(ma.SR, ma.SR/2) : os.oscrs
+         &lt;: par(i, 4, resonator(i+1, F) : _,!);
+</code></pre>
+<h4 id="advantages">Advantages</h4>
+<ul>
+<li>Ultra-low latency: single-sample recursive update</li>
+<li>No FFT or windowing required</li>
+<li>Frequency-dependent smoothing for better stability at low f</li>
+<li>Scales linearly with the number of resonators</li>
+</ul>
+<h4 id="reference_5">Reference</h4>
+<ul>
+<li><a href="https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf">https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf</a></li>
+</ul>
+<hr />
 <h3 id="anfft"><code>(an.)fft</code></h3>
 <p>Fast Fourier Transform (FFT).</p>
-<h4 id="usage_25">Usage</h4>
+<h4 id="usage_26">Usage</h4>
 <pre><code>si.cbus(N) : fft(N) : si.cbus(N)
 </code></pre>
 <p>Where:</p>
@@ -801,14 +850,14 @@ band-split frequencies are passed explicitly as arguments.</p>
 <p>See <code>dm.fft_spectral_level_demo(N)</code> in <code>demos.lib</code> for an example GUI driving <code>an.rfft_spectral_level()</code>.</p>
 </li>
 </ul>
-<h4 id="reference_5">Reference</h4>
+<h4 id="reference_6">Reference</h4>
 <ul>
 <li><a href="https://cnx.org/contents/zmcmahhR@7/Decimation-in-time-DIT-Radix-2">Decimation-in-time (DIT) Radix-2 FFT</a></li>
 </ul>
 <hr />
 <h3 id="anifft"><code>(an.)ifft</code></h3>
 <p>Inverse Fast Fourier Transform (IFFT).</p>
-<h4 id="usage_26">Usage</h4>
+<h4 id="usage_27">Usage</h4>
 <pre><code>si.cbus(N) : ifft(N) : si.cbus(N)
 </code></pre>
 <p>Where:</p>
