@@ -802,6 +802,47 @@ with {
 //---------------------------------------------------
 goertzel = goertzelOpt;
 
+// ----------------------------`(an.)resonator`--------------------------------
+// Efficient low latency resonator.
+//
+// #### Usage
+//
+// ```
+// _ : resonator(N,f) : _,_ // magnitude, phase
+// ```
+//
+// Where:
+//
+// * `N`: smoothing filter order, compile time constant.
+//        N > 1 makes the output more smooth and robust, but slows the
+//        response at lower frequencies.
+// * `f': frequency to be analyzed.
+//
+// #### Example test program
+//
+// ```
+// F = nentry("F", 1000, 0,10000,.001);
+// process = ba.line(ma.SR, ma.SR/2) : os.oscrs
+//          <: par(i,4, resonator(i+1,F) : _,!);
+// ```
+//
+// #### Reference
+//
+// https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf
+//-----------------------------------------------------------------------------
+resonator(N,f) = _ <: *(so),*(co) : par(i,2,sm) <: mag,ang
+with {
+    qo = os.quadosc(f);
+    co = qo : _,!;
+    so = qo : !,_;
+
+    sf = 1 - exp(-f / (log(1+f) * ma.SR));
+    sm = seq(n, N, si.smooth((1 - N*sf)));
+
+    mag = ^(2) + ^(2) : sqrt * 2;
+    ang = atan2;
+};
+
 // Undocumented utility functions used by fft and ifft:
 c_magsq(N) = si.cbus(N) : par(i,N,(par(j,2,abs<:_*_):>_)) :> si.bus(N);
 c_magdb(N) = si.cbus(N) : an.c_magsq(N) : par(i,N,(max(ma.EPSILON):log10:*(10.0)));
