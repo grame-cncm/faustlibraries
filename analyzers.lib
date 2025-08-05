@@ -1002,6 +1002,48 @@ rfft_spectral_level(N,tau,dB_offset) = _<: _, an.rfft_analyzer_db(N) : _,(displa
 };
 
 // end jos section
+
+
+//================ Test signal generators ===================
+// Signal generators for testing purposes.
+//============================================================
+
+//---------------`(an.)logsweep`---------------------
+// Logarithmic sine sweep generator.
+//
+// #### Usage
+//
+// ```
+// logsweep(fs,fe,dur) : _
+// ```
+//
+// Where:
+//
+// * `fs`: start frequency in Hz
+// * `fe`: end frequency in Hz
+// * `dur`: duration of the sweep in seconds
+//---------------------------------------------------
+declare linsweep author "Oleg Nesterov";
+logsweep(fs, fe, dur) = fs * (fe/fs) ^ os.lf_sawpos(1/dur) : os.oscrs;
+
+//---------------`(an.)linsweep`---------------------
+// Linear sine sweep generator.
+//
+// #### Usage
+//
+// ```
+// linsweep(fs,fe,dur) : _
+// ```
+//
+// Where:
+//
+// * `fs`: start frequency in Hz
+// * `fe`: end frequency in Hz
+// * `dur`: duration of the sweep in seconds
+//---------------------------------------------------
+declare linsweep author "Oleg Nesterov";
+linsweep(fs, fe, dur) = fs + (fe-fs) * os.lf_sawpos(1/dur) : os.oscrs;
+
 /************************************************************************
 ************************************************************************
 FAUST library file, GRAME section
