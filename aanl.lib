@@ -42,7 +42,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Antialiased Nonlinearities";
-declare version "1.4.1";
+declare version "1.4.2";
 
 //==============================Auxiliary Functions=======================================
 //========================================================================================
@@ -68,7 +68,7 @@ Rlog(x) = log(max(ma.EPSILON, x));
 //-------`(aa.)Rtan`-----------
 // Real-valued tan().
 //-----------------------------
-Rtan(x) = tan(clip(-ma.MAX, ma.MAX, x));
+Rtan(x) = tan(clip(0-ma.MAX, ma.MAX, x));
 
 
 //-------`(aa.)Racos`----------
@@ -98,7 +98,7 @@ Rcosh(x) = min(ma.MAX, ma.cosh(x));
 //-------`(aa.)Rsinh`-----------
 // Real-valued sinh().
 //------------------------------
-Rsinh(x) = clip(-ma.MAX, ma.MAX, ma.sinh(x));
+Rsinh(x) = clip(0-ma.MAX, ma.MAX, ma.sinh(x));
 
 
 //-------`(aa.)Ratanh`----------
