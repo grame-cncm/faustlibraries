@@ -797,6 +797,30 @@ nextpow2(x) = ceil(log(x)/log(2.0));
 //-----------------------------------------------------------------------------
 zc = ba.tAndH(!=(0)) <: *(mem) < 0;
 
+//-------------------------`(ma.)unwrap` --------------------------------------
+// Unwrap the input signal so that successive output values never differ
+// by more than `pi`, switching to a 2*pi-complementary value when needed.
+//
+// #### Usage
+//
+// ```
+// _ : unwrap(pi) : _
+// ```
+//
+// Where:
+//
+// * `pi`: maximum discontinuity between the output values (typically `ma.PI`)
+//
+// #### Example
+//
+// process = 0 - os.oscrc(1000)          // the true phase is either -PI or +PI
+//         : an.resonator(1,1000) : !,_  // oscillates between -PI and +PI
+//         : ma.unwrap(ma.PI);           // oscillates near +PI
+//-----------------------------------------------------------------------------
+unwrap(pi,x) = (_ <: +(dz)) ~ _ with {
+    dz(z) = wrap(x - z, 2*pi) <: ba.ifNc(1, >(pi),-(2*pi));
+    wrap(x,d) = x - d * floor(x / d);
+};
 
 //--------------------`(ma.)primes`------------------------------------------------
 // Return the n-th prime using a waveform primitive. Note that primes(0) is 2,
