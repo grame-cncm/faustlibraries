@@ -441,6 +441,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#maunwrap" class="nav-link">(ma.)unwrap</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#maprimes" class="nav-link">(ma.)primes</a>
               <ul class="nav flex-column">
               </ul>
@@ -851,11 +855,27 @@ occurs, 0 otherwise.</p>
 <pre><code>_ : zc : _
 </code></pre>
 <hr />
+<h3 id="maunwrap"><code>(ma.)unwrap</code></h3>
+<p>Unwrap the input signal so that successive output values never differ
+by more than <code>pi</code>, switching to a 2*pi-complementary value when needed.</p>
+<h4 id="usage_52">Usage</h4>
+<pre><code>_ : unwrap(pi) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>pi</code>: maximum discontinuity between the output values (typically <code>ma.PI</code>)</li>
+</ul>
+<h4 id="example-test-program">Example test program</h4>
+<pre><code>process = 0 - os.oscrc(1000)          // the true phase is either -PI or +PI
+        : an.resonator(1,1000) : !,_  // oscillates between -PI and +PI
+        : ma.unwrap(ma.PI);           // oscillates near +PI
+</code></pre>
+<hr />
 <h3 id="maprimes"><code>(ma.)primes</code></h3>
 <p>Return the n-th prime using a waveform primitive. Note that primes(0) is 2,
 primes(1) is 3, and so on. The waveform is length 2048, so the largest
 precomputed prime is primes(2047) which is 17863.</p>
-<h4 id="usage_52">Usage</h4>
+<h4 id="usage_53">Usage</h4>
 <pre><code>_ : primes : _
 </code></pre></div>
             </div>

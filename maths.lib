@@ -55,7 +55,7 @@ pl = library("platform.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Math Library";
-declare version "2.8.1";
+declare version "2.9.0";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LGPL with exception";
@@ -811,11 +811,14 @@ zc = ba.tAndH(!=(0)) <: *(mem) < 0;
 //
 // * `pi`: maximum discontinuity between the output values (typically `ma.PI`)
 //
-// #### Example
+// #### Example test program
 //
+// ```
 // process = 0 - os.oscrc(1000)          // the true phase is either -PI or +PI
 //         : an.resonator(1,1000) : !,_  // oscillates between -PI and +PI
 //         : ma.unwrap(ma.PI);           // oscillates near +PI
+// ```
+// 
 //-----------------------------------------------------------------------------
 unwrap(pi,x) = (_ <: +(dz)) ~ _ with {
     dz(z) = wrap(x - z, 2*pi) <: ba.ifNc(1, >(pi),-(2*pi));
