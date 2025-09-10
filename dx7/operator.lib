@@ -1,0 +1,354 @@
+ba = library("basics.lib");
+ma = library("maths.lib");
+os = library("oscillators.lib");
+si = library("signals.lib");
+
+declare version "2.0.0";
+
+// env(rates, levels, outLevel, rateScale, gate) : _
+import("env.lib");
+
+// lfo(lfoWave, lfoDelay, lfoSync, lfoSpeed, gate) : _, _
+import("lfo.lib");
+
+// pitchenv(rates, levels, gate) : _
+import("pitchenv.lib");
+
+
+//------------------------------`(dx.)operator`--------------------------------
+// DX7 Operator. Implements a phase-modulable sine wave oscillator connected
+// to a DX7 envelope generator.
+//
+// #### Usage:
+//
+// ```
+// operator(mode,freqCoarse,freqFine,detune,outLev,R1,R2,R3,R4,L1,L2,L3,L4,keyVelSens,ampModSens,rateScale,lfoWave,lfoSpeed,lfoDelay,lfoPMD,lfoAMD,lfoSync,lfoPitchModSens,oscKeySync,pitch_egR1,pitch_egR2,pitch_egR3,pitch_egR4,pitch_egL1,pitch_egL2,pitch_egL3,pitch_egL4,breakpoint,breakpointLDepth,breakpointRDepth,breakpointLCurve,breakpointRCurve,transpose,phaseMod,base_freq,gain,gate) : _
+// ```
+//
+// Where:
+//
+// * `mode`: pitch mode (0=ratio; 1=fixed)
+// * `freqCoarse`: coarse frequency (0-31)
+// * `freqFine`: fine frequency (0-99)
+// * `detune`: detune in semitones (-7 - 7), *not* (0 - 14)
+// * `outLev`: output level (0-99)
+// * `R1`: envelope rate 1 (0-99)
+// * `R2`: envelope rate 2 (0-99)
+// * `R3`: envelope rate 3 (0-99)
+// * `R4`: envelope rate 4 (0-99)
+// * `L1`: envelope level 1 (0-99)
+// * `L2`: envelope level 2 (0-99)
+// * `L3`: envelope level 3 (0-99)
+// * `L4`: envelope level 4 (0-99)
+// * `keyVelSens`: key velocity sensitivity (0-7)
+// * `ampModSens`: amplitude sensitivity (0-3)
+// * `rateScale`: envelope rate scale (0-7)
+// * `breakpoint`: break point position (0-99) // todo: is it 0-99 or 0-34ish?
+// * `breakpointLDepth`: break point left depth (0-99)
+// * `breakpointRDepth`: break point right depth (0-99)
+// * `breakpointLCurve`: break point left curve (0-3) (-LIN,-EXP,+EXP,+LIN)
+// * `breakpointRCurve`: break point right curve (0-3) (-LIN,-EXP,+EXP,+LIN)
+// * `lfoWave`: LFO wave mode (0-5) (triangle, saw down, saw up, square, sine, sample&hold)
+// * `lfoSpeed`: LFO speed (0-99)
+// * `lfoDelay`: LFO delay (0-99)
+// * `lfoPMD`: LFO pitch modulation depth (0-99)
+// * `lfoAMD`: LFO amplitude modulation depth (0-99)
+// * `lfoSync`: (0-1) (0=no retrigger; 1=retrigger)
+// * `lfoPitchModSens`: LFO Pitch modulation sensitivity (0-7)
+// * `oscKeySync`: osc key sync (0-1)
+// * `pitch_egR1`: pitch envelope generator rate 1 (0-99)
+// * `pitch_egR2`: pitch envelope generator rate 2 (0-99)
+// * `pitch_egR3`: pitch envelope generator rate 3 (0-99)
+// * `pitch_egR4`: pitch envelope generator rate 4 (0-99)
+// * `pitch_egL1`: pitch envelope generator level 1 (0-99)
+// * `pitch_egL2`: pitch envelope generator level 2 (0-99)
+// * `pitch_egL3`: pitch envelope generator level 3 (0-99)
+// * `pitch_egL4`: pitch envelope generator level 4 (0-99)
+// * `transpose`: global transpose (-24 - 24), *not* (0-48)
+// * `phaseMod`: phase deviation (-1 - 1)
+// * `base_freq`: frequency of the oscillator
+// * `gain`: general gain, like a velocity but 0.-1. instead of 0-127.
+// * `gate`: trigger signal, "is the note on?"
+//-----------------------------------------------------------------------------
+declare operator author "David Braun";
+declare operator copyright "Copyright (C) 2025 David Braun";
+declare operator license "Apache License, Version 2.0";
+operator(
+  mode,
+  freqCoarse,
+  freqFine,
+  detune,
+  outLev,
+  R1,
+  R2,
+  R3,
+  R4,
+  L1,
+  L2,
+  L3,
+  L4,
+  keyVelSens,
+  ampModSens,
+  rateScale,
+  breakpoint,
+  breakpointLDepth,
+  breakpointRDepth,
+  breakpointLCurve,
+  breakpointRCurve,
+  lfoWave,
+  lfoSpeed,
+  lfoDelay,
+  lfoPMD,
+  lfoAMD,
+  lfoSync,
+  lfoPitchModSens,
+  oscKeySync,
+  pitch_egR1,
+  pitch_egR2,
+  pitch_egR3,
+  pitch_egR4,
+  pitch_egL1,
+  pitch_egL2,
+  pitch_egL3,
+  pitch_egL4,
+  transpose,
+  phaseMod,
+  base_freq_,
+  gain,
+  gate
+) = output
+with {
+ 
+  base_freq = base_freq_ : ba.hz2midikey : _ + transpose : ba.midikey2hz;
+
+  osc_freq = select2(mode, osc_freq_mode_0, osc_freq_mode_1)
+  with {
+    osc_freq_mode_0 = logfreq_d
+    with {
+      // todo: use ba.tabulateNd
+      coarsemul = round : rdtable(waveform{
+        -16777216, 0, 16777216, 26591258, 33554432, 38955489, 43368474, 47099600,
+        50331648, 53182516, 55732705, 58039632, 60145690, 62083076, 63876816,
+        65546747, 67108864, 68576247, 69959732, 71268397, 72509921, 73690858,
+        74816848, 75892776, 76922906, 77910978, 78860292, 79773775, 80654032,
+        81503396, 82323963, 83117622
+      });
+
+      mtsLogFreqToNoteLogFreq = float(1 << 24) / log(2.);
+      logfreq = log(base_freq) * mtsLogFreqToNoteLogFreq;
+
+      // could use more precision, closer enough for now. those numbers comes from my DX7
+      detuneRatio = 0.0209 * exp(-0.396 * (logfreq/float(1<<24))) / 7.;
+      logfreq_b = logfreq + detuneRatio * logfreq * detune;
+      logfreq_c = logfreq_b + coarsemul(int(freqCoarse) & 31);
+
+      logfreq_d = logfreq_c + ba.if(freqFine, int(floor(24204406.323123 * log(1 + 0.01 * freqFine) + 0.5)), 0);
+    };
+
+    osc_freq_mode_1 = logfreq_c
+    with {
+        // ((1 << 24) * log(10) / log(2) * .01) << 3
+        logfreq_b = (4458616 * ((int(freqCoarse) & 3) * 100 + freqFine)) >> 3;
+        logfreq_c = logfreq_b + ba.if(detune > 0, 13457 * detune, 0);
+    };
+  };
+
+  lfo_val = lfo(lfoWave, lfoDelay, lfoSync, lfoSpeed, gate) : _,!; // 0.0 to 1.0
+  lfo_delay = lfo(lfoWave, lfoDelay, lfoSync, lfoSpeed, gate) : !,_; // 0.0 to 1.0
+
+  // lines ~278-281
+  Freqlut_lookup(logfreq_) = pow(2., logfreq_/float(1<<24));
+  freq = Freqlut_lookup(osc_freq + ba.if(mode, pitch_base, pitch_mod));
+
+  sineWave(freq) = m_hsp_phasor(freq, oscKeySync & (gate > gate'), 0) + phaseMod : sin(_*2.*ma.PI);
+  // mathematical hard-syncing phasor (see `phasor_imp` in `faustlibraries/oscillators.lib`)
+  m_hsp_phasor(freq, reset, phase) = (select2(reset, +(freq/ma.SR), phase) : ma.decimal) ~ _;
+
+  // ---- PITCH BEND ----
+  pitch_base = 0; // todo:
+  toQ24 = _ * 16777216.0;
+
+  // dx7note.cc lines 208~217
+  pitch_mod = pitchenv(pitch_rates, pitch_levels, gate) + toQ24((pmod_1 * (ba.if(senslfo < 0, -1., 1.))) + pitch_base)
+  with {
+    pitch_rates = pitch_egR1,pitch_egR2,pitch_egR3,pitch_egR4;
+    pitch_levels = pitch_egL1,pitch_egL2,pitch_egL3,pitch_egL4;
+
+    // ==== PITCH ====
+    // todo: some major simplifications were made here by DBraun, but listening tests are pretty good.
+    pitchmoddepth_ = 2.*lfoPMD / 99.; // 0.0 to 2.0
+    pitchmodsens_ = pitchmodsenstab(lfoPitchModSens) / 256.0 // 0.0 to ~1.0
+    with {
+      // todo: use ba.tabulateNd
+      pitchmodsenstab = round : rdtable(waveform{
+        0, 10, 20, 33, 55, 92, 153, 255
+      });
+    };
+
+    pmd = pitchmoddepth_ * lfo_delay;
+    senslfo = pitchmodsens_ * (lfo_val - 0.5);
+    pmod_1 = pmd * senslfo : abs;
+  };
+
+  midinote = base_freq : ba.hz2midikey : round;
+  level_scaling = ScaleLevel(midinote, breakpoint, breakpointLDepth, breakpointRDepth, breakpointLCurve, breakpointRCurve);
+  rate_scaling = ScaleRate(midinote, rateScale);
+
+  amd_mod = amod_1
+  with {
+    // ==== AMP MOD ====
+    // dx7note.cc line 259
+    // todo: some simplifications were made here.
+    ampmoddepth_ = lfoAMD / 99.0; // 0.0 to 1.0
+    lfo_val_inverted = 1.- lfo_val;
+    amod_1 = ampmoddepth_ * lfo_delay * lfo_val_inverted;
+  };
+
+  // `envSample` is a combination of lines ~352-362 and `env_[op].getsample()` in dx7note.cc
+  envSample = env((R1,R2,R3,R4), (L1,L2,L3,L4), env_outlevel, rate_scaling, gate)
+  with {
+    velocity = gain*127.0;
+    env_outlevel = scaleoutlevel(outLev) + level_scaling
+      : min(127)
+      : _ * 32.0
+      : _ + ScaleVelocity(velocity, keyVelSens)
+      : max(0);
+  };
+
+  // see dx7note.cc lines ~270-296.
+  outlevel = envSample - ba.if(ampmodsens_!=0, ldiff, 0)
+  with {
+    ampmodsens_ = ampmodsenstab(ampModSens)
+    with {
+      // todo: use ba.tabulateNd
+      ampmodsenstab = round : rdtable(waveform{
+        0, 4342338, 7171437, 16777216
+      });
+    };
+    sensamp = amd_mod * ampmodsens_;
+
+    INV_Q24 = 1.0 / 16777216.0;
+
+    // TODO: mehhh.. this needs some real tuning.
+    pt = exp(sensamp / 262144.0 * 0.07 + 12.2);
+    ldiff = int(float(envSample) * pt * INV_Q24 + 0.5);
+  };
+
+  // todo: We multiply by 0.5 below to make the output bounded between -1.0 and 1.0.
+  output = q24_to_linear(outlevel) * sineWave(freq) * .5;
+};
+
+// --- Tests ---
+
+// process = hgroup("DX7 Op",
+//   operator(
+//     mode,
+//     freqCoarse,
+//     freqFine,
+//     detune,
+//     outLev,
+//     R1,
+//     R2,
+//     R3,
+//     R4,
+//     L1,
+//     L2,
+//     L3,
+//     L4,
+//     keyVelSens,
+//     ampModSens,
+//     rateScale,
+//     breakpoint,
+//     breakpointLDepth,
+//     breakpointRDepth,
+//     breakpointLCurve,
+//     breakpointRCurve,
+//     lfoWave,
+//     lfoSpeed,
+//     lfoDelay,
+//     lfoPMD,
+//     lfoAMD,
+//     lfoSync,
+//     lfoPitchModSens,
+//     oscKeySync,
+//     pegR1,
+//     pegR2,
+//     pegR3,
+//     pegR4,
+//     pegL1,
+//     pegL2,
+//     pegL3,
+//     pegL4,
+//     transpose,
+//     phaseMod,
+//     base_freq,
+//     gain,
+//     gate
+//   ))
+// <: _,_
+// with {
+//   mode = checkbox("Osc Mode");  // todo: enabling this seems to break the output.
+//   phaseMod = 0; // todo:
+
+//   GLOBAL(x) = vgroup("Global", x);
+//   MAIN(x) = GLOBAL(hgroup("[0] Main", x));
+//   PEGL(x) = GLOBAL(hgroup("[1] Pitch EG Levels", x));
+//   PEGR(x) = GLOBAL(hgroup("[2] Pitch EG Rates", x));
+//   LFO(x) = GLOBAL(hgroup("[3] LFO", x));
+//   base_freq = GLOBAL(hslider("[4] freq [hidden:1]",400,50,1000,0.01));
+//   gain = GLOBAL(hslider("[5] gain [hidden:1]",0.8,0,1,0.01));
+//   gate = GLOBAL(button("[6] gate [hidden:1]"));
+
+//   feedbackAmp = MAIN(hslider("[0] Feedback [style:knob]",0,0,7,1)) : dx7_fdbkscalef;
+//   transpose = MAIN(hslider("[1] Transpose [style:knob]",0,-24,24,1));
+//   oscKeySync = MAIN(hslider("[2] Osc Key Sync [style:knob]",1,0,1,1));
+
+//   pegL1 = PEGL(hslider("[0] L1 [style:knob]",50,0,99,1));
+//   pegL2 = PEGL(hslider("[1] L2 [style:knob]",50,0,99,1));
+//   pegL3 = PEGL(hslider("[2] L3 [style:knob]",50,0,99,1));
+//   pegL4 = PEGL(hslider("[3] L4 [style:knob]",50,0,99,1));
+
+//   pegR1 = PEGR(hslider("[0] R1 [style:knob]",99,0,99,1));
+//   pegR2 = PEGR(hslider("[1] R2 [style:knob]",99,0,99,1));
+//   pegR3 = PEGR(hslider("[2] R3 [style:knob]",99,0,99,1));
+//   pegR4 = PEGR(hslider("[3] R4 [style:knob]",99,0,99,1));
+
+//   lfoWave = LFO(nentry("[0] Wave [style:menu{'Triangle':0;'Saw Down':1;'Saw Up':2;'Square':3;'Sine':4;'Sample & Hold':5}]",0,0,5,1));
+//   lfoSpeed = LFO(hslider("[1] Speed [style:knob]",35,0,99,1));
+//   lfoDelay = LFO(hslider("[2] Delay [style:knob]",0,0,99,1));
+//   lfoPMD = LFO(hslider("[3] PMD [style:knob]",0,0,99,1));
+//   lfoAMD = LFO(hslider("[4] AMD [style:knob]",0,0,99,1));
+//   lfoSync = LFO(hslider("[5] Sync [style:knob]",1,0,1,1));
+//   lfoPitchModSens = LFO(hslider("[6] P Mod Sens [style:knob]",3,0,7,1));
+
+//   AEG(x) = vgroup("[0] Amp Env Generator", x);
+//   LEVELS(x) = AEG(hgroup("[0] Levels", x));
+//   RATES(x) = AEG(hgroup("[1] Rates", x));
+//   AEOTHER(x) = AEG(hgroup("[2] Other", x));
+//   TONE(x) = hgroup("[1] Tone", x);
+//   BREAKPOINT(x) = hgroup("[2] Break Point", x);
+
+//   L1           = LEVELS(hslider("[0] L1 [style:knob]",99,0,99,1));
+//   L2           = LEVELS(hslider("[1] L2 [style:knob]",99,0,99,1));
+//   L3           = LEVELS(hslider("[2] L3 [style:knob]",99,0,99,1));
+//   L4           = LEVELS(hslider("[3] L4 [style:knob]",0,0,99,1));
+//   R1           = RATES(hslider("[0] R1 [style:knob]",99,0,99,1));
+//   R2           = RATES(hslider("[1] R2 [style:knob]",99,0,99,1));
+//   R3           = RATES(hslider("[2] R3 [style:knob]",99,0,99,1));
+//   R4           = RATES(hslider("[3] R4 [style:knob]",99,0,99,1));
+//   freqMode     = AEOTHER(hslider("[0] Freq Mode [style:knob]",0,0,1,1));
+//   rateScale    = AEOTHER(hslider("[1] Rate Scale [style:knob]",0,0,7,1));
+//   outLev       = AEOTHER(hslider("[2] Level [style:knob]",99,0,99,1));
+//   keyVelSens   = AEOTHER(hslider("[3] Key Vel [style:knob]",0,0,7,1));
+//   ampModSens   = AEOTHER(hslider("[4] A Mod Sens [style:knob]",0,0,3,1));
+
+//   freqCoarse   = TONE(hslider("[0] Freq Coarse [style:knob]",1,0.0,31,1):round);
+//   freqFine     = TONE(hslider("[1] Freq Fine [style:knob]",0,0.0,99,1):round);
+//   detune       = TONE(hslider("[2] Detune [style:knob]",0,-7,7,1));
+
+//   breakpoint       = BREAKPOINT(hslider("[0] Break Point [style:knob]", 0, 0, 99, 1));
+//   breakpointLDepth = BREAKPOINT(hslider("[1] L Depth [style:knob]", 0, 0, 99, 1));
+//   breakpointRDepth = BREAKPOINT(hslider("[2] R Depth [style:knob]", 0, 0, 99, 1));
+//   breakpointLCurve = BREAKPOINT(nentry("[3] L Curve [style:menu{'-LIN':0;'-EXP':1;'+EXP':2;'+LIN':3}]",0,0,3,1));
+//   breakpointRCurve = BREAKPOINT(nentry("[4] R Curve [style:menu{'-LIN':0;'-EXP':1;'+EXP':2;'+LIN':3}]",0,0,3,1));
+// };

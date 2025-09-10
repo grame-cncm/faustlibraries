@@ -1,0 +1,130 @@
+ba = library("basics.lib");
+ma = library("maths.lib");
+si = library("signals.lib");
+
+// todo: In Dexed, the parameters are only set during a keyDown event, but in
+// Faust we update them continuously. This probably leads to some artifacts if
+// the parameters are continuously changing.
+
+
+//--------------------`(dx.)pitchenv`-----------------------------------------
+//
+// Global Pitch Envelope in the DX7, based on Dexed/MSFA code.
+// The output is a Q24 number, so you may want to divide by 67108864.
+// to get a number in [-1,1]
+// 
+// #### Usage
+// ```
+// pitchenv(rates, levels, gate) : _
+// ```
+//
+// Where:
+//
+// * `rates`: 4 channels of rates between 0-99
+// * `levels`: 4 channels of levels between 0-99
+// * `gate`: trigger
+//
+// #### Reference
+//
+// * <https://github.com/asb2m10/dexed/blob/master/Source/msfa/pitchenv.cc>
+//-----------------------------------------------------------------------------
+declare pitchenv author "David Braun";
+declare pitchenv copyright "Copyright (C) 2025 David Braun";
+declare pitchenv license "Apache License, Version 2.0";
+pitchenv(rates, levels, gate) = ((keyUp : keyDown : cond1) ~ si.bus(6)) : _*524288.0, !,!,!,!,!
+with {
+
+  keyDown(level_, ix_, targetlevel_, rising_, inc_, down_) = level_, ix_, targetlevel_, rising_, inc_, down_, changed : ba.selectbus(6, 2, gate > gate')
+  with {
+    newlevel_ = levels : ba.selector(3,4) : pitchenv_tab;
+    changed = advance(newlevel_, 0, targetlevel_, rising_, inc_, 1);
+  };
+
+  keyUp(level_, ix_, targetlevel_, rising_, inc_, down_) = level_, ix_, targetlevel_, rising_, inc_, down_, changed : ba.selectbus(6, 2, gate < gate')
+  with {
+    changed = advance(level_, 3, targetlevel_, rising_, inc_, 0);
+  };
+
+  cond1(level_, ix_, targetlevel_, rising_, inc_, down_) = level_, ix_, targetlevel_, rising_, inc_, down_ <: si.bus(6), cond2 : ba.selectbus(6,2, ((ix_ < 3) | ((ix_<4) & (1-down_))));
+
+  cond2(level_, ix_, targetlevel_, rising_, inc_, down_) = level_, ix_, targetlevel_, rising_, inc_, down_ <: cond4, cond3 : ba.selectbus(6,2, rising_);
+
+  cond3(level_, ix_, targetlevel_, rising_, inc_, down_) = newlevel, ix_, targetlevel_, rising_, inc_, down_ : cond5
+  with {
+    newlevel = level_ + inc_;
+  };
+
+  cond4(level_, ix_, targetlevel_, rising_, inc_, down_) = newlevel, ix_, targetlevel_, rising_, inc_, down_ : cond6
+  with {
+    newlevel = level_ - inc_;
+  };
+
+  cond5(level_, ix_, targetlevel_, rising_, inc_, down_) = unchanged, changed : ba.selectbus(6,2, level_ >= targetlevel_)
+  with {
+    unchanged = level_, ix_, targetlevel_, rising_, inc_, down_;
+    changed = advance(targetlevel_, ix_+1, targetlevel_, rising_, inc_, down_);
+  };
+
+  cond6(level_, ix_, targetlevel_, rising_, inc_, down_) = unchanged, changed : ba.selectbus(6,2, level_ <= targetlevel_)
+  with {
+    unchanged = level_, ix_, targetlevel_, rising_, inc_, down_;
+    changed = advance(targetlevel_, ix_+1, targetlevel_, rising_, inc_, down_);
+  };
+
+  advance(level_, ix_, targetlevel_, rising_, inc_, down_) = level_, ix_, (bus1, bus2 : ba.selectbus(3,2,ix_ < 4)), down_
+  with {
+    bus1 = targetlevel_, rising_, inc_;
+
+    newtargetlevel = levels : ba.selectn(4, ix_) : pitchenv_tab;
+    newrising = newtargetlevel > level_;
+    newinc = rates : ba.selectn(4, ix_) : pitchenv_rate;
+    bus2 = newtargetlevel, newrising, newinc;
+  };
+
+  unit_ = 32.0 / (21.3 * ma.SR);
+
+  // todo: use ba.tabulateNd?
+  pitchenv_rate = round : rdtable(waveform{
+    1, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12,
+    12, 13, 13, 14, 14, 15, 16, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24,
+    25, 26, 27, 28, 30, 31, 33, 34, 36, 37, 38, 39, 41, 42, 44, 46, 47,
+    49, 51, 53, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 79, 82,
+    85, 88, 91, 94, 98, 102, 106, 110, 115, 120, 125, 130, 135, 141, 147,
+    153, 159, 165, 171, 178, 185, 193, 202, 211, 232, 243, 254, 255
+  }) : _*unit_;
+
+  // todo: use ba.tabulateNd?
+  pitchenv_tab = round : rdtable(waveform{
+    -128, -116, -104, -95, -85, -76, -68, -61, -56, -52, -49, -46, -43,
+    -41, -39, -37, -35, -33, -32, -31, -30, -29, -28, -27, -26, -25, -24,
+    -23, -22, -21, -20, -19, -18, -17, -16, -15, -14, -13, -12, -11, -10,
+    -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+    28, 29, 30, 31, 32, 33, 34, 35, 38, 40, 43, 46, 49, 53, 58, 65, 73,
+    82, 92, 103, 115, 127
+  }); 
+};
+
+// --- Tests ---
+
+// Test this with polyphony set to mono.
+// process = vgroup("Pitch Env", pitchenv(pitch_rates, pitch_levels, gate))
+// : _/(67108864) // Normalize to -1.0 to +1.0 octave range
+// with {
+//   PEGL(x) = hgroup("[1] Pitch Env Generator Levels", round(x));
+//   PEGR(x) = hgroup("[2] Pitch Env Generator Rates", round(x));
+
+//   pegR1 = PEGR(hslider("[0] R1 [style:knob]",99,0,99,1));
+//   pegR2 = PEGR(hslider("[1] R2 [style:knob]",99,0,99,1));
+//   pegR3 = PEGR(hslider("[2] R3 [style:knob]",99,0,99,1));
+//   pegR4 = PEGR(hslider("[3] R4 [style:knob]",99,0,99,1));
+
+//   pegL1 = PEGL(hslider("[0] L1 [style:knob]",50,0,99,1));
+//   pegL2 = PEGL(hslider("[1] L2 [style:knob]",50,0,99,1));
+//   pegL3 = PEGL(hslider("[2] L3 [style:knob]",50,0,99,1));
+//   pegL4 = PEGL(hslider("[3] L4 [style:knob]",50,0,99,1));
+
+//   pitch_rates = pegR1, pegR2, pegR3, pegR4;
+//   pitch_levels = pegL1, pegL2, pegL3, pegL4;
+//   gate = button("gate");
+// };

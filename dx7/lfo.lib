@@ -1,0 +1,165 @@
+ba = library("basics.lib");
+ma = library("maths.lib");
+si = library("signals.lib");
+
+// https://github.com/asb2m10/dexed/issues/291#issuecomment-2845550557
+// it's mostly linear up to and including value 10.117361.
+// take in `idx` from 0 to 99.
+_lfoRateTable(idx) = frdtable(1, waveform{
+  0.062541, 0.125031, 0.312393, 0.437120, 0.624610,
+  0.750694, 0.936330, 1.125302, 1.249609, 1.436782,
+  1.560915, 1.752081, 1.875117, 2.062494, 2.247191,
+  2.374451, 2.560492, 2.686728, 2.873976, 2.998950,
+  3.188013, 3.369840, 3.500175, 3.682224, 3.812065,
+  4.000800, 4.186202, 4.310716, 4.501260, 4.623209,
+  4.814636, 4.930480, 5.121901, 5.315191, 5.434783,
+  5.617346, 5.750431, 5.946717, 6.062811, 6.248438,
+  6.431695, 6.564264, 6.749460, 6.868132, 7.052186,
+  7.250580, 7.375719, 7.556294, 7.687577, 7.877738,
+  7.993605, 8.181967, 8.372405, 8.504848, 8.685079,
+  8.810573, 8.986341, 9.122423, 9.300595, 9.500285,
+  9.607994, 9.798158, 9.950249, 10.117361, 11.251125,
+  11.384335, 12.562814, 13.676149, 13.904338, 15.092062,
+  16.366612, 16.638935, 17.869907, 19.193858, 19.425019,
+  20.833333, 21.034918, 22.502250, 24.003841, 24.260068,
+  25.746653, 27.173913, 27.578599, 29.052876, 30.693677,
+  31.191516, 32.658393, 34.317090, 34.674064, 36.416606,
+  38.197097, 38.550501, 40.387722, 40.749796, 42.625746,
+  44.326241, 44.883303, 46.772685, 48.590865, 49.261084
+  }, idx);
+
+// David Braun created this "good" approximation of the _lfoRateTable above.
+_lfoRateTableApprox(idx) = ba.if(u <= 0.656566, 15.648243*u + 0.036478, 108.925146*u - 61.205933)
+with {
+  u = idx / 99;
+};
+
+
+//------------------------`(dx.)lfo`------------------------------------------
+// The DX7 LFO module according to Dexed. The two outputs are the LFO
+// value and LFO delay. Both are between 0 and 1.0.
+// See `Dx7Note::compute` in Dexed.
+//
+// #### Usage
+//
+// ```
+// lfo(lfoWave, lfoDelay, lfoSync, lfoSpeed, gate) : _, _
+// ```
+// 
+// Where:
+// * `lfoWave`: LFO wave mode (0-5) (triangle, saw down, saw up, square, sine, sample&hold)
+// * `lfoDelay`: LFO delay (0-99)
+// * `lfoSync`: (0-1) (0=no retrigger; 1=retrigger)
+// * `lfoSpeed`: LFO speed (0-99)
+// * `gate`: trigger signal
+//
+// #### Reference
+//
+// * <https://github.com/asb2m10/dexed/blob/master/Source/msfa/lfo.cc>
+//-----------------------------------------------------------------------------
+declare lfo author "David Braun";
+declare lfo copyright "Copyright (C) 2025 David Braun";
+declare lfo license "Apache License, Version 2.0";
+lfo(lfoWave, lfoDelay, lfoSync, lfoSpeed, gate) = (keyDown : update) ~ si.bus(5) : par(i, 5, !), _, _
+with {
+    
+  keyDown(phase_, delaystate_, delayinc_, delayinc2_, randstate_) = newphase, newdelayState, delayinc_, delayinc2_, randstate_
+  with {
+    // detect rising edge of gate (0 -> 1)
+    isKeyDown = gate > gate';
+    newphase = ba.if(lfoSync & isKeyDown, 0, phase_);
+    newdelayState = ba.if(isKeyDown, 0, delaystate_);
+  };
+
+  update(phase_, delaystate_, delayinc_, delayinc2_, randstate_) = newphase_, newdelayState, delayinc_bus, newSample, delayVal
+  with {
+    // Original constant was 1 << 32 / 15.5s / 11
+    // Convert from Q32 to floating-point
+    unit_ = 25190424.0 / ma.SR
+       : _/4294967296.0; // divide by (1<<32) to normalize from Q32 to 0.0-1.0 range
+
+    delta_ = _lfoRateTableApprox(lfoSpeed) / ma.SR;
+
+    // to produce new `delayinc_, delayinc2_`
+    delayinc_bus = delayinc_bus2, delayinc_bus1 : ba.selectbus(2, 2, a==99)
+    with {
+      a = 99 - lfoDelay;
+      delayinc_bus1 = 1.0, 1.0;  // Maximum value
+      delayinc_bus2 = unit_ * b, unit_ * max((b & 65408), 128)
+      with {
+        b = (16 + (a & 15)) << (1 + (a >> 4));
+      };
+    };
+
+    newphase_ = phase_ + delta_ : ma.frac; // todo: alternatives to ma.frac?
+
+    getTri = randstate_, x
+    with {
+      x = ba.if(
+        newphase_ < 0.5,
+        newphase_ * 2.0,  // Rising 0.0 to 1.0
+        2.0 - phase_ * 2.0  // Falling 1.0 to 0.0
+      );
+    };
+
+    getSawdown = randstate_, x
+    with {
+      x = 1.0 - newphase_;
+    };
+
+    getSawUp = randstate_, x
+    with {
+      x = newphase_;
+    };
+
+    getSquare = randstate_, x
+    with {
+      x = ba.if(newphase_ < 0.5, 1.0, 0.);
+    };
+
+    getSine = randstate_, x
+    with {
+      x = 0.5 + 0.5 * sin(newphase_ * 2.0 * ma.PI);
+    };
+
+    getSandH = newrandstate, x
+    with {
+      newrandstate = ba.if(newphase_ < delta_, (randstate_ * 179 + 17) & 255, randstate_);
+      x = newrandstate / 255.0;
+    };
+
+    newSample = getTri, getSawdown, getSawUp, getSquare, getSine, getSandH : ba.selectbus(2, 6, lfoWave);
+
+    // --- get delay to produce 2 channels: `delaystate_, Lfo::getdelay()`
+    // see lfo.cc lines~78-90
+    delayBus = delayVal1, delayVal2, delayVal3 : ba.selectbus(2, 3, (d <= 2.0)*(2-(d < 1.0)))
+    with {
+      d = delaystate_ + delta
+      with {
+        // We use `delayinc_bus` instead of `delayinc_, delayinc2_` because we assume
+        // the order of events in C++ is reset(), keydown(), getsample(), getdelay()
+        delta = (delayinc_bus : ba.if(delaystate_ < 1.0));
+      };
+
+      delayVal1 = delaystate_, 1.0; // path if (d > 2.0)
+      delayVal2 = d, 0; // else if (d < 1.0)
+      delayVal3 = d, d - 1.0; // else
+    };
+    newdelayState = delayBus : _,!;
+    delayVal = delayBus : !, _;
+  };
+};
+
+// --- Tests ---
+
+// process = hgroup("LFO", lfo(lfoWave, lfoDelay, lfoSync, lfoSpeed, gate))
+// : _,! // take just sample not "delay value"
+// // : !,_ // show the delay
+// // : _*_ // multiply them
+// with {
+//   lfoWave = nentry("[0] Wave [style:menu{'Triangle':0;'Saw Down':1;'Saw Up':2;'Square':3;'Sine':4;'Sample & Hold':5}]",0,0,5,1);
+//   lfoSpeed = hslider("[1] Speed [style:knob]",35,0,99,1);
+//   lfoDelay = hslider("[2] Delay [style:knob]",0,0,99,1);
+//   lfoSync = checkbox("[3] Sync [style:knob]");
+//   gate = button("[4] gate");
+// };
