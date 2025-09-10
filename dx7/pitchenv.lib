@@ -2,7 +2,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 si = library("signals.lib");
 
-// todo: In Dexed, the parameters are only set during a keyDown event, but in
+// TODO: In Dexed, the parameters are only set during a keyDown event, but in
 // Faust we update them continuously. This probably leads to some artifacts if
 // the parameters are continuously changing.
 
@@ -10,8 +10,8 @@ si = library("signals.lib");
 //--------------------`(dx.)pitchenv`-----------------------------------------
 //
 // Global Pitch Envelope in the DX7, based on Dexed/MSFA code.
-// The output is a Q24 number, so you may want to divide by 67108864.
-// to get a number in [-1,1]
+// The output is a Q24 number, so you may want to divide by 67108864
+// to get a number in [-1,1].
 // 
 // #### Usage
 // ```
@@ -83,7 +83,7 @@ with {
 
   unit_ = 32.0 / (21.3 * ma.SR);
 
-  // todo: use ba.tabulateNd?
+  // TODO: use ba.tabulateNd?
   pitchenv_rate = round : rdtable(waveform{
     1, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12,
     12, 13, 13, 14, 14, 15, 16, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24,
@@ -93,7 +93,7 @@ with {
     153, 159, 165, 171, 178, 185, 193, 202, 211, 232, 243, 254, 255
   }) : _*unit_;
 
-  // todo: use ba.tabulateNd?
+  // TODO: use ba.tabulateNd?
   pitchenv_tab = round : rdtable(waveform{
     -128, -116, -104, -95, -85, -76, -68, -61, -56, -52, -49, -46, -43,
     -41, -39, -37, -35, -33, -32, -31, -30, -29, -28, -27, -26, -25, -24,

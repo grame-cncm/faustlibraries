@@ -53,15 +53,13 @@ clean:
 
 ####################################################################
 # building md files
-md : $(DOCDIR)/libs $(MD)
+md: $(MD)
 
-$(DOCDIR)/libs :
-	mkdir $(DOCDIR)/libs 
-
-$(DOCDIR)/libs/%.md:$(FAUSTLIBS)/%.lib 
+$(DOCDIR)/libs/%.md: $(FAUSTLIBS)/%.lib
+	@mkdir -p $(dir $@)
 	@echo ========= building $<
 	cat $< | $(AWK) -f scripts/faustlib2md.awk > $@
-
+	
 ####################################################################
 # building index
 index: $(DOCDIR)/libs/index.md

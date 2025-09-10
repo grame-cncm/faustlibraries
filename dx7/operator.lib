@@ -43,7 +43,7 @@ import("pitchenv.lib");
 // * `keyVelSens`: key velocity sensitivity (0-7)
 // * `ampModSens`: amplitude sensitivity (0-3)
 // * `rateScale`: envelope rate scale (0-7)
-// * `breakpoint`: break point position (0-99) // todo: is it 0-99 or 0-34ish?
+// * `breakpoint`: break point position (0-99) // TODO: is it 0-99 or 0-34ish?
 // * `breakpointLDepth`: break point left depth (0-99)
 // * `breakpointRDepth`: break point right depth (0-99)
 // * `breakpointLCurve`: break point left curve (0-3) (-LIN,-EXP,+EXP,+LIN)
@@ -125,7 +125,7 @@ with {
   with {
     osc_freq_mode_0 = logfreq_d
     with {
-      // todo: use ba.tabulateNd
+      // TODO: use ba.tabulateNd
       coarsemul = round : rdtable(waveform{
         -16777216, 0, 16777216, 26591258, 33554432, 38955489, 43368474, 47099600,
         50331648, 53182516, 55732705, 58039632, 60145690, 62083076, 63876816,
@@ -165,7 +165,7 @@ with {
   m_hsp_phasor(freq, reset, phase) = (select2(reset, +(freq/ma.SR), phase) : ma.decimal) ~ _;
 
   // ---- PITCH BEND ----
-  pitch_base = 0; // todo:
+  pitch_base = 0; // TODO:
   toQ24 = _ * 16777216.0;
 
   // dx7note.cc lines 208~217
@@ -175,11 +175,11 @@ with {
     pitch_levels = pitch_egL1,pitch_egL2,pitch_egL3,pitch_egL4;
 
     // ==== PITCH ====
-    // todo: some major simplifications were made here by DBraun, but listening tests are pretty good.
+    // TODO: some major simplifications were made here by DBraun, but listening tests are pretty good.
     pitchmoddepth_ = 2.*lfoPMD / 99.; // 0.0 to 2.0
     pitchmodsens_ = pitchmodsenstab(lfoPitchModSens) / 256.0 // 0.0 to ~1.0
     with {
-      // todo: use ba.tabulateNd
+      // TODO: use ba.tabulateNd
       pitchmodsenstab = round : rdtable(waveform{
         0, 10, 20, 33, 55, 92, 153, 255
       });
@@ -198,7 +198,7 @@ with {
   with {
     // ==== AMP MOD ====
     // dx7note.cc line 259
-    // todo: some simplifications were made here.
+    // TODO: some simplifications were made here.
     ampmoddepth_ = lfoAMD / 99.0; // 0.0 to 1.0
     lfo_val_inverted = 1.- lfo_val;
     amod_1 = ampmoddepth_ * lfo_delay * lfo_val_inverted;
@@ -220,7 +220,7 @@ with {
   with {
     ampmodsens_ = ampmodsenstab(ampModSens)
     with {
-      // todo: use ba.tabulateNd
+      // TODO: use ba.tabulateNd
       ampmodsenstab = round : rdtable(waveform{
         0, 4342338, 7171437, 16777216
       });
@@ -234,7 +234,7 @@ with {
     ldiff = int(float(envSample) * pt * INV_Q24 + 0.5);
   };
 
-  // todo: We multiply by 0.5 below to make the output bounded between -1.0 and 1.0.
+  // TODO: We multiply by 0.5 below to make the output bounded between -1.0 and 1.0.
   output = q24_to_linear(outlevel) * sineWave(freq) * .5;
 };
 
@@ -287,8 +287,8 @@ with {
 //   ))
 // <: _,_
 // with {
-//   mode = checkbox("Osc Mode");  // todo: enabling this seems to break the output.
-//   phaseMod = 0; // todo:
+//   mode = checkbox("Osc Mode");  // TODO: enabling this seems to break the output.
+//   phaseMod = 0; // TODO:
 
 //   GLOBAL(x) = vgroup("Global", x);
 //   MAIN(x) = GLOBAL(hgroup("[0] Main", x));

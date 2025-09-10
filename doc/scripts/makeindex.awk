@@ -1,8 +1,9 @@
 
 function makeSection(file) {
-	sub(".*/", "", file)
-	sub(".md", "", file);
-	return file;
+	section = file;
+	gsub(/^docs\/libs\//, "", section);   # keep subpath under docs/libs/
+	sub(/\.md$/, "", section);
+	return section;
 }
 
 function printSection() {
