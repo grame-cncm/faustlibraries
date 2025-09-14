@@ -1368,8 +1368,7 @@ sidebands(vs, c0,s0)
     : seq(n, outputs(vs)-1, add(vn(n+1)))
     : _,_, !,!, !,!
 with {
-    // ba.take(n+1, vs)
-    vn(n) = vs : route(outputs(vs),1, n+1,1);
+    vn = ba.pick(vs);
 
     add(vn, co,so, cn_2,cn_1, sn_2,sn_1) =
         co+cn*vn, so+sn*vn, cn_1,cn, sn_1,sn

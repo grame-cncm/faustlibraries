@@ -4075,12 +4075,9 @@ with {
     O = outputs(ts);
     N = outputs(eq);
 
-    // same as ba.take(n+1,l) but more efficient
-    take(l,n) = l : route(outputs(l),1, n+1, 1);
-
     // solution for the current tick, calculated at the previous
     // tick or `iv` if T == 0 (first tick).
-    curr = par(i,N, ck_iv(take(iv,i))) with {
+    curr = par(i,N, ck_iv(ba.pick(iv,i))) with {
         ck_iv = case {
             (0) => _; (0.0) => _; // optimization
             (x) => select2(ba.time, x);
@@ -4091,7 +4088,7 @@ with {
     // solution for T+h time. And we can't just add `: par(i,N,mem)`,
     // this won't work at T == 0 time if iv != 0, see ck_iv above.
     doit = (si.bus(N) <: tick, si.bus(N)) ~ curr :
-        si.block(N), si.bus(N);
+            si.block(N), si.bus(N);
 
     // repeat `step` `ni` times using the `h/ni` time step, outputs
     // the solution for T+h time (next tick).
@@ -4107,8 +4104,8 @@ with {
             push = ro.interleave(N,K) : par(i,N, vec) : eqt;
         };
 
-        vec(K) = _, par(i,K, *(take(ks, K*(K-1)/2 + i))) :> _;
-        eqt(K) = eq(t + h * take(ts, K)) : par(i,N, *(h));
+        vec(K) = _, par(i,K, *(ba.pick(ks, K*(K-1)/2 + i))) :> _;
+        eqt(K) = eq(t + h * ba.pick(ts, K)) : par(i,N, *(h));
     };
 };
 
