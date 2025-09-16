@@ -1672,10 +1672,10 @@ declare ifNc license "MIT-style STK-4.3 license";
 ifNcNo(Nc,No) = si.bus(Ni) <: par(no,No, slice(no) : ifNc(Nc))
 with {
     Ni = Nc*No + Nc+No;
-    slice(no) = route(Ni,2*Nc+1, (par(nc,Nc, ct(nc,no)),else(no)));
-    ct(nc,no) = nc*(No+1)+1,    2*nc+1,    // cond[nc]
-                nc*(No+1)+2+no, 2*nc+2;    // then[nc][no]
-    else(no)  = Nc*(No+1)+1+no, 2*Nc+1;    // else[no]
+    slice(no) = pickN(Ni, (par(nc,Nc, ct(nc,no)), else(no)));
+    ct(nc,no) = nc*(No+1)+0,    // cond[nc]
+                nc*(No+1)+1+no; // then[nc][no]
+    else(no)  = Nc*(No+1)+0+no; // else[no]
 };
 
 declare ifNcNo author "Oleg Nesterov";
