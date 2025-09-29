@@ -6,7 +6,8 @@ DOCDIR   := docs
 SITEDIR	 := ../docs
 FAUSTLIBS ?= ../../faustlibraries
 
-SRC   	 := $(shell cat $(FAUSTLIBS)/all.lib | grep import | sed -e 's/[^"]*"\(..*\.lib\).*/\1/')
+# Use doc.lib (instead of all.lib) to list all needed files, including the one in subfolders
+SRC   	 := $(shell cat $(FAUSTLIBS)/doc.lib | grep import | sed -e 's/[^"]*"\(..*\.lib\).*/\1/')
 MD   	 := $(SRC:%.lib=$(DOCDIR)/libs/%.md)
 LIST   	 := $(SRC:%.lib=%)
 

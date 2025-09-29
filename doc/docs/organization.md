@@ -40,6 +40,8 @@ Other deprecated libraries such as `music.lib`, etc. are present but are not doc
 
 The documentation of each library can be found in `/documentation/library.html` or in `/documentation/library.pdf`. 
 
+The `all.lib` compatibility library imports all libraries in a same namespace, to be located in a single folder. The `doc.lib` describes the actual locatisation of all libraries, including possible subfolders, and is used to generate the documentation of the Faust standard libraries.
+
 ### Versioning
 
 A global `version` number for the standard libraries is defined in `version.lib`. 

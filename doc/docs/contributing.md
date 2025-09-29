@@ -171,8 +171,8 @@ Any function containing UI elements should be placed in this library and respect
 
 Before preparing a pull-request, the new library must be carefully tested:
 
-- all functions defined  in the  library must be tested by preparing a DSP test program
-- the  compatibilty library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program:
+- all functions defined in the library must be tested by preparing a DSP test program
+- the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program:
 
 ```
 import("all.lib");
