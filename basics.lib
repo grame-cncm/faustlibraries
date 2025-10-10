@@ -1887,19 +1887,20 @@ selectoutn(N, s) = _ <: par(i, N, *(s==i));
 //========================================================================================
 
 //----------------------------`(ba.)latch`--------------------------------
-// Latch input on positive-going transition of trig: "records" the input when trig
-// switches from 0 to 1, outputs a frozen values everytime else.
+// Latch input on the rising edge of trig.
+// Captures ("records") the input x whenever trig crosses from ≤0 to >0,
+// and holds the last captured value at all other times.
 //
 // #### Usage
-//
 // ```
 // _ : latch(trig) : _
 // ```
 //
 // Where:
 //
-// * `trig`: hold trigger (0 for hold, 1 for bypass)
-//------------------------------------------------------------
+// * `trig`: trigger signal. A rising edge (≤0 → >0) samples the input.
+//
+//------------------------------------------------------------------------
 latch(trig, x) = x * s : + ~ *(1-s) with { s = (trig' <= 0) & (trig > 0); };
 
 
