@@ -30,11 +30,16 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 // ```
 //
 // #### References
+//
 // * <https://some_url1>
 // * <https://some_url2>
 //
 // #### Test
+//
+// ```
 // functionName_test = some_dsp_code;
+// ```
+//
 //-------------------------------------------------
 ```
 
