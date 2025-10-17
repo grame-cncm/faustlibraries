@@ -1,6 +1,17 @@
 //################################ envelopes.lib ##########################################
-// This library contains a collection of envelope generators. Its official prefix is `en`.
+// Envelopes library. Its official prefix is `en`.
 //
+// This library provides envelope generators and control functions for shaping
+// signal amplitude, pitch, or other parameters. It includes ADSR, AR, and percussive
+// models, as well as exponential, linear, and segmented envelope types used in both
+// synthesis and dynamic processing contexts.
+//
+// The Envelopes library is organized into 3 sections:
+//
+// * [Envelopes with linear segments](#envelopes-with-linear-segments)
+// * [Envelopes with exponential segments](#envelopes-with-exponential-segments)
+// * [Others](#others)
+// 
 // #### References
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/envelopes.lib>
 //########################################################################################
@@ -53,7 +64,7 @@ declare author "GRAME";
 declare copyright "GRAME";
 declare license "LGPL with exception";
 
-//=============================Functions Reference========================================
+//=============================Envelopes with linear segments============================
 //========================================================================================
 
 //-----------------------`(en.)ar`--------------------------
@@ -458,6 +469,9 @@ declare ahdsr_bias author "Andrew John March and David Braun";
 declare ahdsr_bias licence "STK-4.3";
 ahdsr_bias(att, hol, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.ahdsr_bias(att, hol, dec, sus, rel, 0, bias_att, bias_dec, bias_rel, legato, gate);
 
+//=============================Envelopes with exponential segments========================
+//========================================================================================
+
 
 //------------------------`(en.)smoothEnvelope`------------------------
 // An envelope with an exponential attack and release.
@@ -633,6 +647,8 @@ with {
   envelope = target : si.smooth(pole);
 };
 
+//=============================Others============================
+//===============================================================
 
 //----------------------`(en.)dx7envelope`----------------------
 // DX7 operator envelope generator with 4 independent rates and levels. It is
