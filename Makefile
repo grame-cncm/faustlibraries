@@ -3,10 +3,12 @@
 # `make reference`  - compile each *_test entry and store terminal output under tests/reference/.
 # `make check`      - recompile, run each test, and diff against the stored reference output.
 # `make clean`      - remove build artefacts and generated outputs.
+# `make bench`      - use faustbench-llvm to benchmark all test specs.
 # `make build_doc`  - build the documentation.
 # `make serve_doc`  - serve the documentation.
 
 FAUST ?= faust
+FAUSTBENCH ?= faustbench-llvm
 CXX ?= g++
 CXXFLAGS ?= -O2 -std=c++17
 NUM_SAMPLES ?= 1000
@@ -21,8 +23,9 @@ REFERENCE_DIR := tests/reference
 OUTPUT_DIR := tests/output
 DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
+BENCH_LOG := tests/bench.log
 
-.PHONY: reference check clean help reference check
+.PHONY: reference check clean help bench
 
 help: ## Show available targets and descriptions
 	@printf "Usage:\n  make \033[36m<target>\033[0m\n\n"
@@ -81,6 +84,39 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 	fi; \
 	if ! $(FLOATDIFF) $(REFERENCE_DIR)/$*.ref $@ $(FLOAT_TOL); then \
 		echo "[fail] output for $* differs from reference"; \
+	fi
+
+bench: ## Run faustbench-llvm on all test specs and capture memory/CPU stats
+	@set -e; \
+	rm -f $(BENCH_LOG); \
+	mkdir -p $(dir $(BENCH_LOG)); \
+	for spec in $(TEST_SPECS); do \
+		file=$${spec%%:*}; \
+		test=$${spec##*:}; \
+		printf '[bench] %s from %s\n' "$$test" "$$file"; \
+		tmp="$$(mktemp)"; \
+		if $(FAUSTBENCH) -single -pn "$$test" "$$file" > "$$tmp" 2>&1; then \
+			line="$$(grep -m1 'MBytes/sec' "$$tmp" || true)"; \
+			if [ -n "$$line" ]; then \
+				mb="$$(printf '%s\n' "$$line" | sed -nE 's/.*: ([0-9.]+) MBytes\/sec.*/\1/p')"; \
+				sd="$$(printf '%s\n' "$$line" | sed -nE 's/.*SD[[:space:]]*:[[:space:]]*([0-9.]+%).*/\1/p')"; \
+				if [ -n "$$mb" ] && [ -n "$$sd" ]; then \
+					printf '%s: %s : %s %s\n' "$$test" "$$file" "$$mb" "$$sd" >> $(BENCH_LOG); \
+				else \
+					printf '[warn] could not parse bench output for %s\n' "$$test" >&2; \
+				fi; \
+			else \
+				printf '[warn] missing MBytes/sec output for %s\n' "$$test" >&2; \
+			fi; \
+		else \
+			printf '[skip] bench failed for %s\n' "$$test" >&2; \
+		fi; \
+		rm -f "$$tmp"; \
+	done; \
+	if [ -f $(BENCH_LOG) ]; then \
+		printf '[bench] results saved to %s\n' $(BENCH_LOG); \
+	else \
+		printf '[bench] no results generated\n' >&2; \
 	fi
 
 build_doc:
