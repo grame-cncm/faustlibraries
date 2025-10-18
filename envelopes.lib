@@ -83,6 +83,13 @@ declare license "LGPL with exception";
 // * `rt`: release (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when the envelope value reaches 1)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// ar_test = no.noise * en.ar(0.02, 0.3, button("gate"));
+// ```
 //-----------------------------------------------------
 declare ar author "Yann Orlarey, Stéphane Letz";
 ar(at,rt,gate) = AR : max(0)
@@ -134,6 +141,13 @@ with {
 // * `rt`: release (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// asr_test = no.noise * en.asr(0.05, 0.7, 0.4, button("gate"));
+// ```
 //-----------------------------------------------------
 declare asr author "Yann Orlarey, Stéphane Letz";
 asr(at,sl,rt,gate) = AS - R : max(0)
@@ -183,6 +197,13 @@ with {
 // * `rt`: release time (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// adsr_test = no.noise * en.adsr(0.05, 0.1, 0.6, 0.3, button("gate"));
+// ```
 //-----------------------------------------------------
 declare adsr author "Yann Orlarey and Andrey Bundin";
 adsr(at,dt,sl,rt,gate) = ADS : *(1-R) : max(0)
@@ -376,6 +397,17 @@ adsr_bias_env = environment
 // * `legato`: toggle for legato. If disabled, envelopes "re-trigger" from zero.
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// adsrf_bias_test = no.noise * en.adsrf_bias(
+//   0.05, 0.1, 0.6, 0.4, 0.2,
+//   0.4, 0.6, 0.5,
+//   checkbox("legato"), button("gate")
+// );
+// ```
 //-------------------------------------------------------------------------------
 declare adsrf_bias author "Andrew John March and David Braun";
 declare adsrf_bias licence "STK-4.3";
@@ -404,6 +436,17 @@ adsrf_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate
 // * `legato`: toggle for legato. If disabled, envelopes "re-trigger" from zero.
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// adsr_bias_test = no.noise * en.adsr_bias(
+//   0.05, 0.1, 0.6, 0.4,
+//   0.4, 0.6, 0.5,
+//   checkbox("legato"), button("gate")
+// );
+// ```
 //-------------------------------------------------------------------------------
 declare adsr_bias author "Andrew John March and David Braun";
 declare adsr_bias licence "STK-4.3";
@@ -434,6 +477,17 @@ adsr_bias(att, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) = adsr
 // * `legato`: toggle for legato. If disabled, envelopes "re-trigger" from zero.
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// ahdsrf_bias_test = no.noise * en.ahdsrf_bias(
+//   0.05, 0.05, 0.1, 0.6, 0.4, 0.2,
+//   0.4, 0.6, 0.5,
+//   checkbox("legato"), button("gate")
+// );
+// ```
 //---------------------------------------------------------------------
 declare ahdsrf_bias author "Andrew John March and David Braun";
 declare ahdsrf_bias licence "STK-4.3";
@@ -464,6 +518,17 @@ ahdsrf_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato
 // * `legato`: toggle for legato. If disabled, envelopes "re-trigger" from zero.
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// ahdsr_bias_test = no.noise * en.ahdsr_bias(
+//   0.05, 0.05, 0.1, 0.6, 0.4,
+//   0.4, 0.6, 0.5,
+//   checkbox("legato"), button("gate")
+// );
+// ```
 //---------------------------------------------------------------------
 declare ahdsr_bias author "Andrew John March and David Braun";
 declare ahdsr_bias licence "STK-4.3";
@@ -483,9 +548,18 @@ ahdsr_bias(att, hol, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) 
 // smoothEnvelope(ar,t) : _
 // ```
 //
+// Where:
+//
 // * `ar`: attack and release duration (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// smoothEnvelope_test = no.noise * en.smoothEnvelope(0.2, button("gate"));
+// ```
 //----------------------------------------------------------------
 declare smoothEnvelope author "Romain Michon";
 smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
@@ -519,6 +593,13 @@ with {
 // * `fl`: final level to approach upon release (such as 0)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// arfe_test = no.noise * en.arfe(0.2, 0.4, 0, button("gate"));
+// ```
 //-----------------------------------------------------
 declare arfe author "Julius O. Smith III, revised by Stephane Letz";
 declare arfe licence "STK-4.3";
@@ -542,6 +623,13 @@ arfe(attT60,relT60,fv,gate) = asrfe(attT60,1.0,relT60,fv,gate);
 // * `rt`: release (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// are_test = no.noise * en.are(0.2, 0.4, button("gate"));
+// ```
 //-----------------------------------------------------
 declare are author "Julius O. Smith III, revised by Stephane Letz";
 declare are licence "STK-4.3";
@@ -565,6 +653,13 @@ are(attT60,relT60,gate) = asrfe(attT60,1.0,relT60,0.0,gate);
 // * `rt`: release (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// asre_test = no.noise * en.asre(0.2, 0.6, 0.4, button("gate"));
+// ```
 //-----------------------------------------------------
 declare asre author "Julius O. Smith III, revised by Stephane Letz";
 declare asre licence "STK-4.3";
@@ -590,6 +685,13 @@ asre(attT60,susLvl,relT60,gate) = asrfe(attT60,susLvl,relT60,0.0,gate);
 // * `rt`: release (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// adsre_test = no.noise * en.adsre(0.2, 0.1, 0.6, 0.4, button("gate"));
+// ```
 //-----------------------------------------------------
 declare adsre author "Julius O. Smith III";
 declare adsre licence "STK-4.3";
@@ -628,6 +730,13 @@ with {
 // * `rt`: release (sec)
 // * `t`: trigger signal (attack is triggered when `t>0`, release is triggered
 // when `t=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// ahdsre_test = no.noise * en.ahdsre(0.2, 0.05, 0.1, 0.6, 0.4, button("gate"));
+// ```
 //-----------------------------------------------------
 declare ahdsre author "Julius O. Smith III, David Braun";
 declare ahdsre licence "STK-4.3";
@@ -665,6 +774,17 @@ with {
 // * `RN`: rates in seconds
 // * `LN`: levels (0-1)
 // * `t`: trigger signal
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// os = library("oscillators.lib");
+// dx7envelope_test = en.dx7envelope(
+//   0.05, 0.1, 0.1, 0.2,
+//   1, 0.8, 0.6, 0,
+//   button("gate")
+// ) * os.osc(440);
+// ```
 //-----------------------------------------------------
 declare dx7envelope author "Romain Michon";
 

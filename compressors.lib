@@ -84,8 +84,13 @@ declare version "1.6.0";
 // Where:
 //
 // * `ratio`:  compression ratio, between 1 and infinity (1=no compression, infinity means hard limiting)
+//
+// #### Test
+// ```
+// co = library("compressors.lib");
+// ratio2strength_test = co.ratio2strength(4);
+// ```
 //------------------------------------------------------------
-
 declare ratio2strength author "Bart Brouns";
 declare ratio2strength license "GPLv3";
 
@@ -104,8 +109,13 @@ ratio2strength(ratio) = 1-(1/ratio);
 // Where:
 //
 // * `strength`: strength of the compression (0 = no compression, 1 means hard limiting, >1 means over-compression)
+//
+// #### Test
+// ```
+// co = library("compressors.lib");
+// strength2ratio_test = co.strength2ratio(0.75);
+// ```
 //------------------------------------------------------------
-
 declare strength2ratio author "Bart Brouns";
 declare strength2ratio license "GPLv3";
 
@@ -145,6 +155,13 @@ strength2ratio(strength) = 1/(1-strength);
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// peak_compression_gain_mono_db_test = os.osc(440) : co.peak_compression_gain_mono_db(0.5, -12, 0.01, 0.1, 6, 0);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -154,7 +171,6 @@ strength2ratio(strength) = 1/(1-strength);
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare peak_compression_gain_mono_db author "Bart Brouns";
 declare peak_compression_gain_mono_db license "GPLv3";
 
@@ -203,6 +219,13 @@ with {
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// peak_compression_gain_N_chan_db_test = (os.osc(440), os.osc(660)) : co.peak_compression_gain_N_chan_db(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -212,7 +235,6 @@ with {
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare peak_compression_gain_N_chan_db author "Bart Brouns";
 declare peak_compression_gain_N_chan_db license "GPLv3";
 
@@ -265,6 +287,14 @@ peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// meter(x) = x;
+// FFcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FFcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -274,7 +304,6 @@ peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare FFcompressor_N_chan author "Bart Brouns";
 declare FFcompressor_N_chan license "GPLv3";
 
@@ -319,6 +348,14 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// meter(x) = x;
+// FBcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FBcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -328,7 +365,6 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare FBcompressor_N_chan author "Bart Brouns";
 declare FBcompressor_N_chan license "GPLv3";
 
@@ -373,6 +409,14 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// meter(x) = x;
+// FBFFcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FBFFcompressor_N_chan(0.4, -12, 0.01, 0.1, 6, 0, 0.5, 0.3, meter, 2);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -382,7 +426,6 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare FBFFcompressor_N_chan author "Bart Brouns";
 declare FBFFcompressor_N_chan license "GPLv3";
 
@@ -425,6 +468,13 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // Sometimes even bigger ratios are useful:
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
+//
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// RMS_compression_gain_mono_db_test = os.osc(330) : co.RMS_compression_gain_mono_db(0.5, -18, 0.02, 0.12, 6, 0);
+// ```
 //
 // #### References
 //
@@ -486,6 +536,13 @@ RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// RMS_compression_gain_N_chan_db_test = (os.osc(330), os.osc(550)) : co.RMS_compression_gain_N_chan_db(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -495,7 +552,6 @@ RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare RMS_compression_gain_N_chan_db author "Bart Brouns";
 declare RMS_compression_gain_N_chan_db license "GPLv3";
 
@@ -550,6 +606,13 @@ RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // and feed that into one set of gain calculators
 // again the strength is much higher when in FB mode, but implemented differently.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// meter(x) = x;
+// RMS_FBFFcompressor_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBFFcompressor_N_chan(0.4, -18, 0.02, 0.12, 6, 0, 0.5, 0.3, meter, 2);
+// ```
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -559,7 +622,6 @@ RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare RMS_FBFFcompressor_N_chan author "Bart Brouns";
 declare RMS_FBFFcompressor_N_chan license "GPLv3";
 
@@ -614,6 +676,14 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// meter(x) = x;
+// meterLim(x) = x;
+// RMS_FBcompressor_peak_limiter_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(0.4, -18, -2, 0.02, 0.12, 6, 0.5, meter, meterLim, 2);
+// ```
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -623,7 +693,6 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare RMS_FBcompressor_peak_limiter_N_chan author "Bart Brouns";
 declare RMS_FBcompressor_peak_limiter_N_chan license "GPLv3";
 
@@ -668,6 +737,13 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// peak_compression_gain_mono_test = os.osc(440) : co.peak_compression_gain_mono(0.5, -12, 0.01, 0.1, 6, 0);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -677,7 +753,6 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare peak_compression_gain_mono author "Bart Brouns";
 declare peak_compression_gain_mono license "GPLv3";
 
@@ -718,6 +793,13 @@ peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// peak_compression_gain_N_chan_test = (os.osc(440), os.osc(660)) : co.peak_compression_gain_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -727,7 +809,6 @@ peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare peak_compression_gain_N_chan author "Bart Brouns";
 declare peak_compression_gain_N_chan license "GPLv3";
 
@@ -768,6 +849,13 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// RMS_compression_gain_mono_test = os.osc(330) : co.RMS_compression_gain_mono(0.5, -18, 0.02, 0.12, 6, 0);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -777,7 +865,6 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare RMS_compression_gain_mono author "Bart Brouns";
 declare RMS_compression_gain_mono license "GPLv3";
 
@@ -818,6 +905,13 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 // and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// RMS_compression_gain_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -827,7 +921,6 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // Michael MASSBERG (<michael@massberg.org>),
 // and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
-
 declare RMS_compression_gain_N_chan author "Bart Brouns";
 declare RMS_compression_gain_N_chan license "GPLv3";
 
@@ -863,6 +956,13 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // * `att`: attack time = time constant (sec) when level & compression are going up
 // * `rel`: release time = time constant (sec) coming out of compression
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// compressor_lad_mono_test = os.osc(440) : co.compressor_lad_mono(0.005, 4, -9, 0.01, 0.1);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -896,6 +996,13 @@ compressor_lad_mono(lad,ratio,thresh,att,rel,x)
 // * `att`: attack time = time constant (sec) when level & compression are going up
 // * `rel`: release time = time constant (sec) coming out of compression
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// compressor_mono_test = os.osc(440) : co.compressor_mono(4, -9, 0.01, 0.2);
+// ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
@@ -924,6 +1031,13 @@ compressor_mono = compressor_lad_mono(0);
 // * `thresh`: dB level threshold above which compression kicks in (0 dB = max level)
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
+//
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// compressor_stereo_test = (os.osc(440), os.osc(660)) : co.compressor_stereo(4, -9, 0.01, 0.2);
+// ```
 //
 // #### References
 //
@@ -955,6 +1069,13 @@ compressor_stereo(ratio,thresh,att,rel,x,y) = cgm*x, cgm*y with {
 // * `thresh`: dB level threshold above which compression kicks in (0 dB = max level)
 // * `att`: attack time = time constant (sec) when level & compression going up
 // * `rel`: release time = time constant (sec) coming out of compression
+//
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// compression_gain_mono_test = os.osc(440) : co.compression_gain_mono(4, -9, 0.01, 0.2);
+// ```
 //
 // #### References
 //
@@ -1013,6 +1134,13 @@ with {
 //  _ : limiter_1176_R4_mono : _
 // ```
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// limiter_1176_R4_mono_test = os.osc(440) : co.limiter_1176_R4_mono;
+// ```
+//
 // #### Reference:
 //
 // <http://en.wikipedia.org/wiki/1176_Peak_Limiter>
@@ -1048,6 +1176,13 @@ limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
 //
 // ```
 //  _,_ : limiter_1176_R4_stereo : _,_
+// ```
+//
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// limiter_1176_R4_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_1176_R4_stereo;
 // ```
 //
 // #### Reference:
@@ -1092,8 +1227,13 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // * `maxHold`: the maximum hold time in samples, known at compile time
 // * `N`: the number of channels of the gain computer, known at compile time
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// peak_expansion_gain_N_chan_db_test = (os.osc(220), os.osc(330)) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0, 0.5, 2048, 2);
+// ```
 //------------------------------------------------------------
-
 declare peak_expansion_gain_N_chan_db author "Bart Brouns";
 declare peak_expansion_gain_N_chan_db license "GPLv3";
 
@@ -1158,8 +1298,14 @@ with {
 // * `maxHold`: the maximum hold time in samples, known at compile time
 // * `N`: the number of channels of the expander, known at compile time
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// meter(x) = x;
+// expander_N_chan_test = (os.osc(220), os.osc(330)) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2);
+// ```
 //------------------------------------------------------------
-
 declare expander_N_chan author "Bart Brouns";
 declare expander_N_chan license "GPLv3";
 
@@ -1200,8 +1346,15 @@ expander_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,maxHo
 // * `SCswitch` : use either the regular audio input or the SCsignal as the input for the level detector
 // * `SCsignal` : an audio signal, to be used as the input for the level detector when SCswitch is 1
 //
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// meter(x) = x;
+// SCfunction(x) = x;
+// expanderSC_N_chan_test = (os.osc(220), os.osc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.osc(880));
+// ```
 //------------------------------------------------------------
-
 declare expanderSC_N_chan author "Bart Brouns";
 declare expanderSC_N_chan license "GPLv3";
 
@@ -1267,10 +1420,17 @@ expanderSC_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,max
 //
 // Example for a stereo limiter: `limiter_lad_N(2, .01, 1, .01, .1, 1);`
 //
-// #### Reference:
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// limiter_lad_N_test = (os.osc(440), os.osc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
+// ```
 //
+// #### Reference:
 // <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
+
 declare limiter_lad_N author "Dario Sanfilippo";
 declare limiter_lad_N copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -1307,8 +1467,14 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 // * `hold`: is the hold time in seconds
 // * `release`: is the release time in seconds
 //
-// #### Reference:
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// limiter_lad_mono_test = os.osc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
+// ```
 //
+// #### Reference:
 // <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_mono author "Dario Sanfilippo";
@@ -1335,8 +1501,14 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 // * `hold`: is the hold time in seconds
 // * `release`: is the release time in seconds
 //
-// #### Reference:
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// limiter_lad_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
 //
+// ```
+// #### Reference:
 // <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_stereo author "Dario Sanfilippo";
@@ -1363,8 +1535,14 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 // * `hold`: is the hold time in seconds
 // * `release`: is the release time in seconds
 //
-// #### Reference:
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// limiter_lad_quad_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
+// ```
 //
+// #### Reference:
 // <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_quad author "Dario Sanfilippo";
@@ -1391,8 +1569,14 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 // _ : limiter_lad_bw : _
 // ```
 //
-// #### Reference:
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// limiter_lad_bw_test = os.osc(440) : co.limiter_lad_bw;
+// ```
 //
+// #### Reference:
 // <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_bw author "Dario Sanfilippo";

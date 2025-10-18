@@ -76,6 +76,16 @@ declare version "1.6.0";
 // Where:
 //
 // * `N`: is an integer known at compile time that indicates the number of parallel cables
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// bus_test = (
+//     hslider("bus:x0", 0, -1, 1, 0.01),
+//     hslider("bus:x1", 0, -1, 1, 0.01),
+//     hslider("bus:x2", 0, -1, 1, 0.01)
+// ) : si.bus(3);
+// ```
 //-----------------------------------------------------------------------------
 bus(0) = 0:!;
 bus(1) = _;    // avoids a lot of "bus(1)" labels in block diagrams
@@ -95,6 +105,15 @@ bus(N) = par(i, N, _);
 // Where:
 //
 // * `N`: the number of signals to be blocked known at compile time 
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// block_test = (
+//     hslider("block:x0", 0, -1, 1, 0.01),
+//     hslider("block:x1", 0, -1, 1, 0.01)
+// ) : (si.block(1), _);
+// ```
 //--------------------------------------
 block(N) = par(i, N, !);
 
@@ -110,6 +129,17 @@ block(N) = par(i, N, !);
 // Where:
 //
 // * `i`: interpolation control between 0 and 1 (0: first input; 1: second input)
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// os = library("oscillators.lib");
+// interpolate_test = si.interpolate(
+//     hslider("interpolate:mix", 0.5, 0, 1, 0.01),
+//     os.osc(220),
+//     os.osc(440)
+// );
+// ```
 //-----------------------------------------------------------------------------
 interpolate(i,x,y) = x + i*(y-x);  
 
@@ -130,6 +160,12 @@ interpolate(i,x,y) = x + i*(y-x);
 //
 // * `N`: Number of repetitions, minimum of 1, a constant numerical expression 
 // * `FX`: an arbitrary effect (N inputs and N outputs) that will be repeated
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// repeat_test = hslider("repeat:input", 0, -1, 1, 0.01) : si.repeat(3, *(0.5));
+// ```
 //
 // Example 1:
 // ```
@@ -165,6 +201,12 @@ with {
 // ```
 // hslider(...) : smoo;
 // ```
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// smoo_test = hslider("smoo:input", 0, -1, 1, 0.01) : si.smoo;
+// ```
 //---------------------------------------------------------------------
 smoo = si.smooth(1 - 44.1/ma.SR);
 
@@ -186,6 +228,13 @@ smoo = si.smooth(1 - 44.1/ma.SR);
 // * `s`: the smoothness (see `smooth`)
 // * `d`: the number of samples to wait before the signal start being
 //     smoothed after `g` switched to 1
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// polySmooth_test = hslider("polySmooth:input", 0, -1, 1, 0.01)
+//   : si.polySmooth(button("polySmooth:gate"), 0.999, 32);
+// ```
 //-------------------------------------------------------------------
 polySmooth(g,s,d) = si.smooth(s*((g==(g@d)) | (g == 0)));
 
@@ -205,6 +254,13 @@ polySmooth(g,s,d) = si.smooth(s*((g==(g@d)) | (g == 0)));
 //
 // * `g`: the hold signal (0 for hold, 1 for bypass)
 // * `s`: the smoothness (see `smooth`)
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// smoothAndH_test = hslider("smoothAndH:input", 0, -1, 1, 0.01)
+//   : si.smoothAndH(button("smoothAndH:hold"), 0.999);
+// ```
 //-------------------------------------------------------------------
 smoothAndH(t,s) = si.smooth(s*t) : ba.sAndH(t);
 
@@ -215,6 +271,12 @@ smoothAndH(t,s) = si.smooth(s*t) : ba.sAndH(t);
 //
 // ```
 // hslider(...) : bsmooth : _
+// ```
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// bsmooth_test = hslider("bsmooth:input", 0, -1, 1, 0.01) : si.bsmooth;
 // ```
 //-----------------------------------------------------------------------
 bsmooth(c) = +(i) ~ _
@@ -235,6 +297,16 @@ with {
 // Where:
 //
 // * `N`: size of the vectors (int, must be known at compile time)
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// os = library("oscillators.lib");
+// dot_test = (
+//     os.osc(100), os.osc(200), os.osc(300),
+//     os.osc(400), os.osc(500), os.osc(600)
+// ) : si.dot(3);
+// ```
 //-----------------------------------------------------------------------------
 dot(N) = ro.interleave(N,2) : par(i,N,*) :> _;
 
@@ -278,6 +350,12 @@ Michon and Julius O. Smith III, and are released under the
 // The exponential time-constant is approximately 1/(1-s) samples, when s is close to
 // (but less than) 1.
 //
+// #### Test
+// ```
+// si = library("signals.lib");
+// smooth_test = hslider("smooth:input", 0, -1, 1, 0.01) : si.smooth(0.9);
+// ```
+//
 // #### References:
 //
 // * <https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html>
@@ -315,6 +393,12 @@ smooth = smooth_imp(0);
 //
 // * `time`: seconds to reach target
 // * `q`: curve shape (between 0..1, 0 is Exponential, 1 is Linear)
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// smoothq_test = hslider("smoothq:input", 0, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+// ```
 //-----------------------------------------------------------------------------
 declare smoothq author "Andrew John March";
 declare smoothq licence "STK-4.3";
@@ -367,6 +451,16 @@ smoothq(time, q, tar) = envelope
 //
 // * `N`: is an integer known at compile time that indicates the number of parallel cables.
 // * each complex number is represented by two real signals as (real,imag)
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// os = library("oscillators.lib");
+// cbus_test = (
+//     os.osc(100), os.osc(150),
+//     os.osc(200), os.osc(250)
+// ) : si.cbus(2);
+// ```
 //-----------------------------------------------------------------------------
 cbus(1) = (_,_);
 cbus(N) = par(i, N, (_,_));
@@ -386,6 +480,16 @@ cbus(N) = par(i, N, (_,_));
 // * Each complex number is represented by two real signals as (real,imag), so
 // - `(r1,i1)` = real and imaginary parts of signal 1
 // - `(r2,i2)` = real and imaginary parts of signal 2
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// os = library("oscillators.lib");
+// cmul_test = si.cmul(
+//     os.osc(110), os.osc(220),
+//    os.osc(330), os.osc(440)
+// );
+// ```
 //-----------------------------------------------------------------------------
 cmul(r1,i1,r2,i2) = (r1*r2 - i1*i2), (r1*i2 + r2*i1);
 
@@ -404,6 +508,13 @@ cmul(r1,i1,r2,i2) = (r1*r2 - i1*i2), (r1*i2 + r2*i1);
 // * Each complex number is represented by two real signals as (real,imag), so
 // - `(r1,i1)` = real and imaginary parts of the input signal
 // - `(r1,-i1)` = real and imaginary parts of the output signal
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// os = library("oscillators.lib");
+// cconj_test = (os.osc(210), os.osc(310)) : si.cconj;
+// ```
 //-----------------------------------------------------------------------------
 cconj = _, *(-1);
 
@@ -432,6 +543,12 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // * `att`: the attack tau time constant in second
 // * `rel`: the release tau time constant in second
 //
+// #### Test
+// ```
+// si = library("signals.lib");
+// onePoleSwitching_test = hslider("onePoleSwitching:input", 0, -1, 1, 0.01)
+//   : si.onePoleSwitching(0.05, 0.2);
+// ```
 //----------------------------------------------------
 declare onePoleSwitching author "Jonatan Liljedahl, revised by Dario Sanfilippo";
 declare onePoleSwitching licence "STK-4.3";
@@ -463,6 +580,13 @@ lag_ud = onePoleSwitching;
 // Where:
 //
 // * `n`: the block size in samples
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// os = library("oscillators.lib");
+// rev_test = os.osc(440) : si.rev(32);
+// ```
 //----------------------------------------------------
 declare rev author "Yann Orlarey";
 
@@ -500,6 +624,16 @@ with {
 //
 // * `vectorsList`: is a list of vectors
 // * `op`: is a two-input, one-output operator
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// vecOp_test = si.vecOp((v0, v1), +)
+// with {
+//     v0 = (hslider("vecOp:v0_0", 0.1, -1, 1, 0.01), hslider("vecOp:v0_1", 0.2, -1, 1, 0.01));
+//     v1 = (hslider("vecOp:v1_0", 0.3, -1, 1, 0.01), hslider("vecOp:v1_1", 0.4, -1, 1, 0.01));
+// };
+// ```
 //
 // For example, consider the following vectors lists:
 //
@@ -602,6 +736,13 @@ when the repeated expression doesn't depend on the variable.
 // * `N`: number of repetitions, minimum 1, a constant numerical expression
 // * `f`: an arbitrary expression
 //
+// #### Test
+// ```
+// si = library("signals.lib");
+// os = library("oscillators.lib");
+// bpar_test = (os.osc(120), os.osc(240), os.osc(360)) : si.bpar(3, *(0.5));
+// ```
+//
 // Example:
 // ```
 // // square each of 4000 inputs
@@ -632,6 +773,14 @@ bpar(N, f) = bpar(left, f), bpar(right, f) with {
 // * `N`: number of repetitions, minimum 1, a constant numerical expression
 // * `f`: an arbitrary expression with 1 output.
 //
+// #### Test
+// ```
+// si = library("signals.lib");
+// os = library("oscillators.lib");
+// bsum_test = (os.osc(100), os.osc(200), os.osc(300))
+//   : si.bsum(3, *(0.5));
+// ```
+//
 // Example:
 // ```
 // // square each of 1000 inputs and add the results
@@ -660,6 +809,15 @@ bsum(N, f) = bsum(left, f) + bsum(right, f) with {
 //
 // * `N`: number of repetitions, minimum 1, a constant numerical expression
 // * `f`: an arbitrary expression with 1 output.
+//
+// #### Test
+// ```
+// si = library("signals.lib");
+// bprod_test = (
+//     hslider("bprod:x0", 0.5, 0, 2, 0.01),
+//     hslider("bprod:x1", 0.8, 0, 2, 0.01)
+// ) : si.bprod(2, _);
+// ```
 //
 // Example:
 // ```

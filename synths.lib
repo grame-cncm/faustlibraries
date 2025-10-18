@@ -72,6 +72,16 @@ declare version "1.1.0";
 // * `freq`: the resonance frequency of the instrument in Hz
 // * `q`: the q of the res filter (typically, 5 is a good value)
 // * `gate`: the trigger signal (0 or 1)
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// popFilterDrum_test = sy.popFilterDrum(
+//     hslider("popFilterDrum:freq", 200, 50, 1000, 1),
+//     hslider("popFilterDrum:q", 5, 1, 20, 0.1),
+//     button("popFilterDrum:gate")
+// );
+// ```
 //----------------------------------------------------------------------------------------
 declare popFilterDrum author "Romain Michon";
 
@@ -94,6 +104,17 @@ popFilterDrum(freq,q,gate) = en.ar(0.001,0.001,gate)*no.noise : fi.resonbp(freq,
 // * `ctFreq`: cutoff frequency of the filter
 // * `q`: Q of the filter
 // * `gate`: the trigger signal (0 or 1)
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// dubDub_test = sy.dubDub(
+//     hslider("dubDub:freq", 220, 50, 1000, 1),
+//     hslider("dubDub:cutoff", 800, 100, 6000, 1),
+//     hslider("dubDub:q", 2, 0.2, 10, 0.1),
+//     button("dubDub:gate")
+// );
+// ```
 //----------------------------------------------------------------------------------------
 declare dubDub author "Romain Michon";
 
@@ -119,6 +140,16 @@ with {
 // * `freq`: the frequency in Hz
 // * `gain`: the gain (0-1)
 // * `gate`: the gate (0 or 1)
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// sawTrombone_test = sy.sawTrombone(
+//     hslider("sawTrombone:freq", 196, 50, 600, 1),
+//     hslider("sawTrombone:gain", 0.6, 0, 1, 0.01),
+//     button("sawTrombone:gate")
+// );
+// ```
 //----------------------------------------------------------------------------------------
 declare sawTrombone author "Romain Michon";
 
@@ -145,6 +176,16 @@ with {
 // * `freq`: the frequency of the string in Hz
 // * `res`: string T60 (resonance time) in second
 // * `gate`: trigger signal (0 or 1)
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// combString_test = sy.combString(
+//     hslider("combString:freq", 220, 55, 880, 1),
+//     hslider("combString:res", 4, 0.1, 10, 0.01),
+//     button("combString:gate")
+// );
+// ```
 //----------------------------------------------------------------------------------------
 declare combString author "Romain Michon";
 
@@ -181,6 +222,20 @@ with {
 // * `att`: attack duration in second
 // * `rel`: release duration in second
 // * `gate`: trigger signal (0 or 1)
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// additiveDrum_test = sy.additiveDrum(
+//     hslider("additiveDrum:freq", 180, 60, 600, 1),
+//     (1, 1.3, 2.4, 3.2),
+//     (1, 0.8, 0.6, 0.4),
+//     hslider("additiveDrum:harmDec", 0.4, 0, 1, 0.01),
+//     0.01,
+//     0.4,
+//     button("additiveDrum:gate")
+// );
+// ```
 //----------------------------------------------------------------------------------------
 declare additiveDrum author "Romain Michon";
 
@@ -210,6 +265,12 @@ with {
 // * `freqs`: a list of frequencies where the first one is the frequency of the carrier
 //            and the others, the frequency of the modulator(s)
 // * `indices`: the indices of modulation (Nfreqs-1)
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// fm_test = sy.fm((220, 440, 660), (1.5, 0.8));
+// ```
 //----------------------------------------------------------------------------------------
 declare fm author "Romain Michon";
 
@@ -253,6 +314,19 @@ with {
 // #### Reference
 //
 // <https://github.com/nick-thompson/drumsynth/blob/master/kick.js>
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// kick_test = sy.kick(
+//     hslider("kick:pitch", 60, 30, 120, 0.1),
+//     hslider("kick:click", 0.2, 0.005, 1, 0.001),
+//     0.01,
+//     0.5,
+//     hslider("kick:drive", 3, 1, 10, 0.1),
+//     button("kick:gate")
+// );
+// ```
 //-------------------------------------------------------------------------------------
 kick(pitch, click, attack, decay, drive, gate) = out
 with {
@@ -282,6 +356,17 @@ with {
 // #### Reference
 //
 // <https://github.com/nick-thompson/drumsynth/blob/master/clap.js>
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// clap_test = sy.clap(
+//     hslider("clap:tone", 1200, 400, 3500, 10),
+//     0.01,
+//     0.6,
+//     button("clap:gate")
+// );
+// ```
 //-------------------------------------------------------------------------------------
 clap(tone, attack, decay, gate) = out
 with {
@@ -313,6 +398,18 @@ with {
 // #### Reference
 //
 // <https://github.com/nick-thompson/drumsynth/blob/master/hat.js>
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// hat_test = sy.hat(
+//     hslider("hat:pitch", 800, 317, 3170, 1),
+//     hslider("hat:tone", 5000, 800, 18000, 10),
+//     0.005,
+//     0.3,
+//     button("hat:gate")
+// );
+// ```
 //-------------------------------------------------------------------------------------
 hat(pitch, tone, attack, decay, gate) = out
 with {

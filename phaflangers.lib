@@ -57,6 +57,13 @@ Michon and Julius O. Smith III, and are released under the
 // * `fb`: feedback gain between 0 and 1 (0 typical)
 // * `invert`: 0 for normal, 1 to invert sign of flanging sum
 //
+// #### Test
+// ```
+// pf = library("phaflangers.lib");
+// os = library("oscillators.lib");
+// flanger_mono_test = os.osc(440) : pf.flanger_mono(4096, 1024, 0.7, 0.25, 0);
+// ```
+//
 // #### Reference
 //
 // <https://ccrma.stanford.edu/~jos/pasp/Flanging.html>
@@ -84,6 +91,13 @@ flanger_mono(dmax,curdel,depth,fb,invert)
 // * `depth`: effect strength between 0 and 1 (1 typical)
 // * `fb`: feedback gain between 0 and 1 (0 typical)
 // * `invert`: 0 for normal, 1 to invert sign of flanging sum
+//
+// #### Test
+// ```
+// pf = library("phaflangers.lib");
+// os = library("oscillators.lib");
+// flanger_stereo_test = os.osc(440), os.osc(660) : pf.flanger_stereo(4096, 1024, 1536, 0.7, 0.25, 0);
+// ```
 //
 // #### Reference
 //
@@ -139,7 +153,14 @@ with {
 // * `fb`: feedback gain between -1 and 1 (0 typical)
 // * `invert`: 0 for normal, 1 to invert sign of flanging sum
 //
-// Reference:
+// #### Test
+// ```
+// pf = library("phaflangers.lib");
+// os = library("oscillators.lib");
+// phaser2_mono_test = os.osc(330) : pf.phaser2_mono(4, 0.0, 50, 200, 1.5, 4000, 0.5, 0.8, 0.2, 0);
+// ```
+//
+// #### Reference
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Phasing.html>
 // * <http://www.geofex.com/Article_Folders/phasers/phase.html>
@@ -179,7 +200,14 @@ with {               // depth=0 => direct-signal only
 // * `fb`: feedback gain between -1 and 1 (0 typical)
 // * `invert`: 0 for normal, 1 to invert sign of flanging sum
 //
-// Reference:
+// #### Test
+// ```
+// pf = library("phaflangers.lib");
+// os = library("oscillators.lib");
+// phaser2_stereo_test = os.osc(220), os.osc(330) : pf.phaser2_stereo(4, 50, 200, 1.5, 4000, 0.5, 0.8, 0.2, 0);
+// ```
+//
+// #### Reference
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Phasing.html>
 // * <http://www.geofex.com/Article_Folders/phasers/phase.html>

@@ -71,6 +71,13 @@ Michon and Julius O. Smith III, and are released under the
 // ```
 // _ : jcrev : _,_,_,_
 // ```
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// jcrev_test = os.osc(440) : re.jcrev;
+// ```
 //------------------------------------------------------------
 jcrev = *(0.06) : allpass_chain <: comb_bank : mix_mtx with {
   rev1N = fi.rev1;
@@ -110,6 +117,13 @@ jcrev = *(0.06) : allpass_chain <: comb_bank : mix_mtx with {
 //
 // ```
 // _ : satrev : _,_
+// ```
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// satrev_test = os.osc(330) : re.satrev;
 // ```
 //------------------------------------------------------------
 satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
@@ -153,6 +167,14 @@ satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
 // * `durs`: NB decay times (t60) desired for the various bands
 // * `loopgainmax`: scalar gain between 0 and 1 used to "squelch" the reverb
 // * `nonl`: nonlinearity (0 to 0.999..., 0 being linear)
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// fdnrev0_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550))
+//   <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 2.0, 1.5), 0.8, 0.0);
+// ```
 //
 // #### Reference
 //
@@ -214,6 +236,14 @@ with {
 // * `t60dc`: desired decay time (t60) at frequency 0 (sec)
 // * `t60m`: desired decay time (t60) at midrange frequencies (sec)
 // * `fsmax`: maximum sampling rate to be used (Hz)
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// zita_rev_fdn_test = par(i, 8, os.osc(110 * (i + 1)))
+//   <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 48000);
+// ```
 //
 // #### Reference
 //
@@ -300,6 +330,14 @@ zita_distrib2(N) = _,_ <: fanflip(N) with {
 //
 // `rdel`  = delay (in ms) before reverberation begins (e.g., 0 to ~100 ms)
 // (remaining args and refs as for `zita_rev_fdn` above)
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// zita_rev1_stereo_test = (os.osc(440), os.osc(550))
+//   : re.zita_rev1_stereo(20, 200, 2000, 3.0, 2.0, 48000);
+// ```
 //------------------------------------------------------------
 zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax) =
    zita_in_delay(rdel)
@@ -329,6 +367,14 @@ with {
 //
 // `rgxyz` = relative gain of lanes 1,4,2 to lane 0 in output (e.g., -9 to 9)
 //   (remaining args and references as for zita_rev1_stereo above)
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// zita_rev1_ambi_test = (os.osc(330), os.osc(550))
+//   : re.zita_rev1_ambi(0.0, 25, 200, 2000, 3.0, 2.0, 48000);
+// ```
 //------------------------------------------------------------
 zita_rev1_ambi(rgxyz,rdel,f1,f2,t60dc,t60m,fsmax) =
    zita_in_delay(rdel)
@@ -405,6 +451,14 @@ closed source license or any other license if you decide so.
 // * `time`: The decay time of the reverb
 // * `size`: The size of the room
 // * `mix`: A wetness value to use in a final dry/wet mixer
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// vital_rev_test = (os.osc(330), os.osc(440))
+//   : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0.3, 0.2, 0.1, 0.7, 0.5, 0.4);
+// ```
 //-----------------------------------------------------------------------------
 vital_rev(_prelow, _prehigh, _lowcutoff, _highcutoff, _lowgain, _highgain, _chorus_amt, _chorus_freq, _predelay, _time, _size, _mix) = ef.dryWetMixerConstantPower(wetAmount, reverb) : gainMakeup
 with {
@@ -656,6 +710,13 @@ declare vital_rev license "GPL-3.0";
 // * `damp`: damping of the lowpass comb filter (0-1)
 // * `spread`: spatial spread in number of samples (for stereo)
 //
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// mono_freeverb_test = os.osc(440) : re.mono_freeverb(0.7, 0.5, 0.3, 30);
+// ```
+//
 // #### License
 // While this version is licensed LGPL (with exception) along with other GRAME
 // library functions, the file freeverb.dsp in the examples directory of older
@@ -711,6 +772,14 @@ with {
 // * `fb2`: coefficient of the allpass comb filters (0-1)
 // * `damp`: damping of the lowpass comb filter (0-1)
 // * `spread`: spatial spread in number of samples (for stereo)
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// stereo_freeverb_test = (os.osc(330), os.osc(550))
+//   : re.stereo_freeverb(0.7, 0.5, 0.3, 30);
+// ```
 //------------------------------------------------------------
 declare stereo_freeverb author "Romain Michon";
 
@@ -752,6 +821,14 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // * `d_diff2`: decay diffusion factor 2;
 // * `damping`: high-frequency damping; no damping = 0.0
 //
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// dattorro_rev_test = (os.osc(330), os.osc(550))
+//   : re.dattorro_rev(200, 0.5, 0.7, 0.6, 0.5, 0.7, 0.5, 0.2);
+// ```
+//
 // #### Reference
 //
 // <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
@@ -792,6 +869,14 @@ with {
 //
 // ```
 // _,_ : dattorro_rev_default : _,_
+// ```
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// dattorro_rev_default_test = (os.osc(330), os.osc(550))
+//   : re.dattorro_rev_default;
 // ```
 //
 // #### Reference
@@ -904,6 +989,14 @@ jp_gh_rev = environment {
 // * `low_cutoff`: frequency (100..6000 Hz) at which the crossover between the low and mid bands of the reverb occurs
 // * `high_cutoff`: frequency (1000..10000 Hz) at which the crossover between the mid and high bands of the reverb occurs
 //
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// jpverb_test = (os.osc(330), os.osc(440))
+//   : re.jpverb(3.0, 0.2, 1.0, 0.8, 0.3, 0.4, 0.9, 0.8, 0.7, 500, 4000);
+// ```
+//
 // #### Reference
 //
 // <https://doc.sccode.org/Overviews/DEIND.html>
@@ -940,6 +1033,14 @@ jpverb(t60, damp, size, early_diff,
 // * `mod_depth`: depth ([0..1]) of delay-line modulation. Use in combination with `mod_freq` to produce chorus and pitch-variations in the echoes
 // * `mod_freq`: frequency ([0..10] Hz) of delay-line modulation. Use in combination with `mod_depth` to produce chorus and pitch-variations in the echoes
 //
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// greyhole_test = (os.osc(220), os.osc(440))
+//   : re.greyhole(2.0, 0.3, 1.0, 0.6, 0.5, 0.4, 0.2);
+// ```
+//
 // #### Reference
 //
 // <https://doc.sccode.org/Overviews/DEIND.html>
@@ -972,6 +1073,14 @@ greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq)
 //
 // * `rt`: coefficent of the decay of the reverb (0-1)
 // * `damp`: coefficient of the lowpass filters (0-1)
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// kb_rom_rev1_test = (os.osc(330), os.osc(660))
+//   : re.kb_rom_rev1(0.7, 0.3);
+// ```
 //
 // #### Reference
 //

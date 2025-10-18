@@ -98,6 +98,16 @@ noise_env(seed) = environment {
 // ```
 // noise : _
 // ```
+//
+// Where:
+//
+// * output: white noise signal in [-1, 1].
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// noise_test = no.noise;
+// ```
 //------------------------
 noise = noise_env(12345).noise;
 
@@ -113,6 +123,12 @@ noise = noise_env(12345).noise;
 // Where:
 //
 // * `N`: the number of decorrelated random numbers in parallel, a constant numerical expression
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// multirandom_test = no.multirandom(4);
+// ```
 //-------------------------------------------------------------
 multirandom(N) = noise_env(12345).multirandom(N);
 
@@ -129,6 +145,12 @@ multirandom(N) = noise_env(12345).multirandom(N);
 // Where:
 //
 // * `N`: the number of decorrelated random numbers in parallel, a constant numerical expression
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// multinoise_test = no.multinoise(3);
+// ```
 //------------------------------------------------------------
 multinoise(N) = noise_env(12345).multinoise(N);
 
@@ -146,6 +168,12 @@ multinoise(N) = noise_env(12345).multinoise(N);
 //
 // * `N`: the number of decorrelated random numbers in parallel, a constant numerical expression
 // * `i`: the selected random number (i in [0..N[)
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// noises_test = no.noises(4, 2);
+// ```
 //----------------------------------------------------------
 noises(N,i) = noise_env(12345).noises(N,i);
 
@@ -164,6 +192,13 @@ noises(N,i) = noise_env(12345).noises(N,i);
 //
 // * `t`: is a noise burst trigger
 // * `sx`: defines the range of integer seed multipliers. 
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// dnoise_test = (1 : ba.impulsify, 10.0) : no.dnoise;
+// ```
 //
 // #### Example 
 // This expression `sx = hslider("seed multiplier",1,1,1000,1)` allows 1000 distinct seed variations.
@@ -184,6 +219,15 @@ dnoise(t,sx) = noise_env(12345).dnoise(t,sx);
 // randomseed : _
 // ```
 //
+// Where:
+//
+// * output: platform-specific random seed value.
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// randomseed_test = no.randomseed;
+// ```
 //------------------------------------------------------------
 randomseed = ffunction(int arc4random(), <stdlib.h>, ""), 12345 : select2(1');
 
@@ -197,6 +241,12 @@ randomseed = ffunction(int arc4random(), <stdlib.h>, ""), 12345 : select2(1');
 //
 // ```
 // rnoise : _
+// ```
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// rnoise_test = no.rnoise;
 // ```
 //------------------------
 rnoise = noise_env(randomseed).noise;
@@ -215,6 +265,12 @@ rnoise = noise_env(randomseed).noise;
 // Where:
 //
 // * `N`: the number of decorrelated random numbers in parallel, a constant numerical expression
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// rmultirandom_test = no.rmultirandom(4);
+// ```
 //-------------------------------------------------------------
 rmultirandom(N) = noise_env(randomseed).multirandom(N);
 
@@ -233,6 +289,12 @@ rmultirandom(N) = noise_env(randomseed).multirandom(N);
 // Where:
 //
 // * `N`: the number of decorrelated random numbers in parallel, a constant numerical expression
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// rmultinoise_test = no.rmultinoise(3);
+// ```
 //------------------------------------------------------------
 rmultinoise(N) = noise_env(randomseed).multinoise(N);
 
@@ -252,6 +314,12 @@ rmultinoise(N) = noise_env(randomseed).multinoise(N);
 //
 // * `N`: the number of decorrelated random numbers in parallel
 // * `i`: the selected random number (i in [0..N[)
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// rnoises_test = no.rnoises(4, 2);
+// ```
 //----------------------------------------------------------
 rnoises(N,i) = noise_env(randomseed).noises(N,i);
 
@@ -280,8 +348,15 @@ Michon and/or Julius O. Smith III, and are released under the
 // pink_noise : _
 // ```
 //
-// #### Reference
-// <https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html>
+// Where:
+//
+// * output: pink (1/f) noise signal.
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// pink_noise_test = no.pink_noise;
+// ```
 //
 // #### Alternatives
 // Higher-order approximations covering any frequency band can be obtained using
@@ -292,7 +367,7 @@ Michon and/or Julius O. Smith III, and are released under the
 // power spectral density, and can be changed to other real values.
 //
 // #### Example
-// // pink_noise_compare.dsp - compare three pinking filters
+// pink_noise_compare.dsp - compare three pinking filters
 // ```
 // process = pink_noises with {
 //     f0 = 35; // Lower bandlimit in Hz
@@ -314,6 +389,9 @@ Michon and/or Julius O. Smith III, and are released under the
 // ...
 // ```
 // <img alt="pink_noise_demo figure" src="https://ccrma.stanford.edu/wiki/Images/8/86/Tpinkd.jpg" width="600" />
+//
+// #### Reference
+// <https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html>
 //------------------------------------------------------------
 pink_filter = fi.iir((0.049922035, -0.095993537, 0.050612699, -0.004408786),
                     (-2.494956002, 2.017265875, -0.522189400));
@@ -336,6 +414,12 @@ pink_noise_m = pink_noise * 12.5; // Equalizes loudness to that of no.noise (tha
 //
 // * `N`: number of latched white-noise processes to sum,
 // not to exceed sizeof(int) in C++ (typically 32).
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// pink_noise_vm_test = no.pink_noise_vm(4);
+// ```
 //
 // #### References
 //
@@ -369,6 +453,14 @@ with {
 //           lfnoiseN(3,rate), // lfnoise0 smoothed by 3rd order Butterworth LPF
 //           lfnoise(rate);    // lfnoise0 smoothed with no overshoot
 // ```
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// lfnoise0_test = no.lfnoise0(10.0);
+// lfnoiseN_test = no.lfnoiseN(3, 10.0);
+// lfnoise_test = no.lfnoise(10.0);
+// ```
 //------------------------------------------------------------
 lfnoise0(freq) = noise : ba.latch(os.oscrs(freq));
 lfnoiseN(N,freq) = lfnoise0(freq) : fi.lowpass(N,freq);       // Nth-order Butterworth lowpass
@@ -390,6 +482,12 @@ lfnoise(freq) = lfnoise0(freq) : seq(i,5,fi.lowpass(1,freq)); // non-overshootin
 //
 // Random impulses in the amplitude range -1 to 1 are generated
 // at an average rate of f0 impulses per second.
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// sparse_noise_test = no.sparse_noise(5.0);
+// ```
 //
 // #### Reference
 //
@@ -421,6 +519,12 @@ with {
 // * `amp`: amplitude of noise impulses (positive and negative)
 // * `f0`: average frequency of noise impulses per second
 //
+// #### Test
+// ```
+// no = library("noises.lib");
+// velvet_noise_test = no.velvet_noise(0.5, 5.0);
+// ```
+//
 // #### Reference
 //
 // * Matti Karjalainen and Hanna Jarvelainen,
@@ -448,6 +552,12 @@ with {
 // Where:
 //
 // * `N`: number of uniform random numbers added to approximate Gaussian white noise
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// gnoise_test = no.gnoise(8);
+// ```
 //
 // #### Reference
 //
@@ -497,6 +607,13 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // * `alpha`: slope of roll-off, between -1 and 1. -1 corresponds to 
 // brown/red noise, -1/2 pink noise, 0 white noise, 1/2 blue noise,
 // and 1 violet/azure noise.
+//
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// colored_noise_test = no.colored_noise(4, 0.0);
+// ```
 //
 // #### Examples
 // See `dm.colored_noise_demo`.

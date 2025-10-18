@@ -84,6 +84,12 @@ declare copyright "2018-2020 GRAME / GIPSA-Lab";
 //
 // * `x`: position value signal
 // * `x0`: initial value for position
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// initState_test = button("impulse") : mi.initState(1.0);
+// ```
 //---------------------------------------------------------
 initState(init) = R(0,init)
 with{
@@ -115,6 +121,12 @@ with{
 // * `grav`: gravity force value
 // * `x0`: initial position
 // * `xr0`: initial delayed position (inferred from initial velocity)
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// mass_test = 0 : mi.mass(1.0, 0.0, 0.0, 0.0);
+// ```
 //---------------------------------------------------------
 mass(m, grav, x0, x1) = equation
 with{
@@ -146,6 +158,12 @@ with{
 // * `grav`: gravity force value
 // * `x0`: initial position
 // * `xr0`: initial delayed position (inferred from initial velocity)
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// oscil_test = 0 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.0, 0.0);
+// ```
 //---------------------------------------------------------
 oscil(m, k, z, grav, x0, x1) = equation
 with{
@@ -174,6 +192,12 @@ with{
 // Where:
 //
 // * `x0`: initial position
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// ground_test = 0 : mi.ground(0.0);
+// ```
 //---------------------------------------------------------
 ground(x0) = equation
 with{
@@ -200,6 +224,13 @@ with{
 // Where:
 //
 // * `x0`: initial position
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// os = library("oscillators.lib");
+// posInput_test = 0, os.osc(1) : mi.posInput(0.0);
+// ```
 //---------------------------------------------------------
 posInput(init) = _,_ : !,_ : initState(init);
 
@@ -227,6 +258,12 @@ posInput(init) = _,_ : !,_ : initState(init);
 // * `k`: stiffness value
 // * `x1r`: initial delayed position of mass 1 (unused here)
 // * `x2r`: initial delayed position of mass 2 (unused here)
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// spring_test = mi.spring(10.0, 0.0, 0.0, 0.1, -0.1);
+// ```
 //---------------------------------------------------------
 spring(k, x1r0, x2r0, x1, x2) = 
   k*deltapos <: *(-1),_
@@ -251,6 +288,12 @@ with{
 // * `z`: damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// damper_test = mi.damper(0.5, 0.0, 0.0, 0.2, -0.2);
+// ```
 //---------------------------------------------------------
 damper(z, x1r0, x2r0, x1, x2) = 
   z*deltavel <: *(-1),_
@@ -275,6 +318,12 @@ with{
 // * `z`: damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// springDamper_test = mi.springDamper(5.0, 0.3, 0.0, 0.0, 0.1, -0.1);
+// ```
 //---------------------------------------------------------
 springDamper(k, z, x1r0, x2r0, x1, x2) = 
   k*deltapos + 
@@ -304,6 +353,12 @@ with{
 // * `z`: damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// nlSpringDamper2_test = mi.nlSpringDamper2(5.0, 1.0, 0.2, 0.0, 0.0, 0.1, -0.1);
+// ```
 //---------------------------------------------------------
 nlSpringDamper2(k, q, z, x1r0, x2r0, x1, x2) =
   k*deltapos + q * ma.signum(deltapos) * pow(deltapos, 2) +
@@ -333,6 +388,12 @@ with{
 // * `z`: damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// nlSpringDamper3_test = mi.nlSpringDamper3(5.0, 0.5, 0.2, 0.0, 0.0, 0.1, -0.1);
+// ```
 //---------------------------------------------------------
 nlSpringDamper3(k, q, z, x1r0, x2r0, x1, x2) =
   k*deltapos + q * pow(deltapos, 3) +
@@ -370,6 +431,12 @@ with{
 // * `z`: (linear) damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// nlSpringDamperClipped_test = mi.nlSpringDamperClipped(5.0, 0.5, 8.0, 0.2, 0.0, 0.0, 0.1, -0.1);
+// ```
 //---------------------------------------------------------
 nlSpringDamperClipped(s, c, k, z, x1r0, x2r0, x1, x2) =
     select2(c == 0,
@@ -413,6 +480,12 @@ with{
 // * `z`: (linear) damping value
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// nlPluck_test = mi.nlPluck(5.0, 0.1, 0.2, 0.0, 0.0, 0.05, -0.05);
+// ```
 //---------------------------------------------------------
 nlPluck(k, scale, z, x1r0, x2r0, x1, x2) = 
   select2(absdeltapos < tipdist,
@@ -455,6 +528,12 @@ with{
 // * `type`: interaction profile (0 = piecewise linear, 1 = smooth function)
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// nlBow_test = mi.nlBow(0.5, 0.1, 1.0, 0.0, 0.0, 0.05, -0.05);
+// ```
 //---------------------------------------------------------
 nlBow(z, scale, type, x1r0, x2r0, x1, x2) =
   select2(type > 0,
@@ -495,6 +574,12 @@ with{
 // * `thres`: threshold distance for the contact between elements
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// collision_test = mi.collision(5.0, 0.2, 0.01, 0.0, 0.0, 0.0, -0.02);
+// ```
 //---------------------------------------------------------
 collision(k,z,thres,x1r0,x2r0,x1,x2) = 
   springDamper(k,z,x1r0,x2r0,x1+thres,x2) : (select2(comp,0,_),select2(comp,0,_))
@@ -525,6 +610,12 @@ with{
 // * `thres`: threshold distance for the contact between elements
 // * `x1r`: initial delayed position of mass 1
 // * `x2r`: initial delayed position of mass 2
+//
+// #### Test
+// ```
+// mi = library("mi.lib");
+// nlCollisionClipped_test = mi.nlCollisionClipped(3.0, 0.5, 6.0, 0.2, 0.01, 0.0, 0.0, 0.0, -0.02);
+// ```
 //---------------------------------------------------------
 nlCollisionClipped(s, c, k, z, thres, x1r0, x2r0, x1, x2) = 
   nlSpringDamperClipped(s,c,k,z,x1r0,x2r0,x1+thres,x2) : (select2(comp,0,_),select2(comp,0,_))

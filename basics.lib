@@ -83,6 +83,12 @@ declare version "1.22.0";
 // Where:
 //
 // * `n`: number of samples
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// samp2sec_test = ba.samp2sec(512);
+// ```
 //----------------------------
 samp2sec(n) = n/ma.SR;
 
@@ -100,6 +106,12 @@ samp2sec(n) = n/ma.SR;
 // Where:
 //
 // * `d`: duration in seconds
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// sec2samp_test = ba.sec2samp(0.01);
+// ```
 //----------------------------
 sec2samp(d) = d*ma.SR;
 
@@ -117,7 +129,13 @@ sec2samp(d) = d*ma.SR;
 // Where:
 //
 // * `l`: amplitude in dB
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// db2linear_test = ba.db2linear(-6);
+// ```
+//----------------------------
 db2linear(l) = pow(10.0, l/20.0);
 
 
@@ -134,7 +152,13 @@ db2linear(l) = pow(10.0, l/20.0);
 // Where:
 //
 // * `g`: a linear gain
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// linear2db_test = ba.linear2db(0.5);
+// ```
+//----------------------------
 linear2db(g) = 20.0*log10(max(ma.MIN, g));
 
 
@@ -150,7 +174,13 @@ linear2db(g) = 20.0*log10(max(ma.MIN, g));
 // Where:
 //
 // * `n`: the linear gain
-//---------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// lin2LogGain_test = ba.lin2LogGain(0.5);
+// ```
+//----------------------------
 lin2LogGain(n) = n*n;
 
 
@@ -166,7 +196,13 @@ lin2LogGain(n) = n*n;
 // Where:
 //
 // * `n`: the log gain
-//---------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// log2LinGain_test = ba.log2LinGain(0.25);
+// ```
+//----------------------------
 log2LinGain(n) = sqrt(n);
 
 
@@ -200,9 +236,15 @@ Michon and Julius O. Smith III, and are released under the
 // Where:
 //
 // * `tau`: time-constant in seconds
-//-----------------------------
+//
 // tau2pole(tau) = exp(-1.0/(tau*ma.SR));
-
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// tau2pole_test = ba.tau2pole(0.01);
+// ```
+//----------------------------
 tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR))))
 with {
     clipCond = abs(tau)<ma.EPSILON;
@@ -224,7 +266,13 @@ with {
 // Where:
 //
 // * `pole`: the pole
-//-----------------------------
+// 
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pole2tau_test = ba.pole2tau(0.9);
+// ```
+//----------------------------
 pole2tau(pole) = -1.0/(log(max(ma.MIN, pole))*ma.SR);
 
 
@@ -241,7 +289,13 @@ pole2tau(pole) = -1.0/(log(max(ma.MIN, pole))*ma.SR);
 // Where:
 //
 // * `mk`: the MIDI key number
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// midikey2hz_test = ba.midikey2hz(60);
+// ```
+//----------------------------
 midikey2hz(mk) = 440.0*pow(2.0, (mk-69.0)/12.0);
 
 
@@ -258,7 +312,13 @@ midikey2hz(mk) = 440.0*pow(2.0, (mk-69.0)/12.0);
 // Where:
 //
 // * `freq`: frequency in Hz
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// hz2midikey_test = ba.hz2midikey(440);
+// ```
+//----------------------------
 hz2midikey(freq) = 12.0*ma.log2(freq/440.0) + 69.0;
 
 
@@ -275,7 +335,13 @@ hz2midikey(freq) = 12.0*ma.log2(freq/440.0) + 69.0;
 // Where:
 //
 // * `semi`: number of semitone
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// semi2ratio_test = ba.semi2ratio(7);
+// ```
+//----------------------------
 semi2ratio(semi) = pow(2.0, semi/12.0);
 
 
@@ -292,7 +358,13 @@ semi2ratio(semi) = pow(2.0, semi/12.0);
 // Where:
 //
 // * `ratio`: frequency multiplicative ratio
-//-----------------------------
+// 
+// #### Test
+// ```
+// ba = library("basics.lib");
+// ratio2semi_test = ba.ratio2semi(2.0);
+// ```
+//----------------------------
 ratio2semi(ratio) = 12.0*log(ratio)/log(2.0);
 
 
@@ -308,7 +380,13 @@ ratio2semi(ratio) = 12.0*log(ratio)/log(2.0);
 // Where:
 //
 // * `cent`: number of cents
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// cent2ratio_test = ba.cent2ratio(100);
+// ```
+//----------------------------
 cent2ratio(cent) = pow(2.0, cent/1200.0);
 
 
@@ -324,7 +402,13 @@ cent2ratio(cent) = pow(2.0, cent/1200.0);
 // Where:
 //
 // * `ratio`: frequency multiplicative ratio
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// ratio2cent_test = ba.ratio2cent(1.5);
+// ```
+//----------------------------
 ratio2cent(ratio) = 1200.0*log(ratio)/log(2.0);
 
 
@@ -340,7 +424,13 @@ ratio2cent(ratio) = 1200.0*log(ratio)/log(2.0);
 // Where:
 //
 // * `pk`: the piano key number
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pianokey2hz_test = ba.pianokey2hz(49);
+// ```
+//----------------------------
 pianokey2hz(pk) = 440.0*pow(2.0, (pk-49.0)/12.0);
 
 
@@ -356,7 +446,13 @@ pianokey2hz(pk) = 440.0*pow(2.0, (pk-49.0)/12.0);
 // Where:
 //
 // * `freq`: frequency in Hz
-//-----------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// hz2pianokey_test = ba.hz2pianokey(440);
+// ```
+//----------------------------
 hz2pianokey(freq) = 12.0*ma.log2(freq/440.0) + 49.0;
 
 
@@ -382,7 +478,13 @@ FAUST library file, GRAME section 2
 // Where:
 //
 // * `trig`: the trigger signal, each upfront will move the counter to the next integer
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// counter_test = ba.counter(button("trig"));
+// ```
+//----------------------------
 declare counter author "Stephane Letz";
 
 counter(trig) = upfront(trig) : + ~ _ with { upfront(x) = x > x'; };
@@ -404,7 +506,13 @@ counter(trig) = upfront(trig) : + ~ _ with { upfront(x) = x > x'; };
 //
 // * `n`: the starting point of the countdown
 // * `trig`: the trigger signal (1: start at `n`; 0: decrease until 0)
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// countdown_test = ba.countdown(8, button("trig"));
+// ```
+//----------------------------
 countdown(n, trig) = \(c).(if(trig>0, n, max(0, c-1))) ~ _;
 
 
@@ -424,7 +532,13 @@ countdown(n, trig) = \(c).(if(trig>0, n, max(0, c-1))) ~ _;
 //
 // * `n`: the maximum count value
 // * `trig`: the trigger signal (1: start at 0; 0: increase until `n`)
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// countup_test = ba.countup(8, button("trig"));
+// ```
+//----------------------------
 countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~ _;
 
 
@@ -439,7 +553,13 @@ countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~ _;
 // ```
 // sweep(period,run) : _
 // ```
-//-----------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// sweep_test = ba.sweep(64, checkbox("run"));
+// ```
+//----------------------------
 declare sweep author "Jonatan Liljedahl";
 
 sweep = %(int(*:max(1)))~+(1);
@@ -454,7 +574,13 @@ sweep = %(int(*:max(1)))~+(1);
 // ```
 // time : _
 // ```
-//------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// time_test = ba.time;
+// ```
+//----------------------------
 time = +(1)~_ : mem;
 
 
@@ -469,7 +595,14 @@ time = +(1)~_ : mem;
 // Where:
 //
 // * `n`: number of samples to increment/decrement the value by one
-//------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// ramp_test = os.osc(1) : ba.ramp(256);
+// ```
+//----------------------------
 ramp = case {
     (0) => _;
     (n) => \(y,x).(if(y+1.0/n < x, y+1.0/n, if(y-1.0/n > x, y-1.0/n, x))) ~ _;
@@ -491,7 +624,14 @@ ramp = case {
 // Where:
 //
 // * `n`: number of samples to reach the new target received at its input
-//------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// line_test = os.osc(1) : ba.line(256);
+// ```
+//----------------------------
 line(n, x) = state ~ (_,_) : !,_
 with {
     state(t, c) = nt,nc
@@ -514,7 +654,13 @@ with {
 // Where:
 //
 // * `t`: tempo in BPM
-//------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// tempo_test = ba.tempo(120);
+// ```
+//----------------------------
 tempo(t) = (60*ma.SR)/t;
 
 
@@ -530,8 +676,14 @@ tempo(t) = (60*ma.SR)/t;
 // Where:
 //
 // * `p`: period as a number of samples
-//------------------------
+//
 // NOTE: may be this should go in oscillators.lib
+// #### Test
+// ```
+// ba = library("basics.lib");
+// period_test = ba.period(64);
+// ```
+//----------------------------
 period(p) = %(int(p))~+(1');
 
 
@@ -548,7 +700,13 @@ period(p) = %(int(p))~+(1');
 //
 // * `n`: pulse length as a number of samples
 // * `trig`: the trigger signal (1: start the pulse)
-//------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// spulse_test = ba.spulse(32, button("trig"));
+// ```
+//----------------------------
 spulse(n, trig) = trig : trigger(n)
 with {
     upfront(x) = x > x';    // detect rising edge
@@ -570,8 +728,14 @@ with {
 // Where:
 //
 // * `p`: period as a number of samples
-//------------------------
+//
 // NOTE: may be this should go in oscillators.lib
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pulse_test = ba.pulse(64);
+// ```
+//----------------------------
 pulse(p) = period(p) : \(x).(x <= x');
 
 
@@ -588,8 +752,14 @@ pulse(p) = period(p) : \(x).(x <= x');
 //
 // * `n`: pulse length as a number of samples
 // * `p`: period as a number of samples
-//------------------------
+//
 // NOTE: may be this should go in oscillators.lib
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pulsen_test = ba.pulsen(8, 64);
+// ```
+//----------------------------
 pulsen(n,p) = period(p)<n;
 
 
@@ -605,7 +775,13 @@ pulsen(n,p) = period(p)<n;
 // Where:
 //
 // * `n`: the number of cycles/output signals
-//---------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// cycle_test = button("gate") : ba.cycle(3);
+// ```
+//----------------------------
 declare cycle author "Mike Olsen";
 
 cycle(n) = _ <: par(i,n,resetCtr(n,(i+1)));
@@ -624,7 +800,13 @@ cycle(n) = _ <: par(i,n,resetCtr(n,(i+1)));
 // Where:
 //
 // * `t`: tempo in BPM
-//------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// beat_test = ba.beat(120);
+// ```
+//----------------------------
 beat(t) = pulse(tempo(t));
 
 
@@ -641,7 +823,13 @@ beat(t) = pulse(tempo(t));
 // Where:
 //
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pulse_countup_test = ba.pulse_countup(button("run"));
+// ```
+//----------------------------
 declare pulse_countup author "Vince";
 
 pulse_countup(trig) = + ~ _ * trig;
@@ -660,7 +848,13 @@ pulse_countup(trig) = + ~ _ * trig;
 // Where:
 //
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pulse_countdown_test = ba.pulse_countdown(button("run"));
+// ```
+//----------------------------
 declare pulse_countdown author "Vince";
 
 pulse_countdown(trig) = - ~ _ * trig;
@@ -681,7 +875,13 @@ pulse_countdown(trig) = - ~ _ * trig;
 //
 // * `n`: the highest number of the countup (included) before reset to 0
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pulse_countup_loop_test = ba.pulse_countup_loop(4, button("run"));
+// ```
+//----------------------------
 declare pulse_countup_loop author "Vince";
 
 pulse_countup_loop(n, trig) = + ~ cond(n)*trig
@@ -705,7 +905,13 @@ with {
 //
 // * `n`: the highest number of the countup (included) before reset to 0
 // * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pulse_countdown_loop_test = ba.pulse_countdown_loop(4, button("run"));
+// ```
+//----------------------------
 declare pulse_countdown_loop author "Vince";
 
 pulse_countdown_loop(n, trig) = - ~ cond(n)*trig
@@ -728,7 +934,13 @@ with {
 //
 // * `n`: the total number of impulses being split
 // * `m`: index of impulse to allow to be output
-//---------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// resetCtr_test = ba.pulse(16) : ba.resetCtr(4, 2);
+// ```
+//----------------------------
 declare resetCtr author "Mike Olsen";
 
 resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
@@ -751,7 +963,13 @@ resetCtr(n,m) = _ <: (_,pulse_countup_loop(n-1,1)) : (_,(_==m)) : *;
 // Where:
 //
 // * `l`: list of elements
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// count_test = ba.count((10,20,30,40));
+// ```
+//----------------------------
 count((xs, xxs)) = 1 + count(xxs);
 count(xx) = 1;
 
@@ -771,7 +989,13 @@ count(xx) = 1;
 //
 // * `P`: position (int, known at compile time, P > 0)
 // * `l`: list of elements
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// take_test = ba.take(3, (10,20,30,40));
+// ```
+//----------------------------
 take(1, (xs, xxs))  = xs;
 take(1, xs)         = xs;
 take(N, (xs, xxs)) = take(N-1, xxs);
@@ -806,7 +1030,13 @@ take(N, (xs, xxs)) = take(N-1, xxs);
 //
 // Unlike `take()`, `pick()` always flattens the list, so
 // `pick((10,(20,30),40), 1)` outputs `20`, not `20,30`.
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pick_test = ba.pick((10,20,30,40), 2);
+// ```
+//----------------------------
 pick(l,n) = l : route(outputs(l),1, n+1, 1);
 
 //-------------------------------`(ba.)pickN`----------------------------------
@@ -840,7 +1070,13 @@ pick(l,n) = l : route(outputs(l),1, n+1, 1);
 // ```
 // process = pickN(2, (1,0,0,1)) // same as `process(x,y) = y,x,x,y`
 // ```
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// pickN_test = (1,2,3,4) : ba.pickN(4, (0,2));
+// ```
+//----------------------------
 pickN(N,O) = route(N,outputs(O), par(o,outputs(O), pick(O,o)+1, o+1));
 
 //----------------------------`(ba.)subseq`--------------------------------
@@ -864,7 +1100,13 @@ pickN(N,O) = route(N,outputs(O), par(o,outputs(O), pick(O,o)+1, o+1));
 //
 // Faust doesn't have proper lists. Lists are simulated with parallel
 // compositions and there is no empty list.
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// subseq_test = ba.subseq((10,20,30,40,50), 1, 3);
+// ```
+//----------------------------
 subseq((head, tail), 0, 1) = head;
 subseq((head, tail), 0, N) = head, subseq(tail, 0, N-1);
 subseq((head, tail), P, N) = subseq(tail, P-1, N);
@@ -898,7 +1140,6 @@ subseq(head, 0, N)         = head;
 //    line(n, x0, x1) = x0 + (ba.time%n)/n * (x1-x0);
 // };
 // ```
-
 
 //-------`(ba.)tabulate`----------
 // Tabulate a 1D function over the range [r0, r1] for access via nearest-value, linear, cubic interpolation.
@@ -935,7 +1176,12 @@ subseq(head, 0, N)         = head;
 // process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 // ```
 //
-//--------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// tabulate_test = ba.tabulate(1, ba.midikey2hz, 128, 0, 127, 60).lin;
+// ```
+//----------------------------
 tabulate(C, FX, S, r0, r1, x) = environment {
 
     // Maximum index to access
@@ -1012,7 +1258,12 @@ declare tabulate author "Stephane Letz";
 // process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
 // ```
 //
-//--------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// tabulate_chebychev_test = ba.tabulate_chebychev(1, ba.midikey2hz, 32, 4, 0, 127, 60);
+// ```
+//----------------------------
 tabulate_chebychev(C, FX, NX, CD, r0, r1, x) = y with {
     ck(0) = _;
     ck(1) = max(0) : min(NX-1);
@@ -1094,7 +1345,7 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //
 // #### Example test program
 //
-// ```faust
+// ```
 // powSin(x,y) = sin(pow(x,y)); // The function we want to tabulate
 // powSinTable(x,y) = ba.tabulateNd(1, powSin, (sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) ).lin;
 // sizeX = 512; // table size of the first parameter
@@ -1221,7 +1472,7 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //
 // To get the read values for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest. These offsets are best explained by looking at the code of ``tabulate2d``, the hardcoded 2D version:
 //
-// ```faust
+// ```
 // tabulate2d(C,function, sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) =
 //   environment {
 //     size = sizeX*sizeY;
@@ -1336,7 +1587,13 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 //
 // In the interest of brevity, we'll stop explaining here. If you have any more questions, feel free to open an issue on [faustlibraries](https://github.com/grame-cncm/faustlibraries) and tag @magnetophon.
 //
-//--------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// powSin(x,y) = sin(pow(x,y));
+// tabulateNd_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 3.0,4.0)).lin;
+// ```
+//----------------------------
 tabulateNd(C,function,parameters) =
     environment {
         val =
@@ -1607,8 +1864,15 @@ declare tabulateNd license "AGPL-3.0";
 // * `cond`: condition
 // * `then`: signal selected while cond is true
 // * `else`: signal selected while cond is false
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// if_test = ba.if(1, 0.5, -0.5);
+// ```
+//----------------------------
 if(cond,then,else) = select2(cond,else,then);
+
 // TODO: perhaps it would make more sense to have an if(a,b) and an ifelse(a,b,c)?
 
 //-----------------------------`(ba.)ifNc`--------------------------------------
@@ -1642,7 +1906,13 @@ if(cond,then,else) = select2(cond,else,then);
 // ```
 //
 // outputs `-1` if `x<y`, `+1` if `x>y`, `0` otherwise.
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// ifNc_test = ba.ifNc((1, 10, 0, 20, 30));
+// ```
+//----------------------------
 ifNc((c,r)) = c,r : ifNc(outputs(r)/2);
 ifNc(1) = if;
 ifNc(n) = _,_,ifNc(n-1) : ifNc(1);
@@ -1675,7 +1945,13 @@ declare ifNc license "MIT-style STK-4.3 license";
 // ```
 //
 // outputs `-1,-1,-1` if `x<0`, `1,1,1` if `x>0`, `0,0,0` otherwise.
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// ifNcNo_test = (1, 10, 0, 20, 30) : ba.ifNcNo(2, 1);
+// ```
+//----------------------------
 ifNcNo(Nc,No) = si.bus(Ni) <: par(no,No, slice(no) : ifNc(Nc))
 with {
     Ni = Nc*No + Nc+No;
@@ -1706,7 +1982,13 @@ declare ifNcNo license "MIT-style STK-4.3 license";
 //
 // There is also `cselector` for selecting among complex input signals of the form (real,imag).
 //
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// selector_test = (0.1, 0.2, 0.3, 0.4) : ba.selector(2, 4);
+// ```
+//----------------------------
 selector(i,n) = par(j, n, S(i, j))    with { S(i,i) = _; S(i,j) = !; };
 cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; // for complex numbers
 
@@ -1723,7 +2005,13 @@ cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; 
 // Where:
 //
 // * `bpc`: the selector switch (0/1)
-//------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// select2stereo_test = ba.select2stereo(1, (0.1,0.2, 0.3,0.4));
+// ```
+//----------------------------
 select2stereo(bpc) = ro.cross2 : select2(bpc), select2(bpc) : _,_;
 
 
@@ -1748,7 +2036,13 @@ select2stereo(bpc) = ro.cross2 : select2(bpc), select2(bpc) : _,_;
 // N = 64;
 // process = par(n, N, (par(i,N,i) : selectn(N,n)));
 // ```
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// selectn_test = (1,2,3,4) : ba.selectn(4, 2);
+// ```
+//----------------------------
 selectn(N,i) = selectnX(N,i,selector)
 with {
     selector(i,j,x,y) = select2((i >= j), x, y);
@@ -1788,7 +2082,12 @@ with {
 // * `NUM_BUSES`: number of buses (int, known at compile time).
 // * `id`: index of the bus to select (int, `0<=id<NUM_BUSES`)
 //
-//-------------------------------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// selectbus_test = (1,2,3,4) : ba.selectbus(2, 2, 1);
+// ```
+//----------------------------
 selectbus(BUS_SIZE, NUM_BUSES, id) = ro.interleave(BUS_SIZE, NUM_BUSES) : par(j, BUS_SIZE, selectn(NUM_BUSES, id));
 declare selectbus author "David Braun";
 declare selectbus license "MIT";
@@ -1811,7 +2110,12 @@ declare selectbus license "MIT";
 // * `fade`: number of samples for the crossfade.
 // * `id`: index of the bus to select (int, `0<=id<NUM_BUSES`)
 //
-//-------------------------------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// selectxbus_test = (1,2,3,4) : ba.selectxbus(2, 2, 16, checkbox("bus"));
+// ```
+//----------------------------
 selectxbus(BUS_SIZE, NUM_BUSES, fade, id) =
     ro.interleave(BUS_SIZE, NUM_BUSES):
     par(i, BUS_SIZE, selectnX(NUM_BUSES, id, xfade))
@@ -1846,7 +2150,17 @@ declare selectxbus license "MIT";
 // process = selectmulti(ma.SR/10, ((3,9),(2,8),(5,7)), nentry("choice", 0, 0, 2, 1));
 // process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry("choice", 0, 0, 2, 1));
 // ```
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// ma = library("maths.lib");
+// effects = ((_*0.5,_*0.5),(_*0.25,_*0.25));
+// choice = int(checkbox("choice"));
+// selectmulti_test = (os.osc(440), os.osc(660)) : ba.selectmulti(ma.SR/100, effects, choice);
+// ```
+//----------------------------
 selectmulti(n, lgen, id) = selectmultiX(ins, lgen, id)
 with {
     selectmultiX(0, lgen, id) = selector;                    // No inputs
@@ -1884,7 +2198,13 @@ with {
 // process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph("v.bargraph %i", 0, 1));
 // sel = hslider("volume", 0, 0, 2, 1) : int;
 // ```
-//--------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// selectoutn_test = 1 : ba.selectoutn(3, 1);
+// ```
+//----------------------------
 declare selectoutn author "Vince";
 
 selectoutn(N, s) = _ <: par(i, N, *(s==i));
@@ -1907,7 +2227,13 @@ selectoutn(N, s) = _ <: par(i, N, *(s==i));
 //
 // * `trig`: trigger signal. A rising edge (≤0 → >0) samples the input.
 //
-//------------------------------------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// latch_test = os.osc(2) : ba.latch(button("hold"));
+// ```
+//----------------------------
 latch(trig, x) = x * s : + ~ *(1-s) with { s = (trig' <= 0) & (trig > 0); };
 
 
@@ -1924,7 +2250,14 @@ latch(trig, x) = x * s : + ~ *(1-s) with { s = (trig' <= 0) & (trig > 0); };
 // Where:
 //
 // * `trig`: hold trigger (0 for hold, 1 for bypass)
-//----------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// sAndH_test = os.osc(2) : ba.sAndH(button("hold"));
+// ```
+//----------------------------
 declare sAndH author "Romain Michon";
 
 sAndH(trig) = select2(trig) ~ _;
@@ -1941,7 +2274,15 @@ sAndH(trig) = select2(trig) ~ _;
 // Where:
 //
 // * `pred`: predicate to test the input
-//----------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// isPositive(x) = x > 0.0;
+// tAndH_test = os.osc(2) : ba.tAndH(isPositive);
+// ```
+//----------------------------
 tAndH(pred) = _ <: pred,_ : sAndH;
 
 //--------------------------`(ba.)downSample`-------------------------------
@@ -1958,7 +2299,14 @@ tAndH(pred) = _ <: pred,_ : sAndH;
 // Where:
 //
 // * `freq`: new rate in Hz
-//----------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// downSample_test = os.osc(440) : ba.downSample(11025);
+// ```
+//----------------------------
 declare downSample author "Romain Michon";
 
 downSample(freq) = sAndH(hold)
@@ -1981,7 +2329,14 @@ with {
 // Where:
 //
 // * `amount`: The amount of down-sampling to perform [0..1]
-//-----------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// downSampleCV_test = os.osc(440) : ba.downSampleCV(0.5);
+// ```
+//----------------------------
 downSampleCV(amt) = sAndH(hold)
 with {
     // If amt is 0, then freq should be ma.SR/2.
@@ -2010,7 +2365,14 @@ declare downSampleCV author "Romain Michon/David Braun";
 //  0 - Pass through. A single sample 0 trigger will work as a reset.
 //
 //  1 - Track and hold max value.
-//----------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// peakhold_test = os.osc(440) : ba.peakhold(1);
+// ```
+//----------------------------
 declare peakhold author "Jonatan Liljedahl, revised by Romain Michon";
 
 peakhold = (*,_ : max) ~ _;
@@ -2035,7 +2397,14 @@ peakhold = (*,_ : max) ~ _;
 // Where:
 //
 // * `holdTime`: hold time in samples
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// peakholder_test = os.osc(440) : ba.peakholder(ba.sec2samp(0.1));
+// ```
+//----------------------------
 declare peakholder author "Dario Sanfilippo";
 declare peakholder copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
@@ -2090,7 +2459,13 @@ peakholder(n) = peakhold2 ~ reset : (!,_) with {
 // ```
 // hslider("freq", 200, 200, 2000, 0.1) : kr2ar;
 // ```
-//----------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// kr2ar_test = button("gate") : ba.kr2ar;
+// ```
+//----------------------------
 kr2ar = + ~ *(0); 
 
 
@@ -2105,7 +2480,14 @@ kr2ar = + ~ *(0);
 // ```
 // button("gate") : impulsify;
 // ```
-//----------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// impulsify_test = os.osc(440) : ba.impulsify;
+// ```
+//----------------------------
 impulsify = _ <: _,mem : - <: >(0)*_;
 
 
@@ -2123,7 +2505,14 @@ impulsify = _ <: _,mem : - <: >(0)*_;
 // * `t`: tempo in BPM
 // * `size`: number of items in the loop
 // * `init`: init value in the loop
-//-----------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// autoControl = hslider("autoControl", 0.2, 0, 1, 0.01);
+// automat_test = autoControl : ba.automat(120, 4, 0.0);
+// ```
+//----------------------------
 automat(t, size, init, input) = rwtable(size+1, init, windex, input, rindex)
 with {
     clock = beat(t);
@@ -2255,7 +2644,13 @@ bpf = environment
 //
 // * `index`: the index (float) to interpolate between the different values.
 // The range of `index` depends on the size of the list.
-//------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// listInterp_test = ba.listInterp((800,400,350,450,325), 1.5);
+// ```
+//----------------------------
 declare listInterp author "Romain Michon";
 
 listInterp(v) =
@@ -2279,7 +2674,14 @@ listInterp(v) =
 //
 // * `bpc`: bypass switch (0/1)
 // * `e`: a mono effect
-//------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// bypass1_test = os.osc(440) : ba.bypass1(button("bypass"), *(0.5));
+// ```
+//----------------------------
 declare bypass1 author "Julius Smith";
 // License: STK-4.3
 
@@ -2304,7 +2706,14 @@ with {
 //
 // * `bpc`: bypass switch (0/1)
 // * `e`: a stereo effect
-//------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// bypass2_test = (os.osc(440), os.osc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
+// ```
+//----------------------------
 declare bypass2 author "Julius Smith";
 // License: STK-4.3
 
@@ -2330,7 +2739,15 @@ with {
 //
 // * `bpc`: bypass switch (0/1)
 // * `e`: a mono-to-stereo effect
-//------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// monoToStereo(x) = (x*0.5, x*0.25);
+// bypass1to2_test = os.osc(440) : ba.bypass1to2(button("bypass"), monoToStereo);
+// ```
+//----------------------------
 declare bypass1to2 author "Julius Smith";
 // License: STK-4.3
 
@@ -2364,7 +2781,14 @@ with {
 // process = bypass_fade(ma.SR/10, checkbox("bypass echo"), echo);
 // process = bypass_fade(ma.SR/10, checkbox("bypass reverb"), freeverb);
 // ```
-//---------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// bypass_fade_test = (os.osc(440), os.osc(660)) : ba.bypass_fade(128, button("bypass"), par(i,2, *(0.5)));
+// ```
+//----------------------------
 bypass_fade(n, b, e) = par(i, ins, _)
             <: (par(i, ins, *(1-xb)) : e : par(i, outs, *(1-xb))), par(i, ins, *(xb))
             :> par(i, outs, _)
@@ -2391,7 +2815,12 @@ with {
 // (an.amp_follower(0.1) > 0.01) : toggle : vbargraph("output", 0, 1) // takes audio input
 // ```
 //
-//------------------------------------------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// toggle_test = ba.toggle(button("trig"));
+// ```
+//----------------------------
 declare toggle author "Vince";
 
 toggle = trig : loop
@@ -2416,7 +2845,12 @@ with {
 // button("on"), button("off") : on_and_off : vbargraph("output", 0, 1)
 // ```
 //
-//------------------------------------------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// on_and_off_test = button("on"), button("off") : ba.on_and_off;
+// ```
+//----------------------------
 declare on_and_off author "Vince";
 
 on_and_off(a, b) = (a : trig) : loop(b)
@@ -2439,7 +2873,13 @@ with {
 //
 // * `nbits`: the number of bits of the wanted resolution
 //
-//------------------------------------------------------------------------------
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// bitcrusher_test = os.osc(440) : ba.bitcrusher(8);
+// ```
+//----------------------------
 declare bitcrusher author "Julius O. Smith III, revised by Stephane Letz";
 
 bitcrusher(nbits,x) = round(x * scaler) / scaler
@@ -2493,11 +2933,16 @@ with {
 // In this example, a sine wave at 440 Hz is passed through the μ-law bitcrusher, with a compression
 // parameter `mu` of 255 and 8-bit quantization. This creates a distorted, "lo-fi" effect.
 //
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// mulaw_bitcrusher_test = os.osc(440) : ba.mulaw_bitcrusher(2.0, 8);
+// ```
 // #### References
-//
 // * <https://en.wikipedia.org/wiki/Μ-law_algorithm>
-
 //------------------------------------------------------------------------------
+
 declare mulaw_bitcrusher author "Stephane Letz";
 
 mulaw_bitcrusher(mu,nbits,x) =  x : muLawCompress(mu) : bitcrusher(nbits) : muLawExpand(mu)
@@ -2693,7 +3138,15 @@ with {
 // `+(x,0)` equals `x` and `min(x,ma.MAX)` equals `x`. So if we want to
 // calculate the sum, we need to give 0 as `disabledVal`, and if we want the
 // minimum, we need to give `ma.MAX` as `disabledVal`.
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// ma = library("maths.lib");
+// slidingReduce_test = os.osc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
+// ```
+//----------------------------------------------------
 slidingReduce(op,n,0,disabledVal) = 0:!;
 slidingReduce(op,n,1,disabledVal) = _;
 slidingReduce(op,n,maxN,disabledVal) =
@@ -2740,7 +3193,14 @@ slidingReduce(op,n,maxN,disabledVal) =
 // Where:
 //
 // * `n`: the number of values to process
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// slidingSum_test = os.osc(440) : ba.slidingSum(64);
+// ```
+//----------------------------------------------------
 slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
 
 
@@ -2759,7 +3219,14 @@ slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
 //
 // * `n`: the number of values to process
 // * `maxN`: the maximum number of values to process (int, known at compile time, maxN > 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// slidingSump_test = os.osc(440) : ba.slidingSump(64, 128);
+// ```
+//----------------------------------------------------
 slidingSump(n,maxN) = slidingReduce(+,n,maxN,0);
 
 
@@ -2776,7 +3243,15 @@ slidingSump(n,maxN) = slidingReduce(+,n,maxN,0);
 //
 // * `n`: the number of values to process
 // * `maxN`: the maximum number of values to process (int, known at compile time, maxN > 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// ma = library("maths.lib");
+// slidingMax_test = os.osc(440) : ba.slidingMax(64, 128);
+// ```
+//----------------------------------------------------
 slidingMax(n,maxN) = slidingReduce(max,n,maxN,0-(ma.MAX));
 
 //----------------------------`(ba.)slidingMin`--------------------------------
@@ -2792,7 +3267,15 @@ slidingMax(n,maxN) = slidingReduce(max,n,maxN,0-(ma.MAX));
 //
 // * `n`: the number of values to process
 // * `maxN`: the maximum number of values to process (int, known at compile time, maxN > 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// ma = library("maths.lib");
+// slidingMin_test = os.osc(440) : ba.slidingMin(64, 128);
+// ```
+//----------------------------------------------------
 slidingMin(n,maxN) = slidingReduce(min,n,maxN,ma.MAX);
 
 
@@ -2811,7 +3294,14 @@ slidingMin(n,maxN) = slidingReduce(min,n,maxN,ma.MAX);
 // Where:
 //
 // * `n`: the number of values to process
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// slidingMean_test = os.osc(440) : ba.slidingMean(64);
+// ```
+//----------------------------------------------------
 slidingMean(n) = slidingSum(n)/n;
 
 
@@ -2830,7 +3320,14 @@ slidingMean(n) = slidingSum(n)/n;
 //
 // * `n`: the number of values to process
 // * `maxN`: the maximum number of values to process (int, known at compile time, maxN > 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// slidingMeanp_test = os.osc(440) : ba.slidingMeanp(64, 128);
+// ```
+//----------------------------------------------------
 slidingMeanp(n,maxN) = slidingSump(n,maxN)/n;
 
 
@@ -2850,7 +3347,14 @@ slidingMeanp(n,maxN) = slidingSump(n,maxN)/n;
 // Where:
 //
 // * `n`: the number of values to process
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// slidingRMS_test = os.osc(440) : ba.slidingRMS(64);
+// ```
+//----------------------------------------------------
 slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
 
 
@@ -2869,7 +3373,14 @@ slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
 //
 // * `n`: the number of values to process
 // * `maxN`: the maximum number of values to process (int, known at compile time, maxN > 0)
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// os = library("oscillators.lib");
+// slidingRMSp_test = os.osc(440) : ba.slidingRMSp(64, 128);
+// ```
+//----------------------------------------------------
 slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 
 
@@ -2901,8 +3412,12 @@ slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
 // * `N`: the number of parallel inputs known at compile time
 // * `op`: the operator which needs to be commutative
 //
-//------------------------------------------------------------------------------
-
+// #### Test
+// ```
+// ba = library("basics.lib");
+// parallelOp_test = (0.2, 0.5, 0.1) : ba.parallelOp(max, 3);
+// ```
+//----------------------------------------------------
 parallelOp(op,1) = _;
 parallelOp(op,2) = op;
 parallelOp(op,n) = op(parallelOp(op,n-1));
@@ -2924,7 +3439,13 @@ declare parallelOp copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.n
 // Where:
 //
 // * `N`: the number of parallel inputs known at compile time
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// parallelMax_test = (0.2, 0.5, 0.1) : ba.parallelMax(3);
+// ```
+//----------------------------------------------------
 parallelMax(n) = parallelOp(max,n);
 
 declare parallelMax author "Bart Brouns";
@@ -2944,7 +3465,13 @@ declare parallelMax copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.
 // Where:
 //
 // * `N`: the number of parallel inputs known at compile time
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// parallelMin_test = (0.2, 0.5, 0.1) : ba.parallelMin(3);
+// ```
+//----------------------------------------------------
 parallelMin(n) = parallelOp(min,n);
 
 declare parallelMin author "Bart Brouns";
@@ -2964,7 +3491,13 @@ declare parallelMin copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.
 // Where:
 //
 // * `N`: the number of parallel inputs known at compile time
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// parallelMean_test = (0.2, 0.5, 0.1) : ba.parallelMean(3);
+// ```
+//----------------------------------------------------
 parallelMean(n) = si.bus(n):>_/n;
 
 declare parallelMean author "Bart Brouns";
@@ -2983,7 +3516,13 @@ declare parallelMean copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon
 // Where:
 //
 // * `N`: the number of parallel inputs known at compile time
-//------------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// parallelRMS_test = (0.2, 0.5, 0.1) : ba.parallelRMS(3);
+// ```
+//----------------------------------------------------
 parallelRMS(n) = par(i, n, pow(2)) : parallelMean(n) : sqrt;
 
 declare parallelRMS author "Bart Brouns";

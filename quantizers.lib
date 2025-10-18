@@ -112,6 +112,12 @@ quantizer = environment {
 // * `rf` : frequency of the root note of the scale
 // * `nl` : list of frequency ratios for each note relative to root
 //
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// quantize_test = qu.quantize(440, qu.ionian, hslider("input", 450, 100, 1000, 1));
+// ```
+//
 // #### Example
 // ```
 // process = quantize(440, (1, 1.125, 1.25, 1.333, 1.5));
@@ -135,6 +141,12 @@ quantize(rf, nl, x) = rf * quantizer.getOctave(x, rf) * quantizer.findClosestRat
 // * `rf` : frequency of the root note of the scale
 // * `nl` : list of frequency ratios for each note relative to root
 //
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// quantizeSmoothed_test = qu.quantizeSmoothed(440, qu.ionian, hslider("input", 450, 100, 1000, 1));
+// ```
+//
 // #### Example
 // ```
 // process = quantizeSmoothed(440, dodeca);
@@ -154,6 +166,12 @@ quantizeSmoothed(rf, nl, x) = rf * quantizer.getOctave(x, rf) * quantizer.smooth
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// ionian_test = qu.quantize(220, qu.ionian, 260);
+// ```
 //-------------------------------------------------------------
 ionian = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,11/12));
 
@@ -169,6 +187,12 @@ ionian = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,11
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// dorian_test = qu.quantize(220, qu.dorian, 260);
+// ```
 //-------------------------------------------------------------
 dorian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,10/12));
 
@@ -184,6 +208,12 @@ dorian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,10
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// phrygian_test = qu.quantize(220, qu.phrygian, 260);
+// ```
 //-------------------------------------------------------------
 phrygian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10/12));
 
@@ -199,6 +229,12 @@ phrygian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// lydian_test = qu.quantize(220, qu.lydian, 260);
+// ```
 //-------------------------------------------------------------
 lydian = (1,pow(2,2/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,11/12));
 
@@ -214,6 +250,12 @@ lydian = (1,pow(2,2/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,11
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// mixo_test = qu.quantize(220, qu.mixo, 260);
+// ```
 //-------------------------------------------------------------
 mixo = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,10/12));
 
@@ -229,6 +271,12 @@ mixo = (1,pow(2,2/12),pow(2,4/12),pow(2,5/12),pow(2,7/12),pow(2,9/12),pow(2,10/1
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// eolian_test = qu.quantize(220, qu.eolian, 260);
+// ```
 //-------------------------------------------------------------
 eolian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10/12));
 
@@ -244,6 +292,12 @@ eolian = (1,pow(2,2/12),pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,8/12),pow(2,10
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// locrian_test = qu.quantize(220, qu.locrian, 260);
+// ```
 //-------------------------------------------------------------
 locrian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,6/12),pow(2,8/12),pow(2,10/12));
 
@@ -259,6 +313,12 @@ locrian = (1,pow(2,1/12),pow(2,3/12),pow(2,5/12),pow(2,6/12),pow(2,8/12),pow(2,1
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// pentanat_test = qu.quantize(220, qu.pentanat, 260);
+// ```
 //-------------------------------------------------------------
 pentanat = (1,32/27,4/3,3/2,16/9);
 
@@ -274,6 +334,12 @@ pentanat = (1,32/27,4/3,3/2,16/9);
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// kumoi_test = qu.quantize(220, qu.kumoi, 260);
+// ```
 //-------------------------------------------------------------
 kumoi = (1,16/15,4/3,3/2,8/5);
 
@@ -289,6 +355,12 @@ kumoi = (1,16/15,4/3,3/2,8/5);
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// natural_test = qu.quantize(220, qu.natural, 260);
+// ```
 //-------------------------------------------------------------
 natural = (1,9/8,5/4,4/3,3/2,5/3,15/8);
 
@@ -304,6 +376,12 @@ natural = (1,9/8,5/4,4/3,3/2,5/3,15/8);
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// dodeca_test = qu.quantize(220, qu.dodeca, 260);
+// ```
 //-------------------------------------------------------------
 dodeca = (1,pow(2,1/12),pow(2,2/12),pow(2,3/12),pow(2,4/12),pow(2,5/12),pow(2,6/12),pow(2,7/12),pow(2,8/12),pow(2,9/12),pow(2,10/12),pow(2,11/12));
 
@@ -319,6 +397,12 @@ dodeca = (1,pow(2,1/12),pow(2,2/12),pow(2,3/12),pow(2,4/12),pow(2,5/12),pow(2,6/
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// dimin_test = qu.quantize(220, qu.dimin, 260);
+// ```
 //-------------------------------------------------------------
 dimin = (1,pow(2,1/12),pow(2,3/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/12),pow(2,10/12));
 
@@ -334,5 +418,11 @@ dimin = (1,pow(2,1/12),pow(2,3/12),pow(2,4/12),pow(2,6/12),pow(2,7/12),pow(2,9/1
 // Where:
 //
 // * `rf`: frequency of the root note of the scale
+//
+// #### Test
+// ```
+// qu = library("quantizers.lib");
+// penta_test = qu.quantize(220, qu.penta, 260);
+// ```
 //-------------------------------------------------------------
 penta = (1,pow(2,3/12),pow(2,5/12),pow(2,7/12),pow(2,10/12));

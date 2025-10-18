@@ -60,11 +60,23 @@ Michon and Julius O. Smith III, and are released under the
 // ```
 // _ : moog_vcf(res,fr) : _
 // ```
+//
 // Where:
 //
 // * `res`: normalized amount of corner-resonance between 0 and 1 
 // (0 is no resonance, 1 is maximum)
 // * `fr`: corner-resonance frequency in Hz (less than SR/6.3 or so)
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// moog_vcf_test = os.osc(440)
+//   : ve.moog_vcf(
+//       hslider("moog_vcf:res", 0.5, 0, 1, 0.01),
+//       hslider("moog_vcf:freq", 1000, 50, 4000, 1)
+//     );
+// ```
 //
 // #### References
 // * <https://ccrma.stanford.edu/~stilti/papers/moogvcf.pdf>
@@ -103,6 +115,22 @@ with {
 // * `res`: normalized amount of corner-resonance between 0 and 1
 // (0 is min resonance, 1 is maximum)
 // * `fr`: corner-resonance frequency in Hz
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// moog_vcf_2b_test = os.osc(330)
+//   : ve.moog_vcf_2b(
+//       hslider("moog_vcf_2b:res", 0.4, 0, 1, 0.01),
+//       hslider("moog_vcf_2b:freq", 1200, 50, 6000, 1)
+//     );
+// moog_vcf_2bn_test = os.osc(330)
+//   : ve.moog_vcf_2bn(
+//       hslider("moog_vcf_2bn:res", 0.4, 0, 1, 0.01),
+//       hslider("moog_vcf_2bn:freq", 1200, 50, 6000, 1)
+//     );
+// ```
 //------------------------------------------------------------
 declare moog_vcf_2b author "Julius O. Smith III";
 declare moog_vcf_2b copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -146,15 +174,6 @@ with {
 // 1st-order filters are cascaded in series. Feedback is then used, in part, to 
 // control the cut-off frequency and the resonance.
 //
-// #### References
-//
-// [Zavalishin 2012] (revision 2.1.2, February 2020): 
-//
-// * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
-//
-// This fix is based on Lorenzo Della Cioppa's correction to Pirkle's implementation; see this post: 
-// https://www.kvraudio.com/forum/viewtopic.php?f=33&t=571909
-//
 // #### Usage
 //
 // ```
@@ -165,6 +184,26 @@ with {
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: quality factor between .707 (0 feedback coefficient) to 25 (feedback = 4, which is the self-oscillating threshold).
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// moogLadder_test = os.osc(220)
+//   : ve.moogLadder(
+//       hslider("moogLadder:normFreq", 0.3, 0, 1, 0.001),
+//       hslider("moogLadder:Q", 4, 0.7, 20, 0.1)
+//     );
+// ```
+//
+// #### References
+//
+// [Zavalishin 2012] (revision 2.1.2, February 2020): 
+//
+// * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
+//
+// This fix is based on Lorenzo Della Cioppa's correction to Pirkle's implementation; see this post: 
+// https://www.kvraudio.com/forum/viewtopic.php?f=33&t=571909
 //---------------------------------------------------------------------
 declare moogLadder author "Dario Sanfilippo";
 declare moogLadder license "MIT-style STK-4.3 license";
@@ -203,12 +242,6 @@ with {
 // raw feedback coefficient, for the resonance. 
 // Also, note that the parameter order has changed.
 //
-// #### References
-//
-// [Zavalishin 2012] (revision 2.1.2, February 2020): 
-//
-// * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
-//
 // #### Usage
 //
 // ```
@@ -220,6 +253,17 @@ with {
 // * `k`: feedback coefficient between 0 and 4, which is the stability threshold.
 // * `CF`: the filter's cutoff in Hz.
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// lowpassLadder4_test = os.osc(110)
+//   : ve.lowpassLadder4(
+//       hslider("lowpassLadder4:k", 2.0, 0, 4, 0.1),
+//       hslider("lowpassLadder4:freq", 800, 50, 5000, 1)
+//     );
+// ```
+//
 // Notes:
 // 
 // If you want to express the feedback coefficient as the resonance peak, you can use the formula: 
@@ -229,6 +273,12 @@ with {
 // where Q, between .25 and infinity, corresponds to the peak of the filter at cutoff. 
 // I.e., if you feed the filter with a sine whose frequency is the same as the cutoff, the output 
 // peak corresponds exactly to that set via the Q-param.
+// #### References
+//
+// [Zavalishin 2012] (revision 2.1.2, February 2020): 
+//
+// * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
+//---------------------------------------------------------------------
 declare lowpassLadder4 author "Dario Sanfilippo";
 declare lowpassLadder4 license "MIT License";
 lowpassLadder4(k, CF, x) = loop ~ si.bus(4) : si.block(4) , _
@@ -269,11 +319,6 @@ lowpassLadder4(k, CF, x) = loop ~ si.bus(4) : si.block(4) , _
 //
 // This filter was implemented in Faust by Eric Tarr during the 
 // [2019 Embedded DSP With Faust Workshop](https://ccrma.stanford.edu/workshops/faust-embedded-19/).
-// 
-// #### References
-//
-// * <https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter>
-// * <http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf>
 //
 // #### Usage
 //
@@ -285,6 +330,22 @@ lowpassLadder4(k, CF, x) = loop ~ si.bus(4) : si.block(4) , _
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// moogHalfLadder_test = os.osc(220)
+//   : ve.moogHalfLadder(
+//       hslider("moogHalfLadder:normFreq", 0.3, 0, 1, 0.001),
+//       hslider("moogHalfLadder:Q", 4, 0.7, 20, 0.1)
+//     );
+// ```
+//
+// #### References
+//
+// * <https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter>
+// * <http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf>
 //---------------------------------------------------------------------
 declare moogHalfLadder author "Eric Tarr";
 declare moogHalfLadder license "MIT-style STK-4.3 license";
@@ -323,11 +384,6 @@ with{
 //
 // This filter was implemented in Faust by Eric Tarr during the 
 // [2019 Embedded DSP With Faust Workshop](https://ccrma.stanford.edu/workshops/faust-embedded-19/).
-// 
-// #### References
-//
-// * <https://www.willpirkle.com/virtual-analog-diode-ladder-filter/>
-// * <http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf>
 //
 // #### Usage
 //
@@ -339,6 +395,22 @@ with{
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// diodeLadder_test = os.osc(220)
+//   : ve.diodeLadder(
+//       hslider("diodeLadder:normFreq", 0.4, 0, 1, 0.001),
+//       hslider("diodeLadder:Q", 4, 0.7, 20, 0.1)
+//     );
+// ```
+//
+// #### References
+//
+// * <https://www.willpirkle.com/virtual-analog-diode-ladder-filter/>
+// * <http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf>
 //---------------------------------------------------------------------
 declare diodeLadder author "Eric Tarr";
 declare diodeLadder license "MIT-style STK-4.3 license";
@@ -473,6 +545,17 @@ with{
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// korg35LPF_test = os.osc(220)
+//   : ve.korg35LPF(
+//       hslider("korg35LPF:normFreq", 0.35, 0, 1, 0.001),
+//       hslider("korg35LPF:Q", 3.5, 0.7, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare korg35LPF author "Eric Tarr";
 declare korg35LPF license "MIT-style STK-4.3 license";
@@ -513,6 +596,17 @@ with{
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// korg35HPF_test = os.osc(330)
+//   : ve.korg35HPF(
+//       hslider("korg35HPF:normFreq", 0.4, 0, 1, 0.001),
+//       hslider("korg35HPF:Q", 3.5, 0.7, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare korg35HPF author "Eric Tarr";
 declare korg35HPF license "MIT-style STK-4.3 license";
@@ -565,6 +659,17 @@ with{
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// oberheim_test = os.osc(220)
+//   : ve.oberheim(
+//       hslider("oberheim:normFreq", 0.4, 0, 1, 0.001),
+//       hslider("oberheim:Q", 1.5, 0.5, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare oberheim author "Eric Tarr";
 declare oberheim license "MIT-style STK-4.3 license";
@@ -606,6 +711,17 @@ with{
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// oberheimBSF_test = os.osc(220)
+//   : ve.oberheimBSF(
+//       hslider("oberheimBSF:normFreq", 0.4, 0, 1, 0.001),
+//       hslider("oberheimBSF:Q", 1.5, 0.5, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare oberheimBSF author "Eric Tarr";
 declare oberheimBSF license "MIT-style STK-4.3 license";
@@ -627,6 +743,17 @@ oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// oberheimBPF_test = os.osc(220)
+//   : ve.oberheimBPF(
+//       hslider("oberheimBPF:normFreq", 0.4, 0, 1, 0.001),
+//       hslider("oberheimBPF:Q", 1.5, 0.5, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare oberheimBPF author "Eric Tarr";
 declare oberheimBPF license "MIT-style STK-4.3 license";
@@ -648,6 +775,17 @@ oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// oberheimHPF_test = os.osc(220)
+//   : ve.oberheimHPF(
+//       hslider("oberheimHPF:normFreq", 0.4, 0, 1, 0.001),
+//       hslider("oberheimHPF:Q", 1.5, 0.5, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare oberheimHPF author "Eric Tarr";
 declare oberheimHPF license "MIT-style STK-4.3 license";
@@ -669,6 +807,17 @@ oberheimHPF(normFreq,Q) = oberheim(normFreq,Q):!,!,_,!;
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: q
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// oberheimLPF_test = os.osc(220)
+//   : ve.oberheimLPF(
+//       hslider("oberheimLPF:normFreq", 0.4, 0, 1, 0.001),
+//       hslider("oberheimLPF:Q", 1.5, 0.5, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare oberheimLPF author "Eric Tarr";
 declare oberheimLPF license "MIT-style STK-4.3 license";
@@ -735,7 +884,17 @@ oberheimLPF(normFreq,Q) = oberheim(normFreq,Q):!,!,!,_;
 // Where:
 //
 // * `normFreq`: normalized frequency (0-1)
-
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// sallenKeyOnePole_test = os.osc(440)
+//   : ve.sallenKeyOnePole(
+//       hslider("sallenKeyOnePole:normFreq", 0.25, 0, 1, 0.001)
+//     );
+// ```
+//---------------------------------------------------------------------
 declare sallenKeyOnePole author "Eric Tarr";
 declare sallenKeyOnePole license "MIT-style STK-4.3 license";
 sallenKeyOnePole(normFreq) = _<:(s,ylpf,-(ylpf)) : !,_,_
@@ -767,7 +926,17 @@ with{
 // Where:
 //
 // * `normFreq`: normalized frequency (0-1)
-
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// sallenKeyOnePoleLPF_test = os.osc(440)
+//   : ve.sallenKeyOnePoleLPF(
+//       hslider("sallenKeyOnePoleLPF:normFreq", 0.25, 0, 1, 0.001)
+//     );
+// ```
+//---------------------------------------------------------------------
 declare sallenKeyOnePoleLPF author "Eric Tarr";
 declare sallenKeyOnePoleLPF license "MIT-style STK-4.3 license";
 sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
@@ -789,6 +958,16 @@ sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 // Where:
 //
 // * `normFreq`: normalized frequency (0-1)
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// sallenKeyOnePoleHPF_test = os.osc(440)
+//   : ve.sallenKeyOnePoleHPF(
+//       hslider("sallenKeyOnePoleHPF:normFreq", 0.25, 0, 1, 0.001)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare sallenKeyOnePoleHPF author "Eric Tarr";
 declare sallenKeyOnePoleHPF license "MIT-style STK-4.3 license";
@@ -823,6 +1002,17 @@ sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// sallenKey2ndOrder_test = os.osc(330)
+//   : ve.sallenKey2ndOrder(
+//       hslider("sallenKey2ndOrder:normFreq", 0.3, 0, 1, 0.001),
+//       hslider("sallenKey2ndOrder:Q", 1.0, 0.1, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare sallenKey2ndOrder author "Eric Tarr";
 declare sallenKey2ndOrder license "MIT-style STK-4.3 license";
@@ -862,6 +1052,17 @@ with{
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// sallenKey2ndOrderLPF_test = os.osc(330)
+//   : ve.sallenKey2ndOrderLPF(
+//       hslider("sallenKey2ndOrderLPF:normFreq", 0.3, 0, 1, 0.001),
+//       hslider("sallenKey2ndOrderLPF:Q", 0.8, 0.1, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderLPF author "Eric Tarr";
 declare sallenKey2ndOrderLPF license "MIT-style STK-4.3 license";
@@ -883,6 +1084,17 @@ sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// sallenKey2ndOrderBPF_test = os.osc(330)
+//   : ve.sallenKey2ndOrderBPF(
+//       hslider("sallenKey2ndOrderBPF:normFreq", 0.3, 0, 1, 0.001),
+//       hslider("sallenKey2ndOrderBPF:Q", 1.5, 0.1, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderBPF author "Eric Tarr";
 declare sallenKey2ndOrderBPF license "MIT-style STK-4.3 license";
@@ -904,6 +1116,17 @@ sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 //
 // * `normFreq`: normalized frequency (0-1)
 // * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// sallenKey2ndOrderHPF_test = os.osc(330)
+//   : ve.sallenKey2ndOrderHPF(
+//       hslider("sallenKey2ndOrderHPF:normFreq", 0.3, 0, 1, 0.001),
+//       hslider("sallenKey2ndOrderHPF:Q", 0.8, 0.1, 10, 0.1)
+//     );
+// ```
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderHPF author "Eric Tarr";
 declare sallenKey2ndOrderHPF license "MIT-style STK-4.3 license";
@@ -953,10 +1176,18 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 // _ : biquad(b0, b1, b2, a1, a2) : _
 // ```
 //
-// #### Where:
+// Where:
 //
 // * `b0, b1, b2, a1, a2` are the coefficients of the difference equation above
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// biquad_test = os.osc(440)
+//   : ve.biquad(0.5, 0.3, 0.2, -0.3, 0.2);
+// ```
+//---------------------------------------------------------------------
 declare biquad author "Dario Sanfilippo";
 declare biquad license "MIT License";
 biquad(b0, b1, b2, a1, a2, x) = f ~ _
@@ -974,11 +1205,22 @@ biquad(b0, b1, b2, a1, a2, x) = f ~ _
 // _ : lowpass2Matched(CF, Q) : _
 // ```
 //
-// #### Where:
+// Where:
 //
 // * `CF`: cutoff frequency in Hz
 // * `Q`: resonance linear amplitude
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// lowpass2Matched_test = os.osc(440)
+//   : ve.lowpass2Matched(
+//       hslider("lowpass2Matched:CF", 1000, 50, 5000, 1),
+//       hslider("lowpass2Matched:Q", 0.707, 0.1, 5, 0.01)
+//     );
+// ```
+//---------------------------------------------------------------------
 declare lowpass2Matched author "Dario Sanfilippo";
 declare lowpass2Matched license "MIT License";
 lowpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
@@ -1013,11 +1255,22 @@ lowpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // _ : highpass2Matched(CF, Q) : _
 // ```
 //
-// #### Where:
+// Where:
 //
 // * `CF`: cutoff frequency in Hz
 // * `Q`: resonance linear amplitude
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// highpass2Matched_test = os.osc(440)
+//   : ve.highpass2Matched(
+//       hslider("highpass2Matched:CF", 500, 50, 5000, 1),
+//       hslider("highpass2Matched:Q", 0.707, 0.1, 5, 0.01)
+//     );
+// ```
+//---------------------------------------------------------------------
 declare highpass2Matched author "Dario Sanfilippo";
 declare highpass2Matched license "MIT License";
 highpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
@@ -1049,11 +1302,22 @@ highpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // _ : bandpass2Matched(CF, Q) : _
 // ```
 //
-// #### Where:
+// Where:
 //
 // * `CF`: cutoff frequency in Hz
 // * `Q`: peak width
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// bandpass2Matched_test = os.osc(440)
+//   : ve.bandpass2Matched(
+//       hslider("bandpass2Matched:CF", 1200, 50, 5000, 1),
+//       hslider("bandpass2Matched:Q", 2.0, 0.1, 10, 0.01)
+//     );
+// ```
+//---------------------------------------------------------------------
 declare bandpass2Matched author "Dario Sanfilippo";
 declare bandpass2Matched license "MIT License";
 bandpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
@@ -1089,12 +1353,24 @@ bandpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // _ : peaking2Matched(G, CF, Q) : _
 // ```
 //
-// #### Where:
+// Where:
 //
 // * `G`: peak linear amplitude
 // * `CF`: cutoff frequency in Hz
 // * `Q`: peak width
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// peaking2Matched_test = os.osc(440)
+//   : ve.peaking2Matched(
+//       hslider("peaking2Matched:G", 1.5, 0.1, 4, 0.01),
+//       hslider("peaking2Matched:CF", 1000, 50, 5000, 1),
+//       hslider("peaking2Matched:Q", 2.0, 0.1, 10, 0.01)
+//     );
+// ```
+//---------------------------------------------------------------------
 declare peaking2Matched author "Dario Sanfilippo";
 declare peaking2Matched license "MIT License";
 peaking2Matched(G, CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
@@ -1132,11 +1408,22 @@ peaking2Matched(G, CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // _ : lowshelf2Matched(G, CF) : _
 // ```
 //
-// #### Where:
+// Where:
 //
 // * `G`: shelf linear amplitude
 // * `CF`: cutoff frequency in Hz
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// lowshelf2Matched_test = os.osc(330)
+//   : ve.lowshelf2Matched(
+//       hslider("lowshelf2Matched:G", 1.5, 0.5, 4, 0.01),
+//       hslider("lowshelf2Matched:CF", 500, 50, 5000, 1)
+//     );
+// ```
+//---------------------------------------------------------------------
 declare lowshelf2Matched author "Dario Sanfilippo";
 declare lowshelf2Matched license "MIT License";
 lowshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
@@ -1188,11 +1475,22 @@ lowshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
 // _ : highshelf2Matched(G, CF) : _
 // ```
 //
-// #### Where:
+// Where:
 //
 // * `G`: shelf linear amplitude
 // * `CF`: cutoff frequency in Hz
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// highshelf2Matched_test = os.osc(330)
+//   : ve.highshelf2Matched(
+//       hslider("highshelf2Matched:G", 1.5, 0.5, 4, 0.01),
+//       hslider("highshelf2Matched:CF", 1500, 50, 10000, 1)
+//     );
+// ```
+//---------------------------------------------------------------------
 declare highshelf2Matched author "Dario Sanfilippo";
 declare highshelf2Matched license "MIT License";
 highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
@@ -1251,6 +1549,16 @@ highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
 //
 // * `fr`: resonance frequency in Hz
 //
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// wah4_test = os.osc(220)
+//   : ve.wah4(
+//       hslider("wah4:freq", 800, 200, 2000, 1)
+//     );
+// ```
+//
 // #### Reference
 //
 // <https://ccrma.stanford.edu/~jos/pasp/vegf.html>
@@ -1270,6 +1578,16 @@ wah4(fr) = 4*moog_vcf((3.2/4),fr:si.smooth(0.999));
 // Where:
 //
 // * `level`: amount of effect desired (0 to 1).
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// autowah_test = os.osc(220)
+//   : ve.autowah(
+//       hslider("autowah:level", 0.7, 0, 1, 0.01)
+//     );
+// ```
 //------------------------------------------------------------
 autowah(level,x) = level * crybaby(an.amp_follower(0.1,x),x) + (1.0-level)*x;
 
@@ -1286,6 +1604,16 @@ autowah(level,x) = level * crybaby(an.amp_follower(0.1,x),x) + (1.0-level)*x;
 // Where:
 //
 // * `wah`: "pedal angle" from 0 to 1
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// crybaby_test = os.osc(220)
+//   : ve.crybaby(
+//       hslider("crybaby:wah", 0.3, 0, 1, 0.01)
+//     );
+// ```
 //
 // #### Reference
 //
@@ -1369,6 +1697,20 @@ closed source license or any other license if you decide so.
 // * `BWRatio`: Coefficient to adjust the bandwidth of each band (0.1 - 2)
 // * `source`: Modulation signal
 // * `excitation`: Excitation/Carrier signal
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// no = library("noises.lib");
+// os = library("oscillators.lib");
+// vocoder_test = (no.noise, os.osc(220))
+//   : ve.vocoder(
+//       8,
+//       hslider("vocoder:att", 0.01, 0.001, 0.1, 0.001),
+//       hslider("vocoder:rel", 0.1, 0.01, 0.5, 0.01),
+//       hslider("vocoder:BWRatio", 1.0, 0.5, 1.5, 0.01)
+//     );
+// ```
 //------------------------------------------------------------
 declare oneVocoderBand author "Romain Michon";
 oneVocoderBand(band,bandsNumb,bwRatio,bandGain,x) = x : fi.resonbp(bandFreq,bandQ,bandGain) with {

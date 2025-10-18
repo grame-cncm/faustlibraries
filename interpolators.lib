@@ -229,6 +229,11 @@ doubleprecision quadprecision decrease_modulo(trig, step, length) = raise_modulo
 // * `v0`: is the first value
 // * `v1`: is the second value
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// interpolate_linear_test = it.interpolate_linear(0.5, 0.0, 1.0);
+// ```
 //
 // #### Reference:
 //
@@ -257,6 +262,11 @@ interpolate_linear(dv,v0,v1) = v0 + dv*(v1-v0);  // (faster than v0*(1-dv)+v1*dv
 // * `v0`: is the first value
 // * `v1`: is the second value
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// interpolate_cosine_test = it.interpolate_cosine(0.5, 0.0, 1.0);
+// ```
 //
 // #### Reference:
 //
@@ -289,6 +299,11 @@ interpolate_cosine(dv,v0,v1) = v0 + a2*(v1-v0) with { a2 = 0.5 * (1.0 - cos(dv*m
 // * `v2`: is the third value
 // * `v3`: is the fourth value
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// interpolate_cubic_test = it.interpolate_cubic(0.5, -1.0, 2.0, 1.0, 4.0);
+// ```
 //
 // #### Reference:
 //
@@ -320,6 +335,18 @@ interpolate_cubic(dv,v0,v1,v2,v3)
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 // * `interpolate_two_points`: a two points interpolation function
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// ma = library("maths.lib");
+// interpolator_two_points_test = it.interpolator_two_points(gen, idv, it.interpolate_linear)
+// with {
+//     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
+//     step = 0.25;
+//     idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+//     idv = it.make_idv(idxFloat);
+// };
+// ```
 //--------------------------------------------
 declare interpolator_two_points author "Stéphane Letz";
 declare interpolator_two_points licence "MIT";
@@ -348,6 +375,18 @@ with {
 // * `gen`: a circuit with an 'idv' reader input that produces N outputs
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// ma = library("maths.lib");
+// interpolator_linear_test = it.interpolator_linear(gen, idv)
+// with {
+//     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
+//     step = 0.25;
+//     idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+//     idv = it.make_idv(idxFloat);
+// };
+// ```
 //--------------------------------------------
 declare interpolator_linear author "Stéphane Letz";
 declare interpolator_linear licence "MIT";
@@ -369,6 +408,18 @@ interpolator_linear(gen, idv) = interpolator_two_points(gen, idv, interpolate_li
 // * `gen`: a circuit with an 'idv' reader input that produces N outputs
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// ma = library("maths.lib");
+// interpolator_cosine_test = it.interpolator_cosine(gen, idv)
+// with {
+//     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
+//     step = 0.25;
+//     idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+//     idv = it.make_idv(idxFloat);
+// };
+// ```
 //--------------------------------------------
 declare interpolator_cosine author "Stéphane Letz";
 declare interpolator_cosine licence "MIT";
@@ -398,6 +449,18 @@ interpolator_null(gen, idv) = interpolator_two_points(gen, idv, \(dv,v0,v1).(v0)
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 // * `interpolate_four_points`: a four points interpolation function
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// ma = library("maths.lib");
+// interpolator_four_points_test = it.interpolator_four_points(gen, idv, it.interpolate_cubic)
+// with {
+//     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
+//     step = 0.25;
+//     idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+//     idv = it.make_idv(idxFloat);
+// };
+// ```
 //--------------------------------------------
 declare interpolator_four_points author "Stéphane Letz";
 declare interpolator_four_points licence "MIT";
@@ -428,6 +491,18 @@ with {
 // * `gen`: a circuit with an 'idv' reader input that produces N outputs
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// ma = library("maths.lib");
+// interpolator_cubic_test = it.interpolator_cubic(gen, idv)
+// with {
+//     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
+//     step = 0.25;
+//     idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+//     idv = it.make_idv(idxFloat);
+// };
+// ```
 //--------------------------------------------
 declare interpolator_cubic author "Stéphane Letz";
 declare interpolator_cubic licence "MIT";
@@ -458,6 +533,18 @@ nointerp = MAX_INTER-1;
 // * `idv`: a fractional read index expressed as a float value, or a (int,frac) pair
 // * `sel`: an interpolation algorithm selector in [0..3] (0 = linear, 1 = cosine, 2 = cubic, 3 = nointerp)
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// ma = library("maths.lib");
+// interpolator_select_test = it.interpolator_select(gen, idv, 2)
+// with {
+//     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
+//     step = 0.25;
+//     idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+//     idv = it.make_idv(idxFloat);
+// };
+// ```
 //--------------------------------------------
 declare interpolator_select author "Stéphane Letz";
 declare interpolator_select licence "MIT";
@@ -489,6 +576,12 @@ with {
 // * `y0`: y-coordinate origin
 // * `y1`: y-coordinate destination
 // * `x`: x-coordinate input
+//
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// lerp_test = it.lerp(0.0, 10.0, -5.0, 5.0, 2.5);
+// ```
 //------------------------------------------------------------------------------
 declare lerp author "Dario Sanfilippo";
 declare lerp licence "MIT";
@@ -526,6 +619,11 @@ lerp(x0, x1, y0, y1, x) = y
 // process = it.piecewise((-5, -3, 0, 3, 5), (2, 0, 3, -3, -2), x);
 // ```
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.osc(0.1));
+// ```
 //------------------------------------------------------------------------------
 declare piecewise author "Dario Sanfilippo";
 declare piecewise licence "MIT";
@@ -559,6 +657,12 @@ piecewise(xList, yList, x) = y , assert
 // * `N`: order of the interpolation filter, known at compile-time
 // * `xCoordsList`: a list of N + 1 elements determining the x-axis coordinates of N + 1 values, known at compile-time
 // * `x`: a fractional position on the x-axis to obtain the interpolated y-value
+//
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// lagrangeCoeffs_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), 0.25);
+// ```
 //
 // #### Reference
 //
@@ -623,6 +727,19 @@ lagrange_h(N, x) = lagrangeCoeffs(N, xCoord, x)
 // process = x, yCoords : it.lagrangeInterpolation(N, xCoordsList);
 // ```
 //
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// lagrangeInterpolation_test = (lagrange_x, lagrange_y0, lagrange_y1, lagrange_y2, lagrange_y3) : it.lagrangeInterpolation(3, (0, 1, 2, 3))
+// with {
+//     lagrange_x = 1.5;
+//     lagrange_y0 = 2.0;
+//     lagrange_y1 = 5.0;
+//     lagrange_y2 = -1.0;
+//     lagrange_y3 = 3.0;
+// };
+// ```
+//
 // #### Reference
 // 
 // <https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html>
@@ -669,6 +786,13 @@ lagrangeN(N, x) = si.dot(N + 1, lagrange_h(N, x));
 // index = os.phasor(S, 1000);
 // process = rdtable(S, os.sinwaveform(S), int(index)) ,
 //           it.frdtable(N, S, os.sinwaveform(S), index);
+// ```
+//
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// os = library("oscillators.lib");
+// frdtable_test = it.frdtable(3, 16, os.sinwaveform(16), os.phasor(16, 200));
 // ```
 //------------------------------------------------------------
 
@@ -719,6 +843,14 @@ frdtable(N, S, init, idx) =
 // process = rwtable(S, os.sinwaveform(S), wIdx, os.sinwaveform(S), int(rIdx)) ,
 //           it.frwtable(N, S, os.sinwaveform(S), wIdx, os.sinwaveform(S), rIdx);
 // ```
+//
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// os = library("oscillators.lib");
+// ba = library("basics.lib");
+// frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.osc(220), os.phasor(16, 150));
+// ```
 //------------------------------------------------------------
 
 declare frwtable author "Dario Sanfilippo";
@@ -759,8 +891,14 @@ frwtable(N, S, init, w_idx, x, r_idx) =
 // ```
 // os.osc(440) : it.remap(-1., 1., 100., 1000.)
 // ```
+//
+// #### Test
+// ```
+// it = library("interpolators.lib");
+// os = library("oscillators.lib");
+// remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.osc(0.5));
+// ```
 //------------------------------------------------------------
 declare remap author "David Braun";
 
 remap(from1, from2, to1, to2, x) = to1 + (x-from1)*(to2-to1)/(from2-from1);
-

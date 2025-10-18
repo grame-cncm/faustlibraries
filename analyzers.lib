@@ -62,6 +62,13 @@ Michon and Julius O. Smith III, and is released under the
 // Where:
 //
 // * `period`: sets the averaging frame in seconds
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// abs_envelope_rect_test = an.abs_envelope_rect(0.05, os.osc(220));
+// ```
 //-----------------------------------------------------------------------------
 declare abs_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
 declare abs_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
@@ -84,6 +91,13 @@ abs_envelope_rect(period, x) = abs(x) : fi.avg_rect(period);
 // Where:
 //
 // * `period`: (time to decay by 1/e) sets the averaging frame in secs
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// abs_envelope_tau_test = an.abs_envelope_tau(0.05, os.osc(220));
+// ```
 //-----------------------------------------------------------------------------
 declare abs_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
 declare abs_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
@@ -106,6 +120,13 @@ abs_envelope_tau(period, x) = abs(x) : fi.avg_tau(period);
 // Where:
 //
 // * `period`: (time to decay by 60 dB) sets the averaging frame in secs
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// abs_envelope_t60_test = an.abs_envelope_t60(0.05, os.osc(220));
+// ```
 //-----------------------------------------------------------------------------
 declare abs_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
 declare abs_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
@@ -128,6 +149,13 @@ abs_envelope_t60(period, x) = abs(x) : fi.avg_t60(period);
 // Where:
 //
 // * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// abs_envelope_t19_test = an.abs_envelope_t19(0.05, os.osc(220));
+// ```
 //-----------------------------------------------------------------------------
 declare abs_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
 declare abs_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
@@ -154,11 +182,19 @@ abs_envelope_t19(period, x) = abs(x) : fi.avg_t19(period);
 //
 // * `rel`: release time = amplitude-envelope time-constant (sec) going down
 //
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// amp_follower_test = os.osc(220) : an.amp_follower(0.05);
+// ```
+//
 // #### References
 //
 // * Musical Engineer's Handbook, Bernie Hutchins, Ithaca NY
 // * 1975 Electronotes Newsletter, Bernie Hutchins
-//------------------------------------------------------------
+//
+//-----------------------------------------------------------------------------
 amp_follower(rel) = abs : env with {
     p = ba.tau2pole(rel);
     env(x) = x * (1.0 - p) : (+ : max(x,_)) ~ *(p);
@@ -181,6 +217,12 @@ peak_envelope = amp_follower; // Synonym for more standard naming
 //
 // * `att`: attack time = amplitude-envelope time constant (sec) going up
 // * `rel`: release time = amplitude-envelope time constant (sec) going down
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// amp_follower_ud_test = os.osc(220) : an.amp_follower_ud(0.002, 0.05);
 //
 // #### Note
 //
@@ -213,6 +255,12 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 // * `att`: attack time = amplitude-envelope time constant (sec) going up
 // * `rel`: release time = amplitude-envelope time constant (sec) going down
 //
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// amp_follower_ar_test = os.osc(220) : an.amp_follower_ar(0.002, 0.05);
+// ```
 //---------------------------------------------------------
 declare amp_follower_ar author "Jonatan Liljedahl, revised by Romain Michon";
 amp_follower_ar(att,rel) = abs : si.onePoleSwitching(att,rel);
@@ -230,7 +278,14 @@ amp_follower_ar(att,rel) = abs : si.onePoleSwitching(att,rel);
 // Where:
 //
 // * `period`: sets the averaging frame in secs
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// ms_envelope_rect_test = an.ms_envelope_rect(0.05, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare ms_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
 declare ms_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com> and 
@@ -252,7 +307,14 @@ ms_envelope_rect(period, x) = x * x : fi.avg_rect(period);
 // Where:
 //
 // * `period`: (time to decay by 1/e) sets the averaging frame in secs
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// ms_envelope_tau_test = an.ms_envelope_tau(0.05, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare ms_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
 declare ms_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com> and 
@@ -274,7 +336,14 @@ ms_envelope_tau(period, x) = x * x : fi.avg_tau(period);
 // Where:
 //
 // * `period`: (time to decay by 60 dB) sets the averaging frame in secs
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// ms_envelope_t60_test = an.ms_envelope_t60(0.05, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare ms_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
 declare ms_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com> and 
@@ -296,7 +365,14 @@ ms_envelope_t60(period, x) = x * x : fi.avg_t60(period);
 // Where:
 //
 // * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// ms_envelope_t19_test = an.ms_envelope_t19(0.05, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare ms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
 declare ms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com> and 
@@ -317,7 +393,14 @@ ms_envelope_t19(period, x) = x * x : fi.avg_t19(period);
 // Where:
 //
 // * `period`: sets the averaging frame in secs
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// rms_envelope_rect_test = an.rms_envelope_rect(0.05, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare rms_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
 declare rms_envelope_rect copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com> and 
@@ -339,7 +422,14 @@ rms_envelope_rect(period, x) = ms_envelope_rect(period, x) : sqrt;
 // Where:
 //
 // * `period`: (time to decay by 1/e) sets the averaging frame in secs
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// rms_envelope_tau_test = an.rms_envelope_tau(0.05, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare rms_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
 declare rms_envelope_tau copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com> and 
@@ -361,7 +451,14 @@ rms_envelope_tau(period, x) = ms_envelope_tau(period, x) : sqrt;
 // Where:
 //
 // * `period`: (time to decay by 60 dB) sets the averaging frame in secs
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// rms_envelope_t60_test = an.rms_envelope_t60(0.05, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare rms_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
 declare rms_envelope_t60 copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com> and 
@@ -383,7 +480,14 @@ rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
 // Where:
 //
 // * `period`: (time to decay by 1/e^2.2) sets the averaging frame in secs
-//-----------------------------------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// rms_envelope_t19_test = an.rms_envelope_t19(0.05, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare rms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
 declare rms_envelope_t19 copyright "Copyright (C) 2020 Dario Sanfilippo 
       <sanfilippo.dario@gmail.com> and 
@@ -411,6 +515,14 @@ rms_envelope_t19(period, x) = ms_envelope_t19(period, x) : sqrt;
 // Where:
 //
 // * `tau`: (time to decay by e^-1) sets the averaging frame in seconds.
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// zcr_test = an.zcr(0.01, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare zcr author "Dario Sanfilippo";
 declare zcr copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -439,6 +551,14 @@ zcr(period, x) = ma.zc(x) : fi.lptau(period);
 //  determines the sensitivity of the algorithm for signals where partials are
 //  stronger than the fundamental frequency.
 // * `tau`: response time in seconds based on exponentially-weighted averaging with tau time-constant. See <https://ccrma.stanford.edu/~jos/st/Exponentials.html>.
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// pitchTracker_test = an.pitchTracker(4, 0.02, os.osc(220));
+// ```
+//---------------------------------------------------------
 declare pitchTracker author "Dario Sanfilippo";
 declare pitchTracker copyright "Copyright (C) 2022 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -478,14 +598,21 @@ pitchTracker(N, t, x) = loop ~ _
 //  such as .001 <= tau <= .005 , otherwise, the nonlinearity may reduce precision.
 // * `tau`: response time in seconds based on exponentially-weighted averaging with tau time-constant. See <https://ccrma.stanford.edu/~jos/st/Exponentials.html>.
 //
-// #### Reference:
-//  Sanfilippo, D. (2021). Time-Domain Adaptive Algorithms for Low- and High-Level 
-//  Audio Information Processing. Computer Music Journal, 45(1), 24-38.
-//
 // #### Example:
 //
 //  `process = os.osc(500) + os.osc(1000) + os.osc(2000) + os.osc(4000) + os.osc(8000) : an.spectralCentroid(1, .001);`
 //
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// spectralCentroid_test = (os.osc(440) + os.osc(880)) : an.spectralCentroid(1, 0.01);
+// ```
+//
+// #### Reference:
+//  Sanfilippo, D. (2021). Time-Domain Adaptive Algorithms for Low- and High-Level 
+//  Audio Information Processing. Computer Music Journal, 45(1), 24-38.
+//---------------------------------------------------------
 declare spectralCentroid author "Dario Sanfilippo";
 declare spectralCentroid copyright "Copyright (C) 2022 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
@@ -580,6 +707,13 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
 // * `M`: number of band-slices per octave
 // * `ftop`: highest band-split crossover frequency (e.g., 20 kHz)
 // * `N`: total number of bands (including dc and Nyquist)
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// mth_octave_analyzer_test = os.osc(440) : an.mth_octave_analyzer(3, 3, 8000, 5);
+// ```
 //------------------------------------------------------------
 mth_octave_analyzer6e(M,ftop,N) = _ <: bsplit(N-1) with {
   fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
@@ -591,7 +725,6 @@ mth_octave_analyzer6e(M,ftop,N) = _ <: bsplit(N-1) with {
 
 // Butterworth analyzers may be cascaded with allpass
 // delay-equalizers to make (allpass-complementary) filter banks:
-
 mth_octave_analyzer(O,M,ftop,N) = _ <: bsplit(N-1) with {
   fc(n) = ftop * 2^(float(n-N+1)/float(M));
   lp(n) = fi.lowpass(O,fc(n)); // Order O Butterworth
@@ -632,6 +765,13 @@ mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
 // ```
 // mth_octave_spectral_level_default = mth_octave_spectral_level6e;
 // spectral_level = mth_octave_spectral_level(2,10000,20);
+// ```
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// mth_octave_spectral_level6e_test = os.osc(440) : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
 // ```
 //------------------------------------------------------------
 mth_octave_spectral_level6e(M,ftop,N,tau,dB_offset) = _<:
@@ -715,7 +855,14 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 // ```
 // _ : analyzer(3,(fc1,fc2)) : _,_,_
 // ```
-//---------------------------------------------------
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// analyzer_test = os.osc(440) : an.analyzer(3, (500, 2000));
+// ```
+//------------------------------------------------------------
 analyzer(O,lfreqs) = _ <: bsplit(nb) 
 with {
    nb = ba.count(lfreqs);
@@ -743,6 +890,13 @@ with {
 //
 // * `freq`: frequency to be analyzed
 // * `n`: the Goertzel block size
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// goertzelOpt_test = an.goertzelOpt(440, 128, os.osc(440));
+// ```
 //
 // #### Reference
 //
@@ -777,8 +931,14 @@ with {
 // * `freq`: frequency to be analyzed
 // * `n`: the Goertzel block size
 //
-// #### Reference
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// goertzelComp_test = an.goertzelComp(440, 128, os.osc(440));
+// ```
 //
+// #### Reference
 // * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
 //---------------------------------------------------
 goertzelComp(freq,n,x) = mg 
@@ -814,8 +974,14 @@ with {
 // * `freq`: frequency to be analyzed
 // * `n`: the Goertzel block size
 //
-// #### Reference
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// goertzel_test = an.goertzel(440, 128, os.osc(440));
+// ```
 //
+// #### Reference
 // * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
 //---------------------------------------------------
 goertzel = goertzelOpt;
@@ -838,6 +1004,13 @@ goertzel = goertzelOpt;
 //        - N > 1: smoother magnitude/phase estimates, but slower response at low f
 //        - N = 1: faster response at low f, less stable at any f
 // * `f`: frequency to be analyzed (Hz).
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// resonator_test = os.osc(440) : an.resonator(2, 440);
+// ```
 //
 // #### Algorithm
 //
@@ -871,9 +1044,9 @@ goertzel = goertzelOpt;
 // * Scales linearly with the number of resonators
 //
 // #### Reference
-//
 // * <https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf>
 //---------------------------------------------------
+
 resonator(N,f) = _ <: *(so),*(co) : par(i,2,sm) <: mag,ang
 with {
     // Quadrature oscillator at target frequency f
@@ -891,7 +1064,6 @@ with {
     mag = ^(2) + ^(2) : sqrt * 2;
     ang = atan2;
 };
-
 
 // Undocumented utility functions used by fft and ifft:
 c_magsq(N) = si.cbus(N) : par(i,N,(par(j,2,abs<:_*_):>_)) :> si.bus(N);
@@ -951,8 +1123,14 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 //
 //   * See `dm.fft_spectral_level_demo(N)` in `demos.lib` for an example GUI driving `an.rfft_spectral_level()`.
 //
-// #### Reference
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// fft_test = an.rtocv(8, os.osc(220)) : an.fft(8);
+// ```
 //
+// #### Reference
 // * [Decimation-in-time (DIT) Radix-2 FFT](https://cnx.org/contents/zmcmahhR@7/Decimation-in-time-DIT-Radix-2)
 //
 //---------------------------------------------------
@@ -990,6 +1168,13 @@ with {
 //   (R0, I0), (R1,I1), (R2,I2), ...
 // * Output is a bank of N complex signals giving the complex signal in the time domain:
 //   (r0, i0), (r1,i1), (r2,i2), ...
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// ifft_test = (an.rtocv(8, os.osc(220)) : an.fft(8)) : an.ifft(8);
+// ```
 //---------------------------------------------------
 ifft(N) = si.cbus(N) : an.c_bit_reverse_shuffle(N) : an.ifftb(N); // input is shuffled off to the butterflies:
 ifftb(1) = _,_;
@@ -1040,6 +1225,12 @@ rfft_spectral_level(N,tau,dB_offset) = _<: _, an.rfft_analyzer_db(N) : _,(displa
 // * `fs`: start frequency in Hz
 // * `fe`: end frequency in Hz
 // * `dur`: duration of the sweep in seconds
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// logsweep_test = an.logsweep(20, 2000, 5);
+// ```
 //---------------------------------------------------
 declare linsweep author "Oleg Nesterov";
 logsweep(fs, fe, dur) = fs * (fe/fs) ^ os.lf_sawpos(1/dur) : os.oscrs;
@@ -1058,6 +1249,12 @@ logsweep(fs, fe, dur) = fs * (fe/fs) ^ os.lf_sawpos(1/dur) : os.oscrs;
 // * `fs`: start frequency in Hz
 // * `fe`: end frequency in Hz
 // * `dur`: duration of the sweep in seconds
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// linsweep_test = an.linsweep(20, 2000, 5);
+// ```
 //---------------------------------------------------
 declare linsweep author "Oleg Nesterov";
 linsweep(fs, fe, dur) = fs + (fe-fs) * os.lf_sawpos(1/dur) : os.oscrs;

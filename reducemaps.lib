@@ -56,8 +56,6 @@ declare copyright "Grame and Yann Orlarey";
 declare version "1.2.0";
 declare license "LGPL with exception"; 
 
-
-
 //----------------------------`(rm.)parReduce`--------------------------------
 // `parReduce(op,N)` combines a set of `N` parallel signals into a single one
 // using a binary operation `op`.
@@ -88,13 +86,16 @@ declare license "LGPL with exception";
 // * `N`: is the number of incomming signals (`N>0`). We use a capital letter
 // here to indicate that the number of incomming signals must be constant and
 // known at compile time.
+//
+// #### Test
+// ```
+// rm = library("reducemaps.lib");
+// parReduce_test = (1,2,3,4) : rm.parReduce(+, 4);
+// ```
 //-----------------------------------------------------------------------------
-
 parReduce(op,1) = par(i,outputs(op),_);
 parReduce(op,2) = op;
 parReduce(op,N) = parReduce(op,int(N/2)), parReduce(op,N-int(N/2)) : op;
-
-
 
 
 //----------------------------`(rm.)topReduce`--------------------------------
@@ -122,12 +123,16 @@ parReduce(op,N) = parReduce(op,int(N/2)), parReduce(op,N-int(N/2)) : op;
 // * `N`: is the number of incomming signals (`N>0`). We use a capital letter
 // here to indicate that the number of incomming signals must be constant and
 // known at compile time.
+//
+// #### Test
+// ```
+// rm = library("reducemaps.lib");
+// topReduce_test = (1,2,3,4) : rm.topReduce(+, 4);
+// ```
 //-----------------------------------------------------------------------------
-
 topReduce(op,1) = par(i,outputs(op),_);
 topReduce(op,2) = op;
 topReduce(op,N) = topReduce(op,N-1), par(i,outputs(op),_) : op;
-
 
 
 //----------------------------`(rm.)botReduce`--------------------------------
@@ -155,8 +160,13 @@ topReduce(op,N) = topReduce(op,N-1), par(i,outputs(op),_) : op;
 // * N: is the number of incomming signals (`N>0`). We use a capital letter
 // here to indicate that the number of incomming signals must be constant and
 // known at compile time.
+//
+// #### Test
+// ```
+// rm = library("reducemaps.lib");
+// botReduce_test = (1,2,3,4) : rm.botReduce(+, 4);
+// ```
 //-----------------------------------------------------------------------------
-
 botReduce(op,1) = par(i,outputs(op),_);
 botReduce(op,2) = op;
 botReduce(op,n) = par(i,outputs(op),_), botReduce(op,n-1) : op;
@@ -180,8 +190,13 @@ botReduce(op,n) = par(i,outputs(op),_), botReduce(op,n-1) : op;
 //
 // * `op`: is a binary operation
 // * `n`: is the number of consecutive samples in a block. 
+//
+// #### Test
+// ```
+// rm = library("reducemaps.lib");
+// reduce_test = rm.reduce(max, 4, hslider("reduce:input", 0, -1, 1, 0.01));
+// ```
 //-----------------------------------------------------------------------------
-
 reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
     with {
         compute(acc, count, val) =
@@ -208,8 +223,13 @@ reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
 // * `op`: is a binary operation
 // * `foo`: is a function applied to the result of the reduction
 // * `n`: is the number of consecutive samples in a block. 
+//
+// #### Test
+// ```
+// rm = library("reducemaps.lib");
+// reducemap_test = rm.reducemap(+, /(4), 4, hslider("reducemap:input", 0, -1, 1, 0.01));
+// ```
 //-----------------------------------------------------------------------------
-
 reducemap(op, foo, n, x) = compute ~ (_,_,_) : (!,!,_)
     with {
         compute(acc, count, val) =
@@ -234,4 +254,3 @@ mean(n) = reducemap(+, /(n), n);
 
 // RMS
 RMS(n) = float : ^(2) : reducemap(+, (/(n):sqrt), n);
-

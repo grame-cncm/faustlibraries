@@ -81,6 +81,16 @@ declare license "LGPL with exception";
 // ```
 // SR : _
 // ```
+//
+// Where:
+//
+// * `SR`: initialization-time sampling rate constant
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// SR_test = ma.SR;
+// ```
 //-----------------------------------------------------------------------------
 SR = pl.SR;
 
@@ -92,6 +102,16 @@ SR = pl.SR;
 // ```
 // T : _
 // ```
+//
+// Where:
+//
+// * `T`: sample duration (`1/SR`) constant
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// T_test = ma.T;
+// ```
 //-----------------------------------------------------------------------------
 T = 1.0 / SR;
 
@@ -102,6 +122,16 @@ T = 1.0 / SR;
 //
 // ```
 // BS : _
+// ```
+//
+// Where:
+//
+// * `BS`: current processing block size
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// BS_test = ma.BS;
 // ```
 //-----------------------------------------------------------------------------
 BS = pl.BS;
@@ -115,6 +145,16 @@ BS = pl.BS;
 // ```
 // PI : _
 // ```
+//
+// Where:
+//
+// * `PI`: double-precision π constant
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// PI_test = ma.PI;
+// ```
 //-----------------------------------------------------------------------------
 PI = 3.14159265358979323846;
 
@@ -126,6 +166,16 @@ PI = 3.14159265358979323846;
 //
 // ```
 // 45. : deg2rad
+// ```
+//
+// Where:
+//
+// * input: angle in degrees to convert
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// deg2rad_test = 45.0 : ma.deg2rad;
 // ```
 //-----------------------------------------------------------------------------
 deg2rad = _ * PI / 180.;
@@ -139,6 +189,16 @@ deg2rad = _ * PI / 180.;
 // ```
 // ma.PI : rad2deg
 // ```
+//
+// Where:
+//
+// * input: angle in radians to convert
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// rad2deg_test = ma.PI : ma.rad2deg;
+// ```
 //-----------------------------------------------------------------------------
 rad2deg = _ * 180. / PI;
 
@@ -150,6 +210,16 @@ rad2deg = _ * 180. / PI;
 //
 // ```
 // E : _
+// ```
+//
+// Where:
+//
+// * `E`: double-precision Euler's number constant
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// E_test = ma.E;
 // ```
 //-----------------------------------------------------------------------------
 E = 2.71828182845904523536;
@@ -166,6 +236,16 @@ E = 2.71828182845904523536;
 // ```
 // EPSILON : _
 // ```
+//
+// Where:
+//
+// * `EPSILON`: machine epsilon constant for the current floating-point precision
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// EPSILON_test = ma.EPSILON;
+// ```
 //-----------------------------------------------------------------------------
 singleprecision EPSILON = 1.192092896e-07;
 doubleprecision EPSILON = 2.2204460492503131e-016;
@@ -181,6 +261,16 @@ fixedpointprecision EPSILON = 2.2204460492503131e-016;
 // ```
 // MIN : _
 // ```
+//
+// Where:
+//
+// * `MIN`: minimal positive normalized value for the current precision
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// MIN_test = ma.MIN;
+// ```
 //-----------------------------------------------------------------------------
 singleprecision MIN = 1.175494351e-38;
 doubleprecision MIN = 2.2250738585072014e-308;
@@ -195,6 +285,16 @@ fixedpointprecision MIN = 2.2250738585072014e-308;
 //
 // ```
 // MAX : _
+// ```
+//
+// Where:
+//
+// * `MAX`: maximal finite value for the current precision
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// MAX_test = ma.MAX;
 // ```
 //-----------------------------------------------------------------------------
 singleprecision MAX = 3.402823466e+38;
@@ -216,6 +316,16 @@ INFINITY = MAX;
 // _ : FTZ : _
 // ```
 //
+// Where:
+//
+// * `x`: input signal to flush if its magnitude is subnormal
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// FTZ_test = (ma.MIN * 0.5) : ma.FTZ;
+// ```
+//
 // #### Reference
 //
 // <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
@@ -231,6 +341,17 @@ FTZ(x) = x * (abs(x) > MIN);
 // ```
 // _,_ : copysign : _
 // ```
+//
+// Where:
+//
+// * `x`: value whose magnitude is preserved
+// * `y`: value providing the sign
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// copysign_test = (-1.0, 2.0) : ma.copysign;
+// ```
 //-----------------------------------------------------------------------------
 copysign = ffunction(float copysignf|copysign|copysignl (float, float), <math.h>,"");
 
@@ -242,6 +363,16 @@ copysign = ffunction(float copysignf|copysign|copysignl (float, float), <math.h>
 //
 // ```
 // _ : neg : _
+// ```
+//
+// Where:
+//
+// * `x`: value to negate
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// neg_test = 3.5 : ma.neg;
 // ```
 //-----------------------------------------------------------------------------
 neg(x) = -x;
@@ -256,6 +387,16 @@ neg(x) = -x;
 // ```
 // _ : not : _
 // ```
+//
+// Where:
+//
+// * `x`: integer input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// not_test = 5 : ma.not;
+// ```
 //-----------------------------------------------------------------------------
 not(x) = x xor -1;
 
@@ -267,6 +408,17 @@ not(x) = x xor -1;
 //
 // ```
 // _,_ : sub : _
+// ```
+//
+// Where:
+//
+// * `x`: first operand
+// * `y`: second operand
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// sub_test = (3, 10) : ma.sub;
 // ```
 //------------------------------
 sub(x,y) = y-x;
@@ -280,6 +432,16 @@ sub(x,y) = y-x;
 // ```
 // _ : inv : _
 // ```
+//
+// Where:
+//
+// * `x`: denominator input (non-zero)
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// inv_test = 4.0 : ma.inv;
+// ```
 //-----------------------------------------------------------------------------
 inv(x) = 1/x;
 
@@ -291,6 +453,16 @@ inv(x) = 1/x;
 //
 // ```
 // _ : cbrt : _
+// ```
+//
+// Where:
+//
+// * `x`: value whose cube root is computed
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// cbrt_test = 8.0 : ma.cbrt;
 // ```
 //-----------------------------------------------------------------------------
 cbrt = ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
@@ -305,6 +477,17 @@ cbrt = ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
 // ```
 // _,_ : hypot : _
 // ```
+//
+// Where:
+//
+// * `x`: first operand
+// * `y`: second operand
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// hypot_test = (3.0, 4.0) : ma.hypot;
+// ```
 //-----------------------------------------------------------------------------
 hypot = ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
 
@@ -316,6 +499,17 @@ hypot = ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
 //
 // ```
 // _,_ : ldexp : _
+// ```
+//
+// Where:
+//
+// * `x`: significand input
+// * `n`: exponent (integer) input
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// ldexp_test = (1.5, 3) : ma.ldexp;
 // ```
 //-----------------------------------------------------------------------------
 ldexp = ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
@@ -329,6 +523,17 @@ ldexp = ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
 // ```
 // _,_ : scalb : _
 // ```
+//
+// Where:
+//
+// * `x`: significand input
+// * `n`: exponent (integer) input
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// scalb_test = (2.0, -1) : ma.scalb;
+// ```
 //-----------------------------------------------------------------------------
 scalb = ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
 
@@ -340,6 +545,16 @@ scalb = ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
 //
 // ```
 // _ : log1p : _
+// ```
+//
+// Where:
+//
+// * `x`: offset used in `log(1 + x)` (must be greater than -1)
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// log1p_test = 0.5 : ma.log1p;
 // ```
 //-----------------------------------------------------------------------------
 log1p = ffunction(float log1pf|log1p|log1pl (float), <math.h>,"");
@@ -353,6 +568,16 @@ log1p = ffunction(float log1pf|log1p|log1pl (float), <math.h>,"");
 // ```
 // _ : logb : _
 // ```
+//
+// Where:
+//
+// * `x`: positive value whose exponent part is returned
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// logb_test = 8.0 : ma.logb;
+// ```
 //-----------------------------------------------------------------------------
 logb = ffunction(float logbf|logb|logbl (float), <math.h>,"");
 
@@ -364,6 +589,16 @@ logb = ffunction(float logbf|logb|logbl (float), <math.h>,"");
 //
 // ```
 // _ : ilogb : _
+// ```
+//
+// Where:
+//
+// * `x`: positive value whose exponent part is returned
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// ilogb_test = 8.0 : ma.ilogb;
 // ```
 //-----------------------------------------------------------------------------
 ilogb = ffunction(int ilogbf|ilogb|ilogbl (float), <math.h>,"");
@@ -377,6 +612,16 @@ ilogb = ffunction(int ilogbf|ilogb|ilogbl (float), <math.h>,"");
 // ```
 // _ : log2 : _
 // ```
+//
+// Where:
+//
+// * `x`: positive value whose base-2 logarithm is computed
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// log2_test = 8.0 : ma.log2;
+// ```
 //-----------------------------------------------------------------------------
 log2(x) = log(x)/log(2.0);
 
@@ -388,6 +633,16 @@ log2(x) = log(x)/log(2.0);
 //
 // ```
 // _ : expm1 : _
+// ```
+//
+// Where:
+//
+// * `x`: input value used for the `exp(x) - 1` computation
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// expm1_test = 0.5 : ma.expm1;
 // ```
 //-----------------------------------------------------------------------------
 expm1 = ffunction(float expm1f|expm1|expm1l (float), <math.h>,"");
@@ -402,6 +657,16 @@ expm1 = ffunction(float expm1f|expm1|expm1l (float), <math.h>,"");
 // ```
 // _ : acosh : _
 // ```
+//
+// Where:
+//
+// * `x`: input value (greater than or equal to 1)
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// acosh_test = 1.5 : ma.acosh;
+// ```
 //-----------------------------------------------------------------------------
 acosh = ffunction(float acoshf|acosh|acoshl (float), <math.h>, "");
 
@@ -413,6 +678,16 @@ acosh = ffunction(float acoshf|acosh|acoshl (float), <math.h>, "");
 //
 // ```
 // _ : asinh : _
+// ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// asinh_test = 0.5 : ma.asinh;
 // ```
 //-----------------------------------------------------------------------------
 asinh = ffunction(float asinhf|asinh|asinhl (float), <math.h>, "");
@@ -426,6 +701,16 @@ asinh = ffunction(float asinhf|asinh|asinhl (float), <math.h>, "");
 // ```
 // _ : atanh : _
 // ```
+//
+// Where:
+//
+// * `x`: input value in (-1, 1)
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// atanh_test = 0.5 : ma.atanh;
+// ```
 //-----------------------------------------------------------------------------
 atanh = ffunction(float atanhf|atanh|atanhl (float), <math.h>, "");
 
@@ -437,6 +722,16 @@ atanh = ffunction(float atanhf|atanh|atanhl (float), <math.h>, "");
 //
 // ```
 // _ : sinh : _
+// ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// sinh_test = 0.5 : ma.sinh;
 // ```
 //-----------------------------------------------------------------------------
 sinh = ffunction(float sinhf|sinh|sinhl (float), <math.h>, "");
@@ -450,6 +745,16 @@ sinh = ffunction(float sinhf|sinh|sinhl (float), <math.h>, "");
 // ```
 // _ : cosh : _
 // ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// cosh_test = 0.5 : ma.cosh;
+// ```
 //-----------------------------------------------------------------------------
 cosh = ffunction(float coshf|cosh|coshl (float), <math.h>, "");
 
@@ -461,6 +766,16 @@ cosh = ffunction(float coshf|cosh|coshl (float), <math.h>, "");
 //
 // ```
 // _ : tanh : _
+// ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// tanh_test = 0.5 : ma.tanh;
 // ```
 //-----------------------------------------------------------------------------
 tanh = ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
@@ -474,6 +789,16 @@ tanh = ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
 // ```
 // _ : erf : _
 // ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// erf_test = 0.5 : ma.erf;
+// ```
 //-----------------------------------------------------------------------------
 erf = ffunction(float erff|erf|erfl(float), <math.h>,"");
 
@@ -486,6 +811,16 @@ erf = ffunction(float erff|erf|erfl(float), <math.h>,"");
 // ```
 // _ : erfc : _
 // ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// erfc_test = 0.5 : ma.erfc;
+// ```
 //-----------------------------------------------------------------------------
 erfc = ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
 
@@ -497,6 +832,16 @@ erfc = ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
 //
 // ```
 // _ : gamma : _
+// ```
+//
+// Where:
+//
+// * `x`: positive input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// gamma_test = 3.0 : ma.gamma;
 // ```
 //-----------------------------------------------------------------------------
 gamma = ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
@@ -511,6 +856,16 @@ gamma = ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
 // ```
 // _ : lgamma : _
 // ```
+//
+// Where:
+//
+// * `x`: positive input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// lgamma_test = 3.0 : ma.lgamma;
+// ```
 //-----------------------------------------------------------------------------
 lgamma = ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
 
@@ -523,6 +878,16 @@ lgamma = ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
 //
 // ```
 // _ : J0 : _
+// ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// J0_test = 1.0 : ma.J0;
 // ```
 //-----------------------------------------------------------------------------
 J0 = ffunction(float j0(float), <math.h>,"");
@@ -537,6 +902,16 @@ J0 = ffunction(float j0(float), <math.h>,"");
 // ```
 // _ : J1 : _
 // ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// J1_test = 1.0 : ma.J1;
+// ```
 //-----------------------------------------------------------------------------
 J1 = ffunction(float j1(float), <math.h>,"");
 
@@ -549,6 +924,17 @@ J1 = ffunction(float j1(float), <math.h>,"");
 //
 // ```
 // _,_ : Jn : _
+// ```
+//
+// Where:
+//
+// * `n`: integer order
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// Jn_test = (2, 1.0) : ma.Jn;
 // ```
 //-----------------------------------------------------------------------------
 Jn = ffunction(float jn(int, float), <math.h>,"");
@@ -563,6 +949,16 @@ Jn = ffunction(float jn(int, float), <math.h>,"");
 // ```
 // _ : Y0 : _
 // ```
+//
+// Where:
+//
+// * `x`: positive input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// Y0_test = 1.0 : ma.Y0;
+// ```
 //-----------------------------------------------------------------------------
 Y0 = ffunction(float y0(float), <math.h>,"");
 
@@ -576,6 +972,16 @@ Y0 = ffunction(float y0(float), <math.h>,"");
 // ```
 // _ : Y0 : _
 // ```
+//
+// Where:
+//
+// * `x`: positive input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// Y1_test = 1.0 : ma.Y1;
+// ```
 //-----------------------------------------------------------------------------
 Y1 = ffunction(float y1(float), <math.h>,"");
 
@@ -588,6 +994,17 @@ Y1 = ffunction(float y1(float), <math.h>,"");
 //
 // ```
 // _,_ : Yn : _
+// ```
+//
+// Where:
+//
+// * `n`: integer order
+// * `x`: positive input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// Yn_test = (2, 1.0) : ma.Yn;
 // ```
 //-----------------------------------------------------------------------------
 Yn = ffunction(float yn(int, float), <math.h>,"");
@@ -618,6 +1035,12 @@ fmin = min;
 // Where:
 //
 // * `n`: an integer
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// np2_test = 5 : ma.np2;
+// ```
 //-----------------------------------------------------------------------------
 np2 = -(1) <: >>(1)|_ <: >>(2)|_ <: >>(4)|_ <: >>(8)|_ <: >>(16)|_ : +(1);
 
@@ -634,6 +1057,12 @@ np2 = -(1) <: >>(1)|_ <: >>(2)|_ <: >>(4)|_ <: >>(8)|_ <: >>(16)|_ : +(1);
 // Where:
 //
 // * `n`: a decimal number
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// frac_test = 3.75 : ma.frac;
+// ```
 //------------------------------------------------------------------------------
 frac(n) = n - floor(n);
 decimal = frac;
@@ -657,6 +1086,12 @@ decimal = frac;
 //
 // * `x`: the numerator
 // * `y`: the denominator
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// modulo_test = (-3, 4) : ma.modulo;
+// ```
 //------------------------------------------------------------------------------
 modulo(x,y) = (x % y + y) % y;
 
@@ -674,6 +1109,12 @@ modulo(x,y) = (x % y + y) % y;
 // Where:
 //
 // * `x`: signal to analyse
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// isnan_test = 1.0 : ma.isnan;
+// ```
 //------------------------------------------
 isnan = ffunction(int isnanf|isnan|isnanl (float),<math.h>,"");
 
@@ -691,6 +1132,12 @@ isnan = ffunction(int isnanf|isnan|isnanl (float),<math.h>,"");
 // Where:
 //
 // * `x`: signal to analyse
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// isinf_test = 1.0 : ma.isinf;
+// ```
 //------------------------------------------
 isinf = ffunction(int isinff|isinf|isinfl (float),<math.h>,"");
 
@@ -721,6 +1168,12 @@ nextafter = ffunction(float nextafter(float, float),<math.h>,"");
 // #### Reference
 //
 // <http://en.wikipedia.org/wiki/Chebyshev_polynomial>
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// chebychev_test = 0.5 : ma.chebychev(3);
+// ```
 //-------------------------------------------------------------------------
 chebychev(0,x) = 1;
 chebychev(1,x) = x;
@@ -744,6 +1197,12 @@ chebychev(n,x) = 2*x*chebychev(n-1, x) - chebychev(n-2, x);
 // #### Reference
 //
 // <http://www.csounds.com/manual/html/chebyshevpoly.html>
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// chebychevpoly_test = 0.5 : ma.chebychevpoly((1, 0, 1));
+// ```
 //-------------------------------------------------------------------------
 chebychevpoly(lcoef) = _ <: L(0,lcoef) :> _
     with {
@@ -760,6 +1219,17 @@ chebychevpoly(lcoef) = _ <: L(0,lcoef) :> _
 // ```
 // _ : diffn : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// diffn_test = os.osc(440) : ma.diffn;
+// ```
 //--------------------------------------------------------
 diffn(x) = x' - x; // negated first-order difference
 
@@ -772,6 +1242,16 @@ diffn(x) = x' - x; // negated first-order difference
 //
 // ```
 // _ : signum : _
+// ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// signum_test = (-5.0) : ma.signum;
 // ```
 //--------------------------------------------------------
 signum(x) = (x>0)-(x<0);
@@ -790,6 +1270,16 @@ signum(x) = (x>0)-(x<0);
 // ```
 // delay(2^nextpow2(maxDelayNeeded), currentDelay);
 // ```
+//
+// Where:
+//
+// * `n`: positive value whose next power-of-two exponent is computed
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// nextpow2_test = 10.0 : ma.nextpow2;
+// ```
 //--------------------------------------------------------
 nextpow2(x) = ceil(log(x)/log(2.0));
 
@@ -802,6 +1292,17 @@ nextpow2(x) = ceil(log(x)/log(2.0));
 //
 // ```
 // _ : zc : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal to monitor for zero crossings
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// zc_test = os.osc(440) : ma.zc;
 // ```
 //-----------------------------------------------------------------------------
 zc = ba.tAndH(!=(0)) <: *(mem) < 0;
@@ -819,6 +1320,13 @@ zc = ba.tAndH(!=(0)) <: *(mem) < 0;
 // Where:
 //
 // * `pi`: maximum discontinuity between the output values (typically `ma.PI`)
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// unwrap_test = os.oscrc(100) : ma.unwrap(ma.PI);
+// ```
 //
 // #### Example test program
 //
@@ -843,6 +1351,16 @@ unwrap(pi,x) = (_ <: +(dz)) ~ _ with {
 //
 // ```
 // _ : primes : _
+// ```
+//
+// Where:
+//
+// * `x`: index of the prime number sequence (0-based).
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// primes_test = 10 : ma.primes;
 // ```
 //-----------------------------------------------------------------------------
 primes(x) = rdtable(waveform{

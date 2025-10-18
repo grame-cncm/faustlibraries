@@ -91,6 +91,17 @@ TODO:
 // * `T`: time coefficient, indicates how much steps back in time are needed (i.
 //        e. if T=1 the maximum delay needed for a neighbour state is 1 sample)
 // * `scheme`: coefficients scheme
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// scheme = 0, 0;
+// model1D_test = si.bus(2)
+//   : fd.model1D(2, 0, 0, scheme)
+//   : si.bus(2);
+// ```
 //------------------------------------------------------------------------------
 model1D(points,R,T,scheme) =
     (route1D(points,R,T,scheme) : buildScheme1D(points,R,T)) ~ si.bus(points);
@@ -119,6 +130,17 @@ model1D(points,R,T,scheme) =
 // * `T`: time coefficient, indicates how much steps back in time are needed (i.
 //        e. if T=1 the maximum delay needed for a neighbour state is 1 sample)
 // * `scheme`: coefficients scheme
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// scheme = 0, 0, 0, 0;
+// model2D_test = si.bus(4)
+//   : fd.model2D(2, 2, 0, 0, scheme)
+//   : si.bus(4);
+// ```
 //------------------------------------------------------------------------------
 model2D(pointsX,pointsY,R,T,scheme) =
     (route2D(pointsX,pointsY,R,T,scheme) :
@@ -150,6 +172,15 @@ model2D(pointsX,pointsY,R,T,scheme) =
 //
 // * `points`: total number of points in the mesh
 // * `point`: number of the desired nonzero signal
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// stairsInterp1D_test = si.bus(4)
+//   : fd.stairsInterp1D(4, 1);
+// ```
 //------------------------------------------------------------------------------
 stairsInterp1D(points,point) = par(i,points,_*select2(i==point,0,1));
 
@@ -169,6 +200,15 @@ stairsInterp1D(points,point) = par(i,points,_*select2(i==point,0,1));
 // * `pointsY`: total number of points in the Y direction
 // * `pointX`: horizontal index of the desired nonzero signal
 // * `pointY`: vertical index of the desired nonzero signal
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// stairsInterp2D_test = si.bus(4)
+//   : fd.stairsInterp2D(2, 2, 1, 0);
+// ```
 //------------------------------------------------------------------------------
 stairsInterp2D(pointsX,pointsY,pointX,pointY) =
     par(i,pointsX,
@@ -192,6 +232,15 @@ stairsInterp2D(pointsX,pointsY,pointX,pointY) =
 //
 // * `points`: total number of points in the mesh
 // * `point`: floating point index
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// linInterp1D_test = si.bus(4)
+//   : fd.linInterp1D(4, 1.25);
+// ```
 //------------------------------------------------------------------------------
 linInterp1D(points,point) = par(i,points,_*select2(
         i==int(point), select2(i==int(point+1),0,fraction),(1-fraction)))
@@ -216,6 +265,15 @@ with
 // * `pointsY`: total number of points in the Y direction
 // * `pointX`: horizontal float index
 // * `pointY`: vertical float index
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// linInterp2D_test = si.bus(4)
+//   : fd.linInterp2D(2, 2, 0.6, 1.2);
+// ```
 //------------------------------------------------------------------------------
 linInterp2D(pointsX,pointsY,pointX,pointY) =
 par(i,pointsX,
@@ -251,6 +309,15 @@ with
 //
 // * `points`: total number of points in the mesh
 // * `point`: number of the desired nonzero signal
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// stairsInterp1DOut_test = si.bus(4)
+//   : fd.stairsInterp1DOut(4, 2);
+// ```
 //------------------------------------------------------------------------------
 stairsInterp1DOut(points,point) = ba.selectn(points,point);
 
@@ -269,9 +336,18 @@ stairsInterp1DOut(points,point) = ba.selectn(points,point);
 // * `pointsY`: total number of points in the Y direction
 // * `pointX`: horizontal index of the desired nonzero signal
 // * `pointY`: vertical index of the desired nonzero signal
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// stairsInterp2DOut_test = si.bus(4)
+//   : fd.stairsInterp2DOut(2, 2, 1, 0);
+// ```
 //------------------------------------------------------------------------------
 stairsInterp2DOut(pointsX,pointsY,pointX,pointY) =
-    ba.selectn(pointsX*pointsY,pointY+pointX*Y);
+    ba.selectn(pointsX*pointsY,pointX+pointY);
 
 //---------------------------`(fd.)linInterp1DOut`--------------------------
 // Linear interpolator in 1 dimension. Similar to `stairsInterp1D`, except it
@@ -287,6 +363,15 @@ stairsInterp2DOut(pointsX,pointsY,pointX,pointY) =
 //
 // * `points`: total number of points in the mesh
 // * `point`: floating point index
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// linInterp1DOut_test = si.bus(4)
+//   : fd.linInterp1DOut(4, 1.5);
+// ```
 //------------------------------------------------------------------------------
 linInterp1DOut(points,point) = linInterp1D(points,point):>_;
 
@@ -305,6 +390,15 @@ linInterp1DOut(points,point) = linInterp1D(points,point):>_;
 // * `pointsY`: total number of points in the Y direction
 // * `pointX`: horizontal float index
 // * `pointY`: vertical float index
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// linInterp2DOut_test = si.bus(4)
+//   : fd.linInterp2DOut(2, 2, 0.6, 1.2);
+// ```
 //------------------------------------------------------------------------------
 linInterp2DOut(pointsX,pointsY,pointX,pointY) =
     linInterp2D(pointsX,pointsY,pointX,pointY):>_;
@@ -334,6 +428,16 @@ linInterp2DOut(pointsX,pointsY,pointX,pointY) =
 // * `points`: total number of points in the mesh
 // * `R`: neighbourhood radius
 // * `T`: time coefficient
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// route1D_test = par(i, 3, 0)
+//   : fd.route1D(1, 0, 0)
+//   : si.bus(3);
+// ```
 //------------------------------------------------------------------------------
 route1D(points, R, T) = route(points*2+points*nCoeffs, points*nInputs,
                                 par(x, points, connections(x)))
@@ -368,6 +472,16 @@ with
 // * `pointsY`: total number of points in the Y direction
 // * `R`: neighbourhood radius
 // * `T`: time coefficient
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// route2D_test = par(i, 3, 0)
+//   : fd.route2D(1, 1, 0, 0)
+//   : si.bus(3);
+// ```
 //------------------------------------------------------------------------------
 route2D(pointsX, pointsY, R, T) =
     route(nPoints*2+nPoints*nCoeffs, nPoints*nInputs,
@@ -417,6 +531,15 @@ with
 // * `R`: neighbourhood radius
 // * `T`: time coefficient
 // * `D`: scheme spatial dimensions (i.e. 1 if 1-D, 2 if 2-D)
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// schemePoint_test = par(i, 3, 0)
+//   : fd.schemePoint(0, 0, 1);
+// ```
 //------------------------------------------------------------------------------
 schemePoint(R,T,D) = routing:operations:>_
 with
@@ -448,6 +571,15 @@ with
 // * `points`: total number of points in the mesh
 // * `R`: neighbourhood radius
 // * `T`: time coefficient
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// buildScheme1D_test = par(i, 3, 0)
+//   : fd.buildScheme1D(1, 0, 0);
+// ```
 //------------------------------------------------------------------------------
 buildScheme1D(points,R,T) =
     par (x, points,schemePoint(R,T,1));
@@ -469,6 +601,15 @@ buildScheme1D(points,R,T) =
 // * `pointsY`: total number of points in the Y direction
 // * `R`: neighbourhood radius
 // * `T`: time coefficient
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// si = library("signals.lib");
+//
+// buildScheme2D_test = par(i, 3, 0)
+//   : fd.buildScheme2D(1, 1, 0, 0);
+// ```
 //------------------------------------------------------------------------------
 buildScheme2D(pointsX,pointsY,R,T) =
     par (x, pointsX,
@@ -505,6 +646,24 @@ buildScheme2D(pointsX,pointsY,R,T) =
 // * `k`: time sampling step (the same as for the mesh)
 // * `offset`: distance between the string and the hammer at rest in meters
 // * `fIn`: hammer excitation signal (i.e. a button)
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// os = library("oscillators.lib");
+//
+// hammer_test = os.osc(5)
+//   : fd.hammer(
+//       0.1,
+//       1000,
+//       0.01,
+//       1e5,
+//       2.0,
+//       1.0/48000,
+//       0.001,
+//       button("hammer:trigger")
+//     );
+// ```
 //------------------------------------------------------------------------------
 hammer(coeff,omega0Sqr,sigma0,kH,alpha,k,offset,fIn) =
     (hammerForce<:hammerModel(fIn,k,offset,_),_)~_:!,_*coeff
@@ -534,6 +693,15 @@ with
 // * `alpha`: nonlinearity parameter
 // * `k`: time sampling step (the same as for the mesh)
 // * `vb`: bow velocity [m/s]
+//
+// #### Test
+// ```
+// fd = library("fds.lib");
+// os = library("oscillators.lib");
+//
+// bow_test = os.osc(5)
+//   : fd.bow(0.05, 2.0, 1.0/48000, 0.1);
+// ```
 //------------------------------------------------------------------------------
 bow(coeff,alpha,k,vb) = _:phi*(-coeff)
 with

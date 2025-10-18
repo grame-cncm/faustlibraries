@@ -70,6 +70,13 @@ declare version "1.2.0";
 //
 // * `N`: number of signals (int, as a constant numerical expression)
 //
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// cross_test = (os.osc(200), os.osc(300), os.osc(400)) : ro.cross(3);
+// ```
+//
 // #### Note
 //
 // Special case: `cross2`:
@@ -95,6 +102,13 @@ cross2 = _,cross(2),_; // for compatibility with some old misceffects.lib functi
 // Where:
 //
 // * `N`: the number of signals in the `bus` (int, as a constant numerical expression)
+//
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// crossnn_test = (os.osc(110), os.osc(220), os.osc(330), os.osc(440)) : ro.crossnn(2);
+// ```
 //--------------------------------------
 crossnn(N) = crossNM(N,N);
 
@@ -111,6 +125,13 @@ crossnn(N) = crossNM(N,N);
 // Where:
 //
 // * `N`: the number of signals in the first `bus` (int, as a constant numerical expression)
+//
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// crossn1_test = (os.osc(100), os.osc(200), os.osc(300), os.osc(400)) : ro.crossn1(3);
+// ```
 //--------------------------------------
 crossn1(N) = crossNM(N,1);
 
@@ -127,6 +148,13 @@ crossn1(N) = crossNM(N,1);
 // Where:
 //
 // * `N`: the number of signals in the second `bus` (int, as a constant numerical expression)
+//
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// cross1n_test = (os.osc(150), os.osc(250), os.osc(350), os.osc(450)) : ro.cross1n(3);
+// ```
 //--------------------------------------
 cross1n(N) = crossNM(1,N);
 
@@ -144,6 +172,13 @@ cross1n(N) = crossNM(1,N);
 //
 // * `N`: the number of signals in the first `bus` (int, as a constant numerical expression)
 // * `M`: the number of signals in the second `bus` (int, as a constant numerical expression)
+//
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// crossNM_test = (os.osc(180), os.osc(280), os.osc(380), os.osc(480), os.osc(580)) : ro.crossNM(2,3);
+// ```
 //--------------------------------------
 crossNM(N,M) = route(N+M, N+M, par(i, N+M, i+1, ((i+M)%(N+M))+1));
 
@@ -168,6 +203,13 @@ crossNM(N,M) = route(N+M, N+M, par(i, N+M, i+1, ((i+M)%(N+M))+1));
 //
 // * `R`: row length (int, as a constant numerical expression)
 // * `C`: column length (int, as a constant numerical expression)
+//
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// interleave_test = (os.osc(200), os.osc(300), os.osc(400), os.osc(500)) : ro.interleave(2,2);
+// ```
 //-----------------------------------------------------------------------------
 interleave(1,2) = _,_;
 interleave(R,C) = route(R*C, R*C, par(i, R*C, (i+1, (i%R)*C + int(i/R) + 1)));
@@ -184,6 +226,13 @@ interleave(R,C) = route(R*C, R*C, par(i, R*C, (i+1, (i%R)*C + int(i/R) + 1)));
 // Where:
 //
 // * `N`: size of the butterfly (N is int, even and as a constant numerical expression)
+//
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// butterfly_test = (os.osc(250), os.osc(350), os.osc(450), os.osc(550)) : ro.butterfly(4);
+// ```
 //-----------------------------------------------------------------------------
 butterfly(2) = si.bus(2) <: +,-;
 butterfly(N) = si.bus(N) <: interleave(N/2,2), interleave(N/2,2) : par(i, N/2, +), par(i, N/2, -);
@@ -202,6 +251,12 @@ butterfly(N) = si.bus(N) <: interleave(N/2,2), interleave(N/2,2) : par(i, N/2, +
 //
 // * `N`: `2^k`, size of the matrix (int, as a constant numerical expression)
 //
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// hadamard_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550)) : ro.hadamard(4);
+// ```
 //-----------------------------------------------------------------------------
 declare hadamard author "Remy Muller, revised by Romain Michon";
 hadamard(2) = butterfly(2);
@@ -222,6 +277,13 @@ hadamard(N) = butterfly(N) : (hadamard(N/2), hadamard(N/2));
 //
 // * `p`: the forward arbitrary processor
 // * `q`: the feedback arbitrary processor
+//
+// #### Test
+// ```
+// ro = library("routes.lib");
+// os = library("oscillators.lib");
+// recursivize_test = (os.osc(220), os.osc(330)) : ro.recursivize(*(0.5), *(0.3));
+// ```
 //----------------------------------------
 recursivize(p,q) = (_,_,_,_ :> sp.stereoize(p)) ~ sp.stereoize(q);
 
@@ -255,6 +317,17 @@ recursivize(p,q) = (_,_,_,_ :> sp.stereoize(p)) ~ sp.stereoize(q);
 // Where:
 //
 // * `N`: the number of signals to be sorted (must be an int >= 0, as a constant numerical expression)
+//
+// #### Test
+// ```
+// ro = library("routes.lib");
+// bubbleSort_test = (
+//     hslider("bubbleSort:x0", 0.3, -1, 1, 0.01),
+//     hslider("bubbleSort:x1", -0.2, -1, 1, 0.01),
+//     hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
+//     hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
+// ) : ro.bubbleSort(4);
+// ```
 //
 // #### Reference
 // <https://en.wikipedia.org/wiki/Bubble_sort>

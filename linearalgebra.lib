@@ -97,6 +97,12 @@ declare version "0.1.0";
 // Where:
 //
 // * `N`: the size of each axis of the matrix.
+//
+// #### Test
+// ```
+// la = library("linearalgebra.lib");
+// determinant_test = (1, 2, 3, 4) : la.determinant(2);
+// ```
 //------------------------------------------------------
 determinant(1) = _;
 determinant(2) = det2x2
@@ -128,6 +134,12 @@ declare determinant copyright "MIT License";
 // * `ROW`: the selected position on 0th dimension of the matrix (`0 <= ROW < N`)
 // * `COL`: the selected position on the 1st dimension of the matrix (`0 <= COL < N`)
 //
+// #### Test
+// ```
+// la = library("linearalgebra.lib");
+// minor_test = (1, 2, 3, 0, 4, 5, 7, 8, 9) : la.minor(3, 1, 1);
+// ```
+//
 // #### References
 // * <https://en.wikipedia.org/wiki/Minor_(linear_algebra)#First_minor>
 //----------------------------------------------------------------------------
@@ -152,6 +164,12 @@ declare minor copyright "MIT License";
 // Where:
 //
 // * `N`: the size of each axis of the matrix.
+//
+// #### Test
+// ```
+// la = library("linearalgebra.lib");
+// inverse_test = (4, 7, 2, 6) : la.inverse(2);
+// ```
 //---------------------------------------------------------------------
 inverse(1) = 1/_;
 inverse(2) = inverse2x2
@@ -188,6 +206,12 @@ declare inverse copyright "MIT License";
 //
 // * `N`: the number of rows in the input matrix
 // * `M`: the number of columns in the input matrix
+//
+// #### Test
+// ```
+// la = library("linearalgebra.lib");
+// transpose2_test = (1, 2, 3, 4, 5, 6) : la.transpose2(2, 3);
+// ```
 //-----------------------------------------------------------------
 transpose2(N, M) = ro.interleave(M,N);
 declare transpose2 author "David Braun";
@@ -211,6 +235,12 @@ declare transpose2 copyright "MIT License";
 // * `K`: the number of columns in `mat1`
 // * `L`: the number of rows in `mat2`
 // * `M`: the number of columns in `mat2`
+//
+// #### Test
+// ```
+// la = library("linearalgebra.lib");
+// matMul_test = (1, 2, 3, 4), (5, 6, 7, 8) : la.matMul(2, 2, 2, 2);
+// ```
 //-----------------------------------------------------------------
 matMul(J, K, L, M) = si.bus(J*K), transpose2(L, M) <: par(j, J, par(m, M,
     si.dot(K, (ba.selectbus(K, J, j)), (ba.selectbus(L, M, m)))
@@ -230,6 +260,12 @@ declare matMul copyright "MIT License";
 // Where:
 //
 // * `N`: The size of each axis of the identity matrix.
+//
+// #### Test
+// ```
+// la = library("linearalgebra.lib");
+// identity_test = la.identity(3);
+// ```
 //-------------------------------------------------------
 identity(N) = par(i, N, par(j, N, i == j));
 declare identity author "David Braun";
@@ -248,6 +284,12 @@ declare identity copyright "MIT License";
 // Where:
 //
 // * `N`: The size of each axis of the matrix.
+//
+// #### Test
+// ```
+// la = library("linearalgebra.lib");
+// diag_test = (1, 2, 3) : la.diag(3);
+// ```
 //---------------------------------------------------------
 diag(N) = route(N, N*N, par(i,N, (i+1, (N+1)*i+1)));
 declare diag author "David Braun";

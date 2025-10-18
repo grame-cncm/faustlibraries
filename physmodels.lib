@@ -91,6 +91,12 @@ maxLength = 3;
 // Where:
 //
 // * `freq`: the frequency
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// f2l_test = pm.f2l(440);
+// ```
 //-------------------------------
 f2l(freq) = speedOfSound/freq;
 
@@ -106,6 +112,12 @@ f2l(freq) = speedOfSound/freq;
 // Where:
 //
 // * `length`: length/distance in meters
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// l2f_test = pm.l2f(0.75);
+// ```
 //-------------------------------
 l2f(length) = speedOfSound/length;
 
@@ -121,6 +133,12 @@ l2f(length) = speedOfSound/length;
 // Where:
 //
 // * `l`: length in meters
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// l2s_test = pm.l2s(1.2);
+// ```
 //-------------------------------
 l2s(l) = l*ma.SR/speedOfSound;
 
@@ -143,6 +161,12 @@ l2s(l) = l*ma.SR/speedOfSound;
 // ```
 // chain(basicBlock : basicBlock : etc.)
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// basicBlock_test = 0,0,0 : pm.basicBlock;
+// ```
 //-------------------------------
 basicBlock = _,_,_;
 
@@ -164,6 +188,12 @@ basicBlock = _,_,_;
 //    B = _,_,_;
 // };
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// chain_test = 0,0,0 : pm.chain(pm.in(0.1) : pm.basicBlock);
+// ```
 //-----------------------------
 chain(A:As) = ((ro.crossnn(1),_',_ : _,A : ro.crossnn(1),_,_ : _,chain(As) : ro.crossnn(1),_,_)) ~ _ : !,_,_,_;
 chain(A) = A;
@@ -179,6 +209,12 @@ chain(A) = A;
 //
 // Where `A` and `B` are bidirectional blocks and `x` is the signal added to left
 // going waves in that chain.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// inLeftWave_test = 0,0,0 : pm.inLeftWave(0.25);
+// ```
 //--------------------------------
 inLeftWave(x) = +(x),_,_;
 
@@ -193,6 +229,12 @@ inLeftWave(x) = +(x),_,_;
 //
 // Where `A` and `B` are bidirectional blocks and `x` is the signal added to right
 // going waves in that chain.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// inRightWave_test = 0,0,0 : pm.inRightWave(0.25);
+// ```
 //--------------------------------
 inRightWave(x) = _,+(x),_;
 
@@ -208,6 +250,12 @@ inRightWave(x) = _,+(x),_;
 //
 // Where `A` and `B` are bidirectional blocks and `x` is the signal added to
 // left and right going waves in that chain.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// in_test = 0,0,0 : pm.in(0.25);
+// ```
 //--------------------------------
 in(x) = +(x),+(x),_;
 
@@ -221,6 +269,12 @@ in(x) = +(x),+(x),_;
 // ```
 //
 // Where `A` and `B` are bidirectional blocks.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// outLeftWave_test = pm.outLeftWave(0.1, 0.2, 0.3);
+// ```
 //--------------------------------
 outLeftWave(x,y,s) = x,y,x+s;
 
@@ -234,6 +288,12 @@ outLeftWave(x,y,s) = x,y,x+s;
 // ```
 //
 // Where `A` and `B` are bidirectional blocks.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// outRightWave_test = pm.outRightWave(0.1, 0.2, 0.3);
+// ```
 //--------------------------------
 outRightWave(x,y,s) = x,y,y+s;
 
@@ -248,6 +308,12 @@ outRightWave(x,y,s) = x,y,y+s;
 // ```
 //
 // Where `A` and `B` are bidirectional blocks.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// out_test = pm.out(0.1, 0.2, 0.3);
+// ```
 //--------------------------------
 out(x,y,s) = x,y,x+y+s;
 
@@ -268,6 +334,12 @@ out(x,y,s) = x,y,x+y+s;
 //    c = *(-1); // right termination
 // };
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// terminations_test = 0,0,0 : pm.terminations(*(-1), pm.basicBlock, *(-1));
+// ```
 //----------------------------------------
 terminations(a,b,c) = (_,ro.crossnn(1),_,_ : +,+,_ : b) ~ (a,c : ro.crossnn(1));
 
@@ -285,6 +357,12 @@ terminations(a,b,c) = (_,ro.crossnn(1),_,_ : +,+,_ : b) ~ (a,c : ro.crossnn(1));
 //    a = *(-1); // left termination
 //    b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
 // };
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// lTermination_test = 0,0,0 : pm.lTermination(*(-1), pm.basicBlock);
 // ```
 //----------------------------------------
 lTermination(a,b) = (ro.crossnn(1),_,_ : _,+,_ : b) ~ a;
@@ -304,6 +382,12 @@ lTermination(a,b) = (ro.crossnn(1),_,_ : _,+,_ : b) ~ a;
 //    c = *(-1); // right termination
 // };
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// rTermination_test = 0,0,0 : pm.rTermination(pm.basicBlock, *(-1));
+// ```
 //----------------------------------------
 rTermination(b,c) = (_,_,_,_ : +,_,_ : b) ~ (!,c);
 
@@ -314,6 +398,12 @@ rTermination(b,c) = (_,_,_,_ : +,_,_ : b) ~ (!,c);
 //
 // ```
 // closeIns : chain(...) : _,_,_
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// closeIns_test = pm.closeIns;
 // ```
 //----------------------------------------
 closeIns = 0,0,0;
@@ -327,6 +417,12 @@ closeIns = 0,0,0;
 // ```
 // _,_,_ : chain(...) : _
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// closeOuts_test = 0,0,0 : pm.closeOuts;
+// ```
 //----------------------------------------
 closeOuts = !,!,_;
 
@@ -338,6 +434,12 @@ closeOuts = !,!,_;
 //
 // ```
 // endChain(chain(...)) : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// endChain_test = 0,0,0 : pm.endChain(pm.basicBlock);
 // ```
 //----------------------------------------
 endChain(b) = closeIns : b : closeOuts;
@@ -369,6 +471,15 @@ endChain(b) = closeIns : b : closeOuts;
 //
 // * `nMax`: the maximum length of the delays in the waveguide
 // * `n`: the length of the delay lines in samples.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// waveguideUd_test = 0,0,0 : pm.waveguideUd(512, 32);
+// waveguideFd_test = 0,0,0 : pm.waveguideFd(512, 32);
+// waveguideFd2_test = 0,0,0 : pm.waveguideFd2(512, 32);
+// waveguideFd4_test = 0,0,0 : pm.waveguideFd4(512, 32);
+// ```
 //----------------------------------
 waveguideUd(nMax,n) = par(i,2,de.delay(nMax,n)),_;
 waveguideFd(nMax,n) = par(i,2,de.fdelay(nMax,n)),_;
@@ -389,6 +500,12 @@ waveguideFd4(nMax,n) = par(i,2,de.fdelay4(nMax,n)),_;
 //
 // * `nMax`: the maximum length of the delays in the waveguide
 // * `n`: the length of the delay lines in samples.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// waveguide_test = 0,0,0 : pm.waveguide(512, 32);
+// ```
 //----------------------------------
 waveguide(nMax,n) = waveguideFd4(nMax,n);
 
@@ -409,6 +526,12 @@ waveguide(nMax,n) = waveguideFd4(nMax,n);
 // * `brightness`: controls the damping of high frequencies (0-1)
 // * `absorption`: controls the absorption of the brige and thus the t60 of
 // the string plugged to it (0-1) (1 = 20 seconds)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// bridgeFilter_test = pm.bridgeFilter(0.6, 0.4, os.osc(110));
+// ```
 //----------------------------------
 // TODO: perhaps, the coefs of this filter should be adapted in function of SR
 bridgeFilter(brightness,absorption,x) = rho * (h0 * x' + h1*(x+x''))
@@ -436,6 +559,12 @@ with {
 // * `freq`: mode frequency
 // * `t60`: mode resonance duration (in seconds)
 // * `gain`: mode gain (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// modeFilter_test = pm.modeFilter(440, 1.5, 0.8);
+// ```
 //----------------------------------
 modeFilter(freq,t60,gain) = fi.tf2(b0,b1,b2,a1,a2)*gain
 with {
@@ -467,6 +596,12 @@ with {
 //
 // * `maxLength`: the maximum length of the string in meters (should be static)
 // * `length`: the length of the string in meters
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// stringSegment_test = 0,0,0 : pm.stringSegment(1.0, 0.5);
+// ```
 //----------------------------------
 stringSegment(maxLength,length) = waveguide(nMax,n)
 with {
@@ -493,6 +628,12 @@ with {
 // * `stiffness`: the stiffness of the string (0-1) (1 for max stiffness)
 // * `pluckPosition`: excitation position (0-1) (1 is bottom)
 // * `excitation`: the excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// openString_test = 0,0,0 : pm.openString(0.8, 0.5, 0.2, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 openString(length,stiffness,pluckPosition,excitation) = chain(stringSegment(maxStringLength,ntbd) : in(excitation) : dispersionFilters : stringSegment(maxStringLength,btbd))
 with {
@@ -519,6 +660,12 @@ with {
 // * `length`: the length of the string in meters
 // * `pluckPosition`: excitation position (0-1) (1 is bottom)
 // * `excitation`: the excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// nylonString_test = 0,0,0 : pm.nylonString(0.8, 0.3, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 nylonString(length,pluckPosition,excitation) =
 openString(length,stiffness,pluckPosition,excitation)
@@ -543,6 +690,12 @@ with {
 // * `length`: the length of the string in meters
 // * `pluckPosition`: excitation position (0-1) (1 is bottom)
 // * `excitation`: the excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// steelString_test = 0,0,0 : pm.steelString(0.8, 0.3, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 steelString(length,pluckPosition,excitation) =
 openString(length,stiffness,pluckPosition,excitation)
@@ -571,6 +724,12 @@ with {
 // * `stiffness`: the stiffness of the string (0-1) (1 for max stiffness)
 // * `pluckPosition`: excitation position (0-1) (1 is bottom)
 // * `excitation`: the excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// openStringPick_test = 0,0,0 : pm.openStringPick(0.8, 0.4, 0.3, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 openStringPick(length,stiffness,pluckPosition,excitation) = strChain
 with {
@@ -603,6 +762,12 @@ with {
 // pickup (0-1) (1 for same as pickup position)
 // * `pickupPosition`: position of the pickup on the string (0-1) (1 is bottom)
 // * `excitation`: the excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// openStringPickUp_test = 0,0,0 : pm.openStringPickUp(0.8, 0.4, 0.6, 0.7, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 openStringPickUp(length,stiffness,pluckPosition,pickupPosition,excitation) = strChain
 with {
@@ -638,6 +803,12 @@ with {
 // * `pickupPosition`: position of the pickup between the top of the string
 // and the excitation position (0-1) (1 is excitation position)
 // * `excitation`: the excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// openStringPickDown_test = 0,0,0 : pm.openStringPickDown(0.8, 0.4, 0.6, 0.5, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 openStringPickDown(length,stiffness,pluckPosition,pickupPosition,excitation) =
 strChain
@@ -669,6 +840,13 @@ with {
 // ```
 // terminations(_,chain(...),ksReflexionFilter)
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// os = library("oscillators.lib");
+// ksReflexionFilter_test = os.osc(220) : pm.ksReflexionFilter;
+// ```
 //----------------------------------
 ksReflexionFilter = _ <: (_+_')/2;
 
@@ -682,6 +860,12 @@ ksReflexionFilter = _ <: (_+_')/2;
 // ```
 // chain(rStringRigidTermination : stringSegment : ...)
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// rStringRigidTermination_test = 0,0,0 : pm.rStringRigidTermination;
+// ```
 //----------------------------------
 rStringRigidTermination = rTermination(basicBlock,*(-1));
 
@@ -694,6 +878,12 @@ rStringRigidTermination = rTermination(basicBlock,*(-1));
 //
 // ```
 // chain(... : stringSegment : lStringRigidTermination)
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// lStringRigidTermination_test = 0,0,0 : pm.lStringRigidTermination;
 // ```
 //----------------------------------
 lStringRigidTermination = lTermination(*(-1),basicBlock);
@@ -711,6 +901,12 @@ lStringRigidTermination = lTermination(*(-1),basicBlock);
 // ```
 // chain(... : stringSegment : elecGuitarBridge)
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// elecGuitarBridge_test = 0,0,0 : pm.elecGuitarBridge;
+// ```
 //----------------------------------
 elecGuitarBridge = rTermination(basicBlock,-bridgeFilter(0.8,0.6));
 
@@ -727,6 +923,12 @@ elecGuitarBridge = rTermination(basicBlock,-bridgeFilter(0.8,0.6));
 // ```
 // chain(elecGuitarNuts : stringSegment : ...)
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// elecGuitarNuts_test = 0,0,0 : pm.elecGuitarNuts;
+// ```
 //----------------------------------
 elecGuitarNuts = lTermination(-bridgeFilter(0.8,0.6),basicBlock);
 
@@ -742,6 +944,12 @@ elecGuitarNuts = lTermination(-bridgeFilter(0.8,0.6),basicBlock);
 //
 // ```
 // chain(... : stringSegment : guitarBridge)
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// guitarBridge_test = 0,0,0 : pm.guitarBridge;
 // ```
 //----------------------------------
 guitarBridge = rTermination(basicBlock,reflectance) : _,transmittance,_
@@ -763,6 +971,12 @@ with {
 // ```
 // chain(guitarNuts : stringSegment : ...)
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// guitarNuts_test = 0,0,0 : pm.guitarNuts;
+// ```
 //----------------------------------
 guitarNuts = lTermination(-bridgeFilter(0.4,0.5),basicBlock);
 
@@ -779,9 +993,16 @@ guitarNuts = lTermination(-bridgeFilter(0.4,0.5),basicBlock);
 // ```
 //
 // With:
+//
 // * `length`: the length of the string in meters
 // * `pluckPosition`: the plucking position (0.001-0.999)
 // * `excitation`: the input signal for the excitation.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// idealString_test = 0,0,0 : pm.idealString(0.9, 0.2, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------------------------------
 idealString(length,pluckPosition,excitation) = wg
 with {
@@ -811,6 +1032,12 @@ with {
 // * `length`: the length of the string in meters
 // * `damping`: string damping (0-1)
 // * `excitation`: excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// ks_test = pm.ks(0.9, 0.3, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 ks(length,damping,excitation) = endChain(ksChain)
 with {
@@ -831,6 +1058,12 @@ with {
 //
 // ```
 // ks_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// ks_ui_MIDI_test = pm.ks_ui_MIDI;
 // ```
 //----------------------------------
 ks_ui_MIDI = gate : impulseExcitation*gain : ks( (freq : f2l), damping )
@@ -869,6 +1102,12 @@ with {
 // * `pluckPosition`: pluck position (0-1) (1 is on the bridge)
 // * `mute`: mute coefficient (1 for no mute and 0 for instant mute)
 // * `excitation`: excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// elecGuitarModel_test = pm.elecGuitarModel(0.9, 0.3, 0.8, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 elecGuitarModel(length,pluckPosition,mute,excitation) = endChain(egChain)
 with {
@@ -904,6 +1143,12 @@ with {
 // * `mute`: mute coefficient (1 for no mute and 0 for instant mute)
 // * `gain`: gain of the pluck (0-1)
 // * `trigger`: trigger signal (1 for on, 0 for off)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// elecGuitar_test = pm.elecGuitar(0.9, 0.3, 0.8, 0.6, button("gate"));
+// ```
 //----------------------------------
 elecGuitar(stringLength,pluckPosition,mute,gain,trigger) =
 pluckString(stringLength,1,1,1,gain,trigger) :
@@ -917,6 +1162,12 @@ elecGuitarModel(stringLength,pluckPosition,mute);
 //
 // ```
 // elecGuitar_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// elecGuitar_ui_MIDI_test = pm.elecGuitar_ui_MIDI;
 // ```
 //----------------------------------
 elecGuitar_ui_MIDI = elecGuitar(stringLength,pluckPosition,1,gain,gate)*outGain
@@ -944,6 +1195,12 @@ with {
 //
 // ```
 // chain(... : guitarBody)
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// guitarBody_test = 0,0,0 : pm.guitarBody;
 // ```
 //----------------------------------
 // TODO: not implemented yet
@@ -973,6 +1230,12 @@ with {
 // * `length`: the length of the string in meters
 // * `pluckPosition`: pluck position (0-1) (1 is on the bridge)
 // * `excitation`: excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// guitarModel_test = pm.guitarModel(0.9, 0.25, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 guitarModel(length,pluckPosition,excitation) = endChain(egChain)
 with {
@@ -1002,6 +1265,12 @@ with {
 // * `pluckPosition`: pluck position (0-1) (1 is on the bridge)
 // * `gain`: gain of the excitation
 // * `trigger`: trigger signal (1 for on, 0 for off)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// guitar_test = pm.guitar(0.9, 0.25, 0.8, button("gate"));
+// ```
 //----------------------------------
 guitar(stringLength,pluckPosition,gain,trigger) =
 pluckString(stringLength,1,1.5,1,gain,trigger) : guitarModel(stringLength, pluckPosition);
@@ -1015,6 +1284,12 @@ pluckString(stringLength,1,1.5,1,gain,trigger) : guitarModel(stringLength, pluck
 //
 // ```
 // guitar_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// guitar_ui_MIDI_test = pm.guitar_ui_MIDI;
 // ```
 //----------------------------------
 guitar_ui_MIDI = guitar(stringLength,pluckPosition,gain,gate)*outGain
@@ -1054,6 +1329,12 @@ with {
 // * `length`: the length of the string in meters
 // * `pluckPosition`: pluck position (0-1) (1 is on the bridge)
 // * `excitation`: excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// nylonGuitarModel_test = pm.nylonGuitarModel(0.9, 0.25, pm.impulseExcitation(button("gate")));
+// ```
 //----------------------------------
 nylonGuitarModel(length,pluckPosition,excitation) = endChain(egChain)
 with {
@@ -1083,6 +1364,12 @@ with {
 // * `pluckPosition`: pluck position (0-1) (1 is on the bridge)
 // * `gain`: gain of the excitation (0-1)
 // * `trigger`: trigger signal (1 for on, 0 for off)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// nylonGuitar_test = pm.nylonGuitar(0.9, 0.25, 0.8, button("gate"));
+// ```
 //----------------------------------
 nylonGuitar(stringLength,pluckPosition,gain,trigger) =
 pluckString(stringLength,1,1.5,1,gain,trigger) : nylonGuitarModel(stringLength, pluckPosition);
@@ -1096,6 +1383,12 @@ pluckString(stringLength,1,1.5,1,gain,trigger) : nylonGuitarModel(stringLength, 
 //
 // ```
 // nylonGuitar_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// nylonGuitar_ui_MIDI_test = pm.nylonGuitar_ui_MIDI;
 // ```
 //----------------------------------
 nylonGuitar_ui_MIDI = nylonGuitar(stringLength,pluckPosition,gain,gate)*outGain
@@ -1134,6 +1427,13 @@ with {
 // * `nModes`: number of modeled modes (40 max)
 // * `x`: shape of the resonator (0: square, 1: square with rounded corners, 2: round)
 // * `y`: scale of the resonator (0: small, 1: medium, 2: large)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// os = library("oscillators.lib");
+// modeInterpRes_test = os.osc(110) : pm.modeInterpRes(20, 1.0, 1.5);
+// ```
 //----------------------------------
 modeInterpRes(nModes,x,y) = _ <: par(i,min(40,nModes),modeFilter(modeFreq(i),modeT60(i),modeGain(i))) :> /(nModes)
 with {
@@ -1222,6 +1522,12 @@ with {
 // * `nModes`: number of modeled modes (40 max)
 // * `shape`: shape of the resonator (0: square, 1: square with rounded corners, 2: round)
 // * `scale`: scale of the resonator (0: small, 1: medium, 2: large)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// modularInterpBody_test = 0,0,0 : pm.modularInterpBody(20, 1.0, 1.5);
+// ```
 //----------------------------------
 modularInterpBody(nModes,shape,scale) = _,modeInterpRes(nModes,shape,scale),_;
 
@@ -1245,6 +1551,12 @@ modularInterpBody(nModes,shape,scale) = _,modeInterpRes(nModes,shape,scale),_;
 // * `scale`: scale of the resonator (0: small, 1: medium, 2: large)
 // * `bodyExcitation`: excitation signal for the body
 // * `stringExcitation`: excitation signal for the string
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// modularInterpStringModel_test = pm.modularInterpStringModel(0.9, 0.3, 1.0, 1.5, pm.impulseExcitation(button("body")), pm.impulseExcitation(button("string")));
+// ```
 //----------------------------------
 modularInterpStringModel(stringLength,pluckPosition,shape,scale,bodyExcitation,stringExcitation) = endChain(egChain)*0.5
 with {
@@ -1277,6 +1589,12 @@ with {
 // * `gain`: of the string excitation
 // * `tapBody`: send an impulse in the body of the instrument where the string is connected (1 for on, 0 for off)
 // * `triggerString`: trigger signal for the string (1 for on, 0 for off)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// modularInterpInstr_test = pm.modularInterpInstr(0.9, 0.3, 1.0, 1.5, 0.8, button("body"), button("string"));
+// ```
 //----------------------------------
 modularInterpInstr(stringLength,pluckPosition,shape,scale,gain,tapBody,triggerString) = 
 (tapBody : ba.impulsify), pluckString(stringLength,1,1,1,gain,triggerString) : 
@@ -1293,6 +1611,12 @@ modularInterpStringModel(stringLength,pluckPosition,shape,scale);
 //
 // ```
 // modularInterpInstr_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// modularInterpInstr_ui_MIDI_test = pm.modularInterpInstr_ui_MIDI;
 // ```
 //----------------------------------
 modularInterpInstr_ui_MIDI = modularInterpInstr(stringLength,pluckPosition,shape,scale,gain,tapBody,gate)*outGain
@@ -1328,7 +1652,7 @@ with {
 // #### Usage
 //
 // ```
-// excitation : bowTable(offeset,slope) : _
+// excitation : bowTable(offset,slope) : _
 // ```
 //
 // Where:
@@ -1336,6 +1660,12 @@ with {
 // * `excitation`: an excitation signal
 // * `offset`: table offset
 // * `slope`: table slope
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// bowTable_test = pm.bowTable(0.4, 0.1);
+// ```
 //----------------------------------
 bowTable(offset,slope) = pow(abs(sample) + 0.75, -4) : min(1)
 with {
@@ -1356,6 +1686,12 @@ with {
 //
 // * `bowVelocity`: velocity of the bow/excitation signal (0-1)
 // * `bowPressure`: bow pressure on the string (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violinBowTable_test = pm.violinBowTable(0.4, 0.1);
+// ```
 //----------------------------------
 violinBowTable(bowPressure) = bowTable(0,tableSlope)
 with {
@@ -1376,6 +1712,12 @@ with {
 // Where:
 //
 // * `bowTable`: the bow table
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// bowInteraction_test = pm.bowInteraction((0.4, 0.05));
+// ```
 //----------------------------------
 bowInteraction(b) = (_,_ <: b,_,_ :> _,_),_;
 
@@ -1394,6 +1736,12 @@ bowInteraction(b) = (_,_ <: b,_,_ :> _,_),_;
 //
 // * `bowVelocity`: velocity of the bow / excitation signal (0-1)
 // * `bowPressure`: bow pressure on the string (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violinBow_test = pm.violinBow(0.4, 0.05);
+// ```
 //----------------------------------
 violinBow(bowPressure,bowVelocity) = bowInteraction(bowSystem)
 with {
@@ -1417,6 +1765,12 @@ with {
 // * `bowVelocity`: velocity of the bow / excitation signal (0-1)
 // * `bowPressure`: bow pressure on the string (0-1)
 // * `bowPosition`: the position of the bow on the string (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violinBowedString_test = 0,0,0 : pm.violinBowedString(0.82, 0.35, pm.violinBow(0.4, 0.05), 0.15);
+// ```
 //----------------------------------
 violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) =
     chain(
@@ -1440,6 +1794,12 @@ violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) =
 // ```
 // chain(violinNuts : stringSegment : ...)
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violinNuts_test = 0,0,0 : pm.violinNuts;
+// ```
 //----------------------------------
 violinNuts = lTermination(-bridgeFilter(0.6,0.1),basicBlock);
 
@@ -1452,6 +1812,12 @@ violinNuts = lTermination(-bridgeFilter(0.6,0.1),basicBlock);
 //
 // ```
 // chain(... : stringSegment : violinBridge
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violinBridge_test = 0,0,0 : pm.violinBridge;
 // ```
 //----------------------------------
 // TODO:
@@ -1471,6 +1837,12 @@ with {
 //
 // ```
 // chain(... : stringSegment : violinBridge : violinBody)
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violinBody_test = 0,0,0 : pm.violinBody;
 // ```
 //----------------------------------
 // TODO:
@@ -1501,6 +1873,12 @@ with {
 // * `bowVelocity`: velocity of the bow / excitation signal (0-1)
 // * `bowPressure`: bow pressure on the string (0-1))
 // * `bowPosition`: the position of the bow on the string (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violinModel_test = pm.violinModel(0.82, 0.35, pm.violinBow(0.4, 0.05), 0.15);
+// ```
 //----------------------------------
 violinModel(stringLength,bowPressure,bowVelocity,bowPosition) =
     endChain(modelChain)
@@ -1525,6 +1903,12 @@ with {
 // ```
 // violinModel_ui : _
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violin_ui_test = pm.violin_ui;
+// ```
 //----------------------------------
 violin_ui = violinModel(stringLength,bowPress,bowVel,bowPos)*outGain
 with {
@@ -1543,6 +1927,12 @@ with {
 //
 // ```
 // violin_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// violin_ui_MIDI_test = pm.violin_ui_MIDI;
 // ```
 //----------------------------------
 violin_ui_MIDI = violinModel(stringLength,bowPress,bowVel,bowPos)*outGain
@@ -1596,6 +1986,12 @@ with {
 //
 // * `maxLength`: the maximum length of the tube in meters (should be static)
 // * `length`: the length of the tube in meters
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// openTube_test = pm.openTube(0.9);
+// ```
 //----------------------------------
 openTube = stringSegment;
 
@@ -1615,6 +2011,12 @@ openTube = stringSegment;
 // * `excitation`: an excitation signal
 // * `offset`: table offset
 // * `slope`: table slope
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// reedTable_test = pm.reedTable(0.4, 0.2);
+// ```
 //----------------------------------
 reedTable(offset,slope) = reedTable : min(1) : max(-1)
 with {
@@ -1634,6 +2036,12 @@ with {
 // Where:
 //
 // * `excitation`: an excitation signal
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fluteJetTable_test = pm.fluteJetTable(0.5);
+// ```
 //----------------------------------
 fluteJetTable = _ <: *(* : -(1)) : clipping
 with {
@@ -1657,6 +2065,12 @@ with {
 // * `excitation`: an excitation signal (can be DC)
 // * `tubeLength`: length in meters of the tube connected to the mouthpiece
 // * `lipsTension`: tension of the lips (0-1) (default: 0.5)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// brassLipsTable_test = pm.brassLipsTable(0.3, 0.2);
+// ```
 //----------------------------------
 brassLipsTable(tubeLength,lipsTension) = *(0.03) : lipFilter <: * : clipping
 with {
@@ -1682,6 +2096,12 @@ with {
 //
 // * `excitation`: an excitation signal
 // * `stiffness`: reed stiffness (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// clarinetReed_test = pm.clarinetReed(0.6, 0.4, 0.1);
+// ```
 //----------------------------------
 clarinetReed(stiffness) = reedTable(0.7,tableSlope)
 with {
@@ -1706,6 +2126,12 @@ with {
 // This can also be any kind of signal that will directly injected in the mouthpiece
 // (e.g., breath noise, etc.).
 // * `reedStiffness`: reed stiffness (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// clarinetMouthPiece_test = pm.clarinetMouthPiece(0.6, 0.4, 0.1);
+// ```
 //----------------------------------
 clarinetMouthPiece(reedStiffness,pressure) = lTermination(reedInteraction,in(pressure))
 with {
@@ -1731,6 +2157,12 @@ with {
 // * `pressure`: the pressure of the air flow (DC) created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
 // (e.g., breath noise, etc.).
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// brassLips_test = pm.brassLips(0.3, 0.2, 0.1);
+// ```
 //----------------------------------
 brassLips(tubeLength,lipsTension,pressure) = lTermination(mpInteraction,basicBlock)
 with {
@@ -1758,6 +2190,12 @@ with {
 // performer (0-1).
 // This can also be any kind of signal that will directly injected in the
 // mouthpiece (e.g., breath noise, etc.).
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fluteEmbouchure_test = pm.fluteEmbouchure(0.5, 0.3);
+// ```
 //----------------------------------
 fluteEmbouchure(pressure) =
 (_ <: _,_),_,_ : _,*(0.5)+(pressure-_*0.5 : fluteJetTable),_;
@@ -1776,6 +2214,12 @@ fluteEmbouchure(pressure) =
 // Where:
 //
 // * `opening`: the "opening" of bell (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// wBell_test = pm.wBell(0.4, 0.6);
+// ```
 //----------------------------------
 wBell(opening) = rTermination(basicBlock,si.smooth(opening));
 
@@ -1787,6 +2231,12 @@ wBell(opening) = rTermination(basicBlock,si.smooth(opening));
 //
 // ```
 // chain(fluteHead : tube : ...)
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fluteHead_test = pm.fluteHead(0.8, 0.4, 0.3);
 // ```
 //----------------------------------
 fluteHead = lTermination(*(absorption),basicBlock)
@@ -1802,6 +2252,12 @@ with {
 //
 // ```
 // chain(... : tube : fluteFoot)
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fluteFoot_test = pm.fluteFoot(0.8, 0.4, 0.3);
 // ```
 //----------------------------------
 fluteFoot = rTermination(basicBlock,*(absorption) : dispersion)
@@ -1829,6 +2285,12 @@ with {
 // (e.g., breath noise, etc.).
 // * `reedStiffness`: reed stiffness (0-1)
 // * `bellOpening`: the opening of bell (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// clarinetModel_test = pm.clarinetModel(0.9, 0.4, 0.3, 0.2);
+// ```
 //----------------------------------
 clarinetModel(tubeLength,pressure,reedStiffness,bellOpening) = endChain(modelChain)
 with {
@@ -1859,6 +2321,12 @@ with {
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will be directly injected in the mouthpiece
 // (e.g., breath noise, etc.).
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// clarinetModel_ui_test = pm.clarinetModel_ui;
+// ```
 //----------------------------------
 clarinetModel_ui(pressure) = clarinetModel(tubeLength,pressure,reedStiffness,bellOpening)*outGain
 with {
@@ -1878,6 +2346,12 @@ with {
 // ```
 // clarinet_ui : _
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// clarinet_ui_test = pm.clarinet_ui;
+// ```
 //----------------------------------
 clarinet_ui = hgroup("clarinet",blower_ui : clarinetModel_ui);
 
@@ -1889,6 +2363,12 @@ clarinet_ui = hgroup("clarinet",blower_ui : clarinetModel_ui);
 //
 // ```
 // clarinet_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// clarinet_ui_MIDI_test = pm.clarinet_ui_MIDI;
 // ```
 //----------------------------------
 clarinet_ui_MIDI =
@@ -1946,6 +2426,12 @@ with {
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
 // (e.g., breath noise, etc.).
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// brassModel_test = pm.brassModel(0.9, 0.4, 0.2, 0.6);
+// ```
 //----------------------------------
 brassModel(tubeLength,lipsTension,mute,pressure) = endChain(brassChain)
 with {
@@ -1971,6 +2457,12 @@ with {
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will be directly injected in the mouthpiece
 // (e.g., breath noise, etc.).
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// brassModel_ui_test = pm.brassModel_ui;
+// ```
 //----------------------------------
 brassModel_ui(pressure) = brassModel(tubeLength,lipsTension,mute,pressure)
 with {
@@ -1989,6 +2481,12 @@ with {
 // ```
 // brass_ui : _
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// brass_ui_test = pm.brass_ui;
+// ```
 //----------------------------------
 brass_ui = hgroup("brass",blower_ui : brassModel_ui);
 
@@ -2000,6 +2498,12 @@ brass_ui = hgroup("brass",blower_ui : brassModel_ui);
 //
 // ```
 // brass_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// brass_ui_MIDI_test = pm.brass_ui_MIDI;
 // ```
 //----------------------------------
 brass_ui_MIDI = brassModel(tubeLength,lipsTension,mute,pressure)*outGain
@@ -2052,6 +2556,12 @@ with {
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
 // (e.g., breath noise, etc.).
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fluteModel_test = pm.fluteModel(0.9, 0.4, 0.6);
+// ```
 //----------------------------------
 // TODO: this model is out of tune and we're not really sure why
 fluteModel(tubeLength,mouthPosition,pressure) = endChain(fluteChain) : fi.dcblocker
@@ -2081,6 +2591,12 @@ with {
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will be directly injected in the mouthpiece
 // (e.g., breath noise, etc.).
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fluteModel_ui_test = pm.fluteModel_ui;
+// ```
 //----------------------------------
 fluteModel_ui(pressure) =
 fluteModel(tubeLength,mouthPosition,pressure)*outGain
@@ -2100,6 +2616,12 @@ with {
 // ```
 // flute_ui : _
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// flute_ui_test = pm.flute_ui;
+// ```
 //----------------------------------
 flute_ui = hgroup("flute",blower_ui : fluteModel_ui);
 
@@ -2111,6 +2633,12 @@ flute_ui = hgroup("flute",blower_ui : fluteModel_ui);
 //
 // ```
 // flute_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// flute_ui_MIDI_test = pm.flute_ui_MIDI;
 // ```
 //----------------------------------
 flute_ui_MIDI = fluteModel(tubeLength,mouthPosition,blow)*outGain
@@ -2162,6 +2690,12 @@ with {
 // Where:
 //
 // * `gate`: a gate button
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// impulseExcitation_test = pm.impulseExcitation(button("gate"));
+// ```
 //--------------------------------------
 impulseExcitation(trigger) = trigger : ba.impulsify;
 
@@ -2183,6 +2717,12 @@ impulseExcitation(trigger) = trigger : ba.impulsify;
 // * `sharpness`: sharpness of the attack and release (0-1)
 // * `gain`: gain of the excitation
 // * `gate`: a gate button/trigger signal (0/1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// strikeModel_test = pm.strikeModel(200, 4000, 0.5, 0.8, button("gate"));
+// ```
 //--------------------------------------
 strikeModel(HPcutoff,LPcutoff,sharpness,gain,trigger) =
 no.noise : fi.highpass(2,HPcutoff) : fi.lowpass(2,LPcutoff) :
@@ -2210,6 +2750,12 @@ with {
 // * `sharpness`: sharpness of the attack and release (0-1)
 // * `gain`: gain of the excitation
 // * `gate`: a gate button/trigger signal (0/1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// strike_test = pm.strike(0.4, 0.5, 0.8, button("gate"));
+// ```
 //--------------------------------------
 strike(exPos,sharpness,gain,trigger) = strikeModel(HPcutoff,LPcutoff,sharpness,gain,trigger)
 with {
@@ -2236,6 +2782,12 @@ with {
 // * `sharpness`: sharpness of the attack and release (1 for default)
 // * `gain`: gain of the excitation (0-1)
 // * `trigger`: trigger signal (1 for on, 0 for off)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// pluckString_test = pm.pluckString(0.9, 1, 1, 1, 0.6, button("gate"));
+// ```
 //--------------------------------------
 pluckString(stringLength,cutoff,maxFreq,sharpness,gain,trigger) =
 no.noise : fi.lowpass(2,cutoffreq) : *(en.ar(att,rel,trigger))*gain
@@ -2262,6 +2814,12 @@ with {
 // * `pressure`: pressure (0-1)
 // * `breathGain`: breath noise gain (0-1) (recommended: 0.005)
 // * `breathCutoff`: breath cuttoff frequency (Hz) (recommended: 2000)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// blower_test = pm.blower(0.5, 0.05, 2000, 5, 0.2);
+// ```
 //--------------------------------------
 blower(pressure,breathGain,breathCutoff,vibratoFreq,vibratoGain) = pressure + vibrato + breathNoise
 with {
@@ -2277,6 +2835,12 @@ with {
 //
 // ```
 // blower : somethingToBeBlown
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// blower_ui_test = pm.blower_ui;
 // ```
 //--------------------------------------
 blower_ui = blower(pressure,breathGain,breathCutoff,vibratoFreq,vibratoGain)
@@ -2308,6 +2872,12 @@ with {
 //
 // * `excitation`: excitation signal
 // * `freq`: fundamental frequency of the bar
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// djembeModel_test = pm.djembeModel(110);
+// ```
 //----------------------------------
 djembeModel(freq) = _ <: par(i,nModes,modeFilter(modeFreqs(i),modeT60s(i),modeGains(i))) :> /(nModes)
 with {
@@ -2340,6 +2910,12 @@ with {
 // * `strikeSharpness`: sharpness of the strike (0-1, default: 0.5)
 // * `gain`: gain of the strike
 // * `trigger`: trigger signal (0: off, 1: on)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// djembe_test = pm.djembe(110, 0.3, 0.5, 0.8, button("gate"));
+// ```
 //----------------------------------
 djembe(freq,strikePosition,strikeSharpness,gain,trigger) =
 strike(strikePosition,strikeSharpness,gain,trigger) : djembeModel(freq);
@@ -2351,6 +2927,12 @@ strike(strikePosition,strikeSharpness,gain,trigger) : djembeModel(freq);
 //
 // ```
 // djembe_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// djembe_ui_MIDI_test = pm.djembe_ui_MIDI;
 // ```
 //----------------------------------
 djembe_ui_MIDI =
@@ -2398,6 +2980,12 @@ with {
 // * `t60`: T60 in seconds (recommended value: 0.1)
 // * `t60DecayRatio`: T60 decay ratio (recommended value: 1)
 // * `t60DecaySlope`: T60 decay slope (recommended value: 5)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// marimbaBarModel_test = pm.marimbaBarModel(220);
+// ```
 //----------------------------------
 marimbaBarModel(freq,exPos,t60,t60DecayRatio,t60DecaySlope) = _ <: par(i,nModes,modeFilter(modesFreqs(i),modesT60s(i),modesGains(int(exPos),i))) :> /(nModes)
 with {
@@ -2423,6 +3011,12 @@ with {
 //
 // * `tubeLength`: the length of the tube in meters
 // * `excitation`: the excitation signal (audio in)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// marimbaResTube_test = pm.marimbaResTube(220);
+// ```
 //----------------------------------
 marimbaResTube(tubeLength,excitation) = endChain(tubeChain)
 with {
@@ -2458,6 +3052,12 @@ with {
 // * `excitation`: the excitation signal
 // * `freq`: the frequency of the bar/tube couple
 // * `exPos`: excitation position (0-4)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// marimbaModel_test = pm.marimbaModel(220);
+// ```
 //----------------------------------
 marimbaModel(freq,exPos) =
 marimbaBarModel(freq,exPos,maxT60,T60Decay,T60Slope) : marimbaResTube(resTubeLength)
@@ -2491,6 +3091,12 @@ with {
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
 // * `trigger` signal (0: off, 1: on)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// marimba_test = pm.marimba(220, 0.4, 1, 0.5, 0.8, button("gate"));
+// ```
 //----------------------------------
 marimba(freq,strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
 strikeModel(10,strikeCutoff,strikeSharpness,gain,trigger) :
@@ -2508,6 +3114,12 @@ marimbaModel(freq,strikePosition);
 //
 // ```
 // marimba_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// marimba_ui_MIDI_test = pm.marimba_ui_MIDI;
 // ```
 //----------------------------------
 marimba_ui_MIDI =
@@ -2554,6 +3166,12 @@ with {
 // * `t60`: T60 in seconds (recommended value: 0.1)
 // * `t60DecayRatio`: T60 decay ratio (recommended value: 1)
 // * `t60DecaySlope`: T60 decay slope (recommended value: 5)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// churchBellModel_test = pm.churchBellModel(110);
+// ```
 //----------------------------------
 churchBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope) = _ <: par(i,nModes,modeFilter(modesFreqs(i),modesT60s(i),modesGains(int(exPos),i))) :> /(nModes)
 with {
@@ -2591,6 +3209,12 @@ with {
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
 // * `trigger` signal (0: off, 1: on)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// churchBell_test = pm.churchBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// ```
 //----------------------------------
 churchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
 strikeModel(10,strikeCutoff,strikeSharpness,gain,trigger) :
@@ -2605,6 +3229,12 @@ churchBellModel(50,strikePosition,30,1,2.5);
 //
 // ```
 // churchBell_ui : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// churchBell_ui_test = pm.churchBell_ui;
 // ```
 //----------------------------------
 churchBell_ui =
@@ -2649,6 +3279,12 @@ with {
 // * `t60`: T60 in seconds (recommended value: 0.1)
 // * `t60DecayRatio`: T60 decay ratio (recommended value: 1)
 // * `t60DecaySlope`: T60 decay slope (recommended value: 5)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// englishBellModel_test = pm.englishBellModel(110);
+// ```
 //----------------------------------
 englishBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope) = _ <: par(i,nModes,modeFilter(modesFreqs(i),modesT60s(i),modesGains(int(exPos),i))) :> /(nModes)
 with {
@@ -2687,6 +3323,12 @@ with {
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
 // * `trigger` signal (0: off, 1: on)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// englishBell_test = pm.englishBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// ```
 //----------------------------------
 englishBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
 strikeModel(10,strikeCutoff,strikeSharpness,gain,trigger) :
@@ -2701,6 +3343,12 @@ englishBellModel(50,strikePosition,30,1,3);
 //
 // ```
 // englishBell_ui : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// englishBell_ui_test = pm.englishBell_ui;
 // ```
 //----------------------------------
 englishBell_ui =
@@ -2742,6 +3390,12 @@ with {
 // * `t60`: T60 in seconds (recommended value: 0.1)
 // * `t60DecayRatio`: T60 decay ratio (recommended value: 1)
 // * `t60DecaySlope`: T60 decay slope (recommended value: 5)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// frenchBellModel_test = pm.frenchBellModel(110);
+// ```
 //----------------------------------
 frenchBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope) = _ <: par(i,nModes,modeFilter(modesFreqs(i),modesT60s(i),modesGains(int(exPos),i))) :> /(nModes)
 with {
@@ -2780,6 +3434,12 @@ with {
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
 // * `trigger` signal (0: off, 1: on)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// frenchBell_test = pm.frenchBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// ```
 //----------------------------------
 frenchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
 strikeModel(10,strikeCutoff,strikeSharpness,gain,trigger) :
@@ -2794,6 +3454,12 @@ frenchBellModel(50,strikePosition,30,1,3);
 //
 // ```
 // frenchBell_ui : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// frenchBell_ui_test = pm.frenchBell_ui;
 // ```
 //----------------------------------
 frenchBell_ui =
@@ -2835,6 +3501,12 @@ with {
 // * `t60`: T60 in seconds (recommended value: 0.1)
 // * `t60DecayRatio`: T60 decay ratio (recommended value: 1)
 // * `t60DecaySlope`: T60 decay slope (recommended value: 5)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// germanBellModel_test = pm.germanBellModel(110);
+// ```
 //----------------------------------
 germanBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope) = _ <: par(i,nModes,modeFilter(modesFreqs(i),modesT60s(i),modesGains(int(exPos),i))) :> /(nModes)
 with {
@@ -2873,6 +3545,12 @@ with {
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
 // * `trigger` signal (0: off, 1: on)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// germanBell_test = pm.germanBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// ```
 //----------------------------------
 germanBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
 strikeModel(10,strikeCutoff,strikeSharpness,gain,trigger) :
@@ -2887,6 +3565,12 @@ germanBellModel(50,strikePosition,30,1,2.5);
 //
 // ```
 // germanBell_ui : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// germanBell_ui_test = pm.germanBell_ui;
 // ```
 //----------------------------------
 germanBell_ui =
@@ -2928,6 +3612,12 @@ with {
 // * `t60`: T60 in seconds (recommended value: 0.1)
 // * `t60DecayRatio`: T60 decay ratio (recommended value: 1)
 // * `t60DecaySlope`: T60 decay slope (recommended value: 5)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// russianBellModel_test = pm.russianBellModel(110);
+// ```
 //----------------------------------
 russianBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope) = _ <: par(i,nModes,modeFilter(modesFreqs(i),modesT60s(i),modesGains(int(exPos),i))) :> /(nModes)
 with {
@@ -2966,6 +3656,12 @@ with {
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
 // * `trigger` signal (0: off, 1: on)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// russianBell_test = pm.russianBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// ```
 //----------------------------------
 russianBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
 strikeModel(10,strikeCutoff,strikeSharpness,gain,trigger) :
@@ -2980,6 +3676,12 @@ russianBellModel(50,strikePosition,30,1,3);
 //
 // ```
 // russianBell_ui : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// russianBell_ui_test = pm.russianBell_ui;
 // ```
 //----------------------------------
 russianBell_ui =
@@ -3019,6 +3721,12 @@ with {
 // * `t60`: T60 in seconds (recommended value: 0.1)
 // * `t60DecayRatio`: T60 decay ratio (recommended value: 1)
 // * `t60DecaySlope`: T60 decay slope (recommended value: 5)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// standardBellModel_test = pm.standardBellModel(110);
+// ```
 //----------------------------------
 standardBellModel(nModes,exPos,t60,t60DecayRatio,t60DecaySlope) = _ <: par(i,nModes,modeFilter(modesFreqs(i),modesT60s(i),modesGains(int(exPos),i))) :> /(nModes)
 with {
@@ -3056,6 +3764,12 @@ with {
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
 // * `trigger` signal (0: off, 1: on)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// standardBell_test = pm.standardBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// ```
 //----------------------------------
 standardBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
 strikeModel(10,strikeCutoff,strikeSharpness,gain,trigger) :
@@ -3070,6 +3784,12 @@ standardBellModel(50,strikePosition,30,1,2.5);
 //
 // ```
 // standardBell_ui : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// standardBell_ui_test = pm.standardBell_ui;
 // ```
 //----------------------------------
 standardBell_ui =
@@ -3108,6 +3828,12 @@ with {
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3:
 // soprano, 4: tenor)
 // * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// formantValues_test = pm.formantValues.f(0);
+// ```
 //--------------------------------------
 formantValues = environment {
     f(0) = (800,400,350,450,325,600,400,250,400,350,660,440,270,430,370,800,
@@ -3178,6 +3904,12 @@ maxGenderFreq = (523.25,1046.5);
 // Where:
 //
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// voiceGender_test = pm.voiceGender(0.5);
+// ```
 //---------------------------------------------
 declare voiceGender author "Mike Olsen";
 
@@ -3199,6 +3931,12 @@ voiceGender(voiceType) = ba.if(voiceType == 0,1,ba.if(voiceType == 3,1,0));
 // * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 // * `freq`: the fundamental frequency of the excitation signal
 // * `gender`: gender of the voice used in the fof filter (0: male, 1: female)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// skirtWidthMultiplier_test = pm.skirtWidthMultiplier(0.5);
+// ```
 //---------------------------------------------
 declare skirtWidthMultiplier author "Mike Olsen";
 
@@ -3220,9 +3958,6 @@ with {
 // the fundamental frequency of the excitation signal and leaves
 // all other formant frequencies unchanged. Ported from `chant-lib`.
 //
-// #### Reference
-//
-// <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //
 // #### Usage
 //
@@ -3236,6 +3971,16 @@ with {
 // * `freq`: the fundamental frequency of the excitation signal
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
 // * input is the center frequency of the corresponding formant
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// autobendFreq_test = pm.autobendFreq(440, 0.5);
+// ```
+//
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //---------------------------------------------
 declare autobendFreq author "Mike Olsen";
 
@@ -3256,10 +4001,6 @@ with {
 // reinforced for higher fundamental frequencies.
 // Ported from `chant-lib`.
 //
-// #### Reference
-//
-// <https://ccrma.stanford.edu/~rmichon/chantLib/>.
-//
 // #### Usage
 //
 // ```
@@ -3271,6 +4012,16 @@ with {
 // * `freq`: the fundamental frequency of the excitation signal
 // * `gender`: the gender of the voice type (0: male, 1: female)
 // * input is the linear amplitude of the formant
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// vocalEffort_test = pm.vocalEffort(0.6);
+// ```
+//
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //---------------------------------------------
 declare vocalEffort author "Mike Olsen";
 
@@ -3279,10 +4030,6 @@ vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),*(0.8+
 
 //-------------------------`(pm.)fof`--------------------------
 // Function to generate a single Formant-Wave-Function.
-// 
-// #### Reference
-//
-// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //
@@ -3297,6 +4044,16 @@ vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),*(0.8+
 // * `sw`: formant skirtwidth (Hz)
 // * `g`: linear scale factor (g=1 gives 0dB amplitude response at fc)
 // * input is an impulse signal to excite filter
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fof_test = pm.fof(0.3, 440, 880, 0.5);
+// ```
+// 
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //---------------------------------------------------------
 declare fof author "Mike Olsen";
 
@@ -3318,10 +4075,6 @@ with {
 //-------------------------`(pm.)fofSH`-------------------------
 // FOF with sample and hold used on `bw` and a parameter
 // used in the filter-cycling FOF function `fofCycle`.
-// 
-// #### Reference
-//
-// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //
@@ -3330,6 +4083,16 @@ with {
 // ```
 //
 // Where: all parameters same as for [`fof`](#fof)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fofSH_test = pm.fofSH(0.3, 440, 880, 0.5);
+// ```
+// 
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //---------------------------------------------------------
 declare fofSH author "Mike Olsen";
 
@@ -3339,10 +4102,6 @@ fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') :
 //----------------------`(pm.)fofCycle`-------------------------
 // FOF implementation where time-varying filter parameter noise is
 // mitigated by using a cycle of `n` sample and hold FOF filters.
-// 
-// #### Reference
-//
-// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //
 // #### Usage
 //
@@ -3354,6 +4113,16 @@ fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') :
 //
 // * `n`: the number of FOF filters to cycle through
 // * all other parameters are same as for [`fof`](#fof)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 0.2);
+// ```
+// 
+// #### Reference
+//
+// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //---------------------------------------------------------
 declare fofCycle author "Mike Olsen";
 
@@ -3375,6 +4144,12 @@ fofCycle(fc,bw,a,g,n) = _ : ba.cycle(n) : par(i,n,fofSH(fc,bw,a,g)) :> _;
 //
 // * `tau`: the desired smoothing time constant in seconds
 // * all other parameters are same as for [`fof`](#fof)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2);
+// ```
 //---------------------------------------------------------
 declare fofSmooth author "Mike Olsen";
 
@@ -3410,6 +4185,12 @@ with {
 // * `i`: formant number (i.e. 0 - 4) used to index formant data value arrays
 // * `freq`: fundamental frequency of excitation signal. Used to calculate
 //         rise time of envelope
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// formantFilterFofCycle_test = pm.formantFilterFofCycle(0, 0, 5, 0, 200);
+// ```
 //--------------------------------------
 declare formantFilterFofCycle author "Mike Olsen";
 
@@ -3451,7 +4232,13 @@ with {
 // * `nFormants`: number of formant regions in frequency domain, typically 5
 // * `i`: formant number (i.e. 1 - 5) used to index formant data value arrays
 // * `freq`: fundamental frequency of excitation signal. Used to calculate
-//         rise time of envelope
+// rise time of envelope
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// formantFilterFofSmooth_test = pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
+// ```
 //--------------------------------------
 declare formantFilterFofSmooth author "Mike Olsen";
 
@@ -3490,6 +4277,12 @@ with {
 // * `nFormants`: number of formant regions in frequency domain, typically 5
 // * `i`: formant index used to index formant data value arrays
 // * `freq`: fundamental frequency of excitation signal.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// formantFilterBP_test = pm.formantFilterBP(0, 0, 5, 0, 200);
+// ```
 //--------------------------------------
 formantFilterBP(voiceType,vowel,nFormants,i,freq) =
     fi.resonbp(formantFreq(i),formantFreq(i)/formantBw(i),
@@ -3526,6 +4319,12 @@ with {
 //  (i.e. FormantFilterbankBP, FormantFilterbankFof,...)
 // * `freq`: fundamental frequency of excitation signal. Needed for FOF
 //  version to calculate rise time of envelope
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// formantFilterbank_test = pm.formantFilterbank(0, 0, 5, 0);
+// ```
 //--------------------------------------
 declare formantFilterbank author "Mike Olsen";
 
@@ -3554,6 +4353,12 @@ with {
 // * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 // * `freq`: the fundamental frequency of the excitation signal. Needed to calculate the skirtwidth 
 // of the FOF envelopes and for the autobendFreq and vocalEffort functions
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// formantFilterbankFofCycle_test = pm.formantFilterbankFofCycle(0, 0, 5));
+// ```
 //-------------------------------------
 declare formantFilterbankFofCycle author "Mike Olsen";
 
@@ -3580,6 +4385,12 @@ formantFilterbank(voiceType,vowel,formantFilterFofCycle,freq);
 // * `freq`: the fundamental frequency of the excitation signal. Needed to
 // calculate the skirtwidth of the FOF envelopes and for the
 // autobendFreq and vocalEffort functions
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// formantFilterbankFofSmooth_test = pm.formantFilterbankFofSmooth(0, 0, 5);
+// ```
 //-------------------------------------
 declare formantFilterbankFofSmooth author "Mike Olsen";
 
@@ -3603,7 +4414,13 @@ formantFilterbank(voiceType,vowel,formantFilterFofSmooth,freq);
 //
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
 // * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
-// * `freq`: the fundamental frequency of the excitation signal. Needed for the autobendFreq and vocalEffort functions
+// * `freq`: the fundamental frequency of the excitation signal. Needed for the autobendFreq and vocalEffort functions.
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// formantFilterbankBP_test = pm.formantFilterbankBP(0, 0, 5);
+// ```
 //--------------------------------------
 formantFilterbankBP(voiceType,vowel,freq) =
 formantFilterbank(voiceType,vowel,formantFilterBP,freq);
@@ -3632,6 +4449,12 @@ formantFilterbank(voiceType,vowel,formantFilterBP,freq);
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
 // * `isFof`: whether model is FOF based (0: no, 1: yes)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModel_test = pm.SFFormantModel(0, 0, 0.5, 0.6, 100, 2, 1, 1);
+// ```
 //--------------------------------------
 declare SFFormantModel author "Mike Olsen";
 
@@ -3666,6 +4489,12 @@ with {
 // * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelFofCycle_test = pm.SFFormantModelFofCycle(0.5, 0.6, 0.7);
+// ```
 //---------------------------------------
 declare SFFormantModelFofCycle author "Mike Olsen";
 
@@ -3693,6 +4522,12 @@ formantFilterbankFofCycle,1);
 // * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelFofSmooth_test = pm.SFFormantModelFofSmooth(0.5, 0.6, 0.7);
+// ```
 //---------------------------------------
 declare SFFormantModelFofSmooth author "Mike Olsen";
 
@@ -3724,6 +4559,12 @@ formantFilterbankFofSmooth,1);
 // * `exType`: voice vs. fricative sound ratio (0-1 where 1 is 100% fricative)
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelBP_test = pm.SFFormantModelBP(0.5, 0.6, 0.7);
+// ```
 //---------------------------------------
 SFFormantModelBP(voiceType,vowel,exType,freq,gain) =
 SFFormantModel(voiceType,vowel,exType,freq,gain,os.sawtooth(freq),
@@ -3737,6 +4578,12 @@ formantFilterbankBP,0);
 //
 // ```
 // SFFormantModelFofCycle_ui : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelFofCycle_ui_test = pm.SFFormantModelFofCycle_ui;
 // ```
 //----------------------------------
 declare SFFormantModelFofCycle_ui author "Mike Olsen";
@@ -3762,6 +4609,12 @@ with {
 // ```
 // SFFormantModelFofSmooth_ui : _
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelFofSmooth_ui_test = pm.SFFormantModelFofSmooth_ui;
+// ```
 //----------------------------------
 declare SFFormantModelFofSmooth_ui author "Mike Olsen";
 
@@ -3786,6 +4639,12 @@ with {
 // ```
 // SFFormantModelBP_ui : _
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelBP_ui_test = pm.SFFormantModelBP_ui;
+// ```
 //----------------------------------
 SFFormantModelBP_ui = SFFormantModelBP(voiceType,vowel,fricative,freq2,gain)
 with {
@@ -3807,6 +4666,12 @@ with {
 //
 // ```
 // SFFormantModelFofCycle_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelFofCycle_ui_MIDI_test = pm.SFFormantModelFofCycle_ui_MIDI;
 // ```
 //----------------------------------
 SFFormantModelFofCycle_ui_MIDI = SFFormantModelFofCycle(voiceType,vowel,freq2,envelope)*outGain
@@ -3847,6 +4712,12 @@ with {
 // ```
 // SFFormantModelFofSmooth_ui_MIDI : _
 // ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelFofSmooth_ui_MIDI_test = pm.SFFormantModelFofSmooth_ui_MIDI;
+// ```
 //----------------------------------
 SFFormantModelFofSmooth_ui_MIDI = SFFormantModelFofSmooth(voiceType,vowel,freq2,envelope)*outGain
 with {
@@ -3885,6 +4756,12 @@ with {
 //
 // ```
 // SFFormantModelBP_ui_MIDI : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// SFFormantModelBP_ui_MIDI_test = pm.SFFormantModelBP_ui_MIDI;
 // ```
 //----------------------------------
 SFFormantModelBP_ui_MIDI = SFFormantModelBP(voiceType,vowel,fricative,freq2,envelope)*outGain
@@ -3936,6 +4813,12 @@ with {
 // Where:
 //
 // * `nonlinearity`: amount of nonlinearity to be added (0-1)
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// allpassNL_test = 0,0,0 : pm.allpassNL(0.4);
+// ```
 //--------------------------------------
 allpassNL(nonlinearity) = par(i,2,nlf),_
 with {
@@ -3971,6 +4854,13 @@ with {
 // os.impulse : modalModel(2, (440, 660),
 //                            (0.5, 0.25),
 //                            (ba.db2linear(-1), ba.db2linear(-6)) : _
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// os = library("oscillators.lib");
+// modalModel_test = os.impulse : pm.modalModel(3, (440,660,880), (0.5,0.4,0.3), (0.8,0.6,0.4));
 // ```
 //
 // Further reading: [Grumiaux et. al., 2017:
@@ -4010,6 +4900,13 @@ with {
 // rk_solve_2 = rk_solve((0,1/2), (1/2, 0,1), 1);
 // rk_solve_3 = rk_solve((0,1/2,1), (1/2,-1,2, 1/6,2/3,1/6), 1);
 // rk_solve_4 = rk_solve((0,1/2,1/2,1), (1/2,0,1/2,0,0,1, 1/6,1/3,1/3,1/6), 1);
+// ```
+//
+// #### Test
+// ```
+// pm = library("physmodels.lib");
+// ma = library("maths.lib");
+// rk_solve_test = pm.rk_solve((0), (1), 1, 1.0/ma.SR, eq, (1)) with { eq(t,x) = -x; };
 // ```
 //
 // #### Example test program

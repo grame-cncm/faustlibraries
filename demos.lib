@@ -99,6 +99,14 @@ Michon and Julius O. Smith III, and are released under the
 // ```
 // _ : mth_octave_spectral_level_demo(BandsPerOctave) : _
 // _ : spectral_level_demo : _ // 2/3 octave
+//
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// mth_octave_spectral_level_demo_test = no.noise : dm.mth_octave_spectral_level_demo(1.5);
+// spectral_level_demo_test = no.noise : dm.spectral_level_demo;
 // ```
 //------------------------------------------------------------
 declare mth_octave_spectral_level_demo author "Julius O. Smith III and Yann Orlarey";
@@ -133,6 +141,13 @@ spectral_level_demo = mth_octave_spectral_level_demo(1.5); // 2/3 octave
 //
 // ```
 // _ : parametric_eq_demo : _
+//
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// parametric_eq_demo_test = no.noise : dm.parametric_eq_demo;
 // ```
 //------------------------------------------------------------
 declare parametric_eq_demo author "Julius O. Smith III";
@@ -183,6 +198,13 @@ with{
 //
 // * `N`: filter order (integer)
 //
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// spectral_tilt_demo_test = no.noise : dm.spectral_tilt_demo(4);
+// ```
+//
 // All other parameters interactive
 //------------------------------------------------------------
 declare spectral_tilt_demo author "Julius O. Smith III";
@@ -210,6 +232,14 @@ with{
 // Where:
 //
 // * `M`: number of bands per octave
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// mth_octave_filterbank_demo_test = no.noise : dm.mth_octave_filterbank_demo(1);
+// filterbank_demo_test = no.noise : dm.filterbank_demo;
+// ```
 //--------------------------------------------------------------
 declare mth_octave_filterbank_demo author "Julius O. Smith III";
 declare mth_octave_filterbank_demo licence "MIT";
@@ -246,6 +276,13 @@ filterbank_demo = mth_octave_filterbank_demo(1); // octave-bands = default
 //
 // ```
 // _ : cubicnl_demo : _
+//
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// cubicnl_demo_test = no.noise : dm.cubicnl_demo;
 // ```
 //------------------------------------------------------------
 declare cubicnl_demo author "Julius O. Smith III";
@@ -271,6 +308,13 @@ with{
 //
 // ```
 // _,_ : gate_demo : _,_
+//
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// gate_demo_test = no.noise, no.noise : dm.gate_demo;
 // ```
 //------------------------------------------------------------
 declare gate_demo author "Julius O. Smith III";
@@ -321,6 +365,13 @@ with{
 //
 // ```
 // _,_ : compressor_demo : _,_
+//
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// compressor_demo_test = no.noise, no.noise : dm.compressor_demo;
 // ```
 //------------------------------------------------------------
 declare compressor_demo author "Julius O. Smith III";
@@ -385,6 +436,13 @@ with{
 // ```
 // _ : moog_vcf_demo : _
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// moog_vcf_demo_test = os.osc(440) : dm.moog_vcf_demo;
+// ```
 //------------------------------------------------------------
 declare moog_vcf_demo author "Julius O. Smith III";
 declare moog_vcf_demo licence "MIT";
@@ -428,6 +486,13 @@ with{
 // ```
 // _ : wah4_demo : _
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// wah4_demo_test = os.osc(440) : dm.wah4_demo;
+// ```
 //------------------------------------------------------------
 declare wah4_demo author "Julius O. Smith III";
 declare wah4_demo licence "MIT";
@@ -451,6 +516,13 @@ with{
 // ```
 // _ : crybaby_demo : _
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// crybaby_demo_test = os.osc(440) : dm.crybaby_demo;
+// ```
 //------------------------------------------------------------
 declare crybaby_demo author "Julius O. Smith III";
 declare crybaby_demo licence "MIT";
@@ -472,6 +544,13 @@ with{
 //
 // ```
 // _,_ : flanger_demo : _,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// flanger_demo_test = os.osc(440), os.osc(442) : dm.flanger_demo;
 // ```
 //------------------------------------------------------------
 declare flanger_demo author "Julius O. Smith III";
@@ -522,6 +601,13 @@ with{
 //
 // ```
 // _,_ : phaser2_demo : _,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// phaser2_demo_test = os.osc(440), os.osc(442) : dm.phaser2_demo;
 // ```
 //------------------------------------------------------------
 declare phaser2_demo author "Julius O. Smith III";
@@ -578,6 +664,13 @@ with{
 // ```
 // _,_ : tapeStop_demo : _,_
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// tapeStop_demo_test = os.osc(440), os.osc(442) : dm.tapeStop_demo;
+// ```
 //------------------------------------------------------------
 declare tapeStop_demo author "David Braun";
 declare tapeStop_demo copyright "Copyright (C) 2024 by David Braun <braun@ccrma.stanford.edu>";
@@ -611,6 +704,13 @@ with {
 //
 // ```
 // _,_ : freeverb_demo : _,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// freeverb_demo_test = os.osc(440), os.osc(442) : dm.freeverb_demo;
 // ```
 //------------------------------------------------------------
 declare freeverb_demo author " Romain Michon";
@@ -651,6 +751,13 @@ with{
 // ```
 // For suppressing the `gui_group` input, pass it as `!`.
 // (See `(dm.)fdnrev0_demo` for an example of its use).
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// stereo_reverb_tester_test = no.noise, no.noise : dm.stereo_reverb_tester(!);
+// ```
 //------------------------------------------------------------
 declare stereo_reverb_tester author "Julius O. Smith III";
 declare stereo_reverb_tester licence "MIT";
@@ -699,6 +806,13 @@ with {
 //    / Integer 3 or greater
 // * `BBSO` : butterworth band-split order / order of lowpass/highpass bandsplit
 //    used at each crossover freq / odd positive integer
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// fdnrev0_demo_test = no.noise, no.noise : dm.fdnrev0_demo(16, 5, 3);
+// ```
 //------------------------------------------------------------
 declare fdnrev0_demo author "Julius O. Smith III";
 declare fdnrev0_demo licence "MIT";
@@ -763,6 +877,13 @@ with{
 // ```
 // si.bus(8) : zita_rev_fdn_demo : si.bus(8)
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// zita_rev_fdn_demo_test = par(i, 8, os.osc(440 + i)) : dm.zita_rev_fdn_demo;
+// ```
 //------------------------------------------------------------
 declare zita_rev_fdn_demo author "Julius O. Smith III";
 declare zita_rev_fdn_demo licence "MIT";
@@ -794,6 +915,13 @@ with{
 //
 // ```
 // _,_ : zita_light : _,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// zita_light_test = os.osc(440), os.osc(442) : dm.zita_light;
 // ```
 //------------------------------------------------------------
 declare zita_light author "Julius O. Smith III";
@@ -846,8 +974,14 @@ with{
 // _,_ : zita_rev1 : _,_
 // ```
 //
-// #### Reference
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// zita_rev1_test = os.osc(440), os.osc(442) : dm.zita_rev1;
+// ```
 //
+// #### Reference
 // <http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html>
 //------------------------------------------------------------
 declare zita_rev1 author "Julius O. Smith III";
@@ -943,8 +1077,14 @@ with{
 //
 // ```
 // _,_ : vital_rev_demo : _,_
-// ```
 //
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// vital_rev_demo_test = os.osc(440), os.osc(442) : dm.vital_rev_demo;
+// ```
 //------------------------------------------------------------
 vital_rev_demo = hgroup("Reverb", re.vital_rev(prelow, prehigh, lowcutoff, highcutoff, lowgain, highgain, chorus_amt, chorus_freq, predelay, time, size, mix))
 with {
@@ -988,6 +1128,13 @@ declare vital_rev_demo license "GPL-3.0";
 // #### Usage
 // ```
 // _,_ : reverbTank_demo : _,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// reverbTank_demo_test = os.osc(440), os.osc(442) : dm.reverbTank_demo;
 // ```
 //
 // #### References
@@ -1211,6 +1358,13 @@ declare reverbTank_demo license "MIT-style STK-4.3 license";
 // ```
 // _,_ : kb_rom_rev1_demo : _,_
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// kb_rom_rev1_demo_test = os.osc(440), os.osc(442) : dm.kb_rom_rev1_demo;
+// ```
 //------------------------------------------------------------
 declare kb_rom_rev1_demo author "Luca Spanedda";
 declare kb_rom_rev1_demo licence "GPL-3.0";
@@ -1240,6 +1394,13 @@ with {
 //
 // ```
 // _,_ : dattorro_rev_demo : _,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// dattorro_rev_demo_test = os.osc(440), os.osc(442) : dm.dattorro_rev_demo;
 // ```
 //
 //------------------------------------------------------------
@@ -1283,6 +1444,12 @@ with {
 // _,_ : jprev_demo : _,_
 // ```
 //
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// jprev_demo_test = os.osc(440), os.osc(442) : dm.jprev_demo;
+// ```
 //------------------------------------------------------------
 declare jprev_demo author "Till Bovermann";
 declare jprev_demo license "GPL2+";
@@ -1317,8 +1484,14 @@ with {
 //
 // ```
 // _,_ : greyhole_demo : _,_
-// ```
 //
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// greyhole_demo_test = os.osc(440), os.osc(442) : dm.greyhole_demo;
+// ```
 //------------------------------------------------------------
 declare greyhole_demo author "Till Bovermann";
 declare greyhole_demo license "GPL2+";
@@ -1350,6 +1523,12 @@ with {
 //
 // ```
 // sawtooth_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// sawtooth_demo_test = dm.sawtooth_demo;
 // ```
 //------------------------------------------------------------
 declare sawtooth_demo author "Julius O. Smith III";
@@ -1398,6 +1577,12 @@ with{
 //
 // ```
 // virtual_analog_oscillator_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// virtual_analog_oscillator_demo_test = dm.virtual_analog_oscillator_demo;
 // ```
 //------------------------------------------------------------
 declare virtual_analog_oscillator_demo author "Julius O. Smith III";
@@ -1488,6 +1673,12 @@ with{
 // ```
 // oscrs_demo : _
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// oscrs_demo_test = dm.oscrs_demo;
+// ```
 //-------------------------------------------------------------------
 declare oscrs_demo author "Julius O. Smith III";
 declare oscrs_demo licence "MIT";
@@ -1522,6 +1713,12 @@ oscr_demo = oscrs_demo; // synonym
 // ```
 // velvet_noise_demo : _
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// velvet_noise_demo_test = dm.velvet_noise_demo;
+// ```
 //-------------------------------------------------------------------
 declare velvet_noise_demo author "Julius O. Smith III";
 declare velvet_noise_demo licence "MIT";
@@ -1545,6 +1742,12 @@ with{
 // faust2octave latch_demo.dsp
 // Octave:1> plot(faustout);
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// latch_demo_test = dm.latch_demo;
+// ```
 //-------------------------------------------------------------------
 declare latch_demo author "Julius O. Smith III";
 declare latch_demo licence "MIT";
@@ -1567,6 +1770,12 @@ with{
 // echo 'process = dm.envelopes_demo;' >> envelopes_demo.dsp
 // faust2octave envelopes_demo.dsp
 // Octave:1> plot(faustout);
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// envelopes_demo_test = dm.envelopes_demo;
 // ```
 //-------------------------------------------------------------------
 declare envelopes_demo author "Julius O. Smith III";
@@ -1606,6 +1815,12 @@ with{
 //   faust2jaqt fft_spectral_level_demo.dsp
 //   ./fft_spectral_level_demo
 // ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// fft_spectral_level_demo_test = dm.fft_spectral_level_demo(256);
+// ```
 //-------------------------------------------------------------------
 declare fft_spectral_level_demo author "Julius O. Smith III";
 declare fft_spectral_level_demo licence "MIT";
@@ -1640,6 +1855,13 @@ with{
 //   faust2jaqt reverse_echo_demo.dsp
 //   ./reverse_echo_demo
 // Etc.
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// reverse_echo_demo_test = no.noise : dm.reverse_echo_demo(3);
 // ```
 //-------------------------------------------------------------------
 declare reverse_echo_demo author "Julius O. Smith III";
@@ -1679,6 +1901,13 @@ with {
 //   faust2jaqt pospass_demo.dsp
 //   ./pospass_demo
 // Etc.
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// pospass_demo_test = os.osc(440) : dm.pospass_demo;
 // ```
 //-------------------------------------------------------------------
 declare pospass_demo author "Julius O. Smith III";
@@ -1759,10 +1988,16 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //
 // ```
 // _ : exciter : _
+//
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// exciter_test = no.noise : dm.exciter;
 // ```
 //
 // #### References
-//
 // * <https://secure.aes.org/forum/pubs/ebriefs/?elib=16939>
 // * <https://www.researchgate.net/publication/258333577_Modeling_the_Harmonic_Exciter>
 //-------------------------------------------------------------------------------------
@@ -1854,6 +2089,14 @@ with{
 //
 // ```
 // _ : vocoder_demo : _
+// 
+// ```
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// no = library("noises.lib");
+// vocoder_demo_test = no.noise : dm.vocoder_demo;
 // ```
 //------------------------------------------------------------
 declare vocoder_demo author "Romain Michon";
@@ -1884,6 +2127,11 @@ with{
 // colored_noise_demo : _
 // ```
 //
+// #### Test
+// ```
+// dm = library("demos.lib");
+// colored_noise_demo_test = dm.colored_noise_demo;
+// ```
 //-------------------------------------------------
 declare colored_noise author "Constantinos Odysseas Economou";
 declare colored_noise license "MIT";
