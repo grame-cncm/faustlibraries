@@ -271,7 +271,14 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="phaflangerslib">phaflangers.lib</h1>
-<p>A library of phasor and flanger effects. Its official prefix is <code>pf</code>.</p>
+<p>Phasers and Flangers library. Its official prefix is <code>pf</code>.</p>
+<p>This library provides a set of phaser and flanger effects based on delay-line
+modulation. It includes classic implementations with feedback, multi-stage and variable
+modulation options, as well as stereo and through-zero configurations.</p>
+<p>The Phaflangers library is organized into 1 section:</p>
+<ul>
+<li><a href="#functions-reference">Functions Reference</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/phaflangers.lib">https://github.com/grame-cncm/faustlibraries/blob/master/phaflangers.lib</a></li>
@@ -291,6 +298,11 @@
 <li><code>fb</code>: feedback gain between 0 and 1 (0 typical)</li>
 <li><code>invert</code>: 0 for normal, 1 to invert sign of flanging sum</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>pf = library(&quot;phaflangers.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+flanger_mono_test = os.osc(440) : pf.flanger_mono(4096, 1024, 0.7, 0.25, 0);
+</code></pre>
 <h4 id="reference">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Flanging.html">https://ccrma.stanford.edu/~jos/pasp/Flanging.html</a></li>
@@ -311,6 +323,11 @@
 <li><code>fb</code>: feedback gain between 0 and 1 (0 typical)</li>
 <li><code>invert</code>: 0 for normal, 1 to invert sign of flanging sum</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>pf = library(&quot;phaflangers.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+flanger_stereo_test = os.osc(440), os.osc(660) : pf.flanger_stereo(4096, 1024, 1536, 0.7, 0.25, 0);
+</code></pre>
 <h4 id="reference_1">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Flanging.html">https://ccrma.stanford.edu/~jos/pasp/Flanging.html</a></li>
@@ -335,7 +352,12 @@
 <li><code>fb</code>: feedback gain between -1 and 1 (0 typical)</li>
 <li><code>invert</code>: 0 for normal, 1 to invert sign of flanging sum</li>
 </ul>
-<p>Reference:</p>
+<h4 id="test_2">Test</h4>
+<pre><code>pf = library(&quot;phaflangers.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+phaser2_mono_test = os.osc(330) : pf.phaser2_mono(4, 0.0, 50, 200, 1.5, 4000, 0.5, 0.8, 0.2, 0);
+</code></pre>
+<h4 id="reference_2">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Phasing.html">https://ccrma.stanford.edu/~jos/pasp/Phasing.html</a></li>
 <li><a href="http://www.geofex.com/Article_Folders/phasers/phase.html">http://www.geofex.com/Article_Folders/phasers/phase.html</a></li>
@@ -363,7 +385,12 @@
 <li><code>fb</code>: feedback gain between -1 and 1 (0 typical)</li>
 <li><code>invert</code>: 0 for normal, 1 to invert sign of flanging sum</li>
 </ul>
-<p>Reference:</p>
+<h4 id="test_3">Test</h4>
+<pre><code>pf = library(&quot;phaflangers.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+phaser2_stereo_test = os.osc(220), os.osc(330) : pf.phaser2_stereo(4, 50, 200, 1.5, 4000, 0.5, 0.8, 0.2, 0);
+</code></pre>
+<h4 id="reference_3">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Phasing.html">https://ccrma.stanford.edu/~jos/pasp/Phasing.html</a></li>
 <li><a href="http://www.geofex.com/Article_Folders/phasers/phase.html">http://www.geofex.com/Article_Folders/phasers/phase.html</a></li>

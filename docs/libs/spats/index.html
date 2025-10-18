@@ -243,6 +243,8 @@
             
             <li class="nav-item" data-level="1"><a href="#spatslib" class="nav-link">spats.lib</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#functions-reference" class="nav-link">Functions Reference</a>
+              <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#sppanner" class="nav-link">(sp.)panner</a>
               <ul class="nav flex-column">
               </ul>
@@ -269,18 +271,26 @@
             </li>
               </ul>
             </li>
+              </ul>
+            </li>
         </ul>
     </div>
 </div></div>
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="spatslib">spats.lib</h1>
-<p>This library contains a collection of tools for sound spatialization.
-Its official prefix is <code>sp</code>.</p>
+<p>Spatialization (Spats) library. Its official prefix is <code>sp</code>.</p>
+<p>This library provides spatialization in Faust.
+It includes panning and wfs algorithms.</p>
+<p>The Spats library is organized into 1 section:</p>
+<ul>
+<li><a href="#functions-reference">Functions Reference</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/spats.lib">https://github.com/grame-cncm/faustlibraries/blob/master/spats.lib</a></li>
 </ul>
+<h2 id="functions-reference">Functions Reference</h2>
 <hr />
 <h3 id="sppanner"><code>(sp.)panner</code></h3>
 <p>A simple linear stereo panner.
@@ -292,6 +302,11 @@ Its official prefix is <code>sp</code>.</p>
 <ul>
 <li><code>g</code>: the panning (0-1)</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>sp = library(&quot;spats.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+panner_test = os.osc(220) : sp.panner(hslider(&quot;panner:pan&quot;, 0.3, 0, 1, 0.01));
+</code></pre>
 <hr />
 <h3 id="spconstantpowerpan"><code>(sp.)constantPowerPan</code></h3>
 <p>Apply the constant power pan rule to a stereo signal.
@@ -306,6 +321,12 @@ A pan value of 0.5 applies a gain of 0.5 to both channels. </p>
 <ul>
 <li><code>p</code>: the panning (0-1)</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>sp = library(&quot;spats.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+constantPowerPan_test = (os.osc(110), os.osc(220))
+  : sp.constantPowerPan(hslider(&quot;constantPowerPan:pan&quot;, 0.4, 0, 1, 0.01));
+</code></pre>
 <hr />
 <h3 id="spspat"><code>(sp.)spat</code></h3>
 <p>GMEM SPAT: n-outputs spatializer.
@@ -319,6 +340,14 @@ A pan value of 0.5 applies a gain of 0.5 to both channels. </p>
 <li><code>r</code>: rotation (between 0 et 1)</li>
 <li><code>d</code>: distance of the source (between 0 et 1)</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>sp = library(&quot;spats.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+spat_test = os.osc(330)
+  : sp.spat(4,
+      hslider(&quot;spat:rotation&quot;, 0.25, 0, 1, 0.01),
+      hslider(&quot;spat:distance&quot;, 0.5, 0, 1, 0.01));
+</code></pre>
 <hr />
 <h3 id="spwfs"><code>(sp.)wfs</code></h3>
 <p>Wave Field Synthesis algorithm for multiple sound sources. 
@@ -339,6 +368,16 @@ Implementation generalized starting from Pierre Lecomte version. </p>
 <li><code>ys</code>: y-coordinate of the sound source as a function of the source index</li>
 <li><code>zs</code>: z-coordinate of the sound source as a function of the source index</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>sp = library(&quot;spats.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+wfs_inGain(i) = 0.5;
+wfs_xs(i) = 0.0;
+wfs_ys(i) = 1.0;
+wfs_zs(i) = 0.0;
+wfs_test = os.osc(440)
+  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_inGain, wfs_xs, wfs_ys, wfs_zs);
+</code></pre>
 <hr />
 <h3 id="spwfs_ui"><code>(sp.)wfs_ui</code></h3>
 <p>Wave Field Synthesis algorithm for multiple sound sources with a built-in UI.</p>
@@ -354,6 +393,12 @@ Implementation generalized starting from Pierre Lecomte version. </p>
 <li><code>nSources</code>: number of sound sources</li>
 <li><code>nSpeakers</code>: number of speakers</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>sp = library(&quot;spats.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+wfs_ui_test = os.osc(550)
+  : sp.wfs_ui(0, 1, 0, 0.5, 1, 2);
+</code></pre>
 <h4 id="example-test-program">Example test program</h4>
 <pre><code>// Distance between speakers in meters
 speakersDist = 0.0783;  
@@ -376,7 +421,13 @@ and 2 outputs.</p>
 <p>Where:</p>
 <ul>
 <li><code>p</code>: the arbitrary processor</li>
-</ul></div>
+</ul>
+<h4 id="test_5">Test</h4>
+<pre><code>sp = library(&quot;spats.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+stereoize_test = (os.osc(660), os.osc(770))
+  : sp.stereoize(+);
+</code></pre></div>
             </div>
         </div>
 

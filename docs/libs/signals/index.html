@@ -335,7 +335,15 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="signalslib">signals.lib</h1>
-<p>A library of basic elements to handle signals in Faust. Its official prefix is <code>si</code>.</p>
+<p>Signals library. Its official prefix is <code>si</code>.</p>
+<p>This library provides fundamental signal processing operations for Faust,
+including generators, combinators, selectors, and basic DSP utilities. It defines
+essential functions used across all Faust libraries for building and manipulating
+audio and control signals.</p>
+<p>The Signals library is organized into 1 section:</p>
+<ul>
+<li><a href="#functions-reference">Functions Reference</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/signals.lib">https://github.com/grame-cncm/faustlibraries/blob/master/signals.lib</a></li>
@@ -353,6 +361,14 @@ bus(4) : _,_,_,_
 <ul>
 <li><code>N</code>: is an integer known at compile time that indicates the number of parallel cables</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+bus_test = (
+    hslider(&quot;bus:x0&quot;, 0, -1, 1, 0.01),
+    hslider(&quot;bus:x1&quot;, 0, -1, 1, 0.01),
+    hslider(&quot;bus:x2&quot;, 0, -1, 1, 0.01)
+) : si.bus(3);
+</code></pre>
 <hr />
 <h3 id="siblock"><code>(si.)block</code></h3>
 <p>Block - terminate N signals.
@@ -364,6 +380,13 @@ bus(4) : _,_,_,_
 <ul>
 <li><code>N</code>: the number of signals to be blocked known at compile time </li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+block_test = (
+    hslider(&quot;block:x0&quot;, 0, -1, 1, 0.01),
+    hslider(&quot;block:x1&quot;, 0, -1, 1, 0.01)
+) : (si.block(1), _);
+</code></pre>
 <hr />
 <h3 id="siinterpolate"><code>(si.)interpolate</code></h3>
 <p>Linear interpolation between two signals.</p>
@@ -374,6 +397,15 @@ bus(4) : _,_,_,_
 <ul>
 <li><code>i</code>: interpolation control between 0 and 1 (0: first input; 1: second input)</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+interpolate_test = si.interpolate(
+    hslider(&quot;interpolate:mix&quot;, 0.5, 0, 1, 0.01),
+    os.osc(220),
+    os.osc(440)
+);
+</code></pre>
 <hr />
 <h3 id="sirepeat"><code>(si.)repeat</code></h3>
 <p>Repeat an effect N time(s) and take the parallel sum of all
@@ -390,6 +422,10 @@ intermediate buses.</p>
 <li><code>N</code>: Number of repetitions, minimum of 1, a constant numerical expression </li>
 <li><code>FX</code>: an arbitrary effect (N inputs and N outputs) that will be repeated</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+repeat_test = hslider(&quot;repeat:input&quot;, 0, -1, 1, 0.01) : si.repeat(3, *(0.5));
+</code></pre>
 <p>Example 1:</p>
 <pre><code>process = repeat(2, dm.zita_light) : _*.5,_*.5;
 </code></pre>
@@ -409,6 +445,10 @@ low-pass considering the coefficient calculation:
 <h4 id="usage_4">Usage</h4>
 <pre><code>hslider(...) : smoo;
 </code></pre>
+<h4 id="test_4">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+smoo_test = hslider(&quot;smoo:input&quot;, 0, -1, 1, 0.01) : si.smoo;
+</code></pre>
 <hr />
 <h3 id="sipolysmooth"><code>(si.)polySmooth</code></h3>
 <p>A smoothing function based on <code>smooth</code> that doesn't smooth when a
@@ -425,6 +465,11 @@ is the right one when the note is started.</p>
 <li><code>d</code>: the number of samples to wait before the signal start being
     smoothed after <code>g</code> switched to 1</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+polySmooth_test = hslider(&quot;polySmooth:input&quot;, 0, -1, 1, 0.01)
+  : si.polySmooth(button(&quot;polySmooth:gate&quot;), 0.999, 32);
+</code></pre>
 <hr />
 <h3 id="sismoothandh"><code>(si.)smoothAndH</code></h3>
 <p>A smoothing function based on <code>smooth</code> that holds its output
@@ -439,11 +484,20 @@ smoothed parameter to change when a note-off event is sent.</p>
 <li><code>g</code>: the hold signal (0 for hold, 1 for bypass)</li>
 <li><code>s</code>: the smoothness (see <code>smooth</code>)</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+smoothAndH_test = hslider(&quot;smoothAndH:input&quot;, 0, -1, 1, 0.01)
+  : si.smoothAndH(button(&quot;smoothAndH:hold&quot;), 0.999);
+</code></pre>
 <hr />
 <h3 id="sibsmooth"><code>(si.)bsmooth</code></h3>
 <p>Block smooth linear interpolation during a block of samples (given by the <code>ma.BS</code> value).</p>
 <h4 id="usage_7">Usage</h4>
 <pre><code>hslider(...) : bsmooth : _
+</code></pre>
+<h4 id="test_7">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+bsmooth_test = hslider(&quot;bsmooth:input&quot;, 0, -1, 1, 0.01) : si.bsmooth;
 </code></pre>
 <hr />
 <h3 id="sidot"><code>(si.)dot</code></h3>
@@ -455,6 +509,14 @@ smoothed parameter to change when a note-off event is sent.</p>
 <ul>
 <li><code>N</code>: size of the vectors (int, must be known at compile time)</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+dot_test = (
+    os.osc(100), os.osc(200), os.osc(300),
+    os.osc(400), os.osc(500), os.osc(600)
+) : si.dot(3);
+</code></pre>
 <hr />
 <h3 id="sismooth"><code>(si.)smooth</code></h3>
 <p>Exponential smoothing by a unity-dc-gain one-pole lowpass.
@@ -475,6 +537,10 @@ s&gt;1 is unstable, and s=1 yields the zero signal for all inputs.
 The exponential time-constant is approximately 1/(1-s) samples, when s is close to
 (but less than) 1.</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+smooth_test = hslider(&quot;smooth:input&quot;, 0, -1, 1, 0.01) : si.smooth(0.9);
+</code></pre>
 <h4 id="references_2">References:</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html">https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html</a></li>
@@ -491,6 +557,10 @@ The exponential time-constant is approximately 1/(1-s) samples, when s is close 
 <li><code>time</code>: seconds to reach target</li>
 <li><code>q</code>: curve shape (between 0..1, 0 is Exponential, 1 is Linear)</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+smoothq_test = hslider(&quot;smoothq:input&quot;, 0, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+</code></pre>
 <hr />
 <h3 id="sicbus"><code>(si.)cbus</code></h3>
 <p>N parallel cables for complex signals.
@@ -504,6 +574,14 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <li><code>N</code>: is an integer known at compile time that indicates the number of parallel cables.</li>
 <li>each complex number is represented by two real signals as (real,imag)</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+cbus_test = (
+    os.osc(100), os.osc(150),
+    os.osc(200), os.osc(250)
+) : si.cbus(2);
+</code></pre>
 <hr />
 <h3 id="sicmul"><code>(si.)cmul</code></h3>
 <p>Multiply two complex signals pointwise.
@@ -517,6 +595,14 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <li><code>(r1,i1)</code> = real and imaginary parts of signal 1</li>
 <li><code>(r2,i2)</code> = real and imaginary parts of signal 2</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+cmul_test = si.cmul(
+    os.osc(110), os.osc(220),
+   os.osc(330), os.osc(440)
+);
+</code></pre>
 <hr />
 <h3 id="sicconj"><code>(si.)cconj</code></h3>
 <p>Complex conjugation of a (complex) signal.
@@ -530,6 +616,11 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <li><code>(r1,i1)</code> = real and imaginary parts of the input signal</li>
 <li><code>(r1,-i1)</code> = real and imaginary parts of the output signal</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+cconj_test = (os.osc(210), os.osc(310)) : si.cconj;
+</code></pre>
 <hr />
 <h3 id="sionepoleswitching"><code>(si.)onePoleSwitching</code></h3>
 <p>One pole filter with independent attack and release times.</p>
@@ -541,6 +632,11 @@ cbus(4) : (r0,i0), (r1,i1), (r2,i2), (r3,i3)
 <li><code>att</code>: the attack tau time constant in second</li>
 <li><code>rel</code>: the release tau time constant in second</li>
 </ul>
+<h4 id="test_14">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+onePoleSwitching_test = hslider(&quot;onePoleSwitching:input&quot;, 0, -1, 1, 0.01)
+  : si.onePoleSwitching(0.05, 0.2);
+</code></pre>
 <hr />
 <h3 id="sirev"><code>(si.)rev</code></h3>
 <p>Reverse the input signal by blocks of n&gt;0 samples. <code>rev(1)</code> is the indentity
@@ -552,6 +648,11 @@ function. <code>rev(n)</code> has a latency of <code>n-1</code> samples.</p>
 <ul>
 <li><code>n</code>: the block size in samples</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+rev_test = os.osc(440) : si.rev(32);
+</code></pre>
 <hr />
 <h3 id="sivecop"><code>(si.)vecOp</code></h3>
 <p>This function is a generalisation of Faust's iterators such as <code>prod</code> and
@@ -576,6 +677,14 @@ that is greater or equal to one.</p>
 <li><code>vectorsList</code>: is a list of vectors</li>
 <li><code>op</code>: is a two-input, one-output operator</li>
 </ul>
+<h4 id="test_16">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+vecOp_test = si.vecOp((v0, v1), +)
+with {
+    v0 = (hslider(&quot;vecOp:v0_0&quot;, 0.1, -1, 1, 0.01), hslider(&quot;vecOp:v0_1&quot;, 0.2, -1, 1, 0.01));
+    v1 = (hslider(&quot;vecOp:v1_0&quot;, 0.3, -1, 1, 0.01), hslider(&quot;vecOp:v1_1&quot;, 0.4, -1, 1, 0.01));
+};
+</code></pre>
 <p>For example, consider the following vectors lists:</p>
 <pre><code> v0 = (0 , 1 , 2 , 3);
  v1 = (4 , 5 , 6 , 7);
@@ -641,6 +750,11 @@ doesn't search for the variable. This can be much faster than <code>par</code> t
 <li><code>N</code>: number of repetitions, minimum 1, a constant numerical expression</li>
 <li><code>f</code>: an arbitrary expression</li>
 </ul>
+<h4 id="test_17">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+bpar_test = (os.osc(120), os.osc(240), os.osc(360)) : si.bpar(3, *(0.5));
+</code></pre>
 <p>Example:</p>
 <pre><code>// square each of 4000 inputs
 process = si.bpar(4000, (_ &lt;: _, _ : *));
@@ -656,6 +770,12 @@ process = si.bpar(4000, (_ &lt;: _, _ : *));
 <li><code>N</code>: number of repetitions, minimum 1, a constant numerical expression</li>
 <li><code>f</code>: an arbitrary expression with 1 output.</li>
 </ul>
+<h4 id="test_18">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+bsum_test = (os.osc(100), os.osc(200), os.osc(300))
+  : si.bsum(3, *(0.5));
+</code></pre>
 <p>Example:</p>
 <pre><code>// square each of 1000 inputs and add the results
 process = si.bsum(1000, (_ &lt;: _, _ : *));
@@ -671,6 +791,13 @@ process = si.bsum(1000, (_ &lt;: _, _ : *));
 <li><code>N</code>: number of repetitions, minimum 1, a constant numerical expression</li>
 <li><code>f</code>: an arbitrary expression with 1 output.</li>
 </ul>
+<h4 id="test_19">Test</h4>
+<pre><code>si = library(&quot;signals.lib&quot;);
+bprod_test = (
+    hslider(&quot;bprod:x0&quot;, 0.5, 0, 2, 0.01),
+    hslider(&quot;bprod:x1&quot;, 0.8, 0, 2, 0.01)
+) : si.bprod(2, _);
+</code></pre>
 <p>Example:</p>
 <pre><code>// Add 8000 consecutive inputs (in pairs) and multiply the results
 process = si.bprod(4000, +);

@@ -272,7 +272,8 @@
 
 <h1 id="reducemapslib">reducemaps.lib</h1>
 <p>A library providing reduce/map operations in Faust. Its official prefix is
-<code>rm</code>. The basic idea behind <em>reduce</em> operations is to combine several values
+<code>rm</code>. </p>
+<p>The basic idea behind <em>reduce</em> operations is to combine several values
 into a single one by repeatedly applying a binary operation. A typical
 example is finding the maximum of a set of values by repeatedly applying the
 binary operation <code>max</code>.</p>
@@ -308,6 +309,10 @@ whenever <code>op</code> is associative.</p>
 here to indicate that the number of incomming signals must be constant and
 known at compile time.</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>rm = library(&quot;reducemaps.lib&quot;);
+parReduce_test = (1,2,3,4) : rm.parReduce(+, 4);
+</code></pre>
 <hr />
 <h3 id="rmtopreduce"><code>(rm.)topReduce</code></h3>
 <p><code>topReduce(op,N)</code> involves combining a set of <code>N</code> parallel signals into a
@@ -330,6 +335,10 @@ outputs.</p>
 here to indicate that the number of incomming signals must be constant and
 known at compile time.</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>rm = library(&quot;reducemaps.lib&quot;);
+topReduce_test = (1,2,3,4) : rm.topReduce(+, 4);
+</code></pre>
 <hr />
 <h3 id="rmbotreduce"><code>(rm.)botReduce</code></h3>
 <p><code>botReduce(op,N)</code> combines a set of <code>N</code> parallel signals into a single one
@@ -352,6 +361,10 @@ outputs.</p>
 here to indicate that the number of incomming signals must be constant and
 known at compile time.</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>rm = library(&quot;reducemaps.lib&quot;);
+botReduce_test = (1,2,3,4) : rm.botReduce(+, 4);
+</code></pre>
 <hr />
 <h3 id="rmreduce"><code>(rm.)reduce</code></h3>
 <p>Reduce a block of <code>n</code> consecutive samples of the incomming signal using a
@@ -368,6 +381,10 @@ blocks should be of at least one sample (n&gt;0).</p>
 <li><code>op</code>: is a binary operation</li>
 <li><code>n</code>: is the number of consecutive samples in a block. </li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>rm = library(&quot;reducemaps.lib&quot;);
+reduce_test = rm.reduce(max, 4, hslider(&quot;reduce:input&quot;, 0, -1, 1, 0.01));
+</code></pre>
 <hr />
 <h3 id="rmreducemap"><code>(rm.)reducemap</code></h3>
 <p>Like <code>reduce</code> but a <code>foo</code> function is applied to the result. From
@@ -382,7 +399,11 @@ but more efficient.</p>
 <li><code>op</code>: is a binary operation</li>
 <li><code>foo</code>: is a function applied to the result of the reduction</li>
 <li><code>n</code>: is the number of consecutive samples in a block. </li>
-</ul></div>
+</ul>
+<h4 id="test_4">Test</h4>
+<pre><code>rm = library(&quot;reducemaps.lib&quot;);
+reducemap_test = rm.reducemap(+, /(4), 4, hslider(&quot;reducemap:input&quot;, 0, -1, 1, 0.01));
+</code></pre></div>
             </div>
         </div>
 

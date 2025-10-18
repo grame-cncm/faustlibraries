@@ -631,7 +631,22 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="basicslib">basics.lib</h1>
-<p>A library of basic elements. Its official prefix is <code>ba</code>.</p>
+<p>Basics library. Its official prefix is <code>ba</code>.</p>
+<p>This library provides reusable building blocks for core DSP and Faust
+programming. It typically includes low-level utilities for math, routing,
+signal conditioning, timing, control, and helper components used across
+higher-level libraries.</p>
+<p>The Basics library is organized into 8 sections:</p>
+<ul>
+<li><a href="#conversion-tools">Conversion Tools</a></li>
+<li><a href="#counters-and-timetempo-tools">Counters and Time/Tempo Tools</a></li>
+<li><a href="#array-processingpattern-matching">Array Processing/Pattern Matching</a></li>
+<li><a href="#function-tabulation">Function tabulation</a></li>
+<li><a href="#selectors-conditions">Selectors (Conditions)</a></li>
+<li><a href="#other">Other</a></li>
+<li><a href="#sliding-reduce">Sliding Reduce</a></li>
+<li><a href="#parallel-operators">Parallel Operators</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/basics.lib">https://github.com/grame-cncm/faustlibraries/blob/master/basics.lib</a></li>
@@ -648,6 +663,10 @@
 <ul>
 <li><code>n</code>: number of samples</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+samp2sec_test = ba.samp2sec(512);
+</code></pre>
 <hr />
 <h3 id="basec2samp"><code>(ba.)sec2samp</code></h3>
 <p>Converts a duration in seconds to a number of samples at the current sampling rate (see <code>ma.SR</code>).
@@ -659,6 +678,10 @@
 <ul>
 <li><code>d</code>: duration in seconds</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+sec2samp_test = ba.sec2samp(0.01);
+</code></pre>
 <hr />
 <h3 id="badb2linear"><code>(ba.)db2linear</code></h3>
 <p>dB-to-linear value converter. It can be used to convert an amplitude in dB to a linear gain ]0-N].
@@ -670,6 +693,10 @@
 <ul>
 <li><code>l</code>: amplitude in dB</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+db2linear_test = ba.db2linear(-6);
+</code></pre>
 <hr />
 <h3 id="balinear2db"><code>(ba.)linear2db</code></h3>
 <p>linea-to-dB value converter. It can be used to convert a linear gain ]0-N] to an amplitude in dB.
@@ -681,6 +708,10 @@
 <ul>
 <li><code>g</code>: a linear gain</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+linear2db_test = ba.linear2db(0.5);
+</code></pre>
 <hr />
 <h3 id="balin2loggain"><code>(ba.)lin2LogGain</code></h3>
 <p>Converts a linear gain (0-1) to a log gain (0-1).</p>
@@ -691,6 +722,10 @@
 <ul>
 <li><code>n</code>: the linear gain</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+lin2LogGain_test = ba.lin2LogGain(0.5);
+</code></pre>
 <hr />
 <h3 id="balog2lingain"><code>(ba.)log2LinGain</code></h3>
 <p>Converts a log gain (0-1) to a linear gain (0-1).</p>
@@ -701,6 +736,10 @@
 <ul>
 <li><code>n</code>: the log gain</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+log2LinGain_test = ba.log2LinGain(0.25);
+</code></pre>
 <hr />
 <h3 id="batau2pole"><code>(ba.)tau2pole</code></h3>
 <p>Returns a real pole giving exponential decay.
@@ -713,6 +752,11 @@ Note that t60 (time to decay 60 dB) is ~6.91 time constants.
 <ul>
 <li><code>tau</code>: time-constant in seconds</li>
 </ul>
+<p>tau2pole(tau) = exp(-1.0/(tau*ma.SR));</p>
+<h4 id="test_6">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+tau2pole_test = ba.tau2pole(0.01);
+</code></pre>
 <hr />
 <h3 id="bapole2tau"><code>(ba.)pole2tau</code></h3>
 <p>Returns the time-constant, in seconds, corresponding to the given real,
@@ -725,6 +769,10 @@ positive pole in (0-1).
 <ul>
 <li><code>pole</code>: the pole</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pole2tau_test = ba.pole2tau(0.9);
+</code></pre>
 <hr />
 <h3 id="bamidikey2hz"><code>(ba.)midikey2hz</code></h3>
 <p>Converts a MIDI key number to a frequency in Hz (MIDI key 69 = A440).
@@ -736,6 +784,10 @@ positive pole in (0-1).
 <ul>
 <li><code>mk</code>: the MIDI key number</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+midikey2hz_test = ba.midikey2hz(60);
+</code></pre>
 <hr />
 <h3 id="bahz2midikey"><code>(ba.)hz2midikey</code></h3>
 <p>Converts a frequency in Hz to a MIDI key number (MIDI key 69 = A440).
@@ -747,6 +799,10 @@ positive pole in (0-1).
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+hz2midikey_test = ba.hz2midikey(440);
+</code></pre>
 <hr />
 <h3 id="basemi2ratio"><code>(ba.)semi2ratio</code></h3>
 <p>Converts semitones in a frequency multiplicative ratio.
@@ -758,6 +814,10 @@ positive pole in (0-1).
 <ul>
 <li><code>semi</code>: number of semitone</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+semi2ratio_test = ba.semi2ratio(7);
+</code></pre>
 <hr />
 <h3 id="baratio2semi"><code>(ba.)ratio2semi</code></h3>
 <p>Converts a frequency multiplicative ratio in semitones.
@@ -769,6 +829,10 @@ positive pole in (0-1).
 <ul>
 <li><code>ratio</code>: frequency multiplicative ratio</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+ratio2semi_test = ba.ratio2semi(2.0);
+</code></pre>
 <hr />
 <h3 id="bacent2ratio"><code>(ba.)cent2ratio</code></h3>
 <p>Converts cents in a frequency multiplicative ratio.</p>
@@ -779,6 +843,10 @@ positive pole in (0-1).
 <ul>
 <li><code>cent</code>: number of cents</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+cent2ratio_test = ba.cent2ratio(100);
+</code></pre>
 <hr />
 <h3 id="baratio2cent"><code>(ba.)ratio2cent</code></h3>
 <p>Converts a frequency multiplicative ratio in cents.</p>
@@ -789,6 +857,10 @@ positive pole in (0-1).
 <ul>
 <li><code>ratio</code>: frequency multiplicative ratio</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+ratio2cent_test = ba.ratio2cent(1.5);
+</code></pre>
 <hr />
 <h3 id="bapianokey2hz"><code>(ba.)pianokey2hz</code></h3>
 <p>Converts a piano key number to a frequency in Hz (piano key 49 = A440).</p>
@@ -799,6 +871,10 @@ positive pole in (0-1).
 <ul>
 <li><code>pk</code>: the piano key number</li>
 </ul>
+<h4 id="test_14">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pianokey2hz_test = ba.pianokey2hz(49);
+</code></pre>
 <hr />
 <h3 id="bahz2pianokey"><code>(ba.)hz2pianokey</code></h3>
 <p>Converts a frequency in Hz to a piano key number (piano key 49 = A440).</p>
@@ -809,6 +885,10 @@ positive pole in (0-1).
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+hz2pianokey_test = ba.hz2pianokey(440);
+</code></pre>
 <h2 id="counters-and-timetempo-tools">Counters and Time/Tempo Tools</h2>
 <hr />
 <h3 id="bacounter"><code>(ba.)counter</code></h3>
@@ -821,6 +901,10 @@ at each upfront of the trigger.</p>
 <ul>
 <li><code>trig</code>: the trigger signal, each upfront will move the counter to the next integer</li>
 </ul>
+<h4 id="test_16">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+counter_test = ba.counter(button(&quot;trig&quot;));
+</code></pre>
 <hr />
 <h3 id="bacountdown"><code>(ba.)countdown</code></h3>
 <p>Starts counting down from n included to 0. While trig is 1 the output is n.
@@ -835,6 +919,10 @@ of the countdown the output value will remain at 0 until the next trig.
 <li><code>n</code>: the starting point of the countdown</li>
 <li><code>trig</code>: the trigger signal (1: start at <code>n</code>; 0: decrease until 0)</li>
 </ul>
+<h4 id="test_17">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+countdown_test = ba.countdown(8, button(&quot;trig&quot;));
+</code></pre>
 <hr />
 <h3 id="bacountup"><code>(ba.)countup</code></h3>
 <p>Starts counting up from 0 to n included. While trig is 1 the output is 0.
@@ -849,6 +937,10 @@ of the countup the output value will remain at n until the next trig.
 <li><code>n</code>: the maximum count value</li>
 <li><code>trig</code>: the trigger signal (1: start at 0; 0: increase until <code>n</code>)</li>
 </ul>
+<h4 id="test_18">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+countup_test = ba.countup(8, button(&quot;trig&quot;));
+</code></pre>
 <hr />
 <h3 id="basweep"><code>(ba.)sweep</code></h3>
 <p>Counts from 0 to <code>period-1</code> repeatedly, generating a
@@ -858,12 +950,20 @@ Outputs zero while <code>run</code> is 0.</p>
 <h4 id="usage_19">Usage</h4>
 <pre><code>sweep(period,run) : _
 </code></pre>
+<h4 id="test_19">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+sweep_test = ba.sweep(64, checkbox(&quot;run&quot;));
+</code></pre>
 <hr />
 <h3 id="batime"><code>(ba.)time</code></h3>
 <p>A simple counter that produces the sequence of 0,1,2...N integer values.
 <code>time</code> is a standard Faust function.</p>
 <h4 id="usage_20">Usage</h4>
 <pre><code>time : _
+</code></pre>
+<h4 id="test_20">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+time_test = ba.time;
 </code></pre>
 <hr />
 <h3 id="baramp"><code>(ba.)ramp</code></h3>
@@ -875,6 +975,11 @@ Outputs zero while <code>run</code> is 0.</p>
 <ul>
 <li><code>n</code>: number of samples to increment/decrement the value by one</li>
 </ul>
+<h4 id="test_21">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ramp_test = os.osc(1) : ba.ramp(256);
+</code></pre>
 <hr />
 <h3 id="baline"><code>(ba.)line</code></h3>
 <p>A ramp interpolator that generates a linear transition to reach a target value:</p>
@@ -890,6 +995,11 @@ Outputs zero while <code>run</code> is 0.</p>
 <ul>
 <li><code>n</code>: number of samples to reach the new target received at its input</li>
 </ul>
+<h4 id="test_22">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+line_test = os.osc(1) : ba.line(256);
+</code></pre>
 <hr />
 <h3 id="batempo"><code>(ba.)tempo</code></h3>
 <p>Converts a tempo in BPM into a number of samples.</p>
@@ -900,6 +1010,10 @@ Outputs zero while <code>run</code> is 0.</p>
 <ul>
 <li><code>t</code>: tempo in BPM</li>
 </ul>
+<h4 id="test_23">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+tempo_test = ba.tempo(120);
+</code></pre>
 <hr />
 <h3 id="baperiod"><code>(ba.)period</code></h3>
 <p>Basic sawtooth wave of period <code>p</code>.</p>
@@ -910,6 +1024,11 @@ Outputs zero while <code>run</code> is 0.</p>
 <ul>
 <li><code>p</code>: period as a number of samples</li>
 </ul>
+<p>NOTE: may be this should go in oscillators.lib</p>
+<h4 id="test_24">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+period_test = ba.period(64);
+</code></pre>
 <hr />
 <h3 id="baspulse"><code>(ba.)spulse</code></h3>
 <p>Produces a single pulse of n samples when trig goes from 0 to 1.</p>
@@ -921,6 +1040,10 @@ Outputs zero while <code>run</code> is 0.</p>
 <li><code>n</code>: pulse length as a number of samples</li>
 <li><code>trig</code>: the trigger signal (1: start the pulse)</li>
 </ul>
+<h4 id="test_25">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+spulse_test = ba.spulse(32, button(&quot;trig&quot;));
+</code></pre>
 <hr />
 <h3 id="bapulse"><code>(ba.)pulse</code></h3>
 <p>Pulses (like 10000) generated at period <code>p</code>.</p>
@@ -931,6 +1054,11 @@ Outputs zero while <code>run</code> is 0.</p>
 <ul>
 <li><code>p</code>: period as a number of samples</li>
 </ul>
+<p>NOTE: may be this should go in oscillators.lib</p>
+<h4 id="test_26">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pulse_test = ba.pulse(64);
+</code></pre>
 <hr />
 <h3 id="bapulsen"><code>(ba.)pulsen</code></h3>
 <p>Pulses (like 11110000) of length <code>n</code> generated at period <code>p</code>.</p>
@@ -942,6 +1070,11 @@ Outputs zero while <code>run</code> is 0.</p>
 <li><code>n</code>: pulse length as a number of samples</li>
 <li><code>p</code>: period as a number of samples</li>
 </ul>
+<p>NOTE: may be this should go in oscillators.lib</p>
+<h4 id="test_27">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pulsen_test = ba.pulsen(8, 64);
+</code></pre>
 <hr />
 <h3 id="bacycle"><code>(ba.)cycle</code></h3>
 <p>Split nonzero input values into <code>n</code> cycles.</p>
@@ -952,6 +1085,10 @@ Outputs zero while <code>run</code> is 0.</p>
 <ul>
 <li><code>n</code>: the number of cycles/output signals</li>
 </ul>
+<h4 id="test_28">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+cycle_test = button(&quot;gate&quot;) : ba.cycle(3);
+</code></pre>
 <hr />
 <h3 id="babeat"><code>(ba.)beat</code></h3>
 <p>Pulses at tempo <code>t</code> in BPM.
@@ -963,6 +1100,10 @@ Outputs zero while <code>run</code> is 0.</p>
 <ul>
 <li><code>t</code>: tempo in BPM</li>
 </ul>
+<h4 id="test_29">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+beat_test = ba.beat(120);
+</code></pre>
 <hr />
 <h3 id="bapulse_countup"><code>(ba.)pulse_countup</code></h3>
 <p>Starts counting up pulses. While trig is 1 the output is
@@ -974,6 +1115,10 @@ counting up, while trig is 0 the counter is reset to 0.</p>
 <ul>
 <li><code>trig</code>: the trigger signal (1: start at next pulse; 0: reset to 0)</li>
 </ul>
+<h4 id="test_30">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pulse_countup_test = ba.pulse_countup(button(&quot;run&quot;));
+</code></pre>
 <hr />
 <h3 id="bapulse_countdown"><code>(ba.)pulse_countdown</code></h3>
 <p>Starts counting down pulses. While trig is 1 the output is
@@ -985,6 +1130,10 @@ counting down, while trig is 0 the counter is reset to 0.</p>
 <ul>
 <li><code>trig</code>: the trigger signal (1: start at next pulse; 0: reset to 0)</li>
 </ul>
+<h4 id="test_31">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pulse_countdown_test = ba.pulse_countdown(button(&quot;run&quot;));
+</code></pre>
 <hr />
 <h3 id="bapulse_countup_loop"><code>(ba.)pulse_countup_loop</code></h3>
 <p>Starts counting up pulses from 0 to n included. While trig is 1 the output is
@@ -998,6 +1147,10 @@ of the countup (n) the output value will be reset to 0.</p>
 <li><code>n</code>: the highest number of the countup (included) before reset to 0</li>
 <li><code>trig</code>: the trigger signal (1: start at next pulse; 0: reset to 0)</li>
 </ul>
+<h4 id="test_32">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pulse_countup_loop_test = ba.pulse_countup_loop(4, button(&quot;run&quot;));
+</code></pre>
 <hr />
 <h3 id="bapulse_countdown_loop"><code>(ba.)pulse_countdown_loop</code></h3>
 <p>Starts counting down pulses from 0 to n included. While trig is 1 the output
@@ -1011,6 +1164,10 @@ of the countdown (n) the output value will be reset to 0.</p>
 <li><code>n</code>: the highest number of the countup (included) before reset to 0</li>
 <li><code>trig</code>: the trigger signal (1: start at next pulse; 0: reset to 0)</li>
 </ul>
+<h4 id="test_33">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pulse_countdown_loop_test = ba.pulse_countdown_loop(4, button(&quot;run&quot;));
+</code></pre>
 <hr />
 <h3 id="baresetctr"><code>(ba.)resetCtr</code></h3>
 <p>Function that lets through the mth impulse out of
@@ -1023,6 +1180,10 @@ each consecutive group of <code>n</code> impulses.</p>
 <li><code>n</code>: the total number of impulses being split</li>
 <li><code>m</code>: index of impulse to allow to be output</li>
 </ul>
+<h4 id="test_34">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+resetCtr_test = ba.pulse(16) : ba.resetCtr(4, 2);
+</code></pre>
 <h2 id="array-processingpattern-matching">Array Processing/Pattern Matching</h2>
 <hr />
 <h3 id="bacount"><code>(ba.)count</code></h3>
@@ -1036,6 +1197,10 @@ count((10,20,30,40)) -&gt; 4
 <ul>
 <li><code>l</code>: list of elements</li>
 </ul>
+<h4 id="test_35">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+count_test = ba.count((10,20,30,40));
+</code></pre>
 <hr />
 <h3 id="batake"><code>(ba.)take</code></h3>
 <p>Take an element from a list.
@@ -1049,6 +1214,10 @@ take(3,(10,20,30,40)) -&gt; 30
 <li><code>P</code>: position (int, known at compile time, P &gt; 0)</li>
 <li><code>l</code>: list of elements</li>
 </ul>
+<h4 id="test_36">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+take_test = ba.take(3, (10,20,30,40));
+</code></pre>
 <hr />
 <h3 id="bapick"><code>(ba.)pick</code></h3>
 <p>Pick the nth element from a list.
@@ -1070,6 +1239,10 @@ Similar to <code>ba.take(n+1,l)</code> but faster and more powerful.</p>
 <p>while <code>ba.take(2, si.bus(3))</code> acts as <code>_</code>.</p>
 <p>Unlike <code>take()</code>, <code>pick()</code> always flattens the list, so
 <code>pick((10,(20,30),40), 1)</code> outputs <code>20</code>, not <code>20,30</code>.</p>
+<h4 id="test_37">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pick_test = ba.pick((10,20,30,40), 2);
+</code></pre>
 <hr />
 <h3 id="bapickn"><code>(ba.)pickN</code></h3>
 <p>Select the inputs listed in <code>O</code> among <code>N</code> at compile time.</p>
@@ -1090,6 +1263,10 @@ Similar to <code>ba.take(n+1,l)</code> but faster and more powerful.</p>
 </code></pre>
 <pre><code>process = pickN(2, (1,0,0,1)) // same as `process(x,y) = y,x,x,y`
 </code></pre>
+<h4 id="test_38">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+pickN_test = (1,2,3,4) : ba.pickN(4, (0,2));
+</code></pre>
 <hr />
 <h3 id="basubseq"><code>(ba.)subseq</code></h3>
 <p>Extract a part of a list.</p>
@@ -1107,6 +1284,10 @@ subseq((10,20,30,40,50,60), 4, 1) -&gt; 50
 <h4 id="note">Note:</h4>
 <p>Faust doesn't have proper lists. Lists are simulated with parallel
 compositions and there is no empty list.</p>
+<h4 id="test_39">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+subseq_test = ba.subseq((10,20,30,40,50), 1, 3);
+</code></pre>
 <h2 id="function-tabulation">Function tabulation</h2>
 <p>The purpose of function tabulation is to speed up the computation of heavy functions over an interval, 
 so that the computation at runtime can be faster than directly using the function. 
@@ -1158,6 +1339,10 @@ In other words, the uniformly tabulated function can be evaluated using interpol
 <pre><code>midikey2hz(mk) = ba.tabulate(1, ba.midikey2hz, 512, 0, 127, mk).lin;
 process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 </code></pre>
+<h4 id="test_40">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+tabulate_test = ba.tabulate(1, ba.midikey2hz, 128, 0, 127, 60).lin;
+</code></pre>
 <hr />
 <h3 id="batabulate_chebychev"><code>(ba.)tabulate_chebychev</code></h3>
 <p>Tabulate a 1D function over the range [r0, r1] for access via Chebyshev polynomial approximation.
@@ -1181,6 +1366,10 @@ or use <code>C = 1</code>.</p>
 <h4 id="example-test-program_3">Example test program</h4>
 <pre><code>midikey2hz_chebychev(mk) = ba.tabulate_chebychev(1, ba.midikey2hz, 100, 4, 0, 127, mk);
 process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
+</code></pre>
+<h4 id="test_41">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+tabulate_chebychev_test = ba.tabulate_chebychev(1, ba.midikey2hz, 32, 4, 0, 127, 60);
 </code></pre>
 <hr />
 <h3 id="batabulatend"><code>(ba.)tabulateNd</code></h3>
@@ -1221,7 +1410,7 @@ process = midikey2hz_chebychev(ba.time), ba.midikey2hz(ba.time);
 <li>Evaluates at x using cubic interpolation between the closest stored values.</li>
 </ul>
 <h4 id="example-test-program_4">Example test program</h4>
-<pre><code class="language-faust">powSin(x,y) = sin(pow(x,y)); // The function we want to tabulate
+<pre><code>powSin(x,y) = sin(pow(x,y)); // The function we want to tabulate
 powSinTable(x,y) = ba.tabulateNd(1, powSin, (sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) ).lin;
 sizeX = 512; // table size of the first parameter
 sizeY = 512; // table size of the second parameter
@@ -1323,7 +1512,7 @@ Say we wanted to read the value closest to <code>x=0.5</code> and <code>y=0</cod
 <p>For the general nD case, we need to do the same operation N times, each feeding into the next. This operation is the <code>riN</code> function. We take four parameters: the size of the dimension before it <code>prevSize</code>, the index of the previous dimension <code>prevIX</code>, the current size <code>sizeX</code> and the current id <code>idX</code>.  <code>riN</code> has 2 outputs, the size, for feeding into the next dimension's <code>prevSize</code>, and the read index feeding into the next dimension's <code>prevIX</code>.<br />
 The size is the <code>sizeX</code> times <code>prevSize</code>. The read index is the rounded <code>idX</code> times <code>prevSize</code> added to the <code>prevIX</code>. Our final <code>readIndex</code> is the read index output of the last dimension.</p>
 <p>To get the read values for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest. These offsets are best explained by looking at the code of <code>tabulate2d</code>, the hardcoded 2D version:</p>
-<pre><code class="language-faust">tabulate2d(C,function, sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) =
+<pre><code>tabulate2d(C,function, sizeX,sizeY, rx0,ry0, rx1,ry1, x,y) =
   environment {
     size = sizeX*sizeY;
     // Maximum X index to access
@@ -1435,6 +1624,11 @@ The size is the <code>sizeX</code> times <code>prevSize</code>. The read index i
   };
 </code></pre>
 <p>In the interest of brevity, we'll stop explaining here. If you have any more questions, feel free to open an issue on <a href="https://github.com/grame-cncm/faustlibraries">faustlibraries</a> and tag @magnetophon.</p>
+<h4 id="test_42">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+powSin(x,y) = sin(pow(x,y));
+tabulateNd_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 3.0,4.0)).lin;
+</code></pre>
 <h2 id="selectors-conditions">Selectors (Conditions)</h2>
 <hr />
 <h3 id="baif"><code>(ba.)if</code></h3>
@@ -1451,6 +1645,10 @@ protect against forbidden computations like division-by-zero for instance.</p>
 <li><code>then</code>: signal selected while cond is true</li>
 <li><code>else</code>: signal selected while cond is false</li>
 </ul>
+<h4 id="test_43">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+if_test = ba.if(1, 0.5, -0.5);
+</code></pre>
 <hr />
 <h3 id="baifnc"><code>(ba.)ifNc</code></h3>
 <p>if-then-elseif-then-...elsif-then-else implemented on top of <code>ba.if</code>.</p>
@@ -1476,6 +1674,10 @@ or
    process(x,y) = x&lt;y,-1, x&gt;y,+1, 0 : ifNc(2);
 </code></pre>
 <p>outputs <code>-1</code> if <code>x&lt;y</code>, <code>+1</code> if <code>x&gt;y</code>, <code>0</code> otherwise.</p>
+<h4 id="test_44">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+ifNc_test = ba.ifNc((1, 10, 0, 20, 30));
+</code></pre>
 <hr />
 <h3 id="baifncno"><code>(ba.)ifNcNo</code></h3>
 <p><code>ifNcNo(Nc,No)</code> is similar to <code>ifNc(Nc)</code> above but then/else branches have <code>No</code> outputs.</p>
@@ -1494,6 +1696,10 @@ or
 <pre><code>   process(x) = ifNcNo(2,3, x&lt;0, -1,-1,-1, x&gt;0, 1,1,1, 0,0,0);
 </code></pre>
 <p>outputs <code>-1,-1,-1</code> if <code>x&lt;0</code>, <code>1,1,1</code> if <code>x&gt;0</code>, <code>0,0,0</code> otherwise.</p>
+<h4 id="test_45">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+ifNcNo_test = (1, 10, 0, 20, 30) : ba.ifNcNo(2, 1);
+</code></pre>
 <hr />
 <h3 id="baselector"><code>(ba.)selector</code></h3>
 <p>Selects the ith input among n at compile time.</p>
@@ -1507,6 +1713,10 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <li><code>N</code>: number of inputs (int, known at compile time, N &gt; I)</li>
 </ul>
 <p>There is also <code>cselector</code> for selecting among complex input signals of the form (real,imag).</p>
+<h4 id="test_46">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+selector_test = (0.1, 0.2, 0.3, 0.4) : ba.selector(2, 4);
+</code></pre>
 <hr />
 <h3 id="baselect2stereo"><code>(ba.)select2stereo</code></h3>
 <p>Select between 2 stereo signals.</p>
@@ -1517,6 +1727,10 @@ _,_,_,_ : selector(2,4) : _ // selects the 3rd input among 4
 <ul>
 <li><code>bpc</code>: the selector switch (0/1)</li>
 </ul>
+<h4 id="test_47">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+select2stereo_test = ba.select2stereo(1, (0.1,0.2, 0.3,0.4));
+</code></pre>
 <hr />
 <h3 id="baselectn"><code>(ba.)selectn</code></h3>
 <p>Selects the ith input among N at run time.</p>
@@ -1533,6 +1747,10 @@ _,_,_,_ : selectn(4,2) : _ // selects the 3rd input among 4
 <pre><code>N = 64;
 process = par(n, N, (par(i,N,i) : selectn(N,n)));
 </code></pre>
+<h4 id="test_48">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+selectn_test = (1,2,3,4) : ba.selectn(4, 2);
+</code></pre>
 <hr />
 <h3 id="baselectbus"><code>(ba.)selectbus</code></h3>
 <p>Select a bus among <code>NUM_BUSES</code> buses, where each bus has <code>BUS_SIZE</code> outputs.
@@ -1547,6 +1765,10 @@ signals of the second bus, and so on.</p>
 <li><code>NUM_BUSES</code>: number of buses (int, known at compile time).</li>
 <li><code>id</code>: index of the bus to select (int, <code>0&lt;=id&lt;NUM_BUSES</code>)</li>
 </ul>
+<h4 id="test_49">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+selectbus_test = (1,2,3,4) : ba.selectbus(2, 2, 1);
+</code></pre>
 <hr />
 <h3 id="baselectxbus"><code>(ba.)selectxbus</code></h3>
 <p>Like <code>ba.selectbus</code>, but with a cross-fade when selecting the bus using the same 
@@ -1561,6 +1783,10 @@ technique than <code>ba.selectmulti</code>.</p>
 <li><code>fade</code>: number of samples for the crossfade.</li>
 <li><code>id</code>: index of the bus to select (int, <code>0&lt;=id&lt;NUM_BUSES</code>)</li>
 </ul>
+<h4 id="test_50">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+selectxbus_test = (1,2,3,4) : ba.selectxbus(2, 2, 16, checkbox(&quot;bus&quot;));
+</code></pre>
 <hr />
 <h3 id="baselectmulti"><code>(ba.)selectmulti</code></h3>
 <p>Selects the ith circuit among N at run time (all should have the same number of inputs and outputs)
@@ -1578,6 +1804,14 @@ with a crossfade.</p>
 <pre><code>process = selectmulti(ma.SR/10, ((3,9),(2,8),(5,7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;choice&quot;, 0, 0, 2, 1));
 </code></pre>
+<h4 id="test_51">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+effects = ((_*0.5,_*0.5),(_*0.25,_*0.25));
+choice = int(checkbox(&quot;choice&quot;));
+selectmulti_test = (os.osc(440), os.osc(660)) : ba.selectmulti(ma.SR/100, effects, choice);
+</code></pre>
 <hr />
 <h3 id="baselectoutn"><code>(ba.)selectoutn</code></h3>
 <p>Route input to the output among N at run time.</p>
@@ -1593,6 +1827,10 @@ process = selectmulti(ma.SR/10, ((_*3,_*9),(_*2,_*8),(_*5,_*7)), nentry(&quot;ch
 <pre><code>process = 1 : selectoutn(3, sel) : par(i, 3, vbargraph(&quot;v.bargraph %i&quot;, 0, 1));
 sel = hslider(&quot;volume&quot;, 0, 0, 2, 1) : int;
 </code></pre>
+<h4 id="test_52">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+selectoutn_test = 1 : ba.selectoutn(3, 1);
+</code></pre>
 <h2 id="other">Other</h2>
 <hr />
 <h3 id="balatch"><code>(ba.)latch</code></h3>
@@ -1606,6 +1844,11 @@ and holds the last captured value at all other times.</p>
 <ul>
 <li><code>trig</code>: trigger signal. A rising edge (≤0 → &gt;0) samples the input.</li>
 </ul>
+<h4 id="test_53">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+latch_test = os.osc(2) : ba.latch(button(&quot;hold&quot;));
+</code></pre>
 <hr />
 <h3 id="basandh"><code>(ba.)sAndH</code></h3>
 <p>Sample And Hold: "records" the input when trig is 1, outputs a frozen value when trig is 0.
@@ -1617,6 +1860,11 @@ and holds the last captured value at all other times.</p>
 <ul>
 <li><code>trig</code>: hold trigger (0 for hold, 1 for bypass)</li>
 </ul>
+<h4 id="test_54">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sAndH_test = os.osc(2) : ba.sAndH(button(&quot;hold&quot;));
+</code></pre>
 <hr />
 <h3 id="batandh"><code>(ba.)tAndH</code></h3>
 <p>Test And Hold: "records" the input when pred(input) is true, outputs a frozen value otherwise.</p>
@@ -1627,6 +1875,12 @@ and holds the last captured value at all other times.</p>
 <ul>
 <li><code>pred</code>: predicate to test the input</li>
 </ul>
+<h4 id="test_55">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+isPositive(x) = x &gt; 0.0;
+tAndH_test = os.osc(2) : ba.tAndH(isPositive);
+</code></pre>
 <hr />
 <h3 id="badownsample"><code>(ba.)downSample</code></h3>
 <p>Down sample a signal. WARNING: this function doesn't change the
@@ -1639,6 +1893,11 @@ rate of a signal, it just holds samples...
 <ul>
 <li><code>freq</code>: new rate in Hz</li>
 </ul>
+<h4 id="test_56">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+downSample_test = os.osc(440) : ba.downSample(11025);
+</code></pre>
 <hr />
 <h3 id="badownsamplecv"><code>(ba.)downSampleCV</code></h3>
 <p>A version of <code>ba.downSample</code> where the frequency parameter has
@@ -1652,6 +1911,11 @@ signal, it just holds samples...</p>
 <ul>
 <li><code>amount</code>: The amount of down-sampling to perform [0..1]</li>
 </ul>
+<h4 id="test_57">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+downSampleCV_test = os.osc(440) : ba.downSampleCV(0.5);
+</code></pre>
 <hr />
 <h3 id="bapeakhold"><code>(ba.)peakhold</code></h3>
 <p>Outputs current max value above zero.</p>
@@ -1662,6 +1926,11 @@ signal, it just holds samples...</p>
 <p><code>mode</code> means:</p>
 <p>0 - Pass through. A single sample 0 trigger will work as a reset.</p>
 <p>1 - Track and hold max value.</p>
+<h4 id="test_58">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peakhold_test = os.osc(440) : ba.peakhold(1);
+</code></pre>
 <hr />
 <h3 id="bapeakholder"><code>(ba.)peakholder</code></h3>
 <p>While peak-holder functions are scarcely discussed in the literature
@@ -1679,11 +1948,20 @@ detected, the absolute value of the current input becomes the new peak.</p>
 <ul>
 <li><code>holdTime</code>: hold time in samples</li>
 </ul>
+<h4 id="test_59">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peakholder_test = os.osc(440) : ba.peakholder(ba.sec2samp(0.1));
+</code></pre>
 <hr />
 <h3 id="bakr2ar"><code>(ba.)kr2ar</code></h3>
 <p>Force a control rate signal to be used as an audio rate signal.</p>
 <h4 id="usage_60">Usage</h4>
 <pre><code>hslider(&quot;freq&quot;, 200, 200, 2000, 0.1) : kr2ar;
+</code></pre>
+<h4 id="test_60">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+kr2ar_test = button(&quot;gate&quot;) : ba.kr2ar;
 </code></pre>
 <hr />
 <h3 id="baimpulsify"><code>(ba.)impulsify</code></h3>
@@ -1693,6 +1971,11 @@ detected, the absolute value of the current input becomes the new peak.</p>
 function.</p>
 <h4 id="usage_61">Usage</h4>
 <pre><code>button(&quot;gate&quot;) : impulsify;
+</code></pre>
+<h4 id="test_61">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+impulsify_test = os.osc(440) : ba.impulsify;
 </code></pre>
 <hr />
 <h3 id="baautomat"><code>(ba.)automat</code></h3>
@@ -1706,6 +1989,11 @@ function.</p>
 <li><code>size</code>: number of items in the loop</li>
 <li><code>init</code>: init value in the loop</li>
 </ul>
+<h4 id="test_62">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+autoControl = hslider(&quot;autoControl&quot;, 0.2, 0, 1, 0.01);
+automat_test = autoControl : ba.automat(120, 4, 0.0);
+</code></pre>
 <hr />
 <h3 id="babpf"><code>(ba.)bpf</code></h3>
 <p>bpf is an environment (a group of related definitions) that can be used to
@@ -1770,6 +2058,10 @@ process = listInterp((800,400,350,450,325),index);
 <li><code>index</code>: the index (float) to interpolate between the different values.
 The range of <code>index</code> depends on the size of the list.</li>
 </ul>
+<h4 id="test_63">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+listInterp_test = ba.listInterp((800,400,350,450,325), 1.5);
+</code></pre>
 <hr />
 <h3 id="babypass1"><code>(ba.)bypass1</code></h3>
 <p>Takes a mono input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>.
@@ -1783,6 +2075,11 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 <li><code>bpc</code>: bypass switch (0/1)</li>
 <li><code>e</code>: a mono effect</li>
 </ul>
+<h4 id="test_64">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+bypass1_test = os.osc(440) : ba.bypass1(button(&quot;bypass&quot;), *(0.5));
+</code></pre>
 <hr />
 <h3 id="babypass2"><code>(ba.)bypass2</code></h3>
 <p>Takes a stereo input signal, route it to <code>e</code> and bypass it if <code>bpc = 1</code>.
@@ -1796,6 +2093,11 @@ When bypassed, <code>e</code> is feed with zeros so that its state is cleanup up
 <li><code>bpc</code>: bypass switch (0/1)</li>
 <li><code>e</code>: a stereo effect</li>
 </ul>
+<h4 id="test_65">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+bypass2_test = (os.osc(440), os.osc(660)) : ba.bypass2(button(&quot;bypass&quot;), par(i,2, *(0.5)));
+</code></pre>
 <hr />
 <h3 id="babypass1to2"><code>(ba.)bypass1to2</code></h3>
 <p>Bypass switch for effect <code>e</code> having mono input signal and stereo output.
@@ -1810,6 +2112,12 @@ so that its state is cleanup up.
 <li><code>bpc</code>: bypass switch (0/1)</li>
 <li><code>e</code>: a mono-to-stereo effect</li>
 </ul>
+<h4 id="test_66">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+monoToStereo(x) = (x*0.5, x*0.25);
+bypass1to2_test = os.osc(440) : ba.bypass1to2(button(&quot;bypass&quot;), monoToStereo);
+</code></pre>
 <hr />
 <h3 id="babypass_fade"><code>(ba.)bypass_fade</code></h3>
 <p>Bypass an arbitrary (N x N) circuit with 'n' samples crossfade.
@@ -1831,6 +2139,11 @@ _,_ : bypass_fade(n,b,e) : _,_
 <pre><code>process = bypass_fade(ma.SR/10, checkbox(&quot;bypass echo&quot;), echo);
 process = bypass_fade(ma.SR/10, checkbox(&quot;bypass reverb&quot;), freeverb);
 </code></pre>
+<h4 id="test_67">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+bypass_fade_test = (os.osc(440), os.osc(660)) : ba.bypass_fade(128, button(&quot;bypass&quot;), par(i,2, *(0.5)));
+</code></pre>
 <hr />
 <h3 id="batoggle"><code>(ba.)toggle</code></h3>
 <p>Triggered by the change of 0 to 1, it toggles the output value
@@ -1842,6 +2155,10 @@ between 0 and 1.</p>
 <pre><code>button(&quot;toggle&quot;) : toggle : vbargraph(&quot;output&quot;, 0, 1)
 (an.amp_follower(0.1) &gt; 0.01) : toggle : vbargraph(&quot;output&quot;, 0, 1) // takes audio input
 </code></pre>
+<h4 id="test_68">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+toggle_test = ba.toggle(button(&quot;trig&quot;));
+</code></pre>
 <hr />
 <h3 id="baon_and_off"><code>(ba.)on_and_off</code></h3>
 <p>The first channel set the output to 1, the second channel to 0.</p>
@@ -1850,6 +2167,10 @@ between 0 and 1.</p>
 </code></pre>
 <h4 id="example-test-program_12">Example test program</h4>
 <pre><code>button(&quot;on&quot;), button(&quot;off&quot;) : on_and_off : vbargraph(&quot;output&quot;, 0, 1)
+</code></pre>
+<h4 id="test_69">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+on_and_off_test = button(&quot;on&quot;), button(&quot;off&quot;) : ba.on_and_off;
 </code></pre>
 <hr />
 <h3 id="babitcrusher"><code>(ba.)bitcrusher</code></h3>
@@ -1861,6 +2182,11 @@ between 0 and 1.</p>
 <ul>
 <li><code>nbits</code>: the number of bits of the wanted resolution</li>
 </ul>
+<h4 id="test_70">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+bitcrusher_test = os.osc(440) : ba.bitcrusher(8);
+</code></pre>
 <hr />
 <h3 id="bamulaw_bitcrusher"><code>(ba.)mulaw_bitcrusher</code></h3>
 <p>Produce distortion by reducing the signal resolution using μ-law compression.</p>
@@ -1897,6 +2223,11 @@ compared to linear bitcrushing, making it suitable for creative sound design.</p
 </code></pre>
 <p>In this example, a sine wave at 440 Hz is passed through the μ-law bitcrusher, with a compression
 parameter <code>mu</code> of 255 and 8-bit quantization. This creates a distorted, "lo-fi" effect.</p>
+<h4 id="test_71">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+mulaw_bitcrusher_test = os.osc(440) : ba.mulaw_bitcrusher(2.0, 8);
+</code></pre>
 <h4 id="references_1">References</h4>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Μ-law_algorithm">https://en.wikipedia.org/wiki/Μ-law_algorithm</a></li>
@@ -2050,6 +2381,12 @@ output is constant for the duration of a block.</p>
 <code>+(x,0)</code> equals <code>x</code> and <code>min(x,ma.MAX)</code> equals <code>x</code>. So if we want to
 calculate the sum, we need to give 0 as <code>disabledVal</code>, and if we want the
 minimum, we need to give <code>ma.MAX</code> as <code>disabledVal</code>.</p>
+<h4 id="test_72">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+slidingReduce_test = os.osc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
+</code></pre>
 <hr />
 <h3 id="baslidingsum"><code>(ba.)slidingSum</code></h3>
 <p>The sliding sum of the last n input samples.</p>
@@ -2062,6 +2399,11 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <ul>
 <li><code>n</code>: the number of values to process</li>
 </ul>
+<h4 id="test_73">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+slidingSum_test = os.osc(440) : ba.slidingSum(64);
+</code></pre>
 <hr />
 <h3 id="baslidingsump"><code>(ba.)slidingSump</code></h3>
 <p>The sliding sum of the last n input samples.</p>
@@ -2074,6 +2416,11 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <li><code>n</code>: the number of values to process</li>
 <li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
+<h4 id="test_74">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+slidingSump_test = os.osc(440) : ba.slidingSump(64, 128);
+</code></pre>
 <hr />
 <h3 id="baslidingmax"><code>(ba.)slidingMax</code></h3>
 <p>The sliding maximum of the last n input samples.</p>
@@ -2085,6 +2432,12 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <li><code>n</code>: the number of values to process</li>
 <li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
+<h4 id="test_75">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+slidingMax_test = os.osc(440) : ba.slidingMax(64, 128);
+</code></pre>
 <hr />
 <h3 id="baslidingmin"><code>(ba.)slidingMin</code></h3>
 <p>The sliding minimum of the last n input samples.</p>
@@ -2096,6 +2449,12 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <li><code>n</code>: the number of values to process</li>
 <li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
+<h4 id="test_76">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+slidingMin_test = os.osc(440) : ba.slidingMin(64, 128);
+</code></pre>
 <hr />
 <h3 id="baslidingmean"><code>(ba.)slidingMean</code></h3>
 <p>The sliding mean of the last n input samples.</p>
@@ -2108,6 +2467,11 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <ul>
 <li><code>n</code>: the number of values to process</li>
 </ul>
+<h4 id="test_77">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+slidingMean_test = os.osc(440) : ba.slidingMean(64);
+</code></pre>
 <hr />
 <h3 id="baslidingmeanp"><code>(ba.)slidingMeanp</code></h3>
 <p>The sliding mean of the last n input samples.</p>
@@ -2120,6 +2484,11 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <li><code>n</code>: the number of values to process</li>
 <li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
+<h4 id="test_78">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+slidingMeanp_test = os.osc(440) : ba.slidingMeanp(64, 128);
+</code></pre>
 <hr />
 <h3 id="baslidingrms"><code>(ba.)slidingRMS</code></h3>
 <p>The root mean square of the last n input samples.</p>
@@ -2132,6 +2501,11 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <ul>
 <li><code>n</code>: the number of values to process</li>
 </ul>
+<h4 id="test_79">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+slidingRMS_test = os.osc(440) : ba.slidingRMS(64);
+</code></pre>
 <hr />
 <h3 id="baslidingrmsp"><code>(ba.)slidingRMSp</code></h3>
 <p>The root mean square of the last n input samples.</p>
@@ -2144,6 +2518,11 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <li><code>n</code>: the number of values to process</li>
 <li><code>maxN</code>: the maximum number of values to process (int, known at compile time, maxN &gt; 0)</li>
 </ul>
+<h4 id="test_80">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+slidingRMSp_test = os.osc(440) : ba.slidingRMSp(64, 128);
+</code></pre>
 <h2 id="parallel-operators">Parallel Operators</h2>
 <p>Provides various operations on N parallel inputs using a high order
 <code>parallelOp(op,N,x)</code> function:</p>
@@ -2164,6 +2543,10 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <li><code>N</code>: the number of parallel inputs known at compile time</li>
 <li><code>op</code>: the operator which needs to be commutative</li>
 </ul>
+<h4 id="test_81">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+parallelOp_test = (0.2, 0.5, 0.1) : ba.parallelOp(max, 3);
+</code></pre>
 <hr />
 <h3 id="baparallelmax"><code>(ba.)parallelMax</code></h3>
 <p>The maximum of N parallel inputs.</p>
@@ -2174,6 +2557,10 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <ul>
 <li><code>N</code>: the number of parallel inputs known at compile time</li>
 </ul>
+<h4 id="test_82">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+parallelMax_test = (0.2, 0.5, 0.1) : ba.parallelMax(3);
+</code></pre>
 <hr />
 <h3 id="baparallelmin"><code>(ba.)parallelMin</code></h3>
 <p>The minimum of N parallel inputs.</p>
@@ -2184,6 +2571,10 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <ul>
 <li><code>N</code>: the number of parallel inputs known at compile time</li>
 </ul>
+<h4 id="test_83">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+parallelMin_test = (0.2, 0.5, 0.1) : ba.parallelMin(3);
+</code></pre>
 <hr />
 <h3 id="baparallelmean"><code>(ba.)parallelMean</code></h3>
 <p>The mean of N parallel inputs.</p>
@@ -2194,6 +2585,10 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <ul>
 <li><code>N</code>: the number of parallel inputs known at compile time</li>
 </ul>
+<h4 id="test_84">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+parallelMean_test = (0.2, 0.5, 0.1) : ba.parallelMean(3);
+</code></pre>
 <hr />
 <h3 id="baparallelrms"><code>(ba.)parallelRMS</code></h3>
 <p>The RMS of N parallel inputs.</p>
@@ -2203,7 +2598,11 @@ If that matters in your application, use the more CPU-intensive <code>ba.sliding
 <p>Where:</p>
 <ul>
 <li><code>N</code>: the number of parallel inputs known at compile time</li>
-</ul></div>
+</ul>
+<h4 id="test_85">Test</h4>
+<pre><code>ba = library(&quot;basics.lib&quot;);
+parallelRMS_test = (0.2, 0.5, 0.1) : ba.parallelRMS(3);
+</code></pre></div>
             </div>
         </div>
 

@@ -419,8 +419,18 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="demoslib">demos.lib</h1>
-<p>This library contains a set of demo functions based on examples located in the
-<code>/examples</code> folder. Its official prefix is <code>dm</code>.</p>
+<p>Demos library. Its official prefix is <code>dm</code>.</p>
+<p>This library provides a collection of example DSP algorithms and demonstrations
+used to illustrate Faust features, syntax, and best practices. It includes simple
+oscillators, filters, effects, and synthesis examples useful for learning and testing.</p>
+<p>The Demos library is organized into 5 sections:</p>
+<ul>
+<li><a href="#analyzers">Analyzers</a></li>
+<li><a href="#filters">Filters</a></li>
+<li><a href="#effects">Effects</a></li>
+<li><a href="#reverbs">Reverbs</a></li>
+<li><a href="#generators">Generators</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/demos.lib">https://github.com/grame-cncm/faustlibraries/blob/master/demos.lib</a></li>
@@ -432,6 +442,13 @@
 <h4 id="usage">Usage</h4>
 <pre><code>_ : mth_octave_spectral_level_demo(BandsPerOctave) : _
 _ : spectral_level_demo : _ // 2/3 octave
+
+</code></pre>
+<h4 id="test">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+mth_octave_spectral_level_demo_test = no.noise : dm.mth_octave_spectral_level_demo(1.5);
+spectral_level_demo_test = no.noise : dm.spectral_level_demo;
 </code></pre>
 <h2 id="filters">Filters</h2>
 <hr />
@@ -439,6 +456,12 @@ _ : spectral_level_demo : _ // 2/3 octave
 <p>A parametric equalizer application.</p>
 <h4 id="usage_1">Usage:</h4>
 <pre><code>_ : parametric_eq_demo : _
+
+</code></pre>
+<h4 id="test_1">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+parametric_eq_demo_test = no.noise : dm.parametric_eq_demo;
 </code></pre>
 <hr />
 <h3 id="dmspectral_tilt_demo"><code>(dm.)spectral_tilt_demo</code></h3>
@@ -450,6 +473,11 @@ _ : spectral_level_demo : _ // 2/3 octave
 <ul>
 <li><code>N</code>: filter order (integer)</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+spectral_tilt_demo_test = no.noise : dm.spectral_tilt_demo(4);
+</code></pre>
 <p>All other parameters interactive</p>
 <hr />
 <h3 id="dmmth_octave_filterbank_demo-and-dmfilterbank_demo"><code>(dm.)mth_octave_filterbank_demo</code> and <code>(dm.)filterbank_demo</code></h3>
@@ -462,24 +490,48 @@ _ : filterbank_demo : _
 <ul>
 <li><code>M</code>: number of bands per octave</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+mth_octave_filterbank_demo_test = no.noise : dm.mth_octave_filterbank_demo(1);
+filterbank_demo_test = no.noise : dm.filterbank_demo;
+</code></pre>
 <h2 id="effects">Effects</h2>
 <hr />
 <h3 id="dmcubicnl_demo"><code>(dm.)cubicnl_demo</code></h3>
 <p>Distortion demo application.</p>
 <h4 id="usage_4">Usage:</h4>
 <pre><code>_ : cubicnl_demo : _
+
+</code></pre>
+<h4 id="test_4">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+cubicnl_demo_test = no.noise : dm.cubicnl_demo;
 </code></pre>
 <hr />
 <h3 id="dmgate_demo"><code>(dm.)gate_demo</code></h3>
 <p>Gate demo application.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>_,_ : gate_demo : _,_
+
+</code></pre>
+<h4 id="test_5">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+gate_demo_test = no.noise, no.noise : dm.gate_demo;
 </code></pre>
 <hr />
 <h3 id="dmcompressor_demo"><code>(dm.)compressor_demo</code></h3>
 <p>Compressor demo application.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>_,_ : compressor_demo : _,_
+
+</code></pre>
+<h4 id="test_6">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+compressor_demo_test = no.noise, no.noise : dm.compressor_demo;
 </code></pre>
 <hr />
 <h3 id="dmmoog_vcf_demo"><code>(dm.)moog_vcf_demo</code></h3>
@@ -487,11 +539,21 @@ _ : filterbank_demo : _
 <h4 id="usage_7">Usage</h4>
 <pre><code>_ : moog_vcf_demo : _
 </code></pre>
+<h4 id="test_7">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+moog_vcf_demo_test = os.osc(440) : dm.moog_vcf_demo;
+</code></pre>
 <hr />
 <h3 id="dmwah4_demo"><code>(dm.)wah4_demo</code></h3>
 <p>Wah pedal application.</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>_ : wah4_demo : _
+</code></pre>
+<h4 id="test_8">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+wah4_demo_test = os.osc(440) : dm.wah4_demo;
 </code></pre>
 <hr />
 <h3 id="dmcrybaby_demo"><code>(dm.)crybaby_demo</code></h3>
@@ -499,11 +561,21 @@ _ : filterbank_demo : _
 <h4 id="usage_9">Usage</h4>
 <pre><code>_ : crybaby_demo : _
 </code></pre>
+<h4 id="test_9">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+crybaby_demo_test = os.osc(440) : dm.crybaby_demo;
+</code></pre>
 <hr />
 <h3 id="dmflanger_demo"><code>(dm.)flanger_demo</code></h3>
 <p>Flanger effect application.</p>
 <h4 id="usage_10">Usage</h4>
 <pre><code>_,_ : flanger_demo : _,_
+</code></pre>
+<h4 id="test_10">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+flanger_demo_test = os.osc(440), os.osc(442) : dm.flanger_demo;
 </code></pre>
 <hr />
 <h3 id="dmphaser2_demo"><code>(dm.)phaser2_demo</code></h3>
@@ -511,11 +583,21 @@ _ : filterbank_demo : _
 <h4 id="usage_11">Usage</h4>
 <pre><code>_,_ : phaser2_demo : _,_
 </code></pre>
+<h4 id="test_11">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+phaser2_demo_test = os.osc(440), os.osc(442) : dm.phaser2_demo;
+</code></pre>
 <hr />
 <h3 id="dmtapestop_demo"><code>(dm.)tapeStop_demo</code></h3>
 <p>Stereo tape-stop effect.</p>
 <h4 id="usage_12">Usage</h4>
 <pre><code>_,_ : tapeStop_demo : _,_
+</code></pre>
+<h4 id="test_12">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+tapeStop_demo_test = os.osc(440), os.osc(442) : dm.tapeStop_demo;
 </code></pre>
 <h2 id="reverbs">Reverbs</h2>
 <hr />
@@ -523,6 +605,11 @@ _ : filterbank_demo : _
 <p>Freeverb demo application.</p>
 <h4 id="usage_13">Usage</h4>
 <pre><code>_,_ : freeverb_demo : _,_
+</code></pre>
+<h4 id="test_13">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+freeverb_demo_test = os.osc(440), os.osc(442) : dm.freeverb_demo;
 </code></pre>
 <hr />
 <h3 id="dmstereo_reverb_tester"><code>(dm.)stereo_reverb_tester</code></h3>
@@ -532,6 +619,11 @@ _ : filterbank_demo : _
 </code></pre>
 <p>For suppressing the <code>gui_group</code> input, pass it as <code>!</code>.
 (See <code>(dm.)fdnrev0_demo</code> for an example of its use).</p>
+<h4 id="test_14">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+stereo_reverb_tester_test = no.noise, no.noise : dm.stereo_reverb_tester(!);
+</code></pre>
 <hr />
 <h3 id="dmfdnrev0_demo"><code>(dm.)fdnrev0_demo</code></h3>
 <p>A reverb application using <code>fdnrev0</code>.</p>
@@ -548,17 +640,32 @@ _ : filterbank_demo : _
 <li><code>BBSO</code> : butterworth band-split order / order of lowpass/highpass bandsplit
    used at each crossover freq / odd positive integer</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+fdnrev0_demo_test = no.noise, no.noise : dm.fdnrev0_demo(16, 5, 3);
+</code></pre>
 <hr />
 <h3 id="dmzita_rev_fdn_demo"><code>(dm.)zita_rev_fdn_demo</code></h3>
 <p>Reverb demo application based on <code>zita_rev_fdn</code>.</p>
 <h4 id="usage_16">Usage</h4>
 <pre><code>si.bus(8) : zita_rev_fdn_demo : si.bus(8)
 </code></pre>
+<h4 id="test_16">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+zita_rev_fdn_demo_test = par(i, 8, os.osc(440 + i)) : dm.zita_rev_fdn_demo;
+</code></pre>
 <hr />
 <h3 id="dmzita_light"><code>(dm.)zita_light</code></h3>
 <p>Light version of <code>dm.zita_rev1</code> with only 2 UI elements.</p>
 <h4 id="usage_17">Usage</h4>
 <pre><code>_,_ : zita_light : _,_
+</code></pre>
+<h4 id="test_17">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+zita_light_test = os.osc(440), os.osc(442) : dm.zita_light;
 </code></pre>
 <hr />
 <h3 id="dmzita_rev1"><code>(dm.)zita_rev1</code></h3>
@@ -569,6 +676,11 @@ in the same way.</p>
 <h4 id="usage_18">Usage</h4>
 <pre><code>_,_ : zita_rev1 : _,_
 </code></pre>
+<h4 id="test_18">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+zita_rev1_test = os.osc(440), os.osc(442) : dm.zita_rev1;
+</code></pre>
 <h4 id="reference">Reference</h4>
 <ul>
 <li><a href="http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html">http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html</a></li>
@@ -578,6 +690,12 @@ in the same way.</p>
 <p>Example GUI for <code>vital_rev</code> with all parameters exposed.</p>
 <h4 id="usage_19">Usage</h4>
 <pre><code>_,_ : vital_rev_demo : _,_
+
+</code></pre>
+<h4 id="test_19">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+vital_rev_demo_test = os.osc(440), os.osc(442) : dm.vital_rev_demo;
 </code></pre>
 <hr />
 <h3 id="dmreverbtank_demo"><code>(dm.)reverbTank_demo</code></h3>
@@ -587,6 +705,11 @@ It is an unofficial version of the Spin Semiconductor® Reverb.
 Other relevant instructional material can be found in [2-4].</p>
 <h4 id="usage_20">Usage</h4>
 <pre><code>_,_ : reverbTank_demo : _,_
+</code></pre>
+<h4 id="test_20">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+reverbTank_demo_test = os.osc(440), os.osc(442) : dm.reverbTank_demo;
 </code></pre>
 <h4 id="references_1">References</h4>
 <ul>
@@ -609,6 +732,11 @@ Other relevant instructional material can be found in [2-4].</p>
 <h4 id="usage_21">Usage</h4>
 <pre><code>_,_ : kb_rom_rev1_demo : _,_
 </code></pre>
+<h4 id="test_21">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+kb_rom_rev1_demo_test = os.osc(440), os.osc(442) : dm.kb_rom_rev1_demo;
+</code></pre>
 <hr />
 <h3 id="dmdattorro_rev_demo"><code>(dm.)dattorro_rev_demo</code></h3>
 <p>Example GUI for <code>dattorro_rev</code> with all parameters exposed and additional
@@ -616,17 +744,33 @@ dry/wet and output gain control.</p>
 <h4 id="usage_22">Usage</h4>
 <pre><code>_,_ : dattorro_rev_demo : _,_
 </code></pre>
+<h4 id="test_22">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+dattorro_rev_demo_test = os.osc(440), os.osc(442) : dm.dattorro_rev_demo;
+</code></pre>
 <hr />
 <h3 id="dmjprev_demo"><code>(dm.)jprev_demo</code></h3>
 <p>Example GUI for <code>jprev</code> with all parameters exposed. </p>
 <h4 id="usage_23">Usage</h4>
 <pre><code>_,_ : jprev_demo : _,_
 </code></pre>
+<h4 id="test_23">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+jprev_demo_test = os.osc(440), os.osc(442) : dm.jprev_demo;
+</code></pre>
 <hr />
 <h3 id="dmgreyhole_demo"><code>(dm.)greyhole_demo</code></h3>
 <p>Example GUI for <code>greyhole</code> with all parameters exposed. </p>
 <h4 id="usage_24">Usage</h4>
 <pre><code>_,_ : greyhole_demo : _,_
+
+</code></pre>
+<h4 id="test_24">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+greyhole_demo_test = os.osc(440), os.osc(442) : dm.greyhole_demo;
 </code></pre>
 <h2 id="generators">Generators</h2>
 <hr />
@@ -635,11 +779,19 @@ dry/wet and output gain control.</p>
 <h4 id="usage_25">Usage</h4>
 <pre><code>sawtooth_demo : _
 </code></pre>
+<h4 id="test_25">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+sawtooth_demo_test = dm.sawtooth_demo;
+</code></pre>
 <hr />
 <h3 id="dmvirtual_analog_oscillator_demo"><code>(dm.)virtual_analog_oscillator_demo</code></h3>
 <p>Virtual analog oscillator demo application.</p>
 <h4 id="usage_26">Usage</h4>
 <pre><code>virtual_analog_oscillator_demo : _
+</code></pre>
+<h4 id="test_26">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+virtual_analog_oscillator_demo_test = dm.virtual_analog_oscillator_demo;
 </code></pre>
 <hr />
 <h3 id="dmoscrs_demo"><code>(dm.)oscrs_demo</code></h3>
@@ -647,11 +799,19 @@ dry/wet and output gain control.</p>
 <h4 id="usage_27">Usage</h4>
 <pre><code>oscrs_demo : _
 </code></pre>
+<h4 id="test_27">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+oscrs_demo_test = dm.oscrs_demo;
+</code></pre>
 <hr />
 <h3 id="dmvelvet_noise_demo"><code>(dm.)velvet_noise_demo</code></h3>
 <p>Listen to velvet_noise!</p>
 <h4 id="usage_28">Usage</h4>
 <pre><code>velvet_noise_demo : _
+</code></pre>
+<h4 id="test_28">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+velvet_noise_demo_test = dm.velvet_noise_demo;
 </code></pre>
 <hr />
 <h3 id="dmlatch_demo"><code>(dm.)latch_demo</code></h3>
@@ -662,6 +822,10 @@ echo 'process = dm.latch_demo;' &gt;&gt; latch_demo.dsp
 faust2octave latch_demo.dsp
 Octave:1&gt; plot(faustout);
 </code></pre>
+<h4 id="test_29">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+latch_demo_test = dm.latch_demo;
+</code></pre>
 <hr />
 <h3 id="dmenvelopes_demo"><code>(dm.)envelopes_demo</code></h3>
 <p>Illustrate various envelopes overlaid, including their gate * 1.1.</p>
@@ -670,6 +834,10 @@ Octave:1&gt; plot(faustout);
 echo 'process = dm.envelopes_demo;' &gt;&gt; envelopes_demo.dsp
 faust2octave envelopes_demo.dsp
 Octave:1&gt; plot(faustout);
+</code></pre>
+<h4 id="test_30">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+envelopes_demo_test = dm.envelopes_demo;
 </code></pre>
 <hr />
 <h3 id="dmfft_spectral_level_demo"><code>(dm.)fft_spectral_level_demo</code></h3>
@@ -686,6 +854,10 @@ Linux GTK:
 Linux QT:
   faust2jaqt fft_spectral_level_demo.dsp
   ./fft_spectral_level_demo
+</code></pre>
+<h4 id="test_31">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+fft_spectral_level_demo_test = dm.fft_spectral_level_demo(256);
 </code></pre>
 <hr />
 <h3 id="dmreverse_echo_demonchans"><code>(dm.)reverse_echo_demo(nChans)</code></h3>
@@ -704,6 +876,11 @@ Linux QT:
   faust2jaqt reverse_echo_demo.dsp
   ./reverse_echo_demo
 Etc.
+</code></pre>
+<h4 id="test_32">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+reverse_echo_demo_test = no.noise : dm.reverse_echo_demo(3);
 </code></pre>
 <hr />
 <h3 id="dmpospass_demo"><code>(dm.)pospass_demo</code></h3>
@@ -733,11 +910,22 @@ Linux QT:
   ./pospass_demo
 Etc.
 </code></pre>
+<h4 id="test_33">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+pospass_demo_test = os.osc(440) : dm.pospass_demo;
+</code></pre>
 <hr />
 <h3 id="dmexciter"><code>(dm.)exciter</code></h3>
 <p>Psychoacoustic harmonic exciter, with GUI.</p>
 <h4 id="usage_34">Usage</h4>
 <pre><code>_ : exciter : _
+
+</code></pre>
+<h4 id="test_34">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+exciter_test = no.noise : dm.exciter;
 </code></pre>
 <h4 id="references_2">References</h4>
 <ul>
@@ -750,12 +938,23 @@ Etc.
 as excitation.</p>
 <h4 id="usage_35">Usage</h4>
 <pre><code>_ : vocoder_demo : _
+
+</code></pre>
+<h4 id="test_35">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+vocoder_demo_test = no.noise : dm.vocoder_demo;
 </code></pre>
 <hr />
 <h3 id="dmcolored_noise_demo"><code>(dm.)colored_noise_demo</code></h3>
 <p>A coloured noise signal generator.</p>
 <h4 id="usage_36">Usage</h4>
 <pre><code>colored_noise_demo : _
+</code></pre>
+<h4 id="test_36">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+colored_noise_demo_test = dm.colored_noise_demo;
 </code></pre></div>
             </div>
         </div>

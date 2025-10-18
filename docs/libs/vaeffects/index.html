@@ -399,8 +399,10 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="vaeffectslib">vaeffects.lib</h1>
-<p>A library of virtual analog filter effects. Its official prefix is <code>ve</code>.</p>
-<p>The virtual analog filter library is organized into 6 sections:</p>
+<p>Virtual Analog Effects (VAE) library. Its official prefix is <code>ve</code>.</p>
+<p>This library provides virtual analog (VA) audio effects modeled after classic
+analog circuitry. It includes nonlinear filters and effects.</p>
+<p>The virtual analog filter library is organized into 7 sections:</p>
 <ul>
 <li><a href="#moog-filters">Moog Filters</a></li>
 <li><a href="#korg-35-filters">Korg 35 Filters</a></li>
@@ -433,6 +435,15 @@ See <code>moog_vcf_2b</code> below for a more accurate implementation.</p>
 (0 is no resonance, 1 is maximum)</li>
 <li><code>fr</code>: corner-resonance frequency in Hz (less than SR/6.3 or so)</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+moog_vcf_test = os.osc(440)
+  : ve.moog_vcf(
+      hslider(&quot;moog_vcf:res&quot;, 0.5, 0, 1, 0.01),
+      hslider(&quot;moog_vcf:freq&quot;, 1000, 50, 4000, 1)
+    );
+</code></pre>
 <h4 id="references_1">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~stilti/papers/moogvcf.pdf">https://ccrma.stanford.edu/~stilti/papers/moogvcf.pdf</a></li>
@@ -459,19 +470,26 @@ _ : moog_vcf_2bn(res,fr) : _
 (0 is min resonance, 1 is maximum)</li>
 <li><code>fr</code>: corner-resonance frequency in Hz</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+moog_vcf_2b_test = os.osc(330)
+  : ve.moog_vcf_2b(
+      hslider(&quot;moog_vcf_2b:res&quot;, 0.4, 0, 1, 0.01),
+      hslider(&quot;moog_vcf_2b:freq&quot;, 1200, 50, 6000, 1)
+    );
+moog_vcf_2bn_test = os.osc(330)
+  : ve.moog_vcf_2bn(
+      hslider(&quot;moog_vcf_2bn:res&quot;, 0.4, 0, 1, 0.01),
+      hslider(&quot;moog_vcf_2bn:freq&quot;, 1200, 50, 6000, 1)
+    );
+</code></pre>
 <hr />
 <h3 id="vemoogladder"><code>(ve.)moogLadder</code></h3>
 <p>Virtual analog model of the 4th-order Moog Ladder (without any nonlinearities), which is arguably the 
 most well-known ladder filter in analog synthesizers. Several 
 1st-order filters are cascaded in series. Feedback is then used, in part, to 
 control the cut-off frequency and the resonance.</p>
-<h4 id="references_2">References</h4>
-<p>[Zavalishin 2012] (revision 2.1.2, February 2020): </p>
-<ul>
-<li><a href="https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf">https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf</a></li>
-</ul>
-<p>This fix is based on Lorenzo Della Cioppa's correction to Pirkle's implementation; see this post: 
-https://www.kvraudio.com/forum/viewtopic.php?f=33&amp;t=571909</p>
 <h4 id="usage_2">Usage</h4>
 <pre><code>_ : moogLadder(normFreq,Q) : _
 </code></pre>
@@ -480,6 +498,22 @@ https://www.kvraudio.com/forum/viewtopic.php?f=33&amp;t=571909</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: quality factor between .707 (0 feedback coefficient) to 25 (feedback = 4, which is the self-oscillating threshold).</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+moogLadder_test = os.osc(220)
+  : ve.moogLadder(
+      hslider(&quot;moogLadder:normFreq&quot;, 0.3, 0, 1, 0.001),
+      hslider(&quot;moogLadder:Q&quot;, 4, 0.7, 20, 0.1)
+    );
+</code></pre>
+<h4 id="references_2">References</h4>
+<p>[Zavalishin 2012] (revision 2.1.2, February 2020): </p>
+<ul>
+<li><a href="https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf">https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf</a></li>
+</ul>
+<p>This fix is based on Lorenzo Della Cioppa's correction to Pirkle's implementation; see this post: 
+https://www.kvraudio.com/forum/viewtopic.php?f=33&amp;t=571909</p>
 <hr />
 <h3 id="velowpassladder4"><code>(ve.)lowpassLadder4</code></h3>
 <p>Topology-preserving transform implementation of a four-pole ladder lowpass.
@@ -487,11 +521,6 @@ This is essentially the same filter as the moogLadder above except for
 the parameters, which will be expressed in Hz, for the cutoff, and as a
 raw feedback coefficient, for the resonance. 
 Also, note that the parameter order has changed.</p>
-<h4 id="references_3">References</h4>
-<p>[Zavalishin 2012] (revision 2.1.2, February 2020): </p>
-<ul>
-<li><a href="https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf">https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf</a></li>
-</ul>
 <h4 id="usage_3">Usage</h4>
 <pre><code>_ : lowpassLadder4(k, CF) : _
 </code></pre>
@@ -500,6 +529,15 @@ Also, note that the parameter order has changed.</p>
 <li><code>k</code>: feedback coefficient between 0 and 4, which is the stability threshold.</li>
 <li><code>CF</code>: the filter's cutoff in Hz.</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+lowpassLadder4_test = os.osc(110)
+  : ve.lowpassLadder4(
+      hslider(&quot;lowpassLadder4:k&quot;, 2.0, 0, 4, 0.1),
+      hslider(&quot;lowpassLadder4:freq&quot;, 800, 50, 5000, 1)
+    );
+</code></pre>
 <p>Notes:</p>
 <p>If you want to express the feedback coefficient as the resonance peak, you can use the formula: </p>
 <pre><code> k = 4.0 - 1.0 / Q;
@@ -507,6 +545,11 @@ Also, note that the parameter order has changed.</p>
 <p>where Q, between .25 and infinity, corresponds to the peak of the filter at cutoff. 
 I.e., if you feed the filter with a sine whose frequency is the same as the cutoff, the output 
 peak corresponds exactly to that set via the Q-param.</p>
+<h4 id="references_3">References</h4>
+<p>[Zavalishin 2012] (revision 2.1.2, February 2020): </p>
+<ul>
+<li><a href="https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf">https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf</a></li>
+</ul>
 <hr />
 <h3 id="vemooghalfladder"><code>(ve.)moogHalfLadder</code></h3>
 <p>Virtual analog model of the 2nd-order Moog Half Ladder (simplified version of
@@ -515,11 +558,6 @@ Feedback is then used, in part, to control the cut-off frequency and the
 resonance.</p>
 <p>This filter was implemented in Faust by Eric Tarr during the 
 <a href="https://ccrma.stanford.edu/workshops/faust-embedded-19/">2019 Embedded DSP With Faust Workshop</a>.</p>
-<h4 id="references_4">References</h4>
-<ul>
-<li><a href="https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter">https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter</a></li>
-<li><a href="http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf">http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf</a></li>
-</ul>
 <h4 id="usage_4">Usage</h4>
 <pre><code>_ : moogHalfLadder(normFreq,Q) : _
 </code></pre>
@@ -527,6 +565,20 @@ resonance.</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
+</ul>
+<h4 id="test_4">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+moogHalfLadder_test = os.osc(220)
+  : ve.moogHalfLadder(
+      hslider(&quot;moogHalfLadder:normFreq&quot;, 0.3, 0, 1, 0.001),
+      hslider(&quot;moogHalfLadder:Q&quot;, 4, 0.7, 20, 0.1)
+    );
+</code></pre>
+<h4 id="references_4">References</h4>
+<ul>
+<li><a href="https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter">https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter</a></li>
+<li><a href="http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf">http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf</a></li>
 </ul>
 <hr />
 <h3 id="vediodeladder"><code>(ve.)diodeLadder</code></h3>
@@ -538,11 +590,6 @@ in the Faust implementation, they are simply implicitly calculated by
 tracing back to the other states (<code>s1</code>,<code>s2</code>,<code>s3</code>,<code>s4</code>) each recursive step.</p>
 <p>This filter was implemented in Faust by Eric Tarr during the 
 <a href="https://ccrma.stanford.edu/workshops/faust-embedded-19/">2019 Embedded DSP With Faust Workshop</a>.</p>
-<h4 id="references_5">References</h4>
-<ul>
-<li><a href="https://www.willpirkle.com/virtual-analog-diode-ladder-filter/">https://www.willpirkle.com/virtual-analog-diode-ladder-filter/</a></li>
-<li><a href="http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf">http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf</a></li>
-</ul>
 <h4 id="usage_5">Usage</h4>
 <pre><code>_ : diodeLadder(normFreq,Q) : _
 </code></pre>
@@ -550,6 +597,20 @@ tracing back to the other states (<code>s1</code>,<code>s2</code>,<code>s3</code
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
+</ul>
+<h4 id="test_5">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+diodeLadder_test = os.osc(220)
+  : ve.diodeLadder(
+      hslider(&quot;diodeLadder:normFreq&quot;, 0.4, 0, 1, 0.001),
+      hslider(&quot;diodeLadder:Q&quot;, 4, 0.7, 20, 0.1)
+    );
+</code></pre>
+<h4 id="references_5">References</h4>
+<ul>
+<li><a href="https://www.willpirkle.com/virtual-analog-diode-ladder-filter/">https://www.willpirkle.com/virtual-analog-diode-ladder-filter/</a></li>
+<li><a href="http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf">http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf</a></li>
 </ul>
 <h2 id="korg-35-filters">Korg 35 Filters</h2>
 <p>The following filters are virtual analog models of the Korg 35 low-pass 
@@ -575,6 +636,15 @@ MS-20 synthesizers.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+korg35LPF_test = os.osc(220)
+  : ve.korg35LPF(
+      hslider(&quot;korg35LPF:normFreq&quot;, 0.35, 0, 1, 0.001),
+      hslider(&quot;korg35LPF:Q&quot;, 3.5, 0.7, 10, 0.1)
+    );
+</code></pre>
 <hr />
 <h3 id="vekorg35hpf"><code>(ve.)korg35HPF</code></h3>
 <p>Virtual analog models of the Korg 35 high-pass filter found in the MS-10 and 
@@ -587,6 +657,15 @@ MS-20 synthesizers.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+korg35HPF_test = os.osc(330)
+  : ve.korg35HPF(
+      hslider(&quot;korg35HPF:normFreq&quot;, 0.4, 0, 1, 0.001),
+      hslider(&quot;korg35HPF:Q&quot;, 3.5, 0.7, 10, 0.1)
+    );
+</code></pre>
 <h2 id="oberheim-filters">Oberheim Filters</h2>
 <p>The following filter (4 types) is an implementation of the virtual analog 
 model described in Section 7.2 of the Will Pirkle book, "Designing Software 
@@ -607,6 +686,15 @@ the <code>(ef.)cubicnl</code> function.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+oberheim_test = os.osc(220)
+  : ve.oberheim(
+      hslider(&quot;oberheim:normFreq&quot;, 0.4, 0, 1, 0.001),
+      hslider(&quot;oberheim:Q&quot;, 1.5, 0.5, 10, 0.1)
+    );
+</code></pre>
 <hr />
 <h3 id="veoberheimbsf"><code>(ve.)oberheimBSF</code></h3>
 <p>Band-Stop Oberheim filter (see description above). 
@@ -620,6 +708,15 @@ the compiler will only generate the needed code.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+oberheimBSF_test = os.osc(220)
+  : ve.oberheimBSF(
+      hslider(&quot;oberheimBSF:normFreq&quot;, 0.4, 0, 1, 0.001),
+      hslider(&quot;oberheimBSF:Q&quot;, 1.5, 0.5, 10, 0.1)
+    );
+</code></pre>
 <hr />
 <h3 id="veoberheimbpf"><code>(ve.)oberheimBPF</code></h3>
 <p>Band-Pass Oberheim filter (see description above).
@@ -633,6 +730,15 @@ the compiler will only generate the needed code.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+oberheimBPF_test = os.osc(220)
+  : ve.oberheimBPF(
+      hslider(&quot;oberheimBPF:normFreq&quot;, 0.4, 0, 1, 0.001),
+      hslider(&quot;oberheimBPF:Q&quot;, 1.5, 0.5, 10, 0.1)
+    );
+</code></pre>
 <hr />
 <h3 id="veoberheimhpf"><code>(ve.)oberheimHPF</code></h3>
 <p>High-Pass Oberheim filter (see description above).
@@ -646,6 +752,15 @@ the compiler will only generate the needed code.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+oberheimHPF_test = os.osc(220)
+  : ve.oberheimHPF(
+      hslider(&quot;oberheimHPF:normFreq&quot;, 0.4, 0, 1, 0.001),
+      hslider(&quot;oberheimHPF:Q&quot;, 1.5, 0.5, 10, 0.1)
+    );
+</code></pre>
 <hr />
 <h3 id="veoberheimlpf"><code>(ve.)oberheimLPF</code></h3>
 <p>Low-Pass Oberheim filter (see description above). 
@@ -659,6 +774,15 @@ the compiler will only generate the needed code.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: q</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+oberheimLPF_test = os.osc(220)
+  : ve.oberheimLPF(
+      hslider(&quot;oberheimLPF:normFreq&quot;, 0.4, 0, 1, 0.001),
+      hslider(&quot;oberheimLPF:Q&quot;, 1.5, 0.5, 10, 0.1)
+    );
+</code></pre>
 <h2 id="sallen-key-filters">Sallen Key Filters</h2>
 <p>The following filters were implemented based on VA models of synthesizer 
 filters.</p>
@@ -705,6 +829,14 @@ path and a feedback path. In reality, the signals being summed are identical
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sallenKeyOnePole_test = os.osc(440)
+  : ve.sallenKeyOnePole(
+      hslider(&quot;sallenKeyOnePole:normFreq&quot;, 0.25, 0, 1, 0.001)
+    );
+</code></pre>
 <hr />
 <h3 id="vesallenkeyonepolelpf"><code>(ve.)sallenKeyOnePoleLPF</code></h3>
 <p>Sallen-Key One Pole lowpass filter (see description above).
@@ -717,6 +849,14 @@ the compiler will only generate the needed code.</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 </ul>
+<h4 id="test_14">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sallenKeyOnePoleLPF_test = os.osc(440)
+  : ve.sallenKeyOnePoleLPF(
+      hslider(&quot;sallenKeyOnePoleLPF:normFreq&quot;, 0.25, 0, 1, 0.001)
+    );
+</code></pre>
 <hr />
 <h3 id="vesallenkeyonepolehpf"><code>(ve.)sallenKeyOnePoleHPF</code></h3>
 <p>Sallen-Key One Pole Highpass filter (see description above). The dry input 
@@ -731,6 +871,14 @@ the compiler will only generate the needed code.</p>
 <ul>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sallenKeyOnePoleHPF_test = os.osc(440)
+  : ve.sallenKeyOnePoleHPF(
+      hslider(&quot;sallenKeyOnePoleHPF:normFreq&quot;, 0.25, 0, 1, 0.001)
+    );
+</code></pre>
 <hr />
 <h3 id="vesallenkey2ndorder"><code>(ve.)sallenKey2ndOrder</code></h3>
 <p>Sallen-Key generic 2nd order filter that produces the LPF, BPF and HPF outputs. </p>
@@ -754,6 +902,15 @@ beyond what is used for <code>s1</code>. </p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range <code>[ma.EPSILON, ma.MAX]</code></li>
 </ul>
+<h4 id="test_16">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sallenKey2ndOrder_test = os.osc(330)
+  : ve.sallenKey2ndOrder(
+      hslider(&quot;sallenKey2ndOrder:normFreq&quot;, 0.3, 0, 1, 0.001),
+      hslider(&quot;sallenKey2ndOrder:Q&quot;, 1.0, 0.1, 10, 0.1)
+    );
+</code></pre>
 <hr />
 <h3 id="vesallenkey2ndorderlpf"><code>(ve.)sallenKey2ndOrderLPF</code></h3>
 <p>Sallen-Key 2nd order lowpass filter (see description above). 
@@ -767,6 +924,15 @@ the compiler will only generate the needed code.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range <code>[ma.EPSILON, ma.MAX]</code></li>
 </ul>
+<h4 id="test_17">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sallenKey2ndOrderLPF_test = os.osc(330)
+  : ve.sallenKey2ndOrderLPF(
+      hslider(&quot;sallenKey2ndOrderLPF:normFreq&quot;, 0.3, 0, 1, 0.001),
+      hslider(&quot;sallenKey2ndOrderLPF:Q&quot;, 0.8, 0.1, 10, 0.1)
+    );
+</code></pre>
 <hr />
 <h3 id="vesallenkey2ndorderbpf"><code>(ve.)sallenKey2ndOrderBPF</code></h3>
 <p>Sallen-Key 2nd order bandpass filter (see description above). 
@@ -780,6 +946,15 @@ the compiler will only generate the needed code.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range <code>[ma.EPSILON, ma.MAX]</code></li>
 </ul>
+<h4 id="test_18">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sallenKey2ndOrderBPF_test = os.osc(330)
+  : ve.sallenKey2ndOrderBPF(
+      hslider(&quot;sallenKey2ndOrderBPF:normFreq&quot;, 0.3, 0, 1, 0.001),
+      hslider(&quot;sallenKey2ndOrderBPF:Q&quot;, 1.5, 0.1, 10, 0.1)
+    );
+</code></pre>
 <hr />
 <h3 id="vesallenkey2ndorderhpf"><code>(ve.)sallenKey2ndOrderHPF</code></h3>
 <p>Sallen-Key 2nd order highpass filter (see description above). 
@@ -793,6 +968,15 @@ the compiler will only generate the needed code.</p>
 <li><code>normFreq</code>: normalized frequency (0-1)</li>
 <li><code>Q</code>: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range <code>[ma.EPSILON, ma.MAX]</code></li>
 </ul>
+<h4 id="test_19">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sallenKey2ndOrderHPF_test = os.osc(330)
+  : ve.sallenKey2ndOrderHPF(
+      hslider(&quot;sallenKey2ndOrderHPF:normFreq&quot;, 0.3, 0, 1, 0.001),
+      hslider(&quot;sallenKey2ndOrderHPF:Q&quot;, 0.8, 0.1, 10, 0.1)
+    );
+</code></pre>
 <h2 id="vicaneks-matched-decramped-second-order-filters">Vicanek's Matched (Decramped) Second-Order Filters</h2>
 <p>Vicanek's Matched (Decramped) Second-Order Filters.</p>
 <p>This collection implements high-quality, double-precision second-order filters
@@ -828,10 +1012,16 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h4 id="usage_20">Usage:</h4>
 <pre><code>_ : biquad(b0, b1, b2, a1, a2) : _
 </code></pre>
-<h4 id="where">Where:</h4>
+<p>Where:</p>
 <ul>
 <li><code>b0, b1, b2, a1, a2</code> are the coefficients of the difference equation above</li>
 </ul>
+<h4 id="test_20">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+biquad_test = os.osc(440)
+  : ve.biquad(0.5, 0.3, 0.2, -0.3, 0.2);
+</code></pre>
 <hr />
 <h3 id="velowpass2matched"><code>(ve.)lowpass2Matched</code></h3>
 <p>Vicanek's decramped second-order resonant lowpass filter.</p>
@@ -839,11 +1029,20 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h4 id="usage_21">Usage:</h4>
 <pre><code>_ : lowpass2Matched(CF, Q) : _
 </code></pre>
-<h4 id="where_1">Where:</h4>
+<p>Where:</p>
 <ul>
 <li><code>CF</code>: cutoff frequency in Hz</li>
 <li><code>Q</code>: resonance linear amplitude</li>
 </ul>
+<h4 id="test_21">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+lowpass2Matched_test = os.osc(440)
+  : ve.lowpass2Matched(
+      hslider(&quot;lowpass2Matched:CF&quot;, 1000, 50, 5000, 1),
+      hslider(&quot;lowpass2Matched:Q&quot;, 0.707, 0.1, 5, 0.01)
+    );
+</code></pre>
 <hr />
 <h3 id="vehighpass2matched"><code>(ve.)highpass2Matched</code></h3>
 <p>Vicanek's decramped second-order resonant highpass filter.</p>
@@ -851,11 +1050,20 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h4 id="usage_22">Usage:</h4>
 <pre><code>_ : highpass2Matched(CF, Q) : _
 </code></pre>
-<h4 id="where_2">Where:</h4>
+<p>Where:</p>
 <ul>
 <li><code>CF</code>: cutoff frequency in Hz</li>
 <li><code>Q</code>: resonance linear amplitude</li>
 </ul>
+<h4 id="test_22">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+highpass2Matched_test = os.osc(440)
+  : ve.highpass2Matched(
+      hslider(&quot;highpass2Matched:CF&quot;, 500, 50, 5000, 1),
+      hslider(&quot;highpass2Matched:Q&quot;, 0.707, 0.1, 5, 0.01)
+    );
+</code></pre>
 <hr />
 <h3 id="vebandpass2matched"><code>(ve.)bandpass2Matched</code></h3>
 <p>Vicanek's decramped second-order resonant bandpass filter.</p>
@@ -863,11 +1071,20 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h4 id="usage_23">Usage:</h4>
 <pre><code>_ : bandpass2Matched(CF, Q) : _
 </code></pre>
-<h4 id="where_3">Where:</h4>
+<p>Where:</p>
 <ul>
 <li><code>CF</code>: cutoff frequency in Hz</li>
 <li><code>Q</code>: peak width</li>
 </ul>
+<h4 id="test_23">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+bandpass2Matched_test = os.osc(440)
+  : ve.bandpass2Matched(
+      hslider(&quot;bandpass2Matched:CF&quot;, 1200, 50, 5000, 1),
+      hslider(&quot;bandpass2Matched:Q&quot;, 2.0, 0.1, 10, 0.01)
+    );
+</code></pre>
 <hr />
 <h3 id="vepeaking2matched"><code>(ve.)peaking2Matched</code></h3>
 <p>Vicanek's decramped second-order resonant bandpass filter.</p>
@@ -875,12 +1092,22 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h4 id="usage_24">Usage:</h4>
 <pre><code>_ : peaking2Matched(G, CF, Q) : _
 </code></pre>
-<h4 id="where_4">Where:</h4>
+<p>Where:</p>
 <ul>
 <li><code>G</code>: peak linear amplitude</li>
 <li><code>CF</code>: cutoff frequency in Hz</li>
 <li><code>Q</code>: peak width</li>
 </ul>
+<h4 id="test_24">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peaking2Matched_test = os.osc(440)
+  : ve.peaking2Matched(
+      hslider(&quot;peaking2Matched:G&quot;, 1.5, 0.1, 4, 0.01),
+      hslider(&quot;peaking2Matched:CF&quot;, 1000, 50, 5000, 1),
+      hslider(&quot;peaking2Matched:Q&quot;, 2.0, 0.1, 10, 0.01)
+    );
+</code></pre>
 <hr />
 <h3 id="velowshelf2matched"><code>(ve.)lowshelf2Matched</code></h3>
 <p>Vicanek's decramped second-order Butterworth lowshelf filter.</p>
@@ -888,11 +1115,20 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h4 id="usage_25">Usage:</h4>
 <pre><code>_ : lowshelf2Matched(G, CF) : _
 </code></pre>
-<h4 id="where_5">Where:</h4>
+<p>Where:</p>
 <ul>
 <li><code>G</code>: shelf linear amplitude</li>
 <li><code>CF</code>: cutoff frequency in Hz</li>
 </ul>
+<h4 id="test_25">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+lowshelf2Matched_test = os.osc(330)
+  : ve.lowshelf2Matched(
+      hslider(&quot;lowshelf2Matched:G&quot;, 1.5, 0.5, 4, 0.01),
+      hslider(&quot;lowshelf2Matched:CF&quot;, 500, 50, 5000, 1)
+    );
+</code></pre>
 <hr />
 <h3 id="vehighshelf2matched"><code>(ve.)highshelf2Matched</code></h3>
 <p>Vicanek's decramped second-order Butterworth highshelf filter.</p>
@@ -900,11 +1136,20 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <h4 id="usage_26">Usage:</h4>
 <pre><code>_ : highshelf2Matched(G, CF) : _
 </code></pre>
-<h4 id="where_6">Where:</h4>
+<p>Where:</p>
 <ul>
 <li><code>G</code>: shelf linear amplitude</li>
 <li><code>CF</code>: cutoff frequency in Hz</li>
 </ul>
+<h4 id="test_26">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+highshelf2Matched_test = os.osc(330)
+  : ve.highshelf2Matched(
+      hslider(&quot;highshelf2Matched:G&quot;, 1.5, 0.5, 4, 0.01),
+      hslider(&quot;highshelf2Matched:CF&quot;, 1500, 50, 10000, 1)
+    );
+</code></pre>
 <h2 id="effects">Effects</h2>
 <hr />
 <h3 id="vewah4"><code>(ve.)wah4</code></h3>
@@ -917,6 +1162,14 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <ul>
 <li><code>fr</code>: resonance frequency in Hz</li>
 </ul>
+<h4 id="test_27">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+wah4_test = os.osc(220)
+  : ve.wah4(
+      hslider(&quot;wah4:freq&quot;, 800, 200, 2000, 1)
+    );
+</code></pre>
 <h4 id="reference">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/vegf.html">https://ccrma.stanford.edu/~jos/pasp/vegf.html</a></li>
@@ -932,6 +1185,14 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <ul>
 <li><code>level</code>: amount of effect desired (0 to 1).</li>
 </ul>
+<h4 id="test_28">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+autowah_test = os.osc(220)
+  : ve.autowah(
+      hslider(&quot;autowah:level&quot;, 0.7, 0, 1, 0.01)
+    );
+</code></pre>
 <hr />
 <h3 id="vecrybaby"><code>(ve.)crybaby</code></h3>
 <p>Digitized CryBaby wah pedal.
@@ -943,6 +1204,14 @@ accurate placement of the frequency response peak and preserve Q and gain behavi
 <ul>
 <li><code>wah</code>: "pedal angle" from 0 to 1</li>
 </ul>
+<h4 id="test_29">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+crybaby_test = os.osc(220)
+  : ve.crybaby(
+      hslider(&quot;crybaby:wah&quot;, 0.3, 0, 1, 0.01)
+    );
+</code></pre>
 <h4 id="reference_1">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/vegf.html">https://ccrma.stanford.edu/~jos/pasp/vegf.html</a></li>
@@ -963,7 +1232,19 @@ is analyzed using a filter bank.
 <li><code>BWRatio</code>: Coefficient to adjust the bandwidth of each band (0.1 - 2)</li>
 <li><code>source</code>: Modulation signal</li>
 <li><code>excitation</code>: Excitation/Carrier signal</li>
-</ul></div>
+</ul>
+<h4 id="test_30">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+vocoder_test = (no.noise, os.osc(220))
+  : ve.vocoder(
+      8,
+      hslider(&quot;vocoder:att&quot;, 0.01, 0.001, 0.1, 0.001),
+      hslider(&quot;vocoder:rel&quot;, 0.1, 0.01, 0.5, 0.01),
+      hslider(&quot;vocoder:BWRatio&quot;, 1.0, 0.5, 1.5, 0.01)
+    );
+</code></pre></div>
             </div>
         </div>
 

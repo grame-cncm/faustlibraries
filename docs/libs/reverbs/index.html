@@ -331,7 +331,19 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="reverbslib">reverbs.lib</h1>
-<p>A library of reverb effects. Its official prefix is <code>re</code>.</p>
+<p>Reverbs library. Its official prefix is <code>re</code>.</p>
+<p>This library provides a collection of artificial reverberation algorithms in Faust.
+It includes Schroeder, Moorer, Freeverb, and FDN-based designs. These modules can be used
+for room simulation, spatialization, and creative ambience design in both mono and multichannel contexts.</p>
+<p>The Reverbs library is organized into 6 sections:</p>
+<ul>
+<li><a href="#schroeder-reverberators">Schroeder Reverberators</a></li>
+<li><a href="#feedback-delay-network-fdn-reverberators">Feedback Delay Network (FDN) Reverberators</a></li>
+<li><a href="#freeverb">Freeverb</a></li>
+<li><a href="#dattorro-reverb">Dattorro Reverb</a></li>
+<li><a href="#jpverb-and-greyhole-reverbs">JPverb and Greyhole Reverbs</a></li>
+<li><a href="#keith-barr-allpass-loop-reverb">Keith Barr Allpass Loop Reverb</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/reverbs.lib">https://github.com/grame-cncm/faustlibraries/blob/master/reverbs.lib</a></li>
@@ -353,6 +365,11 @@ well known and often copied JCREV.</p>
 <h4 id="usage">Usage</h4>
 <pre><code>_ : jcrev : _,_,_,_
 </code></pre>
+<h4 id="test">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+jcrev_test = os.osc(440) : re.jcrev;
+</code></pre>
 <hr />
 <h3 id="resatrev"><code>(re.)satrev</code></h3>
 <p>This artificial reverberator take a mono signal and output stereo
@@ -368,6 +385,11 @@ often-heard brass canon sound examples, one of which can be found at
 * <a href="https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav">https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav</a>.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>_ : satrev : _,_
+</code></pre>
+<h4 id="test_1">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+satrev_test = os.osc(330) : re.satrev;
 </code></pre>
 <h2 id="feedback-delay-network-fdn-reverberators">Feedback Delay Network (FDN) Reverberators</h2>
 <hr />
@@ -390,6 +412,12 @@ fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) :&gt;
 <li><code>loopgainmax</code>: scalar gain between 0 and 1 used to "squelch" the reverb</li>
 <li><code>nonl</code>: nonlinearity (0 to 0.999..., 0 being linear)</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+fdnrev0_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550))
+  &lt;: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 2.0, 1.5), 0.8, 0.0);
+</code></pre>
 <h4 id="reference">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html">https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html</a></li>
@@ -411,6 +439,12 @@ damping filters.</p>
 <li><code>t60m</code>: desired decay time (t60) at midrange frequencies (sec)</li>
 <li><code>fsmax</code>: maximum sampling rate to be used (Hz)</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+zita_rev_fdn_test = par(i, 8, os.osc(110 * (i + 1)))
+  &lt;: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 48000);
+</code></pre>
 <h4 id="reference_1">Reference</h4>
 <ul>
 <li><a href="http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html">http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html</a></li>
@@ -426,6 +460,12 @@ damping filters.</p>
 <p>Where:</p>
 <p><code>rdel</code>  = delay (in ms) before reverberation begins (e.g., 0 to ~100 ms)
 (remaining args and refs as for <code>zita_rev_fdn</code> above)</p>
+<h4 id="test_4">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+zita_rev1_stereo_test = (os.osc(440), os.osc(550))
+  : re.zita_rev1_stereo(20, 200, 2000, 3.0, 2.0, 48000);
+</code></pre>
 <hr />
 <h3 id="rezita_rev1_ambi"><code>(re.)zita_rev1_ambi</code></h3>
 <p>Extend <code>zita_rev_fdn</code> to include <code>zita_rev1</code> input/output mapping in
@@ -436,6 +476,12 @@ damping filters.</p>
 <p>Where:</p>
 <p><code>rgxyz</code> = relative gain of lanes 1,4,2 to lane 0 in output (e.g., -9 to 9)
   (remaining args and references as for zita_rev1_stereo above)</p>
+<h4 id="test_5">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+zita_rev1_ambi_test = (os.osc(330), os.osc(550))
+  : re.zita_rev1_ambi(0.0, 25, 200, 2000, 3.0, 2.0, 48000);
+</code></pre>
 <hr />
 <h3 id="revital_rev"><code>(re.)vital_rev</code></h3>
 <p>A port of the reverb from the Vital synthesizer. All input parameters
@@ -459,6 +505,12 @@ The scaling of the parameters happens inside the function.</p>
 <li><code>size</code>: The size of the room</li>
 <li><code>mix</code>: A wetness value to use in a final dry/wet mixer</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+vital_rev_test = (os.osc(330), os.osc(440))
+  : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0.3, 0.2, 0.1, 0.7, 0.5, 0.4);
+</code></pre>
 <h2 id="freeverb">Freeverb</h2>
 <hr />
 <h3 id="remono_freeverb"><code>(re.)mono_freeverb</code></h3>
@@ -477,6 +529,11 @@ audio channel, and is said to be especially well tuned.</p>
 <li><code>damp</code>: damping of the lowpass comb filter (0-1)</li>
 <li><code>spread</code>: spatial spread in number of samples (for stereo)</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+mono_freeverb_test = os.osc(440) : re.mono_freeverb(0.7, 0.5, 0.3, 30);
+</code></pre>
 <h4 id="license">License</h4>
 <p>While this version is licensed LGPL (with exception) along with other GRAME
 library functions, the file freeverb.dsp in the examples directory of older
@@ -498,6 +555,12 @@ audio channel, and is said to be especially well tuned.</p>
 <li><code>damp</code>: damping of the lowpass comb filter (0-1)</li>
 <li><code>spread</code>: spatial spread in number of samples (for stereo)</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+stereo_freeverb_test = (os.osc(330), os.osc(550))
+  : re.stereo_freeverb(0.7, 0.5, 0.3, 30);
+</code></pre>
 <h2 id="dattorro-reverb">Dattorro Reverb</h2>
 <hr />
 <h3 id="redattorro_rev"><code>(re.)dattorro_rev</code></h3>
@@ -517,6 +580,12 @@ not use modulated delay lengths (excursion).</p>
 <li><code>d_diff2</code>: decay diffusion factor 2;</li>
 <li><code>damping</code>: high-frequency damping; no damping = 0.0</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+dattorro_rev_test = (os.osc(330), os.osc(550))
+  : re.dattorro_rev(200, 0.5, 0.7, 0.6, 0.5, 0.7, 0.5, 0.2);
+</code></pre>
 <h4 id="reference_2">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf">https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf</a></li>
@@ -529,6 +598,12 @@ This implementation does not use modulated delay lengths (excursion) and
 uses zero length pre-delay.</p>
 <h4 id="usage_10">Usage</h4>
 <pre><code>_,_ : dattorro_rev_default : _,_
+</code></pre>
+<h4 id="test_10">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+dattorro_rev_default_test = (os.osc(330), os.osc(550))
+  : re.dattorro_rev_default;
 </code></pre>
 <h4 id="reference_3">Reference</h4>
 <ul>
@@ -557,6 +632,12 @@ Designed to sound great with synthetic sound sources, rather than sound like a r
 <li><code>low_cutoff</code>: frequency (100..6000 Hz) at which the crossover between the low and mid bands of the reverb occurs</li>
 <li><code>high_cutoff</code>: frequency (1000..10000 Hz) at which the crossover between the mid and high bands of the reverb occurs</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+jpverb_test = (os.osc(330), os.osc(440))
+  : re.jpverb(3.0, 0.2, 1.0, 0.8, 0.3, 0.4, 0.9, 0.8, 0.7, 500, 4000);
+</code></pre>
 <h4 id="reference_4">Reference</h4>
 <ul>
 <li><a href="https://doc.sccode.org/Overviews/DEIND.html">https://doc.sccode.org/Overviews/DEIND.html</a></li>
@@ -580,6 +661,12 @@ Excels at producing spacey washes of sound.</p>
 <li><code>mod_depth</code>: depth ([0..1]) of delay-line modulation. Use in combination with <code>mod_freq</code> to produce chorus and pitch-variations in the echoes</li>
 <li><code>mod_freq</code>: frequency ([0..10] Hz) of delay-line modulation. Use in combination with <code>mod_depth</code> to produce chorus and pitch-variations in the echoes</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+greyhole_test = (os.osc(220), os.osc(440))
+  : re.greyhole(2.0, 0.3, 1.0, 0.6, 0.5, 0.4, 0.2);
+</code></pre>
 <h4 id="reference_5">Reference</h4>
 <ul>
 <li><a href="https://doc.sccode.org/Overviews/DEIND.html">https://doc.sccode.org/Overviews/DEIND.html</a></li>
@@ -600,6 +687,12 @@ The result, after a short period of time, is a wash of sound, completely diffuse
 <li><code>rt</code>: coefficent of the decay of the reverb (0-1)</li>
 <li><code>damp</code>: coefficient of the lowpass filters (0-1)</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>re = library(&quot;reverbs.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+kb_rom_rev1_test = (os.osc(330), os.osc(660))
+  : re.kb_rom_rev1(0.7, 0.3);
+</code></pre>
 <h4 id="reference_6">Reference</h4>
 <ul>
 <li><a href="https://www.spinsemi.com/programs.php#://~://text=Keith%20Barrrom_rev1.spn,-ROM%20reverb%202">https://www.spinsemi.com/programs.php#://~://text=Keith%20Barrrom_rev1.spn,-ROM%20reverb%202</a></li>

@@ -362,13 +362,27 @@ functions.</p>
 <p>Here are listed some works on finite difference schemes and cellular
 automata thet were the basis for the implementation of this library</p>
 <ul>
-<li>S. Bilbao, Numerical Sound Synthesis.Chichester, UK: John Wiley Sons,
-Ltd, 2009</li>
-<li>P. Narbel, "Qualitative and quantitative cellular automata from
+<li>
+<p>S. Bilbao, Numerical Sound Synthesis.Chichester, UK: John Wiley Sons,
+Ltd, 2009</p>
+</li>
+<li>
+<p>P. Narbel, "Qualitative and quantitative cellular automata from
 differential equations," Lecture Notes in Computer Science, vol. 4173,
-pp. 112–121, 10 2006</li>
-<li>X.-S. Yang and Y. Young, Cellular Automata, PDEs, and Pattern Formation.
-Chapman &amp; Hall/CRC, 092005, ch. 18, pp. 271–282.</li>
+pp. 112–121, 10 2006</p>
+</li>
+<li>
+<p>X.-S. Yang and Y. Young, Cellular Automata, PDEs, and Pattern Formation.
+Chapman &amp; Hall/CRC, 092005, ch. 18, pp. 271–282.</p>
+</li>
+</ul>
+<p>The FDS library is organized into 5 sections:</p>
+<ul>
+<li><a href="#model-construction">Model Construction</a></li>
+<li><a href="#interpolation">Interpolation</a></li>
+<li><a href="#routing">Routing</a></li>
+<li><a href="#scheme-operations">Scheme Operations</a></li>
+<li><a href="#interaction-models">Interaction Models</a></li>
 </ul>
 <h4 id="references">References</h4>
 <ul>
@@ -397,6 +411,15 @@ point.</p>
        e. if T=1 the maximum delay needed for a neighbour state is 1 sample)</li>
 <li><code>scheme</code>: coefficients scheme</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+scheme = 0, 0;
+model1D_test = si.bus(2)
+  : fd.model1D(2, 0, 0, scheme)
+  : si.bus(2);
+</code></pre>
 <hr />
 <h3 id="fdmodel2d"><code>(fd.)model2D</code></h3>
 <p>This function can be used to obtain a physical model in 2 dimension.
@@ -419,6 +442,15 @@ the online one presents some issues.</p>
        e. if T=1 the maximum delay needed for a neighbour state is 1 sample)</li>
 <li><code>scheme</code>: coefficients scheme</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+scheme = 0, 0, 0, 0;
+model2D_test = si.bus(4)
+  : fd.model2D(2, 2, 0, 0, scheme)
+  : si.bus(4);
+</code></pre>
 <h2 id="interpolation">Interpolation</h2>
 <p>Interpolation functions can be used to drive the input signals to the
 correct mesh points, or to get the output signal from the
@@ -441,6 +473,13 @@ but must be an integer.</p>
 <li><code>points</code>: total number of points in the mesh</li>
 <li><code>point</code>: number of the desired nonzero signal</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+stairsInterp1D_test = si.bus(4)
+  : fd.stairsInterp1D(4, 1);
+</code></pre>
 <hr />
 <h3 id="fdstairsinterp2d"><code>(fd.)stairsInterp2D</code></h3>
 <p>Stairs interpolator in 2 dimensions. Similar to the 1-D version.</p>
@@ -455,6 +494,13 @@ but must be an integer.</p>
 <li><code>pointX</code>: horizontal index of the desired nonzero signal</li>
 <li><code>pointY</code>: vertical index of the desired nonzero signal</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+stairsInterp2D_test = si.bus(4)
+  : fd.stairsInterp2D(2, 2, 1, 0);
+</code></pre>
 <hr />
 <h3 id="fdlininterp1d"><code>(fd.)linInterp1D</code></h3>
 <p>Linear interpolator in 1 dimension. Takes a number of signals and outputs
@@ -471,6 +517,13 @@ at run time.</p>
 <li><code>points</code>: total number of points in the mesh</li>
 <li><code>point</code>: floating point index</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+linInterp1D_test = si.bus(4)
+  : fd.linInterp1D(4, 1.25);
+</code></pre>
 <hr />
 <h3 id="fdlininterp2d"><code>(fd.)linInterp2D</code></h3>
 <p>Linear interpolator in 2 dimensions. Similar to the 1 D version.</p>
@@ -485,6 +538,13 @@ at run time.</p>
 <li><code>pointX</code>: horizontal float index</li>
 <li><code>pointY</code>: vertical float index</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+linInterp2D_test = si.bus(4)
+  : fd.linInterp2D(2, 2, 0.6, 1.2);
+</code></pre>
 <hr />
 <h3 id="fdstairsinterp1dout"><code>(fd.)stairsInterp1DOut</code></h3>
 <p>Stairs interpolator in 1 dimension. Similar to <code>stairsInterp1D</code>, except it
@@ -497,6 +557,13 @@ outputs only the desired signal.</p>
 <li><code>points</code>: total number of points in the mesh</li>
 <li><code>point</code>: number of the desired nonzero signal</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+stairsInterp1DOut_test = si.bus(4)
+  : fd.stairsInterp1DOut(4, 2);
+</code></pre>
 <hr />
 <h3 id="fdstairsinterp2dout"><code>(fd.)stairsInterp2DOut</code></h3>
 <p>Stairs interpolator in 2 dimensions which outputs only one signal.</p>
@@ -510,6 +577,13 @@ outputs only the desired signal.</p>
 <li><code>pointX</code>: horizontal index of the desired nonzero signal</li>
 <li><code>pointY</code>: vertical index of the desired nonzero signal</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+stairsInterp2DOut_test = si.bus(4)
+  : fd.stairsInterp2DOut(2, 2, 1, 0);
+</code></pre>
 <hr />
 <h3 id="fdlininterp1dout"><code>(fd.)linInterp1DOut</code></h3>
 <p>Linear interpolator in 1 dimension. Similar to <code>stairsInterp1D</code>, except it
@@ -522,6 +596,13 @@ sums each output signal and provides only one output value.</p>
 <li><code>points</code>: total number of points in the mesh</li>
 <li><code>point</code>: floating point index</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+linInterp1DOut_test = si.bus(4)
+  : fd.linInterp1DOut(4, 1.5);
+</code></pre>
 <hr />
 <h3 id="fdstairsinterp2dout_1"><code>(fd.)stairsInterp2DOut</code></h3>
 <p>Linear interpolator in 2 dimensions which outputs only one signal.</p>
@@ -535,6 +616,13 @@ sums each output signal and provides only one output value.</p>
 <li><code>pointX</code>: horizontal float index</li>
 <li><code>pointY</code>: vertical float index</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+linInterp2DOut_test = si.bus(4)
+  : fd.linInterp2DOut(2, 2, 0.6, 1.2);
+</code></pre>
 <h2 id="routing">Routing</h2>
 <p>The routing functions are used internally by the model building functions,
 but can also be taken separately. These functions route the forces, the
@@ -556,6 +644,14 @@ signals. These functions are based on the Faust route primitive.</p>
 <li><code>R</code>: neighbourhood radius</li>
 <li><code>T</code>: time coefficient</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+route1D_test = par(i, 3, 0)
+  : fd.route1D(1, 0, 0)
+  : si.bus(3);
+</code></pre>
 <hr />
 <h3 id="fdroute2d"><code>(fd.)route2D</code></h3>
 <p>Routing function for 2 dimensional schemes.</p>
@@ -571,6 +667,14 @@ signals. These functions are based on the Faust route primitive.</p>
 <li><code>R</code>: neighbourhood radius</li>
 <li><code>T</code>: time coefficient</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+route2D_test = par(i, 3, 0)
+  : fd.route2D(1, 1, 0, 0)
+  : si.bus(3);
+</code></pre>
 <h2 id="scheme-operations">Scheme Operations</h2>
 <p>The scheme operation functions are used internally by the model building
 functions but can also be taken separately. The schemePoint function is
@@ -592,6 +696,13 @@ and the neighbours’ signals and outputs the next point state.</p>
 <li><code>T</code>: time coefficient</li>
 <li><code>D</code>: scheme spatial dimensions (i.e. 1 if 1-D, 2 if 2-D)</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+schemePoint_test = par(i, 3, 0)
+  : fd.schemePoint(0, 0, 1);
+</code></pre>
 <hr />
 <h3 id="fdbuildscheme1d"><code>(fd.)buildScheme1D</code></h3>
 <p>This function is used to stack in parallel several schemePoint functions in
@@ -606,6 +717,13 @@ and the neighbours’ signals and outputs the next point state.</p>
 <li><code>R</code>: neighbourhood radius</li>
 <li><code>T</code>: time coefficient</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+buildScheme1D_test = par(i, 3, 0)
+  : fd.buildScheme1D(1, 0, 0);
+</code></pre>
 <hr />
 <h3 id="fdbuildscheme2d"><code>(fd.)buildScheme2D</code></h3>
 <p>This function is used to stack in parallel several schemePoint functions in
@@ -621,6 +739,13 @@ and the neighbours’ signals and outputs the next point state.</p>
 <li><code>R</code>: neighbourhood radius</li>
 <li><code>T</code>: time coefficient</li>
 </ul>
+<h4 id="test_14">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+si = library(&quot;signals.lib&quot;);
+
+buildScheme2D_test = par(i, 3, 0)
+  : fd.buildScheme2D(1, 1, 0, 0);
+</code></pre>
 <h2 id="interaction-models">Interaction Models</h2>
 <p>Here are defined two physically based interaction algorithms: a hammer and
 a bow. These functions need to be coupled to the mesh pde, in the point
@@ -648,6 +773,22 @@ Numerical Sound Synthesis).</p>
 <li><code>offset</code>: distance between the string and the hammer at rest in meters</li>
 <li><code>fIn</code>: hammer excitation signal (i.e. a button)</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+
+hammer_test = os.osc(5)
+  : fd.hammer(
+      0.1,
+      1000,
+      0.01,
+      1e5,
+      2.0,
+      1.0/48000,
+      0.001,
+      button(&quot;hammer:trigger&quot;)
+    );
+</code></pre>
 <hr />
 <h3 id="fdbow"><code>(fd.)bow</code></h3>
 <p>Implementation of a nonlinear friction based interaction model that induces
@@ -661,7 +802,14 @@ Helmholtz motion. (see Stefan Bilbao's book, Numerical Sound Synthesis).</p>
 <li><code>alpha</code>: nonlinearity parameter</li>
 <li><code>k</code>: time sampling step (the same as for the mesh)</li>
 <li><code>vb</code>: bow velocity [m/s]</li>
-</ul></div>
+</ul>
+<h4 id="test_16">Test</h4>
+<pre><code>fd = library(&quot;fds.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+
+bow_test = os.osc(5)
+  : fd.bow(0.05, 2.0, 1.0/48000, 0.1);
+</code></pre></div>
             </div>
         </div>
 

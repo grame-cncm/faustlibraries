@@ -475,7 +475,18 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="mathslib">maths.lib</h1>
-<p>Mathematic library for Faust. Its official prefix is <code>ma</code>.</p>
+<p>Maths library. Its official prefix is <code>ma</code>.</p>
+<p>This library provides mathematical functions and utilities for numerical
+computations in Faust. It includes trigonometric, exponential, logarithmic, and
+statistical functions, constants, and tools for array, matrix, and complex-number
+operations used throughout Faust DSP and control code.</p>
+<p>The Maths library is organized into 1 section:</p>
+<ul>
+<li><a href="#functions-reference">Functions Reference</a></li>
+</ul>
+<p>Some functions are implemented as Faust foreign functions of <code>math.h</code> functions
+that are not part of Faust's primitives. Defines also various constants and several
+utilities.</p>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/maths.lib">https://github.com/grame-cncm/faustlibraries/blob/master/maths.lib</a></li>
@@ -487,11 +498,27 @@
 <h4 id="usage">Usage</h4>
 <pre><code>SR : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>SR</code>: initialization-time sampling rate constant</li>
+</ul>
+<h4 id="test">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+SR_test = ma.SR;
+</code></pre>
 <hr />
 <h3 id="mat"><code>(ma.)T</code></h3>
 <p>Current sample duration in seconds computed from the sampling rate given at init time. Constant during program execution.</p>
 <h4 id="usage_1">Usage</h4>
 <pre><code>T : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>T</code>: sample duration (<code>1/SR</code>) constant</li>
+</ul>
+<h4 id="test_1">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+T_test = ma.T;
 </code></pre>
 <hr />
 <h3 id="mabs"><code>(ma.)BS</code></h3>
@@ -499,11 +526,27 @@
 <h4 id="usage_2">Usage</h4>
 <pre><code>BS : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>BS</code>: current processing block size</li>
+</ul>
+<h4 id="test_2">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+BS_test = ma.BS;
+</code></pre>
 <hr />
 <h3 id="mapi"><code>(ma.)PI</code></h3>
 <p>Constant PI in double precision.</p>
 <h4 id="usage_3">Usage</h4>
 <pre><code>PI : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>PI</code>: double-precision π constant</li>
+</ul>
+<h4 id="test_3">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+PI_test = ma.PI;
 </code></pre>
 <hr />
 <h3 id="madeg2rad"><code>(ma.)deg2rad</code></h3>
@@ -511,17 +554,41 @@
 <h4 id="usage_4">Usage</h4>
 <pre><code>45. : deg2rad
 </code></pre>
+<p>Where:</p>
+<ul>
+<li>input: angle in degrees to convert</li>
+</ul>
+<h4 id="test_4">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+deg2rad_test = 45.0 : ma.deg2rad;
+</code></pre>
 <hr />
 <h3 id="marad2deg"><code>(ma.)rad2deg</code></h3>
 <p>Convert radians to degrees.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>ma.PI : rad2deg
 </code></pre>
+<p>Where:</p>
+<ul>
+<li>input: angle in radians to convert</li>
+</ul>
+<h4 id="test_5">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+rad2deg_test = ma.PI : ma.rad2deg;
+</code></pre>
 <hr />
 <h3 id="mae"><code>(ma.)E</code></h3>
 <p>Constant e in double precision.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>E : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>E</code>: double-precision Euler's number constant</li>
+</ul>
+<h4 id="test_6">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+E_test = ma.E;
 </code></pre>
 <hr />
 <h3 id="maepsilon"><code>(ma.)EPSILON</code></h3>
@@ -532,17 +599,41 @@ that is smallest positive number such that <code>1.0 + EPSILON != 1.0</code>.</p
 <h4 id="usage_7">Usage</h4>
 <pre><code>EPSILON : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>EPSILON</code>: machine epsilon constant for the current floating-point precision</li>
+</ul>
+<h4 id="test_7">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+EPSILON_test = ma.EPSILON;
+</code></pre>
 <hr />
 <h3 id="mamin"><code>(ma.)MIN</code></h3>
 <p>Constant MIN available in simple/double/quad precision (minimal positive value).</p>
 <h4 id="usage_8">Usage</h4>
 <pre><code>MIN : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>MIN</code>: minimal positive normalized value for the current precision</li>
+</ul>
+<h4 id="test_8">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+MIN_test = ma.MIN;
+</code></pre>
 <hr />
 <h3 id="mamax"><code>(ma.)MAX</code></h3>
 <p>Constant MAX available in simple/double/quad precision (maximal positive value).</p>
 <h4 id="usage_9">Usage</h4>
 <pre><code>MAX : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>MAX</code>: maximal finite value for the current precision</li>
+</ul>
+<h4 id="test_9">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+MAX_test = ma.MAX;
 </code></pre>
 <hr />
 <h3 id="maftz"><code>(ma.)FTZ</code></h3>
@@ -551,6 +642,14 @@ to be zero. Usually not needed in C++ because the architecture
 file take care of this, but can be useful in JavaScript for instance.</p>
 <h4 id="usage_10">Usage</h4>
 <pre><code>_ : FTZ : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input signal to flush if its magnitude is subnormal</li>
+</ul>
+<h4 id="test_10">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+FTZ_test = (ma.MIN * 0.5) : ma.FTZ;
 </code></pre>
 <h4 id="reference">Reference</h4>
 <ul>
@@ -562,11 +661,28 @@ file take care of this, but can be useful in JavaScript for instance.</p>
 <h4 id="usage_11">Usage</h4>
 <pre><code>_,_ : copysign : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: value whose magnitude is preserved</li>
+<li><code>y</code>: value providing the sign</li>
+</ul>
+<h4 id="test_11">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+copysign_test = (-1.0, 2.0) : ma.copysign;
+</code></pre>
 <hr />
 <h3 id="maneg"><code>(ma.)neg</code></h3>
 <p>Invert the sign (-x) of a signal.</p>
 <h4 id="usage_12">Usage</h4>
 <pre><code>_ : neg : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: value to negate</li>
+</ul>
+<h4 id="test_12">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+neg_test = 3.5 : ma.neg;
 </code></pre>
 <hr />
 <h3 id="manot"><code>(ma.)not</code></h3>
@@ -575,11 +691,28 @@ So working regardless of the size of the integer, assuming negative numbers in t
 <h4 id="usage_13">Usage</h4>
 <pre><code>_ : not : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: integer input value</li>
+</ul>
+<h4 id="test_13">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+not_test = 5 : ma.not;
+</code></pre>
 <hr />
 <h3 id="masubxy"><code>(ma.)sub(x,y)</code></h3>
 <p>Subtract <code>x</code> and <code>y</code>.</p>
 <h4 id="usage_14">Usage</h4>
 <pre><code>_,_ : sub : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: first operand</li>
+<li><code>y</code>: second operand</li>
+</ul>
+<h4 id="test_14">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+sub_test = (3, 10) : ma.sub;
 </code></pre>
 <hr />
 <h3 id="mainv"><code>(ma.)inv</code></h3>
@@ -587,11 +720,27 @@ So working regardless of the size of the integer, assuming negative numbers in t
 <h4 id="usage_15">Usage</h4>
 <pre><code>_ : inv : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: denominator input (non-zero)</li>
+</ul>
+<h4 id="test_15">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+inv_test = 4.0 : ma.inv;
+</code></pre>
 <hr />
 <h3 id="macbrt"><code>(ma.)cbrt</code></h3>
 <p>Computes the cube root of of the input signal.</p>
 <h4 id="usage_16">Usage</h4>
 <pre><code>_ : cbrt : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: value whose cube root is computed</li>
+</ul>
+<h4 id="test_16">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+cbrt_test = 8.0 : ma.cbrt;
 </code></pre>
 <hr />
 <h3 id="mahypot"><code>(ma.)hypot</code></h3>
@@ -600,11 +749,29 @@ sqrt(x<em>x+y</em>y) without undue overflow or underflow.</p>
 <h4 id="usage_17">Usage</h4>
 <pre><code>_,_ : hypot : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: first operand</li>
+<li><code>y</code>: second operand</li>
+</ul>
+<h4 id="test_17">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+hypot_test = (3.0, 4.0) : ma.hypot;
+</code></pre>
 <hr />
 <h3 id="maldexp"><code>(ma.)ldexp</code></h3>
 <p>Takes two input signals: x and n, and multiplies x by 2 to the power n.</p>
 <h4 id="usage_18">Usage</h4>
 <pre><code>_,_ : ldexp : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: significand input</li>
+<li><code>n</code>: exponent (integer) input</li>
+</ul>
+<h4 id="test_18">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+ldexp_test = (1.5, 3) : ma.ldexp;
 </code></pre>
 <hr />
 <h3 id="mascalb"><code>(ma.)scalb</code></h3>
@@ -612,11 +779,28 @@ sqrt(x<em>x+y</em>y) without undue overflow or underflow.</p>
 <h4 id="usage_19">Usage</h4>
 <pre><code>_,_ : scalb : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: significand input</li>
+<li><code>n</code>: exponent (integer) input</li>
+</ul>
+<h4 id="test_19">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+scalb_test = (2.0, -1) : ma.scalb;
+</code></pre>
 <hr />
 <h3 id="malog1p"><code>(ma.)log1p</code></h3>
 <p>Computes log(1 + x) without undue loss of accuracy when x is nearly zero.</p>
 <h4 id="usage_20">Usage</h4>
 <pre><code>_ : log1p : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: offset used in <code>log(1 + x)</code> (must be greater than -1)</li>
+</ul>
+<h4 id="test_20">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+log1p_test = 0.5 : ma.log1p;
 </code></pre>
 <hr />
 <h3 id="malogb"><code>(ma.)logb</code></h3>
@@ -624,11 +808,27 @@ sqrt(x<em>x+y</em>y) without undue overflow or underflow.</p>
 <h4 id="usage_21">Usage</h4>
 <pre><code>_ : logb : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: positive value whose exponent part is returned</li>
+</ul>
+<h4 id="test_21">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+logb_test = 8.0 : ma.logb;
+</code></pre>
 <hr />
 <h3 id="mailogb"><code>(ma.)ilogb</code></h3>
 <p>Return exponent of the input signal as an integer number.</p>
 <h4 id="usage_22">Usage</h4>
 <pre><code>_ : ilogb : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: positive value whose exponent part is returned</li>
+</ul>
+<h4 id="test_22">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+ilogb_test = 8.0 : ma.ilogb;
 </code></pre>
 <hr />
 <h3 id="malog2"><code>(ma.)log2</code></h3>
@@ -636,11 +836,27 @@ sqrt(x<em>x+y</em>y) without undue overflow or underflow.</p>
 <h4 id="usage_23">Usage</h4>
 <pre><code>_ : log2 : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: positive value whose base-2 logarithm is computed</li>
+</ul>
+<h4 id="test_23">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+log2_test = 8.0 : ma.log2;
+</code></pre>
 <hr />
 <h3 id="maexpm1"><code>(ma.)expm1</code></h3>
 <p>Return exponent of the input signal minus 1 with better precision.</p>
 <h4 id="usage_24">Usage</h4>
 <pre><code>_ : expm1 : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value used for the <code>exp(x) - 1</code> computation</li>
+</ul>
+<h4 id="test_24">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+expm1_test = 0.5 : ma.expm1;
 </code></pre>
 <hr />
 <h3 id="maacosh"><code>(ma.)acosh</code></h3>
@@ -649,11 +865,27 @@ of the input signal.</p>
 <h4 id="usage_25">Usage</h4>
 <pre><code>_ : acosh : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value (greater than or equal to 1)</li>
+</ul>
+<h4 id="test_25">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+acosh_test = 1.5 : ma.acosh;
+</code></pre>
 <hr />
 <h3 id="maasinh"><code>(ma.)asinh</code></h3>
 <p>Computes the inverse hyperbolic sine of the input signal.</p>
 <h4 id="usage_26">Usage</h4>
 <pre><code>_ : asinh : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_26">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+asinh_test = 0.5 : ma.asinh;
 </code></pre>
 <hr />
 <h3 id="maatanh"><code>(ma.)atanh</code></h3>
@@ -661,11 +893,27 @@ of the input signal.</p>
 <h4 id="usage_27">Usage</h4>
 <pre><code>_ : atanh : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value in (-1, 1)</li>
+</ul>
+<h4 id="test_27">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+atanh_test = 0.5 : ma.atanh;
+</code></pre>
 <hr />
 <h3 id="masinh"><code>(ma.)sinh</code></h3>
 <p>Computes the hyperbolic sine of the input signal.</p>
 <h4 id="usage_28">Usage</h4>
 <pre><code>_ : sinh : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_28">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+sinh_test = 0.5 : ma.sinh;
 </code></pre>
 <hr />
 <h3 id="macosh"><code>(ma.)cosh</code></h3>
@@ -673,11 +921,27 @@ of the input signal.</p>
 <h4 id="usage_29">Usage</h4>
 <pre><code>_ : cosh : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_29">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+cosh_test = 0.5 : ma.cosh;
+</code></pre>
 <hr />
 <h3 id="matanh"><code>(ma.)tanh</code></h3>
 <p>Computes the hyperbolic tangent of the input signal.</p>
 <h4 id="usage_30">Usage</h4>
 <pre><code>_ : tanh : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_30">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+tanh_test = 0.5 : ma.tanh;
 </code></pre>
 <hr />
 <h3 id="maerf"><code>(ma.)erf</code></h3>
@@ -685,17 +949,41 @@ of the input signal.</p>
 <h4 id="usage_31">Usage</h4>
 <pre><code>_ : erf : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_31">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+erf_test = 0.5 : ma.erf;
+</code></pre>
 <hr />
 <h3 id="maerfc"><code>(ma.)erfc</code></h3>
 <p>Computes the complementary error function of the input signal.</p>
 <h4 id="usage_32">Usage</h4>
 <pre><code>_ : erfc : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_32">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+erfc_test = 0.5 : ma.erfc;
+</code></pre>
 <hr />
 <h3 id="magamma"><code>(ma.)gamma</code></h3>
 <p>Computes the gamma function of the input signal.</p>
 <h4 id="usage_33">Usage</h4>
 <pre><code>_ : gamma : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: positive input value</li>
+</ul>
+<h4 id="test_33">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+gamma_test = 3.0 : ma.gamma;
 </code></pre>
 <hr />
 <h3 id="malgamma"><code>(ma.)lgamma</code></h3>
@@ -704,12 +992,28 @@ the gamma function of the input signal.</p>
 <h4 id="usage_34">Usage</h4>
 <pre><code>_ : lgamma : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: positive input value</li>
+</ul>
+<h4 id="test_34">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+lgamma_test = 3.0 : ma.lgamma;
+</code></pre>
 <hr />
 <h3 id="maj0"><code>(ma.)J0</code></h3>
 <p>Computes the Bessel function of the first kind of order 0
 of the input signal.</p>
 <h4 id="usage_35">Usage</h4>
 <pre><code>_ : J0 : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_35">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+J0_test = 1.0 : ma.J0;
 </code></pre>
 <hr />
 <h3 id="maj1"><code>(ma.)J1</code></h3>
@@ -718,12 +1022,29 @@ of the input signal.</p>
 <h4 id="usage_36">Usage</h4>
 <pre><code>_ : J1 : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_36">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+J1_test = 1.0 : ma.J1;
+</code></pre>
 <hr />
 <h3 id="majn"><code>(ma.)Jn</code></h3>
 <p>Computes the Bessel function of the first kind of order n
 (first input signal) of the second input signal.</p>
 <h4 id="usage_37">Usage</h4>
 <pre><code>_,_ : Jn : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>n</code>: integer order</li>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_37">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+Jn_test = (2, 1.0) : ma.Jn;
 </code></pre>
 <hr />
 <h3 id="may0"><code>(ma.)Y0</code></h3>
@@ -732,6 +1053,14 @@ of order 0 of the input signal.</p>
 <h4 id="usage_38">Usage</h4>
 <pre><code>_ : Y0 : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: positive input value</li>
+</ul>
+<h4 id="test_38">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+Y0_test = 1.0 : ma.Y0;
+</code></pre>
 <hr />
 <h3 id="may1"><code>(ma.)Y1</code></h3>
 <p>Computes the linearly independent Bessel function of the second kind
@@ -739,12 +1068,29 @@ of order 1 of the input signal.</p>
 <h4 id="usage_39">Usage</h4>
 <pre><code>_ : Y0 : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: positive input value</li>
+</ul>
+<h4 id="test_39">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+Y1_test = 1.0 : ma.Y1;
+</code></pre>
 <hr />
 <h3 id="mayn"><code>(ma.)Yn</code></h3>
 <p>Computes the linearly independent Bessel function of the second kind
 of order n (first input signal) of the second input signal.</p>
 <h4 id="usage_40">Usage</h4>
 <pre><code>_,_ : Yn : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>n</code>: integer order</li>
+<li><code>x</code>: positive input value</li>
+</ul>
+<h4 id="test_40">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+Yn_test = (2, 1.0) : ma.Yn;
 </code></pre>
 <hr />
 <h3 id="mafabs-mafmax-mafmin"><code>(ma.)fabs</code>, <code>(ma.)fmax</code>, <code>(ma.)fmin</code></h3>
@@ -763,6 +1109,10 @@ fmin = min
 <ul>
 <li><code>n</code>: an integer</li>
 </ul>
+<h4 id="test_41">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+np2_test = 5 : ma.np2;
+</code></pre>
 <hr />
 <h3 id="mafrac"><code>(ma.)frac</code></h3>
 <p>Gives the fractional part of n.</p>
@@ -773,6 +1123,10 @@ fmin = min
 <ul>
 <li><code>n</code>: a decimal number</li>
 </ul>
+<h4 id="test_42">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+frac_test = 3.75 : ma.frac;
+</code></pre>
 <hr />
 <h3 id="mamodulo"><code>(ma.)modulo</code></h3>
 <p>Modulus operation using the <code>(x%y+y)%y</code> formula to ensures the result is always non-negative, even if <code>x</code> is negative.</p>
@@ -784,6 +1138,10 @@ fmin = min
 <li><code>x</code>: the numerator</li>
 <li><code>y</code>: the denominator</li>
 </ul>
+<h4 id="test_43">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+modulo_test = (-3, 4) : ma.modulo;
+</code></pre>
 <hr />
 <h3 id="maisnan"><code>(ma.)isnan</code></h3>
 <p>Return non-zero if x is a NaN.</p>
@@ -795,6 +1153,10 @@ _ : isnan : _
 <ul>
 <li><code>x</code>: signal to analyse</li>
 </ul>
+<h4 id="test_44">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+isnan_test = 1.0 : ma.isnan;
+</code></pre>
 <hr />
 <h3 id="maisinf"><code>(ma.)isinf</code></h3>
 <p>Return non-zero if x is a positive or negative infinity.</p>
@@ -806,6 +1168,10 @@ _ : isinf : _
 <ul>
 <li><code>x</code>: signal to analyse</li>
 </ul>
+<h4 id="test_45">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+isinf_test = 1.0 : ma.isinf;
+</code></pre>
 <hr />
 <h3 id="machebychev"><code>(ma.)chebychev</code></h3>
 <p>Chebychev transformation of order N.</p>
@@ -825,6 +1191,10 @@ T[n](x) = 2x*T[n-1](x) - T[n-2](x)
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Chebyshev_polynomial">http://en.wikipedia.org/wiki/Chebyshev_polynomial</a></li>
 </ul>
+<h4 id="test_46">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+chebychev_test = 0.5 : ma.chebychev(3);
+</code></pre>
 <hr />
 <h3 id="machebychevpoly"><code>(ma.)chebychevpoly</code></h3>
 <p>Linear combination of the first Chebyshev polynomials.</p>
@@ -840,11 +1210,24 @@ chebychevpoly((c0,c1,...,cn)) = Sum of chebychev(i)*ci</li>
 <ul>
 <li><a href="http://www.csounds.com/manual/html/chebyshevpoly.html">http://www.csounds.com/manual/html/chebyshevpoly.html</a></li>
 </ul>
+<h4 id="test_47">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+chebychevpoly_test = 0.5 : ma.chebychevpoly((1, 0, 1));
+</code></pre>
 <hr />
 <h3 id="madiffn"><code>(ma.)diffn</code></h3>
 <p>Negated first-order difference.</p>
 <h4 id="usage_48">Usage</h4>
 <pre><code>_ : diffn : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input signal</li>
+</ul>
+<h4 id="test_48">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+diffn_test = os.osc(440) : ma.diffn;
 </code></pre>
 <hr />
 <h3 id="masignum"><code>(ma.)signum</code></h3>
@@ -852,6 +1235,14 @@ chebychevpoly((c0,c1,...,cn)) = Sum of chebychev(i)*ci</li>
 -1 for x&lt;0, 0 for x==0, and 1 for x&gt;0.</p>
 <h4 id="usage_49">Usage</h4>
 <pre><code>_ : signum : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_49">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+signum_test = (-5.0) : ma.signum;
 </code></pre>
 <hr />
 <h3 id="manextpow2"><code>(ma.)nextpow2</code></h3>
@@ -863,12 +1254,29 @@ chebychevpoly((c0,c1,...,cn)) = Sum of chebychev(i)*ci</li>
 <p>Useful for allocating delay lines, e.g., </p>
 <pre><code>delay(2^nextpow2(maxDelayNeeded), currentDelay);
 </code></pre>
+<p>Where:</p>
+<ul>
+<li><code>n</code>: positive value whose next power-of-two exponent is computed</li>
+</ul>
+<h4 id="test_50">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+nextpow2_test = 10.0 : ma.nextpow2;
+</code></pre>
 <hr />
 <h3 id="mazc"><code>(ma.)zc</code></h3>
 <p>Indicator function for zero-crossing: it returns 1 if a zero-crossing
 occurs, 0 otherwise.</p>
 <h4 id="usage_51">Usage</h4>
 <pre><code>_ : zc : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input signal to monitor for zero crossings</li>
+</ul>
+<h4 id="test_51">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+zc_test = os.osc(440) : ma.zc;
 </code></pre>
 <hr />
 <h3 id="maunwrap"><code>(ma.)unwrap</code></h3>
@@ -881,6 +1289,11 @@ by more than <code>pi</code>, switching to a 2*pi-complementary value when neede
 <ul>
 <li><code>pi</code>: maximum discontinuity between the output values (typically <code>ma.PI</code>)</li>
 </ul>
+<h4 id="test_52">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+unwrap_test = os.oscrc(100) : ma.unwrap(ma.PI);
+</code></pre>
 <h4 id="example-test-program">Example test program</h4>
 <pre><code>process = 0 - os.oscrc(1000)          // the true phase is either -PI or +PI
         : an.resonator(1,1000) : !,_  // oscillates between -PI and +PI
@@ -893,6 +1306,14 @@ primes(1) is 3, and so on. The waveform is length 2048, so the largest
 precomputed prime is primes(2047) which is 17863.</p>
 <h4 id="usage_53">Usage</h4>
 <pre><code>_ : primes : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: index of the prime number sequence (0-based).</li>
+</ul>
+<h4 id="test_53">Test</h4>
+<pre><code>ma = library(&quot;maths.lib&quot;);
+primes_test = 10 : ma.primes;
 </code></pre></div>
             </div>
         </div>

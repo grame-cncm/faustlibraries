@@ -323,7 +323,15 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="noiseslib">noises.lib</h1>
-<p>Faust Noise Generator Library. Its official prefix is <code>no</code>.</p>
+<p>Noises library. Its official prefix is <code>no</code>.</p>
+<p>This library provides various noise generators and stochastic signal sources
+for audio synthesis and testing. It includes white, pink, brown, and blue noise,
+as well as pseudo-random number generators and utilities for decorrelated signals
+and random modulation in Faust DSP programs.</p>
+<p>The Noises library is organized into 1 section:</p>
+<ul>
+<li><a href="#functions-reference">Functions Reference</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/noises.lib">https://github.com/grame-cncm/faustlibraries/blob/master/noises.lib</a></li>
@@ -336,6 +344,14 @@
 <h4 id="usage">Usage</h4>
 <pre><code>noise : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li>output: white noise signal in [-1, 1].</li>
+</ul>
+<h4 id="test">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+noise_test = no.noise;
+</code></pre>
 <hr />
 <h3 id="nomultirandom"><code>(no.)multirandom</code></h3>
 <p>Generates multiple decorrelated random numbers in parallel.</p>
@@ -346,6 +362,10 @@
 <ul>
 <li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+multirandom_test = no.multirandom(4);
+</code></pre>
 <hr />
 <h3 id="nomultinoise"><code>(no.)multinoise</code></h3>
 <p>Generates multiple decorrelated noises in parallel.</p>
@@ -356,6 +376,10 @@
 <ul>
 <li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+multinoise_test = no.multinoise(3);
+</code></pre>
 <hr />
 <h3 id="nonoises"><code>(no.)noises</code></h3>
 <p>A convenient wrapper around multinoise.</p>
@@ -367,6 +391,10 @@
 <li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
 <li><code>i</code>: the selected random number (i in [0..N[)</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+noises_test = no.noises(4, 2);
+</code></pre>
 <hr />
 <h3 id="nodnoise"><code>(no.)dnoise</code></h3>
 <p>A deterministic noise burst with a dynamically adjustable seed, enabling consistent recall.
@@ -379,6 +407,11 @@ Useful for noise variation sensitive applications like replicable/recallable per
 <li><code>t</code>: is a noise burst trigger</li>
 <li><code>sx</code>: defines the range of integer seed multipliers. </li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+ba = library(&quot;basics.lib&quot;);
+dnoise_test = (1 : ba.impulsify, 10.0) : no.dnoise;
+</code></pre>
 <h4 id="example">Example</h4>
 <p>This expression <code>sx = hslider("seed multiplier",1,1,1000,1)</code> allows 1000 distinct seed variations.
 To generate a burst with a fixed length, use <code>ba.spulse(bLength, t)</code> (as trigger for the <code>t</code> parameter), where <code>bLength</code> is the burst duration in samples and <code>t</code> is a trigger.</p>
@@ -391,12 +424,24 @@ avoid having the same pseudo random sequence at each run.</p>
 <h4 id="usage_5">Usage</h4>
 <pre><code>randomseed : _
 </code></pre>
+<p>Where:</p>
+<ul>
+<li>output: platform-specific random seed value.</li>
+</ul>
+<h4 id="test_5">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+randomseed_test = no.randomseed;
+</code></pre>
 <hr />
 <h3 id="nornoise"><code>(no.)rnoise</code></h3>
 <p>A randomized white noise generator (outputs random number between -1 and 1).</p>
 <p>WARNING: using the foreign function <code>arc4random</code>, so only available in C/C++ and LLVM backends.</p>
 <h4 id="usage_6">Usage</h4>
 <pre><code>rnoise : _
+</code></pre>
+<h4 id="test_6">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+rnoise_test = no.rnoise;
 </code></pre>
 <hr />
 <h3 id="normultirandom"><code>(no.)rmultirandom</code></h3>
@@ -409,6 +454,10 @@ avoid having the same pseudo random sequence at each run.</p>
 <ul>
 <li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+rmultirandom_test = no.rmultirandom(4);
+</code></pre>
 <hr />
 <h3 id="normultinoise"><code>(no.)rmultinoise</code></h3>
 <p>Generates multiple decorrelated noises in parallel.</p>
@@ -420,6 +469,10 @@ avoid having the same pseudo random sequence at each run.</p>
 <ul>
 <li><code>N</code>: the number of decorrelated random numbers in parallel, a constant numerical expression</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+rmultinoise_test = no.rmultinoise(3);
+</code></pre>
 <hr />
 <h3 id="nornoises"><code>(no.)rnoises</code></h3>
 <p>A convenient wrapper around rmultinoise.</p>
@@ -432,6 +485,10 @@ avoid having the same pseudo random sequence at each run.</p>
 <li><code>N</code>: the number of decorrelated random numbers in parallel</li>
 <li><code>i</code>: the selected random number (i in [0..N[)</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+rnoises_test = no.rnoises(4, 2);
+</code></pre>
 <hr />
 <h3 id="nopink_noise"><code>(no.)pink_noise</code></h3>
 <p>Pink noise (1/f noise) generator (third-order approximation covering the audio band well).
@@ -439,10 +496,14 @@ avoid having the same pseudo random sequence at each run.</p>
 <h4 id="usage_10">Usage</h4>
 <pre><code>pink_noise : _
 </code></pre>
-<h4 id="reference">Reference</h4>
+<p>Where:</p>
 <ul>
-<li><a href="https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html">https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html</a></li>
+<li>output: pink (1/f) noise signal.</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+pink_noise_test = no.pink_noise;
+</code></pre>
 <h4 id="alternatives">Alternatives</h4>
 <p>Higher-order approximations covering any frequency band can be obtained using</p>
 <pre><code>no.noise : fi.spectral_tilt(order,lowerBandLimit,Bandwidth,p)
@@ -450,7 +511,7 @@ avoid having the same pseudo random sequence at each run.</p>
 <p>where <code>p=-0.5</code> means filter rolloff <code>f^(-1/2)</code> which gives 1/f rolloff in the
 power spectral density, and can be changed to other real values.</p>
 <h4 id="example_1">Example</h4>
-<p>// pink_noise_compare.dsp - compare three pinking filters</p>
+<p>pink_noise_compare.dsp - compare three pinking filters</p>
 <pre><code>process = pink_noises with {
     f0 = 35; // Lower bandlimit in Hz
     bw3 = 0.7 * ma.SR/2.0 - f0; // Bandwidth in Hz, 3rd order case
@@ -469,6 +530,10 @@ Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
 ...
 </code></pre>
 <p><img alt="pink_noise_demo figure" src="https://ccrma.stanford.edu/wiki/Images/8/86/Tpinkd.jpg" width="600" /></p>
+<h4 id="reference">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html">https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html</a></li>
+</ul>
 <hr />
 <h3 id="nopink_noise_vm"><code>(no.)pink_noise_vm</code></h3>
 <p>Multi pink noise generator.</p>
@@ -480,6 +545,10 @@ Octave:1&gt; semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
 <li><code>N</code>: number of latched white-noise processes to sum,
 not to exceed sizeof(int) in C++ (typically 32).</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+pink_noise_vm_test = no.pink_noise_vm(4);
+</code></pre>
 <h4 id="references_1">References</h4>
 <ul>
 <li><a href="http://www.dsprelated.com/showarticle/908.php">http://www.dsprelated.com/showarticle/908.php</a></li>
@@ -500,6 +569,12 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
           lfnoiseN(3,rate), // lfnoise0 smoothed by 3rd order Butterworth LPF
           lfnoise(rate);    // lfnoise0 smoothed with no overshoot
 </code></pre>
+<h4 id="test_12">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+lfnoise0_test = no.lfnoise0(10.0);
+lfnoiseN_test = no.lfnoiseN(3, 10.0);
+lfnoise_test = no.lfnoise(10.0);
+</code></pre>
 <hr />
 <h3 id="nosparse_noise"><code>(no.)sparse_noise</code></h3>
 <p>Sparse noise generator.</p>
@@ -512,6 +587,10 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 </ul>
 <p>Random impulses in the amplitude range -1 to 1 are generated
 at an average rate of f0 impulses per second.</p>
+<h4 id="test_13">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+sparse_noise_test = no.sparse_noise(5.0);
+</code></pre>
 <h4 id="reference_1">Reference</h4>
 <ul>
 <li>See velvet_noise</li>
@@ -527,6 +606,10 @@ at an average rate of f0 impulses per second.</p>
 <li><code>amp</code>: amplitude of noise impulses (positive and negative)</li>
 <li><code>f0</code>: average frequency of noise impulses per second</li>
 </ul>
+<h4 id="test_14">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+velvet_noise_test = no.velvet_noise(0.5, 5.0);
+</code></pre>
 <h4 id="reference_2">Reference</h4>
 <ul>
 <li>Matti Karjalainen and Hanna Jarvelainen,
@@ -544,6 +627,10 @@ at an average rate of f0 impulses per second.</p>
 <ul>
 <li><code>N</code>: number of uniform random numbers added to approximate Gaussian white noise</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+gnoise_test = no.gnoise(8);
+</code></pre>
 <h4 id="reference_3">Reference</h4>
 <ul>
 <li>See Central Limit Theorem</li>
@@ -564,6 +651,10 @@ level is maintained for different values of alpha.</p>
 brown/red noise, -1/2 pink noise, 0 white noise, 1/2 blue noise,
 and 1 violet/azure noise.</li>
 </ul>
+<h4 id="test_16">Test</h4>
+<pre><code>no = library(&quot;noises.lib&quot;);
+colored_noise_test = no.colored_noise(4, 0.0);
+</code></pre>
 <h4 id="examples">Examples</h4>
 <p>See <code>dm.colored_noise_demo</code>.</p></div>
             </div>

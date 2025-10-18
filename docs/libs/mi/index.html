@@ -365,6 +365,12 @@ Proceedings of the Linux Audio Conference (LAC-12), Stanford, USA, 2012.</li>
 of Multisensory Virtual Musical Instruments. In Proceedings of the New
 Interfaces for Musical Expression (NIME-15) Conference, Baton Rouge, USA, 2015.</li>
 </ul>
+<p>The MI library is organized into 3 sections:</p>
+<ul>
+<li><a href="#utility-functions">Utility Functions</a></li>
+<li><a href="#mass-algorithms">Mass Algorithms</a></li>
+<li><a href="#interaction-algorithms">Interaction Algorithms</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/mi.lib">https://github.com/grame-cncm/faustlibraries/blob/master/mi.lib</a></li>
@@ -386,6 +392,10 @@ at step 0 of the physics simulation.</p>
 <li><code>x</code>: position value signal</li>
 <li><code>x0</code>: initial value for position</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+initState_test = button(&quot;impulse&quot;) : mi.initState(1.0);
+</code></pre>
 <h2 id="mass-algorithms">Mass Algorithms</h2>
 <p>All mass-type physical element functions are declared here. They all expect to receive
 a force input signal and produce a position signal.
@@ -404,6 +414,10 @@ Takes an input force and produces output position.</p>
 <li><code>x0</code>: initial position</li>
 <li><code>xr0</code>: initial delayed position (inferred from initial velocity)</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+mass_test = 0 : mi.mass(1.0, 0.0, 0.0, 0.0);
+</code></pre>
 <hr />
 <h3 id="mioscil"><code>(mi.)oscil</code></h3>
 <p>Implementation of a simple linear harmonic oscillator.
@@ -420,6 +434,10 @@ Takes an input force and produces output position.</p>
 <li><code>x0</code>: initial position</li>
 <li><code>xr0</code>: initial delayed position (inferred from initial velocity)</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+oscil_test = 0 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.0, 0.0);
+</code></pre>
 <hr />
 <h3 id="miground"><code>(mi.)ground</code></h3>
 <p>Implementation of a fixed point element.
@@ -433,6 +451,10 @@ rules).</p>
 <ul>
 <li><code>x0</code>: initial position</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+ground_test = 0 : mi.ground(0.0);
+</code></pre>
 <hr />
 <h3 id="miposinput"><code>(mi.)posInput</code></h3>
 <p>Implementation of a position input module (driven by an outside
@@ -445,6 +467,11 @@ affect position) and the driving position signal.</p>
 <ul>
 <li><code>x0</code>: initial position</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+posInput_test = 0, os.osc(1) : mi.posInput(0.0);
+</code></pre>
 <h2 id="interaction-algorithms">Interaction Algorithms</h2>
 <p>All interaction-type physical element functions are declared here. They each expect to
 receive two position signals (coming from the two mass-elements that they connect) and
@@ -463,6 +490,10 @@ All physical parameters are expressed in sample-rate dependant values.</p>
 <li><code>x1r</code>: initial delayed position of mass 1 (unused here)</li>
 <li><code>x2r</code>: initial delayed position of mass 2 (unused here)</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+spring_test = mi.spring(10.0, 0.0, 0.0, 0.1, -0.1);
+</code></pre>
 <hr />
 <h3 id="midamper"><code>(mi.)damper</code></h3>
 <p>Implementation of a linear damper interaction.
@@ -477,6 +508,10 @@ truncated if position values are not centered around zero!</p>
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+damper_test = mi.damper(0.5, 0.0, 0.0, 0.2, -0.2);
+</code></pre>
 <hr />
 <h3 id="mispringdamper"><code>(mi.)springDamper</code></h3>
 <p>Implementation of a linear viscoelastic spring-damper interaction
@@ -491,6 +526,10 @@ truncated if position values are not centered around zero!</p>
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+springDamper_test = mi.springDamper(5.0, 0.3, 0.0, 0.0, 0.1, -0.1);
+</code></pre>
 <hr />
 <h3 id="minlspringdamper2"><code>(mi.)nlSpringDamper2</code></h3>
 <p>Implementation of a non-linear viscoelastic spring-damper interaction
@@ -508,6 +547,10 @@ stability conditions ! The <code>nlSpringDamperClipped</code> is a safer option.
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+nlSpringDamper2_test = mi.nlSpringDamper2(5.0, 1.0, 0.2, 0.0, 0.0, 0.1, -0.1);
+</code></pre>
 <hr />
 <h3 id="minlspringdamper3"><code>(mi.)nlSpringDamper3</code></h3>
 <p>Implementation of a non-linear viscoelastic spring-damper interaction
@@ -525,6 +568,10 @@ stability conditions ! The <code>nlSpringDamperClipped</code> is a safer option.
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+nlSpringDamper3_test = mi.nlSpringDamper3(5.0, 0.5, 0.2, 0.0, 0.0, 0.1, -0.1);
+</code></pre>
 <hr />
 <h3 id="minlspringdamperclipped"><code>(mi.)nlSpringDamperClipped</code></h3>
 <p>Implementation of a non-linear viscoelastic spring-damper interaction
@@ -548,6 +595,10 @@ interpolation, etc.)</p>
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+nlSpringDamperClipped_test = mi.nlSpringDamperClipped(5.0, 0.5, 8.0, 0.2, 0.0, 0.0, 0.1, -0.1);
+</code></pre>
 <hr />
 <h3 id="minlpluck"><code>(mi.)nlPluck</code></h3>
 <p>Implementation of a piecewise linear plucking interaction.
@@ -566,6 +617,10 @@ of the interaction.</p>
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+nlPluck_test = mi.nlPluck(5.0, 0.1, 0.2, 0.0, 0.0, 0.05, -0.05);
+</code></pre>
 <hr />
 <h3 id="minlbow"><code>(mi.)nlBow</code></h3>
 <p>Implementation of a non-linear friction based interaction
@@ -584,6 +639,10 @@ Stefan Bilbao's book, Numerical Sound Synthesis).</p>
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+nlBow_test = mi.nlBow(0.5, 0.1, 1.0, 0.0, 0.0, 0.05, -0.05);
+</code></pre>
 <hr />
 <h3 id="micollision"><code>(mi.)collision</code></h3>
 <p>Implementation of a collision interaction, producing linear visco-elastic
@@ -599,6 +658,10 @@ repulsion forces when two mass elements are interpenetrating.</p>
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+collision_test = mi.collision(5.0, 0.2, 0.01, 0.0, 0.0, 0.0, -0.02);
+</code></pre>
 <hr />
 <h3 id="minlcollisionclipped"><code>(mi.)nlCollisionClipped</code></h3>
 <p>Implementation of a collision interaction, producing non-linear
@@ -618,7 +681,11 @@ This interaction is particularly useful for more realistic contact dynamics
 <li><code>thres</code>: threshold distance for the contact between elements</li>
 <li><code>x1r</code>: initial delayed position of mass 1</li>
 <li><code>x2r</code>: initial delayed position of mass 2</li>
-</ul></div>
+</ul>
+<h4 id="test_14">Test</h4>
+<pre><code>mi = library(&quot;mi.lib&quot;);
+nlCollisionClipped_test = mi.nlCollisionClipped(3.0, 0.5, 6.0, 0.2, 0.01, 0.0, 0.0, 0.0, -0.02);
+</code></pre></div>
             </div>
         </div>
 

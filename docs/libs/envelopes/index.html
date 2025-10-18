@@ -243,7 +243,7 @@
             
             <li class="nav-item" data-level="1"><a href="#envelopeslib" class="nav-link">envelopes.lib</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#functions-reference" class="nav-link">Functions Reference</a>
+            <li class="nav-item" data-level="2"><a href="#envelopes-with-linear-segments" class="nav-link">Envelopes with linear segments</a>
               <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#enar" class="nav-link">(en.)ar</a>
               <ul class="nav flex-column">
@@ -273,6 +273,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#envelopes-with-exponential-segments" class="nav-link">Envelopes with exponential segments</a>
+              <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#ensmoothenvelope" class="nav-link">(en.)smoothEnvelope</a>
               <ul class="nav flex-column">
               </ul>
@@ -297,6 +301,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#others" class="nav-link">Others</a>
+              <ul class="nav flex-column">
             <li class="nav-item" data-level="3"><a href="#endx7envelope" class="nav-link">(en.)dx7envelope</a>
               <ul class="nav flex-column">
               </ul>
@@ -311,12 +319,22 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="envelopeslib">envelopes.lib</h1>
-<p>This library contains a collection of envelope generators. Its official prefix is <code>en</code>.</p>
+<p>Envelopes library. Its official prefix is <code>en</code>.</p>
+<p>This library provides envelope generators and control functions for shaping
+signal amplitude, pitch, or other parameters. It includes ADSR, AR, and percussive
+models, as well as exponential, linear, and segmented envelope types used in both
+synthesis and dynamic processing contexts.</p>
+<p>The Envelopes library is organized into 3 sections:</p>
+<ul>
+<li><a href="#envelopes-with-linear-segments">Envelopes with linear segments</a></li>
+<li><a href="#envelopes-with-exponential-segments">Envelopes with exponential segments</a></li>
+<li><a href="#others">Others</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/envelopes.lib">https://github.com/grame-cncm/faustlibraries/blob/master/envelopes.lib</a></li>
 </ul>
-<h2 id="functions-reference">Functions Reference</h2>
+<h2 id="envelopes-with-linear-segments">Envelopes with linear segments</h2>
 <hr />
 <h3 id="enar"><code>(en.)ar</code></h3>
 <p>AR (Attack, Release) envelope generator (useful to create percussion envelopes).
@@ -331,6 +349,11 @@
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when the envelope value reaches 1)</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+ar_test = no.noise * en.ar(0.02, 0.3, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="enasr"><code>(en.)asr</code></h3>
 <p>ASR (Attack, Sustain, Release) envelope generator.
@@ -346,6 +369,11 @@ when the envelope value reaches 1)</li>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+asr_test = no.noise * en.asr(0.05, 0.7, 0.4, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="enadsr"><code>(en.)adsr</code></h3>
 <p>ADSR (Attack, Decay, Sustain, Release) envelope generator.
@@ -362,6 +390,11 @@ when <code>t=0</code>)</li>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+adsr_test = no.noise * en.adsr(0.05, 0.1, 0.6, 0.3, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="enadsrf_bias"><code>(en.)adsrf_bias</code></h3>
 <p>ADSR (Attack, Decay, Sustain, Release, Final) envelope generator with
@@ -383,6 +416,15 @@ control over bias on each segment, and toggle for legato.</p>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+adsrf_bias_test = no.noise * en.adsrf_bias(
+  0.05, 0.1, 0.6, 0.4, 0.2,
+  0.4, 0.6, 0.5,
+  checkbox(&quot;legato&quot;), button(&quot;gate&quot;)
+);
+</code></pre>
 <hr />
 <h3 id="enadsr_bias"><code>(en.)adsr_bias</code></h3>
 <p>ADSR (Attack, Decay, Sustain, Release) envelope generator with
@@ -403,6 +445,15 @@ control over bias on each segment, and toggle for legato.</p>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+adsr_bias_test = no.noise * en.adsr_bias(
+  0.05, 0.1, 0.6, 0.4,
+  0.4, 0.6, 0.5,
+  checkbox(&quot;legato&quot;), button(&quot;gate&quot;)
+);
+</code></pre>
 <hr />
 <h3 id="enahdsrf_bias"><code>(en.)ahdsrf_bias</code></h3>
 <p>AHDSR (Attack, Hold, Decay, Sustain, Release, Final) envelope generator
@@ -425,6 +476,15 @@ with control over bias on each segment, and toggle for legato.</p>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+ahdsrf_bias_test = no.noise * en.ahdsrf_bias(
+  0.05, 0.05, 0.1, 0.6, 0.4, 0.2,
+  0.4, 0.6, 0.5,
+  checkbox(&quot;legato&quot;), button(&quot;gate&quot;)
+);
+</code></pre>
 <hr />
 <h3 id="enahdsr_bias"><code>(en.)ahdsr_bias</code></h3>
 <p>AHDSR (Attack, Hold, Decay, Sustain, Release) envelope generator
@@ -447,6 +507,16 @@ with control over bias on each segment, and toggle for legato.</p>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+ahdsr_bias_test = no.noise * en.ahdsr_bias(
+  0.05, 0.05, 0.1, 0.6, 0.4,
+  0.4, 0.6, 0.5,
+  checkbox(&quot;legato&quot;), button(&quot;gate&quot;)
+);
+</code></pre>
+<h2 id="envelopes-with-exponential-segments">Envelopes with exponential segments</h2>
 <hr />
 <h3 id="ensmoothenvelope"><code>(en.)smoothEnvelope</code></h3>
 <p>An envelope with an exponential attack and release.
@@ -454,11 +524,17 @@ when <code>t=0</code>)</li>
 <h4 id="usage_7">Usage</h4>
 <pre><code>smoothEnvelope(ar,t) : _
 </code></pre>
+<p>Where:</p>
 <ul>
 <li><code>ar</code>: attack and release duration (sec)</li>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+smoothEnvelope_test = no.noise * en.smoothEnvelope(0.2, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="enarfe"><code>(en.)arfe</code></h3>
 <p>ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.
@@ -474,6 +550,11 @@ Approximately equal to <code>smoothEnvelope(Attack/6.91)</code> when Attack == R
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+arfe_test = no.noise * en.arfe(0.2, 0.4, 0, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="enare"><code>(en.)are</code></h3>
 <p>ARE (Attack, Release) envelope generator with Exponential segments.
@@ -488,6 +569,11 @@ Approximately equal to <code>smoothEnvelope(Attack/6.91)</code> when Attack == R
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+are_test = no.noise * en.are(0.2, 0.4, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="enasre"><code>(en.)asre</code></h3>
 <p>ASRE (Attack, Sustain, Release) envelope generator with Exponential segments.</p>
@@ -502,6 +588,11 @@ when <code>t=0</code>)</li>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+asre_test = no.noise * en.asre(0.2, 0.6, 0.4, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="enadsre"><code>(en.)adsre</code></h3>
 <p>ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential
@@ -518,6 +609,11 @@ segments.</p>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+adsre_test = no.noise * en.adsre(0.2, 0.1, 0.6, 0.4, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="enahdsre"><code>(en.)ahdsre</code></h3>
 <p>AHDSRE (Attack, Hold, Decay, Sustain, Release) envelope generator with Exponential
@@ -535,6 +631,12 @@ segments.</p>
 <li><code>t</code>: trigger signal (attack is triggered when <code>t&gt;0</code>, release is triggered
 when <code>t=0</code>)</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+ahdsre_test = no.noise * en.ahdsre(0.2, 0.05, 0.1, 0.6, 0.4, button(&quot;gate&quot;));
+</code></pre>
+<h2 id="others">Others</h2>
 <hr />
 <h3 id="endx7envelope"><code>(en.)dx7envelope</code></h3>
 <p>DX7 operator envelope generator with 4 independent rates and levels. It is
@@ -547,7 +649,16 @@ essentially a 4 points BPF.</p>
 <li><code>RN</code>: rates in seconds</li>
 <li><code>LN</code>: levels (0-1)</li>
 <li><code>t</code>: trigger signal</li>
-</ul></div>
+</ul>
+<h4 id="test_13">Test</h4>
+<pre><code>en = library(&quot;envelopes.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+dx7envelope_test = en.dx7envelope(
+  0.05, 0.1, 0.1, 0.2,
+  1, 0.8, 0.6, 0,
+  button(&quot;gate&quot;)
+) * os.osc(440);
+</code></pre></div>
             </div>
         </div>
 

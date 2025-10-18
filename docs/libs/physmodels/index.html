@@ -897,8 +897,10 @@
 <h1 id="physmodelslib">physmodels.lib</h1>
 <p>Faust physical modeling library. Its official prefix is <code>pm</code>.</p>
 <p>This library provides an environment to facilitate physical modeling of musical
-instruments. It contains dozens of functions implementing low and high level
-elements going from a simple waveguide to fully operational models with
+instruments. It includes waveguide, mass-spring, and digital wave
+models for strings, membranes, bars, and resonant systems used in physical modeling
+synthesis and acoustic simulation research. It contains dozens of functions implementing
+low and high level elements going from a simple waveguide to fully operational models with
 built-in UI, etc.</p>
 <p>It is organized as follows:</p>
 <ul>
@@ -952,6 +954,10 @@ library. This variable should be overriden to allow longer strings or tubes.</p>
 <ul>
 <li><code>freq</code>: the frequency</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+f2l_test = pm.f2l(440);
+</code></pre>
 <hr />
 <h3 id="pml2f"><code>(pm.)l2f</code></h3>
 <p>Length in meters to frequency.</p>
@@ -962,6 +968,10 @@ library. This variable should be overriden to allow longer strings or tubes.</p>
 <ul>
 <li><code>length</code>: length/distance in meters</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+l2f_test = pm.l2f(0.75);
+</code></pre>
 <hr />
 <h3 id="pml2s"><code>(pm.)l2s</code></h3>
 <p>Length in meters to number of samples.</p>
@@ -972,6 +982,10 @@ library. This variable should be overriden to allow longer strings or tubes.</p>
 <ul>
 <li><code>l</code>: length in meters</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+l2s_test = pm.l2s(1.2);
+</code></pre>
 <h2 id="bidirectional-utilities">Bidirectional Utilities</h2>
 <p>Set of fundamental functions to create bi-directional block diagrams in Faust.
 These elements are used as the basis of this library to connect high level
@@ -986,6 +1000,10 @@ algorithm.</p>
 and 3 signals out.</p>
 <h4 id="usage_3">Usage</h4>
 <pre><code>chain(basicBlock : basicBlock : etc.)
+</code></pre>
+<h4 id="test_3">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+basicBlock_test = 0,0,0 : pm.basicBlock;
 </code></pre>
 <hr />
 <h3 id="pmchain"><code>(pm.)chain</code></h3>
@@ -1003,6 +1021,10 @@ with {
    B = _,_,_;
 };
 </code></pre>
+<h4 id="test_4">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+chain_test = 0,0,0 : pm.chain(pm.in(0.1) : pm.basicBlock);
+</code></pre>
 <hr />
 <h3 id="pminleftwave"><code>(pm.)inLeftWave</code></h3>
 <p>Adds a signal to left going waves anywhere in a <a href="#chain"><code>chain</code></a> of blocks.</p>
@@ -1011,6 +1033,10 @@ with {
 </code></pre>
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to left
 going waves in that chain.</p>
+<h4 id="test_5">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+inLeftWave_test = 0,0,0 : pm.inLeftWave(0.25);
+</code></pre>
 <hr />
 <h3 id="pminrightwave"><code>(pm.)inRightWave</code></h3>
 <p>Adds a signal to right going waves anywhere in a <a href="#chain"><code>chain</code></a> of blocks.</p>
@@ -1019,6 +1045,10 @@ going waves in that chain.</p>
 </code></pre>
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to right
 going waves in that chain.</p>
+<h4 id="test_6">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+inRightWave_test = 0,0,0 : pm.inRightWave(0.25);
+</code></pre>
 <hr />
 <h3 id="pmin"><code>(pm.)in</code></h3>
 <p>Adds a signal to left and right going waves anywhere in a <a href="#chain"><code>chain</code></a>
@@ -1028,6 +1058,10 @@ of blocks.</p>
 </code></pre>
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks and <code>x</code> is the signal added to
 left and right going waves in that chain.</p>
+<h4 id="test_7">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+in_test = 0,0,0 : pm.in(0.25);
+</code></pre>
 <hr />
 <h3 id="pmoutleftwave"><code>(pm.)outLeftWave</code></h3>
 <p>Sends the signal of left going waves to the output channel of the <a href="#chain"><code>chain</code></a>.</p>
@@ -1035,6 +1069,10 @@ left and right going waves in that chain.</p>
 <pre><code>chain(A : outLeftWave : B)
 </code></pre>
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
+<h4 id="test_8">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+outLeftWave_test = pm.outLeftWave(0.1, 0.2, 0.3);
+</code></pre>
 <hr />
 <h3 id="pmoutrightwave"><code>(pm.)outRightWave</code></h3>
 <p>Sends the signal of right going waves to the output channel of the <a href="#chain"><code>chain</code></a>.</p>
@@ -1042,6 +1080,10 @@ left and right going waves in that chain.</p>
 <pre><code>chain(A : outRightWave : B)
 </code></pre>
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
+<h4 id="test_9">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+outRightWave_test = pm.outRightWave(0.1, 0.2, 0.3);
+</code></pre>
 <hr />
 <h3 id="pmout"><code>(pm.)out</code></h3>
 <p>Sends the signal of right and left going waves to the output channel of the
@@ -1050,6 +1092,10 @@ left and right going waves in that chain.</p>
 <pre><code>chain(A : out : B)
 </code></pre>
 <p>Where <code>A</code> and <code>B</code> are bidirectional blocks.</p>
+<h4 id="test_10">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+out_test = pm.out(0.1, 0.2, 0.3);
+</code></pre>
 <hr />
 <h3 id="pmterminations"><code>(pm.)terminations</code></h3>
 <p>Creates terminations on both sides of a <a href="#chain"><code>chain</code></a> without closing
@@ -1065,6 +1111,10 @@ with {
    c = *(-1); // right termination
 };
 </code></pre>
+<h4 id="test_11">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+terminations_test = 0,0,0 : pm.terminations(*(-1), pm.basicBlock, *(-1));
+</code></pre>
 <hr />
 <h3 id="pmltermination"><code>(pm.)lTermination</code></h3>
 <p>Creates a termination on the left side of a <a href="#chain"><code>chain</code></a> without
@@ -1077,6 +1127,10 @@ with {
    a = *(-1); // left termination
    b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
 };
+</code></pre>
+<h4 id="test_12">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+lTermination_test = 0,0,0 : pm.lTermination(*(-1), pm.basicBlock);
 </code></pre>
 <hr />
 <h3 id="pmrtermination"><code>(pm.)rTermination</code></h3>
@@ -1091,11 +1145,19 @@ with {
    c = *(-1); // right termination
 };
 </code></pre>
+<h4 id="test_13">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+rTermination_test = 0,0,0 : pm.rTermination(pm.basicBlock, *(-1));
+</code></pre>
 <hr />
 <h3 id="pmcloseins"><code>(pm.)closeIns</code></h3>
 <p>Closes the inputs of a bidirectional chain in all directions.</p>
 <h4 id="usage_14">Usage</h4>
 <pre><code>closeIns : chain(...) : _,_,_
+</code></pre>
+<h4 id="test_14">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+closeIns_test = pm.closeIns;
 </code></pre>
 <hr />
 <h3 id="pmcloseouts"><code>(pm.)closeOuts</code></h3>
@@ -1104,12 +1166,20 @@ main signal output (3d output).</p>
 <h4 id="usage_15">Usage</h4>
 <pre><code>_,_,_ : chain(...) : _
 </code></pre>
+<h4 id="test_15">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+closeOuts_test = 0,0,0 : pm.closeOuts;
+</code></pre>
 <hr />
 <h3 id="pmendchain"><code>(pm.)endChain</code></h3>
 <p>Closes the inputs and outputs of a bidirectional chain in all directions
 except for the main signal output (3d output).</p>
 <h4 id="usage_16">Usage</h4>
 <pre><code>endChain(chain(...)) : _
+</code></pre>
+<h4 id="test_16">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+endChain_test = 0,0,0 : pm.endChain(pm.basicBlock);
 </code></pre>
 <h2 id="basic-elements">Basic Elements</h2>
 <p>Basic elements for physical modeling (e.g., waveguides, specific filters,
@@ -1133,6 +1203,13 @@ etc.).</p>
 <li><code>nMax</code>: the maximum length of the delays in the waveguide</li>
 <li><code>n</code>: the length of the delay lines in samples.</li>
 </ul>
+<h4 id="test_17">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+waveguideUd_test = 0,0,0 : pm.waveguideUd(512, 32);
+waveguideFd_test = 0,0,0 : pm.waveguideFd(512, 32);
+waveguideFd2_test = 0,0,0 : pm.waveguideFd2(512, 32);
+waveguideFd4_test = 0,0,0 : pm.waveguideFd4(512, 32);
+</code></pre>
 <hr />
 <h3 id="pmwaveguide"><code>(pm.)waveguide</code></h3>
 <p>Standard <code>pm.lib</code> waveguide (based on <a href="#waveguiden"><code>waveguideFd4</code></a>).</p>
@@ -1144,6 +1221,10 @@ etc.).</p>
 <li><code>nMax</code>: the maximum length of the delays in the waveguide</li>
 <li><code>n</code>: the length of the delay lines in samples.</li>
 </ul>
+<h4 id="test_18">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+waveguide_test = 0,0,0 : pm.waveguide(512, 32);
+</code></pre>
 <hr />
 <h3 id="pmbridgefilter"><code>(pm.)bridgeFilter</code></h3>
 <p>Generic two zeros bridge FIR filter (as implemented in the
@@ -1158,6 +1239,10 @@ implement the reflectance violin, guitar, etc. bridges.</p>
 <li><code>absorption</code>: controls the absorption of the brige and thus the t60 of
 the string plugged to it (0-1) (1 = 20 seconds)</li>
 </ul>
+<h4 id="test_19">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+bridgeFilter_test = pm.bridgeFilter(0.6, 0.4, os.osc(110));
+</code></pre>
 <hr />
 <h3 id="pmmodefilter"><code>(pm.)modeFilter</code></h3>
 <p>Resonant bandpass filter that can be used to implement a single resonance
@@ -1171,6 +1256,10 @@ the string plugged to it (0-1) (1 = 20 seconds)</li>
 <li><code>t60</code>: mode resonance duration (in seconds)</li>
 <li><code>gain</code>: mode gain (0-1)</li>
 </ul>
+<h4 id="test_20">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+modeFilter_test = pm.modeFilter(440, 1.5, 0.8);
+</code></pre>
 <h2 id="string-instruments">String Instruments</h2>
 <p>Low and high level string instruments parts. Most of the elements in
 this section can be used in a bidirectional chain.</p>
@@ -1185,6 +1274,10 @@ this section can be used in a bidirectional chain.</p>
 <li><code>maxLength</code>: the maximum length of the string in meters (should be static)</li>
 <li><code>length</code>: the length of the string in meters</li>
 </ul>
+<h4 id="test_21">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+stringSegment_test = 0,0,0 : pm.stringSegment(1.0, 0.5);
+</code></pre>
 <hr />
 <h3 id="pmopenstring"><code>(pm.)openString</code></h3>
 <p>A bidirectional block implementing a basic "generic" string with a
@@ -1201,6 +1294,10 @@ to change the "stiffness" of the string.</p>
 <li><code>pluckPosition</code>: excitation position (0-1) (1 is bottom)</li>
 <li><code>excitation</code>: the excitation signal</li>
 </ul>
+<h4 id="test_22">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+openString_test = 0,0,0 : pm.openString(0.8, 0.5, 0.2, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmnylonstring"><code>(pm.)nylonString</code></h3>
 <p>A bidirectional block implementing a basic nylon string with selectable
@@ -1215,6 +1312,10 @@ and has a fix stiffness corresponding to that of a nylon string.</p>
 <li><code>pluckPosition</code>: excitation position (0-1) (1 is bottom)</li>
 <li><code>excitation</code>: the excitation signal</li>
 </ul>
+<h4 id="test_23">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+nylonString_test = 0,0,0 : pm.nylonString(0.8, 0.3, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmsteelstring"><code>(pm.)steelString</code></h3>
 <p>A bidirectional block implementing a basic steel string with selectable
@@ -1229,6 +1330,10 @@ and has a fix stiffness corresponding to that of a steel string.</p>
 <li><code>pluckPosition</code>: excitation position (0-1) (1 is bottom)</li>
 <li><code>excitation</code>: the excitation signal</li>
 </ul>
+<h4 id="test_24">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+steelString_test = 0,0,0 : pm.steelString(0.8, 0.3, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmopenstringpick"><code>(pm.)openStringPick</code></h3>
 <p>A bidirectional block implementing a "generic" string with selectable
@@ -1245,6 +1350,10 @@ will also move the pickup.</p>
 <li><code>pluckPosition</code>: excitation position (0-1) (1 is bottom)</li>
 <li><code>excitation</code>: the excitation signal</li>
 </ul>
+<h4 id="test_25">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+openStringPick_test = 0,0,0 : pm.openStringPick(0.8, 0.4, 0.3, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmopenstringpickup"><code>(pm.)openStringPickUp</code></h3>
 <p>A bidirectional block implementing a "generic" string with selectable
@@ -1263,6 +1372,10 @@ pickup (0-1) (1 for same as pickup position)</li>
 <li><code>pickupPosition</code>: position of the pickup on the string (0-1) (1 is bottom)</li>
 <li><code>excitation</code>: the excitation signal</li>
 </ul>
+<h4 id="test_26">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+openStringPickUp_test = 0,0,0 : pm.openStringPickUp(0.8, 0.4, 0.6, 0.7, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmopenstringpickdown"><code>(pm.)openStringPickDown</code></h3>
 <p>A bidirectional block implementing a "generic" string with selectable
@@ -1281,12 +1394,21 @@ pickup has to be placed before the excitation position.</p>
 and the excitation position (0-1) (1 is excitation position)</li>
 <li><code>excitation</code>: the excitation signal</li>
 </ul>
+<h4 id="test_27">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+openStringPickDown_test = 0,0,0 : pm.openStringPickDown(0.8, 0.4, 0.6, 0.5, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmksreflexionfilter"><code>(pm.)ksReflexionFilter</code></h3>
 <p>The "typical" one-zero Karplus-strong feedforward reflexion filter. This
 filter will be typically used in a termination (see below).</p>
 <h4 id="usage_28">Usage</h4>
 <pre><code>terminations(_,chain(...),ksReflexionFilter)
+</code></pre>
+<h4 id="test_28">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ksReflexionFilter_test = os.osc(220) : pm.ksReflexionFilter;
 </code></pre>
 <hr />
 <h3 id="pmrstringrigidtermination"><code>(pm.)rStringRigidTermination</code></h3>
@@ -1295,12 +1417,20 @@ just phase inversion).</p>
 <h4 id="usage_29">Usage</h4>
 <pre><code>chain(rStringRigidTermination : stringSegment : ...)
 </code></pre>
+<h4 id="test_29">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+rStringRigidTermination_test = 0,0,0 : pm.rStringRigidTermination;
+</code></pre>
 <hr />
 <h3 id="pmlstringrigidtermination"><code>(pm.)lStringRigidTermination</code></h3>
 <p>Bidirectional block implementing a left rigid string termination (no damping,
 just phase inversion).</p>
 <h4 id="usage_30">Usage</h4>
 <pre><code>chain(... : stringSegment : lStringRigidTermination)
+</code></pre>
+<h4 id="test_30">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+lStringRigidTermination_test = 0,0,0 : pm.lStringRigidTermination;
 </code></pre>
 <hr />
 <h3 id="pmelecguitarbridge"><code>(pm.)elecGuitarBridge</code></h3>
@@ -1312,6 +1442,10 @@ duration of the string with the nuts used on the other side.</p>
 <h4 id="usage_31">Usage</h4>
 <pre><code>chain(... : stringSegment : elecGuitarBridge)
 </code></pre>
+<h4 id="test_31">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+elecGuitarBridge_test = 0,0,0 : pm.elecGuitarBridge;
+</code></pre>
 <hr />
 <h3 id="pmelecguitarnuts"><code>(pm.)elecGuitarNuts</code></h3>
 <p>Bidirectional block implementing a simple electric guitar nuts. This
@@ -1321,6 +1455,10 @@ other side of the chain. It also partially sets the resonance duration of
 the string with the bridge used on the other side.</p>
 <h4 id="usage_32">Usage</h4>
 <pre><code>chain(elecGuitarNuts : stringSegment : ...)
+</code></pre>
+<h4 id="test_32">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+elecGuitarNuts_test = 0,0,0 : pm.elecGuitarNuts;
 </code></pre>
 <hr />
 <h3 id="pmguitarbridge"><code>(pm.)guitarBridge</code></h3>
@@ -1332,6 +1470,10 @@ the nuts used on the other side.</p>
 <h4 id="usage_33">Usage</h4>
 <pre><code>chain(... : stringSegment : guitarBridge)
 </code></pre>
+<h4 id="test_33">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+guitarBridge_test = 0,0,0 : pm.guitarBridge;
+</code></pre>
 <hr />
 <h3 id="pmguitarnuts"><code>(pm.)guitarNuts</code></h3>
 <p>Bidirectional block implementing a simple acoustic guitar nuts. This
@@ -1342,6 +1484,10 @@ the bridge used on the other side.</p>
 <h4 id="usage_34">Usage</h4>
 <pre><code>chain(guitarNuts : stringSegment : ...)
 </code></pre>
+<h4 id="test_34">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+guitarNuts_test = 0,0,0 : pm.guitarNuts;
+</code></pre>
 <hr />
 <h3 id="pmidealstring"><code>(pm.)idealString</code></h3>
 <p>An "ideal" string with rigid terminations and where the plucking position
@@ -1350,10 +1496,16 @@ string will ring forever.</p>
 <h4 id="usage_35">Usage</h4>
 <pre><code>1-1' : idealString(length,reflexion,xPosition,excitation)
 </code></pre>
-<p>With:
-* <code>length</code>: the length of the string in meters
-* <code>pluckPosition</code>: the plucking position (0.001-0.999)
-* <code>excitation</code>: the input signal for the excitation.</p>
+<p>With:</p>
+<ul>
+<li><code>length</code>: the length of the string in meters</li>
+<li><code>pluckPosition</code>: the plucking position (0.001-0.999)</li>
+<li><code>excitation</code>: the input signal for the excitation.</li>
+</ul>
+<h4 id="test_35">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+idealString_test = 0,0,0 : pm.idealString(0.9, 0.2, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmks"><code>(pm.)ks</code></h3>
 <p>A Karplus-Strong string (in that case, the string is implemented as a
@@ -1367,11 +1519,19 @@ one dimension waveguide).</p>
 <li><code>damping</code>: string damping (0-1)</li>
 <li><code>excitation</code>: excitation signal</li>
 </ul>
+<h4 id="test_36">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+ks_test = pm.ks(0.9, 0.3, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmks_ui_midi"><code>(pm.)ks_ui_MIDI</code></h3>
 <p>Ready-to-use, MIDI-enabled Karplus-Strong string with buil-in UI.</p>
 <h4 id="usage_37">Usage</h4>
 <pre><code>ks_ui_MIDI : _
+</code></pre>
+<h4 id="test_37">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+ks_ui_MIDI_test = pm.ks_ui_MIDI;
 </code></pre>
 <hr />
 <h3 id="pmelecguitarmodel"><code>(pm.)elecGuitarModel</code></h3>
@@ -1390,6 +1550,10 @@ changing the length of the string and not through a finger model.</p>
 <li><code>mute</code>: mute coefficient (1 for no mute and 0 for instant mute)</li>
 <li><code>excitation</code>: excitation signal</li>
 </ul>
+<h4 id="test_38">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+elecGuitarModel_test = pm.elecGuitarModel(0.9, 0.3, 0.8, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmelecguitar"><code>(pm.)elecGuitar</code></h3>
 <p>A simple electric guitar model with steel strings (based on
@@ -1408,11 +1572,19 @@ by making a polyphonic application out of this function.</p>
 <li><code>gain</code>: gain of the pluck (0-1)</li>
 <li><code>trigger</code>: trigger signal (1 for on, 0 for off)</li>
 </ul>
+<h4 id="test_39">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+elecGuitar_test = pm.elecGuitar(0.9, 0.3, 0.8, 0.6, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmelecguitar_ui_midi"><code>(pm.)elecGuitar_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-enabled electric guitar physical model with built-in UI.</p>
 <h4 id="usage_40">Usage</h4>
 <pre><code>elecGuitar_ui_MIDI : _
+</code></pre>
+<h4 id="test_40">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+elecGuitar_ui_MIDI_test = pm.elecGuitar_ui_MIDI;
 </code></pre>
 <hr />
 <h3 id="pmguitarbody"><code>(pm.)guitarBody</code></h3>
@@ -1420,6 +1592,10 @@ by making a polyphonic application out of this function.</p>
 Bidirectional block implementing a simple acoustic guitar body.</p>
 <h4 id="usage_41">Usage</h4>
 <pre><code>chain(... : guitarBody)
+</code></pre>
+<h4 id="test_41">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+guitarBody_test = 0,0,0 : pm.guitarBody;
 </code></pre>
 <hr />
 <h3 id="pmguitarmodel"><code>(pm.)guitarModel</code></h3>
@@ -1438,6 +1614,10 @@ bridge).</p>
 <li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
 <li><code>excitation</code>: excitation signal</li>
 </ul>
+<h4 id="test_42">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+guitarModel_test = pm.guitarModel(0.9, 0.25, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmguitar"><code>(pm.)guitar</code></h3>
 <p>A simple acoustic guitar model with steel strings (based on
@@ -1454,12 +1634,20 @@ by making a polyphonic application out of this function.</p>
 <li><code>gain</code>: gain of the excitation</li>
 <li><code>trigger</code>: trigger signal (1 for on, 0 for off)</li>
 </ul>
+<h4 id="test_43">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+guitar_test = pm.guitar(0.9, 0.25, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmguitar_ui_midi"><code>(pm.)guitar_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-enabled steel strings acoustic guitar physical model with
 built-in UI.</p>
 <h4 id="usage_44">Usage</h4>
 <pre><code>guitar_ui_MIDI : _
+</code></pre>
+<h4 id="test_44">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+guitar_ui_MIDI_test = pm.guitar_ui_MIDI;
 </code></pre>
 <hr />
 <h3 id="pmnylonguitarmodel"><code>(pm.)nylonGuitarModel</code></h3>
@@ -1478,6 +1666,10 @@ bridge).</p>
 <li><code>pluckPosition</code>: pluck position (0-1) (1 is on the bridge)</li>
 <li><code>excitation</code>: excitation signal</li>
 </ul>
+<h4 id="test_45">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+nylonGuitarModel_test = pm.nylonGuitarModel(0.9, 0.25, pm.impulseExcitation(button(&quot;gate&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmnylonguitar"><code>(pm.)nylonGuitar</code></h3>
 <p>A simple acoustic guitar model with nylon strings (based on
@@ -1494,12 +1686,20 @@ by making a polyphonic application out of this function.</p>
 <li><code>gain</code>: gain of the excitation (0-1)</li>
 <li><code>trigger</code>: trigger signal (1 for on, 0 for off)</li>
 </ul>
+<h4 id="test_46">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+nylonGuitar_test = pm.nylonGuitar(0.9, 0.25, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmnylonguitar_ui_midi"><code>(pm.)nylonGuitar_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-enabled nylon strings acoustic guitar physical model with
 built-in UI.</p>
 <h4 id="usage_47">Usage</h4>
 <pre><code>nylonGuitar_ui_MIDI : _
+</code></pre>
+<h4 id="test_47">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+nylonGuitar_ui_MIDI_test = pm.nylonGuitar_ui_MIDI;
 </code></pre>
 <hr />
 <h3 id="pmmodeinterpres"><code>(pm.)modeInterpRes</code></h3>
@@ -1517,6 +1717,11 @@ More information about this technique/project can be found here:
 <li><code>x</code>: shape of the resonator (0: square, 1: square with rounded corners, 2: round)</li>
 <li><code>y</code>: scale of the resonator (0: small, 1: medium, 2: large)</li>
 </ul>
+<h4 id="test_48">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+modeInterpRes_test = os.osc(110) : pm.modeInterpRes(20, 1.0, 1.5);
+</code></pre>
 <hr />
 <h3 id="pmmodularinterpbody"><code>(pm.)modularInterpBody</code></h3>
 <p>Bidirectional block implementing a modular string instrument resonator 
@@ -1530,6 +1735,10 @@ More information about this technique/project can be found here:
 <li><code>shape</code>: shape of the resonator (0: square, 1: square with rounded corners, 2: round)</li>
 <li><code>scale</code>: scale of the resonator (0: small, 1: medium, 2: large)</li>
 </ul>
+<h4 id="test_49">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+modularInterpBody_test = 0,0,0 : pm.modularInterpBody(20, 1.0, 1.5);
+</code></pre>
 <hr />
 <h3 id="pmmodularinterpstringmodel"><code>(pm.)modularInterpStringModel</code></h3>
 <p>String instrument model with a modular body (see 
@@ -1547,6 +1756,10 @@ More information about this technique/project can be found here:
 <li><code>bodyExcitation</code>: excitation signal for the body</li>
 <li><code>stringExcitation</code>: excitation signal for the string</li>
 </ul>
+<h4 id="test_50">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+modularInterpStringModel_test = pm.modularInterpStringModel(0.9, 0.3, 1.0, 1.5, pm.impulseExcitation(button(&quot;body&quot;)), pm.impulseExcitation(button(&quot;string&quot;)));
+</code></pre>
 <hr />
 <h3 id="pmmodularinterpinstr"><code>(pm.)modularInterpInstr</code></h3>
 <p>String instrument with a modular body (see 
@@ -1565,6 +1778,10 @@ More information about this technique/project can be found here:
 <li><code>tapBody</code>: send an impulse in the body of the instrument where the string is connected (1 for on, 0 for off)</li>
 <li><code>triggerString</code>: trigger signal for the string (1 for on, 0 for off)</li>
 </ul>
+<h4 id="test_51">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+modularInterpInstr_test = pm.modularInterpInstr(0.9, 0.3, 1.0, 1.5, 0.8, button(&quot;body&quot;), button(&quot;string&quot;));
+</code></pre>
 <hr />
 <h3 id="pmmodularinterpinstr_ui_midi"><code>(pm.)modularInterpInstr_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-enabled string instrument with a modular body (see 
@@ -1574,6 +1791,10 @@ with built-in UI.</p>
 <h4 id="usage_52">Usage</h4>
 <pre><code>modularInterpInstr_ui_MIDI : _
 </code></pre>
+<h4 id="test_52">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+modularInterpInstr_ui_MIDI_test = pm.modularInterpInstr_ui_MIDI;
+</code></pre>
 <h2 id="bowed-string-instruments">Bowed String Instruments</h2>
 <p>Low and high level basic string instruments parts. Most of the elements in
 this section can be used in a bidirectional chain.</p>
@@ -1582,7 +1803,7 @@ this section can be used in a bidirectional chain.</p>
 <p>Extremely basic bow table that can be used to implement a wide range of
 bow types for many different bowed string instruments (violin, cello, etc.).</p>
 <h4 id="usage_53">Usage</h4>
-<pre><code>excitation : bowTable(offeset,slope) : _
+<pre><code>excitation : bowTable(offset,slope) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -1590,6 +1811,10 @@ bow types for many different bowed string instruments (violin, cello, etc.).</p>
 <li><code>offset</code>: table offset</li>
 <li><code>slope</code>: table slope</li>
 </ul>
+<h4 id="test_53">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+bowTable_test = pm.bowTable(0.4, 0.1);
+</code></pre>
 <hr />
 <h3 id="pmviolinbowtable"><code>(pm.)violinBowTable</code></h3>
 <p>Violin bow table based on <a href="#bowtable"><code>bowTable</code></a>.</p>
@@ -1601,6 +1826,10 @@ bow types for many different bowed string instruments (violin, cello, etc.).</p>
 <li><code>bowVelocity</code>: velocity of the bow/excitation signal (0-1)</li>
 <li><code>bowPressure</code>: bow pressure on the string (0-1)</li>
 </ul>
+<h4 id="test_54">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violinBowTable_test = pm.violinBowTable(0.4, 0.1);
+</code></pre>
 <hr />
 <h3 id="pmbowinteraction"><code>(pm.)bowInteraction</code></h3>
 <p>Bidirectional block implementing the interaction of a bow in a
@@ -1612,6 +1841,10 @@ bow types for many different bowed string instruments (violin, cello, etc.).</p>
 <ul>
 <li><code>bowTable</code>: the bow table</li>
 </ul>
+<h4 id="test_55">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+bowInteraction_test = pm.bowInteraction((0.4, 0.05));
+</code></pre>
 <hr />
 <h3 id="pmviolinbow"><code>(pm.)violinBow</code></h3>
 <p>Bidirectional block implementing a violin bow and its interaction with
@@ -1624,6 +1857,10 @@ a string.</p>
 <li><code>bowVelocity</code>: velocity of the bow / excitation signal (0-1)</li>
 <li><code>bowPressure</code>: bow pressure on the string (0-1)</li>
 </ul>
+<h4 id="test_56">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violinBow_test = pm.violinBow(0.4, 0.05);
+</code></pre>
 <hr />
 <h3 id="pmviolinbowedstring"><code>(pm.)violinBowedString</code></h3>
 <p>Violin bowed string bidirectional block with controllable bow position.
@@ -1638,12 +1875,20 @@ Terminations are not implemented in this model.</p>
 <li><code>bowPressure</code>: bow pressure on the string (0-1)</li>
 <li><code>bowPosition</code>: the position of the bow on the string (0-1)</li>
 </ul>
+<h4 id="test_57">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violinBowedString_test = 0,0,0 : pm.violinBowedString(0.82, 0.35, pm.violinBow(0.4, 0.05), 0.15);
+</code></pre>
 <hr />
 <h3 id="pmviolinnuts"><code>(pm.)violinNuts</code></h3>
 <p>Bidirectional block implementing simple violin nuts. This function is
 based on <a href="#bridgefilter"><code>bridgeFilter</code></a>.</p>
 <h4 id="usage_58">Usage</h4>
 <pre><code>chain(violinNuts : stringSegment : ...)
+</code></pre>
+<h4 id="test_58">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violinNuts_test = 0,0,0 : pm.violinNuts;
 </code></pre>
 <hr />
 <h3 id="pmviolinbridge"><code>(pm.)violinBridge</code></h3>
@@ -1652,12 +1897,20 @@ based on <a href="#bridgefilter"><code>bridgeFilter</code></a>.</p>
 <h4 id="usage_59">Usage</h4>
 <pre><code>chain(... : stringSegment : violinBridge
 </code></pre>
+<h4 id="test_59">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violinBridge_test = 0,0,0 : pm.violinBridge;
+</code></pre>
 <hr />
 <h3 id="pmviolinbody"><code>(pm.)violinBody</code></h3>
 <p>Bidirectional block implementing a simple violin body (just a simple
 resonant lowpass filter).</p>
 <h4 id="usage_60">Usage</h4>
 <pre><code>chain(... : stringSegment : violinBridge : violinBody)
+</code></pre>
+<h4 id="test_60">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violinBody_test = 0,0,0 : pm.violinBody;
 </code></pre>
 <hr />
 <h3 id="pmviolinmodel"><code>(pm.)violinModel</code></h3>
@@ -1676,17 +1929,29 @@ bridgeAbsorption,bowPosition) : _
 <li><code>bowPressure</code>: bow pressure on the string (0-1))</li>
 <li><code>bowPosition</code>: the position of the bow on the string (0-1)</li>
 </ul>
+<h4 id="test_61">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violinModel_test = pm.violinModel(0.82, 0.35, pm.violinBow(0.4, 0.05), 0.15);
+</code></pre>
 <hr />
 <h3 id="pmviolin_ui"><code>(pm.)violin_ui</code></h3>
 <p>Ready-to-use violin physical model with built-in UI.</p>
 <h4 id="usage_62">Usage</h4>
 <pre><code>violinModel_ui : _
 </code></pre>
+<h4 id="test_62">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violin_ui_test = pm.violin_ui;
+</code></pre>
 <hr />
 <h3 id="pmviolin_ui_midi"><code>(pm.)violin_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-enabled violin physical model with built-in UI.</p>
 <h4 id="usage_63">Usage</h4>
 <pre><code>violin_ui_MIDI : _
+</code></pre>
+<h4 id="test_63">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+violin_ui_MIDI_test = pm.violin_ui_MIDI;
 </code></pre>
 <h2 id="wind-instruments">Wind Instruments</h2>
 <p>Low and high level basic wind instruments parts. Most of the elements in
@@ -1702,6 +1967,10 @@ this section can be used in a bidirectional chain.</p>
 <li><code>maxLength</code>: the maximum length of the tube in meters (should be static)</li>
 <li><code>length</code>: the length of the tube in meters</li>
 </ul>
+<h4 id="test_64">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+openTube_test = pm.openTube(0.9);
+</code></pre>
 <hr />
 <h3 id="pmreedtable"><code>(pm.)reedTable</code></h3>
 <p>Extremely basic reed table that can be used to implement a wide range of
@@ -1715,6 +1984,10 @@ single reed types for many different instruments (saxophone, clarinet, etc.).</p
 <li><code>offset</code>: table offset</li>
 <li><code>slope</code>: table slope</li>
 </ul>
+<h4 id="test_65">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+reedTable_test = pm.reedTable(0.4, 0.2);
+</code></pre>
 <hr />
 <h3 id="pmflutejettable"><code>(pm.)fluteJetTable</code></h3>
 <p>Extremely basic flute jet table.</p>
@@ -1725,6 +1998,10 @@ single reed types for many different instruments (saxophone, clarinet, etc.).</p
 <ul>
 <li><code>excitation</code>: an excitation signal</li>
 </ul>
+<h4 id="test_66">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fluteJetTable_test = pm.fluteJetTable(0.5);
+</code></pre>
 <hr />
 <h3 id="pmbrasslipstable"><code>(pm.)brassLipsTable</code></h3>
 <p>Simple brass lips/mouthpiece table. Since this implementation is very basic
@@ -1739,6 +2016,10 @@ length of that tube must be provided here.</p>
 <li><code>tubeLength</code>: length in meters of the tube connected to the mouthpiece</li>
 <li><code>lipsTension</code>: tension of the lips (0-1) (default: 0.5)</li>
 </ul>
+<h4 id="test_67">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+brassLipsTable_test = pm.brassLipsTable(0.3, 0.2);
+</code></pre>
 <hr />
 <h3 id="pmclarinetreed"><code>(pm.)clarinetReed</code></h3>
 <p>Clarinet reed based on <a href="#reedtable"><code>reedTable</code></a> with controllable
@@ -1751,6 +2032,10 @@ stiffness.</p>
 <li><code>excitation</code>: an excitation signal</li>
 <li><code>stiffness</code>: reed stiffness (0-1)</li>
 </ul>
+<h4 id="test_68">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+clarinetReed_test = pm.clarinetReed(0.6, 0.4, 0.1);
+</code></pre>
 <hr />
 <h3 id="pmclarinetmouthpiece"><code>(pm.)clarinetMouthPiece</code></h3>
 <p>Bidirectional block implementing a clarinet mouthpiece as well as the various
@@ -1766,6 +2051,10 @@ This can also be any kind of signal that will directly injected in the mouthpiec
 (e.g., breath noise, etc.).</li>
 <li><code>reedStiffness</code>: reed stiffness (0-1)</li>
 </ul>
+<h4 id="test_69">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+clarinetMouthPiece_test = pm.clarinetMouthPiece(0.6, 0.4, 0.1);
+</code></pre>
 <hr />
 <h3 id="pmbrasslips"><code>(pm.)brassLips</code></h3>
 <p>Bidirectional block implementing a brass mouthpiece as well as the various
@@ -1782,6 +2071,10 @@ plugged to a tube...</p>
 This can also be any kind of signal that will directly injected in the mouthpiece
 (e.g., breath noise, etc.).</li>
 </ul>
+<h4 id="test_70">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+brassLips_test = pm.brassLips(0.3, 0.2, 0.1);
+</code></pre>
 <hr />
 <h3 id="pmfluteembouchure"><code>(pm.)fluteEmbouchure</code></h3>
 <p>Bidirectional block implementing a flute embouchure as well as the various
@@ -1797,6 +2090,10 @@ performer (0-1).
 This can also be any kind of signal that will directly injected in the
 mouthpiece (e.g., breath noise, etc.).</li>
 </ul>
+<h4 id="test_71">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fluteEmbouchure_test = pm.fluteEmbouchure(0.5, 0.3);
+</code></pre>
 <hr />
 <h3 id="pmwbell"><code>(pm.)wBell</code></h3>
 <p>Generic wind instrument bell bidirectional block that should be placed at
@@ -1808,17 +2105,29 @@ the end of a <a href="#chain"><code>chain</code></a>.</p>
 <ul>
 <li><code>opening</code>: the "opening" of bell (0-1)</li>
 </ul>
+<h4 id="test_72">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+wBell_test = pm.wBell(0.4, 0.6);
+</code></pre>
 <hr />
 <h3 id="pmflutehead"><code>(pm.)fluteHead</code></h3>
 <p>Simple flute head implementing waves reflexion.</p>
 <h4 id="usage_73">Usage</h4>
 <pre><code>chain(fluteHead : tube : ...)
 </code></pre>
+<h4 id="test_73">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fluteHead_test = pm.fluteHead(0.8, 0.4, 0.3);
+</code></pre>
 <hr />
 <h3 id="pmflutefoot"><code>(pm.)fluteFoot</code></h3>
 <p>Simple flute foot implementing waves reflexion and dispersion.</p>
 <h4 id="usage_74">Usage</h4>
 <pre><code>chain(... : tube : fluteFoot)
+</code></pre>
+<h4 id="test_74">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fluteFoot_test = pm.fluteFoot(0.8, 0.4, 0.3);
 </code></pre>
 <hr />
 <h3 id="pmclarinetmodel"><code>(pm.)clarinetModel</code></h3>
@@ -1836,6 +2145,10 @@ This can also be any kind of signal that will directly injected in the mouthpiec
 <li><code>reedStiffness</code>: reed stiffness (0-1)</li>
 <li><code>bellOpening</code>: the opening of bell (0-1)</li>
 </ul>
+<h4 id="test_75">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+clarinetModel_test = pm.clarinetModel(0.9, 0.4, 0.3, 0.2);
+</code></pre>
 <hr />
 <h3 id="pmclarinetmodel_ui"><code>(pm.)clarinetModel_ui</code></h3>
 <p>Same as <a href="#clarinetModel"><code>clarinetModel</code></a> but with a built-in UI. This function
@@ -1849,6 +2162,10 @@ doesn't implement a virtual "blower", thus <code>pressure</code> remains an argu
 This can also be any kind of signal that will be directly injected in the mouthpiece
 (e.g., breath noise, etc.).</li>
 </ul>
+<h4 id="test_76">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+clarinetModel_ui_test = pm.clarinetModel_ui;
+</code></pre>
 <hr />
 <h3 id="pmclarinet_ui"><code>(pm.)clarinet_ui</code></h3>
 <p>Ready-to-use clarinet physical model with built-in UI based on
@@ -1856,11 +2173,19 @@ This can also be any kind of signal that will be directly injected in the mouthp
 <h4 id="usage_77">Usage</h4>
 <pre><code>clarinet_ui : _
 </code></pre>
+<h4 id="test_77">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+clarinet_ui_test = pm.clarinet_ui;
+</code></pre>
 <hr />
 <h3 id="pmclarinet_ui_midi"><code>(pm.)clarinet_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI compliant clarinet physical model with built-in UI.</p>
 <h4 id="usage_78">Usage</h4>
 <pre><code>clarinet_ui_MIDI : _
+</code></pre>
+<h4 id="test_78">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+clarinet_ui_MIDI_test = pm.clarinet_ui_MIDI;
 </code></pre>
 <hr />
 <h3 id="pmbrassmodel"><code>(pm.)brassModel</code></h3>
@@ -1880,6 +2205,10 @@ bad parameters are given to it...</p>
 This can also be any kind of signal that will directly injected in the mouthpiece
 (e.g., breath noise, etc.).</li>
 </ul>
+<h4 id="test_79">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+brassModel_test = pm.brassModel(0.9, 0.4, 0.2, 0.6);
+</code></pre>
 <hr />
 <h3 id="pmbrassmodel_ui"><code>(pm.)brassModel_ui</code></h3>
 <p>Same as <a href="#brassModel"><code>brassModel</code></a> but with a built-in UI. This function
@@ -1893,6 +2222,10 @@ doesn't implement a virtual "blower", thus <code>pressure</code> remains an argu
 This can also be any kind of signal that will be directly injected in the mouthpiece
 (e.g., breath noise, etc.).</li>
 </ul>
+<h4 id="test_80">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+brassModel_ui_test = pm.brassModel_ui;
+</code></pre>
 <hr />
 <h3 id="pmbrass_ui"><code>(pm.)brass_ui</code></h3>
 <p>Ready-to-use brass instrument physical model with built-in UI based on
@@ -1900,11 +2233,19 @@ This can also be any kind of signal that will be directly injected in the mouthp
 <h4 id="usage_81">Usage</h4>
 <pre><code>brass_ui : _
 </code></pre>
+<h4 id="test_81">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+brass_ui_test = pm.brass_ui;
+</code></pre>
 <hr />
 <h3 id="pmbrass_ui_midi"><code>(pm.)brass_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable brass instrument physical model with built-in UI.</p>
 <h4 id="usage_82">Usage</h4>
 <pre><code>brass_ui_MIDI : _
+</code></pre>
+<h4 id="test_82">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+brass_ui_MIDI_test = pm.brass_ui_MIDI;
 </code></pre>
 <hr />
 <h3 id="pmflutemodel"><code>(pm.)fluteModel</code></h3>
@@ -1921,6 +2262,10 @@ This can also be any kind of signal that will be directly injected in the mouthp
 This can also be any kind of signal that will directly injected in the mouthpiece
 (e.g., breath noise, etc.).</li>
 </ul>
+<h4 id="test_83">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fluteModel_test = pm.fluteModel(0.9, 0.4, 0.6);
+</code></pre>
 <hr />
 <h3 id="pmflutemodel_ui"><code>(pm.)fluteModel_ui</code></h3>
 <p>Same as <a href="#fluteModel"><code>fluteModel</code></a> but with a built-in UI. This function
@@ -1934,6 +2279,10 @@ doesn't implement a virtual "blower", thus <code>pressure</code> remains an argu
 This can also be any kind of signal that will be directly injected in the mouthpiece
 (e.g., breath noise, etc.).</li>
 </ul>
+<h4 id="test_84">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fluteModel_ui_test = pm.fluteModel_ui;
+</code></pre>
 <hr />
 <h3 id="pmflute_ui"><code>(pm.)flute_ui</code></h3>
 <p>Ready-to-use flute physical model with built-in UI based on
@@ -1941,11 +2290,19 @@ This can also be any kind of signal that will be directly injected in the mouthp
 <h4 id="usage_85">Usage</h4>
 <pre><code>flute_ui : _
 </code></pre>
+<h4 id="test_85">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+flute_ui_test = pm.flute_ui;
+</code></pre>
 <hr />
 <h3 id="pmflute_ui_midi"><code>(pm.)flute_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable flute physical model with built-in UI.</p>
 <h4 id="usage_86">Usage</h4>
 <pre><code>flute_ui_MIDI : _
+</code></pre>
+<h4 id="test_86">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+flute_ui_MIDI_test = pm.flute_ui_MIDI;
 </code></pre>
 <h2 id="exciters">Exciters</h2>
 <p>Various kind of excitation signal generators.</p>
@@ -1960,6 +2317,10 @@ impulseExcitation(gate) : chain;
 <ul>
 <li><code>gate</code>: a gate button</li>
 </ul>
+<h4 id="test_87">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+impulseExcitation_test = pm.impulseExcitation(button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmstrikemodel"><code>(pm.)strikeModel</code></h3>
 <p>Creates a filtered noise excitation.</p>
@@ -1975,6 +2336,10 @@ strikeModel(LPcutoff,HPcutoff,sharpness,gain,gate) : chain;
 <li><code>gain</code>: gain of the excitation</li>
 <li><code>gate</code>: a gate button/trigger signal (0/1)</li>
 </ul>
+<h4 id="test_88">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+strikeModel_test = pm.strikeModel(200, 4000, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmstrike"><code>(pm.)strike</code></h3>
 <p>Strikes generator with controllable excitation position.</p>
@@ -1990,6 +2355,10 @@ freqs. So, on membrane for example, 0 would be the middle and 1 the edge</li>
 <li><code>gain</code>: gain of the excitation</li>
 <li><code>gate</code>: a gate button/trigger signal (0/1)</li>
 </ul>
+<h4 id="test_89">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+strike_test = pm.strike(0.4, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmpluckstring"><code>(pm.)pluckString</code></h3>
 <p>Creates a plucking excitation signal.</p>
@@ -2006,6 +2375,10 @@ pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
 <li><code>gain</code>: gain of the excitation (0-1)</li>
 <li><code>trigger</code>: trigger signal (1 for on, 0 for off)</li>
 </ul>
+<h4 id="test_90">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+pluckString_test = pm.pluckString(0.9, 1, 1, 1, 0.6, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmblower"><code>(pm.)blower</code></h3>
 <p>A virtual blower creating a DC signal with some breath noise in it.</p>
@@ -2018,11 +2391,19 @@ pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
 <li><code>breathGain</code>: breath noise gain (0-1) (recommended: 0.005)</li>
 <li><code>breathCutoff</code>: breath cuttoff frequency (Hz) (recommended: 2000)</li>
 </ul>
+<h4 id="test_91">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+blower_test = pm.blower(0.5, 0.05, 2000, 5, 0.2);
+</code></pre>
 <hr />
 <h3 id="pmblower_ui"><code>(pm.)blower_ui</code></h3>
 <p>Same as <a href="#blower"><code>blower</code></a> but with a built-in UI.</p>
 <h4 id="usage_92">Usage</h4>
 <pre><code>blower : somethingToBeBlown
+</code></pre>
+<h4 id="test_92">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+blower_ui_test = pm.blower_ui;
 </code></pre>
 <h2 id="modal-percussions">Modal Percussions</h2>
 <p>High and low level functions for modal synthesis of percussion instruments.</p>
@@ -2039,6 +2420,10 @@ kind of sound good though :).</p>
 <li><code>excitation</code>: excitation signal</li>
 <li><code>freq</code>: fundamental frequency of the bar</li>
 </ul>
+<h4 id="test_93">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+djembeModel_test = pm.djembeModel(110);
+</code></pre>
 <hr />
 <h3 id="pmdjembe"><code>(pm.)djembe</code></h3>
 <p>Dirt-simple djembe modal physical model. Mode parameters are empirically
@@ -2057,11 +2442,19 @@ kind of sound good though :).</p>
 <li><code>gain</code>: gain of the strike</li>
 <li><code>trigger</code>: trigger signal (0: off, 1: on)</li>
 </ul>
+<h4 id="test_94">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+djembe_test = pm.djembe(110, 0.3, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmdjembe_ui_midi"><code>(pm.)djembe_ui_MIDI</code></h3>
 <p>Simple MIDI controllable djembe physical model with built-in UI.</p>
 <h4 id="usage_95">Usage</h4>
 <pre><code>djembe_ui_MIDI : _
+</code></pre>
+<h4 id="test_95">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+djembe_ui_MIDI_test = pm.djembe_ui_MIDI;
 </code></pre>
 <hr />
 <h3 id="pmmarimbabarmodel"><code>(pm.)marimbaBarModel</code></h3>
@@ -2090,6 +2483,10 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
 <li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
 </ul>
+<h4 id="test_96">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+marimbaBarModel_test = pm.marimbaBarModel(220);
+</code></pre>
 <hr />
 <h3 id="pmmarimbarestube"><code>(pm.)marimbaResTube</code></h3>
 <p>Simple marimba resonance tube.</p>
@@ -2101,6 +2498,10 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>tubeLength</code>: the length of the tube in meters</li>
 <li><code>excitation</code>: the excitation signal (audio in)</li>
 </ul>
+<h4 id="test_97">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+marimbaResTube_test = pm.marimbaResTube(220);
+</code></pre>
 <hr />
 <h3 id="pmmarimbamodel"><code>(pm.)marimbaModel</code></h3>
 <p>Simple marimba physical model implementing a single tone bar connected to
@@ -2116,6 +2517,10 @@ limitations of this type of system).</p>
 <li><code>freq</code>: the frequency of the bar/tube couple</li>
 <li><code>exPos</code>: excitation position (0-4)</li>
 </ul>
+<h4 id="test_98">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+marimbaModel_test = pm.marimbaModel(220);
+</code></pre>
 <hr />
 <h3 id="pmmarimba"><code>(pm.)marimba</code></h3>
 <p>Simple marimba physical model implementing a single tone bar connected to
@@ -2135,6 +2540,10 @@ limitations of this type of system).</p>
 <li><code>gain</code>: gain of the strike (0-1)</li>
 <li><code>trigger</code> signal (0: off, 1: on)</li>
 </ul>
+<h4 id="test_99">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+marimba_test = pm.marimba(220, 0.4, 1, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmmarimba_ui_midi"><code>(pm.)marimba_ui_MIDI</code></h3>
 <p>Simple MIDI controllable marimba physical model with built-in UI
@@ -2144,6 +2553,10 @@ tube. This model is scalable and can be adapted to any size of bar/tube
 limitations of this type of system).</p>
 <h4 id="usage_100">Usage</h4>
 <pre><code>marimba_ui_MIDI : _
+</code></pre>
+<h4 id="test_100">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+marimba_ui_MIDI_test = pm.marimba_ui_MIDI;
 </code></pre>
 <hr />
 <h3 id="pmchurchbellmodel"><code>(pm.)churchBellModel</code></h3>
@@ -2167,6 +2580,10 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
 <li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
 </ul>
+<h4 id="test_101">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+churchBellModel_test = pm.churchBellModel(110);
+</code></pre>
 <hr />
 <h3 id="pmchurchbell"><code>(pm.)churchBell</code></h3>
 <p>Generic church bell modal model.</p>
@@ -2188,12 +2605,20 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>gain</code>: gain of the strike (0-1)</li>
 <li><code>trigger</code> signal (0: off, 1: on)</li>
 </ul>
+<h4 id="test_102">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+churchBell_test = pm.churchBell(0.4, 2000, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmchurchbell_ui"><code>(pm.)churchBell_ui</code></h3>
 <p>Church bell physical model based on <a href="#pmchurchbell"><code>churchBell</code></a> with
 built-in UI.</p>
 <h4 id="usage_103">Usage</h4>
 <pre><code>churchBell_ui : _
+</code></pre>
+<h4 id="test_103">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+churchBell_ui_test = pm.churchBell_ui;
 </code></pre>
 <hr />
 <h3 id="pmenglishbellmodel"><code>(pm.)englishBellModel</code></h3>
@@ -2218,6 +2643,10 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
 <li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
 </ul>
+<h4 id="test_104">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+englishBellModel_test = pm.englishBellModel(110);
+</code></pre>
 <hr />
 <h3 id="pmenglishbell"><code>(pm.)englishBell</code></h3>
 <p>English church bell modal model.</p>
@@ -2240,12 +2669,20 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>gain</code>: gain of the strike (0-1)</li>
 <li><code>trigger</code> signal (0: off, 1: on)</li>
 </ul>
+<h4 id="test_105">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+englishBell_test = pm.englishBell(0.4, 2000, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmenglishbell_ui"><code>(pm.)englishBell_ui</code></h3>
 <p>English church bell physical model based on <a href="#pmenglishbell"><code>englishBell</code></a> with
 built-in UI.</p>
 <h4 id="usage_106">Usage</h4>
 <pre><code>englishBell_ui : _
+</code></pre>
+<h4 id="test_106">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+englishBell_ui_test = pm.englishBell_ui;
 </code></pre>
 <hr />
 <h3 id="pmfrenchbellmodel"><code>(pm.)frenchBellModel</code></h3>
@@ -2270,6 +2707,10 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
 <li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
 </ul>
+<h4 id="test_107">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+frenchBellModel_test = pm.frenchBellModel(110);
+</code></pre>
 <hr />
 <h3 id="pmfrenchbell"><code>(pm.)frenchBell</code></h3>
 <p>French church bell modal model.</p>
@@ -2291,12 +2732,20 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>gain</code>: gain of the strike (0-1)</li>
 <li><code>trigger</code> signal (0: off, 1: on)</li>
 </ul>
+<h4 id="test_108">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+frenchBell_test = pm.frenchBell(0.4, 2000, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmfrenchbell_ui"><code>(pm.)frenchBell_ui</code></h3>
 <p>French church bell physical model based on <a href="#pmfrenchbell"><code>frenchBell</code></a> with
 built-in UI.</p>
 <h4 id="usage_109">Usage</h4>
 <pre><code>frenchBell_ui : _
+</code></pre>
+<h4 id="test_109">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+frenchBell_ui_test = pm.frenchBell_ui;
 </code></pre>
 <hr />
 <h3 id="pmgermanbellmodel"><code>(pm.)germanBellModel</code></h3>
@@ -2321,6 +2770,10 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
 <li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
 </ul>
+<h4 id="test_110">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+germanBellModel_test = pm.germanBellModel(110);
+</code></pre>
 <hr />
 <h3 id="pmgermanbell"><code>(pm.)germanBell</code></h3>
 <p>German church bell modal model.</p>
@@ -2343,12 +2796,20 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>gain</code>: gain of the strike (0-1)</li>
 <li><code>trigger</code> signal (0: off, 1: on)</li>
 </ul>
+<h4 id="test_111">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+germanBell_test = pm.germanBell(0.4, 2000, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmgermanbell_ui"><code>(pm.)germanBell_ui</code></h3>
 <p>German church bell physical model based on <a href="#pmgermanbell"><code>germanBell</code></a> with
 built-in UI.</p>
 <h4 id="usage_112">Usage</h4>
 <pre><code>germanBell_ui : _
+</code></pre>
+<h4 id="test_112">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+germanBell_ui_test = pm.germanBell_ui;
 </code></pre>
 <hr />
 <h3 id="pmrussianbellmodel"><code>(pm.)russianBellModel</code></h3>
@@ -2373,6 +2834,10 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
 <li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
 </ul>
+<h4 id="test_113">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+russianBellModel_test = pm.russianBellModel(110);
+</code></pre>
 <hr />
 <h3 id="pmrussianbell"><code>(pm.)russianBell</code></h3>
 <p>Russian church bell modal model.</p>
@@ -2395,12 +2860,20 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>gain</code>: gain of the strike (0-1)</li>
 <li><code>trigger</code> signal (0: off, 1: on)</li>
 </ul>
+<h4 id="test_114">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+russianBell_test = pm.russianBell(0.4, 2000, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmrussianbell_ui"><code>(pm.)russianBell_ui</code></h3>
 <p>Russian church bell physical model based on <a href="#pmrussianbell"><code>russianBell</code></a> with
 built-in UI.</p>
 <h4 id="usage_115">Usage</h4>
 <pre><code>russianBell_ui : _
+</code></pre>
+<h4 id="test_115">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+russianBell_ui_test = pm.russianBell_ui;
 </code></pre>
 <hr />
 <h3 id="pmstandardbellmodel"><code>(pm.)standardBellModel</code></h3>
@@ -2424,6 +2897,10 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>t60DecayRatio</code>: T60 decay ratio (recommended value: 1)</li>
 <li><code>t60DecaySlope</code>: T60 decay slope (recommended value: 5)</li>
 </ul>
+<h4 id="test_116">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+standardBellModel_test = pm.standardBellModel(110);
+</code></pre>
 <hr />
 <h3 id="pmstandardbell"><code>(pm.)standardBell</code></h3>
 <p>Standard church bell modal model.</p>
@@ -2445,12 +2922,20 @@ position could be regenerated using <code>mesh2faust</code>.</p>
 <li><code>gain</code>: gain of the strike (0-1)</li>
 <li><code>trigger</code> signal (0: off, 1: on)</li>
 </ul>
+<h4 id="test_117">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+standardBell_test = pm.standardBell(0.4, 2000, 0.5, 0.8, button(&quot;gate&quot;));
+</code></pre>
 <hr />
 <h3 id="pmstandardbell_ui"><code>(pm.)standardBell_ui</code></h3>
 <p>Standard church bell physical model based on <a href="#pmstandardbell"><code>standardBell</code></a> with
 built-in UI.</p>
 <h4 id="usage_118">Usage</h4>
 <pre><code>standardBell_ui : _
+</code></pre>
+<h4 id="test_118">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+standardBell_ui_test = pm.standardBell_ui;
 </code></pre>
 <h2 id="vocal-synthesis">Vocal Synthesis</h2>
 <p>Vocal synthesizer functions (source/filter, fof, etc.).</p>
@@ -2472,6 +2957,10 @@ ba.take(j+1,formantValues.bw(i)) : _
 soprano, 4: tenor)</li>
 <li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
 </ul>
+<h4 id="test_119">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+formantValues_test = pm.formantValues.f(0);
+</code></pre>
 <hr />
 <h3 id="pmvoicegender"><code>(pm.)voiceGender</code></h3>
 <p>Calculate the gender for the provided <code>voiceType</code> value. (0: male, 1: female)</p>
@@ -2482,6 +2971,10 @@ soprano, 4: tenor)</li>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)</li>
 </ul>
+<h4 id="test_120">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+voiceGender_test = pm.voiceGender(0.5);
+</code></pre>
 <hr />
 <h3 id="pmskirtwidthmultiplier"><code>(pm.)skirtWidthMultiplier</code></h3>
 <p>Calculates value to multiply bandwidth to obtain <code>skirtwidth</code>
@@ -2495,15 +2988,15 @@ for a Fof filter.</p>
 <li><code>freq</code>: the fundamental frequency of the excitation signal</li>
 <li><code>gender</code>: gender of the voice used in the fof filter (0: male, 1: female)</li>
 </ul>
+<h4 id="test_121">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+skirtWidthMultiplier_test = pm.skirtWidthMultiplier(0.5);
+</code></pre>
 <hr />
 <h3 id="pmautobendfreq"><code>(pm.)autobendFreq</code></h3>
 <p>Autobends the center frequencies of formants 1 and 2 based on
 the fundamental frequency of the excitation signal and leaves
 all other formant frequencies unchanged. Ported from <code>chant-lib</code>.</p>
-<h4 id="reference">Reference</h4>
-<ul>
-<li><a href="https://ccrma.stanford.edu/~rmichon/chantLib/">https://ccrma.stanford.edu/~rmichon/chantLib/</a>.</li>
-</ul>
 <h4 id="usage_122">Usage</h4>
 <pre><code>_ : autobendFreq(n,freq,voiceType) : _
 </code></pre>
@@ -2514,16 +3007,20 @@ all other formant frequencies unchanged. Ported from <code>chant-lib</code>.</p>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)</li>
 <li>input is the center frequency of the corresponding formant</li>
 </ul>
+<h4 id="test_122">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+autobendFreq_test = pm.autobendFreq(440, 0.5);
+</code></pre>
+<h4 id="reference">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~rmichon/chantLib/">https://ccrma.stanford.edu/~rmichon/chantLib/</a>.</li>
+</ul>
 <hr />
 <h3 id="pmvocaleffort"><code>(pm.)vocalEffort</code></h3>
 <p>Changes the gains of the formants based on the fundamental
 frequency of the excitation signal. Higher formants are
 reinforced for higher fundamental frequencies.
 Ported from <code>chant-lib</code>.</p>
-<h4 id="reference_1">Reference</h4>
-<ul>
-<li><a href="https://ccrma.stanford.edu/~rmichon/chantLib/">https://ccrma.stanford.edu/~rmichon/chantLib/</a>.</li>
-</ul>
 <h4 id="usage_123">Usage</h4>
 <pre><code>_ : vocalEffort(freq,gender) : _
 </code></pre>
@@ -2533,13 +3030,17 @@ Ported from <code>chant-lib</code>.</p>
 <li><code>gender</code>: the gender of the voice type (0: male, 1: female)</li>
 <li>input is the linear amplitude of the formant</li>
 </ul>
+<h4 id="test_123">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+vocalEffort_test = pm.vocalEffort(0.6);
+</code></pre>
+<h4 id="reference_1">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~rmichon/chantLib/">https://ccrma.stanford.edu/~rmichon/chantLib/</a>.</li>
+</ul>
 <hr />
 <h3 id="pmfof"><code>(pm.)fof</code></h3>
 <p>Function to generate a single Formant-Wave-Function.</p>
-<h4 id="reference_2">Reference</h4>
-<ul>
-<li><a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</li>
-</ul>
 <h4 id="usage_124">Usage</h4>
 <pre><code>_ : fof(fc,bw,a,g) : _
 </code></pre>
@@ -2551,26 +3052,34 @@ Ported from <code>chant-lib</code>.</p>
 <li><code>g</code>: linear scale factor (g=1 gives 0dB amplitude response at fc)</li>
 <li>input is an impulse signal to excite filter</li>
 </ul>
+<h4 id="test_124">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fof_test = pm.fof(0.3, 440, 880, 0.5);
+</code></pre>
+<h4 id="reference_2">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</li>
+</ul>
 <hr />
 <h3 id="pmfofsh"><code>(pm.)fofSH</code></h3>
 <p>FOF with sample and hold used on <code>bw</code> and a parameter
 used in the filter-cycling FOF function <code>fofCycle</code>.</p>
-<h4 id="reference_3">Reference</h4>
-<ul>
-<li><a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</li>
-</ul>
 <h4 id="usage_125">Usage</h4>
 <pre><code>_ : fofSH(fc,bw,a,g) : _
 </code></pre>
 <p>Where: all parameters same as for <a href="#fof"><code>fof</code></a></p>
+<h4 id="test_125">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fofSH_test = pm.fofSH(0.3, 440, 880, 0.5);
+</code></pre>
+<h4 id="reference_3">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</li>
+</ul>
 <hr />
 <h3 id="pmfofcycle"><code>(pm.)fofCycle</code></h3>
 <p>FOF implementation where time-varying filter parameter noise is
 mitigated by using a cycle of <code>n</code> sample and hold FOF filters.</p>
-<h4 id="reference_4">Reference</h4>
-<ul>
-<li><a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</li>
-</ul>
 <h4 id="usage_126">Usage</h4>
 <pre><code>_ : fofCycle(fc,bw,a,g,n) : _
 </code></pre>
@@ -2578,6 +3087,14 @@ mitigated by using a cycle of <code>n</code> sample and hold FOF filters.</p>
 <ul>
 <li><code>n</code>: the number of FOF filters to cycle through</li>
 <li>all other parameters are same as for <a href="#fof"><code>fof</code></a></li>
+</ul>
+<h4 id="test_126">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 0.2);
+</code></pre>
+<h4 id="reference_4">Reference</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf">https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf</a>.</li>
 </ul>
 <hr />
 <h3 id="pmfofsmooth"><code>(pm.)fofSmooth</code></h3>
@@ -2592,6 +3109,10 @@ parameters <code>bw</code> and <code>a</code> with <a href="#smooth">smooth</a>.
 <li><code>tau</code>: the desired smoothing time constant in seconds</li>
 <li>all other parameters are same as for <a href="#fof"><code>fof</code></a></li>
 </ul>
+<h4 id="test_127">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2);
+</code></pre>
 <hr />
 <h3 id="pmformantfilterfofcycle"><code>(pm.)formantFilterFofCycle</code></h3>
 <p>Formant filter based on a single FOF filter.
@@ -2615,6 +3136,10 @@ the frequency range of the provided source to be realistic.</p>
 <li><code>freq</code>: fundamental frequency of excitation signal. Used to calculate
         rise time of envelope</li>
 </ul>
+<h4 id="test_128">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+formantFilterFofCycle_test = pm.formantFilterFofCycle(0, 0, 5, 0, 200);
+</code></pre>
 <hr />
 <h3 id="pmformantfilterfofsmooth"><code>(pm.)formantFilterFofSmooth</code></h3>
 <p>Formant filter based on a single FOF filter.
@@ -2634,8 +3159,12 @@ the frequency range of the provided source to be realistic.</p>
 <li><code>nFormants</code>: number of formant regions in frequency domain, typically 5</li>
 <li><code>i</code>: formant number (i.e. 1 - 5) used to index formant data value arrays</li>
 <li><code>freq</code>: fundamental frequency of excitation signal. Used to calculate
-        rise time of envelope</li>
+rise time of envelope</li>
 </ul>
+<h4 id="test_129">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+formantFilterFofSmooth_test = pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
+</code></pre>
 <hr />
 <h3 id="pmformantfilterbp"><code>(pm.)formantFilterBP</code></h3>
 <p>Formant filter based on a single resonant bandpass filter.
@@ -2653,6 +3182,10 @@ the frequency range of the provided source to be realistic.</p>
 <li><code>i</code>: formant index used to index formant data value arrays</li>
 <li><code>freq</code>: fundamental frequency of excitation signal.</li>
 </ul>
+<h4 id="test_130">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+formantFilterBP_test = pm.formantFilterBP(0, 0, 5, 0, 200);
+</code></pre>
 <hr />
 <h3 id="pmformantfilterbank"><code>(pm.)formantFilterbank</code></h3>
 <p>Formant filterbank which can use different types of filterbank
@@ -2672,6 +3205,10 @@ of the provided source to be realistic.</p>
 <li><code>freq</code>: fundamental frequency of excitation signal. Needed for FOF
  version to calculate rise time of envelope</li>
 </ul>
+<h4 id="test_131">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+formantFilterbank_test = pm.formantFilterbank(0, 0, 5, 0);
+</code></pre>
 <hr />
 <h3 id="pmformantfilterbankfofcycle"><code>(pm.)formantFilterbankFofCycle</code></h3>
 <p>Formant filterbank based on a bank of fof filters.
@@ -2688,6 +3225,10 @@ the frequency range of the provided source to be realistic.</p>
 <li><code>freq</code>: the fundamental frequency of the excitation signal. Needed to calculate the skirtwidth 
 of the FOF envelopes and for the autobendFreq and vocalEffort functions</li>
 </ul>
+<h4 id="test_132">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+formantFilterbankFofCycle_test = pm.formantFilterbankFofCycle(0, 0, 5));
+</code></pre>
 <hr />
 <h3 id="pmformantfilterbankfofsmooth"><code>(pm.)formantFilterbankFofSmooth</code></h3>
 <p>Formant filterbank based on a bank of fof filters.
@@ -2705,6 +3246,10 @@ the frequency range of the provided source to be realistic.</p>
 calculate the skirtwidth of the FOF envelopes and for the
 autobendFreq and vocalEffort functions</li>
 </ul>
+<h4 id="test_133">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+formantFilterbankFofSmooth_test = pm.formantFilterbankFofSmooth(0, 0, 5);
+</code></pre>
 <hr />
 <h3 id="pmformantfilterbankbp"><code>(pm.)formantFilterbankBP</code></h3>
 <p>Formant filterbank based on a bank of resonant bandpass filters.
@@ -2718,8 +3263,12 @@ the frequency range of the provided source to be realistic.</p>
 <ul>
 <li><code>voiceType</code>: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)</li>
 <li><code>vowel</code>: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)</li>
-<li><code>freq</code>: the fundamental frequency of the excitation signal. Needed for the autobendFreq and vocalEffort functions</li>
+<li><code>freq</code>: the fundamental frequency of the excitation signal. Needed for the autobendFreq and vocalEffort functions.</li>
 </ul>
+<h4 id="test_134">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+formantFilterbankBP_test = pm.formantFilterbankBP(0, 0, 5);
+</code></pre>
 <hr />
 <h3 id="pmsfformantmodel"><code>(pm.)SFFormantModel</code></h3>
 <p>Simple formant/vocal synthesizer based on a source/filter model. The <code>source</code>
@@ -2741,6 +3290,10 @@ the frequency range of the synthesized voice to be realistic.</p>
 <li><code>gain</code>: linear gain multiplier to multiply the source by</li>
 <li><code>isFof</code>: whether model is FOF based (0: no, 1: yes)</li>
 </ul>
+<h4 id="test_135">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModel_test = pm.SFFormantModel(0, 0, 0.5, 0.6, 100, 2, 1, 1);
+</code></pre>
 <hr />
 <h3 id="pmsfformantmodelfofcycle"><code>(pm.)SFFormantModelFofCycle</code></h3>
 <p>Simple formant/vocal synthesizer based on a source/filter model. The source
@@ -2760,6 +3313,10 @@ and model does not depend on SFFormantModel function.</p>
 <li><code>freq</code>: the fundamental frequency of the source signal</li>
 <li><code>gain</code>: linear gain multiplier to multiply the source by</li>
 </ul>
+<h4 id="test_136">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelFofCycle_test = pm.SFFormantModelFofCycle(0.5, 0.6, 0.7);
+</code></pre>
 <hr />
 <h3 id="pmsfformantmodelfofsmooth"><code>(pm.)SFFormantModelFofSmooth</code></h3>
 <p>Simple formant/vocal synthesizer based on a source/filter model. The source
@@ -2777,6 +3334,10 @@ the frequency range of the synthesized voice to be realistic.</p>
 <li><code>freq</code>: the fundamental frequency of the source signal</li>
 <li><code>gain</code>: linear gain multiplier to multiply the source by</li>
 </ul>
+<h4 id="test_137">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelFofSmooth_test = pm.SFFormantModelFofSmooth(0.5, 0.6, 0.7);
+</code></pre>
 <hr />
 <h3 id="pmsfformantmodelbp"><code>(pm.)SFFormantModelBP</code></h3>
 <p>Simple formant/vocal synthesizer based on a source/filter model. The source
@@ -2797,11 +3358,19 @@ the frequency range of the synthesized voice to be realistic.</p>
 <li><code>freq</code>: the fundamental frequency of the source signal</li>
 <li><code>gain</code>: linear gain multiplier to multiply the source by</li>
 </ul>
+<h4 id="test_138">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelBP_test = pm.SFFormantModelBP(0.5, 0.6, 0.7);
+</code></pre>
 <hr />
 <h3 id="pmsfformantmodelfofcycle_ui"><code>(pm.)SFFormantModelFofCycle_ui</code></h3>
 <p>Ready-to-use source-filter vocal synthesizer with built-in user interface.</p>
 <h4 id="usage_139">Usage</h4>
 <pre><code>SFFormantModelFofCycle_ui : _
+</code></pre>
+<h4 id="test_139">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelFofCycle_ui_test = pm.SFFormantModelFofCycle_ui;
 </code></pre>
 <hr />
 <h3 id="pmsfformantmodelfofsmooth_ui"><code>(pm.)SFFormantModelFofSmooth_ui</code></h3>
@@ -2809,11 +3378,19 @@ the frequency range of the synthesized voice to be realistic.</p>
 <h4 id="usage_140">Usage</h4>
 <pre><code>SFFormantModelFofSmooth_ui : _
 </code></pre>
+<h4 id="test_140">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelFofSmooth_ui_test = pm.SFFormantModelFofSmooth_ui;
+</code></pre>
 <hr />
 <h3 id="pmsfformantmodelbp_ui"><code>(pm.)SFFormantModelBP_ui</code></h3>
 <p>Ready-to-use source-filter vocal synthesizer with built-in user interface.</p>
 <h4 id="usage_141">Usage</h4>
 <pre><code>SFFormantModelBP_ui : _
+</code></pre>
+<h4 id="test_141">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelBP_ui_test = pm.SFFormantModelBP_ui;
 </code></pre>
 <hr />
 <h3 id="pmsfformantmodelfofcycle_ui_midi"><code>(pm.)SFFormantModelFofCycle_ui_MIDI</code></h3>
@@ -2821,17 +3398,29 @@ the frequency range of the synthesized voice to be realistic.</p>
 <h4 id="usage_142">Usage</h4>
 <pre><code>SFFormantModelFofCycle_ui_MIDI : _
 </code></pre>
+<h4 id="test_142">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelFofCycle_ui_MIDI_test = pm.SFFormantModelFofCycle_ui_MIDI;
+</code></pre>
 <hr />
 <h3 id="pmsfformantmodelfofsmooth_ui_midi"><code>(pm.)SFFormantModelFofSmooth_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable source-filter vocal synthesizer.</p>
 <h4 id="usage_143">Usage</h4>
 <pre><code>SFFormantModelFofSmooth_ui_MIDI : _
 </code></pre>
+<h4 id="test_143">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelFofSmooth_ui_MIDI_test = pm.SFFormantModelFofSmooth_ui_MIDI;
+</code></pre>
 <hr />
 <h3 id="pmsfformantmodelbp_ui_midi"><code>(pm.)SFFormantModelBP_ui_MIDI</code></h3>
 <p>Ready-to-use MIDI-controllable source-filter vocal synthesizer.</p>
 <h4 id="usage_144">Usage</h4>
 <pre><code>SFFormantModelBP_ui_MIDI : _
+</code></pre>
+<h4 id="test_144">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+SFFormantModelBP_ui_MIDI_test = pm.SFFormantModelBP_ui_MIDI;
 </code></pre>
 <h2 id="misc-functions">Misc Functions</h2>
 <p>Various miscellaneous functions.</p>
@@ -2847,6 +3436,10 @@ allpass filter by the signal it is processing.</p>
 <ul>
 <li><code>nonlinearity</code>: amount of nonlinearity to be added (0-1)</li>
 </ul>
+<h4 id="test_145">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+allpassNL_test = 0,0,0 : pm.allpassNL(0.4);
+</code></pre>
 <hr />
 <h3 id="pmmodalmodel"><code>(pm.)modalModel</code></h3>
 <p>Implement multiple resonance modes using resonant bandpass filters.</p>
@@ -2865,6 +3458,11 @@ fifth) where the higher one decays faster and is attenuated:</p>
 <pre><code>os.impulse : modalModel(2, (440, 660),
                            (0.5, 0.25),
                            (ba.db2linear(-1), ba.db2linear(-6)) : _
+</code></pre>
+<h4 id="test_146">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+modalModel_test = os.impulse : pm.modalModel(3, (440,660,880), (0.5,0.4,0.3), (0.8,0.6,0.4));
 </code></pre>
 <p>Further reading: <a href="https://raw.githubusercontent.com/grame-cncm/faust/master-dev/tools/physicalModeling/ir2dsp/lacPaper2017.pdf">Grumiaux et. al., 2017:
 Impulse-Response and CAD-Model-Based Physical Modeling in
@@ -2890,6 +3488,11 @@ the explicit Runge-Kutta methods.</p>
 rk_solve_2 = rk_solve((0,1/2), (1/2, 0,1), 1);
 rk_solve_3 = rk_solve((0,1/2,1), (1/2,-1,2, 1/6,2/3,1/6), 1);
 rk_solve_4 = rk_solve((0,1/2,1/2,1), (1/2,0,1/2,0,0,1, 1/6,1/3,1/3,1/6), 1);
+</code></pre>
+<h4 id="test_147">Test</h4>
+<pre><code>pm = library(&quot;physmodels.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+rk_solve_test = pm.rk_solve((0), (1), 1, 1.0/ma.SR, eq, (1)) with { eq(t,x) = -x; };
 </code></pre>
 <h4 id="example-test-program">Example test program</h4>
 <p>Suppose we have a system of differential equations:</p>

@@ -267,7 +267,15 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="soundfileslib">soundfiles.lib</h1>
-<p>A library to handle soundfiles in Faust. Its official prefix is <code>so</code>.</p>
+<p>Soundfiles library. Its official prefix is <code>so</code>.</p>
+<p>This library provides functions and abstractions to read, write, and manage
+audio files in Faust. It supports sample-based playback, multi-channel file handling,
+interpolation, and looping controls for integration of recorded or pre-rendered audio
+in synthesis, effects, and compositional contexts.</p>
+<p>The Soundfiles library is organized into 1 section:</p>
+<ul>
+<li><a href="#functions-reference">Functions Reference</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/soundfiles.lib">https://github.com/grame-cncm/faustlibraries/blob/master/soundfiles.lib</a></li>
@@ -285,6 +293,11 @@
 <li><code>sf</code>: the soundfile</li>
 <li><code>part</code>: the part in the soundfile list of sounds</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>so = library(&quot;soundfiles.lib&quot;);
+sf = soundfile(&quot;sound[url:{'tests/assets/silence.wav'}]&quot;, 1);
+loop_test = so.loop(sf, 0);
+</code></pre>
 <hr />
 <h3 id="soloop_speed"><code>(so.)loop_speed</code></h3>
 <p>Play a soundfile in a loop taking into account its sampling rate, with speed control.
@@ -298,6 +311,11 @@
 <li><code>part</code>: the part in the soundfile list of sounds</li>
 <li><code>speed</code>: the speed between 0 and n</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>so = library(&quot;soundfiles.lib&quot;);
+sf = soundfile(&quot;sound[url:{'tests/assets/silence.wav'}]&quot;, 1);
+loop_speed_test = so.loop_speed(sf, 0, hslider(&quot;loop_speed:speed&quot;, 1, 0, 2, 0.01));
+</code></pre>
 <hr />
 <h3 id="soloop_speed_level"><code>(so.)loop_speed_level</code></h3>
 <p>Play a soundfile in a loop taking into account its sampling rate, with speed and level controls.
@@ -311,7 +329,17 @@
 <li><code>part</code>: the part in the soundfile list of sounds</li>
 <li><code>speed</code>: the speed between 0 and n</li>
 <li><code>level</code>: the volume between 0 and n</li>
-</ul></div>
+</ul>
+<h4 id="test_2">Test</h4>
+<pre><code>so = library(&quot;soundfiles.lib&quot;);
+sf = soundfile(&quot;sound[url:{'tests/assets/silence.wav'}]&quot;, 1);
+loop_speed_level_test = so.loop_speed_level(
+    sf,
+    0,
+    hslider(&quot;loop_speed_level:speed&quot;, 1, 0, 2, 0.01),
+    hslider(&quot;loop_speed_level:level&quot;, 0.5, 0, 1, 0.01)
+);
+</code></pre></div>
             </div>
         </div>
 

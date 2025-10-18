@@ -583,7 +583,11 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="oscillatorslib">oscillators.lib</h1>
-<p>This library contains a collection of sound generators. Its official prefix is <code>os</code>.</p>
+<p>Oscillators library. Its official prefix is <code>os</code>.</p>
+<p>This library provides a wide range of oscillator designs for sound synthesis.
+It includes classic waveforms (sine, sawtooth, square, triangle), band-limited and anti-aliased
+oscillators, phase and frequency modulation units, as well as noise-based and physical-model
+driven oscillators for advanced synthesis techniques in Faust.</p>
 <p>The oscillators library is organized into 9 sections:</p>
 <ul>
 <li><a href="#wave-table-based-oscillators">Wave-Table-Based Oscillators</a></li>
@@ -629,6 +633,10 @@ version is implemented, and can be used alternatively by setting <code>SAFE=1</c
 <ul>
 <li><code>tablesize</code>: the table size</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+sinwaveform_test = os.sinwaveform(1024);
+</code></pre>
 <hr />
 <h3 id="oscoswaveform"><code>(os.)coswaveform</code></h3>
 <p>Cosine waveform ready to use with a <code>rdtable</code>.</p>
@@ -639,6 +647,10 @@ version is implemented, and can be used alternatively by setting <code>SAFE=1</c
 <ul>
 <li><code>tablesize</code>: the table size</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+coswaveform_test = os.coswaveform(1024);
+</code></pre>
 <hr />
 <h3 id="osphasor"><code>(os.)phasor</code></h3>
 <p>A simple phasor to be used with a <code>rdtable</code>.
@@ -653,6 +665,10 @@ version is implemented, and can be used alternatively by setting <code>SAFE=1</c
 </ul>
 <p>Note that <code>tablesize</code> is just a multiplier for the output of a unit-amp phasor
 so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the range [0, 1[.</p>
+<h4 id="test_2">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+phasor_test = os.phasor(1024, 440);
+</code></pre>
 <hr />
 <h3 id="oshs_phasor"><code>(os.)hs_phasor</code></h3>
 <p>Hardsyncing phasor to be used with a <code>rdtable</code>.</p>
@@ -665,6 +681,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <li><code>freq</code>: the frequency in Hz</li>
 <li><code>reset</code>: a reset signal, reset phase to 0 when equal to 1</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+hs_phasor_test = os.hs_phasor(1024, 330, button(&quot;reset&quot;));
+</code></pre>
 <hr />
 <h3 id="oshsp_phasor"><code>(os.)hsp_phasor</code></h3>
 <p>Hardsyncing phasor with selectable phase to be used with a <code>rdtable</code>.</p>
@@ -678,6 +698,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <li><code>reset</code>: reset the oscillator to phase when equal to 1</li>
 <li><code>phase</code>: phase between 0 and 1</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+hsp_phasor_test = os.hsp_phasor(1024, 330, button(&quot;reset&quot;), 0.25);
+</code></pre>
 <hr />
 <h3 id="ososcsin"><code>(os.)oscsin</code></h3>
 <p>Sine wave oscillator.
@@ -689,6 +713,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscsin_test = os.oscsin(440);
+</code></pre>
 <hr />
 <h3 id="oshs_oscsin"><code>(os.)hs_oscsin</code></h3>
 <p>Sin lookup table with hardsyncing phase.</p>
@@ -700,6 +728,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <li><code>freq</code>: the frequency in Hz</li>
 <li><code>reset</code>: reset the oscillator to 0 when equal to 1</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+hs_oscsin_test = os.hs_oscsin(440, button(&quot;reset&quot;));
+</code></pre>
 <hr />
 <h3 id="ososccos"><code>(os.)osccos</code></h3>
 <p>Cosine wave oscillator.</p>
@@ -710,6 +742,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+osccos_test = os.osccos(440);
+</code></pre>
 <hr />
 <h3 id="oshs_osccos"><code>(os.)hs_osccos</code></h3>
 <p>Cos lookup table with hardsyncing phase.</p>
@@ -721,6 +757,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <li><code>freq</code>: the frequency in Hz</li>
 <li><code>reset</code>: reset the oscillator to 0 when equal to 1</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+hs_osccos_test = os.hs_osccos(440, button(&quot;reset&quot;));
+</code></pre>
 <hr />
 <h3 id="ososcp"><code>(os.)oscp</code></h3>
 <p>A sine wave generator with controllable phase.</p>
@@ -732,6 +772,11 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <li><code>freq</code>: the frequency in Hz</li>
 <li><code>phase</code>: the phase in radian</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+oscp_test = os.oscp(440, ma.PI/3);
+</code></pre>
 <hr />
 <h3 id="ososci"><code>(os.)osci</code></h3>
 <p>Interpolated phase sine wave oscillator.</p>
@@ -742,6 +787,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+osci_test = os.osci(440);
+</code></pre>
 <hr />
 <h3 id="ososc"><code>(os.)osc</code></h3>
 <p>Default sine wave oscillator (same as <a href="#oscsin">oscsin</a>).
@@ -753,6 +802,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+osc_test = os.osc(440);
+</code></pre>
 <hr />
 <h3 id="osm_oscsin"><code>(os.)m_oscsin</code></h3>
 <p>Sine wave oscillator based on the <code>sin</code> mathematical function.</p>
@@ -763,6 +816,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+m_oscsin_test = os.m_oscsin(440);
+</code></pre>
 <hr />
 <h3 id="osm_osccos"><code>(os.)m_osccos</code></h3>
 <p>Sine wave oscillator based on the <code>cos</code> mathematical function.</p>
@@ -773,6 +830,10 @@ so <code>phasor(1.0, freq)</code> can be used to generate a phasor output in the
 <ul>
 <li><code>freq</code>: the frequency in Hz</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+m_osccos_test = os.m_osccos(440);
+</code></pre>
 <h2 id="low-frequency-oscillators">Low Frequency Oscillators</h2>
 <p>Low Frequency Oscillators (LFOs) have prefix <code>lf_</code>
 (no aliasing suppression, since it is inaudible at LF).
@@ -788,6 +849,10 @@ Use <code>sawN</code> and its derivatives for audio oscillators with suppressed 
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_14">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_imptrain_test = os.lf_imptrain(3);
+</code></pre>
 <hr />
 <h3 id="oslf_pulsetrainpos"><code>(os.)lf_pulsetrainpos</code></h3>
 <p>Unit-amplitude nonnegative LF pulse train, duty cycle between 0 and 1.</p>
@@ -799,6 +864,10 @@ Use <code>sawN</code> and its derivatives for audio oscillators with suppressed 
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>duty</code>: duty cycle between 0 and 1</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_pulsetrainpos_test = os.lf_pulsetrainpos(3, 0.35);
+</code></pre>
 <hr />
 <h3 id="oslf_pulsetrain"><code>(os.)lf_pulsetrain</code></h3>
 <p>Unit-amplitude zero-mean LF pulse train, duty cycle between 0 and 1.</p>
@@ -810,6 +879,10 @@ Use <code>sawN</code> and its derivatives for audio oscillators with suppressed 
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>duty</code>: duty cycle between 0 and 1</li>
 </ul>
+<h4 id="test_16">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_pulsetrain_test = os.lf_pulsetrain(3, 0.35);
+</code></pre>
 <hr />
 <h3 id="oslf_squarewavepos"><code>(os.)lf_squarewavepos</code></h3>
 <p>Positive LF square wave in [0,1]</p>
@@ -820,6 +893,10 @@ Use <code>sawN</code> and its derivatives for audio oscillators with suppressed 
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_17">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_squarewavepos_test = os.lf_squarewavepos(3);
+</code></pre>
 <hr />
 <h3 id="oslf_squarewave"><code>(os.)lf_squarewave</code></h3>
 <p>Zero-mean unit-amplitude LF square wave.
@@ -831,6 +908,10 @@ Use <code>sawN</code> and its derivatives for audio oscillators with suppressed 
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_18">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_squarewave_test = os.lf_squarewave(3);
+</code></pre>
 <hr />
 <h3 id="oslf_trianglepos"><code>(os.)lf_trianglepos</code></h3>
 <p>Positive unit-amplitude LF positive triangle wave.</p>
@@ -841,6 +922,10 @@ Use <code>sawN</code> and its derivatives for audio oscillators with suppressed 
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_19">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_trianglepos_test = os.lf_trianglepos(3);
+</code></pre>
 <hr />
 <h3 id="oslf_triangle"><code>(os.)lf_triangle</code></h3>
 <p>Zero-mean unit-amplitude LF triangle wave.
@@ -852,6 +937,10 @@ Use <code>sawN</code> and its derivatives for audio oscillators with suppressed 
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_20">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_triangle_test = os.lf_triangle(3);
+</code></pre>
 <h2 id="low-frequency-sawtooths">Low Frequency Sawtooths</h2>
 <p>Sawtooth waveform oscillators for virtual analog synthesis et al.
 The 'simple' versions (<code>lf_rawsaw</code>, <code>lf_sawpos</code> and <code>saw1</code>), are mere samplings of
@@ -874,6 +963,10 @@ suppression (i.e., <code>saw1</code> is ok).</p>
 <ul>
 <li><code>periodsamps</code>: number of periods per samples</li>
 </ul>
+<h4 id="test_21">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_rawsaw_test = os.lf_rawsaw(128);
+</code></pre>
 <hr />
 <h3 id="oslf_sawpos"><code>(os.)lf_sawpos</code></h3>
 <p>Simple sawtooth waveform oscillator between 0 and 1.</p>
@@ -884,6 +977,10 @@ suppression (i.e., <code>saw1</code> is ok).</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_22">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_sawpos_test = os.lf_sawpos(3);
+</code></pre>
 <hr />
 <h3 id="oslf_sawpos_phase"><code>(os.)lf_sawpos_phase</code></h3>
 <p>Simple sawtooth waveform oscillator between 0 and 1
@@ -896,6 +993,10 @@ with phase control.</p>
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>phase</code>: phase between 0 and 1</li>
 </ul>
+<h4 id="test_23">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_sawpos_phase_test = os.lf_sawpos_phase(3, 0.25);
+</code></pre>
 <hr />
 <h3 id="oslf_sawpos_reset"><code>(os.)lf_sawpos_reset</code></h3>
 <p>Simple sawtooth waveform oscillator between 0 and 1
@@ -908,6 +1009,10 @@ with reset.</p>
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>reset</code>: reset the oscillator to 0 when equal to 1</li>
 </ul>
+<h4 id="test_24">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_sawpos_reset_test = os.lf_sawpos_reset(3, button(&quot;reset&quot;));
+</code></pre>
 <hr />
 <h3 id="oslf_sawpos_phase_reset"><code>(os.)lf_sawpos_phase_reset</code></h3>
 <p>Simple sawtooth waveform oscillator between 0 and 1
@@ -921,6 +1026,10 @@ with phase control and reset.</p>
 <li><code>phase</code>: phase between 0 and 1</li>
 <li><code>reset</code>: reset the oscillator to phase when equal to 1</li>
 </ul>
+<h4 id="test_25">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, button(&quot;reset&quot;));
+</code></pre>
 <hr />
 <h3 id="oslf_saw"><code>(os.)lf_saw</code></h3>
 <p>Simple sawtooth waveform oscillator between -1 and 1.
@@ -932,6 +1041,10 @@ with phase control and reset.</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_26">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+lf_saw_test = os.lf_saw(3);
+</code></pre>
 <h2 id="alias-suppressed-sawtooth">Alias-Suppressed Sawtooth</h2>
 <hr />
 <h3 id="ossawn"><code>(os.)sawN</code></h3>
@@ -957,6 +1070,10 @@ saw2f4(freq) : _        // saw2dpw with 4th-order droop-correction filtering
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>phase</code>: phase between 0 and 1</li>
 </ul>
+<h4 id="test_27">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+sawN_test = os.sawN(3, 440);
+</code></pre>
 <h4 id="method">Method</h4>
 <p>Differentiated Polynomial Wave (DPW).</p>
 <h5 id="reference">Reference</h5>
@@ -981,6 +1098,10 @@ be generated using <code>lf_sawpos</code> instead.)</p>
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>phase</code>: waveform phase as a fraction of one period (rounded to nearest sample)</li>
 </ul>
+<h4 id="test_28">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+sawNp_test = os.sawNp(3, 330, 0.5);
+</code></pre>
 <h4 id="implementation-notes">Implementation Notes</h4>
 <p>The phase offset is implemented by delaying <code>sawN(N,freq)</code> by
 <code>round(phase*ma.SR/freq)</code> samples, for up to 8191 samples.
@@ -999,6 +1120,12 @@ saw4(freq) : _
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_29">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+saw2_test = os.saw2(220);
+saw3_test = os.saw3(220);
+saw4_test = os.saw4(220);
+</code></pre>
 <h5 id="references_1">References</h5>
 <p>See <code>sawN</code> above.</p>
 <h4 id="implementation-notes_1">Implementation Notes</h4>
@@ -1015,6 +1142,10 @@ using Polynomial Transition Regions (PTR) for order 2.</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_30">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+saw2ptr_test = os.saw2ptr(220);
+</code></pre>
 <h5 id="implementation">Implementation</h5>
 <p>Polynomial Transition Regions (PTR) method for aliasing suppression.</p>
 <h5 id="references_2">References</h5>
@@ -1044,6 +1175,10 @@ using the Differentiated Polynomial Waveform (DWP) method.</p>
 <p>This is the original Faust <code>saw2</code> function using the DPW method.
 Since <code>saw2</code> is now defined as <code>saw2ptr</code>, the DPW version
 is now available as <code>saw2dwp</code>.</p>
+<h4 id="test_31">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+saw2dpw_test = os.saw2dpw(220);
+</code></pre>
 <hr />
 <h3 id="ossawtooth"><code>(os.)sawtooth</code></h3>
 <p>Alias-suppressed aliasing-suppressed sawtooth oscillator, presently defined as <code>saw2</code>.
@@ -1055,6 +1190,10 @@ is now available as <code>saw2dwp</code>.</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_32">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+sawtooth_test = os.sawtooth(220);
+</code></pre>
 <hr />
 <h3 id="ossaw2f2-ossaw2f4"><code>(os.)saw2f2, (os.)saw2f4</code></h3>
 <p>Alias-Suppressed Sawtooth Audio-Frequency Oscillator with Order 2 or 4 Droop Correction Filtering.</p>
@@ -1071,6 +1210,11 @@ This can be considered as beneficial, or it can be compensated with a high-frequ
 The boost filter is second-order for <code>saw2f2</code> and fourth-order for <code>saw2f4</code>, and both are designed
 for the DWP case and therefore use <code>saw2dpw</code>.
 See Figure 4(b) in the DPW reference for a plot of the slight droop in the DPW case.</p>
+<h4 id="test_33">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+saw2f2_test = os.saw2f2(220);
+saw2f4_test = os.saw2f4(220);
+</code></pre>
 <h2 id="alias-suppressed-pulse-square-and-impulse-trains">Alias-Suppressed Pulse, Square, and Impulse Trains</h2>
 <p>Alias-Suppressed Pulse, Square and Impulse Trains.</p>
 <p><code>pulsetrainN</code>, <code>pulsetrain</code>, <code>squareN</code>, <code>square</code>, <code>imptrainN</code>, <code>imptrain</code>,
@@ -1095,12 +1239,36 @@ triangle : _ // = triangleN(2)
 <li><code>N</code>: polynomial order, a constant numerical expression</li>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_34">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+sawNp_test = os.sawNp(3, 330, 0.5);
+saw2_test = os.saw2(220);
+saw3_test = os.saw3(220);
+saw4_test = os.saw4(220);
+saw2ptr_test = os.saw2ptr(220);
+saw2dpw_test = os.saw2dpw(220);
+sawtooth_test = os.sawtooth(220);
+saw2f2_test = os.saw2f2(220);
+saw2f4_test = os.saw2f4(220);
+pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
+pulsetrain_test = os.pulsetrain(220, 0.25);
+squareN_test = os.squareN(3, 220);
+square_test = os.square(220);
+imptrainN_test = os.imptrainN(3, 220);
+imptrain_test = os.imptrain(220);
+triangleN_test = os.triangleN(3, 220);
+triangle_test = os.triangle(220);
+</code></pre>
 <hr />
 <h3 id="osimpulse"><code>(os.)impulse</code></h3>
 <p>One-time impulse generated when the Faust process is started.
 <code>impulse</code> is a standard Faust function.</p>
 <h4 id="usage_35">Usage</h4>
 <pre><code>impulse : _
+</code></pre>
+<h4 id="test_35">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+impulse_test = os.impulse;
 </code></pre>
 <hr />
 <h3 id="ospulsetrainn"><code>(os.)pulsetrainN</code></h3>
@@ -1114,6 +1282,10 @@ triangle : _ // = triangleN(2)
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>duty</code>: duty cycle between 0 and 1</li>
 </ul>
+<h4 id="test_36">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
+</code></pre>
 <hr />
 <h3 id="ospulsetrain"><code>(os.)pulsetrain</code></h3>
 <p>Alias-suppressed pulse train oscillator. Based on <code>pulsetrainN(2)</code>.
@@ -1126,6 +1298,10 @@ triangle : _ // = triangleN(2)
 <li><code>freq</code>: frequency in Hz</li>
 <li><code>duty</code>: duty cycle between 0 and 1</li>
 </ul>
+<h4 id="test_37">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+pulsetrain_test = os.pulsetrain(220, 0.25);
+</code></pre>
 <hr />
 <h3 id="ossquaren"><code>(os.)squareN</code></h3>
 <p>Alias-suppressed square wave oscillator.</p>
@@ -1137,6 +1313,10 @@ triangle : _ // = triangleN(2)
 <li><code>N</code>: order, as a constant numerical expression</li>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_38">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+squareN_test = os.squareN(3, 220);
+</code></pre>
 <hr />
 <h3 id="ossquare"><code>(os.)square</code></h3>
 <p>Alias-suppressed square wave oscillator. Based on <code>squareN(2)</code>.
@@ -1148,6 +1328,10 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_39">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+square_test = os.square(220);
+</code></pre>
 <hr />
 <h3 id="osimptrainn"><code>(os.)imptrainN</code></h3>
 <p>Alias-suppressed impulse train generator.</p>
@@ -1159,6 +1343,10 @@ triangle : _ // = triangleN(2)
 <li><code>N</code>: order, as a constant numerical expression</li>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_40">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+imptrainN_test = os.imptrainN(4, 220);
+</code></pre>
 <hr />
 <h3 id="osimptrain"><code>(os.)imptrain</code></h3>
 <p>Alias-suppressed impulse train generator. Based on <code>imptrainN(2)</code>.
@@ -1170,6 +1358,10 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_41">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+imptrain_test = os.imptrain(220);
+</code></pre>
 <hr />
 <h3 id="ostrianglen"><code>(os.)triangleN</code></h3>
 <p>Alias-suppressed triangle wave oscillator.</p>
@@ -1181,6 +1373,10 @@ triangle : _ // = triangleN(2)
 <li><code>N</code>: order, as a constant numerical expression</li>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_42">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+triangleN_test = os.triangleN(3, 220);
+</code></pre>
 <hr />
 <h3 id="ostriangle"><code>(os.)triangle</code></h3>
 <p>Alias-suppressed triangle wave oscillator. Based on <code>triangleN(2)</code>.
@@ -1192,10 +1388,22 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_43">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+triangle_test = os.triangle(220);
+</code></pre>
 <h2 id="filter-based-oscillators">Filter-Based Oscillators</h2>
 <p>Filter-Based Oscillators.</p>
 <h4 id="usage_44">Usage</h4>
 <pre><code>osc[b|rq|rs|rc|s](freq), where freq = frequency in Hz.
+</code></pre>
+<h4 id="test_44">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscb_test = os.oscb(440);
+oscrq_test = os.oscrq(440);
+oscrs_test = os.oscrs(440);
+oscrc_test = os.oscrc(440);
+oscs_test = os.oscs(440);
 </code></pre>
 <h4 id="references_3">References</h4>
 <ul>
@@ -1212,6 +1420,14 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_45">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscb_test = os.oscb(440);
+oscrq_test = os.oscrq(440);
+oscrs_test = os.oscrs(440);
+oscrc_test = os.oscrc(440);
+oscs_test = os.oscs(440);
+</code></pre>
 <hr />
 <h3 id="ososcrq"><code>(os.)oscrq</code></h3>
 <p>Sinusoidal (sine and cosine) oscillator based on 2D vector rotation,
@@ -1224,6 +1440,10 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_46">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscrq_test = os.oscrq(440);
+</code></pre>
 <h4 id="reference_1">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
@@ -1240,6 +1460,10 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_47">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscrs_test = os.oscrs(440);
+</code></pre>
 <h4 id="reference_2">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
@@ -1256,6 +1480,10 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_48">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscrc_test = os.oscrc(440);
+</code></pre>
 <h4 id="reference_3">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
@@ -1272,6 +1500,10 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_49">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscs_test = os.oscs(440);
+</code></pre>
 <hr />
 <h3 id="osquadosc"><code>(os.)quadosc</code></h3>
 <p>Quadrature (cosine and sine) oscillator based on QuadOsc by Martin Vicanek.</p>
@@ -1282,6 +1514,10 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_50">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+quadosc_test = os.quadosc(440);
+</code></pre>
 <h4 id="reference_4">Reference</h4>
 <ul>
 <li><a href="https://vicanek.de/articles/QuadOsc.pdf">https://vicanek.de/articles/QuadOsc.pdf</a></li>
@@ -1296,6 +1532,10 @@ triangle : _ // = triangleN(2)
 <ul>
 <li><code>vs</code> : list of amplitudes</li>
 </ul>
+<h4 id="test_51">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+sidebands_test = os.quadosc(110) : os.sidebands((1, 0.5, 0.25));
+</code></pre>
 <h4 id="example-test-program">Example test program</h4>
 <pre><code>   cos(x),sin(x) : sidebands((10,20,30))
 </code></pre>
@@ -1336,6 +1576,10 @@ generic but less convenient for immediate usage.</p>
 <ul>
 <li><code>N</code> : number of harmonics, compile time constant &gt; 1</li>
 </ul>
+<h4 id="test_52">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+sidebands_list_test = os.quadosc(110) : os.sidebands_list(3);
+</code></pre>
 <h4 id="example-test-program_1">Example test program</h4>
 <pre><code>   cos(x),sin(x) : sidebands_list(3)
 </code></pre>
@@ -1363,6 +1607,15 @@ harmonics based on direct summation formula.</p>
 <li><code>a</code>: decaying factor != 1</li>
 <li><code>n</code>: total number of harmonics (<code>osccN/oscsN</code> only)</li>
 </ul>
+<h4 id="test_53">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+dsf_oscc_test = os.dsf.oscc(220, 110, 0.6);
+dsf_oscs_test = os.dsf.oscs(220, 110, 0.6);
+dsf_osccN_test = os.dsf.osccN(220, 110, 0.6, 4);
+dsf_oscsN_test = os.dsf.oscsN(220, 110, 0.6, 4);
+dsf_osccNq_test = os.dsf.osccNq(220, 110, 0.6);
+dsf_oscsNq_test = os.dsf.oscsNq(220, 110, 0.6);
+</code></pre>
 <h4 id="variants">Variants</h4>
 <ul>
 <li>infinite number of harmonics, implies aliasing</li>
@@ -1410,6 +1663,10 @@ cosine oscillator.</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_54">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscwc_test = os.oscwc(440);
+</code></pre>
 <h4 id="reference_6">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
@@ -1425,6 +1682,10 @@ sine oscillator.</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_55">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscws_test = os.oscws(440);
+</code></pre>
 <h4 id="reference_7">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
@@ -1440,6 +1701,10 @@ Unit-amplitude cosine and sine (quadrature) oscillator.</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_56">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscq_test = os.oscq(440);
+</code></pre>
 <h4 id="reference_8">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
@@ -1455,6 +1720,10 @@ Unit-amplitude cosine oscillator (default).</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_57">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+oscw_test = os.oscw(440);
+</code></pre>
 <h4 id="reference_9">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
@@ -1495,6 +1764,10 @@ There are two versions of the "index oscillators":</p>
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = saw-wave</li>
 </ul>
+<h4 id="test_58">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZsaw_test = os.CZsaw(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczsawp"><code>(os.)CZsawP</code></h3>
 <p>Oscillator that mimics the Casio CZ saw oscillator,
@@ -1508,6 +1781,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = saw-wave</li>
 </ul>
+<h4 id="test_59">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZsawP_test = os.CZsawP(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczsquare"><code>(os.)CZsquare</code></h3>
 <p>Oscillator that mimics the Casio CZ square oscillator
@@ -1520,6 +1797,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = square-wave</li>
 </ul>
+<h4 id="test_60">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZsquare_test = os.CZsquare(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczsquarep"><code>(os.)CZsquareP</code></h3>
 <p>Oscillator that mimics the Casio CZ square oscillator,
@@ -1533,6 +1814,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 to 1. 0 = sine-wave, 1 = square-wave</li>
 </ul>
+<h4 id="test_61">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZsquareP_test = os.CZsquareP(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczpulse"><code>(os.)CZpulse</code></h3>
 <p>Oscillator that mimics the Casio CZ pulse oscillator.
@@ -1545,6 +1830,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is closer to a pulse</li>
 </ul>
+<h4 id="test_62">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZpulse_test = os.CZpulse(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczpulsep"><code>(os.)CZpulseP</code></h3>
 <p>Oscillator that mimics the Casio CZ pulse oscillator,
@@ -1558,6 +1847,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is closer to a pulse</li>
 </ul>
+<h4 id="test_63">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZpulseP_test = os.CZpulseP(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczsinepulse"><code>(os.)CZsinePulse</code></h3>
 <p>Oscillator that mimics the Casio CZ sine/pulse oscillator.
@@ -1570,6 +1863,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is a sine minus a pulse</li>
 </ul>
+<h4 id="test_64">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZsinePulse_test = os.CZsinePulse(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczsinepulsep"><code>(os.)CZsinePulseP</code></h3>
 <p>Oscillator that mimics the Casio CZ sine/pulse oscillator,
@@ -1583,6 +1880,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is a sine minus a pulse</li>
 </ul>
+<h4 id="test_65">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZsinePulseP_test = os.CZsinePulseP(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczhalfsine"><code>(os.)CZhalfSine</code></h3>
 <p>Oscillator that mimics the Casio CZ half sine oscillator.
@@ -1595,6 +1896,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is somewhere between a saw and a square</li>
 </ul>
+<h4 id="test_66">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZhalfSine_test = os.CZhalfSine(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczhalfsinep"><code>(os.)CZhalfSineP</code></h3>
 <p>Oscillator that mimics the Casio CZ half sine oscillator,
@@ -1608,6 +1913,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>index</code>: the brightness of the oscillator, 0 gives a sine-wave, 1 is somewhere between a saw and a square</li>
 </ul>
+<h4 id="test_67">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZhalfSineP_test = os.CZhalfSineP(os.lf_sawpos(110), 0.5);
+</code></pre>
 <hr />
 <h3 id="osczressaw"><code>(os.)CZresSaw</code></h3>
 <p>Oscillator that mimics the Casio CZ resonant sawtooth oscillator.
@@ -1620,6 +1929,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>res</code>: the frequency of resonance as a factor of the fundamental pitch.</li>
 </ul>
+<h4 id="test_68">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZresSaw_test = os.CZresSaw(os.lf_sawpos(110), 2.5);
+</code></pre>
 <hr />
 <h3 id="osczrestriangle"><code>(os.)CZresTriangle</code></h3>
 <p>Oscillator that mimics the Casio CZ resonant triangle oscillator.
@@ -1632,6 +1945,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>res</code>: the frequency of resonance as a factor of the fundamental pitch.</li>
 </ul>
+<h4 id="test_69">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZresTriangle_test = os.CZresTriangle(os.lf_sawpos(110), 2.5);
+</code></pre>
 <hr />
 <h3 id="osczrestrap"><code>(os.)CZresTrap</code></h3>
 <p>Oscillator that mimics the Casio CZ resonant trapeze oscillator
@@ -1644,6 +1961,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>fund</code>: a saw-tooth waveform between 0 and 1 that the oscillator slaves to</li>
 <li><code>res</code>: the frequency of resonance as a factor of the fundamental pitch.</li>
 </ul>
+<h4 id="test_70">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+CZresTrap_test = os.CZresTrap(os.lf_sawpos(110), 2.5);
+</code></pre>
 <h2 id="polyblep-based-oscillators">PolyBLEP-Based Oscillators</h2>
 <hr />
 <h3 id="ospolyblep"><code>(os.)polyblep</code></h3>
@@ -1656,6 +1977,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <li><code>Q</code>: smoothing factor between 0 and 0.5. Determines how far from the ends of the phase interval the quadratic function is used.</li>
 <li><code>phase</code>: normalised phase (between 0 and 1)</li>
 </ul>
+<h4 id="test_71">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+polyblep_test = os.polyblep(0.2, os.lf_sawpos(220));
+</code></pre>
 <hr />
 <h3 id="ospolyblep_saw"><code>(os.)polyblep_saw</code></h3>
 <p>Sawtooth oscillator with suppressed aliasing (using <code>polyblep</code>).</p>
@@ -1666,6 +1991,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_72">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+polyblep_saw_test = os.polyblep_saw(220);
+</code></pre>
 <hr />
 <h3 id="ospolyblep_square"><code>(os.)polyblep_square</code></h3>
 <p>Square wave oscillator with suppressed aliasing (using <code>polyblep</code>).</p>
@@ -1676,6 +2005,10 @@ with it's phase aligned to <code>fund:sin</code>.
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
 </ul>
+<h4 id="test_73">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+polyblep_square_test = os.polyblep_square(220);
+</code></pre>
 <hr />
 <h3 id="ospolyblep_triangle"><code>(os.)polyblep_triangle</code></h3>
 <p>Triangle wave oscillator with suppressed aliasing (using <code>polyblep</code>).</p>
@@ -1685,7 +2018,11 @@ with it's phase aligned to <code>fund:sin</code>.
 <p>Where:</p>
 <ul>
 <li><code>freq</code>: frequency in Hz</li>
-</ul></div>
+</ul>
+<h4 id="test_74">Test</h4>
+<pre><code>os = library(&quot;oscillators.lib&quot;);
+polyblep_triangle_test = os.polyblep_triangle(220);
+</code></pre></div>
             </div>
         </div>
 

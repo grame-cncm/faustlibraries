@@ -315,7 +315,13 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="quantizerslib">quantizers.lib</h1>
-<p>Faust Frequency Quantization Library. Its official prefix is <code>qu</code>.</p>
+<p>Quantizers library. Its official prefix is <code>qu</code>.</p>
+<p>This library provides utilities for pitch and signal quantization in Faust.
+It includes functions for mapping continuous inputs to discrete musical scales.</p>
+<p>The Quantizers library is organized into 1 section:</p>
+<ul>
+<li><a href="#functions-reference">Functions Reference</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/quantizers.lib">https://github.com/grame-cncm/faustlibraries/blob/master/quantizers.lib</a></li>
@@ -333,6 +339,10 @@ Works for positive audio frequencies.</p>
 <li><code>rf</code> : frequency of the root note of the scale</li>
 <li><code>nl</code> : list of frequency ratios for each note relative to root</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+quantize_test = qu.quantize(440, qu.ionian, hslider(&quot;input&quot;, 450, 100, 1000, 1));
+</code></pre>
 <h4 id="example">Example</h4>
 <pre><code>process = quantize(440, (1, 1.125, 1.25, 1.333, 1.5));
 </code></pre>
@@ -348,6 +358,10 @@ Works for positive audio frequencies.</p>
 <li><code>rf</code> : frequency of the root note of the scale</li>
 <li><code>nl</code> : list of frequency ratios for each note relative to root</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+quantizeSmoothed_test = qu.quantizeSmoothed(440, qu.ionian, hslider(&quot;input&quot;, 450, 100, 1000, 1));
+</code></pre>
 <h4 id="example_1">Example</h4>
 <pre><code>process = quantizeSmoothed(440, dodeca);
 </code></pre>
@@ -361,6 +375,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+ionian_test = qu.quantize(220, qu.ionian, 260);
+</code></pre>
 <hr />
 <h3 id="qudorian"><code>(qu.)dorian</code></h3>
 <p>List of the frequency ratios of the notes of the dorian mode.</p>
@@ -371,6 +389,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+dorian_test = qu.quantize(220, qu.dorian, 260);
+</code></pre>
 <hr />
 <h3 id="quphrygian"><code>(qu.)phrygian</code></h3>
 <p>List of the frequency ratios of the notes of the phrygian mode.</p>
@@ -381,6 +403,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+phrygian_test = qu.quantize(220, qu.phrygian, 260);
+</code></pre>
 <hr />
 <h3 id="qulydian"><code>(qu.)lydian</code></h3>
 <p>List of the frequency ratios of the notes of the lydian mode.</p>
@@ -391,6 +417,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+lydian_test = qu.quantize(220, qu.lydian, 260);
+</code></pre>
 <hr />
 <h3 id="qumixo"><code>(qu.)mixo</code></h3>
 <p>List of the frequency ratios of the notes of the mixolydian mode.</p>
@@ -401,6 +431,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+mixo_test = qu.quantize(220, qu.mixo, 260);
+</code></pre>
 <hr />
 <h3 id="queolian"><code>(qu.)eolian</code></h3>
 <p>List of the frequency ratios of the notes of the eolian mode.</p>
@@ -411,6 +445,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+eolian_test = qu.quantize(220, qu.eolian, 260);
+</code></pre>
 <hr />
 <h3 id="qulocrian"><code>(qu.)locrian</code></h3>
 <p>List of the frequency ratios of the notes of the locrian mode.</p>
@@ -421,6 +459,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+locrian_test = qu.quantize(220, qu.locrian, 260);
+</code></pre>
 <hr />
 <h3 id="qupentanat"><code>(qu.)pentanat</code></h3>
 <p>List of the frequency ratios of the notes of the pythagorean tuning for the minor pentatonic scale.</p>
@@ -431,6 +473,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+pentanat_test = qu.quantize(220, qu.pentanat, 260);
+</code></pre>
 <hr />
 <h3 id="qukumoi"><code>(qu.)kumoi</code></h3>
 <p>List of the frequency ratios of the notes of the kumoijoshi, the japanese pentatonic scale.</p>
@@ -441,6 +487,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+kumoi_test = qu.quantize(220, qu.kumoi, 260);
+</code></pre>
 <hr />
 <h3 id="qunatural"><code>(qu.)natural</code></h3>
 <p>List of the frequency ratios of the notes of the natural major scale.</p>
@@ -451,6 +501,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+natural_test = qu.quantize(220, qu.natural, 260);
+</code></pre>
 <hr />
 <h3 id="qudodeca"><code>(qu.)dodeca</code></h3>
 <p>List of the frequency ratios of the notes of the dodecaphonic scale.</p>
@@ -461,6 +515,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+dodeca_test = qu.quantize(220, qu.dodeca, 260);
+</code></pre>
 <hr />
 <h3 id="qudimin"><code>(qu.)dimin</code></h3>
 <p>List of the frequency ratios of the notes of the diminished scale.</p>
@@ -471,6 +529,10 @@ Works for positive audio frequencies.</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+dimin_test = qu.quantize(220, qu.dimin, 260);
+</code></pre>
 <hr />
 <h3 id="qupenta"><code>(qu.)penta</code></h3>
 <p>List of the frequency ratios of the notes of the minor pentatonic scale.</p>
@@ -480,7 +542,11 @@ Works for positive audio frequencies.</p>
 <p>Where:</p>
 <ul>
 <li><code>rf</code>: frequency of the root note of the scale</li>
-</ul></div>
+</ul>
+<h4 id="test_14">Test</h4>
+<pre><code>qu = library(&quot;quantizers.lib&quot;);
+penta_test = qu.quantize(220, qu.penta, 260);
+</code></pre></div>
             </div>
         </div>
 

@@ -279,7 +279,10 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="linearalgebralib">linearalgebra.lib</h1>
-<p>A library of linear algebra functions. Its official prefix is <code>la</code>.</p>
+<p>Linear Algebra library. Its official prefix is <code>la</code>.</p>
+<p>This library provides mathematical tools for matrix and vector operations
+in Faust. It includes basic arithmetic, dot products, outer products, matrix inversion,
+determinant computation, and utilities for linear transformations and numerical analysis.</p>
 <p>This library adds some new linear algebra functions:</p>
 <p><code>determinant</code></p>
 <p><code>minor</code></p>
@@ -314,6 +317,10 @@ an <code>NxN</code> matrix.</p>
 <ul>
 <li><code>N</code>: the size of each axis of the matrix.</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>la = library(&quot;linearalgebra.lib&quot;);
+determinant_test = (1, 2, 3, 4) : la.determinant(2);
+</code></pre>
 <hr />
 <h3 id="laminor"><code>(la.)minor</code></h3>
 <p>An utility for finding the matrix minor when inverting a matrix.
@@ -331,6 +338,10 @@ The following implementation doesn't work but looks simple.</p>
 <li><code>ROW</code>: the selected position on 0th dimension of the matrix (<code>0 &lt;= ROW &lt; N</code>)</li>
 <li><code>COL</code>: the selected position on the 1st dimension of the matrix (<code>0 &lt;= COL &lt; N</code>)</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>la = library(&quot;linearalgebra.lib&quot;);
+minor_test = (1, 2, 3, 0, 4, 5, 7, 8, 9) : la.minor(3, 1, 1);
+</code></pre>
 <h4 id="references_1">References</h4>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Minor_(linear_algebra)#First_minor">https://en.wikipedia.org/wiki/Minor_(linear_algebra)#First_minor</a></li>
@@ -346,6 +357,10 @@ Note, this is an unsafe operation since not all matrices are invertible.</p>
 <ul>
 <li><code>N</code>: the size of each axis of the matrix.</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>la = library(&quot;linearalgebra.lib&quot;);
+inverse_test = (4, 7, 2, 6) : la.inverse(2);
+</code></pre>
 <hr />
 <h3 id="latranspose2"><code>(la.)transpose2</code></h3>
 <p>Transposes an <code>NxM</code> matrix stored in row-major order, resulting
@@ -358,6 +373,10 @@ in an <code>MxN</code> matrix stored in row-major order.</p>
 <li><code>N</code>: the number of rows in the input matrix</li>
 <li><code>M</code>: the number of columns in the input matrix</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>la = library(&quot;linearalgebra.lib&quot;);
+transpose2_test = (1, 2, 3, 4, 5, 6) : la.transpose2(2, 3);
+</code></pre>
 <hr />
 <h3 id="lamatmul"><code>(la.)matMul</code></h3>
 <p>Multiply a <code>JxK</code> matrix (mat1) and an <code>LxM</code> matrix (mat2) to produce a <code>JxM</code> matrix.
@@ -374,6 +393,10 @@ In terms of numpy, this function is <code>mat1 @ mat2</code>.</p>
 <li><code>L</code>: the number of rows in <code>mat2</code></li>
 <li><code>M</code>: the number of columns in <code>mat2</code></li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>la = library(&quot;linearalgebra.lib&quot;);
+matMul_test = (1, 2, 3, 4), (5, 6, 7, 8) : la.matMul(2, 2, 2, 2);
+</code></pre>
 <hr />
 <h3 id="laidentity"><code>(la.)identity</code></h3>
 <p>Creates an <code>NxN</code> identity matrix.</p>
@@ -384,6 +407,10 @@ In terms of numpy, this function is <code>mat1 @ mat2</code>.</p>
 <ul>
 <li><code>N</code>: The size of each axis of the identity matrix.</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>la = library(&quot;linearalgebra.lib&quot;);
+identity_test = la.identity(3);
+</code></pre>
 <hr />
 <h3 id="ladiag"><code>(la.)diag</code></h3>
 <p>Creates a diagonal matrix of size <code>NxN</code> with specified
@@ -394,7 +421,11 @@ values along the diagonal.</p>
 <p>Where:</p>
 <ul>
 <li><code>N</code>: The size of each axis of the matrix.</li>
-</ul></div>
+</ul>
+<h4 id="test_6">Test</h4>
+<pre><code>la = library(&quot;linearalgebra.lib&quot;);
+diag_test = (1, 2, 3) : la.diag(3);
+</code></pre></div>
             </div>
         </div>
 

@@ -299,7 +299,17 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="delayslib">delays.lib</h1>
-<p>This library contains a collection of delay functions. Its official prefix is <code>de</code>.</p>
+<p>Delays library. Its official prefix is <code>de</code>.</p>
+<p>This library provides reusable building blocks for delay-based processing:
+single and multi-tap delays, fractional delays, modulators (chorus/flanger),
+variable/read-write buffers, and utilities for echo and spatial effects.</p>
+<p>The Delays library is organized into 4 sections:</p>
+<ul>
+<li><a href="#basic-delay-functions">Basic Delay Functions</a></li>
+<li><a href="#lagrange-interpolation">Lagrange Interpolation</a></li>
+<li><a href="#thiran-allpass-interpolation">Thiran Allpass Interpolation</a></li>
+<li><a href="#others">Others</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/delays.lib">https://github.com/grame-cncm/faustlibraries/blob/master/delays.lib</a></li>
@@ -320,6 +330,12 @@ if the interval of d can't be computed by the compiler.
 <li><code>n</code>: the max delay length in samples</li>
 <li><code>d</code>: the delay length in samples (integer)</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>de = library(&quot;delays.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+delay_test = os.osc(440) : de.delay(44100, 22050);
+</code></pre>
+<p>TODO: add MBH np2</p>
 <hr />
 <h3 id="defdelay"><code>(de.)fdelay</code></h3>
 <p>Simple <code>d</code> samples fractional delay based on 2 interpolated delay lines where <code>n</code> is
@@ -333,6 +349,11 @@ the maximum delay length as a number of samples.</p>
 <li><code>n</code>: the max delay length in samples</li>
 <li><code>d</code>: the delay length in samples (float)</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>de = library(&quot;delays.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+fdelay_test = os.osc(440) : de.fdelay(44100, 22050.5);
+</code></pre>
 <hr />
 <h3 id="desdelay"><code>(de.)sdelay</code></h3>
 <p>s(mooth)delay: a mono delay that doesn't click and doesn't
@@ -346,6 +367,11 @@ transpose when the delay time is changed.</p>
 <li><code>it</code>: interpolation time (in samples), for example 1024</li>
 <li><code>d</code>: the delay length in samples (float)</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>de = library(&quot;delays.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+sdelay_test = os.osc(440) : de.sdelay(44100, 1024, 22050.5);
+</code></pre>
 <hr />
 <h3 id="deprime_power_delays"><code>(de.)prime_power_delays</code></h3>
 <p>Prime Power Delay Line Lengths.</p>
@@ -358,6 +384,10 @@ transpose when the delay time is changed.</p>
 <li><code>pathmin</code>: minimum acoustic ray length in the reverberator (in meters)</li>
 <li><code>pathmax</code>: maximum acoustic ray length (meters) - think "room size"</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>de = library(&quot;delays.lib&quot;);
+prime_power_delays_test = de.prime_power_delays(4, 1, 10);
+</code></pre>
 <h4 id="reference">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Prime_Power_Delay_Line.html">https://ccrma.stanford.edu/~jos/pasp/Prime_Power_Delay_Line.html</a></li>
@@ -378,6 +408,12 @@ transpose when the delay time is changed.</p>
 <p><code>fdelaylti</code> is most efficient, but designed for constant/slowly-varying delay.
 <code>fdelayltv</code> is more expensive and more robust when the delay varies rapidly.</p>
 <p>Note: the requested delay should not be less than <code>(N-1)/2</code>.</p>
+<h4 id="test_4">Test</h4>
+<pre><code>de = library(&quot;delays.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+fdelaylti_test = os.osc(440) : de.fdelaylti(3, 44100, 22050.5);
+fdelayltv_test = os.osc(440) : de.fdelayltv(3, 44100, 22050.5);
+</code></pre>
 <h4 id="references_1">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html">https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html</a></li>
@@ -414,6 +450,11 @@ are also available where <code>N</code> is the order of the interpolation, built
 <li><code>n</code>: the max delay length in samples</li>
 <li><code>d</code>: the delay length in samples</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>de = library(&quot;delays.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+fdelay2a_test = os.osc(440) : de.fdelay2a(44100, 22050.5);
+</code></pre>
 <h4 id="note">Note</h4>
 <p>The interpolated delay should not be less than <code>N-1/2</code>.
 (The allpass delay ranges from <code>N-1/2</code> to <code>N+1/2</code>).
@@ -451,8 +492,7 @@ applications like Wave Field Synthesis (WFS) and auralization.</p>
 <li>Switching between fixed and variable delay modes to ensure stability</li>
 </ul>
 <h4 id="usage_6">Usage</h4>
-<pre><code> _ : multiTapSincDelay(K, MaxDelay, tau1, tau2, alpha) : _
-
+<pre><code>_ : multiTapSincDelay(K, MaxDelay, tau1, tau2, alpha) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -462,6 +502,11 @@ applications like Wave Field Synthesis (WFS) and auralization.</p>
 <li><code>tau2</code>: target delay in samples (can be fractional)</li>
 <li><code>alpha</code>: interpolation factor between tau1 and tau2 (in [0,1] with 0 = tau1, 1 = tau2)</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>de = library(&quot;delays.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+multiTapSincDelay_test = os.osc(440) : de.multiTapSincDelay(2, 4096, 1024.0, 1536.0, 0.5);
+</code></pre>
 <h4 id="reference_2">Reference</h4>
 <ul>
 <li>T. Carpentier, "Implementation of a continuously variable delay line by crossfading between several tap delays", 2024: <a href="https://hal.science/hal-04646939">https://hal.science/hal-04646939</a></li>

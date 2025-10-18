@@ -383,7 +383,18 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="hoalib">hoa.lib</h1>
-<p>Faust library for high order ambisonic. Its official prefix is <code>ho</code>.</p>
+<p>Higher-Order Ambisonics (HOA) library. Its official prefix is <code>ho</code>.</p>
+<p>The HOA library provides functions and components for spatial audio rendering
+and analysis using Higher-Order Ambisonics. It includes encoders, decoders,
+rotators, and utilities for spherical harmonics and spatial transformations.
+The library supports both 2D and 3D HOA processing workflows for immersive audio.</p>
+<p>The HOA library is organized into 4 sections:</p>
+<ul>
+<li><a href="#encodingdecoding-functions">Encoding/decoding Functions</a></li>
+<li><a href="#optimization-functions">Optimization Functions</a></li>
+<li><a href="#spatial-sound-processes">Spatial Sound Processes</a></li>
+<li><a href="#3d-functions">3D Functions</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/hoa.lib">https://github.com/grame-cncm/faustlibraries/blob/master/hoa.lib</a></li>
@@ -402,6 +413,11 @@ depending on an order of decomposition and an angle.</p>
 <li><code>x</code>: the signal</li>
 <li><code>a</code>: the angle</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+encoder_test = ho.encoder(1, os.osc(440), 0.0);
+</code></pre>
 <hr />
 <h3 id="horencoder"><code>(ho.)rEncoder</code></h3>
 <p>Ambisonic encoder in 2D including source rotation. A mono signal is encoded at a certain ambisonic order
@@ -416,6 +432,11 @@ with two possible modes: either rotation with an angular speed, or static with a
 <li><code>a</code>: the fixed azimuth when the rotation stops (sp = 0) in radians</li>
 <li><code>it</code> : interpolation time (in milliseconds) between the rotation and the fixed modes</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+rEncoder_test = os.osc(440) : ho.rEncoder(1, 0.5, 0.0, 0.05);
+</code></pre>
 <hr />
 <h3 id="hostereoencoder"><code>(ho.)stereoEncoder</code></h3>
 <p>Encoding of a stereo pair of channels with symetric angles (a/2, -a/2).</p>
@@ -427,6 +448,11 @@ with two possible modes: either rotation with an angular speed, or static with a
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>a</code> : opening angle in radians, left channel at a/2 angle, right channel at -a/2 angle</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+stereoEncoder_test = os.osc(440), os.osc(660) : ho.stereoEncoder(1, 1.0);
+</code></pre>
 <hr />
 <h3 id="homultiencoder"><code>(ho.)multiEncoder</code></h3>
 <p>Encoding of a set of P signals distributed on the unit circle according to a list of P speeds and P angles.</p>
@@ -440,6 +466,11 @@ with two possible modes: either rotation with an angular speed, or static with a
 <li><code>langle</code> : a list of P angles in radians on the unit circle to localize the sources (one angle per input signal)</li>
 <li><code>it</code> : interpolation time (in milliseconds) between the rotation and the fixed modes.</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+multiEncoder_test = os.osc(440), os.osc(660) : ho.multiEncoder(1, (0.0, 0.0), (0.0, 1.57), 0.05);
+</code></pre>
 <hr />
 <h3 id="hodecoder"><code>(ho.)decoder</code></h3>
 <p>Decodes an ambisonics sound field for a circular array of loudspeakers.</p>
@@ -451,6 +482,12 @@ with two possible modes: either rotation with an angular speed, or static with a
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>P</code>: the number of speakers (constant numerical expression)</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+decoder_test = ambi : ho.decoder(1, 4);
+</code></pre>
 <h4 id="note">Note</h4>
 <p>The number of loudspeakers must be greater or equal to 2n+1.
 It's preferable to use 2n+2 loudspeakers.</p>
@@ -467,6 +504,12 @@ use <code>inPhase</code> optimization with ponctual sources.</p>
 <ul>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+decoderStereo_test = ambi : ho.decoderStereo(1);
+</code></pre>
 <hr />
 <h3 id="hoibasicdecoder"><code>(ho.)iBasicDecoder</code></h3>
 <p>The irregular basic decoder is a simple decoder that projects the incoming ambisonic situation
@@ -482,6 +525,12 @@ When there is a strong irregularity, there can be some discontinuity in the soun
 <li><code>direct</code>: 1 for direct mode, -1 for the indirect mode (changes the rotation direction)</li>
 <li><code>shift</code> : angular shift in degrees to easily adjust angles</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+iBasicDecoder_test = ambi : ho.iBasicDecoder(1, (0, 120, 240), 1, 0);
+</code></pre>
 <hr />
 <h3 id="hocircularscaledvbap"><code>(ho.)circularScaledVBAP</code></h3>
 <p>The function provides a circular scaled VBAP with all loudspeakers and the virtual source on the unit-circle.</p>
@@ -493,6 +542,11 @@ When there is a strong irregularity, there can be some discontinuity in the soun
 <li><code>l</code> : the list of angles of the loudspeakers in degrees, for instance (0, 85, 182, 263) for four loudspeakers</li>
 <li><code>t</code> : the current angle of the virtual source in degrees</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+circularScaledVBAP_test = os.osc(440) : ho.circularScaledVBAP((0, 120, 240), 60);
+</code></pre>
 <hr />
 <h3 id="hoimlsdecoder"><code>(ho.)imlsDecoder</code></h3>
 <p>Irregular decoder in 2D for an irregular configuration of P loudspeakers
@@ -507,6 +561,12 @@ using 2D VBAP for compensation.</p>
 <li><code>direct</code>: 1 for direct mode, -1 for the indirect mode (changes the rotation direction)</li>
 <li><code>shift</code> : angular shift in degrees to easily adjust angles</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+imlsDecoder_test = ambi : ho.imlsDecoder(1, (0, 90, 180, 270), 1, 0);
+</code></pre>
 <hr />
 <h3 id="hoidecoder"><code>(ho.)iDecoder</code></h3>
 <p>General decoder in 2D enabling an irregular multi-loudspeaker configuration
@@ -523,6 +583,12 @@ and to switch between multi-channel and stereo.</p>
 <li><code>st</code>: 1 for stereo, 0 for multi-loudspeaker configuration. When 1, stereo sounds goes through the first two channels</li>
 <li><code>g</code> : gain between 0 and 1</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+iDecoder_test = (ambi, 0.0) : ho.iDecoder(1, (0, 120, 240), 1, 0, 0.8);
+</code></pre>
 <h2 id="optimization-functions">Optimization Functions</h2>
 <p>Functions to weight the circular harmonics signals depending to the
 ambisonics optimization.
@@ -539,6 +605,12 @@ array.</p>
 <ul>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
+<h4 id="test_10">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+optimBasic_test = ambi : ho.optimBasic(1);
+</code></pre>
 <hr />
 <h3 id="hooptimmaxre"><code>(ho.)optimMaxRe</code></h3>
 <p>The maxRe optimization optimizes energy vector. It should be used for an
@@ -550,6 +622,12 @@ auditory confined in the center of the loudspeakers array.</p>
 <ul>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+optimMaxRe_test = ambi : ho.optimMaxRe(1);
+</code></pre>
 <hr />
 <h3 id="hooptiminphase"><code>(ho.)optimInPhase</code></h3>
 <p>The inPhase optimization optimizes energy vector and put all loudspeakers signals
@@ -561,6 +639,12 @@ in phase. It should be used for an auditory.</p>
 <ul>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
+<h4 id="test_12">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+optimInPhase_test = ambi : ho.optimInPhase(1);
+</code></pre>
 <hr />
 <h3 id="hooptim"><code>(ho.)optim</code></h3>
 <p>Ambisonic optimizer including the three elementary optimizers:
@@ -573,6 +657,12 @@ in phase. It should be used for an auditory.</p>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>ot</code> : optimization type (0 for <code>optimBasic</code>, 1 for <code>optimMaxRe</code>, 2 for <code>optimInPhase</code>)</li>
 </ul>
+<h4 id="test_13">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+optim_test = ambi : ho.optim(1, 1);
+</code></pre>
 <hr />
 <h3 id="howider"><code>(ho.)wider</code></h3>
 <p>Can be used to wide the diffusion of a localized sound. The order
@@ -586,6 +676,12 @@ have linear changes.</p>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>w</code>: the width value between 0 - 1</li>
 </ul>
+<h4 id="test_14">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+wider_test = ambi : ho.wider(1, 0.5);
+</code></pre>
 <hr />
 <h3 id="homirror"><code>(ho.)mirror</code></h3>
 <p>Mirroring effect on the sound field.</p>
@@ -597,6 +693,12 @@ have linear changes.</p>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>fa</code> : mirroring type (1 = original sound field, 0 = original+mirrored sound field, -1 = mirrored sound field)</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi = ho.encoder(1, os.osc(440), 0.0);
+mirror_test = ambi : ho.mirror(1, -1);
+</code></pre>
 <hr />
 <h3 id="homap"><code>(ho.)map</code></h3>
 <p>It simulates the distance of the source by applying a gain
@@ -611,6 +713,11 @@ on the signal and a wider processing on the soundfield.</p>
 <li><code>r</code>: the radius</li>
 <li><code>a</code>: the angle in radian</li>
 </ul>
+<h4 id="test_16">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+map_test = ho.map(1, os.osc(440), 0.5, 0.0);
+</code></pre>
 <hr />
 <h3 id="horotate"><code>(ho.)rotate</code></h3>
 <p>Rotates the sound field.</p>
@@ -622,6 +729,11 @@ on the signal and a wider processing on the soundfield.</p>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>a</code>: the angle in radian</li>
 </ul>
+<h4 id="test_17">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+rotate_test = ho.encoder(1, os.osc(440), 0.0) : ho.rotate(1, 0.78);
+</code></pre>
 <hr />
 <h3 id="hoscope"><code>(ho.)scope</code></h3>
 <p>Produces an XY pair of signals representing the ambisonic sound field.</p>
@@ -633,6 +745,11 @@ on the signal and a wider processing on the soundfield.</p>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>rt</code> : refreshment time in milliseconds</li>
 </ul>
+<h4 id="test_18">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+scope_test = ho.encoder(1, os.osc(440), 0.0) : ho.scope(1, 0.1);
+</code></pre>
 <h2 id="spatial-sound-processes">Spatial Sound Processes</h2>
 <p>We propose implementations of processes intricated to the ambisonic model.
 The process is implemented using as many instances as the number of harmonics at at certain order.
@@ -665,6 +782,11 @@ Therefore, delays are progressively revealed when the factor increases:</p>
 <li><code>fd</code>: feedback / level of reinjection (between 0 and 1)</li>
 <li><code>tf</code>: type of function of delay distribution (integer, between 0 and 21)</li>
 </ul>
+<h4 id="test_19">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+fxDecorrelation_test = ho.encoder(1, os.osc(440), 0.0) : ho.fxDecorrelation(1, 64, 5, 0.5, 0.2, 0);
+</code></pre>
 <hr />
 <h3 id="hosyndecorrelation"><code>(ho.).synDecorrelation</code></h3>
 <p>Spatial ambisonic decorrelation in syn mode.</p>
@@ -694,6 +816,11 @@ to avoid source localization and to produce a large mono.</p>
 <li><code>fd</code>: feedback / level of reinjection (between 0 and 1)</li>
 <li><code>tf</code>: type of function of delay distribution (integer, between 0 and 21)</li>
 </ul>
+<h4 id="test_20">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+synDecorrelation_test = os.osc(440) : ho.synDecorrelation(1, 64, 5, 0.5, 0.2, 0);
+</code></pre>
 <hr />
 <h3 id="hofxringmod"><code>(ho.).fxRingMod</code></h3>
 <p>Spatial ring modulation in syn mode.</p>
@@ -715,6 +842,11 @@ On the contrary, it provides the original signal.</p>
 <li><code>fa</code>: decorrelation factor (between 0 and 1)</li>
 <li><code>tf</code>: type of function of delay distribution (integer, between 0 and 21)</li>
 </ul>
+<h4 id="test_21">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+fxRingMod_test = ho.encoder(1, os.osc(440), 0.0) : ho.fxRingMod(1, 200, 0.5, 0);
+</code></pre>
 <hr />
 <h3 id="hosynringmod"><code>(ho.).synRingMod</code></h3>
 <p>Spatial ring modulation in syn mode.</p>
@@ -738,6 +870,11 @@ to avoid source localization and to produce a large mono.</p>
 <li><code>fa</code>: decorrelation factor (between 0 and 1)</li>
 <li><code>tf</code>: type of function of delay distribution (integer, between 0 and 21)</li>
 </ul>
+<h4 id="test_22">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+synRingMod_test = os.osc(440) : ho.synRingMod(1, 200, 0.5, 0);
+</code></pre>
 <h2 id="3d-functions">3D Functions</h2>
 <hr />
 <h3 id="hoencoder3d"><code>(ho.)encoder3D</code></h3>
@@ -753,6 +890,11 @@ depending on an order of decomposition, an angle and an elevation.</p>
 <li><code>a</code>: the angle</li>
 <li><code>e</code>: the elevation</li>
 </ul>
+<h4 id="test_23">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+encoder3D_test = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
+</code></pre>
 <hr />
 <h3 id="horencoder3d"><code>(ho.)rEncoder3D</code></h3>
 <p>Ambisonic encoder in 3D including source rotation. A mono signal is encoded at at certain ambisonic order
@@ -770,6 +912,11 @@ with two possible modes: either rotation with 2 angular speeds (azimuth and elev
 <li><code>el</code>: the fixed elevation when the elevation rotation stops (elsp = 0) in radians</li>
 <li><code>it</code> : interpolation time (in milliseconds) between the rotation and the fixed modes</li>
 </ul>
+<h4 id="test_24">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+rEncoder3D_test = os.osc(440) : ho.rEncoder3D(1, 0.5, 0.3, 0.0, 0.0, 0.05);
+</code></pre>
 <hr />
 <h3 id="hooptimbasic3d"><code>(ho.)optimBasic3D</code></h3>
 <p>The basic optimization has no effect and should be used for a perfect
@@ -782,6 +929,12 @@ array.</p>
 <ul>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
+<h4 id="test_25">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
+optimBasic3D_test = ambi3D : ho.optimBasic3D(1);
+</code></pre>
 <hr />
 <h3 id="hooptimmaxre3d"><code>(ho.)optimMaxRe3D</code></h3>
 <p>The maxRe optimization optimize energy vector. It should be used for an
@@ -793,6 +946,12 @@ auditory confined in the center of the loudspeakers array.</p>
 <ul>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
+<h4 id="test_26">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
+optimMaxRe3D_test = ambi3D : ho.optimMaxRe3D(1);
+</code></pre>
 <hr />
 <h3 id="hooptiminphase3d"><code>(ho.)optimInPhase3D</code></h3>
 <p>The inPhase Optimization optimizes energy vector and put all loudspeakers signals
@@ -804,6 +963,12 @@ in phase. It should be used for an auditory.</p>
 <ul>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 </ul>
+<h4 id="test_27">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
+optimInPhase3D_test = ambi3D : ho.optimInPhase3D(1);
+</code></pre>
 <hr />
 <h3 id="hooptim3d"><code>(ho.)optim3D</code></h3>
 <p>Ambisonic optimizer including the three elementary optimizers:
@@ -815,7 +980,13 @@ in phase. It should be used for an auditory.</p>
 <ul>
 <li><code>N</code>: the ambisonic order (constant numerical expression)</li>
 <li><code>ot</code> : optimization type (0 for optimBasic, 1 for optimMaxRe, 2 for optimInPhase)</li>
-</ul></div>
+</ul>
+<h4 id="test_28">Test</h4>
+<pre><code>ho = library(&quot;hoa.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
+optim3D_test = ambi3D : ho.optim3D(1, 2);
+</code></pre></div>
             </div>
         </div>
 

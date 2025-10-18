@@ -344,7 +344,20 @@
 
 <h1 id="interpolatorslib">interpolators.lib</h1>
 <p>A library to handle interpolation. Its official prefix is <code>it</code>.</p>
-<p>This library provides several basic interpolation functions, as well as interpolators 
+<p>This library provides interpolation algorithms for signal and control
+processing. It includes linear, polynomial, spline, and higher-order interpolation
+methods used in delay lines, envelope shaping, resampling, and parameter smoothing.</p>
+<p>The Interpolators library is organized into 7 sections:</p>
+<ul>
+<li><a href="#two-points-interpolation-functions">Two points interpolation functions</a></li>
+<li><a href="#four-points-interpolation-functions">Four points interpolation functions</a></li>
+<li><a href="#two-points-interpolators">Two points interpolators</a></li>
+<li><a href="#four-points-interpolators">Four points interpolators</a></li>
+<li><a href="#generic-piecewise-linear-interpolation">Generic piecewise linear interpolation</a></li>
+<li><a href="#lagrange-based-interpolators">Lagrange based interpolators</a></li>
+<li><a href="#misc-functions">Misc functions</a></li>
+</ul>
+<p>The first four sections provide several basic interpolation functions, as well as interpolators
 taking a <code>gen</code> circuit of N outputs producing values to be interpolated, triggered
 by a <code>idv</code> read index signal. Two points and four points interpolations are implemented.</p>
 <p>The <code>idv</code> parameter is to be used as a read index. In <code>-single</code> (= singleprecision) mode, 
@@ -449,6 +462,10 @@ with {
 <li><code>v0</code>: is the first value</li>
 <li><code>v1</code>: is the second value</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+interpolate_linear_test = it.interpolate_linear(0.5, 0.0, 1.0);
+</code></pre>
 <h4 id="reference">Reference:</h4>
 <ul>
 <li><a href="https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h">https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h</a></li>
@@ -465,6 +482,10 @@ with {
 <li><code>v0</code>: is the first value</li>
 <li><code>v1</code>: is the second value</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+interpolate_cosine_test = it.interpolate_cosine(0.5, 0.0, 1.0);
+</code></pre>
 <h4 id="reference_1">Reference:</h4>
 <ul>
 <li><a href="https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h">https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h</a></li>
@@ -484,6 +505,10 @@ with {
 <li><code>v2</code>: is the third value</li>
 <li><code>v3</code>: is the fourth value</li>
 </ul>
+<h4 id="test_2">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+interpolate_cubic_test = it.interpolate_cubic(0.5, -1.0, 2.0, 1.0, 4.0);
+</code></pre>
 <h4 id="reference_2">Reference:</h4>
 <ul>
 <li><a href="https://www.paulinternet.nl/?page=bicubic">https://www.paulinternet.nl/?page=bicubic</a></li>
@@ -501,6 +526,17 @@ with {
 <li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 <li><code>interpolate_two_points</code>: a two points interpolation function</li>
 </ul>
+<h4 id="test_3">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+interpolator_two_points_test = it.interpolator_two_points(gen, idv, it.interpolate_linear)
+with {
+    gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
+    step = 0.25;
+    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    idv = it.make_idv(idxFloat);
+};
+</code></pre>
 <hr />
 <h3 id="itinterpolator_linear"><code>(it.)interpolator_linear</code></h3>
 <p>Linear interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.</p>
@@ -512,6 +548,17 @@ with {
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
 <li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 </ul>
+<h4 id="test_4">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+interpolator_linear_test = it.interpolator_linear(gen, idv)
+with {
+    gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
+    step = 0.25;
+    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    idv = it.make_idv(idxFloat);
+};
+</code></pre>
 <hr />
 <h3 id="itinterpolator_cosine"><code>(it.)interpolator_cosine</code></h3>
 <p>Cosine interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.</p>
@@ -523,6 +570,17 @@ with {
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
 <li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 </ul>
+<h4 id="test_5">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+interpolator_cosine_test = it.interpolator_cosine(gen, idv)
+with {
+    gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
+    step = 0.25;
+    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    idv = it.make_idv(idxFloat);
+};
+</code></pre>
 <h2 id="four-points-interpolators">Four points interpolators</h2>
 <hr />
 <h3 id="itinterpolator_four_points"><code>(it.)interpolator_four_points</code></h3>
@@ -536,6 +594,17 @@ with {
 <li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 <li><code>interpolate_four_points</code>: a four points interpolation function</li>
 </ul>
+<h4 id="test_6">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+interpolator_four_points_test = it.interpolator_four_points(gen, idv, it.interpolate_cubic)
+with {
+    gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
+    step = 0.25;
+    idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+    idv = it.make_idv(idxFloat);
+};
+</code></pre>
 <hr />
 <h3 id="itinterpolator_cubic"><code>(it.)interpolator_cubic</code></h3>
 <p>Cubic interpolator for a 'gen' circuit triggered by an 'idv' input to generate values.</p>
@@ -547,6 +616,17 @@ with {
 <li><code>gen</code>: a circuit with an 'idv' reader input that produces N outputs</li>
 <li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 </ul>
+<h4 id="test_7">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+interpolator_cubic_test = it.interpolator_cubic(gen, idv)
+with {
+    gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
+    step = 0.25;
+    idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+    idv = it.make_idv(idxFloat);
+};
+</code></pre>
 <hr />
 <h3 id="itinterpolator_select"><code>(it.)interpolator_select</code></h3>
 <p>Generic configurable interpolator (with selector between in [0..3]). The value 3 is used for no interpolation.</p>
@@ -559,6 +639,17 @@ with {
 <li><code>idv</code>: a fractional read index expressed as a float value, or a (int,frac) pair</li>
 <li><code>sel</code>: an interpolation algorithm selector in [0..3] (0 = linear, 1 = cosine, 2 = cubic, 3 = nointerp)</li>
 </ul>
+<h4 id="test_8">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+ma = library(&quot;maths.lib&quot;);
+interpolator_select_test = it.interpolator_select(gen, idv, 2)
+with {
+    gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
+    step = 0.25;
+    idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+    idv = it.make_idv(idxFloat);
+};
+</code></pre>
 <h2 id="generic-piecewise-linear-interpolation">Generic piecewise linear interpolation</h2>
 <hr />
 <h3 id="itlerp"><code>(it.)lerp</code></h3>
@@ -574,6 +665,10 @@ with {
 <li><code>y1</code>: y-coordinate destination</li>
 <li><code>x</code>: x-coordinate input</li>
 </ul>
+<h4 id="test_9">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+lerp_test = it.lerp(0.0, 10.0, -5.0, 5.0, 2.5);
+</code></pre>
 <hr />
 <h3 id="itpiecewise"><code>(it.)piecewise</code></h3>
 <p>Linear piecewise interpolation between N points.</p>
@@ -592,6 +687,10 @@ y coordinates as the input goes from -5 to 5:</p>
 <pre><code>x = hslider(&quot;x&quot;, -5, -5.0, 5.0, .001);
 process = it.piecewise((-5, -3, 0, 3, 5), (2, 0, 3, -3, -2), x);
 </code></pre>
+<h4 id="test_10">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.osc(0.1));
+</code></pre>
 <h2 id="lagrange-based-interpolators">Lagrange based interpolators</h2>
 <hr />
 <h3 id="itlagrangecoeffs"><code>(it.)lagrangeCoeffs</code></h3>
@@ -606,6 +705,10 @@ basis polynomial with arbitrary spacing of the points.</p>
 <li><code>xCoordsList</code>: a list of N + 1 elements determining the x-axis coordinates of N + 1 values, known at compile-time</li>
 <li><code>x</code>: a fractional position on the x-axis to obtain the interpolated y-value</li>
 </ul>
+<h4 id="test_11">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+lagrangeCoeffs_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), 0.25);
+</code></pre>
 <h4 id="reference_3">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html">https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html</a></li>
@@ -642,6 +745,17 @@ x = os.phasor(16, 1) - 9;
 yCoords = 5, 2, -2, 9;
 process = x, yCoords : it.lagrangeInterpolation(N, xCoordsList);
 </code></pre>
+<h4 id="test_12">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+lagrangeInterpolation_test = (lagrange_x, lagrange_y0, lagrange_y1, lagrange_y2, lagrange_y3) : it.lagrangeInterpolation(3, (0, 1, 2, 3))
+with {
+    lagrange_x = 1.5;
+    lagrange_y0 = 2.0;
+    lagrange_y1 = 5.0;
+    lagrange_y2 = -1.0;
+    lagrange_y3 = 3.0;
+};
+</code></pre>
 <h4 id="reference_4">Reference</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html">https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html</a>
@@ -673,6 +787,11 @@ index = os.phasor(S, 1000);
 process = rdtable(S, os.sinwaveform(S), int(index)) ,
           it.frdtable(N, S, os.sinwaveform(S), index);
 </code></pre>
+<h4 id="test_13">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+frdtable_test = it.frdtable(3, 16, os.sinwaveform(16), os.phasor(16, 200));
+</code></pre>
 <hr />
 <h3 id="itfrwtable"><code>(it.)frwtable</code></h3>
 <p>Look-up updatable circular table with Nth-order Lagrange interpolation for
@@ -701,6 +820,12 @@ wIdx = ba.period(S);
 process = rwtable(S, os.sinwaveform(S), wIdx, os.sinwaveform(S), int(rIdx)) ,
           it.frwtable(N, S, os.sinwaveform(S), wIdx, os.sinwaveform(S), rIdx);
 </code></pre>
+<h4 id="test_14">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+ba = library(&quot;basics.lib&quot;);
+frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.osc(220), os.phasor(16, 150));
+</code></pre>
 <h2 id="misc-functions">Misc functions</h2>
 <hr />
 <h3 id="itremap"><code>(it.)remap</code></h3>
@@ -719,6 +844,11 @@ process = rwtable(S, os.sinwaveform(S), wIdx, os.sinwaveform(S), int(rIdx)) ,
 <h4 id="example-test-program_3">Example test program</h4>
 <p>An oscillator remapped from [-1., 1.] to [100., 1000.]:</p>
 <pre><code>os.osc(440) : it.remap(-1., 1., 100., 1000.)
+</code></pre>
+<h4 id="test_15">Test</h4>
+<pre><code>it = library(&quot;interpolators.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.osc(0.5));
 </code></pre></div>
             </div>
         </div>

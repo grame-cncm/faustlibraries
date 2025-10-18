@@ -391,7 +391,19 @@
                     <div class="col-md-9 main-container" role="main">
 
 <h1 id="compressorslib">compressors.lib</h1>
-<p>A library of compressor effects. Its official prefix is <code>co</code>.</p>
+<p>Compressors library. Its official prefix is <code>co</code>.</p>
+<p>This library provides building blocks and complete dynamic processors
+including compressors, limiters, expanders, and gates. It contains detector designs,
+envelope followers, gain computer modules, and full-band/multi-band dynamic processors.</p>
+<p>The Compressors library is organized into 6 sections:</p>
+<ul>
+<li><a href="#conversion-tools">Conversion Tools</a></li>
+<li><a href="#functions-reference">Functions Reference</a></li>
+<li><a href="#linear-gain-computer-section">Linear gain computer section</a></li>
+<li><a href="#original-versions-section">Original versions section</a></li>
+<li><a href="#expanders">Expanders</a></li>
+<li><a href="#lookahead-limiters">Lookahead Limiters</a></li>
+</ul>
 <h4 id="references">References</h4>
 <ul>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/compressors.lib">https://github.com/grame-cncm/faustlibraries/blob/master/compressors.lib</a></li>
@@ -414,6 +426,10 @@ therefore most compressors in this library use a strength parameter instead, whe
 <ul>
 <li><code>ratio</code>:  compression ratio, between 1 and infinity (1=no compression, infinity means hard limiting)</li>
 </ul>
+<h4 id="test">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+ratio2strength_test = co.ratio2strength(4);
+</code></pre>
 <hr />
 <h3 id="costrength2ratio"><code>(co.)strength2ratio</code></h3>
 <p>This utility converts a strength to a ratio.</p>
@@ -424,6 +440,10 @@ therefore most compressors in this library use a strength parameter instead, whe
 <ul>
 <li><code>strength</code>: strength of the compression (0 = no compression, 1 means hard limiting, &gt;1 means over-compression)</li>
 </ul>
+<h4 id="test_1">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+strength2ratio_test = co.strength2ratio(0.75);
+</code></pre>
 <h2 id="functions-reference">Functions Reference</h2>
 <hr />
 <h3 id="copeak_compression_gain_mono_db"><code>(co.)peak_compression_gain_mono_db</code></h3>
@@ -451,6 +471,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_2">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peak_compression_gain_mono_db_test = os.osc(440) : co.peak_compression_gain_mono_db(0.5, -12, 0.01, 0.1, 6, 0);
+</code></pre>
 <h4 id="references_1">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -488,6 +513,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_3">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peak_compression_gain_N_chan_db_test = (os.osc(440), os.osc(660)) : co.peak_compression_gain_N_chan_db(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+</code></pre>
 <h4 id="references_2">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -527,6 +557,12 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_4">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+meter(x) = x;
+FFcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FFcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+</code></pre>
 <h4 id="references_3">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -567,6 +603,12 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_5">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+meter(x) = x;
+FBcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FBcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+</code></pre>
 <h4 id="references_4">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -608,6 +650,12 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_6">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+meter(x) = x;
+FBFFcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FBFFcompressor_N_chan(0.4, -12, 0.01, 0.1, 6, 0, 0.5, 0.3, meter, 2);
+</code></pre>
 <h4 id="references_5">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -643,6 +691,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_7">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+RMS_compression_gain_mono_db_test = os.osc(330) : co.RMS_compression_gain_mono_db(0.5, -18, 0.02, 0.12, 6, 0);
+</code></pre>
 <h4 id="references_6">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -680,6 +733,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_8">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+RMS_compression_gain_N_chan_db_test = (os.osc(330), os.osc(550)) : co.RMS_compression_gain_N_chan_db(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+</code></pre>
 <h4 id="references_7">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -726,6 +784,12 @@ instead of crosfading between two sets of gain calculators as above,
 we take the <code>abs</code> of the audio from both the FF and FB, and crossfade between those,
 and feed that into one set of gain calculators
 again the strength is much higher when in FB mode, but implemented differently.</p>
+<h4 id="test_9">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+meter(x) = x;
+RMS_FBFFcompressor_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBFFcompressor_N_chan(0.4, -18, 0.02, 0.12, 6, 0, 0.5, 0.3, meter, 2);
+</code></pre>
 <h4 id="references_8">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -772,6 +836,13 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_10">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+meter(x) = x;
+meterLim(x) = x;
+RMS_FBcompressor_peak_limiter_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(0.4, -18, -2, 0.02, 0.12, 6, 0.5, meter, meterLim, 2);
+</code></pre>
 <h4 id="references_9">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -810,6 +881,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_11">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peak_compression_gain_mono_test = os.osc(440) : co.peak_compression_gain_mono(0.5, -12, 0.01, 0.1, 6, 0);
+</code></pre>
 <h4 id="references_10">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -847,6 +923,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_12">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peak_compression_gain_N_chan_test = (os.osc(440), os.osc(660)) : co.peak_compression_gain_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+</code></pre>
 <h4 id="references_11">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -882,6 +963,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_13">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+RMS_compression_gain_mono_test = os.osc(330) : co.RMS_compression_gain_mono(0.5, -18, 0.02, 0.12, 6, 0);
+</code></pre>
 <h4 id="references_12">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -919,6 +1005,11 @@ For that you'd need a ratio of infinity:1, and you cannot express that in Faust.
 <p>Sometimes even bigger ratios are useful:
 for example a group recording where one instrument is recorded with both a close microphone and a room microphone,
 and the instrument is loud enough in the room mic when playing loud, but you want to boost it when it is playing soft.</p>
+<h4 id="test_14">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+RMS_compression_gain_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+</code></pre>
 <h4 id="references_13">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -950,6 +1041,11 @@ MIT-style license is required.</p>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression are going up</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
 </ul>
+<h4 id="test_15">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+compressor_lad_mono_test = os.osc(440) : co.compressor_lad_mono(0.005, 4, -9, 0.01, 0.1);
+</code></pre>
 <h4 id="references_14">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -973,6 +1069,11 @@ MIT-style license is required.</p>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression are going up</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
 </ul>
+<h4 id="test_16">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+compressor_mono_test = os.osc(440) : co.compressor_mono(4, -9, 0.01, 0.2);
+</code></pre>
 <h4 id="references_15">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -993,6 +1094,11 @@ MIT-style license is required.</p>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
 </ul>
+<h4 id="test_17">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+compressor_stereo_test = (os.osc(440), os.osc(660)) : co.compressor_stereo(4, -9, 0.01, 0.2);
+</code></pre>
 <h4 id="references_16">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -1013,6 +1119,11 @@ MIT-style license is required.</p>
 <li><code>att</code>: attack time = time constant (sec) when level &amp; compression going up</li>
 <li><code>rel</code>: release time = time constant (sec) coming out of compression</li>
 </ul>
+<h4 id="test_18">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+compression_gain_mono_test = os.osc(440) : co.compression_gain_mono(4, -9, 0.01, 0.2);
+</code></pre>
 <h4 id="references_17">References</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Dynamic_range_compression">http://en.wikipedia.org/wiki/Dynamic_range_compression</a></li>
@@ -1045,6 +1156,11 @@ parameters are hardwired here to nominal values.</p>
 <h4 id="usage_19">Usage</h4>
 <pre><code> _ : limiter_1176_R4_mono : _
 </code></pre>
+<h4 id="test_19">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+limiter_1176_R4_mono_test = os.osc(440) : co.limiter_1176_R4_mono;
+</code></pre>
 <h4 id="reference">Reference:</h4>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/1176_Peak_Limiter">http://en.wikipedia.org/wiki/1176_Peak_Limiter</a></li>
@@ -1067,6 +1183,11 @@ Faster attack gives "more bite" (e.g. on vocals).
 He hears a bright, clear eq effect as well (not implemented here).</p>
 <h4 id="usage_20">Usage</h4>
 <pre><code> _,_ : limiter_1176_R4_stereo : _,_
+</code></pre>
+<h4 id="test_20">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+limiter_1176_R4_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_1176_R4_stereo;
 </code></pre>
 <h4 id="reference_1">Reference:</h4>
 <ul>
@@ -1098,6 +1219,11 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>maxHold</code>: the maximum hold time in samples, known at compile time</li>
 <li><code>N</code>: the number of channels of the gain computer, known at compile time</li>
 </ul>
+<h4 id="test_21">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peak_expansion_gain_N_chan_db_test = (os.osc(220), os.osc(330)) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0, 0.5, 2048, 2);
+</code></pre>
 <hr />
 <h3 id="coexpander_n_chan"><code>(co.)expander_N_chan</code></h3>
 <p>Feed forward N channels dynamic range expander.
@@ -1125,6 +1251,12 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>maxHold</code>: the maximum hold time in samples, known at compile time</li>
 <li><code>N</code>: the number of channels of the expander, known at compile time</li>
 </ul>
+<h4 id="test_22">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+meter(x) = x;
+expander_N_chan_test = (os.osc(220), os.osc(330)) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2);
+</code></pre>
 <hr />
 <h3 id="coexpandersc_n_chan"><code>(co.)expanderSC_N_chan</code></h3>
 <p>Feed forward N channels dynamic range expander with sidechain.
@@ -1155,6 +1287,13 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 <li><code>SCswitch</code> : use either the regular audio input or the SCsignal as the input for the level detector</li>
 <li><code>SCsignal</code> : an audio signal, to be used as the input for the level detector when SCswitch is 1</li>
 </ul>
+<h4 id="test_23">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+meter(x) = x;
+SCfunction(x) = x;
+expanderSC_N_chan_test = (os.osc(220), os.osc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.osc(880));
+</code></pre>
 <h2 id="lookahead-limiters">Lookahead Limiters</h2>
 <hr />
 <h3 id="colimiter_lad_n"><code>(co.)limiter_lad_N</code></h3>
@@ -1197,6 +1336,11 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <li><code>release</code>: is the release time in seconds</li>
 </ul>
 <p>Example for a stereo limiter: <code>limiter_lad_N(2, .01, 1, .01, .1, 1);</code></p>
+<h4 id="test_24">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+limiter_lad_N_test = (os.osc(440), os.osc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
+</code></pre>
 <h4 id="reference_2">Reference:</h4>
 <ul>
 <li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
@@ -1215,6 +1359,11 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <li><code>hold</code>: is the hold time in seconds</li>
 <li><code>release</code>: is the release time in seconds</li>
 </ul>
+<h4 id="test_25">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+limiter_lad_mono_test = os.osc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
+</code></pre>
 <h4 id="reference_3">Reference:</h4>
 <ul>
 <li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
@@ -1233,6 +1382,12 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <li><code>hold</code>: is the hold time in seconds</li>
 <li><code>release</code>: is the release time in seconds</li>
 </ul>
+<h4 id="test_26">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+limiter_lad_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
+
+</code></pre>
 <h4 id="reference_4">Reference:</h4>
 <ul>
 <li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
@@ -1251,6 +1406,11 @@ between them all, so that amplitude ratios between the signals are kept.</p>
 <li><code>hold</code>: is the hold time in seconds</li>
 <li><code>release</code>: is the release time in seconds</li>
 </ul>
+<h4 id="test_27">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+limiter_lad_quad_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
+</code></pre>
 <h4 id="reference_5">Reference:</h4>
 <ul>
 <li><a href="http://iem.at/~zmoelnig/publications/limiter">http://iem.at/~zmoelnig/publications/limiter</a></li>
@@ -1267,6 +1427,11 @@ Tests have shown that, given a pop song with 60 dB of amplification
 and a 0-dB-ceiling, the loudest peak recorded was ~0.38 dB.</p>
 <h4 id="usage_28">Usage</h4>
 <pre><code>_ : limiter_lad_bw : _
+</code></pre>
+<h4 id="test_28">Test</h4>
+<pre><code>co = library(&quot;compressors.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+limiter_lad_bw_test = os.osc(440) : co.limiter_lad_bw;
 </code></pre>
 <h4 id="reference_6">Reference:</h4>
 <ul>

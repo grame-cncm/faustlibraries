@@ -12,7 +12,7 @@ CXXFLAGS ?= -O2 -std=c++17
 NUM_SAMPLES ?= 1000
 SAMPLE_RATE ?= 48000
 
-FLOAT_TOL ?= 1e-4
+FLOAT_TOL ?= 1e-5
 FLOATDIFF ?= ./scripts/floatdiff.py
 
 ARCH := arch/print_arch.cpp
