@@ -1126,11 +1126,13 @@ saw2_test = os.saw2(220);
 saw3_test = os.saw3(220);
 saw4_test = os.saw4(220);
 </code></pre>
-<h5 id="references_1">References</h5>
-<p>See <code>sawN</code> above.</p>
 <h4 id="implementation-notes_1">Implementation Notes</h4>
 <p>Presently, only <code>saw2</code> uses the PTR method, while <code>saw3</code> and <code>saw4</code> use DPW.
 This is because PTR has been implemented and tested for the 2nd-order case only.</p>
+<h4 id="references_1">References</h4>
+<ul>
+<li>See <code>sawN</code> above.</li>
+</ul>
 <hr />
 <h3 id="ossaw2ptr"><code>(os.)saw2ptr</code></h3>
 <p>Alias-Suppressed Sawtooth Audio-Frequency Oscillator
@@ -1148,19 +1150,17 @@ saw2ptr_test = os.saw2ptr(220);
 </code></pre>
 <h5 id="implementation">Implementation</h5>
 <p>Polynomial Transition Regions (PTR) method for aliasing suppression.</p>
-<h5 id="references_2">References</h5>
-<ul>
-<li>Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio
-    Signals Using Polynomial Transition Regions," in Signal Processing
-    Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012</li>
-<li><a href="https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9">https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9</a></li>
-<li><a href="http://research.spa.aalto.fi/publications/papers/spl-ptr/">http://research.spa.aalto.fi/publications/papers/spl-ptr/</a></li>
-</ul>
 <h5 id="notes_1">Notes</h5>
 <p>Method PTR may be preferred because it requires less
 computation and is stateless which means that the frequency <code>freq</code>
 can be modulated arbitrarily fast over time without filtering
 artifacts.  For this reason, <code>saw2</code> is presently defined as <code>saw2ptr</code>.</p>
+<h4 id="references_2">References</h4>
+<ul>
+<li>Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio Signals Using Polynomial Transition Regions," Signal Processing Letters, IEEE, vol.19, no.2, pp.67-70, Feb. 2012</li>
+<li><a href="https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9">https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9</a></li>
+<li><a href="http://research.spa.aalto.fi/publications/papers/spl-ptr/">http://research.spa.aalto.fi/publications/papers/spl-ptr/</a></li>
+</ul>
 <hr />
 <h3 id="ossaw2dpw"><code>(os.)saw2dpw</code></h3>
 <p>Alias-Suppressed Sawtooth Audio-Frequency Oscillator
@@ -1444,7 +1444,7 @@ oscs_test = os.oscs(440);
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 oscrq_test = os.oscrq(440);
 </code></pre>
-<h4 id="reference_1">Reference</h4>
+<h4 id="references_4">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
 </ul>
@@ -1464,7 +1464,7 @@ oscrq_test = os.oscrq(440);
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 oscrs_test = os.oscrs(440);
 </code></pre>
-<h4 id="reference_2">Reference</h4>
+<h4 id="references_5">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
 </ul>
@@ -1484,7 +1484,7 @@ oscrs_test = os.oscrs(440);
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 oscrc_test = os.oscrc(440);
 </code></pre>
-<h4 id="reference_3">Reference</h4>
+<h4 id="references_6">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html">https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html</a></li>
 </ul>
@@ -1518,7 +1518,7 @@ oscs_test = os.oscs(440);
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 quadosc_test = os.quadosc(440);
 </code></pre>
-<h4 id="reference_4">Reference</h4>
+<h4 id="references_7">References</h4>
 <ul>
 <li><a href="https://vicanek.de/articles/QuadOsc.pdf">https://vicanek.de/articles/QuadOsc.pdf</a></li>
 </ul>
@@ -1646,7 +1646,7 @@ process = sum(k,N, A^k * c(F0 + k*DF)),
           sum(k,N, A^k * s(F0 + k*DF));
 </code></pre>
 <p>but much more efficient.</p>
-<h4 id="reference_5">Reference</h4>
+<h4 id="references_8">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/STANM/stanms/stanm5/stanm5.pdf">https://ccrma.stanford.edu/STANM/stanms/stanm5/stanm5.pdf</a></li>
 </ul>
@@ -1667,7 +1667,7 @@ cosine oscillator.</p>
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 oscwc_test = os.oscwc(440);
 </code></pre>
-<h4 id="reference_6">Reference</h4>
+<h4 id="references_9">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
 </ul>
@@ -1686,7 +1686,7 @@ sine oscillator.</p>
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 oscws_test = os.oscws(440);
 </code></pre>
-<h4 id="reference_7">Reference</h4>
+<h4 id="references_10">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
 </ul>
@@ -1705,7 +1705,7 @@ Unit-amplitude cosine and sine (quadrature) oscillator.</p>
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 oscq_test = os.oscq(440);
 </code></pre>
-<h4 id="reference_8">Reference</h4>
+<h4 id="references_11">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
 </ul>
@@ -1724,7 +1724,7 @@ Unit-amplitude cosine oscillator (default).</p>
 <pre><code>os = library(&quot;oscillators.lib&quot;);
 oscw_test = os.oscw(440);
 </code></pre>
-<h4 id="reference_9">Reference</h4>
+<h4 id="references_12">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html</a></li>
 </ul>

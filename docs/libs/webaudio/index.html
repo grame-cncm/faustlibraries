@@ -303,7 +303,12 @@ Frequencies below the cutoff pass through, frequencies above it are attenuated.<
 <li><code>Q</code>: the quality factor</li>
 <li><code>dtune</code>: detuning of the frequency in cents</li>
 </ul>
-<h4 id="reference">Reference</h4>
+<h4 id="test">Test</h4>
+<pre><code>wa = library(&quot;webaudio.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+lowpass2_test = os.osc(440) : wa.lowpass2(1000, 0.707, 0);
+</code></pre>
+<h4 id="references_1">References</h4>
 <ul>
 <li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98</a></li>
 </ul>
@@ -320,7 +325,12 @@ Frequencies below the cutoff are attenuated, frequencies above it pass through.<
 <li><code>Q</code>: the quality factor</li>
 <li><code>dtune</code>: detuning of the frequency in cents</li>
 </ul>
-<h4 id="reference_1">Reference</h4>
+<h4 id="test_1">Test</h4>
+<pre><code>wa = library(&quot;webaudio.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+highpass2_test = os.osc(440) : wa.highpass2(1000, 0.707, 0);
+</code></pre>
+<h4 id="references_2">References</h4>
 <ul>
 <li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127</a></li>
 </ul>
@@ -337,7 +347,12 @@ Frequencies outside the given range of frequencies are attenuated, the frequenci
 <li><code>Q</code>: the quality factor</li>
 <li><code>dtune</code>: detuning of the frequency in cents</li>
 </ul>
-<h4 id="reference_2">Reference</h4>
+<h4 id="test_2">Test</h4>
+<pre><code>wa = library(&quot;webaudio.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+bandpass2_test = os.osc(440) : wa.bandpass2(1000, 1, 0);
+</code></pre>
+<h4 id="references_3">References</h4>
 <ul>
 <li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#334">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#334</a></li>
 </ul>
@@ -355,7 +370,12 @@ pass through, frequencies inside it are attenuated.</p>
 <li><code>Q</code>: the quality factor</li>
 <li><code>dtune</code>: detuning of the frequency in cents</li>
 </ul>
-<h4 id="reference_3">Reference</h4>
+<h4 id="test_3">Test</h4>
+<pre><code>wa = library(&quot;webaudio.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+notch2_test = os.osc(440) : wa.notch2(1000, 1, 0);
+</code></pre>
+<h4 id="references_4">References</h4>
 <ul>
 <li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#301">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#301</a></li>
 </ul>
@@ -372,7 +392,12 @@ but changes the phase-relationship between the various frequencies.</p>
 <li><code>Q</code>: the quality factor</li>
 <li><code>dtune</code>: detuning of the frequency in cents</li>
 </ul>
-<h4 id="reference_4">Reference</h4>
+<h4 id="test_4">Test</h4>
+<pre><code>wa = library(&quot;webaudio.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+allpass2_test = os.osc(440) : wa.allpass2(1000, 1, 0);
+</code></pre>
+<h4 id="references_5">References</h4>
 <ul>
 <li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#268">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#268</a></li>
 </ul>
@@ -389,7 +414,12 @@ but changes the phase-relationship between the various frequencies.</p>
 <li><code>Q</code>: the quality factor</li>
 <li><code>dtune</code>: detuning of the frequency in cents</li>
 </ul>
-<h4 id="reference_5">Reference</h4>
+<h4 id="test_5">Test</h4>
+<pre><code>wa = library(&quot;webaudio.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+peaking2_test = os.osc(440) : wa.peaking2(1000, 3, 1, 0);
+</code></pre>
+<h4 id="references_6">References</h4>
 <ul>
 <li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233</a></li>
 </ul>
@@ -405,7 +435,12 @@ Frequencies lower than the frequency get a boost, or an attenuation, frequencies
 <li><code>gain</code>: the gain in dB</li>
 <li><code>dtune</code>: detuning of the frequency in cents</li>
 </ul>
-<h4 id="reference_6">Reference</h4>
+<h4 id="test_6">Test</h4>
+<pre><code>wa = library(&quot;webaudio.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+lowshelf2_test = os.osc(440) : wa.lowshelf2(500, 6, 0);
+</code></pre>
+<h4 id="references_7">References</h4>
 <ul>
 <li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#169">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#169</a></li>
 </ul>
@@ -421,7 +456,12 @@ Frequencies higher than the frequency get a boost or an attenuation, frequencies
 <li><code>gain</code>: the gain in dB</li>
 <li><code>dtune</code>: detuning of the frequency in cents</li>
 </ul>
-<h4 id="reference_7">Reference</h4>
+<h4 id="test_7">Test</h4>
+<pre><code>wa = library(&quot;webaudio.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+highshelf2_test = os.osc(440) : wa.highshelf2(2000, -6, 0);
+</code></pre>
+<h4 id="references_8">References</h4>
 <ul>
 <li><a href="https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#201">https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#201</a></li>
 </ul></div>

@@ -420,7 +420,7 @@ os = library(&quot;oscillators.lib&quot;);
 cubicnl_test = os.osc(440) : ef.cubicnl(0.5, 0.0);
 cubicnl_nodc_test = os.osc(440) : ef.cubicnl_nodc(0.5, 0.0);
 </code></pre>
-<h4 id="references_1">References:</h4>
+<h4 id="references_1">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Cubic_Soft_Clipper.html">https://ccrma.stanford.edu/~jos/pasp/Cubic_Soft_Clipper.html</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/pasp/Nonlinear_Distortion.html">https://ccrma.stanford.edu/~jos/pasp/Nonlinear_Distortion.html</a></li>
@@ -576,7 +576,7 @@ piano_dispersion_filter_test = os.osc(110) : ef.piano_dispersion_filter(4, 0.000
     from delay-line length.</li>
 <li>Output signal from allpass chain</li>
 </ul>
-<h4 id="reference">Reference</h4>
+<h4 id="references_4">References</h4>
 <ul>
 <li>"Dispersion Modeling in Waveguide Piano Synthesis Using Tunable
 Allpass Filters", by Jukka Rauhala and Vesa Valimaki, DAFX-2006, pp. 71-76</li>
@@ -604,7 +604,7 @@ stereo_width_test = os.osc(440), os.osc(550) : ef.stereo_width(0.5);
 <p>At <code>w=0</code>, the output signal is mono ((left+right)/2 in both channels).
 At <code>w=1</code>, there is no effect (original stereo image).
 Thus, w between 0 and 1 varies stereo width from 0 to "original".</p>
-<h4 id="reference_1">Reference</h4>
+<h4 id="references_5">References</h4>
 <ul>
 <li>"Applications of Blumlein Shuffling to Stereo Microphone Techniques"
 Michael A. Gerzon, JAES vol. 42, no. 6, June 1994</li>
@@ -624,10 +624,6 @@ Michael A. Gerzon, JAES vol. 42, no. 6, June 1994</li>
 <pre><code>ef = library(&quot;misceffects.lib&quot;);
 mesh_square_test = (0,0,0,0) : ef.mesh_square(1);
 </code></pre>
-<h4 id="reference_2">Reference</h4>
-<ul>
-<li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html</a></li>
-</ul>
 <h4 id="signal-order-in-and-out">Signal Order In and Out</h4>
 <p>The mesh is constructed recursively using 2x2 embeddings. Thus,
 the top level of <code>mesh_square(M)</code> is a block 2x2 mesh, where each
@@ -675,6 +671,10 @@ process = 1-1' : mesh_square_test(4); // all modes excited forever
    3So -&gt; 1Wi, 3Wo -&gt; 3Wi, 4So -&gt; 2Ei, 4Eo -&gt; 4Ei
 </code></pre>
 <p>A routing matrix can be used to obtain other connection geometries.</p>
+<h4 id="references_6">References</h4>
+<ul>
+<li><a href="https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html">https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html</a></li>
+</ul>
 <h2 id="mixing">Mixing</h2>
 <hr />
 <h3 id="efdrywetmixer"><code>(ef.)dryWetMixer</code></h3>
@@ -918,7 +918,7 @@ transpose_test = os.osc(440) : ef.transpose(1024, 512, 7);
 os = library(&quot;oscillators.lib&quot;);
 softclipQuadratic_test = os.osc(440) : ef.softclipQuadratic;
 </code></pre>
-<h4 id="references_4">References</h4>
+<h4 id="references_7">References</h4>
 <ul>
 <li>U. Zölzer: Digital Audio Signal Processing. John Wiley &amp; Sons Ltd, 2022.</li>
 </ul>

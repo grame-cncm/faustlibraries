@@ -410,10 +410,6 @@ interpolate_test = si.interpolate(
 <h3 id="sirepeat"><code>(si.)repeat</code></h3>
 <p>Repeat an effect N time(s) and take the parallel sum of all
 intermediate buses.</p>
-<h4 id="references_1">References</h4>
-<ul>
-<li><a href="https://github.com/orlarey/presentation-compilateur-faust/blob/master/slides.pdf">https://github.com/orlarey/presentation-compilateur-faust/blob/master/slides.pdf</a></li>
-</ul>
 <h4 id="usage_3">Usage</h4>
 <pre><code>si.bus(inputs(FX)) : repeat(N, FX) : si.bus(outputs(FX))
 </code></pre>
@@ -435,6 +431,10 @@ C = 2;
 fx(i) = i+1, par(j, C, @(i*5000));
 process = 0, si.bus(C) : repeat(N, fx) : !, par(i, C, _*.2/N);
 </code></pre>
+<h4 id="references_1">References</h4>
+<ul>
+<li><a href="https://github.com/orlarey/presentation-compilateur-faust/blob/master/slides.pdf">https://github.com/orlarey/presentation-compilateur-faust/blob/master/slides.pdf</a></li>
+</ul>
 <hr />
 <h3 id="sismoo"><code>(si.)smoo</code></h3>
 <p>Smoothing function based on <code>smooth</code> ideal to smooth UI signals
@@ -541,7 +541,7 @@ The exponential time-constant is approximately 1/(1-s) samples, when s is close 
 <pre><code>si = library(&quot;signals.lib&quot;);
 smooth_test = hslider(&quot;smooth:input&quot;, 0, -1, 1, 0.01) : si.smooth(0.9);
 </code></pre>
-<h4 id="references_2">References:</h4>
+<h4 id="references_2">References</h4>
 <ul>
 <li><a href="https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html">https://ccrma.stanford.edu/~jos/mdft/Convolution_Example_2_ADSR.html</a></li>
 <li><a href="https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html">https://ccrma.stanford.edu/~jos/aspf/Appendix_B_Inspecting_Assembly.html</a></li>
