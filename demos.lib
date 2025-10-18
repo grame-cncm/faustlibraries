@@ -14,7 +14,9 @@
 // * [Generators](#generators)
 // 
 // #### References
+//
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/demos.lib>
+
 //########################################################################################
 
 /************************************************************************
@@ -1138,6 +1140,7 @@ declare vital_rev_demo license "GPL-3.0";
 // ```
 //
 // #### References
+//
 // * [1] Pirkle, W. C. (2019). Designing audio effect plugins in C++ (2nd ed.). Chapter 17.14.
 //
 // * [2] Spin Semiconductor. (n.d.). Reverberation. Retrieved 2024-04-16, from <http://www.spinsemi.com/knowledge_base/effects.html#Reverberation>
@@ -1145,6 +1148,7 @@ declare vital_rev_demo license "GPL-3.0";
 // * [3] Zölzer, U. (2022). Digital audio signal processing (3rd ed.). Chapter 7, Figure 7.39.
 //
 // * [4] Valhalla DSP. (2010, August 25). RIP Keith Barr. Retrieved 2024-04-16, from <https://valhalladsp.com/2010/08/25/rip-keith-barr/>
+
 //-----------------------------------------------------------------------
 reverbTank_demo = hgroup("Reverb", ef.dryWetMixer(wet, 
     (preDelay : preFilter : avg : ((si.bus(2) :> branches) ~ selectLastBranchDelay) : selectLR :> shelves)
@@ -1235,8 +1239,10 @@ with {
     // * `outerG`: allpass minus-gain coefficient [-1..1]
     // * `innerG`: allpass minus-gain coefficient [-1..1]
     //
-    // #### References
-    // [1] Pirkle, W. C. (2019). Designing audio effect plugins in C++ (2nd ed.). Chapter 17.13.17.
+// #### References
+//
+// * [1] Pirkle, W. C. (2019). Designing audio effect plugins in C++ (2nd ed.). Chapter 17.13.17.
+
     //------------------------------------------------------------
     nestedDelayAPF(outerDelay, MAXLEN, curDel, outerG, innerG) =
     (+ <: (innerAPF:outerDelay),*(outerG)) ~ *(-outerG) : mem,_ : +
@@ -1998,8 +2004,10 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // ```
 //
 // #### References
+//
 // * <https://secure.aes.org/forum/pubs/ebriefs/?elib=16939>
 // * <https://www.researchgate.net/publication/258333577_Modeling_the_Harmonic_Exciter>
+
 //-------------------------------------------------------------------------------------
 declare exciter author "PPriyanka Shekar and Julius O. Smith III";
 declare exciter licence "STK-4.3";

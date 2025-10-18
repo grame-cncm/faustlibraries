@@ -15,7 +15,9 @@
 // * [Effects](#effects)
 //
 // #### References
+//
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/vaeffects.lib>
+
 //########################################################################################
 
 ba = library("basics.lib");
@@ -79,8 +81,10 @@ Michon and Julius O. Smith III, and are released under the
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~stilti/papers/moogvcf.pdf>
 // * <https://ccrma.stanford.edu/~jos/pasp/vegf.html>
+
 //------------------------------------------------------------
 declare moog_vcf author "Julius O. Smith III";
 declare moog_vcf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -198,12 +202,10 @@ with {
 //
 // #### References
 //
-// [Zavalishin 2012] (revision 2.1.2, February 2020): 
-//
+// * [Zavalishin 2012] (revision 2.1.2, February 2020)
 // * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
-//
-// This fix is based on Lorenzo Della Cioppa's correction to Pirkle's implementation; see this post: 
-// https://www.kvraudio.com/forum/viewtopic.php?f=33&t=571909
+// * Lorenzo Della Cioppa's correction to Pirkle's implementation: <https://www.kvraudio.com/forum/viewtopic.php?f=33&t=571909>
+
 //---------------------------------------------------------------------
 declare moogLadder author "Dario Sanfilippo";
 declare moogLadder license "MIT-style STK-4.3 license";
@@ -275,9 +277,9 @@ with {
 // peak corresponds exactly to that set via the Q-param.
 // #### References
 //
-// [Zavalishin 2012] (revision 2.1.2, February 2020): 
-//
+// * [Zavalishin 2012] (revision 2.1.2, February 2020)
 // * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
+
 //---------------------------------------------------------------------
 declare lowpassLadder4 author "Dario Sanfilippo";
 declare lowpassLadder4 license "MIT License";
@@ -346,6 +348,7 @@ lowpassLadder4(k, CF, x) = loop ~ si.bus(4) : si.block(4) , _
 //
 // * <https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter>
 // * <http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf>
+
 //---------------------------------------------------------------------
 declare moogHalfLadder author "Eric Tarr";
 declare moogHalfLadder license "MIT-style STK-4.3 license";
@@ -411,6 +414,7 @@ with{
 //
 // * <https://www.willpirkle.com/virtual-analog-diode-ladder-filter/>
 // * <http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf>
+
 //---------------------------------------------------------------------
 declare diodeLadder author "Eric Tarr";
 declare diodeLadder license "MIT-style STK-4.3 license";
@@ -1160,11 +1164,11 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 //
 // ⚠️ **Note:** These filters require **double-precision** support.
 //
-// #### References:
-// Vicanek, M. (2016) *Matched Second Order Digital Filters* 
+// #### References
 //
-// <https://www.vicanek.de/articles/BiquadFits.pdf>
-//
+// * Vicanek, M. (2016) *Matched Second Order Digital Filters*
+// * <https://www.vicanek.de/articles/BiquadFits.pdf>
+
 //================================================================================
 
 //----------`(ve.)biquad`-------------------------------------------------------

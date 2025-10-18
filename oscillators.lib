@@ -19,7 +19,9 @@
 // * [PolyBLEP-Based Oscillators](#polyblep-based-oscillators)
 //
 // #### References
+//
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/oscillators.lib>
+
 //########################################################################################
 
 /************************************************************************
@@ -994,9 +996,11 @@ sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))
 // saw3_test = os.saw3(220);
 // saw4_test = os.saw4(220);
 // ```
-// ##### References
-// See `sawN` above.
+// #### References
 //
+// * See `sawN` above.
+//
+
 // #### Implementation Notes
 //
 // Presently, only `saw2` uses the PTR method, while `saw3` and `saw4` use DPW.
@@ -1030,13 +1034,12 @@ saw4 = sawN(4); // only choice available right now
 //
 // Polynomial Transition Regions (PTR) method for aliasing suppression.
 //
-// ##### References
+// #### References
 //
-// * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio
-//     Signals Using Polynomial Transition Regions," in Signal Processing
-//     Letters, IEEE , vol.19, no.2, pp.67-70, Feb. 2012
+// * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio Signals Using Polynomial Transition Regions," Signal Processing Letters, IEEE, vol.19, no.2, pp.67-70, Feb. 2012
 // * <https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9>
 // * <http://research.spa.aalto.fi/publications/papers/spl-ptr/>
+
 //
 // ##### Notes
 //
@@ -1450,6 +1453,7 @@ triangle = triangleN(2); // default based on saw2
 //
 // * <http://lac.linuxaudio.org/2012/download/lac12-slides-jos.pdf>
 // * <https://ccrma.stanford.edu/~jos/pdf/lac12-paper-jos.pdf>
+
 //========================================================================================
 
 //--------------------------`(os.)oscb`--------------------------------

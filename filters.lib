@@ -33,7 +33,9 @@
 // * [Kalman Filters](#kalman-filters)
 //
 // #### References
+//
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/filters.lib>
+
 //
 //########################################################################################
 
@@ -164,8 +166,10 @@ integrator = + ~ _;
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html>
 // * <https://ccrma.stanford.edu/~jos/spectilt/Bode_Plots.html>
+
 //------------------------------------------------------------
 declare dcblockerat author "Julius O. Smith III";
 declare dcblockerat copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -559,9 +563,11 @@ ffbcombfilter(maxdel,del,g) = (+ : de.fdelay(maxdel,del)) ~ *(g);
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html>
 // * <https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html>
+
 //------------------------------------------------------------
 declare allpass_comb author "Julius O. Smith III";
 declare allpass_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -603,9 +609,11 @@ allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ :
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html>
 // * <https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html>
+
 //------------------------------------------------------------
 declare allpass_fcomb author "Julius O. Smith III";
 declare allpass_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -1269,8 +1277,10 @@ with {
 // ```
 //
 // #### References
+//
 // * J. D. Markel and A. H. Gray, Linear Prediction of Speech, New York: Springer Verlag, 1976.
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
+
 //------------------------------------------------------------
 declare iir_nl author "Julius O. Smith III";
 declare iir_nl copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -1311,8 +1321,10 @@ with {
 // ```
 //
 // #### References
+//
 // * J. D. Markel and A. H. Gray, Linear Prediction of Speech, New York: Springer Verlag, 1976.
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
+
 //------------------------------------------------------------
 declare allpassnnlt author "Julius O. Smith III";
 declare allpassnnlt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -1399,8 +1411,10 @@ with {
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/pasp/Power_Normalized_Waveguide_Filters.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html>
+
 //------------------------------------------------------------
 declare wgr author "Julius O. Smith III";
 declare wgr copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -1491,9 +1505,11 @@ with {
 // They are defined here as nested allpass filters, hence the names `allpassn*`.
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/pasp/Conventional_Ladder_Filters.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Nested_Allpass_Filters.html>
 // * Linear Prediction of Speech, Markel and Gray, Springer Verlag, 1976
+
 //========================================================================================
 
 //-----------------------`(fi.)scatN`--------------------------
@@ -1539,9 +1555,11 @@ with {
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/pasp/Loaded_Waveguide_Junctions.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Passive_String_Terminations.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Unloaded_Junctions_Alpha_Parameters.html>
+
 //------------------------------------------------------------
 declare scatN author "Julius O. Smith III";
 declare scatN copyright "Copyright (C) 2024 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -1623,8 +1641,10 @@ scat(s,r) = _ <: ((+ <: (r,*(s)))~(*(-s))) : _',_ :+;
 // ```
 //
 // #### References
+//
 // * J. D. Markel and A. H. Gray: Linear Prediction of Speech, New York: Springer Verlag, 1976.
 // * <https://ccrma.stanford.edu/~jos/pasp/Conventional_Ladder_Filters.html>
+
 //----------------------------------------------
 declare allpassn author "Julius O. Smith III";
 declare allpassn copyright "Copyright (c) 2003-2024 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2170,8 +2190,10 @@ with {
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html>
 // * `butter` function in Octave `("[z,p,g] = butter(N,1,'s');")`
+
 //------------------------------
 declare lowpass author "Julius O. Smith III";
 declare lowpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2203,8 +2225,10 @@ lowpass(N,fc) = lowpass0_highpass1(0,N,fc);
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/filters/Butterworth_Lowpass_Design.html>
 // * `butter` function in Octave `("[z,p,g] = butter(N,1,'s');")`
+
 //------------------------------
 declare highpass author "Julius O. Smith III";
 declare highpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2363,8 +2387,10 @@ declare highpass_plus_lowpass_odd license "MIT-style STK-4.3 license";
 // Elliptic (Cauer) Lowpass Filters
 //
 // #### References
+//
 // * <http://en.wikipedia.org/wiki/Elliptic_filter>
 // * functions `ncauer` and `ellip` in Octave.
+
 //========================================================================================
 
 //-----------------------------`(fi.)lowpass3e`-----------------------------
@@ -2772,9 +2798,11 @@ with { // octave script output:
 // ```
 //
 // #### References
+//
 // * <https://ccrma.stanford.edu/~jos/mdft/Analytic_Signals_Hilbert_Transform.html>
 // * <https://ccrma.stanford.edu/~jos/sasp/Comparison_Optimal_Chebyshev_FIR_I.html>
 // * <https://ccrma.stanford.edu/~jos/sasp/Hilbert_Transform.html>
+
 //------------------------------------------------------------
 declare pospass author "Julius O. Smith III";
 declare pospass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2806,6 +2834,7 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 // Parametric Equalizers (Shelf, Peaking).
 //
 // #### References
+//
 // * <http://en.wikipedia.org/wiki/Equalization>
 // * <https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt>
 // * Digital Audio Signal Processing, Udo Zolzer, Wiley, 1999, p. 124
@@ -2813,6 +2842,7 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 // * <https://ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html>
 // * maxmsp.lib in the Faust distribution
 // * bandfilter.dsp in the faust2pd distribution
+
 //========================================================================================
 
 //----------------------`(fi.)lowshelf`----------------------
@@ -2865,9 +2895,9 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 //  See `lowshelf_other_freq`.
 //
 // #### References
-// See "Parametric Equalizers" above for references regarding
-// `low_shelf`, `high_shelf`, and `peak_eq`.
 //
+// * See "Parametric Equalizers" above for references regarding `low_shelf`, `high_shelf`, and `peak_eq`.
+
 //--------------------------------------------------------------
 declare lowshelf author "Julius O. Smith III";
 declare lowshelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -2960,9 +2990,9 @@ lowshelf_other_freq(N, L0, fx) = ba.db2linear(ba.linear2db(fx) + L0/N); // conve
 // ```
 //
 // #### References
-// See "Parametric Equalizers" above for references regarding
-// `low_shelf`, `high_shelf`, and `peak_eq`.
 //
+// * See "Parametric Equalizers" above for references regarding `low_shelf`, `high_shelf`, and `peak_eq`.
+
 //--------------------------------------------------------------
 declare highshelf author "Julius O. Smith III";
 declare highshelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -3047,8 +3077,9 @@ highshelf_other_freq(N, Lpi, fx) = ba.db2linear(ba.linear2db(fx) - Lpi/N);
 // ```
 //
 // #### References
-// See "Parametric Equalizers" above for references regarding
-// `low_shelf`, `high_shelf`, and `peak_eq`.
+//
+// * See "Parametric Equalizers" above for references regarding `low_shelf`, `high_shelf`, and `peak_eq`.
+
 //--------------------------------------------------------------
 declare peak_eq author "Julius O. Smith III";
 declare peak_eq copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -3087,8 +3118,9 @@ peak_eq(Lfx,fx,B) = tf2s(1,b1s,1,a1s,1,wx) with {
 // ```
 //
 // #### References
-// See "Parametric Equalizers" above for references regarding
-// `low_shelf`, `high_shelf`, and `peak_eq`.
+//
+// * See "Parametric Equalizers" above for references regarding `low_shelf`, `high_shelf`, and `peak_eq`.
+
 //------------------------------------------------------------
 declare peak_eq_cq author "Julius O. Smith III";
 declare peak_eq_cq copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -3309,10 +3341,11 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 // filter-banks using elliptic or Chebyshev prototype filters.
 //
 // #### References
-// * "Tree-structured complementary filter banks using all-pass sections",
-//   Regalia et al., IEEE Trans. Circuits & Systems, CAS-34:1470-1484, Dec. 1987
+//
+// * "Tree-structured complementary filter banks using all-pass sections", Regalia et al., IEEE Trans. Circuits & Systems, CAS-34:1470-1484, Dec. 1987
 // * "Multirate Systems and Filter Banks", P. Vaidyanathan, Prentice-Hall, 1993
 // * Elementary filter theory: <https://ccrma.stanford.edu/~jos/filters/>
+
 //========================================================================================
 
 //------------------------`(fi.)mth_octave_filterbank[n]`-------------------------
@@ -3532,9 +3565,10 @@ with {
 
 //===============State Variable Filters=========================================================
 // #### References
-// Solving the continuous SVF equations using trapezoidal integration
 //
-// <https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf>
+// * Solving the continuous SVF equations using trapezoidal integration
+// * <https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf>
+
 //========================================================================================
 
 //-----------------`(fi.)svf`----------------------
@@ -3877,7 +3911,9 @@ dynamicSmoothing(sensitivity, baseCF, x) = f ~ _ : ! , _
 // ```
 //
 // #### References
+//
 // * <https://gery.casiez.net/1euro/>
+
 //------------------------------------------------------------------------
 declare oneEuro author "David Braun";
 declare oneEuro copyright "Copyright (C) 2024 by David Braun <braun@ccrma.stanford.edu>";
@@ -4518,8 +4554,10 @@ kalmanEnv = environment {
 // };
 // ```
 // #### References
+//
 // * <https://en.wikipedia.org/wiki/Kalman_filter>
 // * <https://www.cs.unc.edu/~welch/kalman/index.html>
+
 //----------------------------------------------------------------------------
 declare kalman author "David Braun";
 declare kalman license "MIT License";

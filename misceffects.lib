@@ -18,7 +18,9 @@
 // * [Saturators](#saturators)
 //
 // #### References
+//
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/misceffects.lib>
+
 //########################################################################################
 
 /************************************************************************
@@ -94,10 +96,11 @@ declare version "2.5.1";
 // cubicnl_nodc_test = os.osc(440) : ef.cubicnl_nodc(0.5, 0.0);
 // ```
 //
-// #### References:
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Cubic_Soft_Clipper.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Nonlinear_Distortion.html>
+
 //------------------------------------------------------------
 cubicnl(drive,offset) = *(pregain) : +(offset) : clip(-1,1) : cubic
 with {
@@ -143,6 +146,7 @@ declare cubicnl_nodc license "STK-4.3";
 // * <http://en.wikipedia.org/wiki/Noise_gate>
 // * <http://www.soundonsound.com/sos/apr01/articles/advanced.asp>
 // * <http://en.wikipedia.org/wiki/Gating_(sound_engineering)>
+
 //------------------------------------------------------------
 gate_mono(thresh,att,hold,rel,x) = x * gate_gain_mono(thresh,att,hold,rel,x);
 
@@ -178,6 +182,7 @@ declare gate_mono license "STK-4.3";
 // * <http://en.wikipedia.org/wiki/Noise_gate>
 // * <http://www.soundonsound.com/sos/apr01/articles/advanced.asp>
 // * <http://en.wikipedia.org/wiki/Gating_(sound_engineering)>
+
 //------------------------------------------------------------
 gate_stereo(thresh,att,hold,rel,x,y) = ggm*x, ggm*y with {
   ggm = gate_gain_mono(thresh,att,hold,rel,abs(x)+abs(y));
@@ -1197,6 +1202,7 @@ nonlinearityEnv = environment
 // #### References
 //
 // * U. Zölzer: Digital Audio Signal Processing. John Wiley & Sons Ltd, 2022.
+
 //---------------------------------------------------------------------------------------
 declare softclipQuadratic author "David Braun";
 declare softclipQuadratic copyright "Copyright (C) 2024 David Braun";

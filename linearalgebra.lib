@@ -42,7 +42,9 @@
 // This would ultimately enable `result = packedLeftHand : matMul(packedRightHand);` for the equivalent numpy code: `result = packedLeftHand @ packedRightHand;`.
 // 
 // #### References
+//
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/linearalgebra.lib>
+
 //#################################################################################
 
 /************************************************************************
@@ -141,7 +143,9 @@ declare determinant copyright "MIT License";
 // ```
 //
 // #### References
+//
 // * <https://en.wikipedia.org/wiki/Minor_(linear_algebra)#First_minor>
+
 //----------------------------------------------------------------------------
 minor(N, ROW, COL) = par(i, ROW, deleteColumn), deleteRow, par(i, N-1-ROW, deleteColumn) : determinant(N-1)
 with {
