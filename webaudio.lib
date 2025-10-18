@@ -230,6 +230,13 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
+// #### Test
+// ```
+// wa = library("webaudio.lib");
+// os = library("oscillators.lib");
+// lowpass2_test = os.osc(440) : wa.lowpass2(1000, 0.707, 0);
+// ```
+//
 // #### Reference
 //
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98>
@@ -254,6 +261,13 @@ lowpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass2, x : fi.tf2;
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
+// #### Test
+// ```
+// wa = library("webaudio.lib");
+// os = library("oscillators.lib");
+// highpass2_test = os.osc(440) : wa.highpass2(1000, 0.707, 0);
+// ```
+//
 // #### Reference
 //
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127>
@@ -277,6 +291,13 @@ highpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass2, x : fi.tf2
 // * `f0`: cutoff frequency in Hz
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
+//
+// #### Test
+// ```
+// wa = library("webaudio.lib");
+// os = library("oscillators.lib");
+// bandpass2_test = os.osc(440) : wa.bandpass2(1000, 1, 0);
+// ```
 //
 // #### Reference
 //
@@ -303,6 +324,13 @@ bandpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass2, x : fi.tf2
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
+// #### Test
+// ```
+// wa = library("webaudio.lib");
+// os = library("oscillators.lib");
+// notch2_test = os.osc(440) : wa.notch2(1000, 1, 0);
+// ```
+//
 // #### Reference
 //
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#301>
@@ -326,6 +354,13 @@ notch2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch2, x : fi.tf2;
 // * `f0`: cutoff frequency in Hz
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
+//
+// #### Test
+// ```
+// wa = library("webaudio.lib");
+// os = library("oscillators.lib");
+// allpass2_test = os.osc(440) : wa.allpass2(1000, 1, 0);
+// ```
 //
 // #### Reference
 //
@@ -351,6 +386,13 @@ allpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass2, x : fi.tf2;
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
+// #### Test
+// ```
+// wa = library("webaudio.lib");
+// os = library("oscillators.lib");
+// peaking2_test = os.osc(440) : wa.peaking2(1000, 3, 1, 0);
+// ```
+//
 // #### Reference
 //
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233>
@@ -372,6 +414,13 @@ peaking2(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking2, x :
 // * `f0`: cutoff frequency in Hz
 // * `gain`: the gain in dB
 // * `dtune`: detuning of the frequency in cents
+//
+// #### Test
+// ```
+// wa = library("webaudio.lib");
+// os = library("oscillators.lib");
+// lowshelf2_test = os.osc(440) : wa.lowshelf2(500, 6, 0);
+// ```
 //
 // #### Reference
 //
@@ -395,10 +444,16 @@ lowshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf2, x : 
 // * `gain`: the gain in dB
 // * `dtune`: detuning of the frequency in cents
 //
+// #### Test
+// ```
+// wa = library("webaudio.lib");
+// os = library("oscillators.lib");
+// highshelf2_test = os.osc(440) : wa.highshelf2(2000, -6, 0);
+// ```
+//
 // #### Reference
 //
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#201>
 //--------------------------------------
 
 highshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).highshelf2, x : fi.tf2;
-
