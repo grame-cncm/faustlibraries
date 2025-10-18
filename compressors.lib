@@ -18,7 +18,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/compressors.lib>
-
 //########################################################################################
 
 /************************************************************************
@@ -168,7 +167,6 @@ strength2ratio(strength) = 1/(1-strength);
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare peak_compression_gain_mono_db author "Bart Brouns";
 declare peak_compression_gain_mono_db license "GPLv3";
@@ -229,7 +227,6 @@ with {
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare peak_compression_gain_N_chan_db author "Bart Brouns";
 declare peak_compression_gain_N_chan_db license "GPLv3";
@@ -295,7 +292,6 @@ peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare FFcompressor_N_chan author "Bart Brouns";
 declare FFcompressor_N_chan license "GPLv3";
@@ -353,7 +349,6 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare FBcompressor_N_chan author "Bart Brouns";
 declare FBcompressor_N_chan license "GPLv3";
@@ -411,7 +406,6 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare FBFFcompressor_N_chan author "Bart Brouns";
 declare FBFFcompressor_N_chan license "GPLv3";
@@ -467,9 +461,7 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
-
 declare RMS_compression_gain_mono_db author "Bart Brouns";
 declare RMS_compression_gain_mono_db license "GPLv3";
 
@@ -531,7 +523,6 @@ RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare RMS_compression_gain_N_chan_db author "Bart Brouns";
 declare RMS_compression_gain_N_chan_db license "GPLv3";
@@ -594,11 +585,11 @@ RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // meter(x) = x;
 // RMS_FBFFcompressor_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBFFcompressor_N_chan(0.4, -18, 0.02, 0.12, 6, 0, 0.5, 0.3, meter, 2);
 // ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare RMS_FBFFcompressor_N_chan author "Bart Brouns";
 declare RMS_FBFFcompressor_N_chan license "GPLv3";
@@ -662,11 +653,11 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // meterLim(x) = x;
 // RMS_FBcompressor_peak_limiter_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(0.4, -18, -2, 0.02, 0.12, 6, 0.5, meter, meterLim, 2);
 // ```
+//
 // #### References
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare RMS_FBcompressor_peak_limiter_N_chan author "Bart Brouns";
 declare RMS_FBcompressor_peak_limiter_N_chan license "GPLv3";
@@ -723,7 +714,6 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare peak_compression_gain_mono author "Bart Brouns";
 declare peak_compression_gain_mono license "GPLv3";
@@ -776,7 +766,6 @@ peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare peak_compression_gain_N_chan author "Bart Brouns";
 declare peak_compression_gain_N_chan license "GPLv3";
@@ -829,7 +818,6 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare RMS_compression_gain_mono author "Bart Brouns";
 declare RMS_compression_gain_mono license "GPLv3";
@@ -882,7 +870,6 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 //
 // * <http://en.wikipedia.org/wiki/Dynamic_range_compression>
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
-
 //------------------------------------------------------------
 declare RMS_compression_gain_N_chan author "Bart Brouns";
 declare RMS_compression_gain_N_chan license "GPLv3";
@@ -932,7 +919,6 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // * <https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html>
 // * Albert Graef's "faust2pd"/examples/synth/compressor_.dsp
 // * More features: <https://github.com/magnetophon/faustCompressors>
-
 //------------------------------------------------------------
 declare compressor_lad_mono author "Julius O. Smith III";
 declare compressor_lad_mono copyright
@@ -973,7 +959,6 @@ compressor_lad_mono(lad,ratio,thresh,att,rel,x)
 // * <https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html>
 // * Albert Graef's "faust2pd"/examples/synth/compressor_.dsp
 // * More features: <https://github.com/magnetophon/faustCompressors>
-
 //------------------------------------------------------------
 declare compressor_mono author "Julius O. Smith III";
 declare compressor_mono copyright
@@ -1010,7 +995,6 @@ compressor_mono = compressor_lad_mono(0);
 // * <https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html>
 // * Albert Graef's "faust2pd"/examples/synth/compressor_.dsp
 // * More features: <https://github.com/magnetophon/faustCompressors>
-
 //------------------------------------------------------------
 declare compressor_stereo author "Julius O. Smith III";
 declare compressor_stereo copyright
@@ -1049,7 +1033,6 @@ compressor_stereo(ratio,thresh,att,rel,x,y) = cgm*x, cgm*y with {
 // * <https://ccrma.stanford.edu/~jos/filters/Nonlinear_Filter_Example_Dynamic.html>
 // * Albert Graef's "faust2pd"/examples/synth/compressor_.dsp
 // * More features: <https://github.com/magnetophon/faustCompressors>
-
 //------------------------------------------------------------
 declare compression_gain_mono author "Julius O. Smith III";
 declare compression_gain_mono copyright
@@ -1108,9 +1091,9 @@ with {
 // limiter_1176_R4_mono_test = os.osc(440) : co.limiter_1176_R4_mono;
 // ```
 //
-// #### Reference:
+// #### References
 //
-// <http://en.wikipedia.org/wiki/1176_Peak_Limiter>
+// * <http://en.wikipedia.org/wiki/1176_Peak_Limiter>
 //------------------------------------------------------------
 declare limiter_1176_R4_mono author "Julius O. Smith III";
 declare limiter_1176_R4_mono copyright
@@ -1152,9 +1135,9 @@ limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
 // limiter_1176_R4_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_1176_R4_stereo;
 // ```
 //
-// #### Reference:
+// #### References
 //
-// <http://en.wikipedia.org/wiki/1176_Peak_Limiter>
+// * <http://en.wikipedia.org/wiki/1176_Peak_Limiter>
 //------------------------------------------------------------
 declare limiter_1176_R4_stereo author "Julius O. Smith III";
 declare limiter_1176_R4_stereo copyright
@@ -1394,8 +1377,9 @@ expanderSC_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,max
 // limiter_lad_N_test = (os.osc(440), os.osc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
 // ```
 //
-// #### Reference:
-// <http://iem.at/~zmoelnig/publications/limiter>
+// #### References
+//
+// * <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 
 declare limiter_lad_N author "Dario Sanfilippo";
@@ -1441,8 +1425,9 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 // limiter_lad_mono_test = os.osc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
 // ```
 //
-// #### Reference:
-// <http://iem.at/~zmoelnig/publications/limiter>
+// #### References
+//
+// * <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_mono author "Dario Sanfilippo";
 declare limiter_lad_mono copyright "Copyright (C) 2020 Dario Sanfilippo
@@ -1475,8 +1460,9 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 // limiter_lad_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
 //
 // ```
-// #### Reference:
-// <http://iem.at/~zmoelnig/publications/limiter>
+// #### References
+//
+// * <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_stereo author "Dario Sanfilippo";
 declare limiter_lad_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
@@ -1509,8 +1495,9 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 // limiter_lad_quad_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
 // ```
 //
-// #### Reference:
-// <http://iem.at/~zmoelnig/publications/limiter>
+// #### References
+//
+// * <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_quad author "Dario Sanfilippo";
 declare limiter_lad_quad copyright "Copyright (C) 2020 Dario Sanfilippo
@@ -1543,8 +1530,9 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 // limiter_lad_bw_test = os.osc(440) : co.limiter_lad_bw;
 // ```
 //
-// #### Reference:
-// <http://iem.at/~zmoelnig/publications/limiter>
+// #### References
+//
+// * <http://iem.at/~zmoelnig/publications/limiter>
 //------------------------------------------------------------------------------
 declare limiter_lad_bw author "Dario Sanfilippo";
 declare limiter_lad_bw copyright "Copyright (C) 2020 Dario Sanfilippo

@@ -20,7 +20,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/analyzers.lib>
-
 //########################################################################################
 
 ma = library("maths.lib");
@@ -195,8 +194,6 @@ abs_envelope_t19(period, x) = abs(x) : fi.avg_t19(period);
 //
 // * Musical Engineer's Handbook, Bernie Hutchins, Ithaca NY
 // * 1975 Electronotes Newsletter, Bernie Hutchins
-
-//
 //-----------------------------------------------------------------------------
 amp_follower(rel) = abs : env with {
     p = ba.tau2pole(rel);
@@ -226,6 +223,7 @@ peak_envelope = amp_follower; // Synonym for more standard naming
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
 // amp_follower_ud_test = os.osc(220) : an.amp_follower_ud(0.002, 0.05);
+// ```
 //
 // #### Note
 //
@@ -233,7 +231,7 @@ peak_envelope = amp_follower; // Synonym for more standard naming
 // For audio, att is normally faster (smaller) than rel (e.g., 0.001 and 0.01).
 // Use `amp_follower_ar` below to remove this restriction.
 //
-// #### Reference
+// #### References
 //
 // * "Digital Dynamic Range Compressor Design --- A Tutorial and Analysis", by
 //   Dimitrios Giannoulis, Michael Massberg, and Joshua D. Reiss
@@ -612,7 +610,8 @@ pitchTracker(N, t, x) = loop ~ _
 // spectralCentroid_test = (os.osc(440) + os.osc(880)) : an.spectralCentroid(1, 0.01);
 // ```
 //
-// #### Reference:
+// #### References
+// 
 //  Sanfilippo, D. (2021). Time-Domain Adaptive Algorithms for Low- and High-Level 
 //  Audio Information Processing. Computer Music Journal, 45(1), 24-38.
 //---------------------------------------------------------
@@ -682,7 +681,6 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
 // * "Tree-structured complementary filter banks using all-pass sections", Regalia et al., IEEE Trans. Circuits & Systems, CAS-34:1470-1484, Dec. 1987
 // * "Multirate Systems and Filter Banks", P. Vaidyanathan, Prentice-Hall, 1993
 // * Elementary filter theory: <https://ccrma.stanford.edu/~jos/filters/>
-
 //========================================================================================
 
 
@@ -901,7 +899,7 @@ with {
 // goertzelOpt_test = an.goertzelOpt(440, 128, os.osc(440));
 // ```
 //
-// #### Reference
+// #### References
 //
 // * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
 //---------------------------------------------------
@@ -941,7 +939,8 @@ with {
 // goertzelComp_test = an.goertzelComp(440, 128, os.osc(440));
 // ```
 //
-// #### Reference
+// #### References
+//
 // * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
 //---------------------------------------------------
 goertzelComp(freq,n,x) = mg 
@@ -984,7 +983,8 @@ with {
 // goertzel_test = an.goertzel(440, 128, os.osc(440));
 // ```
 //
-// #### Reference
+// #### References
+//
 // * <https://en.wikipedia.org/wiki/Goertzel_algorithm>
 //---------------------------------------------------
 goertzel = goertzelOpt;
@@ -1046,7 +1046,8 @@ goertzel = goertzelOpt;
 // * Frequency-dependent smoothing for better stability at low f
 // * Scales linearly with the number of resonators
 //
-// #### Reference
+// #### References
+//
 // * <https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf>
 //---------------------------------------------------
 
@@ -1133,9 +1134,9 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 // fft_test = an.rtocv(8, os.osc(220)) : an.fft(8);
 // ```
 //
-// #### Reference
-// * [Decimation-in-time (DIT) Radix-2 FFT](https://cnx.org/contents/zmcmahhR@7/Decimation-in-time-DIT-Radix-2)
+// #### References
 //
+// * [Decimation-in-time (DIT) Radix-2 FFT](https://cnx.org/contents/zmcmahhR@7/Decimation-in-time-DIT-Radix-2)
 //---------------------------------------------------
 fft(N) = si.cbus(N) : an.c_bit_reverse_shuffle(N) : an.fftb(N); // shuffle off to the butterflies:
 fftb(1) = _,_; // each complex number is represented as (real,imag)

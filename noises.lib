@@ -13,7 +13,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/noises.lib>
-
 //########################################################################################
 
 ma = library("maths.lib");
@@ -392,8 +391,9 @@ Michon and/or Julius O. Smith III, and are released under the
 // ```
 // <img alt="pink_noise_demo figure" src="https://ccrma.stanford.edu/wiki/Images/8/86/Tpinkd.jpg" width="600" />
 //
-// #### Reference
-// <https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html>
+// #### References
+//
+// * <https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html>
 //------------------------------------------------------------
 pink_filter = fi.iir((0.049922035, -0.095993537, 0.050612699, -0.004408786),
                     (-2.494956002, 2.017265875, -0.522189400));
@@ -427,7 +427,6 @@ pink_noise_m = pink_noise * 12.5; // Equalizes loudness to that of no.noise (tha
 //
 // * <http://www.dsprelated.com/showarticle/908.php>
 // * <http://www.firstpr.com.au/dsp/pink-noise/#Voss-McCartney>
-
 //------------------------------------------------------------
 pink_noise_vm(N) = noise <: _,par(i,N,ba.latch(clock(i))) :> _
 with {
@@ -492,7 +491,7 @@ lfnoise(freq) = lfnoise0(freq) : seq(i,5,fi.lowpass(1,freq)); // non-overshootin
 // sparse_noise_test = no.sparse_noise(5.0);
 // ```
 //
-// #### Reference
+// #### References
 //
 // * See velvet_noise
 //------------------------------------------------------------
@@ -528,13 +527,12 @@ with {
 // velvet_noise_test = no.velvet_noise(0.5, 5.0);
 // ```
 //
-// #### Reference
+// #### References
 //
 // * Matti Karjalainen and Hanna Jarvelainen,
 //   "Reverberation Modeling Using Velvet Noise",
 //   in Proc. 30th Int. Conf. Intelligent Audio Environments (AES07),
 //   March 2007.
-//
 //------------------------------------------------------------
 velvet_noise(amp, f0) = vn
 with {
@@ -562,10 +560,9 @@ with {
 // gnoise_test = no.gnoise(8);
 // ```
 //
-// #### Reference
+// #### References
 //
 // * See Central Limit Theorem
-//
 //------------------------------------------------------------
 gnoise(N) = uvgwn
 with {

@@ -114,7 +114,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/interpolators.lib>
-
 //########################################################################################
 
 /************************************************************************
@@ -236,12 +235,10 @@ doubleprecision quadprecision decrease_modulo(trig, step, length) = raise_modulo
 // interpolate_linear_test = it.interpolate_linear(0.5, 0.0, 1.0);
 // ```
 //
-// #### Reference:
+// #### References
 //
-// <https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h>
-//
+// * <https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h>
 //--------------------------------------------
-
 declare interpolate_linear author "Stéphane Letz";
 declare interpolate_linear licence "MIT";
 
@@ -269,10 +266,9 @@ interpolate_linear(dv,v0,v1) = v0 + dv*(v1-v0);  // (faster than v0*(1-dv)+v1*dv
 // interpolate_cosine_test = it.interpolate_cosine(0.5, 0.0, 1.0);
 // ```
 //
-// #### Reference:
+// #### References
 //
-// <https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h>
-//
+// * <https://github.com/jamoma/JamomaCore/blob/master/Foundation/library/includes/TTInterpolate.h>
 //--------------------------------------------
 declare interpolate_cosine author "Stéphane Letz";
 declare interpolate_cosine licence "MIT";
@@ -306,10 +302,9 @@ interpolate_cosine(dv,v0,v1) = v0 + a2*(v1-v0) with { a2 = 0.5 * (1.0 - cos(dv*m
 // interpolate_cubic_test = it.interpolate_cubic(0.5, -1.0, 2.0, 1.0, 4.0);
 // ```
 //
-// #### Reference:
+// #### References
 //
-// <https://www.paulinternet.nl/?page=bicubic>
-//
+// * <https://www.paulinternet.nl/?page=bicubic>
 //--------------------------------------------
 declare interpolate_cubic author "Stéphane Letz";
 declare interpolate_cubic licence "MIT";
@@ -665,12 +660,11 @@ piecewise(xList, yList, x) = y , assert
 // lagrangeCoeffs_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), 0.25);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html>
-// <https://en.wikipedia.org/wiki/Lagrange_polynomial>
+// * <https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html>
+// * <https://en.wikipedia.org/wiki/Lagrange_polynomial>
 //------------------------------------------------------------
-
 declare lagrangeCoeffs author "Dario Sanfilippo";
 declare lagrangeCoeffs copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -741,13 +735,12 @@ lagrange_h(N, x) = lagrangeCoeffs(N, xCoord, x)
 // };
 // ```
 //
-// #### Reference
-// 
-// <https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html>
-// Sanfilippo and Parker 2021, "Combining zeroth and first‐order analysis with Lagrange polynomials to reduce artefacts in live concatenative granular processing." Proceedings of the DAFx conference 2021, Vienna, Austria.
-// <https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in21_paper_38.pdf>
+// #### References
+//
+// * <https://ccrma.stanford.edu/~jos/pasp/Lagrange_Interpolation.html>
+// * Sanfilippo and Parker 2021, "Combining zeroth and first‐order analysis with Lagrange polynomials to reduce artefacts in live concatenative granular processing." Proceedings of the DAFx conference 2021, Vienna, Austria.
+// * <https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in21_paper_38.pdf>
 //------------------------------------------------------------
-
 declare lagrangeInterpolation author "Dario Sanfilippo";
 declare lagrangeInterpolation copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -796,7 +789,6 @@ lagrangeN(N, x) = si.dot(N + 1, lagrange_h(N, x));
 // frdtable_test = it.frdtable(3, 16, os.sinwaveform(16), os.phasor(16, 200));
 // ```
 //------------------------------------------------------------
-
 declare frdtable author "Dario Sanfilippo";
 declare frdtable copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -853,7 +845,6 @@ frdtable(N, S, init, idx) =
 // frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.osc(220), os.phasor(16, 150));
 // ```
 //------------------------------------------------------------
-
 declare frwtable author "Dario Sanfilippo";
 declare frwtable copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";

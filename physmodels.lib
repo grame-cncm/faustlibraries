@@ -39,7 +39,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/physmodels.lib>
-
 //########################################################################################
 // Authors: Romain Michon, Pierre-Amaury Grumiaux, and Yann Orlarey
 
@@ -3980,9 +3979,9 @@ with {
 // autobendFreq_test = pm.autobendFreq(440, 0.5);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~rmichon/chantLib/>.
+// * <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //---------------------------------------------
 declare autobendFreq author "Mike Olsen";
 
@@ -4021,9 +4020,9 @@ with {
 // vocalEffort_test = pm.vocalEffort(0.6);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~rmichon/chantLib/>.
+// * <https://ccrma.stanford.edu/~rmichon/chantLib/>.
 //---------------------------------------------
 declare vocalEffort author "Mike Olsen";
 
@@ -4053,9 +4052,9 @@ vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),*(0.8+
 // fof_test = pm.fof(0.3, 440, 880, 0.5);
 // ```
 // 
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
+// * <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //---------------------------------------------------------
 declare fof author "Mike Olsen";
 
@@ -4092,9 +4091,9 @@ with {
 // fofSH_test = pm.fofSH(0.3, 440, 880, 0.5);
 // ```
 // 
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
+// * <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //---------------------------------------------------------
 declare fofSH author "Mike Olsen";
 
@@ -4122,9 +4121,9 @@ fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') :
 // fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 0.2);
 // ```
 // 
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
+// * <https://ccrma.stanford.edu/~mjolsen/pdfs/smc2016_MOlsenFOF.pdf>.
 //---------------------------------------------------------
 declare fofCycle author "Mike Olsen";
 
@@ -4969,7 +4968,6 @@ with {
 // #### References
 //
 // * <https://wikipedia.org/wiki/Runge%E2%80%93Kutta_methods>
-
 //------------------------------------------------------------------------
 rk_solve(ts,ks, ni,h, eq,iv) = doit
 with {

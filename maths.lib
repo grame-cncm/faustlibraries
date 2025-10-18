@@ -17,7 +17,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/maths.lib>
-
 //########################################################################################
 
 // ## History
@@ -328,9 +327,9 @@ INFINITY = MAX;
 // FTZ_test = (ma.MIN * 0.5) : ma.FTZ;
 // ```
 //
-// #### Reference
+// #### References
 //
-// <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
+// * <http://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html>
 //-----------------------------------------------------------------------------
 FTZ(x) = x * (abs(x) > MIN);
 
@@ -1167,15 +1166,15 @@ nextafter = ffunction(float nextafter(float, float),<math.h>,"");
 // T[n](x) = 2x*T[n-1](x) - T[n-2](x)
 // ```
 //
-// #### Reference
-//
-// <http://en.wikipedia.org/wiki/Chebyshev_polynomial>
-//
 // #### Test
 // ```
 // ma = library("maths.lib");
 // chebychev_test = 0.5 : ma.chebychev(3);
 // ```
+//
+// #### References
+//
+// * <http://en.wikipedia.org/wiki/Chebyshev_polynomial>
 //-------------------------------------------------------------------------
 chebychev(0,x) = 1;
 chebychev(1,x) = x;
@@ -1196,15 +1195,15 @@ chebychev(n,x) = 2*x*chebychev(n-1, x) - chebychev(n-2, x);
 // * `cn`: the different Chebychevs polynomials such that:
 // chebychevpoly((c0,c1,...,cn)) = Sum of chebychev(i)*ci
 //
-// #### Reference
-//
-// <http://www.csounds.com/manual/html/chebyshevpoly.html>
-//
 // #### Test
 // ```
 // ma = library("maths.lib");
 // chebychevpoly_test = 0.5 : ma.chebychevpoly((1, 0, 1));
 // ```
+//
+// #### References
+//
+// * <http://www.csounds.com/manual/html/chebyshevpoly.html>
 //-------------------------------------------------------------------------
 chebychevpoly(lcoef) = _ <: L(0,lcoef) :> _
     with {

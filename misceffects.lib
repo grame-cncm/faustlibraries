@@ -20,7 +20,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/misceffects.lib>
-
 //########################################################################################
 
 /************************************************************************
@@ -100,7 +99,6 @@ declare version "2.5.1";
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Cubic_Soft_Clipper.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Nonlinear_Distortion.html>
-
 //------------------------------------------------------------
 cubicnl(drive,offset) = *(pregain) : +(offset) : clip(-1,1) : cubic
 with {
@@ -146,7 +144,6 @@ declare cubicnl_nodc license "STK-4.3";
 // * <http://en.wikipedia.org/wiki/Noise_gate>
 // * <http://www.soundonsound.com/sos/apr01/articles/advanced.asp>
 // * <http://en.wikipedia.org/wiki/Gating_(sound_engineering)>
-
 //------------------------------------------------------------
 gate_mono(thresh,att,hold,rel,x) = x * gate_gain_mono(thresh,att,hold,rel,x);
 
@@ -182,7 +179,6 @@ declare gate_mono license "STK-4.3";
 // * <http://en.wikipedia.org/wiki/Noise_gate>
 // * <http://www.soundonsound.com/sos/apr01/articles/advanced.asp>
 // * <http://en.wikipedia.org/wiki/Gating_(sound_engineering)>
-
 //------------------------------------------------------------
 gate_stereo(thresh,att,hold,rel,x,y) = ggm*x, ggm*y with {
   ggm = gate_gain_mono(thresh,att,hold,rel,abs(x)+abs(y));
@@ -377,7 +373,7 @@ declare speakerbp license "STK-4.3";
 //     from delay-line length.
 // * Output signal from allpass chain
 //
-// #### Reference
+// #### References
 //
 // * "Dispersion Modeling in Waveguide Piano Synthesis Using Tunable
 // Allpass Filters", by Jukka Rauhala and Vesa Valimaki, DAFX-2006, pp. 71-76
@@ -439,7 +435,7 @@ declare piano_dispersion_filter license "STK-4.3";
 // At `w=1`, there is no effect (original stereo image).
 // Thus, w between 0 and 1 varies stereo width from 0 to "original".
 //
-// #### Reference
+// #### References
 //
 // * "Applications of Blumlein Shuffling to Stereo Microphone Techniques"
 // Michael A. Gerzon, JAES vol. 42, no. 6, June 1994
@@ -478,10 +474,6 @@ declare stereo_width license "STK-4.3";
 // ef = library("misceffects.lib");
 // mesh_square_test = (0,0,0,0) : ef.mesh_square(1);
 // ```
-//
-// #### Reference
-//
-// <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html>
 //
 // #### Signal Order In and Out
 //
@@ -540,6 +532,11 @@ declare stereo_width license "STK-4.3";
 //        3So -> 1Wi, 3Wo -> 3Wi, 4So -> 2Ei, 4Eo -> 4Ei
 //
 // A routing matrix can be used to obtain other connection geometries.
+//
+// #### References
+//
+// <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Mesh.html>
+//
 //------------------------------------------------------------
 // four-port scattering junction:
 mesh_square(1) =
@@ -1202,7 +1199,6 @@ nonlinearityEnv = environment
 // #### References
 //
 // * U. Zölzer: Digital Audio Signal Processing. John Wiley & Sons Ltd, 2022.
-
 //---------------------------------------------------------------------------------------
 declare softclipQuadratic author "David Braun";
 declare softclipQuadratic copyright "Copyright (C) 2024 David Braun";

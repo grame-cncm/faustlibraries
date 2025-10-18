@@ -17,7 +17,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/vaeffects.lib>
-
 //########################################################################################
 
 ba = library("basics.lib");
@@ -84,7 +83,6 @@ Michon and Julius O. Smith III, and are released under the
 //
 // * <https://ccrma.stanford.edu/~stilti/papers/moogvcf.pdf>
 // * <https://ccrma.stanford.edu/~jos/pasp/vegf.html>
-
 //------------------------------------------------------------
 declare moog_vcf author "Julius O. Smith III";
 declare moog_vcf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -205,7 +203,6 @@ with {
 // * [Zavalishin 2012] (revision 2.1.2, February 2020)
 // * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
 // * Lorenzo Della Cioppa's correction to Pirkle's implementation: <https://www.kvraudio.com/forum/viewtopic.php?f=33&t=571909>
-
 //---------------------------------------------------------------------
 declare moogLadder author "Dario Sanfilippo";
 declare moogLadder license "MIT-style STK-4.3 license";
@@ -279,7 +276,6 @@ with {
 //
 // * [Zavalishin 2012] (revision 2.1.2, February 2020)
 // * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
-
 //---------------------------------------------------------------------
 declare lowpassLadder4 author "Dario Sanfilippo";
 declare lowpassLadder4 license "MIT License";
@@ -348,7 +344,6 @@ lowpassLadder4(k, CF, x) = loop ~ si.bus(4) : si.block(4) , _
 //
 // * <https://www.willpirkle.com/app-notes/virtual-analog-moog-half-ladder-filter>
 // * <http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf>
-
 //---------------------------------------------------------------------
 declare moogHalfLadder author "Eric Tarr";
 declare moogHalfLadder license "MIT-style STK-4.3 license";
@@ -414,7 +409,6 @@ with{
 //
 // * <https://www.willpirkle.com/virtual-analog-diode-ladder-filter/>
 // * <http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf>
-
 //---------------------------------------------------------------------
 declare diodeLadder author "Eric Tarr";
 declare diodeLadder license "MIT-style STK-4.3 license";
@@ -1168,7 +1162,6 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 //
 // * Vicanek, M. (2016) *Matched Second Order Digital Filters*
 // * <https://www.vicanek.de/articles/BiquadFits.pdf>
-
 //================================================================================
 
 //----------`(ve.)biquad`-------------------------------------------------------
@@ -1563,9 +1556,9 @@ highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
 //     );
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~jos/pasp/vegf.html>
+// * <https://ccrma.stanford.edu/~jos/pasp/vegf.html>
 //------------------------------------------------------------
 wah4(fr) = 4*moog_vcf((3.2/4),fr:si.smooth(0.999));
 
@@ -1619,9 +1612,9 @@ autowah(level,x) = level * crybaby(an.amp_follower(0.1,x),x) + (1.0-level)*x;
 //     );
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~jos/pasp/vegf.html>
+// * <https://ccrma.stanford.edu/~jos/pasp/vegf.html>
 //------------------------------------------------------------
 crybaby(wah) = *(gs) : fi.tf2(1,-1,0,a1s,a2s)
 with {

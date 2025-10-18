@@ -12,7 +12,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/phaflangers.lib>
-
 //########################################################################################
 
 ma = library("maths.lib");
@@ -66,9 +65,9 @@ Michon and Julius O. Smith III, and are released under the
 // flanger_mono_test = os.osc(440) : pf.flanger_mono(4096, 1024, 0.7, 0.25, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~jos/pasp/Flanging.html>
+// * <https://ccrma.stanford.edu/~jos/pasp/Flanging.html>
 //------------------------------------------------------------
 flanger_mono(dmax,curdel,depth,fb,invert)
   = _ <: _, (- : de.fdelay(dmax,curdel)) ~ *(fb) : _,
@@ -101,9 +100,9 @@ flanger_mono(dmax,curdel,depth,fb,invert)
 // flanger_stereo_test = os.osc(440), os.osc(660) : pf.flanger_stereo(4096, 1024, 1536, 0.7, 0.25, 0);
 // ```
 //
-// #### Reference
+// #### References      
 //
-// <https://ccrma.stanford.edu/~jos/pasp/Flanging.html>
+// * <https://ccrma.stanford.edu/~jos/pasp/Flanging.html>
 //------------------------------------------------------------
 flanger_stereo(dmax,curdel1,curdel2,depth,fb,invert)
   =  flanger_mono(dmax,curdel1,depth,fb,invert),
@@ -162,7 +161,7 @@ with {
 // phaser2_mono_test = os.osc(330) : pf.phaser2_mono(4, 0.0, 50, 200, 1.5, 4000, 0.5, 0.8, 0.2, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Phasing.html>
 // * <http://www.geofex.com/Article_Folders/phasers/phase.html>
@@ -209,7 +208,7 @@ with {               // depth=0 => direct-signal only
 // phaser2_stereo_test = os.osc(220), os.osc(330) : pf.phaser2_stereo(4, 50, 200, 1.5, 4000, 0.5, 0.8, 0.2, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Phasing.html>
 // * <http://www.geofex.com/Article_Folders/phasers/phase.html>

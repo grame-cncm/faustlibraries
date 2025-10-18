@@ -17,7 +17,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/reverbs.lib>
-
 //########################################################################################
 
 ma = library("maths.lib");
@@ -178,9 +177,9 @@ satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
 //   <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 2.0, 1.5), 0.8, 0.0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html>
+// * <https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html>
 //------------------------------------------------------------
 fdnrev0(MAXDELAY, delays, BBSO, freqs, durs, loopgainmax, nonl)
   = (si.bus(2*N) :> si.bus(N) : delaylines(N)) ~
@@ -247,7 +246,7 @@ with {
 //   <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 48000);
 // ```
 //
-// #### Reference
+// #### References
 //
 // * <http://www.kokkinizita.net/linuxaudio/zita-rev1-doc/quickguide.html>
 // * <https://ccrma.stanford.edu/~jos/pasp/Zita_Rev1.html>
@@ -831,9 +830,9 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //   : re.dattorro_rev(200, 0.5, 0.7, 0.6, 0.5, 0.7, 0.5, 0.2);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
+// * <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
 //------------------------------------------------------------
 declare dattorro_rev author "Jakob Zerbian";
 declare dattorro_rev licence "MIT-style STK-4.3 license";
@@ -881,9 +880,9 @@ with {
 //   : re.dattorro_rev_default;
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
+// * <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
 //------------------------------------------------------------
 declare dattorro_rev_default author "Jakob Zerbian";
 declare dattorro_rev_default license "MIT-style STK-4.3 license";
@@ -999,9 +998,9 @@ jp_gh_rev = environment {
 //   : re.jpverb(3.0, 0.2, 1.0, 0.8, 0.3, 0.4, 0.9, 0.8, 0.7, 500, 4000);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://doc.sccode.org/Overviews/DEIND.html>
+// * <https://doc.sccode.org/Overviews/DEIND.html>
 //------------------------------------------------------------
 declare jpverb author "Julian Parker, bug fixes and minor interface changes by Till Bovermann";
 declare jpverb license "MIT license";
@@ -1043,9 +1042,9 @@ jpverb(t60, damp, size, early_diff,
 //   : re.greyhole(2.0, 0.3, 1.0, 0.6, 0.5, 0.4, 0.2);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://doc.sccode.org/Overviews/DEIND.html>
+// * <https://doc.sccode.org/Overviews/DEIND.html>
 //------------------------------------------------------------
 declare greyhole author "Julian Parker, bug fixes and minor interface changes by Till Bovermann";
 declare greyhole license "MIT license";
@@ -1084,7 +1083,7 @@ greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq)
 //   : re.kb_rom_rev1(0.7, 0.3);
 // ```
 //
-// #### Reference
+// #### References
 //
 // * <https://www.spinsemi.com/programs.php#:~:text=Keith%20Barr-,rom_rev1.spn,-ROM%20reverb%202>
 // * <https://www.spinsemi.com/knowledge_base/effects.html#Reverberation>

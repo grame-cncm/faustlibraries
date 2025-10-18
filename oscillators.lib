@@ -21,7 +21,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/oscillators.lib>
-
 //########################################################################################
 
 /************************************************************************
@@ -996,16 +995,15 @@ sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))
 // saw3_test = os.saw3(220);
 // saw4_test = os.saw4(220);
 // ```
-// #### References
 //
-// * See `sawN` above.
-//
-
 // #### Implementation Notes
 //
 // Presently, only `saw2` uses the PTR method, while `saw3` and `saw4` use DPW.
 // This is because PTR has been implemented and tested for the 2nd-order case only.
 //
+// #### References
+//
+// * See `sawN` above.
 //------------------------------------------------------------------
 saw2 = saw2ptr; // "faustlibraries choice"
 saw3 = sawN(3); // only choice available right now
@@ -1034,13 +1032,6 @@ saw4 = sawN(4); // only choice available right now
 //
 // Polynomial Transition Regions (PTR) method for aliasing suppression.
 //
-// #### References
-//
-// * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio Signals Using Polynomial Transition Regions," Signal Processing Letters, IEEE, vol.19, no.2, pp.67-70, Feb. 2012
-// * <https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9>
-// * <http://research.spa.aalto.fi/publications/papers/spl-ptr/>
-
-//
 // ##### Notes
 //
 // Method PTR may be preferred because it requires less
@@ -1048,6 +1039,11 @@ saw4 = sawN(4); // only choice available right now
 // can be modulated arbitrarily fast over time without filtering
 // artifacts.  For this reason, `saw2` is presently defined as `saw2ptr`.
 //
+// #### References
+//
+// * Kleimola, J.; Valimaki, V., "Reducing Aliasing from Synthetic Audio Signals Using Polynomial Transition Regions," Signal Processing Letters, IEEE, vol.19, no.2, pp.67-70, Feb. 2012
+// * <https://aaltodoc.aalto.fi/bitstream/handle/123456789/7747/publication6.pdf?sequence=9>
+// * <http://research.spa.aalto.fi/publications/papers/spl-ptr/>
 //--------------------------------------------------------
 declare saw2ptr author "Julius O. Smith III";
 declare saw2ptr license "STK-4.3";
@@ -1453,7 +1449,6 @@ triangle = triangleN(2); // default based on saw2
 //
 // * <http://lac.linuxaudio.org/2012/download/lac12-slides-jos.pdf>
 // * <https://ccrma.stanford.edu/~jos/pdf/lac12-paper-jos.pdf>
-
 //========================================================================================
 
 //--------------------------`(os.)oscb`--------------------------------
@@ -1506,7 +1501,7 @@ with {
 // os = library("oscillators.lib");
 // oscrq_test = os.oscrq(440);
 // ```
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
 //------------------------------------------------------------
@@ -1532,7 +1527,7 @@ oscrq(f) = impulse : fi.nlf2(f,1); // sine and cosine outputs
 // os = library("oscillators.lib");
 // oscrs_test = os.oscrs(440);
 // ```
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
 //------------------------------------------------------------
@@ -1558,7 +1553,7 @@ oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
 // os = library("oscillators.lib");
 // oscrc_test = os.oscrc(440);
 // ```
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
 //------------------------------------------------------------
@@ -1615,7 +1610,8 @@ with {
 // os = library("oscillators.lib");
 // quadosc_test = os.quadosc(440);
 // ```
-// #### Reference
+// #### References
+//
 // * <https://vicanek.de/articles/QuadOsc.pdf>
 //------------------------------------------------------------
 // Authors:
@@ -1835,10 +1831,10 @@ with {
 // ```
 // but much more efficient.
 //
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/STANM/stanms/stanm5/stanm5.pdf>
-//
+//----------------------------------------------------------------
 declare dsf author "Oleg Nesterov";
 dsf = environment {
     qo = quadosc;
@@ -1883,7 +1879,7 @@ dsf = environment {
 // os = library("oscillators.lib");
 // oscwc_test = os.oscwc(440);
 // ```
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html>
 //------------------------------------------------------------
@@ -1908,7 +1904,7 @@ oscwc(fr) = impulse : fi.wgr(fr,1) : _,!; // cosine (cheapest at 1 mpy/sample)
 // os = library("oscillators.lib");
 // oscws_test = os.oscws(440);
 // ```
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html>
 //------------------------------------------------------------
@@ -1933,7 +1929,7 @@ oscws(fr) = impulse : fi.wgr(fr,1) : !,_; // sine (needs a 2nd scaling mpy)
 // os = library("oscillators.lib");
 // oscq_test = os.oscq(440);
 // ```
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html>
 //------------------------------------------------------------
@@ -1958,7 +1954,7 @@ oscq(fr) = impulse : fi.wgr(fr,1);       // phase quadrature outputs
 // os = library("oscillators.lib");
 // oscw_test = os.oscw(440);
 // ```
-// #### Reference
+// #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Digital_Waveguide_Oscillator.html>
 //------------------------------------------------------------

@@ -138,7 +138,7 @@ Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 //         F1(x) = ba.if((x <= 1.0) & (x >= -1.0), 0.5 * x^2, x * ma.signum(x) - 0.5);
 //     };
 // ```
-
+//---------------------------------------------
 declare ADAA1 author "Dario Sanfilippo";
 declare ADAA1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -186,7 +186,7 @@ ADAA1(EPS, f, F1, x) = D1q
 //         F2(x) = ba.if((x <= 1.0) & (x >= -1.0), (1.0 / 3.0) * x^3, ((0.5 * x^2) - 1.0 / 6.0) * ma.signum(x));
 //     };
 // ```
-
+//---------------------------------------------
 declare ADAA2 author "Dario Sanfilippo";
 declare ADAA2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
@@ -272,7 +272,6 @@ hardclip(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // hardclip2_test = aa.hardclip2(os.osc(110));
 // ```
-
 //---------------------------------------------
 declare hardclip2 author "Dario Sanfilippo";
 declare hardclip2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -309,7 +308,6 @@ hardclip2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // cubic1_test = aa.cubic1(os.osc(110));
 // ```
-
 //-------------------------------------------
 declare cubic1 author "Dario Sanfilippo";
 declare cubic1 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -345,7 +343,6 @@ cubic1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // parabolic_test = aa.parabolic(os.osc(110));
 // ```
-
 //--------------------------------------------
 declare parabolic author "Dario Sanfilippo";
 declare parabolic copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -380,7 +377,6 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // parabolic2_test = aa.parabolic2(os.osc(110));
 // ```
-
 //---------------------------------------------
 declare parabolic2 author "Dario Sanfilippo";
 declare parabolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -419,7 +415,6 @@ parabolic2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // hyperbolic_test = aa.hyperbolic(os.osc(110));
 // ```
-
 //---------------------------------------------
 declare hyperbolic author "Dario Sanfilippo";
 declare hyperbolic copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -449,7 +444,6 @@ hyperbolic(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // hyperbolic2_test = aa.hyperbolic2(os.osc(110));
 // ```
-
 //----------------------------------------------
 declare hyperbolic2 author "Dario Sanfilippo";
 declare hyperbolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -481,7 +475,6 @@ hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // sinarctan_test = aa.sinarctan(os.osc(110));
 // ```
-
 //----------------------------------------------
 declare sinarctan author "Dario Sanfilippo";
 declare sinarctan copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -514,7 +507,6 @@ sinarctan(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sinarctan2_test = aa.sinarctan2(os.osc(110));
 // ```
-
 //----------------------------------------------
 declare sinarctan2 author "Dario Sanfilippo";
 declare sinarctan2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -585,7 +577,6 @@ softclipEnv = environment {
 // os = library("oscillators.lib");
 // softclipQuadratic1_test = aa.softclipQuadratic1(os.osc(110));
 // ```
-
 //----------------------------------------------
 declare softclipQuadratic1 author "David Braun";
 declare softclipQuadratic1 copyright "Copyright (C) 2024 David Braun";
@@ -610,7 +601,6 @@ softclipQuadratic1 = softclipEnv.softclipQuadratic1;
 // os = library("oscillators.lib");
 // softclipQuadratic2_test = aa.softclipQuadratic2(os.osc(110));
 // ```
-
 //----------------------------------------------
 declare softclipQuadratic2 author "David Braun";
 declare softclipQuadratic2 copyright "Copyright (C) 2024 David Braun";
@@ -635,7 +625,6 @@ softclipQuadratic2 = softclipEnv.softclipQuadratic2;
 // os = library("oscillators.lib");
 // tanh1_test = aa.tanh1(os.osc(110));
 // ```
-
 //----------------------------------------------
 declare tanh1 author "Dario Sanfilippo";
 declare tanh1 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -665,7 +654,6 @@ tanh1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // arctan_test = aa.arctan(os.osc(110));
 // ```
-
 //-------------------------------------------
 declare arctan author "Dario Sanfilippo";
 declare arctan copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -695,7 +683,6 @@ arctan(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // arctan2_test = aa.arctan2(os.osc(110));
 // ```
-
 //-------------------------------------------
 declare arctan2 author "Dario Sanfilippo";
 declare arctan2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -726,7 +713,6 @@ arctan2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // asinh1_test = aa.asinh1(os.osc(110));
 // ```
-
 //-------------------------------------------
 declare asinh1 author "Dario Sanfilippo";
 declare asinh1 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -759,7 +745,6 @@ asinh1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // asinh2_test = aa.asinh2(os.osc(110));
 // ```
-
 //-------------------------------------------
 declare asinh2 author "Dario Sanfilippo";
 declare asinh2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -782,7 +767,6 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
 // These functions are reliable if input signals are within their domains.
 //============================================
 
-
 //-------`(aa.)cosine1`---------------------
 //
 // First-order ADAA cos().
@@ -799,7 +783,6 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // cosine1_test = aa.cosine1(os.osc(110));
 // ```
-
 //-------------------------------------------
 declare cosine1 author "Dario Sanfilippo";
 declare cosine1 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -829,7 +812,6 @@ cosine1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // cosine2_test = aa.cosine2(os.osc(110));
 // ```
-
 //-------------------------------------------
 declare cosine2 author "Dario Sanfilippo";
 declare cosine2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -861,7 +843,6 @@ cosine2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // arccos_test = aa.arccos(os.osc(110));
 // ```
-
 //------------------------------------------
 declare arccos author "Dario Sanfilippo";
 declare arccos copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -898,7 +879,6 @@ arccos(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // arccos2_test = aa.arccos2(os.osc(110));
 // ```
-
 //--------------------------------------------
 declare arccos2 author "Dario Sanfilippo";
 declare arccos2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -933,7 +913,6 @@ arccos2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // acosh1_test = aa.acosh1(1.0 + abs(os.osc(110)));
 // ```
-
 //------------------------------------------
 declare acosh1 author "Dario Sanfilippo";
 declare acosh1 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -966,7 +945,6 @@ acosh1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // acosh2_test = aa.acosh2(1.0 + abs(os.osc(110)));
 // ```
-
 //-------------------------------------------
 declare acosh2 author "Dario Sanfilippo";
 declare acosh2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -999,7 +977,6 @@ acosh2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // sine_test = aa.sine(os.osc(110));
 // ```
-
 //----------------------------------------
 declare sine author "Dario Sanfilippo";
 declare sine copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -1029,7 +1006,6 @@ sine(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sine2_test = aa.sine2(os.osc(110));
 // ```
-
 //----------------------------------------
 declare sine2 author "Dario Sanfilippo";
 declare sine2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -1061,7 +1037,6 @@ sine2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // arcsin_test = aa.arcsin(os.osc(110));
 // ```
-
 //------------------------------------------
 declare arcsin author "Dario Sanfilippo";
 declare arcsin copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -1098,7 +1073,6 @@ arcsin(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // arcsin2_test = aa.arcsin2(os.osc(110));
 // ```
-
 //------------------------------------------
 declare arcsin2 author "Dario Sanfilippo";
 declare arcsin2 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -1134,7 +1108,6 @@ arcsin2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // tangent_test = aa.tangent(0.25 * ma.PI * os.osc(110));
 // ```
-
 //------------------------------------------
 declare tangent author "Dario Sanfilippo";
 declare tangent copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -1164,7 +1137,6 @@ tangent(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // atanh1_test = aa.atanh1(0.8 * os.osc(110));
 // ```
-
 //------------------------------------------
 declare atanh1 author "Dario Sanfilippo";
 declare atanh1 copyright "Copyright (C) 2021 Dario Sanfilippo
@@ -1194,7 +1166,6 @@ atanh1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // atanh2_test = aa.atanh2(0.8 * os.osc(110));
 // ```
-
 //------------------------------------------
 declare atanh2 author "Dario Sanfilippo";
 declare atanh2 copyright "Copyright (C) 2021 Dario Sanfilippo

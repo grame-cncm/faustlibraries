@@ -7,7 +7,6 @@
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/webaudio.lib>
-
 //########################################################################################
 
 /************************************************************************
@@ -237,11 +236,10 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 // lowpass2_test = os.osc(440) : wa.lowpass2(1000, 0.707, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98>
+// * <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#98>
 //--------------------------------------
-
 lowpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass2, x : fi.tf2;
 
 
@@ -268,11 +266,10 @@ lowpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass2, x : fi.tf2;
 // highpass2_test = os.osc(440) : wa.highpass2(1000, 0.707, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127>
+// * <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#127>
 //--------------------------------------
-
 highpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass2, x : fi.tf2;
 
 
@@ -299,11 +296,10 @@ highpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass2, x : fi.tf2
 // bandpass2_test = os.osc(440) : wa.bandpass2(1000, 1, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#334>
+// * <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#334>
 //--------------------------------------
-
 bandpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass2, x : fi.tf2;
 
 
@@ -331,11 +327,10 @@ bandpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass2, x : fi.tf2
 // notch2_test = os.osc(440) : wa.notch2(1000, 1, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#301>
+// * <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#301>
 //--------------------------------------
-
 notch2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch2, x : fi.tf2;
 
 
@@ -362,11 +357,10 @@ notch2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch2, x : fi.tf2;
 // allpass2_test = os.osc(440) : wa.allpass2(1000, 1, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#268>
+// * <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#268>
 //--------------------------------------
-
 allpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass2, x : fi.tf2;
 
 
@@ -393,11 +387,10 @@ allpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass2, x : fi.tf2;
 // peaking2_test = os.osc(440) : wa.peaking2(1000, 3, 1, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233>
+// * <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#233>
 //--------------------------------------
-
 peaking2(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking2, x : fi.tf2;
 
 
@@ -422,11 +415,10 @@ peaking2(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking2, x :
 // lowshelf2_test = os.osc(440) : wa.lowshelf2(500, 6, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
-// <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#169>
+// * <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#169>
 //--------------------------------------
-
 lowshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf2, x : fi.tf2;
 
 
@@ -451,9 +443,8 @@ lowshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf2, x : 
 // highshelf2_test = os.osc(440) : wa.highshelf2(2000, -6, 0);
 // ```
 //
-// #### Reference
+// #### References
 //
 // <https://searchfox.org/mozilla-central/source/dom/media/webaudio/blink/Biquad.cpp#201>
 //--------------------------------------
-
 highshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).highshelf2, x : fi.tf2;
