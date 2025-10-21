@@ -1,11 +1,11 @@
-# Minimal test harness for Faust DSP tests.
+# Minimal test harness for Faust DSP tests and to build and test the documentation.
 #
 # `make reference`  - compile each *_test entry and store terminal output under tests/reference/.
 # `make check`      - recompile, run each test, and diff against the stored reference output.
 # `make clean`      - remove build artefacts and generated outputs.
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
-# `make build_doc`  - build the documentation.
-# `make serve_doc`  - serve the documentation.
+# `make build`      - build the documentation.
+# `make serve`      - serve the documentation.
 
 FAUST ?= faust
 FAUSTBENCH ?= faustbench-llvm
@@ -18,7 +18,7 @@ FLOAT_TOL ?= 1e-5
 FLOATDIFF ?= ./scripts/floatdiff.py
 
 ARCH := arch/print_arch.cpp
-BUILD_DIR := build
+BUILD_DIR := tests/build
 REFERENCE_DIR := tests/reference
 OUTPUT_DIR := tests/output
 DSP_TEST_DIR := tests
@@ -119,10 +119,10 @@ bench: ## Run faustbench-llvm on all test specs and capture memory/CPU stats
 		printf '[bench] no results generated\n' >&2; \
 	fi
 
-build_doc:
+build: ## Build the documentation
 	$(MAKE) -C doc build
  
-serve_doc:
+serve: ## Serve the documentation
 	$(MAKE) -C doc serve
 
 clean: ## Remove build artefacts and generated outputs
