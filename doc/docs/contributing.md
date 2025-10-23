@@ -191,7 +191,7 @@ Any function containing UI elements should be placed in this library and respect
 
 Before preparing a pull-request, the new library must be carefully tested:
 
-- all functions defined in the library must be tested by preparing a DSP test program
+- all functions defined in the library must be tested by preparing a DSP test program, to be added using the `#### Test` syntax 
 - the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program:
 
 ```
@@ -199,10 +199,11 @@ import("all.lib");
 process = _;
 ```
 
-## Library deployment
+## Library test and deployment
 
 For GRAME maintainers:
 
+- global tests can be done using the `make reference` and `make check` at rool level
 - regenerate the PDF documentation using `make pdf` target in the `doc` folder
 - update the library submodule in [faust](https://github.com/grame-cncm/faust), recompile and deploy WebAssembly libfaust in [fausteditor](https://github.com/grame-cncm/fausteditor), [faustplayground](https://github.com/grame-cncm/faustplayground) and [faustide](https://github.com/grame-cncm/faustide)
 - update the library submodule in [faustlive](https://github.com/grame-cncm/faustlive) 

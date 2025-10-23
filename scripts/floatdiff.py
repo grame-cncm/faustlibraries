@@ -33,7 +33,7 @@ def compare_files(file1, file2, tol=1e-6):
                 fa, fb = float(a), float(b)
                 diff = fa - fb
                 if not math.isclose(fa, fb, rel_tol=tol, abs_tol=tol):
-                    print(f"(Δ={diff:.4g}, tol={tol})")
+                    print(f"(Line {i+1}, fa = {fa}, fb = {fb}, Δ = {diff:.4g}, tol = {tol})")
                     diff_found = True
             except ValueError:
                 if a != b:
