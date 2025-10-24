@@ -11,12 +11,12 @@ spat_test = os.osc(330)
       hslider("spat:rotation", 0.25, 0, 1, 0.01),
       hslider("spat:distance", 0.5, 0, 1, 0.01));
 
-wfs_inGain(i) = 0.5;
+wfs_proc(i) = *(0.5); // Simple gain processor
 wfs_xs(i) = 0.0;
 wfs_ys(i) = 1.0;
 wfs_zs(i) = 0.0;
 wfs_test = os.osc(440)
-  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_inGain, wfs_xs, wfs_ys, wfs_zs);
+  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
 
 wfs_ui_test = os.osc(550)
   : sp.wfs_ui(0, 1, 0, 0.5, 1, 2);

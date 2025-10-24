@@ -52,7 +52,7 @@ fi = library("filters.lib");
 de = library("delays.lib");
 
 declare name "Faust Spatialization Library";
-declare version "1.2.0";
+declare version "1.2.1";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -152,7 +152,6 @@ with {
     * sqrt(max(0.0, 1.0 - abs(fmod(a+0.5+float(N-i)/N, 1.0) - 0.5) * N * d));
 };
 
-
 //-------`(sp.)wfs`-------------------
 // Wave Field Synthesis algorithm for multiple sound sources. 
 // Implementation generalized starting from Pierre Lecomte version. 
@@ -160,7 +159,7 @@ with {
 // #### Usage
 //
 // ```
-// wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inGain, xs, ys, zs) : si.bus(nSpeakers)
+// wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inProc, xs, ys, zs) : si.bus(nSpeakers)
 // ```
 //
 // Where:
@@ -171,7 +170,7 @@ with {
 // * `speakersDist`: distance between speakers in meters
 // * `nSources`: number of sound sources
 // * `nSpeakers`: number of speakers
-// * `inGain`: input gain (0-1) as a function of the source index
+// * `inProc`: per-source processor function, as a function of the source index
 // * `xs`: x-coordinate of the sound source in meters, as a function of the source index
 // * `ys`: y-coordinate of the sound source in meters, as a function of the source index
 // * `zs`: z-coordinate of the sound source in meters, as a function of the source index
@@ -180,32 +179,22 @@ with {
 // ```
 // sp = library("spats.lib");
 // os = library("oscillators.lib");
-// wfs_inGain(i) = 0.5;
+// wfs_proc(i) = *(0.5); // Simple gain processor
 // wfs_xs(i) = 0.0;
 // wfs_ys(i) = 1.0;
 // wfs_zs(i) = 0.0;
 // wfs_test = os.osc(440)
-//   : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_inGain, wfs_xs, wfs_ys, wfs_zs);
+//   : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_inGain, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
 // ```
 //--------------------------------------
 declare wfs author "Pierre Lecomte, revised by GRAME";
-wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inGain, xs, ys, zs) 
-    = par(i, nSources, oneSource(xref,yref,zref,speakersDist,nSpeakers,inGain(i),xs(i),ys(i),zs(i))) 
+wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inGain, inProc, xs, ys, zs) 
+    = par(i, nSources, oneSource(xref,yref,zref,speakersDist,nSpeakers,inProc(i),xs(i),ys(i),zs(i))) 
     :> si.bus(nSpeakers)
 with {
 
     // Physical constant: speed of sound in air (m/s)
     c = 340;
-
-    // Filtering stage (pre-defined transfer function approximation)
-    filter = fi.tf2(b0,b1,b2,a1,a2)
-    with {
-        b0 = 1;
-        b1 = -0.8715;
-        b2 = 0.0412;
-        a1 = -0.31134;
-        a2 = -0.088955;
-    };
 
     // Function to compute Euclidean distance between two points in 3D space
     norm(x1, y1, z1, x2, y2, z2) = sqrt((x1 - x2)^2 + (y1 - y2)^2 + (z1 - z2)^2);
@@ -226,9 +215,8 @@ with {
     speakersXpos(speakersDist, nSpeakers) = par(i,nSpeakers,(-speakersDist*nSpeakers/2 + speakersDist/2 + i*speakersDist));
 
     // Function to synthesize a single sound source for WFS
-    oneSource(xref, yref, zref, speakersDist, nSpeakers, inGain, xs, ys, zs) =
-        *(inGain)
-        : filter <:
+    oneSource(xref, yref, zref, speakersDist, nSpeakers, inProc, xs, ys, zs) =
+        inProc <: // Apply per-source processor
         (speakersXpos(speakersDist,nSpeakers) <: par(i,nSpeakers,norm(xref,yref,zref,_,0,0)*ys),(par(i,nSpeakers,norm(xs,ys,zs,_,0,0))
          <: par(i,nSpeakers,_),(mins(nSpeakers)
          <: par(i,nSpeakers,_)))),par(i,nSpeakers,_)
@@ -279,12 +267,20 @@ with {
 // ```
 //--------------------------------------
 declare wfs author "Pierre Lecomte, revised by GRAME";
-wfs_ui(xref, yref, zref, speakersDist, nSources, nSpeakers) = wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inGain, xs, ys, zs)
+wfs_ui(xref, yref, zref, speakersDist, nSources, nSpeakers) = wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inProc, xs, ys, zs)
 with {
     xs(i) = hslider("v:Sound%2i/xs", 0, -10, 10, 0.01);
     ys(i) = hslider("v:Sound%2i/ys", 1.5,  1, 10, 0.01);
     zs(i) = hslider("v:Sound%2i/zs", 0, -10, 10, 0.01);
     inGain(i) = hslider("v:Sound%2i/inGain",1,0,10,0.01);
+    inProc(i) = *(inGain(i)) : fi.tf2(b0,b1,b2,a1,a2) // Filtering stage (pre-defined transfer function approximation)
+    with {
+        b0 = 1;
+        b1 = -0.8715;
+        b2 = 0.0412;
+        a1 = -0.31134;
+        a2 = -0.088955;
+    };
 };
 
 //---------------`(sp.)stereoize`-------------
