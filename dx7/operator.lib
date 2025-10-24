@@ -14,7 +14,6 @@ import("lfo.lib");
 // pitchenv(rates, levels, gate) : _
 import("pitchenv.lib");
 
-
 //------------------------------`(dx.)operator`--------------------------------
 // DX7 Operator. Implements a phase-modulable sine wave oscillator connected
 // to a DX7 envelope generator.
@@ -69,6 +68,12 @@ import("pitchenv.lib");
 // * `base_freq`: frequency of the oscillator
 // * `gain`: general gain, like a velocity but 0.-1. instead of 0-127.
 // * `gate`: trigger signal, "is the note on?"
+//
+// #### Test
+// ```
+// op = library("operator.lib");
+// operator_test = op.operator(0,1,0,0,99,99,99,99,99,0,0,0,0,0,0,0,4,35,0,0,0,1,3,99,99,99,99,0,0,0,0,50,0,0,0,0,0,-12,0,440.0,1.0,button("gate"));
+// ```
 //-----------------------------------------------------------------------------
 declare operator author "David Braun";
 declare operator copyright "Copyright (C) 2025 David Braun";

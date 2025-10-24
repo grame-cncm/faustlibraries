@@ -117,23 +117,32 @@ int main(int argc, char* argv[])
     control.buttonON();
     control.checkboxON();
     
+    std::cout << std::setprecision(10);
+    
     dsp.compute(32, inputBuffer, outputBuffer);
     
-    // Button and checkbox OFF
-    control.buttonON();
-    control.checkboxOFF();
-    
-    // Then regular computation
-    dsp.compute(frames - 32, inputBuffer, outputBuffer);
-
-    std::cout << std::setprecision(10);
-    for (int frame = 0; frame < frames; ++frame) {
+    for (int frame = 0; frame < 32; ++frame) {
         std::cout << frame;
         for (int ch = 0; ch < numOutputs; ++ch) {
             std::cout << '\t' << outputs[ch][frame];
         }
         std::cout << '\n';
     }
-
+    
+    // Button and checkbox OFF
+    control.buttonON();
+    control.checkboxOFF();
+    
+    // Then regular computation
+    dsp.compute(frames, inputBuffer, outputBuffer);
+    
+    for (int frame = 0; frame < frames - 32; ++frame) {
+        std::cout << frame + 32;
+        for (int ch = 0; ch < numOutputs; ++ch) {
+            std::cout << '\t' << outputs[ch][frame];
+        }
+        std::cout << '\n';
+    }
+     
     return 0;
 }
