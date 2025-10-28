@@ -353,7 +353,7 @@ spat_test = os.osc(330)
 <p>Wave Field Synthesis algorithm for multiple sound sources. 
 Implementation generalized starting from Pierre Lecomte version. </p>
 <h4 id="usage_3">Usage</h4>
-<pre><code>wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inGain, xs, ys, zs) : si.bus(nSpeakers)
+<pre><code>wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inProc, xs, ys, zs) : si.bus(nSpeakers)
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -363,7 +363,7 @@ Implementation generalized starting from Pierre Lecomte version. </p>
 <li><code>speakersDist</code>: distance between speakers in meters</li>
 <li><code>nSources</code>: number of sound sources</li>
 <li><code>nSpeakers</code>: number of speakers</li>
-<li><code>inGain</code>: input gain (0-1) as a function of the source index</li>
+<li><code>inProc</code>: per-source processor function, as a function of the source index</li>
 <li><code>xs</code>: x-coordinate of the sound source in meters, as a function of the source index</li>
 <li><code>ys</code>: y-coordinate of the sound source in meters, as a function of the source index</li>
 <li><code>zs</code>: z-coordinate of the sound source in meters, as a function of the source index</li>
@@ -371,12 +371,12 @@ Implementation generalized starting from Pierre Lecomte version. </p>
 <h4 id="test_3">Test</h4>
 <pre><code>sp = library(&quot;spats.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
-wfs_inGain(i) = 0.5;
+wfs_proc(i) = *(0.5); // Simple gain processor
 wfs_xs(i) = 0.0;
 wfs_ys(i) = 1.0;
 wfs_zs(i) = 0.0;
 wfs_test = os.osc(440)
-  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_inGain, wfs_xs, wfs_ys, wfs_zs);
+  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_inGain, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
 </code></pre>
 <hr />
 <h3 id="spwfs_ui"><code>(sp.)wfs_ui</code></h3>
