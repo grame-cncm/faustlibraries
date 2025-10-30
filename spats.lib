@@ -188,7 +188,7 @@ with {
 // ```
 //--------------------------------------
 declare wfs author "Pierre Lecomte, revised by GRAME";
-wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inGain, inProc, xs, ys, zs) 
+wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inProc, xs, ys, zs) 
     = par(i, nSources, oneSource(xref,yref,zref,speakersDist,nSpeakers,inProc(i),xs(i),ys(i),zs(i))) 
     :> si.bus(nSpeakers)
 with {
