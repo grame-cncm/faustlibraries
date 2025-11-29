@@ -60,6 +60,30 @@ Many functions benefit from two public faces so the same DSP can serve both low-
 
 Use the UI-free core for correctness and performance work; build the UI variant when you need something directly tweakable in examples or end-user contexts.
 
+A generic core/UI pair could be:
+
+```
+// Core: parameters explicit, no UI
+coreEffect(paramA, paramB, mix) =
+  fooProcessing(mix, wet)
+with {
+  wet = *(paramA) : barProcessing(paramB); // barProcessing is your DSP
+};
+
+// UI wrapper: binds smoothed controls to the core
+coreEffect_ui =
+  coreEffect(paramA_ui, paramB_ui, mix_ui)
+with {
+  paramA_ui = hslider("Param A", 1.0, 0.0, 2.0, 0.01) : si.smoo;
+  paramB_ui = hslider("Param B", 0.5, 0.0, 1.0, 0.01) : si.smoo;
+  mix_ui    = hslider("Mix", 1.0, 0.0, 1.0, 0.01) : si.smoo;
+};
+
+process = coreEffect_ui; 
+```
+
+This keeps the core reusable (no UI dependencies) and the wrapper ready for immediate tweaking; `process` points to the UI layer for quick testing.
+
 #### Instrument-specific three-layer pattern
 
 Instrument models often add a third, ready-to-play layer. The clarinet model is a reference:
@@ -69,6 +93,7 @@ Instrument models often add a third, ready-to-play layer. The clarinet model is 
 - `pm.clarinet_ui_MIDI`: builds a playable instrument by pairing the core with a blower/envelope plus MIDI-mapped UI (pitch bend, sustain, vibrato, gain, etc.).
 
 When adding similar models, start with the UI-free core, add a minimal UI wrapper, then optionally provide a controller-specific wrapper (MIDI or otherwise). Keep the core independent so it remains reusable.
+
 
 ### Variables and identifiers scoping
 
