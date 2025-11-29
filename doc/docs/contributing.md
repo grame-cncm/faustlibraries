@@ -70,6 +70,10 @@ Instrument models often add a third, ready-to-play layer. The clarinet model is 
 
 When adding similar models, start with the UI-free core, add a minimal UI wrapper, then optionally provide a controller-specific wrapper (MIDI or otherwise). Keep the core independent so it remains reusable.
 
+### Variables and identifiers scoping
+
+To avoid name clashes between libraries, keep identifiers as local as possible. Prefer defining intermediate constants and helpers inside `with { ... }` blocks or `environment { ... }` sections, and only expose the intended public entry points. This minimizes collisions when several libraries are imported together and keeps global namespace usage limited to documented, public-facing functions.
+
 ## New Libraries
 
 * Any new "standard" library should be declared in `stdfaust.lib` with its own environment (2 letters - see `stdfaust.lib`).
@@ -133,7 +137,6 @@ JOS proposal: using terms used in the field of digital signal processing, as fol
  Strictly speaking, there are no lists in Faust. But list operations [can be simulated](https://faustdoc.grame.fr/manual/faq/#pattern-matching-and-lists) (in part) using the parallel binary composition operation `,` and pattern matching.
 
 Thus functions expecting a variable number of arguments can use this mechanism, like a `foo` function that would be used this way: `foo((a,b,c,d))`. See [fi.iir](https://faustlibraries.grame.fr/libs/filters/#fiiir) and [fi.fir](https://faustlibraries.grame.fr/libs/filters/#fifir) examples.
-
 
 ### Documentation
 
