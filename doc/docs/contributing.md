@@ -51,6 +51,24 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * Some functions use parameters that are [constant numerical expressions](https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions). The convention is to label them in *capital letters* and document them preferably to be *constant numerical expressions* (or *known at compile time* in existing libraries).
 *  Functions with several parameters should better be written by putting the *more constant parameters* (like control, setup...) at the beginning of the parameter list, and *audio signals to be processed* at the end. This allows to do partial-application. So prefer the following  `clip(low, high, x) = min(max(x, low), high);` form where `clip(-1, 1)` partially applied version can be used later on in different contexts, better than `clip(x, low, high) = min(max(x, low), high);` version.
 
+### Layering UI-ready variants
+
+Many functions benefit from two public faces so the same DSP can serve both low-level reuse and ready-to-tweak usage:
+
+- *Core function*: exposes all parameters, no UI or side effects; best for reuse, composition, and testing.
+- *UI wrapper*: fixes sensible defaults and exposes only runtime-tuned parameters as UI controls; leaves signals that must be provided externally as arguments.
+
+Use the UI-free core for correctness and performance work; build the UI variant when you need something directly tweakable in examples or end-user contexts.
+
+#### Instrument-specific three-layer pattern
+
+Instrument models often add a third, ready-to-play layer. The clarinet model is a reference:
+
+- `pm.clarinetModel(tubeLength, pressure, reedStiffness, bellOpening)`: core DSP with every parameter explicit and no UI.
+- `pm.clarinetModel_ui(pressure)`: wraps the core and adds UI sliders for tube length, reed stiffness, bell opening, and output gain; keeps `pressure` as an argument.
+- `pm.clarinet_ui_MIDI`: builds a playable instrument by pairing the core with a blower/envelope plus MIDI-mapped UI (pitch bend, sustain, vibrato, gain, etc.).
+
+When adding similar models, start with the UI-free core, add a minimal UI wrapper, then optionally provide a controller-specific wrapper (MIDI or otherwise). Keep the core independent so it remains reusable.
 
 ## New Libraries
 
@@ -212,4 +230,3 @@ For GRAME maintainers:
 - update the library list in the [faustgen~](https://github.com/grame-cncm/faust/blob/master-dev/embedded/faustgen/src/faustgen%7E.cpp) code
 - update the [Faust Syntax Highlighting Files](https://github.com/grame-cncm/faust/tree/master-dev/syntax-highlighting)
 - make an update PR for [vscode-faust](https://github.com/hellbent/vscode-faust) project
-
