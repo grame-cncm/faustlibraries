@@ -358,13 +358,12 @@
 <li><em>UI wrapper</em>: fixes sensible defaults and exposes only runtime-tuned parameters as UI controls; leaves signals that must be provided externally as arguments.</li>
 </ul>
 <p>Use the UI-free core for correctness and performance work; build the UI variant when you need something directly tweakable in examples or end-user contexts.</p>
-<h4 id="simple-dsp-layering-example">Simple DSP layering example</h4>
-<p>Keep identifiers local and expose only the intended public entry points. A generic core/ UI pair:</p>
+<p>A generic core/UI pair could be:</p>
 <pre><code>// Core: parameters explicit, no UI
 coreEffect(paramA, paramB, mix) =
-  ef.dryWetMixer(mix, wet)
+  fooProcessing(mix, wet)
 with {
-  wet = (_ * paramA) : fooProcessing(paramB); // fooProcessing is your DSP
+  wet = *(paramA) : barProcessing(paramB); // barProcessing is your DSP
 };
 
 // UI wrapper: binds smoothed controls to the core
@@ -376,7 +375,7 @@ with {
   mix_ui    = hslider(&quot;Mix&quot;, 1.0, 0.0, 1.0, 0.01) : si.smoo;
 };
 
-process = par(i, 2, coreEffect_ui); // default entry point
+process = coreEffect_ui; 
 </code></pre>
 <p>This keeps the core reusable (no UI dependencies) and the wrapper ready for immediate tweaking; <code>process</code> points to the UI layer for quick testing.</p>
 <h4 id="instrument-specific-three-layer-pattern">Instrument-specific three-layer pattern</h4>
