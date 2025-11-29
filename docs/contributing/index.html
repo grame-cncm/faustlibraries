@@ -249,6 +249,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#variables-and-identifiers-scoping" class="nav-link">Variables and identifiers scoping</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#new-libraries" class="nav-link">New Libraries</a>
@@ -362,6 +366,8 @@
 <li><code>pm.clarinet_ui_MIDI</code>: builds a playable instrument by pairing the core with a blower/envelope plus MIDI-mapped UI (pitch bend, sustain, vibrato, gain, etc.).</li>
 </ul>
 <p>When adding similar models, start with the UI-free core, add a minimal UI wrapper, then optionally provide a controller-specific wrapper (MIDI or otherwise). Keep the core independent so it remains reusable.</p>
+<h3 id="variables-and-identifiers-scoping">Variables and identifiers scoping</h3>
+<p>To avoid name clashes between libraries, keep identifiers as local as possible. Prefer defining intermediate constants and helpers inside <code>with { ... }</code> blocks or <code>environment { ... }</code> sections, and only expose the intended public entry points. This minimizes collisions when several libraries are imported together and keeps global namespace usage limited to documented, public-facing functions.</p>
 <h2 id="new-libraries">New Libraries</h2>
 <ul>
 <li>Any new "standard" library should be declared in <code>stdfaust.lib</code> with its own environment (2 letters - see <code>stdfaust.lib</code>).</li>
