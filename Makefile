@@ -71,7 +71,7 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 	file='$(call file_for,$*)'; \
 	if [ -z "$$file" ]; then echo "No source file found for test '$*'"; exit 1; fi; \
 	printf '[check] %s from %s\n' '$*' "$$file"; \
-	$(FAUST) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
+	$(FAUST) -lang ocpp -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
 	if ! $(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.cpp -o $(BUILD_DIR)/$*; \
 		then \
 			echo "[skip] build failed for $*"; \

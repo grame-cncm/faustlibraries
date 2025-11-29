@@ -245,6 +245,10 @@
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#new-functions" class="nav-link">New Functions</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#layering-ui-ready-variants" class="nav-link">Layering UI-ready variants</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#new-libraries" class="nav-link">New Libraries</a>
@@ -343,6 +347,21 @@
 <li>Some functions use parameters that are <a href="https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions">constant numerical expressions</a>. The convention is to label them in <em>capital letters</em> and document them preferably to be <em>constant numerical expressions</em> (or <em>known at compile time</em> in existing libraries).</li>
 <li>Functions with several parameters should better be written by putting the <em>more constant parameters</em> (like control, setup...) at the beginning of the parameter list, and <em>audio signals to be processed</em> at the end. This allows to do partial-application. So prefer the following  <code>clip(low, high, x) = min(max(x, low), high);</code> form where <code>clip(-1, 1)</code> partially applied version can be used later on in different contexts, better than <code>clip(x, low, high) = min(max(x, low), high);</code> version.</li>
 </ul>
+<h3 id="layering-ui-ready-variants">Layering UI-ready variants</h3>
+<p>Many functions benefit from two public faces so the same DSP can serve both low-level reuse and ready-to-tweak usage:</p>
+<ul>
+<li><em>Core function</em>: exposes all parameters, no UI or side effects; best for reuse, composition, and testing.</li>
+<li><em>UI wrapper</em>: fixes sensible defaults and exposes only runtime-tuned parameters as UI controls; leaves signals that must be provided externally as arguments.</li>
+</ul>
+<p>Use the UI-free core for correctness and performance work; build the UI variant when you need something directly tweakable in examples or end-user contexts.</p>
+<h4 id="instrument-specific-three-layer-pattern">Instrument-specific three-layer pattern</h4>
+<p>Instrument models often add a third, ready-to-play layer. The clarinet model is a reference:</p>
+<ul>
+<li><code>pm.clarinetModel(tubeLength, pressure, reedStiffness, bellOpening)</code>: core DSP with every parameter explicit and no UI.</li>
+<li><code>pm.clarinetModel_ui(pressure)</code>: wraps the core and adds UI sliders for tube length, reed stiffness, bell opening, and output gain; keeps <code>pressure</code> as an argument.</li>
+<li><code>pm.clarinet_ui_MIDI</code>: builds a playable instrument by pairing the core with a blower/envelope plus MIDI-mapped UI (pitch bend, sustain, vibrato, gain, etc.).</li>
+</ul>
+<p>When adding similar models, start with the UI-free core, add a minimal UI wrapper, then optionally provide a controller-specific wrapper (MIDI or otherwise). Keep the core independent so it remains reusable.</p>
 <h2 id="new-libraries">New Libraries</h2>
 <ul>
 <li>Any new "standard" library should be declared in <code>stdfaust.lib</code> with its own environment (2 letters - see <code>stdfaust.lib</code>).</li>
