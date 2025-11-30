@@ -124,6 +124,9 @@ build: ## Build the documentation
  
 serve: ## Serve the documentation
 	$(MAKE) -C doc serve
+	
+pdf: ## Create the PDF documentation
+	$(MAKE) -C doc pdf
 
 clean: ## Remove build artefacts and generated outputs
 	rm -rf $(BUILD_DIR) $(REFERENCE_DIR) $(OUTPUT_DIR)
