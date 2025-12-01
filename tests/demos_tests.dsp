@@ -27,6 +27,7 @@ flanger_demo_test = stereoOsc(440, 442) : dm.flanger_demo;
 phaser2_demo_test = stereoOsc(440, 442) : dm.phaser2_demo;
 tapeStop_demo_test = stereoOsc(440, 442) : dm.tapeStop_demo;
 freeverb_demo_test = stereoOsc(440, 442) : dm.freeverb_demo;
+springreverb_demo_test = monoOsc(220) : dm.springreverb_demo;
 stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(!);
 fdnrev0_demo_test = stereoNoise : dm.fdnrev0_demo(16, 5, 3);
 zita_rev_fdn_demo_test = par(i, 8, monoOsc(440 + i)) : dm.zita_rev_fdn_demo;

@@ -24,5 +24,7 @@ jpverb_test = (os.osc(330), os.osc(440))
   : re.jpverb(3.0, 0.2, 1.0, 0.8, 0.3, 0.4, 0.9, 0.8, 0.7, 500, 4000);
 greyhole_test = (os.osc(220), os.osc(440))
   : re.greyhole(2.0, 0.3, 1.0, 0.6, 0.5, 0.4, 0.2);
+springreverb_test = os.osc(330)
+  : re.springreverb(5.0, 5.0, 5.0, 5.0, 1);
 kb_rom_rev1_test = (os.osc(330), os.osc(660))
   : re.kb_rom_rev1(0.7, 0.3);

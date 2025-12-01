@@ -73,7 +73,7 @@ aa = library("aanl.lib");
 sp = library("spats.lib");
 
 declare name "Faust Demos Library";
-declare version "1.2.0";
+declare version "1.3.0";
 
 //########################################################################################
 /************************************************************************
@@ -740,6 +740,39 @@ with{
         : int);
     g = parameters(vslider("[1] Wet [tooltip: The amount of reverb applied to the signal
         between 0 and 1 with 1 for the maximum amount of reverb.]", 0.3333, 0, 1, 0.025));
+};
+
+//---------------------------`(dm.)springreverb_demo`----------------------------
+// Mono spring-inspired reverb demo using `re.springreverb`.
+//
+// #### Usage
+//
+// ```
+// _ : springreverb_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// springreverb_demo_test = os.osc(220) : dm.springreverb_demo;
+// ```
+//------------------------------------------------------------
+declare springreverb_demo author "Daniel Leonov";
+declare springreverb_demo licence "MIT";
+
+springreverb_demo = hgroup("Spring Reverb", spring_reverb)
+with {
+
+    dwell   = vslider("[0] Dwell [style:knob] [tooltip: Feedback amount; controls decay length (0..10)]", 5, 0, 10, 0.1);
+    blend   = vslider("[1] Blend [style:knob] [tooltip: Wet gain scaling; maps to 0..0.8 (0..10)]", 5, 0, 10, 0.1);
+    tone    = vslider("[2] Tone [style:knob] [tooltip: Lowpass cutoff on wet path; darker to brighter (0..10)]", 5, 0, 10, 0.1);
+    tension = vslider("[3] Tension [style:knob] [tooltip: Base delay time; affects predelay and tail diffusion (0..10)]", 5, 0, 10, 0.1);
+    springs = nentry("[4] Springs [style:menu{'Left':0;'Right':1;'Middle':2}] [tooltip: Spacing preset between spring delays]", 1, 0, 2, 1);
+    wetmix  = vslider("[5] Wet [style:knob] [tooltip: Wet/dry mix (0=dry, 1=wet)]", 0.5, 0, 1, 0.01);
+
+    spring_reverb = _ <: (_, re.springreverb(dwell, blend, tone, tension, springs))
+        :> (*(1 - wetmix), *(wetmix)) :> +;
 };
 
 //---------------------`(dm.)stereo_reverb_tester`--------------------
