@@ -711,7 +711,8 @@ kb_rom_rev1_test = (os.osc(330), os.osc(660))
 <h2 id="others">Others</h2>
 <hr />
 <h3 id="respringreverb"><code>(re.)springreverb</code></h3>
-<p>Mono spring-inspired reverb originally designed for the Chaos Audio Stratus.
+<p>Mono spring-inspired reverb originally designed for the Chaos Audio Stratus, which defines all parameters
+in the [0..10] range. They have been remapped to more typical [0..1] ranges in this implementation.
 Uses a diffusion stage into a bank of damped delay lines with Hadamard
 feedback mixing to emulate the lively, metallic character of multi-spring tanks.</p>
 <h4 id="usage_14">Usage</h4>
@@ -719,17 +720,17 @@ feedback mixing to emulate the lively, metallic character of multi-spring tanks.
 </code></pre>
 <p>Where:</p>
 <ul>
-<li><code>dwell</code>: feedback amount controlling decay length ([0..10])</li>
-<li><code>blend</code>: wet gain scaling ([0..10], maps to 0..0.8)</li>
-<li><code>tone</code>: lowpass cutoff applied to the wet path ([0..10])</li>
-<li><code>tension</code>: base spring delay time and tail length ([0..10])</li>
+<li><code>dwell</code>: feedback amount controlling decay length ([0..1])</li>
+<li><code>blend</code>: wet gain scaling ([0..1], maps to 0..0.8)</li>
+<li><code>tone</code>: lowpass cutoff applied to the wet path ([0..1])</li>
+<li><code>tension</code>: base spring delay time and tail length ([0..1])</li>
 <li><code>springs</code>: spacing preset between spring delays (0 = left, 1 = right, 2 = middle)</li>
 </ul>
 <h4 id="test_14">Test</h4>
 <pre><code>re = library(&quot;reverbs.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 springreverb_test = os.osc(330)
-  : re.springreverb(5.0, 5.0, 5.0, 5.0, 1);
+  : re.springreverb(0.5, 0.5, 0.5, 0.5, 1);
 </code></pre></div>
             </div>
         </div>
