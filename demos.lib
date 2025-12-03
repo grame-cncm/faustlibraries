@@ -764,10 +764,10 @@ declare springreverb_demo licence "MIT";
 springreverb_demo = hgroup("Spring Reverb", spring_reverb)
 with {
 
-    dwell   = vslider("[0] Dwell [style:knob] [tooltip: Feedback amount; controls decay length (0..10)]", 5, 0, 10, 0.1);
-    blend   = vslider("[1] Blend [style:knob] [tooltip: Wet gain scaling; maps to 0..0.8 (0..10)]", 5, 0, 10, 0.1);
-    tone    = vslider("[2] Tone [style:knob] [tooltip: Lowpass cutoff on wet path; darker to brighter (0..10)]", 5, 0, 10, 0.1);
-    tension = vslider("[3] Tension [style:knob] [tooltip: Base delay time; affects predelay and tail diffusion (0..10)]", 5, 0, 10, 0.1);
+    dwell   = vslider("[0] Dwell [style:knob] [tooltip: Feedback amount; controls decay length (0..1)]", 0.5, 0, 1, 0.01);
+    blend   = vslider("[1] Blend [style:knob] [tooltip: Wet gain scaling; maps to 0..0.8 (0..1)]", 0.5, 0, 1, 0.01);
+    tone    = vslider("[2] Tone [style:knob] [tooltip: Lowpass cutoff on wet path; darker to brighter (0..1)]", 0.5, 0, 1, 0.01);
+    tension = vslider("[3] Tension [style:knob] [tooltip: Base delay time; affects predelay and tail diffusion (0..1)]", 0.5, 0, 1, 0.01);
     springs = nentry("[4] Springs [style:menu{'Left':0;'Right':1;'Middle':2}] [tooltip: Spacing preset between spring delays]", 1, 0, 2, 1);
     wetmix  = vslider("[5] Wet [style:knob] [tooltip: Wet/dry mix (0=dry, 1=wet)]", 0.5, 0, 1, 0.01);
 

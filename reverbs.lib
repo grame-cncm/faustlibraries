@@ -33,7 +33,7 @@ sp = library("spats.lib");
 aa = library("aanl.lib");
 
 declare name "Faust Reverb Library";
-declare version "1.5.0";
+declare version "1.5.1";
 
 //########################################################################################
 /************************************************************************
@@ -1143,7 +1143,8 @@ with {
 //===============================================================================
 
 //-------------------------------`(re.)springreverb`-------------------------------
-// Mono spring-inspired reverb originally designed for the Chaos Audio Stratus.
+// Mono spring-inspired reverb originally designed for the Chaos Audio Stratus, which defines all parameters
+// in the [0..10] range. They have been remapped to more typical [0..1] ranges in this implementation.
 // Uses a diffusion stage into a bank of damped delay lines with Hadamard
 // feedback mixing to emulate the lively, metallic character of multi-spring tanks.
 //
@@ -1155,10 +1156,10 @@ with {
 //
 // Where:
 //
-// * `dwell`: feedback amount controlling decay length ([0..10])
-// * `blend`: wet gain scaling ([0..10], maps to 0..0.8)
-// * `tone`: lowpass cutoff applied to the wet path ([0..10])
-// * `tension`: base spring delay time and tail length ([0..10])
+// * `dwell`: feedback amount controlling decay length ([0..1])
+// * `blend`: wet gain scaling ([0..1], maps to 0..0.8)
+// * `tone`: lowpass cutoff applied to the wet path ([0..1])
+// * `tension`: base spring delay time and tail length ([0..1])
 // * `springs`: spacing preset between spring delays (0 = left, 1 = right, 2 = middle)
 //
 // #### Test
@@ -1166,15 +1167,21 @@ with {
 // re = library("reverbs.lib");
 // os = library("oscillators.lib");
 // springreverb_test = os.osc(330)
-//   : re.springreverb(5.0, 5.0, 5.0, 5.0, 1);
+//   : re.springreverb(0.5, 0.5, 0.5, 0.5, 1);
 // ```
 //------------------------------------------------------------
 declare springreverb author "Daniel Leonov";
 
-springreverb(dwell, blend, tone, tension, springs) =
+springreverb(dwell_aux, blend_aux, tone_aux, tension_aux, springs) =
     _ <: (_, wet_gain_linear * reverb) :> _
 with {
     sample_rate_hz = ma.SR;  // For plugins 
+
+    // Parameter remapping from external [0..1] to internal [0..10]
+    dwell = dwell_aux * 10;
+    blend = blend_aux * 10;
+    tone = tone_aux * 10;
+    tension = tension_aux * 10;
 
     clamp(x, lo, hi) = max(lo, min(hi, x));  // Enforce UI-style parameter limits when called from the library
 
