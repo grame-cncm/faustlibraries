@@ -9,7 +9,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * All functions must be preceded by a markdown documentation header respecting the following format (open the source code of any of the libraries for an example):
 
 ```
-//-----------------functionName--------------------
+//-----------------(pr).functionName--------------------
 // Description
 //
 // #### Usage
@@ -20,8 +20,8 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 //
 // Where:
 //
-// * argument1: argument 1 description
-// * argument2: argument 2 description
+// * `param1`: parameter 1 description
+// * `param2`: parameter 2 description
 //
 // #### Example
 //
@@ -41,15 +41,16 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 //-------------------------------------------------
 ```
 
-* Every time a new function is added, the documentation should be updated simply by running `make doclib`. <!-- TODO -->
+* The `functionName` must be prefixed by the `libraryName` name prefix, like `(pr)` in the example.
 * The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on [Library Import](#library-import)).
 * Try to reuse existing functions as much as possible.
-* The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen: _` for a mono generator, `_ : filter : _` for a mono effect, etc.
+* The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen: _` for a mono generator, `_ : filter : _` for a mono effect, etc. The `Where:` section then allows each parameter to be described individually, using the appropriate surrounding quotes.
 * The `Example` line can be used to provide additional examples.
 * The `Test` line should used to add a DSP program to test the function. The test name must be `functionName_test`. The actual code can be extracted and independantly tested using the `-pn` compiler option (to specify the name of the dsp entry-point instead of process). The test code must import all the needed libraries, like `an = library("analyzers.lib");` if a function from analyzers.lib is used in the test code. The `functionName_test` test should be added in the relevant file in the *tests* folder.
 * The `References` line can be used to add links to references.
 * Some functions use parameters that are [constant numerical expressions](https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions). The convention is to label them in *capital letters* and document them preferably to be *constant numerical expressions* (or *known at compile time* in existing libraries).
 *  Functions with several parameters should better be written by putting the *more constant parameters* (like control, setup...) at the beginning of the parameter list, and *audio signals to be processed* at the end. This allows to do partial-application. So prefer the following  `clip(low, high, x) = min(max(x, low), high);` form where `clip(-1, 1)` partially applied version can be used later on in different contexts, better than `clip(x, low, high) = min(max(x, low), high);` version.
+* Every time a new function is added, the documentation should be updated simply by running `make doclib`. <!-- TODO -->
 
 ### Layering UI-ready variants
 
