@@ -309,7 +309,7 @@
 <ul>
 <li>All functions must be preceded by a markdown documentation header respecting the following format (open the source code of any of the libraries for an example):</li>
 </ul>
-<pre><code>//-----------------functionName--------------------
+<pre><code>//-----------------(pr).functionName--------------------
 // Description
 //
 // #### Usage
@@ -320,8 +320,8 @@
 //
 // Where:
 //
-// * argument1: argument 1 description
-// * argument2: argument 2 description
+// * `param1`: parameter 1 description
+// * `param2`: parameter 2 description
 //
 // #### Example
 //
@@ -341,15 +341,16 @@
 //-------------------------------------------------
 </code></pre>
 <ul>
-<li>Every time a new function is added, the documentation should be updated simply by running <code>make doclib</code>. <!-- TODO --></li>
+<li>The <code>functionName</code> must be prefixed by the <code>libraryName</code> name prefix, like <code>(pr)</code> in the example.</li>
 <li>The environment system (e.g. <code>os.osc</code>) should be used when calling a function declared in another library (see the section on <a href="#library-import">Library Import</a>).</li>
 <li>Try to reuse existing functions as much as possible.</li>
-<li>The <code>Usage</code> line must show the <em>input/output shape</em> (the number of inputs and outputs) of the function, like <code>gen: _</code> for a mono generator, <code>_ : filter : _</code> for a mono effect, etc.</li>
+<li>The <code>Usage</code> line must show the <em>input/output shape</em> (the number of inputs and outputs) of the function, like <code>gen: _</code> for a mono generator, <code>_ : filter : _</code> for a mono effect, etc. The <code>Where:</code> section then allows each parameter to be described individually, using the appropriate surrounding quotes.</li>
 <li>The <code>Example</code> line can be used to provide additional examples.</li>
 <li>The <code>Test</code> line should used to add a DSP program to test the function. The test name must be <code>functionName_test</code>. The actual code can be extracted and independantly tested using the <code>-pn</code> compiler option (to specify the name of the dsp entry-point instead of process). The test code must import all the needed libraries, like <code>an = library("analyzers.lib");</code> if a function from analyzers.lib is used in the test code. The <code>functionName_test</code> test should be added in the relevant file in the <em>tests</em> folder.</li>
 <li>The <code>References</code> line can be used to add links to references.</li>
 <li>Some functions use parameters that are <a href="https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions">constant numerical expressions</a>. The convention is to label them in <em>capital letters</em> and document them preferably to be <em>constant numerical expressions</em> (or <em>known at compile time</em> in existing libraries).</li>
 <li>Functions with several parameters should better be written by putting the <em>more constant parameters</em> (like control, setup...) at the beginning of the parameter list, and <em>audio signals to be processed</em> at the end. This allows to do partial-application. So prefer the following  <code>clip(low, high, x) = min(max(x, low), high);</code> form where <code>clip(-1, 1)</code> partially applied version can be used later on in different contexts, better than <code>clip(x, low, high) = min(max(x, low), high);</code> version.</li>
+<li>Every time a new function is added, the documentation should be updated simply by running <code>make doclib</code>. <!-- TODO --></li>
 </ul>
 <h3 id="layering-ui-ready-variants">Layering UI-ready variants</h3>
 <p>Many functions benefit from two public faces so the same DSP can serve both low-level reuse and ready-to-tweak usage:</p>
