@@ -147,6 +147,10 @@
 </li>
                                     
 <li>
+    <a href="../motion/" class="dropdown-item"> motion </a>
+</li>
+                                    
+<li>
     <a href="../noises/" class="dropdown-item"> noises </a>
 </li>
                                     
@@ -415,6 +419,30 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#motion" class="nav-link">Motion</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#dmshock_trigger_demo" class="nav-link">(dm.)shock_trigger_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dmprojected_gravity_demo" class="nav-link">(dm.)projected_gravity_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dmtotal_accel_demo" class="nav-link">(dm.)total_accel_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dmorientation6_demo" class="nav-link">(dm.)orientation6_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dmmotion_wrapper_demo" class="nav-link">(dm.)motion_wrapper_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -427,13 +455,14 @@
 <p>This library provides a collection of example DSP algorithms and demonstrations
 used to illustrate Faust features, syntax, and best practices. It includes simple
 oscillators, filters, effects, and synthesis examples useful for learning and testing.</p>
-<p>The Demos library is organized into 5 sections:</p>
+<p>The Demos library is organized into 6 sections:</p>
 <ul>
 <li><a href="#analyzers">Analyzers</a></li>
 <li><a href="#filters">Filters</a></li>
 <li><a href="#effects">Effects</a></li>
 <li><a href="#reverbs">Reverbs</a></li>
 <li><a href="#generators">Generators</a></li>
+<li><a href="#motion">Motion</a></li>
 </ul>
 <h4 id="references">References</h4>
 <ul>
@@ -970,6 +999,96 @@ vocoder_demo_test = no.noise : dm.vocoder_demo;
 <h4 id="test_37">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 colored_noise_demo_test = dm.colored_noise_demo;
+</code></pre>
+<h2 id="motion">Motion</h2>
+<p>Motion, gravity, and orientation demos based on motion helpers.</p>
+<hr />
+<h3 id="dmshock_trigger_demo"><code>(dm.)shock_trigger_demo</code></h3>
+<p>Debounced shock trigger driving a tone. UI:</p>
+<ul>
+<li>[Auto Pulse] synths periodic impacts.</li>
+<li>[Pulse Rate] sets the tempo.</li>
+<li>[Axis Offset] trims the accelerometer input before HP/threshold.</li>
+<li>[High-pass], [Threshold], [Debounce] shape the trigger window.</li>
+<li>[Tone Frequency] sets the audible indicator driven by the shock gate.</li>
+</ul>
+<h4 id="usage_38">Usage</h4>
+<pre><code>shock_trigger_demo : _
+</code></pre>
+<h4 id="test_38">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+shock_trigger_demo_test = dm.shock_trigger_demo;
+</code></pre>
+<hr />
+<h3 id="dmprojected_gravity_demo"><code>(dm.)projected_gravity_demo</code></h3>
+<p>Gravity projection mapped to a low-pass filter sweep. UI:</p>
+<ul>
+<li>[Auto Tilt] + [Tilt Rate]/[Tilt Depth] synthesize rocking.</li>
+<li>[Axis Offset] biases the axis.</li>
+<li>[Low-pass] controls smoothing before projection</li>
+<li>[Offset] sets the dead-zone.</li>
+<li>[Noise Level] sets bed loudness; projection modulates filter cutoff.</li>
+</ul>
+<h4 id="usage_39">Usage</h4>
+<pre><code>projected_gravity_demo : _
+</code></pre>
+<h4 id="test_39">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+projected_gravity_demo_test = dm.projected_gravity_demo;
+</code></pre>
+<hr />
+<h3 id="dmtotal_accel_demo"><code>(dm.)total_accel_demo</code></h3>
+<p>Total acceleration envelope mapped to noise amplitude. UI:</p>
+<ul>
+<li>[Auto Motion] + per-axis rates/depth synthesize movement; per-axis offsets bias inputs.</li>
+<li>[Threshold]/[Gain] set envelope detection.</li>
+<li>[Attack]/[Release] smooth it.</li>
+<li>Envelope scales the saw tone amplitude.</li>
+</ul>
+<h4 id="usage_40">Usage</h4>
+<pre><code>total_accel_demo : _
+</code></pre>
+<h4 id="test_40">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+total_accel_demo_test = dm.total_accel_demo;
+</code></pre>
+<hr />
+<h3 id="dmorientation6_demo"><code>(dm.)orientation6_demo</code></h3>
+<p>Six-axis orientation weights mapped to six tonal channels. UI:</p>
+<ul>
+<li>[Auto Orbit] + [Orbit Rate]/[Depth] synthesize a 3D path; X/Y/Z knobs add offsets.</li>
+<li>Six [Shape ...] knobs tighten/loosen each face’s lobe.</li>
+<li>[Smooth] sets response time.</li>
+<li>Each weight drives a distinct tone channel.</li>
+</ul>
+<h4 id="usage_41">Usage</h4>
+<pre><code>orientation6_demo : _,_,_,_,_,_
+</code></pre>
+<h4 id="test_41">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+orientation6_demo_test = dm.orientation6_demo;
+</code></pre>
+<hr />
+<h3 id="dmmotion_wrapper_demo"><code>(dm.)motion_wrapper_demo</code></h3>
+<p>End-to-end motion feature monitor built on motion.lib:</p>
+<ul>
+<li>Ingests six 3-axis IMUs (left arm, feet, back, right arm, head, stomach).</li>
+<li>Derives shock triggers, inclinometers, projected gravity, accel/gyro envelopes,
+  six-face orientation weights per sensor, and raw/scaled axis taps.</li>
+<li>Exposes 92 UI-gated outputs matching the motion.lib signal names.</li>
+</ul>
+<h4 id="usage_42">Usage</h4>
+<pre><code>motion_wrapper_demo :
+  (brasG_x, brasG_y, brasG_z,
+   pieds_x, pieds_y, pieds_z,
+   dos_x,   dos_y,   dos_z,
+   brasD_x, brasD_y, brasD_z,
+   tete_x,  tete_y,  tete_z,
+   ventre_x, ventre_y, ventre_z) -&gt; 92 outputs
+</code></pre>
+<h4 id="test_42">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+motion_wrapper_demo_test = dm.motion_wrapper_demo;
 </code></pre></div>
             </div>
         </div>
