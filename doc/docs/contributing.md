@@ -9,7 +9,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * All functions must be preceded by a markdown documentation header respecting the following format (open the source code of any of the libraries for an example):
 
 ```
-//-----------------(pr).functionName--------------------
+//-----------------`(pr).functionName`--------------------
 // Description
 //
 // #### Usage
@@ -196,17 +196,19 @@ la = library("linearalgebra.lib");
 ma = library("maths.lib");
 mi = library("mi.lib");
 ef = library("misceffects.lib");
-os = library("oscillators.lib");
+mo = library("motion.lib");
 no = library("noises.lib");
+os = library("oscillators.lib");
 pf = library("phaflangers.lib");
+pl = library("platform.lib");
 pm = library("physmodels.lib");
 qu = library("quantizers.lib");
 rm = library("reducemaps.lib");
 re = library("reverbs.lib");
 ro = library("routes.lib");
+sp = library("spats.lib");
 si = library("signals.lib");
 so = library("soundfiles.lib");
-sp = library("spats.lib");
 sy = library("synths.lib");
 ve = library("vaeffects.lib");
 vl = library("version.lib");

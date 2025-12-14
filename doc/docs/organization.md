@@ -18,8 +18,9 @@ Only the libraries that are considered to be "standard" are documented:
 * `maths.lib`
 * `mi.lib`
 * `misceffects.lib`
-* `oscillators.lib`
+* `motion.lib`
 * `noises.lib`
+* `oscillators.lib`
 * `phaflangers.lib`
 * `physmodels.lib`
 * `reducemaps.lib`

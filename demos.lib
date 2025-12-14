@@ -5,13 +5,14 @@
 // used to illustrate Faust features, syntax, and best practices. It includes simple
 // oscillators, filters, effects, and synthesis examples useful for learning and testing.
 //
-// The Demos library is organized into 5 sections:
+// The Demos library is organized into 6 sections:
 //
 // * [Analyzers](#analyzers)
 // * [Filters](#filters)
 // * [Effects](#effects)
 // * [Reverbs](#reverbs)
 // * [Generators](#generators)
+// * [Motion](#motion)
 // 
 // #### References
 //
@@ -71,9 +72,10 @@ en = library("envelopes.lib");
 it = library("interpolators.lib");
 aa = library("aanl.lib");
 sp = library("spats.lib");
+mo = library("motion.lib");
 
 declare name "Faust Demos Library";
-declare version "1.3.0";
+declare version "1.4.0";
 
 //########################################################################################
 /************************************************************************
@@ -2180,6 +2182,493 @@ with {
     alpha = hslider("[0] Alpha [style:knob] [tooltip: Spectral roll-off factor]", 0.0, -1.0, 1.0, 0.001) : si.smoo;
     ampdb = hslider("[1] Amplitude [unit:dB] [style:knob] [tooltip: Noise amplitude]", -20, -120, 10, 0.1) : ba.db2linear : si.smoo;
     gate = checkbox("[2] Gate");
+};
+
+//======================================Motion===========================================
+// Motion, gravity, and orientation demos based on motion helpers.
+//========================================================================================
+
+//-----------------`(dm.)shock_trigger_demo`--------------------
+// Debounced shock trigger driving a tone. UI:
+//
+// - [Auto Pulse] synths periodic impacts.
+// - [Pulse Rate] sets the tempo.
+// - [Axis Offset] trims the accelerometer input before HP/threshold.
+// - [High-pass], [Threshold], [Debounce] shape the trigger window.
+// - [Tone Frequency] sets the audible indicator driven by the shock gate.
+//
+// #### Usage
+//
+// ```
+// shock_trigger_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// shock_trigger_demo_test = dm.shock_trigger_demo;
+// ```
+//-------------------------------------------------
+shock_trigger_demo = demoGroup(shockTone)
+with {
+    // Group the controls under a titled UI folder.
+    demoGroup(x) = vgroup("[0] Shock Trigger Demo", x);
+    // Checkbox to synthesize periodic impacts instead of relying on external accel data.
+    autoPulse = checkbox("[0] Auto Pulse");
+    // Knob to set the frequency of the synthetic pulse train (Hz).
+    pulseRate = hslider("[1] Pulse Rate [unit:Hz] [style:knob]", 2, 0.1, 10, 0.1);
+    // DC offset applied to the accel axis (in g) to bias the detector up/down.
+    axisTrim = hslider("[2] Axis Offset [unit:g] [style:knob]", 0, -2, 2, 0.001);
+    // Effective axis signal: manual offset plus optional auto pulse.
+    axis = axisTrim + (autoPulse * os.pulsetrain(pulseRate, 0.5));
+    // High-pass cutoff used to isolate shocks (Hz).
+    hp = hslider("[3] High-pass [unit:Hz] [style:knob]", 50, 1, 200, 0.1);
+    // Detection threshold after HP (normalized g).
+    thr = hslider("[4] Threshold [style:knob]", 0.75, 0, 3, 0.01);
+    // Debounce/hold time (ms) to avoid rapid retriggering.
+    debounce = hslider("[5] Debounce [unit:ms] [style:knob]", 75, 0, 1000, 1);
+    // Detected gate, lightly smoothed for UI viewing.
+    env = mo.shockTrigger(hp, thr, debounce, axis) : si.smooth(0.999);
+    // Tone frequency (Hz) to make the gate audible.
+    toneFreq = hslider("[6] Tone Frequency [unit:Hz] [style:knob]", 220, 60, 1200, 1);
+    shockTone = env * os.sawtooth(toneFreq) * 0.2;
+};
+
+//-----------------`(dm.)projected_gravity_demo`--------------------
+// Gravity projection mapped to a low-pass filter sweep. UI:
+//
+// - [Auto Tilt] + [Tilt Rate]/[Tilt Depth] synthesize rocking.
+// - [Axis Offset] biases the axis.
+// - [Low-pass] controls smoothing before projection
+// - [Offset] sets the dead-zone.
+// - [Noise Level] sets bed loudness; projection modulates filter cutoff.
+//
+// #### Usage
+//
+// ```
+// projected_gravity_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// projected_gravity_demo_test = dm.projected_gravity_demo;
+// ```
+//-------------------------------------------------
+projected_gravity_demo = demoGroup(filteredNoise)
+with {
+    // Group the controls under a titled UI folder.
+    demoGroup(x) = vgroup("[1] Gravity Projection Demo", x);
+    // Checkbox to auto-synthesize a tilt signal.
+    autoTilt = checkbox("[0] Auto Tilt");
+    // Knob to set the rate of the synthetic tilt (Hz).
+    tiltRate = hslider("[1] Tilt Rate [unit:Hz] [style:knob]", 0.1, 0.01, 1, 0.01);
+    // Knob to set the amplitude of the synthetic tilt (0..1 g).
+    tiltDepth = hslider("[2] Tilt Depth [style:knob]", 0.5, 0, 1, 0.001);
+    // Manual axis bias (g) applied before projection.
+    axisManual = hslider("[3] Axis Offset [unit:g] [style:knob]", 0, -1, 1, 0.001);
+    // Effective axis: manual bias plus optional auto tilt waveform.
+    axis = axisManual + (autoTilt : *(os.triangle(tiltRate) * tiltDepth));
+    // Low-pass cutoff (Hz) to smooth the axis before projection.
+    lp = hslider("[4] Low-pass [unit:Hz] [style:knob]", 1.5, 0.1, 20, 0.01);
+    // Dead-zone offset applied after projection (0..0.33).
+    offset = hslider("[5] Offset [style:knob]", 0.08, 0, 0.33, 0.01);
+    // Normalized projection of the axis onto gravity.
+    proj = mo.projectedGravity(lp, offset, axis);
+    // Input noise level in dB.
+    noiseLevel = hslider("[6] Noise Level [unit:dB] [style:knob]", -20, -60, 0, 0.1) : ba.db2linear;
+    // Map projected gravity to filter cutoff (Hz).
+    cutoff = 200 + proj * 18000;
+    filteredNoise = no.noise : *(noiseLevel) : fi.lowpass(1, cutoff);
+};
+
+//-----------------`(dm.)total_accel_demo`--------------------
+// Total acceleration envelope mapped to noise amplitude. UI:
+//
+// - [Auto Motion] + per-axis rates/depth synthesize movement; per-axis offsets bias inputs.
+// - [Threshold]/[Gain] set envelope detection.
+// - [Attack]/[Release] smooth it.
+// - Envelope scales the saw tone amplitude.
+//
+// #### Usage
+//
+// ```
+// total_accel_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// total_accel_demo_test = dm.total_accel_demo;
+// ```
+//-------------------------------------------------
+total_accel_demo = demoGroup(outSig)
+with {
+    // Group the controls under a titled UI folder.
+    demoGroup(x) = vgroup("[2] Total Accel Demo", x);
+    // Checkbox to synthesize movement on all axes.
+    autoMotion = checkbox("[0] Auto Motion");
+    // Per-axis rate knobs (Hz) for the synthetic motion LFOs.
+    rateX = hslider("[1] Rate X [unit:Hz] [style:knob]", 0.2, 0.01, 2, 0.01);
+    rateY = hslider("[2] Rate Y [unit:Hz] [style:knob]", 0.27, 0.01, 2, 0.01);
+    rateZ = hslider("[3] Rate Z [unit:Hz] [style:knob]", 0.34, 0.01, 2, 0.01);
+    // Global depth for the synthetic motion (g).
+    depth = hslider("[4] Motion Depth [style:knob]", 0.6, 0, 1, 0.001);
+    // Manual per-axis biases (g).
+    axManual = hslider("[5] Axis X Offset [unit:g] [style:knob]", 0, -1, 1, 0.001);
+    ayManual = hslider("[6] Axis Y Offset [unit:g] [style:knob]", 0, -1, 1, 0.001);
+    azManual = hslider("[7] Axis Z Offset [unit:g] [style:knob]", 0, -1, 1, 0.001);
+    // Effective axes: manual bias plus optional synthetic motion waveforms.
+    ax = axManual + (autoMotion : *(os.sawtooth(rateX) * depth));
+    ay = ayManual + (autoMotion : *(os.triangle(rateY) * depth));
+    az = azManual + (autoMotion : *(os.sawtooth(rateZ) * depth));
+    // Envelope detector controls: threshold, gain, attack, release.
+    thr = hslider("[8] Threshold [style:knob]", 0.1, 0, 1, 0.01);
+    gain = hslider("[9] Gain [style:knob]", 1.35, 0, 5, 0.01);
+    envUp = hslider("[10] Attack [unit:ms] [style:knob]", 10, 0, 5000, 1);
+    envDown = hslider("[11] Release [unit:ms] [style:knob]", 10, 0, 5000, 1);
+    // Envelope driven by total acceleration magnitude.
+    env = mo.totalAccel(thr, gain, envUp, envDown, ax, ay, az);
+    // Base saw tone scaled by the envelope.
+    baseTone = os.sawtooth(110) * 0.1;
+    outSig = env * baseTone;
+};
+
+//-----------------`(dm.)orientation6_demo`--------------------
+// Six-axis orientation weights mapped to six tonal channels. UI:
+//
+// - [Auto Orbit] + [Orbit Rate]/[Depth] synthesize a 3D path; X/Y/Z knobs add offsets.
+// - Six [Shape ...] knobs tighten/loosen each face’s lobe.
+// - [Smooth] sets response time.
+// - Each weight drives a distinct tone channel.
+//
+// #### Usage
+//
+// ```
+// orientation6_demo : _,_,_,_,_,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// orientation6_demo_test = dm.orientation6_demo;
+// ```
+//-------------------------------------------------
+orientation6_demo = demoGroup(weightedTones)
+with {
+    // Group the controls under a titled UI folder.
+    demoGroup(x) = vgroup("[3] Orientation6 Demo", x);
+    // Checkbox to auto-orbit in 3D space.
+    autoOrbit = checkbox("[0] Auto Orbit");
+    // Orbit speed (Hz) for the synthetic path.
+    orbitRate = hslider("[1] Orbit Rate [unit:Hz] [style:knob]", 0.05, 0.005, 0.2, 0.005);
+    // Manual XYZ offsets (-1..1) applied to the orientation vector.
+    manualX = hslider("[2] X [style:knob]", 0, -1, 1, 0.001);
+    manualY = hslider("[3] Y [style:knob]", 0, -1, 1, 0.001);
+    manualZ = hslider("[4] Z [style:knob]", 0, -1, 1, 0.001);
+    // Depth of the synthetic orbit modulation.
+    orbitDepth = hslider("[5] Orbit Depth [style:knob]", 0.6, 0, 1, 0.001);
+    // Effective orientation vector: manual offsets plus optional auto orbit waveforms.
+    xs = manualX + (autoOrbit : *(os.oscsin(orbitRate) * orbitDepth));
+    ys = manualY + (autoOrbit : *(os.sawtooth(orbitRate * 0.7) * orbitDepth));
+    zs = manualZ + (autoOrbit : *(os.triangle(orbitRate * 0.5) * orbitDepth));
+    // Per-face shape controls to widen/tighten each lobe (-X, -Y, +X, +Y, -Z, +Z).
+    shapeCour = hslider("[6] Shape Cour [style:knob]", 1, 0, 4, 0.01);
+    shapeRear = hslider("[7] Shape Rear [style:knob]", 1, 0, 4, 0.01);
+    shapeJardin = hslider("[8] Shape Jardin [style:knob]", 1, 0, 4, 0.01);
+    shapeFront = hslider("[9] Shape Front [style:knob]", 1, 0, 4, 0.01);
+    shapeDown = hslider("[10] Shape Down [style:knob]", 1, 0, 4, 0.01);
+    shapeUp = hslider("[11] Shape Up [style:knob]", 1, 0, 4, 0.01);
+    // Smoothing time (ms) for the six weights.
+    smoothMs = hslider("[12] Smooth [unit:ms] [style:knob]", 10, 0, 200, 1);
+    // Six weights computed from orientation and per-face shapes.
+    weights = mo.orientation6(xs, ys, zs, shapeCour, shapeRear, shapeJardin, shapeFront, shapeDown, shapeUp, smoothMs);
+    // Each weight drives its own tone channel.
+    weightedTones = weights :> par(i,6, *(os.oscsin(120 * (i + 1)) * 0.1));
+};
+
+//-----------------`(dm.)motion_wrapper_demo`--------------------
+// End-to-end motion feature monitor built on motion.lib:
+//
+// - Ingests six 3-axis IMUs (left arm, feet, back, right arm, head, stomach).
+// - Derives shock triggers, inclinometers, projected gravity, accel/gyro envelopes,
+//   six-face orientation weights per sensor, and raw/scaled axis taps.
+// - Exposes 92 UI-gated outputs matching the motion.lib signal names.
+//
+// #### Usage
+//
+// ```
+// motion_wrapper_demo :
+//   (brasG_x, brasG_y, brasG_z,
+//    pieds_x, pieds_y, pieds_z,
+//    dos_x,   dos_y,   dos_z,
+//    brasD_x, brasD_y, brasD_z,
+//    tete_x,  tete_y,  tete_z,
+//    ventre_x, ventre_y, ventre_z) -> 92 outputs
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// motion_wrapper_demo_test = dm.motion_wrapper_demo;
+// ```
+//-------------------------------------------------
+motion_wrapper_demo = demoGroup(wrapperGraph)
+with {
+    // Group controls under a dedicated demo folder.
+    demoGroup(x) = vgroup("[4] Motion Wrapper Demo", x);
+
+    // Sensor inputs
+    accX = hslider("acc_x [acc:0 0 -30 0 30][hidden:1]", 0, -1, 1, 0.001);
+    accY = hslider("acc_y [acc:1 0 -30 0 30][hidden:1]", 0, -1, 1, 0.001);
+    accZ = hslider("acc_z [acc:2 0 -30 0 30][hidden:1]", 0, -1, 1, 0.001);
+    accXEnv = accX : fi.dcblockerat(12);
+    accYEnv = accY : fi.dcblockerat(12);
+    accZEnv = accZ : fi.dcblockerat(12);
+
+    gyroX = hslider("gx [gyr:0 0 -35 0 35][hidden:1]", 0, -1, 1, 0.001) : si.smoo;
+    gyroY = hslider("gy [gyr:1 0 -35 0 35][hidden:1]", 0, -1, 1, 0.001) : si.smoo;
+    gyroZ = hslider("gz [gyr:2 0 -35 0 35][hidden:1]", 0, -1, 1, 0.001) : si.smoo;
+
+    // Parameters
+    hpHz       = hslider("[101]hp_Param [showName:highPass]", 50, 1, 50, 0.01);
+    shockThr   = hslider("[102]shock_thr_Param [showName:shockThred]", 0.75, 0.1, 3, 0.01);
+    debounceMs = hslider("[103]antirebon_Param [showName:antirebond][unit:ms]", 75, 0, 5000, 1);
+
+    lpHz       = hslider("[104]lp_Param [showName:lowPass]", 1.5, 0.1, 20, 0.01);
+    offsetProj = hslider("[105]osfproj_Param [showName:osfproj]", 0.08, 0, 0.33, 0.01);
+
+    taccThr    = hslider("[106]tacc_thr_Param [showName:accThred]", 0.1, 0, 1, 0.01);
+    taccGain   = hslider("[107]tacc_gain_Param [showName:accGain]", 1.35, 0, 5, 0.01);
+    taccUpMs   = hslider("[108]tacc_up_Param [showName:accEvUp]", 10, 0, 5000, 1);
+    taccDownMs = hslider("[109]tacc_down_Param [showName:accEvDown]", 10, 0, 5000, 1);
+
+    tgyrThr    = hslider("[110]tgyr_thr_Param [showName:gyoThred]", 0.01, 0, 1, 0.001);
+    tgyrGain   = hslider("[111]tgyr_gain_Param [showName:gyoGain]", 0.79, 0, 5, 0.01);
+    tgyrUpMs   = hslider("[112]tgyr_up_Param [showName:gyoEvUp]", 50, 0, 5000, 1);
+    tgyrDownMs = hslider("[113]tgyr_down_Param [showName:gyoEvDown]", 50, 0, 5000, 1);
+
+    shapeCour   = hslider("[114]shapeCour_Param [showName:shapeCour]", 1, 0, 100, 0.01);
+    shapeRear   = hslider("[115]shapeRear_Param [showName:shapeRear]", 1, 0, 100, 0.01);
+    shapeJardin = hslider("[116]shapeJardin_Param [showName:shapeJardin]", 1, 0, 100, 0.01);
+    shapeFront  = hslider("[117]shapeFront_Param [showName:shapeFront]", 1, 0, 100, 0.01);
+    shapeDown   = hslider("[118]shapeDown_Param [showName:shapeDown]", 1, 0, 100, 0.01);
+    shapeUp     = hslider("[119]shapeUp_Param [showName:shapeUp]", 1, 0, 100, 0.01);
+    orientSmoothMs = hslider("[120]orientSmooth_Param [showName:orientSmooth][unit:ms]", 10, 0, 500, 1);
+
+    // Derived signals using motion.lib helpers
+    shockPos(sig) = mo.shockTrigger(hpHz, shockThr, debounceMs, sig:max(0));
+    shockNeg(sig) = mo.shockTrigger(hpHz, shockThr, debounceMs, sig * (-1):max(0));
+    sxp = shockPos(accX); syp = shockPos(accY); szp = shockPos(accZ);
+    sxn = shockNeg(accX); syn = shockNeg(accY); szn = shockNeg(accZ);
+
+    ixp = mo.inclinometer(lpHz, accX);
+    iyp = mo.inclinometer(lpHz, accY);
+    izp = mo.inclinometer(lpHz, accZ);
+    ixn = mo.inclinometer(lpHz, accX * (-1));
+    iyn = mo.inclinometer(lpHz, accY * (-1));
+    izn = mo.inclinometer(lpHz, accZ * (-1));
+
+    ixpn = mo.inclineBalance(lpHz, accX, accX * (-1));
+    iypn = mo.inclineBalance(lpHz, accY, accY * (-1));
+    izpn = mo.inclineBalance(lpHz, accZ, accZ * (-1));
+    ixpn_sym = mo.inclineSymmetric(lpHz, accX, accX * (-1));
+    iypn_sym = mo.inclineSymmetric(lpHz, accY, accY * (-1));
+    izpn_sym = mo.inclineSymmetric(lpHz, accZ, accZ * (-1));
+
+    pixp = mo.projectedGravity(lpHz, offsetProj, accX);
+    piyp = mo.projectedGravity(lpHz, offsetProj, accY);
+    pizp = mo.projectedGravity(lpHz, offsetProj, accZ);
+    pixn = mo.projectedGravity(lpHz, offsetProj, accX * (-1));
+    piyn = mo.projectedGravity(lpHz, offsetProj, accY * (-1));
+    pizn = mo.projectedGravity(lpHz, offsetProj, accZ * (-1));
+
+    axpn = mo.accelEnvelopeAbs(taccThr, taccGain, taccUpMs, taccDownMs, accXEnv);
+    aypn = mo.accelEnvelopeAbs(taccThr, taccGain, taccUpMs, taccDownMs, accYEnv);
+    azpn = mo.accelEnvelopeAbs(taccThr, taccGain, taccUpMs, taccDownMs, accZEnv);
+    axp = mo.accelEnvelopePos(taccThr, taccGain, taccUpMs, taccDownMs, accXEnv);
+    ayp = mo.accelEnvelopePos(taccThr, taccGain, taccUpMs, taccDownMs, accYEnv);
+    azp = mo.accelEnvelopePos(taccThr, taccGain, taccUpMs, taccDownMs, accZEnv);
+    axn = mo.accelEnvelopeNeg(taccThr, taccGain, taccUpMs, taccDownMs, accXEnv);
+    ayn = mo.accelEnvelopeNeg(taccThr, taccGain, taccUpMs, taccDownMs, accYEnv);
+    azn = mo.accelEnvelopeNeg(taccThr, taccGain, taccUpMs, taccDownMs, accZEnv);
+    totalaccel = mo.totalAccel(taccThr, taccGain, taccUpMs, taccDownMs, accXEnv, accYEnv, accZEnv);
+
+    gxpn = mo.gyroEnvelopeAbs(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX);
+    gypn = mo.gyroEnvelopeAbs(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroY);
+    gzpn = mo.gyroEnvelopeAbs(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroZ);
+    gxp = mo.gyroEnvelopePos(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX);
+    gyp = mo.gyroEnvelopePos(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroY);
+    gzp = mo.gyroEnvelopePos(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroZ);
+    gxn = mo.gyroEnvelopeNeg(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX);
+    gyn = mo.gyroEnvelopeNeg(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroY);
+    gzn = mo.gyroEnvelopeNeg(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroZ);
+    totalgyro = mo.totalGyro(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX, gyroY, gyroZ);
+    gyro_xy = mo.totalEnvelope(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX, gyroY, 0);
+
+    orient(xs, ys, zs) = mo.orientation6(xs, ys, zs,
+                                         shapeCour, shapeRear, shapeJardin, shapeFront, shapeDown, shapeUp,
+                                         orientSmoothMs);
+    orientCour(xs, ys, zs) = orient(xs, ys, zs) : _,!,!,!,!,!;
+    orientRear(xs, ys, zs) = orient(xs, ys, zs) : !,_,!,!,!,!;
+    orientJardin(xs, ys, zs) = orient(xs, ys, zs) : !,!,_,!,!,!;
+    orientFront(xs, ys, zs) = orient(xs, ys, zs) : !,!,!,_,!,!;
+    orientDown(xs, ys, zs) = orient(xs, ys, zs) : !,!,!,!,_,!;
+    orientUp(xs, ys, zs) = orient(xs, ys, zs) : !,!,!,!,!,_;
+
+    wrapperGraph(brasG_x, brasG_y, brasG_z,
+                 pieds_x, pieds_y, pieds_z,
+                 dos_x, dos_y, dos_z,
+                 brasD_x, brasD_y, brasD_z,
+                 tete_x, tete_y, tete_z,
+                 ventre_x, ventre_y, ventre_z) =
+      vgroup("Motion",
+        (sxp : enable(checkbox("[00]sxpOn [motionName:sxp]")) ),
+        (syp : enable(checkbox("[01]sypOn [motionName:syp]")) ),
+        (szp : enable(checkbox("[02]szpOn [motionName:szp]")) ),
+        (sxn : enable(checkbox("[03]sxnOn [motionName:sxn]")) ),
+        (syn : enable(checkbox("[04]synOn [motionName:syn]")) ),
+        (szn : enable(checkbox("[05]sznOn [motionName:szn]")) ),
+        (ixp : enable(checkbox("[06]ixpOn [motionName:ixp]")) ),
+        (iyp : enable(checkbox("[07]iypOn [motionName:iyp]")) ),
+        (izp : enable(checkbox("[08]izpOn [motionName:izp]")) ),
+        (ixn : enable(checkbox("[09]ixnOn [motionName:ixn]")) ),
+        (iyn : enable(checkbox("[10]iynOn [motionName:iyn]")) ),
+        (izn : enable(checkbox("[11]iznOn [motionName:izn]")) ),
+        (pixp : enable(checkbox("[12]pixpOn [motionName:pixp]")) ),
+        (piyp : enable(checkbox("[13]piypOn [motionName:piyp]")) ),
+        (pizp : enable(checkbox("[14]pizpOn [motionName:pizp]")) ),
+        (pixn : enable(checkbox("[15]pixnOn [motionName:pixn]")) ),
+        (piyn : enable(checkbox("[16]piynOn [motionName:piyn]")) ),
+        (pizn : enable(checkbox("[17]piznOn [motionName:pizn]")) ),
+        (axpn : enable(checkbox("[18]axpnOn [motionName:axpn]")) ),
+        (aypn : enable(checkbox("[19]aypnOn [motionName:aypn]")) ),
+        (azpn : enable(checkbox("[20]azpnOn [motionName:azpn]")) ),
+        (axp : enable(checkbox("[21]axpOn [motionName:axp]")) ),
+        (ayp : enable(checkbox("[22]aypOn [motionName:ayp]")) ),
+        (azp : enable(checkbox("[23]azpOn [motionName:azp]")) ),
+        (axn : enable(checkbox("[24]axnOn [motionName:axn]")) ),
+        (ayn : enable(checkbox("[25]aynOn [motionName:ayn]")) ),
+        (azn : enable(checkbox("[26]aznOn [motionName:azn]")) ),
+        (totalaccel : enable(checkbox("[27]totalaccelOn [motionName:totalaccel]")) ),
+        (gxpn : enable(checkbox("[28]gxpnOn [motionName:gxpn]")) ),
+        (gypn : enable(checkbox("[29]gypnOn [motionName:gypn]")) ),
+        (gzpn : enable(checkbox("[30]gzpnOn [motionName:gzpn]")) ),
+        (gxp : enable(checkbox("[31]gxpOn [motionName:gxp]")) ),
+        (gyp : enable(checkbox("[32]gypOn [motionName:gyp]")) ),
+        (gzp : enable(checkbox("[33]gzpOn [motionName:gzp]")) ),
+        (gxn : enable(checkbox("[34]gxnOn [motionName:gxn]")) ),
+        (gyn : enable(checkbox("[35]gynOn [motionName:gyn]")) ),
+        (gzn : enable(checkbox("[36]gznOn [motionName:gzn]")) ),
+        (totalgyro : enable(checkbox("[37]totalgyroOn [motionName:totalgyro]")) ),
+
+        (brasG_cour : enable(checkbox("[38]brasG_courOn [motionName:brasG_cour]")) ),
+        (brasG_rear : enable(checkbox("[39]brasG_rearOn [motionName:brasG_rear]")) ),
+        (brasG_jardin : enable(checkbox("[40]brasG_jardinOn [motionName:brasG_jardin]")) ),
+        (brasG_front : enable(checkbox("[41]brasG_frontOn [motionName:brasG_front]")) ),
+        (brasG_down : enable(checkbox("[42]brasG_downOn [motionName:brasG_down]")) ),
+        (brasG_up : enable(checkbox("[43]brasG_upOn [motionName:brasG_up]")) ),
+
+        (pieds_cour : enable(checkbox("[44]pieds_courOn [motionName:pieds_cour]")) ),
+        (pieds_rear : enable(checkbox("[45]pieds_rearOn [motionName:pieds_rear]")) ),
+        (pieds_jardin : enable(checkbox("[46]pieds_jardinOn [motionName:pieds_jardin]")) ),
+        (pieds_front : enable(checkbox("[47]pieds_frontOn [motionName:pieds_front]")) ),
+        (pieds_down : enable(checkbox("[48]pieds_downOn [motionName:pieds_down]")) ),
+        (pieds_up : enable(checkbox("[49]pieds_upOn [motionName:pieds_up]")) ),
+
+        (dos_cour : enable(checkbox("[50]dos_courOn [motionName:dos_cour]")) ),
+        (dos_rear : enable(checkbox("[51]dos_rearOn [motionName:dos_rear]")) ),
+        (dos_jardin : enable(checkbox("[52]dos_jardinOn [motionName:dos_jardin]")) ),
+        (dos_front : enable(checkbox("[53]dos_frontOn [motionName:dos_front]")) ),
+        (dos_down : enable(checkbox("[54]dos_downOn [motionName:dos_down]")) ),
+        (dos_up : enable(checkbox("[55]dos_upOn [motionName:dos_up]")) ),
+
+        (brasD_cour : enable(checkbox("[56]brasD_courOn [motionName:brasD_cour]")) ),
+        (brasD_rear : enable(checkbox("[57]brasD_rearOn [motionName:brasD_rear]")) ),
+        (brasD_jardin : enable(checkbox("[58]brasD_jardinOn [motionName:brasD_jardin]")) ),
+        (brasD_front : enable(checkbox("[59]brasD_frontOn [motionName:brasD_front]")) ),
+        (brasD_down : enable(checkbox("[60]brasD_downOn [motionName:brasD_down]")) ),
+        (brasD_up : enable(checkbox("[61]brasD_upOn [motionName:brasD_up]")) ),
+
+        (tete_cour : enable(checkbox("[62]tete_courOn [motionName:tete_cour]")) ),
+        (tete_rear : enable(checkbox("[63]tete_rearOn [motionName:tete_rear]")) ),
+        (tete_jardin : enable(checkbox("[64]tete_jardinOn [motionName:tete_jardin]")) ),
+        (tete_front : enable(checkbox("[65]tete_frontOn [motionName:tete_front]")) ),
+        (tete_down : enable(checkbox("[66]tete_downOn [motionName:tete_down]")) ),
+        (tete_up : enable(checkbox("[67]tete_upOn [motionName:tete_up]")) ),
+
+        (ventre_cour : enable(checkbox("[68]ventre_courOn [motionName:ventre_cour]")) ),
+        (ventre_rear : enable(checkbox("[69]ventre_rearOn [motionName:ventre_rear]")) ),
+        (ventre_jardin : enable(checkbox("[70]ventre_jardinOn [motionName:ventre_jardin]")) ),
+        (ventre_front : enable(checkbox("[71]ventre_frontOn [motionName:ventre_front]")) ),
+        (ventre_down : enable(checkbox("[72]ventre_downOn [motionName:ventre_down]")) ),
+        (ventre_up : enable(checkbox("[73]ventre_upOn [motionName:ventre_up]")) ),
+
+        (ixpn : enable(checkbox("[74]ixpnOn [motionName:ixpn]")) ),
+        (iypn : enable(checkbox("[75]iypnOn [motionName:iypn]")) ),
+        (izpn : enable(checkbox("[76]izpnOn [motionName:izpn]")) ),
+        (ixpn_sym : enable(checkbox("[77]ixpn_symOn [motionName:ixpn_sym]")) ),
+        (iypn_sym : enable(checkbox("[78]iypn_symOn [motionName:iypn_sym]")) ),
+        (izpn_sym : enable(checkbox("[79]izpn_symOn [motionName:izpn_sym]")) ),
+        (dosx_scaled : enable(checkbox("[80]dosxOn [motionName:dosx]")) ),
+        (dosy_scaled : enable(checkbox("[81]dosyOn [motionName:dosy]")) ),
+        (dos_x : enable(checkbox("[82]cooxOn [motionName:coox]")) ),
+        (dos_y : enable(checkbox("[83]cooyOn [motionName:cooy]")) ),
+        (dos_z : enable(checkbox("[84]coozOn [motionName:cooz]")) ),
+        (tete_x : enable(checkbox("[85]cooxTOn [motionName:cooxT]")) ),
+        (tete_y : enable(checkbox("[86]cooyTOn [motionName:cooyT]")) ),
+        (tete_z : enable(checkbox("[87]coozTOn [motionName:coozT]")) ),
+        (brasG_x : enable(checkbox("[88]cooxBGOn [motionName:cooxBG]")) ),
+        (brasG_y : enable(checkbox("[89]cooyBGOn [motionName:cooyBG]")) ),
+        (brasG_z : enable(checkbox("[90]coozBGOn [motionName:coozBG]")) ),
+        (gyro_xy : enable(checkbox("[91]gyro_xyOn [motionName:gyro_xy]")) )
+      )
+    with {
+        brasG_cour = orientCour(brasG_x, brasG_y, brasG_z);
+        brasG_rear = orientRear(brasG_x, brasG_y, brasG_z);
+        brasG_jardin = orientJardin(brasG_x, brasG_y, brasG_z);
+        brasG_front = orientFront(brasG_x, brasG_y, brasG_z);
+        brasG_down = orientDown(brasG_x, brasG_y, brasG_z);
+        brasG_up = orientUp(brasG_x, brasG_y, brasG_z);
+
+        pieds_cour = orientCour(pieds_x, pieds_y, pieds_z);
+        pieds_rear = orientRear(pieds_x, pieds_y, pieds_z);
+        pieds_jardin = orientJardin(pieds_x, pieds_y, pieds_z);
+        pieds_front = orientFront(pieds_x, pieds_y, pieds_z);
+        pieds_down = orientDown(pieds_x, pieds_y, pieds_z);
+        pieds_up = orientUp(pieds_x, pieds_y, pieds_z);
+
+        dos_cour = orientCour(dos_x, dos_y, dos_z);
+        dos_rear = orientRear(dos_x, dos_y, dos_z);
+        dos_jardin = orientJardin(dos_x, dos_y, dos_z);
+        dos_front = orientFront(dos_x, dos_y, dos_z);
+        dos_down = orientDown(dos_x, dos_y, dos_z);
+        dos_up = orientUp(dos_x, dos_y, dos_z);
+
+        brasD_cour = orientCour(brasD_x, brasD_y, brasD_z);
+        brasD_rear = orientRear(brasD_x, brasD_y, brasD_z);
+        brasD_jardin = orientJardin(brasD_x, brasD_y, brasD_z);
+        brasD_front = orientFront(brasD_x, brasD_y, brasD_z);
+        brasD_down = orientDown(brasD_x, brasD_y, brasD_z);
+        brasD_up = orientUp(brasD_x, brasD_y, brasD_z);
+
+        tete_cour = orientCour(tete_x, tete_y, tete_z);
+        tete_rear = orientRear(tete_x, tete_y, tete_z);
+        tete_jardin = orientJardin(tete_x, tete_y, tete_z);
+        tete_front = orientFront(tete_x, tete_y, tete_z);
+        tete_down = orientDown(tete_x, tete_y, tete_z);
+        tete_up = orientUp(tete_x, tete_y, tete_z);
+
+        ventre_cour = orientCour(ventre_x, ventre_y, ventre_z);
+        ventre_rear = orientRear(ventre_x, ventre_y, ventre_z);
+        ventre_jardin = orientJardin(ventre_x, ventre_y, ventre_z);
+        ventre_front = orientFront(ventre_x, ventre_y, ventre_z);
+        ventre_down = orientDown(ventre_x, ventre_y, ventre_z);
+        ventre_up = orientUp(ventre_x, ventre_y, ventre_z);
+
+        dosx_scaled = (dos_x * (-0.5) + 0.5) : mo.scale(0.2, 0.8, 0, 1);
+        dosy_scaled = (dos_y * (-0.5) + 0.5) : mo.scale(0.2, 0.8, 0, 1);
+    };
 };
 
 // end further contributions section

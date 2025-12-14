@@ -35,8 +35,9 @@ This will give you access to all the Faust libraries through a series of environ
 * `ma`: `maths.lib`
 * `mi`: `mi.lib`
 * `ef`: `misceffects.lib`
-* `os`: `oscillators.lib`
+* `mo`: `motion.lib`
 * `no`: `noises.lib`
+* `os`: `oscillators.lib`
 * `pf`: `phaflangers.lib`
 * `pm`: `physmodels.lib`
 * `qu`: `quantizers.lib`
