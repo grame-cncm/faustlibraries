@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title> motion  - Faust Libraries</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../css/extra.css" rel="stylesheet">
+
+        <script src="../../js/jquery-3.6.0.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../.."><img src="../../img/faustText.svg" width="150px"> </a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Overview <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../../organization/" class="dropdown-item"> Organization </a>
+</li>
+                                    
+<li>
+    <a href="../../standardFunctions/" class="dropdown-item"> Standard Functions </a>
+</li>
+                                    
+<li>
+    <a href="../../contributing/" class="dropdown-item"> Contributing </a>
+</li>
+                                    
+<li>
+    <a href="../../community/" class="dropdown-item"> Community </a>
+</li>
+                                    
+<li>
+    <a href="../../about/" class="dropdown-item"> Copyright/License </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../" class="nav-link">Index</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Libraries <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../aanl/" class="dropdown-item"> antialiased </a>
+</li>
+                                    
+<li>
+    <a href="../analyzers/" class="dropdown-item"> analyzers </a>
+</li>
+                                    
+<li>
+    <a href="../basics/" class="dropdown-item"> basics </a>
+</li>
+                                    
+<li>
+    <a href="../compressors/" class="dropdown-item"> compressors </a>
+</li>
+                                    
+<li>
+    <a href="../delays/" class="dropdown-item"> delays </a>
+</li>
+                                    
+<li>
+    <a href="../demos/" class="dropdown-item"> demos </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/dx7/" class="dropdown-item"> dx7/dx7 </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/env/" class="dropdown-item"> dx7/env </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/lfo/" class="dropdown-item"> dx7/lfo </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/operator/" class="dropdown-item"> dx7/operator </a>
+</li>
+                                    
+<li>
+    <a href="../dx7/pitchenv/" class="dropdown-item"> dx7/pitchenv </a>
+</li>
+                                    
+<li>
+    <a href="../envelopes/" class="dropdown-item"> envelopes </a>
+</li>
+                                    
+<li>
+    <a href="../fds/" class="dropdown-item"> fds </a>
+</li>
+                                    
+<li>
+    <a href="../filters/" class="dropdown-item"> filters </a>
+</li>
+                                    
+<li>
+    <a href="../hoa/" class="dropdown-item"> hoa </a>
+</li>
+                                    
+<li>
+    <a href="../interpolators/" class="dropdown-item"> interpolators </a>
+</li>
+                                    
+<li>
+    <a href="../linearalgebra/" class="dropdown-item"> linearalgebra </a>
+</li>
+                                    
+<li>
+    <a href="../maths/" class="dropdown-item"> maths </a>
+</li>
+                                    
+<li>
+    <a href="../mi/" class="dropdown-item"> mi </a>
+</li>
+                                    
+<li>
+    <a href="../misceffects/" class="dropdown-item"> misceffects </a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active"> motion </a>
+</li>
+                                    
+<li>
+    <a href="../noises/" class="dropdown-item"> noises </a>
+</li>
+                                    
+<li>
+    <a href="../oscillators/" class="dropdown-item"> oscillators </a>
+</li>
+                                    
+<li>
+    <a href="../phaflangers/" class="dropdown-item"> phaflangers </a>
+</li>
+                                    
+<li>
+    <a href="../physmodels/" class="dropdown-item"> physmodels </a>
+</li>
+                                    
+<li>
+    <a href="../quantizers/" class="dropdown-item"> quantizers </a>
+</li>
+                                    
+<li>
+    <a href="../reducemaps/" class="dropdown-item"> reducemaps </a>
+</li>
+                                    
+<li>
+    <a href="../reverbs/" class="dropdown-item"> reverbs </a>
+</li>
+                                    
+<li>
+    <a href="../routes/" class="dropdown-item"> routes </a>
+</li>
+                                    
+<li>
+    <a href="../signals/" class="dropdown-item"> signals </a>
+</li>
+                                    
+<li>
+    <a href="../soundfiles/" class="dropdown-item"> soundfiles </a>
+</li>
+                                    
+<li>
+    <a href="../spats/" class="dropdown-item"> spats </a>
+</li>
+                                    
+<li>
+    <a href="../synths/" class="dropdown-item"> synths </a>
+</li>
+                                    
+<li>
+    <a href="../vaeffects/" class="dropdown-item"> vaeffects </a>
+</li>
+                                    
+<li>
+    <a href="../version/" class="dropdown-item"> version </a>
+</li>
+                                    
+<li>
+    <a href="../wdmodels/" class="dropdown-item"> wdmodels </a>
+</li>
+                                    
+<li>
+    <a href="../webaudio/" class="dropdown-item"> webaudio </a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../about/" class="nav-link">About</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <div class="container">
+            <div class="row"><div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#motionlib" class="nav-link">motion.lib</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#shock-detection" class="nav-link">Shock Detection</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#moshocktrigger" class="nav-link">(mo.)shockTrigger</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#inclination-and-gravity-projection" class="nav-link">Inclination and Gravity Projection</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#moinclinometer" class="nav-link">(mo.)inclinometer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moinclinebalance" class="nav-link">(mo.)inclineBalance</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moinclinesymmetric" class="nav-link">(mo.)inclineSymmetric</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moprojectedgravity" class="nav-link">(mo.)projectedGravity</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#envelopes-helpers" class="nav-link">Envelopes Helpers</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#momotionenvelope" class="nav-link">(mo.)motionEnvelope</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moenvelopeabs" class="nav-link">(mo.)envelopeAbs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moenvelopepos" class="nav-link">(mo.)envelopePos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moenvelopeneg" class="nav-link">(mo.)envelopeNeg</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#mopita3" class="nav-link">(mo.)pita3</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#mototalenvelope" class="nav-link">(mo.)totalEnvelope</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#acceleration-envelopes" class="nav-link">Acceleration Envelopes</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#moaccelenvelopeabs" class="nav-link">(mo.)accelEnvelopeAbs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moaccelenvelopepos" class="nav-link">(mo.)accelEnvelopePos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moaccelenvelopeneg" class="nav-link">(mo.)accelEnvelopeNeg</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#mototalaccel" class="nav-link">(mo.)totalAccel</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#gyroscope-envelopes" class="nav-link">Gyroscope Envelopes</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#mogyroenvelopeabs" class="nav-link">(mo.)gyroEnvelopeAbs</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#mogyroenvelopepos" class="nav-link">(mo.)gyroEnvelopePos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#mogyroenvelopeneg" class="nav-link">(mo.)gyroEnvelopeNeg</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#mototalgyro" class="nav-link">(mo.)totalGyro</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#orientation-weighting" class="nav-link">Orientation Weighting</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#moorientationweight" class="nav-link">(mo.)orientationWeight</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#moorientation6" class="nav-link">(mo.)orientation6</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#utility-scaling" class="nav-link">Utility Scaling</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#moscale" class="nav-link">(mo.)scale</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9 main-container" role="main">
+
+<h1 id="motionlib">motion.lib</h1>
+<p>Motion library. Its official prefix is <code>mo</code>.</p>
+<p>This library provides helpers for motion and orientation processing: shock detection,
+inclination and gravity projection, acceleration and gyroscope envelopes, orientation
+weighting toward the device axes, and utilities for normalized motion streams.</p>
+<p>Usage:</p>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.shockTrigger(50, 0.75, 75, accX);
+</code></pre>
+<p>All motion axes are expected to be normalized to [-1, 1] (e.g., gravity ~= 1 g).
+Functions return signals in [0, 1] unless documented otherwise. Time parameters
+are in milliseconds unless noted. Some helpers (e.g., projectedGravity) allow an
+optional dead-zone offset: low magnitudes are zeroed, and the remaining span is
+rescaled to preserve the 0..1 range.</p>
+<p>Typical use-cases:</p>
+<ul>
+<li>Map shocks to drum triggers or one-shot events.</li>
+<li>Derive smooth inclination or projected-gravity controls for fades/pans.</li>
+<li>Track acceleration/gyro envelopes to drive dynamics (filters, gains, FX sends).</li>
+<li>Weight device orientation toward axes for spatial routing or mode selection.</li>
+<li>Normalize motion streams with dead-zones to reduce jitter or false positives.</li>
+</ul>
+<p>The Motion library is organized into 7 sections:</p>
+<ul>
+<li><a href="#shock-detection">Shock Detection</a></li>
+<li><a href="#inclination-and-gravity-projection">Inclination and Gravity Projection</a></li>
+<li><a href="#envelopes-helpers">Envelopes Helpers</a></li>
+<li><a href="#acceleration-envelopes">Acceleration Envelopes</a></li>
+<li><a href="#gyroscope-envelopes">Gyroscope Envelopes</a></li>
+<li><a href="#orientation-weighting">Orientation Weighting</a></li>
+<li><a href="#utility-scaling">Utility Scaling</a></li>
+</ul>
+<h4 id="references">References</h4>
+<ul>
+<li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/motion.lib">https://github.com/grame-cncm/faustlibraries/blob/master/motion.lib</a></li>
+</ul>
+<h2 id="shock-detection">Shock Detection</h2>
+<hr />
+<h3 id="moshocktrigger"><code>(mo.)shockTrigger</code></h3>
+<p>Debounced shock trigger from an accelerometer axis.</p>
+<h4 id="usage">Usage</h4>
+<pre><code>shockTrigger(hpHz, threshold, debounceMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>hpHz</code>: high-pass frequency (Hz) used to isolate shocks ( &gt; 0 )</li>
+<li><code>threshold</code>: trigger threshold applied after high-pass (normalized g units)</li>
+<li><code>debounceMs</code>: time in milliseconds to hold the trigger high (&gt;= 0)</li>
+<li><code>sig</code>: accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li>Output is a gate in [0, 1].</li>
+</ul>
+<h4 id="example">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.shockTrigger(50, 0.75, 75, accX);
+</code></pre>
+<h4 id="test">Test</h4>
+<pre><code>shockTrigger_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+    accX = os.pulsetrain(4) * 2;
+  } : mo.shockTrigger(50, 0.5, 50);
+</code></pre>
+<h2 id="inclination-and-gravity-projection">Inclination and Gravity Projection</h2>
+<hr />
+<h3 id="moinclinometer"><code>(mo.)inclinometer</code></h3>
+<p>Low-pass inclinometer for a single axis.</p>
+<h4 id="usage_1">Usage</h4>
+<pre><code>inclinometer(lpHz, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>lpHz</code>: low-pass frequency (Hz) ( &gt; 0 )</li>
+<li><code>sig</code>: accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li>Output is clamped to [0, 1] with negative values removed.</li>
+</ul>
+<h4 id="example_1">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.inclinometer(1.5, accX);
+</code></pre>
+<h4 id="test_1">Test</h4>
+<pre><code>inclinometer_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+  } : mo.inclinometer(2, os.sawtooth(1));
+</code></pre>
+<hr />
+<h3 id="moinclinebalance"><code>(mo.)inclineBalance</code></h3>
+<p>Balance between positive and negative inclination on the same axis.</p>
+<h4 id="usage_2">Usage</h4>
+<pre><code>inclineBalance(lpHz, posSig, negSig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>lpHz</code>: low-pass frequency (Hz) ( &gt; 0 )</li>
+<li><code>posSig</code>: positive-facing accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li><code>negSig</code>: negative-facing accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li>Output maps posSig -&gt; 1 and negSig -&gt; 0 with smoothing and clamping.</li>
+</ul>
+<h4 id="example_2">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.inclineBalance(1.5, accPosX, accNegX);
+</code></pre>
+<h4 id="test_2">Test</h4>
+<pre><code>inclineBalance_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+    accPosX = os.sawtooth(0.1) * 0.5 + 0.5;
+    accNegX = accPosX * (-1);
+  } : mo.inclineBalance(1, accPosX, accNegX);
+</code></pre>
+<hr />
+<h3 id="moinclinesymmetric"><code>(mo.)inclineSymmetric</code></h3>
+<p>Symmetric gravity comparison (0-&gt;1-&gt;0) from positive and negative axes.</p>
+<h4 id="usage_3">Usage</h4>
+<pre><code>inclineSymmetric(lpHz, posSig, negSig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>lpHz</code>: low-pass frequency (Hz) ( &gt; 0 )</li>
+<li><code>posSig</code>: positive-facing accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li><code>negSig</code>: negative-facing accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li>Output peaks at 1 near either pole and returns to 0 near the midpoint.</li>
+</ul>
+<h4 id="example_3">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.inclineSymmetric(1.5, accPosX, accNegX);
+</code></pre>
+<h4 id="test_3">Test</h4>
+<pre><code>inclineSymmetric_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+    accPosX = os.triangle(0.2) * 0.5 + 0.5;
+    accNegX = accPosX * (-1);
+  } : mo.inclineSymmetric(2, accPosX, accNegX);
+</code></pre>
+<hr />
+<h3 id="moprojectedgravity"><code>(mo.)projectedGravity</code></h3>
+<p>Projects an axis onto gravity with optional dead-zone offset.</p>
+<h4 id="usage_4">Usage</h4>
+<pre><code>projectedGravity(lpHz, offset, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>lpHz</code>: low-pass frequency (Hz) ( &gt; 0 )</li>
+<li><code>offset</code>: dead-zone offset applied after projection (0..0.33). Magnitudes below
+  <code>offset</code> clamp to 0, and the remaining range is rescaled to keep the output in [0, 1].</li>
+<li><code>sig</code>: accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li>Output is normalized to [0, 1] with an optional dead zone near 0.</li>
+</ul>
+<h4 id="example_4">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.projectedGravity(1.5, 0.08, accX);
+</code></pre>
+<h4 id="test_4">Test</h4>
+<pre><code>projectedGravity_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+  } : mo.projectedGravity(2, 0.05, os.triangle(0.1));
+</code></pre>
+<h2 id="envelopes-helpers">Envelopes Helpers</h2>
+<hr />
+<h3 id="momotionenvelope"><code>(mo.)motionEnvelope</code></h3>
+<p>Base thresholded AR envelope used by the accelerometer and gyroscope helpers.</p>
+<h4 id="usage_5">Usage</h4>
+<pre><code>motionEnvelope(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>sig</code>: input signal (normalized)</li>
+<li>Signal is offset by <code>thr</code>, floored at 0, scaled by <code>gain</code>, clamped to [0, 1], then
+    fed to an attack/release follower (<code>an.amp_follower_ar</code>).</li>
+</ul>
+<h4 id="example_5">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.motionEnvelope(0.05, 1.25, 15, 25, accX);
+</code></pre>
+<hr />
+<h3 id="moenvelopeabs"><code>(mo.)envelopeAbs</code></h3>
+<p>Envelope on the absolute value of a signal (responds to both polarities).</p>
+<h4 id="usage_6">Usage</h4>
+<pre><code>envelopeAbs(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>, <code>gain</code>, <code>envUpMs</code>, <code>envDownMs</code>: passed to <code>motionEnvelope</code></li>
+<li><code>sig</code>: input signal</li>
+<li>Absolute value is taken before envelope detection.</li>
+</ul>
+<hr />
+<h3 id="moenvelopepos"><code>(mo.)envelopePos</code></h3>
+<p>Envelope for the positive portion of a signal.</p>
+<h4 id="usage_7">Usage</h4>
+<pre><code>envelopePos(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>, <code>gain</code>, <code>envUpMs</code>, <code>envDownMs</code>: passed to <code>motionEnvelope</code></li>
+<li><code>sig</code>: input signal</li>
+<li>Negative values are ignored by the thresholding stage.</li>
+</ul>
+<hr />
+<h3 id="moenvelopeneg"><code>(mo.)envelopeNeg</code></h3>
+<p>Envelope for the negative portion of a signal (by flipping its polarity first).</p>
+<h4 id="usage_8">Usage</h4>
+<pre><code>envelopeNeg(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>, <code>gain</code>, <code>envUpMs</code>, <code>envDownMs</code>: passed to <code>motionEnvelope</code></li>
+<li><code>sig</code>: input signal</li>
+<li>The signal is negated before the shared positive-only detector.</li>
+</ul>
+<hr />
+<h3 id="mopita3"><code>(mo.)pita3</code></h3>
+<p>3D magnitude helper <code>sqrt(x^2 + y^2 + z^2)</code> used for total envelopes.</p>
+<h4 id="usage_9">Usage</h4>
+<pre><code>pita3(x, y, z) : _
+</code></pre>
+<hr />
+<h3 id="mototalenvelope"><code>(mo.)totalEnvelope</code></h3>
+<p>Magnitude-based envelope across three axes.</p>
+<h4 id="usage_10">Usage</h4>
+<pre><code>totalEnvelope(thr, gain, envUpMs, envDownMs, x, y, z) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>, <code>gain</code>, <code>envUpMs</code>, <code>envDownMs</code>: passed to <code>motionEnvelope</code></li>
+<li><code>x</code>, <code>y</code>, <code>z</code>: three-axis signals (normalized)</li>
+<li>Computes a magnitude via <code>pita3</code> then applies <code>motionEnvelope</code>.</li>
+</ul>
+<h2 id="acceleration-envelopes">Acceleration Envelopes</h2>
+<hr />
+<h3 id="moaccelenvelopeabs"><code>(mo.)accelEnvelopeAbs</code></h3>
+<p>Envelope follower on the absolute value of an accelerometer axis.</p>
+<h4 id="usage_11">Usage</h4>
+<pre><code>accelEnvelopeAbs(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>sig</code>: accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li>Output envelope is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_6">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.accelEnvelopeAbs(0.1, 1.2, 10, 12, accX);
+</code></pre>
+<h4 id="test_5">Test</h4>
+<pre><code>accelEnvelopeAbs_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+    accX = os.sawtooth(0.5);
+  } : mo.accelEnvelopeAbs(0.1, 1.5, 5, 20, accX);
+</code></pre>
+<hr />
+<h3 id="moaccelenvelopepos"><code>(mo.)accelEnvelopePos</code></h3>
+<p>Envelope follower for positive acceleration on one axis.</p>
+<h4 id="usage_12">Usage</h4>
+<pre><code>accelEnvelopePos(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>sig</code>: accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li>Negative values are ignored; output envelope is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_7">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.accelEnvelopePos(0.05, 1.35, 10, 10, accX);
+</code></pre>
+<h4 id="test_6">Test</h4>
+<pre><code>accelEnvelopePos_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+  } : mo.accelEnvelopePos(0.05, 1, 5, 5, os.triangle(0.25));
+</code></pre>
+<hr />
+<h3 id="moaccelenvelopeneg"><code>(mo.)accelEnvelopeNeg</code></h3>
+<p>Envelope follower for negative acceleration on one axis.</p>
+<h4 id="usage_13">Usage</h4>
+<pre><code>accelEnvelopeNeg(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>sig</code>: accelerometer axis signal (normalized, typically [-1, 1])</li>
+<li>Positive values are ignored; output envelope is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_8">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.accelEnvelopeNeg(0.05, 1.35, 10, 10, accX);
+</code></pre>
+<h4 id="test_7">Test</h4>
+<pre><code>accelEnvelopeNeg_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+  } : mo.accelEnvelopeNeg(0.05, 1, 5, 5, os.triangle(0.25));
+</code></pre>
+<hr />
+<h3 id="mototalaccel"><code>(mo.)totalAccel</code></h3>
+<p>Total acceleration magnitude with thresholding and envelope.</p>
+<h4 id="usage_14">Usage</h4>
+<pre><code>totalAccel(thr, gain, envUpMs, envDownMs, ax, ay, az) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>ax</code>: accelerometer X axis (normalized, typically [-1, 1])</li>
+<li><code>ay</code>: accelerometer Y axis (normalized, typically [-1, 1])</li>
+<li><code>az</code>: accelerometer Z axis (normalized, typically [-1, 1])</li>
+<li>Output magnitude is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_9">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.totalAccel(0.1, 1.35, 10, 10, ax, ay, az);
+</code></pre>
+<h4 id="test_8">Test</h4>
+<pre><code>totalAccel_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+    ax = os.sawtooth(0.2) * 0.2;
+    ay = os.triangle(0.15) * 0.1;
+    az = os.sawtooth(0.12) * 0.3;
+  } : mo.totalAccel(0.05, 1.2, 8, 12, ax, ay, az);
+</code></pre>
+<h2 id="gyroscope-envelopes">Gyroscope Envelopes</h2>
+<hr />
+<h3 id="mogyroenvelopeabs"><code>(mo.)gyroEnvelopeAbs</code></h3>
+<p>Envelope follower on the absolute value of a gyroscope axis.</p>
+<h4 id="usage_15">Usage</h4>
+<pre><code>gyroEnvelopeAbs(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>sig</code>: gyroscope axis signal (normalized rad/s range)</li>
+<li>Output envelope is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_10">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.gyroEnvelopeAbs(0.01, 0.8, 50, 50, gx);
+</code></pre>
+<h4 id="test_9">Test</h4>
+<pre><code>gyroEnvelopeAbs_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+  } : mo.gyroEnvelopeAbs(0.02, 0.9, 25, 30, os.sawtooth(0.5));
+</code></pre>
+<hr />
+<h3 id="mogyroenvelopepos"><code>(mo.)gyroEnvelopePos</code></h3>
+<p>Envelope follower for positive gyroscope rotation on one axis.</p>
+<h4 id="usage_16">Usage</h4>
+<pre><code>gyroEnvelopePos(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>sig</code>: gyroscope axis signal (normalized rad/s range)</li>
+<li>Negative values are ignored; output envelope is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_11">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.gyroEnvelopePos(0.01, 0.8, 50, 50, gx);
+</code></pre>
+<h4 id="test_10">Test</h4>
+<pre><code>gyroEnvelopePos_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+  } : mo.gyroEnvelopePos(0.02, 0.9, 25, 30, os.triangle(0.5));
+</code></pre>
+<hr />
+<h3 id="mogyroenvelopeneg"><code>(mo.)gyroEnvelopeNeg</code></h3>
+<p>Envelope follower for negative gyroscope rotation on one axis.</p>
+<h4 id="usage_17">Usage</h4>
+<pre><code>gyroEnvelopeNeg(thr, gain, envUpMs, envDownMs, sig) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>sig</code>: gyroscope axis signal (normalized rad/s range)</li>
+<li>Positive values are ignored; output envelope is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_12">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.gyroEnvelopeNeg(0.01, 0.8, 50, 50, gx);
+</code></pre>
+<h4 id="test_11">Test</h4>
+<pre><code>gyroEnvelopeNeg_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+  } : mo.gyroEnvelopeNeg(0.02, 0.9, 25, 30, os.triangle(0.5));
+</code></pre>
+<hr />
+<h3 id="mototalgyro"><code>(mo.)totalGyro</code></h3>
+<p>Total gyroscope magnitude with thresholding and envelope.</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>totalGyro(thr, gain, envUpMs, envDownMs, gx, gy, gz) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>thr</code>: threshold subtracted before detection (normalized)</li>
+<li><code>gain</code>: linear gain applied after thresholding</li>
+<li><code>envUpMs</code>: attack time in milliseconds (&gt;= 0)</li>
+<li><code>envDownMs</code>: release time in milliseconds (&gt;= 0)</li>
+<li><code>gx</code>: gyroscope X axis (normalized rad/s range)</li>
+<li><code>gy</code>: gyroscope Y axis (normalized rad/s range)</li>
+<li><code>gz</code>: gyroscope Z axis (normalized rad/s range)</li>
+<li>Output magnitude is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_13">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.totalGyro(0.01, 0.8, 50, 50, gx, gy, gz);
+</code></pre>
+<h4 id="test_12">Test</h4>
+<pre><code>totalGyro_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+    gx = os.sawtooth(0.2) * 0.2;
+    gy = os.triangle(0.15) * 0.1;
+    gz = os.sawtooth(0.12) * 0.3;
+  } : mo.totalGyro(0.01, 0.9, 25, 30, gx, gy, gz);
+</code></pre>
+<h2 id="orientation-weighting">Orientation Weighting</h2>
+<hr />
+<h3 id="moorientationweight"><code>(mo.)orientationWeight</code></h3>
+<p>Weighting of a 3D vector toward a target axis with shape and smoothing.</p>
+<h4 id="usage_19">Usage</h4>
+<pre><code>orientationWeight(targetX, targetY, targetZ, shape, xs, ys, zs, smoothMs) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>targetX</code>: target X coordinate (-1..1)</li>
+<li><code>targetY</code>: target Y coordinate (-1..1)</li>
+<li><code>targetZ</code>: target Z coordinate (-1..1)</li>
+<li><code>shape</code>: scaling applied to the distance (&gt;= 0, larger tightens the lobe)</li>
+<li><code>xs</code>: current X coordinate (normalized)</li>
+<li><code>ys</code>: current Y coordinate (normalized)</li>
+<li><code>zs</code>: current Z coordinate (normalized)</li>
+<li><code>smoothMs</code>: smoothing time in milliseconds (&gt;= 0)</li>
+<li>Output weight is clamped to [0, 1].</li>
+</ul>
+<h4 id="example_14">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.orientationWeight(0, 1, 0, 1, x, y, z, 10);
+</code></pre>
+<h4 id="test_13">Test</h4>
+<pre><code>orientationWeight_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+    x = os.triangle(0.1);
+    y = os.sawtooth(0.1);
+    z = os.triangle(0.05);
+  } : mo.orientationWeight(0, 1, 0, 1, x, y, z, 10);
+</code></pre>
+<hr />
+<h3 id="moorientation6"><code>(mo.)orientation6</code></h3>
+<p>Weights toward the six device axes (Cour/stage left -X, Rear -Y, Jardin/stage right +X,
+Front +Y, Down -Z, Up +Z).</p>
+<h4 id="usage_20">Usage</h4>
+<pre><code>orientation6(xs, ys, zs,
+             shapeCour, shapeRear, shapeJardin, shapeFront, shapeDown, shapeUp,
+             smoothMs) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>xs</code>: current X coordinate (normalized)</li>
+<li><code>ys</code>: current Y coordinate (normalized)</li>
+<li><code>zs</code>: current Z coordinate (normalized)</li>
+<li><code>shapeCour</code>: shape for Cour (-X)</li>
+<li><code>shapeRear</code>: shape for Rear (-Y)</li>
+<li><code>shapeJardin</code>: shape for Jardin (+X)</li>
+<li><code>shapeFront</code>: shape for Front (+Y)</li>
+<li><code>shapeDown</code>: shape for Down (-Z)</li>
+<li><code>shapeUp</code>: shape for Up (+Z)</li>
+<li><code>smoothMs</code>: smoothing time in milliseconds (&gt;= 0)</li>
+<li>Output is six weights (Cour, Rear, Jardin, Front, Down, Up), each in [0, 1].</li>
+</ul>
+<h4 id="example_15">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = mo.orientation6(x, y, z, 1, 1, 1, 1, 1, 1, 10);
+</code></pre>
+<h4 id="test_14">Test</h4>
+<pre><code>orientation6_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+    x = os.triangle(0.05);
+    y = os.sawtooth(0.08);
+    z = os.triangle(0.03);
+  } : mo.orientation6(x, y, z, 1, 1, 1, 1, 1, 1, 10);
+</code></pre>
+<h2 id="utility-scaling">Utility Scaling</h2>
+<hr />
+<h3 id="moscale"><code>(mo.)scale</code></h3>
+<p>Normalized scaler with input dead-zone and bounded output range.</p>
+<h4 id="usage_21">Usage</h4>
+<pre><code>scale(ilow, ihigh, olow, ohigh) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ilow</code>: minimum input value before scaling starts (0..1)</li>
+<li><code>ihigh</code>: maximum input value before clamping (must be &gt; ilow)</li>
+<li><code>olow</code>: minimum output value</li>
+<li><code>ohigh</code>: maximum output value</li>
+<li>Inputs below ilow clamp to olow; above ihigh clamp to ohigh.</li>
+</ul>
+<h4 id="example_16">Example</h4>
+<pre><code>mo = library(&quot;motion.lib&quot;);
+process = _ : mo.scale(0.2, 0.8, 100, 20000) : _;
+</code></pre>
+<h4 id="test_15">Test</h4>
+<pre><code>scale_test =
+  with {
+    mo = library(&quot;motion.lib&quot;);
+    os = library(&quot;oscillators.lib&quot;);
+  } : os.sawtooth(0.2) : mo.scale(0.2, 0.8, 0, 1);
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+                <p>Copyright &copy; 2019-2025 <a href="https://www.grame.fr">Grame-CNCM</a></p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
