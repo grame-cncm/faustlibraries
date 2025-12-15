@@ -2399,12 +2399,12 @@ with {
 //
 // ```
 // motion_wrapper_demo :
-//   (brasG_x, brasG_y, brasG_z,
-//    pieds_x, pieds_y, pieds_z,
-//    dos_x,   dos_y,   dos_z,
-//    brasD_x, brasD_y, brasD_z,
-//    tete_x,  tete_y,  tete_z,
-//    ventre_x, ventre_y, ventre_z) -> 92 outputs
+//   (leftArm_x,  leftArm_y,  leftArm_z,
+//    feet_x,     feet_y,     feet_z,
+//    back_x,     back_y,     back_z,
+//    rightArm_x, rightArm_y, rightArm_z,
+//    head_x,     head_y,     head_z,
+//    stomach_x,  stomach_y,  stomach_z) -> 92 outputs
 // ```
 //
 // #### Test
@@ -2431,34 +2431,34 @@ with {
     gyroZ = hslider("gz [gyr:2 0 -35 0 35][hidden:1]", 0, -1, 1, 0.001) : si.smoo;
 
     // Parameters
-    hpHz       = hslider("[101]hp_Param [showName:highPass]", 50, 1, 50, 0.01);
-    shockThr   = hslider("[102]shock_thr_Param [showName:shockThred]", 0.75, 0.1, 3, 0.01);
-    debounceMs = hslider("[103]antirebon_Param [showName:antirebond][unit:ms]", 75, 0, 5000, 1);
+    hpHz = hslider("[101]hp_Param [showName:highPass]", 50, 1, 50, 0.01);
+    shockThreshold = hslider("[102]shock_threshold_Param [showName:shockThreshold]", 0.75, 0.1, 3, 0.01);
+    debounceMs = hslider("[103]debounce_Param [showName:debounce][unit:ms]", 75, 0, 5000, 1);
 
-    lpHz       = hslider("[104]lp_Param [showName:lowPass]", 1.5, 0.1, 20, 0.01);
-    offsetProj = hslider("[105]osfproj_Param [showName:osfproj]", 0.08, 0, 0.33, 0.01);
+    lpHz = hslider("[104]lp_Param [showName:lowPass]", 1.5, 0.1, 20, 0.01);
+    offsetProjection = hslider("[105]offsetProjection_Param [showName:offsetProjection]", 0.08, 0, 0.33, 0.01);
 
-    taccThr    = hslider("[106]tacc_thr_Param [showName:accThred]", 0.1, 0, 1, 0.01);
-    taccGain   = hslider("[107]tacc_gain_Param [showName:accGain]", 1.35, 0, 5, 0.01);
-    taccUpMs   = hslider("[108]tacc_up_Param [showName:accEvUp]", 10, 0, 5000, 1);
-    taccDownMs = hslider("[109]tacc_down_Param [showName:accEvDown]", 10, 0, 5000, 1);
+    accelThreshold = hslider("[106]accel_threshold_Param [showName:accelThreshold]", 0.1, 0, 1, 0.01);
+    accelGain = hslider("[107]accel_gain_Param [showName:accelGain]", 1.35, 0, 5, 0.01);
+    accelRiseMs = hslider("[108]accel_rise_Param [showName:accelRise][unit:ms]", 10, 0, 5000, 1);
+    accelFallMs = hslider("[109]accel_fall_Param [showName:accelFall][unit:ms]", 10, 0, 5000, 1);
 
-    tgyrThr    = hslider("[110]tgyr_thr_Param [showName:gyoThred]", 0.01, 0, 1, 0.001);
-    tgyrGain   = hslider("[111]tgyr_gain_Param [showName:gyoGain]", 0.79, 0, 5, 0.01);
-    tgyrUpMs   = hslider("[112]tgyr_up_Param [showName:gyoEvUp]", 50, 0, 5000, 1);
-    tgyrDownMs = hslider("[113]tgyr_down_Param [showName:gyoEvDown]", 50, 0, 5000, 1);
+    gyroThreshold = hslider("[110]gyro_threshold_Param [showName:gyroThreshold]", 0.01, 0, 1, 0.001);
+    gyroGain = hslider("[111]gyro_gain_Param [showName:gyroGain]", 0.79, 0, 5, 0.01);
+    gyroRiseMs = hslider("[112]gyro_rise_Param [showName:gyroRise][unit:ms]", 50, 0, 5000, 1);
+    gyroFallMs = hslider("[113]gyro_fall_Param [showName:gyroFall][unit:ms]", 50, 0, 5000, 1);
 
-    shapeCour   = hslider("[114]shapeCour_Param [showName:shapeCour]", 1, 0, 100, 0.01);
-    shapeRear   = hslider("[115]shapeRear_Param [showName:shapeRear]", 1, 0, 100, 0.01);
-    shapeJardin = hslider("[116]shapeJardin_Param [showName:shapeJardin]", 1, 0, 100, 0.01);
-    shapeFront  = hslider("[117]shapeFront_Param [showName:shapeFront]", 1, 0, 100, 0.01);
-    shapeDown   = hslider("[118]shapeDown_Param [showName:shapeDown]", 1, 0, 100, 0.01);
-    shapeUp     = hslider("[119]shapeUp_Param [showName:shapeUp]", 1, 0, 100, 0.01);
+    shapeStageLeft = hslider("[114]shapeStageLeft_Param [showName:shapeStageLeft]", 1, 0, 100, 0.01);
+    shapeRear = hslider("[115]shapeRear_Param [showName:shapeRear]", 1, 0, 100, 0.01);
+    shapeStageRight = hslider("[116]shapeStageRight_Param [showName:shapeStageRight]", 1, 0, 100, 0.01);
+    shapeFront = hslider("[117]shapeFront_Param [showName:shapeFront]", 1, 0, 100, 0.01);
+    shapeDown = hslider("[118]shapeDown_Param [showName:shapeDown]", 1, 0, 100, 0.01);
+    shapeUp = hslider("[119]shapeUp_Param [showName:shapeUp]", 1, 0, 100, 0.01);
     orientSmoothMs = hslider("[120]orientSmooth_Param [showName:orientSmooth][unit:ms]", 10, 0, 500, 1);
 
     // Derived signals using motion.lib helpers
-    shockPos(sig) = mo.shockTrigger(hpHz, shockThr, debounceMs, sig:max(0));
-    shockNeg(sig) = mo.shockTrigger(hpHz, shockThr, debounceMs, sig * (-1):max(0));
+    shockPos(sig) = mo.shockTrigger(hpHz, shockThreshold, debounceMs, sig:max(0));
+    shockNeg(sig) = mo.shockTrigger(hpHz, shockThreshold, debounceMs, sig * (-1):max(0));
     sxp = shockPos(accX); syp = shockPos(accY); szp = shockPos(accZ);
     sxn = shockNeg(accX); syn = shockNeg(accY); szn = shockNeg(accZ);
 
@@ -2476,52 +2476,52 @@ with {
     iypn_sym = mo.inclineSymmetric(lpHz, accY, accY * (-1));
     izpn_sym = mo.inclineSymmetric(lpHz, accZ, accZ * (-1));
 
-    pixp = mo.projectedGravity(lpHz, offsetProj, accX);
-    piyp = mo.projectedGravity(lpHz, offsetProj, accY);
-    pizp = mo.projectedGravity(lpHz, offsetProj, accZ);
-    pixn = mo.projectedGravity(lpHz, offsetProj, accX * (-1));
-    piyn = mo.projectedGravity(lpHz, offsetProj, accY * (-1));
-    pizn = mo.projectedGravity(lpHz, offsetProj, accZ * (-1));
+    pixp = mo.projectedGravity(lpHz, offsetProjection, accX);
+    piyp = mo.projectedGravity(lpHz, offsetProjection, accY);
+    pizp = mo.projectedGravity(lpHz, offsetProjection, accZ);
+    pixn = mo.projectedGravity(lpHz, offsetProjection, accX * (-1));
+    piyn = mo.projectedGravity(lpHz, offsetProjection, accY * (-1));
+    pizn = mo.projectedGravity(lpHz, offsetProjection, accZ * (-1));
 
-    axpn = mo.accelEnvelopeAbs(taccThr, taccGain, taccUpMs, taccDownMs, accXEnv);
-    aypn = mo.accelEnvelopeAbs(taccThr, taccGain, taccUpMs, taccDownMs, accYEnv);
-    azpn = mo.accelEnvelopeAbs(taccThr, taccGain, taccUpMs, taccDownMs, accZEnv);
-    axp = mo.accelEnvelopePos(taccThr, taccGain, taccUpMs, taccDownMs, accXEnv);
-    ayp = mo.accelEnvelopePos(taccThr, taccGain, taccUpMs, taccDownMs, accYEnv);
-    azp = mo.accelEnvelopePos(taccThr, taccGain, taccUpMs, taccDownMs, accZEnv);
-    axn = mo.accelEnvelopeNeg(taccThr, taccGain, taccUpMs, taccDownMs, accXEnv);
-    ayn = mo.accelEnvelopeNeg(taccThr, taccGain, taccUpMs, taccDownMs, accYEnv);
-    azn = mo.accelEnvelopeNeg(taccThr, taccGain, taccUpMs, taccDownMs, accZEnv);
-    totalaccel = mo.totalAccel(taccThr, taccGain, taccUpMs, taccDownMs, accXEnv, accYEnv, accZEnv);
+    axpn = mo.accelEnvelopeAbs(accelThreshold, accelGain, accelRiseMs, accelFallMs, accXEnv);
+    aypn = mo.accelEnvelopeAbs(accelThreshold, accelGain, accelRiseMs, accelFallMs, accYEnv);
+    azpn = mo.accelEnvelopeAbs(accelThreshold, accelGain, accelRiseMs, accelFallMs, accZEnv);
+    axp = mo.accelEnvelopePos(accelThreshold, accelGain, accelRiseMs, accelFallMs, accXEnv);
+    ayp = mo.accelEnvelopePos(accelThreshold, accelGain, accelRiseMs, accelFallMs, accYEnv);
+    azp = mo.accelEnvelopePos(accelThreshold, accelGain, accelRiseMs, accelFallMs, accZEnv);
+    axn = mo.accelEnvelopeNeg(accelThreshold, accelGain, accelRiseMs, accelFallMs, accXEnv);
+    ayn = mo.accelEnvelopeNeg(accelThreshold, accelGain, accelRiseMs, accelFallMs, accYEnv);
+    azn = mo.accelEnvelopeNeg(accelThreshold, accelGain, accelRiseMs, accelFallMs, accZEnv);
+    totalaccel = mo.totalAccel(accelThreshold, accelGain, accelRiseMs, accelFallMs, accXEnv, accYEnv, accZEnv);
 
-    gxpn = mo.gyroEnvelopeAbs(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX);
-    gypn = mo.gyroEnvelopeAbs(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroY);
-    gzpn = mo.gyroEnvelopeAbs(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroZ);
-    gxp = mo.gyroEnvelopePos(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX);
-    gyp = mo.gyroEnvelopePos(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroY);
-    gzp = mo.gyroEnvelopePos(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroZ);
-    gxn = mo.gyroEnvelopeNeg(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX);
-    gyn = mo.gyroEnvelopeNeg(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroY);
-    gzn = mo.gyroEnvelopeNeg(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroZ);
-    totalgyro = mo.totalGyro(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX, gyroY, gyroZ);
-    gyro_xy = mo.totalEnvelope(tgyrThr, tgyrGain, tgyrUpMs, tgyrDownMs, gyroX, gyroY, 0);
+    gxpn = mo.gyroEnvelopeAbs(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroX);
+    gypn = mo.gyroEnvelopeAbs(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroY);
+    gzpn = mo.gyroEnvelopeAbs(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroZ);
+    gxp = mo.gyroEnvelopePos(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroX);
+    gyp = mo.gyroEnvelopePos(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroY);
+    gzp = mo.gyroEnvelopePos(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroZ);
+    gxn = mo.gyroEnvelopeNeg(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroX);
+    gyn = mo.gyroEnvelopeNeg(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroY);
+    gzn = mo.gyroEnvelopeNeg(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroZ);
+    totalgyro = mo.totalGyro(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroX, gyroY, gyroZ);
+    gyro_xy = mo.totalEnvelope(gyroThreshold, gyroGain, gyroRiseMs, gyroFallMs, gyroX, gyroY, 0);
 
     orient(xs, ys, zs) = mo.orientation6(xs, ys, zs,
-                                         shapeCour, shapeRear, shapeJardin, shapeFront, shapeDown, shapeUp,
+                                         shapeStageLeft, shapeRear, shapeStageRight, shapeFront, shapeDown, shapeUp,
                                          orientSmoothMs);
-    orientCour(xs, ys, zs) = orient(xs, ys, zs) : _,!,!,!,!,!;
+    orientStageLeft(xs, ys, zs) = orient(xs, ys, zs) : _,!,!,!,!,!;
     orientRear(xs, ys, zs) = orient(xs, ys, zs) : !,_,!,!,!,!;
-    orientJardin(xs, ys, zs) = orient(xs, ys, zs) : !,!,_,!,!,!;
+    orientStageRight(xs, ys, zs) = orient(xs, ys, zs) : !,!,_,!,!,!;
     orientFront(xs, ys, zs) = orient(xs, ys, zs) : !,!,!,_,!,!;
     orientDown(xs, ys, zs) = orient(xs, ys, zs) : !,!,!,!,_,!;
     orientUp(xs, ys, zs) = orient(xs, ys, zs) : !,!,!,!,!,_;
 
-    wrapperGraph(brasG_x, brasG_y, brasG_z,
-                 pieds_x, pieds_y, pieds_z,
-                 dos_x, dos_y, dos_z,
-                 brasD_x, brasD_y, brasD_z,
-                 tete_x, tete_y, tete_z,
-                 ventre_x, ventre_y, ventre_z) =
+    wrapperGraph(leftArm_x, leftArm_y, leftArm_z,
+                 feet_x, feet_y, feet_z,
+                 back_x, back_y, back_z,
+                 rightArm_x, rightArm_y, rightArm_z,
+                 head_x, head_y, head_z,
+                 stomach_x, stomach_y, stomach_z) =
       vgroup("Motion",
         (sxp : enable(checkbox("[00]sxpOn [motionName:sxp]")) ),
         (syp : enable(checkbox("[01]sypOn [motionName:syp]")) ),
@@ -2562,47 +2562,47 @@ with {
         (gzn : enable(checkbox("[36]gznOn [motionName:gzn]")) ),
         (totalgyro : enable(checkbox("[37]totalgyroOn [motionName:totalgyro]")) ),
 
-        (brasG_cour : enable(checkbox("[38]brasG_courOn [motionName:brasG_cour]")) ),
-        (brasG_rear : enable(checkbox("[39]brasG_rearOn [motionName:brasG_rear]")) ),
-        (brasG_jardin : enable(checkbox("[40]brasG_jardinOn [motionName:brasG_jardin]")) ),
-        (brasG_front : enable(checkbox("[41]brasG_frontOn [motionName:brasG_front]")) ),
-        (brasG_down : enable(checkbox("[42]brasG_downOn [motionName:brasG_down]")) ),
-        (brasG_up : enable(checkbox("[43]brasG_upOn [motionName:brasG_up]")) ),
+        (leftArm_stageLeft : enable(checkbox("[38]leftArm_stageLeftOn [motionName:leftArm_stageLeft]")) ),
+        (leftArm_rear : enable(checkbox("[39]leftArm_rearOn [motionName:leftArm_rear]")) ),
+        (leftArm_stageRight : enable(checkbox("[40]leftArm_stageRightOn [motionName:leftArm_stageRight]")) ),
+        (leftArm_front : enable(checkbox("[41]leftArm_frontOn [motionName:leftArm_front]")) ),
+        (leftArm_down : enable(checkbox("[42]leftArm_downOn [motionName:leftArm_down]")) ),
+        (leftArm_up : enable(checkbox("[43]leftArm_upOn [motionName:leftArm_up]")) ),
 
-        (pieds_cour : enable(checkbox("[44]pieds_courOn [motionName:pieds_cour]")) ),
-        (pieds_rear : enable(checkbox("[45]pieds_rearOn [motionName:pieds_rear]")) ),
-        (pieds_jardin : enable(checkbox("[46]pieds_jardinOn [motionName:pieds_jardin]")) ),
-        (pieds_front : enable(checkbox("[47]pieds_frontOn [motionName:pieds_front]")) ),
-        (pieds_down : enable(checkbox("[48]pieds_downOn [motionName:pieds_down]")) ),
-        (pieds_up : enable(checkbox("[49]pieds_upOn [motionName:pieds_up]")) ),
+        (feet_stageLeft : enable(checkbox("[44]feet_stageLeftOn [motionName:feet_stageLeft]")) ),
+        (feet_rear : enable(checkbox("[45]feet_rearOn [motionName:feet_rear]")) ),
+        (feet_stageRight : enable(checkbox("[46]feet_stageRightOn [motionName:feet_stageRight]")) ),
+        (feet_front : enable(checkbox("[47]feet_frontOn [motionName:feet_front]")) ),
+        (feet_down : enable(checkbox("[48]feet_downOn [motionName:feet_down]")) ),
+        (feet_up : enable(checkbox("[49]feet_upOn [motionName:feet_up]")) ),
 
-        (dos_cour : enable(checkbox("[50]dos_courOn [motionName:dos_cour]")) ),
-        (dos_rear : enable(checkbox("[51]dos_rearOn [motionName:dos_rear]")) ),
-        (dos_jardin : enable(checkbox("[52]dos_jardinOn [motionName:dos_jardin]")) ),
-        (dos_front : enable(checkbox("[53]dos_frontOn [motionName:dos_front]")) ),
-        (dos_down : enable(checkbox("[54]dos_downOn [motionName:dos_down]")) ),
-        (dos_up : enable(checkbox("[55]dos_upOn [motionName:dos_up]")) ),
+        (back_stageLeft : enable(checkbox("[50]back_stageLeftOn [motionName:back_stageLeft]")) ),
+        (back_rear : enable(checkbox("[51]back_rearOn [motionName:back_rear]")) ),
+        (back_stageRight : enable(checkbox("[52]back_stageRightOn [motionName:back_stageRight]")) ),
+        (back_front : enable(checkbox("[53]back_frontOn [motionName:back_front]")) ),
+        (back_down : enable(checkbox("[54]back_downOn [motionName:back_down]")) ),
+        (back_up : enable(checkbox("[55]back_upOn [motionName:back_up]")) ),
 
-        (brasD_cour : enable(checkbox("[56]brasD_courOn [motionName:brasD_cour]")) ),
-        (brasD_rear : enable(checkbox("[57]brasD_rearOn [motionName:brasD_rear]")) ),
-        (brasD_jardin : enable(checkbox("[58]brasD_jardinOn [motionName:brasD_jardin]")) ),
-        (brasD_front : enable(checkbox("[59]brasD_frontOn [motionName:brasD_front]")) ),
-        (brasD_down : enable(checkbox("[60]brasD_downOn [motionName:brasD_down]")) ),
-        (brasD_up : enable(checkbox("[61]brasD_upOn [motionName:brasD_up]")) ),
+        (rightArm_stageLeft : enable(checkbox("[56]rightArm_stageLeftOn [motionName:rightArm_stageLeft]")) ),
+        (rightArm_rear : enable(checkbox("[57]rightArm_rearOn [motionName:rightArm_rear]")) ),
+        (rightArm_stageRight : enable(checkbox("[58]rightArm_stageRightOn [motionName:rightArm_stageRight]")) ),
+        (rightArm_front : enable(checkbox("[59]rightArm_frontOn [motionName:rightArm_front]")) ),
+        (rightArm_down : enable(checkbox("[60]rightArm_downOn [motionName:rightArm_down]")) ),
+        (rightArm_up : enable(checkbox("[61]rightArm_upOn [motionName:rightArm_up]")) ),
 
-        (tete_cour : enable(checkbox("[62]tete_courOn [motionName:tete_cour]")) ),
-        (tete_rear : enable(checkbox("[63]tete_rearOn [motionName:tete_rear]")) ),
-        (tete_jardin : enable(checkbox("[64]tete_jardinOn [motionName:tete_jardin]")) ),
-        (tete_front : enable(checkbox("[65]tete_frontOn [motionName:tete_front]")) ),
-        (tete_down : enable(checkbox("[66]tete_downOn [motionName:tete_down]")) ),
-        (tete_up : enable(checkbox("[67]tete_upOn [motionName:tete_up]")) ),
+        (head_stageLeft : enable(checkbox("[62]head_stageLeftOn [motionName:head_stageLeft]")) ),
+        (head_rear : enable(checkbox("[63]head_rearOn [motionName:head_rear]")) ),
+        (head_stageRight : enable(checkbox("[64]head_stageRightOn [motionName:head_stageRight]")) ),
+        (head_front : enable(checkbox("[65]head_frontOn [motionName:head_front]")) ),
+        (head_down : enable(checkbox("[66]head_downOn [motionName:head_down]")) ),
+        (head_up : enable(checkbox("[67]head_upOn [motionName:head_up]")) ),
 
-        (ventre_cour : enable(checkbox("[68]ventre_courOn [motionName:ventre_cour]")) ),
-        (ventre_rear : enable(checkbox("[69]ventre_rearOn [motionName:ventre_rear]")) ),
-        (ventre_jardin : enable(checkbox("[70]ventre_jardinOn [motionName:ventre_jardin]")) ),
-        (ventre_front : enable(checkbox("[71]ventre_frontOn [motionName:ventre_front]")) ),
-        (ventre_down : enable(checkbox("[72]ventre_downOn [motionName:ventre_down]")) ),
-        (ventre_up : enable(checkbox("[73]ventre_upOn [motionName:ventre_up]")) ),
+        (stomach_stageLeft : enable(checkbox("[68]stomach_stageLeftOn [motionName:stomach_stageLeft]")) ),
+        (stomach_rear : enable(checkbox("[69]stomach_rearOn [motionName:stomach_rear]")) ),
+        (stomach_stageRight : enable(checkbox("[70]stomach_stageRightOn [motionName:stomach_stageRight]")) ),
+        (stomach_front : enable(checkbox("[71]stomach_frontOn [motionName:stomach_front]")) ),
+        (stomach_down : enable(checkbox("[72]stomach_downOn [motionName:stomach_down]")) ),
+        (stomach_up : enable(checkbox("[73]stomach_upOn [motionName:stomach_up]")) ),
 
         (ixpn : enable(checkbox("[74]ixpnOn [motionName:ixpn]")) ),
         (iypn : enable(checkbox("[75]iypnOn [motionName:iypn]")) ),
@@ -2610,64 +2610,64 @@ with {
         (ixpn_sym : enable(checkbox("[77]ixpn_symOn [motionName:ixpn_sym]")) ),
         (iypn_sym : enable(checkbox("[78]iypn_symOn [motionName:iypn_sym]")) ),
         (izpn_sym : enable(checkbox("[79]izpn_symOn [motionName:izpn_sym]")) ),
-        (dosx_scaled : enable(checkbox("[80]dosxOn [motionName:dosx]")) ),
-        (dosy_scaled : enable(checkbox("[81]dosyOn [motionName:dosy]")) ),
-        (dos_x : enable(checkbox("[82]cooxOn [motionName:coox]")) ),
-        (dos_y : enable(checkbox("[83]cooyOn [motionName:cooy]")) ),
-        (dos_z : enable(checkbox("[84]coozOn [motionName:cooz]")) ),
-        (tete_x : enable(checkbox("[85]cooxTOn [motionName:cooxT]")) ),
-        (tete_y : enable(checkbox("[86]cooyTOn [motionName:cooyT]")) ),
-        (tete_z : enable(checkbox("[87]coozTOn [motionName:coozT]")) ),
-        (brasG_x : enable(checkbox("[88]cooxBGOn [motionName:cooxBG]")) ),
-        (brasG_y : enable(checkbox("[89]cooyBGOn [motionName:cooyBG]")) ),
-        (brasG_z : enable(checkbox("[90]coozBGOn [motionName:coozBG]")) ),
+        (back_x_scaled : enable(checkbox("[80]back_x_scaledOn [motionName:back_x_scaled]")) ),
+        (back_y_scaled : enable(checkbox("[81]back_y_scaledOn [motionName:back_y_scaled]")) ),
+        (back_x : enable(checkbox("[82]back_xOn [motionName:back_x]")) ),
+        (back_y : enable(checkbox("[83]back_yOn [motionName:back_y]")) ),
+        (back_z : enable(checkbox("[84]back_zOn [motionName:back_z]")) ),
+        (head_x : enable(checkbox("[85]head_xOn [motionName:head_x]")) ),
+        (head_y : enable(checkbox("[86]head_yOn [motionName:head_y]")) ),
+        (head_z : enable(checkbox("[87]head_zOn [motionName:head_z]")) ),
+        (leftArm_x : enable(checkbox("[88]leftArm_xOn [motionName:leftArm_x]")) ),
+        (leftArm_y : enable(checkbox("[89]leftArm_yOn [motionName:leftArm_y]")) ),
+        (leftArm_z : enable(checkbox("[90]leftArm_zOn [motionName:leftArm_z]")) ),
         (gyro_xy : enable(checkbox("[91]gyro_xyOn [motionName:gyro_xy]")) )
       )
     with {
-        brasG_cour = orientCour(brasG_x, brasG_y, brasG_z);
-        brasG_rear = orientRear(brasG_x, brasG_y, brasG_z);
-        brasG_jardin = orientJardin(brasG_x, brasG_y, brasG_z);
-        brasG_front = orientFront(brasG_x, brasG_y, brasG_z);
-        brasG_down = orientDown(brasG_x, brasG_y, brasG_z);
-        brasG_up = orientUp(brasG_x, brasG_y, brasG_z);
+        leftArm_stageLeft = orientStageLeft(leftArm_x, leftArm_y, leftArm_z);
+        leftArm_rear = orientRear(leftArm_x, leftArm_y, leftArm_z);
+        leftArm_stageRight = orientStageRight(leftArm_x, leftArm_y, leftArm_z);
+        leftArm_front = orientFront(leftArm_x, leftArm_y, leftArm_z);
+        leftArm_down = orientDown(leftArm_x, leftArm_y, leftArm_z);
+        leftArm_up = orientUp(leftArm_x, leftArm_y, leftArm_z);
 
-        pieds_cour = orientCour(pieds_x, pieds_y, pieds_z);
-        pieds_rear = orientRear(pieds_x, pieds_y, pieds_z);
-        pieds_jardin = orientJardin(pieds_x, pieds_y, pieds_z);
-        pieds_front = orientFront(pieds_x, pieds_y, pieds_z);
-        pieds_down = orientDown(pieds_x, pieds_y, pieds_z);
-        pieds_up = orientUp(pieds_x, pieds_y, pieds_z);
+        feet_stageLeft = orientStageLeft(feet_x, feet_y, feet_z);
+        feet_rear = orientRear(feet_x, feet_y, feet_z);
+        feet_stageRight = orientStageRight(feet_x, feet_y, feet_z);
+        feet_front = orientFront(feet_x, feet_y, feet_z);
+        feet_down = orientDown(feet_x, feet_y, feet_z);
+        feet_up = orientUp(feet_x, feet_y, feet_z);
 
-        dos_cour = orientCour(dos_x, dos_y, dos_z);
-        dos_rear = orientRear(dos_x, dos_y, dos_z);
-        dos_jardin = orientJardin(dos_x, dos_y, dos_z);
-        dos_front = orientFront(dos_x, dos_y, dos_z);
-        dos_down = orientDown(dos_x, dos_y, dos_z);
-        dos_up = orientUp(dos_x, dos_y, dos_z);
+        back_stageLeft = orientStageLeft(back_x, back_y, back_z);
+        back_rear = orientRear(back_x, back_y, back_z);
+        back_stageRight = orientStageRight(back_x, back_y, back_z);
+        back_front = orientFront(back_x, back_y, back_z);
+        back_down = orientDown(back_x, back_y, back_z);
+        back_up = orientUp(back_x, back_y, back_z);
 
-        brasD_cour = orientCour(brasD_x, brasD_y, brasD_z);
-        brasD_rear = orientRear(brasD_x, brasD_y, brasD_z);
-        brasD_jardin = orientJardin(brasD_x, brasD_y, brasD_z);
-        brasD_front = orientFront(brasD_x, brasD_y, brasD_z);
-        brasD_down = orientDown(brasD_x, brasD_y, brasD_z);
-        brasD_up = orientUp(brasD_x, brasD_y, brasD_z);
+        rightArm_stageLeft = orientStageLeft(rightArm_x, rightArm_y, rightArm_z);
+        rightArm_rear = orientRear(rightArm_x, rightArm_y, rightArm_z);
+        rightArm_stageRight = orientStageRight(rightArm_x, rightArm_y, rightArm_z);
+        rightArm_front = orientFront(rightArm_x, rightArm_y, rightArm_z);
+        rightArm_down = orientDown(rightArm_x, rightArm_y, rightArm_z);
+        rightArm_up = orientUp(rightArm_x, rightArm_y, rightArm_z);
 
-        tete_cour = orientCour(tete_x, tete_y, tete_z);
-        tete_rear = orientRear(tete_x, tete_y, tete_z);
-        tete_jardin = orientJardin(tete_x, tete_y, tete_z);
-        tete_front = orientFront(tete_x, tete_y, tete_z);
-        tete_down = orientDown(tete_x, tete_y, tete_z);
-        tete_up = orientUp(tete_x, tete_y, tete_z);
+        head_stageLeft = orientStageLeft(head_x, head_y, head_z);
+        head_rear = orientRear(head_x, head_y, head_z);
+        head_stageRight = orientStageRight(head_x, head_y, head_z);
+        head_front = orientFront(head_x, head_y, head_z);
+        head_down = orientDown(head_x, head_y, head_z);
+        head_up = orientUp(head_x, head_y, head_z);
 
-        ventre_cour = orientCour(ventre_x, ventre_y, ventre_z);
-        ventre_rear = orientRear(ventre_x, ventre_y, ventre_z);
-        ventre_jardin = orientJardin(ventre_x, ventre_y, ventre_z);
-        ventre_front = orientFront(ventre_x, ventre_y, ventre_z);
-        ventre_down = orientDown(ventre_x, ventre_y, ventre_z);
-        ventre_up = orientUp(ventre_x, ventre_y, ventre_z);
+        stomach_stageLeft = orientStageLeft(stomach_x, stomach_y, stomach_z);
+        stomach_rear = orientRear(stomach_x, stomach_y, stomach_z);
+        stomach_stageRight = orientStageRight(stomach_x, stomach_y, stomach_z);
+        stomach_front = orientFront(stomach_x, stomach_y, stomach_z);
+        stomach_down = orientDown(stomach_x, stomach_y, stomach_z);
+        stomach_up = orientUp(stomach_x, stomach_y, stomach_z);
 
-        dosx_scaled = (dos_x * (-0.5) + 0.5) : mo.scale(0.2, 0.8, 0, 1);
-        dosy_scaled = (dos_y * (-0.5) + 0.5) : mo.scale(0.2, 0.8, 0, 1);
+        back_x_scaled = (back_x * (-0.5) + 0.5) : mo.scale(0.2, 0.8, 0, 1);
+        back_y_scaled = (back_y * (-0.5) + 0.5) : mo.scale(0.2, 0.8, 0, 1);
     };
 };
 
