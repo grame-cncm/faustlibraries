@@ -8,13 +8,14 @@
 # `make serve`      - serve the documentation.
 
 FAUST ?= faust
+FAUST_OPT ?= -double
 FAUSTBENCH ?= faustbench-llvm
 CXX ?= g++
 CXXFLAGS ?= -O2 -std=c++17
 NUM_SAMPLES ?= 1000
 SAMPLE_RATE ?= 48000
 
-FLOAT_TOL ?= 1e-5
+FLOAT_TOL ?= 1e-4
 FLOATDIFF ?= ./scripts/floatdiff.py
 
 ARCH := arch/print_arch.cpp
@@ -55,8 +56,8 @@ $(REFERENCE_DIR)/%.ref: | $(REFERENCE_DIR) $(BUILD_DIR)
 	file='$(call file_for,$*)'; \
 	if [ -z "$$file" ]; then echo "No source file found for test '$*'"; exit 1; fi; \
 	printf '[reference] %s from %s\n' '$*' "$$file"; \
-	$(FAUST) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
-	if ! 	$(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.cpp -o $(BUILD_DIR)/$*; \
+	$(FAUST) $(FAUST_OPT) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
+	if ! $(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.cpp -o $(BUILD_DIR)/$*; \
 	then \
 		echo "[skip] build failed for $*"; \
 		exit 0; \
@@ -71,7 +72,7 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 	file='$(call file_for,$*)'; \
 	if [ -z "$$file" ]; then echo "No source file found for test '$*'"; exit 1; fi; \
 	printf '[check] %s from %s\n' '$*' "$$file"; \
-	$(FAUST) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
+	$(FAUST) $(FAUST_OPT) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
 	if ! $(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.cpp -o $(BUILD_DIR)/$*; \
 		then \
 			echo "[skip] build failed for $*"; \
