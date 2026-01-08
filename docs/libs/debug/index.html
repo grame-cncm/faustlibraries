@@ -335,6 +335,18 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#tap-utilities" class="nav-link">Tap Utilities</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#dbprobe_tap" class="nav-link">(db.)probe_tap</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_tap_n" class="nav-link">(db.)probe_tap_n</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -350,13 +362,14 @@ simple band-energy meters.</p>
 <p>Debug probes can be compiled out by setting the <code>DEBUG</code> global to 0 via
 explicit substitution (e.g. <code>db[DEBUG=0;].probe_rms_db(...)</code>).
 CNE means constant numerical expression (known at compile time).</p>
-<p>The Debug library is organized into 5 sections:</p>
+<p>The Debug library is organized into 6 sections:</p>
 <ul>
 <li><a href="#level-probes">Level Probes</a></li>
 <li><a href="#dynamics-probes">Dynamics Probes</a></li>
 <li><a href="#signal-quality-probes">Signal Quality Probes</a></li>
 <li><a href="#control-signal-probes">Control Signal Probes</a></li>
 <li><a href="#spectral-probes">Spectral Probes</a></li>
+<li><a href="#tap-utilities">Tap Utilities</a></li>
 </ul>
 <h4 id="references">References</h4>
 <ul>
@@ -622,6 +635,71 @@ probe_band_mid_test = db.probe_band_mid(14, 1, os.osc(220));
 <pre><code>db = library(&quot;debug.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 probe_band_hi_test = db.probe_band_hi(15, 1, os.osc(220));
+</code></pre>
+<h2 id="tap-utilities">Tap Utilities</h2>
+<hr />
+<h3 id="dbprobe_tap"><code>(db.)probe_tap</code></h3>
+<p>Tap a signal for side-effect analysis without changing output arity.</p>
+<h4 id="usage_16">Usage</h4>
+<pre><code>_ : probe_tap(F) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>F</code>: signal processor for the tap (e.g., meter, analyser)</li>
+</ul>
+<h4 id="example-test-program">Example test program</h4>
+<p>Tap a pre-filter signal without changing arity:</p>
+<ul>
+<li>The probe taps the signal before the filter.</li>
+<li>The main signal path remains 1-in/1-out, so the lowpass still sees a mono input.</li>
+<li>The RMS probe runs in parallel and is exposed through the UI/metrics.</li>
+</ul>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+fi = library(&quot;filters.lib&quot;);
+process = os.osc(220)
+  : db.probe_tap(db.probe_rms_db(0, 1))
+  : fi.lowpass(4, 2000);
+</code></pre>
+<h4 id="test_16">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+tap_test = db.probe_tap(db.probe_rms_db(0, 1), os.osc(220));
+</code></pre>
+<hr />
+<h3 id="dbprobe_tap_n"><code>(db.)probe_tap_n</code></h3>
+<p>Tap an N-channel signal with a processor that takes N inputs and produces 1 output.
+The original N-channel signal passes through unchanged.</p>
+<h4 id="usage_17">Usage</h4>
+<pre><code>probe_tap_n(N, F)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: (CNE) number of channels</li>
+<li><code>F</code>: processor with N inputs and 1 output (e.g., sum or mix meter)</li>
+</ul>
+<h4 id="example-test-program_1">Example test program</h4>
+<p>Tap a stereo signal with a mixdown probe:</p>
+<ul>
+<li>Two oscillators build a stereo pair with different filters per channel.</li>
+<li>After a stereo EQ stage, <code>probe_tap_n</code> mixes both channels for a single probe.</li>
+<li>The stereo signal continues unchanged after the tap (2-in/2-out).</li>
+</ul>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+fi = library(&quot;filters.lib&quot;);
+left = os.osc(220) : fi.lowpass(2, 1200);
+right = os.osc(330) : fi.highpass(2, 400);
+stereo = (left, right)
+  : (fi.lowpass(2, 2000), fi.highpass(2, 700));
+process = stereo
+  : db.probe_tap_n(2,  + : db.probe_rms_db(100, 1))
+  : (fi.lowpass(2, 8000), fi.lowpass(2, 8000));
+</code></pre>
+<h4 id="test_17">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+tap_n_test = (os.osc(220), os.osc(330)) : db.probe_tap_n(2, +);
 </code></pre></div>
             </div>
         </div>
