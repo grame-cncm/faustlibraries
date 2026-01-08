@@ -9,13 +9,14 @@
 // explicit substitution (e.g. `db[DEBUG=0;].probe_rms_db(...)`).
 // CNE means constant numerical expression (known at compile time).
 //
-// The Debug library is organized into 5 sections:
+// The Debug library is organized into 6 sections:
 //
 // * [Level Probes](#level-probes)
 // * [Dynamics Probes](#dynamics-probes)
 // * [Signal Quality Probes](#signal-quality-probes)
 // * [Control Signal Probes](#control-signal-probes)
 // * [Spectral Probes](#spectral-probes)
+// * [Tap Utilities](#tap-utilities)
 //
 // #### References
 //
@@ -26,11 +27,12 @@ ma = library("maths.lib");
 ba = library("basics.lib");
 fi = library("filters.lib");
 an = library("analyzers.lib");
+si = library("signals.lib");
 
 db = library("debug.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Debug Library";
-declare version "0.1.0";
+declare version "0.2.0";
 
 // Global parameter to enable/disable debug probes.
 DEBUG = 1; // 0: bypass probes (identity), 1: enable probes
@@ -478,3 +480,99 @@ probe_band_hi_impl(1, id, hide, x) = attach(x,
   fi.highpass(2, 3000, x) : an.rms_envelope_rect(0.1)
   : hbargraph("Probe Hi%2id[probe:%id][hidden:%hide]", 0, 1));
 probe_band_hi(id, hide, x) = probe_band_hi_impl(DEBUG, id, hide, x);
+
+//==============================Tap Utilities===============================================
+//==========================================================================================
+
+//------------------`(db.)probe_tap`--------------------------------------------- -----------------
+// Tap a signal for side-effect analysis without changing output arity.
+//
+// #### Usage
+//
+// ```
+// _ : probe_tap(F) : _
+// ```
+//
+// Where:
+//
+// * `F`: signal processor for the tap (e.g., meter, analyser)
+//
+// #### Example test program
+//
+// Tap a pre-filter signal without changing arity:
+//
+// - The probe taps the signal before the filter.
+// - The main signal path remains 1-in/1-out, so the lowpass still sees a mono input.
+// - The RMS probe runs in parallel and is exposed through the UI/metrics.
+// ```
+// db = library("debug.lib");
+// os = library("oscillators.lib");
+// fi = library("filters.lib");
+// process = os.osc(220)
+//   : db.probe_tap(db.probe_rms_db(0, 1))
+//   : fi.lowpass(4, 2000);
+// ```
+//
+// #### Test
+// ```
+// db = library("debug.lib");
+// os = library("oscillators.lib");
+// tap_test = db.probe_tap(db.probe_rms_db(0, 1), os.osc(220));
+// ```
+//-----------------------------------------------------------------------------
+probe_tap_impl(0, f, x) = x;
+probe_tap_impl(1, f, x) = x <: attach(x, f);
+probe_tap(f, x) = probe_tap_impl(DEBUG, f, x);
+
+//------------------`(db.)probe_tap_n`-------------------------------------------- -----------------
+// Tap an N-channel signal with a processor that takes N inputs and produces 1 output.
+// The original N-channel signal passes through unchanged.
+//
+// #### Usage
+//
+// ```
+// probe_tap_n(N, F)
+// ```
+//
+// Where:
+//
+// * `N`: (CNE) number of channels
+// * `F`: processor with N inputs and 1 output (e.g., sum or mix meter)
+//
+// #### Example test program
+//
+// Tap a stereo signal with a mixdown probe:
+//
+// - Two oscillators build a stereo pair with different filters per channel.
+// - After a stereo EQ stage, `probe_tap_n` mixes both channels for a single probe.
+// - The stereo signal continues unchanged after the tap (2-in/2-out).
+// ```
+// db = library("debug.lib");
+// os = library("oscillators.lib");
+// fi = library("filters.lib");
+// left = os.osc(220) : fi.lowpass(2, 1200);
+// right = os.osc(330) : fi.highpass(2, 400);
+// stereo = (left, right)
+//   : (fi.lowpass(2, 2000), fi.highpass(2, 700));
+// process = stereo
+//   : db.probe_tap_n(2,  + : db.probe_rms_db(100, 1))
+//   : (fi.lowpass(2, 8000), fi.lowpass(2, 8000));
+// ```
+//
+// #### Test
+// ```
+// db = library("debug.lib");
+// os = library("oscillators.lib");
+// tap_n_test = (os.osc(220), os.osc(330)) : db.probe_tap_n(2, +);
+// ```
+//-----------------------------------------------------------------------------
+probe_tap_n_impl(0, n, f) = si.bus(n);
+probe_tap_n_impl(1, 1, f) = probe_tap(f);
+probe_tap_n_reorder(n) = route(n+1, n+1,
+  (1, 1),
+  (n+1, 2),
+  par(i, n-1, (i+1, i+2)));
+probe_tap_n_impl(1, n, f) = si.bus(n) <: (si.bus(n), f)
+  : probe_tap_n_reorder(n)
+  : (attach, si.bus(n-1));
+probe_tap_n(n, f) = probe_tap_n_impl(DEBUG, n, f);
