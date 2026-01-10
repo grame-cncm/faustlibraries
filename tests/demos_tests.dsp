@@ -49,6 +49,7 @@ fft_spectral_level_demo_test = dm.fft_spectral_level_demo(256);
 reverse_echo_demo_test = no.noise : dm.reverse_echo_demo(3);
 pospass_demo_test = monoOsc(440) : dm.pospass_demo;
 exciter_test = no.noise : dm.exciter;
+ja_transformer_demo_test = stereoNoise : dm.ja_transformer_demo;
 vocoder_demo_test = no.noise : dm.vocoder_demo;
 colored_noise_demo_test = dm.colored_noise_demo;
 shock_trigger_demo_test = dm.shock_trigger_demo;

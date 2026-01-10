@@ -6,6 +6,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `analyzers.lib`
 * `basics.lib`
 * `compressors.lib`
+* `debug.lib`
 * `delays.lib`
 * `demos.lib`
 * `dx7.lib`
@@ -13,6 +14,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `fds.lib`
 * `filters.lib`
 * `hoa.lib`
+* `hysteresis.lib`
 * `interpolators.lib`
 * `linearalgebra.lib`
 * `maths.lib`
