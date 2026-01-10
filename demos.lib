@@ -5,7 +5,7 @@
 // used to illustrate Faust features, syntax, and best practices. It includes simple
 // oscillators, filters, effects, and synthesis examples useful for learning and testing.
 //
-// The Demos library is organized into 6 sections:
+// The Demos library is organized into 7 sections:
 //
 // * [Analyzers](#analyzers)
 // * [Filters](#filters)
@@ -13,6 +13,7 @@
 // * [Reverbs](#reverbs)
 // * [Generators](#generators)
 // * [Motion](#motion)
+// * [Hysteresis](#hysteresis)
 // 
 // #### References
 //
@@ -73,6 +74,7 @@ it = library("interpolators.lib");
 aa = library("aanl.lib");
 sp = library("spats.lib");
 mo = library("motion.lib");
+hy = library("hysteresis.lib");
 
 declare name "Faust Demos Library";
 declare version "1.4.0";
@@ -2669,6 +2671,103 @@ with {
         back_x_scaled = (back_x * (-0.5) + 0.5) : mo.scale(0.2, 0.8, 0, 1);
         back_y_scaled = (back_y * (-0.5) + 0.5) : mo.scale(0.2, 0.8, 0, 1);
     };
+};
+
+//====================================Hysteresis==========================================
+//========================================================================================
+
+//----------------------------`(dm.)ja_transformer_demo`-----------------------------
+// Magnetic transformer saturation demo using Jiles-Atherton hysteresis.
+// Stereo processor with Pre-EQ, J-A hysteresis core, and inverse Post-EQ.
+//
+// #### Usage
+//
+// ```
+// _,_ : ja_transformer_demo : _,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// ja_transformer_demo_test = no.noise, no.noise : dm.ja_transformer_demo;
+// ```
+//------------------------------------------------------------
+declare ja_transformer_demo author "Thomas Mandolini";
+declare ja_transformer_demo licence "LGPLv2.1";
+
+ja_transformer_demo = par(i, 2, transformer)
+with {
+    // UI Groups
+    ui(x) = vgroup("[0]J-A TRANSFORMER", x);
+    top_row(x) = ui(hgroup("[1]EQ & CORE", x));
+    pre_eq_group(x) = top_row(hgroup("[0]Pre-EQ", x));
+    ja_group(x) = top_row(hgroup("[1]Core Material", x));
+    drive_group(x) = ui(hgroup("[2]Drive and Mix", x));
+
+    // Pre-EQ Controls
+    ls_freq = pre_eq_group(vslider("[0]LS Freq", 80, 20, 400, 1));
+    ls_gain = pre_eq_group(vslider("[1]LS Gain dB", 0, -12, 12, 0.1));
+    mid_freq = pre_eq_group(vslider("[2]Mid Freq", 1500, 200, 8000, 10));
+    mid_q = pre_eq_group(vslider("[3]Mid Q", 0.38, 0.3, 3.0, 0.01));
+    mid_gain = pre_eq_group(vslider("[4]Mid Gain dB", 0, -12, 12, 0.1));
+    hs_freq = pre_eq_group(vslider("[5]HS Freq", 12000, 2000, 20000, 100));
+    hs_gain = pre_eq_group(vslider("[6]HS Gain dB", 0, -12, 12, 0.1));
+    eq_scale = pre_eq_group(vslider("[7]EQ Scale %", 100, 0, 200, 1)) / 100.0;
+
+    // J-A Core Controls
+    a_param = ja_group(vslider("[0]Anhysteretic a", 720, 100, 2000, 1));
+    k_param = ja_group(vslider("[1]Coercivity k", 380, 50, 1000, 1));
+    alpha_param = ja_group(vslider("[2]Alpha coupling", 0.015, 0.001, 0.1, 0.001));
+    c_param = ja_group(vslider("[3]Reversibility c", 0.25, 0.0, 1.0, 0.01));
+
+    // Drive and Mix Controls
+    input_gain = drive_group(vslider("[0]Input Gain dB", 0, -20, 20, 0.1)) : ba.db2linear;
+    ja_calibration = drive_group(vslider("[1]JA Calibration dB", -50, -60, 60, 0.1)) : ba.db2linear;
+    saturation_drive = drive_group(vslider("[2]Drive", 0, -50, 50, 0.1)) : ba.db2linear : si.smoo;
+    Ms = drive_group(vslider("[3]Saturation", 380, 100, 1000, 1)) : si.smoo;
+    drive_comp = 1.0 / max(0.001, saturation_drive);
+    ja_norm = a_param / max(0.01, c_param * Ms);
+    ja_trim = drive_group(vslider("[4]Output Trim dB", 0, -20, 20, 0.1)) : ba.db2linear;
+    inverse_amt = drive_group(vslider("[5]Inverse EQ %", 100, 0, 100, 1)) / 100.0;
+    mix = drive_group(vslider("[6]Wet/Dry Mix", 100, 0, 100, 1)) / 100.0;
+    output_gain = drive_group(vslider("[7]Output Gain dB", 0, -20, 20, 0.1)) : ba.db2linear;
+
+    // EQ Processors
+    ls_gain_scaled = ls_gain * eq_scale;
+    mid_gain_scaled = mid_gain * eq_scale;
+    hs_gain_scaled = hs_gain * eq_scale;
+    ls_gain_inv = -ls_gain_scaled * inverse_amt;
+    mid_gain_inv = -mid_gain_scaled * inverse_amt;
+    hs_gain_inv = -hs_gain_scaled * inverse_amt;
+
+    pre_eq = fi.svf.ls(ls_freq, 0.707, ls_gain_scaled)
+           : fi.svf.bell(mid_freq, mid_q, mid_gain_scaled)
+           : fi.svf.hs(hs_freq, 0.707, hs_gain_scaled);
+
+    post_eq = fi.svf.ls(ls_freq, 0.707, ls_gain_inv)
+            : fi.svf.bell(mid_freq, mid_q, mid_gain_inv)
+            : fi.svf.hs(hs_freq, 0.707, hs_gain_inv);
+
+    dc_blocker = fi.SVFTPT.HP2(7.0, 0.7071);
+
+    // Signal flow: EQ shaping → drive into saturation → J-A hysteresis → normalize → inverse EQ
+    input_stage = *(input_gain);
+    wet_chain = pre_eq
+              : *(saturation_drive)
+              : *(ja_calibration)
+              : hy.ja_hysteresis(Ms, a_param, alpha_param, k_param, c_param)
+              : *(ja_norm)
+              : dc_blocker
+              : *(ja_trim)
+              : *(drive_comp)
+              : /(ja_calibration)
+              : post_eq;
+    dry_chain = _;
+    mix_stage = _ <: (wet_chain : _ * mix), (dry_chain : _ * (1.0 - mix)) :> _;
+    output_stage = _ * output_gain;
+
+    transformer = input_stage : mix_stage : output_stage;
 };
 
 // end further contributions section
