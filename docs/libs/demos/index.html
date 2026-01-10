@@ -131,6 +131,10 @@
 </li>
                                     
 <li>
+    <a href="../hysteresis/" class="dropdown-item"> hysteresis </a>
+</li>
+                                    
+<li>
     <a href="../interpolators/" class="dropdown-item"> interpolators </a>
 </li>
                                     
@@ -447,6 +451,14 @@
             </li>
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#hysteresis" class="nav-link">Hysteresis</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#dmja_transformer_demo" class="nav-link">(dm.)ja_transformer_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -459,7 +471,7 @@
 <p>This library provides a collection of example DSP algorithms and demonstrations
 used to illustrate Faust features, syntax, and best practices. It includes simple
 oscillators, filters, effects, and synthesis examples useful for learning and testing.</p>
-<p>The Demos library is organized into 6 sections:</p>
+<p>The Demos library is organized into 7 sections:</p>
 <ul>
 <li><a href="#analyzers">Analyzers</a></li>
 <li><a href="#filters">Filters</a></li>
@@ -467,6 +479,7 @@ oscillators, filters, effects, and synthesis examples useful for learning and te
 <li><a href="#reverbs">Reverbs</a></li>
 <li><a href="#generators">Generators</a></li>
 <li><a href="#motion">Motion</a></li>
+<li><a href="#hysteresis">Hysteresis</a></li>
 </ul>
 <h4 id="references">References</h4>
 <ul>
@@ -1093,6 +1106,19 @@ orientation6_demo_test = dm.orientation6_demo;
 <h4 id="test_42">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 motion_wrapper_demo_test = dm.motion_wrapper_demo;
+</code></pre>
+<h2 id="hysteresis">Hysteresis</h2>
+<hr />
+<h3 id="dmja_transformer_demo"><code>(dm.)ja_transformer_demo</code></h3>
+<p>Magnetic transformer saturation demo using Jiles-Atherton hysteresis.
+Stereo processor with Pre-EQ, J-A hysteresis core, and inverse Post-EQ.</p>
+<h4 id="usage_43">Usage</h4>
+<pre><code>_,_ : ja_transformer_demo : _,_
+</code></pre>
+<h4 id="test_43">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+no = library(&quot;noises.lib&quot;);
+ja_transformer_demo_test = no.noise, no.noise : dm.ja_transformer_demo;
 </code></pre></div>
             </div>
         </div>
