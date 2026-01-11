@@ -13,10 +13,21 @@
 // * [Jiles-Atherton Processors](#jiles-atherton-processors)
 // * [Jiles-Atherton UI Wrappers](#jiles-atherton-ui-wrappers)
 //
+// #### Musical Character
+//
+// The `c` (reversibility) and input calibration work together:
+//
+// | Calibration | c    | Character                      |
+// |-------------|------|--------------------------------|
+// | -50 dB      | 0.25 | Forward, open, dynamic         |
+// | 0 dB        | 0.9  | Compressed, set back, controlled |
+//
+// Blend between these extremes for different textures.
+//
 // #### References
 //
 // * <https://en.wikipedia.org/wiki/Jiles-Atherton_model>
-// * <https://github.com/grame-cncm/faustlibraries/blob/master/hysteresis.lib>
+// * <https://github.com/grame-cncm/faustlibraries>
 //############################################################################################
 
 /************************************************************************
@@ -58,7 +69,7 @@ fi = library("filters.lib");
 
 declare name "Faust Hysteresis Library";
 declare author "Thomas Mandolini";
-declare version "1.0.0";
+declare version "1.0.1";
 
 //========================== Jiles-Atherton Core =====================================
 // The core hysteresis function implementing the Jiles-Atherton model with
