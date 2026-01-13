@@ -1857,96 +1857,56 @@ dsf = environment {
     oscsNq(f0,df,a) = oscsN(f0,df,a, Nq(f0,df));
 };
 
-//--------------------------`(os.)to_twin_osc`------------------------------
+//--------------------------`(os.)twin_osc`------------------------------
 // Twin oscillator using a time-varying comb filter for PWM, morph, or detune.
+// Sawtooth through feedforward comb filter: `y = x - g*x[n-d]`
 //
 // Based on: "Virtual Analog Synthesis with a Time-Varying Comb Filter"
 // D. Lowenfels, AES Convention 115, October 2003.
 //
+// Modes (comb filter configurations):
+//
+// * 0 = PWM: `y = x - x[d]` - pulse width modulation
+// * 1 = MORPH: `y = x - amt*x[d]` - saw to square morphing
+// * 2 = DETUNE: `y = x + x[d]` - summing comb
+//
 // #### Usage
 //
 // ```
-// to_twin_osc(freq, amount, detune, mode) : _
+// twin_osc(freq, amt, detune, mode) : _
 // ```
 //
 // Where:
 //
 // * `freq`: frequency in Hz
-// * `amount`: 0-1 PWM amount or saw->square morph amount
-// * `detune`: delay offset in samples (set 0 for normal use)
-// * `mode`: 0 = PWM, 1 = Morph, 2 = Detune
+// * `amt`: effect amount (0-1), controls comb delay time
+// * `detune`: additional delay offset in samples
+// * `mode`: mode selector (0=PWM, 1=MORPH, 2=DETUNE)
 //
 // #### Test
 // ```
 // os = library("oscillators.lib");
-// twin_osc_test = os.to_twin_osc(220, 0.5, 0, 0);
+// twin_osc_test = os.twin_osc(220, 0.5, 0, 0);
 // ```
 //
 // #### References
 //
 // * <https://www.researchgate.net/publication/325654284>
 //------------------------------------------------------------
-declare to_twin_osc author "David Lowenfels <dfl>";
+declare twin_osc author "David Lowenfels";
 
-//=============================================================================
-// Twin Oscillator (Time-Varying Comb Filter)
-//=============================================================================
-// Sawtooth through feedforward comb filter: y = x - g*x[n-d]
-//
-// Modes (comb filter configurations):
-//   0 = PWM:    y = x - x[d]     Feedforward comb -> pulse width modulation
-//   1 = MORPH:  y = x - g*x[d]   Scaled comb -> saw to square morphing
-//   2 = DETUNE: y = x + x[d]     Summing comb (note: handled separately in DSP)
-//
-// Parameters:
-//   f      - frequency in Hz
-//   amt    - effect amount (0-1), controls comb delay time
-//   detune - additional delay offset in samples
-//   m      - mode selector (0, 1, or 2)
-
-to_twin_osc(f, amt, detune, m) = output
+twin_osc(f, amt, detune, m) = output
 with {
-    //=============================================================================
-    // Antialiased Sawtooth
-    //=============================================================================
-
-    to_saw(freq) = sawtooth(freq);
-
-    //=============================================================================
-    // Hermite Interpolation Delay
-    //=============================================================================
-    // 4-point 3rd-order Lagrange interpolation for smooth fractional delay
-
-    to_hermite_delay(maxdelay, d, x) = de.fdelaylti(4, maxdelay, d, x);
-
-    //=============================================================================
-    // Helpers
-    //=============================================================================
-
-    to_select3(s, a, b, c) = select2(s > 0, a, select2(s > 1, b, c));
-
-    //=============================================================================
-    // Delay Calculation
-    //=============================================================================
-    // Converts PWM amount (0-1) to delay in samples
-    // amt=0.5 gives half-period delay (square wave in PWM mode)
-
-    to_calc_delay(freq, amount, detune_offset) = base_delay * ma.SR / freq + detune_offset
-    with {
-        base_delay = amount * 0.5;
-    };
-
-    to_MAX_DELAY = 4096;
-
-    osc_out = to_saw(f);
-    delay_samples = max(0.01, to_calc_delay(f, amt, detune));
-    delayed = to_hermite_delay(to_MAX_DELAY, delay_samples, osc_out);
+    MAX_DELAY = 4096;
+    osc_out = sawtooth(f);
+    delay_samples = max(0.01, amt * 0.5 * ma.SR / f + detune);
+    delayed = de.fdelaylti(4, MAX_DELAY, delay_samples, osc_out);
 
     pwm_out = osc_out - delayed;
     morph_out = osc_out - amt * delayed;
     detune_out = osc_out + delayed;
 
-    output = to_select3(m, pwm_out, morph_out, detune_out);
+    output = select3(m, pwm_out, morph_out, detune_out);
 };
 
 //================ Waveguide-Resonator-Based Oscillators ================
