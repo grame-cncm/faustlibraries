@@ -1918,7 +1918,7 @@ with {
 // #### Usage
 //
 // ```
-// rpm.saw(freq, beta) : _
+// rpm.sawtooth(freq, beta) : _
 // rpm.square(freq, beta) : _
 // ```
 //
@@ -1930,13 +1930,13 @@ with {
 // #### Test
 // ```
 // os = library("oscillators.lib");
-// rpm_saw_test = os.rpm.saw(220, 1.0);
+// rpm_sawtooth_test = os.rpm.sawtooth(220, 1.0);
 // rpm_square_test = os.rpm.square(220, 1.0);
 // ```
 //
 // #### Variants
 //
-// * `saw(freq, beta)`: sawtooth-like waveform (sine morphs to saw as beta -> 1.5)
+// * `sawtooth(freq, beta)`: sawtooth-like waveform (sine morphs to saw as beta -> 1.5)
 // * `square(freq, beta)`: odd-harmonic square-like waveform (squared feedback)
 //
 // #### References
@@ -1946,7 +1946,7 @@ with {
 declare rpm author "David Lowenfels";
 
 rpm = environment {
-    saw(freq, beta) = tick ~ (_,_) : _,!
+    sawtooth(freq, beta) = tick ~ (_,_) : _,!
     with {
         phase = phasor(1, freq) * 2 * ma.PI;
         tick(y1, y2) = out, y1
