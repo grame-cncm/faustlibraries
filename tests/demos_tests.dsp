@@ -41,6 +41,7 @@ jprev_demo_test = stereoOsc(440, 442) : dm.jprev_demo;
 greyhole_demo_test = stereoOsc(440, 442) : dm.greyhole_demo;
 sawtooth_demo_test = dm.sawtooth_demo;
 virtual_analog_oscillator_demo_test = dm.virtual_analog_oscillator_demo;
+twin_osc_demo_test = dm.twin_osc_demo;
 oscrs_demo_test = dm.oscrs_demo;
 velvet_noise_demo_test = dm.velvet_noise_demo;
 latch_demo_test = dm.latch_demo;
