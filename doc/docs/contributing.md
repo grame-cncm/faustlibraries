@@ -258,7 +258,7 @@ For GRAME maintainers:
 - regenerate the PDF documentation using `make pdf` target at rool level
 - update the library submodule in [faust](https://github.com/grame-cncm/faust), recompile and deploy WebAssembly libfaust in [fausteditor](https://github.com/grame-cncm/fausteditor), [faustplayground](https://github.com/grame-cncm/faustplayground) and [faustide](https://github.com/grame-cncm/faustide)
 - update the library submodule in [faustlive](https://github.com/grame-cncm/faustlive) 
-- update the library list in this [fausteditor](https://github.com/grame-cncm/fausteditor/blob/master/src/faustlive.js) page as well as the [snippets](https://github.com/grame-cncm/fausteditor/blob/master/src/codemirror/mode/faust/faustsnippets.js) (using the `faust2atomsnippets` tool).
+- update the library list in this [fausteditor](https://github.com/grame-cncm/fausteditor/blob/master/src/faustlive.js) page as well as the [snippets](https://github.com/grame-cncm/fausteditor/blob/master/src/codemirror/mode/faust/faustsnippets.js) (using the `faust2atomsnippets -s *.lib` command at root level).
 - update the library list in this [faustide](https://github.com/grame-cncm/faustide/blob/master/src/documentation.ts) page and [LIBRARIES](https://github.com/grame-cncm/faustide/tree/master/src/static/examples/LIBRARIES) folder.
 - update the library list in the [faustgen~](https://github.com/grame-cncm/faust/blob/master-dev/embedded/faustgen/src/faustgen_factory.cpp) code
 - update the [Faust Syntax Highlighting Files](https://github.com/grame-cncm/faust/tree/master-dev/syntax-highlighting)
