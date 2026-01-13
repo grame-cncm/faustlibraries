@@ -1030,6 +1030,67 @@ case{
     t = 1/ma.SR; //sampling interval
 };
 
+//----------------------`(wd.)capacitor_Iout`--------------------------
+// Adapted Capacitor + current out.
+//
+// A basic adaptor implementing a capacitor for use within Wave Digital Filter connection trees.
+//
+// It should be used as a leaf/terminating element of the connection tree.
+// The capacitor will also pass the current through itself as an output of the model.
+// This capacitor model was digitized using the bi-linear transform.
+//
+// #### Usage
+//
+// ```
+// cout(i) = capacitor_Iout(i, C);
+// buildtree( A : cout ) : _, _
+// ```
+//
+// Where:
+//
+// * `i`: index used by model-building functions. Should never be user declared.
+// * `C` : Capacitance of the capacitor being modeled in Farads.
+//
+// #### Test
+// ```
+// wd = library("wdmodels.lib");
+// os = library("oscillators.lib");
+//
+// drive = os.osc(440);
+//
+// vsrc(i) = wd.u_voltage(i, drive);
+// series_node(i) = wd.series(i);
+// cap_branch(i) = wd.capacitor_Iout(i, 1e-6);
+// load(i) = wd.resistor(i, 1000);
+//
+// capacitor_Iout_test = wd.buildtree(vsrc : (series_node : (cap_branch, load)));
+// ```
+//
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
+// Correct implementation is shown above.
+//
+// #### References
+//
+// K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters"
+//----------------------------------------------------------
+declare capacitor_Iout license "MIT-style STK-4.3 license";
+capacitor_Iout =
+case{
+    (0, C) => b0
+    with{
+        R0 = t/(2*C);
+        // b = a (reflected wave), I = (a - a')/(2*R0) (current through capacitor)
+        b0(a1) = a1*1, (a1 - a1')/(2*R0);
+    };
+    (1, C) => _, !;
+    (2, C) => R0
+    with {
+        R0 = t/(2*C);
+    };
+}with{
+    t = 1/ma.SR; //sampling interval
+};
+
 //----------------------`(wd.)inductor`--------------------------
 // Unadapted Inductor.
 //
@@ -1143,6 +1204,67 @@ case{
     (2, R) => R0
     with {
         R0 = (2*R)/t; 
+    };
+}with{
+    t = 1/ma.SR; //sampling interval
+};
+
+//----------------------`(wd.)inductor_Iout`--------------------------
+// Unadapted Inductor + current out.
+//
+// A basic adaptor implementing an inductor for use within Wave Digital Filter connection trees.
+//
+// It should be used as a leaf/terminating element of the connection tree.
+// The inductor will also pass the current through itself as an output of the model.
+// This inductor model was digitized using the bi-linear transform.
+//
+// #### Usage
+//
+// ```
+// lout(i) = inductor_Iout(i, L);
+// buildtree( A : lout ) : _, _
+// ```
+//
+// Where:
+//
+// * `i`: index used by model-building functions. Should never be user declared.
+// * `L` : Inductance of the inductor being modeled in Henries.
+//
+// #### Test
+// ```
+// wd = library("wdmodels.lib");
+// os = library("oscillators.lib");
+//
+// drive = os.osc(280);
+//
+// vsrc(i) = wd.u_voltage(i, drive);
+// series_node(i) = wd.series(i);
+// inductive_branch(i) = wd.inductor_Iout(i, 0.02);
+// load(i) = wd.resistor(i, 1500);
+//
+// inductor_Iout_test = wd.buildtree(vsrc : (series_node : (inductive_branch, load)));
+// ```
+//
+// Note: the adaptor must be declared as a separate function before integration into the connection tree.
+// Correct implementation is shown above.
+//
+// #### References
+//
+// K. Werner, "Virtual Analog Modeling of Audio Circuitry Using Wave Digital Filters"
+//----------------------------------------------------------
+declare inductor_Iout license "MIT-style STK-4.3 license";
+inductor_Iout =
+case{
+    (0, L) => b0
+    with{
+        R0 = (2*L)/t;
+        // b = -a (reflected wave inverted), I = (a + a')/(2*R0) (current through inductor)
+        b0(a1) = a1*(-1), (a1 + a1')/(2*R0);
+    };
+    (1, L) => _, !;
+    (2, L) => R0
+    with {
+        R0 = (2*L)/t;
     };
 }with{
     t = 1/ma.SR; //sampling interval
