@@ -1766,16 +1766,10 @@ with {
     // PWM and Morph use the comb filter oscillator
     pwm_morph_out = os.twin_osc(freq, mod_amount, 0, mode);
 
-    // Detune: pitch shift via Doppler effect from continuously ramping delay
-    MAX_DELAY = 4096;
-    period_samples = ma.SR / freq;
-    ratio = 1 + amount;
-    phasor_freq = freq * (ratio - 1);
-    phasor = os.phasor(1, phasor_freq);
-    delay_samples = (2 - phasor) * period_samples;
-
+    // Detune: pitch shift via Doppler effect
     osc_source = os.sawtooth(freq);
-    osc_shifted = de.fdelaylti(4, MAX_DELAY, delay_samples, osc_source);
+    ratio = 1 + amount;
+    osc_shifted = osc_source : ef.doppler_shift(freq, ratio);
     detune_out = (osc_source + osc_shifted) * 0.707;
 
     // Mode selection

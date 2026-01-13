@@ -56,6 +56,7 @@ closed source license or any other license if you decide so.
 ma = library("maths.lib");
 ba = library("basics.lib");
 de = library("delays.lib");
+os = library("oscillators.lib");
 si = library("signals.lib");
 an = library("analyzers.lib");
 fi = library("filters.lib");
@@ -1147,6 +1148,45 @@ with {
     maxDelay = 65536;
     i = 1 - pow(2, s/12);
     d = i : (+ : +(w) : fmod(_,w)) ~ _;
+};
+
+//--------------`(ef.)doppler_shift`----------------
+// Pitch shifter for signals with known fundamental frequency.
+// Uses Doppler effect from a continuously ramping delay line,
+// with phase-coherent phasor reset synced to the signal period.
+// Best suited for harmonic/periodic signals like oscillator outputs.
+//
+// #### Usage
+//
+// ```
+// _ : doppler_shift(freq, ratio) : _
+// ```
+//
+// Where:
+//
+// * `freq`: fundamental frequency of the input signal (Hz)
+// * `ratio`: pitch ratio (1.0 = no shift, 2.0 = octave up, 0.5 = octave down)
+//
+// #### Test
+// ```
+// ef = library("misceffects.lib");
+// os = library("oscillators.lib");
+// doppler_shift_test = os.sawtooth(220) : ef.doppler_shift(220, 1.5);
+// ```
+//
+// #### References
+//
+// * <https://www.researchgate.net/publication/325654284>
+//-----------------------------------------
+declare doppler_shift author "David Lowenfels";
+
+doppler_shift(freq, ratio, sig) = de.fdelaylti(4, MAX_DELAY, delay_samples, sig)
+with {
+    MAX_DELAY = 4096;
+    period_samples = ma.SR / freq;
+    phasor_freq = freq * (ratio - 1);
+    phasor = os.phasor(1, phasor_freq);
+    delay_samples = (2 - phasor) * period_samples;
 };
 
 //=======================================Saturators=======================================

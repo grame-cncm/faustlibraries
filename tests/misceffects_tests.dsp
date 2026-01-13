@@ -38,6 +38,7 @@ uniformPanToStereo_test = os.osc(440), os.osc(550), os.osc(660) : ef.uniformPanT
 tapeStop_test = os.osc(440), os.osc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, button("stop"));
 
 transpose_test = os.osc(440) : ef.transpose(1024, 512, 7);
+doppler_shift_test = os.sawtooth(220) : ef.doppler_shift(220, 1.5);
 
 softclipQuadratic_test = os.osc(440) : ef.softclipQuadratic;
 wavefold_test = os.osc(440) : ef.wavefold(0.5);
