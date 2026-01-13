@@ -385,6 +385,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#dmtwin_osc_demo" class="nav-link">(dm.)twin_osc_demo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="3"><a href="#dmoscrs_demo" class="nav-link">(dm.)oscrs_demo</a>
               <ul class="nav flex-column">
               </ul>
@@ -855,55 +859,71 @@ sawtooth_demo_test = dm.sawtooth_demo;
 virtual_analog_oscillator_demo_test = dm.virtual_analog_oscillator_demo;
 </code></pre>
 <hr />
-<h3 id="dmoscrs_demo"><code>(dm.)oscrs_demo</code></h3>
-<p>Simple application demoing filter based oscillators.</p>
+<h3 id="dmtwin_osc_demo"><code>(dm.)twin_osc_demo</code></h3>
+<p>TwinOsc - virtual analog synthesis with a time-varying comb filter.</p>
+<p>Based on: "Virtual Analog Synthesis with a Time-Varying Comb Filter"
+D. Lowenfels, AES Convention 115, October 2003.</p>
 <h4 id="usage_28">Usage</h4>
-<pre><code>oscrs_demo : _
+<pre><code>twin_osc_demo : _,_
 </code></pre>
 <h4 id="test_28">Test</h4>
+<pre><code>dm = library(&quot;demos.lib&quot;);
+twin_osc_demo_test = dm.twin_osc_demo;
+</code></pre>
+<h4 id="references_3">References</h4>
+<ul>
+<li><a href="https://www.researchgate.net/publication/325654284">https://www.researchgate.net/publication/325654284</a></li>
+</ul>
+<hr />
+<h3 id="dmoscrs_demo"><code>(dm.)oscrs_demo</code></h3>
+<p>Simple application demoing filter based oscillators.</p>
+<h4 id="usage_29">Usage</h4>
+<pre><code>oscrs_demo : _
+</code></pre>
+<h4 id="test_29">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 oscrs_demo_test = dm.oscrs_demo;
 </code></pre>
 <hr />
 <h3 id="dmvelvet_noise_demo"><code>(dm.)velvet_noise_demo</code></h3>
 <p>Listen to velvet_noise!</p>
-<h4 id="usage_29">Usage</h4>
+<h4 id="usage_30">Usage</h4>
 <pre><code>velvet_noise_demo : _
 </code></pre>
-<h4 id="test_29">Test</h4>
+<h4 id="test_30">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 velvet_noise_demo_test = dm.velvet_noise_demo;
 </code></pre>
 <hr />
 <h3 id="dmlatch_demo"><code>(dm.)latch_demo</code></h3>
 <p>Illustrate latch operation.</p>
-<h4 id="usage_30">Usage</h4>
+<h4 id="usage_31">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; latch_demo.dsp
 echo 'process = dm.latch_demo;' &gt;&gt; latch_demo.dsp
 faust2octave latch_demo.dsp
 Octave:1&gt; plot(faustout);
 </code></pre>
-<h4 id="test_30">Test</h4>
+<h4 id="test_31">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 latch_demo_test = dm.latch_demo;
 </code></pre>
 <hr />
 <h3 id="dmenvelopes_demo"><code>(dm.)envelopes_demo</code></h3>
 <p>Illustrate various envelopes overlaid, including their gate * 1.1.</p>
-<h4 id="usage_31">Usage</h4>
+<h4 id="usage_32">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; envelopes_demo.dsp
 echo 'process = dm.envelopes_demo;' &gt;&gt; envelopes_demo.dsp
 faust2octave envelopes_demo.dsp
 Octave:1&gt; plot(faustout);
 </code></pre>
-<h4 id="test_31">Test</h4>
+<h4 id="test_32">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 envelopes_demo_test = dm.envelopes_demo;
 </code></pre>
 <hr />
 <h3 id="dmfft_spectral_level_demo"><code>(dm.)fft_spectral_level_demo</code></h3>
 <p>Make a real-time spectrum analyzer using FFT from analyzers.lib.</p>
-<h4 id="usage_32">Usage</h4>
+<h4 id="usage_33">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; fft_spectral_level_demo.dsp
 echo 'process = dm.fft_spectral_level_demo;' &gt;&gt; fft_spectral_level_demo.dsp
 Mac:
@@ -916,14 +936,14 @@ Linux QT:
   faust2jaqt fft_spectral_level_demo.dsp
   ./fft_spectral_level_demo
 </code></pre>
-<h4 id="test_32">Test</h4>
+<h4 id="test_33">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 fft_spectral_level_demo_test = dm.fft_spectral_level_demo(256);
 </code></pre>
 <hr />
 <h3 id="dmreverse_echo_demonchans"><code>(dm.)reverse_echo_demo(nChans)</code></h3>
 <p>Multichannel echo effect with reverse delays.</p>
-<h4 id="usage_33">Usage</h4>
+<h4 id="usage_34">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; reverse_echo_demo.dsp
 echo 'nChans = 3; // Any integer &gt; 1 should work here' &gt;&gt; reverse_echo_demo.dsp
 echo 'process = dm.reverse_echo_demo(nChans);' &gt;&gt; reverse_echo_demo.dsp
@@ -938,7 +958,7 @@ Linux QT:
   ./reverse_echo_demo
 Etc.
 </code></pre>
-<h4 id="test_33">Test</h4>
+<h4 id="test_34">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 no = library(&quot;noises.lib&quot;);
 reverse_echo_demo_test = no.noise : dm.reverse_echo_demo(3);
@@ -957,7 +977,7 @@ Note that frequency shifting is not the same as frequency scaling.
 A frequency-shifted harmonic signal is usually not harmonic.
 Very small frequency shifts give interesting chirp effects when
 there is feedback around the frequency shifter.</p>
-<h4 id="usage_34">Usage</h4>
+<h4 id="usage_35">Usage</h4>
 <pre><code>echo 'import(&quot;stdfaust.lib&quot;);' &gt; pospass_demo.dsp
 echo 'process = dm.pospass_demo;' &gt;&gt; pospass_demo.dsp
 Mac:
@@ -971,7 +991,7 @@ Linux QT:
   ./pospass_demo
 Etc.
 </code></pre>
-<h4 id="test_34">Test</h4>
+<h4 id="test_35">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 pospass_demo_test = os.osc(440) : dm.pospass_demo;
@@ -979,16 +999,16 @@ pospass_demo_test = os.osc(440) : dm.pospass_demo;
 <hr />
 <h3 id="dmexciter"><code>(dm.)exciter</code></h3>
 <p>Psychoacoustic harmonic exciter, with GUI.</p>
-<h4 id="usage_35">Usage</h4>
+<h4 id="usage_36">Usage</h4>
 <pre><code>_ : exciter : _
 
 </code></pre>
-<h4 id="test_35">Test</h4>
+<h4 id="test_36">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 no = library(&quot;noises.lib&quot;);
 exciter_test = no.noise : dm.exciter;
 </code></pre>
-<h4 id="references_3">References</h4>
+<h4 id="references_4">References</h4>
 <ul>
 <li><a href="https://secure.aes.org/forum/pubs/ebriefs/?elib=16939">https://secure.aes.org/forum/pubs/ebriefs/?elib=16939</a></li>
 <li><a href="https://www.researchgate.net/publication/258333577_Modeling_the_Harmonic_Exciter">https://www.researchgate.net/publication/258333577_Modeling_the_Harmonic_Exciter</a></li>
@@ -997,11 +1017,11 @@ exciter_test = no.noise : dm.exciter;
 <h3 id="dmvocoder_demo"><code>(dm.)vocoder_demo</code></h3>
 <p>Use example of the vocoder function where an impulse train is used
 as excitation.</p>
-<h4 id="usage_36">Usage</h4>
+<h4 id="usage_37">Usage</h4>
 <pre><code>_ : vocoder_demo : _
 
 </code></pre>
-<h4 id="test_36">Test</h4>
+<h4 id="test_37">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 no = library(&quot;noises.lib&quot;);
@@ -1010,10 +1030,10 @@ vocoder_demo_test = no.noise : dm.vocoder_demo;
 <hr />
 <h3 id="dmcolored_noise_demo"><code>(dm.)colored_noise_demo</code></h3>
 <p>A coloured noise signal generator.</p>
-<h4 id="usage_37">Usage</h4>
+<h4 id="usage_38">Usage</h4>
 <pre><code>colored_noise_demo : _
 </code></pre>
-<h4 id="test_37">Test</h4>
+<h4 id="test_38">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 colored_noise_demo_test = dm.colored_noise_demo;
 </code></pre>
@@ -1029,10 +1049,10 @@ colored_noise_demo_test = dm.colored_noise_demo;
 <li>[High-pass], [Threshold], [Debounce] shape the trigger window.</li>
 <li>[Tone Frequency] sets the audible indicator driven by the shock gate.</li>
 </ul>
-<h4 id="usage_38">Usage</h4>
+<h4 id="usage_39">Usage</h4>
 <pre><code>shock_trigger_demo : _
 </code></pre>
-<h4 id="test_38">Test</h4>
+<h4 id="test_39">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 shock_trigger_demo_test = dm.shock_trigger_demo;
 </code></pre>
@@ -1046,10 +1066,10 @@ shock_trigger_demo_test = dm.shock_trigger_demo;
 <li>[Offset] sets the dead-zone.</li>
 <li>[Noise Level] sets bed loudness; projection modulates filter cutoff.</li>
 </ul>
-<h4 id="usage_39">Usage</h4>
+<h4 id="usage_40">Usage</h4>
 <pre><code>projected_gravity_demo : _
 </code></pre>
-<h4 id="test_39">Test</h4>
+<h4 id="test_40">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 projected_gravity_demo_test = dm.projected_gravity_demo;
 </code></pre>
@@ -1062,10 +1082,10 @@ projected_gravity_demo_test = dm.projected_gravity_demo;
 <li>[Attack]/[Release] smooth it.</li>
 <li>Envelope scales the saw tone amplitude.</li>
 </ul>
-<h4 id="usage_40">Usage</h4>
+<h4 id="usage_41">Usage</h4>
 <pre><code>total_accel_demo : _
 </code></pre>
-<h4 id="test_40">Test</h4>
+<h4 id="test_41">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 total_accel_demo_test = dm.total_accel_demo;
 </code></pre>
@@ -1078,10 +1098,10 @@ total_accel_demo_test = dm.total_accel_demo;
 <li>[Smooth] sets response time.</li>
 <li>Each weight drives a distinct tone channel.</li>
 </ul>
-<h4 id="usage_41">Usage</h4>
+<h4 id="usage_42">Usage</h4>
 <pre><code>orientation6_demo : _,_,_,_,_,_
 </code></pre>
-<h4 id="test_41">Test</h4>
+<h4 id="test_42">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 orientation6_demo_test = dm.orientation6_demo;
 </code></pre>
@@ -1094,7 +1114,7 @@ orientation6_demo_test = dm.orientation6_demo;
   six-face orientation weights per sensor, and raw/scaled axis taps.</li>
 <li>Exposes 92 UI-gated outputs matching the motion.lib signal names.</li>
 </ul>
-<h4 id="usage_42">Usage</h4>
+<h4 id="usage_43">Usage</h4>
 <pre><code>motion_wrapper_demo :
   (leftArm_x,  leftArm_y,  leftArm_z,
    feet_x,     feet_y,     feet_z,
@@ -1103,7 +1123,7 @@ orientation6_demo_test = dm.orientation6_demo;
    head_x,     head_y,     head_z,
    stomach_x,  stomach_y,  stomach_z) -&gt; 92 outputs
 </code></pre>
-<h4 id="test_42">Test</h4>
+<h4 id="test_43">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 motion_wrapper_demo_test = dm.motion_wrapper_demo;
 </code></pre>
@@ -1112,10 +1132,10 @@ motion_wrapper_demo_test = dm.motion_wrapper_demo;
 <h3 id="dmja_transformer_demo"><code>(dm.)ja_transformer_demo</code></h3>
 <p>Magnetic transformer saturation demo using Jiles-Atherton hysteresis.
 Stereo processor with Pre-EQ, J-A hysteresis core, and inverse Post-EQ.</p>
-<h4 id="usage_43">Usage</h4>
+<h4 id="usage_44">Usage</h4>
 <pre><code>_,_ : ja_transformer_demo : _,_
 </code></pre>
-<h4 id="test_43">Test</h4>
+<h4 id="test_44">Test</h4>
 <pre><code>dm = library(&quot;demos.lib&quot;);
 no = library(&quot;noises.lib&quot;);
 ja_transformer_demo_test = no.noise, no.noise : dm.ja_transformer_demo;
