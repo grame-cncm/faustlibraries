@@ -109,6 +109,14 @@ with {
   load(i) = wd.resistor(i, 1500);
 };
 
+capacitor_Iout_test = wd.buildtree(vsrc : (series_node : (cap_branch, load)))
+with {
+  vsrc(i) = wd.u_voltage(i, os.osc(440));
+  series_node(i) = wd.series(i);
+  cap_branch(i) = wd.capacitor_Iout(i, 1e-6);
+  load(i) = wd.resistor(i, 1000);
+};
+
 inductor_test = wd.buildtree(vsrc : (series_node : (inductive_branch, probe)))
 with {
   vsrc(i) = wd.u_voltage(i, os.osc(260));
@@ -122,6 +130,14 @@ with {
   vsrc(i) = wd.u_voltage(i, os.osc(280));
   series_node(i) = wd.series(i);
   inductive_branch(i) = wd.inductor_Vout(i, 0.02);
+  load(i) = wd.resistor(i, 1500);
+};
+
+inductor_Iout_test = wd.buildtree(vsrc : (series_node : (inductive_branch, load)))
+with {
+  vsrc(i) = wd.u_voltage(i, os.osc(280));
+  series_node(i) = wd.series(i);
+  inductive_branch(i) = wd.inductor_Iout(i, 0.02);
   load(i) = wd.resistor(i, 1500);
 };
 
