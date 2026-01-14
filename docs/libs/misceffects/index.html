@@ -369,6 +369,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#efdoppler_shift" class="nav-link">(ef.)doppler_shift</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#saturators" class="nav-link">Saturators</a>
@@ -917,33 +921,56 @@ tapeStop_test = os.osc(440), os.osc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.
 os = library(&quot;oscillators.lib&quot;);
 transpose_test = os.osc(440) : ef.transpose(1024, 512, 7);
 </code></pre>
+<hr />
+<h3 id="efdoppler_shift"><code>(ef.)doppler_shift</code></h3>
+<p>Pitch shifter for signals with known fundamental frequency.
+Uses Doppler effect from a continuously ramping delay line,
+with phase-coherent phasor reset synced to the signal period.
+Best suited for harmonic/periodic signals like oscillator outputs.</p>
+<h4 id="usage_22">Usage</h4>
+<pre><code>_ : doppler_shift(freq, ratio) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>freq</code>: fundamental frequency of the input signal (Hz)</li>
+<li><code>ratio</code>: pitch ratio (1.0 = no shift, 2.0 = octave up, 0.5 = octave down)</li>
+</ul>
+<h4 id="test_22">Test</h4>
+<pre><code>ef = library(&quot;misceffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+doppler_shift_test = os.sawtooth(220) : ef.doppler_shift(220, 1.5);
+</code></pre>
+<h4 id="references_7">References</h4>
+<ul>
+<li><a href="https://www.researchgate.net/publication/325654284">https://www.researchgate.net/publication/325654284</a></li>
+</ul>
 <h2 id="saturators">Saturators</h2>
 <hr />
 <h3 id="efsoftclipquadratic"><code>(ef.)softclipQuadratic</code></h3>
 <p>Quadratic softclip nonlinearity.</p>
-<h4 id="usage_22">Usage</h4>
+<h4 id="usage_23">Usage</h4>
 <pre><code>_ : softclipQuadratic : _
 </code></pre>
-<h4 id="test_22">Test</h4>
+<h4 id="test_23">Test</h4>
 <pre><code>ef = library(&quot;misceffects.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 softclipQuadratic_test = os.osc(440) : ef.softclipQuadratic;
 </code></pre>
-<h4 id="references_7">References</h4>
+<h4 id="references_8">References</h4>
 <ul>
 <li>U. Zölzer: Digital Audio Signal Processing. John Wiley &amp; Sons Ltd, 2022.</li>
 </ul>
 <hr />
 <h3 id="efwavefold"><code>(ef.)wavefold</code></h3>
 <p>Wavefolding nonlinearity.</p>
-<h4 id="usage_23">Usage</h4>
+<h4 id="usage_24">Usage</h4>
 <pre><code>_ : wavefold(width) : _
 </code></pre>
 <p>Where:</p>
 <ul>
 <li><code>width</code>: The width of the folded section [0..1] (float).</li>
 </ul>
-<h4 id="test_23">Test</h4>
+<h4 id="test_24">Test</h4>
 <pre><code>ef = library(&quot;misceffects.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 wavefold_test = os.osc(440) : ef.wavefold(0.5);
