@@ -159,11 +159,15 @@ with {
 
 lambert_test = os.osc(220) * wd.lambert(0.5, 6);
 
+omega_test = wd.omega(0.5);
+
 u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025);
 
 u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026);
 
 u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2);
+
+u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1);
 
 u_parallel2Port_test = wd.buildtree(root : (branch_source, branch_load))
 with {
