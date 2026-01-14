@@ -256,7 +256,7 @@ ma = library("maths.lib");
 si = library("signals.lib");
 
 declare name "Faust Wave Digital Model Library";
-declare version "1.3.0";
+declare version "1.4.0";
 
 
 //=============================Algebraic One Port Adaptors=================================
@@ -1584,8 +1584,111 @@ case{
             mu1 = ba.if((a1 > 0), M, N);
         };
     };
-    (1, Is, Vt, M, N) => !, !; 
-    (2, Is, Vt, M, N) => 0; 
+    (1, Is, Vt, M, N) => !, !;
+    (2, Is, Vt, M, N) => 0;
+};
+
+
+//----------------------`(wd.)omega`--------------------------
+// Wright Omega function approximation for diode modeling.
+//
+// An attempt to attempt the Wright Omega function using a peicewise
+// approach with third-order polynomials and Newton-Raphson refinement.
+// This matches the approach used in chowdsp::wdf for diode modeling.
+//
+// #### Usage
+//
+// ```
+// y = omega(x) : _;
+// ```
+//
+// Where:
+//
+// * `x`: input value
+//
+// #### Reference
+//
+// * S. D'Angelo, L. Gabrielli, L. Turchet, "Fast Approximation of the Lambert W
+//   Function for Virtual Analog Modelling," Proc. 22nd Intl. Conf. Digital Audio
+//   Effects (DAFx-19), Birmingham, UK, 2019
+//----------------------------------------------------------
+declare omega license "MIT-style STK-4.3 license";
+omega(x) = omega4(x)
+with {
+    x1 = -3.341459552768620;
+    x2 = 8.0;
+    a = -1.314293149877800e-3;
+    b = 4.775931364975583e-2;
+    c = 3.631952663804445e-1;
+    d = 6.313183464296682e-1;
+
+    // Third-order polynomial approximation
+    omega3(xx) = ba.if(xx < x1, 0.0,
+                 ba.if(xx < x2,
+                     d + xx * (c + xx * (b + xx * a)),
+                     xx - log(max(xx, 1e-10))));
+
+    // Newton-Raphson refinement
+    omega4(xx) = y - (y - exp(xx - y)) / (y + 1.0)
+    with {
+        y = omega3(xx);
+    };
+};
+
+
+//----------------------`(wd.)u_diodeAntiparallel_omega`--------------------------
+// Unadapted antiparallel diodes using Wright Omega function.
+//
+// An unadapted adaptor implementing antiparallel diodes for Wave Digital Filter connection trees.
+// Uses the Wright Omega function instead of Lambert W.
+//
+// #### Usage
+//
+// ```
+// d1(i) = u_diodeAntiparallel_omega(i, Is, Vt);
+// buildtree( d1 : B );
+// ```
+//
+// Where:
+//
+// * `i`: index used by model-building functions. Should never be user declared
+// * `Is` : saturation current of the diodes (e.g., 2.52e-9 for 1N4148)
+// * `Vt` : thermal voltage (typically 0.02585 at room temperature)
+//
+// #### Test
+// ```
+// wd = library("wdmodels.lib");
+// u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1);
+// ```
+//
+// Note: only usable as the root of a tree.
+// Assumes symmetric diodes (M = N = 1). For asymmetric configurations, use u_diodeAntiparallel.
+//
+// #### Reference
+//
+// * S. D'Angelo, L. Gabrielli, L. Turchet, "Fast Approximation of the Lambert W
+//   Function for Virtual Analog Modelling," Proc. 22nd Intl. Conf. Digital Audio
+//   Effects (DAFx-19), Birmingham, UK, 2019
+// * J. Chowdhury, "chowdsp_wdf: An Advanced C++ Library for Wave Digital Circuit
+//   Modelling," arXiv:2210.12554, 2022
+//----------------------------------------------------------
+declare u_diodeAntiparallel_omega license "MIT-style STK-4.3 license";
+u_diodeAntiparallel_omega =
+case{
+    (0, Is, Vt, M, N) => b1
+    with{
+        b1(R1, a1) = a1 + 2 * lam * (R_Is - Vt * omega(wright_in))
+        with{
+            lam = ma.signum(a1);
+            mu = 1.0;  // Symmetric M = N = 1
+            R_Is = (R1 * Is) / mu;
+            R_Is_overVt = R_Is / Vt;
+            safe_ln(x) = log(max(x, 1e-18));
+            wright_in = safe_ln(R_Is_overVt) + lam * (a1 / (Vt * mu)) + R_Is_overVt;
+        };
+    };
+    (1, Is, Vt, M, N) => !, !;
+    (2, Is, Vt, M, N) => 0;
 };
 
 
