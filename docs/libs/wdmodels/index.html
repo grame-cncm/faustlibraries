@@ -397,6 +397,14 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#wdomega" class="nav-link">(wd.)omega</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#wdu_diodeantiparallel_omega" class="nav-link">(wd.)u_diodeAntiparallel_omega</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#two-port-adaptors" class="nav-link">Two Port Adaptors</a>
@@ -1401,19 +1409,71 @@ u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2);
 Correct implementation is shown above.</p>
 <h4 id="references_22">References</h4>
 <p>K. Werner et al. "An Improved and Generalized Diode Clipper Model for Wave Digital Filters"</p>
+<hr />
+<h3 id="wdomega"><code>(wd.)omega</code></h3>
+<p>Wright Omega function approximation for diode modeling.</p>
+<p>An attempt at the Wright Omega function using a piecewise 
+approach with third‑order polynomials and Newton‑Raphson refinement. 
+This matches the approach used in chowdsp::wdf for diode modeling.</p>
+<h4 id="usage_23">Usage</h4>
+<pre><code>y = omega(x) : _;
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>x</code>: input value</li>
+</ul>
+<h4 id="test_23">Test</h4>
+<pre><code>wd = library(&quot;wdmodels.lib&quot;);
+omega_test = wd.omega(0.5);
+</code></pre>
+<h4 id="reference">Reference</h4>
+<ul>
+<li>S. D'Angelo, L. Gabrielli, L. Turchet, "Fast Approximation of the Lambert W
+  Function for Virtual Analog Modelling," Proc. 22nd Intl. Conf. Digital Audio
+  Effects (DAFx-19), Birmingham, UK, 2019</li>
+</ul>
+<hr />
+<h3 id="wdu_diodeantiparallel_omega"><code>(wd.)u_diodeAntiparallel_omega</code></h3>
+<p>Unadapted antiparallel diodes using Wright Omega function.</p>
+<p>An unadapted adaptor implementing antiparallel diodes for Wave Digital Filter connection trees.
+Uses the Wright Omega function instead of Lambert W.</p>
+<h4 id="usage_24">Usage</h4>
+<pre><code>d1(i) = u_diodeAntiparallel_omega(i, Is, Vt);
+buildtree( d1 : B );
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>i</code>: index used by model-building functions. Should never be user declared</li>
+<li><code>Is</code> : saturation current of the diodes (e.g., 2.52e-9 for 1N4148)</li>
+<li><code>Vt</code> : thermal voltage (typically 0.02585 at room temperature)</li>
+</ul>
+<h4 id="test_24">Test</h4>
+<pre><code>wd = library(&quot;wdmodels.lib&quot;);
+u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1);
+</code></pre>
+<p>Note: only usable as the root of a tree.
+Assumes symmetric diodes (M = N = 1). For asymmetric configurations, use <code>u_diodeAntiparallel</code>.</p>
+<h4 id="reference_1">Reference</h4>
+<ul>
+<li>S. D'Angelo, L. Gabrielli, L. Turchet, "Fast Approximation of the Lambert W
+  Function for Virtual Analog Modelling," Proc. 22nd Intl. Conf. Digital Audio
+  Effects (DAFx-19), Birmingham, UK, 2019</li>
+<li>J. Chowdhury, "chowdsp_wdf: An Advanced C++ Library for Wave Digital Circuit
+  Modelling," arXiv:2210.12554, 2022</li>
+</ul>
 <h2 id="two-port-adaptors">Two Port Adaptors</h2>
 <hr />
 <h3 id="wdu_parallel2port"><code>(wd.)u_parallel2Port</code></h3>
 <p>Unadapted 2-port parallel connection.</p>
 <p>An unadapted adaptor implementing a 2-port parallel connection between adaptors for Wave Digital Filter connection trees.
 Elements connected to this adaptor will behave as if connected in parallel in circuit.</p>
-<h4 id="usage_23">Usage</h4>
+<h4 id="usage_25">Usage</h4>
 <pre><code>buildtree( u_parallel2Port : (A, B) );
 </code></pre>
 <p>Note: only usable as the root of a tree.
 This adaptor has no user-accessible parameters. 
 Correct implementation is shown above.</p>
-<h4 id="test_23">Test</h4>
+<h4 id="test_25">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1430,13 +1490,13 @@ u_parallel2Port_test = wd.buildtree(root : (branch_source, branch_load));
 <p>Adapted 2-port parallel connection.</p>
 <p>An adaptor implementing a 2-port parallel connection between adaptors for Wave Digital Filter connection trees.
 Elements connected to this adaptor will behave as if connected in parallel in circuit.</p>
-<h4 id="usage_24">Usage</h4>
+<h4 id="usage_26">Usage</h4>
 <pre><code>buildtree( A : parallel2Port : B );
 </code></pre>
 <p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and one forward adaptor.
 Correct implementation is shown above.</p>
-<h4 id="test_24">Test</h4>
+<h4 id="test_26">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1453,13 +1513,13 @@ parallel2Port_test = wd.buildtree(vsrc : (connector : load));
 <p>Unadapted 2-port series connection.</p>
 <p>An unadapted adaptor implementing a 2-port series connection between adaptors for Wave Digital Filter connection trees.
 Elements connected to this adaptor will behave as if connected in series in circuit.</p>
-<h4 id="usage_25">Usage</h4>
+<h4 id="usage_27">Usage</h4>
 <pre><code>buildtree( u_series2Port : (A, B) );
 </code></pre>
 <p>Note: only usable as the root of a tree.
 This adaptor has no user-accessible parameters. 
 Correct implementation is shown above.</p>
-<h4 id="test_25">Test</h4>
+<h4 id="test_27">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1476,13 +1536,13 @@ u_series2Port_test = wd.buildtree(root : (branch_source, branch_load));
 <p>Adapted 2-port series connection.</p>
 <p>An adaptor implementing a 2-port series connection between adaptors for Wave Digital Filter connection trees.
 Elements connected to this adaptor will behave as if connected in series in circuit.</p>
-<h4 id="usage_26">Usage</h4>
+<h4 id="usage_28">Usage</h4>
 <pre><code>buildtree( A : series2Port : B );
 </code></pre>
 <p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and one forward adaptor.
 Correct implementation is shown above.</p>
-<h4 id="test_26">Test</h4>
+<h4 id="test_28">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1499,7 +1559,7 @@ series2Port_test = wd.buildtree(vsrc : (connector : load));
 <p>Adapted 2-port parallel connection + ideal current source.</p>
 <p>An adaptor implementing a 2-port series connection and internal idealized current source between adaptors for Wave Digital Filter connection trees.
 This adaptor connects the two connected elements and an additional ideal current source in parallel.</p>
-<h4 id="usage_27">Usage</h4>
+<h4 id="usage_29">Usage</h4>
 <pre><code>i1(i) = parallelCurrent(i, jin);
 buildtree(A : i1 : B);
 </code></pre>
@@ -1508,7 +1568,7 @@ buildtree(A : i1 : B);
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>jin</code> :  Current through the ideal current source in Amps</li>
 </ul>
-<h4 id="test_27">Test</h4>
+<h4 id="test_29">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1528,7 +1588,7 @@ Correct implementation is shown above.</p>
 <p>Adapted 2-port series connection + ideal voltage source.</p>
 <p>An adaptor implementing a 2-port series connection and internal ideal voltage source between adaptors for Wave Digital Filter connection trees.
 This adaptor connects the two connected adaptors and an additional ideal voltage source in series.</p>
-<h4 id="usage_28">Usage</h4>
+<h4 id="usage_30">Usage</h4>
 <pre><code>v1(i) = seriesVoltage(i, vin)
 buildtree( A : v1 : B );
 </code></pre>
@@ -1537,7 +1597,7 @@ buildtree( A : v1 : B );
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>vin</code> :  voltage across the ideal current source in Volts</li>
 </ul>
-<h4 id="test_28">Test</h4>
+<h4 id="test_30">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1556,7 +1616,7 @@ It should be used within the connection tree with one previous and one forward a
 <p>Unadapted ideal transformer.</p>
 <p>An adaptor implementing an ideal transformer for Wave Digital Filter connection trees.
 The first downward-facing port corresponds to the primary winding connections, and the second downward-facing port to the secondary winding connections.</p>
-<h4 id="usage_29">Usage</h4>
+<h4 id="usage_31">Usage</h4>
 <pre><code>t1(i) = u_transformer(i, tr);
 buildtree(t1 : (A , B));
 </code></pre>
@@ -1565,7 +1625,7 @@ buildtree(t1 : (A , B));
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>tr</code> :  the turn ratio between the windings on the primary and secondary coils</li>
 </ul>
-<h4 id="test_29">Test</h4>
+<h4 id="test_31">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1584,7 +1644,7 @@ It may only be used as the root of the connection tree with two forward nodes.</
 <p>Adapted ideal transformer.</p>
 <p>An adaptor implementing an ideal transformer for Wave Digital Filter connection trees.
 The upward-facing port corresponds to the primary winding connections, and the downward-facing port to the secondary winding connections</p>
-<h4 id="usage_30">Usage</h4>
+<h4 id="usage_32">Usage</h4>
 <pre><code>t1(i) = transformer(i, tr);
 buildtree(A : t1 : B);
 </code></pre>
@@ -1593,7 +1653,7 @@ buildtree(A : t1 : B);
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>tr</code> :  the turn ratio between the windings on the primary and secondary coils</li>
 </ul>
-<h4 id="test_30">Test</h4>
+<h4 id="test_32">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1612,7 +1672,7 @@ It should be used within the connection tree with one backward and one forward n
 <p>Unadapted ideal active transformer.</p>
 <p>An adaptor implementing an ideal transformer for Wave Digital Filter connection trees.
 The first downward-facing port corresponds to the primary winding connections, and the second downward-facing port to the secondary winding connections.</p>
-<h4 id="usage_31">Usage</h4>
+<h4 id="usage_33">Usage</h4>
 <pre><code>t1(i) = u_transformerActive(i, gamma1, gamma2);
 buildtree(t1 : (A , B));
 </code></pre>
@@ -1622,7 +1682,7 @@ buildtree(t1 : (A , B));
 <li><code>gamma1</code> :  the turn ratio describing the voltage relationship between the primary and secondary coils</li>
 <li><code>gamma2</code> :  the turn ratio describing the current relationship between the primary and secondary coils</li>
 </ul>
-<h4 id="test_31">Test</h4>
+<h4 id="test_33">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1641,7 +1701,7 @@ It may only be used as the root of the connection tree with two forward nodes.</
 <p>Adapted ideal active transformer.</p>
 <p>An adaptor implementing an ideal active transformer for Wave Digital Filter connection trees.
 The upward-facing port corresponds to the primary winding connections, and the downward-facing port to the secondary winding connections</p>
-<h4 id="usage_32">Usage</h4>
+<h4 id="usage_34">Usage</h4>
 <pre><code>t1(i) = transformerActive(i, gamma1, gamma2);
 buildtree(A : t1 : B);
 </code></pre>
@@ -1651,7 +1711,7 @@ buildtree(A : t1 : B);
 <li><code>gamma1</code> :  the turn ratio describing the voltage relationship between the primary and secondary coils</li>
 <li><code>gamma2</code> :  the turn ratio describing the current relationship between the primary and secondary coils</li>
 </ul>
-<h4 id="test_32">Test</h4>
+<h4 id="test_34">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1671,12 +1731,12 @@ It should be used within the connection tree with two forward nodes.</p>
 <p>Adapted 3-port parallel connection.</p>
 <p>An adaptor implementing a 3-port parallel connection between adaptors for Wave Digital Filter connection trees.
 This adaptor is used to connect adaptors simulating components connected in parallel in the circuit.</p>
-<h4 id="usage_33">Usage</h4>
+<h4 id="usage_35">Usage</h4>
 <pre><code>buildtree( A : parallel : (B, C) );
 </code></pre>
 <p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.</p>
-<h4 id="test_33">Test</h4>
+<h4 id="test_35">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1694,13 +1754,13 @@ parallel_test = wd.buildtree(vsrc : (junction : (branch_a, branch_b)));
 <p>Adapted 3-port series connection.</p>
 <p>An adaptor implementing a 3-port series connection between adaptors for Wave Digital Filter connection trees.
 This adaptor is used to connect adaptors simulating components connected in series in the circuit.</p>
-<h4 id="usage_34">Usage</h4>
+<h4 id="usage_36">Usage</h4>
 <pre><code>
 tree = A : (series : (B, C));
 </code></pre>
 <p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.</p>
-<h4 id="test_34">Test</h4>
+<h4 id="test_36">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1719,13 +1779,13 @@ series_test = wd.buildtree(vsrc : (junction : (branch_a, branch_b)));
 <p>Unadapted six-port rigid connection.</p>
 <p>An adaptor implementing a six-port passive rigid connection between elements. 
 It implements the simplest possible rigid connection found in the Fender Bassman Tonestack circuit.</p>
-<h4 id="usage_35">Usage</h4>
+<h4 id="usage_37">Usage</h4>
 <pre><code>
 tree = u_sixportPassive : (A, B, C, D, E, F));
 </code></pre>
 <p>Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with six forward adaptors.</p>
-<h4 id="test_35">Test</h4>
+<h4 id="test_37">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1740,7 +1800,7 @@ u_sixportPassive_test = (1000, 1200, 1400, 1600, 1800, 2000, os.osc(220), 0, 0, 
 <p>Function for generating an adapted node from another faust function or scattering matrix.</p>
 <p>This function generates a node which is suitable for use in the connection tree structure. 
 <code>genericNode</code> separates the function that it is passed into upward-going and downward-going waves. </p>
-<h4 id="usage_36">Usage</h4>
+<h4 id="usage_38">Usage</h4>
 <pre><code>n1(i) = genericNode(i, scatter, upRes);
 </code></pre>
 <p>Where:</p>
@@ -1749,7 +1809,7 @@ u_sixportPassive_test = (1000, 1200, 1400, 1600, 1800, 2000, os.osc(220), 0, 0, 
 <li><code>scatter</code> : the function which describes the the node's scattering behavior</li>
 <li><code>upRes</code> : the function which describes the node's upward-facing port-resistance</li>
 </ul>
-<h4 id="test_36">Test</h4>
+<h4 id="test_38">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1763,7 +1823,7 @@ load(i) = wd.resistor(i, 1800);
 
 genericNode_Iout_test = wd.buildtree(vsrc : (branch : (node_iout, load)));
 </code></pre>
-<h4 id="test_37">Test</h4>
+<h4 id="test_39">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1777,7 +1837,7 @@ load(i) = wd.resistor(i, 1800);
 
 genericNode_Vout_test = wd.buildtree(vsrc : (branch : (node_vout, load)));
 </code></pre>
-<h4 id="test_38">Test</h4>
+<h4 id="test_40">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1806,7 +1866,7 @@ genericNode_test = wd.buildtree(vsrc : (branch : (node, probe)));
 <p>Function for generating a terminating/leaf node which gives the voltage across itself as a model output.</p>
 <p>This function generates a node which is suitable for use in the connection tree structure. 
 It also calculates the voltage across the element and gives it as a model output.</p>
-<h4 id="usage_37">Usage</h4>
+<h4 id="usage_39">Usage</h4>
 <pre><code>n1(i) = genericNode_Vout(i, scatter, upRes);
 </code></pre>
 <p>Where:</p>
@@ -1827,7 +1887,7 @@ It also calculates the voltage across the element and gives it as a model output
 <p>Function for generating a terminating/leaf node which gives the current through itself as a model output.</p>
 <p>This function generates a node which is suitable for use in the connection tree structure. 
 It also calculates the current through the element and gives it as a model output.</p>
-<h4 id="usage_38">Usage</h4>
+<h4 id="usage_40">Usage</h4>
 <pre><code>n1(i) = genericNode_Iout(i, scatter, upRes);
 </code></pre>
 <p>Where:</p>
@@ -1847,7 +1907,7 @@ It also calculates the current through the element and gives it as a model outpu
 <h3 id="wdu_genericnode"><code>(wd.)u_genericNode</code></h3>
 <p>Function for generating an unadapted node from another Faust function or scattering matrix.</p>
 <p>This function generates a node which is suitable for use as the root of the connection tree structure. </p>
-<h4 id="usage_39">Usage</h4>
+<h4 id="usage_41">Usage</h4>
 <pre><code>n1(i) = u_genericNode(i, scatter);
 </code></pre>
 <p>Where:</p>
@@ -1855,7 +1915,7 @@ It also calculates the current through the element and gives it as a model outpu
 <li><code>i</code>: index used by model-building functions. Should never be user declared</li>
 <li><code>scatter</code> : the function which describes the the node's scattering behavior</li>
 </ul>
-<h4 id="test_39">Test</h4>
+<h4 id="test_41">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1878,12 +1938,12 @@ u_genericNode_test = wd.buildtree(root : (branch : (load_a, load_b)));
 <p>Function for building the structure for calculating waves traveling down the WD connection tree.</p>
 <p>It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 It is used in conjunction with the buildup() function to create a model.</p>
-<h4 id="usage_40">Usage</h4>
+<h4 id="usage_42">Usage</h4>
 <pre><code>builddown(A : B)~buildup(A : B);
 </code></pre>
 <p>Where: 
  <code>(A : B)</code> : is a connection tree composed of WD adaptors</p>
-<h4 id="test_40">Test</h4>
+<h4 id="test_42">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1900,12 +1960,12 @@ builddown_test = wd.builddown(tree) ~ wd.buildup(tree) : wd.buildout(tree);
 <p>Function for building the structure for calculating waves traveling up the WD connection tree.</p>
 <p>It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 It is used in conjunction with the builddown() function to create a full structure.</p>
-<h4 id="usage_41">Usage</h4>
+<h4 id="usage_43">Usage</h4>
 <pre><code>builddown(A : B)~buildup(A : B);
 </code></pre>
 <p>Where: 
 <code>(A : B)</code> : is a connection tree composed of WD adaptors</p>
-<h4 id="test_41">Test</h4>
+<h4 id="test_43">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1922,12 +1982,12 @@ buildup_test = wd.builddown(tree) ~ wd.buildup(tree) : wd.buildout(tree);
 <p>Function for determining the upward-facing port resistance of a partial WD connection tree.</p>
 <p>It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 It is used by the buildup and builddown functions but is also helpful in testing.</p>
-<h4 id="usage_42">Usage</h4>
+<h4 id="usage_44">Usage</h4>
 <pre><code>getres(A : B)~getres(A : B);
 </code></pre>
 <p>Where: 
 <code>(A : B)</code> : is a partial connection tree composed of WD adaptors</p>
-<h4 id="test_42">Test</h4>
+<h4 id="test_44">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1947,12 +2007,12 @@ This function cannot be used on a complete WD tree. When called on an unadapted 
 <p>It recursively steps through the given tree, parametrizes the adaptors, and builds an algorithm.
 It is used by the buildup and builddown functions but is also helpful in testing.
 This function is a parallelized version of <code>getres</code>.</p>
-<h4 id="usage_43">Usage</h4>
+<h4 id="usage_45">Usage</h4>
 <pre><code>parres((A , B))~parres((A , B));
 </code></pre>
 <p>Where: 
 <code>(A , B)</code> : is a partial connection tree composed of WD adaptors</p>
-<h4 id="test_43">Test</h4>
+<h4 id="test_45">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1973,12 +2033,12 @@ parres_test = wd.parres((subtree_left, subtree_right)) : _, !;
 <h3 id="wdbuildout"><code>(wd.)buildout</code></h3>
 <p>Function for creating the output matrix for a WD model from a WD connection tree.</p>
 <p>It recursively steps through the given tree and creates an output matrix passing only outputs.</p>
-<h4 id="usage_44">Usage</h4>
+<h4 id="usage_46">Usage</h4>
 <pre><code>buildout( A : B );
 </code></pre>
 <p>Where: 
 <code>(A : B)</code> : is a connection tree composed of WD adaptors</p>
-<h4 id="test_44">Test</h4>
+<h4 id="test_46">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
@@ -1995,12 +2055,12 @@ buildout_test = wd.builddown(tree) ~ wd.buildup(tree) : buildout_matrix;
 <h3 id="wdbuildtree"><code>(wd.)buildtree</code></h3>
 <p>Function for building the DSP model from a WD connection tree structure.</p>
 <p>It recursively steps through the given tree, parametrizes the adaptors, and builds the algorithm.</p>
-<h4 id="usage_45">Usage</h4>
+<h4 id="usage_47">Usage</h4>
 <pre><code>buildtree(A : B);
 </code></pre>
 <p>Where: 
 <code>(A : B)</code> : a connection tree composed of WD adaptors</p>
-<h4 id="test_45">Test</h4>
+<h4 id="test_47">Test</h4>
 <pre><code>wd = library(&quot;wdmodels.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 
