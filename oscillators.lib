@@ -1952,7 +1952,7 @@ rpm = environment {
         tick(y1, y2) = out, y1
         with {
             y_avg = 0.5 * (y1 + y2);
-            out = sin(phase + beta * y_avg);
+            out = sin(phase - beta * y_avg);
         };
     };
 
@@ -1961,9 +1961,8 @@ rpm = environment {
         phase = phasor(1, freq) * 2 * ma.PI;
         tick(y1, y2) = out, y1
         with {
-            sum_y = y1 + y2;
-            y_avg = 0.5 * sum_y * sum_y;
-            out = sin(phase - beta * y_avg);
+            y_avg = 0.5 * (y1 + y2);
+            out = sin(phase - beta * y_avg * y_avg);
         };
     };
 };
