@@ -70,6 +70,7 @@ fi = library("filters.lib");
 
 declare name "Faust Hysteresis Library";
 declare author "Thomas Mandolini";
+declare contributor "Bart Brouns a.k.a magnetophon";
 declare version "1.0.1";
 
 //========================== Jiles-Atherton Core =====================================
@@ -155,10 +156,14 @@ with {
 
     // 4x cascaded substeps with cubic Hermite interpolation
     // Uses H history for smooth tangent-matched curve between samples
-    core(H_in) = (loop ~ (_, _, _)) : (_, !, !)
+    core(H_in) = loop ~ _
     with {
-        loop(M_prev, H_prev, H_prev_prev) = M4, H_in, H_prev
+        loop(M_prev) = M4
         with {
+            // H history via delay operators
+            H_prev = H_in@1;
+            H_prev_prev = H_in@2;
+
             // Tangent estimation (Catmull-Rom style)
             dH_prev = H_prev - H_prev_prev;
             dH_in = H_in - H_prev;
