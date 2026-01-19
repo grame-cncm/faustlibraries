@@ -520,11 +520,9 @@ process = si.smooth(0.999);
 <p>Before preparing a pull-request, the new library must be carefully tested:</p>
 <ul>
 <li>all functions defined in the library must be tested by preparing a DSP test program, to be added using the <code>#### Test</code> syntax </li>
-<li>the compatibility library <code>all.lib</code> imports all libraries in a same namespace, so check functions names collisions using the following test program:</li>
+<li>the compatibility library <code>all.lib</code> imports all libraries in a same namespace, so check functions names collisions using the following test program: <code>import("all.lib"); process = _;</code></li>
+<li>reference files for all tests can be generated using the <code>make reference</code> command and then verified with the <code>make check</code> command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified.</li>
 </ul>
-<pre><code>import(&quot;all.lib&quot;);
-process = _;
-</code></pre>
 <h2 id="library-test-and-deployment">Library test and deployment</h2>
 <p>For GRAME maintainers:</p>
 <ul>

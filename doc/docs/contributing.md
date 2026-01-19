@@ -243,12 +243,8 @@ Any function containing UI elements should be placed in this library and respect
 Before preparing a pull-request, the new library must be carefully tested:
 
 - all functions defined in the library must be tested by preparing a DSP test program, to be added using the `#### Test` syntax 
-- the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program:
-
-```
-import("all.lib");
-process = _;
-```
+- the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program: `import("all.lib"); process = _;`
+- reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified.
 
 ## Library test and deployment
 
