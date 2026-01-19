@@ -401,6 +401,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#vekloncentaur" class="nav-link">(ve.)klonCentaur</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
               </ul>
@@ -1255,7 +1259,43 @@ vocoder_test = (no.noise, os.osc(220))
       hslider(&quot;vocoder:rel&quot;, 0.1, 0.01, 0.5, 0.01),
       hslider(&quot;vocoder:BWRatio&quot;, 1.0, 0.5, 1.5, 0.01)
     );
-</code></pre></div>
+</code></pre>
+<hr />
+<h3 id="vekloncentaur"><code>(ve.)klonCentaur</code></h3>
+<p>Klon Centaur overdrive pedal circuit model.</p>
+<p>The Klon Centaur is a guitar overdrive pedal known for adding gain and
+harmonic distortion while preserving the instrument's natural tone. This
+implementation uses wave digital filter (WDF) techniques to model the
+analog circuitry, including the gain stage, tone control, and clipping.</p>
+<h4 id="usage_31">Usage</h4>
+<pre><code>_ : klonCentaur(gain, treble, level) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>gain</code>: Gain control (0-1), where 0 is minimum gain and 1 is maximum gain.
+  Controls the resistance of the gain potentiometer (R10b) in the preamp stage,
+  ranging from 2kΩ at maximum gain to 102kΩ at minimum gain.</li>
+<li><code>treble</code>: Treble/tone control (0-1), where 0 is dark/warm tone and 1 is bright tone.
+  Controls the frequency response of the active tone shaping filter.</li>
+<li><code>level</code>: Output level/volume control (0-1), where 0 is minimum output and 1 is maximum output.
+  Controls the output potentiometer resistance, setting the final output amplitude.</li>
+</ul>
+<h4 id="test_31">Test</h4>
+<pre><code>ve = library(&quot;vaeffects.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+klonCentaur_test = os.osc(330)
+  : ve.klonCentaur(
+      hslider(&quot;klonCentaur:gain&quot;, 0.5, 0, 1, 0.01),
+      hslider(&quot;klonCentaur:treble&quot;, 0.5, 0, 1, 0.01),
+      hslider(&quot;klonCentaur:level&quot;, 0.5, 0, 1, 0.01)
+    );
+</code></pre>
+<h4 id="references_9">References</h4>
+<ul>
+<li>J. Chowdhury, "chowdsp_wdf: An Advanced C++ Library for Wave Digital Circuit
+  Modelling," arXiv:2210.12554, 2022</li>
+<li><a href="https://github.com/jatinchowdhury18/KlonCentaur/tree/master/ChowCentaur">https://github.com/jatinchowdhury18/KlonCentaur/tree/master/ChowCentaur</a></li>
+</ul></div>
             </div>
         </div>
 
