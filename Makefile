@@ -8,11 +8,11 @@
 # `make serve`      - serve the documentation.
 
 FAUST ?= faust
-FAUST_OPT ?= -double
+FAUST_OPT ?= -double -t 0
 FAUSTBENCH ?= faustbench-llvm
 CXX ?= g++
 CXXFLAGS ?= -O2 -std=c++17
-NUM_SAMPLES ?= 1000
+NUM_SAMPLES ?= 48000
 SAMPLE_RATE ?= 48000
 
 FLOAT_TOL ?= 1e-4

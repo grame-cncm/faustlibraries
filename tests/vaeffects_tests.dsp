@@ -192,3 +192,10 @@ vocoder_test = (no.noise, os.osc(220))
       hslider("vocoder:rel", 0.1, 0.01, 0.5, 0.01),
       hslider("vocoder:BWRatio", 1.0, 0.5, 1.5, 0.01)
     );
+
+klonCentaur_test = os.osc(330)
+   : ve.klonCentaur(
+       hslider("klonCentaur:gain", 0.5, 0, 1, 0.01),
+       hslider("klonCentaur:treble", 0.5, 0, 1, 0.01),
+       hslider("klonCentaur:level", 0.5, 0, 1, 0.01)
+     );
