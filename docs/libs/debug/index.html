@@ -257,19 +257,19 @@
               <ul class="nav flex-column">
             <li class="nav-item" data-level="2"><a href="#level-probes" class="nav-link">Level Probes</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-level="3"><a href="#dbprobe_rms_db" class="nav-link">(db.)probe_rms_db</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
             <li class="nav-item" data-level="3"><a href="#dbprobe_rms_lin" class="nav-link">(db.)probe_rms_lin</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-level="3"><a href="#dbprobe_peak_db" class="nav-link">(db.)probe_peak_db</a>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_rms_db" class="nav-link">(db.)probe_rms_db</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             <li class="nav-item" data-level="3"><a href="#dbprobe_peak_lin" class="nav-link">(db.)probe_peak_lin</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_peak_db" class="nav-link">(db.)probe_peak_db</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -445,7 +445,8 @@ It includes RMS/Peak meters, dynamics probes, signal quality probes, and
 simple band-energy meters.</p>
 <p>Debug probes can be compiled out by setting the <code>DEBUG</code> global to 0 via
 explicit substitution (e.g. <code>db[DEBUG=0;].probe_rms_db(...)</code>).
-CNE means constant numerical expression (known at compile time).</p>
+CNE means constant numerical expression (known at compile time).
+<code>[probe:ID]</code> metadata tags are used to identify probes in the UI</p>
 <p>The Debug library is organized into 11 sections:</p>
 <ul>
 <li><a href="#level-probes">Level Probes</a></li>
@@ -468,10 +469,10 @@ CNE means constant numerical expression (known at compile time).</p>
 <p>Level meters for quick signal magnitude checks (RMS/peak).
 Use for coarse gain staging and headroom validation.</p>
 <hr />
-<h3 id="dbprobe_rms_db"><code>(db.)probe_rms_db</code></h3>
-<p>RMS level probe (dB). Bargraph includes <code>[unit:dB]</code>.</p>
+<h3 id="dbprobe_rms_lin"><code>(db.)probe_rms_lin</code></h3>
+<p>RMS level probe (linear).</p>
 <h4 id="usage">Usage</h4>
-<pre><code>_ : probe_rms_db(ID, HIDE) : _
+<pre><code>_ : probe_rms_lin(ID, HIDE) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -481,13 +482,13 @@ Use for coarse gain staging and headroom validation.</p>
 <h4 id="test">Test</h4>
 <pre><code>db = library(&quot;debug.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
-probe_rms_db_test = db.probe_rms_db(0, 1, os.osc(220));
+probe_rms_lin_test = db.probe_rms_lin(1, 1, os.osc(220));
 </code></pre>
 <hr />
-<h3 id="dbprobe_rms_lin"><code>(db.)probe_rms_lin</code></h3>
-<p>RMS level probe (linear).</p>
+<h3 id="dbprobe_rms_db"><code>(db.)probe_rms_db</code></h3>
+<p>RMS level probe (dB). Bargraph includes <code>[unit:dB]</code>.</p>
 <h4 id="usage_1">Usage</h4>
-<pre><code>_ : probe_rms_lin(ID, HIDE) : _
+<pre><code>_ : probe_rms_db(ID, HIDE) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -497,13 +498,13 @@ probe_rms_db_test = db.probe_rms_db(0, 1, os.osc(220));
 <h4 id="test_1">Test</h4>
 <pre><code>db = library(&quot;debug.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
-probe_rms_lin_test = db.probe_rms_lin(1, 1, os.osc(220));
+probe_rms_db_test = db.probe_rms_db(0, 1, os.osc(220));
 </code></pre>
 <hr />
-<h3 id="dbprobe_peak_db"><code>(db.)probe_peak_db</code></h3>
-<p>Peak level probe (dB). Bargraph includes <code>[unit:dB]</code>.</p>
+<h3 id="dbprobe_peak_lin"><code>(db.)probe_peak_lin</code></h3>
+<p>Peak level probe (linear).</p>
 <h4 id="usage_2">Usage</h4>
-<pre><code>_ : probe_peak_db(ID, HIDE) : _
+<pre><code>_ : probe_peak_lin(ID, HIDE) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -513,13 +514,13 @@ probe_rms_lin_test = db.probe_rms_lin(1, 1, os.osc(220));
 <h4 id="test_2">Test</h4>
 <pre><code>db = library(&quot;debug.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
-probe_peak_db_test = db.probe_peak_db(2, 1, os.osc(220));
+probe_peak_lin_test = db.probe_peak_lin(3, 1, os.osc(220));
 </code></pre>
 <hr />
-<h3 id="dbprobe_peak_lin"><code>(db.)probe_peak_lin</code></h3>
-<p>Peak level probe (linear).</p>
+<h3 id="dbprobe_peak_db"><code>(db.)probe_peak_db</code></h3>
+<p>Peak level probe (dB). Bargraph includes <code>[unit:dB]</code>.</p>
 <h4 id="usage_3">Usage</h4>
-<pre><code>_ : probe_peak_lin(ID, HIDE) : _
+<pre><code>_ : probe_peak_db(ID, HIDE) : _
 </code></pre>
 <p>Where:</p>
 <ul>
@@ -529,7 +530,7 @@ probe_peak_db_test = db.probe_peak_db(2, 1, os.osc(220));
 <h4 id="test_3">Test</h4>
 <pre><code>db = library(&quot;debug.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
-probe_peak_lin_test = db.probe_peak_lin(3, 1, os.osc(220));
+probe_peak_db_test = db.probe_peak_db(2, 1, os.osc(220));
 </code></pre>
 <h2 id="dynamics-probes">Dynamics Probes</h2>
 <p>Dynamics-related meters for crest factor and envelope tracking.
