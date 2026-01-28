@@ -337,6 +337,86 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_spectral_centroid" class="nav-link">(db.)probe_spectral_centroid</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_multiband" class="nav-link">(db.)probe_multiband</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#analysis-probes" class="nav-link">Analysis Probes</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#dbprobe_freq_lin" class="nav-link">(db.)probe_freq_lin</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_freq_db" class="nav-link">(db.)probe_freq_db</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_freq_ratio" class="nav-link">(db.)probe_freq_ratio</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#decay-probes" class="nav-link">Decay Probes</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#dbprobe_env_lin" class="nav-link">(db.)probe_env_lin</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_env_db" class="nav-link">(db.)probe_env_db</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_peak_hold" class="nav-link">(db.)probe_peak_hold</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_below_threshold" class="nav-link">(db.)probe_below_threshold</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#attack-probes" class="nav-link">Attack Probes</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#dbprobe_attack_state" class="nav-link">(db.)probe_attack_state</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_onset" class="nav-link">(db.)probe_onset</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#analysis-signal-quality-probes" class="nav-link">Analysis Signal Quality Probes</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#dbprobe_dc_precise" class="nav-link">(db.)probe_dc_precise</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_silence" class="nav-link">(db.)probe_silence</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#time-stamping" class="nav-link">Time Stamping</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="3"><a href="#dbprobe_sample_count" class="nav-link">(db.)probe_sample_count</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="3"><a href="#dbprobe_time_ms" class="nav-link">(db.)probe_time_ms</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
             <li class="nav-item" data-level="2"><a href="#tap-utilities" class="nav-link">Tap Utilities</a>
@@ -366,13 +446,18 @@ simple band-energy meters.</p>
 <p>Debug probes can be compiled out by setting the <code>DEBUG</code> global to 0 via
 explicit substitution (e.g. <code>db[DEBUG=0;].probe_rms_db(...)</code>).
 CNE means constant numerical expression (known at compile time).</p>
-<p>The Debug library is organized into 6 sections:</p>
+<p>The Debug library is organized into 11 sections:</p>
 <ul>
 <li><a href="#level-probes">Level Probes</a></li>
 <li><a href="#dynamics-probes">Dynamics Probes</a></li>
 <li><a href="#signal-quality-probes">Signal Quality Probes</a></li>
 <li><a href="#control-signal-probes">Control Signal Probes</a></li>
 <li><a href="#spectral-probes">Spectral Probes</a></li>
+<li><a href="#analysis-probes">Analysis Probes</a></li>
+<li><a href="#decay-probes">Decay Probes</a></li>
+<li><a href="#attack-probes">Attack Probes</a></li>
+<li><a href="#analysis-signal-quality-probes">Analysis Signal Quality Probes</a></li>
+<li><a href="#time-stamping">Time Stamping</a></li>
 <li><a href="#tap-utilities">Tap Utilities</a></li>
 </ul>
 <h4 id="references">References</h4>
@@ -380,6 +465,8 @@ CNE means constant numerical expression (known at compile time).</p>
 <li><a href="https://github.com/grame-cncm/faustlibraries/blob/master/debug.lib">https://github.com/grame-cncm/faustlibraries/blob/master/debug.lib</a></li>
 </ul>
 <h2 id="level-probes">Level Probes</h2>
+<p>Level meters for quick signal magnitude checks (RMS/peak).
+Use for coarse gain staging and headroom validation.</p>
 <hr />
 <h3 id="dbprobe_rms_db"><code>(db.)probe_rms_db</code></h3>
 <p>RMS level probe (dB). Bargraph includes <code>[unit:dB]</code>.</p>
@@ -445,6 +532,8 @@ os = library(&quot;oscillators.lib&quot;);
 probe_peak_lin_test = db.probe_peak_lin(3, 1, os.osc(220));
 </code></pre>
 <h2 id="dynamics-probes">Dynamics Probes</h2>
+<p>Dynamics-related meters for crest factor and envelope tracking.
+Useful for checking transient behavior and overall dynamics.</p>
 <hr />
 <h3 id="dbprobe_crest_db"><code>(db.)probe_crest_db</code></h3>
 <p>Crest factor probe (peak/rms ratio in dB).</p>
@@ -510,6 +599,8 @@ os = library(&quot;oscillators.lib&quot;);
 probe_max_test = db.probe_max(7, 1, os.osc(220));
 </code></pre>
 <h2 id="signal-quality-probes">Signal Quality Probes</h2>
+<p>Signal integrity checks such as DC offset, slew rate, and ZCR.
+Helps detect bias, harsh transitions, or excessive high-frequency content.</p>
 <hr />
 <h3 id="dbprobe_dc"><code>(db.)probe_dc</code></h3>
 <p>DC offset probe (very lowpass).</p>
@@ -559,6 +650,8 @@ os = library(&quot;oscillators.lib&quot;);
 probe_zcr_test = db.probe_zcr(10, 1, os.osc(220));
 </code></pre>
 <h2 id="control-signal-probes">Control Signal Probes</h2>
+<p>Probes for control-rate or boolean signals.
+Use to visualize modulators, gates, and internal state values.</p>
 <hr />
 <h3 id="dbprobe_value"><code>(db.)probe_value</code></h3>
 <p>Raw value probe (no smoothing).</p>
@@ -592,6 +685,8 @@ os = library(&quot;oscillators.lib&quot;);
 probe_bool_test = db.probe_bool(12, 1, os.osc(220) &gt; 0);
 </code></pre>
 <h2 id="spectral-probes">Spectral Probes</h2>
+<p>Frequency-band and spectral analysis probes.
+Includes simple band meters plus centroid and multiband analysis.</p>
 <hr />
 <h3 id="dbprobe_band_lo"><code>(db.)probe_band_lo</code></h3>
 <p>Low-band energy probe (&lt;300 Hz).</p>
@@ -640,11 +735,293 @@ probe_band_mid_test = db.probe_band_mid(14, 1, os.osc(220));
 os = library(&quot;oscillators.lib&quot;);
 probe_band_hi_test = db.probe_band_hi(15, 1, os.osc(220));
 </code></pre>
+<hr />
+<h3 id="dbprobe_spectral_centroid"><code>(db.)probe_spectral_centroid</code></h3>
+<p>Spectral centroid estimate using multi-band analysis.
+Outputs frequency estimate of spectral "center of mass".</p>
+<h4 id="usage_16">Usage</h4>
+<pre><code>_ : probe_spectral_centroid(ID, HIDE) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+</ul>
+<h4 id="test_16">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_spectral_centroid_test = db.probe_spectral_centroid(43, 1, os.osc(220));
+</code></pre>
+<hr />
+<h3 id="dbprobe_multiband"><code>(db.)probe_multiband</code></h3>
+<p>Multi-band analyzer - outputs energy in N frequency bands.
+Designed for STFT-like time-frequency analysis via time-series capture.</p>
+<h4 id="usage_17">Usage</h4>
+<pre><code>_ : probe_multiband(ID, HIDE) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) base probe id used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+</ul>
+<p>Creates 8 probes at IDs ID through ID+7.</p>
+<h4 id="test_17">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_multiband_test = db.probe_multiband(44, 1, os.osc(220));
+</code></pre>
+<h2 id="analysis-probes">Analysis Probes</h2>
+<p>Targeted analysis probes for offline or diagnostic workflows.
+Includes parametric band energy and frequency ratio checks.</p>
+<hr />
+<h3 id="dbprobe_freq_lin"><code>(db.)probe_freq_lin</code></h3>
+<p>Parametric bandpass energy probe at a specific frequency.
+Use to verify presence of expected oscillator frequencies.</p>
+<h4 id="usage_18">Usage</h4>
+<pre><code>_ : probe_freq_lin(ID, HIDE, freq, q) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>freq</code>: center frequency in Hz</li>
+<li><code>q</code>: filter Q (higher = narrower band, typically 5-20)</li>
+</ul>
+<h4 id="test_18">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_freq_lin_test = db.probe_freq_lin(34, 1, 440, 10, os.osc(440));
+</code></pre>
+<hr />
+<h3 id="dbprobe_freq_db"><code>(db.)probe_freq_db</code></h3>
+<p>Parametric bandpass energy probe in dB at a specific frequency.</p>
+<h4 id="usage_19">Usage</h4>
+<pre><code>_ : probe_freq_db(ID, HIDE, freq, q) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>freq</code>: center frequency in Hz</li>
+<li><code>q</code>: filter Q (higher = narrower band, typically 5-20)</li>
+</ul>
+<h4 id="test_19">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_freq_db_test = db.probe_freq_db(35, 1, 440, 10, os.osc(440));
+</code></pre>
+<hr />
+<h3 id="dbprobe_freq_ratio"><code>(db.)probe_freq_ratio</code></h3>
+<p>Ratio between two frequency bands (useful for verifying oscillator balance).</p>
+<h4 id="usage_20">Usage</h4>
+<pre><code>_ : probe_freq_ratio(ID, HIDE, f1, f2, q) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>f1</code>: center frequency in Hz for the first band</li>
+<li><code>f2</code>: center frequency in Hz for the second band</li>
+<li><code>q</code>: filter Q (higher = narrower band, typically 5-20)</li>
+</ul>
+<h4 id="test_20">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_freq_ratio_test = db.probe_freq_ratio(36, 1, 440, 660, 12, os.osc(440));
+</code></pre>
+<h2 id="decay-probes">Decay Probes</h2>
+<p>Decay and release measurement helpers.
+Use to track envelope level, peaks, and decay thresholds.</p>
+<hr />
+<h3 id="dbprobe_env_lin"><code>(db.)probe_env_lin</code></h3>
+<p>Envelope state probe - outputs current envelope level for time-series capture.</p>
+<h4 id="usage_21">Usage</h4>
+<pre><code>_ : probe_env_lin(ID, HIDE, att_s, rel_s) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>att_s</code>: envelope attack time in seconds (e.g., 0.001)</li>
+<li><code>rel_s</code>: envelope release time in seconds (e.g., 0.1)</li>
+</ul>
+<h4 id="test_21">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_env_lin_test = db.probe_env_lin(37, 1, 0.001, 0.1, os.osc(220));
+</code></pre>
+<hr />
+<h3 id="dbprobe_env_db"><code>(db.)probe_env_db</code></h3>
+<p>Envelope state probe in dB - for decay time analysis.</p>
+<h4 id="usage_22">Usage</h4>
+<pre><code>_ : probe_env_db(ID, HIDE, att_s, rel_s) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>att_s</code>: envelope attack time in seconds (e.g., 0.001)</li>
+<li><code>rel_s</code>: envelope release time in seconds (e.g., 0.1)</li>
+</ul>
+<h4 id="test_22">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_env_db_test = db.probe_env_db(38, 1, 0.001, 0.1, os.osc(220));
+</code></pre>
+<hr />
+<h3 id="dbprobe_peak_hold"><code>(db.)probe_peak_hold</code></h3>
+<p>Peak hold probe - captures and holds peak value until reset.
+Useful for measuring maximum amplitude reached.</p>
+<h4 id="usage_23">Usage</h4>
+<pre><code>_ : probe_peak_hold(ID, HIDE, decay_s) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>decay_s</code>: time for held peak to decay (set high for true hold, e.g., 10.0)</li>
+</ul>
+<h4 id="test_23">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_peak_hold_test = db.probe_peak_hold(39, 1, 2.0, os.osc(220));
+</code></pre>
+<hr />
+<h3 id="dbprobe_below_threshold"><code>(db.)probe_below_threshold</code></h3>
+<p>Threshold crossing probe - outputs 1 when signal drops below threshold.
+Useful for detecting when decay is "complete".</p>
+<h4 id="usage_24">Usage</h4>
+<pre><code>_ : probe_below_threshold(ID, HIDE, thresh_db) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>thresh_db</code>: threshold in dB for "below" detection</li>
+</ul>
+<h4 id="test_24">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_below_threshold_test = db.probe_below_threshold(40, 1, -40, os.osc(220));
+</code></pre>
+<h2 id="attack-probes">Attack Probes</h2>
+<p>Attack/onset detection helpers.
+Useful for timing, transient detection, and trigger validation.</p>
+<hr />
+<h3 id="dbprobe_attack_state"><code>(db.)probe_attack_state</code></h3>
+<p>Attack phase detector - outputs 1 during attack, 0 otherwise.
+Attack is defined as: envelope rising AND above noise floor.</p>
+<h4 id="usage_25">Usage</h4>
+<pre><code>_ : probe_attack_state(ID, HIDE, floor_db) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>floor_db</code>: noise floor threshold in dB</li>
+</ul>
+<h4 id="test_25">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_attack_state_test = db.probe_attack_state(41, 1, -60, os.osc(220));
+</code></pre>
+<hr />
+<h3 id="dbprobe_onset"><code>(db.)probe_onset</code></h3>
+<p>Onset detector - pulses 1 at signal onset (transition from silence to sound).</p>
+<h4 id="usage_26">Usage</h4>
+<pre><code>_ : probe_onset(ID, HIDE, thresh_db, holdoff_ms) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>thresh_db</code>: threshold for "sound present" (e.g., -40)</li>
+<li><code>holdoff_ms</code>: minimum time between onsets in ms</li>
+</ul>
+<h4 id="test_26">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_onset_test = db.probe_onset(42, 1, -40, 50, os.osc(220));
+</code></pre>
+<h2 id="analysis-signal-quality-probes">Analysis Signal Quality Probes</h2>
+<p>Additional signal-quality probes for analysis tasks.
+Includes precise DC measurement and silence detection.</p>
+<hr />
+<h3 id="dbprobe_dc_precise"><code>(db.)probe_dc_precise</code></h3>
+<p>Precise DC offset probe with very low cutoff for accurate measurement.</p>
+<h4 id="usage_27">Usage</h4>
+<pre><code>_ : probe_dc_precise(ID, HIDE) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+</ul>
+<h4 id="test_27">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_dc_precise_test = db.probe_dc_precise(56, 1, os.osc(2));
+</code></pre>
+<hr />
+<h3 id="dbprobe_silence"><code>(db.)probe_silence</code></h3>
+<p>Silence detector - outputs 1 when signal is effectively silent.</p>
+<h4 id="usage_28">Usage</h4>
+<pre><code>_ : probe_silence(ID, HIDE, thresh_db) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+<li><code>thresh_db</code>: threshold in dB below which the signal is considered silent</li>
+</ul>
+<h4 id="test_28">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_silence_test = db.probe_silence(57, 1, -60, os.osc(220));
+</code></pre>
+<h2 id="time-stamping">Time Stamping</h2>
+<p>Timebase probes for aligning analysis data.
+Use sample count or milliseconds for synchronization.</p>
+<hr />
+<h3 id="dbprobe_sample_count"><code>(db.)probe_sample_count</code></h3>
+<p>Sample counter probe - outputs current sample number (wraps at 2^24).
+Useful for synchronizing time-series data.</p>
+<h4 id="usage_29">Usage</h4>
+<pre><code>_ : probe_sample_count(ID, HIDE) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+</ul>
+<h4 id="test_29">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_sample_count_test = db.probe_sample_count(58, 1, os.osc(220));
+</code></pre>
+<hr />
+<h3 id="dbprobe_time_ms"><code>(db.)probe_time_ms</code></h3>
+<p>Time probe in milliseconds (wraps at ~16 seconds at 44.1kHz).</p>
+<h4 id="usage_30">Usage</h4>
+<pre><code>_ : probe_time_ms(ID, HIDE) : _
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>ID</code>: (CNE) probe id integer used in <code>[probe:ID]</code></li>
+<li><code>HIDE</code>: (CNE) 0 to show, 1 to hide in UI</li>
+</ul>
+<h4 id="test_30">Test</h4>
+<pre><code>db = library(&quot;debug.lib&quot;);
+os = library(&quot;oscillators.lib&quot;);
+probe_time_ms_test = db.probe_time_ms(59, 1, os.osc(220));
+</code></pre>
 <h2 id="tap-utilities">Tap Utilities</h2>
+<p>Utilities for tapping signals without changing arity.
+Use to branch analysis meters while preserving main signal flow.</p>
 <hr />
 <h3 id="dbprobe_tap"><code>(db.)probe_tap</code></h3>
 <p>Tap a signal for side-effect analysis without changing output arity.</p>
-<h4 id="usage_16">Usage</h4>
+<h4 id="usage_31">Usage</h4>
 <pre><code>_ : probe_tap(F) : _
 </code></pre>
 <p>Where:</p>
@@ -665,7 +1042,7 @@ process = os.osc(220)
   : db.probe_tap(db.probe_rms_db(0, 1))
   : fi.lowpass(4, 2000);
 </code></pre>
-<h4 id="test_16">Test</h4>
+<h4 id="test_31">Test</h4>
 <pre><code>db = library(&quot;debug.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 tap_test = db.probe_tap(db.probe_rms_db(0, 1), os.osc(220));
@@ -674,7 +1051,7 @@ tap_test = db.probe_tap(db.probe_rms_db(0, 1), os.osc(220));
 <h3 id="dbprobe_tap_n"><code>(db.)probe_tap_n</code></h3>
 <p>Tap an N-channel signal with a processor that takes N inputs and produces 1 output.
 The original N-channel signal passes through unchanged.</p>
-<h4 id="usage_17">Usage</h4>
+<h4 id="usage_32">Usage</h4>
 <pre><code>probe_tap_n(N, F)
 </code></pre>
 <p>Where:</p>
@@ -700,7 +1077,7 @@ process = stereo
   : db.probe_tap_n(2,  + : db.probe_rms_db(100, 1))
   : (fi.lowpass(2, 8000), fi.lowpass(2, 8000));
 </code></pre>
-<h4 id="test_17">Test</h4>
+<h4 id="test_32">Test</h4>
 <pre><code>db = library(&quot;debug.lib&quot;);
 os = library(&quot;oscillators.lib&quot;);
 tap_n_test = (os.osc(220), os.osc(330)) : db.probe_tap_n(2, +);
