@@ -8,6 +8,7 @@
 // Debug probes can be compiled out by setting the `DEBUG` global to 0 via
 // explicit substitution (e.g. `db[DEBUG=0;].probe_rms_db(...)`).
 // CNE means constant numerical expression (known at compile time).
+// `[probe:ID]` metadata tags are used to identify probes in the UI
 //
 // The Debug library is organized into 11 sections:
 //
@@ -47,6 +48,32 @@ DEBUG = 1; // 0: bypass probes (identity), 1: enable probes
 // Use for coarse gain staging and headroom validation.
 //========================================================================================
 
+//------------------`(db.)probe_rms_lin`---------------------------------------
+// RMS level probe (linear).
+//
+// #### Usage
+//
+// ```
+// _ : probe_rms_lin(ID, HIDE) : _
+// ```
+//
+// Where:
+//
+// * `ID`: (CNE) probe id integer used in `[probe:ID]`
+// * `HIDE`: (CNE) 0 to show, 1 to hide in UI
+//
+// #### Test
+// ```
+// db = library("debug.lib");
+// os = library("oscillators.lib");
+// probe_rms_lin_test = db.probe_rms_lin(1, 1, os.osc(220));
+// ```
+//-----------------------------------------------------------------------------
+probe_rms_lin_impl(0, id, hide, x) = x;
+probe_rms_lin_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
+  : hbargraph("Probe RMS%2id[probe:%id][hidden:%hide]", 0, 1));
+probe_rms_lin(id, hide, x) = probe_rms_lin_impl(DEBUG, id, hide, x);
+
 //------------------`(db.)probe_rms_db`----------------------------------------
 // RMS level probe (dB). Bargraph includes `[unit:dB]`.
 //
@@ -74,13 +101,13 @@ probe_rms_db_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
   : hbargraph("Probe RMS dB%2id[probe:%id][unit:dB][hidden:%hide]", -60, 0));
 probe_rms_db(id, hide, x) = probe_rms_db_impl(DEBUG, id, hide, x);
 
-//------------------`(db.)probe_rms_lin`---------------------------------------
-// RMS level probe (linear).
+//------------------`(db.)probe_peak_lin`--------------------------------------
+// Peak level probe (linear).
 //
 // #### Usage
 //
 // ```
-// _ : probe_rms_lin(ID, HIDE) : _
+// _ : probe_peak_lin(ID, HIDE) : _
 // ```
 //
 // Where:
@@ -92,13 +119,14 @@ probe_rms_db(id, hide, x) = probe_rms_db_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// probe_rms_lin_test = db.probe_rms_lin(1, 1, os.osc(220));
+// probe_peak_lin_test = db.probe_peak_lin(3, 1, os.osc(220));
 // ```
 //-----------------------------------------------------------------------------
-probe_rms_lin_impl(0, id, hide, x) = x;
-probe_rms_lin_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
-  : hbargraph("Probe RMS%2id[probe:%id][hidden:%hide]", 0, 1));
-probe_rms_lin(id, hide, x) = probe_rms_lin_impl(DEBUG, id, hide, x);
+probe_peak_lin_impl(0, id, hide, x) = x;
+probe_peak_lin_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
+  : hbargraph("Probe Peak%2id[probe:%id][hidden:%hide]", 0, 1));
+probe_peak_lin(id, hide, x) = probe_peak_lin_impl(DEBUG, id, hide, x);
+
 
 //------------------`(db.)probe_peak_db`---------------------------------------
 // Peak level probe (dB). Bargraph includes `[unit:dB]`.
@@ -126,32 +154,6 @@ probe_peak_db_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
   : max(0.00001) : ba.linear2db
   : hbargraph("Probe Peak dB%2id[probe:%id][unit:dB][hidden:%hide]", -60, 0));
 probe_peak_db(id, hide, x) = probe_peak_db_impl(DEBUG, id, hide, x);
-
-//------------------`(db.)probe_peak_lin`--------------------------------------
-// Peak level probe (linear).
-//
-// #### Usage
-//
-// ```
-// _ : probe_peak_lin(ID, HIDE) : _
-// ```
-//
-// Where:
-//
-// * `ID`: (CNE) probe id integer used in `[probe:ID]`
-// * `HIDE`: (CNE) 0 to show, 1 to hide in UI
-//
-// #### Test
-// ```
-// db = library("debug.lib");
-// os = library("oscillators.lib");
-// probe_peak_lin_test = db.probe_peak_lin(3, 1, os.osc(220));
-// ```
-//-----------------------------------------------------------------------------
-probe_peak_lin_impl(0, id, hide, x) = x;
-probe_peak_lin_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
-  : hbargraph("Probe Peak%2id[probe:%id][hidden:%hide]", 0, 1));
-probe_peak_lin(id, hide, x) = probe_peak_lin_impl(DEBUG, id, hide, x);
 
 //=============================Dynamics Probes============================================
 // Dynamics-related meters for crest factor and envelope tracking.
