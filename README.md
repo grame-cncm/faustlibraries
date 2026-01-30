@@ -44,6 +44,10 @@ $ make help
 
 Publishing is handled by GitHub Actions. Pushing to the main branch will build and deploy the site.
 
+### LLMs
+
+The site exposes an `llms.txt` file generated from `doc/docs/llms.txt` and published at `https://faustlibraries.grame.fr/llms.txt`.
+
 ### WARNING!!
 
 - never delete the **doc/docs/CNAME** file (which is mandatory for the final generated site to work)
