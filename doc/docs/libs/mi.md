@@ -1,0 +1,497 @@
+#  mi.lib 
+
+This ongoing work is the fruit of a collaboration between GRAME-CNCM and
+the ANIS (Arts Numériques et Immersions Sensorielles) research group from
+GIPSA-Lab (Université Grenoble Alpes).
+
+This library implements basic 1-DoF mass-interaction physics algorithms,
+allowing to declare and connect physical elements (masses, springs, non
+linear interactions, etc.) together to form topological networks.
+Models can be assembled by hand, however in more complex scenarios it is
+recommended to use a scripting tool (such as MIMS) to generate the FAUST
+signal routing for a given physical network. Its official prefix is `mi`.
+
+[Video introduction to Mass Interaction](https://faust.grame.fr/community/events/#an-introduction-to-mass-interaction-modelling-in-faust-james-leonard-and-jerome-villeneuve)
+
+[LAC 2019 Paper](https://hal.science/hal-02270654)
+
+## Sources
+
+The core mass-interaction algorithms implemented in this library are in the public
+domain and are disclosed in the following scientific publications:
+
+* Claude Cadoz, Annie Luciani, Jean-Loup Florens, Curtis Roads and Françoise
+Chabade. Responsive Input Devices and Sound Synthesis by Stimulation of
+Instrumental Mechanisms: The Cordis System. Computer Music Journal, Vol 8.
+No. 3, 1984.
+* Claude Cadoz, Annie Luciani and Jean Loup Florens. CORDIS-ANIMA: A Modeling
+and Simulation System for Sound and Image Synthesis: The General Formalism.
+Computer Music Journal. Vol. 17, No. 1, 1993.
+* Alexandros Kontogeorgakopoulos and Claude Cadoz. Cordis Anima Physical
+Modeling and Simulation System Analysis. In Proceedings of the Sound and Music
+Computing Conference (SMC-07), Lefkada, Greece, 2007.
+* Nicolas Castagne, Claude Cadoz, Ali Allaoui and Olivier Tache. G3: Genesis
+Software Environment Update. In Proceedings of the International Computer
+Music Conference (ICMC-09), Montreal, Canada, 2009.
+* Nicolas Castagné and Claude Cadoz. Genesis 3: Plate-forme pour la création
+musicale à l'aide des modèles physiques Cordis-Anima. In Proceedings of the
+Journée de l'Informatique Musicale, Grenoble, France, 2009.
+* Edgar Berdahl and Julius O. Smith. An Introduction to the Synth-A-Modeler
+Compiler: Modular and Open-Source Sound Synthesis using Physical Models. In
+Proceedings of the Linux Audio Conference (LAC-12), Stanford, USA, 2012.
+* James Leonard and Claude Cadoz. Physical Modelling Concepts for a Collection
+of Multisensory Virtual Musical Instruments. In Proceedings of the New
+Interfaces for Musical Expression (NIME-15) Conference, Baton Rouge, USA, 2015.
+
+The MI library is organized into 3 sections:
+
+* [Utility Functions](#utility-functions)
+* [Mass Algorithms](#mass-algorithms)
+* [Interaction Algorithms](#interaction-algorithms)
+
+#### References
+
+* [https://github.com/grame-cncm/faustlibraries/blob/master/mi.lib](https://github.com/grame-cncm/faustlibraries/blob/master/mi.lib)
+
+## Utility Functions
+
+These utility functions are used to help certain operations (e.g. define initial
+positions and velocities for physical elements).
+
+----
+
+### `(mi.)initState`
+
+Used to set initial delayed position values that must be initialised
+at step 0 of the physics simulation.
+
+If you develop any of your own modules, you will need to use this (see
+`mass` and `springDamper` algorithm codes for examples).
+
+#### Usage
+
+```
+x : initState(x0) : _
+```
+
+Where:
+
+* `x`: position value signal
+* `x0`: initial value for position
+
+#### Test
+```
+mi = library("mi.lib");
+initState_test = button("impulse") : mi.initState(1.0);
+```
+
+## Mass Algorithms
+
+All mass-type physical element functions are declared here. They all expect to receive
+a force input signal and produce a position signal.
+All physical parameters are expressed in sample-rate dependant values.
+
+----
+
+### `(mi.)mass`
+
+Implementation of a punctual mass element.
+Takes an input force and produces output position.
+
+#### Usage
+
+```
+mass(m, grav, x0, xr0),_ : _
+```
+
+Where:
+
+* `m`: mass value
+* `grav`: gravity force value
+* `x0`: initial position
+* `xr0`: initial delayed position (inferred from initial velocity)
+
+#### Test
+```
+mi = library("mi.lib");
+mass_test = 0 : mi.mass(1.0, 0.0, 0.0, 0.0);
+```
+
+----
+
+### `(mi.)oscil`
+
+Implementation of a simple linear harmonic oscillator.
+Takes an input force and produces output position.
+
+#### Usage
+
+```
+oscil(m, k, z, grav, x0, xr0),_ : _
+```
+
+Where:
+
+* `m`: mass value
+* `k`: stiffness value
+* `z`: damping value
+* `grav`: gravity force value
+* `x0`: initial position
+* `xr0`: initial delayed position (inferred from initial velocity)
+
+#### Test
+```
+mi = library("mi.lib");
+oscil_test = 0 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.0, 0.0);
+```
+
+----
+
+### `(mi.)ground`
+
+Implementation of a fixed point element.
+The position output produced by this module never changes, however
+it still expects a force input signal (for compliance with connection
+rules).
+
+#### Usage
+
+```
+ground(x0),_ : _
+```
+
+Where:
+
+* `x0`: initial position
+
+#### Test
+```
+mi = library("mi.lib");
+ground_test = 0 : mi.ground(0.0);
+```
+
+----
+
+### `(mi.)posInput`
+
+Implementation of a position input module (driven by an outside
+signal). Takes two signal inputs: incoming force (which doesn't
+affect position) and the driving position signal.
+
+#### Usage
+
+```
+posInput(x0),_,_ : _
+```
+
+Where:
+
+* `x0`: initial position
+
+#### Test
+```
+mi = library("mi.lib");
+os = library("oscillators.lib");
+posInput_test = 0, os.osc(1) : mi.posInput(0.0);
+```
+
+## Interaction Algorithms
+
+All interaction-type physical element functions are declared here. They each expect to
+receive two position signals (coming from the two mass-elements that they connect) and
+produce two equal and opposite force signals that must be routed back to the mass
+elements' inputs.
+All physical parameters are expressed in sample-rate dependant values.
+
+----
+
+### `(mi.)spring`
+
+Implementation of a linear elastic spring interaction.
+
+#### Usage
+
+```
+spring(k, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `k`: stiffness value
+* `x1r`: initial delayed position of mass 1 (unused here)
+* `x2r`: initial delayed position of mass 2 (unused here)
+
+#### Test
+```
+mi = library("mi.lib");
+spring_test = mi.spring(10.0, 0.0, 0.0, 0.1, -0.1);
+```
+
+----
+
+### `(mi.)damper`
+
+Implementation of a linear damper interaction.
+Beware: in 32bit precision mode, damping forces can become
+truncated if position values are not centered around zero!
+
+#### Usage
+
+```
+damper(z, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `z`: damping value
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+damper_test = mi.damper(0.5, 0.0, 0.0, 0.2, -0.2);
+```
+
+----
+
+### `(mi.)springDamper`
+
+Implementation of a linear viscoelastic spring-damper interaction
+(a combination of the spring and damper modules).
+
+#### Usage
+
+```
+springDamper(k, z, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `k`: stiffness value
+* `z`: damping value
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+springDamper_test = mi.springDamper(5.0, 0.3, 0.0, 0.0, 0.1, -0.1);
+```
+
+----
+
+### `(mi.)nlSpringDamper2`
+
+Implementation of a non-linear viscoelastic spring-damper interaction
+containing a quadratic term (function of squared distance).
+Beware: at high displacements, this interaction will break numerical
+stability conditions ! The `nlSpringDamperClipped` is a safer option.
+
+#### Usage
+
+```
+nlSpringDamper2(k, q, z, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `k`: linear stiffness value
+* `q`: quadratic stiffness value
+* `z`: damping value
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+nlSpringDamper2_test = mi.nlSpringDamper2(5.0, 1.0, 0.2, 0.0, 0.0, 0.1, -0.1);
+```
+
+----
+
+### `(mi.)nlSpringDamper3`
+
+Implementation of a non-linear viscoelastic spring-damper interaction
+containing a cubic term (function of distance^3).
+Beware: at high displacements, this interaction will break numerical
+stability conditions ! The `nlSpringDamperClipped` is a safer option.
+
+#### Usage
+
+```
+nlSpringDamper3(k, q, z, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `k`: linear stiffness value
+* `q`: cubic stiffness value
+* `z`: damping value
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+nlSpringDamper3_test = mi.nlSpringDamper3(5.0, 0.5, 0.2, 0.0, 0.0, 0.1, -0.1);
+```
+
+----
+
+### `(mi.)nlSpringDamperClipped`
+
+Implementation of a non-linear viscoelastic spring-damper interaction
+containing a cubic term (function of distance^3), bound by an
+upper linear stiffness (hard-clipping).
+
+This bounding means that when faced with strong displacements, the
+interaction profile will "clip" at a given point and never produce
+forces higher than the bounding equivalent linear spring, stopping models
+from becoming unstable.
+
+So far the interaction clips "hard" (with no soft-knee spline
+interpolation, etc.)
+
+#### Usage
+
+```
+nlSpringDamperClipped(s, c, k, z, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `s`: linear stiffness value
+* `c`: cubic stiffness value
+* `k`: upper-bound linear stiffness value
+* `z`: (linear) damping value
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+nlSpringDamperClipped_test = mi.nlSpringDamperClipped(5.0, 0.5, 8.0, 0.2, 0.0, 0.0, 0.1, -0.1);
+```
+
+----
+
+### `(mi.)nlPluck`
+
+Implementation of a piecewise linear plucking interaction.
+The symmetric function provides a repulsive viscoelastic interaction
+upon contact, until a tipping point is reached (when the plucking occurs).
+The tipping point depends both on the stiffness and the distance scaling
+of the interaction.
+
+
+#### Usage
+
+```
+nlPluck(knl, scale, z, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `knl`: stiffness scaling parameter (vertical stretch of the NL function)
+* `scale`: distance scaling parameter (horizontal stretch of the NL function)
+* `z`: (linear) damping value
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+nlPluck_test = mi.nlPluck(5.0, 0.1, 0.2, 0.0, 0.0, 0.05, -0.05);
+```
+
+----
+
+### `(mi.)nlBow`
+
+Implementation of a non-linear friction based interaction
+that allows for stick-slip bowing behaviour.
+Two versions are proposed : a piecewise linear function (very
+similar to the `nlPluck`) or a mathematical approximation (see
+Stefan Bilbao's book, Numerical Sound Synthesis).
+
+
+#### Usage
+
+```
+nlBow(znl, scale, type, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `znl`: friction scaling parameter (vertical stretch of the NL function)
+* `scale`: velocity scaling parameter (horizontal stretch of the NL function)
+* `type`: interaction profile (0 = piecewise linear, 1 = smooth function)
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+nlBow_test = mi.nlBow(0.5, 0.1, 1.0, 0.0, 0.0, 0.05, -0.05);
+```
+
+----
+
+### `(mi.)collision`
+
+Implementation of a collision interaction, producing linear visco-elastic
+repulsion forces when two mass elements are interpenetrating.
+
+
+#### Usage
+
+```
+collision(k, z, thres, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `k`: collision stiffness parameter
+* `z`: collision damping parameter
+* `thres`: threshold distance for the contact between elements
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+collision_test = mi.collision(5.0, 0.2, 0.01, 0.0, 0.0, 0.0, -0.02);
+```
+
+----
+
+### `(mi.)nlCollisionClipped`
+
+Implementation of a collision interaction, producing non-linear
+visco-elastic repulsion forces when two mass elements are interpenetrating.
+Bound by an upper stiffness value to maintain stability.
+This interaction is particularly useful for more realistic contact dynamics
+(greater difference in velocity provides sharper contacts, and reciprocally).
+
+#### Usage
+
+```
+nlCollisionClipped(s, c, k, z, thres, x1r, x2r),_,_ : _,_
+```
+
+Where:
+
+* `s`: collision linear stiffness parameter
+* `c`: collision cubic stiffness parameter
+* `k`: collision upper-bounding stiffness parameter
+* `z`: collision damping parameter
+* `thres`: threshold distance for the contact between elements
+* `x1r`: initial delayed position of mass 1
+* `x2r`: initial delayed position of mass 2
+
+#### Test
+```
+mi = library("mi.lib");
+nlCollisionClipped_test = mi.nlCollisionClipped(3.0, 0.5, 6.0, 0.2, 0.01, 0.0, 0.0, 0.0, -0.02);
+```

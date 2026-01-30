@@ -33,7 +33,7 @@ When ready, you can generate the documentation web site. Type:
 ~~~~~~~~~~~~~~~~
 $ make build
 ~~~~~~~~~~~~~~~~
-The web site will be available from the `docs` folder at the root of the `faustlibraries` folder
+The web site will be available from the `site` folder at the root of the `faustlibraries` folder
 
 More details on the build process:
 ~~~~~~~~~~~~~~~~
@@ -42,12 +42,8 @@ $ make help
 
 ### Publishing 
 
-The docs folder at root level contains all files that will be published. To make the current version publicly available:
-- add all the new files using `git add docs`
-- commit using `git commit -am "message"` (so new files and deleted files will be commited, except docs/CNAME file) 
-- and push the commit
+Publishing is handled by GitHub Actions. Pushing to the main branch will build and deploy the site.
 
 ### WARNING!!
 
-- never delete the **docs/CNAME file** (which is mandatory for the final generated site to work)
-- in case it has been removed, restore it using `git checkout docs/CNAME`
+- never delete the **doc/docs/CNAME** file (which is mandatory for the final generated site to work)

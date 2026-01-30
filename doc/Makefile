@@ -3,7 +3,6 @@ MAKE 	?= make
 AWK		?= gawk
 
 DOCDIR   := docs
-SITEDIR	 := ../docs
 FAUSTLIBS ?= ../../faustlibraries
 
 # Use doc.lib (instead of all.lib) to list all needed files, including the one in subfolders
@@ -36,7 +35,6 @@ build:
 	$(MAKE) md
 	$(MAKE) index
 	mkdocs build
-	git checkout $(SITEDIR)/CNAME
 
 serve:
 	@echo "you can browse the site at http://localhost:8000"
