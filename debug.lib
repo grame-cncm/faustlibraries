@@ -38,7 +38,7 @@ si = library("signals.lib");
 db = library("debug.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Debug Library";
-declare version "0.3.0";
+declare version "0.3.1";
 
 // Global parameter to enable/disable debug probes.
 DEBUG = 1; // 0: bypass probes (identity), 1: enable probes
@@ -71,7 +71,7 @@ DEBUG = 1; // 0: bypass probes (identity), 1: enable probes
 //-----------------------------------------------------------------------------
 probe_rms_lin_impl(0, id, hide, x) = x;
 probe_rms_lin_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
-  : hbargraph("Probe RMS%2id[probe:%id][hidden:%hide]", 0, 1));
+  : hbargraph("Probe RMS%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_rms_lin(id, hide, x) = probe_rms_lin_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_rms_db`----------------------------------------
@@ -98,7 +98,7 @@ probe_rms_lin(id, hide, x) = probe_rms_lin_impl(DEBUG, id, hide, x);
 probe_rms_db_impl(0, id, hide, x) = x;
 probe_rms_db_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
   : max(0.00001) : ba.linear2db
-  : hbargraph("Probe RMS dB%2id[probe:%id][unit:dB][hidden:%hide]", -60, 0));
+  : hbargraph("Probe RMS dB%2id [probe:%id][unit:dB][hidden:%hide]", -60, 0));
 probe_rms_db(id, hide, x) = probe_rms_db_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_peak_lin`--------------------------------------
@@ -124,7 +124,7 @@ probe_rms_db(id, hide, x) = probe_rms_db_impl(DEBUG, id, hide, x);
 //-----------------------------------------------------------------------------
 probe_peak_lin_impl(0, id, hide, x) = x;
 probe_peak_lin_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
-  : hbargraph("Probe Peak%2id[probe:%id][hidden:%hide]", 0, 1));
+  : hbargraph("Probe Peak%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_peak_lin(id, hide, x) = probe_peak_lin_impl(DEBUG, id, hide, x);
 
 
@@ -152,7 +152,7 @@ probe_peak_lin(id, hide, x) = probe_peak_lin_impl(DEBUG, id, hide, x);
 probe_peak_db_impl(0, id, hide, x) = x;
 probe_peak_db_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
   : max(0.00001) : ba.linear2db
-  : hbargraph("Probe Peak dB%2id[probe:%id][unit:dB][hidden:%hide]", -60, 0));
+  : hbargraph("Probe Peak dB%2id [probe:%id][unit:dB][hidden:%hide]", -60, 0));
 probe_peak_db(id, hide, x) = probe_peak_db_impl(DEBUG, id, hide, x);
 
 //=============================Dynamics Probes============================================
@@ -185,7 +185,7 @@ probe_crest_db_impl(0, id, hide, x) = x;
 probe_crest_db_impl(1, id, hide, x) = attach(x,
   (an.peak_envelope(0.1, x) / max(0.00001, an.rms_envelope_rect(0.1, x)))
   : ba.linear2db
-  : hbargraph("Probe Crest%2id[probe:%id][unit:dB][hidden:%hide]", 0, 20));
+  : hbargraph("Probe Crest%2id [probe:%id][unit:dB][hidden:%hide]", 0, 20));
 probe_crest_db(id, hide, x) = probe_crest_db_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_env`-------------------------------------------
@@ -212,7 +212,7 @@ probe_crest_db(id, hide, x) = probe_crest_db_impl(DEBUG, id, hide, x);
 probe_env_impl(0, id, hide, x) = x;
 probe_env_impl(1, id, hide, x) = attach(x,
   an.amp_follower_ar(0.05, 0.2, x)
-  : hbargraph("Probe Env%2id[probe:%id][hidden:%hide]", 0, 1));
+  : hbargraph("Probe Env%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_env(id, hide, x) = probe_env_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_min`-------------------------------------------
@@ -239,7 +239,7 @@ probe_env(id, hide, x) = probe_env_impl(DEBUG, id, hide, x);
 probe_min_impl(0, id, hide, x) = x;
 probe_min_impl(1, id, hide, x) = attach(x,
   (x * -1) : an.peak_envelope(0.5) : (_ * -1)
-  : hbargraph("Probe Min%2id[probe:%id][hidden:%hide]", -2, 2));
+  : hbargraph("Probe Min%2id [probe:%id][hidden:%hide]", -2, 2));
 probe_min(id, hide, x) = probe_min_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_max`-------------------------------------------
@@ -266,7 +266,7 @@ probe_min(id, hide, x) = probe_min_impl(DEBUG, id, hide, x);
 probe_max_impl(0, id, hide, x) = x;
 probe_max_impl(1, id, hide, x) = attach(x,
   an.peak_envelope(0.5, x)
-  : hbargraph("Probe Max%2id[probe:%id][hidden:%hide]", -2, 2));
+  : hbargraph("Probe Max%2id [probe:%id][hidden:%hide]", -2, 2));
 probe_max(id, hide, x) = probe_max_impl(DEBUG, id, hide, x);
 
 //===========================Signal Quality Probes========================================
@@ -298,7 +298,7 @@ probe_max(id, hide, x) = probe_max_impl(DEBUG, id, hide, x);
 probe_dc_impl(0, id, hide, x) = x;
 probe_dc_impl(1, id, hide, x) = attach(x,
   fi.lowpass(1, 5, x)
-  : hbargraph("Probe DC%2id[probe:%id][hidden:%hide]", -1, 1));
+  : hbargraph("Probe DC%2id [probe:%id][hidden:%hide]", -1, 1));
 probe_dc(id, hide, x) = probe_dc_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_slew`------------------------------------------
@@ -325,7 +325,7 @@ probe_dc(id, hide, x) = probe_dc_impl(DEBUG, id, hide, x);
 probe_slew_impl(0, id, hide, x) = x;
 probe_slew_impl(1, id, hide, x) = attach(x,
   (x - x') : abs : an.rms_envelope_rect(0.05)
-  : hbargraph("Probe Slew%2id[probe:%id][hidden:%hide]", 0, 1));
+  : hbargraph("Probe Slew%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_slew(id, hide, x) = probe_slew_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_zcr`-------------------------------------------
@@ -352,7 +352,7 @@ probe_slew(id, hide, x) = probe_slew_impl(DEBUG, id, hide, x);
 probe_zcr_impl(0, id, hide, x) = x;
 probe_zcr_impl(1, id, hide, x) = attach(x,
   an.zcr(0.1, x)
-  : hbargraph("Probe ZCR%2id[probe:%id][hidden:%hide]", 0, 1));
+  : hbargraph("Probe ZCR%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_zcr(id, hide, x) = probe_zcr_impl(DEBUG, id, hide, x);
 
 //===========================Control Signal Probes========================================
@@ -383,7 +383,7 @@ probe_zcr(id, hide, x) = probe_zcr_impl(DEBUG, id, hide, x);
 //-----------------------------------------------------------------------------
 probe_value_impl(0, id, hide, x) = x;
 probe_value_impl(1, id, hide, x) = attach(x,
-  x : hbargraph("Probe Val%2id[probe:%id][hidden:%hide]", -1, 1));
+  x : hbargraph("Probe Val%2id [probe:%id][hidden:%hide]", -1, 1));
 probe_value(id, hide, x) = probe_value_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_bool`------------------------------------------
@@ -409,7 +409,7 @@ probe_value(id, hide, x) = probe_value_impl(DEBUG, id, hide, x);
 //-----------------------------------------------------------------------------
 probe_bool_impl(0, id, hide, x) = x;
 probe_bool_impl(1, id, hide, x) = attach(x,
-  x : hbargraph("Probe Bool%2id[probe:%id][hidden:%hide]", 0, 1));
+  x : hbargraph("Probe Bool%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_bool(id, hide, x) = probe_bool_impl(DEBUG, id, hide, x);
 
 //==============================Spectral Probes===========================================
@@ -441,7 +441,7 @@ probe_bool(id, hide, x) = probe_bool_impl(DEBUG, id, hide, x);
 probe_band_lo_impl(0, id, hide, x) = x;
 probe_band_lo_impl(1, id, hide, x) = attach(x,
   fi.lowpass(2, 300, x) : an.rms_envelope_rect(0.1)
-  : hbargraph("Probe Lo%2id[probe:%id][hidden:%hide]", 0, 1));
+  : hbargraph("Probe Lo%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_band_lo(id, hide, x) = probe_band_lo_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_band_mid`--------------------------------------
@@ -468,7 +468,7 @@ probe_band_lo(id, hide, x) = probe_band_lo_impl(DEBUG, id, hide, x);
 probe_band_mid_impl(0, id, hide, x) = x;
 probe_band_mid_impl(1, id, hide, x) = attach(x,
   fi.bandpass(2, 300, 3000, x) : an.rms_envelope_rect(0.1)
-  : hbargraph("Probe Mid%2id[probe:%id][hidden:%hide]", 0, 1));
+  : hbargraph("Probe Mid%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_band_mid(id, hide, x) = probe_band_mid_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_band_hi`---------------------------------------
@@ -495,7 +495,7 @@ probe_band_mid(id, hide, x) = probe_band_mid_impl(DEBUG, id, hide, x);
 probe_band_hi_impl(0, id, hide, x) = x;
 probe_band_hi_impl(1, id, hide, x) = attach(x,
   fi.highpass(2, 3000, x) : an.rms_envelope_rect(0.1)
-  : hbargraph("Probe Hi%2id[probe:%id][hidden:%hide]", 0, 1));
+  : hbargraph("Probe Hi%2id [probe:%id][hidden:%hide]", 0, 1));
 probe_band_hi(id, hide, x) = probe_band_hi_impl(DEBUG, id, hide, x);
 
 
@@ -549,7 +549,7 @@ with {
   total_energy = energies :> _ : max(1e-6);
 
   centroid = weighted_sum / total_energy
-    : hbargraph("Centroid%2id[probe:%id][unit:Hz][hidden:%hide]", 0, 10000);
+    : hbargraph("Centroid%2id [probe:%id][unit:Hz][hidden:%hide]", 0, 10000);
 };
 declare probe_spectral_centroid author "David Löwenfels";
 probe_spectral_centroid(id, hide, x) = probe_spectral_centroid_impl(DEBUG, id, hide, x);
@@ -579,24 +579,30 @@ probe_spectral_centroid(id, hide, x) = probe_spectral_centroid_impl(DEBUG, id, h
 // ```
 //-----------------------------------------------------------------------------
 probe_multiband_impl(0, id, hide, x) = x;
-probe_multiband_impl(1, id, hide, x) = x <: (_, probes) : (_, par(i, 8, !))
+probe_multiband_impl(1, id, hide, x) = x <: (attach_all, probes) : (_, par(i, 8, !))
 with {
   band_lo(f) = fi.lowpass(2, f) : an.rms_envelope_rect(0.03);
   band_bp(f1, f2) = fi.bandpass(2, f1, f2) : an.rms_envelope_rect(0.03);
   band_hi(f) = fi.highpass(2, f) : an.rms_envelope_rect(0.03);
 
-  probes = (
-    (band_lo(200) : hbargraph("Band <200%2id[probe:%id][band:0][hidden:%hide]", 0, 1)),
-    (band_bp(200, 400) : hbargraph("Band 200-400%2id[probe:%id][band:1][hidden:%hide]", 0, 1)),
-    (band_bp(400, 600) : hbargraph("Band 400-600%2id[probe:%id][band:2][hidden:%hide]", 0, 1)),
-    (band_bp(600, 900) : hbargraph("Band 600-900%2id[probe:%id][band:3][hidden:%hide]", 0, 1)),
-    (band_bp(900, 1400) : hbargraph("Band 900-1400%2id[probe:%id][band:4][hidden:%hide]", 0, 1)),
-    (band_bp(1400, 2200) : hbargraph("Band 1400-2200%2id[probe:%id][band:5][hidden:%hide]", 0, 1)),
-    (band_bp(2200, 3500) : hbargraph("Band 2200-3500%2id[probe:%id][band:6][hidden:%hide]", 0, 1)),
-    (band_hi(3500) : hbargraph("Band >3500%2id[probe:%id][band:7][hidden:%hide]", 0, 1))
-  );
+  id0 = id; id1 = id+1; id2 = id+2; id3 = id+3;
+  id4 = id+4; id5 = id+5; id6 = id+6; id7 = id+7;
+
+  probe0 = band_lo(200) : hbargraph("Band <200 [%id0][probe:%id0][band:0][hidden:%hide]", 0, 1);
+  probe1 = band_bp(200, 400) : hbargraph("Band 200-400 [%id1][probe:%id1][band:1][hidden:%hide]", 0, 1);
+  probe2 = band_bp(400, 600) : hbargraph("Band 400-600 [%id2][probe:%id2][band:2][hidden:%hide]", 0, 1);
+  probe3 = band_bp(600, 900) : hbargraph("Band 600-900 [%id3][probe:%id3][band:3][hidden:%hide]", 0, 1);
+  probe4 = band_bp(900, 1400) : hbargraph("Band 900-1400 [%id4][probe:%id4][band:4][hidden:%hide]", 0, 1);
+  probe5 = band_bp(1400, 2200) : hbargraph("Band 1400-2200 [%id5][probe:%id5][band:5][hidden:%hide]", 0, 1);
+  probe6 = band_bp(2200, 3500) : hbargraph("Band 2200-3500 [%id6][probe:%id6][band:6][hidden:%hide]", 0, 1);
+  probe7 = band_hi(3500) : hbargraph("Band >3500 [%id7][probe:%id7][band:7][hidden:%hide]", 0, 1);
+
+  probes = probe0, probe1, probe2, probe3, probe4, probe5, probe6, probe7;
+  
+  // Force probes computation by attaching them all
+  attach_all = _ <: (_, (probes :> _)) : attach;
 };
-declare probe_multiband author "David Löwenfels";
+declare probe_multiband author "David Löwenfels";
 probe_multiband(id, hide, x) = probe_multiband_impl(DEBUG, id, hide, x);
 
 //==============================Analysis Probes===========================================
@@ -631,7 +637,7 @@ probe_multiband(id, hide, x) = probe_multiband_impl(DEBUG, id, hide, x);
 probe_freq_lin_impl(0, id, hide, freq, q, x) = x;
 probe_freq_lin_impl(1, id, hide, freq, q, x) = attach(x,
   fi.resonbp(freq, q, 1, x) : abs : an.rms_envelope_rect(0.05)
-  : hbargraph("Freq %freq Hz%2id[probe:%id][freq:%freq][q:%q][hidden:%hide]", 0, 1));
+  : hbargraph("Freq %freq Hz%2id [probe:%id][freq:%freq][q:%q][hidden:%hide]", 0, 1));
 declare probe_freq_lin author "David Löwenfels";
 probe_freq_lin(id, hide, freq, q, x) = probe_freq_lin_impl(DEBUG, id, hide, freq, q, x);
 
@@ -662,7 +668,7 @@ probe_freq_db_impl(0, id, hide, freq, q, x) = x;
 probe_freq_db_impl(1, id, hide, freq, q, x) = attach(x,
   fi.resonbp(freq, q, 1, x) : abs : an.rms_envelope_rect(0.05)
   : max(1e-6) : ba.linear2db
-  : hbargraph("Freq %freq Hz%2id[probe:%id][unit:dB][freq:%freq][q:%q][hidden:%hide]", -80, 0));
+  : hbargraph("Freq %freq Hz%2id [probe:%id][unit:dB][freq:%freq][q:%q][hidden:%hide]", -80, 0));
 declare probe_freq_db author "David Löwenfels";
 probe_freq_db(id, hide, freq, q, x) = probe_freq_db_impl(DEBUG, id, hide, freq, q, x);
 
@@ -693,7 +699,7 @@ probe_freq_db(id, hide, freq, q, x) = probe_freq_db_impl(DEBUG, id, hide, freq, 
 probe_freq_ratio_impl(0, id, hide, f1, f2, q, x) = x;
 probe_freq_ratio_impl(1, id, hide, f1, f2, q, x) = attach(x,
   (band1 / max(1e-6, band2))
-  : hbargraph("Ratio %f1/%f2%2id[probe:%id][hidden:%hide]", 0, 10))
+  : hbargraph("Ratio %f1/%f2%2id [probe:%id][hidden:%hide]", 0, 10))
 with {
   band1 = fi.resonbp(f1, q, 1, x) : abs : an.rms_envelope_rect(0.05);
   band2 = fi.resonbp(f2, q, 1, x) : abs : an.rms_envelope_rect(0.05);
@@ -732,7 +738,7 @@ probe_freq_ratio(id, hide, f1, f2, q, x) = probe_freq_ratio_impl(DEBUG, id, hide
 probe_env_lin_impl(0, id, hide, att, rel, x) = x;
 probe_env_lin_impl(1, id, hide, att, rel, x) = attach(x,
   an.amp_follower_ar(att, rel, x)
-  : hbargraph("Env%2id[probe:%id][attack:%att][release:%rel][hidden:%hide]", 0, 1));
+  : hbargraph("Env%2id [probe:%id][attack:%att][release:%rel][hidden:%hide]", 0, 1));
 declare probe_env_lin author "David Löwenfels";
 probe_env_lin(id, hide, att, rel, x) = probe_env_lin_impl(DEBUG, id, hide, att, rel, x);
 
@@ -796,7 +802,7 @@ with {
   env = abs(x);
   decay_coef = ba.tau2pole(decay_s);
   held = env : max ~ (_ * decay_coef)
-    : hbargraph("Peak Hold%2id[probe:%id][hidden:%hide]", 0, 1);
+    : hbargraph("Peak Hold%2id [probe:%id][hidden:%hide]", 0, 1);
 };
 declare probe_peak_hold author "David Löwenfels";
 probe_peak_hold(id, hide, decay_s, x) = probe_peak_hold_impl(DEBUG, id, hide, decay_s, x);
@@ -865,7 +871,7 @@ probe_below_threshold(id, hide, thresh_db, x) = probe_below_threshold_impl(DEBUG
 probe_attack_state_impl(0, id, hide, floor_db, x) = x;
 probe_attack_state_impl(1, id, hide, floor_db, x) = attach(x,
   (rising & above_floor)
-  : hbargraph("Attacking%2id[probe:%id][hidden:%hide]", 0, 1))
+  : hbargraph("Attacking%2id [probe:%id][hidden:%hide]", 0, 1))
 with {
   env = an.amp_follower_ar(0.0005, 0.01, x);
   env_db = env : max(1e-6) : ba.linear2db;
@@ -943,7 +949,7 @@ probe_onset(id, hide, thresh_db, holdoff_ms, x) = probe_onset_impl(DEBUG, id, hi
 probe_dc_precise_impl(0, id, hide, x) = x;
 probe_dc_precise_impl(1, id, hide, x) = attach(x,
   fi.lowpass(2, 2, x)
-  : hbargraph("DC Offset%2id[probe:%id][hidden:%hide]", -0.1, 0.1));
+  : hbargraph("DC Offset%2id [probe:%id][hidden:%hide]", -0.1, 0.1));
 declare probe_dc_precise author "David Löwenfels";
 probe_dc_precise(id, hide, x) = probe_dc_precise_impl(DEBUG, id, hide, x);
 
@@ -972,7 +978,7 @@ probe_dc_precise(id, hide, x) = probe_dc_precise_impl(DEBUG, id, hide, x);
 probe_silence_impl(0, id, hide, thresh_db, x) = x;
 probe_silence_impl(1, id, hide, thresh_db, x) = attach(x,
   (env_db < thresh_db)
-  : hbargraph("Silent%2id[probe:%id][thresh:%thresh_db][hidden:%hide]", 0, 1))
+  : hbargraph("Silent%2id [probe:%id][thresh:%thresh_db][hidden:%hide]", 0, 1))
 with {
   env_db = an.rms_envelope_rect(0.05, x) : max(1e-6) : ba.linear2db;
 };
@@ -1009,7 +1015,7 @@ probe_silence(id, hide, thresh_db, x) = probe_silence_impl(DEBUG, id, hide, thre
 probe_sample_count_impl(0, id, hide, x) = x;
 probe_sample_count_impl(1, id, hide, x) = attach(x,
   (+(1) : %(16777216)) ~ _  // 2^24 wrap
-  : hbargraph("Sample%2id[probe:%id][hidden:%hide]", 0, 16777216));
+  : hbargraph("Sample%2id [probe:%id][hidden:%hide]", 0, 16777216));
 declare probe_sample_count author "David Löwenfels";
 probe_sample_count(id, hide, x) = probe_sample_count_impl(DEBUG, id, hide, x);
 
@@ -1037,7 +1043,7 @@ probe_sample_count(id, hide, x) = probe_sample_count_impl(DEBUG, id, hide, x);
 probe_time_ms_impl(0, id, hide, x) = x;
 probe_time_ms_impl(1, id, hide, x) = attach(x,
   ((+(1) : %(int(ma.SR * 16))) ~ _) / ma.SR * 1000
-  : hbargraph("Time%2id[probe:%id][unit:ms][hidden:%hide]", 0, 16000));
+  : hbargraph("Time%2id [probe:%id][unit:ms][hidden:%hide]", 0, 16000));
 declare probe_time_ms author "David Löwenfels";
 probe_time_ms(id, hide, x) = probe_time_ms_impl(DEBUG, id, hide, x);
 
