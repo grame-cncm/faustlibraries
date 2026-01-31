@@ -8,7 +8,7 @@
 // Debug probes can be compiled out by setting the `DEBUG` global to 0 via
 // explicit substitution (e.g. `db[DEBUG=0;].probe_rms_db(...)`).
 // CNE means constant numerical expression (known at compile time).
-// `[probe:ID]` metadata tags are used to identify probes in the UI
+// `[probe:ID]` metadata tags are used to identify probes in the UI.
 //
 // The Debug library is organized into 11 sections:
 //
@@ -579,28 +579,37 @@ probe_spectral_centroid(id, hide, x) = probe_spectral_centroid_impl(DEBUG, id, h
 // ```
 //-----------------------------------------------------------------------------
 probe_multiband_impl(0, id, hide, x) = x;
-probe_multiband_impl(1, id, hide, x) = x <: (attach_all, probes) : (_, par(i, 8, !))
+probe_multiband_impl(1, id, hide, x) = attach(x, probes :> _)
 with {
-  band_lo(f) = fi.lowpass(2, f) : an.rms_envelope_rect(0.03);
-  band_bp(f1, f2) = fi.bandpass(2, f1, f2) : an.rms_envelope_rect(0.03);
-  band_hi(f) = fi.highpass(2, f) : an.rms_envelope_rect(0.03);
+  // 8-band analysis
+  bands = (
+    fi.lowpass(2, 200, x),
+    fi.bandpass(2, 200, 400, x),
+    fi.bandpass(2, 400, 600, x),
+    fi.bandpass(2, 600, 900, x),
+    fi.bandpass(2, 900, 1400, x),
+    fi.bandpass(2, 1400, 2200, x),
+    fi.bandpass(2, 2200, 3500, x),
+    fi.highpass(2, 3500, x)
+  );
 
-  id0 = id; id1 = id+1; id2 = id+2; id3 = id+3;
-  id4 = id+4; id5 = id+5; id6 = id+6; id7 = id+7;
+  // RMS of each band
+  energies = bands : par(i, 8, an.rms_envelope_rect(0.03));
 
-  probe0 = band_lo(200) : hbargraph("Band <200 [%id0][probe:%id0][band:0][hidden:%hide]", 0, 1);
-  probe1 = band_bp(200, 400) : hbargraph("Band 200-400 [%id1][probe:%id1][band:1][hidden:%hide]", 0, 1);
-  probe2 = band_bp(400, 600) : hbargraph("Band 400-600 [%id2][probe:%id2][band:2][hidden:%hide]", 0, 1);
-  probe3 = band_bp(600, 900) : hbargraph("Band 600-900 [%id3][probe:%id3][band:3][hidden:%hide]", 0, 1);
-  probe4 = band_bp(900, 1400) : hbargraph("Band 900-1400 [%id4][probe:%id4][band:4][hidden:%hide]", 0, 1);
-  probe5 = band_bp(1400, 2200) : hbargraph("Band 1400-2200 [%id5][probe:%id5][band:5][hidden:%hide]", 0, 1);
-  probe6 = band_bp(2200, 3500) : hbargraph("Band 2200-3500 [%id6][probe:%id6][band:6][hidden:%hide]", 0, 1);
-  probe7 = band_hi(3500) : hbargraph("Band >3500 [%id7][probe:%id7][band:7][hidden:%hide]", 0, 1);
+  // IDs (required for substitution)
+  id0=id; id1=id+1; id2=id+2; id3=id+3; id4=id+4; id5=id+5; id6=id+6; id7=id+7;
 
-  probes = probe0, probe1, probe2, probe3, probe4, probe5, probe6, probe7;
-  
-  // Force probes computation by attaching them all
-  attach_all = _ <: (_, (probes :> _)) : attach;
+  // Probes with unique IDs
+  probes = energies : (
+    hbargraph("Band 0 [%id0][probe:%id0][band:0][hidden:%hide]", 0, 1),
+    hbargraph("Band 1 [%id1][probe:%id1][band:1][hidden:%hide]", 0, 1),
+    hbargraph("Band 2 [%id2][probe:%id2][band:2][hidden:%hide]", 0, 1),
+    hbargraph("Band 3 [%id3][probe:%id3][band:3][hidden:%hide]", 0, 1),
+    hbargraph("Band 4 [%id4][probe:%id4][band:4][hidden:%hide]", 0, 1),
+    hbargraph("Band 5 [%id5][probe:%id5][band:5][hidden:%hide]", 0, 1),
+    hbargraph("Band 6 [%id6][probe:%id6][band:6][hidden:%hide]", 0, 1),
+    hbargraph("Band 7 [%id7][probe:%id7][band:7][hidden:%hide]", 0, 1)
+  );
 };
 declare probe_multiband author "David Löwenfels";
 probe_multiband(id, hide, x) = probe_multiband_impl(DEBUG, id, hide, x);
