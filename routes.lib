@@ -347,3 +347,172 @@ bubbleSort(N) = seq(i, N - 1, pairSortN(N - i), bus(i))
         pairSort = bus(2) <: select2(>), select2(<);
         pairSortN(N) = seq(i, N - 1, bus(i), pairSort, bus(N - i - 2));
     };
+
+
+//--------------------(ro.)bitonicSort------------------------------------------
+//
+// A bitonic sorter is a parallel sorting network that performs comparisons
+// and swaps on signal pairs iterativily. The pairs are selected according
+// to different index gaps, and the sorting direction of each pair depends on
+// the current stage index.
+//
+// The algorithm first builds a bitonic sequence with the input values, 
+// that is, a sequence that is ascending for the first half, and descending 
+// for the second half. Then, it applies a bitonic merger to sort the bitonic
+// list in ascending or descending order.
+//
+// The algorithm has O(log2(N) ^ 2) depth complexity, and O(N * log2(N) ^ 2)
+// work complexity. Specifically, the bitonic sorter algorithm requires N 
+// inputs to be a power-of-two. The algorithm has a total of 
+// log2(N) * ((log2(N) + 1) / 2) stages, and each stage requires N / 2 
+// comparators. Each comparator has one min() and one max() functions.
+//
+// For comparison, the Bubble Sort algorithm has N - 1 stages, and
+// N * (N - 1) / 2 comparators. For N = 32, Bitonic Sort has 15 stages
+// and 240 comparators, Bubble Sort has 31 stages and 496 comparators.
+//
+// The sorting process is zero-latency.
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : bitonicSort(N) : si.bus(N)
+//
+// ```
+//
+// Where:
+//
+// * `N`: the number of signals to be sorted (it must be a power-of-two 
+// compile-time numerical expression)
+//
+// #### References
+//
+// * <https://en.wikipedia.org/wiki/Bitonic_sorter>
+declare bitonicSort author "Dario Sanfilippo";
+declare bitonicSort copyright "Copyright (C) 2026 Dario Sanfilippo
+    <sanfilippo.dario@gmail.com>";
+declare bitonicSort license "MIT License";
+
+// Helper 0-indexed route wrapper
+route0idx(N, M, connectionList) = 
+    route(N, M, si.vecOp((connectionList, par(i, outputs(connectionList), 1)), +));
+// Ascending and descending comparators
+comparatorDes(x0, x1) = max(x0, x1) , min(x0, x1);
+comparatorAsc(x0, x1) = min(x0, x1) , max(x0, x1);
+comparator(0, x0, x1) = comparatorDes(x0, x1);
+comparator(1, x0, x1) = comparatorAsc(x0, x1);
+// Direction selector, according to the stage index
+comparatorDirections(N, s) = par(i, N / 2, (i % (2 ^ (s + 1)) < (2 ^ s)));
+// Comparison input routing pairs
+bitonicRouteCompareInputList(N, G) = inlets , outlets : interleave(N, 2) with {
+    inlets = par(j, N / (2 * G) , par(i, G, i + j * (2 * G) , i + G + j * (2 * G)));
+    outlets = par(i, N, i);
+};
+// Comparison output unrouting pairs
+bitonicRouteCompareOutputList(N, G) = inlets , outlets : interleave(N, 2) with {
+    inlets = par(i, N, i);
+    outlets = par(j, N / (2 * G) , par(i, G, i + j * (2 * G) , i + G + j * (2 * G)));
+};
+// Apply routing
+bitonicRouteInput(N, G) = route0idx(N, N, (bitonicRouteCompareInputList(N, G)));
+bitonicRouteOutput(N, G) = route0idx(N, N, (bitonicRouteCompareOutputList(N, G)));
+// Bitonic sequence builder layer
+bitonicBuilderLayer(N, s, p) = Y with {
+    G = 2 ^ (s - p);
+    D(i) = ba.pick(comparatorDirections(N, s), i);
+    Y = bitonicRouteInput(N, G) : par(i, N / 2, comparator(D(i))) : bitonicRouteOutput(N, G);
+};
+// Bitonic sequence builder network
+bitonicBuilderNetwork(N) = Y with {
+    S = rint(ma.log2(N) - 1);
+    Y = seq(s, S, seq(p, s + 1, bitonicBuilderLayer(N, s, p)));
+};
+// Bitonic sorter layer
+bitonicSorterLayer(N, s, p) = Y with {
+    G = 2 ^ (s - p);
+    Y = bitonicRouteInput(N, G) : par(i, N / 2, comparator(1)) : bitonicRouteOutput(N, G);
+};
+// Bitonic sorter network
+bitonicSorterNetwork(N) = Y with {
+    S = rint(ma.log2(N) - 1);
+    Y = seq(p, S + 1, bitonicSorterLayer(N, S, p));
+};
+// Bitonic sorter
+bitonicSort(N) = bitonicBuilderNetwork(N) : bitonicSorterNetwork(N);
+
+
+//--------------------(ro.)bitonicSortIdx---------------------------------------
+//
+// This function is based on the bitonicSort function, except it returns the 
+// set of indices for the ordered input values. This is useful if you want
+// to sort one set based on another one.
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : bitonicSortIdx(N) : si.bus(N)
+//
+// ```
+//
+// Where:
+//
+// * `N`: the number of signals to be sorted (it must be a power-of-two
+// compile-time numerical expression)
+//
+// #### References
+//
+// * <https://en.wikipedia.org/wiki/Bitonic_sorter>
+declare bitonicSortIdx author "Dario Sanfilippo";
+declare bitonicSortIdx copyright "Copyright (C) 2026 Dario Sanfilippo
+    <sanfilippo.dario@gmail.com>";
+declare bitonicSortIdx license "MIT License";
+
+comparatorDesIdx(x0, i0, x1, i1) = ba.if(cond, x1, x0) , ba.if(cond, i1, i0) , ba.if(cond, x0, x1) , ba.if(cond, i0, i1) with {
+    cond = x1 > x0;
+};
+comparatorAscIdx(x0, i0, x1, i1) = ba.if(cond, x1, x0) , ba.if(cond, i1, i0) , ba.if(cond, x0, x1) , ba.if(cond, i0, i1) with {
+    cond = x0 > x1;
+};
+comparatorIdx(0, x0, i0, x1, i1) = comparatorDesIdx(x0, i0, x1, i1);
+comparatorIdx(1, x0, i0, x1, i1) = comparatorAscIdx(x0, i0, x1, i1);
+comparatorDirectionsIdx(N, s) = par(i, N / 2, (i % (2 ^ (s + 1)) < (2 ^ s)));
+
+bitonicRouteCompareInputListIdx(N, G) = inlets , outlets : ro.interleave(2 * N, 2) with {
+    inlets = par(j, N / (2 * G), par(i, G,
+        2 * (i + j * (2 * G)),
+        2 * (i + j * (2 * G)) + 1,
+        2 * (i + G + j * (2 * G)),
+        2 * (i + G + j * (2 * G)) + 1
+    ));
+    outlets = par(i, N, 2 * i, 2 * i + 1);
+};
+bitonicRouteCompareOutputListIdx(N, G) = inlets , outlets : ro.interleave(2 * N, 2) with {
+    inlets = par(i, N, 2 * i, 2 * i + 1);
+    outlets = par(j, N / (2 * G), par(i, G,
+        2 * (i + j * (2 * G)),
+        2 * (i + j * (2 * G)) + 1,
+        2 * (i + G + j * (2 * G)),
+        2 * (i + G + j * (2 * G)) + 1
+    ));
+};
+bitonicRouteInputIdx(N, G) = route0idx(2 * N, 2 * N, (bitonicRouteCompareInputListIdx(N, G)));
+bitonicRouteOutputIdx(N, G) = route0idx(2 * N, 2 * N, (bitonicRouteCompareOutputListIdx(N, G)));
+
+bitonicBuilderLayerIdx(N, s, p) = Y with {
+    G = 2 ^ (s - p);
+    D(i) = ba.pick(comparatorDirectionsIdx(N, s), i);
+    Y = bitonicRouteInputIdx(N, G) : par(i, N / 2, comparatorIdx(D(i))) : bitonicRouteOutputIdx(N, G);
+};
+bitonicBuilderNetworkIdx(N) = Y with {
+    S = rint(ma.log2(N) - 1);
+    Y = seq(s, S, seq(p, s + 1, bitonicBuilderLayerIdx(N, s, p)));
+};
+bitonicSorterLayerIdx(N, s, p) = Y with {
+    G = 2 ^ (s - p);
+    Y = bitonicRouteInputIdx(N, G) : par(i, N / 2, comparatorIdx(1)) : bitonicRouteOutputIdx(N, G);
+};
+bitonicSorterNetworkIdx(N) = Y with {
+    S = rint(ma.log2(N) - 1);
+    Y = seq(p, S + 1, bitonicSorterLayerIdx(N, S, p));
+};
+bitonicSortIdx(N) = si.bus(N) , par(i, N, i) : ro.interleave(N, 2) : bitonicBuilderNetworkIdx(N) : bitonicSorterNetworkIdx(N) : par(i, N, ! , _);
