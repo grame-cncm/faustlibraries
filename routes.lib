@@ -385,6 +385,17 @@ bubbleSort(N) = seq(i, N - 1, pairSortN(N - i), bus(i))
 // * `N`: the number of signals to be sorted (it must be a power-of-two 
 // compile-time numerical expression)
 //
+// #### Test
+// ```
+// ro = library("routes.lib");
+// bitonicSort_test = (
+//     hslider("bubbleSort:x0", 0.3, -1, 1, 0.01),
+//     hslider("bubbleSort:x1", -0.2, -1, 1, 0.01),
+//     hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
+//     hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
+// ) : ro.bitonicSort(4);
+// ```
+//
 // #### References
 //
 // * <https://en.wikipedia.org/wiki/Bitonic_sorter>
@@ -459,6 +470,17 @@ bitonicSort(N) = bitonicBuilderNetwork(N) : bitonicSorterNetwork(N);
 // * `N`: the number of signals to be sorted (it must be a power-of-two
 // compile-time numerical expression)
 //
+// #### Test
+// ```
+// ro = library("routes.lib");
+// bitonicSortIdx_test = (
+//     hslider("bubbleSort:x0", 0.3, -1, 1, 0.01),
+//     hslider("bubbleSort:x1", -0.2, -1, 1, 0.01),
+//     hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
+//     hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
+// ) : ro.bitonicSortIdx(4);
+// ```
+//
 // #### References
 //
 // * <https://en.wikipedia.org/wiki/Bitonic_sorter>
@@ -478,20 +500,20 @@ comparatorIdx(1, x0, i0, x1, i1) = comparatorAscIdx(x0, i0, x1, i1);
 comparatorDirectionsIdx(N, s) = par(i, N / 2, (i % (2 ^ (s + 1)) < (2 ^ s)));
 
 bitonicRouteCompareInputListIdx(N, G) = inlets , outlets : ro.interleave(2 * N, 2) with {
-    inlets = par(j, N / (2 * G), par(i, G,
-        2 * (i + j * (2 * G)),
-        2 * (i + j * (2 * G)) + 1,
-        2 * (i + G + j * (2 * G)),
+    inlets = par(j, N / (2 * G) , par(i, G,
+        2 * (i + j * (2 * G)) ,
+        2 * (i + j * (2 * G)) + 1 ,
+        2 * (i + G + j * (2 * G)) ,
         2 * (i + G + j * (2 * G)) + 1
     ));
-    outlets = par(i, N, 2 * i, 2 * i + 1);
+    outlets = par(i, N, 2 * i , 2 * i + 1);
 };
 bitonicRouteCompareOutputListIdx(N, G) = inlets , outlets : ro.interleave(2 * N, 2) with {
-    inlets = par(i, N, 2 * i, 2 * i + 1);
-    outlets = par(j, N / (2 * G), par(i, G,
-        2 * (i + j * (2 * G)),
-        2 * (i + j * (2 * G)) + 1,
-        2 * (i + G + j * (2 * G)),
+    inlets = par(i, N, 2 * i , 2 * i + 1);
+    outlets = par(j, N / (2 * G) , par(i, G,
+        2 * (i + j * (2 * G)) ,
+        2 * (i + j * (2 * G)) + 1 ,
+        2 * (i + G + j * (2 * G)) ,
         2 * (i + G + j * (2 * G)) + 1
     ));
 };
