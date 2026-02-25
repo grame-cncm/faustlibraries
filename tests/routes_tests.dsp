@@ -16,3 +16,15 @@ bubbleSort_test = (
     hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
     hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
 ) : ro.bubbleSort(4);
+bitonicSort_test = (
+    hslider("bubbleSort:x0", 0.3, -1, 1, 0.01),
+    hslider("bubbleSort:x1", -0.2, -1, 1, 0.01),
+    hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
+    hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
+) : ro.bitonicSort(4);
+bitonicSortIdx_test = (
+    hslider("bubbleSort:x0", 0.3, -1, 1, 0.01),
+    hslider("bubbleSort:x1", -0.2, -1, 1, 0.01),
+    hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
+    hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
+) : ro.bitonicSortIdx(4);

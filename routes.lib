@@ -51,7 +51,7 @@ si = library("signals.lib");
 sp = library("spats.lib");
 
 declare name "Faust Signal Routing Library";
-declare version "1.2.0";
+declare version "1.3.0";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -404,57 +404,59 @@ declare bitonicSort copyright "Copyright (C) 2026 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
 declare bitonicSort license "MIT License";
 
-// Helper 0-indexed route wrapper
+/// Helper 0-indexed route wrapper
 route0idx(N, M, connectionList) = 
     route(N, M, si.vecOp((connectionList, par(i, outputs(connectionList), 1)), +));
-// Ascending and descending comparators
+/// Ascending and descending comparators
 comparatorDes(x0, x1) = max(x0, x1) , min(x0, x1);
 comparatorAsc(x0, x1) = min(x0, x1) , max(x0, x1);
 comparator(0, x0, x1) = comparatorDes(x0, x1);
 comparator(1, x0, x1) = comparatorAsc(x0, x1);
-// Direction selector, according to the stage index
+/// Direction selector, according to the stage index
 comparatorDirections(N, s) = par(i, N / 2, (i % (2 ^ (s + 1)) < (2 ^ s)));
-// Comparison input routing pairs
+/// Comparison input routing pairs
 bitonicRouteCompareInputList(N, G) = inlets , outlets : interleave(N, 2) with {
     inlets = par(j, N / (2 * G) , par(i, G, i + j * (2 * G) , i + G + j * (2 * G)));
     outlets = par(i, N, i);
 };
-// Comparison output unrouting pairs
+/// Comparison output unrouting pairs
 bitonicRouteCompareOutputList(N, G) = inlets , outlets : interleave(N, 2) with {
     inlets = par(i, N, i);
     outlets = par(j, N / (2 * G) , par(i, G, i + j * (2 * G) , i + G + j * (2 * G)));
 };
-// Apply routing
+/// Apply routing
 bitonicRouteInput(N, G) = route0idx(N, N, (bitonicRouteCompareInputList(N, G)));
 bitonicRouteOutput(N, G) = route0idx(N, N, (bitonicRouteCompareOutputList(N, G)));
-// Bitonic sequence builder layer
+/// Bitonic sequence builder layer
 bitonicBuilderLayer(N, s, p) = Y with {
     G = 2 ^ (s - p);
     D(i) = ba.pick(comparatorDirections(N, s), i);
     Y = bitonicRouteInput(N, G) : par(i, N / 2, comparator(D(i))) : bitonicRouteOutput(N, G);
 };
-// Bitonic sequence builder network
+/// Bitonic sequence builder network
 bitonicBuilderNetwork(N) = Y with {
-    S = rint(ma.log2(N) - 1);
+    S = rint(log2(N) - 1);
     Y = seq(s, S, seq(p, s + 1, bitonicBuilderLayer(N, s, p)));
+    log2(x) = log(x)/log(2.0);
 };
-// Bitonic sorter layer
+/// Bitonic sorter layer
 bitonicSorterLayer(N, s, p) = Y with {
     G = 2 ^ (s - p);
     Y = bitonicRouteInput(N, G) : par(i, N / 2, comparator(1)) : bitonicRouteOutput(N, G);
 };
-// Bitonic sorter network
+/// Bitonic sorter network
 bitonicSorterNetwork(N) = Y with {
-    S = rint(ma.log2(N) - 1);
+    S = rint(log2(N) - 1);
     Y = seq(p, S + 1, bitonicSorterLayer(N, S, p));
+    log2(x) = log(x)/log(2.0);
 };
-// Bitonic sorter
+/// Bitonic sorter
 bitonicSort(N) = bitonicBuilderNetwork(N) : bitonicSorterNetwork(N);
 
 
 //--------------------(ro.)bitonicSortIdx---------------------------------------
 //
-// This function is based on the bitonicSort function, except it returns the 
+// This function is based on the `bitonicSort` function, except it returns the 
 // set of indices for the ordered input values. This is useful if you want
 // to sort one set based on another one.
 //
@@ -499,7 +501,7 @@ comparatorIdx(0, x0, i0, x1, i1) = comparatorDesIdx(x0, i0, x1, i1);
 comparatorIdx(1, x0, i0, x1, i1) = comparatorAscIdx(x0, i0, x1, i1);
 comparatorDirectionsIdx(N, s) = par(i, N / 2, (i % (2 ^ (s + 1)) < (2 ^ s)));
 
-bitonicRouteCompareInputListIdx(N, G) = inlets , outlets : ro.interleave(2 * N, 2) with {
+bitonicRouteCompareInputListIdx(N, G) = inlets , outlets : interleave(2 * N, 2) with {
     inlets = par(j, N / (2 * G) , par(i, G,
         2 * (i + j * (2 * G)) ,
         2 * (i + j * (2 * G)) + 1 ,
@@ -508,7 +510,7 @@ bitonicRouteCompareInputListIdx(N, G) = inlets , outlets : ro.interleave(2 * N, 
     ));
     outlets = par(i, N, 2 * i , 2 * i + 1);
 };
-bitonicRouteCompareOutputListIdx(N, G) = inlets , outlets : ro.interleave(2 * N, 2) with {
+bitonicRouteCompareOutputListIdx(N, G) = inlets , outlets : interleave(2 * N, 2) with {
     inlets = par(i, N, 2 * i , 2 * i + 1);
     outlets = par(j, N / (2 * G) , par(i, G,
         2 * (i + j * (2 * G)) ,
@@ -526,15 +528,17 @@ bitonicBuilderLayerIdx(N, s, p) = Y with {
     Y = bitonicRouteInputIdx(N, G) : par(i, N / 2, comparatorIdx(D(i))) : bitonicRouteOutputIdx(N, G);
 };
 bitonicBuilderNetworkIdx(N) = Y with {
-    S = rint(ma.log2(N) - 1);
+    S = rint(log2(N) - 1);
     Y = seq(s, S, seq(p, s + 1, bitonicBuilderLayerIdx(N, s, p)));
+    log2(x) = log(x)/log(2.0);
 };
 bitonicSorterLayerIdx(N, s, p) = Y with {
     G = 2 ^ (s - p);
     Y = bitonicRouteInputIdx(N, G) : par(i, N / 2, comparatorIdx(1)) : bitonicRouteOutputIdx(N, G);
 };
 bitonicSorterNetworkIdx(N) = Y with {
-    S = rint(ma.log2(N) - 1);
+    S = rint(log2(N) - 1);
     Y = seq(p, S + 1, bitonicSorterLayerIdx(N, S, p));
+    log2(x) = log(x)/log(2.0);
 };
-bitonicSortIdx(N) = si.bus(N) , par(i, N, i) : ro.interleave(N, 2) : bitonicBuilderNetworkIdx(N) : bitonicSorterNetworkIdx(N) : par(i, N, ! , _);
+bitonicSortIdx(N) = si.bus(N) , par(i, N, i) : interleave(N, 2) : bitonicBuilderNetworkIdx(N) : bitonicSorterNetworkIdx(N) : par(i, N, ! , _);
