@@ -352,9 +352,9 @@ bubbleSort(N) = seq(i, N - 1, pairSortN(N - i), bus(i))
 //--------------------(ro.)bitonicSort------------------------------------------
 //
 // A bitonic sorter is a parallel sorting network that performs comparisons
-// and swaps on signal pairs iterativily. The pairs are selected according
-// to different index gaps, and the sorting direction of each pair depends on
-// the current stage index.
+// and swaps on signal pairs iteratively. The pairs are selected according
+// to different index gaps determined by the current state and pass indices, 
+// while the sorting direction of each pair depends on the current stage index.
 //
 // The algorithm first builds a bitonic sequence with the input values, 
 // that is, a sequence that is ascending for the first half, and descending 
@@ -365,7 +365,7 @@ bubbleSort(N) = seq(i, N - 1, pairSortN(N - i), bus(i))
 // work complexity. Specifically, the bitonic sorter algorithm requires N 
 // inputs to be a power-of-two. The algorithm has a total of 
 // log2(N) * ((log2(N) + 1) / 2) stages, and each stage requires N / 2 
-// comparators. Each comparator has one min() and one max() functions.
+// comparators. Each comparator has one min() and one max() function.
 //
 // For comparison, the Bubble Sort algorithm has N - 1 stages, and
 // N * (N - 1) / 2 comparators. For N = 32, Bitonic Sort has 15 stages
