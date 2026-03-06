@@ -566,7 +566,7 @@ waveguide(nMax,n) = waveguideFd4(nMax,n);
 // #### Usage
 //
 // ```
-// _ : bridge(brightness,absorption) : _
+// _ : bridgeFilter(brightness,absorption) : _
 // ```
 //
 // Where:
@@ -578,7 +578,8 @@ waveguide(nMax,n) = waveguideFd4(nMax,n);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// bridgeFilter_test = pm.bridgeFilter(0.6, 0.4, os.osc(110));
+// os = library("oscillators.lib");
+// bridgeFilter_test = os.osc(110) : pm.bridgeFilter(0.6, 0.4);
 // ```
 //----------------------------------
 // TODO: perhaps, the coefs of this filter should be adapted in function of SR
@@ -4554,7 +4555,7 @@ with {
 // Where:
 //
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
-// * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
+// * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
 //
