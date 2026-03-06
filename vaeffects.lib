@@ -1177,7 +1177,11 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 //
 // Where:
 //
-// * `b0, b1, b2, a1, a2` are the coefficients of the difference equation above
+// * `b0`: feedforward coefficient for `x[n]`
+// * `b1`: feedforward coefficient for `x[n-1]`
+// * `b2`: feedforward coefficient for `x[n-2]`
+// * `a1`: feedback coefficient for `y[n-1]`
+// * `a2`: feedback coefficient for `y[n-2]`
 //
 // #### Test
 // ```

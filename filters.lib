@@ -726,7 +726,7 @@ iir(bv,av) = ma.sub ~ fir(av) : fir(bv);
 //
 // Where:
 //
-// * `bv` = b0,b1,...,bn is a parallel bank of coefficient signals.
+// * `bv`: `b0,b1,...,bn`, a parallel bank of coefficient signals
 //
 // #### Note
 //
@@ -1217,8 +1217,8 @@ with {
 //
 // Where:
 //
-// * bv: transfer-function numerator as a bank of parallel signals
-// * av: transfer-function denominator as a bank of parallel signals
+// * `bv`: transfer-function numerator as a bank of parallel signals
+// * `av`: transfer-function denominator as a bank of parallel signals
 //
 // #### Test
 // ```
@@ -1495,7 +1495,8 @@ with {
 //
 // Where:
 //
-// * `a1` and `a2`: allpass coefficients
+// * `a1`: first allpass coefficient
+// * `a2`: second allpass coefficient
 //
 // #### Test
 // ```
@@ -1906,8 +1907,14 @@ tf1snp(b1,b0,a0,w1) = fi.tf2snp(b1,b0,0,a0,0,w1); // FIXME: Faust compiler does 
 //
 // Where:
 //
-// * `b3`, `b2`, `b1`, `b0`: analog numerator coefficients from highest to lowest power of `s`
-// * `a3`, `a2`, `a1`, `a0`: analog denominator coefficients from highest to lowest power of `s`
+// * `b3`: analog numerator coefficient of `s^3`
+// * `b2`: analog numerator coefficient of `s^2`
+// * `b1`: analog numerator coefficient of `s`
+// * `b0`: analog numerator constant term
+// * `a3`: analog denominator coefficient of `s^3`
+// * `a2`: analog denominator coefficient of `s^2`
+// * `a1`: analog denominator coefficient of `s`
+// * `a0`: analog denominator constant term
 //
 // #### Test
 // ```
@@ -1944,6 +1951,14 @@ tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
 // ```
 // _ : tf1s(b1,b0,a0,w1) : _
 // ```
+//
+// Where:
+//
+// * `b1`: analog numerator coefficient of `s`
+// * `b0`: analog numerator constant term
+// * `a0`: analog denominator constant term in `s + a0`
+// * `w1`: desired digital frequency in radians per second corresponding to analog frequency `1 rad/s`
+//
 // Where:
 //
 //        b1 s + b0
@@ -2394,6 +2409,18 @@ highpass_minus_lowpass_even(N,fc) = highpass(N,fc) - lowpass(N,fc);
 
 
 //--------------------`(fi.)highpass_minus_lowpass_odd`----------------
+// Difference between the odd-order highpass and lowpass responses.
+//
+// #### Usage
+//
+// ```
+// _ : highpass_minus_lowpass_odd(N,fc) : _
+// ```
+//
+// Where:
+//
+// * `N`: odd Butterworth order
+// * `fc`: cutoff frequency in Hz
 //
 // #### Test
 // ```
@@ -2410,6 +2437,18 @@ declare highpass_plus_lowpass_odd license "MIT-style STK-4.3 license";
 highpass_plus_lowpass_odd(N,fc) = highpass(N,fc) + lowpass(N,fc);
 
 //--------------------`(fi.)highpass_minus_lowpass_odd`----------------
+// Difference between the odd-order highpass and lowpass responses.
+//
+// #### Usage
+//
+// ```
+// _ : highpass_minus_lowpass_odd(N,fc) : _
+// ```
+//
+// Where:
+//
+// * `N`: odd Butterworth order
+// * `fc`: cutoff frequency in Hz
 //
 // #### Test
 // ```
@@ -3439,6 +3478,19 @@ declare mth_octave_filterbank_alt license "MIT-style STK-4.3 license";
 
 //------------------------`(fi.)mth_octave_filterbank_alt`-------------------------
 //
+// #### Usage
+//
+// ```
+// _ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_)
+// ```
+//
+// Where:
+//
+// * `O`: filter order used to split each band
+// * `M`: number of band-slices per octave
+// * `ftop`: highest band-split crossover frequency
+// * `N`: total number of bands
+//
 // #### Test
 // ```
 // fi = library("filters.lib");
@@ -3462,6 +3514,18 @@ declare mth_octave_filterbank3 license "MIT-style STK-4.3 license";
 
 //------------------------`(fi.)mth_octave_filterbank3`-------------------------
 //
+// #### Usage
+//
+// ```
+// _ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_)
+// ```
+//
+// Where:
+//
+// * `M`: number of band-slices per octave
+// * `ftop`: highest band-split crossover frequency
+// * `N`: total number of bands
+//
 // #### Test
 // ```
 // fi = library("filters.lib");
@@ -3476,6 +3540,18 @@ declare mth_octave_filterbank5 copyright "Copyright (C) 2003-2019 by Julius O. S
 declare mth_octave_filterbank5 license "MIT-style STK-4.3 license";
 
 //------------------------`(fi.)mth_octave_filterbank5`-------------------------
+//
+// #### Usage
+//
+// ```
+// _ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_)
+// ```
+//
+// Where:
+//
+// * `M`: number of band-slices per octave
+// * `ftop`: highest band-split crossover frequency
+// * `N`: total number of bands
 //
 // #### Test
 // ```

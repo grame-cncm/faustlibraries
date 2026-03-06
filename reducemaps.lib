@@ -83,10 +83,8 @@ declare license "LGPL with exception";
 //
 // Where:
 //
-// * `op`: is a binary operation 
-// * `N`: is the number of incomming signals (`N>0`). We use a capital letter
-// here to indicate that the number of incomming signals must be constant and
-// known at compile time.
+// * `op`: binary reduction operation
+// * `N`: number of incoming signals (`N > 0`), known at compile time
 //
 // #### Test
 // ```
@@ -157,10 +155,8 @@ topReduce(op,N) = topReduce(op,N-1), par(i,outputs(op),_) : op;
 //
 // Where:
 //
-// * op: is a binary operation
-// * N: is the number of incomming signals (`N>0`). We use a capital letter
-// here to indicate that the number of incomming signals must be constant and
-// known at compile time.
+// * `op`: binary reduction operation
+// * `N`: number of incoming signals (`N > 0`), known at compile time
 //
 // #### Test
 // ```

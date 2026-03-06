@@ -441,8 +441,9 @@ rTermination(b,c) = (_,_,_,_ : +,_,_ : b) ~ (!,c);
 // #### Usage
 //
 // ```
-// closeIns : chain(...) : _,_,_
+// closeIns : _,_,_
 // ```
+// Typical use: `closeIns : chain(...) : _,_,_`
 //
 // #### Test
 // ```
@@ -888,8 +889,9 @@ with {
 // #### Usage
 //
 // ```
-// terminations(_,chain(...),ksReflexionFilter)
+// _ : ksReflexionFilter : _
 // ```
+// Typical use: `terminations(_,chain(...),ksReflexionFilter)`
 //
 // #### Test
 // ```
@@ -908,8 +910,9 @@ ksReflexionFilter = _ <: (_+_')/2;
 // #### Usage
 //
 // ```
-// chain(rStringRigidTermination : stringSegment : ...)
+// _,_,_ : rStringRigidTermination
 // ```
+// Typical use: `chain(rStringRigidTermination : stringSegment : ...)`
 //
 // #### Test
 // ```
@@ -927,8 +930,9 @@ rStringRigidTermination = rTermination(basicBlock,*(-1));
 // #### Usage
 //
 // ```
-// chain(... : stringSegment : lStringRigidTermination)
+// _,_,_ : lStringRigidTermination
 // ```
+// Typical use: `chain(... : stringSegment : lStringRigidTermination)`
 //
 // #### Test
 // ```
@@ -949,8 +953,9 @@ lStringRigidTermination = lTermination(*(-1),basicBlock);
 // #### Usage
 //
 // ```
-// chain(... : stringSegment : elecGuitarBridge)
+// _,_,_ : elecGuitarBridge
 // ```
+// Typical use: `chain(... : stringSegment : elecGuitarBridge)`
 //
 // #### Test
 // ```
@@ -971,8 +976,9 @@ elecGuitarBridge = rTermination(basicBlock,-bridgeFilter(0.8,0.6));
 // #### Usage
 //
 // ```
-// chain(elecGuitarNuts : stringSegment : ...)
+// _,_,_ : elecGuitarNuts
 // ```
+// Typical use: `chain(elecGuitarNuts : stringSegment : ...)`
 //
 // #### Test
 // ```
@@ -993,8 +999,9 @@ elecGuitarNuts = lTermination(-bridgeFilter(0.8,0.6),basicBlock);
 // #### Usage
 //
 // ```
-// chain(... : stringSegment : guitarBridge)
+// _,_,_ : guitarBridge
 // ```
+// Typical use: `chain(... : stringSegment : guitarBridge)`
 //
 // #### Test
 // ```
@@ -1842,8 +1849,9 @@ violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) =
 // #### Usage
 //
 // ```
-// chain(violinNuts : stringSegment : ...)
+// _,_,_ : violinNuts
 // ```
+// Typical use: `chain(violinNuts : stringSegment : ...)`
 //
 // #### Test
 // ```
@@ -2283,8 +2291,9 @@ wBell(opening) = rTermination(basicBlock,si.smooth(opening));
 // #### Usage
 //
 // ```
-// chain(fluteHead : tube : ...)
+// _,_,_ : fluteHead
 // ```
+// Typical use: `chain(fluteHead : tube : ...)`
 //
 // #### Test
 // ```

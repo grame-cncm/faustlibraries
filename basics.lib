@@ -2374,11 +2374,9 @@ declare downSampleCV author "Romain Michon/David Braun";
 //
 // Where:
 //
-// `mode` means:
-//
-//  0 - Pass through. A single sample 0 trigger will work as a reset.
-//
-//  1 - Track and hold max value.
+// * `mode`: operation mode
+//   `0` passes the signal through and a single-sample `0` trigger resets the held value
+//   `1` tracks and holds the maximum value
 //
 // #### Test
 // ```
@@ -2469,6 +2467,12 @@ peakholder(n) = peakhold2 ~ reset : (!,_) with {
 // Force a control rate signal to be used as an audio rate signal.
 //
 // #### Usage
+//
+// ```
+// kr2ar : _
+// ```
+//
+// Typical use:
 //
 // ```
 // hslider("freq", 200, 200, 2000, 0.1) : kr2ar;

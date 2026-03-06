@@ -365,9 +365,15 @@ pita3(x, y, z) = (x * x), (y * y), (z * z) :> sqrt;
 // ```
 // Where:
 //
-// * `thr`, `gain`, `envUpMs`, `envDownMs`: passed to `motionEnvelope`
-// * `x`, `y`, `z`: three-axis signals (normalized)
-//   - Computes a magnitude via `pita3` then applies `motionEnvelope`.
+// * `thr`: threshold passed to `motionEnvelope`
+// * `gain`: gain passed to `motionEnvelope`
+// * `envUpMs`: attack time in milliseconds passed to `motionEnvelope`
+// * `envDownMs`: release time in milliseconds passed to `motionEnvelope`
+// * `x`: normalized X-axis signal
+// * `y`: normalized Y-axis signal
+// * `z`: normalized Z-axis signal
+//
+// The three-axis magnitude is computed with `pita3` before applying `motionEnvelope`.
 ////-------------------------------------------------
 totalEnvelope(thr, gain, envUpMs, envDownMs, x, y, z) =
   pita3(x, y, z):motionEnvelope(thr, gain, envUpMs, envDownMs);
