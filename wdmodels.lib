@@ -1286,6 +1286,10 @@ case{
 // buildtree( u_idealDiode : B );
 // ```
 //
+// Where:
+//
+// * `i`: index used by model-building functions when the adaptor is declared as `diode(i) = wd.u_idealDiode(i)`
+//
 // Note: only usable as the root of a tree.
 // Correct implementation is shown above.
 //
@@ -1715,6 +1719,10 @@ case{
 // buildtree( u_parallel2Port : (A, B) );
 // ```
 //
+// Where:
+//
+// * `i`: index used by model-building functions when the adaptor is declared as `root(i) = wd.u_parallel2Port(i)`
+//
 // Note: only usable as the root of a tree.
 // This adaptor has no user-accessible parameters. 
 // Correct implementation is shown above.
@@ -1764,6 +1772,10 @@ case{
 // ```
 // buildtree( A : parallel2Port : B );
 // ```
+//
+// Where:
+//
+// * `i`: index used by model-building functions when the adaptor is declared as `connector(i) = wd.parallel2Port(i)`
 //
 // Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and one forward adaptor.
@@ -1818,6 +1830,10 @@ case{
 // buildtree( u_series2Port : (A, B) );
 // ```
 //
+// Where:
+//
+// * `i`: index used by model-building functions when the adaptor is declared as `root(i) = wd.u_series2Port(i)`
+//
 // Note: only usable as the root of a tree.
 // This adaptor has no user-accessible parameters. 
 // Correct implementation is shown above.
@@ -1867,6 +1883,10 @@ case{
 // ```
 // buildtree( A : series2Port : B );
 // ```
+//
+// Where:
+//
+// * `i`: index used by model-building functions when the adaptor is declared as `connector(i) = wd.series2Port(i)`
 //
 // Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and one forward adaptor.
@@ -2284,6 +2304,10 @@ with{
 // ```
 // buildtree( A : parallel : (B, C) );
 // ```
+//
+// Where:
+//
+// * `i`: index used by model-building functions when the adaptor is declared as `junction(i) = wd.parallel(i)`
 //
 // Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and two forward adaptors.
