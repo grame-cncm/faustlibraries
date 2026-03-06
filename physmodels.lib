@@ -4180,8 +4180,11 @@ fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') :
 //
 // Where:
 //
+// * `fc`: center frequency of the filter in Hz
+// * `bw`: bandwidth of the filter in Hz
+// * `a`: attack bandwidth / skirt width in Hz
+// * `g`: linear gain multiplier
 // * `n`: the number of FOF filters to cycle through
-// * all other parameters are same as for [`fof`](#fof)
 //
 // #### Test
 // ```
@@ -4211,8 +4214,11 @@ fofCycle(fc,bw,a,g,n) = _ : ba.cycle(n) : par(i,n,fofSH(fc,bw,a,g)) :> _;
 //
 // Where:
 //
+// * `fc`: center frequency of the filter in Hz
+// * `bw`: bandwidth of the filter in Hz
+// * `sw`: skirt width in Hz
+// * `g`: linear gain multiplier
 // * `tau`: the desired smoothing time constant in seconds
-// * all other parameters are same as for [`fof`](#fof)
 //
 // #### Test
 // ```
@@ -4517,12 +4523,16 @@ formantFilterbank(voiceType,vowel,formantFilterBP,freq);
 // * `exType`: voice vs. fricative sound ratio (0-1 where 1 is 100% fricative)
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
+// * `source`: excitation signal generator used by the model
+// * `filterbank`: formant filterbank function, typically one of
+//   `formantFilterbankBP`, `formantFilterbankFofCycle`, or `formantFilterbankFofSmooth`
 // * `isFof`: whether model is FOF based (0: no, 1: yes)
 //
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// SFFormantModel_test = pm.SFFormantModel(0, 0, 0.5, 0.6, 100, 2, 1, 1);
+// os = library("oscillators.lib");
+// SFFormantModel_test = pm.SFFormantModel(0, 0, 0.2, 220, 0.7, os.lf_imptrain(220), pm.formantFilterbankFofCycle, 1);
 // ```
 //--------------------------------------
 declare SFFormantModel author "Mike Olsen";
