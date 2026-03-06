@@ -2037,7 +2037,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// openTube_test = pm.openTube(0.9);
+// openTube_test = pm.endChain(pm.openTube(pm.maxLength, 0.9));
 // ```
 //----------------------------------
 openTube = stringSegment;
@@ -2062,7 +2062,8 @@ openTube = stringSegment;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// reedTable_test = pm.reedTable(0.4, 0.2);
+// os = library("oscillators.lib");
+// reedTable_test = os.osc(220) : pm.reedTable(0.4, 0.2);
 // ```
 //----------------------------------
 reedTable(offset,slope) = reedTable : min(1) : max(-1)
@@ -2087,7 +2088,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fluteJetTable_test = pm.fluteJetTable(0.5);
+// os = library("oscillators.lib");
+// fluteJetTable_test = os.osc(220) : pm.fluteJetTable;
 // ```
 //----------------------------------
 fluteJetTable = _ <: *(* : -(1)) : clipping
@@ -2116,7 +2118,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// brassLipsTable_test = pm.brassLipsTable(0.3, 0.2);
+// os = library("oscillators.lib");
+// brassLipsTable_test = os.osc(220) : pm.brassLipsTable(0.3, 0.2);
 // ```
 //----------------------------------
 brassLipsTable(tubeLength,lipsTension) = *(0.03) : lipFilter <: * : clipping
@@ -2147,7 +2150,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// clarinetReed_test = pm.clarinetReed(0.6, 0.4, 0.1);
+// os = library("oscillators.lib");
+// clarinetReed_test = os.osc(440) : pm.clarinetReed(0.6);
 // ```
 //----------------------------------
 clarinetReed(stiffness) = reedTable(0.7,tableSlope)
@@ -2177,7 +2181,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// clarinetMouthPiece_test = pm.clarinetMouthPiece(0.6, 0.4, 0.1);
+// clarinetMouthPiece_test = pm.endChain(pm.clarinetMouthPiece(0.6, 0.4));
 // ```
 //----------------------------------
 clarinetMouthPiece(reedStiffness,pressure) = lTermination(reedInteraction,in(pressure))
@@ -2208,7 +2212,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// brassLips_test = pm.brassLips(0.3, 0.2, 0.1);
+// brassLips_test = pm.endChain(pm.brassLips(0.3, 0.2, 0.1));
 // ```
 //----------------------------------
 brassLips(tubeLength,lipsTension,pressure) = lTermination(mpInteraction,basicBlock)
@@ -2241,7 +2245,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fluteEmbouchure_test = pm.fluteEmbouchure(0.5, 0.3);
+// fluteEmbouchure_test = pm.endChain(pm.fluteEmbouchure(0.5));
 // ```
 //----------------------------------
 fluteEmbouchure(pressure) =
@@ -2265,7 +2269,7 @@ fluteEmbouchure(pressure) =
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// wBell_test = pm.wBell(0.4, 0.6);
+// wBell_test = pm.endChain(pm.wBell(0.4));
 // ```
 //----------------------------------
 wBell(opening) = rTermination(basicBlock,si.smooth(opening));
@@ -2283,7 +2287,7 @@ wBell(opening) = rTermination(basicBlock,si.smooth(opening));
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fluteHead_test = pm.fluteHead(0.8, 0.4, 0.3);
+// fluteHead_test = pm.endChain(pm.fluteHead);
 // ```
 //----------------------------------
 fluteHead = lTermination(*(absorption),basicBlock)
@@ -2304,7 +2308,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fluteFoot_test = pm.fluteFoot(0.8, 0.4, 0.3);
+// fluteFoot_test = pm.endChain(pm.fluteFoot);
 // ```
 //----------------------------------
 fluteFoot = rTermination(basicBlock,*(absorption) : dispersion)
@@ -2642,7 +2646,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fluteModel_ui_test = pm.fluteModel_ui;
+// fluteModel_ui_test = pm.fluteModel_ui(0.4);
 // ```
 //----------------------------------
 fluteModel_ui(pressure) =
