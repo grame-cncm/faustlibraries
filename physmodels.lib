@@ -2929,7 +2929,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// djembeModel_test = pm.djembeModel(110);
+// os = library("oscillators.lib");
+// djembeModel_test = os.impulse : pm.djembeModel(110);
 // ```
 //----------------------------------
 djembeModel(freq) = _ <: par(i,nModes,modeFilter(modeFreqs(i),modeT60s(i),modeGains(i))) :> /(nModes)
@@ -3037,7 +3038,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// marimbaBarModel_test = pm.marimbaBarModel(220);
+// os = library("oscillators.lib");
+// marimbaBarModel_test = os.impulse : pm.marimbaBarModel(220, 2, 0.1, 1, 5);
 // ```
 //----------------------------------
 marimbaBarModel(freq,exPos,t60,t60DecayRatio,t60DecaySlope) = _ <: par(i,nModes,modeFilter(modesFreqs(i),modesT60s(i),modesGains(int(exPos),i))) :> /(nModes)
@@ -3068,6 +3070,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
+// os = library("oscillators.lib");
 // marimbaResTube_test = os.impulse : pm.marimbaResTube(0.5);
 // ```
 //----------------------------------
@@ -3109,7 +3112,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// marimbaModel_test = pm.marimbaModel(220);
+// os = library("oscillators.lib");
+// marimbaModel_test = os.impulse : pm.marimbaModel(220, 2);
 // ```
 //----------------------------------
 marimbaModel(freq,exPos) =
