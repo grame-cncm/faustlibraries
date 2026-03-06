@@ -58,6 +58,7 @@ extracts for each documented symbol:
 - `summary`
 - `usage`
 - `params`
+- `notes`
 - `io` with `inSignals` / `outSignals` when derivable
 - `testCode`
 - `references`

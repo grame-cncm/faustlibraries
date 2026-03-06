@@ -343,6 +343,8 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
     - free text before any subsection -> summary
     - `#### Usage` -> usage string or fenced usage block
     - `Where:` -> list of documented parameters
+    - general notes that appear inside `Where:` after the parameter bullets
+      -> `notes`
     - `#### Test` -> example snippet
     - `#### Reference` / `#### References` -> references list
 
@@ -353,6 +355,7 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
     summary_lines: list[str] = []
     usage_buffer: list[str] = []
     params: list[dict[str, str]] = []
+    notes: list[str] = []
     references: list[str] = []
     test_code: str | None = None
 
@@ -360,6 +363,12 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
     in_fence = False
     fence_buffer: list[str] = []
     current_param: dict[str, str] | None = None
+    current_note_index: int | None = None
+
+    def is_general_note_line(text: str) -> bool:
+        """Heuristically detect note-like prose inside a `Where:` section."""
+
+        return bool(re.match(r"^(note|notes|output|outputs|return|returns|result|results)\b", text, flags=re.IGNORECASE))
 
     def flush_fence() -> None:
         """Commit the current fenced code block into the active logical section."""
@@ -397,6 +406,7 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
         if re.match(r"^where\s*:?\s*$", trimmed, flags=re.IGNORECASE):
             section = "where"
             current_param = None
+            current_note_index = None
             continue
 
         if trimmed.startswith("```"):
@@ -426,8 +436,15 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
             if match:
                 current_param = {"name": match.group(1).strip(), "description": match.group(2).strip()}
                 params.append(current_param)
-            elif current_param and trimmed and not trimmed.startswith("* "):
+                current_note_index = None
+            elif current_note_index is not None and trimmed and not trimmed.startswith("* "):
+                notes[current_note_index] = f"{notes[current_note_index]} {trimmed}".strip()
+            elif current_param and trimmed and not trimmed.startswith("* ") and not is_general_note_line(trimmed):
                 current_param["description"] = f"{current_param['description']} {trimmed}".strip()
+            elif trimmed and not trimmed.startswith("* "):
+                notes.append(trimmed)
+                current_note_index = len(notes) - 1
+                current_param = None
             continue
 
         if section == "reference":
@@ -440,12 +457,16 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
 
     usage = None
     if usage_buffer:
-        usage = next((line for line in usage_buffer if ":" in line), usage_buffer[0])
+        if len(usage_buffer) == 1:
+            usage = usage_buffer[0]
+        else:
+            usage = re.sub(r"\s+", " ", " ".join(usage_buffer)).strip()
 
     return {
         "summary": " ".join(summary_lines).strip(),
         "usage": usage,
         "params": params,
+        "notes": notes,
         "testCode": test_code,
         "references": references,
     }
@@ -569,6 +590,7 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
                 "summary": body["summary"],
                 "usage": usage,
                 "params": body["params"],
+                "notes": body["notes"],
                 "io": io,
                 "testCode": body["testCode"],
                 "references": body["references"],
@@ -616,6 +638,7 @@ def make_symbol_summary(symbol: dict[str, object]) -> dict[str, object]:
         "tags": symbol["tags"],
         "source": symbol["source"],
         "hasTestCode": bool(symbol.get("testCode")),
+        "notesCount": len(symbol.get("notes", [])),
         "referencesCount": len(symbol.get("references", [])),
     }
 

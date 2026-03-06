@@ -299,6 +299,23 @@ def get_faust_examples(store: FaustDocStore, symbol_or_module: str, limit: int =
     if not key:
         raise ValueError("Missing symbolOrModule")
 
+    library, symbols = store.get_library_symbols(key)
+    if library is not None:
+        examples = []
+        for symbol in symbols:
+            if not symbol.get("testCode"):
+                continue
+            examples.append(
+                {
+                    "symbol": symbol.get("qualifiedName"),
+                    "code": symbol.get("testCode"),
+                    "source": symbol.get("source"),
+                }
+            )
+            if len(examples) >= limit:
+                break
+        return {"scope": "module", "query": key, "file": library.get("file"), "examples": examples}
+
     found, _ = store.find_symbol(key)
     if found is not None:
         examples = []
@@ -312,24 +329,7 @@ def get_faust_examples(store: FaustDocStore, symbol_or_module: str, limit: int =
             )
         return {"scope": "symbol", "query": key, "examples": examples}
 
-    library, symbols = store.get_library_symbols(key)
-    if library is None:
-        raise ValueError(f"No symbol/module found: {key}")
-
-    examples = []
-    for symbol in symbols:
-        if not symbol.get("testCode"):
-            continue
-        examples.append(
-            {
-                "symbol": symbol.get("qualifiedName"),
-                "code": symbol.get("testCode"),
-                "source": symbol.get("source"),
-            }
-        )
-        if len(examples) >= limit:
-            break
-    return {"scope": "module", "query": key, "file": library.get("file"), "examples": examples}
+    raise ValueError(f"No symbol/module found: {key}")
 
 
 def explain_faust_symbol_for_goal(store: FaustDocStore, symbol: str, goal: str) -> dict[str, object]:
@@ -341,23 +341,28 @@ def explain_faust_symbol_for_goal(store: FaustDocStore, symbol: str, goal: str) 
 
     goal_text = str(goal or "").strip()
     params = found.get("params", [])
+    notes = found.get("notes", [])
     param_hint = (
         "Key params: " + "; ".join(f"{param['name']} ({param['description']})" for param in params)
         if params
         else "No explicit parameter notes found."
     )
+    notes_hint = "Notes: " + " ".join(str(note) for note in notes) if notes else None
     usage = f"Usage: {found['usage']}" if found.get("usage") else "Usage not documented."
-    recommendation = " ".join(
-        [
-            f"Use {found['qualifiedName']} when it matches this goal: {goal_text or 'general DSP design'}.",
-            str(found.get("summary") or "No summary found in comments."),
-            usage,
-            param_hint,
-            "A test snippet is available via get_faust_examples."
-            if found.get("testCode")
-            else "No test snippet found.",
-        ]
+    parts = [
+        f"Use {found['qualifiedName']} when it matches this goal: {goal_text or 'general DSP design'}.",
+        str(found.get("summary") or "No summary found in comments."),
+        usage,
+        param_hint,
+    ]
+    if notes_hint:
+        parts.append(notes_hint)
+    parts.append(
+        "A test snippet is available via get_faust_examples."
+        if found.get("testCode")
+        else "No test snippet found."
     )
+    recommendation = " ".join(parts)
     return {"symbol": found.get("qualifiedName"), "goal": goal_text, "recommendation": recommendation}
 
 
