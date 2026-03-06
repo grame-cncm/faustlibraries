@@ -4073,7 +4073,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// vocalEffort_test = pm.vocalEffort(0.6);
+// vocalEffort_test = 1 : pm.vocalEffort(440, 0);
 // ```
 //
 // #### References
@@ -4419,7 +4419,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// formantFilterbankFofCycle_test = pm.formantFilterbankFofCycle(0, 0, 5));
+// formantFilterbankFofCycle_test = pm.formantFilterbankFofCycle(0, 0, 5);
 // ```
 //-------------------------------------
 declare formantFilterbankFofCycle author "Mike Olsen";
@@ -4506,7 +4506,7 @@ formantFilterbank(voiceType,vowel,formantFilterBP,freq);
 // Where:
 //
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
-// * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
+// * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 // * `exType`: voice vs. fricative sound ratio (0-1 where 1 is 100% fricative)
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
@@ -4555,7 +4555,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// SFFormantModelFofCycle_test = pm.SFFormantModelFofCycle(0.5, 0.6, 0.7);
+// SFFormantModelFofCycle_test = pm.SFFormantModelFofCycle(0, 0, 220, 0.7);
 // ```
 //---------------------------------------
 declare SFFormantModelFofCycle author "Mike Olsen";
@@ -4581,14 +4581,14 @@ formantFilterbankFofCycle,1);
 // Where:
 //
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
-// * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
+// * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
 //
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// SFFormantModelFofSmooth_test = pm.SFFormantModelFofSmooth(0.5, 0.6, 0.7);
+// SFFormantModelFofSmooth_test = pm.SFFormantModelFofSmooth(0, 0, 220, 0.7);
 // ```
 //---------------------------------------
 declare SFFormantModelFofSmooth author "Mike Olsen";
@@ -4617,7 +4617,7 @@ formantFilterbankFofSmooth,1);
 // Where:
 //
 // * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
-// * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
+// * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 // * `exType`: voice vs. fricative sound ratio (0-1 where 1 is 100% fricative)
 // * `freq`: the fundamental frequency of the source signal
 // * `gain`: linear gain multiplier to multiply the source by
@@ -4625,7 +4625,7 @@ formantFilterbankFofSmooth,1);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// SFFormantModelBP_test = pm.SFFormantModelBP(0.5, 0.6, 0.7);
+// SFFormantModelBP_test = pm.SFFormantModelBP(0, 0, 0.2, 220, 0.7);
 // ```
 //---------------------------------------
 SFFormantModelBP(voiceType,vowel,exType,freq,gain) =
