@@ -555,6 +555,11 @@ countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~ _;
 // sweep(period,run) : _
 // ```
 //
+// Where:
+//
+// * `period`: sweep length in samples
+// * `run`: enable signal, non-zero while the sweep runs
+//
 // #### Test
 // ```
 // ba = library("basics.lib");
@@ -1152,11 +1157,14 @@ subseq(head, 0, N)         = head;
 // tabulate(C, FX, S, r0, r1, x).(val|lin|cub) : _
 // ```
 //
+// Where:
+//
 // * `C`: whether to dynamically force the `x` value to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
 // * `FX`: unary function Y=F(X) with one output (scalar function of one variable) 
 // * `S`: size of the table in samples (constant numerical expression)
 // * `r0`: minimum value of argument x
 // * `r1`: maximum value of argument x
+// * `x`: input value used to read the tabulated function
 //
 // ```
 // tabulate(C, FX, S, r0, r1, x).val uses the value in the table closest to x
@@ -1245,12 +1253,15 @@ declare tabulate author "Stephane Letz";
 // _ : tabulate_chebychev(C, FX, NX, CD, r0, r1) : _
 // ```
 //
+// Where:
+//
 // * `C`: whether to dynamically force the value to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
 // * `FX`: unary function Y=F(X) with one output (scalar function of one variable)
 // * `NX`: number of segments for uniformly partitioning [r0, r1] (constant numerical expression)
 // * `CD`: maximum polynomial degree for each Chebyshev polynomial (constant numerical expression)
 // * `r0`: minimum value of argument x
 // * `r1`: maximum value of argument x
+// * `x`: input value used to evaluate the approximation
 //
 // #### Example test program
 //
@@ -1315,6 +1326,8 @@ declare tabulate_chebychev license "MIT-style STK-4.3 license";
 // ```
 // tabulateNd(C, function, (parameters) ).(val|lin|cub) : _
 // ```
+//
+// Where:
 //
 // * `C`: whether to dynamically force the parameter values for each dimension to the ranges specified in parameters: 1 forces the check, 0 deactivates it (constant numerical expression)
 // * `function`: the function we want to tabulate. Can have any number of inputs, but needs to have just one output.
@@ -2772,6 +2785,9 @@ with {
 // or
 // _,_ : bypass_fade(n,b,e) : _,_
 // ```
+//
+// Where:
+//
 // * `n`: number of samples for the crossfade
 // * `b`: bypass switch (0/1)
 // * `e`: N x N circuit
