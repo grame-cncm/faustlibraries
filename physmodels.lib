@@ -612,7 +612,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// modeFilter_test = pm.modeFilter(440, 1.5, 0.8);
+// os = library("oscillators.lib");
+// modeFilter_test = os.osc(110) : pm.modeFilter(440, 1.5, 0.8);
 // ```
 //----------------------------------
 modeFilter(freq,t60,gain) = fi.tf2(b0,b1,b2,a1,a2)*gain
@@ -4264,7 +4265,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// formantFilterFofCycle_test = pm.formantFilterFofCycle(0, 0, 5, 0, 200);
+// os = library("oscillators.lib");
+// formantFilterFofCycle_test = os.osc(110) : pm.formantFilterFofCycle(0, 0, 5, 0, 200);
 // ```
 //--------------------------------------
 declare formantFilterFofCycle author "Mike Olsen";
@@ -4312,7 +4314,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// formantFilterFofSmooth_test = pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
+// os = library("oscillators.lib");
+// formantFilterFofSmooth_test = os.osc(110) : pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
 // ```
 //--------------------------------------
 declare formantFilterFofSmooth author "Mike Olsen";
@@ -4356,7 +4359,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// formantFilterBP_test = pm.formantFilterBP(0, 0, 5, 0, 200);
+// os = library("oscillators.lib");
+// formantFilterBP_test = os.osc(110) : pm.formantFilterBP(0, 0, 5, 0, 200);
 // ```
 //--------------------------------------
 formantFilterBP(voiceType,vowel,nFormants,i,freq) =
@@ -4398,7 +4402,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// formantFilterbank_test = pm.formantFilterbank(0, 0, 5, 0);
+// os = library("oscillators.lib");
+// formantFilterbank_test = os.osc(110) : pm.formantFilterbank(0, 0, pm.formantFilterBP, 200);
 // ```
 //--------------------------------------
 declare formantFilterbank author "Mike Olsen";
@@ -4432,7 +4437,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// formantFilterbankFofCycle_test = pm.formantFilterbankFofCycle(0, 0, 5);
+// os = library("oscillators.lib");
+// formantFilterbankFofCycle_test = os.osc(110) : pm.formantFilterbankFofCycle(0, 0, 200);
 // ```
 //-------------------------------------
 declare formantFilterbankFofCycle author "Mike Olsen";
@@ -4464,7 +4470,8 @@ formantFilterbank(voiceType,vowel,formantFilterFofCycle,freq);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// formantFilterbankFofSmooth_test = pm.formantFilterbankFofSmooth(0, 0, 5);
+// os = library("oscillators.lib");
+// formantFilterbankFofSmooth_test = os.osc(110) : pm.formantFilterbankFofSmooth(0, 0, 200);
 // ```
 //-------------------------------------
 declare formantFilterbankFofSmooth author "Mike Olsen";
@@ -4494,7 +4501,8 @@ formantFilterbank(voiceType,vowel,formantFilterFofSmooth,freq);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// formantFilterbankBP_test = pm.formantFilterbankBP(0, 0, 5);
+// os = library("oscillators.lib");
+// formantFilterbankBP_test = os.osc(110) : pm.formantFilterbankBP(0, 0, 200);
 // ```
 //--------------------------------------
 formantFilterbankBP(voiceType,vowel,freq) =
