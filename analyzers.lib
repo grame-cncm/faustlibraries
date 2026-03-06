@@ -1105,11 +1105,11 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 //
 // Where:
 //
-// * `si.cbus(N)` is a bus of N complex signals, each specified by real and imaginary parts:
+// * `si.cbus(N)`: a bus of N complex signals, each specified by real and imaginary parts:
 //   (r0,i0), (r1,i1), (r2,i2), ...
-// * `N` is the FFT size (must be a power of 2: 2,4,8,16,... known at compile time) 
-// * `fft(N)` performs a length `N` FFT for complex signals (radix 2)
-// * The output is a bank of N complex signals containing the complex spectrum over time:
+// * `N`: FFT size (must be a power of 2: 2,4,8,16,... known at compile time)
+// * `fft(N)`: a length-`N` FFT for complex signals (radix 2)
+// * `output`: a bank of N complex signals containing the complex spectrum over time:
 //   (R0, I0), (R1,I1), ...
 //   - The dc component is (R0,I0), where I0=0 for real input signals.
 //
