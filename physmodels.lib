@@ -163,6 +163,10 @@ l2s(l) = l*ma.SR/speedOfSound;
 // chain(basicBlock : basicBlock : etc.)
 // ```
 //
+// Where:
+//
+// * `basicBlock`: any bidirectional block with 3 inputs and 3 outputs
+//
 // #### Test
 // ```
 // pm = library("physmodels.lib");
@@ -190,6 +194,11 @@ basicBlock = _,_,_;
 // };
 // ```
 //
+// Where:
+//
+// * `A`: first bidirectional block in the chain
+// * `B`: next bidirectional block in the chain
+//
 // #### Test
 // ```
 // pm = library("physmodels.lib");
@@ -208,8 +217,11 @@ chain(A) = A;
 // model(x) = chain(A : inLeftWave(x) : B)
 // ```
 //
-// Where `A` and `B` are bidirectional blocks and `x` is the signal added to left
-// going waves in that chain.
+// Where:
+//
+// * `A`: preceding bidirectional block
+// * `x`: signal added to the left-going wave
+// * `B`: following bidirectional block
 //
 // #### Test
 // ```
@@ -228,8 +240,11 @@ inLeftWave(x) = +(x),_,_;
 // model(x) = chain(A : inRightWave(x) : B)
 // ```
 //
-// Where `A` and `B` are bidirectional blocks and `x` is the signal added to right
-// going waves in that chain.
+// Where:
+//
+// * `A`: preceding bidirectional block
+// * `x`: signal added to the right-going wave
+// * `B`: following bidirectional block
 //
 // #### Test
 // ```
@@ -249,8 +264,11 @@ inRightWave(x) = _,+(x),_;
 // model(x) = chain(A : in(x) : B)
 // ```
 //
-// Where `A` and `B` are bidirectional blocks and `x` is the signal added to
-// left and right going waves in that chain.
+// Where:
+//
+// * `A`: preceding bidirectional block
+// * `x`: signal added to both left- and right-going waves
+// * `B`: following bidirectional block
 //
 // #### Test
 // ```
@@ -269,7 +287,10 @@ in(x) = +(x),+(x),_;
 // chain(A : outLeftWave : B)
 // ```
 //
-// Where `A` and `B` are bidirectional blocks.
+// Where:
+//
+// * `A`: preceding bidirectional block
+// * `B`: following bidirectional block
 //
 // #### Test
 // ```
@@ -288,7 +309,10 @@ outLeftWave(x,y,s) = x,y,x+s;
 // chain(A : outRightWave : B)
 // ```
 //
-// Where `A` and `B` are bidirectional blocks.
+// Where:
+//
+// * `A`: preceding bidirectional block
+// * `B`: following bidirectional block
 //
 // #### Test
 // ```
@@ -308,7 +332,10 @@ outRightWave(x,y,s) = x,y,y+s;
 // chain(A : out : B)
 // ```
 //
-// Where `A` and `B` are bidirectional blocks.
+// Where:
+//
+// * `A`: preceding bidirectional block
+// * `B`: following bidirectional block
 //
 // #### Test
 // ```
@@ -336,6 +363,12 @@ out(x,y,s) = x,y,x+y+s;
 // };
 // ```
 //
+// Where:
+//
+// * `a`: left termination filter
+// * `b`: bidirectional chain to terminate
+// * `c`: right termination filter
+//
 // #### Test
 // ```
 // pm = library("physmodels.lib");
@@ -360,6 +393,11 @@ terminations(a,b,c) = (_,ro.crossnn(1),_,_ : +,+,_ : b) ~ (a,c : ro.crossnn(1));
 // };
 // ```
 //
+// Where:
+//
+// * `a`: left termination filter
+// * `b`: bidirectional chain to terminate
+//
 // #### Test
 // ```
 // pm = library("physmodels.lib");
@@ -383,6 +421,11 @@ lTermination(a,b) = (ro.crossnn(1),_,_ : _,+,_ : b) ~ a;
 //    c = *(-1); // right termination
 // };
 // ```
+//
+// Where:
+//
+// * `b`: bidirectional chain to terminate
+// * `c`: right termination filter
 //
 // #### Test
 // ```
@@ -436,6 +479,10 @@ closeOuts = !,!,_;
 // ```
 // endChain(chain(...)) : _
 // ```
+//
+// Where:
+//
+// * `b`: bidirectional chain to close on all non-audio ports
 //
 // #### Test
 // ```
