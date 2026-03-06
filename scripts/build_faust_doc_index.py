@@ -359,6 +359,7 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
     section = "summary"
     in_fence = False
     fence_buffer: list[str] = []
+    current_param: dict[str, str] | None = None
 
     def flush_fence() -> None:
         """Commit the current fenced code block into the active logical section."""
@@ -395,6 +396,7 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
 
         if re.match(r"^where\s*:?\s*$", trimmed, flags=re.IGNORECASE):
             section = "where"
+            current_param = None
             continue
 
         if trimmed.startswith("```"):
@@ -422,7 +424,10 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
         if section == "where":
             match = PARAM_RE.match(trimmed)
             if match:
-                params.append({"name": match.group(1).strip(), "description": match.group(2).strip()})
+                current_param = {"name": match.group(1).strip(), "description": match.group(2).strip()}
+                params.append(current_param)
+            elif current_param and trimmed and not trimmed.startswith("* "):
+                current_param["description"] = f"{current_param['description']} {trimmed}".strip()
             continue
 
         if section == "reference":
@@ -462,9 +467,13 @@ def parse_usage_io(usage: str | None) -> dict[str, int | str | None]:
     if not usage:
         return {"inSignals": None, "outSignals": None, "raw": None}
 
-    parts = usage.split(":", 1)
-    lhs = parts[0].strip() if parts else ""
-    rhs = parts[1].strip() if len(parts) > 1 else ""
+    parts = [part.strip() for part in usage.split(":")]
+    if len(parts) >= 3:
+        lhs = parts[0]
+        rhs = parts[-1]
+    else:
+        lhs = ""
+        rhs = parts[-1] if parts else ""
 
     def count_signals(expr: str) -> int | None:
         if not expr:
