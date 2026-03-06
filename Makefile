@@ -6,6 +6,8 @@
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
 # `make build`      - build the documentation.
 # `make serve`      - serve the documentation.
+# `make doc-index`  - build the Faust library documentation JSON index.
+# `make doc-index-split` - build a compact index plus one detailed JSON per module.
 
 FAUST ?= faust
 FAUST_OPT ?= -double -t 0
@@ -17,6 +19,10 @@ SAMPLE_RATE ?= 48000
 
 FLOAT_TOL ?= 1e-4
 FLOATDIFF ?= ./scripts/floatdiff.py
+PYTHON ?= python3
+DOC_INDEX_SCRIPT ?= ./scripts/build_faust_doc_index.py
+DOC_INDEX_OUTPUT ?= tests/faust-doc-index.json
+DOC_INDEX_SPLIT_DIR ?= tests/faust-doc
 
 ARCH := arch/print_arch.cpp
 BUILD_DIR := tests/build
@@ -26,7 +32,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check clean help bench
+.PHONY: reference check clean help bench doc-index doc-index-split
 
 help: ## Show available targets and descriptions
 	@printf "Usage:\n  make \033[36m<target>\033[0m\n\n"
@@ -120,6 +126,16 @@ bench: ## Run faustbench-llvm on all test specs and capture memory/CPU stats
 		printf '[bench] no results generated\n' >&2; \
 	fi
 
+doc-index: ## Build the Faust library documentation JSON index
+	@set -e; \
+	printf '[doc-index] writing %s\n' '$(DOC_INDEX_OUTPUT)'; \
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --pretty
+
+doc-index-split: ## Build a compact JSON index and one detailed JSON per library module
+	@set -e; \
+	printf '[doc-index-split] writing %s and %s\n' '$(DOC_INDEX_OUTPUT)' '$(DOC_INDEX_SPLIT_DIR)'; \
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --pretty
+
 build: ## Build the documentation
 	$(MAKE) -C doc build
  
@@ -130,7 +146,7 @@ pdf: ## Create the PDF documentation
 	$(MAKE) -C doc pdf
 
 clean: ## Remove build artefacts and generated outputs
-	rm -rf $(BUILD_DIR) $(REFERENCE_DIR) $(OUTPUT_DIR)
+	rm -rf $(BUILD_DIR) $(REFERENCE_DIR) $(OUTPUT_DIR) $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
 
 $(BUILD_DIR) $(REFERENCE_DIR) $(OUTPUT_DIR):
 	@mkdir -p $@
