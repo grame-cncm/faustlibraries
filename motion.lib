@@ -71,7 +71,8 @@ declare clamp01 author "Christophe Lebreton";
 // * `threshold`: trigger threshold applied after high-pass (normalized g units)
 // * `debounceMs`: time in milliseconds to hold the trigger high (>= 0)
 // * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-//   - Output is a gate in [0, 1].
+//
+// Output is a gate in [0, 1].
 //
 // #### Example
 //
@@ -89,7 +90,7 @@ declare clamp01 author "Christophe Lebreton";
 //     accX = os.pulsetrain(4) * 2;
 //   } : mo.shockTrigger(50, 0.5, 50);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 shockTrigger(hpHz, threshold, debounceMs, sig) =
   sig
   : fi.highpass(1, hpHz)
@@ -124,7 +125,8 @@ declare shockTrigger author "Christophe Lebreton";
 //
 // * `lpHz`: low-pass frequency (Hz) ( > 0 )
 // * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-//   - Output is clamped to [0, 1] with negative values removed.
+//
+// Output is clamped to [0, 1] with negative values removed.
 //
 // #### Example
 //
@@ -141,7 +143,7 @@ declare shockTrigger author "Christophe Lebreton";
 //     os = library("oscillators.lib");
 //   } : mo.inclinometer(2, os.sawtooth(1));
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 inclinometer(lpHz, sig) = sig:max(0):fi.lowpass(1, lpHz):clamp01;
 declare inclinometer author "Christophe Lebreton";
 
@@ -159,7 +161,8 @@ declare inclinometer author "Christophe Lebreton";
 // * `lpHz`: low-pass frequency (Hz) ( > 0 )
 // * `posSig`: positive-facing accelerometer axis signal (normalized, typically [-1, 1])
 // * `negSig`: negative-facing accelerometer axis signal (normalized, typically [-1, 1])
-//   - Output maps posSig -> 1 and negSig -> 0 with smoothing and clamping.
+//
+// Output maps posSig -> 1 and negSig -> 0 with smoothing and clamping.
 //
 // #### Example
 //
@@ -178,7 +181,7 @@ declare inclinometer author "Christophe Lebreton";
 //     accNegX = accPosX * (-1);
 //   } : mo.inclineBalance(1, accPosX, accNegX);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 inclineBalance(lpHz, posSig, negSig) =
   (inclinometer(lpHz, posSig) * 0.5 - inclinometer(lpHz, negSig) * 0.5 + 0.5):clamp01;
 declare inclineBalance author "Christophe Lebreton";
@@ -197,7 +200,8 @@ declare inclineBalance author "Christophe Lebreton";
 // * `lpHz`: low-pass frequency (Hz) ( > 0 )
 // * `posSig`: positive-facing accelerometer axis signal (normalized, typically [-1, 1])
 // * `negSig`: negative-facing accelerometer axis signal (normalized, typically [-1, 1])
-//   - Output peaks at 1 near either pole and returns to 0 near the midpoint.
+// 
+// Output peaks at 1 near either pole and returns to 0 near the midpoint.
 //
 // #### Example
 //
@@ -216,7 +220,7 @@ declare inclineBalance author "Christophe Lebreton";
 //     accNegX = accPosX * (-1);
 //   } : mo.inclineSymmetric(2, accPosX, accNegX);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 inclineSymmetric(lpHz, posSig, negSig) =
   (1 - inclinometer(lpHz, posSig)) + (1 - inclinometer(lpHz, negSig)) - 1 : clamp01;
 declare inclineSymmetric author "Christophe Lebreton";
@@ -236,7 +240,8 @@ declare inclineSymmetric author "Christophe Lebreton";
 // * `offset`: dead-zone offset applied after projection (0..0.33). Magnitudes below
 //   `offset` clamp to 0, and the remaining range is rescaled to keep the output in [0, 1].
 // * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-//   - Output is normalized to [0, 1] with an optional dead zone near 0.
+//
+// Output is normalized to [0, 1] with an optional dead zone near 0.
 //
 // #### Example
 //
@@ -253,7 +258,7 @@ declare inclineSymmetric author "Christophe Lebreton";
 //     os = library("oscillators.lib");
 //   } : mo.projectedGravity(2, 0.05, os.triangle(0.1));
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 projectedGravity(lpHz, offset, sig) =
   sig : fi.lowpass(1, lpHz) : pgravity(offset)
 with {
@@ -282,8 +287,9 @@ declare projectedGravity author "Christophe Lebreton";
 // * `envUpMs`: attack time in milliseconds (>= 0)
 // * `envDownMs`: release time in milliseconds (>= 0)
 // * `sig`: input signal (normalized)
-//   - Signal is offset by `thr`, floored at 0, scaled by `gain`, clamped to [0, 1], then
-//     fed to an attack/release follower (`an.amp_follower_ar`).
+//
+// Signal is offset by `thr`, floored at 0, scaled by `gain`, clamped to [0, 1], then
+// fed to an attack/release follower (`an.amp_follower_ar`).
 //
 // #### Example
 //
@@ -291,7 +297,7 @@ declare projectedGravity author "Christophe Lebreton";
 // mo = library("motion.lib");
 // process = mo.motionEnvelope(0.05, 1.25, 15, 25, accX);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 motionEnvelope(thr, gain, envUpMs, envDownMs, sig) =
   sig:-(thr):max(0):*(gain):clamp01:an.amp_follower_ar(envUpMs * 0.001, envDownMs * 0.001);
 
@@ -306,8 +312,9 @@ motionEnvelope(thr, gain, envUpMs, envDownMs, sig) =
 //
 // * `thr`, `gain`, `envUpMs`, `envDownMs`: passed to `motionEnvelope`
 // * `sig`: input signal
-//   - Absolute value is taken before envelope detection.
-////-------------------------------------------------
+//
+// Absolute value is taken before envelope detection.
+//-------------------------------------------------
 envelopeAbs(thr, gain, envUpMs, envDownMs, sig) = sig:abs:motionEnvelope(thr, gain, envUpMs, envDownMs);
 
 //-----------------`(mo.)envelopePos`--------------------
@@ -321,8 +328,9 @@ envelopeAbs(thr, gain, envUpMs, envDownMs, sig) = sig:abs:motionEnvelope(thr, ga
 //
 // * `thr`, `gain`, `envUpMs`, `envDownMs`: passed to `motionEnvelope`
 // * `sig`: input signal
-//   - Negative values are ignored by the thresholding stage.
-////-------------------------------------------------
+//
+// Negative values are ignored by the thresholding stage.
+//-------------------------------------------------
 envelopePos(thr, gain, envUpMs, envDownMs, sig) = motionEnvelope(thr, gain, envUpMs, envDownMs, sig);
 
 //-----------------`(mo.)envelopeNeg`--------------------
@@ -336,8 +344,9 @@ envelopePos(thr, gain, envUpMs, envDownMs, sig) = motionEnvelope(thr, gain, envU
 //
 // * `thr`, `gain`, `envUpMs`, `envDownMs`: passed to `motionEnvelope`
 // * `sig`: input signal
-//   - The signal is negated before the shared positive-only detector.
-////-------------------------------------------------
+//
+// The signal is negated before the shared positive-only detector.
+//-------------------------------------------------
 envelopeNeg(thr, gain, envUpMs, envDownMs, sig) = sig * (-1):motionEnvelope(thr, gain, envUpMs, envDownMs);
 
 //-----------------`(mo.)pita3`--------------------
@@ -353,7 +362,7 @@ envelopeNeg(thr, gain, envUpMs, envDownMs, sig) = sig * (-1):motionEnvelope(thr,
 // * `x`: first axis or signal component
 // * `y`: second axis or signal component
 // * `z`: third axis or signal component
-////-------------------------------------------------
+//-------------------------------------------------
 pita3(x, y, z) = (x * x), (y * y), (z * z) :> sqrt;
 
 //-----------------`(mo.)totalEnvelope`--------------------
@@ -374,7 +383,7 @@ pita3(x, y, z) = (x * x), (y * y), (z * z) :> sqrt;
 // * `z`: normalized Z-axis signal
 //
 // The three-axis magnitude is computed with `pita3` before applying `motionEnvelope`.
-////-------------------------------------------------
+//-------------------------------------------------
 totalEnvelope(thr, gain, envUpMs, envDownMs, x, y, z) =
   pita3(x, y, z):motionEnvelope(thr, gain, envUpMs, envDownMs);
 
@@ -397,7 +406,8 @@ totalEnvelope(thr, gain, envUpMs, envDownMs, x, y, z) =
 // * `envUpMs`: attack time in milliseconds (>= 0)
 // * `envDownMs`: release time in milliseconds (>= 0)
 // * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-//   - Output envelope is clamped to [0, 1].
+//
+// Output envelope is clamped to [0, 1].
 //
 // #### Example
 //
@@ -415,7 +425,7 @@ totalEnvelope(thr, gain, envUpMs, envDownMs, x, y, z) =
 //     accX = os.sawtooth(0.5);
 //   } : mo.accelEnvelopeAbs(0.1, 1.5, 5, 20, accX);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 accelEnvelopeAbs(thr, gain, envUpMs, envDownMs, sig) =
   envelopeAbs(thr, gain, envUpMs, envDownMs, sig);
 declare accelEnvelopeAbs author "Christophe Lebreton";
@@ -436,7 +446,8 @@ declare accelEnvelopeAbs author "Christophe Lebreton";
 // * `envUpMs`: attack time in milliseconds (>= 0)
 // * `envDownMs`: release time in milliseconds (>= 0)
 // * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-//   - Negative values are ignored; output envelope is clamped to [0, 1].
+//
+// Negative values are ignored; output envelope is clamped to [0, 1].
 //
 // #### Example
 //
@@ -453,7 +464,7 @@ declare accelEnvelopeAbs author "Christophe Lebreton";
 //     os = library("oscillators.lib");
 //   } : mo.accelEnvelopePos(0.05, 1, 5, 5, os.triangle(0.25));
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 accelEnvelopePos(thr, gain, envUpMs, envDownMs, sig) =
   envelopePos(thr, gain, envUpMs, envDownMs, sig);
 declare accelEnvelopePos author "Christophe Lebreton";
@@ -474,7 +485,8 @@ declare accelEnvelopePos author "Christophe Lebreton";
 // * `envUpMs`: attack time in milliseconds (>= 0)
 // * `envDownMs`: release time in milliseconds (>= 0)
 // * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-//   - Positive values are ignored; output envelope is clamped to [0, 1].
+//
+// Positive values are ignored; output envelope is clamped to [0, 1].
 //
 // #### Example
 //
@@ -491,7 +503,7 @@ declare accelEnvelopePos author "Christophe Lebreton";
 //     os = library("oscillators.lib");
 //   } : mo.accelEnvelopeNeg(0.05, 1, 5, 5, os.triangle(0.25));
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 accelEnvelopeNeg(thr, gain, envUpMs, envDownMs, sig) =
   envelopeNeg(thr, gain, envUpMs, envDownMs, sig);
 declare accelEnvelopeNeg author "Christophe Lebreton";
@@ -514,7 +526,8 @@ declare accelEnvelopeNeg author "Christophe Lebreton";
 // * `ax`: accelerometer X axis (normalized, typically [-1, 1])
 // * `ay`: accelerometer Y axis (normalized, typically [-1, 1])
 // * `az`: accelerometer Z axis (normalized, typically [-1, 1])
-//   - Output magnitude is clamped to [0, 1].
+//
+// Output magnitude is clamped to [0, 1].
 //
 // #### Example
 //
@@ -534,7 +547,7 @@ declare accelEnvelopeNeg author "Christophe Lebreton";
 //     az = os.sawtooth(0.12) * 0.3;
 //   } : mo.totalAccel(0.05, 1.2, 8, 12, ax, ay, az);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 totalAccel(thr, gain, envUpMs, envDownMs, ax, ay, az) =
   totalEnvelope(thr, gain, envUpMs, envDownMs, ax, ay, az);
 declare totalAccel author "Christophe Lebreton";
@@ -558,7 +571,8 @@ declare totalAccel author "Christophe Lebreton";
 // * `envUpMs`: attack time in milliseconds (>= 0)
 // * `envDownMs`: release time in milliseconds (>= 0)
 // * `sig`: gyroscope axis signal (normalized rad/s range)
-//   - Output envelope is clamped to [0, 1].
+//
+// Output envelope is clamped to [0, 1].
 //
 // #### Example
 //
@@ -575,7 +589,7 @@ declare totalAccel author "Christophe Lebreton";
 //     os = library("oscillators.lib");
 //   } : mo.gyroEnvelopeAbs(0.02, 0.9, 25, 30, os.sawtooth(0.5));
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 gyroEnvelopeAbs(thr, gain, envUpMs, envDownMs, sig) =
   envelopeAbs(thr, gain, envUpMs, envDownMs, sig);
 declare gyroEnvelopeAbs author "Christophe Lebreton";
@@ -596,7 +610,8 @@ declare gyroEnvelopeAbs author "Christophe Lebreton";
 // * `envUpMs`: attack time in milliseconds (>= 0)
 // * `envDownMs`: release time in milliseconds (>= 0)
 // * `sig`: gyroscope axis signal (normalized rad/s range)
-//   - Negative values are ignored; output envelope is clamped to [0, 1].
+//
+// Negative values are ignored; output envelope is clamped to [0, 1].
 //
 // #### Example
 //
@@ -613,7 +628,7 @@ declare gyroEnvelopeAbs author "Christophe Lebreton";
 //     os = library("oscillators.lib");
 //   } : mo.gyroEnvelopePos(0.02, 0.9, 25, 30, os.triangle(0.5));
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 gyroEnvelopePos(thr, gain, envUpMs, envDownMs, sig) =
   envelopePos(thr, gain, envUpMs, envDownMs, sig);
 declare gyroEnvelopePos author "Christophe Lebreton";
@@ -634,7 +649,8 @@ declare gyroEnvelopePos author "Christophe Lebreton";
 // * `envUpMs`: attack time in milliseconds (>= 0)
 // * `envDownMs`: release time in milliseconds (>= 0)
 // * `sig`: gyroscope axis signal (normalized rad/s range)
-//   - Positive values are ignored; output envelope is clamped to [0, 1].
+//
+// Positive values are ignored; output envelope is clamped to [0, 1].
 //
 // #### Example
 //
@@ -651,7 +667,7 @@ declare gyroEnvelopePos author "Christophe Lebreton";
 //     os = library("oscillators.lib");
 //   } : mo.gyroEnvelopeNeg(0.02, 0.9, 25, 30, os.triangle(0.5));
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 gyroEnvelopeNeg(thr, gain, envUpMs, envDownMs, sig) =
   envelopeNeg(thr, gain, envUpMs, envDownMs, sig);
 declare gyroEnvelopeNeg author "Christophe Lebreton";
@@ -674,7 +690,8 @@ declare gyroEnvelopeNeg author "Christophe Lebreton";
 // * `gx`: gyroscope X axis (normalized rad/s range)
 // * `gy`: gyroscope Y axis (normalized rad/s range)
 // * `gz`: gyroscope Z axis (normalized rad/s range)
-//   - Output magnitude is clamped to [0, 1].
+//
+// Output magnitude is clamped to [0, 1].
 //
 // #### Example
 //
@@ -694,7 +711,7 @@ declare gyroEnvelopeNeg author "Christophe Lebreton";
 //     gz = os.sawtooth(0.12) * 0.3;
 //   } : mo.totalGyro(0.01, 0.9, 25, 30, gx, gy, gz);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 totalGyro(thr, gain, envUpMs, envDownMs, gx, gy, gz) =
   totalEnvelope(thr, gain, envUpMs, envDownMs, gx, gy, gz);
 declare totalGyro author "Christophe Lebreton";
@@ -721,7 +738,8 @@ declare totalGyro author "Christophe Lebreton";
 // * `ys`: current Y coordinate (normalized)
 // * `zs`: current Z coordinate (normalized)
 // * `smoothMs`: smoothing time in milliseconds (>= 0)
-//   - Output weight is clamped to [0, 1].
+//
+// Output weight is clamped to [0, 1].
 //
 // #### Example
 //
@@ -741,7 +759,7 @@ declare totalGyro author "Christophe Lebreton";
 //     z = os.triangle(0.05);
 //   } : mo.orientationWeight(0, 1, 0, 1, x, y, z, 10);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 orientationWeight(targetX, targetY, targetZ, shape, xs, ys, zs, smoothMs) =
   (1 - distance(xs, ys, zs) * shape):max(0):si.smooth(ba.tau2pole(smoothMs * 0.001))
 with {
@@ -773,7 +791,8 @@ declare orientationWeight author "Christophe Lebreton";
 // * `shapeDown`: shape for Down (-Z)
 // * `shapeUp`: shape for Up (+Z)
 // * `smoothMs`: smoothing time in milliseconds (>= 0)
-//   - Output is six weights (Cour, Rear, Jardin, Front, Down, Up), each in [0, 1].
+//
+//  Output is six weights (Cour, Rear, Jardin, Front, Down, Up), each in [0, 1].
 //
 // #### Example
 //
@@ -793,7 +812,7 @@ declare orientationWeight author "Christophe Lebreton";
 //     z = os.triangle(0.03);
 //   } : mo.orientation6(x, y, z, 1, 1, 1, 1, 1, 1, 10);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 orientation6(xs, ys, zs,
              shapeCour, shapeRear, shapeJardin, shapeFront, shapeDown, shapeUp,
              smoothMs) = par(i, 6, weight(i))
@@ -832,7 +851,8 @@ declare orientation6 author "Christophe Lebreton";
 // * `ihigh`: maximum input value before clamping (must be > ilow)
 // * `olow`: minimum output value
 // * `ohigh`: maximum output value
-//   - Inputs below ilow clamp to olow; above ihigh clamp to ohigh.
+//
+// Inputs below ilow clamp to olow; above ihigh clamp to ohigh.
 //
 // #### Example
 //
@@ -849,7 +869,7 @@ declare orientation6 author "Christophe Lebreton";
 //     os = library("oscillators.lib");
 //   } : os.sawtooth(0.2) : mo.scale(0.2, 0.8, 0, 1);
 // ```
-////-------------------------------------------------
+//-------------------------------------------------
 scale(ilow, ihigh, olow, ohigh) =
   -(thr_low):max(0):/((thr_high - thr_low):max(0.001)):*(out_range):+(out_low):min(ohigh)
 with {
