@@ -1911,21 +1911,20 @@ with {
 // #### Usage
 //
 // ```
-// violinModel(stringLength,bowPressure,bowVelocity,bridgeReflexion,
-// bridgeAbsorption,bowPosition) : _
+// violinModel(stringLength,bowPressure,bowVelocity,bowPosition) : _
 // ```
 //
 // Where:
 //
 // * `stringLength`: the length of the string in meters
+// * `bowPressure`: bow pressure on the string (0-1)
 // * `bowVelocity`: velocity of the bow / excitation signal (0-1)
-// * `bowPressure`: bow pressure on the string (0-1))
 // * `bowPosition`: the position of the bow on the string (0-1)
 //
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// violinModel_test = pm.violinModel(0.82, 0.35, pm.violinBow(0.4, 0.05), 0.15);
+// violinModel_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
 // ```
 //----------------------------------
 violinModel(stringLength,bowPressure,bowVelocity,bowPosition) =
@@ -2322,7 +2321,7 @@ with {
 // #### Usage
 //
 // ```
-// clarinetModel(length,pressure,reedStiffness,bellOpening) : _
+// clarinetModel(tubeLength,pressure,reedStiffness,bellOpening) : _
 // ```
 //
 // Where:
@@ -2373,7 +2372,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// clarinetModel_ui_test = pm.clarinetModel_ui;
+// clarinetModel_ui_test = pm.clarinetModel_ui(0.4);
 // ```
 //----------------------------------
 clarinetModel_ui(pressure) = clarinetModel(tubeLength,pressure,reedStiffness,bellOpening)*outGain
@@ -2509,7 +2508,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// brassModel_ui_test = pm.brassModel_ui;
+// brassModel_ui_test = pm.brassModel_ui(0.4);
 // ```
 //----------------------------------
 brassModel_ui(pressure) = brassModel(tubeLength,lipsTension,mute,pressure)
