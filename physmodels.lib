@@ -2857,7 +2857,7 @@ with {
 // #### Usage
 //
 // ```
-// blower(pressure,breathGain,breathCutoff) : _
+// blower(pressure,breathGain,breathCutoff,vibratoFreq,vibratoGain) : _
 // ```
 //
 // Where:
@@ -2865,6 +2865,8 @@ with {
 // * `pressure`: pressure (0-1)
 // * `breathGain`: breath noise gain (0-1) (recommended: 0.005)
 // * `breathCutoff`: breath cuttoff frequency (Hz) (recommended: 2000)
+// * `vibratoFreq`: vibrato frequency in Hz (recommended: 5)
+// * `vibratoGain`: vibrato depth (0-1) (recommended: 0.2)
 //
 // #### Test
 // ```
@@ -3066,7 +3068,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// marimbaResTube_test = pm.marimbaResTube(220);
+// marimbaResTube_test = os.impulse : pm.marimbaResTube(0.5);
 // ```
 //----------------------------------
 marimbaResTube(tubeLength,excitation) = endChain(tubeChain)
@@ -3992,7 +3994,7 @@ voiceGender(voiceType) = ba.if(voiceType == 0,1,ba.if(voiceType == 3,1,0));
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// skirtWidthMultiplier_test = pm.skirtWidthMultiplier(0.5);
+// skirtWidthMultiplier_test = pm.skirtWidthMultiplier(0, 220, 0);
 // ```
 //---------------------------------------------
 declare skirtWidthMultiplier author "Mike Olsen";
@@ -4032,7 +4034,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// autobendFreq_test = pm.autobendFreq(440, 0.5);
+// autobendFreq_test = 440 : pm.autobendFreq(0, 220, 0);
 // ```
 //
 // #### References
