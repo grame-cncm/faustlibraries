@@ -386,7 +386,7 @@ terminations(a,b,c) = (_,ro.crossnn(1),_,_ : +,+,_ : b) ~ (a,c : ro.crossnn(1));
 // #### Usage
 //
 // ```
-// lTerminations(a,b)
+// lTermination(a,b)
 // with {
 //    a = *(-1); // left termination
 //    b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
@@ -415,7 +415,7 @@ lTermination(a,b) = (ro.crossnn(1),_,_ : _,+,_ : b) ~ a;
 // #### Usage
 //
 // ```
-// rTerminations(b,c)
+// rTermination(b,c)
 // with {
 //    b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
 //    c = *(-1); // right termination
@@ -802,7 +802,7 @@ with {
 // #### Usage
 //
 // ```
-// chain(... : openStringPickUp(length,stiffness,pluckPosition,excitation) : ...)
+// chain(... : openStringPickUp(length,stiffness,pluckPosition,pickupPosition,excitation) : ...)
 // ```
 //
 // Where:
@@ -843,7 +843,7 @@ with {
 // #### Usage
 //
 // ```
-// chain(... : openStringPickDown(length,stiffness,pluckPosition,excitation) : ...)
+// chain(... : openStringPickDown(length,stiffness,pluckPosition,pickupPosition,excitation) : ...)
 // ```
 //
 // Where:
@@ -2060,7 +2060,7 @@ openTube = stringSegment;
 // #### Usage
 //
 // ```
-// excitation : reedTable(offeset,slope) : _
+// excitation : reedTable(offset,slope) : _
 // ```
 //
 // Where:
@@ -2833,7 +2833,7 @@ with {
 //
 // ```
 // trigger = button('gate');
-// pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
+// pluckString(stringLength,cutoff,maxFreq,sharpness,gain,trigger)
 // ```
 //
 // Where:
@@ -3158,7 +3158,7 @@ with {
 // * `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
-// * `trigger` signal (0: off, 1: on)
+// * `trigger`: signal (0: off, 1: on)
 //
 // #### Test
 // ```
@@ -3277,7 +3277,7 @@ with {
 // * `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
-// * `trigger` signal (0: off, 1: on)
+// * `trigger`: signal (0: off, 1: on)
 //
 // #### Test
 // ```
@@ -3392,7 +3392,7 @@ with {
 // * `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
-// * `trigger` signal (0: off, 1: on)
+// * `trigger`: signal (0: off, 1: on)
 //
 // #### Test
 // ```
@@ -3504,7 +3504,7 @@ with {
 // * `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
-// * `trigger` signal (0: off, 1: on)
+// * `trigger`: signal (0: off, 1: on)
 //
 // #### Test
 // ```
@@ -3616,7 +3616,7 @@ with {
 // * `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
-// * `trigger` signal (0: off, 1: on)
+// * `trigger`: signal (0: off, 1: on)
 //
 // #### Test
 // ```
@@ -3728,7 +3728,7 @@ with {
 // * `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 // * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 // * `gain`: gain of the strike (0-1)
-// * `trigger` signal (0: off, 1: on)
+// * `trigger`: signal (0: off, 1: on)
 //
 // #### Test
 // ```
@@ -4108,7 +4108,7 @@ vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),*(0.8+
 // #### Usage
 //
 // ```
-// _ : fof(fc,bw,a,g) : _
+// _ : fof(fc,bw,sw,g) : _
 // ```
 //
 // Where:
