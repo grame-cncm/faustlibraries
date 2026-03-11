@@ -170,7 +170,7 @@ l2s(l) = l*ma.SR/speedOfSound;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// basicBlock_test = 0,0,0 : pm.basicBlock;
+// basicBlock_test = 0.25, -0.15, 0.05 : pm.basicBlock;
 // ```
 //-------------------------------
 basicBlock = _,_,_;
@@ -202,7 +202,7 @@ basicBlock = _,_,_;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// chain_test = 0,0,0 : pm.chain(pm.in(0.1) : pm.basicBlock);
+// chain_test = 0.25, -0.15, 0.05 : pm.chain(pm.basicBlock);
 // ```
 //-----------------------------
 chain(A:As) = ((ro.crossnn(1),_',_ : _,A : ro.crossnn(1),_,_ : _,chain(As) : ro.crossnn(1),_,_)) ~ _ : !,_,_,_;
@@ -226,7 +226,7 @@ chain(A) = A;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// inLeftWave_test = 0,0,0 : pm.inLeftWave(0.25);
+// inLeftWave_test = 0, 0, 0 : pm.inLeftWave(0.25);
 // ```
 //--------------------------------
 inLeftWave(x) = +(x),_,_;
@@ -249,7 +249,7 @@ inLeftWave(x) = +(x),_,_;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// inRightWave_test = 0,0,0 : pm.inRightWave(0.25);
+// inRightWave_test = 0, 0, 0 : pm.inRightWave(0.25);
 // ```
 //--------------------------------
 inRightWave(x) = _,+(x),_;
@@ -273,7 +273,7 @@ inRightWave(x) = _,+(x),_;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// in_test = 0,0,0 : pm.in(0.25);
+// in_test = 0, 0, 0 : pm.in(0.25);
 // ```
 //--------------------------------
 in(x) = +(x),+(x),_;
@@ -372,7 +372,7 @@ out(x,y,s) = x,y,x+y+s;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// terminations_test = 0,0,0 : pm.terminations(*(-1), pm.basicBlock, *(-1));
+// terminations_test = 0.25, -0.15, 0.05 : pm.terminations(*(-1), pm.basicBlock, *(-1));
 // ```
 //----------------------------------------
 terminations(a,b,c) = (_,ro.crossnn(1),_,_ : +,+,_ : b) ~ (a,c : ro.crossnn(1));
@@ -401,7 +401,7 @@ terminations(a,b,c) = (_,ro.crossnn(1),_,_ : +,+,_ : b) ~ (a,c : ro.crossnn(1));
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// lTermination_test = 0,0,0 : pm.lTermination(*(-1), pm.basicBlock);
+// lTermination_test = 0.25, -0.15, 0.05 : pm.lTermination(*(-1), pm.basicBlock);
 // ```
 //----------------------------------------
 lTermination(a,b) = (ro.crossnn(1),_,_ : _,+,_ : b) ~ a;
@@ -430,7 +430,7 @@ lTermination(a,b) = (ro.crossnn(1),_,_ : _,+,_ : b) ~ a;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// rTermination_test = 0,0,0 : pm.rTermination(pm.basicBlock, *(-1));
+// rTermination_test = 0.25, -0.15, 0.05 : pm.rTermination(pm.basicBlock, *(-1));
 // ```
 //----------------------------------------
 rTermination(b,c) = (_,_,_,_ : +,_,_ : b) ~ (!,c);
@@ -448,7 +448,7 @@ rTermination(b,c) = (_,_,_,_ : +,_,_ : b) ~ (!,c);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// closeIns_test = pm.closeIns;
+// closeIns_test = pm.closeIns, 0.25;
 // ```
 //----------------------------------------
 closeIns = 0,0,0;
@@ -466,7 +466,7 @@ closeIns = 0,0,0;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// closeOuts_test = 0,0,0 : pm.closeOuts;
+// closeOuts_test = ((0.25, -0.15, 0.05) : pm.closeOuts), 0.25;
 // ```
 //----------------------------------------
 closeOuts = !,!,_;
@@ -488,7 +488,7 @@ closeOuts = !,!,_;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// endChain_test = 0,0,0 : pm.endChain(pm.basicBlock);
+// endChain_test = pm.endChain((_, _, _ + 0.25));
 // ```
 //----------------------------------------
 endChain(b) = closeIns : b : closeOuts;
@@ -524,10 +524,7 @@ endChain(b) = closeIns : b : closeOuts;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// waveguideUd_test = 0,0,0 : pm.waveguideUd(512, 32);
-// waveguideFd_test = 0,0,0 : pm.waveguideFd(512, 32);
-// waveguideFd2_test = 0,0,0 : pm.waveguideFd2(512, 32);
-// waveguideFd4_test = 0,0,0 : pm.waveguideFd4(512, 32);
+// waveguideUd_test = 0.25, -0.15, 0.05 : pm.waveguideUd(512, 32);
 // ```
 //----------------------------------
 waveguideUd(nMax,n) = par(i,2,de.delay(nMax,n)),_;
@@ -553,7 +550,7 @@ waveguideFd4(nMax,n) = par(i,2,de.fdelay4(nMax,n)),_;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// waveguide_test = 0,0,0 : pm.waveguide(512, 32);
+// waveguide_test = 0.25, -0.15, 0.05 : pm.waveguide(512, 32);
 // ```
 //----------------------------------
 waveguide(nMax,n) = waveguideFd4(nMax,n);
@@ -651,7 +648,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// stringSegment_test = 0,0,0 : pm.stringSegment(1.0, 0.5);
+// stringSegment_test = 0.25, -0.15, 0.05 : pm.stringSegment(1.0, 0.5);
 // ```
 //----------------------------------
 stringSegment(maxLength,length) = waveguide(nMax,n)
@@ -683,7 +680,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// openString_test = 0,0,0 : pm.openString(0.8, 0.5, 0.2, pm.impulseExcitation(button("gate")));
+// ba = library("basics.lib");
+// openString_test = 0.25, -0.15, 0.05 : pm.openString(0.8, 0.5, 0.2, pm.impulseExcitation(ba.pulse(64)));
 // ```
 //----------------------------------
 openString(length,stiffness,pluckPosition,excitation) = chain(stringSegment(maxStringLength,ntbd) : in(excitation) : dispersionFilters : stringSegment(maxStringLength,btbd))
@@ -715,7 +713,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// nylonString_test = 0,0,0 : pm.nylonString(0.8, 0.3, pm.impulseExcitation(button("gate")));
+// ba = library("basics.lib");
+// nylonString_test = 0.25, -0.15, 0.05 : pm.nylonString(0.8, 0.3, pm.impulseExcitation(ba.pulse(64)));
 // ```
 //----------------------------------
 nylonString(length,pluckPosition,excitation) =
@@ -745,7 +744,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// steelString_test = 0,0,0 : pm.steelString(0.8, 0.3, pm.impulseExcitation(button("gate")));
+// ba = library("basics.lib");
+// steelString_test = 0.25, -0.15, 0.05 : pm.steelString(0.8, 0.3, pm.impulseExcitation(ba.pulse(64)));
 // ```
 //----------------------------------
 steelString(length,pluckPosition,excitation) =
@@ -779,7 +779,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// openStringPick_test = 0,0,0 : pm.openStringPick(0.8, 0.4, 0.3, pm.impulseExcitation(button("gate")));
+// openStringPick_test = pm.endChain(pm.openStringPick(0.8, 0.4, 0.3, pm.impulseExcitation(button("pm.openStringPick/gate"))));
 // ```
 //----------------------------------
 openStringPick(length,stiffness,pluckPosition,excitation) = strChain
@@ -817,7 +817,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// openStringPickUp_test = 0,0,0 : pm.openStringPickUp(0.8, 0.4, 0.6, 0.7, pm.impulseExcitation(button("gate")));
+// openStringPickUp_test = pm.endChain(pm.openStringPickUp(0.8, 0.4, 0.6, 0.7, pm.impulseExcitation(button("pm.openStringPickUp/gate"))));
 // ```
 //----------------------------------
 openStringPickUp(length,stiffness,pluckPosition,pickupPosition,excitation) = strChain
@@ -858,7 +858,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// openStringPickDown_test = 0,0,0 : pm.openStringPickDown(0.8, 0.4, 0.6, 0.5, pm.impulseExcitation(button("gate")));
+// openStringPickDown_test = pm.endChain(pm.openStringPickDown(0.8, 0.4, 0.6, 0.5, pm.impulseExcitation(button("pm.openStringPickDown/gate"))));
 // ```
 //----------------------------------
 openStringPickDown(length,stiffness,pluckPosition,pickupPosition,excitation) =
@@ -917,7 +917,7 @@ ksReflexionFilter = _ <: (_+_')/2;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// rStringRigidTermination_test = 0,0,0 : pm.rStringRigidTermination;
+// rStringRigidTermination_test = 0.25, -0.15, 0.05 : pm.rStringRigidTermination;
 // ```
 //----------------------------------
 rStringRigidTermination = rTermination(basicBlock,*(-1));
@@ -937,7 +937,7 @@ rStringRigidTermination = rTermination(basicBlock,*(-1));
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// lStringRigidTermination_test = 0,0,0 : pm.lStringRigidTermination;
+// lStringRigidTermination_test = 0.25, -0.15, 0.05 : pm.lStringRigidTermination;
 // ```
 //----------------------------------
 lStringRigidTermination = lTermination(*(-1),basicBlock);
@@ -960,7 +960,7 @@ lStringRigidTermination = lTermination(*(-1),basicBlock);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// elecGuitarBridge_test = 0,0,0 : pm.elecGuitarBridge;
+// elecGuitarBridge_test = 0.25, -0.15, 0.05 : pm.elecGuitarBridge;
 // ```
 //----------------------------------
 elecGuitarBridge = rTermination(basicBlock,-bridgeFilter(0.8,0.6));
@@ -983,7 +983,7 @@ elecGuitarBridge = rTermination(basicBlock,-bridgeFilter(0.8,0.6));
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// elecGuitarNuts_test = 0,0,0 : pm.elecGuitarNuts;
+// elecGuitarNuts_test = 0.25, -0.15, 0.05 : pm.elecGuitarNuts;
 // ```
 //----------------------------------
 elecGuitarNuts = lTermination(-bridgeFilter(0.8,0.6),basicBlock);
@@ -1006,7 +1006,7 @@ elecGuitarNuts = lTermination(-bridgeFilter(0.8,0.6),basicBlock);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// guitarBridge_test = 0,0,0 : pm.guitarBridge;
+// guitarBridge_test = 0.25, -0.15, 0.05 : pm.guitarBridge;
 // ```
 //----------------------------------
 guitarBridge = rTermination(basicBlock,reflectance) : _,transmittance,_
@@ -1032,7 +1032,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// guitarNuts_test = 0,0,0 : pm.guitarNuts;
+// guitarNuts_test = 0.25, -0.15, 0.05 : pm.guitarNuts;
 // ```
 //----------------------------------
 guitarNuts = lTermination(-bridgeFilter(0.4,0.5),basicBlock);
@@ -1058,7 +1058,7 @@ guitarNuts = lTermination(-bridgeFilter(0.4,0.5),basicBlock);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// idealString_test = 0,0,0 : pm.idealString(0.9, 0.2, pm.impulseExcitation(button("gate")));
+// idealString_test = pm.closeIns : pm.idealString(0.9, 0.2, pm.impulseExcitation(button("pm.idealString/gate")));
 // ```
 //----------------------------------------------------------
 idealString(length,pluckPosition,excitation) = wg
@@ -1093,7 +1093,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// ks_test = pm.ks(0.9, 0.3, pm.impulseExcitation(button("gate")));
+// ks_test = pm.ks(0.9, 0.3, pm.impulseExcitation(button("pm.ks/gate")));
 // ```
 //----------------------------------
 ks(length,damping,excitation) = endChain(ksChain)
@@ -1163,7 +1163,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// elecGuitarModel_test = pm.elecGuitarModel(0.9, 0.3, 0.8, pm.impulseExcitation(button("gate")));
+// elecGuitarModel_test = pm.elecGuitarModel(0.9, 0.3, 0.8, pm.impulseExcitation(button("pm.elecGuitarModel/gate")));
 // ```
 //----------------------------------
 elecGuitarModel(length,pluckPosition,mute,excitation) = endChain(egChain)
@@ -1204,7 +1204,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// elecGuitar_test = pm.elecGuitar(0.9, 0.3, 0.8, 0.6, button("gate"));
+// elecGuitar_test = pm.elecGuitar(0.9, 0.3, 0.8, 0.6, button("pm.elecGuitar/gate"));
 // ```
 //----------------------------------
 elecGuitar(stringLength,pluckPosition,mute,gain,trigger) =
@@ -1257,7 +1257,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// guitarBody_test = 0,0,0 : pm.guitarBody;
+// guitarBody_test = 0.25, -0.15, 0.05 : pm.guitarBody;
 // ```
 //----------------------------------
 // TODO: not implemented yet
@@ -1291,7 +1291,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// guitarModel_test = pm.guitarModel(0.9, 0.25, pm.impulseExcitation(button("gate")));
+// guitarModel_test = pm.guitarModel(0.9, 0.25, pm.impulseExcitation(button("pm.guitarModel/gate")));
 // ```
 //----------------------------------
 guitarModel(length,pluckPosition,excitation) = endChain(egChain)
@@ -1326,7 +1326,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// guitar_test = pm.guitar(0.9, 0.25, 0.8, button("gate"));
+// guitar_test = pm.guitar(0.9, 0.25, 0.8, button("pm.guitar/gate"));
 // ```
 //----------------------------------
 guitar(stringLength,pluckPosition,gain,trigger) =
@@ -1390,7 +1390,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// nylonGuitarModel_test = pm.nylonGuitarModel(0.9, 0.25, pm.impulseExcitation(button("gate")));
+// nylonGuitarModel_test = pm.nylonGuitarModel(0.9, 0.25, pm.impulseExcitation(button("pm.nylonGuitarModel/gate")));
 // ```
 //----------------------------------
 nylonGuitarModel(length,pluckPosition,excitation) = endChain(egChain)
@@ -1425,7 +1425,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// nylonGuitar_test = pm.nylonGuitar(0.9, 0.25, 0.8, button("gate"));
+// nylonGuitar_test = pm.nylonGuitar(0.9, 0.25, 0.8, button("pm.nylonGuitar/gate"));
 // ```
 //----------------------------------
 nylonGuitar(stringLength,pluckPosition,gain,trigger) =
@@ -1583,7 +1583,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// modularInterpBody_test = 0,0,0 : pm.modularInterpBody(20, 1.0, 1.5);
+// modularInterpBody_test = 0.25, -0.15, 0.05 : pm.modularInterpBody(20, 1.0, 1.5);
 // ```
 //----------------------------------
 modularInterpBody(nModes,shape,scale) = _,modeInterpRes(nModes,shape,scale),_;
@@ -1612,7 +1612,7 @@ modularInterpBody(nModes,shape,scale) = _,modeInterpRes(nModes,shape,scale),_;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// modularInterpStringModel_test = pm.modularInterpStringModel(0.9, 0.3, 1.0, 1.5, pm.impulseExcitation(button("body")), pm.impulseExcitation(button("string")));
+// modularInterpStringModel_test = pm.modularInterpStringModel(0.9, 0.3, 1.0, 1.5, pm.impulseExcitation(button("pm.modularInterpStringModel/body")), pm.impulseExcitation(button("pm.modularInterpStringModel/string")));
 // ```
 //----------------------------------
 modularInterpStringModel(stringLength,pluckPosition,shape,scale,bodyExcitation,stringExcitation) = endChain(egChain)*0.5
@@ -1650,7 +1650,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// modularInterpInstr_test = pm.modularInterpInstr(0.9, 0.3, 1.0, 1.5, 0.8, button("body"), button("string"));
+// modularInterpInstr_test = pm.modularInterpInstr(0.9, 0.3, 1.0, 1.5, 0.8, button("pm.modularInterpInstr/body"), button("pm.modularInterpInstr/string"));
 // ```
 //----------------------------------
 modularInterpInstr(stringLength,pluckPosition,shape,scale,gain,tapBody,triggerString) = 
@@ -1826,7 +1826,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// violinBowedString_test = 0,0,0 : pm.violinBowedString(0.82, 0.35, pm.violinBow(0.4, 0.05), 0.15);
+// violinBowedString_test = 0.25, -0.15, 0.05 : pm.violinBowedString(0.82, 0.35, 0.2, 0.15);
 // ```
 //----------------------------------
 violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) =
@@ -1856,7 +1856,7 @@ violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) =
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// violinNuts_test = 0,0,0 : pm.violinNuts;
+// violinNuts_test = 0.25, -0.15, 0.05 : pm.violinNuts;
 // ```
 //----------------------------------
 violinNuts = lTermination(-bridgeFilter(0.6,0.1),basicBlock);
@@ -1875,7 +1875,7 @@ violinNuts = lTermination(-bridgeFilter(0.6,0.1),basicBlock);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// violinBridge_test = 0,0,0 : pm.violinBridge;
+// violinBridge_test = 0.25, -0.15, 0.05 : pm.violinBridge;
 // ```
 //----------------------------------
 // TODO:
@@ -1900,7 +1900,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// violinBody_test = 0,0,0 : pm.violinBody;
+// violinBody_test = 0.25, -0.15, 0.05 : pm.violinBody;
 // ```
 //----------------------------------
 // TODO:
@@ -1964,7 +1964,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// violin_ui_test = pm.violin_ui;
+// violin_ui_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
 // ```
 //----------------------------------
 violin_ui = violinModel(stringLength,bowPress,bowVel,bowPos)*outGain
@@ -2047,7 +2047,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// openTube_test = pm.endChain(pm.openTube(pm.maxLength, 0.9));
+// openTube_test = 0.25, -0.15, 0.05 : pm.openTube(pm.maxLength, 0.9);
 // ```
 //----------------------------------
 openTube = stringSegment;
@@ -2191,7 +2191,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// clarinetMouthPiece_test = pm.endChain(pm.clarinetMouthPiece(0.6, 0.4));
+// clarinetMouthPiece_test = 0.25, -0.15, 0.05 : pm.clarinetMouthPiece(0.6, 0.4);
 // ```
 //----------------------------------
 clarinetMouthPiece(reedStiffness,pressure) = lTermination(reedInteraction,in(pressure))
@@ -2222,7 +2222,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// brassLips_test = pm.endChain(pm.brassLips(0.3, 0.2, 0.1));
+// brassLips_test = 0.25, -0.15, 0.05 : pm.brassLips(0.3, 0.2, 0.1);
 // ```
 //----------------------------------
 brassLips(tubeLength,lipsTension,pressure) = lTermination(mpInteraction,basicBlock)
@@ -2255,7 +2255,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fluteEmbouchure_test = pm.endChain(pm.fluteEmbouchure(0.5));
+// fluteEmbouchure_test = 0.25, -0.15, 0.05 : pm.fluteEmbouchure(0.5);
 // ```
 //----------------------------------
 fluteEmbouchure(pressure) =
@@ -2279,7 +2279,7 @@ fluteEmbouchure(pressure) =
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// wBell_test = pm.endChain(pm.wBell(0.4));
+// wBell_test = 0.25, -0.15, 0.05 : pm.wBell(0.4);
 // ```
 //----------------------------------
 wBell(opening) = rTermination(basicBlock,si.smooth(opening));
@@ -2298,7 +2298,7 @@ wBell(opening) = rTermination(basicBlock,si.smooth(opening));
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fluteHead_test = pm.endChain(pm.fluteHead);
+// fluteHead_test = 0.25, -0.15, 0.05 : pm.fluteHead;
 // ```
 //----------------------------------
 fluteHead = lTermination(*(absorption),basicBlock)
@@ -2319,7 +2319,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fluteFoot_test = pm.endChain(pm.fluteFoot);
+// fluteFoot_test = 0.25, -0.15, 0.05 : pm.fluteFoot;
 // ```
 //----------------------------------
 fluteFoot = rTermination(basicBlock,*(absorption) : dispersion)
@@ -2756,7 +2756,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// impulseExcitation_test = pm.impulseExcitation(button("gate"));
+// impulseExcitation_test = pm.impulseExcitation(button("pm.impulseExcitation/gate"));
 // ```
 //--------------------------------------
 impulseExcitation(trigger) = trigger : ba.impulsify;
@@ -2783,7 +2783,7 @@ impulseExcitation(trigger) = trigger : ba.impulsify;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// strikeModel_test = pm.strikeModel(200, 4000, 0.5, 0.8, button("gate"));
+// strikeModel_test = pm.strikeModel(200, 4000, 0.5, 0.8, button("pm.strikeModel/gate"));
 // ```
 //--------------------------------------
 strikeModel(HPcutoff,LPcutoff,sharpness,gain,trigger) =
@@ -2816,7 +2816,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// strike_test = pm.strike(0.4, 0.5, 0.8, button("gate"));
+// strike_test = pm.strike(0.4, 0.5, 0.8, button("pm.strike/gate"));
 // ```
 //--------------------------------------
 strike(exPos,sharpness,gain,trigger) = strikeModel(HPcutoff,LPcutoff,sharpness,gain,trigger)
@@ -2848,7 +2848,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// pluckString_test = pm.pluckString(0.9, 1, 1, 1, 0.6, button("gate"));
+// pluckString_test = pm.pluckString(0.9, 1, 1, 1, 0.6, button("pm.pluckString/gate"));
 // ```
 //--------------------------------------
 pluckString(stringLength,cutoff,maxFreq,sharpness,gain,trigger) =
@@ -2979,7 +2979,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// djembe_test = pm.djembe(110, 0.3, 0.5, 0.8, button("gate"));
+// djembe_test = pm.djembe(110, 0.3, 0.5, 0.8, button("pm.djembe/gate"));
 // ```
 //----------------------------------
 djembe(freq,strikePosition,strikeSharpness,gain,trigger) =
@@ -3163,7 +3163,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// marimba_test = pm.marimba(220, 0.4, 1, 0.5, 0.8, button("gate"));
+// marimba_test = pm.marimba(220, 0.4, 1, 0.5, 0.8, button("pm.marimba/gate"));
 // ```
 //----------------------------------
 marimba(freq,strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
@@ -3282,7 +3282,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// churchBell_test = pm.churchBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// churchBell_test = pm.churchBell(0.4, 2000, 0.5, 0.8, button("pm.churchBell/gate"));
 // ```
 //----------------------------------
 churchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
@@ -3397,7 +3397,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// englishBell_test = pm.englishBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// englishBell_test = pm.englishBell(0.4, 2000, 0.5, 0.8, button("pm.englishBell/gate"));
 // ```
 //----------------------------------
 englishBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
@@ -3509,7 +3509,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// frenchBell_test = pm.frenchBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// frenchBell_test = pm.frenchBell(0.4, 2000, 0.5, 0.8, button("pm.frenchBell/gate"));
 // ```
 //----------------------------------
 frenchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
@@ -3621,7 +3621,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// germanBell_test = pm.germanBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// germanBell_test = pm.germanBell(0.4, 2000, 0.5, 0.8, button("pm.germanBell/gate"));
 // ```
 //----------------------------------
 germanBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
@@ -3733,7 +3733,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// russianBell_test = pm.russianBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// russianBell_test = pm.russianBell(0.4, 2000, 0.5, 0.8, button("pm.russianBell/gate"));
 // ```
 //----------------------------------
 russianBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
@@ -3842,7 +3842,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// standardBell_test = pm.standardBell(0.4, 2000, 0.5, 0.8, button("gate"));
+// standardBell_test = pm.standardBell(0.4, 2000, 0.5, 0.8, button("pm.standardBell/gate"));
 // ```
 //----------------------------------
 standardBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) =
@@ -3982,7 +3982,7 @@ maxGenderFreq = (523.25,1046.5);
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// voiceGender_test = pm.voiceGender(0.5);
+// voiceGender_test = pm.voiceGender(0);
 // ```
 //---------------------------------------------
 declare voiceGender author "Mike Olsen";
@@ -4122,7 +4122,8 @@ vocalEffort(freq,gender) = _ <: ba.if(gender == 0,*(3+1.1*(400-freq)/300),*(0.8+
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fof_test = pm.fof(0.3, 440, 880, 0.5);
+// os = library("oscillators.lib");
+// fof_test = pm.fof(0.3, 440, 880, 0.5) + os.osc(110) * 0.001;
 // ```
 // 
 // #### References
@@ -4166,7 +4167,8 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fofSH_test = pm.fofSH(0.3, 440, 880, 0.5);
+// os = library("oscillators.lib");
+// fofSH_test = pm.fofSH(0.3, 440, 880, 0.5) + os.osc(110) * 0.001;
 // ```
 // 
 // #### References
@@ -4199,7 +4201,8 @@ fofSH(fc,bw,a,g) = _ <: (((_,bw):ba.sAndH),((_,a):ba.sAndH),_) : (fc,_,_,g,_') :
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 0.2);
+// os = library("oscillators.lib");
+// fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 3) + os.osc(110) * 0.001;
 // ```
 // 
 // #### References
@@ -4233,7 +4236,8 @@ fofCycle(fc,bw,a,g,n) = _ : ba.cycle(n) : par(i,n,fofSH(fc,bw,a,g)) :> _;
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2);
+// os = library("oscillators.lib");
+// fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2) + os.osc(110) * 0.001;
 // ```
 //---------------------------------------------------------
 declare fofSmooth author "Mike Olsen";
@@ -4275,7 +4279,7 @@ with {
 // ```
 // pm = library("physmodels.lib");
 // os = library("oscillators.lib");
-// formantFilterFofCycle_test = os.osc(110) : pm.formantFilterFofCycle(0, 0, 5, 0, 200);
+// formantFilterFofCycle_test = (os.osc(110) : pm.formantFilterFofCycle(1, 1, 5, 1, 200)) + os.osc(55) * 0.001;
 // ```
 //--------------------------------------
 declare formantFilterFofCycle author "Mike Olsen";
@@ -4447,7 +4451,7 @@ with {
 // ```
 // pm = library("physmodels.lib");
 // os = library("oscillators.lib");
-// formantFilterbankFofCycle_test = os.osc(110) : pm.formantFilterbankFofCycle(0, 0, 200);
+// formantFilterbankFofCycle_test = (os.osc(110) : pm.formantFilterbankFofCycle(1, 1, 200)) + os.osc(55) * 0.001;
 // ```
 //-------------------------------------
 declare formantFilterbankFofCycle author "Mike Olsen";
@@ -4913,7 +4917,7 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// allpassNL_test = 0,0,0 : pm.allpassNL(0.4);
+// allpassNL_test = 0.25, -0.15, 0.05 : pm.allpassNL(0.4);
 // ```
 //--------------------------------------
 allpassNL(nonlinearity) = par(i,2,nlf),_

@@ -68,7 +68,8 @@ Michon and Julius O. Smith III, and is released under the
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// abs_envelope_rect_test = an.abs_envelope_rect(0.05, os.osc(220));
+// mono = os.osc(220);
+// abs_envelope_rect_test = an.abs_envelope_rect(0.05, mono);
 // ```
 //-----------------------------------------------------------------------------
 declare abs_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
@@ -97,7 +98,8 @@ abs_envelope_rect(period, x) = abs(x) : fi.avg_rect(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// abs_envelope_tau_test = an.abs_envelope_tau(0.05, os.osc(220));
+// mono = os.osc(220);
+// abs_envelope_tau_test = an.abs_envelope_tau(0.05, mono);
 // ```
 //-----------------------------------------------------------------------------
 declare abs_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
@@ -126,7 +128,8 @@ abs_envelope_tau(period, x) = abs(x) : fi.avg_tau(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// abs_envelope_t60_test = an.abs_envelope_t60(0.05, os.osc(220));
+// mono = os.osc(220);
+// abs_envelope_t60_test = an.abs_envelope_t60(0.05, mono);
 // ```
 //-----------------------------------------------------------------------------
 declare abs_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
@@ -155,7 +158,8 @@ abs_envelope_t60(period, x) = abs(x) : fi.avg_t60(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// abs_envelope_t19_test = an.abs_envelope_t19(0.05, os.osc(220));
+// mono = os.osc(220);
+// abs_envelope_t19_test = an.abs_envelope_t19(0.05, mono);
 // ```
 //-----------------------------------------------------------------------------
 declare abs_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
@@ -187,7 +191,8 @@ abs_envelope_t19(period, x) = abs(x) : fi.avg_t19(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// amp_follower_test = os.osc(220) : an.amp_follower(0.05);
+// mono = os.osc(220);
+// amp_follower_test = mono : an.amp_follower(0.05);
 // ```
 //
 // #### References
@@ -222,7 +227,8 @@ peak_envelope = amp_follower; // Synonym for more standard naming
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// amp_follower_ud_test = os.osc(220) : an.amp_follower_ud(0.002, 0.05);
+// mono = os.osc(220);
+// amp_follower_ud_test = mono : an.amp_follower_ud(0.002, 0.05);
 // ```
 //
 // #### Note
@@ -260,7 +266,8 @@ amp_follower_ud(att,rel) = amp_follower(rel) : si.smooth(ba.tau2pole(att));
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// amp_follower_ar_test = os.osc(220) : an.amp_follower_ar(0.002, 0.05);
+// mono = os.osc(220);
+// amp_follower_ar_test = mono : an.amp_follower_ar(0.002, 0.05);
 // ```
 //---------------------------------------------------------
 declare amp_follower_ar author "Jonatan Liljedahl, revised by Romain Michon";
@@ -284,7 +291,8 @@ amp_follower_ar(att,rel) = abs : si.onePoleSwitching(att,rel);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// ms_envelope_rect_test = an.ms_envelope_rect(0.05, os.osc(220));
+// mono = os.osc(220);
+// ms_envelope_rect_test = an.ms_envelope_rect(0.05, mono);
 // ```
 //---------------------------------------------------------
 declare ms_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
@@ -313,7 +321,8 @@ ms_envelope_rect(period, x) = x * x : fi.avg_rect(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// ms_envelope_tau_test = an.ms_envelope_tau(0.05, os.osc(220));
+// mono = os.osc(220);
+// ms_envelope_tau_test = an.ms_envelope_tau(0.05, mono);
 // ```
 //---------------------------------------------------------
 declare ms_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
@@ -342,7 +351,8 @@ ms_envelope_tau(period, x) = x * x : fi.avg_tau(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// ms_envelope_t60_test = an.ms_envelope_t60(0.05, os.osc(220));
+// mono = os.osc(220);
+// ms_envelope_t60_test = an.ms_envelope_t60(0.05, mono);
 // ```
 //---------------------------------------------------------
 declare ms_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
@@ -371,7 +381,8 @@ ms_envelope_t60(period, x) = x * x : fi.avg_t60(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// ms_envelope_t19_test = an.ms_envelope_t19(0.05, os.osc(220));
+// mono = os.osc(220);
+// ms_envelope_t19_test = an.ms_envelope_t19(0.05, mono);
 // ```
 //---------------------------------------------------------
 declare ms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
@@ -399,7 +410,8 @@ ms_envelope_t19(period, x) = x * x : fi.avg_t19(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// rms_envelope_rect_test = an.rms_envelope_rect(0.05, os.osc(220));
+// mono = os.osc(220);
+// rms_envelope_rect_test = an.rms_envelope_rect(0.05, mono);
 // ```
 //---------------------------------------------------------
 declare rms_envelope_rect author "Dario Sanfilippo and Julius O. Smith III";
@@ -428,7 +440,8 @@ rms_envelope_rect(period, x) = ms_envelope_rect(period, x) : sqrt;
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// rms_envelope_tau_test = an.rms_envelope_tau(0.05, os.osc(220));
+// mono = os.osc(220);
+// rms_envelope_tau_test = an.rms_envelope_tau(0.05, mono);
 // ```
 //---------------------------------------------------------
 declare rms_envelope_tau author "Dario Sanfilippo and Julius O. Smith III";
@@ -457,7 +470,8 @@ rms_envelope_tau(period, x) = ms_envelope_tau(period, x) : sqrt;
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// rms_envelope_t60_test = an.rms_envelope_t60(0.05, os.osc(220));
+// mono = os.osc(220);
+// rms_envelope_t60_test = an.rms_envelope_t60(0.05, mono);
 // ```
 //---------------------------------------------------------
 declare rms_envelope_t60 author "Dario Sanfilippo and Julius O. Smith III";
@@ -486,7 +500,8 @@ rms_envelope_t60(period, x) = ms_envelope_t60(period, x) : sqrt;
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// rms_envelope_t19_test = an.rms_envelope_t19(0.05, os.osc(220));
+// mono = os.osc(220);
+// rms_envelope_t19_test = an.rms_envelope_t19(0.05, mono);
 // ```
 //---------------------------------------------------------
 declare rms_envelope_t19 author "Dario Sanfilippo and Julius O. Smith III";
@@ -521,7 +536,8 @@ rms_envelope_t19(period, x) = ms_envelope_t19(period, x) : sqrt;
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// zcr_test = an.zcr(0.01, os.osc(220));
+// mono = os.osc(220);
+// zcr_test = an.zcr(0.01, mono);
 // ```
 //---------------------------------------------------------
 declare zcr author "Dario Sanfilippo";
@@ -557,7 +573,8 @@ zcr(period, x) = ma.zc(x) : fi.lptau(period);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// pitchTracker_test = an.pitchTracker(4, 0.02, os.osc(220));
+// mono = os.osc(220);
+// pitchTracker_test = an.pitchTracker(4, 0.02, mono);
 // ```
 //---------------------------------------------------------
 declare pitchTracker author "Dario Sanfilippo";
@@ -607,7 +624,8 @@ pitchTracker(N, t, x) = loop ~ _
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// spectralCentroid_test = (os.osc(440) + os.osc(880)) : an.spectralCentroid(1, 0.01);
+// rich = os.osc(440) + os.osc(880);
+// spectralCentroid_test = rich : an.spectralCentroid(1, 0.01);
 // ```
 //
 // #### References
@@ -713,7 +731,8 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// mth_octave_analyzer_test = os.osc(440) : an.mth_octave_analyzer(3, 3, 8000, 5);
+// mono = os.osc(220);
+// mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
 // ```
 //------------------------------------------------------------
 mth_octave_analyzer6e(M,ftop,N) = _ <: bsplit(N-1) with {
@@ -772,7 +791,8 @@ mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// mth_octave_spectral_level6e_test = os.osc(440) : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
+// mono = os.osc(220);
+// mth_octave_spectral_level6e_test = mono : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
 // ```
 //------------------------------------------------------------
 mth_octave_spectral_level6e(M,ftop,N,tau,dB_offset) = _<:
@@ -861,7 +881,8 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// analyzer_test = os.osc(440) : an.analyzer(3, (500, 2000));
+// mono = os.osc(220);
+// analyzer_test = mono : an.analyzer(3, (500, 2000));
 // ```
 //------------------------------------------------------------
 analyzer(O,lfreqs) = _ <: bsplit(nb) 
@@ -1012,7 +1033,8 @@ goertzel = goertzelOpt;
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// resonator_test = os.osc(440) : an.resonator(2, 440);
+// mono = os.osc(220);
+// resonator_test = mono : an.resonator(2, 440);
 // ```
 //
 // #### Algorithm
@@ -1131,7 +1153,8 @@ c_bit_reverse_shuffle(N) = si.cbus(N) <: par(i,N,c_bit_reverse_permuter(N,i)) wi
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// fft_test = an.rtocv(8, os.osc(220)) : an.fft(8);
+// mono = os.osc(220);
+// fft_test = an.rtocv(8, mono) : an.fft(8);
 // ```
 //
 // #### References
@@ -1177,7 +1200,8 @@ with {
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
-// ifft_test = (an.rtocv(8, os.osc(220)) : an.fft(8)) : an.ifft(8);
+// mono = os.osc(220);
+// ifft_test = (an.rtocv(8, mono) : an.fft(8)) : an.ifft(8);
 // ```
 //---------------------------------------------------
 ifft(N) = si.cbus(N) : an.c_bit_reverse_shuffle(N) : an.ifftb(N); // input is shuffled off to the butterflies:

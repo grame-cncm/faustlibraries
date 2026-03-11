@@ -2,14 +2,14 @@ si = library("signals.lib");
 os = library("oscillators.lib");
 
 bus_test = (
-    hslider("bus:x0", 0, -1, 1, 0.01),
-    hslider("bus:x1", 0, -1, 1, 0.01),
-    hslider("bus:x2", 0, -1, 1, 0.01)
+    hslider("bus:x0", 0.25, -1, 1, 0.01),
+    hslider("bus:x1", -0.5, -1, 1, 0.01),
+    hslider("bus:x2", 0.75, -1, 1, 0.01)
 ) : si.bus(3);
 
 block_test = (
-    hslider("block:x0", 0, -1, 1, 0.01),
-    hslider("block:x1", 0, -1, 1, 0.01)
+    hslider("block:x0", 0.5, -1, 1, 0.01),
+    hslider("block:x1", -0.25, -1, 1, 0.01)
 ) : (si.block(1), _);
 
 interpolate_test = si.interpolate(
@@ -18,26 +18,26 @@ interpolate_test = si.interpolate(
     os.osc(440)
 );
 
-repeat_test = hslider("repeat:input", 0, -1, 1, 0.01) : si.repeat(3, *(0.5));
+repeat_test = hslider("repeat:input", 0.5, -1, 1, 0.01) : si.repeat(3, *(0.5));
 
-smoo_test = hslider("smoo:input", 0, -1, 1, 0.01) : si.smoo;
+smoo_test = hslider("smoo:input", 0.5, -1, 1, 0.01) : si.smoo;
 
-polySmooth_test = hslider("polySmooth:input", 0, -1, 1, 0.01)
+polySmooth_test = hslider("polySmooth:input", 0.5, -1, 1, 0.01)
   : si.polySmooth(button("polySmooth:gate"), 0.999, 32);
 
-smoothAndH_test = hslider("smoothAndH:input", 0, -1, 1, 0.01)
+smoothAndH_test = hslider("smoothAndH:input", 0.5, -1, 1, 0.01)
   : si.smoothAndH(button("smoothAndH:hold"), 0.999);
 
-bsmooth_test = hslider("bsmooth:input", 0, -1, 1, 0.01) : si.bsmooth;
+bsmooth_test = hslider("bsmooth:input", 0.5, -1, 1, 0.01) : si.bsmooth;
 
 dot_test = (
     os.osc(100), os.osc(200), os.osc(300),
     os.osc(400), os.osc(500), os.osc(600)
 ) : si.dot(3);
 
-smooth_test = hslider("smooth:input", 0, -1, 1, 0.01) : si.smooth(0.9);
+smooth_test = hslider("smooth:input", 0.5, -1, 1, 0.01) : si.smooth(0.9);
 
-smoothq_test = hslider("smoothq:input", 0, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+smoothq_test = hslider("smoothq:input", 0.5, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
 
 cbus_test = (
     os.osc(100), os.osc(150),
@@ -51,7 +51,7 @@ cmul_test = si.cmul(
 
 cconj_test = (os.osc(210), os.osc(310)) : si.cconj;
 
-onePoleSwitching_test = hslider("onePoleSwitching:input", 0, -1, 1, 0.01)
+onePoleSwitching_test = hslider("onePoleSwitching:input", 0.5, -1, 1, 0.01)
   : si.onePoleSwitching(0.05, 0.2);
 
 rev_test = os.osc(440) : si.rev(32);

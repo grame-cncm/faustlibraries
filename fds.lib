@@ -98,9 +98,10 @@ TODO:
 // fd = library("fds.lib");
 // si = library("signals.lib");
 //
-// scheme = 0, 0;
-// model1D_test = si.bus(2)
-//   : fd.model1D(2, 0, 0, scheme)
+// scheme = 1, 0.5;
+// scheme1D = 1, 0.5;
+// model1D_test = (1, 0.5)
+//   : fd.model1D(2, 0, 0, scheme1D)
 //   : si.bus(2);
 // ```
 //------------------------------------------------------------------------------
@@ -137,9 +138,10 @@ model1D(points,R,T,scheme) =
 // fd = library("fds.lib");
 // si = library("signals.lib");
 //
-// scheme = 0, 0, 0, 0;
-// model2D_test = si.bus(4)
-//   : fd.model2D(2, 2, 0, 0, scheme)
+// scheme = 1, 0.5, 0.25, 0.125;
+// scheme2D = 1, 0.5, 0.25, 0.125;
+// model2D_test = (1, 0.5, 0.25, 0.125)
+//   : fd.model2D(2, 2, 0, 0, scheme2D)
 //   : si.bus(4);
 // ```
 //------------------------------------------------------------------------------
@@ -178,8 +180,7 @@ model2D(pointsX,pointsY,R,T,scheme) =
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// stairsInterp1D_test = si.bus(4)
+// stairsInterp1D_test = (1, 0.5, -0.5, -1)
 //   : fd.stairsInterp1D(4, 1);
 // ```
 //------------------------------------------------------------------------------
@@ -206,8 +207,7 @@ stairsInterp1D(points,point) = par(i,points,_*select2(i==point,0,1));
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// stairsInterp2D_test = si.bus(4)
+// stairsInterp2D_test = (1, 0.5, -0.5, -1)
 //   : fd.stairsInterp2D(2, 2, 1, 0);
 // ```
 //------------------------------------------------------------------------------
@@ -238,8 +238,7 @@ stairsInterp2D(pointsX,pointsY,pointX,pointY) =
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// linInterp1D_test = si.bus(4)
+// linInterp1D_test = (1, 0.5, -0.5, -1)
 //   : fd.linInterp1D(4, 1.25);
 // ```
 //------------------------------------------------------------------------------
@@ -271,8 +270,7 @@ with
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// linInterp2D_test = si.bus(4)
+// linInterp2D_test = (1, 0.5, -0.5, -1)
 //   : fd.linInterp2D(2, 2, 0.6, 1.2);
 // ```
 //------------------------------------------------------------------------------
@@ -315,8 +313,7 @@ with
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// stairsInterp1DOut_test = si.bus(4)
+// stairsInterp1DOut_test = (1, 0.5, -0.5, -1)
 //   : fd.stairsInterp1DOut(4, 2);
 // ```
 //------------------------------------------------------------------------------
@@ -342,8 +339,7 @@ stairsInterp1DOut(points,point) = ba.selectn(points,point);
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// stairsInterp2DOut_test = si.bus(4)
+// stairsInterp2DOut_test = (1, 0.5, -0.5, -1)
 //   : fd.stairsInterp2DOut(2, 2, 1, 0);
 // ```
 //------------------------------------------------------------------------------
@@ -369,8 +365,7 @@ stairsInterp2DOut(pointsX,pointsY,pointX,pointY) =
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// linInterp1DOut_test = si.bus(4)
+// linInterp1DOut_test = (1, 0.25, 0.5, 0.75)
 //   : fd.linInterp1DOut(4, 1.5);
 // ```
 //------------------------------------------------------------------------------
@@ -396,8 +391,7 @@ linInterp1DOut(points,point) = linInterp1D(points,point):>_;
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// linInterp2DOut_test = si.bus(4)
+// linInterp2DOut_test = (1, 0.5, -0.5, -1)
 //   : fd.linInterp2DOut(2, 2, 0.6, 1.2);
 // ```
 //------------------------------------------------------------------------------
@@ -434,8 +428,7 @@ linInterp2DOut(pointsX,pointsY,pointX,pointY) =
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// route1D_test = par(i, 3, 0)
+// route1D_test = (1, 0.5, -0.25)
 //   : fd.route1D(1, 0, 0)
 //   : si.bus(3);
 // ```
@@ -478,8 +471,7 @@ with
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// route2D_test = par(i, 3, 0)
+// route2D_test = (1, 0.5, -0.25)
 //   : fd.route2D(1, 1, 0, 0)
 //   : si.bus(3);
 // ```
@@ -537,8 +529,7 @@ with
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// schemePoint_test = par(i, 3, 0)
+// schemePoint_test = (1, 0.5, -0.25)
 //   : fd.schemePoint(0, 0, 1);
 // ```
 //------------------------------------------------------------------------------
@@ -577,8 +568,7 @@ with
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// buildScheme1D_test = par(i, 3, 0)
+// buildScheme1D_test = (1, 0.5, -0.25)
 //   : fd.buildScheme1D(1, 0, 0);
 // ```
 //------------------------------------------------------------------------------
@@ -607,8 +597,7 @@ buildScheme1D(points,R,T) =
 // ```
 // fd = library("fds.lib");
 // si = library("signals.lib");
-//
-// buildScheme2D_test = par(i, 3, 0)
+// buildScheme2D_test = (1, 0.5, -0.25)
 //   : fd.buildScheme2D(1, 1, 0, 0);
 // ```
 //------------------------------------------------------------------------------
@@ -652,7 +641,6 @@ buildScheme2D(pointsX,pointsY,R,T) =
 // ```
 // fd = library("fds.lib");
 // os = library("oscillators.lib");
-//
 // hammer_test = os.osc(5)
 //   : fd.hammer(
 //       0.1,
@@ -699,7 +687,6 @@ with
 // ```
 // fd = library("fds.lib");
 // os = library("oscillators.lib");
-//
 // bow_test = os.osc(5)
 //   : fd.bow(0.05, 2.0, 1.0/48000, 0.1);
 // ```

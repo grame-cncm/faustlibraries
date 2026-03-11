@@ -89,7 +89,8 @@ declare license "LGPL with exception";
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// ar_test = no.noise * en.ar(0.02, 0.3, button("gate"));
+// gate = button("gate");
+// ar_test = no.noise * en.ar(0.02, 0.3, gate);
 // ```
 //-----------------------------------------------------
 declare ar author "Yann Orlarey, Stéphane Letz";
@@ -147,7 +148,8 @@ with {
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// asr_test = no.noise * en.asr(0.05, 0.7, 0.4, button("gate"));
+// gate = button("gate");
+// asr_test = no.noise * en.asr(0.05, 0.7, 0.4, gate);
 // ```
 //-----------------------------------------------------
 declare asr author "Yann Orlarey, Stéphane Letz";
@@ -203,7 +205,8 @@ with {
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// adsr_test = no.noise * en.adsr(0.05, 0.1, 0.6, 0.3, button("gate"));
+// gate = button("gate");
+// adsr_test = no.noise * en.adsr(0.05, 0.1, 0.6, 0.3, gate);
 // ```
 //-----------------------------------------------------
 declare adsr author "Yann Orlarey and Andrey Bundin";
@@ -403,10 +406,12 @@ adsr_bias_env = environment
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
+// gate = button("gate");
+// legato = checkbox("legato");
 // adsrf_bias_test = no.noise * en.adsrf_bias(
 //   0.05, 0.1, 0.6, 0.4, 0.2,
 //   0.4, 0.6, 0.5,
-//   checkbox("legato"), button("gate")
+//   legato, gate
 // );
 // ```
 //-------------------------------------------------------------------------------
@@ -442,10 +447,12 @@ adsrf_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
+// gate = button("gate");
+// legato = checkbox("legato");
 // adsr_bias_test = no.noise * en.adsr_bias(
 //   0.05, 0.1, 0.6, 0.4,
 //   0.4, 0.6, 0.5,
-//   checkbox("legato"), button("gate")
+//   legato, gate
 // );
 // ```
 //-------------------------------------------------------------------------------
@@ -483,10 +490,12 @@ adsr_bias(att, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) = adsr
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
+// gate = button("gate");
+// legato = checkbox("legato");
 // ahdsrf_bias_test = no.noise * en.ahdsrf_bias(
 //   0.05, 0.05, 0.1, 0.6, 0.4, 0.2,
 //   0.4, 0.6, 0.5,
-//   checkbox("legato"), button("gate")
+//   legato, gate
 // );
 // ```
 //---------------------------------------------------------------------
@@ -524,10 +533,12 @@ ahdsrf_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
+// gate = button("gate");
+// legato = checkbox("legato");
 // ahdsr_bias_test = no.noise * en.ahdsr_bias(
 //   0.05, 0.05, 0.1, 0.6, 0.4,
 //   0.4, 0.6, 0.5,
-//   checkbox("legato"), button("gate")
+//   legato, gate
 // );
 // ```
 //---------------------------------------------------------------------
@@ -559,7 +570,8 @@ ahdsr_bias(att, hol, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) 
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// smoothEnvelope_test = no.noise * en.smoothEnvelope(0.2, button("gate"));
+// gate = button("gate");
+// smoothEnvelope_test = no.noise * en.smoothEnvelope(0.2, gate);
 // ```
 //----------------------------------------------------------------
 declare smoothEnvelope author "Romain Michon";
@@ -599,7 +611,8 @@ with {
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// arfe_test = no.noise * en.arfe(0.2, 0.4, 0, button("gate"));
+// gate = button("gate");
+// arfe_test = no.noise * en.arfe(0.2, 0.4, 0, gate);
 // ```
 //-----------------------------------------------------
 declare arfe author "Julius O. Smith III, revised by Stephane Letz";
@@ -629,7 +642,8 @@ arfe(attT60,relT60,fv,gate) = asrfe(attT60,1.0,relT60,fv,gate);
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// are_test = no.noise * en.are(0.2, 0.4, button("gate"));
+// gate = button("gate");
+// are_test = no.noise * en.are(0.2, 0.4, gate);
 // ```
 //-----------------------------------------------------
 declare are author "Julius O. Smith III, revised by Stephane Letz";
@@ -659,7 +673,8 @@ are(attT60,relT60,gate) = asrfe(attT60,1.0,relT60,0.0,gate);
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// asre_test = no.noise * en.asre(0.2, 0.6, 0.4, button("gate"));
+// gate = button("gate");
+// asre_test = no.noise * en.asre(0.2, 0.6, 0.4, gate);
 // ```
 //-----------------------------------------------------
 declare asre author "Julius O. Smith III, revised by Stephane Letz";
@@ -691,7 +706,8 @@ asre(attT60,susLvl,relT60,gate) = asrfe(attT60,susLvl,relT60,0.0,gate);
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// adsre_test = no.noise * en.adsre(0.2, 0.1, 0.6, 0.4, button("gate"));
+// gate = button("gate");
+// adsre_test = no.noise * en.adsre(0.2, 0.1, 0.6, 0.4, gate);
 // ```
 //-----------------------------------------------------
 declare adsre author "Julius O. Smith III";
@@ -736,7 +752,8 @@ with {
 // ```
 // en = library("envelopes.lib");
 // no = library("noises.lib");
-// ahdsre_test = no.noise * en.ahdsre(0.2, 0.05, 0.1, 0.6, 0.4, button("gate"));
+// gate = button("gate");
+// ahdsre_test = no.noise * en.ahdsre(0.2, 0.05, 0.1, 0.6, 0.4, gate);
 // ```
 //-----------------------------------------------------
 declare ahdsre author "Julius O. Smith III, David Braun";
@@ -780,11 +797,12 @@ with {
 // ```
 // en = library("envelopes.lib");
 // os = library("oscillators.lib");
-// dx7envelope_test = en.dx7envelope(
+// gate = button("gate");
+// dx7envelope_test = os.osc(440) * en.dx7envelope(
 //   0.05, 0.1, 0.1, 0.2,
 //   1, 0.8, 0.6, 0,
-//   button("gate")
-// ) * os.osc(440);
+//   gate
+// );
 // ```
 //-----------------------------------------------------
 declare dx7envelope author "Romain Michon";

@@ -191,7 +191,7 @@ botReduce(op,n) = par(i,outputs(op),_), botReduce(op,n-1) : op;
 // #### Test
 // ```
 // rm = library("reducemaps.lib");
-// reduce_test = rm.reduce(max, 4, hslider("reduce:input", 0, -1, 1, 0.01));
+// reduce_test = rm.reduce(max, 4, hslider("reduce:input", 0.5, -1, 1, 0.01));
 // ```
 //-----------------------------------------------------------------------------
 reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
@@ -224,7 +224,7 @@ reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
 // #### Test
 // ```
 // rm = library("reducemaps.lib");
-// reducemap_test = rm.reducemap(+, /(4), 4, hslider("reducemap:input", 0, -1, 1, 0.01));
+// reducemap_test = rm.reducemap(+, /(4), 4, hslider("reducemap:input", 0.5, -1, 1, 0.01));
 // ```
 //-----------------------------------------------------------------------------
 reducemap(op, foo, n, x) = compute ~ (_,_,_) : (!,!,_)

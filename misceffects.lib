@@ -92,7 +92,6 @@ declare version "2.5.2";
 // ef = library("misceffects.lib");
 // os = library("oscillators.lib");
 // cubicnl_test = os.osc(440) : ef.cubicnl(0.5, 0.0);
-// cubicnl_nodc_test = os.osc(440) : ef.cubicnl_nodc(0.5, 0.0);
 // ```
 //
 // #### References
@@ -220,7 +219,7 @@ declare gate_gain_mono license "STK-4.3";
 // #### Test
 // ```
 // ef = library("misceffects.lib");
-// fibonacci_test = 0 : ef.fibonacci(2);
+// fibonacci_test = 1 : ef.fibonacci(2);
 // ```
 //
 // #### Example
@@ -252,7 +251,7 @@ fibonacci(order) = +~(_<:sum(i, order, @(i)):>_);
 // #### Test
 // ```
 // ef = library("misceffects.lib");
-// fibonacciGeneral_test = 0 : ef.fibonacciGeneral(waveform{2, 3});
+// fibonacciGeneral_test = 1 : ef.fibonacciGeneral(waveform{2, 3});
 // ```
 //
 // #### Example:
@@ -477,7 +476,7 @@ declare stereo_width license "STK-4.3";
 // #### Test
 // ```
 // ef = library("misceffects.lib");
-// mesh_square_test = (0,0,0,0) : ef.mesh_square(1);
+// mesh_square_test = (1,0.5,-0.5,0.25) : ef.mesh_square(1);
 // ```
 //
 // #### Signal Order In and Out
@@ -645,6 +644,7 @@ dwmEnv(wetAmount, FX) = environment
 // ```
 // ef = library("misceffects.lib");
 // os = library("oscillators.lib");
+// fi = library("filters.lib");
 // dryWetMixer_test = os.osc(440) : ef.dryWetMixer(0.5, fi.dcblocker);
 // ```
 //------------------------------------------------------------
@@ -696,6 +696,7 @@ dryWetMixer(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixer;
 // ```
 // ef = library("misceffects.lib");
 // os = library("oscillators.lib");
+// fi = library("filters.lib");
 // dryWetMixerConstantPower_test = os.osc(440) : ef.dryWetMixerConstantPower(0.5, fi.dcblocker);
 // ```
 //------------------------------------------------------------
@@ -742,8 +743,8 @@ mixingEnv = environment
   //
   // #### Test
   // ```
-  // ef = library("misceffects.lib");
-  // weightsPowerLoop_test = ef.mixingEnv.weightsPowerLoop(4, 1.2);
+// ef = library("misceffects.lib");
+// weightsPowerLoop_test = ef.mixingEnv.weightsPowerLoop(4, 1.2);
   // ```
   weightsPowerLoop(N, m) = par(i, N, gain(i))
   with {
@@ -830,7 +831,7 @@ mixingEnv = environment
 // #### Test
 // ```
 // ef = library("misceffects.lib");
-// mixLinearClamp_test = (1,0,0,0) : ef.mixLinearClamp(4, 1, 1.2);
+// mixLinearClamp_test = (1,0.5,0,0) : ef.mixLinearClamp(4, 1, 1.2);
 // ```
 //---------------------------------------------------------------------------------------
 declare mixLinearClamp author "David Braun";

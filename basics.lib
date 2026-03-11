@@ -537,7 +537,7 @@ countdown(n, trig) = \(c).(if(trig>0, n, max(0, c-1))) ~ _;
 // #### Test
 // ```
 // ba = library("basics.lib");
-// countup_test = ba.countup(8, button("trig"));
+// countup_test = ba.countup(8, ba.pulse(16));
 // ```
 //----------------------------
 countup(n, trig) = \(c).(if(trig>0, 0, min(n, c+1))) ~ _;
@@ -833,7 +833,7 @@ beat(t) = pulse(tempo(t));
 // #### Test
 // ```
 // ba = library("basics.lib");
-// pulse_countup_test = ba.pulse_countup(button("run"));
+// pulse_countup_test = ba.pulse_countup(1) + 0.001;
 // ```
 //----------------------------
 declare pulse_countup author "Vince";
@@ -858,7 +858,7 @@ pulse_countup(trig) = + ~ _ * trig;
 // #### Test
 // ```
 // ba = library("basics.lib");
-// pulse_countdown_test = ba.pulse_countdown(button("run"));
+// pulse_countdown_test = ba.pulse_countdown(1) + 0.001;
 // ```
 //----------------------------
 declare pulse_countdown author "Vince";
@@ -885,7 +885,7 @@ pulse_countdown(trig) = - ~ _ * trig;
 // #### Test
 // ```
 // ba = library("basics.lib");
-// pulse_countup_loop_test = ba.pulse_countup_loop(4, button("run"));
+// pulse_countup_loop_test = ba.pulse_countup_loop(4, 1) + 0.001;
 // ```
 //----------------------------
 declare pulse_countup_loop author "Vince";
@@ -915,7 +915,7 @@ with {
 // #### Test
 // ```
 // ba = library("basics.lib");
-// pulse_countdown_loop_test = ba.pulse_countdown_loop(4, button("run"));
+// pulse_countdown_loop_test = ba.pulse_countdown_loop(4, 1) + 0.001;
 // ```
 //----------------------------
 declare pulse_countdown_loop author "Vince";
@@ -1273,7 +1273,9 @@ declare tabulate author "Stephane Letz";
 // #### Test
 // ```
 // ba = library("basics.lib");
+// powSin(x,y) = sin(pow(x,y));
 // tabulate_chebychev_test = ba.tabulate_chebychev(1, ba.midikey2hz, 32, 4, 0, 127, 60);
+// powSin(x,y) = sin(pow(x,y));
 // ```
 //----------------------------
 tabulate_chebychev(C, FX, NX, CD, r0, r1, x) = y with {
@@ -2245,7 +2247,7 @@ selectoutn(N, s) = _ <: par(i, N, *(s==i));
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// latch_test = os.osc(2) : ba.latch(button("hold"));
+// latch_test = os.osc(2) : ba.latch(ba.pulse(32));
 // ```
 //----------------------------
 latch(trig, x) = x * s : + ~ *(1-s) with { s = (trig' <= 0) & (trig > 0); };
@@ -2269,7 +2271,9 @@ latch(trig, x) = x * s : + ~ *(1-s) with { s = (trig' <= 0) & (trig > 0); };
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// sAndH_test = os.osc(2) : ba.sAndH(button("hold"));
+// isPositive(x) = x > 0.0;
+// sAndH_test = os.osc(2) : ba.sAndH(ba.pulse(32));
+// isPositive(x) = x > 0.0;
 // ```
 //----------------------------
 declare sAndH author "Romain Michon";
@@ -2729,7 +2733,9 @@ with {
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
+// monoToStereo(x) = (x*0.5, x*0.25);
 // bypass2_test = (os.osc(440), os.osc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
+// monoToStereo(x) = (x*0.5, x*0.25);
 // ```
 //----------------------------
 declare bypass2 author "Julius Smith";

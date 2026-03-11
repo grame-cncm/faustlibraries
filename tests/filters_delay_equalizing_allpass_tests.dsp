@@ -4,10 +4,11 @@
 //----------------------------------------------------------------------------
 
 fi = library("filters.lib");
+os = library("oscillators.lib");
 
-highpass_plus_lowpass_test = fi.highpass_plus_lowpass(3, 1000);
-highpass_minus_lowpass_test = fi.highpass_minus_lowpass(3, 1000);
-highpass_plus_lowpass_even_test = fi.highpass_plus_lowpass_even(4, 1000);
-highpass_minus_lowpass_even_test = fi.highpass_minus_lowpass_even(4, 1000);
-highpass_plus_lowpass_odd_test = fi.highpass_plus_lowpass_odd(3, 1000);
-highpass_minus_lowpass_odd_test = fi.highpass_minus_lowpass_odd(3, 1000);
+highpass_plus_lowpass_test = os.osc(440) : fi.highpass_plus_lowpass(3, 1000);
+highpass_minus_lowpass_test = os.osc(440) : fi.highpass_minus_lowpass(3, 1000);
+highpass_plus_lowpass_even_test = os.osc(440), os.osc(440) : fi.highpass_plus_lowpass_even(4, 1000);
+highpass_minus_lowpass_even_test = os.osc(440), os.osc(440) : fi.highpass_minus_lowpass_even(4, 1000);
+highpass_plus_lowpass_odd_test = os.osc(440), os.osc(440) : fi.highpass_plus_lowpass_odd(3, 1000);
+highpass_minus_lowpass_odd_test = os.osc(440), os.osc(440) : fi.highpass_minus_lowpass_odd(3, 1000);

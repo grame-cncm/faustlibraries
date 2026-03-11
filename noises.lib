@@ -128,7 +128,7 @@ noise = noise_env(12345).noise;
 // #### Test
 // ```
 // no = library("noises.lib");
-// multirandom_test = no.multirandom(4);
+// multirandom_test = no.multirandom(3);
 // ```
 //-------------------------------------------------------------
 multirandom(N) = noise_env(12345).multirandom(N);
@@ -198,7 +198,11 @@ noises(N,i) = noise_env(12345).noises(N,i);
 // ```
 // no = library("noises.lib");
 // ba = library("basics.lib");
-// dnoise_test = (1 : ba.impulsify, 10.0) : no.dnoise;
+// dnoise_test = (trigger, seedRange) : no.dnoise
+// with {
+//   trigger = 1 : ba.impulsify;
+//   seedRange = 10.0;
+// };
 // ```
 //
 // #### Example 
@@ -270,7 +274,7 @@ rnoise = noise_env(randomseed).noise;
 // #### Test
 // ```
 // no = library("noises.lib");
-// rmultirandom_test = no.rmultirandom(4);
+// rmultirandom_test = no.rmultirandom(3);
 // ```
 //-------------------------------------------------------------
 rmultirandom(N) = noise_env(randomseed).multirandom(N);
@@ -319,7 +323,7 @@ rmultinoise(N) = noise_env(randomseed).multinoise(N);
 // #### Test
 // ```
 // no = library("noises.lib");
-// rnoises_test = no.rnoises(4, 2);
+// rnoises_test = no.rnoises(4, 1);
 // ```
 //----------------------------------------------------------
 rnoises(N,i) = noise_env(randomseed).noises(N,i);
@@ -460,8 +464,6 @@ with {
 // ```
 // no = library("noises.lib");
 // lfnoise0_test = no.lfnoise0(10.0);
-// lfnoiseN_test = no.lfnoiseN(3, 10.0);
-// lfnoise_test = no.lfnoise(10.0);
 // ```
 //------------------------------------------------------------
 lfnoise0(freq) = noise : ba.latch(os.oscrs(freq));

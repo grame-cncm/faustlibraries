@@ -270,7 +270,7 @@ fixedpointprecision EPSILON = 2.2204460492503131e-016;
 // #### Test
 // ```
 // ma = library("maths.lib");
-// MIN_test = ma.MIN;
+// MIN_test = ma.MIN * 1e307;
 // ```
 //-----------------------------------------------------------------------------
 singleprecision MIN = 1.175494351e-38;
@@ -324,7 +324,7 @@ INFINITY = MAX;
 // #### Test
 // ```
 // ma = library("maths.lib");
-// FTZ_test = (ma.MIN * 0.5) : ma.FTZ;
+// FTZ_test = ((ma.MIN * 0.5) : ma.FTZ), ((ma.MIN * 1e307) : ma.FTZ);
 // ```
 //
 // #### References
@@ -1114,7 +1114,8 @@ modulo(x,y) = (x % y + y) % y;
 // #### Test
 // ```
 // ma = library("maths.lib");
-// isnan_test = 1.0 : ma.isnan;
+// os = library("oscillators.lib");
+// isnan_test = (os.osc(1) - 2.0) : sqrt : ma.isnan;
 // ```
 //------------------------------------------
 isnan = ffunction(int isnanf|isnan|isnanl (float),<math.h>,"");
@@ -1137,7 +1138,8 @@ isnan = ffunction(int isnanf|isnan|isnanl (float),<math.h>,"");
 // #### Test
 // ```
 // ma = library("maths.lib");
-// isinf_test = 1.0 : ma.isinf;
+// os = library("oscillators.lib");
+// isinf_test = (os.impulse - os.impulse) : log : ma.isinf;
 // ```
 //------------------------------------------
 isinf = ffunction(int isinff|isinf|isinfl (float),<math.h>,"");

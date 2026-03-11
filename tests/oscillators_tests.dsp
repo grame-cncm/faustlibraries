@@ -2,14 +2,15 @@ import("stdfaust.lib");
 
 os = library("oscillators.lib");
 ma = library("maths.lib");
+ba = library("basics.lib");
 
 sinwaveform_test = os.sinwaveform(1024);
 coswaveform_test = os.coswaveform(1024);
 phasor_test = os.phasor(1024, 440);
-hs_phasor_test = os.hs_phasor(1024, 330, button("reset"));
+hs_phasor_test = os.hs_phasor(1024, 330, ba.pulse(32));
 hsp_phasor_test = os.hsp_phasor(1024, 330, button("reset"), 0.25);
 oscsin_test = os.oscsin(440);
-hs_oscsin_test = os.hs_oscsin(440, button("reset"));
+hs_oscsin_test = os.hs_oscsin(440, ba.pulse(32));
 osccos_test = os.osccos(440);
 hs_osccos_test = os.hs_osccos(440, button("reset"));
 oscp_test = os.oscp(440, ma.PI/3);
@@ -27,7 +28,7 @@ lf_triangle_test = os.lf_triangle(3);
 lf_rawsaw_test = os.lf_rawsaw(128);
 lf_sawpos_test = os.lf_sawpos(3);
 lf_sawpos_phase_test = os.lf_sawpos_phase(3, 0.25);
-lf_sawpos_reset_test = os.lf_sawpos_reset(3, button("reset"));
+lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(32));
 lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, button("reset"));
 lf_saw_test = os.lf_saw(3);
 sawN_test = os.sawN(3, 440);

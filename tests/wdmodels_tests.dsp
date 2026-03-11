@@ -83,7 +83,7 @@ with {
   branch_b(i) = wd.resistor_Vout(i, 1800);
 };
 
-u_switch_test = wd.buildtree(root : (series_node : (branch_a, branch_b)))
+u_switch_test = wd.buildtree(root : (series_node : (branch_a, branch_b))) + os.osc(110) * 0.001
 with {
   drive = os.osc(330);
   lambda = hslider("u_switch:lambda", -1, -1, 1, 0.01);
@@ -141,7 +141,7 @@ with {
   load(i) = wd.resistor(i, 1500);
 };
 
-u_idealDiode_test = wd.buildtree(diode : (series_node : (branch_a, branch_b)))
+u_idealDiode_test = wd.buildtree(diode : (series_node : (branch_a, branch_b))) + os.osc(110) * 0.001
 with {
   diode(i) = wd.u_idealDiode(i);
   series_node(i) = wd.series(i);
@@ -149,7 +149,7 @@ with {
   branch_b(i) = wd.resistor_Vout(i, 1800);
 };
 
-u_chua_test = wd.buildtree(chua_node : (series_node : (branch_a, branch_b)))
+u_chua_test = wd.buildtree(chua_node : (series_node : (branch_a, branch_b))) + os.osc(110) * 0.001
 with {
   chua_node(i) = wd.u_chua(i, 1e-3, 5e-4, 0.2);
   series_node(i) = wd.series(i);
@@ -161,13 +161,13 @@ lambert_test = os.osc(220) * wd.lambert(0.5, 6);
 
 omega_test = wd.omega(0.5);
 
-u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025);
+u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025) + os.osc(110) * 0.001;
 
-u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026);
+u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026) + os.osc(110) * 0.001;
 
-u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2);
+u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2) + os.osc(110) * 0.001;
 
-u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1);
+u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1) + os.osc(110) * 0.001;
 
 u_parallel2Port_test = wd.buildtree(root : (branch_source, branch_load))
 with {
@@ -255,8 +255,8 @@ with {
   branch_b(i) = wd.resistor_Vout(i, 2200);
 };
 
-u_sixportPassive_test = (1000, 1200, 1400, 1600, 1800, 2000, os.osc(220), 0, 0, 0, 0, 0, 0)
-  : wd.u_sixportPassive(0) : _, !, !, !, !;
+u_sixportPassive_test = ((1000, 1200, 1400, 1600, 1800, 2000, os.osc(220), 0, 0, 0, 0, 0, 0)
+  : wd.u_sixportPassive(0) : _, !, !, !, !), os.osc(110) * 0.001;
 
 genericNode_test = wd.genericNode(0, scatter, upRes)(os.osc(220))
 with {

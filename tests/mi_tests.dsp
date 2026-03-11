@@ -9,11 +9,11 @@ os = library("oscillators.lib");
 
 initState_test = button("impulse") : mi.initState(1.0);
 
-mass_test = 0 : mi.mass(1.0, 0.0, 0.0, 0.0);
+mass_test = 0.1 : mi.mass(1.0, 0.0, 0.1, 0.0);
 
-oscil_test = 0 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.0, 0.0);
+oscil_test = 0.1 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.1, 0.0);
 
-ground_test = 0 : mi.ground(0.0);
+ground_test = 0.1 : mi.ground(0.1);
 
 posInput_test = 0, os.osc(1.0) : mi.posInput(0.0);
 
@@ -29,7 +29,7 @@ nlSpringDamper3_test = mi.nlSpringDamper3(5.0, 0.5, 0.2, 0.0, 0.0, 0.1, -0.1);
 
 nlSpringDamperClipped_test = mi.nlSpringDamperClipped(5.0, 0.5, 8.0, 0.2, 0.0, 0.0, 0.1, -0.1);
 
-nlPluck_test = mi.nlPluck(5.0, 0.1, 0.2, 0.0, 0.0, 0.05, -0.05);
+nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.osc(110) * 0.001;
 
 nlBow_test = mi.nlBow(0.5, 0.1, 1.0, 0.0, 0.0, 0.05, -0.05);
 

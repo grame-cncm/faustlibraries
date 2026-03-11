@@ -243,7 +243,8 @@ phasor(tablesize, freq) = phasor_table(tablesize, freq, 0, 0);
 // #### Test
 // ```
 // os = library("oscillators.lib");
-// hs_phasor_test = os.hs_phasor(1024, 330, button("reset"));
+// ba = library("basics.lib");
+// hs_phasor_test = os.hs_phasor(1024, 330, ba.pulse(32));
 // ```
 //---------------------------------------------------------
 declare hs_phasor author "Mike Olsen, revised by Stéphane Letz";
@@ -321,7 +322,8 @@ with {
 // #### Test
 // ```
 // os = library("oscillators.lib");
-// hs_oscsin_test = os.hs_oscsin(440, button("reset"));
+// ba = library("basics.lib");
+// hs_oscsin_test = os.hs_oscsin(440, ba.pulse(32));
 // ```
 //---------------------------------------------------------
 declare hs_oscsin author "Mike Olsen";
@@ -800,7 +802,8 @@ lf_sawpos_phase(freq,phase) = phasor_imp(freq, 0, phase);
 // #### Test
 // ```
 // os = library("oscillators.lib");
-// lf_sawpos_reset_test = os.lf_sawpos_reset(3, button("reset"));
+// ba = library("basics.lib");
+// lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(32));
 // ```
 //---------------------------------------------------------
 declare lf_sawpos_reset author "Bart Brouns, revised by Stéphane Letz";
@@ -993,8 +996,6 @@ sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))
 // ```
 // os = library("oscillators.lib");
 // saw2_test = os.saw2(220);
-// saw3_test = os.saw3(220);
-// saw4_test = os.saw4(220);
 // ```
 //
 // #### Implementation Notes
@@ -1132,7 +1133,6 @@ sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 // ```
 // os = library("oscillators.lib");
 // saw2f2_test = os.saw2f2(220);
-// saw2f4_test = os.saw2f4(220);
 // ```
 //--------------------------------------------------------
 declare saw2f2 author "Julius O. Smith III";
@@ -1185,22 +1185,6 @@ saw2f4 = saw2dpw : cf4 with {
 // ```
 // os = library("oscillators.lib");
 // sawNp_test = os.sawNp(3, 330, 0.5);
-// saw2_test = os.saw2(220);
-// saw3_test = os.saw3(220);
-// saw4_test = os.saw4(220);
-// saw2ptr_test = os.saw2ptr(220);
-// saw2dpw_test = os.saw2dpw(220);
-// sawtooth_test = os.sawtooth(220);
-// saw2f2_test = os.saw2f2(220);
-// saw2f4_test = os.saw2f4(220);
-// pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
-// pulsetrain_test = os.pulsetrain(220, 0.25);
-// squareN_test = os.squareN(3, 220);
-// square_test = os.square(220);
-// imptrainN_test = os.imptrainN(3, 220);
-// imptrain_test = os.imptrain(220);
-// triangleN_test = os.triangleN(3, 220);
-// triangle_test = os.triangle(220);
 // ```
 //====================================================================
 
@@ -1350,7 +1334,7 @@ square = squareN(2);
 // #### Test
 // ```
 // os = library("oscillators.lib");
-// imptrainN_test = os.imptrainN(4, 220);
+// imptrainN_test = os.imptrainN(3, 220);
 // ```
 //--------------------------------------------------------
 imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq));
@@ -1441,10 +1425,6 @@ triangle = triangleN(2); // default based on saw2
 // ```
 // os = library("oscillators.lib");
 // oscb_test = os.oscb(440);
-// oscrq_test = os.oscrq(440);
-// oscrs_test = os.oscrs(440);
-// oscrc_test = os.oscrc(440);
-// oscs_test = os.oscs(440);
 // ```
 // #### References
 //
@@ -1469,10 +1449,6 @@ triangle = triangleN(2); // default based on saw2
 // ```
 // os = library("oscillators.lib");
 // oscb_test = os.oscb(440);
-// oscrq_test = os.oscrq(440);
-// oscrs_test = os.oscrs(440);
-// oscrc_test = os.oscrc(440);
-// oscs_test = os.oscs(440);
 // ```
 //------------------------------------------------------------
 oscb(f) = impulse : fi.tf2(1,0,0,a1,1)
@@ -1792,11 +1768,6 @@ with {
 // ```
 // os = library("oscillators.lib");
 // dsf_oscc_test = os.dsf.oscc(220, 110, 0.6);
-// dsf_oscs_test = os.dsf.oscs(220, 110, 0.6);
-// dsf_osccN_test = os.dsf.osccN(220, 110, 0.6, 4);
-// dsf_oscsN_test = os.dsf.oscsN(220, 110, 0.6, 4);
-// dsf_osccNq_test = os.dsf.osccNq(220, 110, 0.6);
-// dsf_oscsNq_test = os.dsf.oscsNq(220, 110, 0.6);
 // ```
 // #### Variants
 //
@@ -1886,7 +1857,7 @@ dsf = environment {
 // #### Test
 // ```
 // os = library("oscillators.lib");
-// twin_osc_test = os.twin_osc(220, 0.5, 0, 0);
+// twin_osc_pwm_test = os.twin_osc(220, 0.5, 0, 0);
 // ```
 //
 // #### References
@@ -1931,7 +1902,6 @@ with {
 // ```
 // os = library("oscillators.lib");
 // rpm_sawtooth_test = os.rpm.sawtooth(220, 1.0);
-// rpm_square_test = os.rpm.square(220, 1.0);
 // ```
 //
 // #### Variants
