@@ -977,15 +977,13 @@ declare sawNp license "STK-4.3";
 // Phase offset = delay (max 8191 samples is more than one period of audio):
 sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))));
 
-//------------------`(os.)saw2, (os.)saw3, (os.)saw4`--------------
-// Alias-Suppressed Sawtooth Audio-Frequency Oscillators of order 2, 3, 4.
+//------------------------------`(os.)saw2`------------------------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator of order 2.
 //
 // #### Usage
 //
 // ```
 // saw2(freq) : _
-// saw3(freq) : _
-// saw4(freq) : _
 // ```
 //
 // where
@@ -1000,13 +998,66 @@ sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))
 //
 // #### Implementation Notes
 //
-// Presently, only `saw2` uses the PTR method, while `saw3` and `saw4` use DPW.
-// This is because PTR has been implemented and tested for the 2nd-order case only.
+// `saw2` uses the PTR method.
 //
 // #### References
 //
 // * See `sawN` above.
-//------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//------------------------------`(os.)saw3`------------------------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator of order 3.
+//
+// #### Usage
+//
+// ```
+// saw3(freq) : _
+// ```
+//
+// where
+//
+// * `freq`: frequency in Hz
+//
+// #### Test
+// ```
+// os = library("oscillators.lib");
+// saw3_test = os.saw3(220);
+// ```
+//
+// #### Implementation Notes
+//
+// `saw3` uses the DPW method.
+//
+// #### References
+//
+// * See `sawN` above.
+//-----------------------------------------------------------------------
+//------------------------------`(os.)saw4`------------------------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator of order 4.
+//
+// #### Usage
+//
+// ```
+// saw4(freq) : _
+// ```
+//
+// where
+//
+// * `freq`: frequency in Hz
+//
+// #### Test
+// ```
+// os = library("oscillators.lib");
+// saw4_test = os.saw4(220);
+// ```
+//
+// #### Implementation Notes
+//
+// `saw4` uses the DPW method.
+//
+// #### References
+//
+// * See `sawN` above.
+//-----------------------------------------------------------------------
 saw2 = saw2ptr; // "faustlibraries choice"
 saw3 = sawN(3); // only choice available right now
 saw4 = sawN(4); // only choice available right now
@@ -1109,14 +1160,13 @@ saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freq);
 //--------------------------------------------------------
 sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 
-//------------------`(os.)saw2f2, (os.)saw2f4`--------------------------------
-// Alias-Suppressed Sawtooth Audio-Frequency Oscillator with Order 2 or 4 Droop Correction Filtering.
+//------------------------------`(os.)saw2f2`------------------------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 2nd-order droop-correction filtering.
 //
 // #### Usage
 //
 // ```
 // saw2f2(freq) : _
-// saw2f4(freq) : _
 // ```
 //
 // Where:
@@ -1125,8 +1175,7 @@ sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 //
 // In return for aliasing suppression, there is some attenuation near half the sampling rate.
 // This can be considered as beneficial, or it can be compensated with a high-frequency boost.
-// The boost filter is second-order for `saw2f2` and fourth-order for `saw2f4`, and both are designed
-// for the DWP case and therefore use `saw2dpw`.
+// The boost filter is second-order for `saw2f2`, and it is designed for the DPW case using `saw2dpw`.
 // See Figure 4(b) in the DPW reference for a plot of the slight droop in the DPW case.
 //
 // #### Test
@@ -1142,6 +1191,30 @@ saw2f2 = saw2dpw : cf2 with {
   cf2 = fi.tf2(1.155704605878911, 0.745184288225518,0.040305967265900,
         0.823765146386639, 0.117420665547108);
 };
+//------------------------------`(os.)saw2f4`------------------------------
+// Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 4th-order droop-correction filtering.
+//
+// #### Usage
+//
+// ```
+// saw2f4(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
+//
+// In return for aliasing suppression, there is some attenuation near half the sampling rate.
+// This can be considered as beneficial, or it can be compensated with a high-frequency boost.
+// The boost filter is fourth-order for `saw2f4`, and it is designed for the DPW case using `saw2dpw`.
+// See Figure 4(b) in the DPW reference for a plot of the slight droop in the DPW case.
+//
+// #### Test
+// ```
+// os = library("oscillators.lib");
+// saw2f4_test = os.saw2f4(220);
+// ```
+//--------------------------------------------------------
 declare saw2f4 author "Julius O. Smith III";
 declare saw2f4 license "STK-4.3";
 saw2f4 = saw2dpw : cf4 with {

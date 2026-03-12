@@ -39,6 +39,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -51,6 +52,7 @@ IMPORT_DIRECTIVE_RE = re.compile(r'import\("([^"]+)"\)\s*;')
 HEADER_RE = re.compile(r"^//-+\s*`([^`]+)`\s*-+")
 PARAM_RE = re.compile(r"^\*\s*`([^`]+)`\s*:\s*(.+)$")
 SEPARATOR_RE = re.compile(r"^[-=#*]{3,}$")
+DEFINITION_NAME_RE = re.compile(r"^(?:declare\s+)?([A-Za-z_][A-Za-z0-9_\[\]]*)\s*(?:\(|=)")
 
 
 @dataclass(frozen=True)
@@ -201,6 +203,37 @@ def parse_symbol_header(line: str) -> dict[str, str | None] | None:
         name = alias_match.group(2).strip()
         return {"header": header, "alias": alias or None, "name": name}
     return {"header": header, "alias": None, "name": header.strip()}
+
+
+def warn(message: str) -> None:
+    """Emit a non-fatal warning during index generation."""
+
+    print(f"WARNING: {message}", file=sys.stderr)
+
+
+def is_suspicious_symbol_name(name: str) -> bool:
+    """Return whether a parsed symbol name looks malformed."""
+
+    if not name:
+        return True
+    if name.startswith(".") or name.endswith("."):
+        return True
+    if ", " in name:
+        return True
+    if "`" in name:
+        return True
+    return False
+
+
+def definition_symbol_name(definition: str | None) -> str | None:
+    """Extract the defined symbol name from a Faust definition line when simple."""
+
+    if not definition:
+        return None
+    match = DEFINITION_NAME_RE.match(definition.strip())
+    if not match:
+        return None
+    return match.group(1)
 
 
 def extract_doc_block(lines: list[str], start_index: int) -> dict[str, object] | None:
@@ -534,6 +567,8 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
     alias_hints: dict[str, set[str]] = defaultdict(set)
     libraries: list[dict[str, object]] = []
     symbols: list[dict[str, object]] = []
+    seen_ids: dict[str, dict[str, object]] = {}
+    seen_qualified_names: dict[str, dict[str, object]] = {}
 
     while queue:
         file_path = queue.popleft().resolve()
@@ -576,6 +611,19 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
                 line_index += 1
                 continue
 
+            source_line_start = int(line_index) - len(block["body"]) + 1
+            def_name = definition_symbol_name(block.get("definition"))
+            if is_suspicious_symbol_name(name):
+                warn(
+                    f"suspicious header name {name!r} in {rel_file}:{source_line_start} "
+                    f"(header={header_info['header']!r})"
+                )
+            if def_name and def_name != name:
+                warn(
+                    f"header/definition mismatch in {rel_file}:{source_line_start}: "
+                    f"header name={name!r}, definition name={def_name!r}"
+                )
+
             alias = str(header_info["alias"] or "").strip() or (hinted_aliases[0] if hinted_aliases else module_name)
             usage = body["usage"] or infer_usage_from_definition(name, block.get("definition"))
             io = parse_usage_io(usage)
@@ -598,10 +646,31 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
                 "source": {
                     "file": file_name,
                     "path": rel_file,
-                    "lineStart": int(line_index) - len(block["body"]) + 1,
+                    "lineStart": source_line_start,
                     "lineEnd": int(block["endIndex"]) + 1,
                 },
             }
+
+            previous = seen_ids.get(symbol["id"])
+            if previous is not None:
+                prev_source = previous["source"]
+                warn(
+                    f"duplicate symbol id {symbol['id']!r} in {rel_file}:{source_line_start}; "
+                    f"previously seen at {prev_source['path']}:{prev_source['lineStart']}"
+                )
+            else:
+                seen_ids[symbol["id"]] = symbol
+
+            previous_qn = seen_qualified_names.get(symbol["qualifiedName"])
+            if previous_qn is not None:
+                prev_source = previous_qn["source"]
+                warn(
+                    f"duplicate qualifiedName {symbol['qualifiedName']!r} in {rel_file}:{source_line_start}; "
+                    f"previously seen at {prev_source['path']}:{prev_source['lineStart']}"
+                )
+            else:
+                seen_qualified_names[symbol["qualifiedName"]] = symbol
+
             lib_symbols.append(symbol)
             symbols.append(symbol)
             line_index += 1

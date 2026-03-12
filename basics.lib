@@ -1273,9 +1273,7 @@ declare tabulate author "Stephane Letz";
 // #### Test
 // ```
 // ba = library("basics.lib");
-// powSin(x,y) = sin(pow(x,y));
 // tabulate_chebychev_test = ba.tabulate_chebychev(1, ba.midikey2hz, 32, 4, 0, 127, 60);
-// powSin(x,y) = sin(pow(x,y));
 // ```
 //----------------------------
 tabulate_chebychev(C, FX, NX, CD, r0, r1, x) = y with {
@@ -2271,9 +2269,7 @@ latch(trig, x) = x * s : + ~ *(1-s) with { s = (trig' <= 0) & (trig > 0); };
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// isPositive(x) = x > 0.0;
 // sAndH_test = os.osc(2) : ba.sAndH(ba.pulse(32));
-// isPositive(x) = x > 0.0;
 // ```
 //----------------------------
 declare sAndH author "Romain Michon";
@@ -2733,9 +2729,7 @@ with {
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// monoToStereo(x) = (x*0.5, x*0.25);
 // bypass2_test = (os.osc(440), os.osc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
-// monoToStereo(x) = (x*0.5, x*0.25);
 // ```
 //----------------------------
 declare bypass2 author "Julius Smith";

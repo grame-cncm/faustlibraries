@@ -2429,7 +2429,7 @@ highpass_minus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
   switch_odd_even(1,N,fc) = highpass_minus_lowpass_odd(N,fc);
 };
 
-//--------------------`(fi.)highpass_plus_lowpass_even`----------------
+//--------------------`(fi.)highpass_minus_lowpass_even`----------------
 //
 // #### Test
 // ```
@@ -2458,13 +2458,13 @@ declare highpass_minus_lowpass_even license "MIT-style STK-4.3 license";
 highpass_minus_lowpass_even(N,fc) = highpass(N,fc) - lowpass(N,fc);
 
 
-//--------------------`(fi.)highpass_minus_lowpass_odd`----------------
-// Difference between the odd-order highpass and lowpass responses.
+//--------------------`(fi.)highpass_plus_lowpass_odd`-----------------
+// Sum of the odd-order highpass and lowpass responses.
 //
 // #### Usage
 //
 // ```
-// _ : highpass_minus_lowpass_odd(N,fc) : _
+// _ : highpass_plus_lowpass_odd(N,fc) : _
 // ```
 //
 // Where:
@@ -2761,7 +2761,7 @@ declare bandpass license "MIT-style STK-4.3 license";
 bandpass(Nh,fl,fu) = bandpass0_bandstop1(0,Nh,fl,fu);
 
 
-//--------------------`(fi.)bandstop`----------------
+//--------------------`(fi.)bandpass0_bandstop1`----------------
 // Order 2*Nh Butterworth bandstop filter made using the transformation
 // `s <- s + wc^2/s` on `highpass(Nh)`, where `wc` is the desired bandpass center
 // frequency.  The `highpass(Nh)` cutoff `w1` is half the desired bandpass width.
@@ -3057,7 +3057,7 @@ declare low_shelf license "MIT-style STK-4.3 license";
 low_shelf  = lowshelf(3); // default = 3rd order Butterworth
 
 
-//----------------------`(fi.)low_shelf1_l`----------------------
+//-----------------------`(fi.)low_shelf1`-----------------------
 // #### Test
 // ```
 // fi = library("filters.lib");
@@ -3099,7 +3099,7 @@ declare lowshelf_other_freq copyright "Copyright (C) 2003-2019 by Julius O. Smit
 declare lowshelf_other_freq license "MIT-style STK-4.3 license";
 lowshelf_other_freq(N, L0, fx) = ba.db2linear(ba.linear2db(fx) + L0/N); // convenience
 
-//-------------`(fi.)high_shelf`--------------
+//--------------`(fi.)highshelf`--------------
 // First-order "high shelf" filter (gain boost|cut above some frequency).
 // `high_shelf` is a standard Faust function.
 //
