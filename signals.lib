@@ -266,6 +266,54 @@ polySmooth(g,s,d) = si.smooth(s*((g==(g@d)) | (g == 0)));
 //-------------------------------------------------------------------
 smoothAndH(t,s) = si.smooth(s*t) : ba.sAndH(t);
 
+//-----------------------`(si.)releaseAfterJoin`--------------------------------
+// The simplest way to understand `releaseAfterJoin` is to compare it to
+// `ba.sAndH` (sample and hold).
+// `sAndH` has two states:
+//
+// * State 0: holds a value sampled from its input,
+// * State 1: releases the value and becomes a pass through.
+//
+// `releaseAfterJoin` is basically a `sAndH` with a join property:
+//
+// * State 0: holds a value sampled from its input
+// * State 1: releases the value and becomes a pass through
+// **BUT** only after the input joined the held value...
+// 
+// #### Usage
+//
+// ```
+// _ : releaseAfterJoin(b) : _
+// ```
+//
+// #### Usage Example
+//
+// ```
+// in = hslider("input", 0, 0, 127, 1);
+// b = (checkbox("Release/Hold")+1) %2;// Start from release state
+// out_sAndH = ba.sAndH(b,in);
+// out_releaseAfterJoin = releaseAfterJoin(b,in);
+// process = (out_sAndH : hbargraph("sAndH output", 0, 127)), (out_releaseAfterJoin : hbargraph("releaseAfterJoin output", 0, 127)) ;
+// ```
+//
+// Where:
+//
+// * `in`: the input signal
+// * `b`: the function state (hold, release)
+//-------------------------------------------------------------------
+releaseAfterJoin(b, i) = joined_h(b, i) , i : select2((b == 1) & (_))
+with {
+     // Ensure we do not sample a new value if the old value hasn't
+     // been joined.
+     joined_h(b,i) = joined(b,i) ~ holder(i)
+     with {
+       joined(b,i,h,thru) =
+       ((b == 1) & (i == h)) , (b == 0) : ba.on_and_off, thru;
+       // sample if in hold mode AND previous sampled value was joined
+       holder(i,j) = i : ba.sAndH((b == 1) & (j == 1)) <: _,_;
+     };
+};
+
 //-----------------------------`(si.)bsmooth`------------------------------
 // Block smooth linear interpolation during a block of samples (given by the `ma.BS` value).
 //
