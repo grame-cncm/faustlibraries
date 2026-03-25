@@ -24,7 +24,7 @@ Where:
 
 #### Test
 ```
-dx = library("dx.lib");
+dx = library("dx7/dx7.lib");
 fdbkscalef_test = dx.fdbkscalef(0.5);
 ```
 #### Reference
@@ -49,7 +49,7 @@ Where:
 
 #### Test
 ```
-dx = library("dx.lib");
+dx = library("dx7/dx7.lib");
 fdbkscalef2_test = dx.fdbkscalef2(0.5);
 ```
 
@@ -71,7 +71,7 @@ algorithms : _
 
 #### Test
 ```
-dx = library("dx.lib");
+dx = library("dx7/dx7.lib");
 algorithms_test = dx.algorithms;
 ```
 
@@ -94,7 +94,7 @@ Where:
 
 #### Test
 ```
-dx = library("dx.lib");
+dx = library("dx7/dx7.lib");
 algorithm1_test = dx.algorithm(1) <: _,_;
 algorithm2_test = dx.algorithm(2) <: _,_;
 algorithm3_test = dx.algorithm(3) <: _,_;

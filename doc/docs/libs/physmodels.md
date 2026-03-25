@@ -151,10 +151,14 @@ and 3 signals out.
 chain(basicBlock : basicBlock : etc.)
 ```
 
+Where:
+
+* `basicBlock`: any bidirectional block with 3 inputs and 3 outputs
+
 #### Test
 ```
 pm = library("physmodels.lib");
-basicBlock_test = 0,0,0 : pm.basicBlock;
+basicBlock_test = 0.25, -0.15, 0.05 : pm.basicBlock;
 ```
 
 ----
@@ -179,10 +183,15 @@ with {
 };
 ```
 
+Where:
+
+* `A`: first bidirectional block in the chain
+* `B`: next bidirectional block in the chain
+
 #### Test
 ```
 pm = library("physmodels.lib");
-chain_test = 0,0,0 : pm.chain(pm.in(0.1) : pm.basicBlock);
+chain_test = 0.25, -0.15, 0.05 : pm.chain(pm.basicBlock);
 ```
 
 ----
@@ -197,13 +206,16 @@ Adds a signal to left going waves anywhere in a [`chain`](#chain) of blocks.
 model(x) = chain(A : inLeftWave(x) : B)
 ```
 
-Where `A` and `B` are bidirectional blocks and `x` is the signal added to left
-going waves in that chain.
+Where:
+
+* `A`: preceding bidirectional block
+* `x`: signal added to the left-going wave
+* `B`: following bidirectional block
 
 #### Test
 ```
 pm = library("physmodels.lib");
-inLeftWave_test = 0,0,0 : pm.inLeftWave(0.25);
+inLeftWave_test = 0, 0, 0 : pm.inLeftWave(0.25);
 ```
 
 ----
@@ -218,13 +230,16 @@ Adds a signal to right going waves anywhere in a [`chain`](#chain) of blocks.
 model(x) = chain(A : inRightWave(x) : B)
 ```
 
-Where `A` and `B` are bidirectional blocks and `x` is the signal added to right
-going waves in that chain.
+Where:
+
+* `A`: preceding bidirectional block
+* `x`: signal added to the right-going wave
+* `B`: following bidirectional block
 
 #### Test
 ```
 pm = library("physmodels.lib");
-inRightWave_test = 0,0,0 : pm.inRightWave(0.25);
+inRightWave_test = 0, 0, 0 : pm.inRightWave(0.25);
 ```
 
 ----
@@ -240,13 +255,16 @@ of blocks.
 model(x) = chain(A : in(x) : B)
 ```
 
-Where `A` and `B` are bidirectional blocks and `x` is the signal added to
-left and right going waves in that chain.
+Where:
+
+* `A`: preceding bidirectional block
+* `x`: signal added to both left- and right-going waves
+* `B`: following bidirectional block
 
 #### Test
 ```
 pm = library("physmodels.lib");
-in_test = 0,0,0 : pm.in(0.25);
+in_test = 0, 0, 0 : pm.in(0.25);
 ```
 
 ----
@@ -261,7 +279,10 @@ Sends the signal of left going waves to the output channel of the [`chain`](#cha
 chain(A : outLeftWave : B)
 ```
 
-Where `A` and `B` are bidirectional blocks.
+Where:
+
+* `A`: preceding bidirectional block
+* `B`: following bidirectional block
 
 #### Test
 ```
@@ -281,7 +302,10 @@ Sends the signal of right going waves to the output channel of the [`chain`](#ch
 chain(A : outRightWave : B)
 ```
 
-Where `A` and `B` are bidirectional blocks.
+Where:
+
+* `A`: preceding bidirectional block
+* `B`: following bidirectional block
 
 #### Test
 ```
@@ -302,7 +326,10 @@ Sends the signal of right and left going waves to the output channel of the
 chain(A : out : B)
 ```
 
-Where `A` and `B` are bidirectional blocks.
+Where:
+
+* `A`: preceding bidirectional block
+* `B`: following bidirectional block
 
 #### Test
 ```
@@ -331,10 +358,16 @@ with {
 };
 ```
 
+Where:
+
+* `a`: left termination filter
+* `b`: bidirectional chain to terminate
+* `c`: right termination filter
+
 #### Test
 ```
 pm = library("physmodels.lib");
-terminations_test = 0,0,0 : pm.terminations(*(-1), pm.basicBlock, *(-1));
+terminations_test = 0.25, -0.15, 0.05 : pm.terminations(*(-1), pm.basicBlock, *(-1));
 ```
 
 ----
@@ -349,17 +382,22 @@ within another [`chain`](#chain).
 #### Usage
 
 ```
-lTerminations(a,b)
+lTermination(a,b)
 with {
    a = *(-1); // left termination
    b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
 };
 ```
 
+Where:
+
+* `a`: left termination filter
+* `b`: bidirectional chain to terminate
+
 #### Test
 ```
 pm = library("physmodels.lib");
-lTermination_test = 0,0,0 : pm.lTermination(*(-1), pm.basicBlock);
+lTermination_test = 0.25, -0.15, 0.05 : pm.lTermination(*(-1), pm.basicBlock);
 ```
 
 ----
@@ -374,17 +412,22 @@ within another [`chain`](#chain).
 #### Usage
 
 ```
-rTerminations(b,c)
+rTermination(b,c)
 with {
    b = chain(D : E : F); // bidirectional chain of blocks (D, E, F, etc.)
    c = *(-1); // right termination
 };
 ```
 
+Where:
+
+* `b`: bidirectional chain to terminate
+* `c`: right termination filter
+
 #### Test
 ```
 pm = library("physmodels.lib");
-rTermination_test = 0,0,0 : pm.rTermination(pm.basicBlock, *(-1));
+rTermination_test = 0.25, -0.15, 0.05 : pm.rTermination(pm.basicBlock, *(-1));
 ```
 
 ----
@@ -396,13 +439,14 @@ Closes the inputs of a bidirectional chain in all directions.
 #### Usage
 
 ```
-closeIns : chain(...) : _,_,_
+closeIns : _,_,_
 ```
+Typical use: `closeIns : chain(...) : _,_,_`
 
 #### Test
 ```
 pm = library("physmodels.lib");
-closeIns_test = pm.closeIns;
+closeIns_test = pm.closeIns, 0.25;
 ```
 
 ----
@@ -421,7 +465,7 @@ _,_,_ : chain(...) : _
 #### Test
 ```
 pm = library("physmodels.lib");
-closeOuts_test = 0,0,0 : pm.closeOuts;
+closeOuts_test = ((0.25, -0.15, 0.05) : pm.closeOuts), 0.25;
 ```
 
 ----
@@ -437,10 +481,14 @@ except for the main signal output (3d output).
 endChain(chain(...)) : _
 ```
 
+Where:
+
+* `b`: bidirectional chain to close on all non-audio ports
+
 #### Test
 ```
 pm = library("physmodels.lib");
-endChain_test = 0,0,0 : pm.endChain(pm.basicBlock);
+endChain_test = pm.endChain((_, _, _ + 0.25));
 ```
 
 ## Basic Elements
@@ -476,10 +524,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-waveguideUd_test = 0,0,0 : pm.waveguideUd(512, 32);
-waveguideFd_test = 0,0,0 : pm.waveguideFd(512, 32);
-waveguideFd2_test = 0,0,0 : pm.waveguideFd2(512, 32);
-waveguideFd4_test = 0,0,0 : pm.waveguideFd4(512, 32);
+waveguideUd_test = 0.25, -0.15, 0.05 : pm.waveguideUd(512, 32);
 ```
 
 ----
@@ -502,7 +547,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-waveguide_test = 0,0,0 : pm.waveguide(512, 32);
+waveguide_test = 0.25, -0.15, 0.05 : pm.waveguide(512, 32);
 ```
 
 ----
@@ -516,19 +561,20 @@ implement the reflectance violin, guitar, etc. bridges.
 #### Usage
 
 ```
-_ : bridge(brightness,absorption) : _
+_ : bridgeFilter(brightness,absorption) : _
 ```
 
 Where:
 
 * `brightness`: controls the damping of high frequencies (0-1)
 * `absorption`: controls the absorption of the brige and thus the t60 of
-the string plugged to it (0-1) (1 = 20 seconds)
+the string connected to it (0-1) (1 = 20 seconds)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-bridgeFilter_test = pm.bridgeFilter(0.6, 0.4, os.osc(110));
+os = library("oscillators.lib");
+bridgeFilter_test = os.osc(110) : pm.bridgeFilter(0.6, 0.4);
 ```
 
 ----
@@ -553,7 +599,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-modeFilter_test = pm.modeFilter(440, 1.5, 0.8);
+os = library("oscillators.lib");
+modeFilter_test = os.osc(110) : pm.modeFilter(440, 1.5, 0.8);
 ```
 
 ## String Instruments
@@ -581,7 +628,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-stringSegment_test = 0,0,0 : pm.stringSegment(1.0, 0.5);
+stringSegment_test = 0.25, -0.15, 0.05 : pm.stringSegment(1.0, 0.5);
 ```
 
 ----
@@ -609,7 +656,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-openString_test = 0,0,0 : pm.openString(0.8, 0.5, 0.2, pm.impulseExcitation(button("gate")));
+ba = library("basics.lib");
+openString_test = 0.25, -0.15, 0.05 : pm.openString(0.8, 0.5, 0.2, pm.impulseExcitation(ba.pulse(64)));
 ```
 
 ----
@@ -635,7 +683,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-nylonString_test = 0,0,0 : pm.nylonString(0.8, 0.3, pm.impulseExcitation(button("gate")));
+ba = library("basics.lib");
+nylonString_test = 0.25, -0.15, 0.05 : pm.nylonString(0.8, 0.3, pm.impulseExcitation(ba.pulse(64)));
 ```
 
 ----
@@ -661,7 +710,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-steelString_test = 0,0,0 : pm.steelString(0.8, 0.3, pm.impulseExcitation(button("gate")));
+ba = library("basics.lib");
+steelString_test = 0.25, -0.15, 0.05 : pm.steelString(0.8, 0.3, pm.impulseExcitation(ba.pulse(64)));
 ```
 
 ----
@@ -689,7 +739,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-openStringPick_test = 0,0,0 : pm.openStringPick(0.8, 0.4, 0.3, pm.impulseExcitation(button("gate")));
+openStringPick_test = pm.endChain(pm.openStringPick(0.8, 0.4, 0.3, pm.impulseExcitation(button("pm.openStringPick/gate"))));
 ```
 
 ----
@@ -704,7 +754,7 @@ pickup has to be placed after the excitation position.
 #### Usage
 
 ```
-chain(... : openStringPickUp(length,stiffness,pluckPosition,excitation) : ...)
+chain(... : openStringPickUp(length,stiffness,pluckPosition,pickupPosition,excitation) : ...)
 ```
 
 Where:
@@ -719,7 +769,7 @@ pickup (0-1) (1 for same as pickup position)
 #### Test
 ```
 pm = library("physmodels.lib");
-openStringPickUp_test = 0,0,0 : pm.openStringPickUp(0.8, 0.4, 0.6, 0.7, pm.impulseExcitation(button("gate")));
+openStringPickUp_test = pm.endChain(pm.openStringPickUp(0.8, 0.4, 0.6, 0.7, pm.impulseExcitation(button("pm.openStringPickUp/gate"))));
 ```
 
 ----
@@ -734,7 +784,7 @@ pickup has to be placed before the excitation position.
 #### Usage
 
 ```
-chain(... : openStringPickDown(length,stiffness,pluckPosition,excitation) : ...)
+chain(... : openStringPickDown(length,stiffness,pluckPosition,pickupPosition,excitation) : ...)
 ```
 
 Where:
@@ -749,7 +799,7 @@ and the excitation position (0-1) (1 is excitation position)
 #### Test
 ```
 pm = library("physmodels.lib");
-openStringPickDown_test = 0,0,0 : pm.openStringPickDown(0.8, 0.4, 0.6, 0.5, pm.impulseExcitation(button("gate")));
+openStringPickDown_test = pm.endChain(pm.openStringPickDown(0.8, 0.4, 0.6, 0.5, pm.impulseExcitation(button("pm.openStringPickDown/gate"))));
 ```
 
 ----
@@ -762,8 +812,9 @@ filter will be typically used in a termination (see below).
 #### Usage
 
 ```
-terminations(_,chain(...),ksReflexionFilter)
+_ : ksReflexionFilter : _
 ```
+Typical use: `terminations(_,chain(...),ksReflexionFilter)`
 
 #### Test
 ```
@@ -782,13 +833,14 @@ just phase inversion).
 #### Usage
 
 ```
-chain(rStringRigidTermination : stringSegment : ...)
+_,_,_ : rStringRigidTermination
 ```
+Typical use: `chain(rStringRigidTermination : stringSegment : ...)`
 
 #### Test
 ```
 pm = library("physmodels.lib");
-rStringRigidTermination_test = 0,0,0 : pm.rStringRigidTermination;
+rStringRigidTermination_test = 0.25, -0.15, 0.05 : pm.rStringRigidTermination;
 ```
 
 ----
@@ -801,13 +853,14 @@ just phase inversion).
 #### Usage
 
 ```
-chain(... : stringSegment : lStringRigidTermination)
+_,_,_ : lStringRigidTermination
 ```
+Typical use: `chain(... : stringSegment : lStringRigidTermination)`
 
 #### Test
 ```
 pm = library("physmodels.lib");
-lStringRigidTermination_test = 0,0,0 : pm.lStringRigidTermination;
+lStringRigidTermination_test = 0.25, -0.15, 0.05 : pm.lStringRigidTermination;
 ```
 
 ----
@@ -823,13 +876,14 @@ duration of the string with the nuts used on the other side.
 #### Usage
 
 ```
-chain(... : stringSegment : elecGuitarBridge)
+_,_,_ : elecGuitarBridge
 ```
+Typical use: `chain(... : stringSegment : elecGuitarBridge)`
 
 #### Test
 ```
 pm = library("physmodels.lib");
-elecGuitarBridge_test = 0,0,0 : pm.elecGuitarBridge;
+elecGuitarBridge_test = 0.25, -0.15, 0.05 : pm.elecGuitarBridge;
 ```
 
 ----
@@ -845,13 +899,14 @@ the string with the bridge used on the other side.
 #### Usage
 
 ```
-chain(elecGuitarNuts : stringSegment : ...)
+_,_,_ : elecGuitarNuts
 ```
+Typical use: `chain(elecGuitarNuts : stringSegment : ...)`
 
 #### Test
 ```
 pm = library("physmodels.lib");
-elecGuitarNuts_test = 0,0,0 : pm.elecGuitarNuts;
+elecGuitarNuts_test = 0.25, -0.15, 0.05 : pm.elecGuitarNuts;
 ```
 
 ----
@@ -867,13 +922,14 @@ the nuts used on the other side.
 #### Usage
 
 ```
-chain(... : stringSegment : guitarBridge)
+_,_,_ : guitarBridge
 ```
+Typical use: `chain(... : stringSegment : guitarBridge)`
 
 #### Test
 ```
 pm = library("physmodels.lib");
-guitarBridge_test = 0,0,0 : pm.guitarBridge;
+guitarBridge_test = 0.25, -0.15, 0.05 : pm.guitarBridge;
 ```
 
 ----
@@ -895,7 +951,7 @@ chain(guitarNuts : stringSegment : ...)
 #### Test
 ```
 pm = library("physmodels.lib");
-guitarNuts_test = 0,0,0 : pm.guitarNuts;
+guitarNuts_test = 0.25, -0.15, 0.05 : pm.guitarNuts;
 ```
 
 ----
@@ -909,19 +965,19 @@ string will ring forever.
 #### Usage
 
 ```
-1-1' : idealString(length,reflexion,xPosition,excitation)
+_ : idealString(length,pluckPosition,excitation) : _
 ```
 
-With:
+Where:
 
 * `length`: the length of the string in meters
 * `pluckPosition`: the plucking position (0.001-0.999)
-* `excitation`: the input signal for the excitation.
+* `excitation`: the excitation signal
 
 #### Test
 ```
 pm = library("physmodels.lib");
-idealString_test = 0,0,0 : pm.idealString(0.9, 0.2, pm.impulseExcitation(button("gate")));
+idealString_test = pm.closeIns : pm.idealString(0.9, 0.2, pm.impulseExcitation(button("pm.idealString/gate")));
 ```
 
 ----
@@ -946,7 +1002,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-ks_test = pm.ks(0.9, 0.3, pm.impulseExcitation(button("gate")));
+ks_test = pm.ks(0.9, 0.3, pm.impulseExcitation(button("pm.ks/gate")));
 ```
 
 ----
@@ -993,7 +1049,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-elecGuitarModel_test = pm.elecGuitarModel(0.9, 0.3, 0.8, pm.impulseExcitation(button("gate")));
+elecGuitarModel_test = pm.elecGuitarModel(0.9, 0.3, 0.8, pm.impulseExcitation(button("pm.elecGuitarModel/gate")));
 ```
 
 ----
@@ -1009,7 +1065,7 @@ by making a polyphonic application out of this function.
 #### Usage
 
 ```
-elecGuitar(length,pluckPosition,trigger) : _
+elecGuitar(length,pluckPosition,mute,gain,trigger) : _
 ```
 
 Where:
@@ -1023,7 +1079,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-elecGuitar_test = pm.elecGuitar(0.9, 0.3, 0.8, 0.6, button("gate"));
+elecGuitar_test = pm.elecGuitar(0.9, 0.3, 0.8, 0.6, button("pm.elecGuitar/gate"));
 ```
 
 ----
@@ -1060,7 +1116,7 @@ chain(... : guitarBody)
 #### Test
 ```
 pm = library("physmodels.lib");
-guitarBody_test = 0,0,0 : pm.guitarBody;
+guitarBody_test = 0.25, -0.15, 0.05 : pm.guitarBody;
 ```
 
 ----
@@ -1089,7 +1145,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-guitarModel_test = pm.guitarModel(0.9, 0.25, pm.impulseExcitation(button("gate")));
+guitarModel_test = pm.guitarModel(0.9, 0.25, pm.impulseExcitation(button("pm.guitarModel/gate")));
 ```
 
 ----
@@ -1104,7 +1160,7 @@ by making a polyphonic application out of this function.
 #### Usage
 
 ```
-guitar(length,pluckPosition,trigger) : _
+guitar(length,pluckPosition,gain,trigger) : _
 ```
 
 Where:
@@ -1117,7 +1173,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-guitar_test = pm.guitar(0.9, 0.25, 0.8, button("gate"));
+guitar_test = pm.guitar(0.9, 0.25, 0.8, button("pm.guitar/gate"));
 ```
 
 ----
@@ -1165,7 +1221,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-nylonGuitarModel_test = pm.nylonGuitarModel(0.9, 0.25, pm.impulseExcitation(button("gate")));
+nylonGuitarModel_test = pm.nylonGuitarModel(0.9, 0.25, pm.impulseExcitation(button("pm.nylonGuitarModel/gate")));
 ```
 
 ----
@@ -1180,7 +1236,7 @@ by making a polyphonic application out of this function.
 #### Usage
 
 ```
-nylonGuitar(length,pluckPosition,trigger) : _
+nylonGuitar(length,pluckPosition,gain,trigger) : _
 ```
 
 Where:
@@ -1193,7 +1249,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-nylonGuitar_test = pm.nylonGuitar(0.9, 0.25, 0.8, button("gate"));
+nylonGuitar_test = pm.nylonGuitar(0.9, 0.25, 0.8, button("pm.nylonGuitar/gate"));
 ```
 
 ----
@@ -1266,7 +1322,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-modularInterpBody_test = 0,0,0 : pm.modularInterpBody(20, 1.0, 1.5);
+modularInterpBody_test = 0.25, -0.15, 0.05 : pm.modularInterpBody(20, 1.0, 1.5);
 ```
 
 ----
@@ -1295,7 +1351,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-modularInterpStringModel_test = pm.modularInterpStringModel(0.9, 0.3, 1.0, 1.5, pm.impulseExcitation(button("body")), pm.impulseExcitation(button("string")));
+modularInterpStringModel_test = pm.modularInterpStringModel(0.9, 0.3, 1.0, 1.5, pm.impulseExcitation(button("pm.modularInterpStringModel/body")), pm.impulseExcitation(button("pm.modularInterpStringModel/string")));
 ```
 
 ----
@@ -1325,7 +1381,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-modularInterpInstr_test = pm.modularInterpInstr(0.9, 0.3, 1.0, 1.5, 0.8, button("body"), button("string"));
+modularInterpInstr_test = pm.modularInterpInstr(0.9, 0.3, 1.0, 1.5, 0.8, button("pm.modularInterpInstr/body"), button("pm.modularInterpInstr/string"));
 ```
 
 ----
@@ -1472,7 +1528,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-violinBowedString_test = 0,0,0 : pm.violinBowedString(0.82, 0.35, pm.violinBow(0.4, 0.05), 0.15);
+violinBowedString_test = 0.25, -0.15, 0.05 : pm.violinBowedString(0.82, 0.35, 0.2, 0.15);
 ```
 
 ----
@@ -1485,13 +1541,14 @@ based on [`bridgeFilter`](#bridgefilter).
 #### Usage
 
 ```
-chain(violinNuts : stringSegment : ...)
+_,_,_ : violinNuts
 ```
+Typical use: `chain(violinNuts : stringSegment : ...)`
 
 #### Test
 ```
 pm = library("physmodels.lib");
-violinNuts_test = 0,0,0 : pm.violinNuts;
+violinNuts_test = 0.25, -0.15, 0.05 : pm.violinNuts;
 ```
 
 ----
@@ -1510,7 +1567,7 @@ chain(... : stringSegment : violinBridge
 #### Test
 ```
 pm = library("physmodels.lib");
-violinBridge_test = 0,0,0 : pm.violinBridge;
+violinBridge_test = 0.25, -0.15, 0.05 : pm.violinBridge;
 ```
 
 ----
@@ -1529,7 +1586,7 @@ chain(... : stringSegment : violinBridge : violinBody)
 #### Test
 ```
 pm = library("physmodels.lib");
-violinBody_test = 0,0,0 : pm.violinBody;
+violinBody_test = 0.25, -0.15, 0.05 : pm.violinBody;
 ```
 
 ----
@@ -1544,21 +1601,20 @@ by changing the length of the string (and not through a finger model).
 #### Usage
 
 ```
-violinModel(stringLength,bowPressure,bowVelocity,bridgeReflexion,
-bridgeAbsorption,bowPosition) : _
+violinModel(stringLength,bowPressure,bowVelocity,bowPosition) : _
 ```
 
 Where:
 
 * `stringLength`: the length of the string in meters
+* `bowPressure`: bow pressure on the string (0-1)
 * `bowVelocity`: velocity of the bow / excitation signal (0-1)
-* `bowPressure`: bow pressure on the string (0-1))
 * `bowPosition`: the position of the bow on the string (0-1)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-violinModel_test = pm.violinModel(0.82, 0.35, pm.violinBow(0.4, 0.05), 0.15);
+violinModel_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
 ```
 
 ----
@@ -1576,7 +1632,7 @@ violinModel_ui : _
 #### Test
 ```
 pm = library("physmodels.lib");
-violin_ui_test = pm.violin_ui;
+violin_ui_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
 ```
 
 ----
@@ -1622,7 +1678,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-openTube_test = pm.openTube(0.9);
+openTube_test = 0.25, -0.15, 0.05 : pm.openTube(pm.maxLength, 0.9);
 ```
 
 ----
@@ -1635,7 +1691,7 @@ single reed types for many different instruments (saxophone, clarinet, etc.).
 #### Usage
 
 ```
-excitation : reedTable(offeset,slope) : _
+excitation : reedTable(offset,slope) : _
 ```
 
 Where:
@@ -1647,7 +1703,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-reedTable_test = pm.reedTable(0.4, 0.2);
+os = library("oscillators.lib");
+reedTable_test = os.osc(220) : pm.reedTable(0.4, 0.2);
 ```
 
 ----
@@ -1669,7 +1726,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteJetTable_test = pm.fluteJetTable(0.5);
+os = library("oscillators.lib");
+fluteJetTable_test = os.osc(220) : pm.fluteJetTable;
 ```
 
 ----
@@ -1695,7 +1753,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-brassLipsTable_test = pm.brassLipsTable(0.3, 0.2);
+os = library("oscillators.lib");
+brassLipsTable_test = os.osc(220) : pm.brassLipsTable(0.3, 0.2);
 ```
 
 ----
@@ -1719,7 +1778,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-clarinetReed_test = pm.clarinetReed(0.6, 0.4, 0.1);
+os = library("oscillators.lib");
+clarinetReed_test = os.osc(440) : pm.clarinetReed(0.6);
 ```
 
 ----
@@ -1746,7 +1806,7 @@ This can also be any kind of signal that will directly injected in the mouthpiec
 #### Test
 ```
 pm = library("physmodels.lib");
-clarinetMouthPiece_test = pm.clarinetMouthPiece(0.6, 0.4, 0.1);
+clarinetMouthPiece_test = 0.25, -0.15, 0.05 : pm.clarinetMouthPiece(0.6, 0.4);
 ```
 
 ----
@@ -1774,7 +1834,7 @@ This can also be any kind of signal that will directly injected in the mouthpiec
 #### Test
 ```
 pm = library("physmodels.lib");
-brassLips_test = pm.brassLips(0.3, 0.2, 0.1);
+brassLips_test = 0.25, -0.15, 0.05 : pm.brassLips(0.3, 0.2, 0.1);
 ```
 
 ----
@@ -1801,7 +1861,7 @@ mouthpiece (e.g., breath noise, etc.).
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteEmbouchure_test = pm.fluteEmbouchure(0.5, 0.3);
+fluteEmbouchure_test = 0.25, -0.15, 0.05 : pm.fluteEmbouchure(0.5);
 ```
 
 ----
@@ -1824,7 +1884,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-wBell_test = pm.wBell(0.4, 0.6);
+wBell_test = 0.25, -0.15, 0.05 : pm.wBell(0.4);
 ```
 
 ----
@@ -1836,13 +1896,14 @@ Simple flute head implementing waves reflexion.
 #### Usage
 
 ```
-chain(fluteHead : tube : ...)
+_,_,_ : fluteHead
 ```
+Typical use: `chain(fluteHead : tube : ...)`
 
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteHead_test = pm.fluteHead(0.8, 0.4, 0.3);
+fluteHead_test = 0.25, -0.15, 0.05 : pm.fluteHead;
 ```
 
 ----
@@ -1860,7 +1921,7 @@ chain(... : tube : fluteFoot)
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteFoot_test = pm.fluteFoot(0.8, 0.4, 0.3);
+fluteFoot_test = 0.25, -0.15, 0.05 : pm.fluteFoot;
 ```
 
 ----
@@ -1873,7 +1934,7 @@ changing the length of the tube of the instrument).
 #### Usage
 
 ```
-clarinetModel(length,pressure,reedStiffness,bellOpening) : _
+clarinetModel(tubeLength,pressure,reedStiffness,bellOpening) : _
 ```
 
 Where:
@@ -1913,7 +1974,7 @@ This can also be any kind of signal that will be directly injected in the mouthp
 #### Test
 ```
 pm = library("physmodels.lib");
-clarinetModel_ui_test = pm.clarinetModel_ui;
+clarinetModel_ui_test = pm.clarinetModel_ui(0.4);
 ```
 
 ----
@@ -2005,7 +2066,7 @@ This can also be any kind of signal that will be directly injected in the mouthp
 #### Test
 ```
 pm = library("physmodels.lib");
-brassModel_ui_test = pm.brassModel_ui;
+brassModel_ui_test = pm.brassModel_ui(0.4);
 ```
 
 ----
@@ -2094,7 +2155,7 @@ This can also be any kind of signal that will be directly injected in the mouthp
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteModel_ui_test = pm.fluteModel_ui;
+fluteModel_ui_test = pm.fluteModel_ui(0.4);
 ```
 
 ----
@@ -2158,7 +2219,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-impulseExcitation_test = pm.impulseExcitation(button("gate"));
+impulseExcitation_test = pm.impulseExcitation(button("pm.impulseExcitation/gate"));
 ```
 
 ----
@@ -2185,7 +2246,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-strikeModel_test = pm.strikeModel(200, 4000, 0.5, 0.8, button("gate"));
+strikeModel_test = pm.strikeModel(200, 4000, 0.5, 0.8, button("pm.strikeModel/gate"));
 ```
 
 ----
@@ -2212,7 +2273,7 @@ freqs. So, on membrane for example, 0 would be the middle and 1 the edge
 #### Test
 ```
 pm = library("physmodels.lib");
-strike_test = pm.strike(0.4, 0.5, 0.8, button("gate"));
+strike_test = pm.strike(0.4, 0.5, 0.8, button("pm.strike/gate"));
 ```
 
 ----
@@ -2225,7 +2286,7 @@ Creates a plucking excitation signal.
 
 ```
 trigger = button('gate');
-pluckString(stringLength,cutoff,maxFreq,sharpness,trigger)
+pluckString(stringLength,cutoff,maxFreq,sharpness,gain,trigger)
 ```
 
 Where:
@@ -2240,7 +2301,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-pluckString_test = pm.pluckString(0.9, 1, 1, 1, 0.6, button("gate"));
+pluckString_test = pm.pluckString(0.9, 1, 1, 1, 0.6, button("pm.pluckString/gate"));
 ```
 
 ----
@@ -2252,14 +2313,16 @@ A virtual blower creating a DC signal with some breath noise in it.
 #### Usage
 
 ```
-blower(pressure,breathGain,breathCutoff) : _
+blower(pressure,breathGain,breathCutoff,vibratoFreq,vibratoGain) : _
 ```
 
 Where:
 
 * `pressure`: pressure (0-1)
 * `breathGain`: breath noise gain (0-1) (recommended: 0.005)
-* `breathCutoff`: breath cuttoff frequency (Hz) (recommended: 2000)
+* `breathCutoff`: breath cutoff frequency (Hz) (recommended: 2000)
+* `vibratoFreq`: vibrato frequency in Hz (recommended: 5)
+* `vibratoGain`: vibrato depth (0-1) (recommended: 0.2)
 
 #### Test
 ```
@@ -2311,7 +2374,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-djembeModel_test = pm.djembeModel(110);
+os = library("oscillators.lib");
+djembeModel_test = os.impulse : pm.djembeModel(110);
 ```
 
 ----
@@ -2334,7 +2398,7 @@ Where:
 
 * `freq`: fundamental frequency of the model
 * `strikePosition`: strike position (0 for the middle of the membrane and
-1 for the edge)
+  1 for the edge)
 * `strikeSharpness`: sharpness of the strike (0-1, default: 0.5)
 * `gain`: gain of the strike
 * `trigger`: trigger signal (0: off, 1: on)
@@ -2342,7 +2406,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-djembe_test = pm.djembe(110, 0.3, 0.5, 0.8, button("gate"));
+djembe_test = pm.djembe(110, 0.3, 0.5, 0.8, button("pm.djembe/gate"));
 ```
 
 ----
@@ -2401,7 +2465,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-marimbaBarModel_test = pm.marimbaBarModel(220);
+os = library("oscillators.lib");
+marimbaBarModel_test = os.impulse : pm.marimbaBarModel(220, 2, 0.1, 1, 5);
 ```
 
 ----
@@ -2424,7 +2489,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-marimbaResTube_test = pm.marimbaResTube(220);
+os = library("oscillators.lib");
+marimbaResTube_test = os.impulse : pm.marimbaResTube(0.5);
 ```
 
 ----
@@ -2451,7 +2517,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-marimbaModel_test = pm.marimbaModel(220);
+os = library("oscillators.lib");
+marimbaModel_test = os.impulse : pm.marimbaModel(220, 2);
 ```
 
 ----
@@ -2463,7 +2530,7 @@ tube. This model is scalable and can be adapted to any size of bar/tube
 (see [`marimbaBarModel`](#marimbabarmodel) to know more about the
 limitations of this type of system).
 
-This function also implement a virtual exciter to drive the model.
+This function also implements a virtual exciter to drive the model.
 
 #### Usage
 
@@ -2475,15 +2542,15 @@ Where:
 
 * `freq`: the frequency of the bar/tube couple
 * `strikePosition`: strike position (0-4)
-* `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
+* `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 * `gain`: gain of the strike (0-1)
-* `trigger` signal (0: off, 1: on)
+* `trigger`: signal (0: off, 1: on)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-marimba_test = pm.marimba(220, 0.4, 1, 0.5, 0.8, button("gate"));
+marimba_test = pm.marimba(220, 0.4, 1, 0.5, 0.8, button("pm.marimba/gate"));
 ```
 
 ----
@@ -2542,7 +2609,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-churchBellModel_test = pm.churchBellModel(110);
+os = library("oscillators.lib");
+churchBellModel_test = os.impulse : pm.churchBellModel(50, 0, 30, 1, 2.5);
 ```
 
 ----
@@ -2560,7 +2628,7 @@ This model contains 7 excitation positions going linearly from the
 bottom to the top of the bell. Obviously, a model with more excitation
 position could be regenerated using `mesh2faust`.
 
-This function also implement a virtual exciter to drive the model.
+This function also implements a virtual exciter to drive the model.
 
 #### Usage
 
@@ -2571,15 +2639,15 @@ churchBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 Where:
 
 * `strikePosition`: strike position (0-6)
-* `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
+* `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 * `gain`: gain of the strike (0-1)
-* `trigger` signal (0: off, 1: on)
+* `trigger`: signal (0: off, 1: on)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-churchBell_test = pm.churchBell(0.4, 2000, 0.5, 0.8, button("gate"));
+churchBell_test = pm.churchBell(0.4, 2000, 0.5, 0.8, button("pm.churchBell/gate"));
 ```
 
 ----
@@ -2636,7 +2704,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-englishBellModel_test = pm.englishBellModel(110);
+os = library("oscillators.lib");
+englishBellModel_test = os.impulse : pm.englishBellModel(50, 0, 30, 1, 3);
 ```
 
 ----
@@ -2655,7 +2724,7 @@ This model contains 7 excitation positions going linearly from the
 bottom to the top of the bell. Obviously, a model with more excitation
 position could be regenerated using `mesh2faust`.
 
-This function also implement a virtual exciter to drive the model.
+This function also implements a virtual exciter to drive the model.
 
 #### Usage
 
@@ -2666,15 +2735,15 @@ englishBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 Where:
 
 * `strikePosition`: strike position (0-6)
-* `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
+* `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 * `gain`: gain of the strike (0-1)
-* `trigger` signal (0: off, 1: on)
+* `trigger`: signal (0: off, 1: on)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-englishBell_test = pm.englishBell(0.4, 2000, 0.5, 0.8, button("gate"));
+englishBell_test = pm.englishBell(0.4, 2000, 0.5, 0.8, button("pm.englishBell/gate"));
 ```
 
 ----
@@ -2731,7 +2800,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-frenchBellModel_test = pm.frenchBellModel(110);
+os = library("oscillators.lib");
+frenchBellModel_test = os.impulse : pm.frenchBellModel(50, 0, 30, 1, 3);
 ```
 
 ----
@@ -2750,7 +2820,7 @@ This model contains 7 excitation positions going linearly from the
 bottom to the top of the bell. Obviously, a model with more excitation
 position could be regenerated using `mesh2faust`.
 
-This function also implement a virtual exciter to drive the model.
+This function also implements a virtual exciter to drive the model.
 
 #### Usage
 
@@ -2760,15 +2830,15 @@ This function also implement a virtual exciter to drive the model.
 Where:
 
 * `strikePosition`: strike position (0-6)
-* `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
+* `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 * `gain`: gain of the strike (0-1)
-* `trigger` signal (0: off, 1: on)
+* `trigger`: signal (0: off, 1: on)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-frenchBell_test = pm.frenchBell(0.4, 2000, 0.5, 0.8, button("gate"));
+frenchBell_test = pm.frenchBell(0.4, 2000, 0.5, 0.8, button("pm.frenchBell/gate"));
 ```
 
 ----
@@ -2825,7 +2895,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-germanBellModel_test = pm.germanBellModel(110);
+os = library("oscillators.lib");
+germanBellModel_test = os.impulse : pm.germanBellModel(50, 0, 30, 1, 2.5);
 ```
 
 ----
@@ -2844,7 +2915,7 @@ This model contains 7 excitation positions going linearly from the
 bottom to the top of the bell. Obviously, a model with more excitation
 position could be regenerated using `mesh2faust`.
 
-This function also implement a virtual exciter to drive the model.
+This function also implements a virtual exciter to drive the model.
 
 #### Usage
 
@@ -2855,15 +2926,15 @@ germanBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 Where:
 
 * `strikePosition`: strike position (0-6)
-* `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
+* `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 * `gain`: gain of the strike (0-1)
-* `trigger` signal (0: off, 1: on)
+* `trigger`: signal (0: off, 1: on)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-germanBell_test = pm.germanBell(0.4, 2000, 0.5, 0.8, button("gate"));
+germanBell_test = pm.germanBell(0.4, 2000, 0.5, 0.8, button("pm.germanBell/gate"));
 ```
 
 ----
@@ -2920,7 +2991,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-russianBellModel_test = pm.russianBellModel(110);
+os = library("oscillators.lib");
+russianBellModel_test = os.impulse : pm.russianBellModel(50, 0, 30, 1, 3);
 ```
 
 ----
@@ -2939,7 +3011,7 @@ This model contains 7 excitation positions going linearly from the
 bottom to the top of the bell. Obviously, a model with more excitation
 position could be regenerated using `mesh2faust`.
 
-This function also implement a virtual exciter to drive the model.
+This function also implements a virtual exciter to drive the model.
 
 #### Usage
 
@@ -2950,15 +3022,15 @@ russianBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 Where:
 
 * `strikePosition`: strike position (0-6)
-* `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
+* `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 * `gain`: gain of the strike (0-1)
-* `trigger` signal (0: off, 1: on)
+* `trigger`: signal (0: off, 1: on)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-russianBell_test = pm.russianBell(0.4, 2000, 0.5, 0.8, button("gate"));
+russianBell_test = pm.russianBell(0.4, 2000, 0.5, 0.8, button("pm.russianBell/gate"));
 ```
 
 ----
@@ -3014,7 +3086,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-standardBellModel_test = pm.standardBellModel(110);
+os = library("oscillators.lib");
+standardBellModel_test = os.impulse : pm.standardBellModel(50, 0, 30, 1, 2.5);
 ```
 
 ----
@@ -3032,7 +3105,7 @@ This model contains 7 excitation positions going linearly from the
 bottom to the top of the bell. Obviously, a model with more excitation
 position could be regenerated using `mesh2faust`.
 
-This function also implement a virtual exciter to drive the model.
+This function also implements a virtual exciter to drive the model.
 
 #### Usage
 
@@ -3043,7 +3116,7 @@ standardBell(strikePosition,strikeCutoff,strikeSharpness,gain,trigger) : _
 Where:
 
 * `strikePosition`: strike position (0-6)
-* `strikeCutoff`: cuttoff frequency of the strike genarator (recommended: ~7000Hz)
+* `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 * `gain`: gain of the strike (0-1)
 * `trigger` signal (0: off, 1: on)
@@ -3051,7 +3124,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-standardBell_test = pm.standardBell(0.4, 2000, 0.5, 0.8, button("gate"));
+standardBell_test = pm.standardBell(0.4, 2000, 0.5, 0.8, button("pm.standardBell/gate"));
 ```
 
 ----
@@ -3127,7 +3200,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-voiceGender_test = pm.voiceGender(0.5);
+voiceGender_test = pm.voiceGender(0);
 ```
 
 ----
@@ -3135,7 +3208,7 @@ voiceGender_test = pm.voiceGender(0.5);
 ### `(pm.)skirtWidthMultiplier`
 
 Calculates value to multiply bandwidth to obtain `skirtwidth`
-for a Fof filter.
+for a FOF filter.
 
 #### Usage
 
@@ -3152,7 +3225,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-skirtWidthMultiplier_test = pm.skirtWidthMultiplier(0.5);
+skirtWidthMultiplier_test = pm.skirtWidthMultiplier(0, 220, 0);
 ```
 
 ----
@@ -3180,7 +3253,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-autobendFreq_test = pm.autobendFreq(440, 0.5);
+autobendFreq_test = 440 : pm.autobendFreq(0, 220, 0);
 ```
 
 #### References
@@ -3211,7 +3284,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-vocalEffort_test = pm.vocalEffort(0.6);
+vocalEffort_test = 1 : pm.vocalEffort(440, 0);
 ```
 
 #### References
@@ -3227,7 +3300,7 @@ Function to generate a single Formant-Wave-Function.
 #### Usage
 
 ```
-_ : fof(fc,bw,a,g) : _
+_ : fof(fc,bw,sw,g) : _
 ```
 
 Where:
@@ -3241,7 +3314,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-fof_test = pm.fof(0.3, 440, 880, 0.5);
+os = library("oscillators.lib");
+fof_test = pm.fof(0.3, 440, 880, 0.5) + os.osc(110) * 0.001;
 ```
 
 #### References
@@ -3261,12 +3335,18 @@ used in the filter-cycling FOF function `fofCycle`.
 _ : fofSH(fc,bw,a,g) : _
 ```
 
-Where: all parameters same as for [`fof`](#fof)
+Where:
+
+* `fc`: formant center frequency
+* `bw`: formant bandwidth (Hz)
+* `a`: formant skirtwidth (Hz)
+* `g`: linear scale factor
 
 #### Test
 ```
 pm = library("physmodels.lib");
-fofSH_test = pm.fofSH(0.3, 440, 880, 0.5);
+os = library("oscillators.lib");
+fofSH_test = pm.fofSH(0.3, 440, 880, 0.5) + os.osc(110) * 0.001;
 ```
 
 #### References
@@ -3288,13 +3368,17 @@ _ : fofCycle(fc,bw,a,g,n) : _
 
 Where:
 
+* `fc`: center frequency of the filter in Hz
+* `bw`: bandwidth of the filter in Hz
+* `a`: attack bandwidth / skirt width in Hz
+* `g`: linear gain multiplier
 * `n`: the number of FOF filters to cycle through
-* all other parameters are same as for [`fof`](#fof)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 0.2);
+os = library("oscillators.lib");
+fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 3) + os.osc(110) * 0.001;
 ```
 
 #### References
@@ -3317,13 +3401,17 @@ _ : fofSmooth(fc,bw,sw,g,tau) : _
 
 Where:
 
+* `fc`: center frequency of the filter in Hz
+* `bw`: bandwidth of the filter in Hz
+* `sw`: skirt width in Hz
+* `g`: linear gain multiplier
 * `tau`: the desired smoothing time constant in seconds
-* all other parameters are same as for [`fof`](#fof)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2);
+os = library("oscillators.lib");
+fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2) + os.osc(110) * 0.001;
 ```
 
 ----
@@ -3335,7 +3423,7 @@ Formant parameters are linearly interpolated allowing to go smoothly from
 one vowel to another. A cycle of `n` fof filters with sample-and-hold is
 used so that the fof filter parameters can be varied in realtime.
 This technique is more robust but more computationally expensive than
-[`formantFilterFofSmooth`](#formantFilterFofSmooth).Voice type can be
+[`formantFilterFofSmooth`](#formantFilterFofSmooth). Voice type can be
 selected but must correspond to
 the frequency range of the provided source to be realistic.
 
@@ -3358,7 +3446,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-formantFilterFofCycle_test = pm.formantFilterFofCycle(0, 0, 5, 0, 200);
+os = library("oscillators.lib");
+formantFilterFofCycle_test = (os.osc(110) : pm.formantFilterFofCycle(1, 1, 5, 1, 200)) + os.osc(55) * 0.001;
 ```
 
 ----
@@ -3367,7 +3456,7 @@ formantFilterFofCycle_test = pm.formantFilterFofCycle(0, 0, 5, 0, 200);
 
 Formant filter based on a single FOF filter.
 Formant parameters are linearly interpolated allowing to go smoothly from
-one vowel to another. Fof filter parameters are lowpass filtered
+one vowel to another. FOF filter parameters are lowpass filtered
 to mitigate possible noise from varying them in realtime.
 Voice type can be selected but must correspond to
 the frequency range of the provided source to be realistic.
@@ -3391,7 +3480,8 @@ rise time of envelope
 #### Test
 ```
 pm = library("physmodels.lib");
-formantFilterFofSmooth_test = pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
+os = library("oscillators.lib");
+formantFilterFofSmooth_test = os.osc(110) : pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
 ```
 
 ----
@@ -3420,7 +3510,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-formantFilterBP_test = pm.formantFilterBP(0, 0, 5, 0, 200);
+os = library("oscillators.lib");
+formantFilterBP_test = os.osc(110) : pm.formantFilterBP(0, 0, 5, 0, 200);
 ```
 
 ----
@@ -3451,7 +3542,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-formantFilterbank_test = pm.formantFilterbank(0, 0, 5, 0);
+os = library("oscillators.lib");
+formantFilterbank_test = os.osc(110) : pm.formantFilterbank(0, 0, pm.formantFilterBP, 200);
 ```
 
 ----
@@ -3479,7 +3571,8 @@ of the FOF envelopes and for the autobendFreq and vocalEffort functions
 #### Test
 ```
 pm = library("physmodels.lib");
-formantFilterbankFofCycle_test = pm.formantFilterbankFofCycle(0, 0, 5));
+os = library("oscillators.lib");
+formantFilterbankFofCycle_test = (os.osc(110) : pm.formantFilterbankFofCycle(1, 1, 200)) + os.osc(55) * 0.001;
 ```
 
 ----
@@ -3508,7 +3601,8 @@ autobendFreq and vocalEffort functions
 #### Test
 ```
 pm = library("physmodels.lib");
-formantFilterbankFofSmooth_test = pm.formantFilterbankFofSmooth(0, 0, 5);
+os = library("oscillators.lib");
+formantFilterbankFofSmooth_test = os.osc(110) : pm.formantFilterbankFofSmooth(0, 0, 200);
 ```
 
 ----
@@ -3535,7 +3629,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-formantFilterbankBP_test = pm.formantFilterbankBP(0, 0, 5);
+os = library("oscillators.lib");
+formantFilterbankBP_test = os.osc(110) : pm.formantFilterbankBP(0, 0, 200);
 ```
 
 ----
@@ -3559,16 +3654,20 @@ SFFormantModel(voiceType,vowel,exType,freq,gain,source,filterbank,isFof) : _
 Where:
 
 * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
-* `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
+* `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 * `exType`: voice vs. fricative sound ratio (0-1 where 1 is 100% fricative)
 * `freq`: the fundamental frequency of the source signal
 * `gain`: linear gain multiplier to multiply the source by
+* `source`: excitation signal generator used by the model
+* `filterbank`: formant filterbank function, typically one of
+  `formantFilterbankBP`, `formantFilterbankFofCycle`, or `formantFilterbankFofSmooth`
 * `isFof`: whether model is FOF based (0: no, 1: yes)
 
 #### Test
 ```
 pm = library("physmodels.lib");
-SFFormantModel_test = pm.SFFormantModel(0, 0, 0.5, 0.6, 100, 2, 1, 1);
+os = library("oscillators.lib");
+SFFormantModel_test = pm.SFFormantModel(0, 0, 0.2, 220, 0.7, os.lf_imptrain(220), pm.formantFilterbankFofCycle, 1);
 ```
 
 ----
@@ -3580,8 +3679,8 @@ is just a periodic impulse and the "filter" is a bank of FOF filters.
 Formant parameters are linearly interpolated allowing to go smoothly from
 one vowel to another. Voice type can be selected but must correspond to
 the frequency range of the synthesized voice to be realistic. This model
-does not work with noise in the source signal so exType has been removed
-and model does not depend on SFFormantModel function.
+does not work with noise in the source signal, so `exType` has been removed
+and the model does not depend on `SFFormantModel`.
 
 #### Usage
 
@@ -3592,14 +3691,14 @@ SFFormantModelFofCycle(voiceType,vowel,freq,gain) : _
 Where:
 
 * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
-* `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
+* `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 * `freq`: the fundamental frequency of the source signal
 * `gain`: linear gain multiplier to multiply the source by
 
 #### Test
 ```
 pm = library("physmodels.lib");
-SFFormantModelFofCycle_test = pm.SFFormantModelFofCycle(0.5, 0.6, 0.7);
+SFFormantModelFofCycle_test = pm.SFFormantModelFofCycle(0, 0, 220, 0.7);
 ```
 
 ----
@@ -3621,14 +3720,14 @@ SFFormantModelFofSmooth(voiceType,vowel,freq,gain) : _
 Where:
 
 * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
-* `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
+* `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 * `freq`: the fundamental frequency of the source signal
 * `gain`: linear gain multiplier to multiply the source by
 
 #### Test
 ```
 pm = library("physmodels.lib");
-SFFormantModelFofSmooth_test = pm.SFFormantModelFofSmooth(0.5, 0.6, 0.7);
+SFFormantModelFofSmooth_test = pm.SFFormantModelFofSmooth(0, 0, 220, 0.7);
 ```
 
 ----
@@ -3653,7 +3752,7 @@ SFFormantModelBP(voiceType,vowel,exType,freq,gain) : _
 Where:
 
 * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3: soprano, 4: tenor)
-* `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u
+* `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
 * `exType`: voice vs. fricative sound ratio (0-1 where 1 is 100% fricative)
 * `freq`: the fundamental frequency of the source signal
 * `gain`: linear gain multiplier to multiply the source by
@@ -3661,7 +3760,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-SFFormantModelBP_test = pm.SFFormantModelBP(0.5, 0.6, 0.7);
+SFFormantModelBP_test = pm.SFFormantModelBP(0, 0, 0.2, 220, 0.7);
 ```
 
 ----
@@ -3797,7 +3896,7 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-allpassNL_test = 0,0,0 : pm.allpassNL(0.4);
+allpassNL_test = 0.25, -0.15, 0.05 : pm.allpassNL(0.4);
 ```
 
 ----
@@ -3816,7 +3915,7 @@ _ : modalModel(n, freqs, t60s, gains) : _
 Where:
 
 * `n`: number of given modes
-* `freqs` : list of filter center freqencies
+* `freqs` : list of filter center frequencies
 * `t60s` : list of mode resonance durations (in seconds)
 * `gains` : list of mode gains (0-1)
 
@@ -3825,8 +3924,8 @@ fifth) where the higher one decays faster and is attenuated:
 
 ```
 os.impulse : modalModel(2, (440, 660),
-                           (0.5, 0.25),
-                           (ba.db2linear(-1), ba.db2linear(-6)) : _
+                        (0.5, 0.25),
+                        (ba.db2linear(-1), ba.db2linear(-6)));
 ```
 
 #### Test

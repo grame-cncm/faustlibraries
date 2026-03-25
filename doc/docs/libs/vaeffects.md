@@ -98,11 +98,6 @@ moog_vcf_2b_test = os.osc(330)
       hslider("moog_vcf_2b:res", 0.4, 0, 1, 0.01),
       hslider("moog_vcf_2b:freq", 1200, 50, 6000, 1)
     );
-moog_vcf_2bn_test = os.osc(330)
-  : ve.moog_vcf_2bn(
-      hslider("moog_vcf_2bn:res", 0.4, 0, 1, 0.01),
-      hslider("moog_vcf_2bn:freq", 1200, 50, 6000, 1)
-    );
 ```
 
 ----
@@ -813,7 +808,11 @@ _ : biquad(b0, b1, b2, a1, a2) : _
 
 Where:
 
-* `b0, b1, b2, a1, a2` are the coefficients of the difference equation above
+* `b0`: feedforward coefficient for `x[n]`
+* `b1`: feedforward coefficient for `x[n-1]`
+* `b2`: feedforward coefficient for `x[n-2]`
+* `a1`: feedback coefficient for `y[n-1]`
+* `a2`: feedback coefficient for `y[n-2]`
 
 #### Test
 ```
@@ -1160,11 +1159,11 @@ Where:
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
 klonCentaur_test = os.osc(330)
-  : ve.klonCentaur(
-      hslider("klonCentaur:gain", 0.5, 0, 1, 0.01),
-      hslider("klonCentaur:treble", 0.5, 0, 1, 0.01),
-      hslider("klonCentaur:level", 0.5, 0, 1, 0.01)
-    );
+   : ve.klonCentaur(
+       hslider("klonCentaur:gain", 0.5, 0, 1, 0.01),
+       hslider("klonCentaur:treble", 0.5, 0, 1, 0.01),
+       hslider("klonCentaur:level", 0.5, 0, 1, 0.01)
+     );
 ```
 
 #### References

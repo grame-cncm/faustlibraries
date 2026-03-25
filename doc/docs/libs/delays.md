@@ -160,7 +160,6 @@ Note: the requested delay should not be less than `(N-1)/2`.
 de = library("delays.lib");
 os = library("oscillators.lib");
 fdelaylti_test = os.osc(440) : de.fdelaylti(3, 44100, 22050.5);
-fdelayltv_test = os.osc(440) : de.fdelayltv(3, 44100, 22050.5);
 ```
 
 #### References

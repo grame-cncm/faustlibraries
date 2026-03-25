@@ -1216,7 +1216,6 @@ Where:
 co = library("compressors.lib");
 os = library("oscillators.lib");
 limiter_lad_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
-
 ```
 #### References
 

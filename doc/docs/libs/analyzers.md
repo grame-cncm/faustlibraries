@@ -45,7 +45,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-abs_envelope_rect_test = an.abs_envelope_rect(0.05, os.osc(220));
+mono = os.osc(220);
+abs_envelope_rect_test = an.abs_envelope_rect(0.05, mono);
 ```
 
 ----
@@ -69,7 +70,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-abs_envelope_tau_test = an.abs_envelope_tau(0.05, os.osc(220));
+mono = os.osc(220);
+abs_envelope_tau_test = an.abs_envelope_tau(0.05, mono);
 ```
 
 ----
@@ -93,7 +95,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-abs_envelope_t60_test = an.abs_envelope_t60(0.05, os.osc(220));
+mono = os.osc(220);
+abs_envelope_t60_test = an.abs_envelope_t60(0.05, mono);
 ```
 
 ----
@@ -117,7 +120,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-abs_envelope_t19_test = an.abs_envelope_t19(0.05, os.osc(220));
+mono = os.osc(220);
+abs_envelope_t19_test = an.abs_envelope_t19(0.05, mono);
 ```
 
 ----
@@ -144,7 +148,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-amp_follower_test = os.osc(220) : an.amp_follower(0.05);
+mono = os.osc(220);
+amp_follower_test = mono : an.amp_follower(0.05);
 ```
 
 #### References
@@ -174,7 +179,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-amp_follower_ud_test = os.osc(220) : an.amp_follower_ud(0.002, 0.05);
+mono = os.osc(220);
+amp_follower_ud_test = mono : an.amp_follower_ud(0.002, 0.05);
 ```
 
 #### Note
@@ -212,7 +218,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-amp_follower_ar_test = os.osc(220) : an.amp_follower_ar(0.002, 0.05);
+mono = os.osc(220);
+amp_follower_ar_test = mono : an.amp_follower_ar(0.002, 0.05);
 ```
 
 ----
@@ -235,7 +242,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-ms_envelope_rect_test = an.ms_envelope_rect(0.05, os.osc(220));
+mono = os.osc(220);
+ms_envelope_rect_test = an.ms_envelope_rect(0.05, mono);
 ```
 
 ----
@@ -259,7 +267,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-ms_envelope_tau_test = an.ms_envelope_tau(0.05, os.osc(220));
+mono = os.osc(220);
+ms_envelope_tau_test = an.ms_envelope_tau(0.05, mono);
 ```
 
 ----
@@ -283,7 +292,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-ms_envelope_t60_test = an.ms_envelope_t60(0.05, os.osc(220));
+mono = os.osc(220);
+ms_envelope_t60_test = an.ms_envelope_t60(0.05, mono);
 ```
 
 ----
@@ -307,7 +317,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-ms_envelope_t19_test = an.ms_envelope_t19(0.05, os.osc(220));
+mono = os.osc(220);
+ms_envelope_t19_test = an.ms_envelope_t19(0.05, mono);
 ```
 
 ----
@@ -330,7 +341,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-rms_envelope_rect_test = an.rms_envelope_rect(0.05, os.osc(220));
+mono = os.osc(220);
+rms_envelope_rect_test = an.rms_envelope_rect(0.05, mono);
 ```
 
 ----
@@ -354,7 +366,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-rms_envelope_tau_test = an.rms_envelope_tau(0.05, os.osc(220));
+mono = os.osc(220);
+rms_envelope_tau_test = an.rms_envelope_tau(0.05, mono);
 ```
 
 ----
@@ -378,7 +391,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-rms_envelope_t60_test = an.rms_envelope_t60(0.05, os.osc(220));
+mono = os.osc(220);
+rms_envelope_t60_test = an.rms_envelope_t60(0.05, mono);
 ```
 
 ----
@@ -402,7 +416,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-rms_envelope_t19_test = an.rms_envelope_t19(0.05, os.osc(220));
+mono = os.osc(220);
+rms_envelope_t19_test = an.rms_envelope_t19(0.05, mono);
 ```
 
 ----
@@ -432,7 +447,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-zcr_test = an.zcr(0.01, os.osc(220));
+mono = os.osc(220);
+zcr_test = an.zcr(0.01, mono);
 ```
 
 ## Adaptive Frequency Analysis
@@ -464,7 +480,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-pitchTracker_test = an.pitchTracker(4, 0.02, os.osc(220));
+mono = os.osc(220);
+pitchTracker_test = an.pitchTracker(4, 0.02, mono);
 ```
 
 ----
@@ -506,7 +523,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-spectralCentroid_test = (os.osc(440) + os.osc(880)) : an.spectralCentroid(1, 0.01);
+rich = os.osc(440) + os.osc(880);
+spectralCentroid_test = rich : an.spectralCentroid(1, 0.01);
 ```
 
 #### References
@@ -584,7 +602,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mth_octave_analyzer_test = os.osc(440) : an.mth_octave_analyzer(3, 3, 8000, 5);
+mono = os.osc(220);
+mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
 ```
 
 ## Mth-Octave Spectral Level
@@ -622,7 +641,8 @@ spectral_level = mth_octave_spectral_level(2,10000,20);
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mth_octave_spectral_level6e_test = os.osc(440) : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
+mono = os.osc(220);
+mth_octave_spectral_level6e_test = mono : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
 ```
 
 ----
@@ -678,7 +698,8 @@ _ : analyzer(3,(fc1,fc2)) : _,_,_
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-analyzer_test = os.osc(440) : an.analyzer(3, (500, 2000));
+mono = os.osc(220);
+analyzer_test = mono : an.analyzer(3, (500, 2000));
 ```
 
 ##  Fast Fourier Transform (fft) and its Inverse (ifft) 
@@ -795,7 +816,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-resonator_test = os.osc(440) : an.resonator(2, 440);
+mono = os.osc(220);
+resonator_test = mono : an.resonator(2, 440);
 ```
 
 #### Algorithm
@@ -847,11 +869,11 @@ si.cbus(N) : fft(N) : si.cbus(N)
 
 Where:
 
-* `si.cbus(N)` is a bus of N complex signals, each specified by real and imaginary parts:
+* `si.cbus(N)`: a bus of N complex signals, each specified by real and imaginary parts:
   (r0,i0), (r1,i1), (r2,i2), ...
-* `N` is the FFT size (must be a power of 2: 2,4,8,16,... known at compile time) 
-* `fft(N)` performs a length `N` FFT for complex signals (radix 2)
-* The output is a bank of N complex signals containing the complex spectrum over time:
+* `N`: FFT size (must be a power of 2: 2,4,8,16,... known at compile time)
+* `fft(N)`: a length-`N` FFT for complex signals (radix 2)
+* `output`: a bank of N complex signals containing the complex spectrum over time:
   (R0, I0), (R1,I1), ...
   - The dc component is (R0,I0), where I0=0 for real input signals.
 
@@ -873,7 +895,8 @@ where `an.rtocv` converts a real (scalar) signal to a complex vector signal havi
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-fft_test = an.rtocv(8, os.osc(220)) : an.fft(8);
+mono = os.osc(220);
+fft_test = an.rtocv(8, mono) : an.fft(8);
 ```
 
 #### References
@@ -894,7 +917,7 @@ si.cbus(N) : ifft(N) : si.cbus(N)
 
 Where:
 
-* N is the IFFT size (power of 2)
+* `N`: IFFT size (power of 2)
 * Input is a complex spectrum represented as interleaved real and imaginary parts:
   (R0, I0), (R1,I1), (R2,I2), ...
 * Output is a bank of N complex signals giving the complex signal in the time domain:
@@ -904,7 +927,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-ifft_test = (an.rtocv(8, os.osc(220)) : an.fft(8)) : an.ifft(8);
+mono = os.osc(220);
+ifft_test = (an.rtocv(8, mono) : an.fft(8)) : an.ifft(8);
 ```
 
 ##  Test signal generators 

@@ -144,7 +144,8 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
-hs_phasor_test = os.hs_phasor(1024, 330, button("reset"));
+ba = library("basics.lib");
+hs_phasor_test = os.hs_phasor(1024, 330, ba.pulse(32));
 ```
 
 ----
@@ -215,7 +216,8 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
-hs_oscsin_test = os.hs_oscsin(440, button("reset"));
+ba = library("basics.lib");
+hs_oscsin_test = os.hs_oscsin(440, ba.pulse(32));
 ```
 
 ----
@@ -644,7 +646,8 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
-lf_sawpos_reset_test = os.lf_sawpos_reset(3, button("reset"));
+ba = library("basics.lib");
+lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(32));
 ```
 
 ----
@@ -783,16 +786,14 @@ audio sampling rates.
 
 ----
 
-### `(os.)saw2, (os.)saw3, (os.)saw4`
+### `(os.)saw2`
 
-Alias-Suppressed Sawtooth Audio-Frequency Oscillators of order 2, 3, 4.
+Alias-Suppressed Sawtooth Audio-Frequency Oscillator of order 2.
 
 #### Usage
 
 ```
 saw2(freq) : _
-saw3(freq) : _
-saw4(freq) : _
 ```
 
 where
@@ -803,14 +804,71 @@ where
 ```
 os = library("oscillators.lib");
 saw2_test = os.saw2(220);
+```
+
+#### Implementation Notes
+
+`saw2` uses the PTR method.
+
+#### References
+
+* See `sawN` above.
+
+----
+
+### `(os.)saw3`
+
+Alias-Suppressed Sawtooth Audio-Frequency Oscillator of order 3.
+
+#### Usage
+
+```
+saw3(freq) : _
+```
+
+where
+
+* `freq`: frequency in Hz
+
+#### Test
+```
+os = library("oscillators.lib");
 saw3_test = os.saw3(220);
+```
+
+#### Implementation Notes
+
+`saw3` uses the DPW method.
+
+#### References
+
+* See `sawN` above.
+
+----
+
+### `(os.)saw4`
+
+Alias-Suppressed Sawtooth Audio-Frequency Oscillator of order 4.
+
+#### Usage
+
+```
+saw4(freq) : _
+```
+
+where
+
+* `freq`: frequency in Hz
+
+#### Test
+```
+os = library("oscillators.lib");
 saw4_test = os.saw4(220);
 ```
 
 #### Implementation Notes
 
-Presently, only `saw2` uses the PTR method, while `saw3` and `saw4` use DPW.
-This is because PTR has been implemented and tested for the 2nd-order case only.
+`saw4` uses the DPW method.
 
 #### References
 
@@ -895,7 +953,7 @@ Alias-suppressed aliasing-suppressed sawtooth oscillator, presently defined as `
 sawtooth(freq) : _
 ```
 
-with
+Where:
 
 * `freq`: frequency in Hz
 
@@ -907,31 +965,55 @@ sawtooth_test = os.sawtooth(220);
 
 ----
 
-### `(os.)saw2f2, (os.)saw2f4`
+### `(os.)saw2f2`
 
-Alias-Suppressed Sawtooth Audio-Frequency Oscillator with Order 2 or 4 Droop Correction Filtering.
+Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 2nd-order droop-correction filtering.
 
 #### Usage
 
 ```
 saw2f2(freq) : _
-saw2f4(freq) : _
 ```
 
-with
+Where:
 
 * `freq`: frequency in Hz
 
 In return for aliasing suppression, there is some attenuation near half the sampling rate.
 This can be considered as beneficial, or it can be compensated with a high-frequency boost.
-The boost filter is second-order for `saw2f2` and fourth-order for `saw2f4`, and both are designed
-for the DWP case and therefore use `saw2dpw`.
+The boost filter is second-order for `saw2f2`, and it is designed for the DPW case using `saw2dpw`.
 See Figure 4(b) in the DPW reference for a plot of the slight droop in the DPW case.
 
 #### Test
 ```
 os = library("oscillators.lib");
 saw2f2_test = os.saw2f2(220);
+```
+
+----
+
+### `(os.)saw2f4`
+
+Alias-Suppressed Sawtooth Audio-Frequency Oscillator with 4th-order droop-correction filtering.
+
+#### Usage
+
+```
+saw2f4(freq) : _
+```
+
+Where:
+
+* `freq`: frequency in Hz
+
+In return for aliasing suppression, there is some attenuation near half the sampling rate.
+This can be considered as beneficial, or it can be compensated with a high-frequency boost.
+The boost filter is fourth-order for `saw2f4`, and it is designed for the DPW case using `saw2dpw`.
+See Figure 4(b) in the DPW reference for a plot of the slight droop in the DPW case.
+
+#### Test
+```
+os = library("oscillators.lib");
 saw2f4_test = os.saw2f4(220);
 ```
 
@@ -970,22 +1052,6 @@ Where:
 ```
 os = library("oscillators.lib");
 sawNp_test = os.sawNp(3, 330, 0.5);
-saw2_test = os.saw2(220);
-saw3_test = os.saw3(220);
-saw4_test = os.saw4(220);
-saw2ptr_test = os.saw2ptr(220);
-saw2dpw_test = os.saw2dpw(220);
-sawtooth_test = os.sawtooth(220);
-saw2f2_test = os.saw2f2(220);
-saw2f4_test = os.saw2f4(220);
-pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
-pulsetrain_test = os.pulsetrain(220, 0.25);
-squareN_test = os.squareN(3, 220);
-square_test = os.square(220);
-imptrainN_test = os.imptrainN(3, 220);
-imptrain_test = os.imptrain(220);
-triangleN_test = os.triangleN(3, 220);
-triangle_test = os.triangle(220);
 ```
 
 ----
@@ -1121,7 +1187,7 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
-imptrainN_test = os.imptrainN(4, 220);
+imptrainN_test = os.imptrainN(3, 220);
 ```
 
 ----
@@ -1207,10 +1273,6 @@ osc[b|rq|rs|rc|s](freq), where freq = frequency in Hz.
 ```
 os = library("oscillators.lib");
 oscb_test = os.oscb(440);
-oscrq_test = os.oscrq(440);
-oscrs_test = os.oscrs(440);
-oscrc_test = os.oscrc(440);
-oscs_test = os.oscs(440);
 ```
 #### References
 
@@ -1237,10 +1299,6 @@ Where:
 ```
 os = library("oscillators.lib");
 oscb_test = os.oscb(440);
-oscrq_test = os.oscrq(440);
-oscrs_test = os.oscrs(440);
-oscrc_test = os.oscrc(440);
-oscs_test = os.oscs(440);
 ```
 
 ----
@@ -1517,11 +1575,6 @@ Where:
 ```
 os = library("oscillators.lib");
 dsf_oscc_test = os.dsf.oscc(220, 110, 0.6);
-dsf_oscs_test = os.dsf.oscs(220, 110, 0.6);
-dsf_osccN_test = os.dsf.osccN(220, 110, 0.6, 4);
-dsf_oscsN_test = os.dsf.oscsN(220, 110, 0.6, 4);
-dsf_osccNq_test = os.dsf.osccNq(220, 110, 0.6);
-dsf_oscsNq_test = os.dsf.oscsNq(220, 110, 0.6);
 ```
 #### Variants
 
@@ -1593,7 +1646,7 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
-twin_osc_test = os.twin_osc(220, 0.5, 0, 0);
+twin_osc_pwm_test = os.twin_osc(220, 0.5, 0, 0);
 ```
 
 #### References
@@ -1625,7 +1678,6 @@ Where:
 ```
 os = library("oscillators.lib");
 rpm_sawtooth_test = os.rpm.sawtooth(220, 1.0);
-rpm_square_test = os.rpm.square(220, 1.0);
 ```
 
 #### Variants

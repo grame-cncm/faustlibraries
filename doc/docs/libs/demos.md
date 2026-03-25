@@ -35,12 +35,15 @@ _ : mth_octave_spectral_level_demo(BandsPerOctave) : _
 _ : spectral_level_demo : _ // 2/3 octave
 
 ```
+Where:
+
+* `BandsPerOctave`: number of spectral bands per octave
+
 #### Test
 ```
 dm = library("demos.lib");
 no = library("noises.lib");
 mth_octave_spectral_level_demo_test = no.noise : dm.mth_octave_spectral_level_demo(1.5);
-spectral_level_demo_test = no.noise : dm.spectral_level_demo;
 ```
 
 ## Filters
@@ -112,7 +115,6 @@ Where:
 dm = library("demos.lib");
 no = library("noises.lib");
 mth_octave_filterbank_demo_test = no.noise : dm.mth_octave_filterbank_demo(1);
-filterbank_demo_test = no.noise : dm.filterbank_demo;
 ```
 
 ## Effects
@@ -153,7 +155,8 @@ _,_ : gate_demo : _,_
 ```
 dm = library("demos.lib");
 no = library("noises.lib");
-gate_demo_test = no.noise, no.noise : dm.gate_demo;
+stereoNoise = no.noise, no.noise;
+gate_demo_test = stereoNoise : dm.gate_demo;
 ```
 
 ----
@@ -172,7 +175,8 @@ _,_ : compressor_demo : _,_
 ```
 dm = library("demos.lib");
 no = library("noises.lib");
-compressor_demo_test = no.noise, no.noise : dm.compressor_demo;
+stereoNoise = no.noise, no.noise;
+compressor_demo_test = stereoNoise : dm.compressor_demo;
 ```
 
 ----
@@ -191,7 +195,8 @@ _ : moog_vcf_demo : _
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-moog_vcf_demo_test = os.osc(440) : dm.moog_vcf_demo;
+monoOsc(freq) = os.osc(freq);
+moog_vcf_demo_test = monoOsc(440) : dm.moog_vcf_demo;
 ```
 
 ----
@@ -210,7 +215,8 @@ _ : wah4_demo : _
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-wah4_demo_test = os.osc(440) : dm.wah4_demo;
+monoOsc(freq) = os.osc(freq);
+wah4_demo_test = monoOsc(440) : dm.wah4_demo;
 ```
 
 ----
@@ -229,7 +235,8 @@ _ : crybaby_demo : _
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-crybaby_demo_test = os.osc(440) : dm.crybaby_demo;
+monoOsc(freq) = os.osc(freq);
+crybaby_demo_test = monoOsc(440) : dm.crybaby_demo;
 ```
 
 ----
@@ -248,7 +255,9 @@ _,_ : flanger_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-flanger_demo_test = os.osc(440), os.osc(442) : dm.flanger_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+flanger_demo_test = stereoOsc(440, 442) : dm.flanger_demo;
 ```
 
 ----
@@ -267,7 +276,9 @@ _,_ : phaser2_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-phaser2_demo_test = os.osc(440), os.osc(442) : dm.phaser2_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+phaser2_demo_test = stereoOsc(440, 442) : dm.phaser2_demo;
 ```
 
 ----
@@ -286,7 +297,9 @@ _,_ : tapeStop_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-tapeStop_demo_test = os.osc(440), os.osc(442) : dm.tapeStop_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+tapeStop_demo_test = stereoOsc(440, 442) : dm.tapeStop_demo;
 ```
 
 ## Reverbs
@@ -308,7 +321,9 @@ _,_ : freeverb_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-freeverb_demo_test = os.osc(440), os.osc(442) : dm.freeverb_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+freeverb_demo_test = stereoOsc(440, 442) : dm.freeverb_demo;
 ```
 
 ----
@@ -327,7 +342,8 @@ _ : springreverb_demo : _
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-springreverb_demo_test = os.osc(220) : dm.springreverb_demo;
+monoOsc(freq) = os.osc(freq);
+springreverb_demo_test = monoOsc(220) : dm.springreverb_demo;
 ```
 
 ----
@@ -341,6 +357,11 @@ Handy test inputs for reverberator demos below.
 ```
 _,_ : stereo_reverb_tester(gui_group) : _,_
 ```
+
+Where:
+
+* `gui_group`: GUI grouping function for the tester controls, or `!` to suppress them
+
 For suppressing the `gui_group` input, pass it as `!`.
 (See `(dm.)fdnrev0_demo` for an example of its use).
 
@@ -348,7 +369,8 @@ For suppressing the `gui_group` input, pass it as `!`.
 ```
 dm = library("demos.lib");
 no = library("noises.lib");
-stereo_reverb_tester_test = no.noise, no.noise : dm.stereo_reverb_tester(!);
+stereoNoise = no.noise, no.noise;
+stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(!);
 ```
 
 ----
@@ -377,7 +399,8 @@ Where:
 ```
 dm = library("demos.lib");
 no = library("noises.lib");
-fdnrev0_demo_test = no.noise, no.noise : dm.fdnrev0_demo(16, 5, 3);
+stereoNoise = no.noise, no.noise;
+fdnrev0_demo_test = stereoNoise : dm.fdnrev0_demo(16, 5, 3);
 ```
 
 ----
@@ -389,14 +412,17 @@ Reverb demo application based on `zita_rev_fdn`.
 #### Usage
 
 ```
-si.bus(8) : zita_rev_fdn_demo : si.bus(8)
+fdnIn : zita_rev_fdn_demo : fdnOut
 ```
+
+Typical use is an 8-channel input bus and an 8-channel output bus.
 
 #### Test
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-zita_rev_fdn_demo_test = par(i, 8, os.osc(440 + i)) : dm.zita_rev_fdn_demo;
+monoOsc(freq) = os.osc(freq);
+zita_rev_fdn_demo_test = par(i, 8, monoOsc(440 + i)) : dm.zita_rev_fdn_demo;
 ```
 
 ----
@@ -415,7 +441,9 @@ _,_ : zita_light : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-zita_light_test = os.osc(440), os.osc(442) : dm.zita_light;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+zita_light_test = stereoOsc(440, 442) : dm.zita_light;
 ```
 
 ----
@@ -438,7 +466,9 @@ _,_ : zita_rev1 : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-zita_rev1_test = os.osc(440), os.osc(442) : dm.zita_rev1;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+zita_rev1_test = stereoOsc(440, 442) : dm.zita_rev1;
 ```
 
 #### References
@@ -461,7 +491,9 @@ _,_ : vital_rev_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-vital_rev_demo_test = os.osc(440), os.osc(442) : dm.vital_rev_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+vital_rev_demo_test = stereoOsc(440, 442) : dm.vital_rev_demo;
 ```
 
 ----
@@ -483,7 +515,9 @@ _,_ : reverbTank_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-reverbTank_demo_test = os.osc(440), os.osc(442) : dm.reverbTank_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+reverbTank_demo_test = stereoOsc(440, 442) : dm.reverbTank_demo;
 ```
 
 #### References
@@ -512,7 +546,9 @@ _,_ : kb_rom_rev1_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-kb_rom_rev1_demo_test = os.osc(440), os.osc(442) : dm.kb_rom_rev1_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+kb_rom_rev1_demo_test = stereoOsc(440, 442) : dm.kb_rom_rev1_demo;
 ```
 
 ----
@@ -532,7 +568,9 @@ _,_ : dattorro_rev_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-dattorro_rev_demo_test = os.osc(440), os.osc(442) : dm.dattorro_rev_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+dattorro_rev_demo_test = stereoOsc(440, 442) : dm.dattorro_rev_demo;
 ```
 
 ----
@@ -551,7 +589,9 @@ _,_ : jprev_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-jprev_demo_test = os.osc(440), os.osc(442) : dm.jprev_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+jprev_demo_test = stereoOsc(440, 442) : dm.jprev_demo;
 ```
 
 ----
@@ -570,7 +610,9 @@ _,_ : greyhole_demo : _,_
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-greyhole_demo_test = os.osc(440), os.osc(442) : dm.greyhole_demo;
+stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
+monoOsc(freq) = os.osc(freq);
+greyhole_demo_test = stereoOsc(440, 442) : dm.greyhole_demo;
 ```
 
 ## Generators
@@ -591,7 +633,9 @@ sawtooth_demo : _
 #### Test
 ```
 dm = library("demos.lib");
-sawtooth_demo_test = dm.sawtooth_demo;
+monoOsc(freq) = os.osc(freq);
+os = library("oscillators.lib");
+sawtooth_demo_test = dm.sawtooth_demo + monoOsc(110) * 0.001;
 ```
 
 ----
@@ -682,6 +726,12 @@ Illustrate latch operation.
 #### Usage
 
 ```
+latch_demo : _
+```
+
+One way to visualize it is:
+
+```
 echo 'import("stdfaust.lib");' > latch_demo.dsp
 echo 'process = dm.latch_demo;' >> latch_demo.dsp
 faust2octave latch_demo.dsp
@@ -701,6 +751,12 @@ latch_demo_test = dm.latch_demo;
 Illustrate various envelopes overlaid, including their gate * 1.1.
 
 #### Usage
+
+```
+envelopes_demo : envelopeBus
+```
+
+One way to visualize it is:
 
 ```
 echo 'import("stdfaust.lib");' > envelopes_demo.dsp
@@ -740,7 +796,8 @@ Linux QT:
 #### Test
 ```
 dm = library("demos.lib");
-fft_spectral_level_demo_test = dm.fft_spectral_level_demo(256);
+no = library("noises.lib");
+fft_spectral_level_demo_test = no.noise : dm.fft_spectral_level_demo(256);
 ```
 
 ----
@@ -812,7 +869,8 @@ Etc.
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-pospass_demo_test = os.osc(440) : dm.pospass_demo;
+monoOsc(freq) = os.osc(freq);
+pospass_demo_test = monoOsc(440) : dm.pospass_demo;
 ```
 
 ----
@@ -1025,5 +1083,6 @@ _,_ : ja_transformer_demo : _,_
 ```
 dm = library("demos.lib");
 no = library("noises.lib");
-ja_transformer_demo_test = no.noise, no.noise : dm.ja_transformer_demo;
+stereoNoise = no.noise, no.noise;
+ja_transformer_demo_test = stereoNoise : dm.ja_transformer_demo;
 ```

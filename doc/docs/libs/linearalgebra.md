@@ -94,7 +94,9 @@ Where:
 #### Test
 ```
 la = library("linearalgebra.lib");
-minor_test = (1, 2, 3, 0, 4, 5, 7, 8, 9) : la.minor(3, 1, 1);
+minor_test = (1, 2, 3,
+              0, 4, 5,
+              7, 8, 9) : la.minor(3, 1, 1);
 ```
 
 #### References
@@ -120,7 +122,8 @@ Where:
 #### Test
 ```
 la = library("linearalgebra.lib");
-inverse_test = (4, 7, 2, 6) : la.inverse(2);
+inverse_test = (4, 7,
+                2, 6) : la.inverse(2);
 ```
 
 ----
@@ -143,7 +146,8 @@ Where:
 #### Test
 ```
 la = library("linearalgebra.lib");
-transpose2_test = (1, 2, 3, 4, 5, 6) : la.transpose2(2, 3);
+transpose2_test = (1, 2, 3,
+                   4, 5, 6) : la.transpose2(2, 3);
 ```
 
 ----
@@ -170,7 +174,10 @@ Where:
 #### Test
 ```
 la = library("linearalgebra.lib");
-matMul_test = (1, 2, 3, 4), (5, 6, 7, 8) : la.matMul(2, 2, 2, 2);
+matMul_test = (1, 2,
+               3, 4),
+              (5, 6,
+               7, 8) : la.matMul(2, 2, 2, 2);
 ```
 
 ----

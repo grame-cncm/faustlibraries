@@ -62,7 +62,8 @@ Where:
 ```
 hy = library("hysteresis.lib");
 os = library("oscillators.lib");
-ja_hysteresis_test = os.osc(100) * 0.5 : hy.ja_hysteresis(380, 720, 0.015, 380, 0.25);
+mono = os.osc(100) * 0.5;
+ja_hysteresis_test = mono : hy.ja_hysteresis(380, 720, 0.015, 380, 0.25);
 ```
 
 #### References
@@ -102,7 +103,8 @@ Where:
 hy = library("hysteresis.lib");
 ba = library("basics.lib");
 os = library("oscillators.lib");
-ja_processor_test = os.osc(100) : hy.ja_processor(380, 720, 0.015, 380, 0.25, ba.db2linear(10), 1);
+mono = os.osc(100) * 0.5;
+ja_processor_test = mono : hy.ja_processor(380, 720, 0.015, 380, 0.25, ba.db2linear(10), 1.0);
 ```
 
 ----
@@ -133,7 +135,8 @@ Where:
 hy = library("hysteresis.lib");
 ba = library("basics.lib");
 os = library("oscillators.lib");
-ja_processor_stereo_test = os.osc(100), os.osc(150) : hy.ja_processor_stereo(380, 720, 0.015, 380, 0.25, ba.db2linear(10), 1);
+stereo = os.osc(100), os.osc(150);
+ja_processor_stereo_test = stereo : hy.ja_processor_stereo(380, 720, 0.015, 380, 0.25, ba.db2linear(10), 1.0);
 ```
 
 ##  Jiles-Atherton UI Wrappers 
@@ -157,7 +160,8 @@ _ : ja_processor_ui : _
 ```
 hy = library("hysteresis.lib");
 os = library("oscillators.lib");
-ja_processor_ui_test = os.osc(100) : hy.ja_processor_ui;
+mono = os.osc(100) * 0.5;
+ja_processor_ui_test = mono : hy.ja_processor_ui;
 ```
 
 ----
@@ -177,5 +181,6 @@ _,_ : ja_processor_stereo_ui : _,_
 ```
 hy = library("hysteresis.lib");
 os = library("oscillators.lib");
-ja_processor_stereo_ui_test = os.osc(100), os.osc(150) : hy.ja_processor_stereo_ui;
+stereo = os.osc(100), os.osc(150);
+ja_processor_stereo_ui_test = stereo : hy.ja_processor_stereo_ui;
 ```

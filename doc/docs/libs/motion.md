@@ -62,7 +62,8 @@ Where:
 * `threshold`: trigger threshold applied after high-pass (normalized g units)
 * `debounceMs`: time in milliseconds to hold the trigger high (>= 0)
 * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-  - Output is a gate in [0, 1].
+
+Output is a gate in [0, 1].
 
 #### Example
 
@@ -73,12 +74,9 @@ process = mo.shockTrigger(50, 0.75, 75, accX);
 
 #### Test
 ```
-shockTrigger_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-    accX = os.pulsetrain(4) * 2;
-  } : mo.shockTrigger(50, 0.5, 50);
+mo = library("motion.lib");
+os = library("oscillators.lib");
+shockTrigger_test = mo.shockTrigger(50, 0.5, 50, os.pulsetrain(2, 0.5));
 ```
 
 ## Inclination and Gravity Projection
@@ -100,7 +98,8 @@ Where:
 
 * `lpHz`: low-pass frequency (Hz) ( > 0 )
 * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-  - Output is clamped to [0, 1] with negative values removed.
+
+Output is clamped to [0, 1] with negative values removed.
 
 #### Example
 
@@ -111,11 +110,9 @@ process = mo.inclinometer(1.5, accX);
 
 #### Test
 ```
-inclinometer_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-  } : mo.inclinometer(2, os.sawtooth(1));
+mo = library("motion.lib");
+os = library("oscillators.lib");
+inclinometer_test = mo.inclinometer(2, os.sawtooth(1));
 ```
 
 ----
@@ -135,7 +132,8 @@ Where:
 * `lpHz`: low-pass frequency (Hz) ( > 0 )
 * `posSig`: positive-facing accelerometer axis signal (normalized, typically [-1, 1])
 * `negSig`: negative-facing accelerometer axis signal (normalized, typically [-1, 1])
-  - Output maps posSig -> 1 and negSig -> 0 with smoothing and clamping.
+
+Output maps posSig -> 1 and negSig -> 0 with smoothing and clamping.
 
 #### Example
 
@@ -146,13 +144,10 @@ process = mo.inclineBalance(1.5, accPosX, accNegX);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 inclineBalance_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-    accPosX = os.sawtooth(0.1) * 0.5 + 0.5;
-    accNegX = accPosX * (-1);
-  } : mo.inclineBalance(1, accPosX, accNegX);
+  mo.inclineBalance(1.5, os.sawtooth(0.2) * 0.5 + 0.5, os.sawtooth(0.2) * (-0.5));
 ```
 
 ----
@@ -172,7 +167,8 @@ Where:
 * `lpHz`: low-pass frequency (Hz) ( > 0 )
 * `posSig`: positive-facing accelerometer axis signal (normalized, typically [-1, 1])
 * `negSig`: negative-facing accelerometer axis signal (normalized, typically [-1, 1])
-  - Output peaks at 1 near either pole and returns to 0 near the midpoint.
+
+Output peaks at 1 near either pole and returns to 0 near the midpoint.
 
 #### Example
 
@@ -183,13 +179,10 @@ process = mo.inclineSymmetric(1.5, accPosX, accNegX);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 inclineSymmetric_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-    accPosX = os.triangle(0.2) * 0.5 + 0.5;
-    accNegX = accPosX * (-1);
-  } : mo.inclineSymmetric(2, accPosX, accNegX);
+  mo.inclineSymmetric(1.5, os.triangle(0.3) * 0.5 + 0.5, os.triangle(0.3) * (-0.5));
 ```
 
 ----
@@ -210,7 +203,8 @@ Where:
 * `offset`: dead-zone offset applied after projection (0..0.33). Magnitudes below
   `offset` clamp to 0, and the remaining range is rescaled to keep the output in [0, 1].
 * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-  - Output is normalized to [0, 1] with an optional dead zone near 0.
+
+Output is normalized to [0, 1] with an optional dead zone near 0.
 
 #### Example
 
@@ -221,11 +215,9 @@ process = mo.projectedGravity(1.5, 0.08, accX);
 
 #### Test
 ```
-projectedGravity_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-  } : mo.projectedGravity(2, 0.05, os.triangle(0.1));
+mo = library("motion.lib");
+os = library("oscillators.lib");
+projectedGravity_test = mo.projectedGravity(2, 0.05, os.triangle(0.1));
 ```
 
 ## Envelopes Helpers
@@ -250,8 +242,9 @@ Where:
 * `envUpMs`: attack time in milliseconds (>= 0)
 * `envDownMs`: release time in milliseconds (>= 0)
 * `sig`: input signal (normalized)
-  - Signal is offset by `thr`, floored at 0, scaled by `gain`, clamped to [0, 1], then
-    fed to an attack/release follower (`an.amp_follower_ar`).
+
+Signal is offset by `thr`, floored at 0, scaled by `gain`, clamped to [0, 1], then
+fed to an attack/release follower (`an.amp_follower_ar`).
 
 #### Example
 
@@ -274,7 +267,8 @@ Where:
 
 * `thr`, `gain`, `envUpMs`, `envDownMs`: passed to `motionEnvelope`
 * `sig`: input signal
-  - Absolute value is taken before envelope detection.
+
+Absolute value is taken before envelope detection.
 
 ----
 
@@ -290,7 +284,8 @@ Where:
 
 * `thr`, `gain`, `envUpMs`, `envDownMs`: passed to `motionEnvelope`
 * `sig`: input signal
-  - Negative values are ignored by the thresholding stage.
+
+Negative values are ignored by the thresholding stage.
 
 ----
 
@@ -306,7 +301,8 @@ Where:
 
 * `thr`, `gain`, `envUpMs`, `envDownMs`: passed to `motionEnvelope`
 * `sig`: input signal
-  - The signal is negated before the shared positive-only detector.
+
+The signal is negated before the shared positive-only detector.
 
 ----
 
@@ -318,6 +314,12 @@ Where:
 ```
 pita3(x, y, z) : _
 ```
+
+Where:
+
+* `x`: first axis or signal component
+* `y`: second axis or signal component
+* `z`: third axis or signal component
 
 ----
 
@@ -331,9 +333,15 @@ totalEnvelope(thr, gain, envUpMs, envDownMs, x, y, z) : _
 ```
 Where:
 
-* `thr`, `gain`, `envUpMs`, `envDownMs`: passed to `motionEnvelope`
-* `x`, `y`, `z`: three-axis signals (normalized)
-  - Computes a magnitude via `pita3` then applies `motionEnvelope`.
+* `thr`: threshold passed to `motionEnvelope`
+* `gain`: gain passed to `motionEnvelope`
+* `envUpMs`: attack time in milliseconds passed to `motionEnvelope`
+* `envDownMs`: release time in milliseconds passed to `motionEnvelope`
+* `x`: normalized X-axis signal
+* `y`: normalized Y-axis signal
+* `z`: normalized Z-axis signal
+
+The three-axis magnitude is computed with `pita3` before applying `motionEnvelope`.
 
 ## Acceleration Envelopes
 
@@ -357,7 +365,8 @@ Where:
 * `envUpMs`: attack time in milliseconds (>= 0)
 * `envDownMs`: release time in milliseconds (>= 0)
 * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-  - Output envelope is clamped to [0, 1].
+
+Output envelope is clamped to [0, 1].
 
 #### Example
 
@@ -368,12 +377,10 @@ process = mo.accelEnvelopeAbs(0.1, 1.2, 10, 12, accX);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 accelEnvelopeAbs_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-    accX = os.sawtooth(0.5);
-  } : mo.accelEnvelopeAbs(0.1, 1.5, 5, 20, accX);
+  mo.accelEnvelopeAbs(0.1, 1.2, 10, 12, os.sawtooth(0.5));
 ```
 
 ----
@@ -395,7 +402,8 @@ Where:
 * `envUpMs`: attack time in milliseconds (>= 0)
 * `envDownMs`: release time in milliseconds (>= 0)
 * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-  - Negative values are ignored; output envelope is clamped to [0, 1].
+
+Negative values are ignored; output envelope is clamped to [0, 1].
 
 #### Example
 
@@ -406,11 +414,10 @@ process = mo.accelEnvelopePos(0.05, 1.35, 10, 10, accX);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 accelEnvelopePos_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-  } : mo.accelEnvelopePos(0.05, 1, 5, 5, os.triangle(0.25));
+  mo.accelEnvelopePos(0.05, 1.35, 10, 10, os.triangle(2) * 0.8);
 ```
 
 ----
@@ -432,7 +439,8 @@ Where:
 * `envUpMs`: attack time in milliseconds (>= 0)
 * `envDownMs`: release time in milliseconds (>= 0)
 * `sig`: accelerometer axis signal (normalized, typically [-1, 1])
-  - Positive values are ignored; output envelope is clamped to [0, 1].
+
+Positive values are ignored; output envelope is clamped to [0, 1].
 
 #### Example
 
@@ -443,11 +451,10 @@ process = mo.accelEnvelopeNeg(0.05, 1.35, 10, 10, accX);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 accelEnvelopeNeg_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-  } : mo.accelEnvelopeNeg(0.05, 1, 5, 5, os.triangle(0.25));
+  mo.accelEnvelopeNeg(0.05, 1.35, 10, 10, os.triangle(2) * (-0.8));
 ```
 
 ----
@@ -471,7 +478,8 @@ Where:
 * `ax`: accelerometer X axis (normalized, typically [-1, 1])
 * `ay`: accelerometer Y axis (normalized, typically [-1, 1])
 * `az`: accelerometer Z axis (normalized, typically [-1, 1])
-  - Output magnitude is clamped to [0, 1].
+
+Output magnitude is clamped to [0, 1].
 
 #### Example
 
@@ -482,14 +490,13 @@ process = mo.totalAccel(0.1, 1.35, 10, 10, ax, ay, az);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 totalAccel_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-    ax = os.sawtooth(0.2) * 0.2;
-    ay = os.triangle(0.15) * 0.1;
-    az = os.sawtooth(0.12) * 0.3;
-  } : mo.totalAccel(0.05, 1.2, 8, 12, ax, ay, az);
+  mo.totalAccel(0.05, 1.2, 8, 12,
+    os.sawtooth(0.2) * 0.2,
+    os.triangle(0.15) * 0.1,
+    os.sawtooth(0.12) * 0.3);
 ```
 
 ## Gyroscope Envelopes
@@ -514,7 +521,8 @@ Where:
 * `envUpMs`: attack time in milliseconds (>= 0)
 * `envDownMs`: release time in milliseconds (>= 0)
 * `sig`: gyroscope axis signal (normalized rad/s range)
-  - Output envelope is clamped to [0, 1].
+
+Output envelope is clamped to [0, 1].
 
 #### Example
 
@@ -525,11 +533,10 @@ process = mo.gyroEnvelopeAbs(0.01, 0.8, 50, 50, gx);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 gyroEnvelopeAbs_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-  } : mo.gyroEnvelopeAbs(0.02, 0.9, 25, 30, os.sawtooth(0.5));
+  mo.gyroEnvelopeAbs(0.02, 0.9, 25, 30, os.sawtooth(0.5) * 0.2);
 ```
 
 ----
@@ -551,7 +558,8 @@ Where:
 * `envUpMs`: attack time in milliseconds (>= 0)
 * `envDownMs`: release time in milliseconds (>= 0)
 * `sig`: gyroscope axis signal (normalized rad/s range)
-  - Negative values are ignored; output envelope is clamped to [0, 1].
+
+Negative values are ignored; output envelope is clamped to [0, 1].
 
 #### Example
 
@@ -562,11 +570,10 @@ process = mo.gyroEnvelopePos(0.01, 0.8, 50, 50, gx);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 gyroEnvelopePos_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-  } : mo.gyroEnvelopePos(0.02, 0.9, 25, 30, os.triangle(0.5));
+  mo.gyroEnvelopePos(0.02, 0.9, 25, 30, os.triangle(3) * 0.8);
 ```
 
 ----
@@ -588,7 +595,8 @@ Where:
 * `envUpMs`: attack time in milliseconds (>= 0)
 * `envDownMs`: release time in milliseconds (>= 0)
 * `sig`: gyroscope axis signal (normalized rad/s range)
-  - Positive values are ignored; output envelope is clamped to [0, 1].
+
+Positive values are ignored; output envelope is clamped to [0, 1].
 
 #### Example
 
@@ -599,11 +607,10 @@ process = mo.gyroEnvelopeNeg(0.01, 0.8, 50, 50, gx);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 gyroEnvelopeNeg_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-  } : mo.gyroEnvelopeNeg(0.02, 0.9, 25, 30, os.triangle(0.5));
+  mo.gyroEnvelopeNeg(0.02, 0.9, 25, 30, os.triangle(3) * (-0.8));
 ```
 
 ----
@@ -627,7 +634,8 @@ Where:
 * `gx`: gyroscope X axis (normalized rad/s range)
 * `gy`: gyroscope Y axis (normalized rad/s range)
 * `gz`: gyroscope Z axis (normalized rad/s range)
-  - Output magnitude is clamped to [0, 1].
+
+Output magnitude is clamped to [0, 1].
 
 #### Example
 
@@ -638,14 +646,13 @@ process = mo.totalGyro(0.01, 0.8, 50, 50, gx, gy, gz);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 totalGyro_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-    gx = os.sawtooth(0.2) * 0.2;
-    gy = os.triangle(0.15) * 0.1;
-    gz = os.sawtooth(0.12) * 0.3;
-  } : mo.totalGyro(0.01, 0.9, 25, 30, gx, gy, gz);
+  mo.totalGyro(0.02, 0.9, 25, 30,
+    os.sawtooth(0.2) * 0.2,
+    os.triangle(0.15) * 0.1,
+    os.sawtooth(0.12) * 0.3);
 ```
 
 ## Orientation Weighting
@@ -673,7 +680,8 @@ Where:
 * `ys`: current Y coordinate (normalized)
 * `zs`: current Z coordinate (normalized)
 * `smoothMs`: smoothing time in milliseconds (>= 0)
-  - Output weight is clamped to [0, 1].
+
+Output weight is clamped to [0, 1].
 
 #### Example
 
@@ -684,14 +692,9 @@ process = mo.orientationWeight(0, 1, 0, 1, x, y, z, 10);
 
 #### Test
 ```
+mo = library("motion.lib");
 orientationWeight_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-    x = os.triangle(0.1);
-    y = os.sawtooth(0.1);
-    z = os.triangle(0.05);
-  } : mo.orientationWeight(0, 1, 0, 1, x, y, z, 10);
+  mo.orientationWeight(0, 1, 0, 1, 0, 1, 0, 10);
 ```
 
 ----
@@ -721,7 +724,8 @@ Where:
 * `shapeDown`: shape for Down (-Z)
 * `shapeUp`: shape for Up (+Z)
 * `smoothMs`: smoothing time in milliseconds (>= 0)
-  - Output is six weights (Cour, Rear, Jardin, Front, Down, Up), each in [0, 1].
+
+ Output is six weights (Cour, Rear, Jardin, Front, Down, Up), each in [0, 1].
 
 #### Example
 
@@ -732,14 +736,15 @@ process = mo.orientation6(x, y, z, 1, 1, 1, 1, 1, 1, 10);
 
 #### Test
 ```
+mo = library("motion.lib");
+os = library("oscillators.lib");
 orientation6_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-    x = os.triangle(0.05);
-    y = os.sawtooth(0.08);
-    z = os.triangle(0.03);
-  } : mo.orientation6(x, y, z, 1, 1, 1, 1, 1, 1, 10);
+  mo.orientation6(
+    os.triangle(0.05),
+    os.sawtooth(0.08),
+    os.triangle(0.03),
+    1, 1, 1, 1, 1, 1,
+    10);
 ```
 
 ## Utility Scaling
@@ -763,7 +768,8 @@ Where:
 * `ihigh`: maximum input value before clamping (must be > ilow)
 * `olow`: minimum output value
 * `ohigh`: maximum output value
-  - Inputs below ilow clamp to olow; above ihigh clamp to ohigh.
+
+Inputs below ilow clamp to olow; above ihigh clamp to ohigh.
 
 #### Example
 
@@ -774,9 +780,7 @@ process = _ : mo.scale(0.2, 0.8, 100, 20000) : _;
 
 #### Test
 ```
-scale_test =
-  with {
-    mo = library("motion.lib");
-    os = library("oscillators.lib");
-  } : os.sawtooth(0.2) : mo.scale(0.2, 0.8, 0, 1);
+mo = library("motion.lib");
+os = library("oscillators.lib");
+scale_test = (os.sawtooth(2) * 0.5 + 0.5) : mo.scale(0.2, 0.8, 0, 1);
 ```

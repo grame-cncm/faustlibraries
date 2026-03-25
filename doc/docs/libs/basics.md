@@ -466,7 +466,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-countup_test = ba.countup(8, button("trig"));
+countup_test = ba.countup(8, ba.pulse(16));
 ```
 
 ----
@@ -483,6 +483,11 @@ Outputs zero while `run` is 0.
 ```
 sweep(period,run) : _
 ```
+
+Where:
+
+* `period`: sweep length in samples
+* `run`: enable signal, non-zero while the sweep runs
 
 #### Test
 ```
@@ -737,7 +742,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-pulse_countup_test = ba.pulse_countup(button("run"));
+pulse_countup_test = ba.pulse_countup(1) + 0.001;
 ```
 
 ----
@@ -760,7 +765,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-pulse_countdown_test = ba.pulse_countdown(button("run"));
+pulse_countdown_test = ba.pulse_countdown(1) + 0.001;
 ```
 
 ----
@@ -785,7 +790,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-pulse_countup_loop_test = ba.pulse_countup_loop(4, button("run"));
+pulse_countup_loop_test = ba.pulse_countup_loop(4, 1) + 0.001;
 ```
 
 ----
@@ -810,7 +815,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-pulse_countdown_loop_test = ba.pulse_countdown_loop(4, button("run"));
+pulse_countdown_loop_test = ba.pulse_countdown_loop(4, 1) + 0.001;
 ```
 
 ----
@@ -1041,11 +1046,14 @@ In other words, the uniformly tabulated function can be evaluated using interpol
 tabulate(C, FX, S, r0, r1, x).(val|lin|cub) : _
 ```
 
+Where:
+
 * `C`: whether to dynamically force the `x` value to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
 * `FX`: unary function Y=F(X) with one output (scalar function of one variable) 
 * `S`: size of the table in samples (constant numerical expression)
 * `r0`: minimum value of argument x
 * `r1`: maximum value of argument x
+* `x`: input value used to read the tabulated function
 
 ```
 tabulate(C, FX, S, r0, r1, x).val uses the value in the table closest to x
@@ -1091,12 +1099,15 @@ or use `C = 1`.
 _ : tabulate_chebychev(C, FX, NX, CD, r0, r1) : _
 ```
 
+Where:
+
 * `C`: whether to dynamically force the value to the range [r0, r1]: 1 forces the check, 0 deactivates it (constant numerical expression)
 * `FX`: unary function Y=F(X) with one output (scalar function of one variable)
 * `NX`: number of segments for uniformly partitioning [r0, r1] (constant numerical expression)
 * `CD`: maximum polynomial degree for each Chebyshev polynomial (constant numerical expression)
 * `r0`: minimum value of argument x
 * `r1`: maximum value of argument x
+* `x`: input value used to evaluate the approximation
 
 #### Example test program
 
@@ -1128,6 +1139,8 @@ Note that processing the last point in each interval is not safe. So either be s
 ```
 tabulateNd(C, function, (parameters) ).(val|lin|cub) : _
 ```
+
+Where:
 
 * `C`: whether to dynamically force the parameter values for each dimension to the ranges specified in parameters: 1 forces the check, 0 deactivates it (constant numerical expression)
 * `function`: the function we want to tabulate. Can have any number of inputs, but needs to have just one output.
@@ -1732,7 +1745,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-latch_test = os.osc(2) : ba.latch(button("hold"));
+latch_test = os.osc(2) : ba.latch(ba.pulse(32));
 ```
 
 ----
@@ -1756,7 +1769,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-sAndH_test = os.osc(2) : ba.sAndH(button("hold"));
+sAndH_test = os.osc(2) : ba.sAndH(ba.pulse(32));
 ```
 
 ----
@@ -1847,11 +1860,9 @@ _ : peakhold(mode) : _
 
 Where:
 
-`mode` means:
-
- 0 - Pass through. A single sample 0 trigger will work as a reset.
-
- 1 - Track and hold max value.
+* `mode`: operation mode
+  `0` passes the signal through and a single-sample `0` trigger resets the held value
+  `1` tracks and holds the maximum value
 
 #### Test
 ```
@@ -1898,6 +1909,12 @@ peakholder_test = os.osc(440) : ba.peakholder(ba.sec2samp(0.1));
 Force a control rate signal to be used as an audio rate signal.
 
 #### Usage
+
+```
+kr2ar : _
+```
+
+Typical use:
 
 ```
 hslider("freq", 200, 200, 2000, 0.1) : kr2ar;
@@ -2149,6 +2166,9 @@ _ : bypass_fade(n,b,e) : _
 or
 _,_ : bypass_fade(n,b,e) : _,_
 ```
+
+Where:
+
 * `n`: number of samples for the crossfade
 * `b`: bypass switch (0/1)
 * `e`: N x N circuit

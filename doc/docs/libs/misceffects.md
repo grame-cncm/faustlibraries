@@ -49,7 +49,6 @@ Where:
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
 cubicnl_test = os.osc(440) : ef.cubicnl(0.5, 0.0);
-cubicnl_nodc_test = os.osc(440) : ef.cubicnl_nodc(0.5, 0.0);
 ```
 
 #### References
@@ -146,7 +145,7 @@ Where:
 #### Test
 ```
 ef = library("misceffects.lib");
-fibonacci_test = 0 : ef.fibonacci(2);
+fibonacci_test = 1 : ef.fibonacci(2);
 ```
 
 #### Example
@@ -176,7 +175,7 @@ Where:
 #### Test
 ```
 ef = library("misceffects.lib");
-fibonacciGeneral_test = 0 : ef.fibonacciGeneral(waveform{2, 3});
+fibonacciGeneral_test = 1 : ef.fibonacciGeneral(waveform{2, 3});
 ```
 
 #### Example:
@@ -231,6 +230,11 @@ fourth-order Butterworth lowpass.
 ```
 _ : speakerbp(f1,f2) : _
 ```
+
+Where:
+
+* `f1`: low-frequency break point in Hz for the speaker model
+* `f2`: high-frequency lowpass cutoff in Hz for the speaker model
 
 #### Test
 ```
@@ -344,7 +348,7 @@ Where:
 #### Test
 ```
 ef = library("misceffects.lib");
-mesh_square_test = (0,0,0,0) : ef.mesh_square(1);
+mesh_square_test = (1,0.5,-0.5,0.25) : ef.mesh_square(1);
 ```
 
 #### Signal Order In and Out
@@ -417,7 +421,13 @@ A routing matrix can be used to obtain other connection geometries.
 
 ### `(ef.)dryWetMixer`
 
-Linear dry-wet mixer for a N inputs and N outputs effect.
+Linear dry-wet mixer for an N-inputs, N-outputs effect. The dry and wet
+gains sum to 1 for all positions, so this mixer is mono-safe but not
+constant-power: total power dips at the midpoint (each channel at −6 dB).
+
+* `wetAmount = 0`  : dry = 1.0 (0 dB),  wet = 0
+* `wetAmount = 0.5`: dry = 0.5 (−6 dB), wet = 0.5 (−6 dB)
+* `wetAmount = 1`  : dry = 0,           wet = 1.0 (0 dB)
 
 #### Usage
 
@@ -427,13 +437,16 @@ si.bus(inputs(FX)) : dryWetMixer(wetAmount, FX) : si.bus(inputs(FX))
 
 Where:
 
-* `wetAmount`: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal
-* `FX`: an arbitrary effect (N inputs and N outputs) to apply to the input bus
+* `wetAmount`: the wet amount (0-1). 0 produces only the dry signal at
+  unity, and 1 produces only the wet signal at unity
+* `FX`: an arbitrary effect (N inputs and N outputs) to apply to the
+  input bus
 
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
+fi = library("filters.lib");
 dryWetMixer_test = os.osc(440) : ef.dryWetMixer(0.5, fi.dcblocker);
 ```
 
@@ -441,23 +454,49 @@ dryWetMixer_test = os.osc(440) : ef.dryWetMixer(0.5, fi.dcblocker);
 
 ### `(ef.)dryWetMixerConstantPower`
 
-Constant-power dry-wet mixer for a N inputs and N outputs effect.
+Constant-power dry-wet mixer for an N-inputs, N-outputs effect. The dry
+input is scaled by cos(θ)/√2 and the wet output by sin(θ)/√2, where
+θ = π*wetAmount/2.
+
+* `wetAmount = 0`  : dry = 1/√2 ≈ 0.707 (−3 dB), wet = 0
+* `wetAmount = 0.5`: dry = 0.5 (−6 dB),          wet = 0.5 (−6 dB)
+* `wetAmount = 1`  : dry = 0,                    wet = 1/√2 ≈ 0.707 (−3 dB)
+
+#### Normalization
+
+A standard constant-power crossfade uses bare cos/sin gains, which peak at
+unity (0 dB) when fully dry or fully wet and dip to 1/√2 (−3 dB) at center.
+This implementation divides by √2, which makes the mixer mono-safe: the sum
+of the dry and wet gains is bounded by 1 for all positions:
+
+  dryGain + wetGain = (cos θ + sin θ) / √2 ≤ 1
+
+This holds because cos θ + sin θ peaks at √2 (at θ = π/4), and √2/√2 = 1.
+As a result, if the dry and wet paths carry correlated or in-phase material,
+their sum can never clip. Total power (dryGain² + wetGain²) is constant at
+0.5 for all positions.
+
+Note that the extremes attenuate by −3 dB rather than passing at unity. Use
+`dryWetMixer` if unity passthrough at the extremes is required.
 
 #### Usage
 
 ```
-si.bus(inputs(FX)) : dryWetMixerConstantPower(wetAmount, FX) :si.bus(inputs(FX))
+si.bus(inputs(FX)) : dryWetMixerConstantPower(wetAmount, FX) : si.bus(inputs(FX))
 ```
 
 Where:
 
-* `wetAmount`: the wet amount (0-1). 0 produces only the dry signal and 1 produces only the wet signal
-* `FX`: an arbitrary effect (N inputs and N outputs) to apply to the input bus
+* `wetAmount`: the wet amount (0-1). 0 produces only the dry signal at −3 dB
+  and 1 produces only the wet signal at −3 dB
+* `FX`: an arbitrary effect (N inputs and N outputs) to apply to the input
+  bus
 
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
+fi = library("filters.lib");
 dryWetMixerConstantPower_test = os.osc(440) : ef.dryWetMixerConstantPower(0.5, fi.dcblocker);
 ```
 
@@ -486,7 +525,7 @@ Where:
 #### Test
 ```
 ef = library("misceffects.lib");
-mixLinearClamp_test = (1,0,0,0) : ef.mixLinearClamp(4, 1, 1.2);
+mixLinearClamp_test = (1,0.5,0,0) : ef.mixLinearClamp(4, 1, 1.2);
 ```
 
 ----

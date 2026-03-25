@@ -44,7 +44,8 @@ when the envelope value reaches 1)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-ar_test = no.noise * en.ar(0.02, 0.3, button("gate"));
+gate = button("gate");
+ar_test = no.noise * en.ar(0.02, 0.3, gate);
 ```
 
 ----
@@ -72,7 +73,8 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-asr_test = no.noise * en.asr(0.05, 0.7, 0.4, button("gate"));
+gate = button("gate");
+asr_test = no.noise * en.asr(0.05, 0.7, 0.4, gate);
 ```
 
 ----
@@ -101,7 +103,8 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-adsr_test = no.noise * en.adsr(0.05, 0.1, 0.6, 0.3, button("gate"));
+gate = button("gate");
+adsr_test = no.noise * en.adsr(0.05, 0.1, 0.6, 0.3, gate);
 ```
 
 ----
@@ -135,10 +138,12 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
+gate = button("gate");
+legato = checkbox("legato");
 adsrf_bias_test = no.noise * en.adsrf_bias(
   0.05, 0.1, 0.6, 0.4, 0.2,
   0.4, 0.6, 0.5,
-  checkbox("legato"), button("gate")
+  legato, gate
 );
 ```
 
@@ -172,10 +177,12 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
+gate = button("gate");
+legato = checkbox("legato");
 adsr_bias_test = no.noise * en.adsr_bias(
   0.05, 0.1, 0.6, 0.4,
   0.4, 0.6, 0.5,
-  checkbox("legato"), button("gate")
+  legato, gate
 );
 ```
 
@@ -211,10 +218,12 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
+gate = button("gate");
+legato = checkbox("legato");
 ahdsrf_bias_test = no.noise * en.ahdsrf_bias(
   0.05, 0.05, 0.1, 0.6, 0.4, 0.2,
   0.4, 0.6, 0.5,
-  checkbox("legato"), button("gate")
+  legato, gate
 );
 ```
 
@@ -250,10 +259,12 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
+gate = button("gate");
+legato = checkbox("legato");
 ahdsr_bias_test = no.noise * en.ahdsr_bias(
   0.05, 0.05, 0.1, 0.6, 0.4,
   0.4, 0.6, 0.5,
-  checkbox("legato"), button("gate")
+  legato, gate
 );
 ```
 
@@ -283,7 +294,8 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-smoothEnvelope_test = no.noise * en.smoothEnvelope(0.2, button("gate"));
+gate = button("gate");
+smoothEnvelope_test = no.noise * en.smoothEnvelope(0.2, gate);
 ```
 
 ----
@@ -311,7 +323,8 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-arfe_test = no.noise * en.arfe(0.2, 0.4, 0, button("gate"));
+gate = button("gate");
+arfe_test = no.noise * en.arfe(0.2, 0.4, 0, gate);
 ```
 
 ----
@@ -338,7 +351,8 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-are_test = no.noise * en.are(0.2, 0.4, button("gate"));
+gate = button("gate");
+are_test = no.noise * en.are(0.2, 0.4, gate);
 ```
 
 ----
@@ -365,7 +379,8 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-asre_test = no.noise * en.asre(0.2, 0.6, 0.4, button("gate"));
+gate = button("gate");
+asre_test = no.noise * en.asre(0.2, 0.6, 0.4, gate);
 ```
 
 ----
@@ -394,7 +409,8 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-adsre_test = no.noise * en.adsre(0.2, 0.1, 0.6, 0.4, button("gate"));
+gate = button("gate");
+adsre_test = no.noise * en.adsre(0.2, 0.1, 0.6, 0.4, gate);
 ```
 
 ----
@@ -424,7 +440,8 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
-ahdsre_test = no.noise * en.ahdsre(0.2, 0.05, 0.1, 0.6, 0.4, button("gate"));
+gate = button("gate");
+ahdsre_test = no.noise * en.ahdsre(0.2, 0.05, 0.1, 0.6, 0.4, gate);
 ```
 
 ## Others
@@ -453,9 +470,10 @@ Where:
 ```
 en = library("envelopes.lib");
 os = library("oscillators.lib");
-dx7envelope_test = en.dx7envelope(
+gate = button("gate");
+dx7envelope_test = os.osc(440) * en.dx7envelope(
   0.05, 0.1, 0.1, 0.2,
   1, 0.8, 0.6, 0,
-  button("gate")
-) * os.osc(440);
+  gate
+);
 ```

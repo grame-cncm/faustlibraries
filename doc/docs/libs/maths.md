@@ -220,7 +220,7 @@ Where:
 #### Test
 ```
 ma = library("maths.lib");
-MIN_test = ma.MIN;
+MIN_test = ma.MIN * 1e307;
 ```
 
 ----
@@ -266,7 +266,7 @@ Where:
 #### Test
 ```
 ma = library("maths.lib");
-FTZ_test = (ma.MIN * 0.5) : ma.FTZ;
+FTZ_test = ((ma.MIN * 0.5) : ma.FTZ), ((ma.MIN * 1e307) : ma.FTZ);
 ```
 
 #### References
@@ -1049,7 +1049,8 @@ Where:
 #### Test
 ```
 ma = library("maths.lib");
-isnan_test = 1.0 : ma.isnan;
+os = library("oscillators.lib");
+isnan_test = (os.osc(1) - 2.0) : sqrt : ma.isnan;
 ```
 
 ----
@@ -1072,7 +1073,8 @@ Where:
 #### Test
 ```
 ma = library("maths.lib");
-isinf_test = 1.0 : ma.isinf;
+os = library("oscillators.lib");
+isinf_test = (os.impulse - os.impulse) : log : ma.isinf;
 ```
 
 ----

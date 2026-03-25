@@ -114,7 +114,7 @@ Where:
 #### Test
 ```
 mi = library("mi.lib");
-mass_test = 0 : mi.mass(1.0, 0.0, 0.0, 0.0);
+mass_test = 0.1 : mi.mass(1.0, 0.0, 0.1, 0.0);
 ```
 
 ----
@@ -142,7 +142,7 @@ Where:
 #### Test
 ```
 mi = library("mi.lib");
-oscil_test = 0 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.0, 0.0);
+oscil_test = 0.1 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.1, 0.0);
 ```
 
 ----
@@ -167,7 +167,7 @@ Where:
 #### Test
 ```
 mi = library("mi.lib");
-ground_test = 0 : mi.ground(0.0);
+ground_test = 0.1 : mi.ground(0.1);
 ```
 
 ----
@@ -192,7 +192,7 @@ Where:
 ```
 mi = library("mi.lib");
 os = library("oscillators.lib");
-posInput_test = 0, os.osc(1) : mi.posInput(0.0);
+posInput_test = 0, os.osc(1.0) : mi.posInput(0.0);
 ```
 
 ## Interaction Algorithms
@@ -402,7 +402,8 @@ Where:
 #### Test
 ```
 mi = library("mi.lib");
-nlPluck_test = mi.nlPluck(5.0, 0.1, 0.2, 0.0, 0.0, 0.05, -0.05);
+os = library("oscillators.lib");
+nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.osc(110) * 0.001;
 ```
 
 ----

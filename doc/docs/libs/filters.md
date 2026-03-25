@@ -60,7 +60,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-zero_test = os.osc(440) : fi.zero(0.5);
+src = os.osc(440);
+zero_test = src : fi.zero(0.5);
 ```
 
 #### References
@@ -87,7 +88,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-pole_test = os.osc(440) : fi.pole(0.9);
+src = os.osc(440);
+pole_test = src : fi.pole(0.9);
 ```
 
 #### References
@@ -109,7 +111,8 @@ _ : integrator : _
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-integrator_test = os.osc(440) : fi.integrator;
+src = os.osc(440);
+integrator_test = src : fi.integrator;
 ```
 
 ----
@@ -139,7 +142,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-dcblockerat_test = os.osc(440) : fi.dcblockerat(30);
+src = os.osc(440);
+dcblockerat_test = src : fi.dcblockerat(30);
 ```
 
 #### References
@@ -165,7 +169,8 @@ _ : dcblocker : _
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-dcblocker_test = os.osc(440) : fi.dcblocker;
+src = os.osc(440);
+dcblocker_test = src : fi.dcblocker;
 ```
 
 ----
@@ -191,7 +196,8 @@ impulse response to decay by `N` dB
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lptN_test = os.osc(440) : fi.lptN(60, 0.1);
+src = os.osc(440);
+lptN_test = src : fi.lptN(60, 0.1);
 ```
 
 #### References
@@ -210,11 +216,16 @@ One-pole lowpass with a tau time constant (1/e attenuation after `tN` seconds).
 _ : lptau(tN) : _
 ```
 
+Where:
+
+* `tN`: tau time constant in seconds (1/e attenuation after `tN` seconds)
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lptau_test = os.osc(440) : fi.lptau(0.1);
+src = os.osc(440);
+lptau_test = src : fi.lptau(0.1);
 ```
 
 ----
@@ -229,11 +240,16 @@ One-pole lowpass with a T60 time constant (60 dB attenuation after `tN` seconds)
 _ : lpt60(tN) : _
 ```
 
+Where:
+
+* `tN`: T60 time constant in seconds (60 dB attenuation after `tN` seconds)
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lpt60_test = os.osc(440) : fi.lpt60(0.3);
+src = os.osc(440);
+lpt60_test = src : fi.lpt60(0.3);
 ```
 
 ----
@@ -248,11 +264,16 @@ One-pole lowpass with a T19 time constant (approx. 19 dB attenuation after `tN` 
 _ : lpt19(tN) : _
 ```
 
+Where:
+
+* `tN`: T19 time constant in seconds (approximately 19 dB attenuation after `tN` seconds)
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lpt19_test = os.osc(440) : fi.lpt19(0.2);
+src = os.osc(440);
+lpt19_test = src : fi.lpt19(0.2);
 ```
 
 ## Comb Filters
@@ -284,7 +305,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-ff_comb_test = os.osc(440) : fi.ff_comb(2048, 64, 1, 0.7);
+src = os.osc(440);
+ff_comb_test = src : fi.ff_comb(2048, 64, 1, 0.7);
 ```
 
 #### References
@@ -316,7 +338,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-ff_fcomb_test = os.osc(440) : fi.ff_fcomb(2048, 64.5, 1, 0.7);
+src = os.osc(440);
+ff_fcomb_test = src : fi.ff_fcomb(2048, 64.5, 1, 0.7);
 ```
 
 #### References
@@ -333,7 +356,8 @@ Typical special case of `ff_comb()` where: `b0 = 1`.
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-ffcombfilter_test = os.osc(440) : fi.ffcombfilter(2048, 64, 0.7);
+src = os.osc(440);
+ffcombfilter_test = src : fi.ffcombfilter(2048, 64, 0.7);
 ```
 
 ----
@@ -371,7 +395,8 @@ See more examples in `filters.lib` below.
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-fb_comb_common_test = os.osc(440) : fi.fb_comb_common(@, 64, 0.8, 0.6);
+src = os.osc(440);
+fb_comb_common_test = src : fi.fb_comb_common(@, 64, 0.8, 0.6);
 ```
 --------------------------------------------------------
 
@@ -399,7 +424,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-fb_comb_test = os.osc(440) : fi.fb_comb(2048, 64, 0.7, 0.6);
+src = os.osc(440);
+fb_comb_test = src : fi.fb_comb(2048, 64, 0.7, 0.6);
 ```
 
 #### References
@@ -430,7 +456,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-fb_fcomb_test = os.osc(440) : fi.fb_fcomb(2048, 64.5, 0.7, 0.6);
+src = os.osc(440);
+fb_fcomb_test = src : fi.fb_fcomb(2048, 64.5, 0.7, 0.6);
 ```
 
 #### References
@@ -449,7 +476,8 @@ See the `jcrev` and `brassrev` in `reverbs.lib` for usage examples.
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-rev1_test = os.osc(440) : fi.rev1(2048, 64, 0.6);
+src = os.osc(440);
+rev1_test = src : fi.rev1(2048, 64, 0.6);
 ```
 
 ----
@@ -476,8 +504,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-fbcombfilter_test = os.osc(440) : fi.fbcombfilter(2048, 64, 0.6);
-ffbcombfilter_test = os.osc(440) : fi.ffbcombfilter(2048, 64.5, 0.6);
+src = os.osc(440);
+fbcombfilter_test = src : fi.fbcombfilter(2048, 64, 0.6);
 ```
 
 #### References
@@ -514,7 +542,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-allpass_comb_test = os.osc(440) : fi.allpass_comb(2048, 64, 0.6);
+src = os.osc(440);
+allpass_comb_test = src : fi.allpass_comb(2048, 64, 0.6);
 ```
 
 #### References
@@ -556,7 +585,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-allpass_fcomb_test = os.osc(440) : fi.allpass_fcomb(2048, 64.5, 0.6);
+src = os.osc(440);
+allpass_fcomb_test = src : fi.allpass_fcomb(2048, 64.5, 0.6);
 ```
 
 #### References
@@ -577,7 +607,8 @@ See the `jcrev` and `brassrev` in `reverbs.lib` for usage examples.
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-rev2_test = os.osc(440) : fi.rev2(2048, 64, 0.6);
+src = os.osc(440);
+rev2_test = src : fi.rev2(2048, 64, 0.6);
 ```
 
 ----
@@ -592,8 +623,8 @@ Same as `allpass_fcomb` but use `fdelay5` and `fdelay1a` internally
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-allpass_fcomb5_test = os.osc(440) : fi.allpass_fcomb5(2048, 64.5, 0.6);
-allpass_fcomb1a_test = os.osc(440) : fi.allpass_fcomb1a(2048, 64.5, 0.6);
+src = os.osc(440);
+allpass_fcomb5_test = src : fi.allpass_fcomb5(2048, 64.5, 0.6);
 ```
 
 ## Direct-Form Digital Filter Sections
@@ -624,7 +655,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-iir_test = os.osc(440) : fi.iir((0.5, 0.5), (0.3));
+src = os.osc(440);
+iir_test = src : fi.iir((0.5, 0.5), (0.3));
 ```
 
 #### References
@@ -645,7 +677,7 @@ _ : fir(bv) : _
 
 Where:
 
-* `bv` = b0,b1,...,bn is a parallel bank of coefficient signals.
+* `bv`: `b0,b1,...,bn`, a parallel bank of coefficient signals
 
 #### Note
 
@@ -703,9 +735,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-tf1_test = os.osc(440) : fi.tf1(0.5, 0.25, -0.4);
-tf2_test = os.osc(440) : fi.tf2(0.1, 0.2, 0.1, -0.5, 0.06);
-tf3_test = os.osc(440) : fi.tf3(0.1, 0.3, 0.3, 0.1, -0.9, 0.26, -0.024);
+src = os.osc(440);
+tf1_test = src : fi.tf1(0.5, 0.25, -0.4);
 ```
 
 #### References
@@ -734,7 +765,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-notchw_test = os.osc(440) : fi.notchw(200, 1000);
+src = os.osc(440);
+notchw_test = src : fi.notchw(200, 1000);
 ```
 
 #### References
@@ -778,10 +810,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-tf21_test = os.osc(440) : fi.tf21(0.1, 0.2, 0.1, -0.5, 0.06);
-tf22_test = os.osc(440) : fi.tf22(0.1, 0.2, 0.1, -0.5, 0.06);
-tf22t_test = os.osc(440) : fi.tf22t(0.1, 0.2, 0.1, -0.5, 0.06);
-tf21t_test = os.osc(440) : fi.tf21t(0.1, 0.2, 0.1, -0.5, 0.06);
+src = os.osc(440);
+tf21_test = src : fi.tf21(0.1, 0.2, 0.1, -0.5, 0.06);
 ```
 
 #### References
@@ -883,7 +913,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-iir_lat2_test = os.osc(440) : fi.iir_lat2((0.1, 0.2, 0.3), (-0.4, 0.1));
+src = os.osc(440);
+iir_lat2_test = src : fi.iir_lat2((0.1, 0.2, 0.3), (-0.4, 0.1));
 ```
 
 ----
@@ -913,7 +944,8 @@ See (fi.)allpassn for the single-output case.
 fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
-allpassnt_test = os.osc(440) : fi.allpassnt(2, (0.3, -0.2)) : si.bus(3);
+src = os.osc(440);
+allpassnt_test = src : fi.allpassnt(2, (0.3, -0.2)) : si.bus(3);
 ```
 
 ----
@@ -937,7 +969,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-iir_kl_test = os.osc(440) : fi.iir_kl((0.1, 0.2, 0.3), (-0.4, 0.1));
+src = os.osc(440);
+iir_kl_test = src : fi.iir_kl((0.1, 0.2, 0.3), (-0.4, 0.1));
 ```
 
 ----
@@ -962,7 +995,8 @@ Where:
 fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
-allpassnklt_test = os.osc(440) : fi.allpassnklt(2, (0.3, -0.2)) : si.bus(3);
+src = os.osc(440);
+allpassnklt_test = src : fi.allpassnklt(2, (0.3, -0.2)) : si.bus(3);
 ```
 
 ----
@@ -979,14 +1013,15 @@ _ : iir_lat1(bv,av) : _
 
 Where:
 
-* bv: transfer-function numerator as a bank of parallel signals
-* av: transfer-function denominator as a bank of parallel signals
+* `bv`: transfer-function numerator as a bank of parallel signals
+* `av`: transfer-function denominator as a bank of parallel signals
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-iir_lat1_test = os.osc(440) : fi.iir_lat1((0.1, 0.2, 0.3), (-0.4, 0.1));
+src = os.osc(440);
+iir_lat1_test = src : fi.iir_lat1((0.1, 0.2, 0.3), (-0.4, 0.1));
 ```
 
 ----
@@ -1011,7 +1046,8 @@ Where:
 fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
-allpassn1mt_test = os.osc(440) : fi.allpassn1mt(2, (0.3, -0.2)) : si.bus(3);
+src = os.osc(440);
+allpassn1mt_test = src : fi.allpassn1mt(2, (0.3, -0.2)) : si.bus(3);
 ```
 
 ----
@@ -1035,7 +1071,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-iir_nl_test = os.osc(440) : fi.iir_nl((0.1, 0.2, 0.3), (-0.4, 0.1));
+src = os.osc(440);
+iir_nl_test = src : fi.iir_nl((0.1, 0.2, 0.3), (-0.4, 0.1));
 ```
 
 #### References
@@ -1065,7 +1102,8 @@ Where:
 fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
-allpassnnlt_test = os.osc(440) : fi.allpassnnlt(2, (0.3, -0.2)) : si.bus(3);
+src = os.osc(440);
+allpassnnlt_test = src : fi.allpassnnlt(2, (0.3, -0.2)) : si.bus(3);
 ```
 
 #### References
@@ -1098,7 +1136,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-tf2np_test = os.osc(440) : fi.tf2np(0.6, 0.3, 0.2, -0.5, 0.2);
+src = os.osc(440);
+tf2np_test = src : fi.tf2np(0.6, 0.3, 0.2, -0.5, 0.2);
 ```
 
 ----
@@ -1122,7 +1161,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-wgr_test = fi.wgr(440, 0.995, os.osc(440));
+src = os.osc(440);
+wgr_test = fi.wgr(440, 0.995, src);
 ```
 
 #### References
@@ -1151,7 +1191,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-nlf2_test = fi.nlf2(440, 0.995, os.osc(440));
+src = os.osc(440);
+nlf2_test = fi.nlf2(440, 0.995, src);
 ```
 
 #### References
@@ -1173,13 +1214,15 @@ _ : apnl(a1,a2) : _
 
 Where:
 
-* `a1` and `a2`: allpass coefficients
+* `a1`: first allpass coefficient
+* `a2`: second allpass coefficient
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-apnl_test = fi.apnl(0.5, -0.5, os.osc(440));
+src = os.osc(440);
+apnl_test = fi.apnl(0.5, -0.5, src);
 ```
 
 #### References
@@ -1241,7 +1284,8 @@ process = _ : *(1.0/sqrt(N)) <: daisyRev(16,2,0.9999) :> _,_ with {
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-scatN_test = (os.osc(440), os.osc(660)) : fi.scatN(2, (1, 1), _);
+dual_src = os.osc(440), os.osc(660);
+scatN_test = dual_src : fi.scatN(2, (1, 1), _);
 ```
 
 #### References
@@ -1261,7 +1305,7 @@ Scatter off of reflectance r with reflection coefficient s.
 ```
 _ : scat(s,r) : _
 ```
-#### Where:
+Where:
 
 * `s`: reflection coefficient between -1 and 1 for stability
 * `r`: single-input, single-output block diagram,
@@ -1278,7 +1322,8 @@ process = fi.allpassn(3,(.3,.2,.1)), fi.scat(.1, fi.scat(.2, fi.scat(.3, _)))
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-scat_test = os.osc(440) : fi.scat(0.5, _);
+src = os.osc(440);
+scat_test = src : fi.scat(0.5, _);
 ```
 
 #### References
@@ -1296,11 +1341,10 @@ Two-multiply lattice filter.
 ```
 _ : allpassn(n,sv) : _
 ```
-#### Where:
+Where:
 
 * `n`: the order of the filter
-* `sv`: the reflection coefficients (-1 1)
-* `sv`: the reflection coefficients  (s1,s2,...,sN), each between -1 and 1.
+* `sv`: the reflection coefficients `(s1,s2,...,sN)`, each between -1 and 1
 
 Equivalent to `fi.allpassnt(n,sv) : _, par(i,n,!);`
 
@@ -1313,7 +1357,8 @@ Identical to `allpassn` in `old/filter.lib`.
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-allpassn_test = os.osc(440) : fi.allpassn(3, (0.3, 0.2, 0.1));
+src = os.osc(440);
+allpassn_test = src : fi.allpassn(3, (0.3, 0.2, 0.1));
 ```
 
 #### References
@@ -1344,7 +1389,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-allpassnn_test = os.osc(440) : fi.allpassnn(3, (0.3, 0.2, 0.1));
+src = os.osc(440);
+allpassnn_test = src : fi.allpassnn(3, (0.3, 0.2, 0.1));
 ```
 
 ----
@@ -1370,7 +1416,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-allpassnkl_test = os.osc(440) : fi.allpassnkl(3, (0.3, 0.2, 0.1));
+src = os.osc(440);
+allpassnkl_test = src : fi.allpassnkl(3, (0.3, 0.2, 0.1));
 ```
 
 ----
@@ -1395,7 +1442,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-allpassn1m_test = os.osc(440) : fi.allpassn1m(3, (0.3, 0.2, 0.1));
+src = os.osc(440);
+allpassn1m_test = src : fi.allpassn1m(3, (0.3, 0.2, 0.1));
 ```
 
 ## Digital Filter Sections Specified as Analog Filter Sections
@@ -1450,7 +1498,8 @@ Bilinear transform scaled for exact mapping of w1.
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-tf2s_test = os.osc(440) : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+src = os.osc(440);
+tf2s_test = src : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
 ```
 
 #### References
@@ -1466,15 +1515,23 @@ First-order special case of tf2snp above.
 #### Usage
 
 ```
-_ : tf1snp(b1,b0,a0) : _
+_ : tf1snp(b1,b0,a0,w1) : _
 ```
+
+Where:
+
+* `b1`: analog numerator coefficient for `s`
+* `b0`: analog numerator constant coefficient
+* `a0`: analog denominator constant coefficient
+* `w1`: desired digital frequency (radians/second) corresponding to analog frequency `1 rad/sec`
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-tf1snp_test = os.osc(440) : fi.tf1snp(0, 1, 1, ma.PI*ma.SR/2);
+src = os.osc(440);
+tf1snp_test = src : fi.tf1snp(0, 1, 1, ma.PI*ma.SR/2);
 ```
 
 ----
@@ -1492,11 +1549,23 @@ Note the lack of a "w1" argument.
 _ : tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) : _
 ```
 
+Where:
+
+* `b3`: analog numerator coefficient of `s^3`
+* `b2`: analog numerator coefficient of `s^2`
+* `b1`: analog numerator coefficient of `s`
+* `b0`: analog numerator constant term
+* `a3`: analog denominator coefficient of `s^3`
+* `a2`: analog denominator coefficient of `s^2`
+* `a1`: analog denominator coefficient of `s`
+* `a0`: analog denominator constant term
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-tf3slf_test = os.osc(440) : fi.tf3slf(0, 0, 0, 1, 1, 2, 2, 1);
+src = os.osc(440);
+tf3slf_test = src : fi.tf3slf(0, 0, 0, 1, 1, 2, 2, 1);
 ```
 
 ----
@@ -1512,6 +1581,14 @@ and a frequency-scaling parameter.
 ```
 _ : tf1s(b1,b0,a0,w1) : _
 ```
+
+Where:
+
+* `b1`: analog numerator coefficient of `s`
+* `b0`: analog numerator constant term
+* `a0`: analog denominator constant term in `s + a0`
+* `w1`: desired digital frequency in radians per second corresponding to analog frequency `1 rad/s`
+
 Where:
 
        b1 s + b0
@@ -1547,7 +1624,8 @@ Bilinear transform scaled for exact mapping of w1.
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-tf1s_test = os.osc(440) : fi.tf1s(0, 1, 1, ma.PI*ma.SR/2);
+src = os.osc(440);
+tf1s_test = src : fi.tf1s(0, 1, 1, ma.PI*ma.SR/2);
 ```
 
 #### References
@@ -1574,12 +1652,20 @@ usual scale parameter `2*SR`.  Algebra carried out in maxima and pasted here.
 _ : tf2sb(b2,b1,b0,a1,a0,w1,wc) : _
 ```
 
+Where:
+
+* `b2`, `b1`, `b0`: analog lowpass numerator coefficients
+* `a1`, `a0`: analog lowpass denominator coefficients
+* `w1`: half the desired passband width in radians/second
+* `wc`: desired center frequency in radians/second
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-tf2sb_test = os.osc(440) : fi.tf2sb(0, 0, 1, sqrt(2), 1, 2*ma.PI*200, 2*ma.PI*1000);
+src = os.osc(440);
+tf2sb_test = src : fi.tf2sb(0, 0, 1, sqrt(2), 1, 2*ma.PI*200, 2*ma.PI*1000);
 ```
 
 ----
@@ -1595,12 +1681,20 @@ analogous to tf2sb above.
 _ : tf1sb(b1,b0,a0,w1,wc) : _
 ```
 
+Where:
+
+* `b1`, `b0`: analog numerator coefficients
+* `a0`: analog denominator constant coefficient
+* `w1`: half the desired passband width in radians/second
+* `wc`: desired center frequency in radians/second
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-tf1sb_test = os.osc(440) : fi.tf1sb(0, 1, 1, 2*ma.PI*200, 2*ma.PI*1000);
+src = os.osc(440);
+tf1sb_test = src : fi.tf1sb(0, 1, 1, 2*ma.PI*200, 2*ma.PI*1000);
 ```
 
 ## Simple Resonator Filters
@@ -1632,7 +1726,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-resonlp_test = os.osc(440) : fi.resonlp(1000, 2, 0.8);
+src = os.osc(440);
+resonlp_test = src : fi.resonlp(1000, 2, 0.8);
 ```
 
 ----
@@ -1661,7 +1756,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-resonhp_test = fi.resonhp(1000, 2, 0.8, os.osc(440));
+src = os.osc(440);
+resonhp_test = fi.resonhp(1000, 2, 0.8, src);
 ```
 
 ----
@@ -1690,7 +1786,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-resonbp_test = os.osc(440) : fi.resonbp(1000, 2, 0.8);
+src = os.osc(440);
+resonbp_test = src : fi.resonbp(1000, 2, 0.8);
 ```
 
 ## Butterworth Lowpass/Highpass Filters
@@ -1718,7 +1815,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lowpass_test = os.osc(440) : fi.lowpass(4, 2000);
+src = os.osc(440);
+lowpass_test = src : fi.lowpass(4, 2000);
 ```
 
 #### References
@@ -1748,7 +1846,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highpass_test = os.osc(440) : fi.highpass(4, 500);
+src = os.osc(440);
+highpass_test = src : fi.highpass(4, 500);
 ```
 
 #### References
@@ -1765,7 +1864,8 @@ highpass_test = os.osc(440) : fi.highpass(4, 500);
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lowpass0_highpass1_test = os.osc(440) : fi.lowpass0_highpass1(0, 2, 1000);
+src = os.osc(440);
+lowpass0_highpass1_test = src : fi.lowpass0_highpass1(0, 2, 1000);
 ```
 
 ## Special Filter-Bank Delay-Equalizing Allpass Filters
@@ -1800,14 +1900,14 @@ highpass_minus_lowpass_test = os.osc(440) : fi.highpass_minus_lowpass(3, 1000);
 
 ----
 
-### `(fi.)highpass_plus_lowpass_even`
+### `(fi.)highpass_minus_lowpass_even`
 
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highpass_plus_lowpass_even_test = os.osc(440) : fi.highpass_plus_lowpass_even(4, 1000);
+highpass_plus_lowpass_even_test = os.osc(440), os.osc(440) : fi.highpass_plus_lowpass_even(4, 1000);
 ```
 
 ----
@@ -1819,19 +1919,31 @@ highpass_plus_lowpass_even_test = os.osc(440) : fi.highpass_plus_lowpass_even(4,
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highpass_minus_lowpass_even_test = os.osc(440) : fi.highpass_minus_lowpass_even(4, 1000);
+highpass_minus_lowpass_even_test = os.osc(440), os.osc(440) : fi.highpass_minus_lowpass_even(4, 1000);
 ```
 
 ----
 
-### `(fi.)highpass_minus_lowpass_odd`
+### `(fi.)highpass_plus_lowpass_odd`
 
+Sum of the odd-order highpass and lowpass responses.
+
+#### Usage
+
+```
+_ : highpass_plus_lowpass_odd(N,fc) : _
+```
+
+Where:
+
+* `N`: odd Butterworth order
+* `fc`: cutoff frequency in Hz
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highpass_plus_lowpass_odd_test = os.osc(440) : fi.highpass_plus_lowpass_odd(3, 1000);
+highpass_plus_lowpass_odd_test = os.osc(440), os.osc(440) : fi.highpass_plus_lowpass_odd(3, 1000);
 ```
 FIXME: Rewrite the following, as for orders 3 and 5 above,
        to eliminate pole-zero cancellations:
@@ -1840,12 +1952,24 @@ FIXME: Rewrite the following, as for orders 3 and 5 above,
 
 ### `(fi.)highpass_minus_lowpass_odd`
 
+Difference between the odd-order highpass and lowpass responses.
+
+#### Usage
+
+```
+_ : highpass_minus_lowpass_odd(N,fc) : _
+```
+
+Where:
+
+* `N`: odd Butterworth order
+* `fc`: cutoff frequency in Hz
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highpass_minus_lowpass_odd_test = os.osc(440) : fi.highpass_minus_lowpass_odd(3, 1000);
+highpass_minus_lowpass_odd_test = os.osc(440), os.osc(440) : fi.highpass_minus_lowpass_odd(3, 1000);
 ```
 FIXME: Rewrite the following, as for orders 3 and 5 above,
        to eliminate pole-zero cancellations/
@@ -1879,7 +2003,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lowpass3e_test = os.osc(440) : fi.lowpass3e(1000);
+src = os.osc(440);
+lowpass3e_test = src : fi.lowpass3e(1000);
 ```
 
 #### Design
@@ -1912,7 +2037,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lowpass6e_test = os.osc(440) : fi.lowpass6e(1000);
+src = os.osc(440);
+lowpass6e_test = src : fi.lowpass6e(1000);
 ```
 
 #### Design
@@ -1949,7 +2075,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highpass3e_test = os.osc(440) : fi.highpass3e(1000);
+src = os.osc(440);
+highpass3e_test = src : fi.highpass3e(1000);
 ```
 
 ----
@@ -1973,7 +2100,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highpass6e_test = os.osc(440) : fi.highpass6e(1000);
+src = os.osc(440);
+highpass6e_test = src : fi.highpass6e(1000);
 ```
 
 ## Butterworth Bandpass/Bandstop Filters
@@ -2006,12 +2134,13 @@ Thus, the passband width is `fu-fl`,
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-bandpass_test = os.osc(440) : fi.bandpass(2, 500, 1500);
+src = os.osc(440);
+bandpass_test = src : fi.bandpass(2, 500, 1500);
 ```
 
 ----
 
-### `(fi.)bandstop`
+### `(fi.)bandpass0_bandstop1`
 
 Order 2*Nh Butterworth bandstop filter made using the transformation
 `s <- s + wc^2/s` on `highpass(Nh)`, where `wc` is the desired bandpass center
@@ -2035,7 +2164,8 @@ Thus, the passband (stopband) width is `fu-fl`,
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-bandstop_test = os.osc(440) : fi.bandstop(2, 500, 1500);
+src = os.osc(440);
+bandstop_test = src : fi.bandstop(2, 500, 1500);
 ```
 
 ----
@@ -2047,7 +2177,8 @@ bandstop_test = os.osc(440) : fi.bandstop(2, 500, 1500);
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-bandpass0_bandstop1_test = os.osc(440) : fi.bandpass0_bandstop1(0, 2, 500, 1500);
+src = os.osc(440);
+bandpass0_bandstop1_test = src : fi.bandpass0_bandstop1(0, 2, 500, 1500);
 ```
 
 ## Elliptic Bandpass Filters
@@ -2155,7 +2286,8 @@ fact that odd-order Butterworth band-splits are allpass-complementary
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lowshelf_test = os.osc(440) : fi.lowshelf(3, 6, 500);
+src = os.osc(440);
+lowshelf_test = src : fi.lowshelf(3, 6, 500);
 ```
 
 #### Shelf Shape
@@ -2188,7 +2320,20 @@ L(lf) is easy to state in dB versus dB-frequency lf = dB(f):
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-low_shelf_test = os.osc(440) : fi.low_shelf(6, 500);
+src = os.osc(440);
+low_shelf_test = src : fi.low_shelf(6, 500);
+```
+
+----
+
+### `(fi.)low_shelf1`
+
+#### Test
+```
+fi = library("filters.lib");
+os = library("oscillators.lib");
+src = os.osc(440);
+low_shelf1_l_test = fi.low_shelf1_l(2, 500, src);
 ```
 
 ----
@@ -2199,18 +2344,8 @@ low_shelf_test = os.osc(440) : fi.low_shelf(6, 500);
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-low_shelf1_l_test = fi.low_shelf1_l(2, 500, os.osc(440));
-```
-
-----
-
-### `(fi.)low_shelf1_l`
-
-#### Test
-```
-fi = library("filters.lib");
-os = library("oscillators.lib");
-low_shelf1_l_test = fi.low_shelf1_l(2, 500, os.osc(440));
+src = os.osc(440);
+low_shelf1_l_test = fi.low_shelf1_l(2, 500, src);
 ```
 
 ----
@@ -2225,7 +2360,7 @@ lowshelf_other_freq_test = fi.lowshelf_other_freq(3, 6, 500);
 
 ----
 
-### `(fi.)high_shelf`
+### `(fi.)highshelf`
 
 First-order "high shelf" filter (gain boost|cut above some frequency).
 `high_shelf` is a standard Faust function.
@@ -2252,7 +2387,8 @@ See `lowshelf` documentation above for more details on shelf shape.
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highshelf_test = os.osc(440) : fi.highshelf(3, 6, 2000);
+src = os.osc(440);
+highshelf_test = src : fi.highshelf(3, 6, 2000);
 ```
 
 #### References
@@ -2267,7 +2403,8 @@ highshelf_test = os.osc(440) : fi.highshelf(3, 6, 2000);
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-high_shelf_test = os.osc(440) : fi.high_shelf(6, 2000);
+src = os.osc(440);
+high_shelf_test = src : fi.high_shelf(6, 2000);
 ```
 
 ----
@@ -2278,7 +2415,8 @@ high_shelf_test = os.osc(440) : fi.high_shelf(6, 2000);
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-high_shelf1_test = fi.high_shelf1(6, 2000, os.osc(440));
+src = os.osc(440);
+high_shelf1_test = fi.high_shelf1(6, 2000, src);
 ```
 
 ----
@@ -2289,7 +2427,8 @@ high_shelf1_test = fi.high_shelf1(6, 2000, os.osc(440));
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-high_shelf1_l_test = fi.high_shelf1_l(2, 2000, os.osc(440));
+src = os.osc(440);
+high_shelf1_l_test = fi.high_shelf1_l(2, 2000, src);
 ```
 
 ----
@@ -2326,7 +2465,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-peak_eq_test = os.osc(440) : fi.peak_eq(6, 1000, 200);
+src = os.osc(440);
+peak_eq_test = src : fi.peak_eq(6, 1000, 200);
 ```
 
 #### References
@@ -2355,7 +2495,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-peak_eq_cq_test = os.osc(440) : fi.peak_eq_cq(6, 1000, 4);
+src = os.osc(440);
+peak_eq_cq_test = src : fi.peak_eq_cq(6, 1000, 4);
 ```
 
 #### References
@@ -2386,7 +2527,8 @@ Where:
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-peak_eq_rm_test = os.osc(440) : fi.peak_eq_rm(6, 1000, ma.tan(ma.PI*200/ma.SR));
+src = os.osc(440);
+peak_eq_rm_test = src : fi.peak_eq_rm(6, 1000, tan(ma.PI*200/ma.SR));
 ```
 
 #### References
@@ -2426,7 +2568,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-spectral_tilt_test = os.osc(440) : fi.spectral_tilt(4, 200, 2000, -0.5);
+src = os.osc(440);
+spectral_tilt_test = src : fi.spectral_tilt(4, 200, 2000, -0.5);
 ```
 
 #### Example test program
@@ -2462,7 +2605,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-levelfilter_test = fi.levelfilter(0.1, 200, os.osc(440));
+src = os.osc(440);
+levelfilter_test = fi.levelfilter(0.1, 200, src);
 ```
 
 #### References
@@ -2491,7 +2635,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-levelfilterN_test = os.osc(440) : fi.levelfilterN(3, 200, 0.1);
+src = os.osc(440);
+levelfilterN_test = src : fi.levelfilterN(3, 200, 0.1);
 ```
 
 #### References
@@ -2577,7 +2722,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-mth_octave_filterbank_test = os.osc(440) : fi.mth_octave_filterbank(3, 2, 8000, 2);
+sig = os.osc(440);
+mth_octave_filterbank_test = sig : fi.mth_octave_filterbank(3, 2, 8000, 2);
 ```
 
 ----
@@ -2585,11 +2731,25 @@ mth_octave_filterbank_test = os.osc(440) : fi.mth_octave_filterbank(3, 2, 8000, 
 ### `(fi.)mth_octave_filterbank_alt`
 
 
+#### Usage
+
+```
+_ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_)
+```
+
+Where:
+
+* `O`: filter order used to split each band
+* `M`: number of band-slices per octave
+* `ftop`: highest band-split crossover frequency
+* `N`: total number of bands
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-mth_octave_filterbank_alt_test = os.osc(440) : fi.mth_octave_filterbank_alt(3, 2, 8000, 2);
+sig = os.osc(440);
+mth_octave_filterbank_alt_test = sig : fi.mth_octave_filterbank_alt(3, 2, 8000, 2);
 ```
 
 ----
@@ -2597,11 +2757,24 @@ mth_octave_filterbank_alt_test = os.osc(440) : fi.mth_octave_filterbank_alt(3, 2
 ### `(fi.)mth_octave_filterbank3`
 
 
+#### Usage
+
+```
+_ : mth_octave_filterbank3(M,ftop,N) : par(i,N,_)
+```
+
+Where:
+
+* `M`: number of band-slices per octave
+* `ftop`: highest band-split crossover frequency
+* `N`: total number of bands
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-mth_octave_filterbank3_test = os.osc(440) : fi.mth_octave_filterbank3(2, 8000, 2);
+sig = os.osc(440);
+mth_octave_filterbank3_test = sig : fi.mth_octave_filterbank3(2, 8000, 2);
 ```
 
 ----
@@ -2609,11 +2782,24 @@ mth_octave_filterbank3_test = os.osc(440) : fi.mth_octave_filterbank3(2, 8000, 2
 ### `(fi.)mth_octave_filterbank5`
 
 
+#### Usage
+
+```
+_ : mth_octave_filterbank5(M,ftop,N) : par(i,N,_)
+```
+
+Where:
+
+* `M`: number of band-slices per octave
+* `ftop`: highest band-split crossover frequency
+* `N`: total number of bands
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-mth_octave_filterbank5_test = os.osc(440) : fi.mth_octave_filterbank5(2, 8000, 2);
+sig = os.osc(440);
+mth_octave_filterbank5_test = sig : fi.mth_octave_filterbank5(2, 8000, 2);
 ```
 
 ----
@@ -2625,7 +2811,8 @@ mth_octave_filterbank5_test = os.osc(440) : fi.mth_octave_filterbank5(2, 8000, 2
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-mth_octave_filterbank_default_test = os.osc(440) : fi.mth_octave_filterbank_default(2, 8000, 2);
+sig = os.osc(440);
+mth_octave_filterbank_default_test = sig : fi.mth_octave_filterbank_default(2, 8000, 2);
 ```
 
 ## Arbitrary-Crossover Filter-Banks and Spectrum Analyzers
@@ -2662,7 +2849,8 @@ _ : filterbank(3,(fc1,fc2)) : _,_,_
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-filterbank_test = os.osc(440) : fi.filterbank(3, (500, 2000));
+src = os.osc(440);
+filterbank_test = src : fi.filterbank(3, (500, 2000));
 ```
 
 ----
@@ -2694,7 +2882,8 @@ _ : filterbanki(3,(fc1,fc2)) : _,_,_
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-filterbanki_test = os.osc(440) : fi.filterbanki(3, (500, 2000));
+src = os.osc(440);
+filterbanki_test = src : fi.filterbanki(3, (500, 2000));
 ```
 
 ## State Variable Filters
@@ -2727,15 +2916,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-svf_lp_test = fi.svf.lp(1000, 0.707, os.osc(440));
-svf_bp_test = fi.svf.bp(1000, 0.707, os.osc(440));
-svf_hp_test = fi.svf.hp(1000, 0.707, os.osc(440));
-svf_notch_test = fi.svf.notch(1000, 0.707, os.osc(440));
-svf_peak_test = fi.svf.peak(1000, 0.707, os.osc(440));
-svf_ap_test = fi.svf.ap(1000, 0.707, os.osc(440));
-svf_bell_test = fi.svf.bell(1000, 0.707, 6, os.osc(440));
-svf_ls_test = fi.svf.ls(500, 0.707, 6, os.osc(440));
-svf_hs_test = fi.svf.hs(3000, 0.707, 6, os.osc(440));
+sig = os.osc(440);
+svf_lp_test = fi.svf.lp(1000, 0.707, sig);
 ```
 
 ----
@@ -2761,7 +2943,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-svf_morph_test = fi.svf_morph(1000, 0.707, 1, os.osc(440));
+sig = os.osc(440);
+svf_morph_test = fi.svf_morph(1000, 0.707, 1, sig);
 ```
 
 #### Example test program
@@ -2802,7 +2985,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-svf_notch_morph_test = fi.svf_notch_morph(1000, 0.707, 1, os.osc(440));
+sig = os.osc(440);
+svf_notch_morph_test = fi.svf_notch_morph(1000, 0.707, 1, sig);
 ```
 
 #### Example test program
@@ -2855,14 +3039,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-SVFTPT_SVF_test = fi.SVFTPT.SVF(1000, 0.707, os.osc(440));
-SVFTPT_LP2_test = fi.SVFTPT.LP2(1000, 0.707, os.osc(440));
-SVFTPT_HP2_test = fi.SVFTPT.HP2(1000, 0.707, os.osc(440));
-SVFTPT_BP2_test = fi.SVFTPT.BP2(1000, 0.707, os.osc(440));
-SVFTPT_BP2Norm_test = fi.SVFTPT.BP2Norm(1000, 0.707, os.osc(440));
-SVFTPT_Notch2_test = fi.SVFTPT.Notch2(1000, 0.707, os.osc(440));
-SVFTPT_AP2_test = fi.SVFTPT.AP2(1000, 0.707, os.osc(440));
-SVFTPT_Peaking2_test = fi.SVFTPT.Peaking2(1000, 0.707, os.osc(440));
+sig = os.osc(440);
+SVFTPT_SVF_test = fi.SVFTPT.SVF(1000, 0.707, sig);
 ```
 
 ----
@@ -2902,7 +3080,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-dynamicSmoothing_test = fi.dynamicSmoothing(0.5, 500, os.osc(440));
+sig = os.osc(440);
+dynamicSmoothing_test = fi.dynamicSmoothing(0.5, 500, sig);
 ```
 
 #### References
@@ -2933,7 +3112,8 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-oneEuro_test = os.osc(440) : fi.oneEuro(1, 0.5, 5);
+sig = os.osc(440);
+oneEuro_test = sig : fi.oneEuro(1, 0.5, 5);
 ```
 
 #### References
@@ -2972,13 +3152,14 @@ _ : lowpassLR4(cf) : _
 
 Where:
 
-* `cf` is the lowpass cutoff in Hz
+* `cf`: lowpass cutoff in Hz
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-lowpassLR4_test = os.osc(440) : fi.lowpassLR4(1000);
+src = os.osc(440);
+lowpassLR4_test = src : fi.lowpassLR4(1000);
 ```
 
 ----
@@ -2995,13 +3176,14 @@ _ : highpassLR4(cf) : _
 
 Where:
 
-* `cf` is the highpass cutoff in Hz
+* `cf`: highpass cutoff in Hz
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-highpassLR4_test = os.osc(440) : fi.highpassLR4(1000);
+src = os.osc(440);
+highpassLR4_test = src : fi.highpassLR4(1000);
 ```
 
 ----
@@ -3018,13 +3200,14 @@ _ : crossover2LR4(cf) : si.bus(2)
 
 Where:
 
-* `cf` is the crossover split cutoff in Hz
+* `cf`: crossover split cutoff in Hz
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-crossover2LR4_test = os.osc(440) : fi.crossover2LR4(1000);
+src = os.osc(440);
+crossover2LR4_test = src : fi.crossover2LR4(1000);
 ```
 
 ----
@@ -3041,14 +3224,15 @@ _ : crossover3LR4(cf1, cf2) : si.bus(3)
 
 Where:
 
-* `cf1` is the crossover lower split cutoff in Hz
-* `cf2` is the crossover upper split cutoff in Hz
+* `cf1`: crossover lower split cutoff in Hz
+* `cf2`: crossover upper split cutoff in Hz
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-crossover3LR4_test = os.osc(440) : fi.crossover3LR4(500, 2000);
+src = os.osc(440);
+crossover3LR4_test = src : fi.crossover3LR4(500, 2000);
 ```
 
 ----
@@ -3065,15 +3249,16 @@ _ : crossover4LR4(cf1, cf2, cf3) : si.bus(4)
 
 Where:
 
-* `cf1` is the crossover lower split cutoff in Hz
-* `cf2` is the crossover mid split cutoff in Hz
-* `cf3` is the crossover upper split cutoff in Hz
+* `cf1`: crossover lower split cutoff in Hz
+* `cf2`: crossover mid split cutoff in Hz
+* `cf3`: crossover upper split cutoff in Hz
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-crossover4LR4_test = os.osc(440) : fi.crossover4LR4(300, 1000, 3000);
+src = os.osc(440);
+crossover4LR4_test = src : fi.crossover4LR4(300, 1000, 3000);
 ```
 
 ----
@@ -3090,13 +3275,20 @@ _ : crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7) : si.bus(8)
 
 Where:
 
-* `cf1-cf7` are the crossover cutoff frequencies in Hz
+* `cf1`: lowest crossover cutoff frequency in Hz
+* `cf2`: second crossover cutoff frequency in Hz
+* `cf3`: third crossover cutoff frequency in Hz
+* `cf4`: fourth crossover cutoff frequency in Hz
+* `cf5`: fifth crossover cutoff frequency in Hz
+* `cf6`: sixth crossover cutoff frequency in Hz
+* `cf7`: highest crossover cutoff frequency in Hz
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-crossover8LR4_test = os.osc(440) : fi.crossover8LR4(100, 200, 400, 800, 1600, 3200, 6400);
+src = os.osc(440);
+crossover8LR4_test = src : fi.crossover8LR4(100, 200, 400, 800, 1600, 3200, 6400);
 ```
 
 ##  Standardized Filters 
@@ -3133,7 +3325,8 @@ _ : itu_r_bs_1770_4_kfilter : _
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-itu_r_bs_1770_4_kfilter_test = os.osc(440) : fi.itu_r_bs_1770_4_kfilter;
+src = os.osc(440);
+itu_r_bs_1770_4_kfilter_test = src : fi.itu_r_bs_1770_4_kfilter;
 ```
 
 #### References
@@ -3158,7 +3351,7 @@ _ : avg_rect(period) : _
 
 Where:
 
-* `period` is the averaging frame in seconds
+* `period`: averaging frame duration in seconds
 
 ----
 
@@ -3178,7 +3371,7 @@ _ : avg_tau(period) : _
 
 Where:
 
-* `period` is the time, in seconds, for the system to decay by 1/e,
+* `period`: time, in seconds, for the system to decay by 1/e,
 or to reach 1-1/e of its final value.
 
 #### References
@@ -3201,7 +3394,7 @@ _ : avg_t60(period) : _
 
 Where:
 
-* `period` is the time, in seconds, for the system to decay by 1/1000,
+* `period`: time, in seconds, for the system to decay by 1/1000,
 or to reach 1-1/1000 of its final value.
 
 #### References
@@ -3225,7 +3418,7 @@ _ : avg_t19(period) : _
 
 Where:
 
-* `period` is the time, in seconds, for the system to decay by 1/e^2.2,
+* `period`: time, in seconds, for the system to decay by 1/e^2.2,
 or to reach 1-1/e^2.2 of its final value.
 
 #### References

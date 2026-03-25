@@ -9,7 +9,7 @@ simple band-energy meters.
 Debug probes can be compiled out by setting the `DEBUG` global to 0 via
 explicit substitution (e.g. `db[DEBUG=0;].probe_rms_db(...)`).
 CNE means constant numerical expression (known at compile time).
-`[probe:ID]` metadata tags are used to identify probes in the UI
+`[probe:ID]` metadata tags are used to identify probes in the UI.
 
 The Debug library is organized into 11 sections:
 
@@ -55,7 +55,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_rms_lin_test = db.probe_rms_lin(1, 1, os.osc(220));
+mono = os.osc(220);
+probe_rms_lin_test = db.probe_rms_lin(1, 1, mono);
 ```
 
 ----
@@ -79,7 +80,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_rms_db_test = db.probe_rms_db(0, 1, os.osc(220));
+mono = os.osc(220);
+probe_rms_db_test = db.probe_rms_db(0, 1, mono);
 ```
 
 ----
@@ -103,7 +105,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_peak_lin_test = db.probe_peak_lin(3, 1, os.osc(220));
+mono = os.osc(220);
+probe_peak_lin_test = db.probe_peak_lin(3, 1, mono);
 ```
 
 ----
@@ -127,7 +130,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_peak_db_test = db.probe_peak_db(2, 1, os.osc(220));
+mono = os.osc(220);
+probe_peak_db_test = db.probe_peak_db(2, 1, mono);
 ```
 
 ## Dynamics Probes
@@ -156,7 +160,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_crest_db_test = db.probe_crest_db(4, 1, os.osc(220));
+mono = os.osc(220);
+probe_crest_db_test = db.probe_crest_db(4, 1, mono);
 ```
 
 ----
@@ -180,7 +185,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_env_test = db.probe_env(5, 1, os.osc(220));
+mono = os.osc(220);
+probe_env_test = db.probe_env(5, 1, mono);
 ```
 
 ----
@@ -204,7 +210,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_min_test = db.probe_min(6, 1, os.osc(220));
+mono = os.osc(220);
+probe_min_test = db.probe_min(6, 1, mono);
 ```
 
 ----
@@ -228,7 +235,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_max_test = db.probe_max(7, 1, os.osc(220));
+mono = os.osc(220);
+probe_max_test = db.probe_max(7, 1, mono);
 ```
 
 ## Signal Quality Probes
@@ -257,7 +265,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_dc_test = db.probe_dc(8, 1, os.osc(220));
+mono = os.osc(220);
+probe_dc_test = db.probe_dc(8, 1, mono);
 ```
 
 ----
@@ -281,7 +290,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_slew_test = db.probe_slew(9, 1, os.osc(220));
+mono = os.osc(220);
+probe_slew_test = db.probe_slew(9, 1, mono);
 ```
 
 ----
@@ -305,7 +315,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_zcr_test = db.probe_zcr(10, 1, os.osc(220));
+mono = os.osc(220);
+probe_zcr_test = db.probe_zcr(10, 1, mono);
 ```
 
 ## Control Signal Probes
@@ -334,7 +345,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_value_test = db.probe_value(11, 1, os.osc(220));
+mono = os.osc(220);
+probe_value_test = db.probe_value(11, 1, mono);
 ```
 
 ----
@@ -358,7 +370,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_bool_test = db.probe_bool(12, 1, os.osc(220) > 0);
+mono = os.osc(220);
+probe_bool_test = db.probe_bool(12, 1, mono > 0);
 ```
 
 ## Spectral Probes
@@ -387,7 +400,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_band_lo_test = db.probe_band_lo(13, 1, os.osc(220));
+mono = os.osc(220);
+probe_band_lo_test = db.probe_band_lo(13, 1, mono);
 ```
 
 ----
@@ -411,7 +425,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_band_mid_test = db.probe_band_mid(14, 1, os.osc(220));
+mono = os.osc(220);
+probe_band_mid_test = db.probe_band_mid(14, 1, mono);
 ```
 
 ----
@@ -435,7 +450,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_band_hi_test = db.probe_band_hi(15, 1, os.osc(220));
+mono = os.osc(220);
+probe_band_hi_test = db.probe_band_hi(15, 1, mono);
 ```
 
 ----
@@ -460,7 +476,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_spectral_centroid_test = db.probe_spectral_centroid(43, 1, os.osc(220));
+mono = os.osc(220);
+probe_spectral_centroid_test = db.probe_spectral_centroid(43, 1, mono);
 ```
 
 ----
@@ -487,7 +504,8 @@ Creates 8 probes at IDs ID through ID+7.
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_multiband_test = db.probe_multiband(44, 1, os.osc(220));
+mono = os.osc(220);
+probe_multiband_test = db.probe_multiband(44, 1, mono);
 ```
 
 ## Analysis Probes
@@ -519,7 +537,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_freq_lin_test = db.probe_freq_lin(34, 1, 440, 10, os.osc(440));
+mono = os.osc(220);
+probe_freq_lin_test = db.probe_freq_lin(34, 1, 440, 10, mono);
 ```
 
 ----
@@ -545,7 +564,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_freq_db_test = db.probe_freq_db(35, 1, 440, 10, os.osc(440));
+mono = os.osc(220);
+probe_freq_db_test = db.probe_freq_db(35, 1, 440, 10, mono);
 ```
 
 ----
@@ -572,7 +592,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_freq_ratio_test = db.probe_freq_ratio(36, 1, 440, 660, 12, os.osc(440));
+mono = os.osc(220);
+probe_freq_ratio_test = db.probe_freq_ratio(36, 1, 440, 660, 12, mono);
 ```
 
 ## Decay Probes
@@ -603,7 +624,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_env_lin_test = db.probe_env_lin(37, 1, 0.001, 0.1, os.osc(220));
+mono = os.osc(220);
+probe_env_lin_test = db.probe_env_lin(37, 1, 0.001, 0.1, mono);
 ```
 
 ----
@@ -629,7 +651,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_env_db_test = db.probe_env_db(38, 1, 0.001, 0.1, os.osc(220));
+mono = os.osc(220);
+probe_env_db_test = db.probe_env_db(38, 1, 0.001, 0.1, mono);
 ```
 
 ----
@@ -655,7 +678,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_peak_hold_test = db.probe_peak_hold(39, 1, 2.0, os.osc(220));
+mono = os.osc(220);
+probe_peak_hold_test = db.probe_peak_hold(39, 1, 2.0, mono);
 ```
 
 ----
@@ -681,7 +705,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_below_threshold_test = db.probe_below_threshold(40, 1, -40, os.osc(220));
+mono = os.osc(220);
+probe_below_threshold_test = db.probe_below_threshold(40, 1, -40, mono);
 ```
 
 ## Attack Probes
@@ -712,7 +737,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_attack_state_test = db.probe_attack_state(41, 1, -60, os.osc(220));
+mono = os.osc(220);
+probe_attack_state_test = db.probe_attack_state(41, 1, -60, mono);
 ```
 
 ----
@@ -738,7 +764,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_onset_test = db.probe_onset(42, 1, -40, 50, os.osc(220));
+mono = os.osc(220);
+probe_onset_test = db.probe_onset(42, 1, -40, 50, mono);
 ```
 
 ## Analysis Signal Quality Probes
@@ -767,7 +794,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_dc_precise_test = db.probe_dc_precise(56, 1, os.osc(2));
+mono = os.osc(220);
+probe_dc_precise_test = db.probe_dc_precise(56, 1, mono);
 ```
 
 ----
@@ -792,7 +820,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_silence_test = db.probe_silence(57, 1, -60, os.osc(220));
+mono = os.osc(220);
+probe_silence_test = db.probe_silence(57, 1, -60, mono);
 ```
 
 ## Time Stamping
@@ -822,7 +851,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_sample_count_test = db.probe_sample_count(58, 1, os.osc(220));
+mono = os.osc(220);
+probe_sample_count_test = db.probe_sample_count(58, 1, mono);
 ```
 
 ----
@@ -846,7 +876,8 @@ Where:
 ```
 db = library("debug.lib");
 os = library("oscillators.lib");
-probe_time_ms_test = db.probe_time_ms(59, 1, os.osc(220));
+mono = os.osc(220);
+probe_time_ms_test = db.probe_time_ms(59, 1, mono);
 ```
 
 ## Tap Utilities
@@ -889,8 +920,9 @@ process = os.osc(220)
 #### Test
 ```
 db = library("debug.lib");
+mono = os.osc(220);
 os = library("oscillators.lib");
-tap_test = db.probe_tap(db.probe_rms_db(0, 1), os.osc(220));
+probe_tap_test = db.probe_tap(db.probe_rms_db(16, 1), mono);
 ```
 
 ----
@@ -933,7 +965,15 @@ process = stereo
 
 #### Test
 ```
+probe_tap_n_example = stereo
+  : db.probe_tap_n(2, + : db.probe_rms_db(100, 1))
+  : (fi.lowpass(2, 8000), fi.lowpass(2, 8000));
 db = library("debug.lib");
+fi = library("filters.lib");
+stereo = (left, right)
+  : (fi.lowpass(2, 2000), fi.highpass(2, 700));
+left = os.osc(220) : fi.lowpass(2, 1200);
+right = os.osc(330) : fi.highpass(2, 400);
 os = library("oscillators.lib");
-tap_n_test = (os.osc(220), os.osc(330)) : db.probe_tap_n(2, +);
+probe_tap_n_test = probe_tap_n_example;
 ```

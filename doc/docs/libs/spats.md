@@ -44,11 +44,32 @@ panner_test = os.osc(220) : sp.panner(hslider("panner:pan", 0.3, 0, 1, 0.01));
 
 ### `(sp.)constantPowerPan`
 
-Apply the constant power pan rule to a stereo signal.
-The channels are not respatialized. Their gains are simply
-adjusted. A pan of 0 preserves the left channel and silences
-the right channel. A pan of 1 has the opposite effect.
-A pan value of 0.5 applies a gain of 0.5 to both channels. 
+Apply constant-power panning to a stereo signal. Each input channel's gain
+is adjusted according to the pan position using a cosine/sine law: the left
+input is scaled by cos(θ)/√2 and the right input by sin(θ)/√2, where
+θ = π·p/2.
+
+#### Normalization
+
+A standard constant-power pan uses bare cos/sin gains, which peak at unity
+(0 dB) when hard-panned and dip to 1/√2 (−3 dB) at center. This
+implementation divides by √2, halving all gains:
+
+* `p = 0`  : left = 1/√2 ≈ 0.707 (−3 dB), right = 0
+* `p = 0.5`: left = 0.5 (−6 dB),          right = 0.5 (−6 dB)
+* `p = 1`  : left = 0,                    right = 1/√2 ≈ 0.707 (−3 dB)
+
+The /√2 factor makes the panner mono-safe: if the two output channels are
+ever summed to mono, the worst case is center pan, where the mono signal
+becomes 0.5*x + 0.5*y. Without the normalization, center pan would produce
+≈ 0.707*x + 0.707*y, which can clip with correlated or in-phase material.
+More generally, the normalization guarantees that the sum of the two gains
+never exceeds unity for any pan position:
+
+  gainLeft + gainRight = (cos θ + sin θ) / √2 ≤ 1
+
+This holds because cos θ + sin θ has a maximum of √2 (at θ = π/4), and
+√2/√2 = 1. The total power is also constant at 0.5 for all pan positions.
 
 #### Usage
 
@@ -132,7 +153,7 @@ wfs_xs(i) = 0.0;
 wfs_ys(i) = 1.0;
 wfs_zs(i) = 0.0;
 wfs_test = os.osc(440)
-  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_inGain, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
+  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
 ```
 
 ----

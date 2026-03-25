@@ -40,9 +40,9 @@ Where:
 ```
 si = library("signals.lib");
 bus_test = (
-    hslider("bus:x0", 0, -1, 1, 0.01),
-    hslider("bus:x1", 0, -1, 1, 0.01),
-    hslider("bus:x2", 0, -1, 1, 0.01)
+    hslider("bus:x0", 0.25, -1, 1, 0.01),
+    hslider("bus:x1", -0.5, -1, 1, 0.01),
+    hslider("bus:x2", 0.75, -1, 1, 0.01)
 ) : si.bus(3);
 ```
 
@@ -67,8 +67,8 @@ Where:
 ```
 si = library("signals.lib");
 block_test = (
-    hslider("block:x0", 0, -1, 1, 0.01),
-    hslider("block:x1", 0, -1, 1, 0.01)
+    hslider("block:x0", 0.5, -1, 1, 0.01),
+    hslider("block:x1", -0.25, -1, 1, 0.01)
 ) : (si.block(1), _);
 ```
 
@@ -120,7 +120,7 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
-repeat_test = hslider("repeat:input", 0, -1, 1, 0.01) : si.repeat(3, *(0.5));
+repeat_test = hslider("repeat:input", 0.5, -1, 1, 0.01) : si.repeat(3, *(0.5));
 ```
 
 Example 1:
@@ -160,7 +160,7 @@ hslider(...) : smoo;
 #### Test
 ```
 si = library("signals.lib");
-smoo_test = hslider("smoo:input", 0, -1, 1, 0.01) : si.smoo;
+smoo_test = hslider("smoo:input", 0.5, -1, 1, 0.01) : si.smoo;
 ```
 
 ----
@@ -188,7 +188,7 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
-polySmooth_test = hslider("polySmooth:input", 0, -1, 1, 0.01)
+polySmooth_test = hslider("polySmooth:input", 0.5, -1, 1, 0.01)
   : si.polySmooth(button("polySmooth:gate"), 0.999, 32);
 ```
 
@@ -215,7 +215,7 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
-smoothAndH_test = hslider("smoothAndH:input", 0, -1, 1, 0.01)
+smoothAndH_test = hslider("smoothAndH:input", 0.5, -1, 1, 0.01)
   : si.smoothAndH(button("smoothAndH:hold"), 0.999);
 ```
 
@@ -234,7 +234,7 @@ hslider(...) : bsmooth : _
 #### Test
 ```
 si = library("signals.lib");
-bsmooth_test = hslider("bsmooth:input", 0, -1, 1, 0.01) : si.bsmooth;
+bsmooth_test = hslider("bsmooth:input", 0.5, -1, 1, 0.01) : si.bsmooth;
 ```
 
 ----
@@ -294,7 +294,7 @@ The exponential time-constant is approximately 1/(1-s) samples, when s is close 
 #### Test
 ```
 si = library("signals.lib");
-smooth_test = hslider("smooth:input", 0, -1, 1, 0.01) : si.smooth(0.9);
+smooth_test = hslider("smooth:input", 0.5, -1, 1, 0.01) : si.smooth(0.9);
 ```
 
 #### References
@@ -322,7 +322,7 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
-smoothq_test = hslider("smoothq:input", 0, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+smoothq_test = hslider("smoothq:input", 0.5, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
 ```
 
 ----
@@ -379,7 +379,7 @@ si = library("signals.lib");
 os = library("oscillators.lib");
 cmul_test = si.cmul(
     os.osc(110), os.osc(220),
-   os.osc(330), os.osc(440)
+    os.osc(330), os.osc(440)
 );
 ```
 
@@ -429,7 +429,7 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
-onePoleSwitching_test = hslider("onePoleSwitching:input", 0, -1, 1, 0.01)
+onePoleSwitching_test = hslider("onePoleSwitching:input", 0.5, -1, 1, 0.01)
   : si.onePoleSwitching(0.05, 0.2);
 ```
 
@@ -485,7 +485,7 @@ that is greater or equal to one.
      si.bus(inputs(vectorsList)) : vecOp((vectorsList), op) : si.bus(outputs(ba.take(1, vectorsList)));
 ```
 
-#### Where
+Where:
 
 * `vectorsList`: is a list of vectors
 * `op`: is a two-input, one-output operator
@@ -620,8 +620,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-bsum_test = (os.osc(100), os.osc(200), os.osc(300))
-  : si.bsum(3, *(0.5));
+bsum_test = (os.osc(100), os.osc(200), os.osc(300)) : si.bsum(3, *(0.5));
 ```
 
 Example:

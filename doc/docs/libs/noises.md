@@ -59,7 +59,7 @@ Where:
 #### Test
 ```
 no = library("noises.lib");
-multirandom_test = no.multirandom(4);
+multirandom_test = no.multirandom(3);
 ```
 
 ----
@@ -129,7 +129,11 @@ Where:
 ```
 no = library("noises.lib");
 ba = library("basics.lib");
-dnoise_test = (1 : ba.impulsify, 10.0) : no.dnoise;
+dnoise_test = (trigger, seedRange) : no.dnoise
+with {
+  trigger = 1 : ba.impulsify;
+  seedRange = 10.0;
+};
 ```
 
 #### Example 
@@ -202,7 +206,7 @@ Where:
 #### Test
 ```
 no = library("noises.lib");
-rmultirandom_test = no.rmultirandom(4);
+rmultirandom_test = no.rmultirandom(3);
 ```
 
 ----
@@ -251,7 +255,7 @@ Where:
 #### Test
 ```
 no = library("noises.lib");
-rnoises_test = no.rnoises(4, 2);
+rnoises_test = no.rnoises(4, 1);
 ```
 
 ----
@@ -369,8 +373,6 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 ```
 no = library("noises.lib");
 lfnoise0_test = no.lfnoise0(10.0);
-lfnoiseN_test = no.lfnoiseN(3, 10.0);
-lfnoise_test = no.lfnoise(10.0);
 ```
 
 ----

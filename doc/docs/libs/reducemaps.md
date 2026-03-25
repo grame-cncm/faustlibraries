@@ -45,10 +45,8 @@ _,...,_ : parReduce(op, N) : _
 
 Where:
 
-* `op`: is a binary operation 
-* `N`: is the number of incomming signals (`N>0`). We use a capital letter
-here to indicate that the number of incomming signals must be constant and
-known at compile time.
+* `op`: binary reduction operation
+* `N`: number of incoming signals (`N > 0`), known at compile time
 
 #### Test
 ```
@@ -115,10 +113,8 @@ outputs.
 
 Where:
 
-* op: is a binary operation
-* N: is the number of incomming signals (`N>0`). We use a capital letter
-here to indicate that the number of incomming signals must be constant and
-known at compile time.
+* `op`: binary reduction operation
+* `N`: number of incoming signals (`N > 0`), known at compile time
 
 #### Test
 ```
@@ -151,7 +147,7 @@ Where:
 #### Test
 ```
 rm = library("reducemaps.lib");
-reduce_test = rm.reduce(max, 4, hslider("reduce:input", 0, -1, 1, 0.01));
+reduce_test = rm.reduce(max, 4, hslider("reduce:input", 0.5, -1, 1, 0.01));
 ```
 
 ----
@@ -178,5 +174,5 @@ Where:
 #### Test
 ```
 rm = library("reducemaps.lib");
-reducemap_test = rm.reducemap(+, /(4), 4, hslider("reducemap:input", 0, -1, 1, 0.01));
+reducemap_test = rm.reducemap(+, /(4), 4, hslider("reducemap:input", 0.5, -1, 1, 0.01));
 ```

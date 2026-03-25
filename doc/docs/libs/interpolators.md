@@ -456,6 +456,7 @@ process = it.piecewise((-5, -3, 0, 3, 5), (2, 0, 3, -3, -2), x);
 #### Test
 ```
 it = library("interpolators.lib");
+os = library("oscillators.lib");
 piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.osc(0.1));
 ```
 
@@ -539,7 +540,9 @@ process = x, yCoords : it.lagrangeInterpolation(N, xCoordsList);
 #### Test
 ```
 it = library("interpolators.lib");
-lagrangeInterpolation_test = (lagrange_x, lagrange_y0, lagrange_y1, lagrange_y2, lagrange_y3) : it.lagrangeInterpolation(3, (0, 1, 2, 3))
+lagrangeInterpolation_test =
+    (lagrange_x, lagrange_y0, lagrange_y1, lagrange_y2, lagrange_y3)
+    : it.lagrangeInterpolation(3, (0, 1, 2, 3))
 with {
     lagrange_x = 1.5;
     lagrange_y0 = 2.0;

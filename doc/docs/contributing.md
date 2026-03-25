@@ -246,6 +246,138 @@ Before preparing a pull-request, the new library must be carefully tested:
 - the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program: `import("all.lib"); process = _;`
 - reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified.
 
+
+## LLMs
+
+The site exposes an `llms.txt` file generated from `doc/docs/llms.txt` and published at [https://faustlibraries.grame.fr/llms.txt](https://faustlibraries.grame.fr/llms.txt).
+
+### Faust Library JSON Exports
+
+This repository can also generate machine-readable JSON exports of the Faust
+library documentation directly from the `.lib` sources.
+
+The generator is:
+
+```bash
+scripts/build_faust_doc_index.py
+```
+
+It parses documentation blocks from the library sources, starting from
+`stdfaust.lib`, follows `library("...")` and `import("...")` directives, and
+extracts for each documented symbol:
+
+- `summary`
+- `usage`
+- `params`
+- `notes`
+- `io` with `inSignals` / `outSignals` when derivable
+- `testCode`
+- `references`
+- `source`
+
+Two JSON layouts are supported:
+
+- monolithic: one full JSON file containing all libraries and symbols
+- split: one compact global index plus one detailed JSON file per module
+
+Default Make targets:
+
+```bash
+make doc-index
+make doc-index-split
+```
+
+Default output locations:
+
+- `make doc-index` writes `tests/faust-doc-index.json`
+- `make doc-index-split` writes:
+  - `tests/faust-doc-index.json`
+  - `tests/faust-doc/index.json`
+  - `tests/faust-doc/modules/*.json`
+
+You can override the output paths:
+
+```bash
+make doc-index DOC_INDEX_OUTPUT=/tmp/faust-doc-index.json
+make doc-index-split DOC_INDEX_OUTPUT=/tmp/faust-doc-index.json DOC_INDEX_SPLIT_DIR=/tmp/faust-doc
+```
+
+You can also run the generator directly:
+
+```bash
+python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --pretty
+python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --split-output-dir tests/faust-doc --pretty
+```
+
+The split layout is recommended for LLM or retrieval-based use because it avoids
+loading the whole documentation into context for every request.
+
+### Local Documentation Query API
+
+The repository also ships with a local query tool that reproduces the Faust
+library documentation operations used in `faustforge`:
+
+```bash
+scripts/faust_doc_api.py
+```
+
+Supported operations:
+
+- `search_faust_lib`
+- `get_faust_symbol`
+- `list_faust_module`
+- `get_faust_examples`
+- `explain_faust_symbol_for_goal`
+
+The tool can read either:
+
+- the monolithic export `tests/faust-doc-index.json`
+- the split export `tests/faust-doc/index.json`
+
+If `--index` is omitted, it tries these defaults in that order:
+
+1. `tests/faust-doc/index.json`
+2. `tests/faust-doc-index.json`
+
+Examples:
+
+```bash
+python3 scripts/faust_doc_api.py --pretty search_faust_lib reverb --limit 5
+python3 scripts/faust_doc_api.py --pretty search_faust_lib filter --module filters --limit 10
+
+python3 scripts/faust_doc_api.py --pretty get_faust_symbol de.delay
+python3 scripts/faust_doc_api.py --pretty list_faust_module delays --limit 20
+python3 scripts/faust_doc_api.py --pretty get_faust_examples delay
+python3 scripts/faust_doc_api.py --pretty explain_faust_symbol_for_goal re.springreverb "build a metallic spring reverb"
+```
+
+To force a specific index location:
+
+```bash
+python3 scripts/faust_doc_api.py --index tests/faust-doc-index.json --pretty get_faust_symbol aa.Rsqrt
+python3 scripts/faust_doc_api.py --index tests/faust-doc --pretty list_faust_module filters --limit 10
+```
+
+Operation semantics mirror `faustforge`:
+
+- `search_faust_lib(query, limit?, module?)`
+  searches symbols by name, qualified name, summary, and source file without
+  loading full docs into context
+- `get_faust_symbol(symbol)`
+  returns the full symbol entry plus close alternatives
+- `list_faust_module(module, limit?)`
+  lists symbols from one library module such as `delays` or `filters`
+- `get_faust_examples(symbolOrModule, limit?)`
+  returns the `#### Test` snippets for a symbol or module
+- `explain_faust_symbol_for_goal(symbol, goal)`
+  builds an action-oriented explanation for a concrete DSP objective
+
+The `make clean` target removes the generated JSON artifacts by default:
+
+- `tests/faust-doc-index.json`
+- `tests/faust-doc/`
+
+
 ## Library test and deployment
 
 For GRAME maintainers:
