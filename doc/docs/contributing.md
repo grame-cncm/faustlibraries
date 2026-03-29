@@ -358,20 +358,6 @@ python3 scripts/faust_doc_api.py --index tests/faust-doc-index.json --pretty get
 python3 scripts/faust_doc_api.py --index tests/faust-doc --pretty list_faust_module filters --limit 10
 ```
 
-Operation semantics mirror `faustforge`:
-
-- `search_faust_lib(query, limit?, module?)`
-  searches symbols by name, qualified name, summary, and source file without
-  loading full docs into context
-- `get_faust_symbol(symbol)`
-  returns the full symbol entry plus close alternatives
-- `list_faust_module(module, limit?)`
-  lists symbols from one library module such as `delays` or `filters`
-- `get_faust_examples(symbolOrModule, limit?)`
-  returns the `#### Test` snippets for a symbol or module
-- `explain_faust_symbol_for_goal(symbol, goal)`
-  builds an action-oriented explanation for a concrete DSP objective
-
 The `make clean` target removes the generated JSON artifacts by default:
 
 - `tests/faust-doc-index.json`
