@@ -380,16 +380,17 @@ def search_faust_lib(store: FaustDocStore, query: str, limit: int = 10, module: 
     results = []
     for entry in ranked[:limit]:
         symbol = entry["symbol"]
-        results.append(
-            {
-                "id": symbol.get("id"),
-                "name": symbol.get("name"),
-                "qualifiedName": symbol.get("qualifiedName"),
-                "summary": symbol.get("summary"),
-                "usage": symbol.get("usage"),
-                "source": symbol.get("source"),
-            }
-        )
+        result = {
+            "id": symbol.get("id"),
+            "name": symbol.get("name"),
+            "qualifiedName": symbol.get("qualifiedName"),
+            "summary": symbol.get("summary"),
+            "usage": symbol.get("usage"),
+            "source": symbol.get("source"),
+        }
+        if symbol.get("license"):
+            result["license"] = symbol.get("license")
+        results.append(result)
     return {"query": query, "module": module or None, "results": results}
 
 
@@ -428,20 +429,24 @@ def list_faust_module(store: FaustDocStore, module: str, limit: int = 200) -> di
     if library is None:
         raise ValueError(f"Module not found: {module}")
 
+    output_symbols = []
+    for symbol in symbols[:limit]:
+        entry = {
+            "id": symbol.get("id"),
+            "qualifiedName": symbol.get("qualifiedName"),
+            "summary": symbol.get("summary"),
+            "usage": symbol.get("usage"),
+            "source": symbol.get("source"),
+        }
+        if symbol.get("license"):
+            entry["license"] = symbol.get("license")
+        output_symbols.append(entry)
+
     return {
         "module": normalize_module_key(module),
         "file": library.get("file"),
         "aliasHints": library.get("aliasHints", []),
-        "symbols": [
-            {
-                "id": symbol.get("id"),
-                "qualifiedName": symbol.get("qualifiedName"),
-                "summary": symbol.get("summary"),
-                "usage": symbol.get("usage"),
-                "source": symbol.get("source"),
-            }
-            for symbol in symbols[:limit]
-        ],
+        "symbols": output_symbols,
     }
 
 
@@ -521,6 +526,7 @@ def explain_faust_symbol_for_goal(store: FaustDocStore, symbol: str, goal: str) 
         if params
         else "No explicit parameter notes found."
     )
+    license_hint = f"License: {found['license']}" if found.get("license") else None
     notes_hint = "Notes: " + " ".join(str(note) for note in notes) if notes else None
     usage = f"Usage: {found['usage']}" if found.get("usage") else "Usage not documented."
     parts = [
@@ -529,6 +535,8 @@ def explain_faust_symbol_for_goal(store: FaustDocStore, symbol: str, goal: str) 
         usage,
         param_hint,
     ]
+    if license_hint:
+        parts.append(license_hint)
     if notes_hint:
         parts.append(notes_hint)
     parts.append(

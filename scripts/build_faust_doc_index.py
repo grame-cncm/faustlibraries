@@ -53,6 +53,9 @@ HEADER_RE = re.compile(r"^//-+\s*`([^`]+)`\s*-+")
 PARAM_RE = re.compile(r"^\*\s*`([^`]+)`\s*:\s*(.+)$")
 SEPARATOR_RE = re.compile(r"^[-=#*]{3,}$")
 DEFINITION_NAME_RE = re.compile(r"^(?:declare\s+)?([A-Za-z_][A-Za-z0-9_\[\]]*)\s*(?:\(|=)")
+DECLARE_LICENSE_RE = re.compile(
+    r'^declare\s+([A-Za-z_][A-Za-z0-9_\[\]]*)\s+(license|licence)\s+"([^"]*)"\s*;'
+)
 
 
 @dataclass(frozen=True)
@@ -234,6 +237,21 @@ def definition_symbol_name(definition: str | None) -> str | None:
     if not match:
         return None
     return match.group(1)
+
+
+def extract_symbol_licenses(lines: Iterable[str]) -> dict[str, str]:
+    """Extract per-symbol license metadata from `declare ... license|licence` lines."""
+
+    licenses: dict[str, str] = {}
+    for raw_line in lines:
+        match = DECLARE_LICENSE_RE.match(raw_line.strip())
+        if not match:
+            continue
+        symbol_name = match.group(1)
+        license_name = match.group(3).strip()
+        if license_name:
+            licenses[symbol_name] = license_name
+    return licenses
 
 
 def extract_doc_block(lines: list[str], start_index: int) -> dict[str, object] | None:
@@ -578,6 +596,7 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
 
         source = file_path.read_text(encoding="utf-8")
         lines = source.splitlines()
+        symbol_licenses = extract_symbol_licenses(lines)
         file_name = file_path.name
         rel_file = repo_relative(file_path, repo_root)
 
@@ -650,6 +669,8 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
                     "lineEnd": int(block["endIndex"]) + 1,
                 },
             }
+            if name in symbol_licenses:
+                symbol["license"] = symbol_licenses[name]
 
             previous = seen_ids.get(symbol["id"])
             if previous is not None:
@@ -697,7 +718,7 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
 def make_symbol_summary(symbol: dict[str, object]) -> dict[str, object]:
     """Project a full symbol entry into a compact search-friendly summary."""
 
-    return {
+    summary = {
         "id": symbol["id"],
         "name": symbol["name"],
         "qualifiedName": symbol["qualifiedName"],
@@ -710,6 +731,9 @@ def make_symbol_summary(symbol: dict[str, object]) -> dict[str, object]:
         "notesCount": len(symbol.get("notes", [])),
         "referencesCount": len(symbol.get("references", [])),
     }
+    if symbol.get("license"):
+        summary["license"] = symbol["license"]
+    return summary
 
 
 def module_output_relpath(library_path: str) -> str:

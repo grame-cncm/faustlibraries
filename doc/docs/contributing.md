@@ -363,6 +363,26 @@ The `make clean` target removes the generated JSON artifacts by default:
 - `tests/faust-doc-index.json`
 - `tests/faust-doc/`
 
+### Licensing issue
+
+Some DSP functions carry per-symbol licenses that are more restrictive than the
+default Faust libraries distribution terms. This matters in LLM-assisted code
+generation and code reuse workflows.
+
+In particular, functions released under licenses that are non-commercial,
+copyleft-incompatible, or otherwise unsuitable for the intended downstream use
+**must not be suggested blindly in generated code**.
+
+When exposing Faust library data to LLM tools or retrieval systems:
+
+- preserve per-function license metadata when it exists
+- make that metadata queryable alongside the usual documentation fields
+- check license compatibility before recommending or assembling generated DSP
+  code from library functions
+
+The local JSON export and query tooling can expose this information, so **license
+checks can be integrated into higher-level assistants and generation pipelines**.
+
 
 ## Library test and deployment
 
