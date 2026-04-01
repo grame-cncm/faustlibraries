@@ -56,6 +56,28 @@ DEFINITION_NAME_RE = re.compile(r"^(?:declare\s+)?([A-Za-z_][A-Za-z0-9_\[\]]*)\s
 DECLARE_LICENSE_RE = re.compile(
     r'^declare\s+([A-Za-z_][A-Za-z0-9_\[\]]*)\s+(license|licence)\s+"([^"]*)"\s*;'
 )
+COMMERCIAL_COMPATIBLE_TOKENS = (
+    "mit",
+    "bsd",
+    "apache",
+    "lgpl with exception",
+    "lgpl",
+    "mpl",
+    "unlicense",
+    "isc",
+    "zlib",
+    "boost",
+    "public domain",
+    "stk-4.3",
+)
+COMMERCIAL_INCOMPATIBLE_TOKENS = (
+    "agpl",
+    "gpl",
+    "non-commercial",
+    "non commercial",
+    "cc-by-nc",
+    "creativecommons.org/licenses/by-nc",
+)
 
 
 @dataclass(frozen=True)
@@ -252,6 +274,92 @@ def extract_symbol_licenses(lines: Iterable[str]) -> dict[str, str]:
         if license_name:
             licenses[symbol_name] = license_name
     return licenses
+
+
+def load_license_token_file(path: Path | None) -> tuple[str, ...]:
+    """Load one newline-based license token file.
+
+    Empty lines and lines starting with `#` are ignored. Matching is done with
+    case-insensitive substring checks, so each non-empty line is interpreted as
+    one token/pattern to search for in the normalized license string.
+    """
+
+    if path is None:
+        return ()
+
+    tokens: list[str] = []
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        token = raw_line.strip().lower()
+        if not token or token.startswith("#"):
+            continue
+        tokens.append(token)
+    return tuple(tokens)
+
+
+def is_commercial_compatible_license(
+    license_name: str | None,
+    allow_tokens: tuple[str, ...] = COMMERCIAL_COMPATIBLE_TOKENS,
+    deny_tokens: tuple[str, ...] = COMMERCIAL_INCOMPATIBLE_TOKENS,
+) -> bool:
+    """Return whether a license looks commercially compatible.
+
+    This heuristic is intentionally conservative for LLM-assisted code
+    generation workflows. It allows common permissive licenses and LGPL-style
+    cases, rejects GPL/AGPL/non-commercial markers as not suitable for a
+    generic "commercial-compatible" export, and treats the absence of an
+    explicit per-symbol license as compatible with the library default.
+    """
+
+    if not license_name:
+        return True
+
+    normalized = str(license_name).strip().lower()
+    if not normalized:
+        return True
+
+    if any(token in normalized for token in deny_tokens):
+        return False
+    return any(token in normalized for token in allow_tokens)
+
+
+def filter_index_for_license_policy(
+    index: dict[str, object],
+    policy: str,
+    allow_tokens: tuple[str, ...] = COMMERCIAL_COMPATIBLE_TOKENS,
+    deny_tokens: tuple[str, ...] = COMMERCIAL_INCOMPATIBLE_TOKENS,
+) -> dict[str, object]:
+    """Filter an already-built index according to one license policy."""
+
+    if policy == "all":
+        return index
+    if policy != "commercial-compatible":
+        raise ValueError(f"Unsupported license policy: {policy}")
+
+    filtered_libraries: list[dict[str, object]] = []
+    filtered_symbols: list[dict[str, object]] = []
+
+    for library in index["libraries"]:
+        kept_symbols = [
+            symbol for symbol in library.get("symbols", [])
+            if is_commercial_compatible_license(
+                symbol.get("license"),
+                allow_tokens=allow_tokens,
+                deny_tokens=deny_tokens,
+            )
+        ]
+        if not kept_symbols:
+            continue
+
+        filtered_library = dict(library)
+        filtered_library["symbols"] = kept_symbols
+        filtered_libraries.append(filtered_library)
+        filtered_symbols.extend(kept_symbols)
+
+    filtered_index = dict(index)
+    filtered_index["libraries"] = filtered_libraries
+    filtered_index["symbols"] = filtered_symbols
+    filtered_index["licensePolicy"] = policy
+    return filtered_index
 
 
 def extract_doc_block(lines: list[str], start_index: int) -> dict[str, object] | None:
@@ -875,6 +983,34 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional directory for a split index: compact index.json + detailed modules/*.json.",
     )
+    parser.add_argument(
+        "--license-policy",
+        choices=["all", "commercial-compatible"],
+        default="all",
+        help=(
+            "Optional license filter for exported symbols. "
+            "'commercial-compatible' keeps only symbols whose per-function license "
+            "matches a conservative allow-list heuristic."
+        ),
+    )
+    parser.add_argument(
+        "--license-allowlist-file",
+        type=Path,
+        default=None,
+        help=(
+            "Optional newline-based file extending the built-in allowlist "
+            "used by --license-policy commercial-compatible."
+        ),
+    )
+    parser.add_argument(
+        "--license-denylist-file",
+        type=Path,
+        default=None,
+        help=(
+            "Optional newline-based file extending the built-in denylist "
+            "used by --license-policy commercial-compatible."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -894,8 +1030,21 @@ def main() -> int:
     repo_root = args.repo_root.resolve()
     stdlib = args.stdlib.resolve() if args.stdlib else (repo_root / "stdfaust.lib").resolve()
     output = args.output.resolve()
+    allow_tokens = COMMERCIAL_COMPATIBLE_TOKENS
+    deny_tokens = COMMERCIAL_INCOMPATIBLE_TOKENS
+
+    if args.license_allowlist_file is not None:
+        allow_tokens = allow_tokens + load_license_token_file(args.license_allowlist_file.resolve())
+    if args.license_denylist_file is not None:
+        deny_tokens = deny_tokens + load_license_token_file(args.license_denylist_file.resolve())
 
     index = build_index(repo_root=repo_root, stdlib=stdlib)
+    index = filter_index_for_license_policy(
+        index,
+        args.license_policy,
+        allow_tokens=allow_tokens,
+        deny_tokens=deny_tokens,
+    )
     write_json_document(output, index, args.pretty)
 
     split_summary = {}
@@ -907,7 +1056,12 @@ def main() -> int:
         "rootLibPath": index["rootLibPath"],
         "librariesCount": len(index["libraries"]),
         "symbolsCount": len(index["symbols"]),
+        "licensePolicy": args.license_policy,
     }
+    if args.license_allowlist_file is not None:
+        summary["licenseAllowlistFile"] = normalize_posix_path(args.license_allowlist_file.resolve())
+    if args.license_denylist_file is not None:
+        summary["licenseDenylistFile"] = normalize_posix_path(args.license_denylist_file.resolve())
     summary.update(split_summary)
     print(json.dumps(summary, ensure_ascii=True))
     return 0

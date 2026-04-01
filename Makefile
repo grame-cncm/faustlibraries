@@ -8,6 +8,7 @@
 # `make serve`      - serve the documentation.
 # `make doc-index`  - build the Faust library documentation JSON index.
 # `make doc-index-split` - build a compact index plus one detailed JSON per module.
+# `make doc-index-commercial` - build a JSON index filtered to commercially compatible symbols.
 
 FAUST ?= faust
 FAUST_OPT ?= -double -t 0
@@ -23,6 +24,8 @@ PYTHON ?= python3
 DOC_INDEX_SCRIPT ?= ./scripts/build_faust_doc_index.py
 DOC_INDEX_OUTPUT ?= tests/faust-doc-index.json
 DOC_INDEX_SPLIT_DIR ?= tests/faust-doc
+DOC_INDEX_LICENSE_ALLOWLIST_FILE ?=
+DOC_INDEX_LICENSE_DENYLIST_FILE ?=
 
 ARCH := arch/print_arch.cpp
 BUILD_DIR := tests/build
@@ -32,7 +35,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check clean help bench doc-index doc-index-split
+.PHONY: reference check clean help bench doc-index doc-index-split doc-index-commercial
 
 help: ## Show available targets and descriptions
 	@printf "Usage:\n  make \033[36m<target>\033[0m\n\n"
@@ -135,6 +138,11 @@ doc-index-split: ## Build a compact JSON index and one detailed JSON per library
 	@set -e; \
 	printf '[doc-index-split] writing %s and %s\n' '$(DOC_INDEX_OUTPUT)' '$(DOC_INDEX_SPLIT_DIR)'; \
 	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --pretty
+
+doc-index-commercial: ## Build a JSON index filtered to commercially compatible symbols
+	@set -e; \
+	printf '[doc-index-commercial] writing %s and %s\n' '$(DOC_INDEX_OUTPUT)' '$(DOC_INDEX_SPLIT_DIR)'; \
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --license-policy commercial-compatible $(if $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),--license-allowlist-file $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),) $(if $(DOC_INDEX_LICENSE_DENYLIST_FILE),--license-denylist-file $(DOC_INDEX_LICENSE_DENYLIST_FILE),) --pretty
 
 build: ## Build the documentation
 	$(MAKE) -C doc build

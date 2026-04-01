@@ -273,6 +273,7 @@ extracts for each documented symbol:
 - `io` with `inSignals` / `outSignals` when derivable
 - `testCode`
 - `references`
+- `license` when a per-symbol `declare ... license|licence "..."` is present
 - `source`
 
 Two JSON layouts are supported:
@@ -285,6 +286,7 @@ Default Make targets:
 ```bash
 make doc-index
 make doc-index-split
+make doc-index-commercial
 ```
 
 Default output locations:
@@ -294,6 +296,9 @@ Default output locations:
   - `tests/faust-doc-index.json`
   - `tests/faust-doc/index.json`
   - `tests/faust-doc/modules/*.json`
+- `make doc-index-commercial` writes the same paths as `make doc-index-split`,
+  but filters the exported symbols using the `commercial-compatible` license
+  policy
 
 You can override the output paths:
 
@@ -307,6 +312,62 @@ You can also run the generator directly:
 ```bash
 python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --pretty
 python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --split-output-dir tests/faust-doc --pretty
+python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --split-output-dir tests/faust-doc --license-policy commercial-compatible --pretty
+```
+
+License-policy filtering is optional. The supported values are:
+
+- `all`: export every documented symbol
+- `commercial-compatible`: keep only symbols that pass a conservative
+  per-symbol license heuristic
+
+The current `commercial-compatible` heuristic:
+
+- accepts missing per-symbol licenses and treats them as falling back to the
+  library default
+- accepts common permissive or weak-copyleft markers such as `MIT`, `BSD`,
+  `Apache`, `LGPL`, `LGPL with exception`, `MPL`, `ISC`, `zlib`, `Boost`,
+  `Unlicense`, `public domain`, and `STK-4.3`
+- rejects markers such as `GPL`, `AGPL`, and explicitly non-commercial terms
+
+This is a practical export filter for tooling, not a legal opinion.
+
+The policy can also be customized with external allowlist/denylist files:
+
+```bash
+python3 scripts/build_faust_doc_index.py \
+  --repo-root . \
+  --output tests/faust-doc-index.json \
+  --split-output-dir tests/faust-doc \
+  --license-policy commercial-compatible \
+  --license-allowlist-file /path/to/license-allowlist.txt \
+  --license-denylist-file /path/to/license-denylist.txt \
+  --pretty
+```
+
+These files use a simple newline-based format:
+
+- one token or pattern per line
+- matching is case-insensitive and based on substring inclusion
+- empty lines are ignored
+- lines starting with `#` are treated as comments
+
+Example:
+
+```text
+# Allow permissive licenses and a specific local marker
+mit
+bsd
+apache
+my-company-approved-license
+```
+
+The Make target also supports these overrides:
+
+```bash
+make doc-index-commercial \
+  DOC_INDEX_LICENSE_ALLOWLIST_FILE=/path/to/license-allowlist.txt \
+  DOC_INDEX_LICENSE_DENYLIST_FILE=/path/to/license-denylist.txt
 ```
 
 The split layout is recommended for LLM or retrieval-based use because it avoids
