@@ -296,6 +296,23 @@ def load_license_token_file(path: Path | None) -> tuple[str, ...]:
     return tuple(tokens)
 
 
+def license_matches_token(license_name: str, token: str) -> bool:
+    """Return whether one normalized license string matches one normalized token.
+
+    Matching is usually based on substring inclusion, but GPL-family markers
+    need slightly stricter handling so that `gpl` does not accidentally match
+    `lgpl`.
+    """
+
+    if token == "gpl":
+        return bool(re.search(r"(?<!l)(?<!a)gpl(?:[-\s]*v?\d[\w.+-]*)?", license_name))
+    if token == "agpl":
+        return bool(re.search(r"agpl(?:[-\s]*v?\d[\w.+-]*)?", license_name))
+    if token == "lgpl":
+        return bool(re.search(r"lgpl(?:[-\s]*v?\d[\w.+-]*)?", license_name))
+    return token in license_name
+
+
 def is_commercial_compatible_license(
     license_name: str | None,
     allow_tokens: tuple[str, ...] = COMMERCIAL_COMPATIBLE_TOKENS,
@@ -317,9 +334,9 @@ def is_commercial_compatible_license(
     if not normalized:
         return True
 
-    if any(token in normalized for token in deny_tokens):
+    if any(license_matches_token(normalized, token) for token in deny_tokens):
         return False
-    return any(token in normalized for token in allow_tokens)
+    return any(license_matches_token(normalized, token) for token in allow_tokens)
 
 
 def filter_index_for_license_policy(
