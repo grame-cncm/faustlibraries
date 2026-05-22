@@ -52,7 +52,7 @@ fi = library("filters.lib");
 de = library("delays.lib");
 
 declare name "Faust Spatialization Library";
-declare version "1.2.2";
+declare version "1.3.0";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -287,7 +287,7 @@ with {
 // process = wfs_ui(xref,yref,zref,speakersDist,4,16);
 // ```
 //--------------------------------------
-declare wfs author "Pierre Lecomte, revised by GRAME";
+declare wfs_ui author "Pierre Lecomte, revised by GRAME";
 wfs_ui(xref, yref, zref, speakersDist, nSources, nSpeakers) = wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inProc, xs, ys, zs)
 with {
     xs(i) = hslider("v:Sound%2i/xs", 0, -10, 10, 0.01);
@@ -302,6 +302,145 @@ with {
         a1 = -0.31134;
         a2 = -0.088955;
     };
+};
+
+
+//-----------------`(sp.)spcap`--------------------
+// Speaker-Placement Correction Amplitude Panning (SPCAP).
+//
+// SPCAP calculates panning gains for an arbitrary 2D loudspeaker 
+// layout by computing the angular distance between the virtual source 
+// and each speaker, and correcting for "speaker density" (groupings 
+// of speakers that would otherwise cause a volume imbalance).
+//
+// Important note on physical distance: this algorithm only handles spatial
+// distribution based on azimuth angles. It does not compensate for volume drops
+// or acoustic delays caused by uneven physical distances of the speakers from
+// the listener. In a complete DSP chain, distance correction must be applied
+// downstream from this algorithm, individually per channel, using a delay line
+// for time alignment and a static gain trim to equalize acoustic pressure.
+//
+// #### Usage
+//
+// ```
+// _ : spcap(N, alpha, th, theta_s) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: number of speakers (int, compile-time constant).
+// * `alpha`: panning sharpness/width (float signal, typical range 1.0 to 10.0).
+// * `th`: a function `th(i)` returning the physical azimuth angle of speaker `i` in radians.
+// * `theta_s`: virtual source azimuth angle in radians (float signal).
+//
+// #### Test
+//
+// ```
+// N = 4;
+// alpha = 2.0;
+// theta_s = 0.0;
+// spk_deg(0) = -135;
+// spk_deg(1) =  -45;
+// spk_deg(2) =   45;
+// spk_deg(3) =  135;
+// spk_angle(i) = spk_deg(i) * ma.PI / 180.0;
+//
+// spcap_test = os.osc(440) : sp.spcap(N, alpha, spk_angle, theta_s);
+// ```
+//
+// #### References
+//
+// * Ramy Sadek and Chris Kyriakakis, "A Novel Multichannel Panning Method for Standard and Arbitrary Loudspeaker Configurations", 2004. (DTIC Reference: ADA464895)
+// * <https://apps.dtic.mil/sti/tr/pdf/ADA464895.pdf>
+//------------------------------------------------------------
+
+declare spcap author "Gemini, revised by GRAME";
+declare spcap version "0.1";
+declare spcap license "MIT";
+
+spcap(N, alpha, th, theta_s) = _ <: par(i, N, *(g(i)))
+with {
+    // Helper: Wrap phase between -PI and PI
+    wrap_pi(x) = x - 2.0 * ma.PI * floor((x + ma.PI) / (2.0 * ma.PI));
+
+    // 1. Basic Amplitude Panning@
+    P(i) = max(0.0, cos(wrap_pi(theta_s - th(i)) / 2.0)) ^ alpha;
+
+    // 2. Density Factor (Placement Correction)
+    beta(i) = sum(j, N, max(0.0, cos(wrap_pi(th(i) - th(j)) / 2.0)) ^ alpha);
+
+    // 3. Correction Application (Basic Panning / Density)
+    G(i) = P(i) / max(0.0001, beta(i));
+
+    // 4. Power Normalization (Constant Power Rule)
+    total_power = sum(i, N, G(i)^2);
+    norm_factor = sqrt(total_power) + 0.000001;
+
+    // Final gain applied to speaker i
+    g(i) = G(i) / norm_factor;
+};
+
+//-----------------`(sp.)spcap_ui`--------------------
+// Speaker-Placement Correction Amplitude Panning with a built-in UI.
+// This is a convenience wrapper around `spcap` for interactive control of the
+// virtual source azimuth, the panning sharpness, and the physical azimuth of
+// each loudspeaker.
+//
+// #### Usage
+//
+// ```
+// _ : spcap_ui(N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: number of speakers (int, compile-time constant). The function has one
+//   input signal and produces `N` output signals, one per speaker.
+//
+// UI controls:
+//
+// * `SPCAP/pan_sharpness`: panning sharpness parameter `alpha`. Higher values
+//   make the virtual source more focused around the closest speakers.
+// * `SPCAP/source_angle`: virtual source azimuth in degrees. The value is
+//   converted to radians before calling `spcap`.
+// * `SPCAP/Speaker%2i/angle`: physical azimuth of speaker `i` in degrees. The
+//   default layout is a regular circular distribution centered in each speaker
+//   sector, and can be edited from the UI.
+//
+// Use `spcap` directly when the source angle, speaker angles, or sharpness
+// parameter must be supplied by an existing DSP expression instead of UI
+// controls.
+//
+// #### Test
+//
+// ```
+// sp = library("spats.lib");
+// os = library("oscillators.lib");
+// spcap_ui_test = os.osc(440) : sp.spcap_ui(4);
+// ```
+//
+// #### Example test program
+//
+// ```
+// import("stdfaust.lib");
+//
+// process = os.osc(440) : sp.spcap_ui(8);
+// ```
+//------------------------------------------------------------
+declare spcap_ui author "Gemini, revised by GRAME";
+declare spcap_ui version "0.1";
+declare spcap_ui license "MIT";
+
+spcap_ui(N) = spcap(N, alpha_ui, th_ui, theta_s_ui)
+with {
+    alpha_ui = hslider("v:SPCAP/pan_sharpness", 2.0, 1.0, 10.0, 0.1);
+    theta_s_ui = hslider("v:SPCAP/source_angle [unit:deg]", 0, -180, 180, 0.1)
+        : ma.deg2rad;
+
+    default_spk_deg(i) = -180.0 + 360.0 * (float(i) + 0.5) / float(N);
+    spk_deg(i) = hslider("v:SPCAP/v:Speaker%2i/angle [unit:deg]",
+                         default_spk_deg(i), -180, 180, 1);
+    th_ui(i) = spk_deg(i) : ma.deg2rad;
 };
 
 //---------------`(sp.)stereoize`-------------
