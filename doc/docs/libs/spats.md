@@ -136,9 +136,9 @@ Where:
 * `xref`: x-coordinate of the reference listening point in meters
 * `yref`: y-coordinate of the reference listening point in meters
 * `zref`: z-coordinate of the reference listening point in meters
-* `speakersDist`: distance between speakers in meters
-* `nSources`: number of sound sources
-* `nSpeakers`: number of speakers
+* `speakersDist`: distance between speakers in meters (a constant numerical expression)
+* `nSources`: number of sound sources (a constant numerical expression)
+* `nSpeakers`: number of speakers (a constant numerical expression)
 * `inProc`: per-source processor function, as a function of the source index
 * `xs`: x-coordinate of the sound source in meters, as a function of the source index
 * `ys`: y-coordinate of the sound source in meters, as a function of the source index
@@ -165,7 +165,7 @@ Wave Field Synthesis algorithm for multiple sound sources with a built-in UI.
 #### Usage
 
 ```
-wfs_ui(xref, yref, zref, speakersDist, nSources, nSpeaker) : si.bus(nSpeakers)
+wfs_ui(xref, yref, zref, speakersDist, nSources, nSpeakers) : si.bus(nSpeakers)
 ```
 
 Where:
@@ -174,8 +174,8 @@ Where:
 * `yref`: y-coordinate of the reference listening point in meters
 * `zref`: z-coordinate of the reference listening point in meters
 * `speakersDist`: distance between speakers in meters
-* `nSources`: number of sound sources
-* `nSpeakers`: number of speakers
+* `nSources`: number of sound sources (a constant numerical expression)
+* `nSpeakers`: number of speakers (a constant numerical expression)
 
 #### Test
 ```
@@ -198,6 +198,107 @@ zref = 0;
 
 Spatialize 4 sound sources on 16 speakers
 process = wfs_ui(xref,yref,zref,speakersDist,4,16);
+```
+
+----
+
+### `(sp.)spcap`
+
+Speaker-Placement Correction Amplitude Panning (SPCAP).
+
+SPCAP calculates panning gains for an arbitrary 2D loudspeaker 
+layout by computing the angular distance between the virtual source 
+and each speaker, and correcting for "speaker density" (groupings 
+of speakers that would otherwise cause a volume imbalance).
+
+Important note on physical distance: this algorithm only handles spatial
+distribution based on azimuth angles. It does not compensate for volume drops
+or acoustic delays caused by uneven physical distances of the speakers from
+the listener. In a complete DSP chain, distance correction must be applied
+downstream from this algorithm, individually per channel, using a delay line
+for time alignment and a static gain trim to equalize acoustic pressure.
+
+#### Usage
+
+```
+_ : spcap(N, alpha, th, theta_s) : si.bus(N)
+```
+
+Where:
+
+* `N`: number of speakers (a constant numerical expression)
+* `alpha`: panning sharpness/width (float signal, typical range 1.0 to 10.0)
+* `th`: a function `th(i)` returning the physical azimuth angle of speaker `i` in radians
+* `theta_s`: virtual source azimuth angle in radians (float signal)
+
+#### Test
+
+```
+N = 4;
+alpha = 2.0;
+theta_s = 0.0;
+spk_deg(0) = -135;
+spk_deg(1) =  -45;
+spk_deg(2) =   45;
+spk_deg(3) =  135;
+spk_angle(i) = spk_deg(i) * ma.PI / 180.0;
+
+spcap_test = os.osc(440) : sp.spcap(N, alpha, spk_angle, theta_s);
+```
+
+#### References
+
+* Ramy Sadek and Chris Kyriakakis, "A Novel Multichannel Panning Method for Standard and Arbitrary Loudspeaker Configurations", 2004. (DTIC Reference: ADA464895)
+* [https://apps.dtic.mil/sti/tr/pdf/ADA464895.pdf](https://apps.dtic.mil/sti/tr/pdf/ADA464895.pdf)
+
+----
+
+### `(sp.)spcap_ui`
+
+Speaker-Placement Correction Amplitude Panning with a built-in UI.
+This is a convenience wrapper around `spcap` for interactive control of the
+virtual source azimuth, the panning sharpness, and the physical azimuth of
+each loudspeaker.
+
+#### Usage
+
+```
+_ : spcap_ui(N) : si.bus(N)
+```
+
+Where:
+
+* `N`: number of speakers (a constant numerical expression). The function has one
+  input signal and produces `N` output signals, one per speaker
+
+UI controls:
+
+* `SPCAP/pan_sharpness`: panning sharpness parameter `alpha`. Higher values
+  make the virtual source more focused around the closest speakers.
+* `SPCAP/source_angle`: virtual source azimuth in degrees. The value is
+  converted to radians before calling `spcap`.
+* `SPCAP/Speaker%2i/angle`: physical azimuth of speaker `i` in degrees. The
+  default layout is a regular circular distribution centered in each speaker
+  sector, and can be edited from the UI.
+
+Use `spcap` directly when the source angle, speaker angles, or sharpness
+parameter must be supplied by an existing DSP expression instead of UI
+controls.
+
+#### Test
+
+```
+sp = library("spats.lib");
+os = library("oscillators.lib");
+spcap_ui_test = os.osc(440) : sp.spcap_ui(4);
+```
+
+#### Example test program
+
+```
+import("stdfaust.lib");
+
+process = os.osc(440) : sp.spcap_ui(8);
 ```
 
 ----

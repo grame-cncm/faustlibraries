@@ -1027,6 +1027,8 @@
 [(sp.)spat](spats.md#spspat)
 [(sp.)wfs](spats.md#spwfs)
 [(sp.)wfs_ui](spats.md#spwfs_ui)
+[(sp.)spcap](spats.md#spspcap)
+[(sp.)spcap_ui](spats.md#spspcap_ui)
 [(sp.)stereoize](spats.md#spstereoize)
 
 ## synths
