@@ -1,14 +1,31 @@
 //############################### debug.lib ############################################
 // Debug library. Its official prefix is `db`.
 //
-// This library provides UI-based debug probes for metering and diagnostics.
-// It includes RMS/Peak meters, dynamics probes, signal quality probes, and
-// simple band-energy meters.
+// This library provides UI-based debug probes for metering, diagnostics, and
+// automated analysis. It includes level probes (RMS, peak, min/max), dynamics
+// probes (crest factor and envelope tracking), signal-quality probes (DC
+// offset, slew rate, zero-crossing rate, silence detection), control-signal
+// probes, spectral probes, decay/attack helpers, time stamps, and tap utilities.
+//
+// Each probe is a one-input/one-output processor that analyzes the passing
+// signal while leaving it unchanged. The measured value is exposed through
+// an output bargraph that can be regularly retrieved for metering purposes.
+//
+// Most probes take an `ID` argument and a `HIDE` argument. `ID` is embedded in
+// the `[probe:ID]` metadata tag so host applications can identify and collect
+// probe values reliably. `HIDE` controls the `[hidden:HIDE]` metadata tag and
+// can be used to keep probes out of the regular UI while still making their
+// values available to host-side tooling.
+//
+// Probes are intended to be inserted directly in a signal chain, or attached
+// with `probe_tap`/`probe_tap_n` when the measured signal should be branched
+// from mono or multichannel processing without changing the main arity.
 //
 // Debug probes can be compiled out by setting the `DEBUG` global to 0 via
 // explicit substitution (e.g. `db[DEBUG=0;].probe_rms_db(...)`).
 // CNE means constant numerical expression (known at compile time).
-// `[probe:ID]` metadata tags are used to identify probes in the UI.
+// Some probes create several bargraphs from a base `ID`, such as
+// `probe_multiband`, which uses IDs `ID` through `ID+7`.
 //
 // The Debug library is organized into 11 sections:
 //
