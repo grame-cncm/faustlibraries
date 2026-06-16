@@ -102,12 +102,13 @@ To avoid name clashes between libraries, keep identifiers as local as possible. 
 
 ## New Libraries
 
-* Any new "standard" library should be declared in `stdfaust.lib` with its own environment (2 letters - see `stdfaust.lib`).
+* Any new "standard" library should be declared in `stdfaust.lib` with its own environment (2 letters - see `stdfaust.lib`) and in `all.lib`.
+* Some of the new library functions should be demonstrated in [demos.lib](#demo-functions).
 * Any new "standard" library must be added to `generateDoc`.
 * Functions must be organized by sections.
 * Any new library should at least `declare` a `name` and a `version`.
 * Any new library has to use a prefix declared in the header section with the following kind of syntax: `Its official prefix is 'qu'` (look at an existing library to follow the exact syntax).
-* Be sure to add the appropriate kind of `ma = library("maths.lib");`  import library line, for each external library function used in the new library (for instance `ma.foo` that would be used somewhre in the code).
+* Be sure to add the appropriate kind of `ma = library("maths.lib");` import library line, for each external library function used in the new library (for instance `ma.foo` that would be used somewhre in the code).
 * The comment based markdown documentation of each library must respect the following format (open the source code of any of the libraries for an example):
 
 ```
@@ -230,7 +231,7 @@ This standard is only used within the libraries: nothing prevents coders to stil
 
 ### "Demo" Functions
 
-"Demo" functions are placed in `demos.lib` and have a built-in user interface (UI). Their name ends with the `_demo` suffix. Each of these function have a `.dsp` file associated to them in the `/examples` folder.
+"Demo" functions are placed in `demos.lib` and have a built-in user interface (UI). Their name ends with the `_demo` suffix. Each of these function have a `.dsp` file associated to them in the [Faust project](https://github.com/grame-cncm/faust) `examples` folder.
 
 Any function containing UI elements should be placed in this library and respect these standards.
 
@@ -245,7 +246,6 @@ Before preparing a pull-request, the new library must be carefully tested:
 - all functions defined in the library must be tested by preparing a DSP test program, to be added using the `#### Test` syntax 
 - the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program: `import("all.lib"); process = _;`
 - reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified.
-
 
 ## LLMs
 
