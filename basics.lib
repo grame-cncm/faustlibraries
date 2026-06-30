@@ -323,6 +323,57 @@ midikey2hz(mk) = 440.0*pow(2.0, (mk-69.0)/12.0);
 hz2midikey(freq) = 12.0*ma.log2(freq/440.0) + 69.0;
 
 
+//-------`(ba.)hz2mel`----------
+// Converts a frequency in Hz to the mel perceptual-pitch scale.
+// Uses the O'Shaughnessy (1987) formula `2595 * log10(1 + f/700)`. Useful with
+// `mel2hz` and `it.interpolate_mel` for spacing things the way the ear hears pitch.
+//
+// #### Usage
+//
+// ```
+// hz2mel(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// hz2mel_test = ba.hz2mel(440.0);
+// ```
+//----------------------------
+declare hz2mel author "Bart Brouns";
+declare hz2mel licence "MIT";
+hz2mel(freq) = 2595.0*log10(1.0+freq/700.0);
+
+
+//-------`(ba.)mel2hz`----------
+// Converts a value on the mel perceptual-pitch scale back to a frequency in Hz.
+// Inverse of `hz2mel`, using `700 * (10^(m/2595) - 1)`.
+//
+// #### Usage
+//
+// ```
+// mel2hz(mel) : _
+// ```
+//
+// Where:
+//
+// * `mel`: value on the mel scale
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// mel2hz_test = ba.mel2hz(1000.0);
+// ```
+//----------------------------
+declare mel2hz author "Bart Brouns";
+declare mel2hz licence "MIT";
+mel2hz(mel) = 700.0*(pow(10.0, mel/2595.0)-1.0);
+
+
 //-------`(ba.)semi2ratio`----------
 // Converts semitones in a frequency multiplicative ratio.
 // `semi2ratio` is a standard Faust function.
