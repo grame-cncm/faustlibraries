@@ -1119,6 +1119,130 @@ subseq((head, tail), P, N) = subseq(tail, P-1, N);
 subseq(head, 0, N)         = head;
 
 
+//----------------------------`(ba.)processArray`-------------------------------
+// Run `N` parallel copies of `processor`, interpolating its parameters across the copies.
+// Each input of `processor` is one of two kinds, depending on whether you supply bounds
+// for it: a *parameter input*, which `processArray` generates by interpolating across a
+// lo/hi range and smoothing, or a *signal input*, which you feed in and `processArray`
+// passes through to the copies untouched.
+//
+// For each parameter input of `processor` you give a low and a high bound; `processArray`
+// spreads that range across the `N` copies so the first copy gets the low bound,
+// the last copy gets the high bound, and the copies in between get values stepping
+// from low to high. Each per-input range is shaped by a supplied interpolator, so
+// the steps need not be evenly spaced. With several parameters interpolated at once,
+// each copy takes one value from every range: copy `j` gets the `j`-th value of each.
+//
+// If fewer parameter bounds are supplied than `processor` has inputs, the inputs left
+// without bounds are taken from `processArray`'s own signal inputs instead: one
+// `N`-wide bus per such input, so `(inputs(processor) - outputs(loBounds)) * N` signal
+// inputs in all. When every input is bounded, `processArray` has no signal input.
+//
+// #### Interpolators
+//
+// An interpolator is a function `interp(frac, lo, hi)` that maps a fraction `frac` in
+// `0..1` across the `lo`/`hi` range — the shape of every `interpolate_*` in
+// `interpolators.lib`. Pass one interpolator to shape every parameter the same way, or a
+// list of one per parameter to shape each differently.
+//
+// #### Smoothers
+//
+// `smoother` is a per-wire stage applied to the interpolated values, after
+// interpolation and before `processor`. It goes here, not on the bounds, because
+// some interpolators aren't cheap (`it.interpolate_logarithmic`,
+// `it.interpolate_power`): with slider bounds the interpolator folds to a block
+// constant, but smoothing the bounds first would force it to recompute per-sample.
+//
+// `smoother` follows the same one-or-list convention as `interp`: pass one stage to
+// apply to every parameter, or a list of one stage per parameter. For no smoothing,
+// pass `_` (the identity wire) — it broadcasts to a pass-through on every parameter.
+//
+// #### Usage
+//
+// ```
+// si.bus((inputs(processor)-outputs(loBounds))*N) : processArray(N, processor, interp, smoother, loBounds, hiBounds) : si.bus(N*outputs(processor))
+// ```
+//
+// Where:
+//
+// * `N`: number of parallel copies (int, known at compile time, `N >= 2`)
+// * `processor`: the function to replicate
+// * `interp`: interpolator function(s) of shape `interp(frac, lo, hi)`; either a
+//   single function applied to every array, or a list of one function per supplied array
+// * `smoother`: per-wire 1-in/1-out stage(s) applied to the interpolated values
+//   before `processor`; either a single stage for every array, or a list of one per
+//   supplied array. Use `_` for no smoothing.
+// * `loBounds`: list of low bounds, one per array (at most `inputs(processor)` of them)
+// * `hiBounds`: list of high bounds, matching `loBounds`
+//
+// #### Note:
+//
+// The number of supplied arrays is measured as `outputs(loBounds)`, so `loBounds`,
+// `hiBounds`, and (when passed as a list) `interp` and `smoother` must all have that
+// same length.
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// it = library("interpolators.lib");
+// si = library("signals.lib");
+// // 3-input processor, 2 arrays supplied -> 1 N-wide bus input, sliders smoothed:
+// processArray_proc(a, b, c) = a + b + c;
+// processArray_test = si.bus(4) : ba.processArray(4, processArray_proc, it.interpolate_linear, si.smoo, (0.1, 1.0), (1.0, 10.0));
+// ```
+//----------------------------
+declare processArray author "Bart Brouns";
+declare processArray copyright "Copyright (C) 2026 Bart Brouns <bart@magnetophon.nl>";
+declare processArray license "AGPL-3.0-only";
+processArray(N, processor, interp, smoother, loBounds, hiBounds) = build(nSignalInputs)
+    with {
+        nIn = inputs(processor);
+        nArray = outputs(loBounds);
+        nSignalInputs = nIn-nArray;
+        // `interp` is either one interpolator or a list of one per array. Normalize to
+        // the list form so `ba.take` below can index it. Discriminate on
+        // `outputs(interp)` — 1 means a single interpolator (replicate it), nArray
+        // means a list (pass through). Not `outputs(par(i, nArray, interp))`: that is
+        // nArray for a single interp too, so it can't tell the cases apart once
+        // nArray > 1.
+        interps = broadcast(outputs(interp))
+            with {
+                broadcast = case{(1)=>par(i, nArray, interp);
+                (n)=>interp;
+                };
+            };
+        // `smoother` is broadcast the same way. `_` (identity) has 1 output, so it
+        // broadcasts to a pass-through on every parameter — i.e. no smoothing.
+        smoothers = broadcast(outputs(smoother))
+            with {
+                broadcast = case{(1)=>par(i, nArray, smoother);
+                (n)=>smoother;
+                };
+            };
+        // loBounds and hiBounds arrive as one flat list: every low bound first, then
+        // every high bound. interleave(nArray, 2) zips them back into nArray (lo, hi)
+        // pairs — one per array. oneArray then expands each pair into its own N-wide
+        // bus of interpolated values, then applies that parameter's smoother to all N.
+        allArrays = (loBounds, hiBounds):ro.interleave(nArray, 2):par(i, nArray, oneArray(ba.take(i+1, interps), ba.take(i+1, smoothers)));
+        // allArrays lays its output out parameter-by-parameter: all N values of
+        // parameter 0, then all N values of parameter 1, and so on. The processor
+        // instances need the opposite grouping — each instance wants one value from
+        // every parameter. interleave(N, nIn) performs that transpose, turning the nIn
+        // parameter-blocks into N per-copy blocks, which then feed the N processor
+        // instances. When signal inputs are present, their nSignalInputs*N buses (laid out
+        // the same parameter-by-parameter way) are appended first, so the same
+        // transpose lines everything up.
+        build = case{(0)=>allArrays:ro.interleave(N, nIn):par(i, N, processor);
+        (b)=>(allArrays, si.bus(nSignalInputs*N)):ro.interleave(N, nIn):par(i, N, processor);
+        };
+        // Replicate one array: interpolate at each frac step, then smooth all N wires
+        // of this parameter. Per-wire layout is parameter-major, matching allArrays.
+        oneArray(thisInterp, thisSmoother, lo, hi) = par(i, N, thisInterp(frac(i), lo, hi):thisSmoother);
+        // frac runs 0..1 across the N copies. NOTE: divides by N-1, so N must be >= 2.
+        frac(i) = i/(N-1);
+    };
+
+
 //============================Function tabulation=========================================
 // The purpose of function tabulation is to speed up the computation of heavy functions over an interval, 
 // so that the computation at runtime can be faster than directly using the function. 
