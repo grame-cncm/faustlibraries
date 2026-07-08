@@ -12,6 +12,18 @@ interpolate_linear_test = it.interpolate_linear(0.5, 0.0, 1.0);
 
 interpolate_cosine_test = it.interpolate_cosine(0.5, 0.0, 1.0);
 
+interpolate_logarithmic_test = it.interpolate_logarithmic(0.5, 100.0, 10000.0);
+
+interpolate_power_test = it.interpolate_power(2.0, 0.5, 0.0, 1.0);
+
+interpolate_exponential_test = it.interpolate_exponential(3.0, 0.5, 0.0, 1.0);
+
+interpolate_smoothstep_test = it.interpolate_smoothstep(0.5, 0.0, 1.0);
+
+interpolate_smootherstep_test = it.interpolate_smootherstep(0.5, 0.0, 1.0);
+
+interpolate_mel_test = it.interpolate_mel(0.5, 100.0, 8000.0);
+
 interpolate_cubic_test = it.interpolate_cubic(0.5, -1.0, 2.0, 1.0, 4.0);
 
 interpolator_two_points_test = it.interpolator_two_points(gen, idv, it.interpolate_linear)
