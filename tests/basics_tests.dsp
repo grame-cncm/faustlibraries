@@ -6,6 +6,8 @@
 ba = library("basics.lib");
 ma = library("maths.lib");
 os = library("oscillators.lib");
+si = library("signals.lib");
+it = library("interpolators.lib");
 
 samp2sec_test = ba.samp2sec(512);
 sec2samp_test = ba.sec2samp(0.01);
@@ -101,3 +103,5 @@ parallelMax_test = (0.2, 0.5, 0.1) : ba.parallelMax(3);
 parallelMin_test = (0.2, 0.5, 0.1) : ba.parallelMin(3);
 parallelMean_test = (0.2, 0.5, 0.1) : ba.parallelMean(3);
 parallelRMS_test = (0.2, 0.5, 0.1) : ba.parallelRMS(3);
+processArray_proc(a, b, c) = a + b + c;
+processArray_test = si.bus(4) : ba.processArray(4, processArray_proc, it.interpolate_linear, si.smoo, (0.1, 1.0), (1.0, 10.0));
