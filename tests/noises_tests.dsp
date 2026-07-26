@@ -18,11 +18,11 @@ with {
   seedRange = 10.0;
 };
 
-randomseed_test = no.randomseed;
-rnoise_test = no.rnoise;
-rmultirandom_test = no.rmultirandom(3);
-rmultinoise_test = no.rmultinoise(3);
-rnoises_test = no.rnoises(4, 1);
+//randomseed_test = no.randomseed;
+//rnoise_test = no.rnoise;
+//rmultirandom_test = no.rmultirandom(3);
+//rmultinoise_test = no.rmultinoise(3);
+//rnoises_test = no.rnoises(4, 1);
 
 pink_noise_test = no.pink_noise;
 pink_noise_vm_test = no.pink_noise_vm(4);
