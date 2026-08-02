@@ -259,6 +259,53 @@ hz2midikey_test = ba.hz2midikey(440);
 
 ----
 
+### `(ba.)hz2mel`
+
+Converts a frequency in Hz to the mel perceptual-pitch scale.
+Uses the O'Shaughnessy (1987) formula `2595 * log10(1 + f/700)`. Useful with
+`mel2hz` and `it.interpolate_mel` for spacing things the way the ear hears pitch.
+
+#### Usage
+
+```
+hz2mel(freq) : _
+```
+
+Where:
+
+* `freq`: frequency in Hz
+
+#### Test
+```
+ba = library("basics.lib");
+hz2mel_test = ba.hz2mel(440.0);
+```
+
+----
+
+### `(ba.)mel2hz`
+
+Converts a value on the mel perceptual-pitch scale back to a frequency in Hz.
+Inverse of `hz2mel`, using `700 * (10^(m/2595) - 1)`.
+
+#### Usage
+
+```
+mel2hz(mel) : _
+```
+
+Where:
+
+* `mel`: value on the mel scale
+
+#### Test
+```
+ba = library("basics.lib");
+mel2hz_test = ba.mel2hz(1000.0);
+```
+
+----
+
 ### `(ba.)semi2ratio`
 
 Converts semitones in a frequency multiplicative ratio.
@@ -1004,6 +1051,81 @@ compositions and there is no empty list.
 ```
 ba = library("basics.lib");
 subseq_test = ba.subseq((10,20,30,40,50), 1, 3);
+```
+
+----
+
+### `(ba.)processArray`
+
+Run `N` parallel copies of `processor`, interpolating its parameters across the copies.
+Each input of `processor` is one of two kinds, depending on whether you supply bounds
+for it: a *parameter input*, which `processArray` generates by interpolating across a
+lo/hi range and smoothing, or a *signal input*, which you feed in and `processArray`
+passes through to the copies untouched.
+
+For each parameter input of `processor` you give a low and a high bound; `processArray`
+spreads that range across the `N` copies so the first copy gets the low bound,
+the last copy gets the high bound, and the copies in between get values stepping
+from low to high. Each per-input range is shaped by a supplied interpolator, so
+the steps need not be evenly spaced. With several parameters interpolated at once,
+each copy takes one value from every range: copy `j` gets the `j`-th value of each.
+
+If fewer parameter bounds are supplied than `processor` has inputs, the inputs left
+without bounds are taken from `processArray`'s own signal inputs instead: one
+`N`-wide bus per such input, so `(inputs(processor) - outputs(loBounds)) * N` signal
+inputs in all. When every input is bounded, `processArray` has no signal input.
+
+#### Interpolators
+
+An interpolator is a function `interp(frac, lo, hi)` that maps a fraction `frac` in
+`0..1` across the `lo`/`hi` range — the shape of every `interpolate_*` in
+`interpolators.lib`. Pass one interpolator to shape every parameter the same way, or a
+list of one per parameter to shape each differently.
+
+#### Smoothers
+
+`smoother` is a per-wire stage applied to the interpolated values, after
+interpolation and before `processor`. It goes here, not on the bounds, because
+some interpolators aren't cheap (`it.interpolate_logarithmic`,
+`it.interpolate_power`): with slider bounds the interpolator folds to a block
+constant, but smoothing the bounds first would force it to recompute per-sample.
+
+`smoother` follows the same one-or-list convention as `interp`: pass one stage to
+apply to every parameter, or a list of one stage per parameter. For no smoothing,
+pass `_` (the identity wire) — it broadcasts to a pass-through on every parameter.
+
+#### Usage
+
+```
+si.bus((inputs(processor)-outputs(loBounds))*N) : processArray(N, processor, interp, smoother, loBounds, hiBounds) : si.bus(N*outputs(processor))
+```
+
+Where:
+
+* `N`: number of parallel copies (int, known at compile time, `N >= 2`)
+* `processor`: the function to replicate
+* `interp`: interpolator function(s) of shape `interp(frac, lo, hi)`; either a
+  single function applied to every array, or a list of one function per supplied array
+* `smoother`: per-wire 1-in/1-out stage(s) applied to the interpolated values
+  before `processor`; either a single stage for every array, or a list of one per
+  supplied array. Use `_` for no smoothing.
+* `loBounds`: list of low bounds, one per array (at most `inputs(processor)` of them)
+* `hiBounds`: list of high bounds, matching `loBounds`
+
+#### Note:
+
+The number of supplied arrays is measured as `outputs(loBounds)`, so `loBounds`,
+`hiBounds`, and (when passed as a list) `interp` and `smoother` must all have that
+same length.
+
+#### Test
+```
+ba = library("basics.lib");
+it = library("interpolators.lib");
+si = library("signals.lib");
+// 3-input processor, 2 arrays supplied -> 1 N-wide bus input, sliders smoothed:
+processArray_proc(a, b, c) = a + b + c;
+processArray_test = si.bus(4) : ba.processArray(4, processArray_proc, it.interpolate_linear, si.smoo, (0.1, 1.0), (1.0, 10.0));
 ```
 
 ## Function tabulation

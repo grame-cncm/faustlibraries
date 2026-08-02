@@ -18,7 +18,7 @@ CXXFLAGS ?= -O2 -std=c++17
 NUM_SAMPLES ?= 48000
 SAMPLE_RATE ?= 48000
 
-FLOAT_TOL ?= 1e-4
+FLOAT_TOL ?= 1e-5
 FLOATDIFF ?= ./scripts/floatdiff.py
 PYTHON ?= python3
 DOC_INDEX_SCRIPT ?= ./scripts/build_faust_doc_index.py

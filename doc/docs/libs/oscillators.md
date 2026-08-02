@@ -43,7 +43,7 @@ phasor would initially run but it'd eventually get stuck once the output gets bi
 
 All functions using `phasor_imp` are affected by this problem, but a safer
 version is implemented, and can be used alternatively by setting `SAFE=1` in the environment using 
-[explicit sustitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution) syntax.
+[explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution) syntax.
 
 For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer implementation of `phasor_imp`.
 
