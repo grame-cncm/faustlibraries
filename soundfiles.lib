@@ -66,15 +66,28 @@ super = environment {
     outs(sf, level) = sf : si.block(2), bus(outputs(sf)-2) with { bus(n) = par(i,n,*(level)); };
 
     // Plays a soundfile
-    // 'reader' in a function of type \(sf,part).(body) whih produces the (possibly fractional) read index
-    player(sf, part, reader, level) = (part, it.int_part(reader(sf, part))) : outs(sf, level);
-
+    // 'reader' in a function of type \(sf,part).(body) which produces the (possibly fractional) read index
+    player(sf, part, reader, level) = (part, idx) : outs(sf, level * is_playing)
+    with {
+        idx = it.int_part(reader(sf, part));
+		
+        // 'is_playing' is 0 when the index has left the part.
+        // If we didn't do this, the last sample is played instead, causing unwanted DC effect.
+        // Note: 'play_rev'/'play_alt' start at index 'length' (clamped to the
+        // last sample), so their first output sample is silenced and the
+        // reverse playback starts one sample later.
+        is_playing = (idx >= 0) & (idx < length(sf, part));
+    };
     // Plays a soundfile with configurable interpolation
     player_interp(sf, part, reader, level, selector) = it.interpolator_select(gen, idv, selector)
     with {
         // Adapts the (sf, part, reader) parameters as 'idv' and 'gen' types for the generic interpolator
         idv = reader(sf, part);
-        gen(idx) = (part, idx) : outs(sf, level);
+		
+        gen(idx) = (part, idx) : outs(sf, level * is_playing);
+		
+        // 'is_playing' is 0 when the read index has left the part.
+        is_playing = (it.int_part(idv) >= 0) & (it.int_part(idv) < length(sf, part));
     };
 
      // Plays a soundfile with configurable interpolation and a reference frequence 'ref'
