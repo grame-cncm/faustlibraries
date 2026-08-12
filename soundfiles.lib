@@ -199,7 +199,7 @@ sound(sf, part) = environment {
     loop_speed(speed) = super.loop_speed(sf, part, speed);
     loop_speed_level(speed, level) = super.loop_speed_level(sf, part, speed, level);
 
-    // Play once
+    // Play once (note: after reaching the end of a sound, the last sample is returned, not 0)
     play(level, gate) = super.player(sf, part, reader, level)
     with {
         reader(sf, part) = it.raise(gate, super.srate(sf, part)/ma.SR, super.length(sf, part));
