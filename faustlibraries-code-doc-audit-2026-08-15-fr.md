@@ -1178,6 +1178,76 @@ Aucun des deux ne suffit seul. C'est pourquoi l'ordre du §9.5 tient : Lean sans
 harnais capable d'échouer produirait des théorèmes vrais sur du code que personne ne
 vérifie.
 
+### 10.5 Un prototype fonctionnel de la voie d'import
+
+Le §10.3 présentait l'architecture B — importer le graphe de signaux compilé —
+comme la cible plutôt que le point de départ. Elle s'avère atteignable dès
+maintenant :
+
+```
+.dsp  →  faust-rs --dump-sig  →  parseur  →  terme Lean Sig  →  theorem … := by decide
+```
+
+**Aucune modification de `faust-rs` n'a été nécessaire.** L'option `--dump-sig`
+existe déjà et produit une S-expression propre (`SIGBINOP(op=add (+), …)`,
+`int(n)`, `float_bits(0x…)`, `DEBRUIJNREC`, `DEBRUIJNREF`), ce qui était la
+principale inconnue.
+
+Le prototype se compose de :
+
+| Fichier | Rôle |
+|---|---|
+| `signal-import-formal-spec.lean` | Prélude écrit et relu à la main : l'inductif `Sig`, l'extracteur de récursion linéaire, le critère de Jury, les obligations consignées |
+| `scripts/sig2lean.py` | Parseur du dump et émetteur Lean ; exécute Lean une fois pour lire chaque verdict, puis émet un théorème `by decide` qui le fixe |
+| `tests/lean-examples/` | Cinq entrées `.dsp` et le `certified.lean` engendré |
+
+Résultats, tous verdicts corrects :
+
+| DSP | `a₁`, `a₂` extraits | Verdict |
+|---|---|---|
+| `+ ~ *(0.7)` | −0,7, 0 | stable |
+| `fi.tf2(…, −1.2, 0.5)` | −1,2, 1/2 | stable |
+| `fi.tf2(…, −0.5, −0.8)` | −1/2, −0,8 | instable |
+| `+ ~ *(1.5)` | −3/2, 0 | instable |
+| `+ ~ (*(0.9) : ma.tanh)` | — | refusé : non linéaire |
+
+Les cinq théorèmes se vérifient en 4,2 s et **ne dépendent que de `propext`**.
+
+#### Ce que la construction a révélé
+
+- **La récursion n'est pas à la racine.** La première conception supposait un
+  graphe exporté de la forme `SIGPROJ(0, SIGREC(…))`. Or `fi.tf2` — la première
+  vraie fonction de bibliothèque essayée — place le `SIGREC` *sous* le numérateur,
+  en `b₀w[n] + b₁w[n-1] + b₂w[n-2]`. Le certificateur doit **chercher** la
+  récursion, pas présumer sa position. Un prototype éprouvé seulement sur des
+  expressions jouets aurait paru correct.
+- **`Rat` est inutilisable dans un vérificateur décidable.** Ni `decide`, ni
+  `grind`, ni `rfl` ne réduisent à travers `Rat.instDecidableLt` dans Std 4.31.
+  Les coefficients sont donc portés en paires d'entiers — et comme tout double
+  IEEE-754 vaut exactement `m/2ᵏ`, l'import est **exact**, pas approché.
+- **`deriving DecidableEq` ne s'applique pas à l'inductif imbriqué**
+  (`opaqueN … (kids : List Sig)`), donc les récursions trouvées ne peuvent pas
+  être dédupliquées structurellement. Comparer leurs *analyses* est moins coûteux,
+  et se trouve être plus fort : un verdict n'est accepté que si toutes les
+  récursions du graphe concordent.
+- **La totalité achète une correction unilatérale.** Tout tag non modélisé devient
+  `opaqueN`, que l'analyse ne peut jamais lire comme terme linéaire. Ajouter un
+  tag ne peut qu'élargir ce qui est accepté, jamais faire accepter du faux.
+
+#### Ce qu'il n'est pas
+
+Le prototype réalise l'*import* de l'architecture B mais conserve la faiblesse
+d'adéquation de l'architecture A : `feedbackOf` est affirmé, non prouvé, renvoyer
+les coefficients de rétroaction de la récursion qu'on lui a donnée. Le prouver
+demande une dénotation `Sig → (ℕ → ℝ)`, donc mathlib, donc l'étage 3 (§10.1).
+En attendant, la garantie est unilatérale : l'extracteur renvoie `none` sur tout
+ce qu'il ne reconnaît pas exactement, de sorte qu'un verdict positif ne provient
+jamais d'un graphe mal lu.
+
+Il ne traite par ailleurs que les récursions à une sortie d'ordre ≤ 2, et certifie
+les **rationnels exacts** dénotés par les coefficients exportés — pas le
+comportement du filtre exécuté en virgule flottante (§9.2).
+
 ---
 
 ## Annexe — reproduire les mesures

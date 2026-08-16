@@ -1144,6 +1144,72 @@ A distinction to hold firmly, or the exercise becomes self-deception:
 Neither is sufficient alone. This is why the ordering in §9.5 holds: Lean without a
 harness that can fail would produce true theorems about code nobody checks.
 
+### 10.5 A working prototype of the import path
+
+§10.3 presented architecture B — importing the compiled signal graph — as the
+target rather than the starting point. It turns out to be reachable now:
+
+```
+.dsp  →  faust-rs --dump-sig  →  parser  →  Lean Sig term  →  theorem … := by decide
+```
+
+**No change to `faust-rs` was required.** The `--dump-sig` flag already exists and
+emits a clean S-expression (`SIGBINOP(op=add (+), …)`, `int(n)`,
+`float_bits(0x…)`, `DEBRUIJNREC`, `DEBRUIJNREF`), which was the main unknown.
+
+The prototype ships as:
+
+| File | Role |
+|---|---|
+| `signal-import-formal-spec.lean` | Hand-written, reviewed prelude: the `Sig` inductive, the linear-recursion extractor, the Jury criterion, the standing obligations |
+| `scripts/sig2lean.py` | Dump parser and Lean emitter; runs Lean once to read each verdict, then emits a `by decide` theorem pinning it |
+| `tests/lean-examples/` | Five `.dsp` inputs and the generated `certified.lean` |
+
+Results, all verdicts correct:
+
+| DSP | extracted `a₁`, `a₂` | verdict |
+|---|---|---|
+| `+ ~ *(0.7)` | −0.7, 0 | stable |
+| `fi.tf2(…, −1.2, 0.5)` | −1.2, 1/2 | stable |
+| `fi.tf2(…, −0.5, −0.8)` | −1/2, −0.8 | not stable |
+| `+ ~ *(1.5)` | −3/2, 0 | not stable |
+| `+ ~ (*(0.9) : ma.tanh)` | — | refused: not linear |
+
+The five theorems check in 4.2 s and **depend only on `propext`**.
+
+#### What building it revealed
+
+- **The recursion is not at the root.** The first design assumed the exported
+  graph would be `SIGPROJ(0, SIGREC(…))`. `fi.tf2` — the first real library
+  function tried — puts the `SIGREC` *below* the numerator, as
+  `b₀w[n] + b₁w[n-1] + b₂w[n-2]`. The certifier must **search** for the
+  recursion, not presume its position. A prototype exercised only on toy
+  expressions would have looked correct.
+- **`Rat` is unusable in a decidable checker.** Neither `decide` nor `grind` nor
+  `rfl` reduces through `Rat.instDecidableLt` in Std 4.31. Coefficients are
+  therefore carried as integer pairs — and since every IEEE-754 double is exactly
+  `m/2ᵏ`, the import is **exact**, not approximate.
+- **`deriving DecidableEq` does not apply to the nested inductive**
+  (`opaqueN … (kids : List Sig)`), so the recursions found cannot be deduplicated
+  structurally. Comparing their *analyses* instead is cheaper, and happens to be
+  stronger: a verdict is accepted only when every recursion in the graph agrees.
+- **Totality buys one-sided soundness.** Every unmodelled tag becomes `opaqueN`,
+  which the analysis can never read as a linear term. Adding a tag can only widen
+  what is accepted, never make it accept something wrong.
+
+#### What it is not
+
+The prototype implements architecture B's *import* but keeps architecture A's
+adequacy gap: `feedbackOf` is asserted, not proved, to return the feedback
+coefficients of the recursion it was handed. Proving that needs a denotation
+`Sig → (ℕ → ℝ)`, hence mathlib, hence Tier 3 (§10.1). Until then the guarantee is
+one-sided: the extractor returns `none` on anything it does not recognise exactly,
+so a positive verdict never comes from a graph it misread.
+
+It also handles only single-output recursions of order ≤ 2, and certifies the
+**exact rationals** denoted by the exported coefficients — not the behaviour of
+the filter as executed in floating point (§9.2).
+
 ---
 
 ## Appendix — reproducing the measurements
