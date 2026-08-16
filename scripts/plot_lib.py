@@ -47,21 +47,34 @@ N = 8192
 F0 = 512 * SR / N
 DRIVE = 2.0          # enough to engage every saturator in the library
 RAMP_SPAN = 2.0      # transfer curve swept over [-RAMP_SPAN, +RAMP_SPAN]
-WARMUP = 32          # frames `print_arch.cpp` computes with buttons held on
+SETTLE = 4           # ADAA state settling, dropped from the transfer curve
 CURVE_DECIMATION = 8
 SPECTRUM_DECIMATION = 4
 
+# Probe sources are library functions: `ba.time` for the sample counter and
+# `os.osc` for the sine. Only the scaling around them lives here, which is
+# assembly rather than a reimplementation.
+#
+# `os.lf_rawsaw(n)` was tried for the ramp and rejected: it is a *periodic*
+# sawtooth, so over an n-sample capture it wraps on the last sample and feeds
+# the nonlinearity a full-scale jump. A transfer curve wants a monotone sweep,
+# which is what `ba.time` gives.
+#
+# Both probes fan the source out to two outputs, `in <: _, f(in)`. The transfer
+# curve is then a parametric plot of (column 1, column 2), so the x axis is the
+# input as the DSP actually produced it. Deriving it in Python instead would
+# duplicate the generator's semantics and drift from it silently.
 PROBE_TRANSFER = """\
 aa = library("aanl.lib");
 ba = library("basics.lib");
-ramp = (float(ba.time) / {n}.0) * {span2} - {span};
-process = ramp : aa.{name};
+ramp = float(ba.time) / {n} * {span2} - {span};
+process = ramp <: _, aa.{name};
 """
 
 PROBE_SPECTRUM = """\
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-process = {drive} * os.osc({f0}) : aa.{name};
+process = {drive} * os.osc({f0}) <: _, aa.{name};
 """
 
 
@@ -101,7 +114,8 @@ def run_probe(source: str, frames: int) -> np.ndarray | None:
         if run.returncode != 0 or not run.stdout.strip():
             return None
         data = np.loadtxt(run.stdout.splitlines())
-        return data[:, 1] if data.ndim == 2 else data
+        # Column 0 is the frame index; channels follow.
+        return np.atleast_2d(data)[:, 1:]
 
 
 def harmonic_marks(f0: float, nyquist: float, count: int = 24) -> list[float]:
@@ -120,12 +134,13 @@ def harmonic_marks(f0: float, nyquist: float, count: int = 24) -> list[float]:
 def plot(name: str, curve: np.ndarray, spectrum: np.ndarray, out: Path) -> None:
     fig, (ax_t, ax_f) = plt.subplots(1, 2, figsize=(9.0, 3.4))
 
-    # The harness computes 32 warm-up frames with buttons held on; drop them,
-    # then decimate — an SVG carrying 8192 points is 47 kB for a smooth curve.
-    body = curve[WARMUP:][::CURVE_DECIMATION]
-    x = np.linspace(-RAMP_SPAN + 2 * RAMP_SPAN * WARMUP / len(curve),
-                    RAMP_SPAN, len(body))
-    ax_t.plot(x, body, lw=1.6, color="#1f6feb")
+    # Parametric: input on x, output on y, both as the DSP emitted them. The
+    # leading samples are dropped because the ADAA forms carry one sample of
+    # state and their first outputs are a settling transient, not the curve.
+    x = curve[SETTLE:, 0][::CURVE_DECIMATION]
+    y = curve[SETTLE:, 1][::CURVE_DECIMATION]
+    order = np.argsort(x)
+    ax_t.plot(x[order], y[order], lw=1.6, color="#1f6feb")
     ax_t.axhline(0, lw=0.6, color="#999")
     ax_t.axvline(0, lw=0.6, color="#999")
     ax_t.set_title(f"aa.{name} — transfer curve", fontsize=10)
@@ -133,8 +148,8 @@ def plot(name: str, curve: np.ndarray, spectrum: np.ndarray, out: Path) -> None:
     ax_t.set_ylabel("output")
     ax_t.grid(alpha=0.25)
 
-    # Drop the warm-up transient before transforming.
-    seg = spectrum[-N:] * np.hanning(N)
+    # Drop the start-up transient before transforming; use the output channel.
+    seg = spectrum[-N:, 1] * np.hanning(N)
     mag = np.abs(np.fft.rfft(seg))
     freq = np.fft.rfftfreq(N, 1 / SR)
     db = 20 * np.log10(mag / max(mag.max(), 1e-30) + 1e-12)
