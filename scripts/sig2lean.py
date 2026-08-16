@@ -136,13 +136,132 @@ def emit(n):
     return f'(.opaqueN "{lean_str(t)}" [{kids}])'
 
 
-def dumps_of(dsp):
-    cmd = [FAUST_RS, "--dump-sig"] + (["-I", LIBS] if LIBS else []) + [dsp]
+def split_args(text):
+    """Split one argument list on top-level commas."""
+    parts, depth, quoted, cur = [], 0, False, []
+    for ch in text:
+        if quoted:
+            cur.append(ch)
+            quoted = ch != '"' or cur[-2:-1] == ["\\"]
+            continue
+        if ch == '"':
+            quoted = True
+        elif ch in "([":
+            depth += 1
+        elif ch in ")]":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            parts.append("".join(cur).strip())
+            cur = []
+            continue
+        cur.append(ch)
+    if "".join(cur).strip():
+        parts.append("".join(cur).strip())
+    return parts
+
+
+BIND = re.compile(r'^n(\d+) = ([A-Za-z_][A-Za-z0-9_]*)\((.*)\)$')
+ROOT = re.compile(r'^\[(\d+)\] = (.+)$')
+KV = re.compile(r'^(op|init|min|max|step)=(.*)$')
+
+
+def dag_of(dsp):
+    """Run `--dump-sig-dag` and return (bindings, roots).
+
+    `bindings[k]` is `(tag, args, range)`; an arg is either `("ref", k)` or a
+    parsed leaf `Node`. Reading the DAG form rather than the tree form is what
+    keeps this linear: the tree dump of `fi.bandpass(4)` is 2.3 MB for the same
+    6.5 kB of graph.
+    """
+    cmd = [FAUST_RS, "--dump-sig-dag"] + (["-I", LIBS] if LIBS else []) + [dsp]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         raise RuntimeError(f"{dsp}: {r.stderr.strip()}")
-    return [re.sub(r'^\[\d+\] ', '', l) for l in r.stdout.splitlines()
-            if re.match(r'^\[\d+\] ', l)]
+    bindings, roots = {}, []
+    for line in r.stdout.splitlines():
+        m = BIND.match(line)
+        if m:
+            idx, tag, rest = int(m.group(1)), m.group(2), m.group(3)
+            args, rng, op = [], {}, None
+            for a in split_args(rest):
+                kv = KV.match(a)
+                if kv and kv.group(1) == "op":
+                    op = kv.group(2).split()[0]
+                elif kv:
+                    rng[kv.group(1)] = Fraction(kv.group(2))
+                elif re.fullmatch(r"n\d+", a):
+                    args.append(("ref", int(a[1:])))
+                else:
+                    args.append(("leaf", parse(a)))
+            bindings[idx] = (tag, args, rng, op)
+            continue
+        m = ROOT.match(line)
+        if m:
+            arg = m.group(2)
+            roots.append(("ref", int(arg[1:])) if re.fullmatch(r"n\d+", arg)
+                         else ("leaf", parse(arg)))
+    return bindings, roots
+
+
+def reachable(bindings, root):
+    """Bindings reachable from one root, in dependency order.
+
+    `--dump-sig-dag` numbers nodes in post-order, so a child always carries a
+    lower index than its parent. Sorting the reachable set ascending is
+    therefore already a topological order -- no second traversal needed.
+    """
+    seen, stack = set(), [root]
+    while stack:
+        kind, val = stack.pop()
+        if kind != "ref" or val in seen:
+            continue
+        seen.add(val)
+        stack.extend(a for a in bindings[val][1] if a[0] == "ref")
+    return sorted(seen)
+
+
+def emit_arg(bindings, arg):
+    kind, val = arg
+    return f"n{val}" if kind == "ref" else emit(val)
+
+
+def emit_binding(bindings, idx):
+    tag, args, rng, op = bindings[idx]
+    if tag in UI_RANGE_TAGS and rng:
+        cid = emit_arg(bindings, args[0]).strip("()")
+        cid = cid.replace(".int ", "")
+        kids = ", ".join(emit_arg(bindings, a) for a in args[1:])
+        return (f'Sig.control "{tag}" {cid} '
+                f"{q_lit(rng['min'])} {q_lit(rng['max'])} [{kids}]")
+    if tag == "SIGBINOP" and op:
+        lean_op = {"add": ".add", "sub": ".sub", "mul": ".mul",
+                   "div": ".div", "rem": ".rem"}.get(op)
+        a, b = (emit_arg(bindings, x) for x in args)
+        if lean_op:
+            return f"Sig.binop {lean_op} {a} {b}"
+        return f'Sig.opaqueN "SIGBINOP:{lean_str(op)}" [{a}, {b}]'
+    simple = {"SIGINPUT": "Sig.input", "SIGDELAY1": "Sig.delay1",
+              "SIGDELAY": "Sig.delay", "SIGPROJ": "Sig.proj",
+              "DEBRUIJNREC": "Sig.recur", "DEBRUIJNREF": "Sig.ref",
+              "cons": "Sig.cons"}
+    rendered = [emit_arg(bindings, a) for a in args]
+    if tag in ("SIGINPUT", "DEBRUIJNREF"):
+        return f"{simple[tag]} {rendered[0].replace('(.int ', '(').strip('()')}"
+    if tag == "SIGPROJ":
+        return f"Sig.proj {rendered[0].replace('(.int ', '(').strip('()')} {rendered[1]}"
+    if tag in simple:
+        return f"{simple[tag]} {' '.join(rendered)}"
+    return f'Sig.opaqueN "{lean_str(tag)}" [{", ".join(rendered)}]'
+
+
+def emit_dag(bindings, root, indent="  "):
+    """One `let`-chain per root, binding only what that root reaches."""
+    if root[0] == "leaf":
+        return emit(root[1])
+    lines = [f"{indent}let n{k} : Sig := {emit_binding(bindings, k)}"
+             for k in reachable(bindings, root)]
+    lines.append(f"{indent}n{root[1]}")
+    return "\n" + "\n".join(lines)
 
 
 def ident(p):
@@ -162,11 +281,12 @@ def build(template, dsps, verdicts=None):
     names = []
     for d in dsps:
         src = open(d).read().strip()
-        for k, line in enumerate(dumps_of(d)):
+        bindings, roots = dag_of(d)
+        for k, root in enumerate(roots):
             name = f"{ident(d)}_out{k}"
             names.append(name)
             out.append(f"/-- `{src}` — output {k} -/")
-            out.append(f"def {name} : Sig :=\n  {emit(parse(line))}\n")
+            out.append(f"def {name} : Sig :={emit_dag(bindings, root)}\n")
     if verdicts is None:
         out += [f'#eval s!"{n}|" ++ toString (certifyStableB {n}) ++ "|" '
                 f'++ toString (certifyIndicesB {n})' for n in names]

@@ -9,7 +9,13 @@
   that its feedback recursion is stable.
 
   This file is the hand-written, reviewed prelude. The terms it is applied to
-  are generated from `faust-rs --dump-sig` by `scripts/sig2lean.py`:
+  are generated from `faust-rs --dump-sig-dag` by `scripts/sig2lean.py`.
+
+  The DAG form of the dump matters here. The tree form re-expands every shared
+  subgraph at each path reaching it, so `fi.bandpass(4, 500, 2000)` prints
+  2.3 MB for what the DAG form says in 6.5 kB. Read through the DAG and emitted
+  as a `let`-chain, the generated Lean stays flat: 8.8 kB of bindings for that
+  same filter, and a check time that does not move with filter order.
 
       export FAUST_RS=<faust-rs>/target/release/faust-rs
       export FAUST_LIBS=<faustlibraries>

@@ -9,7 +9,13 @@
   that its feedback recursion is stable.
 
   This file is the hand-written, reviewed prelude. The terms it is applied to
-  are generated from `faust-rs --dump-sig` by `scripts/sig2lean.py`:
+  are generated from `faust-rs --dump-sig-dag` by `scripts/sig2lean.py`.
+
+  The DAG form of the dump matters here. The tree form re-expands every shared
+  subgraph at each path reaching it, so `fi.bandpass(4, 500, 2000)` prints
+  2.3 MB for what the DAG form says in 6.5 kB. Read through the DAG and emitted
+  as a `let`-chain, the generated Lean stays flat: 8.8 kB of bindings for that
+  same filter, and a check time that does not move with filter order.
 
       export FAUST_RS=<faust-rs>/target/release/faust-rs
       export FAUST_LIBS=<faustlibraries>
@@ -424,47 +430,189 @@ open Faust.Signal
 /-- `de = library("delays.lib");
 process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — output 0 -/
 def fdelay_clamped_out0 : Sig :=
-  (.binop .add (.binop .mul (.delay (.input 0) (.opaqueN "SIGMIN" [(.int 1025), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ [])])])])) (.binop .sub (.int 1) (.binop .sub (.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ []) (.opaqueN "SIGFLOOR" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ [])])))) (.binop .mul (.delay (.input 0) (.opaqueN "SIGMIN" [(.int 1025), (.opaqueN "SIGMAX" [(.int 0), (.binop .add (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ [])]) (.int 1))])])) (.binop .sub (.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ []) (.opaqueN "SIGFLOOR" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ [])]))))
+  let n0 : Sig := Sig.input 0
+  let n1 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ []
+  let n2 : Sig := Sig.opaqueN "SIGINTCAST" [n1]
+  let n3 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n2]
+  let n4 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n3]
+  let n5 : Sig := Sig.delay n0 n4
+  let n6 : Sig := Sig.opaqueN "SIGFLOOR" [n1]
+  let n7 : Sig := Sig.binop .sub n1 n6
+  let n8 : Sig := Sig.binop .sub (.int 1) n7
+  let n9 : Sig := Sig.binop .mul n5 n8
+  let n10 : Sig := Sig.binop .add n2 (.int 1)
+  let n11 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n10]
+  let n12 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n11]
+  let n13 : Sig := Sig.delay n0 n12
+  let n14 : Sig := Sig.binop .mul n13 n7
+  let n15 : Sig := Sig.binop .add n9 n14
+  n15
 
 /-- `import("maths.lib");
 process = + ~ (*(0.9) : ma.tanh);` — output 0 -/
 def nonlinear_out0 : Sig :=
-  (.proj 0 (.recur (.cons (.binop .add (.opaqueN "SIGFFUN" [(.opaqueN "FFUN" [(.cons (.int 1) (.cons (.cons (.opaque "tanhf") (.cons (.opaque "tanh") (.cons (.opaque "tanhl") (.cons (.opaque "tanhl") (.nil))))) (.cons (.int 1) (.nil)))), (.opaque "<math.h>"), (.opaque "\\\"\\\"")]), (.cons (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨8106479329266893, 9007199254740992⟩)) (.nil))]) (.input 0)) (.nil))))
+  let n0 : Sig := Sig.cons (.opaque "tanhl") (.nil)
+  let n1 : Sig := Sig.cons (.opaque "tanhl") n0
+  let n2 : Sig := Sig.cons (.opaque "tanh") n1
+  let n3 : Sig := Sig.cons (.opaque "tanhf") n2
+  let n4 : Sig := Sig.cons (.int 1) (.nil)
+  let n5 : Sig := Sig.cons n3 n4
+  let n6 : Sig := Sig.cons (.int 1) n5
+  let n7 : Sig := Sig.opaqueN "FFUN" [n6, (.opaque "<math.h>"), (.opaque "\\\"\\\"")]
+  let n8 : Sig := Sig.ref 1
+  let n9 : Sig := Sig.proj 0 n8
+  let n10 : Sig := Sig.delay1 n9
+  let n11 : Sig := Sig.binop .mul n10 (.const ⟨8106479329266893, 9007199254740992⟩)
+  let n12 : Sig := Sig.cons n11 (.nil)
+  let n13 : Sig := Sig.opaqueN "SIGFFUN" [n7, n12]
+  let n14 : Sig := Sig.input 0
+  let n15 : Sig := Sig.binop .add n13 n14
+  let n16 : Sig := Sig.cons n15 (.nil)
+  let n17 : Sig := Sig.recur n16
+  let n18 : Sig := Sig.proj 0 n17
+  n18
 
 /-- `process = *(0.5) : (+ ~ *(0.7));` — output 0 -/
 def onepole_out0 : Sig :=
-  (.proj 0 (.recur (.cons (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨3152519739159347, 4503599627370496⟩)) (.binop .mul (.input 0) (.const ⟨1, 2⟩))) (.nil))))
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .mul n2 (.const ⟨3152519739159347, 4503599627370496⟩)
+  let n4 : Sig := Sig.input 0
+  let n5 : Sig := Sig.binop .mul n4 (.const ⟨1, 2⟩)
+  let n6 : Sig := Sig.binop .add n3 n5
+  let n7 : Sig := Sig.cons n6 (.nil)
+  let n8 : Sig := Sig.recur n7
+  let n9 : Sig := Sig.proj 0 n8
+  n9
 
 /-- `os = library("oscillators.lib");
 process = os.osc(440);` — output 0 -/
 def osc_out0 : Sig :=
-  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 65536), (.opaqueN "SIGGEN" [(.opaqueN "SIGSIN" [(.binop .div (.binop .mul (.opaqueN "SIGFLOATCAST" [(.proj 0 (.recur (.cons (.binop .rem (.binop .add (.delay1 (.proj 0 (.ref 1))) (.delay1 (.int 1))) (.int 65536)) (.nil))))]) (.const ⟨884279719003555, 140737488355328⟩)) (.const ⟨65536, 1⟩))])]), (.nil), (.nil)]), (.opaqueN "SIGINTCAST" [(.binop .mul (.proj 0 (.recur (.cons (.binop .sub (.opaqueN "SIGSELECT2" [(.opaqueN "SIGBINOP:or" [(.binop .sub (.int 1) (.delay1 (.int 1))), (.int 0)]), (.binop .add (.delay1 (.proj 0 (.ref 1))) (.binop .div (.int 440) (.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), (.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), (.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")])])]))), (.int 0)]) (.opaqueN "SIGFLOOR" [(.opaqueN "SIGSELECT2" [(.opaqueN "SIGBINOP:or" [(.binop .sub (.int 1) (.delay1 (.int 1))), (.int 0)]), (.binop .add (.delay1 (.proj 0 (.ref 1))) (.binop .div (.int 440) (.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), (.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), (.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")])])]))), (.int 0)])])) (.nil)))) (.const ⟨65536, 1⟩))])])
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.delay1 (.int 1)
+  let n4 : Sig := Sig.binop .add n2 n3
+  let n5 : Sig := Sig.binop .rem n4 (.int 65536)
+  let n6 : Sig := Sig.cons n5 (.nil)
+  let n7 : Sig := Sig.recur n6
+  let n8 : Sig := Sig.proj 0 n7
+  let n9 : Sig := Sig.opaqueN "SIGFLOATCAST" [n8]
+  let n10 : Sig := Sig.binop .mul n9 (.const ⟨884279719003555, 140737488355328⟩)
+  let n11 : Sig := Sig.binop .div n10 (.const ⟨65536, 1⟩)
+  let n12 : Sig := Sig.opaqueN "SIGSIN" [n11]
+  let n13 : Sig := Sig.opaqueN "SIGGEN" [n12]
+  let n14 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 65536), n13, (.nil), (.nil)]
+  let n15 : Sig := Sig.binop .sub (.int 1) n3
+  let n16 : Sig := Sig.opaqueN "SIGBINOP:or" [n15, (.int 0)]
+  let n17 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
+  let n18 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), n17]
+  let n19 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n18]
+  let n20 : Sig := Sig.binop .div (.int 440) n19
+  let n21 : Sig := Sig.binop .add n2 n20
+  let n22 : Sig := Sig.opaqueN "SIGSELECT2" [n16, n21, (.int 0)]
+  let n23 : Sig := Sig.opaqueN "SIGFLOOR" [n22]
+  let n24 : Sig := Sig.binop .sub n22 n23
+  let n25 : Sig := Sig.cons n24 (.nil)
+  let n26 : Sig := Sig.recur n25
+  let n27 : Sig := Sig.proj 0 n26
+  let n28 : Sig := Sig.binop .mul n27 (.const ⟨65536, 1⟩)
+  let n29 : Sig := Sig.opaqueN "SIGINTCAST" [n28]
+  let n30 : Sig := Sig.opaqueN "SIGRDTBL" [n14, n29]
+  n30
 
 /-- `process = rdtable(16, 1.0, min(100, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
 def table_bad_clamp_out0 : Sig :=
-  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGMIN" [(.int 100), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ [])])])])])
+  let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
+  let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
+  let n2 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ []
+  let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
+  let n4 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n3]
+  let n5 : Sig := Sig.opaqueN "SIGMIN" [(.int 100), n4]
+  let n6 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n5]
+  n6
 
 /-- `process = rdtable(16, 1.0, min(15, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
 def table_good_clamp_out0 : Sig :=
-  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGMIN" [(.int 15), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ [])])])])])
+  let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
+  let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
+  let n2 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ []
+  let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
+  let n4 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n3]
+  let n5 : Sig := Sig.opaqueN "SIGMIN" [(.int 15), n4]
+  let n6 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n5]
+  n6
 
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,100,1)));` — output 0 -/
 def table_unclamped_out0 : Sig :=
-  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ [])])])
+  let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
+  let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
+  let n2 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ []
+  let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
+  let n4 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n3]
+  n4
 
 /-- `import("filters.lib");
 process = fi.tf2(0.3, 0.2, 0.1, -1.2, 0.5);` — output 0 -/
 def tf2_stable_out0 : Sig :=
-  (.binop .add (.binop .add (.binop .mul (.proj 0 (.recur (.cons (.binop .sub (.input 0) (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨(-5404319552844595), 4503599627370496⟩)) (.binop .mul (.delay (.delay1 (.proj 0 (.ref 1))) (.int 1)) (.const ⟨1, 2⟩)))) (.nil)))) (.const ⟨5404319552844595, 18014398509481984⟩)) (.binop .mul (.delay (.proj 0 (.recur (.cons (.binop .sub (.input 0) (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨(-5404319552844595), 4503599627370496⟩)) (.binop .mul (.delay (.delay1 (.proj 0 (.ref 1))) (.int 1)) (.const ⟨1, 2⟩)))) (.nil)))) (.int 1)) (.const ⟨3602879701896397, 18014398509481984⟩))) (.binop .mul (.delay (.proj 0 (.recur (.cons (.binop .sub (.input 0) (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨(-5404319552844595), 4503599627370496⟩)) (.binop .mul (.delay (.delay1 (.proj 0 (.ref 1))) (.int 1)) (.const ⟨1, 2⟩)))) (.nil)))) (.int 2)) (.const ⟨3602879701896397, 36028797018963968⟩)))
+  let n0 : Sig := Sig.input 0
+  let n1 : Sig := Sig.ref 1
+  let n2 : Sig := Sig.proj 0 n1
+  let n3 : Sig := Sig.delay1 n2
+  let n4 : Sig := Sig.binop .mul n3 (.const ⟨(-5404319552844595), 4503599627370496⟩)
+  let n5 : Sig := Sig.delay n3 (.int 1)
+  let n6 : Sig := Sig.binop .mul n5 (.const ⟨1, 2⟩)
+  let n7 : Sig := Sig.binop .add n4 n6
+  let n8 : Sig := Sig.binop .sub n0 n7
+  let n9 : Sig := Sig.cons n8 (.nil)
+  let n10 : Sig := Sig.recur n9
+  let n11 : Sig := Sig.proj 0 n10
+  let n12 : Sig := Sig.binop .mul n11 (.const ⟨5404319552844595, 18014398509481984⟩)
+  let n13 : Sig := Sig.delay n11 (.int 1)
+  let n14 : Sig := Sig.binop .mul n13 (.const ⟨3602879701896397, 18014398509481984⟩)
+  let n15 : Sig := Sig.binop .add n12 n14
+  let n16 : Sig := Sig.delay n11 (.int 2)
+  let n17 : Sig := Sig.binop .mul n16 (.const ⟨3602879701896397, 36028797018963968⟩)
+  let n18 : Sig := Sig.binop .add n15 n17
+  n18
 
 /-- `import("filters.lib");
 process = fi.tf2(1, 0, 0, -0.5, -0.8);` — output 0 -/
 def tf2_unstable_out0 : Sig :=
-  (.binop .add (.binop .add (.binop .mul (.proj 0 (.recur (.cons (.binop .sub (.input 0) (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨(-1), 2⟩)) (.binop .mul (.delay (.delay1 (.proj 0 (.ref 1))) (.int 1)) (.const ⟨(-3602879701896397), 4503599627370496⟩)))) (.nil)))) (.int 1)) (.binop .mul (.delay (.proj 0 (.recur (.cons (.binop .sub (.input 0) (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨(-1), 2⟩)) (.binop .mul (.delay (.delay1 (.proj 0 (.ref 1))) (.int 1)) (.const ⟨(-3602879701896397), 4503599627370496⟩)))) (.nil)))) (.int 1)) (.int 0))) (.binop .mul (.delay (.proj 0 (.recur (.cons (.binop .sub (.input 0) (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨(-1), 2⟩)) (.binop .mul (.delay (.delay1 (.proj 0 (.ref 1))) (.int 1)) (.const ⟨(-3602879701896397), 4503599627370496⟩)))) (.nil)))) (.int 2)) (.int 0)))
+  let n0 : Sig := Sig.input 0
+  let n1 : Sig := Sig.ref 1
+  let n2 : Sig := Sig.proj 0 n1
+  let n3 : Sig := Sig.delay1 n2
+  let n4 : Sig := Sig.binop .mul n3 (.const ⟨(-1), 2⟩)
+  let n5 : Sig := Sig.delay n3 (.int 1)
+  let n6 : Sig := Sig.binop .mul n5 (.const ⟨(-3602879701896397), 4503599627370496⟩)
+  let n7 : Sig := Sig.binop .add n4 n6
+  let n8 : Sig := Sig.binop .sub n0 n7
+  let n9 : Sig := Sig.cons n8 (.nil)
+  let n10 : Sig := Sig.recur n9
+  let n11 : Sig := Sig.proj 0 n10
+  let n12 : Sig := Sig.binop .mul n11 (.int 1)
+  let n13 : Sig := Sig.delay n11 (.int 1)
+  let n14 : Sig := Sig.binop .mul n13 (.int 0)
+  let n15 : Sig := Sig.binop .add n12 n14
+  let n16 : Sig := Sig.delay n11 (.int 2)
+  let n17 : Sig := Sig.binop .mul n16 (.int 0)
+  let n18 : Sig := Sig.binop .add n15 n17
+  n18
 
 /-- `process = + ~ *(1.5);` — output 0 -/
 def unstable_out0 : Sig :=
-  (.proj 0 (.recur (.cons (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨3, 2⟩)) (.input 0)) (.nil))))
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .mul n2 (.const ⟨3, 2⟩)
+  let n4 : Sig := Sig.input 0
+  let n5 : Sig := Sig.binop .add n3 n4
+  let n6 : Sig := Sig.cons n5 (.nil)
+  let n7 : Sig := Sig.recur n6
+  let n8 : Sig := Sig.proj 0 n7
+  n8
 
 /-! ## Certification
 
