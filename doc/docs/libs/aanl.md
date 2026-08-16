@@ -45,11 +45,15 @@ the standard libraries in Faust, the functions below can be called as `aa.functi
 
 ### `(aa.)Rsqrt`
 
+![Rsqrt — response plots](../img/aa_Rsqrt.svg)
+
 Real-valued sqrt().
 
 ----
 
 ### `(aa.)Rlog`
+
+![Rlog — response plots](../img/aa_Rlog.svg)
 
 Real-valued log().
 
@@ -57,11 +61,15 @@ Real-valued log().
 
 ### `(aa.)Rtan`
 
+![Rtan — response plots](../img/aa_Rtan.svg)
+
 Real-valued tan().
 
 ----
 
 ### `(aa.)Racos`
+
+![Racos — response plots](../img/aa_Racos.svg)
 
 Real-valued acos().
 
@@ -69,11 +77,15 @@ Real-valued acos().
 
 ### `(aa.)Rasin`
 
+![Rasin — response plots](../img/aa_Rasin.svg)
+
 Real-valued asin().
 
 ----
 
 ### `(aa.)Racosh`
+
+![Racosh — response plots](../img/aa_Racosh.svg)
 
 Real-valued acosh()
 
@@ -81,17 +93,23 @@ Real-valued acosh()
 
 ### `(aa.)Rcosh`
 
+![Rcosh — response plots](../img/aa_Rcosh.svg)
+
 Real-valued cosh().
 
 ----
 
 ### `(aa.)Rsinh`
 
+![Rsinh — response plots](../img/aa_Rsinh.svg)
+
 Real-valued sinh().
 
 ----
 
 ### `(aa.)Ratanh`
+
+![Ratanh — response plots](../img/aa_Ratanh.svg)
 
 Real-valued atanh().
 
@@ -185,6 +203,8 @@ amplitude profile of the input signal.
 
 ### `(aa.)hardclip`
 
+![hardclip — response plots](../img/aa_hardclip.svg)
+
 
 First-order ADAA hard-clip.
 
@@ -206,6 +226,8 @@ hardclip_test = aa.hardclip(sig);
 
 ### `(aa.)hardclip2`
 
+![hardclip2 — response plots](../img/aa_hardclip2.svg)
+
 
 Second-order ADAA hard-clip.
 
@@ -226,6 +248,8 @@ hardclip2_test = aa.hardclip2(sig);
 ----
 
 ### `(aa.)cubic1`
+
+![cubic1 — response plots](../img/aa_cubic1.svg)
 
 
 First-order ADAA cubic saturator.
@@ -249,6 +273,8 @@ cubic1_test = aa.cubic1(sig);
 
 ### `(aa.)parabolic`
 
+![parabolic — response plots](../img/aa_parabolic.svg)
+
 
 First-order ADAA parabolic saturator.
 
@@ -269,6 +295,8 @@ parabolic_test = aa.parabolic(sig);
 ----
 
 ### `(aa.)parabolic2`
+
+![parabolic2 — response plots](../img/aa_parabolic2.svg)
 
 
 Second-order ADAA parabolic saturator.
@@ -291,6 +319,8 @@ parabolic2_test = aa.parabolic2(sig);
 
 ### `(aa.)hyperbolic`
 
+![hyperbolic — response plots](../img/aa_hyperbolic.svg)
+
 
 First-order ADAA hyperbolic saturator.
 
@@ -311,6 +341,8 @@ hyperbolic_test = aa.hyperbolic(sig);
 ----
 
 ### `(aa.)hyperbolic2`
+
+![hyperbolic2 — response plots](../img/aa_hyperbolic2.svg)
 
 
 Second-order ADAA hyperbolic saturator.
@@ -333,6 +365,8 @@ hyperbolic2_test = aa.hyperbolic2(sig);
 
 ### `(aa.)sinarctan`
 
+![sinarctan — response plots](../img/aa_sinarctan.svg)
+
 
 First-order ADAA sin(atan()) saturator.
 
@@ -353,6 +387,8 @@ sinarctan_test = aa.sinarctan(sig);
 ----
 
 ### `(aa.)sinarctan2`
+
+![sinarctan2 — response plots](../img/aa_sinarctan2.svg)
 
 
 Second-order ADAA sin(atan()) saturator.
@@ -375,6 +411,8 @@ sinarctan2_test = aa.sinarctan2(sig);
 
 ### `(aa.)softclipQuadratic1`
 
+![softclipQuadratic1 — response plots](../img/aa_softclipQuadratic1.svg)
+
 
 First-order ADAA quadratic softclip.
 
@@ -395,6 +433,8 @@ softclipQuadratic1_test = aa.softclipQuadratic1(sig);
 ----
 
 ### `(aa.)softclipQuadratic2`
+
+![softclipQuadratic2 — response plots](../img/aa_softclipQuadratic2.svg)
 
 
 Second-order ADAA quadratic softclip.
@@ -417,6 +457,8 @@ softclipQuadratic2_test = aa.softclipQuadratic2(sig);
 
 ### `(aa.)tanh1`
 
+![tanh1 — response plots](../img/aa_tanh1.svg)
+
 
 First-order ADAA tanh() saturator.
 
@@ -437,6 +479,8 @@ tanh1_test = aa.tanh1(sig);
 ----
 
 ### `(aa.)arctan`
+
+![arctan — response plots](../img/aa_arctan.svg)
 
 
 First-order ADAA atan().
@@ -459,6 +503,8 @@ arctan_test = aa.arctan(sig);
 
 ### `(aa.)arctan2`
 
+![arctan2 — response plots](../img/aa_arctan2.svg)
+
 
 Second-order ADAA atan().
 
@@ -480,6 +526,8 @@ arctan2_test = aa.arctan2(sig);
 
 ### `(aa.)asinh1`
 
+![asinh1 — response plots](../img/aa_asinh1.svg)
+
 
 First-order ADAA asinh() saturator (unbounded).
 
@@ -500,6 +548,8 @@ asinh1_test = aa.asinh1(sig);
 ----
 
 ### `(aa.)asinh2`
+
+![asinh2 — response plots](../img/aa_asinh2.svg)
 
 
 Second-order ADAA asinh() saturator (unbounded).
@@ -526,6 +576,8 @@ These functions are reliable if input signals are within their domains.
 
 ### `(aa.)cosine1`
 
+![cosine1 — response plots](../img/aa_cosine1.svg)
+
 
 First-order ADAA cos().
 
@@ -546,6 +598,8 @@ cosine1_test = aa.cosine1(sig);
 ----
 
 ### `(aa.)cosine2`
+
+![cosine2 — response plots](../img/aa_cosine2.svg)
 
 
 Second-order ADAA cos().
@@ -568,6 +622,8 @@ cosine2_test = aa.cosine2(sig);
 
 ### `(aa.)arccos`
 
+![arccos — response plots](../img/aa_arccos.svg)
+
 
 First-order ADAA acos().
 
@@ -589,6 +645,8 @@ arccos_test = aa.arccos(sig);
 ----
 
 ### `(aa.)arccos2`
+
+![arccos2 — response plots](../img/aa_arccos2.svg)
 
 
 Second-order ADAA acos().
@@ -615,6 +673,8 @@ arccos2_test = aa.arccos2(sig);
 
 ### `(aa.)acosh1`
 
+![acosh1 — response plots](../img/aa_acosh1.svg)
+
 
 First-order ADAA acosh(). 
 
@@ -636,6 +696,8 @@ acosh1_test = aa.acosh1(acoshDomainSig);
 ----
 
 ### `(aa.)acosh2`
+
+![acosh2 — response plots](../img/aa_acosh2.svg)
 
 
 Second-order ADAA acosh().
@@ -662,6 +724,8 @@ acosh2_test = aa.acosh2(acoshDomainSig);
 
 ### `(aa.)sine`
 
+![sine — response plots](../img/aa_sine.svg)
+
 
 First-order ADAA sin().
 
@@ -682,6 +746,8 @@ sine_test = aa.sine(sig);
 ----
 
 ### `(aa.)sine2`
+
+![sine2 — response plots](../img/aa_sine2.svg)
 
 
 Second-order ADAA sin().
@@ -704,6 +770,8 @@ sine2_test = aa.sine2(sig);
 
 ### `(aa.)arcsin`
 
+![arcsin — response plots](../img/aa_arcsin.svg)
+
 
 First-order ADAA asin().
 
@@ -725,6 +793,8 @@ arcsin_test = aa.arcsin(sig);
 ----
 
 ### `(aa.)arcsin2`
+
+![arcsin2 — response plots](../img/aa_arcsin2.svg)
 
 
 Second-order ADAA asin().
@@ -751,6 +821,8 @@ arcsin2_test = aa.arcsin2(sig);
 
 ### `(aa.)tangent`
 
+![tangent — response plots](../img/aa_tangent.svg)
+
 
 First-order ADAA tan().
 
@@ -774,6 +846,8 @@ tangent_test = aa.tangent(tanDomainSig);
 
 ### `(aa.)atanh1`
 
+![atanh1 — response plots](../img/aa_atanh1.svg)
+
 
 First-order ADAA atanh(). 
 
@@ -795,6 +869,8 @@ atanh1_test = aa.atanh1(atanhDomainSig);
 ----
 
 ### `(aa.)atanh2`
+
+![atanh2 — response plots](../img/aa_atanh2.svg)
 
 
 Second-order ADAA atanh().

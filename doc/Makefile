@@ -1,6 +1,7 @@
 
 MAKE 	?= make
 AWK		?= gawk
+PYTHON ?= python3
 
 DOCDIR   := docs
 FAUSTLIBS ?= ../../faustlibraries
@@ -58,6 +59,7 @@ $(DOCDIR)/libs/%.md: $(FAUSTLIBS)/%.lib
 	@mkdir -p $(dir $@)
 	@echo ========= building $<
 	cat $< | $(AWK) -f scripts/faustlib2md.awk > $@
+	@$(PYTHON) scripts/inject_plots.py $@ $(DOCDIR)/img ../img
 	
 ####################################################################
 # building index

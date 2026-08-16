@@ -6,6 +6,7 @@
 #define MEMORY_READER
 #include "faust/gui/SoundUI.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -97,8 +98,15 @@ int main(int argc, char* argv[])
     const int numInputs = dsp.getNumInputs();
     const int numOutputs = dsp.getNumOutputs();
 
-    std::vector<std::vector<FAUSTFLOAT>> inputs(numInputs, std::vector<FAUSTFLOAT>(frames, static_cast<FAUSTFLOAT>(0)));
-    std::vector<std::vector<FAUSTFLOAT>> outputs(numOutputs, std::vector<FAUSTFLOAT>(frames, static_cast<FAUSTFLOAT>(0)));
+    // The warm-up pass below always computes `kWarmup` frames, so the buffers
+    // must hold at least that many even when fewer are requested. Without this
+    // the harness writes past the end of the vectors and crashes for any
+    // `frames < kWarmup`.
+    const int kWarmup = 32;
+    const int capacity = std::max(frames, kWarmup);
+
+    std::vector<std::vector<FAUSTFLOAT>> inputs(numInputs, std::vector<FAUSTFLOAT>(capacity, static_cast<FAUSTFLOAT>(0)));
+    std::vector<std::vector<FAUSTFLOAT>> outputs(numOutputs, std::vector<FAUSTFLOAT>(capacity, static_cast<FAUSTFLOAT>(0)));
 
     std::vector<FAUSTFLOAT*> inputPtrs(numInputs);
     std::vector<FAUSTFLOAT*> outputPtrs(numOutputs);
@@ -119,9 +127,10 @@ int main(int argc, char* argv[])
     
     std::cout << std::setprecision(10);
     
-    dsp.compute(32, inputBuffer, outputBuffer);
+    dsp.compute(kWarmup, inputBuffer, outputBuffer);
     
-    for (int frame = 0; frame < 32; ++frame) {
+    // Print at most what was asked for: a short run stops inside the warm-up.
+    for (int frame = 0; frame < std::min(frames, kWarmup); ++frame) {
         std::cout << frame;
         for (int ch = 0; ch < numOutputs; ++ch) {
             std::cout << '\t' << outputs[ch][frame];
@@ -136,8 +145,8 @@ int main(int argc, char* argv[])
     // Then regular computation
     dsp.compute(frames, inputBuffer, outputBuffer);
     
-    for (int frame = 0; frame < frames - 32; ++frame) {
-        std::cout << frame + 32;
+    for (int frame = 0; frame < frames - kWarmup; ++frame) {
+        std::cout << frame + kWarmup;
         for (int ch = 0; ch < numOutputs; ++ch) {
             std::cout << '\t' << outputs[ch][frame];
         }
