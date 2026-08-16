@@ -54,7 +54,7 @@ def wellFormed (a : Q) : Bool := decide (0 < a.d)
 end Q
 
 inductive BinOp where
-  | add | sub | mul | div
+  | add | sub | mul | div | rem
 deriving Repr, DecidableEq
 
 /-! ## The imported graph
@@ -213,6 +213,137 @@ def certifyReport (s : Sig) : String :=
       s!"a1 = {a.1.n}/{a.1.d}, a2 = {a.2.n}/{a.2.d} => " ++
       (if juryStableB a then "STABLE" else "NOT STABLE")
 
+/-! ## Index bounds
+
+A second, independent analysis over the same imported graph: are table reads
+and delay taps addressed within range?
+
+The safety of a Faust table read is **not** in general visible in the signal
+graph. `rdtable` emits a bare index, and the bound is inserted later by the
+backend from the compiler's interval analysis of that index — for a slider,
+from its declared range, which `--dump-sig` does not carry. What the graph
+*does* show is when an index is bounded by its own structure: a literal, an
+explicit `min`/`max` clamp written in the library source (as `delays.lib`
+does), or a remainder.
+
+So the analysis below is a **classifier**, not a bug finder: it separates the
+sites whose safety follows from the graph alone from those that delegate it to
+metadata outside the graph. Only the first kind can be certified here; the
+second is reported as unproven, never as unsafe. -/
+
+/-- A conservative integer range with **independently** optional sides:
+    `max 0 x` bounds the low side while leaving the high side unknown, which a
+    single `Option (Int × Int)` cannot express. `none` on a side always means
+    "no bound follows from the term", and is always a safe answer. -/
+structure Range where
+  lo : Option Int
+  hi : Option Int
+deriving Repr, DecidableEq
+
+namespace Range
+def unknown : Range := ⟨none, none⟩
+def exact (k : Int) : Range := ⟨some k, some k⟩
+
+/-- Best bound available from one or both sides. -/
+private def meet (f : Int → Int → Int) : Option Int → Option Int → Option Int
+  | some x, some y => some (f x y)
+  | some x, none   => some x
+  | none,   some y => some y
+  | none,   none   => none
+
+private def join (f : Int → Int → Int) : Option Int → Option Int → Option Int
+  | some x, some y => some (f x y)
+  | _,      _      => none
+
+/-- `min x y ≤ x`, so one known upper bound suffices; the lower bound needs both. -/
+def rmin (a b : Range) : Range := ⟨join min a.lo b.lo, meet min a.hi b.hi⟩
+
+/-- Dually for `max`. -/
+def rmax (a b : Range) : Range := ⟨meet max a.lo b.lo, join max a.hi b.hi⟩
+end Range
+
+/-- Range of a subterm, when one follows from its structure alone.
+
+    Recursion is on an explicit fuel counter rather than on `Sig`: the
+    interesting cases descend into the *children of an `opaqueN` list*, which
+    Lean does not accept as structurally decreasing on a nested inductive, and
+    a `partial def` would be opaque to the kernel — `#eval` would work but
+    `decide` would not. Running out of fuel yields the unknown range. -/
+def rangeOfFuel : Nat → Sig → Range
+  | 0, _ => Range.unknown
+  | _ + 1, .int k => Range.exact k
+  | n + 1, .opaqueN "SIGINTCAST" [x] => rangeOfFuel n x
+  | n + 1, .opaqueN "SIGMIN" [a, b]  => Range.rmin (rangeOfFuel n a) (rangeOfFuel n b)
+  | n + 1, .opaqueN "SIGMAX" [a, b]  => Range.rmax (rangeOfFuel n a) (rangeOfFuel n b)
+  | n + 1, .binop .rem a (.int m)    =>
+      if 0 < m then
+        -- C semantics: `%` truncates toward zero, so a negative dividend gives
+        -- a negative remainder unless the dividend is known non-negative.
+        match (rangeOfFuel n a).lo with
+        | some l => if 0 ≤ l then ⟨some 0, some (m - 1)⟩ else ⟨some (1 - m), some (m - 1)⟩
+        | none   => ⟨some (1 - m), some (m - 1)⟩
+      else Range.unknown
+  | _ + 1, _ => Range.unknown
+
+/-- Fuel is bounded by the depth of a clamp expression, not by graph size. -/
+def rangeOf (s : Sig) : Range := rangeOfFuel 64 s
+
+/-- One addressing site: a table read of a known size, or a delay tap. -/
+inductive Site where
+  | table (size : Int) (idx : Sig)
+  | tap   (idx : Sig)
+
+mutual
+def sites : Sig → List Site
+  | .opaqueN "SIGRDTBL" [.opaqueN "SIGWRTBL" (.int size :: rest), idx] =>
+      .table size idx :: sitesL rest ++ sites idx
+  | .delay x n    => .tap n :: sites x ++ sites n
+  | .delay1 x     => sites x
+  | .proj _ x     => sites x
+  | .recur b      => sites b
+  | .cons a b     => sites a ++ sites b
+  | .binop _ a b  => sites a ++ sites b
+  | .opaqueN _ ks => sitesL ks
+  | _             => []
+
+def sitesL : List Sig → List Site
+  | []      => []
+  | k :: ks => sites k ++ sitesL ks
+end
+
+/-- A table read is certified when its index provably lies in `[0, size-1]`;
+    a delay tap when its index is provably non-negative. -/
+def siteOkB : Site → Bool
+  | .table size idx =>
+      match (rangeOf idx).lo, (rangeOf idx).hi with
+      | some l, some h => decide (0 ≤ l) && decide (h ≤ size - 1)
+      | _, _           => false
+  | .tap idx =>
+      match (rangeOf idx).lo with
+      | some l => decide (0 ≤ l)
+      | none   => false
+
+def certifyIndicesB (s : Sig) : Bool := (sites s).all siteOkB
+
+def siteReport : Site → String
+  | .table size idx =>
+      match (rangeOf idx).lo, (rangeOf idx).hi with
+      | some l, some h =>
+          s!"table[{size}] index in [{l}, {h}] => " ++
+          (if 0 ≤ l && h ≤ size - 1 then "IN RANGE" else "OUT OF RANGE")
+      | _, _ => s!"table[{size}] index not bounded by structure => not proven"
+  | .tap idx =>
+      match (rangeOf idx).lo, (rangeOf idx).hi with
+      | some l, some h => s!"delay tap in [{l}, {h}] => " ++
+                          (if 0 ≤ l then "BOUNDED" else "may be negative")
+      | some l, none   => s!"delay tap >= {l} => " ++ (if 0 ≤ l then "BOUNDED" else "may be negative")
+      | _, _ => "delay tap not bounded by structure => not proven"
+
+def indexReport (s : Sig) : String :=
+  match sites s with
+  | [] => "no addressing site"
+  | ss => String.intercalate "; " (ss.map siteReport)
+
 /-! ## Standing obligations
 
 Two gaps are recorded here rather than silently relied upon.
@@ -246,6 +377,11 @@ Everything below is produced by `scripts/sig2lean.py` from
 namespace Faust.Signal.Generated
 open Faust.Signal
 
+/-- `de = library("delays.lib");
+process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — output 0 -/
+def fdelay_clamped_out0 : Sig :=
+  (.binop .add (.binop .mul (.delay (.input 0) (.opaqueN "SIGMIN" [(.int 1025), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])])])])) (.binop .sub (.int 1) (.binop .sub (.opaqueN "SIGHSLIDER" [(.int 0)]) (.opaqueN "SIGFLOOR" [(.opaqueN "SIGHSLIDER" [(.int 0)])])))) (.binop .mul (.delay (.input 0) (.opaqueN "SIGMIN" [(.int 1025), (.opaqueN "SIGMAX" [(.int 0), (.binop .add (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])]) (.int 1))])])) (.binop .sub (.opaqueN "SIGHSLIDER" [(.int 0)]) (.opaqueN "SIGFLOOR" [(.opaqueN "SIGHSLIDER" [(.int 0)])]))))
+
 /-- `import("maths.lib");
 process = + ~ (*(0.9) : ma.tanh);` — output 0 -/
 def nonlinear_out0 : Sig :=
@@ -254,6 +390,23 @@ def nonlinear_out0 : Sig :=
 /-- `process = *(0.5) : (+ ~ *(0.7));` — output 0 -/
 def onepole_out0 : Sig :=
   (.proj 0 (.recur (.cons (.binop .add (.binop .mul (.delay1 (.proj 0 (.ref 1))) (.const ⟨3152519739159347, 4503599627370496⟩)) (.binop .mul (.input 0) (.const ⟨1, 2⟩))) (.nil))))
+
+/-- `os = library("oscillators.lib");
+process = os.osc(440);` — output 0 -/
+def osc_out0 : Sig :=
+  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 65536), (.opaqueN "SIGGEN" [(.opaqueN "SIGSIN" [(.binop .div (.binop .mul (.opaqueN "SIGFLOATCAST" [(.proj 0 (.recur (.cons (.binop .rem (.binop .add (.delay1 (.proj 0 (.ref 1))) (.delay1 (.int 1))) (.int 65536)) (.nil))))]) (.const ⟨884279719003555, 140737488355328⟩)) (.const ⟨65536, 1⟩))])]), (.nil), (.nil)]), (.opaqueN "SIGINTCAST" [(.binop .mul (.proj 0 (.recur (.cons (.binop .sub (.opaqueN "SIGSELECT2" [(.opaqueN "SIGBINOP:or" [(.binop .sub (.int 1) (.delay1 (.int 1))), (.int 0)]), (.binop .add (.delay1 (.proj 0 (.ref 1))) (.binop .div (.int 440) (.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), (.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), (.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")])])]))), (.int 0)]) (.opaqueN "SIGFLOOR" [(.opaqueN "SIGSELECT2" [(.opaqueN "SIGBINOP:or" [(.binop .sub (.int 1) (.delay1 (.int 1))), (.int 0)]), (.binop .add (.delay1 (.proj 0 (.ref 1))) (.binop .div (.int 440) (.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), (.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), (.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")])])]))), (.int 0)])])) (.nil)))) (.const ⟨65536, 1⟩))])])
+
+/-- `process = rdtable(16, 1.0, min(100, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
+def table_bad_clamp_out0 : Sig :=
+  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGMIN" [(.int 100), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])])])])])
+
+/-- `process = rdtable(16, 1.0, min(15, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
+def table_good_clamp_out0 : Sig :=
+  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGMIN" [(.int 15), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])])])])])
+
+/-- `process = rdtable(16, 1.0, int(hslider("i",0,0,100,1)));` — output 0 -/
+def table_unclamped_out0 : Sig :=
+  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])])])
 
 /-- `import("filters.lib");
 process = fi.tf2(0.3, 0.2, 0.1, -1.2, 0.5);` — output 0 -/
@@ -271,21 +424,54 @@ def unstable_out0 : Sig :=
 
 /-! ## Certification
 
-Each line below is kernel-checked. `true` means the feedback
-coefficients read off the exported graph satisfy the Jury
-criterion; `false` means they do not, or that the graph was
-not recognised as a linear recursion of order ≤ 2. -/
+Two independent analyses over the same imported graph.
+`certifyStableB` reads the feedback coefficients and applies the
+Jury criterion. `certifyIndicesB` checks every table read and
+delay tap whose range follows from the graph structure alone;
+`false` there means *not proven*, never *unsafe*. -/
 
+#eval certifyReport fdelay_clamped_out0
 #eval certifyReport nonlinear_out0
 #eval certifyReport onepole_out0
+#eval certifyReport osc_out0
+#eval certifyReport table_bad_clamp_out0
+#eval certifyReport table_good_clamp_out0
+#eval certifyReport table_unclamped_out0
 #eval certifyReport tf2_stable_out0
 #eval certifyReport tf2_unstable_out0
 #eval certifyReport unstable_out0
 
-theorem nonlinear_out0_certified : certifyStableB nonlinear_out0 = false := by decide
-theorem onepole_out0_certified : certifyStableB onepole_out0 = true := by decide
-theorem tf2_stable_out0_certified : certifyStableB tf2_stable_out0 = true := by decide
-theorem tf2_unstable_out0_certified : certifyStableB tf2_unstable_out0 = false := by decide
-theorem unstable_out0_certified : certifyStableB unstable_out0 = false := by decide
+#eval indexReport fdelay_clamped_out0
+#eval indexReport nonlinear_out0
+#eval indexReport onepole_out0
+#eval indexReport osc_out0
+#eval indexReport table_bad_clamp_out0
+#eval indexReport table_good_clamp_out0
+#eval indexReport table_unclamped_out0
+#eval indexReport tf2_stable_out0
+#eval indexReport tf2_unstable_out0
+#eval indexReport unstable_out0
+
+theorem fdelay_clamped_out0_stability : certifyStableB fdelay_clamped_out0 = false := by decide
+theorem nonlinear_out0_stability : certifyStableB nonlinear_out0 = false := by decide
+theorem onepole_out0_stability : certifyStableB onepole_out0 = true := by decide
+theorem osc_out0_stability : certifyStableB osc_out0 = false := by decide
+theorem table_bad_clamp_out0_stability : certifyStableB table_bad_clamp_out0 = false := by decide
+theorem table_good_clamp_out0_stability : certifyStableB table_good_clamp_out0 = false := by decide
+theorem table_unclamped_out0_stability : certifyStableB table_unclamped_out0 = false := by decide
+theorem tf2_stable_out0_stability : certifyStableB tf2_stable_out0 = true := by decide
+theorem tf2_unstable_out0_stability : certifyStableB tf2_unstable_out0 = false := by decide
+theorem unstable_out0_stability : certifyStableB unstable_out0 = false := by decide
+
+theorem fdelay_clamped_out0_indices : certifyIndicesB fdelay_clamped_out0 = true := by decide
+theorem nonlinear_out0_indices : certifyIndicesB nonlinear_out0 = true := by decide
+theorem onepole_out0_indices : certifyIndicesB onepole_out0 = true := by decide
+theorem osc_out0_indices : certifyIndicesB osc_out0 = false := by decide
+theorem table_bad_clamp_out0_indices : certifyIndicesB table_bad_clamp_out0 = false := by decide
+theorem table_good_clamp_out0_indices : certifyIndicesB table_good_clamp_out0 = true := by decide
+theorem table_unclamped_out0_indices : certifyIndicesB table_unclamped_out0 = false := by decide
+theorem tf2_stable_out0_indices : certifyIndicesB tf2_stable_out0 = true := by decide
+theorem tf2_unstable_out0_indices : certifyIndicesB tf2_unstable_out0 = true := by decide
+theorem unstable_out0_indices : certifyIndicesB unstable_out0 = true := by decide
 
 end Faust.Signal.Generated

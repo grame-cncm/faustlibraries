@@ -1210,6 +1210,75 @@ It also handles only single-output recursions of order ≤ 2, and certifies the
 **exact rationals** denoted by the exported coefficients — not the behaviour of
 the filter as executed in floating point (§9.2).
 
+### 10.6 A second analysis over the same import: index bounds
+
+Stability is one property; the import path is worth more than one. The second
+analysis added to the same prelude answers: **are table reads and delay taps
+addressed within range?**
+
+#### A hypothesis that did not survive contact
+
+The analysis was motivated by an expected bug: a slider declared `0..100`
+indexing a 16-entry table. That DSP does compile without a warning, and the
+signal graph is a bare `SIGRDTBL(SIGWRTBL(int(16), …), SIGINTCAST(SIGHSLIDER(int(0))))`
+with no bound in sight. But the generated C++ is
+
+```cpp
+float fSlow0 = ftbl0mydspSIG0[std::min<int>(((int)(((float)(fHslider0)))), 15)];
+```
+
+The backend inserts the clamp from the compiler's interval analysis of the
+index — which draws on the slider's declared range. **There is no bug**, and the
+safety of a Faust table read is in general *not* visible in the signal graph.
+
+That reframes the analysis. It is not a bug finder; it is a **classifier**,
+separating addressing sites whose safety follows from the graph alone from
+those that delegate it to metadata the graph does not carry. Sites of the second
+kind are reported as *not proven*, never as unsafe.
+
+The distinction is real and falls along library lines: `delays.lib` writes its
+clamp in Faust source, so `de.fdelay` is certifiable from the graph, whereas a
+bare `rdtable` is not.
+
+#### Results
+
+| DSP | verdict |
+|---|---|
+| `de.fdelay(1024, hslider(…))` | `delay tap in [0, 1025] => BOUNDED` |
+| `rdtable(16, 1.0, min(15, max(0, …)))` | `table[16] index in [0, 15] => IN RANGE` |
+| `rdtable(16, 1.0, min(100, max(0, …)))` | `table[16] index in [0, 100] => OUT OF RANGE` |
+| `rdtable(16, 1.0, int(hslider(…)))` | `not bounded by structure => not proven` |
+| `os.osc(440)` | `table[65536] not bounded by structure => not proven` |
+| `fi.tf2(…)` | `delay tap in [1, 1] … [2, 2] => BOUNDED` |
+
+The third row is the rejecting witness: a clamp that is present but too wide is
+caught. The fourth and fifth are the honest abstentions. 20 theorems across the
+two analyses check in 4.3 s, depending only on `propext`.
+
+#### Two Lean findings
+
+- **`partial def` is invisible to the kernel.** The range function first descended
+  into the children of an `opaqueN` list, which Lean does not accept as
+  structurally decreasing on a nested inductive, so it was written `partial`.
+  `#eval` then worked and `decide` did not. Recursion on an explicit fuel
+  counter fixes it; running out of fuel yields the unknown range, which is the
+  safe answer.
+- **A range needs two independently optional sides.** With `Option (Int × Int)`,
+  `max 0 x` — which bounds the low side and leaves the high side unknown —
+  cannot be expressed, and a correct clamp was misreported as out of range.
+  `{lo : Option Int, hi : Option Int}` with `min` meeting on the high side and
+  joining on the low side (and dually for `max`) is the right lattice.
+
+#### Where it stops
+
+`os.osc` is bounded in reality by a `%` on a counter whose invariant is
+`0 ≤ c < 65536`, but that invariant lives in a recursion the analysis does not
+enter: proving it needs a fixpoint, not a walk. Certifying the remaining sites
+would need the control table exported alongside the graph, since
+`SIGHSLIDER(int(0))` carries an identifier and not its declared range — a minor
+extension to `--dump-sig`, and the prerequisite for any interval-based analysis
+(§10.1, tier 2).
+
 ---
 
 ## Appendix — reproducing the measurements

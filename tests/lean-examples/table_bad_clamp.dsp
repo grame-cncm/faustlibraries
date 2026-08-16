@@ -1,0 +1,1 @@
+process = rdtable(16, 1.0, min(100, max(0, int(hslider("i",0,0,100,1)))));

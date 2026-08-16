@@ -102,9 +102,15 @@ def emit(n):
     if t == "DEBRUIJNREF": return f"(.ref {i(n.kids[0].val)})"
     if t == "cons":        return f"(.cons {emit(n.kids[0])} {emit(n.kids[1])})"
     if t == "SIGBINOP":
-        op = {"add": ".add", "sub": ".sub", "mul": ".mul", "div": ".div"}.get(n.val)
+        op = {"add": ".add", "sub": ".sub", "mul": ".mul",
+              "div": ".div", "rem": ".rem"}.get(n.val)
         if op:
             return f"(.binop {op} {emit(n.kids[0])} {emit(n.kids[1])})"
+        # keep the opcode in the name: an unmapped binop must stay
+        # distinguishable, otherwise every comparison and bit operation
+        # collapses onto the same opaque node.
+        kids = ", ".join(emit(k) for k in n.kids)
+        return f'(.opaqueN "SIGBINOP:{lean_str(n.val)}" [{kids}])' 
     # Anything not modelled above stays opaque, which the certifier can never
     # read as a linear term.
     kids = ", ".join(emit(k) for k in n.kids)
@@ -143,16 +149,23 @@ def build(template, dsps, verdicts=None):
             out.append(f"/-- `{src}` — output {k} -/")
             out.append(f"def {name} : Sig :=\n  {emit(parse(line))}\n")
     if verdicts is None:
-        out += [f"#eval s!\"{n}|\" ++ toString (certifyStableB {n})" for n in names]
+        out += [f'#eval s!"{n}|" ++ toString (certifyStableB {n}) ++ "|" '
+                f'++ toString (certifyIndicesB {n})' for n in names]
     else:
         out.append("/-! ## Certification\n")
-        out.append("Each line below is kernel-checked. `true` means the feedback")
-        out.append("coefficients read off the exported graph satisfy the Jury")
-        out.append("criterion; `false` means they do not, or that the graph was")
-        out.append("not recognised as a linear recursion of order ≤ 2. -/\n")
+        out.append("Two independent analyses over the same imported graph.")
+        out.append("`certifyStableB` reads the feedback coefficients and applies the")
+        out.append("Jury criterion. `certifyIndicesB` checks every table read and")
+        out.append("delay tap whose range follows from the graph structure alone;")
+        out.append("`false` there means *not proven*, never *unsafe*. -/\n")
         out += [f"#eval certifyReport {n}" for n in names]
         out.append("")
-        out += [f"theorem {n}_certified : certifyStableB {n} = {verdicts[n]} := by decide"
+        out += [f"#eval indexReport {n}" for n in names]
+        out.append("")
+        out += [f"theorem {n}_stability : certifyStableB {n} = {verdicts[n][0]} := by decide"
+                for n in names]
+        out.append("")
+        out += [f"theorem {n}_indices : certifyIndicesB {n} = {verdicts[n][1]} := by decide"
                 for n in names]
     out.append("\nend Faust.Signal.Generated")
     return "\n".join(out), names
@@ -165,14 +178,16 @@ def main():
         f.write(probe)
         probe_path = f.name
     r = subprocess.run([LEAN, probe_path], capture_output=True, text=True)
-    verdicts = dict(re.findall(r'"?(\w+)\|(true|false)"?', r.stdout))
+    verdicts = {m[0]: (m[1], m[2]) for m in
+                re.findall(r'"?(\w+)\|(true|false)\|(true|false)"?', r.stdout)}
     missing = [n for n in names if n not in verdicts]
     if missing:
         sys.exit(f"probe failed for {missing}\n{r.stdout}\n{r.stderr}")
     final, _ = build(template, dsps, verdicts)
     open(target, "w").write(final)
     print(f"wrote {target}: {len(names)} signal(s), "
-          f"{sum(v == 'true' for v in verdicts.values())} certified stable")
+          f"{sum(v[0] == 'true' for v in verdicts.values())} certified stable, "
+          f"{sum(v[1] == 'true' for v in verdicts.values())} with certified indices")
     os.unlink(probe_path)
 
 

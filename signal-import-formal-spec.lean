@@ -54,7 +54,7 @@ def wellFormed (a : Q) : Bool := decide (0 < a.d)
 end Q
 
 inductive BinOp where
-  | add | sub | mul | div
+  | add | sub | mul | div | rem
 deriving Repr, DecidableEq
 
 /-! ## The imported graph
@@ -212,6 +212,137 @@ def certifyReport (s : Sig) : String :=
       let a := denomCoefs c
       s!"a1 = {a.1.n}/{a.1.d}, a2 = {a.2.n}/{a.2.d} => " ++
       (if juryStableB a then "STABLE" else "NOT STABLE")
+
+/-! ## Index bounds
+
+A second, independent analysis over the same imported graph: are table reads
+and delay taps addressed within range?
+
+The safety of a Faust table read is **not** in general visible in the signal
+graph. `rdtable` emits a bare index, and the bound is inserted later by the
+backend from the compiler's interval analysis of that index — for a slider,
+from its declared range, which `--dump-sig` does not carry. What the graph
+*does* show is when an index is bounded by its own structure: a literal, an
+explicit `min`/`max` clamp written in the library source (as `delays.lib`
+does), or a remainder.
+
+So the analysis below is a **classifier**, not a bug finder: it separates the
+sites whose safety follows from the graph alone from those that delegate it to
+metadata outside the graph. Only the first kind can be certified here; the
+second is reported as unproven, never as unsafe. -/
+
+/-- A conservative integer range with **independently** optional sides:
+    `max 0 x` bounds the low side while leaving the high side unknown, which a
+    single `Option (Int × Int)` cannot express. `none` on a side always means
+    "no bound follows from the term", and is always a safe answer. -/
+structure Range where
+  lo : Option Int
+  hi : Option Int
+deriving Repr, DecidableEq
+
+namespace Range
+def unknown : Range := ⟨none, none⟩
+def exact (k : Int) : Range := ⟨some k, some k⟩
+
+/-- Best bound available from one or both sides. -/
+private def meet (f : Int → Int → Int) : Option Int → Option Int → Option Int
+  | some x, some y => some (f x y)
+  | some x, none   => some x
+  | none,   some y => some y
+  | none,   none   => none
+
+private def join (f : Int → Int → Int) : Option Int → Option Int → Option Int
+  | some x, some y => some (f x y)
+  | _,      _      => none
+
+/-- `min x y ≤ x`, so one known upper bound suffices; the lower bound needs both. -/
+def rmin (a b : Range) : Range := ⟨join min a.lo b.lo, meet min a.hi b.hi⟩
+
+/-- Dually for `max`. -/
+def rmax (a b : Range) : Range := ⟨meet max a.lo b.lo, join max a.hi b.hi⟩
+end Range
+
+/-- Range of a subterm, when one follows from its structure alone.
+
+    Recursion is on an explicit fuel counter rather than on `Sig`: the
+    interesting cases descend into the *children of an `opaqueN` list*, which
+    Lean does not accept as structurally decreasing on a nested inductive, and
+    a `partial def` would be opaque to the kernel — `#eval` would work but
+    `decide` would not. Running out of fuel yields the unknown range. -/
+def rangeOfFuel : Nat → Sig → Range
+  | 0, _ => Range.unknown
+  | _ + 1, .int k => Range.exact k
+  | n + 1, .opaqueN "SIGINTCAST" [x] => rangeOfFuel n x
+  | n + 1, .opaqueN "SIGMIN" [a, b]  => Range.rmin (rangeOfFuel n a) (rangeOfFuel n b)
+  | n + 1, .opaqueN "SIGMAX" [a, b]  => Range.rmax (rangeOfFuel n a) (rangeOfFuel n b)
+  | n + 1, .binop .rem a (.int m)    =>
+      if 0 < m then
+        -- C semantics: `%` truncates toward zero, so a negative dividend gives
+        -- a negative remainder unless the dividend is known non-negative.
+        match (rangeOfFuel n a).lo with
+        | some l => if 0 ≤ l then ⟨some 0, some (m - 1)⟩ else ⟨some (1 - m), some (m - 1)⟩
+        | none   => ⟨some (1 - m), some (m - 1)⟩
+      else Range.unknown
+  | _ + 1, _ => Range.unknown
+
+/-- Fuel is bounded by the depth of a clamp expression, not by graph size. -/
+def rangeOf (s : Sig) : Range := rangeOfFuel 64 s
+
+/-- One addressing site: a table read of a known size, or a delay tap. -/
+inductive Site where
+  | table (size : Int) (idx : Sig)
+  | tap   (idx : Sig)
+
+mutual
+def sites : Sig → List Site
+  | .opaqueN "SIGRDTBL" [.opaqueN "SIGWRTBL" (.int size :: rest), idx] =>
+      .table size idx :: sitesL rest ++ sites idx
+  | .delay x n    => .tap n :: sites x ++ sites n
+  | .delay1 x     => sites x
+  | .proj _ x     => sites x
+  | .recur b      => sites b
+  | .cons a b     => sites a ++ sites b
+  | .binop _ a b  => sites a ++ sites b
+  | .opaqueN _ ks => sitesL ks
+  | _             => []
+
+def sitesL : List Sig → List Site
+  | []      => []
+  | k :: ks => sites k ++ sitesL ks
+end
+
+/-- A table read is certified when its index provably lies in `[0, size-1]`;
+    a delay tap when its index is provably non-negative. -/
+def siteOkB : Site → Bool
+  | .table size idx =>
+      match (rangeOf idx).lo, (rangeOf idx).hi with
+      | some l, some h => decide (0 ≤ l) && decide (h ≤ size - 1)
+      | _, _           => false
+  | .tap idx =>
+      match (rangeOf idx).lo with
+      | some l => decide (0 ≤ l)
+      | none   => false
+
+def certifyIndicesB (s : Sig) : Bool := (sites s).all siteOkB
+
+def siteReport : Site → String
+  | .table size idx =>
+      match (rangeOf idx).lo, (rangeOf idx).hi with
+      | some l, some h =>
+          s!"table[{size}] index in [{l}, {h}] => " ++
+          (if 0 ≤ l && h ≤ size - 1 then "IN RANGE" else "OUT OF RANGE")
+      | _, _ => s!"table[{size}] index not bounded by structure => not proven"
+  | .tap idx =>
+      match (rangeOf idx).lo, (rangeOf idx).hi with
+      | some l, some h => s!"delay tap in [{l}, {h}] => " ++
+                          (if 0 ≤ l then "BOUNDED" else "may be negative")
+      | some l, none   => s!"delay tap >= {l} => " ++ (if 0 ≤ l then "BOUNDED" else "may be negative")
+      | _, _ => "delay tap not bounded by structure => not proven"
+
+def indexReport (s : Sig) : String :=
+  match sites s with
+  | [] => "no addressing site"
+  | ss => String.intercalate "; " (ss.map siteReport)
 
 /-! ## Standing obligations
 
