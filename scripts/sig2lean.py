@@ -21,6 +21,8 @@ TOKEN = re.compile(r'''
     | (?P<flt>float_bits\(0x(?P<fbits>[0-9a-fA-F]{16})\))
     | (?P<sym>sym\("(?P<sval>(?:[^"\\]|\\.)*)"\))
     | (?P<str>str\("(?P<tval>(?:[^"\\]|\\.)*)"\))
+    | (?P<range>,\s*init=(?P<rinit>[-\d.einf]+),\s*min=(?P<rmin>[-\d.einf]+),
+        \s*max=(?P<rmax>[-\d.einf]+),\s*step=(?P<rstep>[-\d.einf]+))
     | (?P<nil>nil)
     | (?P<tag>[A-Za-z][A-Za-z0-9_]*)\(
     | (?P<close>\))
@@ -45,6 +47,10 @@ def parse(text):
             raise SyntaxError(f"at {pos}: {text[pos:pos + 60]!r}")
         pos, g = m.end(), m.lastgroup
         if g in ("space", "comma"):
+            continue
+        if g == "range":
+            stack[-1].val = tuple(Fraction(m.group(k))
+                                  for k in ("rinit", "rmin", "rmax", "rstep"))
             continue
         if g == "close":
             done = stack.pop()
@@ -82,6 +88,14 @@ def lean_str(s):
     return s.replace("\\", "\\\\").replace('"', '\\"')
 
 
+UI_RANGE_TAGS = {"SIGVSLIDER", "SIGHSLIDER", "SIGNUMENTRY",
+                 "SIGVBARGRAPH", "SIGHBARGRAPH"}
+
+
+def q_lit(f):
+    return f"⟨{i(f.numerator)}, {f.denominator}⟩"
+
+
 def i(v):
     return f"({v})" if v < 0 else f"{v}"
 
@@ -94,6 +108,11 @@ def emit(n):
     if t == "float":
         f = n.val
         return f"(.const ⟨{i(f.numerator)}, {f.denominator}⟩)"
+    if t in UI_RANGE_TAGS and isinstance(n.val, tuple):
+        _, lo, hi, _ = n.val
+        kids = ", ".join(emit(k) for k in n.kids[1:])
+        return (f'(.control "{t}" {i(n.kids[0].val)} '
+                f"{q_lit(lo)} {q_lit(hi)} [{kids}])")
     if t == "SIGINPUT":    return f"(.input {i(n.kids[0].val)})"
     if t == "SIGDELAY1":   return f"(.delay1 {emit(n.kids[0])})"
     if t == "SIGDELAY":    return f"(.delay {emit(n.kids[0])} {emit(n.kids[1])})"

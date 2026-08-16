@@ -1213,71 +1213,91 @@ the filter as executed in floating point (§9.2).
 ### 10.6 A second analysis over the same import: index bounds
 
 Stability is one property; the import path is worth more than one. The second
-analysis added to the same prelude answers: **are table reads and delay taps
-addressed within range?**
+analysis over the same graph asks whether table reads and delay taps are
+addressed within range.
 
 #### A hypothesis that did not survive contact
 
-The analysis was motivated by an expected bug: a slider declared `0..100`
-indexing a 16-entry table. That DSP does compile without a warning, and the
-signal graph is a bare `SIGRDTBL(SIGWRTBL(int(16), …), SIGINTCAST(SIGHSLIDER(int(0))))`
-with no bound in sight. But the generated C++ is
+It was motivated by an expected bug: a slider declared `0..100` indexing a
+16-entry table. That DSP does compile without a warning, and the signal graph
+was a bare `SIGRDTBL(SIGWRTBL(int(16), …), SIGINTCAST(SIGHSLIDER(int(0))))`.
+But the generated C++ is
 
 ```cpp
 float fSlow0 = ftbl0mydspSIG0[std::min<int>(((int)(((float)(fHslider0)))), 15)];
 ```
 
 The backend inserts the clamp from the compiler's interval analysis of the
-index — which draws on the slider's declared range. **There is no bug**, and the
-safety of a Faust table read is in general *not* visible in the signal graph.
+index, which draws on the slider's declared range. **There is no bug.**
 
-That reframes the analysis. It is not a bug finder; it is a **classifier**,
-separating addressing sites whose safety follows from the graph alone from
-those that delegate it to metadata the graph does not carry. Sites of the second
-kind are reported as *not proven*, never as unsafe.
+#### What the missing metadata cost, and what fixing it changed
 
-The distinction is real and falls along library lines: `delays.lib` writes its
-clamp in Faust source, so `de.fdelay` is certifiable from the graph, whereas a
-bare `rdtable` is not.
+The first version of this analysis had to report every control-driven index as
+*not proven*, because the range it needed was not in the dump: a signal node
+carries only a `ControlId`, and `SIGHSLIDER(int(0))` says nothing about `0..100`.
+That was a real gap in the exporter rather than a limit of the method, and it has
+since been closed in `faust-rs`: `--dump-sig` now resolves the declared range of
+slider, numeric-entry and bargraph controls.
+
+With the bounds available the analysis stops abstaining — and changes meaning. It
+is not "is this program safe": the backend guarantees that. It is
+
+> does this index stay in range **as written**, or does its safety rest on a
+> compiler-inserted clamp?
+
+Hence a three-valued verdict. `CLAMP REQUIRED` is not a defect report; it names a
+genuine dependency on the backend. The analysis thereby doubles as an
+**independent oracle for the compiler's own bound insertion**: a site it calls in
+range but that the backend clamps anyway is a missed optimisation, and the
+converse would be a real defect.
 
 #### Results
 
-| DSP | verdict |
-|---|---|
-| `de.fdelay(1024, hslider(…))` | `delay tap in [0, 1025] => BOUNDED` |
-| `rdtable(16, 1.0, min(15, max(0, …)))` | `table[16] index in [0, 15] => IN RANGE` |
-| `rdtable(16, 1.0, min(100, max(0, …)))` | `table[16] index in [0, 100] => OUT OF RANGE` |
-| `rdtable(16, 1.0, int(hslider(…)))` | `not bounded by structure => not proven` |
-| `os.osc(440)` | `table[65536] not bounded by structure => not proven` |
-| `fi.tf2(…)` | `delay tap in [1, 1] … [2, 2] => BOUNDED` |
+| DSP | index range | verdict |
+|---|---|---|
+| `de.fdelay(1024, hslider(…))` | `[0, 1025]` | `NON-NEGATIVE` |
+| `rdtable(16, 1.0, min(15, max(0, …)))` | `[0, 15]` | `IN RANGE` |
+| `rdtable(16, 1.0, min(100, max(0, …)))` | `[0, 100]` | `CLAMP REQUIRED` |
+| `rdtable(16, 1.0, int(hslider("i",0,0,100,1)))` | `[0, 100]` | `CLAMP REQUIRED` |
+| `os.osc(440)` | `[?, ?]` | `not proven` |
+| `fi.tf2(…)` | `[1, 1] … [2, 2]` | `NON-NEGATIVE` |
 
-The third row is the rejecting witness: a clamp that is present but too wide is
-caught. The fourth and fifth are the honest abstentions. 20 theorems across the
-two analyses check in 4.3 s, depending only on `propext`.
+The third row is worth its own line: the source *does* write a clamp,
+`min(100, max(0, …))`, and it is too wide to bound a 16-entry table. The verdict
+says so — an explicit clamp that does not actually do its job is a code smell the
+compiler silently repairs.
 
-#### Two Lean findings
+Table and tap verdicts are deliberately worded differently. A table read is
+checked against a size the graph carries; a delay tap has no declared size there
+— the compiler derives the line length from that very index — so the only claim
+available is non-negativity.
 
-- **`partial def` is invisible to the kernel.** The range function first descended
-  into the children of an `opaqueN` list, which Lean does not accept as
-  structurally decreasing on a nested inductive, so it was written `partial`.
-  `#eval` then worked and `decide` did not. Recursion on an explicit fuel
-  counter fixes it; running out of fuel yields the unknown range, which is the
-  safe answer.
+Twenty theorems across the two analyses check in about 4 s, depending only on
+`propext`.
+
+#### Three Lean findings
+
+- **`partial def` is invisible to the kernel.** The range function descends into
+  the children of an `opaqueN` list, which Lean does not accept as structurally
+  decreasing on a nested inductive, so it was first written `partial`. `#eval`
+  then worked and `decide` did not. Recursion on an explicit fuel counter fixes
+  it; exhausting the fuel yields the unknown range, the safe answer.
 - **A range needs two independently optional sides.** With `Option (Int × Int)`,
-  `max 0 x` — which bounds the low side and leaves the high side unknown —
-  cannot be expressed, and a correct clamp was misreported as out of range.
-  `{lo : Option Int, hi : Option Int}` with `min` meeting on the high side and
-  joining on the low side (and dually for `max`) is the right lattice.
+  `max 0 x` — low side bounded, high side unknown — cannot be expressed, and a
+  correct clamp was misreported as out of range.
+- **Truncation must widen on both sides.** Control bounds are rationals, so the
+  range is rational and `SIGINTCAST` has to land it on integers. Flooring both
+  ends is unsound for negative values, where truncation moves *up*:
+  `trunc(-2.5) = -2` escapes `[⌊-2.9⌋, ⌊-2.1⌋] = [-3, -3]`. The sound choice is
+  `[⌊lo⌋, ⌈hi⌉]`.
 
 #### Where it stops
 
 `os.osc` is bounded in reality by a `%` on a counter whose invariant is
 `0 ≤ c < 65536`, but that invariant lives in a recursion the analysis does not
-enter: proving it needs a fixpoint, not a walk. Certifying the remaining sites
-would need the control table exported alongside the graph, since
-`SIGHSLIDER(int(0))` carries an identifier and not its declared range — a minor
-extension to `--dump-sig`, and the prerequisite for any interval-based analysis
-(§10.1, tier 2).
+enter: proving it needs a fixpoint, not a walk. That is now the *only* remaining
+abstention among the examples — the metadata gap is closed, the analysis gap is
+not.
 
 ---
 

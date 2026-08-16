@@ -1251,72 +1251,93 @@ comportement du filtre exécuté en virgule flottante (§9.2).
 ### 10.6 Une seconde analyse sur le même import : les bornes d'indices
 
 La stabilité est une propriété parmi d'autres ; la voie d'import en vaut
-plusieurs. La seconde analyse ajoutée au même prélude répond à : **les lectures
-de table et les prises de retard sont-elles adressées dans les bornes ?**
+plusieurs. La seconde analyse sur le même graphe demande si les lectures de table
+et les prises de retard sont adressées dans les bornes.
 
 #### Une hypothèse qui n'a pas survécu au contact
 
-L'analyse partait d'un bug attendu : un slider déclaré `0..100` indexant une
-table de 16 entrées. Ce DSP compile effectivement sans avertissement, et le
-graphe de signaux est un `SIGRDTBL(SIGWRTBL(int(16), …), SIGINTCAST(SIGHSLIDER(int(0))))`
-nu, sans borne apparente. Mais le C++ engendré est :
+Elle partait d'un bug attendu : un slider déclaré `0..100` indexant une table de
+16 entrées. Ce DSP compile sans avertissement, et le graphe de signaux était un
+`SIGRDTBL(SIGWRTBL(int(16), …), SIGINTCAST(SIGHSLIDER(int(0))))` nu. Mais le C++
+engendré est :
 
 ```cpp
 float fSlow0 = ftbl0mydspSIG0[std::min<int>(((int)(((float)(fHslider0)))), 15)];
 ```
 
 Le backend insère le clamp à partir de l'analyse d'intervalles du compilateur,
-qui exploite la plage déclarée du slider. **Il n'y a pas de bug**, et la sûreté
-d'une lecture de table Faust n'est en général *pas* visible dans le graphe de
-signaux.
+qui exploite la plage déclarée du slider. **Il n'y a pas de bug.**
 
-Cela redéfinit l'analyse. Ce n'est pas un chercheur de bugs, c'est un
-**classificateur** : il sépare les sites d'adressage dont la sûreté découle du
-graphe seul de ceux qui la délèguent à des métadonnées que le graphe ne porte
-pas. Les seconds sont signalés *non prouvés*, jamais *non sûrs*.
+#### Ce que coûtait la métadonnée manquante, et ce que sa correction change
 
-La distinction est réelle et suit les frontières des bibliothèques :
-`delays.lib` écrit son clamp en source Faust, donc `de.fdelay` est certifiable
-depuis le graphe, alors qu'un `rdtable` nu ne l'est pas.
+La première version de cette analyse devait rapporter *non prouvé* tout index
+issu d'un contrôle, parce que la plage nécessaire n'était pas dans le dump : un
+nœud de signal ne porte qu'un `ControlId`, et `SIGHSLIDER(int(0))` ne dit rien de
+`0..100`. C'était une lacune de l'exportateur, non une limite de la méthode, et
+elle est depuis comblée dans `faust-rs` : `--dump-sig` résout désormais la plage
+déclarée des sliders, entrées numériques et bargraphs.
+
+Les bornes disponibles, l'analyse cesse de s'abstenir — et change de sens. Ce
+n'est pas « ce programme est-il sûr » : le backend le garantit. C'est
+
+> cet index reste-t-il dans les bornes **tel qu'il est écrit**, ou sa sûreté
+> repose-t-elle sur un clamp inséré par le compilateur ?
+
+D'où un verdict à trois valeurs. `CLAMP REQUIRED` n'est pas un rapport de défaut ;
+il nomme une dépendance réelle envers le backend. L'analyse devient ainsi un
+**oracle indépendant de l'insertion de bornes du compilateur** : un site qu'elle
+déclare dans les bornes mais que le backend clampe quand même est une
+optimisation manquée, et la réciproque serait un vrai défaut.
 
 #### Résultats
 
-| DSP | Verdict |
-|---|---|
-| `de.fdelay(1024, hslider(…))` | `delay tap in [0, 1025] => BOUNDED` |
-| `rdtable(16, 1.0, min(15, max(0, …)))` | `table[16] index in [0, 15] => IN RANGE` |
-| `rdtable(16, 1.0, min(100, max(0, …)))` | `table[16] index in [0, 100] => OUT OF RANGE` |
-| `rdtable(16, 1.0, int(hslider(…)))` | `not bounded by structure => not proven` |
-| `os.osc(440)` | `table[65536] not bounded by structure => not proven` |
-| `fi.tf2(…)` | `delay tap in [1, 1] … [2, 2] => BOUNDED` |
+| DSP | Plage de l'index | Verdict |
+|---|---|---|
+| `de.fdelay(1024, hslider(…))` | `[0, 1025]` | `NON-NEGATIVE` |
+| `rdtable(16, 1.0, min(15, max(0, …)))` | `[0, 15]` | `IN RANGE` |
+| `rdtable(16, 1.0, min(100, max(0, …)))` | `[0, 100]` | `CLAMP REQUIRED` |
+| `rdtable(16, 1.0, int(hslider("i",0,0,100,1)))` | `[0, 100]` | `CLAMP REQUIRED` |
+| `os.osc(440)` | `[?, ?]` | `not proven` |
+| `fi.tf2(…)` | `[1, 1] … [2, 2]` | `NON-NEGATIVE` |
 
-La troisième ligne est le témoin rejetant : un clamp présent mais trop large est
-attrapé. Les quatrième et cinquième sont les abstentions honnêtes. Les 20
-théorèmes des deux analyses se vérifient en 4,3 s, ne dépendant que de `propext`.
+La troisième ligne mérite d'être relevée : la source *écrit* bien un clamp,
+`min(100, max(0, …))`, et il est trop large pour borner une table de 16 entrées.
+Le verdict le dit — un clamp explicite qui ne fait pas son office est un défaut de
+code que le compilateur répare silencieusement.
 
-#### Deux constats Lean
+Les verdicts de table et de prise de retard sont délibérément formulés
+différemment. Une lecture de table est confrontée à une taille que le graphe
+porte ; une prise de retard n'y a pas de taille déclarée — le compilateur déduit
+la longueur de la ligne de cet index même — de sorte que la seule affirmation
+disponible est la non-négativité.
 
-- **`partial def` est invisible au noyau.** La fonction de bornes descendait
-  d'abord dans les enfants d'une liste `opaqueN`, ce que Lean n'accepte pas
-  comme structurellement décroissant sur un inductif imbriqué ; elle avait donc
-  été écrite `partial`. `#eval` fonctionnait alors, mais pas `decide`. La
-  récursion sur un compteur de carburant explicite corrige cela ; l'épuisement
-  du carburant rend la plage inconnue, qui est la réponse sûre.
+Les vingt théorèmes des deux analyses se vérifient en 4 s environ, ne dépendant
+que de `propext`.
+
+#### Trois constats Lean
+
+- **`partial def` est invisible au noyau.** La fonction de bornes descend dans les
+  enfants d'une liste `opaqueN`, ce que Lean n'accepte pas comme structurellement
+  décroissant sur un inductif imbriqué ; elle avait donc été écrite `partial`.
+  `#eval` fonctionnait alors, mais pas `decide`. La récursion sur un compteur de
+  carburant explicite corrige cela ; l'épuisement rend la plage inconnue, réponse
+  sûre.
 - **Une plage exige deux côtés indépendamment optionnels.** Avec
-  `Option (Int × Int)`, `max 0 x` — qui borne le côté bas en laissant le haut
-  inconnu — n'est pas exprimable, et un clamp correct était rapporté hors
-  bornes. `{lo : Option Int, hi : Option Int}`, avec `min` qui rencontre du côté
-  haut et joint du côté bas (et dualement pour `max`), est le bon treillis.
+  `Option (Int × Int)`, `max 0 x` — côté bas borné, côté haut inconnu — n'est pas
+  exprimable, et un clamp correct était rapporté hors bornes.
+- **La troncature doit élargir des deux côtés.** Les bornes de contrôle sont des
+  rationnels, donc la plage l'est aussi, et `SIGINTCAST` doit la ramener aux
+  entiers. Arrondir les deux extrémités par le bas est incorrect pour les valeurs
+  négatives, où la troncature remonte : `trunc(-2,5) = -2` échappe à
+  `[⌊-2,9⌋, ⌊-2,1⌋] = [-3, -3]`. Le choix sûr est `[⌊lo⌋, ⌈hi⌉]`.
 
 #### Où elle s'arrête
 
 `os.osc` est bornée en réalité par un `%` sur un compteur dont l'invariant est
 `0 ≤ c < 65536`, mais cet invariant vit dans une récursion où l'analyse n'entre
-pas : le prouver demande un point fixe, pas une traversée. Certifier les sites
-restants exigerait d'exporter la table des contrôles à côté du graphe, puisque
-`SIGHSLIDER(int(0))` porte un identifiant et non sa plage déclarée — extension
-mineure de `--dump-sig`, et prérequis de toute analyse par intervalles
-(§10.1, étage 2).
+pas : le prouver demande un point fixe, pas une traversée. C'est désormais la
+*seule* abstention restante parmi les exemples — la lacune de métadonnée est
+comblée, la lacune d'analyse ne l'est pas.
 
 ---
 

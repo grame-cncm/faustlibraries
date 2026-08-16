@@ -51,6 +51,13 @@ def one  : Q := ⟨1, 1⟩
 def neg  (a : Q) : Q := ⟨-a.n, a.d⟩
 def add  (a b : Q) : Q := ⟨a.n * b.d + b.n * a.d, a.d * b.d⟩
 def wellFormed (a : Q) : Bool := decide (0 < a.d)
+def ofInt (k : Int) : Q := ⟨k, 1⟩
+/-- Comparison by cross-multiplication; valid because denominators are positive. -/
+def le (a b : Q) : Bool := decide (a.n * b.d ≤ b.n * a.d)
+def min (a b : Q) : Q := if le a b then a else b
+def max (a b : Q) : Q := if le a b then b else a
+def floor (a : Q) : Int := Int.fdiv a.n a.d
+def ceil (a : Q) : Int := -(Int.fdiv (-a.n) a.d)
 end Q
 
 inductive BinOp where
@@ -76,6 +83,7 @@ inductive Sig where
   | cons    (a b : Sig)
   | nil
   | binop   (op : BinOp) (a b : Sig)
+  | control (name : String) (id : Int) (lo hi : Q) (kids : List Sig)
   | opaque  (name : String)
   | opaqueN (name : String) (kids : List Sig)
 deriving Repr, Inhabited
@@ -92,6 +100,7 @@ def hasRef : Sig → Bool
   | .recur b      => hasRef b
   | .cons a b     => hasRef a || hasRef b
   | .binop _ a b  => hasRef a || hasRef b
+  | .control _ _ _ _ ks => hasRefL ks
   | .opaqueN _ ks => hasRefL ks
   | _             => false
 
@@ -139,6 +148,7 @@ def collectRecs : Sig → List Sig
   | .recur b      => collectRecs b
   | .cons a b     => collectRecs a ++ collectRecs b
   | .binop _ a b  => collectRecs a ++ collectRecs b
+  | .control _ _ _ _ ks => collectRecsL ks
   | .opaqueN _ ks => collectRecsL ks
   | _             => []
 
@@ -215,51 +225,59 @@ def certifyReport (s : Sig) : String :=
 
 /-! ## Index bounds
 
-A second, independent analysis over the same imported graph: are table reads
-and delay taps addressed within range?
+A second, independent analysis over the same imported graph: are table reads and
+delay taps addressed within range?
 
-The safety of a Faust table read is **not** in general visible in the signal
-graph. `rdtable` emits a bare index, and the bound is inserted later by the
-backend from the compiler's interval analysis of that index — for a slider,
-from its declared range, which `--dump-sig` does not carry. What the graph
-*does* show is when an index is bounded by its own structure: a literal, an
-explicit `min`/`max` clamp written in the library source (as `delays.lib`
-does), or a remainder.
+Since `--dump-sig` resolves declared control ranges, a slider now arrives as
+`.control "SIGHSLIDER" 0 lo hi []` and its bounds enter the analysis directly.
+That changes what the analysis *means*. It is not "is this program safe" — the
+backend inserts a clamp (`std::min<int>(…, 15)`) exactly when the compiler's own
+interval analysis finds the index can leave the table. It is:
 
-So the analysis below is a **classifier**, not a bug finder: it separates the
-sites whose safety follows from the graph alone from those that delegate it to
-metadata outside the graph. Only the first kind can be certified here; the
-second is reported as unproven, never as unsafe. -/
+> does this index stay in range **as written**, or does its safety rest on a
+> compiler-inserted clamp?
 
-/-- A conservative integer range with **independently** optional sides:
+Hence a three-valued verdict. `clampRequired` is not a defect report; it says the
+site is safe only because the backend clamps it, which is a genuine dependency
+worth naming. The analysis doubles as an independent oracle for the compiler's
+bound insertion: a site this says is in range but that the backend clamps anyway
+is a missed optimisation, and the converse would be a real defect. -/
+
+/-- A conservative rational range with **independently** optional sides:
     `max 0 x` bounds the low side while leaving the high side unknown, which a
-    single `Option (Int × Int)` cannot express. `none` on a side always means
-    "no bound follows from the term", and is always a safe answer. -/
+    single `Option (Q × Q)` cannot express. `none` on a side always means "no
+    bound follows from the term", and is always a safe answer. -/
 structure Range where
-  lo : Option Int
-  hi : Option Int
-deriving Repr, DecidableEq
+  lo : Option Q
+  hi : Option Q
+deriving Repr
 
 namespace Range
 def unknown : Range := ⟨none, none⟩
-def exact (k : Int) : Range := ⟨some k, some k⟩
+def exact (q : Q) : Range := ⟨some q, some q⟩
 
 /-- Best bound available from one or both sides. -/
-private def meet (f : Int → Int → Int) : Option Int → Option Int → Option Int
+private def meet (f : Q → Q → Q) : Option Q → Option Q → Option Q
   | some x, some y => some (f x y)
   | some x, none   => some x
   | none,   some y => some y
   | none,   none   => none
 
-private def join (f : Int → Int → Int) : Option Int → Option Int → Option Int
+private def join (f : Q → Q → Q) : Option Q → Option Q → Option Q
   | some x, some y => some (f x y)
   | _,      _      => none
 
 /-- `min x y ≤ x`, so one known upper bound suffices; the lower bound needs both. -/
-def rmin (a b : Range) : Range := ⟨join min a.lo b.lo, meet min a.hi b.hi⟩
+def rmin (a b : Range) : Range := ⟨join Q.min a.lo b.lo, meet Q.min a.hi b.hi⟩
 
 /-- Dually for `max`. -/
-def rmax (a b : Range) : Range := ⟨meet max a.lo b.lo, join max a.hi b.hi⟩
+def rmax (a b : Range) : Range := ⟨meet Q.max a.lo b.lo, join Q.max a.hi b.hi⟩
+
+/-- Truncation toward zero of a value in `[lo, hi]` lands in
+    `[⌊lo⌋, ⌈hi⌉]`. Widening on both sides is what keeps this sound for
+    negative values, where truncation moves *up*. -/
+def trunc (r : Range) : Range :=
+  ⟨r.lo.map fun q => Q.ofInt q.floor, r.hi.map fun q => Q.ofInt q.ceil⟩
 end Range
 
 /-- Range of a subterm, when one follows from its structure alone.
@@ -271,8 +289,10 @@ end Range
     `decide` would not. Running out of fuel yields the unknown range. -/
 def rangeOfFuel : Nat → Sig → Range
   | 0, _ => Range.unknown
-  | _ + 1, .int k => Range.exact k
-  | n + 1, .opaqueN "SIGINTCAST" [x] => rangeOfFuel n x
+  | _ + 1, .int k => Range.exact (Q.ofInt k)
+  | _ + 1, .const q => Range.exact q
+  | _ + 1, .control _ _ lo hi _ => ⟨some lo, some hi⟩
+  | n + 1, .opaqueN "SIGINTCAST" [x] => (rangeOfFuel n x).trunc
   | n + 1, .opaqueN "SIGMIN" [a, b]  => Range.rmin (rangeOfFuel n a) (rangeOfFuel n b)
   | n + 1, .opaqueN "SIGMAX" [a, b]  => Range.rmax (rangeOfFuel n a) (rangeOfFuel n b)
   | n + 1, .binop .rem a (.int m)    =>
@@ -280,12 +300,13 @@ def rangeOfFuel : Nat → Sig → Range
         -- C semantics: `%` truncates toward zero, so a negative dividend gives
         -- a negative remainder unless the dividend is known non-negative.
         match (rangeOfFuel n a).lo with
-        | some l => if 0 ≤ l then ⟨some 0, some (m - 1)⟩ else ⟨some (1 - m), some (m - 1)⟩
-        | none   => ⟨some (1 - m), some (m - 1)⟩
+        | some l => if Q.le (Q.ofInt 0) l then ⟨some (Q.ofInt 0), some (Q.ofInt (m - 1))⟩
+                    else ⟨some (Q.ofInt (1 - m)), some (Q.ofInt (m - 1))⟩
+        | none   => ⟨some (Q.ofInt (1 - m)), some (Q.ofInt (m - 1))⟩
       else Range.unknown
   | _ + 1, _ => Range.unknown
 
-/-- Fuel is bounded by the depth of a clamp expression, not by graph size. -/
+/-- Fuel is bounded by the depth of an index expression, not by graph size. -/
 def rangeOf (s : Sig) : Range := rangeOfFuel 64 s
 
 /-- One addressing site: a table read of a known size, or a delay tap. -/
@@ -303,6 +324,7 @@ def sites : Sig → List Site
   | .recur b      => sites b
   | .cons a b     => sites a ++ sites b
   | .binop _ a b  => sites a ++ sites b
+  | .control _ _ _ _ ks => sitesL ks
   | .opaqueN _ ks => sitesL ks
   | _             => []
 
@@ -311,33 +333,55 @@ def sitesL : List Sig → List Site
   | k :: ks => sites k ++ sitesL ks
 end
 
-/-- A table read is certified when its index provably lies in `[0, size-1]`;
-    a delay tap when its index is provably non-negative. -/
-def siteOkB : Site → Bool
-  | .table size idx =>
-      match (rangeOf idx).lo, (rangeOf idx).hi with
-      | some l, some h => decide (0 ≤ l) && decide (h ≤ size - 1)
-      | _, _           => false
-  | .tap idx =>
-      match (rangeOf idx).lo with
-      | some l => decide (0 ≤ l)
-      | none   => false
+inductive Verdict where
+  | inRange
+  | clampRequired
+  | notProven
+deriving Repr, DecidableEq
 
-def certifyIndicesB (s : Sig) : Bool := (sites s).all siteOkB
-
-def siteReport : Site → String
+def siteVerdict : Site → Verdict
   | .table size idx =>
       match (rangeOf idx).lo, (rangeOf idx).hi with
       | some l, some h =>
-          s!"table[{size}] index in [{l}, {h}] => " ++
-          (if 0 ≤ l && h ≤ size - 1 then "IN RANGE" else "OUT OF RANGE")
-      | _, _ => s!"table[{size}] index not bounded by structure => not proven"
+          if Q.le (Q.ofInt 0) l && Q.le h (Q.ofInt (size - 1)) then .inRange
+          else .clampRequired
+      | _, _ => .notProven
   | .tap idx =>
-      match (rangeOf idx).lo, (rangeOf idx).hi with
-      | some l, some h => s!"delay tap in [{l}, {h}] => " ++
-                          (if 0 ≤ l then "BOUNDED" else "may be negative")
-      | some l, none   => s!"delay tap >= {l} => " ++ (if 0 ≤ l then "BOUNDED" else "may be negative")
-      | _, _ => "delay tap not bounded by structure => not proven"
+      match (rangeOf idx).lo with
+      | some l => if Q.le (Q.ofInt 0) l then .inRange else .clampRequired
+      | none   => .notProven
+
+/-- Certified only when every site is in range *as written*. -/
+def certifyIndicesB (s : Sig) : Bool :=
+  (sites s).all fun st => siteVerdict st == Verdict.inRange
+
+private def showQ (q : Q) : String := s!"{q.n}/{q.d}"
+
+private def showRange (r : Range) : String :=
+  match r.lo, r.hi with
+  | some l, some h => s!"[{showQ l}, {showQ h}]"
+  | some l, none   => s!"[{showQ l}, ?]"
+  | none,   some h => s!"[?, {showQ h}]"
+  | none,   none   => "[?, ?]"
+
+/-- Table and tap verdicts are not the same claim, so they are not worded the
+    same. A table read is checked against a size the graph carries. A delay tap
+    has no declared size in the graph — the compiler derives the line length
+    from this very index — so all that can be checked here is non-negativity. -/
+def siteReport (st : Site) : String :=
+  match st with
+  | .table size idx =>
+      let v := match siteVerdict st with
+               | .inRange       => "IN RANGE"
+               | .clampRequired => "CLAMP REQUIRED"
+               | .notProven     => "not proven"
+      s!"table[{size}] index {showRange (rangeOf idx)} => {v}"
+  | .tap idx =>
+      let v := match siteVerdict st with
+               | .inRange       => "NON-NEGATIVE"
+               | .clampRequired => "may be negative"
+               | .notProven     => "not proven"
+      s!"delay tap {showRange (rangeOf idx)} => {v}"
 
 def indexReport (s : Sig) : String :=
   match sites s with
@@ -380,7 +424,7 @@ open Faust.Signal
 /-- `de = library("delays.lib");
 process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — output 0 -/
 def fdelay_clamped_out0 : Sig :=
-  (.binop .add (.binop .mul (.delay (.input 0) (.opaqueN "SIGMIN" [(.int 1025), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])])])])) (.binop .sub (.int 1) (.binop .sub (.opaqueN "SIGHSLIDER" [(.int 0)]) (.opaqueN "SIGFLOOR" [(.opaqueN "SIGHSLIDER" [(.int 0)])])))) (.binop .mul (.delay (.input 0) (.opaqueN "SIGMIN" [(.int 1025), (.opaqueN "SIGMAX" [(.int 0), (.binop .add (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])]) (.int 1))])])) (.binop .sub (.opaqueN "SIGHSLIDER" [(.int 0)]) (.opaqueN "SIGFLOOR" [(.opaqueN "SIGHSLIDER" [(.int 0)])]))))
+  (.binop .add (.binop .mul (.delay (.input 0) (.opaqueN "SIGMIN" [(.int 1025), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ [])])])])) (.binop .sub (.int 1) (.binop .sub (.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ []) (.opaqueN "SIGFLOOR" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ [])])))) (.binop .mul (.delay (.input 0) (.opaqueN "SIGMIN" [(.int 1025), (.opaqueN "SIGMAX" [(.int 0), (.binop .add (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ [])]) (.int 1))])])) (.binop .sub (.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ []) (.opaqueN "SIGFLOOR" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ [])]))))
 
 /-- `import("maths.lib");
 process = + ~ (*(0.9) : ma.tanh);` — output 0 -/
@@ -398,15 +442,15 @@ def osc_out0 : Sig :=
 
 /-- `process = rdtable(16, 1.0, min(100, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
 def table_bad_clamp_out0 : Sig :=
-  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGMIN" [(.int 100), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])])])])])
+  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGMIN" [(.int 100), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ [])])])])])
 
 /-- `process = rdtable(16, 1.0, min(15, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
 def table_good_clamp_out0 : Sig :=
-  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGMIN" [(.int 15), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])])])])])
+  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGMIN" [(.int 15), (.opaqueN "SIGMAX" [(.int 0), (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ [])])])])])
 
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,100,1)));` — output 0 -/
 def table_unclamped_out0 : Sig :=
-  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGINTCAST" [(.opaqueN "SIGHSLIDER" [(.int 0)])])])
+  (.opaqueN "SIGRDTBL" [(.opaqueN "SIGWRTBL" [(.int 16), (.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]), (.nil), (.nil)]), (.opaqueN "SIGINTCAST" [(.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ [])])])
 
 /-- `import("filters.lib");
 process = fi.tf2(0.3, 0.2, 0.1, -1.2, 0.5);` — output 0 -/
