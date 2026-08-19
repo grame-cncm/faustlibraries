@@ -22,7 +22,7 @@ os = library("oscillators.lib");
 no = library("noises.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Noise Generator Library";
-declare version "1.7.0";
+declare version "1.8.0";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -664,6 +664,175 @@ with {
     };
 };
 
+//-----------------`(no.)simplex2`--------------------
+// Simplex gradient noise (Ken Perlin, 2001), in the 2-D formulation of Stefan
+// Gustavson ("Simplex noise demystified", 2005) as implemented in Joseph Gentle's
+// `noisejs`, which is what Neil Thapen's *Pink Trombone* uses for its slow random
+// drift. Unlike filtered white noise, simplex noise is a smooth (C²) deterministic
+// function of its argument, bounded to [-1,1], zero at the lattice points, with
+// most of its energy below roughly 2 cycles per unit of the argument.
+//
+//
+// #### Usage
+//
+// ```
+// simplex2(seed, x, y) : _
+// ```
+//
+// Where:
+//
+// * `seed`: Constant integer in 0..65535; values below 256 are mirrored into the high byte.
+// * `x`: First coordinate signal, in lattice units.
+// * `y`: Second coordinate signal, in lattice units.
+//
+// #### Test
+// ```
+// import("stdfaust.lib");
+// simplex2_test = no.simplex2(12345, os.lf_sawpos(1)*10, 0.5);
+// ```
+//
+// #### References
+//
+// * Stefan Gustavson, "Simplex noise demystified" (2005).
+// * Joseph Gentle, noisejs: <https://github.com/josephg/noisejs>.
+//------------------------------------------------------------
+declare simplex2 license "MIT";
+declare simplex2 author "David Braun (Faust port of Stefan Gustavson's / Joseph Gentle's code)";
+
+simplex2(seed, x, y) = (x, y) : skew : _simplex2Cell(seed)
+with {
+    // staged so shared intermediates travel as wires: Faust substitutes plain
+    // definitions textually, and the nested corner/gradient expressions made
+    // the *block diagram* of every simplex noise instance explode (the signal
+    // compiler CSEs the duplicates, the SVG drawer does not)
+    skew = \(xin, yin).(xin, yin, int(floor(xin + (xin + yin)*_simplexF2)), int(floor(yin + (xin + yin)*_simplexF2)))
+         : \(xin, yin, i, j).(xin - i + (i + j)*_simplexG2, yin - j + (i + j)*_simplexG2, i & 255, j & 255);
+};
+
+// Skew factors of the 2-D simplex lattice.
+_simplexF2 = 0.5*(sqrt(3.0) - 1.0);
+_simplexG2 = (3.0 - sqrt(3.0))/6.0;
+
+// simplex2 evaluated from its lattice decomposition: (x0, y0) is the unskewed
+// offset of the point from the origin of skewed cell (ii, jj), ii, jj in 0..255.
+// The noise depends on the cell only through ii, jj (the permutation table has
+// period 256), which is what lets `simplex1_lf` keep its coordinate bounded.
+_simplex2Cell(seed) = \(x0, y0, ii, jj).(x0, y0, x0 > y0, ii, jj, perm(jj), perm(jj + 1)) : corners : sum3
+with {
+    G2 = _simplexG2;
+    corners = \(x0, y0, lower, ii, jj, pj, pj1).(
+                  corner(x0, y0, perm(ii + pj) % 12),
+                  corner(x0 - lower + G2, y0 - (1 - lower) + G2,
+                         perm(ii + lower + perm(jj + (1 - lower))) % 12),
+                  corner(x0 - 1.0 + 2.0*G2, y0 - 1.0 + 2.0*G2, perm(ii + 1 + pj1) % 12));
+    sum3 = \(n0, n1, n2).(70.0*(n0 + n1 + n2));
+    // contribution of one corner: (0.5 - r^2)^4 * (grad . offset), 0 outside the kernel
+    corner(cx, cy, cg) = (cx, cy, cg) : \(x1, y1, gi).(0.5 - x1*x1 - y1*y1, gradx(gi)*x1 + grady(gi)*y1)
+                       : \(t0, gd).(select2(t0 < 0, t0*t0*t0*t0*gd, 0));
+    // seeded permutation table: perm[k] = p[k & 255] ^ (k odd ? seed & 255 : seed >> 8 & 255)
+    // (indices only ever reach 511 and k+256 has the same parity as k, so no doubled table is needed)
+    sd = select2(seed < 256, seed, seed | (seed << 8));
+    perm(k) = rdtable(pwave, (k & 255)) xor select2(k & 1, (sd >> 8) & 255, sd & 255);
+    gradx(g) = rdtable(waveform{1,-1,1,-1,1,-1,1,-1,0,0,0,0}, g);
+    grady(g) = rdtable(waveform{1,1,-1,-1,0,0,0,0,1,-1,1,-1}, g);
+    pwave = waveform{
+        151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,
+        140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,
+        247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,
+        57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,
+        74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,
+        60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,
+        65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,
+        200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,
+        52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,
+        207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,
+        119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,
+        129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,
+        218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,
+        81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,
+        184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,
+        222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
+    };
+};
+//-----------------`(no.)simplex1`--------------------
+// One-dimensional slice of simplex2 at (1.2*x, -0.7*x), as used by Pink Trombone.
+//
+// #### Usage
+//
+// ```
+// simplex1(seed, x) : _
+// ```
+//
+// Where:
+//
+// * `seed`: Constant integer in 0..65535; values below 256 are mirrored into the high byte.
+// * `x`: Coordinate signal, in lattice units.
+//
+// #### Test
+// ```
+// import("stdfaust.lib");
+// simplex1_test = no.simplex1(12345, os.lf_sawpos(1)*10);
+// ```
+//
+// #### References
+//
+// * Stefan Gustavson, "Simplex noise demystified" (2005).
+// * Joseph Gentle, noisejs: <https://github.com/josephg/noisejs>.
+//------------------------------------------------------------
+declare simplex1 license "MIT";
+simplex1(seed, x) = simplex2(seed, x*1.2, 0 - x*0.7);
+//-----------------`(no.)simplex1_lf`--------------------
+// Smooth seeded simplex modulation: `simplex1(seed, x)` where the coordinate `x`
+// advances by `rate/ma.SR` per sample (so x = rate*t for a constant rate, to
+// within a few ppm of the rate). The coordinate is kept in exact fixed point as
+// a simplex lattice cell (modulo the 256-cell period of the permutation table)
+// plus an offset inside it, so the output stays as smooth after hours as at
+// start-up (no float32 precision loss, no sample-counter overflow), is the same
+// in single and double precision, and a time-varying `rate` integrates without
+// phase jumps.
+//
+// #### Usage
+//
+// ```
+// simplex1_lf(seed, rate) : _
+// ```
+//
+// Where:
+//
+// * `seed`: Constant integer in 0..65535; values below 256 are mirrored into the high byte.
+// * `rate`: Features per second, below about 0.7*`ma.SR` in magnitude (may vary; negative runs backwards); one coordinate unit is traversed in 1/rate seconds.
+//
+// #### Test
+// ```
+// import("stdfaust.lib");
+// simplex1_lf_test = no.simplex1_lf(12345, 4.07);
+// ```
+//
+// #### References
+//
+// * Stefan Gustavson, "Simplex noise demystified" (2005).
+// * Joseph Gentle, noisejs: <https://github.com/josephg/noisejs>.
+//------------------------------------------------------------
+declare simplex1_lf license "MIT";
+simplex1_lf(seed, rate) = _simplexLattice(rate*(1.2 + 0.5*_simplexF2)/ma.SR),
+                          _simplexLattice(rate*(0.5*_simplexF2 - 0.7)/ma.SR)
+    : \(fx, ii, fy, jj).(fx - (fx + fy)*_simplexG2, fy - (fx + fy)*_simplexG2, ii, jj)
+    : _simplex2Cell(seed);
+
+// Running sum of `d` (starting at 0) along one skewed simplex axis, carried as
+// (fraction in [0,1), integer part modulo 256): bounded, so it never overflows
+// however long it runs. The fraction is 30-bit fixed point so the sum is exact
+// integer arithmetic: a float32 accumulator drifts (~1e-3 lattice units per
+// second at typical rates), and Faust's normaliser folds away a Kahan
+// compensation term. `d` is quantized to 2^-30 (a few ppm of a typical rate)
+// and limited to |d| < 1 so that the int32 sum cannot overflow.
+_simplexLattice(d) = (step ~ (_, _)) : (!, !, _, _) : (float : *(1.0/one)), _
+with {
+    one = 1073741824;  // 2^30
+    D = int(floor(max(1 - one, min(one - 1, d*one)) + 0.5));
+    step(i, F) = F + D : \(s).((s >= one) - (s < 0), s)
+               : \(carry, s).((i + carry) & 255, s - carry*one, F, i);
+};
 
 // Deprecated backward-compatibility alias, kept for one version and
 // scheduled for removal: the canonical name now carries the internal

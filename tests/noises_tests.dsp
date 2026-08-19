@@ -44,3 +44,8 @@ gnoise_test = no.gnoise(8);
 colored_noise_test = no.colored_noise(4, 0.0);
 gnoisem_test = no.gnoisem(8);
 pink_noise_m_test = no.pink_noise_m;
+
+os = library("oscillators.lib");
+simplex2_test = no.simplex2(12345, os.lf_sawpos(1)*10, 0.5);
+simplex1_test = no.simplex1(12345, os.lf_sawpos(1)*10);
+simplex1_lf_test = no.simplex1_lf(12345, 4.07);

@@ -58,3 +58,4 @@ projected_gravity_demo_test = dm.projected_gravity_demo;
 total_accel_demo_test = dm.total_accel_demo;
 orientation6_demo_test = dm.orientation6_demo;
 motion_wrapper_demo_test = dm.motion_wrapper_demo;
+pink_trombone_demo_test = dm.pink_trombone_demo;

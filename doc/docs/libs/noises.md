@@ -525,3 +525,101 @@ colored_noise_test = no.colored_noise(4, 0.0);
 #### Examples
 See `dm.colored_noise_demo`.
 
+
+----
+
+### `(no.)simplex2`
+
+Simplex gradient noise (Ken Perlin, 2001), in the 2-D formulation of Stefan
+Gustavson ("Simplex noise demystified", 2005) as implemented in Joseph Gentle's
+`noisejs`, which is what Neil Thapen's *Pink Trombone* uses for its slow random
+drift. Unlike filtered white noise, simplex noise is a smooth (C²) deterministic
+function of its argument, bounded to [-1,1], zero at the lattice points, with
+most of its energy below roughly 2 cycles per unit of the argument.
+
+
+#### Usage
+
+```
+simplex2(seed, x, y) : _
+```
+
+Where:
+
+* `seed`: Constant integer in 0..65535; values below 256 are mirrored into the high byte.
+* `x`: First coordinate signal, in lattice units.
+* `y`: Second coordinate signal, in lattice units.
+
+#### Test
+```
+import("stdfaust.lib");
+simplex2_test = no.simplex2(12345, os.lf_sawpos(1)*10, 0.5);
+```
+
+#### References
+
+* Stefan Gustavson, "Simplex noise demystified" (2005).
+* Joseph Gentle, noisejs: [https://github.com/josephg/noisejs](https://github.com/josephg/noisejs).
+
+----
+
+### `(no.)simplex1`
+
+One-dimensional slice of simplex2 at (1.2*x, -0.7*x), as used by Pink Trombone.
+
+#### Usage
+
+```
+simplex1(seed, x) : _
+```
+
+Where:
+
+* `seed`: Constant integer in 0..65535; values below 256 are mirrored into the high byte.
+* `x`: Coordinate signal, in lattice units.
+
+#### Test
+```
+import("stdfaust.lib");
+simplex1_test = no.simplex1(12345, os.lf_sawpos(1)*10);
+```
+
+#### References
+
+* Stefan Gustavson, "Simplex noise demystified" (2005).
+* Joseph Gentle, noisejs: [https://github.com/josephg/noisejs](https://github.com/josephg/noisejs).
+
+----
+
+### `(no.)simplex1_lf`
+
+Smooth seeded simplex modulation: `simplex1(seed, x)` where the coordinate `x`
+advances by `rate/ma.SR` per sample (so x = rate*t for a constant rate, to
+within a few ppm of the rate). The coordinate is kept in exact fixed point as
+a simplex lattice cell (modulo the 256-cell period of the permutation table)
+plus an offset inside it, so the output stays as smooth after hours as at
+start-up (no float32 precision loss, no sample-counter overflow), is the same
+in single and double precision, and a time-varying `rate` integrates without
+phase jumps.
+
+#### Usage
+
+```
+simplex1_lf(seed, rate) : _
+```
+
+Where:
+
+* `seed`: Constant integer in 0..65535; values below 256 are mirrored into the high byte.
+* `rate`: Features per second, below about 0.7*`ma.SR` in magnitude (may vary; negative runs backwards); one coordinate unit is traversed in 1/rate seconds.
+
+#### Test
+```
+import("stdfaust.lib");
+simplex1_lf_test = no.simplex1_lf(12345, 4.07);
+```
+
+#### References
+
+* Stefan Gustavson, "Simplex noise demystified" (2005).
+* Joseph Gentle, noisejs: [https://github.com/josephg/noisejs](https://github.com/josephg/noisejs).

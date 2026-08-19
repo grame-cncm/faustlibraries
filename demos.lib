@@ -75,9 +75,10 @@ aa = library("aanl.lib");
 sp = library("spats.lib");
 mo = library("motion.lib");
 hy = library("hysteresis.lib");
+pt = library("pinktrombone.lib");
 
 declare name "Faust Demos Library";
-declare version "1.5.0";
+declare version "1.6.0";
 
 //########################################################################################
 /************************************************************************
@@ -2942,3 +2943,55 @@ with {
 };
 
 // end further contributions section
+
+//====================================Pink Trombone======================================
+//========================================================================================
+
+//----------------------------`(dm.)pink_trombone_demo`----------------------------------
+// Neil Thapen's Pink Trombone vocal-tract synthesiser (see `pinktrombone.lib`) with its
+// original controls: voicebox (pitch, tenseness, always voice, pitch wobble), tract
+// (tongue index/diameter, nasal) and two independent constrictions (index, diameter, active).
+// As in the original, "always voice" is on by default, so the demo speaks on start-up.
+//
+// #### Usage
+//
+// ```
+// pink_trombone_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// pink_trombone_demo_test = dm.pink_trombone_demo;
+// ```
+//------------------------------------------------------------
+declare pink_trombone_demo author "David Braun";
+declare pink_trombone_demo license "MIT";
+
+pink_trombone_demo = hgroup("[0] Pink Trombone",
+    pt.pinkTrombone2(freq, tenseness, voiced, wobble, tongueIndex, tongueDiameter,
+                  cIndex, cDiameter, cActive, c2Index, c2Diameter, c2Active, nasal)
+)
+with {
+    vb(x) = vgroup("[0] voicebox", x);
+    tr(x) = vgroup("[1] tract", x);
+    cs(x) = vgroup("[2] constriction", x);
+    // keyboard: baseNote F2 = 87.3071 Hz, 20 semitones
+    semitone = vb(hslider("[0] pitch [unit:semitones][style:knob]", 9, 0, 20, 0.01));
+    freq = 87.3071*pow(2, semitone/12);
+    tenseness = vb(hslider("[1] tenseness [style:knob]", 0.6, 0, 1, 0.001));
+    // on by default, as in the original (`alwaysVoice = true`); a checkbox
+    // cannot default to 1
+    voiced = vb(nentry("[2] always voice [style:menu{'off':0;'on':1}]", 1, 0, 1, 1));
+    wobble = vb(checkbox("[3] pitch wobble"));
+    tongueIndex = tr(hslider("[0] tongue index [style:knob]", 12.9, 12, 29, 0.01));
+    tongueDiameter = tr(hslider("[1] tongue diameter [style:knob]", 2.43, 2.05, 3.5, 0.01));
+    nasal = tr(checkbox("[2] nasal (velum open)"));
+    cIndex = cs(hslider("[0] index [style:knob]", 30, 2, 44, 0.01));
+    cDiameter = cs(hslider("[1] diameter [style:knob]", 1.0, 0, 3, 0.01));
+    cActive = cs(checkbox("[2] active"));
+    cs2(x) = vgroup("[3] constriction 2", x);
+    c2Index = cs2(hslider("[0] index [style:knob]", 20, 2, 44, 0.01));
+    c2Diameter = cs2(hslider("[1] diameter [style:knob]", 1.0, 0, 3, 0.01));
+    c2Active = cs2(checkbox("[2] active"));
+};

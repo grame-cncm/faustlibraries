@@ -1125,3 +1125,27 @@ no = library("noises.lib");
 stereoNoise = no.noise, no.noise;
 ja_transformer_demo_test = stereoNoise : dm.ja_transformer_demo;
 ```
+
+## Pink Trombone
+
+
+----
+
+### `(dm.)pink_trombone_demo`
+
+Neil Thapen's Pink Trombone vocal-tract synthesiser (see `pinktrombone.lib`) with its
+original controls: voicebox (pitch, tenseness, always voice, pitch wobble), tract
+(tongue index/diameter, nasal) and two independent constrictions (index, diameter, active).
+As in the original, "always voice" is on by default, so the demo speaks on start-up.
+
+#### Usage
+
+```
+pink_trombone_demo : _
+```
+
+#### Test
+```
+dm = library("demos.lib");
+pink_trombone_demo_test = dm.pink_trombone_demo;
+```
