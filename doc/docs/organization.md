@@ -25,6 +25,7 @@ Only the libraries that are considered to be "standard" are documented:
 * `oscillators.lib`
 * `phaflangers.lib`
 * `physmodels.lib`
+* `pinktrombone.lib`
 * `reducemaps.lib`
 * `reverbs.lib`
 * `routes.lib`
