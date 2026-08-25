@@ -34,11 +34,11 @@ test:
 build:
 	$(MAKE) md
 	$(MAKE) index
-	mkdocs build
+	python3 -m mkdocs build
 
 serve:
 	@echo "you can browse the site at http://localhost:8000"
-	mkdocs serve
+	python3 -m mkdocs serve
 
 list:
 	@echo $(foreach e, $(LIST), "        - '" $e "':  libs/"$e.md"\n")
