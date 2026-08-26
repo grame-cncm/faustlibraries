@@ -21,7 +21,8 @@ This work brings two things to the Faust libraries: **new DSP functions**, and a
 | Function | Description |
 |---|---|
 | [`fi.hilbert`](https://faustlibraries.grame.fr/libs/filters/#fihilbert) | Approximate Hilbert transform: quadrature pair for analytic-signal processing (envelope detection, frequency shifting, SSB) |
-| [`fi.lms`](https://faustlibraries.grame.fr/libs/filters/#films-finlms-fiadaptfir), [`fi.nlms`](https://faustlibraries.grame.fr/libs/filters/#films-finlms-fiadaptfir) | Adaptive FIR filters — least mean squares and its normalized variant — for system identification, adaptive noise cancellation, echo cancellation |
+| [`fi.lms`](https://faustlibraries.grame.fr/libs/filters/#films-finlms), [`fi.nlms`](https://faustlibraries.grame.fr/libs/filters/#films-finlms) | Adaptive FIR filters — least mean squares and its normalized variant — for system identification, adaptive noise cancellation, echo cancellation |
+| [`fi.adaptFIR`](https://faustlibraries.grame.fr/libs/filters/#fiadaptfir) | Generic adaptive FIR engine underneath `lms`/`nlms`: its adaptation step is a *signal*, the extension point for custom rules (leaky, gated, scheduled, custom normalization) |
 
 ### misceffects.lib
 

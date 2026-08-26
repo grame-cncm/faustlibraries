@@ -11,3 +11,4 @@ d = x@3 * 0.5 + x@1 * 0.25;
 
 lms_test = x, d : fi.lms(8, 0.05);
 nlms_test = x, d : fi.nlms(8, 0.5);
+adaptFIR_test = x, d : fi.adaptFIR(8, 0.01);

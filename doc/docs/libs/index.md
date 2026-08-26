@@ -497,7 +497,8 @@
 [(fi.)avg_t60](filters.md#fiavg_t60)
 [(fi.)avg_t19](filters.md#fiavg_t19)
 [(fi.)kalman](filters.md#fikalman)
-[(fi.)lms, (fi.)nlms, (fi.)adaptFIR](filters.md#films,-finlms,-fiadaptfir)
+[(fi.)lms, (fi.)nlms](filters.md#films,-finlms)
+[(fi.)adaptFIR](filters.md#fiadaptfir)
 
 ## hoa
 

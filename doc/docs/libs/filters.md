@@ -3897,7 +3897,7 @@ with {
 
 ----
 
-### `(fi.)lms`, `(fi.)nlms`, `(fi.)adaptFIR`
+### `(fi.)lms`, `(fi.)nlms`
 
 Adaptive N-tap FIR filter trained by the (delayed-update) LMS rule:
 the filter output `y` is the dot product of the adaptive weights with the
@@ -3944,3 +3944,57 @@ nlms_test = no.noise, (no.noise : @(3)*0.5 + no.noise@(1)*0.25) : fi.nlms(8, 0.5
 
 * S. Haykin, "Adaptive Filter Theory", Prentice Hall.
 * B. Widrow and S.D. Stearns, "Adaptive Signal Processing", Prentice Hall.
+
+----
+
+### `(fi.)adaptFIR`
+
+Generic adaptive N-tap FIR engine that `lms` and `nlms` are built on.
+The filter output `y` is the dot product of the adaptive weights with the
+last `N` input samples, the error `e = d - y` is the single feedback
+signal, and each weight integrates its (one-sample-delayed) gradient
+step: `w_k <- w_k + step * e * x@k`.
+
+Unlike `mu` in `lms`, the `step` parameter is a **signal**, which makes
+this the extension point for the whole family of adaptation rules:
+`nlms` is `adaptFIR` with the step divided by the instantaneous input
+energy, a leaky or gated LMS is `adaptFIR` with a step that decays or is
+forced to 0 while adaptation should be frozen, a scheduled step
+implements search-then-converge, and so on. Use `lms`/`nlms` directly
+unless you need a custom rule.
+
+#### Usage
+
+```
+x, d : adaptFIR(N, step) : _, _   // outputs: y (filter output), e (error)
+```
+
+Where:
+
+* `N`: number of adaptive weights (a constant numerical expression)
+* `step`: adaptation step, as a signal evaluated at every sample; the
+  `lms` stability bound `step < 2/(N*power(x))` applies to its
+  instantaneous value
+* `x`: input signal (the reference fed to the adaptive FIR)
+* `d`: desired signal
+
+#### Example
+
+```
+// NLMS is one normalization away:
+nlms(N, mu, x, d) = adaptFIR(N, mu / (ma.EPSILON + sum(k, N, x@k * x@k)), x, d);
+// gated adaptation: freeze the weights below an input-level threshold
+gatedLMS(N, mu, th, x, d) = adaptFIR(N, mu * (abs(x) > th), x, d);
+```
+
+#### Test
+```
+fi = library("filters.lib");
+no = library("noises.lib");
+adaptFIR_test = no.noise, (no.noise : @(3)*0.5 + no.noise@(1)*0.25)
+    : fi.adaptFIR(8, 0.01);
+```
+
+#### References
+
+* S. Haykin, "Adaptive Filter Theory", Prentice Hall.
