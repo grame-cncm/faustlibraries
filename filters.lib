@@ -486,6 +486,7 @@ fb_comb(maxdel,del,b0,aN) = fb_comb_common(de.delay(maxdel),del,b0,-aN) : mem;
 
 //-----------------------`(fi.)fb_fcomb`-----------------------
 // Feed-Back Comb Filter (floating point delay).
+// `fb_fcomb` is a standard Faust function.
 //
 // #### Usage
 //
@@ -632,7 +633,9 @@ allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ :
 
 
 //-------------------`(fi.)allpass_fcomb`-----------------
-// Schroeder Allpass Comb Filter. Note that:
+// Schroeder Allpass Comb Filter.
+// `allpass_fcomb` is a standard Faust function.
+// Note that:
 //
 // ```
 // allpass_comb(maxlen,len,aN) = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len-1,1,aN);
@@ -785,7 +788,8 @@ declare iir license "MIT-style STK-4.3 license";
 iir(bv,av) = ma.sub ~ fir(av) : fir(bv);
 
 //-----------------------------`(fi.)fir`---------------------------------
-// FIR filter (convolution of FIR filter coefficients with a signal). `fir` is standard Faust function.
+// FIR filter (convolution of FIR filter coefficients with a signal).
+// `fir` is a standard Faust function.
 //
 // #### Usage
 //
@@ -869,6 +873,7 @@ conv(kv) = fir(kv);
 
 //----------------`(fi.)tf1`, `(fi.)tf2` and `(fi.)tf3`----------------------
 // tfN = N'th-order direct-form digital filter.
+// `tf2` is a standard Faust function.
 //
 // #### Usage
 //
