@@ -20,6 +20,8 @@ The Phaflangers library is organized into 1 section:
 
 ### `(pf.)flanger_mono`
 
+![flanger_mono — response plots](../img/pf_flanger_mono.svg)
+
 Mono flanging effect.
 
 #### Usage:
@@ -83,6 +85,8 @@ flanger_stereo_test = os.osc(440), os.osc(660) : pf.flanger_stereo(4096, 1024, 1
 ----
 
 ### `(pf.)phaser2_mono`
+
+![phaser2_mono — response plots](../img/pf_phaser2_mono.svg)
 
 Mono phasing effect.
 

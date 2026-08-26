@@ -52,6 +52,8 @@ TODO: add MBH np2
 
 ### `(de.)fdelay`
 
+![fdelay — response plots](../img/de_fdelay.svg)
+
 Simple `d` samples fractional delay based on 2 interpolated delay lines where `n` is
 the maximum delay length as a number of samples.
 
@@ -135,6 +137,8 @@ prime_power_delays_test = de.prime_power_delays(4, 1, 10);
 ----
 
 ### `(de.)fdelaylti` and `(de.)fdelayltv`
+
+![fdelaylti — response plots](../img/de_fdelaylti.svg)
 
 Fractional delay line using Lagrange interpolation.
 

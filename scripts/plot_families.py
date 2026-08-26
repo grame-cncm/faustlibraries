@@ -42,7 +42,16 @@ fi = library("filters.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
 os = library("oscillators.lib");
+de = library("delays.lib");
+pf = library("phaflangers.lib");
+ts = library("tonestacks.lib");
+tu = library("tubes.lib");
+ve = library("vaeffects.lib");
+wa = library("webaudio.lib");
 """
+
+# ve.* filters map normFreq logarithmically: cf = 2*10^(3*nf+1), so 1 kHz is
+VA_NF = "0.56632"
 
 failures: list[str] = []
 
@@ -89,10 +98,17 @@ def save(fig, out: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def freq_response(out: Path, stem: str, title: str, variants, checks=(),
-                  nfft: int = 16384, ylim=(-80, 20)) -> None:
-    """Impulse response -> FFT magnitude, one curve per (label, expr)."""
+                  nfft: int = 16384, ylim=(-80, 20), amp: float = 1.0,
+                  custom=None) -> None:
+    """Impulse response -> FFT magnitude, one curve per (label, expr).
+
+    `amp` scales the probe impulse; a small value keeps a saturating filter
+    (tanh ladder, diode) in its linear region, and the magnitude is
+    normalized back. `custom(stem, freq, curves)` may run extra cross-curve
+    assertions through check().
+    """
     body = ",\n          ".join(f"(imp : {expr})" for _, expr in variants)
-    src = LIBS + f"imp = 1-1';\nprocess = {body};\n"
+    src = LIBS + f"imp = {amp} - {amp}';\nprocess = {body};\n"
     data = run_probe(src, nfft)
     if data is None:
         failures.append(f"{stem}: probe did not compile")
@@ -102,17 +118,25 @@ def freq_response(out: Path, stem: str, title: str, variants, checks=(),
     fig, ax = new_axes(title)
     curves = []
     for i, (label, _) in enumerate(variants):
-        mag = np.abs(np.fft.rfft(data[:nfft, i]))
+        mag = np.abs(np.fft.rfft(data[:nfft, i])) / amp
         db = 20 * np.log10(mag + 1e-12)
         curves.append(db)
         ax.semilogx(freq[1:], db[1:], lw=1.3, label=label,
                     color=COLORS[i % len(COLORS)])
     for i, f, expected, tol in checks:
         got = db_at(freq, curves[i], f)
-        check(abs(got - expected) <= tol,
-              f"{stem}: variant {i} at {f:.0f} Hz is {got:+.2f} dB, "
-              f"expected {expected:+.1f} +/- {tol} dB")
-        ax.plot([f], [expected], "o", ms=4, mfc="none", color="#333", zorder=5)
+        if tol is None:  # one-sided: expected is an upper bound (attenuation)
+            check(got <= expected,
+                  f"{stem}: variant {i} at {f:.0f} Hz is {got:+.2f} dB, "
+                  f"expected <= {expected:+.1f} dB")
+        else:
+            check(abs(got - expected) <= tol,
+                  f"{stem}: variant {i} at {f:.0f} Hz is {got:+.2f} dB, "
+                  f"expected {expected:+.1f} +/- {tol} dB")
+            ax.plot([f], [expected], "o", ms=4, mfc="none", color="#333",
+                    zorder=5)
+    if custom is not None:
+        custom(stem, freq, curves)
     ax.set_xlim(20, SR / 2)
     # never clip a resonance peak: extend the top when a curve exceeds it
     top = max(ylim[1], max(c[1:].max() for c in curves) + 4.0)
@@ -304,6 +328,111 @@ def error_spectrum(out: Path, stem: str, title: str, variants,
     ax.set_xlabel("Hz")
     ax.set_ylabel("dB (error PSD)")
     ax.legend(fontsize=8, loc="lower right")
+    save(fig, out)
+
+
+def osc_fig(out: Path, stem: str, title: str, expr: str, f0: float,
+            alias_max: float | None = None, alias_min: float | None = None,
+            fund_within: float = 6.0) -> None:
+    """Waveform (3 periods) + spectrum with the true-harmonic grid.
+
+    The *alias floor* is the loudest bin at least 150 Hz away from every
+    true (unreflected) harmonic of f0 — everything there is aliasing or
+    noise by definition. An upper bound asserts band-limitation, a lower
+    bound asserts that a deliberately naive oscillator does alias.
+    """
+    n, settle = 32768, 2048
+    src = LIBS + f"process = {expr};\n"
+    data = run_probe(src, n + settle)
+    if data is None:
+        failures.append(f"{stem}: probe did not compile")
+        print(f"  PROBE FAILED: {stem}")
+        return
+    y = data[settle:settle + n, 0]
+    freq = np.fft.rfftfreq(n, 1 / SR)
+    db = 20 * np.log10(np.abs(np.fft.rfft(y * np.hanning(n))) + 1e-12)
+    db -= db.max()
+    marks = np.arange(1, int((SR / 2) / f0) + 1) * f0
+    dist = np.min(np.abs(freq[:, None] - marks[None, :]), axis=1)
+    sel = (freq > 300) & (dist > 150)
+    floor = float(db[sel].max())
+    k0 = int(round(f0 * n / SR))
+    fund = float(db[k0 - 3:k0 + 4].max())
+    check(fund >= -fund_within,
+          f"{stem}: fundamental {fund:+.1f} dB below the spectral peak")
+    if alias_max is not None:
+        check(floor <= alias_max,
+              f"{stem}: alias floor {floor:+.1f} dB, expected <= {alias_max}")
+    if alias_min is not None:
+        check(floor >= alias_min,
+              f"{stem}: alias floor {floor:+.1f} dB, expected >= {alias_min}"
+              " (this oscillator is supposed to alias)")
+
+    fig, (ax_t, ax_f) = plt.subplots(1, 2, figsize=(9.0, 3.2))
+    per = int(3 * SR / f0) + 1
+    ax_t.plot(np.arange(per) / SR * 1000, y[:per], lw=1.2, color=COLORS[0])
+    ax_t.set_title(f"{title} — waveform", fontsize=10)
+    ax_t.set_xlabel("ms")
+    ax_t.grid(alpha=0.25)
+    group = 4
+    keep = (len(db) // group) * group
+    dbd = db[:keep].reshape(-1, group).max(axis=1)
+    fqd = freq[:keep].reshape(-1, group).mean(axis=1)
+    for m in marks[:40]:
+        ax_f.axvline(m, color="#d0d7de", lw=0.7, zorder=0)
+    ax_f.plot(fqd, dbd, lw=0.8, color=COLORS[1])
+    ax_f.axhline(floor, lw=0.7, ls=":", color="#333")
+    ax_f.set_xlim(0, SR / 2)
+    ax_f.set_ylim(-120, 5)
+    ax_f.set_title(f"spectrum, {f0:.0f} Hz (dotted = alias floor "
+                   f"{floor:.0f} dB)", fontsize=10)
+    ax_f.set_xlabel("Hz")
+    ax_f.set_ylabel("dB")
+    ax_f.grid(alpha=0.25)
+    save(fig, out)
+
+
+def tube_fig(out: Path, stem: str, title: str, expr: str,
+             f0: float = 220.0, drive: float = 0.5) -> None:
+    """Driven tube stage: waveform asymmetry + harmonic spectrum.
+
+    Asserts the triode signature: a second harmonic well above the floor.
+    """
+    n, settle = 32768, SR  # a full second lets the cathode highpass settle
+    src = LIBS + f"process = {drive} * os.osc({f0}) : {expr};\n"
+    data = run_probe(src, n + settle)
+    if data is None:
+        failures.append(f"{stem}: probe did not compile")
+        print(f"  PROBE FAILED: {stem}")
+        return
+    y = data[settle:settle + n, 0]
+    freq = np.fft.rfftfreq(n, 1 / SR)
+    db = 20 * np.log10(np.abs(np.fft.rfft(y * np.hanning(n))) + 1e-12)
+    db -= db.max()
+
+    def harm(k):
+        i = int(round(k * f0 * n / SR))
+        return float(db[i - 3:i + 4].max())
+
+    check(harm(1) > -1.0, f"{stem}: fundamental is not the spectral peak")
+    check(harm(2) > -70.0,
+          f"{stem}: second harmonic {harm(2):+.1f} dB, expected > -70"
+          " (triode asymmetry)")
+
+    fig, (ax_t, ax_f) = plt.subplots(1, 2, figsize=(9.0, 3.2))
+    per = int(3 * SR / f0) + 1
+    ax_t.plot(np.arange(per) / SR * 1000, y[:per], lw=1.2, color=COLORS[0])
+    ax_t.set_title(f"{title} — output, {drive} * osc({f0:.0f})", fontsize=10)
+    ax_t.set_xlabel("ms")
+    ax_t.grid(alpha=0.25)
+    kmax = 12
+    ax_f.stem([k * f0 for k in range(1, kmax + 1)],
+              [max(harm(k), -100) for k in range(1, kmax + 1)], basefmt=" ")
+    ax_f.set_ylim(-100, 5)
+    ax_f.set_title("harmonics (dB rel. fundamental)", fontsize=10)
+    ax_f.set_xlabel("Hz")
+    ax_f.set_ylabel("dB")
+    ax_f.grid(alpha=0.25)
     save(fig, out)
 
 
@@ -526,6 +655,248 @@ def build_all(out_dir: Path, wanted: set[str]) -> None:
                        [("K=1", "ef.dither_shaped(1, 16)"),
                         ("K=2", "ef.dither_shaped(2, 16)")],
                        tilt_checks=[(0, 8.0, 30.0), (1, 18.0, 45.0)])
+
+    # ================= phase B =================
+
+    # ---- oscillators.lib: waveform + alias floor ------------------------
+    F0B = 2789.0  # not a divisor of SR: folded harmonics land off-harmonic
+    oscs = [
+        ("os_osc", "os.osc", f"os.osc({F0B})", dict(alias_max=-80.0)),
+        ("os_lf_saw", "os.lf_saw (naive)", f"os.lf_saw({F0B})",
+         dict(alias_min=-25.0)),
+        ("os_lf_squarewave", "os.lf_squarewave (naive)",
+         f"os.lf_squarewave({F0B})", dict(alias_min=-25.0)),
+        ("os_lf_triangle", "os.lf_triangle (naive)",
+         f"os.lf_triangle({F0B})", dict()),
+        ("os_lf_imptrain", "os.lf_imptrain (naive)",
+         f"os.lf_imptrain({F0B})", dict(alias_min=-12.0, fund_within=12.0)),
+        ("os_sawN", "os.sawN(4)", f"os.sawN(4, {F0B})",
+         dict(alias_max=-30.0)),
+        ("os_squareN", "os.squareN(4)", f"os.squareN(4, {F0B})",
+         dict(alias_max=-35.0)),
+        ("os_triangleN", "os.triangleN(4)", f"os.triangleN(4, {F0B})",
+         dict(alias_max=-48.0)),
+        ("os_polyblep_saw", "os.polyblep_saw", f"os.polyblep_saw({F0B})",
+         dict(alias_max=-25.0)),
+        ("os_polyblep_square", "os.polyblep_square",
+         f"os.polyblep_square({F0B})", dict(alias_max=-25.0)),
+        ("os_polyblep_triangle", "os.polyblep_triangle",
+         f"os.polyblep_triangle({F0B})", dict(alias_max=-40.0)),
+        ("os_CZsaw", "os.CZsaw(index 0.8)",
+         f"os.CZsaw(os.lf_sawpos({F0B}), 0.8)", dict()),
+        ("os_CZsquare", "os.CZsquare(index 0.8)",
+         f"os.CZsquare(os.lf_sawpos({F0B}), 0.8)", dict()),
+        ("os_CZresSaw", "os.CZresSaw(res 2.5)",
+         f"os.CZresSaw(os.lf_sawpos({F0B}), 2.5)", dict(fund_within=25.0)),
+    ]
+    for stem, title, expr, kw in oscs:
+        if go(stem):
+            osc_fig(out_dir / f"{stem}.svg", stem, title, expr, F0B, **kw)
+
+    # ---- vaeffects.lib: responses at growing resonance ------------------
+    def resonance_grows(stem, freq, curves, ref_hz=100.0):
+        # peak-to-passband contrast, immune to the Moog passband droop and
+        # to the diode ladder's intrinsic gain
+        lo = curves[0][1:].max() - db_at(freq, curves[0], ref_hz)
+        hi = curves[2][1:].max() - db_at(freq, curves[2], ref_hz)
+        check(hi >= lo + 6.0,
+              f"{stem}: peak/passband contrast grows only "
+              f"{hi - lo:+.1f} dB from the lowest to the highest Q")
+
+    def resonance_grows_hpf(stem, freq, curves):
+        resonance_grows(stem, freq, curves, ref_hz=10000.0)
+
+    # the ladders map Q over 0.707..25 (self-oscillation at 25); the
+    # korg35/oberheim/sallenKey family uses 0.707..10
+    for stem, fn in [("ve_moogLadder", "ve.moogLadder"),
+                     ("ve_moogHalfLadder", "ve.moogHalfLadder")]:
+        if go(stem):
+            freq_response(out_dir / f"{stem}.svg", stem,
+                          f"{fn}(normFreq 1 kHz, Q) — small-signal response",
+                          [(f"Q={q}", f"{fn}({VA_NF}, {q})")
+                           for q in (1.0, 10.0, 20.0)],
+                          checks=[(0, 100.0, 0.0, 3.0),
+                                  (0, 10000.0, -20.0, None)],
+                          amp=0.001, custom=resonance_grows, ylim=(-80, 25))
+    if go("ve_diodeLadder"):
+        # Tarr's diode ladder has a large intrinsic passband gain, so its
+        # properties are asserted relative to its own passband
+        def diode_checks(stem, freq, curves):
+            resonance_grows(stem, freq, curves)
+            check(db_at(freq, curves[0], 10000.0)
+                  <= db_at(freq, curves[0], 100.0) - 30.0,
+                  f"{stem}: less than 30 dB of rolloff a decade above cutoff")
+        freq_response(out_dir / "ve_diodeLadder.svg", "ve_diodeLadder",
+                      "ve.diodeLadder(normFreq 1 kHz, Q) — small-signal response",
+                      [(f"Q={q}", f"ve.diodeLadder({VA_NF}, {q})")
+                       for q in (1.0, 10.0, 20.0)],
+                      amp=0.001, custom=diode_checks, ylim=(-40, 65))
+    for stem, fn in [("ve_korg35LPF", "ve.korg35LPF"),
+                     ("ve_oberheimLPF", "ve.oberheimLPF"),
+                     ("ve_sallenKey2ndOrderLPF", "ve.sallenKey2ndOrderLPF")]:
+        if go(stem):
+            freq_response(out_dir / f"{stem}.svg", stem,
+                          f"{fn}(normFreq 1 kHz, Q) — small-signal response",
+                          [(f"Q={q}", f"{fn}({VA_NF}, {q})")
+                           for q in (0.707, 2.0, 8.0)],
+                          checks=[(0, 100.0, 0.0, 3.0),
+                                  (0, 10000.0, -20.0, None)],
+                          amp=0.001, custom=resonance_grows, ylim=(-80, 25))
+    va_hpf = [("ve_korg35HPF", "ve.korg35HPF"),
+              ("ve_oberheimHPF", "ve.oberheimHPF"),
+              ("ve_sallenKey2ndOrderHPF", "ve.sallenKey2ndOrderHPF")]
+    for stem, fn in va_hpf:
+        if go(stem):
+            freq_response(out_dir / f"{stem}.svg", stem,
+                          f"{fn}(normFreq 1 kHz, Q) — small-signal response",
+                          [(f"Q={q}", f"{fn}({VA_NF}, {q})")
+                           for q in (0.707, 2.0, 8.0)],
+                          checks=[(0, 10000.0, 0.0, 3.0),
+                                  (0, 100.0, -20.0, None)],
+                          amp=0.001, custom=resonance_grows_hpf,
+                          ylim=(-80, 25))
+    for stem, fn, chk in [
+            ("ve_oberheimBPF", "ve.oberheimBPF",
+             [(0, 100.0, -12.0, None), (0, 10000.0, -12.0, None)]),
+            ("ve_oberheimBSF", "ve.oberheimBSF",
+             [(0, 1000.0, -12.0, None), (0, 100.0, 0.0, 2.0),
+              (0, 10000.0, 0.0, 2.0)]),
+            ("ve_sallenKey2ndOrderBPF", "ve.sallenKey2ndOrderBPF",
+             [(0, 100.0, -12.0, None), (0, 10000.0, -12.0, None)])]:
+        if go(stem):
+            freq_response(out_dir / f"{stem}.svg", stem,
+                          f"{fn}(normFreq 1 kHz, Q) — small-signal response",
+                          [(f"Q={q}", f"{fn}({VA_NF}, {q})")
+                           for q in (0.707, 2.0, 8.0)],
+                          checks=chk, amp=0.001, ylim=(-80, 25))
+    if go("ve_moog_vcf"):
+        freq_response(out_dir / "ve_moog_vcf.svg", "ve_moog_vcf",
+                      "ve.moog_vcf(res, 1000)",
+                      [(f"res={r}", f"ve.moog_vcf({r}, 1000.0)")
+                       for r in (0.0, 0.4, 0.9)],
+                      checks=[(0, 10000.0, -30.0, None)],
+                      amp=0.001, ylim=(-80, 25))
+
+    # ---- webaudio.lib: the eight biquads --------------------------------
+    wa_figs = [
+        ("wa_lowpass2", "wa.lowpass2(1000, Q, 0)",
+         [(f"Q={q}", f"wa.lowpass2(1000.0, {q}.0, 0.0)") for q in (0, 10, 20)],
+         [(0, 40.0, 0.0, 1.0), (0, 10000.0, -35.0, None)]),
+        ("wa_highpass2", "wa.highpass2(1000, Q, 0)",
+         [(f"Q={q}", f"wa.highpass2(1000.0, {q}.0, 0.0)") for q in (0, 10, 20)],
+         [(0, 20000.0, 0.0, 1.0), (0, 100.0, -35.0, None)]),
+        ("wa_bandpass2", "wa.bandpass2(1000, Q, 0)",
+         [(f"Q={q}", f"wa.bandpass2(1000.0, {q}.0, 0.0)") for q in (1, 5, 20)],
+         [(0, 1000.0, 0.0, 1.0), (0, 100.0, -12.0, None)]),
+        ("wa_notch2", "wa.notch2(1000, Q, 0)",
+         [(f"Q={q}", f"wa.notch2(1000.0, {q}.0, 0.0)") for q in (1, 5, 20)],
+         [(0, 1000.0, -20.0, None), (0, 50.0, 0.0, 1.0)]),
+        ("wa_allpass2", "wa.allpass2(1000, Q, 0) — flat magnitude",
+         [("Q=1", "wa.allpass2(1000.0, 1.0, 0.0)")],
+         [(0, 100.0, 0.0, 0.5), (0, 1000.0, 0.0, 0.5),
+          (0, 10000.0, 0.0, 0.5)]),
+        ("wa_peaking2", "wa.peaking2(1000, gain, 2, 0)",
+         [("+12 dB", "wa.peaking2(1000.0, 12.0, 2.0, 0.0)"),
+          ("-12 dB", "wa.peaking2(1000.0, -12.0, 2.0, 0.0)")],
+         [(0, 1000.0, 12.0, 1.5), (1, 1000.0, -12.0, 1.5),
+          (0, 50.0, 0.0, 1.0)]),
+        ("wa_lowshelf2", "wa.lowshelf2(1000, gain, 0)",
+         [("+12 dB", "wa.lowshelf2(1000.0, 12.0, 0.0)"),
+          ("-12 dB", "wa.lowshelf2(1000.0, -12.0, 0.0)")],
+         [(0, 50.0, 12.0, 1.5), (1, 50.0, -12.0, 1.5),
+          (0, 15000.0, 0.0, 1.5)]),
+        ("wa_highshelf2", "wa.highshelf2(1000, gain, 0)",
+         [("+12 dB", "wa.highshelf2(1000.0, 12.0, 0.0)"),
+          ("-12 dB", "wa.highshelf2(1000.0, -12.0, 0.0)")],
+         [(0, 15000.0, 12.0, 1.5), (1, 15000.0, -12.0, 1.5),
+          (0, 50.0, 0.0, 1.5)]),
+    ]
+    for stem, title, variants, chk in wa_figs:
+        if go(stem):
+            freq_response(out_dir / f"{stem}.svg", stem, title, variants,
+                          checks=chk, ylim=(-60, 20))
+
+    # ---- tonestacks.lib: one EQ figure per amp model --------------------
+    def knobs_work(stem, freq, curves):
+        # the pots also shift the overall insertion loss, so the invariant
+        # is each setting's own bass/treble tilt, not absolute levels
+        def tilt(c):
+            return db_at(freq, c, 100.0) - db_at(freq, c, 5000.0)
+        t, b = curves[1], curves[2]  # treble-full vs bass-full settings
+        check(db_at(freq, t, 10000.0) >= db_at(freq, b, 10000.0) + 6.0,
+              f"{stem}: treble knob moves < 6 dB at 10 kHz")
+        check(tilt(b) >= tilt(t) + 10.0,
+              f"{stem}: bass-full vs treble-full tilt contrast "
+              f"{tilt(b) - tilt(t):+.1f} dB, expected >= 10")
+
+    TS_MODELS = ["bassman", "mesa", "twin", "princeton", "jcm800", "jcm2000",
+                 "jtm45", "mlead", "m2199", "ac30", "ac15", "soldano",
+                 "sovtek", "peavey", "ibanez", "roland", "ampeg",
+                 "ampeg_rev", "bogner", "groove", "crunch", "fender_blues",
+                 "fender_default", "fender_deville", "gibsen"]
+    for model in TS_MODELS:
+        stem = f"ts_{model}"
+        if go(stem):
+            freq_response(out_dir / f"{stem}.svg", stem,
+                          f"ts.{model}(t, m, l)",
+                          [("t=m=l=0.5", f"ts.{model}(0.5, 0.5, 0.5)"),
+                           ("treble full", f"ts.{model}(1.0, 0.0, 0.0)"),
+                           ("bass full", f"ts.{model}(0.0, 0.0, 1.0)")],
+                          custom=knobs_work, ylim=(-45, 10))
+
+    # ---- tubes.lib: driven stages ---------------------------------------
+    for tube in ["12AX7", "12AT7", "12AU7", "6V6", "6DJ8", "6C16"]:
+        stem = f"tu_T1_{tube}"
+        if go(stem):
+            tube_fig(out_dir / f"{stem}.svg", stem, f"tu.T1_{tube}",
+                     f"tu.T1_{tube}")
+    if go("tu_tubestage"):
+        tube_fig(out_dir / "tu_tubestage.svg", "tu_tubestage",
+                 "tu.tubestage(12AX7 table, 86, 2.7k, 1.58)",
+                 "tu.tubestage(tu.tubetable_12AX7_0, 86.0, 2700.0, 1.581656)")
+
+    # ---- phaflangers.lib: frozen-LFO responses --------------------------
+    if go("pf_flanger_mono"):
+        freq_response(out_dir / "pf_flanger_mono.svg", "pf_flanger_mono",
+                      "pf.flanger_mono(512, 48, 1, 0, invert) — 1 ms comb",
+                      [("invert=0", "pf.flanger_mono(512, 48.0, 1.0, 0.0, 0.0)"),
+                       ("invert=1", "pf.flanger_mono(512, 48.0, 1.0, 0.0, 1.0)")],
+                      checks=[(0, 1000.0, -30.0, None),
+                              (0, 2000.0, -30.0, None),
+                              (0, 500.0, 0.0, 1.5),
+                              (1, 500.0, -30.0, None),
+                              (1, 1500.0, -30.0, None)],
+                      ylim=(-60, 12))
+    if go("pf_phaser2_mono"):
+        def has_notches(stem, freq, curves):
+            sel = (freq >= 100) & (freq <= 5000)
+            check(curves[0][sel].min() <= -10.0,
+                  f"{stem}: no notch deeper than -10 dB in 100 Hz..5 kHz")
+        freq_response(out_dir / "pf_phaser2_mono.svg", "pf_phaser2_mono",
+                      "pf.phaser2_mono, 4 notches, LFO frozen (speed 0)",
+                      [("speed=0",
+                        "pf.phaser2_mono(4, 0.0, 1000.0, 100.0, 1.5,"
+                        " 800.0, 0.0, 1.0, 0.0, 0.0)")],
+                      custom=has_notches, ylim=(-40, 12))
+
+    # ---- delays.lib: fractional-delay interpolation error ---------------
+    if go("de_fdelay"):
+        freq_response(out_dir / "de_fdelay.svg", "de_fdelay",
+                      "de.fdelay(128, 64+frac) — linear interpolation loss",
+                      [("frac=0", "de.fdelay(128, 64.0)"),
+                       ("frac=0.3", "de.fdelay(128, 64.3)"),
+                       ("frac=0.5", "de.fdelay(128, 64.5)")],
+                      checks=[(0, 10000.0, 0.0, 0.2),
+                              (2, 10000.0, -2.0, 0.7)],
+                      ylim=(-24, 6))
+    if go("de_fdelaylti"):
+        freq_response(out_dir / "de_fdelaylti.svg", "de_fdelaylti",
+                      "de.fdelaylti(N, 128, 64.5) vs linear interpolation",
+                      [("linear", "de.fdelay(128, 64.5)"),
+                       ("N=2", "de.fdelaylti(2, 128, 64.5)"),
+                       ("N=4", "de.fdelaylti(4, 128, 64.5)")],
+                      checks=[(2, 10000.0, 0.0, 1.0)],
+                      ylim=(-24, 6))
 
 
 def main() -> int:

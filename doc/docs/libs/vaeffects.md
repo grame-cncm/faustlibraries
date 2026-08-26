@@ -26,6 +26,8 @@ The virtual analog filter library is organized into 7 sections:
 
 ### `(ve.)moog_vcf`
 
+![moog_vcf — response plots](../img/ve_moog_vcf.svg)
+
 Moog "Voltage Controlled Filter" (VCF) in "analog" form. Moog VCF
 implemented using the same logical block diagram as the classic
 analog circuit.  As such, it neglects the one-sample delay associated
@@ -103,6 +105,8 @@ moog_vcf_2b_test = os.osc(330)
 ----
 
 ### `(ve.)moogLadder`
+
+![moogLadder — response plots](../img/ve_moogLadder.svg)
 
 Virtual analog model of the 4th-order Moog Ladder (without any nonlinearities), which is arguably the 
 most well-known ladder filter in analog synthesizers. Several 
@@ -187,6 +191,8 @@ peak corresponds exactly to that set via the Q-param.
 
 ### `(ve.)moogHalfLadder`
 
+![moogHalfLadder — response plots](../img/ve_moogHalfLadder.svg)
+
 Virtual analog model of the 2nd-order Moog Half Ladder (simplified version of
 `(ve.)moogLadder`). Several 1st-order filters are cascaded in series. 
 Feedback is then used, in part, to control the cut-off frequency and the 
@@ -225,6 +231,8 @@ moogHalfLadder_test = os.osc(220)
 ----
 
 ### `(ve.)diodeLadder`
+
+![diodeLadder — response plots](../img/ve_diodeLadder.svg)
 
 4th order virtual analog diode ladder filter. In addition to the individual 
 states used within each independent 1st-order filter, there are also additional 
@@ -282,6 +290,8 @@ These filters were implemented in Faust by Eric Tarr during the
 
 ### `(ve.)korg35LPF`
 
+![korg35LPF — response plots](../img/ve_korg35LPF.svg)
+
 Virtual analog models of the Korg 35 low-pass filter found in the MS-10 and 
 MS-20 synthesizers.
 
@@ -310,6 +320,8 @@ korg35LPF_test = os.osc(220)
 ----
 
 ### `(ve.)korg35HPF`
+
+![korg35HPF — response plots](../img/ve_korg35HPF.svg)
 
 Virtual analog models of the Korg 35 high-pass filter found in the MS-10 and 
 MS-20 synthesizers.
@@ -381,6 +393,8 @@ oberheim_test = os.osc(220)
 
 ### `(ve.)oberheimBSF`
 
+![oberheimBSF — response plots](../img/ve_oberheimBSF.svg)
+
 Band-Stop Oberheim filter (see description above). 
 Specialize the generic implementation: keep the first BSF output, 
 the compiler will only generate the needed code.
@@ -410,6 +424,8 @@ oberheimBSF_test = os.osc(220)
 ----
 
 ### `(ve.)oberheimBPF`
+
+![oberheimBPF — response plots](../img/ve_oberheimBPF.svg)
 
 Band-Pass Oberheim filter (see description above).
 Specialize the generic implementation: keep the second BPF output, 
@@ -441,6 +457,8 @@ oberheimBPF_test = os.osc(220)
 
 ### `(ve.)oberheimHPF`
 
+![oberheimHPF — response plots](../img/ve_oberheimHPF.svg)
+
 High-Pass Oberheim filter (see description above).
 Specialize the generic implementation: keep the third HPF output, 
 the compiler will only generate the needed code.
@@ -470,6 +488,8 @@ oberheimHPF_test = os.osc(220)
 ----
 
 ### `(ve.)oberheimLPF`
+
+![oberheimLPF — response plots](../img/ve_oberheimLPF.svg)
 
 Low-Pass Oberheim filter (see description above). 
 Specialize the generic implementation: keep the fourth LPF output,
@@ -674,6 +694,8 @@ sallenKey2ndOrder_test = os.osc(330)
 
 ### `(ve.)sallenKey2ndOrderLPF`
 
+![sallenKey2ndOrderLPF — response plots](../img/ve_sallenKey2ndOrderLPF.svg)
+
 Sallen-Key 2nd order lowpass filter (see description above). 
 Specialize the generic implementation: keep the first LPF output,
 the compiler will only generate the needed code.
@@ -704,6 +726,8 @@ sallenKey2ndOrderLPF_test = os.osc(330)
 
 ### `(ve.)sallenKey2ndOrderBPF`
 
+![sallenKey2ndOrderBPF — response plots](../img/ve_sallenKey2ndOrderBPF.svg)
+
 Sallen-Key 2nd order bandpass filter (see description above). 
 Specialize the generic implementation: keep the second BPF output, 
 the compiler will only generate the needed code.
@@ -733,6 +757,8 @@ sallenKey2ndOrderBPF_test = os.osc(330)
 ----
 
 ### `(ve.)sallenKey2ndOrderHPF`
+
+![sallenKey2ndOrderHPF — response plots](../img/ve_sallenKey2ndOrderHPF.svg)
 
 Sallen-Key 2nd order highpass filter (see description above). 
 Specialize the generic implementation: keep the third HPF output, 

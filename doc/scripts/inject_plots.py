@@ -24,6 +24,11 @@ from pathlib import Path
 HEADING = re.compile(r"^### +`\(")
 NAME = re.compile(r"`\((?P<prefix>[a-zA-Z0-9]+)\.\)(?P<name>[A-Za-z0-9_]+)`")
 
+# Libraries without an official prefix document their functions with bare
+# headings (`### `bassman``); their figures still need a filesystem prefix.
+BARE_PREFIX = {"tonestacks": "ts", "tubes": "tu"}
+BARE_HEADING = re.compile(r"^### +`(?P<name>[A-Za-z0-9_]+)`")
+
 
 def main() -> int:
     if len(sys.argv) != 4:
@@ -36,13 +41,19 @@ def main() -> int:
     out, injected = [], 0
     for line in page.read_text(errors="replace").splitlines():
         out.append(line)
-        if not HEADING.match(line):
-            continue
-        for m in NAME.finditer(line):
-            stem = f"{m.group('prefix')}_{m.group('name')}"
+        names = []
+        if HEADING.match(line):
+            names = [f"{m.group('prefix')}_{m.group('name')}"
+                     for m in NAME.finditer(line)]
+        elif page.stem in BARE_PREFIX:
+            m = BARE_HEADING.match(line)
+            if m:
+                names = [f"{BARE_PREFIX[page.stem]}_{m.group('name')}"]
+        for stem in names:
             if (img_dir / f"{stem}.svg").exists():
+                name = stem.split("_", 1)[1]
                 out.append("")
-                out.append(f"![{m.group('name')} — response plots]"
+                out.append(f"![{name} — response plots]"
                            f"({url_prefix}/{stem}.svg)")
                 injected += 1
 

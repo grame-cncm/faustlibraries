@@ -46,6 +46,8 @@ Where:
 
 ### `bassman`
 
+![bassman — response plots](../img/ts_bassman.svg)
+
 Tone stack of the 1959 Fender Bassman 5F6-A.
 
 #### Usage
@@ -63,6 +65,8 @@ Where:
 ----
 
 ### `mesa`
+
+![mesa — response plots](../img/ts_mesa.svg)
 
 Tone stack of the Mesa Boogie Mark.
 
@@ -82,6 +86,8 @@ Where:
 
 ### `twin`
 
+![twin — response plots](../img/ts_twin.svg)
+
 Tone stack of the 1969 Fender Twin Reverb AA270.
 
 #### Usage
@@ -99,6 +105,8 @@ Where:
 ----
 
 ### `princeton`
+
+![princeton — response plots](../img/ts_princeton.svg)
 
 Tone stack of the 1964 Fender Princeton AA1164.
 
@@ -118,6 +126,8 @@ Where:
 
 ### `jcm800`
 
+![jcm800 — response plots](../img/ts_jcm800.svg)
+
 Tone stack of the Marshall JCM-800 Lead 100 (model 2203).
 
 #### Usage
@@ -135,6 +145,8 @@ Where:
 ----
 
 ### `jcm2000`
+
+![jcm2000 — response plots](../img/ts_jcm2000.svg)
 
 Tone stack of the Marshall JCM-2000 Lead.
 
@@ -154,6 +166,8 @@ Where:
 
 ### `jtm45`
 
+![jtm45 — response plots](../img/ts_jtm45.svg)
+
 Tone stack of the Marshall JTM 45.
 
 #### Usage
@@ -171,6 +185,8 @@ Where:
 ----
 
 ### `mlead`
+
+![mlead — response plots](../img/ts_mlead.svg)
 
 Tone stack of the 1967 Marshall Major Lead 200.
 
@@ -190,6 +206,8 @@ Where:
 
 ### `m2199`
 
+![m2199 — response plots](../img/ts_m2199.svg)
+
 Tone stack of the Marshall M2199 30W solid state.
 
 #### Usage
@@ -207,6 +225,8 @@ Where:
 ----
 
 ### `ac30`
+
+![ac30 — response plots](../img/ts_ac30.svg)
 
 Tone stack of the Vox AC-30.
 
@@ -226,6 +246,8 @@ Where:
 
 ### `ac15`
 
+![ac15 — response plots](../img/ts_ac15.svg)
+
 Tone stack of the Vox AC-15.
 
 #### Usage
@@ -243,6 +265,8 @@ Where:
 ----
 
 ### `soldano`
+
+![soldano — response plots](../img/ts_soldano.svg)
 
 Tone stack of the Soldano SLO 100.
 
@@ -262,6 +286,8 @@ Where:
 
 ### `sovtek`
 
+![sovtek — response plots](../img/ts_sovtek.svg)
+
 Tone stack of the Sovtek MIG 100H.
 
 #### Usage
@@ -279,6 +305,8 @@ Where:
 ----
 
 ### `peavey`
+
+![peavey — response plots](../img/ts_peavey.svg)
 
 Tone stack of the Peavey C20.
 
@@ -298,6 +326,8 @@ Where:
 
 ### `ibanez`
 
+![ibanez — response plots](../img/ts_ibanez.svg)
+
 Tone stack of the Ibanez GX20.
 
 #### Usage
@@ -315,6 +345,8 @@ Where:
 ----
 
 ### `roland`
+
+![roland — response plots](../img/ts_roland.svg)
 
 Tone stack of the Roland Cube 60.
 
@@ -334,6 +366,8 @@ Where:
 
 ### `ampeg`
 
+![ampeg — response plots](../img/ts_ampeg.svg)
+
 Tone stack of the Ampeg VL 501.
 
 #### Usage
@@ -351,6 +385,8 @@ Where:
 ----
 
 ### `ampeg_rev`
+
+![ampeg_rev — response plots](../img/ts_ampeg_rev.svg)
 
 Tone stack of the Ampeg Reverbrocket.
 
@@ -370,6 +406,8 @@ Where:
 
 ### `bogner`
 
+![bogner — response plots](../img/ts_bogner.svg)
+
 Tone stack of the Bogner Triple Giant preamp.
 
 #### Usage
@@ -387,6 +425,8 @@ Where:
 ----
 
 ### `groove`
+
+![groove — response plots](../img/ts_groove.svg)
 
 Tone stack of the Groove Tubes Trio preamp.
 
@@ -406,6 +446,8 @@ Where:
 
 ### `crunch`
 
+![crunch — response plots](../img/ts_crunch.svg)
+
 Tone stack of the Hughes & Kettner.
 
 #### Usage
@@ -423,6 +465,8 @@ Where:
 ----
 
 ### `fender_blues`
+
+![fender_blues — response plots](../img/ts_fender_blues.svg)
 
 Tone stack of the Fender Blues Junior.
 
@@ -442,6 +486,8 @@ Where:
 
 ### `fender_default`
 
+![fender_default — response plots](../img/ts_fender_default.svg)
+
 Tone stack of the Fender (generic).
 
 #### Usage
@@ -460,6 +506,8 @@ Where:
 
 ### `fender_deville`
 
+![fender_deville — response plots](../img/ts_fender_deville.svg)
+
 Tone stack of the Fender Hot Rod DeVille.
 
 #### Usage
@@ -477,6 +525,8 @@ Where:
 ----
 
 ### `gibsen`
+
+![gibsen — response plots](../img/ts_gibsen.svg)
 
 Tone stack of the Gibson GS12 Reverbrocket.
 

@@ -13,6 +13,8 @@ taken from Mozilla Firefox implementation.
 
 ### `(wa.)lowpass2`
 
+![lowpass2 — response plots](../img/wa_lowpass2.svg)
+
 Standard second-order resonant lowpass filter with 12dB/octave rolloff.
 Frequencies below the cutoff pass through, frequencies above it are attenuated.
 
@@ -42,6 +44,8 @@ lowpass2_test = os.osc(440) : wa.lowpass2(1000, 0.707, 0);
 ----
 
 ### `(wa.)highpass2`
+
+![highpass2 — response plots](../img/wa_highpass2.svg)
 
 Standard second-order resonant highpass filter with 12dB/octave rolloff.
 Frequencies below the cutoff are attenuated, frequencies above it pass through.
@@ -73,6 +77,8 @@ highpass2_test = os.osc(440) : wa.highpass2(1000, 0.707, 0);
 
 ### `(wa.)bandpass2`
 
+![bandpass2 — response plots](../img/wa_bandpass2.svg)
+
 Standard second-order bandpass filter.
 Frequencies outside the given range of frequencies are attenuated, the frequencies inside it pass through.
 
@@ -102,6 +108,8 @@ bandpass2_test = os.osc(440) : wa.bandpass2(1000, 1, 0);
 ----
 
 ### `(wa.)notch2`
+
+![notch2 — response plots](../img/wa_notch2.svg)
 
 Standard notch filter, also called a band-stop or band-rejection filter.
 It is the opposite of a bandpass filter: frequencies outside the give range of frequencies 
@@ -134,6 +142,8 @@ notch2_test = os.osc(440) : wa.notch2(1000, 1, 0);
 
 ### `(wa.)allpass2`
 
+![allpass2 — response plots](../img/wa_allpass2.svg)
+
 Standard second-order allpass filter. It lets all frequencies through,
 but changes the phase-relationship between the various frequencies.
 
@@ -163,6 +173,8 @@ allpass2_test = os.osc(440) : wa.allpass2(1000, 1, 0);
 ----
 
 ### `(wa.)peaking2`
+
+![peaking2 — response plots](../img/wa_peaking2.svg)
 
 Frequencies inside the range get a boost or an attenuation, frequencies outside it are unchanged.
 
@@ -194,6 +206,8 @@ peaking2_test = os.osc(440) : wa.peaking2(1000, 3, 1, 0);
 
 ### `(wa.)lowshelf2`
 
+![lowshelf2 — response plots](../img/wa_lowshelf2.svg)
+
 Standard second-order lowshelf filter.
 Frequencies lower than the frequency get a boost, or an attenuation, frequencies over it are unchanged.
 
@@ -223,6 +237,8 @@ lowshelf2_test = os.osc(440) : wa.lowshelf2(500, 6, 0);
 ----
 
 ### `(wa.)highshelf2`
+
+![highshelf2 — response plots](../img/wa_highshelf2.svg)
 
 Standard second-order highshelf filter.
 Frequencies higher than the frequency get a boost or an attenuation, frequencies lower than it are unchanged.

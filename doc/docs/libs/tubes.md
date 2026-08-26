@@ -23,6 +23,8 @@ process = tu.T1_12AX7 : *(preamp) : tu.T2_12AX7;
 
 ### `tubestage`
 
+![tubestage — response plots](../img/tu_tubestage.svg)
+
 One complete triode gain stage: table-driven waveshaping followed by the
 highpass formed by the cathode capacitor and resistor.
 `tubestageF(tb,vplus,divider,fck,Rk,Vk0)` is the fully parameterized form;
@@ -50,6 +52,8 @@ Where:
 
 ### `T1_12AX7`, `T2_12AX7`, `T3_12AX7`
 
+![T1_12AX7 — response plots](../img/tu_T1_12AX7.svg)
+
 First, second and third preamp stage of a 12AX7 (high-gain dual triode, the classic guitar preamp tube),
 with the bias values used by the Guitarix amplifiers.
 
@@ -62,6 +66,8 @@ _ : T1_12AX7 : _
 ----
 
 ### `T1_12AT7`, `T2_12AT7`, `T3_12AT7`
+
+![T1_12AT7 — response plots](../img/tu_T1_12AT7.svg)
 
 First, second and third preamp stage of a 12AT7 (medium-gain dual triode),
 with the bias values used by the Guitarix amplifiers.
@@ -76,6 +82,8 @@ _ : T1_12AT7 : _
 
 ### `T1_12AU7`, `T2_12AU7`, `T3_12AU7`
 
+![T1_12AU7 — response plots](../img/tu_T1_12AU7.svg)
+
 First, second and third preamp stage of a 12AU7 (low-gain dual triode),
 with the bias values used by the Guitarix amplifiers.
 
@@ -88,6 +96,8 @@ _ : T1_12AU7 : _
 ----
 
 ### `T1_6V6`, `T2_6V6`, `T3_6V6`
+
+![T1_6V6 — response plots](../img/tu_T1_6V6.svg)
 
 First, second and third preamp stage of a 6V6 (beam power tetrode, wired as a triode),
 with the bias values used by the Guitarix amplifiers.
@@ -102,6 +112,8 @@ _ : T1_6V6 : _
 
 ### `T1_6DJ8`, `T2_6DJ8`, `T3_6DJ8`
 
+![T1_6DJ8 — response plots](../img/tu_T1_6DJ8.svg)
+
 First, second and third preamp stage of a 6DJ8 / ECC88 (low-noise dual triode),
 with the bias values used by the Guitarix amplifiers.
 
@@ -114,6 +126,8 @@ _ : T1_6DJ8 : _
 ----
 
 ### `T1_6C16`, `T2_6C16`, `T3_6C16`
+
+![T1_6C16 — response plots](../img/tu_T1_6C16.svg)
 
 First, second and third preamp stage of a 6C16 (single triode),
 with the bias values used by the Guitarix amplifiers.

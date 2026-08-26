@@ -315,6 +315,8 @@ osci_test = os.osci(440);
 
 ### `(os.)osc`
 
+![osc — response plots](../img/os_osc.svg)
+
 Default sine wave oscillator (same as [oscsin](#oscsin)).
 `osc` is a standard Faust function.
 
@@ -387,6 +389,8 @@ Use `sawN` and its derivatives for audio oscillators with suppressed aliasing.
 ----
 
 ### `(os.)lf_imptrain`
+
+![lf_imptrain — response plots](../img/os_lf_imptrain.svg)
 
 Unit-amplitude low-frequency impulse train.
 `lf_imptrain` is a standard Faust function.
@@ -479,6 +483,8 @@ lf_squarewavepos_test = os.lf_squarewavepos(3);
 
 ### `(os.)lf_squarewave`
 
+![lf_squarewave — response plots](../img/os_lf_squarewave.svg)
+
 Zero-mean unit-amplitude LF square wave.
 `lf_squarewave` is a standard Faust function.
 
@@ -523,6 +529,8 @@ lf_trianglepos_test = os.lf_trianglepos(3);
 ----
 
 ### `(os.)lf_triangle`
+
+![lf_triangle — response plots](../img/os_lf_triangle.svg)
 
 Zero-mean unit-amplitude LF triangle wave.
 `lf_triangle` is a standard Faust function.
@@ -679,6 +687,8 @@ lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, button("reset"));
 
 ### `(os.)lf_saw`
 
+![lf_saw — response plots](../img/os_lf_saw.svg)
+
 Simple sawtooth waveform oscillator between -1 and 1.
 `lf_saw` is a standard Faust function.
 
@@ -704,6 +714,8 @@ lf_saw_test = os.lf_saw(3);
 ----
 
 ### `(os.)sawN`
+
+![sawN — response plots](../img/os_sawN.svg)
 
 Alias-Suppressed Sawtooth Audio-Frequency Oscillator using Nth-order polynomial transitions
 to reduce aliasing.
@@ -1125,6 +1137,8 @@ pulsetrain_test = os.pulsetrain(220, 0.25);
 
 ### `(os.)squareN`
 
+![squareN — response plots](../img/os_squareN.svg)
+
 Alias-suppressed square wave oscillator.
 
 #### Usage
@@ -1216,6 +1230,8 @@ imptrain_test = os.imptrain(220);
 ----
 
 ### `(os.)triangleN`
+
+![triangleN — response plots](../img/os_triangleN.svg)
 
 Alias-suppressed triangle wave oscillator.
 
@@ -1824,6 +1840,8 @@ For the `fund` waveform, use a low-frequency oscillator without anti-aliasing su
 
 ### `(os.)CZsaw`
 
+![CZsaw — response plots](../img/os_CZsaw.svg)
+
 Oscillator that mimics the Casio CZ saw oscillator.
 `CZsaw` is a standard Faust function.
 
@@ -1872,6 +1890,8 @@ CZsawP_test = os.CZsawP(os.lf_sawpos(110), 0.5);
 ----
 
 ### `(os.)CZsquare`
+
+![CZsquare — response plots](../img/os_CZsquare.svg)
 
 Oscillator that mimics the Casio CZ square oscillator
 `CZsquare` is a standard Faust function.
@@ -2069,6 +2089,8 @@ CZhalfSineP_test = os.CZhalfSineP(os.lf_sawpos(110), 0.5);
 
 ### `(os.)CZresSaw`
 
+![CZresSaw — response plots](../img/os_CZresSaw.svg)
+
 Oscillator that mimics the Casio CZ resonant sawtooth oscillator.
 `CZresSaw` is a standard Faust function.
 
@@ -2167,6 +2189,8 @@ polyblep_test = os.polyblep(0.2, os.lf_sawpos(220));
 
 ### `(os.)polyblep_saw`
 
+![polyblep_saw — response plots](../img/os_polyblep_saw.svg)
+
 Sawtooth oscillator with suppressed aliasing (using `polyblep`).
 
 #### Usage
@@ -2189,6 +2213,8 @@ polyblep_saw_test = os.polyblep_saw(220);
 
 ### `(os.)polyblep_square`
 
+![polyblep_square — response plots](../img/os_polyblep_square.svg)
+
 Square wave oscillator with suppressed aliasing (using `polyblep`).
 
 #### Usage
@@ -2210,6 +2236,8 @@ polyblep_square_test = os.polyblep_square(220);
 ----
 
 ### `(os.)polyblep_triangle`
+
+![polyblep_triangle — response plots](../img/os_polyblep_triangle.svg)
 
 Triangle wave oscillator with suppressed aliasing (using `polyblep`).
 
