@@ -33,3 +33,9 @@ wfs_ui_test = os.osc(550)
 
 stereoize_test = (os.osc(660), os.osc(770))
   : sp.stereoize(+);
+
+binauralModel_test = os.osc(440)
+  : sp.binauralModel(45);
+
+binauralFir_test = os.osc(440)
+  : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));

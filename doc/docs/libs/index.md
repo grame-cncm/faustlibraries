@@ -1062,6 +1062,8 @@
 [(sp.)spcap](spats.md#spspcap)
 [(sp.)spcap_ui](spats.md#spspcap_ui)
 [(sp.)stereoize](spats.md#spstereoize)
+[(sp.)binauralModel](spats.md#spbinauralmodel)
+[(sp.)binauralFir](spats.md#spbinauralfir)
 
 ## synths
 

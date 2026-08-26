@@ -485,6 +485,88 @@ with {
 
 // TODO: need demo function of spat here
 
+//-----------------------`(sp.)binauralModel`------------------------
+// Parametric (structural) binaural spatializer after Brown and Duda: a mono
+// source is placed at a given azimuth using the two dominant localization
+// cues. The interaural time difference follows the Woodworth spherical-head
+// formula (radius 8.75 cm, applied as a fractional delay on the far ear),
+// and the interaural level difference is a one-pole/one-zero head-shadow
+// filter per ear whose high-frequency response varies continuously from
+// +6 dB (source side) to shadowed (opposite side), corner around 1.2 kHz.
+// No elevation cues and no pinna model: for full localization use measured
+// HRIRs with `sp.binauralFir`.
+//
+// #### Usage
+//
+// ```
+// _ : binauralModel(az) : _,_ // left, right
+// ```
+//
+// Where:
+//
+// * `az`: azimuth in degrees, 0 in front, positive towards the RIGHT ear,
+//   any value (wrapped internally to [-180, 180])
+//
+// #### Test
+// ```
+// sp = library("spats.lib");
+// os = library("oscillators.lib");
+// binauralModel_test = os.osc(440) : sp.binauralModel(45);
+// ```
+//
+// #### References
+//
+// * C.P. Brown and R.O. Duda, "A structural model for binaural sound
+//   synthesis", IEEE Trans. Speech and Audio Processing, 6(5), 1998.
+// * <https://ccrma.stanford.edu/~jos/pasp/Spherical_Head_Model.html>
+//------------------------------------------------------------
+declare binauralModel license "MIT";
+binauralModel(az) = _ <: ear(-1), ear(+1)
+with {
+    a = 0.0875;              // head radius in meters
+    c = 343.0;               // speed of sound in m/s
+    rad = ma.PI/180.0;
+    azw = ma.frac((az + 180.0)/360.0)*360.0 - 180.0;   // wrap to [-180,180)
+    theta = azw * rad;
+    // Woodworth ITD, front/back symmetric
+    phi = min(abs(theta), ma.PI - abs(theta));
+    itd = a/c * (phi + sin(abs(theta)));
+    // side = +1 for the right ear, -1 for the left
+    ear(side) = de.fdelay(512, dly(side)*ma.SR) : shadow(side);
+    dly(side) = select2(side*azw >= 0.0, itd, 0.0);    // far ear gets the ITD
+    // head-shadow filter: H(s) = (alpha*s + 1)/(s + 1) at w0 = 2c/a rad/s
+    shadow(side) = fi.tf1s(alpha(side), 1.0, 1.0, 2.0*c/a);
+    alpha(side) = 1.0 + side*sin(theta);
+};
+
+//-----------------------`(sp.)binauralFir`------------------------
+// Binaural rendering by direct convolution with a measured pair of head
+// related impulse responses. Measured HRIRs are short (128-256 taps at
+// 44.1/48 kHz), so a direct FIR is perfectly affordable and no partitioned
+// convolution is needed: pass the taps of the left-ear and right-ear HRIRs
+// for the desired direction as two constant lists.
+//
+// #### Usage
+//
+// ```
+// _ : binauralFir((l0, l1, ...), (r0, r1, ...)) : _,_ // left, right
+// ```
+//
+// Where:
+//
+// * `(l0, l1, ...)`: left-ear HRIR taps (constant numerical expressions)
+// * `(r0, r1, ...)`: right-ear HRIR taps
+//
+// #### Test
+// ```
+// sp = library("spats.lib");
+// os = library("oscillators.lib");
+// binauralFir_test = os.osc(440) : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));
+// ```
+//------------------------------------------------------------
+declare binauralFir license "MIT";
+binauralFir(hL, hR) = _ <: fi.fir(hL), fi.fir(hR);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // UNDOCUMENTED/DISMISSED ELEMENTS
 //////////////////////////////////////////////////////////////////////////////////////////

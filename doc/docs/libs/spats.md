@@ -325,3 +325,69 @@ os = library("oscillators.lib");
 stereoize_test = (os.osc(660), os.osc(770))
   : sp.stereoize(+);
 ```
+
+----
+
+### `(sp.)binauralModel`
+
+Parametric (structural) binaural spatializer after Brown and Duda: a mono
+source is placed at a given azimuth using the two dominant localization
+cues. The interaural time difference follows the Woodworth spherical-head
+formula (radius 8.75 cm, applied as a fractional delay on the far ear),
+and the interaural level difference is a one-pole/one-zero head-shadow
+filter per ear whose high-frequency response varies continuously from
++6 dB (source side) to shadowed (opposite side), corner around 1.2 kHz.
+No elevation cues and no pinna model: for full localization use measured
+HRIRs with `sp.binauralFir`.
+
+#### Usage
+
+```
+_ : binauralModel(az) : _,_ // left, right
+```
+
+Where:
+
+* `az`: azimuth in degrees, 0 in front, positive towards the RIGHT ear,
+  any value (wrapped internally to [-180, 180])
+
+#### Test
+```
+sp = library("spats.lib");
+os = library("oscillators.lib");
+binauralModel_test = os.osc(440) : sp.binauralModel(45);
+```
+
+#### References
+
+* C.P. Brown and R.O. Duda, "A structural model for binaural sound
+  synthesis", IEEE Trans. Speech and Audio Processing, 6(5), 1998.
+* [https://ccrma.stanford.edu/~jos/pasp/Spherical_Head_Model.html](https://ccrma.stanford.edu/~jos/pasp/Spherical_Head_Model.html)
+
+----
+
+### `(sp.)binauralFir`
+
+Binaural rendering by direct convolution with a measured pair of head
+related impulse responses. Measured HRIRs are short (128-256 taps at
+44.1/48 kHz), so a direct FIR is perfectly affordable and no partitioned
+convolution is needed: pass the taps of the left-ear and right-ear HRIRs
+for the desired direction as two constant lists.
+
+#### Usage
+
+```
+_ : binauralFir((l0, l1, ...), (r0, r1, ...)) : _,_ // left, right
+```
+
+Where:
+
+* `(l0, l1, ...)`: left-ear HRIR taps (constant numerical expressions)
+* `(r0, r1, ...)`: right-ear HRIR taps
+
+#### Test
+```
+sp = library("spats.lib");
+os = library("oscillators.lib");
+binauralFir_test = os.osc(440) : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));
+```
