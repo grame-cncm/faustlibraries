@@ -47,7 +47,7 @@ fi = library("filters.lib");
 declare name "Faust WebAudio Filters Library";
 declare author "GRAME";
 declare copyright "GRAME";
-declare version "1.1.0";
+declare version "1.1.1";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 
 //---------------------------------------------------
@@ -188,12 +188,12 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
         aPlusOne = A + 1;
         aMinusOne = A - 1;
 
-        b0 = A * (aPlusOne - aMinusOne * k + k2);
-        b1 = 2 * A * (aMinusOne - aPlusOne * k);
-        b2 = A * (aPlusOne - aMinusOne * k - k2);
-        a0 = aPlusOne + aMinusOne * k + k2;
-        a1 = -2 * (aMinusOne + aPlusOne * k);
-        a2 = aPlusOne + aMinusOne * k - k2;
+        b0 = A * (aPlusOne + aMinusOne * k + k2);
+        b1 = -2 * A * (aMinusOne + aPlusOne * k);
+        b2 = A * (aPlusOne + aMinusOne * k - k2);
+        a0 = aPlusOne - aMinusOne * k + k2;
+        a1 = 2 * (aMinusOne - aPlusOne * k);
+        a2 = aPlusOne - aMinusOne * k - k2;
     };
 
     // --------------------- implementation ------------------------------
