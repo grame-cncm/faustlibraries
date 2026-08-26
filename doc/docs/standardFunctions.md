@@ -144,6 +144,7 @@ Function Type | Function Name | Description
 [Comb (Allpass)](libs/filters.md#fiallpass_fcomb) | [`fi.`](libs/filters.md)[`allpass_fcomb`](libs/filters.md#fiallpass_fcomb) | Schroeder allpass comb filter
 [Comb (Feedback)](libs/filters.md#fifb_fcomb) | [`fi.`](libs/filters.md)[`fb_fcomb`](libs/filters.md#fifb_fcomb) | Feedback comb filter
 [Comb (Feedforward)](libs/filters.md#fiff_fcomb) | [`fi.`](libs/filters.md)[`ff_fcomb`](libs/filters.md#fiff_fcomb) | Feed-forward comb filter.
+[dcblocker](libs/filters.md#fidcblocker) | [`fi.`](libs/filters.md)[`dcblocker`](libs/filters.md#fidcblocker) | DC blocker. Default dc blocker has -3dB point near 35 Hz (at 44.1 kHz)
 [ff_comb](libs/filters.md#fiff_comb) | [`fi.`](libs/filters.md)[`ff_comb`](libs/filters.md#fiff_comb) | Feed-Forward Comb Filter. Note that `ff_comb` requires integer delays
 [Filterbank](libs/filters.md#fifilterbank) | [`fi.`](libs/filters.md)[`filterbank`](libs/filters.md#fifilterbank) | Generic filter bank
 [FIR (Arbitrary Order)](libs/filters.md#fifir) | [`fi.`](libs/filters.md)[`fir`](libs/filters.md#fifir) | Nth-order FIR filter

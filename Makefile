@@ -2,6 +2,7 @@
 #
 # `make reference`  - compile each *_test entry and store terminal output under tests/reference/.
 # `make check`      - recompile, run each test, and diff against the stored reference output.
+# `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
@@ -36,7 +37,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check clean distclean help bench doc-index doc-index-split doc-index-commercial
+.PHONY: reference check checkdoc clean distclean help bench doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -112,6 +113,9 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 		echo "[fail] output for $* differs from reference"; \
 		exit 1; \
 	fi
+
+checkdoc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.json)
+	@$(PYTHON) scripts/checkdoc.py
 
 bench: ## Run faustbench-llvm on all test specs and capture memory/CPU stats
 	@set -e; \
