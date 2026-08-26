@@ -330,6 +330,8 @@ stereoize_test = (os.osc(660), os.osc(770))
 
 ### `(sp.)binauralModel`
 
+![binauralModel — response plots](../img/sp_binauralModel.svg)
+
 Parametric (structural) binaural spatializer after Brown and Duda: a mono
 source is placed at a given azimuth using the two dominant localization
 cues. The interaural time difference follows the Woodworth spherical-head

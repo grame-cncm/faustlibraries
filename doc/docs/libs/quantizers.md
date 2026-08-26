@@ -20,6 +20,8 @@ The Quantizers library is organized into 1 section:
 
 ### `(qu.)quantize`
 
+![quantize — response plots](../img/qu_quantize.svg)
+
 Configurable frequency quantization tool. Snaps input frequencies to exact scale notes.
 Works for positive audio frequencies.
 
@@ -48,6 +50,8 @@ process = quantize(440, (1, 1.125, 1.25, 1.333, 1.5));
 ----
 
 ### `(qu.)quantizeSmoothed`
+
+![quantizeSmoothed — response plots](../img/qu_quantizeSmoothed.svg)
 
 Configurable frequency quantization tool. Smoothly transitions between scale notes.
 Works for positive audio frequencies.

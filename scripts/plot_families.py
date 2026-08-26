@@ -48,6 +48,9 @@ ts = library("tonestacks.lib");
 tu = library("tubes.lib");
 ve = library("vaeffects.lib");
 wa = library("webaudio.lib");
+qu = library("quantizers.lib");
+re = library("reverbs.lib");
+sp = library("spats.lib");
 """
 
 # ve.* filters map normFreq logarithmically: cf = 2*10^(3*nf+1), so 1 kHz is
@@ -433,6 +436,124 @@ def tube_fig(out: Path, stem: str, title: str, expr: str,
     ax_f.set_xlabel("Hz")
     ax_f.set_ylabel("dB")
     ax_f.grid(alpha=0.25)
+    save(fig, out)
+
+
+def edc_fig(out: Path, stem: str, title: str, expr: str, seconds: float,
+            mono_in: bool = False, rt_request: float | None = None) -> None:
+    """Schroeder energy decay curve of a reverb's impulse response.
+
+    The RT60 is fitted on the -5..-25 dB stretch of the EDC; when the
+    reverb was asked for a specific decay time, the fit must land within
+    a factor of two of it, and every EDC must reach -30 dB by the end.
+    """
+    n = int(seconds * SR)
+    pipe = "imp :" if mono_in else "imp <:"
+    src = LIBS + f"imp = 1-1';\nprocess = {pipe} {expr};\n"
+    data = run_probe(src, n)
+    if data is None:
+        failures.append(f"{stem}: probe did not compile")
+        print(f"  PROBE FAILED: {stem}")
+        return
+    t = np.arange(n) / SR
+    fig, ax = new_axes(title)
+    rt_txt = ""
+    for ch in range(data.shape[1]):
+        x = data[:n, ch]
+        edc = np.cumsum(x[::-1] ** 2)[::-1]
+        db = 10 * np.log10(edc / max(edc[0], 1e-30) + 1e-14)
+        dec = max(1, n // 4000)
+        ax.plot(t[::dec], db[::dec], lw=1.2,
+                label=f"ch {ch}", color=COLORS[ch % len(COLORS)])
+        check(db[-2] <= -30.0,
+              f"{stem}: ch {ch} EDC only reaches {db[-2]:.1f} dB "
+              f"in {seconds} s, expected <= -30")
+        sel = (db <= -5.0) & (db >= -25.0)
+        if ch == 0 and sel.sum() > 10:
+            slope = np.polyfit(t[sel], db[sel], 1)[0]
+            rt = -60.0 / slope
+            rt_txt = f", fitted RT60 = {rt:.2f} s"
+            if rt_request is not None:
+                check(rt_request / 2 <= rt <= rt_request * 2,
+                      f"{stem}: fitted RT60 {rt:.2f} s vs requested "
+                      f"{rt_request} s (factor > 2)")
+    ax.set_title(title + rt_txt, fontsize=10)
+    ax.set_xlabel("s")
+    ax.set_ylabel("EDC dB")
+    ax.set_ylim(-80, 3)
+    ax.legend(fontsize=8, loc="upper right")
+    save(fig, out)
+
+
+def binaural_fig(out: Path, stem: str, title: str) -> None:
+    """ITD and broadband ILD of sp.binauralModel across azimuth."""
+    azs = list(range(-90, 91, 15))
+    n = 65536
+    body = ",\n ".join(f"(nz : sp.binauralModel({az}.0))" for az in azs)
+    src = LIBS + f"nz = no.noise;\nprocess = {body};\n"
+    data = run_probe(src, n)
+    if data is None:
+        failures.append(f"{stem}: probe did not compile")
+        print(f"  PROBE FAILED: {stem}")
+        return
+    itd_ms, ild_db = [], []
+    for i in range(len(azs)):
+        L, R = data[:n, 2 * i], data[:n, 2 * i + 1]
+        corr = np.correlate(L[512:-512], R[:n], mode="valid")
+        lag = np.argmax(np.abs(corr)) - 512  # >0: right leads (left delayed)
+        itd_ms.append(1000.0 * lag / SR)
+        ild_db.append(20 * np.log10(np.sqrt(np.mean(R ** 2))
+                                    / np.sqrt(np.mean(L ** 2))))
+    itd_ms, ild_db = np.array(itd_ms), np.array(ild_db)
+    z = azs.index(0)
+    check(abs(itd_ms[z]) <= 0.05, f"{stem}: ITD at 0 deg is {itd_ms[z]:.2f} ms")
+    check(0.4 <= abs(itd_ms[-1]) <= 0.9,
+          f"{stem}: |ITD| at +90 deg is {abs(itd_ms[-1]):.2f} ms, "
+          "expected in 0.4..0.9 (Woodworth, 8.75 cm head)")
+    check(ild_db[-1] >= 2.0,
+          f"{stem}: ILD at +90 deg is {ild_db[-1]:+.1f} dB, expected >= +2")
+    check(ild_db[0] <= -2.0,
+          f"{stem}: ILD at -90 deg is {ild_db[0]:+.1f} dB, expected <= -2")
+
+    fig, (ax_t, ax_l) = plt.subplots(1, 2, figsize=(9.0, 3.2))
+    ax_t.plot(azs, itd_ms, "o-", lw=1.3, ms=3, color=COLORS[0])
+    ax_t.set_title(f"{title} — ITD", fontsize=10)
+    ax_t.set_xlabel("azimuth (deg)")
+    ax_t.set_ylabel("ms (positive: left ear delayed)")
+    ax_t.grid(alpha=0.25)
+    ax_l.plot(azs, ild_db, "o-", lw=1.3, ms=3, color=COLORS[1])
+    ax_l.set_title("broadband ILD (right - left)", fontsize=10)
+    ax_l.set_xlabel("azimuth (deg)")
+    ax_l.set_ylabel("dB")
+    ax_l.grid(alpha=0.25)
+    save(fig, out)
+
+
+def quantize_fig(out: Path, stem: str, title: str, expr: str,
+                 staircase: bool) -> None:
+    """Continuous sweep in, quantized frequency out, against the identity."""
+    n = 48000
+    src = LIBS + (f"x = 220.0 * pow(2.0, float(ba.time)/{n}.0*2.0);\n"
+                  f"process = x, ({expr});\n")
+    data = run_probe(src, n)
+    if data is None:
+        failures.append(f"{stem}: probe did not compile")
+        print(f"  PROBE FAILED: {stem}")
+        return
+    x, y = data[:n, 0], data[:n, 1]
+    if staircase:
+        vals = np.unique(np.round(y, 3))
+        check(8 <= len(vals) <= 24,
+              f"{stem}: {len(vals)} distinct output values over 2 octaves,"
+              " expected 8..24 (a 7-degree scale)")
+        check(float(np.min(np.diff(y))) >= -1e-6,
+              f"{stem}: quantized output is not monotone over a rising sweep")
+    fig, ax = new_axes(title)
+    ax.plot(x, x, lw=0.8, ls=":", color="#999", label="identity")
+    ax.plot(x[::20], y[::20], lw=1.4, color=COLORS[0], label="output")
+    ax.set_xlabel("input Hz")
+    ax.set_ylabel("output Hz")
+    ax.legend(fontsize=8, loc="upper left")
     save(fig, out)
 
 
@@ -897,6 +1018,45 @@ def build_all(out_dir: Path, wanted: set[str]) -> None:
                        ("N=4", "de.fdelaylti(4, 128, 64.5)")],
                       checks=[(2, 10000.0, 0.0, 1.0)],
                       ylim=(-24, 6))
+
+    # ================= phase C =================
+
+    # ---- reverbs.lib: energy decay curves -------------------------------
+    if go("re_mono_freeverb"):
+        edc_fig(out_dir / "re_mono_freeverb.svg", "re_mono_freeverb",
+                "re.mono_freeverb(0.85, 0.5, 0.2, 23)",
+                "re.mono_freeverb(0.85, 0.5, 0.2, 23)", 3.0, mono_in=True)
+    if go("re_stereo_freeverb"):
+        edc_fig(out_dir / "re_stereo_freeverb.svg", "re_stereo_freeverb",
+                "re.stereo_freeverb(0.85, 0.5, 0.2, 23)",
+                "re.stereo_freeverb(0.85, 0.5, 0.2, 23)", 3.0)
+    if go("re_zita_rev1_stereo"):
+        edc_fig(out_dir / "re_zita_rev1_stereo.svg", "re_zita_rev1_stereo",
+                "re.zita_rev1_stereo, t60 = 2 s requested",
+                "re.zita_rev1_stereo(60.0, 200.0, 6000.0, 2.0, 2.0, 48000.0)",
+                4.0, rt_request=2.0)
+    if go("re_dattorro_rev"):
+        edc_fig(out_dir / "re_dattorro_rev.svg", "re_dattorro_rev",
+                "re.dattorro_rev, decay 0.5",
+                "re.dattorro_rev(0.0, 0.9995, 0.75, 0.625, 0.5,"
+                " 0.7, 0.5, 0.0005)", 3.0)
+
+    # ---- spats.lib: binaural model cues ---------------------------------
+    if go("sp_binauralModel"):
+        binaural_fig(out_dir / "sp_binauralModel.svg", "sp_binauralModel",
+                     "sp.binauralModel(az)")
+
+    # ---- quantizers.lib: mapping staircases -----------------------------
+    if go("qu_quantize"):
+        quantize_fig(out_dir / "qu_quantize.svg", "qu_quantize",
+                     "qu.quantize(220, qu.ionian) — 2-octave sweep",
+                     "qu.quantize(220.0, qu.ionian, x)", staircase=True)
+    if go("qu_quantizeSmoothed"):
+        quantize_fig(out_dir / "qu_quantizeSmoothed.svg",
+                     "qu_quantizeSmoothed",
+                     "qu.quantizeSmoothed(220, qu.ionian) — 2-octave sweep",
+                     "qu.quantizeSmoothed(220.0, qu.ionian, x)",
+                     staircase=False)
 
 
 def main() -> int:

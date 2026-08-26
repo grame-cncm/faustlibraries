@@ -164,6 +164,8 @@ zita_rev_fdn_test = par(i, 8, os.osc(110 * (i + 1)))
 
 ### `(re.)zita_rev1_stereo`
 
+![zita_rev1_stereo — response plots](../img/re_zita_rev1_stereo.svg)
+
 Extend `zita_rev_fdn` to include `zita_rev1` input/output mapping in stereo mode.
 `zita_rev1_stereo` is a standard Faust function.
 
@@ -265,6 +267,8 @@ vital_rev_test = (os.osc(330), os.osc(440))
 
 ### `(re.)mono_freeverb`
 
+![mono_freeverb — response plots](../img/re_mono_freeverb.svg)
+
 A simple Schroeder reverberator primarily developed by "Jezar at Dreampoint" that
 is extensively used in the free-software world. It uses four Schroeder allpasses in
 series and eight parallel Schroeder-Moorer filtered-feedback comb-filters for each
@@ -302,6 +306,8 @@ which is less restrictive.
 
 ### `(re.)stereo_freeverb`
 
+![stereo_freeverb — response plots](../img/re_stereo_freeverb.svg)
+
 A simple Schroeder reverberator primarily developed by "Jezar at Dreampoint" that
 is extensively used in the free-software world. It uses four Schroeder allpasses in
 series and eight parallel Schroeder-Moorer filtered-feedback comb-filters for each
@@ -334,6 +340,8 @@ stereo_freeverb_test = (os.osc(330), os.osc(550))
 ----
 
 ### `(re.)dattorro_rev`
+
+![dattorro_rev — response plots](../img/re_dattorro_rev.svg)
 
 Reverberator based on the Dattorro reverb topology. This implementation does
 not use modulated delay lengths (excursion).
