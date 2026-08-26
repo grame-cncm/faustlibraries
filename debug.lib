@@ -55,9 +55,20 @@ si = library("signals.lib");
 db = library("debug.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Debug Library";
-declare version "0.3.1";
+declare version "0.4.0";
 
-// Global parameter to enable/disable debug probes.
+//------------------`(db.)DEBUG`----------------------------------------
+// Global switch enabling or disabling every probe in this library: 1 makes
+// the probes active, 0 turns each of them into the identity so a fully
+// probed patch compiles down to the unprobed one. Override it per use site
+// with an explicit substitution: `db[DEBUG = 0;].probe_rms_db(...)`.
+//
+// #### Usage
+//
+// ```
+// DEBUG : _
+// ```
+//-----------------------------------------------------------------------------
 DEBUG = 1; // 0: bypass probes (identity), 1: enable probes
 
 //==============================Level Probes===============================================
@@ -87,10 +98,10 @@ DEBUG = 1; // 0: bypass probes (identity), 1: enable probes
 // probe_rms_lin_test = db.probe_rms_lin(1, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_rms_lin_impl(0, id, hide, x) = x;
-probe_rms_lin_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
+_probe_rms_lin_impl(0, id, hide, x) = x;
+_probe_rms_lin_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
   : hbargraph("Probe RMS%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_rms_lin(id, hide, x) = probe_rms_lin_impl(DEBUG, id, hide, x);
+probe_rms_lin(id, hide, x) = _probe_rms_lin_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_rms_db`----------------------------------------
 // RMS level probe (dB). Bargraph includes `[unit:dB]`.
@@ -114,11 +125,11 @@ probe_rms_lin(id, hide, x) = probe_rms_lin_impl(DEBUG, id, hide, x);
 // probe_rms_db_test = db.probe_rms_db(0, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_rms_db_impl(0, id, hide, x) = x;
-probe_rms_db_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
+_probe_rms_db_impl(0, id, hide, x) = x;
+_probe_rms_db_impl(1, id, hide, x) = attach(x, an.rms_envelope_rect(0.1, x)
   : max(0.00001) : ba.linear2db
   : hbargraph("Probe RMS dB%2id [probe:%id][unit:dB][hidden:%hide]", -60, 0));
-probe_rms_db(id, hide, x) = probe_rms_db_impl(DEBUG, id, hide, x);
+probe_rms_db(id, hide, x) = _probe_rms_db_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_peak_lin`--------------------------------------
 // Peak level probe (linear).
@@ -142,10 +153,10 @@ probe_rms_db(id, hide, x) = probe_rms_db_impl(DEBUG, id, hide, x);
 // probe_peak_lin_test = db.probe_peak_lin(3, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_peak_lin_impl(0, id, hide, x) = x;
-probe_peak_lin_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
+_probe_peak_lin_impl(0, id, hide, x) = x;
+_probe_peak_lin_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
   : hbargraph("Probe Peak%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_peak_lin(id, hide, x) = probe_peak_lin_impl(DEBUG, id, hide, x);
+probe_peak_lin(id, hide, x) = _probe_peak_lin_impl(DEBUG, id, hide, x);
 
 
 //------------------`(db.)probe_peak_db`---------------------------------------
@@ -170,11 +181,11 @@ probe_peak_lin(id, hide, x) = probe_peak_lin_impl(DEBUG, id, hide, x);
 // probe_peak_db_test = db.probe_peak_db(2, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_peak_db_impl(0, id, hide, x) = x;
-probe_peak_db_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
+_probe_peak_db_impl(0, id, hide, x) = x;
+_probe_peak_db_impl(1, id, hide, x) = attach(x, an.peak_envelope(0.1, x)
   : max(0.00001) : ba.linear2db
   : hbargraph("Probe Peak dB%2id [probe:%id][unit:dB][hidden:%hide]", -60, 0));
-probe_peak_db(id, hide, x) = probe_peak_db_impl(DEBUG, id, hide, x);
+probe_peak_db(id, hide, x) = _probe_peak_db_impl(DEBUG, id, hide, x);
 
 //=============================Dynamics Probes============================================
 // Dynamics-related meters for crest factor and envelope tracking.
@@ -203,12 +214,12 @@ probe_peak_db(id, hide, x) = probe_peak_db_impl(DEBUG, id, hide, x);
 // probe_crest_db_test = db.probe_crest_db(4, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_crest_db_impl(0, id, hide, x) = x;
-probe_crest_db_impl(1, id, hide, x) = attach(x,
+_probe_crest_db_impl(0, id, hide, x) = x;
+_probe_crest_db_impl(1, id, hide, x) = attach(x,
   (an.peak_envelope(0.1, x) / max(0.00001, an.rms_envelope_rect(0.1, x)))
   : ba.linear2db
   : hbargraph("Probe Crest%2id [probe:%id][unit:dB][hidden:%hide]", 0, 20));
-probe_crest_db(id, hide, x) = probe_crest_db_impl(DEBUG, id, hide, x);
+probe_crest_db(id, hide, x) = _probe_crest_db_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_env`-------------------------------------------
 // Envelope follower probe (attack/release).
@@ -232,11 +243,11 @@ probe_crest_db(id, hide, x) = probe_crest_db_impl(DEBUG, id, hide, x);
 // probe_env_test = db.probe_env(5, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_env_impl(0, id, hide, x) = x;
-probe_env_impl(1, id, hide, x) = attach(x,
+_probe_env_impl(0, id, hide, x) = x;
+_probe_env_impl(1, id, hide, x) = attach(x,
   an.amp_follower_ar(0.05, 0.2, x)
   : hbargraph("Probe Env%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_env(id, hide, x) = probe_env_impl(DEBUG, id, hide, x);
+probe_env(id, hide, x) = _probe_env_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_min`-------------------------------------------
 // Minimum-hold probe (inverted peak envelope).
@@ -260,11 +271,11 @@ probe_env(id, hide, x) = probe_env_impl(DEBUG, id, hide, x);
 // probe_min_test = db.probe_min(6, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_min_impl(0, id, hide, x) = x;
-probe_min_impl(1, id, hide, x) = attach(x,
+_probe_min_impl(0, id, hide, x) = x;
+_probe_min_impl(1, id, hide, x) = attach(x,
   (x * -1) : an.peak_envelope(0.5) : (_ * -1)
   : hbargraph("Probe Min%2id [probe:%id][hidden:%hide]", -2, 2));
-probe_min(id, hide, x) = probe_min_impl(DEBUG, id, hide, x);
+probe_min(id, hide, x) = _probe_min_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_max`-------------------------------------------
 // Maximum-hold probe (slow peak envelope).
@@ -288,11 +299,11 @@ probe_min(id, hide, x) = probe_min_impl(DEBUG, id, hide, x);
 // probe_max_test = db.probe_max(7, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_max_impl(0, id, hide, x) = x;
-probe_max_impl(1, id, hide, x) = attach(x,
+_probe_max_impl(0, id, hide, x) = x;
+_probe_max_impl(1, id, hide, x) = attach(x,
   an.peak_envelope(0.5, x)
   : hbargraph("Probe Max%2id [probe:%id][hidden:%hide]", -2, 2));
-probe_max(id, hide, x) = probe_max_impl(DEBUG, id, hide, x);
+probe_max(id, hide, x) = _probe_max_impl(DEBUG, id, hide, x);
 
 //===========================Signal Quality Probes========================================
 // Signal integrity checks such as DC offset, slew rate, and ZCR.
@@ -321,11 +332,11 @@ probe_max(id, hide, x) = probe_max_impl(DEBUG, id, hide, x);
 // probe_dc_test = db.probe_dc(8, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_dc_impl(0, id, hide, x) = x;
-probe_dc_impl(1, id, hide, x) = attach(x,
+_probe_dc_impl(0, id, hide, x) = x;
+_probe_dc_impl(1, id, hide, x) = attach(x,
   fi.lowpass(1, 5, x)
   : hbargraph("Probe DC%2id [probe:%id][hidden:%hide]", -1, 1));
-probe_dc(id, hide, x) = probe_dc_impl(DEBUG, id, hide, x);
+probe_dc(id, hide, x) = _probe_dc_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_slew`------------------------------------------
 // Slew rate probe (RMS of signal derivative).
@@ -349,11 +360,11 @@ probe_dc(id, hide, x) = probe_dc_impl(DEBUG, id, hide, x);
 // probe_slew_test = db.probe_slew(9, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_slew_impl(0, id, hide, x) = x;
-probe_slew_impl(1, id, hide, x) = attach(x,
+_probe_slew_impl(0, id, hide, x) = x;
+_probe_slew_impl(1, id, hide, x) = attach(x,
   (x - x') : abs : an.rms_envelope_rect(0.05)
   : hbargraph("Probe Slew%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_slew(id, hide, x) = probe_slew_impl(DEBUG, id, hide, x);
+probe_slew(id, hide, x) = _probe_slew_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_zcr`-------------------------------------------
 // Zero-crossing rate probe (lowpassed).
@@ -377,11 +388,11 @@ probe_slew(id, hide, x) = probe_slew_impl(DEBUG, id, hide, x);
 // probe_zcr_test = db.probe_zcr(10, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_zcr_impl(0, id, hide, x) = x;
-probe_zcr_impl(1, id, hide, x) = attach(x,
+_probe_zcr_impl(0, id, hide, x) = x;
+_probe_zcr_impl(1, id, hide, x) = attach(x,
   an.zcr(0.1, x)
   : hbargraph("Probe ZCR%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_zcr(id, hide, x) = probe_zcr_impl(DEBUG, id, hide, x);
+probe_zcr(id, hide, x) = _probe_zcr_impl(DEBUG, id, hide, x);
 
 //===========================Control Signal Probes========================================
 // Probes for control-rate or boolean signals.
@@ -410,10 +421,10 @@ probe_zcr(id, hide, x) = probe_zcr_impl(DEBUG, id, hide, x);
 // probe_value_test = db.probe_value(11, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_value_impl(0, id, hide, x) = x;
-probe_value_impl(1, id, hide, x) = attach(x,
+_probe_value_impl(0, id, hide, x) = x;
+_probe_value_impl(1, id, hide, x) = attach(x,
   x : hbargraph("Probe Val%2id [probe:%id][hidden:%hide]", -1, 1));
-probe_value(id, hide, x) = probe_value_impl(DEBUG, id, hide, x);
+probe_value(id, hide, x) = _probe_value_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_bool`------------------------------------------
 // Boolean probe (gate/trigger state).
@@ -437,10 +448,10 @@ probe_value(id, hide, x) = probe_value_impl(DEBUG, id, hide, x);
 // probe_bool_test = db.probe_bool(12, 1, mono > 0);
 // ```
 //-----------------------------------------------------------------------------
-probe_bool_impl(0, id, hide, x) = x;
-probe_bool_impl(1, id, hide, x) = attach(x,
+_probe_bool_impl(0, id, hide, x) = x;
+_probe_bool_impl(1, id, hide, x) = attach(x,
   x : hbargraph("Probe Bool%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_bool(id, hide, x) = probe_bool_impl(DEBUG, id, hide, x);
+probe_bool(id, hide, x) = _probe_bool_impl(DEBUG, id, hide, x);
 
 //==============================Spectral Probes===========================================
 // Frequency-band and spectral analysis probes.
@@ -469,11 +480,11 @@ probe_bool(id, hide, x) = probe_bool_impl(DEBUG, id, hide, x);
 // probe_band_lo_test = db.probe_band_lo(13, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_band_lo_impl(0, id, hide, x) = x;
-probe_band_lo_impl(1, id, hide, x) = attach(x,
+_probe_band_lo_impl(0, id, hide, x) = x;
+_probe_band_lo_impl(1, id, hide, x) = attach(x,
   fi.lowpass(2, 300, x) : an.rms_envelope_rect(0.1)
   : hbargraph("Probe Lo%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_band_lo(id, hide, x) = probe_band_lo_impl(DEBUG, id, hide, x);
+probe_band_lo(id, hide, x) = _probe_band_lo_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_band_mid`--------------------------------------
 // Mid-band energy probe (300 Hz - 3 kHz).
@@ -497,11 +508,11 @@ probe_band_lo(id, hide, x) = probe_band_lo_impl(DEBUG, id, hide, x);
 // probe_band_mid_test = db.probe_band_mid(14, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_band_mid_impl(0, id, hide, x) = x;
-probe_band_mid_impl(1, id, hide, x) = attach(x,
+_probe_band_mid_impl(0, id, hide, x) = x;
+_probe_band_mid_impl(1, id, hide, x) = attach(x,
   fi.bandpass(2, 300, 3000, x) : an.rms_envelope_rect(0.1)
   : hbargraph("Probe Mid%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_band_mid(id, hide, x) = probe_band_mid_impl(DEBUG, id, hide, x);
+probe_band_mid(id, hide, x) = _probe_band_mid_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_band_hi`---------------------------------------
 // High-band energy probe (>3 kHz).
@@ -525,11 +536,11 @@ probe_band_mid(id, hide, x) = probe_band_mid_impl(DEBUG, id, hide, x);
 // probe_band_hi_test = db.probe_band_hi(15, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_band_hi_impl(0, id, hide, x) = x;
-probe_band_hi_impl(1, id, hide, x) = attach(x,
+_probe_band_hi_impl(0, id, hide, x) = x;
+_probe_band_hi_impl(1, id, hide, x) = attach(x,
   fi.highpass(2, 3000, x) : an.rms_envelope_rect(0.1)
   : hbargraph("Probe Hi%2id [probe:%id][hidden:%hide]", 0, 1));
-probe_band_hi(id, hide, x) = probe_band_hi_impl(DEBUG, id, hide, x);
+probe_band_hi(id, hide, x) = _probe_band_hi_impl(DEBUG, id, hide, x);
 
 
 //------------------`(db.)probe_spectral_centroid`------------------------------
@@ -555,8 +566,8 @@ probe_band_hi(id, hide, x) = probe_band_hi_impl(DEBUG, id, hide, x);
 // probe_spectral_centroid_test = db.probe_spectral_centroid(43, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_spectral_centroid_impl(0, id, hide, x) = x;
-probe_spectral_centroid_impl(1, id, hide, x) = attach(x, centroid)
+_probe_spectral_centroid_impl(0, id, hide, x) = x;
+_probe_spectral_centroid_impl(1, id, hide, x) = attach(x, centroid)
 with {
   // 8-band analysis
   bands = (
@@ -586,7 +597,7 @@ with {
     : hbargraph("Centroid%2id [probe:%id][unit:Hz][hidden:%hide]", 0, 10000);
 };
 declare probe_spectral_centroid author "David Löwenfels";
-probe_spectral_centroid(id, hide, x) = probe_spectral_centroid_impl(DEBUG, id, hide, x);
+probe_spectral_centroid(id, hide, x) = _probe_spectral_centroid_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_multiband`--------------------------------------
 // Multi-band analyzer - outputs energy in N frequency bands.
@@ -613,8 +624,8 @@ probe_spectral_centroid(id, hide, x) = probe_spectral_centroid_impl(DEBUG, id, h
 // probe_multiband_test = db.probe_multiband(44, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_multiband_impl(0, id, hide, x) = x;
-probe_multiband_impl(1, id, hide, x) = attach(x, probes :> _)
+_probe_multiband_impl(0, id, hide, x) = x;
+_probe_multiband_impl(1, id, hide, x) = attach(x, probes :> _)
 with {
   // 8-band analysis
   bands = (
@@ -647,7 +658,7 @@ with {
   );
 };
 declare probe_multiband author "David Löwenfels";
-probe_multiband(id, hide, x) = probe_multiband_impl(DEBUG, id, hide, x);
+probe_multiband(id, hide, x) = _probe_multiband_impl(DEBUG, id, hide, x);
 
 //==============================Analysis Probes===========================================
 // Targeted analysis probes for offline or diagnostic workflows.
@@ -679,12 +690,12 @@ probe_multiband(id, hide, x) = probe_multiband_impl(DEBUG, id, hide, x);
 // probe_freq_lin_test = db.probe_freq_lin(34, 1, 440, 10, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_freq_lin_impl(0, id, hide, freq, q, x) = x;
-probe_freq_lin_impl(1, id, hide, freq, q, x) = attach(x,
+_probe_freq_lin_impl(0, id, hide, freq, q, x) = x;
+_probe_freq_lin_impl(1, id, hide, freq, q, x) = attach(x,
   fi.resonbp(freq, q, 1, x) : abs : an.rms_envelope_rect(0.05)
   : hbargraph("Freq %freq Hz%2id [probe:%id][freq:%freq][q:%q][hidden:%hide]", 0, 1));
 declare probe_freq_lin author "David Löwenfels";
-probe_freq_lin(id, hide, freq, q, x) = probe_freq_lin_impl(DEBUG, id, hide, freq, q, x);
+probe_freq_lin(id, hide, freq, q, x) = _probe_freq_lin_impl(DEBUG, id, hide, freq, q, x);
 
 //------------------`(db.)probe_freq_db`----------------------------------------
 // Parametric bandpass energy probe in dB at a specific frequency.
@@ -710,13 +721,13 @@ probe_freq_lin(id, hide, freq, q, x) = probe_freq_lin_impl(DEBUG, id, hide, freq
 // probe_freq_db_test = db.probe_freq_db(35, 1, 440, 10, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_freq_db_impl(0, id, hide, freq, q, x) = x;
-probe_freq_db_impl(1, id, hide, freq, q, x) = attach(x,
+_probe_freq_db_impl(0, id, hide, freq, q, x) = x;
+_probe_freq_db_impl(1, id, hide, freq, q, x) = attach(x,
   fi.resonbp(freq, q, 1, x) : abs : an.rms_envelope_rect(0.05)
   : max(1e-6) : ba.linear2db
   : hbargraph("Freq %freq Hz%2id [probe:%id][unit:dB][freq:%freq][q:%q][hidden:%hide]", -80, 0));
 declare probe_freq_db author "David Löwenfels";
-probe_freq_db(id, hide, freq, q, x) = probe_freq_db_impl(DEBUG, id, hide, freq, q, x);
+probe_freq_db(id, hide, freq, q, x) = _probe_freq_db_impl(DEBUG, id, hide, freq, q, x);
 
 //------------------`(db.)probe_freq_ratio`-------------------------------------
 // Ratio between two frequency bands (useful for verifying oscillator balance).
@@ -743,8 +754,8 @@ probe_freq_db(id, hide, freq, q, x) = probe_freq_db_impl(DEBUG, id, hide, freq, 
 // probe_freq_ratio_test = db.probe_freq_ratio(36, 1, 440, 660, 12, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_freq_ratio_impl(0, id, hide, f1, f2, q, x) = x;
-probe_freq_ratio_impl(1, id, hide, f1, f2, q, x) = attach(x,
+_probe_freq_ratio_impl(0, id, hide, f1, f2, q, x) = x;
+_probe_freq_ratio_impl(1, id, hide, f1, f2, q, x) = attach(x,
   (band1 / max(1e-6, band2))
   : hbargraph("Ratio %f1/%f2%2id [probe:%id][hidden:%hide]", 0, 10))
 with {
@@ -752,7 +763,7 @@ with {
   band2 = fi.resonbp(f2, q, 1, x) : abs : an.rms_envelope_rect(0.05);
 };
 declare probe_freq_ratio author "David Löwenfels";
-probe_freq_ratio(id, hide, f1, f2, q, x) = probe_freq_ratio_impl(DEBUG, id, hide, f1, f2, q, x);
+probe_freq_ratio(id, hide, f1, f2, q, x) = _probe_freq_ratio_impl(DEBUG, id, hide, f1, f2, q, x);
 
 //==============================Decay Probes=============================================
 // Decay and release measurement helpers.
@@ -783,12 +794,12 @@ probe_freq_ratio(id, hide, f1, f2, q, x) = probe_freq_ratio_impl(DEBUG, id, hide
 // probe_env_lin_test = db.probe_env_lin(37, 1, 0.001, 0.1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_env_lin_impl(0, id, hide, att, rel, x) = x;
-probe_env_lin_impl(1, id, hide, att, rel, x) = attach(x,
+_probe_env_lin_impl(0, id, hide, att, rel, x) = x;
+_probe_env_lin_impl(1, id, hide, att, rel, x) = attach(x,
   an.amp_follower_ar(att, rel, x)
   : hbargraph("Env%2id [probe:%id][attack:%att][release:%rel][hidden:%hide]", 0, 1));
 declare probe_env_lin author "David Löwenfels";
-probe_env_lin(id, hide, att, rel, x) = probe_env_lin_impl(DEBUG, id, hide, att, rel, x);
+probe_env_lin(id, hide, att, rel, x) = _probe_env_lin_impl(DEBUG, id, hide, att, rel, x);
 
 //------------------`(db.)probe_env_db`-----------------------------------------
 // Envelope state probe in dB - for decay time analysis.
@@ -814,13 +825,13 @@ probe_env_lin(id, hide, att, rel, x) = probe_env_lin_impl(DEBUG, id, hide, att, 
 // probe_env_db_test = db.probe_env_db(38, 1, 0.001, 0.1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_env_db_impl(0, id, hide, att, rel, x) = x;
-probe_env_db_impl(1, id, hide, att, rel, x) = attach(x,
+_probe_env_db_impl(0, id, hide, att, rel, x) = x;
+_probe_env_db_impl(1, id, hide, att, rel, x) = attach(x,
   an.amp_follower_ar(att, rel, x)
   : max(1e-6) : ba.linear2db
   : hbargraph("Env dB%2id[probe:%id][unit:dB][attack:%att][release:%rel][hidden:%hide]", -80, 0));
 declare probe_env_db author "David Löwenfels";
-probe_env_db(id, hide, att, rel, x) = probe_env_db_impl(DEBUG, id, hide, att, rel, x);
+probe_env_db(id, hide, att, rel, x) = _probe_env_db_impl(DEBUG, id, hide, att, rel, x);
 
 //------------------`(db.)probe_peak_hold`--------------------------------------
 // Peak hold probe - captures and holds peak value until reset.
@@ -846,8 +857,8 @@ probe_env_db(id, hide, att, rel, x) = probe_env_db_impl(DEBUG, id, hide, att, re
 // probe_peak_hold_test = db.probe_peak_hold(39, 1, 2.0, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_peak_hold_impl(0, id, hide, decay_s, x) = x;
-probe_peak_hold_impl(1, id, hide, decay_s, x) = attach(x, held)
+_probe_peak_hold_impl(0, id, hide, decay_s, x) = x;
+_probe_peak_hold_impl(1, id, hide, decay_s, x) = attach(x, held)
 with {
   env = abs(x);
   decay_coef = ba.tau2pole(decay_s);
@@ -855,7 +866,7 @@ with {
     : hbargraph("Peak Hold%2id [probe:%id][hidden:%hide]", 0, 1);
 };
 declare probe_peak_hold author "David Löwenfels";
-probe_peak_hold(id, hide, decay_s, x) = probe_peak_hold_impl(DEBUG, id, hide, decay_s, x);
+probe_peak_hold(id, hide, decay_s, x) = _probe_peak_hold_impl(DEBUG, id, hide, decay_s, x);
 
 //------------------`(db.)probe_below_threshold`--------------------------------
 // Threshold crossing probe - outputs 1 when signal drops below threshold.
@@ -881,15 +892,15 @@ probe_peak_hold(id, hide, decay_s, x) = probe_peak_hold_impl(DEBUG, id, hide, de
 // probe_below_threshold_test = db.probe_below_threshold(40, 1, -40, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_below_threshold_impl(0, id, hide, thresh_db, x) = x;
-probe_below_threshold_impl(1, id, hide, thresh_db, x) = attach(x,
+_probe_below_threshold_impl(0, id, hide, thresh_db, x) = x;
+_probe_below_threshold_impl(1, id, hide, thresh_db, x) = attach(x,
   (env_db < thresh_db)
   : hbargraph("Below %thresh_db dB%2id[probe:%id][thresh:%thresh_db][hidden:%hide]", 0, 1))
 with {
   env_db = an.amp_follower_ar(0.001, 0.05, x) : max(1e-6) : ba.linear2db;
 };
 declare probe_below_threshold author "David Löwenfels";
-probe_below_threshold(id, hide, thresh_db, x) = probe_below_threshold_impl(DEBUG, id, hide, thresh_db, x);
+probe_below_threshold(id, hide, thresh_db, x) = _probe_below_threshold_impl(DEBUG, id, hide, thresh_db, x);
 
 //==============================Attack Probes============================================
 // Attack/onset detection helpers.
@@ -920,8 +931,8 @@ probe_below_threshold(id, hide, thresh_db, x) = probe_below_threshold_impl(DEBUG
 // probe_attack_state_test = db.probe_attack_state(41, 1, -60, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_attack_state_impl(0, id, hide, floor_db, x) = x;
-probe_attack_state_impl(1, id, hide, floor_db, x) = attach(x,
+_probe_attack_state_impl(0, id, hide, floor_db, x) = x;
+_probe_attack_state_impl(1, id, hide, floor_db, x) = attach(x,
   (rising & above_floor)
   : hbargraph("Attacking%2id [probe:%id][hidden:%hide]", 0, 1))
 with {
@@ -931,7 +942,7 @@ with {
   above_floor = env_db > floor_db;
 };
 declare probe_attack_state author "David Löwenfels";
-probe_attack_state(id, hide, floor_db, x) = probe_attack_state_impl(DEBUG, id, hide, floor_db, x);
+probe_attack_state(id, hide, floor_db, x) = _probe_attack_state_impl(DEBUG, id, hide, floor_db, x);
 
 //------------------`(db.)probe_onset`------------------------------------------
 // Onset detector - pulses 1 at signal onset (transition from silence to sound).
@@ -957,8 +968,8 @@ probe_attack_state(id, hide, floor_db, x) = probe_attack_state_impl(DEBUG, id, h
 // probe_onset_test = db.probe_onset(42, 1, -40, 50, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_onset_impl(0, id, hide, thresh_db, holdoff_ms, x) = x;
-probe_onset_impl(1, id, hide, thresh_db, holdoff_ms, x) = attach(x, onset_pulse)
+_probe_onset_impl(0, id, hide, thresh_db, holdoff_ms, x) = x;
+_probe_onset_impl(1, id, hide, thresh_db, holdoff_ms, x) = attach(x, onset_pulse)
 with {
   env_db = an.amp_follower_ar(0.0005, 0.02, x) : max(1e-6) : ba.linear2db;
   above = env_db > thresh_db;
@@ -971,7 +982,7 @@ with {
     : hbargraph("Onset%2id[probe:%id][hidden:%hide]", 0, 1);
 };
 declare probe_onset author "David Löwenfels";
-probe_onset(id, hide, thresh_db, holdoff_ms, x) = probe_onset_impl(DEBUG, id, hide, thresh_db, holdoff_ms, x);
+probe_onset(id, hide, thresh_db, holdoff_ms, x) = _probe_onset_impl(DEBUG, id, hide, thresh_db, holdoff_ms, x);
 
 //==============================Analysis Signal Quality Probes=============================
 // Additional signal-quality probes for analysis tasks.
@@ -1000,12 +1011,12 @@ probe_onset(id, hide, thresh_db, holdoff_ms, x) = probe_onset_impl(DEBUG, id, hi
 // probe_dc_precise_test = db.probe_dc_precise(56, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_dc_precise_impl(0, id, hide, x) = x;
-probe_dc_precise_impl(1, id, hide, x) = attach(x,
+_probe_dc_precise_impl(0, id, hide, x) = x;
+_probe_dc_precise_impl(1, id, hide, x) = attach(x,
   fi.lowpass(2, 2, x)
   : hbargraph("DC Offset%2id [probe:%id][hidden:%hide]", -0.1, 0.1));
 declare probe_dc_precise author "David Löwenfels";
-probe_dc_precise(id, hide, x) = probe_dc_precise_impl(DEBUG, id, hide, x);
+probe_dc_precise(id, hide, x) = _probe_dc_precise_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_silence`----------------------------------------
 // Silence detector - outputs 1 when signal is effectively silent.
@@ -1030,15 +1041,15 @@ probe_dc_precise(id, hide, x) = probe_dc_precise_impl(DEBUG, id, hide, x);
 // probe_silence_test = db.probe_silence(57, 1, -60, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_silence_impl(0, id, hide, thresh_db, x) = x;
-probe_silence_impl(1, id, hide, thresh_db, x) = attach(x,
+_probe_silence_impl(0, id, hide, thresh_db, x) = x;
+_probe_silence_impl(1, id, hide, thresh_db, x) = attach(x,
   (env_db < thresh_db)
   : hbargraph("Silent%2id [probe:%id][thresh:%thresh_db][hidden:%hide]", 0, 1))
 with {
   env_db = an.rms_envelope_rect(0.05, x) : max(1e-6) : ba.linear2db;
 };
 declare probe_silence author "David Löwenfels";
-probe_silence(id, hide, thresh_db, x) = probe_silence_impl(DEBUG, id, hide, thresh_db, x);
+probe_silence(id, hide, thresh_db, x) = _probe_silence_impl(DEBUG, id, hide, thresh_db, x);
 
 //==============================Time Stamping=============================================
 // Timebase probes for aligning analysis data.
@@ -1068,12 +1079,12 @@ probe_silence(id, hide, thresh_db, x) = probe_silence_impl(DEBUG, id, hide, thre
 // probe_sample_count_test = db.probe_sample_count(58, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_sample_count_impl(0, id, hide, x) = x;
-probe_sample_count_impl(1, id, hide, x) = attach(x,
+_probe_sample_count_impl(0, id, hide, x) = x;
+_probe_sample_count_impl(1, id, hide, x) = attach(x,
   (+(1) : %(16777216)) ~ _  // 2^24 wrap
   : hbargraph("Sample%2id [probe:%id][hidden:%hide]", 0, 16777216));
 declare probe_sample_count author "David Löwenfels";
-probe_sample_count(id, hide, x) = probe_sample_count_impl(DEBUG, id, hide, x);
+probe_sample_count(id, hide, x) = _probe_sample_count_impl(DEBUG, id, hide, x);
 
 //------------------`(db.)probe_time_ms`----------------------------------------
 // Time probe in milliseconds (wraps at ~16 seconds at 44.1kHz).
@@ -1097,12 +1108,12 @@ probe_sample_count(id, hide, x) = probe_sample_count_impl(DEBUG, id, hide, x);
 // probe_time_ms_test = db.probe_time_ms(59, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_time_ms_impl(0, id, hide, x) = x;
-probe_time_ms_impl(1, id, hide, x) = attach(x,
+_probe_time_ms_impl(0, id, hide, x) = x;
+_probe_time_ms_impl(1, id, hide, x) = attach(x,
   ((+(1) : %(int(ma.SR * 16))) ~ _) / ma.SR * 1000
   : hbargraph("Time%2id [probe:%id][unit:ms][hidden:%hide]", 0, 16000));
 declare probe_time_ms author "David Löwenfels";
-probe_time_ms(id, hide, x) = probe_time_ms_impl(DEBUG, id, hide, x);
+probe_time_ms(id, hide, x) = _probe_time_ms_impl(DEBUG, id, hide, x);
 
 //==============================Tap Utilities===============================================
 // Utilities for tapping signals without changing arity.
@@ -1146,9 +1157,9 @@ probe_time_ms(id, hide, x) = probe_time_ms_impl(DEBUG, id, hide, x);
 // probe_tap_test = db.probe_tap(db.probe_rms_db(16, 1), mono);
 // ```
 //-----------------------------------------------------------------------------
-probe_tap_impl(0, f, x) = x;
-probe_tap_impl(1, f, x) = x <: attach(x, f);
-probe_tap(f, x) = probe_tap_impl(DEBUG, f, x);
+_probe_tap_impl(0, f, x) = x;
+_probe_tap_impl(1, f, x) = x <: attach(x, f);
+probe_tap(f, x) = _probe_tap_impl(DEBUG, f, x);
 
 //------------------`(db.)probe_tap_n`-------------------------------------------- -----------------
 // Tap an N-channel signal with a processor that takes N inputs and produces 1 output.
@@ -1200,13 +1211,85 @@ probe_tap(f, x) = probe_tap_impl(DEBUG, f, x);
 // probe_tap_n_test = probe_tap_n_example;
 // ```
 //-----------------------------------------------------------------------------
-probe_tap_n_impl(0, n, f) = si.bus(n);
-probe_tap_n_impl(1, 1, f) = probe_tap(f);
-probe_tap_n_reorder(n) = route(n+1, n+1,
+_probe_tap_n_impl(0, n, f) = si.bus(n);
+_probe_tap_n_impl(1, 1, f) = probe_tap(f);
+_probe_tap_n_reorder(n) = route(n+1, n+1,
   (1, 1),
   (n+1, 2),
   par(i, n-1, (i+1, i+2)));
-probe_tap_n_impl(1, n, f) = si.bus(n) <: (si.bus(n), f)
-  : probe_tap_n_reorder(n)
+_probe_tap_n_impl(1, n, f) = si.bus(n) <: (si.bus(n), f)
+  : _probe_tap_n_reorder(n)
   : (attach, si.bus(n-1));
-probe_tap_n(n, f) = probe_tap_n_impl(DEBUG, n, f);
+probe_tap_n(n, f) = _probe_tap_n_impl(DEBUG, n, f);
+
+// Deprecated aliases of the internal probe implementations, kept for one
+// version: the canonical names now carry the internal underscore prefix
+// (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare probe_attack_state_impl deprecated "internal implementation, renamed _probe_attack_state_impl";
+probe_attack_state_impl = _probe_attack_state_impl;
+declare probe_band_hi_impl deprecated "internal implementation, renamed _probe_band_hi_impl";
+probe_band_hi_impl = _probe_band_hi_impl;
+declare probe_band_lo_impl deprecated "internal implementation, renamed _probe_band_lo_impl";
+probe_band_lo_impl = _probe_band_lo_impl;
+declare probe_band_mid_impl deprecated "internal implementation, renamed _probe_band_mid_impl";
+probe_band_mid_impl = _probe_band_mid_impl;
+declare probe_below_threshold_impl deprecated "internal implementation, renamed _probe_below_threshold_impl";
+probe_below_threshold_impl = _probe_below_threshold_impl;
+declare probe_bool_impl deprecated "internal implementation, renamed _probe_bool_impl";
+probe_bool_impl = _probe_bool_impl;
+declare probe_crest_db_impl deprecated "internal implementation, renamed _probe_crest_db_impl";
+probe_crest_db_impl = _probe_crest_db_impl;
+declare probe_dc_impl deprecated "internal implementation, renamed _probe_dc_impl";
+probe_dc_impl = _probe_dc_impl;
+declare probe_dc_precise_impl deprecated "internal implementation, renamed _probe_dc_precise_impl";
+probe_dc_precise_impl = _probe_dc_precise_impl;
+declare probe_env_db_impl deprecated "internal implementation, renamed _probe_env_db_impl";
+probe_env_db_impl = _probe_env_db_impl;
+declare probe_env_impl deprecated "internal implementation, renamed _probe_env_impl";
+probe_env_impl = _probe_env_impl;
+declare probe_env_lin_impl deprecated "internal implementation, renamed _probe_env_lin_impl";
+probe_env_lin_impl = _probe_env_lin_impl;
+declare probe_freq_db_impl deprecated "internal implementation, renamed _probe_freq_db_impl";
+probe_freq_db_impl = _probe_freq_db_impl;
+declare probe_freq_lin_impl deprecated "internal implementation, renamed _probe_freq_lin_impl";
+probe_freq_lin_impl = _probe_freq_lin_impl;
+declare probe_freq_ratio_impl deprecated "internal implementation, renamed _probe_freq_ratio_impl";
+probe_freq_ratio_impl = _probe_freq_ratio_impl;
+declare probe_max_impl deprecated "internal implementation, renamed _probe_max_impl";
+probe_max_impl = _probe_max_impl;
+declare probe_min_impl deprecated "internal implementation, renamed _probe_min_impl";
+probe_min_impl = _probe_min_impl;
+declare probe_multiband_impl deprecated "internal implementation, renamed _probe_multiband_impl";
+probe_multiband_impl = _probe_multiband_impl;
+declare probe_onset_impl deprecated "internal implementation, renamed _probe_onset_impl";
+probe_onset_impl = _probe_onset_impl;
+declare probe_peak_db_impl deprecated "internal implementation, renamed _probe_peak_db_impl";
+probe_peak_db_impl = _probe_peak_db_impl;
+declare probe_peak_hold_impl deprecated "internal implementation, renamed _probe_peak_hold_impl";
+probe_peak_hold_impl = _probe_peak_hold_impl;
+declare probe_peak_lin_impl deprecated "internal implementation, renamed _probe_peak_lin_impl";
+probe_peak_lin_impl = _probe_peak_lin_impl;
+declare probe_rms_db_impl deprecated "internal implementation, renamed _probe_rms_db_impl";
+probe_rms_db_impl = _probe_rms_db_impl;
+declare probe_rms_lin_impl deprecated "internal implementation, renamed _probe_rms_lin_impl";
+probe_rms_lin_impl = _probe_rms_lin_impl;
+declare probe_sample_count_impl deprecated "internal implementation, renamed _probe_sample_count_impl";
+probe_sample_count_impl = _probe_sample_count_impl;
+declare probe_silence_impl deprecated "internal implementation, renamed _probe_silence_impl";
+probe_silence_impl = _probe_silence_impl;
+declare probe_slew_impl deprecated "internal implementation, renamed _probe_slew_impl";
+probe_slew_impl = _probe_slew_impl;
+declare probe_spectral_centroid_impl deprecated "internal implementation, renamed _probe_spectral_centroid_impl";
+probe_spectral_centroid_impl = _probe_spectral_centroid_impl;
+declare probe_tap_impl deprecated "internal implementation, renamed _probe_tap_impl";
+probe_tap_impl = _probe_tap_impl;
+declare probe_tap_n_impl deprecated "internal implementation, renamed _probe_tap_n_impl";
+probe_tap_n_impl = _probe_tap_n_impl;
+declare probe_tap_n_reorder deprecated "internal implementation, renamed _probe_tap_n_reorder";
+probe_tap_n_reorder = _probe_tap_n_reorder;
+declare probe_time_ms_impl deprecated "internal implementation, renamed _probe_time_ms_impl";
+probe_time_ms_impl = _probe_time_ms_impl;
+declare probe_value_impl deprecated "internal implementation, renamed _probe_value_impl";
+probe_value_impl = _probe_value_impl;
+declare probe_zcr_impl deprecated "internal implementation, renamed _probe_zcr_impl";
+probe_zcr_impl = _probe_zcr_impl;

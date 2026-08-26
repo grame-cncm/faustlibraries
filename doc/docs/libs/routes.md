@@ -295,7 +295,7 @@ bubbleSort_test = (
 
 ----
 
-### (ro.)bitonicSort
+### `(ro.)bitonicSort`
 
 
 A bitonic sorter is a parallel sorting network that performs comparisons
@@ -312,7 +312,7 @@ The algorithm has O(log2(N) ^ 2) depth complexity, and O(N * log2(N) ^ 2)
 work complexity. Specifically, the bitonic sorter algorithm requires N 
 inputs to be a power-of-two. The algorithm has a total of 
 log2(N) * ((log2(N) + 1) / 2) stages, and each stage requires N / 2 
-comparators. Each comparator has one min() and one max() function.
+comparators. Each _comparator has one min() and one max() function.
 
 For comparison, the Bubble Sort algorithm has N - 1 stages, and
 N * (N - 1) / 2 comparators. For N = 32, Bitonic Sort has 15 stages
@@ -349,7 +349,7 @@ bitonicSort_test = (
 
 ----
 
-### (ro.)bitonicSortIdx
+### `(ro.)bitonicSortIdx`
 
 
 This function is based on the `bitonicSort` function, except it returns the 
@@ -382,3 +382,6 @@ bitonicSortIdx_test = (
 #### References
 
 * [https://en.wikipedia.org/wiki/Bitonic_sorter](https://en.wikipedia.org/wiki/Bitonic_sorter)
+Deprecated aliases of the internal bitonic-sort machinery, kept for one
+version: the canonical names now carry the internal underscore prefix
+(see CONTRIBUTING.md, "Variables and identifiers scoping").

@@ -224,6 +224,7 @@
 
 ## debug
 
+[(db.)DEBUG](debug.md#dbdebug)
 [(db.)probe_rms_lin](debug.md#dbprobe_rms_lin)
 [(db.)probe_rms_db](debug.md#dbprobe_rms_db)
 [(db.)probe_peak_lin](debug.md#dbprobe_peak_lin)
@@ -1024,6 +1025,8 @@
 [(ro.)hadamard](routes.md#rohadamard)
 [(ro.)recursivize](routes.md#rorecursivize)
 [(ro.)bubbleSort](routes.md#robubblesort)
+[(ro.)bitonicSort](routes.md#robitonicsort)
+[(ro.)bitonicSortIdx](routes.md#robitonicsortidx)
 
 ## signals
 

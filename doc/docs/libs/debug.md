@@ -46,6 +46,21 @@ The Debug library is organized into 11 sections:
 
 * [https://github.com/grame-cncm/faustlibraries/blob/master/debug.lib](https://github.com/grame-cncm/faustlibraries/blob/master/debug.lib)
 
+----
+
+### `(db.)DEBUG`
+
+Global switch enabling or disabling every probe in this library: 1 makes
+the probes active, 0 turns each of them into the identity so a fully
+probed patch compiles down to the unprobed one. Override it per use site
+with an explicit substitution: `db[DEBUG = 0;].probe_rms_db(...)`.
+
+#### Usage
+
+```
+DEBUG : _
+```
+
 ## Level Probes
 
 Level meters for quick signal magnitude checks (RMS/peak).
