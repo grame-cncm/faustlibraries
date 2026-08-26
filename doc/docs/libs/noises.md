@@ -22,6 +22,8 @@ The Noises library is organized into 1 section:
 
 ### `(no.)noise`
 
+![noise — response plots](../img/no_noise.svg)
+
 White noise generator (outputs random number between -1 and 1).
 `noise` is a standard Faust function.
 
@@ -262,6 +264,8 @@ rnoises_test = no.rnoises(4, 1);
 
 ### `(no.)pink_noise`
 
+![pink_noise — response plots](../img/no_pink_noise.svg)
+
 Pink noise (1/f noise) generator (third-order approximation covering the audio band well).
 `pink_noise` is a standard Faust function.
 
@@ -463,6 +467,8 @@ gnoise_test = no.gnoise(8);
 ----
 
 ### `(no.)colored_noise`
+
+![colored_noise — response plots](../img/no_colored_noise.svg)
 
 Generates a colored noise signal with an arbitrary spectral
 roll-off factor (alpha) over the entire audible frequency range

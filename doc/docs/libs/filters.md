@@ -155,6 +155,8 @@ dcblockerat_test = src : fi.dcblockerat(30);
 
 ### `(fi.)dcblocker`
 
+![dcblocker — response plots](../img/fi_dcblocker.svg)
+
 DC blocker. Default dc blocker has -3dB point near 35 Hz (at 44.1 kHz)
 and high-frequency gain near 1.0025 (due to no scaling).
 `dcblocker` is a standard Faust function.
@@ -800,6 +802,8 @@ tf1_test = src : fi.tf1(0.5, 0.25, -0.4);
 ----
 
 ### `(fi.)notchw`
+
+![notchw — response plots](../img/fi_notchw.svg)
 
 Simple notch filter based on a biquad (`tf2`).
 `notchw` is a standard Faust function.
@@ -1758,6 +1762,8 @@ tf1sb_test = src : fi.tf1sb(0, 1, 1, 2*ma.PI*200, 2*ma.PI*1000);
 
 ### `(fi.)resonlp`
 
+![resonlp — response plots](../img/fi_resonlp.svg)
+
 Simple resonant lowpass filter based on `tf2s` (virtual analog).
 `resonlp` is a standard Faust function.
 
@@ -1788,6 +1794,8 @@ resonlp_test = src : fi.resonlp(1000, 2, 0.8);
 
 ### `(fi.)resonhp`
 
+![resonhp — response plots](../img/fi_resonhp.svg)
+
 Simple resonant highpass filters based on `tf2s` (virtual analog).
 `resonhp` is a standard Faust function.
 
@@ -1817,6 +1825,8 @@ resonhp_test = fi.resonhp(1000, 2, 0.8, src);
 ----
 
 ### `(fi.)resonbp`
+
+![resonbp — response plots](../img/fi_resonbp.svg)
 
 Simple resonant bandpass filters based on `tf2s` (virtual analog).
 `resonbp` is a standard Faust function.
@@ -1851,6 +1861,8 @@ resonbp_test = src : fi.resonbp(1000, 2, 0.8);
 
 ### `(fi.)lowpass`
 
+![lowpass — response plots](../img/fi_lowpass.svg)
+
 Nth-order Butterworth lowpass filter.
 `lowpass` is a standard Faust function.
 
@@ -1881,6 +1893,8 @@ lowpass_test = src : fi.lowpass(4, 2000);
 ----
 
 ### `(fi.)highpass`
+
+![highpass — response plots](../img/fi_highpass.svg)
 
 Nth-order Butterworth highpass filter.
 `highpass` is a standard Faust function.
@@ -1946,6 +1960,8 @@ canceling pole-zero pairs removed (which occurs for odd N).
 ----
 
 ### `(fi.)highpass_plus_lowpass`
+
+![highpass_plus_lowpass — response plots](../img/fi_highpass_plus_lowpass.svg)
 
 Sum of the order-`N` Butterworth highpass and lowpass responses at the same
 cutoff: an allpass used as delay equalizer by `fi.filterbank` and the
@@ -2116,6 +2132,8 @@ Elliptic (Cauer) Lowpass Filters
 
 ### `(fi.)lowpass3e`
 
+![lowpass3e — response plots](../img/fi_lowpass3e.svg)
+
 Third-order Elliptic (Cauer) lowpass filter.
 
 #### Usage
@@ -2149,6 +2167,8 @@ Rs = 0.2 % dB ripple in passband
 ----
 
 ### `(fi.)lowpass6e`
+
+![lowpass6e — response plots](../img/fi_lowpass6e.svg)
 
 Sixth-order Elliptic/Cauer lowpass filter.
 
@@ -2187,6 +2207,8 @@ For spectral band-slice level display (see octave_analyzer6e):
 
 ### `(fi.)highpass3e`
 
+![highpass3e — response plots](../img/fi_highpass3e.svg)
+
 Third-order Elliptic (Cauer) highpass filter. Inversion of `lowpass3e` wrt unit
 circle in s plane (s <- 1/s).
 
@@ -2211,6 +2233,8 @@ highpass3e_test = src : fi.highpass3e(1000);
 ----
 
 ### `(fi.)highpass6e`
+
+![highpass6e — response plots](../img/fi_highpass6e.svg)
 
 Sixth-order Elliptic/Cauer highpass filter. Inversion of `lowpass3e` wrt unit
 circle in s plane (s <- 1/s).
@@ -2239,6 +2263,10 @@ highpass6e_test = src : fi.highpass6e(1000);
 ----
 
 ### `(fi.)bandpass`, `(fi.)bandstop`
+
+![bandpass — response plots](../img/fi_bandpass.svg)
+
+![bandstop — response plots](../img/fi_bandstop.svg)
 
 Order 2*Nh Butterworth bandpass filter made using the transformation
 `s <- s + wc^2/s` on `lowpass(Nh)`, where `wc` is the desired bandpass center
@@ -2525,6 +2553,8 @@ L(lf) is easy to state in dB versus dB-frequency lf = dB(f):
 
 ### `(fi.)low_shelf`
 
+![low_shelf — response plots](../img/fi_low_shelf.svg)
+
 Default low shelf filter: 3rd-order Butterworth case of `fi.lowshelf`
 (`low_shelf = lowshelf(3)`), boosting or cutting by `L0` dB between dc and
 `fx`. `low_shelf` is a standard Faust function. See `fi.lowshelf` for the
@@ -2670,6 +2700,8 @@ highshelf_test = src : fi.highshelf(3, 6, 2000);
 
 ### `(fi.)high_shelf`
 
+![high_shelf — response plots](../img/fi_high_shelf.svg)
+
 Default high shelf filter: 3rd-order Butterworth case of `fi.highshelf`
 (`high_shelf = highshelf(3)`), boosting or cutting by `Lpi` dB between `fx`
 and SR/2. `high_shelf` is a standard Faust function. See `fi.highshelf`
@@ -2776,6 +2808,8 @@ highshelf_other_freq_test = fi.highshelf_other_freq(3, 6, 2000);
 ----
 
 ### `(fi.)peak_eq`
+
+![peak_eq — response plots](../img/fi_peak_eq.svg)
 
 Second order "peaking equalizer" section (gain boost or cut near some frequency)
 Also called a "parametric equalizer" section.
@@ -3645,6 +3679,8 @@ crossover8LR4_test = src : fi.crossover8LR4(100, 200, 400, 800, 1600, 3200, 6400
 ----
 
 ### `(fi.)itu_r_bs_1770_4_kfilter`
+
+![itu_r_bs_1770_4_kfilter — response plots](../img/fi_itu_r_bs_1770_4_kfilter.svg)
 
 The prefilter from Recommendation ITU-R BS.1770-4 for loudness
 measurement. Also known as "K-filter". The recommendation defines

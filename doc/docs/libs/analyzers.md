@@ -876,6 +876,22 @@ For DFT-even (periodic) windows, evaluate at i/N instead of i/(N-1).
 
 ### `(an.)window_rect`, `(an.)window_hann`, `(an.)window_hamming`, `(an.)window_blackman`, `(an.)window_blackman_harris`, `(an.)window_nuttall`, `(an.)window_flattop`, `(an.)window_bartlett`
 
+![window_rect — response plots](../img/an_window_rect.svg)
+
+![window_hann — response plots](../img/an_window_hann.svg)
+
+![window_hamming — response plots](../img/an_window_hamming.svg)
+
+![window_blackman — response plots](../img/an_window_blackman.svg)
+
+![window_blackman_harris — response plots](../img/an_window_blackman_harris.svg)
+
+![window_nuttall — response plots](../img/an_window_nuttall.svg)
+
+![window_flattop — response plots](../img/an_window_flattop.svg)
+
+![window_bartlett — response plots](../img/an_window_bartlett.svg)
+
 The classic fixed window functions:
 
 * `window_rect`: rectangular (boxcar) window, 1 inside [0,1], 0 outside
@@ -946,6 +962,8 @@ window_cosN_test = an.window_cosN((0.5, -0.5), os.lf_sawpos(100));
 
 ### `(an.)window_tukey`
 
+![window_tukey — response plots](../img/an_window_tukey.svg)
+
 Tukey (cosine-tapered) window: flat at 1 over the central `1-a` fraction of
 the support, with raised-cosine tapers of total length `a` at the edges.
 `window_tukey(0)` degenerates to the rectangular window and
@@ -972,6 +990,8 @@ window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
 ----
 
 ### `(an.)window_kaiser`
+
+![window_kaiser — response plots](../img/an_window_kaiser.svg)
 
 Kaiser window of shape parameter `beta`, computed with a fixed-length
 series for the modified Bessel function I0 (40 terms: exact to double

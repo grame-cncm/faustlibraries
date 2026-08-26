@@ -363,6 +363,8 @@ output format.
 
 ### `(ef.)dither`
 
+![dither — response plots](../img/ef_dither.svg)
+
 TPDF-dithered requantizer to a given bit depth: adds triangular dither of
 2 LSB peak-to-peak (the sum of two independent uniform noises), then
 rounds to the nearest of the `2^nbits` levels covering [-1,1). Unlike the
@@ -395,6 +397,8 @@ dither_test = os.osc(440)*0.001 : ef.dither(16);
 ----
 
 ### `(ef.)dither_shaped`
+
+![dither_shaped — response plots](../img/ef_dither_shaped.svg)
 
 TPDF-dithered requantizer with error-feedback noise shaping: the
 quantization error is fed back through `(1-z^-1)^K`, giving a noise

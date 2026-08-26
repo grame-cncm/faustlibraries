@@ -780,6 +780,8 @@ compressor_lad_mono_test = os.osc(440) : co.compressor_lad_mono(0.005, 4, -9, 0.
 
 ### `(co.)compressor_mono`
 
+![compressor_mono — response plots](../img/co_compressor_mono.svg)
+
 Mono dynamic range compressors.
 `compressor_mono` is a standard Faust function.
 
@@ -881,6 +883,8 @@ compression_gain_mono_test = os.osc(440) : co.compression_gain_mono(4, -9, 0.01,
 ----
 
 ### `(co.)limiter_1176_R4_mono`
+
+![limiter_1176_R4_mono — response plots](../img/co_limiter_1176_R4_mono.svg)
 
 A limiter guards against hard-clipping.  It can be
 implemented as a compressor having a high threshold (near the

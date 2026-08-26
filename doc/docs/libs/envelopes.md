@@ -24,6 +24,8 @@ The Envelopes library is organized into 3 sections:
 
 ### `(en.)ar`
 
+![ar — response plots](../img/en_ar.svg)
+
 AR (Attack, Release) envelope generator (useful to create percussion envelopes).
 `ar` is a standard Faust function.
 
@@ -51,6 +53,8 @@ ar_test = no.noise * en.ar(0.02, 0.3, gate);
 ----
 
 ### `(en.)asr`
+
+![asr — response plots](../img/en_asr.svg)
 
 ASR (Attack, Sustain, Release) envelope generator.
 `asr` is a standard Faust function.
@@ -80,6 +84,8 @@ asr_test = no.noise * en.asr(0.05, 0.7, 0.4, gate);
 ----
 
 ### `(en.)adsr`
+
+![adsr — response plots](../img/en_adsr.svg)
 
 ADSR (Attack, Decay, Sustain, Release) envelope generator.
 `adsr` is a standard Faust function.
@@ -331,6 +337,8 @@ arfe_test = no.noise * en.arfe(0.2, 0.4, 0, gate);
 
 ### `(en.)are`
 
+![are — response plots](../img/en_are.svg)
+
 ARE (Attack, Release) envelope generator with Exponential segments.
 Approximately equal to `smoothEnvelope(Attack/6.91)` when Attack == Release.
 
@@ -359,6 +367,8 @@ are_test = no.noise * en.are(0.2, 0.4, gate);
 
 ### `(en.)asre`
 
+![asre — response plots](../img/en_asre.svg)
+
 ASRE (Attack, Sustain, Release) envelope generator with Exponential segments.
 
 #### Usage
@@ -386,6 +396,8 @@ asre_test = no.noise * en.asre(0.2, 0.6, 0.4, gate);
 ----
 
 ### `(en.)adsre`
+
+![adsre — response plots](../img/en_adsre.svg)
 
 ADSRE (Attack, Decay, Sustain, Release) envelope generator with Exponential
 segments.
