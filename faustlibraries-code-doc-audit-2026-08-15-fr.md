@@ -1404,3 +1404,113 @@ ont été obtenues par des scripts jetables non conservés. Elles restent
 reproductibles à partir des définitions données dans les sections correspondantes ;
 les intégrer à `audit2.py` en ferait un vérificateur de documentation utilisable
 en CI (cf. recommandation 24).
+
+
+---
+
+## Addendum du 2026-08-26 — état d'avancement du plan
+
+Toutes les recommandations de la section 8 réalisables en monorate sont
+faites, sur la branche `claude`, chaque point vérifié par le circuit complet
+(validation numérique contre des références indépendantes, `make reference`
+incrémental, `make -k check` intégral, puis `make checkdoc` une fois créé).
+
+### Phase 0 — immédiat : FAIT (sauf CI, différée volontairement)
+
+Points 1-3 et la moitié locale du point 4 : `e60c77c2`. `floatdiff.py` sort en
+erreur sur divergence, le Makefile propage les échecs de build et de
+comparaison (`.DELETE_ON_ERROR` compris), `clean` préserve `tests/reference/`
+(un `distclean` séparé la supprime), et `make reference` trace ses paramètres
+dans `tests/reference/PARAMS`. Les 1 110 références ont été régénérées
+(1,2 Go, locales — trop volumineuses pour être versionnées telles quelles) et
+le `make -k check` intégral passe. Le point 5 (CI) est différé sur décision
+explicite : rien sur GitHub pour l'instant.
+
+### Phase 1 — documentation (6-11) : FAIT
+
+* **6** `cb7c7fbd` — sous-système FFT d'`analyzers.lib` documenté, convention
+  de représentation complexe en tête ; couverture 51 % → 100 %.
+* **7** `f8cac689` — les 15 blocs « Test seul » de `filters.lib` et les blocs
+  sans `#### Usage` complétés ; en-têtes `_even` intervertis, en-tête
+  `bandstop` dupliqué, arités `_odd` et trois `declare` malformés corrigés au
+  passage. La partie `aanl.lib` a été annulée sur demande (`7380f340`).
+* **8** `27f3a807` — `standardFunctions.md` désormais **généré** depuis les
+  marqueurs source (`scripts/build_standard_functions.py`, mode `--check`) ;
+  les 42 fonctions manquantes ajoutées, l'entrée morte `sy.popFilterPerc`
+  retirée, les 9 fonctions non marquées résolues côté source.
+* **9** `12381dad` — 373 déclarations de licence normalisées en identifiants
+  SPDX canoniques (`scripts/normalize_licenses.py`, mode `--check`) ; les 16
+  orthographes ramenées à 11 identifiants, dont `LicenseRef-STK-4.3`.
+* **10** `5e3ed239` — `tonestacks.lib` documentée à 100 % (25 modèles
+  identifiés), `tubes.lib` à 36 % (tout sauf les tables), pages du site
+  ajoutées, `organization.md` mis à jour.
+* **11** `5766d524` — les 18 fonctions dépréciées portent
+  `declare ... deprecated` et l'avertissement puissances-de-deux ;
+  documentation de `ba.downSample` réécrite (échantillonneur-bloqueur, pas
+  une décimation).
+
+### Phase 2 — lacunes monorate (12-18) : FAIT
+
+* **12** `828e630d` — famille `an.window_*` (Hann → Kaiser via série I0 de
+  40 termes, constructeur `window_cosN`), validée à 1e-6.
+* **13** `f9529beb` — `fi.hilbert` défini, précision documentée sur mesures.
+* **14** `9f671593` — `ef.ms_enc`/`ef.ms_dec` (identité à 1e-16),
+  `ef.dither` TPDF et `ef.dither_shaped` (NTF `(1-z^-1)^K` ; un bug de signe
+  trouvé et corrigé par la mesure : +23 dB de bascule à l'ordre 2).
+* **15** `46b70db5` — `an.loudness_momentary/shortterm/integrated` (points de
+  conformité BS.1770 à 0,006 dB) et `an.true_peak` (polyphase 4x12, poids
+  Kaiser à la compilation, +0,08 dB sur pic inter-échantillon).
+* **16** `9e02888d` — `fi.lms`/`fi.nlms` (identification convergée à
+  -271 dB) ; `an.spectral_centroid/spread/flux` sur les bancs d'octaves,
+  ordre des bandes établi et documenté.
+* **17** `7bb62808` — `sp.binauralModel` (Brown-Duda : ITD mesuré 33
+  échantillons pour 31,5 prédits, ILD 16,7 dB pour 16,2) et `sp.binauralFir`.
+* **18** `61ba486d` — `ef.transpose_windowed` (taps Hann recouvrants) et
+  `ef.granular` (identité à ratio 1, octave exacte à ratio 2, phasing
+  granulaire documenté).
+
+Au total : 31 fonctions publiques et 28 tests de régression ajoutés.
+
+### Structurel (23-25) : FAIT
+
+* **24** `005f353c` — `make checkdoc` : verrou anti-régression agrégeant
+  couverture (baseline versionnée `tests/doc-baseline.json`), blocs
+  incomplets, `standardFunctions.md` et licences. Sa première exécution a
+  attrapé deux régressions réelles.
+* **23** `05a795bd` — politiques manquantes ajoutées à `contributing.md` :
+  nommage (style dominant du fichier), SPDX obligatoire, test exigé,
+  convention `_nom`.
+* **25** `191eae68` + `43bf58d0` — convention `_nom` outillée (exclue de la
+  couverture) et migration effectuée : 34 internes de `debug.lib` et 25 de
+  `routes.lib` renommés, alias dépréciés conservés une version ; les
+  en-têtes de `bitonicSort`/`bitonicSortIdx` réparés (backticks manquants),
+  `db.DEBUG` documenté.
+
+### Phase 3 (19-22) : EN ATTENTE
+
+Suspendue à l'extension multi-débit (travail clock-domains de `faust-rs`),
+conformément au §7.4.
+
+### Chantier ouvert : diagrammes SVG au-delà d'`aanl.lib`
+
+Le prototype (`scripts/plot_lib.py` + `doc/scripts/inject_plots.py`,
+injection par convention de nommage, 38 figures) est étendu selon le plan
+suivant. Critère : une figure se justifie quand elle montre une propriété
+invisible en prose — réponse en fréquence, courbe temporelle, courbe
+statique, spectre. Chaque type de figure embarque une assertion de propriété
+(le passe-bas doit être à -3 dB en fc...), dans l'esprit d'oracle analytique
+du §9.
+
+* **Phase A** (~60 figures) : `filters.lib` (ordres superposés, courbe K,
+  crossovers avec leur somme), `an.window_*` (forme + lobes), `envelopes.lib`,
+  `noises.lib` (pentes théoriques en repère), `compressors.lib`
+  (caractéristiques statiques), `ef.dither_shaped` (NTF mesurée).
+* **Phase B** (~55 figures) : `oscillators.lib` (anti-repliement),
+  `vaeffects`, `webaudio`, `tonestacks` (une courbe d'EQ par ampli),
+  `tubes` (transferts d'étages), `phaflangers`, `de.fdelay[N]`.
+* **Phase C** (optionnelle) : réverbes (EDC), `sp.binauralModel`
+  (ITD/ILD polaires), quantizers.
+
+Hors périmètre : basics, routes, signals, maths, physmodels, synths, demos,
+debug, soundfiles, mi, fds, wdmodels. Coût accepté : ~3,5 Mo d'images au
+total au format actuel (texte en `<text>`, décimation).

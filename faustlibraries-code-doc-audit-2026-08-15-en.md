@@ -1362,3 +1362,112 @@ normalisation (§3.6) and `standardFunctions.md` consistency (§3.5) — were ob
 with throwaway scripts that were not kept. They remain reproducible from the
 definitions given in the corresponding sections; folding them into `audit2.py`
 would turn it into a documentation checker usable in CI (cf. recommendation 24).
+
+
+---
+
+## Addendum, 2026-08-26 — plan progress
+
+Every section 8 recommendation feasible in monorate Faust is done, on the
+`claude` branch, each item verified with the full loop (numerical validation
+against independent references, incremental `make reference`, complete
+`make -k check`, then `make checkdoc` once it existed).
+
+### Phase 0 — immediate: DONE (except CI, deliberately deferred)
+
+Items 1-3 and the local half of item 4: `e60c77c2`. `floatdiff.py` exits
+nonzero on divergence, the Makefile propagates build and comparison failures
+(including `.DELETE_ON_ERROR`), `clean` keeps `tests/reference/` (a separate
+`distclean` removes it), and `make reference` records its parameters in
+`tests/reference/PARAMS`. The 1,110 references were regenerated (1.2 GB,
+local — too large to track as-is) and the full `make -k check` passes.
+Item 5 (CI) is deferred by explicit decision: nothing on GitHub for now.
+
+### Phase 1 — documentation (6-11): DONE
+
+* **6** `cb7c7fbd` — the analyzers.lib FFT subsystem documented, complex
+  vector convention first; coverage 51% -> 100%.
+* **7** `f8cac689` — the 15 test-only filters.lib blocks and the Usage-less
+  blocks completed; the swapped `_even` headers, the duplicated `bandstop`
+  header, the `_odd` arities and three malformed declares fixed along the
+  way. The aanl.lib part was reverted on request (`7380f340`).
+* **8** `27f3a807` — `standardFunctions.md` now **generated** from the
+  source markers (`scripts/build_standard_functions.py`, `--check` mode);
+  the 42 missing functions added, the dead `sy.popFilterPerc` entry dropped,
+  the 9 unmarked functions resolved on the source side.
+* **9** `12381dad` — 373 license declarations normalized to canonical SPDX
+  identifiers (`scripts/normalize_licenses.py`, `--check` mode); 16
+  spellings collapsed to 11 identifiers, including `LicenseRef-STK-4.3`.
+* **10** `5e3ed239` — tonestacks.lib documented to 100% (25 models
+  identified), tubes.lib to 36% (everything but the tables), site pages
+  added, `organization.md` updated.
+* **11** `5766d524` — the 18 deprecated functions carry
+  `declare ... deprecated` and the power-of-two warning; the
+  `ba.downSample` documentation rewritten (sample-and-hold, not decimation).
+
+### Phase 2 — monorate gaps (12-18): DONE
+
+* **12** `828e630d` — the `an.window_*` family (Hann through Kaiser via a
+  40-term I0 series, `window_cosN` constructor), validated to 1e-6.
+* **13** `f9529beb` — `fi.hilbert` defined, accuracy documented from
+  measurements.
+* **14** `9f671593` — `ef.ms_enc`/`ef.ms_dec` (identity to 1e-16), TPDF
+  `ef.dither` and `ef.dither_shaped` (NTF `(1-z^-1)^K`; a sign bug found
+  and fixed by measurement: +23 dB of tilt at order 2).
+* **15** `46b70db5` — `an.loudness_momentary/shortterm/integrated`
+  (BS.1770 compliance points within 0.006 dB) and `an.true_peak` (4x12
+  polyphase, compile-time Kaiser weights, +0.08 dB on an inter-sample peak).
+* **16** `9e02888d` — `fi.lms`/`fi.nlms` (system identification converged
+  to -271 dB); `an.spectral_centroid/spread/flux` on the octave banks, band
+  ordering established and documented.
+* **17** `7bb62808` — `sp.binauralModel` (Brown-Duda: measured ITD of 33
+  samples against 31.5 predicted, ILD 16.7 dB against 16.2) and
+  `sp.binauralFir`.
+* **18** `61ba486d` — `ef.transpose_windowed` (overlapping Hann taps) and
+  `ef.granular` (identity at ratio 1, exact octave at ratio 2, granular
+  phasing documented).
+
+In total: 31 public functions and 28 regression tests added.
+
+### Structural (23-25): DONE
+
+* **24** `005f353c` — `make checkdoc`: regression gate aggregating coverage
+  (versioned baseline `tests/doc-baseline.json`), incomplete blocks,
+  `standardFunctions.md` and licenses. Its first run caught two real
+  regressions.
+* **23** `05a795bd` — the missing policies added to `contributing.md`:
+  naming (dominant style of the file), mandatory SPDX, required test,
+  `_name` convention.
+* **25** `191eae68` + `43bf58d0` — the `_name` convention wired into the
+  tooling (excluded from coverage) and the migration done: 34 debug.lib and
+  25 routes.lib internals renamed, deprecated aliases kept for one version;
+  the `bitonicSort`/`bitonicSortIdx` headers repaired (missing backquotes),
+  `db.DEBUG` documented.
+
+### Phase 3 (19-22): PENDING
+
+Waiting on the multirate extension (the `faust-rs` clock-domain work), as
+per section 7.4.
+
+### Open workstream: SVG diagrams beyond aanl.lib
+
+The prototype (`scripts/plot_lib.py` + `doc/scripts/inject_plots.py`,
+injection by naming convention, 38 figures) is being extended along this
+plan. Criterion: a figure earns its place when it shows a property invisible
+in prose — frequency response, time curve, static curve, spectrum. Every
+figure type embeds a property assertion (the lowpass must be -3 dB at fc...),
+in the analytic-oracle spirit of section 9.
+
+* **Phase A** (~60 figures): filters.lib (overlaid orders, the K curve,
+  crossovers with their sum), `an.window_*` (shape + sidelobes),
+  envelopes.lib, noises.lib (theoretical slopes as marks), compressors.lib
+  (static characteristics), `ef.dither_shaped` (measured NTF).
+* **Phase B** (~55 figures): oscillators.lib (alias suppression),
+  vaeffects, webaudio, tonestacks (one EQ curve per amp), tubes (stage
+  transfer curves), phaflangers, `de.fdelay[N]`.
+* **Phase C** (optional): reverbs (EDC), `sp.binauralModel` (polar
+  ITD/ILD), quantizers.
+
+Out of scope: basics, routes, signals, maths, physmodels, synths, demos,
+debug, soundfiles, mi, fds, wdmodels. Accepted cost: about 3.5 MB of images
+in total at the current format (`<text>` labels, decimation).
