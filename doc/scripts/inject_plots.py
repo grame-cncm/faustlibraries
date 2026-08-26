@@ -18,7 +18,11 @@ import re
 import sys
 from pathlib import Path
 
-HEADING = re.compile(r"^### +`\((?P<prefix>[a-zA-Z0-9]+)\.\)(?P<name>[A-Za-z0-9_]+)`")
+# A heading may document several functions (`### `(an.)window_rect`,
+# `(an.)window_hann`, ...`): every name found on the line is tried, so a
+# family block collects the figure of each member that has one.
+HEADING = re.compile(r"^### +`\(")
+NAME = re.compile(r"`\((?P<prefix>[a-zA-Z0-9]+)\.\)(?P<name>[A-Za-z0-9_]+)`")
 
 
 def main() -> int:
@@ -32,15 +36,15 @@ def main() -> int:
     out, injected = [], 0
     for line in page.read_text(errors="replace").splitlines():
         out.append(line)
-        m = HEADING.match(line)
-        if not m:
+        if not HEADING.match(line):
             continue
-        stem = f"{m.group('prefix')}_{m.group('name')}"
-        if (img_dir / f"{stem}.svg").exists():
-            out.append("")
-            out.append(f"![{m.group('name')} — response plots]"
-                       f"({url_prefix}/{stem}.svg)")
-            injected += 1
+        for m in NAME.finditer(line):
+            stem = f"{m.group('prefix')}_{m.group('name')}"
+            if (img_dir / f"{stem}.svg").exists():
+                out.append("")
+                out.append(f"![{m.group('name')} — response plots]"
+                           f"({url_prefix}/{stem}.svg)")
+                injected += 1
 
     if injected:
         page.write_text("\n".join(out) + "\n")

@@ -37,7 +37,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check checkdoc clean distclean help bench doc-index doc-index-split doc-index-commercial
+.PHONY: reference check checkdoc plots clean distclean help bench doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -116,6 +116,12 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 
 checkdoc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.json)
 	@$(PYTHON) scripts/checkdoc.py
+
+plots: ## Regenerate the SVG plots, then rebuild the doc pages that embed them
+	@$(PYTHON) scripts/plot_lib.py
+	@$(PYTHON) scripts/plot_families.py
+	$(MAKE) -C doc clean
+	$(MAKE) -C doc build
 
 bench: ## Run faustbench-llvm on all test specs and capture memory/CPU stats
 	@set -e; \
