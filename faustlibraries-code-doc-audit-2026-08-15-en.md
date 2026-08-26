@@ -1465,8 +1465,14 @@ in the analytic-oracle spirit of section 9.
 * **Phase B** (~55 figures): oscillators.lib (alias suppression),
   vaeffects, webaudio, tonestacks (one EQ curve per amp), tubes (stage
   transfer curves), phaflangers, `de.fdelay[N]`.
-* **Phase C** (optional): reverbs (EDC), `sp.binauralModel` (polar
-  ITD/ILD), quantizers.
+* **Phase C**: reverbs (EDC), `sp.binauralModel` (ITD/ILD), quantizers.
+
+**Completed 2026-08-26**: all three phases are done (157 figures, 4.7 MB,
+every one behind property assertions). The assertions caught a real bug
+along the way: `wa.highshelf2` was a copy-paste of the lowshelf (all six
+coefficients identical) and boosted the band below its corner frequency -
+fixed with the WebAudio/Audio-EQ-Cookbook formulas, test reference
+regenerated.
 
 Out of scope: basics, routes, signals, maths, physmodels, synths, demos,
 debug, soundfiles, mi, fds, wdmodels. Accepted cost: about 3.5 MB of images

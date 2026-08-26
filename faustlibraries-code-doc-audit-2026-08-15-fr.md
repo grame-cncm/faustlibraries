@@ -1508,8 +1508,14 @@ du §9.
 * **Phase B** (~55 figures) : `oscillators.lib` (anti-repliement),
   `vaeffects`, `webaudio`, `tonestacks` (une courbe d'EQ par ampli),
   `tubes` (transferts d'étages), `phaflangers`, `de.fdelay[N]`.
-* **Phase C** (optionnelle) : réverbes (EDC), `sp.binauralModel`
-  (ITD/ILD polaires), quantizers.
+* **Phase C** : réverbes (EDC), `sp.binauralModel` (ITD/ILD), quantizers.
+
+**Réalisé le 2026-08-26** : les trois phases sont faites (157 figures, 4,7 Mo,
+toutes sous assertions de propriété). Les assertions ont attrapé un vrai bug
+au passage : `wa.highshelf2` était un copier-collé du lowshelf (six
+coefficients identiques) et boostait la bande sous sa fréquence de coin —
+corrigé selon les formules WebAudio/Audio-EQ-Cookbook, référence de test
+régénérée.
 
 Hors périmètre : basics, routes, signals, maths, physmodels, synths, demos,
 debug, soundfiles, mi, fds, wdmodels. Coût accepté : ~3,5 Mo d'images au
