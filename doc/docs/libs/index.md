@@ -87,6 +87,10 @@
 [(an.)ifft, (an.)ifftb](analyzers.md#anifft,-anifftb)
 [(an.)rfft_analyzer_c, (an.)rfft_analyzer_db, (an.)rfft_analyzer_magsq](analyzers.md#anrfft_analyzer_c,-anrfft_analyzer_db,-anrfft_analyzer_magsq)
 [(an.)rfft_spectral_level](analyzers.md#anrfft_spectral_level)
+[(an.)loudness_momentary, (an.)loudness_shortterm](analyzers.md#anloudness_momentary,-anloudness_shortterm)
+[(an.)loudness_meansquare, (an.)meansquare2lufs](analyzers.md#anloudness_meansquare,-anmeansquare2lufs)
+[(an.)loudness_integrated](analyzers.md#anloudness_integrated)
+[(an.)true_peak](analyzers.md#antrue_peak)
 [(an.)logsweep](analyzers.md#anlogsweep)
 [(an.)linsweep](analyzers.md#anlinsweep)
 

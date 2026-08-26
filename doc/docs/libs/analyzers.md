@@ -1273,6 +1273,141 @@ Where:
 
 See `dm.fft_spectral_level_demo(N)` in `demos.lib` for an example GUI.
 
+##  Loudness Metering (EBU R128 / ITU-R BS.1770) 
+
+Multichannel loudness measurement after Recommendation ITU-R BS.1770-4 /
+EBU R128: each channel is prefiltered with the K-filter
+(`fi.itu_r_bs_1770_4_kfilter`, normalized so that no -0.691 dB correction
+is needed), mean-squared over the measurement window, channel-weighted
+(1.0 for the first three channels, 1.41 for surround channels 4 and 5,
+LFE not handled) and summed; loudness is `10*log10` of that sum, in LUFS.
+
+----
+
+### `(an.)loudness_momentary`, `(an.)loudness_shortterm`
+
+Momentary (400 ms window) and short-term (3 s window) loudness of an
+N-channel signal, in LUFS, per ITU-R BS.1770-4.
+
+A 997 Hz full-scale sine reads -3.01 LUFS on one channel and 0.0 LUFS on
+two channels, matching the BS.1770 compliance points.
+
+#### Usage
+
+```
+si.bus(N) : loudness_momentary(N) : _
+si.bus(N) : loudness_shortterm(N) : _
+```
+
+Where:
+
+* `N`: number of channels, in BS.1770 order (L, R, C, Ls, Rs), a constant numerical expression
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+loudness_momentary_test = os.osc(997), os.osc(997) : an.loudness_momentary(2);
+loudness_shortterm_test = os.osc(997), os.osc(997) : an.loudness_shortterm(2);
+```
+
+#### References
+
+* [https://www.itu.int/rec/R-REC-BS.1770](https://www.itu.int/rec/R-REC-BS.1770)
+* EBU R128 / EBU Tech 3341.
+
+----
+
+### `(an.)loudness_meansquare`, `(an.)meansquare2lufs`
+
+The machinery shared by the loudness meters: `loudness_meansquare(T,N)`
+is the channel-weighted, K-filtered mean square of an N-channel signal
+over a `T`-second rectangular window (the linear-domain quantity BS.1770
+calls the sum of `G_i z_i`), and `meansquare2lufs` converts it to LUFS
+(`10*log10`, floored at -100).
+
+#### Usage
+
+```
+si.bus(N) : loudness_meansquare(T,N) : _
+_ : meansquare2lufs : _
+```
+
+Where:
+
+* `T`: averaging window in seconds
+* `N`: number of channels, in BS.1770 order, a constant numerical expression
+
+----
+
+### `(an.)loudness_integrated`
+
+Streaming approximation of the gated integrated (programme) loudness of
+EBU R128, in LUFS: the 400 ms mean square is accumulated under the -70
+LUFS absolute gate, a relative threshold is derived 10 LU below the
+absolute-gated running mean, and a second accumulation under that
+threshold yields the integrated value.
+
+This is the usual real-time meter construction: it differs from the
+offline two-pass measurement in that already-accumulated blocks are not
+re-gated when the relative threshold later moves, and gating is applied
+per sample rather than on 75%-overlapped 400 ms blocks. On programme
+material the deviation is typically well under 0.5 LU.
+
+The measurement starts at power-up and never resets; restart the DSP to
+restart the measurement.
+
+#### Usage
+
+```
+si.bus(N) : loudness_integrated(N) : _
+```
+
+Where:
+
+* `N`: number of channels, in BS.1770 order, a constant numerical expression
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+loudness_integrated_test = os.osc(997), os.osc(997) : an.loudness_integrated(2);
+```
+
+#### References
+
+* [https://www.itu.int/rec/R-REC-BS.1770](https://www.itu.int/rec/R-REC-BS.1770) (gating: BS.1770-4, section 2)
+* EBU Tech 3341, "Loudness Metering: 'EBU Mode' metering".
+
+----
+
+### `(an.)true_peak`
+
+True-peak estimate per ITU-R BS.1770-4 Annex 2: the signal is 4x
+oversampled with a 48-tap polyphase windowed-sinc interpolator (12 taps
+per phase, Kaiser window beta = 10, each phase normalized to unity DC
+gain, all weights computed at compile time with `an.window_kaiser`), and
+the output is the largest absolute value among the four inter-sample
+phases. Feed it to a max-hold for a dBTP meter reading:
+`an.true_peak : max ~ _ : ba.linear2db`.
+
+#### Usage
+
+```
+_ : true_peak : _
+```
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+true_peak_test = os.osc(12000)*0.97 : an.true_peak;
+```
+
+#### References
+
+* [https://www.itu.int/rec/R-REC-BS.1770](https://www.itu.int/rec/R-REC-BS.1770) (Annex 2)
+
 ##  Test signal generators 
 
 Signal generators for testing purposes.

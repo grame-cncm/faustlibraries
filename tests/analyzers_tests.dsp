@@ -63,3 +63,9 @@ window_bartlett_test = an.window_bartlett(os.lf_sawpos(100));
 window_cosN_test = an.window_cosN((0.5, -0.5), os.lf_sawpos(100));
 window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
 window_kaiser_test = an.window_kaiser(8.6, os.lf_sawpos(100));
+
+// Loudness metering (EBU R128 / ITU-R BS.1770)
+loudness_momentary_test = os.osc(997), os.osc(997) : an.loudness_momentary(2);
+loudness_shortterm_test = os.osc(997), os.osc(997) : an.loudness_shortterm(2);
+loudness_integrated_test = os.osc(997), os.osc(997) : an.loudness_integrated(2);
+true_peak_test = os.osc(12000)*0.97 : an.true_peak;
