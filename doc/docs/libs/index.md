@@ -447,6 +447,7 @@
 [(fi.)bandpass6e](filters.md#fibandpass6e)
 [(fi.)bandpass12e](filters.md#fibandpass12e)
 [(fi.)pospass](filters.md#fipospass)
+[(fi.)hilbert](filters.md#fihilbert)
 [(fi.)lowshelf](filters.md#filowshelf)
 [(fi.)low_shelf](filters.md#filow_shelf)
 [(fi.)low_shelf1](filters.md#filow_shelf1)
