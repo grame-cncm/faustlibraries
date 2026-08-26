@@ -9,6 +9,7 @@ libraries actually use:
   * generic patterns         //---`(de.)fdelay[N]`---      matches fdelay1..N
   * `library()` / `environment` aliases are not definitions and are excluded
     (otherwise every `ba`, `fi`, `ma` import counts as an undocumented symbol)
+  * `_name` definitions are internal by convention and are excluded
 
 Reports, per library: line count, number of definitions, number of doc blocks,
 undocumented symbols, coverage, and blocks missing a `#### Usage` section.
@@ -63,6 +64,10 @@ for lib in libs:
         if m:
             defs.add(m.group(1))
     defs -= aliases
+    # underscore-prefixed symbols are internal by convention (CONTRIBUTING.md,
+    # "Variables and identifiers scoping"): outside the public API, outside
+    # the coverage accounting
+    defs = {d for d in defs if not d.startswith("_")}
     undoc = sorted(d for d in defs
                    if d not in documented and not any(matches(p, d) for p in patterns))
 
