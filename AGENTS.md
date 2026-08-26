@@ -57,3 +57,12 @@ make build       # build the mkdocs site (doc pages + figure injection)
    `scripts/build_standard_functions.py`) and the figures in
    `doc/docs/img/` (regenerate with `make plots` — the generator embeds
    property assertions and must end with "all property assertions hold").
+7. **Keep the LLM-facing JSON exports working.** `make doc-index-split`
+   (`scripts/build_faust_doc_index.py`) parses the same doc blocks into the
+   machine-readable index that MCP tools and `scripts/faust_doc_api.py`
+   consume. After any change to documentation *format* (header shapes,
+   section names, block structure), regenerate the export and spot-check
+   that the touched symbols still come out with their summary, usage,
+   params and license (`scripts/faust_doc_api.py get_faust_symbol xx.name`).
+   `make checkdoc` guards the floor — the exported symbol count may only
+   grow — but it cannot see a field that silently comes out empty.

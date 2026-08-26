@@ -13,7 +13,11 @@ regression, without requiring the historical debt to be paid first:
   3. doc/docs/standardFunctions.md must match the source markers
      (scripts/build_standard_functions.py --check);
   4. license declarations must be canonical SPDX identifiers
-     (scripts/normalize_licenses.py --check).
+     (scripts/normalize_licenses.py --check);
+  5. the LLM-facing JSON export (scripts/build_faust_doc_index.py) must
+     still parse every documented symbol: its symbol count may only grow
+     against the recorded baseline (a drop means the doc-block format
+     drifted away from what the exporter understands).
 
 Usage:
     scripts/checkdoc.py                    # verify, exit 1 on regression
@@ -45,6 +49,19 @@ def run_audit():
         os.unlink(path)
 
 
+def doc_index_symbol_count():
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+        path = tmp.name
+    try:
+        out = subprocess.check_output(
+            [PYTHON, "scripts/build_faust_doc_index.py",
+             "--repo-root", ".", "--output", path],
+            stderr=subprocess.DEVNULL, text=True)
+        return int(json.loads(out.splitlines()[-1])["symbolsCount"])
+    finally:
+        os.unlink(path)
+
+
 def current_debt(audit):
     return {
         lib: {
@@ -60,15 +77,19 @@ def main():
     update = "--update-baseline" in sys.argv
     audit = run_audit()
     debt = current_debt(audit)
+    n_index = doc_index_symbol_count()
+    debt["_doc_index"] = {"symbols": n_index}
 
     if update:
         with open(BASELINE, "w") as f:
             json.dump(debt, f, indent=1, sort_keys=True)
             f.write("\n")
-        n_undoc = sum(len(v["undocumented"]) for v in debt.values())
-        n_nousage = sum(len(v["no_usage"]) for v in debt.values())
-        print("Wrote %s (%d undocumented symbols, %d Usage-less blocks accepted)."
-              % (BASELINE, n_undoc, n_nousage))
+        n_undoc = sum(len(v["undocumented"]) for k, v in debt.items()
+                      if not k.startswith("_"))
+        n_nousage = sum(len(v["no_usage"]) for k, v in debt.items()
+                        if not k.startswith("_"))
+        print("Wrote %s (%d undocumented symbols, %d Usage-less blocks,"
+              " %d exported symbols)." % (BASELINE, n_undoc, n_nousage, n_index))
         return
 
     errors = []
@@ -81,7 +102,15 @@ def main():
         errors.append("%s is missing; run scripts/checkdoc.py --update-baseline"
                       % BASELINE)
         baseline = {}
+    floor = baseline.get("_doc_index", {}).get("symbols")
+    if floor is not None and n_index < floor:
+        errors.append("JSON doc export dropped from %d to %d symbols; the"
+                      " exporter no longer parses part of the documentation"
+                      % (floor, n_index))
+
     for lib, entry in debt.items():
+        if lib.startswith("_"):
+            continue
         for kind, label in (("undocumented", "undocumented symbol"),
                             ("no_usage", "block without #### Usage")):
             accepted = set(baseline.get(lib, {}).get(kind, []))
@@ -116,9 +145,10 @@ def main():
         print("If a reported symbol is deliberate accepted debt, rerun with"
               " --update-baseline and commit %s." % BASELINE)
         sys.exit(1)
-    n_undoc = sum(len(v["undocumented"]) for v in debt.values())
-    print("checkdoc: OK (accepted debt: %d undocumented symbols, no new gaps)."
-          % n_undoc)
+    n_undoc = sum(len(v["undocumented"]) for k, v in debt.items()
+                  if not k.startswith("_"))
+    print("checkdoc: OK (accepted debt: %d undocumented symbols, no new gaps,"
+          " %d exported symbols)." % (n_undoc, n_index))
 
 
 if __name__ == "__main__":

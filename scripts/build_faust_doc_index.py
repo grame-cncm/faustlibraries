@@ -49,7 +49,9 @@ from typing import Iterable
 
 LIBRARY_DIRECTIVE_RE = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)\s*=\s*library\("([^"]+)"\)\s*;')
 IMPORT_DIRECTIVE_RE = re.compile(r'import\("([^"]+)"\)\s*;')
-HEADER_RE = re.compile(r"^//-+\s*`([^`]+)`\s*-+")
+# A header may document several symbols on one line:
+#   `//-----`(fi.)lms`, `(fi.)nlms`-----`
+HEADER_RE = re.compile(r"^//-+\s*(`[^`]+`(?:\s*,\s*`[^`]+`)*)\s*-+")
 PARAM_RE = re.compile(r"^\*\s*`([^`]+)`\s*:\s*(.+)$")
 SEPARATOR_RE = re.compile(r"^[-=#*]{3,}$")
 DEFINITION_NAME_RE = re.compile(r"^(?:declare\s+)?([A-Za-z_][A-Za-z0-9_\[\]]*)\s*(?:\(|=)")
@@ -218,16 +220,32 @@ def parse_symbol_header(line: str) -> dict[str, str | None] | None:
     - `name`: symbol name, e.g. `Rsqrt`
     """
 
+    headers = parse_symbol_headers(line)
+    return headers[0] if headers else None
+
+
+def parse_symbol_headers(line: str) -> list[dict[str, str | None]]:
+    """Parse a header line into one entry per documented symbol.
+
+    A single header line may document several symbols
+    (```//-----`(fi.)lms`, `(fi.)nlms`-----```); every backquoted name on
+    the line yields its own entry, all sharing the same documentation block.
+    """
+
     match = HEADER_RE.match(line)
     if not match:
-        return None
-    header = match.group(1).strip()
-    alias_match = re.match(r"^\(([^)]+)\)\s*(.+)$", header)
-    if alias_match:
-        alias = alias_match.group(1).rstrip(".").strip()
-        name = alias_match.group(2).strip()
-        return {"header": header, "alias": alias or None, "name": name}
-    return {"header": header, "alias": None, "name": header.strip()}
+        return []
+    entries: list[dict[str, str | None]] = []
+    for header in re.findall(r"`([^`]+)`", match.group(1)):
+        header = header.strip()
+        alias_match = re.match(r"^\(([^)]+)\)\s*(.+)$", header)
+        if alias_match:
+            alias = alias_match.group(1).rstrip(".").strip()
+            name = alias_match.group(2).strip()
+            entries.append({"header": header, "alias": alias or None, "name": name})
+        else:
+            entries.append({"header": header, "alias": None, "name": header})
+    return entries
 
 
 def warn(message: str) -> None:
@@ -392,8 +410,9 @@ def extract_doc_block(lines: list[str], start_index: int) -> dict[str, object] |
     `#### Usage` section.
     """
 
-    header_info = parse_symbol_header(lines[start_index] if start_index < len(lines) else "")
-    if not header_info:
+    header_infos = parse_symbol_headers(
+        lines[start_index] if start_index < len(lines) else "")
+    if not header_infos:
         return None
 
     body: list[str] = []
@@ -423,7 +442,7 @@ def extract_doc_block(lines: list[str], start_index: int) -> dict[str, object] |
         break
 
     return {
-        "headerInfo": header_info,
+        "headerInfos": header_infos,
         "body": body,
         "endIndex": index - 1,
         "definition": definition,
@@ -626,9 +645,9 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
         if section == "reference":
             if trimmed.startswith("* "):
                 ref_text = trimmed[2:].strip()
-                if ref_text:
+                if ref_text and not is_separator_line(ref_text):
                     references.append(ref_text)
-            elif trimmed:
+            elif trimmed and not is_separator_line(trimmed):
                 references.append(trimmed)
 
     usage = None
@@ -747,78 +766,81 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
                 continue
 
             line_index = int(block["endIndex"])
-            header_info = block["headerInfo"]
             body = parse_doc_body(block["body"])
+            header_names = {str(h["name"] or "").strip()
+                            for h in block["headerInfos"]}
 
-            name = str(header_info["name"] or "").strip()
-            if not name:
-                line_index += 1
+            for header_info in block["headerInfos"]:
+              name = str(header_info["name"] or "").strip()
+              if not name:
                 continue
 
-            source_line_start = int(line_index) - len(block["body"]) + 1
-            def_name = definition_symbol_name(block.get("definition"))
-            if is_suspicious_symbol_name(name):
+              source_line_start = int(line_index) - len(block["body"]) + 1
+              def_name = definition_symbol_name(block.get("definition"))
+              if is_suspicious_symbol_name(name):
                 warn(
                     f"suspicious header name {name!r} in {rel_file}:{source_line_start} "
                     f"(header={header_info['header']!r})"
                 )
-            if def_name and def_name != name:
+              # a shared block documents several symbols; the definition that
+              # follows can only match one of them
+              if def_name and def_name not in header_names:
                 warn(
                     f"header/definition mismatch in {rel_file}:{source_line_start}: "
                     f"header name={name!r}, definition name={def_name!r}"
                 )
 
-            alias = str(header_info["alias"] or "").strip() or (hinted_aliases[0] if hinted_aliases else module_name)
-            usage = body["usage"] or infer_usage_from_definition(name, block.get("definition"))
-            io = parse_usage_io(usage)
+              alias = str(header_info["alias"] or "").strip() or (hinted_aliases[0] if hinted_aliases else module_name)
+              usage = body["usage"] or infer_usage_from_definition(name, block.get("definition"))
+              io = parse_usage_io(usage)
 
-            # `id` is stable and file-based, while `qualifiedName` is alias-based
-            # and therefore closer to how users actually call the symbol.
-            symbol = {
-                "id": f"{module_name}.{name}",
-                "name": name,
-                "qualifiedName": f"{alias}.{name}",
-                "header": header_info["header"],
-                "summary": body["summary"],
-                "usage": usage,
-                "params": body["params"],
-                "notes": body["notes"],
-                "io": io,
-                "testCode": body["testCode"],
-                "references": body["references"],
-                "tags": [module_name],
-                "source": {
-                    "file": file_name,
-                    "path": rel_file,
-                    "lineStart": source_line_start,
-                    "lineEnd": int(block["endIndex"]) + 1,
-                },
-            }
-            if name in symbol_licenses:
-                symbol["license"] = symbol_licenses[name]
+              # `id` is stable and file-based, while `qualifiedName` is alias-based
+              # and therefore closer to how users actually call the symbol.
+              symbol = {
+                  "id": f"{module_name}.{name}",
+                  "name": name,
+                  "qualifiedName": f"{alias}.{name}",
+                  "header": header_info["header"],
+                  "summary": body["summary"],
+                  "usage": usage,
+                  "params": body["params"],
+                  "notes": body["notes"],
+                  "io": io,
+                  "testCode": body["testCode"],
+                  "references": body["references"],
+                  "tags": [module_name],
+                  "source": {
+                      "file": file_name,
+                      "path": rel_file,
+                      "lineStart": source_line_start,
+                      "lineEnd": int(block["endIndex"]) + 1,
+                  },
+              }
+              if name in symbol_licenses:
+                  symbol["license"] = symbol_licenses[name]
 
-            previous = seen_ids.get(symbol["id"])
-            if previous is not None:
-                prev_source = previous["source"]
-                warn(
-                    f"duplicate symbol id {symbol['id']!r} in {rel_file}:{source_line_start}; "
-                    f"previously seen at {prev_source['path']}:{prev_source['lineStart']}"
-                )
-            else:
-                seen_ids[symbol["id"]] = symbol
+              previous = seen_ids.get(symbol["id"])
+              if previous is not None:
+                  prev_source = previous["source"]
+                  warn(
+                      f"duplicate symbol id {symbol['id']!r} in {rel_file}:{source_line_start}; "
+                      f"previously seen at {prev_source['path']}:{prev_source['lineStart']}"
+                  )
+              else:
+                  seen_ids[symbol["id"]] = symbol
 
-            previous_qn = seen_qualified_names.get(symbol["qualifiedName"])
-            if previous_qn is not None:
-                prev_source = previous_qn["source"]
-                warn(
-                    f"duplicate qualifiedName {symbol['qualifiedName']!r} in {rel_file}:{source_line_start}; "
-                    f"previously seen at {prev_source['path']}:{prev_source['lineStart']}"
-                )
-            else:
-                seen_qualified_names[symbol["qualifiedName"]] = symbol
+              previous_qn = seen_qualified_names.get(symbol["qualifiedName"])
+              if previous_qn is not None:
+                  prev_source = previous_qn["source"]
+                  warn(
+                      f"duplicate qualifiedName {symbol['qualifiedName']!r} in {rel_file}:{source_line_start}; "
+                      f"previously seen at {prev_source['path']}:{prev_source['lineStart']}"
+                  )
+              else:
+                  seen_qualified_names[symbol["qualifiedName"]] = symbol
 
-            lib_symbols.append(symbol)
-            symbols.append(symbol)
+              lib_symbols.append(symbol)
+              symbols.append(symbol)
             line_index += 1
 
         libraries.append(
