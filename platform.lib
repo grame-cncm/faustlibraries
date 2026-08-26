@@ -50,11 +50,23 @@ declare version "1.3.0";
 // compiler to optimize the code by computing constant expressions at
 // compile time, and can be valuable for performance, especially on
 // embedded systems.
+//
+// #### Usage
+//
+// ```
+// SR : _
+// ```
 //-----------------------------------------------------------------------------
 SR = min(192000.0, max(1.0, fconstant(int fSamplingFreq, <math.h>)));
 
 //---------------------------------`(pl.)BS`---------------------------------------
 // Current block-size (between 1 and 16384 frames). Can change during the execution.
+//
+// #### Usage
+//
+// ```
+// BS : _
+// ```
 //-----------------------------------------------------------------------------
 BS = min(16384.0, max(1.0, fvariable(int count, <math.h>)));
 
@@ -62,5 +74,11 @@ BS = min(16384.0, max(1.0, fvariable(int count, <math.h>)));
 // Oscillator table size. This value is used to define the size of the
 // table used by the oscillators. It is usually a power of 2 and can be lowered
 // to save memory. The default value is 65536.
+//
+// #### Usage
+//
+// ```
+// tablesize : _
+// ```
 //-----------------------------------------------------------------------------
 tablesize = 1 << 16;

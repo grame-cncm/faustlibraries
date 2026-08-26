@@ -53,54 +53,126 @@ clip(l, h, x) = max(l, min(h, x));
 
 //-------`(aa.)Rsqrt`----------
 // Real-valued sqrt().
+//
+// #### Usage
+//
+// ```
+// _ : Rsqrt : _
+// ```
+//
+// Where the input is domain-clipped to `x >= 0` so the result stays real and finite.
 //-----------------------------
 Rsqrt(x) = sqrt(max(0.0, x));
 
 
 //-------`(aa.)Rlog`-----------
 // Real-valued log().
+//
+// #### Usage
+//
+// ```
+// _ : Rlog : _
+// ```
+//
+// Where the input is domain-clipped to `x >= ma.EPSILON` so the result stays real and finite.
 //-----------------------------
 Rlog(x) = log(max(ma.EPSILON, x));
 
 
 //-------`(aa.)Rtan`-----------
 // Real-valued tan().
+//
+// #### Usage
+//
+// ```
+// _ : Rtan : _
+// ```
+//
+// Where the input is range-clipped to `[-ma.MAX, ma.MAX]` so the result stays real and finite.
 //-----------------------------
 Rtan(x) = tan(clip(0-ma.MAX, ma.MAX, x));
 
 
 //-------`(aa.)Racos`----------
 // Real-valued acos().
+//
+// #### Usage
+//
+// ```
+// _ : Racos : _
+// ```
+//
+// Where the input is domain-clipped to `[-1, 1]` so the result stays real and finite.
 //-----------------------------
 Racos(x) = acos(clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Rasin`----------
 // Real-valued asin().
+//
+// #### Usage
+//
+// ```
+// _ : Rasin : _
+// ```
+//
+// Where the input is domain-clipped to `[-1, 1]` so the result stays real and finite.
 //-----------------------------
 Rasin(x) = asin(clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Racosh`----------
 // Real-valued acosh()
+//
+// #### Usage
+//
+// ```
+// _ : Racosh : _
+// ```
+//
+// Where the input is domain-clipped to `x >= 1` so the result stays real and finite.
 //------------------------------
 Racosh(x) = ma.acosh(clip(1.0, ma.MAX, x));
 
 
 //-------`(aa.)Rcosh`----------
 // Real-valued cosh().
+//
+// #### Usage
+//
+// ```
+// _ : Rcosh : _
+// ```
+//
+// Where the input is range-clipped to `ma.MAX` so the result stays real and finite.
 //-----------------------------
 Rcosh(x) = min(ma.MAX, ma.cosh(x));
 
 
 //-------`(aa.)Rsinh`-----------
 // Real-valued sinh().
+//
+// #### Usage
+//
+// ```
+// _ : Rsinh : _
+// ```
+//
+// Where the input is range-clipped to `[-ma.MAX, ma.MAX]` so the result stays real and finite.
 //------------------------------
 Rsinh(x) = clip(0-ma.MAX, ma.MAX, ma.sinh(x));
 
 
 //-------`(aa.)Ratanh`----------
 // Real-valued atanh().
+//
+// #### Usage
+//
+// ```
+// _ : Ratanh : _
+// ```
+//
+// Where the input is domain-clipped to `(-1, 1)` so the result stays real and finite.
 //------------------------------
 Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 
