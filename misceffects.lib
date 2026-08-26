@@ -1318,8 +1318,21 @@ wavefold = nonlinearityEnv.wavefold;
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////
 // This section implements functions that used to be in music.lib but that are now
-// considered as "deprecated".
+// considered as "deprecated": kept for backward compatibility only, they should
+// not be used in new code.
+//
+// WARNING: despite their names, the '1s'/'2s'/.../'43s' suffixes do NOT denote
+// durations in seconds. They are fixed power-of-two sizes in SAMPLES (65536,
+// 131072, ..., 2097152), so the actual duration depends on the sampling rate:
+// 65536 samples last 1.49 s at 44.1 kHz but 1.37 s at 48 kHz.
 //////////////////////////////////////////////////////////////////////////////////////////
+
+declare echo1s deprecated "use ef.echo with explicit parameters; the 1s..43s names are power-of-two sample counts, not seconds";
+declare echo2s deprecated "use ef.echo with explicit parameters; the 1s..43s names are power-of-two sample counts, not seconds";
+declare echo5s deprecated "use ef.echo with explicit parameters; the 1s..43s names are power-of-two sample counts, not seconds";
+declare echo10s deprecated "use ef.echo with explicit parameters; the 1s..43s names are power-of-two sample counts, not seconds";
+declare echo21s deprecated "use ef.echo with explicit parameters; the 1s..43s names are power-of-two sample counts, not seconds";
+declare echo43s deprecated "use ef.echo with explicit parameters; the 1s..43s names are power-of-two sample counts, not seconds";
 
 echo1s  = vgroup("echo 1000", +~(de.delay(65536, int(hslider("millisecond", 0, 0, 1000, 0.10)*ba.millisec)-1) * (hslider("feedback", 0, 0, 100, 0.1)/100.0)));
 echo2s  = vgroup("echo 2000", +~(de.delay(131072, int(hslider("millisecond", 0, 0, 2000, 0.25)*ba.millisec)-1) * (hslider("feedback", 0, 0, 100, 0.1)/100.0)));
