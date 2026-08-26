@@ -53,126 +53,54 @@ clip(l, h, x) = max(l, min(h, x));
 
 //-------`(aa.)Rsqrt`----------
 // Real-valued sqrt().
-//
-// #### Usage
-//
-// ```
-// _ : Rsqrt : _
-// ```
-//
-// Where the input is domain-clipped to `x >= 0` so the result stays real and finite.
 //-----------------------------
 Rsqrt(x) = sqrt(max(0.0, x));
 
 
 //-------`(aa.)Rlog`-----------
 // Real-valued log().
-//
-// #### Usage
-//
-// ```
-// _ : Rlog : _
-// ```
-//
-// Where the input is domain-clipped to `x >= ma.EPSILON` so the result stays real and finite.
 //-----------------------------
 Rlog(x) = log(max(ma.EPSILON, x));
 
 
 //-------`(aa.)Rtan`-----------
 // Real-valued tan().
-//
-// #### Usage
-//
-// ```
-// _ : Rtan : _
-// ```
-//
-// Where the input is range-clipped to `[-ma.MAX, ma.MAX]` so the result stays real and finite.
 //-----------------------------
 Rtan(x) = tan(clip(0-ma.MAX, ma.MAX, x));
 
 
 //-------`(aa.)Racos`----------
 // Real-valued acos().
-//
-// #### Usage
-//
-// ```
-// _ : Racos : _
-// ```
-//
-// Where the input is domain-clipped to `[-1, 1]` so the result stays real and finite.
 //-----------------------------
 Racos(x) = acos(clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Rasin`----------
 // Real-valued asin().
-//
-// #### Usage
-//
-// ```
-// _ : Rasin : _
-// ```
-//
-// Where the input is domain-clipped to `[-1, 1]` so the result stays real and finite.
 //-----------------------------
 Rasin(x) = asin(clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Racosh`----------
 // Real-valued acosh()
-//
-// #### Usage
-//
-// ```
-// _ : Racosh : _
-// ```
-//
-// Where the input is domain-clipped to `x >= 1` so the result stays real and finite.
 //------------------------------
 Racosh(x) = ma.acosh(clip(1.0, ma.MAX, x));
 
 
 //-------`(aa.)Rcosh`----------
 // Real-valued cosh().
-//
-// #### Usage
-//
-// ```
-// _ : Rcosh : _
-// ```
-//
-// Where the input is range-clipped to `ma.MAX` so the result stays real and finite.
 //-----------------------------
 Rcosh(x) = min(ma.MAX, ma.cosh(x));
 
 
 //-------`(aa.)Rsinh`-----------
 // Real-valued sinh().
-//
-// #### Usage
-//
-// ```
-// _ : Rsinh : _
-// ```
-//
-// Where the input is range-clipped to `[-ma.MAX, ma.MAX]` so the result stays real and finite.
 //------------------------------
 Rsinh(x) = clip(0-ma.MAX, ma.MAX, ma.sinh(x));
 
 
 //-------`(aa.)Ratanh`----------
 // Real-valued atanh().
-//
-// #### Usage
-//
-// ```
-// _ : Ratanh : _
-// ```
-//
-// Where the input is domain-clipped to `(-1, 1)` so the result stays real and finite.
 //------------------------------
 Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 
@@ -212,7 +140,7 @@ Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 declare ADAA1 author "Dario Sanfilippo";
 declare ADAA1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare ADAA1 license "MIT";
+declare ADAA1 license "MIT License";
 ADAA1(EPS, f, F1, x) = D1q 
       with {
            D1q = ba.if(abs(x - x') <= EPS, ill_D1q, safe_D1q)
@@ -261,7 +189,7 @@ ADAA1(EPS, f, F1, x) = D1q
 declare ADAA2 author "Dario Sanfilippo";
 declare ADAA2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare ADAA2 license "MIT";
+declare ADAA2 license "MIT License";
 ADAA2(EPS, f, F1, F2, x) = T1 + T2 
       with {
            T1 = ba.if((x - x') ^ 2.0 <= EPS, ill_T1, safe_T1)
@@ -317,7 +245,7 @@ ADAA2(EPS, f, F1, F2, x) = T1 + T2
 declare hardclip author "Dario Sanfilippo";
 declare hardclip copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare hardclip license "MIT";
+declare hardclip license "MIT License";
 hardclip(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001;
@@ -349,7 +277,7 @@ hardclip(x) = ADAA1(EPS, f, F1, x)
 declare hardclip2 author "Dario Sanfilippo";
 declare hardclip2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare hardclip2 license "MIT";
+declare hardclip2 license "MIT License";
 hardclip2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
            EPS = .001;
@@ -386,7 +314,7 @@ hardclip2(x) = ADAA2(EPS, f, F1, F2, x)
 declare cubic1 author "Dario Sanfilippo";
 declare cubic1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare cubic1 license "MIT";
+declare cubic1 license "MIT License";
 cubic1(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001; 
@@ -422,7 +350,7 @@ cubic1(x) = ADAA1(EPS, f, F1, x)
 declare parabolic author "Dario Sanfilippo";
 declare parabolic copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare parabolic license "MIT";
+declare parabolic license "MIT License";
 parabolic(x) = ADAA1(EPS, f, F1, x) 
       with {
            EPS = .001; 
@@ -457,7 +385,7 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
 declare parabolic2 author "Dario Sanfilippo";
 declare parabolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare parabolic2 license "MIT";
+declare parabolic2 license "MIT License";
 parabolic2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
            EPS = .001; 
@@ -496,7 +424,7 @@ parabolic2(x) = ADAA2(EPS, f, F1, F2, x)
 declare hyperbolic author "Dario Sanfilippo";
 declare hyperbolic copyright "Copyright (C) 2021 Dario Sanfilippo
      <sanfilippo.dario@gmail.com>";
-declare hyperbolic license "MIT";
+declare hyperbolic license "MIT License";
 hyperbolic(x) = ADAA1(EPS, f, F1, x)
     with {
         EPS = .001; 
@@ -526,7 +454,7 @@ hyperbolic(x) = ADAA1(EPS, f, F1, x)
 declare hyperbolic2 author "Dario Sanfilippo";
 declare hyperbolic2 copyright "Copyright (C) 2021 Dario Sanfilippo
      <sanfilippo.dario@gmail.com>";
-declare hyperbolic2 license "MIT";
+declare hyperbolic2 license "MIT License";
 hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
     with {
         EPS = .001; 
@@ -558,7 +486,7 @@ hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
 declare sinarctan author "Dario Sanfilippo";
 declare sinarctan copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare sinarctan license "MIT";
+declare sinarctan license "MIT License";
 sinarctan(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001; 
@@ -591,7 +519,7 @@ sinarctan(x) = ADAA1(EPS, f, F1, x)
 declare sinarctan2 author "Dario Sanfilippo";
 declare sinarctan2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare sinarctan2 license "MIT";
+declare sinarctan2 license "MIT License";
 sinarctan2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
            EPS = .001; 
@@ -661,7 +589,7 @@ softclipEnv = environment {
 //----------------------------------------------
 declare softclipQuadratic1 author "David Braun";
 declare softclipQuadratic1 copyright "Copyright (C) 2024 David Braun";
-declare softclipQuadratic1 license "MIT";
+declare softclipQuadratic1 license "MIT license";
 
 softclipQuadratic1 = softclipEnv.softclipQuadratic1;
 
@@ -686,7 +614,7 @@ softclipQuadratic1 = softclipEnv.softclipQuadratic1;
 //----------------------------------------------
 declare softclipQuadratic2 author "David Braun";
 declare softclipQuadratic2 copyright "Copyright (C) 2024 David Braun";
-declare softclipQuadratic2 license "MIT";
+declare softclipQuadratic2 license "MIT license";
 
 softclipQuadratic2 = softclipEnv.softclipQuadratic2;
 
@@ -712,7 +640,7 @@ softclipQuadratic2 = softclipEnv.softclipQuadratic2;
 declare tanh1 author "Dario Sanfilippo";
 declare tanh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare tanh1 license "MIT";
+declare tanh1 license "MIT License";
 tanh1(x) = ADAA1(EPS, f, F1, x) 
       with {
            EPS = .001; 
@@ -742,7 +670,7 @@ tanh1(x) = ADAA1(EPS, f, F1, x)
 declare arctan author "Dario Sanfilippo";
 declare arctan copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arctan license "MIT";
+declare arctan license "MIT License";
 arctan(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001; 
@@ -772,7 +700,7 @@ arctan(x) = ADAA1(EPS, f, F1, x)
 declare arctan2 author "Dario Sanfilippo";
 declare arctan2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arctan2 license "MIT";
+declare arctan2 license "MIT License";
 arctan2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
            EPS = .001; 
@@ -803,7 +731,7 @@ arctan2(x) = ADAA2(EPS, f, F1, F2, x)
 declare asinh1 author "Dario Sanfilippo";
 declare asinh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare asinh1 license "MIT";
+declare asinh1 license "MIT License";
 asinh1(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001; 
@@ -836,7 +764,7 @@ asinh1(x) = ADAA1(EPS, f, F1, x)
 declare asinh2 author "Dario Sanfilippo";
 declare asinh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare asinh2 license "MIT";
+declare asinh2 license "MIT License";
 asinh2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
            EPS = .001; 
@@ -875,7 +803,7 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
 declare cosine1 author "Dario Sanfilippo";
 declare cosine1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare cosine1 license "MIT";
+declare cosine1 license "MIT License";
 cosine1(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001; 
@@ -905,7 +833,7 @@ cosine1(x) = ADAA1(EPS, f, F1, x)
 declare cosine2 author "Dario Sanfilippo";
 declare cosine2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare cosine2 license "MIT";
+declare cosine2 license "MIT License";
 cosine2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
            EPS = .001; 
@@ -937,7 +865,7 @@ cosine2(x) = ADAA2(EPS, f, F1, F2, x)
 declare arccos author "Dario Sanfilippo";
 declare arccos copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arccos license "MIT";
+declare arccos license "MIT License";
 arccos(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001; 
@@ -974,7 +902,7 @@ arccos(x) = ADAA1(EPS, f, F1, x)
 declare arccos2 author "Dario Sanfilippo";
 declare arccos2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arccos2 license "MIT";
+declare arccos2 license "MIT License";
 arccos2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
            EPS = .001; 
@@ -1010,7 +938,7 @@ arccos2(x) = ADAA2(EPS, f, F1, F2, x)
 declare acosh1 author "Dario Sanfilippo";
 declare acosh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare acosh1 license "MIT";
+declare acosh1 license "MIT License";
 acosh1(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001; 
@@ -1044,7 +972,7 @@ acosh1(x) = ADAA1(EPS, f, F1, x)
 declare acosh2 author "Dario Sanfilippo";
 declare acosh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare acosh2 license "MIT";
+declare acosh2 license "MIT License";
 acosh2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
            EPS = .001;
@@ -1077,7 +1005,7 @@ acosh2(x) = ADAA2(EPS, f, F1, F2, x)
 declare sine author "Dario Sanfilippo";
 declare sine copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare sine license "MIT";
+declare sine license "MIT License";
 sine(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001;
@@ -1107,7 +1035,7 @@ sine(x) = ADAA1(EPS, f, F1, x)
 declare sine2 author "Dario Sanfilippo";
 declare sine2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare sine2 license "MIT";
+declare sine2 license "MIT License";
 sine2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
            EPS = .001;
@@ -1139,7 +1067,7 @@ sine2(x) = ADAA2(EPS, f, F1, F2, x)
 declare arcsin author "Dario Sanfilippo";
 declare arcsin copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arcsin license "MIT";
+declare arcsin license "MIT License";
 arcsin(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001;
@@ -1176,7 +1104,7 @@ arcsin(x) = ADAA1(EPS, f, F1, x)
 declare arcsin2 author "Dario Sanfilippo";
 declare arcsin2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare arcsin2 license "MIT";
+declare arcsin2 license "MIT License";
 arcsin2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
            EPS = .001;
@@ -1213,7 +1141,7 @@ arcsin2(x) = ADAA2(EPS, f, F1, F2, x)
 declare tangent author "Dario Sanfilippo";
 declare tangent copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare tangent license "MIT";
+declare tangent license "MIT License";
 tangent(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001;
@@ -1244,7 +1172,7 @@ tangent(x) = ADAA1(EPS, f, F1, x)
 declare atanh1 author "Dario Sanfilippo";
 declare atanh1 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare atanh1 license "MIT";
+declare atanh1 license "MIT License";
 atanh1(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001;
@@ -1275,7 +1203,7 @@ atanh1(x) = ADAA1(EPS, f, F1, x)
 declare atanh2 author "Dario Sanfilippo";
 declare atanh2 copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare atanh2 license "MIT";
+declare atanh2 license "MIT License";
 atanh2(x) = ADAA2(EPS, f, F1, F2, x)
       with {
            EPS = .001;
