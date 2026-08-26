@@ -100,6 +100,14 @@ When adding similar models, start with the UI-free core, add a minimal UI wrappe
 
 To avoid name clashes between libraries, keep identifiers as local as possible. Prefer defining intermediate constants and helpers inside `with { ... }` blocks or `environment { ... }` sections, and only expose the intended public entry points. This minimizes collisions when several libraries are imported together and keeps global namespace usage limited to documented, public-facing functions.
 
+When a helper cannot live inside a `with`/`environment` block (for instance
+because several public functions share it), prefix its name with an
+underscore: `_helperName`. The underscore marks it as **internal**: it is not
+part of the library's public API, needs no documentation block, is excluded
+from the documentation coverage accounting (`scripts/audit2.py`,
+`make checkdoc`), and may change or disappear without notice. Do not use
+underscore-prefixed symbols from another library.
+
 ## New Libraries
 
 * Any new "standard" library should be declared in `stdfaust.lib` with its own environment (2 letters - see `stdfaust.lib`) and in `all.lib`.
@@ -146,9 +154,19 @@ In order to have a uniformized library system, we established the following conv
 
 ### Function Naming
 
-[WIP]
+The libraries historically mix `snake_case` and `camelCase` in roughly equal
+proportion, sometimes inside a single file. Renaming existing public symbols
+is not an option (it breaks user code), so the rule applies to *new* code:
 
-JOS proposal: using terms used in the field of digital signal processing, as follows:
+* a new function added to an existing library follows the **dominant style of
+  that library** (and of the section it lands in, when the library is mixed);
+* a new library picks **one** style in its header section and uses it
+  consistently;
+* internal helpers follow the underscore convention described in
+  [Variables and identifiers scoping](#variables-and-identifiers-scoping).
+
+For terminology, use the terms of the digital signal processing field
+(JOS proposal):
 
 * `impulse`: ...,0,1,0,...
 * `pulse`: ...,0,1,1,0,... or longer
@@ -156,8 +174,6 @@ JOS proposal: using terms used in the field of digital signal processing, as fol
 * `pulse_train`
 * `gate` = pulse controlled externally (e.g., by NoteOn,NoteOff)
 * `trigger` = impulse controlled externally (gate - gate' > 0) == gate rising edge
-
-[/WIP]
 
 ### Variable Argument List 
 
@@ -172,7 +188,16 @@ Thus functions expecting a variable number of arguments can use this mechanism, 
 * Sections in function documentation should be declared as `####` markdown title.
 * Each function documentation provides a "Usage" section (see `basics.lib`). 
 * The full documentation can be generated using the doc/Makefile script. Use `make help` to see all possible commands. If you plan to create a pull-request, *do not commit the full generated code* but only the modified .lib files.
-* Each function can have `declare author "name";`, `declare copyright "XXX";` and `declare licence "YYY";` declarations.
+* Each function can have `declare author "name";` and `declare copyright "XXX";` declarations.
+* Every **new** function must carry a `declare functionName license "ID";` line
+  whose `ID` is a canonical [SPDX identifier](https://spdx.org/licenses/) --
+  e.g. `MIT`, `GPL-3.0-only`, `LGPL-2.1-or-later`, `BSD-3-Clause`, `ISC`, or
+  the repository's `LicenseRef-STK-4.3` and
+  `LicenseRef-LGPL-2.1-or-later-with-Faust-exception` for the two licenses
+  without an SPDX-listed id. The accepted spellings are the `CANONICAL` /
+  `ALLOWED` tables of `scripts/normalize_licenses.py`; run
+  `scripts/normalize_licenses.py --check` (included in `make checkdoc`) to
+  verify, and plain `scripts/normalize_licenses.py` to fix legacy spellings.
 * Each library has a `declare version "xx.yy.zz";` [semantic version](https://semver.org) number to be raised each time a modification is done. The global `version` number in `version.lib` also has to be adapted according to the change.  
 
 ### Library Import
@@ -245,7 +270,9 @@ Before preparing a pull-request, the new library must be carefully tested:
 
 - all functions defined in the library must be tested by preparing a DSP test program, to be added using the `#### Test` syntax 
 - the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program: `import("all.lib"); process = _;`
-- reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified.
+- reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified. `make check` fails on the first divergence; use `make -k check` to run the whole suite and collect every failure.
+- every new function therefore ships with **both** its `#### Test` section and the corresponding `functionName_test` entry in the *tests* folder, and its reference is generated with `make reference` in the same change.
+- finally, `make checkdoc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted.
 
 ## LLMs
 
