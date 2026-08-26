@@ -198,7 +198,44 @@ Thus functions expecting a variable number of arguments can use this mechanism, 
   `ALLOWED` tables of `scripts/normalize_licenses.py`; run
   `scripts/normalize_licenses.py --check` (included in `make checkdoc`) to
   verify, and plain `scripts/normalize_licenses.py` to fix legacy spellings.
-* Each library has a `declare version "xx.yy.zz";` [semantic version](https://semver.org) number to be raised each time a modification is done. The global `version` number in `version.lib` also has to be adapted according to the change.  
+* Each library has a `declare version "xx.yy.zz";` [semantic version](https://semver.org) number to be raised each time a modification is done, and the global `version` triplet in `version.lib` follows — see [Versioning](#versioning) for the exact rules.
+
+### Versioning
+
+Version numbers live at two levels, and both follow
+[semantic versioning](https://semver.org):
+
+* each library carries its own `declare version "MAJOR.MINOR.PATCH";`,
+  raised **in the same commit** as the change it describes;
+* `version.lib` holds the global `vl.version` triplet for the library set as
+  a whole, raised once per batch of changes according to the
+  highest-ranking change since it was last raised.
+
+Which component to raise:
+
+* **MAJOR** — any backwards-*incompatible* change to the public API:
+  removing or renaming a documented function, changing its arity, its
+  parameter order or units, or its audible semantics; and in particular
+  **removing deprecated aliases** at the end of their grace period.
+* **MINOR** — backwards-compatible functionality: a new function or
+  library, new optional behavior, documenting a previously undocumented
+  symbol, or **marking a function deprecated** (the alias still works, so
+  deprecation itself is not a breaking change).
+* **PATCH** — backwards-compatible bug fixes and internal improvements:
+  wrong coefficients or constants, performance work, documentation fixes,
+  and any change confined to underscore-prefixed internal symbols (they
+  are not API — see
+  [Variables and identifiers scoping](#variables-and-identifiers-scoping)).
+
+The deprecation lifecycle ties into this: deprecating a name is MINOR,
+and its removal must wait until at least one *published release* has
+shipped with the `declare ... deprecated` warning, at which point the
+removal is the MAJOR change of the next version. When in doubt about
+whether a change is breaking, treat the documented behavior — the
+function's doc block and its regression test — as the contract: if an
+existing test reference has to be regenerated because the output changed,
+the change is at least a bug fix worth calling out, and if callers must
+edit their code, it is MAJOR.
 
 ### Library Import
 
