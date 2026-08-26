@@ -44,6 +44,7 @@ def compare_files(file1, file2, tol=1e-6):
         print(f"No differences within tolerance {tol}")
     else:
         print("Differences found.")
+    return diff_found
 
 
 if __name__ == "__main__":
@@ -67,4 +68,4 @@ if __name__ == "__main__":
         except ValueError:
             pass
 
-    compare_files(args.file1, args.file2, tol)
+    sys.exit(1 if compare_files(args.file1, args.file2, tol) else 0)

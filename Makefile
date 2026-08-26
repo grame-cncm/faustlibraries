@@ -2,7 +2,8 @@
 #
 # `make reference`  - compile each *_test entry and store terminal output under tests/reference/.
 # `make check`      - recompile, run each test, and diff against the stored reference output.
-# `make clean`      - remove build artefacts and generated outputs.
+# `make clean`      - remove build artefacts and generated outputs (references are kept).
+# `make distclean`  - additionally remove the stored reference outputs.
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
 # `make build`      - build the documentation.
 # `make serve`      - serve the documentation.
@@ -35,7 +36,11 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check clean help bench doc-index doc-index-split doc-index-commercial
+.PHONY: reference check clean distclean help bench doc-index doc-index-split doc-index-commercial
+
+# Remove a target whose recipe failed, so a failed test is re-run next time
+# instead of being considered up to date.
+.DELETE_ON_ERROR:
 
 help: ## Show available targets and descriptions
 	@printf "Usage:\n  make \033[36m<target>\033[0m\n\n"
@@ -57,7 +62,18 @@ $(firstword $(subst :, ,$(filter %:$1,$(TEST_SPECS))))
 endef
 
 # Default goals remain documented via help; reference/check now depend on per-test files
-reference: $(REFS) ## Build reference outputs for all *_test specifications
+reference: $(REFS) $(REFERENCE_DIR)/PARAMS ## Build reference outputs for all *_test specifications (records PARAMS)
+
+# Record the parameters the references were generated with, so a regeneration
+# or a comparison under different settings is detectable.
+$(REFERENCE_DIR)/PARAMS: | $(REFERENCE_DIR)
+	@{ \
+		echo "FAUST_VERSION=$$($(FAUST) --version 2>/dev/null | head -1)"; \
+		echo "FAUST_OPT=$(FAUST_OPT)"; \
+		echo "NUM_SAMPLES=$(NUM_SAMPLES)"; \
+		echo "SAMPLE_RATE=$(SAMPLE_RATE)"; \
+		echo "FLOAT_TOL=$(FLOAT_TOL)"; \
+	} > $@
 
 # Build a single reference from its test name (stem: %)
 $(REFERENCE_DIR)/%.ref: | $(REFERENCE_DIR) $(BUILD_DIR)
@@ -68,12 +84,12 @@ $(REFERENCE_DIR)/%.ref: | $(REFERENCE_DIR) $(BUILD_DIR)
 	$(FAUST) $(FAUST_OPT) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
 	if ! $(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.cpp -o $(BUILD_DIR)/$*; \
 	then \
-		echo "[skip] build failed for $*"; \
-		exit 0; \
+		echo "[fail] build failed for $*"; \
+		exit 1; \
 	fi; \
 	$(BUILD_DIR)/$* $(NUM_SAMPLES) $(SAMPLE_RATE) > $@
 
-check: $(OUTS) ## Run tests and diff against reference outputs
+check: $(OUTS) ## Run tests and diff against references (fails on first divergence; use -k to run all)
 
 # Build a single output and immediately compare with its reference
 $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
@@ -84,8 +100,8 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 	$(FAUST) $(FAUST_OPT) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
 	if ! $(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.cpp -o $(BUILD_DIR)/$*; \
 		then \
-			echo "[skip] build failed for $*"; \
-			exit 0; \
+			echo "[fail] build failed for $*"; \
+			exit 1; \
 		fi; \
 	$(BUILD_DIR)/$* $(NUM_SAMPLES) $(SAMPLE_RATE) > $@; \
 	if [ ! -f $(REFERENCE_DIR)/$*.ref ]; then \
@@ -94,6 +110,7 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 	fi; \
 	if ! $(FLOATDIFF) $(REFERENCE_DIR)/$*.ref $@ $(FLOAT_TOL); then \
 		echo "[fail] output for $* differs from reference"; \
+		exit 1; \
 	fi
 
 bench: ## Run faustbench-llvm on all test specs and capture memory/CPU stats
@@ -153,8 +170,11 @@ serve: ## Serve the documentation
 pdf: ## Create the PDF documentation
 	$(MAKE) -C doc pdf
 
-clean: ## Remove build artefacts and generated outputs
-	rm -rf $(BUILD_DIR) $(REFERENCE_DIR) $(OUTPUT_DIR) $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
+clean: ## Remove build artefacts and generated outputs (keeps references)
+	rm -rf $(BUILD_DIR) $(OUTPUT_DIR) $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
+
+distclean: clean ## Additionally remove the stored reference outputs
+	rm -rf $(REFERENCE_DIR)
 
 $(BUILD_DIR) $(REFERENCE_DIR) $(OUTPUT_DIR):
 	@mkdir -p $@
