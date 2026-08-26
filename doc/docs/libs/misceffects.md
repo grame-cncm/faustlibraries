@@ -900,6 +900,83 @@ transpose_test = os.osc(440) : ef.transpose(1024, 512, 7);
 
 ----
 
+### `(ef.)transpose_windowed`
+
+Delay-line pitch shifter with `P` overlapping Hann-windowed read taps:
+the windowed-tap refinement of `ef.transpose`. Each tap sweeps the same
+`w`-sample window with a phase offset of `1/P`, weighted by
+`an.window_hann` of its own phase; since Hann windows at any regular
+overlap sum to a constant, the crossfade is click-free and
+equal-amplitude by construction (with `s = 0` the output is exactly a
+delayed copy). `P = 2` matches the classic two-tap topology; higher `P`
+smears transients less at large shifts.
+
+#### Usage
+
+```
+_ : transpose_windowed(P, w, s) : _
+```
+
+Where:
+
+* `P`: number of overlapping taps, 2 or more (a constant numerical expression)
+* `w`: window length in samples (up to 65536)
+* `s`: shift in semitones (positive or negative, may vary at run time)
+
+#### Test
+```
+ef = library("misceffects.lib");
+os = library("oscillators.lib");
+transpose_windowed_test = os.osc(440) : ef.transpose_windowed(2, 1024, 7);
+```
+
+----
+
+### `(ef.)granular`
+
+Live granulator on an internal delay line: `P` voices continuously replay
+Hann-windowed grains of `dur` seconds taken `pos` seconds back in the
+input, each voice offset by `1/P` of a grain so the voices overlap into a
+continuous texture (Hann overlaps sum to a constant: with `ratio = 1`,
+`jit = 0` the output is exactly the delayed input). The grain start
+position is latched when each grain begins - `pos` and `jit` can move
+freely without tearing grains. `ratio` repitches the material inside
+each grain by resampling (2 = up an octave, 0.5 = down an octave), and
+`jit` adds a per-grain random offset to the position for the classic
+granular cloud.
+
+When repitching tonal material with `jit = 0`, note that the voices read
+the source offset by `dur/P` seconds from one another: if that offset
+lands near an odd half-period of a source partial, that partial cancels
+between overlapping grains (ordinary granular phasiness). Choose `dur`
+against the material, or add a little `jit`, to decorrelate the voices.
+
+#### Usage
+
+```
+_ : granular(P, dur, ratio, pos, jit) : _
+```
+
+Where:
+
+* `P`: number of overlapping grain voices, 2 or more (a constant numerical expression)
+* `dur`: grain duration in seconds
+* `ratio`: playback speed inside each grain (1 = unchanged pitch)
+* `pos`: read position in seconds behind the write head
+* `jit`: random position jitter in seconds, latched per grain
+
+The latched read offset `pos + jit + (ratio-1)*dur` must stay within the
+65536-sample internal line (about 1.36 s at 48 kHz).
+
+#### Test
+```
+ef = library("misceffects.lib");
+os = library("oscillators.lib");
+granular_test = os.osc(440) : ef.granular(4, 0.05, 1.5, 0.2, 0.1);
+```
+
+----
+
 ### `(ef.)doppler_shift`
 
 Pitch shifter for signals with known fundamental frequency.

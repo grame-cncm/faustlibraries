@@ -676,6 +676,8 @@
 [(ef.)uniformPanToStereo](misceffects.md#efuniformpantostereo)
 [(ef.)tapeStop](misceffects.md#eftapestop)
 [(ef.)transpose](misceffects.md#eftranspose)
+[(ef.)transpose_windowed](misceffects.md#eftranspose_windowed)
+[(ef.)granular](misceffects.md#efgranular)
 [(ef.)doppler_shift](misceffects.md#efdoppler_shift)
 [(ef.)softclipQuadratic](misceffects.md#efsoftclipquadratic)
 [(ef.)wavefold](misceffects.md#efwavefold)

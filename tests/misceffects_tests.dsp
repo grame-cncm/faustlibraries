@@ -50,3 +50,7 @@ ms_enc_test = os.osc(440), os.osc(550) : ef.ms_enc;
 ms_dec_test = os.osc(440), os.osc(550) : ef.ms_enc : ef.ms_dec;
 dither_test = os.osc(440)*0.001 : ef.dither(16);
 dither_shaped_test = os.osc(440)*0.001 : ef.dither_shaped(2, 16);
+
+// Windowed transposer and granulator
+transpose_windowed_test = os.osc(440) : ef.transpose_windowed(2, 1024, 7);
+granular_test = os.osc(440) : ef.granular(2, 0.05, 1.5, 0.2, 0.1);
