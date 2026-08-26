@@ -242,9 +242,14 @@ def parse_symbol_headers(line: str) -> list[dict[str, str | None]]:
         if alias_match:
             alias = alias_match.group(1).rstrip(".").strip()
             name = alias_match.group(2).strip()
-            entries.append({"header": header, "alias": alias or None, "name": name})
         else:
-            entries.append({"header": header, "alias": None, "name": header})
+            alias = None
+            name = header
+        # some headers title the symbol with its argument list
+        # (`(dm.)reverse_echo_demo(nChans)`); the symbol name is the bare
+        # identifier
+        name = re.sub(r"\([^()]*\)$", "", name).strip()
+        entries.append({"header": header, "alias": alias or None, "name": name})
     return entries
 
 
@@ -441,11 +446,26 @@ def extract_doc_block(lines: list[str], start_index: int) -> dict[str, object] |
         definition = candidate
         break
 
+    # A section may define helpers before the documented symbol itself
+    # (`_probe_x_impl` before `probe_x`), so collect every top-level
+    # definition name up to the next symbol header for the mismatch check.
+    definition_names: list[str] = []
+    scan_index = index
+    while scan_index < len(lines):
+        line = lines[scan_index]
+        if parse_symbol_header(line):
+            break
+        name_match = DEFINITION_NAME_RE.match(line)
+        if name_match:
+            definition_names.append(name_match.group(1))
+        scan_index += 1
+
     return {
         "headerInfos": header_infos,
         "body": body,
         "endIndex": index - 1,
         "definition": definition,
+        "definitionNames": definition_names,
     }
 
 
@@ -782,12 +802,14 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
                     f"suspicious header name {name!r} in {rel_file}:{source_line_start} "
                     f"(header={header_info['header']!r})"
                 )
-              # a shared block documents several symbols; the definition that
-              # follows can only match one of them
-              if def_name and def_name not in header_names:
+              # a section may define helpers before the documented symbol, so
+              # only warn when no definition up to the next header matches any
+              # of the block's documented names
+              definition_names = list(block.get("definitionNames") or [])
+              if def_name and not header_names.intersection(definition_names):
                 warn(
                     f"header/definition mismatch in {rel_file}:{source_line_start}: "
-                    f"header name={name!r}, definition name={def_name!r}"
+                    f"header name={name!r}, definitions={definition_names!r}"
                 )
 
               alias = str(header_info["alias"] or "").strip() or (hinted_aliases[0] if hinted_aliases else module_name)
