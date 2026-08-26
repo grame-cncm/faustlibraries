@@ -87,6 +87,9 @@
 [(an.)ifft, (an.)ifftb](analyzers.md#anifft,-anifftb)
 [(an.)rfft_analyzer_c, (an.)rfft_analyzer_db, (an.)rfft_analyzer_magsq](analyzers.md#anrfft_analyzer_c,-anrfft_analyzer_db,-anrfft_analyzer_magsq)
 [(an.)rfft_spectral_level](analyzers.md#anrfft_spectral_level)
+[(an.)spectral_centroid, (an.)spectral_spread](analyzers.md#anspectral_centroid,-anspectral_spread)
+[(an.)band_powers, (an.)band_center, (an.)moment, (an.)safe_div](analyzers.md#anband_powers,-anband_center,-anmoment,-ansafe_div)
+[(an.)spectral_flux](analyzers.md#anspectral_flux)
 [(an.)loudness_momentary, (an.)loudness_shortterm](analyzers.md#anloudness_momentary,-anloudness_shortterm)
 [(an.)loudness_meansquare, (an.)meansquare2lufs](analyzers.md#anloudness_meansquare,-anmeansquare2lufs)
 [(an.)loudness_integrated](analyzers.md#anloudness_integrated)
@@ -493,6 +496,7 @@
 [(fi.)avg_t60](filters.md#fiavg_t60)
 [(fi.)avg_t19](filters.md#fiavg_t19)
 [(fi.)kalman](filters.md#fikalman)
+[(fi.)lms, (fi.)nlms, (fi.)adaptFIR](filters.md#films,-finlms,-fiadaptfir)
 
 ## hoa
 

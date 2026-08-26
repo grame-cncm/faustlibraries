@@ -3855,3 +3855,56 @@ with {
 
 * [https://en.wikipedia.org/wiki/Kalman_filter](https://en.wikipedia.org/wiki/Kalman_filter)
 * [https://www.cs.unc.edu/~welch/kalman/index.html](https://www.cs.unc.edu/~welch/kalman/index.html)
+
+## Adaptive Filters
+
+
+----
+
+### `(fi.)lms`, `(fi.)nlms`, `(fi.)adaptFIR`
+
+Adaptive N-tap FIR filter trained by the (delayed-update) LMS rule:
+the filter output `y` is the dot product of the adaptive weights with the
+last `N` input samples, the error `e = d - y` is fed back, and each weight
+moves along its instantaneous gradient: `w_k <- w_k + mu * e * x@k`.
+`nlms` is the normalized variant: the step is divided by the energy of
+the `N` input samples currently in the filter, making the convergence
+rate independent of the input level (use it unless the input power is
+known and constant).
+
+The weight update uses the one-sample-delayed error (the standard
+"delayed LMS" that a causal sample loop imposes), which does not change
+the converged solution.
+
+#### Usage
+
+```
+x, d : lms(N, mu) : _, _   // outputs: y (filter output), e (error)
+x, d : nlms(N, mu) : _, _
+```
+
+Where:
+
+* `N`: number of adaptive weights (a constant numerical expression)
+* `mu`: adaptation step; for `lms`, stability requires
+  `mu < 2/(N*power(x))`, while for `nlms` values in (0, 2) are stable and
+  0.1-1.0 is typical
+* `x`: input signal (the reference fed to the adaptive FIR)
+* `d`: desired signal
+
+A converged identification of an unknown system H feeding
+`d = H(x)` leaves the weights equal to the first `N` samples of the
+impulse response of H, `y` equal to `d`, and `e` near zero.
+
+#### Test
+```
+fi = library("filters.lib");
+no = library("noises.lib");
+lms_test = no.noise, (no.noise : @(3)*0.5 + no.noise@(1)*0.25) : fi.lms(8, 0.01);
+nlms_test = no.noise, (no.noise : @(3)*0.5 + no.noise@(1)*0.25) : fi.nlms(8, 0.5);
+```
+
+#### References
+
+* S. Haykin, "Adaptive Filter Theory", Prentice Hall.
+* B. Widrow and S.D. Stearns, "Adaptive Signal Processing", Prentice Hall.

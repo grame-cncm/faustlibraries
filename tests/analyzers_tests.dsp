@@ -69,3 +69,8 @@ loudness_momentary_test = os.osc(997), os.osc(997) : an.loudness_momentary(2);
 loudness_shortterm_test = os.osc(997), os.osc(997) : an.loudness_shortterm(2);
 loudness_integrated_test = os.osc(997), os.osc(997) : an.loudness_integrated(2);
 true_peak_test = os.osc(12000)*0.97 : an.true_peak;
+
+// Spectral descriptors (filter-bank based)
+spectral_centroid_test = os.osc(1000) : an.spectral_centroid(3, 1, 8000, 6, 0.1);
+spectral_spread_test = os.osc(800) + os.osc(5000) : an.spectral_spread(3, 1, 8000, 6, 0.1);
+spectral_flux_test = os.osc(1000) * ((ba.time % 24000) > 12000) : an.spectral_flux(3, 1, 8000, 6, 0.02);

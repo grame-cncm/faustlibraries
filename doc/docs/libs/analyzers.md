@@ -1273,6 +1273,95 @@ Where:
 
 See `dm.fft_spectral_level_demo(N)` in `demos.lib` for an example GUI.
 
+##  Spectral Descriptors (filter-bank based) 
+
+Low-level MIR descriptors computed on the constant-Q filter banks of this
+library rather than on an FFT: monorate, sample-accurate, no framing. The
+M-per-octave analyzer splits the signal into N bands (highest band first,
+dc band last); the descriptors combine the smoothed band powers with the
+geometric band-center frequencies.
+
+----
+
+### `(an.)spectral_centroid`, `(an.)spectral_spread`
+
+Spectral centroid and spread of a signal, in Hz, computed from the band
+powers of `an.mth_octave_analyzer(O,M,ftop,N)`: the centroid is the
+power-weighted mean of the band center frequencies, the spread the
+power-weighted standard deviation around it. Frequency resolution is that
+of the filter bank (M bands per octave).
+
+#### Usage
+
+```
+_ : spectral_centroid(O,M,ftop,N,T) : _
+_ : spectral_spread(O,M,ftop,N,T) : _
+```
+
+Where:
+
+* `O`: band-split filter order (a constant numerical expression)
+* `M`: bands per octave (a constant numerical expression)
+* `ftop`: highest band-split crossover frequency in Hz
+* `N`: total number of bands, including dc and top (a constant numerical expression)
+* `T`: power averaging time in seconds
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+spectral_centroid_test = os.osc(1000) : an.spectral_centroid(3, 1, 8000, 6, 0.1);
+spectral_spread_test = os.osc(800) + os.osc(5000) : an.spectral_spread(3, 1, 8000, 6, 0.1);
+```
+
+----
+
+### `(an.)band_powers`, `(an.)band_center`, `(an.)moment`, `(an.)safe_div`
+
+The machinery shared by the descriptors: `band_powers(O,M,ftop,N,T)` is
+the bank of smoothed band powers (highest band first, like the analyzer
+itself), `band_center(M,ftop,N,i)` the geometric center frequency in Hz
+of band `i` (top and dc bands use their edges), `moment(M,ftop,N,K)` sums
+N band powers weighted by `center^K`, and `safe_div` divides with an
+epsilon-guarded denominator.
+
+#### Usage
+
+```
+_ : band_powers(O,M,ftop,N,T) : si.bus(N)
+band_center(M,ftop,N,i) : _
+si.bus(N) : moment(M,ftop,N,K) : _
+```
+
+----
+
+### `(an.)spectral_flux`
+
+Spectral flux: the half-wave-rectified increase of each band amplitude
+over a `hop`-second interval, summed across the bands of
+`an.mth_octave_analyzer(O,M,ftop,N)`. Rises sharply on note onsets and
+broadband transients; threshold it for a simple onset detector.
+
+#### Usage
+
+```
+_ : spectral_flux(O,M,ftop,N,hop) : _
+```
+
+Where:
+
+* `O`, `M`, `ftop`, `N`: filter bank parameters as above
+* `hop`: comparison interval in seconds (also used as the amplitude
+  smoothing time; 10-50 ms typical)
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+ba = library("basics.lib");
+spectral_flux_test = os.osc(1000) * ((ba.time % 24000) > 12000) : an.spectral_flux(3, 1, 8000, 6, 0.02);
+```
+
 ##  Loudness Metering (EBU R128 / ITU-R BS.1770) 
 
 Multichannel loudness measurement after Recommendation ITU-R BS.1770-4 /
