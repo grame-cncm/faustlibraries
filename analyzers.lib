@@ -32,7 +32,7 @@ os = library("oscillators.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "1.3.0";
+declare version "1.4.0";
 
 /************************************************************************
 FAUST library file, jos section
@@ -1089,6 +1089,178 @@ with {
     // Magnitude and phase computation
     mag = ^(2) + ^(2) : sqrt * 2;
     ang = atan2;
+};
+
+//==================================== Window Functions ==================================
+// Continuous window functions, defined on the normalized abscissa x in [0,1]
+// and evaluating to their peak at x = 1/2. Each is a pure arithmetic
+// expression, so it can be applied to a constant (to weight the taps of an
+// FIR or the grains of a granular engine at compile time) as well as to a
+// signal (a phase ramp, for run-time windowing):
+//
+// ```
+// // N compile-time weights (symmetric window):
+// w(i) = an.window_hann(i/(N-1));
+// // run-time windowing of a stream, with ph a 0..1 phase ramp:
+// process = _ * an.window_hann(ph);
+// ```
+//
+// For DFT-even (periodic) windows, evaluate at i/N instead of i/(N-1).
+//========================================================================================
+
+//---------------`(an.)window_rect`, `(an.)window_hann`, `(an.)window_hamming`, `(an.)window_blackman`, `(an.)window_blackman_harris`, `(an.)window_nuttall`, `(an.)window_flattop`, `(an.)window_bartlett`--------------------------
+// The classic fixed window functions:
+//
+// * `window_rect`: rectangular (boxcar) window, 1 inside [0,1], 0 outside
+// * `window_hann`: Hann (raised cosine), -31.5 dB first sidelobe
+// * `window_hamming`: Hamming (0.54/0.46), -42.7 dB first sidelobe
+// * `window_blackman`: Blackman (3-term, exact 0.42/0.50/0.08), -58 dB
+// * `window_blackman_harris`: minimum 4-term Blackman-Harris, -92 dB
+// * `window_nuttall`: Nuttall's continuous-first-derivative 4-term, -93 dB
+// * `window_flattop`: 5-term flat-top (amplitude-accurate spectral peaks,
+//    scalloping loss < 0.01 dB, very wide main lobe)
+// * `window_bartlett`: Bartlett (triangular, reaching 0 at both ends)
+//
+// #### Usage
+//
+// ```
+// window_hann(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: normalized abscissa, the window support being [0,1]
+//   (values outside [0,1] return 0)
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// window_hann_test = an.window_hann(os.lf_sawpos(100));
+// ```
+//
+// #### References
+//
+// * F.J. Harris, "On the use of windows for harmonic analysis with the
+//   discrete Fourier transform", Proc. IEEE 66(1), 1978.
+// * A.H. Nuttall, "Some windows with very good sidelobe behavior",
+//   IEEE Trans. ASSP 29(1), 1981.
+// * <https://en.wikipedia.org/wiki/Window_function>
+//---------------------------------------------------
+window_rect(x) = in01(x)
+with { in01(x) = (x >= 0.0) & (x <= 1.0); };
+window_hann(x) = window_cosN((0.5, -0.5), x);
+window_hamming(x) = window_cosN((0.54, -0.46), x);
+window_blackman(x) = window_cosN((0.42, -0.50, 0.08), x);
+window_blackman_harris(x) = window_cosN((0.35875, -0.48829, 0.14128, -0.01168), x);
+window_nuttall(x) = window_cosN((0.355768, -0.487396, 0.144232, -0.012604), x);
+window_flattop(x) = window_cosN((0.21557895, -0.41663158, 0.277263158,
+                                 -0.083578947, 0.006947368), x);
+window_bartlett(x) = max(0.0, 1.0 - abs(2.0*x - 1.0)) * ((x >= 0.0) & (x <= 1.0));
+
+//---------------`(an.)window_cosN`--------------------------
+// Generic sum-of-cosines window: given the coefficient list `(a0, a1, ..., aK)`,
+// evaluates `a0 + a1*cos(2*PI*x) + a2*cos(4*PI*x) + ...` inside [0,1] and 0
+// outside. All the fixed windows above are instances of this function; use it
+// directly for custom sidelobe trade-offs.
+//
+// #### Usage
+//
+// ```
+// window_cosN((a0, a1, ..., aK), x) : _
+// ```
+//
+// Where:
+//
+// * `(a0, ..., aK)`: cosine-series coefficients, alternating in sign for the
+//   usual windows (peak value at x = 1/2 is a0 - a1 + a2 - ...)
+// * `x`: normalized abscissa in [0,1]
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// window_cosN_test = an.window_cosN((0.5, -0.5), os.lf_sawpos(100));
+// ```
+//---------------------------------------------------
+window_cosN(coeffs, x) = sum(k, K, ba.take(k+1, coeffs) * cos(k*ma.PI*2.0*x))
+                         * ((x >= 0.0) & (x <= 1.0))
+with { K = ba.count(coeffs); };
+window_cosN(a0, x) = a0 * ((x >= 0.0) & (x <= 1.0));
+
+//---------------`(an.)window_tukey`--------------------------
+// Tukey (cosine-tapered) window: flat at 1 over the central `1-a` fraction of
+// the support, with raised-cosine tapers of total length `a` at the edges.
+// `window_tukey(0)` degenerates to the rectangular window and
+// `window_tukey(1)` to the Hann window.
+//
+// #### Usage
+//
+// ```
+// window_tukey(a, x) : _
+// ```
+//
+// Where:
+//
+// * `a`: taper fraction between 0 and 1
+// * `x`: normalized abscissa in [0,1]
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
+// ```
+//---------------------------------------------------
+window_tukey(a, x) = taper(min(x, 1.0 - x)) * ((x >= 0.0) & (x <= 1.0))
+with {
+    // distance d from the nearest edge; cosine taper while d < a/2
+    taper(d) = select2(2.0*d < a1, 1.0, 0.5*(1.0 + cos(ma.PI*(2.0*d/a1 - 1.0))));
+    a1 = max(a, ma.EPSILON);
+};
+
+//---------------`(an.)window_kaiser`--------------------------
+// Kaiser window of shape parameter `beta`, computed with a fixed-length
+// series for the modified Bessel function I0 (40 terms: exact to double
+// precision for any useful `beta`, and pure arithmetic, so usable at compile
+// time). Larger `beta` trades main-lobe width for sidelobe attenuation:
+// beta = 0 is rectangular, 5 approximates Hamming, 8.6 approximates
+// Blackman.
+//
+// #### Usage
+//
+// ```
+// window_kaiser(beta, x) : _
+// ```
+//
+// Where:
+//
+// * `beta`: shape parameter (>= 0), typically between 2 and 16
+// * `x`: normalized abscissa in [0,1]
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// window_kaiser_test = an.window_kaiser(8.6, os.lf_sawpos(100));
+// ```
+//
+// #### References
+//
+// * J.F. Kaiser and R.W. Schafer, "On the use of the I0-sinh window for
+//   spectrum analysis", IEEE Trans. ASSP 28(1), 1980.
+//---------------------------------------------------
+window_kaiser(beta, x) = besselI0(beta * sqrt(max(0.0, 1.0 - z*z))) / besselI0(beta)
+                         * ((x >= 0.0) & (x <= 1.0))
+with {
+    z = 2.0*x - 1.0;
+    // I0(v) = sum_k ((v/2)^k / k!)^2, truncated at 40 terms
+    besselI0(v) = 1.0 + sum(k, 40, pow(0.5*v, 2*(k+1)) / factsq(k+1))
+    with {
+        fact(0) = 1.0;
+        fact(n) = n * fact(n-1);
+        factsq(n) = fact(n) * fact(n);
+    };
 };
 
 //==================================== FFT Subsystem =====================================

@@ -50,3 +50,16 @@ ifft_test = (an.rtocv(8, mono) : an.fft(8)) : an.ifft(8);
 
 logsweep_test = an.logsweep(20, 2000, 5);
 linsweep_test = an.linsweep(20, 2000, 5);
+
+// Window functions (continuous, evaluated on a 100 Hz phase ramp)
+window_rect_test = an.window_rect(os.lf_sawpos(100));
+window_hann_test = an.window_hann(os.lf_sawpos(100));
+window_hamming_test = an.window_hamming(os.lf_sawpos(100));
+window_blackman_test = an.window_blackman(os.lf_sawpos(100));
+window_blackman_harris_test = an.window_blackman_harris(os.lf_sawpos(100));
+window_nuttall_test = an.window_nuttall(os.lf_sawpos(100));
+window_flattop_test = an.window_flattop(os.lf_sawpos(100));
+window_bartlett_test = an.window_bartlett(os.lf_sawpos(100));
+window_cosN_test = an.window_cosN((0.5, -0.5), os.lf_sawpos(100));
+window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
+window_kaiser_test = an.window_kaiser(8.6, os.lf_sawpos(100));
