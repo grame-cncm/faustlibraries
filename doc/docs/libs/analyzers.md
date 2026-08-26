@@ -126,7 +126,7 @@ abs_envelope_t19_test = an.abs_envelope_t19(0.05, mono);
 
 ----
 
-### `(an.)amp_follower`
+### `(an.)amp_follower`, `(an.)peak_envelope`
 
 Classic analog audio envelope follower with infinitely fast rise and
 exponential decay.  The amplitude envelope instantaneously follows
@@ -572,7 +572,7 @@ filter-banks using elliptic or Chebyshev prototype filters.
 
 ----
 
-### `(an.)mth_octave_analyzer`
+### `(an.)mth_octave_analyzer`, `(an.)mth_octave_analyzer3`, `(an.)mth_octave_analyzer5`, `(an.)mth_octave_analyzer6e`, `(an.)mth_octave_analyzer_default`
 
 Octave analyzer.
 `mth_octave_analyzer[N]` are standard Faust functions.
@@ -612,7 +612,7 @@ Spectral Level: display (in bargraphs) the average signal level in each spectral
 
 ----
 
-### `(an.)mth_octave_spectral_level6e`
+### `(an.)mth_octave_spectral_level6e`, `(an.)mth_octave_spectral_level_default`, `(an.)spectral_level`
 
 Spectral level display.
 
@@ -647,7 +647,7 @@ mth_octave_spectral_level6e_test = mono : an.mth_octave_spectral_level6e(3, 8000
 
 ----
 
-### `(an.)[third|half]_octave_[analyzer|filterbank]`
+### `(an.)octave_analyzer`, `(an.)half_octave_analyzer`, `(an.)third_octave_analyzer`, `(an.)octave_filterbank`, `(an.)half_octave_filterbank`, `(an.)third_octave_filterbank`
 
 A bunch of special cases based on the different analyzer functions described above:
 
@@ -855,9 +855,135 @@ process = ba.line(ma.SR, ma.SR/2) : os.oscrs
 
 * [https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf](https://alexandrefrancois.org/assets/publications/FrancoisARJ-ICMC2025.pdf)
 
+##  FFT Subsystem 
+
+Sliding FFT/IFFT for complex and real signals, with the conversion and display
+helpers they rely on.
+
+**Complex vector representation.** Throughout this section, a *complex vector
+signal* of length `N` is a bank of `2*N` parallel real signals holding
+interleaved (real, imaginary) pairs: `(r0,i0), (r1,i1), ..., (rN-1,iN-1)`.
+This is the convention enforced by `si.cbus(N)`, and it is the input and
+output format of `an.fft` and `an.ifft`. A *real vector signal* of length `N`
+is simply `N` parallel real signals (`si.bus(N)`). The `rtorv`/`rtocv`/`rvtocv`
+functions convert a scalar signal or a real vector into these formats, and the
+`c_*` functions operate on complex vectors.
+
 ----
 
-### `(an.)fft` 
+### `(an.)c_magsq`
+
+Squared magnitude of each bin of a complex vector signal.
+
+#### Usage
+
+```
+si.cbus(N) : c_magsq(N) : si.bus(N)
+```
+
+Where:
+
+* `N`: number of complex bins (power of 2 in FFT contexts)
+* input: `N` complex signals as interleaved (real, imaginary) pairs
+* output: `N` real signals, the `k`-th one being `r(k)^2 + i(k)^2`
+
+----
+
+### `(an.)c_magdb`
+
+Magnitude in dB (power) of each bin of a complex vector signal:
+`10*log10(r^2 + i^2)`, floored at `ma.EPSILON` to avoid `log10(0)`.
+
+#### Usage
+
+```
+si.cbus(N) : c_magdb(N) : si.bus(N)
+```
+
+Where:
+
+* `N`: number of complex bins
+* input: `N` complex signals as interleaved (real, imaginary) pairs
+* output: `N` real signals giving the power of each bin in dB
+
+----
+
+### `(an.)c_select_pos_freqs`
+
+Select the `N/2+1` non-negative-frequency bins (dc up to and including
+Nyquist) out of an `N`-bin complex spectrum, discarding the redundant
+negative-frequency bins of a real signal's spectrum.
+`select_pos_freqs(N)` is the same selection for a real vector
+(e.g. a power spectrum).
+
+#### Usage
+
+```
+si.cbus(N) : c_select_pos_freqs(N) : si.cbus(N/2+1)
+si.bus(N) : select_pos_freqs(N) : si.bus(N/2+1)
+```
+
+Where:
+
+* `N`: full spectrum size (power of 2)
+* output: bins `0..N/2` (dc and Nyquist included)
+
+----
+
+### `(an.)rtorv`, `(an.)rtocv`, `(an.)rvtocv`
+
+Convert a real signal to the vector formats used by `an.fft`:
+
+* `rtorv(N,x)`: real scalar signal to length-`N` real vector holding the last
+  `N` samples of `x`: `(x, x@1, ..., x@(N-1))`
+* `rtocv(N,x)`: real scalar signal to length-`N` complex vector holding the
+  last `N` samples of `x` with zero imaginary parts: `(x,0), (x@1,0), ...`
+* `rvtocv(N)`: length-`N` real vector to length-`N` complex vector with zero
+  imaginary parts
+
+#### Usage
+
+```
+rtorv(N,x) : si.bus(N)
+rtocv(N,x) : si.cbus(N)
+si.bus(N) : rvtocv(N) : si.cbus(N)
+```
+
+Where:
+
+* `N`: vector size (power of 2 in FFT contexts, known at compile time)
+* `x`: a real (scalar) input signal
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+rtocv_test = an.rtocv(8, os.osc(220));
+```
+
+----
+
+### `(an.)bit_reverse_shuffle`, `(an.)c_bit_reverse_shuffle`, `(an.)bit_reverse_selector`
+
+Bit-reversal permutation of a vector signal, as performed on the input of a
+decimation-in-time radix-2 FFT. `bit_reverse_shuffle(N)` permutes a real
+vector, `c_bit_reverse_shuffle(N)` a complex vector. Used internally by
+`an.fft` and `an.ifft`.
+
+#### Usage
+
+```
+si.bus(N) : bit_reverse_shuffle(N) : si.bus(N)
+si.cbus(N) : c_bit_reverse_shuffle(N) : si.cbus(N)
+```
+
+Where:
+
+* `N`: vector size (must be a power of 2)
+
+----
+
+### `(an.)fft`, `(an.)fftb`
 
 Fast Fourier Transform (FFT).
 
@@ -903,9 +1029,14 @@ fft_test = an.rtocv(8, mono) : an.fft(8);
 
 * [Decimation-in-time (DIT) Radix-2 FFT](https://cnx.org/contents/zmcmahhR@7/Decimation-in-time-DIT-Radix-2)
 
+#### Implementation notes
+
+`fft(N)` is `c_bit_reverse_shuffle(N)` followed by `fftb(N)`, the radix-2
+butterfly core, which expects its input already in bit-reversed order.
+
 ----
 
-### `(an.)ifft`
+### `(an.)ifft`, `(an.)ifftb`
 
 Inverse Fast Fourier Transform (IFFT).
 
@@ -930,6 +1061,69 @@ os = library("oscillators.lib");
 mono = os.osc(220);
 ifft_test = (an.rtocv(8, mono) : an.fft(8)) : an.ifft(8);
 ```
+
+#### Implementation notes
+
+`ifft(N)` is `c_bit_reverse_shuffle(N)` followed by `ifftb(N)`, the
+conjugate butterfly core (which also applies the `1/N` scaling), so that
+`an.fft(N) : an.ifft(N)` is the identity.
+
+----
+
+### `(an.)rfft_analyzer_c`, `(an.)rfft_analyzer_db`, `(an.)rfft_analyzer_magsq`
+
+Sliding FFT analyzers for a real input signal, built from `an.fft`:
+
+* `rfft_analyzer_c(N)`: complex spectrum, bins 0 to N/2 (dc to Nyquist)
+* `rfft_analyzer_db(N)`: power of each bin in dB
+* `rfft_analyzer_magsq(N)`: squared magnitude of each bin
+
+"Sliding" means the `N`-point FFT is recomputed every sample over the last
+`N` input samples, with no windowing (rectangular window) and no hop.
+
+#### Usage
+
+```
+_ : rfft_analyzer_c(N) : si.cbus(N/2+1)
+_ : rfft_analyzer_db(N) : si.bus(N/2+1)
+_ : rfft_analyzer_magsq(N) : si.bus(N/2+1)
+```
+
+Where:
+
+* `N`: FFT size (must be a power of 2 known at compile time)
+* input: a real (scalar) signal
+* output: the `N/2+1` non-negative-frequency bins, complex for
+  `rfft_analyzer_c` (interleaved real/imaginary pairs), real for the others
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+rfft_analyzer_db_test = os.osc(220) : an.rfft_analyzer_db(8);
+```
+
+----
+
+### `(an.)rfft_spectral_level`
+
+Real-signal FFT power spectrum display: passes the signal through unchanged
+and shows the smoothed level of each of the `N/2+1` non-negative-frequency
+bins in a bank of dB bargraphs.
+
+#### Usage
+
+```
+_ : rfft_spectral_level(N,tau,dB_offset) : _
+```
+
+Where:
+
+* `N`: FFT size (must be a power of 2 known at compile time)
+* `tau`: display averaging-time (time constant) in seconds
+* `dB_offset`: constant dB offset applied to all band level meters
+
+See `dm.fft_spectral_level_demo(N)` in `demos.lib` for an example GUI.
 
 ##  Test signal generators 
 

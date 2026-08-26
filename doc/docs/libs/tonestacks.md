@@ -1,4 +1,4 @@
-# tonestacks.lib
+#  tonestacks.lib 
 
 A library of guitar amplifier tone stack emulations, from the Guitarix
 project, based on the circuit analysis of D.T. Yeh (some component values

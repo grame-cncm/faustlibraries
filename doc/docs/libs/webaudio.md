@@ -197,6 +197,8 @@ peaking2_test = os.osc(440) : wa.peaking2(1000, 3, 1, 0);
 Standard second-order lowshelf filter.
 Frequencies lower than the frequency get a boost, or an attenuation, frequencies over it are unchanged.
 
+#### Usage
+
 ```
 _ : lowshelf2(f0, gain, dtune) : _
 ```
@@ -224,6 +226,8 @@ lowshelf2_test = os.osc(440) : wa.lowshelf2(500, 6, 0);
 
 Standard second-order highshelf filter.
 Frequencies higher than the frequency get a boost or an attenuation, frequencies lower than it are unchanged.
+
+#### Usage
 
 ```
 _ : highshelf2(f0, gain, dtune) : _

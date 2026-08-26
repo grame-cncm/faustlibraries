@@ -292,3 +292,93 @@ bubbleSort_test = (
 #### References
 
 * [https://en.wikipedia.org/wiki/Bubble_sort](https://en.wikipedia.org/wiki/Bubble_sort)
+
+----
+
+### (ro.)bitonicSort
+
+
+A bitonic sorter is a parallel sorting network that performs comparisons
+and swaps on signal pairs iteratively. The pairs are selected according
+to different index gaps determined by the current state and pass indices, 
+while the sorting direction of each pair depends on the current stage index.
+
+The algorithm first builds a bitonic sequence with the input values, 
+that is, a sequence that is ascending for the first half, and descending 
+for the second half. Then, it applies a bitonic merger to sort the bitonic
+list in ascending or descending order.
+
+The algorithm has O(log2(N) ^ 2) depth complexity, and O(N * log2(N) ^ 2)
+work complexity. Specifically, the bitonic sorter algorithm requires N 
+inputs to be a power-of-two. The algorithm has a total of 
+log2(N) * ((log2(N) + 1) / 2) stages, and each stage requires N / 2 
+comparators. Each comparator has one min() and one max() function.
+
+For comparison, the Bubble Sort algorithm has N - 1 stages, and
+N * (N - 1) / 2 comparators. For N = 32, Bitonic Sort has 15 stages
+and 240 comparators, Bubble Sort has 31 stages and 496 comparators.
+
+The sorting process is zero-latency.
+
+#### Usage
+
+```
+si.bus(N) : bitonicSort(N) : si.bus(N)
+
+```
+
+Where:
+
+* `N`: the number of signals to be sorted (it must be a power-of-two 
+compile-time numerical expression)
+
+#### Test
+```
+ro = library("routes.lib");
+bitonicSort_test = (
+    hslider("bubbleSort:x0", 0.3, -1, 1, 0.01),
+    hslider("bubbleSort:x1", -0.2, -1, 1, 0.01),
+    hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
+    hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
+) : ro.bitonicSort(4);
+```
+
+#### References
+
+* [https://en.wikipedia.org/wiki/Bitonic_sorter](https://en.wikipedia.org/wiki/Bitonic_sorter)
+
+----
+
+### (ro.)bitonicSortIdx
+
+
+This function is based on the `bitonicSort` function, except it returns the 
+set of indices for the ordered input values. This is useful if you want
+to sort one set based on another one.
+
+#### Usage
+
+```
+si.bus(N) : bitonicSortIdx(N) : si.bus(N)
+
+```
+
+Where:
+
+* `N`: the number of signals to be sorted (it must be a power-of-two
+compile-time numerical expression)
+
+#### Test
+```
+ro = library("routes.lib");
+bitonicSortIdx_test = (
+    hslider("bubbleSort:x0", 0.3, -1, 1, 0.01),
+    hslider("bubbleSort:x1", -0.2, -1, 1, 0.01),
+    hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
+    hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
+) : ro.bitonicSortIdx(4);
+```
+
+#### References
+
+* [https://en.wikipedia.org/wiki/Bitonic_sorter](https://en.wikipedia.org/wiki/Bitonic_sorter)

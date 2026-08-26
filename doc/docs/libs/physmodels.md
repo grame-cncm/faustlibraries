@@ -51,12 +51,24 @@ Useful pre-defined variables for physical modeling.
 
 Speed of sound in meters per second (340m/s).
 
+#### Usage
+
+```
+speedOfSound : _
+```
+
 ----
 
 ### `(pm.)maxLength`
 
 The default maximum length (3) in meters of strings and tubes used in this
 library. This variable should be overriden to allow longer strings or tubes.
+
+#### Usage
+
+```
+maxLength : _
+```
 
 ## Conversion Tools
 

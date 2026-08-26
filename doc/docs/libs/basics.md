@@ -53,7 +53,7 @@ samp2sec_test = ba.samp2sec(512);
 ### `(ba.)sec2samp`
 
 Converts a duration in seconds to a number of samples at the current sampling rate (see `ma.SR`).
-`samp2sec` is a standard Faust function.
+`sec2samp` is a standard Faust function.
 
 #### Usage
 
@@ -1922,8 +1922,15 @@ tAndH_test = os.osc(2) : ba.tAndH(isPositive);
 
 ### `(ba.)downSample`
 
-Down sample a signal. WARNING: this function doesn't change the
-rate of a signal, it just holds samples...
+Sample-and-hold "down sampling" effect: holds each sample for
+`ma.SR/freq` samples, deliberately producing aliasing ("lo-fi"
+decimator sound).
+
+WARNING: despite its name, this function performs NO sample rate
+conversion and NO anti-aliasing filtering: the output stays at the
+current sampling rate, and the held staircase folds all the aliased
+images back into the band. Do not use it where a proper decimation
+(lowpass filtering followed by rate reduction) is required.
 `downSample` is a standard Faust function.
 
 #### Usage
@@ -2054,8 +2061,8 @@ kr2ar_test = button("gate") : ba.kr2ar;
 
 Turns a signal into an impulse with the value of the current sample
 (0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a
-`button` to turn its output into an impulse. `impulsify` is a standard Faust
-function.
+`button` to turn its output into an impulse.
+`impulsify` is a standard Faust function.
 
 #### Usage
 
@@ -2105,6 +2112,8 @@ create break-point functions. It contains three functions:
 * `start(x,y)` to start a break-point function
 * `end(x,y)` to end a break-point function
 * `point(x,y)` to add intermediate points to a break-point function, using linear interpolation
+
+#### Usage
 
 A minimal break-point function must contain at least a start and an end point:
 
@@ -2852,7 +2861,7 @@ Provides various operations on N parallel inputs using a high order
 
 Apply a commutative binary operation `op` to N parallel inputs.
 
-#### usage
+#### Usage
 
 ```
 si.bus(N) : parallelOp(op,N) : _

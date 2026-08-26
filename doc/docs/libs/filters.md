@@ -157,7 +157,7 @@ dcblockerat_test = src : fi.dcblockerat(30);
 
 DC blocker. Default dc blocker has -3dB point near 35 Hz (at 44.1 kHz)
 and high-frequency gain near 1.0025 (due to no scaling).
-`dcblocker` is as standard Faust function.
+`dcblocker` is a standard Faust function.
 
 #### Usage
 
@@ -352,6 +352,18 @@ ff_fcomb_test = src : fi.ff_fcomb(2048, 64.5, 1, 0.7);
 
 Typical special case of `ff_comb()` where: `b0 = 1`.
 
+#### Usage
+
+```
+_ : ffcombfilter(maxdel,del,g) : _
+```
+
+Where:
+
+* `maxdel`: maximum delay (a power of 2)
+* `del`: current (float) comb-filter delay between 0 and maxdel
+* `g`: gain applied to the delayed tap
+
 #### Test
 ```
 fi = library("filters.lib");
@@ -437,6 +449,7 @@ fb_comb_test = src : fi.fb_comb(2048, 64, 0.7, 0.6);
 ### `(fi.)fb_fcomb`
 
 Feed-Back Comb Filter (floating point delay).
+`fb_fcomb` is a standard Faust function.
 
 #### Usage
 
@@ -471,6 +484,18 @@ fb_fcomb_test = src : fi.fb_fcomb(2048, 64.5, 0.7, 0.6);
 Special case of `fb_comb` (`rev1(maxdel,N,g)`).
 The "rev1 section" dates back to the 1960s in computer-music reverberation.
 See the `jcrev` and `brassrev` in `reverbs.lib` for usage examples.
+
+#### Usage
+
+```
+_ : rev1(maxdel,N,g) : _
+```
+
+Where:
+
+* `maxdel`: maximum delay (a power of 2)
+* `N`: current feedback comb-filter delay in samples
+* `g`: feedback gain (its sign is negated internally)
 
 #### Test
 ```
@@ -556,7 +581,9 @@ allpass_comb_test = src : fi.allpass_comb(2048, 64, 0.6);
 
 ### `(fi.)allpass_fcomb`
 
-Schroeder Allpass Comb Filter. Note that:
+Schroeder Allpass Comb Filter.
+`allpass_fcomb` is a standard Faust function.
+Note that:
 
 ```
 allpass_comb(maxlen,len,aN) = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len-1,1,aN);
@@ -603,6 +630,18 @@ Special case of `allpass_comb` (`rev2(maxlen,len,g)`).
 The "rev2 section" dates back to the 1960s in computer-music reverberation.
 See the `jcrev` and `brassrev` in `reverbs.lib` for usage examples.
 
+#### Usage
+
+```
+_ : rev2(maxlen,len,g) : _
+```
+
+Where:
+
+* `maxlen`: maximum delay (a power of 2)
+* `len`: current allpass comb-filter delay in samples
+* `g`: allpass coefficient (its sign is negated internally)
+
 #### Test
 ```
 fi = library("filters.lib");
@@ -618,6 +657,19 @@ rev2_test = src : fi.rev2(2048, 64, 0.6);
 Same as `allpass_fcomb` but use `fdelay5` and `fdelay1a` internally
 (Interpolation helps - look at an fft of faust2octave on:
 `1-1' <: allpass_fcomb(1024,10.5,0.95), allpass_fcomb5(1024,10.5,0.95);`)
+
+#### Usage
+
+```
+_ : allpass_fcomb5(maxdel,N,aN) : _
+_ : allpass_fcomb1a(maxdel,N,aN) : _
+```
+
+Where:
+
+* `maxdel`: maximum delay (a power of 2)
+* `N`: current (float) allpass comb-filter delay between 0 and maxdel
+* `aN`: coefficient of z^(-N) in the transfer function numerator
 
 #### Test
 ```
@@ -667,7 +719,8 @@ iir_test = src : fi.iir((0.5, 0.5), (0.3));
 
 ### `(fi.)fir`
 
-FIR filter (convolution of FIR filter coefficients with a signal). `fir` is standard Faust function.
+FIR filter (convolution of FIR filter coefficients with a signal).
+`fir` is a standard Faust function.
 
 #### Usage
 
@@ -717,6 +770,7 @@ _ : convN(N,(k1,k2,k3,...)) : _ // Useful when N < count((k1,...))
 ### `(fi.)tf1`, `(fi.)tf2` and `(fi.)tf3`
 
 tfN = N'th-order direct-form digital filter.
+`tf2` is a standard Faust function.
 
 #### Usage
 
@@ -1859,6 +1913,21 @@ highpass_test = src : fi.highpass(4, 500);
 
 ### `(fi.)lowpass0_highpass1`
 
+Generic Butterworth lowpass/highpass filter: the shared implementation
+behind `fi.lowpass` and `fi.highpass`, with a selector choosing between
+the two responses.
+
+#### Usage
+
+```
+_ : lowpass0_highpass1(s,N,fc) : _
+```
+
+Where:
+
+* `s`: response selector: 0 for lowpass, 1 for highpass (a constant numerical expression)
+* `N`: filter order (a constant numerical expression)
+* `fc`: -3dB cutoff frequency in Hz
 
 #### Test
 ```
@@ -1878,6 +1947,21 @@ canceling pole-zero pairs removed (which occurs for odd N).
 
 ### `(fi.)highpass_plus_lowpass`
 
+Sum of the order-`N` Butterworth highpass and lowpass responses at the same
+cutoff: an allpass used as delay equalizer by `fi.filterbank` and the
+filter banks below. For odd orders 1, 3 and 5, canceling pole-zero pairs
+are removed.
+
+#### Usage
+
+```
+_ : highpass_plus_lowpass(N,fc) : _
+```
+
+Where:
+
+* `N`: filter order (a constant numerical expression)
+* `fc`: crossover frequency in Hz
 
 #### Test
 ```
@@ -1890,6 +1974,21 @@ highpass_plus_lowpass_test = os.osc(440) : fi.highpass_plus_lowpass(3, 1000);
 
 ### `(fi.)highpass_minus_lowpass`
 
+Difference between the order-`N` Butterworth highpass and lowpass responses
+at the same cutoff: an allpass used as delay equalizer by the
+dc-inverted filter banks (`fi.mth_octave_filterbank_alt`). For odd orders
+3 and 5, canceling pole-zero pairs are removed.
+
+#### Usage
+
+```
+_ : highpass_minus_lowpass(N,fc) : _
+```
+
+Where:
+
+* `N`: filter order (a constant numerical expression)
+* `fc`: crossover frequency in Hz
 
 #### Test
 ```
@@ -1900,8 +1999,23 @@ highpass_minus_lowpass_test = os.osc(440) : fi.highpass_minus_lowpass(3, 1000);
 
 ----
 
-### `(fi.)highpass_minus_lowpass_even`
+### `(fi.)highpass_plus_lowpass_even`
 
+Sum of the even-order Butterworth highpass and lowpass responses,
+`highpass(N,fc) + lowpass(N,fc)`. Takes two copies of the input signal
+(both normally fed the same signal); `fi.highpass_plus_lowpass` selects
+this case automatically for even `N`.
+
+#### Usage
+
+```
+_,_ : highpass_plus_lowpass_even(N,fc) : _
+```
+
+Where:
+
+* `N`: even filter order (a constant numerical expression)
+* `fc`: crossover frequency in Hz
 
 #### Test
 ```
@@ -1912,8 +2026,23 @@ highpass_plus_lowpass_even_test = os.osc(440), os.osc(440) : fi.highpass_plus_lo
 
 ----
 
-### `(fi.)highpass_plus_lowpass_even`
+### `(fi.)highpass_minus_lowpass_even`
 
+Difference between the even-order Butterworth highpass and lowpass
+responses, `highpass(N,fc) - lowpass(N,fc)`. Takes two copies of the input
+signal (both normally fed the same signal); `fi.highpass_minus_lowpass`
+selects this case automatically for even `N`.
+
+#### Usage
+
+```
+_,_ : highpass_minus_lowpass_even(N,fc) : _
+```
+
+Where:
+
+* `N`: even filter order (a constant numerical expression)
+* `fc`: crossover frequency in Hz
 
 #### Test
 ```
@@ -1931,7 +2060,7 @@ Sum of the odd-order highpass and lowpass responses.
 #### Usage
 
 ```
-_ : highpass_plus_lowpass_odd(N,fc) : _
+_,_ : highpass_plus_lowpass_odd(N,fc) : _
 ```
 
 Where:
@@ -1957,7 +2086,7 @@ Difference between the odd-order highpass and lowpass responses.
 #### Usage
 
 ```
-_ : highpass_minus_lowpass_odd(N,fc) : _
+_,_ : highpass_minus_lowpass_odd(N,fc) : _
 ```
 
 Where:
@@ -2109,7 +2238,7 @@ highpass6e_test = src : fi.highpass6e(1000);
 
 ----
 
-### `(fi.)bandpass`
+### `(fi.)bandpass`, `(fi.)bandstop`
 
 Order 2*Nh Butterworth bandpass filter made using the transformation
 `s <- s + wc^2/s` on `lowpass(Nh)`, where `wc` is the desired bandpass center
@@ -2170,8 +2299,24 @@ bandstop_test = src : fi.bandstop(2, 500, 1500);
 
 ----
 
-### `(fi.)bandstop`
+### `(fi.)bandpass0_bandstop1`
 
+Generic Butterworth bandpass/bandstop filter: the shared implementation
+behind `fi.bandpass` and `fi.bandstop`, with a selector choosing between
+the two responses.
+
+#### Usage
+
+```
+_ : bandpass0_bandstop1(s,Nh,fl,fu) : _
+```
+
+Where:
+
+* `s`: response selector: 0 for bandpass, 1 for bandstop (a constant numerical expression)
+* `Nh`: HALF the filter order, i.e. the number of second-order sections (a constant numerical expression)
+* `fl`: lower -3dB band edge frequency in Hz
+* `fu`: upper -3dB band edge frequency in Hz
 
 #### Test
 ```
@@ -2190,11 +2335,33 @@ bandpass0_bandstop1_test = src : fi.bandpass0_bandstop1(0, 2, 500, 1500);
 
 Order 12 elliptic bandpass filter analogous to `bandpass(6)`.
 
+#### Usage
+
+```
+_ : bandpass6e(fl,fu) : _
+```
+
+Where:
+
+* `fl`: lower -3dB band edge frequency in Hz
+* `fu`: upper -3dB band edge frequency in Hz
+
 ----
 
 ### `(fi.)bandpass12e`
 
 Order 24 elliptic bandpass filter analogous to `bandpass(6)`.
+
+#### Usage
+
+```
+_ : bandpass12e(fl,fu) : _
+```
+
+Where:
+
+* `fl`: lower -3dB band edge frequency in Hz
+* `fu`: upper -3dB band edge frequency in Hz
 
 ----
 
@@ -2316,6 +2483,22 @@ L(lf) is easy to state in dB versus dB-frequency lf = dB(f):
 
 ### `(fi.)low_shelf`
 
+Default low shelf filter: 3rd-order Butterworth case of `fi.lowshelf`
+(`low_shelf = lowshelf(3)`), boosting or cutting by `L0` dB between dc and
+`fx`. `low_shelf` is a standard Faust function. See `fi.lowshelf` for the
+full documentation, including the shelf shape.
+
+#### Usage
+
+```
+_ : low_shelf(L0,fx) : _
+```
+
+Where:
+
+* `L0`: desired level (dB) between dc and `fx` (boost `L0>0` or cut `L0<0`)
+* `fx`: transition frequency in Hz
+
 #### Test
 ```
 fi = library("filters.lib");
@@ -2328,17 +2511,46 @@ low_shelf_test = src : fi.low_shelf(6, 500);
 
 ### `(fi.)low_shelf1`
 
+First-order low shelf filter, an optimized special case of `fi.lowshelf(1)`:
+boosts or cuts by `L0` dB between dc and `fx`.
+
+#### Usage
+
+```
+_ : low_shelf1(L0,fx) : _
+```
+
+Where:
+
+* `L0`: desired level (dB) between dc and `fx` (boost `L0>0` or cut `L0<0`)
+* `fx`: transition frequency in Hz
+
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
 src = os.osc(440);
-low_shelf1_l_test = fi.low_shelf1_l(2, 500, src);
+low_shelf1_test = fi.low_shelf1(2, 500, src);
 ```
 
 ----
 
 ### `(fi.)low_shelf1_l`
+
+First-order low shelf filter like `fi.low_shelf1`, but taking a LINEAR gain
+`G0` instead of a level in dB (avoids computing `ba.db2linear` at run time
+when the gain is already linear).
+
+#### Usage
+
+```
+_ : low_shelf1_l(G0,fx) : _
+```
+
+Where:
+
+* `G0`: desired linear gain between dc and `fx`
+* `fx`: transition frequency in Hz
 
 #### Test
 ```
@@ -2351,6 +2563,23 @@ low_shelf1_l_test = fi.low_shelf1_l(2, 500, src);
 ----
 
 ### `(fi.)lowshelf_other_freq`
+
+Second corner frequency of a low shelf: given the shelf order `N`, level
+`L0` and transition frequency `fx` of `fi.lowshelf(N,L0,fx)`, returns the
+frequency at which the response returns to 0 dB (see the "Shelf Shape"
+section of `fi.lowshelf`). This is a frequency computation, not a filter.
+
+#### Usage
+
+```
+lowshelf_other_freq(N,L0,fx) : _
+```
+
+Where:
+
+* `N`: shelf order (odd)
+* `L0`: shelf level in dB
+* `fx`: transition frequency in Hz
 
 #### Test
 ```
@@ -2399,6 +2628,22 @@ highshelf_test = src : fi.highshelf(3, 6, 2000);
 
 ### `(fi.)high_shelf`
 
+Default high shelf filter: 3rd-order Butterworth case of `fi.highshelf`
+(`high_shelf = highshelf(3)`), boosting or cutting by `Lpi` dB between `fx`
+and SR/2. `high_shelf` is a standard Faust function. See `fi.highshelf`
+for the full documentation.
+
+#### Usage
+
+```
+_ : high_shelf(Lpi,fx) : _
+```
+
+Where:
+
+* `Lpi`: desired level (dB) between `fx` and SR/2 (boost `Lpi>0` or cut `Lpi<0`)
+* `fx`: transition frequency in Hz
+
 #### Test
 ```
 fi = library("filters.lib");
@@ -2410,6 +2655,20 @@ high_shelf_test = src : fi.high_shelf(6, 2000);
 ----
 
 ### `(fi.)high_shelf1`
+
+First-order high shelf filter, an optimized special case of
+`fi.highshelf(1)`: boosts or cuts by `Lpi` dB between `fx` and SR/2.
+
+#### Usage
+
+```
+_ : high_shelf1(Lpi,fx) : _
+```
+
+Where:
+
+* `Lpi`: desired level (dB) between `fx` and SR/2 (boost `Lpi>0` or cut `Lpi<0`)
+* `fx`: transition frequency in Hz
 
 #### Test
 ```
@@ -2423,6 +2682,20 @@ high_shelf1_test = fi.high_shelf1(6, 2000, src);
 
 ### `(fi.)high_shelf1_l`
 
+First-order high shelf filter like `fi.high_shelf1`, but taking a LINEAR
+gain `Gpi` instead of a level in dB.
+
+#### Usage
+
+```
+_ : high_shelf1_l(Gpi,fx) : _
+```
+
+Where:
+
+* `Gpi`: desired linear gain between `fx` and SR/2
+* `fx`: transition frequency in Hz
+
 #### Test
 ```
 fi = library("filters.lib");
@@ -2434,6 +2707,23 @@ high_shelf1_l_test = fi.high_shelf1_l(2, 2000, src);
 ----
 
 ### `(fi.)highshelf_other_freq`
+
+Second corner frequency of a high shelf: given the shelf order `N`, level
+`Lpi` and transition frequency `fx` of `fi.highshelf(N,Lpi,fx)`, returns
+the frequency at which the response leaves 0 dB. This is a frequency
+computation, not a filter.
+
+#### Usage
+
+```
+highshelf_other_freq(N,Lpi,fx) : _
+```
+
+Where:
+
+* `N`: shelf order (odd)
+* `Lpi`: shelf level in dB
+* `fx`: transition frequency in Hz
 
 #### Test
 ```
@@ -2806,6 +3096,22 @@ mth_octave_filterbank5_test = sig : fi.mth_octave_filterbank5(2, 8000, 2);
 
 ### `(fi.)mth_octave_filterbank_default`
 
+Default Mth-octave filter bank: the 5th-order Butterworth case of
+`fi.mth_octave_filterbank` (`mth_octave_filterbank_default =
+mth_octave_filterbank5`). See `fi.mth_octave_filterbank[n]` for the full
+documentation.
+
+#### Usage
+
+```
+_ : mth_octave_filterbank_default(M,ftop,N) : par(i,N,_)
+```
+
+Where:
+
+* `M`: number of band-slices per octave (a constant numerical expression)
+* `ftop`: highest band-split crossover frequency in Hz
+* `N`: total number of bands, including dc and Nyquist (a constant numerical expression)
 
 #### Test
 ```

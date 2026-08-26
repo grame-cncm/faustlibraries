@@ -11,6 +11,11 @@ SRC   	 := $(shell cat $(FAUSTLIBS)/doc.lib | grep import | sed -e 's/[^"]*"\(..
 MD   	 := $(SRC:%.lib=$(DOCDIR)/libs/%.md)
 LIST   	 := $(SRC:%.lib=%)
 
+# Remove a target whose recipe failed: without this, a failed conversion
+# (e.g. awk missing) leaves a truncated .md that is newer than its source
+# and is then silently considered up to date by every later build.
+.DELETE_ON_ERROR:
+
 ####################################################################
 help:
 	@echo "========================================================================"

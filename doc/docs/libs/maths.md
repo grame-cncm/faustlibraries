@@ -954,7 +954,18 @@ Yn_test = (2, 1.0) : ma.Yn;
 
 ### `(ma.)fabs`, `(ma.)fmax`, `(ma.)fmin`
 
-Just for compatibility...
+Aliases of the `abs`, `max` and `min` primitives, for compatibility with
+the C math library naming.
+
+#### Usage
+
+```
+_ : fabs : _
+_,_ : fmax : _
+_,_ : fmin : _
+```
+
+Where:
 
 ```
 fabs = abs

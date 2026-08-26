@@ -1390,6 +1390,7 @@ oscrc_test = os.oscrc(440);
 Sinusoidal oscillator based on the state variable filter
 = undamped "modified-coupled-form" resonator
 = "magic circle" algorithm used in graphics.
+`oscs` is a standard Faust function.
 
 #### Usage
 

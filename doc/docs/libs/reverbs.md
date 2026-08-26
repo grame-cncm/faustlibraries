@@ -175,8 +175,12 @@ _,_ : zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax) : _,_
 
 Where:
 
-`rdel`  = delay (in ms) before reverberation begins (e.g., 0 to ~100 ms)
-(remaining args and refs as for `zita_rev_fdn` above)
+* `rdel`: delay in milliseconds before reverberation begins (for example, 0 to about 100 ms)
+* `f1`: crossover frequency between low and mid decay regions
+* `f2`: crossover frequency between mid and high decay regions
+* `t60dc`: low-frequency decay time in seconds
+* `t60m`: mid-band decay time in seconds
+* `fsmax`: maximum supported sample rate
 
 #### Test
 ```
@@ -201,8 +205,13 @@ _,_ : zita_rev1_ambi(rgxyz,rdel,f1,f2,t60dc,t60m,fsmax) : _,_,_,_
 
 Where:
 
-`rgxyz` = relative gain of lanes 1,4,2 to lane 0 in output (e.g., -9 to 9)
-  (remaining args and references as for zita_rev1_stereo above)
+* `rgxyz`: relative gain of lanes 1, 4, and 2 compared to lane 0 in the output (for example, -9 to 9 dB)
+* `rdel`: delay in milliseconds before reverberation begins
+* `f1`: crossover frequency between low and mid decay regions
+* `f2`: crossover frequency between mid and high decay regions
+* `t60dc`: low-frequency decay time in seconds
+* `t60m`: mid-band decay time in seconds
+* `fsmax`: maximum supported sample rate
 
 #### Test
 ```

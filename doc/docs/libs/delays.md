@@ -177,6 +177,22 @@ fdelaylti_test = os.osc(440) : de.fdelaylti(3, 44100, 22050.5);
 For convenience, `fdelay1`, `fdelay2`, `fdelay3`, `fdelay4`, `fdelay5`
 are also available where `N` is the order of the interpolation, built using `fdelayltv`.
 
+#### Usage
+
+```
+_ : fdelay1(maxdel,d) : _
+_ : fdelay2(maxdel,d) : _
+_ : fdelay3(maxdel,d) : _
+_ : fdelay4(maxdel,d) : _
+_ : fdelay5(maxdel,d) : _
+```
+
+Where:
+
+* `maxdel`: maximum delay in samples (a power of 2)
+* `d`: current (float) delay in samples; must satisfy `d > (N-1)/2` for
+  order-`N` Lagrange interpolation (see `de.fdelayltv`)
+
 ## Thiran Allpass Interpolation
 
 Thiran Allpass Interpolation.

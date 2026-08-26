@@ -86,7 +86,7 @@ flanger_stereo_test = os.osc(440), os.osc(660) : pf.flanger_stereo(4096, 1024, 1
 
 Mono phasing effect.
 
-#### Phaser
+#### Usage
 
 ```
 _ : phaser2_mono(Notches,phase,width,frqmin,fratio,frqmax,speed,depth,fb,invert) : _
@@ -128,7 +128,7 @@ phaser2_mono_test = os.osc(330) : pf.phaser2_mono(4, 0.0, 50, 200, 1.5, 4000, 0.
 Stereo phasing effect.
 `phaser2_stereo` is a standard Faust function.
 
-#### Phaser
+#### Usage
 
 ```
 _,_ : phaser2_stereo(Notches,width,frqmin,fratio,frqmax,speed,depth,fb,invert) : _,_
