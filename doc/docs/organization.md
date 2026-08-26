@@ -32,8 +32,8 @@ Only the libraries that are considered to be "standard" are documented:
 * `soundfiles.lib`
 * `spats.lib`
 * `synths.lib`
-* `tonestacks.lib` (not documented but example in `/examples/misc`)
-* `tubes.lib` (not documented but example in `/examples/misc`)
+* `tonestacks.lib` (example in `/examples/misc`)
+* `tubes.lib` (example in `/examples/misc`)
 * `vaeffects.lib`
 * `version.lib`
 * `wdmodels.lib`

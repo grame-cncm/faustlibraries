@@ -1,3 +1,24 @@
+//#################################### tubes.lib ########################################
+// Vacuum tube amplifier stage emulations from the Guitarix project. The
+// transfer curve of each tube is stored as a precomputed table
+// (`tubetable_*`), interpolated at run time; `tubestage` wraps one table
+// into a complete gain stage with its cathode-capacitor highpass. The
+// `T1_*`/`T2_*`/`T3_*` functions below instantiate the first, second and
+// third preamp stage of each supported tube model.
+//
+// The models are normally used through their own namespace:
+//
+// ```
+// tu = library("tubes.lib");
+// process = tu.T1_12AX7 : *(preamp) : tu.T2_12AX7;
+// ```
+//
+// #### References
+//
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/tubes.lib>
+// * <https://github.com/brummer10/guitarix>
+//########################################################################################
+
 /******************************************************************************
  **  Guitar(ix) tube amp emulations
  **
@@ -75,6 +96,30 @@ getFactor(low, step, size, x) =
  /******************************************************************************
  ******************************************************************************/
 
+//---------------------------`tubestage`--------------------------------
+// One complete triode gain stage: table-driven waveshaping followed by the
+// highpass formed by the cathode capacitor and resistor.
+// `tubestageF(tb,vplus,divider,fck,Rk,Vk0)` is the fully parameterized form;
+// `tubestage(tb,fck,Rk,Vk0)` uses the standard 250V supply with divider 40,
+// and `tubestage130_20(tb,fck,Rk,Vk0)` a 130V supply with divider 20.
+//
+// #### Usage
+//
+// ```
+// _ : tubestage(tb,fck,Rk,Vk0) : _
+// _ : tubestage130_20(tb,fck,Rk,Vk0) : _
+// _ : tubestageF(tb,vplus,divider,fck,Rk,Vk0) : _
+// ```
+//
+// Where:
+//
+// * `tb`: a tube transfer-curve table (one of the `tubetable_*` waveforms)
+// * `vplus`: supply voltage in Volts (`tubestageF` only)
+// * `divider`: output voltage divider factor (`tubestageF` only)
+// * `fck`: cutoff frequency in Hz of the cathode highpass
+// * `Rk`: cathode resistor value in Ohms
+// * `Vk0`: quiescent cathode voltage in Volts
+//----------------------------------------------------------
 tubestageF(tb,vplus,divider,fck,Rk,Vk0) = tube : hpf with {
     lpfk = fi.lowpass(1,fck);
     Rp = 100.0e3;
@@ -95,21 +140,81 @@ tubestage130_20(tb,fck,Rk,Vk0) = tubestageF(tb,130.0,20.0,fck,Rk,Vk0);
 
 /********************* basic tube settings to model stage 1 - 2 *************************/
 
+//---------------------------`T1_12AX7`, `T2_12AX7`, `T3_12AX7`--------------------------------
+// First, second and third preamp stage of a 12AX7 (high-gain dual triode, the classic guitar preamp tube),
+// with the bias values used by the Guitarix amplifiers.
+//
+// #### Usage
+//
+// ```
+// _ : T1_12AX7 : _
+// ```
+//----------------------------------------------------------
 T1_12AX7 = tubestage(tubetable_12AX7_0,86.0,2700.0,1.581656);
 T2_12AX7 = tubestage(tubetable_12AX7_1,132.0,1500.0,1.204285);
 T3_12AX7 = tubestage(tubetable_12AX7_1,194.0,820.0,0.840703);
+//---------------------------`T1_12AT7`, `T2_12AT7`, `T3_12AT7`--------------------------------
+// First, second and third preamp stage of a 12AT7 (medium-gain dual triode),
+// with the bias values used by the Guitarix amplifiers.
+//
+// #### Usage
+//
+// ```
+// _ : T1_12AT7 : _
+// ```
+//----------------------------------------------------------
 T1_12AT7 = tubestage(tubetable_12AT7_0,86.0,2700.0,2.617753);
 T2_12AT7 = tubestage(tubetable_12AT7_1,132.0,1500.0,1.887332);
 T3_12AT7 = tubestage(tubetable_12AT7_1,194.0,820.0,1.256962);
+//---------------------------`T1_12AU7`, `T2_12AU7`, `T3_12AU7`--------------------------------
+// First, second and third preamp stage of a 12AU7 (low-gain dual triode),
+// with the bias values used by the Guitarix amplifiers.
+//
+// #### Usage
+//
+// ```
+// _ : T1_12AU7 : _
+// ```
+//----------------------------------------------------------
 T1_12AU7 = tubestage(tubetable_12AU7_0,86.0,2700.0,3.718962);
 T2_12AU7 = tubestage(tubetable_12AU7_1,132.0,1500.0,2.314844);
 T3_12AU7 = tubestage(tubetable_12AU7_1,194.0,820.0,1.356567);
+//---------------------------`T1_6V6`, `T2_6V6`, `T3_6V6`--------------------------------
+// First, second and third preamp stage of a 6V6 (beam power tetrode, wired as a triode),
+// with the bias values used by the Guitarix amplifiers.
+//
+// #### Usage
+//
+// ```
+// _ : T1_6V6 : _
+// ```
+//----------------------------------------------------------
 T1_6V6   = tubestage(tubetable_6V6_0,86.0,2700.0,2.296150);
 T2_6V6   = tubestage(tubetable_6V6_1,132.0,1500.0,1.675587);
 T3_6V6   = tubestage(tubetable_6V6_1,194.0,820.0,1.130462);
+//---------------------------`T1_6DJ8`, `T2_6DJ8`, `T3_6DJ8`--------------------------------
+// First, second and third preamp stage of a 6DJ8 / ECC88 (low-noise dual triode),
+// with the bias values used by the Guitarix amplifiers.
+//
+// #### Usage
+//
+// ```
+// _ : T1_6DJ8 : _
+// ```
+//----------------------------------------------------------
 T1_6DJ8  = tubestage130_20(tubetable_6DJ8_0,86.0,2700.0,1.863946);
 T2_6DJ8  = tubestage130_20(tubetable_6DJ8_1,132.0,1500.0,1.271609);
 T3_6DJ8  = tubestage130_20(tubetable_6DJ8_0,194.0,820.0,0.799031);
+//---------------------------`T1_6C16`, `T2_6C16`, `T3_6C16`--------------------------------
+// First, second and third preamp stage of a 6C16 (single triode),
+// with the bias values used by the Guitarix amplifiers.
+//
+// #### Usage
+//
+// ```
+// _ : T1_6C16 : _
+// ```
+//----------------------------------------------------------
 T1_6C16  = tubestage(tubetable_6C16_0,86.0,2700.0,2.921806);
 T2_6C16  = tubestage(tubetable_6C16_1,132.0,1500.0,2.097743);
 T3_6C16  = tubestage(tubetable_6C16_1,194.0,820.0,1.378742);
