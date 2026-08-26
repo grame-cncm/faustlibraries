@@ -326,6 +326,109 @@ Thus, w between 0 and 1 varies stereo width from 0 to "original".
 * "Applications of Blumlein Shuffling to Stereo Microphone Techniques"
 Michael A. Gerzon, JAES vol. 42, no. 6, June 1994
 
+----
+
+### `(ef.)ms_enc`, `(ef.)ms_dec`
+
+Mid/side encoder and decoder. `ms_enc` converts a left/right stereo pair
+into mid = (l+r)/2 and side = (l-r)/2; `ms_dec` is its exact inverse
+(l = m+s, r = m-s), so `ms_enc : ms_dec` is the identity. Process the mid
+and side channels independently between the two (e.g. compress the mid,
+EQ or widen the side) for classic M/S mastering.
+
+#### Usage
+
+```
+_,_ : ms_enc : _,_ // (l,r) to (m,s)
+_,_ : ms_dec : _,_ // (m,s) to (l,r)
+```
+
+#### Test
+```
+ef = library("misceffects.lib");
+os = library("oscillators.lib");
+ms_enc_test = os.osc(440), os.osc(550) : ef.ms_enc;
+ms_dec_test = os.osc(440), os.osc(550) : ef.ms_enc : ef.ms_dec;
+```
+
+## Dither and Noise Shaping
+
+Requantization to a target bit depth, done properly: TPDF dither
+decorrelates the quantization error from the signal, and error-feedback
+noise shaping pushes it towards high frequencies where hearing is least
+sensitive. Use these at the very end of a chain that feeds an integer
+output format.
+
+----
+
+### `(ef.)dither`
+
+TPDF-dithered requantizer to a given bit depth: adds triangular dither of
+2 LSB peak-to-peak (the sum of two independent uniform noises), then
+rounds to the nearest of the `2^nbits` levels covering [-1,1). Unlike the
+plain `ba.bitcrusher`, the quantization error is decorrelated from the
+signal: low-level material fades into a constant noise floor instead of
+developing correlated distortion.
+
+#### Usage
+
+```
+_ : dither(nbits) : _
+```
+
+Where:
+
+* `nbits`: target bit depth (e.g. 16), a constant numerical expression
+
+#### Test
+```
+ef = library("misceffects.lib");
+os = library("oscillators.lib");
+dither_test = os.osc(440)*0.001 : ef.dither(16);
+```
+
+#### References
+
+* S.P. Lipshitz, R.A. Wannamaker, J. Vanderkooy, "Quantization and
+  Dither: A Theoretical Survey", JAES vol. 40, no. 5, 1992.
+
+----
+
+### `(ef.)dither_shaped`
+
+TPDF-dithered requantizer with error-feedback noise shaping: the
+quantization error is fed back through `(1-z^-1)^K`, giving a noise
+transfer function that rises at 6*K dB/octave and pushes the error energy
+towards Nyquist. `K = 1` or `2` are the useful orders: higher plain
+difference orders boost the total noise power faster than hearing
+benefits (psychoacoustically weighted shapers need dedicated
+coefficients).
+
+#### Usage
+
+```
+_ : dither_shaped(K,nbits) : _
+```
+
+Where:
+
+* `K`: noise shaping order, 1 or 2 (a constant numerical expression)
+* `nbits`: target bit depth (e.g. 16), a constant numerical expression
+
+#### Test
+```
+ef = library("misceffects.lib");
+os = library("oscillators.lib");
+dither_shaped_test = os.osc(440)*0.001 : ef.dither_shaped(2, 16);
+```
+
+#### References
+
+* S.P. Lipshitz, R.A. Wannamaker, J. Vanderkooy, "Quantization and
+  Dither: A Theoretical Survey", JAES vol. 40, no. 5, 1992.
+* R.A. Wannamaker, "Psychoacoustically Optimal Noise Shaping", JAES
+  vol. 40, no. 7/8, 1992.
+
 ## Meshes
 
 

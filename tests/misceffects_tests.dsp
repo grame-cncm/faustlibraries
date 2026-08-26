@@ -44,3 +44,9 @@ softclipQuadratic_test = os.osc(440) : ef.softclipQuadratic;
 wavefold_test = os.osc(440) : ef.wavefold(0.5);
 
 weightsPowerLoop_test = ef.mixingEnv.weightsPowerLoop(4, 1.2);
+
+// Mid/side and dither
+ms_enc_test = os.osc(440), os.osc(550) : ef.ms_enc;
+ms_dec_test = os.osc(440), os.osc(550) : ef.ms_enc : ef.ms_dec;
+dither_test = os.osc(440)*0.001 : ef.dither(16);
+dither_shaped_test = os.osc(440)*0.001 : ef.dither_shaped(2, 16);
