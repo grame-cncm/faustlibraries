@@ -114,7 +114,9 @@ def freq_response(out: Path, stem: str, title: str, variants, checks=(),
               f"expected {expected:+.1f} +/- {tol} dB")
         ax.plot([f], [expected], "o", ms=4, mfc="none", color="#333", zorder=5)
     ax.set_xlim(20, SR / 2)
-    ax.set_ylim(*ylim)
+    # never clip a resonance peak: extend the top when a curve exceeds it
+    top = max(ylim[1], max(c[1:].max() for c in curves) + 4.0)
+    ax.set_ylim(ylim[0], top)
     ax.set_xlabel("Hz")
     ax.set_ylabel("dB")
     if len(variants) > 1:
