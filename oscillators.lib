@@ -691,7 +691,7 @@ lf_trianglepos(freq) = 1.0-abs(saw1(freq)); // saw1 defined below
 // ```
 //------------------------------------------------------------
 declare lf_triangle author "Bart Brouns";
-declare lf_triangle licence "STK-4.3";
+declare lf_triangle licence "LicenseRef-STK-4.3";
 
 lf_triangle(freq) = 2.0*lf_trianglepos(freq) - 1.0;
 
@@ -752,7 +752,7 @@ lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 // ```
 //---------------------------------------------------------
 declare lf_sawpos author "Bart Brouns, revised by Stéphane Letz";
-declare lf_sawpos licence "STK-4.3";
+declare lf_sawpos licence "LicenseRef-STK-4.3";
 
 lf_sawpos(freq) = phasor_imp(freq, 0, 0);
 
@@ -779,7 +779,7 @@ lf_sawpos(freq) = phasor_imp(freq, 0, 0);
 // ```
 //---------------------------------------------------------
 declare lf_sawpos_phase author "Bart Brouns, revised by Stéphane Letz";
-declare lf_sawpos_phase licence "STK-4.3";
+declare lf_sawpos_phase licence "LicenseRef-STK-4.3";
 
 lf_sawpos_phase(freq,phase) = phasor_imp(freq, 0, phase);
 
@@ -807,7 +807,7 @@ lf_sawpos_phase(freq,phase) = phasor_imp(freq, 0, phase);
 // ```
 //---------------------------------------------------------
 declare lf_sawpos_reset author "Bart Brouns, revised by Stéphane Letz";
-declare lf_sawpos_reset licence "STK-4.3";
+declare lf_sawpos_reset licence "LicenseRef-STK-4.3";
 
 lf_sawpos_reset(freq,reset) = phasor_imp(freq, reset, 0);
 
@@ -835,7 +835,7 @@ lf_sawpos_reset(freq,reset) = phasor_imp(freq, reset, 0);
 // ```
 //---------------------------------------------------------
 declare lf_sawpos_phase_reset author "Bart Brouns, revised by Stéphane Letz";
-declare lf_sawpos_phase_reset licence "STK-4.3";
+declare lf_sawpos_phase_reset licence "LicenseRef-STK-4.3";
 
 lf_sawpos_phase_reset(freq,phase,reset) = phasor_imp(freq, reset, phase);
 
@@ -861,7 +861,7 @@ lf_sawpos_phase_reset(freq,phase,reset) = phasor_imp(freq, reset, phase);
 // ```
 //---------------------------------------------------------
 declare saw1 author "Bart Brouns";
-declare saw1 licence "STK-4.3";
+declare saw1 licence "LicenseRef-STK-4.3";
 
 saw1(freq) = 2.0 * lf_sawpos(freq) - 1.0;
 lf_saw(freq) = saw1(freq);
@@ -916,7 +916,7 @@ lf_saw(freq) = saw1(freq);
 // be generated using `lf_sawpos` instead.)
 //-----------------------------------------------------------------
 declare sawN author "Julius O. Smith III";
-declare sawN license "STK-4.3";
+declare sawN license "LicenseRef-STK-4.3";
 // --- sawN for N = 1 to 4 ---
 // Orders 5 and 6 have noise at low fundamentals: MAX_SAW_ORDER = 6; MAX_SAW_ORDER_NEXTPOW2 = 8;
 MAX_SAW_ORDER = 4;
@@ -972,7 +972,7 @@ with {
 //
 //-----------------------------------------------------------------
 declare sawNp author "Julius O. Smith III";
-declare sawNp license "STK-4.3";
+declare sawNp license "LicenseRef-STK-4.3";
 // --- sawNp for N = 1 to 4 ---
 // Phase offset = delay (max 8191 samples is more than one period of audio):
 sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))));
@@ -1099,7 +1099,7 @@ saw4 = sawN(4); // only choice available right now
 // * <http://research.spa.aalto.fi/publications/papers/spl-ptr/>
 //--------------------------------------------------------
 declare saw2ptr author "Julius O. Smith III";
-declare saw2ptr license "STK-4.3";
+declare saw2ptr license "LicenseRef-STK-4.3";
 // specialized reimplementation:
 saw2ptr(freq) = y with { // newer PTR version (stateless - freq can vary at any speed)
   p0 = float(ma.SR)/float(max(ma.EPSILON,abs(freq))); // period in samples
@@ -1135,7 +1135,7 @@ saw2ptr(freq) = y with { // newer PTR version (stateless - freq can vary at any 
 // ```
 //--------------------------------------------------------
 declare saw2dpw author "Julius O. Smith III";
-declare saw2dpw license "STK-4.3";
+declare saw2dpw license "LicenseRef-STK-4.3";
 saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freq);
 
 //------------------`(os.)sawtooth`--------------------------------
@@ -1185,7 +1185,7 @@ sawtooth = saw2; // default choice for sawtooth signal - see also sawN
 // ```
 //--------------------------------------------------------
 declare saw2f2 author "Julius O. Smith III";
-declare saw2f2 license "STK-4.3";
+declare saw2f2 license "LicenseRef-STK-4.3";
 // --- Correction-filtered versions of saw2: saw2f2, saw2f4 -----
 saw2f2 = saw2dpw : cf2 with {
   cf2 = fi.tf2(1.155704605878911, 0.745184288225518,0.040305967265900,
@@ -1216,7 +1216,7 @@ saw2f2 = saw2dpw : cf2 with {
 // ```
 //--------------------------------------------------------
 declare saw2f4 author "Julius O. Smith III";
-declare saw2f4 license "STK-4.3";
+declare saw2f4 license "LicenseRef-STK-4.3";
 saw2f4 = saw2dpw : cf4 with {
   cf4 = fi.iir((1.155727435125014, 2.285861038554662,
         1.430915027294021, 0.290713280893317, 0.008306401748854),
@@ -2172,7 +2172,7 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // ```
 //------------------------------------------------------------
 declare CZsaw author "Bart Brouns";
-declare CZsaw licence "STK-4.3";
+declare CZsaw licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2203,7 +2203,7 @@ CZsaw(fund, index) = CZ.sawChooseP(fund, index, 0);
 // ```
 //------------------------------------------------------------
 declare CZsawP author "Bart Brouns";
-declare CZsawP licence "STK-4.3";
+declare CZsawP licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2233,7 +2233,7 @@ CZsawP(fund, index) = CZ.sawChooseP(fund, index, 1);
 // ```
 //------------------------------------------------------------
 declare CZsquare author "Bart Brouns";
-declare CZsquare licence "STK-4.3";
+declare CZsquare licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2264,7 +2264,7 @@ CZsquare(fund, index) = CZ.squareChooseP(fund, index, 0);
 // ```
 //------------------------------------------------------------
 declare CZsquareP author "Bart Brouns";
-declare CZsquareP licence "STK-4.3";
+declare CZsquareP licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2294,7 +2294,7 @@ CZsquareP(fund, index) = CZ.squareChooseP(fund, index, 1);
 // ```
 //------------------------------------------------------------
 declare CZpulse author "Bart Brouns";
-declare CZpulse licence "STK-4.3";
+declare CZpulse licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2325,7 +2325,7 @@ CZpulse(fund, index) = CZ.pulseChooseP(fund, index, 0);
 // ```
 //------------------------------------------------------------
 declare CZpulseP author "Bart Brouns";
-declare CZpulseP licence "STK-4.3";
+declare CZpulseP licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2355,7 +2355,7 @@ CZpulseP(fund, index) = CZ.pulseChooseP(fund, index, 1);
 // ```
 //------------------------------------------------------------
 declare CZsinePulse author "Bart Brouns";
-declare CZsinePulse licence "STK-4.3";
+declare CZsinePulse licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2386,7 +2386,7 @@ CZsinePulse(fund, index) = CZ.sinePulseChooseP(fund, index, 0);
 // ```
 //------------------------------------------------------------
 declare CZsinePulseP author "Bart Brouns";
-declare CZsinePulseP licence "STK-4.3";
+declare CZsinePulseP licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2416,7 +2416,7 @@ CZsinePulseP(fund, index) = CZ.sinePulseChooseP(fund, index, 1);
 // ```
 //------------------------------------------------------------
 declare CZhalfSine author "Bart Brouns";
-declare CZhalfSine licence "STK-4.3";
+declare CZhalfSine licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2447,7 +2447,7 @@ CZhalfSine(fund, index) = CZ.halfSineChooseP(fund, index, 0);
 // ```
 //------------------------------------------------------------
 declare CZhalfSineP author "Bart Brouns";
-declare CZhalfSineP licence "STK-4.3";
+declare CZhalfSineP licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2477,7 +2477,7 @@ CZhalfSineP(fund, index) = CZ.halfSineChooseP(fund, index, 1);
 // ```
 //------------------------------------------------------------
 declare CZresSaw author "Bart Brouns";
-declare CZresSaw licence "STK-4.3";
+declare CZresSaw licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2507,7 +2507,7 @@ CZresSaw(fund,res) = CZ.resSaw(fund,res);
 // ```
 //------------------------------------------------------------
 declare CZresTriangle author "Bart Brouns";
-declare CZresTriangle licence "STK-4.3";
+declare CZresTriangle licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>
@@ -2537,7 +2537,7 @@ CZresTriangle(fund,res) = CZ.resTriangle(fund,res);
 // ```
 //------------------------------------------------------------
 declare CZresTrap author "Bart Brouns";
-declare CZresTrap licence "STK-4.3";
+declare CZresTrap licence "LicenseRef-STK-4.3";
 
 // CZ oscillators by Mike Moser-Booth:
 // <https://forum.pdpatchrepo.info/topic/5992/casio-cz-oscillators>

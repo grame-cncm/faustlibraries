@@ -337,7 +337,7 @@ recursivize(p,q) = (_,_,_,_ :> sp.stereoize(p)) ~ sp.stereoize(q);
 declare bubbleSort author "Dario Sanfilippo";
 declare bubbleSort copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare bubbleSort license "MIT License";
+declare bubbleSort license "MIT";
 bubbleSort(0) = 0 : !;
 bubbleSort(1) = _;
 bubbleSort(N) = seq(i, N - 1, pairSortN(N - i), bus(i))
@@ -402,7 +402,7 @@ bubbleSort(N) = seq(i, N - 1, pairSortN(N - i), bus(i))
 declare bitonicSort author "Dario Sanfilippo";
 declare bitonicSort copyright "Copyright (C) 2026 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare bitonicSort license "MIT License";
+declare bitonicSort license "MIT";
 
 /// Helper 0-indexed route wrapper
 route0idx(N, M, connectionList) = 
@@ -489,7 +489,7 @@ bitonicSort(N) = bitonicBuilderNetwork(N) : bitonicSorterNetwork(N);
 declare bitonicSortIdx author "Dario Sanfilippo";
 declare bitonicSortIdx copyright "Copyright (C) 2026 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare bitonicSortIdx license "MIT License";
+declare bitonicSortIdx license "MIT";
 
 comparatorDesIdx(x0, i0, x1, i1) = ba.if(cond, x1, x0) , ba.if(cond, i1, i0) , ba.if(cond, x0, x1) , ba.if(cond, i0, i1) with {
     cond = x1 > x0;

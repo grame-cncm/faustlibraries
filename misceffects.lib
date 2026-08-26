@@ -110,9 +110,9 @@ with {
 cubicnl_nodc(drive,offset) = cubicnl(drive,offset) : fi.dcblocker;
 
 declare cubicnl author "Julius O. Smith III";
-declare cubicnl license "STK-4.3";
+declare cubicnl license "LicenseRef-STK-4.3";
 declare cubicnl_nodc author "Julius O. Smith III";
-declare cubicnl_nodc license "STK-4.3";
+declare cubicnl_nodc license "LicenseRef-STK-4.3";
 
 //-----------------`(ef.)gate_mono`-------------------
 // Mono signal gate.
@@ -147,7 +147,7 @@ declare cubicnl_nodc license "STK-4.3";
 gate_mono(thresh,att,hold,rel,x) = x * gate_gain_mono(thresh,att,hold,rel,x);
 
 declare gate_mono author "Julius O. Smith III";
-declare gate_mono license "STK-4.3";
+declare gate_mono license "LicenseRef-STK-4.3";
 
 //-----------------`(ef.)gate_stereo`-------------------
 // Stereo signal gates.
@@ -195,9 +195,9 @@ gate_gain_mono(thresh,att,hold,rel,x) = x : extendedrawgate : an.amp_follower_ar
 };
 
 declare gate_stereo author "Julius O. Smith III";
-declare gate_stereo license "STK-4.3";
+declare gate_stereo license "LicenseRef-STK-4.3";
 declare gate_gain_mono author "Julius O. Smith III";
-declare gate_gain_mono license "STK-4.3";
+declare gate_gain_mono license "LicenseRef-STK-4.3";
 
 //=====================================Fibonacci==========================================
 //========================================================================================
@@ -344,7 +344,7 @@ declare fibonacciSeq author "Dario Sanfilippo";
 speakerbp(f1,f2) = fi.dcblockerat(f1) : fi.dcblockerat(f1) : fi.lowpass(4,f2);
 
 declare speakerbp author "Julius O. Smith III";
-declare speakerbp license "STK-4.3";
+declare speakerbp license "LicenseRef-STK-4.3";
 
 //------------`(ef.)piano_dispersion_filter`---------------
 // Piano dispersion allpass filter in closed form.
@@ -412,7 +412,7 @@ with {
 };
 
 declare piano_dispersion_filter author "Julius O. Smith III";
-declare piano_dispersion_filter license "STK-4.3";
+declare piano_dispersion_filter license "LicenseRef-STK-4.3";
 
 //-------------------------`(ef.)stereo_width`---------------------------
 // Stereo Width effect using the Blumlein Shuffler technique.
@@ -452,7 +452,7 @@ with {
 };
 
 declare stereo_width author "Julius O. Smith III";
-declare stereo_width license "STK-4.3";
+declare stereo_width license "LicenseRef-STK-4.3";
 
 //===========================================Meshes=======================================
 //========================================================================================
@@ -589,7 +589,7 @@ with {
 };
 
 declare mesh_square author "Julius O. Smith III";
-declare mesh_square license "STK-4.3";
+declare mesh_square license "LicenseRef-STK-4.3";
 
 
 //=====================================Mixing=============================================
@@ -996,7 +996,7 @@ with{
 reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
 
 declare reverseEchoN author "Julius O. Smith III";
-declare reverseEchoN license "STK-4.3";
+declare reverseEchoN license "LicenseRef-STK-4.3";
 
 
 //-------------------`(ef.)reverseDelayRamped`------------------
@@ -1035,7 +1035,7 @@ reverseDelayRamped(delMax,phs) = rampGain * de.delay(delMax,del) with {
 };
 
 declare reverseDelayRamped author "Julius O. Smith III";
-declare reverseDelayRamped license "STK-4.3";
+declare reverseDelayRamped license "LicenseRef-STK-4.3";
 
 //-------------------`(ef.)uniformPanToStereo`------------------
 // Pan nChans channels to the stereo field, spread uniformly left to right.
@@ -1069,7 +1069,7 @@ uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
               (par(i,N,*(1-i/(N-1))) :> _);
 
 declare uniformPanToStereo author "Julius O. Smith III";
-declare uniformPanToStereo license "STK-4.3";
+declare uniformPanToStereo license "LicenseRef-STK-4.3";
 
 //---------------------`(ef.)tapeStop`-----------------------------------------
 // A tape-stop effect, like putting a finger on a vinyl record player.
@@ -1153,7 +1153,7 @@ with {
 
 declare tapeStop author "David Braun";
 declare tapeStop copyright "Copyright (C) 2024 by David Braun <braun@ccrma.stanford.edu>";
-declare tapeStop license "MIT-style STK-4.3 license";
+declare tapeStop license "LicenseRef-STK-4.3";
 
 //=======================================Pitch Shifting===================================
 //========================================================================================
@@ -1280,7 +1280,7 @@ nonlinearityEnv = environment
 //---------------------------------------------------------------------------------------
 declare softclipQuadratic author "David Braun";
 declare softclipQuadratic copyright "Copyright (C) 2024 David Braun";
-declare softclipQuadratic license "MIT license";
+declare softclipQuadratic license "MIT";
 
 softclipQuadratic(x) = ba.ifNcNo(2, 1, 
     absX < 1/3, 2*x,

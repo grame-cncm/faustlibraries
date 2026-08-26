@@ -63,7 +63,7 @@ declare name "Faust Envelope Library";
 declare version "1.3.0";
 declare author "GRAME";
 declare copyright "GRAME";
-declare license "LGPL with exception";
+declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 
 //=============================Envelopes with linear segments============================
 //========================================================================================
@@ -416,7 +416,7 @@ adsr_bias_env = environment
 // ```
 //-------------------------------------------------------------------------------
 declare adsrf_bias author "Andrew John March and David Braun";
-declare adsrf_bias licence "STK-4.3";
+declare adsrf_bias licence "LicenseRef-STK-4.3";
 adsrf_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.adsr_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate);
 
 
@@ -457,7 +457,7 @@ adsrf_bias(att, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate
 // ```
 //-------------------------------------------------------------------------------
 declare adsr_bias author "Andrew John March and David Braun";
-declare adsr_bias licence "STK-4.3";
+declare adsr_bias licence "LicenseRef-STK-4.3";
 adsr_bias(att, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.adsr_bias(att, dec, sus, rel, 0, bias_att, bias_dec, bias_rel, legato, gate);
 
 
@@ -500,7 +500,7 @@ adsr_bias(att, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) = adsr
 // ```
 //---------------------------------------------------------------------
 declare ahdsrf_bias author "Andrew John March and David Braun";
-declare ahdsrf_bias licence "STK-4.3";
+declare ahdsrf_bias licence "LicenseRef-STK-4.3";
 ahdsrf_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.ahdsr_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato, gate);
 
 
@@ -543,7 +543,7 @@ ahdsrf_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato
 // ```
 //---------------------------------------------------------------------
 declare ahdsr_bias author "Andrew John March and David Braun";
-declare ahdsr_bias licence "STK-4.3";
+declare ahdsr_bias licence "LicenseRef-STK-4.3";
 ahdsr_bias(att, hol, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) = adsr_bias_env.ahdsr_bias(att, hol, dec, sus, rel, 0, bias_att, bias_dec, bias_rel, legato, gate);
 
 //=============================Envelopes with exponential segments========================
@@ -616,7 +616,7 @@ with {
 // ```
 //-----------------------------------------------------
 declare arfe author "Julius O. Smith III, revised by Stephane Letz";
-declare arfe licence "STK-4.3";
+declare arfe licence "LicenseRef-STK-4.3";
 
 arfe(attT60,relT60,fv,gate) = asrfe(attT60,1.0,relT60,fv,gate);
 
@@ -647,7 +647,7 @@ arfe(attT60,relT60,fv,gate) = asrfe(attT60,1.0,relT60,fv,gate);
 // ```
 //-----------------------------------------------------
 declare are author "Julius O. Smith III, revised by Stephane Letz";
-declare are licence "STK-4.3";
+declare are licence "LicenseRef-STK-4.3";
 
 are(attT60,relT60,gate) = asrfe(attT60,1.0,relT60,0.0,gate);
 
@@ -678,7 +678,7 @@ are(attT60,relT60,gate) = asrfe(attT60,1.0,relT60,0.0,gate);
 // ```
 //-----------------------------------------------------
 declare asre author "Julius O. Smith III, revised by Stephane Letz";
-declare asre licence "STK-4.3";
+declare asre licence "LicenseRef-STK-4.3";
 
 asre(attT60,susLvl,relT60,gate) = asrfe(attT60,susLvl,relT60,0.0,gate);
 
@@ -711,7 +711,7 @@ asre(attT60,susLvl,relT60,gate) = asrfe(attT60,susLvl,relT60,0.0,gate);
 // ```
 //-----------------------------------------------------
 declare adsre author "Julius O. Smith III";
-declare adsre licence "STK-4.3";
+declare adsre licence "LicenseRef-STK-4.3";
 
 adsre(attT60,decT60,susLvl,relT60,gate) = envelope 
 with {
@@ -757,7 +757,7 @@ with {
 // ```
 //-----------------------------------------------------
 declare ahdsre author "Julius O. Smith III, David Braun";
-declare ahdsre licence "STK-4.3";
+declare ahdsre licence "LicenseRef-STK-4.3";
 
 ahdsre(attT60,htT60,decT60,susLvl,relT60,gate) = envelope 
 with {

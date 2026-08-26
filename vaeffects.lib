@@ -88,7 +88,7 @@ Michon and Julius O. Smith III, and are released under the
 //------------------------------------------------------------
 declare moog_vcf author "Julius O. Smith III";
 declare moog_vcf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare moog_vcf license "MIT-style STK-4.3 license";
+declare moog_vcf license "LicenseRef-STK-4.3";
 moog_vcf(res,fr) = (+ : seq(i,4,fi.pole(p)) : *(unitygain(p))) ~ *(mk)
 with {
      p = 1.0 - fr * 2.0 * ma.PI / ma.SR; // good approximation for fr << SR
@@ -133,7 +133,7 @@ with {
 //------------------------------------------------------------
 declare moog_vcf_2b author "Julius O. Smith III";
 declare moog_vcf_2b copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare moog_vcf_2b license "MIT-style STK-4.3 license";
+declare moog_vcf_2b license "LicenseRef-STK-4.3";
 moog_vcf_2b(res,fr) = fi.tf2s(0,0,b0,a11,a01,w1) : fi.tf2s(0,0,b0,a12,a02,w1)
 with {
  s = 1; // minus the open-loop location of all four poles
@@ -152,7 +152,7 @@ with {
 
 declare moog_vcf_2bn author "Julius O. Smith III";
 declare moog_vcf_2bn copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare moog_vcf_2bn license "MIT-style STK-4.3 license";
+declare moog_vcf_2bn license "LicenseRef-STK-4.3";
 moog_vcf_2bn(res,fr) = fi.tf2snp(0,0,b0,a11,a01,w1) : fi.tf2snp(0,0,b0,a12,a02,w1)
 with {
  s = 1; // minus the open-loop location of all four poles
@@ -202,7 +202,7 @@ with {
 // * Lorenzo Della Cioppa's correction to Pirkle's implementation: <https://www.kvraudio.com/forum/viewtopic.php?f=33&t=571909>
 //---------------------------------------------------------------------
 declare moogLadder author "Dario Sanfilippo";
-declare moogLadder license "MIT-style STK-4.3 license";
+declare moogLadder license "LicenseRef-STK-4.3";
 moogLadder(normFreq, Q, x) = loop ~ si.bus(4) : (!,!,!,!,_)
 with {
     loop(s1, s2, s3, s4) =  v1 + lp1 , // define s1
@@ -275,7 +275,7 @@ with {
 // * <https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf>
 //---------------------------------------------------------------------
 declare lowpassLadder4 author "Dario Sanfilippo";
-declare lowpassLadder4 license "MIT License";
+declare lowpassLadder4 license "MIT";
 lowpassLadder4(k, CF, x) = loop ~ si.bus(4) : si.block(4) , _
     with {
         loop(s0, s1, s2, s3) = u0 , u1 , u2 , u3 , LP3
@@ -343,7 +343,7 @@ lowpassLadder4(k, CF, x) = loop ~ si.bus(4) : si.block(4) , _
 // * <http://www.willpirkle.com/Downloads/AN-8MoogHalfLadderFilter.pdf>
 //---------------------------------------------------------------------
 declare moogHalfLadder author "Eric Tarr";
-declare moogHalfLadder license "MIT-style STK-4.3 license";
+declare moogHalfLadder license "LicenseRef-STK-4.3";
 moogHalfLadder(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_ 
 letrec{
   's1 = -(s3*B3*k):-(s2*B2*k):-(s1*B1*k):*(alpha0):-(s1):*(alpha*2):+(s1);
@@ -408,7 +408,7 @@ with{
 // * <http://www.willpirkle.com/Downloads/AN-6DiodeLadderFilter.pdf>
 //---------------------------------------------------------------------
 declare diodeLadder author "Eric Tarr";
-declare diodeLadder license "MIT-style STK-4.3 license";
+declare diodeLadder license "LicenseRef-STK-4.3";
 diodeLadder(normFreq,Q) = ef.cubicnl(1,0)*1.5 <:(s1,s2,s3,s4,y)  : !,!,!,!,_ 
 letrec{
   's1 = _-(s4*B4*SG4*k) : 
@@ -553,7 +553,7 @@ with{
 // ```
 //---------------------------------------------------------------------
 declare korg35LPF author "Eric Tarr";
-declare korg35LPF license "MIT-style STK-4.3 license";
+declare korg35LPF license "LicenseRef-STK-4.3";
 korg35LPF(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_
 letrec{
   's1 = _-s1:_*(alpha*2):_+s1;
@@ -604,7 +604,7 @@ with{
 // ```
 //---------------------------------------------------------------------
 declare korg35HPF author "Eric Tarr";
-declare korg35HPF license "MIT-style STK-4.3 license";
+declare korg35HPF license "LicenseRef-STK-4.3";
 korg35HPF(normFreq,Q) = _ <: (s1,s2,s3,y) : !,!,!,_
 letrec{
   's1 = _-s1:_*(alpha*2):_+s1;
@@ -667,7 +667,7 @@ with{
 // ```
 //---------------------------------------------------------------------
 declare oberheim author "Eric Tarr";
-declare oberheim license "MIT-style STK-4.3 license";
+declare oberheim license "LicenseRef-STK-4.3";
 oberheim(normFreq,Q) = _<:(s1,s2,ybsf,ybpf,yhpf,ylpf) : !,!,_,_,_,_  
 letrec{
   's1 = _-s2:_-(s1*FBs1):_*alpha0:_*g<:_,(_+s1:ef.cubicnl(0.0,0)):>_;
@@ -719,7 +719,7 @@ with{
 // ```
 //---------------------------------------------------------------------
 declare oberheimBSF author "Eric Tarr";
-declare oberheimBSF license "MIT-style STK-4.3 license";
+declare oberheimBSF license "LicenseRef-STK-4.3";
 oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 
 
@@ -751,7 +751,7 @@ oberheimBSF(normFreq,Q) = oberheim(normFreq,Q):_,!,!,!;
 // ```
 //---------------------------------------------------------------------
 declare oberheimBPF author "Eric Tarr";
-declare oberheimBPF license "MIT-style STK-4.3 license";
+declare oberheimBPF license "LicenseRef-STK-4.3";
 oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 
 
@@ -783,7 +783,7 @@ oberheimBPF(normFreq,Q) = oberheim(normFreq,Q):!,_,!,!;
 // ```
 //---------------------------------------------------------------------
 declare oberheimHPF author "Eric Tarr";
-declare oberheimHPF license "MIT-style STK-4.3 license";
+declare oberheimHPF license "LicenseRef-STK-4.3";
 oberheimHPF(normFreq,Q) = oberheim(normFreq,Q):!,!,_,!;
 
 
@@ -815,7 +815,7 @@ oberheimHPF(normFreq,Q) = oberheim(normFreq,Q):!,!,_,!;
 // ```
 //---------------------------------------------------------------------
 declare oberheimLPF author "Eric Tarr";
-declare oberheimLPF license "MIT-style STK-4.3 license";
+declare oberheimLPF license "LicenseRef-STK-4.3";
 oberheimLPF(normFreq,Q) = oberheim(normFreq,Q):!,!,!,_;
 
 
@@ -891,7 +891,7 @@ oberheimLPF(normFreq,Q) = oberheim(normFreq,Q):!,!,!,_;
 // ```
 //---------------------------------------------------------------------
 declare sallenKeyOnePole author "Eric Tarr";
-declare sallenKeyOnePole license "MIT-style STK-4.3 license";
+declare sallenKeyOnePole license "LicenseRef-STK-4.3";
 sallenKeyOnePole(normFreq) = _<:(s,ylpf,-(ylpf)) : !,_,_
 letrec {  
   's = -(s):*(2*G):+(s);
@@ -933,7 +933,7 @@ with{
 // ```
 //---------------------------------------------------------------------
 declare sallenKeyOnePoleLPF author "Eric Tarr";
-declare sallenKeyOnePoleLPF license "MIT-style STK-4.3 license";
+declare sallenKeyOnePoleLPF license "LicenseRef-STK-4.3";
 sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 
 
@@ -965,7 +965,7 @@ sallenKeyOnePoleLPF(normFreq) = sallenKeyOnePole(normFreq) : _,!;
 // ```
 //---------------------------------------------------------------------
 declare sallenKeyOnePoleHPF author "Eric Tarr";
-declare sallenKeyOnePoleHPF license "MIT-style STK-4.3 license";
+declare sallenKeyOnePoleHPF license "LicenseRef-STK-4.3";
 sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 
 
@@ -1010,7 +1010,7 @@ sallenKeyOnePoleHPF(normFreq) = sallenKeyOnePole(normFreq) : !,_;
 // ```
 //---------------------------------------------------------------------
 declare sallenKey2ndOrder author "Eric Tarr";
-declare sallenKey2ndOrder license "MIT-style STK-4.3 license";
+declare sallenKey2ndOrder license "LicenseRef-STK-4.3";
 sallenKey2ndOrder(normFreq,Q) = _<:(s1,s2,ylpf,ybpf,yhpf) : !,!,_,_,_ 
 letrec{
   's1 = -(s2):-(s1*FBs1):*(alpha0):*(g*2):+(s1);
@@ -1060,7 +1060,7 @@ with{
 // ```
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderLPF author "Eric Tarr";
-declare sallenKey2ndOrderLPF license "MIT-style STK-4.3 license";
+declare sallenKey2ndOrderLPF license "LicenseRef-STK-4.3";
 sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 
 
@@ -1092,7 +1092,7 @@ sallenKey2ndOrderLPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : _,!,!;
 // ```
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderBPF author "Eric Tarr";
-declare sallenKey2ndOrderBPF license "MIT-style STK-4.3 license";
+declare sallenKey2ndOrderBPF license "LicenseRef-STK-4.3";
 sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 
 
@@ -1124,7 +1124,7 @@ sallenKey2ndOrderBPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,_,!;
 // ```
 //---------------------------------------------------------------------
 declare sallenKey2ndOrderHPF author "Eric Tarr";
-declare sallenKey2ndOrderHPF license "MIT-style STK-4.3 license";
+declare sallenKey2ndOrderHPF license "LicenseRef-STK-4.3";
 sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 
 //====================Vicanek's Matched (Decramped) Second-Order Filters========
@@ -1187,7 +1187,7 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 // ```
 //---------------------------------------------------------------------
 declare biquad author "Dario Sanfilippo";
-declare biquad license "MIT License";
+declare biquad license "MIT";
 biquad(b0, b1, b2, a1, a2, x) = f ~ _
     with {
         f(s) = b0 * x + b1 * x' + b2 * x'' - a1 * s - a2 * s';
@@ -1220,7 +1220,7 @@ biquad(b0, b1, b2, a1, a2, x) = f ~ _
 // ```
 //---------------------------------------------------------------------
 declare lowpass2Matched author "Dario Sanfilippo";
-declare lowpass2Matched license "MIT License";
+declare lowpass2Matched license "MIT";
 lowpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
     with {
         q = 1.0 / (2.0 * Q);
@@ -1270,7 +1270,7 @@ lowpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // ```
 //---------------------------------------------------------------------
 declare highpass2Matched author "Dario Sanfilippo";
-declare highpass2Matched license "MIT License";
+declare highpass2Matched license "MIT";
 highpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
     with {
         q = 1.0 / (2.0 * Q);
@@ -1317,7 +1317,7 @@ highpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // ```
 //---------------------------------------------------------------------
 declare bandpass2Matched author "Dario Sanfilippo";
-declare bandpass2Matched license "MIT License";
+declare bandpass2Matched license "MIT";
 bandpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
     with {
         q = 1.0 / (2.0 * Q);
@@ -1370,7 +1370,7 @@ bandpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // ```
 //---------------------------------------------------------------------
 declare peaking2Matched author "Dario Sanfilippo";
-declare peaking2Matched license "MIT License";
+declare peaking2Matched license "MIT";
 peaking2Matched(G, CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
     with {
         q = 1.0 / (2.0 * Q);
@@ -1423,7 +1423,7 @@ peaking2Matched(G, CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // ```
 //---------------------------------------------------------------------
 declare lowshelf2Matched author "Dario Sanfilippo";
-declare lowshelf2Matched license "MIT License";
+declare lowshelf2Matched license "MIT";
 lowshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
     with {
         safeG = ba.if(G < 1.0, min(1.0 - ma.EPSILON, G), max(1.0 + ma.EPSILON, G));
@@ -1490,7 +1490,7 @@ lowshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
 // ```
 //---------------------------------------------------------------------
 declare highshelf2Matched author "Dario Sanfilippo";
-declare highshelf2Matched license "MIT License";
+declare highshelf2Matched license "MIT";
 highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
     with {
         safeG = ba.if(G < 1.0, min(1.0 - ma.EPSILON, G), max(1.0 + ma.EPSILON, G));
@@ -2175,4 +2175,4 @@ with {
 };
 declare klonCentaur author "David Braun";
 declare klonCentaur copyright "Chowdhury-DSP";
-declare klonCentaur license "BSD 3-Clause License";
+declare klonCentaur license "BSD-3-Clause";

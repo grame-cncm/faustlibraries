@@ -403,7 +403,7 @@ smooth = smooth_imp(0);
 // ```
 //-----------------------------------------------------------------------------
 declare smoothq author "Andrew John March";
-declare smoothq licence "STK-4.3";
+declare smoothq licence "LicenseRef-STK-4.3";
 
 smoothq(time, q, tar) = envelope 
     with {
@@ -553,7 +553,7 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // ```
 //----------------------------------------------------
 declare onePoleSwitching author "Jonatan Liljedahl, revised by Dario Sanfilippo";
-declare onePoleSwitching licence "STK-4.3";
+declare onePoleSwitching licence "LicenseRef-STK-4.3";
 
 onePoleSwitching(att, rel, x) = loop ~ _
     with {
@@ -703,7 +703,7 @@ with {
 declare vecOp author "Dario Sanfilippo";
 declare vecOp copyright "Copyright (C) 2022 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare vecOp license "MIT License";
+declare vecOp license "MIT";
 vecOp(vectorsList, op) =
     vectorsList : seq(i, vecDim - 1, vecOp2D , vecBus(vecDim - 2 - i))
     with {
@@ -754,7 +754,7 @@ when the repeated expression doesn't depend on the variable.
 //------------------------------------------
 declare bpar author "Haggai Nuchi";
 declare bpar copyright "Copyright (C) 2024 Haggai Nuchi <haggai@haggainuchi.com>";
-declare bpar license "MIT License";
+declare bpar license "MIT";
 bpar(1, f) = f;
 bpar(N, f) = bpar(left, f), bpar(right, f) with {
     left = ma.np2(N) >> 1; // biggest power of 2 less than N
@@ -790,7 +790,7 @@ bpar(N, f) = bpar(left, f), bpar(right, f) with {
 //----------------------------------------------------
 declare bsum author "Haggai Nuchi";
 declare bsum copyright "Copyright (C) 2024 Haggai Nuchi <haggai@haggainuchi.com>";
-declare bsum license "MIT License";
+declare bsum license "MIT";
 bsum(1, f) = f;
 bsum(N, f) = bsum(left, f) + bsum(right, f) with {
     left = ma.np2(N) >> 1; // biggest power of 2 less than N
@@ -828,7 +828,7 @@ bsum(N, f) = bsum(left, f) + bsum(right, f) with {
 //----------------------------------------------------
 declare bprod author "Haggai Nuchi";
 declare bprod copyright "Copyright (C) 2024 Haggai Nuchi <haggai@haggainuchi.com>";
-declare bprod license "MIT License";
+declare bprod license "MIT";
 bprod(1, f) = f;
 bprod(N, f) = bprod(left, f) * bprod(right, f) with {
     left = ma.np2(N) >> 1; // biggest power of 2 less than N

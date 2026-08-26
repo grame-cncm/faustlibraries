@@ -879,7 +879,7 @@ piecewise(xList, yList, x) = y , assert
 declare lagrangeCoeffs author "Dario Sanfilippo";
 declare lagrangeCoeffs copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare lagrangeCoeffs license "MIT license";
+declare lagrangeCoeffs license "MIT";
 lagrangeCoeffs(N, xCoords, x) = par(n, N + 1, prod(k, N + 1, f(n, k)))
     with {
         xVals(i) = ba.take(i + 1, xCoords);
@@ -957,7 +957,7 @@ lagrange_h(N, x) = lagrangeCoeffs(N, xCoord, x)
 declare lagrangeInterpolation author "Dario Sanfilippo";
 declare lagrangeInterpolation copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare lagrangeInterpolation license "MIT license";
+declare lagrangeInterpolation license "MIT";
 lagrangeInterpolation(N, xCoords, x) = si.dot(N + 1, lagrangeCoeffs(N, xCoords, x));
 // The following definition for uniformely-spaced points interpolation is kept for back-compatibility
 lagrangeN(N, x) = si.dot(N + 1, lagrange_h(N, x));
@@ -1005,7 +1005,7 @@ lagrangeN(N, x) = si.dot(N + 1, lagrange_h(N, x));
 declare frdtable author "Dario Sanfilippo";
 declare frdtable copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare frdtable license "LGPL v3.0 license";
+declare frdtable license "LGPL-3.0-only";
 frdtable(N, S, init, idx) =
     lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int(N / 2) + i)))
     with {
@@ -1061,7 +1061,7 @@ frdtable(N, S, init, idx) =
 declare frwtable author "Dario Sanfilippo";
 declare frwtable copyright "Copyright (C) 2021 Dario Sanfilippo
     <sanfilippo.dario@gmail.com>";
-declare frwtable license "LGPL v3.0 license";
+declare frwtable license "LGPL-3.0-only";
 frwtable(N, S, init, w_idx, x, r_idx) =
     lagrangeN(N, f_idx, par(i, N + 1, table(i_idx - int(N / 2) + i)))
     with {

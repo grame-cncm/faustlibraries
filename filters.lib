@@ -84,7 +84,7 @@ declare version "1.7.1";
 //----------------------------------------------------------
 declare zero author "Julius O. Smith III";
 declare zero copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare zero license "MIT-style STK-4.3 license";
+declare zero license "LicenseRef-STK-4.3";
 zero(z) = _ <: _,mem : _,*(z) : -;
 
 //------------------------`(fi.)pole`---------------------------
@@ -114,7 +114,7 @@ zero(z) = _ <: _,mem : _,*(z) : -;
 //------------------------------------------------------------
 declare pole author "Julius O. Smith III";
 declare pole copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare pole license "MIT-style STK-4.3 license";
+declare pole license "LicenseRef-STK-4.3";
 pole(p) = + ~ *(p);
 
 //----------------------`(fi.)integrator`--------------------------
@@ -136,7 +136,7 @@ pole(p) = + ~ *(p);
 //------------------------------------------------------------
 declare integrator author "Julius O. Smith III";
 declare integrator copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare integrator license "MIT-style STK-4.3 license";
+declare integrator license "LicenseRef-STK-4.3";
 integrator = + ~ _;
 
 //-------------------`(fi.)dcblockerat`-----------------------
@@ -175,7 +175,7 @@ integrator = + ~ _;
 //------------------------------------------------------------
 declare dcblockerat author "Julius O. Smith III";
 declare dcblockerat copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare dcblockerat license "MIT-style STK-4.3 license";
+declare dcblockerat license "LicenseRef-STK-4.3";
 dcblockerat(fb) = *(b0) : zero(1) : pole(p)
 with {
   wn = ma.PI*fb/ma.SR;
@@ -204,7 +204,7 @@ with {
 //------------------------------------------------------------
 declare dcblocker author "Julius O. Smith III";
 declare dcblocker copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare dcblocker license "MIT-style STK-4.3 license";
+declare dcblocker license "LicenseRef-STK-4.3";
 dcblocker = zero(1) : pole(0.995);
 
 //----------------------------`(fi.)lptN`--------------------------------------
@@ -237,7 +237,7 @@ dcblocker = zero(1) : pole(0.995);
 //----------------------------------------------------------
 declare lptN author "Julius O. Smith III";
 declare lptN copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare lptN license "MIT-style STK-4.3 license";
+declare lptN license "LicenseRef-STK-4.3";
 lptN(N, tN, x) = x : si.smooth(ba.tau2pole(tN / log(10.0^(float(N)/20.0))));
 // Special cases of lptN
 //------------------------`(fi.)lptau`--------------------------
@@ -345,7 +345,7 @@ lpt19(tN, x) = lptN(19, tN, x); // T19 constant, i.e., 1/e^2.2 atten. after tN s
 //------------------------------------------------------------
 declare ff_comb author "Julius O. Smith III";
 declare ff_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare ff_comb license "MIT-style STK-4.3 license";
+declare ff_comb license "LicenseRef-STK-4.3";
 ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : +;
 
 //------`(fi.)ff_fcomb`--------
@@ -380,7 +380,7 @@ ff_comb(maxdel,M,b0,bM) = _ <: *(b0), bM * de.delay(maxdel,M) : +;
 //------------------------------------------------------------
 declare ff_fcomb author "Julius O. Smith III";
 declare ff_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare ff_fcomb license "MIT-style STK-4.3 license";
+declare ff_fcomb license "LicenseRef-STK-4.3";
 ff_fcomb(maxdel,del,b0,bM) = _ <: *(b0), bM * de.fdelay(maxdel,del) : +;
 
 //-----------`(fi.)ffcombfilter`-------------------
@@ -408,7 +408,7 @@ ff_fcomb(maxdel,del,b0,bM) = _ <: *(b0), bM * de.fdelay(maxdel,del) : +;
 //------------------------------------------------------------
 declare ff_combfilter author "Julius O. Smith III";
 declare ff_combfilter copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare ff_combfilter license "MIT-style STK-4.3 license";
+declare ff_combfilter license "LicenseRef-STK-4.3";
 ffcombfilter(maxdel,del,g) = ff_comb(maxdel,del,1,g);
 
 //---------------------`(fi.)fb_comb_common`---------------------
@@ -481,7 +481,7 @@ fb_comb_common(dop,N,b0,aN) = + ~ aN * dop(N-1) : *(b0);
 //------------------------------------------------------------
 declare fb_comb author "Julius O. Smith III";
 declare fb_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>, revised by Oleg Nesterov";
-declare fb_comb license "MIT-style STK-4.3 license";
+declare fb_comb license "LicenseRef-STK-4.3";
 fb_comb(maxdel,del,b0,aN) = fb_comb_common(de.delay(maxdel),del,b0,-aN) : mem;
 
 //-----------------------`(fi.)fb_fcomb`-----------------------
@@ -516,7 +516,7 @@ fb_comb(maxdel,del,b0,aN) = fb_comb_common(de.delay(maxdel),del,b0,-aN) : mem;
 //------------------------------------------------------------
 declare fb_fcomb author "Julius O. Smith III";
 declare fb_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>, revised by Oleg Nesterov";
-declare fb_fcomb license "MIT-style STK-4.3 license";
+declare fb_fcomb license "LicenseRef-STK-4.3";
 fb_fcomb(maxdel,del,b0,aN) = fb_comb_common(de.fdelay(maxdel),del,b0,-aN) : mem;
 
 //-----------------------`(fi.)rev1`-----------------------
@@ -546,7 +546,7 @@ fb_fcomb(maxdel,del,b0,aN) = fb_comb_common(de.fdelay(maxdel),del,b0,-aN) : mem;
 //------------------------------------------------------------
 declare rev1 author "Julius O. Smith III";
 declare rev1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare rev1 license "MIT-style STK-4.3 license";
+declare rev1 license "LicenseRef-STK-4.3";
 rev1(maxdel,N,g) = fb_comb(maxdel,N,1,-g);
 
 //-----`(fi.)fbcombfilter` and `(fi.)ffbcombfilter`------------
@@ -580,12 +580,12 @@ rev1(maxdel,N,g) = fb_comb(maxdel,N,1,-g);
 //------------------------------------------------------------
 declare fbcombfilter author "Julius O. Smith III";
 declare fbcombfilter copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare fbcombfilter license "MIT-style STK-4.3 license";
+declare fbcombfilter license "LicenseRef-STK-4.3";
 fbcombfilter(maxdel,intdel,g) = (+ : de.delay(maxdel,intdel)) ~ *(g);
 
 declare ffbcombfilter author "Julius O. Smith III";
 declare ffbcombfilter copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare ffbcombfilter license "MIT-style STK-4.3 license";
+declare ffbcombfilter license "LicenseRef-STK-4.3";
 ffbcombfilter(maxdel,del,g) = (+ : de.fdelay(maxdel,del)) ~ *(g);
 
 
@@ -628,7 +628,7 @@ ffbcombfilter(maxdel,del,g) = (+ : de.fdelay(maxdel,del)) ~ *(g);
 //------------------------------------------------------------
 declare allpass_comb author "Julius O. Smith III";
 declare allpass_comb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpass_comb license "MIT-style STK-4.3 license";
+declare allpass_comb license "LicenseRef-STK-4.3";
 allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
 
@@ -676,7 +676,7 @@ allpass_comb(maxdel,N,aN) = (+ <: de.delay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ :
 //------------------------------------------------------------
 declare allpass_fcomb author "Julius O. Smith III";
 declare allpass_fcomb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpass_fcomb license "MIT-style STK-4.3 license";
+declare allpass_fcomb license "LicenseRef-STK-4.3";
 allpass_fcomb(maxdel,N,aN) = (+ <: de.fdelay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
 
@@ -707,7 +707,7 @@ allpass_fcomb(maxdel,N,aN) = (+ <: de.fdelay(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_
 //------------------------------------------------------------
 declare rev2 author "Julius O. Smith III";
 declare rev2 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare rev2 license "MIT-style STK-4.3 license";
+declare rev2 license "LicenseRef-STK-4.3";
 rev2(maxlen,len,g) = allpass_comb(maxlen,len,-g);
 
 //-------------------`(fi.)allpass_fcomb5` and `(fi.)allpass_fcomb1a`-----------------
@@ -738,12 +738,12 @@ rev2(maxlen,len,g) = allpass_comb(maxlen,len,-g);
 //------------------------------------------------------------
 declare allpass_fcomb5 author "Julius O. Smith III";
 declare allpass_fcomb5 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpass_fcomb5 license "MIT-style STK-4.3 license";
+declare allpass_fcomb5 license "LicenseRef-STK-4.3";
 allpass_fcomb5(maxdel,N,aN) = (+ <: de.fdelay5(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
 declare allpass_fcomb1a author "Julius O. Smith III";
 declare allpass_fcomb1a copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpass_fcomb1a license "MIT-style STK-4.3 license";
+declare allpass_fcomb1a license "LicenseRef-STK-4.3";
 allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : mem,_ : +;
 
 
@@ -784,7 +784,7 @@ allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : m
 //------------------------------------------------------------
 declare iir author "Julius O. Smith III";
 declare iir copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare iir license "MIT-style STK-4.3 license";
+declare iir license "LicenseRef-STK-4.3";
 iir(bv,av) = ma.sub ~ fir(av) : fir(bv);
 
 //-----------------------------`(fi.)fir`---------------------------------
@@ -833,7 +833,7 @@ iir(bv,av) = ma.sub ~ fir(av) : fir(bv);
 //------------------------------------------------------------
 declare fir author "Julius O. Smith III";
 declare fir copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare fir license "MIT-style STK-4.3 license";
+declare fir license "LicenseRef-STK-4.3";
 fir((b0,bv)) = _ <: *(b0), R(1,bv) :> _ with {
     R(n,(bn,bv)) = (@(n):*(bn)), R(n+1,bv);
     R(n, bn)     = (@(n):*(bn)); };
@@ -862,13 +862,13 @@ fir(b0) = *(b0);
 
 declare convN author "Julius O. Smith III";
 declare convN copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare convN license "MIT-style STK-4.3 license";
+declare convN license "LicenseRef-STK-4.3";
 convN(N,kv) = sum(i,N, @(i)*ba.take(i+1,kv)); // take() defined in basics.lib
 //conv(kv,x) = sum(i,count(kv),take(i+1,kv) * x@i); // count() from math.lib
 
 declare conv author "Julius O. Smith III";
 declare conv copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare conv license "MIT-style STK-4.3 license";
+declare conv license "LicenseRef-STK-4.3";
 conv(kv) = fir(kv);
 
 //----------------`(fi.)tf1`, `(fi.)tf2` and `(fi.)tf3`----------------------
@@ -902,18 +902,18 @@ conv(kv) = fir(kv);
 //------------------------------------------------------------
 declare tf1 author "Julius O. Smith III";
 declare tf1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf1 license "MIT-style STK-4.3 license";
+declare tf1 license "LicenseRef-STK-4.3";
 tf1(b0,b1,a1) = _ <: *(b0), (mem : *(b1)) :> + ~ *(0-a1);
 
 declare tf2 author "Julius O. Smith III";
 declare tf2 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf2 license "MIT-style STK-4.3 license";
+declare tf2 license "LicenseRef-STK-4.3";
 tf2(b0,b1,b2,a1,a2) = iir((b0,b1,b2),(a1,a2));
 // tf2 is a variant of tf22 below with duplicated mems
 
 declare tf3 author "Julius O. Smith III";
 declare tf3 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf3 license "MIT-style STK-4.3 license";
+declare tf3 license "LicenseRef-STK-4.3";
 tf3(b0,b1,b2,b3,a1,a2,a3) = iir((b0,b1,b2,b3),(a1,a2,a3));
 
 // "Original" version for music.lib. This is here for comparison but people should
@@ -954,7 +954,7 @@ with {
 //------------------------------------------------------------
 declare notchw author "Julius O. Smith III";
 declare notchw copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare notchw license "MIT-style STK-4.3 license";
+declare notchw license "LicenseRef-STK-4.3";
 notchw(width,freq) = tf2(b0,b1,b2,a1,a2)
 with {
   fb = 0.5*width; // First design a dcblockerat(width/2)
@@ -1015,28 +1015,28 @@ with {
 //------------------------------------------------------------
 declare tf21 author "Julius O. Smith III";
 declare tf21 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf21 license "MIT-style STK-4.3 license";
+declare tf21 license "LicenseRef-STK-4.3";
 tf21(b0,b1,b2,a1,a2) = // tf2, direct-form 1:
     _ <:(mem<:((mem:*(b2)),*(b1))),*(b0) :>_
     : ((_,_,_:>_) ~(_<:*(-a1),(mem:*(-a2))));
 
 declare tf22 author "Julius O. Smith III";
 declare tf22 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf22 license "MIT-style STK-4.3 license";
+declare tf22 license "LicenseRef-STK-4.3";
 tf22(b0,b1,b2,a1,a2) = // tf2, direct-form 2:
     _ : (((_,_,_:>_)~*(-a1)<:mem,*(b0))~*(-a2))
       : (_<:mem,*(b1)),_ : *(b2),_,_ :> _;
 
 declare tf22t author "Julius O. Smith III";
 declare tf22t copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf22t license "MIT-style STK-4.3 license";
+declare tf22t license "LicenseRef-STK-4.3";
 tf22t(b0,b1,b2,a1,a2) = // tf2, direct-form 2 transposed:
     _ : (_,_,(_ <: *(b2)',*(b1)',*(b0))
       : _,+',_,_ :> _)~*(-a1)~*(-a2) : _;
 
 declare tf21t author "Julius O. Smith III";
 declare tf21t copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf21t license "MIT-style STK-4.3 license";
+declare tf21t license "LicenseRef-STK-4.3";
 tf21t(b0,b1,b2,a1,a2) = // tf2, direct-form 1 transposed:
     tf22t(1,0,0,a1,a2) : tf22t(b0,b1,b2,0,0); // or write it out if you want
 
@@ -1085,7 +1085,7 @@ tf21t(b0,b1,b2,a1,a2) = // tf2, direct-form 1 transposed:
 //------------------------------------------------------------
 declare av2sv author "Julius O. Smith III";
 declare av2sv copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare av2sv license "MIT-style STK-4.3 license";
+declare av2sv license "LicenseRef-STK-4.3";
 av2sv(av) = par(i,M,s(i+1)) with {
   M = ba.count(av);
   s(m) = sr(M-m+1); // m=1..M
@@ -1124,7 +1124,7 @@ av2sv(av) = par(i,M,s(i+1)) with {
 //------------------------------------------------------------
 declare bvav2nuv author "Julius O. Smith III";
 declare bvav2nuv copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare bvav2nuv license "MIT-style STK-4.3 license";
+declare bvav2nuv license "LicenseRef-STK-4.3";
 bvav2nuv(bv,av) = par(m,M+1,nu(m)) with {
   M = ba.count(av);
   nu(m) = ba.take(m+1,Pr(M-m)); // m=0..M
@@ -1163,7 +1163,7 @@ bvav2nuv(bv,av) = par(m,M+1,nu(m)) with {
 //------------------------------------------------------------
 declare iir_lat2 author "Julius O. Smith III";
 declare iir_lat2 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare iir_lat2 license "MIT-style STK-4.3 license";
+declare iir_lat2 license "LicenseRef-STK-4.3";
 iir_lat2(bv,av) = allpassnt(M,sv) : sum(i,M+1,*(ba.take(M-i+1,tg)))
 with {
   M = ba.count(av);
@@ -1201,7 +1201,7 @@ with {
 //------------------------------------------------------------
 declare allpassnt author "Julius O. Smith III";
 declare allpassnt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpassnt license "MIT-style STK-4.3 license";
+declare allpassnt license "LicenseRef-STK-4.3";
 allpassnt(0,sv) = _;
 allpassnt(n,sv) = _ : ((+ <: (allpassnt(n-1,sv),*(s)))~*(-s)) : fsec(n)
 with {
@@ -1235,7 +1235,7 @@ with {
 //------------------------------------------------------------
 declare iir_kl author "Julius O. Smith III";
 declare iir_kl copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare iir_kl license "MIT-style STK-4.3 license";
+declare iir_kl license "LicenseRef-STK-4.3";
 iir_kl(bv,av) = allpassnklt(M,sv) : sum(i,M+1,*(tghr(i)))
 with {
   M = ba.count(av);
@@ -1272,7 +1272,7 @@ with {
 //------------------------------------------------------------
 declare allpassnklt author "Julius O. Smith III";
 declare allpassnklt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpassnklt license "MIT-style STK-4.3 license";
+declare allpassnklt license "LicenseRef-STK-4.3";
 allpassnklt(0,sv) = _;
 allpassnklt(n,sv) = _ <: *(s),(*(1+s) : (+
                    : allpassnklt(n-1,sv))~(*(-s))) : fsec(n)
@@ -1307,7 +1307,7 @@ with {
 //------------------------------------------------------------
 declare iir_lat1 author "Julius O. Smith III";
 declare iir_lat1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare iir_lat1 license "MIT-style STK-4.3 license";
+declare iir_lat1 license "LicenseRef-STK-4.3";
 iir_lat1(bv,av) = allpassn1mt(M,sv) : sum(i,M+1,*(tghr(i+1)))
 with {
   M = ba.count(av);
@@ -1344,7 +1344,7 @@ with {
 //------------------------------------------------------------
 declare allpassn1mt author "Julius O. Smith III";
 declare allpassn1mt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpassn1mt license "MIT-style STK-4.3 license";
+declare allpassn1mt license "LicenseRef-STK-4.3";
 allpassn1mt(0,sv) = _;
 allpassn1mt(n,sv) = _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : ro.crossnn(1)
           : allpassn1mt(n-1,sv),_)~(*(-1)) : fsec(n)
@@ -1384,7 +1384,7 @@ with {
 //------------------------------------------------------------
 declare iir_nl author "Julius O. Smith III";
 declare iir_nl copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare iir_nl license "MIT-style STK-4.3 license";
+declare iir_nl license "LicenseRef-STK-4.3";
 iir_nl(bv,av) = allpassnnlt(M,sv) : sum(i,M+1,*(tghr(i)))
 with {
   M = ba.count(av);
@@ -1428,7 +1428,7 @@ with {
 //------------------------------------------------------------
 declare allpassnnlt author "Julius O. Smith III";
 declare allpassnnlt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpassnnlt license "MIT-style STK-4.3 license";
+declare allpassnnlt license "LicenseRef-STK-4.3";
 allpassnnlt(0,sv) = _;
 allpassnnlt(n,scl*(sv)) = allpassnnlt(n,par(i,count(sv),scl*(sv(i))));
 allpassnnlt(n,sv) = _ <: *(s),(*(c) : (+
@@ -1469,7 +1469,7 @@ with {
 //------------------------------------------------------------
 declare tf2np author "Julius O. Smith III";
 declare tf2np copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf2np license "MIT-style STK-4.3 license";
+declare tf2np license "LicenseRef-STK-4.3";
 
 tf2np(b0,b1,b2,a1,a2) = allpassnnlt(M,sv) : sum(i,M+1,*(tghr(i)))
 with {
@@ -1519,7 +1519,7 @@ with {
 //------------------------------------------------------------
 declare wgr author "Julius O. Smith III";
 declare wgr copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare wgr license "MIT-style STK-4.3 license";
+declare wgr license "LicenseRef-STK-4.3";
 wgr(f,r,x) = (*(G),_<:_,((+:*(C))<:_,_),_:+,_,_:+(x),-) ~ cross : _,*(0-gi)
 with {
   C = cos(2*ma.PI*f/ma.SR);
@@ -1556,7 +1556,7 @@ with {
 //------------------------------------------------------------
 declare nlf2 author "Julius O. Smith III";
 declare nlf2 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare nlf2 license "MIT-style STK-4.3 license";
+declare nlf2 license "LicenseRef-STK-4.3";
 nlf2(f,r,x) = ((_<:_,_),(_<:_,_) : (*(s),*(c),*(c),*(0-s)) :>
               (*(r),+(x))) ~ cross
 with {
@@ -1597,7 +1597,7 @@ with {
 //------------------------------------------------------------
 declare apnl author "Julius O. Smith III";
 declare apnl copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare apnl license "MIT-style STK-4.3 license";
+declare apnl license "LicenseRef-STK-4.3";
 apnl(a1,a2,x) = nonLinFilter
 with {
    condition = _>0;
@@ -1668,7 +1668,7 @@ with {
 //------------------------------------------------------------
 declare scatN author "Julius O. Smith III";
 declare scatN copyright "Copyright (C) 2024 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare scatN license "MIT-style STK-4.3 license";
+declare scatN license "LicenseRef-STK-4.3";
 
 scatN(0,av,filter) = !;
 scatN(N,av,filter) = incomingWaves <: (junctionSum : filter <: si.bus(N)), par(i,N,*(-1)) :> si.bus(N)
@@ -1715,7 +1715,7 @@ with {
 //----------------------------------------------
 declare scat author "Julius O. Smith III";
 declare scat copyright "Copyright (C) 2024 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare scat license "MIT-style STK-4.3 license";
+declare scat license "LicenseRef-STK-4.3";
 
 scat(s,r) = _ <: ((+ <: (r,*(s)))~(*(-s))) : _',_ :+;
 
@@ -1754,7 +1754,7 @@ scat(s,r) = _ <: ((+ <: (r,*(s)))~(*(-s))) : _',_ :+;
 //----------------------------------------------
 declare allpassn author "Julius O. Smith III";
 declare allpassn copyright "Copyright (c) 2003-2024 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpassn license "MIT-style STK-4.3 license";
+declare allpassn license "LicenseRef-STK-4.3";
 allpassn(0,sv) = _;
 allpassn(n,sv) = _ <: ((+ <: (allpassn(n-1,sv)),*(s))~(*(-s))) : _',_ :+
 with { s = ba.take(n,sv); };
@@ -1786,7 +1786,7 @@ with { s = ba.take(n,sv); };
 // power-normalized (reflection coefficients s = sin(t)):
 declare allpassnn author "Julius O. Smith III";
 declare allpassnn copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpassnn license "MIT-style STK-4.3 license";
+declare allpassnn license "LicenseRef-STK-4.3";
 
 allpassnn(0,tv) = _;
 allpassnn(n,tv) = _ <: *(s), (*(c) : (+
@@ -1820,7 +1820,7 @@ with { c = cos(ba.take(n,tv));  s = sin(ba.take(n,tv)); };
 // Kelly-Lochbaum:
 declare allpassnnkl author "Julius O. Smith III";
 declare allpassnnkl copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpassnnkl license "MIT-style STK-4.3 license";
+declare allpassnnkl license "LicenseRef-STK-4.3";
 
 allpassnkl(0,sv) = _;
 allpassnkl(n,sv) = _ <: *(s),(*(1+s) : (+
@@ -1853,7 +1853,7 @@ with { s = ba.take(n,sv); };
 // one-multiply:
 declare allpassn1m author "Julius O. Smith III";
 declare allpassn1m copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare allpassn1m license "MIT-style STK-4.3 license";
+declare allpassn1m license "LicenseRef-STK-4.3";
 
 allpassn1m(0,sv) = _;
 allpassn1m(n,sv) = _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : cross
@@ -1919,7 +1919,7 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 //----------------------------------------------
 declare tf2s author "Julius O. Smith III";
 declare tf2s copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf2s license "MIT-style STK-4.3 license";
+declare tf2s license "LicenseRef-STK-4.3";
 tf2s(b2,b1,b0,a1,a0,w1) = tf2(b0d,b1d,b2d,a1d,a2d)
 with {
   c   = 1/tan(w1*0.5/ma.SR); // bilinear-transform scale-factor
@@ -1983,7 +1983,7 @@ with {
 //----------------------------------------------
 declare tf1snp author "Julius O. Smith III";
 declare tf1snp copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf1snp license "MIT-style STK-4.3 license";
+declare tf1snp license "LicenseRef-STK-4.3";
 tf1snp(b1,b0,a0,w1) = fi.tf2snp(b1,b0,0,a0,0,w1); // FIXME: Faust compiler does not fully optimize - does C++?
 
 
@@ -2020,7 +2020,7 @@ tf1snp(b1,b0,a0,w1) = fi.tf2snp(b1,b0,0,a0,0,w1); // FIXME: Faust compiler does 
 //----------------------------------------------
 declare tf3slf author "Julius O. Smith III";
 declare tf3slf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf3slf license "MIT-style STK-4.3 license";
+declare tf3slf license "LicenseRef-STK-4.3";
 tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
   c   = 2.0 * ma.SR; // bilinear-transform scale-factor ("lf" case)
   csq = c*c;
@@ -2099,7 +2099,7 @@ tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
 //----------------------------------------------
 declare tf1s author "Julius O. Smith III";
 declare tf1s copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf1s license "MIT-style STK-4.3 license";
+declare tf1s license "LicenseRef-STK-4.3";
 tf1s(b1,b0,a0,w1) = tf1(b0d,b1d,a1d)
 with {
   c   = 1/tan(w1*0.5/ma.SR); // bilinear-transform scale-factor
@@ -2144,7 +2144,7 @@ with {
 //----------------------------------------------
 declare tf2sb author "Julius O. Smith III";
 declare tf2sb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf2sb license "MIT-style STK-4.3 license";
+declare tf2sb license "LicenseRef-STK-4.3";
 tf2sb(b2,b1,b0,a1,a0,w1,wc) =
   iir((b0d/a0d,b1d/a0d,b2d/a0d,b3d/a0d,b4d/a0d),(a1d/a0d,a2d/a0d,a3d/a0d,a4d/a0d)) with {
   T = 1.0/float(ma.SR);
@@ -2189,7 +2189,7 @@ tf2sb(b2,b1,b0,a1,a0,w1,wc) =
 //----------------------------------------------
 declare tf1sb author "Julius O. Smith III";
 declare tf1sb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare tf1sb license "MIT-style STK-4.3 license";
+declare tf1sb license "LicenseRef-STK-4.3";
 tf1sb(b1,b0,a0,w1,wc) = tf2(b0d/a0d,b1d/a0d,b2d/a0d,a1d/a0d,a2d/a0d) with {
   T = 1.0/float(ma.SR);
   a0d = wc^2*T^2+2*a0*w1*T+4;
@@ -2234,7 +2234,7 @@ tf1sb(b1,b0,a0,w1,wc) = tf2(b0d/a0d,b1d/a0d,b2d/a0d,a1d/a0d,a2d/a0d) with {
 // resonlp = 2nd-order lowpass with corner resonance:
 declare resonlp author "Julius O. Smith III";
 declare resonlp copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare resonlp license "MIT-style STK-4.3 license";
+declare resonlp license "LicenseRef-STK-4.3";
 
 resonlp(fc,Q,gain) = tf2s(b2,b1,b0,a1,a0,wc)
 with {
@@ -2277,7 +2277,7 @@ with {
 // resonhp = 2nd-order highpass with corner resonance:
 declare resonhp author "Julius O. Smith III";
 declare resonhp copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare resonhp license "MIT-style STK-4.3 license";
+declare resonhp license "LicenseRef-STK-4.3";
 
 resonhp(fc,Q,gain,x) = gain*x-resonlp(fc,Q,gain,x);
 
@@ -2312,7 +2312,7 @@ resonhp(fc,Q,gain,x) = gain*x-resonlp(fc,Q,gain,x);
 // resonbp = 2nd-order bandpass
 declare resonbp author "Julius O. Smith III";
 declare resonbp copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare resonbp license "MIT-style STK-4.3 license";
+declare resonbp license "LicenseRef-STK-4.3";
 
 resonbp(fc,Q,gain) = tf2s(b2,b1,b0,a1,a0,wc)
 with {
@@ -2358,7 +2358,7 @@ with {
 //------------------------------
 declare lowpass author "Julius O. Smith III";
 declare lowpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare lowpass license "MIT-style STK-4.3 license";
+declare lowpass license "LicenseRef-STK-4.3";
 
 lowpass(N,fc) = lowpass0_highpass1(0,N,fc);
 
@@ -2393,7 +2393,7 @@ lowpass(N,fc) = lowpass0_highpass1(0,N,fc);
 //------------------------------
 declare highpass author "Julius O. Smith III";
 declare highpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass license "MIT-style STK-4.3 license";
+declare highpass license "LicenseRef-STK-4.3";
 
 highpass(N,fc) = lowpass0_highpass1(1,N,fc);
 
@@ -2425,7 +2425,7 @@ highpass(N,fc) = lowpass0_highpass1(1,N,fc);
 //------------------------------
 declare lowpass0_highpass1 author "Julius O. Smith III";
 declare lowpass0_highpass1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare lowpass0_highpass1 license "MIT-style STK-4.3 license";
+declare lowpass0_highpass1 license "LicenseRef-STK-4.3";
 
 lowpass0_highpass1(s,N,fc) = lphpr(s,N,N,fc)
 with {
@@ -2472,7 +2472,7 @@ with {
 //------------------------------
 declare highpass_plus_lowpass author "Julius O. Smith III";
 declare highpass_plus_lowpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_plus_lowpass license "MIT-style STK-4.3 license";
+declare highpass_plus_lowpass license "LicenseRef-STK-4.3";
 
 highpass_plus_lowpass(1,fc) = _;
 highpass_plus_lowpass(3,fc) = tf2s(1,-1,1,1,1,w1) with { w1 = 2*ma.PI*fc; };
@@ -2514,7 +2514,7 @@ highpass_plus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
 //------------------------------
 declare highpass_minus_lowpass author "Julius O. Smith III";
 declare highpass_minus_lowpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_minus_lowpass license "MIT-style STK-4.3 license";
+declare highpass_minus_lowpass license "LicenseRef-STK-4.3";
 highpass_minus_lowpass(3,fc) = tf1s(-1,1,1,w1) with { w1 = 2*ma.PI*fc; };
 highpass_minus_lowpass(5,fc) = tf1s(1,-1,1,w1) : tf2s(1,-a12,1,a12,1,w1)
 with {
@@ -2554,7 +2554,7 @@ highpass_minus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
 //------------------------------
 declare highpass_plus_lowpass_even author "Julius O. Smith III";
 declare highpass_plus_lowpass_even copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_plus_lowpass_even license "MIT-style STK-4.3 license";
+declare highpass_plus_lowpass_even license "LicenseRef-STK-4.3";
 highpass_plus_lowpass_even(N,fc) = highpass(N,fc) + lowpass(N,fc);
 
 //--------------------`(fi.)highpass_minus_lowpass_even`----------------
@@ -2583,7 +2583,7 @@ highpass_plus_lowpass_even(N,fc) = highpass(N,fc) + lowpass(N,fc);
 //------------------------------
 declare highpass_minus_lowpass_even author "Julius O. Smith III";
 declare highpass_minus_lowpass_even copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_minus_lowpass_even license "MIT-style STK-4.3 license";
+declare highpass_minus_lowpass_even license "LicenseRef-STK-4.3";
 highpass_minus_lowpass_even(N,fc) = highpass(N,fc) - lowpass(N,fc);
 
 
@@ -2612,7 +2612,7 @@ highpass_minus_lowpass_even(N,fc) = highpass(N,fc) - lowpass(N,fc);
 //------------------------------
 declare highpass_plus_lowpass_odd author "Julius O. Smith III";
 declare highpass_plus_lowpass_odd copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_plus_lowpass_odd license "MIT-style STK-4.3 license";
+declare highpass_plus_lowpass_odd license "LicenseRef-STK-4.3";
 highpass_plus_lowpass_odd(N,fc) = highpass(N,fc) + lowpass(N,fc);
 
 //--------------------`(fi.)highpass_minus_lowpass_odd`----------------
@@ -2641,7 +2641,7 @@ highpass_plus_lowpass_odd(N,fc) = highpass(N,fc) + lowpass(N,fc);
 highpass_minus_lowpass_odd(N,fc) = highpass(N,fc) - lowpass(N,fc);
 declare highpass_minus_lowpass_odd author "Julius O. Smith III";
 declare highpass_minus_lowpass_odd copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass_minus_lowpass_odd license "MIT-style STK-4.3 license";
+declare highpass_minus_lowpass_odd license "LicenseRef-STK-4.3";
 
 
 //==========================Elliptic (Cauer) Lowpass Filters==============================
@@ -2686,7 +2686,7 @@ declare highpass_minus_lowpass_odd license "MIT-style STK-4.3 license";
 //---------------------------------------------------------------------
 declare lowpass3e author "Julius O. Smith III";
 declare lowpass3e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare lowpass3e license "MIT-style STK-4.3 license";
+declare lowpass3e license "LicenseRef-STK-4.3";
 
 lowpass3e(fc) = tf2s(b21,b11,b01,a11,a01,w1) : tf1s(0,1,a02,w1)
 with {
@@ -2732,7 +2732,7 @@ with {
 //----------------------------------------------------------------------
 declare lowpass6e author "Julius O. Smith III";
 declare lowpass6e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare lowpass6e license "MIT-style STK-4.3 license";
+declare lowpass6e license "LicenseRef-STK-4.3";
 
 lowpass6e(fc) =
               tf2s(b21,b11,b01,a11,a01,w1) :
@@ -2788,7 +2788,7 @@ with {
 //-------------------------------------------------------------------------
 declare highpass3e author "Julius O. Smith III";
 declare highpass3e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass3e license "MIT-style STK-4.3 license";
+declare highpass3e license "LicenseRef-STK-4.3";
 highpass3e(fc) = tf2s(b01/a01,b11/a01,b21/a01,a11/a01,1/a01,w1) :
                  tf1s(1/a02,0,1/a02,w1)
 with {
@@ -2825,7 +2825,7 @@ with {
 //-------------------------------------------------------------------------
 declare highpass6e author "Julius O. Smith III";
 declare highpass6e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highpass6e license "MIT-style STK-4.3 license";
+declare highpass6e license "LicenseRef-STK-4.3";
 highpass6e(fc) =
               tf2s(b01/a01,b11/a01,b21/a01,a11/a01,1/a01,w1) :
               tf2s(b02/a02,b12/a02,b22/a02,a12/a02,1/a02,w1) :
@@ -2886,7 +2886,7 @@ with {
 //-------------------------------------------------------------------------
 declare bandpass author "Julius O. Smith III";
 declare bandpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare bandpass license "MIT-style STK-4.3 license";
+declare bandpass license "LicenseRef-STK-4.3";
 bandpass(Nh,fl,fu) = bandpass0_bandstop1(0,Nh,fl,fu);
 
 
@@ -2919,7 +2919,7 @@ bandpass(Nh,fl,fu) = bandpass0_bandstop1(0,Nh,fl,fu);
 //-------------------------------------------------------------------------
 declare bandstop author "Julius O. Smith III";
 declare bandstop copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare bandstop license "MIT-style STK-4.3 license";
+declare bandstop license "LicenseRef-STK-4.3";
 bandstop(Nh,fl,fu) = bandpass0_bandstop1(1,Nh,fl,fu);
 
 //--------------------`(fi.)bandpass0_bandstop1`----------------
@@ -2950,7 +2950,7 @@ bandstop(Nh,fl,fu) = bandpass0_bandstop1(1,Nh,fl,fu);
 //-------------------------------------------------
 declare bandpass0_bandstop1 author "Julius O. Smith III";
 declare bandpass0_bandstop1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare bandpass0_bandstop1 license "MIT-style STK-4.3 license";
+declare bandpass0_bandstop1 license "LicenseRef-STK-4.3";
 bandpass0_bandstop1(s,Nh,fl,fu) = bpbsr(s,Nh,Nh,fl,fu)
 with {
   wl = 2*ma.PI*fl; // digital (z-plane) lower passband edge
@@ -2993,7 +2993,7 @@ with {
 //--------------------------------------------------------------
 declare bandpass6e author "Julius O. Smith III";
 declare bandpass6e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare bandpass6e license "MIT-style STK-4.3 license";
+declare bandpass6e license "LicenseRef-STK-4.3";
 bandpass6e(fl,fu) = tf2sb(b21,b11,b01,a11,a01,w1,wc) : tf1sb(0,1,a02,w1,wc)
 with {
   a11 = 0.802636764161030; // In octave: format long; poly(p(1:2))
@@ -3030,7 +3030,7 @@ with {
 //--------------------------------------------------------------
 declare bandpass12e author "Julius O. Smith III";
 declare bandpass12e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare bandpass12e license "MIT-style STK-4.3 license";
+declare bandpass12e license "LicenseRef-STK-4.3";
 bandpass12e(fl,fu) =
               tf2sb(b21,b11,b01,a11,a01,w1,wc) :
               tf2sb(b22,b12,b02,a12,a02,w1,wc) :
@@ -3110,7 +3110,7 @@ with { // octave script output:
 //------------------------------------------------------------
 declare pospass author "Julius O. Smith III";
 declare pospass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare pospass license "MIT-style STK-4.3 license";
+declare pospass license "LicenseRef-STK-4.3";
 pospass(N,fc) = fi.pospass0(lpf) with {
   fcs = ma.SR/4 - fc; // Upper lowpass cutoff = (SR/2 - fc) - SR/4
   lpf = fi.lowpass(N,fcs); // Butterworth lowpass
@@ -3118,14 +3118,14 @@ pospass(N,fc) = fi.pospass0(lpf) with {
 
 declare pospass6e author "Julius O. Smith III";
 declare pospass6e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare pospass6e license "MIT-style STK-4.3 license";
+declare pospass6e license "LicenseRef-STK-4.3";
 pospass6e(fc) = fi.pospass0(lpf) with {
   lpf = fi.lowpass6e(ma.SR/4 - fc); // Elliptic lowpass, order 6
 };
 
 declare pospass0 author "Julius O. Smith III";
 declare pospass0 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare pospass0 license "MIT-style STK-4.3 license";
+declare pospass0 license "LicenseRef-STK-4.3";
 pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
   c = 1-1' : +~(*(-1):mem); // complex sinusoid rotating at SR/4
   s = c'; // ||: 0, 1, 0, -1 :||
@@ -3204,7 +3204,7 @@ pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 //--------------------------------------------------------------
 declare lowshelf author "Julius O. Smith III";
 declare lowshelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare lowshelf license "MIT-style STK-4.3 license";
+declare lowshelf license "LicenseRef-STK-4.3";
 lowshelf(N,L0,fx) = filterbank(N,(fx)) : _, *(ba.db2linear(L0)) :> _;
 
 // Special cases and optimization:
@@ -3236,7 +3236,7 @@ lowshelf(N,L0,fx) = filterbank(N,(fx)) : _, *(ba.db2linear(L0)) :> _;
 //-----------------------------------------------
 declare low_shelf author "Julius O. Smith III";
 declare low_shelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare low_shelf license "MIT-style STK-4.3 license";
+declare low_shelf license "LicenseRef-STK-4.3";
 low_shelf  = lowshelf(3); // default = 3rd order Butterworth
 
 
@@ -3265,7 +3265,7 @@ low_shelf  = lowshelf(3); // default = 3rd order Butterworth
 //-----------------------------------------------
 declare low_shelf1 author "Julius O. Smith III";
 declare low_shelf1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare low_shelf1 license "MIT-style STK-4.3 license";
+declare low_shelf1 license "LicenseRef-STK-4.3";
 low_shelf1(L0,fx,x) = x + (ba.db2linear(L0)-1)*lowpass(1,fx,x); // optimized
 
 
@@ -3295,7 +3295,7 @@ low_shelf1(L0,fx,x) = x + (ba.db2linear(L0)-1)*lowpass(1,fx,x); // optimized
 //-----------------------------------------------
 declare low_shelf1_l author "Julius O. Smith III";
 declare low_shelf1_l copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare low_shelf1_l license "MIT-style STK-4.3 license";
+declare low_shelf1_l license "LicenseRef-STK-4.3";
 low_shelf1_l(G0,fx,x) = x + (G0-1)*lowpass(1,fx,x); // optimized
 
 
@@ -3325,7 +3325,7 @@ low_shelf1_l(G0,fx,x) = x + (G0-1)*lowpass(1,fx,x); // optimized
 //-----------------------------------------------
 declare lowshelf_other_freq author "Julius O. Smith III";
 declare lowshelf_other_freq copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare lowshelf_other_freq license "MIT-style STK-4.3 license";
+declare lowshelf_other_freq license "LicenseRef-STK-4.3";
 lowshelf_other_freq(N, L0, fx) = ba.db2linear(ba.linear2db(fx) + L0/N); // convenience
 
 //--------------`(fi.)highshelf`--------------
@@ -3364,7 +3364,7 @@ lowshelf_other_freq(N, L0, fx) = ba.db2linear(ba.linear2db(fx) + L0/N); // conve
 //--------------------------------------------------------------
 declare highshelf author "Julius O. Smith III";
 declare highshelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highshelf license "MIT-style STK-4.3 license";
+declare highshelf license "LicenseRef-STK-4.3";
 highshelf(N,Lpi,fx) = filterbank(N,(fx)) : *(ba.db2linear(Lpi)), _ :> _;
 
 // Special cases and optimization:
@@ -3421,7 +3421,7 @@ high_shelf = highshelf(3); // default = 3rd order Butterworth
 //---------------------------------------------------
 declare high_shelf1 author "Julius O. Smith III";
 declare high_shelf1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare high_shelf1 license "MIT-style STK-4.3 license";
+declare high_shelf1 license "LicenseRef-STK-4.3";
 high_shelf1(Lpi,fx,x) = x + (ba.db2linear(Lpi)-1)*highpass(1,fx,x); // optimized
 
 //----------------------`(fi.)high_shelf1_l`----------------------
@@ -3449,7 +3449,7 @@ high_shelf1(Lpi,fx,x) = x + (ba.db2linear(Lpi)-1)*highpass(1,fx,x); // optimized
 //---------------------------------------------------
 declare high_shelf1_l author "Julius O. Smith III";
 declare high_shelf1_l copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare high_shelf1_l license "MIT-style STK-4.3 license";
+declare high_shelf1_l license "LicenseRef-STK-4.3";
 high_shelf1_l(Gpi,fx,x) = x + (Gpi-1)*highpass(1,fx,x); //optimized
 
 // shelf transitions between frequency fx and this one:
@@ -3480,7 +3480,7 @@ high_shelf1_l(Gpi,fx,x) = x + (Gpi-1)*highpass(1,fx,x); //optimized
 //---------------------------------------------------
 declare highshelf_other_freq author "Julius O. Smith III";
 declare highshelf_other_freq copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare highshelf_other_freq license "MIT-style STK-4.3 license";
+declare highshelf_other_freq license "LicenseRef-STK-4.3";
 highshelf_other_freq(N, Lpi, fx) = ba.db2linear(ba.linear2db(fx) - Lpi/N);
 
 
@@ -3515,7 +3515,7 @@ highshelf_other_freq(N, Lpi, fx) = ba.db2linear(ba.linear2db(fx) - Lpi/N);
 //--------------------------------------------------------------
 declare peak_eq author "Julius O. Smith III";
 declare peak_eq copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare peak_eq license "MIT-style STK-4.3 license";
+declare peak_eq license "LicenseRef-STK-4.3";
 peak_eq(Lfx,fx,B) = tf2s(1,b1s,1,a1s,1,wx) with {
   T = float(1.0/ma.SR);
   Bw = B*T/sin(wx*T); // prewarp s-bandwidth for more accuracy in z-plane
@@ -3556,7 +3556,7 @@ peak_eq(Lfx,fx,B) = tf2s(1,b1s,1,a1s,1,wx) with {
 //------------------------------------------------------------
 declare peak_eq_cq author "Julius O. Smith III";
 declare peak_eq_cq copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare peak_eq_cq license "MIT-style STK-4.3 license";
+declare peak_eq_cq license "LicenseRef-STK-4.3";
 peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 
 //-------------------`(fi.)peak_eq_rm`--------------------------
@@ -3594,7 +3594,7 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 //------------------------------------------------------------
 declare peak_eq_rm author "Julius O. Smith III";
 declare peak_eq_rm copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare peak_eq_rm license "MIT-style STK-4.3 license";
+declare peak_eq_rm license "LicenseRef-STK-4.3";
 peak_eq_rm(Lfx,fx,tanPiBT) = _ <: _,A,_ : +,- : *(0.5),*(K/2.0) : + with {
   A = tf2(k2, k1*(1+k2), 1, k1*(1+k2), k2) <: _,_; // allpass
   k1 = 0.0 - cos(2.0*ma.PI*fx/ma.SR);
@@ -3645,7 +3645,7 @@ peak_eq_rm(Lfx,fx,tanPiBT) = _ <: _,A,_ : +,- : *(0.5),*(K/2.0) : + with {
 //------------------------------------------------------------
 declare spectral_tilt author "Julius O. Smith III";
 declare spectral_tilt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare spectral_tilt license "MIT-style STK-4.3 license";
+declare spectral_tilt license "LicenseRef-STK-4.3";
 spectral_tilt(N,f0,bw,alpha) = seq(i,N,sec(i)) with {
   sec(i) = g * tf1s(b1,b0,a0,1) with {
     g = a0/b0; // unity dc-gain scaling
@@ -3695,7 +3695,7 @@ spectral_tilt(N,f0,bw,alpha) = seq(i,N,sec(i)) with {
 //------------------------------------------------------------
 declare levelfilter author "Julius O. Smith III";
 declare levelfilter copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare levelfilter license "MIT-style STK-4.3 license";
+declare levelfilter license "LicenseRef-STK-4.3";
 levelfilter(L,freq,x) = (L * L0 * x) + ((1.0-L) * lp2out(x))
 with {
   L0 = pow(L,1/3);
@@ -3735,7 +3735,7 @@ with {
 //------------------------------------------------------------
 declare levelfilterN author "Julius O. Smith III";
 declare levelfilterN copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare levelfilterN license "MIT-style STK-4.3 license";
+declare levelfilterN license "LicenseRef-STK-4.3";
 levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 
 
@@ -3821,7 +3821,7 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter((L/N),freq));
 //------------------------------------------------------------
 declare mth_octave_filterbank author "Julius O. Smith III";
 declare mth_octave_filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare mth_octave_filterbank license "MIT-style STK-4.3 license";
+declare mth_octave_filterbank license "LicenseRef-STK-4.3";
 
 mth_octave_filterbank(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeq(N)
 with {
@@ -3836,7 +3836,7 @@ with {
 // and all higher bands sign-inverted (if preferred).
 declare mth_octave_filterbank_alt author "Julius O. Smith III";
 declare mth_octave_filterbank_alt copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare mth_octave_filterbank_alt license "MIT-style STK-4.3 license";
+declare mth_octave_filterbank_alt license "LicenseRef-STK-4.3";
 
 //------------------------`(fi.)mth_octave_filterbank_alt`-------------------------
 //
@@ -3873,7 +3873,7 @@ with {
 // See Vaidyanathan 1993 and papers cited there for more info.
 declare mth_octave_filterbank3 author "Julius O. Smith III";
 declare mth_octave_filterbank3 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare mth_octave_filterbank3 license "MIT-style STK-4.3 license";
+declare mth_octave_filterbank3 license "LicenseRef-STK-4.3";
 
 //------------------------`(fi.)mth_octave_filterbank3`-------------------------
 //
@@ -3901,7 +3901,7 @@ mth_octave_filterbank3(M,ftop,N) = mth_octave_filterbank_alt(3,M,ftop,N);
 
 declare mth_octave_filterbank5 author "Julius O. Smith III";
 declare mth_octave_filterbank5 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare mth_octave_filterbank5 license "MIT-style STK-4.3 license";
+declare mth_octave_filterbank5 license "LicenseRef-STK-4.3";
 
 //------------------------`(fi.)mth_octave_filterbank5`-------------------------
 //
@@ -3929,7 +3929,7 @@ mth_octave_filterbank5(M,ftop,N) = mth_octave_filterbank(5,M,ftop,N);
 
 declare mth_octave_filterbank_default author "Julius O. Smith III";
 declare mth_octave_filterbank_default copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare mth_octave_filterbank_default license "MIT-style STK-4.3 license";
+declare mth_octave_filterbank_default license "LicenseRef-STK-4.3";
 
 //------------------------`(fi.)mth_octave_filterbank_default`-------------------------
 // Default Mth-octave filter bank: the 5th-order Butterworth case of
@@ -4001,7 +4001,7 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 //---------------------------------------------------
 declare filterbank author "Julius O. Smith III";
 declare filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare filterbank license "MIT-style STK-4.3 license";
+declare filterbank license "LicenseRef-STK-4.3";
 filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb)
 with {
    nb = ba.count(lfreqs);
@@ -4045,7 +4045,7 @@ with {
 //---------------------------------------------------
 declare filterbanki author "Julius O. Smith III";
 declare filterbanki copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare filterbanki license "MIT-style STK-4.3 license";
+declare filterbanki license "LicenseRef-STK-4.3";
 filterbanki(O,lfreqs) = _ <: bsplit(nb)
 with {
    nb = ba.count(lfreqs);
@@ -4093,7 +4093,7 @@ with {
 //---------------------------------------------------
 declare svf author "Oleg Nesterov";
 declare svf copyright "Copyright (C) 2020 Oleg Nesterov <oleg@redhat.com>";
-declare svf license "MIT-style STK-4.3 license";
+declare svf license "LicenseRef-STK-4.3";
 
 svf = environment {
 
@@ -4189,7 +4189,7 @@ svf = environment {
 //-----------------------------------------------------
 declare svf_morph author "David Braun and Clarence W. Rowley";
 declare svf_morph copyright "Copyright (C) 2024 David Braun <braun@ccrma.stanford.edu>";
-declare svf_morph license "MIT-style STK-4.3 license";
+declare svf_morph license "LicenseRef-STK-4.3";
 svf_morph(f, q, _b, x) = svf.lp(f,q,x)*w_LP + svf.bp(f,q,x)*w_BP + svf.hp(f,q,x)*w_HP
 with {
   b = _b - 1; // b is now -1 to 1.
@@ -4240,7 +4240,7 @@ with {
 //-----------------------------------------------------------
 declare svf_notch_morph author "David Braun and Clarence W. Rowley";
 declare svf_notch_morph copyright "Copyright (C) 2024 David Braun <braun@ccrma.stanford.edu>";
-declare svf_notch_morph license "MIT-style STK-4.3 license";
+declare svf_notch_morph license "LicenseRef-STK-4.3";
 svf_notch_morph(f, q, _b, x) = svf.lp(f,q,x)*w_LP + svf.hp(f,q,x)*w_HP
 with {
   b = _b - 1; // b is now -1 to 1.
@@ -4288,7 +4288,7 @@ with {
 declare SVFTPT author "Dario Sanfilippo";
 declare SVFTPT copyright
     "Copyright (C) 2024 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare SVFTPT license "MIT License";
+declare SVFTPT license "MIT";
 SVFTPT = environment {
     SVF(CF, Q, x) = f ~ si.bus(2) : (! , ! , _ , _ , _ , _ , _ , _ , _)
         with {
@@ -4364,7 +4364,7 @@ SVFTPT = environment {
 declare dynamicSmoothing author "Dario Sanfilippo";
 declare dynamicSmoothing copyright
     "Copyright (C) 2024 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare dynamicSmoothing license "MIT License";
+declare dynamicSmoothing license "MIT";
 dynamicSmoothing(sensitivity, baseCF, x) = f ~ _ : ! , _
     with {
         f(s) = SVFTPT.BP2(CF, .5 , x) , SVFTPT.LP2(CF, .5, x)
@@ -4469,7 +4469,7 @@ with {
 declare lowpassLR4 author "Dario Sanfilippo";
 declare lowpassLR4 copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare lowpassLR4 license "MIT-style STK-4.3 license";
+declare lowpassLR4 license "LicenseRef-STK-4.3";
 lowpassLR4(cf, x) = x : seq(i, 2, svf.lp(cf, 1.0 / sqrt(2.0)));
 
 
@@ -4497,7 +4497,7 @@ lowpassLR4(cf, x) = x : seq(i, 2, svf.lp(cf, 1.0 / sqrt(2.0)));
 declare highpassLR4 author "Dario Sanfilippo";
 declare highpassLR4 copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare highpassLR4 license "MIT-style STK-4.3 license";
+declare highpassLR4 license "LicenseRef-STK-4.3";
 highpassLR4(cf, x) = x : seq(i, 2, svf.hp(cf, 1.0 / sqrt(2.0)));
 
 
@@ -4525,7 +4525,7 @@ highpassLR4(cf, x) = x : seq(i, 2, svf.hp(cf, 1.0 / sqrt(2.0)));
 declare crossover2LR4 author "Dario Sanfilippo";
 declare crossover2LR4 copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare crossover2LR4 license "MIT-style STK-4.3 license";
+declare crossover2LR4 license "LicenseRef-STK-4.3";
 crossover2LR4(cf, x) = lowpassLR4(cf, x) , highpassLR4(cf, x);
 
 
@@ -4554,7 +4554,7 @@ crossover2LR4(cf, x) = lowpassLR4(cf, x) , highpassLR4(cf, x);
 declare crossover3LR4 author "Dario Sanfilippo";
 declare crossover3LR4 copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare crossover3LR4 license "MIT-style STK-4.3 license";
+declare crossover3LR4 license "LicenseRef-STK-4.3";
 crossover3LR4(cf1, cf2, x) =
     crossover2LR4(cf1, x) : svf.ap(cf2, 1.0 / sqrt(2.0)) , crossover2LR4(cf2);
 
@@ -4585,7 +4585,7 @@ crossover3LR4(cf1, cf2, x) =
 declare crossover4LR4 author "Dario Sanfilippo";
 declare crossover4LR4 copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare crossover4LR4 license "MIT-style STK-4.3 license";
+declare crossover4LR4 license "LicenseRef-STK-4.3";
 crossover4LR4(cf1, cf2, cf3, x) =
     crossover2LR4(cf2, x) :
         svf.ap(cf3, 1.0 / sqrt(2.0)) ,
@@ -4624,7 +4624,7 @@ crossover4LR4(cf1, cf2, cf3, x) =
 declare crossover8LR4 author "Dario Sanfilippo";
 declare crossover8LR4 copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare crossover8LR4 license "MIT-style STK-4.3 license";
+declare crossover8LR4 license "LicenseRef-STK-4.3";
 crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7, x) =
     crossover2LR4(cf4, x) :
         (ap(cf6) : ap(cf5) : ap(cf7)) ,
@@ -4689,7 +4689,7 @@ crossover8LR4(cf1, cf2, cf3, cf4, cf5, cf6, cf7, x) =
 //-----------------------------------------------------------------------------
 declare itu_r_bs_1770_4_kfilter author "Jakob Dübel";
 declare itu_r_bs_1770_4_kfilter copyright "Copyright (C) 2022 Jakob Dübel";
-declare itu_r_bs_1770_4_kfilter license "ISC license";
+declare itu_r_bs_1770_4_kfilter license "ISC";
 
 itu_r_bs_1770_4_kfilter = stage1 : stage2 : normalize997Hz
 with {
@@ -4753,7 +4753,7 @@ declare avg_rect author "Dario Sanfilippo and Julius O. Smith III";
 declare avg_rect copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare avg_rect license "MIT-style STK-4.3 license";
+declare avg_rect license "LicenseRef-STK-4.3";
 avg_rect(period, x) = x : ba.slidingMean(rint(period * ma.SR));
 
 
@@ -4783,7 +4783,7 @@ declare avg_tau author "Dario Sanfilippo and Julius O. Smith III";
 declare avg_tau copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare avg_tau license "MIT-style STK-4.3 license";
+declare avg_tau license "LicenseRef-STK-4.3";
 avg_tau(period, x) = fi.lptau(period, x);
 
 
@@ -4811,7 +4811,7 @@ declare avg_t60 author "Dario Sanfilippo and Julius O. Smith III";
 declare avg_t60 copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare avg_t60 license "MIT-style STK-4.3 license";
+declare avg_t60 license "LicenseRef-STK-4.3";
 avg_t60(period, x) = fi.lpt60(period, x);
 
 
@@ -4840,7 +4840,7 @@ declare avg_t19 author "Dario Sanfilippo and Julius O. Smith III";
 declare avg_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare avg_t19 license "MIT-style STK-4.3 license";
+declare avg_t19 license "LicenseRef-STK-4.3";
 avg_t19(period, x) = fi.lpt19(period, x);
 
 
@@ -5065,7 +5065,7 @@ kalmanEnv = environment {
 // * <https://www.cs.unc.edu/~welch/kalman/index.html>
 //----------------------------------------------------------------------------
 declare kalman author "David Braun";
-declare kalman license "MIT License";
+declare kalman license "MIT";
 kalman = kalmanEnv.kalmanFilter;
 
 

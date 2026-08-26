@@ -1484,7 +1484,7 @@ tabulate_chebychev(C, FX, NX, CD, r0, r1, x) = y with {
 
 declare tabulate_chebychev author "Oleg Nesterov";
 declare tabulate_chebychev copyright "Copyright (C) 2022 Oleg Nesterov <oleg@redhat.com>";
-declare tabulate_chebychev license "MIT-style STK-4.3 license";
+declare tabulate_chebychev license "LicenseRef-STK-4.3";
 
 
 //-------`(ba.)tabulateNd`----------
@@ -2034,7 +2034,7 @@ tabulateNd(C,function,parameters) =
 
 declare tabulateNd author "Bart Brouns";
 declare tabulateNd copyright "Copyright (C) 2023 Bart Brouns <bart@magnetophon.nl>";
-declare tabulateNd license "AGPL-3.0";
+declare tabulateNd license "AGPL-3.0-only";
 
 //============================Selectors (Conditions)======================================
 //========================================================================================
@@ -2108,7 +2108,7 @@ ifNc(n) = _,_,ifNc(n-1) : ifNc(1);
 
 declare ifNc author "Oleg Nesterov";
 declare ifNc copyright "Copyright (C) 2023 Oleg Nesterov <oleg@redhat.com>";
-declare ifNc license "MIT-style STK-4.3 license";
+declare ifNc license "LicenseRef-STK-4.3";
 
 //-----------------------------`(ba.)ifNcNo`-------------------------------------
 // `ifNcNo(Nc,No)` is similar to `ifNc(Nc)` above but then/else branches have `No` outputs.
@@ -2152,7 +2152,7 @@ with {
 
 declare ifNcNo author "Oleg Nesterov";
 declare ifNcNo copyright "Copyright (C) 2023 Oleg Nesterov <oleg@redhat.com>";
-declare ifNcNo license "MIT-style STK-4.3 license";
+declare ifNcNo license "LicenseRef-STK-4.3";
 
 //-----------------------------`(ba.)selector`---------------------------------
 // Selects the ith input among N at compile time.
@@ -2595,7 +2595,7 @@ peakhold = (*,_ : max) ~ _;
 declare peakholder author "Dario Sanfilippo";
 declare peakholder copyright
     "Copyright (C) 2022 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare peakholder license "MIT-style STK-4.3 license";
+declare peakholder license "LicenseRef-STK-4.3";
 peakholder(holdTime, x) = loop ~ si.bus(2) : ! , _
     with {
         loop(timerState, outState) = timer , output
@@ -3622,7 +3622,7 @@ parallelOp(op,2) = op;
 parallelOp(op,n) = op(parallelOp(op,n-1));
 
 declare parallelOp author "Bart Brouns";
-declare parallelOp licence "GPL-3.0";
+declare parallelOp licence "GPL-3.0-only";
 declare parallelOp copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
 
 
@@ -3648,7 +3648,7 @@ declare parallelOp copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.n
 parallelMax(n) = parallelOp(max,n);
 
 declare parallelMax author "Bart Brouns";
-declare parallelMax licence "GPL-3.0";
+declare parallelMax licence "GPL-3.0-only";
 declare parallelMax copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
 
 
@@ -3674,7 +3674,7 @@ declare parallelMax copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.
 parallelMin(n) = parallelOp(min,n);
 
 declare parallelMin author "Bart Brouns";
-declare parallelMin licence "GPL-3.0";
+declare parallelMin licence "GPL-3.0-only";
 declare parallelMin copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
 
 
@@ -3700,7 +3700,7 @@ declare parallelMin copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.
 parallelMean(n) = si.bus(n):>_/n;
 
 declare parallelMean author "Bart Brouns";
-declare parallelMean licence "GPL-3.0";
+declare parallelMean licence "GPL-3.0-only";
 declare parallelMean copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
 
 //---------------------------`(ba.)parallelRMS`---------------------------------
@@ -3725,7 +3725,7 @@ declare parallelMean copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon
 parallelRMS(n) = par(i, n, pow(2)) : parallelMean(n) : sqrt;
 
 declare parallelRMS author "Bart Brouns";
-declare parallelRMS licence "GPL-3.0";
+declare parallelRMS licence "GPL-3.0-only";
 declare parallelRMS copyright "Copyright (c) 2020 Bart Brouns <bart@magnetophon.nl>";
 
 //////////////////////////////////Deprecated Functions////////////////////////////////////

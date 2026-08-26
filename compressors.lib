@@ -92,7 +92,7 @@ declare version "1.6.0";
 // ```
 //------------------------------------------------------------
 declare ratio2strength author "Bart Brouns";
-declare ratio2strength license "GPLv3";
+declare ratio2strength license "GPL-3.0-only";
 
 ratio2strength(ratio) = 1-(1/ratio);
 
@@ -117,7 +117,7 @@ ratio2strength(ratio) = 1-(1/ratio);
 // ```
 //------------------------------------------------------------
 declare strength2ratio author "Bart Brouns";
-declare strength2ratio license "GPLv3";
+declare strength2ratio license "GPL-3.0-only";
 
 strength2ratio(strength) = 1/(1-strength);
 
@@ -168,7 +168,7 @@ strength2ratio(strength) = 1/(1-strength);
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare peak_compression_gain_mono_db author "Bart Brouns";
-declare peak_compression_gain_mono_db license "GPLv3";
+declare peak_compression_gain_mono_db license "GPL-3.0-only";
 
 peak_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
   abs : ba.bypass1(prePost,si.onePoleSwitching(att,rel)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost !=1),si.onePoleSwitching(rel,att))
@@ -228,7 +228,7 @@ with {
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare peak_compression_gain_N_chan_db author "Bart Brouns";
-declare peak_compression_gain_N_chan_db license "GPLv3";
+declare peak_compression_gain_N_chan_db license "GPL-3.0-only";
 
 // generalise compression gains for N channels.
 // first we define a mono version:
@@ -293,7 +293,7 @@ peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare FFcompressor_N_chan author "Bart Brouns";
-declare FFcompressor_N_chan license "GPLv3";
+declare FFcompressor_N_chan license "GPL-3.0-only";
 
 // feed forward compressor
 FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
@@ -350,7 +350,7 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare FBcompressor_N_chan author "Bart Brouns";
-declare FBcompressor_N_chan license "GPLv3";
+declare FBcompressor_N_chan license "GPL-3.0-only";
 
 FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
   (peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N),si.bus(N) : (ro.interleave(N,2) : par(i,N,(meter : ba.db2linear)*_))) ~ si.bus(N);
@@ -407,7 +407,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare FBFFcompressor_N_chan author "Bart Brouns";
-declare FBFFcompressor_N_chan license "GPLv3";
+declare FBFFcompressor_N_chan license "GPL-3.0-only";
 
 FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
   si.bus(N) <: si.bus(N*2) :
@@ -462,7 +462,7 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare RMS_compression_gain_mono_db author "Bart Brouns";
-declare RMS_compression_gain_mono_db license "GPLv3";
+declare RMS_compression_gain_mono_db license "GPL-3.0-only";
 
 RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
   RMS(rel) : ba.bypass1(prePost,si.onePoleSwitching(att,0)) : ba.linear2db : gain_computer(strength,thresh,knee) : ba.bypass1((prePost!=1),si.onePoleSwitching(0,att))  
@@ -524,7 +524,7 @@ RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare RMS_compression_gain_N_chan_db author "Bart Brouns";
-declare RMS_compression_gain_N_chan_db license "GPLv3";
+declare RMS_compression_gain_N_chan_db license "GPL-3.0-only";
 
 RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,1) =
   RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost);
@@ -591,7 +591,7 @@ RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare RMS_FBFFcompressor_N_chan author "Bart Brouns";
-declare RMS_FBFFcompressor_N_chan license "GPLv3";
+declare RMS_FBFFcompressor_N_chan license "GPL-3.0-only";
 
 RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
   si.bus(N) <: si.bus(N*2):
@@ -659,7 +659,7 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare RMS_FBcompressor_peak_limiter_N_chan author "Bart Brouns";
-declare RMS_FBcompressor_peak_limiter_N_chan license "GPLv3";
+declare RMS_FBcompressor_peak_limiter_N_chan license "GPL-3.0-only";
 
 RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link,meter,meterLim,N) =
   (((RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,0,link,N)),si.bus(N)) : ro.interleave(N,2) : par(i,N,(meter : ba.db2linear)*_) : FFcompressor_N_chan(1,threshLim,0,att:min(rel),knee*0.5,0,link,meterLim,N))
@@ -715,7 +715,7 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare peak_compression_gain_mono author "Bart Brouns";
-declare peak_compression_gain_mono license "GPLv3";
+declare peak_compression_gain_mono license "GPL-3.0-only";
 
 peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
   peak_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost):ba.db2linear;
@@ -767,7 +767,7 @@ peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare peak_compression_gain_N_chan author "Bart Brouns";
-declare peak_compression_gain_N_chan license "GPLv3";
+declare peak_compression_gain_N_chan license "GPL-3.0-only";
 
 // generalise compression gains for N channels.
 // first we define a mono version:
@@ -819,7 +819,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare RMS_compression_gain_mono author "Bart Brouns";
-declare RMS_compression_gain_mono license "GPLv3";
+declare RMS_compression_gain_mono license "GPL-3.0-only";
 
 RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
   RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost):ba.db2linear;
@@ -871,7 +871,7 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // * Digital Dynamic Range Compressor Design: A Tutorial and Analysis, Dimitrios GIANNOULIS (<Dimitrios.Giannoulis@eecs.qmul.ac.uk>), Michael MASSBERG (<michael@massberg.org>), and Josuah D.REISS (<josh.reiss@eecs.qmul.ac.uk>)
 //------------------------------------------------------------
 declare RMS_compression_gain_N_chan author "Bart Brouns";
-declare RMS_compression_gain_N_chan license "GPLv3";
+declare RMS_compression_gain_N_chan license "GPL-3.0-only";
 
 RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
   RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N)
@@ -922,7 +922,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 declare compressor_lad_mono author "Julius O. Smith III";
 declare compressor_lad_mono copyright
         "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare compressor_lad_mono license "MIT-style STK-4.3 license";
+declare compressor_lad_mono license "LicenseRef-STK-4.3";
 compressor_lad_mono(lad,ratio,thresh,att,rel,x)
   = x@max(0,floor(0.5+ma.SR*lad)) * compression_gain_mono(ratio,thresh,att,rel,x);
 
@@ -962,7 +962,7 @@ compressor_lad_mono(lad,ratio,thresh,att,rel,x)
 declare compressor_mono author "Julius O. Smith III";
 declare compressor_mono copyright
         "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare compressor_mono license "MIT-style STK-4.3 license";
+declare compressor_mono license "LicenseRef-STK-4.3";
 compressor_mono = compressor_lad_mono(0);
 
 //--------------------`(co.)compressor_stereo`-------------------
@@ -998,7 +998,7 @@ compressor_mono = compressor_lad_mono(0);
 declare compressor_stereo author "Julius O. Smith III";
 declare compressor_stereo copyright
         "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare compressor_stereo license "MIT-style STK-4.3 license";
+declare compressor_stereo license "LicenseRef-STK-4.3";
 compressor_stereo(ratio,thresh,att,rel,x,y) = cgm*x, cgm*y with {
   cgm = compression_gain_mono(ratio,thresh,att,rel,abs(x)+abs(y));
 };
@@ -1036,7 +1036,7 @@ compressor_stereo(ratio,thresh,att,rel,x,y) = cgm*x, cgm*y with {
 declare compression_gain_mono author "Julius O. Smith III";
 declare compression_gain_mono copyright
         "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare compression_gain_mono license "MIT-style STK-4.3 license";
+declare compression_gain_mono license "LicenseRef-STK-4.3";
 compression_gain_mono(ratio,thresh,att,rel) =
   an.amp_follower_ar(att,rel) : ba.linear2db : outminusindb(ratio,thresh) :
   kneesmooth(att) : ba.db2linear
@@ -1097,7 +1097,7 @@ with {
 declare limiter_1176_R4_mono author "Julius O. Smith III";
 declare limiter_1176_R4_mono copyright
         "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare limiter_1176_R4_mono license "MIT-style STK-4.3 license";
+declare limiter_1176_R4_mono license "LicenseRef-STK-4.3";
 limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
 
 
@@ -1141,7 +1141,7 @@ limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
 declare limiter_1176_R4_stereo author "Julius O. Smith III";
 declare limiter_1176_R4_stereo copyright
         "Copyright (C) 2014-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare limiter_1176_R4_stereo license "MIT-style STK-4.3 license";
+declare limiter_1176_R4_stereo license "LicenseRef-STK-4.3";
 limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 
 
@@ -1184,7 +1184,7 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // ```
 //------------------------------------------------------------
 declare peak_expansion_gain_N_chan_db author "Bart Brouns";
-declare peak_expansion_gain_N_chan_db license "GPLv3";
+declare peak_expansion_gain_N_chan_db license "GPL-3.0-only";
 
 // generalise expansion gains for N channels.
 // first we define a mono version:
@@ -1256,7 +1256,7 @@ with {
 // ```
 //------------------------------------------------------------
 declare expander_N_chan author "Bart Brouns";
-declare expander_N_chan license "GPLv3";
+declare expander_N_chan license "GPL-3.0-only";
 
 // Feed forward expander
 expander_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,maxHold,N) =
@@ -1305,7 +1305,7 @@ expander_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,maxHo
 // ```
 //------------------------------------------------------------
 declare expanderSC_N_chan author "Bart Brouns";
-declare expanderSC_N_chan license "GPLv3";
+declare expanderSC_N_chan license "GPL-3.0-only";
 
 // Feed forward expander with sidechain
 expanderSC_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,maxHold,N,SCfunction,SCswitch,SCsignal) =
@@ -1384,7 +1384,7 @@ expanderSC_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,max
 declare limiter_lad_N author "Dario Sanfilippo";
 declare limiter_lad_N copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_lad_N license "GPLv3 license";
+declare limiter_lad_N license "GPL-3.0-only";
 limiter_lad_N(N, LD, ceiling, attack, hold, release) = 
       si.bus(N) <: par(i, N, @(LD * ma.SR)), 
                    (scaling <: si.bus(N)) : ro.interleave(N, 2) : par(i, N, *)
@@ -1431,7 +1431,7 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 declare limiter_lad_mono author "Dario Sanfilippo";
 declare limiter_lad_mono copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_lad_mono license "GPLv3 license";
+declare limiter_lad_mono license "GPL-3.0-only";
 limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 
 //-------------`(co.)limiter_lad_stereo`--------------------------------------
@@ -1465,7 +1465,7 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 declare limiter_lad_stereo author "Dario Sanfilippo";
 declare limiter_lad_stereo copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_lad_stereo license "GPLv3 license";
+declare limiter_lad_stereo license "GPL-3.0-only";
 limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 
 //-------------`(co.)limiter_lad_quad`----------------------------------------
@@ -1500,7 +1500,7 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 declare limiter_lad_quad author "Dario Sanfilippo";
 declare limiter_lad_quad copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_lad_quad license "GPLv3 license";
+declare limiter_lad_quad license "GPL-3.0-only";
 limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 
 //-------------`(co.)limiter_lad_bw`-----------------------------------------
@@ -1535,7 +1535,7 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 declare limiter_lad_bw author "Dario Sanfilippo";
 declare limiter_lad_bw copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com>";
-declare limiter_lad_bw license "GPLv3 license";
+declare limiter_lad_bw license "GPL-3.0-only";
 limiter_lad_bw = limiter_lad_mono(.01, 1, 0.01/twopi, .1, 1/twopi)
 with {
     twopi = 2 * ma.PI;

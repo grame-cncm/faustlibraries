@@ -695,7 +695,7 @@ with {
 };
 
 declare vital_rev author "David Braun";
-declare vital_rev license "GPL-3.0";
+declare vital_rev license "GPL-3.0-only";
 
 //===============================Freeverb===================================
 //==========================================================================
@@ -845,7 +845,7 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // * <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
 //------------------------------------------------------------
 declare dattorro_rev author "Jakob Zerbian";
-declare dattorro_rev licence "MIT-style STK-4.3 license";
+declare dattorro_rev licence "LicenseRef-STK-4.3";
 
 dattorro_rev(pre_delay, bw, i_diff1, i_diff2, decay, d_diff1, d_diff2, damping) = 
     si.bus(2) : + : *(0.5) : predelay : bw_filter : diffusion_network <: ((si.bus(4) :> _,_) ~ (reverb_network : ro.cross(2)))
@@ -895,7 +895,7 @@ with {
 // * <https://ccrma.stanford.edu/~dattorro/EffectDesignPart1.pdf>
 //------------------------------------------------------------
 declare dattorro_rev_default author "Jakob Zerbian";
-declare dattorro_rev_default license "MIT-style STK-4.3 license";
+declare dattorro_rev_default license "LicenseRef-STK-4.3";
 
 dattorro_rev_default = dattorro_rev(0, 0.9995, 0.75, 0.625, 0.5, 0.7, 0.5, 0.0005);
 
@@ -1013,7 +1013,7 @@ jp_gh_rev = environment {
 // * <https://doc.sccode.org/Overviews/DEIND.html>
 //------------------------------------------------------------
 declare jpverb author "Julian Parker, bug fixes and minor interface changes by Till Bovermann";
-declare jpverb license "MIT license";
+declare jpverb license "MIT";
 
 jpverb(t60, damp, size, early_diff, 
         mod_depth, mod_freq, 
@@ -1057,7 +1057,7 @@ jpverb(t60, damp, size, early_diff,
 // * <https://doc.sccode.org/Overviews/DEIND.html>
 //------------------------------------------------------------
 declare greyhole author "Julian Parker, bug fixes and minor interface changes by Till Bovermann";
-declare greyhole license "MIT license";
+declare greyhole license "MIT";
 
 greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq) 
     = jp_gh_rev.greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq);
@@ -1101,7 +1101,7 @@ greyhole(dt, damp, size, early_diff, feedback, mod_depth, mod_freq)
 // * <https://www.spinsemi.com/knowledge_base/inst_syntax.html>
 //------------------------------------------------------------
 declare kb_rom_rev1 author "Luca Spanedda";
-declare kb_rom_rev1 license "GPL-3.0";
+declare kb_rom_rev1 license "GPL-3.0-only";
 
 kb_rom_rev1(rt, damp) = aploop
 with {

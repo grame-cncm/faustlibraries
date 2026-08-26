@@ -623,7 +623,7 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //-------------------------------------------------
 declare colored_noise author "Constantinos Odysseas Economou";
 declare colored_noise copyright "Copyright (C) 2022 Constantinos Odysseas Economou <c.economou@sirenfx.io>";
-declare colored_noise license "MIT-style STK-4.3 license";
+declare colored_noise license "LicenseRef-STK-4.3";
 
 colored_noise(N,alpha) = no.noise : fi.dcblocker : fi.spectral_tilt(N,fmin,bw,alpha) : *(uniNorm(alpha * 2)) : max(-1.0) : min(1.0)
 with {

@@ -111,7 +111,7 @@ declare version "1.0.1";
 // * <https://www.sciencedirect.com/science/article/abs/pii/S0304885321006466>
 //------------------------------------------------------------
 declare ja_hysteresis author "Thomas Mandolini";
-declare ja_hysteresis license "LGPLv2.1";
+declare ja_hysteresis license "LGPL-2.1-only";
 
 ja_hysteresis(Ms, a, alpha, k, c) = core
 with {
@@ -219,7 +219,7 @@ with {
 // ```
 //------------------------------------------------------------
 declare ja_processor author "Thomas Mandolini";
-declare ja_processor license "LGPLv2.1";
+declare ja_processor license "LGPL-2.1-only";
 
 ja_processor(Ms, a, alpha, k, c, drive, trim) = chain
 with {
@@ -274,7 +274,7 @@ with {
 // ```
 //------------------------------------------------------------
 declare ja_processor_stereo author "Thomas Mandolini";
-declare ja_processor_stereo license "LGPLv2.1";
+declare ja_processor_stereo license "LGPL-2.1-only";
 
 ja_processor_stereo(Ms, a, alpha, k, c, drive, trim) =
     par(i, 2, ja_processor(Ms, a, alpha, k, c, drive, trim));
@@ -303,7 +303,7 @@ ja_processor_stereo(Ms, a, alpha, k, c, drive, trim) =
 // ```
 //------------------------------------------------------------
 declare ja_processor_ui author "Thomas Mandolini";
-declare ja_processor_ui license "LGPLv2.1";
+declare ja_processor_ui license "LGPL-2.1-only";
 
 ja_processor_ui = ja_processor(Ms_ui, a_ui, alpha_ui, k_ui, c_ui, drive_ui, trim_ui)
 with {
@@ -344,7 +344,7 @@ with {
 // ```
 //------------------------------------------------------------
 declare ja_processor_stereo_ui author "Thomas Mandolini";
-declare ja_processor_stereo_ui license "LGPLv2.1";
+declare ja_processor_stereo_ui license "LGPL-2.1-only";
 
 ja_processor_stereo_ui = ja_processor_stereo(Ms_ui, a_ui, alpha_ui, k_ui, c_ui, drive_ui, trim_ui)
 with {
