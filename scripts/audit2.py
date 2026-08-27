@@ -8,7 +8,9 @@ libraries actually use:
   * multi-function headers   //---`(fi.)tf1`, `(fi.)tf2` and `(fi.)tf3`---
   * generic patterns         //---`(de.)fdelay[N]`---      matches fdelay1..N
   * `library()` / `environment` aliases are not definitions and are excluded
-    (otherwise every `ba`, `fi`, `ma` import counts as an undocumented symbol)
+    (otherwise every `ba`, `fi`, `ma` import counts as an undocumented symbol);
+    an alias of an alias (sf.lib: `an = sf;` with `sf = library("all.lib")`)
+    is excluded the same way, expanded to a fixed point
   * `_name` definitions are internal by convention and are excluded
 
 Reports, per library: line count, number of definitions, number of doc blocks,
@@ -34,6 +36,7 @@ name_re = re.compile(r'`\(?([a-zA-Z0-9_]+)\.\)?([a-zA-Z0-9_\[\]]+)`')  # `(fi.)n
 bare_re = re.compile(r'`([a-zA-Z0-9_\[\]]+)`')                  # `name`
 def_re = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*(\([^)]*\))?\s*=')
 alias_re = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(library|environment|component)\b')
+alias_pair_re = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*;')
 
 
 def matches(pattern, name):
@@ -48,6 +51,7 @@ results = {}
 for lib in libs:
     lines = open(lib, encoding="utf-8", errors="replace").read().split("\n")
     documented, patterns, defs, aliases = set(), set(), set(), set()
+    alias_pairs = []
     doc_starts = []
     for i, l in enumerate(lines):
         if marker_re.match(l):
@@ -60,9 +64,21 @@ for lib in libs:
         if alias_re.match(l):
             aliases.add(alias_re.match(l).group(1))
             continue
+        m2 = alias_pair_re.match(l)
+        if m2:
+            alias_pairs.append((m2.group(1), m2.group(2)))
         m = def_re.match(l)
         if m:
             defs.add(m.group(1))
+    # an alias whose body is exactly another alias (sf.lib: `an = sf;`) is
+    # itself an alias, not a public definition — expand to a fixed point
+    changed = True
+    while changed:
+        changed = False
+        for n, t in alias_pairs:
+            if t in aliases and n not in aliases:
+                aliases.add(n)
+                changed = True
     defs -= aliases
     # underscore-prefixed symbols are internal by convention (CONTRIBUTING.md,
     # "Variables and identifiers scoping"): outside the public API, outside
