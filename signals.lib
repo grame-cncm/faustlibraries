@@ -58,7 +58,7 @@ ma = library("maths.lib");
 si = library("signals.lib");
 
 declare name "Faust Routing Library";
-declare version "1.6.0";
+declare version "1.7.0";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -365,21 +365,21 @@ Michon and Julius O. Smith III, and are released under the
 //-------------------------------------------------------------
 
 // See [grame-cncm/faustlibraries]: Minor improvement to si.smoo. (Discussion #106)
+// Implementation 0 is the best compromise on modern CPUs where two independent
+// multiplications can be done in parallel. The other versions could possibly
+// be faster on embedded devices.
+smooth = imp(0) with {
+  imp = case {
+    // y[n] = (1 - s) * x[n] + s * y[n - 1]
+    (0,s) => \(x).(fb ~ _ with { fb(y) = (1.0 - s) * x + s * y; });
 
-smooth_imp = case { 
-  // y[n] = (1 - s) * x[n] + s * y[n - 1]
-  (0,s) => \(x).(fb ~ _ with { fb(y) = (1.0 - s) * x + s * y; });
-  
-  // y[n] = s * (y[n - 1] - x[n]) + x[n]
-  (1,s) => \(x).(fb ~ _ with { fb(y) = s * (y - x) + x; });
-  
-  // y[n] = y[n - 1] + (1 - s) * (x[n] - y[n - 1])
-  (2,s) => \(x).(fb ~ _ with { fb(y) = y + (1.0 - s) * (x - y); });
+    // y[n] = s * (y[n - 1] - x[n]) + x[n]
+    (1,s) => \(x).(fb ~ _ with { fb(y) = s * (y - x) + x; });
+
+    // y[n] = y[n - 1] + (1 - s) * (x[n] - y[n - 1])
+    (2,s) => \(x).(fb ~ _ with { fb(y) = y + (1.0 - s) * (x - y); });
+  };
 };
-
-// The best compromise on modern CPUs where two independent multiplications can be done in parallel.
-// Other versions could possibly be faster on embedded devices. 
-smooth = smooth_imp(0);
 
 
 //--------------------------------`(si.)smoothq`-------------------------------------
@@ -856,4 +856,16 @@ bprod(1, f) = f;
 bprod(N, f) = bprod(left, f) * bprod(right, f) with {
     left = ma.np2(N) >> 1; // biggest power of 2 less than N
     right = N - left;
+};
+
+
+// Deprecated backward-compatibility alias, kept for one version and scheduled
+// for removal: a frozen copy of the internal implementation selector that was
+// folded into si.smooth (see CONTRIBUTING.md, "Variables and identifiers
+// scoping").
+declare smooth_imp deprecated "internal implementation selector, folded into si.smooth";
+smooth_imp = case {
+  (0,s) => \(x).(fb ~ _ with { fb(y) = (1.0 - s) * x + s * y; });
+  (1,s) => \(x).(fb ~ _ with { fb(y) = s * (y - x) + x; });
+  (2,s) => \(x).(fb ~ _ with { fb(y) = y + (1.0 - s) * (x - y); });
 };

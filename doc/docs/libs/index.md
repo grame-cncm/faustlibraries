@@ -733,10 +733,11 @@
 [(no.)rmultinoise](noises.md#normultinoise)
 [(no.)rnoises](noises.md#nornoises)
 [(no.)pink_noise](noises.md#nopink_noise)
+[(no.)pink_filter](noises.md#nopink_filter)
 [(no.)pink_noise_vm](noises.md#nopink_noise_vm)
 [(no.)lfnoise, (no.)lfnoise0 and (no.)lfnoiseN](noises.md#nolfnoise,-nolfnoise0-and-nolfnoisen)
 [(no.)sparse_noise](noises.md#nosparse_noise)
-[(no.)velvet_noise_vm](noises.md#novelvet_noise_vm)
+[(no.)velvet_noise](noises.md#novelvet_noise)
 [(no.)gnoise](noises.md#nognoise)
 [(no.)colored_noise](noises.md#nocolored_noise)
 

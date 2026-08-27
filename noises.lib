@@ -399,6 +399,24 @@ Michon and/or Julius O. Smith III, and are released under the
 //
 // * <https://ccrma.stanford.edu/~jos/sasp/Example_Synthesis_1_F_Noise.html>
 //------------------------------------------------------------
+//-------------------------`(no.)pink_filter`-------------------
+// The pinking filter used by `pink_noise`: a third-order IIR
+// approximating a -3 dB/octave spectral rolloff, designed with
+// `invfreqz` in Octave (see the `pink_noise` example, which compares it
+// against `fi.spectral_tilt` alternatives).
+//
+// #### Usage
+//
+// ```
+// _ : pink_filter : _
+// ```
+//
+// #### Test
+// ```
+// no = library("noises.lib");
+// pink_filter_test = no.noise : no.pink_filter;
+// ```
+//------------------------------------------------------------
 pink_filter = fi.iir((0.049922035, -0.095993537, 0.050612699, -0.004408786),
                     (-2.494956002, 2.017265875, -0.522189400));
 

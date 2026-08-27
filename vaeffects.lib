@@ -28,7 +28,7 @@ wd = library("wdmodels.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.5.0";
+declare version "1.6.0";
 
 //########################################################################################
 /************************************************************************
@@ -1709,15 +1709,16 @@ closed source license or any other license if you decide so.
 //     );
 // ```
 //------------------------------------------------------------
-declare oneVocoderBand author "Romain Michon";
-oneVocoderBand(band,bandsNumb,bwRatio,bandGain,x) = x : fi.resonbp(bandFreq,bandQ,bandGain) with {
+declare vocoder author "Romain Michon";
+vocoder(nBands,att,rel,BWRatio,source,excitation) = source <: par(i,nBands,oneBand(i,nBands,BWRatio,1) :
+    an.amp_follower_ar(att,rel) : _,excitation : oneBand(i,nBands,BWRatio)) :> _
+with {
+    oneBand(band,bandsNumb,bwRatio,bandGain,x) = x : fi.resonbp(bandFreq,bandQ,bandGain) with {
         bandFreq = 25*pow(2,(band+1)*(9/bandsNumb));
         BW = (bandFreq - 25*pow(2,(band)*(9/bandsNumb)))*bwRatio;
         bandQ = bandFreq/BW;
+    };
 };
-
-vocoder(nBands,att,rel,BWRatio,source,excitation) = source <: par(i,nBands,oneVocoderBand(i,nBands,BWRatio,1) :
-    an.amp_follower_ar(att,rel) : _,excitation : oneVocoderBand(i,nBands,BWRatio)) :> _ ;
 
 //########################################################################################
 /************************************************************************
@@ -2175,3 +2176,15 @@ with {
 declare klonCentaur author "David Braun";
 declare klonCentaur copyright "Chowdhury-DSP";
 declare klonCentaur license "BSD-3-Clause";
+
+
+// Deprecated backward-compatibility alias, kept for one version and scheduled
+// for removal: a frozen copy of the internal band filter that was folded into
+// ve.vocoder (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare oneVocoderBand author "Romain Michon";
+declare oneVocoderBand deprecated "internal helper, folded into ve.vocoder";
+oneVocoderBand(band,bandsNumb,bwRatio,bandGain,x) = x : fi.resonbp(bandFreq,bandQ,bandGain) with {
+        bandFreq = 25*pow(2,(band+1)*(9/bandsNumb));
+        BW = (bandFreq - 25*pow(2,(band)*(9/bandsNumb)))*bwRatio;
+        bandQ = bandFreq/BW;
+};

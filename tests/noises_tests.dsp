@@ -24,6 +24,7 @@ with {
 //rmultinoise_test = no.rmultinoise(3);
 //rnoises_test = no.rnoises(4, 1);
 
+pink_filter_test = no.noise : no.pink_filter;
 pink_noise_test = no.pink_noise;
 pink_noise_vm_test = no.pink_noise_vm(4);
 

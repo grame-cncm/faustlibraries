@@ -322,6 +322,27 @@ Octave:1> semilogx(20*log10(abs(fft(faustout,8192))(1:4096,:)));
 
 ----
 
+### `(no.)pink_filter`
+
+The pinking filter used by `pink_noise`: a third-order IIR
+approximating a -3 dB/octave spectral rolloff, designed with
+`invfreqz` in Octave (see the `pink_noise` example, which compares it
+against `fi.spectral_tilt` alternatives).
+
+#### Usage
+
+```
+_ : pink_filter : _
+```
+
+#### Test
+```
+no = library("noises.lib");
+pink_filter_test = no.noise : no.pink_filter;
+```
+
+----
+
 ### `(no.)pink_noise_vm`
 
 Multi pink noise generator.
@@ -410,7 +431,7 @@ sparse_noise_test = no.sparse_noise(5.0);
 
 ----
 
-### `(no.)velvet_noise_vm`
+### `(no.)velvet_noise`
 
 Velvet noise generator.
 
