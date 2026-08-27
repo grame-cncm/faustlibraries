@@ -577,9 +577,39 @@ ahdsr_bias(att, hol, dec, sus, rel, bias_att, bias_dec, bias_rel, legato, gate) 
 declare smoothEnvelope author "Romain Michon";
 smoothEnvelope(ar,t) = t : si.smooth(ba.tau2pole(ar));
 
-// Generic form to be specialized
-// Author: JOS, revised by Stephane Letz 
-asrfe(attT60,susLvl,relT60,finLvl,gate) = envelope 
+//------------------------`(en.)asrfe`----------------------
+// ASRFE (Attack, Sustain, Release-to-Final-value Exponentially) envelope
+// generator. Generic form specialized by `arfe` and friends: while the gate
+// is open the envelope approaches `susLvl` with time constant `attT60/6.91`,
+// and when it closes it approaches `finLvl` with time constant `relT60/6.91`.
+//
+// #### Usage
+//
+// ```
+// asrfe(attT60,susLvl,relT60,finLvl,gate) : _
+// ```
+//
+// Where:
+//
+// * `attT60`: attack time (sec) to reach the sustain level
+// * `susLvl`: sustain level held while the gate is open
+// * `relT60`: release time (sec) to reach the final level
+// * `finLvl`: final level to approach upon release (such as 0)
+// * `gate`: trigger signal (attack is triggered when `gate>0`, release is
+// triggered when `gate=0`)
+//
+// #### Test
+// ```
+// en = library("envelopes.lib");
+// no = library("noises.lib");
+// gate = button("gate");
+// asrfe_test = no.noise * en.asrfe(0.02, 0.8, 0.4, 0, gate);
+// ```
+//-----------------------------------------------------
+declare asrfe author "Julius O. Smith III, revised by Stephane Letz";
+declare asrfe licence "LicenseRef-STK-4.3";
+
+asrfe(attT60,susLvl,relT60,finLvl,gate) = envelope
 with {
   ugate = gate>0;
   target = select2(ugate, finLvl, susLvl*float(ugate));

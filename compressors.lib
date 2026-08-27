@@ -71,7 +71,7 @@ declare version "1.6.0";
 // 0 means no compression, 1 means hard limiting and  bigger than 1 means over-compression.
 //========================================================================================
 //
-//--------------------`(co.)ratio2strength `-------------------
+//--------------------`(co.)ratio2strength`-------------------
 //
 // This utility converts a ratio to a strength.
 //
@@ -96,7 +96,7 @@ declare ratio2strength license "GPL-3.0-only";
 
 ratio2strength(ratio) = 1-(1/ratio);
 
-//--------------------`(co.)strength2ratio `-------------------
+//--------------------`(co.)strength2ratio`-------------------
 //
 // This utility converts a strength to a ratio.
 //
@@ -1200,6 +1200,42 @@ peak_expansion_gain_N_chan_db(strength,thresh,range,att,hold,rel,knee,prePost,li
 
   <: (si.bus(N),(ba.parallelMax(N) <: si.bus(N))) : ro.interleave(N,2) : par(i,N,(it.interpolate_linear(link)));
 
+
+//--------------------`(co.)peak_expansion_gain_mono_db`-------------------
+// Mono dynamic range expander gain computer with dB output. This is
+// the per-channel core of `peak_expansion_gain_N_chan_db`.
+//
+// #### Usage
+//
+// ```
+// _ : peak_expansion_gain_mono_db(maxHold,strength,thresh,range,attack,hold,release,knee,prePost) : _
+// ```
+//
+// Where:
+//
+// * `maxHold`: the maximum hold time in samples, known at compile time
+// * `strength`: strength of the expansion (0 = no expansion, 100 means gating, <1 means upward compression)
+// * `thresh`: dB level threshold below which expansion kicks in
+// * `range`: maximum amount of expansion in dB
+// * `attack`: attack time = time constant (sec) coming out of expansion
+// * `hold`: hold time (sec)
+// * `release`: release time = time constant (sec) going into expansion
+// * `knee`: a gradual increase in gain reduction around the threshold:
+// above thresh+(knee/2) there is no gain reduction,
+// below thresh-(knee/2) there is the same gain reduction as without a knee,
+// and in between there is a gradual increase in gain reduction
+// * `prePost`: places the level detector either at the input or after the gain computer;
+// this turns it from a linear return-to-zero detector into a log domain return-to-range detector
+//
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// peak_expansion_gain_mono_db_test = os.osc(220) : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0);
+// ```
+//------------------------------------------------------------
+declare peak_expansion_gain_mono_db author "Bart Brouns";
+declare peak_expansion_gain_mono_db license "GPL-3.0-only";
 
 peak_expansion_gain_mono_db(maxHold,strength,thresh,range,attack,hold,release,knee,prePost) =
   level(hold,maxHold):ba.bypass1(prePost,si.lag_ud(attack,release)) :ba.linear2db : gain_computer(strength,thresh,range,knee) : ba.bypass1((prePost !=1),si.lag_ud(att,rel))

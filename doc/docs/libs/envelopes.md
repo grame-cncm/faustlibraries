@@ -306,6 +306,38 @@ smoothEnvelope_test = no.noise * en.smoothEnvelope(0.2, gate);
 
 ----
 
+### `(en.)asrfe`
+
+ASRFE (Attack, Sustain, Release-to-Final-value Exponentially) envelope
+generator. Generic form specialized by `arfe` and friends: while the gate
+is open the envelope approaches `susLvl` with time constant `attT60/6.91`,
+and when it closes it approaches `finLvl` with time constant `relT60/6.91`.
+
+#### Usage
+
+```
+asrfe(attT60,susLvl,relT60,finLvl,gate) : _
+```
+
+Where:
+
+* `attT60`: attack time (sec) to reach the sustain level
+* `susLvl`: sustain level held while the gate is open
+* `relT60`: release time (sec) to reach the final level
+* `finLvl`: final level to approach upon release (such as 0)
+* `gate`: trigger signal (attack is triggered when `gate>0`, release is
+triggered when `gate=0`)
+
+#### Test
+```
+en = library("envelopes.lib");
+no = library("noises.lib");
+gate = button("gate");
+asrfe_test = no.noise * en.asrfe(0.02, 0.8, 0.4, 0, gate);
+```
+
+----
+
 ### `(en.)arfe`
 
 ARFE (Attack and Release-to-Final-value Exponentially) envelope generator.

@@ -435,6 +435,30 @@ onePoleSwitching_test = hslider("onePoleSwitching:input", 0.5, -1, 1, 0.01)
 
 ----
 
+### `(si.)lag_ud`
+
+Lag filter with separate times for the up (attack) and down (release)
+directions. Alias of `onePoleSwitching`, kept for backward compatibility.
+
+#### Usage
+
+```
+_ : lag_ud(up,dn) : _
+```
+
+Where:
+
+* `up`: the attack tau time constant in second
+* `dn`: the release tau time constant in second
+
+#### Test
+```
+si = library("signals.lib");
+lag_ud_test = hslider("lag_ud:input", 0.5, -1, 1, 0.01) : si.lag_ud(0.05, 0.2);
+```
+
+----
+
 ### `(si.)rev`
 
 Reverse the input signal by blocks of n>0 samples. `rev(1)` is the indentity

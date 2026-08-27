@@ -247,6 +247,25 @@ MAX_test = ma.MAX;
 
 ----
 
+### `(ma.)INFINITY`
+
+Obsolete alias of `MAX`, kept for compatibility reasons. Despite its name it
+is not an IEEE infinity but the maximal finite value for the current precision.
+
+#### Usage
+
+```
+INFINITY : _
+```
+
+#### Test
+```
+ma = library("maths.lib");
+INFINITY_test = ma.INFINITY;
+```
+
+----
+
 ### `(ma.)FTZ`
 
 Flush to zero: force samples under the "maximum subnormal number"
@@ -343,7 +362,7 @@ not_test = 5 : ma.not;
 
 ----
 
-### `(ma.)sub(x,y)`
+### `(ma.)sub`
 
 Subtract `x` and `y`.
 
@@ -1019,6 +1038,30 @@ frac_test = 3.75 : ma.frac;
 
 ----
 
+### `(ma.)decimal`
+
+Gives the fractional part of n. Alias of `frac`, kept for backward
+compatibility: JOS uses `frac` a lot in filters.lib so that name was
+preferred.
+
+#### Usage
+
+```
+decimal(n) : _
+```
+
+Where:
+
+* `n`: a decimal number
+
+#### Test
+```
+ma = library("maths.lib");
+decimal_test = 3.75 : ma.decimal;
+```
+
+----
+
 ### `(ma.)modulo`
 
 Modulus operation using the `(x%y+y)%y` formula to ensures the result is always non-negative, even if `x` is negative.
@@ -1086,6 +1129,30 @@ Where:
 ma = library("maths.lib");
 os = library("oscillators.lib");
 isinf_test = (os.impulse - os.impulse) : log : ma.isinf;
+```
+
+----
+
+### `(ma.)nextafter`
+
+Gives the next representable floating-point value after `x` in the
+direction of `y` (the C `nextafter` function of math.h).
+
+#### Usage
+
+```
+_,_ : nextafter : _
+```
+
+Where:
+
+* `x`: the starting value
+* `y`: the direction toward which the next representable value is taken
+
+#### Test
+```
+ma = library("maths.lib");
+nextafter_test = (1.0, 2.0) : ma.nextafter;
 ```
 
 ----

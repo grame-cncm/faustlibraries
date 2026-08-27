@@ -84,6 +84,42 @@ flanger_stereo_test = os.osc(440), os.osc(660) : pf.flanger_stereo(4096, 1024, 1
 
 ----
 
+### `(pf.)vibrato2_mono`
+
+Sweeping second-order resonant allpass chain with feedback, the core
+used by `phaser2_mono`: `sections` allpass sections whose notch
+frequencies are swept between `frqmin` and `frqmax` by a sinusoidal LFO.
+
+#### Usage
+
+```
+_ : vibrato2_mono(sections,phase01,fb,width,frqmin,fratio,frqmax,speed) : _
+```
+
+Where:
+
+* `sections`: number of second-order allpass sections (MACRO ARGUMENT - not a signal)
+* `phase01`: phase of the LFO (0-1): crossfades between sine and cosine phase
+* `fb`: feedback gain between -1 and 1
+* `width`: approximate width of spectral notches in Hz
+* `frqmin`: approximate minimum frequency of first spectral notch in Hz
+* `fratio`: ratio of adjacent notch frequencies
+* `frqmax`: approximate maximum frequency of first spectral notch in Hz
+* `speed`: LFO frequency in Hz
+
+#### Test
+```
+pf = library("phaflangers.lib");
+os = library("oscillators.lib");
+vibrato2_mono_test = os.osc(440) : pf.vibrato2_mono(4, 0, 0.5, 1000, 100, 1.5, 4800, 0.5);
+```
+
+#### References
+
+* [https://ccrma.stanford.edu/~jos/pasp/Phasing.html](https://ccrma.stanford.edu/~jos/pasp/Phasing.html)
+
+----
+
 ### `(pf.)phaser2_mono`
 
 ![phaser2_mono — response plots](../img/pf_phaser2_mono.svg)

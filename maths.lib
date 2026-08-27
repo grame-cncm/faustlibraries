@@ -303,8 +303,23 @@ doubleprecision MAX = 1.7976931348623158e+308;
 quadprecision MAX = 1.7976931348623158e+308;
 fixedpointprecision MAX = 1.7976931348623158e+308;
 
-// Obsolete, kept for compatibility reasons
-INFINITY = MAX; 
+//---------------------------------`(ma.)INFINITY`---------------------------------------
+// Obsolete alias of `MAX`, kept for compatibility reasons. Despite its name it
+// is not an IEEE infinity but the maximal finite value for the current precision.
+//
+// #### Usage
+//
+// ```
+// INFINITY : _
+// ```
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// INFINITY_test = ma.INFINITY;
+// ```
+//-----------------------------------------------------------------------------
+INFINITY = MAX;
 
 //---------------------------------`(ma.)FTZ`---------------------------------------
 // Flush to zero: force samples under the "maximum subnormal number"
@@ -402,7 +417,7 @@ neg(x) = -x;
 not(x) = x xor -1;
 
 
-//-------`(ma.)sub(x,y)`------------------
+//-------`(ma.)sub`------------------
 // Subtract `x` and `y`.
 //
 // #### Usage
@@ -1077,12 +1092,29 @@ np2 = -(1) <: >>(1)|_ <: >>(2)|_ <: >>(4)|_ <: >>(8)|_ <: >>(16)|_ : +(1);
 // ```
 //------------------------------------------------------------------------------
 frac(n) = n - floor(n);
-decimal = frac;
 
-// NOTE: decimal does the same thing as frac but using floor instead. JOS uses frac a lot
-// in filters.lib so we decided to keep that one... decimal is declared though for
-// backward compatibility.
-// decimal(n) = n - floor(n);
+//-----------------------------`(ma.)decimal`---------------------------------------
+// Gives the fractional part of n. Alias of `frac`, kept for backward
+// compatibility: JOS uses `frac` a lot in filters.lib so that name was
+// preferred.
+//
+// #### Usage
+//
+// ```
+// decimal(n) : _
+// ```
+//
+// Where:
+//
+// * `n`: a decimal number
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// decimal_test = 3.75 : ma.decimal;
+// ```
+//------------------------------------------------------------------------------
+decimal = frac;
 
 
 //-------------------------------`(ma.)modulo`---------------------------------------
@@ -1155,6 +1187,27 @@ isnan = ffunction(int isnanf|isnan|isnanl (float),<math.h>,"");
 //------------------------------------------
 isinf = ffunction(int isinff|isinf|isinfl (float),<math.h>,"");
 
+//---------------------------`(ma.)nextafter`-------------------------------
+// Gives the next representable floating-point value after `x` in the
+// direction of `y` (the C `nextafter` function of math.h).
+//
+// #### Usage
+//
+// ```
+// _,_ : nextafter : _
+// ```
+//
+// Where:
+//
+// * `x`: the starting value
+// * `y`: the direction toward which the next representable value is taken
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// nextafter_test = (1.0, 2.0) : ma.nextafter;
+// ```
+//------------------------------------------
 nextafter = ffunction(float nextafter(float, float),<math.h>,"");
 
 
