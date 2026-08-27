@@ -50,13 +50,13 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Antialiased Nonlinearities";
-declare version "1.4.2";
+declare version "1.5.0";
 
 //==============================Auxiliary Functions=======================================
 //========================================================================================
 
 // Internal utility function, not documented for users.
-clip(l, h, x) = max(l, min(h, x));
+_clip(l, h, x) = max(l, min(h, x));
 
 //-------`(aa.)Rsqrt`----------
 // Real-valued sqrt().
@@ -73,25 +73,25 @@ Rlog(x) = log(max(ma.EPSILON, x));
 //-------`(aa.)Rtan`-----------
 // Real-valued tan().
 //-----------------------------
-Rtan(x) = tan(clip(0-ma.MAX, ma.MAX, x));
+Rtan(x) = tan(_clip(0-ma.MAX, ma.MAX, x));
 
 
 //-------`(aa.)Racos`----------
 // Real-valued acos().
 //-----------------------------
-Racos(x) = acos(clip(-1.0, 1.0, x));
+Racos(x) = acos(_clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Rasin`----------
 // Real-valued asin().
 //-----------------------------
-Rasin(x) = asin(clip(-1.0, 1.0, x));
+Rasin(x) = asin(_clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Racosh`----------
 // Real-valued acosh()
 //------------------------------
-Racosh(x) = ma.acosh(clip(1.0, ma.MAX, x));
+Racosh(x) = ma.acosh(_clip(1.0, ma.MAX, x));
 
 
 //-------`(aa.)Rcosh`----------
@@ -103,13 +103,13 @@ Rcosh(x) = min(ma.MAX, ma.cosh(x));
 //-------`(aa.)Rsinh`-----------
 // Real-valued sinh().
 //------------------------------
-Rsinh(x) = clip(0-ma.MAX, ma.MAX, ma.sinh(x));
+Rsinh(x) = _clip(0-ma.MAX, ma.MAX, ma.sinh(x));
 
 
 //-------`(aa.)Ratanh`----------
 // Real-valued atanh().
 //------------------------------
-Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
+Ratanh(x) = ma.atanh(_clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 
 
 //-------`(aa.)ADAA1`---------------------
@@ -139,7 +139,7 @@ Ratanh(x) = ma.atanh(clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 // sig = os.osc(110);
 // ADAA1_test = aa.ADAA1(0.001, f, F1, sig)
 //     with {
-//         f(x) = aa.clip(-1.0, 1.0, x);
+//         f(x) = max(-1.0, min(1.0, x));
 //         F1(x) = ba.if((x <= 1.0) & (x >= -1.0), 0.5 * x^2, x * ma.signum(x) - 0.5);
 //     };
 // ```
@@ -187,7 +187,7 @@ ADAA1(EPS, f, F1, x) = D1q
 // sig = os.osc(110);
 // ADAA2_test = aa.ADAA2(0.001, f, F1, F2, sig)
 //     with {
-//         f(x) = aa.clip(-1.0, 1.0, x);
+//         f(x) = max(-1.0, min(1.0, x));
 //         F1(x) = ba.if((x <= 1.0) & (x >= -1.0), 0.5 * x^2, x * ma.signum(x) - 0.5);
 //         F2(x) = ba.if((x <= 1.0) & (x >= -1.0), (1.0 / 3.0) * x^3, ((0.5 * x^2) - 1.0 / 6.0) * ma.signum(x));
 //     };
@@ -256,7 +256,7 @@ declare hardclip license "MIT";
 hardclip(x) = ADAA1(EPS, f, F1, x)
       with {
            EPS = .001;
-           f(x_f) = clip(-1.0, 1.0, x_f);
+           f(x_f) = _clip(-1.0, 1.0, x_f);
            F1(x_F1) = ba.if(   (x_F1 <= 1.0) & (x_F1 >= -1.0), 
                                .5 * x_F1 ^ 2.0, 
                                x_F1 * ma.signum(x_F1) - .5);
@@ -288,7 +288,7 @@ declare hardclip2 license "MIT";
 hardclip2(x) = ADAA2(EPS, f, F1, F2, x) 
       with {
            EPS = .001;
-           f(x_f) = clip(-1.0, 1.0, x_f);
+           f(x_f) = _clip(-1.0, 1.0, x_f);
            F1(x_F1) = ba.if(   (x_F1 <= 1.0) & (x_F1 >= -1.0), 
                                .5 * x_F1 ^ 2.0, 
                                x_F1 * ma.signum(x_F1) - .5);
@@ -1219,3 +1219,10 @@ atanh2(x) = ADAA2(EPS, f, F1, F2, x)
            F2(x_F2) = .5 * x_F2 ^ 2.0 * f(x_F2) + x_F2 / 2.0 + .25 * 
                Rlog(1.0 - x_F2) - .25 * Rlog(1.0 + x_F2);
       };
+
+
+// Deprecated backward-compatibility alias, kept for one version and
+// scheduled for removal: the canonical name now carries the internal
+// underscore prefix (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare clip deprecated "internal helper, renamed _clip";
+clip = _clip;

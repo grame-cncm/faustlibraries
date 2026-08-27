@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.8.0";
+declare version "1.9.0";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -3135,7 +3135,7 @@ with { // octave script output:
 declare pospass author "Julius O. Smith III";
 declare pospass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare pospass license "LicenseRef-STK-4.3";
-pospass(N,fc) = fi.pospass0(lpf) with {
+pospass(N,fc) = fi._pospass0(lpf) with {
   fcs = ma.SR/4 - fc; // Upper lowpass cutoff = (SR/2 - fc) - SR/4
   lpf = fi.lowpass(N,fcs); // Butterworth lowpass
 };
@@ -3165,14 +3165,11 @@ pospass(N,fc) = fi.pospass0(lpf) with {
 declare pospass6e author "Julius O. Smith III";
 declare pospass6e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare pospass6e license "LicenseRef-STK-4.3";
-pospass6e(fc) = fi.pospass0(lpf) with {
+pospass6e(fc) = fi._pospass0(lpf) with {
   lpf = fi.lowpass6e(ma.SR/4 - fc); // Elliptic lowpass, order 6
 };
 
-declare pospass0 author "Julius O. Smith III";
-declare pospass0 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
-declare pospass0 license "LicenseRef-STK-4.3";
-pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
+_pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
   c = 1-1' : +~(*(-1):mem); // complex sinusoid rotating at SR/4
   s = c'; // ||: 0, 1, 0, -1 :||
   unmodulate = _ <: *(c),*(-s); // subtract SR/4 from all input frequencies
@@ -5346,3 +5343,13 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
 *******************************************************************************/
+
+
+// Deprecated backward-compatibility alias, kept for one version and
+// scheduled for removal: the canonical name now carries the internal
+// underscore prefix (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare pospass0 author "Julius O. Smith III";
+declare pospass0 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare pospass0 license "LicenseRef-STK-4.3";
+declare pospass0 deprecated "internal core of pospass and pospass6e, renamed _pospass0";
+pospass0 = _pospass0;

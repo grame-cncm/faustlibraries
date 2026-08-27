@@ -60,7 +60,7 @@ ro = library("routes.lib");
 de = library("delays.lib");
 
 declare name "High Order Ambisonics library";
-declare version "1.4.0";
+declare version "1.5.0";
 declare author "Pierre Guillot";
 declare author "Eliott Paris";
 declare author "Julien Colafrancesco";
@@ -855,7 +855,7 @@ with {
     //computes the ith duration of the ith delay in samples with twenty two possibilities of distribution
     elemdur(d, i, p, fa, tf, ind) = (tf == ind) * (fa > (1 - x)) * d * x * fa
     with {
-        x = th(ind, i, p);
+        x = _th(ind, i, p);
     };
     //duration in samples computed as a sum of the 22 cases//
     dur(d, i, p, fa, tf) = sum(ind, 22, elemdur(d, i, p, fa, tf, ind)) : int;
@@ -928,7 +928,7 @@ with {
     //computes the ith duration of the ith delay in samples with twenty two possibilities of distribution
     elemdur(d, i, p, fa, tf, ind) = (tf == ind) * fa * d * x
     with {
-        x = th(ind, i, p);
+        x = _th(ind, i, p);
     };
     //duration in samples computed as a sum of the 22 cases//
     dur(d, i, p, fa, tf) = sum(ind, 22, elemdur(d, i, p, fa, tf, ind)) : int;
@@ -993,7 +993,7 @@ with {
     //
     ringmodfreq(f, i, N, tf, ind) = (tf == ind) * f * x * coef
     with {
-        x = th(ind, i, N);
+        x = _th(ind, i, N);
         coef = min(1, max(N * (fa - (N - i - 1) / N), 0));
     };
     //
@@ -1061,7 +1061,7 @@ with {
     //
     ringmodfreq(f, i, N, tf, ind) = (tf == ind) * f * x * coef
     with {
-        x = th(ind, i, N);
+        x = _th(ind, i, N);
         coef = min(1, max(N * (fa - (N - i - 1) / N), 0));
     };
     //
@@ -1072,28 +1072,28 @@ with {
 //TYPES OF DISTRIBUTIONS: 22 EASING FUNCTIONS FROM [0, 1] to [0,1]
 //(i+1)/p belongs to [0, 1] and its image by any function in the list also belongs to the interval
 
-th(0, i, p) = (i+1) / p;
-th(1, i, p) = ((i+1) / p)^2;
-th(2, i, p) = sin(ma.PI * 0.5 * (i+1) / p);
-th(3, i, p) = log10(1 + (i+1) / p) / log10(2);
-th(4, i, p) = sqrt((i+1) / p);
-th(5, i, p) = 1 - cos(ma.PI * 0.5 * (i+1) / p);
-th(6, i, p) = (1 - cos(ma.PI * (i+1) / p)) * 0.5;
-th(7, i, p) = 1 - (1 - (i+1) / p )^2;
-th(8, i, p) = ((i+1) / p < 0.5) * 2 * ((i+1) / p)^2 + ((i+1) / p >= 0.5) * (1 - (-2 * (i+1) / p + 2)^2 * 0.5);
-th(9, i, p) = ((i+1) / p)^3;
-th(10, i, p) = 1 - (1 - (i+1) / p)^3;
-th(11, i, p) = ((i+1) / p < 0.5) * 4 * ((i+1) / p)^3 + ((i+1) / p >= 0.5) * (1 - (-2 * (i+1) / p + 2)^3 * 0.5);
-th(12, i, p) = ((i+1) / p)^4;
-th(13, i, p) = 1 - (1 - (i+1) / p)^4;
-th(14, i, p) = ((i+1) / p < 0.5) * 8 * ((i+1) / p)^4 + ((i+1) / p >= 0.5) * (1 - (-2 * (i+1) / p + 2)^4 * 0.5);
-th(15, i, p) = ((i+1) / p)^5;
-th(16, i, p) = 1 - (1 - (i+1) / p)^5;
-th(17, i, p) = ((i+1) / p < 0.5) * 16 * ((i+1) / p)^5 + ((i+1) / p >= 0.5) * (1 - (-2 * (i+1) / p + 2)^5 * 0.5);
-th(18, i, p) = 2^(10 * (i+1) / p - 10);
-th(19, i, p) = ((i+1) / p < 1) * (1 - 2^(-10 * (i+1) / p)) + ((i+1) / p == 1);
-th(20, i, p) = 1 - sqrt(1 - ((i+1) / p)^2);
-th(21, i, p) = sqrt(1 - ((i+1) / p - 1)^2);
+_th(0, i, p) = (i+1) / p;
+_th(1, i, p) = ((i+1) / p)^2;
+_th(2, i, p) = sin(ma.PI * 0.5 * (i+1) / p);
+_th(3, i, p) = log10(1 + (i+1) / p) / log10(2);
+_th(4, i, p) = sqrt((i+1) / p);
+_th(5, i, p) = 1 - cos(ma.PI * 0.5 * (i+1) / p);
+_th(6, i, p) = (1 - cos(ma.PI * (i+1) / p)) * 0.5;
+_th(7, i, p) = 1 - (1 - (i+1) / p )^2;
+_th(8, i, p) = ((i+1) / p < 0.5) * 2 * ((i+1) / p)^2 + ((i+1) / p >= 0.5) * (1 - (-2 * (i+1) / p + 2)^2 * 0.5);
+_th(9, i, p) = ((i+1) / p)^3;
+_th(10, i, p) = 1 - (1 - (i+1) / p)^3;
+_th(11, i, p) = ((i+1) / p < 0.5) * 4 * ((i+1) / p)^3 + ((i+1) / p >= 0.5) * (1 - (-2 * (i+1) / p + 2)^3 * 0.5);
+_th(12, i, p) = ((i+1) / p)^4;
+_th(13, i, p) = 1 - (1 - (i+1) / p)^4;
+_th(14, i, p) = ((i+1) / p < 0.5) * 8 * ((i+1) / p)^4 + ((i+1) / p >= 0.5) * (1 - (-2 * (i+1) / p + 2)^4 * 0.5);
+_th(15, i, p) = ((i+1) / p)^5;
+_th(16, i, p) = 1 - (1 - (i+1) / p)^5;
+_th(17, i, p) = ((i+1) / p < 0.5) * 16 * ((i+1) / p)^5 + ((i+1) / p >= 0.5) * (1 - (-2 * (i+1) / p + 2)^5 * 0.5);
+_th(18, i, p) = 2^(10 * (i+1) / p - 10);
+_th(19, i, p) = ((i+1) / p < 1) * (1 - 2^(-10 * (i+1) / p)) + ((i+1) / p == 1);
+_th(20, i, p) = 1 - sqrt(1 - ((i+1) / p)^2);
+_th(21, i, p) = sqrt(1 - ((i+1) / p - 1)^2);
 
 
 //========================================================================================
@@ -1361,3 +1361,10 @@ with {
     bus3D = si.bus((N+1)*(N+1));
     thisOptimizer = ((bus3D  <: ((bus3D:ho.optimBasic3D(N)), (bus3D:ho.optimMaxRe3D(N)), (bus3D:ho.optimInPhase3D(N)))), ((optb <: bus3D), (optm <: bus3D), (opti <: bus3D))) : ro.interleave(3*(N+1)*(N+1), 2) : par(i, 3*(N+1)*(N+1), *) :> bus3D;
 };
+
+
+// Deprecated backward-compatibility alias, kept for one version and
+// scheduled for removal: the canonical name now carries the internal
+// underscore prefix (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare th deprecated "internal helper, renamed _th";
+th = _th;

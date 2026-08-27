@@ -67,7 +67,7 @@ aa = library("aanl.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.5.2"; 
+declare version "2.6.0"; 
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -754,7 +754,7 @@ declare mesh_square license "LicenseRef-STK-4.3";
 //========================================================================================
 
 // Implementation to share common code
-dwmEnv(wetAmount, FX) = environment
+_dwmEnv(wetAmount, FX) = environment
 {
     N = inputs(FX);
     wet(wg) = FX : par(i, N, *(wg));
@@ -808,7 +808,7 @@ dwmEnv(wetAmount, FX) = environment
 //------------------------------------------------------------
 declare dryWetMixer author "David Braun, revised by Stéphane Letz";
 
-dryWetMixer(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixer;
+dryWetMixer(wetAmount, FX) = _dwmEnv(wetAmount, FX).dryWetMixer;
 
 
 //---------------`(ef.)dryWetMixerConstantPower`-------------------------------
@@ -860,7 +860,7 @@ dryWetMixer(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixer;
 //------------------------------------------------------------
 declare dryWetMixerConstantPower author "David Braun, revised by Stéphane Letz";
 
-dryWetMixerConstantPower(wetAmount, FX) = dwmEnv(wetAmount, FX).dryWetMixerConstantPower;
+dryWetMixerConstantPower(wetAmount, FX) = _dwmEnv(wetAmount, FX).dryWetMixerConstantPower;
 
 
 mixingEnv = environment
@@ -1594,3 +1594,10 @@ echo5s  = vgroup("echo 5000", +~(de.delay(262144, int(hslider("millisecond", 0, 
 echo10s = vgroup("echo 10000", +~(de.delay(524288, int(hslider("millisecond", 0, 0, 10000, 1.00)*ba.millisec)-1) * (hslider("feedback", 0, 0, 100, 0.1)/100.0)));
 echo21s = vgroup("echo 21000", +~(de.delay(1048576, int(hslider("millisecond", 0, 0, 21000, 1.00)*ba.millisec)-1) * (hslider("feedback", 0, 0, 100, 0.1)/100.0)));
 echo43s = vgroup("echo 43000", +~(de.delay(2097152, int(hslider("millisecond", 0, 0, 43000, 1.00)*ba.millisec)-1) * (hslider("feedback", 0, 0, 100, 0.1)/100.0)));
+
+
+// Deprecated backward-compatibility alias, kept for one version and
+// scheduled for removal: the canonical name now carries the internal
+// underscore prefix (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare dwmEnv deprecated "internal machinery, renamed _dwmEnv";
+dwmEnv = _dwmEnv;

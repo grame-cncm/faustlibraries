@@ -154,10 +154,10 @@ ma = library("maths.lib");
 si = library("signals.lib");
 
 declare name "Faust Interpolator Library";
-declare version "1.5.0";
+declare version "1.6.0";
 
 // Produces 0 until the first trig, then 1 until the next trig (which outputs a 0 sample to reset), and so on
-reset(trig) = hold * (trig <= trig')
+_reset(trig) = hold * (trig <= trig')
 with {
     hold = select2(trig,_,trig) ~ _;
 };
@@ -170,15 +170,15 @@ singleprecision make_idv(id) = int(id), ma.frac(id);
 // Infinite raising index
 singleprecision raise(trig, step, length) = id, dv
 letrec {
-    'id = (id + int(step) + int(dv + ma.frac(step))) * reset(trig);
-    'dv = ma.frac(dv + ma.frac(step)) * reset(trig);
+    'id = (id + int(step) + int(dv + ma.frac(step))) * _reset(trig);
+    'dv = ma.frac(dv + ma.frac(step)) * _reset(trig);
 };
 
 // Modulo based raising index
 singleprecision raise_modulo(trig, step, length) = id, dv
 letrec {
-    'id = fmod(id + int(step) + int(dv + ma.frac(step)), length) * reset(trig);
-    'dv = ma.frac(dv + ma.frac(step)) * reset(trig);
+    'id = fmod(id + int(step) + int(dv + ma.frac(step)), length) * _reset(trig);
+    'dv = ma.frac(dv + ma.frac(step)) * _reset(trig);
 };
 
 // Decreasing index starting at 'length'
@@ -196,13 +196,13 @@ doubleprecision quadprecision make_idv(id) = id;
 // Infinite raising index
 doubleprecision quadprecision raise(trig, step, length) = idv
 letrec {
-    'idv = (idv + step) * reset(trig);
+    'idv = (idv + step) * _reset(trig);
 };
 
 // Modulo based raising index
 doubleprecision quadprecision raise_modulo(trig, step, length) = idv
 letrec {
-    'idv = fmod(idv + step, length) * reset(trig);
+    'idv = fmod(idv + step, length) * _reset(trig);
 };
 
 // Decreasing index starting at 'length'
@@ -1158,3 +1158,10 @@ frwtable(N, S, init, w_idx, x, r_idx) =
 declare remap author "David Braun";
 
 remap(from1, from2, to1, to2, x) = to1 + (x-from1)*(to2-to1)/(from2-from1);
+
+
+// Deprecated backward-compatibility alias, kept for one version and
+// scheduled for removal: the canonical name now carries the internal
+// underscore prefix (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare reset deprecated "internal helper, renamed _reset";
+reset = _reset;

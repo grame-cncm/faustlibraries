@@ -747,6 +747,7 @@
 
 ## oscillators
 
+[(os.)SAFE](oscillators.md#ossafe)
 [(os.)sinwaveform](oscillators.md#ossinwaveform)
 [(os.)coswaveform](oscillators.md#oscoswaveform)
 [(os.)phasor](oscillators.md#osphasor)

@@ -92,3 +92,4 @@ polyblep_square_test = os.polyblep_square(220);
 polyblep_triangle_test = os.polyblep_triangle(220);
 oscrp_test = os.oscrp(440, 0.5);
 oscr_test = os.oscr(440);
+SAFE_test = os.SAFE, os[SAFE=1;].phasor(1.0, -.001);

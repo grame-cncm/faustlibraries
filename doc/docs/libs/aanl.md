@@ -149,7 +149,7 @@ os = library("oscillators.lib");
 sig = os.osc(110);
 ADAA1_test = aa.ADAA1(0.001, f, F1, sig)
     with {
-        f(x) = aa.clip(-1.0, 1.0, x);
+        f(x) = max(-1.0, min(1.0, x));
         F1(x) = ba.if((x <= 1.0) & (x >= -1.0), 0.5 * x^2, x * ma.signum(x) - 0.5);
     };
 ```
@@ -183,7 +183,7 @@ os = library("oscillators.lib");
 sig = os.osc(110);
 ADAA2_test = aa.ADAA2(0.001, f, F1, F2, sig)
     with {
-        f(x) = aa.clip(-1.0, 1.0, x);
+        f(x) = max(-1.0, min(1.0, x));
         F1(x) = ba.if((x <= 1.0) & (x >= -1.0), 0.5 * x^2, x * ma.signum(x) - 0.5);
         F2(x) = ba.if((x <= 1.0) & (x >= -1.0), (1.0 / 3.0) * x^3, ((0.5 * x^2) - 1.0 / 6.0) * ma.signum(x));
     };

@@ -67,7 +67,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "1.7.0";
+declare version "1.8.0";
 
 // This library contains platform specific constants
 pl = library("platform.lib");
@@ -75,7 +75,7 @@ pl = library("platform.lib");
 //======================Oscillators based on mathematical functions===============
 //
 // Note that there is a numerical problem with several phasor functions built using the internal
-// `phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, which happens with very small frequencies, 
+// `_phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, which happens with very small frequencies, 
 // so it will have no effect when summed to 1, but it will be enough to make the fractional function wrap 
 // around when summed to 0. An example of this problem can be observed when running the following code:
 //
@@ -89,11 +89,11 @@ pl = library("platform.lib");
 // always run correctly for its full cycle, otherwise, for increments smaller than `ma.EPSILON`, 
 // phasor would initially run but it'd eventually get stuck once the output gets big enough.
 // 
-// All functions using `phasor_imp` are affected by this problem, but a safer
+// All functions using `_phasor_imp` are affected by this problem, but a safer
 // version is implemented, and can be used alternatively by setting `SAFE=1` in the environment using 
 // [explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution) syntax.
 // 
-// For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer implementation of `phasor_imp`.
+// For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer implementation of `_phasor_imp`.
 //=================================================================================
 
 //=========================Wave-Table-Based Oscillators===================================
@@ -101,9 +101,26 @@ pl = library("platform.lib");
 // [pl.tablesize](https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib) constant.
 //========================================================================================
 
-// Global parameter to use the safer version of `phasor_imp`, but which
-// could be used in other functions as well.
-
+//-----------------------`(os.)SAFE`------------------------
+// Global parameter selecting the safer version of the internal phasor
+// implementation (0: faster version, 1: safer version, protecting
+// against the small-increment numerical problem described at the top of
+// this section). Meant to be overridden through
+// [explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution)
+// syntax, and usable by other functions as well.
+//
+// #### Usage
+//
+// ```
+// os[SAFE=1;].phasor(1.0, -.001) : _
+// ```
+//
+// #### Test
+// ```
+// os = library("oscillators.lib");
+// SAFE_test = os.SAFE, os[SAFE=1;].phasor(1.0, -.001);
+// ```
+//------------------------------------------------------------
 SAFE = 0; // 0: use the faster version, 1: use the safer version
 
 //-----------------------`(os.)sinwaveform`------------------------
@@ -176,7 +193,7 @@ phasor_env(freq, N) = environment {
 declare phasor_env author "Pierre Mascarade Relano, Maxime Sirbu, Stéphane Letz";
 
 // Generic phasor with `reset` and `phase` parameters to be specialised in concrete use-cases.
-phasor_imp(freq, reset, phase) = (select2(hard_reset, +(incr(SAFE)), phase) : ma.decimal) ~ _
+_phasor_imp(freq, reset, phase) = (select2(hard_reset, +(incr(SAFE)), phase) : ma.decimal) ~ _
 with {
     incr_aux = freq/ma.SR;
 
@@ -196,7 +213,7 @@ with {
 // phasor_imp(freq, reset, phase) = phasor_env(freq, 16).hsp(reset, phase);
 
 // Version to be used with tables
-phasor_table(tablesize, freq, reset, phase) = phasor_imp(freq, reset, phase) : *(float(tablesize));
+_phasor_table(tablesize, freq, reset, phase) = _phasor_imp(freq, reset, phase) : *(float(tablesize));
 
 
 //-----------------------`(os.)phasor`------------------------
@@ -223,7 +240,7 @@ phasor_table(tablesize, freq, reset, phase) = phasor_imp(freq, reset, phase) : *
 // phasor_test = os.phasor(1024, 440);
 // ```
 //------------------------------------------------------------
-phasor(tablesize, freq) = phasor_table(tablesize, freq, 0, 0);
+phasor(tablesize, freq) = _phasor_table(tablesize, freq, 0, 0);
 
 
 //-----------------------`(os.)hs_phasor`------------------------
@@ -250,7 +267,7 @@ phasor(tablesize, freq) = phasor_table(tablesize, freq, 0, 0);
 //---------------------------------------------------------
 declare hs_phasor author "Mike Olsen, revised by Stéphane Letz";
 
-hs_phasor(tablesize, freq, reset) = phasor_table(tablesize, freq, reset, 0);
+hs_phasor(tablesize, freq, reset) = _phasor_table(tablesize, freq, reset, 0);
 
 
 //-----------------------`(os.)hsp_phasor`------------------------
@@ -277,7 +294,7 @@ hs_phasor(tablesize, freq, reset) = phasor_table(tablesize, freq, reset, 0);
 //---------------------------------------------------------
 declare hsp_phasor author "Christophe Lebreton, revised by Stéphane Letz";
 
-hsp_phasor(tablesize, freq, reset, phase) = phasor_table(tablesize, freq, reset, phase);
+hsp_phasor(tablesize, freq, reset, phase) = _phasor_table(tablesize, freq, reset, phase);
 
 
 //-----------------------`(os.)oscsin`------------------------
@@ -755,7 +772,7 @@ lf_rawsaw(periodsamps) = (_,periodsamps : fmod) ~ +(1.0);
 declare lf_sawpos author "Bart Brouns, revised by Stéphane Letz";
 declare lf_sawpos licence "LicenseRef-STK-4.3";
 
-lf_sawpos(freq) = phasor_imp(freq, 0, 0);
+lf_sawpos(freq) = _phasor_imp(freq, 0, 0);
 
 
 //-----------------`(os.)lf_sawpos_phase`--------------------
@@ -782,7 +799,7 @@ lf_sawpos(freq) = phasor_imp(freq, 0, 0);
 declare lf_sawpos_phase author "Bart Brouns, revised by Stéphane Letz";
 declare lf_sawpos_phase licence "LicenseRef-STK-4.3";
 
-lf_sawpos_phase(freq,phase) = phasor_imp(freq, 0, phase);
+lf_sawpos_phase(freq,phase) = _phasor_imp(freq, 0, phase);
 
 
 //-----------------`(os.)lf_sawpos_reset`--------------------
@@ -810,7 +827,7 @@ lf_sawpos_phase(freq,phase) = phasor_imp(freq, 0, phase);
 declare lf_sawpos_reset author "Bart Brouns, revised by Stéphane Letz";
 declare lf_sawpos_reset licence "LicenseRef-STK-4.3";
 
-lf_sawpos_reset(freq,reset) = phasor_imp(freq, reset, 0);
+lf_sawpos_reset(freq,reset) = _phasor_imp(freq, reset, 0);
 
 
 //-----------------`(os.)lf_sawpos_phase_reset`--------------------
@@ -838,7 +855,7 @@ lf_sawpos_reset(freq,reset) = phasor_imp(freq, reset, 0);
 declare lf_sawpos_phase_reset author "Bart Brouns, revised by Stéphane Letz";
 declare lf_sawpos_phase_reset licence "LicenseRef-STK-4.3";
 
-lf_sawpos_phase_reset(freq,phase,reset) = phasor_imp(freq, reset, phase);
+lf_sawpos_phase_reset(freq,phase,reset) = _phasor_imp(freq, reset, phase);
 
 
 //-----------------`(os.)lf_saw`, `(os.)saw1`--------------------
@@ -920,9 +937,9 @@ lf_saw(freq) = saw1(freq);
 declare sawN author "Julius O. Smith III";
 declare sawN license "LicenseRef-STK-4.3";
 // --- sawN for N = 1 to 4 ---
-// Orders 5 and 6 have noise at low fundamentals: MAX_SAW_ORDER = 6; MAX_SAW_ORDER_NEXTPOW2 = 8;
+// Orders 5 and 6 have noise at low fundamentals: MAX_SAW_ORDER = 6; _MAX_SAW_ORDER_NEXTPOW2 = 8;
 MAX_SAW_ORDER = 4;
-MAX_SAW_ORDER_NEXTPOW2 = 8; // par cannot handle the case of 0 elements
+_MAX_SAW_ORDER_NEXTPOW2 = 8; // par cannot handle the case of 0 elements
 sawN(N,freq) = saw1l : poly(Nc) : D(Nc-1) : gate(Nc-1)
 with {
   Nc = max(1,min(N,MAX_SAW_ORDER));
@@ -2740,3 +2757,14 @@ polyblep_triangle(freq) = polyblep_square(freq) : fi.pole(0.999) : *(4 * freq / 
 
 // end further contributions section
 //########################################################################################
+
+
+// Deprecated backward-compatibility aliases, kept for one version and
+// scheduled for removal: the canonical names now carry the internal
+// underscore prefix (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare phasor_imp deprecated "internal machinery, renamed _phasor_imp";
+phasor_imp = _phasor_imp;
+declare phasor_table deprecated "internal machinery, renamed _phasor_table";
+phasor_table = _phasor_table;
+declare MAX_SAW_ORDER_NEXTPOW2 deprecated "internal constant, renamed _MAX_SAW_ORDER_NEXTPOW2";
+MAX_SAW_ORDER_NEXTPOW2 = _MAX_SAW_ORDER_NEXTPOW2;

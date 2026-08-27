@@ -42,7 +42,7 @@
 //########################################################################################
 
 declare name "Faust Motion Library";
-declare version "0.8.0";
+declare version "0.9.0";
 
 an = library("analyzers.lib");
 ba = library("basics.lib");
@@ -50,8 +50,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 ma = library("maths.lib");
 
-clamp01(x) = x:max(0):min(1);
-declare clamp01 author "Christophe Lebreton";
+_clamp01(x) = x:max(0):min(1);
 
 //==================================Shock Detection======================================
 //========================================================================================
@@ -139,7 +138,7 @@ declare shockTrigger author "Christophe Lebreton";
 // inclinometer_test = mo.inclinometer(2, os.sawtooth(1));
 // ```
 //-------------------------------------------------
-inclinometer(lpHz, sig) = sig:max(0):fi.lowpass(1, lpHz):clamp01;
+inclinometer(lpHz, sig) = sig:max(0):fi.lowpass(1, lpHz):_clamp01;
 declare inclinometer author "Christophe Lebreton";
 
 //-----------------`(mo.)inclineBalance`--------------------
@@ -175,7 +174,7 @@ declare inclinometer author "Christophe Lebreton";
 // ```
 //-------------------------------------------------
 inclineBalance(lpHz, posSig, negSig) =
-  (inclinometer(lpHz, posSig) * 0.5 - inclinometer(lpHz, negSig) * 0.5 + 0.5):clamp01;
+  (inclinometer(lpHz, posSig) * 0.5 - inclinometer(lpHz, negSig) * 0.5 + 0.5):_clamp01;
 declare inclineBalance author "Christophe Lebreton";
 
 //-----------------`(mo.)inclineSymmetric`--------------------
@@ -211,7 +210,7 @@ declare inclineBalance author "Christophe Lebreton";
 // ```
 //-------------------------------------------------
 inclineSymmetric(lpHz, posSig, negSig) =
-  (1 - inclinometer(lpHz, posSig)) + (1 - inclinometer(lpHz, negSig)) - 1 : clamp01;
+  (1 - inclinometer(lpHz, posSig)) + (1 - inclinometer(lpHz, negSig)) - 1 : _clamp01;
 declare inclineSymmetric author "Christophe Lebreton";
 
 //-----------------`(mo.)projectedGravity`--------------------
@@ -286,7 +285,7 @@ declare projectedGravity author "Christophe Lebreton";
 // ```
 //-------------------------------------------------
 motionEnvelope(thr, gain, envUpMs, envDownMs, sig) =
-  sig:-(thr):max(0):*(gain):clamp01:an.amp_follower_ar(envUpMs * 0.001, envDownMs * 0.001);
+  sig:-(thr):max(0):*(gain):_clamp01:an.amp_follower_ar(envUpMs * 0.001, envDownMs * 0.001);
 
 //-----------------`(mo.)envelopeAbs`--------------------
 // Envelope on the absolute value of a signal (responds to both polarities).
@@ -852,3 +851,11 @@ with {
   out_range = out_high - out_low;
 };
 declare scale author "Christophe Lebreton";
+
+
+// Deprecated backward-compatibility alias, kept for one version and
+// scheduled for removal: the canonical name now carries the internal
+// underscore prefix (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare clamp01 author "Christophe Lebreton";
+declare clamp01 deprecated "internal helper, renamed _clamp01";
+clamp01 = _clamp01;

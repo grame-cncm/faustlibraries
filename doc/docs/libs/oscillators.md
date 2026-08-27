@@ -28,7 +28,7 @@ The oscillators library is organized into 10 sections:
 
 
 Note that there is a numerical problem with several phasor functions built using the internal
-`phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, which happens with very small frequencies, 
+`_phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, which happens with very small frequencies, 
 so it will have no effect when summed to 1, but it will be enough to make the fractional function wrap 
 around when summed to 0. An example of this problem can be observed when running the following code:
 
@@ -42,16 +42,39 @@ The incremental step can be clipped to guarantee that the phasor will
 always run correctly for its full cycle, otherwise, for increments smaller than `ma.EPSILON`, 
 phasor would initially run but it'd eventually get stuck once the output gets big enough.
 
-All functions using `phasor_imp` are affected by this problem, but a safer
+All functions using `_phasor_imp` are affected by this problem, but a safer
 version is implemented, and can be used alternatively by setting `SAFE=1` in the environment using 
 [explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution) syntax.
 
-For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer implementation of `phasor_imp`.
+For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer implementation of `_phasor_imp`.
 
 ## Wave-Table-Based Oscillators
 
 Oscillators using tables. The table size is set by the 
 [pl.tablesize](https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib) constant.
+
+----
+
+### `(os.)SAFE`
+
+Global parameter selecting the safer version of the internal phasor
+implementation (0: faster version, 1: safer version, protecting
+against the small-increment numerical problem described at the top of
+this section). Meant to be overridden through
+[explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution)
+syntax, and usable by other functions as well.
+
+#### Usage
+
+```
+os[SAFE=1;].phasor(1.0, -.001) : _
+```
+
+#### Test
+```
+os = library("oscillators.lib");
+SAFE_test = os.SAFE, os[SAFE=1;].phasor(1.0, -.001);
+```
 
 ----
 

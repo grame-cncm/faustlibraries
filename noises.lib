@@ -22,7 +22,7 @@ os = library("oscillators.lib");
 no = library("noises.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Noise Generator Library";
-declare version "1.5.0";
+declare version "1.6.0";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -63,7 +63,7 @@ closed source license or any other license if you decide so.
 ************************************************************************
 ************************************************************************/
 
-noise_env(seed) = environment {
+_noise_env(seed) = environment {
 
     RANDMAX = 2147483647.0; // = 2^31-1 = MAX_SIGNED_INT in 32 bits
     
@@ -110,7 +110,7 @@ noise_env(seed) = environment {
 // noise_test = no.noise;
 // ```
 //------------------------
-noise = noise_env(12345).noise;
+noise = _noise_env(12345).noise;
 
 
 //---------------------`(no.)multirandom`--------------------------
@@ -131,7 +131,7 @@ noise = noise_env(12345).noise;
 // multirandom_test = no.multirandom(3);
 // ```
 //-------------------------------------------------------------
-multirandom(N) = noise_env(12345).multirandom(N);
+multirandom(N) = _noise_env(12345).multirandom(N);
 
 
 //-----------------------`(no.)multinoise`------------------------
@@ -153,7 +153,7 @@ multirandom(N) = noise_env(12345).multirandom(N);
 // multinoise_test = no.multinoise(3);
 // ```
 //------------------------------------------------------------
-multinoise(N) = noise_env(12345).multinoise(N);
+multinoise(N) = _noise_env(12345).multinoise(N);
 
 
 //-----------------------`(no.)noises`------------------------
@@ -176,7 +176,7 @@ multinoise(N) = noise_env(12345).multinoise(N);
 // noises_test = no.noises(4, 2);
 // ```
 //----------------------------------------------------------
-noises(N,i) = noise_env(12345).noises(N,i);
+noises(N,i) = _noise_env(12345).noises(N,i);
 
 
 //-----------------------`(no.)dnoise`------------------------
@@ -209,7 +209,7 @@ noises(N,i) = noise_env(12345).noises(N,i);
 // This expression `sx = hslider("seed multiplier",1,1,1000,1)` allows 1000 distinct seed variations.
 // To generate a burst with a fixed length, use `ba.spulse(bLength, t)` (as trigger for the `t` parameter), where `bLength` is the burst duration in samples and `t` is a trigger.
 //----------------------------------------------------------
-dnoise(t,sx) = noise_env(12345).dnoise(t,sx);
+dnoise(t,sx) = _noise_env(12345).dnoise(t,sx);
 
 //-----------------------`(no.)randomseed`------------------------
 // A random seed based on the foreign function `arc4random`
@@ -254,7 +254,7 @@ randomseed = ffunction(int arc4random(), <stdlib.h>, ""), 12345 : select2(1');
 // rnoise_test = no.rnoise;
 // ```
 //------------------------
-rnoise = noise_env(randomseed).noise;
+rnoise = _noise_env(randomseed).noise;
 
 
 //---------------------`(no.)rmultirandom`--------------------------
@@ -277,7 +277,7 @@ rnoise = noise_env(randomseed).noise;
 // rmultirandom_test = no.rmultirandom(3);
 // ```
 //-------------------------------------------------------------
-rmultirandom(N) = noise_env(randomseed).multirandom(N);
+rmultirandom(N) = _noise_env(randomseed).multirandom(N);
 
 
 //-----------------------`(no.)rmultinoise`------------------------
@@ -301,7 +301,7 @@ rmultirandom(N) = noise_env(randomseed).multirandom(N);
 // rmultinoise_test = no.rmultinoise(3);
 // ```
 //------------------------------------------------------------
-rmultinoise(N) = noise_env(randomseed).multinoise(N);
+rmultinoise(N) = _noise_env(randomseed).multinoise(N);
 
 
 //-----------------------`(no.)rnoises`------------------------
@@ -326,7 +326,7 @@ rmultinoise(N) = noise_env(randomseed).multinoise(N);
 // rnoises_test = no.rnoises(4, 1);
 // ```
 //----------------------------------------------------------
-rnoises(N,i) = noise_env(randomseed).noises(N,i);
+rnoises(N,i) = _noise_env(randomseed).noises(N,i);
 
 
 //########################################################################################
@@ -661,3 +661,10 @@ with {
         d = ba.if(ma.signum(alpha) > 0, 0, -0.7196);
     };
 };
+
+
+// Deprecated backward-compatibility alias, kept for one version and
+// scheduled for removal: the canonical name now carries the internal
+// underscore prefix (see CONTRIBUTING.md, "Variables and identifiers scoping").
+declare noise_env deprecated "internal machinery, renamed _noise_env";
+noise_env = _noise_env;
