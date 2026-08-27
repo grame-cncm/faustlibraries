@@ -156,9 +156,11 @@ tu_boundIndex_test = tu.boundIndex(2000, 2500);
 
 ### `boundFactor`
 
-Bound the interpolation factor at the table edges: returns 0 when the
-unbounded index falls below the table, and keeps the last entry
-reachable when it falls above.
+Interpolation factor bounded at the table edges: the fractional part
+`factor - index` in range, clipped to 0 below the table (hold the
+first entry) and to 1 above it (reach the last entry, which sits one
+past `size-1` — the tables are allocated one point larger for exactly
+this purpose).
 
 #### Usage
 
@@ -168,7 +170,7 @@ boundFactor(size, factor, index) : _
 
 Where:
 
-* `size`: the table size
+* `size`: the table size (kept for signature compatibility)
 * `factor`: the unbounded fractional index
 * `index`: the bounded integer index (from `boundIndex`)
 

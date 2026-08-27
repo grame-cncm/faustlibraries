@@ -46,7 +46,7 @@
 
 fi = library("filters.lib");
 
-declare version "1.0.0";
+declare version "1.1.0";
 
 /*******************************************************************************
   * 1-dimensional function tables for linear interpolation
@@ -181,9 +181,11 @@ interpolation(table, f, i) = rtable(table, i)*(1-f) + rtable(table,i+1)*f;
 boundIndex(size, index) = index : floor: min(size-1) : max(0);
 
 //---------------------------`boundFactor`--------------------------------
-// Bound the interpolation factor at the table edges: returns 0 when the
-// unbounded index falls below the table, and keeps the last entry
-// reachable when it falls above.
+// Interpolation factor bounded at the table edges: the fractional part
+// `factor - index` in range, clipped to 0 below the table (hold the
+// first entry) and to 1 above it (reach the last entry, which sits one
+// past `size-1` — the tables are allocated one point larger for exactly
+// this purpose).
 //
 // #### Usage
 //
@@ -193,7 +195,7 @@ boundIndex(size, index) = index : floor: min(size-1) : max(0);
 //
 // Where:
 //
-// * `size`: the table size
+// * `size`: the table size (kept for signature compatibility)
 // * `factor`: the unbounded fractional index
 // * `index`: the bounded integer index (from `boundIndex`)
 //
@@ -203,12 +205,7 @@ boundIndex(size, index) = index : floor: min(size-1) : max(0);
 // tu_boundFactor_test = tu.boundFactor(2000, 1500.5, 1500);
 // ```
 //----------------------------------------------------------
-boundFactor(size, factor, index) =
-  select2(0<index, boundupperFactor(size, factor, index), 0)
-with {
-  boundupperFactor(size, factor, index) =
-    select2(index<size-1, size-1, factor - index);
-};
+boundFactor(size, factor, index) = max(0, min(1, factor - index));
 
 //---------------------------`tubeF`--------------------------------
 // Look up `x` in a transfer-curve table with linear interpolation: maps
