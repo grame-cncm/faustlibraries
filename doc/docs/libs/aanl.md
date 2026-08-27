@@ -32,6 +32,13 @@ double-precision or more to reduce errors.
 The environment identifier for this library is `aa`. After importing
 the standard libraries in Faust, the functions below can be called as `aa.function_name`.
 
+The Antialiased Nonlinearities library is organized into 4 sections:
+
+* [Auxiliary Functions](#auxiliary-functions)
+* [Main functions](#main-functions)
+* [Saturators](#saturators)
+* [Trigonometry](#trigonometry)
+
 #### References
 
 * [https://github.com/grame-cncm/faustlibraries/blob/master/aanl.lib](https://github.com/grame-cncm/faustlibraries/blob/master/aanl.lib)

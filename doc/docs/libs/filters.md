@@ -7,7 +7,7 @@ filters used in audio and signal processing. It includes low-pass, high-pass,
 band-pass, allpass, shelving, equalizer, and crossover filters, as well as advanced
 analog and digital filter design sections for both educational and production use.
 
-The Filters library is organized into 23 sections:
+The Filters library is organized into 24 sections:
 
 * [Basic Filters](#basic-filters)
 * [Comb Filters](#comb-filters)
@@ -32,6 +32,7 @@ The Filters library is organized into 23 sections:
 * [Standardized Filters](#standardized-filters)
 * [Averaging Functions](#averaging-functions)
 * [Kalman Filters](#kalman-filters)
+* [Adaptive Filters](#adaptive-filters)
 
 #### References
 
@@ -2262,11 +2263,9 @@ highpass6e_test = src : fi.highpass6e(1000);
 
 ----
 
-### `(fi.)bandpass`, `(fi.)bandstop`
+### `(fi.)bandpass`
 
 ![bandpass — response plots](../img/fi_bandpass.svg)
-
-![bandstop — response plots](../img/fi_bandstop.svg)
 
 Order 2*Nh Butterworth bandpass filter made using the transformation
 `s <- s + wc^2/s` on `lowpass(Nh)`, where `wc` is the desired bandpass center
@@ -2297,7 +2296,9 @@ bandpass_test = src : fi.bandpass(2, 500, 1500);
 
 ----
 
-### `(fi.)bandpass0_bandstop1`
+### `(fi.)bandstop`
+
+![bandstop — response plots](../img/fi_bandstop.svg)
 
 Order 2*Nh Butterworth bandstop filter made using the transformation
 `s <- s + wc^2/s` on `highpass(Nh)`, where `wc` is the desired bandpass center

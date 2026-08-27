@@ -6,11 +6,12 @@ This library contains a collection of diverse audio effects and utilities
 not included in other specialized Faust libraries. It includes filtering, mixing, time based, pitch shifters, 
 and other creative or experimental signal processing components for sound design and musical applications.
 
-The library is organized into 7 sections:
+The library is organized into 9 sections:
 
 * [Dynamic](#dynamic)
 * [Fibonacci](#fibonacci)
 * [Filtering](#filtering)
+* [Dither and Noise Shaping](#dither-and-noise-shaping)
 * [Meshes](#meshes)
 * [Mixing](#mixing)
 * [Time Based](#time-based)

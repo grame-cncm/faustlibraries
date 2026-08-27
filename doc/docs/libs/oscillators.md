@@ -7,8 +7,9 @@ It includes classic waveforms (sine, sawtooth, square, triangle), band-limited a
 oscillators, phase and frequency modulation units, as well as noise-based and physical-model
 driven oscillators for advanced synthesis techniques in Faust.
 
-The oscillators library is organized into 9 sections:
+The oscillators library is organized into 10 sections:
 
+* [Oscillators based on mathematical functions](#oscillators-based-on-mathematical-functions)
 * [Wave-Table-Based Oscillators](#wave-table-based-oscillators)
 * [Low Frequency Oscillators](#low-frequency-oscillators)
 * [Low Frequency Sawtooths](#low-frequency-sawtooths)

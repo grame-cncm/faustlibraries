@@ -8,14 +8,18 @@ components for measuring levels, extracting features, and
 computing statistics useful in visualization, diagnostics,
 adaptive processing, and music information retrieval.
 
-The Analyzers library is organized into 7 sections:
+The Analyzers library is organized into 11 sections:
 
 * [Amplitude Tracking](#amplitude-tracking)
 * [Adaptive Frequency Analysis](#adaptive-frequency-analysis)
 * [Spectrum-Analyzers](#spectrum-analyzers)
 * [Mth-Octave Spectral Level](#mth-octave-spectral-level)
-* [Arbritary-Crossover Filter-Banks and Spectrum Analyzers](#arbritary-crossover-filter-banks-and-spectrum-analyzers)
+* [Arbitrary-Crossover Filter-Banks and Spectrum Analyzers](#arbitrary-crossover-filter-banks-and-spectrum-analyzers)
 * [Fast Fourier Transform (fft) and its Inverse (ifft)](#fast-fourier-transform-fft-and-its-inverse-ifft)
+* [Window Functions](#window-functions)
+* [FFT Subsystem](#fft-subsystem)
+* [Spectral Descriptors (filter-bank based)](#spectral-descriptors-filter-bank-based)
+* [Loudness Metering (EBU R128 / ITU-R BS.1770)](#loudness-metering-ebu-r128-itu-r-bs1770)
 * [Test signal generators](#test-signal-generators)
 
 #### References
@@ -664,7 +668,7 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 
 See `mth_octave_spectral_level_demo` in `demos.lib`.
 
-## Arbritary-Crossover Filter-Banks and Spectrum Analyzers
+## Arbitrary-Crossover Filter-Banks and Spectrum Analyzers
 
 These are similar to the Mth-octave analyzers above, except that the
 band-split frequencies are passed explicitly as arguments.

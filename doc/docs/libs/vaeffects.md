@@ -5,14 +5,13 @@ Virtual Analog Effects (VAE) library. Its official prefix is `ve`.
 This library provides virtual analog (VA) audio effects modeled after classic
 analog circuitry. It includes nonlinear filters and effects.
 
-The virtual analog filter library is organized into 7 sections:
+The virtual analog filter library is organized into 6 sections:
 
 * [Moog Filters](#moog-filters)
 * [Korg 35 Filters](#korg-35-filters)
 * [Oberheim Filters](#oberheim-filters)
 * [Sallen Key Filters](#sallen-key-filters)
-* [Korg 35 Filters](#korg-35-filters)
-* [Vicanek's matched (decramped) second-order filters](#vicaneks-matched-decramped-second-order-filters)
+* [Vicanek's Matched (Decramped) Second-Order Filters](#vicaneks-matched-decramped-second-order-filters)
 * [Effects](#effects)
 
 #### References

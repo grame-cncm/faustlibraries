@@ -22,7 +22,7 @@ bidirectional block diagrams for physical modeling.
 (e.g., steel, nylon, etc.), bridges, guitars, etc.
 * [Bowed String Instruments](#bowed-string-instruments): parts and models
 specific to bowed string instruments (e.g., bows, bridges, violins, etc.).
-* [Wind Instrument](#wind-instruments): parts and models specific to wind
+* [Wind Instruments](#wind-instruments): parts and models specific to wind
 instruments (e.g., reeds, mouthpieces, flutes, clarinets, etc.).
 * [Exciters](#exciters): pluck generators, "blowers", etc.
 * [Modal Percussions](#modal-percussions): percussion instruments based on
