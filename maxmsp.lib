@@ -46,17 +46,41 @@ declare copyright "GRAME";
 declare version "1.1.0";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 
-atodb = db2lin;
+//---------------------------`atodb`--------------------------------
+// Convert a linear amplitude to a level in dB, as the MaxMSP `atodb`
+// object.
+//
+// #### Usage
+//
+// ```
+// _ : atodb : _
+// ```
+//----------------------------------------------------------
+atodb = ba.linear2db;
 
-//-------------------------------------------------------------------------
+//---------------------------`filtercoeff`--------------------------------
+// Implementation of MaxMSP filtercoeff: an environment holding the
+// biquad coefficient sets (`a0,a1,a2,b1,b2`, normalized and ready for
+// `biquad`) of the filters below, computed from the Cookbook formulae
+// for audio EQ biquad filter coefficients by Robert Bristow-Johnson.
 //
-// Implementation of MaxMSP filtercoeff
+// #### Usage
 //
-//    from : Cookbook formulae for audio EQ biquad filter coefficients
-//        by : Robert Bristow-Johnson  <rbj@audioimagination.com>
-//       URL : <http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt>
+// ```
+// filtercoeff(f0, dBgain, Q).LPF // or .HPF, .BPF, .notch, .APF,
+//                                // .peakingEQ, .peakNotch, .lowShelf, .highShelf
+// ```
 //
-//-------------------------------------------------------------------------
+// Where:
+//
+// * `f0`: center/cutoff frequency in Hz
+// * `dBgain`: gain in dB (used by the peaking and shelving filters)
+// * `Q`: quality factor
+//
+// #### References
+//
+// * <http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt>
+//----------------------------------------------------------
 
 filtercoeff(f0, dBgain, Q) = environment
 {
@@ -169,62 +193,95 @@ filtercoeff(f0, dBgain, Q) = environment
 };
 
 
-//-------------------------------------------------------------------------
-// Implementation of MaxMSP biquad~
+//---------------------------`biquad`--------------------------------
+// Implementation of MaxMSP biquad~:
 // y[n] = a0 * x[n] + a1 * x[n-1] + a2 * x[n-2] - b1 * y[n-1] - b2 * y[n-2]
-//-------------------------------------------------------------------------
-
+//
+// #### Usage
+//
+// ```
+// biquad(x,a0,a1,a2,b1,b2) : _
+// ```
+//
+// Where:
+//
+// * `x`: the input signal
+// * `a0,a1,a2`: feedforward coefficients
+// * `b1,b2`: feedback coefficients
+//----------------------------------------------------------
 biquad(x,a0,a1,a2,b1,b2) =  x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
     with {
         conv2(c0,c1,x) = c0*x+c1*x';
         conv3(c0,c1,c2,x) = c0*x+c1*x'+c2*x'';
     };
 
-//-------------------------------------------------------------------------
+//---------------------------`LPF`, `HPF`, `BPF`, `notch`, `APF`--------------------------------
+// Second-order lowpass, highpass, bandpass (constant 0 dB peak gain),
+// notch and allpass filters, combining `filtercoeff` and `biquad`.
+// The `gain` argument is ignored by these filter types; it is kept so
+// all nine filters share the same signature.
 //
-// Filters using filtercoeff and biquad
+// #### Usage
 //
-//-------------------------------------------------------------------------
-
-// Low Pass Filter
+// ```
+// LPF(x, f0, gain, Q) : _ // and likewise HPF, BPF, notch, APF
+// ```
+//
+// Where:
+//
+// * `x`: the input signal
+// * `f0`: center/cutoff frequency in Hz
+// * `gain`: unused for these filter types
+// * `Q`: quality factor
+//----------------------------------------------------------
 LPF(x, f0, gain, Q)= x , filtercoeff(f0,gain,Q).LPF : biquad;
-
-// High Pass Filter
 HPF(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).HPF : biquad;
-
-// Band Pass Filter
 BPF(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).BPF : biquad;
-
-// notch Filter
 notch(x, f0, gain, Q)= x , filtercoeff(f0,gain,Q).notch : biquad;
-
-// All Pass Filter
 APF(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).APF : biquad;
 
-// ????
+//---------------------------`peakingEQ`, `peakNotch`, `lowShelf`, `highShelf`--------------------------------
+// Second-order peaking equalizer and shelving filters, combining
+// `filtercoeff` and `biquad`. `peakNotch` is like `peakingEQ` but with a
+// linear gain.
+//
+// #### Usage
+//
+// ```
+// peakingEQ(x, f0, gain, Q) : _ // and likewise peakNotch, lowShelf, highShelf
+// ```
+//
+// Where:
+//
+// * `x`: the input signal
+// * `f0`: center frequency in Hz
+// * `gain`: gain in dB (linear for `peakNotch`)
+// * `Q`: quality factor
+//----------------------------------------------------------
 peakingEQ(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).peakingEQ : biquad;
-
-// Max peakNotch is like peakingEQ but with a linear gain
 peakNotch(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).peakNotch : biquad;
-
-// ????
 lowShelf(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).lowShelf : biquad;
-
-// ????
 highShelf(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).highShelf : biquad;
 
 
-//-------------------------------------------------------------------------
-// Implementation of Max/MSP line~. Generate signal ramp or envelop
+//---------------------------`line`--------------------------------
+// Implementation of Max/MSP line~. Generate a signal ramp or envelope.
 //
-// USAGE : line(value, time)
-//    value : the desired output value
-//    time  : the interpolation time to reach this value (in milliseconds)
+// Note that the interpolation process is restarted every time the
+// desired output value changes. The interpolation time is sampled only
+// then.
 //
-// NOTE : the interpolation process is restarted every time the desired
-// output value changes. The interpolation time is sampled only then.
-//-------------------------------------------------------------------------
-
+// #### Usage
+//
+// ```
+// line(value, time) : _
+// ```
+//
+// Where:
+//
+// * `value`: the desired output value
+// * `time`: the interpolation time to reach this value (in milliseconds)
+//----------------------------------------------------------
 line(value, time) = state~(_,_):!,_
     with {
         state(t, c) = nt,nc 

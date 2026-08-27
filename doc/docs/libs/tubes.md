@@ -21,7 +21,155 @@ process = tu.T1_12AX7 : *(preamp) : tu.T2_12AX7;
 
 ----
 
-### `tubestage`
+### `rtable`
+
+Read one entry of a `waveform` table (`rdtable` with the index
+truncated to an int).
+
+#### Usage
+
+```
+rtable(table, r) : _
+```
+
+Where:
+
+* `table`: a `waveform` primitive
+* `r`: the index to read (truncated to an int)
+
+----
+
+### `inverse`
+
+Change the sign of the input signal x.
+
+#### Usage
+
+```
+_ : inverse : _
+```
+
+----
+
+### `ccopysign`
+
+Compose the magnitude of `f` with the sign of `x`, following the
+`sign` convention below.
+
+#### Usage
+
+```
+ccopysign(f, x) : _
+```
+
+Where:
+
+* `f`: the signal giving the magnitude
+* `x`: the signal giving the sign
+
+----
+
+### `sign`, `invsign`
+
+Sign (-1 for x<0, 1 otherwise) and reversed sign (1 for x<0, -1
+otherwise) of a signal x.
+
+#### Usage
+
+```
+_ : sign : _
+_ : invsign : _
+```
+
+----
+
+### `interpolation`
+
+Interpolate linearly between the entries `i` and `i+1` of a table with
+coefficient `f`.
+
+#### Usage
+
+```
+interpolation(table, f, i) : _
+```
+
+Where:
+
+* `table`: a `waveform` primitive
+* `f`: interpolation coefficient between 0 and 1
+* `i`: the lower table index
+
+----
+
+### `boundIndex`
+
+Bound an index to the table boundaries [0, size-1].
+
+#### Usage
+
+```
+boundIndex(size, index) : _
+```
+
+----
+
+### `boundFactor`
+
+Bound the interpolation factor at the table edges: returns 0 when the
+unbounded index falls below the table, and keeps the last entry
+reachable when it falls above.
+
+#### Usage
+
+```
+boundFactor(size, factor, index) : _
+```
+
+Where:
+
+* `size`: the table size
+* `factor`: the unbounded fractional index
+* `index`: the bounded integer index (from `boundIndex`)
+
+----
+
+### `tubeF`
+
+Look up `x` in a transfer-curve table with linear interpolation: maps
+the input range starting at `low` onto the table entries, `step`
+entries per input unit, bounded to the table edges.
+
+#### Usage
+
+```
+_ : tubeF(table, low, high, step, size) : _
+```
+
+Where:
+
+* `table`: a `waveform` primitive holding the transfer curve
+* `low`: input value mapped to the first entry
+* `high`: input value mapped to the last entry (informative)
+* `step`: number of table entries per input unit
+* `size`: the table size used for bounding
+
+----
+
+### `getFactor`
+
+The interpolation factor `tubeF` feeds to `interpolation`: the
+fractional part of the table index of `x`, bounded at the table edges.
+
+#### Usage
+
+```
+getFactor(low, step, size, x) : _
+```
+
+----
+
+### `tubestage`, `tubestage130_20`, `tubestageF`
 
 ![tubestage — response plots](../img/tu_tubestage.svg)
 
@@ -136,4 +284,94 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_6C16 : _
+```
+
+----
+
+### `tubetable_6C16_0`, `tubetable_6C16_1`, `tubetable_6C16_rtable_0`, `tubetable_6C16_rtable_1`
+
+Precomputed transfer-curve tables of the 6C16 triode, sampled at the
+two operating points used by the `T1_6C16`..`T3_6C16` stages (`_0` and
+`_1`). The `_rtable_*` forms read one raw entry.
+
+#### Usage
+
+```
+_ : tubestage(tubetable_6C16_0,fck,Rk,Vk0) : _
+tubetable_6C16_rtable_0(r) : _
+```
+
+----
+
+### `tubetable_6DJ8_0`, `tubetable_6DJ8_1`, `tubetable_6DJ8_rtable_0`, `tubetable_6DJ8_rtable_1`
+
+Precomputed transfer-curve tables of the 6DJ8 triode, sampled at the
+two operating points used by the `T1_6DJ8`..`T3_6DJ8` stages (`_0` and
+`_1`). The `_rtable_*` forms read one raw entry.
+
+#### Usage
+
+```
+_ : tubestage130_20(tubetable_6DJ8_0,fck,Rk,Vk0) : _
+tubetable_6DJ8_rtable_0(r) : _
+```
+
+----
+
+### `tubetable_6V6_0`, `tubetable_6V6_1`, `tubetable_6V6_rtable_0`, `tubetable_6V6_rtable_1`
+
+Precomputed transfer-curve tables of the 6V6 tube, sampled at the two
+operating points used by the `T1_6V6`..`T3_6V6` stages (`_0` and
+`_1`). The `_rtable_*` forms read one raw entry.
+
+#### Usage
+
+```
+_ : tubestage(tubetable_6V6_0,fck,Rk,Vk0) : _
+tubetable_6V6_rtable_0(r) : _
+```
+
+----
+
+### `tubetable_12AT7_0`, `tubetable_12AT7_1`, `tubetable_12AT7_rtable_0`, `tubetable_12AT7_rtable_1`
+
+Precomputed transfer-curve tables of the 12AT7 triode, sampled at the
+two operating points used by the `T1_12AT7`..`T3_12AT7` stages (`_0`
+and `_1`). The `_rtable_*` forms read one raw entry.
+
+#### Usage
+
+```
+_ : tubestage(tubetable_12AT7_0,fck,Rk,Vk0) : _
+tubetable_12AT7_rtable_0(r) : _
+```
+
+----
+
+### `tubetable_12AU7_0`, `tubetable_12AU7_1`, `tubetable_12AU7_rtable_0`, `tubetable_12AU7_rtable_1`
+
+Precomputed transfer-curve tables of the 12AU7 tube, sampled at the
+two operating points used by the `T1_12AU7`..`T3_12AU7` stages (`_0`
+and `_1`). The `_rtable_*` forms read one raw entry.
+
+#### Usage
+
+```
+_ : tubestage(tubetable_12AU7_0,fck,Rk,Vk0) : _
+tubetable_12AU7_rtable_0(r) : _
+```
+
+----
+
+### `tubetable_12AX7_0`, `tubetable_12AX7_1`, `tubetable_12AX7_rtable_0`, `tubetable_12AX7_rtable_1`
+
+Precomputed transfer-curve tables of the 12AX7 triode, sampled at the
+two operating points used by the `T1_12AX7`..`T3_12AX7` stages (`_0`
+and `_1`). The `_rtable_*` forms read one raw entry.
+
+#### Usage
+
+```
+_ : tubestage(tubetable_12AX7_0,fck,Rk,Vk0) : _
+tubetable_12AX7_rtable_0(r) : _
 ```

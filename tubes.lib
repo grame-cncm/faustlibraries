@@ -52,27 +52,111 @@ declare version "1.0.0";
   * 1-dimensional function tables for linear interpolation
 *******************************************************************************/
 
-//-- Rdtable from waveform
+//---------------------------`rtable`--------------------------------
+// Read one entry of a `waveform` table (`rdtable` with the index
+// truncated to an int).
+//
+// #### Usage
+//
+// ```
+// rtable(table, r) : _
+// ```
+//
+// Where:
+//
+// * `table`: a `waveform` primitive
+// * `r`: the index to read (truncated to an int)
+//----------------------------------------------------------
 rtable(table, r) = (table, int(r)):rdtable;
 
-// Change sign of input signal x;
+//---------------------------`inverse`--------------------------------
+// Change the sign of the input signal x.
+//
+// #### Usage
+//
+// ```
+// _ : inverse : _
+// ```
+//----------------------------------------------------------
 inverse(x) = abs(x) * invsign(x);
 
-// function that takes f value and x sign
+//---------------------------`ccopysign`--------------------------------
+// Compose the magnitude of `f` with the sign of `x`, following the
+// `sign` convention below.
+//
+// #### Usage
+//
+// ```
+// ccopysign(f, x) : _
+// ```
+//
+// Where:
+//
+// * `f`: the signal giving the magnitude
+// * `x`: the signal giving the sign
+//----------------------------------------------------------
 ccopysign(f, x) = abs(f) * sign(x);
 
-//-- Get sign and reversed sign of a signal x
+//---------------------------`sign`, `invsign`--------------------------------
+// Sign (-1 for x<0, 1 otherwise) and reversed sign (1 for x<0, -1
+// otherwise) of a signal x.
+//
+// #### Usage
+//
+// ```
+// _ : sign : _
+// _ : invsign : _
+// ```
+//----------------------------------------------------------
 sign(x) = x<0, 1, -1 : select2;
 invsign(x) = x<0, -1, 1 : select2;
 
-//-- Interpolate value between i and i+1 in table with coefficient f.
+//---------------------------`interpolation`--------------------------------
+// Interpolate linearly between the entries `i` and `i+1` of a table with
+// coefficient `f`.
+//
+// #### Usage
+//
+// ```
+// interpolation(table, f, i) : _
+// ```
+//
+// Where:
+//
+// * `table`: a `waveform` primitive
+// * `f`: interpolation coefficient between 0 and 1
+// * `i`: the lower table index
+//----------------------------------------------------------
 interpolation(table, f, i) = rtable(table, i)*(1-f) + rtable(table,i+1)*f;
 
-//-- Bound Index with table boundaries
+//---------------------------`boundIndex`--------------------------------
+// Bound an index to the table boundaries [0, size-1].
+//
+// #### Usage
+//
+// ```
+// boundIndex(size, index) : _
+// ```
+//----------------------------------------------------------
 boundIndex(size, index) = index : floor: min(size-1) : max(0);
 
-//-- Bound factor of interpolation :
-//if index<0 return 0 | if index>size-1 return size-1
+//---------------------------`boundFactor`--------------------------------
+// Bound the interpolation factor at the table edges: returns 0 when the
+// unbounded index falls below the table, and keeps the last entry
+// reachable when it falls above.
+//
+// #### Usage
+//
+// ```
+// boundFactor(size, factor, index) : _
+// ```
+//
+// Where:
+//
+// * `size`: the table size
+// * `factor`: the unbounded fractional index
+// * `index`: the bounded integer index (from `boundIndex`)
+//----------------------------------------------------------
 boundFactor(size, factor, index) =
   select2(0<index, boundupperFactor(size, factor, index), 0)
 with {
@@ -80,12 +164,39 @@ with {
     select2(index<size-1, size-1, factor - index);
 };
 
-// Linear interpolation of x value in table
+//---------------------------`tubeF`--------------------------------
+// Look up `x` in a transfer-curve table with linear interpolation: maps
+// the input range starting at `low` onto the table entries, `step`
+// entries per input unit, bounded to the table edges.
+//
+// #### Usage
+//
+// ```
+// _ : tubeF(table, low, high, step, size) : _
+// ```
+//
+// Where:
+//
+// * `table`: a `waveform` primitive holding the transfer curve
+// * `low`: input value mapped to the first entry
+// * `high`: input value mapped to the last entry (informative)
+// * `step`: number of table entries per input unit
+// * `size`: the table size used for bounding
+//----------------------------------------------------------
 tubeF(table, low, high, step, size, x) =
   interpolation(table,getFactor(low, step, size, x),
   linindex(low, step, x) : boundIndex(size));
 
-//--Get interpolation factor
+//---------------------------`getFactor`--------------------------------
+// The interpolation factor `tubeF` feeds to `interpolation`: the
+// fractional part of the table index of `x`, bounded at the table edges.
+//
+// #### Usage
+//
+// ```
+// getFactor(low, step, size, x) : _
+// ```
+//----------------------------------------------------------
 getFactor(low, step, size, x) =
   boundFactor(size, linindex(low, step, x), linindex(low, step, x) :
   boundIndex(size));
@@ -96,7 +207,7 @@ getFactor(low, step, size, x) =
  /******************************************************************************
  ******************************************************************************/
 
-//---------------------------`tubestage`--------------------------------
+//---------------------------`tubestage`, `tubestage130_20`, `tubestageF`--------------------------------
 // One complete triode gain stage: table-driven waveshaping followed by the
 // highpass formed by the cathode capacitor and resistor.
 // `tubestageF(tb,vplus,divider,fck,Rk,Vk0)` is the fully parameterized form;
@@ -223,6 +334,18 @@ T3_6C16  = tubestage(tubetable_6C16_1,194.0,820.0,1.378742);
 *    declare all the waveforms
 ****************************************************************************************/
 
+//---`tubetable_6C16_0`, `tubetable_6C16_1`, `tubetable_6C16_rtable_0`, `tubetable_6C16_rtable_1`---
+// Precomputed transfer-curve tables of the 6C16 triode, sampled at the
+// two operating points used by the `T1_6C16`..`T3_6C16` stages (`_0` and
+// `_1`). The `_rtable_*` forms read one raw entry.
+//
+// #### Usage
+//
+// ```
+// _ : tubestage(tubetable_6C16_0,fck,Rk,Vk0) : _
+// tubetable_6C16_rtable_0(r) : _
+// ```
+//----------------------------------------------------------
 // generated by ../../tools/tube_transfer.py
 // tube: 6C16
 // plate current function: triode
@@ -1043,6 +1166,18 @@ tubetable_6C16_1 = waveform{
 tubetable_6C16_rtable_0(r) = (tubetable_6C16_0,r):rdtable;
 tubetable_6C16_rtable_1(r) = (tubetable_6C16_1,r):rdtable;
 
+//---`tubetable_6DJ8_0`, `tubetable_6DJ8_1`, `tubetable_6DJ8_rtable_0`, `tubetable_6DJ8_rtable_1`---
+// Precomputed transfer-curve tables of the 6DJ8 triode, sampled at the
+// two operating points used by the `T1_6DJ8`..`T3_6DJ8` stages (`_0` and
+// `_1`). The `_rtable_*` forms read one raw entry.
+//
+// #### Usage
+//
+// ```
+// _ : tubestage130_20(tubetable_6DJ8_0,fck,Rk,Vk0) : _
+// tubetable_6DJ8_rtable_0(r) : _
+// ```
+//----------------------------------------------------------
 // generated by ../../tools/tube_transfer.py
 // tube: 6DJ8
 // plate current function: triode
@@ -1865,11 +2000,20 @@ tubetable_6DJ8_rtable_0(r) = (tubetable_6DJ8_0,r):rdtable;
 tubetable_6DJ8_rtable_1(r) = (tubetable_6DJ8_1,r):rdtable;
 
 
-/*
- * tube: 6V6
- * */
-
- tubetable_6V6_0 = waveform{
+//---`tubetable_6V6_0`, `tubetable_6V6_1`, `tubetable_6V6_rtable_0`, `tubetable_6V6_rtable_1`---
+// Precomputed transfer-curve tables of the 6V6 tube, sampled at the two
+// operating points used by the `T1_6V6`..`T3_6V6` stages (`_0` and
+// `_1`). The `_rtable_*` forms read one raw entry.
+//
+// #### Usage
+//
+// ```
+// _ : tubestage(tubetable_6V6_0,fck,Rk,Vk0) : _
+// tubetable_6V6_rtable_0(r) : _
+// ```
+//----------------------------------------------------------
+// tube: 6V6
+tubetable_6V6_0 = waveform{
     239.919843376,239.854937108,239.789738489,239.724247218,239.658462996,
     239.592385535,239.526014546,239.459349752,239.392390878,239.325137654,
     239.257589818,239.189747112,239.121609284,239.053176087,238.984447281,
@@ -2272,7 +2416,7 @@ tubetable_6DJ8_rtable_1(r) = (tubetable_6DJ8_1,r):rdtable;
     40.1406384829,40.1318978228,40.1231654504,40.1144413503,40.1057255068,
     40.0970179046
     };
- tubetable_6V6_1 = waveform{
+tubetable_6V6_1 = waveform{
     239.919843376,239.854937108,239.789738489,239.724247218,239.658462996,
     239.592385535,239.526014546,239.459349752,239.392390878,239.325137654,
     239.257589818,239.189747112,239.121609284,239.053176087,238.984447281,
@@ -2680,6 +2824,18 @@ tubetable_6DJ8_rtable_1(r) = (tubetable_6DJ8_1,r):rdtable;
 tubetable_6V6_rtable_0(r) = (tubetable_6V6_0,r):rdtable;
 tubetable_6V6_rtable_1(r) = (tubetable_6V6_1,r):rdtable;
 
+//---`tubetable_12AT7_0`, `tubetable_12AT7_1`, `tubetable_12AT7_rtable_0`, `tubetable_12AT7_rtable_1`---
+// Precomputed transfer-curve tables of the 12AT7 triode, sampled at the
+// two operating points used by the `T1_12AT7`..`T3_12AT7` stages (`_0`
+// and `_1`). The `_rtable_*` forms read one raw entry.
+//
+// #### Usage
+//
+// ```
+// _ : tubestage(tubetable_12AT7_0,fck,Rk,Vk0) : _
+// tubetable_12AT7_rtable_0(r) : _
+// ```
+//----------------------------------------------------------
 // generated by ../../tools/tube_transfer.py
 // tube: 12AT7
 // plate current function: triode
@@ -3502,6 +3658,18 @@ tubetable_12AT7_rtable_0(r) = (tubetable_12AT7_0,r):rdtable;
 tubetable_12AT7_rtable_1(r) = (tubetable_12AT7_1,r):rdtable;
 
 
+//---`tubetable_12AU7_0`, `tubetable_12AU7_1`, `tubetable_12AU7_rtable_0`, `tubetable_12AU7_rtable_1`---
+// Precomputed transfer-curve tables of the 12AU7 tube, sampled at the
+// two operating points used by the `T1_12AU7`..`T3_12AU7` stages (`_0`
+// and `_1`). The `_rtable_*` forms read one raw entry.
+//
+// #### Usage
+//
+// ```
+// _ : tubestage(tubetable_12AU7_0,fck,Rk,Vk0) : _
+// tubetable_12AU7_rtable_0(r) : _
+// ```
+//----------------------------------------------------------
 // generated by ../../tools/tube_transfer.py
 // tube: 12AU7
 // plate current function: pentode
@@ -4323,6 +4491,18 @@ tubetable_12AU7_rtable_0(r) = (tubetable_12AU7_0,r):rdtable;
 tubetable_12AU7_rtable_1(r) = (tubetable_12AU7_1,r):rdtable;
 
 
+//---`tubetable_12AX7_0`, `tubetable_12AX7_1`, `tubetable_12AX7_rtable_0`, `tubetable_12AX7_rtable_1`---
+// Precomputed transfer-curve tables of the 12AX7 triode, sampled at the
+// two operating points used by the `T1_12AX7`..`T3_12AX7` stages (`_0`
+// and `_1`). The `_rtable_*` forms read one raw entry.
+//
+// #### Usage
+//
+// ```
+// _ : tubestage(tubetable_12AX7_0,fck,Rk,Vk0) : _
+// tubetable_12AX7_rtable_0(r) : _
+// ```
+//----------------------------------------------------------
 // generated by ../../tools/tube_transfer.py
 // tube: 12AX7
 // plate current function: triode
