@@ -11,6 +11,8 @@ libraries actually use:
     (otherwise every `ba`, `fi`, `ma` import counts as an undocumented symbol);
     an alias of an alias (sf.lib: `an = sf;` with `sf = library("all.lib")`)
     is excluded the same way, expanded to a fixed point
+  * code inside `/* ... */` block comments (commented-out examples, license
+    headers) is not scanned for definitions
   * `_name` definitions are internal by convention and are excluded
 
 Reports, per library: line count, number of definitions, number of doc blocks,
@@ -39,6 +41,28 @@ alias_re = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(library|environment|com
 alias_pair_re = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*;')
 
 
+def blank_block_comments(src):
+    """Blank out the contents of C-style /* ... */ comments, keeping newlines,
+    so commented-out example code is not scanned as definitions and line
+    numbers stay stable."""
+    out = list(src)
+    i, n, in_comment = 0, len(src), False
+    while i < n:
+        if not in_comment and src.startswith("/*", i):
+            in_comment = True
+            out[i] = out[i + 1] = " "
+            i += 2
+        elif in_comment and src.startswith("*/", i):
+            in_comment = False
+            out[i] = out[i + 1] = " "
+            i += 2
+        else:
+            if in_comment and src[i] != "\n":
+                out[i] = " "
+            i += 1
+    return "".join(out)
+
+
 def matches(pattern, name):
     """`fdelay[N]` matches fdelay1, fdelay2, ... — one doc block, many symbols."""
     if '[' not in pattern:
@@ -49,7 +73,8 @@ def matches(pattern, name):
 
 results = {}
 for lib in libs:
-    lines = open(lib, encoding="utf-8", errors="replace").read().split("\n")
+    lines = blank_block_comments(
+        open(lib, encoding="utf-8", errors="replace").read()).split("\n")
     documented, patterns, defs, aliases = set(), set(), set(), set()
     alias_pairs = []
     doc_starts = []
