@@ -514,7 +514,12 @@ Two gaps are recorded here rather than silently relied upon.
    only from one it read as a plain second-order linear recursion.
 
 The classical equivalence "Jury criterion ⟺ roots inside the unit disc" is the
-same standing obligation as in `tf2s-stability-formal-spec.lean`.
+same standing obligation as in `tf2s-stability-formal-spec.lean`. At order 2 it
+is discharged in the optional mathlib project: `mathlib/JuryRoots.lean` proves
+`juryStableB a = true ↔ every root of z² + a₁z + a₂ has norm < 1` for the
+denoted rational coefficients (`make certify-deep`). This Std-only file does
+not depend on that proof; the obligation note stays here so the trust story is
+readable from one place.
 
 Note also that certification is over the **exact rationals** denoted by the
 exported double-precision coefficients. It says nothing about the behaviour of

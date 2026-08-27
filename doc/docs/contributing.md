@@ -385,6 +385,15 @@ signal graph (not to the generated C++/Rust code), and to the exact rationals
 denoted by the coefficients (not to floating-point execution). Both are
 recorded as named obligations in `formalisation/signal-import-formal-spec.lean`.
 
+A third, optional layer exists for maintainers: `make certify-deep` builds a
+small [mathlib](https://github.com/leanprover-community/mathlib4)-based project
+(`formalisation/mathlib/`) that discharges the central recorded obligation —
+the executable Jury test is proved equivalent, at order 2, to "every pole lies
+strictly inside the unit disc" — plus the positivity hypothesis of the `tf2s`
+theorem. It pins its own toolchain and downloads the mathlib build cache
+(several GB) on first run; it is never needed for `make certify`, for
+contributions, or for pull-requests.
+
 ## LLMs
 
 The site exposes an `llms.txt` file generated from `doc/docs/llms.txt` and published at [https://faustlibraries.grame.fr/llms.txt](https://faustlibraries.grame.fr/llms.txt).

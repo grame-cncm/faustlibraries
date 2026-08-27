@@ -51,7 +51,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check checkdoc plots clean distclean help bench certify certify-reference doc-index doc-index-split doc-index-commercial
+.PHONY: reference check checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -194,6 +194,17 @@ certify-reference: ## Regenerate tests/lean/certified.lean in place and kernel-c
 	FAUST_RS=$(FAUST_RS) FAUST_LIBS=$(CURDIR) $(PYTHON) $(SIG2LEAN) $(LEAN_TEMPLATE) $(LEAN_CERTIFIED) $(LEAN_CERT_DSP); \
 	$(LEAN) $(LEAN_CERTIFIED); \
 	printf '[certify-reference] wrote and checked %s\n' '$(LEAN_CERTIFIED)'
+
+# Optional and heavy: builds the mathlib project that discharges the standing
+# obligations of the Std-only specifications (Jury <=> poles in the unit disc,
+# tan positivity). First run downloads the mathlib build cache (several GB).
+# Never required by `make certify`.
+certify-deep: ## Build the optional mathlib proofs discharging the certify obligations
+	@set -e; \
+	cd $(LEAN_SPEC_DIR)/mathlib; \
+	lake exe cache get; \
+	lake build; \
+	printf '[certify-deep] mathlib obligations check\n'
 
 doc-index: ## Build the Faust library documentation JSON index
 	@set -e; \

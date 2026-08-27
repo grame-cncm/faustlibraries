@@ -1,0 +1,16 @@
+# Optional deep-certification project: discharges the standing obligations of
+# the Std-only specifications with mathlib proofs. Built by `make certify-deep`
+# only; never required by `make certify`.
+name = "faustCertifyDeep"
+defaultTargets = ["JuryRoots"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "v4.31.0"
+
+[[lean_lib]]
+name = "FaustSignal"
+
+[[lean_lib]]
+name = "JuryRoots"
