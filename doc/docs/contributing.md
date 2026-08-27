@@ -311,6 +311,80 @@ Before preparing a pull-request, the new library must be carefully tested:
 - every new function therefore ships with **both** its `#### Test` section and the corresponding `functionName_test` entry in the *tests* folder, and its reference is generated with `make reference` in the same change.
 - finally, `make checkdoc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted.
 
+## Formal certification (experimental, work in progress)
+
+> **Status: experimental.** This tool is under active development: the set of
+> properties it can certify is deliberately small, its verdicts and file
+> formats may change, and it is **not** required for a pull-request to be
+> accepted. Regular testing (`make reference` / `make check` / `make checkdoc`)
+> remains the contract.
+
+Alongside the numerical test harness, the repository carries a formal
+certification pipeline based on [Lean 4](https://lean-lang.org): the compiled
+signal graph of a DSP example is imported into Lean, analysed, and each verdict
+is pinned as a machine-checked theorem. The hand-written specifications live in
+`formalisation/`, the certified examples in `tests/lean/`, and the generator in
+`scripts/sig2lean.py`.
+
+Two properties are currently certified, on concrete instantiations:
+
+- **feedback stability**: linear recursions of order ≤ 2 with constant
+  coefficients are checked against the Jury criterion in exact rational
+  arithmetic (e.g. `fi.tf2` instances);
+- **index bounds**: every table read and delay tap is checked to stay in range
+  *as written* — as opposed to being made safe by a compiler-inserted clamp.
+
+Everything the analysers do not recognise exactly is **refused, not guessed**:
+a refusal (`not certified`, `not proven`) is a statement about the analyser's
+current coverage, not a defect report about the function.
+
+### Contributor workflow
+
+No Lean knowledge is needed. Prerequisites: `lean` (4.31, bundled Std only) and
+`faust-rs` on the PATH — or override with `make certify FAUST_RS=... LEAN=...`.
+
+1. Add a small DSP program to `tests/lean/` instantiating the new function
+   with concrete parameters, e.g. `tests/lean/machin.dsp`:
+
+   ```
+   xx = library("malib.lib");
+   process = xx.machin(3, 1000);
+   ```
+
+   The file's base name becomes the name of the generated definitions and
+   theorems. A nominal case plus a boundary case is a good default; a
+   deliberate counter-example whose refusal is itself pinned (like
+   `tf2_unstable.dsp` or `table_bad_clamp.dsp`) is also valuable.
+
+2. Run `make certify`. It regenerates the theorems into `tests/build/`,
+   kernel-checks them, and diffs against the committed
+   `tests/lean/certified.lean` — so a new `.dsp` makes it fail, displaying
+   exactly the block that would be added. Read the verdicts in that diff:
+
+   - `STABLE` / `IN RANGE`: the property is certified by a kernel-checked
+     theorem;
+   - `NOT STABLE` / `CLAMP REQUIRED`: the graph really is unstable, or the
+     index only stays in the table thanks to the backend's clamp — for a
+     library function, a hint to clamp or document on the Faust side;
+   - `not a recognised linear recursion` / `not proven`: outside the certified
+     fragment (coefficients depending on `ma.SR`, nonlinear recursion,
+     order > 2…). The refusal is pinned as a `= false` theorem, so if a later
+     extension of the analysers unlocks the case, `make certify` will show the
+     verdict flip.
+
+3. Once the verdicts look right, run `make certify-reference` to regenerate
+   `tests/lean/certified.lean` in place, and commit **both** the `.dsp` and the
+   regenerated `certified.lean`.
+
+From then on, every `make certify` re-proves the theorems and turns any
+verdict drift — from a compiler or specification change — into a loud failure,
+exactly as `make check` does for numerical outputs.
+
+Two standing limits are worth knowing: certification applies to the exported
+signal graph (not to the generated C++/Rust code), and to the exact rationals
+denoted by the coefficients (not to floating-point execution). Both are
+recorded as named obligations in `formalisation/signal-import-formal-spec.lean`.
+
 ## LLMs
 
 The site exposes an `llms.txt` file generated from `doc/docs/llms.txt` and published at [https://faustlibraries.grame.fr/llms.txt](https://faustlibraries.grame.fr/llms.txt).
