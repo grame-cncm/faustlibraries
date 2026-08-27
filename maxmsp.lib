@@ -55,6 +55,12 @@ declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 // ```
 // _ : atodb : _
 // ```
+//
+// #### Test
+// ```
+// mm = library("maxmsp.lib");
+// mm_atodb_test = 0.5 : mm.atodb;
+// ```
 //----------------------------------------------------------
 atodb = ba.linear2db;
 
@@ -76,6 +82,12 @@ atodb = ba.linear2db;
 // * `f0`: center/cutoff frequency in Hz
 // * `dBgain`: gain in dB (used by the peaking and shelving filters)
 // * `Q`: quality factor
+//
+// #### Test
+// ```
+// mm = library("maxmsp.lib");
+// mm_filtercoeff_test = mm.filtercoeff(1000, 6, 1).LPF;
+// ```
 //
 // #### References
 //
@@ -208,6 +220,13 @@ filtercoeff(f0, dBgain, Q) = environment
 // * `x`: the input signal
 // * `a0,a1,a2`: feedforward coefficients
 // * `b1,b2`: feedback coefficients
+//
+// #### Test
+// ```
+// mm = library("maxmsp.lib");
+// os = library("oscillators.lib");
+// mm_biquad_test = mm.biquad(os.osc(440), 0.5, 0.2, 0.1, 0.1, 0.05);
+// ```
 //----------------------------------------------------------
 biquad(x,a0,a1,a2,b1,b2) =  x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
     with {
@@ -233,6 +252,13 @@ biquad(x,a0,a1,a2,b1,b2) =  x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
 // * `f0`: center/cutoff frequency in Hz
 // * `gain`: unused for these filter types
 // * `Q`: quality factor
+//
+// #### Test
+// ```
+// mm = library("maxmsp.lib");
+// os = library("oscillators.lib");
+// mm_LPF_test = mm.LPF(os.osc(440), 1000, 0, 1);
+// ```
 //----------------------------------------------------------
 LPF(x, f0, gain, Q)= x , filtercoeff(f0,gain,Q).LPF : biquad;
 HPF(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).HPF : biquad;
@@ -257,6 +283,13 @@ APF(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).APF : biquad;
 // * `f0`: center frequency in Hz
 // * `gain`: gain in dB (linear for `peakNotch`)
 // * `Q`: quality factor
+//
+// #### Test
+// ```
+// mm = library("maxmsp.lib");
+// os = library("oscillators.lib");
+// mm_peakingEQ_test = mm.peakingEQ(os.osc(440), 1000, 6, 1);
+// ```
 //----------------------------------------------------------
 peakingEQ(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).peakingEQ : biquad;
 peakNotch(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).peakNotch : biquad;
@@ -281,6 +314,12 @@ highShelf(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).highShelf : biquad;
 //
 // * `value`: the desired output value
 // * `time`: the interpolation time to reach this value (in milliseconds)
+//
+// #### Test
+// ```
+// mm = library("maxmsp.lib");
+// mm_line_test = mm.line(hslider("value", 0, 0, 1, 0.01), 100);
+// ```
 //----------------------------------------------------------
 line(value, time) = state~(_,_):!,_
     with {

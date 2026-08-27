@@ -37,6 +37,12 @@ Where:
 * `table`: a `waveform` primitive
 * `r`: the index to read (truncated to an int)
 
+#### Test
+```
+tu = library("tubes.lib");
+tu_rtable_test = tu.rtable(waveform{0.0, 1.0, 2.0, 3.0}, 2);
+```
+
 ----
 
 ### `inverse`
@@ -47,6 +53,13 @@ Change the sign of the input signal x.
 
 ```
 _ : inverse : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+tu_inverse_test = os.osc(440) : tu.inverse;
 ```
 
 ----
@@ -67,6 +80,13 @@ Where:
 * `f`: the signal giving the magnitude
 * `x`: the signal giving the sign
 
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+tu_ccopysign_test = tu.ccopysign(0.5, os.osc(440));
+```
+
 ----
 
 ### `sign`, `invsign`
@@ -79,6 +99,14 @@ otherwise) of a signal x.
 ```
 _ : sign : _
 _ : invsign : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+tu_sign_test = os.osc(440) : tu.sign;
+tu_invsign_test = os.osc(440) : tu.invsign;
 ```
 
 ----
@@ -100,6 +128,12 @@ Where:
 * `f`: interpolation coefficient between 0 and 1
 * `i`: the lower table index
 
+#### Test
+```
+tu = library("tubes.lib");
+tu_interpolation_test = tu.interpolation(waveform{0.0, 1.0, 2.0, 3.0}, 0.5, 1);
+```
+
 ----
 
 ### `boundIndex`
@@ -110,6 +144,12 @@ Bound an index to the table boundaries [0, size-1].
 
 ```
 boundIndex(size, index) : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+tu_boundIndex_test = tu.boundIndex(2000, 2500);
 ```
 
 ----
@@ -131,6 +171,12 @@ Where:
 * `size`: the table size
 * `factor`: the unbounded fractional index
 * `index`: the bounded integer index (from `boundIndex`)
+
+#### Test
+```
+tu = library("tubes.lib");
+tu_boundFactor_test = tu.boundFactor(2000, 1500.5, 1500);
+```
 
 ----
 
@@ -154,6 +200,13 @@ Where:
 * `step`: number of table entries per input unit
 * `size`: the table size used for bounding
 
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+tu_tubeF_test = os.osc(440) : tu.tubeF(tu.tubetable_12AX7_0, -5, 5, 200, 2000);
+```
+
 ----
 
 ### `getFactor`
@@ -165,6 +218,13 @@ fractional part of the table index of `x`, bounded at the table edges.
 
 ```
 getFactor(low, step, size, x) : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+tu_getFactor_test = tu.getFactor(-5, 200, 2000, os.osc(440));
 ```
 
 ----
@@ -195,6 +255,15 @@ Where:
 * `fck`: cutoff frequency in Hz of the cathode highpass
 * `Rk`: cathode resistor value in Ohms
 * `Vk0`: quiescent cathode voltage in Volts
+
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+tubestage_test = os.osc(440) : tu.tubestage(tu.tubetable_12AX7_0, 86.0, 2700.0, 1.581656);
+tubestage130_20_test = os.osc(440) : tu.tubestage130_20(tu.tubetable_6DJ8_0, 86.0, 2700.0, 1.863946);
+tubestageF_test = os.osc(440) : tu.tubestageF(tu.tubetable_12AX7_0, 250.0, 40.0, 86.0, 2700.0, 1.581656);
+```
 
 ----
 
@@ -301,6 +370,12 @@ _ : tubestage(tubetable_6C16_0,fck,Rk,Vk0) : _
 tubetable_6C16_rtable_0(r) : _
 ```
 
+#### Test
+```
+tu = library("tubes.lib");
+tubetable_6C16_test = tu.tubetable_6C16_rtable_0(100), tu.tubetable_6C16_rtable_1(100);
+```
+
 ----
 
 ### `tubetable_6DJ8_0`, `tubetable_6DJ8_1`, `tubetable_6DJ8_rtable_0`, `tubetable_6DJ8_rtable_1`
@@ -314,6 +389,12 @@ two operating points used by the `T1_6DJ8`..`T3_6DJ8` stages (`_0` and
 ```
 _ : tubestage130_20(tubetable_6DJ8_0,fck,Rk,Vk0) : _
 tubetable_6DJ8_rtable_0(r) : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+tubetable_6DJ8_test = tu.tubetable_6DJ8_rtable_0(100), tu.tubetable_6DJ8_rtable_1(100);
 ```
 
 ----
@@ -331,6 +412,12 @@ _ : tubestage(tubetable_6V6_0,fck,Rk,Vk0) : _
 tubetable_6V6_rtable_0(r) : _
 ```
 
+#### Test
+```
+tu = library("tubes.lib");
+tubetable_6V6_test = tu.tubetable_6V6_rtable_0(100), tu.tubetable_6V6_rtable_1(100);
+```
+
 ----
 
 ### `tubetable_12AT7_0`, `tubetable_12AT7_1`, `tubetable_12AT7_rtable_0`, `tubetable_12AT7_rtable_1`
@@ -344,6 +431,12 @@ and `_1`). The `_rtable_*` forms read one raw entry.
 ```
 _ : tubestage(tubetable_12AT7_0,fck,Rk,Vk0) : _
 tubetable_12AT7_rtable_0(r) : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+tubetable_12AT7_test = tu.tubetable_12AT7_rtable_0(100), tu.tubetable_12AT7_rtable_1(100);
 ```
 
 ----
@@ -361,6 +454,12 @@ _ : tubestage(tubetable_12AU7_0,fck,Rk,Vk0) : _
 tubetable_12AU7_rtable_0(r) : _
 ```
 
+#### Test
+```
+tu = library("tubes.lib");
+tubetable_12AU7_test = tu.tubetable_12AU7_rtable_0(100), tu.tubetable_12AU7_rtable_1(100);
+```
+
 ----
 
 ### `tubetable_12AX7_0`, `tubetable_12AX7_1`, `tubetable_12AX7_rtable_0`, `tubetable_12AX7_rtable_1`
@@ -374,4 +473,10 @@ and `_1`). The `_rtable_*` forms read one raw entry.
 ```
 _ : tubestage(tubetable_12AX7_0,fck,Rk,Vk0) : _
 tubetable_12AX7_rtable_0(r) : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+tubetable_12AX7_test = tu.tubetable_12AX7_rtable_0(100), tu.tubetable_12AX7_rtable_1(100);
 ```
