@@ -1,4 +1,19 @@
-//instruments.lib - Faust function of various types useful for building physical model instruments
+//################################ instruments.lib ##########################################
+// Faust functions of various types useful for building physical model
+// instruments, imported from the Faust-STK project.
+//
+// The library is organized into 4 sections:
+//
+// * [ENVELOPE GENERATORS](#envelope-generators)
+// * [TABLES](#tables)
+// * [FILTERS](#filters)
+// * [TOOLS](#tools)
+//
+// #### References
+//
+// * <https://github.com/grame-cncm/faustlibraries/blob/master/instruments.lib>
+// * <https://ccrma.stanford.edu/~rmichon/publications/doc/DAFx11-Faust-STK.pdf>
+//########################################################################################
 
 no = library("noises.lib");
 en = library("envelopes.lib");
@@ -19,17 +34,31 @@ declare licence "LicenseRef-STK-4.3"; // Synthesis Tool Kit 4.3 (MIT style licen
 
 //========================= ENVELOPE GENERATORS ===============================
 
-//----------------------- VIBRATO ENVELOPE ----------------------------
-// 4 phases envelope to control vibrato gain
+//-----------------------`envVibrato`----------------------------
+// 4 phases envelope to control vibrato gain.
 //
-// USAGE:
-//   _ : *(envVibrato(b,a,s,r,t)) : _
-// where
-//   b = beginning duration (silence) in seconds
-//   a = attack duration in seconds
-//   s = sustain as a percentage of the amplitude to be modified
-//   r = release duration in seconds
-//   t = trigger signal
+// #### Usage
+//
+// ```
+// _ : *(envVibrato(b,a,s,r,t)) : _
+// ```
+//
+// Where:
+//
+// * `b`: beginning duration (silence) in seconds
+// * `a`: attack duration in seconds
+// * `s`: sustain as a percentage of the amplitude to be modified
+// * `r`: release duration in seconds
+// * `t`: trigger signal
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// gate = button("gate");
+// inst_envVibrato_test = os.osc(440) * inst.envVibrato(0.05, 0.1, 80, 0.2, gate);
+// ```
+//----------------------------------------------------------
 
 envVibrato(b,a,s,r,t) = env ~ (_,_,_) : (!,!,_) // the 3 'state' signals are fed back
     with {
@@ -52,16 +81,29 @@ envVibrato(b,a,s,r,t) = env ~ (_,_,_) : (!,!,_) // the 3 'state' signals are fed
         };
     };
 
-//----------------------- ASYMPT60 ----------------------------
+//-----------------------`asympT60`----------------------------
 // Envelope generator which asymptotically approaches a target value.
 //
-// USAGE:
-//   asympT60(value,trgt,T60,trig) : _
-// where
-//   value = starting value
-//   trgt = target value
-//   T60 = ramping time
-//   trig = trigger signal
+// #### Usage
+//
+// ```
+// asympT60(value,trgt,T60,trig) : _
+// ```
+//
+// Where:
+//
+// * `value`: starting value
+// * `trgt`: target value
+// * `T60`: ramping time
+// * `trig`: trigger signal
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// gate = button("gate");
+// inst_asympT60_test = inst.asympT60(1, 0, 0.5, gate);
+// ```
+//----------------------------------------------------------
 
 asympT60(value,trgt,T60,trig) = (_*factor + constant)~_
     with {
@@ -78,40 +120,84 @@ asympT60(value,trgt,T60,trig) = (_*factor + constant)~_
 
 //========================= TABLES ===============================
 
-//----------------------- CLIPPING FUNCTION ----------------------------
-// Positive and negative clipping functions.
+//-----------------------`saturationPos`, `saturationNeg`----------------------------
+// Positive and negative clipping functions: clip the signal at 1
+// (`saturationPos`) or at -1 (`saturationNeg`); chain both to clip to
+// [-1,1].
 //
-// USAGE:
-//   _ : saturationPos : _
-//   _ : saturationNeg : _
-//   _ : saturationPos : saturationNeg : _
+// #### Usage
+//
+// ```
+// _ : saturationPos : _
+// _ : saturationNeg : _
+// _ : saturationPos : saturationNeg : _
+// ```
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_saturationPos_test = 2 * os.osc(440) : inst.saturationPos;
+// inst_saturationNeg_test = 2 * os.osc(440) : inst.saturationNeg;
+// ```
+//----------------------------------------------------------
 
 saturationPos(x) = x <: (_>1),(_<=1 : *(x)) :> +;
 saturationNeg(x) = x <: (_<-1),(_>=-1 : *(x)) :> *(-1) + _;
 
-//----------------------- BOW TABLE ----------------------------
+//-----------------------`bow`----------------------------
 // Simple bow table.
 //
-// USAGE:
-//   index : bow(offset,slope) : _
-// where
-//   0 <= index <= 1
+// #### Usage
+//
+// ```
+// index : bow(offset,slope) : _
+// ```
+//
+// Where:
+//
+// * `index`: table index, between 0 and 1
+// * `offset`: table offset
+// * `slope`: table slope
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_bow_test = abs(os.osc(5)) : inst.bow(0.2, 3);
+// ```
+//----------------------------------------------------------
 
 bow(offset,slope) = pow(abs(sample) + 0.75, -4) : saturationPos
     with {
         sample(y) = (y + offset)*slope;
     };
 
-//----------------------- REED TABLE ----------------------------
+//-----------------------`reed`----------------------------
 // Simple reed table to be used with waveguide models of clarinet, saxophone, etc.
 //
-// USAGE:
-//   _ : reed(offset,slope) : _
-// where
-//   offset = offset between 0 and 1
-//   slope = slope between 0 and 1
-// REFERENCE:
-//   <https://ccrma.stanford.edu/~jos/pasp/View_Single_Reed_Oscillation.html>
+// #### Usage
+//
+// ```
+// _ : reed(offset,slope) : _
+// ```
+//
+// Where:
+//
+// * `offset`: offset between 0 and 1
+// * `slope`: slope between 0 and 1
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_reed_test = os.osc(440) : inst.reed(0.6, -0.8);
+// ```
+//
+// #### References
+//
+// * <https://ccrma.stanford.edu/~jos/pasp/View_Single_Reed_Oscillation.html>
+//----------------------------------------------------------
 
 reed(offset,slope) = reedTable : saturationPos : saturationNeg
     with {
@@ -120,31 +206,127 @@ reed(offset,slope) = reedTable : saturationPos : saturationNeg
 
 //========================= FILTERS ===============================
 
-//----------------------- ONE POLE ----------------------------
-
+//-----------------------`onePole`----------------------------
+// One pole filter: y[n] = b0 * x[n] - a1 * y[n-1].
+//
+// #### Usage
+//
+// ```
+// _ : onePole(b0,a1) : _
+// ```
+//
+// Where:
+//
+// * `b0`: the feedforward coefficient
+// * `a1`: the feedback coefficient
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_onePole_test = os.osc(440) : inst.onePole(0.1, -0.9);
+// ```
+//----------------------------------------------------------
 onePole(b0,a1,x) = (b0*x - a1*_)~_;
 
-//----------------------- ONE POLE SWEPT ----------------------------
-
+//-----------------------`onePoleSwep`----------------------------
+// One pole swept filter: y[n] = (1 + a1) * x[n] - a1 * x[n-1].
+//
+// #### Usage
+//
+// ```
+// _ : onePoleSwep(a1) : _
+// ```
+//
+// Where:
+//
+// * `a1`: the sweep coefficient
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_onePoleSwep_test = os.osc(440) : inst.onePoleSwep(0.5);
+// ```
+//----------------------------------------------------------
 onePoleSwep(a1,x) = (1 + a1)*x - a1*x';
 
-//----------------------- POLE ZERO ----------------------------
-
+//-----------------------`poleZero`----------------------------
+// Pole-zero filter: y[n] = b0 * x[n] + b1 * x[n-1] - a1 * y[n-1].
+//
+// #### Usage
+//
+// ```
+// _ : poleZero(b0,b1,a1) : _
+// ```
+//
+// Where:
+//
+// * `b0`, `b1`: the feedforward coefficients
+// * `a1`: the feedback coefficient
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_poleZero_test = os.osc(440) : inst.poleZero(0.5, 0.5, -0.9);
+// ```
+//----------------------------------------------------------
 poleZero(b0,b1,a1,x) = (b0*x + b1*x' - a1*_)~_;
 
-//----------------------- ONE ZEROS ----------------------------
-// Simple One zero and One zero recursive filters
+//-----------------------`oneZero0`, `oneZero1`----------------------------
+// Simple one zero recursive (`oneZero0`) and non-recursive (`oneZero1`)
+// filters.
 //
-// USAGE:
-//   _ : oneZero0(b0,b1) : _
-//   _ : oneZero1(b0,b1) : _
-// REFERENCE:
-//   <https://ccrma.stanford.edu/~jos/fp2/One_Zero.html>
+// #### Usage
+//
+// ```
+// _ : oneZero0(b0,b1) : _
+// _ : oneZero1(b0,b1) : _
+// ```
+//
+// Where:
+//
+// * `b0`, `b1`: the filter coefficients
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_oneZero0_test = os.osc(440) : inst.oneZero0(0.5, 0.5);
+// inst_oneZero1_test = os.osc(440) : inst.oneZero1(0.5, 0.5);
+// ```
+//
+// #### References
+//
+// * <https://ccrma.stanford.edu/~jos/fp2/One_Zero.html>
+//----------------------------------------------------------
 
 oneZero0(b0,b1,x) = (*(b1) + x*b0)~_;
 oneZero1(b0,b1,x) = (x'*b1 + x*b0);
 
-//----------------------- BANDPASS FILTER WITH CONSTANT UNITY PEAK GAIN BASED ON A BIQUAD ----------------------------
+//-----------------------`bandPass`----------------------------
+// Bandpass filter with constant unity peak gain based on a biquad
+// (`fi.TF2`).
+//
+// #### Usage
+//
+// ```
+// _ : bandPass(resonance,radius) : _
+// ```
+//
+// Where:
+//
+// * `resonance`: center frequency in Hz
+// * `radius`: pole radius between 0 and 1
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_bandPass_test = os.osc(440) : inst.bandPass(1000, 0.95);
+// ```
+//----------------------------------------------------------
 
 bandPass(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
     with {
@@ -155,14 +337,27 @@ bandPass(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
         b2 = -b0;
     };
 
-//----------------------- BANDPASS FILTER BASED ON A BIQUAD ----------------------------
-// Band pass filter using a biquad (TF2 is declared in filter.lib)
+//-----------------------`bandPassH`----------------------------
+// Bandpass filter based on a biquad (`fi.TF2`), with unity gain at DC.
 //
-// USAGE:
-//   _ : bandPassH(resonance,radius) : _
-// where
-//   resonance = center frequency
-//   radius = radius
+// #### Usage
+//
+// ```
+// _ : bandPassH(resonance,radius) : _
+// ```
+//
+// Where:
+//
+// * `resonance`: center frequency in Hz
+// * `radius`: pole radius between 0 and 1
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_bandPassH_test = os.osc(440) : inst.bandPassH(1000, 0.95);
+// ```
+//----------------------------------------------------------
 
 bandPassH(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
     with {
@@ -173,27 +368,62 @@ bandPassH(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
         b2 = 0;
     };
 
-//----------------------- FLUE JET NON-LINEAR FUNCTION ----------------------------
-// Jet Table: flue jet non-linear function, computed by a polynomial calculation
+//-----------------------`jetTable`----------------------------
+// Jet Table: flue jet non-linear function, computed by a polynomial
+// calculation, useful for flute-like waveguide models.
+//
+// #### Usage
+//
+// ```
+// _ : jetTable : _
+// ```
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_jetTable_test = os.osc(440) : inst.jetTable;
+// ```
+//----------------------------------------------------------
 
 jetTable(x) = x <: _*(_*_-1) : saturationPos : saturationNeg;
 
-//----------------------- NON LINEAR MODULATOR ----------------------------
-// nonLinearModulator adapts the function allpassnn from filter.lib for using it with waveguide instruments (see the corresponding DAFx paper: <https://ccrma.stanford.edu/~rmichon/publications/doc/DAFx11-Faust-STK.pdf> (Faust-STK: a Set of Linear and Nonlinear Physical Models for the Faust Programming Language) for more details).
+//-----------------------`nonLinearModulator`----------------------------
+// `nonLinearModulator` adapts the function `fi.allpassnn` for using it
+// with waveguide instruments (see the corresponding DAFx paper,
+// Faust-STK: a Set of Linear and Nonlinear Physical Models for the
+// Faust Programming Language, for more details).
 //
-// USAGE:
-//   _ : nonLinearModulator(nonlinearity,env,freq,typeMod,freqMod,order) : _
-// where
-//   nonlinearity = nonlinearity coefficient between 0 and 1
-//   env = input to connect any kind of envelope
-//   freq = current tone frequency
-//   typeMod = if 0: theta is modulated by the incoming signal;
-//         if 1: theta is modulated by the averaged incoming signal;
-//         if 2: theta is modulated by the squared incoming signal;
-//         if 3: theta is modulated by a sine wave of frequency freqMod;
-//         if 4: theta is modulated by a sine wave of frequency freq;
-//   freqMod = frequency of the sine wave modulation
-//   order = order of the filter
+// #### Usage
+//
+// ```
+// _ : nonLinearModulator(nonlinearity,env,freq,typeMod,freqMod,order) : _
+// ```
+//
+// Where:
+//
+// * `nonlinearity`: nonlinearity coefficient between 0 and 1
+// * `env`: input to connect any kind of envelope
+// * `freq`: current tone frequency
+// * `typeMod`: if 0: theta is modulated by the incoming signal;
+// if 1: theta is modulated by the averaged incoming signal;
+// if 2: theta is modulated by the squared incoming signal;
+// if 3: theta is modulated by a sine wave of frequency `freqMod`;
+// if 4: theta is modulated by a sine wave of frequency `freq`
+// * `freqMod`: frequency of the sine wave modulation
+// * `order`: order of the filter
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_nonLinearModulator_test = os.osc(440) : inst.nonLinearModulator(0.5, 1, 440, 0, 100, 3);
+// ```
+//
+// #### References
+//
+// * <https://ccrma.stanford.edu/~rmichon/publications/doc/DAFx11-Faust-STK.pdf>
+//----------------------------------------------------------
 
 nonLinearModulator(nonlinearity,env,freq,typeMod,freqMod,order) =
     //theta is modulated by a sine wave
@@ -224,16 +454,32 @@ nonLinearModulator(nonlinearity,env,freq,typeMod,freqMod,order) =
 
 //========================= TOOLS ===============================
 
-//----------------------- STEREOIZER ----------------------------
-// This function takes a mono input signal and spacialize it in stereo
+//-----------------------`stereoizer`----------------------------
+// This function takes a mono input signal and spacializes it in stereo
 // in function of the period duration of the tone being played.
 //
-// USAGE:
-//   _ : stereo(periodDuration) : _,_
-// where
-//   periodDuration = period duration of the tone being played in number of samples
-// REFERENCE:
-//   <https://ccrma.stanford.edu/realsimple/faust_strings/>
+// #### Usage
+//
+// ```
+// _ : stereoizer(periodDuration) : _,_
+// ```
+//
+// Where:
+//
+// * `periodDuration`: period duration of the tone being played in number of samples
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// ma = library("maths.lib");
+// inst_stereoizer_test = os.osc(440) : inst.stereoizer(ma.SR/440);
+// ```
+//
+// #### References
+//
+// * <https://ccrma.stanford.edu/realsimple/faust_strings/>
+//----------------------------------------------------------
 
 stereoizer(periodDuration) = _ <: _,widthdelay : stereopanner
     with {
@@ -243,11 +489,23 @@ stereoizer(periodDuration) = _ <: _,widthdelay : stereopanner
         stereopanner = _,_ : *(1.0-A), *(A);
     };
 
-//----------------------- INSTRREVERB ----------------------------
-// GUI for zita_rev1_stereo from reverbs.lib
+//-----------------------`instrReverb`----------------------------
+// Stereo reverb with GUI controls, based on `re.zita_rev1_stereo`, with
+// a dry/wet control.
 //
-// USAGE:
-//  _,_ : instrRerveb
+// #### Usage
+//
+// ```
+// _,_ : instrReverb : _,_
+// ```
+//
+// #### Test
+// ```
+// inst = library("instruments.lib");
+// os = library("oscillators.lib");
+// inst_instrReverb_test = os.osc(440), os.osc(660) : inst.instrReverb;
+// ```
+//----------------------------------------------------------
 
 instrReverb = _,_ <: *(reverbGain),*(reverbGain),*(1 - reverbGain),*(1 - reverbGain) :
 re.zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax),_,_ <: _,!,_,!,!,_,!,_ : +,+
