@@ -6,9 +6,8 @@
 // oscillators, phase and frequency modulation units, as well as noise-based and physical-model
 // driven oscillators for advanced synthesis techniques in Faust.
 //
-// The oscillators library is organized into 10 sections:
+// The oscillators library is organized into 9 sections:
 //
-// * [Oscillators based on mathematical functions](#oscillators-based-on-mathematical-functions)
 // * [Wave-Table-Based Oscillators](#wave-table-based-oscillators)
 // * [Low Frequency Oscillators](#low-frequency-oscillators)
 // * [Low Frequency Sawtooths](#low-frequency-sawtooths)
@@ -72,33 +71,30 @@ declare version "1.8.0";
 // This library contains platform specific constants
 pl = library("platform.lib");
 
-//======================Oscillators based on mathematical functions===============
+//=========================Wave-Table-Based Oscillators===================================
+// Oscillators using tables. The table size is set by the
+// [pl.tablesize](https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib) constant.
 //
 // Note that there is a numerical problem with several phasor functions built using the internal
-// `_phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, which happens with very small frequencies, 
-// so it will have no effect when summed to 1, but it will be enough to make the fractional function wrap 
+// `_phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, which happens with very small frequencies,
+// so it will have no effect when summed to 1, but it will be enough to make the fractional function wrap
 // around when summed to 0. An example of this problem can be observed when running the following code:
 //
 // `process = os.phasor(1.0, -.001);`
 //
-// The output of this program is the sequence 1, 0, 1, 0, 1... This happens because the negative incremental 
-// step is greater than `-ma.EPSILON`, which will have no effect when summed to 1, but it will be significant 
+// The output of this program is the sequence 1, 0, 1, 0, 1... This happens because the negative incremental
+// step is greater than `-ma.EPSILON`, which will have no effect when summed to 1, but it will be significant
 // enough to make the fractional function  wrap around when summed to 0.
 //
-// The incremental step can be clipped to guarantee that the phasor will 
-// always run correctly for its full cycle, otherwise, for increments smaller than `ma.EPSILON`, 
+// The incremental step can be clipped to guarantee that the phasor will
+// always run correctly for its full cycle, otherwise, for increments smaller than `ma.EPSILON`,
 // phasor would initially run but it'd eventually get stuck once the output gets big enough.
-// 
+//
 // All functions using `_phasor_imp` are affected by this problem, but a safer
-// version is implemented, and can be used alternatively by setting `SAFE=1` in the environment using 
+// version is implemented, and can be used alternatively by setting `SAFE=1` in the environment using
 // [explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution) syntax.
-// 
+//
 // For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer implementation of `_phasor_imp`.
-//=================================================================================
-
-//=========================Wave-Table-Based Oscillators===================================
-// Oscillators using tables. The table size is set by the 
-// [pl.tablesize](https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib) constant.
 //========================================================================================
 
 //-----------------------`(os.)SAFE`------------------------
