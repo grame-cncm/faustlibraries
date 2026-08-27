@@ -850,7 +850,7 @@
 [(pm.)closeIns](physmodels.md#pmcloseins)
 [(pm.)closeOuts](physmodels.md#pmcloseouts)
 [(pm.)endChain](physmodels.md#pmendchain)
-[(pm.)waveguideN](physmodels.md#pmwaveguiden)
+[(pm.)waveguideUd, (pm.)waveguideFd, (pm.)waveguideFd2, (pm.)waveguideFd4](physmodels.md#pmwaveguideud,-pmwaveguidefd,-pmwaveguidefd2,-pmwaveguidefd4)
 [(pm.)waveguide](physmodels.md#pmwaveguide)
 [(pm.)bridgeFilter](physmodels.md#pmbridgefilter)
 [(pm.)modeFilter](physmodels.md#pmmodefilter)
@@ -953,6 +953,8 @@
 [(pm.)standardBell](physmodels.md#pmstandardbell)
 [(pm.)standardBell_ui](physmodels.md#pmstandardbell_ui)
 [(pm.)formantValues](physmodels.md#pmformantvalues)
+[(pm.)bwMultMins, (pm.)bwMultMaxes](physmodels.md#pmbwmultmins,-pmbwmultmaxes)
+[(pm.)minGenderFreq, (pm.)maxGenderFreq](physmodels.md#pmmingenderfreq,-pmmaxgenderfreq)
 [(pm.)voiceGender](physmodels.md#pmvoicegender)
 [(pm.)skirtWidthMultiplier](physmodels.md#pmskirtwidthmultiplier)
 [(pm.)autobendFreq](physmodels.md#pmautobendfreq)
@@ -980,7 +982,7 @@
 [(pm.)SFFormantModelBP_ui_MIDI](physmodels.md#pmsfformantmodelbp_ui_midi)
 [(pm.)allpassNL](physmodels.md#pmallpassnl)
 [(pm.)modalModel](physmodels.md#pmmodalmodel)
-[(pm.)rk_solve](physmodels.md#pmrk_solve)
+[(pm.)rk_solve, (pm.)rk_solve_1, (pm.)rk_solve_2, (pm.)rk_solve_3, (pm.)rk_solve_4](physmodels.md#pmrk_solve,-pmrk_solve_1,-pmrk_solve_2,-pmrk_solve_3,-pmrk_solve_4)
 
 ## quantizers
 

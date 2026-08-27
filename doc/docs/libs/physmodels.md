@@ -510,7 +510,7 @@ etc.).
 
 ----
 
-### `(pm.)waveguideN`
+### `(pm.)waveguideUd`, `(pm.)waveguideFd`, `(pm.)waveguideFd2`, `(pm.)waveguideFd4`
 
 A series of waveguide functions based on various types of delays (see
 [`fdelay[n]`](#fdelayn)).
@@ -537,13 +537,16 @@ Where:
 ```
 pm = library("physmodels.lib");
 waveguideUd_test = 0.25, -0.15, 0.05 : pm.waveguideUd(512, 32);
+waveguideFd_test = 0.25, -0.15, 0.05 : pm.waveguideFd(512, 32);
+waveguideFd2_test = 0.25, -0.15, 0.05 : pm.waveguideFd2(512, 32);
+waveguideFd4_test = 0.25, -0.15, 0.05 : pm.waveguideFd4(512, 32);
 ```
 
 ----
 
 ### `(pm.)waveguide`
 
-Standard `pm.lib` waveguide (based on [`waveguideFd4`](#waveguiden)).
+Standard `pm.lib` waveguide (based on `waveguideFd4` above).
 
 #### Usage
 
@@ -3195,6 +3198,56 @@ formantValues_test = pm.formantValues.f(0);
 
 ----
 
+### `(pm.)bwMultMins`, `(pm.)bwMultMaxes`
+
+Arrays of values used to multiply bandwidths by to get attack
+bandwidths for the FOF version of the vocal synthesizer: min/max
+values per vowel (AEIOU) and per gender (M/F), indexed by
+`gender*5 + vowel`. Values were chosen based on informal listening
+tests.
+
+#### Usage
+
+```
+ba.take(gender*5 + vowel + 1, bwMultMins) : _
+ba.take(gender*5 + vowel + 1, bwMultMaxes) : _
+```
+
+#### Test
+```
+pm = library("physmodels.lib");
+ba = library("basics.lib");
+bwMultMins_test = ba.take(3, pm.bwMultMins);
+bwMultMaxes_test = ba.take(3, pm.bwMultMaxes);
+```
+
+----
+
+### `(pm.)minGenderFreq`, `(pm.)maxGenderFreq`
+
+Minimum/maximum frequency values per gender (M/F) used in the
+calculation of the attack bandwidths from the release bandwidths in
+the FOF version of the vocal synthesizer. Values are based on
+arbitrary maximum/minimum singing values in Hz for male/female
+voices.
+
+#### Usage
+
+```
+ba.take(gender + 1, minGenderFreq) : _
+ba.take(gender + 1, maxGenderFreq) : _
+```
+
+#### Test
+```
+pm = library("physmodels.lib");
+ba = library("basics.lib");
+minGenderFreq_test = ba.take(1, pm.minGenderFreq);
+maxGenderFreq_test = ba.take(2, pm.maxGenderFreq);
+```
+
+----
+
 ### `(pm.)voiceGender`
 
 Calculate the gender for the provided `voiceType` value. (0: male, 1: female)
@@ -3954,7 +4007,7 @@ Faust](https://raw.githubusercontent.com/grame-cncm/faust/master-dev/tools/physi
 
 ----
 
-### `(pm.)rk_solve`
+### `(pm.)rk_solve`, `(pm.)rk_solve_1`, `(pm.)rk_solve_2`, `(pm.)rk_solve_3`, `(pm.)rk_solve_4`
 
 Solves the system of ordinary differential equations of any order using
 the explicit Runge-Kutta methods.
@@ -3987,6 +4040,10 @@ rk_solve_4 = rk_solve((0,1/2,1/2,1), (1/2,0,1/2,0,0,1, 1/6,1/3,1/3,1/6), 1);
 pm = library("physmodels.lib");
 ma = library("maths.lib");
 rk_solve_test = pm.rk_solve((0), (1), 1, 1.0/ma.SR, eq, (1)) with { eq(t,x) = -x; };
+rk_solve_1_test = pm.rk_solve_1(1.0/ma.SR, eq, (1)) with { eq(t,x) = -x; };
+rk_solve_2_test = pm.rk_solve_2(1.0/ma.SR, eq, (1)) with { eq(t,x) = -x; };
+rk_solve_3_test = pm.rk_solve_3(1.0/ma.SR, eq, (1)) with { eq(t,x) = -x; };
+rk_solve_4_test = pm.rk_solve_4(1.0/ma.SR, eq, (1)) with { eq(t,x) = -x; };
 ```
 
 #### Example test program
