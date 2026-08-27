@@ -32,10 +32,9 @@ double-precision or more to reduce errors.
 The environment identifier for this library is `aa`. After importing
 the standard libraries in Faust, the functions below can be called as `aa.function_name`.
 
-The Antialiased Nonlinearities library is organized into 4 sections:
+The Antialiased Nonlinearities library is organized into 3 sections:
 
 * [Auxiliary Functions](#auxiliary-functions)
-* [Main functions](#main-functions)
 * [Saturators](#saturators)
 * [Trigonometry](#trigonometry)
 
@@ -188,9 +187,6 @@ ADAA2_test = aa.ADAA2(0.001, f, F1, F2, sig)
         F2(x) = ba.if((x <= 1.0) & (x >= -1.0), (1.0 / 3.0) * x^3, ((0.5 * x^2) - 1.0 / 6.0) * ma.signum(x));
     };
 ```
-
-## Main functions
-
 
 ##  Saturators 
 
