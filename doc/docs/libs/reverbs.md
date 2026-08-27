@@ -162,6 +162,55 @@ zita_rev_fdn_test = par(i, 8, os.osc(110 * (i + 1)))
 
 ----
 
+### `(re.)zita_in_delay`
+
+Stereo input delay used by `zita_rev1` in both stereo and ambisonics
+mode: delays both channels by `rdel` milliseconds and scales them by 0.3.
+
+#### Usage
+
+```
+_,_ : zita_in_delay(rdel) : _,_
+```
+
+Where:
+
+* `rdel`: delay (ms) before reverberation begins (e.g., 0 to ~100 ms)
+
+#### Test
+```
+re = library("reverbs.lib");
+os = library("oscillators.lib");
+zita_in_delay_test = os.osc(440), os.osc(660) : re.zita_in_delay(60);
+```
+
+----
+
+### `(re.)zita_distrib2`
+
+Stereo input mapping used by `zita_rev1` in both stereo and ambisonics
+mode: fans the two input channels out to the `N` delay lines of the
+feedback delay network, flipping the sign of half of them.
+
+#### Usage
+
+```
+_,_ : zita_distrib2(N) : si.bus(N)
+```
+
+Where:
+
+* `N`: number of delay lines of the FDN, a power of two >= 4, known at compile time
+
+#### Test
+```
+re = library("reverbs.lib");
+os = library("oscillators.lib");
+zita_distrib2_test = os.osc(440), os.osc(660) : re.zita_distrib2(8);
+```
+
+----
+
 ### `(re.)zita_rev1_stereo`
 
 ![zita_rev1_stereo — response plots](../img/re_zita_rev1_stereo.svg)

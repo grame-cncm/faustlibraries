@@ -136,6 +136,26 @@ with{
     50,-50,100,1));
 };
 
+//------------------------`(dm.)spectral_level_demo`---------------------------
+// Spectral level display, 2/3 octave. Synonym for
+// `mth_octave_spectral_level_demo(1.5)`.
+//
+// #### Usage
+//
+// ```
+// _ : spectral_level_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// spectral_level_demo_test = no.noise : dm.spectral_level_demo;
+// ```
+//------------------------------------------------------------
+declare spectral_level_demo author "Julius O. Smith III and Yann Orlarey";
+declare spectral_level_demo licence "MIT";
+
 spectral_level_demo = mth_octave_spectral_level_demo(1.5); // 2/3 octave
 
 
@@ -1859,6 +1879,25 @@ with{
     signal = amp * os.oscrs(sfreq);
 };
 
+//------------------------`(dm.)oscr_demo`---------------------------
+// Sine oscillator demo based on 2D vector rotation. Synonym for
+// `oscrs_demo`.
+//
+// #### Usage
+//
+// ```
+// oscr_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// oscr_demo_test = dm.oscr_demo;
+// ```
+//------------------------------------------------------------
+declare oscr_demo author "Julius O. Smith III";
+declare oscr_demo licence "MIT";
+
 oscr_demo = oscrs_demo; // synonym
 
 
@@ -2006,7 +2045,7 @@ with{
         50,-50,100,1));
 };
 
-//-----------------`(dm.)reverse_echo_demo(nChans)`----------------
+//-----------------`(dm.)reverse_echo_demo`----------------
 // Multichannel echo effect with reverse delays.
 //
 // #### Usage

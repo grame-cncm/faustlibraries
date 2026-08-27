@@ -27,9 +27,10 @@ The library is organized into 9 sections:
 
 ----
 
-### `(ef.)cubicnl`
+### `(ef.)cubicnl`, `(ef.)cubicnl_nodc`
 
-Cubic nonlinearity distortion.
+Cubic nonlinearity distortion. The `cubicnl_nodc` variant adds a
+`dcblocker` on the output.
 `cubicnl` is a standard Faust function.
 
 #### Usage:
@@ -122,6 +123,34 @@ gate_stereo_test = os.osc(440), os.osc(441) : ef.gate_stereo(-60, 0.0001, 0.1, 0
 * [http://en.wikipedia.org/wiki/Noise_gate](http://en.wikipedia.org/wiki/Noise_gate)
 * [http://www.soundonsound.com/sos/apr01/articles/advanced.asp](http://www.soundonsound.com/sos/apr01/articles/advanced.asp)
 * [http://en.wikipedia.org/wiki/Gating_(sound_engineering)](http://en.wikipedia.org/wiki/Gating_(sound_engineering))
+
+----
+
+### `(ef.)gate_gain_mono`
+
+The gain signal of the mono gate: the core shared by `gate_mono` and
+`gate_stereo`, which multiply their input by it. Returns a smoothed
+gain between 0 and 1 following the level of the input signal.
+
+#### Usage
+
+```
+_ : gate_gain_mono(thresh,att,hold,rel) : _
+```
+
+Where:
+
+* `thresh`: dB level threshold above which gate opens (e.g., -60 dB)
+* `att`: attack time = time constant (sec) for gate to open (e.g., 0.0001 s = 0.1 ms)
+* `hold`: hold time = time (sec) gate stays open after signal level < thresh (e.g., 0.1 s)
+* `rel`: release time = time constant (sec) for gate to close (e.g., 0.020 s = 20 ms)
+
+#### Test
+```
+ef = library("misceffects.lib");
+os = library("oscillators.lib");
+gate_gain_mono_test = os.osc(440) : ef.gate_gain_mono(-60, 0.0001, 0.1, 0.02);
+```
 
 ## Fibonacci
 

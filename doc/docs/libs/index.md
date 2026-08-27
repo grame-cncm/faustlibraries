@@ -149,8 +149,10 @@
 [(ba.)ifNc](basics.md#baifnc)
 [(ba.)ifNcNo](basics.md#baifncno)
 [(ba.)selector](basics.md#baselector)
+[(ba.)cselector](basics.md#bacselector)
 [(ba.)select2stereo](basics.md#baselect2stereo)
 [(ba.)selectn](basics.md#baselectn)
+[(ba.)selectnX](basics.md#baselectnx)
 [(ba.)selectbus](basics.md#baselectbus)
 [(ba.)selectxbus](basics.md#baselectxbus)
 [(ba.)selectmulti](basics.md#baselectmulti)
@@ -189,6 +191,7 @@
 [(ba.)parallelMin](basics.md#baparallelmin)
 [(ba.)parallelMean](basics.md#baparallelmean)
 [(ba.)parallelRMS](basics.md#baparallelrms)
+[(ba.)millisec](basics.md#bamillisec)
 
 ## compressors
 
@@ -274,6 +277,7 @@
 ## demos
 
 [(dm.)mth_octave_spectral_level_demo](demos.md#dmmth_octave_spectral_level_demo)
+[(dm.)spectral_level_demo](demos.md#dmspectral_level_demo)
 [(dm.)parametric_eq_demo](demos.md#dmparametric_eq_demo)
 [(dm.)spectral_tilt_demo](demos.md#dmspectral_tilt_demo)
 [(dm.)mth_octave_filterbank_demo and (dm.)filterbank_demo](demos.md#dmmth_octave_filterbank_demo-and-dmfilterbank_demo)
@@ -303,11 +307,12 @@
 [(dm.)virtual_analog_oscillator_demo](demos.md#dmvirtual_analog_oscillator_demo)
 [(dm.)twin_osc_demo](demos.md#dmtwin_osc_demo)
 [(dm.)oscrs_demo ](demos.md#dmoscrs_demo-)
+[(dm.)oscr_demo](demos.md#dmoscr_demo)
 [(dm.)velvet_noise_demo](demos.md#dmvelvet_noise_demo)
 [(dm.)latch_demo](demos.md#dmlatch_demo)
 [(dm.)envelopes_demo](demos.md#dmenvelopes_demo)
 [(dm.)fft_spectral_level_demo](demos.md#dmfft_spectral_level_demo)
-[(dm.)reverse_echo_demo(nChans)](demos.md#dmreverse_echo_demonchans)
+[(dm.)reverse_echo_demo](demos.md#dmreverse_echo_demo)
 [(dm.)pospass_demo](demos.md#dmpospass_demo)
 [(dm.)exciter](demos.md#dmexciter)
 [(dm.)vocoder_demo](demos.md#dmvocoder_demo)
@@ -658,9 +663,10 @@
 
 ## misceffects
 
-[(ef.)cubicnl](misceffects.md#efcubicnl)
+[(ef.)cubicnl, (ef.)cubicnl_nodc](misceffects.md#efcubicnl,-efcubicnl_nodc)
 [(ef.)gate_mono](misceffects.md#efgate_mono)
 [(ef.)gate_stereo](misceffects.md#efgate_stereo)
+[(ef.)gate_gain_mono](misceffects.md#efgate_gain_mono)
 [(ef.)fibonacci](misceffects.md#effibonacci)
 [(ef.)fibonacciGeneral](misceffects.md#effibonaccigeneral)
 [(ef.)fibonacciSeq](misceffects.md#effibonacciseq)
@@ -1008,6 +1014,8 @@
 [(re.)satrev](reverbs.md#resatrev)
 [(re.)fdnrev0](reverbs.md#refdnrev0)
 [(re.)zita_rev_fdn](reverbs.md#rezita_rev_fdn)
+[(re.)zita_in_delay](reverbs.md#rezita_in_delay)
+[(re.)zita_distrib2](reverbs.md#rezita_distrib2)
 [(re.)zita_rev1_stereo](reverbs.md#rezita_rev1_stereo)
 [(re.)zita_rev1_ambi](reverbs.md#rezita_rev1_ambi)
 [(re.)vital_rev](reverbs.md#revital_rev)

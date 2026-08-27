@@ -2179,6 +2179,29 @@ declare ifNcNo license "LicenseRef-STK-4.3";
 // ```
 //----------------------------
 selector(i,n) = par(j, n, S(i, j))    with { S(i,i) = _; S(i,j) = !; };
+
+//-----------------------------`(ba.)cselector`---------------------------------
+// Selects the ith complex input among N at compile time. The complex
+// version of `selector`: each input is a pair of (real,imag) signals.
+//
+// #### Usage
+//
+// ```
+// cselector(I,N)
+// _,_, _,_, _,_, _,_ : cselector(2,4) : _,_ // selects the 3rd complex input among 4
+// ```
+//
+// Where:
+//
+// * `I`: complex input to select (int, numbered from 0, known at compile time)
+// * `N`: number of complex inputs (int, known at compile time, N > I)
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// cselector_test = (0.1, 0.2, 0.3, 0.4) : ba.cselector(1, 2);
+// ```
+//----------------------------
 cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; // for complex numbers
 
 
@@ -2238,11 +2261,31 @@ with {
 };
 
 
-// The generic version with a 'sel' function to be applied on:
-// - the channel index as a (possibly) fractional value
-// - the next channel index as an integer value
-// - the 2 signals to be selected between
-
+//-----------------------------`(ba.)selectnX`---------------------------------
+// Generic form of `selectn`, with a `sel` function deciding how each pair
+// of candidate signals is combined. `selectn` specializes it with a hard
+// `select2`; a crossfading `sel` turns it into an interpolated selector.
+//
+// #### Usage
+//
+// ```
+// si.bus(N) : selectnX(N,i,sel) : _
+// ```
+//
+// Where:
+//
+// * `N`: number of inputs (int, known at compile time, N > 0)
+// * `i`: input to select (numbered from 0, possibly fractional)
+// * `sel`: selection function applied on: the channel index `i` as a
+// (possibly) fractional value, the next channel index as an integer value,
+// and the 2 signals to be selected between
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// selectnX_test = (1,2,3,4) : ba.selectnX(4, 2, \(i,j,x,y).(select2((i >= j), x, y)));
+// ```
+//----------------------------
 selectnX(N,i,sel) = S(N,0)
 with {
     S(1,offset) = _;
@@ -3754,6 +3797,22 @@ declare time10s deprecated "the 1s..43s names are power-of-two related ranges in
 declare time21s deprecated "the 1s..43s names are power-of-two related ranges in milliseconds of a fixed slider, not seconds";
 declare time43s deprecated "the 1s..43s names are power-of-two related ranges in milliseconds of a fixed slider, not seconds";
 
+//-----------------------------`(ba.)millisec`---------------------------------
+// Number of samples in one millisecond at the current sampling rate.
+// Multiply a duration expressed in milliseconds by it to convert to samples.
+//
+// #### Usage
+//
+// ```
+// millisec : _
+// ```
+//
+// #### Test
+// ```
+// ba = library("basics.lib");
+// millisec_test = 10 * ba.millisec; // 10 ms as a number of samples
+// ```
+//----------------------------
 millisec = ma.SR/1000.0;
 
 time1s = hslider("time", 0, 0,  1000, 0.1)*millisec;

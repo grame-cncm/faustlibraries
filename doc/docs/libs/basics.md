@@ -1674,6 +1674,31 @@ selector_test = (0.1, 0.2, 0.3, 0.4) : ba.selector(2, 4);
 
 ----
 
+### `(ba.)cselector`
+
+Selects the ith complex input among N at compile time. The complex
+version of `selector`: each input is a pair of (real,imag) signals.
+
+#### Usage
+
+```
+cselector(I,N)
+_,_, _,_, _,_, _,_ : cselector(2,4) : _,_ // selects the 3rd complex input among 4
+```
+
+Where:
+
+* `I`: complex input to select (int, numbered from 0, known at compile time)
+* `N`: number of complex inputs (int, known at compile time, N > I)
+
+#### Test
+```
+ba = library("basics.lib");
+cselector_test = (0.1, 0.2, 0.3, 0.4) : ba.cselector(1, 2);
+```
+
+----
+
 ### `(ba.)select2stereo`
 
 Select between 2 stereo signals.
@@ -1723,6 +1748,34 @@ process = par(n, N, (par(i,N,i) : selectn(N,n)));
 ```
 ba = library("basics.lib");
 selectn_test = (1,2,3,4) : ba.selectn(4, 2);
+```
+
+----
+
+### `(ba.)selectnX`
+
+Generic form of `selectn`, with a `sel` function deciding how each pair
+of candidate signals is combined. `selectn` specializes it with a hard
+`select2`; a crossfading `sel` turns it into an interpolated selector.
+
+#### Usage
+
+```
+si.bus(N) : selectnX(N,i,sel) : _
+```
+
+Where:
+
+* `N`: number of inputs (int, known at compile time, N > 0)
+* `i`: input to select (numbered from 0, possibly fractional)
+* `sel`: selection function applied on: the channel index `i` as a
+(possibly) fractional value, the next channel index as an integer value,
+and the 2 signals to be selected between
+
+#### Test
+```
+ba = library("basics.lib");
+selectnX_test = (1,2,3,4) : ba.selectnX(4, 2, \(i,j,x,y).(select2((i >= j), x, y)));
 ```
 
 ----
@@ -2964,4 +3017,23 @@ Where:
 ```
 ba = library("basics.lib");
 parallelRMS_test = (0.2, 0.5, 0.1) : ba.parallelRMS(3);
+```
+
+----
+
+### `(ba.)millisec`
+
+Number of samples in one millisecond at the current sampling rate.
+Multiply a duration expressed in milliseconds by it to convert to samples.
+
+#### Usage
+
+```
+millisec : _
+```
+
+#### Test
+```
+ba = library("basics.lib");
+millisec_test = 10 * ba.millisec; // 10 ms as a number of samples
 ```

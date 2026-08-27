@@ -46,6 +46,26 @@ no = library("noises.lib");
 mth_octave_spectral_level_demo_test = no.noise : dm.mth_octave_spectral_level_demo(1.5);
 ```
 
+----
+
+### `(dm.)spectral_level_demo`
+
+Spectral level display, 2/3 octave. Synonym for
+`mth_octave_spectral_level_demo(1.5)`.
+
+#### Usage
+
+```
+_ : spectral_level_demo : _
+```
+
+#### Test
+```
+dm = library("demos.lib");
+no = library("noises.lib");
+spectral_level_demo_test = no.noise : dm.spectral_level_demo;
+```
+
 ## Filters
 
 
@@ -701,6 +721,25 @@ oscrs_demo_test = dm.oscrs_demo;
 
 ----
 
+### `(dm.)oscr_demo`
+
+Sine oscillator demo based on 2D vector rotation. Synonym for
+`oscrs_demo`.
+
+#### Usage
+
+```
+oscr_demo : _
+```
+
+#### Test
+```
+dm = library("demos.lib");
+oscr_demo_test = dm.oscr_demo;
+```
+
+----
+
 ### `(dm.)velvet_noise_demo`
 
 Listen to velvet_noise!
@@ -802,7 +841,7 @@ fft_spectral_level_demo_test = no.noise : dm.fft_spectral_level_demo(256);
 
 ----
 
-### `(dm.)reverse_echo_demo(nChans)`
+### `(dm.)reverse_echo_demo`
 
 Multichannel echo effect with reverse delays.
 
