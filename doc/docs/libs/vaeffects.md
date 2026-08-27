@@ -65,7 +65,7 @@ moog_vcf_test = os.osc(440)
 
 ----
 
-### `(ve.)moog_vcf_2b[n]`
+### `(ve.)moog_vcf_2b`, `(ve.)moog_vcf_2bn`
 
 Moog "Voltage Controlled Filter" (VCF) as two biquads. Implementation
 of the ideal Moog VCF transfer function factored into second-order

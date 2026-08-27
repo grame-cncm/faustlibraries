@@ -802,6 +802,34 @@ tf1_test = src : fi.tf1(0.5, 0.25, -0.4);
 
 ----
 
+### `(fi.)TF2`
+
+Tunable second-order direct-form digital filter, the "original"
+biquad of music.lib: y[n] = b0*x[n] + b1*x[n-1] + b2*x[n-2] -
+a1*y[n-1] - a2*y[n-2]. Kept for comparison and for the compatibility
+libraries (maxmsp.lib, instruments.lib); new code should use `tf2`
+instead.
+
+#### Usage
+
+```
+_ : TF2(b0,b1,b2,a1,a2) : _
+```
+
+Where:
+
+* `b0`, `b1`, `b2`: the feedforward coefficients
+* `a1`, `a2`: the feedback coefficients
+
+#### Test
+```
+fi = library("filters.lib");
+os = library("oscillators.lib");
+TF2_legacy_test = os.osc(440) : fi.TF2(0.2, 0.4, 0.2, -0.5, 0.3);
+```
+
+----
+
 ### `(fi.)notchw`
 
 ![notchw — response plots](../img/fi_notchw.svg)
@@ -1481,7 +1509,7 @@ allpassnkl_test = src : fi.allpassnkl(3, (0.3, 0.2, 0.1));
 
 ----
 
-### `(fi.)allpass1m`
+### `(fi.)allpassn1m`
 
 One-multiply form - one multiply and three adds per section.
 Normally the most efficient in special-purpose hardware.
@@ -2439,6 +2467,31 @@ hilbert(N) = pospass(N) : !,*(2);
 
 ----
 
+### `(fi.)pospass6e`
+
+Positive-pass filter like `pospass`, but built on the order-6 elliptic
+lowpass `lowpass6e` instead of a Butterworth lowpass: a steeper
+transition band for the same order.
+
+#### Usage
+
+```
+_ : pospass6e(fc) : _,_
+```
+
+Where:
+
+* `fc`: lower cutoff frequency in Hz
+
+#### Test
+```
+fi = library("filters.lib");
+os = library("oscillators.lib");
+pospass6e_test = os.osc(440) : fi.pospass6e(100);
+```
+
+----
+
 ### `(fi.)hilbert`
 
 Approximate Hilbert transform: twice the imaginary part of the analytic
@@ -3058,7 +3111,7 @@ filter-banks using elliptic or Chebyshev prototype filters.
 
 ----
 
-### `(fi.)mth_octave_filterbank[n]`
+### `(fi.)mth_octave_filterbank[n]`, `(fi.)mth_octave_filterbank`
 
 Allpass-complementary filter banks based on Butterworth band-splitting.
 For Butterworth band-splits, the needed delay equalizer is easily found.

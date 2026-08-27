@@ -686,7 +686,7 @@ lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, button("reset"));
 
 ----
 
-### `(os.)lf_saw`
+### `(os.)lf_saw`, `(os.)saw1`
 
 ![lf_saw — response plots](../img/os_lf_saw.svg)
 
@@ -714,12 +714,13 @@ lf_saw_test = os.lf_saw(3);
 
 ----
 
-### `(os.)sawN`
+### `(os.)sawN`, `(os.)MAX_SAW_ORDER`
 
 ![sawN — response plots](../img/os_sawN.svg)
 
 Alias-Suppressed Sawtooth Audio-Frequency Oscillator using Nth-order polynomial transitions
-to reduce aliasing.
+to reduce aliasing. The maximum usable order is `MAX_SAW_ORDER` (4:
+orders 5 and 6 have noise at low fundamentals).
 
 `sawN(N,freq)`, `sawNp(N,freq,phase)`, `saw2dpw(freq)`, `saw2(freq)`, `saw3(freq)`,
 `saw4(freq)`, `sawtooth(freq)`, `saw2f2(freq)`, `saw2f4(freq)`
@@ -1399,6 +1400,34 @@ oscrc_test = os.oscrc(440);
 #### References
 
 * [https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html](https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html)
+
+----
+
+### `(os.)oscrp`, `(os.)oscr`
+
+Sinusoidal oscillators based on 2D vector rotation like `oscrs` and
+`oscrc`: `oscrp(f,p)` gives an arbitrary initial phase (p=0 for sine,
+PI/2 for cosine, etc.), and `oscr` is the default form, a synonym for
+`oscrs` (sine, starts without a pop).
+
+#### Usage
+
+```
+oscrp(freq,phase) : _
+oscr(freq) : _
+```
+
+Where:
+
+* `freq`: frequency in Hz
+* `phase`: initial phase in radians
+
+#### Test
+```
+os = library("oscillators.lib");
+oscrp_test = os.oscrp(440, 0.5);
+oscr_test = os.oscr(440);
+```
 
 ----
 

@@ -12,3 +12,4 @@ pospass_test = src : fi.pospass(3, 1000);
 pospass6e_test = src : fi.pospass6e(1000);
 
 hilbert_test = src : fi.hilbert(4, 20);
+pospass6e_test = src : fi.pospass6e(100);

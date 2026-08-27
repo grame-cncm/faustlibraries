@@ -11,6 +11,34 @@ taken from Mozilla Firefox implementation.
 
 ----
 
+### `BiquadFilter`
+
+Environment holding the normalized biquad coefficient sets
+(`b0,b1,b2,a1,a2`, ready for `fi.tf2`) of the Web Audio filters below,
+computed from the Web Audio API specification formulas.
+
+#### Usage
+
+```
+BiquadFilter(f0, dBgain, Q, aDetune).lowpass2 // or .highpass2, .bandpass2,
+                   // .notch2, .allpass2, .peaking2, .lowshelf2, .highshelf2
+```
+
+Where:
+
+* `f0`: center/cutoff frequency in Hz
+* `dBgain`: gain in dB (used by the peaking and shelving filters)
+* `Q`: quality factor
+* `aDetune`: detune amount in cents
+
+#### Test
+```
+wa = library("webaudio.lib");
+BiquadFilter_test = wa.BiquadFilter(1000, 6, 1, 0).lowpass2;
+```
+
+----
+
 ### `(wa.)lowpass2`
 
 ![lowpass2 — response plots](../img/wa_lowpass2.svg)

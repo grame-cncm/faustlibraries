@@ -96,3 +96,11 @@ frdtable_test = it.frdtable(3, 16, os.sinwaveform(16), os.phasor(16, 200));
 frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.osc(220), os.phasor(16, 150));
 
 remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.osc(0.5));
+interpolator_null_test = it.interpolator_null(gen, idv)
+with {
+    gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
+    step = 0.25;
+    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    idv = it.make_idv(idxFloat);
+};
+linear_test = it.linear, it.cosine, it.cubic, it.nointerp, it.MAX_INTER;

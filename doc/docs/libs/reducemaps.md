@@ -176,3 +176,33 @@ Where:
 rm = library("reducemaps.lib");
 reducemap_test = rm.reducemap(+, /(4), 4, hslider("reducemap:input", 0.5, -1, 1, 0.01));
 ```
+
+----
+
+### `(rm.)sumn`, `(rm.)maxn`, `(rm.)minn`, `(rm.)mean`, `(rm.)RMS`
+
+Block-wise statistics of the input signal, built on `reduce` and
+`reducemap`: for each block of `n` consecutive samples, output the sum
+(`sumn`), the maximum (`maxn`), the minimum (`minn`), the average
+(`mean`), or the root mean square (`RMS`) of the block.
+
+#### Usage
+
+```
+_ : sumn(n) : _ // and likewise maxn, minn, mean, RMS
+```
+
+Where:
+
+* `n`: the block size in samples, an int > 0 known at compile time
+
+#### Test
+```
+rm = library("reducemaps.lib");
+os = library("oscillators.lib");
+sumn_test = os.osc(440) : rm.sumn(64);
+maxn_test = os.osc(440) : rm.maxn(64);
+minn_test = os.osc(440) : rm.minn(64);
+mean_test = os.osc(440) : rm.mean(64);
+RMS_test = os.osc(440) : rm.RMS(64);
+```

@@ -102,3 +102,27 @@ loop_speed_level_test = so.loop_speed_level(
     hslider("loop_speed_level:level", 0.5, 0, 1, 0.01)
 ) + os.osc(110) * 0.001;
 ```
+
+----
+
+### `(so.)sound`
+
+Environment to handle a given sound of a soundfile: binds a `soundfile`
+primitive and a part number once, and exposes the players as methods
+(`.loop`, `.loop_speed(speed)`, `.loop_speed_level(speed, level)`,
+`.play(level, gate)`, `.play_rev(level, gate)`,
+`.play_interp(ref, freq, level, gate, selector)`,
+`.play_alt(level, gate, ctrl)`) — see the commented example at the end
+of this file.
+
+#### Usage
+
+```
+sample = sound(soundfile("[url:{'foo.wav'}]", 2), 0);
+process = sample.loop;
+```
+
+Where:
+
+* `sf`: a `soundfile` primitive
+* `part`: the part number in the soundfile list

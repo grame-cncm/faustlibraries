@@ -28,3 +28,4 @@ bitonicSortIdx_test = (
     hslider("bubbleSort:x2", 0.8, -1, 1, 0.01),
     hslider("bubbleSort:x3", -0.5, -1, 1, 0.01)
 ) : ro.bitonicSortIdx(4);
+cross2_test = (1,2,3,4) : ro.cross2;

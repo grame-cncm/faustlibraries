@@ -37,3 +37,5 @@ velvet_noise_test = no.velvet_noise(0.5, 5.0);
 
 gnoise_test = no.gnoise(8);
 colored_noise_test = no.colored_noise(4, 0.0);
+gnoisem_test = no.gnoisem(8);
+pink_noise_m_test = no.pink_noise_m;

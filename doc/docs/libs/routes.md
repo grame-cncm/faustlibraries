@@ -52,6 +52,26 @@ cross2 = _,cross(2),_;
 
 ----
 
+### `(ro.)cross2`
+
+Swap the two middle signals of four: (a,b,c,d) -> (a,c,b,d). Kept
+public for compatibility with some old misceffects.lib functions
+(basics.lib uses it).
+
+#### Usage
+
+```
+_,_,_,_ : cross2 : _,_,_,_
+```
+
+#### Test
+```
+ro = library("routes.lib");
+cross2_test = (1,2,3,4) : ro.cross2;
+```
+
+----
+
 ### `(ro.)crossnn`
 
 Cross two `bus(N)`s.

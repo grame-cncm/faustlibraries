@@ -344,9 +344,11 @@ Michon and/or Julius O. Smith III, and are released under the
 
 ************************************************************************/
 
-//---------------------------`(no.)pink_noise`--------------------------
+//---------------------------`(no.)pink_noise`, `(no.)pink_noise_m`--------------------------
 // Pink noise (1/f noise) generator (third-order approximation covering the audio band well).
-// `pink_noise` is a standard Faust function.
+// `pink_noise` is a standard Faust function. `pink_noise_m` is the same
+// generator with its loudness equalized to that of `no.noise` (beware of
+// clipping).
 //
 // #### Usage
 // ```
@@ -561,8 +563,10 @@ with {
 };
 
 
-//----------------------------`(no.)gnoise`------------------------
+//----------------------------`(no.)gnoise`, `(no.)gnoisem`------------------------
 // Approximate zero-mean, unit-variance Gaussian white noise generator.
+// `gnoisem` is the same generator with its loudness equalized to that of
+// `no.noise`.
 //
 // #### Usage
 //

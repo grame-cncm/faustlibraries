@@ -18,3 +18,4 @@ peaking2_test = os.osc(440) : wa.peaking2(1000, 3, 1, 0);
 lowshelf2_test = os.osc(440) : wa.lowshelf2(500, 6, 0);
 
 highshelf2_test = os.osc(440) : wa.highshelf2(2000, -6, 0);
+BiquadFilter_test = wa.BiquadFilter(1000, 6, 1, 0).lowpass2;

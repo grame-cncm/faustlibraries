@@ -262,12 +262,14 @@ rnoises_test = no.rnoises(4, 1);
 
 ----
 
-### `(no.)pink_noise`
+### `(no.)pink_noise`, `(no.)pink_noise_m`
 
 ![pink_noise — response plots](../img/no_pink_noise.svg)
 
 Pink noise (1/f noise) generator (third-order approximation covering the audio band well).
-`pink_noise` is a standard Faust function.
+`pink_noise` is a standard Faust function. `pink_noise_m` is the same
+generator with its loudness equalized to that of `no.noise` (beware of
+clipping).
 
 #### Usage
 ```
@@ -461,9 +463,11 @@ velvet_noise_test = no.velvet_noise(0.5, 5.0);
 
 ----
 
-### `(no.)gnoise`
+### `(no.)gnoise`, `(no.)gnoisem`
 
 Approximate zero-mean, unit-variance Gaussian white noise generator.
+`gnoisem` is the same generator with its loudness equalized to that of
+`no.noise`.
 
 #### Usage
 

@@ -489,6 +489,38 @@ with {
 };
 ```
 
+----
+
+### `(it.)interpolator_null`
+
+Interpolator with no interpolation: reads the table at the truncated
+index. To be used in `interpolator_select` (this is the `nointerp`
+choice of the interpolation enum).
+
+#### Usage
+
+```
+interpolator_null(gen, idv) : _
+```
+
+Where:
+
+* `gen`: a table content generator function
+* `idv`: a fractional read index
+
+#### Test
+```
+it = library("interpolators.lib");
+ma = library("maths.lib");
+interpolator_null_test = it.interpolator_null(gen, idv)
+with {
+    gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
+    step = 0.25;
+    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    idv = it.make_idv(idxFloat);
+};
+```
+
 ## Four points interpolators
 
 
@@ -551,6 +583,27 @@ with {
     idxFloat = ma.modulo((+(step)~_) - step, 5.0);
     idv = it.make_idv(idxFloat);
 };
+```
+
+----
+
+### `(it.)linear`, `(it.)cosine`, `(it.)cubic`, `(it.)nointerp`, `(it.)MAX_INTER`
+
+Enum of the interpolation algorithms, to be given to functions taking
+an interpolation-choice parameter (like `frdtable`, `frwtable`, or the
+soundfiles `play_interp` players): `linear` (0), `cosine` (1), `cubic`
+(2), and `nointerp` (3). `MAX_INTER` is the number of choices.
+
+#### Usage
+
+```
+sample.play_interp(length, freq, gain, trig, it.cubic)
+```
+
+#### Test
+```
+it = library("interpolators.lib");
+linear_test = it.linear, it.cosine, it.cubic, it.nointerp, it.MAX_INTER;
 ```
 
 ----
@@ -652,11 +705,13 @@ piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.osc(0.1));
 
 ----
 
-### `(it.)lagrangeCoeffs`
+### `(it.)lagrangeCoeffs`, `(it.)lagrange_h`
 
 
 This is a function to generate N + 1 coefficients for an Nth-order Lagrange
 basis polynomial with arbitrary spacing of the points.
+`lagrange_h(N, x)` is the uniformly-spaced specialization
+(points at 0,1,...,N), kept for back-compatibility.
 
 #### Usage
 
@@ -683,8 +738,12 @@ lagrangeCoeffs_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), 0.25);
 
 ----
 
-### `(it.)lagrangeInterpolation`
+### `(it.)lagrangeInterpolation`, `(it.)lagrangeN`
 
+
+Nth-order Lagrange interpolation of a value `x` between input points.
+`lagrangeN(N, x)` is the uniformly-spaced specialization
+(points at 0,1,...,N), kept for back-compatibility.
 
 Nth-order Lagrange interpolator to interpolate between a set of arbitrarily spaced N + 1 points.
 

@@ -188,10 +188,27 @@ loop_speed(sf, part, speed) = super.loop_speed(sf, part, speed);
 
 loop_speed_level(sf, part, speed, level) = super.loop_speed_level(sf, part, speed, level);
 
-//====================================================
-// Environment to handle a given sound in a soundfile
-//====================================================
-
+//-----------------------------`(so.)sound`--------------------------------
+// Environment to handle a given sound of a soundfile: binds a `soundfile`
+// primitive and a part number once, and exposes the players as methods
+// (`.loop`, `.loop_speed(speed)`, `.loop_speed_level(speed, level)`,
+// `.play(level, gate)`, `.play_rev(level, gate)`,
+// `.play_interp(ref, freq, level, gate, selector)`,
+// `.play_alt(level, gate, ctrl)`) — see the commented example at the end
+// of this file.
+//
+// #### Usage
+//
+// ```
+// sample = sound(soundfile("[url:{'foo.wav'}]", 2), 0);
+// process = sample.loop;
+// ```
+//
+// Where:
+//
+// * `sf`: a `soundfile` primitive
+// * `part`: the part number in the soundfile list
+//----------------------------------------------------------
 sound(sf, part) = environment {
 
     // Looping the sound

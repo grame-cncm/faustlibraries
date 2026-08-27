@@ -90,3 +90,5 @@ polyblep_test = os.polyblep(0.2, os.lf_sawpos(220));
 polyblep_saw_test = os.polyblep_saw(220);
 polyblep_square_test = os.polyblep_square(220);
 polyblep_triangle_test = os.polyblep_triangle(220);
+oscrp_test = os.oscrp(440, 0.5);
+oscr_test = os.oscr(440);

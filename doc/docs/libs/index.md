@@ -412,6 +412,7 @@
 [(fi.)fir](filters.md#fifir)
 [(fi.)conv and (fi.)convN](filters.md#ficonv-and-ficonvn)
 [(fi.)tf1, (fi.)tf2 and (fi.)tf3](filters.md#fitf1,-fitf2-and-fitf3)
+[(fi.)TF2](filters.md#fitf2)
 [(fi.)notchw](filters.md#finotchw)
 [(fi.)tf21, (fi.)tf22, (fi.)tf22t and (fi.)tf21t](filters.md#fitf21,-fitf22,-fitf22t-and-fitf21t)
 [(fi.)av2sv](filters.md#fiav2sv)
@@ -433,7 +434,7 @@
 [(fi.)allpassn](filters.md#fiallpassn)
 [(fi.)allpassnn](filters.md#fiallpassnn)
 [(fi.)allpassnkl](filters.md#fiallpassnkl)
-[(fi.)allpass1m](filters.md#fiallpass1m)
+[(fi.)allpassn1m](filters.md#fiallpassn1m)
 [(fi.)tf2s and (fi.)tf2snp](filters.md#fitf2s-and-fitf2snp)
 [(fi.)tf1snp](filters.md#fitf1snp)
 [(fi.)tf3slf](filters.md#fitf3slf)
@@ -462,6 +463,7 @@
 [(fi.)bandpass6e](filters.md#fibandpass6e)
 [(fi.)bandpass12e](filters.md#fibandpass12e)
 [(fi.)pospass](filters.md#fipospass)
+[(fi.)pospass6e](filters.md#fipospass6e)
 [(fi.)hilbert](filters.md#fihilbert)
 [(fi.)lowshelf](filters.md#filowshelf)
 [(fi.)low_shelf](filters.md#filow_shelf)
@@ -479,7 +481,7 @@
 [(fi.)spectral_tilt](filters.md#fispectral_tilt)
 [(fi.)levelfilter](filters.md#filevelfilter)
 [(fi.)levelfilterN](filters.md#filevelfiltern)
-[(fi.)mth_octave_filterbank[n]](filters.md#fimth_octave_filterbankn)
+[(fi.)mth_octave_filterbank[n], (fi.)mth_octave_filterbank](filters.md#fimth_octave_filterbankn,-fimth_octave_filterbank)
 [(fi.)mth_octave_filterbank_alt](filters.md#fimth_octave_filterbank_alt)
 [(fi.)mth_octave_filterbank3](filters.md#fimth_octave_filterbank3)
 [(fi.)mth_octave_filterbank5](filters.md#fimth_octave_filterbank5)
@@ -561,13 +563,15 @@
 [(it.)interpolator_two_points](interpolators.md#itinterpolator_two_points)
 [(it.)interpolator_linear](interpolators.md#itinterpolator_linear)
 [(it.)interpolator_cosine](interpolators.md#itinterpolator_cosine)
+[(it.)interpolator_null](interpolators.md#itinterpolator_null)
 [(it.)interpolator_four_points](interpolators.md#itinterpolator_four_points)
 [(it.)interpolator_cubic](interpolators.md#itinterpolator_cubic)
+[(it.)linear, (it.)cosine, (it.)cubic, (it.)nointerp, (it.)MAX_INTER](interpolators.md#itlinear,-itcosine,-itcubic,-itnointerp,-itmax_inter)
 [(it.)interpolator_select](interpolators.md#itinterpolator_select)
 [(it.)lerp](interpolators.md#itlerp)
 [(it.)piecewise](interpolators.md#itpiecewise)
-[(it.)lagrangeCoeffs](interpolators.md#itlagrangecoeffs)
-[(it.)lagrangeInterpolation](interpolators.md#itlagrangeinterpolation)
+[(it.)lagrangeCoeffs, (it.)lagrange_h](interpolators.md#itlagrangecoeffs,-itlagrange_h)
+[(it.)lagrangeInterpolation, (it.)lagrangeN](interpolators.md#itlagrangeinterpolation,-itlagrangen)
 [(it.)frdtable](interpolators.md#itfrdtable)
 [(it.)frwtable](interpolators.md#itfrwtable)
 [(it.)remap](interpolators.md#itremap)
@@ -732,13 +736,13 @@
 [(no.)rmultirandom](noises.md#normultirandom)
 [(no.)rmultinoise](noises.md#normultinoise)
 [(no.)rnoises](noises.md#nornoises)
-[(no.)pink_noise](noises.md#nopink_noise)
+[(no.)pink_noise, (no.)pink_noise_m](noises.md#nopink_noise,-nopink_noise_m)
 [(no.)pink_filter](noises.md#nopink_filter)
 [(no.)pink_noise_vm](noises.md#nopink_noise_vm)
 [(no.)lfnoise, (no.)lfnoise0 and (no.)lfnoiseN](noises.md#nolfnoise,-nolfnoise0-and-nolfnoisen)
 [(no.)sparse_noise](noises.md#nosparse_noise)
 [(no.)velvet_noise](noises.md#novelvet_noise)
-[(no.)gnoise](noises.md#nognoise)
+[(no.)gnoise, (no.)gnoisem](noises.md#nognoise,-nognoisem)
 [(no.)colored_noise](noises.md#nocolored_noise)
 
 ## oscillators
@@ -769,8 +773,8 @@
 [(os.)lf_sawpos_phase](oscillators.md#oslf_sawpos_phase)
 [(os.)lf_sawpos_reset](oscillators.md#oslf_sawpos_reset)
 [(os.)lf_sawpos_phase_reset](oscillators.md#oslf_sawpos_phase_reset)
-[(os.)lf_saw](oscillators.md#oslf_saw)
-[(os.)sawN](oscillators.md#ossawn)
+[(os.)lf_saw, (os.)saw1](oscillators.md#oslf_saw,-ossaw1)
+[(os.)sawN, (os.)MAX_SAW_ORDER](oscillators.md#ossawn,-osmax_saw_order)
 [(os.)sawNp](oscillators.md#ossawnp)
 [(os.)saw2](oscillators.md#ossaw2)
 [(os.)saw3](oscillators.md#ossaw3)
@@ -793,6 +797,7 @@
 [(os.)oscrq](oscillators.md#ososcrq)
 [(os.)oscrs](oscillators.md#ososcrs)
 [(os.)oscrc](oscillators.md#ososcrc)
+[(os.)oscrp, (os.)oscr](oscillators.md#ososcrp,-ososcr)
 [(os.)oscs](oscillators.md#ososcs)
 [(os.)quadosc](oscillators.md#osquadosc)
 [(os.)sidebands](oscillators.md#ossidebands)
@@ -1010,6 +1015,7 @@
 [(rm.)botReduce](reducemaps.md#rmbotreduce)
 [(rm.)reduce](reducemaps.md#rmreduce)
 [(rm.)reducemap](reducemaps.md#rmreducemap)
+[(rm.)sumn, (rm.)maxn, (rm.)minn, (rm.)mean, (rm.)RMS](reducemaps.md#rmsumn,-rmmaxn,-rmminn,-rmmean,-rmrms)
 
 ## reverbs
 
@@ -1034,6 +1040,7 @@
 ## routes
 
 [(ro.)cross](routes.md#rocross)
+[(ro.)cross2](routes.md#rocross2)
 [(ro.)crossnn](routes.md#rocrossnn)
 [(ro.)crossn1](routes.md#rocrossn1)
 [(ro.)cross1n](routes.md#rocross1n)
@@ -1075,6 +1082,7 @@
 [(so.)loop](soundfiles.md#soloop)
 [(so.)loop_speed](soundfiles.md#soloop_speed)
 [(so.)loop_speed_level](soundfiles.md#soloop_speed_level)
+[(so.)sound](soundfiles.md#sosound)
 
 ## spats
 
@@ -1104,7 +1112,7 @@
 ## vaeffects
 
 [(ve.)moog_vcf](vaeffects.md#vemoog_vcf)
-[(ve.)moog_vcf_2b[n]](vaeffects.md#vemoog_vcf_2bn)
+[(ve.)moog_vcf_2b, (ve.)moog_vcf_2bn](vaeffects.md#vemoog_vcf_2b,-vemoog_vcf_2bn)
 [(ve.)moogLadder](vaeffects.md#vemoogladder)
 [(ve.)lowpassLadder4](vaeffects.md#velowpassladder4)
 [(ve.)moogHalfLadder](vaeffects.md#vemooghalfladder)

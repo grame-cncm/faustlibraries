@@ -841,7 +841,7 @@ declare lf_sawpos_phase_reset licence "LicenseRef-STK-4.3";
 lf_sawpos_phase_reset(freq,phase,reset) = phasor_imp(freq, reset, phase);
 
 
-//-----------------`(os.)lf_saw`--------------------
+//-----------------`(os.)lf_saw`, `(os.)saw1`--------------------
 // Simple sawtooth waveform oscillator between -1 and 1.
 // `lf_saw` is a standard Faust function.
 //
@@ -868,9 +868,10 @@ saw1(freq) = 2.0 * lf_sawpos(freq) - 1.0;
 lf_saw(freq) = saw1(freq);
 
 //================== Alias-Suppressed Sawtooth ====================
-//-----------------`(os.)sawN`--------------------
+//-----------------`(os.)sawN`, `(os.)MAX_SAW_ORDER`--------------------
 // Alias-Suppressed Sawtooth Audio-Frequency Oscillator using Nth-order polynomial transitions
-// to reduce aliasing.
+// to reduce aliasing. The maximum usable order is `MAX_SAW_ORDER` (4:
+// orders 5 and 6 have noise at low fundamentals).
 //
 // `sawN(N,freq)`, `sawNp(N,freq,phase)`, `saw2dpw(freq)`, `saw2(freq)`, `saw3(freq)`,
 // `saw4(freq)`, `sawtooth(freq)`, `saw2f2(freq)`, `saw2f4(freq)`
@@ -1610,6 +1611,31 @@ oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
 //------------------------------------------------------------
 oscrc(f) = impulse : fi.nlf2(f,1) : !,_; // cosine
 
+//--------------------------`(os.)oscrp`, `(os.)oscr`--------------------------------
+// Sinusoidal oscillators based on 2D vector rotation like `oscrs` and
+// `oscrc`: `oscrp(f,p)` gives an arbitrary initial phase (p=0 for sine,
+// PI/2 for cosine, etc.), and `oscr` is the default form, a synonym for
+// `oscrs` (sine, starts without a pop).
+//
+// #### Usage
+//
+// ```
+// oscrp(freq,phase) : _
+// oscr(freq) : _
+// ```
+//
+// Where:
+//
+// * `freq`: frequency in Hz
+// * `phase`: initial phase in radians
+//
+// #### Test
+// ```
+// os = library("oscillators.lib");
+// oscrp_test = os.oscrp(440, 0.5);
+// oscr_test = os.oscr(440);
+// ```
+//------------------------------------------------------------
 oscrp(f,p) = oscrq(f) : *(cos(p)), *(sin(p)) : + ; // p=0 for sine, p=PI/2 for cosine, etc.
 
 oscr = oscrs; // default = sine (starts without a pop)
