@@ -62,6 +62,9 @@ def ofInt (k : Int) : Q := ⟨k, 1⟩
 def le (a b : Q) : Bool := decide (a.n * b.d ≤ b.n * a.d)
 def min (a b : Q) : Q := if le a b then a else b
 def max (a b : Q) : Q := if le a b then b else a
+def mul (a b : Q) : Q := ⟨a.n * b.n, a.d * b.d⟩
+/-- Strict positivity; like `le`, valid because denominators are positive. -/
+def pos (a : Q) : Bool := decide (0 < a.n)
 def floor (a : Q) : Int := Int.fdiv a.n a.d
 def ceil (a : Q) : Int := -(Int.fdiv (-a.n) a.d)
 end Q
@@ -113,6 +116,36 @@ def hasRef : Sig → Bool
 def hasRefL : List Sig → Bool
   | []      => false
   | k :: ks => hasRef k || hasRefL ks
+end
+
+mutual
+/-- Structural equality. `Sig` is a nested inductive, so `deriving DecidableEq`
+    does not apply (see `feedbackOf`); this hand-written `Bool` version is what
+    the range analysis uses to recognise `x - floor(x)` — the two occurrences
+    of `x` come from one DAG node, so after `let`-inlining they are structurally
+    identical. -/
+def beq : Sig → Sig → Bool
+  | .const a, .const b => a == b
+  | .int a, .int b => a == b
+  | .input a, .input b => a == b
+  | .delay1 a, .delay1 b => beq a b
+  | .delay a n, .delay b m => beq a b && beq n m
+  | .proj i a, .proj j b => i == j && beq a b
+  | .recur a, .recur b => beq a b
+  | .ref a, .ref b => a == b
+  | .cons a b, .cons c d => beq a c && beq b d
+  | .nil, .nil => true
+  | .binop o a b, .binop p c d => o == p && beq a c && beq b d
+  | .control n i lo hi ks, .control m j lo' hi' ks' =>
+      n == m && i == j && lo == lo' && hi == hi' && beqL ks ks'
+  | .opaque a, .opaque b => a == b
+  | .opaqueN a ks, .opaqueN b ks' => a == b && beqL ks ks'
+  | _, _ => false
+
+def beqL : List Sig → List Sig → Bool
+  | [], [] => true
+  | a :: as, b :: bs => beq a b && beqL as bs
+  | _, _ => false
 end
 
 /-- `some k` when the term is exactly the recursion's own output delayed by
@@ -252,15 +285,25 @@ is a missed optimisation, and the converse would be a real defect. -/
 /-- A conservative rational range with **independently** optional sides:
     `max 0 x` bounds the low side while leaving the high side unknown, which a
     single `Option (Q × Q)` cannot express. `none` on a side always means "no
-    bound follows from the term", and is always a safe answer. -/
+    bound follows from the term", and is always a safe answer.
+
+    The upper bound additionally carries a strictness flag: `hiStrict = true`
+    reads `v < hi` instead of `v ≤ hi`. It exists for one client — the phasor
+    identity `x - floor(x) ∈ [0, 1)`, where the closed bound `1` would put
+    `intCast(frac · N)` at `N`, one past the table, and lose the verdict that
+    matters. The lower bound stays closed: no current rule produces a strict
+    one, and a strict bound may always be weakened to the closed bound at the
+    same value (`v < h` implies `v ≤ h`). `hiStrict` is meaningful only when
+    `hi` is `some`. -/
 structure Range where
   lo : Option Q
   hi : Option Q
+  hiStrict : Bool
 deriving Repr
 
 namespace Range
-def unknown : Range := ⟨none, none⟩
-def exact (q : Q) : Range := ⟨some q, some q⟩
+def unknown : Range := ⟨none, none, false⟩
+def exact (q : Q) : Range := ⟨some q, some q, false⟩
 
 /-- Best bound available from one or both sides. -/
 private def meet (f : Q → Q → Q) : Option Q → Option Q → Option Q
@@ -273,17 +316,59 @@ private def join (f : Q → Q → Q) : Option Q → Option Q → Option Q
   | some x, some y => some (f x y)
   | _,      _      => none
 
+/-- Strictness of `min` over upper bounds: the smaller bound's flag wins; on a
+    tie, either strict flag keeps the result strict. -/
+private def strictMin : Option Q → Bool → Option Q → Bool → Bool
+  | some x, sx, some y, sy =>
+      if Q.le x y then (if Q.le y x then sx || sy else sx) else sy
+  | some _, sx, none, _  => sx
+  | none, _, some _, sy  => sy
+  | none, _, none, _     => false
+
+/-- Strictness of `max` over upper bounds: the larger bound's flag wins; on a
+    tie, both must be strict for the result to be. Unknown on either side
+    already makes the joined bound `none`, so the flag is then irrelevant. -/
+private def strictMax : Option Q → Bool → Option Q → Bool → Bool
+  | some x, sx, some y, sy =>
+      if Q.le x y then (if Q.le y x then sx && sy else sy) else sx
+  | _, _, _, _ => false
+
 /-- `min x y ≤ x`, so one known upper bound suffices; the lower bound needs both. -/
-def rmin (a b : Range) : Range := ⟨join Q.min a.lo b.lo, meet Q.min a.hi b.hi⟩
+def rmin (a b : Range) : Range :=
+  ⟨join Q.min a.lo b.lo, meet Q.min a.hi b.hi,
+   strictMin a.hi a.hiStrict b.hi b.hiStrict⟩
 
 /-- Dually for `max`. -/
-def rmax (a b : Range) : Range := ⟨meet Q.max a.lo b.lo, join Q.max a.hi b.hi⟩
+def rmax (a b : Range) : Range :=
+  ⟨meet Q.max a.lo b.lo, join Q.max a.hi b.hi,
+   strictMax a.hi a.hiStrict b.hi b.hiStrict⟩
 
 /-- Truncation toward zero of a value in `[lo, hi]` lands in
     `[⌊lo⌋, ⌈hi⌉]`. Widening on both sides is what keeps this sound for
-    negative values, where truncation moves *up*. -/
+    negative values, where truncation moves *up*.
+
+    A strict upper bound tightens to `max (⌈hi⌉ - 1) 0`: a non-negative value
+    below `hi` truncates to an integer at most `⌈hi⌉ - 1`, and a negative one
+    truncates upward to at most `0` — reaching `0` even when `hi ≤ 0`, hence
+    the outer `max`. The result is closed either way: truncation outputs can
+    attain these integer bounds. -/
 def trunc (r : Range) : Range :=
-  ⟨r.lo.map fun q => Q.ofInt q.floor, r.hi.map fun q => Q.ofInt q.ceil⟩
+  ⟨r.lo.map fun q => Q.ofInt q.floor,
+   r.hi.map fun q =>
+     if r.hiStrict then
+       let c := q.ceil - 1
+       Q.ofInt (if c ≤ 0 then 0 else c)
+     else Q.ofInt q.ceil,
+   false⟩
+
+/-- Multiply a range by an exact constant. A positive factor preserves both
+    sides and the upper bound's strictness; a negative factor swaps the sides,
+    the strict upper bound weakening to a closed lower one (`v < h` gives
+    `q·v > q·h`, hence `q·v ≥ q·h`); a zero factor pins the product at zero. -/
+def scale (r : Range) (q : Q) : Range :=
+  if Q.pos q then ⟨r.lo.map (Q.mul q), r.hi.map (Q.mul q), r.hiStrict⟩
+  else if Q.pos q.neg then ⟨r.hi.map (Q.mul q), r.lo.map (Q.mul q), false⟩
+  else exact Q.zero
 end Range
 
 /-- Range of a subterm, when one follows from its structure alone.
@@ -297,7 +382,7 @@ def rangeOfFuel : Nat → Sig → Range
   | 0, _ => Range.unknown
   | _ + 1, .int k => Range.exact (Q.ofInt k)
   | _ + 1, .const q => Range.exact q
-  | _ + 1, .control _ _ lo hi _ => ⟨some lo, some hi⟩
+  | _ + 1, .control _ _ lo hi _ => ⟨some lo, some hi, false⟩
   | n + 1, .opaqueN "SIGINTCAST" [x] => (rangeOfFuel n x).trunc
   | n + 1, .opaqueN "SIGMIN" [a, b]  => Range.rmin (rangeOfFuel n a) (rangeOfFuel n b)
   | n + 1, .opaqueN "SIGMAX" [a, b]  => Range.rmax (rangeOfFuel n a) (rangeOfFuel n b)
@@ -306,10 +391,27 @@ def rangeOfFuel : Nat → Sig → Range
         -- C semantics: `%` truncates toward zero, so a negative dividend gives
         -- a negative remainder unless the dividend is known non-negative.
         match (rangeOfFuel n a).lo with
-        | some l => if Q.le (Q.ofInt 0) l then ⟨some (Q.ofInt 0), some (Q.ofInt (m - 1))⟩
-                    else ⟨some (Q.ofInt (1 - m)), some (Q.ofInt (m - 1))⟩
-        | none   => ⟨some (Q.ofInt (1 - m)), some (Q.ofInt (m - 1))⟩
+        | some l => if Q.le (Q.ofInt 0) l then ⟨some (Q.ofInt 0), some (Q.ofInt (m - 1)), false⟩
+                    else ⟨some (Q.ofInt (1 - m)), some (Q.ofInt (m - 1)), false⟩
+        | none   => ⟨some (Q.ofInt (1 - m)), some (Q.ofInt (m - 1)), false⟩
       else Range.unknown
+  | _ + 1, .binop .sub x (.opaqueN "SIGFLOOR" [y]) =>
+      -- The phasor identity: over exact rationals, `x - ⌊x⌋ ∈ [0, 1)` whatever
+      -- the range of `x`. The two occurrences are one DAG node, so structural
+      -- equality is the right test.
+      if beq x y then ⟨some Q.zero, some Q.one, true⟩ else Range.unknown
+  | n + 1, .binop .mul a (.const q) => (rangeOfFuel n a).scale q
+  | n + 1, .binop .mul a (.int k)   => (rangeOfFuel n a).scale (Q.ofInt k)
+  | n + 1, .binop .mul (.const q) b => (rangeOfFuel n b).scale q
+  | n + 1, .binop .mul (.int k) b   => (rangeOfFuel n b).scale (Q.ofInt k)
+  | n + 1, .proj 0 (.recur (.cons body .nil)) =>
+      -- The recursion invariant, in its state-independent form: `ref`, `delay1`
+      -- and `delay` all yield the unknown range, so any bound this returns for
+      -- the body holds for arbitrary values of the recursive state — hence for
+      -- every output of the recursion, with no fixed-point iteration. This is
+      -- what bounds a phasor: its body is `frac(state + inc)`, and the `[0, 1)`
+      -- of the rule above does not depend on the state at all.
+      rangeOfFuel n body
   | _ + 1, _ => Range.unknown
 
 /-- Fuel is bounded by the depth of an index expression, not by graph size. -/
@@ -364,10 +466,11 @@ def certifyIndicesB (s : Sig) : Bool :=
 private def showQ (q : Q) : String := s!"{q.n}/{q.d}"
 
 private def showRange (r : Range) : String :=
+  let close := if r.hiStrict then ")" else "]"
   match r.lo, r.hi with
-  | some l, some h => s!"[{showQ l}, {showQ h}]"
+  | some l, some h => s!"[{showQ l}, {showQ h}{close}"
   | some l, none   => s!"[{showQ l}, ?]"
-  | none,   some h => s!"[?, {showQ h}]"
+  | none,   some h => s!"[?, {showQ h}{close}"
   | none,   none   => "[?, ?]"
 
 /-- Table and tap verdicts are not the same claim, so they are not worded the
@@ -415,6 +518,14 @@ same standing obligation as in `tf2s-stability-formal-spec.lean`.
 
 Note also that certification is over the **exact rationals** denoted by the
 exported double-precision coefficients. It says nothing about the behaviour of
-the filter as executed in floating point. -/
+the filter as executed in floating point.
+
+The same caveat carries one concrete instance in the range analysis: the
+phasor rule reads `x - floor(x) ∈ [0, 1)`, which is an identity of exact
+arithmetic. In floating point the subtraction is exact whenever
+`floor(x) ≤ x < 2·floor(x)` (Sterbenz) and rounds otherwise; a rounding that
+reached `1.0` would step outside the certified interval. Auditing the float
+behaviour of `frac` is part of the same floating-point obligation, not a new
+one. -/
 
 end Faust.Signal
