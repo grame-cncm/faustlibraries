@@ -206,14 +206,50 @@ recursion of order 3: all yield "not certified", pinned as a `= false`
 theorem. If a later extension of the analyses unlocks such a case, the pinned
 refusal flips and `make certify` shows it.
 
-This is also what distinguishes the Lean analyses from the interval analysis
-inside the Faust compilers (C++ and Rust), which must return an answer for
-every node, quickly, and widens when unsure — silently. The two computations
-are independent implementations, and their disagreements are informative in
-both directions: a site Lean proves in range but the backend clamps anyway is
-a missed optimization; a site the backend leaves unclamped but Lean cannot
-prove deserves a look. The Lean side doubles as an oracle for the compiler's
-own bound insertion.
+### The compiler's interval analysis and the Lean proof
+
+The Faust compilers (C++ and Rust) already carry an internal interval
+library, used among other things to decide where table accesses need a
+clamp. A fair question is what the Lean analysis adds on top of it. The
+answer is that the two computations differ on every axis that matters — they
+are complements, not competitors:
+
+**They answer different questions.** The compiler's analysis answers *"must I
+insert a clamp to make this access safe?"* — an engineering decision, after
+which the program is safe regardless. The Lean verdict answers *"is this
+index in range as written, or does its safety rest on a compiler-inserted
+clamp?"* The three-valued verdict makes that dependency explicit: `CLAMP
+REQUIRED` is not a defect report, it is a *named dependency* — of interest to
+the library author (a clamp-dependent site in a `.lib` function suggests
+clamping or documenting on the Faust side) and to performance work (`IN
+RANGE` is a licence to elide the clamp in an inner loop).
+
+**They sit on opposite sides of the trust boundary.** The internal interval
+code is part of the object under test: if it computes a wrong interval — too
+wide *or* too narrow — nothing signals it, because it is both the judge and
+the party. Its result is trusted output of trusted code, with no witness. The
+Lean analysis is a second, independently written implementation over the
+exported graph, and its result is not an analysis output at all but a
+*theorem* the kernel re-checks on every `lake`/`lean` run. The trusted base
+shrinks from "the whole interval library of the compiler" to the ~500-line
+reviewed prelude, the Lean kernel, and the recorded adequacy obligations.
+
+**They fail in opposite directions.** The compiler's analysis must return an
+interval for *every* node, quickly; when unsure it widens — silently, since a
+too-wide interval only costs an extra clamp, and a too-narrow one is an
+invisible soundness bug. The prelude is total in the opposite way: whatever
+it does not recognize exactly becomes an unreadable opaque node and the
+verdict "not proven". Widening errors cannot exist because widening does not
+exist; each accepting rule carries its soundness argument as a comment and is
+reviewed as mathematics.
+
+**Their disagreements are the payoff.** Because the two are independent,
+every divergence is information: a site Lean proves in range but the backend
+clamps anyway is a missed optimization; a site the backend leaves unclamped
+but Lean cannot prove deserves a look at both sides. Run under `make
+certify`, the Lean analysis thus doubles as a standing, kernel-checked oracle
+for the compiler's own bound insertion — and any regression in either
+implementation surfaces as a verdict drift on the committed reference.
 
 ## 5. The trust story
 
