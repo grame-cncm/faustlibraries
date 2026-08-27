@@ -1163,7 +1163,7 @@ The prototype ships as:
 |---|---|
 | `signal-import-formal-spec.lean` | Hand-written, reviewed prelude: the `Sig` inductive, the linear-recursion extractor, the Jury criterion, the standing obligations |
 | `scripts/sig2lean.py` | Dump parser and Lean emitter; runs Lean once to read each verdict, then emits a `by decide` theorem pinning it |
-| `tests/lean-examples/` | Five `.dsp` inputs and the generated `certified.lean` |
+| `tests/lean/` | Five `.dsp` inputs and the generated `certified.lean` |
 
 Results, all verdicts correct:
 

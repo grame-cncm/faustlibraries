@@ -6,6 +6,10 @@
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
+# `make certify`    - regenerate the Lean certification theorems into tests/build/,
+#                     kernel-check them, and fail if any verdict drifted from the
+#                     committed tests/lean/certified.lean.
+# `make certify-reference` - regenerate and re-check tests/lean/certified.lean in place.
 # `make build`      - build the documentation.
 # `make serve`      - serve the documentation.
 # `make doc-index`  - build the Faust library documentation JSON index.
@@ -29,6 +33,16 @@ DOC_INDEX_SPLIT_DIR ?= tests/faust-doc
 DOC_INDEX_LICENSE_ALLOWLIST_FILE ?=
 DOC_INDEX_LICENSE_DENYLIST_FILE ?=
 
+# --- Lean certification (formalisation/ + tests/lean/) ---
+LEAN ?= lean
+FAUST_RS ?= faust-rs
+SIG2LEAN := ./scripts/sig2lean.py
+LEAN_SPEC_DIR := formalisation
+LEAN_TEMPLATE := $(LEAN_SPEC_DIR)/signal-import-formal-spec.lean
+LEAN_EXAMPLES_DIR := tests/lean
+LEAN_CERT_DSP := $(sort $(wildcard $(LEAN_EXAMPLES_DIR)/*.dsp))
+LEAN_CERTIFIED := $(LEAN_EXAMPLES_DIR)/certified.lean
+
 ARCH := arch/print_arch.cpp
 BUILD_DIR := tests/build
 REFERENCE_DIR := tests/reference
@@ -37,7 +51,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check checkdoc plots clean distclean help bench doc-index doc-index-split doc-index-commercial
+.PHONY: reference check checkdoc plots clean distclean help bench certify certify-reference doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -155,6 +169,31 @@ bench: ## Run faustbench-llvm on all test specs and capture memory/CPU stats
 	else \
 		printf '[bench] no results generated\n' >&2; \
 	fi
+
+# The generator predicts each verdict and pins it as a `by decide` theorem, so a
+# regenerated file always type-checks; drift is caught by diffing against the
+# committed reference, exactly as `check` diffs numerical outputs. A compiler or
+# prelude change that flips a verdict therefore fails this target loudly.
+certify: ## Regenerate the Lean certification theorems, kernel-check them, and fail on drift
+	@set -e; \
+	mkdir -p $(BUILD_DIR); \
+	printf '[certify] checking prelude and specs in %s\n' '$(LEAN_SPEC_DIR)'; \
+	$(LEAN) $(LEAN_TEMPLATE); \
+	$(LEAN) $(LEAN_SPEC_DIR)/tf2s-stability-formal-spec.lean; \
+	printf '[certify] generating %s from %d dsp files\n' '$(BUILD_DIR)/certified.lean' '$(words $(LEAN_CERT_DSP))'; \
+	FAUST_RS=$(FAUST_RS) FAUST_LIBS=$(CURDIR) $(PYTHON) $(SIG2LEAN) $(LEAN_TEMPLATE) $(BUILD_DIR)/certified.lean $(LEAN_CERT_DSP); \
+	$(LEAN) $(BUILD_DIR)/certified.lean; \
+	if ! diff -u $(LEAN_CERTIFIED) $(BUILD_DIR)/certified.lean; then \
+		echo "[fail] certification drifted from $(LEAN_CERTIFIED) — review the diff above, then run 'make certify-reference'"; \
+		exit 1; \
+	fi; \
+	printf '[certify] all theorems check; verdicts match %s\n' '$(LEAN_CERTIFIED)'
+
+certify-reference: ## Regenerate tests/lean/certified.lean in place and kernel-check it
+	@set -e; \
+	FAUST_RS=$(FAUST_RS) FAUST_LIBS=$(CURDIR) $(PYTHON) $(SIG2LEAN) $(LEAN_TEMPLATE) $(LEAN_CERTIFIED) $(LEAN_CERT_DSP); \
+	$(LEAN) $(LEAN_CERTIFIED); \
+	printf '[certify-reference] wrote and checked %s\n' '$(LEAN_CERTIFIED)'
 
 doc-index: ## Build the Faust library documentation JSON index
 	@set -e; \

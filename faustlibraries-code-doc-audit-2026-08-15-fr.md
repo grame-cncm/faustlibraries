@@ -1199,7 +1199,7 @@ Le prototype se compose de :
 |---|---|
 | `signal-import-formal-spec.lean` | Prélude écrit et relu à la main : l'inductif `Sig`, l'extracteur de récursion linéaire, le critère de Jury, les obligations consignées |
 | `scripts/sig2lean.py` | Parseur du dump et émetteur Lean ; exécute Lean une fois pour lire chaque verdict, puis émet un théorème `by decide` qui le fixe |
-| `tests/lean-examples/` | Cinq entrées `.dsp` et le `certified.lean` engendré |
+| `tests/lean/` | Cinq entrées `.dsp` et le `certified.lean` engendré |
 
 Résultats, tous verdicts corrects :
 
