@@ -22,12 +22,18 @@ make build       # build the mkdocs site (doc pages + figure injection)
   non-canonical license string. Accepted historical debt is pinned in
   `tests/doc-baseline.json`; never regenerate that baseline to silence a
   failure you caused.
-- The test references (`tests/reference/`, ~1.2 GB) are local build
+- The test references (`tests/reference/`, ~1.4 GB) are local build
   artifacts: generate them with `make reference`, never commit them. Same
   for the built site (`site/`) and `tests/build|output`.
 - A test failure means the change altered audible output. That is either a
   bug in the change or a deliberate fix; in the second case say so
   explicitly and regenerate only the affected references.
+- **`make check` caches**: the `.out`/`.ref` targets do not depend on the
+  `.lib` sources, so after editing a library a plain `make check` re-runs
+  only tests whose outputs are missing and silently skips the rest. For a
+  real full validation, `rm -rf tests/output` first; to regenerate
+  references after a deliberate behavior change, delete the affected
+  `.ref` files before `make reference`.
 
 ## Hard rules for library changes
 
@@ -38,9 +44,35 @@ make build       # build the mkdocs site (doc pages + figure injection)
      reference generated with `make reference`;
    - a `declare functionName license "ID";` with a canonical SPDX
      identifier (check with `scripts/normalize_licenses.py --check`).
+
+   The doc-block **title must name every symbol the block documents,
+   exactly**, each in its own backquotes: `` `(pp.)name` `` or
+   `` `(pp.)name1`, `(pp.)name2` `` for multi-function blocks. The tooling
+   does not recognize a title with a trailing space inside the backquotes,
+   an argument list appended to the name, or a sibling only mentioned in
+   the prose — all three make the symbol count as undocumented. The
+   generic pattern `` `name[N]` `` matches digit suffixes only
+   (`name1`..`name9`), not letter variants.
+
+   Test names must be **unique across all of `tests/*.dsp`** (each becomes
+   one `tests/reference/<name>.ref`), and must not differ from an existing
+   name only by letter case — the `.ref` files collide on case-insensitive
+   filesystems (macOS). Prefix with the library's short name (`mm_`,
+   `tu_`, `inst_`) when the natural name is taken. Every test must produce
+   a **nonzero output signal**: a gate defaulting to 0 or a slider
+   defaulting to silence turns the reference into all zeros, which
+   validates nothing. Check the generated `.ref` before committing it.
 2. **Internal helpers** that cannot live in a `with { }` /
    `environment { }` block are prefixed `_name`. They need no doc block and
    are excluded from coverage; never use another library's `_` symbols.
+   When hiding or renaming an existing public-by-accident symbol, the old
+   name survives one published release as a deprecated alias grouped at
+   the end of the file (`declare oldname deprecated "...renamed _name";`
+   `oldname = _name;` — or a frozen copy of the body when the definition
+   moved into a `with`). Before hiding anything, check it is not used by
+   another library, a documented example, or an explicit-substitution
+   switch (`os[SAFE=1;]`) — any of those makes it de facto public: document
+   it instead.
 3. **Naming**: existing symbols keep their names; new code follows the
    dominant style of the file (or section) it lands in.
 4. **Versioning**: raise the library's `declare version` in the same commit
