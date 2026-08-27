@@ -1,6 +1,6 @@
 # Faust libraries: new functions and illustrated documentation
 
-*August 2026 — `claude` branch of [grame-cncm/faustlibraries](https://github.com/grame-cncm/faustlibraries).*
+*August 2026 — `claude` helped rework of [grame-cncm/faustlibraries](https://github.com/grame-cncm/faustlibraries).*
 
 This work brings two things to the Faust libraries: **new DSP functions**, and an **illustrated documentation** — SVG figures embedded in the library pages at [faustlibraries.grame.fr](https://faustlibraries.grame.fr), each one generated from a compiled Faust probe and validated by property assertions.
 
