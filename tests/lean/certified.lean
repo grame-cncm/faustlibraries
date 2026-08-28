@@ -968,41 +968,41 @@ Jury criterion. `certifyIndicesB` checks every table read and
 delay tap whose range follows from the graph structure alone;
 `false` there means *not proven*, never *unsafe*. -/
 
-#eval certifyReport dcblocker_out0
-#eval certifyReport fdelay_clamped_out0
-#eval certifyReport lowpass3_out0
-#eval certifyReport noise_lcg_out0
-#eval certifyReport nonlinear_out0
-#eval certifyReport onepole_out0
-#eval certifyReport osc_out0
-#eval certifyReport smooth_stable_out0
-#eval certifyReport table_bad_clamp_out0
-#eval certifyReport table_good_clamp_out0
-#eval certifyReport table_unclamped_out0
-#eval certifyReport tabulate_protected_out0
-#eval certifyReport tabulate_unprotected_out0
-#eval certifyReport tf2_stable_out0
-#eval certifyReport tf2_unstable_out0
-#eval certifyReport time_marginal_out0
-#eval certifyReport unstable_out0
+#eval s!"dcblocker_out0: " ++ certifyReport dcblocker_out0
+#eval s!"fdelay_clamped_out0: " ++ certifyReport fdelay_clamped_out0
+#eval s!"lowpass3_out0: " ++ certifyReport lowpass3_out0
+#eval s!"noise_lcg_out0: " ++ certifyReport noise_lcg_out0
+#eval s!"nonlinear_out0: " ++ certifyReport nonlinear_out0
+#eval s!"onepole_out0: " ++ certifyReport onepole_out0
+#eval s!"osc_out0: " ++ certifyReport osc_out0
+#eval s!"smooth_stable_out0: " ++ certifyReport smooth_stable_out0
+#eval s!"table_bad_clamp_out0: " ++ certifyReport table_bad_clamp_out0
+#eval s!"table_good_clamp_out0: " ++ certifyReport table_good_clamp_out0
+#eval s!"table_unclamped_out0: " ++ certifyReport table_unclamped_out0
+#eval s!"tabulate_protected_out0: " ++ certifyReport tabulate_protected_out0
+#eval s!"tabulate_unprotected_out0: " ++ certifyReport tabulate_unprotected_out0
+#eval s!"tf2_stable_out0: " ++ certifyReport tf2_stable_out0
+#eval s!"tf2_unstable_out0: " ++ certifyReport tf2_unstable_out0
+#eval s!"time_marginal_out0: " ++ certifyReport time_marginal_out0
+#eval s!"unstable_out0: " ++ certifyReport unstable_out0
 
-#eval indexReport dcblocker_out0
-#eval indexReport fdelay_clamped_out0
-#eval indexReport lowpass3_out0
-#eval indexReport noise_lcg_out0
-#eval indexReport nonlinear_out0
-#eval indexReport onepole_out0
-#eval indexReport osc_out0
-#eval indexReport smooth_stable_out0
-#eval indexReport table_bad_clamp_out0
-#eval indexReport table_good_clamp_out0
-#eval indexReport table_unclamped_out0
-#eval indexReport tabulate_protected_out0
-#eval indexReport tabulate_unprotected_out0
-#eval indexReport tf2_stable_out0
-#eval indexReport tf2_unstable_out0
-#eval indexReport time_marginal_out0
-#eval indexReport unstable_out0
+#eval s!"dcblocker_out0: " ++ indexReport dcblocker_out0
+#eval s!"fdelay_clamped_out0: " ++ indexReport fdelay_clamped_out0
+#eval s!"lowpass3_out0: " ++ indexReport lowpass3_out0
+#eval s!"noise_lcg_out0: " ++ indexReport noise_lcg_out0
+#eval s!"nonlinear_out0: " ++ indexReport nonlinear_out0
+#eval s!"onepole_out0: " ++ indexReport onepole_out0
+#eval s!"osc_out0: " ++ indexReport osc_out0
+#eval s!"smooth_stable_out0: " ++ indexReport smooth_stable_out0
+#eval s!"table_bad_clamp_out0: " ++ indexReport table_bad_clamp_out0
+#eval s!"table_good_clamp_out0: " ++ indexReport table_good_clamp_out0
+#eval s!"table_unclamped_out0: " ++ indexReport table_unclamped_out0
+#eval s!"tabulate_protected_out0: " ++ indexReport tabulate_protected_out0
+#eval s!"tabulate_unprotected_out0: " ++ indexReport tabulate_unprotected_out0
+#eval s!"tf2_stable_out0: " ++ indexReport tf2_stable_out0
+#eval s!"tf2_unstable_out0: " ++ indexReport tf2_unstable_out0
+#eval s!"time_marginal_out0: " ++ indexReport time_marginal_out0
+#eval s!"unstable_out0: " ++ indexReport unstable_out0
 
 theorem dcblocker_out0_stability : certifyStableB dcblocker_out0 = true := by decide
 theorem fdelay_clamped_out0_stability : certifyStableB fdelay_clamped_out0 = false := by decide

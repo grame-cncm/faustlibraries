@@ -407,9 +407,12 @@ def build(template, dsps, verdicts=None, oracle=None):
         out.append("Jury criterion. `certifyIndicesB` checks every table read and")
         out.append("delay tap whose range follows from the graph structure alone;")
         out.append("`false` there means *not proven*, never *unsafe*. -/\n")
-        out += [f"#eval certifyReport {n}" for n in names]
+        # Prefix each report with the program name: Lean prints bare #eval
+        # strings, and an unnamed verdict can only be attributed by counting
+        # lines in fixture order.
+        out += [f'#eval s!"{n}: " ++ certifyReport {n}' for n in names]
         out.append("")
-        out += [f"#eval indexReport {n}" for n in names]
+        out += [f'#eval s!"{n}: " ++ indexReport {n}' for n in names]
         out.append("")
         out += [f"theorem {n}_stability : certifyStableB {n} = {verdicts[n][0]} := by decide"
                 for n in names]
