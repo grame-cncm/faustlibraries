@@ -65,6 +65,10 @@ def max (a b : Q) : Q := if le a b then b else a
 def mul (a b : Q) : Q := ⟨a.n * b.n, a.d * b.d⟩
 /-- Strict positivity; like `le`, valid because denominators are positive. -/
 def pos (a : Q) : Bool := decide (0 < a.n)
+/-- Multiplicative inverse, sign-normalized so the positive-denominator
+    invariant is preserved. Meaningful only when `a.n ≠ 0`; the one caller
+    (the division rule of `rangeOfFuel`) guards the zero case. -/
+def inv (a : Q) : Q := if 0 < a.n then ⟨a.d, a.n⟩ else ⟨-a.d, -a.n⟩
 def floor (a : Q) : Int := Int.fdiv a.n a.d
 def ceil (a : Q) : Int := -(Int.fdiv (-a.n) a.d)
 end Q
@@ -377,6 +381,13 @@ def scale (r : Range) (q : Q) : Range :=
   if Q.pos q then ⟨r.lo.map (Q.mul q), r.hi.map (Q.mul q), r.hiStrict⟩
   else if Q.pos q.neg then ⟨r.hi.map (Q.mul q), r.lo.map (Q.mul q), false⟩
   else exact Q.zero
+
+/-- Translation by a constant: both bounds shift by `q`, each side
+    independently (`none` stays `none`). Sound because `v ≤ h ↔ v + q ≤ h + q`
+    over the rationals; the same equivalence for `<` is why `hiStrict` is
+    preserved, unlike under a negative `scale`. -/
+def translate (r : Range) (q : Q) : Range :=
+  ⟨r.lo.map (Q.add q), r.hi.map (Q.add q), r.hiStrict⟩
 end Range
 
 /-- Range of a subterm, when one follows from its structure alone.
@@ -412,6 +423,21 @@ def rangeOfFuel : Nat → Sig → Range
   | n + 1, .binop .mul a (.int k)   => (rangeOfFuel n a).scale (Q.ofInt k)
   | n + 1, .binop .mul (.const q) b => (rangeOfFuel n b).scale q
   | n + 1, .binop .mul (.int k) b   => (rangeOfFuel n b).scale (Q.ofInt k)
+  -- Affine completions, the shapes `ba.tabulate`'s index arithmetic
+  -- ((x - r0) / (r1 - r0) * (S-1) + 1/2) normalizes to. Addition and
+  -- subtraction of a constant are exact translations; division by a nonzero
+  -- constant is multiplication by its sign-normalized inverse, delegating
+  -- the negative-divisor bound swap (and strictness drop) to `scale`.
+  | n + 1, .binop .add a (.const q) => (rangeOfFuel n a).translate q
+  | n + 1, .binop .add a (.int k)   => (rangeOfFuel n a).translate (Q.ofInt k)
+  | n + 1, .binop .add (.const q) b => (rangeOfFuel n b).translate q
+  | n + 1, .binop .add (.int k) b   => (rangeOfFuel n b).translate (Q.ofInt k)
+  | n + 1, .binop .sub a (.const q) => (rangeOfFuel n a).translate q.neg
+  | n + 1, .binop .sub a (.int k)   => (rangeOfFuel n a).translate (Q.ofInt (-k))
+  | n + 1, .binop .div a (.const q) =>
+      if q.n == 0 then Range.unknown else (rangeOfFuel n a).scale q.inv
+  | n + 1, .binop .div a (.int k)   =>
+      if k == 0 then Range.unknown else (rangeOfFuel n a).scale (Q.inv (Q.ofInt k))
   | n + 1, .proj 0 (.recur (.cons body .nil)) =>
       -- The recursion invariant, in its state-independent form: `ref`, `delay1`
       -- and `delay` all yield the unknown range, so any bound this returns for
