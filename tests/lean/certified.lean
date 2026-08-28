@@ -280,7 +280,15 @@ Hence a three-valued verdict. `clampRequired` is not a defect report; it says th
 site is safe only because the backend clamps it, which is a genuine dependency
 worth naming. The analysis doubles as an independent oracle for the compiler's
 bound insertion: a site this says is in range but that the backend clamps anyway
-is a missed optimisation, and the converse would be a real defect. -/
+is a missed optimisation, and the converse would be a real defect.
+
+Since faust-rs moved that clamp to the signal level (`-ct`, visible through
+`--dump-sig-dag-prepared`), the oracle comparison is mechanized:
+`sig2lean.py` reads each table verdict here through `tableSiteVerdictsB`,
+reads what the compiler actually did by diffing the prepared forest under
+`-ct 1` against `-ct 0`, and fails certification on the defect direction
+(a `clampRequired` table size the compiler left unclamped). The agreed
+outcome is pinned in the generated section of `certified.lean`. -/
 
 /-- A conservative rational range with **independently** optional sides:
     `max 0 x` bounds the low side while leaving the high side unknown, which a
@@ -497,6 +505,25 @@ def indexReport (s : Sig) : String :=
   | [] => "no addressing site"
   | ss => String.intercalate "; " (ss.map siteReport)
 
+/-- Machine-readable table verdicts for the compiler clamp oracle: one
+    `size:verdict` entry per **table** site, in `sites` order (delay taps are
+    excluded — the compiler has no clamp pass for taps). `sig2lean.py` parses
+    this from a probe `#eval` and compares it, per table size, against the
+    clamps the compiler actually inserted (`--dump-sig-dag-prepared` under
+    `-ct 1` versus `-ct 0`). Shared reads may appear once per path here while
+    the compiler's hash-consed forest holds one node, so the comparison is by
+    table-size presence, not by site count. -/
+def tableSiteVerdictsB (s : Sig) : String :=
+  String.intercalate ";" ((sites s).filterMap fun st =>
+    match st with
+    | .table size _ =>
+        let v := match siteVerdict st with
+                 | .inRange       => "inRange"
+                 | .clampRequired => "clampRequired"
+                 | .notProven     => "notProven"
+        some s!"{size}:{v}"
+    | .tap _ => none)
+
 /-! ## Standing obligations
 
 Two gaps are recorded here rather than silently relied upon.
@@ -709,16 +736,14 @@ def table_bad_clamp_out0 : Sig :=
   let n6 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n5]
   n6
 
-/-- `process = rdtable(16, 1.0, min(15, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
+/-- `process = rdtable(16, 1.0, int(hslider("i",0,0,10,1)));` — output 0 -/
 def table_good_clamp_out0 : Sig :=
   let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
   let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
-  let n2 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨100, 1⟩ []
+  let n2 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨10, 1⟩ []
   let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
-  let n4 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n3]
-  let n5 : Sig := Sig.opaqueN "SIGMIN" [(.int 15), n4]
-  let n6 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n5]
-  n6
+  let n4 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n3]
+  n4
 
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,100,1)));` — output 0 -/
 def table_unclamped_out0 : Sig :=
@@ -845,5 +870,26 @@ theorem table_unclamped_out0_indices : certifyIndicesB table_unclamped_out0 = fa
 theorem tf2_stable_out0_indices : certifyIndicesB tf2_stable_out0 = true := by decide
 theorem tf2_unstable_out0_indices : certifyIndicesB tf2_unstable_out0 = true := by decide
 theorem unstable_out0_indices : certifyIndicesB unstable_out0 = true := by decide
+
+/-! ## Compiler clamp oracle
+
+Per program, Lean's as-written table verdicts confronted with the
+clamps the compiler actually inserted (`--dump-sig-dag-prepared`,
+`-ct 1` versus `-ct 0`). Recorded by `sig2lean.py`; a defect —
+a `clampRequired` table left unclamped — fails generation instead
+of being recorded here.
+
+fdelay_clamped.dsp: no table site
+lowpass3.dsp: no table site
+nonlinear.dsp: no table site
+onepole.dsp: no table site
+osc.dsp: missed optimisation: compiler clamps table[65536] though Lean proves it in range
+table_bad_clamp.dsp: agree on table[16]
+table_good_clamp.dsp: agree on table[16]
+table_unclamped.dsp: agree on table[16]
+tf2_stable.dsp: no table site
+tf2_unstable.dsp: no table site
+unstable.dsp: no table site
+-/
 
 end Faust.Signal.Generated

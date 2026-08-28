@@ -6,6 +6,12 @@
 Runs in two passes: it emits the terms, asks Lean for each verdict via `#eval`,
 then re-emits the file with a `by decide` theorem pinning each verdict. The
 theorem is the artefact — Lean proves it, the script only predicts it.
+It also runs the compiler clamp oracle: for every table read, Lean's
+as-written verdict (`tableSiteVerdictsB`) is compared with what the compiler
+actually did (`--dump-sig-dag-prepared` under `-ct 1` versus `-ct 0`). A
+`clampRequired` table the compiler left unclamped fails certification; a
+clamp on a table Lean proves in range is reported as a missed optimisation.
+The per-program outcome is pinned into the generated file.
 """
 import os, re, struct, subprocess, sys, tempfile
 from fractions import Fraction
@@ -220,6 +226,102 @@ def reachable(bindings, root):
     return sorted(seen)
 
 
+RAW_BIND = re.compile(r'^n(\d+) = ([A-Za-z_][A-Za-z0-9_]*)\((.*)\)$')
+NREF = re.compile(r'\bn(\d+)\b')
+
+
+def prepared_table_reads(dsp, ct):
+    """Table read sites of the *prepared* forest under `-ct <ct>`.
+
+    Runs `--dump-sig-dag-prepared` and returns, in binding order, one
+    `(size, index_expr)` pair per `SIGRDTBL` whose table is a `SIGWRTBL` of
+    constant size — the same site universe the Lean `sites` function models.
+    `index_expr` is the index argument with every `nK` reference textually
+    expanded, so it is stable under the renumbering that inserting clamp
+    nodes causes between the two `-ct` runs.
+    """
+    cmd = ([FAUST_RS, "--dump-sig-dag-prepared", "-ct", str(ct)]
+           + (["-I", LIBS] if LIBS else []) + [dsp])
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        raise RuntimeError(f"{dsp} (-ct {ct}): {r.stderr.strip()}")
+    raw = {}
+    for line in r.stdout.splitlines():
+        m = RAW_BIND.match(line)
+        if m:
+            raw[int(m.group(1))] = (m.group(2), m.group(3))
+
+    def expand(text, depth=0):
+        if depth > 500:
+            raise RuntimeError(f"{dsp}: reference expansion too deep")
+        return NREF.sub(
+            lambda m: (lambda tag, rest:
+                       f"{tag}({expand(rest, depth + 1)})")(*raw[int(m.group(1))]),
+            text)
+
+    sites = []
+    for idx in sorted(raw):
+        tag, rest = raw[idx]
+        if tag != "SIGRDTBL":
+            continue
+        args = split_args(rest)
+        tref = NREF.fullmatch(args[0])
+        if not tref:
+            continue
+        ttag, trest = raw[int(tref.group(1))]
+        if ttag != "SIGWRTBL":
+            continue
+        msize = re.match(r"int\((\d+)\)", split_args(trest)[0])
+        if not msize:
+            continue
+        sites.append((int(msize.group(1)), expand(args[1])))
+    return sites
+
+
+def clamp_oracle(dsp, lean_site_verdicts):
+    """Cross-checks Lean's table verdicts against the compiler's `-ct` clamps.
+
+    `lean_site_verdicts` is the parsed `tableSiteVerdictsB` output for every
+    output of `dsp`: a list of `(size, verdict)` pairs. The compiler side is
+    the diff of the prepared forest between `-ct 1` and `-ct 0`: a read whose
+    expanded index changed was clamped by the compiler.
+
+    The comparison is by table-size *presence* (Lean walks the term tree, so
+    a shared read can appear once per path; the compiler's hash-consed dump
+    holds it once). Returns `(status_line, defect)` where `defect` names a
+    table size Lean proves can leave the table but the compiler left
+    unclamped — the direction that must fail certification.
+    """
+    ct1 = prepared_table_reads(dsp, 1)
+    ct0 = prepared_table_reads(dsp, 0)
+    if [sz for sz, _ in ct1] != [sz for sz, _ in ct0]:
+        raise RuntimeError(f"{dsp}: -ct 1 / -ct 0 table sites do not align")
+    clamped = {sz for (sz, i1), (_, i0) in zip(ct1, ct0) if i1 != i0}
+    required = {sz for sz, v in lean_site_verdicts if v == "clampRequired"}
+    sizes = {sz for sz, _ in lean_site_verdicts}
+    in_range_only = {sz for sz in sizes
+                     if all(v == "inRange"
+                            for s2, v in lean_site_verdicts if s2 == sz)}
+
+    defect = sorted(required - clamped)
+    missed = sorted(clamped & in_range_only)
+    agree = sorted((required & clamped) | (in_range_only - clamped))
+    parts = []
+    if agree:
+        parts.append("agree on " + ", ".join(f"table[{sz}]" for sz in agree))
+    if missed:
+        parts.append("missed optimisation: compiler clamps "
+                     + ", ".join(f"table[{sz}]" for sz in missed)
+                     + " though Lean proves it in range")
+    if defect:
+        parts.append("DEFECT: Lean requires a clamp on "
+                     + ", ".join(f"table[{sz}]" for sz in defect)
+                     + " but the compiler left it unclamped")
+    if not sizes:
+        parts.append("no table site")
+    return "; ".join(parts), defect
+
+
 def emit_arg(bindings, arg):
     kind, val = arg
     return f"n{val}" if kind == "ref" else emit(val)
@@ -268,7 +370,7 @@ def ident(p):
     return re.sub(r'\W', '_', os.path.splitext(os.path.basename(p))[0])
 
 
-def build(template, dsps, verdicts=None):
+def build(template, dsps, verdicts=None, oracle=None):
     out = [open(template).read(),
            "/-! # Generated section",
            "",
@@ -289,7 +391,8 @@ def build(template, dsps, verdicts=None):
             out.append(f"def {name} : Sig :={emit_dag(bindings, root)}\n")
     if verdicts is None:
         out += [f'#eval s!"{n}|" ++ toString (certifyStableB {n}) ++ "|" '
-                f'++ toString (certifyIndicesB {n})' for n in names]
+                f'++ toString (certifyIndicesB {n}) ++ "|" '
+                f'++ tableSiteVerdictsB {n}' for n in names]
     else:
         out.append("/-! ## Certification\n")
         out.append("Two independent analyses over the same imported graph.")
@@ -306,6 +409,18 @@ def build(template, dsps, verdicts=None):
         out.append("")
         out += [f"theorem {n}_indices : certifyIndicesB {n} = {verdicts[n][1]} := by decide"
                 for n in names]
+    if oracle:
+        out.append("")
+        out.append("/-! ## Compiler clamp oracle\n")
+        out.append("Per program, Lean's as-written table verdicts confronted with the")
+        out.append("clamps the compiler actually inserted (`--dump-sig-dag-prepared`,")
+        out.append("`-ct 1` versus `-ct 0`). Recorded by `sig2lean.py`; a defect —")
+        out.append("a `clampRequired` table left unclamped — fails generation instead")
+        out.append("of being recorded here.")
+        out.append("")
+        for line in oracle:
+            out.append(line)
+        out.append("-/")
     out.append("\nend Faust.Signal.Generated")
     return "\n".join(out), names
 
@@ -317,16 +432,38 @@ def main():
         f.write(probe)
         probe_path = f.name
     r = subprocess.run([LEAN, probe_path], capture_output=True, text=True)
-    verdicts = {m[0]: (m[1], m[2]) for m in
-                re.findall(r'"?(\w+)\|(true|false)\|(true|false)"?', r.stdout)}
+    verdicts = {m[0]: (m[1], m[2], m[3]) for m in
+                re.findall(r'"?(\w+)\|(true|false)\|(true|false)\|([^"\n]*)"?',
+                           r.stdout)}
     missing = [n for n in names if n not in verdicts]
     if missing:
         sys.exit(f"probe failed for {missing}\n{r.stdout}\n{r.stderr}")
-    final, _ = build(template, dsps, verdicts)
+
+    # Compiler clamp oracle: Lean's table verdicts vs the -ct clamps.
+    oracle_lines, defects = [], []
+    for d in dsps:
+        stem = ident(d)
+        site_verdicts = []
+        for n in names:
+            if n.startswith(f"{stem}_out"):
+                for entry in filter(None, verdicts[n][2].split(";")):
+                    size, verdict = entry.split(":")
+                    site_verdicts.append((int(size), verdict))
+        status, defect = clamp_oracle(d, site_verdicts)
+        oracle_lines.append(f"{os.path.basename(d)}: {status}")
+        if defect:
+            defects.append(f"{os.path.basename(d)}: table sizes {defect}")
+    if defects:
+        sys.exit("clamp oracle DEFECT — Lean requires a clamp the compiler "
+                 "did not insert:\n  " + "\n  ".join(defects))
+
+    final, _ = build(template, dsps, verdicts, oracle=oracle_lines)
     open(target, "w").write(final)
     print(f"wrote {target}: {len(names)} signal(s), "
           f"{sum(v[0] == 'true' for v in verdicts.values())} certified stable, "
           f"{sum(v[1] == 'true' for v in verdicts.values())} with certified indices")
+    for line in oracle_lines:
+        print(f"  clamp oracle: {line}")
     os.unlink(probe_path)
 
 

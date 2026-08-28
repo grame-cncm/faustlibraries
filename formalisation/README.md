@@ -251,6 +251,21 @@ certify`, the Lean analysis thus doubles as a standing, kernel-checked oracle
 for the compiler's own bound insertion — and any regression in either
 implementation surfaces as a verdict drift on the committed reference.
 
+Since faust-rs moved its clamp insertion to the signal level (option `-ct`,
+observable through `--dump-sig-dag-prepared`), this confrontation is
+mechanized rather than aspirational. During generation, `sig2lean.py` reads
+what the compiler actually did — the prepared forest under `-ct 1` diffed
+against `-ct 0`, a table read whose index changed was clamped — and compares
+it, per table size, with Lean's `tableSiteVerdictsB`. The defect direction
+(a `clampRequired` table left unclamped) **fails** `make certify`; the
+missed-optimization direction is recorded, not fatal. The per-program
+outcome is pinned in a "Compiler clamp oracle" section of `certified.lean`,
+so it drifts — and is reviewed — like any other verdict. The first run
+already earned its keep: on `osc.dsp`, Lean's strict phasor bound
+`x - ⌊x⌋ ∈ [0, 1)` proves the 65536-entry table read in range, while the
+compiler's own interval analysis does not and clamps it — a recorded missed
+optimization in faust-rs (and reference C++, which shares the behavior).
+
 ## 5. The trust story
 
 What must be believed, and what is checked, is meant to be readable from one

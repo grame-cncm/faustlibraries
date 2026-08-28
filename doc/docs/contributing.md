@@ -372,6 +372,13 @@ No Lean knowledge is needed. Prerequisites: `lean` (4.31, bundled Std only) and
      extension of the analysers unlocks the case, `make certify` will show the
      verdict flip.
 
+   The run also cross-checks every table verdict against the compiler's own
+   clamp insertion (the `-ct` pass, read from
+   `faust-rs --dump-sig-dag-prepared`): a `CLAMP REQUIRED` table the
+   compiler left unclamped fails certification outright, and a clamp on a
+   table Lean proves in range is recorded as a missed optimisation in the
+   "Compiler clamp oracle" section of `certified.lean`.
+
 3. Once the verdicts look right, run `make certify-reference` to regenerate
    `tests/lean/certified.lean` in place, and commit **both** the `.dsp` and the
    regenerated `certified.lean`.
