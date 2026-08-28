@@ -570,6 +570,25 @@ Everything below is produced by `scripts/sig2lean.py` from
 namespace Faust.Signal.Generated
 open Faust.Signal
 
+/-- `// fi.dcblocker = zero(1) : pole(0.995) — a classic constant-coefficient
+// one-pole from filters.lib. Pins: STABLE through the zero/pole composition.
+fi = library("filters.lib");
+process = fi.dcblocker;` — output 0 -/
+def dcblocker_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .mul n2 (.const ⟨8962163258467287, 9007199254740992⟩)
+  let n4 : Sig := Sig.input 0
+  let n5 : Sig := Sig.delay1 n4
+  let n6 : Sig := Sig.binop .mul n5 (.int 1)
+  let n7 : Sig := Sig.binop .sub n4 n6
+  let n8 : Sig := Sig.binop .add n3 n7
+  let n9 : Sig := Sig.cons n8 (.nil)
+  let n10 : Sig := Sig.recur n9
+  let n11 : Sig := Sig.proj 0 n10
+  n11
+
 /-- `de = library("delays.lib");
 process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — output 0 -/
 def fdelay_clamped_out0 : Sig :=
@@ -651,6 +670,26 @@ def lowpass3_out0 : Sig :=
   let n54 : Sig := Sig.binop .add n51 n53
   n54
 
+/-- `// no.noise — the LCG recursion x = 1103515245*x' + 12345 at the heart of
+// noises.lib. The generator is only bounded by wrapping int32 semantics,
+// which the certified fragment deliberately does not model: the recursion
+// is refused ("not recognised"), and that refusal is what this fixture
+// pins — if the analysers ever start reading int recursions, the verdict
+// flip will surface here.
+no = library("noises.lib");
+process = no.noise;` — output 0 -/
+def noise_lcg_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .mul n2 (.int 1103515245)
+  let n4 : Sig := Sig.binop .add n3 (.int 12345)
+  let n5 : Sig := Sig.cons n4 (.nil)
+  let n6 : Sig := Sig.recur n5
+  let n7 : Sig := Sig.proj 0 n6
+  let n8 : Sig := Sig.binop .div n7 (.const ⟨2147483647, 1⟩)
+  n8
+
 /-- `import("maths.lib");
 process = + ~ (*(0.9) : ma.tanh);` — output 0 -/
 def nonlinear_out0 : Sig :=
@@ -725,6 +764,24 @@ def osc_out0 : Sig :=
   let n30 : Sig := Sig.opaqueN "SIGRDTBL" [n14, n29]
   n30
 
+/-- `// si.smooth with a constant coefficient — the most used smoothing idiom in
+// the libraries (si.smoo is the same recursion with an SR-dependent pole).
+// Pins: order-1 recursion, a1 = -0.999, Jury => STABLE.
+si = library("signals.lib");
+process = hslider("g", 0, 0, 1, 0.01) : si.smooth(0.999);` — output 0 -/
+def smooth_stable_out0 : Sig :=
+  let n0 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨1, 1⟩ []
+  let n1 : Sig := Sig.binop .mul (.const ⟨9007199254741, 9007199254740992⟩) n0
+  let n2 : Sig := Sig.ref 1
+  let n3 : Sig := Sig.proj 0 n2
+  let n4 : Sig := Sig.delay1 n3
+  let n5 : Sig := Sig.binop .mul (.const ⟨8998192055486251, 9007199254740992⟩) n4
+  let n6 : Sig := Sig.binop .add n1 n5
+  let n7 : Sig := Sig.cons n6 (.nil)
+  let n8 : Sig := Sig.recur n7
+  let n9 : Sig := Sig.proj 0 n8
+  n9
+
 /-- `process = rdtable(16, 1.0, min(100, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
 def table_bad_clamp_out0 : Sig :=
   let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
@@ -753,6 +810,78 @@ def table_unclamped_out0 : Sig :=
   let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
   let n4 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n3]
   n4
+
+/-- `// ba.tabulate with C = 1: the library clamps the read index itself
+// (rid(x,1) = max(0, min(x, S-1))), and the interval analysis reads that
+// clamp: the table verdict is IN RANGE as written, and the clamp oracle
+// checks the compiler inserts nothing on top. The stability verdict is a
+// pinned refusal: the table *generator* contains ba.time's counter
+// recursion, whose pole sits on the unit circle.
+ba = library("basics.lib");
+process = ba.tabulate(1, sin, 128, 0.0, 10.0, hslider("x", 0, 0, 10, 0.01)).val;` — output 0 -/
+def tabulate_protected_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .add n2 (.int 1)
+  let n4 : Sig := Sig.cons n3 (.nil)
+  let n5 : Sig := Sig.recur n4
+  let n6 : Sig := Sig.proj 0 n5
+  let n7 : Sig := Sig.delay1 n6
+  let n8 : Sig := Sig.opaqueN "SIGMIN" [n7, (.int 127)]
+  let n9 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n8]
+  let n10 : Sig := Sig.opaqueN "SIGFLOATCAST" [n9]
+  let n11 : Sig := Sig.binop .mul n10 (.const ⟨10, 1⟩)
+  let n12 : Sig := Sig.binop .div n11 (.const ⟨127, 1⟩)
+  let n13 : Sig := Sig.binop .add (.const ⟨0, 1⟩) n12
+  let n14 : Sig := Sig.opaqueN "SIGSIN" [n13]
+  let n15 : Sig := Sig.opaqueN "SIGGEN" [n14]
+  let n16 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 128), n15, (.nil), (.nil)]
+  let n17 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨10, 1⟩ []
+  let n18 : Sig := Sig.binop .sub n17 (.const ⟨0, 1⟩)
+  let n19 : Sig := Sig.binop .div n18 (.const ⟨10, 1⟩)
+  let n20 : Sig := Sig.binop .mul n19 (.int 127)
+  let n21 : Sig := Sig.binop .add n20 (.const ⟨1, 2⟩)
+  let n22 : Sig := Sig.opaqueN "SIGINTCAST" [n21]
+  let n23 : Sig := Sig.opaqueN "SIGMIN" [n22, (.int 127)]
+  let n24 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n23]
+  let n25 : Sig := Sig.opaqueN "SIGRDTBL" [n16, n24]
+  n25
+
+/-- `// ba.tabulate with C = 0 and an input range wider than [r0, r1]: the
+// library applies no protection and the index can leave the table. The
+// affine index arithmetic ((x-r0)/(r1-r0)*(S-1)) is outside rangeOf's
+// current rules, so the as-written verdict is a pinned "not proven" — and
+// the clamp oracle records that only the compiler's -ct clamp stands
+// between this real-code site and an out-of-bounds read.
+ba = library("basics.lib");
+process = ba.tabulate(0, sin, 128, 0.0, 10.0, hslider("x", 0, 0, 20, 0.01)).val;` — output 0 -/
+def tabulate_unprotected_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .add n2 (.int 1)
+  let n4 : Sig := Sig.cons n3 (.nil)
+  let n5 : Sig := Sig.recur n4
+  let n6 : Sig := Sig.proj 0 n5
+  let n7 : Sig := Sig.delay1 n6
+  let n8 : Sig := Sig.opaqueN "SIGMIN" [n7, (.int 127)]
+  let n9 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n8]
+  let n10 : Sig := Sig.opaqueN "SIGFLOATCAST" [n9]
+  let n11 : Sig := Sig.binop .mul n10 (.const ⟨10, 1⟩)
+  let n12 : Sig := Sig.binop .div n11 (.const ⟨127, 1⟩)
+  let n13 : Sig := Sig.binop .add (.const ⟨0, 1⟩) n12
+  let n14 : Sig := Sig.opaqueN "SIGSIN" [n13]
+  let n15 : Sig := Sig.opaqueN "SIGGEN" [n14]
+  let n16 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 128), n15, (.nil), (.nil)]
+  let n17 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨20, 1⟩ []
+  let n18 : Sig := Sig.binop .sub n17 (.const ⟨0, 1⟩)
+  let n19 : Sig := Sig.binop .div n18 (.const ⟨10, 1⟩)
+  let n20 : Sig := Sig.binop .mul n19 (.int 127)
+  let n21 : Sig := Sig.binop .add n20 (.const ⟨1, 2⟩)
+  let n22 : Sig := Sig.opaqueN "SIGINTCAST" [n21]
+  let n23 : Sig := Sig.opaqueN "SIGRDTBL" [n16, n22]
+  n23
 
 /-- `import("filters.lib");
 process = fi.tf2(0.3, 0.2, 0.1, -1.2, 0.5);` — output 0 -/
@@ -802,6 +931,22 @@ def tf2_unstable_out0 : Sig :=
   let n18 : Sig := Sig.binop .add n15 n17
   n18
 
+/-- `// ba.time — the sample counter (+(1) ~ _). Its pole sits exactly on the
+// unit circle, and the Jury criterion is strict: an unbounded ramp is not
+// certified stable. Pins the strictness of the boundary case on real code.
+ba = library("basics.lib");
+process = ba.time;` — output 0 -/
+def time_marginal_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .add n2 (.int 1)
+  let n4 : Sig := Sig.cons n3 (.nil)
+  let n5 : Sig := Sig.recur n4
+  let n6 : Sig := Sig.proj 0 n5
+  let n7 : Sig := Sig.delay1 n6
+  n7
+
 /-- `process = + ~ *(1.5);` — output 0 -/
 def unstable_out0 : Sig :=
   let n0 : Sig := Sig.ref 1
@@ -823,52 +968,76 @@ Jury criterion. `certifyIndicesB` checks every table read and
 delay tap whose range follows from the graph structure alone;
 `false` there means *not proven*, never *unsafe*. -/
 
+#eval certifyReport dcblocker_out0
 #eval certifyReport fdelay_clamped_out0
 #eval certifyReport lowpass3_out0
+#eval certifyReport noise_lcg_out0
 #eval certifyReport nonlinear_out0
 #eval certifyReport onepole_out0
 #eval certifyReport osc_out0
+#eval certifyReport smooth_stable_out0
 #eval certifyReport table_bad_clamp_out0
 #eval certifyReport table_good_clamp_out0
 #eval certifyReport table_unclamped_out0
+#eval certifyReport tabulate_protected_out0
+#eval certifyReport tabulate_unprotected_out0
 #eval certifyReport tf2_stable_out0
 #eval certifyReport tf2_unstable_out0
+#eval certifyReport time_marginal_out0
 #eval certifyReport unstable_out0
 
+#eval indexReport dcblocker_out0
 #eval indexReport fdelay_clamped_out0
 #eval indexReport lowpass3_out0
+#eval indexReport noise_lcg_out0
 #eval indexReport nonlinear_out0
 #eval indexReport onepole_out0
 #eval indexReport osc_out0
+#eval indexReport smooth_stable_out0
 #eval indexReport table_bad_clamp_out0
 #eval indexReport table_good_clamp_out0
 #eval indexReport table_unclamped_out0
+#eval indexReport tabulate_protected_out0
+#eval indexReport tabulate_unprotected_out0
 #eval indexReport tf2_stable_out0
 #eval indexReport tf2_unstable_out0
+#eval indexReport time_marginal_out0
 #eval indexReport unstable_out0
 
+theorem dcblocker_out0_stability : certifyStableB dcblocker_out0 = true := by decide
 theorem fdelay_clamped_out0_stability : certifyStableB fdelay_clamped_out0 = false := by decide
 theorem lowpass3_out0_stability : certifyStableB lowpass3_out0 = false := by decide
+theorem noise_lcg_out0_stability : certifyStableB noise_lcg_out0 = false := by decide
 theorem nonlinear_out0_stability : certifyStableB nonlinear_out0 = false := by decide
 theorem onepole_out0_stability : certifyStableB onepole_out0 = true := by decide
 theorem osc_out0_stability : certifyStableB osc_out0 = false := by decide
+theorem smooth_stable_out0_stability : certifyStableB smooth_stable_out0 = true := by decide
 theorem table_bad_clamp_out0_stability : certifyStableB table_bad_clamp_out0 = false := by decide
 theorem table_good_clamp_out0_stability : certifyStableB table_good_clamp_out0 = false := by decide
 theorem table_unclamped_out0_stability : certifyStableB table_unclamped_out0 = false := by decide
+theorem tabulate_protected_out0_stability : certifyStableB tabulate_protected_out0 = false := by decide
+theorem tabulate_unprotected_out0_stability : certifyStableB tabulate_unprotected_out0 = false := by decide
 theorem tf2_stable_out0_stability : certifyStableB tf2_stable_out0 = true := by decide
 theorem tf2_unstable_out0_stability : certifyStableB tf2_unstable_out0 = false := by decide
+theorem time_marginal_out0_stability : certifyStableB time_marginal_out0 = false := by decide
 theorem unstable_out0_stability : certifyStableB unstable_out0 = false := by decide
 
+theorem dcblocker_out0_indices : certifyIndicesB dcblocker_out0 = true := by decide
 theorem fdelay_clamped_out0_indices : certifyIndicesB fdelay_clamped_out0 = true := by decide
 theorem lowpass3_out0_indices : certifyIndicesB lowpass3_out0 = true := by decide
+theorem noise_lcg_out0_indices : certifyIndicesB noise_lcg_out0 = true := by decide
 theorem nonlinear_out0_indices : certifyIndicesB nonlinear_out0 = true := by decide
 theorem onepole_out0_indices : certifyIndicesB onepole_out0 = true := by decide
 theorem osc_out0_indices : certifyIndicesB osc_out0 = true := by decide
+theorem smooth_stable_out0_indices : certifyIndicesB smooth_stable_out0 = true := by decide
 theorem table_bad_clamp_out0_indices : certifyIndicesB table_bad_clamp_out0 = false := by decide
 theorem table_good_clamp_out0_indices : certifyIndicesB table_good_clamp_out0 = true := by decide
 theorem table_unclamped_out0_indices : certifyIndicesB table_unclamped_out0 = false := by decide
+theorem tabulate_protected_out0_indices : certifyIndicesB tabulate_protected_out0 = true := by decide
+theorem tabulate_unprotected_out0_indices : certifyIndicesB tabulate_unprotected_out0 = false := by decide
 theorem tf2_stable_out0_indices : certifyIndicesB tf2_stable_out0 = true := by decide
 theorem tf2_unstable_out0_indices : certifyIndicesB tf2_unstable_out0 = true := by decide
+theorem time_marginal_out0_indices : certifyIndicesB time_marginal_out0 = true := by decide
 theorem unstable_out0_indices : certifyIndicesB unstable_out0 = true := by decide
 
 /-! ## Compiler clamp oracle
@@ -879,16 +1048,22 @@ clamps the compiler actually inserted (`--dump-sig-dag-prepared`,
 a `clampRequired` table left unclamped — fails generation instead
 of being recorded here.
 
+dcblocker.dsp: no table site
 fdelay_clamped.dsp: no table site
 lowpass3.dsp: no table site
+noise_lcg.dsp: no table site
 nonlinear.dsp: no table site
 onepole.dsp: no table site
 osc.dsp: missed optimisation: compiler clamps table[65536] though Lean proves it in range
+smooth_stable.dsp: no table site
 table_bad_clamp.dsp: agree on table[16]
 table_good_clamp.dsp: agree on table[16]
 table_unclamped.dsp: agree on table[16]
+tabulate_protected.dsp: agree on table[128]
+tabulate_unprotected.dsp: table[128] not proven by Lean — compiler clamps it
 tf2_stable.dsp: no table site
 tf2_unstable.dsp: no table site
+time_marginal.dsp: no table site
 unstable.dsp: no table site
 -/
 

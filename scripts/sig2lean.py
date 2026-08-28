@@ -303,6 +303,8 @@ def clamp_oracle(dsp, lean_site_verdicts):
                      if all(v == "inRange"
                             for s2, v in lean_site_verdicts if s2 == sz)}
 
+    not_proven = {sz for sz, v in lean_site_verdicts if v == "notProven"}
+
     defect = sorted(required - clamped)
     missed = sorted(clamped & in_range_only)
     agree = sorted((required & clamped) | (in_range_only - clamped))
@@ -313,6 +315,11 @@ def clamp_oracle(dsp, lean_site_verdicts):
         parts.append("missed optimisation: compiler clamps "
                      + ", ".join(f"table[{sz}]" for sz in missed)
                      + " though Lean proves it in range")
+    for sz in sorted(not_proven):
+        # Lean makes no claim on this size; record what the compiler did so
+        # a later rangeOf extension that unlocks the site shows as a drift.
+        parts.append(f"table[{sz}] not proven by Lean — compiler "
+                     + ("clamps it" if sz in clamped else "leaves it direct"))
     if defect:
         parts.append("DEFECT: Lean requires a clamp on "
                      + ", ".join(f"table[{sz}]" for sz in defect)
