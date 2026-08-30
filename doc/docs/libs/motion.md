@@ -19,6 +19,13 @@ are in milliseconds unless noted. Some helpers (e.g., projectedGravity) allow an
 optional dead-zone offset: low magnitudes are zeroed, and the remaining span is
 rescaled to preserve the 0..1 range.
 
+Accelerometer axes carry gravity: a device lying still already has a total
+magnitude of about 1 g, so the acceleration envelopes saturate on a motionless
+device unless the static component is removed first. Feed them axes that have
+been high-passed with `fi.dcblockerat` when what you want is movement rather
+than orientation. The inclination helpers want the opposite: raw axes, gravity
+included.
+
 Typical use-cases:
 
 * Map shocks to drum triggers or one-shot events.
@@ -255,6 +262,92 @@ process = mo.motionEnvelope(0.05, 1.25, 15, 25, accX);
 
 ----
 
+### `(mo.)motionEnvelopeRange`
+
+Thresholded AR envelope parameterized by an input range instead of a gain.
+
+#### Usage
+
+```
+motionEnvelopeRange(lo, hi, envUpMs, envDownMs, sig) : _
+```
+
+Where:
+
+* `lo`: input value at which the output leaves 0 (0..1)
+* `hi`: input value at which the output reaches 1 (must be > `lo`)
+* `envUpMs`: attack time in milliseconds (>= 0)
+* `envDownMs`: release time in milliseconds (>= 0)
+* `sig`: input signal (normalized)
+
+Same detector as `motionEnvelope`, but the dead-zone is given by its two
+endpoints rather than by a threshold plus a matching gain. `motionEnvelope`
+requires the caller to derive `gain = 1 / (hi - thr)` by hand to reach full
+scale at `hi`; getting that wrong silently rescales the whole control. Prefer
+this variant whenever the useful input span is known.
+
+#### Example
+
+```
+mo = library("motion.lib");
+// full scale at 0.6 g of movement, nothing below 0.15 g
+process = mo.motionEnvelopeRange(0.15, 0.6, 15, 25, accX);
+```
+
+#### Test
+```
+mo = library("motion.lib");
+os = library("oscillators.lib");
+motionEnvelopeRange_test =
+  mo.motionEnvelopeRange(0.2, 0.5, 15, 25, os.sawtooth(0.5) * 0.5 + 0.5);
+```
+
+----
+
+### `(mo.)motionEnvelopeUD`
+
+Thresholded envelope with a peak detector and a symmetric smoother.
+
+#### Usage
+
+```
+motionEnvelopeUD(thr, gain, envUpMs, envDownMs, sig) : _
+```
+
+Where:
+
+* `thr`: threshold subtracted before detection (normalized)
+* `gain`: linear gain applied after thresholding
+* `envUpMs`: smoothing time constant in milliseconds, applied in both
+  directions (>= 0)
+* `envDownMs`: peak-decay time constant in milliseconds (>= 0)
+* `sig`: input signal (normalized)
+
+Same conditioning as `motionEnvelope` but fed to `an.amp_follower_ud` instead
+of `an.amp_follower_ar`: a peak follower with a `envDownMs` decay, cascaded
+with a symmetric one-pole of time constant `envUpMs`. Two poles instead of
+one, so the decay is rounder and never discontinuous, which suits slow hand
+gestures better than the switching follower. Note that the two parameters are
+not attack and release here: `envUpMs` smooths both directions, and
+`envDownMs` alone at 0 still leaves the `envUpMs` smoothing in place.
+
+#### Example
+
+```
+mo = library("motion.lib");
+process = mo.motionEnvelopeUD(0.05, 1.25, 670, 0, accX);
+```
+
+#### Test
+```
+mo = library("motion.lib");
+os = library("oscillators.lib");
+motionEnvelopeUD_test =
+  mo.motionEnvelopeUD(0.05, 1.25, 120, 40, os.triangle(0.4) * 0.5 + 0.5);
+```
+
+----
+
 ### `(mo.)envelopeAbs`
 
 Envelope on the absolute value of a signal (responds to both polarities).
@@ -485,7 +578,9 @@ Output magnitude is clamped to [0, 1].
 
 ```
 mo = library("motion.lib");
-process = mo.totalAccel(0.1, 1.35, 10, 10, ax, ay, az);
+fi = library("filters.lib");
+dc(x) = x : fi.dcblockerat(10); // drop gravity, keep movement
+process = mo.totalAccel(0.1, 1.35, 10, 10, dc(ax), dc(ay), dc(az));
 ```
 
 #### Test
@@ -494,6 +589,99 @@ mo = library("motion.lib");
 os = library("oscillators.lib");
 totalAccel_test =
   mo.totalAccel(0.05, 1.2, 8, 12,
+    os.sawtooth(0.2) * 0.2,
+    os.triangle(0.15) * 0.1,
+    os.sawtooth(0.12) * 0.3);
+```
+
+----
+
+### `(mo.)totalAccelRange`
+
+Total acceleration magnitude, dead-zone given by its two endpoints.
+
+#### Usage
+
+```
+totalAccelRange(lo, hi, envUpMs, envDownMs, ax, ay, az) : _
+```
+
+Where:
+
+* `lo`: magnitude at which the output leaves 0 (0..1)
+* `hi`: magnitude at which the output reaches 1 (must be > `lo`)
+* `envUpMs`: attack time in milliseconds (>= 0)
+* `envDownMs`: release time in milliseconds (>= 0)
+* `ax`: accelerometer X axis (normalized, typically [-1, 1])
+* `ay`: accelerometer Y axis (normalized, typically [-1, 1])
+* `az`: accelerometer Z axis (normalized, typically [-1, 1])
+
+`totalAccel` expressed with `motionEnvelopeRange`. A narrow span close to 1
+makes a shock detector: `totalAccelRange(0.999, 1, ...)` fires only on the
+sharpest peaks, where the equivalent `totalAccel` call needs a gain of 1000.
+
+#### Example
+
+```
+mo = library("motion.lib");
+fi = library("filters.lib");
+dc(x) = x : fi.dcblockerat(10); // drop gravity, keep movement
+process = mo.totalAccelRange(0.1, 0.8, 10, 10, dc(ax), dc(ay), dc(az));
+```
+
+#### Test
+```
+mo = library("motion.lib");
+os = library("oscillators.lib");
+totalAccelRange_test =
+  mo.totalAccelRange(0.1, 0.4, 8, 12,
+    os.sawtooth(0.2) * 0.2,
+    os.triangle(0.15) * 0.1,
+    os.sawtooth(0.12) * 0.3);
+```
+
+----
+
+### `(mo.)totalAccelUD`
+
+Total acceleration magnitude with a peak detector and a symmetric smoother.
+
+#### Usage
+
+```
+totalAccelUD(thr, gain, envUpMs, envDownMs, ax, ay, az) : _
+```
+
+Where:
+
+* `thr`: threshold subtracted before detection (normalized)
+* `gain`: linear gain applied after thresholding
+* `envUpMs`: smoothing time constant in milliseconds, applied in both
+  directions (>= 0)
+* `envDownMs`: peak-decay time constant in milliseconds (>= 0)
+* `ax`: accelerometer X axis (normalized, typically [-1, 1])
+* `ay`: accelerometer Y axis (normalized, typically [-1, 1])
+* `az`: accelerometer Z axis (normalized, typically [-1, 1])
+
+`totalAccel` expressed with `motionEnvelopeUD`, for the rounder two-pole decay
+described there. Suited to sustained gestures (wind, shaking) where the
+switching follower of `totalAccel` cuts the tail off abruptly.
+
+#### Example
+
+```
+mo = library("motion.lib");
+fi = library("filters.lib");
+dc(x) = x : fi.dcblockerat(10); // drop gravity, keep movement
+process = mo.totalAccelUD(0.1, 1.35, 670, 0, dc(ax), dc(ay), dc(az));
+```
+
+#### Test
+```
+mo = library("motion.lib");
+os = library("oscillators.lib");
+totalAccelUD_test =
+  mo.totalAccelUD(0.05, 1.2, 120, 40,
     os.sawtooth(0.2) * 0.2,
     os.triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
@@ -769,7 +957,12 @@ Where:
 * `olow`: minimum output value
 * `ohigh`: maximum output value
 
-Inputs below ilow clamp to olow; above ihigh clamp to ohigh.
+Inputs below ilow clamp to olow; above ihigh clamp to ohigh. A very narrow
+span is honored: `scale(0.999, 1, 0, 1)` really does spread the last
+thousandth of the input over the whole output range, which is what turns the
+helper into a shock detector. Degenerate spans are absorbed by the divisor
+floor rather than by moving `ilow`: `ihigh <= ilow` leaves the output pinned
+at `olow` instead of scaling by a wrong factor.
 
 #### Example
 

@@ -62,3 +62,26 @@ orientation6_test =
     10);
 
 scale_test = (os.sawtooth(2) * 0.5 + 0.5) : mo.scale(0.2, 0.8, 0, 1);
+
+// Regression: a dead-zone above 0.99 used to be clipped back to 0.99, which
+// widened the span tenfold and divided the gain by ten. Full scale must be
+// reached at 1.0, not at 0.91.
+scale_narrow_test = (os.sawtooth(2) * 0.0005 + 0.9995) : mo.scale(0.999, 1, 0, 1);
+
+motionEnvelopeRange_test =
+  mo.motionEnvelopeRange(0.2, 0.5, 15, 25, os.sawtooth(0.5) * 0.5 + 0.5);
+
+motionEnvelopeUD_test =
+  mo.motionEnvelopeUD(0.05, 1.25, 120, 40, os.triangle(0.4) * 0.5 + 0.5);
+
+totalAccelRange_test =
+  mo.totalAccelRange(0.1, 0.4, 8, 12,
+    os.sawtooth(0.2) * 0.2,
+    os.triangle(0.15) * 0.1,
+    os.sawtooth(0.12) * 0.3);
+
+totalAccelUD_test =
+  mo.totalAccelUD(0.05, 1.2, 120, 40,
+    os.sawtooth(0.2) * 0.2,
+    os.triangle(0.15) * 0.1,
+    os.sawtooth(0.12) * 0.3);
