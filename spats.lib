@@ -525,9 +525,9 @@ binauralModel(az) = _ <: ear(-1), ear(+1)
 with {
     a = 0.0875;              // head radius in meters
     c = 343.0;               // speed of sound in m/s
-    rad = ma.PI/180.0;
+    radConv = ma.PI/180.0;
     azw = ma.frac((az + 180.0)/360.0)*360.0 - 180.0;   // wrap to [-180,180)
-    theta = azw * rad;
+    theta = azw * radConv;
     // Woodworth ITD, front/back symmetric
     phi = min(abs(theta), ma.PI - abs(theta));
     itd = a/c * (phi + sin(abs(theta)));
