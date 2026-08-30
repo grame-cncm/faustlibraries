@@ -84,11 +84,17 @@ make build       # build the mkdocs site (doc pages + figure injection)
 5. **Cross-library calls** go through the environment prefixes
    (`ma = library("maths.lib"); ... ma.PI`), never bare names. Check name
    collisions with `import("all.lib"); process = _;`.
-6. Do not edit generated files by hand: `doc/docs/libs/*.md`,
+6. Do not edit generated files by hand: `doc/docs/libs/*.md` (regenerate
+   with `make -C doc md`), `doc/docs/libs/index.md` — the symbol index
+   linking every documented name to its page, rebuilt from those pages by
+   `make -C doc index`, so it is stale until the `md` step has run and a
+   new public function is missing from it until both have —
    `doc/docs/standardFunctions.md` (regenerate with
    `scripts/build_standard_functions.py`) and the figures in
    `doc/docs/img/` (regenerate with `make plots` — the generator embeds
    property assertions and must end with "all property assertions hold").
+   `make -C doc build` chains `md` and `index` before building the site;
+   prefer it over `md` alone, which silently leaves the index behind.
 7. **Keep the LLM-facing JSON exports working.** `make doc-index-split`
    (`scripts/build_faust_doc_index.py`) parses the same doc blocks into the
    machine-readable index that MCP tools and `scripts/faust_doc_api.py`
@@ -98,3 +104,40 @@ make build       # build the mkdocs site (doc pages + figure injection)
    params and license (`scripts/faust_doc_api.py get_faust_symbol xx.name`).
    `make checkdoc` guards the floor — the exported symbol count may only
    grow — but it cannot see a field that silently comes out empty.
+
+## Git history
+
+The history is linear and must stay that way: no merge commits. The last one
+dates from December 2020, and every commit since sits on a single strand.
+Bisecting a 1400-commit library where a regression means "an audible output
+changed" depends on it.
+
+- **Never** `git merge` a branch that has diverged. Rebase the branch onto its
+  target, then fast-forward:
+
+  ```bash
+  git rebase master my-branch      # replay, resolve conflicts here
+  git checkout master
+  git merge --ff-only my-branch    # refuses rather than creating a merge commit
+  ```
+
+- Update from the remote with `git pull --rebase`, never a plain `git pull`.
+  Configure it once so a stray pull cannot create a merge:
+
+  ```bash
+  git config pull.rebase true
+  git config merge.ff only
+  ```
+
+- Squash the work-in-progress commits of a branch before integrating it. One
+  commit per coherent change: a library edit, its tests, its regenerated
+  documentation and its version bumps belong together, not spread over five
+  commits that each leave `make checkdoc` or `make check` failing.
+- Rewriting history (`rebase`, `--amend`, squash) is fine as long as the
+  commits have not been pushed. Once they are on `origin`, they are frozen:
+  fix forward with a new commit.
+- Do not commit build artifacts even when they sit in the working tree.
+  `.gitignore` covers `site/` but not `tests/reference/`, `tests/output/`,
+  `tests/build/` or the doc index exports (`tests/faust-doc-index.json`,
+  `tests/faust-doc/`), so never stage with `git add -A` or `git commit -a` —
+  name the files you mean.
