@@ -7,7 +7,7 @@ DOCDIR   := docs
 FAUSTLIBS ?= ../../faustlibraries
 
 # Use doc.lib (instead of all.lib) to list all needed files, including the one in subfolders
-SRC   	 := $(shell cat $(FAUSTLIBS)/doc.lib | grep import | sed -e 's/[^"]*"\(..*\.lib\).*/\1/')
+SRC   	 := $(shell sed -n 's/^[[:space:]]*import("\(..*\.lib\)").*/\1/p' $(FAUSTLIBS)/doc.lib)
 MD   	 := $(SRC:%.lib=$(DOCDIR)/libs/%.md)
 LIST   	 := $(SRC:%.lib=%)
 
