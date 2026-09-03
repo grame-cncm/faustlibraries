@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <string>
 
@@ -86,17 +87,19 @@ int main(int argc, char* argv[])
         sampleRate = 48000;
     }
 
-    mydsp dsp;
-    dsp.init(sampleRate);
-    
-    ControlUI control;
-    dsp.buildUserInterface(&control);
-    
-    SoundUI sound;
-    dsp.buildUserInterface(&sound);
+    // Allocated on the heap: some DSPs have large internal delay-line buffers
+    // as class members, which would overflow the stack if `dsp` were a local.
+    std::unique_ptr<mydsp> dsp(new mydsp());
+    dsp->init(sampleRate);
 
-    const int numInputs = dsp.getNumInputs();
-    const int numOutputs = dsp.getNumOutputs();
+    ControlUI control;
+    dsp->buildUserInterface(&control);
+
+    SoundUI sound;
+    dsp->buildUserInterface(&sound);
+
+    const int numInputs = dsp->getNumInputs();
+    const int numOutputs = dsp->getNumOutputs();
 
     // The warm-up pass below always computes `kWarmup` frames, so the buffers
     // must hold at least that many even when fewer are requested. Without this
@@ -127,7 +130,7 @@ int main(int argc, char* argv[])
     
     std::cout << std::setprecision(10);
     
-    dsp.compute(kWarmup, inputBuffer, outputBuffer);
+    dsp->compute(kWarmup, inputBuffer, outputBuffer);
     
     // Print at most what was asked for: a short run stops inside the warm-up.
     for (int frame = 0; frame < std::min(frames, kWarmup); ++frame) {
@@ -143,7 +146,7 @@ int main(int argc, char* argv[])
     control.checkboxOFF();
     
     // Then regular computation
-    dsp.compute(frames, inputBuffer, outputBuffer);
+    dsp->compute(frames, inputBuffer, outputBuffer);
     
     for (int frame = 0; frame < frames - kWarmup; ++frame) {
         std::cout << frame + kWarmup;
