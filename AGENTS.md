@@ -140,4 +140,11 @@ changed" depends on it.
   `.gitignore` covers `site/` but not `tests/reference/`, `tests/output/`,
   `tests/build/` or the doc index exports (`tests/faust-doc-index.json`,
   `tests/faust-doc/`), so never stage with `git add -A` or `git commit -a` —
-  name the files you mean.
+  name the files you mean. Naming files explicitly is not enough by
+  itself: after `make reference` regenerates a `.ref` you touched, it is
+  sitting right there next to the source and test files you actually mean
+  to commit, and an explicit `git add lib.lib tests/foo_tests.dsp
+  tests/reference/foo_test.ref` stages it just as surely as `-A` would
+  (done once, 2026-09-04, caught before push). Treat every path under
+  `tests/reference/` as excluded from every `git add`, independently of
+  how the rest of the command is written.
