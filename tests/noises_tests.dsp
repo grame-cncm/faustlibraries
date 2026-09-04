@@ -28,9 +28,14 @@ pink_filter_test = no.noise : no.pink_filter;
 pink_noise_test = no.pink_noise;
 pink_noise_vm_test = no.pink_noise_vm(4);
 
-lfnoise0_test = no.lfnoise0(10.0);
-lfnoiseN_test = no.lfnoiseN(3, 10.0);
-lfnoise_test = no.lfnoise(10.0);
+// 10.1 Hz rather than 10.0: at 48 kHz a 10 Hz period lands on sample 4800
+// exactly, where the driving oscillator crosses zero -- a one-ulp rounding
+// difference between backends flips which side of the sample the latch
+// trigger falls on, making the test back end-sensitive for no reason
+// (Commitium faust-general, thread "emitter", 2026-09-04).
+lfnoise0_test = no.lfnoise0(10.1);
+lfnoiseN_test = no.lfnoiseN(3, 10.1);
+lfnoise_test = no.lfnoise(10.1);
 
 sparse_noise_test = no.sparse_noise(5.0);
 velvet_noise_test = no.velvet_noise(0.5, 5.0);
