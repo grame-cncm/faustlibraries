@@ -2,6 +2,7 @@
 #
 # `make reference`  - compile each *_test entry and store terminal output under tests/reference/.
 # `make check`      - recompile, run each test, and diff against the stored reference output.
+# `make check-vec`  - run the regression tests with Faust's vectorized code generator.
 # `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
@@ -51,7 +52,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -105,6 +106,10 @@ $(REFERENCE_DIR)/%.ref: | $(REFERENCE_DIR) $(BUILD_DIR)
 	$(BUILD_DIR)/$* $(NUM_SAMPLES) $(SAMPLE_RATE) > $@
 
 check: $(OUTS) ## Run tests and diff against references (fails on first divergence; use -k to run all)
+
+check-vec: ## Run all regression tests with Faust's vectorized code generator
+	@rm -rf $(BUILD_DIR) $(OUTPUT_DIR)
+	$(MAKE) check FAUST_OPT="$(FAUST_OPT) -vec"
 
 # Build a single output and immediately compare with its reference
 $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
