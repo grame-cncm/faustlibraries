@@ -66,7 +66,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.23.0";
+declare version "1.23.1";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -1113,7 +1113,7 @@ pick(l,n) = l : route(outputs(l),1, n+1, 1);
 // #### Example test program
 //
 // ```
-// pickN(4,2) : _  // same as selector(2,4) but faster
+// pickN(4,2) : _  // same as selector(2,4)
 // ```
 //
 // ```
@@ -2178,7 +2178,7 @@ declare ifNcNo license "LicenseRef-STK-4.3";
 // selector_test = (0.1, 0.2, 0.3, 0.4) : ba.selector(2, 4);
 // ```
 //----------------------------
-selector(i,n) = par(j, n, S(i, j))    with { S(i,i) = _; S(i,j) = !; };
+selector(i,n) = pickN(n, i);
 
 //-----------------------------`(ba.)cselector`---------------------------------
 // Selects the ith complex input among N at compile time. The complex
@@ -2202,7 +2202,7 @@ selector(i,n) = par(j, n, S(i, j))    with { S(i,i) = _; S(i,j) = !; };
 // cselector_test = (0.1, 0.2, 0.3, 0.4) : ba.cselector(1, 2);
 // ```
 //----------------------------
-cselector(i,n) = par(j, n, S(i, j))   with { S(i,i) = (_,_); S(i,j) = (!,!); }; // for complex numbers
+cselector(i,n) = pickN(2*n, (2*i, 2*i+1));
 
 
 //--------------------`(ba.)select2stereo`--------------------

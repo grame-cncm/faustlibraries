@@ -39,7 +39,7 @@
 declare name "Math Library";
 declare author "GRAME";
 declare copyright "GRAME";
-declare version "1.0";
+declare version "1.0.1";
 declare license "LGPL with exception";
 declare deprecated "This library is deprecated and is not maintained anymore. It will be removed in August 2017."; 
 
@@ -539,7 +539,8 @@ with {
 // + column = the number of column (int, known at compile time)
 //
 //-----------------------------------------------------------------------------
-interleave(row,col) = bus(row*col) <: par(r, row, par(c, col, selector(r+c*row,row*col)));
+interleave(row,col) = route(row*col, row*col,
+                            par(i, row*col, (i+1, (i%row)*col + int(i/row) + 1)));
 
 
 //------------------------------- butterfly(n) --------------------------------
@@ -596,4 +597,4 @@ dot(n) = interleave(n,2) : par(i,n,*) :> _;
 //
 //-----------------------------------------------------------------------------
 // cross n cables : (x1,x2,..,xn) -> (xn,..,x2,x1)
-cross(n) = bus(n) <: par(i,n,selector(n-i-1,n));
+cross(n) = route(n, n, par(i, n, (i+1, n-i)));

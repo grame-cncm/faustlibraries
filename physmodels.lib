@@ -81,7 +81,7 @@ closed source license or any other license if you decide so.
 import("stdfaust.lib");
 
 declare name "Faust Physical Models Library";
-declare version "1.2.0";
+declare version "1.2.1";
 
 /*
 TODO:
@@ -5167,11 +5167,8 @@ with {
 
     // solution for the current tick, calculated at the previous
     // tick or `iv` if T == 0 (first tick).
-    curr = par(i,N, ck_iv(ba.pick(iv,i))) with {
-        ck_iv = case {
-            (0) => _; (0.0) => _; // optimization
-            (x) => select2(ba.time, x);
-        };
+    curr = si.bus(N), iv : ro.interleave(N,2) : par(i,N, ck_iv) with {
+        ck_iv(cur, init) = select2(ba.time, init, cur);
     };
 
     // Why not simply `doit = tick ~ curr` ? This would output the
