@@ -281,6 +281,9 @@ vocoder_slider_test = (no.noise, os.tosc(220))
       hslider("vocoder:BWRatio", 1.0, 0.5, 1.5, 0.01)
     );
 
+mxrPhase90_test = os.osc(440) * 0.3
+   : ve.mxrPhase90(hslider("mxrPhase90:rate", 1.5, 0.1, 10, 0.01));
+
 klonCentaur_test = os.tosc(330) : ve.klonCentaur(0.5, 0.5, 0.5);
 klonCentaur_slider_test = os.tosc(330)
    : ve.klonCentaur(
