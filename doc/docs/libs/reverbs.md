@@ -571,6 +571,78 @@ kb_rom_rev1_test = (os.osc(330), os.osc(660))
 * [https://www.spinsemi.com/knowledge_base/effects.html#Reverberation](https://www.spinsemi.com/knowledge_base/effects.html#Reverberation)
 * [https://www.spinsemi.com/knowledge_base/inst_syntax.html](https://www.spinsemi.com/knowledge_base/inst_syntax.html)
 
+## Valhalla Supermassive
+
+
+----
+
+### `(re.)valhallaSupermassive`
+
+Model of six modes of Valhalla DSP's free ValhallaSupermassive delay/reverb:
+feedback delay networks and cascades of matrix allpasses, with delay lines of
+up to 2 s, modulated by a shared quadrature LFO.
+
+| `mode` | name | structure |
+|---|---|---|
+| 0 | Gemini | sixteen modulated delays, scattered by a butterfly of rotations |
+| 2 | Centaurus | four serial four-channel matrix allpasses |
+| 3 | Sagittarius | eight serial stereo matrix allpasses |
+| 4 | Great Annihilator | a plain four-channel stage and three matrix allpasses inside a global feedback loop |
+| 6 | Lyra | four modulated delays with a four-channel scattering matrix |
+| 19 | Virgo | Lyra with highpass and lowpass filters inside the feedback loop |
+
+The mode numbers are the plug-in's own. The structures follow the diagrams
+Sean Costello presented at DAFx26; delay, gain, modulation and filter laws
+were matched to the plug-in (v5.0.0). Stereo in, stereo out.
+
+#### Usage
+
+```
+_,_ : valhallaSupermassive(mode, mix, delay, warp, feedback, density, width,
+                           lowcut, highcut, modrate, moddepth) : _,_
+```
+
+Where:
+
+* `mode`: the mode number (see the table), a constant numerical expression
+* `mix`: dry/wet mix (0-1), equal-power
+* `delay`: base delay time in milliseconds (0-2000)
+* `warp`: spreads the delay lengths below `delay` (0-1)
+* `feedback`: feedback amount (0-1)
+* `density`: scattering angle of the rotation matrices (0-1)
+* `width`: stereo width of the wet signal (-1 to 1; 1 is full width,
+  0 is mono, -1 swaps the channels)
+* `lowcut`: highpass cutoff in Hz (10-2000)
+* `highcut`: lowpass cutoff in Hz (200-20000)
+* `modrate`: LFO rate in Hz (0.01-10)
+* `moddepth`: modulation depth (0-1)
+
+#### Test
+```
+re = library("reverbs.lib");
+os = library("oscillators.lib");
+valhallaSupermassive_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(6, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_gemini_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(0, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_centaurus_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(2, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_sagittarius_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(3, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_annihilator_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(4, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_virgo_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(19, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+```
+
+#### References
+
+* S. Costello, keynote, 29th Int. Conf. Digital Audio Effects (DAFx26),
+  Cambridge, MA, USA, 2026
+* S. Costello, "Plugin Design: Rescue Your Darlings," Valhalla DSP, 2021,
+*   [https://valhalladsp.com/2021/08/16/put-it-down-for-now-pick-it-back-up-later/](https://valhalladsp.com/2021/08/16/put-it-down-for-now-pick-it-back-up-later/)
+* [https://valhalladsp.com/shop/reverb/valhalla-supermassive/](https://valhalladsp.com/shop/reverb/valhalla-supermassive/)
+
 ## Others
 
 

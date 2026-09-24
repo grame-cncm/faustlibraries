@@ -1040,6 +1040,7 @@
 [(re.)jpverb](reverbs.md#rejpverb)
 [(re.)greyhole](reverbs.md#regreyhole)
 [(re.)kb_rom_rev1](reverbs.md#rekb_rom_rev1)
+[(re.)valhallaSupermassive](reverbs.md#revalhallasupermassive)
 [(re.)springreverb](reverbs.md#respringreverb)
 
 ## routes
