@@ -821,9 +821,14 @@ pulse_countdown_test = ba.pulse_countdown(1) + 0.001;
 
 ### `(ba.)pulse_countup_loop`
 
-Starts counting up pulses from 0 to n included. While trig is 1 the output is
-counting up, while trig is 0 the counter is reset to 0. At the end
-of the countup (n) the output value will be reset to 0.
+Counts pulses up from 0 to n included, then starts again from 0: each pulse
+adds 1, the pulse after the one that reached n brings the output back to 0,
+and each value is held until the next pulse. While trig is 1 the output
+counts, while trig is 0 the counter is reset to 0. With pulses of 1 and
+n = 4 the output goes 1, 2, 3, 4, 0, 1, ...
+
+Until basics.lib 1.23.3 the output went up to n+1 before coming back to 0,
+and n itself was held for one sample only.
 
 #### Usage
 
@@ -833,22 +838,29 @@ _ : pulse_countup_loop(n,trig) : _
 
 Where:
 
-* `n`: the highest number of the countup (included) before reset to 0
+* `n`: the highest value of the count (included) before it starts again from 0
 * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 
 #### Test
 ```
 ba = library("basics.lib");
 pulse_countup_loop_test = ba.pulse_countup_loop(4, 1) + 0.001;
+pulse_countup_loop_pulses_test = ba.pulse(2) : ba.pulse_countup_loop(4, 1);
 ```
 
 ----
 
 ### `(ba.)pulse_countdown_loop`
 
-Starts counting down pulses from 0 to n included. While trig is 1 the output
-is counting down, while trig is 0 the counter is reset to 0. At the end
-of the countdown (n) the output value will be reset to 0.
+Counts pulses down from 0 to -n included, then starts again from 0: each
+pulse subtracts 1, the pulse after the one that reached -n brings the output
+back to 0, and each value is held until the next pulse. While trig is 1 the
+output counts, while trig is 0 the counter is reset to 0. With pulses of 1
+and n = 4 the output goes -1, -2, -3, -4, 0, -1, ...: the opposite of
+`pulse_countup_loop`, and a count down as `pulse_countdown` counts.
+
+Until basics.lib 1.23.3 the count only looped for a negative n: with a
+positive n it did not count, the output was -1 on each pulse and 0 between.
 
 #### Usage
 
@@ -858,13 +870,14 @@ _ : pulse_countdown_loop(n,trig) : _
 
 Where:
 
-* `n`: the highest number of the countup (included) before reset to 0
+* `n`: the magnitude of the lowest value of the count (-n, included) before it starts again from 0
 * `trig`: the trigger signal (1: start at next pulse; 0: reset to 0)
 
 #### Test
 ```
 ba = library("basics.lib");
 pulse_countdown_loop_test = ba.pulse_countdown_loop(4, 1) + 0.001;
+pulse_countdown_loop_pulses_test = ba.pulse(2) : ba.pulse_countdown_loop(4, 1);
 ```
 
 ----
@@ -889,6 +902,7 @@ Where:
 ```
 ba = library("basics.lib");
 resetCtr_test = ba.pulse(16) : ba.resetCtr(4, 2);
+resetCtr_last_test = ba.pulse(4) : ba.resetCtr(4, 4);
 ```
 
 ## Array Processing/Pattern Matching
@@ -1907,7 +1921,9 @@ selectoutn_test = 1 : ba.selectoutn(3, 1);
 
 Latch input on the rising edge of trig.
 Captures ("records") the input x whenever trig crosses from ≤0 to >0,
-and holds the last captured value at all other times.
+and holds the last captured value at all other times. An infinite or NaN
+input between the rising edges does not reach the output (until
+basics.lib 1.23.3 it turned the held value into NaN).
 
 #### Usage
 ```
@@ -1923,6 +1939,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 latch_test = os.osc(2) : ba.latch(ba.pulse(32));
+latch_inf_test = (1 / (ba.time - 3)) : ba.latch(ba.time == 1);
 ```
 
 ----
