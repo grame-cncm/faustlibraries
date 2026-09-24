@@ -33,7 +33,7 @@ sp = library("spats.lib");
 aa = library("aanl.lib");
 
 declare name "Faust Reverb Library";
-declare version "1.5.1";
+declare version "1.5.2";
 
 //########################################################################################
 /************************************************************************
@@ -778,8 +778,11 @@ declare vital_rev license "GPL-3.0-only";
 declare mono_freeverb author "Romain Michon";
 
 mono_freeverb(fb1, fb2, damp, spread) = _ <: par(i,8,lbcf(combtuningL(i)+spread,fb1,damp))
-    :> seq(i,4,fi.allpass_comb(1024, allpasstuningL(i)+spread, -fb2))
+    :> seq(i,4,fi.allpass_comb(4096, allpasstuningL(i)+spread, -fb2))
 with {
+    // The allpass buffers hold the longest tuning (556 samples at 44.1 kHz,
+    // 2420 at 192 kHz, the highest ma.SR) plus the spread: 1024 clamped the
+    // delay above 81 kHz.
  
     // Filters parameters
     combtuningL(0) = adaptSR(1116);
