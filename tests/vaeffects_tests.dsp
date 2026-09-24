@@ -201,3 +201,11 @@ klonCentaur_test = os.osc(330)
      );
 
 klonCentaur_hot_test = os.osc(110)*0.5 : ve.klonCentaur(1, 0, 1);
+
+fulltoneOCD_test = os.osc(330)
+   : ve.fulltoneOCD(
+       hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
+       hslider("fulltoneOCD:tone", 0.5, 0, 1, 0.01),
+       hslider("fulltoneOCD:volume", 0.35, 0, 1, 0.01),
+       checkbox("fulltoneOCD:hp")
+     );
