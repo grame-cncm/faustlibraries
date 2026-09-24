@@ -66,7 +66,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "1.8.0";
+declare version "1.8.1";
 
 // This library contains platform specific constants
 pl = library("platform.lib");
@@ -1509,11 +1509,6 @@ triangle = triangleN(2); // default based on saw2
 // osc[b|rq|rs|rc|s](freq), where freq = frequency in Hz.
 // ```
 //
-// #### Test
-// ```
-// os = library("oscillators.lib");
-// oscb_test = os.oscb(440);
-// ```
 // #### References
 //
 // * <http://lac.linuxaudio.org/2012/download/lac12-slides-jos.pdf>
@@ -1521,7 +1516,14 @@ triangle = triangleN(2); // default based on saw2
 //========================================================================================
 
 //--------------------------`(os.)oscb`--------------------------------
-// Sinusoidal oscillator based on the biquad.
+// Sinusoidal oscillator based on the biquad: the impulse response of
+// sin(w) z^-1 / (1 - 2cos(w) z^-1 + z^-2), w = 2*PI*freq/SR, which is
+// sin(n*w), of amplitude 1 and starting at 0 like `osc`. The state carries
+// the amplitude: a frequency that changes while it runs changes the
+// amplitude too, so `oscb` is meant for a constant frequency.
+//
+// Until oscillators.lib 1.8.1 the numerator was 1, and the amplitude
+// 1/sin(w): about 16 at 440 Hz and 44.1 kHz.
 //
 // #### Usage
 //
@@ -1539,9 +1541,10 @@ triangle = triangleN(2); // default based on saw2
 // oscb_test = os.oscb(440);
 // ```
 //------------------------------------------------------------
-oscb(f) = impulse : fi.tf2(1,0,0,a1,1)
+oscb(f) = impulse : fi.tf2(0,sin(w),0,a1,1)
 with {
-  a1 = -2*cos(2*ma.PI*f/ma.SR);
+  w = 2*ma.PI*f/ma.SR;
+  a1 = -2*cos(w);
 };
 
 

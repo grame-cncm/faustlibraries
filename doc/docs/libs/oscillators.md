@@ -1306,11 +1306,6 @@ Filter-Based Oscillators.
 osc[b|rq|rs|rc|s](freq), where freq = frequency in Hz.
 ```
 
-#### Test
-```
-os = library("oscillators.lib");
-oscb_test = os.oscb(440);
-```
 #### References
 
 * [http://lac.linuxaudio.org/2012/download/lac12-slides-jos.pdf](http://lac.linuxaudio.org/2012/download/lac12-slides-jos.pdf)
@@ -1320,7 +1315,14 @@ oscb_test = os.oscb(440);
 
 ### `(os.)oscb`
 
-Sinusoidal oscillator based on the biquad.
+Sinusoidal oscillator based on the biquad: the impulse response of
+sin(w) z^-1 / (1 - 2cos(w) z^-1 + z^-2), w = 2*PI*freq/SR, which is
+sin(n*w), of amplitude 1 and starting at 0 like `osc`. The state carries
+the amplitude: a frequency that changes while it runs changes the
+amplitude too, so `oscb` is meant for a constant frequency.
+
+Until oscillators.lib 1.8.1 the numerator was 1, and the amplitude
+1/sin(w): about 16 at 440 Hz and 44.1 kHz.
 
 #### Usage
 
