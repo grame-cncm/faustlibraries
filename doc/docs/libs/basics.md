@@ -609,6 +609,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 line_test = os.osc(1) : ba.line(256);
+line_frac_test = os.lf_squarewavepos(100) : ba.line(4.8);
 ```
 
 ----
