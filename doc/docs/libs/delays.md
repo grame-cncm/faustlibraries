@@ -136,7 +136,7 @@ prime_power_delays_test = de.prime_power_delays(4, 1, 10);
 
 ----
 
-### `(de.)fdelaylti` and `(de.)fdelayltv`
+### `(de.)fdelaylti`, `(de.)fdelayltv`
 
 ![fdelaylti — response plots](../img/de_fdelaylti.svg)
 

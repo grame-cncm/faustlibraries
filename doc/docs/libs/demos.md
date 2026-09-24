@@ -115,7 +115,7 @@ All other parameters interactive
 
 ----
 
-### `(dm.)mth_octave_filterbank_demo` and `(dm.)filterbank_demo`
+### `(dm.)mth_octave_filterbank_demo`, `(dm.)filterbank_demo`
 
 Graphic Equalizer: each filter-bank output signal routes through a fader.
 

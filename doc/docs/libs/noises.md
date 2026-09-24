@@ -373,7 +373,7 @@ pink_noise_vm_test = no.pink_noise_vm(4);
 
 ----
 
-### `(no.)lfnoise`, `(no.)lfnoise0` and `(no.)lfnoiseN`
+### `(no.)lfnoise`, `(no.)lfnoise0`, `(no.)lfnoiseN`
 
 Low-frequency noise generators (Butterworth-filtered downsampled white noise).
 
@@ -399,7 +399,9 @@ process = lfnoise0(rate),   // sampled/held noise (piecewise constant)
 #### Test
 ```
 no = library("noises.lib");
-lfnoise0_test = no.lfnoise0(10.0);
+lfnoise0_test = no.lfnoise0(10.1);
+lfnoiseN_test = no.lfnoiseN(3, 10.1);
+lfnoise_test = no.lfnoise(10.1);
 ```
 
 ----

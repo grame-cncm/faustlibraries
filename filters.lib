@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.10.0";
+declare version "1.11.0";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -550,7 +550,7 @@ declare rev1 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrm
 declare rev1 license "LicenseRef-STK-4.3";
 rev1(maxdel,N,g) = fb_comb(maxdel,N,1,-g);
 
-//-----`(fi.)fbcombfilter` and `(fi.)ffbcombfilter`------------
+//-----`(fi.)fbcombfilter`, `(fi.)ffbcombfilter`------------
 // Other special cases of Feed-Back Comb Filter.
 //
 // #### Usage
@@ -711,7 +711,7 @@ declare rev2 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrm
 declare rev2 license "LicenseRef-STK-4.3";
 rev2(maxlen,len,g) = allpass_comb(maxlen,len,-g);
 
-//-------------------`(fi.)allpass_fcomb5` and `(fi.)allpass_fcomb1a`-----------------
+//-------------------`(fi.)allpass_fcomb5`, `(fi.)allpass_fcomb1a`-----------------
 // Same as `allpass_fcomb` but use `fdelay5` and `fdelay1a` internally
 // (Interpolation helps - look at an fft of faust2octave on:
 // `1-1' <: allpass_fcomb(1024,10.5,0.95), allpass_fcomb5(1024,10.5,0.95);`)
@@ -876,7 +876,7 @@ declare conv copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrm
 declare conv license "LicenseRef-STK-4.3";
 conv(kv) = fir(kv);
 
-//----------------`(fi.)tf1`, `(fi.)tf2` and `(fi.)tf3`----------------------
+//----------------`(fi.)tf1`, `(fi.)tf2`, `(fi.)tf3`----------------------
 // tfN = N'th-order direct-form digital filter.
 // `tf2` is a standard Faust function.
 //
@@ -1007,7 +1007,7 @@ with {
 // <https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html>
 //========================================================================================
 
-//----------------`(fi.)tf21`, `(fi.)tf22`, `(fi.)tf22t` and `(fi.)tf21t`----------------------
+//----------------`(fi.)tf21`, `(fi.)tf22`, `(fi.)tf22t`, `(fi.)tf21t`----------------------
 // tfN = N'th-order direct-form digital filter where:
 //
 // * `tf21` is tf2, direct-form 1
@@ -1891,7 +1891,7 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 //===========Digital Filter Sections Specified as Analog Filter Sections==================
 //========================================================================================
 
-//-------------------------`(fi.)tf2s` and `(fi.)tf2snp`--------------------------------
+//-------------------------`(fi.)tf2s`, `(fi.)tf2snp`--------------------------------
 // Second-order direct-form digital filter,
 // specified by ANALOG transfer-function polynomials B(s)/A(s),
 // and a frequency-scaling parameter. Digitization via the

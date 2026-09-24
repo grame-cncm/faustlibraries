@@ -510,7 +510,7 @@ rev1_test = src : fi.rev1(2048, 64, 0.6);
 
 ----
 
-### `(fi.)fbcombfilter` and `(fi.)ffbcombfilter`
+### `(fi.)fbcombfilter`, `(fi.)ffbcombfilter`
 
 Other special cases of Feed-Back Comb Filter.
 
@@ -655,7 +655,7 @@ rev2_test = src : fi.rev2(2048, 64, 0.6);
 
 ----
 
-### `(fi.)allpass_fcomb5` and `(fi.)allpass_fcomb1a`
+### `(fi.)allpass_fcomb5`, `(fi.)allpass_fcomb1a`
 
 Same as `allpass_fcomb` but use `fdelay5` and `fdelay1a` internally
 (Interpolation helps - look at an fft of faust2octave on:
@@ -783,7 +783,7 @@ convN_test = (src <: si.bus(3)) : fi.convN(3, (0.3, 0.2, 0.1, 0.05));
 
 ----
 
-### `(fi.)tf1`, `(fi.)tf2` and `(fi.)tf3`
+### `(fi.)tf1`, `(fi.)tf2`, `(fi.)tf3`
 
 tfN = N'th-order direct-form digital filter.
 `tf2` is a standard Faust function.
@@ -883,7 +883,7 @@ Direct-Form Second-Order Biquad Sections
 
 ----
 
-### `(fi.)tf21`, `(fi.)tf22`, `(fi.)tf22t` and `(fi.)tf21t`
+### `(fi.)tf21`, `(fi.)tf22`, `(fi.)tf22t`, `(fi.)tf21t`
 
 tfN = N'th-order direct-form digital filter where:
 
@@ -1551,7 +1551,7 @@ allpassn1m_test = src : fi.allpassn1m(3, (0.3, 0.2, 0.1));
 
 ----
 
-### `(fi.)tf2s` and `(fi.)tf2snp`
+### `(fi.)tf2s`, `(fi.)tf2snp`
 
 Second-order direct-form digital filter,
 specified by ANALOG transfer-function polynomials B(s)/A(s),
