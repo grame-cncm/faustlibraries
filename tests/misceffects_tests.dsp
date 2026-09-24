@@ -45,6 +45,9 @@ echo_test = os.tosc(440) : ef.echo(0.5, 0.25, 0.4);
 reverseEchoN_test = os.tosc(440) : ef.reverseEchoN(2, 32);
 reverseDelayRamped_test = os.tosc(440) : ef.reverseDelayRamped(32, 0.6);
 uniformPanToStereo_test = os.tosc(440), os.tosc(550), os.tosc(660) : ef.uniformPanToStereo(3);
+xferDimensionExpander_test = os.osc(440), os.osc(550)
+   : ef.xferDimensionExpander(hslider("xferDimensionExpander:size", 0.5, 0, 1, 0.01),
+                              hslider("xferDimensionExpander:wet", 0.5, 0, 1, 0.01));
 
 tapeStop_test = os.tosc(440), os.tosc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, button("stop"));
 tapeStop_jump_test = os.tosc(440), os.tosc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, sq) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; };
