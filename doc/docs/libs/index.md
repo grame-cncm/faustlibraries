@@ -1148,6 +1148,7 @@
 [(ve.)crybaby](vaeffects.md#vecrybaby)
 [(ve.)vocoder](vaeffects.md#vevocoder)
 [(ve.)klonCentaur](vaeffects.md#vekloncentaur)
+[(ve.)fulltoneOCD](vaeffects.md#vefulltoneocd)
 
 ## version
 

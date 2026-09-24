@@ -1196,3 +1196,63 @@ klonCentaur_test = os.osc(330)
 * J. Chowdhury, "chowdsp_wdf: An Advanced C++ Library for Wave Digital Circuit
   Modelling," arXiv:2210.12554, 2022
 * [https://github.com/jatinchowdhury18/KlonCentaur/tree/master/ChowCentaur](https://github.com/jatinchowdhury18/KlonCentaur/tree/master/ChowCentaur)
+
+----
+
+### `(ve.)fulltoneOCD`
+
+Fulltone OCD (Obsessive Compulsive Drive) v2 overdrive pedal circuit model.
+
+The OCD is a two-op-amp overdrive whose clipping comes from a pair of
+2N7000 MOSFETs shunting the signal to the half-supply rail, followed by a
+passive tone network with an HP/LP voicing switch. This implementation
+follows the explicit wave digital (WD) model of Giampiccolo et al. (DAFx-26):
+the clipping node and the passive output network are wave digital trees,
+the MOSFET pair is a single canonical piecewise-linear (CPWL) element fitted
+to the measured I-V curve and evaluated without iteration, and the clipping
+node runs 4x oversampled. Mono.
+
+`drive`, `tone` and `hp` are clamped to [0, 1]; otherwise the controls are
+used as given: smooth them (e.g. with `si.smoo`) when they are driven from
+a UI. Input and output are in volts, a sample of
+±1 being treated as ±1 V as in the reference model.
+
+#### Usage
+
+```
+_ : fulltoneOCD(drive, tone, volume, hp) : _
+```
+
+Where:
+
+* `drive`: Drive knob (0-1), audio taper: the Drive pot resistance is
+  1 MΩ * drive^2 in the feedback of the first op-amp stage
+* `tone`: Tone knob (0-1), linear; 0 is darkest, 1 is brightest
+* `volume`: Volume knob (0-1), a linear output gain (the v2 output is buffered,
+  so the pot wiper is unloaded)
+* `hp`: HP/LP switch, 1 = HP (brighter and louder), 0 = LP; intermediate
+  values crossfade the series resistance, so a smoothed switch clicks less
+
+#### Test
+```
+ve = library("vaeffects.lib");
+os = library("oscillators.lib");
+fulltoneOCD_test = os.osc(330)
+   : ve.fulltoneOCD(
+       hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
+       hslider("fulltoneOCD:tone", 0.5, 0, 1, 0.01),
+       hslider("fulltoneOCD:volume", 0.35, 0, 1, 0.01),
+       checkbox("fulltoneOCD:hp")
+     );
+```
+
+#### References
+
+* R. Giampiccolo, S. Polimeno, C. Macrì, A. Lenoci, O. Massi, A. Bernardini,
+  "Explicit Wave Digital Model of the Fulltone OCD Pedal Based on Canonical
+  Piecewise-Linear Functions," Proc. 29th Int. Conf. Digital Audio Effects
+  (DAFx-26), Cambridge, MA, USA, 2026
+* [https://github.com/polimi-ispl/fulltoneocd](https://github.com/polimi-ispl/fulltoneocd)
+* L. O. Chua, S. M. Kang, "Section-wise piecewise-linear functions: canonical
+  representation, properties, and applications," Proc. IEEE, 65(6),
+  pp. 915-929, 1977
