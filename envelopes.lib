@@ -60,7 +60,7 @@ si = library("signals.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Envelope Library";
-declare version "1.3.0";
+declare version "1.3.1";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
@@ -164,8 +164,10 @@ with {
     adelta = sl/an;
     rdelta = sl/rn;
 
-    // Attack time (starts when gate changes and raises until gate == 0)
-    atime = +(gate) ~ *(gate' >= gate);
+    // Attack time (starts when gate changes and raises until gate == 0),
+    // one step per sample whatever the value of the gate: a velocity used as
+    // the gate must not stretch the envelope
+    atime = +(float(gate > 0)) ~ *(gate' >= gate);
 
     // Attack curve
     A = atime * adelta;
@@ -222,8 +224,10 @@ with {
     adelta = 1/an;
     ddelta = (1-sl)/dn;
 
-    // Attack time (starts when gate changes and raises until gate == 0)
-    atime = +(gate) ~ *(gate' >= gate);
+    // Attack time (starts when gate changes and raises until gate == 0),
+    // one step per sample whatever the value of the gate: a velocity used as
+    // the gate must not stretch the envelope
+    atime = +(float(gate > 0)) ~ *(gate' >= gate);
 
     // Attack curve
     A = atime * adelta;

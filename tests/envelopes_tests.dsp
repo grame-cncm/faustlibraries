@@ -13,6 +13,10 @@ legato = checkbox("legato");
 ar_test = no.noise * en.ar(0.02, 0.3, gate);
 asr_test = no.noise * en.asr(0.05, 0.7, 0.4, gate);
 adsr_test = no.noise * en.adsr(0.05, 0.1, 0.6, 0.3, gate);
+// a gate of 0.5 (a velocity) must give the same timing as a gate of 1
+velocity_gate = 0.5 * os.lf_squarewavepos(4);
+asr_velocity_test = en.asr(0.05, 0.7, 0.04, velocity_gate);
+adsr_velocity_test = en.adsr(0.05, 0.1, 0.6, 0.04, velocity_gate);
 adsrf_bias_test = no.noise * en.adsrf_bias(
   0.05, 0.1, 0.6, 0.4, 0.2,
   0.4, 0.6, 0.5,
