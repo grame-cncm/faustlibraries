@@ -757,15 +757,28 @@ process = noise : fir((.2,.2,.2,.2,.2));
 
 ----
 
-### `(fi.)conv` and `(fi.)convN`
+### `(fi.)conv`, `(fi.)convN`
 
-Convolution of input signal with given coefficients.
+Convolution of input signal with given coefficients. `conv` filters one
+signal with all the coefficients. `convN` takes N signals and sums the i-th,
+delayed by i samples, times the i-th coefficient: split one signal to N
+copies first to convolve it with the first N coefficients.
 
 #### Usage
 
 ```
 _ : conv((k1,k2,k3,...,kN)) : _ // Argument = one signal bank
-_ : convN(N,(k1,k2,k3,...)) : _ // Useful when N < count((k1,...))
+si.bus(N) : convN(N,(k1,k2,k3,...)) : _ // Useful when N < count((k1,...))
+_ <: si.bus(N) : convN(N,(k1,k2,k3,...)) : _ // one signal, N coefficients
+```
+
+#### Test
+```
+fi = library("filters.lib");
+os = library("oscillators.lib");
+si = library("signals.lib");
+src = os.osc(440);
+convN_test = (src <: si.bus(3)) : fi.convN(3, (0.3, 0.2, 0.1, 0.05));
 ```
 
 ----

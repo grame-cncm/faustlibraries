@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.9.0";
+declare version "1.10.0";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -840,17 +840,19 @@ fir((b0,bv)) = _ <: *(b0), R(1,bv) :> _ with {
     R(n, bn)     = (@(n):*(bn)); };
 fir(b0) = *(b0);
 
-//---------------`(fi.)conv` and `(fi.)convN`-------------------------------
-// Convolution of input signal with given coefficients.
+//---------------`(fi.)conv`, `(fi.)convN`-------------------------------
+// Convolution of input signal with given coefficients. `conv` filters one
+// signal with all the coefficients. `convN` takes N signals and sums the i-th,
+// delayed by i samples, times the i-th coefficient: split one signal to N
+// copies first to convolve it with the first N coefficients.
 //
 // #### Usage
 //
 // ```
 // _ : conv((k1,k2,k3,...,kN)) : _ // Argument = one signal bank
-// _ : convN(N,(k1,k2,k3,...)) : _ // Useful when N < count((k1,...))
+// si.bus(N) : convN(N,(k1,k2,k3,...)) : _ // Useful when N < count((k1,...))
+// _ <: si.bus(N) : convN(N,(k1,k2,k3,...)) : _ // one signal, N coefficients
 // ```
-//------------------------------------------------------------
-//convN(N,kv,x) = sum(i,N,ba.take(i+1,kv) * x@i); // take() defined in basics.lib
 //
 // #### Test
 // ```
@@ -860,6 +862,8 @@ fir(b0) = *(b0);
 // src = os.osc(440);
 // convN_test = (src <: si.bus(3)) : fi.convN(3, (0.3, 0.2, 0.1, 0.05));
 // ```
+//------------------------------------------------------------
+//convN(N,kv,x) = sum(i,N,ba.take(i+1,kv) * x@i); // take() defined in basics.lib
 
 declare convN author "Julius O. Smith III";
 declare convN copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";

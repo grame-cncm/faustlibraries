@@ -410,7 +410,7 @@
 [(fi.)allpass_fcomb5 and (fi.)allpass_fcomb1a](filters.md#fiallpass_fcomb5-and-fiallpass_fcomb1a)
 [(fi.)iir](filters.md#fiiir)
 [(fi.)fir](filters.md#fifir)
-[(fi.)conv and (fi.)convN](filters.md#ficonv-and-ficonvn)
+[(fi.)conv, (fi.)convN](filters.md#ficonv,-ficonvn)
 [(fi.)tf1, (fi.)tf2 and (fi.)tf3](filters.md#fitf1,-fitf2-and-fitf3)
 [(fi.)TF2](filters.md#fitf2)
 [(fi.)notchw](filters.md#finotchw)
