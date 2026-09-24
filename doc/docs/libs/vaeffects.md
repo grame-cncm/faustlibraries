@@ -1154,6 +1154,49 @@ vocoder_test = (no.noise, os.osc(220))
 
 ----
 
+### `(ve.)mxrPhase90`
+
+MXR Phase 90 phaser pedal circuit model (1974 "script logo" version).
+
+Four first-order all-pass stages whose corner frequencies are swept by
+2N5952 JFETs used as voltage-controlled resistors, summed with the dry
+signal. Following Giampiccolo et al. (DAFx-24), each JFET's channel
+resistance depends on its gate voltage (the LFO) and on its own
+drain-source voltage (the audio at that stage), so the sweep is
+signal-dependent: nearly linear for quiet inputs, increasingly distorted
+at guitar levels, most strongly at the bottom of the sweep. Mono.
+
+Input and output are in volts, a sample of ±1 being treated as ±1 V. Like
+the pedal, the model inverts the polarity of the signal.
+
+#### Usage
+
+```
+_ : mxrPhase90(rate) : _
+```
+
+Where:
+
+* `rate`: LFO rate in Hz (the reference plug-in spans 0.1 to 10 Hz)
+
+#### Test
+```
+ve = library("vaeffects.lib");
+os = library("oscillators.lib");
+mxrPhase90_test = os.osc(440) * 0.3
+   : ve.mxrPhase90(hslider("mxrPhase90:rate", 1.5, 0.1, 10, 0.01));
+```
+
+#### References
+
+* R. Giampiccolo, S. Del Moro, C. Eutizi, M. Massimi, O. Massi,
+  A. Bernardini, "Wave Digital Model of the MXR Phase 90 Based on a
+  Time-Varying Resistor Approximation of JFET Elements," Proc. 27th Int.
+  Conf. Digital Audio Effects (DAFx24), Guildford, UK, 2024
+* [https://github.com/polimi-ispl/mxrphase90](https://github.com/polimi-ispl/mxrphase90)
+
+----
+
 ### `(ve.)klonCentaur`
 
 Klon Centaur overdrive pedal circuit model.
