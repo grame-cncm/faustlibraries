@@ -40,8 +40,9 @@ make build       # build the mkdocs site (doc pages + figure injection)
 1. **Every new public function** needs, in the same commit:
    - a full documentation block (description, `#### Usage` showing the
      input/output shape, `Where:` for each parameter, `#### Test`);
-   - a `functionName_test` entry in the matching `tests/*.dsp` file, and its
-     reference generated with `make reference`;
+   - a `functionName_test` entry in the matching `tests/*.dsp` file, copied
+     from the block's `#### Test` (rule 8), and its reference generated with
+     `make reference`;
    - a `declare functionName license "ID";` with a canonical SPDX
      identifier (check with `scripts/normalize_licenses.py --check`).
 
@@ -104,6 +105,16 @@ make build       # build the mkdocs site (doc pages + figure injection)
    params and license (`scripts/faust_doc_api.py get_faust_symbol xx.name`).
    `make checkdoc` guards the floor — the exported symbol count may only
    grow — but it cannot see a field that silently comes out empty.
+
+8. **Tests are written in the library first.** Every test added — for a
+   new function, or to pin a bug fix or a behavior change of an existing
+   one — goes first into the `#### Test` section of the function's doc block
+   in the `.lib`, then is copied verbatim, same name, into the matching
+   `tests/*.dsp`. `tests/*.dsp` mirrors the `.lib` Test entries, never the
+   other way around: a test that exists only in `tests/*.dsp` is invisible
+   in the documentation and the JSON export, and drifts from them. A fix
+   that changes behavior comes with such a test, one whose output the old
+   definition gets wrong.
 
 ## Git history
 
