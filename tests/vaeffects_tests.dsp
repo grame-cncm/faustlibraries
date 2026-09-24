@@ -292,3 +292,11 @@ klonCentaur_modulated_test = 0.5*no.noise : ve.klonCentaur(0.1 + 0.9*tri, 0.5, 0
 klonCentaur_jump_test = 0.5*no.noise : ve.klonCentaur(0.1 + 0.9*sq, 0.5, 0.5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 
 klonCentaur_hot_test = os.tosc(110)*0.5 : ve.klonCentaur(1, 0, 1);
+
+fulltoneOCD_test = os.osc(330)
+   : ve.fulltoneOCD(
+       hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
+       hslider("fulltoneOCD:tone", 0.5, 0, 1, 0.01),
+       hslider("fulltoneOCD:volume", 0.35, 0, 1, 0.01),
+       checkbox("fulltoneOCD:hp")
+     );
