@@ -590,7 +590,9 @@ ramp_test = os.osc(1) : ba.ramp(256);
 A ramp interpolator that generates a linear transition to reach a target value:
 
  - the interpolation process restarts each time a new and distinct input value is received
- - it utilizes 'n' samples to achieve the transition to the target value
+ - it utilizes 'n' samples to achieve the transition to the target value;
+   'n' is rounded to the nearest whole number of samples, so that a ramp
+   never overshoots its target
  - after reaching the target value, the output value is maintained.
 
 #### Usage
@@ -1001,7 +1003,7 @@ Where:
 #### Example test program
 
 ```
-pickN(4,2) : _  // same as selector(2,4) but faster
+pickN(4,2) : _  // same as selector(2,4)
 ```
 
 ```
@@ -2112,9 +2114,12 @@ kr2ar_test = button("gate") : ba.kr2ar;
 
 ### `(ba.)impulsify`
 
-Turns a signal into an impulse with the value of the current sample
-(0.3,0.2,0.1 becomes 0.3,0.0,0.0). This function is typically used with a
-`button` to turn its output into an impulse.
+Turns each rise of a signal into a one-sample impulse as high as the rise:
+the output is `x - x'` when it is positive, and 0 otherwise. A step from 0
+to `v` gives an impulse of height `v` (0.3,0.2,0.1 becomes 0.3,0.0,0.0), but
+a signal that climbs from 0.3 to 0.5 gives 0.2, and a fall gives nothing.
+This function is typically used with a `button` to turn each press into an
+impulse of 1.
 `impulsify` is a standard Faust function.
 
 #### Usage

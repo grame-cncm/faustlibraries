@@ -34,6 +34,8 @@ sweep_test = ba.sweep(64, checkbox("run"));
 time_test = ba.time;
 ramp_test = os.osc(1) : ba.ramp(256);
 line_test = os.osc(1) : ba.line(256);
+// a ramp of 4.8 samples is rounded to 5 and must not overshoot its target
+line_frac_test = os.lf_squarewavepos(100) : ba.line(4.8);
 tempo_test = ba.tempo(120);
 period_test = ba.period(64);
 spulse_test = ba.spulse(32, button("trig"));

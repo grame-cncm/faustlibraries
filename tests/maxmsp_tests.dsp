@@ -21,3 +21,5 @@ mm_peakNotch_test = mm.peakNotch(src, 1000, 2, 1);
 mm_lowShelf_test = mm.lowShelf(src, 500, 6, 1);
 mm_highShelf_test = mm.highShelf(src, 2000, 6, 1);
 mm_line_test = mm.line(hslider("value", 1, 0, 1, 0.01), 100);
+// 0.1 ms at 48 kHz is 4.8 samples, rounded to 5: no overshoot
+mm_line_frac_test = mm.line(os.lf_squarewavepos(100), 0.1);
