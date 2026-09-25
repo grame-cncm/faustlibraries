@@ -1,7 +1,7 @@
 #  pinktrombone.lib 
 
 A Faust port of Neil Thapen's **Pink Trombone** (2017), the bare-handed procedural
-* speech synthesiser [https://dood.al/pinktrombone/](https://dood.al/pinktrombone/).
+speech synthesiser [https://dood.al/pinktrombone/](https://dood.al/pinktrombone/).
 
 The original is a ~1000-line JavaScript program running in a ScriptProcessorNode.
 This library reproduces its DSP core:
@@ -78,9 +78,9 @@ audio-rate arguments `glottalOutput`, `noiseModulator`, `fricNoise` — an expli
 #### References
 
 * Neil Thapen, *Pink Trombone — bare-handed procedural speech synthesis*,
-*   version 1.1 (March 2017), MIT licence. [https://dood.al/pinktrombone/](https://dood.al/pinktrombone/)
+  version 1.1 (March 2017), MIT licence. [https://dood.al/pinktrombone/](https://dood.al/pinktrombone/)
 * The original's bibliography: J. O. Smith III, *Physical Audio Signal Processing*
-*   [https://ccrma.stanford.edu/~jos/pasp/](https://ccrma.stanford.edu/~jos/pasp/); B. H. Story, "A parametric model of the
+  [https://ccrma.stanford.edu/~jos/pasp/](https://ccrma.stanford.edu/~jos/pasp/); B. H. Story, "A parametric model of the
   vocal tract area function for vowel and consonant simulation", JASA 117(5), 2005;
   H.-L. Lu & J. O. Smith, "Glottal source modeling for singing voice synthesis",
   ICMC 2000; J. Mullen, *Physical modelling of the vocal tract with the 2D digital
@@ -92,7 +92,7 @@ audio-rate arguments `glottalOutput`, `noiseModulator`, `fricNoise` — an expli
 
 The Faust port is MIT-licensed, Copyright 2026 David Braun. It is a derivative
 work of *Pink Trombone* version 1.1 (March 2017) by Neil Thapen
-* [https://venuspatrol.nfshost.com](https://venuspatrol.nfshost.com); the original copyright and permission notice
+[https://venuspatrol.nfshost.com](https://venuspatrol.nfshost.com); the original copyright and permission notice
 follows, reproduced verbatim as it requires:
 
 Copyright 2017 Neil Thapen
