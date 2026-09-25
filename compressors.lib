@@ -57,9 +57,10 @@ an = library("analyzers.lib");
 ro = library("routes.lib");
 ma = library("maths.lib");
 it = library("interpolators.lib");
+fi = library("filters.lib");
 
 declare name "Faust Compressor Effect Library";
-declare version "1.6.0";
+declare version "1.7.0";
 
 //================================Conversion Tools=======================================
 // Most compressors have a ratio parameter to define the amount of compression.
@@ -1576,3 +1577,213 @@ limiter_lad_bw = limiter_lad_mono(.01, 1, 0.01/twopi, .1, 1/twopi)
 with {
     twopi = 2 * ma.PI;
 };
+
+//=================================Multiband Compressors====================================
+//========================================================================================
+
+//-------------------------------`(co.)xfer_ott`---------------------------------
+// Model of Xfer Records' free OTT, a three-band upward/downward compressor (the
+// Ableton "OTT" preset lineage). Stereo in, stereo out, channels linked.
+//
+// The input is split by series 4th-order Linkwitz-Riley crossovers at 88.3 Hz and
+// 2.5 kHz. Each band has a per-sample envelope follower on the channels' mean
+// square, an upward branch (a soft knee rising at about 4:1 below its threshold),
+// a downward branch (a soft knee into an infinite-ratio ceiling), and a
+// Depth-scaled makeup gain; the three gained bands are summed.
+//
+// Every constant was fitted to measurements of the plug-in binary. Goodness of
+// fit, against the plug-in on stereo program material (guitar on one channel,
+// drums on the other), as the error of the 50 ms envelope (median / 95th
+// percentile) and the overall level:
+//
+// * default settings (Time 100 %): 0.3 / 0.9-1.1 dB, level within 0.1 dB,
+//   at 44.1, 48 and 96 kHz
+// * Time 280 %: 0.3-0.5 / 1.3-1.8 dB; Time 640 %: 0.7-0.9 / 1.7-2.1 dB;
+//   level within 0.9 dB (the model is slightly quieter)
+// * upward or downward branch alone: 0.1 / 0.5-1.3 dB, level within 0.1 dB
+//
+// Known divergences: the plug-in's steady-state gain on a sustained tone does not
+// depend on `time`, the model's moves by up to 0.8 dB over `time` 0-1 and up to
+// 1.5 dB at `time` 6.4; raising a band's threshold above 1 (the mid band
+// especially) is up to 0.9 dB off in level. The plug-in's "Clean XOV" crossover
+// option is not modeled.
+//
+// #### Usage
+//
+// ```
+// _,_ : xfer_ott(depth, time, ingain, outgain, upward, downward,
+//                threshL, threshM, threshH, gainL, gainM, gainH,
+//                bypUpL, bypUpM, bypUpH, bypDnL, bypDnM, bypDnH) : _,_
+// ```
+//
+// Where:
+//
+// * `depth`: compression depth (0-1; the plug-in's default is 1)
+// * `time`: release time scale (0-10, 1 = the plug-in's 100 %); it scales the
+//   release only
+// * `ingain`: input gain in dB (up to +19.1)
+// * `outgain`: output gain in dB (up to +19.1)
+// * `upward`: upward-compression strength (0-2, 1 = 100 %)
+// * `downward`: downward-compression strength (0-2, 1 = 100 %)
+// * `threshL`: low-band threshold (0-2, 1 = 100 %; higher compresses more)
+// * `threshM`: mid-band threshold (0-2, 1 = 100 %; higher compresses more)
+// * `threshH`: high-band threshold (0-2, 1 = 100 %; higher compresses more)
+// * `gainL`: low-band output gain in dB (up to +6)
+// * `gainM`: mid-band output gain in dB (up to +6)
+// * `gainH`: high-band output gain in dB (up to +6)
+// * `bypUpL`: 1 bypasses the low band's upward branch, else 0
+// * `bypUpM`: 1 bypasses the mid band's upward branch, else 0
+// * `bypUpH`: 1 bypasses the high band's upward branch, else 0
+// * `bypDnL`: 1 bypasses the low band's downward branch, else 0
+// * `bypDnM`: 1 bypasses the mid band's downward branch, else 0
+// * `bypDnH`: 1 bypasses the high band's downward branch, else 0
+//
+// #### Test
+// ```
+// co = library("compressors.lib");
+// os = library("oscillators.lib");
+// xfer_ott_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
+//    : co.xfer_ott(1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+// xfer_ott_slow_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
+//    : co.xfer_ott(0.5, 2.8, 3, -3, 1.5, 0.5, 0.8, 1.2, 1, 1, 0, -2, 0, 1, 0, 0, 0, 1);
+// ```
+//
+// #### References
+//
+// * <https://xferrecords.com/freeware>
+//------------------------------------------------------------------------------
+/*
+Implementation Notes:
+
+- Envelope: a switching one-pole on the per-sample mean square (L^2 + R^2)/2 of
+  the band (the plug-in links the channels this way, not through the louder
+  channel). Attack is fixed per band (6.2 / 6.0 / 9.7 ms). The release is a
+  seconds-based intercept tr(K, 0) plus a part that grows with `time` (a fitted
+  piecewise-linear law up to 100 %, then in proportion to `time`) and is counted
+  in samples at a 48 kHz reference: the plug-in's release runs twice as fast
+  at 96 kHz, while its attack does not.
+- Gain (dB) = makeup + upward branch (softplus knee) - downward branch (softplus
+  knee), each scaled by fitted Depth, strength and threshold laws, then clamped
+  to +-100 dB as a NaN/Inf guard. The upward branch keeps rising to at least
+  -90 dB band level, as measured, so bands that only carry crossover leakage can
+  reach large gains; the three gained bands must all be summed.
+- Display laws of the plug-in's knobs, for reference: Time 0-1000 %, In/Out Gain
+  -inf to +19.1 dB, band gains -inf to +6 dB, Upwd/Dnwd/Thresh 0-200 %.
+*/
+xfer_ott(depth, time, ingain, outgain, upward, downward,
+         threshL, threshM, threshH, gainL, gainM, gainH,
+         bypUpL, bypUpM, bypUpH, bypDnL, bypDnM, bypDnH, xL, xR) = outL, outR
+with {
+    ia = ba.db2linear(ingain);
+    oa = ba.db2linear(outgain);
+    tp = 100.0 * max(0.0, time);            // release scale in percent
+
+    // Softplus hinge: asymptotes 0 / slope 1.
+    soft(w, z) = max(z, 0.0) + w * log(1.0 + exp(0.0 - abs(z) / w));
+
+    // Switching one-pole on the squared signal (per-sample attack/release).
+    envfollow(ta, tr, x2) = loop ~ _
+    with {
+        loop(e) = e + ba.if(x2 > e, ca, cr) * (x2 - e);
+        ca = 1.0 - exp(-1.0 / (max(1e-5, ta) * ma.SR));
+        cr = 1.0 - exp(-1.0 / (max(1e-4, tr) * ma.SR));
+    };
+
+    // One band: K = 0 (low), 1 (mid), 2 (high).
+    band(K, thr, bu, bd, bl, br) = gl * bl, gl * br
+    with {
+        tr0 = tr(K, 0.0);
+        trel = tr0 + (tr(K, min(100.0, tp)) * max(1.0, tp / 100.0) - tr0)
+             * 48000.0 / ma.SR;
+        env = envfollow(ta(K), trel, 0.5 * (bl * bl + br * br));
+        E = 10.0 * log10(max(env, 1e-20));
+        tsh = tshift(K, thr);
+        mks = mkshape(K, depth);
+        ups = upshape(K, depth) * fustr(upward) * (1.0 - bu);
+        dns = dnshape(K, depth) * fdstr(downward) * (1.0 - bd);
+        gdb = mks * mk(K)
+            + ups * su(K) * soft(wu(K), tu(K) + tsh - E)
+            - dns * soft(wd(K), E - td(K) - tsh);
+        gl = ba.db2linear(max(-100.0, min(100.0, gdb)));
+    };
+
+    bnd(K, x) = x * ia : fi.crossover3LR4(F1, F2) : ba.selector(K, 3);
+    proc(K) = band(K, thrsel(K), busel(K), bdsel(K), bnd(K, xL), bnd(K, xR));
+    thrsel(0) = threshL; thrsel(1) = threshM; thrsel(2) = threshH;
+    busel(0) = bypUpL; busel(1) = bypUpM; busel(2) = bypUpH;
+    bdsel(0) = bypDnL; bdsel(1) = bypDnM; bdsel(2) = bypDnH;
+    gsel(0) = gainL; gsel(1) = gainM; gsel(2) = gainH;
+    outL = oa * sum(k, 3, ba.db2linear(gsel(k)) * (proc(k) : _, !));
+    outR = oa * sum(k, 3, ba.db2linear(gsel(k)) * (proc(k) : !, _));
+
+    // Fitted constants (crossovers, per-band thresholds, knees, makeup,
+    // attack/release and Depth/strength/threshold laws).
+    F1 = 88.3;
+    F2 = 2500.0;
+
+    tu(0) = -43.7919;
+    tu(1) = -53.7793;
+    tu(2) = -45.8209;
+    wu(0) = 1.81218;
+    wu(1) = 1.01672;
+    wu(2) = 1.16742;
+    su(0) = 0.729811;
+    su(1) = 0.710005;
+    su(2) = 0.712083;
+    td(0) = -38.9401;
+    td(1) = -34.8204;
+    td(2) = -41.6879;
+    wd(0) = 0.500002;
+    wd(1) = 0.530023;
+    wd(2) = 0.500003;
+    mk(0) = 14.0348;
+    mk(1) = 9.05203;
+    mk(2) = 14.064;
+
+    ta(0) = 0.00621537;
+    ta(1) = 0.006;
+    ta(2) = 0.0096577;
+
+    // Envelope release tau (s) vs Time in percent, 0-100 % (held above).
+    tr(0, pct) = pct : ba.bpf.start(0, 0.0100376) : ba.bpf.point(50, 0.0148167) : ba.bpf.end(100, 0.030877);
+    tr(1, pct) = pct : ba.bpf.start(0, 0.0118089) : ba.bpf.point(50, 0.0174314) : ba.bpf.end(100, 0.030877);
+    tr(2, pct) = pct : ba.bpf.start(0, 0.00702632) : ba.bpf.point(50, 0.00702632) : ba.bpf.end(100, 0.0103717);
+
+
+    // Depth shapes (cubics through origin, normalized at depth 1)
+    mkshape(0, d) = d * (1.68505 + d * (-1.05364 + d * 0.368593));
+    mkshape(1, d) = d * (1.3332 + d * (-0.396622 + d * 0.0634215));
+    mkshape(2, d) = d * (1.65361 + d * (-1.00788 + d * 0.354275));
+    upshape(0, d) = d * (1.22454 + d * (-0.363558 + d * 0.139018));
+    upshape(1, d) = d * (4.06101 + d * (-6.7907 + d * 3.72969));
+    upshape(2, d) = d * (3.01862 + d * (-5.74831 + d * 3.72969));
+    dnshape(0, d) = d * (0.864884 + d * (0.171047 + d * -0.0359309));
+    dnshape(1, d) = d * (0.895381 + d * (0.154496 + d * -0.0498772));
+    dnshape(2, d) = d * (0.865596 + d * (0.184281 + d * -0.0498772));
+
+    // Strength laws vs upward/downward (0-2), piecewise linear, 1 at 1.
+    fustr(p) = p : ba.bpf.start(0, 0)
+        : ba.bpf.point(0.2, 0.618397)
+        : ba.bpf.point(0.4, 0.747812)
+        : ba.bpf.point(0.6, 0.853081)
+        : ba.bpf.point(0.8, 0.950357)
+        : ba.bpf.point(1, 1)
+        : ba.bpf.point(1.2, 1.02428)
+        : ba.bpf.point(1.4, 1.04744)
+        : ba.bpf.point(1.6, 1.0693)
+        : ba.bpf.point(1.8, 1.09077)
+        : ba.bpf.end(2, 1.11124);
+    fdstr(p) = p : ba.bpf.start(0, 0)
+        : ba.bpf.point(0.2, 0.189716)
+        : ba.bpf.point(0.4, 0.389364)
+        : ba.bpf.point(0.6, 0.590038)
+        : ba.bpf.point(0.8, 0.793116)
+        : ba.bpf.end(1, 1);
+
+    // Threshold shift in dB vs Thresh display pct (quadratic in pct-1)
+    tshift(0, p) = (p - 1.0) * (21.175 + (p - 1.0) * 0.399223);
+    tshift(1, p) = (p - 1.0) * (30.6227 + (p - 1.0) * 4.28107);
+    tshift(2, p) = (p - 1.0) * (20.5799 + (p - 1.0) * 2.33452);
+};
+declare xfer_ott author "David Braun";
+declare xfer_ott license "MIT";

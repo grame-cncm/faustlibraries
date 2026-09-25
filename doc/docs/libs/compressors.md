@@ -1324,3 +1324,80 @@ limiter_lad_bw_test = os.osc(440) : co.limiter_lad_bw;
 #### References
 
 * [http://iem.at/~zmoelnig/publications/limiter](http://iem.at/~zmoelnig/publications/limiter)
+
+## Multiband Compressors
+
+
+----
+
+### `(co.)xfer_ott`
+
+Model of Xfer Records' free OTT, a three-band upward/downward compressor (the
+Ableton "OTT" preset lineage). Stereo in, stereo out, channels linked.
+
+The input is split by series 4th-order Linkwitz-Riley crossovers at 88.3 Hz and
+2.5 kHz. Each band has a per-sample envelope follower on the channels' mean
+square, an upward branch (a soft knee rising at about 4:1 below its threshold),
+a downward branch (a soft knee into an infinite-ratio ceiling), and a
+Depth-scaled makeup gain; the three gained bands are summed.
+
+Every constant was fitted to measurements of the plug-in binary. Goodness of
+fit, against the plug-in on stereo program material (guitar on one channel,
+drums on the other), as the error of the 50 ms envelope (median / 95th
+percentile) and the overall level:
+
+* default settings (Time 100 %): 0.3 / 0.9-1.1 dB, level within 0.1 dB,
+  at 44.1, 48 and 96 kHz
+* Time 280 %: 0.3-0.5 / 1.3-1.8 dB; Time 640 %: 0.7-0.9 / 1.7-2.1 dB;
+  level within 0.9 dB (the model is slightly quieter)
+* upward or downward branch alone: 0.1 / 0.5-1.3 dB, level within 0.1 dB
+
+Known divergences: the plug-in's steady-state gain on a sustained tone does not
+depend on `time`, the model's moves by up to 0.8 dB over `time` 0-1 and up to
+1.5 dB at `time` 6.4; raising a band's threshold above 1 (the mid band
+especially) is up to 0.9 dB off in level. The plug-in's "Clean XOV" crossover
+option is not modeled.
+
+#### Usage
+
+```
+_,_ : xfer_ott(depth, time, ingain, outgain, upward, downward,
+               threshL, threshM, threshH, gainL, gainM, gainH,
+               bypUpL, bypUpM, bypUpH, bypDnL, bypDnM, bypDnH) : _,_
+```
+
+Where:
+
+* `depth`: compression depth (0-1; the plug-in's default is 1)
+* `time`: release time scale (0-10, 1 = the plug-in's 100 %); it scales the
+  release only
+* `ingain`: input gain in dB (up to +19.1)
+* `outgain`: output gain in dB (up to +19.1)
+* `upward`: upward-compression strength (0-2, 1 = 100 %)
+* `downward`: downward-compression strength (0-2, 1 = 100 %)
+* `threshL`: low-band threshold (0-2, 1 = 100 %; higher compresses more)
+* `threshM`: mid-band threshold (0-2, 1 = 100 %; higher compresses more)
+* `threshH`: high-band threshold (0-2, 1 = 100 %; higher compresses more)
+* `gainL`: low-band output gain in dB (up to +6)
+* `gainM`: mid-band output gain in dB (up to +6)
+* `gainH`: high-band output gain in dB (up to +6)
+* `bypUpL`: 1 bypasses the low band's upward branch, else 0
+* `bypUpM`: 1 bypasses the mid band's upward branch, else 0
+* `bypUpH`: 1 bypasses the high band's upward branch, else 0
+* `bypDnL`: 1 bypasses the low band's downward branch, else 0
+* `bypDnM`: 1 bypasses the mid band's downward branch, else 0
+* `bypDnH`: 1 bypasses the high band's downward branch, else 0
+
+#### Test
+```
+co = library("compressors.lib");
+os = library("oscillators.lib");
+xfer_ott_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
+   : co.xfer_ott(1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+xfer_ott_slow_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
+   : co.xfer_ott(0.5, 2.8, 3, -3, 1.5, 0.5, 0.8, 1.2, 1, 1, 0, -2, 0, 1, 0, 0, 0, 1);
+```
+
+#### References
+
+* [https://xferrecords.com/freeware](https://xferrecords.com/freeware)

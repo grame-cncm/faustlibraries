@@ -225,6 +225,7 @@
 [(co.)limiter_lad_stereo](compressors.md#colimiter_lad_stereo)
 [(co.)limiter_lad_quad](compressors.md#colimiter_lad_quad)
 [(co.)limiter_lad_bw](compressors.md#colimiter_lad_bw)
+[(co.)xfer_ott](compressors.md#coxfer_ott)
 
 ## debug
 
