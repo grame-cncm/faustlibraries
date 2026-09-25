@@ -1166,6 +1166,7 @@
 [(ve.)autowah](vaeffects.md#veautowah)
 [(ve.)crybaby](vaeffects.md#vecrybaby)
 [(ve.)vocoder](vaeffects.md#vevocoder)
+[(ve.)mxrPhase90](vaeffects.md#vemxrphase90)
 [(ve.)klonCentaur](vaeffects.md#vekloncentaur)
 
 ## version

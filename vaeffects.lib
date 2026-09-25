@@ -28,7 +28,7 @@ wd = library("wdmodels.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.6.0";
+declare version "1.7.0";
 
 //########################################################################################
 /************************************************************************
@@ -1733,6 +1733,134 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 ************************************************************************/
 
 // end further further contributions section
+
+
+//-----------------------`(ve.)mxrPhase90`---------------------------
+// MXR Phase 90 phaser pedal circuit model (1974 "script logo" version).
+//
+// Four first-order all-pass stages whose corner frequencies are swept by
+// 2N5952 JFETs used as voltage-controlled resistors, summed with the dry
+// signal. Following Giampiccolo et al. (DAFx-24), each JFET's channel
+// resistance depends on its gate voltage (the LFO) and on its own
+// drain-source voltage (the audio at that stage), so the sweep is
+// signal-dependent: nearly linear for quiet inputs, increasingly distorted
+// at guitar levels, most strongly at the bottom of the sweep. Mono.
+//
+// Input and output are in volts, a sample of ±1 being treated as ±1 V. Like
+// the pedal, the model inverts the polarity of the signal.
+//
+// #### Usage
+//
+// ```
+// _ : mxrPhase90(rate) : _
+// ```
+//
+// Where:
+//
+// * `rate`: LFO rate in Hz (the reference plug-in spans 0.1 to 10 Hz)
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// mxrPhase90_test = os.osc(440) * 0.3
+//    : ve.mxrPhase90(hslider("mxrPhase90:rate", 1.5, 0.1, 10, 0.01));
+// ```
+//
+// #### References
+//
+// * R. Giampiccolo, S. Del Moro, C. Eutizi, M. Massimi, O. Massi,
+//   A. Bernardini, "Wave Digital Model of the MXR Phase 90 Based on a
+//   Time-Varying Resistor Approximation of JFET Elements," Proc. 27th Int.
+//   Conf. Digital Audio Effects (DAFx24), Guildford, UK, 2024
+// * <https://github.com/polimi-ispl/mxrphase90>
+//------------------------------------------------------------
+/*
+Implementation Notes:
+
+Circuit (all voltages referenced to the 5.1 V bias rail):
+
+  in -> input coupling (R3 10k, C5 10n, R14 470k) -> unity buffer   = dry
+     -> 4 x phase-shift stage                                        = wet
+     -> PNP summing stage: -1.788 x (dry + wet)/2, AC-coupled by C2 47n
+        into R2 150k (22.6 Hz)
+
+Each phase-shift stage is an inverting all-pass: C 47n from the stage input
+x to the op-amp's + input, which is tied to the rail by 24k in parallel with
+the JFET channel. With vc the capacitor voltage, the + input sits at
+x - vc = v_ds and the output is x - 2 vc; vc is a one-pole lowpass of x with
+time constant (24k || R_JFET) * 47n.
+
+- JFET channel conductance: the approximation of the reference model,
+  G = k (v_ov - v_ds/2) for v_ds <= v_ov, Is0 (1 - v_gs/Vp)^2
+  (1 + lambda v_ds) / v_ds beyond, and 0 below pinch-off, with v_ov =
+  v_gs - Vp, k = 2 Is0 / Vp^2 and the 2N5952 parameters Vp = -2.021 V,
+  Is0 = 5.367 mA, lambda = 4e-3. As in the reference model, each JFET uses
+  its stage's v_ds from the previous sample, which keeps the model explicit.
+- Each stage is discretized in its circuit variables (a trapezoidal,
+  topology-preserving integrator whose state is the capacitor's), not as a
+  direct-form all-pass: the JFET resistance changes at signal rate, and a
+  direct form, whose state is not the capacitor's, then misbehaves. The
+  integrator is pre-warped at the stage corner, capped at a quarter of the
+  sample rate so the update stays passive whatever the signal level.
+- LFO: asymmetric triangle (65 % rising), 3.25 V +- 0.15 V on the gates, as
+  in the reference model; the corners sweep from about 330 Hz to 3.3 kHz.
+- The output-stage gain was measured by simulating the reference LTspice
+  schematic (with the 2N4125 PNP stage) in ngspice; the PNP stage itself adds
+  no measurable distortion there, as the reference paper states.
+- Accuracy against an ngspice simulation of the reference schematic, on
+  guitar DI at 48 kHz (relative error): 1 % at 10 mV peak, 2 % at 0.1 V,
+  5 % at 0.3 V, 9 % at 1 V, halving with each doubling of the sample rate.
+- Sample rate: verified from 8 kHz to 192 kHz. Above 192 kHz ma.SR saturates
+  (see pl.SR), so this model, like every sample-rate-dependent function in
+  the libraries, is mistuned there.
+*/
+mxrPhase90(rate) =
+    inbuf                                              // input coupling
+    <: _, (stage : stage : stage : stage)              // dry, wet
+    : + : *(0.5)
+    : fi.highpass(1, FC_OUT) : *(-G_OUT)               // PNP summing stage
+with {
+    VREF = 5.1;                                        // bias rail
+    R3 = 10e3; C5 = 10e-9; R14 = 470e3;                // input coupling
+    RS = 24e3; CS = 47e-9;                             // phase-shift stages
+    VP = -2.021; IS0 = 5.367e-3; LAMBDA = 4e-3;        // 2N5952
+    K = 2.0 * IS0 / (VP * VP);
+    G_OUT = 1.788;                                     // PNP stage gain (ngspice)
+    FC_OUT = 1.0 / (2.0 * ma.PI * 150e3 * 47e-9);      // C2 into R2
+
+    // Input coupling: H(s) = s C5 R14 / (1 + s C5 (R3 + R14)).
+    inbuf = fi.tf1s(R14 / (R3 + R14), 0.0, 1.0, w1)
+    with { w1 = 1.0 / (C5 * (R3 + R14)); };
+
+    // LFO: asymmetric triangle, gate-source voltage.
+    phase = (+(rate / ma.SR) : ma.frac) ~ _;
+    tri(p) = ba.if(p < 0.65, -1.0 + 2.0 * p / 0.65, 1.0 - 2.0 * (p - 0.65) / 0.35);
+    vgs = 3.25 + 0.15 * tri(phase) - VREF;
+
+    // JFET channel conductance, zero below pinch-off.
+    gj(vd) = ba.if(vov < 0.0, 0.0, ba.if(vd <= vov, K * (vov - 0.5 * vd), gsat))
+    with {
+        vov = vgs - VP;
+        gsat = IS0 * (1.0 - vgs / VP) ^ 2 * (1.0 + LAMBDA * vd) / max(vd, 1e-9);
+    };
+
+    // One phase-shift stage; state: integrator s and the previous v_ds d.
+    stage = core ~ (_, _) : (!, !, _)
+    with {
+        core(sprev, dprev, x) = s, d, y
+        with {
+            wb = (1.0 / RS + gj(dprev)) / CS;
+            g = tan(min(0.5 * wb / ma.SR, 0.25 * ma.PI));   // g <= 1: passive
+            vc = (g * x + sprev) / (1.0 + g);               // capacitor voltage
+            s = 2.0 * vc - sprev;
+            d = x - vc;                                     // JFET v_ds
+            y = x - 2.0 * vc;                               // stage output
+        };
+    };
+};
+declare mxrPhase90 author "David Braun";
+declare mxrPhase90 license "MIT";
 
 
 //-----------------------`(ve.)klonCentaur`---------------------------
