@@ -21,15 +21,45 @@ This library reproduces its DSP core:
   (index / diameter, e.g. for fricatives and stops), and the velum.
 
 Everything that was block-rate (512 samples) in the JavaScript is computed
-at sample rate here, with the block-rate constants converted to per-second
-rates using `512/ma.SR`, so behaviour matches the original at any sample rate.
+at sample rate here, with the block-rate constants converted to rates using
+the original's block length.
+
+**Sample rate.** Each waveguide section is one tick long, so the tract's
+acoustic length, and with it every formant, scales with the tick rate; the
+original has the same property. With the default `ticksPerSample = 2` the
+model is tuned for 44.1 and 48 kHz (at 48 kHz the formants of a given shape
+are about 9 % higher than at 44.1 kHz). At 88.2 or 96 kHz, override it to 1,
+e.g. `pt[ticksPerSample=1;].pinkTrombone(...)`: the whole model then behaves
+as it does at 44.1 or 48 kHz. Other rates shift the formants in proportion.
 The 1-D simplex drift noises are the real thing (`no.simplex1_lf`, a port of
 the same noisejs code, with a fixed seed instead of `Date.now()`); the browser's
 uniform `Math.random()` white noise is replaced by scaled `no.noise`.
 
-Its official prefix is `pt`. See `tests/pinktrombone/` (port-notes.md, the Python
-reference implementation and validation script) for the port notes and the list of
-deliberate deviations (UI-only behaviours that were not modelled).
+Its official prefix is `pt`.
+
+#### Deviations from the original
+
+* The block-rate updates (512-sample blocks) run at sample rate, and the reflection
+  coefficients follow the section diameters every sample instead of being
+  interpolated across each block (which also removes the original's swapped
+  old/new interpolation at the nose junction). The release of a closure is still
+  detected one block late, as in the original.
+* `voiced` behaves like a finger on the original's pitch keyboard: voicing ramps
+  in and out, without the pressed onset of the original's untouched "always
+  voice" start-up.
+* UI-only behaviour is not modelled: the keyboard is replaced by `freq` in Hz;
+  the tongue control's reachable-range kludge, and its side effect of acting as a
+  wide constriction while held, are left out; at most two constrictions
+  (`tract2`, `pinkTrombone2`); the velum is the separate `nasal` gate instead of a
+  touch below the tract.
+* Up to two release transients sound at once (the original keeps a list).
+* The simplex drift uses the fixed seed `noiseSeed` instead of `Date.now()`, and
+  the uniform white noise is scaled `no.noise`.
+* Waveguide state below 1e-20 is flushed to zero, so the (lossless) nose does not
+  decay into denormals.
+
+Against a line-by-line reference port of the JavaScript, settled tract output
+matches to about 1e-6 (relative) and the LF waveform to 2e-3 (absolute, float32).
 
 #### Usage
 
@@ -90,20 +120,22 @@ IN THE SOFTWARE.
 
 ----
 
-### `(pt.)n`
+### `(pt.)ticksPerSample`
 
-Number of mouth waveguide sections (44).
+Waveguide ticks per sample (2). The tract's length, and so its formants, follow
+the tick rate: keep 2 at 44.1/48 kHz, override it to 1 at 88.2/96 kHz with
+explicit substitution (`pt[ticksPerSample=1;]`).
 
 #### Usage
 
 ```
-n : _
+ticksPerSample : _
 ```
 
 #### Test
 ```
 import("stdfaust.lib");
-pt_n_test = pt.n;
+pt_ticksPerSample_test = pt[ticksPerSample=1;].pinkTrombone(140, 0.6, 1, 0, 12.9, 2.43, 30, 3, 0, 0);
 ```
 
 ##  Utilities 
@@ -124,29 +156,7 @@ noiseSeed : _
 #### Test
 ```
 import("stdfaust.lib");
-pt_noiseSeed_test = pt.noiseSeed;
-```
-
-----
-
-### `(pt.)simplexNoise`
-
-Seeded slow simplex drift shared by the Pink Trombone modulators.
-
-#### Usage
-
-```
-simplexNoise(rate) : _
-```
-
-Where:
-
-* `rate`: Simplex features per second.
-
-#### Test
-```
-import("stdfaust.lib");
-pt_simplexNoise_test = pt.simplexNoise(4.07);
+pt_noiseSeed_test = pt[noiseSeed=7;].glottis(140, 0.6, 1, 1) : _, !, !, !;
 ```
 
 ##  Glottis 
@@ -198,7 +208,8 @@ Where:
 
 * `freq`: Positive fundamental frequency in Hz; the demo spans about 87..277 Hz.
 * `tenseness`: Voice tenseness in 0..1; the default is 0.6.
-* `voiced`: Voice gate: positive is on, zero is off.
+* `voiced`: Voice gate: positive is on, zero is off. It acts like a finger on the
+  original's pitch keyboard: voicing ramps in and out, with no pressed onset.
 * `wobble`: Pitch wobble amount in 0..1.
 
 #### Test
@@ -274,83 +285,6 @@ tractDiameters2_test = pt.tractDiameters2(20, 3.0, 36.3, 0.5, 1, 20.6, 0.8, 1);
 
 ----
 
-### `(pt.)NSTATE`
-
-Number of waveguide state signals (144), ordered as 44 right-going mouth, 44 left-going mouth, 28 right-going nasal and 28 left-going nasal waves.
-
-#### Usage
-
-```
-NSTATE : _
-```
-
-#### Test
-```
-import("stdfaust.lib");
-pt_NSTATE_test = pt.NSTATE;
-```
-
-----
-
-### `(pt.)NREFL`
-
-Number of reflection signals (46): 43 mouth junctions followed by the left, right and nasal coefficients of the three-port junction.
-
-#### Usage
-
-```
-NREFL : _
-```
-
-#### Test
-```
-import("stdfaust.lib");
-pt_NREFL_test = pt.NREFL;
-```
-
-----
-
-### `(pt.)tractTick`
-
-One waveguide tick (the original's `Tract.runStep`) as a pure function of the state.
-Inputs are the state (see NSTATE), glottal excitation, 44 injection signals,
-and 46 reflection coefficients (see NREFL). Outputs are the updated state.
-
-#### Usage
-
-```
-si.bus(144), _, si.bus(44), si.bus(46) : tractTick : si.bus(144)
-```
-
-#### Test
-```
-import("stdfaust.lib");
-tractTick_test = (par(k, pt.NSTATE, (k == 16) + (k == 64) + 0.7*(k == 91) + 0.2*(k == 125)), 1, par(k, pt.n, (k == 5)*0.25), par(i, pt.n - 1, 0.01*(i+1)), 0.1, 0.2, 0.3) : pt.tractTick;
-```
-
-----
-
-### `(pt.)tractReflections`
-
-Scattering coefficients from the 44 section diameters and the velum diameter.
-Inputs are 44 mouth diameters followed by the velum diameter.
-Outputs are ordered as described by NREFL. Diameters must be nonnegative
-and the three-port junction must have positive total area.
-
-#### Usage
-
-```
-si.bus(44), _ : tractReflections : si.bus(46)
-```
-
-#### Test
-```
-import("stdfaust.lib");
-tractReflections_test = pt.tractDiameters(12.9, 2.43, 30, 3, 0), 0.01 : pt.tractReflections;
-```
-
-----
-
 ### `(pt.)tract`
 
 The Pink Trombone vocal tract: 44-section Kelly–Lochbaum waveguide with a
@@ -420,12 +354,12 @@ tract2_test = (os.lf_imptrain(140), 0.3) : pt.tract2(12.9, 2.43, 36.3, 0.5, 1, 2
 
 ----
 
-### `(pt.)tractN`
+### `(pt.)tractExt`
 
 Same as `tract` / `tract2` but with an explicit turbulence noise source (the
 original's 1 kHz, Q 0.5 bandpassed white noise) as first argument, for testing.
 
-With `fricNoise = 0` and *constant* articulation arguments, `tractN`/`tractN2`
+With `fricNoise = 0` and *constant* articulation arguments, `tractExt`/`tract2Ext`
 reduce to the bare linear waveguide, which is exactly LTI from `glottalOutput`
 to the output: `_moveTowards` starts on its target, so constant articulation
 never ramps, the reflection coefficients are constants, and no release
@@ -435,7 +369,7 @@ transient can fire. Its impulse response then characterises it completely
 #### Usage
 
 ```
-tractN(fricNoise, tongueIndex, tongueDiameter, cIndex, cDiameter, cActive, nasal, glottalOutput, noiseModulator) : _
+tractExt(fricNoise, tongueIndex, tongueDiameter, cIndex, cDiameter, cActive, nasal, glottalOutput, noiseModulator) : _
 ```
 
 Where:
@@ -453,12 +387,12 @@ Where:
 #### Test
 ```
 import("stdfaust.lib");
-tractN_test = pt.tractN(no.noise, 12.9, 2.43, 30.4, 0.55, 1, 0, os.lf_imptrain(140), 0.3);
+tractExt_test = pt.tractExt(no.noise, 12.9, 2.43, 30.4, 0.55, 1, 0, os.lf_imptrain(140), 0.3);
 ```
 
 ----
 
-### `(pt.)tractN2`
+### `(pt.)tract2Ext`
 
 Vocal tract with two independent constrictions and an explicit turbulence source.
 With zero turbulence and constant articulation, this is a linear time-invariant
@@ -467,7 +401,7 @@ filter of the glottal excitation. Constant articulation starts on its target.
 #### Usage
 
 ```
-tractN2(fricNoise, tongueIndex, tongueDiameter, c1i, c1d, c1a, c2i, c2d, c2a, nasal, glottalOutput, noiseModulator) : _
+tract2Ext(fricNoise, tongueIndex, tongueDiameter, c1i, c1d, c1a, c2i, c2d, c2a, nasal, glottalOutput, noiseModulator) : _
 ```
 
 Where:
@@ -488,7 +422,7 @@ Where:
 #### Test
 ```
 import("stdfaust.lib");
-tractN2_test = pt.tractN2(no.noise, 12.9, 2.43, 36.3, 0.5, 1, 20.6, 0.8, 1, 0, os.lf_imptrain(140), 0.3);
+tract2Ext_test = pt.tract2Ext(no.noise, 12.9, 2.43, 36.3, 0.5, 1, 20.6, 0.8, 1, 0, os.lf_imptrain(140), 0.3);
 ```
 
 ##  Full instrument 
@@ -510,7 +444,8 @@ Where:
 
 * `freq`: Positive fundamental frequency in Hz; the demo spans about 87..277 Hz.
 * `tenseness`: Voice tenseness in 0..1; the default is 0.6.
-* `voiced`: Voice gate: positive is on, zero is off.
+* `voiced`: Voice gate: positive is on, zero is off. It acts like a finger on the
+  original's pitch keyboard: voicing ramps in and out, with no pressed onset.
 * `wobble`: Pitch wobble amount in 0..1.
 * `tongueIndex`: Tongue position in sections, 12..29 (default 12.9).
 * `tongueDiameter`: Tongue diameter in model units, 2.05..3.5 (default 2.43).
@@ -541,7 +476,8 @@ Where:
 
 * `freq`: Positive fundamental frequency in Hz; the demo spans about 87..277 Hz.
 * `tenseness`: Voice tenseness in 0..1; the default is 0.6.
-* `voiced`: Voice gate: positive is on, zero is off.
+* `voiced`: Voice gate: positive is on, zero is off. It acts like a finger on the
+  original's pitch keyboard: voicing ramps in and out, with no pressed onset.
 * `wobble`: Pitch wobble amount in 0..1.
 * `tongueIndex`: Tongue position in sections, 12..29 (default 12.9).
 * `tongueDiameter`: Tongue diameter in model units, 2.05..3.5 (default 2.43).

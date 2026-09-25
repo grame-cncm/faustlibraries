@@ -537,6 +537,10 @@ drift. Unlike filtered white noise, simplex noise is a smooth (C²) deterministi
 function of its argument, bounded to [-1,1], zero at the lattice points, with
 most of its energy below roughly 2 cycles per unit of the argument.
 
+The seeding scheme (Perlin's permutation table XOR-ed with the seed) and the gradient
+set follow Joseph Gentle's `noisejs` (ISC license, (c) 2013 Joseph Gentle; its
+notice is reproduced in the source below `simplex2`). Gustavson's original code is
+public domain.
 
 #### Usage
 
@@ -566,6 +570,11 @@ simplex2_test = no.simplex2(12345, os.lf_sawpos(1)*10, 0.5);
 ### `(no.)simplex1`
 
 One-dimensional slice of simplex2 at (1.2*x, -0.7*x), as used by Pink Trombone.
+
+The seeding scheme (Perlin's permutation table XOR-ed with the seed) and the gradient
+set follow Joseph Gentle's `noisejs` (ISC license, (c) 2013 Joseph Gentle; its
+notice is reproduced in the source below `simplex2`). Gustavson's original code is
+public domain.
 
 #### Usage
 
@@ -601,6 +610,11 @@ plus an offset inside it, so the output stays as smooth after hours as at
 start-up (no float32 precision loss, no sample-counter overflow), is the same
 in single and double precision, and a time-varying `rate` integrates without
 phase jumps.
+
+The seeding scheme (Perlin's permutation table XOR-ed with the seed) and the gradient
+set follow Joseph Gentle's `noisejs` (ISC license, (c) 2013 Joseph Gentle; its
+notice is reproduced in the source below `simplex2`). Gustavson's original code is
+public domain.
 
 #### Usage
 
