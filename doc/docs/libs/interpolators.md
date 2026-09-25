@@ -773,7 +773,7 @@ process = x, yCoords : it.lagrangeInterpolation(N, xCoordsList);
 
 which outputs ~1.938.
 
-* Example: output the dashed curve showed on the Wikipedia page (top figure in [https://en.wikipedia.org/wiki/Lagrange_polynomial](https://en.wikipedia.org/wiki/Lagrange_polynomial)):
+Example: output the dashed curve showed on the Wikipedia page (top figure in [https://en.wikipedia.org/wiki/Lagrange_polynomial](https://en.wikipedia.org/wiki/Lagrange_polynomial)):
 
 ```
 N = 3;

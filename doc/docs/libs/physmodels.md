@@ -1294,7 +1294,7 @@ Modular string instrument resonator based on IR measurements made on 3D
 printed models. The 2D space allowing for the control of the shape and the
 scale of the model is enabled by interpolating between modes parameters.
 More information about this technique/project can be found here: 
-* [https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/](https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/).
+[https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/](https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/).
 
 #### Usage
 
@@ -1346,7 +1346,7 @@ modularInterpBody_test = 0.25, -0.15, 0.05 : pm.modularInterpBody(20, 1.0, 1.5);
 
 String instrument model with a modular body (see 
 [`modeInterpRes`](#pm.modeinterpres) and 
-* [https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/](https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/)).
+[https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/](https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/)).
 
 #### Usage
 
@@ -1375,7 +1375,7 @@ modularInterpStringModel_test = pm.modularInterpStringModel(0.9, 0.3, 1.0, 1.5, 
 
 String instrument with a modular body (see 
 [`modeInterpRes`](#pm.modeinterpres) and 
-* [https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/](https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/)).
+[https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/](https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/)).
 
 #### Usage
 
@@ -1405,7 +1405,7 @@ modularInterpInstr_test = pm.modularInterpInstr(0.9, 0.3, 1.0, 1.5, 0.8, button(
 
 Ready-to-use MIDI-enabled string instrument with a modular body (see 
 [`modeInterpRes`](#pm.modeinterpres) and 
-* [https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/](https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/))
+[https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/](https://ccrma.stanford.edu/~rmichon/3dPrintingModeling/))
 with built-in UI.
 
 #### Usage
@@ -3172,7 +3172,7 @@ Vocal synthesizer functions (source/filter, fof, etc.).
 Formant data values in an environment.
 
 The formant data used here come from the CSOUND manual
-* [http://www.csounds.com/manual/html/](http://www.csounds.com/manual/html/).
+[http://www.csounds.com/manual/html/](http://www.csounds.com/manual/html/).
 
 #### Usage
 
@@ -3806,7 +3806,7 @@ one vowel to another. Voice type can be selected but must correspond to
 the frequency range of the synthesized voice to be realistic.
 
 The formant data used here come from the CSOUND manual
-* [http://www.csounds.com/manual/html/](http://www.csounds.com/manual/html/).
+[http://www.csounds.com/manual/html/](http://www.csounds.com/manual/html/).
 
 #### Usage
 

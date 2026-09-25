@@ -302,4 +302,4 @@ multiTapSincDelay_test = os.osc(440) : de.multiTapSincDelay(2, 4096, 1024.0, 153
 
 #### References
 
-*  T. Carpentier, "Implementation of a continuously variable delay line by crossfading between several tap delays", 2024: [https://hal.science/hal-04646939](https://hal.science/hal-04646939)
+ T. Carpentier, "Implementation of a continuously variable delay line by crossfading between several tap delays", 2024: [https://hal.science/hal-04646939](https://hal.science/hal-04646939)

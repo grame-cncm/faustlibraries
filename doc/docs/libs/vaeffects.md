@@ -535,7 +535,7 @@ state-variable filters capable of LPF, HPF, and BPF.
 * Vadim Zavalishin (2018) "The Art of VA Filter Design", v2.1.0
 * [https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.0.pdf](https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.0.pdf)
 * Will Pirkle (2014) "Resolving Delay-Free Loops in Recursive Filters Using 
-* the Modified Härmä Method", AES 137 [http://www.aes.org/e-lib/browse.cfm?elib=17517](http://www.aes.org/e-lib/browse.cfm?elib=17517)
+the Modified Härmä Method", AES 137 [http://www.aes.org/e-lib/browse.cfm?elib=17517](http://www.aes.org/e-lib/browse.cfm?elib=17517)
 * Description and diagrams of 1st- and 2nd-order TPT filters: 
 * [https://www.willpirkle.com/706-2/](https://www.willpirkle.com/706-2/)
 
@@ -557,7 +557,7 @@ requires independently calculating the output and each state during each
 recursive step. However, it works as a way to store and use "states"
 within the constraints of Faust. 
 The simplest example is the 1st-order LPF (shown on the cover of Zavalishin 
-* 2018 and Fig 4.3 of [https://www.willpirkle.com/706-2/](https://www.willpirkle.com/706-2/)).
+2018 and Fig 4.3 of [https://www.willpirkle.com/706-2/](https://www.willpirkle.com/706-2/)).
 
 Here, the input signal is split in parallel for the calculation of the output signal, `y`, 
 and the state `s`. The value of the state is only used for feedback to the next 
@@ -655,7 +655,7 @@ Sallen-Key generic 2nd order filter that produces the LPF, BPF and HPF outputs.
 This is a 2nd-order Sallen-Key state-variable filter. The idea is that by 
 "tapping" into different points in the circuit, different filters 
 (LPF,BPF,HPF) can be achieved. See Figure 4.6 of 
-* [https://www.willpirkle.com/706-2/](https://www.willpirkle.com/706-2/)
+[https://www.willpirkle.com/706-2/](https://www.willpirkle.com/706-2/)
 
 This is also a good example of the next step for generalizing the Faust 
 programming approach used for all these VA filters. In this case, there are 

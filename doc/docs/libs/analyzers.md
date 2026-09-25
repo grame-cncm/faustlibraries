@@ -197,7 +197,7 @@ Use `amp_follower_ar` below to remove this restriction.
 
 * "Digital Dynamic Range Compressor Design --- A Tutorial and Analysis", by
   Dimitrios Giannoulis, Michael Massberg, and Joshua D. Reiss
-*   [https://www.eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf](https://www.eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf)
+  [https://www.eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf](https://www.eecs.qmul.ac.uk/~josh/documents/2012/GiannoulisMassbergReiss-dynamicrangecompression-JAES2012.pdf)
 
 ----
 

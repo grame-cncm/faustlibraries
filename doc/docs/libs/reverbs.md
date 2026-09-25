@@ -68,7 +68,7 @@ Faust examples directory).
 which was recovered from an old SAIL DART backup tape.
 John Chowning thinks this might be the one used on his
 often-heard brass canon sound examples, one of which can be found at
-* [https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav](https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav).
+[https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav](https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav).
 
 #### Usage
 
@@ -567,7 +567,7 @@ kb_rom_rev1_test = (os.osc(330), os.osc(660))
 
 #### References
 
-* [https://www.spinsemi.com/programs.php#://~://text=Keith%20Barrrom_rev1.spn,-ROM%20reverb%202](https://www.spinsemi.com/programs.php#://~://text=Keith%20Barrrom_rev1.spn,-ROM%20reverb%202)
+* [https://www.spinsemi.com/programs.php#:~:text=Keith%20Barr-,rom_rev1.spn,-ROM%20reverb%202](https://www.spinsemi.com/programs.php#:~:text=Keith%20Barr-,rom_rev1.spn,-ROM%20reverb%202)
 * [https://www.spinsemi.com/knowledge_base/effects.html#Reverberation](https://www.spinsemi.com/knowledge_base/effects.html#Reverberation)
 * [https://www.spinsemi.com/knowledge_base/inst_syntax.html](https://www.spinsemi.com/knowledge_base/inst_syntax.html)
 

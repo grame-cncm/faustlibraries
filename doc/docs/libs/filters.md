@@ -960,7 +960,7 @@ av2sv_test = fi.av2sv((-0.4, 0.1)) : si.bus(2);
 
 #### References
 
-*   [https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html](https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html)
+  [https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html](https://ccrma.stanford.edu/~jos/filters/Step_Down_Procedure.html)
   (where reflection coefficients are denoted by k rather than s).
 
 ----
@@ -3013,7 +3013,7 @@ See `dm.spectral_tilt_demo` and the documentation for `no.pink_noise`.
 
 J.O. Smith and H.F. Smith,
 "Closed Form Fractional Integration and Differentiation via Real Exponentially Spaced Pole-Zero Pairs",
-* arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016, [http://arxiv.org/abs/1606.06154](http://arxiv.org/abs/1606.06154)
+arXiv.org publication arXiv:1606.06154 [cs.CE], June 7, 2016, [http://arxiv.org/abs/1606.06154](http://arxiv.org/abs/1606.06154)
 
 ----
 
