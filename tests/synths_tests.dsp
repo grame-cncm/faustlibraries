@@ -48,6 +48,14 @@ additiveDrum_slider_test = sy.additiveDrum(
 fm_test = sy.fm((220, 440, 660), (1.5, 0.8));
 fm_modulated_test = sy.fm((220, 440), (1000*tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
+logicEFM1_test = sy.logicEFM1(1, 2, 0, 0, 0, 0.3, 2.5, 0.5, 0.2, 0.3, 10, 0,
+                              -0.3, 2, 0.3, 1, 10, 500, 0.7, 300, 0, 800, 0.2, 200,
+                              261.63, ba.time < 36000, 0.8);
+
+logicEFM1_unison_test = sy.logicEFM1(3, 4, 0, 0, 1, 0.35, 8.9, 0.7, 0, 0.2, 35, 1,
+                                     0.8, 1, 0.8, 1, 5, 1200, 0.3, 500, 0, 2000, 0.1, 400,
+                                     261.63, ba.time < 36000, 0.8);
+
 kick_test = sy.kick(60, 0.2, 0.01, 0.5, 3, button("kick:gate"));
 kick_slider_test = sy.kick(
     hslider("kick:pitch", 60, 30, 120, 0.1),
