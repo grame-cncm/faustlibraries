@@ -1001,21 +1001,16 @@
 
 ## pinktrombone
 
-[(pt.)n](pinktrombone.md#ptn)
+[(pt.)ticksPerSample](pinktrombone.md#pttickspersample)
 [(pt.)noiseSeed](pinktrombone.md#ptnoiseseed)
-[(pt.)simplexNoise](pinktrombone.md#ptsimplexnoise)
 [(pt.)lfWaveform](pinktrombone.md#ptlfwaveform)
 [(pt.)glottis](pinktrombone.md#ptglottis)
 [(pt.)tractDiameters](pinktrombone.md#pttractdiameters)
 [(pt.)tractDiameters2](pinktrombone.md#pttractdiameters2)
-[(pt.)NSTATE](pinktrombone.md#ptnstate)
-[(pt.)NREFL](pinktrombone.md#ptnrefl)
-[(pt.)tractTick](pinktrombone.md#pttracttick)
-[(pt.)tractReflections](pinktrombone.md#pttractreflections)
 [(pt.)tract](pinktrombone.md#pttract)
 [(pt.)tract2](pinktrombone.md#pttract2)
-[(pt.)tractN](pinktrombone.md#pttractn)
-[(pt.)tractN2](pinktrombone.md#pttractn2)
+[(pt.)tractExt](pinktrombone.md#pttractext)
+[(pt.)tract2Ext](pinktrombone.md#pttract2ext)
 [(pt.)pinkTrombone](pinktrombone.md#ptpinktrombone)
 [(pt.)pinkTrombone2](pinktrombone.md#ptpinktrombone2)
 

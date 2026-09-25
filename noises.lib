@@ -672,6 +672,10 @@ with {
 // function of its argument, bounded to [-1,1], zero at the lattice points, with
 // most of its energy below roughly 2 cycles per unit of the argument.
 //
+// The seeding scheme (Perlin's permutation table XOR-ed with the seed) and the gradient
+// set follow Joseph Gentle's `noisejs` (ISC license, (c) 2013 Joseph Gentle; its
+// notice is reproduced in the source below `simplex2`). Gustavson's original code is
+// public domain.
 //
 // #### Usage
 //
@@ -698,6 +702,25 @@ with {
 //------------------------------------------------------------
 declare simplex2 license "MIT";
 declare simplex2 author "David Braun (Faust port of Stefan Gustavson's / Joseph Gentle's code)";
+/*
+noisejs, from which the seeding scheme and gradient set of simplex2 are taken:
+
+ISC License
+
+Copyright (c) 2013, Joseph Gentle
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+*/
 
 simplex2(seed, x, y) = (x, y) : skew : _simplex2Cell(seed)
 with {
@@ -757,6 +780,11 @@ with {
 //-----------------`(no.)simplex1`--------------------
 // One-dimensional slice of simplex2 at (1.2*x, -0.7*x), as used by Pink Trombone.
 //
+// The seeding scheme (Perlin's permutation table XOR-ed with the seed) and the gradient
+// set follow Joseph Gentle's `noisejs` (ISC license, (c) 2013 Joseph Gentle; its
+// notice is reproduced in the source below `simplex2`). Gustavson's original code is
+// public domain.
+//
 // #### Usage
 //
 // ```
@@ -790,6 +818,11 @@ simplex1(seed, x) = simplex2(seed, x*1.2, 0 - x*0.7);
 // start-up (no float32 precision loss, no sample-counter overflow), is the same
 // in single and double precision, and a time-varying `rate` integrates without
 // phase jumps.
+//
+// The seeding scheme (Perlin's permutation table XOR-ed with the seed) and the gradient
+// set follow Joseph Gentle's `noisejs` (ISC license, (c) 2013 Joseph Gentle; its
+// notice is reproduced in the source below `simplex2`). Gustavson's original code is
+// public domain.
 //
 // #### Usage
 //
