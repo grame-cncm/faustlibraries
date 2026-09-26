@@ -2386,8 +2386,10 @@ Thus, the passband (stopband) width is `fu-fl`,
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 src = os.osc(440);
 bandstop_test = src : fi.bandstop(2, 500, 1500);
+bandstop_wide_test = no.noise : fi.bandstop(2, 5000, 8000);
 ```
 
 ----
