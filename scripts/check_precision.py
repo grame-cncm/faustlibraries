@@ -27,7 +27,9 @@ in single precision, `level` the worst level gap it may reach (times
 compiler and its libm), and `expected` the tests whose single and double
 outputs differ by definition (ma.EPSILON...), which are not checked. A
 baseline entry that is no longer needed is reported so that it can be
-removed; never add one to silence a failure you caused.
+removed: a level entry once the gap is below threshold / margin, so that a
+gap that is under the threshold on one platform but not on another keeps its
+entry. Never add an entry to silence a failure you caused.
 
 `gap` is reported, not checked: a sine input (os.osc) drifts in phase in
 single precision, so most tests exceed any useful sample-level threshold
@@ -202,10 +204,14 @@ def stale_baseline(res, baseline):
     bad = {str(sr) for sr, m in res["rates"].items() if not m["finite_single"]}
     if allowed - bad:
         stale.append("nonfinite at " + ", ".join(sorted(allowed - bad, key=int)))
+    # A level entry is reported only once the gap is below the threshold by the
+    # same margin that the baseline allows above its entries: a gap just under
+    # the threshold on this platform may still be just over it on another one.
     limit = baseline.get("level", {}).get(name)
     level = worst(res, "level")
-    if limit is not None and level is not None and level <= baseline.get("threshold", 1e-3):
-        stale.append(f"level (now {level:.1e})")
+    below = baseline.get("threshold", 1e-3) / baseline.get("margin", 2.0)
+    if limit is not None and level is not None and level <= below:
+        stale.append(f"level (now {level:.1e}, below {below:g})")
     return stale
 
 
