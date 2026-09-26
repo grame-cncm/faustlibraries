@@ -10,6 +10,7 @@ no = library("noises.lib");
 src = os.osc(440);
 
 bandpass_test = src : fi.bandpass(2, 500, 1500);
+bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);
 bandstop_test = src : fi.bandstop(2, 500, 1500);
 bandstop_wide_test = no.noise : fi.bandstop(2, 5000, 8000);
 bandpass0_bandstop1_test = src : fi.bandpass0_bandstop1(0, 2, 500, 1500);

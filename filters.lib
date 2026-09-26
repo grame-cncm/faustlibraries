@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.11.4";
+declare version "1.11.5";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2197,7 +2197,7 @@ with {
 // section.  Such sections can be combined in series for higher orders.
 // The order of mappings is (1) frequency scaling (to set lowpass cutoff w1),
 // (2) bandpass mapping to wc, then (3) the bilinear transform, with the
-// usual scale parameter `2*SR`.  Algebra carried out in maxima and pasted here.
+// usual scale parameter `2*SR`.
 //
 // #### Usage
 //
@@ -2212,6 +2212,19 @@ with {
 // * `w1`: half the desired passband width in radians/second
 // * `wc`: desired center frequency in radians/second
 //
+// #### Method
+//
+// The fourth-order section is computed as two trapezoidal state-variable
+// sections in cascade, not as one fourth-order direct form: the four poles
+// form two conjugate pairs, at `wc*m` and `wc/m` with the same Q, computed
+// from the prototype poles. With `p = (s^2 + wc^2)/(w1*s)`, the output is
+// `b2*x + (b1 - b2*a1)*p/D(p)*x + (b0 - b2*a0)/D(p)*x`, where
+// `D(p) = p^2 + a1*p + a0`, and both terms are read on the outputs of the
+// two sections. The transfer function is the same bilinear transform
+// (unwarped, scale `2*SR`), but it stays accurate in single precision when
+// the band is low or narrow relative to the sample rate, where the direct
+// form's poles cluster near z = 1 (issue #261).
+//
 // #### Test
 // ```
 // fi = library("filters.lib");
@@ -2224,19 +2237,60 @@ with {
 declare tf2sb author "Julius O. Smith III";
 declare tf2sb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf2sb license "LicenseRef-STK-4.3";
-tf2sb(b2,b1,b0,a1,a0,w1,wc) =
-  iir((b0d/a0d,b1d/a0d,b2d/a0d,b3d/a0d,b4d/a0d),(a1d/a0d,a2d/a0d,a3d/a0d,a4d/a0d)) with {
-  T = 1.0/float(ma.SR);
-  b0d = b2*wc^4*T^4+2*b1*wc^2*w1*T^3+(4*b0*w1^2+8*b2*wc^2)*T^2+8*b1*w1*T+16*b2;
-  b1d = 4*b2*wc^4*T^4+4*b1*wc^2*w1*T^3-16*b1*w1*T-64*b2;
-  b2d = 6*b2*wc^4*T^4+(-8*b0*w1^2-16*b2*wc^2)*T^2+96*b2;
-  b3d = 4*b2*wc^4*T^4-4*b1*wc^2*w1*T^3+16*b1*w1*T-64*b2;
-  b4d = b2*wc^4*T^4-2*b1*wc^2*w1*T^3+(4*b0*w1^2+8*b2*wc^2)*T^2-8*b1*w1*T+16*b2;
-  a0d = wc^4*T^4+2*a1*wc^2*w1*T^3+(4*a0*w1^2+8*wc^2)*T^2+8*a1*w1*T+16;
-  a1d = 4*wc^4*T^4+4*a1*wc^2*w1*T^3-16*a1*w1*T-64;
-  a2d = 6*wc^4*T^4+(-8*a0*w1^2-16*wc^2)*T^2+96;
-  a3d = 4*wc^4*T^4-4*a1*wc^2*w1*T^3+16*a1*w1*T-64;
-  a4d = wc^4*T^4-2*a1*wc^2*w1*T^3+(4*a0*w1^2+8*wc^2)*T^2-8*a1*w1*T+16;
+tf2sb(b2,b1,b0,a1,a0,w1,wc) = _ <: *(b2), (sec(wc*m, R1) : !,_,! : sec(wc/m, R2) : taps) :> _
+with {
+  rho = w1/wc;
+  m = _tf2sbpoles(a1,a0,rho) : _,!,!;
+  R1 = _tf2sbpoles(a1,a0,rho) : !,_,!;
+  R2 = _tf2sbpoles(a1,a0,rho) : !,!,_;
+  // unwarped bilinear transform, as in the direct form: g = w/(2*SR)
+  sec(w,R) = _svfbl(w*0.5/ma.SR, 2*R);
+  // the second section is fed by the first one's bandpass output
+  // wc*m*s/D1, so p/D(p) = w1*s*(s^2+wc^2)/(D1*D2) is (rho/m)*(hp + m^2*lp)
+  // and 1/D(p) = w1^2*s^2/(D1*D2) is rho^2*bp on the second section:
+  taps(lp,bp,hp) = (b1 - b2*a1)*(rho/m)*(hp + m*m*lp) + (b0 - b2*a0)*rho*rho*bp;
+};
+
+// Poles of tf2sb normalized by wc: the bandpass mapping sends each prototype
+// pole q to the roots u of u^2 - q*rho*u + 1, rho = w1/wc. For a complex pair
+// q, conj(q), the four poles are u, 1/u and their conjugates, two sections at
+// wc*|u| and wc/|u| with the same damping R = -Re(u)/|u|. u is the root of
+// larger modulus, computed with a complex square root that does not cancel.
+// For real poles q1, q2, each is one section at wc, with damping -q*rho/2.
+// Returns (m, R1, R2): sections at wc*m and wc/m, with dampings R1 and R2.
+_tf2sbpoles(a1,a0,rho) = select2(real, m, 1), select2(real, R, Rr1), select2(real, R, Rr2)
+with {
+  real = a1*a1 >= 4*a0;
+  // real prototype poles q1 = -(a1 + sqrt(a1^2 - 4*a0))/2 and q2 = a0/q1
+  q1 = 0 - (a1 + sqrt(max(0, a1*a1 - 4*a0)))*0.5 : min(0 - ma.MIN);
+  Rr1 = 0 - q1*rho*0.5;
+  Rr2 = 0 - a0/q1*rho*0.5;
+  // complex pole q:
+  qr = 0 - a1*0.5*rho;                    // Re(q)*rho
+  qi = sqrt(max(0, a0 - a1*a1*0.25))*rho; // Im(q)*rho
+  // sqrt(x + j*y) of the discriminant (q*rho)^2 - 4:
+  x = qr*qr - qi*qi - 4;
+  y = 2*qr*qi;
+  h = sqrt((sqrt(x*x + y*y) + abs(x))*0.5) : max(ma.MIN);
+  dr = select2(x < 0, h, abs(y)/(2*h));
+  di = select2(x < 0, y/(2*h), select2(y < 0, h, 0 - h));
+  sg = select2(qr*dr + qi*di < 0, 1, -1);
+  ur = (qr + sg*dr)*0.5;
+  ui = (qi + sg*di)*0.5;
+  m = sqrt(ur*ur + ui*ui);
+  R = 0 - ur/m;
+};
+
+// Trapezoidal state-variable filter with its integrator gain g and damping k
+// given directly: outputs lp, bp, hp = w^2/D, w*s/D, s^2/D with
+// D = s^2 + k*w*s + w^2, bilinear transform with g = w*T/2 (for tf2sb, tf1sb).
+_svfbl(g,k) = tick ~ (_,_) : !,!,_,_,_
+with {
+  tick(ic1eq, ic2eq, v0) = 2*v1 - ic1eq, 2*v2 - ic2eq, v2, v1, v0 - k*v1 - v2
+  with {
+    v1 = (ic1eq + g*(v0 - ic2eq))/(1 + g*(g + k));
+    v2 = ic2eq + g*v1;
+  };
 };
 
 //-----------------------------`(fi.)tf1sb`--------------------------------
@@ -2256,6 +2310,13 @@ tf2sb(b2,b1,b0,a1,a0,w1,wc) =
 // * `w1`: half the desired passband width in radians/second
 // * `wc`: desired center frequency in radians/second
 //
+// #### Method
+//
+// `(b1*p + b0)/(p + a0)` with `p = (s^2 + wc^2)/(w1*s)` is
+// `b1 + (b0 - b1*a0)*w1*s/(s^2 + a0*w1*s + wc^2)`: one trapezoidal
+// state-variable section at `wc`, whose bandpass output gives the second
+// term, with the unwarped bilinear transform of the direct form.
+//
 // #### Test
 // ```
 // fi = library("filters.lib");
@@ -2268,15 +2329,7 @@ tf2sb(b2,b1,b0,a1,a0,w1,wc) =
 declare tf1sb author "Julius O. Smith III";
 declare tf1sb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf1sb license "LicenseRef-STK-4.3";
-tf1sb(b1,b0,a0,w1,wc) = tf2(b0d/a0d,b1d/a0d,b2d/a0d,a1d/a0d,a2d/a0d) with {
-  T = 1.0/float(ma.SR);
-  a0d = wc^2*T^2+2*a0*w1*T+4;
-  b0d = b1*wc^2*T^2 +2*b0*w1*T+4*b1;
-  b1d = 2*b1*wc^2*T^2-8*b1;
-  b2d = b1*wc^2*T^2-2*b0*w1*T+4*b1;
-  a1d = 2*wc^2*T^2-8;
-  a2d = wc^2*T^2-2*a0*w1*T+4;
-};
+tf1sb(b1,b0,a0,w1,wc) = _ <: *(b1), (_svfbl(wc*0.5/ma.SR, a0*w1/wc) : !,*((b0 - b1*a0)*w1/wc),!) :> _;
 
 
 //==============================Simple Resonator Filters==================================
@@ -2975,8 +3028,10 @@ with {
 // ```
 // fi = library("filters.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
 // src = os.osc(440);
 // bandpass_test = src : fi.bandpass(2, 500, 1500);
+// bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);
 // ```
 //-------------------------------------------------------------------------
 declare bandpass author "Julius O. Smith III";

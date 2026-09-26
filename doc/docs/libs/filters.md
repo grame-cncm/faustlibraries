@@ -1755,7 +1755,7 @@ specified by the coefficients of a second-order analog lowpass prototype
 section.  Such sections can be combined in series for higher orders.
 The order of mappings is (1) frequency scaling (to set lowpass cutoff w1),
 (2) bandpass mapping to wc, then (3) the bilinear transform, with the
-usual scale parameter `2*SR`.  Algebra carried out in maxima and pasted here.
+usual scale parameter `2*SR`.
 
 #### Usage
 
@@ -1769,6 +1769,19 @@ Where:
 * `a1`, `a0`: analog lowpass denominator coefficients
 * `w1`: half the desired passband width in radians/second
 * `wc`: desired center frequency in radians/second
+
+#### Method
+
+The fourth-order section is computed as two trapezoidal state-variable
+sections in cascade, not as one fourth-order direct form: the four poles
+form two conjugate pairs, at `wc*m` and `wc/m` with the same Q, computed
+from the prototype poles. With `p = (s^2 + wc^2)/(w1*s)`, the output is
+`b2*x + (b1 - b2*a1)*p/D(p)*x + (b0 - b2*a0)/D(p)*x`, where
+`D(p) = p^2 + a1*p + a0`, and both terms are read on the outputs of the
+two sections. The transfer function is the same bilinear transform
+(unwarped, scale `2*SR`), but it stays accurate in single precision when
+the band is low or narrow relative to the sample rate, where the direct
+form's poles cluster near z = 1 (issue #261).
 
 #### Test
 ```
@@ -1798,6 +1811,13 @@ Where:
 * `a0`: analog denominator constant coefficient
 * `w1`: half the desired passband width in radians/second
 * `wc`: desired center frequency in radians/second
+
+#### Method
+
+`(b1*p + b0)/(p + a0)` with `p = (s^2 + wc^2)/(w1*s)` is
+`b1 + (b0 - b1*a0)*w1*s/(s^2 + a0*w1*s + wc^2)`: one trapezoidal
+state-variable section at `wc`, whose bandpass output gives the second
+term, with the unwarped bilinear transform of the direct form.
 
 #### Test
 ```
@@ -2354,8 +2374,10 @@ Thus, the passband width is `fu-fl`,
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 src = os.osc(440);
 bandpass_test = src : fi.bandpass(2, 500, 1500);
+bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);
 ```
 
 ----
