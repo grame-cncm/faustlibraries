@@ -2195,6 +2195,32 @@ declare klonCentaur license "BSD-3-Clause";
 // a UI. Input and output are in volts, a sample of
 // ±1 being treated as ±1 V as in the reference model.
 //
+// Output level: the op-amps are ideal, as in the reference model, so nothing
+// limits the output to the ±4.5 V a 9 V pedal can swing. At `volume` = 1 the
+// output peaks at about 6 to 9 V for a 1 V input (HP), and a guitar signal
+// peaking at 0.3 V is raised by about 17 dB (Drive 0) to 37 dB (Drive 1) in HP,
+// 11 to 31 dB in LP. `volume` around 0.14 (Drive 0) down to 0.014 (Drive 1)
+// gives roughly unity gain in HP, twice that in LP.
+//
+// Latency: the 4x oversampling of the clipping node delays the output by
+// 11 samples, at every sample rate.
+//
+// Accuracy: the small-signal response is within 0.1 dB of the analog circuit
+// from 30 Hz to 3 kHz at 44.1 kHz and above. The top octave rolls off (about
+// -1 to -4 dB at 10 kHz at 48 kHz, depending on the controls; under 1 dB at
+// 96 kHz). Relative to a converged simulation of the reference circuit, the
+// harmonics of a 1 kHz tone are within 0.3-0.8 % at 48 kHz and 0.1-0.3 % at
+// 96 kHz, and the error falls quadratically with the sample rate. Tested from
+// 8 kHz to 192 kHz.
+//
+// Data: the MOSFET-pair I-V curve is the single-nonlinearity characteristic
+// `singleNL_char.mat` of the reference model's repository, see References. It
+// was turned into the current into the pair versus node voltage (flipped),
+// shifted by 1.255 µA so that I(0) = 0, and thinned from 30 to 20 points: the
+// 10 points dropped lie within 0.07 mV of the table's ±4 V ends, where the
+// node never goes (it stays within ±2.6 V), and would only add segments too
+// narrow to resolve in single precision.
+//
 // #### Usage
 //
 // ```
@@ -2204,7 +2230,8 @@ declare klonCentaur license "BSD-3-Clause";
 // Where:
 //
 // * `drive`: Drive knob (0-1), audio taper: the Drive pot resistance is
-//   1 MΩ * drive^2 in the feedback of the first op-amp stage
+//   500 kΩ * drive^2 in the feedback of the first op-amp stage, as in the
+//   reference model (v1.x pedals used a 1 MΩ pot)
 // * `tone`: Tone knob (0-1), linear; 0 is darkest, 1 is brightest
 // * `volume`: Volume knob (0-1), a linear output gain (the v2 output is buffered,
 //   so the pot wiper is unloaded)
@@ -2215,6 +2242,7 @@ declare klonCentaur license "BSD-3-Clause";
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
 // fulltoneOCD_test = os.osc(330)
 //    : ve.fulltoneOCD(
 //        hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
@@ -2222,6 +2250,8 @@ declare klonCentaur license "BSD-3-Clause";
 //        hslider("fulltoneOCD:volume", 0.35, 0, 1, 0.01),
 //        checkbox("fulltoneOCD:hp")
 //      );
+// fulltoneOCD_lp_test = os.osc(110)*0.5 : ve.fulltoneOCD(1, 0, 0.1, 0);
+// fulltoneOCD_bright_test = no.noise*0.05 : ve.fulltoneOCD(0.7, 1, 0.1, 1);
 // ```
 //
 // #### References
@@ -2250,8 +2280,9 @@ rail, so the clipping curve is centered on 0 and no DC bias state exists):
         by the 500k Volume pot || (C8 + Tone rheostat)     [wd.buildtree]
      -> 5 Hz DC blocker -> Volume
 
-- Component values are those of the reference model (OCD v2). The Drive pot
-  is taken as 1 MΩ; the reference plug-in exposes 500 kΩ.
+- Component values are those of the reference model (OCD v2), including its
+  500 kΩ Drive pot (its plug-in's Drive maximum too). No v2 source gives the
+  pot value; the AionFX schematic of the v1.7 has 1 MΩ (audio taper).
 - The op-amps are ideal (no rail saturation), as in the reference model. Being
   linear, they are realized as bilinear-transformed biquads of their analytic
   transfer functions (wdmodels.lib has no nullor). Each is pre-warped at its
@@ -2270,17 +2301,12 @@ rail, so the clipping curve is centered on 0 and no DC bias state exists):
   sub-steps are chained by routing so that each CPWL evaluation appears once
   in the expression tree (nesting them as function calls blows up compile
   time).
-- The MOSFET-pair I-V curve is the reference model's single-nonlinearity
-  characteristic, oriented as the current into the pair versus node voltage,
-  anchored at I(0) = 0 and thinned to the 20 knots that carry its shape.
-- Accuracy: the small-signal response is within 0.1 dB of the analog circuit
-  from 30 Hz to 3 kHz at 44.1 kHz and above. Bilinear warping of the linear
-  stages rolls off the top octave (about -1 to -4 dB at 10 kHz at 48 kHz,
-  depending on the controls; under 1 dB at 96 kHz), and the oversampling
-  filter pair adds -0.4 dB at 15 kHz. Relative to a converged simulation of
-  the reference circuit, the full-chain error on guitar is under 1% at 48 kHz
-  and falls quadratically with the sample rate.
-- Sample rate: verified from 8 kHz to 192 kHz. Above 192 kHz ma.SR saturates
+- The MOSFET-pair I-V table (see Data above) keeps knots at least 1 mV apart.
+- Accuracy details: the top-octave roll-off comes from bilinear warping of the
+  linear stages; the oversampling filter pair adds -0.4 dB at 15 kHz. The
+  full-chain error on guitar, relative to a converged simulation of the
+  reference circuit, is under 1 % at 48 kHz.
+- Sample rate: above 192 kHz ma.SR saturates
   (see pl.SR), so this model, like every sample-rate-dependent function in
   the libraries, is mistuned there.
 - The 5 Hz DC blocker replaces the circuit's 0.03 Hz output corner (C7 into
@@ -2302,7 +2328,7 @@ with {
     R7 = 10e3;    R8 = 220e3;  R9 = 10e3;    C4 = 10e-9;      // clipping node
     R10 = 150e3;  R11 = 39e3;  C5 = 220e-12; C6 = 100e-9;     // op-amp 2
     R12 = 22e3;   R13 = 33e3;  C7 = 10e-6;   C8 = 47e-9;      // output network
-    RDRIVE_MAX = 1e6;      // Drive pot
+    RDRIVE_MAX = 500e3;    // Drive pot
     RTONE_MAX = 10e3;      // Tone pot, wired as a rheostat
     RVOL = 500e3;          // Volume pot, loading the output node
     RSER_HP = 1.0 / (1.0 / R12 + 1.0 / R13);   // R12 || R13
