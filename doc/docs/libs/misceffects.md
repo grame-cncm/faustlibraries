@@ -871,6 +871,45 @@ _,_,_ : ef.uniformPanToStereo(3) : _,_
 
 ----
 
+### `(ef.)xferDimensionExpander`
+
+Model of Xfer Records' DimensionExpander, a free stereo spatializer in the
+Roland Dimension D lineage (the "Dimension" half of Serum's Hyper/Dimension
+effect).
+
+The mono sum of the input feeds four fixed delay taps (15 ms * 1.18^i,
+stretched by `size`). Each tap is amplitude-modulated by a 0.455 Hz sine,
+the four sines in quadrature, and the sum is added to the left channel and
+subtracted from the right. The dry signal passes at unity; there are no
+filters and no feedback. Every constant was fitted to measurements of the
+plug-in binary (v1.0.0.5); on stereo program material the wet signal
+matches the plug-in to about -60 dB at 44.1, 48 and 96 kHz, up to the
+LFO's start phase, which the plug-in free-runs.
+
+#### Usage
+
+```
+_,_ : ef.xferDimensionExpander(size, wet) : _,_
+```
+
+Where:
+
+* `size`: Size knob (0-1, clamped), scales the tap delays from 15-25 ms
+  (0) to 115-189 ms (1)
+* `wet`: Dry/Wet knob (0-1), the wet level (the dry signal is always at
+  unity)
+
+#### Test
+```
+ef = library("misceffects.lib");
+os = library("oscillators.lib");
+xferDimensionExpander_test = os.osc(440), os.osc(550)
+   : ef.xferDimensionExpander(hslider("xferDimensionExpander:size", 0.5, 0, 1, 0.01),
+                              hslider("xferDimensionExpander:wet", 0.5, 0, 1, 0.01));
+```
+
+----
+
 ### `(ef.)tapeStop`
 
 A tape-stop effect, like putting a finger on a vinyl record player.

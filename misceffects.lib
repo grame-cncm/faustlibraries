@@ -67,7 +67,7 @@ aa = library("aanl.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.6.0"; 
+declare version "2.7.0"; 
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -1228,6 +1228,87 @@ uniformPanToStereo(N) = si.bus(N) <: par(i,2*N,_) :
 
 declare uniformPanToStereo author "Julius O. Smith III";
 declare uniformPanToStereo license "LicenseRef-STK-4.3";
+
+//-------------------`(ef.)xferDimensionExpander`------------------
+// Model of Xfer Records' DimensionExpander, a free stereo spatializer in the
+// Roland Dimension D lineage (the "Dimension" half of Serum's Hyper/Dimension
+// effect).
+//
+// The mono sum of the input feeds four fixed delay taps (15 ms * 1.18^i,
+// stretched by `size`). Each tap is amplitude-modulated by a 0.455 Hz sine,
+// the four sines in quadrature, and the sum is added to the left channel and
+// subtracted from the right. The dry signal passes at unity; there are no
+// filters and no feedback. Every constant was fitted to measurements of the
+// plug-in binary (v1.0.0.5); on stereo program material the wet signal
+// matches the plug-in to about -60 dB at 44.1, 48 and 96 kHz, up to the
+// LFO's start phase, which the plug-in free-runs.
+//
+// #### Usage
+//
+// ```
+// _,_ : ef.xferDimensionExpander(size, wet) : _,_
+// ```
+//
+// Where:
+//
+// * `size`: Size knob (0-1, clamped), scales the tap delays from 15-25 ms
+//   (0) to 115-189 ms (1)
+// * `wet`: Dry/Wet knob (0-1), the wet level (the dry signal is always at
+//   unity)
+//
+// #### Test
+// ```
+// ef = library("misceffects.lib");
+// os = library("oscillators.lib");
+// xferDimensionExpander_test = os.osc(440), os.osc(550)
+//    : ef.xferDimensionExpander(hslider("xferDimensionExpander:size", 0.5, 0, 1, 0.01),
+//                               hslider("xferDimensionExpander:wet", 0.5, 0, 1, 0.01));
+// ```
+//------------------------------------------------------------
+/*
+Implementation Notes:
+
+  wet(t) = 0.5 * wet * sum_i sin(2 pi f t - i pi/2) * m(t - d_i)
+  d_i = 15 ms * 1.18^i * (1 + 20 size / 3),  i = 0..3,  f = 0.45486 Hz
+  m = (L + R)/2;  L' = L + wet(t);  R' = R - wet(t)
+
+- The taps are fractional delays read through a Catmull-Rom cubic kernel,
+  fitted sample-exact against the plug-in's click response (rounding the taps
+  to whole samples, or using a Lagrange kernel, costs tens of dB of
+  high-frequency accuracy). The kernel lives here because delays.lib has no
+  Catmull-Rom delay.
+- The modulation is applied after the delay, at the tap outputs, with the
+  four gains 0.5 sin(a), -0.5 cos(a), -0.5 sin(a), 0.5 cos(a).
+- Delays and LFO rate are in seconds and hertz: the plug-in's behavior does
+  not change with the sample rate. The buffer holds the longest tap
+  (189 ms) up to 192 kHz.
+*/
+xferDimensionExpander(size, wet, xL, xR) = xL + w, xR - w
+with {
+    MAXD = 65536;                       // 189 ms at 192 kHz fits
+    RATE = 0.45486;                     // LFO rate (Hz)
+    s = max(0.0, min(1.0, size));
+    m = 0.5 * (xL + xR);
+    d(i) = 0.015 * pow(1.18, i) * (1.0 + 20.0 * s / 3.0) * ma.SR;   // samples
+    tap(i) = crdelay(MAXD, d(i), m);
+    a = 2.0 * ma.PI * os.lf_sawpos(RATE);
+    w = 0.5 * wet * (sin(a) * (tap(0) - tap(2)) + cos(a) * (tap(3) - tap(1)));
+
+    // Catmull-Rom fractional delay by dl samples (buffer of maxd samples).
+    crdelay(maxd, dl, x) = hm1 * r(0) + h0 * r(1) + h1 * r(2) + h2 * r(3)
+    with {
+        di = int(floor(dl));
+        f = dl - floor(dl);
+        r(j) = de.delay(maxd, max(0, di - 1 + j), x);
+        hm1 = f * (-0.5 + f * (1.0 - 0.5 * f));
+        h0 = 1.0 + f * f * (-2.5 + 1.5 * f);
+        h1 = f * (0.5 + f * (2.0 - 1.5 * f));
+        h2 = f * f * (-0.5 + 0.5 * f);
+    };
+};
+
+declare xferDimensionExpander author "David Braun";
+declare xferDimensionExpander license "MIT";
 
 //---------------------`(ef.)tapeStop`-----------------------------------------
 // A tape-stop effect, like putting a finger on a vinyl record player.
