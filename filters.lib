@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.11.0";
+declare version "1.11.1";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2375,8 +2375,10 @@ with {
 // ```
 // fi = library("filters.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
 // src = os.osc(440);
 // lowpass_test = src : fi.lowpass(4, 2000);
+// lowpass_lowfc_test = no.noise : fi.lowpass(3, 10.1);
 // ```
 //
 // #### References
@@ -2410,8 +2412,10 @@ lowpass(N,fc) = lowpass0_highpass1(0,N,fc);
 // ```
 // fi = library("filters.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
 // src = os.osc(440);
 // highpass_test = src : fi.highpass(4, 500);
+// highpass_lowfc_test = no.noise : fi.highpass(3, 10.1);
 // ```
 //
 // #### References
@@ -2443,6 +2447,14 @@ highpass(N,fc) = lowpass0_highpass1(1,N,fc);
 // * `N`: filter order (a constant numerical expression)
 // * `fc`: -3dB cutoff frequency in Hz
 //
+// #### Method
+//
+// A first-order section `tf1s` for odd `N`, then second-order sections with
+// the Butterworth pole angles. Each second-order section has the transfer
+// function of `tf2s` (bilinear transform prewarped at `fc`), computed in
+// trapezoidal state-variable form (`svf.lp`/`svf.hp`), which stays accurate in
+// single precision when `fc` is small relative to the sample rate.
+//
 // #### Test
 // ```
 // fi = library("filters.lib");
@@ -2459,11 +2471,16 @@ lowpass0_highpass1(s,N,fc) = lphpr(s,N,N,fc)
 with {
   lphpr(s,0,N,fc) = _;
   lphpr(s,1,N,fc) = tf1s(s,1-s,1,2*ma.PI*fc);
-  lphpr(s,O,N,fc) = lphpr(s,(O-2),N,fc) : tf2s(s,0,1-s,a1s,1,w1) with {
+  lphpr(s,O,N,fc) = lphpr(s,(O-2),N,fc) : section(s) with {
     parity = N % 2;
     S = (O-parity)/2; // current section number
     a1s = -2*cos((ma.PI)*-1 + (1-parity)*ma.PI/(2*N) + (S-1+parity)*ma.PI/N);
-    w1 = 2*ma.PI*fc;
+    // tf2s(s,0,1-s,a1s,1,2*ma.PI*fc) in trapezoidal state-variable form: the
+    // same bilinear transform prewarped at fc, but the direct-form biquad's
+    // poles near z=1 are replaced by integrator states, which stay accurate
+    // in single precision when fc is small relative to ma.SR (issue #262):
+    section(0) = svf.lp(fc, 1/a1s);
+    section(1) = svf.hp(fc, 1/a1s);
   };
 };
 

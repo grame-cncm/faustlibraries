@@ -36,7 +36,7 @@ os = library("oscillators.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "1.4.2";
+declare version "1.4.3";
 
 /************************************************************************
 FAUST library file, jos section
@@ -573,6 +573,10 @@ zcr(period, x) = ma.zc(x) : fi.lptau(period);
 //  stronger than the fundamental frequency.
 // * `tau`: response time in seconds based on exponentially-weighted averaging with tau time-constant. See <https://ccrma.stanford.edu/~jos/st/Exponentials.html>.
 //
+// The estimate fed back to the low-pass cutoff is smoothed by `si.smoo`: an
+// abrupt cutoff change makes the filter ring near its (low) cutoff, and those
+// zero crossings could otherwise hold the estimate there.
+//
 // #### Test
 // ```
 // an = library("analyzers.lib");
@@ -588,7 +592,7 @@ declare pitchTracker license "MIT";
 pitchTracker(N, t, x) = loop ~ _
     with {
         xHighpassed = fi.highpass(1, 20.0, x);
-        loop(y) = an.zcr(t, fi.lowpass(N, max(20.0, y), xHighpassed)) * ma.SR * .5;
+        loop(y) = an.zcr(t, fi.lowpass(N, max(20.0, y) : si.smoo, xHighpassed)) * ma.SR * .5;
     };
 
 

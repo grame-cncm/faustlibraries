@@ -1923,8 +1923,10 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 src = os.osc(440);
 lowpass_test = src : fi.lowpass(4, 2000);
+lowpass_lowfc_test = no.noise : fi.lowpass(3, 10.1);
 ```
 
 #### References
@@ -1956,8 +1958,10 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 src = os.osc(440);
 highpass_test = src : fi.highpass(4, 500);
+highpass_lowfc_test = no.noise : fi.highpass(3, 10.1);
 ```
 
 #### References
@@ -1984,6 +1988,14 @@ Where:
 * `s`: response selector: 0 for lowpass, 1 for highpass (a constant numerical expression)
 * `N`: filter order (a constant numerical expression)
 * `fc`: -3dB cutoff frequency in Hz
+
+#### Method
+
+A first-order section `tf1s` for odd `N`, then second-order sections with
+the Butterworth pole angles. Each second-order section has the transfer
+function of `tf2s` (bilinear transform prewarped at `fc`), computed in
+trapezoidal state-variable form (`svf.lp`/`svf.hp`), which stays accurate in
+single precision when `fc` is small relative to the sample rate.
 
 #### Test
 ```

@@ -480,6 +480,10 @@ Where:
  stronger than the fundamental frequency.
 * `tau`: response time in seconds based on exponentially-weighted averaging with tau time-constant. See [https://ccrma.stanford.edu/~jos/st/Exponentials.html](https://ccrma.stanford.edu/~jos/st/Exponentials.html).
 
+The estimate fed back to the low-pass cutoff is smoothed by `si.smoo`: an
+abrupt cutoff change makes the filter ring near its (low) cutoff, and those
+zero crossings could otherwise hold the estimate there.
+
 #### Test
 ```
 an = library("analyzers.lib");
