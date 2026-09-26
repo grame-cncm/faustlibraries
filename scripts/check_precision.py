@@ -243,17 +243,26 @@ def main():
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("dsp", nargs="*", help="test files (default: the tracked tests/*.dsp)")
     p.add_argument("-k", "--filter", help="regex on test names")
-    p.add_argument("-j", "--jobs", type=int, default=os.cpu_count())
-    p.add_argument("--rates", default=",".join(map(str, DEFAULT_RATES)))
-    p.add_argument("--seconds", type=float, default=1.0)
-    p.add_argument("--threshold", type=float, default=1e-3)
-    p.add_argument("--baseline", default=os.path.join(ROOT, "tests", "precision-baseline.json"))
+    p.add_argument("-j", "--jobs", type=int, default=os.cpu_count(),
+                   help="tests built and rendered in parallel (default: number of CPUs)")
+    p.add_argument("--rates", default=",".join(map(str, DEFAULT_RATES)),
+                   help="comma-separated sample rates (default: %(default)s)")
+    p.add_argument("--seconds", type=float, default=1.0,
+                   help="duration rendered at each rate (default: %(default)s)")
+    p.add_argument("--threshold", type=float, default=1e-3,
+                   help="largest level gap accepted without a baseline entry (default: %(default)g)")
+    p.add_argument("--baseline", default=os.path.join(ROOT, "tests", "precision-baseline.json"),
+                   help="accepted debt (default: tests/precision-baseline.json)")
     p.add_argument("--write-baseline", action="store_true",
                    help="rewrite the baseline from this run (all tests, maintainers only)")
-    p.add_argument("--build-dir", default=os.path.join(ROOT, "tests", "build-precision"))
+    p.add_argument("--build-dir", default=os.path.join(ROOT, "tests", "build-precision"),
+                   help="where the builds are cached; a build is redone when a .lib, its "
+                        "test file or the architecture is newer (default: tests/build-precision)")
     p.add_argument("--json", help="write every measurement to this file")
-    p.add_argument("--faust", default=os.environ.get("FAUST", "faust"))
-    p.add_argument("--cxx", default=os.environ.get("CXX", "c++"))
+    p.add_argument("--faust", default=os.environ.get("FAUST", "faust"),
+                   help="Faust compiler (default: $FAUST, else faust)")
+    p.add_argument("--cxx", default=os.environ.get("CXX", "c++"),
+                   help="C++ compiler (default: $CXX, else c++)")
     args = p.parse_args()
     args.rates = [int(r) for r in args.rates.split(",")]
     os.makedirs(args.build_dir, exist_ok=True)

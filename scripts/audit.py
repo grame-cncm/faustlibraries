@@ -12,6 +12,11 @@ naive parser.
 
 Usage:
     scripts/audit.py [output.json]
+
+Prints one table row per library (lines, defs, doc, undoc, cov%, usage,
+orphan: doc blocks with no matching definition) and, with an argument,
+writes the per-library details as JSON. Always exits 0. Not used by any
+make target.
 """
 import re
 import os

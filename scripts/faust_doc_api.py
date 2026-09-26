@@ -131,12 +131,13 @@ def rank_symbol_match(symbol: dict[str, object], query_lower: str) -> int:
 def normalize_module_key(module: str) -> str:
     """Normalize a user-provided module selector.
 
-    Module lookup is case-insensitive and whitespace-insensitive. The resulting
-    key is suitable for comparison against file stems, source path stems, and
-    alias hints.
+    Module lookup is case-insensitive and whitespace-insensitive, and a `.lib`
+    suffix is ignored (`physmodels.lib` selects `physmodels`, as the module
+    docstring promises). The resulting key is suitable for comparison against
+    file stems, source path stems, and alias hints.
     """
 
-    return str(module or "").strip().lower()
+    return str(module or "").strip().lower().removesuffix(".lib")
 
 
 class FaustDocStore:
@@ -551,7 +552,11 @@ def explain_faust_symbol_for_goal(store: FaustDocStore, symbol: str, goal: str) 
 def build_parser() -> argparse.ArgumentParser:
     """Create the CLI parser and all faustforge-like subcommands."""
 
-    parser = argparse.ArgumentParser(description="Query a Faust documentation index.")
+    parser = argparse.ArgumentParser(
+        description="Query a Faust documentation index built by build_faust_doc_index.py "
+                    "(make doc-index or make doc-index-split). Every command prints JSON.",
+        epilog="Example: scripts/faust_doc_api.py --pretty get_faust_symbol fi.lowpass",
+    )
     parser.add_argument(
         "--index",
         type=Path,
@@ -560,27 +565,38 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
 
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="command", required=True, metavar="COMMAND")
 
-    search = subparsers.add_parser("search_faust_lib")
-    search.add_argument("query")
-    search.add_argument("--limit", type=int, default=10)
-    search.add_argument("--module", default=None)
+    search = subparsers.add_parser(
+        "search_faust_lib",
+        help="search symbols by name, qualified name, summary and source file")
+    search.add_argument("query", help="free-text query, e.g. 'lowpass butterworth'")
+    search.add_argument("--limit", type=int, default=10, help="maximum number of hits (default: 10)")
+    search.add_argument("--module", default=None,
+                        help="restrict to one module: file stem, file name or prefix (filters, filters.lib, fi)")
 
-    symbol = subparsers.add_parser("get_faust_symbol")
-    symbol.add_argument("symbol")
+    symbol = subparsers.add_parser(
+        "get_faust_symbol",
+        help="full documentation entry of one symbol, plus close alternatives")
+    symbol.add_argument("symbol", help="name, id or qualified name, e.g. lowpass or fi.lowpass")
 
-    module = subparsers.add_parser("list_faust_module")
-    module.add_argument("module")
-    module.add_argument("--limit", type=int, default=200)
+    module = subparsers.add_parser(
+        "list_faust_module",
+        help="compact list of the symbols of one module")
+    module.add_argument("module", help="file stem, file name or prefix (physmodels, physmodels.lib, pm)")
+    module.add_argument("--limit", type=int, default=200, help="maximum number of symbols (default: 200)")
 
-    examples = subparsers.add_parser("get_faust_examples")
-    examples.add_argument("symbol_or_module")
-    examples.add_argument("--limit", type=int, default=10)
+    examples = subparsers.add_parser(
+        "get_faust_examples",
+        help="#### Test snippets of a module (tried first) or of a symbol")
+    examples.add_argument("symbol_or_module", help="module selector or symbol name")
+    examples.add_argument("--limit", type=int, default=10, help="maximum number of snippets (default: 10)")
 
-    explain = subparsers.add_parser("explain_faust_symbol_for_goal")
-    explain.add_argument("symbol")
-    explain.add_argument("goal")
+    explain = subparsers.add_parser(
+        "explain_faust_symbol_for_goal",
+        help="short recommendation for using a symbol toward a goal, from its stored documentation")
+    explain.add_argument("symbol", help="name, id or qualified name")
+    explain.add_argument("goal", help="what the caller wants to achieve, in free text")
 
     return parser
 

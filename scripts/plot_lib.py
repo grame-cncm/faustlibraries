@@ -17,6 +17,17 @@ No new architecture file is needed: the probe signal is written in Faust, so the
 existing `arch/print_arch.cpp` (silence in, samples out) drives everything.
 
     scripts/plot_lib.py [--out doc/docs/img] [--only NAME,NAME]
+
+Every function documented in aanl.lib is plotted to <out>/aa_<name>.svg;
+`--only` restricts the run to the listed aanl names (e.g. `--only
+hardclip,tanh1`). A function whose probe does not compile is skipped and
+listed at the end; the exit status is 0 in both cases.
+
+Each probe is compiled with `faust -double -I <repo>` and `g++ -O2`, and
+rendered at 48 kHz; it needs faust, g++, numpy and matplotlib. `run_probe`,
+the compile-and-render helper, is also used by plot_families.py.
+`make plots` runs both scripts and then rebuilds the documentation, where
+doc/scripts/inject_plots.py embeds each figure in its function's page.
 """
 from __future__ import annotations
 
@@ -175,9 +186,11 @@ def plot(name: str, curve: np.ndarray, spectrum: np.ndarray, out: Path) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=str(ROOT / "doc" / "docs" / "img"))
-    ap.add_argument("--only", default="")
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--out", default=str(ROOT / "doc" / "docs" / "img"),
+                    help="output directory for the SVG files (default: doc/docs/img)")
+    ap.add_argument("--only", default="",
+                    help="comma-separated aanl.lib function names to plot (default: all)")
     args = ap.parse_args()
 
     out_dir = Path(args.out)

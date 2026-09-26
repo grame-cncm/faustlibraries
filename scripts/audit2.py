@@ -20,6 +20,17 @@ undocumented symbols, coverage, and blocks missing a `#### Usage` section.
 
 Usage:
     scripts/audit2.py [output.json]
+
+Prints one table row per library (lines, defs, docblk, undoc, cov%, noUsage,
+testOnly), then the blocks that have no description at all (a title and a
+`#### Test` section only). With an argument, also writes the details as JSON:
+
+    {"filters.lib": {"n_defs": ..., "blocks": ..., "lines": ...,
+                     "undocumented": [names], "no_usage": [first name of
+                     each Usage-less block], "test_only": [...]}, ...}
+
+Always exits 0: it measures, it does not judge. scripts/checkdoc.py (`make
+checkdoc`) runs it and compares the JSON with tests/doc-baseline.json.
 """
 import re
 import os

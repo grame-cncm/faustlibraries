@@ -13,6 +13,18 @@ Figures land in doc/docs/img/<prefix>_<name>.svg, where
 doc/scripts/inject_plots.py picks them up by naming convention.
 
     scripts/plot_families.py [--out doc/docs/img] [--only STEM,STEM]
+
+A STEM is a figure's file name without `.svg`, i.e. the library prefix and
+the function name (`fi_lowpass`, `co_compressor_mono`, ...): `--only`
+regenerates just those figures, the default regenerates all of them.
+
+The probes are compiled and rendered by plot_lib.run_probe (faust -double,
+g++, 48 kHz), so the script needs faust, g++, numpy and matplotlib. It ends
+with "all figures generated, all property assertions hold" and exit status
+0, or with the number of failed assertions (a probe that does not compile
+counts as one) and exit status 1. A figure whose assertion fails is still
+written, so that it can be inspected.
+`make plots` runs it after plot_lib.py and rebuilds the documentation.
 """
 from __future__ import annotations
 
@@ -1060,9 +1072,11 @@ def build_all(out_dir: Path, wanted: set[str]) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=str(ROOT / "doc" / "docs" / "img"))
-    ap.add_argument("--only", default="")
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--out", default=str(ROOT / "doc" / "docs" / "img"),
+                    help="output directory for the SVG files (default: doc/docs/img)")
+    ap.add_argument("--only", default="",
+                    help="comma-separated figure stems to regenerate, e.g. fi_lowpass (default: all)")
     args = ap.parse_args()
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)

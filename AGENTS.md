@@ -17,6 +17,8 @@ make plots       # regenerate the documentation SVG figures (needs matplotlib)
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
 
+Every script behind these targets is described in `scripts/README.md`.
+
 - `make checkdoc` must pass before committing: it rejects any new
   undocumented symbol, any doc block without `#### Usage` (or reduced to a
   `#### Test`), a stale `doc/docs/standardFunctions.md`, and any

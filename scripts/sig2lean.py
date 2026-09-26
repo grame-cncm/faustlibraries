@@ -12,6 +12,32 @@ actually did (`--dump-sig-dag-prepared` under `-ct 1` versus `-ct 0`). A
 `clampRequired` table the compiler left unclamped fails certification; a
 clamp on a table Lean proves in range is reported as a missed optimisation.
 The per-program outcome is pinned into the generated file.
+
+Arguments:
+    template.lean   the Lean prelude the generated file starts from
+                    (formalisation/signal-import-formal-spec.lean);
+    out.lean        the file to write (tests/build/certified.lean for
+                    `make certify`, tests/lean/certified.lean for
+                    `make certify-reference`);
+    file.dsp ...    the programs to certify (tests/lean/*.dsp); each file's
+                    base name names its definitions and theorems.
+
+Environment:
+    FAUST_RS    the faust-rs compiler, which provides --dump-sig-dag and
+                --dump-sig-dag-prepared (default: target/release/faust-rs;
+                the Makefile passes $(FAUST_RS), `faust-rs` on the PATH);
+    FAUST_LIBS  a library directory passed to faust-rs with -I (the Makefile
+                passes the checkout, so the libraries under test are used);
+    LEAN        the Lean 4 executable (default: lean).
+
+Prints a summary (signals, certified stable, certified indices) and one
+clamp-oracle line per program. Exits with a message, and writes nothing, if
+Lean returns no verdict for a signal or if the clamp oracle finds a table
+that Lean requires clamped and the compiler did not clamp.
+
+Normally run through `make certify` (which also kernel-checks the result
+and diffs it with tests/lean/certified.lean) or `make certify-reference`;
+see doc/docs/contributing.md, section "Formal certification".
 """
 import os, re, struct, subprocess, sys, tempfile
 from fractions import Fraction
