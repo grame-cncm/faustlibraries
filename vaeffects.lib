@@ -28,7 +28,7 @@ wd = library("wdmodels.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.6.0";
+declare version "1.7.0";
 
 //########################################################################################
 /************************************************************************
@@ -2176,6 +2176,270 @@ with {
 declare klonCentaur author "David Braun";
 declare klonCentaur copyright "Chowdhury-DSP";
 declare klonCentaur license "BSD-3-Clause";
+
+
+//-----------------------`(ve.)fulltoneOCD`---------------------------
+// Fulltone OCD (Obsessive Compulsive Drive) v2 overdrive pedal circuit model.
+//
+// The OCD is a two-op-amp overdrive whose clipping comes from a pair of
+// 2N7000 MOSFETs shunting the signal to the half-supply rail, followed by a
+// passive tone network with an HP/LP voicing switch. This implementation
+// follows the explicit wave digital (WD) model of Giampiccolo et al. (DAFx-26):
+// the clipping node and the passive output network are wave digital trees,
+// the MOSFET pair is a single canonical piecewise-linear (CPWL) element fitted
+// to the measured I-V curve and evaluated without iteration, and the clipping
+// node runs 4x oversampled. Mono.
+//
+// `drive`, `tone` and `hp` are clamped to [0, 1]; otherwise the controls are
+// used as given: smooth them (e.g. with `si.smoo`) when they are driven from
+// a UI. Input and output are in volts, a sample of
+// ±1 being treated as ±1 V as in the reference model.
+//
+// Output level: the op-amps are ideal, as in the reference model, so nothing
+// limits the output to the ±4.5 V a 9 V pedal can swing. At `volume` = 1 the
+// output peaks at about 6 to 9 V for a 1 V input (HP), and a guitar signal
+// peaking at 0.3 V is raised by about 17 dB (Drive 0) to 37 dB (Drive 1) in HP,
+// 11 to 31 dB in LP. `volume` around 0.14 (Drive 0) down to 0.014 (Drive 1)
+// gives roughly unity gain in HP, twice that in LP.
+//
+// Latency: the 4x oversampling of the clipping node delays the output by
+// 11 samples, at every sample rate.
+//
+// Accuracy: the small-signal response is within 0.1 dB of the analog circuit
+// from 30 Hz to 3 kHz at 44.1 kHz and above. The top octave rolls off (about
+// -1 to -4 dB at 10 kHz at 48 kHz, depending on the controls; under 1 dB at
+// 96 kHz). Relative to a converged simulation of the reference circuit, the
+// harmonics of a 1 kHz tone are within 0.3-0.8 % at 48 kHz and 0.1-0.3 % at
+// 96 kHz, and the error falls quadratically with the sample rate. Tested from
+// 8 kHz to 192 kHz.
+//
+// Data: the MOSFET-pair I-V curve is the single-nonlinearity characteristic
+// `singleNL_char.mat` of the reference model's repository, see References. It
+// was turned into the current into the pair versus node voltage (flipped),
+// shifted by 1.255 µA so that I(0) = 0, and thinned from 30 to 20 points: the
+// 10 points dropped lie within 0.07 mV of the table's ±4 V ends, where the
+// node never goes (it stays within ±2.6 V), and would only add segments too
+// narrow to resolve in single precision.
+//
+// #### Usage
+//
+// ```
+// _ : fulltoneOCD(drive, tone, volume, hp) : _
+// ```
+//
+// Where:
+//
+// * `drive`: Drive knob (0-1), audio taper: the Drive pot resistance is
+//   500 kΩ * drive^2 in the feedback of the first op-amp stage, as in the
+//   reference model (v1.x pedals used a 1 MΩ pot)
+// * `tone`: Tone knob (0-1), linear; 0 is darkest, 1 is brightest
+// * `volume`: Volume knob (0-1), a linear output gain (the v2 output is buffered,
+//   so the pot wiper is unloaded)
+// * `hp`: HP/LP switch, 1 = HP (brighter and louder), 0 = LP; intermediate
+//   values crossfade the series resistance, so a smoothed switch clicks less
+//
+// #### Test
+// ```
+// ve = library("vaeffects.lib");
+// os = library("oscillators.lib");
+// no = library("noises.lib");
+// fulltoneOCD_test = os.osc(330)
+//    : ve.fulltoneOCD(
+//        hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
+//        hslider("fulltoneOCD:tone", 0.5, 0, 1, 0.01),
+//        hslider("fulltoneOCD:volume", 0.35, 0, 1, 0.01),
+//        checkbox("fulltoneOCD:hp")
+//      );
+// fulltoneOCD_lp_test = os.osc(110)*0.5 : ve.fulltoneOCD(1, 0, 0.1, 0);
+// fulltoneOCD_bright_test = no.noise*0.05 : ve.fulltoneOCD(0.7, 1, 0.1, 1);
+// ```
+//
+// #### References
+//
+// * R. Giampiccolo, S. Polimeno, C. Macrì, A. Lenoci, O. Massi, A. Bernardini,
+//   "Explicit Wave Digital Model of the Fulltone OCD Pedal Based on Canonical
+//   Piecewise-Linear Functions," Proc. 29th Int. Conf. Digital Audio Effects
+//   (DAFx-26), Cambridge, MA, USA, 2026
+// * <https://github.com/polimi-ispl/fulltoneocd>
+// * L. O. Chua, S. M. Kang, "Section-wise piecewise-linear functions: canonical
+//   representation, properties, and applications," Proc. IEEE, 65(6),
+//   pp. 915-929, 1977
+//------------------------------------------------------------
+/*
+Implementation Notes:
+
+Signal path (every internal voltage is referenced to the 4.5 V half-supply
+rail, so the clipping curve is centered on 0 and no DC bias state exists):
+
+  in -> input coupling (C1, R1, R3)
+     -> op-amp 1, non-inverting, Drive pot in the feedback
+     -> clipping node: R7 into a node shunted to the rail by C4 || MOSFET pair,
+        tapped by the R9/R8 divider                        [WD junction, 4x OS]
+     -> op-amp 2, non-inverting, fixed gain
+     -> output network: C7, series R (R12 || R13 in HP, R13 in LP), node loaded
+        by the 500k Volume pot || (C8 + Tone rheostat)     [wd.buildtree]
+     -> 5 Hz DC blocker -> Volume
+
+- Component values are those of the reference model (OCD v2), including its
+  500 kΩ Drive pot (its plug-in's Drive maximum too). No v2 source gives the
+  pot value; the AionFX schematic of the v1.7 has 1 MΩ (audio taper).
+- The op-amps are ideal (no rail saturation), as in the reference model. Being
+  linear, they are realized as bilinear-transformed biquads of their analytic
+  transfer functions (wdmodels.lib has no nullor). Each is pre-warped at its
+  feedback pole, capped at 1 kHz: pre-warping higher rescales the low corners
+  (and near or above Nyquist, at low sample rates, breaks the stage).
+- The clipping node is a three-port parallel junction (trapezoidal C4, R9+R8,
+  R7 Thevenin source) whose root is the CPWL MOSFET pair,
+  b = mu0 + mu1*a + sum_k eta_k |a - a_k|. The knots are the measured I-V
+  table mapped to the wave domain at the root port resistance, which depends
+  only on the sample rate, so every coefficient folds at init. The junction is
+  unrolled by hand because wd.buildtree cannot be sub-stepped: per sample, the
+  input is polyphase-interpolated to 4 sub-samples, each scatters through the
+  junction, and the node voltages are polyphase-decimated. The filter is a
+  48-tap Kaiser (beta 7) lowpass at 0.9x the base Nyquist (-0.2 dB at 15 kHz,
+  > 53 dB rejection above 30 kHz at 48 kHz); latency 11 samples. The
+  sub-steps are chained by routing so that each CPWL evaluation appears once
+  in the expression tree (nesting them as function calls blows up compile
+  time).
+- The MOSFET-pair I-V table (see Data above) keeps knots at least 1 mV apart.
+- Accuracy details: the top-octave roll-off comes from bilinear warping of the
+  linear stages; the oversampling filter pair adds -0.4 dB at 15 kHz. The
+  full-chain error on guitar, relative to a converged simulation of the
+  reference circuit, is under 1 % at 48 kHz.
+- Sample rate: above 192 kHz ma.SR saturates
+  (see pl.SR), so this model, like every sample-rate-dependent function in
+  the libraries, is mistuned there.
+- The 5 Hz DC blocker replaces the circuit's 0.03 Hz output corner (C7 into
+  the 500k pot, tau ~ 5 s), which would otherwise let the DC produced by the
+  asymmetric clipping linger for seconds after a loud passage.
+*/
+fulltoneOCD(drive, tone, volume, hp) =
+    inhp                              // input coupling
+    : stage1(RDRIVE_MAX * d * d)      // op-amp 1 with the Drive pot
+    : clipnode                        // MOSFET clipping node, 4x oversampled
+    : stage2                          // op-amp 2
+    : outnet(Rser, RTONE_MAX * t)     // passive tone / HP-LP network
+    : fi.dcblockerat(5.0)
+    : *(volume)
+with {
+    // Component values (reference model, OCD v2)
+    R1 = 10e3;    R3 = 470e3;  C1 = 22e-9;                    // input coupling
+    R4 = 18e3;    R6 = 2.2e3;  C2 = 220e-12; C3 = 100e-9;     // op-amp 1
+    R7 = 10e3;    R8 = 220e3;  R9 = 10e3;    C4 = 10e-9;      // clipping node
+    R10 = 150e3;  R11 = 39e3;  C5 = 220e-12; C6 = 100e-9;     // op-amp 2
+    R12 = 22e3;   R13 = 33e3;  C7 = 10e-6;   C8 = 47e-9;      // output network
+    RDRIVE_MAX = 500e3;    // Drive pot
+    RTONE_MAX = 10e3;      // Tone pot, wired as a rheostat
+    RVOL = 500e3;          // Volume pot, loading the output node
+    RSER_HP = 1.0 / (1.0 / R12 + 1.0 / R13);   // R12 || R13
+    RSER_LP = R13;
+    // Controls, clamped: hp > 1 would drive Rser negative (unstable tree).
+    clamp01(x) = max(0.0, min(1.0, x));
+    d = clamp01(drive);
+    t = clamp01(tone);
+    Rser = RSER_LP + clamp01(hp) * (RSER_HP - RSER_LP);
+
+    // Input coupling: H(s) = s C1 R3 / (1 + s C1 (R1 + R3)), pre-warped at fc.
+    inhp = fi.tf1s(R3 / (R1 + R3), 0.0, 1.0, w1)
+    with { w1 = 1.0 / (C1 * (R1 + R3)); };
+
+    // Non-inverting op-amp stage with Zf = Rf || Cf and Zg = Rg + 1/(s Cg):
+    // G(s) = [(1 + s Rf Cf)(1 + s Rg Cg) + s Rf Cg] / [(1 + s Rf Cf)(1 + s Rg Cg)]
+    // fi.tf2s takes the prototype normalized to the pre-warp frequency w1.
+    opamp_ni(Rf, Cf, Rg, Cg) = fi.tf2s(1.0, b1 / w1, a0 / (w1 * w1), a1 / w1, a0 / (w1 * w1), w1)
+    with {
+        d2 = Rf * Cf * Rg * Cg;
+        a1 = (Rf * Cf + Rg * Cg) / d2;
+        a0 = 1.0 / d2;
+        b1 = (Rf * Cf + Rg * Cg + Rf * Cg) / d2;
+        w1 = min(1.0 / (Rf * Cf), 2.0 * ma.PI * 1000.0);
+    };
+    stage1(Rdrive) = opamp_ni(R4 + Rdrive, C2, R6, C3);
+    stage2 = opamp_ni(R10, C5, R11, C6);
+
+    // Measured 2N7000-pair clipping curve: current into the pair (A) versus
+    // node voltage (V), strictly monotone in both.
+    nlN = 20;
+    nlV = (-4.0, -3.83165788, -3.6452573, -3.45708638, -3.26709398, -3.07522643,
+           -2.88142737, -2.68563754, -2.4877946, -2.28783285, -2.02398048,
+           2.14189819, 2.59183671, 2.84510824, 3.07430243, 3.29227325,
+           3.50320045, 3.70899582, 3.9107084, 3.99998958);
+    nlI = (-0.0487362550239921, -0.0403566825239921, -0.0320250613239921,
+           -0.0246140129239921, -0.018140143523992097, -0.0126207736239921,
+           -0.008073984723992098, -0.004518670803992099, -0.001974594683992099,
+           -0.0004624491379920992, -1.255025155791365e-06, 1.3281432979007747e-06,
+           0.0008461729000079007, 0.002767269566007901, 0.0057154213960079,
+           0.009668896996007901, 0.014608397076007902, 0.0205156258760079,
+           0.0273730399760079, 0.030751123576007903);
+
+    // Reflected wave of the CPWL nonlinearity at port resistance R, with
+    // linear extrapolation beyond the outer knots (whose kinks are zero).
+    cpwl_reflect(R, a) = mu0 + mu1 * a + sum(k, nlN - 2, eta(k + 1) * abs(a - av(k + 1)))
+    with {
+        av(k) = ba.take(k + 1, nlV) + R * ba.take(k + 1, nlI);
+        bv(k) = ba.take(k + 1, nlV) - R * ba.take(k + 1, nlI);
+        m(k) = (bv(k + 1) - bv(k)) / (av(k + 1) - av(k));   // segment k slope
+        eta(k) = 0.5 * (m(k) - m(k - 1));                   // kink at knot k
+        mu1 = 0.5 * (m(0) + m(nlN - 2));
+        mu0 = bv(0) - mu1 * av(0) - sum(k, nlN - 2, eta(k + 1) * abs(av(0) - av(k + 1)));
+    };
+
+    // 4x oversampling polyphase filter (48-tap Kaiser lowpass, symmetric).
+    OS = 4;
+    osFIR = (-6.308626527e-05, -3.784630668e-05, 0.0001820684253, 0.0005972141621,
+             0.0009471059494, 0.0007420357709, -0.0004282012255, -0.002413547866,
+             -0.004190612168, -0.004113731, -0.0008640530619, 0.005280837633,
+             0.01168694666, 0.01395448963, 0.008085398626, -0.006563330529,
+             -0.02516401995, -0.03778155471, -0.03281910589, -0.002463250963,
+             0.05237470303, 0.1203567394, 0.1826983549, 0.2199964457,
+             0.2199964457, 0.1826983549, 0.1203567394, 0.05237470303,
+             -0.002463250963, -0.03281910589, -0.03778155471, -0.02516401995,
+             -0.006563330529, 0.008085398626, 0.01395448963, 0.01168694666,
+             0.005280837633, -0.0008640530619, -0.004113731, -0.004190612168,
+             -0.002413547866, -0.0004282012255, 0.0007420357709, 0.0009471059494,
+             0.0005972141621, 0.0001820684253, -3.784630668e-05, -6.308626527e-05);
+    osTaps(p) = par(m, 12, ba.take(OS * m + p + 1, osFIR));
+
+    // Clipping node, returning the voltage at the R9/R8 tap.
+    clipnode(v1) = (fb ~ _) : !, dec : *(R8 / (R8 + R9))
+    with {
+        Gc = 2.0 * OS * ma.SR * C4;      // C4 port conductance at the oversampled rate
+        Gt = 1.0 / (R8 + R9);
+        Gs = 1.0 / R7;
+        Rup = 1.0 / (Gc + Gt + Gs);      // junction up-port (root) resistance
+        up(p) = v1 : fi.fir(par(m, 12, OS * ba.take(OS * m + p + 1, osFIR)));
+        // One sub-step: source voltage e and C4's reflected wave bc (its state)
+        // -> (next bc, node voltage).
+        step(e, bc) = 2.0 * v - bc, v
+        with {
+            b_up = (Gc * bc + Gs * e) * Rup;   // R9+R8 is adapted: reflects 0
+            v = 0.5 * (cpwl_reflect(Rup, b_up) + b_up);
+        };
+        // -> bc4, y3, y2, y1, y0
+        fb(bc) = bc : step(up(0)) : (step(up(1)), _) : (step(up(2)), _, _) : (step(up(3)), _, _, _);
+        dec = par(i, OS, fi.fir(osTaps(i))) :> _;   // input i is sub-sample 3-i
+    };
+
+    // Output network: op-amp 2 output (ideal source) -> C7 -> Rser -> node,
+    // loaded by the Volume pot || (C8 + Tone rheostat). Returns the voltage
+    // across the Volume pot.
+    outnet(Rs, Rtone, v2) = wd.buildtree(tree)
+    with {
+        src(i) = wd.u_voltage(i, v2);
+        c7(i) = wd.capacitor(i, C7);
+        rs(i) = wd.resistor(i, Rs);
+        rv(i) = wd.resistor_Vout(i, RVOL);
+        c8(i) = wd.capacitor(i, C8);
+        rt(i) = wd.resistor(i, max(1.0, Rtone));   // no 0-ohm port
+        s1(i) = wd.series(i);
+        s2(i) = wd.series(i);
+        s3(i) = wd.series(i);
+        p1(i) = wd.parallel(i);
+        tree = src : (s1 : (c7, (s2 : (rs, (p1 : (rv, (s3 : (c8, rt))))))));
+    };
+};
+declare fulltoneOCD author "David Braun";
+declare fulltoneOCD license "MIT";
 
 
 // Deprecated backward-compatibility alias, kept for one version and scheduled

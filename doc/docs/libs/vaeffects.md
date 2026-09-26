@@ -1196,3 +1196,93 @@ klonCentaur_test = os.osc(330)
 * J. Chowdhury, "chowdsp_wdf: An Advanced C++ Library for Wave Digital Circuit
   Modelling," arXiv:2210.12554, 2022
 * [https://github.com/jatinchowdhury18/KlonCentaur/tree/master/ChowCentaur](https://github.com/jatinchowdhury18/KlonCentaur/tree/master/ChowCentaur)
+
+----
+
+### `(ve.)fulltoneOCD`
+
+Fulltone OCD (Obsessive Compulsive Drive) v2 overdrive pedal circuit model.
+
+The OCD is a two-op-amp overdrive whose clipping comes from a pair of
+2N7000 MOSFETs shunting the signal to the half-supply rail, followed by a
+passive tone network with an HP/LP voicing switch. This implementation
+follows the explicit wave digital (WD) model of Giampiccolo et al. (DAFx-26):
+the clipping node and the passive output network are wave digital trees,
+the MOSFET pair is a single canonical piecewise-linear (CPWL) element fitted
+to the measured I-V curve and evaluated without iteration, and the clipping
+node runs 4x oversampled. Mono.
+
+`drive`, `tone` and `hp` are clamped to [0, 1]; otherwise the controls are
+used as given: smooth them (e.g. with `si.smoo`) when they are driven from
+a UI. Input and output are in volts, a sample of
+±1 being treated as ±1 V as in the reference model.
+
+Output level: the op-amps are ideal, as in the reference model, so nothing
+limits the output to the ±4.5 V a 9 V pedal can swing. At `volume` = 1 the
+output peaks at about 6 to 9 V for a 1 V input (HP), and a guitar signal
+peaking at 0.3 V is raised by about 17 dB (Drive 0) to 37 dB (Drive 1) in HP,
+11 to 31 dB in LP. `volume` around 0.14 (Drive 0) down to 0.014 (Drive 1)
+gives roughly unity gain in HP, twice that in LP.
+
+Latency: the 4x oversampling of the clipping node delays the output by
+11 samples, at every sample rate.
+
+Accuracy: the small-signal response is within 0.1 dB of the analog circuit
+from 30 Hz to 3 kHz at 44.1 kHz and above. The top octave rolls off (about
+-1 to -4 dB at 10 kHz at 48 kHz, depending on the controls; under 1 dB at
+96 kHz). Relative to a converged simulation of the reference circuit, the
+harmonics of a 1 kHz tone are within 0.3-0.8 % at 48 kHz and 0.1-0.3 % at
+96 kHz, and the error falls quadratically with the sample rate. Tested from
+8 kHz to 192 kHz.
+
+Data: the MOSFET-pair I-V curve is the single-nonlinearity characteristic
+`singleNL_char.mat` of the reference model's repository, see References. It
+was turned into the current into the pair versus node voltage (flipped),
+shifted by 1.255 µA so that I(0) = 0, and thinned from 30 to 20 points: the
+10 points dropped lie within 0.07 mV of the table's ±4 V ends, where the
+node never goes (it stays within ±2.6 V), and would only add segments too
+narrow to resolve in single precision.
+
+#### Usage
+
+```
+_ : fulltoneOCD(drive, tone, volume, hp) : _
+```
+
+Where:
+
+* `drive`: Drive knob (0-1), audio taper: the Drive pot resistance is
+  500 kΩ * drive^2 in the feedback of the first op-amp stage, as in the
+  reference model (v1.x pedals used a 1 MΩ pot)
+* `tone`: Tone knob (0-1), linear; 0 is darkest, 1 is brightest
+* `volume`: Volume knob (0-1), a linear output gain (the v2 output is buffered,
+  so the pot wiper is unloaded)
+* `hp`: HP/LP switch, 1 = HP (brighter and louder), 0 = LP; intermediate
+  values crossfade the series resistance, so a smoothed switch clicks less
+
+#### Test
+```
+ve = library("vaeffects.lib");
+os = library("oscillators.lib");
+no = library("noises.lib");
+fulltoneOCD_test = os.osc(330)
+   : ve.fulltoneOCD(
+       hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
+       hslider("fulltoneOCD:tone", 0.5, 0, 1, 0.01),
+       hslider("fulltoneOCD:volume", 0.35, 0, 1, 0.01),
+       checkbox("fulltoneOCD:hp")
+     );
+fulltoneOCD_lp_test = os.osc(110)*0.5 : ve.fulltoneOCD(1, 0, 0.1, 0);
+fulltoneOCD_bright_test = no.noise*0.05 : ve.fulltoneOCD(0.7, 1, 0.1, 1);
+```
+
+#### References
+
+* R. Giampiccolo, S. Polimeno, C. Macrì, A. Lenoci, O. Massi, A. Bernardini,
+  "Explicit Wave Digital Model of the Fulltone OCD Pedal Based on Canonical
+  Piecewise-Linear Functions," Proc. 29th Int. Conf. Digital Audio Effects
+  (DAFx-26), Cambridge, MA, USA, 2026
+* [https://github.com/polimi-ispl/fulltoneocd](https://github.com/polimi-ispl/fulltoneocd)
+* L. O. Chua, S. M. Kang, "Section-wise piecewise-linear functions: canonical
+  representation, properties, and applications," Proc. IEEE, 65(6),
+  pp. 915-929, 1977

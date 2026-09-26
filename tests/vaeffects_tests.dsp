@@ -199,3 +199,15 @@ klonCentaur_test = os.osc(330)
        hslider("klonCentaur:treble", 0.5, 0, 1, 0.01),
        hslider("klonCentaur:level", 0.5, 0, 1, 0.01)
      );
+
+fulltoneOCD_test = os.osc(330)
+   : ve.fulltoneOCD(
+       hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
+       hslider("fulltoneOCD:tone", 0.5, 0, 1, 0.01),
+       hslider("fulltoneOCD:volume", 0.35, 0, 1, 0.01),
+       checkbox("fulltoneOCD:hp")
+     );
+
+fulltoneOCD_lp_test = os.osc(110)*0.5 : ve.fulltoneOCD(1, 0, 0.1, 0);
+
+fulltoneOCD_bright_test = no.noise*0.05 : ve.fulltoneOCD(0.7, 1, 0.1, 1);
