@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.11.2";
+declare version "1.11.3";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -1895,12 +1895,15 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 // Second-order direct-form digital filter,
 // specified by ANALOG transfer-function polynomials B(s)/A(s),
 // and a frequency-scaling parameter. Digitization via the
-// bilinear transform is built in.
+// bilinear transform is built in. `tf2snp` computes the same filter as a
+// protected normalized ladder, which stays accurate in single precision when
+// `w1` is small relative to the sample rate.
 //
 // #### Usage
 //
 // ```
 // _ : tf2s(b2,b1,b0,a1,a0,w1) : _
+// _ : tf2snp(b2,b1,b0,a1,a0,w1) : _
 // ```
 // Where:
 //
@@ -1937,8 +1940,12 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 // fi = library("filters.lib");
 // os = library("oscillators.lib");
 // ma = library("maths.lib");
+// no = library("noises.lib");
 // src = os.osc(440);
 // tf2s_test = src : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+// tf2snp_test = src : fi.tf2snp(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+// tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
+// tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
 // ```
 //
 // #### References
@@ -2011,20 +2018,6 @@ with {
   c = ba.take(n,cv);
   sumandtaps(n) = +,par(i,n,_);
 };
-
-//----------------------------------------------
-// #### Test
-// ```
-// fi = library("filters.lib");
-// os = library("oscillators.lib");
-// ma = library("maths.lib");
-// src = os.osc(440);
-// no = library("noises.lib");
-// tf2snp_test = src : fi.tf2snp(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
-// tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
-// tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
-// ```
-//----------------------------------------------
 
 //-----------------------------`(fi.)tf1snp`-------------------------------
 // First-order special case of tf2snp above: a first-order normalized ladder,

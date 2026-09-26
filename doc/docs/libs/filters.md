@@ -1556,12 +1556,15 @@ allpassn1m_test = src : fi.allpassn1m(3, (0.3, 0.2, 0.1));
 Second-order direct-form digital filter,
 specified by ANALOG transfer-function polynomials B(s)/A(s),
 and a frequency-scaling parameter. Digitization via the
-bilinear transform is built in.
+bilinear transform is built in. `tf2snp` computes the same filter as a
+protected normalized ladder, which stays accurate in single precision when
+`w1` is small relative to the sample rate.
 
 #### Usage
 
 ```
 _ : tf2s(b2,b1,b0,a1,a0,w1) : _
+_ : tf2snp(b2,b1,b0,a1,a0,w1) : _
 ```
 Where:
 
@@ -1598,8 +1601,12 @@ Bilinear transform scaled for exact mapping of w1.
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
+no = library("noises.lib");
 src = os.osc(440);
 tf2s_test = src : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+tf2snp_test = src : fi.tf2snp(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
+tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
 ```
 
 #### References
