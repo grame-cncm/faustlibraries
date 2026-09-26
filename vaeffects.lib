@@ -28,7 +28,7 @@ wd = library("wdmodels.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.6.1";
+declare version "1.6.2";
 
 //########################################################################################
 /************************************************************************
@@ -1739,9 +1739,28 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 // Klon Centaur overdrive pedal circuit model.
 //
 // The Klon Centaur is a guitar overdrive pedal known for adding gain and
-// harmonic distortion while preserving the instrument's natural tone. This
-// implementation uses wave digital filter (WDF) techniques to model the
-// analog circuitry, including the gain stage, tone control, and clipping.
+// harmonic distortion while preserving the instrument's natural tone. This is a
+// port of the "Traditional" (circuit model) mode of Jatin Chowdhury's
+// ChowCentaur: the gain stage is modeled with wave digital filters (WDF), with
+// the diode clipper running at twice the sample rate, and the input buffer,
+// amplifier, tone and output stages as bilinear-transformed filters.
+//
+// The controls are smoothed over 50 ms, as in ChowCentaur, starting from their
+// initial values. The input is scaled by 0.5, as in ChowCentaur; a sample of
+// ±1 is treated as ±1 V.
+//
+// Accuracy: against the ChowCentaur 1.4.0 plug-in (Traditional mode), the output
+// level is within 0.13 dB and the waveform within 1.6 % for gain up to 0.5;
+// at gain 1 with loud input the model is up to 0.9 dB louder (waveform within
+// 11 %). The remaining difference comes from the plug-in's fast log/exp
+// approximations in the diode model, which this port evaluates accurately: a
+// variant using the plug-in's approximations matches it within 0.02 %.
+//
+// Single precision: the output stays within 2.3e-4 of double precision at the
+// default settings from 44.1 to 192 kHz. At low gain the preamp's wave digital
+// tree loses precision in float (a 1 µF capacitor next to 15 kΩ), and with gain
+// and treble at 0 the gap grows from 3e-4 of the peak at 44.1 kHz to 6e-3 at
+// 192 kHz; ChowCentaur runs its wave digital filters in double precision.
 //
 // #### Usage
 //
@@ -1769,6 +1788,7 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 //        hslider("klonCentaur:treble", 0.5, 0, 1, 0.01),
 //        hslider("klonCentaur:level", 0.5, 0, 1, 0.01)
 //      );
+// klonCentaur_hot_test = os.osc(110)*0.5 : ve.klonCentaur(1, 0, 1);
 // ```
 //
 // #### References
@@ -1780,34 +1800,40 @@ released under LGPL, STK-4.3, MIT, BSD, or a similar FOSS license.
 /*
 Implementation Notes:
 
-This is a port from Jatin Chowdhury's ChowCentaur C++ implementation, which
-uses wave digital filters (WDF) to model the analog circuitry.
+This is a port of Jatin Chowdhury's ChowCentaur C++ implementation (version
+1.4.0, "Traditional" mode), which uses wave digital filters (WDF) to model the
+analog circuitry.
 
 Circuit Modeling Approach:
-- Input buffer: High-pass filter (R1=10kΩ, R2=1MΩ, C1=0.1µF)
-- Gain stage: WDF-modeled preamp, feed-forward paths, amplifier, and diode clipper
+- Input: scaled by 0.5, then a high-pass buffer (R1=10kΩ, R2=1MΩ, C1=0.1µF)
+- Gain stage: WDF-modeled preamp and feed-forward paths, amplifier, and diode
+  clipper (2x oversampled), summed by an inverting amplifier
 - Tone control: Active filter with variable frequency response (Rpot=10kΩ, C=3.9nF)
 - Output stage: Level control with passive filter (Rpot=10kΩ, C1=4.7µF)
 - DC blocker: 35 Hz high-pass filter (Q=0.707)
 
 Technical Details:
-- Uses Wright Omega function for antiparallel diode modeling (more accurate than Lambert W)
-- Implements JUCE-style parameter smoothing (linear for treble, multiplicative for gain/level)
-- Outputs current from clipping stage capacitor C10
-
-Parameter Differences from Original ChowCentaur Source:
-The following parameters differ from the ChowCentaur source but empirically improve VST correlation:
-- Diode saturation current (Is): 2.52e-9 A (vs 15e-6 A in ChowCentaur)
-  Value taken from chowdsp WDF test files for better accuracy
-- Input scaling: No 0.5x scaling applied (ChowCentaur applies this but omitting improves correlation)
-- Oversampling: None in clipping stage (ChowCentaur uses 2x oversampling)
-- Output gain: Applies factor 0.262 to empirically match ChowCentaur
-
-Note: The root cause of these discrepancies may be related to differences in the WDF
-library implementations or measurement methodology used for parameter extraction.
+- The antiparallel diode pair uses the Wright omega function, evaluated to a
+  relative error below 2e-7; ChowCentaur uses a lookup table near 0 and fast
+  log/exp approximations elsewhere, which is where the two differ.
+- The clipping stage runs at twice the sample rate between JUCE's polyphase IIR
+  half-band filters, as in ChowCentaur. Its tree is written out by hand with
+  chowdsp_wdf's adaptor equations, since wd.buildtree cannot be sub-stepped.
+- The clipping stage's bias is 0 V, as in ChowCentaur: behind C10 a DC bias
+  would only charge the capacitor at startup, an audible transient.
+- The preamp's output voltage is one sample late, as in ChowCentaur, which
+  reads it before propagating the incident waves.
+- JUCE-style parameter smoothing (linear for treble, multiplicative for
+  gain/level), starting at the initial control values as JUCE's SmoothedValue
+  does after prepare().
+- The input buffer and output stage are first-order high-passes a few Hz
+  wide, computed in TPT form (the same bilinear filters as ChowCentaur's), and
+  the 35 Hz DC blocker is a TPT state-variable filter, all accurate in float.
+- Outputs current from clipping stage capacitor C10.
 */
 klonCentaur(gain, treble, level) =
-    input_buffer          // High-pass input coupling
+    *(0.5)                // Input scaling (as in ChowCentaur)
+    : input_buffer        // High-pass input coupling
     : saturate_input      // Prevent excessive input levels
     : gain_stage(gain)    // Preamp, feed-forward, amplifier, and clipping
     : tone_filter(treble) // Active tone control
@@ -1815,7 +1841,6 @@ klonCentaur(gain, treble, level) =
     : saturate_core       // Core saturation limiting
     : output_stage(level) // Level control and output coupling
     : dc_blocker_hp35     // Remove DC offset
-    : *(0.262)            // Output gain correction (empirically matched to ChowCentaur VST)
 with {
     SR = ma.SR;
 
@@ -1825,20 +1850,22 @@ with {
     saturate_core = clip(-13.1, 11.7);  // Core stage saturation (asymmetric)
 
     // JUCE-style Parameter Smoothing
-    // Linear smoothing for parameters with additive behavior (e.g., treble)
-    smoothed_linear(time, target) = target : ba.line(n)
+    // As in JUCE's SmoothedValue after prepare(), each control starts at its
+    // first value and only later changes are ramped: the ramp runs on the
+    // difference from the first value, which is 0 at startup.
+    first = 1 - 1';                       // 1 on the first sample only
+    ramp_from_first(n, x) = x0 + ba.line(n, x - x0)
     with {
-        n = ba.sec2samp(time);  // Convert time (seconds) to samples
+        x0 = x : ba.sAndH(first);
     };
+
+    // Linear smoothing for parameters with additive behavior (e.g., treble)
+    smoothed_linear(time, target) = ramp_from_first(ba.sec2samp(time), target);
 
     // Multiplicative smoothing for parameters with scaling behavior (e.g., gain, level)
     // Smooths in log domain to provide perceptually linear response
-    smoothed_multiplicative(time, min_val, target) = exp(log_smooth)
-    with {
-        safe_target = max(target, min_val);  // Prevent log(0)
-        log_smooth = log(safe_target) : ba.line(n);
-        n = ba.sec2samp(time);
-    };
+    smoothed_multiplicative(time, min_val, target) =
+        exp(ramp_from_first(ba.sec2samp(time), log(max(target, min_val))));
 
     // ============= Stage Implementations =============
 
@@ -1846,24 +1873,21 @@ with {
     // High-pass filter formed by input coupling network
     // Rejects DC and very low frequencies while passing guitar signal
     // Reference: ChowCentaur/CommonProcessors/InputBufferProcessor.cpp
-    input_buffer = fi.tf1(b0_in, b1_in, a1_in)
+    input_buffer = hp1_bilinear(R2 / (R1 + R2), 1.0 / (C1 * (R1 + R2)))
     with {
         R1 = 10000.0;    // 10 kΩ - Series input resistor
         R2 = 1000000.0;  // 1 MΩ - Bias resistor to ground
         C1 = 0.1e-6;     // 0.1 µF - Input coupling capacitor
-        K = 2.0 * SR;    // Bilinear transform frequency warping factor
+    };
 
-        // Analog prototype transfer function H(s) = (bs0*s + bs1) / (as0*s + as1)
-        as0 = C1 * (R1 + R2);
-        as1 = 1.0;
-        bs0 = C1 * R2;
-        bs1 = 0.0;
-
-        // Bilinear transform: s = K*(z-1)/(z+1)
-        a0 = as0 * K + as1;
-        b0_in = (bs0 * K + bs1) / a0;
-        b1_in = (-bs0 * K + bs1) / a0;
-        a1_in = (-as0 * K + as1) / a0;
+    // First-order high-pass H(s) = k * s / (s + wc), bilinear-transformed with
+    // K = 2 * SR as in ChowCentaur, computed in TPT form: the direct form loses
+    // precision in single precision because the pole (a few Hz) is close to z = 1.
+    hp1_bilinear(k, wc, x) = k * (x - 0.5 * (st + st'))
+    with {
+        g = wc / (2.0 * SR);
+        G = g / (1.0 + g);
+        st = (\(s).(s + 2.0 * G * (x - s))) ~ _;  // TPT integrator state
     };
 
     // Tone Control Stage
@@ -1908,7 +1932,7 @@ with {
     // Level control with passive RC filter
     // Controls final output amplitude via variable voltage divider
     // Reference: ChowCentaur/CommonProcessors/OutputStageProcessor.cpp
-    output_stage(level_val) = fi.tf1(b0_out, b1_out, a1_out)
+    output_stage(level_val) = hp1_bilinear(R2 / (R1 + R2), 1.0 / (C1 * (R1 + R2)))
     with {
         level_s = level_val
             : clip(0.00001, 1.0)
@@ -1916,19 +1940,6 @@ with {
         R1 = 560.0 + (1.0 - level_s) * 10000.0;  // 560 Ω + variable (top of pot)
         R2 = level_s * 10000.0 + 1.0;            // Variable (bottom of pot) + 1 Ω floor
         C1 = 4.7e-6;                             // 4.7 µF - Output coupling capacitor
-        K = 2.0 * SR;                            // Bilinear transform frequency factor
-
-        // Analog prototype transfer function
-        as0 = C1 * (R1 + R2);
-        as1 = 1.0;
-        bs0 = C1 * R2;
-        bs1 = 0.0;
-
-        // Bilinear transform
-        a0 = as0 * K + as1;
-        b0_out = (bs0 * K + bs1) / a0;
-        b1_out = (-bs0 * K + bs1) / a0;
-        a1_out = (-as0 * K + as1) / a0;
     };
 
     // Calculate pole frequency for frequency-warped bilinear transform
@@ -2098,40 +2109,86 @@ with {
         tree = vin : wd.series : (p6, s6);
     };
 
-    // ============= Clipping Stage (Wave Digital Filter) =============
-    // Diode clipping stage using antiparallel diode pair
-    // Topology: diodes connected in parallel with:
-    //   - Input path: vin -> C9 -> R13
-    //   - Bias path: C10 -> Vbias (4.5V, 47kΩ)
-    // Outputs current from capacitor C10 for feedback to summing amplifier
-    // Reference: ChowCentaur/TeensyCentaur/src/GainStageProcessors/ClippingStage.h
-    clipping_stage_juce(sig) = wd.buildtree(tree)
+    // ============= Clipping Stage (Wave Digital Filter, 2x oversampled) =============
+    // Diode clipping stage using antiparallel diode pair (D2, D3)
+    // Topology: diodes (root) in parallel with:
+    //   - Input path: vin (inverted) -> C9 -> R13
+    //   - Bias path: C10 -> 47 kΩ to the bias, 0 V as in ChowCentaur (behind C10 a
+    //     DC bias only charges the capacitor, at startup)
+    // Outputs the current through C10 for the summing amplifier.
+    // As in ChowCentaur, the stage runs at twice the sample rate between JUCE's
+    // polyphase IIR half-band filters (maximum-quality settings: transition width
+    // 0.05 / -90 dB up, 0.06 / -75 dB down). wd.buildtree cannot be sub-stepped, so
+    // the tree is written out with chowdsp_wdf's adaptor equations.
+    // Reference: ChowCentaur/GainStageProcessors/ClippingStage.h, GainStageProc.cpp
+    clipping_stage(sig) = sig <: (up_direct, up_delayed) : clip2x : down
     with {
-        // Diode parameters - empirically tuned to match ChowCentaur VST output
-        // Note: JUCE source uses Is=15e-6, but 2.52e-9 (from chowdsp test files)
-        // provides better correlation with the VST plugin output
-        Is_juce = 2.52e-9;  // Reverse saturation current (A)
+        Is = 15e-6;         // Diode reverse saturation current (A), as in ChowCentaur
         Vt = 0.02585;       // Thermal voltage at room temperature (V)
-                            // Vt = kT/q ≈ 26 mV at 25°C
+        fs2 = 2.0 * SR;     // The stage's sample rate
 
-        // Antiparallel diode pair using Wright Omega function
-        // More accurate than Lambert W for diode modeling in WDF
-        diodes(i) = wd.u_diodeAntiparallel_omega(i, Is_juce, Vt, 1.0, 1.0);
+        // Port resistances (capacitors: 1 / (2 C fs))
+        R0 = 1.0e-9;                     // vin: ideal source (chowdsp default)
+        Rc9 = 1.0 / (2.0 * 1.0e-6 * fs2);
+        Rc10 = 1.0 / (2.0 * 1.0e-6 * fs2);
+        R13 = 1000.0;
+        Rb = 47000.0;
+        RS1 = R0 + Rc9;                  // series(vin, C9)
+        RS2 = RS1 + R13;                 // series(S1, R13)
+        RS3 = Rc10 + Rb;                 // series(C10, Rbias)
+        Rp = 1.0 / (1.0 / RS2 + 1.0 / RS3);
+        p1R = (1.0 / RS2) / (1.0 / RS2 + 1.0 / RS3);
 
-        // WDF components
-        vin(i) = wd.resVoltage(i, 1.0, -1.0 * sig);     // 1 Ω source impedance, inverted input
-        c9(i) = wd.capacitor(i, 1.0e-6);                // 1 µF - Input coupling capacitor
-        c10(i) = wd.capacitor_Iout(i, 1.0e-6);          // 1 µF - Bias capacitor (current output)
-        r13(i) = wd.resistor(i, 1000.0);                // 1 kΩ - Series resistor
-        vbias_47k(i) = wd.resVoltage(i, 47000.0, 4.5);  // 47 kΩ resistor, 4.5 V DC bias
+        // Antiparallel diode pair as root (chowdsp CustomDiodePairT). The Wright
+        // omega is wd.omega followed by two more Newton steps on
+        // omega = exp(x - omega): relative error below 2e-7 everywhere. (ChowCentaur
+        // uses a lookup table near 0 and fast log/exp approximations elsewhere.)
+        newton(x, y) = y - (y - exp(x - y)) / (y + 1.0);
+        omega(x) = newton(x, newton(x, max(wd.omega(x), 1e-12)));
+        R_Is = Rp * Is;
+        diode(a) = a + 2.0 * lam * (R_Is - Vt * omega(win))
+        with {
+            lam = ma.signum(a);
+            win = log(R_Is / Vt) + lam * a / Vt + R_Is / Vt;
+        };
 
-        // Build WDF tree: diodes in parallel with input and bias paths
-        s_input_1 = wd.series : (vin, c9);
-        s_input = wd.series : (s_input_1, r13);
-        s_bias = wd.series : (c10, vbias_47k);
-        p1 = wd.parallel : (s_input, s_bias);
+        // One step of the tree: states z9, z10 (capacitor waves), input x
+        step(z9, z10, x) = z9n, z10n, i10
+        with {
+            bS2 = z9 - x;                // reflected up by series(series(-x, C9), R13)
+            bS3 = 0.0 - z10;             // reflected up by series(C10, 0 V)
+            bDiff = bS3 - bS2;
+            bTemp = 0.0 - p1R * bDiff;
+            bP = bS3 + bTemp;            // reflected up by the parallel adaptor
+            aD = diode(bP);              // the root's reflected wave
+            b2 = aD + bTemp;
+            a10 = z10 - (Rc10 / RS3) * (b2 + z10);   // incident on C10
+            i10 = (a10 - z10) * 0.5 / Rc10;           // current through C10
+            z10n = a10;
+            xS2 = bDiff + b2;            // incident on series(S1, R13)
+            xS1 = (x - z9) - (RS1 / RS2) * (xS2 + (x - z9));
+            a1 = (0.0 - x) - (R0 / RS1) * (xS1 + (0.0 - x) + z9);
+            z9n = 0.0 - (xS1 + a1);      // incident on C9
+        };
+        // Two steps per sample: even then odd sub-sample; outputs (even, odd)
+        clip2x(e, o) = (loop ~ (_, _)) : (!, !, \(yo, ye).(ye, yo))
+        with {
+            loop(z9, z10) = step(z9, z10, e) : \(z9e, z10e, ye).(step(z9e, z10e, o), ye);
+        };
 
-        tree = diodes : p1;
+        // JUCE Oversampling2TimesPolyphaseIIR (float coefficients)
+        ap(a) = _ <: *(a), mem : + : (+ ~ *(0.0 - a));
+        up_direct = ap(0.04572814702987671) : ap(0.3325011134147644)
+            : ap(0.6632020473480225) : ap(0.9338558316230774);
+        up_delayed = ap(0.16808754205703735) : ap(0.5044857263565063)
+            : ap(0.8037808537483215);
+        down(e, o) = 0.5 * (dd + mem(dl))
+        with {
+            dd = e : ap(0.05421752482652664) : ap(0.3830873370170593)
+                : ap(0.7487209439277649);
+            dl = o : ap(0.19679796695709229) : ap(0.5731363892555237)
+                : ap(0.9142937064170837);
+        };
     };
 
     // Gain Stage - Complete signal path
@@ -2151,7 +2208,9 @@ with {
 
         // Preamp stage outputs: (voltage, FF1 current)
         preamp_outputs = preamp_stage(gain_clamped, sig);
-        preamp_voltage = preamp_outputs : ba.selector(0, 2);  // Extract voltage
+        // ChowCentaur reads this voltage before propagating the incident waves,
+        // and R6 and Vbias reflect 0, so it reads the previous sample's value.
+        preamp_voltage = preamp_outputs : ba.selector(0, 2) : mem;  // Extract voltage
         ff1_current = preamp_outputs : ba.selector(1, 2);     // Extract FF1 current
 
         // Feed-forward path 2 current
@@ -2161,7 +2220,7 @@ with {
         // The clipping stage outputs the current through C10 for feedback
         diode_current = amp_stage(gain_clamped, preamp_voltage)
             : saturate_input
-            : clipping_stage_juce;
+            : clipping_stage;
     };
 };
 declare klonCentaur author "David Braun";

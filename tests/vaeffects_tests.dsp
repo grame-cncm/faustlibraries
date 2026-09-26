@@ -199,3 +199,5 @@ klonCentaur_test = os.osc(330)
        hslider("klonCentaur:treble", 0.5, 0, 1, 0.01),
        hslider("klonCentaur:level", 0.5, 0, 1, 0.01)
      );
+
+klonCentaur_hot_test = os.osc(110)*0.5 : ve.klonCentaur(1, 0, 1);

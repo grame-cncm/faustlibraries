@@ -1159,9 +1159,28 @@ vocoder_test = (no.noise, os.osc(220))
 Klon Centaur overdrive pedal circuit model.
 
 The Klon Centaur is a guitar overdrive pedal known for adding gain and
-harmonic distortion while preserving the instrument's natural tone. This
-implementation uses wave digital filter (WDF) techniques to model the
-analog circuitry, including the gain stage, tone control, and clipping.
+harmonic distortion while preserving the instrument's natural tone. This is a
+port of the "Traditional" (circuit model) mode of Jatin Chowdhury's
+ChowCentaur: the gain stage is modeled with wave digital filters (WDF), with
+the diode clipper running at twice the sample rate, and the input buffer,
+amplifier, tone and output stages as bilinear-transformed filters.
+
+The controls are smoothed over 50 ms, as in ChowCentaur, starting from their
+initial values. The input is scaled by 0.5, as in ChowCentaur; a sample of
+±1 is treated as ±1 V.
+
+Accuracy: against the ChowCentaur 1.4.0 plug-in (Traditional mode), the output
+level is within 0.13 dB and the waveform within 1.6 % for gain up to 0.5;
+at gain 1 with loud input the model is up to 0.9 dB louder (waveform within
+11 %). The remaining difference comes from the plug-in's fast log/exp
+approximations in the diode model, which this port evaluates accurately: a
+variant using the plug-in's approximations matches it within 0.02 %.
+
+Single precision: the output stays within 2.3e-4 of double precision at the
+default settings from 44.1 to 192 kHz. At low gain the preamp's wave digital
+tree loses precision in float (a 1 µF capacitor next to 15 kΩ), and with gain
+and treble at 0 the gap grows from 3e-4 of the peak at 44.1 kHz to 6e-3 at
+192 kHz; ChowCentaur runs its wave digital filters in double precision.
 
 #### Usage
 
@@ -1189,6 +1208,7 @@ klonCentaur_test = os.osc(330)
        hslider("klonCentaur:treble", 0.5, 0, 1, 0.01),
        hslider("klonCentaur:level", 0.5, 0, 1, 0.01)
      );
+klonCentaur_hot_test = os.osc(110)*0.5 : ve.klonCentaur(1, 0, 1);
 ```
 
 #### References
