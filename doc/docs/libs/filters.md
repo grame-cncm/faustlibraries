@@ -1784,6 +1784,13 @@ two sections. The transfer function is the same bilinear transform
 the band is low or narrow relative to the sample rate, where the direct
 form's poles cluster near z = 1 (issue #261).
 
+When `w1` or `wc` jump abruptly, the state-variable sections release a
+little more of their internal state than the direct form would: the
+transient is slightly larger for an input well outside the band (about
+-75 dB instead of -98 dB in Julius Smith's test, a 5 kHz sine through
+`bandpass(2, fc, 1.2*fc)` with `fc` switching between 100 and 120 Hz).
+With fixed or smoothly varying edges, both forms reject the same.
+
 #### Test
 ```
 fi = library("filters.lib");
