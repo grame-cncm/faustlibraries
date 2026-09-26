@@ -12,6 +12,7 @@ file is the operational summary.
 make checkdoc    # documentation & license gate - run before every commit
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
+make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
 make plots       # regenerate the documentation SVG figures (needs matplotlib)
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
@@ -117,13 +118,20 @@ make build       # build the mkdocs site (doc pages + figure injection)
    definition gets wrong.
 
 9. **Check float and double, from 44.1 to 192 kHz.** `make check` runs
-   in double precision at 48 kHz only. Render new code in `-single` and
-   `-double` at 44.1, 48, 88.2, 96, 176.4 and 192 kHz, on an input that
-   is identical in both precisions (`no.noise`, not `os.osc`): the output
-   must stay finite, the float/double gap small, and what should not
-   depend on the rate must not. Procedure and pitfalls:
-   `doc/docs/contributing.md`, section *Precision and sample rate*.
-   Report what was checked in the pull request.
+   in double precision at 48 kHz only. `make check-precision` renders
+   every test in `-single` and `-double` at 44.1, 48, 88.2, 96, 176.4
+   and 192 kHz and fails on a non-finite output or a float/double RMS
+   level gap above 1e-3, beyond the debt pinned in
+   `tests/precision-baseline.json`. Run it on the test files you touched
+   (`PRECISION_ARGS="tests/xx_tests.dsp"`); a new test must pass without
+   a baseline entry, and a fix that makes an entry unnecessary removes it
+   in the same commit. Never add or loosen an entry to silence a failure.
+   Prefer `no.noise` to `os.osc` as test input: `os.osc` drifts in phase
+   in float. The check uses default control values only: also try the
+   controls at their extremes, and check that what should not depend on
+   the rate does not. Procedure and pitfalls: `doc/docs/contributing.md`,
+   section *Precision and sample rate*. Report what was checked in the
+   pull request.
 
 ## Git history
 
@@ -158,7 +166,7 @@ changed" depends on it.
   fix forward with a new commit.
 - Do not commit build artifacts even when they sit in the working tree.
   `.gitignore` covers `site/` but not `tests/reference/`, `tests/output/`,
-  `tests/build/` or the doc index exports (`tests/faust-doc-index.json`,
+  `tests/build/`, `tests/build-precision/` or the doc index exports (`tests/faust-doc-index.json`,
   `tests/faust-doc/`), so never stage with `git add -A` or `git commit -a` —
   name the files you mean. Naming files explicitly is not enough by
   itself: after `make reference` regenerates a `.ref` you touched, it is

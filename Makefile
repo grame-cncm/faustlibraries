@@ -3,6 +3,9 @@
 # `make reference`  - compile each *_test entry and store terminal output under tests/reference/.
 # `make check`      - recompile, run each test, and diff against the stored reference output.
 # `make check-vec`  - run the regression tests with Faust's vectorized code generator.
+# `make check-precision` - render every test in -single and -double at 44.1 to 192 kHz
+#                     and fail on non-finite output or a float/double level gap
+#                     beyond tests/precision-baseline.json (no reference needed).
 # `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
@@ -48,11 +51,15 @@ ARCH := arch/print_arch.cpp
 BUILD_DIR := tests/build
 REFERENCE_DIR := tests/reference
 OUTPUT_DIR := tests/output
+PRECISION_BUILD_DIR := tests/build-precision
+# Extra arguments for check-precision, e.g. PRECISION_ARGS="tests/vaeffects_tests.dsp"
+# or PRECISION_ARGS="-k klonCentaur_test" (a regex on test names, see scripts/check_precision.py -h).
+PRECISION_ARGS ?=
 DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -110,6 +117,9 @@ check: $(OUTS) ## Run tests and diff against references (fails on first divergen
 check-vec: ## Run all regression tests with Faust's vectorized code generator
 	@rm -rf $(BUILD_DIR) $(OUTPUT_DIR)
 	$(MAKE) check FAUST_OPT="$(FAUST_OPT) -vec"
+
+check-precision: ## Check every test in float and double at 44.1-192 kHz against tests/precision-baseline.json
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) $(PRECISION_ARGS)
 
 # Build a single output and immediately compare with its reference
 $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
@@ -236,7 +246,7 @@ pdf: ## Create the PDF documentation
 	$(MAKE) -C doc pdf
 
 clean: ## Remove build artefacts and generated outputs (keeps references)
-	rm -rf $(BUILD_DIR) $(OUTPUT_DIR) $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
+	rm -rf $(BUILD_DIR) $(PRECISION_BUILD_DIR) $(OUTPUT_DIR) $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
 
 distclean: clean ## Additionally remove the stored reference outputs
 	rm -rf $(REFERENCE_DIR)

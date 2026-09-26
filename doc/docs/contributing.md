@@ -310,11 +310,29 @@ Before preparing a pull-request, the new library must be carefully tested:
 - reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified. `make check` fails on the first divergence; use `make -k check` to run the whole suite and collect every failure.
 - every new function therefore ships with **both** its `#### Test` section and the corresponding `functionName_test` entry in the *tests* folder, and its reference is generated with `make reference` in the same change.
 - finally, `make checkdoc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted.
-- new code must also be checked in single and double precision, from 44.1 to 192 kHz, as described below: `make check` covers neither.
+- new code must also be checked in single and double precision, from 44.1 to 192 kHz, as described below: `make check` covers neither, `make check-precision` does.
 
 ### Precision and sample rate
 
-The regression tests run in double precision at 48 kHz only (`-double`, `SAMPLE_RATE=48000`). Most hosts compile Faust code in single precision (`float`) and run it at 44.1, 48, 88.2, 96, 176.4 or 192 kHz. Before a pull request, new code must therefore be rendered in both precisions and at all these rates, and the results read:
+The regression tests run in double precision at 48 kHz only (`-double`, `SAMPLE_RATE=48000`). Most hosts compile Faust code in single precision (`float`) and run it at 44.1, 48, 88.2, 96, 176.4 or 192 kHz. Before a pull request, new code must therefore be rendered in both precisions and at all these rates.
+
+`make check-precision` does this for every `*_test`, with no stored reference: it compiles each test in `-single` and `-double` with `arch/precision_arch.cpp` (the excitation and control schedule of `arch/print_arch.cpp`, with a binary output), renders one second at each of the six rates, and compares the two builds. A test fails when:
+
+- an output is not finite, in either precision, at any rate;
+- its **level gap** exceeds 1e-3: for some output and rate, the RMS of the single-precision render differs from that of the double-precision render by more than 1e-3 in relative terms.
+
+The level gap is the criterion, not the sample-by-sample gap, because `os.osc`, which drives many tests, drifts in phase in single precision (see below): the sample gap of such a test exceeds 1e-3 whether the code under test is accurate or not. The sample gap is still measured and written to the `--json` report. For a new test, prefer `no.noise` as input: both measurements are then meaningful.
+
+The debt accepted when the check was introduced is pinned in `tests/precision-baseline.json`, the way `tests/doc-baseline.json` pins the documentation debt: `nonfinite` lists the rates at which a test may be non-finite in single precision, `level` the worst level gap it may reach (within a factor `margin` of 2, since the last bits of a single-precision result depend on the compiler and its math library), and `expected` the few tests whose outputs differ between precisions by definition (`ma.EPSILON`, `ma.MIN`). A new test is never in the baseline, so it must pass outright. When a fix removes the need for an entry, the check says so: remove the entry in the same commit. Never add or loosen an entry to silence a failure you caused; the baseline is regenerated as a whole (`scripts/check_precision.py --write-baseline`) only when the rates, the threshold or the harness change.
+
+The whole run compiles every test twice and takes about ten minutes on ten cores. To check one library, pass its test file, or select tests by name:
+
+```bash
+make check-precision PRECISION_ARGS="tests/vaeffects_tests.dsp"
+make check-precision PRECISION_ARGS="-k klonCentaur_test"
+```
+
+`make check-precision` renders each test as written, at its default control values. The points below go further; check them by hand for new code, with the controls at their extremes and with the input levels the function is meant for:
 
 - **Stability.** At every rate and in both precisions the output must stay finite and bounded, with the controls at their extremes and with the input levels the function is meant for.
 - **Float against double.** At each rate, compare the single and double precision renders of the same program. A well-conditioned structure stays within about 1e-5 to 1e-4 of the peak. A larger gap, or one that grows with the sample rate, points to a structure that loses precision in float. Recursive filters whose poles come close to z = 1 are the usual cause, that is, frequencies low relative to the sample rate. For example, `no.noise : fi.lowpass(4, 50)` differs by 0.3 % of its peak at 44.1 kHz and by 8 % at 192 kHz. Prefer a structure that stays accurate there, or document the limitation. A state-variable filter is one such structure: in the same conditions, `fi.svf.lp(50, 0.707)` stays within 4e-5.
@@ -322,7 +340,7 @@ The regression tests run in double precision at 48 kHz only (`-double`, `SAMPLE_
 - **Behavior across rates.** What should not depend on the sample rate must not: cutoff and resonance frequencies, formants, time constants, levels. Compute coefficients from `ma.SR`, and watch for anything set in samples (delay lengths, waveguide sections, block sizes) and for pre-warping or oversampling filters close to Nyquist at the lowest rates. When a model is only valid at some rates, say so in its documentation and, if possible, give a way to adapt it (see `pt.ticksPerSample`). `ma.SR` is clamped to 192 kHz (see `pl.SR`), so behavior above that rate is not guaranteed.
 - **Long runs.** A recursive state decaying towards zero must not linger in the subnormal range, which float reaches much earlier than double: flush it or check that the structure does not produce it. Integer counters such as `ba.time` wrap after 2^31 samples, that is 12.4 hours at 48 kHz: do not use them to detect the first sample, use `1'` or `1 - 1'`.
 
-The `arch/print_arch.cpp` architecture used by `make check` takes the number of frames and the sample rate as arguments. For a program `probe.dsp` built around the new function, for instance `process = no.noise : fi.lowpass(4, 50);`, the following commands render one second at each rate in both precisions and print, for each rate, whether the output is finite, its peak, and the largest float/double difference relative to that peak:
+For such hand checks, the `arch/print_arch.cpp` architecture used by `make check` takes the number of frames and the sample rate as arguments. For a program `probe.dsp` built around the new function, for instance `process = no.noise : fi.lowpass(4, 50);`, the following commands render one second at each rate in both precisions and print, for each rate, whether the output is finite, its peak, and the largest float/double difference relative to that peak:
 
 ```bash
 b=tests/build
