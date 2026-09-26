@@ -49,8 +49,19 @@ serve:
 list:
 	@echo $(foreach e, $(LIST), "        - '" $e "':  libs/"$e.md"\n")
 	
+# lualatex, not xelatex: only lualatex honors the font fallbacks, needed for the
+# Greek letters, math symbols (ℝ, ≈, ≤, 𝜌, ⁻) and ⚠ that Latin Modern lacks.
+# Both fallback fonts ship with TeX Live. --resource-path: the pages of
+# docs/libs/ point to their figures as ../img/*.svg (SVG needs rsvg-convert).
+PDF_ENGINE ?= lualatex
+PDF_FONTS  := -V 'mainfont=Latin Modern Roman' -V 'monofont=Latin Modern Mono' \
+	-V 'mainfontfallback=STIX Two Math:' -V 'mainfontfallback=DejaVu Sans:' \
+	-V 'monofontfallback=STIX Two Math:' -V 'monofontfallback=DejaVu Sans Mono:'
+
 pdf:
-	pandoc --pdf-engine=xelatex --toc docs/index.md docs/organization.md docs/standardFunctions.md docs/contributing.md docs/about.md docs/libs/*.md -o library.pdf
+	pandoc --pdf-engine=$(PDF_ENGINE) --resource-path=$(DOCDIR)/libs:$(DOCDIR) --toc $(PDF_FONTS) \
+		$(DOCDIR)/index.md $(DOCDIR)/organization.md $(DOCDIR)/standardFunctions.md \
+		$(DOCDIR)/contributing.md $(DOCDIR)/about.md $(DOCDIR)/libs/*.md -o library.pdf
 
 clean:
 	rm -f $(MD)
