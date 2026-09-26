@@ -51,9 +51,10 @@ en = library("envelopes.lib");
 fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
+it = library("interpolators.lib");
 
 declare name "Faust Synthesizer Library";
-declare version "1.1.0";
+declare version "1.2.0";
 
 //===============================Synthesizers===================================
 //==============================================================================
@@ -282,6 +283,367 @@ with {
     gain(i) = ba.take(N-i,indices);
     fmBlock(0) = freq(0) : os.osc;
     fmBlock(i) = *(gain(i))+freq(i) : os.osc;
+};
+
+//-----------------------------------`(sy.)logicEFM1`---------------------------------------
+// Model of one voice of Apple Logic Pro's EFM1, a two-operator FM synthesizer: a
+// sine carrier phase-modulated by a modulator whose waveform morphs through ten
+// wavetables, with volume and modulation envelopes, a key-synced LFO, a sub
+// oscillator, carrier stereo detune and a unison mode. Stereo output.
+//
+// EFM1 exists only inside Logic Pro, so it cannot be hosted outside it. The model
+// was reverse-engineered from single notes rendered by Logic at 48 kHz, each with
+// one or two controls changed from a neutral patch and every control value read
+// back from Logic. The laws and constants below were fitted to those renders, and
+// the wavetables were read out of them. Against 94 of these renders the model
+// matches the level to 0.03 dB and, for steady tones, the waveform to 0.7 %
+// (median) and 4.4 % (worst case). The implementation notes give the fit per
+// feature and list what was not measured: only 48 kHz, only C notes (C0 to C6),
+// and one or a few settings for several controls.
+//
+// #### Usage
+//
+// ```
+// logicEFM1(modHarm, carHarm, modFine, carFine, fixedCar, fmInt, modWave,
+//           modEnvFM, modPitch, subLevel, stereoDet, unison,
+//           lfoAmt, lfoRate, velAmt, mainLevel,
+//           vA, vD, vS, vR, mA, mD, mS, mR,
+//           freq, gate, gain) : _,_
+// ```
+//
+// Where:
+//
+// * `modHarm`: modulator harmonic, an integer >= 1 (modulator frequency = modHarm*freq)
+// * `carHarm`: carrier harmonic, an integer >= 0 (carrier frequency = carHarm*freq; 0 gives a 0 Hz carrier)
+// * `modFine`: modulator fine ratio offset (-0.5..0.5), added to modHarm
+// * `carFine`: carrier fine ratio offset (-0.5..0.5), added to carHarm
+// * `fixedCar`: Fixed Carrier switch (0/1): the carrier sits at C1 (32.70 Hz) times its ratio, independent of freq and the LFO
+// * `fmInt`: FM intensity (0-1)
+// * `modWave`: modulator waveform (0-9): 0 is a sine, and the knob blends the ten wavetables linearly
+// * `modEnvFM`: modulation envelope to FM intensity (-1..1)
+// * `modPitch`: modulation envelope to modulator pitch (-1..1; up to +-27.5 semitones)
+// * `subLevel`: sub oscillator level (0-1; a sine one octave below freq)
+// * `stereoDet`: carrier stereo detune as displayed (0-50; the carriers move by about 0.75x this many cents)
+// * `unison`: Unison switch (0/1): a second, slightly detuned copy of the voice
+// * `lfoAmt`: LFO amount, bipolar (-1 = full vibrato, +-36 semitones .. +1 = full FM modulation)
+// * `lfoRate`: LFO rate in Hz (0.01-100)
+// * `velAmt`: velocity sensitivity of the level (0-1)
+// * `mainLevel`: output gain (linear; 1 = Logic's 0 dB)
+// * `vA`: volume envelope attack in ms, as Logic displays it (0-10000)
+// * `vD`: volume envelope decay in ms (0-10000)
+// * `vS`: volume envelope sustain (0-1)
+// * `vR`: volume envelope release in ms (0-10000)
+// * `mA`: modulation envelope attack in ms (0-10000)
+// * `mD`: modulation envelope decay in ms (0-10000)
+// * `mS`: modulation envelope sustain (0-1)
+// * `mR`: modulation envelope release in ms (0-10000)
+// * `freq`: note frequency in Hz
+// * `gate`: note gate (0/1)
+// * `gain`: note velocity (MIDI velocity/127)
+//
+// #### Test
+// ```
+// sy = library("synths.lib");
+// ba = library("basics.lib");
+// logicEFM1_test = sy.logicEFM1(1, 2, 0, 0, 0, 0.3, 2.5, 0.5, 0.2, 0.3, 10, 0,
+//                               -0.3, 2, 0.3, 1, 10, 500, 0.7, 300, 0, 800, 0.2, 200,
+//                               261.63, ba.time < 36000, 0.8);
+// logicEFM1_unison_test = sy.logicEFM1(3, 4, 0, 0, 1, 0.35, 8.9, 0.7, 0, 0.2, 35, 1,
+//                                      0.8, 1, 0.8, 1, 5, 1200, 0.3, 500, 0, 2000, 0.1, 400,
+//                                      261.63, ba.time < 36000, 0.8);
+// ```
+//
+// #### References
+//
+// * Apple, Logic Pro User Guide, "EFM1".
+//------------------------------------------------------------------------------
+/*
+Implementation Notes:
+
+Measured laws (Logic Pro renders at 48 kHz; control values as Logic displays them):
+
+- Frequencies: carrier = (carHarm + carFine)*freq, modulator = (modHarm + modFine)
+  *freq; carHarm 0 is a literal 0 Hz carrier, so the output is sin(beta*modulator).
+  Fixed Carrier pins the carrier at 32.7036 Hz*(carHarm + carFine), exempt from freq
+  and the LFO. All oscillators start at phase 0 on the note's first sample (the
+  model restarts them at every note-on; repeated notes were not measured).
+- FM index (radians): beta = 19.6*x^2 with x = |fmInt + amount^2*lfo +
+  0.764*modEnvFM*modEnv|. The LFO and the envelope add to the FM Intensity input
+  and the sum's sign folds; the cap at 40 is a numeric guard only.
+- Modulator: ten tables, each a sine series of up to 128 harmonics (all sine
+  terms, signed), peak-normalized to 1; table 1 is a triangle wave (1.092/k^2 on
+  odd k, up to k = 31). modWave blends adjacent tables linearly. Harmonic k is
+  played only while k*freq stays below about 17 kHz: 128 harmonics at C2 and
+  below, 64 at C4, 16 at C6. Harmonics 1-64 were read at C4 and 65-128 at C2.
+  Logic's own tables also show faint lookup images (about -70 dB, at harmonics
+  385-640), which are not modeled.
+- Envelopes: the attack follows (1 - exp(-2.4*t/T))/(1 - exp(-2.4)) and reaches 1
+  at the displayed time T; decay and release are exponential with a T60 of 3x the
+  displayed time. The modulator pitch envelope follows only the decaying part of
+  the modulation envelope, (modEnv - sustain), up to +-27.5 semitones.
+- LFO: a triangle, key-synced to start at its peak. Negative amounts give vibrato
+  of the whole voice, up to +-36.07 semitones; the vibrato and the modulator pitch
+  amount share one taper, a break-point curve measured at eight amounts.
+- Level: output gain 0.3776*mainLevel*(1 + velAmt*(gain - 1)); sub oscillator
+  amplitude subLevel^2 before that gain.
+- Stereo: with detune, the carriers move by -0.7511x and +0.7497x the displayed
+  cents (minus 0.01 cent) and the level drops to 2/3, in a step from zero detune.
+  Unison adds a second copy of the voice (+0.279 and -2.421 cents). Placement:
+  without detune, copy A left and copy B right at 4/3; with detune, the outer
+  carriers (A down, B up) hard left and right at 2/3 and, with Unison, the inner
+  two (A up, B down) in both channels at 1/2 (measured 1.333, 0.663 and 0.497).
+
+Goodness of fit against 94 renders, level-matched relative RMS waveform error over
+0.3-1.5 s of each note, and level error:
+
+| Feature (captures)                                           | Waveform  | Level   |
+|--------------------------------------------------------------|-----------|---------|
+| Wavetable readouts, carrier 0, FM 0.1, C4, waves 0-9 (10)    | 0.2-3.0 % | 0.00 dB |
+| Wavetable readouts at C0-C2 (12), see below                  | 0.4-5.2 % | 0.00 dB |
+| Every table and blend in FM, carrier 1-2, FM 0.19-0.5 (13)   | 0.2-4.4 % | 0.03 dB |
+| Sine modulator, FM 0.19-1.0, modulator 1-3 (4)               | 0.1-4.2 % | 0.02 dB |
+| Modulation envelope to FM, depth -0.5..1, attack 300 ms (12) | 0.0-1.7 % | 0.02 dB |
+| LFO to FM, amounts 0.25-1 (5)                                | 0.2-4.1 % | 0.02 dB |
+| Modulation envelope to modulator pitch, +-0.25..0.5 (4)      | 0.2-1.9 % | 0.02 dB |
+| Stereo detune 1-50, Unison, both (8)                         | 0.1-3.5 % | 0.02 dB |
+| Sub oscillator, velocity sensitivity, velocity (7)           | 0.1 %     | 0.02 dB |
+| Volume attack 300 ms, decay to sustain 0.5 (2)               | 0.1 %     | 0.02 dB |
+| Fixed carrier, fine ratios (3)                               | 0.4-1.8 % | 0.02 dB |
+| Other notes: C2, C5, C6 (3)                                  | 0.6-2.7 % | 0.02 dB |
+
+For vibrato (amounts 0.12-1, 8 renders) and the full-scale modulator pitch envelope
+(3 renders) the pitch is compared instead: median error 0.03-3.1 cents, largest
+8.5 cents at full vibrato depth. Part of each waveform error comes from the
+single-precision phase accumulator, which is off by 0.002 cents at C4 and
+0.016 cents at C2 (far below audibility, but the phase drift adds up over a
+second): at FM 1.0 an exact double-precision rendering of the model differs from
+Logic by 2.7 %, against 4.2 % for the model as compiled, and for the C2 wave 8
+readout 0.7 % against 5.2 %.
+
+Not measured, or measured at only a few settings:
+
+- Sample rates other than 48 kHz. Whether the 17 kHz harmonic limit, or anything
+  else, follows the sample rate is unknown.
+- Notes other than C0, C1, C2, C4, C5 and C6. Because these are octaves apart,
+  whether the harmonic limit is a fixed 17 kHz or changes in octave steps (tables
+  of 128, 64, 32 and 16 harmonics) is not resolved.
+- The wavetables were read at C4 and C2 with a 0 Hz carrier and a low index.
+  Each table, and blends at positions 0.5, 2.5, 4.5, 6.5 and 8.5, was then
+  checked in FM (carrier 2, FM 0.3 or as listed above), but blends were not
+  swept finely.
+- Envelope times: attack 300 ms, decays 500 and 780 ms and the default release
+  (72 ms) only. The modulator pitch envelope during release (below the sustain
+  level) was not measured.
+- The LFO rate at 2 Hz only; the vibrato taper is linear between its break points;
+  the LFO FM taper (amount^2) was measured at four amounts.
+- Fine ratios at one combination; carHarm 0 with carFine; the sub oscillator,
+  Fixed Carrier or the modulator pitch envelope combined with Unison.
+- Not modeled: polyphony and voice stealing, Glide, Randomize, the mono modes,
+  Tune and Transpose, and the modulation-wheel routings.
+*/
+declare logicEFM1 author "David Braun";
+declare logicEFM1 license "MIT";
+
+logicEFM1(modHarm, carHarm, modFine, carFine, fixedCar, fmInt, modWave,
+          modEnvFM, modPitch, subLevel, stereoDet, unison,
+          lfoAmt, lfoRate, velAmt, mainLevel,
+          vA, vD, vS, vR, mA, mD, mS, mR,
+          freq, gate, gain) = (left, right) : (_*outVol, _*outVol)
+with {
+    // Envelopes (times in displayed ms). The attack is a one-pole rise toward
+    // 1/(1 - exp(-2.4)) that reaches 1 at exactly the attack time; decay and release
+    // are exponential with a T60 of 3x the displayed time.
+    noteOn = gate > gate';
+    volEnv = adsr(vA, vD, vS, vR);
+    modEnv = adsr(mA, mD, mS, mR);
+    adsr(aMs, dMs, sus, rMs) = (step ~ (_, _)) : (_, !)
+    with {
+        rate(t, n) = 1.0 - exp(0 - n/max(1.0, t*ma.SR));
+        step(yp, dp) = y, done
+        with {
+            done = select2(noteOn, max(dp, yp >= 1.0) * (gate > 0), 0);
+            attack = (gate > 0) * (done == 0);
+            k = select2(gate > 0, rate(rMs*0.003, 6.9078),
+                select2(attack, rate(dMs*0.003, 6.9078), rate(aMs*0.001, 2.4)));
+            target = select2(gate > 0, 0.0, select2(attack, sus, 1.0/(1.0 - exp(-2.4))));
+            yn = yp + (target - yp)*k;
+            y = select2(attack, yn, min(yn, 1.0)) * (yn > 1e-20); // flush denormals
+        };
+    };
+
+    // Taper shared by the vibrato and modulator-pitch amounts: break points
+    // measured at amounts 0.12-1 (as a fraction of full scale), linear in between.
+    amtCurve = ba.bpf.start(0, 0) : ba.bpf.point(0.12, 0.00649) : ba.bpf.point(0.25, 0.02257)
+        : ba.bpf.point(0.38, 0.06946) : ba.bpf.point(0.5, 0.15281) : ba.bpf.point(0.62, 0.23613)
+        : ba.bpf.point(0.75, 0.32644) : ba.bpf.point(0.88, 0.66669) : ba.bpf.end(1, 1);
+
+    // Key-synced triangle LFO starting at its peak. The two sides of the amount
+    // knob have different laws: vibrato up to +-3606.5 cents through amtCurve, and
+    // an FM depth of amount^2.
+    lfoPh = (+(lfoRate/ma.SR) : ma.frac) ~ (*(1.0 - noteOn));
+    lfoTri = 1.0 - 4.0*abs(ma.frac(lfoPh + 0.5) - 0.5);
+    vibCents = 3606.5 * amtCurve(max(0.0, 0 - lfoAmt));
+    fmLfo = pow(max(0.0, lfoAmt), 2.0);
+
+    // Frequencies: vibrato (whole voice) and the modulator pitch envelope, which
+    // follows only the decaying part of the modulation envelope (modEnv - sustain)
+    // with up to +-27.5 semitones; Fixed Carrier ignores freq and vibrato.
+    vibMod = pow(2.0, vibCents*lfoTri/1200.0);
+    pitchSemis = 27.5 * amtCurve(abs(modPitch)) * ma.signum(modPitch) * (modEnv - mS);
+    modPitchRatio = pow(2.0, pitchSemis/12.0);
+    fc = select2(fixedCar > 0.5, freq * vibMod, 32.7036) * (carHarm + carFine);
+    fm = freq * (modHarm + modFine) * vibMod * modPitchRatio;
+
+    // FM index: the LFO and the modulation envelope add to the FM Intensity input,
+    // and one curve maps the sum (its sign folds) to the index in radians.
+    betaCurve(x) = min(40.0, 19.6 * x * x);
+    beta = betaCurve(fmInt + fmLfo*lfoTri + 0.764*modEnvFM*modEnv);
+
+    // Every oscillator restarts at phase 0 on each note-on (measured for single
+    // notes; where sidebands fold, the relative phase sets their balance).
+    phasor(f) = (+(f/ma.SR) : ma.decimal) ~ (*(1.0 - noteOn));
+
+    // Modulator: a sine series. Its 128 coefficients are blended linearly between
+    // the two measured tables adjacent to modWave (see the implementation notes),
+    // harmonics above 17 kHz (or Nyquist) are dropped, and sin(k*th) is generated by
+    // rotating (cos, sin) through th once per harmonic (stable in single precision).
+    nH = 128;
+    wPos = max(0.0, min(9.0, modWave));
+    wLo = int(wPos);
+    wHi = min(9, wLo + 1);
+    wFrac = wPos - wLo;
+    coef(j, k) = rdtable(tables, int(j*nH + k - 1));
+    blend(k) = coef(wLo, k) + wFrac*(coef(wHi, k) - coef(wLo, k));
+    modOsc(f) = (0.0, 1.0, 0.0) : seq(i, nH, step(i + 1)) : (_, !, !)
+    with {
+        th = 2.0*ma.PI*phasor(f);
+        c1 = cos(th);
+        s1 = sin(th);
+        step(k, acc, ck, sk) = acc + blend(k)*(k*f < min(17000.0, 0.5*ma.SR))*sn, cn, sn
+        with {
+            cn = ck*c1 - sk*s1;
+            sn = sk*c1 + ck*s1;
+        };
+    };
+    carrier(f, modsig) = sin(2.0*ma.PI*phasor(f) + beta*modsig);
+
+    // Stereo detune moves the carrier down (dn) and up (up) by about 0.75x the
+    // displayed cents. Unison adds a second copy of the voice: copy A at +0.28 cents,
+    // copy B at -2.42 cents (without Unison both are the plain voice). Stereo placement:
+    // - no detune: A left and B right, each x4/3 with Unison;
+    // - detune: A dn hard left and B up hard right, each x2/3; with Unison, A up and
+    //   B dn are also mixed into both channels, x1/2 each.
+    detOn = stereoDet > 0.0;
+    uniOn = unison > 0.5;
+    detDn = ba.semi2ratio((-0.7511*stereoDet - 0.0095*detOn)/100.0);
+    detUp = ba.semi2ratio((0.7497*stereoDet - 0.0095*detOn)/100.0);
+    uA = select2(uniOn, 1.0, ba.semi2ratio(0.279/100.0));
+    uB = select2(uniOn, 1.0, ba.semi2ratio(-2.421/100.0));
+    outerGain = select2(detOn, select2(uniOn, 1.0, 4.0/3.0), 2.0/3.0);
+    innerGain = select2(detOn & uniOn, 0.0, 0.5);
+    modA = modOsc(fm*uA);
+    modB = modOsc(fm*uB);
+    inner = innerGain * (carrier(fc*detUp*uA, modA) + carrier(fc*detDn*uB, modB));
+    sub = sin(2.0*ma.PI*phasor(freq*0.5)) * subLevel * subLevel;
+    left = outerGain*carrier(fc*detDn*uA, modA) + inner + sub;
+    right = outerGain*carrier(fc*detUp*uB, modB) + inner + sub;
+    velVol = it.interpolate_linear(velAmt, 1.0, gain);
+    outVol = 0.3776 * mainLevel * velVol * volEnv;
+
+    // Sine-series coefficients of the ten modulator tables (harmonics 1-128 each),
+    // read from Logic Pro renders; see the implementation notes.
+    tables = waveform{
+        // table 0
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // table 1
+        1.0918, 0, 0.1213, 0, 0.0437, 0, 0.0223, 0, 0.0135, 0, 0.009, 0, 0.0064, 0, 0.0048, 0,
+        0.0038, 0, 0.003, 0, 0.0025, 0, 0.002, 0, 0.0017, 0, 0.0015, 0, 0.0013, 0, 0.0011, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // table 2
+        0.7261, 0.0235, 0.0169, 0.1868, 0.0206, 0.0092, 0.0847, 0.1021, 0.0293, 0.0258, 0.0444, 0.0199, 0.0134, 0.0464, 0.0252, 0.0101,
+        0.0059, 0.0214, 0.0199, 0.095, 0.0106, 0.0086, 0.0069, 0.003, 0.0018, 0.001, 0, 0, 0.0016, 0.0012, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // table 3
+        0.8265, 0.2712, 0.1251, 0.0348, 0.0134, 0.0169, 0.0177, 0.0598, 0.0296, 0.0787, 0.0498, 0.0245, 0.0197, 0.046, 0.0173, 0.016,
+        0.009, 0.0145, 0.0123, 0.02, 0.0081, 0.0241, 0.0061, 0.007, 0.0071, 0.0156, 0.006, 0.0058, 0.0068, 0.0062, 0.0067, 0.0126,
+        0.0062, 0.0158, 0.0071, 0.0057, 0.0063, 0.0072, 0.0065, 0.0089, 0.0061, 0.0081, 0.0063, 0.0139, 0.0066, 0.0113, 0.0057, 0.0033,
+        0.0066, 0.0014, 0.0049, 0.0122, 0.0067, 0.0085, 0.0046, 0.0122, 0.007, 0.008, 0.0042, 0.0035, 0.0069, 0.003, 0.0032, 0.0145,
+        0.007, 0.0084, 0.0033, 0.0112, 0.0076, 0.0084, 0.0032, 0.004, 0.0065, 0.0025, 0.0024, 0.0128, 0.0058, 0.0078, 0.0029, 0.0086,
+        0.006, 0.0066, 0.004, 0.0022, 0.0048, 0.0015, 0.0035, 0.0057, 0.0038, 0.005, 0.0033, 0.0045, 0.0036, 0.0034, 0.0033, 0.0026,
+        0.0033, 0.0027, 0.0031, 0.0034, 0.003, 0.003, 0.0028, 0.0029, 0.0028, 0.0024, 0.0026, 0.0024, 0.0025, 0.0023, 0.0024, 0.0025,
+        0.0023, 0.0022, 0.0022, 0.0022, 0.0021, 0.002, 0.002, 0.0019, 0.0018, 0.0018, 0.0018, 0.0018, 0.0017, 0.0016, 0.0016, 0.0016,
+        // table 4
+        0.2705, 0.3097, 0.0724, 0.1064, 0.0136, 0.0775, 0.0422, 0.036, 0.0493, 0.0247, 0.0555, 0.0307, 0.0585, 0.0583, 0.0559, 0.0556,
+        0.0555, 0.0478, 0.045, 0.0396, 0.0449, 0.0322, 0.0541, 0.0205, 0.0488, 0.013, 0.034, 0.0062, 0.0265, 0.0018, 0.0198, 0.0016,
+        0.0119, 0.001, 0.0088, 0.0014, 0.0061, 0, 0.0019, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // table 5
+        0.0713, 0.2731, 0.0522, 0.0075, 0.0255, 0.0297, 0.0327, 0.0654, 0.1212, 0.1166, 0.049, 0.1284, 0.0945, 0.1304, 0.1214, 0.0649,
+        0.0275, 0.0195, 0.0493, 0.0283, 0.0124, 0.0116, 0.0043, 0.0047, 0, 0.0011, 0.0021, 0.0028, 0.0022, 0.0015, 0.002, 0,
+        0.0014, 0.0067, 0.018, 0.0339, 0.0414, 0.0268, 0.0034, 0.0095, 0.008, 0.024, 0.0411, 0.0337, 0.0161, 0.0089, 0.0088, 0.0083,
+        0.0052, 0.0022, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0011, 0.0029, 0.0055, 0.008,
+        0.007, 0.0034, 0, 0.0019, 0.0013, 0.003, 0.0074, 0.0077, 0.0058, 0.0027, 0.0011, 0.0013, 0.0013, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0.0013, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // table 6
+        0.5416, 0.2485, 0.4455, 0, 0, 0, 0, 0.2146, 0, 0, 0, 0.0907, 0, 0, 0, 0.0378,
+        0, 0, 0, 0, 0, 0.0312, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // table 7
+        0.3891, 0.097, 0.4349, 0.1264, 0.0206, 0.1983, 0.0011, 0.2657, 0.0055, 0.0076, 0, 0.0166, 0.0065, 0.0036, 0, 0.0117,
+        0.0016, 0.0048, 0.0039, 0, 0.0036, 0.003, 0.0014, 0.001, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        // table 8
+        0.0058, 0.0459, 0.046, 0.0304, 0.0076, 0.3976, 0.0072, 0.0341, 0.0147, 0.0337, 0.0062, 0.19, 0.008, 0.0291, 0.0084, 0.0355,
+        0.0052, 0.1187, 0.0081, 0.0262, 0.006, 0.0364, 0.0054, 0.0796, 0.0077, 0.0231, 0.0048, 0.0358, 0.0034, 0.0568, 0.0074, 0.0209,
+        0.0048, 0.0355, 0.0026, 0.0413, 0.007, 0.0179, 0.0048, 0.034, 0.0018, 0.0298, 0.0065, 0.0151, 0.0052, 0.032, 0.0018, 0.0204,
+        0.006, 0.012, 0.0048, 0.0294, 0.0017, 0.0134, 0.0051, 0.0092, 0.0046, 0.0256, 0.0018, 0.0084, 0.0043, 0.0066, 0.0043, 0.0215,
+        0.002, 0.0047, 0.0036, 0.0042, 0.004, 0.0179, 0.002, 0.0021, 0.0029, 0.0025, 0.0032, 0.014, 0.0019, 0, 0.0023, 0.0012,
+        0.0025, 0.0108, 0.0016, 0.0011, 0.0018, 0.0011, 0.0019, 0.0076, 0.0015, 0.0012, 0.0016, 0.0015, 0.0013, 0.0055, 0.0013, 0.0013,
+        0.0013, 0.0014, 0.001, 0.0036, 0.001, 0.0012, 0, 0.0014, 0, 0.0024, 0, 0.0011, 0, 0.0013, 0, 0.0018,
+        0, 0, 0, 0.0012, 0, 0.0013, 0, 0, 0, 0.0014, 0, 0.001, 0, 0, 0, 0,
+        // table 9
+        0.3447, 0.0014, 0.0069, 0.0013, 0.0158, 0.0019, 0.0551, 0.5337, 0.0607, 0.0025, 0.023, 0.009, 0.0157, 0.0292, 0.1205, 0.0304,
+        0.0096, 0.01, 0.0069, 0.0058, 0.0049, 0.0031, 0.0082, 0.0041, 0.0041, 0.0017, 0.0063, 0.0035, 0.0043, 0.0032, 0.0045, 0.0019,
+        0.0052, 0.003, 0.0028, 0.0028, 0.0026, 0.0023, 0, 0.0048, 0.0014, 0, 0.0027, 0.0016, 0.0025, 0, 0.0033, 0.0012,
+        0.0017, 0.002, 0.0027, 0.0018, 0.0026, 0, 0.003, 0, 0, 0, 0.0017, 0, 0, 0, 0.0025, 0,
+        0.0023, 0, 0, 0, 0.0013, 0, 0, 0, 0.002, 0, 0.0016, 0.001, 0.0015, 0.0011, 0, 0,
+        0.0015, 0, 0.0011, 0, 0, 0, 0, 0.0016, 0, 0, 0, 0, 0, 0, 0.0012, 0,
+        0.001, 0, 0, 0, 0, 0, 0, 0, 0.0011, 0, 0, 0, 0, 0, 0, 0.0025,
+        0.0088, 0.0019, 0, 0, 0.0012, 0, 0.0024, 0.0183, 0.0016, 0, 0, 0, 0, 0, 0.0014, 0
+    };
 };
 
 

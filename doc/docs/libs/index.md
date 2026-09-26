@@ -1129,6 +1129,7 @@
 [(sy.)combString](synths.md#sycombstring)
 [(sy.)additiveDrum](synths.md#syadditivedrum)
 [(sy.)fm](synths.md#syfm)
+[(sy.)logicEFM1](synths.md#sylogicefm1)
 [(sy.)kick](synths.md#sykick)
 [(sy.)clap](synths.md#syclap)
 [(sy.)hat](synths.md#syhat)
