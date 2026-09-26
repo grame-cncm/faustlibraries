@@ -225,6 +225,7 @@
 [(co.)limiter_lad_stereo](compressors.md#colimiter_lad_stereo)
 [(co.)limiter_lad_quad](compressors.md#colimiter_lad_quad)
 [(co.)limiter_lad_bw](compressors.md#colimiter_lad_bw)
+[(co.)xfer_ott](compressors.md#coxfer_ott)
 
 ## debug
 
@@ -284,6 +285,7 @@
 [(dm.)cubicnl_demo](demos.md#dmcubicnl_demo)
 [(dm.)gate_demo](demos.md#dmgate_demo)
 [(dm.)compressor_demo](demos.md#dmcompressor_demo)
+[(dm.)xfer_ott_demo](demos.md#dmxfer_ott_demo)
 [(dm.)moog_vcf_demo](demos.md#dmmoog_vcf_demo)
 [(dm.)wah4_demo](demos.md#dmwah4_demo)
 [(dm.)crybaby_demo](demos.md#dmcrybaby_demo)
