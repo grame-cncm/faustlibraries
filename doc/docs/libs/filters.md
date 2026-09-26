@@ -1748,7 +1748,8 @@ tf1s_test = src : fi.tf1s(0, 1, 1, ma.PI*ma.SR/2);
 ### `(fi.)tf2sb`
 
 Bandpass mapping of `tf2s`: In addition to a frequency-scaling parameter
-`w1` (set to HALF the desired passband width in rad/sec),
+`w1` (set to the desired passband width in rad/sec: the prototype's
+cutoff at 1 rad/sec maps to two band edges `w1` apart),
 there is a desired center-frequency parameter wc (also in rad/s).
 Thus, `tf2sb` implements a fourth-order digital bandpass filter section
 specified by the coefficients of a second-order analog lowpass prototype
@@ -1767,7 +1768,7 @@ Where:
 
 * `b2`, `b1`, `b0`: analog lowpass numerator coefficients
 * `a1`, `a0`: analog lowpass denominator coefficients
-* `w1`: half the desired passband width in radians/second
+* `w1`: desired passband width in radians/second (distance between the band edges)
 * `wc`: desired center frequency in radians/second
 
 #### Method
@@ -1809,7 +1810,7 @@ Where:
 
 * `b1`, `b0`: analog numerator coefficients
 * `a0`: analog denominator constant coefficient
-* `w1`: half the desired passband width in radians/second
+* `w1`: desired passband width in radians/second (distance between the band edges)
 * `wc`: desired center frequency in radians/second
 
 #### Method
@@ -2353,7 +2354,7 @@ highpass6e_test = src : fi.highpass6e(1000);
 
 Order 2*Nh Butterworth bandpass filter made using the transformation
 `s <- s + wc^2/s` on `lowpass(Nh)`, where `wc` is the desired bandpass center
-frequency.  The `lowpass(Nh)` cutoff `w1` is half the desired bandpass width.
+frequency.  The `lowpass(Nh)` cutoff `w1` is the desired bandpass width.
 `bandpass` is a standard Faust function.
 
 #### Usage
@@ -2367,8 +2368,10 @@ Where:
 * `Nh`: HALF the desired bandpass order (which is therefore even)
 * `fl`: lower -3dB frequency in Hz
 * `fu`: upper -3dB frequency in Hz
-Thus, the passband width is `fu-fl`,
-      and its center frequency is `(fl+fu)/2`.
+Thus, the passband width is `fu-fl`, and its center frequency, where
+the response peaks, is the geometric mean of the band edges prewarped by
+the bilinear transform: `sqrt(fl*fu)` well below Nyquist, somewhat higher
+near it.
 
 #### Test
 ```
@@ -2388,7 +2391,7 @@ bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);
 
 Order 2*Nh Butterworth bandstop filter made using the transformation
 `s <- s + wc^2/s` on `highpass(Nh)`, where `wc` is the desired bandpass center
-frequency.  The `highpass(Nh)` cutoff `w1` is half the desired bandpass width.
+frequency.  The `highpass(Nh)` cutoff `w1` is the desired bandstop width.
 `bandstop` is a standard Faust function.
 
 #### Usage
@@ -2401,8 +2404,10 @@ Where:
 * `Nh`: HALF the desired bandstop order (which is therefore even)
 * `fl`: lower -3dB frequency in Hz
 * `fu`: upper -3dB frequency in Hz
-Thus, the passband (stopband) width is `fu-fl`,
-      and its center frequency is `(fl+fu)/2`.
+Thus, the stopband width is `fu-fl`, and its center frequency, where
+the response has its zero, is the geometric mean of the band edges
+prewarped by the bilinear transform: `sqrt(fl*fu)` well below Nyquist,
+somewhat higher near it.
 
 #### Test
 ```
@@ -2450,7 +2455,9 @@ bandpass0_bandstop1_test = src : fi.bandpass0_bandstop1(0, 2, 500, 1500);
 
 ### `(fi.)bandpass6e`
 
-Order 12 elliptic bandpass filter analogous to `bandpass(6)`.
+Order 6 elliptic bandpass filter analogous to `bandpass(3)`: a third-order
+elliptic lowpass prototype mapped to a bandpass, with a 0.2 dB equiripple
+passband between `fl` and `fu`.
 
 #### Usage
 
@@ -2460,14 +2467,24 @@ _ : bandpass6e(fl,fu) : _
 
 Where:
 
-* `fl`: lower -3dB band edge frequency in Hz
-* `fu`: upper -3dB band edge frequency in Hz
+* `fl`: lower passband edge frequency in Hz (-0.2 dB)
+* `fu`: upper passband edge frequency in Hz (-0.2 dB)
+
+#### Test
+```
+fi = library("filters.lib");
+os = library("oscillators.lib");
+src = os.osc(440);
+bandpass6e_test = src : fi.bandpass6e(500, 1500);
+```
 
 ----
 
 ### `(fi.)bandpass12e`
 
-Order 24 elliptic bandpass filter analogous to `bandpass(6)`.
+Order 12 elliptic bandpass filter analogous to `bandpass(6)`: a sixth-order
+elliptic lowpass prototype mapped to a bandpass, with a 0.2 dB equiripple
+passband between `fl` and `fu`.
 
 #### Usage
 
@@ -2477,8 +2494,16 @@ _ : bandpass12e(fl,fu) : _
 
 Where:
 
-* `fl`: lower -3dB band edge frequency in Hz
-* `fu`: upper -3dB band edge frequency in Hz
+* `fl`: lower passband edge frequency in Hz (-0.2 dB)
+* `fu`: upper passband edge frequency in Hz (-0.2 dB)
+
+#### Test
+```
+fi = library("filters.lib");
+os = library("oscillators.lib");
+src = os.osc(440);
+bandpass12e_test = src : fi.bandpass12e(500, 1500);
+```
 
 ----
 
