@@ -53,6 +53,8 @@ IMPORT_DIRECTIVE_RE = re.compile(r'import\("([^"]+)"\)\s*;')
 #   `//-----`(fi.)lms`, `(fi.)nlms`-----`
 HEADER_RE = re.compile(r"^//-+\s*(`[^`]+`(?:\s*,\s*`[^`]+`)*)\s*-+")
 PARAM_RE = re.compile(r"^\*\s*`([^`]+)`\s*:\s*(.+)$")
+# `* `b2`, `b1`, `b0`: description`: several parameters sharing one description.
+PARAM_GROUP_RE = re.compile(r"^\*\s*(`[^`]+`(?:\s*,\s*`[^`]+`)+)\s*:\s*(.+)$")
 SEPARATOR_RE = re.compile(r"^[-=#*]{3,}$")
 DEFINITION_NAME_RE = re.compile(r"^(?:declare\s+)?([A-Za-z_][A-Za-z0-9_\[\]]*)\s*(?:\(|=)")
 DECLARE_LICENSE_RE = re.compile(
@@ -577,7 +579,9 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
     section = "summary"
     in_fence = False
     fence_buffer: list[str] = []
-    current_param: dict[str, str] | None = None
+    # Parameters that continuation lines extend: one, or a group sharing a
+    # description.
+    current_params: list[dict[str, str]] = []
     current_note_index: int | None = None
 
     def is_general_note_line(text: str) -> bool:
@@ -620,7 +624,7 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
 
         if re.match(r"^where\s*:?\s*$", trimmed, flags=re.IGNORECASE):
             section = "where"
-            current_param = None
+            current_params = []
             current_note_index = None
             continue
 
@@ -648,18 +652,26 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
 
         if section == "where":
             match = PARAM_RE.match(trimmed)
-            if match:
-                current_param = {"name": match.group(1).strip(), "description": match.group(2).strip()}
-                params.append(current_param)
+            group = PARAM_GROUP_RE.match(trimmed)
+            if match or group:
+                if match:
+                    names = [match.group(1).strip()]
+                    description = match.group(2).strip()
+                else:
+                    names = [name.strip() for name in re.findall(r"`([^`]+)`", group.group(1))]
+                    description = group.group(2).strip()
+                current_params = [{"name": name, "description": description} for name in names]
+                params.extend(current_params)
                 current_note_index = None
             elif current_note_index is not None and trimmed and not trimmed.startswith("* "):
                 notes[current_note_index] = f"{notes[current_note_index]} {trimmed}".strip()
-            elif current_param and trimmed and not trimmed.startswith("* ") and not is_general_note_line(trimmed):
-                current_param["description"] = f"{current_param['description']} {trimmed}".strip()
+            elif current_params and trimmed and not trimmed.startswith("* ") and not is_general_note_line(trimmed):
+                for param in current_params:
+                    param["description"] = f"{param['description']} {trimmed}".strip()
             elif trimmed and not trimmed.startswith("* "):
                 notes.append(trimmed)
                 current_note_index = len(notes) - 1
-                current_param = None
+                current_params = []
             continue
 
         if section == "reference":
