@@ -28,7 +28,7 @@ wd = library("wdmodels.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.6.0";
+declare version "1.6.1";
 
 //########################################################################################
 /************************************************************************
@@ -2010,21 +2010,12 @@ with {
     // 35 Hz high-pass filter (Butterworth, Q=0.707)
     // Removes any DC offset accumulated through the gain stage
     // Reference: ChowCentaur/ChowCentaurPlugin.cpp (line 66)
-    dc_blocker_hp35 = fi.tf2(b0_dc, b1_dc, b2_dc, a1_dc, a2_dc)
-    with {
-        freq = 35.0;         // Cutoff frequency (Hz)
-        invQ = sqrt(2.0);    // Inverse Q-factor (1/Q = sqrt(2) for Butterworth)
-        n = tan(ma.PI * freq / SR);
-        n2 = n * n;
-        c1 = 1.0 / (1.0 + invQ * n + n2);
-
-        // High-pass filter coefficients
-        b0_dc = c1;
-        b1_dc = -2.0 * c1;
-        b2_dc = c1;
-        a1_dc = 2.0 * c1 * (n2 - 1.0);
-        a2_dc = c1 * (1.0 - invQ * n + n2);
-    };
+    // The TPT state-variable form computes the same bilinear filter as the
+    // direct-form biquad of the reference (prewarped at 35 Hz), but stays
+    // accurate in single precision: the direct form's poles approach z = 1 as
+    // the sample rate grows, and its float output drifted by up to 12% of the
+    // peak at 192 kHz.
+    dc_blocker_hp35 = fi.SVFTPT.HP2(35.0, 1.0 / sqrt(2.0));
 
     // Preamp Stage (Wave Digital Filter)
     // Models the input preamp circuit using WDF topology
