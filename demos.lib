@@ -457,6 +457,70 @@ with{
     40, -96, 96, 0.1)) : ba.db2linear;
 };
 
+//----------------------------`(dm.)xfer_ott_demo`-------------------------
+// Demo application for `co.xfer_ott`, the model of Xfer Records' OTT, with the
+// plug-in's controls in its own units and at its defaults: Depth, Time, In/Out
+// Gain and Upward/Downward strength, and per band (Low / Mid / High) Threshold,
+// Gain and the two branch bypasses. Continuous controls are smoothed; Bypass
+// switches the whole effect off for A/B comparison.
+//
+// #### Usage
+//
+// ```
+// _,_ : xfer_ott_demo : _,_
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// os = library("oscillators.lib");
+// xfer_ott_demo_test = (os.osc(220)*0.3, os.osc(3000)*0.03) : dm.xfer_ott_demo;
+// ```
+//------------------------------------------------------------
+declare xfer_ott_demo author "David Braun";
+declare xfer_ott_demo license "MIT";
+
+xfer_ott_demo = ba.bypass2(bp, ott)
+with {
+    ott_group(x) = vgroup("OTT [tooltip: Model of Xfer Records' OTT (co.xfer_ott);
+        not affiliated with or endorsed by Xfer Records]", x);
+    global_group(x) = ott_group(hgroup("[0] Global", x));
+    band_group(0, x) = ott_group(hgroup("[1] Low", x));
+    band_group(1, x) = ott_group(hgroup("[2] Mid", x));
+    band_group(2, x) = ott_group(hgroup("[3] High", x));
+
+    bp = global_group(checkbox("[0] Bypass [tooltip: When checked, OTT has no effect]"));
+    depth = global_group(hslider("[1] Depth [unit:%] [style:knob]
+        [tooltip: Amount of compression, like a dry/wet control on the gain]",
+        100, 0, 100, 1)) / 100 : si.smoo;
+    time = global_group(hslider("[2] Time [unit:%] [style:knob]
+        [tooltip: Release time scale; 100 % is the plug-in's default]",
+        100, 0, 1000, 1)) / 100 : si.smoo;
+    ingain = global_group(hslider("[3] In Gain [unit:dB] [style:knob]",
+        0, -24, 19.1, 0.1)) : si.smoo;
+    outgain = global_group(hslider("[4] Out Gain [unit:dB] [style:knob]",
+        0, -24, 19.1, 0.1)) : si.smoo;
+    upward = global_group(hslider("[5] Upward [unit:%] [style:knob]
+        [tooltip: Strength of the upward compression (quiet parts raised)]",
+        100, 0, 200, 1)) / 100 : si.smoo;
+    downward = global_group(hslider("[6] Downward [unit:%] [style:knob]
+        [tooltip: Strength of the downward compression (loud parts lowered)]",
+        100, 0, 200, 1)) / 100 : si.smoo;
+
+    // The same four controls in each band's group (distinct paths per band).
+    thresh(k) = band_group(k, vslider("[0] Thresh [unit:%] [style:knob]
+        [tooltip: Band threshold; higher compresses more]",
+        100, 0, 200, 1)) / 100 : si.smoo;
+    gain(k) = band_group(k, vslider("[1] Gain [unit:dB] [style:knob]",
+        0, -24, 6, 0.1)) : si.smoo;
+    bypUp(k) = band_group(k, checkbox("[2] Bypass Upward"));
+    bypDn(k) = band_group(k, checkbox("[3] Bypass Downward"));
+
+    ott = co.xfer_ott(depth, time, ingain, outgain, upward, downward,
+                      thresh(0), thresh(1), thresh(2), gain(0), gain(1), gain(2),
+                      bypUp(0), bypUp(1), bypUp(2), bypDn(0), bypDn(1), bypDn(2));
+};
+
 
 //-------------------------`(dm.)moog_vcf_demo`---------------------------
 // Illustrate and compare all three Moog VCF implementations above.

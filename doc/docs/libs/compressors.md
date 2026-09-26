@@ -5,7 +5,7 @@ Compressors library. Its official prefix is `co`.
 This library provides building blocks and complete dynamic processors
 including compressors, limiters, expanders, and gates.
 
-The Compressors library is organized into 6 sections:
+The Compressors library is organized into 7 sections:
 
 * [Conversion Tools](#conversion-tools)
 * [Functions Reference](#functions-reference)
@@ -13,6 +13,7 @@ The Compressors library is organized into 6 sections:
 * [Original versions section](#original-versions-section)
 * [Expanders](#expanders)
 * [Lookahead Limiters](#lookahead-limiters)
+* [Multiband Compressors](#multiband-compressors)
 
 #### References
 
@@ -1332,31 +1333,44 @@ limiter_lad_bw_test = os.osc(440) : co.limiter_lad_bw;
 
 ### `(co.)xfer_ott`
 
-Model of Xfer Records' free OTT, a three-band upward/downward compressor (the
-Ableton "OTT" preset lineage). Stereo in, stereo out, channels linked.
+Model of Xfer Records' free OTT (measured: version 1.3.1), a three-band
+upward/downward compressor (the Ableton "OTT" preset lineage). Stereo in, stereo
+out, channels linked. Not affiliated with or endorsed by Xfer Records.
 
 The input is split by series 4th-order Linkwitz-Riley crossovers at 88.3 Hz and
 2.5 kHz. Each band has a per-sample envelope follower on the channels' mean
-square, an upward branch (a soft knee rising at about 4:1 below its threshold),
-a downward branch (a soft knee into an infinite-ratio ceiling), and a
-Depth-scaled makeup gain; the three gained bands are summed.
+square, an upward branch (a soft knee rising at about 4:1 below its threshold,
+with a gain cap), a downward branch (a soft knee into an infinite-ratio
+ceiling), a Depth-scaled makeup gain and a floor on the band's total gain; the
+three gained bands are summed.
 
-Every constant was fitted to measurements of the plug-in binary. Goodness of
-fit, against the plug-in on stereo program material (guitar on one channel,
-drums on the other), as the error of the 50 ms envelope (median / 95th
-percentile) and the overall level:
+Every constant was fitted to measurements of the plug-in binary. Static curves
+(one band active at a time, 0 to -150 dBFS, across Upward, Depth and threshold
+settings) match to 0.03-0.04 dB (median) and 1 dB at most. On stereo program
+material (guitar on one channel, drums on the other), as the error of the 50 ms
+envelope (median / 95th percentile) and the overall level, at 44.1 and 48 kHz:
 
-* default settings (Time 100 %): 0.3 / 0.9-1.1 dB, level within 0.1 dB,
-  at 44.1, 48 and 96 kHz
-* Time 280 %: 0.3-0.5 / 1.3-1.8 dB; Time 640 %: 0.7-0.9 / 1.7-2.1 dB;
+* default settings (Time 100 %): 0.1 / 0.8-1.0 dB, level within 0.1 dB
+* Depth 50 %: 0.1 / 0.6-0.7 dB; upward or downward branch alone:
+  0.1 / 0.2-1.0 dB; level within 0.1 dB
+* Time 280 %: 0.4-0.5 / 1.3-1.4 dB; Time 640 %: 0.7-0.9 / 1.9-2.1 dB;
   level within 0.9 dB (the model is slightly quieter)
-* upward or downward branch alone: 0.1 / 0.5-1.3 dB, level within 0.1 dB
 
-Known divergences: the plug-in's steady-state gain on a sustained tone does not
-depend on `time`, the model's moves by up to 0.8 dB over `time` 0-1 and up to
-1.5 dB at `time` 6.4; raising a band's threshold above 1 (the mid band
-especially) is up to 0.9 dB off in level. The plug-in's "Clean XOV" crossover
-option is not modeled.
+Sample rate: OTT counts part of its release in samples, so it releases faster
+at 96 kHz than at 48 kHz (its own envelope differs by 0.5 / 2.2 dB at default
+settings and 1.9 / 5.2 dB at Time 640 %). This model's release is in seconds and
+behaves at every sample rate like the plug-in at 48 kHz: at 96 kHz it is within
+0.1-0.9 / 0.7-1.9 dB of the plug-in at 48 kHz.
+
+Like the plug-in, the output can peak well above the input: the attack takes a
+few ms, and quiet bands sit at up to about +50 dB of upward gain, so a tone
+starting after silence overshoots its steady level by about 10 dB, and a sudden
+drop in level brings a brief burst. Follow it with a limiter where peaks matter.
+
+Known divergences: the plug-in's steady-state gain on a sustained tone barely
+depends on `time` (within 0.7 dB from 0 to 6.4); the model's moves by up to
+1.0 dB over `time` 0-1 and up to 1.7 dB between 1 and 6.4. The plug-in's
+"Clean XOV" crossover option is not modeled.
 
 #### Usage
 
@@ -1369,15 +1383,14 @@ _,_ : xfer_ott(depth, time, ingain, outgain, upward, downward,
 Where:
 
 * `depth`: compression depth (0-1; the plug-in's default is 1)
-* `time`: release time scale (0-10, 1 = the plug-in's 100 %); it scales the
-  release only
+* `time`: release time scale (0-10, 1 = the plug-in's 100 %); it scales the release only, and the release is independent of the sample rate
 * `ingain`: input gain in dB (up to +19.1)
 * `outgain`: output gain in dB (up to +19.1)
-* `upward`: upward-compression strength (0-2, 1 = 100 %)
-* `downward`: downward-compression strength (0-2, 1 = 100 %)
-* `threshL`: low-band threshold (0-2, 1 = 100 %; higher compresses more)
-* `threshM`: mid-band threshold (0-2, 1 = 100 %; higher compresses more)
-* `threshH`: high-band threshold (0-2, 1 = 100 %; higher compresses more)
+* `upward`: upward-compression strength (0-2, 1 = 100 %); it scales the upward slope in proportion
+* `downward`: downward-compression strength (0-2, 1 = 100 %); above 1 the downward ratio keeps steepening until it is infinite, which at depth 1 is already the case at 1
+* `threshL`: low-band threshold (0-2, 1 = 100 %; higher compresses more); 0 and 2 shift the band's knees by -23.0 and +23.0 dB
+* `threshM`: mid-band threshold (0-2, 1 = 100 %; higher compresses more); 0 and 2 shift the band's knees by -23.7 and +23.7 dB
+* `threshH`: high-band threshold (0-2, 1 = 100 %; higher compresses more); 0 and 2 shift the band's knees by -24.0 and +24.0 dB
 * `gainL`: low-band output gain in dB (up to +6)
 * `gainM`: mid-band output gain in dB (up to +6)
 * `gainH`: high-band output gain in dB (up to +6)
@@ -1396,6 +1409,9 @@ xfer_ott_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
    : co.xfer_ott(1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 xfer_ott_slow_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
    : co.xfer_ott(0.5, 2.8, 3, -3, 1.5, 0.5, 0.8, 1.2, 1, 1, 0, -2, 0, 1, 0, 0, 0, 1);
+xfer_ott_burst_test = (os.osc(220)*0.3*os.lf_squarewavepos(3),
+                       os.osc(3000)*0.03*(1 - os.lf_squarewavepos(3)))
+   : co.xfer_ott(1, 2.8, 0, 0, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 ```
 
 #### References
