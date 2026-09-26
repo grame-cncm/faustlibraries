@@ -1694,6 +1694,10 @@ Implementation Notes:
 - The upward branch was fitted with one band active at a time: crossover leakage
   makes band-centre tones measured with all bands active depend on the other
   bands' gains. The model still sums all three gained bands, as the plug-in does.
+- Single precision: the envelope followers are flushed below 1e-30, and a -600 dB
+  signal (DC plus a quarter of the sample rate) is added before the crossovers, so
+  that no state lingers in the subnormal range after the input stops. Silence in
+  therefore gives about -540 dBFS out, not exactly zero.
 - Display laws of the plug-in's knobs, for reference: Time 0-1000 %, In/Out Gain
   -inf to +19.1 dB, band gains -inf to +6 dB, Upwd/Dnwd/Thresh 0-200 %.
 */
@@ -1711,7 +1715,11 @@ with {
     // Switching one-pole on the squared signal (per-sample attack/release).
     envfollow(ta, tr, x2) = loop ~ _
     with {
-        loop(e) = e + ba.if(x2 > e, ca, cr) * (x2 - e);
+        // flushed below 1e-30 so that it does not linger in the subnormal range
+        loop(e) = en * (en > 1e-30)
+        with {
+            en = e + ba.if(x2 > e, ca, cr) * (x2 - e);
+        };
         ca = 1.0 - exp(-1.0 / (max(1e-5, ta) * ma.SR));
         cr = 1.0 - exp(-1.0 / (max(1e-4, tr) * ma.SR));
     };
@@ -1732,7 +1740,10 @@ with {
         gl = ba.db2linear(max(gmin(K), gdb));
     };
 
-    bnd(K, x) = x * ia : fi.crossover3LR4(F1, F2) : ba.selector(K, 3);
+    // A -600 dB signal (DC plus a quarter of the sample rate) keeps the crossover
+    // states out of the subnormal range after the input stops.
+    ad = 1e-30 * (1.0 + (((+(1) : %(4)) ~ _) == 0) - (((+(1) : %(4)) ~ _) == 2));
+    bnd(K, x) = x * ia + ad : fi.crossover3LR4(F1, F2) : ba.selector(K, 3);
     proc(K) = band(K, thrsel(K), busel(K), bdsel(K), bnd(K, xL), bnd(K, xR));
     thrsel(0) = threshL; thrsel(1) = threshM; thrsel(2) = threshH;
     busel(0) = bypUpL; busel(1) = bypUpM; busel(2) = bypUpH;
