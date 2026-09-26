@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.11.1";
+declare version "1.11.2";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -1960,17 +1960,56 @@ with {
   a2d = (a0 - a1*c + csq)/d;
 };
 
-// tf2snp = tf2s but using a protected normalized ladder filter for tf2:
-tf2snp(b2,b1,b0,a1,a0,w1) = tf2np(b0d,b1d,b2d,a1d,a2d)
+// tf2snp = tf2s but using a protected normalized ladder filter for tf2.
+// It computes the tf2np ladder (same reflection coefficients s, same tap gains)
+// from the analog coefficients directly: each s, its complement c = sqrt(1-s^2)
+// and the tap gains are written so that nothing cancels, which keeps the filter
+// accurate in single precision when w1 is small relative to ma.SR (both s
+// approach +-1 there, and forming c = sqrt(1-s*s) from a rounded s would lose
+// most of its digits). With t = tan(w1/(2*ma.SR)), the bilinear transform gives
+// the digital coefficients over D = a0*t^2 + a1*t + 1. The ladder itself still
+// needs 1+s1 = 2*a0*t^2/(1+a0*t^2) to be representable next to 1: in single
+// precision that holds while a0*t^2 is well above ma.EPSILON (for a0 = 1, down to
+// about 20 Hz at 192 kHz). For lower w1/ma.SR, fi.svf keeps its accuracy.
+tf2snp(b2,b1,b0,a1,a0,w1) = _allpassnnltc(2,(s1,s2),(c1,c2)) : sum(i,3,*(tghr(i)))
 with {
-  c   = 1/tan(w1*0.5/ma.SR); // bilinear-transform scale-factor
-  csq = c*c;
-  d   = a0 + a1 * c + csq;
-  b0d = (b0 + b1 * c + b2 * csq)/d;
-  b1d = 2 * (b0 - b2 * csq)/d;
-  b2d = (b0 - b1 * c + b2 * csq)/d;
-  a1d = 2 * (a0 - csq)/d;
-  a2d = (a0 - a1*c + csq)/d;
+  smax = 1.0-ma.EPSILON; // maximum reflection-coefficient magnitude allowed, as in tf2np
+  cmin = sqrt(1.0-smax*smax); // complement of smax
+  t  = tan(w1*0.5/ma.SR);
+  A0 = a0*t*t;
+  A1 = a1*t;
+  B0 = b0*t*t;
+  B1 = b1*t;
+  B2 = b2;
+  D  = A0 + A1 + 1;
+  // s2 = a2d and s1 = a1d/(1+a2d), projected into the stability region as in
+  // tf2np; c2, c1 from (1-s)(1+s) in closed form, never below cmin, so that a
+  // projected s keeps a consistent c:
+  s2 = max(-smax, min(smax, (A0 - A1 + 1)/D));
+  s1 = max(-smax, min(smax, (A0 - 1)/(A0 + 1)));
+  c2 = max(cmin, 2*sqrt(max(0, A1*(A0 + 1)))/D);
+  c1 = max(cmin, 2*sqrt(max(0, A0))/(A0 + 1));
+  // tap gains nu2 = b2d, nu1 = b1d - b2d*a1d, nu0 = b0d - b2d*a2d - nu1*s1:
+  nu2 = (B0 - B1 + B2)/D;
+  nu1 = 2*(B0*A1 + 2*B0 - 2*B2*A0 - B2*A1 + B1*A0 - B1)/(D*D);
+  nu0 = 4*(B0*(A1 + 1 - A0) + B2*A0*(A1 + A0 - 1) + 2*B1*A0)/(D*D*(A0 + 1));
+  // scaled by the ladder's pi parameters (1, c2, c2*c1), as in tf2np:
+  tghr(0) = nu2;
+  tghr(1) = nu1/c2;
+  tghr(2) = nu0/(c2*c1);
+};
+
+// allpassnnlt with each section's complement c = sqrt(1-s^2) supplied in cv
+// instead of computed from s (for tf2snp and tf1snp):
+_allpassnnltc(0,sv,cv) = _;
+_allpassnnltc(n,sv,cv) = _ <: *(s),(*(c) : (+
+                       : _allpassnnltc(n-1,sv,cv))~(*(0-s))) : fsec(n)
+with {
+  fsec(1) = _, (_<:mem*(c),_) : sumandtaps(n);
+  fsec(n) = _, (_<:mem*(c),_), par(i,n-1,_) : sumandtaps(n);
+  s = ba.take(n,sv);
+  c = ba.take(n,cv);
+  sumandtaps(n) = +,par(i,n,_);
 };
 
 //----------------------------------------------
@@ -1980,12 +2019,17 @@ with {
 // os = library("oscillators.lib");
 // ma = library("maths.lib");
 // src = os.osc(440);
+// no = library("noises.lib");
 // tf2snp_test = src : fi.tf2snp(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+// tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
+// tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
 // ```
 //----------------------------------------------
 
 //-----------------------------`(fi.)tf1snp`-------------------------------
-// First-order special case of tf2snp above.
+// First-order special case of tf2snp above: a first-order normalized ladder,
+// with its reflection coefficient, complement and tap gains computed from the
+// analog coefficients without cancellation, like tf2snp.
 //
 // #### Usage
 //
@@ -2006,13 +2050,27 @@ with {
 // os = library("oscillators.lib");
 // ma = library("maths.lib");
 // src = os.osc(440);
+// no = library("noises.lib");
 // tf1snp_test = src : fi.tf1snp(0, 1, 1, ma.PI*ma.SR/2);
+// tf1snp_lowfc_test = no.noise : fi.tf1snp(0, 1, 1, 2*ma.PI*10.1);
 // ```
 //----------------------------------------------
 declare tf1snp author "Julius O. Smith III";
 declare tf1snp copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf1snp license "LicenseRef-STK-4.3";
-tf1snp(b1,b0,a0,w1) = fi.tf2snp(b1,b0,0,a0,0,w1); // FIXME: Faust compiler does not fully optimize - does C++?
+tf1snp(b1,b0,a0,w1) = _allpassnnltc(1,s1,c1) : *(nu1), *(nu0/c1) :> _
+with {
+  smax = 1.0-ma.EPSILON;
+  cmin = sqrt(1.0-smax*smax);
+  t  = tan(w1*0.5/ma.SR);
+  A0 = a0*t;
+  D  = A0 + 1;
+  // s1 = a1d, c1 from (1-s1)(1+s1) in closed form; taps nu1 = b1d, nu0 = b0d - b1d*a1d:
+  s1  = max(-smax, min(smax, (A0 - 1)/D));
+  c1  = max(cmin, 2*sqrt(max(0, A0))/D);
+  nu1 = (b0*t - b1)/D;
+  nu0 = 2*t*(b0 + a0*b1)/(D*D);
+};
 
 
 //-----------------------------`(fi.)tf3slf`-------------------------------

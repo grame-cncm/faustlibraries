@@ -1610,7 +1610,9 @@ tf2s_test = src : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
 
 ### `(fi.)tf1snp`
 
-First-order special case of tf2snp above.
+First-order special case of tf2snp above: a first-order normalized ladder,
+with its reflection coefficient, complement and tap gains computed from the
+analog coefficients without cancellation, like tf2snp.
 
 #### Usage
 
@@ -1631,7 +1633,9 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
 src = os.osc(440);
+no = library("noises.lib");
 tf1snp_test = src : fi.tf1snp(0, 1, 1, ma.PI*ma.SR/2);
+tf1snp_lowfc_test = no.noise : fi.tf1snp(0, 1, 1, 2*ma.PI*10.1);
 ```
 
 ----
