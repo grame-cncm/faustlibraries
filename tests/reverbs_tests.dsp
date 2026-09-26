@@ -28,3 +28,16 @@ springreverb_test = os.osc(330)
   : re.springreverb(0.5, 0.5, 0.5, 0.5, 1);
 kb_rom_rev1_test = (os.osc(330), os.osc(660))
   : re.kb_rom_rev1(0.7, 0.3);
+
+valhallaSupermassive_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(6, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_gemini_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(0, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_centaurus_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(2, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_sagittarius_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(3, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_annihilator_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(4, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_virgo_test = (os.osc(330), os.osc(440))
+   : re.valhallaSupermassive(19, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);

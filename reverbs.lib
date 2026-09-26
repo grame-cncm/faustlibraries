@@ -33,7 +33,7 @@ sp = library("spats.lib");
 aa = library("aanl.lib");
 
 declare name "Faust Reverb Library";
-declare version "1.5.2";
+declare version "1.6.0";
 
 //########################################################################################
 /************************************************************************
@@ -1191,6 +1191,259 @@ with {
         _ * 1.2 @ adaptSR(32768, 3330)) :> +);
     };
 };
+
+//===========================Valhalla Supermassive==========================
+//==========================================================================
+
+//---------------------------`(re.)valhallaSupermassive`---------------------------
+// Model of six modes of Valhalla DSP's free ValhallaSupermassive delay/reverb:
+// feedback delay networks and cascades of matrix allpasses, with delay lines of
+// up to 2 s, modulated by a shared quadrature LFO.
+//
+// | `mode` | name | structure |
+// |---|---|---|
+// | 0 | Gemini | sixteen modulated delays, scattered by a butterfly of rotations |
+// | 2 | Centaurus | four serial four-channel matrix allpasses |
+// | 3 | Sagittarius | eight serial stereo matrix allpasses |
+// | 4 | Great Annihilator | a plain four-channel stage and three matrix allpasses inside a global feedback loop |
+// | 6 | Lyra | four modulated delays with a four-channel scattering matrix |
+// | 19 | Virgo | Lyra with highpass and lowpass filters inside the feedback loop |
+//
+// The mode numbers are the plug-in's own. The structures follow the diagrams
+// Sean Costello presented at DAFx26; delay, gain, modulation and filter laws
+// were matched to the plug-in (v5.0.0). Stereo in, stereo out.
+//
+// #### Usage
+//
+// ```
+// _,_ : valhallaSupermassive(mode, mix, delay, warp, feedback, density, width,
+//                            lowcut, highcut, modrate, moddepth) : _,_
+// ```
+//
+// Where:
+//
+// * `mode`: the mode number (see the table), a constant numerical expression
+// * `mix`: dry/wet mix (0-1), equal-power
+// * `delay`: base delay time in milliseconds (0-2000)
+// * `warp`: spreads the delay lengths below `delay` (0-1)
+// * `feedback`: feedback amount (0-1)
+// * `density`: scattering angle of the rotation matrices (0-1)
+// * `width`: stereo width of the wet signal (-1 to 1; 1 is full width,
+//   0 is mono, -1 swaps the channels)
+// * `lowcut`: highpass cutoff in Hz (10-2000)
+// * `highcut`: lowpass cutoff in Hz (200-20000)
+// * `modrate`: LFO rate in Hz (0.01-10)
+// * `moddepth`: modulation depth (0-1)
+//
+// #### Test
+// ```
+// re = library("reverbs.lib");
+// os = library("oscillators.lib");
+// valhallaSupermassive_test = (os.osc(330), os.osc(440))
+//    : re.valhallaSupermassive(6, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+// valhallaSupermassive_gemini_test = (os.osc(330), os.osc(440))
+//    : re.valhallaSupermassive(0, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+// valhallaSupermassive_centaurus_test = (os.osc(330), os.osc(440))
+//    : re.valhallaSupermassive(2, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+// valhallaSupermassive_sagittarius_test = (os.osc(330), os.osc(440))
+//    : re.valhallaSupermassive(3, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+// valhallaSupermassive_annihilator_test = (os.osc(330), os.osc(440))
+//    : re.valhallaSupermassive(4, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+// valhallaSupermassive_virgo_test = (os.osc(330), os.osc(440))
+//    : re.valhallaSupermassive(19, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+// ```
+//
+// #### References
+//
+// * S. Costello, keynote, 29th Int. Conf. Digital Audio Effects (DAFx26),
+//   Cambridge, MA, USA, 2026
+// * S. Costello, "Plugin Design: Rescue Your Darlings," Valhalla DSP, 2021,
+//   <https://valhalladsp.com/2021/08/16/put-it-down-for-now-pick-it-back-up-later/>
+// * <https://valhalladsp.com/shop/reverb/valhalla-supermassive/>
+//------------------------------------------------------------
+/*
+Implementation Notes:
+
+Shared by all modes (lengths in samples at the host rate SR):
+
+- Delay line i: D * SR * r^k(i) + 33, with r = 1 - warp^3/sqrt(8) and k(i) a
+  mode-specific spread; the 33 samples are a fixed latency of the plug-in, the
+  same at every sample rate. Lines are read through a moving first-order
+  Thiran allpass interpolator (both taps at the current integer position),
+  which preserves the loop magnitude where Lagrange interpolation audibly
+  shortened warped tails.
+- Modulation: one quadrature LFO (a 30-bit phase accumulator, so sub-Hz rates
+  do not drift), lowpassed at 0.25 Hz; excursion (500/48000) s * depth^2 and
+  a mode-specific phase per line.
+- Scattering: R(theta) (x) R(theta) (4 channels) or four butterfly stages of
+  rotations (16 channels, Gemini), theta = pi * density / 4.
+- Filters: a one-pole-one-zero highpass and a unity-DC one-pole lowpass, at
+  the output except in Virgo, where both sit inside the feedback loop.
+- Mix: equal-power dry/wet; width rotates the wet pair between the channels.
+
+Mode-specific laws:
+
+- Lyra, Gemini, Virgo: loop gain g = min(0.9995, sqrt(feedback)) (the plug-in
+  can self-sustain at feedback 1; the cap keeps the model decaying), input
+  gain sqrt(min(1, 0.2/g)).
+- Centaurus, Sagittarius: allpass coefficient 0.91 * feedback; the
+  instantaneous a^N feedthrough is removed and a 32-sample output latency added.
+- Great Annihilator: allpass coefficient 0.91 * feedback, global gain equal to
+  feedback (it can sustain at 1, like the plug-in), and 32 extra samples on the
+  first-stage lines.
+- Minimum-length clamping of the delay lines at extreme settings is a known
+  divergence.
+*/
+valhallaSupermassive(mode, mix, delay, warp, feedback, density, width, lowcut, highcut,
+                     modrate, moddepth, xL, xR) = run(mode)
+with {
+    w = max(0.0, min(1.0, warp));
+    theta = ma.PI * max(0.0, min(1.0, density)) / 4.0;
+    ratio = 1.0 - w*w*w / sqrt(8.0);
+    dsmp = max(0.0, min(2000.0, delay)) * 0.001 * ma.SR;
+    // Lyra, Gemini, Virgo: common feedback and injection gains.
+    g = min(0.9995, sqrt(max(0.0, min(1.0, feedback))));
+    injection = sqrt(min(1.0, 0.2/max(0.000001, g)));
+    // Centaurus, Sagittarius, Great Annihilator: allpass coefficient.
+    apgain = 0.91*max(0.0, min(1.0, feedback));
+
+    // Quadrature LFO: 30-bit phase accumulator, lowpassed at 0.25 Hz.
+    rate = max(0.01, min(10.0, modrate));
+    amount = (500.0/48000.0)*ma.SR*pow(max(0.0, min(1.0, moddepth)), 2.0);
+    phase = ((+(step) : %(1073741824)) ~ _) : float : /(1073741824.0)
+    with { step = int(rate*1073741824.0/ma.SR + 0.5); };
+    angle = 2.0*ma.PI*phase;
+    msin = sin(angle) : fi.lowpass(1, 0.25) : *(amount);
+    mcos = cos(angle) : fi.lowpass(1, 0.25) : *(amount);
+
+    // Moving first-order Thiran read of a delay line of length d samples.
+    fractional(maxd, d, x) = +(a*current + previous) ~ *(-a)
+    with {
+        id = int(d - 0.49999);
+        fd = d - float(id);
+        a = (1.0 - fd)/(1.0 + fd);
+        current = de.delay(maxd, id, x);
+        previous = de.delay(maxd, id + 1, x);
+    };
+    // One modulated line; ~ supplies one sample of the loop, hence the -1.
+    line(base, mod) = fractional(int(2.1*ma.SR), max(2.0, min(2.09*ma.SR, base + mod - 1.0)));
+
+    // R(theta) (x) R(theta), in delay order L,R,L,R.
+    scatter4(a, b, c, d) = cc*a - cs*b - cs*c + ss*d,
+                           cs*a + cc*b - ss*c - cs*d,
+                           cs*a - ss*b + cc*c - cs*d,
+                           ss*a + cs*b + cs*c + cc*d
+    with {
+        cc = cos(theta)*cos(theta);
+        ss = sin(theta)*sin(theta);
+        cs = cos(theta)*sin(theta);
+    };
+    project4(a, b, c, d) = (a + c)/sqrt(2.0), (b + d)/sqrt(2.0);
+    // Butterfly: LEVELS stages, each rotating lanes that differ in one bit.
+    tensor(LEVELS) = seq(K, LEVELS, stage(1<<K))
+    with {
+        N = 1<<LEVELS;
+        stage(B) = si.bus(N) <: par(I, N, par(J, N, *(coefficient(B, I, J))) :> _);
+        coefficient(B, I, J) = case {
+            (1, OFF) => cos(theta);
+            (0, 1) => sign((I&B) == 0);
+            (DIAGONAL, OFF) => 0.0;
+        }(I == J, J == partner(B, I));
+        partner(B, I) = case { (1) => I + B; (0) => I - B; }((I&B) == 0);
+        sign(1) = 0.0 - sin(theta);
+        sign(0) = sin(theta);
+    };
+    // Unnormalized one-pole-one-zero highpass, then unity-DC one-pole lowpass.
+    cuts = fi.zero(1) : fi.pole(hp) : *(1.0 - lp) : fi.pole(lp)
+    with {
+        hp = exp(-2.0*ma.PI*max(10.0, min(0.45*ma.SR, lowcut))/ma.SR);
+        lp = exp(-2.0*ma.PI*max(20.0, min(0.45*ma.SR, highcut))/ma.SR);
+    };
+    wetmix(l, r) = dry*xL + wet*(cw*l + sw*r), dry*xR + wet*(cw*r + sw*l)
+    with {
+        wt = (1.0 - max(-1.0, min(1.0, width)))*ma.PI/4.0;
+        cw = cos(wt);
+        sw = sin(wt);
+        dry = cos(max(0.0, min(1.0, mix))*ma.PI/2.0);
+        wet = sin(max(0.0, min(1.0, mix))*ma.PI/2.0);
+    };
+    finish(l, r) = (l, r) : (cuts, cuts) : wetmix;
+    // Matrix allpass over N lanes (coefficient apgain, scattering S, lines L(I)):
+    // v = S(L(apgain*y + x')), y = v - apgain*x, with y fed back.
+    allpass(N, S, L) = step ~ si.bus(N)
+    with {
+        step = si.bus(2*N) <: (ro.interleave(N, 2) : par(I, N, (*(apgain), _' : + : L(I))) : S),
+                              (par(I, N, !), si.bus(N))
+             : ro.interleave(N, 2) : par(I, N, (_, *(apgain) : -));
+    };
+    quadrant(I) = ba.take(I + 1, (0,2,1,3,1,3,0,2,2,0,3,1,3,1,2,0));
+    qmod(I) = msin*cos(ma.PI*quadrant(I)/2.0) + mcos*sin(ma.PI*quadrant(I)/2.0);
+
+    // Gemini: sixteen lines, butterfly scattering, alternate L/R injection.
+    run(0) = (network : project) : finish
+    with {
+        base(I) = dsmp*pow(ratio, I) + 33.0;
+        modulation(I) = msin*cos(2.0*ma.PI*I/16.0) + mcos*sin(2.0*ma.PI*I/16.0);
+        inject = par(I, 16, *(g) : +(injection*ba.if(I%2 == 0, xL', xR')) : line(base(I), modulation(I)));
+        network = (tensor(4) : inject) ~ si.bus(16);
+        project = si.bus(16) <: (par(I, 8, (_, !)) :> _), (par(I, 8, (!, _)) :> _) : par(I, 2, /(sqrt(8.0)));
+    };
+    // Centaurus: four serial four-channel matrix allpasses.
+    run(2) = (xL, xR, xL, xR) : seq(K, 4, allpass(4, scatter4, lane(K))) : project : finish
+    with {
+        base(I) = dsmp*pow(ratio, I) + 33.0;
+        lane(K, I) = line(base(4*I + K), qmod(4*I + K));
+        project(l, r, u, v) = (l - pow(apgain, 4)*xL), (r - pow(apgain, 4)*xR) : par(I, 2, de.delay(64, 32));
+    };
+    // Sagittarius: eight serial stereo matrix allpasses.
+    run(3) = (xL, xR) : seq(K, 8, allpass(2, rotate, lane(K))) : project : finish
+    with {
+        base(I) = dsmp*pow(ratio, I) + 33.0;
+        modphase(I) = ma.PI*floor(I/2.0)/4.0 + ma.PI*(I%2);
+        lane(K, I) = line(base(2*K + I), msin*cos(modphase(2*K + I)) + mcos*sin(modphase(2*K + I)));
+        rotate(l, r) = cos(theta)*l - sin(theta)*r, sin(theta)*l + cos(theta)*r;
+        project(l, r) = (l - pow(apgain, 8)*xL), (r - pow(apgain, 8)*xR) : par(I, 2, de.delay(64, 32));
+    };
+    // Great Annihilator: plain stage, three matrix allpasses, global feedback.
+    run(4) = network : (_, _, !, !) : finish
+    with {
+        gg = max(0.0, min(1.0, feedback));
+        base(I) = dsmp*pow(ratio, I) + 33.0 + ba.if(I%4 == 0, 32.0, 0.0);
+        lane(K, I) = line(base(4*I + K), qmod(4*I + K));
+        inject = par(I, 4, *(gg) : +(ba.if(I%2 == 0, xL', xR')) : lane(0, I));
+        network = (inject : scatter4 : seq(K, 3, allpass(4, scatter4, lane(K + 1)))) ~ si.bus(4);
+    };
+    // Lyra: four lines, one 4x4 scattering matrix, taps before the matrix.
+    run(6) = (network : project4) : finish
+    with {
+        base(I) = dsmp*pow(ratio, 4*I) + 33.0;
+        modulation(0) = msin;
+        modulation(1) = mcos;
+        modulation(2) = -msin;
+        modulation(3) = -mcos;
+        inject(a, b, c, d) = ((g*a + injection*xL') : line(base(0), modulation(0))),
+                             ((g*b + injection*xR') : line(base(1), modulation(1))),
+                             ((g*c + injection*xL') : line(base(2), modulation(2))),
+                             ((g*d + injection*xR') : line(base(3), modulation(3)));
+        network = (scatter4 : inject) ~ si.bus(4);
+    };
+    // Virgo: Lyra's lines with both cuts inside the loop, output after scattering.
+    run(19) = (network : (_, _, !, !)) : wetmix
+    with {
+        base(I) = dsmp*pow(ratio, 4*I) + 33.0;
+        modulation(0) = msin;
+        modulation(1) = mcos;
+        modulation(2) = -msin;
+        modulation(3) = -mcos;
+        inject(a, b, c, d) = ((g*a + injection*xL') : line(base(0), modulation(0))),
+                             ((g*b + injection*xR') : line(base(1), modulation(1))),
+                             ((g*c + injection*xL') : line(base(2), modulation(2))),
+                             ((g*d + injection*xR') : line(base(3), modulation(3)));
+        network = (inject : par(I, 4, cuts) : scatter4) ~ si.bus(4);
+    };
+};
+declare valhallaSupermassive author "David Braun";
+declare valhallaSupermassive license "MIT";
 
 //==================================Others=====================================
 //===============================================================================
