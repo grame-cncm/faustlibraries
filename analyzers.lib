@@ -36,7 +36,7 @@ os = library("oscillators.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "1.4.1";
+declare version "1.4.2";
 
 /************************************************************************
 FAUST library file, jos section
@@ -1258,12 +1258,15 @@ window_kaiser(beta, x) = besselI0(beta * sqrt(max(0.0, 1.0 - z*z))) / besselI0(b
                          * ((x >= 0.0) & (x <= 1.0))
 with {
     z = 2.0*x - 1.0;
-    // I0(v) = sum_k ((v/2)^k / k!)^2, truncated at 40 terms
-    besselI0(v) = 1.0 + sum(k, 40, pow(0.5*v, 2*(k+1)) / factsq(k+1))
+    // I0(v) = sum_k ((v/2)^k / k!)^2 for k = 0..40, in Horner form:
+    // 1 + q/1^2 (1 + q/2^2 (1 + ... (1 + q/40^2))) with q = (v/2)^2. No
+    // intermediate value exceeds I0(v), where the power-over-factorial form
+    // overflowed single precision ((v/2)^80 and 40!^2 = 6.7e95) to inf/inf.
+    besselI0(v) = horner(0)
     with {
-        fact(0) = 1.0;
-        fact(n) = n * fact(n-1);
-        factsq(n) = fact(n) * fact(n);
+        q = 0.25*v*v;
+        horner(40) = 1.0;
+        horner(k) = 1.0 + q / ((k+1)*(k+1)) * horner(k+1);
     };
 };
 
