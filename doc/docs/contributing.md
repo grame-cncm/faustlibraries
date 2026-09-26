@@ -310,6 +310,34 @@ Before preparing a pull-request, the new library must be carefully tested:
 - reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified. `make check` fails on the first divergence; use `make -k check` to run the whole suite and collect every failure.
 - every new function therefore ships with **both** its `#### Test` section and the corresponding `functionName_test` entry in the *tests* folder, and its reference is generated with `make reference` in the same change.
 - finally, `make checkdoc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted.
+- new code must also be checked in single and double precision, from 44.1 to 192 kHz, as described below: `make check` covers neither.
+
+### Precision and sample rate
+
+The regression tests run in double precision at 48 kHz only (`-double`, `SAMPLE_RATE=48000`). Most hosts compile Faust code in single precision (`float`) and run it at 44.1, 48, 88.2, 96, 176.4 or 192 kHz. Before a pull request, new code must therefore be rendered in both precisions and at all these rates, and the results read:
+
+- **Stability.** At every rate and in both precisions the output must stay finite and bounded, with the controls at their extremes and with the input levels the function is meant for.
+- **Float against double.** At each rate, compare the single and double precision renders of the same program. A well-conditioned structure stays within about 1e-5 to 1e-4 of the peak. A larger gap, or one that grows with the sample rate, points to a structure that loses precision in float. Recursive filters whose poles come close to z = 1 are the usual cause, that is, frequencies low relative to the sample rate. For example, `no.noise : fi.lowpass(4, 50)` differs by 0.3 % of its peak at 44.1 kHz and by 8 % at 192 kHz. Prefer a structure that stays accurate there, or document the limitation. A state-variable filter is one such structure: in the same conditions, `fi.svf.lp(50, 0.707)` stays within 4e-5.
+- **Compare on an input that is the same in both precisions**, such as `no.noise`, which is an integer generator. `os.osc` accumulates its phase in the program's precision, so a sine input already differs between float and double by 0.1 % at 44.1 kHz and 1 % at 192 kHz, and hides the behavior of the code under test.
+- **Behavior across rates.** What should not depend on the sample rate must not: cutoff and resonance frequencies, formants, time constants, levels. Compute coefficients from `ma.SR`, and watch for anything set in samples (delay lengths, waveguide sections, block sizes) and for pre-warping or oversampling filters close to Nyquist at the lowest rates. When a model is only valid at some rates, say so in its documentation and, if possible, give a way to adapt it (see `pt.ticksPerSample`). `ma.SR` is clamped to 192 kHz (see `pl.SR`), so behavior above that rate is not guaranteed.
+- **Long runs.** A recursive state decaying towards zero must not linger in the subnormal range, which float reaches much earlier than double: flush it or check that the structure does not produce it. Integer counters such as `ba.time` wrap after 2^31 samples, that is 12.4 hours at 48 kHz: do not use them to detect the first sample, use `1'` or `1 - 1'`.
+
+The `arch/print_arch.cpp` architecture used by `make check` takes the number of frames and the sample rate as arguments. For a program `probe.dsp` built around the new function, for instance `process = no.noise : fi.lowpass(4, 50);`, the following commands render one second at each rate in both precisions and print, for each rate, whether the output is finite, its peak, and the largest float/double difference relative to that peak:
+
+```bash
+b=tests/build
+for p in single double; do
+  faust -$p -a arch/print_arch.cpp $b/probe.dsp -o $b/probe-$p.cpp
+  c++ -O2 -std=c++17 $b/probe-$p.cpp -o $b/probe-$p
+done
+for sr in 44100 48000 88200 96000 176400 192000; do
+  $b/probe-single $sr $sr > $b/probe-single.txt
+  $b/probe-double $sr $sr > $b/probe-double.txt
+  python3 -c "import numpy as n; s=n.loadtxt('$b/probe-single.txt')[:,1:]; d=n.loadtxt('$b/probe-double.txt')[:,1:]; print('$sr', 'finite' if n.isfinite(s).all() and n.isfinite(d).all() else 'NOT FINITE', 'peak %.3g' % abs(d).max(), 'single/double gap %.1e' % (abs(s-d).max()/abs(d).max()))"
+done
+```
+
+Report in the pull request what was checked and what was found, including any limitation left in the documentation.
 
 ## Formal certification (experimental, work in progress)
 

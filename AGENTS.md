@@ -116,6 +116,15 @@ make build       # build the mkdocs site (doc pages + figure injection)
    that changes behavior comes with such a test, one whose output the old
    definition gets wrong.
 
+9. **Check float and double, from 44.1 to 192 kHz.** `make check` runs
+   in double precision at 48 kHz only. Render new code in `-single` and
+   `-double` at 44.1, 48, 88.2, 96, 176.4 and 192 kHz, on an input that
+   is identical in both precisions (`no.noise`, not `os.osc`): the output
+   must stay finite, the float/double gap small, and what should not
+   depend on the rate must not. Procedure and pitfalls:
+   `doc/docs/contributing.md`, section *Precision and sample rate*.
+   Report what was checked in the pull request.
+
 ## Git history
 
 The history is linear and must stay that way: no merge commits. The last one
