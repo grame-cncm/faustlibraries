@@ -44,3 +44,7 @@ xfer_ott_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
    : co.xfer_ott(1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 xfer_ott_slow_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
    : co.xfer_ott(0.5, 2.8, 3, -3, 1.5, 0.5, 0.8, 1.2, 1, 1, 0, -2, 0, 1, 0, 0, 0, 1);
+
+xfer_ott_burst_test = (os.osc(220)*0.3*os.lf_squarewavepos(3),
+                       os.osc(3000)*0.03*(1 - os.lf_squarewavepos(3)))
+   : co.xfer_ott(1, 2.8, 0, 0, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);

@@ -20,6 +20,8 @@ filterbank_demo_test = no.noise : dm.filterbank_demo;
 cubicnl_demo_test = no.noise : dm.cubicnl_demo;
 gate_demo_test = stereoNoise : dm.gate_demo;
 compressor_demo_test = stereoNoise : dm.compressor_demo;
+
+xfer_ott_demo_test = (os.osc(220)*0.3, os.osc(3000)*0.03) : dm.xfer_ott_demo;
 moog_vcf_demo_test = monoOsc(440) : dm.moog_vcf_demo;
 wah4_demo_test = monoOsc(440) : dm.wah4_demo;
 crybaby_demo_test = monoOsc(440) : dm.crybaby_demo;
