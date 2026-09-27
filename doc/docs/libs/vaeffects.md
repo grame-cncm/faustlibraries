@@ -1170,7 +1170,8 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-autowah_test = os.tosc(220)
+autowah_test = os.tosc(220) : ve.autowah(0.7);
+autowah_slider_test = os.tosc(220)
   : ve.autowah(
       hslider("autowah:level", 0.7, 0, 1, 0.01)
     );
@@ -1197,10 +1198,17 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-crybaby_test = os.tosc(220)
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+crybaby_test = os.tosc(220) : ve.crybaby(0.3);
+crybaby_slider_test = os.tosc(220)
   : ve.crybaby(
       hslider("crybaby:wah", 0.3, 0, 1, 0.01)
     );
+crybaby_modulated_test = no.noise : ve.crybaby(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+crybaby_jump_test = no.noise : ve.crybaby(sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+crybaby_noise_test = no.noise : ve.crybaby(0);
 ```
 
 #### References

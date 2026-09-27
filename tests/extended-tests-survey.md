@@ -74,7 +74,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
   - A stray `#### Test` in the oscillators section header repeats `sawNp_test`.
 
 **Buttons and checkboxes (#281).** Both harnesses (`arch/print_arch.cpp` for `make check`, `arch/precision_arch.cpp` for `make check-precision`) held every button and checkbox at 1 for the whole run: a checkbox was registered as a button, and the "OFF" step called `buttonON()`. Bypassed effects were never tested, nor a release, a note-off or the other state of a checkbox. **Fixed**: every button and checkbox is ON for the first half of the render and OFF for the second half. 115 references change, all in their second half only. `check-precision` then found:
-- `crybaby_demo_test`, 4.6e-3: the demo now runs `ve.crybaby`, whose float debt is pinned for `crybaby_test` (0.0306). Pinned the same way, to be removed with #270.
+- `crybaby_demo_test`, 4.6e-3: the demo now runs `ve.crybaby`, whose float debt is pinned for `crybaby_test` (0.0306). Pinned the same way, to be removed with #270 (removed there: 9.1e-6).
 - `hammer_test` and `hammer_slider_test`, 9.3e-3 and 2.6e-2: once released, the nearly undamped hammer (`sigma0 = 0.01`) bounces freely on the string, and each contact crosses the `(uh - u) > 0` threshold one sample apart in float and double. The tests now use `sigma0 = 10`, at which the released hammer settles (8.2e-6).
 - `orientation6_demo_test` no longer needs its baseline entry.
 
@@ -220,7 +220,7 @@ written and run through `check_precision.py` at the six rates on
 
 - **Fail today: deferred, see section 5.2.**
   - `ve.crybaby`: modulated 2.8e-3, jump 9.2e-3. Its constant test already
-    carries 0.0306.
+    carries 0.0306. Reactivated with #270: 7.0e-6 and 2.5e-5.
   - The Vicanek `*2Matched` filters, non-finite when the frequency or the gain
     moves:
     - `lowpass2Matched` and `bandpass2Matched`, in double, at 176.4–192 kHz;
@@ -328,8 +328,6 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 
 | Test | Library and test file | Fails today with | Unblocked by |
 |---|---|---|---|
-| `crybaby_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | 2.8e-3 | #270 (crybaby accurate in float) |
-| `crybaby_jump_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | 9.2e-3 | #270 |
 | `lowpass2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 176.4–192 kHz | #271, to be checked |
 | `highpass2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in single, every rate | #271, to be checked |
 | `bandpass2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 192 kHz | #271, to be checked |
@@ -338,7 +336,7 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 | `highshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
 | `moog_vcf_2b_jump_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | 0.27 | a TPT `tf2s` (#273) |
 | `moog_vcf_2b_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | 2.1e-3 | a TPT `tf2s` (#273) |
-| `bandpass2Matched_slider_test`, `autowah_slider_test`, `crybaby_slider_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | the debt of their `_test` (non-finite at 176.4 kHz, 2.3e-3, 3.1e-2) | #271, #270 |
+| `bandpass2Matched_slider_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | the debt of its `_test` (non-finite at 176.4 kHz) | #271 |
 | `modeFilter_jump_test` | `physmodels.lib`, `physmodels_tests.dsp` | 0.12 | #269 (modeFilter as a Chamberlin state-variable section) |
 | `oscq_modulated_test` | `oscillators.lib`, `oscillators_tests.dsp` | 8.9e-3 | a better `fi.wgr` (with `wgr_jump_test`) |
 | `goertzel_slider_test` | `analyzers.lib`, `analyzers_tests.dsp` | 1.3e-3 | a Goertzel recursion accurate in float at low frequency, or a smaller n |
@@ -350,8 +348,6 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 | `greyhole_dt_jump_test` | `reverbs.lib`, `reverbs_tests.dsp` | 1.7e-3 at 176.4 kHz (0.25 to 0.5 s; 8.7e-4 from 0.125 to 0.25 s) | a `de.sdelay` crossfade exact in float: it steps by 1/22050 |
 
 ```
-crybaby_modulated_test = no.noise : ve.crybaby(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-crybaby_jump_test = no.noise : ve.crybaby(sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 lowpass2Matched_modulated_test = no.noise : ve.lowpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 highpass2Matched_modulated_test = no.noise : ve.highpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 bandpass2Matched_modulated_test = no.noise : ve.bandpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
@@ -380,11 +376,11 @@ greyhole_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(
 greyhole_dt_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(0.25 + 0.25*sq, 0.3, 1.0, 0.6, 0.5, 0, 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
-`bandpass2Matched_test`, `autowah_test` and `crybaby_test` still take their
-parameters from sliders: their split into a constant `_test` and a
-`_slider_test`, as for the other functions of `vaeffects.lib`, waits for the
-same fixes, since both versions carry the debt of the function and a new
-baseline entry is not allowed.
+`bandpass2Matched_test` still takes its parameters from sliders: its split
+into a constant `_test` and a `_slider_test`, as for the other functions of
+`vaeffects.lib`, waits for the same fix, since both versions carry the debt
+of the function and a new baseline entry is not allowed. `autowah_test` and
+`crybaby_test` were split with #270.
 
 The PR numbers are open PRs that rewrite these structures. Whether a
 given PR makes its test pass is to be checked when it lands, by running
