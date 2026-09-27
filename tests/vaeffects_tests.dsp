@@ -186,6 +186,8 @@ lowpass2Matched_slider_test = os.tosc(440)
       hslider("lowpass2Matched:CF", 1000, 50, 5000, 1),
       hslider("lowpass2Matched:Q", 0.707, 0.1, 5, 0.01)
     );
+lowpass2Matched_modulated_test = no.noise : ve.lowpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lowpass2Matched_low_test = no.noise : ve.lowpass2Matched(50, 10);
 
 highpass2Matched_test = os.tosc(440) : ve.highpass2Matched(500, 0.707);
 highpass2Matched_slider_test = os.tosc(440)
@@ -193,12 +195,17 @@ highpass2Matched_slider_test = os.tosc(440)
       hslider("highpass2Matched:CF", 500, 50, 5000, 1),
       hslider("highpass2Matched:Q", 0.707, 0.1, 5, 0.01)
     );
+highpass2Matched_modulated_test = no.noise : ve.highpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass2Matched_low_test = no.noise : ve.highpass2Matched(50, 10);
 
-bandpass2Matched_test = os.tosc(440)
+bandpass2Matched_test = os.tosc(440) : ve.bandpass2Matched(1200, 2.0);
+bandpass2Matched_slider_test = os.tosc(440)
   : ve.bandpass2Matched(
       hslider("bandpass2Matched:CF", 1200, 50, 5000, 1),
       hslider("bandpass2Matched:Q", 2.0, 0.1, 10, 0.01)
     );
+bandpass2Matched_modulated_test = no.noise : ve.bandpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+bandpass2Matched_low_test = no.noise : ve.bandpass2Matched(50, 10);
 
 peaking2Matched_test = os.tosc(440) : ve.peaking2Matched(1.5, 1000, 2.0);
 peaking2Matched_slider_test = os.tosc(440)
@@ -207,6 +214,8 @@ peaking2Matched_slider_test = os.tosc(440)
       hslider("peaking2Matched:CF", 1000, 50, 5000, 1),
       hslider("peaking2Matched:Q", 2.0, 0.1, 10, 0.01)
     );
+peaking2Matched_modulated_test = no.noise : ve.peaking2Matched(2, 20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+peaking2Matched_low_test = no.noise : ve.peaking2Matched(4, 50, 10);
 
 lowshelf2Matched_test = os.tosc(330) : ve.lowshelf2Matched(1.5, 500);
 lowshelf2Matched_slider_test = os.tosc(330)
@@ -214,6 +223,9 @@ lowshelf2Matched_slider_test = os.tosc(330)
       hslider("lowshelf2Matched:G", 1.5, 0.5, 4, 0.01),
       hslider("lowshelf2Matched:CF", 500, 50, 5000, 1)
     );
+lowshelf2Matched_modulated_test = no.noise : ve.lowshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lowshelf2Matched_low_test = no.noise : ve.lowshelf2Matched(4, 20);
+lowshelf2Matched_unity_test = no.noise : ve.lowshelf2Matched(1, 500);
 
 highshelf2Matched_test = os.tosc(330) : ve.highshelf2Matched(1.5, 1500);
 highshelf2Matched_slider_test = os.tosc(330)
@@ -221,6 +233,9 @@ highshelf2Matched_slider_test = os.tosc(330)
       hslider("highshelf2Matched:G", 1.5, 0.5, 4, 0.01),
       hslider("highshelf2Matched:CF", 1500, 50, 10000, 1)
     );
+highshelf2Matched_modulated_test = no.noise : ve.highshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highshelf2Matched_low_test = no.noise : ve.highshelf2Matched(0.25, 20);
+highshelf2Matched_unity_test = no.noise : ve.highshelf2Matched(1, 500);
 
 wah4_test = os.tosc(220) : ve.wah4(800);
 wah4_slider_test = os.tosc(220)

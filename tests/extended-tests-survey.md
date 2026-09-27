@@ -88,7 +88,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 - `moog_vcf`: fr exp 50..5000, res 0.9.
 - `moog_vcf_2bn`: protected normalized ladder.
 - `klonCentaur`: gain `0.1 + 0.9*tri`, jump 0.1↔1. Its 50 ms ramp only runs when a control moves.
-- `lowshelf2Matched`/`highshelf2Matched`: G crossing 1, where the `safeG` branch is almost 0/0. Measured: non-finite, even in double. Deferred, see 5.2.
+- `lowshelf2Matched`/`highshelf2Matched`: G crossing 1, where the `safeG` branch is almost 0/0. Measured: non-finite, even in double. Deferred, see 5.2; reactivated with #271.
 
 **signals.lib, analyzers.lib**: the smoothers and followers everything else uses. **Done**: 5 slider, 3 modulated and 3 jump tests in analyzers.lib, 3 of each in signals.lib, all passing without a baseline entry.
 - `si.smooth`: slider, modulated (s 0.9..0.9999), jump, on `no.noise`.
@@ -230,7 +230,9 @@ written and run through `check_precision.py` at the six rates on
 
     The non-finite double outputs are a bug, not a precision limit. The open
     PR #271 (Vicanek's matched filters accurate in float, and in double at a
-    low CF) is the place to check them.
+    low CF) is the place to check them. Reactivated with #271: the six
+    `_modulated_test` are finite in both precisions, level gap 7.3e-7 at
+    most.
   - `pm.modeFilter`, jump: 0.12. It is behind every bell, the marimba and
     the djembe. Reactivated with #269 (a Chamberlin state-variable
     section): 8.2e-6.
@@ -318,13 +320,6 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 
 | Test | Library and test file | Fails today with | Unblocked by |
 |---|---|---|---|
-| `lowpass2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 176.4–192 kHz | #271, to be checked |
-| `highpass2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in single, every rate | #271, to be checked |
-| `bandpass2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 192 kHz | #271, to be checked |
-| `peaking2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in single, every rate | #271, to be checked |
-| `lowshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
-| `highshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
-| `bandpass2Matched_slider_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | the debt of its `_test` (non-finite at 176.4 kHz) | #271 |
 | `oscq_modulated_test` | `oscillators.lib`, `oscillators_tests.dsp` | 8.9e-3 | a better `fi.wgr` (with `wgr_jump_test`) |
 | `goertzel_slider_test` | `analyzers.lib`, `analyzers_tests.dsp` | 1.3e-3 | a Goertzel recursion accurate in float at low frequency, or a smaller n |
 | `lfnoise0_slider_test`, `lfnoise0_jump_test`, `lfnoiseN_jump_test`, `lfnoise_jump_test` (and their modulated and slider siblings, which pass by chance) | `noises.lib`, `noises_tests.dsp` | 3.9e-3; 0.24, 0.20, 0.19 | a trigger exact in both precisions: the zero crossings of `os.oscrs` move by one sample between float and double, and each latches another noise value |
@@ -335,12 +330,6 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 | `greyhole_dt_jump_test` | `reverbs.lib`, `reverbs_tests.dsp` | 1.7e-3 at 176.4 kHz (0.25 to 0.5 s; 8.7e-4 from 0.125 to 0.25 s) | a `de.sdelay` crossfade exact in float: it steps by 1/22050 |
 
 ```
-lowpass2Matched_modulated_test = no.noise : ve.lowpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-highpass2Matched_modulated_test = no.noise : ve.highpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-bandpass2Matched_modulated_test = no.noise : ve.bandpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-peaking2Matched_modulated_test = no.noise : ve.peaking2Matched(2, 20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-lowshelf2Matched_modulated_test = no.noise : ve.lowshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-highshelf2Matched_modulated_test = no.noise : ve.highshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 oscq_modulated_test = os.oscq(20*pow(500, tri)) : _, ! with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 goertzel_slider_test = an.goertzel(hslider("freq", 50, 20, 1000, 1), 4096, no.noise);
 lfnoise0_slider_test = no.lfnoise0(hslider("lfnoise0:freq", 10.1, 0.1, 1000, 0.1));
@@ -360,11 +349,8 @@ greyhole_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(
 greyhole_dt_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(0.25 + 0.25*sq, 0.3, 1.0, 0.6, 0.5, 0, 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
-`bandpass2Matched_test` still takes its parameters from sliders: its split
-into a constant `_test` and a `_slider_test`, as for the other functions of
-`vaeffects.lib`, waits for the same fix, since both versions carry the debt
-of the function and a new baseline entry is not allowed. `autowah_test` and
-`crybaby_test` were split with #270.
+`autowah_test` and `crybaby_test` were split into a constant `_test` and a
+`_slider_test` with #270, and `bandpass2Matched_test` with #271.
 
 The PR numbers are open PRs that rewrite these structures. Whether a
 given PR makes its test pass is to be checked when it lands, by running

@@ -873,7 +873,7 @@ sallenKey2ndOrderHPF_slider_test = os.tosc(330)
 
 Vicanek's Matched (Decramped) Second-Order Filters.
 
-This collection implements high-quality, double-precision second-order filters
+This collection implements high-quality second-order filters
 based on the work of Vicanek, offering improved frequency accuracy and dynamic
 response over traditional biquads—especially near Nyquist.
 
@@ -896,7 +896,10 @@ The filters provided here include:
 Each filter relies on carefully derived coefficient formulas that guarantee
 accurate placement of the frequency response peak and preserve Q and gain behavior.
 
-⚠️ **Note:** These filters require **double-precision** support.
+Their coefficients are computed without cancellation and their recurrence
+runs on small increments, so that they are accurate in single precision too,
+at every sample rate: a low `CF` or a high `Q` stays within about 1e-5 of the
+double-precision output (1e-4 for `bandpass2Matched`).
 
 #### References
 
@@ -937,7 +940,10 @@ biquad_test = os.tosc(440)
 
 Vicanek's decramped second-order resonant lowpass filter.
 
-⚠️ **Note:** These filters require **double-precision** support.
+Accurate in single precision too: its coefficients are computed without
+cancellation and its recurrence runs on small increments, so that a low
+`CF` or a high `Q` at a high sample rate stays within about 1e-5 of the
+double-precision output.
 
 #### Usage:
 ```
@@ -953,12 +959,17 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 lowpass2Matched_test = os.tosc(440) : ve.lowpass2Matched(1000, 0.707);
 lowpass2Matched_slider_test = os.tosc(440)
   : ve.lowpass2Matched(
       hslider("lowpass2Matched:CF", 1000, 50, 5000, 1),
       hslider("lowpass2Matched:Q", 0.707, 0.1, 5, 0.01)
     );
+lowpass2Matched_modulated_test = no.noise : ve.lowpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lowpass2Matched_low_test = no.noise : ve.lowpass2Matched(50, 10);
 ```
 
 ----
@@ -967,7 +978,10 @@ lowpass2Matched_slider_test = os.tosc(440)
 
 Vicanek's decramped second-order resonant highpass filter.
 
-⚠️ **Note:** These filters require **double-precision** support.
+Accurate in single precision too: its coefficients are computed without
+cancellation and its recurrence runs on small increments, so that a low
+`CF` or a high `Q` at a high sample rate stays within about 1e-5 of the
+double-precision output.
 
 #### Usage:
 ```
@@ -983,12 +997,17 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 highpass2Matched_test = os.tosc(440) : ve.highpass2Matched(500, 0.707);
 highpass2Matched_slider_test = os.tosc(440)
   : ve.highpass2Matched(
       hslider("highpass2Matched:CF", 500, 50, 5000, 1),
       hslider("highpass2Matched:Q", 0.707, 0.1, 5, 0.01)
     );
+highpass2Matched_modulated_test = no.noise : ve.highpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass2Matched_low_test = no.noise : ve.highpass2Matched(50, 10);
 ```
 
 ----
@@ -997,7 +1016,10 @@ highpass2Matched_slider_test = os.tosc(440)
 
 Vicanek's decramped second-order resonant bandpass filter.
 
-⚠️ **Note:** These filters require **double-precision** support.
+Accurate in single precision too: its coefficients are computed without
+cancellation and its recurrence runs on small increments, so that a low
+`CF` or a high `Q` at a high sample rate stays within about 1e-4 of the
+double-precision output.
 
 #### Usage:
 ```
@@ -1013,20 +1035,29 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-bandpass2Matched_test = os.tosc(440)
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+bandpass2Matched_test = os.tosc(440) : ve.bandpass2Matched(1200, 2.0);
+bandpass2Matched_slider_test = os.tosc(440)
   : ve.bandpass2Matched(
       hslider("bandpass2Matched:CF", 1200, 50, 5000, 1),
       hslider("bandpass2Matched:Q", 2.0, 0.1, 10, 0.01)
     );
+bandpass2Matched_modulated_test = no.noise : ve.bandpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+bandpass2Matched_low_test = no.noise : ve.bandpass2Matched(50, 10);
 ```
 
 ----
 
 ### `(ve.)peaking2Matched`
 
-Vicanek's decramped second-order resonant bandpass filter.
+Vicanek's decramped second-order peaking equalizer.
 
-⚠️ **Note:** These filters require **double-precision** support.
+Accurate in single precision too: its coefficients are computed without
+cancellation and its recurrence runs on small increments, so that a low
+`CF` or a high `Q` at a high sample rate stays within about 1e-5 of the
+double-precision output.
 
 #### Usage:
 ```
@@ -1043,6 +1074,9 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 peaking2Matched_test = os.tosc(440) : ve.peaking2Matched(1.5, 1000, 2.0);
 peaking2Matched_slider_test = os.tosc(440)
   : ve.peaking2Matched(
@@ -1050,6 +1084,8 @@ peaking2Matched_slider_test = os.tosc(440)
       hslider("peaking2Matched:CF", 1000, 50, 5000, 1),
       hslider("peaking2Matched:Q", 2.0, 0.1, 10, 0.01)
     );
+peaking2Matched_modulated_test = no.noise : ve.peaking2Matched(2, 20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+peaking2Matched_low_test = no.noise : ve.peaking2Matched(4, 50, 10);
 ```
 
 ----
@@ -1058,7 +1094,10 @@ peaking2Matched_slider_test = os.tosc(440)
 
 Vicanek's decramped second-order Butterworth lowshelf filter.
 
-⚠️ **Note:** These filters require **double-precision** support.
+Accurate in single precision too: its coefficients are computed without
+cancellation and its recurrence runs on small increments, so that a low
+`CF` at a high sample rate stays within about 1e-5 of the double-precision
+output. `G = 1` gives the identity.
 
 #### Usage:
 ```
@@ -1074,12 +1113,18 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 lowshelf2Matched_test = os.tosc(330) : ve.lowshelf2Matched(1.5, 500);
 lowshelf2Matched_slider_test = os.tosc(330)
   : ve.lowshelf2Matched(
       hslider("lowshelf2Matched:G", 1.5, 0.5, 4, 0.01),
       hslider("lowshelf2Matched:CF", 500, 50, 5000, 1)
     );
+lowshelf2Matched_modulated_test = no.noise : ve.lowshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lowshelf2Matched_low_test = no.noise : ve.lowshelf2Matched(4, 20);
+lowshelf2Matched_unity_test = no.noise : ve.lowshelf2Matched(1, 500);
 ```
 
 ----
@@ -1088,7 +1133,10 @@ lowshelf2Matched_slider_test = os.tosc(330)
 
 Vicanek's decramped second-order Butterworth highshelf filter.
 
-⚠️ **Note:** These filters require **double-precision** support.
+Accurate in single precision too: its coefficients are computed without
+cancellation and its recurrence runs on small increments, so that a low
+`CF` at a high sample rate stays within about 1e-5 of the double-precision
+output. `G = 1` gives the identity.
 
 #### Usage:
 ```
@@ -1104,12 +1152,18 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 highshelf2Matched_test = os.tosc(330) : ve.highshelf2Matched(1.5, 1500);
 highshelf2Matched_slider_test = os.tosc(330)
   : ve.highshelf2Matched(
       hslider("highshelf2Matched:G", 1.5, 0.5, 4, 0.01),
       hslider("highshelf2Matched:CF", 1500, 50, 10000, 1)
     );
+highshelf2Matched_modulated_test = no.noise : ve.highshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highshelf2Matched_low_test = no.noise : ve.highshelf2Matched(0.25, 20);
+highshelf2Matched_unity_test = no.noise : ve.highshelf2Matched(1, 500);
 ```
 
 ## Effects

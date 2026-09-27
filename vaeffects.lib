@@ -28,7 +28,7 @@ wd = library("wdmodels.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.6.6";
+declare version "1.6.7";
 
 //########################################################################################
 /************************************************************************
@@ -1216,7 +1216,7 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 //====================Vicanek's Matched (Decramped) Second-Order Filters========
 // Vicanek's Matched (Decramped) Second-Order Filters.
 //
-// This collection implements high-quality, double-precision second-order filters
+// This collection implements high-quality second-order filters
 // based on the work of Vicanek, offering improved frequency accuracy and dynamic
 // response over traditional biquads—especially near Nyquist.
 //
@@ -1239,7 +1239,10 @@ sallenKey2ndOrderHPF(normFreq,Q) = sallenKey2ndOrder(normFreq,Q) : !,!,_;
 // Each filter relies on carefully derived coefficient formulas that guarantee
 // accurate placement of the frequency response peak and preserve Q and gain behavior.
 //
-// ⚠️ **Note:** These filters require **double-precision** support.
+// Their coefficients are computed without cancellation and their recurrence
+// runs on small increments, so that they are accurate in single precision too,
+// at every sample rate: a low `CF` or a high `Q` stays within about 1e-5 of the
+// double-precision output (1e-4 for `bandpass2Matched`).
 //
 // #### References
 //
@@ -1279,10 +1282,240 @@ biquad(b0, b1, b2, a1, a2, x) = f ~ _
         f(s) = b0 * x + b1 * x' + b2 * x'' - a1 * s - a2 * s';
     };
 
+// Internal helper shared by the four resonant matched filters below
+// (lowpass2Matched, highpass2Matched, bandpass2Matched, peaking2Matched).
+//
+// Vicanek's analog prototype has the denominator s^2 + (w0/Q)*s + w0^2; its
+// poles, mapped by z = exp(s*T), give the digital denominator
+//   A(z) = 1 + a1*z^-1 + a2*z^-2,   a2 = exp(-2*q*w),
+//   a1 = -2*exp(-q*w)*cos(sqrt(1 - q^2)*w)    (q <= 1, complex poles),
+//   a1 = -2*exp(-q*w)*cosh(sqrt(q^2 - 1)*w)   (q > 1, real poles),
+// with q = 1/(2*Q) and w = 2*pi*CF/SR. The numerators are then chosen to
+// match the analog magnitude at DC, at w and at Nyquist, from quantities
+// such as 1 + a1 + a2 = A(1) and |A(exp(j*w))|^2.
+//
+// Why this helper exists: at a low CF or a high SR, w is small and the poles
+// come within about q*w of z = 1. a1 is then close to -2 and a2 close to 1,
+// and every quantity the numerators depend on is a tiny difference of terms
+// of order 1 to 16: 1 + a1 + a2 is of order w^2, and some combinations used
+// by the numerators of order w^6 or w^8. Computed from a1 and a2, or from
+// Vicanek's polynomial forms, they lose all their digits in single
+// precision (non-finite outputs) and up to a few percent in double. Here
+// each one is computed directly from small arguments (q*w, w/2, th/2...)
+// as a product or a sum of positive terms, so that its relative error stays
+// a few ulps whatever CF, Q and SR. The identities used were checked with a
+// computer algebra system, and the resulting coefficients against a
+// 60-digit evaluation of Vicanek's formulas.
+//
+// Notations: rho = exp(-q*w) is the pole radius (the geometric mean of the
+// two radii when the poles are real), th = sqrt(1 - q^2)*w the pole angle,
+// and phi = sin(w/2)^2.
+//
+// The environment provides:
+// - w, rho, phi and a1, a2 themselves;
+// - P = 1 + a1 + a2 = A(1) = |1 - pole|^2, the DC value of A;
+// - fq = 1 - a2 = 1 - rho^2, the damping;
+// - sA1 = 1 - a1 + a2 = A(-1), close to 4 and harmless;
+// - RA = |A(exp(j*w))|^2;
+// - a = sinh(q*w/2)^2, b = sin(th/2)^2 (-sinh(sqrt(q^2 - 1)*w/2)^2 for real
+//   poles), so that P = 4*rho*(a + b);
+// - X = (q*w/2)^2, ex = a - X, ew = (w/2)^2 - phi: the deviations of
+//   sinh^2 and sin^2 from their first-order terms;
+// - K = (P - 4*rho*phi)/(4*rho) = a + b - phi, of order w^4;
+// - run(b0, b1, b2, x), the filter itself (see _matchedRun below).
+_matched2(CF, Q) = environment {
+    q = 1.0 / (2.0 * Q);
+    w = 2.0 * ma.PI * CF * ma.T;
+    qw = q * w;
+    rho = exp(-1.0 * qw);
+    phi = sin(.5 * w) ^ 2.0;
+    oc = om(qw); // 1 - rho, without the cancellation of 1 - exp(-q*w)
+    cplx = q <= 1.0;
+
+    // Complex poles rho*exp(+-j*th), q <= 1. dm = w - th is written as
+    // w*q^2/(1 + sqrt(1 - q^2)) since w and th are close at a high Q, and
+    // sm = (w + th)/2.
+    sq = sqrt(max(.0, 1.0 - q * q));
+    th = sq * w;
+    dm = w * q * q / (1.0 + sq);
+    sm = .5 * (w + th);
+    // Real poles exp(-y1) and exp(-y2), q > 1, with y1 = (q - sr)*w written
+    // as w/(q + sr) (q and sr are close at a low Q) and y1 + y2 = 2*q*w.
+    sr = sqrt(max(.0, q * q - 1.0));
+    y1 = w / (q + sr);
+    y2 = w * (q + sr);
+    o1 = om(y1); // 1 - exp(-y1)
+    o2 = om(y2); // 1 - exp(-y2)
+
+    a1 = ba.if(cplx, -2.0 * rho * cos(th), -2.0 * rho * ma.cosh(sr * w));
+    a2 = rho * rho;
+    fq = oc * (2.0 - oc); // 1 - rho^2 = (1 - rho)*(1 + rho)
+    sA1 = 1.0 - a1 + a2;
+    // P = 1 - 2*rho*cos(th) + rho^2 = (1 - rho)^2 + 4*rho*sin(th/2)^2 for
+    // complex poles, (1 - exp(-y1))*(1 - exp(-y2)) for real ones.
+    P = ba.if(cplx, oc * oc + 4.0 * rho * sin(.5 * th) ^ 2.0, o1 * o2);
+    // RA = |1 - p1*exp(-j*w)|^2 * |1 - p2*exp(-j*w)|^2, one factor per pole:
+    // |1 - rho*exp(j*(th -+ w))|^2 = (1 - rho)^2 + 4*rho*sin((w -+ th)/2)^2
+    // for complex poles, (1 - p)^2 + 4*p*phi for a real pole p.
+    RA = ba.if(cplx,
+        (oc * oc + 4.0 * rho * sin(.5 * dm) ^ 2.0) * (oc * oc + 4.0 * rho * sin(sm) ^ 2.0),
+        (o1 * o1 + 4.0 * exp(-1.0 * y1) * phi) * (o2 * o2 + 4.0 * exp(-1.0 * y2) * phi));
+
+    // a, b and their deviations. (1 - rho)^2 = 4*rho*a, hence P = 4*rho*(a + b).
+    hx = .5 * qw;
+    X = hx * hx;
+    a = ma.sinh(hx) ^ 2.0;
+    ex = shdef(hx) * (ma.sinh(hx) + hx); // sinh(h)^2 - h^2 = (sinh(h) - h)*(sinh(h) + h)
+    hw = .5 * w;
+    ew = sdef(hw) * (hw + sin(hw));      // h^2 - sin(h)^2 = (h - sin(h))*(h + sin(h))
+    b = ba.if(cplx, sin(.5 * th) ^ 2.0, -1.0 * ma.sinh(.5 * sr * w) ^ 2.0);
+    // K = a + b - phi. Its first-order terms cancel exactly, since
+    // (q*w/2)^2 + (th/2)^2 = (w/2)^2, so it is computed from the deviations:
+    // - complex poles: K = ex + g(w/2) - g(th/2) with g(h) = h^2 - sin(h)^2,
+    //   and g(w/2) - g(th/2) = sm*d - sin(sm)*sin(d), d = dm/2,
+    //   = (sm - sin(sm))*d + sin(sm)*(d - sin(d)): three positive terms;
+    // - real poles: a + b = sinh(y1/2)*sinh(y2/2) with (y1/2)*(y2/2) = (w/2)^2,
+    //   so K = sinh(y1/2)*sinh(y2/2) - (y1/2)*(y2/2) + ew
+    //   = (sinh(y1/2) - y1/2)*sinh(y2/2) + (y1/2)*(sinh(y2/2) - y2/2) + ew.
+    K = ba.if(cplx,
+        ex + sdef(.5 * dm) * sin(sm) + .5 * dm * sdef(sm),
+        shdef(.5 * y1) * ma.sinh(.5 * y2) + .5 * y1 * shdef(.5 * y2) + ew);
+
+    // The filter itself, see _matchedRun below.
+    run(b0, b1, b2, x) = _matchedRun(P, fq, b0, b1, b2, x);
+
+    // 1 - exp(-y) = 2*t/(1 + t) with t = tanh(y/2): exact, and accurate for
+    // a small y where 1 - exp(-y) would cancel.
+    om(y) = 2.0 * t / (1.0 + t) with { t = ma.tanh(.5 * y); };
+    // h - sin(h) and sinh(h) - h. Below 1, by their Taylor series
+    // h^3/6*(1 -+ h^2/20*(1 -+ h^2/42*(1 -+ h^2/72*(1 -+ h^2/110)))),
+    // truncated with a relative error below 1e-9; from 1 on, directly, the
+    // subtraction then losing at most a factor 6.
+    sdef(h) = ba.if(abs(h) < 1.0, h * h2 / 6.0 * ser, h - sin(h))
+    with {
+        h2 = h * h;
+        ser = 1.0 - h2 / 20.0 * (1.0 - h2 / 42.0 * (1.0 - h2 / 72.0 * (1.0 - h2 / 110.0)));
+    };
+    shdef(h) = ba.if(abs(h) < 1.0, h * h2 / 6.0 * ser, ma.sinh(h) - h)
+    with {
+        h2 = h * h;
+        ser = 1.0 + h2 / 20.0 * (1.0 + h2 / 42.0 * (1.0 + h2 / 72.0 * (1.0 + h2 / 110.0)));
+    };
+};
+
+// Internal helper of the matched filters: the biquad
+// y = b0*x + b1*x' + b2*x'' - a1*y' - a2*y'' given by P = 1 + a1 + a2 and
+// fq = 1 - a2, which are small when the poles are close to z = 1 while
+// a1 and a2 are then close to -2 and 1. With v = y - y' the increment of y,
+// the same recurrence reads
+//   v = v' + (b0*x + b1*x' + b2*x'') - P*y' - fq*v',
+//   y = y' + v,
+// where only the small P and fq multiply the states: the rounding of a1
+// and a2 would move the poles. It is algebraically the direct form, so it
+// gives the same output even when the coefficients change every sample. P
+// is factored out, the other coefficients being divided by it: written as
+// v - fq*v', the Faust normalizer would rebuild v'*(1 - fq) and lose fq to
+// the rounding of 1 - fq. The min() keeps each quotient a single constant:
+// the normalizer would otherwise fold its division into the per-sample
+// expression.
+// Rounding: the error made on v enters the filter like its input, through
+// 1/A, whose DC gain 1/P is large; v = y - y' is small when y is smooth, so
+// the recurrence is accurate as long as its output is a lowpass-like signal.
+// A filter whose output keeps strong high frequencies (highpass, shelves) is
+// therefore written as a direct term plus a lowpass-like remainder given to
+// this recurrence.
+_matchedRun(P, fq, b0, b1, b2, x) = tick ~ (_, _) : _, !
+with {
+    qq = min(fq / P, ma.MAX);
+    g0 = min(b0 / P, ma.MAX);
+    g1 = min(b1 / P, ma.MAX);
+    g2 = min(b2 / P, ma.MAX);
+    tick(y, v) = y + vn, vn // y' and v' in, y and v out
+    with {
+        vn = v + P * (g0 * x + g1 * x' + g2 * x'' - y - qq * v);
+    };
+};
+
+// Internal helper shared by lowshelf2Matched and highshelf2Matched.
+// Vicanek's Butterworth shelf is a fit, not a mapping of analog poles: with
+// A and B normalized to A(1) = B(1) = 1, their squared magnitudes are
+// polynomials in phi = sin(w/2)^2 with the same linear term,
+//   |A|^2 = 1 + (al - 1)*phi + (aa1 - al)*phi^2, aa1 = A(-1)^2,
+//   |B|^2 = 1 + (al - 1)*phi + (bb1 - al)*phi^2, bb1 = B(-1)^2,
+// matched to the analog shelf (f^4 + fx^4*gn)/(f^4 + fx^4*Gd) at Nyquist
+// (bb1 = hny*aa1) and at two frequencies f1 and f2 placed by Vicanek (a
+// 2x2 linear system for al and aa1). gn and Gd are 1/G and G for the low
+// shelf (normalized to a DC gain 1), G and 1/G for the high shelf.
+// At a low CF, aa1 grows as 1/f^4 while the coefficients are then
+// recovered as a0 = (v + sqrt(v^2 + (al - aa1)/4))/2, v = (1 + sqrt(aa1))/2,
+// a difference of terms of order 1/f^4 that should give one of order 1/f^2:
+// the output was non-finite in single precision. Here, exactly,
+//   (a0 - a2)^2 = (1 + al + 2*sqrt(aa1))/4,
+// a sum of positive terms in which the inaccurate al (its linear system
+// cancels, but al stays of order 1) weighs nothing. The environment
+// provides P = 1 + a1 + a2 and fq = 1 - a2 of the normalized A, and
+// run(x) = B/A applied to x (DC gain 1).
+_shelf2Matched(gn, Gd, CF) = environment {
+    halfPi = ma.PI * .5;
+    f = CF / (ma.SR * .5);
+    f4 = f ^ 4.0;
+    dg = gn - Gd;
+    dny = f4 + Gd;
+    hny = (f4 + gn) / dny;
+    f1 = f / sqrt(.160 + 1.543 * f * f);
+    f14 = f1 ^ 4.0;
+    phi1 = sin(halfPi * f1) ^ 2.0;
+    f2 = f / sqrt(.947 + 3.806 * f * f);
+    f24 = f2 ^ 4.0;
+    phi2 = sin(halfPi * f2) ^ 2.0;
+    // Vicanek's 2x2 system, d = (h - 1)*(1 - phi), c1 = -phi*d and
+    // c2 = phi^2*(hny - h) at f1 and f2, for al and aa1. Every d and c2
+    // carries the factor gn - Gd, zero at G = 1, which cancels in al and aa1:
+    // it is divided out here, with h - 1 = fx^4*(gn - Gd)/(f^4 + fx^4*Gd)
+    // and hny - h = (gn - Gd)*f^4*(1 - fx^4)/((f^4 + Gd)*(f^4 + fx^4*Gd)),
+    // so that G = 1 gives the identity instead of 0/0.
+    k1 = f14 / (f4 + f14 * Gd);
+    k2 = f24 / (f4 + f24 * Gd);
+    e1 = (1.0 - phi1) * k1;                     // d/(gn - Gd) at f1
+    e2 = (1.0 - phi2) * k2;
+    q11 = -1.0 * phi1 * e1;                     // c1/(gn - Gd)
+    q21 = -1.0 * phi2 * e2;
+    q12 = phi1 * phi1 * f4 * (1.0 - f14) / (dny * (f4 + f14 * Gd)); // c2/(gn - Gd)
+    q22 = phi2 * phi2 * f4 * (1.0 - f24) / (dny * (f4 + f24 * Gd));
+    al = (q22 * e1 - q12 * e2) / (q11 * q22 - q12 * q21);
+    aa1 = (e1 - q11 * al) / q12;
+    bb1 = hny * aa1;
+
+    sa = sqrt(aa1);                          // A(-1)
+    sb = sqrt(bb1);                          // B(-1)
+    v = .5 * (1.0 + sa);                     // a0 + a2
+    na = .5 * sqrt(1.0 + al + 2.0 * sa);     // a0 - a2
+    nb = .5 * sqrt(1.0 + al + 2.0 * sb);     // b0 - b2
+    a0 = .5 * (v + na);
+    P = 1.0 / a0;                            // 1 + a1 + a2 once divided by a0
+    fq = na / a0;                            // 1 - a2 once divided by a0
+    // B/A = c + R/A with c = B(-1)/A(-1) = sqrt(hny), the gain at Nyquist,
+    // and R = B - c*A, zero at Nyquist: the state of run() then carries the
+    // smooth R/A*x (see _matchedRun). R = r0 + r1*z^-1 + r2*z^-2 with
+    // r0 - r1 + r2 = 0 and r0 + r1 + r2 = 1 - c, and
+    // r0 - r2 = nb - c*na = (nb^2 - c^2*na^2)/(nb + c*na), where
+    // nb^2 - c^2*na^2 = (1 - c)*((1 + c)*(1 + al) + 2*sb)/4.
+    c = sqrt(hny);
+    omc = -1.0 * dg / (dny * (1.0 + c)); // 1 - c = (1 - hny)/(1 + c)
+    r1 = .5 * omc;
+    rm = omc * ((1.0 + c) * (1.0 + al) + 2.0 * sb) / (4.0 * (nb + c * na)); // r0 - r2
+    r0 = .5 * (r1 + rm);
+    r2 = .5 * (r1 - rm);
+    run(x) = c * x + _matchedRun(P, fq, r0 / a0, r1 / a0, r2 / a0, x);
+};
+
 //----------`(ve.)lowpass2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant lowpass filter.
 //
-// ⚠️ **Note:** These filters require **double-precision** support.
+// Accurate in single precision too: its coefficients are computed without
+// cancellation and its recurrence runs on small increments, so that a low
+// `CF` or a high `Q` at a high sample rate stays within about 1e-5 of the
+// double-precision output.
 //
 // #### Usage:
 // ```
@@ -1298,42 +1531,50 @@ biquad(b0, b1, b2, a1, a2, x) = f ~ _
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // lowpass2Matched_test = os.tosc(440) : ve.lowpass2Matched(1000, 0.707);
 // lowpass2Matched_slider_test = os.tosc(440)
 //   : ve.lowpass2Matched(
 //       hslider("lowpass2Matched:CF", 1000, 50, 5000, 1),
 //       hslider("lowpass2Matched:Q", 0.707, 0.1, 5, 0.01)
 //     );
+// lowpass2Matched_modulated_test = no.noise : ve.lowpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// lowpass2Matched_low_test = no.noise : ve.lowpass2Matched(50, 10);
 // ```
 //---------------------------------------------------------------------
 declare lowpass2Matched author "Dario Sanfilippo";
 declare lowpass2Matched license "MIT";
-lowpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
+lowpass2Matched(CF, Q, x) = m.run(b0, b1, .0, x)
     with {
-        q = 1.0 / (2.0 * Q);
-        w = 2.0 * ma.PI * CF * ma.T;
-        a1Less = -2.0 * exp(-1.0 * q * w) * cos(sqrt(max(.0, 1.0 - q * q)) * w);
-        a1More = -2.0 * exp(-1.0 * q * w) * ma.cosh(sqrt(max(.0, q * q - 1.0)) * w);
-        a1 = ba.if(q <= 1.0, a1Less, a1More);
-        a2 = exp(-2.0 * q * w);
-        phi0 = 1.0 - sin(.5 * w) ^ 2.0;
-        phi1 = sin(.5 * w) ^ 2.0;
-        phi2 = 4.0 * phi0 * phi1;
-        A0 = (1.0 + a1 + a2) ^ 2.0;
-        A1 = (1.0 - a1 + a2) ^ 2.0;
-        A2 = -4.0 * a2;
-        R1 = (A0 * phi0 + A1 * phi1 + A2 * phi2) * Q * Q;
-        B0 = A0;
-        B1 = (R1 - B0 * phi0) / phi1;
-        b0 = .5 * (sqrt(B0) + sqrt(B1));
-        b1 = sqrt(B0) - b0;
-        b2 = .0;
+        m = _matched2(CF, Q);
+        // Vicanek's numerator b0 + b1*z^-1 matches the DC gain, b0 + b1 = P,
+        // and the gain Q at w: b0*b1 = (P^2 - Q^2*RA)/(4*phi). Computed as a
+        // difference, P^2 - Q^2*RA cancels down to 1e-8 of its terms at a low
+        // CF; it is written here as rho^2*L/X, with L a sum of terms of the
+        // same order, the leading ones having cancelled in closed form.
+        s = m.P / (4.0 * m.rho); // a + b
+        L = (3.0 * m.a - m.b) * m.K * (2.0 * s - m.K) + m.phi * m.phi * (4.0 * m.a * m.b + m.K)
+            + (m.K - 4.0 * m.ex) * s * s
+            - m.ew * (s * (m.a + m.K) - m.a * m.K + m.phi * (3.0 * m.a - 4.0 * m.a * m.b - m.K));
+        // B1 = (b0 - b1)^2 = P^2 - 4*b0*b1; above w = 1, where Vicanek's
+        // direct form no longer cancels and L would lose its large terms
+        // (q*w beyond 10), B1 = (Q^2*RA - P^2*(1 - phi))/phi.
+        B1 = ba.if(m.w < 1.0,
+            m.P * m.P - 4.0 * m.rho * m.rho * L / (m.X * m.phi),
+            (Q * Q * m.RA - m.P * m.P * (1.0 - m.phi)) / m.phi);
+        b0 = .5 * (m.P + sqrt(max(.0, B1)));
+        b1 = (m.P * m.P - B1) / (4.0 * b0);
     };
 
 //----------`(ve.)highpass2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant highpass filter.
 //
-// ⚠️ **Note:** These filters require **double-precision** support.
+// Accurate in single precision too: its coefficients are computed without
+// cancellation and its recurrence runs on small increments, so that a low
+// `CF` or a high `Q` at a high sample rate stays within about 1e-5 of the
+// double-precision output.
 //
 // #### Usage:
 // ```
@@ -1349,39 +1590,38 @@ lowpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // highpass2Matched_test = os.tosc(440) : ve.highpass2Matched(500, 0.707);
 // highpass2Matched_slider_test = os.tosc(440)
 //   : ve.highpass2Matched(
 //       hslider("highpass2Matched:CF", 500, 50, 5000, 1),
 //       hslider("highpass2Matched:Q", 0.707, 0.1, 5, 0.01)
 //     );
+// highpass2Matched_modulated_test = no.noise : ve.highpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highpass2Matched_low_test = no.noise : ve.highpass2Matched(50, 10);
 // ```
 //---------------------------------------------------------------------
 declare highpass2Matched author "Dario Sanfilippo";
 declare highpass2Matched license "MIT";
-highpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
+highpass2Matched(CF, Q, x) = b0 * x - m.run(.0, b0 * (m.P + m.fq), -1.0 * b0 * m.fq, x)
     with {
-        q = 1.0 / (2.0 * Q);
-        w = 2.0 * ma.PI * CF * ma.T;
-        a1Less = -2.0 * exp(-1.0 * q * w) * cos(sqrt(max(.0, 1.0 - q * q)) * w);
-        a1More = -2.0 * exp(-1.0 * q * w) * ma.cosh(sqrt(max(.0, q * q - 1.0)) * w);
-        a1 = ba.if(q <= 1.0, a1Less, a1More);
-        a2 = exp(-2.0 * q * w);
-        phi0 = 1.0 - sin(.5 * w) ^ 2.0;
-        phi1 = sin(.5 * w) ^ 2.0;
-        phi2 = 4.0 * phi0 * phi1;
-        A0 = (1.0 + a1 + a2) ^ 2.0;
-        A1 = (1.0 - a1 + a2) ^ 2.0;
-        A2 = -4.0 * a2;
-        b0 = Q * sqrt(A0 * phi0 + A1 * phi1 + A2 * phi2) / (4.0 * phi1);
-        b1 = -2.0 * b0;
-        b2 = b0;
+        m = _matched2(CF, Q);
+        // Vicanek's numerator b0*(1 - z^-1)^2 matches the gain Q at w
+        b0 = Q * sqrt(m.RA) / (4.0 * m.phi);
+        // The recurrence of run() is accurate as long as its state is smooth
+        // (see _matchedRun): the filter is written as b0*(1 - C/A), with the
+        // lowpass C/A, C = A - (1 - z^-1)^2 = (P + fq)*z^-1 - fq*z^-2.
     };
 
 //----------`(ve.)bandpass2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant bandpass filter.
 //
-// ⚠️ **Note:** These filters require **double-precision** support.
+// Accurate in single precision too: its coefficients are computed without
+// cancellation and its recurrence runs on small increments, so that a low
+// `CF` or a high `Q` at a high sample rate stays within about 1e-4 of the
+// double-precision output.
 //
 // #### Usage:
 // ```
@@ -1397,42 +1637,48 @@ highpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
-// bandpass2Matched_test = os.tosc(440)
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// bandpass2Matched_test = os.tosc(440) : ve.bandpass2Matched(1200, 2.0);
+// bandpass2Matched_slider_test = os.tosc(440)
 //   : ve.bandpass2Matched(
 //       hslider("bandpass2Matched:CF", 1200, 50, 5000, 1),
 //       hslider("bandpass2Matched:Q", 2.0, 0.1, 10, 0.01)
 //     );
+// bandpass2Matched_modulated_test = no.noise : ve.bandpass2Matched(20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// bandpass2Matched_low_test = no.noise : ve.bandpass2Matched(50, 10);
 // ```
 //---------------------------------------------------------------------
 declare bandpass2Matched author "Dario Sanfilippo";
 declare bandpass2Matched license "MIT";
-bandpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
+bandpass2Matched(CF, Q, x) = m.run(b0, b1, b2, x)
     with {
-        q = 1.0 / (2.0 * Q);
-        w = 2.0 * ma.PI * CF * ma.T;
-        a1Less = -2.0 * exp(-1.0 * q * w) * cos(sqrt(max(.0, 1.0 - q * q)) * w);
-        a1More = -2.0 * exp(-1.0 * q * w) * ma.cosh(sqrt(max(.0, q * q - 1.0)) * w);
-        a1 = ba.if(q <= 1.0, a1Less, a1More);
-        a2 = exp(-2.0 * q * w);
-        phi0 = 1.0 - sin(.5 * w) ^ 2.0;
-        phi1 = sin(.5 * w) ^ 2.0;
-        phi2 = 4.0 * phi0 * phi1;
-        A0 = (1.0 + a1 + a2) ^ 2.0;
-        A1 = (1.0 - a1 + a2) ^ 2.0;
-        A2 = -4.0 * a2;
-        R1 = A0 * phi0 + A1 * phi1 + A2 * phi2;
-        R2 = -1.0 * A0 + A1 + 4.0 * (phi0 - phi1) * A2;
-        B1 = R2 + 4.0 * (phi1 - phi0) * B2;
-        B2 = (R1 - R2 * phi1) / (4.0 * phi1 * phi1);
-        b0 = .5 * (sqrt(B2 + b1 * b1) - b1);
-        b1 = -.5 * sqrt(B1);
+        m = _matched2(CF, Q);
+        // Vicanek's numerator, b2 = -(b0 + b1), matches the analog peak:
+        // |B|^2 = RA at w, with a zero derivative there. Written as
+        // B(z) = (1 - z^-1)(b0 - b2*z^-1), with u = b0 - b2 and v = -b0*b2:
+        //   u^2 = (RA + D)/(4*phi), v = D/(16*phi^2),
+        // D = P^2 - 16*a2*phi^2 = 4*rho*K*(P + 4*rho*phi). Computed from
+        // Vicanek's polynomial form, RA and D are differences of terms up to
+        // 16 whose result can be below 1e-9: in double the coefficients were
+        // up to 2 % off (CF = 50 Hz, Q = 10 at 192 kHz), in single precision
+        // the output was non-finite.
+        D = 4.0 * m.rho * m.K * (m.P + 4.0 * m.rho * m.phi);
+        u2 = (m.RA + D) / (4.0 * m.phi);
+        v = D / (16.0 * m.phi * m.phi);
+        b1 = -1.0 * sqrt(max(.0, u2 - 4.0 * v));
+        b0 = .5 * (sqrt(u2) - b1);
         b2 = -1.0 * (b0 + b1);
     };
 
 //----------`(ve.)peaking2Matched`----------------------------------------------
-// Vicanek's decramped second-order resonant bandpass filter.
+// Vicanek's decramped second-order peaking equalizer.
 //
-// ⚠️ **Note:** These filters require **double-precision** support.
+// Accurate in single precision too: its coefficients are computed without
+// cancellation and its recurrence runs on small increments, so that a low
+// `CF` or a high `Q` at a high sample rate stays within about 1e-5 of the
+// double-precision output.
 //
 // #### Usage:
 // ```
@@ -1449,6 +1695,9 @@ bandpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // peaking2Matched_test = os.tosc(440) : ve.peaking2Matched(1.5, 1000, 2.0);
 // peaking2Matched_slider_test = os.tosc(440)
 //   : ve.peaking2Matched(
@@ -1456,39 +1705,48 @@ bandpass2Matched(CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 //       hslider("peaking2Matched:CF", 1000, 50, 5000, 1),
 //       hslider("peaking2Matched:Q", 2.0, 0.1, 10, 0.01)
 //     );
+// peaking2Matched_modulated_test = no.noise : ve.peaking2Matched(2, 20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// peaking2Matched_low_test = no.noise : ve.peaking2Matched(4, 50, 10);
 // ```
 //---------------------------------------------------------------------
 declare peaking2Matched author "Dario Sanfilippo";
 declare peaking2Matched license "MIT";
-peaking2Matched(G, CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
+peaking2Matched(G, CF, Q, x) = x + m.run(d0, -1.0 * (d0 + d2), d2, x)
     with {
-        q = 1.0 / (2.0 * Q);
-        w = 2.0 * ma.PI * CF * ma.T;
-        a1Less = -2.0 * exp(-1.0 * q * w) * cos(sqrt(max(.0, 1.0 - q * q)) * w);
-        a1More = -2.0 * exp(-1.0 * q * w) * ma.cosh(sqrt(max(.0, q * q - 1.0)) * w);
-        a1 = ba.if(q <= 1.0, a1Less, a1More);
-        a2 = exp(-2.0 * q * w);
-        phi0 = 1.0 - sin(.5 * w) ^ 2.0;
-        phi1 = sin(.5 * w) ^ 2.0;
-        phi2 = 4.0 * phi0 * phi1;
-        A0 = (1.0 + a1 + a2) ^ 2.0;
-        A1 = (1.0 - a1 + a2) ^ 2.0;
-        A2 = -4.0 * a2;
-        B0 = A0;
-        R1 = (A0 * phi0 + A1 * phi1 + A2 * phi2) * G * G;
-        R2 = (-1.0 * A0 + A1 + 4.0 * (phi0 - phi1) * A2) * G * G;
-        B1 = R2 + B0 + 4.0 * (phi1 - phi0) * B2;
-        B2 = (R1 - R2 * phi1 - B0) / (4.0 * phi1 * phi1);
-        W = .5 * (sqrt(B0) + sqrt(B1));
-        b0 = .5 * (W + sqrt(W * W + B2));
-        b1 = .5 * (sqrt(B0) - sqrt(B1));
-        b2 = (-1.0 * B2) / (4.0 * b0);
+        m = _matched2(CF, Q);
+        // Vicanek's numerator B matches the DC gain, B(1) = A(1) = P, and
+        // the peak G at w with a zero derivative there. Its coefficients are
+        // close to those of A, 1 + a1 + a2 away from each other at a low CF,
+        // and computed as sums of the old ones they were destroyed in single
+        // precision. The filter is written as y = x + (B - A)/A applied to x,
+        // B - A = d0 + d1*z^-1 + d2*z^-2 with d0 + d1 + d2 = 0, the same
+        // recurrence as B/A, and d0, d2 are computed directly:
+        //   d0 + d2 = (sqrt(B1) - sA1)/2, d0 - d2 = n - fq,
+        // B1 = |B(-1)|^2 = sA1^2 + (G^2 - 1)*An and n^2 = (b0 - b2)^2, with
+        // An = sA1^2 - P^2*(1 - phi)^2/phi^2 and n^2 - fq^2 as products of
+        // positive factors.
+        G21 = G * G - 1.0;
+        dA = 2.0 * m.rho * (4.0 * m.a * m.phi - 2.0 * m.K) / m.phi; // sA1 - P*(1 - phi)/phi
+        An = dA * (m.sA1 + m.P * (1.0 - m.phi) / m.phi);
+        sB1 = sqrt(max(.0, m.sA1 * m.sA1 + G21 * An));
+        T1 = An / (2.0 * (sB1 + m.sA1));
+        s02 = G21 * T1; // d0 + d2
+        mB = .5 * (m.P + sB1);
+        mA = .5 * (m.P + m.sA1);
+        dn2 = G21 * (T1 * (mB + mA) + (2.0 * m.rho * m.K / m.phi) * (m.P / (2.0 * m.phi) + 2.0 * m.rho));
+        n = sqrt(max(.0, m.fq * m.fq + dn2));
+        m02 = dn2 / (n + m.fq); // d0 - d2
+        d0 = .5 * (s02 + m02);
+        d2 = .5 * (s02 - m02);
     };
 
 //----------`(ve.)lowshelf2Matched`---------------------------------------------
 // Vicanek's decramped second-order Butterworth lowshelf filter.
 //
-// ⚠️ **Note:** These filters require **double-precision** support.
+// Accurate in single precision too: its coefficients are computed without
+// cancellation and its recurrence runs on small increments, so that a low
+// `CF` at a high sample rate stays within about 1e-5 of the double-precision
+// output. `G = 1` gives the identity.
 //
 // #### Usage:
 // ```
@@ -1504,59 +1762,34 @@ peaking2Matched(G, CF, Q, x) = biquad(b0, b1, b2, a1, a2, x)
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // lowshelf2Matched_test = os.tosc(330) : ve.lowshelf2Matched(1.5, 500);
 // lowshelf2Matched_slider_test = os.tosc(330)
 //   : ve.lowshelf2Matched(
 //       hslider("lowshelf2Matched:G", 1.5, 0.5, 4, 0.01),
 //       hslider("lowshelf2Matched:CF", 500, 50, 5000, 1)
 //     );
+// lowshelf2Matched_modulated_test = no.noise : ve.lowshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// lowshelf2Matched_low_test = no.noise : ve.lowshelf2Matched(4, 20);
+// lowshelf2Matched_unity_test = no.noise : ve.lowshelf2Matched(1, 500);
 // ```
 //---------------------------------------------------------------------
 declare lowshelf2Matched author "Dario Sanfilippo";
 declare lowshelf2Matched license "MIT";
-lowshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
+lowshelf2Matched(G, CF, x) = G * m.run(x)
     with {
-        safeG = ba.if(G < 1.0, min(1.0 - ma.EPSILON, G), max(1.0 + ma.EPSILON, G));
-        g = 1.0 / safeG;
-        halfPi = ma.PI * .5;
-        f = CF / (ma.SR * .5);
-        f4 = f ^ 4.0;
-        hny = (f4 + g) / (f4 + safeG);
-        f1 = f / sqrt(.160 + 1.543 * f * f);
-        f14 = f1 ^ 4.0;
-        h1 = (f4 + f14 * g) / (f4 + f14 * safeG);
-        phi1 = sin(halfPi * f1) ^ 2.0;
-        f2 = f / sqrt(.947 + 3.806 * f * f);
-        f24 = f2 ^ 4.0;
-        h2 = (f4 + f24 * g) / (f4 + f24 * safeG);
-        phi2 = sin(halfPi * f2) ^ 2.0;
-        d1 = (h1 - 1.0) * (1.0 - phi1);
-        c11 = -1.0 * phi1 * d1;
-        c12 = phi1 * phi1 * (hny - h1);
-        d2 = (h2 - 1.0) * (1.0 - phi2);
-        c21 = -1.0 * phi2 * d2;
-        c22 = phi2 * phi2 * (hny - h2);
-        alpha1 = (c22 * d1 - c12 * d2) / (c11 * c22 - c12 * c21);
-        aa1 = (d1 - c11 * alpha1) / c12;
-        bb1 = hny * aa1;
-        aa2 = .25 * (alpha1 - aa1);
-        bb2 = .25 * (alpha1 - bb1);
-        v = .5 * (1.0 + sqrt(aa1));
-        w = .5 * (1.0 + sqrt(bb1));
-        a0 = .5 * (v + sqrt(v * v + aa2));
-        a0Inv = 1.0 / a0;
-        a1 = (1.0 - v) * a0Inv;
-        a2 = -.25 * aa2 * a0Inv * a0Inv;
-        b0Temp = .5 * (w + sqrt(w * w + bb2)) * a0Inv;
-        b1 = safeG * (1.0 - w) * a0Inv;
-        b2 = safeG * (-.25 * bb2 / b0Temp) * a0Inv * a0Inv;
-        b0 = safeG * b0Temp;
+        m = _shelf2Matched(1.0 / G, G, CF);
     };
 
 //----------`(ve.)highshelf2Matched`--------------------------------------------
 // Vicanek's decramped second-order Butterworth highshelf filter.
 //
-// ⚠️ **Note:** These filters require **double-precision** support.
+// Accurate in single precision too: its coefficients are computed without
+// cancellation and its recurrence runs on small increments, so that a low
+// `CF` at a high sample rate stays within about 1e-5 of the double-precision
+// output. `G = 1` gives the identity.
 //
 // #### Usage:
 // ```
@@ -1572,53 +1805,25 @@ lowshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // highshelf2Matched_test = os.tosc(330) : ve.highshelf2Matched(1.5, 1500);
 // highshelf2Matched_slider_test = os.tosc(330)
 //   : ve.highshelf2Matched(
 //       hslider("highshelf2Matched:G", 1.5, 0.5, 4, 0.01),
 //       hslider("highshelf2Matched:CF", 1500, 50, 10000, 1)
 //     );
+// highshelf2Matched_modulated_test = no.noise : ve.highshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highshelf2Matched_low_test = no.noise : ve.highshelf2Matched(0.25, 20);
+// highshelf2Matched_unity_test = no.noise : ve.highshelf2Matched(1, 500);
 // ```
 //---------------------------------------------------------------------
 declare highshelf2Matched author "Dario Sanfilippo";
 declare highshelf2Matched license "MIT";
-highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
+highshelf2Matched(G, CF, x) = m.run(x)
     with {
-        safeG = ba.if(G < 1.0, min(1.0 - ma.EPSILON, G), max(1.0 + ma.EPSILON, G));
-        g = safeG;
-        gInv = 1.0 / g;
-        halfPi = ma.PI * .5;
-        f = CF / (ma.SR * .5);
-        f4 = f ^ 4.0;
-        hny = (f4 + g) / (f4 + gInv);
-        f1 = f / sqrt(.160 + 1.543 * f * f);
-        f14 = f1 ^ 4.0;
-        h1 = (f4 + f14 * g) / (f4 + f14 * gInv);
-        phi1 = sin(halfPi * f1) ^ 2.0;
-        f2 = f / sqrt(.947 + 3.806 * f * f);
-        f24 = f2 ^ 4.0;
-        h2 = (f4 + f24 * g) / (f4 + f24 * gInv);
-        phi2 = sin(halfPi * f2) ^ 2.0;
-        d1 = (h1 - 1.0) * (1.0 - phi1);
-        c11 = -1.0 * phi1 * d1;
-        c12 = phi1 * phi1 * (hny - h1);
-        d2 = (h2 - 1.0) * (1.0 - phi2);
-        c21 = -1.0 * phi2 * d2;
-        c22 = phi2 * phi2 * (hny - h2);
-        alpha1 = (c22 * d1 - c12 * d2) / (c11 * c22 - c12 * c21);
-        aa1 = (d1 - c11 * alpha1) / c12;
-        bb1 = hny * aa1;
-        aa2 = .25 * (alpha1 - aa1);
-        bb2 = .25 * (alpha1 - bb1);
-        v = .5 * (1.0 + sqrt(aa1));
-        w = .5 * (1.0 + sqrt(bb1));
-        a0 = .5 * (v + sqrt(v * v + aa2));
-        a0Inv = 1.0 / a0;
-        a1 = (1.0 - v) * a0Inv;
-        a2 = -.25 * aa2 * a0Inv * a0Inv;
-        b0 = .5 * (w + sqrt(w * w + bb2)) * a0Inv;
-        b1 = (1.0 - w) * a0Inv;
-        b2 = (-.25 * bb2 / b0) * a0Inv * a0Inv;
+        m = _shelf2Matched(G, 1.0 / G, CF);
     };
 
 //=========================================Effects========================================
