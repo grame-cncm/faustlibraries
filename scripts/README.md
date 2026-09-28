@@ -150,7 +150,11 @@ built against the libraries of REV and the table adds the ratio new / base;
 `--new REV` measures REV instead of the working tree, so
 `--base origin/master --new origin/some-branch` measures a pull request without
 checking it out. The test files are those of the new side: a test that only the
-new libraries can compile gets an error on the base side, not a ratio.
+new libraries can compile gets an error on the base side, not a ratio. A test
+file can be named alone (`filters_adaptive_tests.dsp` is looked up in `tests/`);
+a file of the repository is taken from the new side, so that with `--new REV`
+the tests are those of REV; any other file, a program of your own, is taken as
+it is.
 
 - **The measurement** is the "flash" judge of Yann Orlarey's
   [faustcompilerbenchtool](https://github.com/orlarey/faustcompilerbenchtool)

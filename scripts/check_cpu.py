@@ -199,6 +199,31 @@ def test_specs(dsp_files):
     return specs
 
 
+def resolve_dsp(arg, new):
+    """The test file an argument names, taken from the new side.
+
+    A name alone is looked up in tests/ (`filters_adaptive_tests.dsp`). A file
+    of the repository is taken from the new side, so that with --new REV the
+    tests are those of REV, as without file arguments. Any other file (a
+    program of your own, elsewhere) is taken as it is. None when not found.
+    """
+    candidates = [arg, os.path.join("tests", arg)] if not os.path.isabs(arg) else [arg]
+    for c in candidates:
+        path = os.path.abspath(c)
+        rel = os.path.relpath(path, ROOT)
+        if not rel.startswith(".."):
+            # inside the repository: the new side's copy of that file
+            mapped = os.path.join(new.lib_dir, rel)
+            if os.path.exists(mapped):
+                return mapped
+            if os.path.exists(path) and new.lib_dir == ROOT:
+                return path
+            continue
+        if os.path.exists(path):
+            return path
+    return None
+
+
 def default_dsp_files(side):
     """The test files of a side: tests/*.dsp, the tracked ones for the working tree.
 
@@ -449,7 +474,14 @@ def main():
     os.makedirs(args.build_dir, exist_ok=True)
     new = Side("new", args.new, args.build_dir)
     sides = [Side("base", args.base, args.build_dir), new] if args.base else [new]
-    dsp_files = [os.path.abspath(f) for f in args.dsp] or default_dsp_files(new)
+    dsp_files = []
+    for arg in args.dsp:
+        path = resolve_dsp(arg, new)
+        if path is None:
+            where = f" in {new.desc}" if args.new else ""
+            p.error(f"test file not found{where}: {arg} (looked for it as given and in tests/)")
+        dsp_files.append(path)
+    dsp_files = dsp_files or default_dsp_files(new)
     specs = test_specs(dsp_files)
     if args.filter:
         specs = [s for s in specs if re.search(args.filter, s[1])]
@@ -616,8 +648,10 @@ def main():
         crows = [results[(s[1], cfg.name)] for s in specs]
         crows = [r for r in crows if measured(r)]
         if not crows:
-            summaries.append(f"{cfg.name}: no test to report (every build generates the same "
-                             "code on both sides, or none was measured)")
+            same = sum(1 for s in specs if (s[1], cfg.name) in identical)
+            summaries.append(f"{cfg.name}: the {same} tests generate the same code on both sides, "
+                             "nothing to time" if same == len(specs) else
+                             f"{cfg.name}: no test measured")
             continue
         rows += crows
         print(f"\n[{cfg.name}] {cfg.describe(args.double)}")
