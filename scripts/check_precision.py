@@ -34,6 +34,22 @@ entry. Never add an entry to silence a failure you caused.
 `gap` is reported, not checked: a sine input (os.osc) drifts in phase in
 single precision, so most tests exceed any useful sample-level threshold
 without being wrong.
+
+The builds use `faust -single|-double` and `c++ -O2` by default. A precision
+fix can depend on how the code is compiled: the Faust normalizer and a C++
+`-ffast-math` both reassociate floating-point expressions. Two ways to check
+other compilations:
+
+- --faust-options and --cxx-options set the flags of one run, for instance
+  --faust-options=-vec or --cxx-options="-O3 -ffast-math" (with "=", since the
+  value starts with a dash);
+- --matrix runs several named configurations in turn (see CONFIGS below,
+  --matrix all for every one), each against the same baseline, and fails if
+  any of them fails.
+
+Each configuration builds in its own subdirectory of the build directory
+(the default one directly in it), and a build is also redone when its
+compiler command changes.
 """
 
 import argparse
@@ -42,6 +58,7 @@ import glob
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -51,6 +68,14 @@ import numpy as np
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARCH = os.path.join(ROOT, "arch", "precision_arch.cpp")
 DEFAULT_RATES = [44100, 48000, 88200, 96000, 176400, 192000]
+DEFAULT_CXX_OPTIONS = "-O2"
+# Named compilations for --matrix: (Faust options, C++ options).
+CONFIGS = {
+    "default": ("", DEFAULT_CXX_OPTIONS),
+    "fast-math": ("", "-O3 -ffast-math"),
+    "vec": ("-vec", DEFAULT_CXX_OPTIONS),
+    "ocpp": ("-lang ocpp", DEFAULT_CXX_OPTIONS),
+}
 TEST_RE = re.compile(r"^\s*([A-Za-z0-9_]+_test)\s*=", re.M)
 
 
@@ -78,23 +103,50 @@ def newest_source(dsp):
     return max(os.path.getmtime(p) for p in libs + [dsp, ARCH])
 
 
-def build(dsp, name, precision, build_dir, args):
-    exe = os.path.join(build_dir, f"{name}.{precision}")
-    if os.path.exists(exe) and os.path.getmtime(exe) >= newest_source(dsp):
-        return exe, None
+class Config:
+    """One way of compiling the tests: its Faust and C++ options, its build dir."""
+
+    def __init__(self, name, faust_options, cxx_options, build_dir):
+        self.name = name
+        self.faust_options = shlex.split(faust_options)
+        self.cxx_options = shlex.split(cxx_options)
+        self.build_dir = build_dir
+
+    def describe(self):
+        return (f"faust {' '.join(self.faust_options) or '(no option)'}, "
+                f"c++ {' '.join(self.cxx_options)}")
+
+
+def build(dsp, name, precision, cfg, args):
+    exe = os.path.join(cfg.build_dir, f"{name}.{precision}")
     cpp = exe + ".cpp"
-    cmd = [args.faust, f"-{precision}", "-t", "0", "-I", ROOT, "-a", ARCH,
-           "-pn", name, dsp, "-o", cpp]
+    faust_cmd = [args.faust, *cfg.faust_options, f"-{precision}", "-t", "0", "-I", ROOT,
+                 "-a", ARCH, "-pn", name, dsp, "-o", cpp]
+    cxx_cmd = [args.cxx, *cfg.cxx_options, "-std=c++17", cpp, "-o", exe]
+    # The commands are stored next to the build: a build made with other
+    # options is redone, not silently reused.
+    stamp = exe + ".cmd"
+    stamp_text = json.dumps([faust_cmd, cxx_cmd])
+    if (os.path.exists(exe) and os.path.getmtime(exe) >= newest_source(dsp)
+            and os.path.exists(stamp) and open(stamp).read() == stamp_text):
+        return exe, None
     # faust looks for libraries in the current directory before the -I ones:
     # compile from ROOT so that the libraries under test are the ones used.
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
+    r = subprocess.run(faust_cmd, capture_output=True, text=True, cwd=ROOT)
     if r.returncode != 0:
         return None, "faust: " + (r.stderr.strip().splitlines() or ["?"])[-1]
-    r = subprocess.run([args.cxx, "-O2", "-std=c++17", cpp, "-o", exe],
-                       capture_output=True, text=True)
+    r = subprocess.run(cxx_cmd, capture_output=True, text=True)
     if r.returncode != 0:
         return None, "c++: " + (r.stderr.strip().splitlines() or ["?"])[0]
+    with open(stamp, "w") as f:
+        f.write(stamp_text)
     return exe, None
+
+
+def config_dir(faust_options, cxx_options):
+    """Build subdirectory of a non-default compilation, named after its options."""
+    slug = re.sub(r"[^A-Za-z0-9.+-]+", "_", f"{faust_options} {cxx_options}".strip())
+    return "cfg_" + slug.strip("_")
 
 
 def render(exe, sr, frames, path):
@@ -134,12 +186,12 @@ def measure(s, d):
     return m
 
 
-def check_test(spec, args):
+def check_test(spec, cfg, args):
     dsp, name = spec
-    res = {"test": name, "file": os.path.relpath(dsp, ROOT), "rates": {}}
+    res = {"test": name, "file": os.path.relpath(dsp, ROOT), "config": cfg.name, "rates": {}}
     exes = {}
     for precision in ("single", "double"):
-        exe, err = build(dsp, name, precision, args.build_dir, args)
+        exe, err = build(dsp, name, precision, cfg, args)
         if err:
             res["error"] = f"{precision} build: {err}"
             return res
@@ -257,15 +309,25 @@ def main():
                    help="rewrite the baseline from this run (all tests, maintainers only)")
     p.add_argument("--build-dir", default=os.path.join(ROOT, "tests", "build-precision"),
                    help="where the builds are cached; a build is redone when a .lib, its "
-                        "test file or the architecture is newer (default: tests/build-precision)")
+                        "test file or the architecture is newer, or when its compiler "
+                        "command changed (default: tests/build-precision)")
     p.add_argument("--json", help="write every measurement to this file")
     p.add_argument("--faust", default=os.environ.get("FAUST", "faust"),
                    help="Faust compiler (default: $FAUST, else faust)")
     p.add_argument("--cxx", default=os.environ.get("CXX", "c++"),
                    help="C++ compiler (default: $CXX, else c++)")
+    p.add_argument("--faust-options", default="",
+                   help='extra Faust options, e.g. --faust-options=-vec or '
+                        '--faust-options="-lang ocpp" (default: none)')
+    p.add_argument("--cxx-options", default=DEFAULT_CXX_OPTIONS,
+                   help='C++ optimization options, e.g. --cxx-options="-O3 -ffast-math" '
+                        '(default: %(default)s)')
+    p.add_argument("--matrix", metavar="NAMES",
+                   help="run the named configurations in turn, comma-separated, or all: "
+                        + "; ".join(f"{n} = faust {f or '(no option)'}, c++ {c}"
+                                    for n, (f, c) in CONFIGS.items()))
     args = p.parse_args()
     args.rates = [int(r) for r in args.rates.split(",")]
-    os.makedirs(args.build_dir, exist_ok=True)
     baseline = {}
     if os.path.exists(args.baseline):
         with open(args.baseline) as f:
@@ -273,33 +335,68 @@ def main():
     if args.write_baseline and (args.dsp or args.filter):
         p.error("--write-baseline needs a run over all tests")
 
+    custom = args.faust_options or args.cxx_options != DEFAULT_CXX_OPTIONS
+    if args.matrix:
+        if custom:
+            p.error("--matrix and --faust-options/--cxx-options are exclusive")
+        names = list(CONFIGS) if args.matrix == "all" else args.matrix.split(",")
+        unknown = [n for n in names if n not in CONFIGS]
+        if unknown:
+            p.error(f"unknown configuration {', '.join(unknown)} (known: {', '.join(CONFIGS)})")
+        configs = [(n, *CONFIGS[n]) for n in names]
+    elif custom:
+        configs = [("custom", args.faust_options, args.cxx_options)]
+    else:
+        configs = [("default", *CONFIGS["default"])]
+    if args.write_baseline and [c[0] for c in configs] != ["default"]:
+        p.error("--write-baseline needs the default compilation")
+    configs = [Config(n, f, c, args.build_dir if (f, c) == CONFIGS["default"]
+                      else os.path.join(args.build_dir, config_dir(f, c)))
+               for n, f, c in configs]
+    for cfg in configs:
+        os.makedirs(cfg.build_dir, exist_ok=True)
+
     specs = test_specs([os.path.abspath(f) for f in args.dsp] or default_dsp_files())
     if args.filter:
         specs = [s for s in specs if re.search(args.filter, s[1])]
     t0 = time.time()
-    results, failures, stale = [], [], []
-    with cf.ThreadPoolExecutor(max_workers=args.jobs) as pool:
-        futures = {pool.submit(check_test, s, args): s for s in specs}
-        for n, fut in enumerate(cf.as_completed(futures), 1):
-            try:
-                res = fut.result()
-            except Exception as e:  # report it, keep going
-                dsp, name = futures[fut]
-                res = {"test": name, "file": os.path.relpath(dsp, ROOT), "error": repr(e), "rates": {}}
-            res["verdict"], res["reason"] = verdict(res, args, baseline)
-            results.append(res)
-            if res["verdict"] not in ("ok", "expected"):
-                failures.append(res)
-                print(f"[fail] {res['test']} ({res['file']}): {res['verdict']}, {res['reason']}",
-                      flush=True)
-            elif res["verdict"] == "ok":
-                for what in stale_baseline(res, baseline):
-                    stale.append(f"{res['test']}: {what}")
-    results.sort(key=lambda r: r["test"])
+    results, failures, stale, summary = [], [], [], []
+    several = len(configs) > 1
+    for cfg in configs:
+        if several or cfg.name != "default":
+            print(f"[{cfg.name}] {cfg.describe()}", flush=True)
+        tag = f"[{cfg.name}] " if several else ""
+        failed = 0
+        with cf.ThreadPoolExecutor(max_workers=args.jobs) as pool:
+            futures = {pool.submit(check_test, s, cfg, args): s for s in specs}
+            for fut in cf.as_completed(futures):
+                try:
+                    res = fut.result()
+                except Exception as e:  # report it, keep going
+                    dsp, name = futures[fut]
+                    res = {"test": name, "file": os.path.relpath(dsp, ROOT), "config": cfg.name,
+                           "error": repr(e), "rates": {}}
+                res["verdict"], res["reason"] = verdict(res, args, baseline)
+                results.append(res)
+                if res["verdict"] not in ("ok", "expected"):
+                    failures.append(res)
+                    failed += 1
+                    print(f"[fail] {tag}{res['test']} ({res['file']}): {res['verdict']}, "
+                          f"{res['reason']}", flush=True)
+                elif res["verdict"] == "ok" and cfg.name == "default":
+                    # The baseline is measured with the default compilation:
+                    # only that one tells which entries are no longer needed.
+                    for what in stale_baseline(res, baseline):
+                        stale.append(f"{res['test']}: {what}")
+        summary.append(f"{cfg.name}: {failed} failed")
+    results.sort(key=lambda r: (r["test"], r["config"]))
     if args.json:
         with open(args.json, "w") as f:
             json.dump({"rates": args.rates, "seconds": args.seconds,
-                       "threshold": args.threshold, "results": results}, f, indent=1)
+                       "threshold": args.threshold,
+                       "configs": {c.name: {"faust_options": c.faust_options,
+                                            "cxx_options": c.cxx_options} for c in configs},
+                       "results": results}, f, indent=1)
     if args.write_baseline:
         with open(args.baseline, "w") as f:
             json.dump(make_baseline(results, baseline, args), f, indent=1)
@@ -310,7 +407,8 @@ def main():
               f"{os.path.relpath(args.baseline, ROOT)}):")
         for line in sorted(stale):
             print("  " + line)
-    print(f"\n[precision] {len(results)} tests at {', '.join(str(r) for r in args.rates)} Hz "
+    runs = f" x {len(configs)} configurations ({', '.join(summary)})" if several else ""
+    print(f"\n[precision] {len(specs)} tests{runs} at {', '.join(str(r) for r in args.rates)} Hz "
           f"in {time.time() - t0:.0f} s: {len(failures)} failed")
     return 1 if failures and not args.write_baseline else 0
 

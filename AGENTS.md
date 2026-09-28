@@ -131,8 +131,12 @@ Every script behind these targets is described in `scripts/README.md`.
    Prefer `no.noise` to `os.osc` as test input: `os.osc` drifts in phase
    in float. The check uses default control values only: also try the
    controls at their extremes, and check that what should not depend on
-   the rate does not. Procedure and pitfalls: `doc/docs/contributing.md`,
-   section *Precision and sample rate*. Report what was checked in the
+   the rate does not. A fix that relies on a precise evaluation order (a
+   rewrite against cancellation, a workaround of the Faust normalizer) is
+   also checked with other compilations: `make check-precision-matrix`
+   (C++ `-O3 -ffast-math`, Faust `-vec` and `-lang ocpp`). Procedure and
+   pitfalls: `doc/docs/contributing.md`, section *Precision and sample
+   rate*. Report what was checked in the
    pull request.
 
 ## Git history

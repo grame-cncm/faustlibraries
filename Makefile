@@ -6,6 +6,8 @@
 # `make check-precision` - render every test in -single and -double at 44.1 to 192 kHz
 #                     and fail on non-finite output or a float/double level gap
 #                     beyond tests/precision-baseline.json (no reference needed).
+# `make check-precision-matrix` - the same with several compilations in turn: C++ -O2
+#                     and -O3 -ffast-math, Faust -vec and -lang ocpp.
 # `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
@@ -59,7 +61,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision check-precision-matrix checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -120,6 +122,9 @@ check-vec: ## Run all regression tests with Faust's vectorized code generator
 
 check-precision: ## Check every test in float and double at 44.1-192 kHz against tests/precision-baseline.json
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) $(PRECISION_ARGS)
+
+check-precision-matrix: ## check-precision with C++ -O2 and -O3 -ffast-math, Faust -vec and -lang ocpp in turn
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) --matrix all $(PRECISION_ARGS)
 
 # Build a single output and immediately compare with its reference
 $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)

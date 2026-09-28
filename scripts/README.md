@@ -87,7 +87,9 @@ files match, 1 otherwise.
 
 ```
 scripts/check_precision.py [TEST.dsp ...] [-k REGEX] [-j JOBS] [--json FILE]
+                           [--faust-options=OPTS] [--cxx-options=OPTS] [--matrix NAMES|all]
 make check-precision [PRECISION_ARGS="..."]
+make check-precision-matrix [PRECISION_ARGS="..."]
 ```
 
 `make check` runs in double precision at 48 kHz only. This script compiles every
@@ -106,8 +108,20 @@ the last bits of a float result vary between compilers.
 - Select tests with file arguments (`tests/vaeffects_tests.dsp`) or `-k REGEX`
   on test names.
 - Builds are cached in `tests/build-precision/` and redone when a `.lib`, the
-  test file or the architecture is newer. The whole suite takes about ten
-  minutes on ten cores when everything is rebuilt, one minute otherwise.
+  test file or the architecture is newer, or when the compiler command
+  changed. The whole suite takes about ten minutes on ten cores when
+  everything is rebuilt, one minute otherwise.
+- The builds use `faust -single|-double` and `c++ -O2`. A precision fix can
+  depend on the compilation, since the Faust normalizer and a C++
+  `-ffast-math` both reassociate floating-point expressions:
+  `--faust-options=-vec` or `--cxx-options="-O3 -ffast-math"` change the
+  flags of a run (with `=`, the value starting with a dash), and
+  `--matrix all` (`make check-precision-matrix`) runs the named
+  configurations in turn: `default` (`-O2`), `fast-math` (`-O3 -ffast-math`),
+  `vec` (Faust `-vec`) and `ocpp` (Faust `-lang ocpp`). They are checked
+  against the same baseline, each builds in its own subdirectory of the build
+  directory, and the run fails if any of them fails. Unneeded baseline entries
+  are reported from the `default` configuration only.
 - `--json FILE` writes every measurement (per test and rate: finite, peak, gap,
   level, growth).
 - `--write-baseline` rewrites the baseline from a run over all tests; it is for

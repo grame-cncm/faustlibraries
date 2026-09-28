@@ -332,6 +332,14 @@ make check-precision PRECISION_ARGS="tests/vaeffects_tests.dsp"
 make check-precision PRECISION_ARGS="-k klonCentaur_test"
 ```
 
+The builds use `faust -single|-double` and `c++ -O2`. A precision fix can depend on how the code is compiled: the Faust normalizer and a C++ `-ffast-math` both reassociate floating-point expressions, and can undo a rewrite that avoided a cancellation. When a change relies on a precise evaluation order, check it with other compilations too. `make check-precision-matrix` runs the check with C++ `-O2` and `-O3 -ffast-math`, then with Faust `-vec` and `-lang ocpp`, against the same baseline; single options are also available:
+
+```bash
+make check-precision-matrix PRECISION_ARGS="tests/vaeffects_tests.dsp"
+make check-precision PRECISION_ARGS='-k Matched --cxx-options="-O3 -ffast-math"'
+make check-precision PRECISION_ARGS="-k Matched --faust-options=-vec"
+```
+
 `make check-precision` renders each test as written, at its default control values. The points below go further; check them by hand for new code, with the controls at their extremes and with the input levels the function is meant for:
 
 - **Stability.** At every rate and in both precisions the output must stay finite and bounded, with the controls at their extremes and with the input levels the function is meant for.
