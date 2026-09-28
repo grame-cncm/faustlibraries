@@ -2248,35 +2248,62 @@ with {
 // * `b2`: analog numerator coefficient of `s^2`
 // * `b1`: analog numerator coefficient of `s`
 // * `b0`: analog numerator constant term
-// * `a3`: analog denominator coefficient of `s^3`
+// * `a3`: analog denominator coefficient of `s^3` (nonzero: for a
+//   second-order section, use `tf2s`)
 // * `a2`: analog denominator coefficient of `s^2`
 // * `a1`: analog denominator coefficient of `s`
 // * `a0`: analog denominator constant term
 //
+// #### Method
+//
+// The bilinear transform is trapezoidal integration, so the analog section
+// is realized with three trapezoidal integrators (`g = T/2`), in transposed
+// canonical form: `a3*y = b3*x + q2`, `q2 = int(b2*x - a2*y + q1)`,
+// `q1 = int(b1*x - a1*y + q0)`, `q0 = int(b0*x - a0*y)`, with the delay-free
+// loop solved in closed form. The transfer function is the same as that of
+// a third-order direct form with `c = 2*SR`, but the coefficients enter as
+// they are rather than as sums of `a_k*c^k`, so the poles stay accurate in
+// single precision when they are close to z = 1 (cutoffs low relative to
+// the sample rate), where the direct form's become non-finite (a 20 Hz
+// Butterworth section at 44.1 kHz, for example: issue #263). The integrators
+// act on `s/w`, where `w = max(|a2/a3|, sqrt(|a1/a3|), cbrt(|a0/a3|))` is a
+// frequency scale of the denominator (its largest pole magnitude lies
+// between `w/3` and `2*w`), so that every state stays at the output level:
+// when the coefficients jump (a cutoff switching between 50 Hz and 5 kHz),
+// the output stays at the level of `lowpass(3, fc)`'s, where an unnormalized
+// realization peaks thousands of times higher.
+//
 // #### Test
 // ```
 // fi = library("filters.lib");
+// ma = library("maths.lib");
+// no = library("noises.lib");
 // os = library("oscillators.lib");
 // src = os.tosc(440);
 // tf3slf_test = src : fi.tf3slf(0, 0, 0, 1, 1, 2, 2, 1);
+// tf3slf_lp20_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*20; };
+// tf3slf_hp20_test = no.noise : fi.tf3slf(1, 0, 0, 0, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*20; };
+// tf3slf_lp1k_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*1000; };
 // ```
 //----------------------------------------------
 declare tf3slf author "Julius O. Smith III";
 declare tf3slf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf3slf license "LicenseRef-STK-4.3";
-tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
-  c   = 2.0 * ma.SR; // bilinear-transform scale-factor ("lf" case)
-  csq = c*c;
-  cc  = csq*c;
-  // Thank you maxima:
-  b3d = (b3*c^3-b2*c^2+b1*c-b0)/d;
-  b2d = (-3*b3*c^3+b2*c^2+b1*c-3*b0)/d;
-  b1d = (3*b3*c^3+b2*c^2-b1*c-3*b0)/d;
-  b0d = (-b3*c^3-b2*c^2-b1*c-b0)/d;
-  a3d = (a3*c^3-a2*c^2+a1*c-a0)/d;
-  a2d = (-3*a3*c^3+a2*c^2+a1*c-3*a0)/d;
-  a1d = (3*a3*c^3+a2*c^2-a1*c-3*a0)/d;
-  d = (-a3*c^3-a2*c^2-a1*c-a0);
+tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tick ~ (_,_,_) : !,!,!,_
+with {
+  // frequency scale of the denominator: its largest pole magnitude is between w/3 and 2*w
+  w  = max(abs(a2/a3), max(sqrt(abs(a1/a3)), pow(abs(a0/a3), 1.0/3)));
+  g  = w*0.5/ma.SR; // trapezoidal integrators of s/w = bilinear transform with c = 2*SR
+  w2 = w*w;
+  w3 = w2*w;
+  tick(s2, s1, s0, x) = 2*q2 - s2, 2*q1 - s1, 2*q0 - s0, y
+  with {
+    y  = (x*(b3 + g*(b2/w + g*(b1/w2 + g*b0/w3))) + s2 + g*(s1 + g*s0))
+       / (a3 + g*(a2/w + g*(a1/w2 + g*a0/w3)));
+    q0 = g*(b0/w3*x - a0/w3*y) + s0;
+    q1 = g*(b1/w2*x - a1/w2*y + q0) + s1;
+    q2 = g*(b2/w*x - a2/w*y + q1) + s2;
+  };
 };
 
 //-----------------------------`(fi.)tf1s`--------------------------------
