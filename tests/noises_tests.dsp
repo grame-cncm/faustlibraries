@@ -49,3 +49,13 @@ pink_noise_m_test = no.pink_noise_m;
 simplex2_test = no.simplex2(12345, os.lf_sawpos(1)*10, 0.5);
 simplex1_test = no.simplex1(12345, os.lf_sawpos(1)*10);
 simplex1_lf_test = no.simplex1_lf(12345, 4.07);
+
+sample_pmf_test = no.sample_pmf((no.noise + 1)/2, (1, 2, 3), (0.5, 0.2, 0.3));
+
+markov_step_test = no.markov_step((0.1, 0.9, 0.9, 0.1), (no.noise + 1)/2, 1);
+markov_chain_test = no.markov_chain(P, (no.noise + 1)/2, ba.pulse(48))
+with {
+  P = (0, 1, 0,
+       0, 0.5, 0.5,
+       0.8, 0, 0.2);
+};

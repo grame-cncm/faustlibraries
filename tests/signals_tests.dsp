@@ -70,3 +70,10 @@ bprod_test = (
     hslider("bprod:x0", 0.5, 0, 2, 0.01),
     hslider("bprod:x1", 0.8, 0, 2, 0.01)
 ) : si.bprod(2, _);
+
+cumsum_test = (0.1, 0.2, 0.3, 0.4) : si.cumsum(4);
+
+normalizeL1_test = (0.1, -0.2, 0.4) : si.normalizeL1(3);
+normalizeL2_test = (0.1, -0.2, 0.4) : si.normalizeL2(3);
+
+softmax_test = (-0.1, 0.2, 0.3, -0.2) : si.softmax(4, 0.5);
