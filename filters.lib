@@ -2048,12 +2048,11 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 //========================================================================================
 
 //-------------------------`(fi.)tf2s`, `(fi.)tf2snp`--------------------------------
-// Second-order direct-form digital filter,
+// Second-order digital filter,
 // specified by ANALOG transfer-function polynomials B(s)/A(s),
 // and a frequency-scaling parameter. Digitization via the
 // bilinear transform is built in. `tf2snp` computes the same filter as a
-// protected normalized ladder, which stays accurate in single precision when
-// `w1` is small relative to the sample rate. The analog transfer function is:
+// protected normalized ladder. The analog transfer function is:
 //
 // ```
 //         b2 s^2 + b1 s + b0
@@ -2093,7 +2092,25 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 //
 // #### Method
 //
-// Bilinear transform scaled for exact mapping of w1.
+// Bilinear transform scaled for exact mapping of w1. `tf2s` realizes it
+// with two trapezoidal integrators (the bilinear transform is trapezoidal
+// integration) of gain `tan(w1*T/2)`, in controllable canonical form: the
+// integrators compute `V = X/A(s)` and its derivative, the delay-free loop
+// is solved in closed form for `u = s^2*V`, and the output taps
+// `y = b2*u + b1*s*V + b0*V` follow, as in the direct form (poles first,
+// numerator last: a gain common to the `b`s, such as `resonbp`'s, multiplies
+// the output exactly, even when it varies). The transfer function is the
+// same as that of the direct-form biquad, but the poles stay accurate in
+// single precision when `w1` is small relative to the sample rate, where
+// the direct form's cluster near z = 1 and lose their digits (a 20 Hz
+// Butterworth lowpass had a 16 % RMS error at 192 kHz, and a 5 Hz one
+// diverged: issue #263). Near Nyquist its errors stay close to the direct
+// form's: at 44.1 kHz with `w1` at 21 kHz, an RMS error of 1.9e-6 instead of
+// 9.5e-7, and a magnitude-response error of 3e-4 dB instead of 5e-3 dB.
+// The integrators act on `s/w`, where `w = max(|a1|, sqrt(|a0|))` is
+// a frequency scale of the denominator, so that every state stays at the
+// output level when the coefficients change: `a1` and `a0` must not both
+// be zero.
 //
 // #### Test
 // ```
@@ -2103,6 +2120,9 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 // no = library("noises.lib");
 // src = os.tosc(440);
 // tf2s_test = src : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+// tf2s_lp20_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
+// tf2s_lp5_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*5);
+// tf2s_notch50_test = no.noise : fi.tf2s(1, 0, 1, 0.1, 1, 2*ma.PI*50);
 // tf2snp_test = src : fi.tf2snp(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
 // tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
 // tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
@@ -2115,16 +2135,19 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 declare tf2s author "Julius O. Smith III";
 declare tf2s copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf2s license "LicenseRef-STK-4.3";
-tf2s(b2,b1,b0,a1,a0,w1) = tf2(b0d,b1d,b2d,a1d,a2d)
+tf2s(b2,b1,b0,a1,a0,w1) = tick ~ (_,_) : !,!,_
 with {
-  c   = 1/tan(w1*0.5/ma.SR); // bilinear-transform scale-factor
-  csq = c*c;
-  d   = a0 + a1 * c + csq;
-  b0d = (b0 + b1 * c + b2 * csq)/d;
-  b1d = 2 * (b0 - b2 * csq)/d;
-  b2d = (b0 - b1 * c + b2 * csq)/d;
-  a1d = 2 * (a0 - csq)/d;
-  a2d = (a0 - a1*c + csq)/d;
+  w  = max(abs(a1), sqrt(abs(a0))); // frequency scale of the denominator
+  w2 = w*w;
+  g  = w*tan(w1*0.5/ma.SR); // trapezoidal integrators of s/w, prewarped at w1
+  // states: integrators of u = (s/w)^2*V and (s/w)*V, with V = X/A(s)
+  tick(s1, s0, x) = 2*v1 - s1, 2*v0 - s0, y
+  with {
+    u  = (x - a1/w*s1 - a0/w2*(g*s1 + s0))/(1 + g*(a1/w + g*a0/w2));
+    v1 = g*u + s1;
+    v0 = g*v1 + s0;
+    y  = b2*u + b1/w*v1 + b0/w2*v0;
+  };
 };
 
 // tf2snp = tf2s but using a protected normalized ladder filter for tf2.
@@ -2137,7 +2160,7 @@ with {
 // the digital coefficients over D = a0*t^2 + a1*t + 1. The ladder itself still
 // needs 1+s1 = 2*a0*t^2/(1+a0*t^2) to be representable next to 1: in single
 // precision that holds while a0*t^2 is well above ma.EPSILON (for a0 = 1, down to
-// about 20 Hz at 192 kHz). For lower w1/ma.SR, fi.svf keeps its accuracy.
+// about 20 Hz at 192 kHz). For lower w1/ma.SR, tf2s keeps its accuracy.
 tf2snp(b2,b1,b0,a1,a0,w1) = _allpassnnltc(2,(s1,s2),(c1,c2)) : sum(i,3,*(tghr(i)))
 with {
   smax = 1.0-ma.EPSILON; // maximum reflection-coefficient magnitude allowed, as in tf2np
