@@ -7,7 +7,7 @@ filters used in audio and signal processing. It includes low-pass, high-pass,
 band-pass, allpass, shelving, equalizer, and crossover filters, as well as advanced
 analog and digital filter design sections for both educational and production use.
 
-The Filters library is organized into 24 sections:
+The Filters library is organized into 25 sections:
 
 * [Basic Filters](#basic-filters)
 * [Comb Filters](#comb-filters)
@@ -16,6 +16,7 @@ The Filters library is organized into 24 sections:
 * [Ladder/Lattice Digital Filters](#ladderlattice-digital-filters)
 * [Useful Special Cases](#useful-special-cases)
 * [Ladder/Lattice Allpass Filters](#ladderlattice-allpass-filters)
+* [Clipping-Prevention Allpass Filters](#clipping-prevention-allpass-filters)
 * [Digital Filter Sections Specified as Analog Filter Sections](#digital-filter-sections-specified-as-analog-filter-sections)
 * [Simple Resonator Filters](#simple-resonator-filters)
 * [Butterworth Lowpass/Highpass Filters](#butterworth-lowpasshighpass-filters)
@@ -1653,6 +1654,84 @@ os = library("oscillators.lib");
 src = os.osc(440);
 allpassn1m_test = src : fi.allpassn1m(3, (0.3, 0.2, 0.1));
 ```
+
+## Clipping-Prevention Allpass Filters
+
+First- and second-order allpass filters whose coefficients may change at
+any time without the output exceeding a threshold. When a coefficient change
+would make the output exceed the threshold, the change is limited for as
+long as needed, and the coefficient then catches up with its target. With
+constant coefficients the output is that of the plain direct-form allpass.
+
+This is a different protection from the energy-preserving time-varying
+allpasses (`fi.allpassnt` and the other normalized-ladder forms): those
+keep the signal energy under control, but their output can still exceed a
+given level after a coefficient change.
+
+#### References
+
+* F. Fontana, S. Pasin, A. Bernardini and S. D'Angelo, "A Clipping Prevention Method for All-Pass Digital Filters with Time-Varying Coefficients", Proc. DAFx26, Cambridge, MA, USA, 2026, pp. 364-371: [https://dafx.de/paper-archive/2026/papers/DAFx26_paper_45.pdf](https://dafx.de/paper-archive/2026/papers/DAFx26_paper_45.pdf)
+
+----
+
+### `(fi.)allpass1_noclip`, `(fi.)allpass2_noclip`
+
+First- and second-order direct-form allpass filters with clipping prevention
+(Fontana et al., DAFx26, Algorithms 1 and 2). At each sample the filter
+computes the output it would give without the coefficient change, and
+limits the change so that the output stays within [-M, M]. The limiting
+only acts during short transients; afterwards the coefficients reach their
+targets.
+
+`allpass1_noclip` computes y[n] = c (x[n] - y[n-1]) + x[n-1], i.e.
+`fi.tf1(c, 1, c)`. `allpass2_noclip` computes
+y[n] = c0 (x[n] - y[n-2]) + c1 (x[n-1] - y[n-1]) + x[n-2], i.e.
+`fi.tf2(c0, c1, 1, c1, c0)`, and gives each coefficient half of the margin.
+
+The output stays within [-M, M] as long as the input does, and the modified
+coefficients stay stable when the targets are (|c| < 1; |c0| < 1 and
+|c1| < 1 + c0). The limiting also acts after a coefficient change, when the
+filter's own transient would exceed M, and can then hold a coefficient away
+from a constant target. In the second-order case, when limiting each
+coefficient separately (as in the reference) would give an unstable pair, the
+targets are scaled toward 0 instead, which keeps both guarantees. The filter
+starts with the target coefficients. Only the allpass output is bounded: a
+structure that mixes it with its input (a phaser, a Regalia-Mitra equalizer)
+can still exceed M.
+
+#### Usage
+
+```
+_ : allpass1_noclip(M, c) : _
+_ : allpass2_noclip(M, c0, c1) : _
+```
+
+Where:
+
+* `M`: output threshold (e.g. 1)
+* `c`: coefficient of the first-order allpass (target, may change at any time)
+* `c0`, `c1`: coefficients of the second-order allpass (targets, may change
+  at any time)
+
+#### Test
+```
+ba = library("basics.lib");
+fi = library("filters.lib");
+no = library("noises.lib");
+// full-scale noise, coefficients jumping every 24 samples
+allpass1_noclip_test = no.noise : fi.allpass1_noclip(1, c)
+with { c = select2(ba.pulsen(24, 48), 0.99, -0.99); };
+allpass2_noclip_test = no.noise : fi.allpass2_noclip(1, c0, c1)
+with {
+  jump = ba.pulsen(24, 48);
+  c0 = select2(jump, 0.98, -0.98);
+  c1 = select2(jump, -1.96, 0.01);
+};
+```
+
+#### References
+
+* F. Fontana, S. Pasin, A. Bernardini and S. D'Angelo, "A Clipping Prevention Method for All-Pass Digital Filters with Time-Varying Coefficients", Proc. DAFx26, Cambridge, MA, USA, 2026, pp. 364-371: [https://dafx.de/paper-archive/2026/papers/DAFx26_paper_45.pdf](https://dafx.de/paper-archive/2026/papers/DAFx26_paper_45.pdf)
 
 ## Digital Filter Sections Specified as Analog Filter Sections
 

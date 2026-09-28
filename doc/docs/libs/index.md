@@ -436,6 +436,7 @@
 [(fi.)allpassnn](filters.md#fiallpassnn)
 [(fi.)allpassnkl](filters.md#fiallpassnkl)
 [(fi.)allpassn1m](filters.md#fiallpassn1m)
+[(fi.)allpass1_noclip, (fi.)allpass2_noclip](filters.md#fiallpass1_noclip,-fiallpass2_noclip)
 [(fi.)tf2s, (fi.)tf2snp](filters.md#fitf2s,-fitf2snp)
 [(fi.)tf1snp](filters.md#fitf1snp)
 [(fi.)tf3slf](filters.md#fitf3slf)
