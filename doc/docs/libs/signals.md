@@ -705,3 +705,86 @@ Example:
 // Add 8000 consecutive inputs (in pairs) and multiply the results
 process = si.bprod(4000, +);
 ```
+
+----
+
+### `(si.)cumsum`
+
+Cumulative sum of `N` signals: output `k` is the sum of inputs `0` to `k`.
+The inputs need not sum to 1; for a cumulative distribution, normalize them
+first (`si.normalizeL1`).
+
+#### Usage
+
+```
+si.bus(N) : cumsum(N) : si.bus(N)
+```
+
+Where:
+
+* `N`: number of signals (int, known at compile time, at least 1)
+
+#### Test
+```
+si = library("signals.lib");
+cumsum_test = (0.1, 0.2, 0.3, 0.4) : si.cumsum(4);
+```
+
+----
+
+### `(si.)normalizeL1`, `(si.)normalizeL2`
+
+Scale `N` signals by a common factor so that their L1 norm (sum of absolute
+values, `normalizeL1`) or L2 norm (square root of the sum of squares,
+`normalizeL2`) is 1. For non-negative inputs, `normalizeL1` turns weights into
+probabilities; `normalizeL2` turns gains into equal-power gains. The output is
+not finite when all the inputs are 0.
+
+#### Usage
+
+```
+si.bus(N) : normalizeL1(N) : si.bus(N)
+si.bus(N) : normalizeL2(N) : si.bus(N)
+```
+
+Where:
+
+* `N`: number of signals (int, known at compile time)
+
+#### Test
+```
+si = library("signals.lib");
+normalizeL1_test = (0.1, -0.2, 0.4) : si.normalizeL1(3);
+normalizeL2_test = (0.1, -0.2, 0.4) : si.normalizeL2(3);
+```
+
+----
+
+### `(si.)softmax`
+
+Softmax of `N` signals: `exp(x_k/temp)` normalized to sum to 1, which turns
+arbitrary scores (logits) into probabilities. A high temperature flattens the
+distribution toward uniform; a low one sharpens it toward the largest input.
+The maximum is subtracted before `exp`, so the output is finite for any
+finite input.
+
+#### Usage
+
+```
+si.bus(N) : softmax(N, temp) : si.bus(N)
+```
+
+Where:
+
+* `N`: number of signals (int, known at compile time)
+* `temp`: temperature, greater than 0
+
+#### Test
+```
+si = library("signals.lib");
+softmax_test = (-0.1, 0.2, 0.3, -0.2) : si.softmax(4, 0.5);
+```
+
+#### References
+
+* [https://en.wikipedia.org/wiki/Softmax_function](https://en.wikipedia.org/wiki/Softmax_function)
