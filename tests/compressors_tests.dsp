@@ -88,6 +88,7 @@ xfer_ott_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
 xfer_ott_slow_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
    : co.xfer_ott(0.5, 2.8, 3, -3, 1.5, 0.5, 0.8, 1.2, 1, 1, 0, -2, 0, 1, 0, 0, 0, 1);
 
-xfer_ott_burst_test = (os.osc(220)*0.3*os.lf_squarewavepos(3),
-                       os.osc(3000)*0.03*(1 - os.lf_squarewavepos(3)))
-   : co.xfer_ott(1, 2.8, 0, 0, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+// 3 Hz bursts, gated by a sample counter so that float and double switch together
+xfer_ott_burst_test = (os.osc(220)*0.3*g, os.osc(3000)*0.03*(1 - g))
+   : co.xfer_ott(1, 2.8, 0, 0, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+with { g = (ba.time % int(ma.SR / 3)) < int(ma.SR / 6); };
