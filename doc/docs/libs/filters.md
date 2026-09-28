@@ -2754,6 +2754,7 @@ ma = library("maths.lib");
 src = os.tosc(440);
 bandpass_test = src : fi.bandpass(2, 500, 1500);
 bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);
+bandpass_narrowlow_test = no.noise : fi.bandpass(2, 20, 22);
 bandpass_slider_test = no.noise : fi.bandpass(2, hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
 bandpass_modulated_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 bandpass_jump_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fl = 20*pow(250, sq); };
@@ -3967,6 +3968,20 @@ Where:
 * `Q`: quality factor
 * `gain`: gain in dB (`bell`, `ls` and `hs` only)
 
+#### Method
+
+Andrew Simper's trapezoidal state-variable filter: the bilinear transform
+of the analog state-variable filter, prewarped at `freq`, whose outputs
+are mixed into the nine responses. The delay-free loop is solved for the
+highpass first, so that each state is updated by adding a small
+increment. Solving it for the bandpass first, as in Simper's listings,
+multiplies a state by `1/(1 + g*(g+k))`, close to 1 at a low cutoff, and
+loses more than two digits of the damping in single precision: a 20 Hz
+lowpass with `Q` = 10 at 192 kHz was 8.8e-4 off its double-precision
+output, and is now 3.7e-6 off. See the section
+[Digital Filter Sections Specified as Analog Filter Sections](#digital-filter-sections-specified-as-analog-filter-sections)
+and [https://ccrma.stanford.edu/~jos/svf/Numerical_Precision_Low_Corner.html](https://ccrma.stanford.edu/~jos/svf/Numerical_Precision_Low_Corner.html).
+
 #### Test
 ```
 fi = library("filters.lib");
@@ -3976,6 +3991,8 @@ no = library("noises.lib");
 ma = library("maths.lib");
 sig = os.tosc(440);
 svf_lp_test = fi.svf.lp(1000, 0.707, sig);
+svf_lp_lowfc_test = no.noise : fi.svf.lp(5, 10);
+svf_bp_lowfc_test = no.noise : fi.svf.bp(20, 30);
 svf_slider_test = no.noise : fi.svf.bell(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), hslider("gain", 6, -24, 24, 0.1));
 svf_modulated_test = no.noise : fi.svf.lp(20*pow(250, tri), 0.707) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 svf_jump_test = no.noise : fi.svf.lp(20*pow(250, sq), 0.707) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
