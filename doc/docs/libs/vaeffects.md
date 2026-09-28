@@ -161,7 +161,7 @@ moogLadder_jump_test = no.noise : ve.moogLadder(0.8*sq, 20) with { P = int(ma.SR
 #### References
 
 * [Zavalishin 2012] (revision 2.1.2, February 2020)
-* [https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf](https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf)
+* [https://www.discodsp.net/VAFilterDesign_2.1.2.pdf](https://www.discodsp.net/VAFilterDesign_2.1.2.pdf)
 * Lorenzo Della Cioppa's correction to Pirkle's implementation: [https://www.kvraudio.com/forum/viewtopic.php?f=33<https://www.kvraudio.com/forum/viewtopic.php?f=33&t=571909>t=571909](https://www.kvraudio.com/forum/viewtopic.php?f=33<https://www.kvraudio.com/forum/viewtopic.php?f=33&t=571909>t=571909)
 
 ----
@@ -214,7 +214,7 @@ peak corresponds exactly to that set via the Q-param.
 #### References
 
 * [Zavalishin 2012] (revision 2.1.2, February 2020)
-* [https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf](https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.2.pdf)
+* [https://www.discodsp.net/VAFilterDesign_2.1.2.pdf](https://www.discodsp.net/VAFilterDesign_2.1.2.pdf)
 
 ----
 
@@ -597,7 +597,7 @@ state-variable filters capable of LPF, HPF, and BPF.
 #### Resources:
 
 * Vadim Zavalishin (2018) "The Art of VA Filter Design", v2.1.0
-* [https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.0.pdf](https://www.native-instruments.com/fileadmin/ni_media/downloads/pdf/VAFilterDesign_2.1.0.pdf)
+* [https://www.discodsp.net/VAFilterDesign_2.1.0.pdf](https://www.discodsp.net/VAFilterDesign_2.1.0.pdf)
 * Will Pirkle (2014) "Resolving Delay-Free Loops in Recursive Filters Using 
 the Modified Härmä Method", AES 137 [http://www.aes.org/e-lib/browse.cfm?elib=17517](http://www.aes.org/e-lib/browse.cfm?elib=17517)
 * Description and diagrams of 1st- and 2nd-order TPT filters: 
