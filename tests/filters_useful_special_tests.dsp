@@ -5,11 +5,17 @@
 
 fi = library("filters.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
 
 src = os.osc(440);
 
 tf2np_test = src : fi.tf2np(0.6, 0.3, 0.2, -0.5, 0.2);
 wgr_test = fi.wgr(440, 0.995, src);
+wgr_slider_test = fi.wgr(hslider("freq", 440, 20, 5000, 1), hslider("r", 0.995, 0.9, 1, 0.001), no.noise);
+wgr_modulated_test = fi.wgr(100*pow(20, tri), 0.995, no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
 nlf2_test = fi.nlf2(440, 0.995, src);
+nlf2_slider_test = fi.nlf2(hslider("freq", 440, 20, 5000, 1), hslider("r", 0.995, 0.9, 1, 0.001), no.noise);
+nlf2_modulated_test = fi.nlf2(100*pow(20, tri), 0.995, no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
 apnl_test = fi.apnl(0.5, -0.5, src);
 itu_r_bs_1770_4_kfilter_test = src : fi.itu_r_bs_1770_4_kfilter;
