@@ -11,6 +11,8 @@
 # `make check-cpu`  - measure the CPU cost of the tests (ns/frame, % of a core), and with
 #                     CPU_ARGS="--base REV" the ratio new / base against the libraries of REV.
 # `make check-cpu-matrix` - the same with C++ -O3 -ffast-math, -O3, and Faust -vec in turn.
+# `make verify-matched` - prove the rewrites of vaeffects.lib's matched filters and check
+#                     their coefficients against Vicanek's formulas at 60 digits.
 # `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses,
 #                     and compile the Usage sections of the libraries changed since HEAD.
 # `make check-usage` - compile the #### Usage section of every documented symbol
@@ -70,11 +72,14 @@ CPU_BUILD_DIR := tests/build-cpu
 # Extra arguments for check-cpu, e.g. CPU_ARGS="--base origin/master tests/filters_resonator_tests.dsp"
 # or CPU_ARGS="--base origin/master -k resonlp" (see scripts/check_cpu.py -h).
 CPU_ARGS ?=
+# Arguments for verify-matched, e.g. VERIFY_ARGS="--old" or VERIFY_ARGS="--quick"
+# (see scripts/verify_matched2.py -h).
+VERIFY_ARGS ?=
 DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix checkdoc check-usage plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix verify-matched checkdoc check-usage plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -144,6 +149,9 @@ check-cpu: ## Measure the CPU cost of the tests; CPU_ARGS="--base REV" adds the 
 
 check-cpu-matrix: ## check-cpu with C++ -O3 -ffast-math, -O3, and Faust -vec in turn
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_cpu.py --build-dir $(CPU_BUILD_DIR) --matrix all $(CPU_ARGS)
+
+verify-matched: ## Prove the rewrites of vaeffects.lib's matched filters, check their coefficients at 60 digits
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/verify_matched2.py $(VERIFY_ARGS)
 
 # Build a single output and immediately compare with its reference
 $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)

@@ -1303,9 +1303,9 @@ biquad(b0, b1, b2, a1, a2, x) = f ~ _
 // precision (non-finite outputs) and up to a few percent in double. Here
 // each one is computed directly from small arguments (q*w, w/2, th/2...)
 // as a product or a sum of positive terms, so that its relative error stays
-// a few ulps whatever CF, Q and SR. The identities used were checked with a
-// computer algebra system, and the resulting coefficients against a
-// 60-digit evaluation of Vicanek's formulas.
+// a few ulps whatever CF, Q and SR. scripts/verify_matched2.py (make
+// verify-matched) proves the identities used and checks the resulting
+// coefficients against a 60-digit evaluation of Vicanek's formulas.
 //
 // Notations: rho = exp(-q*w) is the pole radius (the geometric mean of the
 // two radii when the poles are real), th = sqrt(1 - q^2)*w the pole angle,
@@ -1322,7 +1322,6 @@ biquad(b0, b1, b2, a1, a2, x) = f ~ _
 // - X = (q*w/2)^2, ex = a - X, ew = (w/2)^2 - phi: the deviations of
 //   sinh^2 and sin^2 from their first-order terms;
 // - K = (P - 4*rho*phi)/(4*rho) = a + b - phi, of order w^4;
-// - run(b0, b1, b2, x), the filter itself (see _matchedRun below).
 _matched2(CF, Q) = environment {
     q = 1.0 / (2.0 * Q);
     w = 2.0 * ma.PI * CF * ma.T;
@@ -1381,9 +1380,6 @@ _matched2(CF, Q) = environment {
         ex + sdef(.5 * dm) * sin(sm) + .5 * dm * sdef(sm),
         shdef(.5 * y1) * ma.sinh(.5 * y2) + .5 * y1 * shdef(.5 * y2) + ew);
 
-    // The filter itself, see _matchedRun below.
-    run(b0, b1, b2, x) = _matchedRun(P, fq, b0, b1, b2, x);
-
     // 1 - exp(-y) = 2*t/(1 + t) with t = tanh(y/2): exact, and accurate for
     // a small y where 1 - exp(-y) would cancel.
     om(y) = 2.0 * t / (1.0 + t) with { t = ma.tanh(.5 * y); };
@@ -1436,6 +1432,14 @@ with {
     };
 };
 
+// Internal helper of the matched filters: the filter described by an
+// environment e of coefficients, y = e.k*x + (n0 + n1*z^-1 + n2*z^-2)/A
+// applied to x, with A given by e.P and e.fq (see _matchedRun). Each filter
+// computes its environment in an internal helper (_lowpass2MatchedCoefs,
+// ..., _shelf2Matched), which scripts/verify_matched2.py reads to check the
+// coefficients against a high-precision evaluation of Vicanek's formulas.
+_matched2Filter(e, x) = e.k * x + _matchedRun(e.P, e.fq, e.n0, e.n1, e.n2, x);
+
 // Internal helper shared by lowshelf2Matched and highshelf2Matched.
 // Vicanek's Butterworth shelf is a fit, not a mapping of analog poles: with
 // A and B normalized to A(1) = B(1) = 1, their squared magnitudes are
@@ -1453,8 +1457,8 @@ with {
 //   (a0 - a2)^2 = (1 + al + 2*sqrt(aa1))/4,
 // a sum of positive terms in which the inaccurate al (its linear system
 // cancels, but al stays of order 1) weighs nothing. The environment
-// provides P = 1 + a1 + a2 and fq = 1 - a2 of the normalized A, and
-// run(x) = B/A applied to x (DC gain 1).
+// provides, for _matched2Filter, P = 1 + a1 + a2 and fq = 1 - a2 of the
+// normalized A, and B/A = k + (n0 + n1*z^-1 + n2*z^-2)/A (DC gain 1).
 _shelf2Matched(gn, Gd, CF) = environment {
     halfPi = ma.PI * .5;
     f = CF / (ma.SR * .5);
@@ -1506,7 +1510,10 @@ _shelf2Matched(gn, Gd, CF) = environment {
     rm = omc * ((1.0 + c) * (1.0 + al) + 2.0 * sb) / (4.0 * (nb + c * na)); // r0 - r2
     r0 = .5 * (r1 + rm);
     r2 = .5 * (r1 - rm);
-    run(x) = c * x + _matchedRun(P, fq, r0 / a0, r1 / a0, r2 / a0, x);
+    k = c;
+    n0 = r0 / a0;
+    n1 = r1 / a0;
+    n2 = r2 / a0;
 };
 
 //----------`(ve.)lowpass2Matched`----------------------------------------------
@@ -1546,27 +1553,35 @@ _shelf2Matched(gn, Gd, CF) = environment {
 //---------------------------------------------------------------------
 declare lowpass2Matched author "Dario Sanfilippo";
 declare lowpass2Matched license "MIT";
-lowpass2Matched(CF, Q, x) = m.run(b0, b1, .0, x)
-    with {
-        m = _matched2(CF, Q);
-        // Vicanek's numerator b0 + b1*z^-1 matches the DC gain, b0 + b1 = P,
-        // and the gain Q at w: b0*b1 = (P^2 - Q^2*RA)/(4*phi). Computed as a
-        // difference, P^2 - Q^2*RA cancels down to 1e-8 of its terms at a low
-        // CF; it is written here as rho^2*L/X, with L a sum of terms of the
-        // same order, the leading ones having cancelled in closed form.
-        s = m.P / (4.0 * m.rho); // a + b
-        L = (3.0 * m.a - m.b) * m.K * (2.0 * s - m.K) + m.phi * m.phi * (4.0 * m.a * m.b + m.K)
-            + (m.K - 4.0 * m.ex) * s * s
-            - m.ew * (s * (m.a + m.K) - m.a * m.K + m.phi * (3.0 * m.a - 4.0 * m.a * m.b - m.K));
-        // B1 = (b0 - b1)^2 = P^2 - 4*b0*b1; above w = 1, where Vicanek's
-        // direct form no longer cancels and L would lose its large terms
-        // (q*w beyond 10), B1 = (Q^2*RA - P^2*(1 - phi))/phi.
-        B1 = ba.if(m.w < 1.0,
-            m.P * m.P - 4.0 * m.rho * m.rho * L / (m.X * m.phi),
-            (Q * Q * m.RA - m.P * m.P * (1.0 - m.phi)) / m.phi);
-        b0 = .5 * (m.P + sqrt(max(.0, B1)));
-        b1 = (m.P * m.P - B1) / (4.0 * b0);
-    };
+lowpass2Matched(CF, Q, x) = _matched2Filter(_lowpass2MatchedCoefs(CF, Q), x);
+
+// Internal helper of lowpass2Matched: its coefficients, for _matched2Filter.
+_lowpass2MatchedCoefs(CF, Q) = environment {
+    m = _matched2(CF, Q);
+    P = m.P;
+    fq = m.fq;
+    k = .0;
+    n0 = b0;
+    n1 = b1;
+    n2 = .0;
+    // Vicanek's numerator b0 + b1*z^-1 matches the DC gain, b0 + b1 = P,
+    // and the gain Q at w: b0*b1 = (P^2 - Q^2*RA)/(4*phi). Computed as a
+    // difference, P^2 - Q^2*RA cancels down to 1e-8 of its terms at a low
+    // CF; it is written here as rho^2*L/X, with L a sum of terms of the
+    // same order, the leading ones having cancelled in closed form.
+    s = m.P / (4.0 * m.rho); // a + b
+    L = (3.0 * m.a - m.b) * m.K * (2.0 * s - m.K) + m.phi * m.phi * (4.0 * m.a * m.b + m.K)
+        + (m.K - 4.0 * m.ex) * s * s
+        - m.ew * (s * (m.a + m.K) - m.a * m.K + m.phi * (3.0 * m.a - 4.0 * m.a * m.b - m.K));
+    // B1 = (b0 - b1)^2 = P^2 - 4*b0*b1; above w = 1, where Vicanek's
+    // direct form no longer cancels and L would lose its large terms
+    // (q*w beyond 10), B1 = (Q^2*RA - P^2*(1 - phi))/phi.
+    B1 = ba.if(m.w < 1.0,
+        m.P * m.P - 4.0 * m.rho * m.rho * L / (m.X * m.phi),
+        (Q * Q * m.RA - m.P * m.P * (1.0 - m.phi)) / m.phi);
+    b0 = .5 * (m.P + sqrt(max(.0, B1)));
+    b1 = (m.P * m.P - B1) / (4.0 * b0);
+};
 
 //----------`(ve.)highpass2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant highpass filter.
@@ -1605,15 +1620,23 @@ lowpass2Matched(CF, Q, x) = m.run(b0, b1, .0, x)
 //---------------------------------------------------------------------
 declare highpass2Matched author "Dario Sanfilippo";
 declare highpass2Matched license "MIT";
-highpass2Matched(CF, Q, x) = b0 * x - m.run(.0, b0 * (m.P + m.fq), -1.0 * b0 * m.fq, x)
-    with {
-        m = _matched2(CF, Q);
-        // Vicanek's numerator b0*(1 - z^-1)^2 matches the gain Q at w
-        b0 = Q * sqrt(m.RA) / (4.0 * m.phi);
-        // The recurrence of run() is accurate as long as its state is smooth
-        // (see _matchedRun): the filter is written as b0*(1 - C/A), with the
-        // lowpass C/A, C = A - (1 - z^-1)^2 = (P + fq)*z^-1 - fq*z^-2.
-    };
+highpass2Matched(CF, Q, x) = _matched2Filter(_highpass2MatchedCoefs(CF, Q), x);
+
+// Internal helper of highpass2Matched: its coefficients, for _matched2Filter.
+_highpass2MatchedCoefs(CF, Q) = environment {
+    m = _matched2(CF, Q);
+    P = m.P;
+    fq = m.fq;
+    // Vicanek's numerator b0*(1 - z^-1)^2 matches the gain Q at w
+    b0 = Q * sqrt(m.RA) / (4.0 * m.phi);
+    // The recurrence is accurate as long as its state is smooth (see
+    // _matchedRun): the filter is written as b0*(1 - C/A), with the lowpass
+    // C/A, C = A - (1 - z^-1)^2 = (P + fq)*z^-1 - fq*z^-2.
+    k = b0;
+    n0 = .0;
+    n1 = -1.0 * b0 * (m.P + m.fq);
+    n2 = b0 * m.fq;
+};
 
 //----------`(ve.)bandpass2Matched`----------------------------------------------
 // Vicanek's decramped second-order resonant bandpass filter.
@@ -1652,25 +1675,33 @@ highpass2Matched(CF, Q, x) = b0 * x - m.run(.0, b0 * (m.P + m.fq), -1.0 * b0 * m
 //---------------------------------------------------------------------
 declare bandpass2Matched author "Dario Sanfilippo";
 declare bandpass2Matched license "MIT";
-bandpass2Matched(CF, Q, x) = m.run(b0, b1, b2, x)
-    with {
-        m = _matched2(CF, Q);
-        // Vicanek's numerator, b2 = -(b0 + b1), matches the analog peak:
-        // |B|^2 = RA at w, with a zero derivative there. Written as
-        // B(z) = (1 - z^-1)(b0 - b2*z^-1), with u = b0 - b2 and v = -b0*b2:
-        //   u^2 = (RA + D)/(4*phi), v = D/(16*phi^2),
-        // D = P^2 - 16*a2*phi^2 = 4*rho*K*(P + 4*rho*phi). Computed from
-        // Vicanek's polynomial form, RA and D are differences of terms up to
-        // 16 whose result can be below 1e-9: in double the coefficients were
-        // up to 2 % off (CF = 50 Hz, Q = 10 at 192 kHz), in single precision
-        // the output was non-finite.
-        D = 4.0 * m.rho * m.K * (m.P + 4.0 * m.rho * m.phi);
-        u2 = (m.RA + D) / (4.0 * m.phi);
-        v = D / (16.0 * m.phi * m.phi);
-        b1 = -1.0 * sqrt(max(.0, u2 - 4.0 * v));
-        b0 = .5 * (sqrt(u2) - b1);
-        b2 = -1.0 * (b0 + b1);
-    };
+bandpass2Matched(CF, Q, x) = _matched2Filter(_bandpass2MatchedCoefs(CF, Q), x);
+
+// Internal helper of bandpass2Matched: its coefficients, for _matched2Filter.
+_bandpass2MatchedCoefs(CF, Q) = environment {
+    m = _matched2(CF, Q);
+    P = m.P;
+    fq = m.fq;
+    k = .0;
+    n0 = b0;
+    n1 = b1;
+    n2 = b2;
+    // Vicanek's numerator, b2 = -(b0 + b1), matches the analog peak:
+    // |B|^2 = RA at w, with a zero derivative there. Written as
+    // B(z) = (1 - z^-1)(b0 - b2*z^-1), with u = b0 - b2 and v = -b0*b2:
+    //   u^2 = (RA + D)/(4*phi), v = D/(16*phi^2),
+    // D = P^2 - 16*a2*phi^2 = 4*rho*K*(P + 4*rho*phi). Computed from
+    // Vicanek's polynomial form, RA and D are differences of terms up to
+    // 16 whose result can be below 1e-9: in double the coefficients were
+    // up to 2 % off (CF = 50 Hz, Q = 10 at 192 kHz), in single precision
+    // the output was non-finite.
+    D = 4.0 * m.rho * m.K * (m.P + 4.0 * m.rho * m.phi);
+    u2 = (m.RA + D) / (4.0 * m.phi);
+    v = D / (16.0 * m.phi * m.phi);
+    b1 = -1.0 * sqrt(max(.0, u2 - 4.0 * v));
+    b0 = .5 * (sqrt(u2) - b1);
+    b2 = -1.0 * (b0 + b1);
+};
 
 //----------`(ve.)peaking2Matched`----------------------------------------------
 // Vicanek's decramped second-order peaking equalizer.
@@ -1711,34 +1742,42 @@ bandpass2Matched(CF, Q, x) = m.run(b0, b1, b2, x)
 //---------------------------------------------------------------------
 declare peaking2Matched author "Dario Sanfilippo";
 declare peaking2Matched license "MIT";
-peaking2Matched(G, CF, Q, x) = x + m.run(d0, -1.0 * (d0 + d2), d2, x)
-    with {
-        m = _matched2(CF, Q);
-        // Vicanek's numerator B matches the DC gain, B(1) = A(1) = P, and
-        // the peak G at w with a zero derivative there. Its coefficients are
-        // close to those of A, 1 + a1 + a2 away from each other at a low CF,
-        // and computed as sums of the old ones they were destroyed in single
-        // precision. The filter is written as y = x + (B - A)/A applied to x,
-        // B - A = d0 + d1*z^-1 + d2*z^-2 with d0 + d1 + d2 = 0, the same
-        // recurrence as B/A, and d0, d2 are computed directly:
-        //   d0 + d2 = (sqrt(B1) - sA1)/2, d0 - d2 = n - fq,
-        // B1 = |B(-1)|^2 = sA1^2 + (G^2 - 1)*An and n^2 = (b0 - b2)^2, with
-        // An = sA1^2 - P^2*(1 - phi)^2/phi^2 and n^2 - fq^2 as products of
-        // positive factors.
-        G21 = G * G - 1.0;
-        dA = 2.0 * m.rho * (4.0 * m.a * m.phi - 2.0 * m.K) / m.phi; // sA1 - P*(1 - phi)/phi
-        An = dA * (m.sA1 + m.P * (1.0 - m.phi) / m.phi);
-        sB1 = sqrt(max(.0, m.sA1 * m.sA1 + G21 * An));
-        T1 = An / (2.0 * (sB1 + m.sA1));
-        s02 = G21 * T1; // d0 + d2
-        mB = .5 * (m.P + sB1);
-        mA = .5 * (m.P + m.sA1);
-        dn2 = G21 * (T1 * (mB + mA) + (2.0 * m.rho * m.K / m.phi) * (m.P / (2.0 * m.phi) + 2.0 * m.rho));
-        n = sqrt(max(.0, m.fq * m.fq + dn2));
-        m02 = dn2 / (n + m.fq); // d0 - d2
-        d0 = .5 * (s02 + m02);
-        d2 = .5 * (s02 - m02);
-    };
+peaking2Matched(G, CF, Q, x) = _matched2Filter(_peaking2MatchedCoefs(G, CF, Q), x);
+
+// Internal helper of peaking2Matched: its coefficients, for _matched2Filter.
+_peaking2MatchedCoefs(G, CF, Q) = environment {
+    m = _matched2(CF, Q);
+    P = m.P;
+    fq = m.fq;
+    k = 1.0;
+    n0 = d0;
+    n1 = -1.0 * (d0 + d2);
+    n2 = d2;
+    // Vicanek's numerator B matches the DC gain, B(1) = A(1) = P, and
+    // the peak G at w with a zero derivative there. Its coefficients are
+    // close to those of A, 1 + a1 + a2 away from each other at a low CF,
+    // and computed as sums of the old ones they were destroyed in single
+    // precision. The filter is written as y = x + (B - A)/A applied to x,
+    // B - A = d0 + d1*z^-1 + d2*z^-2 with d0 + d1 + d2 = 0, the same
+    // recurrence as B/A, and d0, d2 are computed directly:
+    //   d0 + d2 = (sqrt(B1) - sA1)/2, d0 - d2 = n - fq,
+    // B1 = |B(-1)|^2 = sA1^2 + (G^2 - 1)*An and n^2 = (b0 - b2)^2, with
+    // An = sA1^2 - P^2*(1 - phi)^2/phi^2 and n^2 - fq^2 as products of
+    // positive factors.
+    G21 = G * G - 1.0;
+    dA = 2.0 * m.rho * (4.0 * m.a * m.phi - 2.0 * m.K) / m.phi; // sA1 - P*(1 - phi)/phi
+    An = dA * (m.sA1 + m.P * (1.0 - m.phi) / m.phi);
+    sB1 = sqrt(max(.0, m.sA1 * m.sA1 + G21 * An));
+    T1 = An / (2.0 * (sB1 + m.sA1));
+    s02 = G21 * T1; // d0 + d2
+    mB = .5 * (m.P + sB1);
+    mA = .5 * (m.P + m.sA1);
+    dn2 = G21 * (T1 * (mB + mA) + (2.0 * m.rho * m.K / m.phi) * (m.P / (2.0 * m.phi) + 2.0 * m.rho));
+    n = sqrt(max(.0, m.fq * m.fq + dn2));
+    m02 = dn2 / (n + m.fq); // d0 - d2
+    d0 = .5 * (s02 + m02);
+    d2 = .5 * (s02 - m02);
+};
 
 //----------`(ve.)lowshelf2Matched`---------------------------------------------
 // Vicanek's decramped second-order Butterworth lowshelf filter.
@@ -1778,10 +1817,7 @@ peaking2Matched(G, CF, Q, x) = x + m.run(d0, -1.0 * (d0 + d2), d2, x)
 //---------------------------------------------------------------------
 declare lowshelf2Matched author "Dario Sanfilippo";
 declare lowshelf2Matched license "MIT";
-lowshelf2Matched(G, CF, x) = G * m.run(x)
-    with {
-        m = _shelf2Matched(1.0 / G, G, CF);
-    };
+lowshelf2Matched(G, CF, x) = G * _matched2Filter(_shelf2Matched(1.0 / G, G, CF), x);
 
 //----------`(ve.)highshelf2Matched`--------------------------------------------
 // Vicanek's decramped second-order Butterworth highshelf filter.
@@ -1821,10 +1857,7 @@ lowshelf2Matched(G, CF, x) = G * m.run(x)
 //---------------------------------------------------------------------
 declare highshelf2Matched author "Dario Sanfilippo";
 declare highshelf2Matched license "MIT";
-highshelf2Matched(G, CF, x) = m.run(x)
-    with {
-        m = _shelf2Matched(G, 1.0 / G, CF);
-    };
+highshelf2Matched(G, CF, x) = _matched2Filter(_shelf2Matched(G, 1.0 / G, CF), x);
 
 //=========================================Effects========================================
 //========================================================================================

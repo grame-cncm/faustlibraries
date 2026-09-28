@@ -21,6 +21,7 @@ or later.
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
+| [`verify_matched2.py`](#verify_matched2py) | proves the rewrites of Vicanek's matched filters and checks their coefficients at 60 digits | `make verify-matched` |
 | **Documentation checks** | | |
 | [`checkdoc.py`](#checkdocpy) | documentation and license gate, against a baseline | `make checkdoc` |
 | [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters; measures the io of the export | `make check-usage`, `checkdoc.py` (`--changed`), `build_faust_doc_index.py` (`--measure-io`) |
@@ -43,7 +44,9 @@ are run by `doc/Makefile`.
 
 **Prerequisites**, by use:
 
-- tests: `faust` and a C++17 compiler; `check_precision.py` also needs `numpy`;
+- tests: `faust` and a C++17 compiler; `check_precision.py` also needs `numpy`,
+  and `verify_matched2.py` needs `numpy`, `sympy` and `mpmath`
+  (`pip install sympy mpmath`);
 - `check_usage.py`, and `build_faust_doc_index.py --measure-io` (the
   `make doc-index*` targets): `faust` (`checkdoc.py` skips the Usage check
   without it);
@@ -348,6 +351,39 @@ After `add`, the usual steps of a test change apply:
 - raise the library's version (a PATCH for tests alone) and regenerate its
   page with `make -C doc md`;
 - run `make checkdoc`.
+
+### `verify_matched2.py`
+
+```
+scripts/verify_matched2.py [identities|coefficients] [--quick] [--old] [--json FILE]
+                           [--faust-options=OPTS] [--cxx-options=OPTS]
+make verify-matched [VERIFY_ARGS="..."]
+```
+
+The six matched filters of `vaeffects.lib` (`lowpass2Matched`,
+`highpass2Matched`, `bandpass2Matched`, `peaking2Matched`, `lowshelf2Matched`,
+`highshelf2Matched`) compute Vicanek's coefficients through rewritten formulas
+that avoid cancellation, so that they stay accurate in single precision when the
+poles come close to z = 1. This script backs every claim made about them, and
+fails (exit status 1) if one no longer holds:
+
+- `identities`: the algebraic identities the rewrites rely on, proved with
+  `sympy`, and the trigonometric and hyperbolic ones, evaluated with `mpmath`
+  at 120 digits at random points, where they must agree to 40 digits.
+- `coefficients`: the coefficient environments of the actual Faust code
+  (`_lowpass2MatchedCoefs`, ..., `_shelf2Matched`), compiled in `-single` and
+  `-double` and rendered at the six rates, against Vicanek's original formulas
+  evaluated at 60 digits, over 8 CF (20 Hz to 20 kHz), 9 Q (0.1 to 30) and
+  4 to 9 G. It fails above 2e-5 in float and 1e-8 in double. Each filter is
+  compared in the form that matters when the poles are close to z = 1:
+  `P = 1 + a1 + a2`, `fq = 1 - a2`, and its numerator.
+- `--old` adds the same table for the original code, emulated with `numpy` in
+  float32 and float64. `--quick` runs a small grid.
+  `--faust-options` and `--cxx-options` check other compilations
+  (`--cxx-options="-O3 -ffast-math"`, `--faust-options=-vec`).
+
+Run it after any change to these filters or to `_matched2`, `_shelf2Matched`
+or `_matchedRun`. It takes a few seconds.
 
 ## Documentation checks
 
