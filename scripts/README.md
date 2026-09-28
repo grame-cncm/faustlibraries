@@ -19,6 +19,7 @@ or later.
 | [`extract_tests.sh`](#extract_testssh) | lists the `*_test` definitions of test files | `make reference`, `check`, `bench` |
 | [`floatdiff.py`](#floatdiffpy) | compares a test output with its reference, within a tolerance | `make check` |
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
+| [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | **Documentation checks** | | |
 | [`checkdoc.py`](#checkdocpy) | documentation and license gate, against a baseline | `make checkdoc` |
 | [`audit2.py`](#audit2py) | documentation coverage per library | `checkdoc.py` |
@@ -130,6 +131,86 @@ the last bits of a float result vary between compilers.
 Exit status 0 when every test passes, 1 otherwise. See
 `doc/docs/contributing.md`, section *Precision and sample rate*, and
 `AGENTS.md`, rule 9.
+
+### `check_cpu.py`
+
+```
+scripts/check_cpu.py [TEST.dsp ...] [-k REGEX] [--base REV [--new REV]] [--matrix NAMES|all]
+                     [--rounds N] [--rate SR] [--double] [--json FILE] [--fail-above RATIO]
+make check-cpu [CPU_ARGS="..."]
+make check-cpu-matrix [CPU_ARGS="..."]
+```
+
+Measures what the tests cost: each test is compiled with `arch/cpu_arch.cpp`
+and the table gives the best time per frame (ns) and the share of one core at
+the sample rate (48 kHz by default). With `--base REV`, the same tests are also
+built against the libraries of REV and the table adds the ratio new / base;
+`--new REV` measures REV instead of the working tree, so
+`--base origin/master --new origin/some-branch` measures a pull request without
+checking it out. The test files are those of the new side: a test that only the
+new libraries can compile gets an error on the base side, not a ratio.
+
+- **The measurement** is the "flash" judge of Yann Orlarey's
+  [faustcompilerbenchtool](https://github.com/orlarey/faustcompilerbenchtool)
+  (`flasharch_footer.cpp`, copied with its MIT license into `arch/cpu_arch.cpp`):
+  noise on the inputs, 512-frame blocks, a spin that gets the process onto a
+  performance core before anything is timed, warm-up, and the minimum over
+  repetitions. Buttons are pressed, as in `print_arch.cpp`, so that an
+  instrument test is not timed on silence.
+- **The protocol** around it: builds in parallel, timing strictly sequential;
+  no timing on battery power (macOS, `--allow-battery` to override); a pause
+  after the builds; then each test in turn, over `--rounds` rounds (3) in which
+  its two sides run back to back, in an order that alternates between rounds.
+  Each side keeps the **median** of its rounds, each round being the minimum
+  of one run. The minimum across runs is not robust: each process gets its own
+  core, frequency and memory layout, and an occasional run is faster than all
+  the others (with the minimum, an A/A comparison of identical code measured
+  1.27). The `spread` column, (max - min) / min over the rounds, is the noise a
+  ratio is to be read against; a test whose spread exceeds 5% is re-raced once
+  with as many rounds again (marked `*`), as `fcautotool` does.
+- **The noise floor**, measured by A/A comparisons (the same libraries on both
+  sides) of 61 tests spread over the suite: ratios from 0.98 to 1.02 on a quiet
+  machine, 0.96 to 1.04 on a busy one. Read a ratio within 3%, or within its
+  spread, as no difference.
+- A test that computes nothing per sample (below 0.1 ns/frame: its output is a
+  constant computed at init) gets no ratio.
+- **Non-finite output** is flagged `NaN` next to the time: that time measures
+  NaN arithmetic, not the filter. The check reads the output through volatile
+  accesses, since `-ffast-math` lets the compiler assume that no value is NaN.
+- **The compilation** is by default the one faust2xx scripts use
+  (`faustoptflags`): `faust -single`, `c++ -O3 -ffast-math`, plus
+  `-march=native` except on Apple Silicon. A ratio depends on it:
+  `-ffast-math` lets the C++ compiler turn divisions into multiplications and
+  reassociate sums, which a direct-form filter profits from more than a
+  state-variable one (a `tf2s` rewrite measured 1.44 with it and 1.20 without),
+  and Faust `-vec` can change a ratio more still. `--matrix all`
+  (`make check-cpu-matrix`) runs `fast-math`, `strict` (`-O3`) and `vec`
+  (Faust `-vec`) in turn; `--double`, `--faust-options` and `--cxx-options`
+  set a single compilation.
+- The libraries of a revision are extracted with `git archive` into
+  `tests/build-cpu/src/<commit>/`, once, and every build is cached under
+  `tests/build-cpu/` like those of `check_precision.py`.
+- `--json FILE` writes the identity (machine, compilers with their paths,
+  compilations, rate, revisions) and every measurement, rounds included. The
+  progress is printed, and the JSON file updated, every 30 s; an interrupted
+  run (Ctrl-C, kill) still reports the tests already measured, and its JSON
+  says `"complete": false`.
+- `--fail-above RATIO` exits with 1 if a ratio exceeds RATIO. It is off by
+  default: a slower test is a trade-off to state, not an error.
+
+Times are comparable only within one run: machine, compiler and load all
+change them, so the identity lines are printed first and a pull request quotes
+ratios measured side by side, not two separate runs. Each run takes 0.25 s
+or more (the spin alone is 0.2 s), so a comparison costs 1 to 3 s per test and
+compilation and the whole suite about an hour: select the tests you touched
+and their main callers (`-k`, file arguments).
+
+`make bench` (`faustbench-llvm` on every test, MBytes/s into `tests/bench.log`)
+remains for an overview of the whole suite through the LLVM JIT; it compares
+nothing.
+
+Exit status 0, or 1 with `--fail-above` when a ratio exceeds it. See
+`doc/docs/contributing.md`, section *CPU cost*, and `AGENTS.md`, rule 10.
 
 ## Documentation checks
 

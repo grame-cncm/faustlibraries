@@ -8,6 +8,9 @@
 #                     beyond tests/precision-baseline.json (no reference needed).
 # `make check-precision-matrix` - the same with several compilations in turn: C++ -O2
 #                     and -O3 -ffast-math, Faust -vec and -lang ocpp.
+# `make check-cpu`  - measure the CPU cost of the tests (ns/frame, % of a core), and with
+#                     CPU_ARGS="--base REV" the ratio new / base against the libraries of REV.
+# `make check-cpu-matrix` - the same with C++ -O3 -ffast-math, -O3, and Faust -vec in turn.
 # `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
@@ -57,11 +60,15 @@ PRECISION_BUILD_DIR := tests/build-precision
 # Extra arguments for check-precision, e.g. PRECISION_ARGS="tests/vaeffects_tests.dsp"
 # or PRECISION_ARGS="-k klonCentaur_test" (a regex on test names, see scripts/check_precision.py -h).
 PRECISION_ARGS ?=
+CPU_BUILD_DIR := tests/build-cpu
+# Extra arguments for check-cpu, e.g. CPU_ARGS="--base origin/master tests/filters_resonator_tests.dsp"
+# or CPU_ARGS="--base origin/master -k resonlp" (see scripts/check_cpu.py -h).
+CPU_ARGS ?=
 DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision check-precision-matrix checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -125,6 +132,12 @@ check-precision: ## Check every test in float and double at 44.1-192 kHz against
 
 check-precision-matrix: ## check-precision with C++ -O2 and -O3 -ffast-math, Faust -vec and -lang ocpp in turn
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) --matrix all $(PRECISION_ARGS)
+
+check-cpu: ## Measure the CPU cost of the tests; CPU_ARGS="--base REV" adds the ratio new / base
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_cpu.py --build-dir $(CPU_BUILD_DIR) $(CPU_ARGS)
+
+check-cpu-matrix: ## check-cpu with C++ -O3 -ffast-math, -O3, and Faust -vec in turn
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_cpu.py --build-dir $(CPU_BUILD_DIR) --matrix all $(CPU_ARGS)
 
 # Build a single output and immediately compare with its reference
 $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
@@ -251,7 +264,7 @@ pdf: ## Create the PDF documentation
 	$(MAKE) -C doc pdf
 
 clean: ## Remove build artefacts and generated outputs (keeps references)
-	rm -rf $(BUILD_DIR) $(PRECISION_BUILD_DIR) $(OUTPUT_DIR) $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
+	rm -rf $(BUILD_DIR) $(PRECISION_BUILD_DIR) $(CPU_BUILD_DIR) $(OUTPUT_DIR) $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
 
 distclean: clean ## Additionally remove the stored reference outputs
 	rm -rf $(REFERENCE_DIR)

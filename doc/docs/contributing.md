@@ -311,6 +311,45 @@ Before preparing a pull-request, the new library must be carefully tested:
 - every new function therefore ships with **both** its `#### Test` section and the corresponding `functionName_test` entry in the *tests* folder, and its reference is generated with `make reference` in the same change.
 - finally, `make checkdoc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted.
 - new code must also be checked in single and double precision, from 44.1 to 192 kHz, as described below: `make check` covers neither, `make check-precision` does.
+- a function whose parameters are meant to vary at run time is tested with constant, slider and modulated parameters, as described below: the three run different code.
+
+### Constant, slider and modulated tests
+
+The Faust compiler generates different code for a parameter depending on what it is:
+
+| parameter | example | the coefficients that depend on it are computed |
+|---|---|---|
+| a constant | `fi.resonlp(1000, 2, 1)` | once: folded at compile time, or at init when they depend on `ma.SR` |
+| a control (slider) | `fi.resonlp(hslider("fc", ...), ...)` | once per block, at the start of `compute` |
+| a signal | `fi.resonlp(1000*(1 + 0.5*lfo), ...)` | at every sample, inside the loop |
+
+Precision, stability and CPU cost can differ between the three. A function that is correct with constants can lose precision when its coefficients are computed at run time in float. It can also blow up when they change at every sample, since a recursive structure that is stable for each frozen setting is not necessarily stable when that setting moves. And its cost per sample can double. The harnesses (`make check`, `make check-precision`, `make check-cpu`) render the tests as written, with the controls at their default values: they cannot turn a constant into a control or a signal. The test has to do it.
+
+A function whose parameters are meant to vary at run time therefore has three tests, written first in its `#### Test` section like any other (rule 8 of `AGENTS.md`). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
+
+1. **`functionName_test`, constant parameters.** This is the usual test.
+2. **`functionName_slider_test`, parameters from sliders** (`hslider`, `vslider`, `nentry`), without smoothing, with realistic default values. It checks that the function accepts run-time controls: a parameter that must be a constant makes it fail to compile. It checks the coefficients computed at run time in the program's precision: for `fi.resonlp`, the float/double level gap is 6.4e-5 with sliders against 1.8e-5 with constants. And it checks that they stay at control rate: its cost should match the constant test's. When it is clearly slower, the normalizer has moved part of the coefficient computation into the per-sample loop, which is what the `min(x, ma.MAX)` workarounds in the libraries prevent.
+3. **`functionName_modulated_test`, a parameter modulated at every sample**, over the part of its range where the function is under stress (low cutoffs, high resonance...). It checks the stability and the precision of the time-varying structure, and the cost of computing the coefficients at every sample: 6.32 ns/frame for `fi.resonlp` against 3.48 with constants. A slider followed by `si.smoo` is a signal too, so a `_ui` wrapper that smooths its controls belongs to this case, not the previous one.
+
+Drive the modulation with an integer counter, not with `os.osc` or `os.lf_*`. Those accumulate their phase in the program's precision and drift in float: the precision check then measures the modulator, not the function. With a sine modulator, the level gap of the test below is 9 times larger (4.8e-4) and its sample gap 43 times larger (2.2e-2). `ba.period` counts in integers and gives a triangle that is the same in both precisions:
+
+```
+resonlp_test = no.noise : fi.resonlp(1000, 2, 1);
+resonlp_slider_test = no.noise : fi.resonlp(hslider("fc", 1000, 50, 5000, 1), hslider("Q", 2, 0.5, 20, 0.01), 1);
+resonlp_modulated_test = no.noise : fi.resonlp(fc, 2, 1)
+with {
+  tri = 1 - abs(2*ba.period(4800)/4800 - 1); // 0 to 1 and back in 4800 samples, exact
+  fc = 50*pow(100, tri);                     // exponential sweep from 50 Hz to 5 kHz
+};
+```
+
+To test abrupt changes as well (a cutoff switching between two values, where some realizations leave their states at the wrong level), replace the sweep by `select2(ba.period(9600) < 4800, 50, 5000)`.
+
+Parameters that must be known at compile time (in capital letters by convention: an order, a number of voices or bands, a maximum delay) need neither variant. The three costs can be compared in one run:
+
+```bash
+make check-cpu CPU_ARGS="-k '^resonlp(_slider|_modulated)?_test'"
+```
 
 ### Precision and sample rate
 
@@ -364,6 +403,25 @@ done
 ```
 
 Report in the pull request what was checked and what was found, including any limitation left in the documentation.
+
+### CPU cost
+
+A change that alters the structure of a computation, such as a rewrite against cancellation, a filter realized in another form, or a workaround of the normalizer, also changes what it costs. That cost is a trade-off to state in the pull request, with numbers a reviewer can reproduce. `make check-cpu` measures it on the tests. The `--base REV` argument compares the libraries of the working tree, or of `--new REV`, with those of REV:
+
+```bash
+make check-cpu CPU_ARGS="--base origin/master tests/filters_analog_sections_tests.dsp"
+make check-cpu-matrix CPU_ARGS="--base origin/master -k 'resonlp|vocoder_demo'"
+scripts/check_cpu.py --base origin/master --new origin/some-branch -k tf2s
+```
+
+For each test, the table gives the best time per frame in the two versions, their ratio new / base, the share of one core at 48 kHz, and the spread of the rounds, which is the noise the ratio should be read against. Comparisons of identical code put that noise at about 3%: a ratio within 3%, or within its spread, is no difference. The measurement and the protocol come from Yann Orlarey's [faustcompilerbenchtool](https://github.com/orlarey/faustcompilerbenchtool), and are described in `scripts/README.md`. A time is flagged `NaN` when the output was not finite: that time measures NaN arithmetic, not the code.
+
+- **Measure the tests you touched, and the callers that matter.** A function used inside a bank of filters, such as the 32 bands of `dm.vocoder_demo`, costs its ratio times the number of instances. Select these tests by file or with `-k`. The whole suite takes over an hour.
+- **Measure with more than one compilation.** The default one is what faust2xx scripts use (`c++ -O3 -ffast-math`). A ratio depends on the compilation, and not only the times do. `-ffast-math` turns divisions into multiplications and reassociates sums: a direct-form filter profits from that more than a state-variable one. Faust `-vec` can change a ratio even more. `make check-cpu-matrix` runs `fast-math`, `strict` (`-O3`) and `vec` in turn. Report at least `fast-math` and `strict`.
+- **Measure the three regimes.** A test with constant parameters computes its coefficients once. The `_slider_test` and `_modulated_test` variants (see *Constant, slider and modulated tests* above) measure the cost per block and per sample. A rewrite can be cheap in the first regime and twice as slow in the last one: a state-variable realization of `fi.tf3slf` measured 1.22 times the direct form's cost with constants, and 1.97 times with its cutoff modulated at every sample.
+- **Quote ratios from one run.** Times vary between machines, compilers and runs. The identity lines printed first name the machine, the compilers (with their paths) and the revisions, so include them with the table.
+
+Report the ratios, the compilations, and the absolute cost (% of a core) in the pull request. A slower function is acceptable when what it buys (precision, stability, a correct behavior) is worth it: say so explicitly.
 
 ## Formal certification (experimental, work in progress)
 

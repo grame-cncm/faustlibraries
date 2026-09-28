@@ -13,6 +13,7 @@ make checkdoc    # documentation & license gate - run before every commit
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
+make check-cpu   # CPU cost of the tests; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # regenerate the documentation SVG figures (needs matplotlib)
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
@@ -118,6 +119,14 @@ Every script behind these targets is described in `scripts/README.md`.
    in the documentation and the JSON export, and drifts from them. A fix
    that changes behavior comes with such a test, one whose output the old
    definition gets wrong.
+   A function whose parameters are meant to vary at run time (a cutoff, a
+   frequency, a gain, a delay) also gets a `functionName_slider_test`
+   (parameters from sliders: coefficients computed per block, in the
+   program's precision) and a `functionName_modulated_test` (a parameter
+   modulated at every sample): the three run different code. Drive the
+   modulation with an integer counter (`ba.period`), not `os.osc`, which
+   drifts in float. Details: `doc/docs/contributing.md`, section
+   *Constant, slider and modulated tests*.
 
 9. **Check float and double, from 44.1 to 192 kHz.** `make check` runs
    in double precision at 48 kHz only. `make check-precision` renders
@@ -138,6 +147,19 @@ Every script behind these targets is described in `scripts/README.md`.
    pitfalls: `doc/docs/contributing.md`, section *Precision and sample
    rate*. Report what was checked in the
    pull request.
+
+10. **Measure what a structural change costs.** A change that alters the
+    structure of a computation (a rewrite against cancellation, a filter
+    realized in another form, a normalizer workaround) reports its CPU
+    cost as ratios new / base measured side by side:
+    `make check-cpu-matrix CPU_ARGS="--base origin/master ..."` on the
+    tests you touched and on those of the callers that multiply it (a
+    filter bank, `dm.vocoder_demo`). Report at least the `fast-math` and
+    `strict` compilations, since `-ffast-math` alone can move a ratio from
+    1.2 to 1.44, and the identity lines of the run. Timings from separate
+    runs are not comparable, and a ratio within 3% (or within its
+    spread) is noise. A test time flagged `NaN` measures NaN arithmetic. A slower function can be the right trade-off: say what it
+    buys. Details: `doc/docs/contributing.md`, section *CPU cost*.
 
 ## Git history
 
@@ -171,7 +193,7 @@ changed" depends on it.
   commits have not been pushed. Once they are on `origin`, they are frozen:
   fix forward with a new commit.
 - Do not commit build artifacts even when they sit in the working tree.
-  `.gitignore` covers `site/` but not `tests/reference/`, `tests/output/`,
+  `.gitignore` covers `site/` and `tests/build-cpu/` but not `tests/reference/`, `tests/output/`,
   `tests/build/`, `tests/build-precision/` or the doc index exports (`tests/faust-doc-index.json`,
   `tests/faust-doc/`), so never stage with `git add -A` or `git commit -a` —
   name the files you mean. Naming files explicitly is not enough by
