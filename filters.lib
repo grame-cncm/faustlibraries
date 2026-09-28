@@ -860,6 +860,13 @@ allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : m
 
 
 //========================Direct-Form Digital Filter Sections=============================
+// Filters specified by transfer-function polynomials `B(z)/A(z)`, computed
+// directly from their coefficients. A direct form loses precision when its
+// poles come close to z = 1, that is, for frequencies low relative to the
+// sample rate, and it behaves badly when its coefficients change while it
+// runs. For an analog prototype, prefer the functions of the section
+// [Digital Filter Sections Specified as Analog Filter Sections](#digital-filter-sections-specified-as-analog-filter-sections),
+// which explains why.
 //========================================================================================
 
 // Specified by transfer-function polynomials B(z)/A(z) as in matlab
@@ -2045,6 +2052,87 @@ allpassn1m(n,sv) = _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : cross
 with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 
 //===========Digital Filter Sections Specified as Analog Filter Sections==================
+// The functions of this section take an analog transfer function `B(s)/A(s)`
+// and digitize it with the bilinear transform. How the digital filter is then
+// computed matters as much as its transfer function: two realizations of the
+// same filter can differ by orders of magnitude in single precision, and when
+// their coefficients change. `tf2s` and `tf3slf` use the trapezoidal
+// realization described here, `tf2sb` and `tf1sb` trapezoidal state-variable
+// sections, and `tf2snp` and `tf1snp` protected normalized ladders.
+//
+// #### Why not a direct form
+//
+// Expanding `B(s)/A(s)` into the coefficients of a direct-form difference
+// equation (`tf2`, `iir`) sums terms whose relative sizes span powers of
+// `w*T`, for a cutoff `w` (rad/s) and sampling interval `T`, and the pole
+// positions are encoded in the smallest of them. The poles lie within about
+// `w*T` of z = 1, and rounding the coefficients moves a cluster of `N` poles by
+// about the `N`-th root of the rounding error, so the relative error of the
+// output grows roughly as `eps/(w*T)^N` (`eps` = 6e-8 in single precision).
+// A 20 Hz second-order Butterworth lowpass had a 16 % RMS error in single
+// precision at 192 kHz, and the third-order one was non-finite at 44.1 kHz
+// already (issue #263).
+//
+// The direct form also behaves badly when its coefficients change. Its states
+// are signal values whose scale depends on the cutoff: in `iir`, which applies
+// the poles first, the node `X/A(z)` has a DC gain of about `1/(w*T)^N`. When
+// the cutoff jumps, the same states suddenly stand for a much larger or smaller
+// signal. A resonant lowpass (`Q` = 10) switching between 100 Hz and 5 kHz
+// peaked about 2000 times above its static level, and a 1 kHz resonance
+// whose cutoff swung by 90 % at 500 Hz diverged, in double precision too.
+//
+// #### The trapezoidal (topology-preserving) realization
+//
+// The bilinear transform is exactly what trapezoidal integration gives when it
+// replaces each integrator `1/s` of an analog block diagram (Zavalishin,
+// sections 3.6 to 3.9). So instead of expanding the transfer function, `tf2s`
+// and `tf3slf` compute the analog section itself with trapezoidal integrators,
+// and solve the resulting delay-free loop in closed form. The transfer function
+// is unchanged, but the coefficients enter as they are, and the cutoff only
+// through the integrator gains (proportional to `tan(w1*T/2)` in `tf2s`, and
+// to the cutoff times `T/2` in `tf3slf`): the poles stay accurate in single
+// precision down to the lowest audio frequencies. Three choices matter:
+//
+// * Controllable canonical form. The integrators compute `V = X/A(s)` and its
+//   derivatives, and the numerator comes last, `y = b0*V + b1*s*V + ...`, as in
+//   the direct form. A gain common to the numerator coefficients (the `gain`
+//   of `resonbp`, the band gains of `ve.vocoder`) then still multiplies the
+//   output exactly when it varies. The transposed form, which feeds the
+//   numerator into the integrators, filters such a gain instead (an 11.6 % RMS
+//   difference on a modulated `resonbp`).
+// * The loop solved for the highest state first, `u = s^N*V`, then integrated
+//   down. Solving it for a lower state first, as the usual state-variable
+//   formulation does for its bandpass output, loses up to two digits at low
+//   cutoffs in single precision.
+// * States normalized by a frequency scale `w` of `A(s)`. The integrators act
+//   on `s/w`, so that every state stays at the level of the output whatever
+//   the cutoff, and the cutoff enters only ahead of each integrator, as in an
+//   analog circuit. A cutoff jump is then smoothed by the integrators instead
+//   of rescaling the states (Zavalishin, section 3.11): with the jumps above,
+//   the output stays at its static level, and with the modulation above,
+//   within 1.3 times it.
+//
+// The price is small. With fixed coefficients the trapezoidal realization takes
+// 1.1 to 1.4 times as long as the direct form, and up to twice as long when
+// its coefficients change every sample. With the prewarped gain
+// `tan(w1*T/2)` of `tf2s`, its accuracy near Nyquist stays close to the direct
+// form's (at 44.1 kHz with `w1` at 21 kHz, an RMS error of 1.9e-6 instead of
+// 9.5e-7 in single precision).
+//
+// Two realizations with the same transfer function also differ under smooth
+// modulation, since they discretize different time-varying analog systems
+// (Zavalishin, sections 2.7, 2.16 and 3.11). Which analog topology to follow
+// is part of the design, not a question of accuracy.
+//
+// #### References
+//
+// * Julius O. Smith III, "Digital State-Variable Filters", including the
+//   trapezoidal state-variable filter: <https://ccrma.stanford.edu/~jos/svf/>
+// * Vadim Zavalishin, "The Art of VA Filter Design", revision 2.1.2, 2020:
+//   <https://www.discodsp.net/VAFilterDesign_2.1.2.pdf>
+// * <https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html>
+// * <https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html>
+// * <https://github.com/grame-cncm/faustlibraries/issues/263>
 //========================================================================================
 
 //-------------------------`(fi.)tf2s`, `(fi.)tf2snp`--------------------------------
