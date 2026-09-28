@@ -54,3 +54,13 @@ simplex1_test = no.simplex1(12345, os.lf_sawpos(1)*10);
 simplex1_lf_test = no.simplex1_lf(12345, 4.07);
 simplex1_lf_slider_test = no.simplex1_lf(12345, hslider("simplex1_lf:rate", 4.07, -100, 100, 0.01));
 simplex1_lf_modulated_test = no.simplex1_lf(12345, 20*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+
+sample_pmf_test = no.sample_pmf((no.noise + 1)/2, (1, 2, 3), (0.5, 0.2, 0.3));
+
+markov_step_test = no.markov_step((0.1, 0.9, 0.9, 0.1), (no.noise + 1)/2, 1);
+markov_chain_test = no.markov_chain(P, (no.noise + 1)/2, ba.pulse(48))
+with {
+  P = (0, 1, 0,
+       0, 0.5, 0.5,
+       0.8, 0, 0.2);
+};
