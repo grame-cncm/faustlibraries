@@ -1841,17 +1841,49 @@ Where:
 * `b2`: analog numerator coefficient of `s^2`
 * `b1`: analog numerator coefficient of `s`
 * `b0`: analog numerator constant term
-* `a3`: analog denominator coefficient of `s^3`
+* `a3`: analog denominator coefficient of `s^3` (nonzero: for a
+  second-order section, use `tf2s`)
 * `a2`: analog denominator coefficient of `s^2`
 * `a1`: analog denominator coefficient of `s`
 * `a0`: analog denominator constant term
 
+#### Method
+
+The bilinear transform is trapezoidal integration, so the analog section
+is realized with three trapezoidal integrators (`g = T/2`), in controllable
+canonical form: the integrators compute `V = X/A(s)` and its derivatives,
+the delay-free loop is solved in closed form for the highest one,
+`u = s^3*V`, and the output taps `y = b3*u + b2*s^2*V + b1*s*V + b0*V` follow,
+as in the direct form (poles first, numerator last: a gain common to the
+`b`s multiplies the output exactly, even when it varies). The transfer
+function is the same as that of a third-order direct form with `c = 2*SR`,
+but the coefficients enter as they are rather than as sums of `a_k*c^k`,
+so the poles stay accurate in single precision when they are close to
+z = 1 (cutoffs low relative to the sample rate), where the direct form's
+become non-finite (a 20 Hz Butterworth section at 44.1 kHz, for example:
+issue #263). The integrators act on `s/w`, where
+`w = max(|a2/a3|, sqrt(|a1/a3|), cbrt(|a0/a3|))` is a frequency scale of
+the denominator (its largest pole magnitude lies between `w/3` and `2*w`),
+so that every state stays at the output level: when the coefficients jump
+(a cutoff switching between 50 Hz and 5 kHz), the output stays at the
+level of `lowpass(3, fc)`'s, where an unnormalized realization peaks
+thousands of times higher.
+
 #### Test
 ```
+ba = library("basics.lib");
 fi = library("filters.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 os = library("oscillators.lib");
 src = os.tosc(440);
 tf3slf_test = src : fi.tf3slf(0, 0, 0, 1, 1, 2, 2, 1);
+tf3slf_lp20_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*20; };
+tf3slf_hp20_test = no.noise : fi.tf3slf(1, 0, 0, 0, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*20; };
+tf3slf_lp1k_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*1000; };
+tf3slf_slider_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*hslider("fc", 1000, 20, 20000, 1); };
+tf3slf_modulated_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); w = 2*ma.PI*20*pow(250, tri); };
+tf3slf_jump_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; w = 2*ma.PI*20*pow(250, sq); };
 ```
 
 ----
