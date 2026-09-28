@@ -32,7 +32,13 @@ minimum over repetitions. On top of it, this script:
   ns/frame on both sides: a constant output), whose ratio is noise;
 - prints its progress every 30 s (and updates the --json file then); an
   interrupted run (Ctrl-C, kill) still reports the tests already measured;
-- flags a test whose output is not finite: its time measures NaN handling.
+- flags a test whose output is not finite: its time measures NaN handling;
+- with --changed-only, times only the tests whose generated C++ differs
+  between the two sides (metadata lines aside, such as the library
+  versions): the others run the same code, so their ratio is 1 by
+  construction and timing them measures noise. This makes an A/B over the
+  whole suite affordable: a change of fi.lowpass reaches tests in many
+  libraries, which --changed-only finds without guessing them.
 
 The default compilation is the one users get from faust2xx scripts
 (faustoptflags): `-O3 -ffast-math`, plus `-march=native` except on Apple
@@ -246,6 +252,13 @@ def build(spec, side, cfg, args):
     return exe, None
 
 
+def code_of(exe):
+    """The generated C++ of a build, without the metadata lines (library
+    versions, file names), which differ between sides that compute the same."""
+    with open(exe + ".cpp") as f:
+        return [line for line in f if "m->declare(" not in line]
+
+
 def run_once(exe, args):
     """One timed run of a build: ((best ns/frame, finite), error)."""
     env = dict(os.environ, **FLASH_ENV, FLASH_SR=str(args.rate))
@@ -343,6 +356,8 @@ def main():
     p.add_argument("--build-dir", default=os.path.join(ROOT, "tests", "build-cpu"),
                    help="builds and extracted revisions (default: tests/build-cpu)")
     p.add_argument("--json", help="write the identity and every measurement to this file")
+    p.add_argument("--changed-only", action="store_true",
+                   help="with --base: time only the tests whose generated C++ differs")
     p.add_argument("--fail-above", type=float, metavar="RATIO",
                    help="exit with 1 if a ratio new / base exceeds RATIO")
     p.add_argument("--allow-battery", action="store_true",
@@ -350,6 +365,8 @@ def main():
     args = p.parse_args()
     if args.new and not args.base:
         p.error("--new needs --base")
+    if args.changed_only and not args.base:
+        p.error("--changed-only needs --base")
     if args.rounds < 1:
         p.error("--rounds must be at least 1")
 
@@ -419,6 +436,20 @@ def main():
                 results[(name, cfg.name)][side.label] = {"error": err}
             else:
                 exes[(name, cfg.name, side.label)] = exe
+    # With --changed-only, a test whose two sides generate the same code is
+    # not timed: it is reported as identical and left out of the table.
+    identical = set()
+    if args.changed_only:
+        for s in specs:
+            for cfg in configs:
+                keys = [(s[1], cfg.name, side.label) for side in sides]
+                if all(k in exes for k in keys) and code_of(exes[keys[0]]) == code_of(exes[keys[1]]):
+                    identical.add((s[1], cfg.name))
+                    results[(s[1], cfg.name)]["identical"] = True
+                    for k in keys:
+                        del exes[k]
+        print(f"[cpu] --changed-only: {len(identical)} of {len(specs) * len(configs)} "
+              "test builds generate the same code on both sides, not timed", flush=True)
     print(f"[cpu] {len(specs)} tests x {len(configs)} compilations built in "
           f"{time.time() - t0:.0f} s; timing {args.rounds} rounds", flush=True)
     time.sleep(4)  # thermal pause after the build burst
@@ -464,15 +495,17 @@ def main():
                           f, indent=1)
 
     def measured(row):
-        return any(s.label in row for s in sides)
+        return any(s.label in row for s in sides) and not row.get("identical")
 
     # A kill (SIGTERM) is handled like Ctrl-C: report what was measured.
     signal.signal(signal.SIGTERM, interrupt)
-    total, done, interrupted = len(specs) * len(configs), 0, False
+    total, done, interrupted = len(specs) * len(configs) - len(identical), 0, False
     t1 = last = time.time()
     try:
         for cfg in configs:
             for dsp, name in specs:
+                if (name, cfg.name) in identical:
+                    continue
                 times = {s.label: [] for s in sides}
                 finite = {s.label: True for s in sides}
 
@@ -522,6 +555,8 @@ def main():
         crows = [results[(s[1], cfg.name)] for s in specs]
         crows = [r for r in crows if measured(r)]
         if not crows:
+            summaries.append(f"{cfg.name}: no test to report (every build generates the same "
+                             "code on both sides, or none was measured)")
             continue
         rows += crows
         print(f"\n[{cfg.name}] {cfg.describe(args.double)}")
@@ -538,6 +573,9 @@ def main():
                      f"geometric mean {geo:.2f}")
         if errors:
             line += f", {errors} build or run errors"
+        same = sum(1 for s in specs if (s[1], cfg.name) in identical)
+        if same:
+            line += f"; {same} more generate the same code on both sides (not timed)"
         summaries.append(line)
     write_json(not interrupted)
     print(f"\n[cpu] {'interrupted' if interrupted else 'done'} after {time.time() - t0:.0f} s")

@@ -135,8 +135,9 @@ Exit status 0 when every test passes, 1 otherwise. See
 ### `check_cpu.py`
 
 ```
-scripts/check_cpu.py [TEST.dsp ...] [-k REGEX] [--base REV [--new REV]] [--matrix NAMES|all]
-                     [--rounds N] [--rate SR] [--double] [--json FILE] [--fail-above RATIO]
+scripts/check_cpu.py [TEST.dsp ...] [-k REGEX] [--base REV [--new REV] [--changed-only]]
+                     [--matrix NAMES|all] [--rounds N] [--rate SR] [--double] [--json FILE]
+                     [--fail-above RATIO]
 make check-cpu [CPU_ARGS="..."]
 make check-cpu-matrix [CPU_ARGS="..."]
 ```
@@ -174,6 +175,15 @@ new libraries can compile gets an error on the base side, not a ratio.
   spread, as no difference.
 - A test that computes nothing per sample (below 0.1 ns/frame: its output is a
   constant computed at init) gets no ratio.
+- **`--changed-only`** (with `--base`) times only the tests whose generated C++
+  differs between the two sides, the metadata lines (library versions) aside.
+  The others run the same code: their ratio is 1 by construction, and timing
+  them only measures noise. A change reaches further than the tests one would
+  think of (a new `fi.lowpass` changes filter banks, analyzers, reverbs and
+  physical models), and this finds them all without guessing: an A/B of the
+  whole suite then times only the changed tests, 421 of 4335 builds across the
+  three compilations of `--matrix all` for a week of filter rewrites, in about
+  40 minutes. The summary line gives the number of tests left out.
 - **Non-finite output** is flagged `NaN` next to the time: that time measures
   NaN arithmetic, not the filter. The check reads the output through volatile
   accesses, since `-ffast-math` lets the compiler assume that no value is NaN.
@@ -203,7 +213,8 @@ change them, so the identity lines are printed first and a pull request quotes
 ratios measured side by side, not two separate runs. Each run takes 0.25 s
 or more (the spin alone is 0.2 s), so a comparison costs 1 to 3 s per test and
 compilation and the whole suite about an hour: select the tests you touched
-and their main callers (`-k`, file arguments).
+and their main callers (`-k`, file arguments), or let `--changed-only` find
+them.
 
 `make bench` (`faustbench-llvm` on every test, MBytes/s into `tests/bench.log`)
 remains for an overview of the whole suite through the LLVM JIT; it compares
