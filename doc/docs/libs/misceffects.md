@@ -902,8 +902,8 @@ _,_,_ : ef.uniformPanToStereo(3) : _,_
 ### `(ef.)xferDimensionExpander`
 
 Model of Xfer Records' DimensionExpander, a free stereo spatializer in the
-Roland Dimension D lineage (the "Dimension" half of Serum's Hyper/Dimension
-effect).
+spirit of the Roland Dimension D (the "Dimension" half of Serum's
+Hyper/Dimension effect). Not affiliated with or endorsed by Xfer Records.
 
 The mono sum of the input feeds four fixed delay taps (15 ms * 1.18^i,
 stretched by `size`). Each tap is amplitude-modulated by a 0.455 Hz sine,
@@ -913,6 +913,19 @@ filters and no feedback. Every constant was fitted to measurements of the
 plug-in binary (v1.0.0.5); on stereo program material the wet signal
 matches the plug-in to about -60 dB at 44.1, 48 and 96 kHz, up to the
 LFO's start phase, which the plug-in free-runs.
+
+The wet signal is pure side signal: the mono sum `L' + R'` is exactly the
+dry `L + R`, and an anti-phase input (`R = -L`) passes with no wet signal.
+Unlike the Dimension D's swept bucket-brigade delays, the taps are fixed.
+It still sounds like a chorus because the quadrature modulation turns each
+input frequency into two equal sidebands 0.455 Hz above and below it, with
+no carrier: two copies detuned by a constant offset in Hz, not by a pitch
+ratio as in a Doppler chorus.
+
+`size` is used as given, and moving it moves all four taps. Smoothing it
+turns each change into a delay sweep, a Doppler pitch bend: the smoothing
+time sets how gentle the bend is (e.g. a 0.25 s time constant gives a
+smooth bend, `si.smoo` a quick chirp).
 
 #### Usage
 
