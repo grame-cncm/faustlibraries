@@ -126,7 +126,9 @@ Every script behind these targets is described in `scripts/README.md`.
    modulated at every sample): the three run different code. Drive the
    modulation with an integer counter (`ba.period`), not `os.osc`, which
    drifts in float. Details: `doc/docs/contributing.md`, section
-   *Constant, slider and modulated tests*.
+   *Constant, slider and modulated tests*. `scripts/lib_tests.py
+   inventory xx.lib` shows which tests exist where; `scripts/lib_tests.py
+   add xx.lib new_tests.dsp` inserts new ones in both places at once.
 
 9. **Check float and double, from 44.1 to 192 kHz.** `make check` runs
    in double precision at 48 kHz only. `make check-precision` renders

@@ -20,6 +20,7 @@ or later.
 | [`floatdiff.py`](#floatdiffpy) | compares a test output with its reference, within a tolerance | `make check` |
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
+| [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
 | **Documentation checks** | | |
 | [`checkdoc.py`](#checkdocpy) | documentation and license gate, against a baseline | `make checkdoc` |
 | [`audit2.py`](#audit2py) | documentation coverage per library | `checkdoc.py` |
@@ -222,6 +223,71 @@ nothing.
 
 Exit status 0, or 1 with `--fail-above` when a ratio exceeds it. See
 `doc/docs/contributing.md`, section *CPU cost*, and `AGENTS.md`, rule 10.
+
+### `lib_tests.py`
+
+```
+scripts/lib_tests.py inventory LIB [--missing]
+scripts/lib_tests.py add LIB SPEC.dsp [--tests-file FILE] [--dry-run]
+```
+
+Every test lives in two places (`AGENTS.md`, rule 8): in the `#### Test` section
+of the function's doc block, then, verbatim and under the same name, in a
+`tests/*.dsp` file. A function whose parameters are meant to vary at run time has
+three tests: `name_test`, `name_slider_test` and `name_modulated_test` (see
+`doc/docs/contributing.md`, section *Constant, slider and modulated tests*). This
+script checks and maintains both places.
+
+**`inventory LIB`** lists, for every symbol documented in LIB, where each of the
+three tests exists: `both`, `lib` or `dsp` (one side only), or `-`. The tests
+present on one side only break rule 8 and are listed first; the exit status is
+then 1. `--missing` hides the symbols that have all three. Whether a function
+needs the slider and modulated variants is a judgement, which the inventory
+leaves to you: its parameters must be meant to vary at run time.
+
+```bash
+scripts/lib_tests.py inventory filters.lib --missing
+```
+
+**`add LIB SPEC.dsp`** inserts the tests of SPEC.dsp wherever they are missing.
+SPEC.dsp is an ordinary Faust file, with one definition per line: `xx =
+library("...");` imports, `*_test` definitions (a `with { }` on the same line
+is fine), and the helper definitions the tests use (`src = os.osc(440);`). It
+compiles as it is, so write it, check it, then add it:
+
+```bash
+scripts/check_precision.py new_tests.dsp       # every new test must pass
+scripts/lib_tests.py add filters.lib new_tests.dsp --dry-run
+scripts/lib_tests.py add filters.lib new_tests.dsp
+```
+
+- **Which function a test belongs to.** It is the documented function whose
+  name is the longest prefix of the test name: `resonlp_slider_test` belongs
+  to `resonlp`, `highpass_plus_lowpass_even_modulated_test` to
+  `highpass_plus_lowpass_even` and not to `highpass`. A test whose name starts
+  with no documented function is an error.
+- **In the .lib**, the test is appended to the `#### Test` section of that
+  function's doc block. When the block has no such section, one is created,
+  before `#### References` or at the end of the block. The imports and helper
+  definitions the test uses and the section lacks are added with it.
+- **In `tests/*.dsp`**, the test goes after the last test of the same
+  function, in the file that holds its `name_test`. The imports and helpers it
+  needs are added to that file. A function with no test file yet goes to
+  `--tests-file`, which is created when needed, with a header and the imports.
+- **What is already there stays.** A test already present on one side is not
+  touched on that side, so `add` also repairs a test that exists only in
+  `tests/*.dsp`: give it the test as written there, and it is copied into the
+  .lib. A test name already used for another function is an error, since
+  names are unique across `tests/*.dsp`.
+
+After `add`, the usual steps of a test change apply:
+- generate the new references with `make reference`, which builds only the
+  missing ones, and check that none is all zeros;
+- run `make check-precision` on the touched test files: a new test must pass
+  without a baseline entry;
+- raise the library's version (a PATCH for tests alone) and regenerate its
+  page with `make -C doc md`;
+- run `make checkdoc`.
 
 ## Documentation checks
 

@@ -345,7 +345,7 @@ with {
 
 To test abrupt changes as well (a cutoff switching between two values, where some realizations leave their states at the wrong level), replace the sweep by `select2(ba.period(9600) < 4800, 50, 5000)`.
 
-Parameters that must be known at compile time (in capital letters by convention: an order, a number of voices or bands, a maximum delay) need neither variant. The three costs can be compared in one run:
+Parameters that must be known at compile time (in capital letters by convention: an order, a number of voices or bands, a maximum delay) need neither variant. `scripts/lib_tests.py inventory xx.lib` lists which of the three tests each documented function has, in the doc blocks and in `tests/*.dsp`. `scripts/lib_tests.py add xx.lib new_tests.dsp` inserts tests written in an ordinary Faust file into both places; `scripts/README.md` describes it. The three costs can be compared in one run:
 
 ```bash
 make check-cpu CPU_ARGS="-k '^resonlp(_slider|_modulated)?_test'"
