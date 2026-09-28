@@ -33,6 +33,14 @@ minimum over repetitions. On top of it, this script:
 - prints its progress every 30 s (and updates the --json file then); an
   interrupted run (Ctrl-C, kill) still reports the tests already measured;
 - flags a test whose output is not finite: its time measures NaN handling;
+- counts, in the generated code, what each sample executes that an embedded
+  core pays dearly for: divisions, square roots and transcendental calls
+  (pow, exp, log, sin, cos, tan...). An out-of-order desktop core overlaps
+  them with the rest of the loop; a Cortex-M7 spends 14 cycles on a float
+  division or square root, and tens to hundreds on a pow or a tan. The
+  column `ops` gives div/sqrt/fn per sample, and `!` marks a test whose new
+  side has more of any of them than its base: a ratio measured on the
+  desktop does not show what such a change costs on a microcontroller;
 - with --changed-only, times only the tests whose generated C++ differs
   between the two sides (metadata lines aside, such as the library
   versions): the others run the same code, so their ratio is 1 by
@@ -250,6 +258,56 @@ def build(spec, side, cfg, args):
     with open(stamp, "w") as f:
         f.write(stamp_text)
     return exe, None
+
+
+# Per-sample operations that are expensive on in-order and embedded cores.
+DIV_RE = re.compile(r"(?<=[\w)\]]) / (?=[\w(])")
+SQRT_RE = re.compile(r"\b(?:std::)?sqrtf?\(")
+FN_RE = re.compile(r"\b(?:std::)?(pow|exp|exp2|exp10|expm1|log|log2|log10|log1p|sin|cos|tan|"
+                   r"asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|cbrt|hypot|fmod|"
+                   r"remainder)f?\(")
+LOOP_RE = re.compile(r"for \(int (\w+) = 0; \1 < (count|vsize);")
+
+
+def matching_brace(text, i):
+    """Index of the brace closing the one at text[i]."""
+    depth = 0
+    for j in range(i, len(text)):
+        depth += {"{": 1, "}": -1}.get(text[j], 0)
+        if depth == 0:
+            return j
+    return len(text)
+
+
+def loop_ops(exe):
+    """Divisions, square roots and transcendental calls executed per sample.
+
+    Counted in the code Faust generates, inside the per-sample loops of
+    compute(): `i < count` in scalar code; in -vec code, the `i < vsize`
+    loops of the first block only (the code for the remaining frames repeats
+    them). The count is static: one occurrence in the loop is one operation
+    per sample. It does not depend on the C++ options, although -ffast-math
+    may still turn a division by a loop invariant into a multiplication.
+    """
+    with open(exe + ".cpp") as f:
+        text = f.read()
+    start = text.find("virtual void compute(")
+    if start < 0:
+        return None
+    body = text[start:start + matching_brace(text, text.index("{", start)) - start]
+    if "vindex" in body:
+        cut = body.find("if (vindex < count)")
+        body = body[:cut] if cut >= 0 else body
+    div = sqrt = 0
+    fns = {}
+    for m in LOOP_RE.finditer(body):
+        i = body.index("{", m.end())
+        loop = body[i:matching_brace(body, i)]
+        div += len(DIV_RE.findall(loop))
+        sqrt += len(SQRT_RE.findall(loop))
+        for name in FN_RE.findall(loop):
+            fns[name] = fns.get(name, 0) + 1
+    return {"div": div, "sqrt": sqrt, "fn": sum(fns.values()), "fns": fns}
 
 
 def code_of(exe):
@@ -477,12 +535,15 @@ def main():
             if ts and (name, cfg.name, label) in exes:
                 ns = statistics.median(ts)
                 row[label] = {"ns": ns, "min": min(ts), "rounds": ts, "spread": spread(ts),
+                              "ops": loop_ops(exes[(name, cfg.name, label)]),
                               "finite": finite[label],
                               # ns/frame * frames/s = ns per second of audio
                               "core_percent": ns * args.rate * 1e-7}
         b, n = row.get("base", {}), row.get("new", {})
         if "ns" in b and "ns" in n and max(b["ns"], n["ns"]) >= TRIVIAL_NS:
             row["ratio"] = n["ns"] / b["ns"]
+        if b.get("ops") and n.get("ops"):
+            row["more_ops"] = any(n["ops"][k] > b["ops"][k] for k in ("div", "sqrt", "fn"))
 
     def write_json(complete):
         if args.json:
@@ -606,6 +667,11 @@ def cell(side):
     return text
 
 
+def ops_cell(side):
+    ops = side.get("ops")
+    return f"{ops['div']}/{ops['sqrt']}/{ops['fn']}" if ops else "-"
+
+
 def report(rows, args):
     """Print the table, then the errors with their reason.
 
@@ -618,7 +684,8 @@ def report(rows, args):
     width = max([len(r["test"]) for r in rows] + [4])
     head = f"{'test':<{width}}  "
     head += f"{'base ns':>10}  {'new ns':>10}  {'ratio':>6}" if compare else f"{'ns':>10}"
-    head += f"  {'% core':>7}  {'spread':>6}"
+    head += f"  {'% core':>7}  {'spread':>6}  "
+    head += f"{'ops base > new':>16}" if compare else f"{'ops':>8}"
     print("\n" + head)
     for r in rows:
         n = r.get("new", {})
@@ -633,8 +700,16 @@ def report(rows, args):
         worst = f"{100 * max(spreads):.0f}%" if spreads else "-"
         if r.get("reraced"):
             worst += "*"
-        line += f"  {core:>7}  {worst:>6}"
+        line += f"  {core:>7}  {worst:>6}  "
+        if compare:
+            ops = f"{ops_cell(r.get('base', {}))} > {ops_cell(n)}"
+            ops += " !" if r.get("more_ops") else "  "
+            line += f"{ops:>16}"
+        else:
+            line += f"{ops_cell(n):>8}"
         print(line)
+    print("ops: divisions / square roots / transcendental calls per sample, in the generated loop"
+          + ("; ! = more on the new side" if compare else ""))
     if any(r.get("reraced") for r in rows):
         print(f"* spread above {100 * RERACE_SPREAD:.0f}% after --rounds rounds: "
               "re-raced with as many rounds again")

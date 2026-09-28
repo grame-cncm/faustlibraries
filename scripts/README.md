@@ -176,6 +176,21 @@ new libraries can compile gets an error on the base side, not a ratio.
   spread, as no difference.
 - A test that computes nothing per sample (below 0.1 ns/frame: its output is a
   constant computed at init) gets no ratio.
+- **The `ops` column** counts, in the code Faust generates, what each sample
+  executes that an embedded core pays dearly for: divisions, square roots and
+  transcendental calls (`pow`, `exp`, `log`, `sin`, `cos`, `tan`...), as
+  `div/sqrt/fn`, for each side, and `!` marks a test whose new side has more of
+  any of them. A desktop core overlaps these operations with the rest of the
+  loop when they are off its recursion; a Cortex-M7 spends 14 cycles on a float
+  division or square root, and tens to hundreds on a `pow` or a `tan`, so a
+  ratio measured on the desktop can hide what a change costs on a
+  microcontroller. With its cutoff modulated at every sample, the `tf3slf`
+  rewrite of #272 goes from `2/0/1` to `5/1/2` per sample (the modulator of the
+  test contributes one `pow` to both); the `tf2s` rewrite of #273 takes
+  `resonlp` from `6/0/2` to `1/0/2`. The count is static (one occurrence in the
+  per-sample loop is one operation per sample, loops over `count`, or over
+  `vsize` in the first block of `-vec` code), does not depend on the C++
+  options, and is stored in the JSON with the name of each function.
 - **`--changed-only`** (with `--base`) times only the tests whose generated C++
   differs between the two sides, the metadata lines (library versions) aside.
   The others run the same code: their ratio is 1 by construction, and timing

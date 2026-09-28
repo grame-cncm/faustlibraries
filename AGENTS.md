@@ -160,7 +160,10 @@ Every script behind these targets is described in `scripts/README.md`.
     `strict` compilations, since `-ffast-math` alone can move a ratio from
     1.2 to 1.44, and the identity lines of the run. Timings from separate
     runs are not comparable, and a ratio within 3% (or within its
-    spread) is noise. A test time flagged `NaN` measures NaN arithmetic. A slower function can be the right trade-off: say what it
+    spread) is noise. The `ops` column counts the per-sample divisions,
+    square roots and transcendental calls, which embedded cores pay far
+    more for than the desktop the ratio is measured on: report an
+    increase (`!`) even when the ratio is small. A test time flagged `NaN` measures NaN arithmetic. A slower function can be the right trade-off: say what it
     buys. Details: `doc/docs/contributing.md`, section *CPU cost*.
 
 ## Git history
