@@ -6,7 +6,10 @@
   Scope
   -----
   Imports a compiled Faust signal graph into Lean and certifies, mechanically,
-  that its feedback recursion is stable.
+  that its feedback recursion is stable, that its table reads and delay taps
+  stay in range, and — reading the graph as a DAG — that each recursion group
+  is stable at the six rates of `make check-precision` in exact, double and
+  single arithmetic (section "Stability at the sample rates").
 
   This file is the hand-written, reviewed prelude. The terms it is applied to
   are generated from `faust-rs --dump-sig-dag` by `scripts/sig2lean.py`.
@@ -23,7 +26,8 @@
       lean out.lean                                # Lean 4.31, bundled Std
 
   The generator runs Lean once to read each verdict, then emits a
-  `by decide` theorem pinning it. The theorem is the artefact: Lean proves it,
+  `by decide` theorem pinning it (`by decide +kernel` for the rate analysis,
+  whose computations are too deep for the elaborator's `decide`). The theorem is the artefact: Lean proves it,
   the generator only predicts it.
 
   Nothing in this prelude depends on the generated part, so it can be reviewed
@@ -550,9 +554,660 @@ def tableSiteVerdictsB (s : Sig) : String :=
         some s!"{size}:{v}"
     | .tap _ => none)
 
+/-! ## Stability at the sample rates, in exact, double and single precision
+
+The analyses above read a tree (`Sig`) and refuse every coefficient that goes
+through a transcendental function, so nothing that depends on `ma.SR` is ever
+certified, and they read only single-output recursions. This section reads the
+same graph as a **DAG** (`Dag`, one `Node` per dump binding, children by index),
+evaluates it bottom-up so that each node is computed once, and certifies each
+recursion group (`DEBRUIJNREC`):
+
+* at each of the six rates of `make check-precision` (`checkRates`), with the
+  controls at their default values — the configuration `check-precision`
+  renders;
+* in three arithmetics (`Prec`): `exact` (no rounding modelled), `double` and
+  `single`, where every real operation of the graph is rounded;
+* for groups whose state is at most 2 samples: first order, direct-form second
+  order, and two-output state-variable (SVF/TPT) sections.
+
+### What is claimed
+
+For a group, precision `p` and rate `sr`: *the linear recursion whose
+coefficients take the values the program computes in precision `p` at rate
+`sr` is stable.* Every state-free subexpression (a coefficient) is enclosed in
+an interval that contains its value as computed in `p`; the matrix of the
+recursion then ranges over a box, and every matrix of the box is checked stable
+(Jury). The rounding of the loop arithmetic itself — the products and sums that
+involve the state — is not part of the claim: it perturbs the state at each
+sample, which is an accuracy question (proposal P4), not a change of the
+recursion's coefficients.
+
+### How
+
+* **Intervals** (`Iv`) have rational endpoints rounded outward to multiples of
+  `2⁻¹⁰⁰` after every operation (`Q.down`, `Q.up`), so the numbers stay small
+  and every enclosure stays sound.
+* **Rounding model.** A real operation's result is widened by the unit roundoff
+  `u` of the precision (relative) and `eta` (absolute, for subnormals):
+  `x op y` computed is `(x op y)(1 + δ) + ε`, `|δ| ≤ u`, `|ε| ≤ eta`. Libm calls
+  are widened by `libmUlps` ulps. Literals are rounded to the precision, and
+  controls to `float` (`FAUSTFLOAT`). Integer operations are exact, and refused
+  when they may leave the int32 range.
+* **Transcendentals** are Taylor polynomials evaluated in interval arithmetic,
+  plus an explicit Lagrange remainder: `sinI`, `cosI` (|x| ≤ 4), `tanI` as
+  `sin/cos` when the cosine enclosure excludes 0, `expI` with halving,
+  `sqrtI` from an integer square root whose bounds are *checked*, not assumed.
+* **Linear extraction.** Inside a group, a node that does not depend on the
+  group's state (`free = 0`) is a coefficient, known by its interval; the others
+  are affine forms over the delayed outputs `y_i[n-k]`. A product of two state
+  terms, a nonlinear function of the state, a delay-free loop, a variable delay
+  of the state, a nested recursion coupled to the group: refused.
+* **Jury at the vertices.** Up to 2 states, the four Jury conditions
+  (`1 - det > 0`, `1 + det > 0`, `1 - tr + det > 0`, `1 + tr + det > 0`, or
+  `|a| < 1` at order 1) are multilinear in the entries of the matrix, so their
+  minimum over a box is reached at a vertex: checking the vertices, in exact
+  rational arithmetic, checks the whole box.
+
+Every rule below states its soundness argument; the ones that need analysis
+(Taylor remainders, the vertex lemma) are listed with the standing obligations
+at the end of the file. -/
+
+namespace Q
+def sub (a b : Q) : Q := a.add b.neg
+/-- Strict comparison; valid because denominators are positive. -/
+def lt (a b : Q) : Bool := decide (a.n * b.d < b.n * a.d)
+def abs (a : Q) : Q := if 0 ≤ a.n then a else a.neg
+/-- `2⁻ᵏ`. -/
+def pow2neg (k : Nat) : Q := ⟨1, ((2 : Nat) ^ k : Nat)⟩
+/-- Interval endpoints are rounded to multiples of `2⁻PREC`. -/
+def PREC : Nat := 100
+def grid : Int := ((2 : Nat) ^ PREC : Nat)
+/-- Largest multiple of `2⁻PREC` below `a`: `⌊a·2^PREC⌋ ≤ a·2^PREC`. -/
+def down (a : Q) : Q := ⟨Int.fdiv (a.n * grid) a.d, grid⟩
+/-- Smallest multiple of `2⁻PREC` above `a`: `-down(-a)`. -/
+def up (a : Q) : Q := ⟨-(Int.fdiv (-(a.n * grid)) a.d), grid⟩
+end Q
+
+/-- A closed interval with rational endpoints, `lo ≤ hi`. An unknown or
+    unbounded value is `none : Option Iv`. -/
+structure Iv where
+  lo : Q
+  hi : Q
+deriving Repr, Inhabited
+
+namespace Iv
+def pt (q : Q) : Iv := ⟨q, q⟩
+def ofInt (k : Int) : Iv := pt (Q.ofInt k)
+def zero : Iv := pt Q.zero
+def neg (a : Iv) : Iv := ⟨a.hi.neg, a.lo.neg⟩
+def add (a b : Iv) : Iv := ⟨(a.lo.add b.lo).down, (a.hi.add b.hi).up⟩
+def sub (a b : Iv) : Iv := a.add b.neg
+/-- The product's extremes are among the four endpoint products. -/
+def mul (a b : Iv) : Iv :=
+  let p1 := a.lo.mul b.lo
+  let p2 := a.lo.mul b.hi
+  let p3 := a.hi.mul b.lo
+  let p4 := a.hi.mul b.hi
+  ⟨(Q.min (Q.min p1 p2) (Q.min p3 p4)).down, (Q.max (Q.max p1 p2) (Q.max p3 p4)).up⟩
+def hasZero (a : Iv) : Bool := Q.le a.lo Q.zero && Q.le Q.zero a.hi
+/-- `1/x` is decreasing on each side of 0, so on an interval excluding 0 it maps
+    `[lo, hi]` to `[1/hi, 1/lo]`. -/
+def inv (a : Iv) : Option Iv :=
+  if a.hasZero then none else some ⟨(Q.inv a.hi).down, (Q.inv a.lo).up⟩
+def div (a b : Iv) : Option Iv := (inv b).map a.mul
+/-- Division by a positive integer. -/
+def divNat (a : Iv) (m : Nat) : Iv :=
+  ⟨(⟨a.lo.n, a.lo.d * m⟩ : Q).down, (⟨a.hi.n, a.hi.d * m⟩ : Q).up⟩
+def hull (a b : Iv) : Iv := ⟨Q.min a.lo b.lo, Q.max a.hi b.hi⟩
+def rmin (a b : Iv) : Iv := ⟨Q.min a.lo b.lo, Q.min a.hi b.hi⟩
+def rmax (a b : Iv) : Iv := ⟨Q.max a.lo b.lo, Q.max a.hi b.hi⟩
+def abs (a : Iv) : Iv :=
+  if Q.le Q.zero a.lo then a
+  else if Q.le a.hi Q.zero then a.neg
+  else ⟨Q.zero, Q.max a.lo.neg a.hi⟩
+/-- `max |x|` over the interval. -/
+def mag (a : Iv) : Q := Q.max a.lo.abs a.hi.abs
+def within (a : Iv) (m : Q) : Bool := Q.le a.mag m
+/-- Truncation toward zero, and floor, land in `[⌊lo⌋, ⌈hi⌉]`. -/
+def trunc (a : Iv) : Iv := ⟨Q.ofInt a.lo.floor, Q.ofInt a.hi.ceil⟩
+def floor (a : Iv) : Iv := ⟨Q.ofInt a.lo.floor, Q.ofInt a.hi.floor⟩
+/-- Rounding of one operation: a result `v(1 + δ) + ε` with `|δ| ≤ e`,
+    `|ε| ≤ eta`. Sound because `v ↦ v - e|v|` and `v ↦ v + e|v|` are
+    non-decreasing for `e < 1`, so their extremes over `[lo, hi]` are at the
+    endpoints. -/
+def widen (a : Iv) (e eta : Q) : Iv :=
+  ⟨((a.lo.sub (e.mul a.lo.abs)).sub eta).down, ((a.hi.add (e.mul a.hi.abs)).add eta).up⟩
+def fitsInt32 (a : Iv) : Bool :=
+  Q.le (Q.ofInt (-2147483648)) a.lo && Q.le a.hi (Q.ofInt 2147483647)
+end Iv
+
+/-! ### Transcendental enclosures -/
+
+/-- Number of Taylor terms for `sin`/`cos` at `|x| ≤ m`, chosen so that the
+    remainder is below about `10⁻²⁴` (far below a double ulp). Any choice is
+    sound: the remainder is always added to the enclosure. -/
+def trigTerms (m : Q) : Nat :=
+  if Q.le m ⟨1, 4⟩ then 8 else if Q.le m ⟨1, 2⟩ then 10 else if Q.le m Q.one then 12
+  else if Q.le m (Q.ofInt 2) then 15 else 20
+
+/-- Terms for `exp` at `|x| ≤ 1/2`. -/
+def EXPTERMS : Nat := 20
+
+/-- `mⁿ/n!` rounded up, for `m ≥ 0`: each step multiplies by `m/(j+1)` and
+    rounds up, which keeps an upper bound. -/
+def remUp (m : Q) : Nat → Nat → Q → Q
+  | 0, _, r => r
+  | n + 1, j, r =>
+      let p := r.mul m
+      remUp m n (j + 1) (⟨p.n, p.d * (j + 1)⟩ : Q).up
+
+def taylorRem (m : Q) (n : Nat) : Q := remUp m n 0 Q.one
+
+/-- `∑_{k<N} (-1)ᵏ x^(2k+off)/(2k+off)!` in interval arithmetic, from the
+    first term `term` (`x` for `sin`, `1` for `cos`): the interval extension of
+    the Taylor polynomial, which encloses the polynomial at every point of `x`. -/
+def taylorAlt (x2 : Iv) (off : Nat) : Nat → Nat → Iv → Iv → Iv
+  | 0, _, _, acc => acc
+  | n + 1, k, term, acc =>
+      let next := (term.mul x2).divNat ((2 * k + 1 + off) * (2 * k + 2 + off))
+      taylorAlt x2 off n (k + 1) next.neg (acc.add term)
+
+/-- The Taylor polynomial of `sin` with `N` terms has degree `2N - 1`, and also
+    `2N` (the next coefficient is 0); every derivative of `sin` is bounded by 1,
+    so the Lagrange remainder is at most `|x|^(2N+1)/(2N+1)!`. -/
+def sinI (x : Iv) : Option Iv :=
+  if x.within (Q.ofInt 4) then
+    let n := trigTerms x.mag
+    let s := taylorAlt (x.mul x) 1 n 0 x Iv.zero
+    let r := taylorRem x.mag (2 * n + 1)
+    some ⟨(s.lo.sub r).down, (s.hi.add r).up⟩
+  else none
+
+/-- Same for `cos`: degree `2N - 2`, remainder at most `|x|^(2N)/(2N)!`. -/
+def cosI (x : Iv) : Option Iv :=
+  if x.within (Q.ofInt 4) then
+    let n := trigTerms x.mag
+    let c := taylorAlt (x.mul x) 0 n 0 (Iv.pt Q.one) Iv.zero
+    let r := taylorRem x.mag (2 * n)
+    some ⟨(c.lo.sub r).down, (c.hi.add r).up⟩
+  else none
+
+/-- When the enclosure of `cos` over `x` excludes 0, `cos` has no zero on `x`,
+    `tan = sin/cos` is continuous there, and the quotient of the two
+    enclosures contains `tan` at every point of `x`. -/
+def tanI (x : Iv) : Option Iv := do
+  let s ← sinI x
+  let c ← cosI x
+  s.div c
+
+/-- `exp` for `|x| ≤ 1/2`: `N` terms, Lagrange remainder
+    `e^ξ |x|^N/N! ≤ 2|x|^N/N!` since `e^(1/2) < 2`. -/
+def expSmall (x : Iv) : Iv :=
+  let rec go : Nat → Nat → Iv → Iv → Iv
+    | 0, _, _, acc => acc
+    | n + 1, k, term, acc => go n (k + 1) ((term.mul x).divNat (k + 1)) (acc.add term)
+  let s := go EXPTERMS 0 (Iv.pt Q.one) Iv.zero
+  let r := (Q.ofInt 2).mul (taylorRem x.mag EXPTERMS)
+  ⟨(s.lo.sub r).down, (s.hi.add r).up⟩
+
+/-- `exp x = (exp (x/2))²`, halving until `|x| ≤ 1/2`. The square of an
+    enclosure of a positive quantity is an enclosure of its square. -/
+def expI : Nat → Iv → Option Iv
+  | 0, _ => none
+  | f + 1, x =>
+      if x.within ⟨1, 2⟩ then some (expSmall x)
+      else (expI f (x.divNat 2)).map fun e => e.mul e
+
+/-- Integer square root by Newton's method from above. Untrusted: `sqrtI`
+    checks its result. -/
+def isqrtNewton (n : Nat) : Nat → Nat → Nat
+  | 0, x => x
+  | f + 1, x =>
+      let y := (x + n / x) / 2
+      if y < x then isqrtNewton n f y else x
+
+def isqrt (n : Nat) : Nat :=
+  if n = 0 then 0 else isqrtNewton n 400 ((2 : Nat) ^ (Nat.log2 n / 2 + 1))
+
+/-- `sqrt` is increasing. With `a = down lo = na/G` and `b = up hi = nb/G`
+    (`G = 2^PREC`), `sqrt a = sqrt(na·G)/G`: a checked `r² ≤ na·G` gives the
+    lower bound `r/G`, a checked `nb·G ≤ (s+1)²` the upper bound `(s+1)/G`. -/
+def sqrtI (x : Iv) : Option Iv :=
+  if Q.lt x.lo Q.zero then none else
+  let a := x.lo.down
+  let b := x.hi.up
+  let na := (a.n * Q.grid).toNat
+  let nb := (b.n * Q.grid).toNat
+  let ra := isqrt na
+  let rb := isqrt nb
+  if ra * ra ≤ na && nb ≤ (rb + 1) * (rb + 1) && 0 ≤ a.n then
+    some ⟨⟨ra, Q.grid⟩, ⟨rb + 1, Q.grid⟩⟩
+  else none
+
+/-- `xᵏ` for a natural `k`: repeated interval products, on `|x|` when `k` is
+    even (`xᵏ = |x|ᵏ`), which keeps the lower bound non-negative. -/
+def powNat (x : Iv) (k : Nat) : Iv :=
+  let b := if k % 2 == 0 then x.abs else x
+  let rec go : Nat → Iv → Iv
+    | 0, acc => acc
+    | n + 1, acc => go n (acc.mul b)
+  go k (Iv.pt Q.one)
+
+/-! ### Precisions -/
+
+inductive Prec where
+  | exact
+  | double
+  | single
+deriving Repr, DecidableEq, Inhabited
+
+/-- Accuracy assumed of the math library (`tan`, `sin`, `cos`, `exp`), in ulps:
+    a standing obligation. One ulp is at most `2u` relative. -/
+def libmUlps : Nat := 2
+
+namespace Prec
+/-- Unit roundoff: half an ulp of 1, the relative error of a correctly
+    rounded operation. -/
+def u : Prec → Q
+  | .exact  => Q.zero
+  | .double => Q.pow2neg 53
+  | .single => Q.pow2neg 24
+/-- Absolute error allowance for subnormal results (at least the smallest
+    subnormal step of both formats). -/
+def eta : Prec → Q
+  | .exact => Q.zero
+  | _      => Q.pow2neg 140
+/-- Largest integer magnitude converted exactly to the real type. -/
+def intExact : Prec → Int
+  | .single => 16777216
+  | _       => 9007199254740992
+/-- A correctly rounded operation (`+ - * /`, `sqrt`, int-to-real). -/
+def op (p : Prec) (a : Iv) : Iv := if p = .exact then a else a.widen p.u p.eta
+/-- A libm call. -/
+def libm (p : Prec) (a : Iv) : Iv :=
+  if p = .exact then a else a.widen ((Q.ofInt (2 * libmUlps)).mul p.u) p.eta
+/-- A control value, stored as `FAUSTFLOAT` = `float` in both precisions. -/
+def control (p : Prec) (a : Iv) : Iv :=
+  if p = .exact then a else a.widen (Q.pow2neg 24) (Q.pow2neg 140)
+/-- A real literal: the dump gives the double, the single-precision program
+    uses it rounded to `float`. -/
+def lit (p : Prec) (q : Q) : Iv := if p = .single then (Iv.pt q).widen p.u p.eta else Iv.pt q
+/-- An integer operand converted to the real type. -/
+def promote (p : Prec) (isInt : Bool) (a : Iv) : Iv :=
+  if isInt && !(Q.le (Q.ofInt p.intExact) a.mag) then a else if isInt then p.op a else a
+end Prec
+
+/-! ### The DAG -/
+
+inductive Tag where
+  | input | delay1 | delay | proj | recur | ref | cons
+  | binop (op : BinOp)
+  | cmp          -- comparisons: 0 or 1
+  | sr           -- `SIGFCONST fSamplingFreq`
+  | control      -- sliders and numerical entries, with their declared range
+  | button       -- buttons and checkboxes: 0 or 1
+  | intcast | floatcast | min | max | abs | floor | select2
+  | tan | sin | cos | exp | sqrt | pow
+  | other (name : String)
+deriving Repr, Inhabited
+
+def Tag.name : Tag → String
+  | .input => "SIGINPUT" | .delay1 => "SIGDELAY1" | .delay => "SIGDELAY"
+  | .proj => "SIGPROJ" | .recur => "DEBRUIJNREC" | .ref => "DEBRUIJNREF"
+  | .cons => "cons" | .binop .add => "SIGBINOP:add" | .binop .sub => "SIGBINOP:sub"
+  | .binop .mul => "SIGBINOP:mul" | .binop .div => "SIGBINOP:div"
+  | .binop .rem => "SIGBINOP:rem" | .cmp => "comparison" | .sr => "SIGFCONST"
+  | .control => "control" | .button => "button" | .intcast => "SIGINTCAST"
+  | .floatcast => "SIGFLOATCAST" | .min => "SIGMIN" | .max => "SIGMAX"
+  | .abs => "SIGABS" | .floor => "SIGFLOOR" | .select2 => "SIGSELECT2"
+  | .tan => "SIGTAN" | .sin => "SIGSIN" | .cos => "SIGCOS" | .exp => "SIGEXP"
+  | .sqrt => "SIGSQRT" | .pow => "SIGPOW" | .other s => s
+
+inductive Arg where
+  | ref   (i : Nat)
+  | int   (v : Int)
+  | const (q : Q)
+  | nil
+  | other
+deriving Repr, Inhabited
+
+/-- One dump binding. `ctl` is `(init, min, max)` for a control. -/
+structure Node where
+  tag  : Tag
+  args : List Arg
+  ctl  : Q × Q × Q
+deriving Repr, Inhabited
+
+/-- Bindings in dump order: node `i` is `n i`, and a child always has a lower
+    index than its parent (the dump is in post-order). -/
+abbrev Dag := List Node
+
+/-- The value of node `j` while computing node `i`, from `acc`, the values
+    computed so far, most recent first. A forward reference (`j ≥ i`, which a
+    post-order dump never contains) yields `d`. -/
+def lookback {α} (acc : List α) (i j : Nat) (d : α) : α :=
+  if j < i then acc.getD (i - 1 - j) d else d
+
+/-- Fold a node function over the DAG in index order. -/
+def dagPass {α} (dag : Dag) (f : List α → Nat → Node → α) : List α :=
+  let rec go : Nat → List Node → List α → List α
+    | _, [], acc => acc.reverse
+    | i, nd :: rest, acc => go (i + 1) rest (f acc i nd :: acc)
+  go 0 dag []
+
+/-- Element `k` of a `cons` list of arguments. -/
+def consNth (dag : Dag) : Nat → Arg → Option Arg
+  | 0, .ref c => match (dag.getD c default).tag, (dag.getD c default).args with
+      | .cons, [h, _] => some h
+      | _, _ => none
+  | k + 1, .ref c => match (dag.getD c default).tag, (dag.getD c default).args with
+      | .cons, [_, t] => consNth dag k t
+      | _, _ => none
+  | _, _ => none
+
+/-- All elements of a `cons` list (fuel bounds its length). -/
+def consList (dag : Dag) : Nat → Arg → List Arg
+  | 0, _ => []
+  | f + 1, .ref c => match (dag.getD c default).tag, (dag.getD c default).args with
+      | .cons, [h, t] => h :: consList dag f t
+      | _, _ => []
+  | _ + 1, _ => []
+
+def recBody (dag : Dag) (r : Nat) : List Arg :=
+  match (dag.getD r default).tag, (dag.getD r default).args with
+  | .recur, [b] => consList dag 4096 b
+  | _, _ => []
+
+/-! ### Context-free passes: recursion level, nature -/
+
+/-- Highest de Bruijn level a node refers to outside itself: `REF k` refers to
+    level `k`, a `REC` binds one level. `0` means the node depends on no
+    enclosing recursion. Unknown children count as escaping. -/
+def freeLevels (dag : Dag) : List Nat :=
+  dagPass dag fun acc i nd =>
+    let fa : Arg → Nat := fun
+      | .ref j => lookback acc i j 1000
+      | _ => 0
+    match nd.tag, nd.args with
+    | .ref, [.int k] => k.toNat
+    | .recur, [a] => fa a - 1
+    | _, args => args.foldl (fun m a => Nat.max m (fa a)) 0
+
+/-- `true` when the node's value is an integer in the compiled program.
+    Pessimistic: a recursion output is not known to be an integer (`false`),
+    which only makes the analysis treat it as real, i.e. model more rounding.
+    With `optimistic`, a projection of the enclosing recursion is taken to be
+    an integer: used only to *refuse* integer recursions (wrapping semantics). -/
+def natures (dag : Dag) (optimistic : Bool) : List Bool :=
+  dagPass dag fun acc i nd =>
+    let ia : Arg → Bool := fun
+      | .ref j => lookback acc i j false
+      | .int _ => true
+      | _ => false
+    match nd.tag, nd.args with
+    | .intcast, _ | .cmp, _ | .sr, _ => true
+    | .binop .div, _ => false                -- Faust's `/` is always a real division
+    | .binop _, [a, b] | .min, [a, b] | .max, [a, b] | .select2, [_, a, b] => ia a && ia b
+    | .abs, [a] | .delay1, [a] | .delay, [a, _] => ia a
+    | .proj, [_, .ref j] =>
+        optimistic && (match (dag.getD j default).tag with | .ref => true | _ => false)
+    | _, _ => false
+
+/-! ### Ranges -/
+
+/-- Interval of every node, for one precision and rate, controls at their
+    default values. `none`: unknown or unbounded. The state of a recursion is
+    unknown; a recursion output gets the range of its body element with the
+    state unknown, which holds for every value of the state. -/
+def ranges (dag : Dag) (nat natOpt : List Bool) (p : Prec) (sr : Int) : List (Option Iv) :=
+  dagPass dag fun acc i nd =>
+    let v : Arg → Option Iv := fun
+      | .ref j => lookback acc i j none
+      | .int k => some (Iv.ofInt k)
+      | .const q => some (p.lit q)
+      | _ => none
+    let isInt : Arg → Bool := fun
+      | .ref j => nat.getD j false
+      | .int _ => true
+      | _ => false
+    let rv : Arg → Option Iv := fun a => (v a).map (p.promote (isInt a))
+    let intNode := nat.getD i false
+    -- a node that may be an integer in the program (its value depends on a
+    -- recursion typed int) is modelled as real, which covers its rounding,
+    -- but its int32 wrap-around is not modelled: its range must fit int32
+    let maybeInt := natOpt.getD i false
+    let noWrap : Option Iv → Option Iv := fun r =>
+      if maybeInt then r.bind fun x => if x.fitsInt32 then some x else none else r
+    match nd.tag, nd.args with
+    | .sr, _ => some (Iv.ofInt sr)
+    | .control, _ => some (p.control (Iv.pt nd.ctl.1))
+    | .button, _ | .cmp, _ => some ⟨Q.zero, Q.one⟩
+    | .delay1, [a] | .delay, [a, _] => (v a).map (·.hull Iv.zero)
+    | .proj, [.int k, .ref r] =>
+        if r < i then
+          match (dag.getD r default).tag, (dag.getD r default).args with
+          | .recur, [b] => (consNth dag k.toNat b).bind v
+          | _, _ => none
+        else none
+    | .intcast, [a] => (v a).map Iv.trunc
+    | .floatcast, [a] => rv a
+    | .min, [a, b] => do let x ← v a; let y ← v b; pure (x.rmin y)
+    | .max, [a, b] => do let x ← v a; let y ← v b; pure (x.rmax y)
+    | .select2, [_, a, b] => do let x ← v a; let y ← v b; pure (x.hull y)
+    | .abs, [a] => (v a).map Iv.abs
+    | .floor, [a] => (v a).map Iv.floor
+    | .binop op, [a, b] =>
+        if intNode then do
+          let x ← v a
+          let y ← v b
+          let r ← match op with
+            | .add => some (x.add y)
+            | .sub => some (x.sub y)
+            | .mul => some (x.mul y)
+            | .div => none                         -- not an integer operation in Faust
+            | .rem => if y.lo == y.hi && Q.lt Q.zero y.lo then
+                        let m := y.lo.floor
+                        if Q.le Q.zero x.lo then some ⟨Q.zero, Q.ofInt (m - 1)⟩
+                        else some ⟨Q.ofInt (1 - m), Q.ofInt (m - 1)⟩
+                      else none
+          if r.fitsInt32 then some r else none
+        else noWrap do
+          let x ← rv a
+          let y ← rv b
+          match op with
+          | .add => some (p.op (x.add y))
+          | .sub => some (p.op (x.sub y))
+          | .mul => some (p.op (x.mul y))
+          | .div => (x.div y).map p.op
+          | .rem =>                          -- fmod: exact, |r| < |m|, sign of x
+              if y.lo == y.hi && Q.lt Q.zero y.lo then
+                if Q.le Q.zero x.lo then some ⟨Q.zero, y.lo⟩ else some ⟨y.lo.neg, y.lo⟩
+              else none
+    | .tan, [a]  => ((rv a).bind tanI).map p.libm
+    | .sin, [a]  => ((rv a).bind sinI).map p.libm
+    | .cos, [a]  => ((rv a).bind cosI).map p.libm
+    | .exp, [a]  => ((rv a).bind (expI 64)).map p.libm
+    | .sqrt, [a] => ((rv a).bind sqrtI).map p.op
+    | .pow, [a, b] =>                        -- integer exponents only
+        match v b with
+        | some e =>
+            if e.lo == e.hi && e.lo.n % e.lo.d == 0 && 0 ≤ e.lo.n && e.lo.n / e.lo.d ≤ 64 then
+              (rv a).map fun x => p.libm (powNat x (e.lo.n / e.lo.d).toNat)
+            else none
+        | none => none
+    | _, _ => none
+
+/-! ### Linear extraction of a recursion group -/
+
+/-- `((i, k), c)`: coefficient `c` on `y_i[n-k]`, output `i` of the group
+    delayed by `k` samples. -/
+abbrev Aff := List ((Nat × Nat) × Iv)
+
+def Aff.shift (k : Nat) (a : Aff) : Aff := a.map fun ((i, d), c) => ((i, d + k), c)
+def Aff.scale (s : Iv) (a : Aff) : Aff := a.map fun (key, c) => (key, c.mul s)
+def Aff.neg (a : Aff) : Aff := a.map fun (key, c) => (key, c.neg)
+def Aff.coef (a : Aff) (key : Nat × Nat) : Iv :=
+  a.foldl (fun s (k, c) => if k == key then s.add c else s) Iv.zero
+
+/-- Affine form, in the state of the group being analysed, of every node that
+    can be reached from its body without entering a nested recursion. A node
+    with `free = 0` is a coefficient (its form is empty, its value is its
+    range). `REF 1` is the group itself, since only nodes at depth 0 of its
+    body are read here. The loop arithmetic (products by a coefficient,
+    sums) is exact in the claim, see the section header. -/
+def affines (dag : Dag) (free : List Nat) (nat : List Bool) (p : Prec)
+    (rng : List (Option Iv)) : List (Except String Aff) :=
+  dagPass dag fun acc i nd =>
+    let fr : Arg → Nat := fun
+      | .ref j => free.getD j 1000
+      | _ => 0
+    let f : Arg → Except String Aff := fun
+      | .ref j => if free.getD j 1000 == 0 then .ok [] else lookback acc i j (.error "forward reference")
+      | _ => .ok []
+    -- a coefficient: its range, converted to the real type of the state
+    let val : Arg → Option Iv := fun
+      | .ref j => (rng.getD j none).map (p.promote (nat.getD j false))
+      | .int k => some (p.promote true (Iv.ofInt k))
+      | .const q => some (p.lit q)
+      | _ => none
+    if free.getD i 1000 == 0 then .ok [] else
+    match nd.tag, nd.args with
+    | .proj, [.int k, .ref j] =>
+        match (dag.getD j default).tag, (dag.getD j default).args with
+        | .ref, [.int 1] => .ok [((k.toNat, 0), Iv.pt Q.one)]
+        | .ref, _ => .error "reference to an outer recursion"
+        | _, _ => .error "nested recursion coupled to the group"
+    | .recur, _ => .error "nested recursion coupled to the group"
+    | .delay1, [a] => (f a).map (Aff.shift 1)
+    | .delay, [a, n] =>
+        let amount : Option Iv := match n with
+          | .ref j => rng.getD j none
+          | .int k => some (Iv.ofInt k)
+          | _ => none
+        match amount with
+        | some d =>
+            if Q.le d.hi d.lo && d.lo.n % d.lo.d == 0 && 0 ≤ d.lo.n then
+              (f a).map (Aff.shift (d.lo.n / d.lo.d).toNat)
+            else .error "variable delay of the state"
+        | none => .error "variable delay of the state"
+    | .binop .add, [a, b] => do let x ← f a; let y ← f b; pure (x ++ y)
+    | .binop .sub, [a, b] => do let x ← f a; let y ← f b; pure (x ++ y.neg)
+    | .binop .mul, [a, b] =>
+        if fr a != 0 && fr b != 0 then .error "product of two state terms"
+        else
+          let (st, sc) := if fr a == 0 then (b, a) else (a, b)
+          match val sc with
+          | some s => (f st).map (Aff.scale s)
+          | none   => .error "unbounded coefficient on the state"
+    | .binop .div, [a, b] =>
+        if fr b != 0 then .error "division by the state"
+        else match (val b).bind Iv.inv with
+          | some s => (f a).map (Aff.scale s)
+          | none   => .error "coefficient 1/x with x possibly 0"
+    | .floatcast, [a] => f a
+    | t, _ => .error s!"{t.name} applied to the state"
+
+/-! ### Jury at the vertices -/
+
+/-- Both endpoints, or one when the interval is a point. -/
+def Iv.ends (a : Iv) : List Q := if a.lo == a.hi then [a.lo] else [a.lo, a.hi]
+
+def pos (q : Q) : Bool := Q.lt Q.zero q
+
+/-- Order 1: `|a| < 1` for every `a` of the interval. -/
+def jury1 (a : Iv) : Bool := Q.lt (Q.ofInt (-1)) a.lo && Q.lt a.hi Q.one
+
+/-- Order 2, matrix `[[a, b], [c, d]]`: the four Jury conditions at every
+    vertex of the box, in exact arithmetic. -/
+def jury2 (a b c d : Iv) : Bool :=
+  a.ends.all fun a => b.ends.all fun b => c.ends.all fun c => d.ends.all fun d =>
+    let tr  := a.add d
+    let det := (a.mul d).sub (b.mul c)
+    pos (Q.one.sub det) && pos (Q.one.add det) &&
+    pos ((Q.one.sub tr).add det) && pos ((Q.one.add tr).add det)
+
+inductive GV where
+  | stable     -- every matrix of the box is Jury-stable
+  | unproven   -- linear, but some matrix of the box fails Jury
+  | refused    -- not a linear group of at most 2 states
+deriving Repr, DecidableEq
+
+/-- The state of a group: `(i, k)` for `k = 1 .. depth i`, where `depth i` is
+    the largest delay at which output `i` is read. -/
+def stateOf (forms : List Aff) : Except String (List (Nat × Nat)) := do
+  let keys := forms.flatMap (·.map (·.1))
+  if keys.any (·.2 == 0) then throw "delay-free loop"
+  if keys.any (·.1 ≥ forms.length) then throw "state beyond the outputs read"
+  let outs := (List.range forms.length).filter fun i => keys.any (·.1 == i)
+  pure (outs.flatMap fun i =>
+    let depth := keys.foldl (fun m (j, k) => if j == i then Nat.max m k else m) 0
+    (List.range depth).map fun k => (i, k + 1))
+
+/-- Row of the state matrix for state `(i, k)`: the form of output `i` for
+    `k = 1`, the shift `y_i[n-k] ← y_i[n-k+1]` otherwise. -/
+def rowOf (forms : List Aff) (states : List (Nat × Nat)) (s : Nat × Nat) : List Iv :=
+  if s.2 == 1 then states.map fun t => (forms.getD s.1 []).coef t
+  else states.map fun t => if t == (s.1, s.2 - 1) then Iv.pt Q.one else Iv.zero
+
+def groupVerdict (dag : Dag) (free : List Nat) (nat natOpt : List Bool) (p : Prec)
+    (rng : List (Option Iv)) (r : Nat) : GV × String :=
+  let body := recBody dag r
+  let isIntArg : Arg → Bool := fun
+    | .ref j => natOpt.getD j false
+    | .int _ => true
+    | _ => false
+  if body.all isIntArg then (.refused, "integer recursion (wrapping semantics)") else
+  let affs := affines dag free nat p rng
+  let formOf : Arg → Except String Aff := fun
+    | .ref j => if free.getD j 1000 == 0 then .ok [] else affs.getD j (.error "?")
+    | _ => .ok []
+  match body.mapM formOf with
+  | .error e => (.refused, e)
+  | .ok forms =>
+    match stateOf forms with
+    | .error e => (.refused, e)
+    | .ok states =>
+      match states.map (rowOf forms states) with
+      | [] => (.stable, "no feedback")
+      | [[a]] => if jury1 a then (.stable, "") else (.unproven, "Jury fails on the box")
+      | [[a, b], [c, d]] =>
+          if jury2 a b c d then (.stable, "") else (.unproven, "Jury fails on the box")
+      | _ => (.refused, s!"{states.length} states (more than 2)")
+
+/-- The rates of `make check-precision`. -/
+def checkRates : List Int := [44100, 48000, 88200, 96000, 176400, 192000]
+
+def recNodes (dag : Dag) : List Nat :=
+  (List.range dag.length).filter fun i =>
+    match (dag.getD i default).tag with | .recur => true | _ => false
+
+/-- For each recursion group, its verdict at each rate of `checkRates`. -/
+def srVerdictsFull (dag : Dag) (p : Prec) : List (Nat × List (GV × String)) :=
+  let free := freeLevels dag
+  let nat := natures dag false
+  let natOpt := natures dag true
+  let perRate := checkRates.map fun sr =>
+    let rng := ranges dag nat natOpt p sr
+    (recNodes dag).map fun r => groupVerdict dag free nat natOpt p rng r
+  (recNodes dag).zipIdx.map fun (r, g) => (r, perRate.map fun vs => vs.getD g (.refused, "?"))
+
+def srVerdicts (dag : Dag) (p : Prec) : List (Nat × List GV) :=
+  (srVerdictsFull dag p).map fun (r, vs) => (r, vs.map (·.1))
+
+def GV.letter : GV → String
+  | .stable => "S" | .unproven => "U" | .refused => "R"
+
+/-- `n26:SSSSSS;n49:RRRRRR(reason)`, the probe format read by `sig2lean.py`. -/
+def srProbe (dag : Dag) (p : Prec) : String :=
+  String.intercalate ";" ((srVerdictsFull dag p).map fun (r, vs) =>
+    let letters := String.join (vs.map (·.1.letter))
+    let why := (vs.map (·.2)).filter (· != "") |>.eraseDups
+    s!"n{r}:{letters}" ++ (if why.isEmpty then "" else s!"({String.intercalate ", " why})"))
+
 /-! ## Standing obligations
 
-Two gaps are recorded here rather than silently relied upon.
+The gaps below are recorded here rather than silently relied upon.
 
 1. **Adequacy of the import.** `Sig` is asserted to mirror what
    `--dump-sig` emits. Nothing in Lean checks that; it is a review gate, and
@@ -574,16 +1229,40 @@ denoted rational coefficients (`make certify-deep`). This Std-only file does
 not depend on that proof; the obligation note stays here so the trust story is
 readable from one place.
 
-Note also that certification is over the **exact rationals** denoted by the
-exported double-precision coefficients. It says nothing about the behaviour of
-the filter as executed in floating point.
+Note also that `certifyStableB` and `certifyIndicesB` are over the **exact
+rationals** denoted by the exported double-precision coefficients. They say
+nothing about the behaviour of the filter as executed in floating point.
 
 The same caveat carries one concrete instance in the range analysis: the
 phasor rule reads `x - floor(x) ∈ [0, 1)`, which is an identity of exact
-arithmetic. In floating point the subtraction is exact whenever
-`floor(x) ≤ x < 2·floor(x)` (Sterbenz) and rounds otherwise; a rounding that
-reached `1.0` would step outside the certified interval. Auditing the float
-behaviour of `frac` is part of the same floating-point obligation, not a new
-one. -/
+arithmetic. In floating point `frac` is exact for `x ≥ 0`, but not below:
+in single precision `frac(-1e-9)` is `1.0`, one past the interval. Auditing
+the float behaviour of `frac` is part of the same floating-point obligation,
+not a new one.
+
+The rate analysis (`srVerdicts`) does model floating point, under these
+assumptions:
+
+3. **IEEE 754 arithmetic.** `+ - * /` and `sqrt` are correctly rounded, in the
+   evaluation order of the graph. A fused multiply-add is covered (it rounds
+   once where the model rounds twice); a reassociation (`-ffast-math`) is
+   not: it changes the computation, not its rounding.
+
+4. **The math library.** `tan`, `sin`, `cos`, `exp` and `pow` return their
+   result within `libmUlps` ulps. This is a property of each platform's libm,
+   stated, not proved.
+
+5. **The enclosures.** The Taylor remainders of `sinI`, `cosI` and `expSmall`,
+   the continuity argument of `tanI`, the monotonicity of `sqrt` and of the
+   rounding widening, and the vertex lemma of `jury2` (a multilinear function
+   reaches its minimum over a box at a vertex) are stated with their argument
+   next to the code, and reviewed as mathematics. They are the next targets of
+   the optional mathlib layer, which already proves the Jury criterion.
+
+6. **What is claimed.** The coefficients (the state-free subexpressions) are
+   taken as the program computes them; the loop arithmetic that involves the
+   state is taken exactly. Its rounding perturbs the state at each sample: an
+   accuracy question, bounded by no theorem here. The controls are at their
+   default values, as in `make check-precision`. -/
 
 end Faust.Signal

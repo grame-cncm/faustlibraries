@@ -355,6 +355,80 @@ def clamp_oracle(dsp, lean_site_verdicts):
     return "; ".join(parts), defect
 
 
+# ------------------------------------------------ DAG emission (rate analysis)
+
+NODE_TAGS = {"SIGINPUT": ".input", "SIGDELAY1": ".delay1", "SIGDELAY": ".delay",
+             "SIGPROJ": ".proj", "DEBRUIJNREC": ".recur", "DEBRUIJNREF": ".ref",
+             "cons": ".cons", "SIGBUTTON": ".button", "SIGCHECKBOX": ".button",
+             "SIGINTCAST": ".intcast", "SIGFLOATCAST": ".floatcast",
+             "SIGMIN": ".min", "SIGMAX": ".max", "SIGABS": ".abs",
+             "SIGFLOOR": ".floor", "SIGSELECT2": ".select2", "SIGTAN": ".tan",
+             "SIGSIN": ".sin", "SIGCOS": ".cos", "SIGEXP": ".exp",
+             "SIGSQRT": ".sqrt", "SIGPOW": ".pow"}
+BINOPS = {"add": ".binop .add", "sub": ".binop .sub", "mul": ".binop .mul",
+          "div": ".binop .div", "rem": ".binop .rem"}
+COMPARISONS = {"lt", "le", "gt", "ge", "eq", "ne"}
+SR_NAMES = {"fSamplingFreq", "fSamplingRate"}
+PRECISIONS = ("exact", "double", "single")
+
+
+def node_arg(arg):
+    """One argument of a `Node`: a child index, or a leaf."""
+    kind, val = arg
+    if kind == "ref":
+        return f".ref {val}"
+    if val.tag == "int":
+        return f".int {i(val.val)}"
+    if val.tag == "float":
+        return f".const {q_lit(val.val)}"
+    if val.tag == "nil":
+        return ".nil"
+    return ".other"
+
+
+def node_tag(tag, args, op):
+    if tag == "SIGBINOP":
+        if op in BINOPS:
+            return BINOPS[op]
+        if op in COMPARISONS:
+            return ".cmp"
+        return f'.other "SIGBINOP:{lean_str(op or "?")}"'
+    if tag == "SIGFCONST":
+        names = [a[1].val for a in args if a[0] == "leaf" and a[1].tag == "opaque"]
+        return ".sr" if any(n in SR_NAMES for n in names) else '.other "SIGFCONST"'
+    if tag in UI_RANGE_TAGS and tag not in ("SIGVBARGRAPH", "SIGHBARGRAPH"):
+        return ".control"
+    return NODE_TAGS.get(tag, f'.other "{lean_str(tag)}"')
+
+
+def emit_nodes(bindings):
+    """The whole DAG as a `Dag`: node `k` at position `k`."""
+    if sorted(bindings) != list(range(len(bindings))):
+        raise RuntimeError("dump bindings are not numbered 0..N-1")
+    lines = []
+    for k in range(len(bindings)):
+        tag, args, rng, op = bindings[k]
+        t = node_tag(tag, args, op)
+        ctl = (f"({q_lit(rng['init'])}, {q_lit(rng['min'])}, {q_lit(rng['max'])})"
+               if t == ".control" and rng else "(Q.zero, Q.zero, Q.zero)")
+        a = ", ".join(node_arg(x) for x in args)
+        lines.append(f"  ⟨{t}, [{a}], {ctl}⟩")
+    return "[\n" + ",\n".join(lines) + "]"
+
+
+def gv_list(letters):
+    return "[" + ", ".join({"S": ".stable", "U": ".unproven", "R": ".refused"}[c]
+                           for c in letters) + "]"
+
+
+def parse_sr_probe(text):
+    """`n26:SSSSSS;n49:RRRRRR(reason)` -> [(26, "SSSSSS", "reason"), ...]"""
+    out = []
+    for m in re.finditer(r"n(\d+):([SUR]+)(?:\(([^)]*)\))?", text):
+        out.append((int(m.group(1)), m.group(2), m.group(3) or ""))
+    return out
+
+
 def emit_arg(bindings, arg):
     kind, val = arg
     return f"n{val}" if kind == "ref" else emit(val)
@@ -403,7 +477,7 @@ def ident(p):
     return re.sub(r'\W', '_', os.path.splitext(os.path.basename(p))[0])
 
 
-def build(template, dsps, verdicts=None, oracle=None):
+def build(template, dsps, verdicts=None, oracle=None, rates=None):
     out = [open(template).read(),
            "/-! # Generated section",
            "",
@@ -422,10 +496,15 @@ def build(template, dsps, verdicts=None, oracle=None):
             names.append(name)
             out.append(f"/-- `{src}` — output {k} -/")
             out.append(f"def {name} : Sig :={emit_dag(bindings, root)}\n")
+        out.append(f"/-- `{src}` — the whole graph, for the rate analysis -/")
+        out.append(f"def {ident(d)}_dag : Dag := {emit_nodes(bindings)}\n")
+    stems = [ident(d) for d in dsps]
     if verdicts is None:
         out += [f'#eval s!"{n}|" ++ toString (certifyStableB {n}) ++ "|" '
                 f'++ toString (certifyIndicesB {n}) ++ "|" '
                 f'++ tableSiteVerdictsB {n}' for n in names]
+        out += [f'#eval s!"{st}@{p}|" ++ srProbe {st}_dag .{p}'
+                for st in stems for p in PRECISIONS]
     else:
         out.append("/-! ## Certification\n")
         out.append("Two independent analyses over the same imported graph.")
@@ -445,6 +524,21 @@ def build(template, dsps, verdicts=None, oracle=None):
         out.append("")
         out += [f"theorem {n}_indices : certifyIndicesB {n} = {verdicts[n][1]} := by decide"
                 for n in names]
+        out.append("")
+        out.append("/-! ## Stability at the rates of `check-precision`\n")
+        out.append("Per program and precision, the verdict of every recursion group")
+        out.append("(`n<k>`, the dump index of its `DEBRUIJNREC`) at 44.1, 48, 88.2, 96,")
+        out.append("176.4 and 192 kHz: `S` stable, `U` linear but not proven stable,")
+        out.append("`R` refused (outside the fragment: the reason follows). -/\n")
+        for st in stems:
+            for p in PRECISIONS:
+                out.append(f"-- {st} {p}: {rates[(st, p)][1]}")
+        out.append("")
+        for st in stems:
+            for p in PRECISIONS:
+                groups = rates[(st, p)][0]
+                body = ", ".join(f"({g}, {gv_list(l)})" for g, l, _ in groups)
+                out.append(f"theorem {st}_rates_{p} : srVerdicts {st}_dag .{p} = [{body}] := by decide +kernel")
     if oracle:
         out.append("")
         out.append("/-! ## Compiler clamp oracle\n")
@@ -474,6 +568,12 @@ def main():
     missing = [n for n in names if n not in verdicts]
     if missing:
         sys.exit(f"probe failed for {missing}\n{r.stdout}\n{r.stderr}")
+    rates = {}
+    for m in re.finditer(r'"?(\w+)@(exact|double|single)\|([^"\n]*)"?', r.stdout):
+        rates[(m.group(1), m.group(2))] = (parse_sr_probe(m.group(3)), m.group(3) or "no recursion")
+    missing = [(st, p) for st in map(ident, dsps) for p in PRECISIONS if (st, p) not in rates]
+    if missing:
+        sys.exit(f"rate probe failed for {missing}\n{r.stdout}\n{r.stderr}")
 
     # Compiler clamp oracle: Lean's table verdicts vs the -ct clamps.
     oracle_lines, defects = [], []
@@ -493,11 +593,13 @@ def main():
         sys.exit("clamp oracle DEFECT — Lean requires a clamp the compiler "
                  "did not insert:\n  " + "\n  ".join(defects))
 
-    final, _ = build(template, dsps, verdicts, oracle=oracle_lines)
+    final, _ = build(template, dsps, verdicts, oracle=oracle_lines, rates=rates)
     open(target, "w").write(final)
     print(f"wrote {target}: {len(names)} signal(s), "
           f"{sum(v[0] == 'true' for v in verdicts.values())} certified stable, "
           f"{sum(v[1] == 'true' for v in verdicts.values())} with certified indices")
+    for (st, p), (groups, text) in sorted(rates.items()):
+        print(f"  rates {st} {p}: {text}")
     for line in oracle_lines:
         print(f"  clamp oracle: {line}")
     os.unlink(probe_path)
