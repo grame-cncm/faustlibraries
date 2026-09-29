@@ -3,11 +3,12 @@
 // Tests for the Faust-STK instrument building blocks.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 inst = library("instruments.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
 
-src = os.osc(440);
+src = tosc(440);
 gate = button("gate");
 
 // Envelope generators
@@ -17,7 +18,7 @@ inst_asympT60_test = inst.asympT60(1, 0, 0.5, gate);
 // Tables
 inst_saturationPos_test = 2 * src : inst.saturationPos;
 inst_saturationNeg_test = 2 * src : inst.saturationNeg;
-inst_bow_test = abs(os.osc(5)) : inst.bow(0.2, 3);
+inst_bow_test = abs(tosc(5)) : inst.bow(0.2, 3);
 inst_reed_test = src : inst.reed(0.6, -0.8);
 
 // Filters
@@ -33,4 +34,4 @@ inst_nonLinearModulator_test = src : inst.nonLinearModulator(0.5, 1, 440, 0, 100
 
 // Tools
 inst_stereoizer_test = src : inst.stereoizer(ma.SR/440);
-inst_instrReverb_test = src, os.osc(660) : inst.instrReverb;
+inst_instrReverb_test = src, tosc(660) : inst.instrReverb;

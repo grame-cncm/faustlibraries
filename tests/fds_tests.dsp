@@ -3,6 +3,7 @@
 // Tests for finite difference schemes helpers.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fd = library("fds.lib");
 si = library("signals.lib");
 os = library("oscillators.lib");
@@ -58,7 +59,7 @@ buildScheme1D_test = (1, 0.5, -0.25)
 buildScheme2D_test = (1, 0.5, -0.25)
   : fd.buildScheme2D(1, 1, 0, 0);
 
-hammer_test = os.osc(5)
+hammer_test = tosc(5)
   : fd.hammer(
       0.1,
       1000,
@@ -70,5 +71,5 @@ hammer_test = os.osc(5)
       button("hammer:trigger")
     );
 
-bow_test = os.osc(5)
+bow_test = tosc(5)
   : fd.bow(0.05, 2.0, 1.0/48000, 0.1);

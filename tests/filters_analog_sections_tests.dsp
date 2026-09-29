@@ -3,13 +3,14 @@
 // Tests for analog-transfer filter sections.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-src = os.osc(440);
+src = tosc(440);
 
 tf2s_test = src : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
 tf2snp_test = src : fi.tf2snp(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);

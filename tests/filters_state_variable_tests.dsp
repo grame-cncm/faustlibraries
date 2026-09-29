@@ -3,12 +3,13 @@
 // Tests for state-variable filter helpers and related utilities.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-sig = os.osc(440);
+sig = tosc(440);
 
 svf_lp_test = fi.svf.lp(1000, 0.707, sig);
 svf_bp_test = fi.svf.bp(1000, 0.707, sig);

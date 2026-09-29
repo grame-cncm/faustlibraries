@@ -3,10 +3,11 @@
 // Tests for High Order Ambisonics helper functions.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 ho = library("hoa.lib");
 os = library("oscillators.lib");
 
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = tosc(freq);
 stereoSignal(f1, f2) = monoSignal(f1), monoSignal(f2);
 
 encoder_test = ho.encoder(1, monoSignal(440), 0.0);

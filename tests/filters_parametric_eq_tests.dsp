@@ -3,13 +3,14 @@
 // Tests for parametric equalizer helper functions.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-src = os.osc(440);
+src = tosc(440);
 
 lowshelf_test = src : fi.lowshelf(3, 6, 500);
 lowshelf_slider_test = no.noise : fi.lowshelf(3, hslider("L0", 6, -24, 24, 0.1), hslider("fc", 500, 20, 20000, 1));

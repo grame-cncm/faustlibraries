@@ -3,11 +3,12 @@
 // Tests for ladder/lattice envelope helpers.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 
-src = os.osc(440);
-dual_src = os.osc(440), os.osc(660);
+src = tosc(440);
+dual_src = tosc(440), tosc(660);
 
 scatN_test = dual_src : fi.scatN(2, (1, 1), _);
 scat_test = src : fi.scat(0.5, _);

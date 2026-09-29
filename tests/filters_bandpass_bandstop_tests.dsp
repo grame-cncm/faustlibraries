@@ -3,12 +3,13 @@
 // Tests for Butterworth bandpass/bandstop helper functions.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-src = os.osc(440);
+src = tosc(440);
 
 bandpass_test = src : fi.bandpass(2, 500, 1500);
 bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);

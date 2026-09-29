@@ -3,12 +3,13 @@
 // Tests for antialiased nonlinearities.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 aa = library("aanl.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 os = library("oscillators.lib");
 
-sig = os.osc(110);
+sig = tosc(110);
 tanDomainSig = 0.25 * ma.PI * sig;
 atanhDomainSig = 0.8 * sig;
 acoshDomainSig = 1.0 + abs(sig);

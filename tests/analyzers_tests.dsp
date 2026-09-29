@@ -3,14 +3,15 @@
 // Tests for analyzer helper functions.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 an = library("analyzers.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
 
-mono = os.osc(220);
-rich = os.osc(440) + os.osc(880);
+mono = tosc(220);
+rich = tosc(440) + tosc(880);
 
 abs_envelope_rect_test = an.abs_envelope_rect(0.05, mono);
 abs_envelope_tau_test = an.abs_envelope_tau(0.05, mono);
@@ -39,9 +40,9 @@ mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
 mth_octave_spectral_level6e_test = mono : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
 analyzer_test = mono : an.analyzer(3, (500, 2000));
 
-goertzelOpt_test = an.goertzelOpt(440, 128, os.osc(440));
-goertzelComp_test = an.goertzelComp(440, 128, os.osc(440));
-goertzel_test = an.goertzel(440, 128, os.osc(440));
+goertzelOpt_test = an.goertzelOpt(440, 128, tosc(440));
+goertzelComp_test = an.goertzelComp(440, 128, tosc(440));
+goertzel_test = an.goertzel(440, 128, tosc(440));
 
 resonator_test = mono : an.resonator(2, 440);
 
@@ -65,12 +66,12 @@ window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
 window_kaiser_test = an.window_kaiser(8.6, os.lf_sawpos(100));
 
 // Loudness metering (EBU R128 / ITU-R BS.1770)
-loudness_momentary_test = os.osc(997), os.osc(997) : an.loudness_momentary(2);
-loudness_shortterm_test = os.osc(997), os.osc(997) : an.loudness_shortterm(2);
-loudness_integrated_test = os.osc(997), os.osc(997) : an.loudness_integrated(2);
-true_peak_test = os.osc(12000)*0.97 : an.true_peak;
+loudness_momentary_test = tosc(997), tosc(997) : an.loudness_momentary(2);
+loudness_shortterm_test = tosc(997), tosc(997) : an.loudness_shortterm(2);
+loudness_integrated_test = tosc(997), tosc(997) : an.loudness_integrated(2);
+true_peak_test = tosc(12000)*0.97 : an.true_peak;
 
 // Spectral descriptors (filter-bank based)
-spectral_centroid_test = os.osc(1000) : an.spectral_centroid(3, 1, 8000, 6, 0.1);
-spectral_spread_test = os.osc(800) + os.osc(5000) : an.spectral_spread(3, 1, 8000, 6, 0.1);
-spectral_flux_test = os.osc(1000) * ((ba.time % 24000) > 12000) : an.spectral_flux(3, 1, 8000, 6, 0.02);
+spectral_centroid_test = tosc(1000) : an.spectral_centroid(3, 1, 8000, 6, 0.1);
+spectral_spread_test = tosc(800) + tosc(5000) : an.spectral_spread(3, 1, 8000, 6, 0.1);
+spectral_flux_test = tosc(1000) * ((ba.time % 24000) > 12000) : an.spectral_flux(3, 1, 8000, 6, 0.02);

@@ -3,10 +3,11 @@
 // Tests for the MaxMSP compatibility library.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 mm = library("maxmsp.lib");
 os = library("oscillators.lib");
 
-src = os.osc(440);
+src = tosc(440);
 
 mm_atodb_test = 0.5 : mm.atodb;
 mm_filtercoeff_test = mm.filtercoeff(1000, 6, 1).LPF;

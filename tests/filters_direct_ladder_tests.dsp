@@ -3,13 +3,14 @@
 // Tests for direct-form and ladder filters.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 ba = library("basics.lib");
 fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
 no = library("noises.lib");
 
-src = os.osc(440);
+src = tosc(440);
 
 iir_test = src : fi.iir((0.5, 0.5), (0.3));
 fir_test = src : fi.fir((0.2, 0.2, 0.2, 0.2, 0.2));

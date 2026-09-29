@@ -3,11 +3,12 @@
 // Tests for demos helper functions.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 dm = library("demos.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = tosc(freq);
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
 stereoNoise = no.noise, no.noise;
 

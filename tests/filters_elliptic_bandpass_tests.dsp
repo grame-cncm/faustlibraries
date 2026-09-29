@@ -3,12 +3,13 @@
 // Tests for elliptic bandpass helpers.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-src = os.osc(440);
+src = tosc(440);
 
 bandpass6e_test = src : fi.bandpass6e(500, 1500);
 bandpass6e_slider_test = no.noise : fi.bandpass6e(hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));

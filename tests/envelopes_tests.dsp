@@ -3,6 +3,7 @@
 // Tests for envelope helper functions.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 en = library("envelopes.lib");
 no = library("noises.lib");
 os = library("oscillators.lib");
@@ -43,7 +44,7 @@ are_test = no.noise * en.are(0.2, 0.4, gate);
 asre_test = no.noise * en.asre(0.2, 0.6, 0.4, gate);
 adsre_test = no.noise * en.adsre(0.2, 0.1, 0.6, 0.4, gate);
 ahdsre_test = no.noise * en.ahdsre(0.2, 0.05, 0.1, 0.6, 0.4, gate);
-dx7envelope_test = os.osc(440) * en.dx7envelope(
+dx7envelope_test = tosc(440) * en.dx7envelope(
   0.05, 0.1, 0.1, 0.2,
   1, 0.8, 0.6, 0,
   gate

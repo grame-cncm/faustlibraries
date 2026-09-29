@@ -3,12 +3,13 @@
 // Tests for basic Butterworth helper filters.
 //----------------------------------------------------------------------------
 
+import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-src = os.osc(440);
+src = tosc(440);
 
 lowpass_test = src : fi.lowpass(4, 2000);
 lowpass_lowfc_test = no.noise : fi.lowpass(3, 10.1);
