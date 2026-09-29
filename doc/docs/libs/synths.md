@@ -202,6 +202,81 @@ sy = library("synths.lib");
 fm_test = sy.fm((220, 440, 660), (1.5, 0.8));
 ```
 
+----
+
+### `(sy.)logicEFM1`
+
+Model of one voice of Apple Logic Pro's EFM1, a two-operator FM synthesizer: a
+sine carrier phase-modulated by a modulator whose waveform morphs through ten
+wavetables, with volume and modulation envelopes, a key-synced LFO, a sub
+oscillator, carrier stereo detune and a unison mode. Stereo output.
+
+EFM1 exists only inside Logic Pro, so it cannot be hosted outside it. The model
+was reverse-engineered from single notes rendered by Logic at 48 kHz, each with
+one or two controls changed from a neutral patch and every control value read
+back from Logic. The laws and constants below were fitted to those renders, and
+the wavetables were read out of them. Against 94 of these renders the model
+matches the level to 0.03 dB and, for steady tones, the waveform to 0.7 %
+(median) and 4.4 % (worst case). The implementation notes give the fit per
+feature and list what was not measured: only 48 kHz, only C notes (C0 to C6),
+and one or a few settings for several controls.
+
+#### Usage
+
+```
+logicEFM1(modHarm, carHarm, modFine, carFine, fixedCar, fmInt, modWave,
+          modEnvFM, modPitch, subLevel, stereoDet, unison,
+          lfoAmt, lfoRate, velAmt, mainLevel,
+          vA, vD, vS, vR, mA, mD, mS, mR,
+          freq, gate, gain) : _,_
+```
+
+Where:
+
+* `modHarm`: modulator harmonic, an integer >= 1 (modulator frequency = modHarm*freq)
+* `carHarm`: carrier harmonic, an integer >= 0 (carrier frequency = carHarm*freq; 0 gives a 0 Hz carrier)
+* `modFine`: modulator fine ratio offset (-0.5..0.5), added to modHarm
+* `carFine`: carrier fine ratio offset (-0.5..0.5), added to carHarm
+* `fixedCar`: Fixed Carrier switch (0/1): the carrier sits at C1 (32.70 Hz) times its ratio, independent of freq and the LFO
+* `fmInt`: FM intensity (0-1)
+* `modWave`: modulator waveform (0-9): 0 is a sine, and the knob blends the ten wavetables linearly
+* `modEnvFM`: modulation envelope to FM intensity (-1..1)
+* `modPitch`: modulation envelope to modulator pitch (-1..1; up to +-27.5 semitones)
+* `subLevel`: sub oscillator level (0-1; a sine one octave below freq)
+* `stereoDet`: carrier stereo detune as displayed (0-50; the carriers move by about 0.75x this many cents)
+* `unison`: Unison switch (0/1): a second, slightly detuned copy of the voice
+* `lfoAmt`: LFO amount, bipolar (-1 = full vibrato, +-36 semitones .. +1 = full FM modulation)
+* `lfoRate`: LFO rate in Hz (0.01-100)
+* `velAmt`: velocity sensitivity of the level (0-1)
+* `mainLevel`: output gain (linear; 1 = Logic's 0 dB)
+* `vA`: volume envelope attack in ms, as Logic displays it (0-10000)
+* `vD`: volume envelope decay in ms (0-10000)
+* `vS`: volume envelope sustain (0-1)
+* `vR`: volume envelope release in ms (0-10000)
+* `mA`: modulation envelope attack in ms (0-10000)
+* `mD`: modulation envelope decay in ms (0-10000)
+* `mS`: modulation envelope sustain (0-1)
+* `mR`: modulation envelope release in ms (0-10000)
+* `freq`: note frequency in Hz
+* `gate`: note gate (0/1)
+* `gain`: note velocity (MIDI velocity/127)
+
+#### Test
+```
+sy = library("synths.lib");
+ba = library("basics.lib");
+logicEFM1_test = sy.logicEFM1(1, 2, 0, 0, 0, 0.3, 2.5, 0.5, 0.2, 0.3, 10, 0,
+                              -0.3, 2, 0.3, 1, 10, 500, 0.7, 300, 0, 800, 0.2, 200,
+                              261.63, ba.time < 36000, 0.8);
+logicEFM1_unison_test = sy.logicEFM1(3, 4, 0, 0, 1, 0.35, 8.9, 0.7, 0, 0.2, 35, 1,
+                                     0.8, 1, 0.8, 1, 5, 1200, 0.3, 500, 0, 2000, 0.1, 400,
+                                     261.63, ba.time < 36000, 0.8);
+```
+
+#### References
+
+* Apple, Logic Pro User Guide, "EFM1".
+
 ## Drum Synthesis
 
 Drum Synthesis ported in Faust from a version written in [Elementary](https://www.elementary.audio/) 
