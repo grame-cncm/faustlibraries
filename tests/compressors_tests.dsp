@@ -3,7 +3,9 @@
 // Tests for compressor helper functions.
 //----------------------------------------------------------------------------
 
+ba = library("basics.lib");
 co = library("compressors.lib");
+ma = library("maths.lib");
 os = library("oscillators.lib");
 
 meter(x) = x;
@@ -39,3 +41,13 @@ limiter_lad_mono_test = os.osc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0
 limiter_lad_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
 limiter_lad_quad_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
 limiter_lad_bw_test = os.osc(440) : co.limiter_lad_bw;
+
+xfer_ott_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
+   : co.xfer_ott(1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+xfer_ott_slow_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
+   : co.xfer_ott(0.5, 2.8, 3, -3, 1.5, 0.5, 0.8, 1.2, 1, 1, 0, -2, 0, 1, 0, 0, 0, 1);
+
+// 3 Hz bursts, gated by a sample counter so that float and double switch together
+xfer_ott_burst_test = (os.osc(220)*0.3*g, os.osc(3000)*0.03*(1 - g))
+   : co.xfer_ott(1, 2.8, 0, 0, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+with { g = (ba.time % int(ma.SR / 3)) < int(ma.SR / 6); };

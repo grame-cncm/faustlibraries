@@ -201,6 +201,29 @@ compressor_demo_test = stereoNoise : dm.compressor_demo;
 
 ----
 
+### `(dm.)xfer_ott_demo`
+
+Demo application for `co.xfer_ott`, the model of Xfer Records' OTT, with the
+plug-in's controls in its own units and at its defaults: Depth, Time, In/Out
+Gain and Upward/Downward strength, and per band (Low / Mid / High) Threshold,
+Gain and the two branch bypasses. Continuous controls are smoothed; Bypass
+switches the whole effect off for A/B comparison.
+
+#### Usage
+
+```
+_,_ : xfer_ott_demo : _,_
+```
+
+#### Test
+```
+dm = library("demos.lib");
+os = library("oscillators.lib");
+xfer_ott_demo_test = (os.osc(220)*0.3, os.osc(3000)*0.03) : dm.xfer_ott_demo;
+```
+
+----
+
 ### `(dm.)moog_vcf_demo`
 
 Illustrate and compare all three Moog VCF implementations above.
