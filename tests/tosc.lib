@@ -6,10 +6,10 @@
 // depends on the constant f only, never on SR, so both renders read the same phase at
 // every sample and play exactly f Hz (f with at most one decimal). They differ only by
 // the rounding of 2 pi m / N and of sin, bounded, never accumulated.
-tphase(p, N) = %(N) ~ +(p);
-toscStep(f) = int(f * 10 + 0.5);            // the integer step, in tenths of a hertz
 tosc(f) = sin(2.0 * library("maths.lib").PI * float(tphase(p, N)) / N)
 with {
-    N = 10 * int(library("maths.lib").SR);  // a tenth of a hertz of resolution
+    toscStep(f) = int(f * 10 + 0.5);          // the integer step, in tenths of a hertz
     p = toscStep(f);
+    N = 10 * int(library("maths.lib").SR);    // a tenth of a hertz of resolution
+    tphase(p, N) = %(N) ~ +(p);               // the integer phase, exact
 };
