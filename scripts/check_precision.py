@@ -197,13 +197,16 @@ def measure(s, d, sr):
     return m
 
 
-def error_profile(s, d, sr, env_window=0.010, trend_window=0.050, floor=1e-6):
+def error_profile(s, d, sr, env_window=0.010, trend_window=0.050, floor=1e-6, abs_floor=2.0 ** -15):
     """The error relative to the local level of the double render, and its trend.
 
     A pointwise relative error (s - d) / d explodes at every zero crossing of d ;
     the error is divided instead by the RMS of d over env_window around each
-    sample, floored at floor x the channel's peak (silences). Meaningful only when
-    the single and double renders are in phase (an input without phase drift).
+    sample, floored at floor x the channel's peak and at abs_floor, the step of a
+    16-bit sample : where d is quieter than a 16-bit step (a silence, a decaying
+    tail), the error is counted in 16-bit steps rather than relative to a level no
+    16-bit output could represent. Meaningful only when the single and double
+    renders are in phase (an input without phase drift).
 
     - rel_max    : the largest relative error, any channel, any sample ;
     - onset_1e-4, onset_1e-3 : the first time (seconds) it exceeds the threshold ;
@@ -229,7 +232,7 @@ def error_profile(s, d, sr, env_window=0.010, trend_window=0.050, floor=1e-6):
     for c in range(ch):
         if peak[c] <= 1e-12:
             continue
-        rel = np.maximum(rel, err[:, c] / np.maximum(env[:, c], floor * peak[c]))
+        rel = np.maximum(rel, err[:, c] / np.maximum(env[:, c], max(floor * peak[c], abs_floor)))
     out = {"rel_max": float(rel.max()) if n else 0.0}
     for thr in (1e-4, 1e-3):
         idx = np.flatnonzero(rel > thr)
@@ -241,7 +244,7 @@ def error_profile(s, d, sr, env_window=0.010, trend_window=0.050, floor=1e-6):
         return out
     e2 = (err[: k * tw] ** 2).reshape(k, tw, ch).sum(axis=1)
     d2 = (d[: k * tw] ** 2).reshape(k, tw, ch).sum(axis=1)
-    d2 = np.maximum(d2, (floor * peak) ** 2 * tw)
+    d2 = np.maximum(d2, np.maximum(floor * peak, abs_floor) ** 2 * tw)
     ew = np.where(peak > 1e-12, np.sqrt(e2 / d2), 0.0).max(axis=1)
     if not ew.any():
         out.update(growth_exp=0.0, error_class="exact")
