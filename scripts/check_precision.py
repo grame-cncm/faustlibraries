@@ -17,6 +17,8 @@ measures, over all output channels:
           ignores a slow phase drift (os.osc in float) that `gap` does not;
 - growth: peak at this rate / peak at the lowest rate (a blow-up at high
           rates shows here).
+- onset_bits: for k = 0..15, the first sample where |single - double| reaches
+          2^-k (reported, not checked) ;
 - rel_max, onset_1e-4, onset_1e-3, growth_exp, error_class : the error
           relative to the LOCAL level of the double render (see error_profile) ;
           reported, not checked.
@@ -187,6 +189,11 @@ def measure(s, d, sr):
             level = float("inf")
     m["level"] = float(level)
     m.update(error_profile(s, d, sr))
+    # onset_bits[k] : the first sample where |s - d| reaches 2^-k (any channel), None if
+    # never -- the precision in bits along time : k bits hold until onset_bits[k]
+    ea = np.maximum.accumulate(np.abs(s - d).max(axis=1)) if d.shape[0] else np.zeros(0)
+    m["onset_bits"] = [None if (i := int(np.searchsorted(ea, 2.0 ** -k, side="left"))) >= ea.size else i
+                       for k in range(16)]
     return m
 
 
