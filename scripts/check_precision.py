@@ -17,6 +17,9 @@ measures, over all output channels:
           ignores a slow phase drift (os.osc in float) that `gap` does not;
 - growth: peak at this rate / peak at the lowest rate (a blow-up at high
           rates shows here).
+- rel_max, onset_1e-4, onset_1e-3, growth_exp, error_class : the error
+          relative to the LOCAL level of the double render (see error_profile) ;
+          reported, not checked.
 
 A test fails when an output is not finite, or when its level gap exceeds the
 threshold (1e-3), unless tests/precision-baseline.json accepts it. That file
@@ -161,7 +164,7 @@ def render(exe, sr, frames, path):
     return data.reshape(-1, channels) if channels else np.zeros((frames, 0))
 
 
-def measure(s, d):
+def measure(s, d, sr):
     finite_s = bool(np.isfinite(s).all())
     finite_d = bool(np.isfinite(d).all())
     m = {"finite_single": finite_s, "finite_double": finite_d}
@@ -183,7 +186,67 @@ def measure(s, d):
         elif a > 1e-12:
             level = float("inf")
     m["level"] = float(level)
+    m.update(error_profile(s, d, sr))
     return m
+
+
+def error_profile(s, d, sr, env_window=0.010, trend_window=0.050, floor=1e-6):
+    """The error relative to the local level of the double render, and its trend.
+
+    A pointwise relative error (s - d) / d explodes at every zero crossing of d ;
+    the error is divided instead by the RMS of d over env_window around each
+    sample, floored at floor x the channel's peak (silences). Meaningful only when
+    the single and double renders are in phase (an input without phase drift).
+
+    - rel_max    : the largest relative error, any channel, any sample ;
+    - onset_1e-4, onset_1e-3 : the first time (seconds) it exceeds the threshold ;
+    - growth_exp : p such that the error grows like t^p, fitted on the relative
+                   RMS error of trend_window windows (the first one skipped) ;
+    - error_class: exact (no error) ; flat (p < 0.25 : a rounding that does not
+                   accumulate, or a fixed gain error) ; random-walk (0.25 <= p < 0.75 :
+                   unbiased roundings accumulated by a recurrence, which grow like
+                   sqrt(t)) ; linear (0.75 <= p < 1.5 : a bias, a frequency or a rate
+                   off, whose phase or amplitude error grows like t) ; fast (p >= 1.5 :
+                   an instability, a chaotic system) ; saturated (the windowed error
+                   reaches 0.1 : diverged).
+    """
+    n, ch = d.shape
+    err = np.abs(s - d)
+    peak = np.abs(d).max(axis=0)
+    rel = np.zeros(n)
+    w = max(1, int(round(env_window * sr)))
+    c2 = np.concatenate([np.zeros((1, ch)), np.cumsum(d * d, axis=0)])
+    lo = np.clip(np.arange(n) - w // 2, 0, n)
+    hi = np.clip(np.arange(n) + w - w // 2, 0, n)
+    env = np.sqrt((c2[hi] - c2[lo]) / np.maximum(hi - lo, 1)[:, None])
+    for c in range(ch):
+        if peak[c] <= 1e-12:
+            continue
+        rel = np.maximum(rel, err[:, c] / np.maximum(env[:, c], floor * peak[c]))
+    out = {"rel_max": float(rel.max()) if n else 0.0}
+    for thr in (1e-4, 1e-3):
+        idx = np.flatnonzero(rel > thr)
+        out[f"onset_{thr:g}"] = float(idx[0] / sr) if idx.size else None
+    tw = max(1, int(round(trend_window * sr)))
+    k = n // tw
+    if k < 3:
+        out.update(growth_exp=None, error_class=None)
+        return out
+    e2 = (err[: k * tw] ** 2).reshape(k, tw, ch).sum(axis=1)
+    d2 = (d[: k * tw] ** 2).reshape(k, tw, ch).sum(axis=1)
+    d2 = np.maximum(d2, (floor * peak) ** 2 * tw)
+    ew = np.where(peak > 1e-12, np.sqrt(e2 / d2), 0.0).max(axis=1)
+    if not ew.any():
+        out.update(growth_exp=0.0, error_class="exact")
+        return out
+    t = (np.arange(k) + 0.5) * tw / sr
+    y = np.log(np.maximum(ew[1:], 1e-15))
+    x = np.log(t[1:])
+    p = float(np.polyfit(x, y, 1)[0])
+    out["growth_exp"] = p
+    out["error_class"] = ("saturated" if ew.max() >= 0.1 else "flat" if p < 0.25 else
+                          "random-walk" if p < 0.75 else "linear" if p < 1.5 else "fast")
+    return out
 
 
 def check_test(spec, cfg, args):
@@ -205,7 +268,7 @@ def check_test(spec, cfg, args):
         except (RuntimeError, subprocess.TimeoutExpired) as e:
             res["rates"][sr] = {"error": str(e)}
             continue
-        m = measure(s, d)
+        m = measure(s, d, sr)
         if m["peak"] is not None:
             if base_peak is None:
                 base_peak = m["peak"]
