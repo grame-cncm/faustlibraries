@@ -35,6 +35,7 @@ or later.
 | [`plot_families.py`](#plot_familiespy) | figures of the other libraries, with property assertions | `make plots` |
 | **Formal certification** | | |
 | [`sig2lean.py`](#sig2leanpy) | Faust signals to Lean 4 theorems | `make certify`, `certify-reference` |
+| [`certify_tests.py`](#certify_testspy) | the Lean rate analysis on every regression test | `make certify-tests` |
 
 The scripts that turn the `.lib` files into the documentation pages
 (`faustlib2md.awk`, `inject_plots.py`, `makeindex.awk`) are in `doc/scripts/` and
@@ -505,3 +506,49 @@ fails if a table that needs a clamp was left unclamped.
 
 The workflow and the meaning of the verdicts are in `doc/docs/contributing.md`,
 section *Formal certification*.
+
+### `certify_tests.py`
+
+```
+scripts/certify_tests.py [TEST.dsp ...] [-k REGEX] [-j JOBS] [--json FILE]
+                         [--kernel] [--write-baseline]
+make certify-tests [CERTIFY_ARGS="..."]
+```
+
+`make certify` proves theorems about the small programs of `tests/lean/`. This
+script runs the same rate analysis (`srVerdicts`, see `sig2lean.py`) on every
+`*_test` of `tests/*.dsp`. For each recursion group of a test, it gives one
+letter per rate from 44.1 to 192 kHz, in exact, double and single arithmetic,
+with the controls at their default values:
+
+- `S`: stable;
+- `U`: linear but not proven stable. It can be a marginal recursion (an
+  integrator, a counter, a sine oscillator by rotation: a pole on the unit
+  circle); a coefficient whose rounding in single precision can cross the
+  stability limit (a direct-form section at a low frequency and a high rate);
+  or a loss of precision of the analysis (two exclusive conditions each
+  bounded in [0, 1]);
+- `R`: refused, with the reason, such as nonlinear, more than 2 states,
+  integer recursion or coupled groups. A refusal measures the coverage of the
+  analysis and never fails.
+
+A test fails when it has more `U` slots, counted as (group, rate) pairs, than
+`tests/certify-baseline.json` accepts for it in one of the three
+arithmetics. A new test is not in that file, so it must have none. Baseline
+entries that are no longer needed are reported, and `--write-baseline`
+regenerates the file from a full run. The summary counts the structurally
+distinct recursion groups, so that the `os.osc` of most test inputs counts
+once. It also confronts the non-finite entries of
+`tests/precision-baseline.json` with the verdicts at the same rates.
+
+- The prelude is compiled once to an `.olean` in `tests/build-certify/`, and
+  each test is a small Lean file that imports it and evaluates the verdicts
+  with `#eval`. The graph is passed as a string read by `Dag.parse`: a `Dag`
+  literal of 10 000 nodes takes a minute to elaborate. The whole suite takes
+  about a minute and a half on ten cores.
+- This runs the code of the theorems through Lean's evaluator, not its
+  kernel. The suite run is a coverage and regression report; `--kernel` also
+  re-checks every verdict with `decide +kernel`, which takes much longer.
+- `--json FILE` writes every verdict, per test and group, with the refusal
+  reasons.
+

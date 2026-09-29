@@ -522,6 +522,30 @@ stable in float at every rate, and the fixture keeps the certification
 following the library: without one, the rewrite of `fi.lowpass` (#262) went
 through 20 commits before anyone noticed that `make certify` failed.
 
+**The whole test suite.** `make certify-tests` runs the same rate analysis on
+every `*_test` of `tests/*.dsp` (about a minute and a half on ten cores), with one line
+of verdicts per recursion group and arithmetic. Select tests as for
+`check-precision`:
+
+```bash
+make certify-tests CERTIFY_ARGS="tests/filters_butterworth_tests.dsp"
+make certify-tests CERTIFY_ARGS="-k resonlp --json tests/build-certify/resonlp.json"
+```
+
+A test fails when a recursion group is not proven stable (`U`) at more rates
+than `tests/certify-baseline.json` accepts for it. That file pins the
+accepted `U` verdicts the way `precision-baseline.json` pins the precision
+debt: a new test is not in it, entries that are no longer needed are
+reported, and an entry is never added to silence a failure. A `U` is not a
+defect report. It can be a marginal recursion (an integrator, a counter, a
+sine oscillator by rotation, whose pole is on the unit circle), a
+direct-form section whose coefficients in single precision can cross the
+stability limit (`vocoder_test` at 176.4 and 192 kHz), or a loss of
+precision of the analysis. Refused groups (`R`) never fail: they measure the
+coverage of the analysis. These verdicts come from Lean's evaluator running
+the code of the theorems, not from its kernel. `--kernel` also re-checks
+each of them with `decide +kernel`, which is much slower.
+
 Standing limits worth knowing: certification applies to the exported signal
 graph (not to the generated C++/Rust code). Stability and index bounds are
 certified over the exact rationals denoted by the coefficients; the rate

@@ -197,16 +197,19 @@ ROOT = re.compile(r'^\[(\d+)\] = (.+)$')
 KV = re.compile(r'^(op|init|min|max|step)=(.*)$')
 
 
-def dag_of(dsp):
+def dag_of(dsp, extra=(), cwd=None, timeout=None):
     """Run `--dump-sig-dag` and return (bindings, roots).
+
+    `extra` adds compiler arguments (`-pn NAME` to select a test), `cwd` the
+    directory to run in.
 
     `bindings[k]` is `(tag, args, range)`; an arg is either `("ref", k)` or a
     parsed leaf `Node`. Reading the DAG form rather than the tree form is what
     keeps this linear: the tree dump of `fi.bandpass(4)` is 2.3 MB for the same
     6.5 kB of graph.
     """
-    cmd = [FAUST_RS, "--dump-sig-dag"] + (["-I", LIBS] if LIBS else []) + [dsp]
-    r = subprocess.run(cmd, capture_output=True, text=True)
+    cmd = [FAUST_RS, "--dump-sig-dag"] + (["-I", LIBS] if LIBS else []) + list(extra) + [dsp]
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd, timeout=timeout)
     if r.returncode != 0:
         raise RuntimeError(f"{dsp}: {r.stderr.strip()}")
     bindings, roots = {}, []
@@ -391,7 +394,7 @@ def node_tag(tag, args, op):
         if op in BINOPS:
             return BINOPS[op]
         if op in COMPARISONS:
-            return ".cmp"
+            return f".cmp .{op}"
         return f'.other "SIGBINOP:{lean_str(op or "?")}"'
     if tag == "SIGFCONST":
         names = [a[1].val for a in args if a[0] == "leaf" and a[1].tag == "opaque"]
@@ -413,8 +416,53 @@ def emit_nodes(bindings):
                if t == ".control" and rng else "(Q.zero, Q.zero, Q.zero)")
         a = ", ".join(node_arg(x) for x in args)
         lines.append(f"  ⟨{t}, [{a}], {ctl}⟩")
-    return "[\n" + ",\n".join(lines) + "]"
+    # Long list literals exhaust the elaborator's recursion depth: emit the
+    # graph as a concatenation of blocks of CHUNK nodes.
+    CHUNK = 128
+    blocks = ["#[\n" + ",\n".join(lines[k:k + CHUNK]) + "]"
+              for k in range(0, len(lines), CHUNK)] or ["#[]"]
+    return blocks[0] if len(blocks) == 1 else "(" + " ++\n  ".join(blocks) + ")"
 
+
+def text_tag(lean_tag):
+    """The text form of a `Tag` expression emitted by `node_tag`."""
+    t = lean_tag.lstrip(".")
+    if t.startswith("binop ."):
+        return "binop:" + t.split(".")[-1]
+    if t.startswith("cmp ."):
+        return "cmp:" + t.split(".")[-1]
+    if t.startswith("other "):
+        return "other:" + t[len("other "):].strip('"')
+    return t
+
+
+def text_arg(arg):
+    kind, val = arg
+    if kind == "ref":
+        return f"r{val}"
+    if val.tag == "int":
+        return f"i{val.val}"
+    if val.tag == "float":
+        return f"q{val.val.numerator}/{val.val.denominator}"
+    if val.tag == "nil":
+        return "n"
+    return "o"
+
+
+def emit_nodes_text(bindings):
+    """The whole DAG in the text form read by `Dag.parse`, node `k` on line `k`."""
+    if sorted(bindings) != list(range(len(bindings))):
+        raise RuntimeError("dump bindings are not numbered 0..N-1")
+    lines = []
+    for k in range(len(bindings)):
+        tag, args, rng, op = bindings[k]
+        t = node_tag(tag, args, op)
+        ctl = ""
+        if t == ".control" and rng:
+            ctl = " ".join(f"{rng[x].numerator}/{rng[x].denominator}"
+                           for x in ("init", "min", "max"))
+        lines.append(f"{text_tag(t)}|{' '.join(text_arg(a) for a in args)}|{ctl}")
+    return "\n".join(lines)
 
 def gv_list(letters):
     return "[" + ", ".join({"S": ".stable", "U": ".unproven", "R": ".refused"}[c]
@@ -424,7 +472,7 @@ def gv_list(letters):
 def parse_sr_probe(text):
     """`n26:SSSSSS;n49:RRRRRR(reason)` -> [(26, "SSSSSS", "reason"), ...]"""
     out = []
-    for m in re.finditer(r"n(\d+):([SUR]+)(?:\(([^)]*)\))?", text):
+    for m in re.finditer(r"n(\d+):([SUR]+)(?:\((.*?)\))?(?=;n\d+:|$)", text):
         out.append((int(m.group(1)), m.group(2), m.group(3) or ""))
     return out
 

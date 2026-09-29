@@ -15,6 +15,7 @@ make check       # run the regression tests against the references (-k to run al
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
 make check-cpu   # CPU cost of the tests; CPU_ARGS="--base origin/master" for new/base ratios
 make certify     # Lean certification of tests/lean/*.dsp (needs faust-rs + lean 4.31)
+make certify-tests  # the Lean rate analysis on every test, against tests/certify-baseline.json
 make plots       # regenerate the documentation SVG figures (needs matplotlib)
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
@@ -155,8 +156,12 @@ Every script behind these targets is described in `scripts/README.md`.
    analysis says whether each recursion group is stable at the six rates in
    exact, double and single arithmetic (`S`/`U`/`R` per rate), and a drift
    of `tests/lean/certified.lean` is reviewed like a test failure
-   (`make certify-reference` to accept it). Section *Formal certification*
-   of `contributing.md`.
+   (`make certify-reference` to accept it). Run `make certify-tests` on the
+   test files you touched (`CERTIFY_ARGS="tests/xx_tests.dsp"`): a new test
+   must have no group left `U` (not proven stable) without a reason stated
+   in the pull request, and `tests/certify-baseline.json` follows the same
+   rules as the precision baseline. Section *Formal certification* of
+   `contributing.md`.
 
 10. **Measure what a structural change costs.** A change that alters the
     structure of a computation (a rewrite against cancellation, a filter

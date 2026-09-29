@@ -209,11 +209,65 @@ double arithmetic but not proven in single from 88.2 kHz: its Jury margin,
 single precision can move. The design and the measurements behind it are in
 [float-sr-proposal.md](float-sr-proposal.md).
 
+### What "at most 2 states" means
+
+**The state of a recursion** is the set of past values it needs to compute the
+next sample. Their number is the order of the section, that is, its number of
+poles:
+
+| structure | recursion | state | size |
+|---|---|---|---|
+| one pole (`si.smooth`, `fi.dcblocker`) | `y[n] = a·y[n-1] + x[n]` | `y[n-1]` | 1 |
+| direct-form biquad (`fi.tf2`, `fi.tf2s`, `fi.resonlp`) | `y[n] = -a1·y[n-1] - a2·y[n-2] + …` | `y[n-1]`, `y[n-2]` | 2 |
+| state-variable / trapezoidal section (`fi.lowpass` since #262, `fi.tf2sb`) | two outputs `ic1eq`, `ic2eq`, each read back one sample later | `ic1eq[n-1]`, `ic2eq[n-1]` | 2 |
+| `fi.tf3slf`, Moog or diode ladder | order 3 or 4 in one recursion | 3 or 4 values | 3–4 |
+| comb or allpass with a delay line in its loop (`y[n] = x + g·y[n-N]`) | the delay line is in the recursion | the last N values of `y` | N |
+
+Written as a vector `z`, the recursion becomes `z[n] = A·z[n-1] + (input)`.
+It is stable when every eigenvalue of `A` (every pole) lies inside the unit
+disc.
+
+**Why 2 is the limit of the current check.** If `A` were known exactly, any
+size could be tested. Here its coefficients are intervals: in single
+precision, a computed coefficient lies somewhere in `[a - error, a + error]`.
+Stability has to be proved for every matrix of that box, of which there are
+infinitely many.
+
+- **Up to 2 states, the box is decided by its corners.** The four Jury
+  conditions, `1 - det > 0`, `1 + det > 0`, `1 - tr + det > 0` and
+  `1 + tr + det > 0`, are multilinear in the entries of `A`: no entry appears
+  squared. A multilinear function reaches its minimum over a box at a corner,
+  so checking the corners (at most 2⁴ = 16), exactly in rational arithmetic,
+  proves the whole box. That is `jury2` in the prelude.
+- **From 3 states on, corners are no longer enough.** The stability
+  conditions become polynomials of higher degree in the entries, and the
+  stable region is no longer convex: a box can have all its corners stable
+  and still contain an unstable matrix. Another certificate is needed. One is
+  a Lyapunov matrix `P` found by an external solver (a semidefinite program)
+  and checked exactly in Lean: `P ≻ 0` and `P - AᵀPA ≻ 0` at every corner, a
+  condition that is affine in `A` once written as a block matrix, so the
+  corners suffice. The other is the full Jury table with a subdivision of the
+  box. This is item P2 of [float-sr-proposal.md](float-sr-proposal.md).
+
+**What this covers.** Most high-order filters of `filters.lib` are cascades
+of second-order sections, and each section is its own recursion group:
+`fi.lowpass(4, …)` compiles to two groups of 2 states, both within reach.
+Three kinds of structure remain out of reach:
+
+- recursions of order 3 or more in one piece: `fi.tf3slf`, the Moog and
+  diode ladders, and parts of `ve.klonCentaur`;
+- loops that contain a delay line: combs, allpasses, the FDNs of the reverbs,
+  the waveguides. A dedicated rule would be far simpler than a Lyapunov
+  certificate for them: a comb `y = x + g·y[n-N]` is stable if and only if
+  `|g| < 1`, whatever N;
+- groups coupled to each other, which would first have to be flattened into
+  one state vector.
+
 The example set lives in [../tests/lean/](../tests/lean/): one small `.dsp`
 per certified instantiation, plus deliberate counter-examples whose *refusal*
 is itself pinned as a theorem (`+ ~ *(1.5)` is certified unstable; an
 under-clamped table read is certified `CLAMP REQUIRED`). The generated
-[certified.lean](../tests/lean/certified.lean) re-checks in about 30 seconds,
+[certified.lean](../tests/lean/certified.lean) re-checks in about 50 seconds,
 almost all of it in the rate analysis (`by decide +kernel` on the interval
 computations).
 
@@ -326,6 +380,8 @@ symbolically, once.
 make certify            # regenerate theorems into tests/build/, kernel-check,
                         # diff against the committed tests/lean/certified.lean
 make certify-reference  # accept: regenerate the committed reference in place
+make certify-tests      # the rate analysis on every regression test (#eval, not
+                        # kernel-checked), against tests/certify-baseline.json
 make certify-deep       # optional: build the mathlib layer discharging the
                         # Jury and tan obligations (downloads a large cache)
 ```

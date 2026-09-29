@@ -840,10 +840,39 @@ end Prec
 
 /-! ### The DAG -/
 
+/-- The branch `select2(s, a, b)` takes, when the selector decides it. The
+    generated code reads `((int)s) ? b : a`: the selector is truncated toward
+    zero, so `|s| < 1` selects `a` and `|s| ≥ 1` selects `b`. -/
+def Iv.selects (c : Iv) : Option Bool :=
+  if Q.lt (Q.ofInt (-1)) c.lo && Q.lt c.hi Q.one then some false
+  else if Q.le Q.one c.lo || Q.le c.hi (Q.ofInt (-1)) then some true
+  else none
+
+inductive CmpOp where
+  | lt | le | gt | ge | eq | ne
+deriving Repr, DecidableEq, Inhabited
+
+/-- `some b` when the comparison of every value of `x` with every value of `y`
+    gives `b`, `none` when the intervals do not decide it. -/
+def CmpOp.decide (op : CmpOp) (x y : Iv) : Option Bool :=
+  let lt := Q.lt x.hi y.lo              -- every x < every y
+  let ge := Q.le y.hi x.lo              -- every x ≥ every y
+  let le := Q.le x.hi y.lo
+  let gt := Q.lt y.hi x.lo
+  let same := x.lo == x.hi && y.lo == y.hi && x.lo.n * y.lo.d == y.lo.n * x.lo.d
+  let apart := lt || gt
+  match op with
+  | .lt => if lt then some true else if ge then some false else none
+  | .le => if le then some true else if gt then some false else none
+  | .gt => if gt then some true else if le then some false else none
+  | .ge => if ge then some true else if lt then some false else none
+  | .eq => if same then some true else if apart then some false else none
+  | .ne => if apart then some true else if same then some false else none
+
 inductive Tag where
   | input | delay1 | delay | proj | recur | ref | cons
   | binop (op : BinOp)
-  | cmp          -- comparisons: 0 or 1
+  | cmp (op : CmpOp)  -- comparisons: 0 or 1
   | sr           -- `SIGFCONST fSamplingFreq`
   | control      -- sliders and numerical entries, with their declared range
   | button       -- buttons and checkboxes: 0 or 1
@@ -857,7 +886,7 @@ def Tag.name : Tag → String
   | .proj => "SIGPROJ" | .recur => "DEBRUIJNREC" | .ref => "DEBRUIJNREF"
   | .cons => "cons" | .binop .add => "SIGBINOP:add" | .binop .sub => "SIGBINOP:sub"
   | .binop .mul => "SIGBINOP:mul" | .binop .div => "SIGBINOP:div"
-  | .binop .rem => "SIGBINOP:rem" | .cmp => "comparison" | .sr => "SIGFCONST"
+  | .binop .rem => "SIGBINOP:rem" | .cmp _ => "comparison" | .sr => "SIGFCONST"
   | .control => "control" | .button => "button" | .intcast => "SIGINTCAST"
   | .floatcast => "SIGFLOATCAST" | .min => "SIGMIN" | .max => "SIGMAX"
   | .abs => "SIGABS" | .floor => "SIGFLOOR" | .select2 => "SIGSELECT2"
@@ -881,20 +910,20 @@ deriving Repr, Inhabited
 
 /-- Bindings in dump order: node `i` is `n i`, and a child always has a lower
     index than its parent (the dump is in post-order). -/
-abbrev Dag := List Node
+abbrev Dag := Array Node
 
 /-- The value of node `j` while computing node `i`, from `acc`, the values
-    computed so far, most recent first. A forward reference (`j ≥ i`, which a
+    computed so far, in index order. A forward reference (`j ≥ i`, which a
     post-order dump never contains) yields `d`. -/
-def lookback {α} (acc : List α) (i j : Nat) (d : α) : α :=
-  if j < i then acc.getD (i - 1 - j) d else d
+def lookback {α} (acc : Array α) (i j : Nat) (d : α) : α :=
+  if j < i then acc.getD j d else d
 
 /-- Fold a node function over the DAG in index order. -/
-def dagPass {α} (dag : Dag) (f : List α → Nat → Node → α) : List α :=
-  let rec go : Nat → List Node → List α → List α
-    | _, [], acc => acc.reverse
-    | i, nd :: rest, acc => go (i + 1) rest (f acc i nd :: acc)
-  go 0 dag []
+def dagPass {α} (dag : Dag) (f : Array α → Nat → Node → α) : Array α :=
+  let rec go : Nat → List Node → Array α → Array α
+    | _, [], acc => acc
+    | i, nd :: rest, acc => go (i + 1) rest (acc.push (f acc i nd))
+  go 0 dag.toList #[]
 
 /-- Element `k` of a `cons` list of arguments. -/
 def consNth (dag : Dag) : Nat → Arg → Option Arg
@@ -924,7 +953,7 @@ def recBody (dag : Dag) (r : Nat) : List Arg :=
 /-- Highest de Bruijn level a node refers to outside itself: `REF k` refers to
     level `k`, a `REC` binds one level. `0` means the node depends on no
     enclosing recursion. Unknown children count as escaping. -/
-def freeLevels (dag : Dag) : List Nat :=
+def freeLevels (dag : Dag) : Array Nat :=
   dagPass dag fun acc i nd =>
     let fa : Arg → Nat := fun
       | .ref j => lookback acc i j 1000
@@ -939,14 +968,14 @@ def freeLevels (dag : Dag) : List Nat :=
     which only makes the analysis treat it as real, i.e. model more rounding.
     With `optimistic`, a projection of the enclosing recursion is taken to be
     an integer: used only to *refuse* integer recursions (wrapping semantics). -/
-def natures (dag : Dag) (optimistic : Bool) : List Bool :=
+def natures (dag : Dag) (optimistic : Bool) : Array Bool :=
   dagPass dag fun acc i nd =>
     let ia : Arg → Bool := fun
       | .ref j => lookback acc i j false
       | .int _ => true
       | _ => false
     match nd.tag, nd.args with
-    | .intcast, _ | .cmp, _ | .sr, _ => true
+    | .intcast, _ | .cmp _, _ | .sr, _ => true
     | .binop .div, _ => false                -- Faust's `/` is always a real division
     | .binop _, [a, b] | .min, [a, b] | .max, [a, b] | .select2, [_, a, b] => ia a && ia b
     | .abs, [a] | .delay1, [a] | .delay, [a, _] => ia a
@@ -960,7 +989,7 @@ def natures (dag : Dag) (optimistic : Bool) : List Bool :=
     default values. `none`: unknown or unbounded. The state of a recursion is
     unknown; a recursion output gets the range of its body element with the
     state unknown, which holds for every value of the state. -/
-def ranges (dag : Dag) (nat natOpt : List Bool) (p : Prec) (sr : Int) : List (Option Iv) :=
+def ranges (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) : Array (Option Iv) :=
   dagPass dag fun acc i nd =>
     let v : Arg → Option Iv := fun
       | .ref j => lookback acc i j none
@@ -982,7 +1011,12 @@ def ranges (dag : Dag) (nat natOpt : List Bool) (p : Prec) (sr : Int) : List (Op
     match nd.tag, nd.args with
     | .sr, _ => some (Iv.ofInt sr)
     | .control, _ => some (p.control (Iv.pt nd.ctl.1))
-    | .button, _ | .cmp, _ => some ⟨Q.zero, Q.one⟩
+    | .button, _ => some ⟨Q.zero, Q.one⟩
+    | .cmp op, [a, b] =>
+        match (do let x ← v a; let y ← v b; op.decide x y) with
+        | some true  => some (Iv.pt Q.one)
+        | some false => some Iv.zero
+        | none       => some ⟨Q.zero, Q.one⟩
     | .delay1, [a] | .delay, [a, _] => (v a).map (·.hull Iv.zero)
     | .proj, [.int k, .ref r] =>
         if r < i then
@@ -994,7 +1028,11 @@ def ranges (dag : Dag) (nat natOpt : List Bool) (p : Prec) (sr : Int) : List (Op
     | .floatcast, [a] => rv a
     | .min, [a, b] => do let x ← v a; let y ← v b; pure (x.rmin y)
     | .max, [a, b] => do let x ← v a; let y ← v b; pure (x.rmax y)
-    | .select2, [_, a, b] => do let x ← v a; let y ← v b; pure (x.hull y)
+    | .select2, [s, a, b] =>
+        match (v s).bind Iv.selects with
+        | some false => v a
+        | some true  => v b
+        | none => do let x ← v a; let y ← v b; pure (x.hull y)
     | .abs, [a] => (v a).map Iv.abs
     | .floor, [a] => (v a).map Iv.floor
     | .binop op, [a, b] =>
@@ -1056,9 +1094,9 @@ def Aff.coef (a : Aff) (key : Nat × Nat) : Iv :=
     range). `REF 1` is the group itself, since only nodes at depth 0 of its
     body are read here. The loop arithmetic (products by a coefficient,
     sums) is exact in the claim, see the section header. -/
-def affines (dag : Dag) (free : List Nat) (nat : List Bool) (p : Prec)
-    (rng : List (Option Iv)) : List (Except String Aff) :=
-  dagPass dag fun acc i nd =>
+def affNode (dag : Dag) (free : Array Nat) (nat : Array Bool) (p : Prec)
+    (rng : Array (Option Iv)) (acc : Array (Except String Aff)) (i : Nat) (nd : Node) :
+    Except String Aff :=
     let fr : Arg → Nat := fun
       | .ref j => free.getD j 1000
       | _ => 0
@@ -1106,7 +1144,43 @@ def affines (dag : Dag) (free : List Nat) (nat : List Bool) (p : Prec)
           | some s => (f a).map (Aff.scale s)
           | none   => .error "coefficient 1/x with x possibly 0"
     | .floatcast, [a] => f a
+    | .select2, [s, a, b] =>                -- a state-free selector known to the ranges
+        if fr s != 0 then .error "SIGSELECT2 on the state"
+        else match (val s).bind Iv.selects with
+          | some false => f a
+          | some true  => f b
+          | none => .error "SIGSELECT2 applied to the state"
     | t, _ => .error s!"{t.name} applied to the state"
+
+/-- The nodes the body of group `r` reads, without entering a coefficient
+    (`free = 0`: its range is all that is needed) or a nested recursion (an
+    error when it is coupled to the group), in index order. A node the search
+    misses stays "unevaluated", which can only refuse the group. -/
+def bodyNodes (dag : Dag) (free : Array Nat) (r : Nat) : List Nat :=
+  let push : Array Bool × List Nat → Arg → Array Bool × List Nat := fun (vis, st) a =>
+    match a with
+    | .ref j =>
+        if j < r && !(vis.getD j true) && free.getD j 0 != 0 then (vis.set! j true, j :: st)
+        else (vis, st)
+    | _ => (vis, st)
+  let rec go : Nat → Array Bool × List Nat → Array Bool
+    | 0, (vis, _) => vis
+    | _, (vis, []) => vis
+    | f + 1, (vis, j :: rest) =>
+        let nd := dag.getD j default
+        let kids := match nd.tag with
+          | .recur => []
+          | _ => nd.args
+        go f (kids.foldl push (vis, rest))
+  let vis := go (r + 1) ((recBody dag r).foldl push (Array.replicate r false, []))
+  (List.range r).filter fun j => vis.getD j false
+
+/-- Affine forms of the nodes of `bodyNodes`, the others left unevaluated. -/
+def affinesAt (dag : Dag) (free : Array Nat) (nat : Array Bool) (p : Prec)
+    (rng : Array (Option Iv)) (r : Nat) : Array (Except String Aff) :=
+  (bodyNodes dag free r).foldl
+    (fun acc i => acc.set! i (affNode dag free nat p rng acc i (dag.getD i default)))
+    (Array.replicate r (.error "unevaluated"))
 
 /-! ### Jury at the vertices -/
 
@@ -1140,9 +1214,11 @@ def stateOf (forms : List Aff) : Except String (List (Nat × Nat)) := do
   if keys.any (·.2 == 0) then throw "delay-free loop"
   if keys.any (·.1 ≥ forms.length) then throw "state beyond the outputs read"
   let outs := (List.range forms.length).filter fun i => keys.any (·.1 == i)
-  pure (outs.flatMap fun i =>
-    let depth := keys.foldl (fun m (j, k) => if j == i then Nat.max m k else m) 0
-    (List.range depth).map fun k => (i, k + 1))
+  let depth : Nat → Nat := fun i => keys.foldl (fun m (j, k) => if j == i then Nat.max m k else m) 0
+  -- refuse before building a state of thousands of samples (a delay line)
+  let total : Nat := outs.foldl (fun t i => t + depth i) 0
+  if total > 2 then throw s!"{total} states (more than 2)"
+  pure (outs.flatMap fun i => (List.range (depth i)).map fun k => (i, k + 1))
 
 /-- Row of the state matrix for state `(i, k)`: the form of output `i` for
     `k = 1`, the shift `y_i[n-k] ← y_i[n-k+1]` otherwise. -/
@@ -1150,15 +1226,15 @@ def rowOf (forms : List Aff) (states : List (Nat × Nat)) (s : Nat × Nat) : Lis
   if s.2 == 1 then states.map fun t => (forms.getD s.1 []).coef t
   else states.map fun t => if t == (s.1, s.2 - 1) then Iv.pt Q.one else Iv.zero
 
-def groupVerdict (dag : Dag) (free : List Nat) (nat natOpt : List Bool) (p : Prec)
-    (rng : List (Option Iv)) (r : Nat) : GV × String :=
+def groupVerdict (dag : Dag) (free : Array Nat) (nat natOpt : Array Bool) (p : Prec)
+    (rng : Array (Option Iv)) (r : Nat) : GV × String :=
   let body := recBody dag r
   let isIntArg : Arg → Bool := fun
     | .ref j => natOpt.getD j false
     | .int _ => true
     | _ => false
   if body.all isIntArg then (.refused, "integer recursion (wrapping semantics)") else
-  let affs := affines dag free nat p rng
+  let affs := affinesAt dag free nat p rng r
   let formOf : Arg → Except String Aff := fun
     | .ref j => if free.getD j 1000 == 0 then .ok [] else affs.getD j (.error "?")
     | _ => .ok []
@@ -1179,7 +1255,7 @@ def groupVerdict (dag : Dag) (free : List Nat) (nat natOpt : List Bool) (p : Pre
 def checkRates : List Int := [44100, 48000, 88200, 96000, 176400, 192000]
 
 def recNodes (dag : Dag) : List Nat :=
-  (List.range dag.length).filter fun i =>
+  (List.range dag.size).filter fun i =>
     match (dag.getD i default).tag with | .recur => true | _ => false
 
 /-- For each recursion group, its verdict at each rate of `checkRates`. -/
@@ -1204,6 +1280,71 @@ def srProbe (dag : Dag) (p : Prec) : String :=
     let letters := String.join (vs.map (·.1.letter))
     let why := (vs.map (·.2)).filter (· != "") |>.eraseDups
     s!"n{r}:{letters}" ++ (if why.isEmpty then "" else s!"({String.intercalate ", " why})"))
+
+/-! ### Reading a DAG from text
+
+Used by `scripts/certify_tests.py` on the whole test suite, whose largest
+graphs (about 10 000 nodes) take a minute to elaborate as a `Dag` literal: the
+graph is passed as a string, one node per line,
+`tag|arg arg ...|init min max`, with `rJ` a child, `iK` an integer, `qN/D` a
+rational, `n` nil and `o` anything else. It feeds `#eval` only: the theorems of
+`make certify` are stated on `Dag` literals. -/
+
+def parseQ (s : String) : Option Q :=
+  match s.splitOn "/" with
+  | [n, d] => do
+      let n ← n.toInt?
+      let d ← d.toInt?
+      if 0 < d then some ⟨n, d⟩ else none
+  | _ => none
+
+def parseArg (s : String) : Option Arg :=
+  if s == "n" then some .nil else if s == "o" then some .other else
+  let rest := (s.drop 1).toString
+  match s.front with
+  | 'r' => rest.toNat?.map .ref
+  | 'i' => rest.toInt?.map .int
+  | 'q' => (parseQ rest).map .const
+  | _ => none
+
+def parseCmp : String → Option CmpOp
+  | "lt" => some .lt | "le" => some .le | "gt" => some .gt
+  | "ge" => some .ge | "eq" => some .eq | "ne" => some .ne
+  | _ => none
+
+def parseTag (s : String) : Option Tag :=
+  match s with
+  | "input" => some .input | "delay1" => some .delay1 | "delay" => some .delay
+  | "proj" => some .proj | "recur" => some .recur | "ref" => some .ref
+  | "cons" => some .cons | "sr" => some .sr | "control" => some .control
+  | "button" => some .button | "intcast" => some .intcast
+  | "floatcast" => some .floatcast | "min" => some .min | "max" => some .max
+  | "abs" => some .abs | "floor" => some .floor | "select2" => some .select2
+  | "tan" => some .tan | "sin" => some .sin | "cos" => some .cos
+  | "exp" => some .exp | "sqrt" => some .sqrt | "pow" => some .pow
+  | "binop:add" => some (.binop .add) | "binop:sub" => some (.binop .sub)
+  | "binop:mul" => some (.binop .mul) | "binop:div" => some (.binop .div)
+  | "binop:rem" => some (.binop .rem)
+  | _ =>
+      if s.startsWith "cmp:" then (parseCmp (s.drop 4).toString).map .cmp
+      else if s.startsWith "other:" then some (.other (s.drop 6).toString)
+      else none
+
+def parseNode (line : String) : Option Node :=
+  match line.splitOn "|" with
+  | [t, args, ctl] => do
+      let tag ← parseTag t
+      let as ← ((args.splitOn " ").filter (· != "")).mapM parseArg
+      let c ← match (ctl.splitOn " ").filter (· != "") with
+        | [] => some (Q.zero, Q.zero, Q.zero)
+        | [a, b, c] => do pure (← parseQ a, ← parseQ b, ← parseQ c)
+        | _ => none
+      pure ⟨tag, as, c⟩
+  | _ => none
+
+/-- `none` if any line does not parse. -/
+def Dag.parse (text : String) : Option Dag :=
+  (((text.splitOn "\n").filter (· != "")).mapM parseNode).map List.toArray
 
 /-! ## Standing obligations
 
@@ -1337,7 +1478,7 @@ def bandpass_tpt_out0 : Sig :=
 // #261. Pins the verdict of each section at the six rates.
 fi = library("filters.lib");
 process = fi.bandpass(1, 500, 2000);` — the whole graph, for the rate analysis -/
-def bandpass_tpt_dag : Dag := [
+def bandpass_tpt_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .mul, [.ref 0, .int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1413,7 +1554,7 @@ def dcblocker_out0 : Sig :=
 // one-pole from filters.lib. Pins: STABLE through the zero/pole composition.
 fi = library("filters.lib");
 process = fi.dcblocker;` — the whole graph, for the rate analysis -/
-def dcblocker_dag : Dag := [
+def dcblocker_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1450,7 +1591,7 @@ def fdelay_clamped_out0 : Sig :=
 
 /-- `de = library("delays.lib");
 process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — the whole graph, for the rate analysis -/
-def fdelay_clamped_dag : Dag := [
+def fdelay_clamped_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨100, 1⟩, ⟨0, 1⟩, ⟨2000, 1⟩)⟩,
   ⟨.intcast, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1531,7 +1672,7 @@ def lowpass3_out0 : Sig :=
 
 /-- `import("stdfaust.lib");
 process = fi.lowpass(3, 1000);` — the whole graph, for the rate analysis -/
-def lowpass3_dag : Dag := [
+def lowpass3_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1639,7 +1780,7 @@ def lowpass_svf_20hz_out0 : Sig :=
 // check-precision in exact, double and single arithmetic.
 fi = library("filters.lib");
 process = fi.lowpass(2, 20);` — the whole graph, for the rate analysis -/
-def lowpass_svf_20hz_dag : Dag := [
+def lowpass_svf_20hz_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .mul, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1706,7 +1847,7 @@ def noise_lcg_out0 : Sig :=
 // flip will surface here.
 no = library("noises.lib");
 process = no.noise;` — the whole graph, for the rate analysis -/
-def noise_lcg_dag : Dag := [
+def noise_lcg_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1743,7 +1884,7 @@ def nonlinear_out0 : Sig :=
 
 /-- `import("maths.lib");
 process = + ~ (*(0.9) : ma.tanh);` — the whole graph, for the rate analysis -/
-def nonlinear_dag : Dag := [
+def nonlinear_dag : Dag := #[
   ⟨.cons, [.other, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.cons, [.other, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.cons, [.other, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1779,7 +1920,7 @@ def onepole_out0 : Sig :=
   n9
 
 /-- `process = *(0.5) : (+ ~ *(0.7));` — the whole graph, for the rate analysis -/
-def onepole_dag : Dag := [
+def onepole_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1829,7 +1970,7 @@ def osc_out0 : Sig :=
 
 /-- `os = library("oscillators.lib");
 process = os.osc(440);` — the whole graph, for the rate analysis -/
-def osc_dag : Dag := [
+def osc_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1910,7 +2051,7 @@ def resonlp_out0 : Sig :=
 // vocoders. Pins the verdict at the six rates.
 fi = library("filters.lib");
 process = fi.resonlp(1000, 2, 0.8);` — the whole graph, for the rate analysis -/
-def resonlp_dag : Dag := [
+def resonlp_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1976,7 +2117,7 @@ def smoo_sr_out0 : Sig :=
 // sample rate. Pins: stable at the six rates in the three arithmetics.
 si = library("signals.lib");
 process = si.smoo;` — the whole graph, for the rate analysis -/
-def smoo_sr_dag : Dag := [
+def smoo_sr_dag : Dag := #[
   ⟨.sr, [.int 0, .other, .other], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.max, [.const ⟨1, 1⟩, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.min, [.const ⟨192000, 1⟩, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2017,7 +2158,7 @@ def smooth_stable_out0 : Sig :=
 // Pins: order-1 recursion, a1 = -0.999, Jury => STABLE.
 si = library("signals.lib");
 process = hslider("g", 0, 0, 1, 0.01) : si.smooth(0.999);` — the whole graph, for the rate analysis -/
-def smooth_stable_dag : Dag := [
+def smooth_stable_dag : Dag := #[
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩)⟩,
   ⟨.binop .mul, [.const ⟨9007199254741, 9007199254740992⟩, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2041,7 +2182,7 @@ def table_bad_clamp_out0 : Sig :=
   n6
 
 /-- `process = rdtable(16, 1.0, min(100, max(0, int(hslider("i",0,0,100,1)))));` — the whole graph, for the rate analysis -/
-def table_bad_clamp_dag : Dag := [
+def table_bad_clamp_dag : Dag := #[
   ⟨.other "SIGGEN", [.const ⟨1, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.other "SIGWRTBL", [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨100, 1⟩)⟩,
@@ -2060,7 +2201,7 @@ def table_good_clamp_out0 : Sig :=
   n4
 
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,10,1)));` — the whole graph, for the rate analysis -/
-def table_good_clamp_dag : Dag := [
+def table_good_clamp_dag : Dag := #[
   ⟨.other "SIGGEN", [.const ⟨1, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.other "SIGWRTBL", [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨10, 1⟩)⟩,
@@ -2077,7 +2218,7 @@ def table_unclamped_out0 : Sig :=
   n4
 
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,100,1)));` — the whole graph, for the rate analysis -/
-def table_unclamped_dag : Dag := [
+def table_unclamped_dag : Dag := #[
   ⟨.other "SIGGEN", [.const ⟨1, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.other "SIGWRTBL", [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨100, 1⟩)⟩,
@@ -2129,7 +2270,7 @@ def tabulate_protected_out0 : Sig :=
 // recursion, whose pole sits on the unit circle.
 ba = library("basics.lib");
 process = ba.tabulate(1, sin, 128, 0.0, 10.0, hslider("x", 0, 0, 10, 0.01)).val;` — the whole graph, for the rate analysis -/
-def tabulate_protected_dag : Dag := [
+def tabulate_protected_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2202,7 +2343,7 @@ def tabulate_unprotected_out0 : Sig :=
 // out-of-bounds read.
 ba = library("basics.lib");
 process = ba.tabulate(0, sin, 128, 0.0, 10.0, hslider("x", 0, 0, 20, 0.01)).val;` — the whole graph, for the rate analysis -/
-def tabulate_unprotected_dag : Dag := [
+def tabulate_unprotected_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2254,7 +2395,7 @@ def tf2_stable_out0 : Sig :=
 
 /-- `import("filters.lib");
 process = fi.tf2(0.3, 0.2, 0.1, -1.2, 0.5);` — the whole graph, for the rate analysis -/
-def tf2_stable_dag : Dag := [
+def tf2_stable_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2301,7 +2442,7 @@ def tf2_unstable_out0 : Sig :=
 
 /-- `import("filters.lib");
 process = fi.tf2(1, 0, 0, -0.5, -0.8);` — the whole graph, for the rate analysis -/
-def tf2_unstable_dag : Dag := [
+def tf2_unstable_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2376,7 +2517,7 @@ def tf2s_direct_20hz_out0 : Sig :=
 fi = library("filters.lib");
 ma = library("maths.lib");
 process = fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);` — the whole graph, for the rate analysis -/
-def tf2s_direct_20hz_dag : Dag := [
+def tf2s_direct_20hz_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2531,7 +2672,7 @@ def tf2snp_exact_out0 : Sig :=
 // (tf2snp-exact-coeffs). Pins the verdict at the six rates.
 fi = library("filters.lib");
 process = fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*3.141592653589793*1000);` — the whole graph, for the rate analysis -/
-def tf2snp_exact_dag : Dag := [
+def tf2snp_exact_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.sr, [.int 0, .other, .other], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.max, [.const ⟨1, 1⟩, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2716,7 +2857,7 @@ def tf3slf_low_out0 : Sig :=
 // that extending it shows up here.
 fi = library("filters.lib");
 process = fi.tf3slf(0, 0, 0, 1, 1, 2, 2, 1);` — the whole graph, for the rate analysis -/
-def tf3slf_low_dag : Dag := [
+def tf3slf_low_dag : Dag := #[
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2802,7 +2943,7 @@ def time_marginal_out0 : Sig :=
 // certified stable. Pins the strictness of the boundary case on real code.
 ba = library("basics.lib");
 process = ba.time;` — the whole graph, for the rate analysis -/
-def time_marginal_dag : Dag := [
+def time_marginal_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2826,7 +2967,7 @@ def unstable_out0 : Sig :=
   n8
 
 /-- `process = + ~ *(1.5);` — the whole graph, for the rate analysis -/
-def unstable_dag : Dag := [
+def unstable_dag : Dag := #[
   ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,

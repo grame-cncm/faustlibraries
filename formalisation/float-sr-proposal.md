@@ -1,7 +1,7 @@
 # Making the Lean certification useful: float, double and the sample-rate range
 
-*Status: proposal, 2026-09-29, branch `lean-float-sr`. **P0 and step 2
-are implemented** (see "Implemented" at the end); the rest is still a
+*Status: proposal, 2026-09-29, branch `lean-float-sr`. **P0, step 2 and
+step 3 are implemented** (see "Implemented" at the end); the rest is still a
 proposal. It builds on the
 design described in [README.md](README.md). The measurements come from a
 Python prototype in [prototype/](prototype/). It implements the algorithms
@@ -405,7 +405,51 @@ and scipy. It imports the DAG reader of `scripts/sig2lean.py`.
     `SSUUUU` in single, the same verdict as the prototype.
   - `tf2snp` (coupled nested groups), `tf3slf` (3 states), `ba.time` and
     `no.noise` (integer recursions) are refused, with their reason pinned.
+- **Step 3 (P5)**: `make certify-tests` (`scripts/certify_tests.py`) runs the
+  rate analysis on the 1445 tests in about 80 s. The prelude is compiled once,
+  and each graph is read from a string (`Dag.parse`). Its verdicts come from
+  `#eval`, not from the kernel; `--kernel` re-checks them with
+  `decide +kernel`. `tests/certify-baseline.json` pins the accepted
+  not-proven slots (107 tests). The analysis gained exact comparisons and a
+  `select2` that follows a selector known to the ranges (`fi.peak_eq`,
+  `fi.avg_t60` and the envelope followers went from `U` to `S`).
+
+  Of the 7650 structurally distinct recursion groups:
+
+  | arithmetic | stable at the six rates | not proven | refused |
+  |---|---|---|---|
+  | exact | 1496 | 94 | 6060 |
+  | double | 1484 | 95 | 6071 |
+  | single | 1451 | 125 | 6074 |
+
+  **The groups not proven in exact.** Most are marginal: integrators,
+  counters, sliding sums, Goertzel, sine oscillators by rotation (`oscr`,
+  `wgr`), and the sustain of an envelope. A few are losses of precision of
+  the analysis: `inst.asympT60` combines two exclusive conditions, each
+  bounded in [0, 1].
+
+  **The 31 groups not proven in single only** are all low bands of
+  direct-form filter banks at 88.2–192 kHz: `filterbank_demo`,
+  `mth_octave_*`, `spectral_level_demo`, `vocoder_demo`, `vocoder`. This is
+  the problem the `tf2s` rewrite of #273 addresses.
+
+  **The refusals** are dominated by unbounded coefficients (2707: the
+  coefficient depends on a signal whose range the analysis does not know)
+  and by coupled nested groups (1523+191), then by `select2`/`max` on the
+  state.
+
+  **Against check-precision.** The two tools agree on the two tests
+  `check-precision` finds non-finite in single:
+  - `tf3slf_test` has its filter group refused (3 states).
+  - `bandpass2Matched_test` has its filter group `n124` certified stable at
+    176.4 kHz, where the render is non-finite. The generated code shows why
+    both are right: the per-block `fSlow14 = sqrt(…)` gets a negative
+    argument in single precision at that rate (a cancellation). It makes the
+    numerator coefficients `fSlow14..16` NaN, and they are outside the loop.
+    The recursion's own coefficients (`fSlow3`, `fSlow6`) stay finite and
+    stable. This is the case P3's "finite" check is for: a `sqrt` whose
+    enclosure reaches below 0 in single precision.
 - **Not done yet.** Continuous rate and control ranges (P1, which needs
   correlation-preserving arithmetic), more than 2 states and modulated
   verdicts (P2), non-finiteness and float index bounds (P3), error bounds
-  (P4), a suite-wide run (P5), and faust-rs typing (P6).
+  (P4), and faust-rs typing (P6).
