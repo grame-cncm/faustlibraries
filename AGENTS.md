@@ -14,7 +14,7 @@ make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
 make check-cpu   # CPU cost of the tests; CPU_ARGS="--base origin/master" for new/base ratios
-make certify     # Lean certification of tests/lean/*.dsp (needs faust-rs + lean 4.31)
+make certify     # Lean certification of tests/lean/*.dsp (needs faust-rs + lean 4.31, numpy + scipy)
 make certify-tests  # the Lean rate analysis on every test, against tests/certify-baseline.json
 make plots       # regenerate the documentation SVG figures (needs matplotlib)
 make build       # build the mkdocs site (doc pages + figure injection)

@@ -1,8 +1,8 @@
 # Making the Lean certification useful: float, double and the sample-rate range
 
-*Status: proposal, 2026-09-29, branch `lean-float-sr`. **P0, step 2, step 3
-and P3 are implemented** (see "Implemented" at the end); the rest is still a
-proposal. It builds on the
+*Status: proposal, 2026-09-29, branch `lean-float-sr`. **P0, step 2, step 3,
+P3 and the Lyapunov certificates of P2 are implemented** (see "Implemented"
+at the end); the rest is still a proposal. It builds on the
 design described in [README.md](README.md). The measurements come from a
 Python prototype in [prototype/](prototype/). It implements the algorithms
 proposed here, outside Lean, to see what they would find on the real
@@ -527,7 +527,61 @@ and scipy. It imports the DAG reader of `scripts/sig2lean.py`.
   `tf3slf`. They need the Lyapunov certificate of P2.
 
   `make certify-tests` takes 139 s, and `make certify` about 4 minutes.
+- **P2: Lyapunov–Krasovskii certificates.** What Jury and the small-gain
+  test leave unproven is proved with a quadratic energy that decreases at
+  every sample.
+  - **The system.** Short delays (up to 4 samples) are explicit states. The
+    input of each longer delay line becomes an output of the system, and its
+    output becomes a *channel*: an FDN line is one channel, whatever the
+    mixing in front of it. Without this step, the flattened forms read every
+    output through every line, and no diagonal weighting can work.
+  - **The energy.** `V = xᵀPx + Σ_b Σ_{m ≤ b} v_b[n-m]ᵀ D_b v_b[n-m]`, the
+    second term being the energy stored in the delay lines, with one block
+    `D_b` per delay length. `P ≻ 0` and `diag(P, D) - Gᵀ diag(P, W) G ≻ 0`
+    on the box of coefficients give exponential stability, whatever the long
+    delays and even with coefficients that vary in time within the box.
+  - **Oracle and check.** `scripts/lyapunov_oracle.py` (numpy, scipy, untrusted)
+    finds `D` by minimizing the peak gain over frequency with
+    block-diagonal scalings, then `P` from the bounded-real Riccati
+    equation. It retries with larger margins until a float estimate
+    survives the box. Lean (`lyapCheck`) encloses `M` in interval
+    arithmetic, shifts its rounded centre by a bound of the spread, and
+    checks positive definiteness exactly: Sylvester's criterion by Bareiss
+    elimination on integers.
+  - **The protocol.** A probe run prints the systems (`L|` lines), the
+    oracle answers (`W|` lines), and a second run gives the verdicts. In
+    `certified.lean` the certificates are definitions `X_wit_p`, which
+    `make certify` leaves out of its drift check because their floats depend
+    on the platform.
+  - **A rounding rule on the way.** A correctly rounded operation whose exact
+    result is a representable dyadic (an integer delay `SR*t - SR*t'`,
+    `44100 * 0.125 + 0.5`) is not widened: the delays of `zita_rev1` were
+    intervals, hence variable, and only the small-gain test could read them.
+
+  **Results on the suite.** Groups of 39 tests become stable, and none is
+  lost:
+  - the FDN reverbs: `zita_rev1` and its variants, `fdnrev0`,
+    `dattorro_rev`, `instrReverb`;
+  - the 4-state rotation of `fi.tf2snp` at low cutoff;
+  - the Moog ladders;
+  - `fi.tf3` and other sections of order 3 to 5.
+
+  | arithmetic | stable | not proven | refused | analysed with an enclosing group |
+  |---|---|---|---|---|
+  | exact | 1692 | 421 | 2579 | 2958 |
+  | single | 1646 | 452 | 2594 | 2958 |
+
+  Three tests (`SFFormantModel*_ui`) have groups that were refused and are
+  now read: some of them are proven and others are not, so their baseline
+  entries grow. Still not proven:
+  - the lossless rotations of the oscillators, marginal by design;
+  - `tf3slf`, whose triple pole near 1 leaves less margin than the box;
+  - recursions whose coefficient boxes are wide (the interpolation weights
+    of a fractional delay, envelopes, LFOs), where the analysis loses the
+    correlation between coefficients (P1).
+
+  `make certify-tests` takes about 6 minutes (the tests with certificates
+  run twice), and `make certify` about 5 minutes.
 - **Not done yet.** Continuous rate and control ranges (P1, which needs
-  correlation-preserving arithmetic), Lyapunov certificates for what the
-  small-gain test cannot prove (P2: FDNs, rotations, higher orders near 1),
-  error bounds (P4), integer wrap times, and faust-rs typing (P6).
+  correlation-preserving arithmetic), error bounds (P4), integer wrap times,
+  and faust-rs typing (P6).

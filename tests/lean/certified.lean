@@ -28,7 +28,11 @@
   The generator runs Lean once to read each verdict, then emits a
   `by decide` theorem pinning it (`by decide +kernel` for the rate analysis,
   whose computations are too deep for the elaborator's `decide`). The theorem is the artefact: Lean proves it,
-  the generator only predicts it.
+  the generator only predicts it. Where Jury and the small-gain test do not
+  conclude, Lean prints the linear system of the group, an untrusted
+  numerical oracle (`scripts/lyapunov_oracle.py`, numpy and scipy) answers
+  with a Lyapunov certificate, and the theorem is stated with it: Lean checks
+  the certificate exactly, and a wrong one only leaves the group unproven.
 
   Nothing in this prelude depends on the generated part, so it can be reviewed
   on its own.
@@ -579,8 +583,9 @@ The stability verdict is given:
   `single`, where every real operation of the graph is rounded;
 * exactly by Jury for systems whose state is at most 2 samples (first order,
   direct-form second order, two-output state-variable and TPT sections), and
-  by the small-gain test otherwise (feedback combs and allpasses, delays in a
-  loop, higher orders), a sufficient condition;
+  otherwise by the small-gain test (feedback combs and allpasses, delays in a
+  loop) or by a Lyapunov–Krasovskii certificate (feedback delay networks,
+  rotations, higher orders), two sufficient conditions;
 * over the groups nested in a group and coupled to it, analysed as one
   system with it (outputs `(g, i)`, group `g`, output `i`).
 
@@ -591,7 +596,8 @@ coefficients take the values the program computes in precision `p` at rate
 `sr` is stable.* Every state-free subexpression (a coefficient) is enclosed in
 an interval that contains its value as computed in `p`; the matrix of the
 recursion then ranges over a box, and every matrix of the box is checked stable
-(Jury). The rounding of the loop arithmetic itself — the products and sums that
+(Jury), or shares one decreasing energy (the small-gain test, a Lyapunov
+certificate). The rounding of the loop arithmetic itself — the products and sums that
 involve the state — is not part of the claim: it perturbs the state at each
 sample, which is an accuracy question (proposal P4), not a change of the
 recursion's coefficients.
@@ -599,8 +605,9 @@ recursion's coefficients.
 A coefficient that varies in time (it depends on a signal: an envelope stage,
 an LFO) or a state read through a variable delay rules out Jury, which is
 about frozen matrices: with one state, `|a| < 1` over the box is still a
-contraction; otherwise only the small-gain test, which holds for any
-variation within the box, may conclude.
+contraction; otherwise only the small-gain test and a Lyapunov certificate,
+which hold for any variation within the box, may conclude (with a variable
+delay, the small-gain test only).
 
 For the finite verdict, the controls are at their default values, as for
 stability and as in `check-precision`. For indices, a safety property, they
@@ -642,6 +649,9 @@ since it stays non-negative), counters (`ba.period`) and clamped recursions.
   `|a| < 1` at order 1) are multilinear in the entries of the matrix, so their
   minimum over a box is reached at a vertex: checking the vertices, in exact
   rational arithmetic, checks the whole box.
+* **Certificates from an oracle.** Beyond 2 states, a quadratic energy found
+  by an untrusted numerical oracle (`scripts/lyapunov_oracle.py`) is checked
+  exactly (`lyapCheck`): the oracle computes, Lean checks.
 
 Every rule below states its soundness argument; the ones that need analysis
 (Taylor remainders, the vertex lemma) are listed with the standing obligations
@@ -970,8 +980,20 @@ def eta : Prec → Q
 def intExact : Prec → Int
   | .single => 16777216
   | _       => 9007199254740992
-/-- A correctly rounded operation (`+ - * /`, `sqrt`, int-to-real). -/
-def op (p : Prec) (a : Iv) : Iv := if p = .exact then a else a.widen p.u p.eta
+/-- A correctly rounded operation (`+ - * /`, `sqrt`, int-to-real). A point
+    is the exact result (outward rounding keeps a result off the grid off a
+    point), and a dyadic `m / 2ᵏ` with `|m| ≤ 2^24` (single) or `2^53`
+    (double) and `k ≤ 100` is representable, so rounding returns it
+    unchanged: `SR*t - SR*t'` of two integer delays stays an integer delay,
+    and `44100 * 0.125 + 0.5` is `5513`. -/
+def op (p : Prec) (a : Iv) : Iv :=
+  if p = .exact then a
+  else
+    let g : Int := Int.ofNat (Int.gcd a.lo.n a.lo.d)
+    let m := a.lo.n / g
+    let k := a.lo.d / g
+    if a.lo == a.hi && 0 < k && k ≤ Q.grid && Q.grid % k == 0 && m.natAbs ≤ p.intExact.natAbs
+    then a else a.widen p.u p.eta
 /-- A libm call. -/
 def libm (p : Prec) (a : Iv) : Iv :=
   if p = .exact then a else a.widen ((Q.ofInt (2 * libmUlps)).mul p.u) p.eta
@@ -1417,6 +1439,10 @@ def ranges (dag : Dag) (free : Array Nat) (nat natOpt : Array Bool) (p : Prec) (
     analysed as one system over the outputs of all of them. -/
 abbrev Out := Nat × Nat
 
+/-- The output number of the input of a delay line: `(a, PSEUDO)` is the
+    signal of node `a`, written into a delay line (see `groupForms`). -/
+def PSEUDO : Nat := 1000000
+
 /-- `((o, k), c)`: coefficient `c` on output `o` delayed by `k` samples. -/
 structure Aff where
   terms : List ((Out × Nat) × Iv)
@@ -1452,7 +1478,7 @@ def Aff.hullWith (a b : Aff) : Aff :=
     (products by a coefficient, sums) is exact in the claim, see the section
     header. -/
 def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) (ctx : List Nat) (inner : List (Out × Aff))
+    (rng : Array (Option Iv)) (cut : Nat) (ctx : List Nat) (inner : List (Out × Aff))
     (acc : Array (Except String Aff)) (i : Nat) (nd : Node) : Except String Aff :=
     -- a coefficient that varies in time marks the form (`tv`): Jury on a box
     -- of frozen matrices says nothing of a recursion whose matrix moves from
@@ -1496,7 +1522,15 @@ def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
         match amount with
         | some d =>
             if Q.le d.hi d.lo && d.lo.n % d.lo.d == 0 && 0 ≤ d.lo.n then
-              (f a).map (Aff.shift (d.lo.n / d.lo.d).toNat)
+              let k := (d.lo.n / d.lo.d).toNat
+              -- with `cut > 0`, the input of a delay line longer than `cut` is
+              -- an output of the system (`delayInput`): its line is one channel
+              match a with
+              | .ref j =>
+                  if 0 < cut && cut < k then
+                    (f a).map fun x => if x.terms.isEmpty then x else Aff.state (j, PSEUDO) k
+                  else (f a).map (Aff.shift k)
+              | _ => (f a).map (Aff.shift k)
             -- a variable delay of at least one sample: the small-gain test
             -- only needs a delay ≥ 1, not its value
             else if Q.le Q.one d.lo then (f a).map fun x => (x.shift 1).varDelay
@@ -1535,10 +1569,11 @@ def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
 
 /-- Affine forms of the nodes of `bodyNodes`, the others left unevaluated. -/
 def affinesAt (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) (ctx : List Nat) (inner : List (Out × Aff)) (r : Nat) :
+    (rng : Array (Option Iv)) (cut : Nat) (ctx : List Nat) (inner : List (Out × Aff)) (r : Nat) :
     Array (Except String Aff) :=
   (bodyNodes dag free r).foldl
-    (fun acc i => acc.set! i (affNode dag free nat tinv p rng ctx inner acc i (dag.getD i default)))
+    (fun acc i =>
+      acc.set! i (affNode dag free nat tinv p rng cut ctx inner acc i (dag.getD i default)))
     (Array.replicate r (.error "unevaluated"))
 
 /-- The nested groups coupled to `r`, read at depth 0 of its body. -/
@@ -1559,21 +1594,31 @@ def formCalls (dag : Dag) (free : Array Nat) : Nat → Nat → Nat → Nat
     enclosing it, innermost first), and of every group nested in it and
     coupled to it (a nested group that refers to the state of `r` or of a
     group enclosing it), innermost first: nested groups are analysed first,
-    and their outputs enter the forms of `r` through their own forms. -/
+    and their outputs enter the forms of `r` through their own forms. With
+    `cut > 0`, the inputs of the delay lines longer than `cut` are outputs
+    too (`PSEUDO`). -/
 def groupForms (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) : Nat → List Nat → Nat → Except String (List (Out × Aff))
+    (rng : Array (Option Iv)) (cut : Nat) :
+    Nat → List Nat → Nat → Except String (List (Out × Aff))
   | 0, _, _ => .error "nested recursions too deep"
   | f + 1, ctx, r => do
       let ctx' := r :: ctx
       let inner ← (nestedOf dag free r).foldlM (fun acc g => do
-          let fs ← groupForms dag free nat tinv p rng f ctx' g
+          let fs ← groupForms dag free nat tinv p rng cut f ctx' g
           pure (acc ++ fs)) []
-      let affs := affinesAt dag free nat tinv p rng ctx' inner r
+      let affs := affinesAt dag free nat tinv p rng cut ctx' inner r
       let formOf : Arg → Except String Aff := fun
         | .ref j => if free.getD j 1000 == 0 then .ok Aff.none else affs.getD j (.error "?")
         | _ => .ok Aff.none
       let own ← (recBody dag r).zipIdx.mapM fun (a, n) => (formOf a).map fun fm => ((r, n), fm)
-      pure (own ++ inner)
+      -- the delay-line inputs read by this group
+      let lines := (bodyNodes dag free r).filterMap fun j =>
+        match (dag.getD j default).args, affs.getD j (.error "") with
+        | .ref a :: _, .ok x => if x.terms.any (·.1.1 == (a, PSEUDO)) then some a else none
+        | _, _ => none
+      let pseudo ← lines.eraseDups.mapM fun a =>
+        (affs.getD a (.error "?")).map fun x => ((a, PSEUDO), x)
+      pure (own ++ pseudo ++ inner)
 
 /-! ### Jury at the vertices -/
 
@@ -1595,8 +1640,8 @@ def jury2 (a b c d : Iv) : Bool :=
     pos ((Q.one.sub tr).add det) && pos ((Q.one.add tr).add det)
 
 inductive GV where
-  | stable     -- proven stable (Jury at the vertices, or the small-gain test)
-  | unproven   -- linear, but neither test concludes
+  | stable     -- proven stable (Jury, small gain, or a Lyapunov certificate)
+  | unproven   -- linear, but no test concludes
   | refused    -- not a linear system the analysis reads
 deriving Repr, DecidableEq
 
@@ -1650,44 +1695,340 @@ def rowOf (forms : List (Out × Aff)) (states : List (Out × Nat)) (s : Out × N
   if s.2 == 1 then states.map fun t => ((forms.lookup s.1).getD Aff.none).coef t
   else states.map fun t => if t == (s.1, s.2 - 1) then Iv.pt Q.one else Iv.zero
 
+/-! ### Lyapunov–Krasovskii certificates
+
+What Jury and the small-gain test leave: a feedback delay network, whose
+orthogonal mixing matrix has `M v ≥ v` for every weight vector (the small-gain
+test fails) although the network is stable; a resonator of order 3 or more; a
+2-state recursion whose coefficients vary in time. For these, stability
+follows from a quadratic energy that decreases at every sample.
+
+**The system** (`lyapSystem`). The forms are taken again with the input of
+every delay line longer than `SHORT` as an output of its own (`PSEUDO`): the
+line then stores one signal, whatever the mixing in front of it, instead of
+being read through every output that feeds it. The delays at which each
+output `o` is read are grouped into clusters, a gap of more than `GAP`
+samples starting a new one. A cluster that starts at `b ≤ SHORT` is read
+through explicit states `y_o[n-1] … y_o[n-e]`. A cluster that starts at
+`b > SHORT` opens a *channel* `z_j[n] = y_o[n-b]`, whose value the analysis
+never needs to know (the delay line is not part of the state matrix), and
+its later taps `y_o[n-b-1] … y_o[n-e]` are explicit states fed by the
+channel. With `w = (x, z)`:
+
+    x[n+1] = A x + B z,      y[n] = Cx x + Cz z   (+ the input)
+
+and `G = [[A, B], [Cx, Cz]]`, whose `C` rows are the forms of the group (as
+intervals: the box of coefficients).
+
+**The energy.** The channels of one delay `b` form a block; with `P` for the
+states and a matrix `D_b` for each block, let `u_b[n]` be the outputs of the
+channels of block `b`, now, and
+
+    V[n] = x[n]ᵀ P x[n] + Σ_b Σ_{m=1..b} u_b[n-m]ᵀ D_b u_b[n-m]
+
+(the second sum is the energy stored in the delay lines). One step adds
+`u_b[n]ᵀ D_b u_b[n]` to the window of block `b` and removes the same form of
+its channels `z_b[n] = u_b[n-b]`, so, with `D = diag(D_b)`,
+`W = Σ_b E_bᵀ D_b E_b` over the outputs (`E_b` selects the outputs of block
+`b`) and `H = diag(P, W)`:
+
+    V[n+1] - V[n] = -wᵀ M w,    M = diag(P, D) - Gᵀ H G.
+
+If `P ≻ 0`, `D ≻ 0` and `M ≻ 0` for every `G` of the box, then `V` is a
+positive definite quadratic form of the whole state (every value `y_o[n-m]`
+a later step reads is in `x` or in a window). It decreases by at least
+`ε |w|²` at each step, and every value of the state enters some `w` within
+`L` steps (the longest delay): `V` decays geometrically over any `L` steps.
+The recursion is exponentially stable, hence stable for bounded inputs.
+Nothing depends on the lengths of the long delays, and nothing on the
+coefficients being the same from one sample to the next as long as they
+stay in the box: the certificate also holds for coefficients that vary in
+time. It does not hold for a variable delay (a window changes length), which
+stays with the small-gain test. A block, rather than one weight per channel,
+lets the energy follow the signals that share a delay.
+
+**Who finds `P` and `D`.** An untrusted oracle,
+`scripts/lyapunov_oracle.py`. It first finds a block-diagonal scaling of the
+channels that minimizes the peak gain of the system over frequency. It then
+solves the Riccati equation of the bounded-real lemma for `P`. The analysis
+prints the system it builds, and the oracle answers with `P` and `D` as
+dyadic rationals. The check below uses them and nothing else from the
+oracle.
+
+**The check** (`lyapCheck`), exact:
+* `M` is evaluated in interval arithmetic over the box of `G`, which encloses
+  `M(G)` for every `G` of the box;
+* `M̃` is its center, rounded to `2⁻⁶⁰` and made symmetric, and `τ` bounds the
+  largest row sum of `|M(G) - M̃|`, hence (the matrix is symmetric) its
+  spectral norm;
+* `M̃ - τ I ≻ 0` is checked by fraction-free Gaussian elimination on an
+  integer matrix (Bareiss): every leading principal minor is positive
+  (Sylvester's criterion). Then `M(G) ⪰ M̃ - τ I ≻ 0` (Weyl).
+* `P ≻ 0` and `D ≻ 0` the same way, exactly (they are dyadic), with `D`
+  read only within its blocks. -/
+
+/-- Delays up to `SHORT` are read through explicit states. -/
+def SHORT : Nat := 4
+/-- A gap of more than `GAP` samples between two read delays of an output
+    splits them into two clusters. -/
+def GAP : Nat := 8
+
+/-- Insertion into a sorted list without duplicates. -/
+def insertSorted (k : Nat) : List Nat → List Nat
+  | [] => [k]
+  | h :: t => if k < h then k :: h :: t else if k == h then h :: t else h :: insertSorted k t
+
+/-- Consecutive delays whose gaps are at most `GAP`, from a sorted list. -/
+def clusters : List Nat → List (List Nat)
+  | [] => []
+  | k :: ks =>
+      match clusters ks with
+      | (c :: cs) :: rest => if c ≤ k + GAP then (k :: c :: cs) :: rest else [k] :: (c :: cs) :: rest
+      | _ => [[k]]
+
+/-- Where the next value of a state comes from. -/
+inductive Src where
+  | y (f : Nat)   -- output number `f` of `fed`, now
+  | x (i : Nat)   -- state `i`, shifted
+  | z (j : Nat)   -- channel `j`
+
+/-- The system of a group: `nx` states (`(o, m)`: `y_o[n-m]`), `nl` channels
+    (`(o, b)`: `y_o[n-b]`), and the rows of `G` over the `nx + nl` columns,
+    sparse: first the `nx` state rows, then one row per output of `fed`. -/
+structure LinSys where
+  nx : Nat
+  nl : Nat
+  rowsX : List (List (Nat × Iv))
+  rowsY : List (List (Nat × Iv))
+  /-- The output (index in `fed`) and the delay of each channel. -/
+  chan : List (Nat × Nat)
+
+/-- Add `c` at column `k` of a sparse row. -/
+def addAt (k : Nat) (c : Iv) : List (Nat × Iv) → List (Nat × Iv)
+  | [] => [(k, c)]
+  | (k', c') :: t => if k == k' then (k', c'.add c) :: t else (k', c') :: addAt k c t
+
+def sysOf (forms : List (Out × Aff)) (fed : List Out) : Option LinSys :=
+  let keys := forms.flatMap (·.2.terms.map (·.1))
+  -- per output: its states `((o, m), src)` and its channels `(o, b)`
+  let step := fun (acc : List ((Out × Nat) × Src) × List (Out × Nat)) (fo : Nat × Out) =>
+    let (f, o) := fo
+    let ds := keys.foldl (fun s (o', k) => if o' == o then insertSorted k s else s) []
+    (clusters ds).foldl (fun (xs, zs) c =>
+      let b := c.headD 0
+      let e := c.getLastD 0
+      if b ≤ SHORT then
+        (xs ++ (List.range e).map fun m =>
+          ((o, m + 1), if m == 0 then Src.y f else Src.x (xs.length + m - 1)), zs)
+      else
+        (xs ++ (List.range (e - b)).map fun m =>
+          ((o, b + m + 1), if m == 0 then Src.z zs.length else Src.x (xs.length + m - 1)),
+         zs ++ [(o, b)])) acc
+  let (xs, zs) := (fed.zipIdx.map fun (o, f) => (f, o)).foldl step ([], [])
+  let nx := xs.length
+  -- every key is a state or a channel (the clusters cover every delay read);
+  -- checked rather than assumed, since a key left out would drop a term
+  if !keys.all (fun key => xs.any (·.1 == key) || zs.contains key) then none else
+  let col : Out × Nat → Nat := fun key =>
+    match xs.findIdx? (·.1 == key) with
+    | some i => i
+    | none => nx + (zs.findIdx? (· == key)).getD 0
+  let rowsY := fed.map fun o =>
+    ((forms.lookup o).getD Aff.none).terms.foldl (fun row (key, c) => addAt (col key) c row) []
+  let rowsX := xs.map fun (_, s) => match s with
+    | .y f => rowsY.getD f []
+    | .x i => [(i, Iv.pt Q.one)]
+    | .z j => [(nx + j, Iv.pt Q.one)]
+  some ⟨nx, zs.length, rowsX, rowsY, zs.map fun (o, b) => ((fed.findIdx? (· == o)).getD 0, b)⟩
+
+/-- Columns of a sparse matrix given by rows: `(row, coefficient)` lists. -/
+def columns (n : Nat) (rows : List (List (Nat × Iv))) : Array (List (Nat × Iv)) :=
+  rows.zipIdx.foldl (fun cols (row, r) =>
+    row.foldl (fun cols (k, c) => cols.modify k ((r, c) :: ·)) cols) (Array.replicate n [])
+
+/-- Positive definiteness of a symmetric integer matrix: every leading
+    principal minor is positive (Sylvester). Bareiss' elimination makes the
+    pivot of step `k` the `k`-th leading minor, and every division exact. -/
+def bareissPD : Nat → List (List Int) → Int → Bool
+  | 0, _, _ => true
+  | f + 1, rows, prev =>
+      match rows with
+      | [] => true
+      | (p :: r0) :: rest =>
+          decide (0 < p) &&
+          bareissPD f (rest.map fun row => match row with
+            | a0 :: ar => (ar.zip r0).map fun (a, b) => (p * a - a0 * b) / prev
+            | [] => []) p
+      | [] :: _ => false
+
+/-- `⌊q · 2^s⌉`, a nearest integer. -/
+def Q.scaleRound (q : Q) (s : Nat) : Int :=
+  Int.fdiv (2 * q.n * ((2 : Int) ^ s) + q.d) (2 * q.d)
+
+/-- `⌈q · 2^s⌉`. -/
+def Q.scaleUp (q : Q) (s : Nat) : Int := -(Int.fdiv (-(q.n * ((2 : Int) ^ s))) q.d)
+
+def LSCALE : Nat := 60
+
+/-- Sum of two dyadic rationals over the larger denominator (a plain
+    `Q.add` multiplies them). -/
+def Q.addD (a b : Q) : Q :=
+  if b.d % a.d == 0 then ⟨a.n * (b.d / a.d) + b.n, b.d⟩
+  else if a.d % b.d == 0 then ⟨a.n + b.n * (a.d / b.d), a.d⟩
+  else a.add b
+
+/-- A symmetric matrix of dyadic rationals, positive definite: exactly, as an
+    integer matrix scaled by the largest denominator. -/
+def dyadicPD (m : List (List Q)) : Bool :=
+  let n := m.length
+  let at_ : Nat → Nat → Q := fun i j => (m.getD i []).getD j Q.zero
+  let den := m.foldl (fun a row => row.foldl (fun a q => if a < q.d then q.d else a) a) 1
+  m.all (·.length == n) &&
+  (List.range n).all (fun i => (List.range n).all fun j => at_ i j == at_ j i) &&
+  m.all (·.all fun q => den % q.d == 0) &&
+  bareissPD n (m.map (·.map fun q => q.n * (den / q.d))) 1
+
+/-- `P ≻ 0`, `D ≻ 0`, and `diag(P, D) - Gᵀ H G ≻ 0` on the whole box, with `D`
+    read only within the blocks of channels that share a delay. -/
+def lyapCheck (sys : LinSys) (P D : List (List Q)) : Bool :=
+  let n := sys.nx + sys.nl
+  let block : Nat → Nat → Bool := fun j k =>
+    ((sys.chan.getD j (0, 0)).2 == (sys.chan.getD k (0, 0)).2)
+  let Dm : List (List Q) := (List.range sys.nl).map fun j => (List.range sys.nl).map fun k =>
+    if block j k then (D.getD j []).getD k Q.zero else Q.zero
+  -- `xᵀ P x` sees only the symmetric part of `P`, and `M` is read from its
+  -- upper triangle: `P` and `D` must be symmetric (checked by `dyadicPD`)
+  if P.length != sys.nx || D.length != sys.nl then false else
+  if !(dyadicPD P && dyadicPD Dm) then false else
+  let Pa : Array (Array Q) := (P.map List.toArray).toArray
+  let Da : Array (Array Q) := (Dm.map List.toArray).toArray
+  -- W = Σ_b E_bᵀ D_b E_b over the outputs
+  let nf := sys.rowsY.length
+  let W : Array (Array Q) := (sys.chan.zipIdx.foldl (fun w ((f, _), j) =>
+      sys.chan.zipIdx.foldl (fun w ((f', _), k) =>
+        w.modify f (·.modify f' (·.addD ((Da.getD j #[]).getD k Q.zero)))) w)
+    (Array.replicate nf (Array.replicate nf Q.zero)))
+  let colsX := columns n sys.rowsX
+  let colsY := columns n sys.rowsY
+  -- the interval enclosure of M_ij, i ≤ j
+  let entry : Nat → Nat → Iv := fun i j =>
+    let tx := (colsX.getD i []).foldl (fun s (r, g) => (colsX.getD j []).foldl (fun s (r', h) =>
+      s.add ((g.mul (Iv.pt ((Pa.getD r #[]).getD r' Q.zero))).mul h)) s) Iv.zero
+    let ty := (colsY.getD i []).foldl (fun s (f, g) => (colsY.getD j []).foldl (fun s (f', h) =>
+      s.add ((g.mul (Iv.pt ((W.getD f #[]).getD f' Q.zero))).mul h)) s) Iv.zero
+    let dg : Q :=
+      if i < sys.nx then (if j < sys.nx then (Pa.getD i #[]).getD j Q.zero else Q.zero)
+      else if sys.nx ≤ j then (Da.getD (i - sys.nx) #[]).getD (j - sys.nx) Q.zero else Q.zero
+    (Iv.pt dg).sub (tx.add ty)
+  let encA : Array (Array Iv) := (List.range n).toArray.map fun i =>
+    (List.range n).toArray.map fun j => if i ≤ j then entry i j else Iv.zero
+  let enc : Nat → Nat → Iv := fun i j =>
+    if i ≤ j then (encA.getD i #[]).getD j Iv.zero else (encA.getD j #[]).getD i Iv.zero
+  -- center, rounded to 2^-LSCALE, and the deviation of every member from it
+  let cenA : Array (Array Int) := (List.range n).toArray.map fun i =>
+    (List.range n).toArray.map fun j =>
+      let e := enc i j
+      Q.scaleRound (⟨e.lo.n * e.hi.d + e.hi.n * e.lo.d, 2 * e.lo.d * e.hi.d⟩ : Q) LSCALE
+  let cen : Nat → Nat → Int := fun i j => (cenA.getD i #[]).getD j 0
+  let dev : Nat → Nat → Q := fun i j =>
+    let e := enc i j
+    let c : Q := ⟨cen i j, (2 : Int) ^ LSCALE⟩
+    Q.max (c.sub e.lo).abs (e.hi.sub c).abs
+  let tau : Q := (List.range n).foldl (fun m i =>
+    Q.max m ((List.range n).foldl (fun s j => (s.add (dev i j)).up) Q.zero)) Q.zero
+  let t : Int := Q.scaleUp tau LSCALE + 1
+  bareissPD n ((List.range n).map fun i => (List.range n).map fun j =>
+    if i == j then cen i j - t else cen i j) 1
+
+/-- A certificate for group `node` at rate number `rate` (in `checkRates`):
+    `P` for the states, `D` for the channels. -/
+structure LyapW where
+  node : Nat
+  rate : Nat
+  P : List (List Q)
+  D : List (List Q)
+
+/-- The system as the oracle reads it:
+    `nx nl|f:b ...|row;row;...` (the output and delay of each channel), each
+    row `k:lo:hi,...`, the `nx` state rows
+    first, then the output rows. -/
+def LinSys.text (s : LinSys) : String :=
+  let row : List (Nat × Iv) → String := fun r =>
+    ",".intercalate (r.map fun (k, c) => s!"{k}:{showQ c.lo}:{showQ c.hi}")
+  s!"{s.nx} {s.nl}|{" ".intercalate (s.chan.map fun (f, b) => s!"{f}:{b}")}|" ++
+    ";".intercalate ((s.rowsX ++ s.rowsY).map row)
+
+/-- The system of group `r` for a Lyapunov certificate: its forms with the
+    inputs of the long delay lines as outputs, each line one channel. A form
+    that reads an output now (delay 0) reads its form instead; one left after
+    that is a delay-free loop. -/
+def lyapSystem (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
+    (rng : Array (Option Iv)) (r : Nat) : Option LinSys :=
+  match groupForms dag free nat tinv p rng SHORT 16 [] r with
+  | .error _ => none
+  | .ok forms =>
+    let now : Aff → Aff := fun x => x.terms.foldl (fun acc ((o, k), c) =>
+        if k == 0 then acc.add (((forms.lookup o).getD Aff.none).scale c)
+        else acc.add ⟨[((o, k), c)], false, false⟩) { x with terms := [] }
+    let forms := forms.map fun (o, x) => (o, now x)
+    let keys := forms.flatMap (·.2.terms.map (·.1))
+    let fed := (keys.map (·.1)).eraseDups
+    if keys.any (·.2 == 0) || fed.any (fun o => (forms.lookup o).isNone) then none
+    else sysOf forms fed
+
 /-- The stability verdict of group `r` (with the groups nested in it and
     coupled to it). Up to 2 states, constant coefficients and fixed delays:
     Jury at the vertices, exact. One state with a time-varying coefficient:
-    `|a| < 1` over the box, a contraction. Otherwise: the small-gain test. -/
+    `|a| < 1` over the box, a contraction. Otherwise: the small-gain test,
+    then the Lyapunov certificate `wit` (fixed delays only). With `req`, a
+    group left unproven without a certificate carries its system (the third
+    component), for the oracle. -/
 def groupVerdict (dag : Dag) (free : Array Nat) (nat natOpt tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) (r : Nat) : GV × String :=
+    (rng : Array (Option Iv)) (wit : Option LyapW) (req : Bool) (r : Nat) : GV × String × String :=
   let body := recBody dag r
   let isIntArg : Arg → Bool := fun
     | .ref j => natOpt.getD j false
     | .int _ => true
     | _ => false
-  if body.all isIntArg then (.refused, "integer recursion (wrapping semantics)") else
+  if body.all isIntArg then (.refused, "integer recursion (wrapping semantics)", "") else
   -- a group that refers to an enclosing one is analysed with it
-  if free.getD r 1000 != 0 then (.refused, "part of an enclosing group (analysed with it)") else
+  if free.getD r 1000 != 0 then (.refused, "part of an enclosing group (analysed with it)", "") else
   if formCalls dag free 16 r 32 > 32 then
-    (.refused, "more than 32 nested groups coupled to the group") else
-  match groupForms dag free nat tinv p rng 16 [] r with
-  | .error e => (.refused, e)
+    (.refused, "more than 32 nested groups coupled to the group", "") else
+  match groupForms dag free nat tinv p rng 0 16 [] r with
+  | .error e => (.refused, e, "")
   | .ok forms =>
     let keys := forms.flatMap (·.2.terms.map (·.1))
-    if keys.any (·.2 == 0) then (.refused, "delay-free loop") else
+    if keys.any (·.2 == 0) then (.refused, "delay-free loop", "") else
     let fed := (keys.map (·.1)).eraseDups
     if fed.any (fun o => (forms.lookup o).isNone) then
-      (.refused, "state beyond the outputs read") else
+      (.refused, "state beyond the outputs read", "") else
     let tv := forms.any (·.2.tv)
     let vd := forms.any (·.2.vd)
     let depth : Out → Nat := fun o => keys.foldl (fun m (o', k) => if o' == o then Nat.max m k else m) 0
     let total : Nat := fed.foldl (fun t o => t + depth o) 0
-    let bySmallGain : GV × String :=
-      if smallGain (gainMatrix forms fed) 64 (fed.map fun _ => Q.one) then (.stable, "")
-      else (.unproven, s!"small-gain test fails ({total} states)")
+    -- the small-gain test, then a Lyapunov–Krasovskii certificate (not with
+    -- a variable delay)
+    let bySmallGain : GV × String × String :=
+      if smallGain (gainMatrix forms fed) 64 (fed.map fun _ => Q.one) then (.stable, "", "")
+      else
+        let why := s!"small-gain test fails ({total} states)"
+        if vd then (.unproven, why, "") else
+        match lyapSystem dag free nat tinv p rng r with
+        | none => (.unproven, why ++ ", no linear system for a Lyapunov certificate", "")
+        | some sys =>
+        match wit with
+        | some w =>
+            if lyapCheck sys w.P w.D then (.stable, "", "")
+            else (.unproven, why ++ ", Lyapunov certificate rejected", "")
+        | none => (.unproven, why, if req then sys.text else "")
     if vd || total > 2 || (tv && total == 2) then bySmallGain else
     let states := stateOf forms fed
     match states.map (rowOf forms states) with
-    | [] => (.stable, "no feedback")
-    | [[a]] => if jury1 a then (.stable, "") else (.unproven, "Jury fails on the box")
+    | [] => (.stable, "no feedback", "")
+    | [[a]] => if jury1 a then (.stable, "", "") else (.unproven, "Jury fails on the box", "")
     | [[a, b], [c, d]] =>
-        if jury2 a b c d then (.stable, "") else (.unproven, "Jury fails on the box")
+        if jury2 a b c d then (.stable, "", "") else (.unproven, "Jury fails on the box", "")
     | _ => bySmallGain
 
 /-- The rates of `make check-precision`. -/
@@ -1827,17 +2168,22 @@ structure Verdicts where
   sites  : List (Nat × List Bool)    -- per table read and delay tap
 deriving Repr, DecidableEq
 
-/-- Per rate: the group verdicts, the finite verdict, the site verdicts. -/
-def analysis (dag : Dag) (p : Prec) :
-    List (List (GV × String) × (FV × String) × List (Nat × Bool)) :=
+/-- Per rate: the group verdicts, the finite verdict, the site verdicts.
+    `wit` holds the Lyapunov certificates, per group and rate; with `req`,
+    a group they could help and that has none carries its system, for the
+    oracle. -/
+def analysis (dag : Dag) (p : Prec) (wit : List LyapW := []) (req : Bool := false) :
+    List (List (GV × String × String) × (FV × String) × List (Nat × Bool)) :=
   let free := freeLevels dag
   let nat := natures dag false
   let natOpt := natures dag true
   let tinv := pures dag
-  checkRates.map fun sr =>
+  checkRates.zipIdx.map fun (sr, k) =>
     let rng := ranges dag free nat natOpt p sr false
     let rngFull := ranges dag free nat natOpt p sr true
-    ((recNodes dag).map fun r => groupVerdict dag free nat natOpt tinv p rng r,
+    ((recNodes dag).map fun r =>
+      groupVerdict dag free nat natOpt tinv p rng (wit.find? fun w => w.node == r && w.rate == k)
+        req r,
      finiteVerdict dag tinv p rng,
      siteVerdicts dag rngFull)
 
@@ -1845,14 +2191,15 @@ def transpose {α} (rows : List (List α)) (n : Nat) (d : α) : List (List α) :
   (List.range n).map fun k => rows.map fun row => row.getD k d
 
 def verdictsOf (dag : Dag)
-    (a : List (List (GV × String) × (FV × String) × List (Nat × Bool))) : Verdicts :=
+    (a : List (List (GV × String × String) × (FV × String) × List (Nat × Bool))) : Verdicts :=
   let recs := recNodes dag
   let sites := ((a.head?.map (·.2.2)).getD []).map (·.1)
   { groups := recs.zip (transpose (a.map fun (g, _, _) => g.map (·.1)) recs.length .refused)
     finite := a.map fun (_, f, _) => f.1
     sites  := sites.zip (transpose (a.map fun (_, _, s) => s.map (·.2)) sites.length false) }
 
-def verdicts (dag : Dag) (p : Prec) : Verdicts := verdictsOf dag (analysis dag p)
+def verdicts (dag : Dag) (p : Prec) (wit : List LyapW := []) : Verdicts :=
+  verdictsOf dag (analysis dag p wit)
 
 /-- Group verdicts only (the step-2 statement, kept for the report). -/
 def srVerdicts (dag : Dag) (p : Prec) : List (Nat × List GV) := (verdicts dag p).groups
@@ -1864,13 +2211,15 @@ def FV.letter : FV → String
   | .finite => "F" | .domain => "D" | .unknown => "?"
 
 /-- The probe read by `sig2lean.py` and `certify_tests.py`:
-    `n26:SSSSSS;n49:RRRRRR(reason)|FFFFFF(reason)|n30:IIIIII;n41:NNNNNN`. -/
-def probe (dag : Dag) (p : Prec) : String :=
-  let a := analysis dag p
+    `n26:SSSSSS;n49:RRRRRR(reason)|FFFFFF(reason)|n30:IIIIII;n41:NNNNNN`,
+    then, with `req`, one line `L|group|rate|system` per group and rate a
+    Lyapunov certificate could prove (`LinSys.text`). -/
+def probe (dag : Dag) (p : Prec) (wit : List LyapW := []) (req : Bool := false) : String :=
+  let a := analysis dag p wit req
   let recs := recNodes dag
   let groups := recs.zipIdx.map fun (r, g) =>
-    let vs := a.map fun (gs, _, _) => gs.getD g (.refused, "?")
-    let why := (vs.map (·.2)).filter (· != "") |>.eraseDups
+    let vs := a.map fun (gs, _, _) => gs.getD g (.refused, "?", "")
+    let why := (vs.map (·.2.1)).filter (· != "") |>.eraseDups
     s!"n{r}:{String.join (vs.map (·.1.letter))}" ++
       (if why.isEmpty then "" else s!"({String.intercalate ", " why})")
   let fin := a.map fun (_, f, _) => f
@@ -1880,7 +2229,10 @@ def probe (dag : Dag) (p : Prec) : String :=
   let sites := ((a.head?.map (·.2.2)).getD []).zipIdx.map fun ((i, _), k) =>
     s!"n{i}:" ++ String.join (a.map fun (_, _, ss) =>
       if (ss.getD k (0, false)).2 then "I" else "N")
-  String.intercalate ";" groups ++ "|" ++ finS ++ "|" ++ String.intercalate ";" sites
+  let reqs := a.zipIdx.flatMap fun ((gs, _, _), k) =>
+    (recs.zip gs).filterMap fun (r, (_, _, t)) => if t == "" then none else some s!"L|{r}|{k}|{t}"
+  String.intercalate ";" groups ++ "|" ++ finS ++ "|" ++ String.intercalate ";" sites ++
+    String.join (reqs.map ("\n" ++ ·))
 
 /-- The group part of the probe, as before. -/
 def srProbe (dag : Dag) (p : Prec) : String := ((probe dag p).splitOn "|").headD ""
@@ -1954,6 +2306,19 @@ def parseNode (line : String) : Option Node :=
 def Dag.parse (text : String) : Option Dag :=
   (((text.splitOn "\n").filter (· != "")).mapM parseNode).map List.toArray
 
+/-- Lyapunov certificates, one per line: `W|group|rate|D row;...|P row;...`,
+    each row `q q ...` (the oracle's answer to the `L|` lines of `probe`). -/
+def LyapW.parse (text : String) : Option (List LyapW) :=
+  ((text.splitOn "\n").filter (· != "")).mapM fun line =>
+    match line.splitOn "|" with
+    | ["W", r, k, d, P] => do
+        let qs : String → Option (List Q) := fun t =>
+          ((t.splitOn " ").filter (· != "")).mapM parseQ
+        let rows : String → Option (List (List Q)) := fun t =>
+          ((t.splitOn ";").filter (· != "")).mapM qs
+        pure ⟨← r.toNat?, ← k.toNat?, ← rows P, ← rows d⟩
+    | _ => none
+
 /-! ## Standing obligations
 
 The gaps below are recorded here rather than silently relied upon.
@@ -2007,7 +2372,12 @@ assumptions:
    `jury2` (a multilinear function reaches its minimum over a box at a
    vertex), the contraction argument for one time-varying state, the
    weighted max-norm argument of the small-gain test, the
-   floating-point facts of `fracRange` and `isPow2`, and the rounding of
+   Lyapunov–Krasovskii argument of `lyapCheck` (the energy decreases, every
+   value of the state enters the decrease within the longest delay, so it
+   decays geometrically) with Sylvester's criterion, the exactness of
+   Bareiss' elimination and Weyl's inequality it relies on, the
+   floating-point facts of `fracRange`, `isPow2` and `Prec.op` (a
+   representable exact result is not rounded), and the rounding of
    `Q.toFloat32` are stated with their argument next to the code, and
    reviewed as mathematics. They are the next targets of the optional mathlib
    layer, which already proves the Jury criterion.
@@ -2637,6 +3007,294 @@ def fdelay_clamped_dag : Dag := #[
   ⟨.delay, [.ref 0, .ref 12], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .mul, [.ref 13, .ref 7], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .add, [.ref 9, .ref 14], (Q.zero, Q.zero, Q.zero)⟩]
+
+/-- `// A 4-line feedback delay network: delays of 149, 211, 263 and 293
+// samples, a loss of 0.9 per pass, and the orthogonal mixing matrix
+// hadamard(4)/2. Every gain of the small-gain test is 0.45 per line, 1.8 per
+// row: it fails, although the network is stable. A Lyapunov-Krasovskii
+// certificate (the energy of the four delay lines) proves it, whatever the
+// delays. Pins: stable, and fdn_hadamard_unstable.dsp (a gain of 1.05) is not.
+ro = library("routes.lib");
+de = library("delays.lib");
+ba = library("basics.lib");
+N = 4;
+g = 0.9;
+lines = par(i, N, de.delay(512, ba.take(i + 1, (149, 211, 263, 293))) : *(g));
+mix = ro.hadamard(N) : par(i, N, /(2));
+process = (ro.interleave(N, 2) : par(i, N, +) : lines) ~ mix :> _;` — output 0 -/
+def fdn_hadamard_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.proj 2 n0
+  let n4 : Sig := Sig.delay1 n3
+  let n5 : Sig := Sig.binop .add n2 n4
+  let n6 : Sig := Sig.proj 1 n0
+  let n7 : Sig := Sig.delay1 n6
+  let n8 : Sig := Sig.proj 3 n0
+  let n9 : Sig := Sig.delay1 n8
+  let n10 : Sig := Sig.binop .add n7 n9
+  let n11 : Sig := Sig.binop .add n5 n10
+  let n12 : Sig := Sig.binop .div n11 (.int 2)
+  let n13 : Sig := Sig.input 0
+  let n14 : Sig := Sig.binop .add n12 n13
+  let n15 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 149)]
+  let n16 : Sig := Sig.opaqueN "SIGMIN" [(.int 512), n15]
+  let n17 : Sig := Sig.delay n14 n16
+  let n18 : Sig := Sig.binop .mul n17 (.const ⟨8106479329266893, 9007199254740992⟩)
+  let n19 : Sig := Sig.binop .sub n5 n10
+  let n20 : Sig := Sig.binop .div n19 (.int 2)
+  let n21 : Sig := Sig.input 1
+  let n22 : Sig := Sig.binop .add n20 n21
+  let n23 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 211)]
+  let n24 : Sig := Sig.opaqueN "SIGMIN" [(.int 512), n23]
+  let n25 : Sig := Sig.delay n22 n24
+  let n26 : Sig := Sig.binop .mul n25 (.const ⟨8106479329266893, 9007199254740992⟩)
+  let n27 : Sig := Sig.binop .sub n2 n4
+  let n28 : Sig := Sig.binop .sub n7 n9
+  let n29 : Sig := Sig.binop .add n27 n28
+  let n30 : Sig := Sig.binop .div n29 (.int 2)
+  let n31 : Sig := Sig.input 2
+  let n32 : Sig := Sig.binop .add n30 n31
+  let n33 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 263)]
+  let n34 : Sig := Sig.opaqueN "SIGMIN" [(.int 512), n33]
+  let n35 : Sig := Sig.delay n32 n34
+  let n36 : Sig := Sig.binop .mul n35 (.const ⟨8106479329266893, 9007199254740992⟩)
+  let n37 : Sig := Sig.binop .sub n27 n28
+  let n38 : Sig := Sig.binop .div n37 (.int 2)
+  let n39 : Sig := Sig.input 3
+  let n40 : Sig := Sig.binop .add n38 n39
+  let n41 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 293)]
+  let n42 : Sig := Sig.opaqueN "SIGMIN" [(.int 512), n41]
+  let n43 : Sig := Sig.delay n40 n42
+  let n44 : Sig := Sig.binop .mul n43 (.const ⟨8106479329266893, 9007199254740992⟩)
+  let n45 : Sig := Sig.cons n44 (.nil)
+  let n46 : Sig := Sig.cons n36 n45
+  let n47 : Sig := Sig.cons n26 n46
+  let n48 : Sig := Sig.cons n18 n47
+  let n49 : Sig := Sig.recur n48
+  let n50 : Sig := Sig.proj 0 n49
+  let n51 : Sig := Sig.proj 1 n49
+  let n52 : Sig := Sig.binop .add n50 n51
+  let n53 : Sig := Sig.proj 2 n49
+  let n54 : Sig := Sig.binop .add n52 n53
+  let n55 : Sig := Sig.proj 3 n49
+  let n56 : Sig := Sig.binop .add n54 n55
+  n56
+
+/-- `// A 4-line feedback delay network: delays of 149, 211, 263 and 293
+// samples, a loss of 0.9 per pass, and the orthogonal mixing matrix
+// hadamard(4)/2. Every gain of the small-gain test is 0.45 per line, 1.8 per
+// row: it fails, although the network is stable. A Lyapunov-Krasovskii
+// certificate (the energy of the four delay lines) proves it, whatever the
+// delays. Pins: stable, and fdn_hadamard_unstable.dsp (a gain of 1.05) is not.
+ro = library("routes.lib");
+de = library("delays.lib");
+ba = library("basics.lib");
+N = 4;
+g = 0.9;
+lines = par(i, N, de.delay(512, ba.take(i + 1, (149, 211, 263, 293))) : *(g));
+mix = ro.hadamard(N) : par(i, N, /(2));
+process = (ro.interleave(N, 2) : par(i, N, +) : lines) ~ mix :> _;` — the whole graph, for the rate analysis -/
+def fdn_hadamard_dag : Dag := #[
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 2, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 2, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 1, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 6], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 3, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 8], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 7, .ref 9], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 5, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 11, .int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 12, .ref 13], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 149], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 512, .ref 15], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 14, .ref 16], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 17, .const ⟨8106479329266893, 9007199254740992⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 5, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 19, .int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 20, .ref 21], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 211], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 512, .ref 23], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 22, .ref 24], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 25, .const ⟨8106479329266893, 9007199254740992⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 2, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 7, .ref 9], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 27, .ref 28], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 29, .int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 30, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 263], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 512, .ref 33], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 32, .ref 34], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 35, .const ⟨8106479329266893, 9007199254740992⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 27, .ref 28], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 37, .int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 38, .ref 39], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 293], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 512, .ref 41], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 40, .ref 42], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 43, .const ⟨8106479329266893, 9007199254740992⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 44, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 36, .ref 45], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 26, .ref 46], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 18, .ref 47], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 48], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 49], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 1, .ref 49], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 50, .ref 51], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 2, .ref 49], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 52, .ref 53], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 3, .ref 49], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 54, .ref 55], (Q.zero, Q.zero, Q.zero)⟩]
+
+/-- `// fdn_hadamard.dsp with a gain of 1.05 per pass: the mixing matrix is
+// orthogonal, so the network gains 5% per pass and is unstable. No
+// certificate can exist; pins that the analysis does not prove it.
+ro = library("routes.lib");
+de = library("delays.lib");
+ba = library("basics.lib");
+N = 4;
+g = 1.05;
+lines = par(i, N, de.delay(512, ba.take(i + 1, (149, 211, 263, 293))) : *(g));
+mix = ro.hadamard(N) : par(i, N, /(2));
+process = (ro.interleave(N, 2) : par(i, N, +) : lines) ~ mix :> _;` — output 0 -/
+def fdn_hadamard_unstable_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.proj 2 n0
+  let n4 : Sig := Sig.delay1 n3
+  let n5 : Sig := Sig.binop .add n2 n4
+  let n6 : Sig := Sig.proj 1 n0
+  let n7 : Sig := Sig.delay1 n6
+  let n8 : Sig := Sig.proj 3 n0
+  let n9 : Sig := Sig.delay1 n8
+  let n10 : Sig := Sig.binop .add n7 n9
+  let n11 : Sig := Sig.binop .add n5 n10
+  let n12 : Sig := Sig.binop .div n11 (.int 2)
+  let n13 : Sig := Sig.input 0
+  let n14 : Sig := Sig.binop .add n12 n13
+  let n15 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 149)]
+  let n16 : Sig := Sig.opaqueN "SIGMIN" [(.int 512), n15]
+  let n17 : Sig := Sig.delay n14 n16
+  let n18 : Sig := Sig.binop .mul n17 (.const ⟨4728779608739021, 4503599627370496⟩)
+  let n19 : Sig := Sig.binop .sub n5 n10
+  let n20 : Sig := Sig.binop .div n19 (.int 2)
+  let n21 : Sig := Sig.input 1
+  let n22 : Sig := Sig.binop .add n20 n21
+  let n23 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 211)]
+  let n24 : Sig := Sig.opaqueN "SIGMIN" [(.int 512), n23]
+  let n25 : Sig := Sig.delay n22 n24
+  let n26 : Sig := Sig.binop .mul n25 (.const ⟨4728779608739021, 4503599627370496⟩)
+  let n27 : Sig := Sig.binop .sub n2 n4
+  let n28 : Sig := Sig.binop .sub n7 n9
+  let n29 : Sig := Sig.binop .add n27 n28
+  let n30 : Sig := Sig.binop .div n29 (.int 2)
+  let n31 : Sig := Sig.input 2
+  let n32 : Sig := Sig.binop .add n30 n31
+  let n33 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 263)]
+  let n34 : Sig := Sig.opaqueN "SIGMIN" [(.int 512), n33]
+  let n35 : Sig := Sig.delay n32 n34
+  let n36 : Sig := Sig.binop .mul n35 (.const ⟨4728779608739021, 4503599627370496⟩)
+  let n37 : Sig := Sig.binop .sub n27 n28
+  let n38 : Sig := Sig.binop .div n37 (.int 2)
+  let n39 : Sig := Sig.input 3
+  let n40 : Sig := Sig.binop .add n38 n39
+  let n41 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 293)]
+  let n42 : Sig := Sig.opaqueN "SIGMIN" [(.int 512), n41]
+  let n43 : Sig := Sig.delay n40 n42
+  let n44 : Sig := Sig.binop .mul n43 (.const ⟨4728779608739021, 4503599627370496⟩)
+  let n45 : Sig := Sig.cons n44 (.nil)
+  let n46 : Sig := Sig.cons n36 n45
+  let n47 : Sig := Sig.cons n26 n46
+  let n48 : Sig := Sig.cons n18 n47
+  let n49 : Sig := Sig.recur n48
+  let n50 : Sig := Sig.proj 0 n49
+  let n51 : Sig := Sig.proj 1 n49
+  let n52 : Sig := Sig.binop .add n50 n51
+  let n53 : Sig := Sig.proj 2 n49
+  let n54 : Sig := Sig.binop .add n52 n53
+  let n55 : Sig := Sig.proj 3 n49
+  let n56 : Sig := Sig.binop .add n54 n55
+  n56
+
+/-- `// fdn_hadamard.dsp with a gain of 1.05 per pass: the mixing matrix is
+// orthogonal, so the network gains 5% per pass and is unstable. No
+// certificate can exist; pins that the analysis does not prove it.
+ro = library("routes.lib");
+de = library("delays.lib");
+ba = library("basics.lib");
+N = 4;
+g = 1.05;
+lines = par(i, N, de.delay(512, ba.take(i + 1, (149, 211, 263, 293))) : *(g));
+mix = ro.hadamard(N) : par(i, N, /(2));
+process = (ro.interleave(N, 2) : par(i, N, +) : lines) ~ mix :> _;` — the whole graph, for the rate analysis -/
+def fdn_hadamard_unstable_dag : Dag := #[
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 2, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 2, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 1, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 6], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 3, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 8], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 7, .ref 9], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 5, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 11, .int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 12, .ref 13], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 149], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 512, .ref 15], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 14, .ref 16], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 17, .const ⟨4728779608739021, 4503599627370496⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 5, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 19, .int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 20, .ref 21], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 211], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 512, .ref 23], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 22, .ref 24], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 25, .const ⟨4728779608739021, 4503599627370496⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 2, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 7, .ref 9], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 27, .ref 28], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 29, .int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 30, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 263], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 512, .ref 33], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 32, .ref 34], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 35, .const ⟨4728779608739021, 4503599627370496⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 27, .ref 28], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 37, .int 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 38, .ref 39], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 293], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 512, .ref 41], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 40, .ref 42], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 43, .const ⟨4728779608739021, 4503599627370496⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 44, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 36, .ref 45], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 26, .ref 46], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 18, .ref 47], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 48], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 49], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 1, .ref 49], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 50, .ref 51], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 2, .ref 49], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 52, .ref 53], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 3, .ref 49], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 54, .ref 55], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `import("stdfaust.lib");
 process = fi.lowpass(3, 1000);` — output 0 -/
@@ -3774,7 +4432,10 @@ def tf2s_direct_20hz_dag : Dag := #[
   ⟨.binop .add, [.ref 33, .ref 35], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `// fi.tf2snp, normalized-ladder coefficients computed without cancellation
-// (tf2snp-exact-coeffs). Pins the verdict at the six rates.
+// (tf2snp-exact-coeffs): a rotation in a 4-state recursion, which neither
+// Jury (2 states at most) nor the small-gain test (a rotation has gain 1)
+// reads. A Lyapunov certificate proves it stable. Pins the verdict at the
+// six rates.
 fi = library("filters.lib");
 process = fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*3.141592653589793*1000);` — output 0 -/
 def tf2snp_exact_out0 : Sig :=
@@ -3886,7 +4547,10 @@ def tf2snp_exact_out0 : Sig :=
   n104
 
 /-- `// fi.tf2snp, normalized-ladder coefficients computed without cancellation
-// (tf2snp-exact-coeffs). Pins the verdict at the six rates.
+// (tf2snp-exact-coeffs): a rotation in a 4-state recursion, which neither
+// Jury (2 states at most) nor the small-gain test (a rotation has gain 1)
+// reads. A Lyapunov certificate proves it stable. Pins the verdict at the
+// six rates.
 fi = library("filters.lib");
 process = fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*3.141592653589793*1000);` — the whole graph, for the rate analysis -/
 def tf2snp_exact_dag : Dag := #[
@@ -3997,9 +4661,11 @@ def tf2snp_exact_dag : Dag := #[
   ⟨.binop .add, [.ref 85, .ref 103], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `// fi.tf3slf with its poles at 1 rad/s (0.16 Hz), as in tf3slf_test, which
-// check-precision reports non-finite in single at every rate. A third-order
-// recursion: refused by the rate analysis (more than 2 states), pinned so
-// that extending it shows up here.
+// check-precision reports non-finite in single at every rate. A triple pole
+// this close to 1 leaves no margin: the Lyapunov certificate the oracle finds
+// does not survive the box of the coefficients, even in exact arithmetic,
+// and the recursion stays not proven. Pinned so that extending the analysis
+// shows up here.
 fi = library("filters.lib");
 process = fi.tf3slf(0, 0, 0, 1, 1, 2, 2, 1);` — output 0 -/
 def tf3slf_low_out0 : Sig :=
@@ -4069,9 +4735,11 @@ def tf3slf_low_out0 : Sig :=
   n62
 
 /-- `// fi.tf3slf with its poles at 1 rad/s (0.16 Hz), as in tf3slf_test, which
-// check-precision reports non-finite in single at every rate. A third-order
-// recursion: refused by the rate analysis (more than 2 states), pinned so
-// that extending it shows up here.
+// check-precision reports non-finite in single at every rate. A triple pole
+// this close to 1 leaves no margin: the Lyapunov certificate the oracle finds
+// does not survive the box of the coefficients, even in exact arithmetic,
+// and the recursion stays not proven. Pinned so that extending the analysis
+// shows up here.
 fi = library("filters.lib");
 process = fi.tf3slf(0, 0, 0, 1, 1, 2, 2, 1);` — the whole graph, for the rate analysis -/
 def tf3slf_low_dag : Dag := #[
@@ -4212,6 +4880,8 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"fb_comb_unstable_out0: " ++ certifyReport fb_comb_unstable_out0
 #eval s!"fb_fcomb_out0: " ++ certifyReport fb_fcomb_out0
 #eval s!"fdelay_clamped_out0: " ++ certifyReport fdelay_clamped_out0
+#eval s!"fdn_hadamard_out0: " ++ certifyReport fdn_hadamard_out0
+#eval s!"fdn_hadamard_unstable_out0: " ++ certifyReport fdn_hadamard_unstable_out0
 #eval s!"lowpass3_out0: " ++ certifyReport lowpass3_out0
 #eval s!"lowpass_svf_20hz_out0: " ++ certifyReport lowpass_svf_20hz_out0
 #eval s!"modulated_delay_loop_out0: " ++ certifyReport modulated_delay_loop_out0
@@ -4245,6 +4915,8 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"fb_comb_unstable_out0: " ++ indexReport fb_comb_unstable_out0
 #eval s!"fb_fcomb_out0: " ++ indexReport fb_fcomb_out0
 #eval s!"fdelay_clamped_out0: " ++ indexReport fdelay_clamped_out0
+#eval s!"fdn_hadamard_out0: " ++ indexReport fdn_hadamard_out0
+#eval s!"fdn_hadamard_unstable_out0: " ++ indexReport fdn_hadamard_unstable_out0
 #eval s!"lowpass3_out0: " ++ indexReport lowpass3_out0
 #eval s!"lowpass_svf_20hz_out0: " ++ indexReport lowpass_svf_20hz_out0
 #eval s!"modulated_delay_loop_out0: " ++ indexReport modulated_delay_loop_out0
@@ -4278,6 +4950,8 @@ theorem fb_comb_out0_stability : certifyStableB fb_comb_out0 = false := by decid
 theorem fb_comb_unstable_out0_stability : certifyStableB fb_comb_unstable_out0 = false := by decide
 theorem fb_fcomb_out0_stability : certifyStableB fb_fcomb_out0 = false := by decide
 theorem fdelay_clamped_out0_stability : certifyStableB fdelay_clamped_out0 = false := by decide
+theorem fdn_hadamard_out0_stability : certifyStableB fdn_hadamard_out0 = false := by decide
+theorem fdn_hadamard_unstable_out0_stability : certifyStableB fdn_hadamard_unstable_out0 = false := by decide
 theorem lowpass3_out0_stability : certifyStableB lowpass3_out0 = false := by decide
 theorem lowpass_svf_20hz_out0_stability : certifyStableB lowpass_svf_20hz_out0 = false := by decide
 theorem modulated_delay_loop_out0_stability : certifyStableB modulated_delay_loop_out0 = false := by decide
@@ -4311,6 +4985,8 @@ theorem fb_comb_out0_indices : certifyIndicesB fb_comb_out0 = true := by decide
 theorem fb_comb_unstable_out0_indices : certifyIndicesB fb_comb_unstable_out0 = true := by decide
 theorem fb_fcomb_out0_indices : certifyIndicesB fb_fcomb_out0 = true := by decide
 theorem fdelay_clamped_out0_indices : certifyIndicesB fdelay_clamped_out0 = true := by decide
+theorem fdn_hadamard_out0_indices : certifyIndicesB fdn_hadamard_out0 = true := by decide
+theorem fdn_hadamard_unstable_out0_indices : certifyIndicesB fdn_hadamard_unstable_out0 = true := by decide
 theorem lowpass3_out0_indices : certifyIndicesB lowpass3_out0 = true := by decide
 theorem lowpass_svf_20hz_out0_indices : certifyIndicesB lowpass_svf_20hz_out0 = true := by decide
 theorem modulated_delay_loop_out0_indices : certifyIndicesB modulated_delay_loop_out0 = true := by decide
@@ -4375,6 +5051,12 @@ In the comments, the three parts are separated by `|`. -/
 -- fdelay_clamped exact: |FFFFFF|n5:IIIIII;n13:IIIIII
 -- fdelay_clamped double: |FFFFFF|n5:IIIIII;n13:IIIIII
 -- fdelay_clamped single: |FFFFFF|n5:IIIIII;n13:IIIIII
+-- fdn_hadamard exact: n49:SSSSSS|FFFFFF|n17:IIIIII;n25:IIIIII;n35:IIIIII;n43:IIIIII
+-- fdn_hadamard double: n49:SSSSSS|FFFFFF|n17:IIIIII;n25:IIIIII;n35:IIIIII;n43:IIIIII
+-- fdn_hadamard single: n49:SSSSSS|FFFFFF|n17:IIIIII;n25:IIIIII;n35:IIIIII;n43:IIIIII
+-- fdn_hadamard_unstable exact: n49:UUUUUU(small-gain test fails (1176 states))|FFFFFF|n17:IIIIII;n25:IIIIII;n35:IIIIII;n43:IIIIII
+-- fdn_hadamard_unstable double: n49:UUUUUU(small-gain test fails (1176 states))|FFFFFF|n17:IIIIII;n25:IIIIII;n35:IIIIII;n43:IIIIII
+-- fdn_hadamard_unstable single: n49:UUUUUU(small-gain test fails (1176 states))|FFFFFF|n17:IIIIII;n25:IIIIII;n35:IIIIII;n43:IIIIII
 -- lowpass3 exact: n26:SSSSSS;n49:SSSSSS|FFFFFF|
 -- lowpass3 double: n26:SSSSSS;n49:SSSSSS|FFFFFF|
 -- lowpass3 single: n26:SSSSSS;n49:SSSSSS|FFFFFF|
@@ -4432,11 +5114,11 @@ In the comments, the three parts are separated by `|`. -/
 -- tf2s_direct_20hz exact: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
 -- tf2s_direct_20hz double: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
 -- tf2s_direct_20hz single: n26:SSUUUU(Jury fails on the box)|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
--- tf2snp_exact exact: n51:RRRRRR(part of an enclosing group (analysed with it));n58:UUUUUU(small-gain test fails (4 states))|FFFFFF|
--- tf2snp_exact double: n51:RRRRRR(part of an enclosing group (analysed with it));n58:UUUUUU(small-gain test fails (4 states))|FFFFFF|
--- tf2snp_exact single: n51:RRRRRR(part of an enclosing group (analysed with it));n58:UUUUUU(small-gain test fails (4 states))|FFFFFF|
--- tf3slf_low exact: n40:UUUUUU(small-gain test fails (3 states))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
--- tf3slf_low double: n40:UUUUUU(small-gain test fails (3 states))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
+-- tf2snp_exact exact: n51:RRRRRR(part of an enclosing group (analysed with it));n58:SSSSSS|FFFFFF|
+-- tf2snp_exact double: n51:RRRRRR(part of an enclosing group (analysed with it));n58:SSSSSS|FFFFFF|
+-- tf2snp_exact single: n51:RRRRRR(part of an enclosing group (analysed with it));n58:SSSSSS|FFFFFF|
+-- tf3slf_low exact: n40:UUUUUU(small-gain test fails (3 states), Lyapunov certificate rejected, small-gain test fails (3 states))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
+-- tf3slf_low double: n40:UUUUUU(small-gain test fails (3 states), Lyapunov certificate rejected, small-gain test fails (3 states))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
 -- tf3slf_low single: n40:UUUUUU(small-gain test fails (3 states))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
 -- time_marginal exact: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
 -- time_marginal double: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
@@ -4445,6 +5127,14 @@ In the comments, the three parts are separated by `|`. -/
 -- unstable double: n7:UUUUUU(Jury fails on the box)|FFFFFF|
 -- unstable single: n7:UUUUUU(Jury fails on the box)|FFFFFF|
 
+/-- Lyapunov certificates (`X_wit_p`: program `X`, precision `p`), from
+    `scripts/lyapunov_oracle.py`. Untrusted: `lyapCheck` checks each. -/
+def fdn_hadamard_wit_exact : List LyapW := [⟨49, 0, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 1, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 2, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 3, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 4, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 5, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩]
+def fdn_hadamard_wit_double : List LyapW := [⟨49, 0, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 1, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 2, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 3, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 4, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 5, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨432660996801, 9903520314283042199192993792⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩]
+def fdn_hadamard_wit_single : List LyapW := [⟨49, 0, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 1, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 2, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 3, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 4, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩, ⟨49, 5, [[⟨604731395277, 549755813888⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨604731395277, 549755813888⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨333760477459, 4951760157141521099596496896⟩, ⟨604731395277, 549755813888⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨604731395277, 549755813888⟩]], [[⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩, ⟨0, 1⟩], [⟨0, 1⟩, ⟨0, 1⟩, ⟨0, 1⟩, ⟨1, 1⟩]]⟩]
+def tf2snp_exact_wit_exact : List LyapW := [⟨58, 0, [[⟨691321654621, 68719476736⟩, ⟨-642930677479, 4398046511104⟩, ⟨-129374088747, 17179869184⟩, ⟨342654076511, 274877906944⟩], [⟨-642930677479, 4398046511104⟩, ⟨137814602891, 137438953472⟩, ⟨900028371699, 8796093022208⟩, ⟨-102504855269, 4398046511104⟩], [⟨-129374088747, 17179869184⟩, ⟨900028371699, 8796093022208⟩, ⟨803295355941, 34359738368⟩, ⟨-479675960941, 549755813888⟩], [⟨342654076511, 274877906944⟩, ⟨-102504855269, 4398046511104⟩, ⟨-479675960941, 549755813888⟩, ⟨329508534709, 274877906944⟩]], []⟩, ⟨58, 1, [[⟨750898195933, 68719476736⟩, ⟨-607140586711, 4398046511104⟩, ⟨-280629795001, 34359738368⟩, ⟨693691274107, 549755813888⟩], [⟨-607140586711, 4398046511104⟩, ⟨137739983363, 137438953472⟩, ⟨851280783669, 8796093022208⟩, ⟨-704395445305, 35184372088832⟩], [⟨-280629795001, 34359738368⟩, ⟨851280783669, 8796093022208⟩, ⟨27031923269, 1073741824⟩, ⟨-121579347595, 137438953472⟩], [⟨693691274107, 549755813888⟩, ⟨-704395445305, 35184372088832⟩, ⟨-121579347595, 137438953472⟩, ⟨650357096487, 549755813888⟩]], []⟩, ⟨58, 2, [[⟨684415266777, 34359738368⟩, ⟨-94792758189, 1099511627776⟩, ⟨-1006604827613, 68719476736⟩, ⟨367300572397, 274877906944⟩], [⟨-94792758189, 1099511627776⟩, ⟨137496398011, 137438953472⟩, ⟨534868753915, 8796093022208⟩, ⟨-455853344151, 70368744177664⟩], [⟨-1006604827613, 68719476736⟩, ⟨534868753915, 8796093022208⟩, ⟨746912381573, 17179869184⟩, ⟨-518123966491, 549755813888⟩], [⟨367300572397, 274877906944⟩, ⟨-455853344151, 70368744177664⟩, ⟨-518123966491, 549755813888⟩, ⟨302476796985, 274877906944⟩]], []⟩, ⟨58, 3, [[⟨744550550011, 34359738368⟩, ⟨-705846227389, 8796093022208⟩, ⟨-1092459731517, 68719476736⟩, ⟨92293061219, 68719476736⟩], [⟨-705846227389, 8796093022208⟩, ⟨549936952765, 549755813888⟩, ⟨996080047843, 17592186044416⟩, ⟨-776105140467, 140737488355328⟩], [⟨-1092459731517, 68719476736⟩, ⟨996080047843, 17592186044416⟩, ⟨807564827775, 17179869184⟩, ⟨-4070082533, 4294967296⟩], [⟨92293061219, 68719476736⟩, ⟨-776105140467, 140737488355328⟩, ⟨-4070082533, 4294967296⟩, ⟨600495703443, 549755813888⟩]], []⟩, ⟨58, 4, [[⟨42667845089, 1073741824⟩, ⟨-820721881193, 17592186044416⟩, ⟨-246824274885, 8589934592⟩, ⟨47308337083, 34359738368⟩], [⟨-820721881193, 17592186044416⟩, ⟨549787580815, 549755813888⟩, ⟨579969906083, 17592186044416⟩, ⟨-960034384745, 562949953421312⟩], [⟨-246824274885, 8589934592⟩, ⟨579969906083, 17592186044416⟩, ⟨715509619875, 8589934592⟩, ⟨-1069786486993, 1099511627776⟩], [⟨47308337083, 34359738368⟩, ⟨-960034384745, 562949953421312⟩, ⟨-1069786486993, 1099511627776⟩, ⟨288712566201, 274877906944⟩]], []⟩, ⟨58, 5, [[⟨371480597953, 8589934592⟩, ⟨-758819239675, 17592186044416⟩, ⟨-1072740808331, 34359738368⟩, ⟨379335782275, 274877906944⟩], [⟨-758819239675, 17592186044416⟩, ⟨549780652211, 549755813888⟩, ⟨268139472895, 8796093022208⟩, ⟨-813743775265, 562949953421312⟩], [⟨-1072740808331, 34359738368⟩, ⟨268139472895, 8796093022208⟩, ⟨387955802563, 4294967296⟩, ⟨-1072349159233, 1099511627776⟩], [⟨379335782275, 274877906944⟩, ⟨-813743775265, 562949953421312⟩, ⟨-1072349159233, 1099511627776⟩, ⟨575180357987, 549755813888⟩]], []⟩]
+def tf2snp_exact_wit_double : List LyapW := [⟨58, 0, [[⟨691321654621, 68719476736⟩, ⟨-642930677479, 4398046511104⟩, ⟨-129374088747, 17179869184⟩, ⟨342654076511, 274877906944⟩], [⟨-642930677479, 4398046511104⟩, ⟨137814602891, 137438953472⟩, ⟨900028371699, 8796093022208⟩, ⟨-102504855269, 4398046511104⟩], [⟨-129374088747, 17179869184⟩, ⟨900028371699, 8796093022208⟩, ⟨803295355941, 34359738368⟩, ⟨-479675960941, 549755813888⟩], [⟨342654076511, 274877906944⟩, ⟨-102504855269, 4398046511104⟩, ⟨-479675960941, 549755813888⟩, ⟨329508534709, 274877906944⟩]], []⟩, ⟨58, 1, [[⟨750898195933, 68719476736⟩, ⟨-607140586711, 4398046511104⟩, ⟨-280629795001, 34359738368⟩, ⟨693691274107, 549755813888⟩], [⟨-607140586711, 4398046511104⟩, ⟨137739983363, 137438953472⟩, ⟨851280783669, 8796093022208⟩, ⟨-704395445305, 35184372088832⟩], [⟨-280629795001, 34359738368⟩, ⟨851280783669, 8796093022208⟩, ⟨27031923269, 1073741824⟩, ⟨-121579347595, 137438953472⟩], [⟨693691274107, 549755813888⟩, ⟨-704395445305, 35184372088832⟩, ⟨-121579347595, 137438953472⟩, ⟨650357096487, 549755813888⟩]], []⟩, ⟨58, 2, [[⟨684415266777, 34359738368⟩, ⟨-94792758189, 1099511627776⟩, ⟨-1006604827613, 68719476736⟩, ⟨367300572397, 274877906944⟩], [⟨-94792758189, 1099511627776⟩, ⟨137496398011, 137438953472⟩, ⟨534868753915, 8796093022208⟩, ⟨-455853344151, 70368744177664⟩], [⟨-1006604827613, 68719476736⟩, ⟨534868753915, 8796093022208⟩, ⟨746912381573, 17179869184⟩, ⟨-518123966491, 549755813888⟩], [⟨367300572397, 274877906944⟩, ⟨-455853344151, 70368744177664⟩, ⟨-518123966491, 549755813888⟩, ⟨302476796985, 274877906944⟩]], []⟩, ⟨58, 3, [[⟨744550550011, 34359738368⟩, ⟨-705846227389, 8796093022208⟩, ⟨-1092459731517, 68719476736⟩, ⟨92293061219, 68719476736⟩], [⟨-705846227389, 8796093022208⟩, ⟨549936952765, 549755813888⟩, ⟨996080047843, 17592186044416⟩, ⟨-776105140467, 140737488355328⟩], [⟨-1092459731517, 68719476736⟩, ⟨996080047843, 17592186044416⟩, ⟨807564827775, 17179869184⟩, ⟨-4070082533, 4294967296⟩], [⟨92293061219, 68719476736⟩, ⟨-776105140467, 140737488355328⟩, ⟨-4070082533, 4294967296⟩, ⟨600495703443, 549755813888⟩]], []⟩, ⟨58, 4, [[⟨42667845089, 1073741824⟩, ⟨-820721881193, 17592186044416⟩, ⟨-246824274885, 8589934592⟩, ⟨47308337083, 34359738368⟩], [⟨-820721881193, 17592186044416⟩, ⟨549787580815, 549755813888⟩, ⟨579969906083, 17592186044416⟩, ⟨-960034384745, 562949953421312⟩], [⟨-246824274885, 8589934592⟩, ⟨579969906083, 17592186044416⟩, ⟨715509619875, 8589934592⟩, ⟨-1069786486993, 1099511627776⟩], [⟨47308337083, 34359738368⟩, ⟨-960034384745, 562949953421312⟩, ⟨-1069786486993, 1099511627776⟩, ⟨288712566201, 274877906944⟩]], []⟩, ⟨58, 5, [[⟨371480597953, 8589934592⟩, ⟨-758819239675, 17592186044416⟩, ⟨-1072740808331, 34359738368⟩, ⟨379335782275, 274877906944⟩], [⟨-758819239675, 17592186044416⟩, ⟨549780652211, 549755813888⟩, ⟨268139472895, 8796093022208⟩, ⟨-813743775265, 562949953421312⟩], [⟨-1072740808331, 34359738368⟩, ⟨268139472895, 8796093022208⟩, ⟨387955802563, 4294967296⟩, ⟨-1072349159233, 1099511627776⟩], [⟨379335782275, 274877906944⟩, ⟨-813743775265, 562949953421312⟩, ⟨-1072349159233, 1099511627776⟩, ⟨575180357987, 549755813888⟩]], []⟩]
+def tf2snp_exact_wit_single : List LyapW := [⟨58, 0, [[⟨691321640545, 68719476736⟩, ⟨-642930708143, 4398046511104⟩, ⟨-517496338537, 68719476736⟩, ⟨685308162093, 549755813888⟩], [⟨-642930708143, 4398046511104⟩, ⟨551258411749, 549755813888⟩, ⟨900028398519, 8796093022208⟩, ⟨-51252432161, 2199023255552⟩], [⟨-517496338537, 68719476736⟩, ⟨900028398519, 8796093022208⟩, ⟨803295329315, 34359738368⟩, ⟨-479675958707, 549755813888⟩], [⟨685308162093, 549755813888⟩, ⟨-51252432161, 2199023255552⟩, ⟨-479675958707, 549755813888⟩, ⟨659017075303, 549755813888⟩]], []⟩, ⟨58, 1, [[⟨375449090283, 34359738368⟩, ⟨-607140616095, 4398046511104⟩, ⟨-561259571971, 68719476736⟩, ⟨693691283599, 549755813888⟩], [⟨-607140616095, 4398046511104⟩, ⟨17217497925, 17179869184⟩, ⟨851280809739, 8796093022208⟩, ⟨-176098876963, 8796093022208⟩], [⟨-561259571971, 68719476736⟩, ⟨851280809739, 8796093022208⟩, ⟨108127689467, 4294967296⟩, ⟨-972634776783, 1099511627776⟩], [⟨693691283599, 549755813888⟩, ⟨-176098876963, 8796093022208⟩, ⟨-972634776783, 1099511627776⟩, ⟨81294637741, 68719476736⟩]], []⟩, ⟨58, 2, [[⟨342207626249, 17179869184⟩, ⟨-758342104779, 8796093022208⟩, ⟨-503302396523, 34359738368⟩, ⟨367300578133, 274877906944⟩], [⟨-758342104779, 8796093022208⟩, ⟨549985592073, 549755813888⟩, ⟨1044665571, 17179869184⟩, ⟨-911706771341, 140737488355328⟩], [⟨-503302396523, 34359738368⟩, ⟨1044665571, 17179869184⟩, ⟨746912355411, 17179869184⟩, ⟨-1036247931229, 1099511627776⟩], [⟨367300578133, 274877906944⟩, ⟨-911706771341, 140737488355328⟩, ⟨-1036247931229, 1099511627776⟩, ⟨604953597001, 549755813888⟩]], []⟩, ⟨58, 3, [[⟨372275267229, 17179869184⟩, ⟨-705846264153, 8796093022208⟩, ⟨-546229846859, 34359738368⟩, ⟨738344501397, 549755813888⟩], [⟨-705846264153, 8796093022208⟩, ⟨137484238197, 137438953472⟩, ⟨996080082513, 17592186044416⟩, ⟨-776105211315, 140737488355328⟩], [⟨-546229846859, 34359738368⟩, ⟨996080082513, 17592186044416⟩, ⟨201891199831, 4294967296⟩, ⟨-520970563439, 549755813888⟩], [⟨738344501397, 549755813888⟩, ⟨-776105211315, 140737488355328⟩, ⟨-520970563439, 549755813888⟩, ⟨600495706233, 549755813888⟩]], []⟩, ⟨58, 4, [[⟨85335688387, 2147483648⟩, ⟨-12823780081, 274877906944⟩, ⟨-987297063925, 34359738368⟩, ⟨94616675725, 68719476736⟩], [⟨-12823780081, 274877906944⟩, ⟨549787580819, 549755813888⟩, ⟨579969927215, 17592186044416⟩, ⟨-480017236679, 281474976710656⟩], [⟨-987297063925, 34359738368⟩, ⟨579969927215, 17592186044416⟩, ⟨178877398455, 2147483648⟩, ⟨-1069786486259, 1099511627776⟩], [⟨94616675725, 68719476736⟩, ⟨-480017236679, 281474976710656⟩, ⟨-1069786486259, 1099511627776⟩, ⟨577425133929, 549755813888⟩]], []⟩, ⟨58, 5, [[⟨742961180307, 17179869184⟩, ⟨-758819280455, 17592186044416⟩, ⟨-268185192367, 8589934592⟩, ⟨758671577097, 549755813888⟩], [⟨-758819280455, 17592186044416⟩, ⟨274890326107, 274877906944⟩, ⟨1072557930819, 35184372088832⟩, ⟨-203435962613, 140737488355328⟩], [⟨-268185192367, 8589934592⟩, ⟨1072557930819, 35184372088832⟩, ⟨775911576773, 8589934592⟩, ⟨-536174579285, 549755813888⟩], [⟨758671577097, 549755813888⟩, ⟨-203435962613, 140737488355328⟩, ⟨-536174579285, 549755813888⟩, ⟨575180359391, 549755813888⟩]], []⟩]
 theorem allpass_comb_rates_exact : verdicts allpass_comb_dag .exact = ⟨[(12, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(8, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem allpass_comb_rates_double : verdicts allpass_comb_dag .double = ⟨[(12, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(8, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem allpass_comb_rates_single : verdicts allpass_comb_dag .single = ⟨[(12, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(8, [true, true, true, true, true, true])]⟩ := by decide +kernel
@@ -4472,6 +5162,12 @@ theorem fb_fcomb_rates_single : verdicts fb_fcomb_dag .single = ⟨[(19, [.stabl
 theorem fdelay_clamped_rates_exact : verdicts fdelay_clamped_dag .exact = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem fdelay_clamped_rates_double : verdicts fdelay_clamped_dag .double = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem fdelay_clamped_rates_single : verdicts fdelay_clamped_dag .single = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdn_hadamard_rates_exact : verdicts fdn_hadamard_dag .exact fdn_hadamard_wit_exact = ⟨[(49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(17, [true, true, true, true, true, true]), (25, [true, true, true, true, true, true]), (35, [true, true, true, true, true, true]), (43, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdn_hadamard_rates_double : verdicts fdn_hadamard_dag .double fdn_hadamard_wit_double = ⟨[(49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(17, [true, true, true, true, true, true]), (25, [true, true, true, true, true, true]), (35, [true, true, true, true, true, true]), (43, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdn_hadamard_rates_single : verdicts fdn_hadamard_dag .single fdn_hadamard_wit_single = ⟨[(49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(17, [true, true, true, true, true, true]), (25, [true, true, true, true, true, true]), (35, [true, true, true, true, true, true]), (43, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdn_hadamard_unstable_rates_exact : verdicts fdn_hadamard_unstable_dag .exact = ⟨[(49, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(17, [true, true, true, true, true, true]), (25, [true, true, true, true, true, true]), (35, [true, true, true, true, true, true]), (43, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdn_hadamard_unstable_rates_double : verdicts fdn_hadamard_unstable_dag .double = ⟨[(49, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(17, [true, true, true, true, true, true]), (25, [true, true, true, true, true, true]), (35, [true, true, true, true, true, true]), (43, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdn_hadamard_unstable_rates_single : verdicts fdn_hadamard_unstable_dag .single = ⟨[(49, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(17, [true, true, true, true, true, true]), (25, [true, true, true, true, true, true]), (35, [true, true, true, true, true, true]), (43, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem lowpass3_rates_exact : verdicts lowpass3_dag .exact = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem lowpass3_rates_double : verdicts lowpass3_dag .double = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem lowpass3_rates_single : verdicts lowpass3_dag .single = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
@@ -4529,9 +5225,9 @@ theorem tf2_unstable_rates_single : verdicts tf2_unstable_dag .single = ⟨[(10,
 theorem tf2s_direct_20hz_rates_exact : verdicts tf2s_direct_20hz_dag .exact = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem tf2s_direct_20hz_rates_double : verdicts tf2s_direct_20hz_dag .double = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem tf2s_direct_20hz_rates_single : verdicts tf2s_direct_20hz_dag .single = ⟨[(26, [.stable, .stable, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
-theorem tf2snp_exact_rates_exact : verdicts tf2snp_exact_dag .exact = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
-theorem tf2snp_exact_rates_double : verdicts tf2snp_exact_dag .double = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
-theorem tf2snp_exact_rates_single : verdicts tf2snp_exact_dag .single = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf2snp_exact_rates_exact : verdicts tf2snp_exact_dag .exact tf2snp_exact_wit_exact = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf2snp_exact_rates_double : verdicts tf2snp_exact_dag .double tf2snp_exact_wit_double = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf2snp_exact_rates_single : verdicts tf2snp_exact_dag .single tf2snp_exact_wit_single = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem tf3slf_low_rates_exact : verdicts tf3slf_low_dag .exact = ⟨[(40, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem tf3slf_low_rates_double : verdicts tf3slf_low_dag .double = ⟨[(40, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem tf3slf_low_rates_single : verdicts tf3slf_low_dag .single = ⟨[(40, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
@@ -4559,6 +5255,8 @@ fb_comb.dsp: no table site
 fb_comb_unstable.dsp: no table site
 fb_fcomb.dsp: no table site
 fdelay_clamped.dsp: no table site
+fdn_hadamard.dsp: no table site
+fdn_hadamard_unstable.dsp: no table site
 lowpass3.dsp: no table site
 lowpass_svf_20hz.dsp: no table site
 modulated_delay_loop.dsp: missed optimisation: compiler clamps table[65536] though Lean proves it in range

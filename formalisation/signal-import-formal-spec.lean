@@ -28,7 +28,11 @@
   The generator runs Lean once to read each verdict, then emits a
   `by decide` theorem pinning it (`by decide +kernel` for the rate analysis,
   whose computations are too deep for the elaborator's `decide`). The theorem is the artefact: Lean proves it,
-  the generator only predicts it.
+  the generator only predicts it. Where Jury and the small-gain test do not
+  conclude, Lean prints the linear system of the group, an untrusted
+  numerical oracle (`scripts/lyapunov_oracle.py`, numpy and scipy) answers
+  with a Lyapunov certificate, and the theorem is stated with it: Lean checks
+  the certificate exactly, and a wrong one only leaves the group unproven.
 
   Nothing in this prelude depends on the generated part, so it can be reviewed
   on its own.
@@ -579,8 +583,9 @@ The stability verdict is given:
   `single`, where every real operation of the graph is rounded;
 * exactly by Jury for systems whose state is at most 2 samples (first order,
   direct-form second order, two-output state-variable and TPT sections), and
-  by the small-gain test otherwise (feedback combs and allpasses, delays in a
-  loop, higher orders), a sufficient condition;
+  otherwise by the small-gain test (feedback combs and allpasses, delays in a
+  loop) or by a Lyapunov–Krasovskii certificate (feedback delay networks,
+  rotations, higher orders), two sufficient conditions;
 * over the groups nested in a group and coupled to it, analysed as one
   system with it (outputs `(g, i)`, group `g`, output `i`).
 
@@ -591,7 +596,8 @@ coefficients take the values the program computes in precision `p` at rate
 `sr` is stable.* Every state-free subexpression (a coefficient) is enclosed in
 an interval that contains its value as computed in `p`; the matrix of the
 recursion then ranges over a box, and every matrix of the box is checked stable
-(Jury). The rounding of the loop arithmetic itself — the products and sums that
+(Jury), or shares one decreasing energy (the small-gain test, a Lyapunov
+certificate). The rounding of the loop arithmetic itself — the products and sums that
 involve the state — is not part of the claim: it perturbs the state at each
 sample, which is an accuracy question (proposal P4), not a change of the
 recursion's coefficients.
@@ -599,8 +605,9 @@ recursion's coefficients.
 A coefficient that varies in time (it depends on a signal: an envelope stage,
 an LFO) or a state read through a variable delay rules out Jury, which is
 about frozen matrices: with one state, `|a| < 1` over the box is still a
-contraction; otherwise only the small-gain test, which holds for any
-variation within the box, may conclude.
+contraction; otherwise only the small-gain test and a Lyapunov certificate,
+which hold for any variation within the box, may conclude (with a variable
+delay, the small-gain test only).
 
 For the finite verdict, the controls are at their default values, as for
 stability and as in `check-precision`. For indices, a safety property, they
@@ -642,6 +649,9 @@ since it stays non-negative), counters (`ba.period`) and clamped recursions.
   `|a| < 1` at order 1) are multilinear in the entries of the matrix, so their
   minimum over a box is reached at a vertex: checking the vertices, in exact
   rational arithmetic, checks the whole box.
+* **Certificates from an oracle.** Beyond 2 states, a quadratic energy found
+  by an untrusted numerical oracle (`scripts/lyapunov_oracle.py`) is checked
+  exactly (`lyapCheck`): the oracle computes, Lean checks.
 
 Every rule below states its soundness argument; the ones that need analysis
 (Taylor remainders, the vertex lemma) are listed with the standing obligations
@@ -970,8 +980,20 @@ def eta : Prec → Q
 def intExact : Prec → Int
   | .single => 16777216
   | _       => 9007199254740992
-/-- A correctly rounded operation (`+ - * /`, `sqrt`, int-to-real). -/
-def op (p : Prec) (a : Iv) : Iv := if p = .exact then a else a.widen p.u p.eta
+/-- A correctly rounded operation (`+ - * /`, `sqrt`, int-to-real). A point
+    is the exact result (outward rounding keeps a result off the grid off a
+    point), and a dyadic `m / 2ᵏ` with `|m| ≤ 2^24` (single) or `2^53`
+    (double) and `k ≤ 100` is representable, so rounding returns it
+    unchanged: `SR*t - SR*t'` of two integer delays stays an integer delay,
+    and `44100 * 0.125 + 0.5` is `5513`. -/
+def op (p : Prec) (a : Iv) : Iv :=
+  if p = .exact then a
+  else
+    let g : Int := Int.ofNat (Int.gcd a.lo.n a.lo.d)
+    let m := a.lo.n / g
+    let k := a.lo.d / g
+    if a.lo == a.hi && 0 < k && k ≤ Q.grid && Q.grid % k == 0 && m.natAbs ≤ p.intExact.natAbs
+    then a else a.widen p.u p.eta
 /-- A libm call. -/
 def libm (p : Prec) (a : Iv) : Iv :=
   if p = .exact then a else a.widen ((Q.ofInt (2 * libmUlps)).mul p.u) p.eta
@@ -1417,6 +1439,10 @@ def ranges (dag : Dag) (free : Array Nat) (nat natOpt : Array Bool) (p : Prec) (
     analysed as one system over the outputs of all of them. -/
 abbrev Out := Nat × Nat
 
+/-- The output number of the input of a delay line: `(a, PSEUDO)` is the
+    signal of node `a`, written into a delay line (see `groupForms`). -/
+def PSEUDO : Nat := 1000000
+
 /-- `((o, k), c)`: coefficient `c` on output `o` delayed by `k` samples. -/
 structure Aff where
   terms : List ((Out × Nat) × Iv)
@@ -1452,7 +1478,7 @@ def Aff.hullWith (a b : Aff) : Aff :=
     (products by a coefficient, sums) is exact in the claim, see the section
     header. -/
 def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) (ctx : List Nat) (inner : List (Out × Aff))
+    (rng : Array (Option Iv)) (cut : Nat) (ctx : List Nat) (inner : List (Out × Aff))
     (acc : Array (Except String Aff)) (i : Nat) (nd : Node) : Except String Aff :=
     -- a coefficient that varies in time marks the form (`tv`): Jury on a box
     -- of frozen matrices says nothing of a recursion whose matrix moves from
@@ -1496,7 +1522,15 @@ def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
         match amount with
         | some d =>
             if Q.le d.hi d.lo && d.lo.n % d.lo.d == 0 && 0 ≤ d.lo.n then
-              (f a).map (Aff.shift (d.lo.n / d.lo.d).toNat)
+              let k := (d.lo.n / d.lo.d).toNat
+              -- with `cut > 0`, the input of a delay line longer than `cut` is
+              -- an output of the system (`delayInput`): its line is one channel
+              match a with
+              | .ref j =>
+                  if 0 < cut && cut < k then
+                    (f a).map fun x => if x.terms.isEmpty then x else Aff.state (j, PSEUDO) k
+                  else (f a).map (Aff.shift k)
+              | _ => (f a).map (Aff.shift k)
             -- a variable delay of at least one sample: the small-gain test
             -- only needs a delay ≥ 1, not its value
             else if Q.le Q.one d.lo then (f a).map fun x => (x.shift 1).varDelay
@@ -1535,10 +1569,11 @@ def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
 
 /-- Affine forms of the nodes of `bodyNodes`, the others left unevaluated. -/
 def affinesAt (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) (ctx : List Nat) (inner : List (Out × Aff)) (r : Nat) :
+    (rng : Array (Option Iv)) (cut : Nat) (ctx : List Nat) (inner : List (Out × Aff)) (r : Nat) :
     Array (Except String Aff) :=
   (bodyNodes dag free r).foldl
-    (fun acc i => acc.set! i (affNode dag free nat tinv p rng ctx inner acc i (dag.getD i default)))
+    (fun acc i =>
+      acc.set! i (affNode dag free nat tinv p rng cut ctx inner acc i (dag.getD i default)))
     (Array.replicate r (.error "unevaluated"))
 
 /-- The nested groups coupled to `r`, read at depth 0 of its body. -/
@@ -1559,21 +1594,31 @@ def formCalls (dag : Dag) (free : Array Nat) : Nat → Nat → Nat → Nat
     enclosing it, innermost first), and of every group nested in it and
     coupled to it (a nested group that refers to the state of `r` or of a
     group enclosing it), innermost first: nested groups are analysed first,
-    and their outputs enter the forms of `r` through their own forms. -/
+    and their outputs enter the forms of `r` through their own forms. With
+    `cut > 0`, the inputs of the delay lines longer than `cut` are outputs
+    too (`PSEUDO`). -/
 def groupForms (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) : Nat → List Nat → Nat → Except String (List (Out × Aff))
+    (rng : Array (Option Iv)) (cut : Nat) :
+    Nat → List Nat → Nat → Except String (List (Out × Aff))
   | 0, _, _ => .error "nested recursions too deep"
   | f + 1, ctx, r => do
       let ctx' := r :: ctx
       let inner ← (nestedOf dag free r).foldlM (fun acc g => do
-          let fs ← groupForms dag free nat tinv p rng f ctx' g
+          let fs ← groupForms dag free nat tinv p rng cut f ctx' g
           pure (acc ++ fs)) []
-      let affs := affinesAt dag free nat tinv p rng ctx' inner r
+      let affs := affinesAt dag free nat tinv p rng cut ctx' inner r
       let formOf : Arg → Except String Aff := fun
         | .ref j => if free.getD j 1000 == 0 then .ok Aff.none else affs.getD j (.error "?")
         | _ => .ok Aff.none
       let own ← (recBody dag r).zipIdx.mapM fun (a, n) => (formOf a).map fun fm => ((r, n), fm)
-      pure (own ++ inner)
+      -- the delay-line inputs read by this group
+      let lines := (bodyNodes dag free r).filterMap fun j =>
+        match (dag.getD j default).args, affs.getD j (.error "") with
+        | .ref a :: _, .ok x => if x.terms.any (·.1.1 == (a, PSEUDO)) then some a else none
+        | _, _ => none
+      let pseudo ← lines.eraseDups.mapM fun a =>
+        (affs.getD a (.error "?")).map fun x => ((a, PSEUDO), x)
+      pure (own ++ pseudo ++ inner)
 
 /-! ### Jury at the vertices -/
 
@@ -1595,8 +1640,8 @@ def jury2 (a b c d : Iv) : Bool :=
     pos ((Q.one.sub tr).add det) && pos ((Q.one.add tr).add det)
 
 inductive GV where
-  | stable     -- proven stable (Jury at the vertices, or the small-gain test)
-  | unproven   -- linear, but neither test concludes
+  | stable     -- proven stable (Jury, small gain, or a Lyapunov certificate)
+  | unproven   -- linear, but no test concludes
   | refused    -- not a linear system the analysis reads
 deriving Repr, DecidableEq
 
@@ -1650,44 +1695,340 @@ def rowOf (forms : List (Out × Aff)) (states : List (Out × Nat)) (s : Out × N
   if s.2 == 1 then states.map fun t => ((forms.lookup s.1).getD Aff.none).coef t
   else states.map fun t => if t == (s.1, s.2 - 1) then Iv.pt Q.one else Iv.zero
 
+/-! ### Lyapunov–Krasovskii certificates
+
+What Jury and the small-gain test leave: a feedback delay network, whose
+orthogonal mixing matrix has `M v ≥ v` for every weight vector (the small-gain
+test fails) although the network is stable; a resonator of order 3 or more; a
+2-state recursion whose coefficients vary in time. For these, stability
+follows from a quadratic energy that decreases at every sample.
+
+**The system** (`lyapSystem`). The forms are taken again with the input of
+every delay line longer than `SHORT` as an output of its own (`PSEUDO`): the
+line then stores one signal, whatever the mixing in front of it, instead of
+being read through every output that feeds it. The delays at which each
+output `o` is read are grouped into clusters, a gap of more than `GAP`
+samples starting a new one. A cluster that starts at `b ≤ SHORT` is read
+through explicit states `y_o[n-1] … y_o[n-e]`. A cluster that starts at
+`b > SHORT` opens a *channel* `z_j[n] = y_o[n-b]`, whose value the analysis
+never needs to know (the delay line is not part of the state matrix), and
+its later taps `y_o[n-b-1] … y_o[n-e]` are explicit states fed by the
+channel. With `w = (x, z)`:
+
+    x[n+1] = A x + B z,      y[n] = Cx x + Cz z   (+ the input)
+
+and `G = [[A, B], [Cx, Cz]]`, whose `C` rows are the forms of the group (as
+intervals: the box of coefficients).
+
+**The energy.** The channels of one delay `b` form a block; with `P` for the
+states and a matrix `D_b` for each block, let `u_b[n]` be the outputs of the
+channels of block `b`, now, and
+
+    V[n] = x[n]ᵀ P x[n] + Σ_b Σ_{m=1..b} u_b[n-m]ᵀ D_b u_b[n-m]
+
+(the second sum is the energy stored in the delay lines). One step adds
+`u_b[n]ᵀ D_b u_b[n]` to the window of block `b` and removes the same form of
+its channels `z_b[n] = u_b[n-b]`, so, with `D = diag(D_b)`,
+`W = Σ_b E_bᵀ D_b E_b` over the outputs (`E_b` selects the outputs of block
+`b`) and `H = diag(P, W)`:
+
+    V[n+1] - V[n] = -wᵀ M w,    M = diag(P, D) - Gᵀ H G.
+
+If `P ≻ 0`, `D ≻ 0` and `M ≻ 0` for every `G` of the box, then `V` is a
+positive definite quadratic form of the whole state (every value `y_o[n-m]`
+a later step reads is in `x` or in a window). It decreases by at least
+`ε |w|²` at each step, and every value of the state enters some `w` within
+`L` steps (the longest delay): `V` decays geometrically over any `L` steps.
+The recursion is exponentially stable, hence stable for bounded inputs.
+Nothing depends on the lengths of the long delays, and nothing on the
+coefficients being the same from one sample to the next as long as they
+stay in the box: the certificate also holds for coefficients that vary in
+time. It does not hold for a variable delay (a window changes length), which
+stays with the small-gain test. A block, rather than one weight per channel,
+lets the energy follow the signals that share a delay.
+
+**Who finds `P` and `D`.** An untrusted oracle,
+`scripts/lyapunov_oracle.py`. It first finds a block-diagonal scaling of the
+channels that minimizes the peak gain of the system over frequency. It then
+solves the Riccati equation of the bounded-real lemma for `P`. The analysis
+prints the system it builds, and the oracle answers with `P` and `D` as
+dyadic rationals. The check below uses them and nothing else from the
+oracle.
+
+**The check** (`lyapCheck`), exact:
+* `M` is evaluated in interval arithmetic over the box of `G`, which encloses
+  `M(G)` for every `G` of the box;
+* `M̃` is its center, rounded to `2⁻⁶⁰` and made symmetric, and `τ` bounds the
+  largest row sum of `|M(G) - M̃|`, hence (the matrix is symmetric) its
+  spectral norm;
+* `M̃ - τ I ≻ 0` is checked by fraction-free Gaussian elimination on an
+  integer matrix (Bareiss): every leading principal minor is positive
+  (Sylvester's criterion). Then `M(G) ⪰ M̃ - τ I ≻ 0` (Weyl).
+* `P ≻ 0` and `D ≻ 0` the same way, exactly (they are dyadic), with `D`
+  read only within its blocks. -/
+
+/-- Delays up to `SHORT` are read through explicit states. -/
+def SHORT : Nat := 4
+/-- A gap of more than `GAP` samples between two read delays of an output
+    splits them into two clusters. -/
+def GAP : Nat := 8
+
+/-- Insertion into a sorted list without duplicates. -/
+def insertSorted (k : Nat) : List Nat → List Nat
+  | [] => [k]
+  | h :: t => if k < h then k :: h :: t else if k == h then h :: t else h :: insertSorted k t
+
+/-- Consecutive delays whose gaps are at most `GAP`, from a sorted list. -/
+def clusters : List Nat → List (List Nat)
+  | [] => []
+  | k :: ks =>
+      match clusters ks with
+      | (c :: cs) :: rest => if c ≤ k + GAP then (k :: c :: cs) :: rest else [k] :: (c :: cs) :: rest
+      | _ => [[k]]
+
+/-- Where the next value of a state comes from. -/
+inductive Src where
+  | y (f : Nat)   -- output number `f` of `fed`, now
+  | x (i : Nat)   -- state `i`, shifted
+  | z (j : Nat)   -- channel `j`
+
+/-- The system of a group: `nx` states (`(o, m)`: `y_o[n-m]`), `nl` channels
+    (`(o, b)`: `y_o[n-b]`), and the rows of `G` over the `nx + nl` columns,
+    sparse: first the `nx` state rows, then one row per output of `fed`. -/
+structure LinSys where
+  nx : Nat
+  nl : Nat
+  rowsX : List (List (Nat × Iv))
+  rowsY : List (List (Nat × Iv))
+  /-- The output (index in `fed`) and the delay of each channel. -/
+  chan : List (Nat × Nat)
+
+/-- Add `c` at column `k` of a sparse row. -/
+def addAt (k : Nat) (c : Iv) : List (Nat × Iv) → List (Nat × Iv)
+  | [] => [(k, c)]
+  | (k', c') :: t => if k == k' then (k', c'.add c) :: t else (k', c') :: addAt k c t
+
+def sysOf (forms : List (Out × Aff)) (fed : List Out) : Option LinSys :=
+  let keys := forms.flatMap (·.2.terms.map (·.1))
+  -- per output: its states `((o, m), src)` and its channels `(o, b)`
+  let step := fun (acc : List ((Out × Nat) × Src) × List (Out × Nat)) (fo : Nat × Out) =>
+    let (f, o) := fo
+    let ds := keys.foldl (fun s (o', k) => if o' == o then insertSorted k s else s) []
+    (clusters ds).foldl (fun (xs, zs) c =>
+      let b := c.headD 0
+      let e := c.getLastD 0
+      if b ≤ SHORT then
+        (xs ++ (List.range e).map fun m =>
+          ((o, m + 1), if m == 0 then Src.y f else Src.x (xs.length + m - 1)), zs)
+      else
+        (xs ++ (List.range (e - b)).map fun m =>
+          ((o, b + m + 1), if m == 0 then Src.z zs.length else Src.x (xs.length + m - 1)),
+         zs ++ [(o, b)])) acc
+  let (xs, zs) := (fed.zipIdx.map fun (o, f) => (f, o)).foldl step ([], [])
+  let nx := xs.length
+  -- every key is a state or a channel (the clusters cover every delay read);
+  -- checked rather than assumed, since a key left out would drop a term
+  if !keys.all (fun key => xs.any (·.1 == key) || zs.contains key) then none else
+  let col : Out × Nat → Nat := fun key =>
+    match xs.findIdx? (·.1 == key) with
+    | some i => i
+    | none => nx + (zs.findIdx? (· == key)).getD 0
+  let rowsY := fed.map fun o =>
+    ((forms.lookup o).getD Aff.none).terms.foldl (fun row (key, c) => addAt (col key) c row) []
+  let rowsX := xs.map fun (_, s) => match s with
+    | .y f => rowsY.getD f []
+    | .x i => [(i, Iv.pt Q.one)]
+    | .z j => [(nx + j, Iv.pt Q.one)]
+  some ⟨nx, zs.length, rowsX, rowsY, zs.map fun (o, b) => ((fed.findIdx? (· == o)).getD 0, b)⟩
+
+/-- Columns of a sparse matrix given by rows: `(row, coefficient)` lists. -/
+def columns (n : Nat) (rows : List (List (Nat × Iv))) : Array (List (Nat × Iv)) :=
+  rows.zipIdx.foldl (fun cols (row, r) =>
+    row.foldl (fun cols (k, c) => cols.modify k ((r, c) :: ·)) cols) (Array.replicate n [])
+
+/-- Positive definiteness of a symmetric integer matrix: every leading
+    principal minor is positive (Sylvester). Bareiss' elimination makes the
+    pivot of step `k` the `k`-th leading minor, and every division exact. -/
+def bareissPD : Nat → List (List Int) → Int → Bool
+  | 0, _, _ => true
+  | f + 1, rows, prev =>
+      match rows with
+      | [] => true
+      | (p :: r0) :: rest =>
+          decide (0 < p) &&
+          bareissPD f (rest.map fun row => match row with
+            | a0 :: ar => (ar.zip r0).map fun (a, b) => (p * a - a0 * b) / prev
+            | [] => []) p
+      | [] :: _ => false
+
+/-- `⌊q · 2^s⌉`, a nearest integer. -/
+def Q.scaleRound (q : Q) (s : Nat) : Int :=
+  Int.fdiv (2 * q.n * ((2 : Int) ^ s) + q.d) (2 * q.d)
+
+/-- `⌈q · 2^s⌉`. -/
+def Q.scaleUp (q : Q) (s : Nat) : Int := -(Int.fdiv (-(q.n * ((2 : Int) ^ s))) q.d)
+
+def LSCALE : Nat := 60
+
+/-- Sum of two dyadic rationals over the larger denominator (a plain
+    `Q.add` multiplies them). -/
+def Q.addD (a b : Q) : Q :=
+  if b.d % a.d == 0 then ⟨a.n * (b.d / a.d) + b.n, b.d⟩
+  else if a.d % b.d == 0 then ⟨a.n + b.n * (a.d / b.d), a.d⟩
+  else a.add b
+
+/-- A symmetric matrix of dyadic rationals, positive definite: exactly, as an
+    integer matrix scaled by the largest denominator. -/
+def dyadicPD (m : List (List Q)) : Bool :=
+  let n := m.length
+  let at_ : Nat → Nat → Q := fun i j => (m.getD i []).getD j Q.zero
+  let den := m.foldl (fun a row => row.foldl (fun a q => if a < q.d then q.d else a) a) 1
+  m.all (·.length == n) &&
+  (List.range n).all (fun i => (List.range n).all fun j => at_ i j == at_ j i) &&
+  m.all (·.all fun q => den % q.d == 0) &&
+  bareissPD n (m.map (·.map fun q => q.n * (den / q.d))) 1
+
+/-- `P ≻ 0`, `D ≻ 0`, and `diag(P, D) - Gᵀ H G ≻ 0` on the whole box, with `D`
+    read only within the blocks of channels that share a delay. -/
+def lyapCheck (sys : LinSys) (P D : List (List Q)) : Bool :=
+  let n := sys.nx + sys.nl
+  let block : Nat → Nat → Bool := fun j k =>
+    ((sys.chan.getD j (0, 0)).2 == (sys.chan.getD k (0, 0)).2)
+  let Dm : List (List Q) := (List.range sys.nl).map fun j => (List.range sys.nl).map fun k =>
+    if block j k then (D.getD j []).getD k Q.zero else Q.zero
+  -- `xᵀ P x` sees only the symmetric part of `P`, and `M` is read from its
+  -- upper triangle: `P` and `D` must be symmetric (checked by `dyadicPD`)
+  if P.length != sys.nx || D.length != sys.nl then false else
+  if !(dyadicPD P && dyadicPD Dm) then false else
+  let Pa : Array (Array Q) := (P.map List.toArray).toArray
+  let Da : Array (Array Q) := (Dm.map List.toArray).toArray
+  -- W = Σ_b E_bᵀ D_b E_b over the outputs
+  let nf := sys.rowsY.length
+  let W : Array (Array Q) := (sys.chan.zipIdx.foldl (fun w ((f, _), j) =>
+      sys.chan.zipIdx.foldl (fun w ((f', _), k) =>
+        w.modify f (·.modify f' (·.addD ((Da.getD j #[]).getD k Q.zero)))) w)
+    (Array.replicate nf (Array.replicate nf Q.zero)))
+  let colsX := columns n sys.rowsX
+  let colsY := columns n sys.rowsY
+  -- the interval enclosure of M_ij, i ≤ j
+  let entry : Nat → Nat → Iv := fun i j =>
+    let tx := (colsX.getD i []).foldl (fun s (r, g) => (colsX.getD j []).foldl (fun s (r', h) =>
+      s.add ((g.mul (Iv.pt ((Pa.getD r #[]).getD r' Q.zero))).mul h)) s) Iv.zero
+    let ty := (colsY.getD i []).foldl (fun s (f, g) => (colsY.getD j []).foldl (fun s (f', h) =>
+      s.add ((g.mul (Iv.pt ((W.getD f #[]).getD f' Q.zero))).mul h)) s) Iv.zero
+    let dg : Q :=
+      if i < sys.nx then (if j < sys.nx then (Pa.getD i #[]).getD j Q.zero else Q.zero)
+      else if sys.nx ≤ j then (Da.getD (i - sys.nx) #[]).getD (j - sys.nx) Q.zero else Q.zero
+    (Iv.pt dg).sub (tx.add ty)
+  let encA : Array (Array Iv) := (List.range n).toArray.map fun i =>
+    (List.range n).toArray.map fun j => if i ≤ j then entry i j else Iv.zero
+  let enc : Nat → Nat → Iv := fun i j =>
+    if i ≤ j then (encA.getD i #[]).getD j Iv.zero else (encA.getD j #[]).getD i Iv.zero
+  -- center, rounded to 2^-LSCALE, and the deviation of every member from it
+  let cenA : Array (Array Int) := (List.range n).toArray.map fun i =>
+    (List.range n).toArray.map fun j =>
+      let e := enc i j
+      Q.scaleRound (⟨e.lo.n * e.hi.d + e.hi.n * e.lo.d, 2 * e.lo.d * e.hi.d⟩ : Q) LSCALE
+  let cen : Nat → Nat → Int := fun i j => (cenA.getD i #[]).getD j 0
+  let dev : Nat → Nat → Q := fun i j =>
+    let e := enc i j
+    let c : Q := ⟨cen i j, (2 : Int) ^ LSCALE⟩
+    Q.max (c.sub e.lo).abs (e.hi.sub c).abs
+  let tau : Q := (List.range n).foldl (fun m i =>
+    Q.max m ((List.range n).foldl (fun s j => (s.add (dev i j)).up) Q.zero)) Q.zero
+  let t : Int := Q.scaleUp tau LSCALE + 1
+  bareissPD n ((List.range n).map fun i => (List.range n).map fun j =>
+    if i == j then cen i j - t else cen i j) 1
+
+/-- A certificate for group `node` at rate number `rate` (in `checkRates`):
+    `P` for the states, `D` for the channels. -/
+structure LyapW where
+  node : Nat
+  rate : Nat
+  P : List (List Q)
+  D : List (List Q)
+
+/-- The system as the oracle reads it:
+    `nx nl|f:b ...|row;row;...` (the output and delay of each channel), each
+    row `k:lo:hi,...`, the `nx` state rows
+    first, then the output rows. -/
+def LinSys.text (s : LinSys) : String :=
+  let row : List (Nat × Iv) → String := fun r =>
+    ",".intercalate (r.map fun (k, c) => s!"{k}:{showQ c.lo}:{showQ c.hi}")
+  s!"{s.nx} {s.nl}|{" ".intercalate (s.chan.map fun (f, b) => s!"{f}:{b}")}|" ++
+    ";".intercalate ((s.rowsX ++ s.rowsY).map row)
+
+/-- The system of group `r` for a Lyapunov certificate: its forms with the
+    inputs of the long delay lines as outputs, each line one channel. A form
+    that reads an output now (delay 0) reads its form instead; one left after
+    that is a delay-free loop. -/
+def lyapSystem (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
+    (rng : Array (Option Iv)) (r : Nat) : Option LinSys :=
+  match groupForms dag free nat tinv p rng SHORT 16 [] r with
+  | .error _ => none
+  | .ok forms =>
+    let now : Aff → Aff := fun x => x.terms.foldl (fun acc ((o, k), c) =>
+        if k == 0 then acc.add (((forms.lookup o).getD Aff.none).scale c)
+        else acc.add ⟨[((o, k), c)], false, false⟩) { x with terms := [] }
+    let forms := forms.map fun (o, x) => (o, now x)
+    let keys := forms.flatMap (·.2.terms.map (·.1))
+    let fed := (keys.map (·.1)).eraseDups
+    if keys.any (·.2 == 0) || fed.any (fun o => (forms.lookup o).isNone) then none
+    else sysOf forms fed
+
 /-- The stability verdict of group `r` (with the groups nested in it and
     coupled to it). Up to 2 states, constant coefficients and fixed delays:
     Jury at the vertices, exact. One state with a time-varying coefficient:
-    `|a| < 1` over the box, a contraction. Otherwise: the small-gain test. -/
+    `|a| < 1` over the box, a contraction. Otherwise: the small-gain test,
+    then the Lyapunov certificate `wit` (fixed delays only). With `req`, a
+    group left unproven without a certificate carries its system (the third
+    component), for the oracle. -/
 def groupVerdict (dag : Dag) (free : Array Nat) (nat natOpt tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) (r : Nat) : GV × String :=
+    (rng : Array (Option Iv)) (wit : Option LyapW) (req : Bool) (r : Nat) : GV × String × String :=
   let body := recBody dag r
   let isIntArg : Arg → Bool := fun
     | .ref j => natOpt.getD j false
     | .int _ => true
     | _ => false
-  if body.all isIntArg then (.refused, "integer recursion (wrapping semantics)") else
+  if body.all isIntArg then (.refused, "integer recursion (wrapping semantics)", "") else
   -- a group that refers to an enclosing one is analysed with it
-  if free.getD r 1000 != 0 then (.refused, "part of an enclosing group (analysed with it)") else
+  if free.getD r 1000 != 0 then (.refused, "part of an enclosing group (analysed with it)", "") else
   if formCalls dag free 16 r 32 > 32 then
-    (.refused, "more than 32 nested groups coupled to the group") else
-  match groupForms dag free nat tinv p rng 16 [] r with
-  | .error e => (.refused, e)
+    (.refused, "more than 32 nested groups coupled to the group", "") else
+  match groupForms dag free nat tinv p rng 0 16 [] r with
+  | .error e => (.refused, e, "")
   | .ok forms =>
     let keys := forms.flatMap (·.2.terms.map (·.1))
-    if keys.any (·.2 == 0) then (.refused, "delay-free loop") else
+    if keys.any (·.2 == 0) then (.refused, "delay-free loop", "") else
     let fed := (keys.map (·.1)).eraseDups
     if fed.any (fun o => (forms.lookup o).isNone) then
-      (.refused, "state beyond the outputs read") else
+      (.refused, "state beyond the outputs read", "") else
     let tv := forms.any (·.2.tv)
     let vd := forms.any (·.2.vd)
     let depth : Out → Nat := fun o => keys.foldl (fun m (o', k) => if o' == o then Nat.max m k else m) 0
     let total : Nat := fed.foldl (fun t o => t + depth o) 0
-    let bySmallGain : GV × String :=
-      if smallGain (gainMatrix forms fed) 64 (fed.map fun _ => Q.one) then (.stable, "")
-      else (.unproven, s!"small-gain test fails ({total} states)")
+    -- the small-gain test, then a Lyapunov–Krasovskii certificate (not with
+    -- a variable delay)
+    let bySmallGain : GV × String × String :=
+      if smallGain (gainMatrix forms fed) 64 (fed.map fun _ => Q.one) then (.stable, "", "")
+      else
+        let why := s!"small-gain test fails ({total} states)"
+        if vd then (.unproven, why, "") else
+        match lyapSystem dag free nat tinv p rng r with
+        | none => (.unproven, why ++ ", no linear system for a Lyapunov certificate", "")
+        | some sys =>
+        match wit with
+        | some w =>
+            if lyapCheck sys w.P w.D then (.stable, "", "")
+            else (.unproven, why ++ ", Lyapunov certificate rejected", "")
+        | none => (.unproven, why, if req then sys.text else "")
     if vd || total > 2 || (tv && total == 2) then bySmallGain else
     let states := stateOf forms fed
     match states.map (rowOf forms states) with
-    | [] => (.stable, "no feedback")
-    | [[a]] => if jury1 a then (.stable, "") else (.unproven, "Jury fails on the box")
+    | [] => (.stable, "no feedback", "")
+    | [[a]] => if jury1 a then (.stable, "", "") else (.unproven, "Jury fails on the box", "")
     | [[a, b], [c, d]] =>
-        if jury2 a b c d then (.stable, "") else (.unproven, "Jury fails on the box")
+        if jury2 a b c d then (.stable, "", "") else (.unproven, "Jury fails on the box", "")
     | _ => bySmallGain
 
 /-- The rates of `make check-precision`. -/
@@ -1827,17 +2168,22 @@ structure Verdicts where
   sites  : List (Nat × List Bool)    -- per table read and delay tap
 deriving Repr, DecidableEq
 
-/-- Per rate: the group verdicts, the finite verdict, the site verdicts. -/
-def analysis (dag : Dag) (p : Prec) :
-    List (List (GV × String) × (FV × String) × List (Nat × Bool)) :=
+/-- Per rate: the group verdicts, the finite verdict, the site verdicts.
+    `wit` holds the Lyapunov certificates, per group and rate; with `req`,
+    a group they could help and that has none carries its system, for the
+    oracle. -/
+def analysis (dag : Dag) (p : Prec) (wit : List LyapW := []) (req : Bool := false) :
+    List (List (GV × String × String) × (FV × String) × List (Nat × Bool)) :=
   let free := freeLevels dag
   let nat := natures dag false
   let natOpt := natures dag true
   let tinv := pures dag
-  checkRates.map fun sr =>
+  checkRates.zipIdx.map fun (sr, k) =>
     let rng := ranges dag free nat natOpt p sr false
     let rngFull := ranges dag free nat natOpt p sr true
-    ((recNodes dag).map fun r => groupVerdict dag free nat natOpt tinv p rng r,
+    ((recNodes dag).map fun r =>
+      groupVerdict dag free nat natOpt tinv p rng (wit.find? fun w => w.node == r && w.rate == k)
+        req r,
      finiteVerdict dag tinv p rng,
      siteVerdicts dag rngFull)
 
@@ -1845,14 +2191,15 @@ def transpose {α} (rows : List (List α)) (n : Nat) (d : α) : List (List α) :
   (List.range n).map fun k => rows.map fun row => row.getD k d
 
 def verdictsOf (dag : Dag)
-    (a : List (List (GV × String) × (FV × String) × List (Nat × Bool))) : Verdicts :=
+    (a : List (List (GV × String × String) × (FV × String) × List (Nat × Bool))) : Verdicts :=
   let recs := recNodes dag
   let sites := ((a.head?.map (·.2.2)).getD []).map (·.1)
   { groups := recs.zip (transpose (a.map fun (g, _, _) => g.map (·.1)) recs.length .refused)
     finite := a.map fun (_, f, _) => f.1
     sites  := sites.zip (transpose (a.map fun (_, _, s) => s.map (·.2)) sites.length false) }
 
-def verdicts (dag : Dag) (p : Prec) : Verdicts := verdictsOf dag (analysis dag p)
+def verdicts (dag : Dag) (p : Prec) (wit : List LyapW := []) : Verdicts :=
+  verdictsOf dag (analysis dag p wit)
 
 /-- Group verdicts only (the step-2 statement, kept for the report). -/
 def srVerdicts (dag : Dag) (p : Prec) : List (Nat × List GV) := (verdicts dag p).groups
@@ -1864,13 +2211,15 @@ def FV.letter : FV → String
   | .finite => "F" | .domain => "D" | .unknown => "?"
 
 /-- The probe read by `sig2lean.py` and `certify_tests.py`:
-    `n26:SSSSSS;n49:RRRRRR(reason)|FFFFFF(reason)|n30:IIIIII;n41:NNNNNN`. -/
-def probe (dag : Dag) (p : Prec) : String :=
-  let a := analysis dag p
+    `n26:SSSSSS;n49:RRRRRR(reason)|FFFFFF(reason)|n30:IIIIII;n41:NNNNNN`,
+    then, with `req`, one line `L|group|rate|system` per group and rate a
+    Lyapunov certificate could prove (`LinSys.text`). -/
+def probe (dag : Dag) (p : Prec) (wit : List LyapW := []) (req : Bool := false) : String :=
+  let a := analysis dag p wit req
   let recs := recNodes dag
   let groups := recs.zipIdx.map fun (r, g) =>
-    let vs := a.map fun (gs, _, _) => gs.getD g (.refused, "?")
-    let why := (vs.map (·.2)).filter (· != "") |>.eraseDups
+    let vs := a.map fun (gs, _, _) => gs.getD g (.refused, "?", "")
+    let why := (vs.map (·.2.1)).filter (· != "") |>.eraseDups
     s!"n{r}:{String.join (vs.map (·.1.letter))}" ++
       (if why.isEmpty then "" else s!"({String.intercalate ", " why})")
   let fin := a.map fun (_, f, _) => f
@@ -1880,7 +2229,10 @@ def probe (dag : Dag) (p : Prec) : String :=
   let sites := ((a.head?.map (·.2.2)).getD []).zipIdx.map fun ((i, _), k) =>
     s!"n{i}:" ++ String.join (a.map fun (_, _, ss) =>
       if (ss.getD k (0, false)).2 then "I" else "N")
-  String.intercalate ";" groups ++ "|" ++ finS ++ "|" ++ String.intercalate ";" sites
+  let reqs := a.zipIdx.flatMap fun ((gs, _, _), k) =>
+    (recs.zip gs).filterMap fun (r, (_, _, t)) => if t == "" then none else some s!"L|{r}|{k}|{t}"
+  String.intercalate ";" groups ++ "|" ++ finS ++ "|" ++ String.intercalate ";" sites ++
+    String.join (reqs.map ("\n" ++ ·))
 
 /-- The group part of the probe, as before. -/
 def srProbe (dag : Dag) (p : Prec) : String := ((probe dag p).splitOn "|").headD ""
@@ -1954,6 +2306,19 @@ def parseNode (line : String) : Option Node :=
 def Dag.parse (text : String) : Option Dag :=
   (((text.splitOn "\n").filter (· != "")).mapM parseNode).map List.toArray
 
+/-- Lyapunov certificates, one per line: `W|group|rate|D row;...|P row;...`,
+    each row `q q ...` (the oracle's answer to the `L|` lines of `probe`). -/
+def LyapW.parse (text : String) : Option (List LyapW) :=
+  ((text.splitOn "\n").filter (· != "")).mapM fun line =>
+    match line.splitOn "|" with
+    | ["W", r, k, d, P] => do
+        let qs : String → Option (List Q) := fun t =>
+          ((t.splitOn " ").filter (· != "")).mapM parseQ
+        let rows : String → Option (List (List Q)) := fun t =>
+          ((t.splitOn ";").filter (· != "")).mapM qs
+        pure ⟨← r.toNat?, ← k.toNat?, ← rows P, ← rows d⟩
+    | _ => none
+
 /-! ## Standing obligations
 
 The gaps below are recorded here rather than silently relied upon.
@@ -2007,7 +2372,12 @@ assumptions:
    `jury2` (a multilinear function reaches its minimum over a box at a
    vertex), the contraction argument for one time-varying state, the
    weighted max-norm argument of the small-gain test, the
-   floating-point facts of `fracRange` and `isPow2`, and the rounding of
+   Lyapunov–Krasovskii argument of `lyapCheck` (the energy decreases, every
+   value of the state enters the decrease within the longest delay, so it
+   decays geometrically) with Sylvester's criterion, the exactness of
+   Bareiss' elimination and Weyl's inequality it relies on, the
+   floating-point facts of `fracRange`, `isPow2` and `Prec.op` (a
+   representable exact result is not rounded), and the rounding of
    `Q.toFloat32` are stated with their argument next to the code, and
    reviewed as mathematics. They are the next targets of the optional mathlib
    layer, which already proves the Jury criterion.

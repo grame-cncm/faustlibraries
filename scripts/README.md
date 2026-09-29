@@ -36,6 +36,7 @@ or later.
 | **Formal certification** | | |
 | [`sig2lean.py`](#sig2leanpy) | Faust signals to Lean 4 theorems | `make certify`, `certify-reference` |
 | [`certify_tests.py`](#certify_testspy) | the Lean rate analysis on every regression test | `make certify-tests` |
+| [`lyapunov_oracle.py`](#lyapunov_oraclepy) | untrusted Lyapunov certificates for the rate analysis | `sig2lean.py`, `certify_tests.py` |
 
 The scripts that turn the `.lib` files into the documentation pages
 (`faustlib2md.awk`, `inject_plots.py`, `makeindex.awk`) are in `doc/scripts/` and
@@ -45,7 +46,9 @@ are run by `doc/Makefile`.
 
 - tests: `faust` and a C++17 compiler; `check_precision.py` also needs `numpy`;
 - figures: `faust`, `g++`, `numpy` and `matplotlib`;
-- certification: `faust-rs` and `lean` (4.31);
+- certification: `faust-rs` and `lean` (4.31); the Lyapunov certificates
+  also need `numpy` and `scipy` (without them, the groups they would prove
+  stay not proven);
 - everything else: the Python standard library only.
 
 ---
@@ -496,12 +499,16 @@ the rate analysis it also emits the whole graph as a `Dag` (one node per dump
 binding) and prints the verdicts per program and precision
 (`rates lowpass3 single: n26:SSSSSS;n49:SSSSSS`). It also compares Lean's table verdicts
 with the clamps the compiler actually inserts (`-ct 1` against `-ct 0`), and
-fails if a table that needs a clamp was left unclamped.
+fails if a table that needs a clamp was left unclamped. For the groups that
+Jury and the small-gain test leave unproven, it passes the linear systems
+Lean prints to `lyapunov_oracle.py`, runs Lean again with the certificates,
+and pins them in `OUT.lean` as `X_wit_p` definitions, one line each.
 
 - Environment: `FAUST_RS` (compiler, default `target/release/faust-rs`),
   `FAUST_LIBS` (library directory passed with `-I`), `LEAN` (default `lean`).
 - `make certify` writes `tests/build/certified.lean`, kernel-checks it and
-  diffs it with the committed `tests/lean/certified.lean`.
+  diffs it with the committed `tests/lean/certified.lean`, without the
+  certificate lines: their floats may differ from one platform to another.
 - `make certify-reference` rewrites the committed file.
 
 The workflow and the meaning of the verdicts are in `doc/docs/contributing.md`,
@@ -528,8 +535,8 @@ with the controls at their default values:
   stability limit (a direct-form section at a low frequency and a high rate);
   or a loss of precision of the analysis (two exclusive conditions each
   bounded in [0, 1]);
-- `R`: refused, with the reason, such as nonlinear, more than 2 states,
-  integer recursion or coupled groups. A refusal measures the coverage of the
+- `R`: refused, with the reason, such as nonlinear, integer recursion or a
+  coefficient that cannot be bounded. A refusal measures the coverage of the
   analysis and never fails.
 
 The probe also gives, per rate, a verdict on the time-invariant values (`F`
@@ -551,10 +558,37 @@ once. It also confronts the non-finite entries of
   each test is a small Lean file that imports it and evaluates the verdicts
   with `#eval`. The graph is passed as a string read by `Dag.parse`: a `Dag`
   literal of 10 000 nodes takes a minute to elaborate. The whole suite takes
-  about a minute and a half on ten cores.
+  about six minutes on ten cores (the tests with Lyapunov certificates run
+  twice).
 - This runs the code of the theorems through Lean's evaluator, not its
   kernel. The suite run is a coverage and regression report; `--kernel` also
   re-checks every verdict with `decide +kernel`, which takes much longer.
 - `--json FILE` writes every verdict, per test and group, with the refusal
-  reasons.
+  reasons, and the number of Lyapunov requests and certificates per test.
+- A test with requests runs twice: the oracle answers between the two runs
+  (`.lean`, then `.w.lean`).
 
+### `lyapunov_oracle.py`
+
+```
+scripts/lyapunov_oracle.py < requests > answers
+```
+
+The untrusted half of the Lyapunov certificates of the rate analysis (section
+*Lyapunov–Krasovskii certificates* of the prelude). Each request line
+`L|group|rate|nx nl|output:delay ...|rows` is the linear system Lean built for
+a recursion group: `nx` states, `nl` delay-line channels, and the sparse rows
+of `G = [[A, B], [Cx, Cz]]` with interval coefficients. The script answers
+`W|group|rate|D|P` with dyadic rationals: `D`, block diagonal with one block
+per delay length, weights the energy of the delay lines, and `P` weights the
+energy of the states.
+
+- `D` minimizes the peak over frequency of the scaled loop gain, by L-BFGS on
+  a smoothed maximum.
+- `P` solves the Riccati equation of the bounded-real lemma for that `D`.
+  The script tries a few margins and keeps the first whose float estimate
+  survives the box of the coefficients.
+
+Lean checks every answer exactly and trusts none. The script needs `numpy` and
+`scipy`; `sig2lean.py` and `certify_tests.py` import it, and skip the
+certificates without it.

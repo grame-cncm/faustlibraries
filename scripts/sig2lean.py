@@ -505,6 +505,59 @@ def verdicts_lit(groups, fin, sites):
     return f"⟨[{g}], [{f}], [{t}]⟩"
 
 
+def split_probe_output(stdout, key_re):
+    """Probe lines printed by `IO.println (key ++ "|" ++ probe ... true)`,
+    each followed by its Lyapunov requests (`L|...`): {key: (probe, [L lines])}."""
+    out, cur = {}, None
+    for line in stdout.splitlines():
+        m = re.match(key_re + r"\|(.*)$", line)
+        if m:
+            cur = m.group(1)
+            out[cur] = (m.group(2), [])
+        elif line.startswith("L|") and cur is not None:
+            out[cur][1].append(line)
+    return out
+
+
+def lyapunov_answers(requests):
+    """The oracle's certificates for {key: [L lines]} (keys (x, precision)):
+    {key: [W lines]}. One answer per system shape (group, rate, dimensions and
+    channels), computed on the double request when there is one and reused
+    for exact; single, whose boxes are wider, gets its own. Lean checks each
+    against its own system. Empty when numpy/scipy are missing (the groups
+    then stay unproven)."""
+    try:
+        import lyapunov_oracle
+    except ImportError:
+        print("lyapunov_oracle: numpy/scipy missing, no Lyapunov certificates",
+              file=sys.stderr)
+        return {}
+
+    def shape(key, line):   # exact shares the double answer; single has wider boxes
+        return (key[:-1], "single" if key[-1] == "single" else "", tuple(line.split("|")[1:5]))
+    order = {"double": 0, "exact": 1, "single": 2}
+    by_shape = {}
+    for key in sorted(requests, key=lambda k: order.get(k[-1], 3)):
+        for line in requests[key]:
+            by_shape.setdefault(shape(key, line), line)
+    answers = {k: lyapunov_oracle.answer(line) for k, line in by_shape.items()}
+    return {key: [a for a in (answers[shape(key, line)] for line in lines) if a]
+            for key, lines in requests.items()}
+
+
+def witness_lit(lines):
+    """`List LyapW` literal of the oracle's `W|group|rate|D|P` lines."""
+    def rows(t):
+        return "[" + ", ".join(
+            "[" + ", ".join(f"⟨{q.split('/')[0]}, {q.split('/')[1]}⟩" for q in r.split()) + "]"
+            for r in filter(None, t.split(";"))) + "]"
+    items = []
+    for line in lines:
+        _, g, r, D, P = line.split("|")
+        items.append(f"⟨{g}, {r}, {rows(P)}, {rows(D)}⟩")
+    return "[" + ", ".join(items) + "]"
+
+
 def parse_sr_probe(text):
     """`n26:SSSSSS;n49:RRRRRR(reason)` -> [(26, "SSSSSS", "reason"), ...]"""
     out = []
@@ -561,7 +614,7 @@ def ident(p):
     return re.sub(r'\W', '_', os.path.splitext(os.path.basename(p))[0])
 
 
-def build(template, dsps, verdicts=None, oracle=None, rates=None):
+def build(template, dsps, verdicts=None, oracle=None, rates=None, witnesses=None):
     out = [open(template).read(),
            "/-! # Generated section",
            "",
@@ -587,7 +640,9 @@ def build(template, dsps, verdicts=None, oracle=None, rates=None):
         out += [f'#eval s!"{n}|" ++ toString (certifyStableB {n}) ++ "|" '
                 f'++ toString (certifyIndicesB {n}) ++ "|" '
                 f'++ tableSiteVerdictsB {n}' for n in names]
-        out += [f'#eval s!"{st}@{p}|" ++ probe {st}_dag .{p}'
+        out += witness_defs(stems, witnesses)
+        out += [f'#eval IO.println ("{st}@{p}|" ++ probe {st}_dag .{p} {wit_arg(st, p, witnesses)} '
+                f'{"false" if witnesses else "true"})'
                 for st in stems for p in PRECISIONS]
     else:
         out.append("/-! ## Certification\n")
@@ -624,10 +679,12 @@ def build(template, dsps, verdicts=None, oracle=None, rates=None):
             for p in PRECISIONS:
                 out.append(f"-- {st} {p}: {rates[(st, p)][1]}")
         out.append("")
+        out += witness_defs(stems, witnesses)
         for st in stems:
             for p in PRECISIONS:
                 groups, fin, _, sites = rates[(st, p)][0]
-                out.append(f"theorem {st}_rates_{p} : verdicts {st}_dag .{p} = "
+                w = wit_arg(st, p, witnesses)
+                out.append(f"theorem {st}_rates_{p} : verdicts {st}_dag .{p}{' ' + w if w != '[]' else ''} = "
                            f"{verdicts_lit(groups, fin, sites)} := by decide +kernel")
     if oracle:
         out.append("")
@@ -645,25 +702,66 @@ def build(template, dsps, verdicts=None, oracle=None, rates=None):
     return "\n".join(out), names
 
 
+def witness_defs(stems, witnesses):
+    """The Lyapunov certificates of the oracle, pinned as definitions."""
+    if not witnesses or not any(witnesses.values()):
+        return []
+    out = ["/-- Lyapunov certificates (`X_wit_p`: program `X`, precision `p`), from",
+           "    `scripts/lyapunov_oracle.py`. Untrusted: `lyapCheck` checks each. -/"]
+    for st in stems:
+        for p in PRECISIONS:
+            if witnesses.get((st, p)):
+                # one line: the oracle's floats vary with the platform, so
+                # `make certify` leaves these lines out of its drift check
+                out.append(f"def {st}_wit_{p} : List LyapW := {witness_lit(witnesses[(st, p)])}")
+    return out
+
+
+def wit_arg(st, p, witnesses):
+    return f"{st}_wit_{p}" if witnesses and witnesses.get((st, p)) else "[]"
+
+
+def rate_probe(probe_text):
+    """Run a probe file: the clamp verdicts, and per (stem, precision) the
+    rate probe and its Lyapunov requests."""
+    with tempfile.NamedTemporaryFile("w", suffix=".lean", delete=False) as f:
+        f.write(probe_text)
+        path = f.name
+    r = subprocess.run([LEAN, path], capture_output=True, text=True)
+    os.unlink(path)
+    split = split_probe_output(r.stdout, r"(\w+@(?:exact|double|single))")
+    rates = {tuple(k.split("@")): v for k, v in split.items()}
+    return r, rates
+
+
 def main():
     template, target, dsps = sys.argv[1], sys.argv[2], sys.argv[3:]
     probe, names = build(template, dsps)
-    with tempfile.NamedTemporaryFile("w", suffix=".lean", delete=False) as f:
-        f.write(probe)
-        probe_path = f.name
-    r = subprocess.run([LEAN, probe_path], capture_output=True, text=True)
+    r, probed = rate_probe(probe)
     verdicts = {m[0]: (m[1], m[2], m[3]) for m in
                 re.findall(r'"?(\w+)\|(true|false)\|(true|false)\|([^"\n]*)"?',
                            r.stdout)}
     missing = [n for n in names if n not in verdicts]
     if missing:
         sys.exit(f"probe failed for {missing}\n{r.stdout}\n{r.stderr}")
-    rates = {}
-    for m in re.finditer(r'"?(\w+)@(exact|double|single)\|([^"\n]*)"?', r.stdout):
-        rates[(m.group(1), m.group(2))] = (parse_probe(m.group(3)), m.group(3))
-    missing = [(st, p) for st in map(ident, dsps) for p in PRECISIONS if (st, p) not in rates]
+    missing = [(st, p) for st in map(ident, dsps) for p in PRECISIONS if (st, p) not in probed]
     if missing:
         sys.exit(f"rate probe failed for {missing}\n{r.stdout}\n{r.stderr}")
+    # Lyapunov certificates: the oracle answers the requests, and a second
+    # probe gives the verdicts with them.
+    witnesses = lyapunov_answers({k: v[1] for k, v in probed.items() if v[1]})
+    if any(witnesses.values()):
+        r, probed = rate_probe(build(template, dsps, witnesses=witnesses)[0])
+        missing = [(st, p) for st in map(ident, dsps) for p in PRECISIONS if (st, p) not in probed]
+        if missing:
+            sys.exit(f"rate probe with certificates failed for {missing}\n{r.stdout}\n{r.stderr}")
+    rates = {k: (parse_probe(v[0]), v[0]) for k, v in probed.items()}
+    # pin only the certificates Lean accepted: a rejected one changes no
+    # verdict, and whether the oracle answers at all depends on the platform
+    for key, lines in witnesses.items():
+        letters = {n: l for n, l, _ in rates[key][0][0]}
+        witnesses[key] = [w for w in lines
+                          if letters.get(int(w.split("|")[1]), "")[int(w.split("|")[2]):][:1] == "S"]
 
     # Compiler clamp oracle: Lean's table verdicts vs the -ct clamps.
     oracle_lines, defects = [], []
@@ -683,7 +781,8 @@ def main():
         sys.exit("clamp oracle DEFECT — Lean requires a clamp the compiler "
                  "did not insert:\n  " + "\n  ".join(defects))
 
-    final, _ = build(template, dsps, verdicts, oracle=oracle_lines, rates=rates)
+    final, _ = build(template, dsps, verdicts, oracle=oracle_lines, rates=rates,
+                     witnesses=witnesses)
     open(target, "w").write(final)
     print(f"wrote {target}: {len(names)} signal(s), "
           f"{sum(v[0] == 'true' for v in verdicts.values())} certified stable, "
@@ -692,7 +791,6 @@ def main():
         print(f"  rates {st} {p}: {text}")
     for line in oracle_lines:
         print(f"  clamp oracle: {line}")
-    os.unlink(probe_path)
 
 
 if __name__ == "__main__":

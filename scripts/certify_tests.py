@@ -13,9 +13,14 @@ rates"); each group gets one letter per rate:
 - S: stable;
 - U: linear, but not proven stable (in single precision: the rounding of the
      coefficients can move the recursion out of the stable region);
-- R: refused, with the reason (nonlinear, more than 2 states, integer
-     recursion, groups coupled to each other...): outside what the analysis
-     reads, not a defect.
+- R: refused, with the reason (nonlinear, integer recursion, a coefficient
+     that cannot be bounded...): outside what the analysis reads, not a
+     defect.
+
+Where Jury and the small-gain test do not conclude, Lean prints the linear
+system of the group; scripts/lyapunov_oracle.py (numpy, scipy) answers with a
+Lyapunov certificate, and the test runs a second time with the certificates,
+which Lean checks exactly.
 
 The prelude is compiled once to an .olean, and each test is a small Lean file
 that imports it and evaluates the verdicts with `#eval`. That runs the same
@@ -137,29 +142,51 @@ def check_test(spec, args):
     # file reads the graph from a string instead (Dag.parse), and checks that
     # every node was read.
     text = sig2lean.emit_nodes_text(bindings)
+    head = options + [f'def dagText : String := "{text}"',
+                      "def dag : Dag := (Dag.parse dagText).getD #[]", ""]
     with open(base + ".lean", "w") as f:
-        f.write("\n".join(options + [
-            f'def dagText : String := "{text}"',
-            "def dag : Dag := (Dag.parse dagText).getD #[]",
-            "",
-            '#eval s!"size|{dag.size}"'] +
-            [f'#eval "{p}|" ++ probe dag .{p}' for p in PRECISIONS]) + "\n")
+        f.write("\n".join(head + ['#eval s!"size|{dag.size}"'] +
+                [f'#eval IO.println ("{p}|" ++ probe dag .{p} [] true)' for p in PRECISIONS]) + "\n")
     t0 = time.time()
     try:
         r = run_lean(base + ".lean", args.build_dir, args.timeout)
     except subprocess.TimeoutExpired:
         res["error"] = f"lean: timeout after {args.timeout} s"
         return res
-    res["seconds"] = round(time.time() - t0, 2)
-    probes = dict(re.findall(r'"(exact|double|single)\|([^"\n]*)"', r.stdout))
     size = re.search(r'"size\|(\d+)"', r.stdout)
     if r.returncode == 0 and (not size or int(size.group(1)) != len(bindings)):
         res["error"] = f"lean: the graph text was not read ({size.group(1) if size else '?'} " \
                        f"of {len(bindings)} nodes)"
         return res
-    if r.returncode != 0 or set(probes) != set(PRECISIONS):
+    probed = sig2lean.split_probe_output(r.stdout, r"(exact|double|single)")
+    if r.returncode != 0 or set(probed) != set(PRECISIONS):
         res["error"] = "lean: " + ((r.stderr or r.stdout).strip().splitlines() or ["?"])[-1][:200]
         return res
+    # Lyapunov certificates: the oracle answers the systems Lean printed, and
+    # a second run gives the verdicts with them.
+    requests = {(p,): probed[p][1] for p in PRECISIONS if probed[p][1]}
+    witnesses = {k[0]: v for k, v in sig2lean.lyapunov_answers(requests).items() if v}
+    res["lyapunov"] = {"requests": sum(len(v) for v in requests.values()),
+                       "certificates": sum(len(v) for v in witnesses.values())}
+    if witnesses:
+        wdefs = [f'def wit_{p} : List LyapW := (LyapW.parse "{chr(10).join(w)}").getD []'
+                 for p, w in witnesses.items()]
+        with open(base + ".w.lean", "w") as f:
+            f.write("\n".join(head + wdefs + [
+                f'#eval IO.println ("{p}|" ++ probe dag .{p} {"wit_" + p if p in witnesses else "[]"})'
+                for p in PRECISIONS]) + "\n")
+        try:
+            r = run_lean(base + ".w.lean", args.build_dir, args.timeout)
+        except subprocess.TimeoutExpired:
+            res["error"] = f"lean: timeout after {args.timeout} s (with certificates)"
+            return res
+        probed = sig2lean.split_probe_output(r.stdout, r"(exact|double|single)")
+        if r.returncode != 0 or set(probed) != set(PRECISIONS):
+            res["error"] = "lean (certificates): " + \
+                ((r.stderr or r.stdout).strip().splitlines() or ["?"])[-1][:200]
+            return res
+    res["seconds"] = round(time.time() - t0, 2)
+    probes = {p: probed[p][0] for p in PRECISIONS}
     groups = collections.OrderedDict()
     sites = collections.OrderedDict()
     res["finite"], res["finite_reason"] = {}, {}
@@ -184,7 +211,10 @@ def check_test(spec, args):
     res["groups"] = list(groups.values())
     if args.kernel:
         lines = options + [f"def dag : Dag := {sig2lean.emit_nodes(bindings)}", ""] + [
-            f"example : verdicts dag .{p} = {sig2lean.verdicts_lit(*parsed[p][:2], parsed[p][2])} "
+            f"def wit_{p} : List LyapW := {sig2lean.witness_lit(witnesses.get(p, []))}"
+            for p in PRECISIONS] + [
+            f"example : verdicts dag .{p} wit_{p} = "
+            f"{sig2lean.verdicts_lit(*parsed[p][:2], parsed[p][2])} "
             ":= by decide +kernel" for p in PRECISIONS]
         with open(base + ".kernel.lean", "w") as f:
             f.write("\n".join(lines) + "\n")

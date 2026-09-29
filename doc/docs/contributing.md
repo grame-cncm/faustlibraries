@@ -449,9 +449,12 @@ Three properties are currently certified, on concrete instantiations:
 - **stability at the sample rates, in float and double**: each recursion group
   is checked at the six rates of `make check-precision`, with the controls at
   their default values, with its coefficients as the program computes them
-  in exact, double and single arithmetic: exactly (Jury) up to 2 states, by
-  a sufficient small-gain test beyond (feedback combs and allpasses, delays
-  in a loop). This one covers the coefficients that depend on `ma.SR`. The
+  in exact, double and single arithmetic: exactly (Jury) up to 2 states,
+  and beyond by a sufficient small-gain test (feedback combs and allpasses,
+  delays in a loop) or by a Lyapunov certificate (feedback delay networks,
+  rotations, ladders). The certificate is found by an untrusted numerical
+  oracle and checked exactly by Lean. This one covers the coefficients that
+  depend on `ma.SR`. The
   analysis also checks that the time-invariant values stay finite, and that
   table reads and delay taps stay in range, in floating point.
 
@@ -463,6 +466,8 @@ current coverage, not a defect report about the function.
 
 No Lean knowledge is needed. Prerequisites: `lean` (4.31, bundled Std only) and
 `faust-rs` on the PATH — or override with `make certify FAUST_RS=... LEAN=...`.
+The Lyapunov certificates also need `numpy` and `scipy` (`scripts/lyapunov_oracle.py`):
+without them, the groups they would prove are reported not proven.
 
 1. Add a small DSP program to `tests/lean/` instantiating the new function
    with concrete parameters, e.g. `tests/lean/machin.dsp`:
@@ -531,7 +536,7 @@ following the library: without one, the rewrite of `fi.lowpass` (#262) went
 through 20 commits before anyone noticed that `make certify` failed.
 
 **The whole test suite.** `make certify-tests` runs the same rate analysis on
-every `*_test` of `tests/*.dsp` (about a minute and a half on ten cores), with one line
+every `*_test` of `tests/*.dsp` (about six minutes on ten cores), with one line
 of verdicts per recursion group and arithmetic. Select tests as for
 `check-precision`:
 

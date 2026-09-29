@@ -221,7 +221,9 @@ certify: ## Regenerate the Lean certification theorems, kernel-check them, and f
 	printf '[certify] generating %s from %d dsp files\n' '$(BUILD_DIR)/certified.lean' '$(words $(LEAN_CERT_DSP))'; \
 	FAUST_RS=$(FAUST_RS) FAUST_LIBS=$(CURDIR) $(PYTHON) $(SIG2LEAN) $(LEAN_TEMPLATE) $(BUILD_DIR)/certified.lean $(LEAN_CERT_DSP); \
 	$(LEAN) $(BUILD_DIR)/certified.lean; \
-	if ! diff -u $(LEAN_CERTIFIED) $(BUILD_DIR)/certified.lean; then \
+	grep -v '^def [A-Za-z0-9_]*_wit_[a-z]* : List LyapW := ' $(LEAN_CERTIFIED) > $(BUILD_DIR)/certified.ref.cmp || true; \
+	grep -v '^def [A-Za-z0-9_]*_wit_[a-z]* : List LyapW := ' $(BUILD_DIR)/certified.lean > $(BUILD_DIR)/certified.cmp || true; \
+	if ! diff -u $(BUILD_DIR)/certified.ref.cmp $(BUILD_DIR)/certified.cmp; then \
 		echo "[fail] certification drifted from $(LEAN_CERTIFIED) — review the diff above, then run 'make certify-reference'"; \
 		exit 1; \
 	fi; \

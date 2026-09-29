@@ -157,6 +157,14 @@ checks. This is why `sig2lean.py` sits outside the trusted base, and why the
 verdicts pinned in `certified.lean` can be diffed by `make certify` like any
 other test reference.
 
+The rate analysis adds one step between the two passes, for the groups
+that Jury and the small-gain test leave unproven. The probe pass also prints
+their linear systems, an untrusted numerical oracle answers with Lyapunov
+certificates, and a second probe pass reads the verdicts with them. The
+pinning pass then states the theorems with the certificates as arguments.
+The oracle sits outside the trusted base like the script: a wrong
+certificate fails `lyapCheck` and leaves the group unproven.
+
 What remains assumed is the *adequacy of the import itself* — that `Sig`
 faithfully mirrors what `--dump-sig` means. That is the first standing
 obligation of the prelude; its honest mitigation is mechanical
@@ -242,12 +250,8 @@ infinitely many.
 - **From 3 states on, corners are no longer enough.** The stability
   conditions become polynomials of higher degree in the entries, and the
   stable region is no longer convex: a box can have all its corners stable
-  and still contain an unstable matrix. Another certificate is needed. One is
-  a Lyapunov matrix `P` found by an external solver (a semidefinite program)
-  and checked exactly in Lean: `P ≻ 0` and `P - AᵀPA ≻ 0` at every corner, a
-  condition that is affine in `A` once written as a block matrix, so the
-  corners suffice. The other is the full Jury table with a subdivision of the
-  box. This is item P2 of [float-sr-proposal.md](float-sr-proposal.md).
+  and still contain an unstable matrix. Another certificate is needed: the
+  small-gain test and the Lyapunov certificates below.
 
 **What this covers.** Most high-order filters of `filters.lib` are cascades
 of second-order sections, and each section is its own recursion group:
@@ -274,7 +278,66 @@ and three kinds of structure remain out of reach:
 - **higher-order sections in one piece whose poles are close to 1**:
   `fi.tf3slf`, the Moog and diode ladders.
 
-All three need a Lyapunov certificate (P2).
+**Beyond small gain: Lyapunov certificates.** These three are proved by a
+quadratic energy that decreases at every sample (item P2 of
+[float-sr-proposal.md](float-sr-proposal.md)).
+
+- **The system.** The analysis rewrites the group as
+  `x[n+1] = A·x + B·z`, `y[n] = Cx·x + Cz·z`. `x` holds the short delays (up
+  to 4 samples) and the taps that follow a long delay. `z` holds one
+  *channel* per long delay line: its output, `v[n-b]`, where `v` is the
+  signal written into the line. The input of a long delay line is an output
+  of the system in its own right, so an FDN line is one channel, whatever
+  the mixing matrix in front of it.
+- **The energy.** With `P` for the states and `D` for the channels,
+  `V = xᵀPx + Σ_b Σ_{m=1..b} v_b[n-m]ᵀ D_b v_b[n-m]`, the second term being
+  the energy stored in the delay lines. One step changes it by `-wᵀMw`,
+  `w = (x, z)`, with `M = diag(P, D) - Gᵀ·diag(P, W)·G` and
+  `G = [[A, B], [Cx, Cz]]`. If `P ≻ 0` and `M ≻ 0` on the whole box of
+  coefficients, the recursion is exponentially stable, whatever the lengths
+  of the long delays and even if the coefficients change at every sample
+  within the box. A variable delay is not covered.
+- **Who finds it, who checks it.** An untrusted numerical oracle,
+  [scripts/lyapunov_oracle.py](../scripts/lyapunov_oracle.py) (numpy and
+  scipy), finds `D` by minimizing the peak gain of the system over frequency
+  with block-diagonal scalings (one block per delay length), then `P` from
+  the Riccati equation of the bounded-real lemma. Lean checks the answer
+  exactly (`lyapCheck`):
+  - `M` is enclosed in interval arithmetic over the box of `G`;
+  - `M̃ - τI ≻ 0` holds, where `M̃` is the rounded centre of that enclosure
+    and `τ` bounds the distance of every member from it;
+  - `P ≻ 0` and `D ≻ 0` hold.
+
+  Positive definiteness is decided by Sylvester's criterion on an integer
+  matrix, with fraction-free elimination (Bareiss). A wrong certificate, or
+  none, only leaves the group `U`.
+- **The protocol.** The analysis runs once and prints the system of every
+  group it leaves unproven (`probe … true`). The oracle answers, and the
+  analysis runs again with the answers (`verdicts dag p wit`). In
+  `certified.lean` the certificates are pinned as definitions (`X_wit_p`)
+  and the theorems are stated with them. Their numbers come from floating
+  point and may differ from one platform to the next, so `make certify`
+  leaves those lines out of its drift check. The verdicts stay in it.
+
+On the test suite, this proves groups of 39 tests that no other rule
+proved:
+
+- the FDN reverbs: `re.zita_rev1` and its variants, `dm.zita_light`, `re.fdnrev0`,
+  `re.dattorro_rev`, `inst.instrReverb`;
+- the 4-state rotation of `fi.tf2snp` at low cutoff;
+- the ladders: `ve.moog_vcf`, `ve.moog_vcf_2bn`, `ve.lowpassLadder4`;
+- sections of order 3 to 5 with some margin: `fi.tf3`, the K-weighting
+  filter of the loudness meters, the pink-noise filter, the Klon Centaur
+  model, the wave-digital capacitor and inductor.
+
+It does not prove:
+
+- **oscillators** (`os.oscq`, `os.oscws`…), whose rotation is lossless: a
+  marginal recursion has no decreasing energy;
+- **`fi.tf3slf` at low cutoff**, whose triple pole near 1 leaves less margin
+  than the box of its coefficients;
+- **recursions whose coefficient boxes are wide**: the interpolation weights
+  of a fractional delay, and the coefficients of an envelope or an LFO.
 
 **Coupled groups.** A group nested in another and referring to its state is
 analysed as one system with it: the outputs are identified as `(group,
@@ -312,7 +375,7 @@ The example set lives in [../tests/lean/](../tests/lean/): one small `.dsp`
 per certified instantiation, plus deliberate counter-examples whose *refusal*
 is itself pinned as a theorem (`+ ~ *(1.5)` is certified unstable; an
 under-clamped table read is certified `CLAMP REQUIRED`). The generated
-[certified.lean](../tests/lean/certified.lean) re-checks in about four minutes,
+[certified.lean](../tests/lean/certified.lean) re-checks in about five minutes,
 almost all of it in the rate analysis (`by decide +kernel` on the interval
 computations).
 
@@ -402,7 +465,8 @@ place — the "Standing obligations" section of the prelude. The chain:
 | Adequacy of the import (`Sig` mirrors `--dump-sig`) | standing obligation; mitigated by round-tripping |
 | Exact rationals vs. floating-point execution | for stability and indices, a standing obligation — those theorems speak about the denoted exact arithmetic; the rate analysis models floating point |
 | IEEE 754 rounding of `+ - * /` and `sqrt`, libm within `libmUlps` ulps, no reassociation | standing obligations of the rate analysis |
-| Taylor remainders, `tan` as `sin/cos`, vertex lemma of the Jury check | hand-reviewed; the next targets of the mathlib layer |
+| Taylor remainders, `tan` as `sin/cos`, vertex lemma of the Jury check, the small-gain and Lyapunov–Krasovskii arguments, Sylvester's criterion | hand-reviewed; the next targets of the mathlib layer |
+| The Lyapunov certificates (`P`, `D`) | untrusted: found by a numerical oracle (numpy/scipy), checked exactly by `lyapCheck` in every theorem that uses them |
 | The backend compiles the graph faithfully | out of scope — certification is about the signal graph, not the generated C++/Rust |
 
 The generator (`sig2lean.py`) is deliberately *outside* the trusted base: it
@@ -430,6 +494,10 @@ make certify-tests      # the rate analysis on every regression test (#eval, not
 make certify-deep       # optional: build the mathlib layer discharging the
                         # Jury and tan obligations (downloads a large cache)
 ```
+
+The Lyapunov certificates need numpy and scipy (`scripts/lyapunov_oracle.py`);
+without them the analysis still runs, and the groups they would prove stay
+`U`.
 
 Contributors never write Lean. Adding coverage for a new function means
 adding a small `.dsp` instantiating it in `tests/lean/`, reading the verdicts
