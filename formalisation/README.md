@@ -354,6 +354,12 @@ kind:
 
 ## 8. Where this can go
 
+*Since this section was written, the numerical tests have moved to float and
+double over 44.1–192 kHz. [float-sr-proposal.md](float-sr-proposal.md)
+proposes how the certification can follow: the sample rate and the controls
+as ranges, recursion groups as state-space systems, and float and double as
+semantics. It gives measurements from a prototype.*
+
 The realistic ambition is not "prove the libraries correct" but two fronts
 with different economics:
 
