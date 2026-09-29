@@ -2621,22 +2621,29 @@ declare klonCentaur license "BSD-3-Clause";
 //-----------------------`(ve.)fulltoneOCD`---------------------------
 // Fulltone OCD (Obsessive Compulsive Drive) v2 overdrive pedal circuit model.
 //
-// The OCD is a two-op-amp overdrive whose clipping comes from a pair of
-// 2N7000 MOSFETs shunting the signal to the half-supply rail, followed by a
-// passive tone network with an HP/LP voicing switch. This implementation
-// follows the explicit wave digital (WD) model of Giampiccolo et al. (DAFx-26):
-// the clipping node and the passive output network are wave digital trees,
-// the MOSFET pair is a single canonical piecewise-linear (CPWL) element fitted
-// to the measured I-V curve and evaluated without iteration, and the clipping
-// node runs 4x oversampled. Mono.
+// The OCD is a two-op-amp overdrive. Its clipping network shunts the signal to
+// the half-supply rail: a diode-connected 2N7000 MOSFET in parallel with a
+// second diode-connected 2N7000 in series with a 1N34A germanium diode, which
+// makes the clipping asymmetric. A passive tone network with a high-peak /
+// low-peak (HP/LP) switch follows. This implementation follows the explicit
+// wave digital (WD) model of Giampiccolo et al. (DAFx-26): the clipping node and
+// the passive output network are wave digital trees, the clipping network is a
+// single canonical piecewise-linear (CPWL) element evaluated without iteration,
+// and the clipping node runs 4x oversampled. Mono.
+//
+// It models the circuit as idealized in that paper: ideal op-amps, and
+// square-law MOSFETs without body diodes. The paper validates it against a
+// simulation of the same idealized circuit, not against a pedal. In a real
+// pedal the second op-amp saturates at its supply rails, on 9 V before the
+// clipping network conducts; this model has no rail saturation.
 //
 // `drive`, `tone` and `hp` are clamped to [0, 1]; otherwise the controls are
 // used as given: smooth them (e.g. with `si.smoo`) when they are driven from
 // a UI. Input and output are in volts, a sample of
 // ±1 being treated as ±1 V as in the reference model.
 //
-// Output level: the op-amps are ideal, as in the reference model, so nothing
-// limits the output to the ±4.5 V a 9 V pedal can swing. At `volume` = 1 the
+// Output level: the op-amps are ideal, so nothing limits the output to the
+// ±4.5 V a 9 V pedal can swing. At `volume` = 1 the
 // output peaks at about 6 to 9 V for a 1 V input (HP), and a guitar signal
 // peaking at 0.3 V is raised by about 17 dB (Drive 0) to 37 dB (Drive 1) in HP,
 // 11 to 31 dB in LP. `volume` around 0.14 (Drive 0) down to 0.014 (Drive 1)
@@ -2646,20 +2653,21 @@ declare klonCentaur license "BSD-3-Clause";
 // 11 samples, at every sample rate.
 //
 // Accuracy: the small-signal response is within 0.1 dB of the analog circuit
-// from 30 Hz to 3 kHz at 44.1 kHz and above. The top octave rolls off (about
+// from 30 Hz to 2 kHz at 44.1 kHz and above. The top octave rolls off (about
 // -1 to -4 dB at 10 kHz at 48 kHz, depending on the controls; under 1 dB at
 // 96 kHz). Relative to a converged simulation of the reference circuit, the
 // harmonics of a 1 kHz tone are within 0.3-0.8 % at 48 kHz and 0.1-0.3 % at
 // 96 kHz, and the error falls quadratically with the sample rate. Tested from
 // 8 kHz to 192 kHz.
 //
-// Data: the MOSFET-pair I-V curve is the single-nonlinearity characteristic
-// `singleNL_char.mat` of the reference model's repository, see References. It
-// was turned into the current into the pair versus node voltage (flipped),
-// shifted by 1.255 µA so that I(0) = 0, and thinned from 30 to 20 points: the
-// 10 points dropped lie within 0.07 mV of the table's ±4 V ends, where the
-// node never goes (it stays within ±2.6 V), and would only add segments too
-// narrow to resolve in single precision.
+// Data: the I-V curve of the clipping network (current into the network versus
+// node voltage) is computed from the paper's device equations and parameters
+// (Eq. (15) and Table 2 for the 2N7000s, Eq. (8) and Table 2 for the 1N34A;
+// the paper is CC BY 4.0), at 20 voltage knots taken from the authors'
+// `singleNL_char.mat` (see References), then shifted by 1.21 µA so that the
+// CPWL passes through I(0) = 0. The authors' table was simulated with a
+// slightly different diode (Is = 2.68 µA, eta = 1.5975); using it instead
+// changes the output by less than 0.1 %.
 //
 // #### Usage
 //
@@ -2675,8 +2683,10 @@ declare klonCentaur license "BSD-3-Clause";
 // * `tone`: Tone knob (0-1), linear; 0 is darkest, 1 is brightest
 // * `volume`: Volume knob (0-1), a linear output gain (the v2 output is buffered,
 //   so the pot wiper is unloaded)
-// * `hp`: HP/LP switch, 1 = HP (brighter and louder), 0 = LP; intermediate
-//   values crossfade the series resistance, so a smoothed switch clicks less
+// * `hp`: high-peak/low-peak switch, 1 = high peak (brighter and louder), 0 =
+//   low peak; intermediate values crossfade the series resistance, so a
+//   smoothed switch clicks less. The paper models the high-peak position only
+//   (switch closed); the low-peak position extends it
 //
 // #### Test
 // ```
@@ -2696,14 +2706,10 @@ declare klonCentaur license "BSD-3-Clause";
 //
 // #### References
 //
-// * R. Giampiccolo, S. Polimeno, C. Macrì, A. Lenoci, O. Massi, A. Bernardini,
-//   "Explicit Wave Digital Model of the Fulltone OCD Pedal Based on Canonical
-//   Piecewise-Linear Functions," Proc. 29th Int. Conf. Digital Audio Effects
-//   (DAFx-26), Cambridge, MA, USA, 2026
+// * R. Giampiccolo, S. Polimeno, C. Macrì, A. Lenoci, O. Massi, A. Bernardini, "Explicit Wave Digital Model of the Fulltone OCD Pedal Based on Canonical Piecewise-Linear Functions," Proc. 29th Int. Conf. Digital Audio Effects (DAFx-26), Cambridge, MA, USA, 2026, pp. 193-200
 // * <https://github.com/polimi-ispl/fulltoneocd>
-// * L. O. Chua, S. M. Kang, "Section-wise piecewise-linear functions: canonical
-//   representation, properties, and applications," Proc. IEEE, 65(6),
-//   pp. 915-929, 1977
+// * L. O. Chua, S. M. Kang, "Section-wise piecewise-linear functions: canonical representation, properties, and applications," Proc. IEEE, 65(6), pp. 915-929, 1977
+// * A. Bernardini, A. Sarti, "Canonical Piecewise-Linear Representation of Curves in the Wave Digital Domain," Proc. EUSIPCO 2017, pp. 1125-1129
 //------------------------------------------------------------
 /*
 Implementation Notes:
@@ -2713,10 +2719,10 @@ rail, so the clipping curve is centered on 0 and no DC bias state exists):
 
   in -> input coupling (C1, R1, R3)
      -> op-amp 1, non-inverting, Drive pot in the feedback
-     -> clipping node: R7 into a node shunted to the rail by C4 || MOSFET pair,
+     -> clipping node: R7 into a node shunted to the rail by C4 || Q1 || (Q2 + D1),
         tapped by the R9/R8 divider                        [WD junction, 4x OS]
      -> op-amp 2, non-inverting, fixed gain
-     -> output network: C7, series R (R12 || R13 in HP, R13 in LP), node loaded
+     -> output network: C7, series R (R12 || R13 in HP, R12 in LP), node loaded
         by the 500k Volume pot || (C8 + Tone rheostat)     [wd.buildtree]
      -> 5 Hz DC blocker -> Volume
 
@@ -2725,12 +2731,12 @@ rail, so the clipping curve is centered on 0 and no DC bias state exists):
   pot value; the AionFX schematic of the v1.7 has 1 MΩ (audio taper).
 - The op-amps are ideal (no rail saturation), as in the reference model. Being
   linear, they are realized as bilinear-transformed biquads of their analytic
-  transfer functions (wdmodels.lib has no nullor). Each is pre-warped at its
-  feedback pole, capped at 1 kHz: pre-warping higher rescales the low corners
+  transfer functions (wdmodels.lib has no nullor), pre-warped at 1 kHz:
+  pre-warping at the feedback poles (1.4 to 40 kHz) rescales the low corners
   (and near or above Nyquist, at low sample rates, breaks the stage).
 - The clipping node is a three-port parallel junction (trapezoidal C4, R9+R8,
-  R7 Thevenin source) whose root is the CPWL MOSFET pair,
-  b = mu0 + mu1*a + sum_k eta_k |a - a_k|. The knots are the measured I-V
+  R7 Thevenin source) whose root is the CPWL clipping network,
+  b = mu0 + mu1*a + sum_k eta_k |a - a_k|. The knots are the I-V
   table mapped to the wave domain at the root port resistance, which depends
   only on the sample rate, so every coefficient folds at init. The junction is
   unrolled by hand because wd.buildtree cannot be sub-stepped: per sample, the
@@ -2741,7 +2747,7 @@ rail, so the clipping curve is centered on 0 and no DC bias state exists):
   sub-steps are chained by routing so that each CPWL evaluation appears once
   in the expression tree (nesting them as function calls blows up compile
   time).
-- The MOSFET-pair I-V table (see Data above) keeps knots at least 1 mV apart.
+- The I-V table (see Data above) keeps knots at least 1 mV apart.
 - Accuracy details: the top-octave roll-off comes from bilinear warping of the
   linear stages; the oversampling filter pair adds -0.4 dB at 15 kHz. The
   full-chain error on guitar, relative to a converged simulation of the
@@ -2756,7 +2762,7 @@ rail, so the clipping curve is centered on 0 and no DC bias state exists):
 fulltoneOCD(drive, tone, volume, hp) =
     inhp                              // input coupling
     : stage1(RDRIVE_MAX * d * d)      // op-amp 1 with the Drive pot
-    : clipnode                        // MOSFET clipping node, 4x oversampled
+    : clipnode                        // clipping node, 4x oversampled
     : stage2                          // op-amp 2
     : outnet(Rser, RTONE_MAX * t)     // passive tone / HP-LP network
     : fi.dcblockerat(5.0)
@@ -2767,12 +2773,12 @@ with {
     R4 = 18e3;    R6 = 2.2e3;  C2 = 220e-12; C3 = 100e-9;     // op-amp 1
     R7 = 10e3;    R8 = 220e3;  R9 = 10e3;    C4 = 10e-9;      // clipping node
     R10 = 150e3;  R11 = 39e3;  C5 = 220e-12; C6 = 100e-9;     // op-amp 2
-    R12 = 22e3;   R13 = 33e3;  C7 = 10e-6;   C8 = 47e-9;      // output network
+    R12 = 33e3;   R13 = 22e3;  C7 = 10e-6;   C8 = 47e-9;      // output network (R13 switched)
     RDRIVE_MAX = 500e3;    // Drive pot
     RTONE_MAX = 10e3;      // Tone pot, wired as a rheostat
     RVOL = 500e3;          // Volume pot, loading the output node
     RSER_HP = 1.0 / (1.0 / R12 + 1.0 / R13);   // R12 || R13
-    RSER_LP = R13;
+    RSER_LP = R12;
     // Controls, clamped: hp > 1 would drive Rser negative (unstable tree).
     clamp01(x) = max(0.0, min(1.0, x));
     d = clamp01(drive);
@@ -2792,25 +2798,31 @@ with {
         a1 = (Rf * Cf + Rg * Cg) / d2;
         a0 = 1.0 / d2;
         b1 = (Rf * Cf + Rg * Cg + Rf * Cg) / d2;
-        w1 = min(1.0 / (Rf * Cf), 2.0 * ma.PI * 1000.0);
+        w1 = 2.0 * ma.PI * 1000.0;
     };
     stage1(Rdrive) = opamp_ni(R4 + Rdrive, C2, R6, C3);
     stage2 = opamp_ni(R10, C5, R11, C6);
 
-    // Measured 2N7000-pair clipping curve: current into the pair (A) versus
-    // node voltage (V), strictly monotone in both.
+    // Clipping network Q1 || (Q2 + D1) of Giampiccolo et al. (DAFx-26, CC BY 4.0),
+    // current into the network (A) versus node voltage (V), strictly monotone in
+    // both: computed from the paper's Eq. (15) (diode-connected 2N7000s) and
+    // Eq. (8) (1N34A) with its Table 2 parameters, at the voltage knots of the
+    // authors' singleNL_char.mat, then shifted by 1.21 uA so that the CPWL passes
+    // through I(0) = 0. That file was simulated with a slightly different diode
+    // (Is = 2.68 uA, eta = 1.5975): using it instead changes the output by less
+    // than 0.1 %.
     nlN = 20;
     nlV = (-4.0, -3.83165788, -3.6452573, -3.45708638, -3.26709398, -3.07522643,
            -2.88142737, -2.68563754, -2.4877946, -2.28783285, -2.02398048,
            2.14189819, 2.59183671, 2.84510824, 3.07430243, 3.29227325,
            3.50320045, 3.70899582, 3.9107084, 3.99998958);
-    nlI = (-0.0487362550239921, -0.0403566825239921, -0.0320250613239921,
-           -0.0246140129239921, -0.018140143523992097, -0.0126207736239921,
-           -0.008073984723992098, -0.004518670803992099, -0.001974594683992099,
-           -0.0004624491379920992, -1.255025155791365e-06, 1.3281432979007747e-06,
-           0.0008461729000079007, 0.002767269566007901, 0.0057154213960079,
-           0.009668896996007901, 0.014608397076007902, 0.0205156258760079,
-           0.0273730399760079, 0.030751123576007903);
+    nlI = (-0.0487362103139599, -0.04035663768224597, -0.03202501653779945,
+           -0.024613968035306553, -0.018140098795119613, -0.01262072896447979,
+           -0.008073940083459361, -0.004518626085753378, -0.0019745499924853855,
+           -0.00046240441858301745, -1.2103139598983047e-06, 1.2808272143207188e-06,
+           0.0008290630730540757, 0.002728376651676526, 0.005652899196433998,
+           0.009581551575848451, 0.014495345471295782, 0.020376167550775797,
+           0.027206595274231842, 0.030572416432994097);
 
     // Reflected wave of the CPWL nonlinearity at port resistance R, with
     // linear extrapolation beyond the outer knots (whose kinks are zero).
