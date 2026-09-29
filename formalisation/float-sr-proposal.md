@@ -493,7 +493,41 @@ and scipy. It imports the DAG reader of `scripts/sig2lean.py`.
     render comes from its third-order recursion, which the analysis refuses.
 
   `make certify` now takes about two minutes.
+- **Two targeted rules.**
+  - **The small-gain test.** Take the outputs that feed back, with
+    `M o o' ≥ Σ_k |c|` over the box. If `M v < v` for some weights `v > 0`,
+    the recursion contracts a weighted max norm. That holds for any delays,
+    variable ones included, and for coefficients that vary in time. It
+    covers feedback combs and allpasses (`|g| < 1`), damped combs and
+    delays in a loop.
+  - **Coupled nested groups.** They are analysed as one system with the
+    group that encloses them, with outputs keyed `(group, output)`. The
+    analysis is limited to 32 nested groups, because a shared nested group
+    is re-analysed along every path.
+
+  Two further bounds keep the analysis fast: `sin`/`cos` with a range
+  reduction modulo 2π (π between two 37-digit rationals, a new obligation),
+  and `exp` bounded before its halvings. The squares `x*x` are non-negative,
+  and tables have the range of their generator.
+
+  **Results on the suite.** 147 distinct groups become stable and none is
+  lost: freeverb (48 groups), `jcrev`, `satrev`, `dattorro_rev`,
+  `kb_rom_rev1`, string models, the `allpassn*` lattices. Of the 7650
+  distinct groups:
+
+  | arithmetic | stable | not proven | refused | analysed with an enclosing group |
+  |---|---|---|---|---|
+  | exact | 1653 | 460 | 2579 | 2958 |
+  | single | 1602 | 462 | 2628 | 2958 |
+
+  Among the refusals, 5841 before these rules, 2958 are nested groups that
+  their enclosing group now analyses. The groups not proven are mostly
+  those the small-gain test reads without concluding: FDN reverbs with
+  orthogonal mixing, the rotations of `fi.tf2snp` and of the oscillators,
+  `tf3slf`. They need the Lyapunov certificate of P2.
+
+  `make certify-tests` takes 139 s, and `make certify` about 4 minutes.
 - **Not done yet.** Continuous rate and control ranges (P1, which needs
-  correlation-preserving arithmetic), more than 2 states and modulated
-  verdicts for 2 states (P2), error bounds (P4), integer wrap times, and
-  faust-rs typing (P6).
+  correlation-preserving arithmetic), Lyapunov certificates for what the
+  small-gain test cannot prove (P2: FDNs, rotations, higher orders near 1),
+  error bounds (P4), integer wrap times, and faust-rs typing (P6).

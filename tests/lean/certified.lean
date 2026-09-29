@@ -577,8 +577,12 @@ The stability verdict is given:
   renders;
 * in three arithmetics (`Prec`): `exact` (no rounding modelled), `double` and
   `single`, where every real operation of the graph is rounded;
-* for groups whose state is at most 2 samples: first order, direct-form second
-  order, and two-output state-variable (SVF/TPT) sections.
+* exactly by Jury for systems whose state is at most 2 samples (first order,
+  direct-form second order, two-output state-variable and TPT sections), and
+  by the small-gain test otherwise (feedback combs and allpasses, delays in a
+  loop, higher orders), a sufficient condition;
+* over the groups nested in a group and coupled to it, analysed as one
+  system with it (outputs `(g, i)`, group `g`, output `i`).
 
 ### What is claimed
 
@@ -593,9 +597,10 @@ sample, which is an accuracy question (proposal P4), not a change of the
 recursion's coefficients.
 
 A coefficient that varies in time (it depends on a signal: an envelope stage,
-an LFO) is accepted with one state only: `|a| < 1` for every `a` of the box
-makes the recursion a contraction however `a` moves. With two states a box
-of stable matrices can hold an unstable product, and the group is refused.
+an LFO) or a state read through a variable delay rules out Jury, which is
+about frozen matrices: with one state, `|a| < 1` over the box is still a
+contraction; otherwise only the small-gain test, which holds for any
+variation within the box, may conclude.
 
 For the finite verdict, the controls are at their default values, as for
 stability and as in `check-precision`. For indices, a safety property, they
@@ -765,6 +770,32 @@ def cosI (x : Iv) : Option Iv :=
     some ⟨(c.lo.sub r).down, (c.hi.add r).up⟩
   else none
 
+/-- `π` between two rationals, 37 decimals: a standing obligation (the
+    digits of `π`), which mathlib's `Real.pi` bounds discharge. -/
+def piLo : Q := ⟨31415926535897932384626433832795028841, 10 ^ 37⟩
+def piHi : Q := ⟨31415926535897932384626433832795028842, 10 ^ 37⟩
+
+/-- `x - 2πk` for the integer `k` nearest `x / 2π`: the same `sin` and `cos`,
+    an argument within 4 when `x` is narrower than about `2π`. `none` when
+    `x` is too wide for the reduction to help. -/
+def reduce2Pi (x : Iv) : Option Iv :=
+  let twoPiLo := (Q.ofInt 2).mul piLo
+  let twoPiHi := (Q.ofInt 2).mul piHi
+  let mid : Q := ⟨x.lo.n * x.hi.d + x.hi.n * x.lo.d, 2 * x.lo.d * x.hi.d⟩
+  let k : Int := ((Q.mul mid (Q.inv twoPiLo)).add ⟨1, 2⟩).floor   -- nearest
+  -- 2πk lies between k·2πlo and k·2πhi (swapped for k < 0)
+  let a := (Q.ofInt k).mul twoPiLo
+  let b := (Q.ofInt k).mul twoPiHi
+  let y : Iv := ⟨(x.lo.sub (Q.max a b)).down, (x.hi.sub (Q.min a b)).up⟩
+  if y.within (Q.ofInt 4) then some y else none
+
+/-- `sin` and `cos` over any interval: reduced modulo `2π`, and `[-1, 1]`
+    when the interval is too wide. -/
+def sinAny (x : Iv) : Iv :=
+  ((if x.within (Q.ofInt 4) then some x else reduce2Pi x).bind sinI).getD ⟨Q.one.neg, Q.one⟩
+def cosAny (x : Iv) : Iv :=
+  ((if x.within (Q.ofInt 4) then some x else reduce2Pi x).bind cosI).getD ⟨Q.one.neg, Q.one⟩
+
 /-- When the enclosure of `cos` over `x` excludes 0, `cos` has no zero on `x`,
     `tan = sin/cos` is continuous there, and the quotient of the two
     enclosures contains `tan` at every point of `x`. -/
@@ -790,6 +821,16 @@ def expI : Nat → Iv → Option Iv
   | f + 1, x =>
       if x.within ⟨1, 2⟩ then some (expSmall x)
       else (expI f (x.divNat 2)).map fun e => e.mul e
+
+/-- `exp` over any interval: beyond 710 it overflows a double (unknown);
+    below -800 it is under `2⁻¹⁰⁰⁰` (`e⁻⁸⁰⁰ < 10⁻³⁴⁷`), and `exp` is
+    increasing. Keeps the halvings of `expI` few and its numbers small. -/
+def expRange (x : Iv) : Option Iv :=
+  if Q.lt (Q.ofInt 710) x.hi then none
+  else if Q.lt x.hi (Q.ofInt (-800)) then some ⟨Q.zero, Q.pow2neg 1000⟩
+  else if Q.lt x.lo (Q.ofInt (-800)) then
+    (expI 64 ⟨Q.ofInt (-800), x.hi⟩).map fun e => ⟨Q.zero, e.hi⟩
+  else expI 64 x
 
 /-- Integer square root by Newton's method from above. Untrusted: `sqrtI`
     checks its result. -/
@@ -1240,16 +1281,32 @@ def rangeNode (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) (full 
           match op with
           | .add => some (p.op (x.add y))
           | .sub => some (p.op (x.sub y))
-          | .mul => some (if isPow2 x || isPow2 y then x.mul y else p.op (x.mul y))
+          | .mul =>
+              -- `x * x` of one node is a square: non-negative
+              let prod := match a, b with
+                | .ref j, .ref j' => if j == j' then x.abs.mul x.abs else x.mul y
+                | _, _ => x.mul y
+              some (if isPow2 x || isPow2 y then prod else p.op prod)
           | .div => (x.div y).map p.op
           | .rem =>                          -- fmod: exact, |r| < |m|, sign of x
               if y.lo == y.hi && Q.lt Q.zero y.lo then
                 if Q.le Q.zero x.lo then some ⟨Q.zero, y.lo⟩ else some ⟨y.lo.neg, y.lo⟩
               else none
     | .tan, [a]  => ((rv a).bind tanI).map p.libm
-    | .sin, [a]  => ((rv a).bind sinI).map p.libm
-    | .cos, [a]  => ((rv a).bind cosI).map p.libm
-    | .exp, [a]  => ((rv a).bind (expI 64)).map p.libm
+    | .sin, [a]  => some (p.libm (((rv a).map sinAny).getD ⟨Q.one.neg, Q.one⟩))  -- |sin| ≤ 1
+    | .cos, [a]  => some (p.libm (((rv a).map cosAny).getD ⟨Q.one.neg, Q.one⟩))
+    | .other "SIGGEN", [a] => v a                -- a table's generator: its values
+    | .rdtbl, [.ref w, _] =>                     -- a value of the table: generated or written
+        if w < i then
+          match (dag.getD w default).tag, (dag.getD w default).args with
+          | .wrtbl, [_, g, wi, wv] => do
+              let gen ← v g
+              match wi, wv with
+              | .ref _, .ref _ => (v wv).map gen.hull   -- rwtable: the written values too
+              | _, _ => some gen
+          | _, _ => none
+        else none
+    | .exp, [a]  => ((rv a).bind expRange).map p.libm
     | .sqrt, [a] => ((rv a).bind sqrtI).map p.op
     | .log, [a]   => ((rv a).bind logI).map p.libm
     | .log10, [a] => ((rv a).bind log10I).map p.libm
@@ -1355,37 +1412,48 @@ def ranges (dag : Dag) (free : Array Nat) (nat natOpt : Array Bool) (p : Prec) (
 
 /-! ### Linear extraction of a recursion group -/
 
-/-- `((i, k), c)`: coefficient `c` on `y_i[n-k]`, output `i` of the group
-    delayed by `k` samples. -/
+/-- An output of a recursion group: `(g, i)` is output `i` of the group whose
+    `DEBRUIJNREC` is node `g`. A group coupled to groups nested in it is
+    analysed as one system over the outputs of all of them. -/
+abbrev Out := Nat × Nat
+
+/-- `((o, k), c)`: coefficient `c` on output `o` delayed by `k` samples. -/
 structure Aff where
-  terms : List ((Nat × Nat) × Iv)
+  terms : List ((Out × Nat) × Iv)
   /-- some coefficient or selector of the form varies in time -/
   tv : Bool := false
+  /-- some state is read through a variable delay (its key holds 1, the
+      least delay; only the small-gain test may then conclude) -/
+  vd : Bool := false
 
-def Aff.none : Aff := ⟨[], false⟩
-def Aff.state (i k : Nat) : Aff := ⟨[((i, k), Iv.pt Q.one)], false⟩
-def Aff.shift (k : Nat) (a : Aff) : Aff := ⟨a.terms.map fun ((i, d), c) => ((i, d + k), c), a.tv⟩
-def Aff.scale (s : Iv) (a : Aff) : Aff := ⟨a.terms.map fun (key, c) => (key, c.mul s), a.tv⟩
-def Aff.neg (a : Aff) : Aff := ⟨a.terms.map fun (key, c) => (key, c.neg), a.tv⟩
-def Aff.add (a b : Aff) : Aff := ⟨a.terms ++ b.terms, a.tv || b.tv⟩
-def Aff.varying (a : Aff) : Aff := ⟨a.terms, true⟩
-def Aff.coef (a : Aff) (key : Nat × Nat) : Iv :=
+def Aff.none : Aff := ⟨[], false, false⟩
+def Aff.state (o : Out) (k : Nat) : Aff := ⟨[((o, k), Iv.pt Q.one)], false, false⟩
+def Aff.shift (k : Nat) (a : Aff) : Aff :=
+  { a with terms := a.terms.map fun ((o, d), c) => ((o, d + k), c) }
+def Aff.scale (s : Iv) (a : Aff) : Aff := { a with terms := a.terms.map fun (key, c) => (key, c.mul s) }
+def Aff.neg (a : Aff) : Aff := { a with terms := a.terms.map fun (key, c) => (key, c.neg) }
+def Aff.add (a b : Aff) : Aff := ⟨a.terms ++ b.terms, a.tv || b.tv, a.vd || b.vd⟩
+def Aff.varying (a : Aff) : Aff := { a with tv := true }
+def Aff.varDelay (a : Aff) : Aff := { a with vd := true }
+def Aff.coef (a : Aff) (key : Out × Nat) : Iv :=
   a.terms.foldl (fun s (k, c) => if k == key then s.add c else s) Iv.zero
 /-- Coefficient by coefficient hull of two forms: at each sample, the value
     is one of the two, so each coefficient lies in the hull. -/
 def Aff.hullWith (a b : Aff) : Aff :=
   let keys := ((a.terms ++ b.terms).map (·.1)).eraseDups
-  ⟨keys.map fun k => (k, (a.coef k).hull (b.coef k)), a.tv || b.tv⟩
+  ⟨keys.map fun k => (k, (a.coef k).hull (b.coef k)), a.tv || b.tv, a.vd || b.vd⟩
 
-/-- Affine form, in the state of the group being analysed, of every node that
-    can be reached from its body without entering a nested recursion. A node
-    with `free = 0` is a coefficient (its form is empty, its value is its
-    range). `REF 1` is the group itself, since only nodes at depth 0 of its
-    body are read here. The loop arithmetic (products by a coefficient,
-    sums) is exact in the claim, see the section header. -/
+/-- Affine form, in the state of the system being analysed, of every node
+    that can be reached from the body of a group without entering a nested
+    recursion. A node with `free = 0` is a coefficient (its form is empty, its
+    value is its range). `REF m` is the group `ctx[m-1]` (the group itself
+    for `m = 1`, the one enclosing it for `m = 2`...); an output of a nested
+    group coupled to this one is its form, from `inner`. The loop arithmetic
+    (products by a coefficient, sums) is exact in the claim, see the section
+    header. -/
 def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) (acc : Array (Except String Aff)) (i : Nat) (nd : Node) :
-    Except String Aff :=
+    (rng : Array (Option Iv)) (ctx : List Nat) (inner : List (Out × Aff))
+    (acc : Array (Except String Aff)) (i : Nat) (nd : Node) : Except String Aff :=
     -- a coefficient that varies in time marks the form (`tv`): Jury on a box
     -- of frozen matrices says nothing of a recursion whose matrix moves from
     -- sample to sample, except with one state (see `groupVerdict`)
@@ -1409,8 +1477,14 @@ def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
     match nd.tag, nd.args with
     | .proj, [.int k, .ref j] =>
         match (dag.getD j default).tag, (dag.getD j default).args with
-        | .ref, [.int 1] => .ok (Aff.state k.toNat 0)
-        | .ref, _ => .error "reference to an outer recursion"
+        | .ref, [.int m] =>                     -- output k of group ctx[m-1], now
+            match (if 1 ≤ m then ctx[m.toNat - 1]? else none) with
+            | some g => .ok (Aff.state (g, k.toNat) 0)
+            | none => .error "part of an enclosing group (analysed with it)"
+        | .recur, _ =>                          -- a nested group coupled to this one
+            match inner.lookup (j, k.toNat) with
+            | some form => .ok form
+            | none => .error "nested recursion coupled to the group"
         | _, _ => .error "nested recursion coupled to the group"
     | .recur, _ => .error "nested recursion coupled to the group"
     | .delay1, [a] => (f a).map (Aff.shift 1)
@@ -1423,7 +1497,10 @@ def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
         | some d =>
             if Q.le d.hi d.lo && d.lo.n % d.lo.d == 0 && 0 ≤ d.lo.n then
               (f a).map (Aff.shift (d.lo.n / d.lo.d).toNat)
-            else .error "variable delay of the state"
+            -- a variable delay of at least one sample: the small-gain test
+            -- only needs a delay ≥ 1, not its value
+            else if Q.le Q.one d.lo then (f a).map fun x => (x.shift 1).varDelay
+            else .error "variable delay of the state, possibly below 1"
         | none => .error "variable delay of the state"
     | .binop .add, [a, b] => do let x ← f a; let y ← f b; pure (x.add y)
     | .binop .sub, [a, b] => do let x ← f a; let y ← f b; pure (x.add y.neg)
@@ -1458,10 +1535,45 @@ def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
 
 /-- Affine forms of the nodes of `bodyNodes`, the others left unevaluated. -/
 def affinesAt (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
-    (rng : Array (Option Iv)) (r : Nat) : Array (Except String Aff) :=
+    (rng : Array (Option Iv)) (ctx : List Nat) (inner : List (Out × Aff)) (r : Nat) :
+    Array (Except String Aff) :=
   (bodyNodes dag free r).foldl
-    (fun acc i => acc.set! i (affNode dag free nat tinv p rng acc i (dag.getD i default)))
+    (fun acc i => acc.set! i (affNode dag free nat tinv p rng ctx inner acc i (dag.getD i default)))
     (Array.replicate r (.error "unevaluated"))
+
+/-- The nested groups coupled to `r`, read at depth 0 of its body. -/
+def nestedOf (dag : Dag) (free : Array Nat) (r : Nat) : List Nat :=
+  (bodyNodes dag free r).filter fun j =>
+    match (dag.getD j default).tag with | .recur => true | _ => false
+
+/-- The number of `groupForms` calls the analysis of `r` makes, or more than
+    `budget` as soon as it exceeds it: a shared nested group is analysed once
+    per path, which can grow exponentially in a large DAG. -/
+def formCalls (dag : Dag) (free : Array Nat) : Nat → Nat → Nat → Nat
+  | 0, _, budget => budget + 1
+  | f + 1, r, budget =>
+      (nestedOf dag free r).foldl (fun used g =>
+        if used > budget then used else used + formCalls dag free f g (budget - used)) 1
+
+/-- The forms of the outputs of group `r`, in context `ctx` (the groups
+    enclosing it, innermost first), and of every group nested in it and
+    coupled to it (a nested group that refers to the state of `r` or of a
+    group enclosing it), innermost first: nested groups are analysed first,
+    and their outputs enter the forms of `r` through their own forms. -/
+def groupForms (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
+    (rng : Array (Option Iv)) : Nat → List Nat → Nat → Except String (List (Out × Aff))
+  | 0, _, _ => .error "nested recursions too deep"
+  | f + 1, ctx, r => do
+      let ctx' := r :: ctx
+      let inner ← (nestedOf dag free r).foldlM (fun acc g => do
+          let fs ← groupForms dag free nat tinv p rng f ctx' g
+          pure (acc ++ fs)) []
+      let affs := affinesAt dag free nat tinv p rng ctx' inner r
+      let formOf : Arg → Except String Aff := fun
+        | .ref j => if free.getD j 1000 == 0 then .ok Aff.none else affs.getD j (.error "?")
+        | _ => .ok Aff.none
+      let own ← (recBody dag r).zipIdx.mapM fun (a, n) => (formOf a).map fun fm => ((r, n), fm)
+      pure (own ++ inner)
 
 /-! ### Jury at the vertices -/
 
@@ -1483,30 +1595,65 @@ def jury2 (a b c d : Iv) : Bool :=
     pos ((Q.one.sub tr).add det) && pos ((Q.one.add tr).add det)
 
 inductive GV where
-  | stable     -- every matrix of the box is Jury-stable
-  | unproven   -- linear, but some matrix of the box fails Jury
-  | refused    -- not a linear group of at most 2 states
+  | stable     -- proven stable (Jury at the vertices, or the small-gain test)
+  | unproven   -- linear, but neither test concludes
+  | refused    -- not a linear system the analysis reads
 deriving Repr, DecidableEq
 
-/-- The state of a group: `(i, k)` for `k = 1 .. depth i`, where `depth i` is
-    the largest delay at which output `i` is read. -/
-def stateOf (forms : List Aff) : Except String (List (Nat × Nat)) := do
-  let keys := forms.flatMap (·.terms.map (·.1))
-  if keys.any (·.2 == 0) then throw "delay-free loop"
-  if keys.any (·.1 ≥ forms.length) then throw "state beyond the outputs read"
-  let outs := (List.range forms.length).filter fun i => keys.any (·.1 == i)
-  let depth : Nat → Nat := fun i => keys.foldl (fun m (j, k) => if j == i then Nat.max m k else m) 0
-  -- refuse before building a state of thousands of samples (a delay line)
-  let total : Nat := outs.foldl (fun t i => t + depth i) 0
-  if total > 2 then throw s!"{total} states (more than 2)"
-  pure (outs.flatMap fun i => (List.range (depth i)).map fun k => (i, k + 1))
+/-! ### The small-gain test
 
-/-- Row of the state matrix for state `(i, k)`: the form of output `i` for
-    `k = 1`, the shift `y_i[n-k] ← y_i[n-k+1]` otherwise. -/
-def rowOf (forms : List Aff) (states : List (Nat × Nat)) (s : Nat × Nat) : List Iv :=
-  if s.2 == 1 then states.map fun t => (forms.getD s.1 Aff.none).coef t
+If every output that feeds back reads `y_o[n] = Σ c · y_{o'}[n - k] + x_o`
+with delays `k ≥ 1`, let `M o o'` bound `Σ_k |c|` over the box. If some
+weights `v > 0` satisfy `M v < v` componentwise, then with
+`ρ = max_o (M v)_o / v_o < 1` and `E_n = max_{m ≤ n, o} |y_o[m]| / v_o`,
+`|y_o[n]| ≤ ρ v_o E_{n-1} + |x_o|`, so `E` stays below
+`max |x| / (min v · (1 - ρ))`: the recursion is stable. The argument needs no
+bound on the delays and holds when the coefficients change at every sample
+(within the box) and when a delay varies (at least one sample): it covers
+feedback combs and allpasses (`|g| < 1`), their damped variants, and
+variable delays in a loop. It is sufficient, not necessary: a lossless
+orthogonal mixing matrix (an FDN) has `M v ≥ v`. The weights come from the
+iteration `v ← 1 + M v`, untrusted; only the final check `M v < v`, with
+products and sums rounded up, matters. -/
+
+/-- `M o o'`: the sum over the delays of the largest `|c|` of the box, rounded
+    up. -/
+def gainMatrix (forms : List (Out × Aff)) (fed : List Out) : List (List Q) :=
+  fed.map fun o =>
+    let fm := (forms.lookup o).getD Aff.none
+    fed.map fun o' =>
+      fm.terms.foldl (fun s ((o'', _), c) => if o'' == o' then (s.add c.mag).up else s) Q.zero
+
+/-- An upper bound of `M v`, for `v ≥ 0`. -/
+def mulVecUp (M : List (List Q)) (v : List Q) : List Q :=
+  M.map fun row => (row.zip v).foldl (fun s (a, b) => (s.add (a.mul b)).up) Q.zero
+
+def smallGain (M : List (List Q)) : Nat → List Q → Bool
+  | 0, _ => false
+  | f + 1, v =>
+      let mv := mulVecUp M v
+      if (mv.zip v).all (fun (a, b) => Q.lt a b) then true
+      else smallGain M f (mv.map (Q.one.add ·))
+
+/-- The state of a system: `(o, k)` for `k = 1 .. depth o`, where `depth o`
+    is the largest delay at which output `o` is read, for the outputs that
+    feed back (`fed`). -/
+def stateOf (forms : List (Out × Aff)) (fed : List Out) : List (Out × Nat) :=
+  let keys := forms.flatMap (·.2.terms.map (·.1))
+  fed.flatMap fun o =>
+    let depth := keys.foldl (fun m (o', k) => if o' == o then Nat.max m k else m) 0
+    (List.range depth).map fun k => (o, k + 1)
+
+/-- Row of the state matrix for state `(o, k)`: the form of output `o` for
+    `k = 1`, the shift `y_o[n-k] ← y_o[n-k+1]` otherwise. -/
+def rowOf (forms : List (Out × Aff)) (states : List (Out × Nat)) (s : Out × Nat) : List Iv :=
+  if s.2 == 1 then states.map fun t => ((forms.lookup s.1).getD Aff.none).coef t
   else states.map fun t => if t == (s.1, s.2 - 1) then Iv.pt Q.one else Iv.zero
 
+/-- The stability verdict of group `r` (with the groups nested in it and
+    coupled to it). Up to 2 states, constant coefficients and fixed delays:
+    Jury at the vertices, exact. One state with a time-varying coefficient:
+    `|a| < 1` over the box, a contraction. Otherwise: the small-gain test. -/
 def groupVerdict (dag : Dag) (free : Array Nat) (nat natOpt tinv : Array Bool) (p : Prec)
     (rng : Array (Option Iv)) (r : Nat) : GV × String :=
   let body := recBody dag r
@@ -1515,28 +1662,33 @@ def groupVerdict (dag : Dag) (free : Array Nat) (nat natOpt tinv : Array Bool) (
     | .int _ => true
     | _ => false
   if body.all isIntArg then (.refused, "integer recursion (wrapping semantics)") else
-  let affs := affinesAt dag free nat tinv p rng r
-  let formOf : Arg → Except String Aff := fun
-    | .ref j => if free.getD j 1000 == 0 then .ok Aff.none else affs.getD j (.error "?")
-    | _ => .ok Aff.none
-  match body.mapM formOf with
+  -- a group that refers to an enclosing one is analysed with it
+  if free.getD r 1000 != 0 then (.refused, "part of an enclosing group (analysed with it)") else
+  if formCalls dag free 16 r 32 > 32 then
+    (.refused, "more than 32 nested groups coupled to the group") else
+  match groupForms dag free nat tinv p rng 16 [] r with
   | .error e => (.refused, e)
   | .ok forms =>
-    match stateOf forms with
-    | .error e => (.refused, e)
-    | .ok states =>
-      -- With one state, `|a| < 1` for every `a` of the box makes the recursion
-      -- a contraction even when `a` changes at every sample; with two, a box
-      -- of stable matrices can hold an unstable product (P2: a common
-      -- Lyapunov function is needed).
-      if states.length > 1 && forms.any (·.tv) then
-        (.refused, "time-varying coefficient on a state of 2 samples") else
-      match states.map (rowOf forms states) with
-      | [] => (.stable, "no feedback")
-      | [[a]] => if jury1 a then (.stable, "") else (.unproven, "Jury fails on the box")
-      | [[a, b], [c, d]] =>
-          if jury2 a b c d then (.stable, "") else (.unproven, "Jury fails on the box")
-      | _ => (.refused, s!"{states.length} states (more than 2)")
+    let keys := forms.flatMap (·.2.terms.map (·.1))
+    if keys.any (·.2 == 0) then (.refused, "delay-free loop") else
+    let fed := (keys.map (·.1)).eraseDups
+    if fed.any (fun o => (forms.lookup o).isNone) then
+      (.refused, "state beyond the outputs read") else
+    let tv := forms.any (·.2.tv)
+    let vd := forms.any (·.2.vd)
+    let depth : Out → Nat := fun o => keys.foldl (fun m (o', k) => if o' == o then Nat.max m k else m) 0
+    let total : Nat := fed.foldl (fun t o => t + depth o) 0
+    let bySmallGain : GV × String :=
+      if smallGain (gainMatrix forms fed) 64 (fed.map fun _ => Q.one) then (.stable, "")
+      else (.unproven, s!"small-gain test fails ({total} states)")
+    if vd || total > 2 || (tv && total == 2) then bySmallGain else
+    let states := stateOf forms fed
+    match states.map (rowOf forms states) with
+    | [] => (.stable, "no feedback")
+    | [[a]] => if jury1 a then (.stable, "") else (.unproven, "Jury fails on the box")
+    | [[a, b], [c, d]] =>
+        if jury2 a b c d then (.stable, "") else (.unproven, "Jury fails on the box")
+    | _ => bySmallGain
 
 /-- The rates of `make check-precision`. -/
 def checkRates : List Int := [44100, 48000, 88200, 96000, 176400, 192000]
@@ -1845,7 +1997,7 @@ assumptions:
    once where the model rounds twice); a reassociation (`-ffast-math`) is
    not: it changes the computation, not its rounding.
 
-4. **The math library.** `tan`, `sin`, `cos`, `exp` and `pow` return their
+4. **The math library** (and the digits of `π` in `piLo`, `piHi`). `tan`, `sin`, `cos`, `exp` and `pow` return their
    result within `libmUlps` ulps. This is a property of each platform's libm,
    stated, not proved.
 
@@ -1854,6 +2006,7 @@ assumptions:
    `sqrt`, `log`, truncation and of the rounding widening, the vertex lemma of
    `jury2` (a multilinear function reaches its minimum over a box at a
    vertex), the contraction argument for one time-varying state, the
+   weighted max-norm argument of the small-gain test, the
    floating-point facts of `fracRange` and `isPow2`, and the rounding of
    `Q.toFloat32` are stated with their argument next to the code, and
    reviewed as mathematics. They are the next targets of the optional mathlib
@@ -1877,6 +2030,53 @@ Everything below is produced by `scripts/sig2lean.py` from
 
 namespace Faust.Signal.Generated
 open Faust.Signal
+
+/-- `// fi.allpass_comb, the Schroeder allpass of the reverbs: its recursion is a
+// feedback comb with gain -aN. Pins: stable for |aN| < 1, by the small-gain test.
+fi = library("filters.lib");
+process = fi.allpass_comb(1024, 441, 0.6);` — output 0 -/
+def allpass_comb_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .mul n2 (.const ⟨(-5404319552844595), 9007199254740992⟩)
+  let n4 : Sig := Sig.input 0
+  let n5 : Sig := Sig.binop .add n3 n4
+  let n6 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 440)]
+  let n7 : Sig := Sig.opaqueN "SIGMIN" [(.int 1024), n6]
+  let n8 : Sig := Sig.delay n5 n7
+  let n9 : Sig := Sig.binop .mul n5 (.const ⟨5404319552844595, 9007199254740992⟩)
+  let n10 : Sig := Sig.cons n9 (.nil)
+  let n11 : Sig := Sig.cons n8 n10
+  let n12 : Sig := Sig.recur n11
+  let n13 : Sig := Sig.proj 0 n12
+  let n14 : Sig := Sig.delay1 n13
+  let n15 : Sig := Sig.proj 1 n12
+  let n16 : Sig := Sig.binop .add n14 n15
+  n16
+
+/-- `// fi.allpass_comb, the Schroeder allpass of the reverbs: its recursion is a
+// feedback comb with gain -aN. Pins: stable for |aN| < 1, by the small-gain test.
+fi = library("filters.lib");
+process = fi.allpass_comb(1024, 441, 0.6);` — the whole graph, for the rate analysis -/
+def allpass_comb_dag : Dag := #[
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 2, .const ⟨(-5404319552844595), 9007199254740992⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 3, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 440], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 1024, .ref 6], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 5, .ref 7], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 5, .const ⟨5404319552844595, 9007199254740992⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 9, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 8, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 11], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 12], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 13], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 1, .ref 12], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 14, .ref 15], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `// ve.bandpass2Matched at the defaults of bandpass2Matched_test, which
 // check-precision reports non-finite in single at 176.4 kHz: a per-block
@@ -2252,6 +2452,151 @@ def delay_sr_dag : Dag := #[
   ⟨.min, [.ref 3, .ref 5], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.delay, [.ref 0, .ref 6], (Q.zero, Q.zero, Q.zero)⟩]
 
+/-- `// fi.fb_comb: y[n] = x[n] - aN*y[n-441], a feedback comb with 441 samples of
+// state. Jury does not read it (more than 2 states); the small-gain test
+// does: stable when |aN| < 1, whatever the delay. Pins: stable, and
+// fb_comb_unstable.dsp is not.
+fi = library("filters.lib");
+process = fi.fb_comb(1024, 441, 1, 0.7);` — output 0 -/
+def fb_comb_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 440)]
+  let n4 : Sig := Sig.opaqueN "SIGMIN" [(.int 1024), n3]
+  let n5 : Sig := Sig.delay n2 n4
+  let n6 : Sig := Sig.binop .mul (.const ⟨(-3152519739159347), 4503599627370496⟩) n5
+  let n7 : Sig := Sig.input 0
+  let n8 : Sig := Sig.binop .add n6 n7
+  let n9 : Sig := Sig.cons n8 (.nil)
+  let n10 : Sig := Sig.recur n9
+  let n11 : Sig := Sig.proj 0 n10
+  let n12 : Sig := Sig.binop .mul n11 (.int 1)
+  let n13 : Sig := Sig.delay1 n12
+  n13
+
+/-- `// fi.fb_comb: y[n] = x[n] - aN*y[n-441], a feedback comb with 441 samples of
+// state. Jury does not read it (more than 2 states); the small-gain test
+// does: stable when |aN| < 1, whatever the delay. Pins: stable, and
+// fb_comb_unstable.dsp is not.
+fi = library("filters.lib");
+process = fi.fb_comb(1024, 441, 1, 0.7);` — the whole graph, for the rate analysis -/
+def fb_comb_dag : Dag := #[
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 440], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 1024, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 2, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-3152519739159347), 4503599627370496⟩, .ref 5], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 6, .ref 7], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 8, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 9], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 11, .int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 12], (Q.zero, Q.zero, Q.zero)⟩]
+
+/-- `// fi.fb_comb with |aN| = 1.1: its poles lie outside the unit circle. Pins:
+// not proven stable (the small-gain test cannot conclude, as it must not).
+fi = library("filters.lib");
+process = fi.fb_comb(1024, 441, 1, 1.1);` — output 0 -/
+def fb_comb_unstable_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 440)]
+  let n4 : Sig := Sig.opaqueN "SIGMIN" [(.int 1024), n3]
+  let n5 : Sig := Sig.delay n2 n4
+  let n6 : Sig := Sig.binop .mul (.const ⟨(-2476979795053773), 2251799813685248⟩) n5
+  let n7 : Sig := Sig.input 0
+  let n8 : Sig := Sig.binop .add n6 n7
+  let n9 : Sig := Sig.cons n8 (.nil)
+  let n10 : Sig := Sig.recur n9
+  let n11 : Sig := Sig.proj 0 n10
+  let n12 : Sig := Sig.binop .mul n11 (.int 1)
+  let n13 : Sig := Sig.delay1 n12
+  n13
+
+/-- `// fi.fb_comb with |aN| = 1.1: its poles lie outside the unit circle. Pins:
+// not proven stable (the small-gain test cannot conclude, as it must not).
+fi = library("filters.lib");
+process = fi.fb_comb(1024, 441, 1, 1.1);` — the whole graph, for the rate analysis -/
+def fb_comb_unstable_dag : Dag := #[
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 440], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 1024, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 2, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-2476979795053773), 2251799813685248⟩, .ref 5], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 6, .ref 7], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 8, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 9], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 11, .int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 12], (Q.zero, Q.zero, Q.zero)⟩]
+
+/-- `// fi.fb_fcomb, a feedback comb with a fractional delay: two taps weighted by
+// the interpolation, whose absolute values sum to |aN|. Pins: stable.
+fi = library("filters.lib");
+process = fi.fb_fcomb(1024, 441.5, 1, 0.7);` — output 0 -/
+def fb_fcomb_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 440)]
+  let n4 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n3]
+  let n5 : Sig := Sig.delay n2 n4
+  let n6 : Sig := Sig.opaqueN "SIGFLOOR" [(.const ⟨881, 2⟩)]
+  let n7 : Sig := Sig.binop .sub (.const ⟨881, 2⟩) n6
+  let n8 : Sig := Sig.binop .sub (.int 1) n7
+  let n9 : Sig := Sig.binop .mul n5 n8
+  let n10 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), (.int 441)]
+  let n11 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n10]
+  let n12 : Sig := Sig.delay n2 n11
+  let n13 : Sig := Sig.binop .mul n12 n7
+  let n14 : Sig := Sig.binop .add n9 n13
+  let n15 : Sig := Sig.binop .mul (.const ⟨(-3152519739159347), 4503599627370496⟩) n14
+  let n16 : Sig := Sig.input 0
+  let n17 : Sig := Sig.binop .add n15 n16
+  let n18 : Sig := Sig.cons n17 (.nil)
+  let n19 : Sig := Sig.recur n18
+  let n20 : Sig := Sig.proj 0 n19
+  let n21 : Sig := Sig.binop .mul n20 (.int 1)
+  let n22 : Sig := Sig.delay1 n21
+  n22
+
+/-- `// fi.fb_fcomb, a feedback comb with a fractional delay: two taps weighted by
+// the interpolation, whose absolute values sum to |aN|. Pins: stable.
+fi = library("filters.lib");
+process = fi.fb_fcomb(1024, 441.5, 1, 0.7);` — the whole graph, for the rate analysis -/
+def fb_fcomb_dag : Dag := #[
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 440], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 1025, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 2, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.floor, [.const ⟨881, 2⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.const ⟨881, 2⟩, .ref 6], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.int 1, .ref 7], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 5, .ref 8], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .int 441], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 1025, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 2, .ref 11], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 12, .ref 7], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 9, .ref 13], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-3152519739159347), 4503599627370496⟩, .ref 14], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 15, .ref 16], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 17, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 18], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 19], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 20, .int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 21], (Q.zero, Q.zero, Q.zero)⟩]
+
 /-- `de = library("delays.lib");
 process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — output 0 -/
 def fdelay_clamped_out0 : Sig :=
@@ -2502,6 +2847,113 @@ def lowpass_svf_20hz_dag : Dag := #[
   ⟨.proj, [.int 4, .ref 30], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .mul, [.int 1, .ref 34], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .add, [.ref 33, .ref 35], (Q.zero, Q.zero, Q.zero)⟩]
+
+/-- `// A delay modulated at every sample inside a feedback loop, as in a
+// flanger: y = x + 0.5*y[n - d(n)] with d(n) between 100 and 300 samples.
+// Jury cannot read a variable delay; the small-gain test only needs
+// d >= 1. Pins: stable. (With de.fdelay, the two interpolation weights
+// (1-f) and f are bounded separately, their sum by 2: not proven.)
+de = library("delays.lib");
+os = library("oscillators.lib");
+process = (+ : de.delay(1024, int(200 + 100*os.osc(0.5)))) ~ *(0.5);` — output 0 -/
+def modulated_delay_loop_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.binop .mul n2 (.const ⟨1, 2⟩)
+  let n4 : Sig := Sig.input 0
+  let n5 : Sig := Sig.binop .add n3 n4
+  let n6 : Sig := Sig.delay1 (.int 1)
+  let n7 : Sig := Sig.binop .add n2 n6
+  let n8 : Sig := Sig.binop .rem n7 (.int 65536)
+  let n9 : Sig := Sig.cons n8 (.nil)
+  let n10 : Sig := Sig.recur n9
+  let n11 : Sig := Sig.proj 0 n10
+  let n12 : Sig := Sig.opaqueN "SIGFLOATCAST" [n11]
+  let n13 : Sig := Sig.binop .mul n12 (.const ⟨884279719003555, 140737488355328⟩)
+  let n14 : Sig := Sig.binop .div n13 (.int 65536)
+  let n15 : Sig := Sig.opaqueN "SIGSIN" [n14]
+  let n16 : Sig := Sig.opaqueN "SIGGEN" [n15]
+  let n17 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 65536), n16, (.nil), (.nil)]
+  let n18 : Sig := Sig.binop .sub (.int 1) n6
+  let n19 : Sig := Sig.opaqueN "SIGBINOP:or" [n18, (.int 0)]
+  let n20 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
+  let n21 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), n20]
+  let n22 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n21]
+  let n23 : Sig := Sig.binop .div (.const ⟨1, 2⟩) n22
+  let n24 : Sig := Sig.binop .add n2 n23
+  let n25 : Sig := Sig.opaqueN "SIGSELECT2" [n19, n24, (.int 0)]
+  let n26 : Sig := Sig.opaqueN "SIGFLOOR" [n25]
+  let n27 : Sig := Sig.binop .sub n25 n26
+  let n28 : Sig := Sig.cons n27 (.nil)
+  let n29 : Sig := Sig.recur n28
+  let n30 : Sig := Sig.proj 0 n29
+  let n31 : Sig := Sig.binop .mul n30 (.int 65536)
+  let n32 : Sig := Sig.opaqueN "SIGINTCAST" [n31]
+  let n33 : Sig := Sig.opaqueN "SIGRDTBL" [n17, n32]
+  let n34 : Sig := Sig.binop .mul (.int 100) n33
+  let n35 : Sig := Sig.binop .add (.int 200) n34
+  let n36 : Sig := Sig.opaqueN "SIGINTCAST" [n35]
+  let n37 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n36]
+  let n38 : Sig := Sig.opaqueN "SIGMIN" [(.int 1024), n37]
+  let n39 : Sig := Sig.delay n5 n38
+  let n40 : Sig := Sig.cons n39 (.nil)
+  let n41 : Sig := Sig.recur n40
+  let n42 : Sig := Sig.proj 0 n41
+  n42
+
+/-- `// A delay modulated at every sample inside a feedback loop, as in a
+// flanger: y = x + 0.5*y[n - d(n)] with d(n) between 100 and 300 samples.
+// Jury cannot read a variable delay; the small-gain test only needs
+// d >= 1. Pins: stable. (With de.fdelay, the two interpolation weights
+// (1-f) and f are bounded separately, their sum by 2: not proven.)
+de = library("delays.lib");
+os = library("oscillators.lib");
+process = (+ : de.delay(1024, int(200 + 100*os.osc(0.5)))) ~ *(0.5);` — the whole graph, for the rate analysis -/
+def modulated_delay_loop_dag : Dag := #[
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 2, .const ⟨1, 2⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 3, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 2, .ref 6], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .rem, [.ref 7, .int 65536], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 8, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 9], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.floatcast, [.ref 11], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 12, .const ⟨884279719003555, 140737488355328⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 13, .int 65536], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.sin, [.ref 14], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.other "SIGGEN", [.ref 15], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.wrtbl, [.int 65536, .ref 16, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.int 1, .ref 6], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.bit .or, [.ref 18, .int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.sr, [.int 0, .other, .other], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.const ⟨1, 1⟩, .ref 20], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.const ⟨192000, 1⟩, .ref 21], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.const ⟨1, 2⟩, .ref 22], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 2, .ref 23], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.select2, [.ref 19, .ref 24, .int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.floor, [.ref 25], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 25, .ref 26], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 27, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 28], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 29], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 30, .int 65536], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.intcast, [.ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.rdtbl, [.ref 17, .ref 32], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.int 100, .ref 33], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.int 200, .ref 34], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.intcast, [.ref 35], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .ref 36], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.int 1024, .ref 37], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 5, .ref 38], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 39, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 40], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 41], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `// no.noise — the LCG recursion x = 1103515245*x' + 12345 at the heart of
 // noises.lib. The generator is only bounded by wrapping int32 semantics,
@@ -3751,13 +4203,18 @@ Jury criterion. `certifyIndicesB` checks every table read and
 delay tap whose range follows from the graph structure alone;
 `false` there means *not proven*, never *unsafe*. -/
 
+#eval s!"allpass_comb_out0: " ++ certifyReport allpass_comb_out0
 #eval s!"bandpass2matched_float_out0: " ++ certifyReport bandpass2matched_float_out0
 #eval s!"bandpass_tpt_out0: " ++ certifyReport bandpass_tpt_out0
 #eval s!"dcblocker_out0: " ++ certifyReport dcblocker_out0
 #eval s!"delay_sr_out0: " ++ certifyReport delay_sr_out0
+#eval s!"fb_comb_out0: " ++ certifyReport fb_comb_out0
+#eval s!"fb_comb_unstable_out0: " ++ certifyReport fb_comb_unstable_out0
+#eval s!"fb_fcomb_out0: " ++ certifyReport fb_fcomb_out0
 #eval s!"fdelay_clamped_out0: " ++ certifyReport fdelay_clamped_out0
 #eval s!"lowpass3_out0: " ++ certifyReport lowpass3_out0
 #eval s!"lowpass_svf_20hz_out0: " ++ certifyReport lowpass_svf_20hz_out0
+#eval s!"modulated_delay_loop_out0: " ++ certifyReport modulated_delay_loop_out0
 #eval s!"noise_lcg_out0: " ++ certifyReport noise_lcg_out0
 #eval s!"nonlinear_out0: " ++ certifyReport nonlinear_out0
 #eval s!"onepole_out0: " ++ certifyReport onepole_out0
@@ -3779,13 +4236,18 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"time_marginal_out0: " ++ certifyReport time_marginal_out0
 #eval s!"unstable_out0: " ++ certifyReport unstable_out0
 
+#eval s!"allpass_comb_out0: " ++ indexReport allpass_comb_out0
 #eval s!"bandpass2matched_float_out0: " ++ indexReport bandpass2matched_float_out0
 #eval s!"bandpass_tpt_out0: " ++ indexReport bandpass_tpt_out0
 #eval s!"dcblocker_out0: " ++ indexReport dcblocker_out0
 #eval s!"delay_sr_out0: " ++ indexReport delay_sr_out0
+#eval s!"fb_comb_out0: " ++ indexReport fb_comb_out0
+#eval s!"fb_comb_unstable_out0: " ++ indexReport fb_comb_unstable_out0
+#eval s!"fb_fcomb_out0: " ++ indexReport fb_fcomb_out0
 #eval s!"fdelay_clamped_out0: " ++ indexReport fdelay_clamped_out0
 #eval s!"lowpass3_out0: " ++ indexReport lowpass3_out0
 #eval s!"lowpass_svf_20hz_out0: " ++ indexReport lowpass_svf_20hz_out0
+#eval s!"modulated_delay_loop_out0: " ++ indexReport modulated_delay_loop_out0
 #eval s!"noise_lcg_out0: " ++ indexReport noise_lcg_out0
 #eval s!"nonlinear_out0: " ++ indexReport nonlinear_out0
 #eval s!"onepole_out0: " ++ indexReport onepole_out0
@@ -3807,13 +4269,18 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"time_marginal_out0: " ++ indexReport time_marginal_out0
 #eval s!"unstable_out0: " ++ indexReport unstable_out0
 
+theorem allpass_comb_out0_stability : certifyStableB allpass_comb_out0 = false := by decide
 theorem bandpass2matched_float_out0_stability : certifyStableB bandpass2matched_float_out0 = false := by decide
 theorem bandpass_tpt_out0_stability : certifyStableB bandpass_tpt_out0 = false := by decide
 theorem dcblocker_out0_stability : certifyStableB dcblocker_out0 = true := by decide
 theorem delay_sr_out0_stability : certifyStableB delay_sr_out0 = false := by decide
+theorem fb_comb_out0_stability : certifyStableB fb_comb_out0 = false := by decide
+theorem fb_comb_unstable_out0_stability : certifyStableB fb_comb_unstable_out0 = false := by decide
+theorem fb_fcomb_out0_stability : certifyStableB fb_fcomb_out0 = false := by decide
 theorem fdelay_clamped_out0_stability : certifyStableB fdelay_clamped_out0 = false := by decide
 theorem lowpass3_out0_stability : certifyStableB lowpass3_out0 = false := by decide
 theorem lowpass_svf_20hz_out0_stability : certifyStableB lowpass_svf_20hz_out0 = false := by decide
+theorem modulated_delay_loop_out0_stability : certifyStableB modulated_delay_loop_out0 = false := by decide
 theorem noise_lcg_out0_stability : certifyStableB noise_lcg_out0 = false := by decide
 theorem nonlinear_out0_stability : certifyStableB nonlinear_out0 = false := by decide
 theorem onepole_out0_stability : certifyStableB onepole_out0 = true := by decide
@@ -3835,13 +4302,18 @@ theorem tf3slf_low_out0_stability : certifyStableB tf3slf_low_out0 = false := by
 theorem time_marginal_out0_stability : certifyStableB time_marginal_out0 = false := by decide
 theorem unstable_out0_stability : certifyStableB unstable_out0 = false := by decide
 
+theorem allpass_comb_out0_indices : certifyIndicesB allpass_comb_out0 = true := by decide
 theorem bandpass2matched_float_out0_indices : certifyIndicesB bandpass2matched_float_out0 = true := by decide
 theorem bandpass_tpt_out0_indices : certifyIndicesB bandpass_tpt_out0 = true := by decide
 theorem dcblocker_out0_indices : certifyIndicesB dcblocker_out0 = true := by decide
 theorem delay_sr_out0_indices : certifyIndicesB delay_sr_out0 = true := by decide
+theorem fb_comb_out0_indices : certifyIndicesB fb_comb_out0 = true := by decide
+theorem fb_comb_unstable_out0_indices : certifyIndicesB fb_comb_unstable_out0 = true := by decide
+theorem fb_fcomb_out0_indices : certifyIndicesB fb_fcomb_out0 = true := by decide
 theorem fdelay_clamped_out0_indices : certifyIndicesB fdelay_clamped_out0 = true := by decide
 theorem lowpass3_out0_indices : certifyIndicesB lowpass3_out0 = true := by decide
 theorem lowpass_svf_20hz_out0_indices : certifyIndicesB lowpass_svf_20hz_out0 = true := by decide
+theorem modulated_delay_loop_out0_indices : certifyIndicesB modulated_delay_loop_out0 = true := by decide
 theorem noise_lcg_out0_indices : certifyIndicesB noise_lcg_out0 = true := by decide
 theorem nonlinear_out0_indices : certifyIndicesB nonlinear_out0 = true := by decide
 theorem onepole_out0_indices : certifyIndicesB onepole_out0 = true := by decide
@@ -3876,6 +4348,9 @@ Per program and precision, at 44.1, 48, 88.2, 96, 176.4 and 192 kHz:
 
 In the comments, the three parts are separated by `|`. -/
 
+-- allpass_comb exact: n12:SSSSSS|FFFFFF|n8:IIIIII
+-- allpass_comb double: n12:SSSSSS|FFFFFF|n8:IIIIII
+-- allpass_comb single: n12:SSSSSS|FFFFFF|n8:IIIIII
 -- bandpass2matched_float exact: n85:SSSSSS|FFFFFF|
 -- bandpass2matched_float double: n85:SSSSSS|FFFFFF|
 -- bandpass2matched_float single: n85:SSSSSS|FDDDDD(n59 SIGSQRT: argument [-0.000068, 0.030299]; n59 SIGSQRT: argument [-0.048690, 0.058005]; n59 SIGSQRT: argument [-0.059483, 0.067374]; n59 SIGSQRT: argument [-0.216843, 0.219202]; n59 SIGSQRT: argument [-0.257729, 0.259712])|
@@ -3888,6 +4363,15 @@ In the comments, the three parts are separated by `|`. -/
 -- delay_sr exact: |FFFFFF|n7:IIIIII
 -- delay_sr double: |FFFFFF|n7:IIIIII
 -- delay_sr single: |FFFFFF|n7:IIIIII
+-- fb_comb exact: n10:SSSSSS|FFFFFF|n5:IIIIII
+-- fb_comb double: n10:SSSSSS|FFFFFF|n5:IIIIII
+-- fb_comb single: n10:SSSSSS|FFFFFF|n5:IIIIII
+-- fb_comb_unstable exact: n10:UUUUUU(small-gain test fails (441 states))|FFFFFF|n5:IIIIII
+-- fb_comb_unstable double: n10:UUUUUU(small-gain test fails (441 states))|FFFFFF|n5:IIIIII
+-- fb_comb_unstable single: n10:UUUUUU(small-gain test fails (441 states))|FFFFFF|n5:IIIIII
+-- fb_fcomb exact: n19:SSSSSS|FFFFFF|n5:IIIIII;n12:IIIIII
+-- fb_fcomb double: n19:SSSSSS|FFFFFF|n5:IIIIII;n12:IIIIII
+-- fb_fcomb single: n19:SSSSSS|FFFFFF|n5:IIIIII;n12:IIIIII
 -- fdelay_clamped exact: |FFFFFF|n5:IIIIII;n13:IIIIII
 -- fdelay_clamped double: |FFFFFF|n5:IIIIII;n13:IIIIII
 -- fdelay_clamped single: |FFFFFF|n5:IIIIII;n13:IIIIII
@@ -3897,6 +4381,9 @@ In the comments, the three parts are separated by `|`. -/
 -- lowpass_svf_20hz exact: n30:SSSSSS|FFFFFF|
 -- lowpass_svf_20hz double: n30:SSSSSS|FFFFFF|
 -- lowpass_svf_20hz single: n30:SSSSSS|FFFFFF|
+-- modulated_delay_loop exact: n10:RRRRRR(integer recursion (wrapping semantics));n29:RRRRRR(SIGFLOOR applied to the state);n41:SSSSSS|FFFFFF|n33:NNNNNN;n39:IIIIII
+-- modulated_delay_loop double: n10:RRRRRR(integer recursion (wrapping semantics));n29:RRRRRR(SIGFLOOR applied to the state);n41:SSSSSS|FFFFFF|n33:IIIIII;n39:IIIIII
+-- modulated_delay_loop single: n10:RRRRRR(integer recursion (wrapping semantics));n29:RRRRRR(SIGFLOOR applied to the state);n41:SSSSSS|FFFFFF|n33:IIIIII;n39:IIIIII
 -- noise_lcg exact: n6:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
 -- noise_lcg double: n6:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
 -- noise_lcg single: n6:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
@@ -3945,12 +4432,12 @@ In the comments, the three parts are separated by `|`. -/
 -- tf2s_direct_20hz exact: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
 -- tf2s_direct_20hz double: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
 -- tf2s_direct_20hz single: n26:SSUUUU(Jury fails on the box)|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
--- tf2snp_exact exact: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)|FFFFFF|
--- tf2snp_exact double: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)|FFFFFF|
--- tf2snp_exact single: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)|FFFFFF|
--- tf3slf_low exact: n40:RRRRRR(3 states (more than 2))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
--- tf3slf_low double: n40:RRRRRR(3 states (more than 2))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
--- tf3slf_low single: n40:RRRRRR(3 states (more than 2))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
+-- tf2snp_exact exact: n51:RRRRRR(part of an enclosing group (analysed with it));n58:UUUUUU(small-gain test fails (4 states))|FFFFFF|
+-- tf2snp_exact double: n51:RRRRRR(part of an enclosing group (analysed with it));n58:UUUUUU(small-gain test fails (4 states))|FFFFFF|
+-- tf2snp_exact single: n51:RRRRRR(part of an enclosing group (analysed with it));n58:UUUUUU(small-gain test fails (4 states))|FFFFFF|
+-- tf3slf_low exact: n40:UUUUUU(small-gain test fails (3 states))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
+-- tf3slf_low double: n40:UUUUUU(small-gain test fails (3 states))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
+-- tf3slf_low single: n40:UUUUUU(small-gain test fails (3 states))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
 -- time_marginal exact: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
 -- time_marginal double: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
 -- time_marginal single: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
@@ -3958,6 +4445,9 @@ In the comments, the three parts are separated by `|`. -/
 -- unstable double: n7:UUUUUU(Jury fails on the box)|FFFFFF|
 -- unstable single: n7:UUUUUU(Jury fails on the box)|FFFFFF|
 
+theorem allpass_comb_rates_exact : verdicts allpass_comb_dag .exact = ⟨[(12, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(8, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem allpass_comb_rates_double : verdicts allpass_comb_dag .double = ⟨[(12, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(8, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem allpass_comb_rates_single : verdicts allpass_comb_dag .single = ⟨[(12, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(8, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem bandpass2matched_float_rates_exact : verdicts bandpass2matched_float_dag .exact = ⟨[(85, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem bandpass2matched_float_rates_double : verdicts bandpass2matched_float_dag .double = ⟨[(85, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem bandpass2matched_float_rates_single : verdicts bandpass2matched_float_dag .single = ⟨[(85, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .domain, .domain, .domain, .domain, .domain], []⟩ := by decide +kernel
@@ -3970,6 +4460,15 @@ theorem dcblocker_rates_single : verdicts dcblocker_dag .single = ⟨[(10, [.sta
 theorem delay_sr_rates_exact : verdicts delay_sr_dag .exact = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(7, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem delay_sr_rates_double : verdicts delay_sr_dag .double = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(7, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem delay_sr_rates_single : verdicts delay_sr_dag .single = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(7, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_comb_rates_exact : verdicts fb_comb_dag .exact = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_comb_rates_double : verdicts fb_comb_dag .double = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_comb_rates_single : verdicts fb_comb_dag .single = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_comb_unstable_rates_exact : verdicts fb_comb_unstable_dag .exact = ⟨[(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_comb_unstable_rates_double : verdicts fb_comb_unstable_dag .double = ⟨[(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_comb_unstable_rates_single : verdicts fb_comb_unstable_dag .single = ⟨[(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_fcomb_rates_exact : verdicts fb_fcomb_dag .exact = ⟨[(19, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (12, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_fcomb_rates_double : verdicts fb_fcomb_dag .double = ⟨[(19, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (12, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fb_fcomb_rates_single : verdicts fb_fcomb_dag .single = ⟨[(19, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (12, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem fdelay_clamped_rates_exact : verdicts fdelay_clamped_dag .exact = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem fdelay_clamped_rates_double : verdicts fdelay_clamped_dag .double = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem fdelay_clamped_rates_single : verdicts fdelay_clamped_dag .single = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
@@ -3979,6 +4478,9 @@ theorem lowpass3_rates_single : verdicts lowpass3_dag .single = ⟨[(26, [.stabl
 theorem lowpass_svf_20hz_rates_exact : verdicts lowpass_svf_20hz_dag .exact = ⟨[(30, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem lowpass_svf_20hz_rates_double : verdicts lowpass_svf_20hz_dag .double = ⟨[(30, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem lowpass_svf_20hz_rates_single : verdicts lowpass_svf_20hz_dag .single = ⟨[(30, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem modulated_delay_loop_rates_exact : verdicts modulated_delay_loop_dag .exact = ⟨[(10, [.refused, .refused, .refused, .refused, .refused, .refused]), (29, [.refused, .refused, .refused, .refused, .refused, .refused]), (41, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(33, [false, false, false, false, false, false]), (39, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem modulated_delay_loop_rates_double : verdicts modulated_delay_loop_dag .double = ⟨[(10, [.refused, .refused, .refused, .refused, .refused, .refused]), (29, [.refused, .refused, .refused, .refused, .refused, .refused]), (41, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(33, [true, true, true, true, true, true]), (39, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem modulated_delay_loop_rates_single : verdicts modulated_delay_loop_dag .single = ⟨[(10, [.refused, .refused, .refused, .refused, .refused, .refused]), (29, [.refused, .refused, .refused, .refused, .refused, .refused]), (41, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(33, [true, true, true, true, true, true]), (39, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem noise_lcg_rates_exact : verdicts noise_lcg_dag .exact = ⟨[(6, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem noise_lcg_rates_double : verdicts noise_lcg_dag .double = ⟨[(6, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem noise_lcg_rates_single : verdicts noise_lcg_dag .single = ⟨[(6, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
@@ -4027,12 +4529,12 @@ theorem tf2_unstable_rates_single : verdicts tf2_unstable_dag .single = ⟨[(10,
 theorem tf2s_direct_20hz_rates_exact : verdicts tf2s_direct_20hz_dag .exact = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem tf2s_direct_20hz_rates_double : verdicts tf2s_direct_20hz_dag .double = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem tf2s_direct_20hz_rates_single : verdicts tf2s_direct_20hz_dag .single = ⟨[(26, [.stable, .stable, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
-theorem tf2snp_exact_rates_exact : verdicts tf2snp_exact_dag .exact = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
-theorem tf2snp_exact_rates_double : verdicts tf2snp_exact_dag .double = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
-theorem tf2snp_exact_rates_single : verdicts tf2snp_exact_dag .single = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
-theorem tf3slf_low_rates_exact : verdicts tf3slf_low_dag .exact = ⟨[(40, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
-theorem tf3slf_low_rates_double : verdicts tf3slf_low_dag .double = ⟨[(40, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
-theorem tf3slf_low_rates_single : verdicts tf3slf_low_dag .single = ⟨[(40, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2snp_exact_rates_exact : verdicts tf2snp_exact_dag .exact = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf2snp_exact_rates_double : verdicts tf2snp_exact_dag .double = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf2snp_exact_rates_single : verdicts tf2snp_exact_dag .single = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf3slf_low_rates_exact : verdicts tf3slf_low_dag .exact = ⟨[(40, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf3slf_low_rates_double : verdicts tf3slf_low_dag .double = ⟨[(40, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf3slf_low_rates_single : verdicts tf3slf_low_dag .single = ⟨[(40, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
 theorem time_marginal_rates_exact : verdicts time_marginal_dag .exact = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem time_marginal_rates_double : verdicts time_marginal_dag .double = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 theorem time_marginal_rates_single : verdicts time_marginal_dag .single = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
@@ -4048,13 +4550,18 @@ clamps the compiler actually inserted (`--dump-sig-dag-prepared`,
 a `clampRequired` table left unclamped — fails generation instead
 of being recorded here.
 
+allpass_comb.dsp: no table site
 bandpass2matched_float.dsp: no table site
 bandpass_tpt.dsp: no table site
 dcblocker.dsp: no table site
 delay_sr.dsp: no table site
+fb_comb.dsp: no table site
+fb_comb_unstable.dsp: no table site
+fb_fcomb.dsp: no table site
 fdelay_clamped.dsp: no table site
 lowpass3.dsp: no table site
 lowpass_svf_20hz.dsp: no table site
+modulated_delay_loop.dsp: missed optimisation: compiler clamps table[65536] though Lean proves it in range
 noise_lcg.dsp: no table site
 nonlinear.dsp: no table site
 onepole.dsp: no table site

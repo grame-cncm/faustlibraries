@@ -447,11 +447,13 @@ Three properties are currently certified, on concrete instantiations:
 - **index bounds**: every table read and delay tap is checked to stay in range
   *as written* — as opposed to being made safe by a compiler-inserted clamp;
 - **stability at the sample rates, in float and double**: each recursion group
-  whose state is at most 2 samples (first order, direct-form second order,
-  state-variable and trapezoidal sections) is checked at the six rates of
-  `make check-precision`, with the controls at their default values, with its
-  coefficients as the program computes them in exact, double and single
-  arithmetic. This one covers the coefficients that depend on `ma.SR`.
+  is checked at the six rates of `make check-precision`, with the controls at
+  their default values, with its coefficients as the program computes them
+  in exact, double and single arithmetic: exactly (Jury) up to 2 states, by
+  a sufficient small-gain test beyond (feedback combs and allpasses, delays
+  in a loop). This one covers the coefficients that depend on `ma.SR`. The
+  analysis also checks that the time-invariant values stay finite, and that
+  table reads and delay taps stay in range, in floating point.
 
 Everything the analysers do not recognise exactly is **refused, not guessed**:
 a refusal (`not certified`, `not proven`) is a statement about the analyser's

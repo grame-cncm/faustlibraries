@@ -310,10 +310,13 @@ def summarize(results):
         for g in r["groups"]:
             distinct.setdefault(g["shape"], g)
     for g in distinct.values():
+        inner = "part of an enclosing group" in g["reason"]
         for p in PRECISIONS:
             v = g.get(p, "")
-            groups[(p, "S" if set(v) == {"S"} else "R" if "R" in v else "U")] += 1
-        if "R" in g.get("double", ""):
+            groups[(p, "inner" if inner else "S" if set(v) == {"S"} else "R" if "R" in v else "U")] += 1
+        if inner:
+            continue
+        if "R" in g.get("double", "") and not inner:
             why = g["reason"].split(": ", 1)[-1].split(";")[0]
             reasons[why] += 1
     finite = collections.Counter()
@@ -394,10 +397,11 @@ def main():
     print("\nTests:")
     for k, v in tests.most_common():
         print(f"  {v:5d}  {k}")
-    print(f"{ndistinct} structurally distinct recursion groups, "
-          "stable at every rate / not proven at some rate / refused:")
+    print(f"{ndistinct} structurally distinct recursion groups, stable at every rate / "
+          "not proven at some rate / refused / analysed with an enclosing group:")
     for pr in PRECISIONS:
-        print(f"  {pr:6s} S {groups[(pr, 'S')]:5d}  U {groups[(pr, 'U')]:5d}  R {groups[(pr, 'R')]:5d}")
+        print(f"  {pr:6s} S {groups[(pr, 'S')]:5d}  U {groups[(pr, 'U')]:5d}  "
+              f"R {groups[(pr, 'R')]:5d}  inner {groups[(pr, 'inner')]:5d}")
     print("Time-invariant values (tests): finite at every rate / may leave the domain / "
           "not bounded:")
     for pr in PRECISIONS:

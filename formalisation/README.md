@@ -251,17 +251,40 @@ infinitely many.
 
 **What this covers.** Most high-order filters of `filters.lib` are cascades
 of second-order sections, and each section is its own recursion group:
-`fi.lowpass(4, …)` compiles to two groups of 2 states, both within reach.
-Three kinds of structure remain out of reach:
+`fi.lowpass(4, …)` compiles to two groups of 2 states, both within reach of
+Jury.
 
-- recursions of order 3 or more in one piece: `fi.tf3slf`, the Moog and
-  diode ladders, and parts of `ve.klonCentaur`;
-- loops that contain a delay line: combs, allpasses, the FDNs of the reverbs,
-  the waveguides. A dedicated rule would be far simpler than a Lyapunov
-  certificate for them: a comb `y = x + g·y[n-N]` is stable if and only if
-  `|g| < 1`, whatever N;
-- groups coupled to each other, which would first have to be flattened into
-  one state vector.
+**Beyond 2 states: the small-gain test.** Suppose every output `o` that feeds
+back reads `y_o[n] = Σ c·y_{o'}[n-k] + x_o` with delays `k ≥ 1`. Let
+`M o o'` bound `Σ_k |c|` over the box. If some weights `v > 0` satisfy
+`M v < v`, the recursion contracts a weighted max norm of its past, and is
+stable. This holds:
+
+- whatever the delays, and when they vary (at least one sample);
+- when the coefficients change at every sample within the box.
+
+A feedback comb `y = x + g·y[n-N]` has `M = |g|`, stable when `|g| < 1`
+whatever `N`; a damped comb (freeverb) has spectral radius
+`(1-d)·fb + d < 1`. The weights come from the iteration `v ← 1 + M v`,
+untrusted; only the final check is. The test is sufficient, not necessary,
+and three kinds of structure remain out of reach:
+
+- **lossless orthogonal mixing**, as in the FDNs of the reverbs;
+- **rotations**: the normalized ladder of `fi.tf2snp`, and oscillators;
+- **higher-order sections in one piece whose poles are close to 1**:
+  `fi.tf3slf`, the Moog and diode ladders.
+
+All three need a Lyapunov certificate (P2).
+
+**Coupled groups.** A group nested in another and referring to its state is
+analysed as one system with it: the outputs are identified as `(group,
+output)`, the de Bruijn references resolved group by group, and the outputs
+of the nested group enter the forms of the enclosing one through their own
+forms. A system of more than 32 nested groups is refused.
+
+On the test suite these two rules make 147 distinct recursion groups stable:
+the combs and allpasses of freeverb, `jcrev`, `satrev`, `dattorro_rev` and
+`kb_rom_rev1`, the string models, the `allpassn*` lattices.
 
 **Finite values and indices in floating point.** The same DAG analysis
 gives two more verdicts per rate and arithmetic:
@@ -289,7 +312,7 @@ The example set lives in [../tests/lean/](../tests/lean/): one small `.dsp`
 per certified instantiation, plus deliberate counter-examples whose *refusal*
 is itself pinned as a theorem (`+ ~ *(1.5)` is certified unstable; an
 under-clamped table read is certified `CLAMP REQUIRED`). The generated
-[certified.lean](../tests/lean/certified.lean) re-checks in about two minutes,
+[certified.lean](../tests/lean/certified.lean) re-checks in about four minutes,
 almost all of it in the rate analysis (`by decide +kernel` on the interval
 computations).
 
