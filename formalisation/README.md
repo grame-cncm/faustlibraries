@@ -263,11 +263,33 @@ Three kinds of structure remain out of reach:
 - groups coupled to each other, which would first have to be flattened into
   one state vector.
 
+**Finite values and indices in floating point.** The same DAG analysis
+gives two more verdicts per rate and arithmetic:
+
+- **Finite values** (`F`, `D`, `?`). Every time-invariant value (a constant,
+  a coefficient computed from the sample rate and the controls) stays in the
+  domain of its operation over its whole enclosure (no division by an
+  interval containing 0, no `sqrt` or `log` of a value that may be negative,
+  no `tan` near a pole) and does not overflow. `D` names the first operation
+  that may fail, `?` the first value the analysis cannot bound. In single
+  precision, `ve.bandpass2Matched` gets `D` on a `sqrt` of a cancelling
+  expression, the cause of its non-finite render at 176.4 kHz.
+- **Indices** (`I`, `N`). Table reads stay in `[0, size - 1]` and delay taps
+  are non-negative, for every value of the controls. Here the floating-point
+  model matters: `x - floor(x)` is `[0, 1 - u]` for `x ≥ 0` but can round to
+  `1.0` below 0, so the table read of `os.osc(440)` is proven in range in
+  double and single, and that of `os.osc(-440)` is not.
+
+The ranges of recursion outputs come from inductive invariants, checked, not
+assumed: a candidate range containing the initial state 0, such that the body
+evaluated with the state in it stays in it. That is how the phase of
+`os.osc` is known to stay non-negative.
+
 The example set lives in [../tests/lean/](../tests/lean/): one small `.dsp`
 per certified instantiation, plus deliberate counter-examples whose *refusal*
 is itself pinned as a theorem (`+ ~ *(1.5)` is certified unstable; an
 under-clamped table read is certified `CLAMP REQUIRED`). The generated
-[certified.lean](../tests/lean/certified.lean) re-checks in about 50 seconds,
+[certified.lean](../tests/lean/certified.lean) re-checks in about two minutes,
 almost all of it in the rate analysis (`by decide +kernel` on the interval
 computations).
 

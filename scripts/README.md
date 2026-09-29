@@ -532,9 +532,15 @@ with the controls at their default values:
   integer recursion or coupled groups. A refusal measures the coverage of the
   analysis and never fails.
 
-A test fails when it has more `U` slots, counted as (group, rate) pairs, than
-`tests/certify-baseline.json` accepts for it in one of the three
-arithmetics. A new test is not in that file, so it must have none. Baseline
+The probe also gives, per rate, a verdict on the time-invariant values (`F`
+finite, `D` an operation may leave its domain or overflow, `?` not bounded)
+and one on each table read and delay tap (`I` in range for every value of
+the controls, `N` not proven). The summary counts them.
+
+A test fails when it has more `U` slots, counted as (group, rate) pairs, or
+more `D` rates than `tests/certify-baseline.json` accepts for it in one of
+the three arithmetics. Indices never fail: `N` often means an index computed
+from a signal whose range is unknown. A new test is not in that file, so it must have none. Baseline
 entries that are no longer needed are reported, and `--write-baseline`
 regenerates the file from a full run. The summary counts the structurally
 distinct recursion groups, so that the `os.osc` of most test inputs counts

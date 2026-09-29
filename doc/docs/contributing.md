@@ -491,13 +491,19 @@ No Lean knowledge is needed. Prerequisites: `lean` (4.31, bundled Std only) and
      extension of the analysers unlocks the case, `make certify` will show the
      verdict flip.
    - the rate analysis prints one line per program and precision, e.g.
-     `rates tf2s_direct_20hz single: n26:SSUUUU(Jury fails on the box)`: for
-     each recursion group (`n26`, the dump index of its `DEBRUIJNREC`), one
-     letter per rate from 44.1 to 192 kHz. `S` is stable, `U` is not proven
-     stable — in single precision, a structure whose stability margin is
-     smaller than the rounding of its coefficients, here the direct-form
-     lowpass at 20 Hz from 88.2 kHz — and `R` is refused, with the reason
-     (nonlinear, more than 2 states, integer recursion, coupled groups…).
+     `rates tf2s_direct_20hz single: n26:SSUUUU(Jury fails on the box)|FFFFFF|n18:IIIIII`,
+     with one letter per rate from 44.1 to 192 kHz in three parts:
+     - for each recursion group (`n26`, the dump index of its
+       `DEBRUIJNREC`): `S` stable, `U` not proven stable — in single
+       precision, a structure whose stability margin is smaller than the
+       rounding of its coefficients, here the direct-form lowpass at 20 Hz
+       from 88.2 kHz — and `R` refused, with the reason (nonlinear, more
+       than 2 states, integer recursion, coupled groups…);
+     - for the time-invariant values (constants and coefficients): `F`
+       finite, `D` an operation may leave its domain or overflow (the first
+       one is named), `?` a value the analysis cannot bound;
+     - for each table read and delay tap: `I` index in range for every
+       value of the controls, `N` not proven.
 
    The run also cross-checks every table verdict against the compiler's own
    clamp insertion (the `-ct` pass, read from
@@ -533,7 +539,8 @@ make certify-tests CERTIFY_ARGS="-k resonlp --json tests/build-certify/resonlp.j
 ```
 
 A test fails when a recursion group is not proven stable (`U`) at more rates
-than `tests/certify-baseline.json` accepts for it. That file pins the
+than `tests/certify-baseline.json` accepts for it, or when a time-invariant
+value may leave its domain (`D`) at more rates than it accepts. That file pins the
 accepted `U` verdicts the way `precision-baseline.json` pins the precision
 debt: a new test is not in it, entries that are no longer needed are
 reported, and an entry is never added to silence a failure. A `U` is not a

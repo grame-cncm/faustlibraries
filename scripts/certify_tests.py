@@ -130,8 +130,6 @@ def check_test(spec, args):
     except Exception as e:  # noqa: BLE001 - reported per test
         res["error"] = "faust-rs: " + str(e).strip().splitlines()[-1][:200]
         return res
-    if not any(b[0] == "DEBRUIJNREC" for b in bindings.values()):
-        return res
     base = os.path.join(args.build_dir, name)
     options = ["import FaustSignal", "open Faust.Signal", "set_option maxRecDepth 100000",
                "set_option maxHeartbeats 0", ""]
@@ -145,7 +143,7 @@ def check_test(spec, args):
             "def dag : Dag := (Dag.parse dagText).getD #[]",
             "",
             '#eval s!"size|{dag.size}"'] +
-            [f'#eval "{p}|" ++ srProbe dag .{p}' for p in PRECISIONS]) + "\n")
+            [f'#eval "{p}|" ++ probe dag .{p}' for p in PRECISIONS]) + "\n")
     t0 = time.time()
     try:
         r = run_lean(base + ".lean", args.build_dir, args.timeout)
@@ -163,21 +161,31 @@ def check_test(spec, args):
         res["error"] = "lean: " + ((r.stderr or r.stdout).strip().splitlines() or ["?"])[-1][:200]
         return res
     groups = collections.OrderedDict()
+    sites = collections.OrderedDict()
+    res["finite"], res["finite_reason"] = {}, {}
+    parsed = {}
     for p in PRECISIONS:
-        for node, letters, why in sig2lean.parse_sr_probe(probes[p]):
+        gs, fin, fwhy, ss = sig2lean.parse_probe(probes[p])
+        parsed[p] = (gs, fin, ss)
+        res["finite"][p] = fin
+        if fwhy:
+            res["finite_reason"][p] = fwhy
+        for node, letters in ss:
+            sites.setdefault(node, {"node": node})[p] = letters
+        for node, letters, why in gs:
             g = groups.setdefault(node, {"node": node, "reason": ""})
             g[p] = letters
             if why and why not in g["reason"]:
                 g["reason"] = (g["reason"] + "; " if g["reason"] else "") + f"{p}: {why}"
+    res["sites"] = list(sites.values())
     memo = {}
     for g in groups.values():
         g["shape"] = shape(bindings, ("ref", g["node"]), memo)
     res["groups"] = list(groups.values())
     if args.kernel:
         lines = options + [f"def dag : Dag := {sig2lean.emit_nodes(bindings)}", ""] + [
-            f"example : srVerdicts dag .{p} = ["
-            + ", ".join(f"({g['node']}, {sig2lean.gv_list(g[p])})" for g in res["groups"])
-            + "] := by decide +kernel" for p in PRECISIONS]
+            f"example : verdicts dag .{p} = {sig2lean.verdicts_lit(*parsed[p][:2], parsed[p][2])} "
+            ":= by decide +kernel" for p in PRECISIONS]
         with open(base + ".kernel.lean", "w") as f:
             f.write("\n".join(lines) + "\n")
         try:
@@ -193,6 +201,11 @@ def unproven(res):
     return {p: sum(g.get(p, "").count("U") for g in res["groups"]) for p in PRECISIONS}
 
 
+def domain(res):
+    """Number of rates at which a time-invariant value may leave its domain (D)."""
+    return {p: res.get("finite", {}).get(p, "").count("D") for p in PRECISIONS}
+
+
 def verdict(res, baseline):
     if "error" in res:
         return "error", res["error"]
@@ -201,6 +214,10 @@ def verdict(res, baseline):
     allowed = baseline.get("unproven", {}).get(res["test"], {})
     over = [f"{p}: {n} unproven (group, rate) > {allowed.get(p, 0)}"
             for p, n in unproven(res).items() if n > allowed.get(p, 0)]
+    allowed_d = baseline.get("domain", {}).get(res["test"], {})
+    over += [f"{p}: may leave its domain at {n} rates > {allowed_d.get(p, 0)} "
+             f"({res['finite_reason'].get(p, '')[:160]})"
+             for p, n in domain(res).items() if n > allowed_d.get(p, 0)]
     if over:
         why = "; ".join(g["reason"] for g in res["groups"] if "U" in "".join(
             g.get(p, "") for p in PRECISIONS) and g["reason"])
@@ -209,26 +226,35 @@ def verdict(res, baseline):
 
 
 def stale_baseline(res, baseline):
-    allowed = baseline.get("unproven", {}).get(res["test"])
-    if not allowed or "error" in res:
+    if "error" in res:
         return []
-    now = unproven(res)
-    return [f"{p}: {now[p]} unproven, baseline {n}" for p, n in allowed.items() if now[p] < n]
+    out = []
+    for key, count in (("unproven", unproven), ("domain", domain)):
+        allowed = baseline.get(key, {}).get(res["test"])
+        if allowed:
+            now = count(res)
+            out += [f"{key} {p}: {now[p]}, baseline {n}" for p, n in allowed.items() if now[p] < n]
+    return out
 
 
 def make_baseline(results):
-    entries = {}
+    entries, dom = {}, {}
     for r in results:
         if "error" in r:
             continue
         u = {p: n for p, n in unproven(r).items() if n}
         if u:
             entries[r["test"]] = u
+        d = {p: n for p, n in domain(r).items() if n}
+        if d:
+            dom[r["test"]] = d
     return {
-        "comment": "Accepted (group, rate) slots not proven stable, per arithmetic, "
-                   "see scripts/certify_tests.py.",
+        "comment": "Accepted verdicts of the Lean rate analysis, see scripts/certify_tests.py: "
+                   "unproven = (group, rate) slots not proven stable, domain = rates at which a "
+                   "time-invariant value may leave its domain, per arithmetic.",
         "rates": RATES,
         "unproven": dict(sorted(entries.items())),
+        "domain": dict(sorted(dom.items())),
     }
 
 
@@ -252,8 +278,9 @@ def cross_check(results):
                            "every recursion group certified stable there")
             elif k is not None:
                 states = ", ".join(f"n{g['node']}:{g.get('single', '?')[k]}" for g in r["groups"])
+                fin = r.get("finite", {}).get("single", "")[k:k + 1] or "?"
                 out.append(f"{r['test']}: non-finite in single at {sr} Hz (check-precision); "
-                           f"groups at that rate: {states}")
+                           f"groups at that rate: {states}; time-invariant values: {fin}")
     return out
 
 
@@ -289,7 +316,18 @@ def summarize(results):
         if "R" in g.get("double", ""):
             why = g["reason"].split(": ", 1)[-1].split(";")[0]
             reasons[why] += 1
-    return tests, groups, reasons, len(distinct)
+    finite = collections.Counter()
+    sites = collections.Counter()
+    for r in results:
+        if "error" in r:
+            continue
+        for p in PRECISIONS:
+            f = r.get("finite", {}).get(p, "")
+            finite[(p, "D" if "D" in f else "?" if "?" in f else "F")] += 1
+            for st in r.get("sites", []):
+                v = st.get(p, "")
+                sites[(p, "I" if v and set(v) == {"I"} else "N")] += 1
+    return tests, groups, reasons, len(distinct), finite, sites
 
 
 def main():
@@ -352,7 +390,7 @@ def main():
         for line in sorted(stale):
             print("  " + line)
 
-    tests, groups, reasons, ndistinct = summarize(results)
+    tests, groups, reasons, ndistinct, finite, sites = summarize(results)
     print("\nTests:")
     for k, v in tests.most_common():
         print(f"  {v:5d}  {k}")
@@ -360,6 +398,13 @@ def main():
           "stable at every rate / not proven at some rate / refused:")
     for pr in PRECISIONS:
         print(f"  {pr:6s} S {groups[(pr, 'S')]:5d}  U {groups[(pr, 'U')]:5d}  R {groups[(pr, 'R')]:5d}")
+    print("Time-invariant values (tests): finite at every rate / may leave the domain / "
+          "not bounded:")
+    for pr in PRECISIONS:
+        print(f"  {pr:6s} F {finite[(pr, 'F')]:5d}  D {finite[(pr, 'D')]:5d}  ? {finite[(pr, '?')]:5d}")
+    print("Table reads and delay taps (per test): in range at every rate / not proven:")
+    for pr in PRECISIONS:
+        print(f"  {pr:6s} I {sites[(pr, 'I')]:5d}  N {sites[(pr, 'N')]:5d}")
     print("Refusal reasons (distinct groups, double):")
     for k, v in reasons.most_common(12):
         print(f"  {v:5d}  {k}")

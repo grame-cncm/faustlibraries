@@ -1,7 +1,7 @@
 # Making the Lean certification useful: float, double and the sample-rate range
 
-*Status: proposal, 2026-09-29, branch `lean-float-sr`. **P0, step 2 and
-step 3 are implemented** (see "Implemented" at the end); the rest is still a
+*Status: proposal, 2026-09-29, branch `lean-float-sr`. **P0, step 2, step 3
+and P3 are implemented** (see "Implemented" at the end); the rest is still a
 proposal. It builds on the
 design described in [README.md](README.md). The measurements come from a
 Python prototype in [prototype/](prototype/). It implements the algorithms
@@ -449,7 +449,51 @@ and scipy. It imports the DAG reader of `scripts/sig2lean.py`.
     The recursion's own coefficients (`fSlow3`, `fSlow6`) stay finite and
     stable. This is the case P3's "finite" check is for: a `sqrt` whose
     enclosure reaches below 0 in single precision.
+- **P3.** Three verdicts per program, precision and rate, pinned together
+  by `theorem …_rates_<prec> : verdicts …_dag .<prec> = ⟨groups, finite, sites⟩`.
+
+  **The additions to the analysis:**
+  - **Finite values.** Every time-invariant value stays in its domain and
+    does not overflow; the result is `F`, `D` (the first operation that may
+    fail is named) or `?` (not bounded).
+  - **Indices.** Table reads stay in `[0, size - 1]` and delay taps stay
+    non-negative, for every value of the controls.
+  - **Inductive invariants** for the ranges of recursion outputs.
+  - **Floating-point rules**:
+    - exact `float` rounding of literals and control defaults;
+    - exact products by powers of two;
+    - `frac` in `[0, 1 - u]` for `x ≥ 0`, `[0, 1]` below;
+    - monotone truncation.
+  - **New operations modelled**: `log` and `log10` (the `atanh` series),
+    `round`/`rint`/`ceil`, `fmod`, the bit operations, and the `<math.h>`
+    foreign functions, taken as pure.
+
+  **A soundness fix.** A coefficient that varies in time (an envelope stage,
+  an LFO) could get a bounded range, and the frozen Jury check then called
+  its group stable. This happened for 5 groups, in `en.adsre`, `en.ahdsre`
+  and `envelopes_demo`. Such a coefficient is now accepted with one state
+  only, where `|a| < 1` over the box makes the recursion a contraction
+  whatever the variation; with two states the group is refused.
+
+  **Results on the suite** (1445 tests, 136 s):
+  - **Finite values.** In exact arithmetic, 1237 tests are `F`, 2 `D` and
+    206 `?`; in single, 1222, 7 and 216.
+  - **The 7 `D` in single**:
+    - the four `*2Matched` filters, which compute a `sqrt` of a cancelling
+      expression — the cause of the non-finite render of
+      `bandpass2Matched_test` at 176.4 kHz;
+    - `FTZ_test`, which overflows by design;
+    - `tapeStop` and `tapeStop_demo`, which compute `1/select2(stop, 128, 0)`,
+      an infinity each block while the stop button is pressed, discarded
+      further on.
+  - **Indices.** 8848 table reads and delay taps are proven in range in
+    double and single, and 5709 are not, mostly indices computed from
+    signals.
+  - **`tf3slf_test`** has its time-invariant values finite: its non-finite
+    render comes from its third-order recursion, which the analysis refuses.
+
+  `make certify` now takes about two minutes.
 - **Not done yet.** Continuous rate and control ranges (P1, which needs
   correlation-preserving arithmetic), more than 2 states and modulated
-  verdicts (P2), non-finiteness and float index bounds (P3), error bounds
-  (P4), and faust-rs typing (P6).
+  verdicts for 2 states (P2), error bounds (P4), integer wrap times, and
+  faust-rs typing (P6).

@@ -554,14 +554,23 @@ def tableSiteVerdictsB (s : Sig) : String :=
         some s!"{size}:{v}"
     | .tap _ => none)
 
-/-! ## Stability at the sample rates, in exact, double and single precision
+/-! ## The sample rates, in exact, double and single precision
 
 The analyses above read a tree (`Sig`) and refuse every coefficient that goes
 through a transcendental function, so nothing that depends on `ma.SR` is ever
 certified, and they read only single-output recursions. This section reads the
 same graph as a **DAG** (`Dag`, one `Node` per dump binding, children by index),
-evaluates it bottom-up so that each node is computed once, and certifies each
-recursion group (`DEBRUIJNREC`):
+evaluates it bottom-up so that each node is computed once, and gives three
+verdicts (`verdicts`), each at every rate and in every arithmetic:
+
+* **stability** of each recursion group (`DEBRUIJNREC`), below;
+* **finite values** (`finiteVerdict`): every time-invariant value (constants,
+  coefficients computed from the sample rate and the controls) stays in the
+  domain of its operation and does not overflow;
+* **indices in range** (`siteVerdicts`): table reads and delay taps, for every
+  value of the controls.
+
+The stability verdict is given:
 
 * at each of the six rates of `make check-precision` (`checkRates`), with the
   controls at their default values — the configuration `check-precision`
@@ -583,6 +592,21 @@ involve the state — is not part of the claim: it perturbs the state at each
 sample, which is an accuracy question (proposal P4), not a change of the
 recursion's coefficients.
 
+A coefficient that varies in time (it depends on a signal: an envelope stage,
+an LFO) is accepted with one state only: `|a| < 1` for every `a` of the box
+makes the recursion a contraction however `a` moves. With two states a box
+of stable matrices can hold an unstable product, and the group is refused.
+
+For the finite verdict, the controls are at their default values, as for
+stability and as in `check-precision`. For indices, a safety property, they
+range over their declared bounds.
+
+The ranges of recursion outputs come from **inductive invariants**
+(`groupRanges`): a candidate range `C` containing the initial state 0 is
+accepted when the body, evaluated with the state in `C`, stays in `C`. This
+bounds phasors (`os.osc`: the phase stays in `[0, 1 - u]` in floating point
+since it stays non-negative), counters (`ba.period`) and clamped recursions.
+
 ### How
 
 * **Intervals** (`Iv`) have rational endpoints rounded outward to multiples of
@@ -596,8 +620,13 @@ recursion's coefficients.
   when they may leave the int32 range.
 * **Transcendentals** are Taylor polynomials evaluated in interval arithmetic,
   plus an explicit Lagrange remainder: `sinI`, `cosI` (|x| ≤ 4), `tanI` as
-  `sin/cos` when the cosine enclosure excludes 0, `expI` with halving,
-  `sqrtI` from an integer square root whose bounds are *checked*, not assumed.
+  `sin/cos` when the cosine enclosure excludes 0, `expI` with halving, `logI`
+  from the `atanh` series; `sqrtI` from an integer square root whose bounds
+  are *checked*, not assumed.
+* **Floating-point rules.** Literals and control defaults are rounded to
+  `float` exactly (`Q.toFloat32`); a product by a power of two is exact;
+  `x - floor(x)` is `[0, 1 - u]` for `x ≥ 0` and `[0, 1]` otherwise
+  (`frac(-1e-9)` is `1.0` in single); truncation is monotone.
 * **Linear extraction.** Inside a group, a node that does not depend on the
   group's state (`free = 0`) is a coefficient, known by its interval; the others
   are affine forms over the delayed outputs `y_i[n-k]`. A product of two state
@@ -669,8 +698,11 @@ def abs (a : Iv) : Iv :=
 /-- `max |x|` over the interval. -/
 def mag (a : Iv) : Q := Q.max a.lo.abs a.hi.abs
 def within (a : Iv) (m : Q) : Bool := Q.le a.mag m
-/-- Truncation toward zero, and floor, land in `[⌊lo⌋, ⌈hi⌉]`. -/
-def trunc (a : Iv) : Iv := ⟨Q.ofInt a.lo.floor, Q.ofInt a.hi.ceil⟩
+/-- Truncation toward zero of one value: `⌊q⌋` for `q ≥ 0`, `⌈q⌉` below. -/
+def truncQ (q : Q) : Q := if 0 ≤ q.n then Q.ofInt q.floor else Q.ofInt q.ceil
+/-- Truncation toward zero and floor are non-decreasing, so they map
+    `[lo, hi]` into `[f lo, f hi]`. -/
+def trunc (a : Iv) : Iv := ⟨truncQ a.lo, truncQ a.hi⟩
 def floor (a : Iv) : Iv := ⟨Q.ofInt a.lo.floor, Q.ofInt a.hi.floor⟩
 /-- Rounding of one operation: a result `v(1 + δ) + ε` with `|δ| ≤ e`,
     `|ε| ≤ eta`. Sound because `v ↦ v - e|v|` and `v ↦ v + e|v|` are
@@ -794,6 +826,81 @@ def powNat (x : Iv) (k : Nat) : Iv :=
     | n + 1, acc => go n (acc.mul b)
   go k (Iv.pt Q.one)
 
+/-- `mᵏ` rounded up, for `m ≥ 0`. -/
+def powUp (m : Q) : Nat → Q
+  | 0 => Q.one
+  | k + 1 => ((powUp m k).mul m).up
+
+/-- `Σ_{j<N} z^(2j+1)/(2j+1)` in interval arithmetic: `atanh z` without its
+    remainder. -/
+def atanhSeries (z2 : Iv) : Nat → Nat → Iv → Iv → Iv
+  | 0, _, _, acc => acc
+  | n + 1, j, pw, acc => atanhSeries z2 n (j + 1) (pw.mul z2) (acc.add (pw.divNat (2 * j + 1)))
+
+def ATANHTERMS : Nat := 26
+
+/-- `log m = 2·atanh z`, `z = (m-1)/(m+1)`, for `|z| ≤ 1/2`. After `N` terms
+    the remainder of the `atanh` series is at most
+    `|z|^(2N+1) / ((2N+1)(1 - z²)) ≤ (4/3)·|z|^(2N+1)/(2N+1)`. -/
+def logNear1 (m : Iv) : Option Iv := do
+  let z ← (m.sub (Iv.pt Q.one)).div (m.add (Iv.pt Q.one))
+  if !(z.within ⟨1, 2⟩) then none else
+  let s := atanhSeries (z.mul z) ATANHTERMS 0 z Iv.zero
+  let rn := (⟨4, 3⟩ : Q).mul (powUp z.mag (2 * ATANHTERMS + 1))
+  let r : Q := (⟨rn.n, rn.d * (2 * ATANHTERMS + 1)⟩ : Q).up
+  let t : Iv := ⟨(s.lo.sub r).down, (s.hi.add r).up⟩
+  pure (t.add t)
+
+/-- `log q` for a rational `q > 0`: with `a = ⌊log₂ n⌋`, `b = ⌊log₂ d⌋` and
+    `k = a - b`, `m = q / 2ᵏ` lies in `(1/2, 2)`, so `|z| < 1/3`, and
+    `log q = log m + k·log 2`. -/
+def logQ (q : Q) : Option Iv :=
+  if !(Q.lt Q.zero q) then none else
+  let k : Int := (Nat.log2 q.n.toNat : Int) - (Nat.log2 q.d.toNat : Int)
+  let m : Q := if 0 ≤ k then ⟨q.n, q.d * ((2 : Nat) ^ k.toNat : Nat)⟩
+               else ⟨q.n * ((2 : Nat) ^ (-k).toNat : Nat), q.d⟩
+  do
+    let lm ← logNear1 (Iv.pt m)
+    let l2 ← logNear1 (Iv.pt (Q.ofInt 2))
+    pure (lm.add (l2.mul (Iv.ofInt k)))
+
+/-- `log` is increasing on `x > 0`. -/
+def logI (x : Iv) : Option Iv :=
+  if Q.lt Q.zero x.lo then do
+    let a ← logQ x.lo
+    let b ← logQ x.hi
+    pure ⟨a.lo, b.hi⟩
+  else none
+
+def log10I (x : Iv) : Option Iv := do
+  let l ← logI x
+  let t ← logQ (Q.ofInt 10)
+  l.div t
+
+/-- The float nearest to `q` (ties to even), for a dyadic `q` (its
+    denominator a power of two, as every double is) in the normal range of
+    single precision; `none` otherwise. With `e = ⌊log₂ |q|⌋`, the
+    significand `|q|·2^(23-e)` lies in `[2²³, 2²⁴)` and is rounded to an
+    integer. -/
+def Q.toFloat32 (q : Q) : Option Q :=
+  if q.n == 0 then some Q.zero else
+  let n := q.n.natAbs
+  let d := q.d.toNat
+  if !(0 < d && d &&& (d - 1) == 0) then none else
+  let e : Int := (Nat.log2 n : Int) - (Nat.log2 d : Int)
+  if e < -126 || e > 127 then none else
+  -- |q|·2^(23-e) = n·2^(23-e) / d, as num / den
+  let sh : Int := 23 - e
+  let num : Nat := if 0 ≤ sh then n * 2 ^ sh.toNat else n
+  let den : Nat := if 0 ≤ sh then d else d * 2 ^ (-sh).toNat
+  let fl := num / den
+  let rem := num % den
+  let m := if 2 * rem > den || (2 * rem == den && fl % 2 == 1) then fl + 1 else fl
+  -- value m·2^(e-23), sign of q
+  let sgn : Int := if q.n < 0 then -1 else 1
+  some (if 0 ≤ sh then ⟨sgn * (m : Int), ((2 : Nat) ^ sh.toNat : Nat)⟩
+        else ⟨sgn * (m : Int) * ((2 : Nat) ^ (-sh).toNat : Nat), 1⟩)
+
 /-! ### Precisions -/
 
 inductive Prec where
@@ -827,12 +934,23 @@ def op (p : Prec) (a : Iv) : Iv := if p = .exact then a else a.widen p.u p.eta
 /-- A libm call. -/
 def libm (p : Prec) (a : Iv) : Iv :=
   if p = .exact then a else a.widen ((Q.ofInt (2 * libmUlps)).mul p.u) p.eta
-/-- A control value, stored as `FAUSTFLOAT` = `float` in both precisions. -/
+/-- A control value, stored as `FAUSTFLOAT` = `float` in both precisions:
+    its default value rounded to `float`, exactly (`Q.toFloat32`), or widened
+    by one unit roundoff of `float` outside the normal range. -/
 def control (p : Prec) (a : Iv) : Iv :=
-  if p = .exact then a else a.widen (Q.pow2neg 24) (Q.pow2neg 140)
+  if p = .exact then a else
+  match a.lo == a.hi, a.lo.toFloat32 with
+  | true, some f => Iv.pt f
+  | _, _ => a.widen (Q.pow2neg 24) (Q.pow2neg 140)
 /-- A real literal: the dump gives the double, the single-precision program
-    uses it rounded to `float`. -/
-def lit (p : Prec) (q : Q) : Iv := if p = .single then (Iv.pt q).widen p.u p.eta else Iv.pt q
+    uses it rounded to `float`: exactly (`Q.toFloat32`), or widened by one
+    unit roundoff outside the normal range. -/
+def lit (p : Prec) (q : Q) : Iv :=
+  if p = .single then
+    match q.toFloat32 with
+    | some f => Iv.pt f
+    | none => (Iv.pt q).widen p.u p.eta
+  else Iv.pt q
 /-- An integer operand converted to the real type. -/
 def promote (p : Prec) (isInt : Bool) (a : Iv) : Iv :=
   if isInt && !(Q.le (Q.ofInt p.intExact) a.mag) then a else if isInt then p.op a else a
@@ -869,8 +987,16 @@ def CmpOp.decide (op : CmpOp) (x y : Iv) : Option Bool :=
   | .eq => if same then some true else if apart then some false else none
   | .ne => if apart then some true else if same then some false else none
 
+inductive BitOp where
+  | and | or | xor | lsh | rsh | arsh
+deriving Repr, DecidableEq, Inhabited
+
 inductive Tag where
   | input | delay1 | delay | proj | recur | ref | cons
+  | bit (op : BitOp)   -- integer bit operations
+  | round             -- `round`, `rint`, `ceil`: an integer near the value
+  | log | log10 | fmod
+  | rdtbl | wrtbl     -- table read, table write (the table and its size)
   | binop (op : BinOp)
   | cmp (op : CmpOp)  -- comparisons: 0 or 1
   | sr           -- `SIGFCONST fSamplingFreq`
@@ -891,7 +1017,9 @@ def Tag.name : Tag → String
   | .floatcast => "SIGFLOATCAST" | .min => "SIGMIN" | .max => "SIGMAX"
   | .abs => "SIGABS" | .floor => "SIGFLOOR" | .select2 => "SIGSELECT2"
   | .tan => "SIGTAN" | .sin => "SIGSIN" | .cos => "SIGCOS" | .exp => "SIGEXP"
-  | .sqrt => "SIGSQRT" | .pow => "SIGPOW" | .other s => s
+  | .sqrt => "SIGSQRT" | .pow => "SIGPOW" | .bit _ => "bit operation"
+  | .round => "SIGROUND" | .log => "SIGLOG" | .log10 => "SIGLOG10" | .fmod => "SIGFMOD"
+  | .rdtbl => "SIGRDTBL" | .wrtbl => "SIGWRTBL" | .other s => s
 
 inductive Arg where
   | ref   (i : Nat)
@@ -975,7 +1103,7 @@ def natures (dag : Dag) (optimistic : Bool) : Array Bool :=
       | .int _ => true
       | _ => false
     match nd.tag, nd.args with
-    | .intcast, _ | .cmp _, _ | .sr, _ => true
+    | .intcast, _ | .cmp _, _ | .sr, _ | .bit _, _ => true
     | .binop .div, _ => false                -- Faust's `/` is always a real division
     | .binop _, [a, b] | .min, [a, b] | .max, [a, b] | .select2, [_, a, b] => ia a && ia b
     | .abs, [a] | .delay1, [a] | .delay, [a, _] => ia a
@@ -985,14 +1113,55 @@ def natures (dag : Dag) (optimistic : Bool) : Array Bool :=
 
 /-! ### Ranges -/
 
-/-- Interval of every node, for one precision and rate, controls at their
-    default values. `none`: unknown or unbounded. The state of a recursion is
-    unknown; a recursion output gets the range of its body element with the
-    state unknown, which holds for every value of the state. -/
-def ranges (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) : Array (Option Iv) :=
-  dagPass dag fun acc i nd =>
+/-- The nodes the body of group `r` reads, without entering a coefficient
+    (`free = 0`: its range is all that is needed) or a nested recursion (an
+    error when it is coupled to the group), in index order. A node the search
+    misses stays "unevaluated", which can only refuse the group. -/
+def bodyNodes (dag : Dag) (free : Array Nat) (r : Nat) : List Nat :=
+  let push : Array Bool × List Nat → Arg → Array Bool × List Nat := fun (vis, st) a =>
+    match a with
+    | .ref j =>
+        if j < r && !(vis.getD j true) && free.getD j 0 != 0 then (vis.set! j true, j :: st)
+        else (vis, st)
+    | _ => (vis, st)
+  let rec go : Nat → Array Bool × List Nat → Array Bool
+    | 0, (vis, _) => vis
+    | _, (vis, []) => vis
+    | f + 1, (vis, j :: rest) =>
+        let nd := dag.getD j default
+        let kids := match nd.tag with
+          | .recur => []
+          | _ => nd.args
+        go f (kids.foldl push (vis, rest))
+  let vis := go (r + 1) ((recBody dag r).foldl push (Array.replicate r false, []))
+  (List.range r).filter fun j => vis.getD j false
+
+/-- A point interval holding a power of two `2ᵏ`, `k ≥ 0`: multiplying a
+    float by it is exact (barring overflow, which `finiteVerdict` checks). -/
+def isPow2 (c : Iv) : Bool :=
+  c.lo == c.hi && 0 < c.lo.n && c.lo.n % c.lo.d == 0 &&
+    (let m := (c.lo.n / c.lo.d).toNat; m &&& (m - 1) == 0)
+
+/-- `x - floor(x)` computed in floating point. For `x ≥ 0` it is exact (for
+    `x ≥ 1`, `⌊x⌋ ≥ x/2` and Sterbenz applies; below 1, `⌊x⌋ = 0`), and the
+    fractional part of a float is a float below 1, hence at most `1 - u`
+    (the largest float below 1 in both formats). For a negative `x` it can
+    round to `1.0` (`frac(-1e-9) = 1.0` in single): `[0, 1]`. In exact
+    arithmetic the value is below 1 but with no margin: `[0, 1]` as well. -/
+def fracRange (p : Prec) (x : Iv) : Iv :=
+  if p = .exact then ⟨Q.zero, Q.one⟩
+  else if Q.le Q.zero x.lo then ⟨Q.zero, Q.one.sub p.u⟩
+  else ⟨Q.zero, Q.one⟩
+
+/-- Range of one node from the ranges of its arguments (`ref`). `self k` is
+    the range of output `k` of the recursion group being evaluated (for a
+    projection of `REF 1`), `recOut r k` the range of output `k` of the group
+    `r` (for a projection of a nested recursion). `none`: unknown. -/
+def rangeNode (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) (full : Bool)
+    (ref : Nat → Option Iv) (self : Nat → Option Iv) (recOut : Nat → Nat → Option Iv)
+    (i : Nat) (nd : Node) : Option Iv :=
     let v : Arg → Option Iv := fun
-      | .ref j => lookback acc i j none
+      | .ref j => if j < i then ref j else none
       | .int k => some (Iv.ofInt k)
       | .const q => some (p.lit q)
       | _ => none
@@ -1008,9 +1177,22 @@ def ranges (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) : Array (
     let maybeInt := natOpt.getD i false
     let noWrap : Option Iv → Option Iv := fun r =>
       if maybeInt then r.bind fun x => if x.fitsInt32 then some x else none else r
+    let isFrac : Arg → Arg → Bool := fun a b =>
+      match a, b with
+      | .ref x, .ref j =>
+          match (dag.getD j default).tag, (dag.getD j default).args with
+          | .floor, [.ref y] => x == y
+          | _, _ => false
+      | _, _ => false
+    let pt : Iv → Bool := fun c => c.lo == c.hi && c.lo.n % c.lo.d == 0
+    let k : Iv → Int := fun c => c.lo.n / c.lo.d
     match nd.tag, nd.args with
     | .sr, _ => some (Iv.ofInt sr)
-    | .control, _ => some (p.control (Iv.pt nd.ctl.1))
+    | .control, _ =>
+        if full then                            -- any value of the declared range
+          let r : Iv := ⟨nd.ctl.2.1, nd.ctl.2.2⟩
+          some (if p = .exact then r else r.widen (Q.pow2neg 24) (Q.pow2neg 140))
+        else some (p.control (Iv.pt nd.ctl.1))  -- the default value
     | .button, _ => some ⟨Q.zero, Q.one⟩
     | .cmp op, [a, b] =>
         match (do let x ← v a; let y ← v b; op.decide x y) with
@@ -1018,10 +1200,11 @@ def ranges (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) : Array (
         | some false => some Iv.zero
         | none       => some ⟨Q.zero, Q.one⟩
     | .delay1, [a] | .delay, [a, _] => (v a).map (·.hull Iv.zero)
-    | .proj, [.int k, .ref r] =>
-        if r < i then
-          match (dag.getD r default).tag, (dag.getD r default).args with
-          | .recur, [b] => (consNth dag k.toNat b).bind v
+    | .proj, [.int n, .ref j] =>
+        if j < i then
+          match (dag.getD j default).tag, (dag.getD j default).args with
+          | .ref, [.int 1] => self n.toNat
+          | .recur, _ => recOut j n.toNat
           | _, _ => none
         else none
     | .intcast, [a] => (v a).map Iv.trunc
@@ -1050,13 +1233,14 @@ def ranges (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) : Array (
                         else some ⟨Q.ofInt (1 - m), Q.ofInt (m - 1)⟩
                       else none
           if r.fitsInt32 then some r else none
+        else if op == .sub && isFrac a b then (v a).map (fracRange p)
         else noWrap do
           let x ← rv a
           let y ← rv b
           match op with
           | .add => some (p.op (x.add y))
           | .sub => some (p.op (x.sub y))
-          | .mul => some (p.op (x.mul y))
+          | .mul => some (if isPow2 x || isPow2 y then x.mul y else p.op (x.mul y))
           | .div => (x.div y).map p.op
           | .rem =>                          -- fmod: exact, |r| < |m|, sign of x
               if y.lo == y.hi && Q.lt Q.zero y.lo then
@@ -1067,6 +1251,34 @@ def ranges (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) : Array (
     | .cos, [a]  => ((rv a).bind cosI).map p.libm
     | .exp, [a]  => ((rv a).bind (expI 64)).map p.libm
     | .sqrt, [a] => ((rv a).bind sqrtI).map p.op
+    | .log, [a]   => ((rv a).bind logI).map p.libm
+    | .log10, [a] => ((rv a).bind log10I).map p.libm
+    | .round, [a] => (v a).map fun x => ⟨Q.ofInt x.lo.floor, Q.ofInt x.hi.ceil⟩
+    | .fmod, [a, b] => do                    -- exact, |r| < |m|, sign of x
+        let x ← rv a
+        let y ← rv b
+        if y.lo == y.hi && Q.lt Q.zero y.lo then
+          if Q.le Q.zero x.lo then some ⟨Q.zero, y.lo⟩ else some ⟨y.lo.neg, y.lo⟩
+        else none
+    | .bit op, [a, b] => do
+        let x ← v a
+        let y ← v b
+        let nonneg : Iv → Bool := fun c => Q.le Q.zero c.lo
+        let shift : Int → Iv := fun e =>        -- x >> e = ⌊x / 2^e⌋ for integers
+          let d : Int := (2 : Int) ^ e.toNat
+          ⟨Q.ofInt (Int.fdiv x.lo.ceil d), Q.ofInt (Int.fdiv x.hi.floor d)⟩
+        let r ← match op with
+          | .and =>                             -- x & m ∈ [0, m] for m ≥ 0
+              if pt y && 0 ≤ k y then some ⟨Q.zero, Q.ofInt (k y)⟩
+              else if pt x && 0 ≤ k x then some ⟨Q.zero, Q.ofInt (k x)⟩
+              else if nonneg x && nonneg y then some ⟨Q.zero, Q.min x.hi y.hi⟩ else none
+          | .or | .xor =>
+              if pt y && k y == 0 then some x else if pt x && k x == 0 then some y else none
+          | .lsh => if pt y && 0 ≤ k y && k y ≤ 30 then
+                      some (x.mul (Iv.ofInt ((2 : Int) ^ (k y).toNat))) else none
+          | .arsh => if pt y && 0 ≤ k y && k y ≤ 31 then some (shift (k y)) else none
+          | .rsh => if nonneg x && pt y && 0 ≤ k y && k y ≤ 31 then some (shift (k y)) else none
+        if r.fitsInt32 then some r else none
     | .pow, [a, b] =>                        -- integer exponents only
         match v b with
         | some e =>
@@ -1076,17 +1288,94 @@ def ranges (dag : Dag) (nat natOpt : Array Bool) (p : Prec) (sr : Int) : Array (
         | none => none
     | _, _ => none
 
+
+/-- Ranges of the outputs of recursion group `r`, valid at every sample.
+    `outer` holds the ranges of the nodes below `r`. The body is evaluated
+    with the state (the group's own outputs, delayed) in a candidate range
+    `C` containing 0, the initial state: if every output then lands in `C`,
+    `C` is an inductive invariant and the outputs lie in what the body
+    gives, at every sample. The candidates are guesses — the range with the
+    state unknown and its non-negative part, and two Kleene steps from the
+    initial state — and only their check matters. Without an invariant, the
+    range with the state unknown holds. -/
+def groupRanges (dag : Dag) (free : Array Nat) (nat natOpt : Array Bool) (p : Prec)
+    (sr : Int) (full : Bool) (outer : Array (Option Iv)) (r : Nat) : Array (Option Iv) :=
+  let body := recBody dag r
+  let nodes := bodyNodes dag free r
+  let eval : Array (Option Iv) → Array (Option Iv) := fun S =>
+    let loc := nodes.foldl (fun m j =>
+        m.set! j (rangeNode dag nat natOpt p sr full
+          (fun x => if free.getD x 1000 == 0 then outer.getD x none else m.getD x none)
+          (fun n => S.getD n none) (fun _ _ => none) j (dag.getD j default)))
+      (Array.replicate r none)
+    (body.map fun a => match a with
+      | .ref x => if free.getD x 1000 == 0 then outer.getD x none else loc.getD x none
+      | .int n => some (Iv.ofInt n)
+      | .const q => some (p.lit q)
+      | _ => none).toArray
+  let r0 := eval (Array.replicate body.length none)
+  let within : Option Iv → Option Iv → Bool := fun f c =>
+    match f, c with
+    | some f, some c => Q.le c.lo f.lo && Q.le f.hi c.hi
+    | _, _ => false
+  let check : Array (Option Iv) → Option (Array (Option Iv)) := fun C =>
+    if C.all (·.isSome) then
+      let F := eval C
+      if (List.range C.size).all fun n => within (F.getD n none) (C.getD n none) then some F
+      else none
+    else none
+  let withZero := r0.map (·.map (·.hull Iv.zero))
+  let nonneg := r0.map (·.map fun x => (⟨Q.max Q.zero x.lo, Q.max Q.zero x.hi⟩ : Iv).hull Iv.zero)
+  -- Kleene steps from the initial state 0: K₀ = {0}, Kₙ₊₁ = Kₙ ∪ F(Kₙ)
+  let step : Array (Option Iv) → Array (Option Iv) := fun K =>
+    let F := eval K
+    (List.range K.size).toArray.map fun n =>
+      match K.getD n none, F.getD n none with
+      | some k, some f => some (k.hull f)
+      | _, _ => none
+  let k0 : Array (Option Iv) := Array.replicate body.length (some Iv.zero)
+  let k1 := step k0
+  let k2 := step k1
+  let candidates := [nonneg, withZero, k1, k2]
+  match candidates.findSome? check with
+  | some F => F
+  | none => r0
+
+/-- Interval of every node, for one precision and rate, with the controls at
+    their default values (`full = false`) or anywhere in their declared range
+    (`full = true`). `none`: unknown or unbounded. A recursion output gets the
+    range `groupRanges` proves for it. -/
+def ranges (dag : Dag) (free : Array Nat) (nat natOpt : Array Bool) (p : Prec) (sr : Int)
+    (full : Bool) : Array (Option Iv) :=
+  dagPass dag fun acc i nd =>
+    rangeNode dag nat natOpt p sr full (fun j => lookback acc i j none) (fun _ => none)
+      (fun r n => if r < i then (groupRanges dag free nat natOpt p sr full acc r).getD n none
+                  else none)
+      i nd
+
 /-! ### Linear extraction of a recursion group -/
 
 /-- `((i, k), c)`: coefficient `c` on `y_i[n-k]`, output `i` of the group
     delayed by `k` samples. -/
-abbrev Aff := List ((Nat × Nat) × Iv)
+structure Aff where
+  terms : List ((Nat × Nat) × Iv)
+  /-- some coefficient or selector of the form varies in time -/
+  tv : Bool := false
 
-def Aff.shift (k : Nat) (a : Aff) : Aff := a.map fun ((i, d), c) => ((i, d + k), c)
-def Aff.scale (s : Iv) (a : Aff) : Aff := a.map fun (key, c) => (key, c.mul s)
-def Aff.neg (a : Aff) : Aff := a.map fun (key, c) => (key, c.neg)
+def Aff.none : Aff := ⟨[], false⟩
+def Aff.state (i k : Nat) : Aff := ⟨[((i, k), Iv.pt Q.one)], false⟩
+def Aff.shift (k : Nat) (a : Aff) : Aff := ⟨a.terms.map fun ((i, d), c) => ((i, d + k), c), a.tv⟩
+def Aff.scale (s : Iv) (a : Aff) : Aff := ⟨a.terms.map fun (key, c) => (key, c.mul s), a.tv⟩
+def Aff.neg (a : Aff) : Aff := ⟨a.terms.map fun (key, c) => (key, c.neg), a.tv⟩
+def Aff.add (a b : Aff) : Aff := ⟨a.terms ++ b.terms, a.tv || b.tv⟩
+def Aff.varying (a : Aff) : Aff := ⟨a.terms, true⟩
 def Aff.coef (a : Aff) (key : Nat × Nat) : Iv :=
-  a.foldl (fun s (k, c) => if k == key then s.add c else s) Iv.zero
+  a.terms.foldl (fun s (k, c) => if k == key then s.add c else s) Iv.zero
+/-- Coefficient by coefficient hull of two forms: at each sample, the value
+    is one of the two, so each coefficient lies in the hull. -/
+def Aff.hullWith (a b : Aff) : Aff :=
+  let keys := ((a.terms ++ b.terms).map (·.1)).eraseDups
+  ⟨keys.map fun k => (k, (a.coef k).hull (b.coef k)), a.tv || b.tv⟩
 
 /-- Affine form, in the state of the group being analysed, of every node that
     can be reached from its body without entering a nested recursion. A node
@@ -1094,26 +1383,33 @@ def Aff.coef (a : Aff) (key : Nat × Nat) : Iv :=
     range). `REF 1` is the group itself, since only nodes at depth 0 of its
     body are read here. The loop arithmetic (products by a coefficient,
     sums) is exact in the claim, see the section header. -/
-def affNode (dag : Dag) (free : Array Nat) (nat : Array Bool) (p : Prec)
+def affNode (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
     (rng : Array (Option Iv)) (acc : Array (Except String Aff)) (i : Nat) (nd : Node) :
     Except String Aff :=
+    -- a coefficient that varies in time marks the form (`tv`): Jury on a box
+    -- of frozen matrices says nothing of a recursion whose matrix moves from
+    -- sample to sample, except with one state (see `groupVerdict`)
+    let timeInv : Arg → Bool := fun
+      | .ref j => tinv.getD j false
+      | _ => true
     let fr : Arg → Nat := fun
       | .ref j => free.getD j 1000
       | _ => 0
     let f : Arg → Except String Aff := fun
-      | .ref j => if free.getD j 1000 == 0 then .ok [] else lookback acc i j (.error "forward reference")
-      | _ => .ok []
+      | .ref j => if free.getD j 1000 == 0 then .ok Aff.none
+                  else lookback acc i j (.error "forward reference")
+      | _ => .ok Aff.none
     -- a coefficient: its range, converted to the real type of the state
     let val : Arg → Option Iv := fun
       | .ref j => (rng.getD j none).map (p.promote (nat.getD j false))
       | .int k => some (p.promote true (Iv.ofInt k))
       | .const q => some (p.lit q)
       | _ => none
-    if free.getD i 1000 == 0 then .ok [] else
+    if free.getD i 1000 == 0 then .ok Aff.none else
     match nd.tag, nd.args with
     | .proj, [.int k, .ref j] =>
         match (dag.getD j default).tag, (dag.getD j default).args with
-        | .ref, [.int 1] => .ok [((k.toNat, 0), Iv.pt Q.one)]
+        | .ref, [.int 1] => .ok (Aff.state k.toNat 0)
         | .ref, _ => .error "reference to an outer recursion"
         | _, _ => .error "nested recursion coupled to the group"
     | .recur, _ => .error "nested recursion coupled to the group"
@@ -1129,57 +1425,42 @@ def affNode (dag : Dag) (free : Array Nat) (nat : Array Bool) (p : Prec)
               (f a).map (Aff.shift (d.lo.n / d.lo.d).toNat)
             else .error "variable delay of the state"
         | none => .error "variable delay of the state"
-    | .binop .add, [a, b] => do let x ← f a; let y ← f b; pure (x ++ y)
-    | .binop .sub, [a, b] => do let x ← f a; let y ← f b; pure (x ++ y.neg)
+    | .binop .add, [a, b] => do let x ← f a; let y ← f b; pure (x.add y)
+    | .binop .sub, [a, b] => do let x ← f a; let y ← f b; pure (x.add y.neg)
     | .binop .mul, [a, b] =>
         if fr a != 0 && fr b != 0 then .error "product of two state terms"
         else
           let (st, sc) := if fr a == 0 then (b, a) else (a, b)
           match val sc with
-          | some s => (f st).map (Aff.scale s)
+          | some s => (f st).map fun x =>
+              let y := x.scale s
+              if timeInv sc then y else y.varying
           | none   => .error "unbounded coefficient on the state"
     | .binop .div, [a, b] =>
         if fr b != 0 then .error "division by the state"
         else match (val b).bind Iv.inv with
-          | some s => (f a).map (Aff.scale s)
+          | some s => (f a).map fun x =>
+              let y := x.scale s
+              if timeInv b then y else y.varying
           | none   => .error "coefficient 1/x with x possibly 0"
     | .floatcast, [a] => f a
-    | .select2, [s, a, b] =>                -- a state-free selector known to the ranges
+    | .select2, [s, a, b] =>                -- a state-free selector
         if fr s != 0 then .error "SIGSELECT2 on the state"
-        else match (val s).bind Iv.selects with
-          | some false => f a
-          | some true  => f b
-          | none => .error "SIGSELECT2 applied to the state"
+        else match (val s).bind Iv.selects, timeInv s with
+          | some false, true => f a
+          | some true, true  => f b
+          | _, tvs => do                        -- either branch: the hull of both
+              let x ← f a
+              let y ← f b
+              let h := x.hullWith y
+              pure (if tvs then h else h.varying)  -- `tvs`: the selector is time-invariant
     | t, _ => .error s!"{t.name} applied to the state"
 
-/-- The nodes the body of group `r` reads, without entering a coefficient
-    (`free = 0`: its range is all that is needed) or a nested recursion (an
-    error when it is coupled to the group), in index order. A node the search
-    misses stays "unevaluated", which can only refuse the group. -/
-def bodyNodes (dag : Dag) (free : Array Nat) (r : Nat) : List Nat :=
-  let push : Array Bool × List Nat → Arg → Array Bool × List Nat := fun (vis, st) a =>
-    match a with
-    | .ref j =>
-        if j < r && !(vis.getD j true) && free.getD j 0 != 0 then (vis.set! j true, j :: st)
-        else (vis, st)
-    | _ => (vis, st)
-  let rec go : Nat → Array Bool × List Nat → Array Bool
-    | 0, (vis, _) => vis
-    | _, (vis, []) => vis
-    | f + 1, (vis, j :: rest) =>
-        let nd := dag.getD j default
-        let kids := match nd.tag with
-          | .recur => []
-          | _ => nd.args
-        go f (kids.foldl push (vis, rest))
-  let vis := go (r + 1) ((recBody dag r).foldl push (Array.replicate r false, []))
-  (List.range r).filter fun j => vis.getD j false
-
 /-- Affine forms of the nodes of `bodyNodes`, the others left unevaluated. -/
-def affinesAt (dag : Dag) (free : Array Nat) (nat : Array Bool) (p : Prec)
+def affinesAt (dag : Dag) (free : Array Nat) (nat tinv : Array Bool) (p : Prec)
     (rng : Array (Option Iv)) (r : Nat) : Array (Except String Aff) :=
   (bodyNodes dag free r).foldl
-    (fun acc i => acc.set! i (affNode dag free nat p rng acc i (dag.getD i default)))
+    (fun acc i => acc.set! i (affNode dag free nat tinv p rng acc i (dag.getD i default)))
     (Array.replicate r (.error "unevaluated"))
 
 /-! ### Jury at the vertices -/
@@ -1210,7 +1491,7 @@ deriving Repr, DecidableEq
 /-- The state of a group: `(i, k)` for `k = 1 .. depth i`, where `depth i` is
     the largest delay at which output `i` is read. -/
 def stateOf (forms : List Aff) : Except String (List (Nat × Nat)) := do
-  let keys := forms.flatMap (·.map (·.1))
+  let keys := forms.flatMap (·.terms.map (·.1))
   if keys.any (·.2 == 0) then throw "delay-free loop"
   if keys.any (·.1 ≥ forms.length) then throw "state beyond the outputs read"
   let outs := (List.range forms.length).filter fun i => keys.any (·.1 == i)
@@ -1223,10 +1504,10 @@ def stateOf (forms : List Aff) : Except String (List (Nat × Nat)) := do
 /-- Row of the state matrix for state `(i, k)`: the form of output `i` for
     `k = 1`, the shift `y_i[n-k] ← y_i[n-k+1]` otherwise. -/
 def rowOf (forms : List Aff) (states : List (Nat × Nat)) (s : Nat × Nat) : List Iv :=
-  if s.2 == 1 then states.map fun t => (forms.getD s.1 []).coef t
+  if s.2 == 1 then states.map fun t => (forms.getD s.1 Aff.none).coef t
   else states.map fun t => if t == (s.1, s.2 - 1) then Iv.pt Q.one else Iv.zero
 
-def groupVerdict (dag : Dag) (free : Array Nat) (nat natOpt : Array Bool) (p : Prec)
+def groupVerdict (dag : Dag) (free : Array Nat) (nat natOpt tinv : Array Bool) (p : Prec)
     (rng : Array (Option Iv)) (r : Nat) : GV × String :=
   let body := recBody dag r
   let isIntArg : Arg → Bool := fun
@@ -1234,16 +1515,22 @@ def groupVerdict (dag : Dag) (free : Array Nat) (nat natOpt : Array Bool) (p : P
     | .int _ => true
     | _ => false
   if body.all isIntArg then (.refused, "integer recursion (wrapping semantics)") else
-  let affs := affinesAt dag free nat p rng r
+  let affs := affinesAt dag free nat tinv p rng r
   let formOf : Arg → Except String Aff := fun
-    | .ref j => if free.getD j 1000 == 0 then .ok [] else affs.getD j (.error "?")
-    | _ => .ok []
+    | .ref j => if free.getD j 1000 == 0 then .ok Aff.none else affs.getD j (.error "?")
+    | _ => .ok Aff.none
   match body.mapM formOf with
   | .error e => (.refused, e)
   | .ok forms =>
     match stateOf forms with
     | .error e => (.refused, e)
     | .ok states =>
+      -- With one state, `|a| < 1` for every `a` of the box makes the recursion
+      -- a contraction even when `a` changes at every sample; with two, a box
+      -- of stable matrices can hold an unstable product (P2: a common
+      -- Lyapunov function is needed).
+      if states.length > 1 && forms.any (·.tv) then
+        (.refused, "time-varying coefficient on a state of 2 samples") else
       match states.map (rowOf forms states) with
       | [] => (.stable, "no feedback")
       | [[a]] => if jury1 a then (.stable, "") else (.unproven, "Jury fails on the box")
@@ -1258,28 +1545,193 @@ def recNodes (dag : Dag) : List Nat :=
   (List.range dag.size).filter fun i =>
     match (dag.getD i default).tag with | .recur => true | _ => false
 
-/-- For each recursion group, its verdict at each rate of `checkRates`. -/
-def srVerdictsFull (dag : Dag) (p : Prec) : List (Nat × List (GV × String)) :=
+/-- Nodes whose value does not vary in time under the claim: they depend
+    only on constants, the sample rate and the controls (held at their
+    default values). A signal (an input, a delay, a recursion, a table, a
+    generator, a foreign function other than those of `<math.h>`) is not. -/
+def pureOther (s : String) : Bool :=
+  ["SIGASIN", "SIGACOS", "SIGATAN", "SIGATAN2", "SIGFCONST", "FFUN", "SIGFFUN<math.h>"].contains s ||
+    s.startsWith "SIGBINOP:"
+
+def pures (dag : Dag) : Array Bool :=
+  dagPass dag fun acc i nd =>
+    let pa : Arg → Bool := fun
+      | .ref j => lookback acc i j false
+      | _ => true
+    let args := nd.args.all pa
+    match nd.tag with
+    | .input | .delay1 | .delay | .proj | .recur | .ref | .rdtbl | .wrtbl => false
+    | .other s => args && pureOther s
+    | _ => args
+
+/-! ### Finite values and table indices in floating point -/
+
+inductive FV where
+  | finite    -- every time-invariant value is finite and in its domain
+  | domain    -- some operation may leave its domain or overflow
+  | unknown   -- some time-invariant value cannot be bounded (unmodelled)
+deriving Repr, DecidableEq
+
+/-- The largest finite value of the precision: `(2²⁴-1)·2¹⁰⁴` and
+    `(2⁵³-1)·2⁹⁷¹`. -/
+def Prec.maxFinite : Prec → Option Q
+  | .exact  => none
+  | .single => some (Q.ofInt ((2 ^ 24 - 1) * 2 ^ 104))
+  | .double => some (Q.ofInt ((2 ^ 53 - 1) * 2 ^ 971))
+
+private def showQd (q : Q) : String :=
+  toString (Float.ofInt q.n / Float.ofInt q.d)
+
+private def showIv (x : Iv) : String := s!"[{showQd x.lo}, {showQd x.hi}]"
+
+/-- Every time-invariant value (a constant, a coefficient computed from the
+    sample rate and the controls) is finite, at one rate and in one
+    precision: each operation stays in its domain over the ranges of its
+    arguments (no division by an interval containing 0, no `sqrt` or `log`
+    of a value that may be negative, no `tan` near a pole) and no result
+    overflows. A `domain` verdict names the first operation that may fail;
+    `unknown` the first value the analysis cannot bound. This is the
+    time-invariant part of `check-precision`'s non-finite criterion, for
+    every value of the ranges instead of one render. -/
+def finiteVerdict (dag : Dag) (tinv : Array Bool) (p : Prec) (rng : Array (Option Iv)) :
+    FV × String :=
+  let argv : Arg → Option Iv := fun
+    | .ref j => rng.getD j none
+    | .int k => some (Iv.ofInt k)
+    | .const q => some (Iv.pt q)
+    | _ => none
+  let known : Node → Bool := fun nd => nd.args.all fun a =>
+    match a with
+    | .ref j => (rng.getD j none).isSome
+    | _ => true
+  let check : Nat → Node → Option (FV × String) := fun i nd =>
+    let tag := nd.tag.name
+    let dom : Option String :=
+      match nd.tag, nd.args with
+      | .binop .div, [_, b] | .binop .rem, [_, b] | .fmod, [_, b] =>
+          (argv b).bind fun y => if y.hasZero then some s!"divisor {showIv y}" else none
+      | .sqrt, [a] => (argv a).bind fun x =>
+          if Q.lt x.lo Q.zero then some s!"argument {showIv x}" else none
+      | .log, [a] | .log10, [a] => (argv a).bind fun x =>
+          if Q.le x.lo Q.zero then some s!"argument {showIv x}" else none
+      | .tan, [a] => (argv a).bind fun x =>
+          if x.within (Q.ofInt 4) && (tanI x).isNone then some s!"near a pole, {showIv x}" else none
+      | _, _ => none
+    match dom with
+    | some why => some (.domain, s!"n{i} {tag}: {why}")
+    | none =>
+      match rng.getD i none, p.maxFinite with
+      | some x, some m =>
+          if Q.lt m x.mag then some (.domain, s!"n{i} {tag}: overflow {showIv x}") else none
+      | none, _ =>
+          if known nd then some (.unknown, s!"n{i} {tag}: value not bounded") else none
+      | _, _ => none
+  -- argument lists and foreign-function signatures are not values
+  let isValue : Node → Bool := fun nd =>
+    match nd.tag with
+    | .cons => false
+    | .other "FFUN" => false
+    | _ => true
+  let found := (List.range dag.size).filterMap fun i =>
+    let nd := dag.getD i default
+    if tinv.getD i false && isValue nd then check i nd else none
+  match found.find? (·.1 == .domain), found.head? with
+  | some d, _ => d
+  | none, some u => u
+  | none, none => (.finite, "")
+
+/-- Table reads and delay taps, with whether their index is in range at one
+    rate and in one precision, for every value of the controls in their
+    declared range (`rng` from `ranges … true`): a table index in
+    `[0, size - 1]`, a delay amount non-negative. A safety property: unlike
+    the stability and finite verdicts, which take the controls at their
+    default values as `check-precision` does, it must hold for any setting. -/
+def siteVerdicts (dag : Dag) (rng : Array (Option Iv)) : List (Nat × Bool) :=
+  (List.range dag.size).filterMap fun i =>
+    let nd := dag.getD i default
+    let val : Arg → Option Iv := fun
+      | .ref j => rng.getD j none
+      | .int k => some (Iv.ofInt k)
+      | _ => none
+    match nd.tag, nd.args with
+    | .rdtbl, [.ref w, idx] =>
+        match (dag.getD w default).tag, (dag.getD w default).args with
+        | .wrtbl, .int size :: _ =>
+            some (i, match val idx with
+              | some x => Q.le Q.zero x.lo && Q.le x.hi (Q.ofInt (size - 1))
+              | none => false)
+        | _, _ => none
+    | .delay, [_, n] =>
+        some (i, match val n with
+          | some x => Q.le Q.zero x.lo
+          | none => false)
+    | _, _ => none
+
+/-- Everything the rate analysis says of one program in one precision, at
+    each rate of `checkRates`. -/
+structure Verdicts where
+  groups : List (Nat × List GV)      -- per recursion group
+  finite : List FV                   -- per rate
+  sites  : List (Nat × List Bool)    -- per table read and delay tap
+deriving Repr, DecidableEq
+
+/-- Per rate: the group verdicts, the finite verdict, the site verdicts. -/
+def analysis (dag : Dag) (p : Prec) :
+    List (List (GV × String) × (FV × String) × List (Nat × Bool)) :=
   let free := freeLevels dag
   let nat := natures dag false
   let natOpt := natures dag true
-  let perRate := checkRates.map fun sr =>
-    let rng := ranges dag nat natOpt p sr
-    (recNodes dag).map fun r => groupVerdict dag free nat natOpt p rng r
-  (recNodes dag).zipIdx.map fun (r, g) => (r, perRate.map fun vs => vs.getD g (.refused, "?"))
+  let tinv := pures dag
+  checkRates.map fun sr =>
+    let rng := ranges dag free nat natOpt p sr false
+    let rngFull := ranges dag free nat natOpt p sr true
+    ((recNodes dag).map fun r => groupVerdict dag free nat natOpt tinv p rng r,
+     finiteVerdict dag tinv p rng,
+     siteVerdicts dag rngFull)
 
-def srVerdicts (dag : Dag) (p : Prec) : List (Nat × List GV) :=
-  (srVerdictsFull dag p).map fun (r, vs) => (r, vs.map (·.1))
+def transpose {α} (rows : List (List α)) (n : Nat) (d : α) : List (List α) :=
+  (List.range n).map fun k => rows.map fun row => row.getD k d
+
+def verdictsOf (dag : Dag)
+    (a : List (List (GV × String) × (FV × String) × List (Nat × Bool))) : Verdicts :=
+  let recs := recNodes dag
+  let sites := ((a.head?.map (·.2.2)).getD []).map (·.1)
+  { groups := recs.zip (transpose (a.map fun (g, _, _) => g.map (·.1)) recs.length .refused)
+    finite := a.map fun (_, f, _) => f.1
+    sites  := sites.zip (transpose (a.map fun (_, _, s) => s.map (·.2)) sites.length false) }
+
+def verdicts (dag : Dag) (p : Prec) : Verdicts := verdictsOf dag (analysis dag p)
+
+/-- Group verdicts only (the step-2 statement, kept for the report). -/
+def srVerdicts (dag : Dag) (p : Prec) : List (Nat × List GV) := (verdicts dag p).groups
 
 def GV.letter : GV → String
   | .stable => "S" | .unproven => "U" | .refused => "R"
 
-/-- `n26:SSSSSS;n49:RRRRRR(reason)`, the probe format read by `sig2lean.py`. -/
-def srProbe (dag : Dag) (p : Prec) : String :=
-  String.intercalate ";" ((srVerdictsFull dag p).map fun (r, vs) =>
-    let letters := String.join (vs.map (·.1.letter))
+def FV.letter : FV → String
+  | .finite => "F" | .domain => "D" | .unknown => "?"
+
+/-- The probe read by `sig2lean.py` and `certify_tests.py`:
+    `n26:SSSSSS;n49:RRRRRR(reason)|FFFFFF(reason)|n30:IIIIII;n41:NNNNNN`. -/
+def probe (dag : Dag) (p : Prec) : String :=
+  let a := analysis dag p
+  let recs := recNodes dag
+  let groups := recs.zipIdx.map fun (r, g) =>
+    let vs := a.map fun (gs, _, _) => gs.getD g (.refused, "?")
     let why := (vs.map (·.2)).filter (· != "") |>.eraseDups
-    s!"n{r}:{letters}" ++ (if why.isEmpty then "" else s!"({String.intercalate ", " why})"))
+    s!"n{r}:{String.join (vs.map (·.1.letter))}" ++
+      (if why.isEmpty then "" else s!"({String.intercalate ", " why})")
+  let fin := a.map fun (_, f, _) => f
+  let whyF := (fin.map (·.2)).filter (· != "") |>.eraseDups
+  let finS := String.join (fin.map (·.1.letter)) ++
+    (if whyF.isEmpty then "" else s!"({String.intercalate "; " whyF})")
+  let sites := ((a.head?.map (·.2.2)).getD []).zipIdx.map fun ((i, _), k) =>
+    s!"n{i}:" ++ String.join (a.map fun (_, _, ss) =>
+      if (ss.getD k (0, false)).2 then "I" else "N")
+  String.intercalate ";" groups ++ "|" ++ finS ++ "|" ++ String.intercalate ";" sites
+
+/-- The group part of the probe, as before. -/
+def srProbe (dag : Dag) (p : Prec) : String := ((probe dag p).splitOn "|").headD ""
 
 /-! ### Reading a DAG from text
 
@@ -1325,6 +1777,10 @@ def parseTag (s : String) : Option Tag :=
   | "binop:add" => some (.binop .add) | "binop:sub" => some (.binop .sub)
   | "binop:mul" => some (.binop .mul) | "binop:div" => some (.binop .div)
   | "binop:rem" => some (.binop .rem)
+  | "round" => some .round | "log" => some .log | "log10" => some .log10
+  | "fmod" => some .fmod | "rdtbl" => some .rdtbl | "wrtbl" => some .wrtbl
+  | "bit:and" => some (.bit .and) | "bit:or" => some (.bit .or) | "bit:xor" => some (.bit .xor)
+  | "bit:lsh" => some (.bit .lsh) | "bit:rsh" => some (.bit .rsh) | "bit:arsh" => some (.bit .arsh)
   | _ =>
       if s.startsWith "cmp:" then (parseCmp (s.drop 4).toString).map .cmp
       else if s.startsWith "other:" then some (.other (s.drop 6).toString)
@@ -1393,18 +1849,24 @@ assumptions:
    result within `libmUlps` ulps. This is a property of each platform's libm,
    stated, not proved.
 
-5. **The enclosures.** The Taylor remainders of `sinI`, `cosI` and `expSmall`,
-   the continuity argument of `tanI`, the monotonicity of `sqrt` and of the
-   rounding widening, and the vertex lemma of `jury2` (a multilinear function
-   reaches its minimum over a box at a vertex) are stated with their argument
-   next to the code, and reviewed as mathematics. They are the next targets of
-   the optional mathlib layer, which already proves the Jury criterion.
+5. **The enclosures.** The Taylor remainders of `sinI`, `cosI`, `expSmall`
+   and `logNear1`, the continuity argument of `tanI`, the monotonicity of
+   `sqrt`, `log`, truncation and of the rounding widening, the vertex lemma of
+   `jury2` (a multilinear function reaches its minimum over a box at a
+   vertex), the contraction argument for one time-varying state, the
+   floating-point facts of `fracRange` and `isPow2`, and the rounding of
+   `Q.toFloat32` are stated with their argument next to the code, and
+   reviewed as mathematics. They are the next targets of the optional mathlib
+   layer, which already proves the Jury criterion.
 
 6. **What is claimed.** The coefficients (the state-free subexpressions) are
    taken as the program computes them; the loop arithmetic that involves the
    state is taken exactly. Its rounding perturbs the state at each sample: an
-   accuracy question, bounded by no theorem here. The controls are at their
-   default values, as in `make check-precision`. -/
+   accuracy question, bounded by no theorem here. For stability and finite
+   values, the controls are at their default values, as in `make
+   check-precision`; for indices, anywhere in their declared range. A foreign
+   function of `<math.h>` is taken to be pure (no state), which the header
+   says, not the dump. -/
 
 end Faust.Signal
 
@@ -1415,6 +1877,197 @@ Everything below is produced by `scripts/sig2lean.py` from
 
 namespace Faust.Signal.Generated
 open Faust.Signal
+
+/-- `// ve.bandpass2Matched at the defaults of bandpass2Matched_test, which
+// check-precision reports non-finite in single at 176.4 kHz: a per-block
+// sqrt of a cancelling expression gets a negative argument in single
+// precision. Pins: the finite verdict names that sqrt where it may fail.
+ve = library("vaeffects.lib");
+process = ve.bandpass2Matched(1200, 2.0);` — output 0 -/
+def bandpass2matched_float_out0 : Sig :=
+  let n0 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
+  let n1 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), n0]
+  let n2 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n1]
+  let n3 : Sig := Sig.binop .div (.const ⟨1, 1⟩) n2
+  let n4 : Sig := Sig.binop .mul (.const ⟨1036265295707291, 137438953472⟩) n3
+  let n5 : Sig := Sig.binop .mul (.const ⟨(-1), 4⟩) n4
+  let n6 : Sig := Sig.opaqueN "SIGEXP" [n5]
+  let n7 : Sig := Sig.binop .mul (.const ⟨(-2), 1⟩) n6
+  let n8 : Sig := Sig.cons (.opaque "coshl") (.nil)
+  let n9 : Sig := Sig.cons (.opaque "coshl") n8
+  let n10 : Sig := Sig.cons (.opaque "cosh") n9
+  let n11 : Sig := Sig.cons (.opaque "coshf") n10
+  let n12 : Sig := Sig.cons (.int 1) (.nil)
+  let n13 : Sig := Sig.cons n11 n12
+  let n14 : Sig := Sig.cons (.int 1) n13
+  let n15 : Sig := Sig.opaqueN "FFUN" [n14, (.opaque "<math.h>"), (.opaque "\\\"\\\"")]
+  let n16 : Sig := Sig.binop .mul (.const ⟨0, 1⟩) n4
+  let n17 : Sig := Sig.cons n16 (.nil)
+  let n18 : Sig := Sig.opaqueN "SIGFFUN" [n15, n17]
+  let n19 : Sig := Sig.binop .mul n7 n18
+  let n20 : Sig := Sig.binop .mul (.const ⟨4360591588697965, 4503599627370496⟩) n4
+  let n21 : Sig := Sig.opaqueN "SIGCOS" [n20]
+  let n22 : Sig := Sig.binop .mul n7 n21
+  let n23 : Sig := Sig.opaqueN "SIGSELECT2" [(.const ⟨1, 1⟩), n19, n22]
+  let n24 : Sig := Sig.binop .add (.const ⟨1, 1⟩) n23
+  let n25 : Sig := Sig.binop .mul (.const ⟨(-1), 2⟩) n4
+  let n26 : Sig := Sig.opaqueN "SIGEXP" [n25]
+  let n27 : Sig := Sig.binop .add n24 n26
+  let n28 : Sig := Sig.opaqueN "SIGPOW" [n27, (.const ⟨2, 1⟩)]
+  let n29 : Sig := Sig.binop .mul (.const ⟨1, 2⟩) n4
+  let n30 : Sig := Sig.opaqueN "SIGSIN" [n29]
+  let n31 : Sig := Sig.opaqueN "SIGPOW" [n30, (.const ⟨2, 1⟩)]
+  let n32 : Sig := Sig.binop .sub (.const ⟨1, 1⟩) n31
+  let n33 : Sig := Sig.binop .mul n28 n32
+  let n34 : Sig := Sig.binop .sub (.const ⟨1, 1⟩) n23
+  let n35 : Sig := Sig.binop .add n34 n26
+  let n36 : Sig := Sig.opaqueN "SIGPOW" [n35, (.const ⟨2, 1⟩)]
+  let n37 : Sig := Sig.binop .mul n36 n31
+  let n38 : Sig := Sig.binop .add n33 n37
+  let n39 : Sig := Sig.binop .mul (.const ⟨(-4), 1⟩) n26
+  let n40 : Sig := Sig.binop .mul (.const ⟨4, 1⟩) n32
+  let n41 : Sig := Sig.binop .mul n40 n31
+  let n42 : Sig := Sig.binop .mul n39 n41
+  let n43 : Sig := Sig.binop .add n38 n42
+  let n44 : Sig := Sig.binop .mul (.const ⟨(-1), 1⟩) n28
+  let n45 : Sig := Sig.binop .add n44 n36
+  let n46 : Sig := Sig.binop .sub n32 n31
+  let n47 : Sig := Sig.binop .mul (.const ⟨4, 1⟩) n46
+  let n48 : Sig := Sig.binop .mul n47 n39
+  let n49 : Sig := Sig.binop .add n45 n48
+  let n50 : Sig := Sig.binop .mul n49 n31
+  let n51 : Sig := Sig.binop .sub n43 n50
+  let n52 : Sig := Sig.binop .mul (.const ⟨4, 1⟩) n31
+  let n53 : Sig := Sig.binop .mul n52 n31
+  let n54 : Sig := Sig.binop .div n51 n53
+  let n55 : Sig := Sig.binop .sub n31 n32
+  let n56 : Sig := Sig.binop .mul (.const ⟨4, 1⟩) n55
+  let n57 : Sig := Sig.binop .mul n56 n54
+  let n58 : Sig := Sig.binop .add n49 n57
+  let n59 : Sig := Sig.opaqueN "SIGSQRT" [n58]
+  let n60 : Sig := Sig.binop .mul (.const ⟨(-1), 2⟩) n59
+  let n61 : Sig := Sig.binop .mul n60 n60
+  let n62 : Sig := Sig.binop .add n54 n61
+  let n63 : Sig := Sig.opaqueN "SIGSQRT" [n62]
+  let n64 : Sig := Sig.binop .sub n63 n60
+  let n65 : Sig := Sig.binop .mul (.const ⟨1, 2⟩) n64
+  let n66 : Sig := Sig.input 0
+  let n67 : Sig := Sig.binop .mul n65 n66
+  let n68 : Sig := Sig.delay1 n66
+  let n69 : Sig := Sig.binop .mul n60 n68
+  let n70 : Sig := Sig.binop .add n67 n69
+  let n71 : Sig := Sig.binop .add n65 n60
+  let n72 : Sig := Sig.binop .mul (.const ⟨(-1), 1⟩) n71
+  let n73 : Sig := Sig.delay1 n68
+  let n74 : Sig := Sig.binop .mul n72 n73
+  let n75 : Sig := Sig.binop .add n70 n74
+  let n76 : Sig := Sig.ref 1
+  let n77 : Sig := Sig.proj 0 n76
+  let n78 : Sig := Sig.delay1 n77
+  let n79 : Sig := Sig.binop .mul n23 n78
+  let n80 : Sig := Sig.binop .sub n75 n79
+  let n81 : Sig := Sig.delay1 n78
+  let n82 : Sig := Sig.binop .mul n26 n81
+  let n83 : Sig := Sig.binop .sub n80 n82
+  let n84 : Sig := Sig.cons n83 (.nil)
+  let n85 : Sig := Sig.recur n84
+  let n86 : Sig := Sig.proj 0 n85
+  n86
+
+/-- `// ve.bandpass2Matched at the defaults of bandpass2Matched_test, which
+// check-precision reports non-finite in single at 176.4 kHz: a per-block
+// sqrt of a cancelling expression gets a negative argument in single
+// precision. Pins: the finite verdict names that sqrt where it may fail.
+ve = library("vaeffects.lib");
+process = ve.bandpass2Matched(1200, 2.0);` — the whole graph, for the rate analysis -/
+def bandpass2matched_float_dag : Dag := #[
+  ⟨.sr, [.int 0, .other, .other], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.const ⟨1, 1⟩, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.const ⟨192000, 1⟩, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.const ⟨1, 1⟩, .ref 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨1036265295707291, 137438953472⟩, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-1), 4⟩, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.exp, [.ref 5], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-2), 1⟩, .ref 6], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.other, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.other, .ref 8], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.other, .ref 9], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.other, .ref 10], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.int 1, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 11, .ref 12], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.int 1, .ref 13], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.other "FFUN", [.ref 14, .other, .other], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨0, 1⟩, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 16, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.other "SIGFFUN<math.h>", [.ref 15, .ref 17], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 7, .ref 18], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨4360591588697965, 4503599627370496⟩, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cos, [.ref 20], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 7, .ref 21], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.select2, [.const ⟨1, 1⟩, .ref 19, .ref 22], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.const ⟨1, 1⟩, .ref 23], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-1), 2⟩, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.exp, [.ref 25], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 24, .ref 26], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.pow, [.ref 27, .const ⟨2, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨1, 2⟩, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.sin, [.ref 29], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.pow, [.ref 30, .const ⟨2, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.const ⟨1, 1⟩, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 28, .ref 32], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.const ⟨1, 1⟩, .ref 23], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 34, .ref 26], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.pow, [.ref 35, .const ⟨2, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 36, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 33, .ref 37], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-4), 1⟩, .ref 26], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨4, 1⟩, .ref 32], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 40, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 39, .ref 41], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 38, .ref 42], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-1), 1⟩, .ref 28], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 44, .ref 36], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 32, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨4, 1⟩, .ref 46], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 47, .ref 39], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 45, .ref 48], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 49, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 43, .ref 50], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨4, 1⟩, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 52, .ref 31], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 51, .ref 53], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 31, .ref 32], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨4, 1⟩, .ref 55], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 56, .ref 54], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 49, .ref 57], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.sqrt, [.ref 58], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-1), 2⟩, .ref 59], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 60, .ref 60], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 54, .ref 61], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.sqrt, [.ref 62], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 63, .ref 60], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨1, 2⟩, .ref 64], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 65, .ref 66], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 66], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 60, .ref 68], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 67, .ref 69], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 65, .ref 60], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨(-1), 1⟩, .ref 71], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 68], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 72, .ref 73], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 70, .ref 74], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 76], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 77], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 23, .ref 78], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 75, .ref 79], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 78], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 26, .ref 81], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 80, .ref 82], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 83, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 84], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 85], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `// fi.bandpass built on fi.tf2sb, trapezoidal state-variable sections since
 // #261. Pins the verdict of each section at the six rates.
@@ -1567,6 +2220,37 @@ def dcblocker_dag : Dag := #[
   ⟨.cons, [.ref 8, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.recur, [.ref 9], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.proj, [.int 0, .ref 10], (Q.zero, Q.zero, Q.zero)⟩]
+
+/-- `// A delay set in seconds, de.delay(ma.SR, 0.25*ma.SR): the tap is computed
+// from the sample rate in each precision. Pins: non-negative at every rate.
+de = library("delays.lib");
+ma = library("maths.lib");
+process = de.delay(ma.SR, 0.25*ma.SR);` — output 0 -/
+def delay_sr_out0 : Sig :=
+  let n0 : Sig := Sig.input 0
+  let n1 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
+  let n2 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), n1]
+  let n3 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n2]
+  let n4 : Sig := Sig.binop .mul (.const ⟨1, 4⟩) n3
+  let n5 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n4]
+  let n6 : Sig := Sig.opaqueN "SIGMIN" [n3, n5]
+  let n7 : Sig := Sig.delay n0 n6
+  n7
+
+/-- `// A delay set in seconds, de.delay(ma.SR, 0.25*ma.SR): the tap is computed
+// from the sample rate in each precision. Pins: non-negative at every rate.
+de = library("delays.lib");
+ma = library("maths.lib");
+process = de.delay(ma.SR, 0.25*ma.SR);` — the whole graph, for the rate analysis -/
+def delay_sr_dag : Dag := #[
+  ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.sr, [.int 0, .other, .other], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.const ⟨1, 1⟩, .ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.const ⟨192000, 1⟩, .ref 2], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.const ⟨1, 4⟩, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.int 0, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.ref 3, .ref 5], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay, [.ref 0, .ref 6], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `de = library("delays.lib");
 process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — output 0 -/
@@ -1898,7 +2582,7 @@ def nonlinear_dag : Dag := #[
   ⟨.delay1, [.ref 9], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .mul, [.ref 10, .const ⟨8106479329266893, 9007199254740992⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.cons, [.ref 11, .nil], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGFFUN", [.ref 7, .ref 12], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.other "SIGFFUN<math.h>", [.ref 7, .ref 12], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.input, [.int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .add, [.ref 13, .ref 14], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.cons, [.ref 15, .nil], (Q.zero, Q.zero, Q.zero)⟩,
@@ -1985,9 +2669,9 @@ def osc_dag : Dag := #[
   ⟨.binop .div, [.ref 10, .const ⟨65536, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.sin, [.ref 11], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.other "SIGGEN", [.ref 12], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGWRTBL", [.int 65536, .ref 13, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.wrtbl, [.int 65536, .ref 13, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .sub, [.int 1, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGBINOP:or", [.ref 15, .int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.bit .or, [.ref 15, .int 0], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.sr, [.int 0, .other, .other], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.max, [.const ⟨1, 1⟩, .ref 17], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.min, [.const ⟨192000, 1⟩, .ref 18], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2001,7 +2685,88 @@ def osc_dag : Dag := #[
   ⟨.proj, [.int 0, .ref 26], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .mul, [.ref 27, .const ⟨65536, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.intcast, [.ref 28], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGRDTBL", [.ref 14, .ref 29], (Q.zero, Q.zero, Q.zero)⟩]
+  ⟨.rdtbl, [.ref 14, .ref 29], (Q.zero, Q.zero, Q.zero)⟩]
+
+/-- `// os.osc at a negative frequency: the phase x - floor(x) of a slightly
+// negative x rounds to 1.0 in floating point (frac(-1e-9) = 1.0 in single),
+// which puts the 65536-entry table index one past the end. Pins: the table
+// read is proven in range for os.osc(440) (osc.dsp) in double and single,
+// not here.
+os = library("oscillators.lib");
+process = os.osc(-440);` — output 0 -/
+def osc_negative_freq_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.delay1 (.int 1)
+  let n4 : Sig := Sig.binop .add n2 n3
+  let n5 : Sig := Sig.binop .rem n4 (.int 65536)
+  let n6 : Sig := Sig.cons n5 (.nil)
+  let n7 : Sig := Sig.recur n6
+  let n8 : Sig := Sig.proj 0 n7
+  let n9 : Sig := Sig.opaqueN "SIGFLOATCAST" [n8]
+  let n10 : Sig := Sig.binop .mul n9 (.const ⟨884279719003555, 140737488355328⟩)
+  let n11 : Sig := Sig.binop .div n10 (.const ⟨65536, 1⟩)
+  let n12 : Sig := Sig.opaqueN "SIGSIN" [n11]
+  let n13 : Sig := Sig.opaqueN "SIGGEN" [n12]
+  let n14 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 65536), n13, (.nil), (.nil)]
+  let n15 : Sig := Sig.binop .sub (.int 1) n3
+  let n16 : Sig := Sig.opaqueN "SIGBINOP:or" [n15, (.int 0)]
+  let n17 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
+  let n18 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), n17]
+  let n19 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n18]
+  let n20 : Sig := Sig.binop .div (.int (-440)) n19
+  let n21 : Sig := Sig.binop .add n2 n20
+  let n22 : Sig := Sig.opaqueN "SIGSELECT2" [n16, n21, (.int 0)]
+  let n23 : Sig := Sig.opaqueN "SIGFLOOR" [n22]
+  let n24 : Sig := Sig.binop .sub n22 n23
+  let n25 : Sig := Sig.cons n24 (.nil)
+  let n26 : Sig := Sig.recur n25
+  let n27 : Sig := Sig.proj 0 n26
+  let n28 : Sig := Sig.binop .mul n27 (.const ⟨65536, 1⟩)
+  let n29 : Sig := Sig.opaqueN "SIGINTCAST" [n28]
+  let n30 : Sig := Sig.opaqueN "SIGRDTBL" [n14, n29]
+  n30
+
+/-- `// os.osc at a negative frequency: the phase x - floor(x) of a slightly
+// negative x rounds to 1.0 in floating point (frac(-1e-9) = 1.0 in single),
+// which puts the 65536-entry table index one past the end. Pins: the table
+// read is proven in range for os.osc(440) (osc.dsp) in double and single,
+// not here.
+os = library("oscillators.lib");
+process = os.osc(-440);` — the whole graph, for the rate analysis -/
+def osc_negative_freq_dag : Dag := #[
+  ⟨.ref, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.ref 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.delay1, [.int 1], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 2, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .rem, [.ref 4, .int 65536], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 5, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 6], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 7], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.floatcast, [.ref 8], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 9, .const ⟨884279719003555, 140737488355328⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.ref 10, .const ⟨65536, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.sin, [.ref 11], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.other "SIGGEN", [.ref 12], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.wrtbl, [.int 65536, .ref 13, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.int 1, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.bit .or, [.ref 15, .int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.sr, [.int 0, .other, .other], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.max, [.const ⟨1, 1⟩, .ref 17], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.min, [.const ⟨192000, 1⟩, .ref 18], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .div, [.int (-440), .ref 19], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .add, [.ref 2, .ref 20], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.select2, [.ref 16, .ref 21, .int 0], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.floor, [.ref 22], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .sub, [.ref 22, .ref 23], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.cons, [.ref 24, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.recur, [.ref 25], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.proj, [.int 0, .ref 26], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.binop .mul, [.ref 27, .const ⟨65536, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.intcast, [.ref 28], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.rdtbl, [.ref 14, .ref 29], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `// fi.resonlp, a direct-form fi.tf2s section used by filter banks and
 // vocoders. Pins the verdict at the six rates.
@@ -2184,12 +2949,12 @@ def table_bad_clamp_out0 : Sig :=
 /-- `process = rdtable(16, 1.0, min(100, max(0, int(hslider("i",0,0,100,1)))));` — the whole graph, for the rate analysis -/
 def table_bad_clamp_dag : Dag := #[
   ⟨.other "SIGGEN", [.const ⟨1, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGWRTBL", [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.wrtbl, [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨100, 1⟩)⟩,
   ⟨.intcast, [.ref 2], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.max, [.int 0, .ref 3], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.min, [.int 100, .ref 4], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGRDTBL", [.ref 1, .ref 5], (Q.zero, Q.zero, Q.zero)⟩]
+  ⟨.rdtbl, [.ref 1, .ref 5], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,10,1)));` — output 0 -/
 def table_good_clamp_out0 : Sig :=
@@ -2203,10 +2968,10 @@ def table_good_clamp_out0 : Sig :=
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,10,1)));` — the whole graph, for the rate analysis -/
 def table_good_clamp_dag : Dag := #[
   ⟨.other "SIGGEN", [.const ⟨1, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGWRTBL", [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.wrtbl, [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨10, 1⟩)⟩,
   ⟨.intcast, [.ref 2], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGRDTBL", [.ref 1, .ref 3], (Q.zero, Q.zero, Q.zero)⟩]
+  ⟨.rdtbl, [.ref 1, .ref 3], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,100,1)));` — output 0 -/
 def table_unclamped_out0 : Sig :=
@@ -2220,10 +2985,10 @@ def table_unclamped_out0 : Sig :=
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,100,1)));` — the whole graph, for the rate analysis -/
 def table_unclamped_dag : Dag := #[
   ⟨.other "SIGGEN", [.const ⟨1, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGWRTBL", [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.wrtbl, [.int 16, .ref 0, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨100, 1⟩)⟩,
   ⟨.intcast, [.ref 2], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGRDTBL", [.ref 1, .ref 3], (Q.zero, Q.zero, Q.zero)⟩]
+  ⟨.rdtbl, [.ref 1, .ref 3], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `// ba.tabulate with C = 1: the library clamps the read index itself
 // (rid(x,1) = max(0, min(x, S-1))), and the interval analysis reads that
@@ -2287,7 +3052,7 @@ def tabulate_protected_dag : Dag := #[
   ⟨.binop .add, [.const ⟨0, 1⟩, .ref 12], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.sin, [.ref 13], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.other "SIGGEN", [.ref 14], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGWRTBL", [.int 128, .ref 15, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.wrtbl, [.int 128, .ref 15, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨10, 1⟩)⟩,
   ⟨.binop .sub, [.ref 17, .const ⟨0, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .div, [.ref 18, .const ⟨10, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
@@ -2296,7 +3061,7 @@ def tabulate_protected_dag : Dag := #[
   ⟨.intcast, [.ref 21], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.min, [.ref 22, .int 127], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.max, [.int 0, .ref 23], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGRDTBL", [.ref 16, .ref 24], (Q.zero, Q.zero, Q.zero)⟩]
+  ⟨.rdtbl, [.ref 16, .ref 24], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `// ba.tabulate with C = 0 and an input range wider than [r0, r1]: the
 // library applies no protection and the index can leave the table. The
@@ -2360,14 +3125,14 @@ def tabulate_unprotected_dag : Dag := #[
   ⟨.binop .add, [.const ⟨0, 1⟩, .ref 12], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.sin, [.ref 13], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.other "SIGGEN", [.ref 14], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGWRTBL", [.int 128, .ref 15, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
+  ⟨.wrtbl, [.int 128, .ref 15, .nil, .nil], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.control, [.int 0], (⟨0, 1⟩, ⟨0, 1⟩, ⟨20, 1⟩)⟩,
   ⟨.binop .sub, [.ref 17, .const ⟨0, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .div, [.ref 18, .const ⟨10, 1⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .mul, [.ref 19, .int 127], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.binop .add, [.ref 20, .const ⟨1, 2⟩], (Q.zero, Q.zero, Q.zero)⟩,
   ⟨.intcast, [.ref 21], (Q.zero, Q.zero, Q.zero)⟩,
-  ⟨.other "SIGRDTBL", [.ref 16, .ref 22], (Q.zero, Q.zero, Q.zero)⟩]
+  ⟨.rdtbl, [.ref 16, .ref 22], (Q.zero, Q.zero, Q.zero)⟩]
 
 /-- `import("filters.lib");
 process = fi.tf2(0.3, 0.2, 0.1, -1.2, 0.5);` — output 0 -/
@@ -2986,8 +3751,10 @@ Jury criterion. `certifyIndicesB` checks every table read and
 delay tap whose range follows from the graph structure alone;
 `false` there means *not proven*, never *unsafe*. -/
 
+#eval s!"bandpass2matched_float_out0: " ++ certifyReport bandpass2matched_float_out0
 #eval s!"bandpass_tpt_out0: " ++ certifyReport bandpass_tpt_out0
 #eval s!"dcblocker_out0: " ++ certifyReport dcblocker_out0
+#eval s!"delay_sr_out0: " ++ certifyReport delay_sr_out0
 #eval s!"fdelay_clamped_out0: " ++ certifyReport fdelay_clamped_out0
 #eval s!"lowpass3_out0: " ++ certifyReport lowpass3_out0
 #eval s!"lowpass_svf_20hz_out0: " ++ certifyReport lowpass_svf_20hz_out0
@@ -2995,6 +3762,7 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"nonlinear_out0: " ++ certifyReport nonlinear_out0
 #eval s!"onepole_out0: " ++ certifyReport onepole_out0
 #eval s!"osc_out0: " ++ certifyReport osc_out0
+#eval s!"osc_negative_freq_out0: " ++ certifyReport osc_negative_freq_out0
 #eval s!"resonlp_out0: " ++ certifyReport resonlp_out0
 #eval s!"smoo_sr_out0: " ++ certifyReport smoo_sr_out0
 #eval s!"smooth_stable_out0: " ++ certifyReport smooth_stable_out0
@@ -3011,8 +3779,10 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"time_marginal_out0: " ++ certifyReport time_marginal_out0
 #eval s!"unstable_out0: " ++ certifyReport unstable_out0
 
+#eval s!"bandpass2matched_float_out0: " ++ indexReport bandpass2matched_float_out0
 #eval s!"bandpass_tpt_out0: " ++ indexReport bandpass_tpt_out0
 #eval s!"dcblocker_out0: " ++ indexReport dcblocker_out0
+#eval s!"delay_sr_out0: " ++ indexReport delay_sr_out0
 #eval s!"fdelay_clamped_out0: " ++ indexReport fdelay_clamped_out0
 #eval s!"lowpass3_out0: " ++ indexReport lowpass3_out0
 #eval s!"lowpass_svf_20hz_out0: " ++ indexReport lowpass_svf_20hz_out0
@@ -3020,6 +3790,7 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"nonlinear_out0: " ++ indexReport nonlinear_out0
 #eval s!"onepole_out0: " ++ indexReport onepole_out0
 #eval s!"osc_out0: " ++ indexReport osc_out0
+#eval s!"osc_negative_freq_out0: " ++ indexReport osc_negative_freq_out0
 #eval s!"resonlp_out0: " ++ indexReport resonlp_out0
 #eval s!"smoo_sr_out0: " ++ indexReport smoo_sr_out0
 #eval s!"smooth_stable_out0: " ++ indexReport smooth_stable_out0
@@ -3036,8 +3807,10 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"time_marginal_out0: " ++ indexReport time_marginal_out0
 #eval s!"unstable_out0: " ++ indexReport unstable_out0
 
+theorem bandpass2matched_float_out0_stability : certifyStableB bandpass2matched_float_out0 = false := by decide
 theorem bandpass_tpt_out0_stability : certifyStableB bandpass_tpt_out0 = false := by decide
 theorem dcblocker_out0_stability : certifyStableB dcblocker_out0 = true := by decide
+theorem delay_sr_out0_stability : certifyStableB delay_sr_out0 = false := by decide
 theorem fdelay_clamped_out0_stability : certifyStableB fdelay_clamped_out0 = false := by decide
 theorem lowpass3_out0_stability : certifyStableB lowpass3_out0 = false := by decide
 theorem lowpass_svf_20hz_out0_stability : certifyStableB lowpass_svf_20hz_out0 = false := by decide
@@ -3045,6 +3818,7 @@ theorem noise_lcg_out0_stability : certifyStableB noise_lcg_out0 = false := by d
 theorem nonlinear_out0_stability : certifyStableB nonlinear_out0 = false := by decide
 theorem onepole_out0_stability : certifyStableB onepole_out0 = true := by decide
 theorem osc_out0_stability : certifyStableB osc_out0 = false := by decide
+theorem osc_negative_freq_out0_stability : certifyStableB osc_negative_freq_out0 = false := by decide
 theorem resonlp_out0_stability : certifyStableB resonlp_out0 = false := by decide
 theorem smoo_sr_out0_stability : certifyStableB smoo_sr_out0 = false := by decide
 theorem smooth_stable_out0_stability : certifyStableB smooth_stable_out0 = true := by decide
@@ -3061,8 +3835,10 @@ theorem tf3slf_low_out0_stability : certifyStableB tf3slf_low_out0 = false := by
 theorem time_marginal_out0_stability : certifyStableB time_marginal_out0 = false := by decide
 theorem unstable_out0_stability : certifyStableB unstable_out0 = false := by decide
 
+theorem bandpass2matched_float_out0_indices : certifyIndicesB bandpass2matched_float_out0 = true := by decide
 theorem bandpass_tpt_out0_indices : certifyIndicesB bandpass_tpt_out0 = true := by decide
 theorem dcblocker_out0_indices : certifyIndicesB dcblocker_out0 = true := by decide
+theorem delay_sr_out0_indices : certifyIndicesB delay_sr_out0 = true := by decide
 theorem fdelay_clamped_out0_indices : certifyIndicesB fdelay_clamped_out0 = true := by decide
 theorem lowpass3_out0_indices : certifyIndicesB lowpass3_out0 = true := by decide
 theorem lowpass_svf_20hz_out0_indices : certifyIndicesB lowpass_svf_20hz_out0 = true := by decide
@@ -3070,6 +3846,7 @@ theorem noise_lcg_out0_indices : certifyIndicesB noise_lcg_out0 = true := by dec
 theorem nonlinear_out0_indices : certifyIndicesB nonlinear_out0 = true := by decide
 theorem onepole_out0_indices : certifyIndicesB onepole_out0 = true := by decide
 theorem osc_out0_indices : certifyIndicesB osc_out0 = true := by decide
+theorem osc_negative_freq_out0_indices : certifyIndicesB osc_negative_freq_out0 = true := by decide
 theorem resonlp_out0_indices : certifyIndicesB resonlp_out0 = true := by decide
 theorem smoo_sr_out0_indices : certifyIndicesB smoo_sr_out0 = true := by decide
 theorem smooth_stable_out0_indices : certifyIndicesB smooth_stable_out0 = true := by decide
@@ -3086,158 +3863,182 @@ theorem tf3slf_low_out0_indices : certifyIndicesB tf3slf_low_out0 = true := by d
 theorem time_marginal_out0_indices : certifyIndicesB time_marginal_out0 = true := by decide
 theorem unstable_out0_indices : certifyIndicesB unstable_out0 = true := by decide
 
-/-! ## Stability at the rates of `check-precision`
+/-! ## The rates of `check-precision`, in exact, double and single
 
-Per program and precision, the verdict of every recursion group
-(`n<k>`, the dump index of its `DEBRUIJNREC`) at 44.1, 48, 88.2, 96,
-176.4 and 192 kHz: `S` stable, `U` linear but not proven stable,
-`R` refused (outside the fragment: the reason follows). -/
+Per program and precision, at 44.1, 48, 88.2, 96, 176.4 and 192 kHz:
 
--- bandpass_tpt exact: n47:SSSSSS
--- bandpass_tpt double: n47:SSSSSS
--- bandpass_tpt single: n47:SSSSSS
--- dcblocker exact: n10:SSSSSS
--- dcblocker double: n10:SSSSSS
--- dcblocker single: n10:SSSSSS
--- fdelay_clamped exact: no recursion
--- fdelay_clamped double: no recursion
--- fdelay_clamped single: no recursion
--- lowpass3 exact: n26:SSSSSS;n49:SSSSSS
--- lowpass3 double: n26:SSSSSS;n49:SSSSSS
--- lowpass3 single: n26:SSSSSS;n49:SSSSSS
--- lowpass_svf_20hz exact: n30:SSSSSS
--- lowpass_svf_20hz double: n30:SSSSSS
--- lowpass_svf_20hz single: n30:SSSSSS
--- noise_lcg exact: n6:RRRRRR(integer recursion (wrapping semantics))
--- noise_lcg double: n6:RRRRRR(integer recursion (wrapping semantics))
--- noise_lcg single: n6:RRRRRR(integer recursion (wrapping semantics))
--- nonlinear exact: n17:RRRRRR(SIGFFUN applied to the state)
--- nonlinear double: n17:RRRRRR(SIGFFUN applied to the state)
--- nonlinear single: n17:RRRRRR(SIGFFUN applied to the state)
--- onepole exact: n8:SSSSSS
--- onepole double: n8:SSSSSS
--- onepole single: n8:SSSSSS
--- osc exact: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGSELECT2 applied to the state)
--- osc double: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGSELECT2 applied to the state)
--- osc single: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGSELECT2 applied to the state)
--- resonlp exact: n26:SSSSSS
--- resonlp double: n26:SSSSSS
--- resonlp single: n26:SSSSSS
--- smoo_sr exact: n14:SSSSSS
--- smoo_sr double: n14:SSSSSS
--- smoo_sr single: n14:SSSSSS
--- smooth_stable exact: n8:SSSSSS
--- smooth_stable double: n8:SSSSSS
--- smooth_stable single: n8:SSSSSS
--- table_bad_clamp exact: no recursion
--- table_bad_clamp double: no recursion
--- table_bad_clamp single: no recursion
--- table_good_clamp exact: no recursion
--- table_good_clamp double: no recursion
--- table_good_clamp single: no recursion
--- table_unclamped exact: no recursion
--- table_unclamped double: no recursion
--- table_unclamped single: no recursion
--- tabulate_protected exact: n5:RRRRRR(integer recursion (wrapping semantics))
--- tabulate_protected double: n5:RRRRRR(integer recursion (wrapping semantics))
--- tabulate_protected single: n5:RRRRRR(integer recursion (wrapping semantics))
--- tabulate_unprotected exact: n5:RRRRRR(integer recursion (wrapping semantics))
--- tabulate_unprotected double: n5:RRRRRR(integer recursion (wrapping semantics))
--- tabulate_unprotected single: n5:RRRRRR(integer recursion (wrapping semantics))
--- tf2_stable exact: n10:SSSSSS
--- tf2_stable double: n10:SSSSSS
--- tf2_stable single: n10:SSSSSS
--- tf2_unstable exact: n10:UUUUUU(Jury fails on the box)
--- tf2_unstable double: n10:UUUUUU(Jury fails on the box)
--- tf2_unstable single: n10:UUUUUU(Jury fails on the box)
--- tf2s_direct_20hz exact: n26:SSSSSS
--- tf2s_direct_20hz double: n26:SSSSSS
--- tf2s_direct_20hz single: n26:SSUUUU(Jury fails on the box)
--- tf2snp_exact exact: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)
--- tf2snp_exact double: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)
--- tf2snp_exact single: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)
--- tf3slf_low exact: n40:RRRRRR(3 states (more than 2))
--- tf3slf_low double: n40:RRRRRR(3 states (more than 2))
--- tf3slf_low single: n40:RRRRRR(3 states (more than 2))
--- time_marginal exact: n5:RRRRRR(integer recursion (wrapping semantics))
--- time_marginal double: n5:RRRRRR(integer recursion (wrapping semantics))
--- time_marginal single: n5:RRRRRR(integer recursion (wrapping semantics))
--- unstable exact: n7:UUUUUU(Jury fails on the box)
--- unstable double: n7:UUUUUU(Jury fails on the box)
--- unstable single: n7:UUUUUU(Jury fails on the box)
+- each recursion group (`n<k>`, the dump index of its `DEBRUIJNREC`):
+  `S` stable, `U` linear but not proven stable, `R` refused (the
+  reason follows);
+- the time-invariant values: `F` finite, `D` an operation may leave
+  its domain or overflow, `?` a value the analysis cannot bound;
+- each table read and delay tap: `I` index in range, `N` not proven.
 
-theorem bandpass_tpt_rates_exact : srVerdicts bandpass_tpt_dag .exact = [(47, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem bandpass_tpt_rates_double : srVerdicts bandpass_tpt_dag .double = [(47, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem bandpass_tpt_rates_single : srVerdicts bandpass_tpt_dag .single = [(47, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem dcblocker_rates_exact : srVerdicts dcblocker_dag .exact = [(10, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem dcblocker_rates_double : srVerdicts dcblocker_dag .double = [(10, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem dcblocker_rates_single : srVerdicts dcblocker_dag .single = [(10, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem fdelay_clamped_rates_exact : srVerdicts fdelay_clamped_dag .exact = [] := by decide +kernel
-theorem fdelay_clamped_rates_double : srVerdicts fdelay_clamped_dag .double = [] := by decide +kernel
-theorem fdelay_clamped_rates_single : srVerdicts fdelay_clamped_dag .single = [] := by decide +kernel
-theorem lowpass3_rates_exact : srVerdicts lowpass3_dag .exact = [(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem lowpass3_rates_double : srVerdicts lowpass3_dag .double = [(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem lowpass3_rates_single : srVerdicts lowpass3_dag .single = [(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem lowpass_svf_20hz_rates_exact : srVerdicts lowpass_svf_20hz_dag .exact = [(30, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem lowpass_svf_20hz_rates_double : srVerdicts lowpass_svf_20hz_dag .double = [(30, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem lowpass_svf_20hz_rates_single : srVerdicts lowpass_svf_20hz_dag .single = [(30, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem noise_lcg_rates_exact : srVerdicts noise_lcg_dag .exact = [(6, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem noise_lcg_rates_double : srVerdicts noise_lcg_dag .double = [(6, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem noise_lcg_rates_single : srVerdicts noise_lcg_dag .single = [(6, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem nonlinear_rates_exact : srVerdicts nonlinear_dag .exact = [(17, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem nonlinear_rates_double : srVerdicts nonlinear_dag .double = [(17, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem nonlinear_rates_single : srVerdicts nonlinear_dag .single = [(17, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem onepole_rates_exact : srVerdicts onepole_dag .exact = [(8, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem onepole_rates_double : srVerdicts onepole_dag .double = [(8, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem onepole_rates_single : srVerdicts onepole_dag .single = [(8, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem osc_rates_exact : srVerdicts osc_dag .exact = [(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem osc_rates_double : srVerdicts osc_dag .double = [(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem osc_rates_single : srVerdicts osc_dag .single = [(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem resonlp_rates_exact : srVerdicts resonlp_dag .exact = [(26, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem resonlp_rates_double : srVerdicts resonlp_dag .double = [(26, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem resonlp_rates_single : srVerdicts resonlp_dag .single = [(26, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem smoo_sr_rates_exact : srVerdicts smoo_sr_dag .exact = [(14, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem smoo_sr_rates_double : srVerdicts smoo_sr_dag .double = [(14, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem smoo_sr_rates_single : srVerdicts smoo_sr_dag .single = [(14, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem smooth_stable_rates_exact : srVerdicts smooth_stable_dag .exact = [(8, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem smooth_stable_rates_double : srVerdicts smooth_stable_dag .double = [(8, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem smooth_stable_rates_single : srVerdicts smooth_stable_dag .single = [(8, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem table_bad_clamp_rates_exact : srVerdicts table_bad_clamp_dag .exact = [] := by decide +kernel
-theorem table_bad_clamp_rates_double : srVerdicts table_bad_clamp_dag .double = [] := by decide +kernel
-theorem table_bad_clamp_rates_single : srVerdicts table_bad_clamp_dag .single = [] := by decide +kernel
-theorem table_good_clamp_rates_exact : srVerdicts table_good_clamp_dag .exact = [] := by decide +kernel
-theorem table_good_clamp_rates_double : srVerdicts table_good_clamp_dag .double = [] := by decide +kernel
-theorem table_good_clamp_rates_single : srVerdicts table_good_clamp_dag .single = [] := by decide +kernel
-theorem table_unclamped_rates_exact : srVerdicts table_unclamped_dag .exact = [] := by decide +kernel
-theorem table_unclamped_rates_double : srVerdicts table_unclamped_dag .double = [] := by decide +kernel
-theorem table_unclamped_rates_single : srVerdicts table_unclamped_dag .single = [] := by decide +kernel
-theorem tabulate_protected_rates_exact : srVerdicts tabulate_protected_dag .exact = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tabulate_protected_rates_double : srVerdicts tabulate_protected_dag .double = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tabulate_protected_rates_single : srVerdicts tabulate_protected_dag .single = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tabulate_unprotected_rates_exact : srVerdicts tabulate_unprotected_dag .exact = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tabulate_unprotected_rates_double : srVerdicts tabulate_unprotected_dag .double = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tabulate_unprotected_rates_single : srVerdicts tabulate_unprotected_dag .single = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tf2_stable_rates_exact : srVerdicts tf2_stable_dag .exact = [(10, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem tf2_stable_rates_double : srVerdicts tf2_stable_dag .double = [(10, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem tf2_stable_rates_single : srVerdicts tf2_stable_dag .single = [(10, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem tf2_unstable_rates_exact : srVerdicts tf2_unstable_dag .exact = [(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])] := by decide +kernel
-theorem tf2_unstable_rates_double : srVerdicts tf2_unstable_dag .double = [(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])] := by decide +kernel
-theorem tf2_unstable_rates_single : srVerdicts tf2_unstable_dag .single = [(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])] := by decide +kernel
-theorem tf2s_direct_20hz_rates_exact : srVerdicts tf2s_direct_20hz_dag .exact = [(26, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem tf2s_direct_20hz_rates_double : srVerdicts tf2s_direct_20hz_dag .double = [(26, [.stable, .stable, .stable, .stable, .stable, .stable])] := by decide +kernel
-theorem tf2s_direct_20hz_rates_single : srVerdicts tf2s_direct_20hz_dag .single = [(26, [.stable, .stable, .unproven, .unproven, .unproven, .unproven])] := by decide +kernel
-theorem tf2snp_exact_rates_exact : srVerdicts tf2snp_exact_dag .exact = [(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tf2snp_exact_rates_double : srVerdicts tf2snp_exact_dag .double = [(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tf2snp_exact_rates_single : srVerdicts tf2snp_exact_dag .single = [(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tf3slf_low_rates_exact : srVerdicts tf3slf_low_dag .exact = [(40, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tf3slf_low_rates_double : srVerdicts tf3slf_low_dag .double = [(40, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem tf3slf_low_rates_single : srVerdicts tf3slf_low_dag .single = [(40, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem time_marginal_rates_exact : srVerdicts time_marginal_dag .exact = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem time_marginal_rates_double : srVerdicts time_marginal_dag .double = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem time_marginal_rates_single : srVerdicts time_marginal_dag .single = [(5, [.refused, .refused, .refused, .refused, .refused, .refused])] := by decide +kernel
-theorem unstable_rates_exact : srVerdicts unstable_dag .exact = [(7, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])] := by decide +kernel
-theorem unstable_rates_double : srVerdicts unstable_dag .double = [(7, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])] := by decide +kernel
-theorem unstable_rates_single : srVerdicts unstable_dag .single = [(7, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])] := by decide +kernel
+In the comments, the three parts are separated by `|`. -/
+
+-- bandpass2matched_float exact: n85:SSSSSS|FFFFFF|
+-- bandpass2matched_float double: n85:SSSSSS|FFFFFF|
+-- bandpass2matched_float single: n85:SSSSSS|FDDDDD(n59 SIGSQRT: argument [-0.000068, 0.030299]; n59 SIGSQRT: argument [-0.048690, 0.058005]; n59 SIGSQRT: argument [-0.059483, 0.067374]; n59 SIGSQRT: argument [-0.216843, 0.219202]; n59 SIGSQRT: argument [-0.257729, 0.259712])|
+-- bandpass_tpt exact: n47:SSSSSS|FFFFFF|
+-- bandpass_tpt double: n47:SSSSSS|FFFFFF|
+-- bandpass_tpt single: n47:SSSSSS|FFFFFF|
+-- dcblocker exact: n10:SSSSSS|FFFFFF|
+-- dcblocker double: n10:SSSSSS|FFFFFF|
+-- dcblocker single: n10:SSSSSS|FFFFFF|
+-- delay_sr exact: |FFFFFF|n7:IIIIII
+-- delay_sr double: |FFFFFF|n7:IIIIII
+-- delay_sr single: |FFFFFF|n7:IIIIII
+-- fdelay_clamped exact: |FFFFFF|n5:IIIIII;n13:IIIIII
+-- fdelay_clamped double: |FFFFFF|n5:IIIIII;n13:IIIIII
+-- fdelay_clamped single: |FFFFFF|n5:IIIIII;n13:IIIIII
+-- lowpass3 exact: n26:SSSSSS;n49:SSSSSS|FFFFFF|
+-- lowpass3 double: n26:SSSSSS;n49:SSSSSS|FFFFFF|
+-- lowpass3 single: n26:SSSSSS;n49:SSSSSS|FFFFFF|
+-- lowpass_svf_20hz exact: n30:SSSSSS|FFFFFF|
+-- lowpass_svf_20hz double: n30:SSSSSS|FFFFFF|
+-- lowpass_svf_20hz single: n30:SSSSSS|FFFFFF|
+-- noise_lcg exact: n6:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
+-- noise_lcg double: n6:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
+-- noise_lcg single: n6:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
+-- nonlinear exact: n17:RRRRRR(SIGFFUN<math.h> applied to the state)|FFFFFF|
+-- nonlinear double: n17:RRRRRR(SIGFFUN<math.h> applied to the state)|FFFFFF|
+-- nonlinear single: n17:RRRRRR(SIGFFUN<math.h> applied to the state)|FFFFFF|
+-- onepole exact: n8:SSSSSS|FFFFFF|
+-- onepole double: n8:SSSSSS|FFFFFF|
+-- onepole single: n8:SSSSSS|FFFFFF|
+-- osc exact: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGFLOOR applied to the state)|FFFFFF|n30:NNNNNN
+-- osc double: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGFLOOR applied to the state)|FFFFFF|n30:IIIIII
+-- osc single: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGFLOOR applied to the state)|FFFFFF|n30:IIIIII
+-- osc_negative_freq exact: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGFLOOR applied to the state)|FFFFFF|n30:NNNNNN
+-- osc_negative_freq double: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGFLOOR applied to the state)|FFFFFF|n30:NNNNNN
+-- osc_negative_freq single: n7:RRRRRR(integer recursion (wrapping semantics));n26:RRRRRR(SIGFLOOR applied to the state)|FFFFFF|n30:NNNNNN
+-- resonlp exact: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
+-- resonlp double: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
+-- resonlp single: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
+-- smoo_sr exact: n14:SSSSSS|FFFFFF|
+-- smoo_sr double: n14:SSSSSS|FFFFFF|
+-- smoo_sr single: n14:SSSSSS|FFFFFF|
+-- smooth_stable exact: n8:SSSSSS|FFFFFF|
+-- smooth_stable double: n8:SSSSSS|FFFFFF|
+-- smooth_stable single: n8:SSSSSS|FFFFFF|
+-- table_bad_clamp exact: |FFFFFF|n6:NNNNNN
+-- table_bad_clamp double: |FFFFFF|n6:NNNNNN
+-- table_bad_clamp single: |FFFFFF|n6:NNNNNN
+-- table_good_clamp exact: |FFFFFF|n4:IIIIII
+-- table_good_clamp double: |FFFFFF|n4:IIIIII
+-- table_good_clamp single: |FFFFFF|n4:IIIIII
+-- table_unclamped exact: |FFFFFF|n4:NNNNNN
+-- table_unclamped double: |FFFFFF|n4:NNNNNN
+-- table_unclamped single: |FFFFFF|n4:NNNNNN
+-- tabulate_protected exact: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|n25:IIIIII
+-- tabulate_protected double: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|n25:IIIIII
+-- tabulate_protected single: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|n25:IIIIII
+-- tabulate_unprotected exact: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|n23:NNNNNN
+-- tabulate_unprotected double: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|n23:NNNNNN
+-- tabulate_unprotected single: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|n23:NNNNNN
+-- tf2_stable exact: n10:SSSSSS|FFFFFF|n5:IIIIII;n13:IIIIII;n16:IIIIII
+-- tf2_stable double: n10:SSSSSS|FFFFFF|n5:IIIIII;n13:IIIIII;n16:IIIIII
+-- tf2_stable single: n10:SSSSSS|FFFFFF|n5:IIIIII;n13:IIIIII;n16:IIIIII
+-- tf2_unstable exact: n10:UUUUUU(Jury fails on the box)|FFFFFF|n5:IIIIII;n13:IIIIII;n16:IIIIII
+-- tf2_unstable double: n10:UUUUUU(Jury fails on the box)|FFFFFF|n5:IIIIII;n13:IIIIII;n16:IIIIII
+-- tf2_unstable single: n10:UUUUUU(Jury fails on the box)|FFFFFF|n5:IIIIII;n13:IIIIII;n16:IIIIII
+-- tf2s_direct_20hz exact: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
+-- tf2s_direct_20hz double: n26:SSSSSS|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
+-- tf2s_direct_20hz single: n26:SSUUUU(Jury fails on the box)|FFFFFF|n18:IIIIII;n30:IIIIII;n34:IIIIII
+-- tf2snp_exact exact: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)|FFFFFF|
+-- tf2snp_exact double: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)|FFFFFF|
+-- tf2snp_exact single: n51:RRRRRR(reference to an outer recursion);n58:RRRRRR(nested recursion coupled to the group)|FFFFFF|
+-- tf3slf_low exact: n40:RRRRRR(3 states (more than 2))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
+-- tf3slf_low double: n40:RRRRRR(3 states (more than 2))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
+-- tf3slf_low single: n40:RRRRRR(3 states (more than 2))|FFFFFF|n22:IIIIII;n30:IIIIII;n47:IIIIII;n52:IIIIII;n58:IIIIII
+-- time_marginal exact: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
+-- time_marginal double: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
+-- time_marginal single: n5:RRRRRR(integer recursion (wrapping semantics))|FFFFFF|
+-- unstable exact: n7:UUUUUU(Jury fails on the box)|FFFFFF|
+-- unstable double: n7:UUUUUU(Jury fails on the box)|FFFFFF|
+-- unstable single: n7:UUUUUU(Jury fails on the box)|FFFFFF|
+
+theorem bandpass2matched_float_rates_exact : verdicts bandpass2matched_float_dag .exact = ⟨[(85, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem bandpass2matched_float_rates_double : verdicts bandpass2matched_float_dag .double = ⟨[(85, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem bandpass2matched_float_rates_single : verdicts bandpass2matched_float_dag .single = ⟨[(85, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .domain, .domain, .domain, .domain, .domain], []⟩ := by decide +kernel
+theorem bandpass_tpt_rates_exact : verdicts bandpass_tpt_dag .exact = ⟨[(47, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem bandpass_tpt_rates_double : verdicts bandpass_tpt_dag .double = ⟨[(47, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem bandpass_tpt_rates_single : verdicts bandpass_tpt_dag .single = ⟨[(47, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem dcblocker_rates_exact : verdicts dcblocker_dag .exact = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem dcblocker_rates_double : verdicts dcblocker_dag .double = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem dcblocker_rates_single : verdicts dcblocker_dag .single = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem delay_sr_rates_exact : verdicts delay_sr_dag .exact = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(7, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem delay_sr_rates_double : verdicts delay_sr_dag .double = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(7, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem delay_sr_rates_single : verdicts delay_sr_dag .single = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(7, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdelay_clamped_rates_exact : verdicts fdelay_clamped_dag .exact = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdelay_clamped_rates_double : verdicts fdelay_clamped_dag .double = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem fdelay_clamped_rates_single : verdicts fdelay_clamped_dag .single = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem lowpass3_rates_exact : verdicts lowpass3_dag .exact = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem lowpass3_rates_double : verdicts lowpass3_dag .double = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem lowpass3_rates_single : verdicts lowpass3_dag .single = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable]), (49, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem lowpass_svf_20hz_rates_exact : verdicts lowpass_svf_20hz_dag .exact = ⟨[(30, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem lowpass_svf_20hz_rates_double : verdicts lowpass_svf_20hz_dag .double = ⟨[(30, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem lowpass_svf_20hz_rates_single : verdicts lowpass_svf_20hz_dag .single = ⟨[(30, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem noise_lcg_rates_exact : verdicts noise_lcg_dag .exact = ⟨[(6, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem noise_lcg_rates_double : verdicts noise_lcg_dag .double = ⟨[(6, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem noise_lcg_rates_single : verdicts noise_lcg_dag .single = ⟨[(6, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem nonlinear_rates_exact : verdicts nonlinear_dag .exact = ⟨[(17, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem nonlinear_rates_double : verdicts nonlinear_dag .double = ⟨[(17, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem nonlinear_rates_single : verdicts nonlinear_dag .single = ⟨[(17, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem onepole_rates_exact : verdicts onepole_dag .exact = ⟨[(8, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem onepole_rates_double : verdicts onepole_dag .double = ⟨[(8, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem onepole_rates_single : verdicts onepole_dag .single = ⟨[(8, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem osc_rates_exact : verdicts osc_dag .exact = ⟨[(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(30, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem osc_rates_double : verdicts osc_dag .double = ⟨[(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(30, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem osc_rates_single : verdicts osc_dag .single = ⟨[(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(30, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem osc_negative_freq_rates_exact : verdicts osc_negative_freq_dag .exact = ⟨[(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(30, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem osc_negative_freq_rates_double : verdicts osc_negative_freq_dag .double = ⟨[(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(30, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem osc_negative_freq_rates_single : verdicts osc_negative_freq_dag .single = ⟨[(7, [.refused, .refused, .refused, .refused, .refused, .refused]), (26, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(30, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem resonlp_rates_exact : verdicts resonlp_dag .exact = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem resonlp_rates_double : verdicts resonlp_dag .double = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem resonlp_rates_single : verdicts resonlp_dag .single = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem smoo_sr_rates_exact : verdicts smoo_sr_dag .exact = ⟨[(14, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem smoo_sr_rates_double : verdicts smoo_sr_dag .double = ⟨[(14, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem smoo_sr_rates_single : verdicts smoo_sr_dag .single = ⟨[(14, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem smooth_stable_rates_exact : verdicts smooth_stable_dag .exact = ⟨[(8, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem smooth_stable_rates_double : verdicts smooth_stable_dag .double = ⟨[(8, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem smooth_stable_rates_single : verdicts smooth_stable_dag .single = ⟨[(8, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem table_bad_clamp_rates_exact : verdicts table_bad_clamp_dag .exact = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(6, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem table_bad_clamp_rates_double : verdicts table_bad_clamp_dag .double = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(6, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem table_bad_clamp_rates_single : verdicts table_bad_clamp_dag .single = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(6, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem table_good_clamp_rates_exact : verdicts table_good_clamp_dag .exact = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(4, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem table_good_clamp_rates_double : verdicts table_good_clamp_dag .double = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(4, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem table_good_clamp_rates_single : verdicts table_good_clamp_dag .single = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(4, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem table_unclamped_rates_exact : verdicts table_unclamped_dag .exact = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(4, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem table_unclamped_rates_double : verdicts table_unclamped_dag .double = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(4, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem table_unclamped_rates_single : verdicts table_unclamped_dag .single = ⟨[], [.finite, .finite, .finite, .finite, .finite, .finite], [(4, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem tabulate_protected_rates_exact : verdicts tabulate_protected_dag .exact = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(25, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tabulate_protected_rates_double : verdicts tabulate_protected_dag .double = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(25, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tabulate_protected_rates_single : verdicts tabulate_protected_dag .single = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(25, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tabulate_unprotected_rates_exact : verdicts tabulate_unprotected_dag .exact = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(23, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem tabulate_unprotected_rates_double : verdicts tabulate_unprotected_dag .double = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(23, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem tabulate_unprotected_rates_single : verdicts tabulate_unprotected_dag .single = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(23, [false, false, false, false, false, false])]⟩ := by decide +kernel
+theorem tf2_stable_rates_exact : verdicts tf2_stable_dag .exact = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true]), (16, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2_stable_rates_double : verdicts tf2_stable_dag .double = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true]), (16, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2_stable_rates_single : verdicts tf2_stable_dag .single = ⟨[(10, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true]), (16, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2_unstable_rates_exact : verdicts tf2_unstable_dag .exact = ⟨[(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true]), (16, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2_unstable_rates_double : verdicts tf2_unstable_dag .double = ⟨[(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true]), (16, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2_unstable_rates_single : verdicts tf2_unstable_dag .single = ⟨[(10, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(5, [true, true, true, true, true, true]), (13, [true, true, true, true, true, true]), (16, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2s_direct_20hz_rates_exact : verdicts tf2s_direct_20hz_dag .exact = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2s_direct_20hz_rates_double : verdicts tf2s_direct_20hz_dag .double = ⟨[(26, [.stable, .stable, .stable, .stable, .stable, .stable])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2s_direct_20hz_rates_single : verdicts tf2s_direct_20hz_dag .single = ⟨[(26, [.stable, .stable, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], [(18, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (34, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf2snp_exact_rates_exact : verdicts tf2snp_exact_dag .exact = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf2snp_exact_rates_double : verdicts tf2snp_exact_dag .double = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf2snp_exact_rates_single : verdicts tf2snp_exact_dag .single = ⟨[(51, [.refused, .refused, .refused, .refused, .refused, .refused]), (58, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem tf3slf_low_rates_exact : verdicts tf3slf_low_dag .exact = ⟨[(40, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf3slf_low_rates_double : verdicts tf3slf_low_dag .double = ⟨[(40, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem tf3slf_low_rates_single : verdicts tf3slf_low_dag .single = ⟨[(40, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], [(22, [true, true, true, true, true, true]), (30, [true, true, true, true, true, true]), (47, [true, true, true, true, true, true]), (52, [true, true, true, true, true, true]), (58, [true, true, true, true, true, true])]⟩ := by decide +kernel
+theorem time_marginal_rates_exact : verdicts time_marginal_dag .exact = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem time_marginal_rates_double : verdicts time_marginal_dag .double = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem time_marginal_rates_single : verdicts time_marginal_dag .single = ⟨[(5, [.refused, .refused, .refused, .refused, .refused, .refused])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem unstable_rates_exact : verdicts unstable_dag .exact = ⟨[(7, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem unstable_rates_double : verdicts unstable_dag .double = ⟨[(7, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
+theorem unstable_rates_single : verdicts unstable_dag .single = ⟨[(7, [.unproven, .unproven, .unproven, .unproven, .unproven, .unproven])], [.finite, .finite, .finite, .finite, .finite, .finite], []⟩ := by decide +kernel
 
 /-! ## Compiler clamp oracle
 
@@ -3247,8 +4048,10 @@ clamps the compiler actually inserted (`--dump-sig-dag-prepared`,
 a `clampRequired` table left unclamped — fails generation instead
 of being recorded here.
 
+bandpass2matched_float.dsp: no table site
 bandpass_tpt.dsp: no table site
 dcblocker.dsp: no table site
+delay_sr.dsp: no table site
 fdelay_clamped.dsp: no table site
 lowpass3.dsp: no table site
 lowpass_svf_20hz.dsp: no table site
@@ -3256,6 +4059,7 @@ noise_lcg.dsp: no table site
 nonlinear.dsp: no table site
 onepole.dsp: no table site
 osc.dsp: missed optimisation: compiler clamps table[65536] though Lean proves it in range
+osc_negative_freq.dsp: missed optimisation: compiler clamps table[65536] though Lean proves it in range
 resonlp.dsp: no table site
 smoo_sr.dsp: no table site
 smooth_stable.dsp: no table site

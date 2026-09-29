@@ -367,7 +367,11 @@ NODE_TAGS = {"SIGINPUT": ".input", "SIGDELAY1": ".delay1", "SIGDELAY": ".delay",
              "SIGMIN": ".min", "SIGMAX": ".max", "SIGABS": ".abs",
              "SIGFLOOR": ".floor", "SIGSELECT2": ".select2", "SIGTAN": ".tan",
              "SIGSIN": ".sin", "SIGCOS": ".cos", "SIGEXP": ".exp",
-             "SIGSQRT": ".sqrt", "SIGPOW": ".pow"}
+             "SIGSQRT": ".sqrt", "SIGPOW": ".pow", "SIGROUND": ".round",
+             "SIGRINT": ".round", "SIGCEIL": ".round", "SIGLOG": ".log",
+             "SIGLOG10": ".log10", "SIGFMOD": ".fmod", "SIGRDTBL": ".rdtbl",
+             "SIGWRTBL": ".wrtbl"}
+BITOPS = {"and", "or", "xor", "lsh", "rsh", "arsh"}
 BINOPS = {"add": ".binop .add", "sub": ".binop .sub", "mul": ".binop .mul",
           "div": ".binop .div", "rem": ".binop .rem"}
 COMPARISONS = {"lt", "le", "gt", "ge", "eq", "ne"}
@@ -389,18 +393,28 @@ def node_arg(arg):
     return ".other"
 
 
-def node_tag(tag, args, op):
+def node_tag(tag, args, op, bindings=None):
     if tag == "SIGBINOP":
         if op in BINOPS:
             return BINOPS[op]
         if op in COMPARISONS:
             return f".cmp .{op}"
+        if op in BITOPS:
+            return f".bit .{op}"
         return f'.other "SIGBINOP:{lean_str(op or "?")}"'
     if tag == "SIGFCONST":
         names = [a[1].val for a in args if a[0] == "leaf" and a[1].tag == "opaque"]
         return ".sr" if any(n in SR_NAMES for n in names) else '.other "SIGFCONST"'
     if tag in UI_RANGE_TAGS and tag not in ("SIGVBARGRAPH", "SIGHBARGRAPH"):
         return ".control"
+    if tag == "SIGFFUN":
+        # a foreign function of <math.h> is pure; any other one may have a state
+        header = ""
+        if bindings is not None and args and args[0][0] == "ref":
+            fargs = bindings[args[0][1]][1]
+            header = next((a[1].val for a in fargs[1:2]
+                           if a[0] == "leaf" and a[1].tag == "opaque"), "")
+        return '.other "SIGFFUN<math.h>"' if header == "<math.h>" else '.other "SIGFFUN"'
     return NODE_TAGS.get(tag, f'.other "{lean_str(tag)}"')
 
 
@@ -411,7 +425,7 @@ def emit_nodes(bindings):
     lines = []
     for k in range(len(bindings)):
         tag, args, rng, op = bindings[k]
-        t = node_tag(tag, args, op)
+        t = node_tag(tag, args, op, bindings)
         ctl = (f"({q_lit(rng['init'])}, {q_lit(rng['min'])}, {q_lit(rng['max'])})"
                if t == ".control" and rng else "(Q.zero, Q.zero, Q.zero)")
         a = ", ".join(node_arg(x) for x in args)
@@ -431,6 +445,8 @@ def text_tag(lean_tag):
         return "binop:" + t.split(".")[-1]
     if t.startswith("cmp ."):
         return "cmp:" + t.split(".")[-1]
+    if t.startswith("bit ."):
+        return "bit:" + t.split(".")[-1]
     if t.startswith("other "):
         return "other:" + t[len("other "):].strip('"')
     return t
@@ -456,7 +472,7 @@ def emit_nodes_text(bindings):
     lines = []
     for k in range(len(bindings)):
         tag, args, rng, op = bindings[k]
-        t = node_tag(tag, args, op)
+        t = node_tag(tag, args, op, bindings)
         ctl = ""
         if t == ".control" and rng:
             ctl = " ".join(f"{rng[x].numerator}/{rng[x].denominator}"
@@ -467,6 +483,26 @@ def emit_nodes_text(bindings):
 def gv_list(letters):
     return "[" + ", ".join({"S": ".stable", "U": ".unproven", "R": ".refused"}[c]
                            for c in letters) + "]"
+
+
+def parse_probe(text):
+    """`groups|finite|sites` -> (groups, finite letters, finite reason, sites)."""
+    parts = text.split("|")
+    groups = parse_sr_probe(parts[0])
+    fin = parts[1] if len(parts) > 1 else ""
+    m = re.match(r"([FD?]*)(?:\((.*)\))?$", fin)
+    sites = [(int(a), b) for a, b in re.findall(r"n(\d+):([IN]+)", parts[2] if len(parts) > 2 else "")]
+    return groups, m.group(1), m.group(2) or "", sites
+
+
+def verdicts_lit(groups, fin, sites):
+    """The `Verdicts` literal pinned by a theorem."""
+    fv = {"F": ".finite", "D": ".domain", "?": ".unknown"}
+    g = ", ".join(f"({n}, {gv_list(l)})" for n, l, _ in groups)
+    f = ", ".join(fv[c] for c in fin)
+    t = ", ".join(f"({n}, [{', '.join('true' if c == 'I' else 'false' for c in l)}])"
+                  for n, l in sites)
+    return f"⟨[{g}], [{f}], [{t}]⟩"
 
 
 def parse_sr_probe(text):
@@ -551,7 +587,7 @@ def build(template, dsps, verdicts=None, oracle=None, rates=None):
         out += [f'#eval s!"{n}|" ++ toString (certifyStableB {n}) ++ "|" '
                 f'++ toString (certifyIndicesB {n}) ++ "|" '
                 f'++ tableSiteVerdictsB {n}' for n in names]
-        out += [f'#eval s!"{st}@{p}|" ++ srProbe {st}_dag .{p}'
+        out += [f'#eval s!"{st}@{p}|" ++ probe {st}_dag .{p}'
                 for st in stems for p in PRECISIONS]
     else:
         out.append("/-! ## Certification\n")
@@ -573,20 +609,26 @@ def build(template, dsps, verdicts=None, oracle=None, rates=None):
         out += [f"theorem {n}_indices : certifyIndicesB {n} = {verdicts[n][1]} := by decide"
                 for n in names]
         out.append("")
-        out.append("/-! ## Stability at the rates of `check-precision`\n")
-        out.append("Per program and precision, the verdict of every recursion group")
-        out.append("(`n<k>`, the dump index of its `DEBRUIJNREC`) at 44.1, 48, 88.2, 96,")
-        out.append("176.4 and 192 kHz: `S` stable, `U` linear but not proven stable,")
-        out.append("`R` refused (outside the fragment: the reason follows). -/\n")
+        out.append("/-! ## The rates of `check-precision`, in exact, double and single\n")
+        out.append("Per program and precision, at 44.1, 48, 88.2, 96, 176.4 and 192 kHz:")
+        out.append("")
+        out.append("- each recursion group (`n<k>`, the dump index of its `DEBRUIJNREC`):")
+        out.append("  `S` stable, `U` linear but not proven stable, `R` refused (the")
+        out.append("  reason follows);")
+        out.append("- the time-invariant values: `F` finite, `D` an operation may leave")
+        out.append("  its domain or overflow, `?` a value the analysis cannot bound;")
+        out.append("- each table read and delay tap: `I` index in range, `N` not proven.")
+        out.append("")
+        out.append("In the comments, the three parts are separated by `|`. -/\n")
         for st in stems:
             for p in PRECISIONS:
                 out.append(f"-- {st} {p}: {rates[(st, p)][1]}")
         out.append("")
         for st in stems:
             for p in PRECISIONS:
-                groups = rates[(st, p)][0]
-                body = ", ".join(f"({g}, {gv_list(l)})" for g, l, _ in groups)
-                out.append(f"theorem {st}_rates_{p} : srVerdicts {st}_dag .{p} = [{body}] := by decide +kernel")
+                groups, fin, _, sites = rates[(st, p)][0]
+                out.append(f"theorem {st}_rates_{p} : verdicts {st}_dag .{p} = "
+                           f"{verdicts_lit(groups, fin, sites)} := by decide +kernel")
     if oracle:
         out.append("")
         out.append("/-! ## Compiler clamp oracle\n")
@@ -618,7 +660,7 @@ def main():
         sys.exit(f"probe failed for {missing}\n{r.stdout}\n{r.stderr}")
     rates = {}
     for m in re.finditer(r'"?(\w+)@(exact|double|single)\|([^"\n]*)"?', r.stdout):
-        rates[(m.group(1), m.group(2))] = (parse_sr_probe(m.group(3)), m.group(3) or "no recursion")
+        rates[(m.group(1), m.group(2))] = (parse_probe(m.group(3)), m.group(3))
     missing = [(st, p) for st in map(ident, dsps) for p in PRECISIONS if (st, p) not in rates]
     if missing:
         sys.exit(f"rate probe failed for {missing}\n{r.stdout}\n{r.stderr}")
