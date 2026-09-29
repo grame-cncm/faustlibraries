@@ -19,6 +19,8 @@
 #                     kernel-check them, and fail if any verdict drifted from the
 #                     committed tests/lean/certified.lean.
 # `make certify-reference` - regenerate and re-check tests/lean/certified.lean in place.
+# `make certify-tests` - run the Lean rate analysis on every regression test, against
+#                     tests/certify-baseline.json (CERTIFY_ARGS for more options).
 # `make build`      - build the documentation.
 # `make serve`      - serve the documentation.
 # `make doc-index`  - build the Faust library documentation JSON index.
@@ -60,6 +62,9 @@ PRECISION_BUILD_DIR := tests/build-precision
 # Extra arguments for check-precision, e.g. PRECISION_ARGS="tests/vaeffects_tests.dsp"
 # or PRECISION_ARGS="-k klonCentaur_test" (a regex on test names, see scripts/check_precision.py -h).
 PRECISION_ARGS ?=
+# Extra arguments for certify-tests, e.g. CERTIFY_ARGS="tests/filters_butterworth_tests.dsp"
+# or CERTIFY_ARGS="-k lowpass" (see scripts/certify_tests.py -h).
+CERTIFY_ARGS ?=
 CPU_BUILD_DIR := tests/build-cpu
 # Extra arguments for check-cpu, e.g. CPU_ARGS="--base origin/master tests/filters_resonator_tests.dsp"
 # or CPU_ARGS="--base origin/master -k resonlp" (see scripts/check_cpu.py -h).
@@ -68,7 +73,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix checkdoc plots clean distclean help bench certify certify-reference certify-tests certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -216,7 +221,9 @@ certify: ## Regenerate the Lean certification theorems, kernel-check them, and f
 	printf '[certify] generating %s from %d dsp files\n' '$(BUILD_DIR)/certified.lean' '$(words $(LEAN_CERT_DSP))'; \
 	FAUST_RS=$(FAUST_RS) FAUST_LIBS=$(CURDIR) $(PYTHON) $(SIG2LEAN) $(LEAN_TEMPLATE) $(BUILD_DIR)/certified.lean $(LEAN_CERT_DSP); \
 	$(LEAN) $(BUILD_DIR)/certified.lean; \
-	if ! diff -u $(LEAN_CERTIFIED) $(BUILD_DIR)/certified.lean; then \
+	grep -v '^def [A-Za-z0-9_]*_wit_[a-z]* : List LyapW := ' $(LEAN_CERTIFIED) > $(BUILD_DIR)/certified.ref.cmp || true; \
+	grep -v '^def [A-Za-z0-9_]*_wit_[a-z]* : List LyapW := ' $(BUILD_DIR)/certified.lean > $(BUILD_DIR)/certified.cmp || true; \
+	if ! diff -u $(BUILD_DIR)/certified.ref.cmp $(BUILD_DIR)/certified.cmp; then \
 		echo "[fail] certification drifted from $(LEAN_CERTIFIED) — review the diff above, then run 'make certify-reference'"; \
 		exit 1; \
 	fi; \
@@ -227,6 +234,9 @@ certify-reference: ## Regenerate tests/lean/certified.lean in place and kernel-c
 	FAUST_RS=$(FAUST_RS) FAUST_LIBS=$(CURDIR) $(PYTHON) $(SIG2LEAN) $(LEAN_TEMPLATE) $(LEAN_CERTIFIED) $(LEAN_CERT_DSP); \
 	$(LEAN) $(LEAN_CERTIFIED); \
 	printf '[certify-reference] wrote and checked %s\n' '$(LEAN_CERTIFIED)'
+
+certify-tests: ## Run the Lean rate analysis on every test, against tests/certify-baseline.json
+	@FAUST_RS=$(FAUST_RS) FAUST_LIBS=$(CURDIR) LEAN=$(LEAN) $(PYTHON) scripts/certify_tests.py $(CERTIFY_ARGS)
 
 # Optional and heavy: builds the mathlib project that discharges the standing
 # obligations of the Std-only specifications (Jury <=> poles in the unit disc,

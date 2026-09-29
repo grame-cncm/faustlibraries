@@ -157,6 +157,14 @@ checks. This is why `sig2lean.py` sits outside the trusted base, and why the
 verdicts pinned in `certified.lean` can be diffed by `make certify` like any
 other test reference.
 
+The rate analysis adds one step between the two passes, for the groups
+that Jury and the small-gain test leave unproven. The probe pass also prints
+their linear systems, an untrusted numerical oracle answers with Lyapunov
+certificates, and a second probe pass reads the verdicts with them. The
+pinning pass then states the theorems with the certificates as arguments.
+The oracle sits outside the trusted base like the script: a wrong
+certificate fails `lyapCheck` and leaves the group unproven.
+
 What remains assumed is the *adequacy of the import itself* — that `Sig`
 faithfully mirrors what `--dump-sig` means. That is the first standing
 obligation of the prelude; its honest mitigation is mechanical
@@ -165,11 +173,10 @@ diffing), which is future work.
 
 ## 3. What is certified today
 
-Two independent analyses run over each imported graph. Both are defined in
+Three analyses run over each imported graph. All are defined in
 [signal-import-formal-spec.lean](signal-import-formal-spec.lean), the single
-hand-written, hand-reviewed prelude (~500 commented lines, Lean 4.31 with only
-its bundled `Std`, no `sorry`, axioms limited to `propext` on the generated
-theorems).
+hand-written, hand-reviewed prelude (Lean 4.31 with only its bundled `Std`, no
+`sorry`, axioms limited to `propext` on the generated theorems).
 
 **Feedback stability.** Linear recursions of order ≤ 2 with constant
 coefficients are recognized syntactically and checked against the Jury /
@@ -188,11 +195,230 @@ that hold independently of the recursive state: the phasor identity
 `x - floor(x) ∈ [0, 1)` bounds every wrap-around oscillator, so a
 phasor-driven `rdtable` sine oscillator is certified in range end to end.
 
+**Stability at the sample rates, in float and double.** The two analyses
+above refuse every coefficient that depends on `ma.SR` (it goes through `tan`)
+and read single-output recursions only. The third one reads the graph as a
+DAG and certifies each recursion group at the six rates of `make
+check-precision` (44.1 to 192 kHz), with the controls at their default values,
+in three arithmetics: `exact`, `double` and `single`. The coefficients are
+enclosed in intervals that contain their value *as the program computes it*
+in that precision: every real operation is widened by one unit roundoff, a
+libm call by `libmUlps` ulps, and `tan`, `sin`, `cos`, `exp`, `sqrt` are
+enclosed by Taylor polynomials with an explicit remainder, in rational
+arithmetic. A group whose state is at most 2 samples (first order, direct-form
+second order, state-variable and trapezoidal sections) is then certified by
+the Jury conditions at the vertices of the box of its state matrix, which is
+exact because the conditions are multilinear. The verdicts are `S` (stable),
+`U` (not proven) and `R` (refused, with the reason), per rate. For instance,
+`fi.lowpass(2, 20)` (state-variable since #262) is stable at every rate in the
+three arithmetics, whereas the direct form it replaced is stable in exact and
+double arithmetic but not proven in single from 88.2 kHz: its Jury margin,
+1.7e-6 at 96 kHz, is smaller than what the rounding of its coefficients in
+single precision can move. The design and the measurements behind it are in
+[float-sr-proposal.md](float-sr-proposal.md).
+
+### What `exact`, `double` and `single` mean
+
+Every verdict of the rate analysis is given three times, for three ways of
+computing the **coefficients** of a recursion. The coefficients are what
+does not depend on the recursion's state: `tan(π·fc/SR)`, `2·cos(w)`, a
+resonance. In the prelude these are the three values of `Prec`.
+
+| arithmetic | what is computed | the question answered |
+|---|---|---|
+| `exact` | the formula as mathematics defines it, in real arithmetic: rationals exactly, `tan`, `sin` and `exp` enclosed within about `2⁻¹⁰⁰`. No machine computes this. | is the **design** stable at this rate? |
+| `double` | every operation rounded as in a program compiled with `-double`: relative error up to `u = 2⁻⁵³`, libm within 2 ulps, controls in `float`. The interval contains every value such a program can compute. | is the **program compiled in double** stable? |
+| `single` | the same with `float`, `u = 2⁻²⁴`: the default compilation | is the **program compiled in float** stable? |
+
+Comparing the three localizes a problem:
+
+- **`S` in exact and double, `U` in single**: the design is sound, and single
+  precision breaks it. The direct-form `tf2s` at 20 Hz and 96 kHz has a Jury
+  margin of 1.7e-6. That is smaller than what the rounding of its
+  coefficients in single can move, so a float program may compute a
+  recursion outside the stable region. Its state-variable replacement keeps
+  `S` in the three arithmetics.
+- **`U` in all three**: the design itself is marginal, or the analysis is not
+  strong enough. An oscillator by rotation keeps its energy exactly, with a
+  pole on the unit circle, so nothing can prove it asymptotically stable.
+  `tf3slf` at low cutoff is stable, but its triple pole near 1 leaves less
+  margin than the analysis needs.
+- **The boxes are not nested.** In single, a literal such as `0.1` is its
+  `float` value, a single point that differs from `1/10`. The single box
+  therefore need not contain the exact one, and a verdict can, in
+  principle, be better in single than in exact.
+
+Two things are the same in the three arithmetics:
+
+- **The loop arithmetic is taken as exact.** The products and sums that
+  involve the state are not rounded in the model. Their rounding perturbs
+  the state at each sample: that is an accuracy question (item P4 of the
+  proposal), not a change of the recursion's coefficients.
+- **The claim is under the standing obligations of the prelude**: IEEE 754
+  rounding in the evaluation order of the graph, libm within 2 ulps, no
+  reassociation (`-ffast-math` is not covered).
+
+### What "at most 2 states" means
+
+**The state of a recursion** is the set of past values it needs to compute the
+next sample. Their number is the order of the section, that is, its number of
+poles:
+
+| structure | recursion | state | size |
+|---|---|---|---|
+| one pole (`si.smooth`, `fi.dcblocker`) | `y[n] = a·y[n-1] + x[n]` | `y[n-1]` | 1 |
+| direct-form biquad (`fi.tf2`, `fi.tf2s`, `fi.resonlp`) | `y[n] = -a1·y[n-1] - a2·y[n-2] + …` | `y[n-1]`, `y[n-2]` | 2 |
+| state-variable / trapezoidal section (`fi.lowpass` since #262, `fi.tf2sb`) | two outputs `ic1eq`, `ic2eq`, each read back one sample later | `ic1eq[n-1]`, `ic2eq[n-1]` | 2 |
+| `fi.tf3slf`, Moog or diode ladder | order 3 or 4 in one recursion | 3 or 4 values | 3–4 |
+| comb or allpass with a delay line in its loop (`y[n] = x + g·y[n-N]`) | the delay line is in the recursion | the last N values of `y` | N |
+
+Written as a vector `z`, the recursion becomes `z[n] = A·z[n-1] + (input)`.
+It is stable when every eigenvalue of `A` (every pole) lies inside the unit
+disc.
+
+**Why 2 is the limit of the current check.** If `A` were known exactly, any
+size could be tested. Here its coefficients are intervals: in single
+precision, a computed coefficient lies somewhere in `[a - error, a + error]`.
+Stability has to be proved for every matrix of that box, of which there are
+infinitely many.
+
+- **Up to 2 states, the box is decided by its corners.** The four Jury
+  conditions, `1 - det > 0`, `1 + det > 0`, `1 - tr + det > 0` and
+  `1 + tr + det > 0`, are multilinear in the entries of `A`: no entry appears
+  squared. A multilinear function reaches its minimum over a box at a corner,
+  so checking the corners (at most 2⁴ = 16), exactly in rational arithmetic,
+  proves the whole box. That is `jury2` in the prelude.
+- **From 3 states on, corners are no longer enough.** The stability
+  conditions become polynomials of higher degree in the entries, and the
+  stable region is no longer convex: a box can have all its corners stable
+  and still contain an unstable matrix. Another certificate is needed: the
+  small-gain test and the Lyapunov certificates below.
+
+**What this covers.** Most high-order filters of `filters.lib` are cascades
+of second-order sections, and each section is its own recursion group:
+`fi.lowpass(4, …)` compiles to two groups of 2 states, both within reach of
+Jury.
+
+**Beyond 2 states: the small-gain test.** Suppose every output `o` that feeds
+back reads `y_o[n] = Σ c·y_{o'}[n-k] + x_o` with delays `k ≥ 1`. Let
+`M o o'` bound `Σ_k |c|` over the box. If some weights `v > 0` satisfy
+`M v < v`, the recursion contracts a weighted max norm of its past, and is
+stable. This holds:
+
+- whatever the delays, and when they vary (at least one sample);
+- when the coefficients change at every sample within the box.
+
+A feedback comb `y = x + g·y[n-N]` has `M = |g|`, stable when `|g| < 1`
+whatever `N`; a damped comb (freeverb) has spectral radius
+`(1-d)·fb + d < 1`. The weights come from the iteration `v ← 1 + M v`,
+untrusted; only the final check is. The test is sufficient, not necessary,
+and three kinds of structure remain out of reach:
+
+- **lossless orthogonal mixing**, as in the FDNs of the reverbs;
+- **rotations**: the normalized ladder of `fi.tf2snp`, and oscillators;
+- **higher-order sections in one piece whose poles are close to 1**:
+  `fi.tf3slf`, the Moog and diode ladders.
+
+**Beyond small gain: Lyapunov certificates.** These three are proved by a
+quadratic energy that decreases at every sample (item P2 of
+[float-sr-proposal.md](float-sr-proposal.md)).
+
+- **The system.** The analysis rewrites the group as
+  `x[n+1] = A·x + B·z`, `y[n] = Cx·x + Cz·z`. `x` holds the short delays (up
+  to 4 samples) and the taps that follow a long delay. `z` holds one
+  *channel* per long delay line: its output, `v[n-b]`, where `v` is the
+  signal written into the line. The input of a long delay line is an output
+  of the system in its own right, so an FDN line is one channel, whatever
+  the mixing matrix in front of it.
+- **The energy.** With `P` for the states and `D` for the channels,
+  `V = xᵀPx + Σ_b Σ_{m=1..b} v_b[n-m]ᵀ D_b v_b[n-m]`, the second term being
+  the energy stored in the delay lines. One step changes it by `-wᵀMw`,
+  `w = (x, z)`, with `M = diag(P, D) - Gᵀ·diag(P, W)·G` and
+  `G = [[A, B], [Cx, Cz]]`. If `P ≻ 0` and `M ≻ 0` on the whole box of
+  coefficients, the recursion is exponentially stable, whatever the lengths
+  of the long delays and even if the coefficients change at every sample
+  within the box. A variable delay is not covered.
+- **Who finds it, who checks it.** An untrusted numerical oracle,
+  [scripts/lyapunov_oracle.py](../scripts/lyapunov_oracle.py) (numpy and
+  scipy), finds `D` by minimizing the peak gain of the system over frequency
+  with block-diagonal scalings (one block per delay length), then `P` from
+  the Riccati equation of the bounded-real lemma. Lean checks the answer
+  exactly (`lyapCheck`):
+  - `M` is enclosed in interval arithmetic over the box of `G`;
+  - `M̃ - τI ≻ 0` holds, where `M̃` is the rounded centre of that enclosure
+    and `τ` bounds the distance of every member from it;
+  - `P ≻ 0` and `D ≻ 0` hold.
+
+  Positive definiteness is decided by Sylvester's criterion on an integer
+  matrix, with fraction-free elimination (Bareiss). A wrong certificate, or
+  none, only leaves the group `U`.
+- **The protocol.** The analysis runs once and prints the system of every
+  group it leaves unproven (`probe … true`). The oracle answers, and the
+  analysis runs again with the answers (`verdicts dag p wit`). In
+  `certified.lean` the certificates are pinned as definitions (`X_wit_p`)
+  and the theorems are stated with them. Their numbers come from floating
+  point and may differ from one platform to the next, so `make certify`
+  leaves those lines out of its drift check. The verdicts stay in it.
+
+On the test suite, this proves groups of 39 tests that no other rule
+proved:
+
+- the FDN reverbs: `re.zita_rev1` and its variants, `dm.zita_light`, `re.fdnrev0`,
+  `re.dattorro_rev`, `inst.instrReverb`;
+- the 4-state rotation of `fi.tf2snp` at low cutoff;
+- the ladders: `ve.moog_vcf`, `ve.moog_vcf_2bn`, `ve.lowpassLadder4`;
+- sections of order 3 to 5 with some margin: `fi.tf3`, the K-weighting
+  filter of the loudness meters, the pink-noise filter, the Klon Centaur
+  model, the wave-digital capacitor and inductor.
+
+It does not prove:
+
+- **oscillators** (`os.oscq`, `os.oscws`…), whose rotation is lossless: a
+  marginal recursion has no decreasing energy;
+- **`fi.tf3slf` at low cutoff**, whose triple pole near 1 leaves less margin
+  than the box of its coefficients;
+- **recursions whose coefficient boxes are wide**: the interpolation weights
+  of a fractional delay, and the coefficients of an envelope or an LFO.
+
+**Coupled groups.** A group nested in another and referring to its state is
+analysed as one system with it: the outputs are identified as `(group,
+output)`, the de Bruijn references resolved group by group, and the outputs
+of the nested group enter the forms of the enclosing one through their own
+forms. A system of more than 32 nested groups is refused.
+
+On the test suite these two rules make 147 distinct recursion groups stable:
+the combs and allpasses of freeverb, `jcrev`, `satrev`, `dattorro_rev` and
+`kb_rom_rev1`, the string models, the `allpassn*` lattices.
+
+**Finite values and indices in floating point.** The same DAG analysis
+gives two more verdicts per rate and arithmetic:
+
+- **Finite values** (`F`, `D`, `?`). Every time-invariant value (a constant,
+  a coefficient computed from the sample rate and the controls) stays in the
+  domain of its operation over its whole enclosure (no division by an
+  interval containing 0, no `sqrt` or `log` of a value that may be negative,
+  no `tan` near a pole) and does not overflow. `D` names the first operation
+  that may fail, `?` the first value the analysis cannot bound. In single
+  precision, `ve.bandpass2Matched` gets `D` on a `sqrt` of a cancelling
+  expression, the cause of its non-finite render at 176.4 kHz.
+- **Indices** (`I`, `N`). Table reads stay in `[0, size - 1]` and delay taps
+  are non-negative, for every value of the controls. Here the floating-point
+  model matters: `x - floor(x)` is `[0, 1 - u]` for `x ≥ 0` but can round to
+  `1.0` below 0, so the table read of `os.osc(440)` is proven in range in
+  double and single, and that of `os.osc(-440)` is not.
+
+The ranges of recursion outputs come from inductive invariants, checked, not
+assumed: a candidate range containing the initial state 0, such that the body
+evaluated with the state in it stays in it. That is how the phase of
+`os.osc` is known to stay non-negative.
+
 The example set lives in [../tests/lean/](../tests/lean/): one small `.dsp`
 per certified instantiation, plus deliberate counter-examples whose *refusal*
 is itself pinned as a theorem (`+ ~ *(1.5)` is certified unstable; an
 under-clamped table read is certified `CLAMP REQUIRED`). The generated
-[certified.lean](../tests/lean/certified.lean) re-checks in under a second.
+[certified.lean](../tests/lean/certified.lean) re-checks in about five minutes,
+almost all of it in the rate analysis (`by decide +kernel` on the interval
+computations).
 
 ## 4. Safety by refusal
 
@@ -278,7 +504,10 @@ place — the "Standing obligations" section of the prelude. The chain:
 | Jury criterion ⟺ poles strictly inside the unit disc | **proved** at order 2 in the optional mathlib layer ([mathlib/JuryRoots.lean](mathlib/JuryRoots.lean), `make certify-deep`) |
 | `0 < 1/tan(w)` for cutoffs below Nyquist (the `tf2s` hypothesis) | **proved** in the same layer |
 | Adequacy of the import (`Sig` mirrors `--dump-sig`) | standing obligation; mitigated by round-tripping |
-| Exact rationals vs. floating-point execution | standing obligation, permanent limit — the theorems speak about the denoted exact arithmetic |
+| Exact rationals vs. floating-point execution | for stability and indices, a standing obligation — those theorems speak about the denoted exact arithmetic; the rate analysis models floating point |
+| IEEE 754 rounding of `+ - * /` and `sqrt`, libm within `libmUlps` ulps, no reassociation | standing obligations of the rate analysis |
+| Taylor remainders, `tan` as `sin/cos`, vertex lemma of the Jury check, the small-gain and Lyapunov–Krasovskii arguments, Sylvester's criterion | hand-reviewed; the next targets of the mathlib layer |
+| The Lyapunov certificates (`P`, `D`) | untrusted: found by a numerical oracle (numpy/scipy), checked exactly by `lyapCheck` in every theorem that uses them |
 | The backend compiles the graph faithfully | out of scope — certification is about the signal graph, not the generated C++/Rust |
 
 The generator (`sig2lean.py`) is deliberately *outside* the trusted base: it
@@ -301,9 +530,15 @@ symbolically, once.
 make certify            # regenerate theorems into tests/build/, kernel-check,
                         # diff against the committed tests/lean/certified.lean
 make certify-reference  # accept: regenerate the committed reference in place
+make certify-tests      # the rate analysis on every regression test (#eval, not
+                        # kernel-checked), against tests/certify-baseline.json
 make certify-deep       # optional: build the mathlib layer discharging the
                         # Jury and tan obligations (downloads a large cache)
 ```
+
+The Lyapunov certificates need numpy and scipy (`scripts/lyapunov_oracle.py`);
+without them the analysis still runs, and the groups they would prove stay
+`U`.
 
 Contributors never write Lean. Adding coverage for a new function means
 adding a small `.dsp` instantiating it in `tests/lean/`, reading the verdicts
@@ -353,6 +588,12 @@ kind:
   *compiler*, where this work certifies *properties of compiled programs*.
 
 ## 8. Where this can go
+
+*Since this section was written, the numerical tests have moved to float and
+double over 44.1–192 kHz. [float-sr-proposal.md](float-sr-proposal.md)
+proposes how the certification can follow: the sample rate and the controls
+as ranges, recursion groups as state-space systems, and float and double as
+semantics. It gives measurements from a prototype.*
 
 The realistic ambition is not "prove the libraries correct" but two fronts
 with different economics:
