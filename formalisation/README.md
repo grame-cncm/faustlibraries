@@ -217,6 +217,47 @@ double arithmetic but not proven in single from 88.2 kHz: its Jury margin,
 single precision can move. The design and the measurements behind it are in
 [float-sr-proposal.md](float-sr-proposal.md).
 
+### What `exact`, `double` and `single` mean
+
+Every verdict of the rate analysis is given three times, for three ways of
+computing the **coefficients** of a recursion. The coefficients are what
+does not depend on the recursion's state: `tan(π·fc/SR)`, `2·cos(w)`, a
+resonance. In the prelude these are the three values of `Prec`.
+
+| arithmetic | what is computed | the question answered |
+|---|---|---|
+| `exact` | the formula as mathematics defines it, in real arithmetic: rationals exactly, `tan`, `sin` and `exp` enclosed within about `2⁻¹⁰⁰`. No machine computes this. | is the **design** stable at this rate? |
+| `double` | every operation rounded as in a program compiled with `-double`: relative error up to `u = 2⁻⁵³`, libm within 2 ulps, controls in `float`. The interval contains every value such a program can compute. | is the **program compiled in double** stable? |
+| `single` | the same with `float`, `u = 2⁻²⁴`: the default compilation | is the **program compiled in float** stable? |
+
+Comparing the three localizes a problem:
+
+- **`S` in exact and double, `U` in single**: the design is sound, and single
+  precision breaks it. The direct-form `tf2s` at 20 Hz and 96 kHz has a Jury
+  margin of 1.7e-6. That is smaller than what the rounding of its
+  coefficients in single can move, so a float program may compute a
+  recursion outside the stable region. Its state-variable replacement keeps
+  `S` in the three arithmetics.
+- **`U` in all three**: the design itself is marginal, or the analysis is not
+  strong enough. An oscillator by rotation keeps its energy exactly, with a
+  pole on the unit circle, so nothing can prove it asymptotically stable.
+  `tf3slf` at low cutoff is stable, but its triple pole near 1 leaves less
+  margin than the analysis needs.
+- **The boxes are not nested.** In single, a literal such as `0.1` is its
+  `float` value, a single point that differs from `1/10`. The single box
+  therefore need not contain the exact one, and a verdict can, in
+  principle, be better in single than in exact.
+
+Two things are the same in the three arithmetics:
+
+- **The loop arithmetic is taken as exact.** The products and sums that
+  involve the state are not rounded in the model. Their rounding perturbs
+  the state at each sample: that is an accuracy question (item P4 of the
+  proposal), not a change of the recursion's coefficients.
+- **The claim is under the standing obligations of the prelude**: IEEE 754
+  rounding in the evaluation order of the graph, libm within 2 ulps, no
+  reassociation (`-ffast-math` is not covered).
+
 ### What "at most 2 states" means
 
 **The state of a recursion** is the set of past values it needs to compute the
