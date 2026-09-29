@@ -439,13 +439,19 @@ is pinned as a machine-checked theorem. The hand-written specifications live in
 `formalisation/`, the certified examples in `tests/lean/`, and the generator in
 `scripts/sig2lean.py`.
 
-Two properties are currently certified, on concrete instantiations:
+Three properties are currently certified, on concrete instantiations:
 
 - **feedback stability**: linear recursions of order ≤ 2 with constant
   coefficients are checked against the Jury criterion in exact rational
   arithmetic (e.g. `fi.tf2` instances);
 - **index bounds**: every table read and delay tap is checked to stay in range
-  *as written* — as opposed to being made safe by a compiler-inserted clamp.
+  *as written* — as opposed to being made safe by a compiler-inserted clamp;
+- **stability at the sample rates, in float and double**: each recursion group
+  whose state is at most 2 samples (first order, direct-form second order,
+  state-variable and trapezoidal sections) is checked at the six rates of
+  `make check-precision`, with the controls at their default values, with its
+  coefficients as the program computes them in exact, double and single
+  arithmetic. This one covers the coefficients that depend on `ma.SR`.
 
 Everything the analysers do not recognise exactly is **refused, not guessed**:
 a refusal (`not certified`, `not proven`) is a statement about the analyser's
@@ -484,6 +490,14 @@ No Lean knowledge is needed. Prerequisites: `lean` (4.31, bundled Std only) and
      order > 2…). The refusal is pinned as a `= false` theorem, so if a later
      extension of the analysers unlocks the case, `make certify` will show the
      verdict flip.
+   - the rate analysis prints one line per program and precision, e.g.
+     `rates tf2s_direct_20hz single: n26:SSUUUU(Jury fails on the box)`: for
+     each recursion group (`n26`, the dump index of its `DEBRUIJNREC`), one
+     letter per rate from 44.1 to 192 kHz. `S` is stable, `U` is not proven
+     stable — in single precision, a structure whose stability margin is
+     smaller than the rounding of its coefficients, here the direct-form
+     lowpass at 20 Hz from 88.2 kHz — and `R` is refused, with the reason
+     (nonlinear, more than 2 states, integer recursion, coupled groups…).
 
    The run also cross-checks every table verdict against the compiler's own
    clamp insertion (the `-ct` pass, read from
@@ -500,10 +514,22 @@ From then on, every `make certify` re-proves the theorems and turns any
 verdict drift — from a compiler or specification change — into a loud failure,
 exactly as `make check` does for numerical outputs.
 
-Two standing limits are worth knowing: certification applies to the exported
-signal graph (not to the generated C++/Rust code), and to the exact rationals
-denoted by the coefficients (not to floating-point execution). Both are
-recorded as named obligations in `formalisation/signal-import-formal-spec.lean`.
+**When to run it.** A change that rewrites a recursive structure — a filter
+realized in another form, a rewrite against cancellation — adds a fixture for
+the rewritten function to `tests/lean/` and runs `make certify`, next to `make
+check-precision`. The rate analysis then says whether the new structure is
+stable in float at every rate, and the fixture keeps the certification
+following the library: without one, the rewrite of `fi.lowpass` (#262) went
+through 20 commits before anyone noticed that `make certify` failed.
+
+Standing limits worth knowing: certification applies to the exported signal
+graph (not to the generated C++/Rust code). Stability and index bounds are
+certified over the exact rationals denoted by the coefficients; the rate
+analysis models floating point, assuming IEEE 754 rounding, a libm accurate to
+2 ulps and no reassociation (`-ffast-math`), and it takes the loop arithmetic
+that involves the state as exact (its rounding is an accuracy question). All
+are recorded as named obligations in
+`formalisation/signal-import-formal-spec.lean`.
 
 A third, optional layer exists for maintainers: `make certify-deep` builds a
 small [mathlib](https://github.com/leanprover-community/mathlib4)-based project

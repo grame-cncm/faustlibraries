@@ -488,8 +488,12 @@ make certify | certify-reference
 
 Compiles each program with `faust-rs --dump-sig-dag`, translates its signals
 into Lean 4 terms, asks Lean for the verdicts (stability of linear recursions,
-index bounds of table reads and delays), and writes `OUT.lean` with one
-`by decide` theorem pinning each verdict. It also compares Lean's table verdicts
+index bounds of table reads and delays, and stability of each recursion group
+at the six rates of `check-precision` in exact, double and single arithmetic),
+and writes `OUT.lean` with one `by decide` theorem pinning each verdict. For
+the rate analysis it also emits the whole graph as a `Dag` (one node per dump
+binding) and prints the verdicts per program and precision
+(`rates lowpass3 single: n26:SSSSSS;n49:SSSSSS`). It also compares Lean's table verdicts
 with the clamps the compiler actually inserts (`-ct 1` against `-ct 0`), and
 fails if a table that needs a clamp was left unclamped.
 

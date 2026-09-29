@@ -165,11 +165,10 @@ diffing), which is future work.
 
 ## 3. What is certified today
 
-Two independent analyses run over each imported graph. Both are defined in
+Three analyses run over each imported graph. All are defined in
 [signal-import-formal-spec.lean](signal-import-formal-spec.lean), the single
-hand-written, hand-reviewed prelude (~500 commented lines, Lean 4.31 with only
-its bundled `Std`, no `sorry`, axioms limited to `propext` on the generated
-theorems).
+hand-written, hand-reviewed prelude (Lean 4.31 with only its bundled `Std`, no
+`sorry`, axioms limited to `propext` on the generated theorems).
 
 **Feedback stability.** Linear recursions of order ≤ 2 with constant
 coefficients are recognized syntactically and checked against the Jury /
@@ -188,11 +187,35 @@ that hold independently of the recursive state: the phasor identity
 `x - floor(x) ∈ [0, 1)` bounds every wrap-around oscillator, so a
 phasor-driven `rdtable` sine oscillator is certified in range end to end.
 
+**Stability at the sample rates, in float and double.** The two analyses
+above refuse every coefficient that depends on `ma.SR` (it goes through `tan`)
+and read single-output recursions only. The third one reads the graph as a
+DAG and certifies each recursion group at the six rates of `make
+check-precision` (44.1 to 192 kHz), with the controls at their default values,
+in three arithmetics: `exact`, `double` and `single`. The coefficients are
+enclosed in intervals that contain their value *as the program computes it*
+in that precision: every real operation is widened by one unit roundoff, a
+libm call by `libmUlps` ulps, and `tan`, `sin`, `cos`, `exp`, `sqrt` are
+enclosed by Taylor polynomials with an explicit remainder, in rational
+arithmetic. A group whose state is at most 2 samples (first order, direct-form
+second order, state-variable and trapezoidal sections) is then certified by
+the Jury conditions at the vertices of the box of its state matrix, which is
+exact because the conditions are multilinear. The verdicts are `S` (stable),
+`U` (not proven) and `R` (refused, with the reason), per rate. For instance,
+`fi.lowpass(2, 20)` (state-variable since #262) is stable at every rate in the
+three arithmetics, whereas the direct form it replaced is stable in exact and
+double arithmetic but not proven in single from 88.2 kHz: its Jury margin,
+1.7e-6 at 96 kHz, is smaller than what the rounding of its coefficients in
+single precision can move. The design and the measurements behind it are in
+[float-sr-proposal.md](float-sr-proposal.md).
+
 The example set lives in [../tests/lean/](../tests/lean/): one small `.dsp`
 per certified instantiation, plus deliberate counter-examples whose *refusal*
 is itself pinned as a theorem (`+ ~ *(1.5)` is certified unstable; an
 under-clamped table read is certified `CLAMP REQUIRED`). The generated
-[certified.lean](../tests/lean/certified.lean) re-checks in under a second.
+[certified.lean](../tests/lean/certified.lean) re-checks in about 30 seconds,
+almost all of it in the rate analysis (`by decide +kernel` on the interval
+computations).
 
 ## 4. Safety by refusal
 
@@ -278,7 +301,9 @@ place — the "Standing obligations" section of the prelude. The chain:
 | Jury criterion ⟺ poles strictly inside the unit disc | **proved** at order 2 in the optional mathlib layer ([mathlib/JuryRoots.lean](mathlib/JuryRoots.lean), `make certify-deep`) |
 | `0 < 1/tan(w)` for cutoffs below Nyquist (the `tf2s` hypothesis) | **proved** in the same layer |
 | Adequacy of the import (`Sig` mirrors `--dump-sig`) | standing obligation; mitigated by round-tripping |
-| Exact rationals vs. floating-point execution | standing obligation, permanent limit — the theorems speak about the denoted exact arithmetic |
+| Exact rationals vs. floating-point execution | for stability and indices, a standing obligation — those theorems speak about the denoted exact arithmetic; the rate analysis models floating point |
+| IEEE 754 rounding of `+ - * /` and `sqrt`, libm within `libmUlps` ulps, no reassociation | standing obligations of the rate analysis |
+| Taylor remainders, `tan` as `sin/cos`, vertex lemma of the Jury check | hand-reviewed; the next targets of the mathlib layer |
 | The backend compiles the graph faithfully | out of scope — certification is about the signal graph, not the generated C++/Rust |
 
 The generator (`sig2lean.py`) is deliberately *outside* the trusted base: it

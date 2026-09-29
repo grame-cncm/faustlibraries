@@ -14,6 +14,7 @@ make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
 make check-cpu   # CPU cost of the tests; CPU_ARGS="--base origin/master" for new/base ratios
+make certify     # Lean certification of tests/lean/*.dsp (needs faust-rs + lean 4.31)
 make plots       # regenerate the documentation SVG figures (needs matplotlib)
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
@@ -149,6 +150,13 @@ Every script behind these targets is described in `scripts/README.md`.
    pitfalls: `doc/docs/contributing.md`, section *Precision and sample
    rate*. Report what was checked in the
    pull request.
+   A change that rewrites a recursive structure also adds a fixture for the
+   rewritten function to `tests/lean/` and runs `make certify`: its rate
+   analysis says whether each recursion group is stable at the six rates in
+   exact, double and single arithmetic (`S`/`U`/`R` per rate), and a drift
+   of `tests/lean/certified.lean` is reviewed like a test failure
+   (`make certify-reference` to accept it). Section *Formal certification*
+   of `contributing.md`.
 
 10. **Measure what a structural change costs.** A change that alters the
     structure of a computation (a rewrite against cancellation, a filter

@@ -1,6 +1,8 @@
 # Making the Lean certification useful: float, double and the sample-rate range
 
-*Status: proposal, 2026-09-29, branch `lean-float-sr`. It builds on the
+*Status: proposal, 2026-09-29, branch `lean-float-sr`. **P0 and step 2
+are implemented** (see "Implemented" at the end); the rest is still a
+proposal. It builds on the
 design described in [README.md](README.md). The measurements come from a
 Python prototype in [prototype/](prototype/). It implements the algorithms
 proposed here, outside Lean, to see what they would find on the real
@@ -368,3 +370,42 @@ python3 survey.py                 # about 5 minutes on 10 cores; writes survey.j
 `import("stdfaust.lib"); process = fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);`.
 The prototype needs `faust-rs` on the `PATH` (for `--dump-sig-dag`), numpy
 and scipy. It imports the DAG reader of `scripts/sig2lean.py`.
+
+## Implemented (2026-09-29)
+
+- **P0.** `make certify` runs again (`certified.lean` regenerated after #262).
+  AGENTS.md rule 9 and `contributing.md` ask for a `tests/lean/` fixture and
+  a `make certify` run with any rewrite of a recursive structure. New
+  fixtures: `lowpass_svf_20hz`, `tf2s_direct_20hz`, `bandpass_tpt`,
+  `tf2snp_exact`, `resonlp`, `smoo_sr`, `tf3slf_low`.
+- **Step 2**, in the Std-only prelude (section "Stability at the sample
+  rates"), with no mathlib dependency:
+  - the graph is emitted a second time as a `Dag`, evaluated bottom-up so
+    that each node is computed once;
+  - it uses intervals with dyadic endpoints (grid 2⁻¹⁰⁰), rounded outward;
+  - the rounding model covers exact, double and single arithmetic, a libm
+    within `libmUlps` = 2 ulps, and controls stored as `float`;
+  - `sin`, `cos`, `tan`, `exp`, `sqrt` and integer `pow` are enclosed by
+    Taylor polynomials with an explicit remainder, or by a checked integer
+    square root;
+  - linear extraction handles multi-output groups;
+  - stability uses the Jury conditions at the vertices, for groups of up to
+    2 states;
+  - the six `check-precision` rates are taken as points, with the controls
+    at their default values.
+
+  The verdicts are pinned per program and precision by
+  `theorem …_rates_<prec> : srVerdicts …_dag .<prec> = […] := by decide +kernel`.
+  The whole `make certify` takes about 30 s, and the optional mathlib layer
+  still builds.
+- **Verdicts obtained.**
+  - `fi.lowpass(2, 20)`, `fi.bandpass(1, 500, 2000)`, `fi.resonlp`, `si.smoo`
+    and `lowpass3` are stable at the six rates, in all three arithmetics.
+  - The direct-form `fi.tf2s` at 20 Hz is `SSSSSS` in exact and double and
+    `SSUUUU` in single, the same verdict as the prototype.
+  - `tf2snp` (coupled nested groups), `tf3slf` (3 states), `ba.time` and
+    `no.noise` (integer recursions) are refused, with their reason pinned.
+- **Not done yet.** Continuous rate and control ranges (P1, which needs
+  correlation-preserving arithmetic), more than 2 states and modulated
+  verdicts (P2), non-finiteness and float index bounds (P3), error bounds
+  (P4), a suite-wide run (P5), and faust-rs typing (P6).
