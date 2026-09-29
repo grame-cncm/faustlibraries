@@ -1,14 +1,15 @@
 // A test source without phase drift : the sine of an integer phase.
 // os.osc accumulates a real phase, whose rounding drifts in single precision : after one
 // second the float and double renders are out of phase, and only their levels compare.
-// Here the phase is an integer counter modulo N = 2^22, exact in float and in double
-// (m < 2^24), so both renders read the same phase at every sample ; they differ only by
-// the rounding of 2*pi and of sin, bounded, never accumulated. The frequency is rounded
-// to a multiple of SR/N (the step k is checked to be the same integer in both precisions
-// for every frequency the tests use, at the six rates of check_precision.py).
-toscN = 4194304;
-toscStep(f) = int(float(f) * toscN / library("maths.lib").SR + 0.5);  // float(f) : f * toscN in int overflows above 512 Hz
-tosc(f) = sin(2.0 * library("maths.lib").PI * float(m) / toscN)
+// Here the phase is an integer counter m = (m + p) mod N, with an integer step p and
+// N = 10 * SR : m < 2^24, exact in float and in double, and the step p = round(10 f)
+// depends on the constant f only, never on SR, so both renders read the same phase at
+// every sample and play exactly f Hz (f with at most one decimal). They differ only by
+// the rounding of 2 pi m / N and of sin, bounded, never accumulated.
+tphase(p, N) = %(N) ~ +(p);
+toscStep(f) = int(f * 10 + 0.5);            // the integer step, in tenths of a hertz
+tosc(f) = sin(2.0 * library("maths.lib").PI * float(tphase(p, N)) / N)
 with {
-    m = (+(toscStep(f)) : %(toscN)) ~ _;
+    N = 10 * int(library("maths.lib").SR);  // a tenth of a hertz of resolution
+    p = toscStep(f);
 };
