@@ -31,10 +31,11 @@
 // The environment identifier for this library is `aa`. After importing
 // the standard libraries in Faust, the functions below can be called as `aa.function_name`.
 //
-// The Antialiased Nonlinearities library is organized into 3 sections:
+// The Antialiased Nonlinearities library is organized into 4 sections:
 //
 // * [Auxiliary Functions](#auxiliary-functions)
 // * [Saturators](#saturators)
+// * [Wavefolders](#wavefolders)
 // * [Trigonometry](#trigonometry)
 //
 // #### References
@@ -49,7 +50,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Antialiased Nonlinearities";
-declare version "1.5.1";
+declare version "1.6.0";
 
 //==============================Auxiliary Functions=======================================
 //========================================================================================
@@ -962,6 +963,258 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
                };
            F2(x_F2) = .25 * (2.0 * x_F2 ^ 2.0 * f(x_F2) + f(x_F2) - 
                sqrt(x_F2 ^ 2.0 + 1.0) * x_F2);
+      };
+
+
+//================= Wavefolders ===============
+// Wavefolders reflect the part of the signal that exceeds a threshold back
+// towards zero, as many times as needed to keep the output within the
+// threshold. Their slope stays large however hard they are driven, so they
+// alias much more than saturators at the same drive.
+//
+// The folders below share two parameters: the threshold `t` and a decay
+// factor `r`. At each reflection, the part of the input beyond the threshold
+// is scaled by `r`. With `r = 1` the folds are periodic in the input; with
+// `r < 1` each fold is `1/r` times wider than the previous one, so the
+// output moves more slowly as the input grows. Their antiderivatives are in
+// closed form for any number of folds.
+//
+// The trivial (non-antialiased) curves are not exported; they are the
+// limit of the ADAA forms for slowly varying inputs.
+//============================================
+
+// Internal: the fold geometry shared by the wavefolders below.
+// For |x| > t, k is the number of completed reflections, p in [0; 1) the
+// position within the current fold, s = (-1)^k, and g = r^-(k+1) the
+// reciprocal of the current slope. With e = |x| - t and r < 1, the folds
+// end where e = (2t / (1 - r)) * (r^-n - 1), n = 1, 2, ..., hence
+// k + p' = log(1 + e (1 - r) / (2t)) / -log(r) with p' the fractional part,
+// and p = r (r^-p' - 1) / (1 - r). For r = 1, k + p = e / (2t).
+_wavefold(t0, r0) = environment {
+    t = max(ma.EPSILON, t0);
+    r = _clip(ma.EPSILON, 1.0, r0);
+    a = 0.0 - ma.log1p(r - 1.0);
+    rho = 1.0 / (r * r);
+    excess(x) = max(0.0, abs(x) - t);
+    inside(x) = abs(x) <= t;
+    pos(x) = ba.if(r < 1.0, ma.log1p(excess(x) * (1.0 - r) / (2.0 * t)) / max(a, ma.MIN),
+                   excess(x) / (2.0 * t));
+    k(x) = floor(pos(x));
+    p(x) = ba.if(r < 1.0, r * ma.expm1(a * ph) / max(1.0 - r, ma.MIN), ph)
+        with {
+            ph = pos(x) - k(x);
+        };
+    s(x) = 1.0 - 2.0 * fmod(k(x), 2.0);
+    g(x) = exp(a * (k(x) + 1.0));
+    // ADAA2 takes the antiderivative of x * f(x) (see aa.hardclip2). Fold
+    // k has width w = 2 t g and starts at v = t + 2 t (r^-k - 1) / (1 - r);
+    // in it f = s t h(q), q in [0; 1], with h odd about q = 1/2. With H0(p)
+    // and H1(p) the integrals of h(q) and q h(q) over [0; p], fold k adds
+    // s t w (v H0 + w H1), and the completed folds, an alternating geometric
+    // series in rho = r^-2, add 4 t^3 H1(1) (rho - s g^2) / (1 + rho). The
+    // terms are grouped so that none is much larger than the result.
+    xf2(H0, H1, H1full, x) = ma.signum(x) * (t ^ 3.0 / 3.0 + cst + part)
+        with {
+            w = 2.0 * t * g(x);
+            pk = p(x);
+            v = t + 2.0 * t * ba.if(r < 1.0, ma.expm1(a * k(x)) / max(1.0 - r, ma.MIN), k(x));
+            rr = r * r / (1.0 + r * r);
+            cst = 4.0 * t ^ 3.0 * H1full * (1.0 - rr);
+            part = s(x) * t * w * (v * H0(pk) + w * (H1(pk) - H1full * rr));
+        };
+
+    // triangle: within a fold the output goes linearly from s t to -s t
+    triF(x) = ba.if(inside(x), x, ma.signum(x) * s(x) * t * (1.0 - 2.0 * p(x)));
+    triF1(x) = ba.if(inside(x), .5 * x * x,
+                     .5 * t * t + 2.0 * t * t * s(x) * g(x) * p(x) * (1.0 - p(x)));
+    triF2(x) = ba.if(inside(x), x * x * x / 3.0, xf2(H0, H1, -1.0 / 6.0, x))
+        with {
+            H0(q) = q - q * q;
+            H1(q) = q * q * (.5 - 2.0 * q / 3.0);
+        };
+
+    // sine: within a fold the output goes from s t to -s t as s t cos(pi p)
+    // sin(pi q) and 1 - cos(pi q) are written to stay accurate in float
+    // near q = 0 and q = 1, where the large fold widths multiply them
+    sinpi(q) = sin(ma.PI * min(q, 1.0 - q));
+    sinF(x) = ba.if(inside(x), x, ma.signum(x) * s(x) * t * sin(ma.PI * (.5 - p(x))));
+    sinF1(x) = ba.if(inside(x), .5 * x * x,
+                     .5 * t * t + 2.0 * t * t * s(x) * g(x) * sinpi(p(x)) / ma.PI);
+    sinF2(x) = ba.if(inside(x), x * x * x / 3.0, xf2(H0, H1, -2.0 / (ma.PI * ma.PI), x))
+        with {
+            H0(q) = sinpi(q) / ma.PI;
+            H1(q) = q * H0(q) - 2.0 * (sin(.5 * ma.PI * q) / ma.PI) ^ 2.0;
+        };
+};
+
+
+//-------`(aa.)triangleFold1`---------------------
+//
+// First-order ADAA triangle wavefolder.
+//
+// The input passes unchanged between `-t` and `t`. Beyond, it is reflected
+// back linearly, as many times as needed. With `r = 1` this is the classic
+// triangle folder: for `|x| > t` the output is a triangle wave of the input
+// with period `4t`. With `r < 1` the excess is scaled by `r` at every
+// reflection: after k reflections the slope is `r^k` and the fold is
+// `2t / r^k` wide.
+//
+// The domain of this function is ℝ; its theoretical range is [-t; t].
+//
+// #### Usage
+// ```
+// _ : aa.triangleFold1(t, r) : _
+// ```
+//
+// Where:
+//
+// * `t`: the threshold, > 0; the output stays within [-t; t]
+// * `r`: the decay factor of the excess at each reflection, in (0; 1];
+//   1 for periodic folding
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// ba = library("basics.lib");
+// no = library("noises.lib");
+// foldSig = 4.0 * no.noise;
+// foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+// triangleFold1_test = aa.triangleFold1(0.5, 0.9, foldSig);
+// triangleFold1_slider_test = aa.triangleFold1(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.9, 0.5, 1.0, 0.001), foldSig);
+// triangleFold1_modulated_test = aa.triangleFold1(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
+// ```
+//---------------------------------------------
+declare triangleFold1 author "David Braun";
+declare triangleFold1 copyright "Copyright (C) 2026 David Braun";
+declare triangleFold1 license "MIT";
+triangleFold1(t, r, x) = ADAA1(EPS, fold.triF, fold.triF1, x)
+      with {
+           EPS = .001;
+           fold = _wavefold(t, r);
+      };
+
+
+//-------`(aa.)triangleFold2`---------------------
+//
+// Second-order ADAA triangle wavefolder. Same curve and parameters as
+// `aa.triangleFold1`.
+//
+// The domain of this function is ℝ; its theoretical range is [-t; t].
+//
+// #### Usage
+// ```
+// _ : aa.triangleFold2(t, r) : _
+// ```
+//
+// Where:
+//
+// * `t`: the threshold, > 0; the output stays within [-t; t]
+// * `r`: the decay factor of the excess at each reflection, in (0; 1];
+//   1 for periodic folding
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// ba = library("basics.lib");
+// no = library("noises.lib");
+// foldSig = 4.0 * no.noise;
+// foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+// triangleFold2_test = aa.triangleFold2(0.5, 0.9, foldSig);
+// triangleFold2_slider_test = aa.triangleFold2(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.9, 0.5, 1.0, 0.001), foldSig);
+// triangleFold2_modulated_test = aa.triangleFold2(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
+// ```
+//---------------------------------------------
+declare triangleFold2 author "David Braun";
+declare triangleFold2 copyright "Copyright (C) 2026 David Braun";
+declare triangleFold2 license "MIT";
+triangleFold2(t, r, x) = ADAA2(EPS, fold.triF, fold.triF1, fold.triF2, x)
+      with {
+           EPS = .001;
+           fold = _wavefold(t, r);
+      };
+
+
+//-------`(aa.)sineFold1`---------------------
+//
+// First-order ADAA sine wavefolder.
+//
+// The input passes unchanged between `-t` and `t`. Beyond, each fold is a
+// half-period of a cosine that goes from one threshold to the other, so the
+// slope is 1 inside and 0 at the turning points. With `r = 1` the output for
+// `|x| > t` is `t * sin(pi * x / (2t))`. With `r < 1` each fold is `1/r`
+// times wider than the previous one, as for `aa.triangleFold1`: the output
+// is that of the triangle folder `y` passed through `t * sin(pi * y / (2t))`.
+//
+// The domain of this function is ℝ; its theoretical range is [-t; t].
+//
+// #### Usage
+// ```
+// _ : aa.sineFold1(t, r) : _
+// ```
+//
+// Where:
+//
+// * `t`: the threshold, > 0; the output stays within [-t; t]
+// * `r`: the decay factor of the fold width, in (0; 1]; 1 for periodic folding
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// ba = library("basics.lib");
+// no = library("noises.lib");
+// foldSig = 4.0 * no.noise;
+// foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+// sineFold1_test = aa.sineFold1(0.5, 0.8, foldSig);
+// sineFold1_slider_test = aa.sineFold1(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.8, 0.5, 1.0, 0.001), foldSig);
+// sineFold1_modulated_test = aa.sineFold1(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
+// ```
+//---------------------------------------------
+declare sineFold1 author "David Braun";
+declare sineFold1 copyright "Copyright (C) 2026 David Braun";
+declare sineFold1 license "MIT";
+sineFold1(t, r, x) = ADAA1(EPS, fold.sinF, fold.sinF1, x)
+      with {
+           EPS = .001;
+           fold = _wavefold(t, r);
+      };
+
+
+//-------`(aa.)sineFold2`---------------------
+//
+// Second-order ADAA sine wavefolder. Same curve and parameters as
+// `aa.sineFold1`.
+//
+// The domain of this function is ℝ; its theoretical range is [-t; t].
+//
+// #### Usage
+// ```
+// _ : aa.sineFold2(t, r) : _
+// ```
+//
+// Where:
+//
+// * `t`: the threshold, > 0; the output stays within [-t; t]
+// * `r`: the decay factor of the fold width, in (0; 1]; 1 for periodic folding
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// ba = library("basics.lib");
+// no = library("noises.lib");
+// foldSig = 4.0 * no.noise;
+// foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+// sineFold2_test = aa.sineFold2(0.5, 0.8, foldSig);
+// sineFold2_slider_test = aa.sineFold2(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.8, 0.5, 1.0, 0.001), foldSig);
+// sineFold2_modulated_test = aa.sineFold2(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
+// ```
+//---------------------------------------------
+declare sineFold2 author "David Braun";
+declare sineFold2 copyright "Copyright (C) 2026 David Braun";
+declare sineFold2 license "MIT";
+sineFold2(t, r, x) = ADAA2(EPS, fold.sinF, fold.sinF1, fold.sinF2, x)
+      with {
+           EPS = .001;
+           fold = _wavefold(t, r);
       };
 
 
