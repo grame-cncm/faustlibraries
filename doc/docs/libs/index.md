@@ -692,6 +692,7 @@
 [(ef.)reverseEchoN](misceffects.md#efreverseechon)
 [(ef.)reverseDelayRamped](misceffects.md#efreversedelayramped)
 [(ef.)uniformPanToStereo](misceffects.md#efuniformpantostereo)
+[(ef.)xferDimensionExpander](misceffects.md#efxferdimensionexpander)
 [(ef.)tapeStop](misceffects.md#eftapestop)
 [(ef.)transpose](misceffects.md#eftranspose)
 [(ef.)transpose_windowed](misceffects.md#eftranspose_windowed)
