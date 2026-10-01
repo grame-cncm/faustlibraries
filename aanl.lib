@@ -279,7 +279,8 @@ ADAA1(EPS, f, F1, x) = D1q
 // * `EPS`: a threshold for switching between safe and ill-conditioned paths
 // * `f`: a function that we want to process with ADAA
 // * `F1`: f's first antiderivative
-// * `F2`: f's second antiderivative
+// * `F2`: the antiderivative of x * f(x), as in `aa.hardclip2` (not the second
+//   antiderivative of f)
 // * `x`: input signal
 //
 // #### Test
@@ -432,6 +433,8 @@ hardclip2(x) = ADAA2(EPS, f, F1, F2, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // cubic1_test = aa.cubic1(sig);
+// cubic1_noise_test = aa.cubic1(2.0 * no.noise)
+//     with { no = library("noises.lib"); };
 // ```
 //-------------------------------------------
 declare cubic1 author "Dario Sanfilippo";
@@ -445,9 +448,9 @@ cubic1(x) = ADAA1(EPS, f, F1, x)
                            x_f - x_f ^ 3.0 / 3.0, 
                            (2.0 / 3.0) * ma.signum(x_f));
            F1(x_F1) = ba.if(   x_F1 <= -1.0,
-                               x_F1 * -2.0 / 3.0,
+                               x_F1 * -2.0 / 3.0 - .25,
                                ba.if(  x_F1 >= 1.0,
-                                       x_F1 * 2.0 / 3.0,
+                                       x_F1 * 2.0 / 3.0 - .25,
                                        x_F1 ^ 2.0 / 2.0 - x_F1 ^ 4.0 / 12.0));
       };
 
@@ -473,6 +476,8 @@ cubic1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // parabolic_test = aa.parabolic(sig);
+// parabolic_noise_test = aa.parabolic(4.0 * no.noise)
+//     with { no = library("noises.lib"); };
 // ```
 //--------------------------------------------
 declare parabolic author "Dario Sanfilippo";
@@ -488,7 +493,7 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
            F1(x_F1) = ba.if(   abs(x_F1) <= 2.0, 
                                (-1.0 / 12.0) * x_F1 ^ 2.0 * 
                                    (x_F1 * ma.signum(x_F1) - 6.0),
-                               abs(x_F1));
+                               abs(x_F1) - 2.0 / 3.0);
       };
 
 
@@ -513,6 +518,8 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // parabolic2_test = aa.parabolic2(sig);
+// parabolic2_noise_test = aa.parabolic2(4.0 * no.noise)
+//     with { no = library("noises.lib"); };
 // ```
 //---------------------------------------------
 declare parabolic2 author "Dario Sanfilippo";
@@ -528,11 +535,11 @@ parabolic2(x) = ADAA2(EPS, f, F1, F2, x)
            F1(x_F1) = ba.if(   abs(x_F1) <= 2.0,
                                (-1.0 / 12.0) * x_F1 ^ 2.0 * 
                                    (x_F1 * ma.signum(x_F1) - 6.0),
-                               abs(x_F1));
+                               abs(x_F1) - 2.0 / 3.0);
            F2(x_F2) = ba.if(   abs(x_F2) <= 2.0,
                                (1.0 / 48.0) * x_F2 ^ 3.0 * 
                                    (16.0 - 3.0 * x_F2 * ma.signum(x_F2)),
-                               .5 * x_F2 ^ 2.0 * ma.signum(x_F2));
+                               (.5 * x_F2 ^ 2.0 - 1.0 / 3.0) * ma.signum(x_F2));
       };
 
 
@@ -1361,6 +1368,8 @@ arccos(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // arccos2_test = aa.arccos2(sig);
+// arccos2_noise_test = aa.arccos2(no.noise)
+//     with { no = library("noises.lib"); };
 // ```
 //--------------------------------------------
 declare arccos2 author "Dario Sanfilippo";
@@ -1376,7 +1385,7 @@ arccos2(x) = ADAA2(EPS, f, F1, F2, x)
                    const = 1.0; // for F1(0) = 0 to minimise precision loss
                };
            F2(x_F2) = .25 * (2.0 * x_F2 ^ 2.0 * f(x_F2) + Rasin(x_F2) -
-               Rsqrt(1.0 - x_F2 ^ 2.0));
+               x_F2 * Rsqrt(1.0 - x_F2 ^ 2.0));
       };
 
 
