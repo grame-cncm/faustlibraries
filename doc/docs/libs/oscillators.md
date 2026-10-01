@@ -712,7 +712,7 @@ lf_rawsaw(periodsamps) : _
 
 Where:
 
-* `periodsamps`: number of periods per samples
+* `periodsamps`: period in samples
 
 #### Test
 ```
@@ -792,7 +792,7 @@ Where:
 ```
 os = library("oscillators.lib");
 ba = library("basics.lib");
-lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(32));
+lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(10000));
 ```
 
 ----
@@ -817,7 +817,8 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
-lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, button("reset"));
+ba = library("basics.lib");
+lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, ba.pulse(10000));
 ```
 
 ----
@@ -881,7 +882,8 @@ MAX_SAW_ORDER : _
 Where:
 
 * `N`: polynomial order, a constant numerical expression between 1 and `MAX_SAW_ORDER`
-* `freq`: frequency in Hz
+* `freq`: frequency in Hz; `sawN` and `sawNp` use `max(20, abs(freq))`
+  (use `lf_sawpos` below 20 Hz)
 
 #### Test
 ```
@@ -922,18 +924,22 @@ sawNp(N,freq,phase) : _
 where
 
 * `N`: waveform interpolation polynomial order 1 to 4 (constant integer expression)
-* `freq`: frequency in Hz
-* `phase`: waveform phase as a fraction of one period (rounded to nearest sample)
+* `freq`: frequency in Hz, clipped below at 20 Hz as in `sawN`
+* `phase`: waveform phase as a fraction of one period (rounded to nearest sample).
+  It is a delay, i.e., a phase lag: `sawNp(N,freq,0.25)` is a quarter period
+  behind `sawN(N,freq)`, whereas `lf_sawpos_phase(freq,0.25)` is a quarter
+  period ahead of `lf_sawpos(freq)`.
 
 #### Test
 ```
 os = library("oscillators.lib");
 sawNp_test = os.sawNp(3, 330, 0.5);
+sawNp_lowfreq_test = os.sawNp(2, 10, 0.5);
 ```
 #### Implementation Notes
 
 The phase offset is implemented by delaying `sawN(N,freq)` by
-`round(phase*ma.SR/freq)` samples, for up to 8191 samples.
+`round(phase*ma.SR/max(20,abs(freq)))` samples, for up to 8191 samples.
 The minimum sawtooth frequency that can be delayed a whole period
 is therefore `ma.SR/8191`, which is well below audibility for normal
 audio sampling rates.
@@ -1057,7 +1063,12 @@ saw2ptr_modulated_test = os.saw2ptr(20*pow(1000, tri)) with { P = int(ma.SR/10);
 ```
 ##### Implementation
 
-Polynomial Transition Regions (PTR) method for aliasing suppression.
+Polynomial Transition Regions (PTR) method for aliasing suppression,
+order 2 (transition region one sample wide), following Eq. (8) and Table I
+(W = 1) of the reference below: the trivial sawtooth `2*phi-1` offset by
+the phase increment `T = freq/ma.SR` (which makes it zero-mean), and
+`1 + 2*phi - 2*phi/T - T` on the first sample of each period.
+`saw2dpw` outputs the same samples one sample later.
 
 ##### Notes
 
@@ -1101,6 +1112,7 @@ ma = library("maths.lib");
 saw2dpw_test = os.saw2dpw(220);
 saw2dpw_slider_test = os.saw2dpw(hslider("saw2dpw:freq", 220, 20, 20000, 1));
 saw2dpw_modulated_test = os.saw2dpw(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+saw2dpw_zero_test = os.saw2dpw(220*(ba.period(9600) >= 4800));
 ```
 
 ----
@@ -1211,6 +1223,8 @@ Where:
 * `N`: polynomial order, a constant numerical expression
 * `freq`: frequency in Hz
 
+Each function below has its own test.
+
 ----
 
 ### `(os.)impulse`
@@ -1245,8 +1259,10 @@ pulsetrainN(N,freq,duty) : _
 Where:
 
 * `N`: order, as a constant numerical expression
-* `freq`: frequency in Hz
-* `duty`: duty cycle between 0 and 1
+* `freq`: frequency in Hz, clipped below at 23.45 Hz
+* `duty`: duty cycle between 0 and 1: fraction of each period
+  spent at the high level `2*(1-duty)`; the low level is `-2*duty`,
+  so the waveform is zero-mean
 
 #### Test
 ```
@@ -1275,7 +1291,7 @@ pulsetrain(freq,duty) : _
 Where:
 
 * `freq`: frequency in Hz
-* `duty`: duty cycle between 0 and 1
+* `duty`: duty cycle between 0 and 1 (see `pulsetrainN`)
 
 #### Test
 ```
@@ -1394,7 +1410,9 @@ triangleN(N,freq) : _
 Where:
 
 * `N`: order, as a constant numerical expression
-* `freq`: frequency in Hz
+* `freq`: frequency in Hz. Below 23.45 Hz, the triangle stays at 23.45 Hz
+  (the lower limit of `pulsetrainN`) and its amplitude falls as `freq/23.45`:
+  use `lf_triangle` for LFOs.
 
 #### Test
 ```
@@ -1599,13 +1617,18 @@ oscs(freq) : _
 
 Where:
 
-* `freq`: frequency in Hz
+* `freq`: frequency in Hz, between 0 and `ma.SR/2`
+
+The frequency is exact. The peak amplitude is `1/cos(ma.PI*freq/ma.SR)`
+(1.0004 at 440 Hz and 48 kHz, 1.056 at 5 kHz), since the two states of the
+magic circle are half a sample apart.
 
 #### Test
 ```
 os = library("oscillators.lib");
 oscs_test = os.oscs(440);
 oscs_slider_test = os.oscs(hslider("oscs:freq", 440, 20, 14000, 1));
+oscs_hf_test = os.oscs(15000);
 ```
 
 ----
@@ -1682,8 +1705,8 @@ is (modulo floating point issues) the same as:
    c = os.quadosc : _,!;
    s = os.quadosc : !,_;
    process =
-       10*c(F) + 20*c(2*F) + 30*c(F),
-       10*s(F) + 20*s(2*F) + 30*s(F);
+       10*c(F) + 20*c(2*F) + 30*c(3*F),
+       10*s(F) + 20*s(2*F) + 30*s(3*F);
 ```
 
 but much more efficient.
