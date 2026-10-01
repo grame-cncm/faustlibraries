@@ -752,6 +752,8 @@
 [(no.)simplex2](noises.md#nosimplex2)
 [(no.)simplex1](noises.md#nosimplex1)
 [(no.)simplex1_lf](noises.md#nosimplex1_lf)
+[(no.)sample_pmf](noises.md#nosample_pmf)
+[(no.)markov_step, (no.)markov_chain](noises.md#nomarkov_step,-nomarkov_chain)
 
 ## oscillators
 
@@ -1100,6 +1102,9 @@
 [(si.)bpar](signals.md#sibpar)
 [(si.)bsum](signals.md#sibsum)
 [(si.)bprod](signals.md#sibprod)
+[(si.)cumsum](signals.md#sicumsum)
+[(si.)normalizeL1, (si.)normalizeL2](signals.md#sinormalizel1,-sinormalizel2)
+[(si.)softmax](signals.md#sisoftmax)
 
 ## soundfiles
 

@@ -637,3 +637,76 @@ simplex1_lf_test = no.simplex1_lf(12345, 4.07);
 
 * Stefan Gustavson, "Simplex noise demystified" (2005).
 * Joseph Gentle, noisejs: [https://github.com/josephg/noisejs](https://github.com/josephg/noisejs).
+
+----
+
+### `(no.)sample_pmf`
+
+Draw one of `N` values at random, each with probability proportional to its
+weight (sampling a probability mass function). The draw is made at every
+sample from the uniform random signal `u`, and all the inputs may vary over
+time.
+
+#### Usage
+
+```
+sample_pmf(u, values, weights) : _
+```
+
+Where:
+
+* `u`: uniform random signal in [0, 1), for example `(no.noise + 1)/2`.
+  Draws that must be independent need decorrelated sources, e.g.
+  `(no.noises(K, k) + 1)/2`
+* `values`: list of `N` values (`N` known at compile time)
+* `weights`: list of `N` non-negative weights, not all 0; they need not sum
+  to 1
+
+#### Test
+```
+no = library("noises.lib");
+sample_pmf_test = no.sample_pmf((no.noise + 1)/2, (1, 2, 3), (0.5, 0.2, 0.3));
+```
+
+----
+
+### `(no.)markov_step`, `(no.)markov_chain`
+
+A discrete-time Markov chain over the states `0` to `N-1`. `markov_step`
+draws the next state from the current one, and `markov_chain` runs the chain,
+moving at every sample where `trig` is nonzero (use a one-sample trigger such
+as `ba.pulse` or `os.lf_imptrain`) and holding the state in between; it starts
+in state 0. Build other rules (accepting or rejecting a draw, resetting) with
+`markov_step` inside your own recursion. The transition weights may vary over
+time, for example to change the chain at each step of a sequence, and
+`si.softmax` turns scores into weights with a temperature control.
+
+#### Usage
+
+```
+markov_step(P, u, state) : _
+markov_chain(P, u, trig) : _
+```
+
+Where:
+
+* `P`: list of `N*N` transition weights (`N` known at compile time), row by
+  row: the `N` weights from state 0 to states 0 to `N-1`, then from state 1,
+  and so on. Each row is non-negative and not all 0; it need not sum to 1
+* `u`: uniform random signal in [0, 1), for example `(no.noise + 1)/2`
+  (see `no.sample_pmf`)
+* `state`: current state (int, 0 to `N-1`)
+* `trig`: transition trigger (a nonzero sample moves the chain one step)
+
+#### Test
+```
+ba = library("basics.lib");
+no = library("noises.lib");
+markov_step_test = no.markov_step((0.1, 0.9, 0.9, 0.1), (no.noise + 1)/2, 1);
+markov_chain_test = no.markov_chain(P, (no.noise + 1)/2, ba.pulse(48))
+with {
+  P = (0, 1, 0,
+       0, 0.5, 0.5,
+       0.8, 0, 0.2);
+};
+```
