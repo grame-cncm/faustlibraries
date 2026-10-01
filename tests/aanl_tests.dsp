@@ -60,3 +60,20 @@ arcsin2_test = aa.arcsin2(sig);
 tangent_test = aa.tangent(tanDomainSig);
 atanh1_test = aa.atanh1(atanhDomainSig);
 atanh2_test = aa.atanh2(atanhDomainSig);
+
+no = library("noises.lib");
+foldSig = 4.0 * no.noise;
+foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+
+triangleFold1_test = aa.triangleFold1(0.5, 0.9, foldSig);
+triangleFold1_slider_test = aa.triangleFold1(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.9, 0.5, 1.0, 0.001), foldSig);
+triangleFold1_modulated_test = aa.triangleFold1(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
+triangleFold2_test = aa.triangleFold2(0.5, 0.9, foldSig);
+triangleFold2_slider_test = aa.triangleFold2(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.9, 0.5, 1.0, 0.001), foldSig);
+triangleFold2_modulated_test = aa.triangleFold2(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
+sineFold1_test = aa.sineFold1(0.5, 0.8, foldSig);
+sineFold1_slider_test = aa.sineFold1(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.8, 0.5, 1.0, 0.001), foldSig);
+sineFold1_modulated_test = aa.sineFold1(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
+sineFold2_test = aa.sineFold2(0.5, 0.8, foldSig);
+sineFold2_slider_test = aa.sineFold2(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.8, 0.5, 1.0, 0.001), foldSig);
+sineFold2_modulated_test = aa.sineFold2(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
