@@ -30,6 +30,7 @@ piano_dispersion_filter_slider_test = os.tosc(110) : ef.piano_dispersion_filter(
 piano_dispersion_filter_modulated_test = no.noise : ef.piano_dispersion_filter(4, 0.0001, 27.5*pow(4186/27.5, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 piano_dispersion_filter_jump_test = no.noise : ef.piano_dispersion_filter(4, 0.0001, 27.5*pow(4186/27.5, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 stereo_width_test = os.tosc(440), os.tosc(550) : ef.stereo_width(0.5);
+stereo_width_mono_test = no.noise <: _, *(0.5) : ef.stereo_width(0);
 mesh_square_test = (1,0.5,-0.5,0.25) : ef.mesh_square(1);
 
 dryWetMixer_test = os.tosc(440) : ef.dryWetMixer(0.5, fi.dcblocker);

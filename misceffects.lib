@@ -67,7 +67,7 @@ aa = library("aanl.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.6.1"; 
+declare version "2.6.2";
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -234,8 +234,6 @@ gate_gain_mono(thresh,att,hold,rel,x) = x : extendedrawgate : an.amp_follower_ar
 
 declare gate_stereo author "Julius O. Smith III";
 declare gate_stereo license "LicenseRef-STK-4.3";
-declare gate_gain_mono author "Julius O. Smith III";
-declare gate_gain_mono license "LicenseRef-STK-4.3";
 
 //=====================================Fibonacci==========================================
 //========================================================================================
@@ -351,8 +349,6 @@ declare fibonacciSeq author "Dario Sanfilippo";
 // High-frequency model = -24 dB/octave slope implemented using a
 // fourth-order Butterworth lowpass.
 //
-//
-//
 // #### Usage
 // ```
 // _ : speakerbp(f1,f2) : _
@@ -444,7 +440,7 @@ declare speakerbp license "LicenseRef-STK-4.3";
 
 piano_dispersion_filter(M,B,f0) = -Df0*M,seq(i,M,fi.tf1(a1,1,a1))
 with {
- a1 = (1-D)/(1+D); // By Eq. 3, have D >= 0, hence a1 >= 0 also
+ a1 = (1-D)/(1+D); // D > 0 by Eq. 3, hence |a1| < 1 (a1 < 0 when D > 1, i.e., low keys)
  D = exp(Cd - Ikey(f0)*kd);
  trt = pow(2.0,1.0/12.0); // 12th root of 2
  logb(b,x) = log(x) / log(b); // log-base-b of x
@@ -485,7 +481,9 @@ declare piano_dispersion_filter license "LicenseRef-STK-4.3";
 // ```
 // ef = library("misceffects.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
 // stereo_width_test = os.tosc(440), os.tosc(550) : ef.stereo_width(0.5);
+// stereo_width_mono_test = no.noise <: _, *(0.5) : ef.stereo_width(0);
 // ```
 //
 // At `w=0`, the output signal is mono ((left+right)/2 in both channels).
@@ -500,8 +498,8 @@ declare piano_dispersion_filter license "LicenseRef-STK-4.3";
 stereo_width(w) = shuffle : *(mgain),*(sgain) : shuffle
 with {
      shuffle =  _,_ <: +,-; // normally scaled by 1/sqrt(2) for orthonormality,
-     mgain = 1-w/2;  // but we pick up the needed normalization here.
-     sgain = w/2;
+     mgain = 0.5;    // but we pick up the needed normalization here:
+     sgain = w/2;    // (l+r)/2 at w=0, (l,r) at w=1
 };
 
 declare stereo_width author "Julius O. Smith III";
@@ -703,9 +701,9 @@ with {
 // Reflectively terminated mesh impulsed at one corner:
 //
 // ```
-// mesh_square_test(N,x) = mesh_square(N)~(busi(4*N,x)) // input to corner
-// with { 
-//     busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); 
+// mesh_square_test(N,x) = ef.mesh_square(N)~(busi(4*N,x)) // input to corner
+// with {
+//     busi(N,x) = si.bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x);
 // };
 // process = 1-1' : mesh_square_test(4); // all modes excited forever
 // ```
@@ -1165,7 +1163,7 @@ with{
 // #### Demo
 //
 // ```
-// _ : dm.reverseEchoN(N) : _,_
+// _ : dm.reverse_echo_demo(N) : _,_
 // ```
 //
 // #### Description
@@ -1203,7 +1201,7 @@ declare reverseEchoN license "LicenseRef-STK-4.3";
 // #### Demo
 //
 // ```
-// _ : ef.reverseDelayRamped(32,0.6) : _,_
+// _ : ef.reverseDelayRamped(32,0.6) : _
 // ```
 //
 //------------------------------------------------------------
@@ -1228,7 +1226,11 @@ declare reverseDelayRamped license "LicenseRef-STK-4.3";
 //
 // Where:
 //
-// * `N`: Number of input channels to pan down to stereo, a constant numerical expression
+// * `N`: Number of input channels to pan down to stereo, a constant numerical expression (N >= 2)
+//
+// Channel `i` gets gain `i/(N-1)` on the first output and `1-i/(N-1)` on
+// the second: channel 0 goes entirely to the second output, channel N-1
+// entirely to the first.
 //
 // #### Test
 // ```
