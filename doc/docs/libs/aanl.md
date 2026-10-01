@@ -172,7 +172,8 @@ Where:
 * `EPS`: a threshold for switching between safe and ill-conditioned paths
 * `f`: a function that we want to process with ADAA
 * `F1`: f's first antiderivative
-* `F2`: f's second antiderivative
+* `F2`: the antiderivative of x * f(x), as in `aa.hardclip2` (not the second
+  antiderivative of f)
 #### Test
 ```
 aa = library("aanl.lib");
@@ -270,6 +271,8 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.osc(110);
 cubic1_test = aa.cubic1(sig);
+cubic1_noise_test = aa.cubic1(2.0 * no.noise)
+    with { no = library("noises.lib"); };
 ```
 
 ----
@@ -293,6 +296,8 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.osc(110);
 parabolic_test = aa.parabolic(sig);
+parabolic_noise_test = aa.parabolic(4.0 * no.noise)
+    with { no = library("noises.lib"); };
 ```
 
 ----
@@ -316,6 +321,8 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.osc(110);
 parabolic2_test = aa.parabolic2(sig);
+parabolic2_noise_test = aa.parabolic2(4.0 * no.noise)
+    with { no = library("noises.lib"); };
 ```
 
 ----
@@ -670,6 +677,8 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.osc(110);
 arccos2_test = aa.arccos2(sig);
+arccos2_noise_test = aa.arccos2(no.noise)
+    with { no = library("noises.lib"); };
 ```
 
 ----
