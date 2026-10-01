@@ -1660,8 +1660,9 @@ allpassn1m_test = src : fi.allpassn1m(3, (0.3, 0.2, 0.1));
 First- and second-order allpass filters whose coefficients may change at
 any time without the output exceeding a threshold. When a coefficient change
 would make the output exceed the threshold, the change is limited for as
-long as needed, and the coefficient then catches up with its target. With
-constant coefficients the output is that of the plain direct-form allpass.
+long as needed, and the coefficient then catches up with its target. When
+the plain direct-form allpass stays within the threshold, the output is
+the same as its output.
 
 This is a different protection from the energy-preserving time-varying
 allpasses (`fi.allpassnt` and the other normalized-ladder forms): those
@@ -1680,24 +1681,26 @@ First- and second-order direct-form allpass filters with clipping prevention
 (Fontana et al., DAFx26, Algorithms 1 and 2). At each sample the filter
 computes the output it would give without the coefficient change, and
 limits the change so that the output stays within [-M, M]. The limiting
-only acts during short transients; afterwards the coefficients reach their
-targets.
+acts whenever the plain allpass output would exceed M: mostly just after a
+coefficient change, but also with constant coefficients when the input is
+near M. Once the output allows it, the coefficients return to their targets.
 
 `allpass1_noclip` computes y[n] = c (x[n] - y[n-1]) + x[n-1], i.e.
 `fi.tf1(c, 1, c)`. `allpass2_noclip` computes
 y[n] = c0 (x[n] - y[n-2]) + c1 (x[n-1] - y[n-1]) + x[n-2], i.e.
 `fi.tf2(c0, c1, 1, c1, c0)`, and gives each coefficient half of the margin.
 
-The output stays within [-M, M] as long as the input does, and the modified
-coefficients stay stable when the targets are (|c| < 1; |c0| < 1 and
-|c1| < 1 + c0). The limiting also acts after a coefficient change, when the
-filter's own transient would exceed M, and can then hold a coefficient away
-from a constant target. In the second-order case, when limiting each
+When the input stays within [-M, M], so does the output, up to rounding (with
+M = 1, the measured peaks stay below 1 + 1e-15 in double and 1 + 5e-7 in
+float). An input that exceeds M is not limited: the output stays within
+max(M, |x[n-1]|) for the first order and max(M, |x[n-2]|) for the second. The
+modified coefficients are stable whenever the targets are (|c| < 1; |c0| < 1
+and |c1| < 1 + c0), whatever the input. In the first order the coefficient in
+use lies between 0 and its target. In the second order, when limiting each
 coefficient separately (as in the reference) would give an unstable pair, the
-targets are scaled toward 0 instead, which keeps both guarantees. The filter
-starts with the target coefficients. Only the allpass output is bounded: a
-structure that mixes it with its input (a phaser, a Regalia-Mitra equalizer)
-can still exceed M.
+targets are scaled toward 0 instead. The filter starts with the target
+coefficients. Only the allpass output is bounded: a structure that mixes it
+with its input (a phaser, a Regalia-Mitra equalizer) can still exceed M.
 
 #### Usage
 
@@ -1718,10 +1721,26 @@ Where:
 ba = library("basics.lib");
 fi = library("filters.lib");
 no = library("noises.lib");
+// constant coefficients, input low enough that the output never reaches M:
+// same output as fi.tf1(0.5, 1, 0.5) and fi.tf2(0.81, -1.27, 1, -1.27, 0.81)
+allpass1_noclip_test = no.noise * 0.5 : fi.allpass1_noclip(1, 0.5);
+allpass2_noclip_test = no.noise * 0.3 : fi.allpass2_noclip(1, 0.81, -1.27);
+// full-scale noise, coefficients from sliders
+allpass1_noclip_slider_test = no.noise : fi.allpass1_noclip(M, c)
+with {
+  M = hslider("M", 1, 0.1, 1, 0.01);
+  c = hslider("c", 0.5, -0.99, 0.99, 0.01);
+};
+allpass2_noclip_slider_test = no.noise : fi.allpass2_noclip(M, c0, c1)
+with {
+  M = hslider("M", 1, 0.1, 1, 0.01);
+  c0 = hslider("c0", 0.81, -0.99, 0.99, 0.01);
+  c1 = hslider("c1", -1.27, -1.98, 1.98, 0.01);
+};
 // full-scale noise, coefficients jumping every 24 samples
-allpass1_noclip_test = no.noise : fi.allpass1_noclip(1, c)
+allpass1_noclip_modulated_test = no.noise : fi.allpass1_noclip(1, c)
 with { c = select2(ba.pulsen(24, 48), 0.99, -0.99); };
-allpass2_noclip_test = no.noise : fi.allpass2_noclip(1, c0, c1)
+allpass2_noclip_modulated_test = no.noise : fi.allpass2_noclip(1, c0, c1)
 with {
   jump = ba.pulsen(24, 48);
   c0 = select2(jump, 0.98, -0.98);
