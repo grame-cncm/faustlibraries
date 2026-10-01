@@ -564,7 +564,7 @@ each spectral band. They are related to the Mth-Octave Filter-Banks in `filters.
 The documentation of this library contains more details about the implementation.
 The parameters are:
 
-* `M`: number of band-slices per octave (>1)
+* `M`: number of band-slices per octave (>=1)
 * `N`: total number of bands (>2)
 * `ftop` = upper bandlimit of the Mth-octave bands (<SR/2)
 
@@ -573,7 +573,7 @@ containing frequencies from ftop to SR/2, and a "dc band" lowpass signal
 containing frequencies from 0 (dc) up to the start of the Mth-octave bands.
 Thus, the N output signals are:
 ```
-highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-M*(N-1)))
+highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-(N-2)/M))
 ```
 
 A Spectrum-Analyzer is defined here as any band-split whose bands span
@@ -773,7 +773,7 @@ _ : goertzelOpt(freq,n) : _
 
 Where:
 
-* `freq`: frequency to be analyzed
+* `freq`: frequency to be analyzed (rounded to the nearest DFT bin, `freq*n/SR`)
 * `n`: the Goertzel block size
 
 #### Test
@@ -801,7 +801,7 @@ _ : goertzelComp(freq,n) : _
 
 Where:
 
-* `freq`: frequency to be analyzed
+* `freq`: frequency to be analyzed (rounded to the nearest DFT bin, `freq*n/SR`)
 * `n`: the Goertzel block size
 
 #### Test
@@ -956,7 +956,8 @@ The classic fixed window functions:
 * `window_rect`: rectangular (boxcar) window, 1 inside [0,1], 0 outside
 * `window_hann`: Hann (raised cosine), -31.5 dB first sidelobe
 * `window_hamming`: Hamming (0.54/0.46), -42.7 dB first sidelobe
-* `window_blackman`: Blackman (3-term, exact 0.42/0.50/0.08), -58 dB
+* `window_blackman`: classic Blackman (3-term, 0.42/0.50/0.08), -58 dB
+  (not Harris's "exact Blackman", 7938/9240/1430 over 18608)
 * `window_blackman_harris`: minimum 4-term Blackman-Harris, -92 dB
 * `window_nuttall`: Nuttall's continuous-first-derivative 4-term, -93 dB
 * `window_flattop`: 5-term flat-top (amplitude-accurate spectral peaks,
@@ -1065,6 +1066,7 @@ Where:
 an = library("analyzers.lib");
 os = library("oscillators.lib");
 window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
+window_tukey_rect_test = an.window_tukey(0, os.lf_sawpos(100));
 ```
 
 ----
