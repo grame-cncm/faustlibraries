@@ -66,7 +66,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "1.9.0";
+declare version "1.9.1";
 
 // This library contains platform specific constants
 pl = library("platform.lib");
@@ -853,7 +853,7 @@ lf_triangle(freq) = 2.0*lf_trianglepos(freq) - 1.0;
 //
 // Where:
 //
-// * `periodsamps`: number of periods per samples
+// * `periodsamps`: period in samples
 //
 // #### Test
 // ```
@@ -939,7 +939,7 @@ lf_sawpos_phase(freq,phase) = _phasor_imp(freq, 0, phase);
 // ```
 // os = library("oscillators.lib");
 // ba = library("basics.lib");
-// lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(32));
+// lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(10000));
 // ```
 //---------------------------------------------------------
 declare lf_sawpos_reset author "Bart Brouns, revised by Stéphane Letz";
@@ -967,7 +967,8 @@ lf_sawpos_reset(freq,reset) = _phasor_imp(freq, reset, 0);
 // #### Test
 // ```
 // os = library("oscillators.lib");
-// lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, button("reset"));
+// ba = library("basics.lib");
+// lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, ba.pulse(10000));
 // ```
 //---------------------------------------------------------
 declare lf_sawpos_phase_reset author "Bart Brouns, revised by Stéphane Letz";
@@ -1031,7 +1032,8 @@ lf_saw(freq) = saw1(freq);
 // Where:
 //
 // * `N`: polynomial order, a constant numerical expression between 1 and `MAX_SAW_ORDER`
-// * `freq`: frequency in Hz
+// * `freq`: frequency in Hz; `sawN` and `sawNp` use `max(20, abs(freq))`
+//   (use `lf_sawpos` below 20 Hz)
 //
 // #### Test
 // ```
@@ -1096,18 +1098,22 @@ with {
 // where
 //
 // * `N`: waveform interpolation polynomial order 1 to 4 (constant integer expression)
-// * `freq`: frequency in Hz
-// * `phase`: waveform phase as a fraction of one period (rounded to nearest sample)
+// * `freq`: frequency in Hz, clipped below at 20 Hz as in `sawN`
+// * `phase`: waveform phase as a fraction of one period (rounded to nearest sample).
+//   It is a delay, i.e., a phase lag: `sawNp(N,freq,0.25)` is a quarter period
+//   behind `sawN(N,freq)`, whereas `lf_sawpos_phase(freq,0.25)` is a quarter
+//   period ahead of `lf_sawpos(freq)`.
 //
 // #### Test
 // ```
 // os = library("oscillators.lib");
 // sawNp_test = os.sawNp(3, 330, 0.5);
+// sawNp_lowfreq_test = os.sawNp(2, 10, 0.5);
 // ```
 // #### Implementation Notes
 //
 // The phase offset is implemented by delaying `sawN(N,freq)` by
-// `round(phase*ma.SR/freq)` samples, for up to 8191 samples.
+// `round(phase*ma.SR/max(20,abs(freq)))` samples, for up to 8191 samples.
 // The minimum sawtooth frequency that can be delayed a whole period
 // is therefore `ma.SR/8191`, which is well below audibility for normal
 // audio sampling rates.
@@ -1117,7 +1123,10 @@ declare sawNp author "Julius O. Smith III";
 declare sawNp license "LicenseRef-STK-4.3";
 // --- sawNp for N = 1 to 4 ---
 // Phase offset = delay (max 8191 samples is more than one period of audio):
-sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/freq))));
+sawNp(N,freq,phase) = sawN(N,freq) : @(max(0,min(8191,int(0.5+phase*ma.SR/clippedFreq))))
+with {
+  clippedFreq = max(20.0,abs(freq)); // the frequency of sawN
+};
 
 //------------------------------`(os.)saw2`------------------------------
 // Alias-Suppressed Sawtooth Audio-Frequency Oscillator of order 2.
@@ -1229,7 +1238,12 @@ saw4 = sawN(4); // only choice available right now
 // ```
 // ##### Implementation
 //
-// Polynomial Transition Regions (PTR) method for aliasing suppression.
+// Polynomial Transition Regions (PTR) method for aliasing suppression,
+// order 2 (transition region one sample wide), following Eq. (8) and Table I
+// (W = 1) of the reference below: the trivial sawtooth `2*phi-1` offset by
+// the phase increment `T = freq/ma.SR` (which makes it zero-mean), and
+// `1 + 2*phi - 2*phi/T - T` on the first sample of each period.
+// `saw2dpw` outputs the same samples one sample later.
 //
 // ##### Notes
 //
@@ -1252,8 +1266,8 @@ saw2ptr(freq) = y with { // newer PTR version (stateless - freq can vary at any 
   t0 = 1.0/p0; // phase increment
   p = ((_<:(-(1)<:_,_),_) <: selector1,selector2) ~(+(t0)):!,_;
   selector1 = select2(<(0)); // for feedback
-  selector2 = select2(<(0), (_<:_,(*(1-p0):+(1)):+), _); // for output
-  y = 2*p-1;
+  selector2 = select2(<(0), *(1-p0):+(1), _); // for output: 1+phi-phi/T in the transition
+  y = 2*p-1-t0; // dc offset T: Kleimola and Valimaki (2012), Eq. (8)
 };
 
 //----------------------`(os.)saw2dpw`---------------------
@@ -1282,11 +1296,15 @@ saw2ptr(freq) = y with { // newer PTR version (stateless - freq can vary at any 
 // saw2dpw_test = os.saw2dpw(220);
 // saw2dpw_slider_test = os.saw2dpw(hslider("saw2dpw:freq", 220, 20, 20000, 1));
 // saw2dpw_modulated_test = os.saw2dpw(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// saw2dpw_zero_test = os.saw2dpw(220*(ba.period(9600) >= 4800));
 // ```
 //--------------------------------------------------------
 declare saw2dpw author "Julius O. Smith III";
 declare saw2dpw license "LicenseRef-STK-4.3";
-saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freq);
+saw2dpw(freq) = saw1(freq) <: * <: -(mem) : *(0.25'*ma.SR/freqNZ)
+with {
+  freqNZ = select2(abs(freq) < ma.EPSILON, freq, ma.EPSILON); // no 0/0 at freq = 0
+};
 
 //------------------`(os.)sawtooth`--------------------------------
 // Alias-suppressed aliasing-suppressed sawtooth oscillator, presently defined as `saw2`.
@@ -1403,6 +1421,8 @@ saw2f4 = saw2dpw : cf4 with {
 //
 // * `N`: polynomial order, a constant numerical expression
 // * `freq`: frequency in Hz
+//
+// Each function below has its own test.
 //====================================================================
 
 
@@ -1437,8 +1457,10 @@ impulse = 1-1';
 // Where:
 //
 // * `N`: order, as a constant numerical expression
-// * `freq`: frequency in Hz
-// * `duty`: duty cycle between 0 and 1
+// * `freq`: frequency in Hz, clipped below at 23.45 Hz
+// * `duty`: duty cycle between 0 and 1: fraction of each period
+//   spent at the high level `2*(1-duty)`; the low level is `-2*duty`,
+//   so the waveform is zero-mean
 //
 // #### Test
 // ```
@@ -1457,13 +1479,14 @@ pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
     diffdel(x,del) = x-x@int(del)*(1-ma.frac(del))-x@(int(del)+1)*ma.frac(del);
  // Third-order Lagrange interpolated-delay version (see filters.lib):
  // diffdel(x,del) = x - fdelay3(DELPWR2,max(1,min(DELPWR2-2,ddel)));
- DELPWR2 = 2048; // Needs to be a power of 2 when fdelay*() used above.
- delmax = DELPWR2-1; // arbitrary upper limit on diff delay (duty=0.5)
- SRmax = 96000.0; // assumed upper limit on sampling rate
- fmin = SRmax / float(2.0*delmax); // 23.4 Hz (audio freqs only)
+ DELPWR2 = 8192; // Needs to be a power of 2 when fdelay*() used above.
+ delmax = DELPWR2-1; // upper limit on diff delay: one period at fmin and SRmax (8188)
+ SRmax = 192000.0; // assumed upper limit on sampling rate (that of ma.SR)
+ fmin = 96000.0 / 4094.0; // 23.45 Hz (audio freqs only), unchanged since DELPWR2 = 2048
  freqC = max(freq,fmin); // clip frequency at lower limit
  period = (float(ma.SR) / freqC); // actual period
- ddel = duty * period; // desired delay
+ // x - x@ddel is low (-2*duty) for ddel samples after each saw reset, and high otherwise:
+ ddel = (1-duty) * period; // desired delay
  del = max(0,min(delmax,ddel));
 };
 
@@ -1481,7 +1504,7 @@ pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
 // Where:
 //
 // * `freq`: frequency in Hz
-// * `duty`: duty cycle between 0 and 1
+// * `duty`: duty cycle between 0 and 1 (see `pulsetrainN`)
 //
 // #### Test
 // ```
@@ -1558,7 +1581,8 @@ square = squareN(2);
 // imptrainN_test = os.imptrainN(3, 220);
 // ```
 //--------------------------------------------------------
-imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq));
+// impulse stands for the first saw reset; 1@N blanks the step of sawN's startup gate:
+imptrainN(N,freq) = impulse + 0.5*ma.diffn(sawN(N,freq))*(1@N);
 
 
 //------------------`(os.)imptrain`--------------------------------
@@ -1596,7 +1620,9 @@ imptrain = imptrainN(2); // default based on saw2
 // Where:
 //
 // * `N`: order, as a constant numerical expression
-// * `freq`: frequency in Hz
+// * `freq`: frequency in Hz. Below 23.45 Hz, the triangle stays at 23.45 Hz
+//   (the lower limit of `pulsetrainN`) and its amplitude falls as `freq/23.45`:
+//   use `lf_triangle` for LFOs.
 //
 // #### Test
 // ```
@@ -1605,8 +1631,8 @@ imptrain = imptrainN(2); // default based on saw2
 // ```
 //--------------------------------------------------------
 triangleN(N,freq) = squareN(N,freq) : fi.pole(p) : *(gain) with {
-  gain = 4.0*freq/ma.SR; // for aproximate unit peak amplitude
-  p = 0.999;
+  gain = 4.0*freq/ma.SR; // for approximate unit peak amplitude
+  p = 1.0 - 48.0/ma.SR; // leak at 7.6 Hz at every rate (0.999 at 48 kHz)
 };
 
 
@@ -1806,19 +1832,23 @@ oscr = oscrs; // default = sine (starts without a pop)
 //
 // Where:
 //
-// * `freq`: frequency in Hz
+// * `freq`: frequency in Hz, between 0 and `ma.SR/2`
+//
+// The frequency is exact. The peak amplitude is `1/cos(ma.PI*freq/ma.SR)`
+// (1.0004 at 440 Hz and 48 kHz, 1.056 at 5 kHz), since the two states of the
+// magic circle are half a sample apart.
 //
 // #### Test
 // ```
 // os = library("oscillators.lib");
 // oscs_test = os.oscs(440);
 // oscs_slider_test = os.oscs(hslider("oscs:freq", 440, 20, 14000, 1));
+// oscs_hf_test = os.oscs(15000);
 // ```
 //------------------------------------------------------------
 oscs(f) = (*(-1) : sint(wn) : sintp(wn,impulse)) ~ _
 with {
-  wn = 2*ma.PI*f/ma.SR; // approximate
-  // wn = 2*sin(PI*f/SR); // exact
+  wn = 2*sin(ma.PI*f/ma.SR); // exact: 2*ma.PI*f/ma.SR is sharp and diverges above ma.SR/ma.PI
   sint(x) = *(x) : + ~ _ ; // frequency-scaled integrator
   sintp(x,y) = *(x) : +(y): + ~ _; // same + state input
 };
@@ -1906,8 +1936,8 @@ with {
 //    c = os.quadosc : _,!;
 //    s = os.quadosc : !,_;
 //    process =
-//        10*c(F) + 20*c(2*F) + 30*c(F),
-//        10*s(F) + 20*s(2*F) + 30*s(F);
+//        10*c(F) + 20*c(2*F) + 30*c(3*F),
+//        10*s(F) + 20*s(2*F) + 30*s(3*F);
 // ```
 //
 // but much more efficient.
