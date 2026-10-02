@@ -290,6 +290,16 @@ then 1. `--missing` hides the symbols that have the first three; a missing
 function needs the slider, modulated and jump variants is a judgement, which the
 inventory leaves to you: its parameters must be meant to vary at run time.
 
+The inventory reads the titles with or without a prefix (`(tu.)name` or
+`name`, as in tubes.lib, tonestacks.lib, instruments.lib and maxmsp.lib),
+counts the tests of a generic `name[N]` or `name[N]suffix` from any of its
+instances (`fdelay2a_test` for `fdelay[N]a`), and accepts a test named after
+the library's alias when the natural name is taken (`tu_inverse_test`, rule
+1 of `AGENTS.md`); a test found only in `tests/*.dsp` counts for the library
+only if it calls the function through that alias. A test commented out in
+`tests/*.dsp` on purpose, such as the nondeterministic `no.rnoise`, shows as
+`off`.
+
 ```bash
 scripts/lib_tests.py inventory filters.lib --missing
 ```
