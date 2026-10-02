@@ -3,7 +3,6 @@
 // Tests for mass-interaction helper functions.
 //----------------------------------------------------------------------------
 
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 mi = library("mi.lib");
 ma = library("maths.lib");
 os = library("oscillators.lib");
@@ -16,7 +15,7 @@ oscil_test = 0.1 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.1, 0.0);
 
 ground_test = 0.1 : mi.ground(0.1);
 
-posInput_test = 0, tosc(1.0) : mi.posInput(0.0);
+posInput_test = 0, os.tosc(1.0) : mi.posInput(0.0);
 
 spring_test = mi.spring(10.0, 0.0, 0.0, 0.1, -0.1);
 
@@ -30,7 +29,7 @@ nlSpringDamper3_test = mi.nlSpringDamper3(5.0, 0.5, 0.2, 0.0, 0.0, 0.1, -0.1);
 
 nlSpringDamperClipped_test = mi.nlSpringDamperClipped(5.0, 0.5, 8.0, 0.2, 0.0, 0.0, 0.1, -0.1);
 
-nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), tosc(110) * 0.001;
+nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.tosc(110) * 0.001;
 
 nlBow_test = mi.nlBow(0.5, 0.1, 1.0, 0.0, 0.0, 0.05, -0.05);
 

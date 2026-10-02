@@ -4,7 +4,6 @@
 // (pinktrombone.lib).
 //----------------------------------------------------------------------------
 
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 pt = library("pinktrombone.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
@@ -14,9 +13,9 @@ no = library("noises.lib");
 pt_ticksPerSample_test = pt[ticksPerSample=1;].pinkTrombone(140, 0.6, 1, 0, 12.9, 2.43, 30, 3, 0, 0);
 pt_noiseSeed_test = pt[noiseSeed=7;].glottis(140, 0.6, 1, 1) : _, !, !, !;
 lfWaveform_test = par(i, 3, pt.lfWaveform(0.5 + i, os.lf_sawpos(100)));
-lfWaveform_modulated_test = pt.lfWaveform(0.5 + 1.1*(1 + tosc(2)), os.lf_sawpos(200));
+lfWaveform_modulated_test = pt.lfWaveform(0.5 + 1.1*(1 + os.tosc(2)), os.lf_sawpos(200));
 glottis_test = pt.glottis(140, 0.6, (ba.time < 24000), 0);
-glottis_modulated_test = pt.glottis(150 + 50*tosc(0.8), 0.5 + 0.45*tosc(4), (ba.time % 48000) > 12000, 1);
+glottis_modulated_test = pt.glottis(150 + 50*os.tosc(0.8), 0.5 + 0.45*os.tosc(4), (ba.time % 48000) > 12000, 1);
 tractDiameters_test = pt.tractDiameters(12.9, 2.43, 30, 3, 0);
 tractDiameters_constricted_test = pt.tractDiameters(20, 3.0, 30.4, 0.55, 1);
 tractDiameters2_test = pt.tractDiameters2(20, 3.0, 36.3, 0.5, 1, 20.6, 0.8, 1);

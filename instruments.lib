@@ -28,7 +28,7 @@ re = library("reverbs.lib");
 declare name "Faust-STK Tools Library";
 declare author "Romain Michon (rmichon@ccrma.stanford.edu)";
 declare copyright "Romain Michon";
-declare version "1.0.0";
+declare version "1.0.1";
 declare licence "LicenseRef-STK-4.3"; // Synthesis Tool Kit 4.3 (MIT style license);
 
 
@@ -164,7 +164,7 @@ saturationNeg(x) = x <: (_<-1),(_>=-1 : *(x)) :> *(-1) + _;
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_bow_test = abs(os.osc(5)) : inst.bow(0.2, 3);
+// inst_bow_test = abs(os.tosc(5)) : inst.bow(0.2, 3);
 // ```
 //----------------------------------------------------------
 

@@ -139,8 +139,9 @@ Every script behind these targets is described in `scripts/README.md`.
    (`PRECISION_ARGS="tests/xx_tests.dsp"`); a new test must pass without
    a baseline entry, and a fix that makes an entry unnecessary removes it
    in the same commit. Never add or loosen an entry to silence a failure.
-   Prefer `no.noise` to `os.osc` as test input: `os.osc` drifts in phase
-   in float. The check uses default control values only: also try the
+   Prefer `no.noise` or `os.tosc` to `os.osc` as test input: `os.osc`
+   drifts in phase in float, `os.tosc` reads the sine of an exact integer
+   phase (`os.tphase`) and does not. The check uses default control values only: also try the
    controls at their extremes, and check that what should not depend on
    the rate does not. A fix that relies on a precise evaluation order (a
    rewrite against cancellation, a workaround of the Faust normalizer) is

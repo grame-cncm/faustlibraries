@@ -65,7 +65,7 @@ pl = library("platform.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Math Library";
-declare version "2.9.0";
+declare version "2.9.1";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
@@ -1158,7 +1158,7 @@ modulo(x,y) = (x % y + y) % y;
 // ```
 // ma = library("maths.lib");
 // os = library("oscillators.lib");
-// isnan_test = (os.osc(1) - 2.0) : sqrt : ma.isnan;
+// isnan_test = (os.tosc(1) - 2.0) : sqrt : ma.isnan;
 // ```
 //------------------------------------------
 isnan = ffunction(int isnanf|isnan|isnanl (float),<math.h>,"");
@@ -1295,7 +1295,7 @@ chebychevpoly(lcoef) = _ <: L(0,lcoef) :> _
 // ```
 // ma = library("maths.lib");
 // os = library("oscillators.lib");
-// diffn_test = os.osc(440) : ma.diffn;
+// diffn_test = os.tosc(440) : ma.diffn;
 // ```
 //--------------------------------------------------------
 diffn(x) = x' - x; // negated first-order difference
@@ -1369,7 +1369,7 @@ nextpow2(x) = ceil(log(x)/log(2.0));
 // ```
 // ma = library("maths.lib");
 // os = library("oscillators.lib");
-// zc_test = os.osc(440) : ma.zc;
+// zc_test = os.tosc(440) : ma.zc;
 // ```
 //-----------------------------------------------------------------------------
 zc = ba.tAndH(!=(0)) <: *(mem) < 0;

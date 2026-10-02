@@ -62,7 +62,7 @@ Where:
 ```
 hy = library("hysteresis.lib");
 os = library("oscillators.lib");
-mono = os.osc(100) * 0.5;
+mono = os.tosc(100) * 0.5;
 ja_hysteresis_test = mono : hy.ja_hysteresis(380, 720, 0.015, 380, 0.25);
 ```
 
@@ -103,7 +103,7 @@ Where:
 hy = library("hysteresis.lib");
 ba = library("basics.lib");
 os = library("oscillators.lib");
-mono = os.osc(100) * 0.5;
+mono = os.tosc(100) * 0.5;
 ja_processor_test = mono : hy.ja_processor(380, 720, 0.015, 380, 0.25, ba.db2linear(10), 1.0);
 ```
 
@@ -135,7 +135,7 @@ Where:
 hy = library("hysteresis.lib");
 ba = library("basics.lib");
 os = library("oscillators.lib");
-stereo = os.osc(100), os.osc(150);
+stereo = os.tosc(100), os.tosc(150);
 ja_processor_stereo_test = stereo : hy.ja_processor_stereo(380, 720, 0.015, 380, 0.25, ba.db2linear(10), 1.0);
 ```
 
@@ -160,7 +160,7 @@ _ : ja_processor_ui : _
 ```
 hy = library("hysteresis.lib");
 os = library("oscillators.lib");
-mono = os.osc(100) * 0.5;
+mono = os.tosc(100) * 0.5;
 ja_processor_ui_test = mono : hy.ja_processor_ui;
 ```
 
@@ -181,6 +181,6 @@ _,_ : ja_processor_stereo_ui : _,_
 ```
 hy = library("hysteresis.lib");
 os = library("oscillators.lib");
-stereo = os.osc(100), os.osc(150);
+stereo = os.tosc(100), os.tosc(150);
 ja_processor_stereo_ui_test = stereo : hy.ja_processor_stereo_ui;
 ```

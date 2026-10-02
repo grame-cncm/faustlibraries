@@ -154,7 +154,7 @@ ma = library("maths.lib");
 si = library("signals.lib");
 
 declare name "Faust Interpolator Library";
-declare version "1.6.0";
+declare version "1.6.1";
 
 // Produces 0 until the first trig, then 1 until the next trig (which outputs a 0 sample to reset), and so on
 _reset(trig) = hold * (trig <= trig')
@@ -874,7 +874,7 @@ lerp(x0, x1, y0, y1, x) = y
 // ```
 // it = library("interpolators.lib");
 // os = library("oscillators.lib");
-// piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.osc(0.1));
+// piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.tosc(0.1));
 // ```
 //------------------------------------------------------------------------------
 declare piecewise author "Dario Sanfilippo";
@@ -1106,7 +1106,7 @@ frdtable(N, S, init, idx) =
 // it = library("interpolators.lib");
 // os = library("oscillators.lib");
 // ba = library("basics.lib");
-// frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.osc(220), os.phasor(16, 150));
+// frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.tosc(220), os.phasor(16, 150));
 // ```
 //------------------------------------------------------------
 declare frwtable author "Dario Sanfilippo";
@@ -1152,7 +1152,7 @@ frwtable(N, S, init, w_idx, x, r_idx) =
 // ```
 // it = library("interpolators.lib");
 // os = library("oscillators.lib");
-// remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.osc(0.5));
+// remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.tosc(0.5));
 // ```
 //------------------------------------------------------------
 declare remap author "David Braun";

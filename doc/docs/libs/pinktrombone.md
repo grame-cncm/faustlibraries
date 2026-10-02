@@ -185,7 +185,7 @@ Where:
 ```
 import("stdfaust.lib");
 lfWaveform_test = par(i, 3, pt.lfWaveform(0.5 + i, os.lf_sawpos(100)));
-lfWaveform_modulated_test = pt.lfWaveform(0.5 + 1.1*(1 + os.osc(2)), os.lf_sawpos(200));
+lfWaveform_modulated_test = pt.lfWaveform(0.5 + 1.1*(1 + os.tosc(2)), os.lf_sawpos(200));
 ```
 
 ----
@@ -216,7 +216,7 @@ Where:
 ```
 import("stdfaust.lib");
 glottis_test = pt.glottis(140, 0.6, (ba.time < 24000), 0);
-glottis_modulated_test = pt.glottis(150 + 50*os.osc(0.8), 0.5 + 0.45*os.osc(4), (ba.time % 48000) > 12000, 1);
+glottis_modulated_test = pt.glottis(150 + 50*os.tosc(0.8), 0.5 + 0.45*os.tosc(4), (ba.time % 48000) > 12000, 1);
 ```
 
 ##  Tract shape 

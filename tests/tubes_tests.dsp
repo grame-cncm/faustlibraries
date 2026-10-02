@@ -3,11 +3,10 @@
 // Tests for the Guitarix tube amplifier stage emulations.
 //----------------------------------------------------------------------------
 
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 tu = library("tubes.lib");
 os = library("oscillators.lib");
 
-src = tosc(440);
+src = os.tosc(440);
 
 // Table-interpolation helpers
 tu_rtable_test = tu.rtable(waveform{0.0, 1.0, 2.0, 3.0}, 2);

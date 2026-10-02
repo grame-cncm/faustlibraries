@@ -91,7 +91,7 @@ si = library("signals.lib");
 db = library("debug.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Debug Library";
-declare version "0.4.0";
+declare version "0.4.1";
 
 //------------------`(db.)DEBUG`----------------------------------------
 // Global switch enabling or disabling every probe in this library: 1 makes
@@ -130,7 +130,7 @@ DEBUG = 1; // 0: bypass probes (identity), 1: enable probes
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_rms_lin_test = db.probe_rms_lin(1, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -157,7 +157,7 @@ probe_rms_lin(id, hide, x) = _probe_rms_lin_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_rms_db_test = db.probe_rms_db(0, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -185,7 +185,7 @@ probe_rms_db(id, hide, x) = _probe_rms_db_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_peak_lin_test = db.probe_peak_lin(3, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -213,7 +213,7 @@ probe_peak_lin(id, hide, x) = _probe_peak_lin_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_peak_db_test = db.probe_peak_db(2, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -246,7 +246,7 @@ probe_peak_db(id, hide, x) = _probe_peak_db_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_crest_db_test = db.probe_crest_db(4, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -275,7 +275,7 @@ probe_crest_db(id, hide, x) = _probe_crest_db_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_env_test = db.probe_env(5, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -303,7 +303,7 @@ probe_env(id, hide, x) = _probe_env_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_min_test = db.probe_min(6, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -331,7 +331,7 @@ probe_min(id, hide, x) = _probe_min_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_max_test = db.probe_max(7, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -364,7 +364,7 @@ probe_max(id, hide, x) = _probe_max_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_dc_test = db.probe_dc(8, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -392,7 +392,7 @@ probe_dc(id, hide, x) = _probe_dc_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_slew_test = db.probe_slew(9, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -420,7 +420,7 @@ probe_slew(id, hide, x) = _probe_slew_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_zcr_test = db.probe_zcr(10, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -453,7 +453,7 @@ probe_zcr(id, hide, x) = _probe_zcr_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_value_test = db.probe_value(11, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -480,7 +480,7 @@ probe_value(id, hide, x) = _probe_value_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_bool_test = db.probe_bool(12, 1, mono > 0);
 // ```
 //-----------------------------------------------------------------------------
@@ -512,7 +512,7 @@ probe_bool(id, hide, x) = _probe_bool_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_band_lo_test = db.probe_band_lo(13, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -540,7 +540,7 @@ probe_band_lo(id, hide, x) = _probe_band_lo_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_band_mid_test = db.probe_band_mid(14, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -568,7 +568,7 @@ probe_band_mid(id, hide, x) = _probe_band_mid_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_band_hi_test = db.probe_band_hi(15, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -598,7 +598,7 @@ probe_band_hi(id, hide, x) = _probe_band_hi_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_spectral_centroid_test = db.probe_spectral_centroid(43, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -656,7 +656,7 @@ probe_spectral_centroid(id, hide, x) = _probe_spectral_centroid_impl(DEBUG, id, 
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_multiband_test = db.probe_multiband(44, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -722,7 +722,7 @@ probe_multiband(id, hide, x) = _probe_multiband_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_freq_lin_test = db.probe_freq_lin(34, 1, 440, 10, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -753,7 +753,7 @@ probe_freq_lin(id, hide, freq, q, x) = _probe_freq_lin_impl(DEBUG, id, hide, fre
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_freq_db_test = db.probe_freq_db(35, 1, 440, 10, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -786,7 +786,7 @@ probe_freq_db(id, hide, freq, q, x) = _probe_freq_db_impl(DEBUG, id, hide, freq,
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_freq_ratio_test = db.probe_freq_ratio(36, 1, 440, 660, 12, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -826,7 +826,7 @@ probe_freq_ratio(id, hide, f1, f2, q, x) = _probe_freq_ratio_impl(DEBUG, id, hid
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_env_lin_test = db.probe_env_lin(37, 1, 0.001, 0.1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -857,7 +857,7 @@ probe_env_lin(id, hide, att, rel, x) = _probe_env_lin_impl(DEBUG, id, hide, att,
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_env_db_test = db.probe_env_db(38, 1, 0.001, 0.1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -889,7 +889,7 @@ probe_env_db(id, hide, att, rel, x) = _probe_env_db_impl(DEBUG, id, hide, att, r
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_peak_hold_test = db.probe_peak_hold(39, 1, 2.0, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -924,7 +924,7 @@ probe_peak_hold(id, hide, decay_s, x) = _probe_peak_hold_impl(DEBUG, id, hide, d
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_below_threshold_test = db.probe_below_threshold(40, 1, -40, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -963,7 +963,7 @@ probe_below_threshold(id, hide, thresh_db, x) = _probe_below_threshold_impl(DEBU
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_attack_state_test = db.probe_attack_state(41, 1, -60, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -1000,7 +1000,7 @@ probe_attack_state(id, hide, floor_db, x) = _probe_attack_state_impl(DEBUG, id, 
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_onset_test = db.probe_onset(42, 1, -40, 50, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -1043,7 +1043,7 @@ probe_onset(id, hide, thresh_db, holdoff_ms, x) = _probe_onset_impl(DEBUG, id, h
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_dc_precise_test = db.probe_dc_precise(56, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -1073,7 +1073,7 @@ probe_dc_precise(id, hide, x) = _probe_dc_precise_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_silence_test = db.probe_silence(57, 1, -60, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -1111,7 +1111,7 @@ probe_silence(id, hide, thresh_db, x) = _probe_silence_impl(DEBUG, id, hide, thr
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_sample_count_test = db.probe_sample_count(58, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -1140,7 +1140,7 @@ probe_sample_count(id, hide, x) = _probe_sample_count_impl(DEBUG, id, hide, x);
 // ```
 // db = library("debug.lib");
 // os = library("oscillators.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // probe_time_ms_test = db.probe_time_ms(59, 1, mono);
 // ```
 //-----------------------------------------------------------------------------
@@ -1188,7 +1188,7 @@ probe_time_ms(id, hide, x) = _probe_time_ms_impl(DEBUG, id, hide, x);
 // #### Test
 // ```
 // db = library("debug.lib");
-// mono = os.osc(220);
+// mono = os.tosc(220);
 // os = library("oscillators.lib");
 // probe_tap_test = db.probe_tap(db.probe_rms_db(16, 1), mono);
 // ```
@@ -1241,8 +1241,8 @@ probe_tap(f, x) = _probe_tap_impl(DEBUG, f, x);
 // fi = library("filters.lib");
 // stereo = (left, right)
 //   : (fi.lowpass(2, 2000), fi.highpass(2, 700));
-// left = os.osc(220) : fi.lowpass(2, 1200);
-// right = os.osc(330) : fi.highpass(2, 400);
+// left = os.tosc(220) : fi.lowpass(2, 1200);
+// right = os.tosc(330) : fi.highpass(2, 400);
 // os = library("oscillators.lib");
 // probe_tap_n_test = probe_tap_n_example;
 // ```

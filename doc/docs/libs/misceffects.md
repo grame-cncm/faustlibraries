@@ -50,7 +50,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-cubicnl_test = os.osc(440) : ef.cubicnl(0.5, 0.0);
+cubicnl_test = os.tosc(440) : ef.cubicnl(0.5, 0.0);
 ```
 
 #### References
@@ -82,7 +82,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-gate_mono_test = os.osc(440) : ef.gate_mono(-60, 0.0001, 0.1, 0.02);
+gate_mono_test = os.tosc(440) : ef.gate_mono(-60, 0.0001, 0.1, 0.02);
 ```
 
 #### References
@@ -115,7 +115,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-gate_stereo_test = os.osc(440), os.osc(441) : ef.gate_stereo(-60, 0.0001, 0.1, 0.02);
+gate_stereo_test = os.tosc(440), os.tosc(441) : ef.gate_stereo(-60, 0.0001, 0.1, 0.02);
 ```
 
 #### References
@@ -270,7 +270,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-speakerbp_test = os.osc(440) : ef.speakerbp(100.0, 5000.0);
+speakerbp_test = os.tosc(440) : ef.speakerbp(100.0, 5000.0);
 ```
 
 #### Example
@@ -304,7 +304,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-piano_dispersion_filter_test = os.osc(110) : ef.piano_dispersion_filter(4, 0.0001, 110);
+piano_dispersion_filter_test = os.tosc(110) : ef.piano_dispersion_filter(4, 0.0001, 110);
 ```
 
 #### Outputs
@@ -344,7 +344,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-stereo_width_test = os.osc(440), os.osc(550) : ef.stereo_width(0.5);
+stereo_width_test = os.tosc(440), os.tosc(550) : ef.stereo_width(0.5);
 ```
 
 At `w=0`, the output signal is mono ((left+right)/2 in both channels).
@@ -377,8 +377,8 @@ _,_ : ms_dec : _,_ // (m,s) to (l,r)
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-ms_enc_test = os.osc(440), os.osc(550) : ef.ms_enc;
-ms_dec_test = os.osc(440), os.osc(550) : ef.ms_enc : ef.ms_dec;
+ms_enc_test = os.tosc(440), os.tosc(550) : ef.ms_enc;
+ms_dec_test = os.tosc(440), os.tosc(550) : ef.ms_enc : ef.ms_dec;
 ```
 
 ## Dither and Noise Shaping
@@ -416,7 +416,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-dither_test = os.osc(440)*0.001 : ef.dither(16);
+dither_test = os.tosc(440)*0.001 : ef.dither(16);
 ```
 
 #### References
@@ -453,7 +453,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-dither_shaped_test = os.osc(440)*0.001 : ef.dither_shaped(2, 16);
+dither_shaped_test = os.tosc(440)*0.001 : ef.dither_shaped(2, 16);
 ```
 
 #### References
@@ -584,7 +584,7 @@ Where:
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
 fi = library("filters.lib");
-dryWetMixer_test = os.osc(440) : ef.dryWetMixer(0.5, fi.dcblocker);
+dryWetMixer_test = os.tosc(440) : ef.dryWetMixer(0.5, fi.dcblocker);
 ```
 
 ----
@@ -634,7 +634,7 @@ Where:
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
 fi = library("filters.lib");
-dryWetMixerConstantPower_test = os.osc(440) : ef.dryWetMixerConstantPower(0.5, fi.dcblocker);
+dryWetMixerConstantPower_test = os.tosc(440) : ef.dryWetMixerConstantPower(0.5, fi.dcblocker);
 ```
 
 ----
@@ -770,7 +770,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-echo_test = os.osc(440) : ef.echo(0.5, 0.25, 0.4);
+echo_test = os.tosc(440) : ef.echo(0.5, 0.25, 0.4);
 ```
 
 ----
@@ -794,7 +794,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-reverseEchoN_test = os.osc(440) : ef.reverseEchoN(2, 32);
+reverseEchoN_test = os.tosc(440) : ef.reverseEchoN(2, 32);
 ```
 
 #### Demo
@@ -829,7 +829,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-reverseDelayRamped_test = os.osc(440) : ef.reverseDelayRamped(32, 0.6);
+reverseDelayRamped_test = os.tosc(440) : ef.reverseDelayRamped(32, 0.6);
 ```
 
 #### Demo
@@ -859,7 +859,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-uniformPanToStereo_test = os.osc(440), os.osc(550), os.osc(660) : ef.uniformPanToStereo(3);
+uniformPanToStereo_test = os.tosc(440), os.tosc(550), os.tosc(660) : ef.uniformPanToStereo(3);
 ```
 
 #### Demo
@@ -901,7 +901,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-tapeStop_test = os.osc(440), os.osc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, button("stop"));
+tapeStop_test = os.tosc(440), os.tosc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, button("stop"));
 ```
 
 ## Pitch Shifting
@@ -929,7 +929,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-transpose_test = os.osc(440) : ef.transpose(1024, 512, 7);
+transpose_test = os.tosc(440) : ef.transpose(1024, 512, 7);
 ```
 
 ----
@@ -961,7 +961,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-transpose_windowed_test = os.osc(440) : ef.transpose_windowed(2, 1024, 7);
+transpose_windowed_test = os.tosc(440) : ef.transpose_windowed(2, 1024, 7);
 ```
 
 ----
@@ -1059,7 +1059,7 @@ _ : softclipQuadratic : _
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-softclipQuadratic_test = os.osc(440) : ef.softclipQuadratic;
+softclipQuadratic_test = os.tosc(440) : ef.softclipQuadratic;
 ```
 
 #### References
@@ -1086,5 +1086,5 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-wavefold_test = os.osc(440) : ef.wavefold(0.5);
+wavefold_test = os.tosc(440) : ef.wavefold(0.5);
 ```

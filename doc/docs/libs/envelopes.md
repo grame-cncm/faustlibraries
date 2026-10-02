@@ -515,7 +515,7 @@ Where:
 en = library("envelopes.lib");
 os = library("oscillators.lib");
 gate = button("gate");
-dx7envelope_test = os.osc(440) * en.dx7envelope(
+dx7envelope_test = os.tosc(440) * en.dx7envelope(
   0.05, 0.1, 0.1, 0.2,
   1, 0.8, 0.6, 0,
   gate

@@ -94,8 +94,8 @@ si = library("signals.lib");
 os = library("oscillators.lib");
 interpolate_test = si.interpolate(
     hslider("interpolate:mix", 0.5, 0, 1, 0.01),
-    os.osc(220),
-    os.osc(440)
+    os.tosc(220),
+    os.tosc(440)
 );
 ```
 
@@ -258,8 +258,8 @@ Where:
 si = library("signals.lib");
 os = library("oscillators.lib");
 dot_test = (
-    os.osc(100), os.osc(200), os.osc(300),
-    os.osc(400), os.osc(500), os.osc(600)
+    os.tosc(100), os.tosc(200), os.tosc(300),
+    os.tosc(400), os.tosc(500), os.tosc(600)
 ) : si.dot(3);
 ```
 
@@ -349,8 +349,8 @@ Where:
 si = library("signals.lib");
 os = library("oscillators.lib");
 cbus_test = (
-    os.osc(100), os.osc(150),
-    os.osc(200), os.osc(250)
+    os.tosc(100), os.tosc(150),
+    os.tosc(200), os.tosc(250)
 ) : si.cbus(2);
 ```
 
@@ -378,8 +378,8 @@ Where:
 si = library("signals.lib");
 os = library("oscillators.lib");
 cmul_test = si.cmul(
-    os.osc(110), os.osc(220),
-    os.osc(330), os.osc(440)
+    os.tosc(110), os.tosc(220),
+    os.tosc(330), os.tosc(440)
 );
 ```
 
@@ -406,7 +406,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-cconj_test = (os.osc(210), os.osc(310)) : si.cconj;
+cconj_test = (os.tosc(210), os.tosc(310)) : si.cconj;
 ```
 
 ----
@@ -478,7 +478,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-rev_test = os.osc(440) : si.rev(32);
+rev_test = os.tosc(440) : si.rev(32);
 ```
 
 ----
@@ -613,7 +613,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-bpar_test = (os.osc(120), os.osc(240), os.osc(360)) : si.bpar(3, *(0.5));
+bpar_test = (os.tosc(120), os.tosc(240), os.tosc(360)) : si.bpar(3, *(0.5));
 ```
 
 Example:
@@ -644,7 +644,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-bsum_test = (os.osc(100), os.osc(200), os.osc(300)) : si.bsum(3, *(0.5));
+bsum_test = (os.tosc(100), os.tosc(200), os.tosc(300)) : si.bsum(3, *(0.5));
 ```
 
 Example:

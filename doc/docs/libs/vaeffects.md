@@ -51,7 +51,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-moog_vcf_test = os.osc(440)
+moog_vcf_test = os.tosc(440)
   : ve.moog_vcf(
       hslider("moog_vcf:res", 0.5, 0, 1, 0.01),
       hslider("moog_vcf:freq", 1000, 50, 4000, 1)
@@ -94,7 +94,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-moog_vcf_2b_test = os.osc(330)
+moog_vcf_2b_test = os.tosc(330)
   : ve.moog_vcf_2b(
       hslider("moog_vcf_2b:res", 0.4, 0, 1, 0.01),
       hslider("moog_vcf_2b:freq", 1200, 50, 6000, 1)
@@ -127,7 +127,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-moogLadder_test = os.osc(220)
+moogLadder_test = os.tosc(220)
   : ve.moogLadder(
       hslider("moogLadder:normFreq", 0.3, 0, 1, 0.001),
       hslider("moogLadder:Q", 4, 0.7, 20, 0.1)
@@ -165,7 +165,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-lowpassLadder4_test = os.osc(110)
+lowpassLadder4_test = os.tosc(110)
   : ve.lowpassLadder4(
       hslider("lowpassLadder4:k", 2.0, 0, 4, 0.1),
       hslider("lowpassLadder4:freq", 800, 50, 5000, 1)
@@ -215,7 +215,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-moogHalfLadder_test = os.osc(220)
+moogHalfLadder_test = os.tosc(220)
   : ve.moogHalfLadder(
       hslider("moogHalfLadder:normFreq", 0.3, 0, 1, 0.001),
       hslider("moogHalfLadder:Q", 4, 0.7, 20, 0.1)
@@ -258,7 +258,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-diodeLadder_test = os.osc(220)
+diodeLadder_test = os.tosc(220)
   : ve.diodeLadder(
       hslider("diodeLadder:normFreq", 0.4, 0, 1, 0.001),
       hslider("diodeLadder:Q", 4, 0.7, 20, 0.1)
@@ -309,7 +309,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-korg35LPF_test = os.osc(220)
+korg35LPF_test = os.tosc(220)
   : ve.korg35LPF(
       hslider("korg35LPF:normFreq", 0.35, 0, 1, 0.001),
       hslider("korg35LPF:Q", 3.5, 0.7, 10, 0.1)
@@ -340,7 +340,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-korg35HPF_test = os.osc(330)
+korg35HPF_test = os.tosc(330)
   : ve.korg35HPF(
       hslider("korg35HPF:normFreq", 0.4, 0, 1, 0.001),
       hslider("korg35HPF:Q", 3.5, 0.7, 10, 0.1)
@@ -381,7 +381,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-oberheim_test = os.osc(220)
+oberheim_test = os.tosc(220)
   : ve.oberheim(
       hslider("oberheim:normFreq", 0.4, 0, 1, 0.001),
       hslider("oberheim:Q", 1.5, 0.5, 10, 0.1)
@@ -413,7 +413,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-oberheimBSF_test = os.osc(220)
+oberheimBSF_test = os.tosc(220)
   : ve.oberheimBSF(
       hslider("oberheimBSF:normFreq", 0.4, 0, 1, 0.001),
       hslider("oberheimBSF:Q", 1.5, 0.5, 10, 0.1)
@@ -445,7 +445,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-oberheimBPF_test = os.osc(220)
+oberheimBPF_test = os.tosc(220)
   : ve.oberheimBPF(
       hslider("oberheimBPF:normFreq", 0.4, 0, 1, 0.001),
       hslider("oberheimBPF:Q", 1.5, 0.5, 10, 0.1)
@@ -477,7 +477,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-oberheimHPF_test = os.osc(220)
+oberheimHPF_test = os.tosc(220)
   : ve.oberheimHPF(
       hslider("oberheimHPF:normFreq", 0.4, 0, 1, 0.001),
       hslider("oberheimHPF:Q", 1.5, 0.5, 10, 0.1)
@@ -509,7 +509,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-oberheimLPF_test = os.osc(220)
+oberheimLPF_test = os.tosc(220)
   : ve.oberheimLPF(
       hslider("oberheimLPF:normFreq", 0.4, 0, 1, 0.001),
       hslider("oberheimLPF:Q", 1.5, 0.5, 10, 0.1)
@@ -582,7 +582,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-sallenKeyOnePole_test = os.osc(440)
+sallenKeyOnePole_test = os.tosc(440)
   : ve.sallenKeyOnePole(
       hslider("sallenKeyOnePole:normFreq", 0.25, 0, 1, 0.001)
     );
@@ -610,7 +610,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-sallenKeyOnePoleLPF_test = os.osc(440)
+sallenKeyOnePoleLPF_test = os.tosc(440)
   : ve.sallenKeyOnePoleLPF(
       hslider("sallenKeyOnePoleLPF:normFreq", 0.25, 0, 1, 0.001)
     );
@@ -640,7 +640,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-sallenKeyOnePoleHPF_test = os.osc(440)
+sallenKeyOnePoleHPF_test = os.tosc(440)
   : ve.sallenKeyOnePoleHPF(
       hslider("sallenKeyOnePoleHPF:normFreq", 0.25, 0, 1, 0.001)
     );
@@ -682,7 +682,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-sallenKey2ndOrder_test = os.osc(330)
+sallenKey2ndOrder_test = os.tosc(330)
   : ve.sallenKey2ndOrder(
       hslider("sallenKey2ndOrder:normFreq", 0.3, 0, 1, 0.001),
       hslider("sallenKey2ndOrder:Q", 1.0, 0.1, 10, 0.1)
@@ -714,7 +714,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-sallenKey2ndOrderLPF_test = os.osc(330)
+sallenKey2ndOrderLPF_test = os.tosc(330)
   : ve.sallenKey2ndOrderLPF(
       hslider("sallenKey2ndOrderLPF:normFreq", 0.3, 0, 1, 0.001),
       hslider("sallenKey2ndOrderLPF:Q", 0.8, 0.1, 10, 0.1)
@@ -746,7 +746,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-sallenKey2ndOrderBPF_test = os.osc(330)
+sallenKey2ndOrderBPF_test = os.tosc(330)
   : ve.sallenKey2ndOrderBPF(
       hslider("sallenKey2ndOrderBPF:normFreq", 0.3, 0, 1, 0.001),
       hslider("sallenKey2ndOrderBPF:Q", 1.5, 0.1, 10, 0.1)
@@ -778,7 +778,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-sallenKey2ndOrderHPF_test = os.osc(330)
+sallenKey2ndOrderHPF_test = os.tosc(330)
   : ve.sallenKey2ndOrderHPF(
       hslider("sallenKey2ndOrderHPF:normFreq", 0.3, 0, 1, 0.001),
       hslider("sallenKey2ndOrderHPF:Q", 0.8, 0.1, 10, 0.1)
@@ -843,7 +843,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-biquad_test = os.osc(440)
+biquad_test = os.tosc(440)
   : ve.biquad(0.5, 0.3, 0.2, -0.3, 0.2);
 ```
 
@@ -869,7 +869,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-lowpass2Matched_test = os.osc(440)
+lowpass2Matched_test = os.tosc(440)
   : ve.lowpass2Matched(
       hslider("lowpass2Matched:CF", 1000, 50, 5000, 1),
       hslider("lowpass2Matched:Q", 0.707, 0.1, 5, 0.01)
@@ -898,7 +898,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-highpass2Matched_test = os.osc(440)
+highpass2Matched_test = os.tosc(440)
   : ve.highpass2Matched(
       hslider("highpass2Matched:CF", 500, 50, 5000, 1),
       hslider("highpass2Matched:Q", 0.707, 0.1, 5, 0.01)
@@ -927,7 +927,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-bandpass2Matched_test = os.osc(440)
+bandpass2Matched_test = os.tosc(440)
   : ve.bandpass2Matched(
       hslider("bandpass2Matched:CF", 1200, 50, 5000, 1),
       hslider("bandpass2Matched:Q", 2.0, 0.1, 10, 0.01)
@@ -957,7 +957,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-peaking2Matched_test = os.osc(440)
+peaking2Matched_test = os.tosc(440)
   : ve.peaking2Matched(
       hslider("peaking2Matched:G", 1.5, 0.1, 4, 0.01),
       hslider("peaking2Matched:CF", 1000, 50, 5000, 1),
@@ -987,7 +987,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-lowshelf2Matched_test = os.osc(330)
+lowshelf2Matched_test = os.tosc(330)
   : ve.lowshelf2Matched(
       hslider("lowshelf2Matched:G", 1.5, 0.5, 4, 0.01),
       hslider("lowshelf2Matched:CF", 500, 50, 5000, 1)
@@ -1016,7 +1016,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-highshelf2Matched_test = os.osc(330)
+highshelf2Matched_test = os.tosc(330)
   : ve.highshelf2Matched(
       hslider("highshelf2Matched:G", 1.5, 0.5, 4, 0.01),
       hslider("highshelf2Matched:CF", 1500, 50, 10000, 1)
@@ -1047,7 +1047,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-wah4_test = os.osc(220)
+wah4_test = os.tosc(220)
   : ve.wah4(
       hslider("wah4:freq", 800, 200, 2000, 1)
     );
@@ -1078,7 +1078,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-autowah_test = os.osc(220)
+autowah_test = os.tosc(220)
   : ve.autowah(
       hslider("autowah:level", 0.7, 0, 1, 0.01)
     );
@@ -1105,7 +1105,7 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-crybaby_test = os.osc(220)
+crybaby_test = os.tosc(220)
   : ve.crybaby(
       hslider("crybaby:wah", 0.3, 0, 1, 0.01)
     );
@@ -1143,7 +1143,7 @@ Where:
 ve = library("vaeffects.lib");
 no = library("noises.lib");
 os = library("oscillators.lib");
-vocoder_test = (no.noise, os.osc(220))
+vocoder_test = (no.noise, os.tosc(220))
   : ve.vocoder(
       8,
       hslider("vocoder:att", 0.01, 0.001, 0.1, 0.001),
@@ -1202,13 +1202,13 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-klonCentaur_test = os.osc(330)
+klonCentaur_test = os.tosc(330)
    : ve.klonCentaur(
        hslider("klonCentaur:gain", 0.5, 0, 1, 0.01),
        hslider("klonCentaur:treble", 0.5, 0, 1, 0.01),
        hslider("klonCentaur:level", 0.5, 0, 1, 0.01)
      );
-klonCentaur_hot_test = os.osc(110)*0.5 : ve.klonCentaur(1, 0, 1);
+klonCentaur_hot_test = os.tosc(110)*0.5 : ve.klonCentaur(1, 0, 1);
 ```
 
 #### References

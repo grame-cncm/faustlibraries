@@ -1,16 +1,15 @@
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 ro = library("routes.lib");
 os = library("oscillators.lib");
 
-cross_test = (tosc(200), tosc(300), tosc(400)) : ro.cross(3);
-crossnn_test = (tosc(110), tosc(220), tosc(330), tosc(440)) : ro.crossnn(2);
-crossn1_test = (tosc(100), tosc(200), tosc(300), tosc(400)) : ro.crossn1(3);
-cross1n_test = (tosc(150), tosc(250), tosc(350), tosc(450)) : ro.cross1n(3);
-crossNM_test = (tosc(180), tosc(280), tosc(380), tosc(480), tosc(580)) : ro.crossNM(2,3);
-interleave_test = (tosc(200), tosc(300), tosc(400), tosc(500)) : ro.interleave(2,2);
-butterfly_test = (tosc(250), tosc(350), tosc(450), tosc(550)) : ro.butterfly(4);
-hadamard_test = (tosc(220), tosc(330), tosc(440), tosc(550)) : ro.hadamard(4);
-recursivize_test = (tosc(220), tosc(330)) : ro.recursivize(*(0.5), *(0.3));
+cross_test = (os.tosc(200), os.tosc(300), os.tosc(400)) : ro.cross(3);
+crossnn_test = (os.tosc(110), os.tosc(220), os.tosc(330), os.tosc(440)) : ro.crossnn(2);
+crossn1_test = (os.tosc(100), os.tosc(200), os.tosc(300), os.tosc(400)) : ro.crossn1(3);
+cross1n_test = (os.tosc(150), os.tosc(250), os.tosc(350), os.tosc(450)) : ro.cross1n(3);
+crossNM_test = (os.tosc(180), os.tosc(280), os.tosc(380), os.tosc(480), os.tosc(580)) : ro.crossNM(2,3);
+interleave_test = (os.tosc(200), os.tosc(300), os.tosc(400), os.tosc(500)) : ro.interleave(2,2);
+butterfly_test = (os.tosc(250), os.tosc(350), os.tosc(450), os.tosc(550)) : ro.butterfly(4);
+hadamard_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) : ro.hadamard(4);
+recursivize_test = (os.tosc(220), os.tosc(330)) : ro.recursivize(*(0.5), *(0.3));
 bubbleSort_test = (
     hslider("bubbleSort:x0", 0.3, -1, 1, 0.01),
     hslider("bubbleSort:x1", -0.2, -1, 1, 0.01),

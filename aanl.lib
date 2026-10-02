@@ -49,7 +49,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Antialiased Nonlinearities";
-declare version "1.5.0";
+declare version "1.5.1";
 
 //==============================Auxiliary Functions=======================================
 //========================================================================================
@@ -135,7 +135,7 @@ Ratanh(x) = ma.atanh(_clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 // ba = library("basics.lib");
 // ma = library("maths.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // ADAA1_test = aa.ADAA1(0.001, f, F1, sig)
 //     with {
 //         f(x) = max(-1.0, min(1.0, x));
@@ -183,7 +183,7 @@ ADAA1(EPS, f, F1, x) = D1q
 // ba = library("basics.lib");
 // ma = library("maths.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // ADAA2_test = aa.ADAA2(0.001, f, F1, F2, sig)
 //     with {
 //         f(x) = max(-1.0, min(1.0, x));
@@ -241,7 +241,7 @@ ADAA2(EPS, f, F1, F2, x) = T1 + T2
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // hardclip_test = aa.hardclip(sig);
 // ```
 //---------------------------------------------
@@ -273,7 +273,7 @@ hardclip(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // hardclip2_test = aa.hardclip2(sig);
 // ```
 //---------------------------------------------
@@ -310,7 +310,7 @@ hardclip2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // cubic1_test = aa.cubic1(sig);
 // ```
 //-------------------------------------------
@@ -346,7 +346,7 @@ cubic1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // parabolic_test = aa.parabolic(sig);
 // ```
 //--------------------------------------------
@@ -381,7 +381,7 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // parabolic2_test = aa.parabolic2(sig);
 // ```
 //---------------------------------------------
@@ -420,7 +420,7 @@ parabolic2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // hyperbolic_test = aa.hyperbolic(sig);
 // ```
 //---------------------------------------------
@@ -450,7 +450,7 @@ hyperbolic(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // hyperbolic2_test = aa.hyperbolic2(sig);
 // ```
 //----------------------------------------------
@@ -482,7 +482,7 @@ hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // sinarctan_test = aa.sinarctan(sig);
 // ```
 //----------------------------------------------
@@ -515,7 +515,7 @@ sinarctan(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // sinarctan2_test = aa.sinarctan2(sig);
 // ```
 //----------------------------------------------
@@ -586,7 +586,7 @@ softclipEnv = environment {
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // softclipQuadratic1_test = aa.softclipQuadratic1(sig);
 // ```
 //----------------------------------------------
@@ -611,7 +611,7 @@ softclipQuadratic1 = softclipEnv.softclipQuadratic1;
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // softclipQuadratic2_test = aa.softclipQuadratic2(sig);
 // ```
 //----------------------------------------------
@@ -636,7 +636,7 @@ softclipQuadratic2 = softclipEnv.softclipQuadratic2;
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // tanh1_test = aa.tanh1(sig);
 // ```
 //----------------------------------------------
@@ -666,7 +666,7 @@ tanh1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // arctan_test = aa.arctan(sig);
 // ```
 //-------------------------------------------
@@ -696,7 +696,7 @@ arctan(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // arctan2_test = aa.arctan2(sig);
 // ```
 //-------------------------------------------
@@ -727,7 +727,7 @@ arctan2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // asinh1_test = aa.asinh1(sig);
 // ```
 //-------------------------------------------
@@ -760,7 +760,7 @@ asinh1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // asinh2_test = aa.asinh2(sig);
 // ```
 //-------------------------------------------
@@ -799,7 +799,7 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // cosine1_test = aa.cosine1(sig);
 // ```
 //-------------------------------------------
@@ -829,7 +829,7 @@ cosine1(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // cosine2_test = aa.cosine2(sig);
 // ```
 //-------------------------------------------
@@ -861,7 +861,7 @@ cosine2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // arccos_test = aa.arccos(sig);
 // ```
 //------------------------------------------
@@ -898,7 +898,7 @@ arccos(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // arccos2_test = aa.arccos2(sig);
 // ```
 //--------------------------------------------
@@ -934,7 +934,7 @@ arccos2(x) = ADAA2(EPS, f, F1, F2, x)
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
 // acoshDomainSig = 1.0 + abs(sig);
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // acosh1_test = aa.acosh1(acoshDomainSig);
 // ```
 //------------------------------------------
@@ -968,7 +968,7 @@ acosh1(x) = ADAA1(EPS, f, F1, x)
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
 // acoshDomainSig = 1.0 + abs(sig);
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // acosh2_test = aa.acosh2(acoshDomainSig);
 // ```
 //-------------------------------------------
@@ -1001,7 +1001,7 @@ acosh2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // sine_test = aa.sine(sig);
 // ```
 //----------------------------------------
@@ -1031,7 +1031,7 @@ sine(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // sine2_test = aa.sine2(sig);
 // ```
 //----------------------------------------
@@ -1063,7 +1063,7 @@ sine2(x) = ADAA2(EPS, f, F1, F2, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // arcsin_test = aa.arcsin(sig);
 // ```
 //------------------------------------------
@@ -1100,7 +1100,7 @@ arcsin(x) = ADAA1(EPS, f, F1, x)
 // ```
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // arcsin2_test = aa.arcsin2(sig);
 // ```
 //------------------------------------------
@@ -1137,7 +1137,7 @@ arcsin2(x) = ADAA2(EPS, f, F1, F2, x)
 // ma = library("maths.lib");
 // os = library("oscillators.lib");
 // tanDomainSig = 0.25 * ma.PI * sig;
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // tangent_test = aa.tangent(tanDomainSig);
 // ```
 //------------------------------------------
@@ -1168,7 +1168,7 @@ tangent(x) = ADAA1(EPS, f, F1, x)
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
 // atanhDomainSig = 0.8 * sig;
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // atanh1_test = aa.atanh1(atanhDomainSig);
 // ```
 //------------------------------------------
@@ -1199,7 +1199,7 @@ atanh1(x) = ADAA1(EPS, f, F1, x)
 // aa = library("aanl.lib");
 // os = library("oscillators.lib");
 // atanhDomainSig = 0.8 * sig;
-// sig = os.osc(110);
+// sig = os.tosc(110);
 // atanh2_test = aa.atanh2(atanhDomainSig);
 // ```
 //------------------------------------------

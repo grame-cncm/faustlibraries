@@ -589,7 +589,7 @@ the string connected to it (0-1) (1 = 20 seconds)
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-bridgeFilter_test = os.osc(110) : pm.bridgeFilter(0.6, 0.4);
+bridgeFilter_test = os.tosc(110) : pm.bridgeFilter(0.6, 0.4);
 ```
 
 ----
@@ -615,7 +615,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-modeFilter_test = os.osc(110) : pm.modeFilter(440, 1.5, 0.8);
+modeFilter_test = os.tosc(110) : pm.modeFilter(440, 1.5, 0.8);
 ```
 
 ## String Instruments
@@ -835,7 +835,7 @@ Typical use: `terminations(_,chain(...),ksReflexionFilter)`
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-ksReflexionFilter_test = os.osc(220) : pm.ksReflexionFilter;
+ksReflexionFilter_test = os.tosc(220) : pm.ksReflexionFilter;
 ```
 
 ----
@@ -1312,7 +1312,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-modeInterpRes_test = os.osc(110) : pm.modeInterpRes(20, 1.0, 1.5);
+modeInterpRes_test = os.tosc(110) : pm.modeInterpRes(20, 1.0, 1.5);
 ```
 
 ----
@@ -1719,7 +1719,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-reedTable_test = os.osc(220) : pm.reedTable(0.4, 0.2);
+reedTable_test = os.tosc(220) : pm.reedTable(0.4, 0.2);
 ```
 
 ----
@@ -1742,7 +1742,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-fluteJetTable_test = os.osc(220) : pm.fluteJetTable;
+fluteJetTable_test = os.tosc(220) : pm.fluteJetTable;
 ```
 
 ----
@@ -1769,7 +1769,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-brassLipsTable_test = os.osc(220) : pm.brassLipsTable(0.3, 0.2);
+brassLipsTable_test = os.tosc(220) : pm.brassLipsTable(0.3, 0.2);
 ```
 
 ----
@@ -1794,7 +1794,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-clarinetReed_test = os.osc(440) : pm.clarinetReed(0.6);
+clarinetReed_test = os.tosc(440) : pm.clarinetReed(0.6);
 ```
 
 ----
@@ -3380,7 +3380,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-fof_test = pm.fof(0.3, 440, 880, 0.5) + os.osc(110) * 0.001;
+fof_test = pm.fof(0.3, 440, 880, 0.5) + os.tosc(110) * 0.001;
 ```
 
 #### References
@@ -3411,7 +3411,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-fofSH_test = pm.fofSH(0.3, 440, 880, 0.5) + os.osc(110) * 0.001;
+fofSH_test = pm.fofSH(0.3, 440, 880, 0.5) + os.tosc(110) * 0.001;
 ```
 
 #### References
@@ -3443,7 +3443,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 3) + os.osc(110) * 0.001;
+fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 3) + os.tosc(110) * 0.001;
 ```
 
 #### References
@@ -3476,7 +3476,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2) + os.osc(110) * 0.001;
+fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2) + os.tosc(110) * 0.001;
 ```
 
 ----
@@ -3512,7 +3512,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterFofCycle_test = (os.osc(110) : pm.formantFilterFofCycle(1, 1, 5, 1, 200)) + os.osc(55) * 0.001;
+formantFilterFofCycle_test = (os.tosc(110) : pm.formantFilterFofCycle(1, 1, 5, 1, 200)) + os.tosc(55) * 0.001;
 ```
 
 ----
@@ -3546,7 +3546,7 @@ rise time of envelope
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterFofSmooth_test = os.osc(110) : pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
+formantFilterFofSmooth_test = os.tosc(110) : pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
 ```
 
 ----
@@ -3576,7 +3576,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterBP_test = os.osc(110) : pm.formantFilterBP(0, 0, 5, 0, 200);
+formantFilterBP_test = os.tosc(110) : pm.formantFilterBP(0, 0, 5, 0, 200);
 ```
 
 ----
@@ -3608,7 +3608,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterbank_test = os.osc(110) : pm.formantFilterbank(0, 0, pm.formantFilterBP, 200);
+formantFilterbank_test = os.tosc(110) : pm.formantFilterbank(0, 0, pm.formantFilterBP, 200);
 ```
 
 ----
@@ -3637,7 +3637,7 @@ of the FOF envelopes and for the autobendFreq and vocalEffort functions
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterbankFofCycle_test = (os.osc(110) : pm.formantFilterbankFofCycle(1, 1, 200)) + os.osc(55) * 0.001;
+formantFilterbankFofCycle_test = (os.tosc(110) : pm.formantFilterbankFofCycle(1, 1, 200)) + os.tosc(55) * 0.001;
 ```
 
 ----
@@ -3667,7 +3667,7 @@ autobendFreq and vocalEffort functions
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterbankFofSmooth_test = os.osc(110) : pm.formantFilterbankFofSmooth(0, 0, 200);
+formantFilterbankFofSmooth_test = os.tosc(110) : pm.formantFilterbankFofSmooth(0, 0, 200);
 ```
 
 ----
@@ -3695,7 +3695,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterbankBP_test = os.osc(110) : pm.formantFilterbankBP(0, 0, 200);
+formantFilterbankBP_test = os.tosc(110) : pm.formantFilterbankBP(0, 0, 200);
 ```
 
 ----

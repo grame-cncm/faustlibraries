@@ -59,7 +59,7 @@ ma = library("maths.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Compressor Effect Library";
-declare version "1.6.0";
+declare version "1.6.1";
 
 //================================Conversion Tools=======================================
 // Most compressors have a ratio parameter to define the amount of compression.
@@ -159,7 +159,7 @@ strength2ratio(strength) = 1/(1-strength);
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// peak_compression_gain_mono_db_test = os.osc(440) : co.peak_compression_gain_mono_db(0.5, -12, 0.01, 0.1, 6, 0);
+// peak_compression_gain_mono_db_test = os.tosc(440) : co.peak_compression_gain_mono_db(0.5, -12, 0.01, 0.1, 6, 0);
 // ```
 //
 // #### References
@@ -219,7 +219,7 @@ with {
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// peak_compression_gain_N_chan_db_test = (os.osc(440), os.osc(660)) : co.peak_compression_gain_N_chan_db(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+// peak_compression_gain_N_chan_db_test = (os.tosc(440), os.tosc(660)) : co.peak_compression_gain_N_chan_db(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
 // ```
 //
 // #### References
@@ -284,7 +284,7 @@ peak_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
 // meter(x) = x;
-// FFcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FFcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+// FFcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FFcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
 // ```
 //
 // #### References
@@ -341,7 +341,7 @@ FFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
 // meter(x) = x;
-// FBcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FBcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+// FBcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FBcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
 // ```
 //
 // #### References
@@ -398,7 +398,7 @@ FBcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,meter,N) =
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
 // meter(x) = x;
-// FBFFcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FBFFcompressor_N_chan(0.4, -12, 0.01, 0.1, 6, 0, 0.5, 0.3, meter, 2);
+// FBFFcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FBFFcompressor_N_chan(0.4, -12, 0.01, 0.1, 6, 0, 0.5, 0.3, meter, 2);
 // ```
 //
 // #### References
@@ -453,7 +453,7 @@ FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N) =
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// RMS_compression_gain_mono_db_test = os.osc(330) : co.RMS_compression_gain_mono_db(0.5, -18, 0.02, 0.12, 6, 0);
+// RMS_compression_gain_mono_db_test = os.tosc(330) : co.RMS_compression_gain_mono_db(0.5, -18, 0.02, 0.12, 6, 0);
 // ```
 //
 // #### References
@@ -515,7 +515,7 @@ RMS_compression_gain_mono_db(strength,thresh,att,rel,knee,prePost) =
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// RMS_compression_gain_N_chan_db_test = (os.osc(330), os.osc(550)) : co.RMS_compression_gain_N_chan_db(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+// RMS_compression_gain_N_chan_db_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan_db(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
 // ```
 //
 // #### References
@@ -582,7 +582,7 @@ RMS_compression_gain_N_chan_db(strength,thresh,att,rel,knee,prePost,link,N) =
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
 // meter(x) = x;
-// RMS_FBFFcompressor_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBFFcompressor_N_chan(0.4, -18, 0.02, 0.12, 6, 0, 0.5, 0.3, meter, 2);
+// RMS_FBFFcompressor_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_FBFFcompressor_N_chan(0.4, -18, 0.02, 0.12, 6, 0, 0.5, 0.3, meter, 2);
 // ```
 //
 // #### References
@@ -650,7 +650,7 @@ RMS_FBFFcompressor_N_chan(strength,thresh,att,rel,knee,prePost,link,FBFF,meter,N
 // os = library("oscillators.lib");
 // meter(x) = x;
 // meterLim(x) = x;
-// RMS_FBcompressor_peak_limiter_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(0.4, -18, -2, 0.02, 0.12, 6, 0.5, meter, meterLim, 2);
+// RMS_FBcompressor_peak_limiter_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(0.4, -18, -2, 0.02, 0.12, 6, 0.5, meter, meterLim, 2);
 // ```
 //
 // #### References
@@ -706,7 +706,7 @@ RMS_FBcompressor_peak_limiter_N_chan(strength,thresh,threshLim,att,rel,knee,link
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// peak_compression_gain_mono_test = os.osc(440) : co.peak_compression_gain_mono(0.5, -12, 0.01, 0.1, 6, 0);
+// peak_compression_gain_mono_test = os.tosc(440) : co.peak_compression_gain_mono(0.5, -12, 0.01, 0.1, 6, 0);
 // ```
 //
 // #### References
@@ -758,7 +758,7 @@ peak_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// peak_compression_gain_N_chan_test = (os.osc(440), os.osc(660)) : co.peak_compression_gain_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+// peak_compression_gain_N_chan_test = (os.tosc(440), os.tosc(660)) : co.peak_compression_gain_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
 // ```
 //
 // #### References
@@ -810,7 +810,7 @@ peak_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// RMS_compression_gain_mono_test = os.osc(330) : co.RMS_compression_gain_mono(0.5, -18, 0.02, 0.12, 6, 0);
+// RMS_compression_gain_mono_test = os.tosc(330) : co.RMS_compression_gain_mono(0.5, -18, 0.02, 0.12, 6, 0);
 // ```
 //
 // #### References
@@ -862,7 +862,7 @@ RMS_compression_gain_mono(strength,thresh,att,rel,knee,prePost) =
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// RMS_compression_gain_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+// RMS_compression_gain_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
 // ```
 //
 // #### References
@@ -909,7 +909,7 @@ RMS_compression_gain_N_chan(strength,thresh,att,rel,knee,prePost,link,N) =
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// compressor_lad_mono_test = os.osc(440) : co.compressor_lad_mono(0.005, 4, -9, 0.01, 0.1);
+// compressor_lad_mono_test = os.tosc(440) : co.compressor_lad_mono(0.005, 4, -9, 0.01, 0.1);
 // ```
 //
 // #### References
@@ -949,7 +949,7 @@ compressor_lad_mono(lad,ratio,thresh,att,rel,x)
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// compressor_mono_test = os.osc(440) : co.compressor_mono(4, -9, 0.01, 0.2);
+// compressor_mono_test = os.tosc(440) : co.compressor_mono(4, -9, 0.01, 0.2);
 // ```
 //
 // #### References
@@ -985,7 +985,7 @@ compressor_mono = compressor_lad_mono(0);
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// compressor_stereo_test = (os.osc(440), os.osc(660)) : co.compressor_stereo(4, -9, 0.01, 0.2);
+// compressor_stereo_test = (os.tosc(440), os.tosc(660)) : co.compressor_stereo(4, -9, 0.01, 0.2);
 // ```
 //
 // #### References
@@ -1023,7 +1023,7 @@ compressor_stereo(ratio,thresh,att,rel,x,y) = cgm*x, cgm*y with {
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// compression_gain_mono_test = os.osc(440) : co.compression_gain_mono(4, -9, 0.01, 0.2);
+// compression_gain_mono_test = os.tosc(440) : co.compression_gain_mono(4, -9, 0.01, 0.2);
 // ```
 //
 // #### References
@@ -1087,7 +1087,7 @@ with {
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// limiter_1176_R4_mono_test = os.osc(440) : co.limiter_1176_R4_mono;
+// limiter_1176_R4_mono_test = os.tosc(440) : co.limiter_1176_R4_mono;
 // ```
 //
 // #### References
@@ -1131,7 +1131,7 @@ limiter_1176_R4_mono = compressor_mono(4,-6,0.0008,0.5);
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// limiter_1176_R4_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_1176_R4_stereo;
+// limiter_1176_R4_stereo_test = (os.tosc(440), os.tosc(660)) : co.limiter_1176_R4_stereo;
 // ```
 //
 // #### References
@@ -1180,7 +1180,7 @@ limiter_1176_R4_stereo = compressor_stereo(4,-6,0.0008,0.5);
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// peak_expansion_gain_N_chan_db_test = (os.osc(220), os.osc(330)) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0, 0.5, 2048, 2);
+// peak_expansion_gain_N_chan_db_test = (os.tosc(220), os.tosc(330)) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0, 0.5, 2048, 2);
 // ```
 //------------------------------------------------------------
 declare peak_expansion_gain_N_chan_db author "Bart Brouns";
@@ -1288,7 +1288,7 @@ with {
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
 // meter(x) = x;
-// expander_N_chan_test = (os.osc(220), os.osc(330)) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2);
+// expander_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2);
 // ```
 //------------------------------------------------------------
 declare expander_N_chan author "Bart Brouns";
@@ -1337,7 +1337,7 @@ expander_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,maxHo
 // os = library("oscillators.lib");
 // meter(x) = x;
 // SCfunction(x) = x;
-// expanderSC_N_chan_test = (os.osc(220), os.osc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.osc(880));
+// expanderSC_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.tosc(880));
 // ```
 //------------------------------------------------------------
 declare expanderSC_N_chan author "Bart Brouns";
@@ -1409,7 +1409,7 @@ expanderSC_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,max
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// limiter_lad_N_test = (os.osc(440), os.osc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
+// limiter_lad_N_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
 // ```
 //
 // #### References
@@ -1457,7 +1457,7 @@ limiter_lad_N(N, LD, ceiling, attack, hold, release) =
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// limiter_lad_mono_test = os.osc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
+// limiter_lad_mono_test = os.tosc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
 // ```
 //
 // #### References
@@ -1492,7 +1492,7 @@ limiter_lad_mono(LD) = limiter_lad_N(1, LD);
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// limiter_lad_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
+// limiter_lad_stereo_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
 // ```
 // #### References
 //
@@ -1526,7 +1526,7 @@ limiter_lad_stereo(LD) = limiter_lad_N(2, LD);
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// limiter_lad_quad_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
+// limiter_lad_quad_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
 // ```
 //
 // #### References
@@ -1561,7 +1561,7 @@ limiter_lad_quad(LD) = limiter_lad_N(4, LD);
 // ```
 // co = library("compressors.lib");
 // os = library("oscillators.lib");
-// limiter_lad_bw_test = os.osc(440) : co.limiter_lad_bw;
+// limiter_lad_bw_test = os.tosc(440) : co.limiter_lad_bw;
 // ```
 //
 // #### References

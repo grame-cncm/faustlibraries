@@ -3,13 +3,12 @@
 // Tests for hysteresis helper functions.
 //----------------------------------------------------------------------------
 
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 hy = library("hysteresis.lib");
 ba = library("basics.lib");
 os = library("oscillators.lib");
 
-mono = tosc(100) * 0.5;
-stereo = tosc(100), tosc(150);
+mono = os.tosc(100) * 0.5;
+stereo = os.tosc(100), os.tosc(150);
 
 ja_hysteresis_test = mono : hy.ja_hysteresis(380, 720, 0.015, 380, 0.25);
 ja_processor_test = mono : hy.ja_processor(380, 720, 0.015, 380, 0.25, ba.db2linear(10), 1.0);

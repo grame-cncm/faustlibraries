@@ -3,7 +3,6 @@
 // Tests for mathematics helper functions.
 //----------------------------------------------------------------------------
 
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 ma = library("maths.lib");
 os = library("oscillators.lib");
 
@@ -51,13 +50,13 @@ Yn_test = (2, 1.0) : ma.Yn;
 np2_test = 5 : ma.np2;
 frac_test = 3.75 : ma.frac;
 modulo_test = (-3, 4) : ma.modulo;
-isnan_test = (tosc(1) - 2.0) : sqrt : ma.isnan;
+isnan_test = (os.tosc(1) - 2.0) : sqrt : ma.isnan;
 isinf_test = (os.impulse - os.impulse) : log : ma.isinf;
 chebychev_test = 0.5 : ma.chebychev(3);
 chebychevpoly_test = 0.5 : ma.chebychevpoly((1, 0, 1));
-diffn_test = tosc(440) : ma.diffn;
+diffn_test = os.tosc(440) : ma.diffn;
 signum_test = (-5.0) : ma.signum;
 nextpow2_test = 10.0 : ma.nextpow2;
-zc_test = tosc(440) : ma.zc;
+zc_test = os.tosc(440) : ma.zc;
 unwrap_test = os.oscrc(100) : ma.unwrap(ma.PI);
 primes_test = 10 : ma.primes;

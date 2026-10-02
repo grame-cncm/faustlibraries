@@ -557,7 +557,7 @@ Where:
 ```
 fd = library("fds.lib");
 os = library("oscillators.lib");
-hammer_test = os.osc(5)
+hammer_test = os.tosc(5)
   : fd.hammer(
       0.1,
       1000,
@@ -594,6 +594,6 @@ Where:
 ```
 fd = library("fds.lib");
 os = library("oscillators.lib");
-bow_test = os.osc(5)
+bow_test = os.tosc(5)
   : fd.bow(0.05, 2.0, 1.0/48000, 0.1);
 ```

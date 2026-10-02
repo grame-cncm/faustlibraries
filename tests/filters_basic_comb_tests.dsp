@@ -3,13 +3,12 @@
 // Tests for basic and comb envelope helpers.
 //----------------------------------------------------------------------------
 
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-src = tosc(440);
+src = os.tosc(440);
 
 zero_test = src : fi.zero(0.5);
 zero_slider_test = no.noise : fi.zero(hslider("z", 0.5, -1, 1, 0.01));

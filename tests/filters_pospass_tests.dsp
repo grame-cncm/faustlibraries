@@ -3,13 +3,12 @@
 // Tests for positive-pass (single-side-band) filters.
 //----------------------------------------------------------------------------
 
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-src = tosc(440);
+src = os.tosc(440);
 
 pospass_test = src : fi.pospass(3, 1000);
 pospass_slider_test = no.noise : fi.pospass(3, hslider("fc", 1000, 20, 20000, 1));

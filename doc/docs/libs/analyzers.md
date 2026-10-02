@@ -49,7 +49,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 abs_envelope_rect_test = an.abs_envelope_rect(0.05, mono);
 ```
 
@@ -74,7 +74,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 abs_envelope_tau_test = an.abs_envelope_tau(0.05, mono);
 ```
 
@@ -99,7 +99,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 abs_envelope_t60_test = an.abs_envelope_t60(0.05, mono);
 ```
 
@@ -124,7 +124,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 abs_envelope_t19_test = an.abs_envelope_t19(0.05, mono);
 ```
 
@@ -152,7 +152,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 amp_follower_test = mono : an.amp_follower(0.05);
 ```
 
@@ -183,7 +183,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 amp_follower_ud_test = mono : an.amp_follower_ud(0.002, 0.05);
 ```
 
@@ -222,7 +222,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 amp_follower_ar_test = mono : an.amp_follower_ar(0.002, 0.05);
 ```
 
@@ -246,7 +246,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 ms_envelope_rect_test = an.ms_envelope_rect(0.05, mono);
 ```
 
@@ -271,7 +271,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 ms_envelope_tau_test = an.ms_envelope_tau(0.05, mono);
 ```
 
@@ -296,7 +296,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 ms_envelope_t60_test = an.ms_envelope_t60(0.05, mono);
 ```
 
@@ -321,7 +321,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 ms_envelope_t19_test = an.ms_envelope_t19(0.05, mono);
 ```
 
@@ -345,7 +345,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 rms_envelope_rect_test = an.rms_envelope_rect(0.05, mono);
 ```
 
@@ -370,7 +370,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 rms_envelope_tau_test = an.rms_envelope_tau(0.05, mono);
 ```
 
@@ -395,7 +395,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 rms_envelope_t60_test = an.rms_envelope_t60(0.05, mono);
 ```
 
@@ -420,7 +420,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 rms_envelope_t19_test = an.rms_envelope_t19(0.05, mono);
 ```
 
@@ -451,7 +451,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 zcr_test = an.zcr(0.01, mono);
 ```
 
@@ -488,7 +488,7 @@ zero crossings could otherwise hold the estimate there.
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 pitchTracker_test = an.pitchTracker(4, 0.02, mono);
 ```
 
@@ -531,7 +531,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-rich = os.osc(440) + os.osc(880);
+rich = os.tosc(440) + os.tosc(880);
 spectralCentroid_test = rich : an.spectralCentroid(1, 0.01);
 ```
 
@@ -610,7 +610,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
 ```
 
@@ -649,7 +649,7 @@ spectral_level = mth_octave_spectral_level(2,10000,20);
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 mth_octave_spectral_level6e_test = mono : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
 ```
 
@@ -706,7 +706,7 @@ _ : analyzer(3,(fc1,fc2)) : _,_,_
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 analyzer_test = mono : an.analyzer(3, (500, 2000));
 ```
 
@@ -735,7 +735,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-goertzelOpt_test = an.goertzelOpt(440, 128, os.osc(440));
+goertzelOpt_test = an.goertzelOpt(440, 128, os.tosc(440));
 ```
 
 #### References
@@ -763,7 +763,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-goertzelComp_test = an.goertzelComp(440, 128, os.osc(440));
+goertzelComp_test = an.goertzelComp(440, 128, os.tosc(440));
 ```
 
 #### References
@@ -791,7 +791,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-goertzel_test = an.goertzel(440, 128, os.osc(440));
+goertzel_test = an.goertzel(440, 128, os.tosc(440));
 ```
 
 #### References
@@ -824,7 +824,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 resonator_test = mono : an.resonator(2, 440);
 ```
 
@@ -1197,7 +1197,7 @@ where `an.rtocv` converts a real (scalar) signal to a complex vector signal havi
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 fft_test = an.rtocv(8, mono) : an.fft(8);
 ```
 
@@ -1234,7 +1234,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-mono = os.osc(220);
+mono = os.tosc(220);
 ifft_test = (an.rtocv(8, mono) : an.fft(8)) : an.ifft(8);
 ```
 
@@ -1338,8 +1338,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-spectral_centroid_test = os.osc(1000) : an.spectral_centroid(3, 1, 8000, 6, 0.1);
-spectral_spread_test = os.osc(800) + os.osc(5000) : an.spectral_spread(3, 1, 8000, 6, 0.1);
+spectral_centroid_test = os.tosc(1000) : an.spectral_centroid(3, 1, 8000, 6, 0.1);
+spectral_spread_test = os.tosc(800) + os.tosc(5000) : an.spectral_spread(3, 1, 8000, 6, 0.1);
 ```
 
 ----
@@ -1387,7 +1387,7 @@ Where:
 an = library("analyzers.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
-spectral_flux_test = os.osc(1000) * ((ba.time % 24000) > 12000) : an.spectral_flux(3, 1, 8000, 6, 0.02);
+spectral_flux_test = os.tosc(1000) * ((ba.time % 24000) > 12000) : an.spectral_flux(3, 1, 8000, 6, 0.02);
 ```
 
 ##  Loudness Metering (EBU R128 / ITU-R BS.1770) 
@@ -1424,8 +1424,8 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-loudness_momentary_test = os.osc(997), os.osc(997) : an.loudness_momentary(2);
-loudness_shortterm_test = os.osc(997), os.osc(997) : an.loudness_shortterm(2);
+loudness_momentary_test = os.tosc(997), os.tosc(997) : an.loudness_momentary(2);
+loudness_shortterm_test = os.tosc(997), os.tosc(997) : an.loudness_shortterm(2);
 ```
 
 #### References
@@ -1488,7 +1488,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-loudness_integrated_test = os.osc(997), os.osc(997) : an.loudness_integrated(2);
+loudness_integrated_test = os.tosc(997), os.tosc(997) : an.loudness_integrated(2);
 ```
 
 #### References
@@ -1518,7 +1518,7 @@ _ : true_peak : _
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-true_peak_test = os.osc(12000)*0.97 : an.true_peak;
+true_peak_test = os.tosc(12000)*0.97 : an.true_peak;
 ```
 
 #### References

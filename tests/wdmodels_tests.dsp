@@ -1,4 +1,3 @@
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 import("stdfaust.lib");
 
 wd = library("wdmodels.lib");
@@ -6,7 +5,7 @@ os = library("oscillators.lib");
 
 resistor_test = wd.buildtree(vsrc : (series_node : (res_leaf, probe)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   series_node(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1000);
   probe(i) = wd.resistor_Vout(i, 1000);
@@ -14,7 +13,7 @@ with {
 
 resistor_Vout_test = wd.buildtree(vsrc : (series_node : (res_probe, res_load)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   series_node(i) = wd.series(i);
   res_probe(i) = wd.resistor_Vout(i, 820);
   res_load(i) = wd.resistor(i, 1800);
@@ -22,7 +21,7 @@ with {
 
 resistor_Iout_test = wd.buildtree(vsrc : (series_node : (current_probe, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   series_node(i) = wd.series(i);
   current_probe(i) = wd.resistor_Iout(i, 1000);
   load(i) = wd.resistor_Vout(i, 1500);
@@ -30,7 +29,7 @@ with {
 
 u_voltage_test = wd.buildtree(vsrc : (series_node : (branch_a, branch_b)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(330));
+  vsrc(i) = wd.u_voltage(i, os.tosc(330));
   series_node(i) = wd.series(i);
   branch_a(i) = wd.resistor(i, 1200);
   branch_b(i) = wd.resistor_Vout(i, 2200);
@@ -38,7 +37,7 @@ with {
 
 u_current_test = wd.buildtree(isrc : (parallel_node : (branch_a, branch_b)))
 with {
-  isrc(i) = wd.u_current(i, tosc(110));
+  isrc(i) = wd.u_current(i, os.tosc(110));
   parallel_node(i) = wd.parallel(i);
   branch_a(i) = wd.resistor(i, 560);
   branch_b(i) = wd.resistor_Vout(i, 2200);
@@ -46,7 +45,7 @@ with {
 
 resVoltage_test = wd.buildtree(vsrc : (series_node : (branch_source, probe)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(440));
+  vsrc(i) = wd.u_voltage(i, os.tosc(440));
   series_node(i) = wd.series(i);
   branch_source(i) = wd.resVoltage(i, 1000, 0.5);
   probe(i) = wd.resistor_Vout(i, 1800);
@@ -54,7 +53,7 @@ with {
 
 resVoltage_Vout_test = wd.buildtree(vsrc : (series_node : (branch_source, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(330));
+  vsrc(i) = wd.u_voltage(i, os.tosc(330));
   series_node(i) = wd.series(i);
   branch_source(i) = wd.resVoltage_Vout(i, 1500, 0.3);
   load(i) = wd.resistor(i, 2200);
@@ -62,7 +61,7 @@ with {
 
 u_resVoltage_test = wd.buildtree(root : (series_node : (branch_a, branch_b)))
 with {
-  root(i) = wd.u_resVoltage(i, 1800, tosc(220));
+  root(i) = wd.u_resVoltage(i, 1800, os.tosc(220));
   series_node(i) = wd.series(i);
   branch_a(i) = wd.resistor(i, 1500);
   branch_b(i) = wd.resistor_Vout(i, 2200);
@@ -70,7 +69,7 @@ with {
 
 resCurrent_test = wd.buildtree(root : (parallel_node : (source_branch, probe)))
 with {
-  root(i) = wd.u_current(i, tosc(110));
+  root(i) = wd.u_current(i, os.tosc(110));
   parallel_node(i) = wd.parallel(i);
   source_branch(i) = wd.resCurrent(i, 2200, 0.15);
   probe(i) = wd.resistor_Vout(i, 1500);
@@ -78,15 +77,15 @@ with {
 
 u_resCurrent_test = wd.buildtree(root : (parallel_node : (branch_a, branch_b)))
 with {
-  root(i) = wd.u_resCurrent(i, 2000, tosc(150));
+  root(i) = wd.u_resCurrent(i, 2000, os.tosc(150));
   parallel_node(i) = wd.parallel(i);
   branch_a(i) = wd.resistor(i, 1200);
   branch_b(i) = wd.resistor_Vout(i, 1800);
 };
 
-u_switch_test = wd.buildtree(root : (series_node : (branch_a, branch_b))) + tosc(110) * 0.001
+u_switch_test = wd.buildtree(root : (series_node : (branch_a, branch_b))) + os.tosc(110) * 0.001
 with {
-  drive = tosc(330);
+  drive = os.tosc(330);
   lambda = hslider("u_switch:lambda", -1, -1, 1, 0.01);
   root(i) = wd.u_switch(i, lambda);
   series_node(i) = wd.series(i);
@@ -96,7 +95,7 @@ with {
 
 capacitor_test = wd.buildtree(vsrc : (series_node : (cap_branch, probe)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(440));
+  vsrc(i) = wd.u_voltage(i, os.tosc(440));
   series_node(i) = wd.series(i);
   cap_branch(i) = wd.capacitor(i, 1e-7);
   probe(i) = wd.resistor_Vout(i, 1800);
@@ -104,7 +103,7 @@ with {
 
 capacitor_Vout_test = wd.buildtree(vsrc : (series_node : (cap_branch, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(330));
+  vsrc(i) = wd.u_voltage(i, os.tosc(330));
   series_node(i) = wd.series(i);
   cap_branch(i) = wd.capacitor_Vout(i, 2e-7);
   load(i) = wd.resistor(i, 1500);
@@ -112,7 +111,7 @@ with {
 
 capacitor_Iout_test = wd.buildtree(vsrc : (series_node : (cap_branch, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(440));
+  vsrc(i) = wd.u_voltage(i, os.tosc(440));
   series_node(i) = wd.series(i);
   cap_branch(i) = wd.capacitor_Iout(i, 1e-6);
   load(i) = wd.resistor(i, 1000);
@@ -120,7 +119,7 @@ with {
 
 inductor_test = wd.buildtree(vsrc : (series_node : (inductive_branch, probe)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(260));
+  vsrc(i) = wd.u_voltage(i, os.tosc(260));
   series_node(i) = wd.series(i);
   inductive_branch(i) = wd.inductor(i, 0.01);
   probe(i) = wd.resistor_Vout(i, 2200);
@@ -128,7 +127,7 @@ with {
 
 inductor_Vout_test = wd.buildtree(vsrc : (series_node : (inductive_branch, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(280));
+  vsrc(i) = wd.u_voltage(i, os.tosc(280));
   series_node(i) = wd.series(i);
   inductive_branch(i) = wd.inductor_Vout(i, 0.02);
   load(i) = wd.resistor(i, 1500);
@@ -136,13 +135,13 @@ with {
 
 inductor_Iout_test = wd.buildtree(vsrc : (series_node : (inductive_branch, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(280));
+  vsrc(i) = wd.u_voltage(i, os.tosc(280));
   series_node(i) = wd.series(i);
   inductive_branch(i) = wd.inductor_Iout(i, 0.02);
   load(i) = wd.resistor(i, 1500);
 };
 
-u_idealDiode_test = wd.buildtree(diode : (series_node : (branch_a, branch_b))) + tosc(110) * 0.001
+u_idealDiode_test = wd.buildtree(diode : (series_node : (branch_a, branch_b))) + os.tosc(110) * 0.001
 with {
   diode(i) = wd.u_idealDiode(i);
   series_node(i) = wd.series(i);
@@ -150,7 +149,7 @@ with {
   branch_b(i) = wd.resistor_Vout(i, 1800);
 };
 
-u_chua_test = wd.buildtree(chua_node : (series_node : (branch_a, branch_b))) + tosc(110) * 0.001
+u_chua_test = wd.buildtree(chua_node : (series_node : (branch_a, branch_b))) + os.tosc(110) * 0.001
 with {
   chua_node(i) = wd.u_chua(i, 1e-3, 5e-4, 0.2);
   series_node(i) = wd.series(i);
@@ -158,28 +157,28 @@ with {
   branch_b(i) = wd.resistor_Vout(i, 2200);
 };
 
-lambert_test = tosc(220) * wd.lambert(0.5, 6);
+lambert_test = os.tosc(220) * wd.lambert(0.5, 6);
 
 omega_test = wd.omega(0.5);
 
-u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025) + tosc(110) * 0.001;
+u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025) + os.tosc(110) * 0.001;
 
-u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026) + tosc(110) * 0.001;
+u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026) + os.tosc(110) * 0.001;
 
-u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2) + tosc(110) * 0.001;
+u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2) + os.tosc(110) * 0.001;
 
-u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1) + tosc(110) * 0.001;
+u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1) + os.tosc(110) * 0.001;
 
 u_parallel2Port_test = wd.buildtree(root : (branch_source, branch_load))
 with {
   root(i) = wd.u_parallel2Port(i);
-  branch_source(i) = wd.resVoltage_Vout(i, 1500, 0.2 * tosc(220));
+  branch_source(i) = wd.resVoltage_Vout(i, 1500, 0.2 * os.tosc(220));
   branch_load(i) = wd.resistor(i, 1800);
 };
 
 parallel2Port_test = wd.buildtree(vsrc : (connector : load))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(260));
+  vsrc(i) = wd.u_voltage(i, os.tosc(260));
   connector(i) = wd.parallel2Port(i);
   load(i) = wd.resistor_Vout(i, 2200);
 };
@@ -187,27 +186,27 @@ with {
 u_series2Port_test = wd.buildtree(root : (branch_source, branch_load))
 with {
   root(i) = wd.u_series2Port(i);
-  branch_source(i) = wd.resVoltage_Vout(i, 1200, 0.25 * tosc(180));
+  branch_source(i) = wd.resVoltage_Vout(i, 1200, 0.25 * os.tosc(180));
   branch_load(i) = wd.resistor(i, 1800);
 };
 
 series2Port_test = wd.buildtree(vsrc : (connector : load))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(200));
+  vsrc(i) = wd.u_voltage(i, os.tosc(200));
   connector(i) = wd.series2Port(i);
   load(i) = wd.resistor_Vout(i, 2200);
 };
 
 parallelCurrent_test = wd.buildtree(vsrc : (connector : load))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(240));
+  vsrc(i) = wd.u_voltage(i, os.tosc(240));
   connector(i) = wd.parallelCurrent(i, 0.1);
   load(i) = wd.resistor_Vout(i, 1500);
 };
 
 seriesVoltage_test = wd.buildtree(vsrc : (connector : load))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(210));
+  vsrc(i) = wd.u_voltage(i, os.tosc(210));
   connector(i) = wd.seriesVoltage(i, 0.3);
   load(i) = wd.resistor_Vout(i, 1500);
 };
@@ -215,13 +214,13 @@ with {
 u_transformer_test = wd.buildtree(root : (primary, secondary))
 with {
   root(i) = wd.u_transformer(i, 2.0);
-  primary(i) = wd.resVoltage_Vout(i, 1500, 0.2 * tosc(220));
+  primary(i) = wd.resVoltage_Vout(i, 1500, 0.2 * os.tosc(220));
   secondary(i) = wd.resistor_Vout(i, 2200);
 };
 
 transformer_test = wd.buildtree(vsrc : (xfmr : load))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(180));
+  vsrc(i) = wd.u_voltage(i, os.tosc(180));
   xfmr(i) = wd.transformer(i, 2.5);
   load(i) = wd.resistor_Vout(i, 2200);
 };
@@ -229,20 +228,20 @@ with {
 u_transformerActive_test = wd.buildtree(root : (primary, secondary))
 with {
   root(i) = wd.u_transformerActive(i, 0.9, 0.8);
-  primary(i) = wd.resVoltage_Vout(i, 1200, 0.18 * tosc(190));
+  primary(i) = wd.resVoltage_Vout(i, 1200, 0.18 * os.tosc(190));
   secondary(i) = wd.resistor_Vout(i, 2200);
 };
 
 transformerActive_test = wd.buildtree(vsrc : (xfmr : load))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(175));
+  vsrc(i) = wd.u_voltage(i, os.tosc(175));
   xfmr(i) = wd.transformerActive(i, 0.9, 0.8);
   load(i) = wd.resistor_Vout(i, 2200);
 };
 
 parallel_test = wd.buildtree(vsrc : (junction : (branch_a, branch_b)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   junction(i) = wd.parallel(i);
   branch_a(i) = wd.resistor(i, 1200);
   branch_b(i) = wd.resistor_Vout(i, 1800);
@@ -250,41 +249,41 @@ with {
 
 series_test = wd.buildtree(vsrc : (junction : (branch_a, branch_b)))
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(260));
+  vsrc(i) = wd.u_voltage(i, os.tosc(260));
   junction(i) = wd.series(i);
   branch_a(i) = wd.resistor(i, 1000);
   branch_b(i) = wd.resistor_Vout(i, 2200);
 };
 
-u_sixportPassive_test = ((1000, 1200, 1400, 1600, 1800, 2000, tosc(220), 0, 0, 0, 0, 0, 0)
-  : wd.u_sixportPassive(0) : _, !, !, !, !), tosc(110) * 0.001;
+u_sixportPassive_test = ((1000, 1200, 1400, 1600, 1800, 2000, os.tosc(220), 0, 0, 0, 0, 0, 0)
+  : wd.u_sixportPassive(0) : _, !, !, !, !), os.tosc(110) * 0.001;
 
-genericNode_test = wd.genericNode(0, scatter, upRes)(tosc(220))
+genericNode_test = wd.genericNode(0, scatter, upRes)(os.tosc(220))
 with {
   scatter(a) = -a * 0.5;
   upRes = 1200;
 };
 
-genericNode_Vout_test = wd.genericNode_Vout(0, scatter, upRes)(tosc(200)) : _, !
+genericNode_Vout_test = wd.genericNode_Vout(0, scatter, upRes)(os.tosc(200)) : _, !
 with {
   scatter(a) = -a * 0.4;
   upRes = 1600;
 };
 
-genericNode_Iout_test = wd.genericNode_Iout(0, scatter, upRes)(tosc(230)) : _, !
+genericNode_Iout_test = wd.genericNode_Iout(0, scatter, upRes)(os.tosc(230)) : _, !
 with {
   scatter(a) = -a * 0.3;
   upRes = 1400;
 };
 
-u_genericNode_test = wd.u_genericNode(0, scatter)(tosc(220))
+u_genericNode_test = wd.u_genericNode(0, scatter)(os.tosc(220))
 with {
   scatter(a) = -a * 0.5;
 };
 
 builddown_test = wd.builddown(tree) ~ wd.buildup(tree) : wd.buildout(tree)
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
   probe(i) = wd.resistor_Vout(i, 1800);
@@ -293,14 +292,14 @@ with {
 
 buildup_test = wd.builddown(tree) ~ wd.buildup(tree) : wd.buildout(tree)
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
   probe(i) = wd.resistor_Vout(i, 1800);
   tree = vsrc : (branch : (res_leaf, probe));
 };
 
-getres_test = tosc(110) * (1.0/(1.0 + getres_value))
+getres_test = os.tosc(110) * (1.0/(1.0 + getres_value))
 with {
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
@@ -324,7 +323,7 @@ with {
 
 buildout_test = wd.builddown(tree) ~ wd.buildup(tree) : buildout_matrix
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(240));
+  vsrc(i) = wd.u_voltage(i, os.tosc(240));
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
   probe(i) = wd.resistor_Vout(i, 1800);
@@ -334,7 +333,7 @@ with {
 
 buildtree_test = wd.buildtree(tree)
 with {
-  vsrc(i) = wd.u_voltage(i, tosc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
   probe(i) = wd.resistor_Vout(i, 1800);

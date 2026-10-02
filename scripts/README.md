@@ -102,7 +102,9 @@ needs no stored reference.
 A test fails when an output is not finite, or when its **level gap** (relative
 difference of the single and double RMS levels) exceeds 1e-3, unless
 `tests/precision-baseline.json` accepts it. The sample-by-sample gap is only
-reported, because `os.osc`, the input of many tests, drifts in phase in float.
+reported, because `os.osc` drifts in phase in float: the tests use `os.tosc`,
+whose integer phase is the same in both precisions, except those of the
+oscillators themselves.
 The script also reports baseline entries that a fix made unnecessary; a level
 entry is reported only once its gap is below threshold / margin (5e-4), since
 the last bits of a float result vary between compilers.
@@ -271,7 +273,7 @@ scripts/lib_tests.py inventory filters.lib --missing
 **`add LIB SPEC.dsp`** inserts the tests of SPEC.dsp wherever they are missing.
 SPEC.dsp is an ordinary Faust file, with one definition per line: `xx =
 library("...");` imports, `*_test` definitions (a `with { }` on the same line
-is fine), and the helper definitions the tests use (`src = os.osc(440);`). It
+is fine), and the helper definitions the tests use (`src = os.tosc(440);`). It
 compiles as it is, so write it, check it, then add it:
 
 ```bash

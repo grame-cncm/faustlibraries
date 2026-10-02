@@ -200,9 +200,9 @@ Where:
 ```
 rm = library("reducemaps.lib");
 os = library("oscillators.lib");
-sumn_test = os.osc(440) : rm.sumn(64);
-maxn_test = os.osc(440) : rm.maxn(64);
-minn_test = os.osc(440) : rm.minn(64);
-mean_test = os.osc(440) : rm.mean(64);
-RMS_test = os.osc(440) : rm.RMS(64);
+sumn_test = os.tosc(440) : rm.sumn(64);
+maxn_test = os.tosc(440) : rm.maxn(64);
+minn_test = os.tosc(440) : rm.minn(64);
+mean_test = os.tosc(440) : rm.mean(64);
+RMS_test = os.tosc(440) : rm.RMS(64);
 ```

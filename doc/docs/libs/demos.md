@@ -215,7 +215,7 @@ _ : moog_vcf_demo : _
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 moog_vcf_demo_test = monoOsc(440) : dm.moog_vcf_demo;
 ```
 
@@ -235,7 +235,7 @@ _ : wah4_demo : _
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 wah4_demo_test = monoOsc(440) : dm.wah4_demo;
 ```
 
@@ -255,7 +255,7 @@ _ : crybaby_demo : _
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 crybaby_demo_test = monoOsc(440) : dm.crybaby_demo;
 ```
 
@@ -276,7 +276,7 @@ _,_ : flanger_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 flanger_demo_test = stereoOsc(440, 442) : dm.flanger_demo;
 ```
 
@@ -297,7 +297,7 @@ _,_ : phaser2_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 phaser2_demo_test = stereoOsc(440, 442) : dm.phaser2_demo;
 ```
 
@@ -318,7 +318,7 @@ _,_ : tapeStop_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 tapeStop_demo_test = stereoOsc(440, 442) : dm.tapeStop_demo;
 ```
 
@@ -342,7 +342,7 @@ _,_ : freeverb_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 freeverb_demo_test = stereoOsc(440, 442) : dm.freeverb_demo;
 ```
 
@@ -362,7 +362,7 @@ _ : springreverb_demo : _
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 springreverb_demo_test = monoOsc(220) : dm.springreverb_demo;
 ```
 
@@ -441,7 +441,7 @@ Typical use is an 8-channel input bus and an 8-channel output bus.
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 zita_rev_fdn_demo_test = par(i, 8, monoOsc(440 + i)) : dm.zita_rev_fdn_demo;
 ```
 
@@ -462,7 +462,7 @@ _,_ : zita_light : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 zita_light_test = stereoOsc(440, 442) : dm.zita_light;
 ```
 
@@ -487,7 +487,7 @@ _,_ : zita_rev1 : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 zita_rev1_test = stereoOsc(440, 442) : dm.zita_rev1;
 ```
 
@@ -512,7 +512,7 @@ _,_ : vital_rev_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 vital_rev_demo_test = stereoOsc(440, 442) : dm.vital_rev_demo;
 ```
 
@@ -536,7 +536,7 @@ _,_ : reverbTank_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 reverbTank_demo_test = stereoOsc(440, 442) : dm.reverbTank_demo;
 ```
 
@@ -567,7 +567,7 @@ _,_ : kb_rom_rev1_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 kb_rom_rev1_demo_test = stereoOsc(440, 442) : dm.kb_rom_rev1_demo;
 ```
 
@@ -589,7 +589,7 @@ _,_ : dattorro_rev_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 dattorro_rev_demo_test = stereoOsc(440, 442) : dm.dattorro_rev_demo;
 ```
 
@@ -610,7 +610,7 @@ _,_ : jprev_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 jprev_demo_test = stereoOsc(440, 442) : dm.jprev_demo;
 ```
 
@@ -631,7 +631,7 @@ _,_ : greyhole_demo : _,_
 dm = library("demos.lib");
 os = library("oscillators.lib");
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 greyhole_demo_test = stereoOsc(440, 442) : dm.greyhole_demo;
 ```
 
@@ -653,7 +653,7 @@ sawtooth_demo : _
 #### Test
 ```
 dm = library("demos.lib");
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 os = library("oscillators.lib");
 sawtooth_demo_test = dm.sawtooth_demo + monoOsc(110) * 0.001;
 ```
@@ -908,7 +908,7 @@ Etc.
 ```
 dm = library("demos.lib");
 os = library("oscillators.lib");
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 pospass_demo_test = monoOsc(440) : dm.pospass_demo;
 ```
 

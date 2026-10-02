@@ -3,7 +3,6 @@
 // Tests for interpolator helper functions.
 //----------------------------------------------------------------------------
 
-import("tosc.lib");  // the test source without phase drift (tosc.lib)
 it = library("interpolators.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
@@ -77,7 +76,7 @@ with {
 
 lerp_test = it.lerp(0.0, 10.0, -5.0, 5.0, 2.5);
 
-piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), tosc(0.1));
+piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.tosc(0.1));
 
 lagrangeCoeffs_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), 0.25);
 
@@ -94,9 +93,9 @@ with {
 
 frdtable_test = it.frdtable(3, 16, os.sinwaveform(16), os.phasor(16, 200));
 
-frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), tosc(220), os.phasor(16, 150));
+frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.tosc(220), os.phasor(16, 150));
 
-remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, tosc(0.5));
+remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.tosc(0.5));
 interpolator_null_test = it.interpolator_null(gen, idv)
 with {
     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;

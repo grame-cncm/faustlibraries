@@ -53,7 +53,7 @@ ro = library("routes.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Soundfile Library";
-declare version "1.7.0";
+declare version "1.7.1";
 
 //=======================================================================
 // Utility functions added in a 'super' environment (to test the idea...)
@@ -122,7 +122,7 @@ super = environment {
 // so = library("soundfiles.lib");
 // os = library("oscillators.lib");
 // sf = soundfile("sound[url:{'tests/assets/silence.wav'}]", 1);
-// loop_test = so.loop(sf, 0) + os.osc(110) * 0.001;
+// loop_test = so.loop(sf, 0) + os.tosc(110) * 0.001;
 // ```
 //-----------------------------------------------------------------------------
 
@@ -149,7 +149,7 @@ loop(sf, part) = super.loop(sf, part);
 // so = library("soundfiles.lib");
 // os = library("oscillators.lib");
 // sf = soundfile("sound[url:{'tests/assets/silence.wav'}]", 1);
-// loop_speed_test = so.loop_speed(sf, 0, hslider("loop_speed:speed", 1, 0, 2, 0.01)) + os.osc(110) * 0.001;
+// loop_speed_test = so.loop_speed(sf, 0, hslider("loop_speed:speed", 1, 0, 2, 0.01)) + os.tosc(110) * 0.001;
 // ```
 //-----------------------------------------------------------------------------
 
@@ -182,7 +182,7 @@ loop_speed(sf, part, speed) = super.loop_speed(sf, part, speed);
 //     0,
 //     hslider("loop_speed_level:speed", 1, 0, 2, 0.01),
 //     hslider("loop_speed_level:level", 0.5, 0, 1, 0.01)
-// ) + os.osc(110) * 0.001;
+// ) + os.tosc(110) * 0.001;
 // ```
 //-----------------------------------------------------------------------------
 

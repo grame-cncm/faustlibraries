@@ -400,6 +400,105 @@ os = library("oscillators.lib");
 m_osccos_test = os.m_osccos(440);
 ```
 
+----
+
+### `(os.)tphase`
+
+Integer phase accumulator: the phase counter `m(n) = (m(n-1) + p) mod N`,
+computed in integers, so exactly, without drift.
+
+A phasor in floating point (`phasor`, `lf_sawpos`) adds a rounded increment
+at every sample: its rounding error accumulates, and the phase of a
+single-precision render drifts away from that of a double-precision one.
+`tphase` counts in integers instead. Its properties:
+
+* **exact**: `m(n) = ((n+1)·p) mod N`, with no rounding, as long as
+  `N + |p|` stays below 2^31 (the range of a Faust `int`);
+* **the same in every precision**: the integer arithmetic does not depend
+  on `-single`, `-double` or the compilation options;
+* **periodic**: the period is exactly `N/gcd(N, p)` samples;
+* **in range**: `0 <= m < N` for `p >= 0`, and `-N < m <= 0` for
+  `p < 0` (the remainder takes the sign of the counter);
+* **continuous when `p` changes**: a step changed at run time changes the
+  speed of the counter, not its current value.
+
+`float(m)/N` is a phase in cycles; it is exact in `float` as long as
+`N <= 2^24`. The counter starts at `p` (the first sample is `p mod N`).
+
+#### Usage
+
+```
+tphase(N, p) : _
+```
+
+Where:
+
+* `N`: the modulus, a positive integer (the number of steps in one cycle)
+* `p`: the step, an integer (positive or negative), added at every sample
+
+#### Test
+```
+os = library("oscillators.lib");
+tphase_test = os.tphase(480000, 4400);
+tphase_slider_test = os.tphase(480000, int(hslider("step", 4400, -48000, 48000, 1)));
+```
+
+----
+
+### `(os.)tosc`
+
+Sine wave oscillator on an exact integer phase: the same signal in single
+and double precision, at exactly the requested frequency (to 0.1 Hz).
+
+`osc` and `m_oscsin` accumulate a phase in floating point: after one
+second, the single- and double-precision renders are out of phase, and only
+their levels can be compared. `tosc` reads the sine of an integer phase
+`m = tphase(N, p)` with `N = 10·SR` and `p = round(10·freq)`. Its
+properties:
+
+* **no drift**: the phase `m/N` is exact at every sample (see `tphase`);
+  the single- and double-precision outputs differ only by the rounding of
+  `2π·m/N` and of `sin`, a few ulps at every sample, never accumulated;
+* **exact frequency**: the frequency played is `p/10` Hz, that is `freq`
+  rounded to the nearest 0.1 Hz, halves away from zero (`round`, not
+  `rint`, which rounds halves to even: 0.25 Hz plays 0.3 Hz, and -0.25 Hz
+  plays -0.3 Hz). A frequency below 0.05 Hz in magnitude gives `p = 0`, a
+  constant output of 0. The step is the same integer in single and double
+  precision, unless `10·freq` falls within a rounding error of a half;
+* **independent of the sample rate**: the step `p` depends on `freq`
+  only, never on `SR`, so the same `freq` gives the same frequency at
+  every rate, without a rounding that depends on `SR`;
+* **valid ranges**: `SR` an integer up to 1677721 Hz (`N <= 2^24`, so that
+  `float(m)` is exact), and any `freq` (negative frequencies included;
+  above Nyquist, it aliases like any sampled sine);
+* **phase continuous** when `freq` changes at run time.
+
+The first sample is `sin(2π·p/N)`, not 0. `tosc` is meant as a test source
+for numerical checks (comparing renders across precisions, sample rates or
+compilation options); `sin` is computed at every sample, so it costs more
+than the table-based `osc`.
+
+#### Usage
+
+```
+tosc(freq) : _
+```
+
+Where:
+
+* `freq`: the frequency in Hz (rounded to the nearest 0.1 Hz, halves away from zero)
+
+#### Test
+```
+os = library("oscillators.lib");
+ba = library("basics.lib");
+tosc_test = os.tosc(440);
+tosc_12000_test = os.tosc(12000);
+tosc_lfo_test = os.tosc(0.1);
+tosc_slider_test = os.tosc(hslider("freq", 440, -20000, 20000, 0.1));
+tosc_modulated_test = os.tosc(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+```
+
 ## Low Frequency Oscillators
 
 Low Frequency Oscillators (LFOs) have prefix `lf_`

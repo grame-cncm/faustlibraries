@@ -50,7 +50,7 @@ _ : jcrev : _,_,_,_
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-jcrev_test = os.osc(440) : re.jcrev;
+jcrev_test = os.tosc(440) : re.jcrev;
 ```
 
 ----
@@ -80,7 +80,7 @@ _ : satrev : _,_
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-satrev_test = os.osc(330) : re.satrev;
+satrev_test = os.tosc(330) : re.satrev;
 ```
 
 ## Feedback Delay Network (FDN) Reverberators
@@ -116,7 +116,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-fdnrev0_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550))
+fdnrev0_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550))
   <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 2.0, 1.5), 0.8, 0.0);
 ```
 
@@ -151,7 +151,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_rev_fdn_test = par(i, 8, os.osc(110 * (i + 1)))
+zita_rev_fdn_test = par(i, 8, os.tosc(110 * (i + 1)))
   <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 48000);
 ```
 
@@ -237,7 +237,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_rev1_stereo_test = (os.osc(440), os.osc(550))
+zita_rev1_stereo_test = (os.tosc(440), os.tosc(550))
   : re.zita_rev1_stereo(20, 200, 2000, 3.0, 2.0, 48000);
 ```
 
@@ -268,7 +268,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_rev1_ambi_test = (os.osc(330), os.osc(550))
+zita_rev1_ambi_test = (os.tosc(330), os.tosc(550))
   : re.zita_rev1_ambi(0.0, 25, 200, 2000, 3.0, 2.0, 48000);
 ```
 
@@ -305,7 +305,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-vital_rev_test = (os.osc(330), os.osc(440))
+vital_rev_test = (os.tosc(330), os.tosc(440))
   : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0.3, 0.2, 0.1, 0.7, 0.5, 0.4);
 ```
 
@@ -342,7 +342,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-mono_freeverb_test = os.osc(440) : re.mono_freeverb(0.7, 0.5, 0.3, 30);
+mono_freeverb_test = os.tosc(440) : re.mono_freeverb(0.7, 0.5, 0.3, 30);
 ```
 
 #### License
@@ -379,7 +379,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-stereo_freeverb_test = (os.osc(330), os.osc(550))
+stereo_freeverb_test = (os.tosc(330), os.tosc(550))
   : re.stereo_freeverb(0.7, 0.5, 0.3, 30);
 ```
 
@@ -416,7 +416,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-dattorro_rev_test = (os.osc(330), os.osc(550))
+dattorro_rev_test = (os.tosc(330), os.tosc(550))
   : re.dattorro_rev(200, 0.5, 0.7, 0.6, 0.5, 0.7, 0.5, 0.2);
 ```
 
@@ -443,7 +443,7 @@ _,_ : dattorro_rev_default : _,_
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-dattorro_rev_default_test = (os.osc(330), os.osc(550))
+dattorro_rev_default_test = (os.tosc(330), os.tosc(550))
   : re.dattorro_rev_default;
 ```
 
@@ -486,7 +486,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-jpverb_test = (os.osc(330), os.osc(440))
+jpverb_test = (os.tosc(330), os.tosc(440))
   : re.jpverb(3.0, 0.2, 1.0, 0.8, 0.3, 0.4, 0.9, 0.8, 0.7, 500, 4000);
 ```
 
@@ -523,7 +523,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-greyhole_test = (os.osc(220), os.osc(440))
+greyhole_test = (os.tosc(220), os.tosc(440))
   : re.greyhole(2.0, 0.3, 1.0, 0.6, 0.5, 0.4, 0.2);
 ```
 
@@ -561,7 +561,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-kb_rom_rev1_test = (os.osc(330), os.osc(660))
+kb_rom_rev1_test = (os.tosc(330), os.tosc(660))
   : re.kb_rom_rev1(0.7, 0.3);
 ```
 
@@ -601,6 +601,6 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-springreverb_test = os.osc(330)
+springreverb_test = os.tosc(330)
   : re.springreverb(0.5, 0.5, 0.5, 0.5, 1);
 ```

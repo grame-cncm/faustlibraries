@@ -697,7 +697,7 @@ process = it.piecewise((-5, -3, 0, 3, 5), (2, 0, 3, -3, -2), x);
 ```
 it = library("interpolators.lib");
 os = library("oscillators.lib");
-piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.osc(0.1));
+piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.tosc(0.1));
 ```
 
 ## Lagrange based interpolators
@@ -889,7 +889,7 @@ process = rwtable(S, os.sinwaveform(S), wIdx, os.sinwaveform(S), int(rIdx)) ,
 it = library("interpolators.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
-frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.osc(220), os.phasor(16, 150));
+frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.tosc(220), os.phasor(16, 150));
 ```
 
 ## Misc functions
@@ -926,5 +926,5 @@ os.osc(440) : it.remap(-1., 1., 100., 1000.)
 ```
 it = library("interpolators.lib");
 os = library("oscillators.lib");
-remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.osc(0.5));
+remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.tosc(0.5));
 ```

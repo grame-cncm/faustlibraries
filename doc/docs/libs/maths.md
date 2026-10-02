@@ -1104,7 +1104,7 @@ Where:
 ```
 ma = library("maths.lib");
 os = library("oscillators.lib");
-isnan_test = (os.osc(1) - 2.0) : sqrt : ma.isnan;
+isnan_test = (os.tosc(1) - 2.0) : sqrt : ma.isnan;
 ```
 
 ----
@@ -1236,7 +1236,7 @@ Where:
 ```
 ma = library("maths.lib");
 os = library("oscillators.lib");
-diffn_test = os.osc(440) : ma.diffn;
+diffn_test = os.tosc(440) : ma.diffn;
 ```
 
 ----
@@ -1310,7 +1310,7 @@ Where:
 ```
 ma = library("maths.lib");
 os = library("oscillators.lib");
-zc_test = os.osc(440) : ma.zc;
+zc_test = os.tosc(440) : ma.zc;
 ```
 
 ----

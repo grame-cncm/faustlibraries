@@ -770,6 +770,8 @@
 [(os.)osc](oscillators.md#ososc)
 [(os.)m_oscsin](oscillators.md#osm_oscsin)
 [(os.)m_osccos](oscillators.md#osm_osccos)
+[(os.)tphase](oscillators.md#ostphase)
+[(os.)tosc](oscillators.md#ostosc)
 [(os.)lf_imptrain](oscillators.md#oslf_imptrain)
 [(os.)lf_pulsetrainpos](oscillators.md#oslf_pulsetrainpos)
 [(os.)lf_pulsetrain](oscillators.md#oslf_pulsetrain)

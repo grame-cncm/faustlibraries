@@ -47,7 +47,7 @@ fi = library("filters.lib");
 declare name "Faust WebAudio Filters Library";
 declare author "GRAME";
 declare copyright "GRAME";
-declare version "1.1.1";
+declare version "1.1.2";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 
 //---------------------------`BiquadFilter`--------------------------------
@@ -253,7 +253,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 // ```
 // wa = library("webaudio.lib");
 // os = library("oscillators.lib");
-// lowpass2_test = os.osc(440) : wa.lowpass2(1000, 0.707, 0);
+// lowpass2_test = os.tosc(440) : wa.lowpass2(1000, 0.707, 0);
 // ```
 //
 // #### References
@@ -283,7 +283,7 @@ lowpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass2, x : fi.tf2;
 // ```
 // wa = library("webaudio.lib");
 // os = library("oscillators.lib");
-// highpass2_test = os.osc(440) : wa.highpass2(1000, 0.707, 0);
+// highpass2_test = os.tosc(440) : wa.highpass2(1000, 0.707, 0);
 // ```
 //
 // #### References
@@ -313,7 +313,7 @@ highpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass2, x : fi.tf2
 // ```
 // wa = library("webaudio.lib");
 // os = library("oscillators.lib");
-// bandpass2_test = os.osc(440) : wa.bandpass2(1000, 1, 0);
+// bandpass2_test = os.tosc(440) : wa.bandpass2(1000, 1, 0);
 // ```
 //
 // #### References
@@ -344,7 +344,7 @@ bandpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass2, x : fi.tf2
 // ```
 // wa = library("webaudio.lib");
 // os = library("oscillators.lib");
-// notch2_test = os.osc(440) : wa.notch2(1000, 1, 0);
+// notch2_test = os.tosc(440) : wa.notch2(1000, 1, 0);
 // ```
 //
 // #### References
@@ -374,7 +374,7 @@ notch2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch2, x : fi.tf2;
 // ```
 // wa = library("webaudio.lib");
 // os = library("oscillators.lib");
-// allpass2_test = os.osc(440) : wa.allpass2(1000, 1, 0);
+// allpass2_test = os.tosc(440) : wa.allpass2(1000, 1, 0);
 // ```
 //
 // #### References
@@ -404,7 +404,7 @@ allpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass2, x : fi.tf2;
 // ```
 // wa = library("webaudio.lib");
 // os = library("oscillators.lib");
-// peaking2_test = os.osc(440) : wa.peaking2(1000, 3, 1, 0);
+// peaking2_test = os.tosc(440) : wa.peaking2(1000, 3, 1, 0);
 // ```
 //
 // #### References
@@ -434,7 +434,7 @@ peaking2(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking2, x :
 // ```
 // wa = library("webaudio.lib");
 // os = library("oscillators.lib");
-// lowshelf2_test = os.osc(440) : wa.lowshelf2(500, 6, 0);
+// lowshelf2_test = os.tosc(440) : wa.lowshelf2(500, 6, 0);
 // ```
 //
 // #### References
@@ -464,7 +464,7 @@ lowshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf2, x : 
 // ```
 // wa = library("webaudio.lib");
 // os = library("oscillators.lib");
-// highshelf2_test = os.osc(440) : wa.highshelf2(2000, -6, 0);
+// highshelf2_test = os.tosc(440) : wa.highshelf2(2000, -6, 0);
 // ```
 //
 // #### References

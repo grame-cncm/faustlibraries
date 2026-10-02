@@ -43,7 +43,7 @@ Where:
 ```
 de = library("delays.lib");
 os = library("oscillators.lib");
-delay_test = os.osc(440) : de.delay(44100, 22050);
+delay_test = os.tosc(440) : de.delay(44100, 22050);
 ```
 
 TODO: add MBH np2
@@ -74,7 +74,7 @@ Where:
 ```
 de = library("delays.lib");
 os = library("oscillators.lib");
-fdelay_test = os.osc(440) : de.fdelay(44100, 22050.5);
+fdelay_test = os.tosc(440) : de.fdelay(44100, 22050.5);
 ```
 
 ----
@@ -100,7 +100,7 @@ Where:
 ```
 de = library("delays.lib");
 os = library("oscillators.lib");
-sdelay_test = os.osc(440) : de.sdelay(44100, 1024, 22050.5);
+sdelay_test = os.tosc(440) : de.sdelay(44100, 1024, 22050.5);
 ```
 
 ----
@@ -163,7 +163,7 @@ Note: the requested delay should not be less than `(N-1)/2`.
 ```
 de = library("delays.lib");
 os = library("oscillators.lib");
-fdelaylti_test = os.osc(440) : de.fdelaylti(3, 44100, 22050.5);
+fdelaylti_test = os.tosc(440) : de.fdelaylti(3, 44100, 22050.5);
 ```
 
 #### References
@@ -231,7 +231,7 @@ Where:
 ```
 de = library("delays.lib");
 os = library("oscillators.lib");
-fdelay2a_test = os.osc(440) : de.fdelay2a(44100, 22050.5);
+fdelay2a_test = os.tosc(440) : de.fdelay2a(44100, 22050.5);
 ```
 
 #### Note
@@ -297,7 +297,7 @@ Where:
 ```
 de = library("delays.lib");
 os = library("oscillators.lib");
-multiTapSincDelay_test = os.osc(440) : de.multiTapSincDelay(2, 4096, 1024.0, 1536.0, 0.5);
+multiTapSincDelay_test = os.tosc(440) : de.multiTapSincDelay(2, 4096, 1024.0, 1536.0, 0.5);
 ```
 
 #### References

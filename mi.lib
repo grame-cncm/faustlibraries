@@ -58,7 +58,7 @@ ma = library("maths.lib");
 ba = library("basics.lib");
 
 declare name "Faust mass-interaction physical modelling library";
-declare version "1.1.0";
+declare version "1.1.1";
 declare author "James Leonard";
 declare author "Romain Michon";
 declare copyright "2018-2020 GRAME / GIPSA-Lab";
@@ -231,7 +231,7 @@ with{
 // ```
 // mi = library("mi.lib");
 // os = library("oscillators.lib");
-// posInput_test = 0, os.osc(1.0) : mi.posInput(0.0);
+// posInput_test = 0, os.tosc(1.0) : mi.posInput(0.0);
 // ```
 //---------------------------------------------------------
 posInput(init) = _,_ : !,_ : initState(init);
@@ -487,7 +487,7 @@ with{
 // ```
 // mi = library("mi.lib");
 // os = library("oscillators.lib");
-// nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.osc(110) * 0.001;
+// nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.tosc(110) * 0.001;
 // ```
 //---------------------------------------------------------
 nlPluck(k, scale, z, x1r0, x2r0, x1, x2) = 

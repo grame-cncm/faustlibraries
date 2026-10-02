@@ -44,7 +44,7 @@ Where:
 ```
 ho = library("hoa.lib");
 os = library("oscillators.lib");
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 encoder_test = ho.encoder(1, monoSignal(440), 0.0);
 ```
 
@@ -72,7 +72,7 @@ Where:
 ```
 ho = library("hoa.lib");
 os = library("oscillators.lib");
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 rEncoder_test = monoSignal(440) : ho.rEncoder(1, 0.5, 0.0, 0.05);
 ```
 
@@ -98,7 +98,7 @@ Where:
 ho = library("hoa.lib");
 os = library("oscillators.lib");
 stereoSignal(f1, f2) = monoSignal(f1), monoSignal(f2);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 stereoEncoder_test = stereoSignal(440, 660) : ho.stereoEncoder(1, 1.0);
 ```
 
@@ -126,7 +126,7 @@ Where:
 ho = library("hoa.lib");
 os = library("oscillators.lib");
 stereoSignal(f1, f2) = monoSignal(f1), monoSignal(f2);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 multiEncoder_test = stereoSignal(440, 660) : ho.multiEncoder(1, (0.0, 0.0), (0.0, 1.57), 0.05);
 ```
 
@@ -153,7 +153,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 decoder_test = encoder_bus : ho.decoder(1, 4);
 ```
 
@@ -186,7 +186,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 decoderStereo_test = encoder_bus : ho.decoderStereo(1);
 ```
 
@@ -217,7 +217,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 iBasicDecoder_test = encoder_bus : ho.iBasicDecoder(1, (0, 120, 240), 1, 0);
 ```
 
@@ -242,7 +242,7 @@ Where:
 ```
 ho = library("hoa.lib");
 os = library("oscillators.lib");
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 circularScaledVBAP_test = monoSignal(440) : ho.circularScaledVBAP((0, 120, 240), 60);
 ```
 
@@ -272,7 +272,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 imlsDecoder_test = encoder_bus : ho.imlsDecoder(1, (0, 90, 180, 270), 1, 0);
 ```
 
@@ -304,7 +304,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 iDecoder_test = (encoder_bus, 0.0) : ho.iDecoder(1, (0, 120, 240), 1, 0, 0.8);
 ```
 
@@ -338,7 +338,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 optimBasic_test = encoder_bus : ho.optimBasic(1);
 ```
 
@@ -365,7 +365,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 optimMaxRe_test = encoder_bus : ho.optimMaxRe(1);
 ```
 
@@ -392,7 +392,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 optimInPhase_test = encoder_bus : ho.optimInPhase(1);
 ```
 
@@ -420,7 +420,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 optim_test = encoder_bus : ho.optim(1, 1);
 ```
 
@@ -449,7 +449,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 wider_test = encoder_bus : ho.wider(1, 0.5);
 ```
 
@@ -476,7 +476,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi = ho.encoder(1, os.osc(440), 0.0);
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 mirror_test = encoder_bus : ho.mirror(1, -1);
 ```
 
@@ -504,7 +504,7 @@ Where:
 ```
 ho = library("hoa.lib");
 os = library("oscillators.lib");
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 map_test = ho.map(1, monoSignal(440), 0.5, 0.0);
 ```
 
@@ -530,7 +530,7 @@ Where:
 ho = library("hoa.lib");
 os = library("oscillators.lib");
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 rotate_test = encoder_bus : ho.rotate(1, 0.78);
 ```
 
@@ -556,7 +556,7 @@ Where:
 ho = library("hoa.lib");
 os = library("oscillators.lib");
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 scope_test = encoder_bus : ho.scope(1, 0.1);
 ```
 
@@ -607,7 +607,7 @@ Where:
 ho = library("hoa.lib");
 os = library("oscillators.lib");
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 fxDecorrelation_test = encoder_bus : ho.fxDecorrelation(1, 64, 5, 0.5, 0.2, 0);
 ```
 
@@ -653,7 +653,7 @@ Where:
 ```
 ho = library("hoa.lib");
 os = library("oscillators.lib");
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 synDecorrelation_test = monoSignal(440) : ho.synDecorrelation(1, 64, 5, 0.5, 0.2, 0);
 ```
 
@@ -694,7 +694,7 @@ Where:
 ho = library("hoa.lib");
 os = library("oscillators.lib");
 encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 fxRingMod_test = encoder_bus : ho.fxRingMod(1, 200, 0.5, 0);
 ```
 
@@ -736,7 +736,7 @@ Where:
 ```
 ho = library("hoa.lib");
 os = library("oscillators.lib");
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 synRingMod_test = monoSignal(440) : ho.synRingMod(1, 200, 0.5, 0);
 ```
 
@@ -768,7 +768,7 @@ Where:
 ho = library("hoa.lib");
 os = library("oscillators.lib");
 encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 encoder3D_test = encoder3D_base;
 ```
 
@@ -800,7 +800,7 @@ Where:
 ```
 ho = library("hoa.lib");
 os = library("oscillators.lib");
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 rEncoder3D_test = monoSignal(440) : ho.rEncoder3D(1, 0.5, 0.3, 0.0, 0.0, 0.05);
 ```
 
@@ -828,7 +828,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
 encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 optimBasic3D_test = encoder3D_base : ho.optimBasic3D(1);
 ```
 
@@ -855,7 +855,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
 encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 optimMaxRe3D_test = encoder3D_base : ho.optimMaxRe3D(1);
 ```
 
@@ -882,7 +882,7 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
 encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 optimInPhase3D_test = encoder3D_base : ho.optimInPhase3D(1);
 ```
 
@@ -910,6 +910,6 @@ ho = library("hoa.lib");
 os = library("oscillators.lib");
 ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
 encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-monoSignal(freq) = os.osc(freq);
+monoSignal(freq) = os.tosc(freq);
 optim3D_test = encoder3D_base : ho.optim3D(1, 2);
 ```

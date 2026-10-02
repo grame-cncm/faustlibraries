@@ -115,7 +115,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-peak_compression_gain_mono_db_test = os.osc(440) : co.peak_compression_gain_mono_db(0.5, -12, 0.01, 0.1, 6, 0);
+peak_compression_gain_mono_db_test = os.tosc(440) : co.peak_compression_gain_mono_db(0.5, -12, 0.01, 0.1, 6, 0);
 ```
 
 #### References
@@ -163,7 +163,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-peak_compression_gain_N_chan_db_test = (os.osc(440), os.osc(660)) : co.peak_compression_gain_N_chan_db(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+peak_compression_gain_N_chan_db_test = (os.tosc(440), os.tosc(660)) : co.peak_compression_gain_N_chan_db(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
 ```
 
 #### References
@@ -214,7 +214,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
-FFcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FFcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+FFcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FFcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
 ```
 
 #### References
@@ -266,7 +266,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
-FBcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FBcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+FBcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FBcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
 ```
 
 #### References
@@ -319,7 +319,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
-FBFFcompressor_N_chan_test = (os.osc(440), os.osc(660)) : co.FBFFcompressor_N_chan(0.4, -12, 0.01, 0.1, 6, 0, 0.5, 0.3, meter, 2);
+FBFFcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FBFFcompressor_N_chan(0.4, -12, 0.01, 0.1, 6, 0, 0.5, 0.3, meter, 2);
 ```
 
 #### References
@@ -365,7 +365,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-RMS_compression_gain_mono_db_test = os.osc(330) : co.RMS_compression_gain_mono_db(0.5, -18, 0.02, 0.12, 6, 0);
+RMS_compression_gain_mono_db_test = os.tosc(330) : co.RMS_compression_gain_mono_db(0.5, -18, 0.02, 0.12, 6, 0);
 ```
 
 #### References
@@ -413,7 +413,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-RMS_compression_gain_N_chan_db_test = (os.osc(330), os.osc(550)) : co.RMS_compression_gain_N_chan_db(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+RMS_compression_gain_N_chan_db_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan_db(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
 ```
 
 #### References
@@ -472,7 +472,7 @@ again the strength is much higher when in FB mode, but implemented differently.
 co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
-RMS_FBFFcompressor_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBFFcompressor_N_chan(0.4, -18, 0.02, 0.12, 6, 0, 0.5, 0.3, meter, 2);
+RMS_FBFFcompressor_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_FBFFcompressor_N_chan(0.4, -18, 0.02, 0.12, 6, 0, 0.5, 0.3, meter, 2);
 ```
 
 #### References
@@ -531,7 +531,7 @@ co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
 meterLim(x) = x;
-RMS_FBcompressor_peak_limiter_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(0.4, -18, -2, 0.02, 0.12, 6, 0.5, meter, meterLim, 2);
+RMS_FBcompressor_peak_limiter_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(0.4, -18, -2, 0.02, 0.12, 6, 0.5, meter, meterLim, 2);
 ```
 
 #### References
@@ -582,7 +582,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-peak_compression_gain_mono_test = os.osc(440) : co.peak_compression_gain_mono(0.5, -12, 0.01, 0.1, 6, 0);
+peak_compression_gain_mono_test = os.tosc(440) : co.peak_compression_gain_mono(0.5, -12, 0.01, 0.1, 6, 0);
 ```
 
 #### References
@@ -630,7 +630,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-peak_compression_gain_N_chan_test = (os.osc(440), os.osc(660)) : co.peak_compression_gain_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+peak_compression_gain_N_chan_test = (os.tosc(440), os.tosc(660)) : co.peak_compression_gain_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
 ```
 
 #### References
@@ -676,7 +676,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-RMS_compression_gain_mono_test = os.osc(330) : co.RMS_compression_gain_mono(0.5, -18, 0.02, 0.12, 6, 0);
+RMS_compression_gain_mono_test = os.tosc(330) : co.RMS_compression_gain_mono(0.5, -18, 0.02, 0.12, 6, 0);
 ```
 
 #### References
@@ -724,7 +724,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-RMS_compression_gain_N_chan_test = (os.osc(330), os.osc(550)) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+RMS_compression_gain_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
 ```
 
 #### References
@@ -766,7 +766,7 @@ Where:
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-compressor_lad_mono_test = os.osc(440) : co.compressor_lad_mono(0.005, 4, -9, 0.01, 0.1);
+compressor_lad_mono_test = os.tosc(440) : co.compressor_lad_mono(0.005, 4, -9, 0.01, 0.1);
 ```
 
 #### References
@@ -804,7 +804,7 @@ Where:
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-compressor_mono_test = os.osc(440) : co.compressor_mono(4, -9, 0.01, 0.2);
+compressor_mono_test = os.tosc(440) : co.compressor_mono(4, -9, 0.01, 0.2);
 ```
 
 #### References
@@ -837,7 +837,7 @@ Where:
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-compressor_stereo_test = (os.osc(440), os.osc(660)) : co.compressor_stereo(4, -9, 0.01, 0.2);
+compressor_stereo_test = (os.tosc(440), os.tosc(660)) : co.compressor_stereo(4, -9, 0.01, 0.2);
 ```
 
 #### References
@@ -870,7 +870,7 @@ Where:
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-compression_gain_mono_test = os.osc(440) : co.compression_gain_mono(4, -9, 0.01, 0.2);
+compression_gain_mono_test = os.tosc(440) : co.compression_gain_mono(4, -9, 0.01, 0.2);
 ```
 
 #### References
@@ -922,7 +922,7 @@ The 1176 also has a "bright, clear eq effect" (use filters.lib if desired).
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-limiter_1176_R4_mono_test = os.osc(440) : co.limiter_1176_R4_mono;
+limiter_1176_R4_mono_test = os.tosc(440) : co.limiter_1176_R4_mono;
 ```
 
 #### References
@@ -962,7 +962,7 @@ He hears a bright, clear eq effect as well (not implemented here).
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-limiter_1176_R4_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_1176_R4_stereo;
+limiter_1176_R4_stereo_test = (os.tosc(440), os.tosc(660)) : co.limiter_1176_R4_stereo;
 ```
 
 #### References
@@ -1007,7 +1007,7 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-peak_expansion_gain_N_chan_db_test = (os.osc(220), os.osc(330)) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0, 0.5, 2048, 2);
+peak_expansion_gain_N_chan_db_test = (os.tosc(220), os.tosc(330)) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0, 0.5, 2048, 2);
 ```
 
 ----
@@ -1084,7 +1084,7 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
-expander_N_chan_test = (os.osc(220), os.osc(330)) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2);
+expander_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2);
 ```
 
 ----
@@ -1129,7 +1129,7 @@ co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
 SCfunction(x) = x;
-expanderSC_N_chan_test = (os.osc(220), os.osc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.osc(880));
+expanderSC_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.tosc(880));
 ```
 
 ## Lookahead Limiters
@@ -1191,7 +1191,7 @@ Example for a stereo limiter: `limiter_lad_N(2, .01, 1, .01, .1, 1);`
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-limiter_lad_N_test = (os.osc(440), os.osc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
+limiter_lad_N_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
 ```
 
 #### References
@@ -1223,7 +1223,7 @@ Where:
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-limiter_lad_mono_test = os.osc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
+limiter_lad_mono_test = os.tosc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
 ```
 
 #### References
@@ -1255,7 +1255,7 @@ Where:
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-limiter_lad_stereo_test = (os.osc(440), os.osc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
+limiter_lad_stereo_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
 ```
 #### References
 
@@ -1286,7 +1286,7 @@ Where:
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-limiter_lad_quad_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
+limiter_lad_quad_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
 ```
 
 #### References
@@ -1318,7 +1318,7 @@ _ : limiter_lad_bw : _
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-limiter_lad_bw_test = os.osc(440) : co.limiter_lad_bw;
+limiter_lad_bw_test = os.tosc(440) : co.limiter_lad_bw;
 ```
 
 #### References

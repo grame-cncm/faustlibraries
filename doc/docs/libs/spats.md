@@ -37,7 +37,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-panner_test = os.osc(220) : sp.panner(hslider("panner:pan", 0.3, 0, 1, 0.01));
+panner_test = os.tosc(220) : sp.panner(hslider("panner:pan", 0.3, 0, 1, 0.01));
 ```
 
 ----
@@ -85,7 +85,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-constantPowerPan_test = (os.osc(110), os.osc(220))
+constantPowerPan_test = (os.tosc(110), os.tosc(220))
   : sp.constantPowerPan(hslider("constantPowerPan:pan", 0.4, 0, 1, 0.01));
 ```
 
@@ -112,7 +112,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-spat_test = os.osc(330)
+spat_test = os.tosc(330)
   : sp.spat(4,
       hslider("spat:rotation", 0.25, 0, 1, 0.01),
       hslider("spat:distance", 0.5, 0, 1, 0.01));
@@ -152,7 +152,7 @@ wfs_proc(i) = *(0.5); // Simple gain processor
 wfs_xs(i) = 0.0;
 wfs_ys(i) = 1.0;
 wfs_zs(i) = 0.0;
-wfs_test = os.osc(440)
+wfs_test = os.tosc(440)
   : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
 ```
 
@@ -181,7 +181,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-wfs_ui_test = os.osc(550)
+wfs_ui_test = os.tosc(550)
   : sp.wfs_ui(0, 1, 0, 0.5, 1, 2);
 ```
 
@@ -322,7 +322,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-stereoize_test = (os.osc(660), os.osc(770))
+stereoize_test = (os.tosc(660), os.tosc(770))
   : sp.stereoize(+);
 ```
 
@@ -357,7 +357,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-binauralModel_test = os.osc(440) : sp.binauralModel(45);
+binauralModel_test = os.tosc(440) : sp.binauralModel(45);
 ```
 
 #### References
@@ -391,5 +391,5 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-binauralFir_test = os.osc(440) : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));
+binauralFir_test = os.tosc(440) : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));
 ```

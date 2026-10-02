@@ -192,7 +192,7 @@ Where:
 ```
 mi = library("mi.lib");
 os = library("oscillators.lib");
-posInput_test = 0, os.osc(1.0) : mi.posInput(0.0);
+posInput_test = 0, os.tosc(1.0) : mi.posInput(0.0);
 ```
 
 ## Interaction Algorithms
@@ -403,7 +403,7 @@ Where:
 ```
 mi = library("mi.lib");
 os = library("oscillators.lib");
-nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.osc(110) * 0.001;
+nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.tosc(110) * 0.001;
 ```
 
 ----

@@ -580,7 +580,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-ramp_test = os.osc(1) : ba.ramp(256);
+ramp_test = os.tosc(1) : ba.ramp(256);
 ```
 
 ----
@@ -608,7 +608,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-line_test = os.osc(1) : ba.line(256);
+line_test = os.tosc(1) : ba.line(256);
 line_frac_test = os.lf_squarewavepos(100) : ba.line(4.8);
 ```
 
@@ -1880,7 +1880,7 @@ os = library("oscillators.lib");
 ma = library("maths.lib");
 effects = ((_*0.5,_*0.5),(_*0.25,_*0.25));
 choice = int(checkbox("choice"));
-selectmulti_test = (os.osc(440), os.osc(660)) : ba.selectmulti(ma.SR/100, effects, choice);
+selectmulti_test = (os.tosc(440), os.tosc(660)) : ba.selectmulti(ma.SR/100, effects, choice);
 ```
 
 ----
@@ -1939,7 +1939,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-latch_test = os.osc(2) : ba.latch(ba.pulse(32));
+latch_test = os.tosc(2) : ba.latch(ba.pulse(32));
 latch_inf_test = (1 / (ba.time - 3)) : ba.latch(ba.time == 1);
 ```
 
@@ -1964,7 +1964,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-sAndH_test = os.osc(2) : ba.sAndH(ba.pulse(32));
+sAndH_test = os.tosc(2) : ba.sAndH(ba.pulse(32));
 ```
 
 ----
@@ -1988,7 +1988,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 isPositive(x) = x > 0.0;
-tAndH_test = os.osc(2) : ba.tAndH(isPositive);
+tAndH_test = os.tosc(2) : ba.tAndH(isPositive);
 ```
 
 ----
@@ -2020,7 +2020,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-downSample_test = os.osc(440) : ba.downSample(11025);
+downSample_test = os.tosc(440) : ba.downSample(11025);
 ```
 
 ----
@@ -2045,7 +2045,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-downSampleCV_test = os.osc(440) : ba.downSampleCV(0.5);
+downSampleCV_test = os.tosc(440) : ba.downSampleCV(0.5);
 ```
 
 ----
@@ -2070,7 +2070,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-peakhold_test = os.osc(440) : ba.peakhold(1);
+peakhold_test = os.tosc(440) : ba.peakhold(1);
 ```
 
 ----
@@ -2101,7 +2101,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-peakholder_test = os.osc(440) : ba.peakholder(ba.sec2samp(0.1));
+peakholder_test = os.tosc(440) : ba.peakholder(ba.sec2samp(0.1));
 ```
 
 ----
@@ -2150,7 +2150,7 @@ button("gate") : impulsify;
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-impulsify_test = os.osc(440) : ba.impulsify;
+impulsify_test = os.tosc(440) : ba.impulsify;
 ```
 
 ----
@@ -2299,7 +2299,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-bypass1_test = os.osc(440) : ba.bypass1(button("bypass"), *(0.5));
+bypass1_test = os.tosc(440) : ba.bypass1(button("bypass"), *(0.5));
 ```
 
 ----
@@ -2325,7 +2325,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-bypass2_test = (os.osc(440), os.osc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
+bypass2_test = (os.tosc(440), os.tosc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
 ```
 
 ----
@@ -2353,7 +2353,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 monoToStereo(x) = (x*0.5, x*0.25);
-bypass1to2_test = os.osc(440) : ba.bypass1to2(button("bypass"), monoToStereo);
+bypass1to2_test = os.tosc(440) : ba.bypass1to2(button("bypass"), monoToStereo);
 ```
 
 ----
@@ -2391,7 +2391,7 @@ process = bypass_fade(ma.SR/10, checkbox("bypass reverb"), freeverb);
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-bypass_fade_test = (os.osc(440), os.osc(660)) : ba.bypass_fade(128, button("bypass"), par(i,2, *(0.5)));
+bypass_fade_test = (os.tosc(440), os.tosc(660)) : ba.bypass_fade(128, button("bypass"), par(i,2, *(0.5)));
 ```
 
 ----
@@ -2463,7 +2463,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-bitcrusher_test = os.osc(440) : ba.bitcrusher(8);
+bitcrusher_test = os.tosc(440) : ba.bitcrusher(8);
 ```
 
 ----
@@ -2519,7 +2519,7 @@ parameter `mu` of 255 and 8-bit quantization. This creates a distorted, "lo-fi" 
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-mulaw_bitcrusher_test = os.osc(440) : ba.mulaw_bitcrusher(2.0, 8);
+mulaw_bitcrusher_test = os.tosc(440) : ba.mulaw_bitcrusher(2.0, 8);
 ```
 #### References
 
@@ -2712,7 +2712,7 @@ minimum, we need to give `ma.MAX` as `disabledVal`.
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-slidingReduce_test = os.osc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
+slidingReduce_test = os.tosc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
 ```
 
 ----
@@ -2738,7 +2738,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingSum_test = os.osc(440) : ba.slidingSum(64);
+slidingSum_test = os.tosc(440) : ba.slidingSum(64);
 ```
 
 ----
@@ -2764,7 +2764,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingSump_test = os.osc(440) : ba.slidingSump(64, 128);
+slidingSump_test = os.tosc(440) : ba.slidingSump(64, 128);
 ```
 
 ----
@@ -2789,7 +2789,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-slidingMax_test = os.osc(440) : ba.slidingMax(64, 128);
+slidingMax_test = os.tosc(440) : ba.slidingMax(64, 128);
 ```
 
 ----
@@ -2814,7 +2814,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-slidingMin_test = os.osc(440) : ba.slidingMin(64, 128);
+slidingMin_test = os.tosc(440) : ba.slidingMin(64, 128);
 ```
 
 ----
@@ -2840,7 +2840,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingMean_test = os.osc(440) : ba.slidingMean(64);
+slidingMean_test = os.tosc(440) : ba.slidingMean(64);
 ```
 
 ----
@@ -2866,7 +2866,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingMeanp_test = os.osc(440) : ba.slidingMeanp(64, 128);
+slidingMeanp_test = os.tosc(440) : ba.slidingMeanp(64, 128);
 ```
 
 ----
@@ -2892,7 +2892,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingRMS_test = os.osc(440) : ba.slidingRMS(64);
+slidingRMS_test = os.tosc(440) : ba.slidingRMS(64);
 ```
 
 ----
@@ -2918,7 +2918,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingRMSp_test = os.osc(440) : ba.slidingRMSp(64, 128);
+slidingRMSp_test = os.tosc(440) : ba.slidingRMSp(64, 128);
 ```
 
 ## Parallel Operators

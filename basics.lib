@@ -66,7 +66,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.23.4";
+declare version "1.23.5";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -657,7 +657,7 @@ time = +(1)~_ : mem;
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// ramp_test = os.osc(1) : ba.ramp(256);
+// ramp_test = os.tosc(1) : ba.ramp(256);
 // ```
 //----------------------------
 ramp = case {
@@ -688,7 +688,7 @@ ramp = case {
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// line_test = os.osc(1) : ba.line(256);
+// line_test = os.tosc(1) : ba.line(256);
 // line_frac_test = os.lf_squarewavepos(100) : ba.line(4.8);
 // ```
 //----------------------------
@@ -2413,7 +2413,7 @@ declare selectxbus license "MIT";
 // ma = library("maths.lib");
 // effects = ((_*0.5,_*0.5),(_*0.25,_*0.25));
 // choice = int(checkbox("choice"));
-// selectmulti_test = (os.osc(440), os.osc(660)) : ba.selectmulti(ma.SR/100, effects, choice);
+// selectmulti_test = (os.tosc(440), os.tosc(660)) : ba.selectmulti(ma.SR/100, effects, choice);
 // ```
 //----------------------------
 selectmulti(n, lgen, id) = selectmultiX(ins, lgen, id)
@@ -2488,7 +2488,7 @@ selectoutn(N, s) = _ <: par(i, N, *(s==i));
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// latch_test = os.osc(2) : ba.latch(ba.pulse(32));
+// latch_test = os.tosc(2) : ba.latch(ba.pulse(32));
 // latch_inf_test = (1 / (ba.time - 3)) : ba.latch(ba.time == 1);
 // ```
 //----------------------------
@@ -2515,7 +2515,7 @@ latch(trig, x) = x : sAndH(s) with { s = (trig' <= 0) & (trig > 0); };
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// sAndH_test = os.osc(2) : ba.sAndH(ba.pulse(32));
+// sAndH_test = os.tosc(2) : ba.sAndH(ba.pulse(32));
 // ```
 //----------------------------
 declare sAndH author "Romain Michon";
@@ -2540,7 +2540,7 @@ sAndH(trig) = select2(trig) ~ _;
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
 // isPositive(x) = x > 0.0;
-// tAndH_test = os.osc(2) : ba.tAndH(isPositive);
+// tAndH_test = os.tosc(2) : ba.tAndH(isPositive);
 // ```
 //----------------------------
 tAndH(pred) = _ <: pred,_ : sAndH;
@@ -2571,7 +2571,7 @@ tAndH(pred) = _ <: pred,_ : sAndH;
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// downSample_test = os.osc(440) : ba.downSample(11025);
+// downSample_test = os.tosc(440) : ba.downSample(11025);
 // ```
 //----------------------------
 declare downSample author "Romain Michon";
@@ -2601,7 +2601,7 @@ with {
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// downSampleCV_test = os.osc(440) : ba.downSampleCV(0.5);
+// downSampleCV_test = os.tosc(440) : ba.downSampleCV(0.5);
 // ```
 //----------------------------
 downSampleCV(amt) = sAndH(hold)
@@ -2635,7 +2635,7 @@ declare downSampleCV author "Romain Michon/David Braun";
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// peakhold_test = os.osc(440) : ba.peakhold(1);
+// peakhold_test = os.tosc(440) : ba.peakhold(1);
 // ```
 //----------------------------
 declare peakhold author "Jonatan Liljedahl, revised by Romain Michon";
@@ -2667,7 +2667,7 @@ peakhold = (*,_ : max) ~ _;
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// peakholder_test = os.osc(440) : ba.peakholder(ba.sec2samp(0.1));
+// peakholder_test = os.tosc(440) : ba.peakholder(ba.sec2samp(0.1));
 // ```
 //----------------------------
 declare peakholder author "Dario Sanfilippo";
@@ -2759,7 +2759,7 @@ kr2ar = + ~ *(0);
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// impulsify_test = os.osc(440) : ba.impulsify;
+// impulsify_test = os.tosc(440) : ba.impulsify;
 // ```
 //----------------------------
 impulsify = _ <: _,mem : - <: >(0)*_;
@@ -2955,7 +2955,7 @@ listInterp(v) =
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// bypass1_test = os.osc(440) : ba.bypass1(button("bypass"), *(0.5));
+// bypass1_test = os.tosc(440) : ba.bypass1(button("bypass"), *(0.5));
 // ```
 //----------------------------
 declare bypass1 author "Julius Smith";
@@ -2987,7 +2987,7 @@ with {
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// bypass2_test = (os.osc(440), os.osc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
+// bypass2_test = (os.tosc(440), os.tosc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
 // ```
 //----------------------------
 declare bypass2 author "Julius Smith";
@@ -3021,7 +3021,7 @@ with {
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
 // monoToStereo(x) = (x*0.5, x*0.25);
-// bypass1to2_test = os.osc(440) : ba.bypass1to2(button("bypass"), monoToStereo);
+// bypass1to2_test = os.tosc(440) : ba.bypass1to2(button("bypass"), monoToStereo);
 // ```
 //----------------------------
 declare bypass1to2 author "Julius Smith";
@@ -3065,7 +3065,7 @@ with {
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// bypass_fade_test = (os.osc(440), os.osc(660)) : ba.bypass_fade(128, button("bypass"), par(i,2, *(0.5)));
+// bypass_fade_test = (os.tosc(440), os.tosc(660)) : ba.bypass_fade(128, button("bypass"), par(i,2, *(0.5)));
 // ```
 //----------------------------
 bypass_fade(n, b, e) = par(i, ins, _)
@@ -3156,7 +3156,7 @@ with {
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// bitcrusher_test = os.osc(440) : ba.bitcrusher(8);
+// bitcrusher_test = os.tosc(440) : ba.bitcrusher(8);
 // ```
 //----------------------------
 declare bitcrusher author "Julius O. Smith III, revised by Stephane Letz";
@@ -3216,7 +3216,7 @@ with {
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// mulaw_bitcrusher_test = os.osc(440) : ba.mulaw_bitcrusher(2.0, 8);
+// mulaw_bitcrusher_test = os.tosc(440) : ba.mulaw_bitcrusher(2.0, 8);
 // ```
 // #### References
 //
@@ -3424,7 +3424,7 @@ with {
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
 // ma = library("maths.lib");
-// slidingReduce_test = os.osc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
+// slidingReduce_test = os.tosc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
 // ```
 //----------------------------------------------------
 slidingReduce(op,n,0,disabledVal) = 0:!;
@@ -3478,7 +3478,7 @@ slidingReduce(op,n,maxN,disabledVal) =
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// slidingSum_test = os.osc(440) : ba.slidingSum(64);
+// slidingSum_test = os.tosc(440) : ba.slidingSum(64);
 // ```
 //----------------------------------------------------
 slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
@@ -3504,7 +3504,7 @@ slidingSum(n) = fi.integrator <: _, _@int(max(0,n)) :> -;
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// slidingSump_test = os.osc(440) : ba.slidingSump(64, 128);
+// slidingSump_test = os.tosc(440) : ba.slidingSump(64, 128);
 // ```
 //----------------------------------------------------
 slidingSump(n,maxN) = slidingReduce(+,n,maxN,0);
@@ -3529,7 +3529,7 @@ slidingSump(n,maxN) = slidingReduce(+,n,maxN,0);
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
 // ma = library("maths.lib");
-// slidingMax_test = os.osc(440) : ba.slidingMax(64, 128);
+// slidingMax_test = os.tosc(440) : ba.slidingMax(64, 128);
 // ```
 //----------------------------------------------------
 slidingMax(n,maxN) = slidingReduce(max,n,maxN,0-(ma.MAX));
@@ -3553,7 +3553,7 @@ slidingMax(n,maxN) = slidingReduce(max,n,maxN,0-(ma.MAX));
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
 // ma = library("maths.lib");
-// slidingMin_test = os.osc(440) : ba.slidingMin(64, 128);
+// slidingMin_test = os.tosc(440) : ba.slidingMin(64, 128);
 // ```
 //----------------------------------------------------
 slidingMin(n,maxN) = slidingReduce(min,n,maxN,ma.MAX);
@@ -3579,7 +3579,7 @@ slidingMin(n,maxN) = slidingReduce(min,n,maxN,ma.MAX);
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// slidingMean_test = os.osc(440) : ba.slidingMean(64);
+// slidingMean_test = os.tosc(440) : ba.slidingMean(64);
 // ```
 //----------------------------------------------------
 slidingMean(n) = slidingSum(n)/n;
@@ -3605,7 +3605,7 @@ slidingMean(n) = slidingSum(n)/n;
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// slidingMeanp_test = os.osc(440) : ba.slidingMeanp(64, 128);
+// slidingMeanp_test = os.tosc(440) : ba.slidingMeanp(64, 128);
 // ```
 //----------------------------------------------------
 slidingMeanp(n,maxN) = slidingSump(n,maxN)/n;
@@ -3632,7 +3632,7 @@ slidingMeanp(n,maxN) = slidingSump(n,maxN)/n;
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// slidingRMS_test = os.osc(440) : ba.slidingRMS(64);
+// slidingRMS_test = os.tosc(440) : ba.slidingRMS(64);
 // ```
 //----------------------------------------------------
 slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
@@ -3658,7 +3658,7 @@ slidingRMS(n) = pow(2) : slidingMean(n) : sqrt;
 // ```
 // ba = library("basics.lib");
 // os = library("oscillators.lib");
-// slidingRMSp_test = os.osc(440) : ba.slidingRMSp(64, 128);
+// slidingRMSp_test = os.tosc(440) : ba.slidingRMSp(64, 128);
 // ```
 //----------------------------------------------------
 slidingRMSp(n,maxn) = pow(2) : slidingMeanp(n,maxn) : sqrt;
