@@ -17,6 +17,8 @@ interpolate_logarithmic_test = it.interpolate_logarithmic(0.5, 100.0, 10000.0);
 interpolate_power_test = it.interpolate_power(2.0, 0.5, 0.0, 1.0);
 
 interpolate_exponential_test = it.interpolate_exponential(3.0, 0.5, 0.0, 1.0);
+interpolate_exponential_slider_test = it.interpolate_exponential(hslider("k", 0, -5, 5, 0.01), hslider("dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_exponential_modulated_test = it.interpolate_exponential(-5 + 10*tri, 0.5, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 interpolate_smoothstep_test = it.interpolate_smoothstep(0.5, 0.0, 1.0);
 

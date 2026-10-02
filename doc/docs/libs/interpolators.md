@@ -244,8 +244,12 @@ Exponential (constant-rate) interpolation between 2 values.
 Shapes the fraction through `(exp(k*dv)-1)/(exp(k)-1)` and then interpolates
 linearly between `v0` and `v1` by that shaped fraction. `k` sets the curvature:
 `k > 0` clusters the values near `v0`, `k < 0` clusters them near `v1`, and as
-`k -> 0` the curve approaches `interpolate_linear` (guarded so exactly 0 does not
-divide by 0). Because it shapes the fraction rather than the ratio, the bounds may
+`k -> 0` the curve approaches `interpolate_linear`, which it is at `k = 0`.
+Both `exp(x)-1` are computed by their Taylor series for `|x| < 0.1`, which keeps
+all the digits of `exp(x)-1` for a small `x` using only arithmetic (available on
+every backend, unlike `expm1`): in single precision, `exp(x)-1` is 0 for any `|x|`
+below about 6e-8, and the quotient would be 0/0 (NaN) for a `k` near 0, the
+natural default of a slider. Because it shapes the fraction rather than the ratio, the bounds may
 be any values (including 0 and opposite signs), unlike `interpolate_logarithmic`.
 `k` is the first argument so it can be partially applied to obtain a `(dv,v0,v1)`
 interpolator.
@@ -268,7 +272,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_exponential_test = it.interpolate_exponential(3.0, 0.5, 0.0, 1.0);
+interpolate_exponential_slider_test = it.interpolate_exponential(hslider("k", 0, -5, 5, 0.01), hslider("dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_exponential_modulated_test = it.interpolate_exponential(-5 + 10*tri, 0.5, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
