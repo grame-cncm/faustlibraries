@@ -3376,11 +3376,19 @@ Where:
 * `g`: linear scale factor (g=1 gives 0dB amplitude response at fc)
 * input is an impulse signal to excite filter
 
+The envelope filter has two real poles, `exp(-sw*pi/SR)` (rise) and
+`exp(-bw*pi/SR)` (decay), both close to 1. It is computed as two one-pole
+sections in cascade: a direct-form biquad with the same poles drifts in single
+precision, with float/double level gaps up to 1.3e-2 at 192 kHz for a 800 Hz
+formant of 80 Hz bandwidth, against 2.3e-6 for the cascade. Its gain at DC,
+`(1-u1)(1-u2)`, is computed as that product rather than as `1+a1+a2`.
+
 #### Test
 ```
 pm = library("physmodels.lib");
-os = library("oscillators.lib");
-fof_test = pm.fof(0.3, 440, 880, 0.5) + os.tosc(110) * 0.001;
+ba = library("basics.lib");
+ma = library("maths.lib");
+fof_test = ba.pulse(int(ma.SR/110)) : pm.fof(800, 80, 200, 0.5);
 ```
 
 #### References
@@ -3410,8 +3418,9 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-os = library("oscillators.lib");
-fofSH_test = pm.fofSH(0.3, 440, 880, 0.5) + os.tosc(110) * 0.001;
+ba = library("basics.lib");
+ma = library("maths.lib");
+fofSH_test = ba.pulse(int(ma.SR/110)) : pm.fofSH(800, 80, 200, 0.5);
 ```
 
 #### References
@@ -3442,8 +3451,9 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-os = library("oscillators.lib");
-fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 3) + os.tosc(110) * 0.001;
+ba = library("basics.lib");
+ma = library("maths.lib");
+fofCycle_test = ba.pulse(int(ma.SR/110)) : pm.fofCycle(800, 80, 200, 0.5, 3);
 ```
 
 #### References
@@ -3475,8 +3485,9 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-os = library("oscillators.lib");
-fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2) + os.tosc(110) * 0.001;
+ba = library("basics.lib");
+ma = library("maths.lib");
+fofSmooth_test = ba.pulse(int(ma.SR/110)) : pm.fofSmooth(800, 80, 200, 0.5, 0.2);
 ```
 
 ----
