@@ -51,6 +51,7 @@ Where:
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
 cubicnl_test = os.tosc(440) : ef.cubicnl(0.5, 0.0);
+cubicnl_nodc_test = os.tosc(440) : ef.cubicnl_nodc(0.5, 0.0);
 ```
 
 #### References
@@ -149,7 +150,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-gate_gain_mono_test = os.osc(440) : ef.gate_gain_mono(-60, 0.0001, 0.1, 0.02);
+gate_gain_mono_test = os.tosc(440) : ef.gate_gain_mono(-60, 0.0001, 0.1, 0.02);
 ```
 
 ## Fibonacci
@@ -1006,7 +1007,7 @@ The latched read offset `pos + jit + (ratio-1)*dur` must stay within the
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-granular_test = os.osc(440) : ef.granular(4, 0.05, 1.5, 0.2, 0.1);
+granular_test = os.tosc(440) : ef.granular(2, 0.05, 1.5, 0.2, 0.1);
 ```
 
 ----

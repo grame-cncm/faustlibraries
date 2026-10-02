@@ -77,8 +77,11 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
+os = library("oscillators.lib");
 gate = button("gate");
 asr_test = no.noise * en.asr(0.05, 0.7, 0.4, gate);
+velocity_gate = 0.5 * os.lf_squarewavepos(4);
+asr_velocity_test = en.asr(0.05, 0.7, 0.04, velocity_gate);
 ```
 
 ----
@@ -109,8 +112,11 @@ when `t=0`)
 ```
 en = library("envelopes.lib");
 no = library("noises.lib");
+os = library("oscillators.lib");
 gate = button("gate");
 adsr_test = no.noise * en.adsr(0.05, 0.1, 0.6, 0.3, gate);
+velocity_gate = 0.5 * os.lf_squarewavepos(4);
+adsr_velocity_test = en.adsr(0.05, 0.1, 0.6, 0.04, velocity_gate);
 ```
 
 ----

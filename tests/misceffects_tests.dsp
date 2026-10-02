@@ -12,6 +12,7 @@ cubicnl_nodc_test = os.tosc(440) : ef.cubicnl_nodc(0.5, 0.0);
 
 gate_mono_test = os.tosc(440) : ef.gate_mono(-60, 0.0001, 0.1, 0.02);
 gate_stereo_test = os.tosc(440), os.tosc(441) : ef.gate_stereo(-60, 0.0001, 0.1, 0.02);
+gate_gain_mono_test = os.tosc(440) : ef.gate_gain_mono(-60, 0.0001, 0.1, 0.02);
 
 fibonacci_test = 1 : ef.fibonacci(2);
 fibonacciGeneral_test = 1 : ef.fibonacciGeneral(waveform{2, 3});

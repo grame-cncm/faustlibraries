@@ -47,6 +47,7 @@ resonator_test = mono : an.resonator(2, 440);
 
 fft_test = an.rtocv(8, mono) : an.fft(8);
 ifft_test = (an.rtocv(8, mono) : an.fft(8)) : an.ifft(8);
+rfft_analyzer_db_test = 2 * ba.pulse(8) + 0.5 * ba.pulse(4) : an.rfft_analyzer_db(8); // bins of 3 and 2: 9.54 and 6.02 dB
 
 logsweep_test = an.logsweep(20, 2000, 5);
 linsweep_test = an.linsweep(20, 2000, 5);
@@ -63,6 +64,7 @@ window_bartlett_test = an.window_bartlett(os.lf_sawpos(100));
 window_cosN_test = an.window_cosN((0.5, -0.5), os.lf_sawpos(100));
 window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
 window_kaiser_test = an.window_kaiser(8.6, os.lf_sawpos(100));
+rtocv_test = an.rtocv(8, os.tosc(220));
 
 // Loudness metering (EBU R128 / ITU-R BS.1770)
 loudness_momentary_test = os.tosc(997), os.tosc(997) : an.loudness_momentary(2);

@@ -43,7 +43,7 @@ ma = library("maths.lib");
 declare name "MaxMSP compatibility Library";
 declare author "GRAME";
 declare copyright "GRAME";
-declare version "1.1.2";
+declare version "1.1.3";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 
 //---------------------------`atodb`--------------------------------
@@ -225,7 +225,7 @@ filtercoeff(f0, dBgain, Q) = environment
 // ```
 // mm = library("maxmsp.lib");
 // os = library("oscillators.lib");
-// mm_biquad_test = mm.biquad(os.osc(440), 0.5, 0.2, 0.1, 0.1, 0.05);
+// mm_biquad_test = mm.biquad(os.tosc(440), 0.5, 0.2, 0.1, 0.1, 0.05);
 // ```
 //----------------------------------------------------------
 biquad(x,a0,a1,a2,b1,b2) =  x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
@@ -257,7 +257,11 @@ biquad(x,a0,a1,a2,b1,b2) =  x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
 // ```
 // mm = library("maxmsp.lib");
 // os = library("oscillators.lib");
-// mm_LPF_test = mm.LPF(os.osc(440), 1000, 0, 1);
+// mm_LPF_test = mm.LPF(os.tosc(440), 1000, 0, 1);
+// mm_HPF_test = mm.HPF(os.tosc(440), 1000, 0, 1);
+// mm_BPF_test = mm.BPF(os.tosc(440), 1000, 0, 1);
+// mm_notch_test = mm.notch(os.tosc(440), 1000, 0, 1);
+// mm_APF_test = mm.APF(os.tosc(440), 1000, 0, 1);
 // ```
 //----------------------------------------------------------
 LPF(x, f0, gain, Q)= x , filtercoeff(f0,gain,Q).LPF : biquad;
@@ -288,7 +292,10 @@ APF(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).APF : biquad;
 // ```
 // mm = library("maxmsp.lib");
 // os = library("oscillators.lib");
-// mm_peakingEQ_test = mm.peakingEQ(os.osc(440), 1000, 6, 1);
+// mm_peakingEQ_test = mm.peakingEQ(os.tosc(440), 1000, 6, 1);
+// mm_peakNotch_test = mm.peakNotch(os.tosc(440), 1000, 2, 1);
+// mm_lowShelf_test = mm.lowShelf(os.tosc(440), 500, 6, 1);
+// mm_highShelf_test = mm.highShelf(os.tosc(440), 2000, 6, 1);
 // ```
 //----------------------------------------------------------
 peakingEQ(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).peakingEQ : biquad;

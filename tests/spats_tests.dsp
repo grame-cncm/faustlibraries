@@ -19,7 +19,7 @@ spcap_spk_deg(3) = 135;
 spcap_spk_angle(i) = spcap_spk_deg(i) : ma.deg2rad;
 spcap_test = os.tosc(440) : sp.spcap(4, 2.0, spcap_spk_angle, 0.0);
 
-spcap_ui_test = os.tosc(550) : sp.spcap_ui(4);
+spcap_ui_test = os.tosc(440) : sp.spcap_ui(4);
 
 wfs_proc(i) = *(0.5); // Simple gain processor
 wfs_xs(i) = 0.0;

@@ -99,6 +99,11 @@ moog_vcf_2b_test = os.tosc(330)
       hslider("moog_vcf_2b:res", 0.4, 0, 1, 0.01),
       hslider("moog_vcf_2b:freq", 1200, 50, 6000, 1)
     );
+moog_vcf_2bn_test = os.tosc(330)
+  : ve.moog_vcf_2bn(
+      hslider("moog_vcf_2bn:res", 0.4, 0, 1, 0.01),
+      hslider("moog_vcf_2bn:freq", 1200, 50, 6000, 1)
+    );
 ```
 
 ----

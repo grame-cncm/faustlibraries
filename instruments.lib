@@ -56,7 +56,7 @@ declare licence "LicenseRef-STK-4.3"; // Synthesis Tool Kit 4.3 (MIT style licen
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
 // gate = button("gate");
-// inst_envVibrato_test = os.osc(440) * inst.envVibrato(0.05, 0.1, 80, 0.2, gate);
+// inst_envVibrato_test = os.tosc(440) * inst.envVibrato(0.05, 0.1, 80, 0.2, gate);
 // ```
 //----------------------------------------------------------
 
@@ -137,8 +137,8 @@ asympT60(value,trgt,T60,trig) = (_*factor + constant)~_
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_saturationPos_test = 2 * os.osc(440) : inst.saturationPos;
-// inst_saturationNeg_test = 2 * os.osc(440) : inst.saturationNeg;
+// inst_saturationPos_test = 2 * os.tosc(440) : inst.saturationPos;
+// inst_saturationNeg_test = 2 * os.tosc(440) : inst.saturationNeg;
 // ```
 //----------------------------------------------------------
 
@@ -191,7 +191,7 @@ bow(offset,slope) = pow(abs(sample) + 0.75, -4) : saturationPos
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_reed_test = os.osc(440) : inst.reed(0.6, -0.8);
+// inst_reed_test = os.tosc(440) : inst.reed(0.6, -0.8);
 // ```
 //
 // #### References
@@ -224,7 +224,7 @@ reed(offset,slope) = reedTable : saturationPos : saturationNeg
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_onePole_test = os.osc(440) : inst.onePole(0.1, -0.9);
+// inst_onePole_test = os.tosc(440) : inst.onePole(0.1, -0.9);
 // ```
 //----------------------------------------------------------
 onePole(b0,a1,x) = (b0*x - a1*_)~_;
@@ -246,7 +246,7 @@ onePole(b0,a1,x) = (b0*x - a1*_)~_;
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_onePoleSwep_test = os.osc(440) : inst.onePoleSwep(0.5);
+// inst_onePoleSwep_test = os.tosc(440) : inst.onePoleSwep(0.5);
 // ```
 //----------------------------------------------------------
 onePoleSwep(a1,x) = (1 + a1)*x - a1*x';
@@ -269,7 +269,7 @@ onePoleSwep(a1,x) = (1 + a1)*x - a1*x';
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_poleZero_test = os.osc(440) : inst.poleZero(0.5, 0.5, -0.9);
+// inst_poleZero_test = os.tosc(440) : inst.poleZero(0.5, 0.5, -0.9);
 // ```
 //----------------------------------------------------------
 poleZero(b0,b1,a1,x) = (b0*x + b1*x' - a1*_)~_;
@@ -293,8 +293,8 @@ poleZero(b0,b1,a1,x) = (b0*x + b1*x' - a1*_)~_;
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_oneZero0_test = os.osc(440) : inst.oneZero0(0.5, 0.5);
-// inst_oneZero1_test = os.osc(440) : inst.oneZero1(0.5, 0.5);
+// inst_oneZero0_test = os.tosc(440) : inst.oneZero0(0.5, 0.5);
+// inst_oneZero1_test = os.tosc(440) : inst.oneZero1(0.5, 0.5);
 // ```
 //
 // #### References
@@ -324,7 +324,7 @@ oneZero1(b0,b1,x) = (x'*b1 + x*b0);
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_bandPass_test = os.osc(440) : inst.bandPass(1000, 0.95);
+// inst_bandPass_test = os.tosc(440) : inst.bandPass(1000, 0.95);
 // ```
 //----------------------------------------------------------
 
@@ -355,7 +355,7 @@ bandPass(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_bandPassH_test = os.osc(440) : inst.bandPassH(1000, 0.95);
+// inst_bandPassH_test = os.tosc(440) : inst.bandPassH(1000, 0.95);
 // ```
 //----------------------------------------------------------
 
@@ -382,7 +382,7 @@ bandPassH(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_jetTable_test = os.osc(440) : inst.jetTable;
+// inst_jetTable_test = os.tosc(440) : inst.jetTable;
 // ```
 //----------------------------------------------------------
 
@@ -417,7 +417,7 @@ jetTable(x) = x <: _*(_*_-1) : saturationPos : saturationNeg;
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_nonLinearModulator_test = os.osc(440) : inst.nonLinearModulator(0.5, 1, 440, 0, 100, 3);
+// inst_nonLinearModulator_test = os.tosc(440) : inst.nonLinearModulator(0.5, 1, 440, 0, 100, 3);
 // ```
 //
 // #### References
@@ -473,7 +473,7 @@ nonLinearModulator(nonlinearity,env,freq,typeMod,freqMod,order) =
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
 // ma = library("maths.lib");
-// inst_stereoizer_test = os.osc(440) : inst.stereoizer(ma.SR/440);
+// inst_stereoizer_test = os.tosc(440) : inst.stereoizer(ma.SR/440);
 // ```
 //
 // #### References
@@ -503,7 +503,7 @@ stereoizer(periodDuration) = _ <: _,widthdelay : stereopanner
 // ```
 // inst = library("instruments.lib");
 // os = library("oscillators.lib");
-// inst_instrReverb_test = os.osc(440), os.osc(660) : inst.instrReverb;
+// inst_instrReverb_test = os.tosc(440), os.tosc(660) : inst.instrReverb;
 // ```
 //----------------------------------------------------------
 

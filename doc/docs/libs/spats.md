@@ -234,16 +234,15 @@ Where:
 #### Test
 
 ```
-N = 4;
-alpha = 2.0;
-theta_s = 0.0;
-spk_deg(0) = -135;
-spk_deg(1) =  -45;
-spk_deg(2) =   45;
-spk_deg(3) =  135;
-spk_angle(i) = spk_deg(i) * ma.PI / 180.0;
-
-spcap_test = os.osc(440) : sp.spcap(N, alpha, spk_angle, theta_s);
+sp = library("spats.lib");
+ma = library("maths.lib");
+os = library("oscillators.lib");
+spcap_spk_deg(0) = -135;
+spcap_spk_deg(1) = -45;
+spcap_spk_deg(2) = 45;
+spcap_spk_deg(3) = 135;
+spcap_spk_angle(i) = spcap_spk_deg(i) : ma.deg2rad;
+spcap_test = os.tosc(440) : sp.spcap(4, 2.0, spcap_spk_angle, 0.0);
 ```
 
 #### References
@@ -290,7 +289,7 @@ controls.
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-spcap_ui_test = os.osc(440) : sp.spcap_ui(4);
+spcap_ui_test = os.tosc(440) : sp.spcap_ui(4);
 ```
 
 #### Example test program

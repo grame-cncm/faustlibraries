@@ -38,6 +38,7 @@ ahdsr_bias_test = no.noise * en.ahdsr_bias(
   legato, gate
 );
 smoothEnvelope_test = no.noise * en.smoothEnvelope(0.2, gate);
+asrfe_test = no.noise * en.asrfe(0.02, 0.8, 0.4, 0, gate);
 arfe_test = no.noise * en.arfe(0.2, 0.4, 0, gate);
 are_test = no.noise * en.are(0.2, 0.4, gate);
 asre_test = no.noise * en.asre(0.2, 0.6, 0.4, gate);

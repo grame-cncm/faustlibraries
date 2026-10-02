@@ -64,8 +64,10 @@ if_test = ba.if(1, 0.5, -0.5);
 ifNc_test = ba.ifNc((1, 10, 0, 20, 30));
 ifNcNo_test = (1, 10, 0, 20, 30) : ba.ifNcNo(2, 1);
 selector_test = (0.1, 0.2, 0.3, 0.4) : ba.selector(2, 4);
+cselector_test = (0.1, 0.2, 0.3, 0.4) : ba.cselector(1, 2);
 select2stereo_test = ba.select2stereo(1, (0.1,0.2, 0.3,0.4));
 selectn_test = (1,2,3,4) : ba.selectn(4, 2);
+selectnX_test = (1,2,3,4) : ba.selectnX(4, 2, \(i,j,x,y).(select2((i >= j), x, y)));
 selectbus_test = (1,2,3,4) : ba.selectbus(2, 2, 1);
 selectxbus_test = (1,2,3,4) : ba.selectxbus(2, 2, 16, checkbox("bus"));
 effects = ((_*0.5,_*0.5),(_*0.25,_*0.25));
@@ -109,5 +111,6 @@ parallelMax_test = (0.2, 0.5, 0.1) : ba.parallelMax(3);
 parallelMin_test = (0.2, 0.5, 0.1) : ba.parallelMin(3);
 parallelMean_test = (0.2, 0.5, 0.1) : ba.parallelMean(3);
 parallelRMS_test = (0.2, 0.5, 0.1) : ba.parallelRMS(3);
+millisec_test = 10 * ba.millisec; // 10 ms as a number of samples
 processArray_proc(a, b, c) = a + b + c;
 processArray_test = si.bus(4) : ba.processArray(4, processArray_proc, it.interpolate_linear, si.smoo, (0.1, 1.0), (1.0, 10.0));

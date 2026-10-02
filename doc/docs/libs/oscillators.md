@@ -1742,6 +1742,11 @@ Where:
 ```
 os = library("oscillators.lib");
 dsf_oscc_test = os.dsf.oscc(220, 110, 0.6);
+dsf_oscs_test = os.dsf.oscs(220, 110, 0.6);
+dsf_osccN_test = os.dsf.osccN(220, 110, 0.6, 4);
+dsf_oscsN_test = os.dsf.oscsN(220, 110, 0.6, 4);
+dsf_osccNq_test = os.dsf.osccNq(220, 110, 0.6);
+dsf_oscsNq_test = os.dsf.oscsNq(220, 110, 0.6);
 ```
 #### Variants
 
@@ -1814,6 +1819,8 @@ Where:
 ```
 os = library("oscillators.lib");
 twin_osc_pwm_test = os.twin_osc(220, 0.5, 0, 0);
+twin_osc_morph_test = os.twin_osc(220, 0.75, 0, 1);
+twin_osc_detune_test = os.twin_osc(220, 0.5, 0, 2);
 ```
 
 #### References
@@ -1845,6 +1852,7 @@ Where:
 ```
 os = library("oscillators.lib");
 rpm_sawtooth_test = os.rpm.sawtooth(220, 1.0);
+rpm_square_test = os.rpm.square(220, 1.0);
 ```
 
 #### Variants

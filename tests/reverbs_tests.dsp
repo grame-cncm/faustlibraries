@@ -7,6 +7,8 @@ fdnrev0_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550))
   <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 2.0, 1.5), 0.8, 0.0);
 zita_rev_fdn_test = par(i, 8, os.tosc(110 * (i + 1)))
   <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 48000);
+zita_in_delay_test = os.tosc(440), os.tosc(660) : re.zita_in_delay(60);
+zita_distrib2_test = os.tosc(440), os.tosc(660) : re.zita_distrib2(8);
 zita_rev1_stereo_test = (os.tosc(440), os.tosc(550))
   : re.zita_rev1_stereo(20, 200, 2000, 3.0, 2.0, 48000);
 zita_rev1_ambi_test = (os.tosc(330), os.tosc(550))

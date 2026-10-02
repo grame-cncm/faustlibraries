@@ -284,6 +284,7 @@ Where:
 ```
 no = library("noises.lib");
 pink_noise_test = no.pink_noise;
+pink_noise_m_test = no.pink_noise_m;
 ```
 
 #### Alternatives
@@ -485,6 +486,7 @@ Where:
 ```
 no = library("noises.lib");
 gnoise_test = no.gnoise(8);
+gnoisem_test = no.gnoisem(8);
 ```
 
 #### References

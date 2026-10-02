@@ -928,6 +928,13 @@ Where:
 an = library("analyzers.lib");
 os = library("oscillators.lib");
 window_hann_test = an.window_hann(os.lf_sawpos(100));
+window_rect_test = an.window_rect(os.lf_sawpos(100));
+window_hamming_test = an.window_hamming(os.lf_sawpos(100));
+window_blackman_test = an.window_blackman(os.lf_sawpos(100));
+window_blackman_harris_test = an.window_blackman_harris(os.lf_sawpos(100));
+window_nuttall_test = an.window_nuttall(os.lf_sawpos(100));
+window_flattop_test = an.window_flattop(os.lf_sawpos(100));
+window_bartlett_test = an.window_bartlett(os.lf_sawpos(100));
 ```
 
 #### References
@@ -1134,7 +1141,7 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
-rtocv_test = an.rtocv(8, os.osc(220));
+rtocv_test = an.rtocv(8, os.tosc(220));
 ```
 
 ----
@@ -1275,8 +1282,8 @@ Where:
 #### Test
 ```
 an = library("analyzers.lib");
-os = library("oscillators.lib");
-rfft_analyzer_db_test = os.osc(220) : an.rfft_analyzer_db(8);
+ba = library("basics.lib");
+rfft_analyzer_db_test = 2 * ba.pulse(8) + 0.5 * ba.pulse(4) : an.rfft_analyzer_db(8); // bins of 3 and 2: 9.54 and 6.02 dB
 ```
 
 ----

@@ -43,6 +43,7 @@ sawtooth_demo_test = dm.sawtooth_demo + monoOsc(110) * 0.001;
 virtual_analog_oscillator_demo_test = dm.virtual_analog_oscillator_demo;
 twin_osc_demo_test = dm.twin_osc_demo;
 oscrs_demo_test = dm.oscrs_demo;
+oscr_demo_test = dm.oscr_demo;
 velvet_noise_demo_test = dm.velvet_noise_demo;
 latch_demo_test = dm.latch_demo;
 envelopes_demo_test = dm.envelopes_demo;

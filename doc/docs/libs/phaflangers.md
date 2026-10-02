@@ -111,7 +111,7 @@ Where:
 ```
 pf = library("phaflangers.lib");
 os = library("oscillators.lib");
-vibrato2_mono_test = os.osc(440) : pf.vibrato2_mono(4, 0, 0.5, 1000, 100, 1.5, 4800, 0.5);
+vibrato2_mono_test = os.tosc(440) : pf.vibrato2_mono(4, 0, 0.5, 1000, 100, 1.5, 4800, 0.5);
 ```
 
 #### References

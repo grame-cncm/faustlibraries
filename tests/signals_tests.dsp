@@ -53,6 +53,7 @@ cconj_test = (os.tosc(210), os.tosc(310)) : si.cconj;
 
 onePoleSwitching_test = hslider("onePoleSwitching:input", 0.5, -1, 1, 0.01)
   : si.onePoleSwitching(0.05, 0.2);
+lag_ud_test = hslider("lag_ud:input", 0.5, -1, 1, 0.01) : si.lag_ud(0.05, 0.2);
 
 rev_test = os.tosc(440) : si.rev(32);
 

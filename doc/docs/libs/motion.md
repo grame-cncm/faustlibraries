@@ -976,4 +976,5 @@ process = _ : mo.scale(0.2, 0.8, 100, 20000) : _;
 mo = library("motion.lib");
 os = library("oscillators.lib");
 scale_test = (os.sawtooth(2) * 0.5 + 0.5) : mo.scale(0.2, 0.8, 0, 1);
+scale_narrow_test = (os.sawtooth(2) * 0.0005 + 0.9995) : mo.scale(0.999, 1, 0, 1);
 ```

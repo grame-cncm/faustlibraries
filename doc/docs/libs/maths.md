@@ -261,7 +261,7 @@ INFINITY : _
 #### Test
 ```
 ma = library("maths.lib");
-INFINITY_test = ma.INFINITY;
+INFINITY_test = ma.INFINITY == ma.MAX; // 1: ma.INFINITY is ma.MAX, in both precisions
 ```
 
 ----

@@ -135,6 +135,7 @@ Where:
 dm = library("demos.lib");
 no = library("noises.lib");
 mth_octave_filterbank_demo_test = no.noise : dm.mth_octave_filterbank_demo(1);
+filterbank_demo_test = no.noise : dm.filterbank_demo;
 ```
 
 ## Effects

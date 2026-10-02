@@ -931,7 +931,7 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
-TF2_legacy_test = os.osc(440) : fi.TF2(0.2, 0.4, 0.2, -0.5, 0.3);
+TF2_legacy_test = os.tosc(440) : fi.TF2(0.2, 0.4, 0.2, -0.5, 0.3);
 ```
 
 ----
@@ -2793,7 +2793,7 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
-pospass6e_test = os.osc(440) : fi.pospass6e(100);
+pospass6e_test = os.tosc(440) : fi.pospass6e(100);
 pospass6e_slider_test = no.noise : fi.pospass6e(hslider("fc", 100, 20, 20000, 1));
 pospass6e_modulated_test = no.noise : fi.pospass6e(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
 ```
@@ -2834,7 +2834,7 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
-hilbert_test = os.osc(440) : fi.hilbert(4, 20);
+hilbert_test = os.tosc(440) : fi.hilbert(4, 20);
 hilbert_slider_test = no.noise : fi.hilbert(4, hslider("fc", 20, 5, 500, 1));
 hilbert_modulated_test = no.noise : fi.hilbert(4, 10*pow(10, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
 ```
@@ -3732,6 +3732,14 @@ sig = os.tosc(440);
 svf_lp_test = fi.svf.lp(1000, 0.707, sig);
 svf_slider_test = no.noise : fi.svf.bell(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), hslider("gain", 6, -24, 24, 0.1));
 svf_modulated_test = no.noise : fi.svf.lp(20*pow(250, tri), 0.707) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+svf_bp_test = fi.svf.bp(1000, 0.707, sig);
+svf_hp_test = fi.svf.hp(1000, 0.707, sig);
+svf_notch_test = fi.svf.notch(1000, 0.707, sig);
+svf_peak_test = fi.svf.peak(1000, 0.707, sig);
+svf_ap_test = fi.svf.ap(1000, 0.707, sig);
+svf_bell_test = fi.svf.bell(1000, 0.707, 6, sig);
+svf_ls_test = fi.svf.ls(500, 0.707, 6, sig);
+svf_hs_test = fi.svf.hs(3000, 0.707, 6, sig);
 ```
 
 ----
@@ -3867,6 +3875,13 @@ sig = os.tosc(440);
 SVFTPT_SVF_test = fi.SVFTPT.SVF(1000, 0.707, sig);
 SVFTPT_slider_test = fi.SVFTPT.SVF(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), no.noise);
 SVFTPT_modulated_test = fi.SVFTPT.SVF(20*pow(250, tri), 0.707, no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+SVFTPT_LP2_test = fi.SVFTPT.LP2(1000, 0.707, sig);
+SVFTPT_HP2_test = fi.SVFTPT.HP2(1000, 0.707, sig);
+SVFTPT_BP2_test = fi.SVFTPT.BP2(1000, 0.707, sig);
+SVFTPT_BP2Norm_test = fi.SVFTPT.BP2Norm(1000, 0.707, sig);
+SVFTPT_Notch2_test = fi.SVFTPT.Notch2(1000, 0.707, sig);
+SVFTPT_AP2_test = fi.SVFTPT.AP2(1000, 0.707, sig);
+SVFTPT_Peaking2_test = fi.SVFTPT.Peaking2(1000, 0.707, sig);
 ```
 
 ----

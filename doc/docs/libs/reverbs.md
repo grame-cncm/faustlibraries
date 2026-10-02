@@ -181,7 +181,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_in_delay_test = os.osc(440), os.osc(660) : re.zita_in_delay(60);
+zita_in_delay_test = os.tosc(440), os.tosc(660) : re.zita_in_delay(60);
 ```
 
 ----
@@ -206,7 +206,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_distrib2_test = os.osc(440), os.osc(660) : re.zita_distrib2(8);
+zita_distrib2_test = os.tosc(440), os.tosc(660) : re.zita_distrib2(8);
 ```
 
 ----

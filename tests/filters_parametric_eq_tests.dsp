@@ -17,7 +17,7 @@ lowshelf_modulated_test = no.noise : fi.lowshelf(3, 6, 20*pow(250, tri)) with { 
 low_shelf_test = src : fi.low_shelf(6, 500);
 low_shelf_slider_test = no.noise : fi.low_shelf(hslider("L0", 6, -24, 24, 0.1), hslider("fc", 500, 20, 20000, 1));
 low_shelf_modulated_test = no.noise : fi.low_shelf(6, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
-low_shelf1_test = fi.low_shelf1(6, 500, src);
+low_shelf1_test = fi.low_shelf1(2, 500, src);
 low_shelf1_slider_test = no.noise : fi.low_shelf1(hslider("L0", 2, -24, 24, 0.1), hslider("fc", 500, 20, 20000, 1));
 low_shelf1_modulated_test = no.noise : fi.low_shelf1(2, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
 low_shelf1_l_test = fi.low_shelf1_l(2, 500, src);

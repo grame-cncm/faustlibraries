@@ -1043,7 +1043,7 @@ this turns it from a linear return-to-zero detector into a log domain return-to-
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-peak_expansion_gain_mono_db_test = os.osc(220) : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0);
+peak_expansion_gain_mono_db_test = os.tosc(220) : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0);
 ```
 
 ----
