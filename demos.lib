@@ -78,7 +78,7 @@ hy = library("hysteresis.lib");
 pt = library("pinktrombone.lib");
 
 declare name "Faust Demos Library";
-declare version "1.6.2";
+declare version "1.6.3";
 
 //########################################################################################
 /************************************************************************
@@ -1032,10 +1032,13 @@ with{
     eq2f = 1500;
     eq2l = 0;
     eq2q = 3;
-    dry_wet(x,y) = *(wet) + dry*x, *(wet) + dry*y 
+    // zita-rev1's mix law (reverb.cc): with m = (1 - drywet)/2, dry gain 1 - m^2,
+    // wet gain 0.7 m (2-m)/sqrt(t60m), of which re.zita_rev1_stereo applies 0.525/sqrt(t60m)
+    dry_wet(wl,wr) = *(gd) + gw*wl, *(gd) + gw*wr
     with {
-        wet = 0.5*(drywet+1.0);
-        dry = 1.0-wet;
+        m = 0.5*(1.0-drywet);
+        gd = (1.0-m)*(1.0+m);
+        gw = m*(2.0-m)/0.75;
     };
     drywet = vslider("[1] Wet/Dry Mix [style:knob] [tooltip: Ratio of dry and wet signal. -1 = fully wet, +1 = fully dry]",
         0,-1.0,1.0,0.01) : si.smoo;
@@ -1046,6 +1049,8 @@ with{
 
 //----------------------------------`(dm.)zita_rev1`------------------------------
 // Example GUI for `zita_rev1_stereo` (mostly following the Linux `zita-rev1` GUI).
+// The Wet/Dry Mix follows the `zita-rev1` mix law: with m = (1 - mix)/2,
+// the dry gain is 1 - m^2 and the wet gain 0.7 m (2-m)/sqrt(`t60m`).
 //
 // Only the dry/wet and output level parameters are "dezippered" here. If
 // parameters are to be varied in real time, use `smooth(0.999)` or the like
@@ -1141,9 +1146,12 @@ with{
 
     out_group(x) = fdn_group(hgroup("[5] Output", x));
 
-    dry_wet(x,y) = *(wet) + dry*x, *(wet) + dry*y with {
-        wet = 0.5*(drywet+1.0);
-        dry = 1.0-wet;
+    // zita-rev1's mix law (reverb.cc): with m = (1 - drywet)/2, dry gain 1 - m^2,
+    // wet gain 0.7 m (2-m)/sqrt(t60m), of which re.zita_rev1_stereo applies 0.525/sqrt(t60m)
+    dry_wet(wl,wr) = *(gd) + gw*wl, *(gd) + gw*wr with {
+        m = 0.5*(1.0-drywet);
+        gd = (1.0-m)*(1.0+m);
+        gw = m*(2.0-m)/0.75;
     };
 
     drywet = out_group(vslider("[1] Wet/Dry Mix [style:knob] [tooltip: Ratio of dry and wet signal. -1 = fully wet, +1 = fully dry]",
