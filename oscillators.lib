@@ -652,7 +652,7 @@ Michon and Julius O. Smith III, and are released under the
 //--------`(os.)lf_imptrain`----------
 // Unit-amplitude low-frequency impulse train.
 // `lf_imptrain` is a standard Faust function.
-
+//
 // #### Usage
 //
 // ```
@@ -1374,12 +1374,6 @@ saw2f4 = saw2dpw : cf4 with {
 //
 // * `N`: polynomial order, a constant numerical expression
 // * `freq`: frequency in Hz
-//
-// #### Test
-// ```
-// os = library("oscillators.lib");
-// sawNp_test = os.sawNp(3, 330, 0.5);
-// ```
 //====================================================================
 
 
@@ -1422,7 +1416,7 @@ impulse = 1-1';
 // os = library("oscillators.lib");
 // pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
 // ```
-
+//
 //--------------------------------------------------------
 pulsetrainN(N,freq,duty) = diffdel(sawN(N,freqC),del) with {
  // non-interpolated-delay version: diffdel(x,del) = x - x@int(del+0.5);

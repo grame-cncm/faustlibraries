@@ -139,6 +139,7 @@ Where:
 * `EPS`: a threshold for switching between safe and ill-conditioned paths
 * `f`: a function that we want to process with ADAA
 * `F1`: f's first antiderivative
+
 #### Test
 ```
 aa = library("aanl.lib");
@@ -161,6 +162,7 @@ Generalised second-order Antiderivative Anti-Aliasing (ADAA) function.
 
 Implements a second-order ADAA approximation for even better aliasing reduction
 at the cost of additional computation.
+
 #### Usage
 
 ```
@@ -173,6 +175,7 @@ Where:
 * `f`: a function that we want to process with ADAA
 * `F1`: f's first antiderivative
 * `F2`: f's second antiderivative
+
 #### Test
 ```
 aa = library("aanl.lib");

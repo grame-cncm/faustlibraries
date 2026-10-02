@@ -257,6 +257,7 @@ High-frequency model = -24 dB/octave slope implemented using a
 fourth-order Butterworth lowpass.
 
 
+
 #### Usage
 ```
 _ : speakerbp(f1,f2) : _
@@ -767,6 +768,7 @@ Where:
 * `maxDuration`: the max echo duration in seconds
 * `duration`: the echo duration in seconds
 * `feedback`: the feedback coefficient
+
 #### Test
 ```
 ef = library("misceffects.lib");
@@ -898,6 +900,7 @@ Where:
 * `stopAlpha`: `stopAlpha==1` represents a linear deceleration (constant force). `stopAlpha<1` represents an initially weaker, then stronger force. `stopAlpha>1` represents an initially stronger, then weaker force. Safe values are in the range [.01,2].
 * `stopTime`: Desired duration of the stop time, in samples.
 * `stop`: When `stop` becomes positive, the tape-stop effect will start. When `stop` becomes zero, normal audio will resume via crossfade.
+
 #### Test
 ```
 ef = library("misceffects.lib");
@@ -926,6 +929,7 @@ Where:
 * `w`: the window length (samples)
 * `x`: crossfade duration duration (samples)
 * `s`: shift (semitones)
+
 #### Test
 ```
 ef = library("misceffects.lib");

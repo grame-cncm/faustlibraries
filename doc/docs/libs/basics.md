@@ -2878,6 +2878,7 @@ The root mean square of the last n input samples.
 It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive `ba.slidingRMSp`.
 
+
 #### Usage
 
 ```

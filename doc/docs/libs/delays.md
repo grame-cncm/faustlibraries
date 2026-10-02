@@ -39,6 +39,7 @@ Where:
 
 * `n`: the max delay length in samples
 * `d`: the delay length in samples (integer)
+
 #### Test
 ```
 de = library("delays.lib");

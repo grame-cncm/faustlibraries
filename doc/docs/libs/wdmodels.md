@@ -1875,30 +1875,6 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-genericNode_Iout_test = wd.genericNode_Iout(0, scatter, upRes)(os.tosc(230)) : _, !
-with {
-  scatter(a) = -a * 0.3;
-  upRes = 1400;
-};
-```
-
-#### Test
-```
-wd = library("wdmodels.lib");
-os = library("oscillators.lib");
-
-genericNode_Vout_test = wd.genericNode_Vout(0, scatter, upRes)(os.tosc(200)) : _, !
-with {
-  scatter(a) = -a * 0.4;
-  upRes = 1600;
-};
-```
-
-#### Test
-```
-wd = library("wdmodels.lib");
-os = library("oscillators.lib");
-
 genericNode_test = wd.genericNode(0, scatter, upRes)(os.tosc(220))
 with {
   scatter(a) = -a * 0.5;
@@ -1950,6 +1926,18 @@ Note: `scatter` must be a function with 1 input and 1 output.
 `upRes` must be a function with no inputs and 1 output.
  The output should give the upward-facing port resistance of the node.
 
+#### Test
+```
+wd = library("wdmodels.lib");
+os = library("oscillators.lib");
+
+genericNode_Vout_test = wd.genericNode_Vout(0, scatter, upRes)(os.tosc(200)) : _, !
+with {
+  scatter(a) = -a * 0.4;
+  upRes = 1600;
+};
+```
+
 ----
 
 ### `(wd.)genericNode_Iout`
@@ -1980,6 +1968,18 @@ Note: `scatter` must be a function with 1 input and 1 output.
 
 `upRes` must be a function with no inputs and 1 output.
  The output should give the upward-facing port resistance of the node.
+
+#### Test
+```
+wd = library("wdmodels.lib");
+os = library("oscillators.lib");
+
+genericNode_Iout_test = wd.genericNode_Iout(0, scatter, upRes)(os.tosc(230)) : _, !
+with {
+  scatter(a) = -a * 0.3;
+  upRes = 1400;
+};
+```
 
 ----
 

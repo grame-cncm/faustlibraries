@@ -561,6 +561,7 @@ Admittedly, this is not an efficient way to implement a filter because it
 requires independently calculating the output and each state during each 
 recursive step. However, it works as a way to store and use "states"
 within the constraints of Faust. 
+
 The simplest example is the 1st-order LPF (shown on the cover of Zavalishin 
 2018 and Fig 4.3 of [https://www.willpirkle.com/706-2/](https://www.willpirkle.com/706-2/)).
 

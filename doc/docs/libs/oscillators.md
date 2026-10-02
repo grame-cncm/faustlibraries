@@ -514,6 +514,7 @@ Use `sawN` and its derivatives for audio oscillators with suppressed aliasing.
 
 Unit-amplitude low-frequency impulse train.
 `lf_imptrain` is a standard Faust function.
+
 #### Usage
 
 ```
@@ -1181,12 +1182,6 @@ Where:
 * `N`: polynomial order, a constant numerical expression
 * `freq`: frequency in Hz
 
-#### Test
-```
-os = library("oscillators.lib");
-sawNp_test = os.sawNp(3, 330, 0.5);
-```
-
 ----
 
 ### `(os.)impulse`
@@ -1229,6 +1224,7 @@ Where:
 os = library("oscillators.lib");
 pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
 ```
+
 
 ----
 
