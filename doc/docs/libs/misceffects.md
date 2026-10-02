@@ -879,9 +879,9 @@ Where:
 
 * `N`: Number of input channels to pan down to stereo, a constant numerical expression (N >= 2)
 
-Channel `i` gets gain `i/(N-1)` on the first output and `1-i/(N-1)` on
-the second: channel 0 goes entirely to the second output, channel N-1
-entirely to the first.
+Channel `i` gets gain `1-i/(N-1)` on the left (first) output and
+`i/(N-1)` on the right (second): channel 0 is hard left, channel N-1
+hard right.
 
 #### Test
 ```
