@@ -1081,11 +1081,17 @@ _ : wavefold(width) : _
 
 Where:
 
-* `width`: The width of the folded section [0..1] (float).
+* `width`: The width of the folded section [0..1] (float). At 0 nothing is folded:
+  the signal is clipped at ±1.
 
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 wavefold_test = os.tosc(440) : ef.wavefold(0.5);
+wavefold_slider_test = 2*no.noise : ef.wavefold(hslider("width", 0, 0, 1, 0.01));
+wavefold_modulated_test = 2*no.noise : ef.wavefold(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```

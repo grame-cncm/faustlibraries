@@ -6,6 +6,9 @@
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
 fi = library("filters.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 
 cubicnl_test = os.tosc(440) : ef.cubicnl(0.5, 0.0);
 cubicnl_nodc_test = os.tosc(440) : ef.cubicnl_nodc(0.5, 0.0);
@@ -43,6 +46,8 @@ doppler_shift_test = os.sawtooth(220) : ef.doppler_shift(220, 1.5);
 
 softclipQuadratic_test = os.tosc(440) : ef.softclipQuadratic;
 wavefold_test = os.tosc(440) : ef.wavefold(0.5);
+wavefold_slider_test = 2*no.noise : ef.wavefold(hslider("width", 0, 0, 1, 0.01));
+wavefold_modulated_test = 2*no.noise : ef.wavefold(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 weightsPowerLoop_test = ef.mixingEnv.weightsPowerLoop(4, 1.2);
 
