@@ -24,7 +24,7 @@ tosc_test = os.tosc(440);
 tosc_12000_test = os.tosc(12000);
 tosc_lfo_test = os.tosc(0.1);
 tosc_slider_test = os.tosc(hslider("freq", 440, -20000, 20000, 0.1));
-tosc_modulated_test = os.tosc(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+tosc_modulated_test = os.tosc(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 lf_imptrain_test = os.lf_imptrain(3);
 lf_pulsetrainpos_test = os.lf_pulsetrainpos(3, 0.35);
 lf_pulsetrain_test = os.lf_pulsetrain(3, 0.35);

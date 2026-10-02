@@ -331,19 +331,35 @@ A function whose parameters are meant to vary at run time therefore has three te
 2. **`functionName_slider_test`, parameters from sliders** (`hslider`, `vslider`, `nentry`), without smoothing, with realistic default values. It checks that the function accepts run-time controls: a parameter that must be a constant makes it fail to compile. It checks the coefficients computed at run time in the program's precision: for `fi.resonlp`, the float/double level gap is 6.4e-5 with sliders against 1.8e-5 with constants. And it checks that they stay at control rate: its cost should match the constant test's. When it is clearly slower, the normalizer has moved part of the coefficient computation into the per-sample loop, which is what the `min(x, ma.MAX)` workarounds in the libraries prevent.
 3. **`functionName_modulated_test`, a parameter modulated at every sample**, over the part of its range where the function is under stress (low cutoffs, high resonance...). It checks the stability and the precision of the time-varying structure, and the cost of computing the coefficients at every sample: 6.32 ns/frame for `fi.resonlp` against 3.48 with constants. A slider followed by `si.smoo` is a signal too, so a `_ui` wrapper that smooths its controls belongs to this case, not the previous one.
 
-Drive the modulation with an integer counter, not with `os.osc` or `os.lf_*`. Those accumulate their phase in the program's precision and drift in float: the precision check then measures the modulator, not the function. With a sine modulator, the level gap of the test below is 9 times larger (4.8e-4) and its sample gap 43 times larger (2.2e-2). `ba.period` counts in integers and gives a triangle that is the same in both precisions:
+Drive the modulation with an integer counter, not with `os.osc` or `os.lf_*`. Those accumulate their phase in the program's precision and drift in float: the precision check then measures the modulator, not the function. With a sine modulator, the level gap of the test below is 9 times larger (4.8e-4) and its sample gap 43 times larger (2.2e-2). `ba.period` counts in integers and gives a triangle that is the same in both precisions. Give it a period tied to the sample rate, `P = int(ma.SR/10)`, so that the triangle runs at 10 Hz at every rate the precision check uses (with a fixed `ba.period(4800)` it would run at 40 Hz at 192 kHz). `P` and `1/P` are computed once at init: the period adds no per-sample division.
 
 ```
 resonlp_test = no.noise : fi.resonlp(1000, 2, 1);
 resonlp_slider_test = no.noise : fi.resonlp(hslider("fc", 1000, 50, 5000, 1), hslider("Q", 2, 0.5, 20, 0.01), 1);
 resonlp_modulated_test = no.noise : fi.resonlp(fc, 2, 1)
 with {
-  tri = 1 - abs(2*ba.period(4800)/4800 - 1); // 0 to 1 and back in 4800 samples, exact
-  fc = 50*pow(100, tri);                     // exponential sweep from 50 Hz to 5 kHz
+  P = int(ma.SR/10);                     // a tenth of a second, in samples, at every rate
+  tri = 1 - abs(2*ba.period(P)/P - 1);    // 0 to 1 and back at 10 Hz, exact
+  fc = 50*pow(100, tri);                  // exponential sweep from 50 Hz to 5 kHz
 };
 ```
 
-To test abrupt changes as well (a cutoff switching between two values, where some realizations leave their states at the wrong level), replace the sweep by `select2(ba.period(9600) < 4800, 50, 5000)`.
+To test abrupt changes as well (a cutoff switching between two values, where some realizations leave their states at the wrong level), replace the sweep by `select2(ba.period(2*P) < P, 50, 5000)`.
+
+Two more precautions:
+
+- **An integer parameter driven by the triangle**, such as a delay length, must come out the same in both precisions. `int(16 + 112*tri)` does not: float and double `tri` can differ in the last bit, and near an integer boundary `int()` then picks a different delay, so the two outputs diverge by whole samples and the sample gap checks nothing. Compute the integer exactly, with an integer remainder, since Faust's `/` is always a float division:
+
+  ```
+  fb_comb_modulated_test = no.noise : fi.fb_comb(2048, d, 0.7, 0.6)
+  with {
+    P = int(ma.SR/10);
+    m = 112*(P - abs(2*ba.period(P) - P)); // 112*tri*P, an integer
+    d = 16 + int((m - m % P)/P + 0.5);     // 16 + floor(112*tri), the same integer in float and double
+  };
+  ```
+
+- **The interval analysis of the compiler** does not see that `ba.period(P)/P` stays below 1 when `P` is not a constant: a parameter that needs bounds, such as a delay that is read directly with `@` or a window length, gets them explicitly (`: max(16) : min(128)`, `tri : max(0) : min(1)`).
 
 Parameters that must be known at compile time (in capital letters by convention: an order, a number of voices or bands, a maximum delay) need neither variant. `scripts/lib_tests.py inventory xx.lib` lists which of the three tests each documented function has, in the doc blocks and in `tests/*.dsp`. `scripts/lib_tests.py add xx.lib new_tests.dsp` inserts tests written in an ordinary Faust file into both places; `scripts/README.md` describes it. The three costs can be compared in one run:
 

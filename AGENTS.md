@@ -125,7 +125,8 @@ Every script behind these targets is described in `scripts/README.md`.
    program's precision) and a `functionName_modulated_test` (a parameter
    modulated at every sample): the three run different code. Drive the
    modulation with an integer counter (`ba.period`), not `os.osc`, which
-   drifts in float. Details: `doc/docs/contributing.md`, section
+   drifts in float, and tie its period to the sample rate
+   (`P = int(ma.SR/10)`, 10 Hz at every rate). Details: `doc/docs/contributing.md`, section
    *Constant, slider and modulated tests*. `scripts/lib_tests.py
    inventory xx.lib` shows which tests exist where; `scripts/lib_tests.py
    add xx.lib new_tests.dsp` inserts new ones in both places at once.

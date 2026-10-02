@@ -8,6 +8,7 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 
 src = os.tosc(440);
 
@@ -21,7 +22,7 @@ tf2_test = src : fi.tf2(0.1, 0.2, 0.1, -0.5, 0.06);
 tf3_test = src : fi.tf3(0.1, 0.3, 0.3, 0.1, -0.9, 0.26, -0.024);
 notchw_test = src : fi.notchw(200, 1000);
 notchw_slider_test = no.noise : fi.notchw(hslider("width", 200, 10, 2000, 1), hslider("freq", 1000, 20, 20000, 1));
-notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 tf21_test = src : fi.tf21(0.1, 0.2, 0.1, -0.5, 0.06);
 tf22_test = src : fi.tf22(0.1, 0.2, 0.1, -0.5, 0.06);

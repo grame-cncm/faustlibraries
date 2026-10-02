@@ -492,11 +492,12 @@ Where:
 ```
 os = library("oscillators.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 tosc_test = os.tosc(440);
 tosc_12000_test = os.tosc(12000);
 tosc_lfo_test = os.tosc(0.1);
 tosc_slider_test = os.tosc(hslider("freq", 440, -20000, 20000, 0.1));
-tosc_modulated_test = os.tosc(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+tosc_modulated_test = os.tosc(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Low Frequency Oscillators

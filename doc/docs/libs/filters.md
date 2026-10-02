@@ -63,10 +63,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 zero_test = src : fi.zero(0.5);
 zero_slider_test = no.noise : fi.zero(hslider("z", 0.5, -1, 1, 0.01));
-zero_modulated_test = no.noise : fi.zero(-0.9 + 1.8*tri) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+zero_modulated_test = no.noise : fi.zero(-0.9 + 1.8*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -95,10 +96,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 pole_test = src : fi.pole(0.9);
 pole_slider_test = no.noise : fi.pole(hslider("p", 0.9, 0, 0.999, 0.001));
-pole_modulated_test = no.noise : fi.pole(0.5 + 0.499*tri) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+pole_modulated_test = no.noise : fi.pole(0.5 + 0.499*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -153,10 +155,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 dcblockerat_test = src : fi.dcblockerat(30);
 dcblockerat_slider_test = no.noise : fi.dcblockerat(hslider("fb", 30, 1, 500, 1));
-dcblockerat_modulated_test = no.noise : fi.dcblockerat(5*pow(40, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+dcblockerat_modulated_test = no.noise : fi.dcblockerat(5*pow(40, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -213,10 +216,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 lptN_test = src : fi.lptN(60, 0.1);
 lptN_slider_test = no.noise : fi.lptN(60, hslider("tN", 0.1, 0.001, 1, 0.001));
-lptN_modulated_test = no.noise : fi.lptN(60, 0.001*pow(1000, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lptN_modulated_test = no.noise : fi.lptN(60, 0.001*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -245,10 +249,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 lptau_test = src : fi.lptau(0.1);
 lptau_slider_test = no.noise : fi.lptau(hslider("tN", 0.1, 0.001, 1, 0.001));
-lptau_modulated_test = no.noise : fi.lptau(0.001*pow(1000, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lptau_modulated_test = no.noise : fi.lptau(0.001*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -273,10 +278,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 lpt60_test = src : fi.lpt60(0.3);
 lpt60_slider_test = no.noise : fi.lpt60(hslider("tN", 0.3, 0.001, 1, 0.001));
-lpt60_modulated_test = no.noise : fi.lpt60(0.001*pow(1000, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lpt60_modulated_test = no.noise : fi.lpt60(0.001*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -301,10 +307,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 lpt19_test = src : fi.lpt19(0.2);
 lpt19_slider_test = no.noise : fi.lpt19(hslider("tN", 0.2, 0.001, 1, 0.001));
-lpt19_modulated_test = no.noise : fi.lpt19(0.001*pow(1000, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lpt19_modulated_test = no.noise : fi.lpt19(0.001*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Comb Filters
@@ -338,10 +345,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 ff_comb_test = src : fi.ff_comb(2048, 64, 1, 0.7);
 ff_comb_slider_test = no.noise : fi.ff_comb(2048, hslider("delay", 64, 1, 2047, 1), hslider("b0", 1, -1, 1, 0.01), hslider("bM", 0.7, -1, 1, 0.01));
-ff_comb_modulated_test = no.noise : fi.ff_comb(2048, int(16 + 112*tri), 1, 0.7) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+ff_comb_modulated_test = no.noise : fi.ff_comb(2048, d, 1, 0.7) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); d = 16 + int((m - m % P)/P + 0.5); };
 ```
 
 #### References
@@ -375,10 +383,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 ff_fcomb_test = src : fi.ff_fcomb(2048, 64.5, 1, 0.7);
 ff_fcomb_slider_test = no.noise : fi.ff_fcomb(2048, hslider("delay", 64.5, 1, 2047, 0.01), hslider("b0", 1, -1, 1, 0.01), hslider("bM", 0.7, -1, 1, 0.01));
-ff_fcomb_modulated_test = no.noise : fi.ff_fcomb(2048, 16 + 112*tri, 1, 0.7) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+ff_fcomb_modulated_test = no.noise : fi.ff_fcomb(2048, 16 + 112*tri, 1, 0.7) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -409,10 +418,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 ffcombfilter_test = src : fi.ffcombfilter(2048, 64, 0.7);
 ffcombfilter_slider_test = no.noise : fi.ffcombfilter(2048, hslider("delay", 64, 1, 2047, 1), hslider("g", 0.7, -1, 1, 0.01));
-ffcombfilter_modulated_test = no.noise : fi.ffcombfilter(2048, int(16 + 112*tri), 0.7) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+ffcombfilter_modulated_test = no.noise : fi.ffcombfilter(2048, d, 0.7) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); d = 16 + int((m - m % P)/P + 0.5); };
 ```
 
 ----
@@ -452,10 +462,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 fb_comb_common_test = src : fi.fb_comb_common(@, 64, 0.8, 0.6);
 fb_comb_common_slider_test = no.noise : fi.fb_comb_common(@, hslider("delay", 64, 1, 2047, 1), hslider("b0", 0.8, -1, 1, 0.01), hslider("aN", 0.6, -1, 1, 0.01));
-fb_comb_common_modulated_test = no.noise : fi.fb_comb_common(@, int(16 + 112*tri), 0.8, 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+fb_comb_common_modulated_test = no.noise : fi.fb_comb_common(@, d, 0.8, 0.6) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); d = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 --------------------------------------------------------
 
@@ -485,10 +496,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 fb_comb_test = src : fi.fb_comb(2048, 64, 0.7, 0.6);
 fb_comb_slider_test = no.noise : fi.fb_comb(2048, hslider("delay", 64, 1, 2047, 1), hslider("b0", 0.7, -1, 1, 0.01), hslider("aN", 0.6, -1, 1, 0.01));
-fb_comb_modulated_test = no.noise : fi.fb_comb(2048, int(16 + 112*tri), 0.7, 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+fb_comb_modulated_test = no.noise : fi.fb_comb(2048, d, 0.7, 0.6) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); d = 16 + int((m - m % P)/P + 0.5); };
 ```
 
 #### References
@@ -522,10 +534,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 fb_fcomb_test = src : fi.fb_fcomb(2048, 64.5, 0.7, 0.6);
 fb_fcomb_slider_test = no.noise : fi.fb_fcomb(2048, hslider("delay", 64.5, 1, 2047, 0.01), hslider("b0", 0.7, -1, 1, 0.01), hslider("aN", 0.6, -1, 1, 0.01));
-fb_fcomb_modulated_test = no.noise : fi.fb_fcomb(2048, 16 + 112*tri, 0.7, 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+fb_fcomb_modulated_test = no.noise : fi.fb_fcomb(2048, 16 + 112*tri, 0.7, 0.6) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -558,10 +571,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 rev1_test = src : fi.rev1(2048, 64, 0.6);
 rev1_slider_test = no.noise : fi.rev1(2048, hslider("delay", 64, 1, 2047, 1), hslider("g", 0.6, -1, 1, 0.01));
-rev1_modulated_test = no.noise : fi.rev1(2048, int(16 + 112*tri), 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+rev1_modulated_test = no.noise : fi.rev1(2048, d, 0.6) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); d = 16 + int((m - m % P)/P + 0.5); };
 ```
 
 ----
@@ -590,13 +604,14 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 fbcombfilter_test = src : fi.fbcombfilter(2048, 64, 0.6);
 ffbcombfilter_test = src : fi.ffbcombfilter(2048, 64.5, 0.6);
 fbcombfilter_slider_test = no.noise : fi.fbcombfilter(2048, hslider("delay", 64, 1, 2047, 1), hslider("g", 0.6, -1, 1, 0.01));
-fbcombfilter_modulated_test = no.noise : fi.fbcombfilter(2048, int(16 + 112*tri), 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+fbcombfilter_modulated_test = no.noise : fi.fbcombfilter(2048, d, 0.6) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); d = 16 + int((m - m % P)/P + 0.5); };
 ffbcombfilter_slider_test = no.noise : fi.ffbcombfilter(2048, hslider("delay", 64.5, 1, 2047, 0.01), hslider("g", 0.6, -1, 1, 0.01));
-ffbcombfilter_modulated_test = no.noise : fi.ffbcombfilter(2048, 16 + 112*tri, 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+ffbcombfilter_modulated_test = no.noise : fi.ffbcombfilter(2048, 16 + 112*tri, 0.6) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -635,10 +650,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 allpass_comb_test = src : fi.allpass_comb(2048, 64, 0.6);
 allpass_comb_slider_test = no.noise : fi.allpass_comb(2048, hslider("delay", 64, 1, 2047, 1), hslider("aN", 0.6, -1, 1, 0.01));
-allpass_comb_modulated_test = no.noise : fi.allpass_comb(2048, int(16 + 112*tri), 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+allpass_comb_modulated_test = no.noise : fi.allpass_comb(2048, d, 0.6) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); d = 16 + int((m - m % P)/P + 0.5); };
 ```
 
 #### References
@@ -684,10 +700,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 allpass_fcomb_test = src : fi.allpass_fcomb(2048, 64.5, 0.6);
 allpass_fcomb_slider_test = no.noise : fi.allpass_fcomb(2048, hslider("delay", 64.5, 1, 2047, 0.01), hslider("aN", 0.6, -1, 1, 0.01));
-allpass_fcomb_modulated_test = no.noise : fi.allpass_fcomb(2048, 16 + 112*tri, 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+allpass_fcomb_modulated_test = no.noise : fi.allpass_fcomb(2048, 16 + 112*tri, 0.6) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -722,10 +739,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 rev2_test = src : fi.rev2(2048, 64, 0.6);
 rev2_slider_test = no.noise : fi.rev2(2048, hslider("delay", 64, 1, 2047, 1), hslider("g", 0.6, -1, 1, 0.01));
-rev2_modulated_test = no.noise : fi.rev2(2048, int(16 + 112*tri), 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+rev2_modulated_test = no.noise : fi.rev2(2048, d, 0.6) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); d = 16 + int((m - m % P)/P + 0.5); };
 ```
 
 ----
@@ -755,13 +773,14 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 allpass_fcomb5_test = src : fi.allpass_fcomb5(2048, 64.5, 0.6);
 allpass_fcomb1a_test = src : fi.allpass_fcomb1a(2048, 64.5, 0.6);
 allpass_fcomb5_slider_test = no.noise : fi.allpass_fcomb5(2048, hslider("delay", 64.5, 1, 2047, 0.01), hslider("aN", 0.6, -1, 1, 0.01));
-allpass_fcomb5_modulated_test = no.noise : fi.allpass_fcomb5(2048, 16 + 112*tri, 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+allpass_fcomb5_modulated_test = no.noise : fi.allpass_fcomb5(2048, 16 + 112*tri, 0.6) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 allpass_fcomb1a_slider_test = no.noise : fi.allpass_fcomb1a(2048, hslider("delay", 64.5, 1, 2047, 0.01), hslider("aN", 0.6, -1, 1, 0.01));
-allpass_fcomb1a_modulated_test = no.noise : fi.allpass_fcomb1a(2048, 16 + 112*tri, 0.6) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+allpass_fcomb1a_modulated_test = no.noise : fi.allpass_fcomb1a(2048, 16 + 112*tri, 0.6) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Direct-Form Digital Filter Sections
@@ -960,10 +979,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 notchw_test = src : fi.notchw(200, 1000);
 notchw_slider_test = no.noise : fi.notchw(hslider("width", 200, 10, 2000, 1), hslider("freq", 1000, 20, 20000, 1));
-notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -1363,10 +1383,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 wgr_test = fi.wgr(440, 0.995, src);
 wgr_slider_test = fi.wgr(hslider("freq", 440, 20, 5000, 1), hslider("r", 0.995, 0.9, 1, 0.001), no.noise);
-wgr_modulated_test = fi.wgr(100*pow(20, tri), 0.995, no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+wgr_modulated_test = fi.wgr(100*pow(20, tri), 0.995, no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -1397,10 +1418,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 nlf2_test = fi.nlf2(440, 0.995, src);
 nlf2_slider_test = fi.nlf2(hslider("freq", 440, 20, 5000, 1), hslider("r", 0.995, 0.9, 1, 0.001), no.noise);
-nlf2_modulated_test = fi.nlf2(100*pow(20, tri), 0.995, no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+nlf2_modulated_test = fi.nlf2(100*pow(20, tri), 0.995, no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -1753,7 +1775,7 @@ ba = library("basics.lib");
 tf1snp_test = src : fi.tf1snp(0, 1, 1, ma.PI*ma.SR/2);
 tf1snp_lowfc_test = no.noise : fi.tf1snp(0, 1, 1, 2*ma.PI*10.1);
 tf1snp_slider_test = no.noise : fi.tf1snp(0, 1, 1, 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
-tf1snp_modulated_test = no.noise : fi.tf1snp(0, 1, 1, 2*ma.PI*20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+tf1snp_modulated_test = no.noise : fi.tf1snp(0, 1, 1, 2*ma.PI*20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -1851,7 +1873,7 @@ no = library("noises.lib");
 src = os.tosc(440);
 tf1s_test = src : fi.tf1s(0, 1, 1, ma.PI*ma.SR/2);
 tf1s_slider_test = no.noise : fi.tf1s(0, 1, 1, 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
-tf1s_modulated_test = no.noise : fi.tf1s(0, 1, 1, 2*ma.PI*20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+tf1s_modulated_test = no.noise : fi.tf1s(0, 1, 1, 2*ma.PI*20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -1916,7 +1938,7 @@ no = library("noises.lib");
 src = os.tosc(440);
 tf2sb_test = src : fi.tf2sb(0, 0, 1, sqrt(2), 1, 2*ma.PI*200, 2*ma.PI*1000);
 tf2sb_slider_test = no.noise : fi.tf2sb(0, 0, 1, sqrt(2), 1, 2*ma.PI*hslider("bw", 800, 10, 10000, 1), 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
-tf2sb_modulated_test = no.noise : fi.tf2sb(0, 0, 1, sqrt(2), 1, 2*ma.PI*fc/5, 2*ma.PI*fc) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fc = 20*pow(250, tri); };
+tf2sb_modulated_test = no.noise : fi.tf2sb(0, 0, 1, sqrt(2), 1, 2*ma.PI*fc/5, 2*ma.PI*fc) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fc = 20*pow(250, tri); };
 ```
 
 ----
@@ -1956,7 +1978,7 @@ no = library("noises.lib");
 src = os.tosc(440);
 tf1sb_test = src : fi.tf1sb(0, 1, 1, 2*ma.PI*200, 2*ma.PI*1000);
 tf1sb_slider_test = no.noise : fi.tf1sb(0, 1, 1, 2*ma.PI*hslider("bw", 800, 10, 10000, 1), 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
-tf1sb_modulated_test = no.noise : fi.tf1sb(0, 1, 1, 2*ma.PI*fc/5, 2*ma.PI*fc) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fc = 20*pow(250, tri); };
+tf1sb_modulated_test = no.noise : fi.tf1sb(0, 1, 1, 2*ma.PI*fc/5, 2*ma.PI*fc) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fc = 20*pow(250, tri); };
 ```
 
 ## Simple Resonator Filters
@@ -1992,10 +2014,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 resonlp_test = src : fi.resonlp(1000, 2, 0.8);
 resonlp_slider_test = no.noise : fi.resonlp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
-resonlp_modulated_test = no.noise : fi.resonlp(20*pow(250, tri), 2, 0.8) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+resonlp_modulated_test = no.noise : fi.resonlp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2028,10 +2051,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 resonhp_test = fi.resonhp(1000, 2, 0.8, src);
 resonhp_slider_test = no.noise : fi.resonhp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
-resonhp_modulated_test = no.noise : fi.resonhp(20*pow(250, tri), 2, 0.8) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+resonhp_modulated_test = no.noise : fi.resonhp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2064,10 +2088,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 resonbp_test = src : fi.resonbp(1000, 2, 0.8);
 resonbp_slider_test = no.noise : fi.resonbp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
-resonbp_modulated_test = no.noise : fi.resonbp(20*pow(250, tri), 2, 0.8) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+resonbp_modulated_test = no.noise : fi.resonbp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Butterworth Lowpass/Highpass Filters
@@ -2099,11 +2124,12 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 lowpass_test = src : fi.lowpass(4, 2000);
 lowpass_lowfc_test = no.noise : fi.lowpass(3, 10.1);
 lowpass_slider_test = no.noise : fi.lowpass(4, hslider("fc", 2000, 20, 20000, 1));
-lowpass_modulated_test = no.noise : fi.lowpass(4, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lowpass_modulated_test = no.noise : fi.lowpass(4, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -2137,11 +2163,12 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 highpass_test = src : fi.highpass(4, 500);
 highpass_lowfc_test = no.noise : fi.highpass(3, 10.1);
 highpass_slider_test = no.noise : fi.highpass(4, hslider("fc", 500, 20, 20000, 1));
-highpass_modulated_test = no.noise : fi.highpass(4, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass_modulated_test = no.noise : fi.highpass(4, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -2183,10 +2210,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 lowpass0_highpass1_test = src : fi.lowpass0_highpass1(0, 2, 1000);
 lowpass0_highpass1_slider_test = no.noise : fi.lowpass0_highpass1(0, 2, hslider("fc", 1000, 20, 20000, 1));
-lowpass0_highpass1_modulated_test = no.noise : fi.lowpass0_highpass1(0, 2, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lowpass0_highpass1_modulated_test = no.noise : fi.lowpass0_highpass1(0, 2, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Special Filter-Bank Delay-Equalizing Allpass Filters
@@ -2223,9 +2251,10 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 highpass_plus_lowpass_test = os.tosc(440) : fi.highpass_plus_lowpass(3, 1000);
 highpass_plus_lowpass_slider_test = no.noise : fi.highpass_plus_lowpass(3, hslider("fc", 1000, 20, 20000, 1));
-highpass_plus_lowpass_modulated_test = no.noise : fi.highpass_plus_lowpass(3, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass_plus_lowpass_modulated_test = no.noise : fi.highpass_plus_lowpass(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2254,9 +2283,10 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 highpass_minus_lowpass_test = os.tosc(440) : fi.highpass_minus_lowpass(3, 1000);
 highpass_minus_lowpass_slider_test = no.noise : fi.highpass_minus_lowpass(3, hslider("fc", 1000, 20, 20000, 1));
-highpass_minus_lowpass_modulated_test = no.noise : fi.highpass_minus_lowpass(3, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass_minus_lowpass_modulated_test = no.noise : fi.highpass_minus_lowpass(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2285,9 +2315,10 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 highpass_plus_lowpass_even_test = os.tosc(440), os.tosc(440) : fi.highpass_plus_lowpass_even(4, 1000);
 highpass_plus_lowpass_even_slider_test = (no.noise <: _, _) : fi.highpass_plus_lowpass_even(4, hslider("fc", 1000, 20, 20000, 1));
-highpass_plus_lowpass_even_modulated_test = (no.noise <: _, _) : fi.highpass_plus_lowpass_even(4, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass_plus_lowpass_even_modulated_test = (no.noise <: _, _) : fi.highpass_plus_lowpass_even(4, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2316,9 +2347,10 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 highpass_minus_lowpass_even_test = os.tosc(440), os.tosc(440) : fi.highpass_minus_lowpass_even(4, 1000);
 highpass_minus_lowpass_even_slider_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_even(4, hslider("fc", 1000, 20, 20000, 1));
-highpass_minus_lowpass_even_modulated_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_even(4, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass_minus_lowpass_even_modulated_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_even(4, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2344,9 +2376,10 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 highpass_plus_lowpass_odd_test = os.tosc(440), os.tosc(440) : fi.highpass_plus_lowpass_odd(3, 1000);
 highpass_plus_lowpass_odd_slider_test = (no.noise <: _, _) : fi.highpass_plus_lowpass_odd(3, hslider("fc", 1000, 20, 20000, 1));
-highpass_plus_lowpass_odd_modulated_test = (no.noise <: _, _) : fi.highpass_plus_lowpass_odd(3, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass_plus_lowpass_odd_modulated_test = (no.noise <: _, _) : fi.highpass_plus_lowpass_odd(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 FIXME: Rewrite the following, as for orders 3 and 5 above,
        to eliminate pole-zero cancellations:
@@ -2374,9 +2407,10 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 highpass_minus_lowpass_odd_test = os.tosc(440), os.tosc(440) : fi.highpass_minus_lowpass_odd(3, 1000);
 highpass_minus_lowpass_odd_slider_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_odd(3, hslider("fc", 1000, 20, 20000, 1));
-highpass_minus_lowpass_odd_modulated_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_odd(3, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass_minus_lowpass_odd_modulated_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_odd(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 FIXME: Rewrite the following, as for orders 3 and 5 above,
        to eliminate pole-zero cancellations/
@@ -2495,10 +2529,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 highpass3e_test = src : fi.highpass3e(1000);
 highpass3e_slider_test = no.noise : fi.highpass3e(hslider("fc", 1000, 20, 20000, 1));
-highpass3e_modulated_test = no.noise : fi.highpass3e(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass3e_modulated_test = no.noise : fi.highpass3e(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2526,10 +2561,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 highpass6e_test = src : fi.highpass6e(1000);
 highpass6e_slider_test = no.noise : fi.highpass6e(hslider("fc", 1000, 20, 20000, 1));
-highpass6e_modulated_test = no.noise : fi.highpass6e(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpass6e_modulated_test = no.noise : fi.highpass6e(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Butterworth Bandpass/Bandstop Filters
@@ -2568,11 +2604,12 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 bandpass_test = src : fi.bandpass(2, 500, 1500);
 bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);
 bandpass_slider_test = no.noise : fi.bandpass(2, hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
-bandpass_modulated_test = no.noise : fi.bandpass(2, fl, 3*fl) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fl = 20*pow(250, tri); };
+bandpass_modulated_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 ```
 
 ----
@@ -2607,11 +2644,12 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 bandstop_test = src : fi.bandstop(2, 500, 1500);
 bandstop_wide_test = no.noise : fi.bandstop(2, 5000, 8000);
 bandstop_slider_test = no.noise : fi.bandstop(2, hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
-bandstop_modulated_test = no.noise : fi.bandstop(2, fl, 3*fl) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fl = 20*pow(250, tri); };
+bandstop_modulated_test = no.noise : fi.bandstop(2, fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 ```
 
 ----
@@ -2641,10 +2679,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 bandpass0_bandstop1_test = src : fi.bandpass0_bandstop1(0, 2, 500, 1500);
 bandpass0_bandstop1_slider_test = no.noise : fi.bandpass0_bandstop1(0, 2, hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
-bandpass0_bandstop1_modulated_test = no.noise : fi.bandpass0_bandstop1(0, 2, fl, 3*fl) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fl = 20*pow(250, tri); };
+bandpass0_bandstop1_modulated_test = no.noise : fi.bandpass0_bandstop1(0, 2, fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 ```
 
 ## Elliptic Bandpass Filters
@@ -2675,10 +2714,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 bandpass6e_test = src : fi.bandpass6e(500, 1500);
 bandpass6e_slider_test = no.noise : fi.bandpass6e(hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
-bandpass6e_modulated_test = no.noise : fi.bandpass6e(fl, 3*fl) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fl = 20*pow(250, tri); };
+bandpass6e_modulated_test = no.noise : fi.bandpass6e(fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 ```
 
 ----
@@ -2706,10 +2746,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 bandpass12e_test = src : fi.bandpass12e(500, 1500);
 bandpass12e_slider_test = no.noise : fi.bandpass12e(hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
-bandpass12e_modulated_test = no.noise : fi.bandpass12e(fl, 3*fl) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fl = 20*pow(250, tri); };
+bandpass12e_modulated_test = no.noise : fi.bandpass12e(fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 ```
 
 ----
@@ -2757,10 +2798,11 @@ fi = library("filters.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 pospass_test = src : fi.pospass(3, 1000);
 pospass_slider_test = no.noise : fi.pospass(3, hslider("fc", 1000, 20, 20000, 1));
-pospass_modulated_test = no.noise : fi.pospass(3, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+pospass_modulated_test = no.noise : fi.pospass(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -2793,9 +2835,10 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 pospass6e_test = os.tosc(440) : fi.pospass6e(100);
 pospass6e_slider_test = no.noise : fi.pospass6e(hslider("fc", 100, 20, 20000, 1));
-pospass6e_modulated_test = no.noise : fi.pospass6e(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+pospass6e_modulated_test = no.noise : fi.pospass6e(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2834,9 +2877,10 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 hilbert_test = os.tosc(440) : fi.hilbert(4, 20);
 hilbert_slider_test = no.noise : fi.hilbert(4, hslider("fc", 20, 5, 500, 1));
-hilbert_modulated_test = no.noise : fi.hilbert(4, 10*pow(10, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+hilbert_modulated_test = no.noise : fi.hilbert(4, 10*pow(10, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -2891,10 +2935,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 lowshelf_test = src : fi.lowshelf(3, 6, 500);
 lowshelf_slider_test = no.noise : fi.lowshelf(3, hslider("L0", 6, -24, 24, 0.1), hslider("fc", 500, 20, 20000, 1));
-lowshelf_modulated_test = no.noise : fi.lowshelf(3, 6, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lowshelf_modulated_test = no.noise : fi.lowshelf(3, 6, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### Shelf Shape
@@ -2947,10 +2992,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 low_shelf_test = src : fi.low_shelf(6, 500);
 low_shelf_slider_test = no.noise : fi.low_shelf(hslider("L0", 6, -24, 24, 0.1), hslider("fc", 500, 20, 20000, 1));
-low_shelf_modulated_test = no.noise : fi.low_shelf(6, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+low_shelf_modulated_test = no.noise : fi.low_shelf(6, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2977,10 +3023,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 low_shelf1_test = fi.low_shelf1(2, 500, src);
 low_shelf1_slider_test = no.noise : fi.low_shelf1(hslider("L0", 2, -24, 24, 0.1), hslider("fc", 500, 20, 20000, 1));
-low_shelf1_modulated_test = no.noise : fi.low_shelf1(2, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+low_shelf1_modulated_test = no.noise : fi.low_shelf1(2, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -3008,10 +3055,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 low_shelf1_l_test = fi.low_shelf1_l(2, 500, src);
 low_shelf1_l_slider_test = no.noise : fi.low_shelf1_l(hslider("G0", 2, 0, 16, 0.01), hslider("fc", 500, 20, 20000, 1));
-low_shelf1_l_modulated_test = no.noise : fi.low_shelf1_l(2, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+low_shelf1_l_modulated_test = no.noise : fi.low_shelf1_l(2, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -3039,9 +3087,10 @@ Where:
 ```
 fi = library("filters.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 lowshelf_other_freq_test = fi.lowshelf_other_freq(3, 6, 500);
 lowshelf_other_freq_slider_test = fi.lowshelf_other_freq(3, hslider("L0", 6, -24, 24, 0.1), hslider("fc", 500, 20, 20000, 1));
-lowshelf_other_freq_modulated_test = fi.lowshelf_other_freq(3, 6, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lowshelf_other_freq_modulated_test = fi.lowshelf_other_freq(3, 6, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -3075,10 +3124,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 highshelf_test = src : fi.highshelf(3, 6, 2000);
 highshelf_slider_test = no.noise : fi.highshelf(3, hslider("Lpi", 6, -24, 24, 0.1), hslider("fc", 2000, 20, 20000, 1));
-highshelf_modulated_test = no.noise : fi.highshelf(3, 6, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highshelf_modulated_test = no.noise : fi.highshelf(3, 6, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -3113,10 +3163,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 high_shelf_test = src : fi.high_shelf(6, 2000);
 high_shelf_slider_test = no.noise : fi.high_shelf(hslider("Lpi", 6, -24, 24, 0.1), hslider("fc", 2000, 20, 20000, 1));
-high_shelf_modulated_test = no.noise : fi.high_shelf(6, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+high_shelf_modulated_test = no.noise : fi.high_shelf(6, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -3143,10 +3194,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 high_shelf1_test = fi.high_shelf1(6, 2000, src);
 high_shelf1_slider_test = no.noise : fi.high_shelf1(hslider("Lpi", 6, -24, 24, 0.1), hslider("fc", 2000, 20, 20000, 1));
-high_shelf1_modulated_test = no.noise : fi.high_shelf1(6, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+high_shelf1_modulated_test = no.noise : fi.high_shelf1(6, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -3173,10 +3225,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 high_shelf1_l_test = fi.high_shelf1_l(2, 2000, src);
 high_shelf1_l_slider_test = no.noise : fi.high_shelf1_l(hslider("Gpi", 2, 0, 16, 0.01), hslider("fc", 2000, 20, 20000, 1));
-high_shelf1_l_modulated_test = no.noise : fi.high_shelf1_l(2, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+high_shelf1_l_modulated_test = no.noise : fi.high_shelf1_l(2, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -3204,9 +3257,10 @@ Where:
 ```
 fi = library("filters.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 highshelf_other_freq_test = fi.highshelf_other_freq(3, 6, 2000);
 highshelf_other_freq_slider_test = fi.highshelf_other_freq(3, hslider("Lpi", 6, -24, 24, 0.1), hslider("fc", 2000, 20, 20000, 1));
-highshelf_other_freq_modulated_test = fi.highshelf_other_freq(3, 6, 20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highshelf_other_freq_modulated_test = fi.highshelf_other_freq(3, 6, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -3237,10 +3291,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 peak_eq_test = src : fi.peak_eq(6, 1000, 200);
 peak_eq_slider_test = no.noise : fi.peak_eq(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), hslider("B", 200, 1, 5000, 1));
-peak_eq_modulated_test = no.noise : fi.peak_eq(6, fx, fx/5) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fx = 20*pow(250, tri); };
+peak_eq_modulated_test = no.noise : fi.peak_eq(6, fx, fx/5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = 20*pow(250, tri); };
 ```
 
 #### References
@@ -3271,10 +3326,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 peak_eq_cq_test = src : fi.peak_eq_cq(6, 1000, 4);
 peak_eq_cq_slider_test = no.noise : fi.peak_eq_cq(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), hslider("Q", 4, 0.5, 20, 0.01));
-peak_eq_cq_modulated_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, tri), 4) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+peak_eq_cq_modulated_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, tri), 4) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -3310,7 +3366,7 @@ no = library("noises.lib");
 src = os.tosc(440);
 peak_eq_rm_test = src : fi.peak_eq_rm(6, 1000, tan(ma.PI*200/ma.SR));
 peak_eq_rm_slider_test = no.noise : fi.peak_eq_rm(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), tan(ma.PI*hslider("B", 200, 1, 5000, 1)/ma.SR));
-peak_eq_rm_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); fx = 20*pow(250, tri); };
+peak_eq_rm_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = 20*pow(250, tri); };
 ```
 
 #### References
@@ -3352,10 +3408,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 spectral_tilt_test = src : fi.spectral_tilt(4, 200, 2000, -0.5);
 spectral_tilt_slider_test = no.noise : fi.spectral_tilt(4, hslider("f0", 200, 20, 2000, 1), hslider("bw", 2000, 100, 10000, 1), hslider("alpha", -0.5, -1, 1, 0.01));
-spectral_tilt_modulated_test = no.noise : fi.spectral_tilt(4, 200, 2000, -1 + 2*tri) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+spectral_tilt_modulated_test = no.noise : fi.spectral_tilt(4, 200, 2000, -1 + 2*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### Example test program
@@ -3393,10 +3450,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 levelfilter_test = fi.levelfilter(0.1, 200, src);
 levelfilter_slider_test = fi.levelfilter(hslider("L", 0.1, -60, 20, 0.1), hslider("fc", 200, 20, 20000, 1), no.noise);
-levelfilter_modulated_test = fi.levelfilter(0.1, 20*pow(250, tri), no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+levelfilter_modulated_test = fi.levelfilter(0.1, 20*pow(250, tri), no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -3427,10 +3485,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 levelfilterN_test = src : fi.levelfilterN(3, 200, 0.1);
 levelfilterN_slider_test = no.noise : fi.levelfilterN(3, hslider("fc", 200, 20, 20000, 1), hslider("L", 0.1, -60, 20, 0.1));
-levelfilterN_modulated_test = no.noise : fi.levelfilterN(3, 20*pow(250, tri), 0.1) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+levelfilterN_modulated_test = no.noise : fi.levelfilterN(3, 20*pow(250, tri), 0.1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -3728,10 +3787,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 sig = os.tosc(440);
 svf_lp_test = fi.svf.lp(1000, 0.707, sig);
 svf_slider_test = no.noise : fi.svf.bell(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), hslider("gain", 6, -24, 24, 0.1));
-svf_modulated_test = no.noise : fi.svf.lp(20*pow(250, tri), 0.707) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+svf_modulated_test = no.noise : fi.svf.lp(20*pow(250, tri), 0.707) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 svf_bp_test = fi.svf.bp(1000, 0.707, sig);
 svf_hp_test = fi.svf.hp(1000, 0.707, sig);
 svf_notch_test = fi.svf.notch(1000, 0.707, sig);
@@ -3767,10 +3827,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 sig = os.tosc(440);
 svf_morph_test = fi.svf_morph(1000, 0.707, 1, sig);
 svf_morph_slider_test = fi.svf_morph(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), hslider("blend", 1, 0, 2, 0.01), no.noise);
-svf_morph_modulated_test = fi.svf_morph(20*pow(250, tri), 0.707, 2*tri, no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+svf_morph_modulated_test = fi.svf_morph(20*pow(250, tri), 0.707, 2*tri, no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### Example test program
@@ -3813,10 +3874,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 sig = os.tosc(440);
 svf_notch_morph_test = fi.svf_notch_morph(1000, 0.707, 1, sig);
 svf_notch_morph_slider_test = fi.svf_notch_morph(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), hslider("blend", 1, 0, 2, 0.01), no.noise);
-svf_notch_morph_modulated_test = fi.svf_notch_morph(20*pow(250, tri), 0.707, 2*tri, no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+svf_notch_morph_modulated_test = fi.svf_notch_morph(20*pow(250, tri), 0.707, 2*tri, no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### Example test program
@@ -3871,10 +3933,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 sig = os.tosc(440);
 SVFTPT_SVF_test = fi.SVFTPT.SVF(1000, 0.707, sig);
 SVFTPT_slider_test = fi.SVFTPT.SVF(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), no.noise);
-SVFTPT_modulated_test = fi.SVFTPT.SVF(20*pow(250, tri), 0.707, no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+SVFTPT_modulated_test = fi.SVFTPT.SVF(20*pow(250, tri), 0.707, no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 SVFTPT_LP2_test = fi.SVFTPT.LP2(1000, 0.707, sig);
 SVFTPT_HP2_test = fi.SVFTPT.HP2(1000, 0.707, sig);
 SVFTPT_BP2_test = fi.SVFTPT.BP2(1000, 0.707, sig);
@@ -3923,10 +3986,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 sig = os.tosc(440);
 dynamicSmoothing_test = fi.dynamicSmoothing(0.5, 500, sig);
 dynamicSmoothing_slider_test = fi.dynamicSmoothing(hslider("sensitivity", 0.5, 0, 1, 0.01), hslider("fc", 500, 20, 20000, 1), no.noise);
-dynamicSmoothing_modulated_test = fi.dynamicSmoothing(0.5, 20*pow(250, tri), no.noise) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+dynamicSmoothing_modulated_test = fi.dynamicSmoothing(0.5, 20*pow(250, tri), no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -3959,10 +4023,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 sig = os.tosc(440);
 oneEuro_test = sig : fi.oneEuro(1, 0.5, 5);
 oneEuro_slider_test = no.noise : fi.oneEuro(hslider("derivativeCutoff", 1, 0.1, 10, 0.1), hslider("beta", 0.5, 0, 1, 0.01), hslider("minCutoff", 5, 0.1, 50, 0.1));
-oneEuro_modulated_test = no.noise : fi.oneEuro(1, 0.5, pow(50, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+oneEuro_modulated_test = no.noise : fi.oneEuro(1, 0.5, pow(50, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -4009,10 +4074,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 lowpassLR4_test = src : fi.lowpassLR4(1000);
 lowpassLR4_slider_test = no.noise : fi.lowpassLR4(hslider("fc", 1000, 20, 20000, 1));
-lowpassLR4_modulated_test = no.noise : fi.lowpassLR4(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+lowpassLR4_modulated_test = no.noise : fi.lowpassLR4(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -4037,10 +4103,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 highpassLR4_test = src : fi.highpassLR4(1000);
 highpassLR4_slider_test = no.noise : fi.highpassLR4(hslider("fc", 1000, 20, 20000, 1));
-highpassLR4_modulated_test = no.noise : fi.highpassLR4(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+highpassLR4_modulated_test = no.noise : fi.highpassLR4(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -4065,10 +4132,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 crossover2LR4_test = src : fi.crossover2LR4(1000);
 crossover2LR4_slider_test = no.noise : fi.crossover2LR4(hslider("fc", 1000, 20, 20000, 1));
-crossover2LR4_modulated_test = no.noise : fi.crossover2LR4(20*pow(250, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+crossover2LR4_modulated_test = no.noise : fi.crossover2LR4(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -4094,10 +4162,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 crossover3LR4_test = src : fi.crossover3LR4(500, 2000);
 crossover3LR4_slider_test = no.noise : fi.crossover3LR4(hslider("cf1", 500, 20, 20000, 1), hslider("cf2", 2000, 20, 20000, 1));
-crossover3LR4_modulated_test = no.noise : fi.crossover3LR4(cf, 4*cf) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); cf = 20*pow(60, tri); };
+crossover3LR4_modulated_test = no.noise : fi.crossover3LR4(cf, 4*cf) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); cf = 20*pow(60, tri); };
 ```
 
 ----
@@ -4124,10 +4193,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 crossover4LR4_test = src : fi.crossover4LR4(300, 1000, 3000);
 crossover4LR4_slider_test = no.noise : fi.crossover4LR4(hslider("cf1", 300, 20, 20000, 1), hslider("cf2", 1000, 20, 20000, 1), hslider("cf3", 3000, 20, 20000, 1));
-crossover4LR4_modulated_test = no.noise : fi.crossover4LR4(cf, 3*cf, 9*cf) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); cf = 20*pow(25, tri); };
+crossover4LR4_modulated_test = no.noise : fi.crossover4LR4(cf, 3*cf, 9*cf) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); cf = 20*pow(25, tri); };
 ```
 
 ----
@@ -4158,10 +4228,11 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 src = os.tosc(440);
 crossover8LR4_test = src : fi.crossover8LR4(100, 200, 400, 800, 1600, 3200, 6400);
 crossover8LR4_slider_test = no.noise : fi.crossover8LR4(hslider("cf1", 100, 20, 20000, 1), hslider("cf2", 200, 20, 20000, 1), hslider("cf3", 400, 20, 20000, 1), hslider("cf4", 800, 20, 20000, 1), hslider("cf5", 1600, 20, 20000, 1), hslider("cf6", 3200, 20, 20000, 1), hslider("cf7", 6400, 20, 20000, 1));
-crossover8LR4_modulated_test = no.noise : fi.crossover8LR4(cf, 2*cf, 4*cf, 8*cf, 16*cf, 32*cf, 64*cf) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); cf = 20*pow(4, tri); };
+crossover8LR4_modulated_test = no.noise : fi.crossover8LR4(cf, 2*cf, 4*cf, 8*cf, 16*cf, 32*cf, 64*cf) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); cf = 20*pow(4, tri); };
 ```
 
 ##  Standardized Filters 
@@ -4233,9 +4304,10 @@ Where:
 fi = library("filters.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 avg_rect_test = no.noise : fi.avg_rect(0.01);
 avg_rect_slider_test = no.noise : fi.avg_rect(hslider("period", 0.01, 0.001, 0.1, 0.001));
-avg_rect_modulated_test = no.noise : fi.avg_rect(0.001 + 0.019*tri) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+avg_rect_modulated_test = no.noise : fi.avg_rect(0.001 + 0.019*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1) : max(0) : min(1); };
 ```
 
 
@@ -4265,9 +4337,10 @@ or to reach 1-1/e of its final value.
 fi = library("filters.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 avg_tau_test = no.noise : fi.avg_tau(0.01);
 avg_tau_slider_test = no.noise : fi.avg_tau(hslider("period", 0.01, 0.001, 0.1, 0.001));
-avg_tau_modulated_test = no.noise : fi.avg_tau(0.001 + 0.019*tri) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+avg_tau_modulated_test = no.noise : fi.avg_tau(0.001 + 0.019*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -4298,9 +4371,10 @@ or to reach 1-1/1000 of its final value.
 fi = library("filters.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 avg_t60_test = no.noise : fi.avg_t60(0.01);
 avg_t60_slider_test = no.noise : fi.avg_t60(hslider("period", 0.01, 0.001, 0.1, 0.001));
-avg_t60_modulated_test = no.noise : fi.avg_t60(0.001 + 0.019*tri) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+avg_t60_modulated_test = no.noise : fi.avg_t60(0.001 + 0.019*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -4332,9 +4406,10 @@ or to reach 1-1/e^2.2 of its final value.
 fi = library("filters.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 avg_t19_test = no.noise : fi.avg_t19(0.01);
 avg_t19_slider_test = no.noise : fi.avg_t19(hslider("period", 0.01, 0.001, 0.1, 0.001));
-avg_t19_modulated_test = no.noise : fi.avg_t19(0.001 + 0.019*tri) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+avg_t19_modulated_test = no.noise : fi.avg_t19(0.001 + 0.019*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -4425,7 +4500,8 @@ with {
 fi = library("filters.lib");
 ba = library("basics.lib");
 no = library("noises.lib");
-kalman_test = fi.kalman(1, 1, 1, 0.1, 1, 0.01, 1, 0, 0, z) with { z = 0.5*(1 - abs(2*ba.period(4800)/4800 - 1)) + 0.1*no.noise; };
+ma = library("maths.lib");
+kalman_test = fi.kalman(1, 1, 1, 0.1, 1, 0.01, 1, 0, 0, z) with { P = int(ma.SR/10); z = 0.5*(1 - abs(2*ba.period(P)/P - 1)) + 0.1*no.noise; };
 ```
 
 #### References
