@@ -1014,24 +1014,22 @@ zita_light = hgroup("Zita Light",(_,_ <: re.zita_rev1_stereo(rdel,f1,f2,t60dc,t6
     out_eq,_,_ : dry_wet : out_level))
 with{
     fsmax = 192000.0;  // highest sampling rate that will be used
-    rdel = 60;    
+    rdel = 40; // zita-rev1 defaults: 40 ms, 200 Hz, 3 s, 2 s, 6 kHz, EQ at 160 Hz and 2.5 kHz
     f1 = 200;
     t60dc = 3;
     t60m = 2;
     f2 = 6000;
-    out_eq = pareq_stereo(eq1f,eq1l,eq1q) : pareq_stereo(eq2f,eq2l,eq2q);
-    pareq_stereo(eqf,eql,Q) = fi.peak_eq_rm(eql,eqf,tpbt), fi.peak_eq_rm(eql,eqf,tpbt)
+    out_eq = pareq_stereo(eq1f,eq1l) : pareq_stereo(eq2f,eq2l);
+    pareq_stereo(eqf,eql) = fi.peak_eq_rm(eql,eqf,tpbt), fi.peak_eq_rm(eql,eqf,tpbt)
     with {
         tpbt = wcT/sqrt(max(0,g)); // tan(PI*B/SR), B bw in Hz (Q^2 ~ g/4)
         wcT = 2*ma.PI*eqf/ma.SR;  // peak frequency in rad/sample
         g = ba.db2linear(eql); // peak gain
     };
-    eq1f = 315;
+    eq1f = 160;
     eq1l = 0;
-    eq1q = 3;
-    eq2f = 1500;
+    eq2f = 2500;
     eq2l = 0;
-    eq2q = 3;
     // zita-rev1's mix law (reverb.cc): with m = (1 - drywet)/2, dry gain 1 - m^2,
     // wet gain 0.7 m (2-m)/sqrt(t60m), of which re.zita_rev1_stereo applies 0.525/sqrt(t60m)
     dry_wet(wl,wr) = *(gd) + gw*wl, *(gd) + gw*wr
@@ -1051,6 +1049,8 @@ with{
 // Example GUI for `zita_rev1_stereo` (mostly following the Linux `zita-rev1` GUI).
 // The Wet/Dry Mix follows the `zita-rev1` mix law: with m = (1 - mix)/2,
 // the dry gain is 1 - m^2 and the wet gain 0.7 m (2-m)/sqrt(`t60m`).
+// The defaults are those of `zita-rev1`; as there, the equalizer
+// bandwidths are fixed (no Q control).
 //
 // Only the dry/wet and output level parameters are "dezippered" here. If
 // parameters are to be varied in real time, use `smooth(0.999)` or the like
@@ -1091,7 +1091,7 @@ with{
     in_group(x) = fdn_group(hgroup("[1] Input", x));
 
     rdel = in_group(vslider("[1] In Delay [unit:ms] [style:knob] [tooltip: Delay in ms
-        before reverberation begins]",60,20,100,1));
+        before reverberation begins]",40,20,100,1));
 
     freq_group(x) = fdn_group(hgroup("[2] Decay Times in Bands (see tooltips)", x));
 
@@ -1109,11 +1109,10 @@ with{
     [tooltip: Frequency (Hz) at which the high-frequency T60 is half the middle-band's T60]",
     6000, 1500, 23520, 1));
 
-    out_eq = pareq_stereo(eq1f,eq1l,eq1q) : pareq_stereo(eq2f,eq2l,eq2q);
-    // Zolzer style peaking eq (not used in zita-rev1) (filters.lib):
-    // pareq_stereo(eqf,eql,Q) = peak_eq(eql,eqf,eqf/Q), peak_eq(eql,eqf,eqf/Q);
-    // Regalia-Mitra peaking eq with "Q" hard-wired near sqrt(g)/2 (filters.lib):
-    pareq_stereo(eqf,eql,Q) = fi.peak_eq_rm(eql,eqf,tpbt), fi.peak_eq_rm(eql,eqf,tpbt)
+    out_eq = pareq_stereo(eq1f,eq1l) : pareq_stereo(eq2f,eq2l);
+    // Regalia-Mitra peaking eq with its bandwidth tied to the gain, as in zita-rev1
+    // (pareq.cc), which has no Q control (filters.lib):
+    pareq_stereo(eqf,eql) = fi.peak_eq_rm(eql,eqf,tpbt), fi.peak_eq_rm(eql,eqf,tpbt)
     with {
         tpbt = wcT/sqrt(max(0,g)); // tan(PI*B/SR), B bw in Hz (Q^2 ~ g/4)
         wcT = 2*ma.PI*eqf/ma.SR;  // peak frequency in rad/sample
@@ -1124,25 +1123,19 @@ with{
 
     eq1f = eq1_group(vslider("[1] Eq1 Freq [unit:Hz] [style:knob] [scale:log] [tooltip:
         Center-frequency of second-order Regalia-Mitra peaking equalizer section 1]",
-    315, 40, 2500, 1));
+    160, 40, 2500, 1));
 
     eq1l = eq1_group(vslider("[2] Eq1 Level [unit:dB] [style:knob] [tooltip: Peak level
         in dB of second-order Regalia-Mitra peaking equalizer section 1]", 0, -15, 15, 0.1));
-
-    eq1q = eq1_group(vslider("[3] Eq1 Q [style:knob] [tooltip: Q = centerFrequency/bandwidth
-        of second-order peaking equalizer section 1]", 3, 0.1, 10, 0.1));
 
     eq2_group(x) = fdn_group(hgroup("[4] RM Peaking Equalizer 2", x));
 
     eq2f = eq2_group(vslider("[1] Eq2 Freq [unit:Hz] [style:knob] [scale:log] [tooltip:
         Center-frequency of second-order Regalia-Mitra peaking equalizer section 2]",
-    1500, 160, 10000, 1));
+    2500, 160, 10000, 1));
 
     eq2l = eq2_group(vslider("[2] Eq2 Level [unit:dB] [style:knob] [tooltip: Peak level
         in dB of second-order Regalia-Mitra peaking equalizer section 2]", 0, -15, 15, 0.1));
-
-    eq2q = eq2_group(vslider("[3] Eq2 Q [style:knob] [tooltip: Q = centerFrequency/bandwidth
-        of second-order peaking equalizer section 2]", 3, 0.1, 10, 0.1));
 
     out_group(x) = fdn_group(hgroup("[5] Output", x));
 

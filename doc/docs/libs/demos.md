@@ -471,6 +471,8 @@ zita_light_test = stereoOsc(440, 442) : dm.zita_light;
 Example GUI for `zita_rev1_stereo` (mostly following the Linux `zita-rev1` GUI).
 The Wet/Dry Mix follows the `zita-rev1` mix law: with m = (1 - mix)/2,
 the dry gain is 1 - m^2 and the wet gain 0.7 m (2-m)/sqrt(`t60m`).
+The defaults are those of `zita-rev1`; as there, the equalizer
+bandwidths are fixed (no Q control).
 
 Only the dry/wet and output level parameters are "dezippered" here. If
 parameters are to be varied in real time, use `smooth(0.999)` or the like
