@@ -313,7 +313,7 @@ Before preparing a pull-request, the new library must be carefully tested:
 - new code must also be checked in single and double precision, from 44.1 to 192 kHz, as described below: `make check` covers neither, `make check-precision` does.
 - a function whose parameters are meant to vary at run time is tested with constant, slider and modulated parameters, as described below: the three run different code.
 
-### Constant, slider and modulated tests
+### Constant, slider, modulated and jump tests
 
 The Faust compiler generates different code for a parameter depending on what it is:
 
@@ -325,7 +325,7 @@ The Faust compiler generates different code for a parameter depending on what it
 
 Precision, stability and CPU cost can differ between the three. A function that is correct with constants can lose precision when its coefficients are computed at run time in float. It can also blow up when they change at every sample, since a recursive structure that is stable for each frozen setting is not necessarily stable when that setting moves. And its cost per sample can double. The harnesses (`make check`, `make check-precision`, `make check-cpu`) render the tests as written, with the controls at their default values: they cannot turn a constant into a control or a signal. The test has to do it.
 
-A function whose parameters are meant to vary at run time therefore has three tests, written first in its `#### Test` section like any other (rule 8 of `AGENTS.md`). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
+A function whose parameters are meant to vary at run time therefore has three tests, a recursive filter four, written first in its `#### Test` section like any other (rule 8 of `AGENTS.md`). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
 
 1. **`functionName_test`, constant parameters.** This is the usual test.
 2. **`functionName_slider_test`, parameters from sliders** (`hslider`, `vslider`, `nentry`), without smoothing, with realistic default values. It checks that the function accepts run-time controls: a parameter that must be a constant makes it fail to compile. It checks the coefficients computed at run time in the program's precision: for `fi.resonlp`, the float/double level gap is 6.4e-5 with sliders against 1.8e-5 with constants. And it checks that they stay at control rate: its cost should match the constant test's. When it is clearly slower, the normalizer has moved part of the coefficient computation into the per-sample loop, which is what the `min(x, ma.MAX)` workarounds in the libraries prevent.
@@ -344,7 +344,19 @@ with {
 };
 ```
 
-To test abrupt changes as well (a cutoff switching between two values, where some realizations leave their states at the wrong level), replace the sweep by `select2(ba.period(2*P) < P, 50, 5000)`.
+4. **`functionName_jump_test`, a parameter jumping between the two ends of its range**, for recursive filters. It is what a user produces by moving a slider: the harnesses never move one, so the `_slider_test` never jumps. A jump is where realizations differ most. A state-variable section leaks on an attenuated input after an abrupt cutoff change (#264); a direct form can leave its states far from the level the new coefficients expect, and its float and double outputs then diverge. The jump test is the `_modulated_test` with its triangle replaced by a square wave at 5 Hz, `sq = ba.period(2*P) < P`, so that the parameter holds each end of the sweep for 0.1 s:
+
+   ```
+   resonlp_jump_test = no.noise : fi.resonlp(50*pow(100, sq), 2, 1)
+   with {
+     P = int(ma.SR/10);
+     sq = ba.period(2*P) < P; // 0 or 1, switching every 0.1 s, exact
+   };
+   ```
+
+   Delay lines with an integer length need none: a jump of length is the same discontinuity whatever the realization.
+
+   When it was introduced, every filter of `filters.lib` that has a `_modulated_test` got one, except ten that fail `make check-precision`, with level gaps of 1.1e-3 to 0.53. All are built on the direct-form `fi.tf2s` (`resonlp`, `resonhp`, `resonbp`, the `peak_eq` family, `highpass3e`, `highpass6e`, `highpass_plus_lowpass`), except `wgr`, which is already at the threshold with a constant 100 Hz. Every state-variable or TPT filter passes. They will get their jump tests with a realization that passes them.
 
 Two more precautions:
 
@@ -361,7 +373,7 @@ Two more precautions:
 
 - **The interval analysis of the compiler** does not see that `ba.period(P)/P` stays below 1 when `P` is not a constant: a parameter that needs bounds, such as a delay that is read directly with `@` or a window length, gets them explicitly (`: max(16) : min(128)`, `tri : max(0) : min(1)`).
 
-Parameters that must be known at compile time (in capital letters by convention: an order, a number of voices or bands, a maximum delay) need neither variant. `scripts/lib_tests.py inventory xx.lib` lists which of the three tests each documented function has, in the doc blocks and in `tests/*.dsp`. `scripts/lib_tests.py add xx.lib new_tests.dsp` inserts tests written in an ordinary Faust file into both places; `scripts/README.md` describes it. The three costs can be compared in one run:
+Parameters that must be known at compile time (in capital letters by convention: an order, a number of voices or bands, a maximum delay) need neither variant. `scripts/lib_tests.py inventory xx.lib` lists which of the four tests each documented function has, in the doc blocks and in `tests/*.dsp`. `scripts/lib_tests.py add xx.lib new_tests.dsp` inserts tests written in an ordinary Faust file into both places; `scripts/README.md` describes it. The three costs can be compared in one run:
 
 ```bash
 make check-cpu CPU_ARGS="-k '^resonlp(_slider|_modulated)?_test'"
@@ -434,7 +446,7 @@ For each test, the table gives the best time per frame in the two versions, thei
 
 - **Measure the tests you touched, and the callers that matter.** A function used inside a bank of filters, such as the 32 bands of `dm.vocoder_demo`, costs its ratio times the number of instances. Select these tests by file or with `-k`, or run the whole suite with `--changed-only`, which times only the tests whose generated code the change alters, wherever they are.
 - **Measure with more than one compilation.** The default one is what faust2xx scripts use (`c++ -O3 -ffast-math`). A ratio depends on the compilation, and not only the times do. `-ffast-math` turns divisions into multiplications and reassociates sums: a direct-form filter profits from that more than a state-variable one. Faust `-vec` can change a ratio even more. `make check-cpu-matrix` runs `fast-math`, `strict` (`-O3`) and `vec` in turn. Report at least `fast-math` and `strict`.
-- **Measure the three regimes.** A test with constant parameters computes its coefficients once. The `_slider_test` and `_modulated_test` variants (see *Constant, slider and modulated tests* above) measure the cost per block and per sample. A rewrite can be cheap in the first regime and twice as slow in the last one: a state-variable realization of `fi.tf3slf` measured 1.22 times the direct form's cost with constants, and 1.97 times with its cutoff modulated at every sample.
+- **Measure the three regimes.** A test with constant parameters computes its coefficients once. The `_slider_test` and `_modulated_test` variants (see *Constant, slider, modulated and jump tests* above) measure the cost per block and per sample. A rewrite can be cheap in the first regime and twice as slow in the last one: a state-variable realization of `fi.tf3slf` measured 1.22 times the direct form's cost with constants, and 1.97 times with its cutoff modulated at every sample.
 - **Look at the `ops` column, not only at the ratio.** It counts the divisions, square roots and transcendental calls (`pow`, `tan`...) that each sample executes, and marks with `!` a change that adds any. A desktop core hides much of their cost; an embedded core such as a Cortex-M7 does not, since a division costs it 14 cycles and a `pow` tens to hundreds. A new per-sample `pow` or `tan` deserves a mention in the pull request even when the measured ratio looks harmless.
 - **Quote ratios from one run.** Times vary between machines, compilers and runs. The identity lines printed first name the machine, the compilers (with their paths) and the revisions, so include them with the table.
 

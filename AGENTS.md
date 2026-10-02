@@ -123,11 +123,14 @@ Every script behind these targets is described in `scripts/README.md`.
    frequency, a gain, a delay) also gets a `functionName_slider_test`
    (parameters from sliders: coefficients computed per block, in the
    program's precision) and a `functionName_modulated_test` (a parameter
-   modulated at every sample): the three run different code. Drive the
+   modulated at every sample): the three run different code. A recursive
+   filter also gets a `functionName_jump_test` (the parameter jumping
+   between the two ends of its range, as a moved slider does). Drive the
    modulation with an integer counter (`ba.period`), not `os.osc`, which
    drifts in float, and tie its period to the sample rate
-   (`P = int(ma.SR/10)`, 10 Hz at every rate). Details: `doc/docs/contributing.md`, section
-   *Constant, slider and modulated tests*. `scripts/lib_tests.py
+   (`P = int(ma.SR/10)`, 10 Hz at every rate). Details:
+   `doc/docs/contributing.md`, section *Constant, slider, modulated and
+   jump tests*. `scripts/lib_tests.py
    inventory xx.lib` shows which tests exist where; `scripts/lib_tests.py
    add xx.lib new_tests.dsp` inserts new ones in both places at once.
 

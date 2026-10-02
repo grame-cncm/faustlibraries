@@ -255,16 +255,18 @@ scripts/lib_tests.py add LIB SPEC.dsp [--tests-file FILE] [--dry-run]
 Every test lives in two places (`AGENTS.md`, rule 8): in the `#### Test` section
 of the function's doc block, then, verbatim and under the same name, in a
 `tests/*.dsp` file. A function whose parameters are meant to vary at run time has
-three tests: `name_test`, `name_slider_test` and `name_modulated_test` (see
-`doc/docs/contributing.md`, section *Constant, slider and modulated tests*). This
-script checks and maintains both places.
+three tests, `name_test`, `name_slider_test` and `name_modulated_test`, and a
+recursive filter a fourth, `name_jump_test` (see `doc/docs/contributing.md`,
+section *Constant, slider, modulated and jump tests*). This script checks and
+maintains both places.
 
 **`inventory LIB`** lists, for every symbol documented in LIB, where each of the
-three tests exists: `both`, `lib` or `dsp` (one side only), or `-`. The tests
+four tests exists: `both`, `lib` or `dsp` (one side only), or `-`. The tests
 present on one side only break rule 8 and are listed first; the exit status is
-then 1. `--missing` hides the symbols that have all three. Whether a function
-needs the slider and modulated variants is a judgement, which the inventory
-leaves to you: its parameters must be meant to vary at run time.
+then 1. `--missing` hides the symbols that have the first three; a missing
+`_jump_test` does not count, since only recursive filters need one. Whether a
+function needs the slider, modulated and jump variants is a judgement, which the
+inventory leaves to you: its parameters must be meant to vary at run time.
 
 ```bash
 scripts/lib_tests.py inventory filters.lib --missing

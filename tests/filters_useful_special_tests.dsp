@@ -18,5 +18,6 @@ wgr_modulated_test = fi.wgr(100*pow(20, tri), 0.995, no.noise) with { P = int(ma
 nlf2_test = fi.nlf2(440, 0.995, src);
 nlf2_slider_test = fi.nlf2(hslider("freq", 440, 20, 5000, 1), hslider("r", 0.995, 0.9, 1, 0.001), no.noise);
 nlf2_modulated_test = fi.nlf2(100*pow(20, tri), 0.995, no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+nlf2_jump_test = fi.nlf2(100*pow(20, sq), 0.995, no.noise) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 apnl_test = fi.apnl(0.5, -0.5, src);
 itu_r_bs_1770_4_kfilter_test = src : fi.itu_r_bs_1770_4_kfilter;

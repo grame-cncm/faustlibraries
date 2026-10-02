@@ -6,11 +6,13 @@ section of the function's doc block in the .lib, then, copied verbatim and
 under the same name, in the matching tests/*.dsp. A function whose parameters
 are meant to vary at run time has three tests: `name_test` (constant
 parameters), `name_slider_test` (parameters from sliders) and
-`name_modulated_test` (a parameter modulated at every sample); see
-doc/docs/contributing.md, section "Constant, slider and modulated tests".
+`name_modulated_test` (a parameter modulated at every sample), and a
+recursive filter a fourth, `name_jump_test` (a parameter jumping between the
+two ends of its range); see doc/docs/contributing.md, section "Constant,
+slider, modulated and jump tests".
 
 inventory LIB
-    For every documented symbol of LIB, which of the three tests exist, in
+    For every documented symbol of LIB, which of the four tests exist, in
     the .lib and in tests/*.dsp. A test present on one side only breaks rule
     8; the inventory lists those first. Whether a function needs the slider
     and modulated variants is a judgement (its parameters must be meant to
@@ -195,7 +197,7 @@ def inventory(args):
     for b in blocks:
         for s in b.symbols:
             cells = []
-            for suffix in ("_test", "_slider_test", "_modulated_test"):
+            for suffix in ("_test", "_slider_test", "_modulated_test", "_jump_test"):
                 name = s + suffix
                 lib, dsp = name in lib_tests, name in in_dsp
                 cells.append("both" if lib and dsp else "lib" if lib else "dsp" if dsp else "-")
@@ -208,14 +210,15 @@ def inventory(args):
             print("  " + line)
         print()
     width = max(len(s) for _, s, _ in rows)
-    print(f"{'line':>5}  {'symbol':<{width}}  {'_test':>6}  {'_slider':>7}  {'_modulated':>10}")
-    for line, s, (t, sl, mo) in rows:
+    print(f"{'line':>5}  {'symbol':<{width}}  {'_test':>6}  {'_slider':>7}  {'_modulated':>10}  {'_jump':>5}")
+    for line, s, (t, sl, mo, ju) in rows:
+        # _jump_test is for recursive filters only: it does not make a symbol "missing"
         if args.missing and "-" not in (t, sl, mo):
             continue
-        print(f"{line:>5}  {s:<{width}}  {t:>6}  {sl:>7}  {mo:>10}")
-    counts = [sum(1 for _, _, c in rows if c[k] == "both") for k in range(3)]
+        print(f"{line:>5}  {s:<{width}}  {t:>6}  {sl:>7}  {mo:>10}  {ju:>5}")
+    counts = [sum(1 for _, _, c in rows if c[k] == "both") for k in range(4)]
     print(f"\n{len(rows)} symbols; in both places: {counts[0]} _test, {counts[1]} _slider_test, "
-          f"{counts[2]} _modulated_test; {len(one_side)} tests on one side only")
+          f"{counts[2]} _modulated_test, {counts[3]} _jump_test; {len(one_side)} tests on one side only")
     return 1 if one_side else 0
 
 
