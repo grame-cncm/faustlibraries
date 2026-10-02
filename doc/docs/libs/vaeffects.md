@@ -1130,7 +1130,8 @@ _ : wah4(fr) : _
 
 Where:
 
-* `fr`: resonance frequency in Hz
+* `fr`: resonance frequency in Hz, between 0 and SR/7.34 (about 6 kHz at
+  44.1 kHz). Above, or below 0, the filter is unstable.
 
 #### Test
 ```
@@ -1155,7 +1156,9 @@ wah4_modulated_test = no.noise : ve.wah4(200*pow(10, tri)) with { P = int(ma.SR/
 
 ### `(ve.)autowah`
 
-Auto-wah effect.
+Auto-wah effect: `crybaby` with its `wah` parameter driven by the
+input's amplitude envelope (`an.amp_follower`). Input peaks above 1
+hold the pedal fully forward (`crybaby` clamps `wah` to [0,1]).
 `autowah` is a standard Faust function.
 
 #### Usage
@@ -1172,11 +1175,13 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 autowah_test = os.tosc(220) : ve.autowah(0.7);
 autowah_slider_test = os.tosc(220)
   : ve.autowah(
       hslider("autowah:level", 0.7, 0, 1, 0.01)
     );
+autowah_hot_test = 4*no.noise : ve.autowah(1);
 ```
 
 ----
@@ -1194,7 +1199,9 @@ _ : crybaby(wah) : _
 
 Where:
 
-* `wah`: "pedal angle" from 0 to 1
+* `wah`: "pedal angle" from 0 to 1. Values outside are clamped to
+  this range: without the clamp, the poles leave the unit circle
+  above about 2.08 at 44.1 kHz (2.58 at 192 kHz).
 
 #### Test
 ```
@@ -1211,6 +1218,7 @@ crybaby_slider_test = os.tosc(220)
 crybaby_modulated_test = no.noise : ve.crybaby(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 crybaby_jump_test = no.noise : ve.crybaby(sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 crybaby_noise_test = no.noise : ve.crybaby(0);
+crybaby_clamp_test = no.noise <: ve.crybaby(-1), ve.crybaby(3);
 ```
 
 #### References
