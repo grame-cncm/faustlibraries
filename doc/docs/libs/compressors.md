@@ -989,7 +989,8 @@ Where:
 
 * `strength`: strength of the expansion (0 = no expansion, 100 means gating, <1 means upward compression)
 * `thresh`: dB level threshold below which expansion kicks in
-* `range`: maximum amount of expansion in dB
+* `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
+mean at most 20 dB of gain reduction (the sign is ignored)
 * `att`: attack time = time constant (sec) coming out of expansion
 * `hold` : hold time (sec)
 * `rel`: release time = time constant (sec) going into expansion
@@ -1007,7 +1008,9 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-peak_expansion_gain_N_chan_db_test = (os.tosc(220), os.tosc(330)) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0, 0.5, 2048, 2);
+ba = library("basics.lib");
+ma = library("maths.lib");
+peak_expansion_gain_N_chan_db_test = (os.tosc(220)*lv, os.tosc(330)*lv) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.02, 6, 0, 0.5, 2048, 2) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 ```
 
 ----
@@ -1028,7 +1031,8 @@ Where:
 * `maxHold`: the maximum hold time in samples, known at compile time
 * `strength`: strength of the expansion (0 = no expansion, 100 means gating, <1 means upward compression)
 * `thresh`: dB level threshold below which expansion kicks in
-* `range`: maximum amount of expansion in dB
+* `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
+mean at most 20 dB of gain reduction (the sign is ignored)
 * `attack`: attack time = time constant (sec) coming out of expansion
 * `hold`: hold time (sec)
 * `release`: release time = time constant (sec) going into expansion
@@ -1043,7 +1047,10 @@ this turns it from a linear return-to-zero detector into a log domain return-to-
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-peak_expansion_gain_mono_db_test = os.tosc(220) : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0);
+ba = library("basics.lib");
+ma = library("maths.lib");
+peak_expansion_gain_mono_db_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0.01, 0.02, 6, 0) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+peak_expansion_gain_mono_db_hardknee_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, 0.5, -40, -20, 0.05, 0.01, 0.02, 0, 0) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 ```
 
 ----
@@ -1063,7 +1070,8 @@ Where:
 
 * `strength`: strength of the expansion (0 = no expansion, 100 means gating, <1 means upward compression)
 * `thresh`: dB level threshold below which expansion kicks in
-* `range`: maximum amount of expansion in dB
+* `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
+mean at most 20 dB of gain reduction (the sign is ignored)
 * `att`: attack time = time constant (sec) coming out of expansion
 * `hold` : hold time
 * `rel`: release time = time constant (sec) going into expansion
@@ -1083,8 +1091,10 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 meter(x) = x;
-expander_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2);
+expander_N_chan_test = (os.tosc(220)*lv, os.tosc(330)*lv) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.02, 6, 0, 0.5, meter, 4096, 2) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 ```
 
 ----
@@ -1104,7 +1114,8 @@ Where:
 
 * `strength`: strength of the expansion (0 = no expansion, 100 means gating, <1 means upward compression)
 * `thresh`: dB level threshold below which expansion kicks in
-* `range`: maximum amount of expansion in dB
+* `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
+mean at most 20 dB of gain reduction (the sign is ignored)
 * `att`: attack time = time constant (sec) coming out of expansion
 * `hold` : hold time
 * `rel`: release time = time constant (sec) going into expansion
@@ -1127,9 +1138,11 @@ this turns it from a linear return-to-zero detector into a log  domain return-to
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 meter(x) = x;
 SCfunction(x) = x;
-expanderSC_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.tosc(880));
+expanderSC_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.02, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.tosc(880)*lv) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 ```
 
 ## Lookahead Limiters

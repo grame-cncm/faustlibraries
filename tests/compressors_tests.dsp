@@ -5,6 +5,8 @@
 
 co = library("compressors.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 
 meter(x) = x;
 meterLim(x) = x;
@@ -31,10 +33,11 @@ compressor_stereo_test = (os.tosc(440), os.tosc(660)) : co.compressor_stereo(4, 
 compression_gain_mono_test = os.tosc(440) : co.compression_gain_mono(4, -9, 0.01, 0.2);
 limiter_1176_R4_mono_test = os.tosc(440) : co.limiter_1176_R4_mono;
 limiter_1176_R4_stereo_test = (os.tosc(440), os.tosc(660)) : co.limiter_1176_R4_stereo;
-peak_expansion_gain_N_chan_db_test = (os.tosc(220), os.tosc(330)) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0, 0.5, 2048, 2);
-peak_expansion_gain_mono_db_test = os.tosc(220) : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0.01, 0.2, 6, 0);
-expander_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2);
-expanderSC_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.2, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.tosc(880));
+peak_expansion_gain_N_chan_db_test = (os.tosc(220)*lv, os.tosc(330)*lv) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.02, 6, 0, 0.5, 2048, 2) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+peak_expansion_gain_mono_db_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0.01, 0.02, 6, 0) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+peak_expansion_gain_mono_db_hardknee_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, 0.5, -40, -20, 0.05, 0.01, 0.02, 0, 0) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+expander_N_chan_test = (os.tosc(220)*lv, os.tosc(330)*lv) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.02, 6, 0, 0.5, meter, 4096, 2) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+expanderSC_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.02, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.tosc(880)*lv) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 limiter_lad_N_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
 limiter_lad_mono_test = os.tosc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
 limiter_lad_stereo_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
