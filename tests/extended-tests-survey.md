@@ -59,6 +59,8 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 
 ## 3. Tooling and rule 8
 
+**Fixed** in ab3dec00 (the cut doc blocks, all twelve of them, the genericNode tests and the stray section) and 1b3ba475 (`lib_tests.py inventory`: titles without prefix, generic `[N]` symbols, alias-prefixed and disabled tests). The JSON export leaves out tubes.lib, tonestacks.lib, instruments.lib and maxmsp.lib by design: it follows the libraries that stdfaust.lib imports, which these are not.
+
 - **Doc blocks cut by an empty line that is not a comment.** The Test section, and possibly the Usage section, becomes invisible to `lib_tests.py`, to the documentation and to the JSON export (rule 7). Affected:
   - `de.delay`;
   - `ef.speakerbp`, `ef.echo`, `ef.tapeStop`, `ef.transpose`;
