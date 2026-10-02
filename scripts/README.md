@@ -180,9 +180,11 @@ it is.
   nothing else: on AC power, with no build, test suite (`make check`,
   `check-precision`) or other heavy job in parallel. The tool cannot make a
   timing on a loaded machine reliable. It only reports what it sees:
-  - **The load average** is printed with the identity lines, before and after
-    the timing, with a warning when it exceeds the number of performance
-    cores. It is information, not a guarantee: a one-minute average misses a
+  - **The load average** is printed with the identity lines, with a warning
+    when, at the start, it exceeds the number of performance cores. It is also
+    recorded before and after the timing, without a warning: those one-minute
+    averages still hold the run's own parallel builds (a run of 756 builds
+    showed 34 just before timing). It is information, not a guarantee: a one-minute average misses a
     burst of a few seconds, and on Apple Silicon a load on the efficiency
     cores does not disturb a test timed on a performance core.
   - **A ratio whose spread is still above 20% after the re-race** was timed

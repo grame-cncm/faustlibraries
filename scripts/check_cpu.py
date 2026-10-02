@@ -22,8 +22,10 @@ minimum over repetitions. On top of it, this script:
 - builds in parallel but times strictly one binary at a time;
 - refuses to time on battery power (macOS: pmset), since frequency scaling
   biases even ratios measured side by side (--allow-battery overrides it);
-- prints the load average with the identity lines, before and after the
-  timing, and warns when it exceeds the number of performance cores. It is
+- prints the load average with the identity lines, and warns when, at the
+  start, it exceeds the number of performance cores; it also records it
+  before and after the timing, without a warning, since those averages
+  still hold the builds of the run itself. It is
   information, not a guarantee: a one-minute average does not see a burst of
   a few seconds, and on Apple Silicon a load on the efficiency cores does not
   disturb a test that runs on a performance core. The measurements are meant
@@ -405,6 +407,13 @@ def load_text(load):
     return "unknown" if load is None else f"{load[0]:.2f} {load[1]:.2f} {load[2]:.2f} (1, 5, 15 min)"
 
 
+def short_error(text, limit=400):
+    """An error message cut to its first lines: faust can print a whole signal
+    expression, megabytes long, in a single error."""
+    text = text.strip()
+    return text if len(text) <= limit else text[:limit] + f"... ({len(text)} characters)"
+
+
 def check_load(when):
     """Print a warning when the 1-minute load exceeds the performance cores."""
     load, cores = load_average(), performance_cores()
@@ -575,7 +584,7 @@ def main():
             except Exception as e:  # report it, keep going
                 exe, err = None, repr(e)
             if err:
-                results[(name, cfg.name)][side.label] = {"error": err}
+                results[(name, cfg.name)][side.label] = {"error": short_error(err)}
             else:
                 exes[(name, cfg.name, side.label)] = exe
     # With --changed-only, a test whose two sides generate the same code is
@@ -595,7 +604,10 @@ def main():
     print(f"[cpu] {len(specs)} tests x {len(configs)} compilations built in "
           f"{time.time() - t0:.0f} s; timing {args.rounds} rounds", flush=True)
     time.sleep(4)  # thermal pause after the build burst
-    ident["load before timing"] = load_text(check_load("before timing"))
+    # Information only: a one-minute average taken now still holds the builds
+    # this run has just made in parallel, so it would always warn after a large
+    # build. Only the load at the start reflects another job.
+    ident["load before timing"] = load_text(load_average())
 
     # 2. Time them, one binary at a time, one test after the other: all the
     #    rounds of a test, then the next test, so that whatever has been
@@ -666,7 +678,7 @@ def main():
                                 continue
                             res, err = run_once(exes[key], args)
                             if err:
-                                results[(name, cfg.name)][side.label] = {"error": f"run: {err}"}
+                                results[(name, cfg.name)][side.label] = {"error": short_error(f"run: {err}")}
                                 del exes[key]
                                 continue
                             times[side.label].append(res[0])
@@ -730,7 +742,7 @@ def main():
         if same:
             line += f"; {same} more generate the same code on both sides (not timed)"
         summaries.append(line)
-    ident["load after timing"] = load_text(check_load("after timing"))
+    ident["load after timing"] = load_text(load_average())
     write_json(not interrupted)
     print(f"\n[cpu] {'interrupted' if interrupted else 'done'} after {time.time() - t0:.0f} s; "
           f"load {ident['load before timing'] if 'load before timing' in ident else '?'} before "
