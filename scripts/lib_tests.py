@@ -403,7 +403,11 @@ def add(args):
                     flines.pop()
                 flines += block + [""]
             else:
-                flines[anchor + 1:anchor + 1] = block
+                # After the end of that test, which may span several lines.
+                end = anchor
+                while end + 1 < len(flines) and not flines[end].split("//")[0].rstrip().endswith(";"):
+                    end += 1
+                flines[end + 1:end + 1] = block
             for env in sorted(envs_used(" ".join(block))):
                 if env not in imports and env in spec_imports:
                     last_import = max([k for k, l in enumerate(flines) if IMPORT_RE.match(l)],
