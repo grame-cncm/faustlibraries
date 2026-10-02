@@ -12,10 +12,12 @@ ma = library("maths.lib");
 src = os.tosc(440);
 
 bandpass6e_test = src : fi.bandpass6e(500, 1500);
+bandpass6e_zero_freq_test = no.noise : fi.bandpass6e(1000*max(0, 1 - ba.time/12000) + 1000*(ba.time >= 24000), 2000);
 bandpass6e_slider_test = no.noise : fi.bandpass6e(hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
 bandpass6e_modulated_test = no.noise : fi.bandpass6e(fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 bandpass6e_jump_test = no.noise : fi.bandpass6e(fl, 3*fl) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fl = 20*pow(250, sq); };
 bandpass12e_test = src : fi.bandpass12e(500, 1500);
+bandpass12e_zero_freq_test = no.noise : fi.bandpass12e(1000*max(0, 1 - ba.time/12000) + 1000*(ba.time >= 24000), 2000);
 bandpass12e_slider_test = no.noise : fi.bandpass12e(hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
 bandpass12e_modulated_test = no.noise : fi.bandpass12e(fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 bandpass12e_jump_test = no.noise : fi.bandpass12e(fl, 3*fl) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fl = 20*pow(250, sq); };

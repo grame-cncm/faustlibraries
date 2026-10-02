@@ -5,6 +5,7 @@
 
 fi = library("filters.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
@@ -14,6 +15,7 @@ sig = os.tosc(440);
 svf_lp_test = fi.svf.lp(1000, 0.707, sig);
 svf_lp_lowfc_test = no.noise : fi.svf.lp(5, 10);
 svf_bp_lowfc_test = no.noise : fi.svf.bp(20, 30);
+svf_nyquist_test = no.noise : fi.svf.lp(0.6*ma.SR, 1);
 svf_bp_test = fi.svf.bp(1000, 0.707, sig);
 svf_hp_test = fi.svf.hp(1000, 0.707, sig);
 svf_notch_test = fi.svf.notch(1000, 0.707, sig);

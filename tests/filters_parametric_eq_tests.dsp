@@ -54,6 +54,7 @@ highshelf_other_freq_modulated_test = fi.highshelf_other_freq(3, 6, 20*pow(250, 
 highshelf_other_freq_jump_test = fi.highshelf_other_freq(3, 6, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 
 peak_eq_test = src : fi.peak_eq(6, 1000, 200);
+peak_eq_zero_freq_test = no.noise : fi.peak_eq(6, 1000*max(0, 1 - ba.time/12000) + 1000*(ba.time >= 24000), 100);
 peak_eq_slider_test = no.noise : fi.peak_eq(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), hslider("B", 200, 1, 5000, 1));
 peak_eq_modulated_test = no.noise : fi.peak_eq(6, fx, fx/5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = 20*pow(250, tri); };
 peak_eq_jump_test = no.noise : fi.peak_eq(6, fx, fx/5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250, sq); };
