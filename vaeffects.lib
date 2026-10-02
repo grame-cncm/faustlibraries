@@ -73,11 +73,16 @@ Michon and Julius O. Smith III, and are released under the
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
+// ma = library("maths.lib");
+// ba = library("basics.lib");
+// no = library("noises.lib");
 // moog_vcf_test = os.tosc(440)
 //   : ve.moog_vcf(
 //       hslider("moog_vcf:res", 0.5, 0, 1, 0.01),
 //       hslider("moog_vcf:freq", 1000, 50, 4000, 1)
 //     );
+// moog_vcf_modulated_test = no.noise : ve.moog_vcf(0.9, 50*pow(100, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// moog_vcf_jump_test = no.noise : ve.moog_vcf(0.9, 50*pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //
 // #### References
@@ -88,10 +93,14 @@ Michon and Julius O. Smith III, and are released under the
 declare moog_vcf author "Julius O. Smith III";
 declare moog_vcf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare moog_vcf license "LicenseRef-STK-4.3";
-moog_vcf(res,fr) = (+ : seq(i,4,fi.pole(p)) : *(unitygain(p))) ~ *(mk)
+moog_vcf(res,fr) = (+ : seq(i,4, *(1.0-p) : fi.pole(p))) ~ *(mk)
 with {
      p = 1.0 - fr * 2.0 * ma.PI / ma.SR; // good approximation for fr << SR
-     unitygain(p) = pow(1.0-p,4.0); // one-pole unity-gain scaling
+     // one-pole unity-gain scaling, (1-p) at the input of each pole rather than
+     // (1-p)^4 after the four: the same filter for a fixed fr, but the states
+     // stay at the level of the signal. With the gain at the output they grew
+     // as 1/(1-p)^4 (about 1e9 at 50 Hz), and a jump of fr to a higher value
+     // multiplied them by the new, larger gain: an output of 1e6 on noise.
      mk = -4.0*max(0,min(res,0.999999)); // need mk > -4 for stability
 };
 

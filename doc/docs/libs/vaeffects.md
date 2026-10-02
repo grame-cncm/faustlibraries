@@ -51,11 +51,16 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
+ba = library("basics.lib");
+no = library("noises.lib");
 moog_vcf_test = os.tosc(440)
   : ve.moog_vcf(
       hslider("moog_vcf:res", 0.5, 0, 1, 0.01),
       hslider("moog_vcf:freq", 1000, 50, 4000, 1)
     );
+moog_vcf_modulated_test = no.noise : ve.moog_vcf(0.9, 50*pow(100, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+moog_vcf_jump_test = no.noise : ve.moog_vcf(0.9, 50*pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
