@@ -1,5 +1,7 @@
 si = library("signals.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 
 bus_test = (
     hslider("bus:x0", 0.25, -1, 1, 0.01),
@@ -38,6 +40,8 @@ dot_test = (
 smooth_test = hslider("smooth:input", 0.5, -1, 1, 0.01) : si.smooth(0.9);
 
 smoothq_test = hslider("smoothq:input", 0.5, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+smoothq_linear_test = select2(ba.period(2*P) < P, -1, 1) : si.smoothq(0.25, 1)
+with { P = int(ma.SR/4); };
 
 cbus_test = (
     os.tosc(100), os.tosc(150),

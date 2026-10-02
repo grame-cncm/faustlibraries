@@ -399,7 +399,11 @@ smooth = imp(0) with {
 // #### Test
 // ```
 // si = library("signals.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // smoothq_test = hslider("smoothq:input", 0.5, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+// smoothq_linear_test = select2(ba.period(2*P) < P, -1, 1) : si.smoothq(0.25, 1)
+// with { P = int(ma.SR/4); };
 // ```
 //-----------------------------------------------------------------------------
 declare smoothq author "Andrew John March";
@@ -408,24 +412,38 @@ declare smoothq licence "LicenseRef-STK-4.3";
 smoothq(time, q, tar) = envelope 
     with {
         ratio = pow(q, 5) * 32 : max(0.001);
-        coef = (ratio / (1 + ratio))^(1 / (ma.SR * time));
+        // om = 1 - coef, with coef = (ratio / (1 + ratio))^(1 / (ma.SR * time)).
+        // For long times, coef is a few ulps below 1 in single precision: at
+        // time = 1 s and 192 kHz, 1 - coef is off by 11% once coef is
+        // rounded, and the ramp is that much too fast. om is computed
+        // directly, and coef itself is never formed.
+        om = 0 - em1(log(ratio / (1 + ratio)) / (ma.SR * time));
+        // exp(x) - 1 for x <= 0: its Taylor series near 0 (truncation below
+        // 2e-10 relative), where exp(x) - 1 would cancel. Kahan's
+        // (u - 1) * x / log(u) does not survive the Faust normalizer, which
+        // simplifies log(exp(x)) to x.
+        em1(x) = select2(x > -0.1, exp(x) - 1,
+                         x * (1 + x/2 * (1 + x/3 * (1 + x/4 * (1 + x/5 * (1 + x/6))))));
         fb(cBase, cTar, cSrc, cDistance, cDir, cY, cOut) = base, tar, src, distance, dir, y, out
             with {
                 trig = cTar != tar;
                 src = select2(trig, cSrc, cOut);
                 dir = select2(trig, cDir, tar > src);
                 base = select2(trig, cBase, select2(dir,
-                    (0.0 - ratio) * (1.0 - coef),
-                    (1.0 + ratio) * (1.0 - coef)
+                    (0.0 - ratio) * om,
+                    (1.0 + ratio) * om
                 ));
                 distance = select2(trig, cDistance, abs(tar - src));
+                // base + cY * coef, without rounding coef. Written so that the
+                // Faust normalizer does not fold it back into base + (1 - om) * cY.
+                step = cY - (cY * om - base);
                 y = select2(dir,
                     select2(trig, 
-                        max( 0, base + cY * coef),
+                        max(0, step),
                         1
                     ),
                     select2(trig,
-                        min( 1, base + cY * coef),
+                        min(1, step),
                         0
                     )
                 );

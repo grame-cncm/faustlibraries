@@ -322,7 +322,11 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 smoothq_test = hslider("smoothq:input", 0.5, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+smoothq_linear_test = select2(ba.period(2*P) < P, -1, 1) : si.smoothq(0.25, 1)
+with { P = int(ma.SR/4); };
 ```
 
 ----
