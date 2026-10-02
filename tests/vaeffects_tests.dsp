@@ -232,6 +232,7 @@ autowah_slider_test = os.tosc(220)
   : ve.autowah(
       hslider("autowah:level", 0.7, 0, 1, 0.01)
     );
+autowah_hot_test = 4*no.noise : ve.autowah(1);
 
 crybaby_test = os.tosc(220) : ve.crybaby(0.3);
 crybaby_slider_test = os.tosc(220)
@@ -241,6 +242,7 @@ crybaby_slider_test = os.tosc(220)
 crybaby_modulated_test = no.noise : ve.crybaby(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 crybaby_jump_test = no.noise : ve.crybaby(sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 crybaby_noise_test = no.noise : ve.crybaby(0);
+crybaby_clamp_test = no.noise <: ve.crybaby(-1), ve.crybaby(3);
 
 vocoder_test = (no.noise, os.tosc(220)) : ve.vocoder(8, 0.01, 0.1, 1.0);
 vocoder_slider_test = (no.noise, os.tosc(220))
