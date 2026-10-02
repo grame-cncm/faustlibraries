@@ -33,7 +33,7 @@ sp = library("spats.lib");
 aa = library("aanl.lib");
 
 declare name "Faust Reverb Library";
-declare version "1.5.4";
+declare version "1.5.5";
 
 //########################################################################################
 /************************************************************************
@@ -167,13 +167,22 @@ satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
 //
 // * `N`: the number of delay lines, 2, 4, 8, ...  (power of 2)
 // * `MAXDELAY`: power of 2 at least as large as longest delay-line length
-// * `delays`: N delay lines, N a power of 2, lengths preferably coprime
+// * `delays`: N delay lines, N a power of 2, lengths (in samples, at least 2) preferably coprime
 // * `BBSO`: odd positive integer = order of bandsplit desired at freqs
 // * `freqs`: NB-1 crossover frequencies separating desired frequency bands, in increasing order
 // * `durs`: NB decay times (t60) desired for the various bands, highest band first
 //   (the order of the `fi.filterbank` outputs, i.e., the reverse of `freqs`)
 // * `loopgainmax`: scalar gain between 0 and 1 used to "squelch" the reverb
-// * `nonl`: nonlinearity (0 to 0.999..., 0 being linear)
+// * `nonl`: nonlinearity, between -1 and 1 exclusive (0 is linear): the input of each
+//   delay line goes through `fi.apnl(nonl,-nonl)`, a lossless first-order allpass whose
+//   coefficient switches between `nonl` and `-nonl` with the sign of its state
+//   (Pierce and Van Duyne's switching spring). The network stays passive, but the
+//   switching couples its modes and moves energy across frequency: the tail gets
+//   brighter and the band decay times somewhat shorter. The switching being
+//   asymmetric, part of the energy goes to DC, which stays in the loop and is
+//   removed at the outputs by a 5 Hz DC blocker. With `nonl = 0`, `fi.apnl` is
+//   exactly a unit delay, which the delay lines absorb, and the DC blocker is
+//   bypassed, so that the output is that of the linear network, sample for sample
 //
 // #### Example
 //
@@ -193,15 +202,24 @@ satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
 // fdnrev0_slider_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (hslider("fdnrev0:f1", 800, 50, 5000, 1), hslider("fdnrev0:f2", 4000, 100, 10000, 1)), (hslider("fdnrev0:t60high", 1.5, 0.1, 10, 0.01), hslider("fdnrev0:t60mid", 2.0, 0.1, 10, 0.01), hslider("fdnrev0:t60low", 2.5, 0.1, 10, 0.01)), hslider("fdnrev0:loopgainmax", 0.8, 0, 1, 0.01), hslider("fdnrev0:nonl", 0.0, 0, 0.999, 0.001));
 // fdnrev0_modulated_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, tri), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // fdnrev0_jump_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, sq), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// fdnrev0_nonl_test = no.multinoise(4)
+//   : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.2);
+// fdnrev0_nonl_slider_test = no.multinoise(4)
+//   : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, hslider("fdnrev0:nonl", 0.2, -0.999, 0.999, 0.001));
+// fdnrev0_nonl_modulated_test = no.multinoise(4)
+//   : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.4*tri - 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // ```
 //
 // #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html>
+// * "Nonlinear Allpass Ladder Filters in FAUST" by Julius O. Smith and Romain Michon,
+//   Proc. DAFx-11, Paris, 2011 (section 4.3, nonlinear FDN)
 //------------------------------------------------------------
 fdnrev0(MAXDELAY, delays, BBSO, freqs, durs, loopgainmax, nonl)
-  = (si.bus(2*N) :> si.bus(N) : delaylines(N)) ~
-    (delayfilters(N,freqs,durs) : feedbackmatrix(N))
+  = ((si.bus(2*N) :> si.bus(N) : par(i,N,nonlinallpass) : delaylines(N)) ~
+     (delayfilters(N,freqs,durs) : feedbackmatrix(N)))
+  : par(i,N,dcblock)
 with {
   N = ba.count(delays);
   NB = ba.count(durs);
@@ -210,22 +228,26 @@ with {
   dlmax(i) = MAXDELAY; // must hardwire this from argument for now
 //dlmax(i) = 2^max(1,nextpow2(delayval(i))) // try when slider min/max is known
 //           with { nextpow2(x) = ceil(log(x)/log(2.0)); };
-// -1 is for feedback delay:
-  delaylines(N) = par(i,N,(de.delay(dlmax(i),(delayval(i)-1))));
+// -2: one sample is the feedback delay of ~, one is nonlinallpass,
+// which is exactly a unit delay when nonl = 0:
+  delaylines(N) = par(i,N,(de.delay(dlmax(i),(delayval(i)-2))));
   delayfilters(N,freqs,durs) = par(i,N,filter(i,freqs,durs));
   feedbackmatrix(N) = bhadamard(N);
   bhadamard(2) = si.bus(2) <: +,-;
   bhadamard(n) = si.bus(n) <: (si.bus(n):>si.bus(n/2)) , ((si.bus(n/2),(si.bus(n/2):par(i,n/2,*(-1)))) :> si.bus(n/2))
                  : (bhadamard(n/2) , bhadamard(n/2));
 
-  // Experimental nonlinearities:
-  // nonlinallpass = apnl(nonl,-nonl);
-  // s = nonl*PI;
-  // nonlinallpass(x) = allpassnn(3,(s*x,s*x*x,s*x*x*x)); // filters.lib
-     nonlinallpass = _; // disabled by default (rather expensive)
+  // Passive nonlinear allpass at the input of each delay line, lossless at
+  // every sample; fi.apnl(0,-0) is exactly z^(-1), absorbed by the delay lines.
+  nonlinallpass = fi.apnl(nonl,-nonl);
+  // Its asymmetric switching rectifies. The DC it produces stays in the loop
+  // (a DC blocker there would drain the energy that the switching keeps
+  // sending to DC, a decay that depends on nonl and SR, not on durs), and is
+  // removed at the outputs when nonl != 0:
+  dcblock(x) = select2(nonl != 0, x, x : fi.dcblockerat(5));
 
   filter(i,freqs,durs) = fi.filterbank(BBSO,freqs) : par(j,NB,*(g(j,i)))
-                         :> *(loopgainmax) / sqrt(N) : nonlinallpass
+                         :> *(loopgainmax) / sqrt(N)
   with {
     dur(j) = ba.take(j+1,durs);
     n60(j) = dur(j)*ma.SR; // decay time in samples

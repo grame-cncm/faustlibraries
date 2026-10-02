@@ -11,6 +11,12 @@ fdnrev0_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550))
 fdnrev0_slider_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (hslider("fdnrev0:f1", 800, 50, 5000, 1), hslider("fdnrev0:f2", 4000, 100, 10000, 1)), (hslider("fdnrev0:t60high", 1.5, 0.1, 10, 0.01), hslider("fdnrev0:t60mid", 2.0, 0.1, 10, 0.01), hslider("fdnrev0:t60low", 2.5, 0.1, 10, 0.01)), hslider("fdnrev0:loopgainmax", 0.8, 0, 1, 0.01), hslider("fdnrev0:nonl", 0.0, 0, 0.999, 0.001));
 fdnrev0_modulated_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, tri), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fdnrev0_jump_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, sq), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+fdnrev0_nonl_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.2);
+fdnrev0_nonl_slider_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, hslider("fdnrev0:nonl", 0.2, -0.999, 0.999, 0.001));
+fdnrev0_nonl_modulated_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.4*tri - 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 zita_rev_fdn_test = par(i, 8, os.tosc(110 * (i + 1)))
   <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 192000);
 zita_rev_fdn_slider_test = par(i, 8, os.tosc(110 * (i + 1))) <: re.zita_rev_fdn(hslider("zita_rev_fdn:f1", 200, 50, 1000, 1), hslider("zita_rev_fdn:f2", 2000, 1500, 20000, 1), hslider("zita_rev_fdn:t60dc", 3.0, 1, 8, 0.1), hslider("zita_rev_fdn:t60m", 2.0, 1, 8, 0.1), 192000);

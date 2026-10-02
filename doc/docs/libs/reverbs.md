@@ -109,13 +109,22 @@ Where:
 
 * `N`: the number of delay lines, 2, 4, 8, ...  (power of 2)
 * `MAXDELAY`: power of 2 at least as large as longest delay-line length
-* `delays`: N delay lines, N a power of 2, lengths preferably coprime
+* `delays`: N delay lines, N a power of 2, lengths (in samples, at least 2) preferably coprime
 * `BBSO`: odd positive integer = order of bandsplit desired at freqs
 * `freqs`: NB-1 crossover frequencies separating desired frequency bands, in increasing order
 * `durs`: NB decay times (t60) desired for the various bands, highest band first
   (the order of the `fi.filterbank` outputs, i.e., the reverse of `freqs`)
 * `loopgainmax`: scalar gain between 0 and 1 used to "squelch" the reverb
-* `nonl`: nonlinearity (0 to 0.999..., 0 being linear)
+* `nonl`: nonlinearity, between -1 and 1 exclusive (0 is linear): the input of each
+  delay line goes through `fi.apnl(nonl,-nonl)`, a lossless first-order allpass whose
+  coefficient switches between `nonl` and `-nonl` with the sign of its state
+  (Pierce and Van Duyne's switching spring). The network stays passive, but the
+  switching couples its modes and moves energy across frequency: the tail gets
+  brighter and the band decay times somewhat shorter. The switching being
+  asymmetric, part of the energy goes to DC, which stays in the loop and is
+  removed at the outputs by a 5 Hz DC blocker. With `nonl = 0`, `fi.apnl` is
+  exactly a unit delay, which the delay lines absorb, and the DC blocker is
+  bypassed, so that the output is that of the linear network, sample for sample
 
 #### Example
 
@@ -135,11 +144,19 @@ fdnrev0_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550))
 fdnrev0_slider_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (hslider("fdnrev0:f1", 800, 50, 5000, 1), hslider("fdnrev0:f2", 4000, 100, 10000, 1)), (hslider("fdnrev0:t60high", 1.5, 0.1, 10, 0.01), hslider("fdnrev0:t60mid", 2.0, 0.1, 10, 0.01), hslider("fdnrev0:t60low", 2.5, 0.1, 10, 0.01)), hslider("fdnrev0:loopgainmax", 0.8, 0, 1, 0.01), hslider("fdnrev0:nonl", 0.0, 0, 0.999, 0.001));
 fdnrev0_modulated_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, tri), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fdnrev0_jump_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, sq), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+fdnrev0_nonl_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.2);
+fdnrev0_nonl_slider_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, hslider("fdnrev0:nonl", 0.2, -0.999, 0.999, 0.001));
+fdnrev0_nonl_modulated_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.4*tri - 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
 
 * [https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html](https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html)
+* "Nonlinear Allpass Ladder Filters in FAUST" by Julius O. Smith and Romain Michon,
+  Proc. DAFx-11, Paris, 2011 (section 4.3, nonlinear FDN)
 
 ----
 
