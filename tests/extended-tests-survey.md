@@ -78,7 +78,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 
 ### 4.1 Likely to pass now (high value)
 
-**vaeffects.lib**: TPT and ladder filters, modulated and jump tests.
+**vaeffects.lib**: TPT and ladder filters, modulated and jump tests. **Done** (f1629aa8, and the commit after it): 12 modulated and 12 jump tests, and every `_test` that took sliders split into a constant `_test` and a `_slider_test`. The jump test found a real bug, fixed in f1629aa8: `ve.moog_vcf` output 2.6e6 after a jump of its frequency.
 - `moogLadder`, `moogHalfLadder`, `diodeLadder`, `korg35LPF`/`HPF`, `oberheim`, `sallenKeyOnePole`, `sallenKey2ndOrder`: normFreq `0.8*tri` (20 Hz–5 kHz), Q high (about 20, or 9.5 for korg35).
 - `lowpassLadder4`: CF exp 20..5000, k = 3.9.
 - `moog_vcf`: fr exp 50..5000, res 0.9.
@@ -297,6 +297,8 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `no`, `ba`,
 | `lowshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
 | `highshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
 | `moog_vcf_2b_jump_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | 0.27 | a TPT `tf2s` (#273) |
+| `moog_vcf_2b_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | 2.1e-3 | a TPT `tf2s` (#273) |
+| `bandpass2Matched_slider_test`, `autowah_slider_test`, `crybaby_slider_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | the debt of their `_test` (non-finite at 176.4 kHz, 2.3e-3, 3.1e-2) | #271, #270 |
 | `modeFilter_jump_test` | `physmodels.lib`, `physmodels_tests.dsp` | 0.12 | #269 (modeFilter as a Chamberlin state-variable section) |
 | `oscq_modulated_test` | `oscillators.lib`, `oscillators_tests.dsp` | 8.9e-3 | a better `fi.wgr` (with `wgr_jump_test`) |
 | `goertzel_slider_test` | `analyzers.lib`, `analyzers_tests.dsp` | 1.3e-3 | a Goertzel recursion accurate in float at low frequency, or a smaller n |
@@ -311,10 +313,17 @@ peaking2Matched_modulated_test = no.noise : ve.peaking2Matched(2, 20*pow(250, tr
 lowshelf2Matched_modulated_test = no.noise : ve.lowshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 highshelf2Matched_modulated_test = no.noise : ve.highshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 moog_vcf_2b_jump_test = no.noise : ve.moog_vcf_2b(0.95, 20*pow(500, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+moog_vcf_2b_modulated_test = no.noise : ve.moog_vcf_2b(0.95, 20*pow(500, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 modeFilter_jump_test = 0.01*no.noise : pm.modeFilter(50*pow(100, sq), 1, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 oscq_modulated_test = os.oscq(20*pow(500, tri)) : _, ! with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 goertzel_slider_test = an.goertzel(hslider("freq", 50, 20, 1000, 1), 4096, no.noise);
 ```
+
+`bandpass2Matched_test`, `autowah_test` and `crybaby_test` still take their
+parameters from sliders: their split into a constant `_test` and a
+`_slider_test`, as for the other functions of `vaeffects.lib`, waits for the
+same fixes, since both versions carry the debt of the function and a new
+baseline entry is not allowed.
 
 The PR numbers are open PRs that rewrite these structures. Whether a
 given PR makes its test pass is to be checked when it lands, by running
