@@ -176,6 +176,26 @@ it is.
   1.27). The `spread` column, (max - min) / min over the rounds, is the noise a
   ratio is to be read against; a test whose spread exceeds 5% is re-raced once
   with as many rounds again (marked `*`), as `fcautotool` does.
+- **An idle machine.** The measurements are meant for a machine that does
+  nothing else: on AC power, with no build, test suite (`make check`,
+  `check-precision`) or other heavy job in parallel. The tool cannot make a
+  timing on a loaded machine reliable. It only reports what it sees:
+  - **The load average** is printed with the identity lines, before and after
+    the timing, with a warning when it exceeds the number of performance
+    cores. It is information, not a guarantee: a one-minute average misses a
+    burst of a few seconds, and on Apple Silicon a load on the efficiency
+    cores does not disturb a test timed on a performance core.
+  - **A ratio whose spread is still above 20% after the re-race** was timed
+    while the machine was disturbed. It is marked `?`, left out of the summary
+    line, and listed at the end, to be measured again (with `-k`). In two
+    full runs of the suite (848 ratios), this flagged 6. Among them were the
+    only two ratios that differed between the runs by more than 9%: a
+    `lowshelf_modulated_test` timed at 0.81 in one run and at 1.04 in the
+    other, while a few seconds of another load tripled its rounds.
+  - **Two runs agree.** Between two full runs on an idle machine, the median
+    change of a ratio was 0.2% to 0.5%, and 90% of them moved by less than
+    2.5%. A ratio quoted in a pull request comes from a run where it is not
+    marked `?`, and preferably from two runs that agree.
 - **The noise floor**, measured by A/A comparisons (the same libraries on both
   sides) of 61 tests spread over the suite: ratios from 0.98 to 1.02 on a quiet
   machine, 0.96 to 1.04 on a busy one. Read a ratio within 3%, or within its

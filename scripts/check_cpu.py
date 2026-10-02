@@ -22,12 +22,20 @@ minimum over repetitions. On top of it, this script:
 - builds in parallel but times strictly one binary at a time;
 - refuses to time on battery power (macOS: pmset), since frequency scaling
   biases even ratios measured side by side (--allow-battery overrides it);
+- prints the load average with the identity lines, before and after the
+  timing, and warns when it exceeds the number of performance cores. It is
+  information, not a guarantee: a one-minute average does not see a burst of
+  a few seconds, and on Apple Silicon a load on the efficiency cores does not
+  disturb a test that runs on a performance core. The measurements are meant
+  for an idle machine: no build, test suite or other heavy job in parallel;
 - pauses after the builds, then times the tests one after the other, each
   over --rounds rounds in which the two sides run back to back, in an order
   that alternates from one round to the next; each side keeps the median of
   its rounds (each round being the minimum of one run), and the spread of the rounds, (max - min) / min, is reported so that a
   ratio can be read against the noise; a test whose spread exceeds 5% is
-  re-raced once with as many rounds again, as fcautotool does;
+  re-raced once with as many rounds again, as fcautotool does; a test whose
+  spread still exceeds 20% after that was disturbed: its ratio is marked `?`,
+  left out of the summary and listed at the end, to be measured again;
 - gives no ratio for a test that computes nothing per sample (below 0.1
   ns/frame on both sides: a constant output), whose ratio is noise;
 - prints its progress every 30 s (and updates the --json file then); an
@@ -94,6 +102,13 @@ FLASH_ENV = {"FLASH_REPS": "10", "FLASH_BLOCKS": "100", "FLASH_WARM": "120"}
 # A test whose rounds spread more than this on one side is re-raced once, with
 # as many rounds again: a spike in one round should not decide its minimum.
 RERACE_SPREAD = 0.05
+# A test whose spread is still above this after the re-race was measured while
+# the machine was disturbed (a few seconds of another load can triple a round):
+# its ratio is marked unreliable, left out of the summary, and listed to be
+# measured again. Over two full runs of the suite (848 ratios), it flagged 6:
+# the only two ratios that differed between the runs by more than 9% (by 19%
+# and 29%), and 4 that happened to agree.
+UNRELIABLE_SPREAD = 0.20
 # Below this time per frame a test computes nothing per sample (its output is a
 # constant computed at init): its ratio is noise and is not reported.
 TRIVIAL_NS = 0.1
@@ -366,6 +381,40 @@ def on_battery():
     return "Battery Power" in out
 
 
+def performance_cores():
+    """Performance cores (macOS: hw.perflevel0), else all the cores; None if unknown."""
+    if platform.system() == "Darwin":
+        try:
+            n = int(first_line(["sysctl", "-n", "hw.perflevel0.logicalcpu"]))
+            if n > 0:
+                return n
+        except ValueError:
+            pass
+    return os.cpu_count()
+
+
+def load_average():
+    """The 1, 5 and 15 minute load averages, or None where there are none."""
+    try:
+        return os.getloadavg()
+    except (OSError, AttributeError):
+        return None
+
+
+def load_text(load):
+    return "unknown" if load is None else f"{load[0]:.2f} {load[1]:.2f} {load[2]:.2f} (1, 5, 15 min)"
+
+
+def check_load(when):
+    """Print a warning when the 1-minute load exceeds the performance cores."""
+    load, cores = load_average(), performance_cores()
+    if load is not None and cores and load[0] > cores:
+        print(f"[cpu] warning: load average {load[0]:.2f} {when}, above the {cores} "
+              "performance cores: the machine is not idle, and the times are biased; "
+              "read the spread column, and measure again on an idle machine", flush=True)
+    return load
+
+
 def first_line(cmd):
     """First line of a command's output (a --version), or "?"."""
     try:
@@ -387,7 +436,9 @@ def identity(args, sides, configs):
     else:
         cpu = platform.processor() or platform.machine()
     return {
-        "machine": f"{cpu}, {platform.system()} {platform.release()}",
+        "machine": f"{cpu}, {platform.system()} {platform.release()}, "
+                   f"{os.cpu_count()} cores of which {performance_cores()} performance",
+        "load": load_text(load_average()),
         "faust": f"{shutil.which(args.faust) or args.faust} ({first_line([args.faust, '--version'])})",
         "cxx": f"{shutil.which(args.cxx) or args.cxx} ({first_line([args.cxx, '--version'])})",
         "compilations": {c.name: c.describe(args.double) for c in configs},
@@ -495,6 +546,7 @@ def main():
                 print(f"[cpu] {k}: {v}")
         else:
             print(f"[cpu] {key}: {value}")
+    check_load("at the start")
     # Checked before building, so that a refused run costs nothing.
     if on_battery() and not args.allow_battery:
         sys.exit("[cpu] refused: on battery power (pmset); plug in, or --allow-battery "
@@ -543,6 +595,7 @@ def main():
     print(f"[cpu] {len(specs)} tests x {len(configs)} compilations built in "
           f"{time.time() - t0:.0f} s; timing {args.rounds} rounds", flush=True)
     time.sleep(4)  # thermal pause after the build burst
+    ident["load before timing"] = load_text(check_load("before timing"))
 
     # 2. Time them, one binary at a time, one test after the other: all the
     #    rounds of a test, then the next test, so that whatever has been
@@ -574,6 +627,8 @@ def main():
         b, n = row.get("base", {}), row.get("new", {})
         if "ns" in b and "ns" in n and max(b["ns"], n["ns"]) >= TRIVIAL_NS:
             row["ratio"] = n["ns"] / b["ns"]
+            if max(side["spread"] or 0 for side in (b, n)) > UNRELIABLE_SPREAD:
+                row["unreliable"] = True
         if b.get("ops") and n.get("ops"):
             row["more_ops"] = any(n["ops"][k] > b["ops"][k] for k in ("div", "sqrt", "fn"))
 
@@ -656,7 +711,8 @@ def main():
         rows += crows
         print(f"\n[{cfg.name}] {cfg.describe(args.double)}")
         report(crows, args)
-        ratios = [r["ratio"] for r in crows if "ratio" in r]
+        ratios = [r["ratio"] for r in crows if "ratio" in r and not r.get("unreliable")]
+        unreliable = sum(1 for r in crows if r.get("unreliable"))
         errors = sum(1 for r in crows for s in sides if "error" in r.get(s.label, {}))
         line = f"{cfg.name}: {len(crows)} tests"
         if ratios:
@@ -666,22 +722,33 @@ def main():
             geo **= 1.0 / len(ratios)
             line += (f", ratio new / base {min(ratios):.2f} to {max(ratios):.2f}, "
                      f"geometric mean {geo:.2f}")
+        if unreliable:
+            line += f", {unreliable} unreliable ratios left out (?)"
         if errors:
             line += f", {errors} build or run errors"
         same = sum(1 for s in specs if (s[1], cfg.name) in identical)
         if same:
             line += f"; {same} more generate the same code on both sides (not timed)"
         summaries.append(line)
+    ident["load after timing"] = load_text(check_load("after timing"))
     write_json(not interrupted)
-    print(f"\n[cpu] {'interrupted' if interrupted else 'done'} after {time.time() - t0:.0f} s")
+    print(f"\n[cpu] {'interrupted' if interrupted else 'done'} after {time.time() - t0:.0f} s; "
+          f"load {ident['load before timing'] if 'load before timing' in ident else '?'} before "
+          f"timing, {ident['load after timing']} after")
     for line in summaries:
         print(f"[cpu] {line}")
+    shaky = [r for r in rows if r.get("unreliable")]
+    if shaky:
+        print(f"[cpu] {len(shaky)} ratios unreliable (spread above {100 * UNRELIABLE_SPREAD:.0f}% "
+              "after the re-race: the machine was disturbed while they were timed); measure "
+              "them again, for example with -k: "
+              + ", ".join(f"{r['test']} ({r['config']})" for r in shaky))
     if interrupted:
         return 130
     # Only on request: a ratio is a measurement to discuss, not a verdict,
     # and a fix that buys precision may be worth a slower test.
     if args.fail_above is not None:
-        above = [r for r in rows if r.get("ratio", 0) > args.fail_above]
+        above = [r for r in rows if r.get("ratio", 0) > args.fail_above and not r.get("unreliable")]
         if above:
             print(f"[cpu] {len(above)} results above {args.fail_above:g}: "
                   + ", ".join(f"{r['test']} ({r['config']})" for r in above))
@@ -726,6 +793,8 @@ def report(rows, args):
         line = f"{r['test']:<{width}}  "
         if compare:
             ratio = f"{r['ratio']:.2f}" if "ratio" in r else "-"
+            if r.get("unreliable"):
+                ratio += "?"
             line += f"{cell(r.get('base')):>10}  {cell(n):>10}  {ratio:>6}"
         else:
             line += f"{cell(n):>10}"
@@ -747,6 +816,9 @@ def report(rows, args):
     if any(r.get("reraced") for r in rows):
         print(f"* spread above {100 * RERACE_SPREAD:.0f}% after --rounds rounds: "
               "re-raced with as many rounds again")
+    if any(r.get("unreliable") for r in rows):
+        print(f"? spread still above {100 * UNRELIABLE_SPREAD:.0f}% after the re-race: "
+              "unreliable, left out of the summary")
     for r in rows:
         for label in ("base", "new"):
             if "error" in r.get(label, {}):

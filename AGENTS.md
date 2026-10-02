@@ -13,7 +13,7 @@ make checkdoc    # documentation & license gate - run before every commit
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
-make check-cpu   # CPU cost of the tests; CPU_ARGS="--base origin/master" for new/base ratios
+make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # regenerate the documentation SVG figures (needs matplotlib)
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
@@ -163,9 +163,12 @@ Every script behind these targets is described in `scripts/README.md`.
     tests you touched and on those of the callers that multiply it (a
     filter bank, `dm.vocoder_demo`). Report at least the `fast-math` and
     `strict` compilations, since `-ffast-math` alone can move a ratio from
-    1.2 to 1.44, and the identity lines of the run. Timings from separate
-    runs are not comparable, and a ratio within 3% (or within its
-    spread) is noise. The `ops` column counts the per-sample divisions,
+    1.2 to 1.44, and the identity lines of the run. Measure on an idle
+    machine (AC power, no build or test suite in parallel): the tool
+    cannot correct a loaded one, it only warns on a high load average and
+    marks `?` a ratio whose spread stays above 20%, which is not quoted
+    but measured again. Timings from separate runs are not comparable,
+    and a ratio within 3% (or within its spread) is noise. The `ops` column counts the per-sample divisions,
     square roots and transcendental calls, which embedded cores pay far
     more for than the desktop the ratio is measured on: report an
     increase (`!`) even when the ratio is small. A test time flagged `NaN` measures NaN arithmetic. A slower function can be the right trade-off: say what it
