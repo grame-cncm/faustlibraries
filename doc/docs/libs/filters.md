@@ -3412,7 +3412,10 @@ peak_eq_cq_modulated_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, tri), 4) wit
 
 ### `(fi.)peak_eq_rm`
 
-Regalia-Mitra second order peaking equalizer section.
+Regalia-Mitra second order peaking equalizer section:
+`H(z) = (1 + A(z))/2 + K (1 - A(z))/2`, with `A(z)` the second order
+allpass centered at `fx` and `K = 10^(Lfx/20)`. At `Lfx = 0` (K = 1) the
+section is the identity.
 
 #### Usage
 
@@ -3438,6 +3441,7 @@ src = os.tosc(440);
 peak_eq_rm_test = src : fi.peak_eq_rm(6, 1000, tan(ma.PI*200/ma.SR));
 peak_eq_rm_slider_test = no.noise : fi.peak_eq_rm(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), tan(ma.PI*hslider("B", 200, 1, 5000, 1)/ma.SR));
 peak_eq_rm_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = 20*pow(250, tri); };
+peak_eq_rm_unity_test = no.noise : fi.peak_eq_rm(0, 1000, tan(ma.PI*200/ma.SR));
 ```
 
 #### References

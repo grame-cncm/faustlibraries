@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.11.9";
+declare version "1.11.10";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -4189,7 +4189,10 @@ declare peak_eq_cq license "LicenseRef-STK-4.3";
 peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 
 //-------------------`(fi.)peak_eq_rm`--------------------------
-// Regalia-Mitra second order peaking equalizer section.
+// Regalia-Mitra second order peaking equalizer section:
+// `H(z) = (1 + A(z))/2 + K (1 - A(z))/2`, with `A(z)` the second order
+// allpass centered at `fx` and `K = 10^(Lfx/20)`. At `Lfx = 0` (K = 1) the
+// section is the identity.
 //
 // #### Usage
 //
@@ -4215,6 +4218,7 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 // peak_eq_rm_test = src : fi.peak_eq_rm(6, 1000, tan(ma.PI*200/ma.SR));
 // peak_eq_rm_slider_test = no.noise : fi.peak_eq_rm(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), tan(ma.PI*hslider("B", 200, 1, 5000, 1)/ma.SR));
 // peak_eq_rm_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = 20*pow(250, tri); };
+// peak_eq_rm_unity_test = no.noise : fi.peak_eq_rm(0, 1000, tan(ma.PI*200/ma.SR));
 // ```
 //
 // #### References
@@ -4228,8 +4232,8 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 declare peak_eq_rm author "Julius O. Smith III";
 declare peak_eq_rm copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare peak_eq_rm license "LicenseRef-STK-4.3";
-peak_eq_rm(Lfx,fx,tanPiBT) = _ <: _,A,_ : +,- : *(0.5),*(K/2.0) : + with {
-  A = tf2(k2, k1*(1+k2), 1, k1*(1+k2), k2) <: _,_; // allpass
+peak_eq_rm(Lfx,fx,tanPiBT) = _ <: (_,A : +),(_,A : -) : *(0.5),*(K/2.0) : + with {
+  A = tf2(k2, k1*(1+k2), 1, k1*(1+k2), k2); // allpass
   k1 = 0.0 - cos(2.0*ma.PI*fx/ma.SR);
   k2 = (1.0 - tanPiBT)/(1.0 + tanPiBT);
   K = ba.db2linear(Lfx);
