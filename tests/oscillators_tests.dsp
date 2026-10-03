@@ -97,6 +97,8 @@ polyblep_test = os.polyblep(0.2, os.lf_sawpos(220));
 polyblep_saw_test = os.polyblep_saw(220);
 polyblep_square_test = os.polyblep_square(220);
 polyblep_triangle_test = os.polyblep_triangle(220);
+polyblep_triangle_modulated_test = os.polyblep_triangle(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+polyblep_triangle_jump_test = os.polyblep_triangle(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 oscrp_test = os.oscrp(440, 0.5);
 oscr_test = os.oscr(440);
 SAFE_test = os.SAFE, os[SAFE=1;].phasor(1.0, -.001);
