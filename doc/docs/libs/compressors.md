@@ -115,7 +115,14 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 peak_compression_gain_mono_db_test = os.tosc(440) : co.peak_compression_gain_mono_db(0.5, -12, 0.01, 0.1, 6, 0);
+peak_compression_gain_mono_db_slider_test = os.tosc(440) : co.peak_compression_gain_mono_db(hslider("peak_compression_gain_mono_db:strength", 0.5, 0, 1, 0.01), hslider("peak_compression_gain_mono_db:thresh", -12, -60, 0, 0.1), hslider("peak_compression_gain_mono_db:att", 0.01, 0, 1, 0.001), hslider("peak_compression_gain_mono_db:rel", 0.1, 0, 1, 0.001), hslider("peak_compression_gain_mono_db:knee", 6, 0, 30, 0.1), hslider("peak_compression_gain_mono_db:prePost", 0, 0, 1, 1));
+peak_compression_gain_mono_db_post_test = no.noise*e : co.peak_compression_gain_mono_db(0.5, -24, 0.01, 0.1, 6, 1) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); };
+peak_compression_gain_mono_db_modulated_test = no.noise*e : co.peak_compression_gain_mono_db(0.5, -24, 0.001, 0.001*pow(1000, tri), 6, 0) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+peak_compression_gain_mono_db_jump_test = no.noise*e : co.peak_compression_gain_mono_db(0.5, -24, 0.001, 0.001*pow(1000, sq), 6, 0) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -164,6 +171,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 peak_compression_gain_N_chan_db_test = (os.tosc(440), os.tosc(660)) : co.peak_compression_gain_N_chan_db(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+peak_compression_gain_N_chan_db_slider_test = (os.tosc(440), os.tosc(660)) : co.peak_compression_gain_N_chan_db(hslider("peak_compression_gain_N_chan_db:strength", 0.5, 0, 1, 0.01), hslider("peak_compression_gain_N_chan_db:thresh", -12, -60, 0, 0.1), hslider("peak_compression_gain_N_chan_db:att", 0.01, 0, 1, 0.001), hslider("peak_compression_gain_N_chan_db:rel", 0.1, 0, 1, 0.001), hslider("peak_compression_gain_N_chan_db:knee", 6, 0, 30, 0.1), hslider("peak_compression_gain_N_chan_db:prePost", 0, 0, 1, 1), hslider("peak_compression_gain_N_chan_db:link", 0.5, 0, 1, 0.01), 2);
 ```
 
 #### References
@@ -215,6 +223,7 @@ co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
 FFcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FFcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+FFcompressor_N_chan_slider_test = (os.tosc(440), os.tosc(660)) : co.FFcompressor_N_chan(hslider("FFcompressor_N_chan:strength", 0.5, 0, 1, 0.01), hslider("FFcompressor_N_chan:thresh", -12, -60, 0, 0.1), hslider("FFcompressor_N_chan:att", 0.01, 0, 1, 0.001), hslider("FFcompressor_N_chan:rel", 0.1, 0, 1, 0.001), hslider("FFcompressor_N_chan:knee", 6, 0, 30, 0.1), hslider("FFcompressor_N_chan:prePost", 0, 0, 1, 1), hslider("FFcompressor_N_chan:link", 0.5, 0, 1, 0.01), meter, 2);
 ```
 
 #### References
@@ -265,8 +274,14 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 meter(x) = x;
 FBcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FBcompressor_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, meter, 2);
+FBcompressor_N_chan_slider_test = (os.tosc(440), os.tosc(660)) : co.FBcompressor_N_chan(hslider("FBcompressor_N_chan:strength", 0.5, 0, 1, 0.01), hslider("FBcompressor_N_chan:thresh", -12, -60, 0, 0.1), hslider("FBcompressor_N_chan:att", 0.01, 0, 1, 0.001), hslider("FBcompressor_N_chan:rel", 0.1, 0, 1, 0.001), hslider("FBcompressor_N_chan:knee", 6, 0, 30, 0.1), hslider("FBcompressor_N_chan:prePost", 0, 0, 1, 1), hslider("FBcompressor_N_chan:link", 0.5, 0, 1, 0.01), meter, 2);
+FBcompressor_N_chan_modulated_test = par(i, 2, no.noises(2, i)*e) : co.FBcompressor_N_chan(0.5, -24, 0.001*pow(100, tri), 0.001*pow(1000, 1 - tri), 6, 0, 0.5, meter, 2) with { meter(x) = x; e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+FBcompressor_N_chan_jump_test = par(i, 2, no.noises(2, i)*e) : co.FBcompressor_N_chan(0.5, -24, 0.001*pow(100, sq), 0.001*pow(1000, 1 - sq), 6, 0, 0.5, meter, 2) with { meter(x) = x; e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -320,6 +335,7 @@ co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
 FBFFcompressor_N_chan_test = (os.tosc(440), os.tosc(660)) : co.FBFFcompressor_N_chan(0.4, -12, 0.01, 0.1, 6, 0, 0.5, 0.3, meter, 2);
+FBFFcompressor_N_chan_slider_test = (os.tosc(440), os.tosc(660)) : co.FBFFcompressor_N_chan(hslider("FBFFcompressor_N_chan:strength", 0.4, 0, 1, 0.01), hslider("FBFFcompressor_N_chan:thresh", -12, -60, 0, 0.1), hslider("FBFFcompressor_N_chan:att", 0.01, 0, 1, 0.001), hslider("FBFFcompressor_N_chan:rel", 0.1, 0, 1, 0.001), hslider("FBFFcompressor_N_chan:knee", 6, 0, 30, 0.1), hslider("FBFFcompressor_N_chan:prePost", 0, 0, 1, 1), hslider("FBFFcompressor_N_chan:link", 0.5, 0, 1, 0.01), hslider("FBFFcompressor_N_chan:FBFF", 0.3, 0, 1, 0.01), meter, 2);
 ```
 
 #### References
@@ -365,7 +381,13 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 RMS_compression_gain_mono_db_test = os.tosc(330) : co.RMS_compression_gain_mono_db(0.5, -18, 0.02, 0.12, 6, 0);
+RMS_compression_gain_mono_db_slider_test = os.tosc(330) : co.RMS_compression_gain_mono_db(hslider("RMS_compression_gain_mono_db:strength", 0.5, 0, 1, 0.01), hslider("RMS_compression_gain_mono_db:thresh", -18, -60, 0, 0.1), hslider("RMS_compression_gain_mono_db:att", 0.02, 0, 1, 0.001), hslider("RMS_compression_gain_mono_db:rel", 0.12, 0, 1, 0.001), hslider("RMS_compression_gain_mono_db:knee", 6, 0, 30, 0.1), hslider("RMS_compression_gain_mono_db:prePost", 0, 0, 1, 1));
+RMS_compression_gain_mono_db_modulated_test = no.noise*e : co.RMS_compression_gain_mono_db(0.5, -24, 0.001*pow(1000, tri), 0.12, 6, 0) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+RMS_compression_gain_mono_db_jump_test = no.noise*e : co.RMS_compression_gain_mono_db(0.5, -24, 0.001*pow(1000, sq), 0.12, 6, 0) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -414,6 +436,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 RMS_compression_gain_N_chan_db_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan_db(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+RMS_compression_gain_N_chan_db_slider_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan_db(hslider("RMS_compression_gain_N_chan_db:strength", 0.5, 0, 1, 0.01), hslider("RMS_compression_gain_N_chan_db:thresh", -18, -60, 0, 0.1), hslider("RMS_compression_gain_N_chan_db:att", 0.02, 0, 1, 0.001), hslider("RMS_compression_gain_N_chan_db:rel", 0.12, 0, 1, 0.001), hslider("RMS_compression_gain_N_chan_db:knee", 6, 0, 30, 0.1), hslider("RMS_compression_gain_N_chan_db:prePost", 0, 0, 1, 1), hslider("RMS_compression_gain_N_chan_db:link", 0.5, 0, 1, 0.01), 2);
 ```
 
 #### References
@@ -473,6 +496,7 @@ co = library("compressors.lib");
 os = library("oscillators.lib");
 meter(x) = x;
 RMS_FBFFcompressor_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_FBFFcompressor_N_chan(0.4, -18, 0.02, 0.12, 6, 0, 0.5, 0.3, meter, 2);
+RMS_FBFFcompressor_N_chan_slider_test = (os.tosc(330), os.tosc(550)) : co.RMS_FBFFcompressor_N_chan(hslider("RMS_FBFFcompressor_N_chan:strength", 0.4, 0, 1, 0.01), hslider("RMS_FBFFcompressor_N_chan:thresh", -18, -60, 0, 0.1), hslider("RMS_FBFFcompressor_N_chan:att", 0.02, 0, 1, 0.001), hslider("RMS_FBFFcompressor_N_chan:rel", 0.12, 0, 1, 0.001), hslider("RMS_FBFFcompressor_N_chan:knee", 6, 0, 30, 0.1), hslider("RMS_FBFFcompressor_N_chan:prePost", 0, 0, 1, 1), hslider("RMS_FBFFcompressor_N_chan:link", 0.5, 0, 1, 0.01), hslider("RMS_FBFFcompressor_N_chan:FBFF", 0.3, 0, 1, 0.01), meter, 2);
 ```
 
 #### References
@@ -532,6 +556,7 @@ os = library("oscillators.lib");
 meter(x) = x;
 meterLim(x) = x;
 RMS_FBcompressor_peak_limiter_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(0.4, -18, -2, 0.02, 0.12, 6, 0.5, meter, meterLim, 2);
+RMS_FBcompressor_peak_limiter_N_chan_slider_test = (os.tosc(330), os.tosc(550)) : co.RMS_FBcompressor_peak_limiter_N_chan(hslider("RMS_FBcompressor_peak_limiter_N_chan:strength", 0.4, 0, 1, 0.01), hslider("RMS_FBcompressor_peak_limiter_N_chan:thresh", -18, -60, 0, 0.1), hslider("RMS_FBcompressor_peak_limiter_N_chan:threshLim", -2, -60, 0, 0.1), hslider("RMS_FBcompressor_peak_limiter_N_chan:att", 0.02, 0, 1, 0.001), hslider("RMS_FBcompressor_peak_limiter_N_chan:rel", 0.12, 0, 1, 0.001), hslider("RMS_FBcompressor_peak_limiter_N_chan:knee", 6, 0, 30, 0.1), hslider("RMS_FBcompressor_peak_limiter_N_chan:link", 0.5, 0, 1, 0.01), meter, meterLim, 2);
 ```
 
 #### References
@@ -583,6 +608,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 peak_compression_gain_mono_test = os.tosc(440) : co.peak_compression_gain_mono(0.5, -12, 0.01, 0.1, 6, 0);
+peak_compression_gain_mono_slider_test = os.tosc(440) : co.peak_compression_gain_mono(hslider("peak_compression_gain_mono:strength", 0.5, 0, 1, 0.01), hslider("peak_compression_gain_mono:thresh", -12, -60, 0, 0.1), hslider("peak_compression_gain_mono:att", 0.01, 0, 1, 0.001), hslider("peak_compression_gain_mono:rel", 0.1, 0, 1, 0.001), hslider("peak_compression_gain_mono:knee", 6, 0, 30, 0.1), hslider("peak_compression_gain_mono:prePost", 0, 0, 1, 1));
 ```
 
 #### References
@@ -631,6 +657,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 peak_compression_gain_N_chan_test = (os.tosc(440), os.tosc(660)) : co.peak_compression_gain_N_chan(0.5, -12, 0.01, 0.1, 6, 0, 0.5, 2);
+peak_compression_gain_N_chan_slider_test = (os.tosc(440), os.tosc(660)) : co.peak_compression_gain_N_chan(hslider("peak_compression_gain_N_chan:strength", 0.5, 0, 1, 0.01), hslider("peak_compression_gain_N_chan:thresh", -12, -60, 0, 0.1), hslider("peak_compression_gain_N_chan:att", 0.01, 0, 1, 0.001), hslider("peak_compression_gain_N_chan:rel", 0.1, 0, 1, 0.001), hslider("peak_compression_gain_N_chan:knee", 6, 0, 30, 0.1), hslider("peak_compression_gain_N_chan:prePost", 0, 0, 1, 1), hslider("peak_compression_gain_N_chan:link", 0.5, 0, 1, 0.01), 2);
 ```
 
 #### References
@@ -677,6 +704,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 RMS_compression_gain_mono_test = os.tosc(330) : co.RMS_compression_gain_mono(0.5, -18, 0.02, 0.12, 6, 0);
+RMS_compression_gain_mono_slider_test = os.tosc(330) : co.RMS_compression_gain_mono(hslider("RMS_compression_gain_mono:strength", 0.5, 0, 1, 0.01), hslider("RMS_compression_gain_mono:thresh", -18, -60, 0, 0.1), hslider("RMS_compression_gain_mono:att", 0.02, 0, 1, 0.001), hslider("RMS_compression_gain_mono:rel", 0.12, 0, 1, 0.001), hslider("RMS_compression_gain_mono:knee", 6, 0, 30, 0.1), hslider("RMS_compression_gain_mono:prePost", 0, 0, 1, 1));
 ```
 
 #### References
@@ -725,6 +753,7 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 co = library("compressors.lib");
 os = library("oscillators.lib");
 RMS_compression_gain_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
+RMS_compression_gain_N_chan_slider_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan(hslider("RMS_compression_gain_N_chan:strength", 0.5, 0, 1, 0.01), hslider("RMS_compression_gain_N_chan:thresh", -18, -60, 0, 0.1), hslider("RMS_compression_gain_N_chan:att", 0.02, 0, 1, 0.001), hslider("RMS_compression_gain_N_chan:rel", 0.12, 0, 1, 0.001), hslider("RMS_compression_gain_N_chan:knee", 6, 0, 30, 0.1), hslider("RMS_compression_gain_N_chan:prePost", 0, 0, 1, 1), hslider("RMS_compression_gain_N_chan:link", 0.5, 0, 1, 0.01), 2);
 ```
 
 #### References
@@ -767,6 +796,7 @@ Where:
 co = library("compressors.lib");
 os = library("oscillators.lib");
 compressor_lad_mono_test = os.tosc(440) : co.compressor_lad_mono(0.005, 4, -9, 0.01, 0.1);
+compressor_lad_mono_slider_test = os.tosc(440) : co.compressor_lad_mono(hslider("compressor_lad_mono:lad", 0.005, 0, 0.1, 0.001), hslider("compressor_lad_mono:ratio", 4, 1, 20, 0.1), hslider("compressor_lad_mono:thresh", -9, -60, 0, 0.1), hslider("compressor_lad_mono:att", 0.01, 0, 1, 0.001), hslider("compressor_lad_mono:rel", 0.1, 0, 1, 0.001));
 ```
 
 #### References
@@ -805,6 +835,7 @@ Where:
 co = library("compressors.lib");
 os = library("oscillators.lib");
 compressor_mono_test = os.tosc(440) : co.compressor_mono(4, -9, 0.01, 0.2);
+compressor_mono_slider_test = os.tosc(440) : co.compressor_mono(hslider("compressor_mono:ratio", 4, 1, 20, 0.1), hslider("compressor_mono:thresh", -9, -60, 0, 0.1), hslider("compressor_mono:att", 0.01, 0, 1, 0.001), hslider("compressor_mono:rel", 0.2, 0, 1, 0.001));
 ```
 
 #### References
@@ -838,6 +869,7 @@ Where:
 co = library("compressors.lib");
 os = library("oscillators.lib");
 compressor_stereo_test = (os.tosc(440), os.tosc(660)) : co.compressor_stereo(4, -9, 0.01, 0.2);
+compressor_stereo_slider_test = (os.tosc(440), os.tosc(660)) : co.compressor_stereo(hslider("compressor_stereo:ratio", 4, 1, 20, 0.1), hslider("compressor_stereo:thresh", -9, -60, 0, 0.1), hslider("compressor_stereo:att", 0.01, 0, 1, 0.001), hslider("compressor_stereo:rel", 0.2, 0, 1, 0.001));
 ```
 
 #### References
@@ -870,7 +902,13 @@ Where:
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 compression_gain_mono_test = os.tosc(440) : co.compression_gain_mono(4, -9, 0.01, 0.2);
+compression_gain_mono_slider_test = os.tosc(440) : co.compression_gain_mono(hslider("compression_gain_mono:ratio", 4, 1, 20, 0.1), hslider("compression_gain_mono:thresh", -9, -60, 0, 0.1), hslider("compression_gain_mono:att", 0.01, 0, 1, 0.001), hslider("compression_gain_mono:rel", 0.2, 0, 1, 0.001));
+compression_gain_mono_modulated_test = no.noise*e : co.compression_gain_mono(4, -24, 0.001*pow(100, tri), 0.001*pow(1000, 1 - tri)) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+compression_gain_mono_jump_test = no.noise*e : co.compression_gain_mono(4, -24, 0.001*pow(100, sq), 0.001*pow(1000, 1 - sq)) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -1011,6 +1049,7 @@ os = library("oscillators.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 peak_expansion_gain_N_chan_db_test = (os.tosc(220)*lv, os.tosc(330)*lv) : co.peak_expansion_gain_N_chan_db(0.5, -40, 20, 0.05, 0.01, 0.02, 6, 0, 0.5, 2048, 2) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+peak_expansion_gain_N_chan_db_slider_test = (os.tosc(220)*lv, os.tosc(330)*lv) : co.peak_expansion_gain_N_chan_db(hslider("peak_expansion_gain_N_chan_db:strength", 0.5, 0, 1, 0.01), hslider("peak_expansion_gain_N_chan_db:thresh", -40, -60, 0, 0.1), hslider("peak_expansion_gain_N_chan_db:range", 20, 0, 60, 0.1), hslider("peak_expansion_gain_N_chan_db:att", 0.05, 0, 1, 0.001), hslider("peak_expansion_gain_N_chan_db:hold", 0.01, 0, 1, 0.001), hslider("peak_expansion_gain_N_chan_db:rel", 0.02, 0, 1, 0.001), hslider("peak_expansion_gain_N_chan_db:knee", 6, 0, 30, 0.1), hslider("peak_expansion_gain_N_chan_db:prePost", 0, 0, 1, 1), hslider("peak_expansion_gain_N_chan_db:link", 0.5, 0, 1, 0.01), 2048, 2) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 ```
 
 ----
@@ -1049,8 +1088,12 @@ co = library("compressors.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
+no = library("noises.lib");
 peak_expansion_gain_mono_db_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0.01, 0.02, 6, 0) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 peak_expansion_gain_mono_db_hardknee_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, 0.5, -40, -20, 0.05, 0.01, 0.02, 0, 0) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+peak_expansion_gain_mono_db_slider_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, hslider("peak_expansion_gain_mono_db:strength", 0.5, 0, 1, 0.01), hslider("peak_expansion_gain_mono_db:thresh", -40, -60, 0, 0.1), hslider("peak_expansion_gain_mono_db:range", 20, 0, 60, 0.1), hslider("peak_expansion_gain_mono_db:attack", 0.05, 0, 1, 0.001), hslider("peak_expansion_gain_mono_db:hold", 0.01, 0, 1, 0.001), hslider("peak_expansion_gain_mono_db:release", 0.02, 0, 1, 0.001), hslider("peak_expansion_gain_mono_db:knee", 6, 0, 30, 0.1), hslider("peak_expansion_gain_mono_db:prePost", 0, 0, 1, 1)) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+peak_expansion_gain_mono_db_modulated_test = no.noise*e : co.peak_expansion_gain_mono_db(2048, 0.5, -40, -40, 0.001, 0.01, 0.001*pow(1000, tri), 6, 0) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+peak_expansion_gain_mono_db_jump_test = no.noise*e : co.peak_expansion_gain_mono_db(2048, 0.5, -40, -40, 0.001, 0.01, 0.001*pow(1000, sq), 6, 0) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -1095,6 +1138,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 meter(x) = x;
 expander_N_chan_test = (os.tosc(220)*lv, os.tosc(330)*lv) : co.expander_N_chan(0.5, -40, 20, 0.05, 0.02, 0.02, 6, 0, 0.5, meter, 4096, 2) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+expander_N_chan_slider_test = (os.tosc(220)*lv, os.tosc(330)*lv) : co.expander_N_chan(hslider("expander_N_chan:strength", 0.5, 0, 1, 0.01), hslider("expander_N_chan:thresh", -40, -60, 0, 0.1), hslider("expander_N_chan:range", 20, 0, 60, 0.1), hslider("expander_N_chan:att", 0.05, 0, 1, 0.001), hslider("expander_N_chan:hold", 0.02, 0, 1, 0.001), hslider("expander_N_chan:rel", 0.02, 0, 1, 0.001), hslider("expander_N_chan:knee", 6, 0, 30, 0.1), hslider("expander_N_chan:prePost", 0, 0, 1, 1), hslider("expander_N_chan:link", 0.5, 0, 1, 0.01), meter, 4096, 2) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 ```
 
 ----
@@ -1143,6 +1187,7 @@ ma = library("maths.lib");
 meter(x) = x;
 SCfunction(x) = x;
 expanderSC_N_chan_test = (os.tosc(220), os.tosc(330)) : co.expanderSC_N_chan(0.5, -40, 20, 0.05, 0.02, 0.02, 6, 0, 0.5, meter, 4096, 2, SCfunction, 1, os.tosc(880)*lv) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
+expanderSC_N_chan_slider_test = (os.tosc(220), os.tosc(330)) : co.expanderSC_N_chan(hslider("expanderSC_N_chan:strength", 0.5, 0, 1, 0.01), hslider("expanderSC_N_chan:thresh", -40, -60, 0, 0.1), hslider("expanderSC_N_chan:range", 20, 0, 60, 0.1), hslider("expanderSC_N_chan:att", 0.05, 0, 1, 0.001), hslider("expanderSC_N_chan:hold", 0.02, 0, 1, 0.001), hslider("expanderSC_N_chan:rel", 0.02, 0, 1, 0.001), hslider("expanderSC_N_chan:knee", 6, 0, 30, 0.1), hslider("expanderSC_N_chan:prePost", 0, 0, 1, 1), hslider("expanderSC_N_chan:link", 0.5, 0, 1, 0.01), meter, 4096, 2, SCfunction, hslider("expanderSC_N_chan:SCswitch", 1, 0, 1, 1), os.tosc(880)*lv) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 ```
 
 ## Lookahead Limiters
@@ -1204,7 +1249,13 @@ Example for a stereo limiter: `limiter_lad_N(2, .01, 1, .01, .1, 1);`
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 limiter_lad_N_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_N(2, 0.01, 1, 0.01, 0.05, 0.2);
+limiter_lad_N_slider_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_N(2, hslider("limiter_lad_N:LD", 0.01, 0, 0.1, 0.001), hslider("limiter_lad_N:ceiling", 1, 0, 2, 0.01), hslider("limiter_lad_N:attack", 0.01, 0, 1, 0.001), hslider("limiter_lad_N:hold", 0.05, 0, 1, 0.001), hslider("limiter_lad_N:release", 0.2, 0, 1, 0.001));
+limiter_lad_N_modulated_test = par(i, 2, no.noises(2, i)*e) : par(i, 2, *(2)) : co.limiter_lad_N(2, 0.01, 0.5, 0.001, 0.01, 0.01*pow(100, tri)) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+limiter_lad_N_jump_test = par(i, 2, no.noises(2, i)*e) : par(i, 2, *(2)) : co.limiter_lad_N(2, 0.01, 0.5, 0.001, 0.01, 0.01*pow(100, sq)) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -1237,6 +1288,7 @@ Where:
 co = library("compressors.lib");
 os = library("oscillators.lib");
 limiter_lad_mono_test = os.tosc(440) : co.limiter_lad_mono(0.01, 1, 0.01, 0.05, 0.2);
+limiter_lad_mono_slider_test = os.tosc(440) : co.limiter_lad_mono(hslider("limiter_lad_mono:LD", 0.01, 0, 0.1, 0.001), hslider("limiter_lad_mono:ceiling", 1, 0, 2, 0.01), hslider("limiter_lad_mono:attack", 0.01, 0, 1, 0.001), hslider("limiter_lad_mono:hold", 0.05, 0, 1, 0.001), hslider("limiter_lad_mono:release", 0.2, 0, 1, 0.001));
 ```
 
 #### References
@@ -1269,6 +1321,7 @@ Where:
 co = library("compressors.lib");
 os = library("oscillators.lib");
 limiter_lad_stereo_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_stereo(0.01, 1, 0.01, 0.05, 0.2);
+limiter_lad_stereo_slider_test = (os.tosc(440), os.tosc(660)) : co.limiter_lad_stereo(hslider("limiter_lad_stereo:LD", 0.01, 0, 0.1, 0.001), hslider("limiter_lad_stereo:ceiling", 1, 0, 2, 0.01), hslider("limiter_lad_stereo:attack", 0.01, 0, 1, 0.001), hslider("limiter_lad_stereo:hold", 0.05, 0, 1, 0.001), hslider("limiter_lad_stereo:release", 0.2, 0, 1, 0.001));
 ```
 #### References
 
@@ -1300,6 +1353,7 @@ Where:
 co = library("compressors.lib");
 os = library("oscillators.lib");
 limiter_lad_quad_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) : co.limiter_lad_quad(0.01, 1, 0.01, 0.05, 0.2);
+limiter_lad_quad_slider_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) : co.limiter_lad_quad(hslider("limiter_lad_quad:LD", 0.01, 0, 0.1, 0.001), hslider("limiter_lad_quad:ceiling", 1, 0, 2, 0.01), hslider("limiter_lad_quad:attack", 0.01, 0, 1, 0.001), hslider("limiter_lad_quad:hold", 0.05, 0, 1, 0.001), hslider("limiter_lad_quad:release", 0.2, 0, 1, 0.001));
 ```
 
 #### References

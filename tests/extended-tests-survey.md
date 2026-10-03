@@ -40,11 +40,11 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 ## 2. Tests that check little today
 
 - **Feature never exercised.**
-  - The `limiter_lad_*` tests never limit: a sine at 1 against a ceiling of 1.
+  - The `limiter_lad_*` tests never limit: a sine at 1 against a ceiling of 1 (`limiter_lad_N_modulated_test` and `_jump_test` now do).
   - The gate tests never close the gate (the `gate_gain_mono` modulated and jump tests now do).
   - `tapeStop_test` never stops: its `button` is at 0 (`tapeStop_jump_test` now stops).
-  - No compressor or expander test uses `prePost = 1`.
-  - Every compressor test uses a steady sine, so release is hardly exercised.
+  - No compressor or expander test used `prePost = 1` (`peak_compression_gain_mono_db_post_test` now does).
+  - Every compressor test uses a steady sine, so release is hardly exercised (the modulated and jump tests now move it on noise bursts).
 - **Near-silent references.**
   - `dx` `env_test` peaks at 6.4e-5, and `operator_test` at 3.2e-5 (its L1..L4 are all 0).
   - `violin_ui_test` tests `violinModel`, not `violin_ui`.
@@ -137,7 +137,9 @@ The plan was:
 - `re.springreverb`: tone only. Do not modulate tension, which is rounded to integer delays.
 - Slider only: `re.zita_rev1_stereo`, `re.kb_rom_rev1`.
 
-**compressors.lib**: the input must have dynamics, for example `no.noise*(0.05 + tri)`.
+**compressors.lib**: the input must have dynamics, for example `no.noise*(0.05 + tri)`. **Done**: 25 slider tests (every function with run-time parameters, from its constant test), 6 modulated and 6 jump tests, and `peak_compression_gain_mono_db_post_test` (prePost = 1); all pass without a baseline entry. The modulated and jump tests run on noise bursts decaying 60 dB in 0.25 s, with the threshold at -24 dB (-40 dB for the expander), so that the gain moves. Changes to the plan below: `co.limiter_lad_N` limits a doubled input against a 0.5 ceiling; `co.FBcompressor_N_chan` and `co.compression_gain_mono` move att and rel in opposite directions. Left as they are: with an attack or a release of 1 s, the level gap reaches 1e-3 to 1e-2 at 192 kHz (`limiter_lad_N`, the soft-knee post mode, `RMS_compression_gain_mono_db` with a 1 s post attack): the float limit of a one-pole from `ba.tau2pole` at 1 s, as in signals.lib.
+
+The plan was:
 - `co.peak_compression_gain_mono_db`: slider, rel exp 0.001..1 modulated, jump; with a `prePost = 1` variant.
 - `co.compression_gain_mono`: att and rel.
 - `co.peak_expansion_gain_mono_db`: after the sign issue above.
