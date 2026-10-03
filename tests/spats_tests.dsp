@@ -1,6 +1,7 @@
 sp = library("spats.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
+ba = library("basics.lib");
 
 panner_test = os.tosc(220) : sp.panner(hslider("panner:pan", 0.3, 0, 1, 0.01));
 
@@ -27,6 +28,7 @@ wfs_ys(i) = 1.0;
 wfs_zs(i) = 0.0;
 wfs_test = os.tosc(440)
   : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
+wfs_modulated_test = os.tosc(440) : sp.wfs(0, 1, 0, 0.5, 1, 2, proc, xs, ys, zs) with { proc(i) = *(0.5); xs(i) = 2*tri - 1; ys(i) = 1.0; zs(i) = 0.0; P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 wfs_ui_test = os.tosc(550)
   : sp.wfs_ui(0, 1, 0, 0.5, 1, 2);
@@ -36,6 +38,8 @@ stereoize_test = (os.tosc(660), os.tosc(770))
 
 binauralModel_test = os.tosc(440)
   : sp.binauralModel(45);
+binauralModel_modulated_test = os.tosc(440) : sp.binauralModel(180*tri - 90) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+binauralModel_jump_test = os.tosc(440) : sp.binauralModel(180*sq - 90) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 
 binauralFir_test = os.tosc(440)
   : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));

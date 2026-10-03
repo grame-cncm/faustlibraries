@@ -189,10 +189,10 @@ The plan was:
 **Other libraries**:
 - `webaudio.lib`: the 8 filters, slider, modulated and jump (f0 exp 20..5000). **Done**: 24 tests, all passing. The jumps peak at 11 to 49 on noise: the transient of a direct-form biquad whose coefficients jump, exact in float.
 - `instruments.lib`: `bandPass`/`bandPassH` (resonance 50..5000, radius 0.99); `onePole`, `poleZero`, `oneZero0` (coefficient −0.5..−0.999, jump); `asympT60` slider. **Done**: 16 tests (named `inst_*`), all passing.
-- `hysteresis.lib`: `ja_hysteresis` (k or Ms), `ja_processor` (drive).
-- `mi.lib`: `oscil` (k, z, with an impulse excitation and more damping; at the threshold today); `springDamper`.
-- `spats.lib`: `binauralModel` (az −90..90, jump; probed, passes); `wfs` (source position).
-- `wdmodels.lib`: component values (R exp 100..100k, C 1e-9..1e-6), inside the existing small trees. These are time-varying port resistances.
+- `hysteresis.lib`: `ja_hysteresis` (k or Ms), `ja_processor` (drive). **Done**: slider tests, `ja_hysteresis` with k from 100 to 1000, `ja_processor` with its drive from 0 to 20 dB.
+- `mi.lib`: `oscil` (k, z, with an impulse excitation and more damping; at the threshold today); `springDamper`. **Done**: slider tests; `oscil` with k from 0.05 to 0.5 on an impulse every 0.1 s, z = 0.02; `springDamper` with k from 1 to 10.
+- `spats.lib`: `binauralModel` (az −90..90, jump; probed, passes); `wfs` (source position). **Done**: `binauralModel` modulated and jumping, `wfs` with its source x from -1 to 1.
+- `wdmodels.lib`: component values (R exp 100..100k, C 1e-9..1e-6), inside the existing small trees. These are time-varying port resistances. **Done**: the resistor (100 to 100k), the capacitor (1 nF to 1 µF, modulated and jumping) and the inductor (1 to 100 mH), each in a voltage divider driven by noise.
 - `basics.lib`:
   - `tabulate`/`tabulateNd` `.lin`/`.cub` with a moving index;
   - the `sliding*` functions, slider on n, and modulated with an exact integer n;
@@ -204,7 +204,7 @@ The plan was:
 - `pinktrombone.lib`: `tract`/`tract2` tongue parameters. Redo the two existing tests with the integer triangle. **Done**: `lfWaveform_modulated_test` and `glottis_modulated_test` redone on the triangle (same ranges); `tract` with its tongue index (12..29) and diameter (2.05..3.5) modulated, no constriction. With an active constriction the tongue sweep fails (`tract` 4.0e-3, `tract2` 1.4e-3): the turbulence noise is gated by area thresholds, and a decision one sample apart in float and double injects another noise. `tract2_modulated_test` is deferred (5.2).
 - `tonestacks.lib`: a constant, a modulated and a jump test on a representative model, for example `ts.bassman(0.5, 0.5, tri)` on `no.noise`. **Done**: `bassman` constant, slider, modulated and jump tests, in its doc block and in a new `tests/tonestacks_tests.dsp`; the jump test passes at 7.3e-4, close to the threshold (the third-order direct form of `tonestack`).
 - Also passing: `pm.modeFilter` modulated (freq exp 50..5000; done, 7.3e-4, close to the threshold), `os.oscrs` modulated (done) and jump (it fails today at 1.7e-3, the `os.oscr*` debt: deferred, 5.2); `pf.vibrato2_mono` jump on fb (done).
-- `hoa.lib`: `encoder3D` elevation; the decorrelation functions, slider.
+- `hoa.lib`: `encoder3D` elevation; the decorrelation functions, slider. **Done**: `encoder3D` with azimuth and elevation moving, `fxDecorrelation` and `synDecorrelation` slider tests.
 
 ### 4.2 Blocked by existing precision debt
 

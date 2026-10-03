@@ -5,6 +5,8 @@
 
 ho = library("hoa.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 
 monoSignal(freq) = os.tosc(freq);
 stereoSignal(f1, f2) = monoSignal(f1), monoSignal(f2);
@@ -50,8 +52,10 @@ rotate_test = encoder_bus : ho.rotate(1, 0.78);
 scope_test = encoder_bus : ho.scope(1, 0.1);
 
 fxDecorrelation_test = encoder_bus : ho.fxDecorrelation(1, 64, 5, 0.5, 0.2, 0);
+fxDecorrelation_slider_test = ho.encoder(1, os.tosc(440), 0.0) : ho.fxDecorrelation(1, 64, hslider("fxDecorrelation:wf", 5, 0.1, 50, 0.1), hslider("fxDecorrelation:fa", 0.5, 0, 1, 0.01), hslider("fxDecorrelation:fd", 0.2, 0, 1, 0.01), hslider("fxDecorrelation:tf", 0, 0, 21, 1));
 
 synDecorrelation_test = monoSignal(440) : ho.synDecorrelation(1, 64, 5, 0.5, 0.2, 0);
+synDecorrelation_slider_test = os.tosc(440) : ho.synDecorrelation(1, 64, hslider("synDecorrelation:wf", 5, 0.1, 50, 0.1), hslider("synDecorrelation:fa", 0.5, 0, 1, 0.01), hslider("synDecorrelation:fd", 0.2, 0, 1, 0.01), hslider("synDecorrelation:tf", 0, 0, 21, 1));
 
 fxRingMod_test = encoder_bus : ho.fxRingMod(1, 200, 0.5, 0);
 
@@ -60,6 +64,7 @@ synRingMod_test = monoSignal(440) : ho.synRingMod(1, 200, 0.5, 0);
 encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
 
 encoder3D_test = encoder3D_base;
+encoder3D_modulated_test = ho.encoder3D(1, os.tosc(440), ma.PI*tri, ma.PI*(tri - 0.5)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 rEncoder3D_test = monoSignal(440) : ho.rEncoder3D(1, 0.5, 0.3, 0.0, 0.0, 0.05);
 

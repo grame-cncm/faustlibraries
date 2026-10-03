@@ -276,6 +276,9 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 
 resistor_test = wd.buildtree(vsrc : (series_node : (res_leaf, probe)))
 with {
@@ -284,6 +287,7 @@ with {
   res_leaf(i) = wd.resistor(i, 1000);
   probe(i) = wd.resistor_Vout(i, 1000);
 };
+resistor_modulated_test = wd.buildtree(vsrc : (series_node : (res_leaf, probe))) with { vsrc(i) = wd.u_voltage(i, no.noise); series_node(i) = wd.series(i); res_leaf(i) = wd.resistor(i, 100*pow(1000, tri)); probe(i) = wd.resistor_Vout(i, 1000); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 Note: the adaptor must be declared as a separate function before integration into the connection tree.
@@ -780,6 +784,9 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 
 capacitor_test = wd.buildtree(vsrc : (series_node : (cap_branch, probe)))
 with {
@@ -788,6 +795,8 @@ with {
   cap_branch(i) = wd.capacitor(i, 1e-7);
   probe(i) = wd.resistor_Vout(i, 1800);
 };
+capacitor_modulated_test = wd.buildtree(vsrc : (series_node : (cap_branch, probe))) with { vsrc(i) = wd.u_voltage(i, no.noise); series_node(i) = wd.series(i); cap_branch(i) = wd.capacitor(i, 1e-9*pow(1000, tri)); probe(i) = wd.resistor_Vout(i, 1800); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+capacitor_jump_test = wd.buildtree(vsrc : (series_node : (cap_branch, probe))) with { vsrc(i) = wd.u_voltage(i, no.noise); series_node(i) = wd.series(i); cap_branch(i) = wd.capacitor(i, 1e-9*pow(1000, sq)); probe(i) = wd.resistor_Vout(i, 1800); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 Note: the adaptor must be declared as a separate function before integration into the connection tree.
@@ -914,6 +923,9 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 
 inductor_test = wd.buildtree(vsrc : (series_node : (inductive_branch, probe)))
 with {
@@ -922,6 +934,7 @@ with {
   inductive_branch(i) = wd.inductor(i, 0.01);
   probe(i) = wd.resistor_Vout(i, 2200);
 };
+inductor_modulated_test = wd.buildtree(vsrc : (series_node : (inductive_branch, probe))) with { vsrc(i) = wd.u_voltage(i, no.noise); series_node(i) = wd.series(i); inductive_branch(i) = wd.inductor(i, 1e-3*pow(100, tri)); probe(i) = wd.resistor_Vout(i, 1000); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 Note: the adaptor must be declared as a separate function before integration into the connection tree.
