@@ -88,3 +88,7 @@ true_peak_test = os.tosc(12000)*0.97 : an.true_peak;
 spectral_centroid_test = os.tosc(1000) : an.spectral_centroid(3, 1, 8000, 6, 0.1);
 spectral_spread_test = os.tosc(800) + os.tosc(5000) : an.spectral_spread(3, 1, 8000, 6, 0.1);
 spectral_flux_test = os.tosc(1000) * ((ba.time % 24000) > 12000) : an.spectral_flux(3, 1, 8000, 6, 0.02);
+octave_filterbank_test = os.tosc(440) : an.octave_filterbank(5);
+half_octave_filterbank_test = os.tosc(440) : an.half_octave_filterbank(6);
+third_octave_filterbank_test = os.tosc(440) : an.third_octave_filterbank(8);
+spectral_level_test = os.tosc(220) : an.spectral_level(0.05, 0);

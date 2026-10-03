@@ -789,13 +789,16 @@ mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
 
 
 //---`(an.)mth_octave_spectral_level6e`, `(an.)mth_octave_spectral_level_default`, `(an.)spectral_level`---
-// Spectral level display.
+// Spectral level display. `spectral_level` is
+// `mth_octave_spectral_level_default(2,10000,20)`: half-octave bands, the
+// top one at 10 kHz, 20 bands in all.
 //
-// #### Usage:
+// #### Usage
 //
 // ```
 // _ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _
 // _ : mth_octave_spectral_level_default(M,ftop,NBands,tau,dB_offset) : _
+// _ : spectral_level(tau,dB_offset) : _
 // ```
 //
 // Where:
@@ -810,7 +813,7 @@ mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
 //
 // ```
 // mth_octave_spectral_level_default = mth_octave_spectral_level6e;
-// spectral_level = mth_octave_spectral_level(2,10000,20);
+// spectral_level = mth_octave_spectral_level_default(2,10000,20);
 // ```
 //
 // #### Test
@@ -819,6 +822,7 @@ mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
 // os = library("oscillators.lib");
 // mono = os.tosc(220);
 // mth_octave_spectral_level6e_test = mono : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
+// spectral_level_test = os.tosc(220) : an.spectral_level(0.05, 0);
 // ```
 //------------------------------------------------------------
 mth_octave_spectral_level6e(M,ftop,N,tau,dB_offset) = _<:
@@ -836,7 +840,7 @@ mth_octave_spectral_level6e(M,ftop,N,tau,dB_offset) = _<:
 };
 
 mth_octave_spectral_level_default = mth_octave_spectral_level6e;
-spectral_level = mth_octave_spectral_level(2,10000,20);  // simple default
+spectral_level = mth_octave_spectral_level_default(2,10000,20);  // simple default
 
 
 //---`(an.)octave_analyzer`, `(an.)half_octave_analyzer`, `(an.)third_octave_analyzer`, `(an.)octave_filterbank`, `(an.)half_octave_filterbank`, `(an.)third_octave_filterbank`---
@@ -844,10 +848,10 @@ spectral_level = mth_octave_spectral_level(2,10000,20);  // simple default
 //
 // ```
 // third_octave_analyzer(N) = mth_octave_analyzer_default(3,10000,N);
-// third_octave_filterbank(N) = mth_octave_filterbank_default(3,10000,N);
+// third_octave_filterbank(N) = fi.mth_octave_filterbank_default(3,10000,N);
 // half_octave_analyzer(N) = mth_octave_analyzer_default(2,10000,N);
-// half_octave_filterbank(N) = mth_octave_filterbank_default(2,10000,N);
-// octave_filterbank(N) = mth_octave_filterbank_default(1,10000,N);
+// half_octave_filterbank(N) = fi.mth_octave_filterbank_default(2,10000,N);
+// octave_filterbank(N) = fi.mth_octave_filterbank_default(1,10000,N);
 // octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 // ```
 //
@@ -857,17 +861,29 @@ spectral_level = mth_octave_spectral_level(2,10000,20);  // simple default
 // _ : octave_analyzer(N) : par(i,N,_)
 // _ : half_octave_analyzer(N) : par(i,N,_)
 // _ : third_octave_analyzer(N) : par(i,N,_)
+// _ : octave_filterbank(N) : par(i,N,_)
+// _ : half_octave_filterbank(N) : par(i,N,_)
+// _ : third_octave_filterbank(N) : par(i,N,_)
 // ```
 //
 // Where:
 //
 // * `N`: total number of bands (including dc and Nyquist)
 //
-// The `*_filterbank(N)` variants have the same shape, `_ : octave_filterbank(N) : par(i,N,_)`.
 // See `mth_octave_spectral_level_demo` in `demos.lib` for an example.
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// os = library("oscillators.lib");
+// octave_filterbank_test = os.tosc(440) : an.octave_filterbank(5);
+// half_octave_filterbank_test = os.tosc(440) : an.half_octave_filterbank(6);
+// third_octave_filterbank_test = os.tosc(440) : an.third_octave_filterbank(8);
+// ```
+//
 //------------------------------------------------------------
 third_octave_analyzer(N) = mth_octave_analyzer_default(3,10000,N);
-third_octave_filterbank(N) = mth_octave_filterbank_default(3,10000,N);
+third_octave_filterbank(N) = fi.mth_octave_filterbank_default(3,10000,N);
 // Third-Octave Filter-Banks have been used in audio for over a century.
 // See, e.g.,
 //   Acoustics [the book], by L. L. Beranek
@@ -877,9 +893,9 @@ third_octave_filterbank(N) = mth_octave_filterbank_default(3,10000,N);
 // Third-octave bands across the audio spectrum are too wide for current
 // typical computer screens, so half-octave bands are the default:
 half_octave_analyzer(N) = mth_octave_analyzer_default(2,10000,N);
-half_octave_filterbank(N) = mth_octave_filterbank_default(2,10000,N);
+half_octave_filterbank(N) = fi.mth_octave_filterbank_default(2,10000,N);
 
-octave_filterbank(N) = mth_octave_filterbank_default(1,10000,N);
+octave_filterbank(N) = fi.mth_octave_filterbank_default(1,10000,N);
 octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 
 

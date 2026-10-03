@@ -639,13 +639,16 @@ Spectral Level: display (in bargraphs) the average signal level in each spectral
 
 ### `(an.)mth_octave_spectral_level6e`, `(an.)mth_octave_spectral_level_default`, `(an.)spectral_level`
 
-Spectral level display.
+Spectral level display. `spectral_level` is
+`mth_octave_spectral_level_default(2,10000,20)`: half-octave bands, the
+top one at 10 kHz, 20 bands in all.
 
-#### Usage:
+#### Usage
 
 ```
 _ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _
 _ : mth_octave_spectral_level_default(M,ftop,NBands,tau,dB_offset) : _
+_ : spectral_level(tau,dB_offset) : _
 ```
 
 Where:
@@ -660,7 +663,7 @@ Also for convenience:
 
 ```
 mth_octave_spectral_level_default = mth_octave_spectral_level6e;
-spectral_level = mth_octave_spectral_level(2,10000,20);
+spectral_level = mth_octave_spectral_level_default(2,10000,20);
 ```
 
 #### Test
@@ -669,6 +672,7 @@ an = library("analyzers.lib");
 os = library("oscillators.lib");
 mono = os.tosc(220);
 mth_octave_spectral_level6e_test = mono : an.mth_octave_spectral_level6e(3, 8000, 5, 0.05, 0);
+spectral_level_test = os.tosc(220) : an.spectral_level(0.05, 0);
 ```
 
 ----
@@ -679,10 +683,10 @@ A bunch of special cases based on the different analyzer functions described abo
 
 ```
 third_octave_analyzer(N) = mth_octave_analyzer_default(3,10000,N);
-third_octave_filterbank(N) = mth_octave_filterbank_default(3,10000,N);
+third_octave_filterbank(N) = fi.mth_octave_filterbank_default(3,10000,N);
 half_octave_analyzer(N) = mth_octave_analyzer_default(2,10000,N);
-half_octave_filterbank(N) = mth_octave_filterbank_default(2,10000,N);
-octave_filterbank(N) = mth_octave_filterbank_default(1,10000,N);
+half_octave_filterbank(N) = fi.mth_octave_filterbank_default(2,10000,N);
+octave_filterbank(N) = fi.mth_octave_filterbank_default(1,10000,N);
 octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 ```
 
@@ -692,14 +696,26 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 _ : octave_analyzer(N) : par(i,N,_)
 _ : half_octave_analyzer(N) : par(i,N,_)
 _ : third_octave_analyzer(N) : par(i,N,_)
+_ : octave_filterbank(N) : par(i,N,_)
+_ : half_octave_filterbank(N) : par(i,N,_)
+_ : third_octave_filterbank(N) : par(i,N,_)
 ```
 
 Where:
 
 * `N`: total number of bands (including dc and Nyquist)
 
-The `*_filterbank(N)` variants have the same shape, `_ : octave_filterbank(N) : par(i,N,_)`.
 See `mth_octave_spectral_level_demo` in `demos.lib` for an example.
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+octave_filterbank_test = os.tosc(440) : an.octave_filterbank(5);
+half_octave_filterbank_test = os.tosc(440) : an.half_octave_filterbank(6);
+third_octave_filterbank_test = os.tosc(440) : an.third_octave_filterbank(8);
+```
+
 
 ## Arbitrary-Crossover Filter-Banks and Spectrum Analyzers
 
