@@ -416,9 +416,15 @@ def add(args):
                     flines.pop()
                 flines += block + [""]
             else:
-                # After the end of that test, which may span several lines.
-                end = anchor
-                while end + 1 < len(flines) and not flines[end].split("//")[0].rstrip().endswith(";"):
+                # After the end of that test, which may span several lines and
+                # hold a with { ... } whose own definitions end with `;`: the
+                # end is the first `;` at which parentheses and braces balance.
+                end, depth = anchor, 0
+                while True:
+                    code = flines[end].split("//")[0]
+                    depth += code.count("(") + code.count("{") - code.count(")") - code.count("}")
+                    if (depth <= 0 and code.rstrip().endswith(";")) or end + 1 >= len(flines):
+                        break
                     end += 1
                 flines[end + 1:end + 1] = block
             for env in sorted(envs_used(" ".join(block))):
