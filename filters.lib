@@ -260,8 +260,8 @@ dcblocker = zero(1) : pole(0.995);
 //
 // <https://ccrma.stanford.edu/~jos/mdft/Exponentials.html>
 //----------------------------------------------------------
-declare lptN author "Julius O. Smith III";
-declare lptN copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare lptN author "Dario Sanfilippo";
+declare lptN copyright "Copyright (C) 2020 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
 declare lptN license "LicenseRef-STK-4.3";
 lptN(N, tN, x) = x : si.smooth(ba.tau2pole(tN / log(10.0^(float(N)/20.0))));
 // Special cases of lptN
@@ -292,8 +292,8 @@ lptN(N, tN, x) = x : si.smooth(ba.tau2pole(tN / log(10.0^(float(N)/20.0))));
 // lptau_jump_test = no.noise : fi.lptau(0.001*pow(1000, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //------------------------------------------------------------
-declare lptau author "Julius O. Smith III";
-declare lptau copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare lptau author "Dario Sanfilippo";
+declare lptau copyright "Copyright (C) 2020 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
 declare lptau license "LicenseRef-STK-4.3";
 lptau(tN, x) = lptN(8.6858896381, tN, x); // Tau time constant, i.e., 1/e atten. after tN secs
 
@@ -324,8 +324,8 @@ lptau(tN, x) = lptN(8.6858896381, tN, x); // Tau time constant, i.e., 1/e atten.
 // lpt60_jump_test = no.noise : fi.lpt60(0.001*pow(1000, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //------------------------------------------------------------
-declare lpt60 author "Julius O. Smith III";
-declare lpt60 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare lpt60 author "Dario Sanfilippo";
+declare lpt60 copyright "Copyright (C) 2020 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
 declare lpt60 license "LicenseRef-STK-4.3";
 lpt60(tN, x) = lptN(60, tN, x); // T60 constant, i.e., 1/1000 atten. after tN secs
 
@@ -356,8 +356,8 @@ lpt60(tN, x) = lptN(60, tN, x); // T60 constant, i.e., 1/1000 atten. after tN se
 // lpt19_jump_test = no.noise : fi.lpt19(0.001*pow(1000, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //------------------------------------------------------------
-declare lpt19 author "Julius O. Smith III";
-declare lpt19 copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
+declare lpt19 author "Dario Sanfilippo";
+declare lpt19 copyright "Copyright (C) 2020 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
 declare lpt19 license "LicenseRef-STK-4.3";
 lpt19(tN, x) = lptN(19, tN, x); // T19 constant, i.e., 1/e^2.2 atten. after tN secs
 
