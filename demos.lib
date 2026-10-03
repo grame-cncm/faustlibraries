@@ -78,7 +78,7 @@ hy = library("hysteresis.lib");
 pt = library("pinktrombone.lib");
 
 declare name "Faust Demos Library";
-declare version "1.6.1";
+declare version "1.6.2";
 
 //########################################################################################
 /************************************************************************
@@ -422,11 +422,9 @@ with{
     meter_group(hbargraph("[1] Compressor Gain Before Makeup [unit:dB] [tooltip: Current gain of
     the compressor in dB]",-50,+10));
 
-    displaygain = _,_ <: _,_,(abs,abs:+) : _,_,gainview : _,attach;
-
-    compressor_stereo_demo =
-    displaygain(co.compressor_stereo(ratio,threshold,attack,release)) :
-    *(makeupgain), *(makeupgain);
+    // the meter shows the gain computed from the input, not from the compressed output
+    compressor_stereo_demo = _,_ <: co.compressor_stereo(ratio,threshold,attack,release),
+        (abs,abs :> gainview) : _,attach : *(makeupgain),*(makeupgain);
 
     ctl_group(x) = knob_group(hgroup("[3] Compression Control", x));
 
@@ -455,7 +453,7 @@ with{
     makeupgain = comp_group(hslider("[5] Makeup Gain [unit:dB]
     [tooltip: The compressed-signal output level is increased by this amount
     (in dB) to make up for the level lost due to compression]",
-    40, -96, 96, 0.1)) : ba.db2linear;
+    12, -96, 96, 0.1)) : ba.db2linear; // default: about unity at -20 dBFS input
 };
 
 
@@ -615,7 +613,7 @@ with{
     lfol = os.oscrs;
     lfor = os.oscrc;
 
-    dmax = 2048;
+    dmax = 8192; // 40 ms (both delay sliders at max) is 7680 samples at 192 kHz
     dflange = 0.001 * ma.SR *
         del_group(hslider("[1] Flange Delay [unit:ms] [style:knob]", 10, 0, 20, 0.001));
     odflange = 0.001 * ma.SR *
@@ -828,23 +826,21 @@ with {
 //
 // Where:
 //
-// * `gui_group`: GUI grouping function for the tester controls, or `!` to suppress them
-//
-// For suppressing the `gui_group` input, pass it as `!`.
-// (See `(dm.)fdnrev0_demo` for an example of its use).
+// * `gui_group`: GUI grouping function for the tester controls, or `_` for none
+//   (see `(dm.)fdnrev0_demo` for an example of its use)
 //
 // #### Test
 // ```
 // dm = library("demos.lib");
 // no = library("noises.lib");
 // stereoNoise = no.noise, no.noise;
-// stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(!);
+// stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(_);
 // ```
 //------------------------------------------------------------
 declare stereo_reverb_tester author "Julius O. Smith III";
 declare stereo_reverb_tester licence "MIT";
 
-stereo_reverb_tester(revin_group,x,y) = reverb_tester(_,x,y)
+stereo_reverb_tester(revin_group,x,y) = reverb_tester(revin_group,x,y)
 with {
     reverb_tester(revin_group,x,y) = inx,iny with {
         ck_group(x) = revin_group(vgroup("[1] Input Config",x));
@@ -904,7 +900,7 @@ fdnrev0_demo(N,NB,BBSO) = stereo_reverb_tester(revin_group)
       <: re.fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl)
       :> *(gain),*(gain)
 with{
-    MAXDELAY = 8192; // sync w delays and prime_power_delays above
+    MAXDELAY = 8192; // de.prime_power_delays caps every length at 8192
     defdurs = (8.4,6.5,5.0,3.8,2.7); // NB default durations (sec)
     deffreqs = (500,1000,2000,4000); // NB-1 default crossover frequencies (Hz)
     deflens = (56.3,63.0); // 2 default min and max path lengths
@@ -975,7 +971,7 @@ declare zita_rev_fdn_demo licence "MIT";
 
 zita_rev_fdn_demo = re.zita_rev_fdn(f1,f2,t60dc,t60m,fsmax)
 with{
-    fsmax = 48000.0;
+    fsmax = 192000.0; // sizes the delay lines: covers every sampling rate
     fdn_group(x) = hgroup("Zita_Rev Internal FDN Reverb [tooltip: ~ Zita_Rev's internal
         8x8 Feedback Delay Network (FDN) & Schroeder allpass-comb reverberator.     See
         Faust's reverbs.lib for documentation and references]",x);
@@ -990,7 +986,7 @@ with{
     2, 1, 8, 0.1));
     f2 = fdn_group(vslider("[4] HF Damping [unit:Hz] [style:knob] [scale:log]
     [tooltip: Frequency (Hz) at which the high-frequency T60 is half the middle-band's T60]",
-    6000, 1500, 0.49*fsmax, 1));
+    6000, 1500, 23520, 1));
 };
 
 //---------------------------`(dm.)zita_light`------------------------------
@@ -1017,7 +1013,7 @@ declare zita_light licence "MIT";
 zita_light = hgroup("Zita Light",(_,_ <: re.zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax),_,_ : 
     out_eq,_,_ : dry_wet : out_level))
 with{
-    fsmax = 48000.0;  // highest sampling rate that will be used
+    fsmax = 192000.0;  // highest sampling rate that will be used
     rdel = 60;    
     f1 = 200;
     t60dc = 3;
@@ -1080,7 +1076,7 @@ declare zita_rev1 licence "MIT";
 zita_rev1 = _,_ <: re.zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax),_,_ : out_eq,_,_ :
     dry_wet : out_level
 with{
-    fsmax = 48000.0;  // highest sampling rate that will be used
+    fsmax = 192000.0;  // highest sampling rate that will be used
 
     fdn_group(x) = hgroup(
     "[0] Zita_Rev1 [tooltip: ~ ZITA REV1 FEEDBACK DELAY NETWORK (FDN) & SCHROEDER
@@ -1106,7 +1102,7 @@ with{
 
     f2 = freq_group(vslider("[4] HF Damping [unit:Hz] [style:knob] [scale:log]
     [tooltip: Frequency (Hz) at which the high-frequency T60 is half the middle-band's T60]",
-    6000, 1500, 0.49*fsmax, 1));
+    6000, 1500, 23520, 1));
 
     out_eq = pareq_stereo(eq1f,eq1l,eq1q) : pareq_stereo(eq2f,eq2l,eq2q);
     // Zolzer style peaking eq (not used in zita-rev1) (filters.lib):
@@ -1661,7 +1657,7 @@ with{
         suppression]",2,1,os.MAX_SAW_ORDER,1));
     sawchoice = _ <: par(i,os.MAX_SAW_ORDER,os.sawN(i+1)) :
         ba.selectn(int(os.MAX_SAW_ORDER), int(saworder-1)); // when max is pwr of 2
-    tone = (amp/3) * (sawchoice(sfreq) + sawchoice(sfreq*detune1) + sawchoice(sfreq*detune2));
+    tone = (1/3) * (sawchoice(sfreq) + sawchoice(sfreq*detune1) + sawchoice(sfreq*detune2));
     signal = amp * select2(ei, select2(ss, tone, white_or_pink_noise), _);
     white_or_pink_noise = select2(wp,no.noise,no.pink_noise);
     checkbox_group(x) = knob_group(vgroup("[7] Alternate Signals",x));
@@ -1752,7 +1748,7 @@ with{
     freq = af_group(hslider("[2] Frequency [unit:PK] [style:hslider] [tooltip: Sawtooth
         frequency as a Piano Key (PK) number (A440 = key 49)]",49,1,88,0.01) : ba.pianokey2hz);
 
-    detune1 = 1 - 0.01 * knob_group(
+    detune1 = 1 + 0.01 * knob_group(
         vslider("[3] Detuning 1 [unit:%%] [style:knob]
     [tooltip: Percentage frequency-shift up or down for second oscillator]",
     -0.1,-10,10,0.01));

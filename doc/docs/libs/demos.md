@@ -381,17 +381,15 @@ _,_ : stereo_reverb_tester(gui_group) : _,_
 
 Where:
 
-* `gui_group`: GUI grouping function for the tester controls, or `!` to suppress them
-
-For suppressing the `gui_group` input, pass it as `!`.
-(See `(dm.)fdnrev0_demo` for an example of its use).
+* `gui_group`: GUI grouping function for the tester controls, or `_` for none
+  (see `(dm.)fdnrev0_demo` for an example of its use)
 
 #### Test
 ```
 dm = library("demos.lib");
 no = library("noises.lib");
 stereoNoise = no.noise, no.noise;
-stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(!);
+stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(_);
 ```
 
 ----
