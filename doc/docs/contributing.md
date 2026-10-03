@@ -360,7 +360,7 @@ with {
 
    Delay lines with an integer length need none: a jump of length is the same discontinuity whatever the realization.
 
-   When it was introduced, every filter of `filters.lib` that has a `_modulated_test` got one, except ten that fail `make check-precision`, with level gaps of 1.1e-3 to 0.53. All are built on the direct-form `fi.tf2s` (`resonlp`, `resonhp`, `resonbp`, the `peak_eq` family, `highpass3e`, `highpass6e`, `highpass_plus_lowpass`), except `wgr`, which is already at the threshold with a constant 100 Hz. Every state-variable or TPT filter passes. They will get their jump tests with a realization that passes them.
+   When it was introduced, every filter of `filters.lib` that has a `_modulated_test` got one, except ten that failed `make check-precision`, with level gaps of 1.1e-3 to 0.53. Eight of them, built on the direct-form `fi.tf2s` (`resonlp`, `resonhp`, `resonbp`, `peak_eq`, `peak_eq_cq`, `highpass3e`, `highpass6e`, `highpass_plus_lowpass`), got their jump tests when `tf2s` became two trapezoidal integrators (#273). Two still fail: `peak_eq_rm`, a direct-form `fi.tf2` allpass, and `wgr`, which is already at the threshold with a constant 100 Hz. Every state-variable or TPT filter passes. These two will get their jump tests with a realization that passes them.
 
 Two more precautions:
 

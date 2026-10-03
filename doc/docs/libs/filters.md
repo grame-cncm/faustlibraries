@@ -1749,12 +1749,11 @@ integrators, see the first reference below.
 
 ### `(fi.)tf2s`, `(fi.)tf2snp`
 
-Second-order direct-form digital filter,
+Second-order digital filter,
 specified by ANALOG transfer-function polynomials B(s)/A(s),
 and a frequency-scaling parameter. Digitization via the
 bilinear transform is built in. `tf2snp` computes the same filter as a
-protected normalized ladder, which stays accurate in single precision when
-`w1` is small relative to the sample rate. The analog transfer function is:
+protected normalized ladder. The analog transfer function is:
 
 ```
         b2 s^2 + b1 s + b0
@@ -1794,16 +1793,41 @@ cutting off at `SR/4` is specified as `tf2s(0,0,1,sqrt(2),1,PI*SR/2);`
 
 #### Method
 
-Bilinear transform scaled for exact mapping of w1.
+Bilinear transform scaled for exact mapping of w1. `tf2s` realizes it
+with two trapezoidal integrators (the bilinear transform is trapezoidal
+integration) of gain `tan(w1*T/2)`, in controllable canonical form: the
+integrators compute `V = X/A(s)` and its derivative, the delay-free loop
+is solved in closed form for `u = s^2*V`, and the output taps
+`y = b2*u + b1*s*V + b0*V` follow, as in the direct form (poles first,
+numerator last: a gain common to the `b`s, such as `resonbp`'s, multiplies
+the output exactly, even when it varies). The transfer function is the
+same as that of the direct-form biquad, but the poles stay accurate in
+single precision when `w1` is small relative to the sample rate, where
+the direct form's cluster near z = 1 and lose their digits (a 20 Hz
+Butterworth lowpass had a 16 % RMS error at 192 kHz, and a 5 Hz one
+diverged: issue #263). Near Nyquist its errors stay close to the direct
+form's: at 44.1 kHz with `w1` at 21 kHz, an RMS error of 1.9e-6 instead of
+9.5e-7, and a magnitude-response error of 3e-4 dB instead of 5e-3 dB.
+The integrators act on `s/w`, where `w = max(|a1|, sqrt(|a0|))` is
+a frequency scale of the denominator, so that every state stays at the
+output level when the coefficients change: `a1` and `a0` must not both
+be zero.
 
 #### Test
 ```
+ba = library("basics.lib");
 fi = library("filters.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
 src = os.tosc(440);
 tf2s_test = src : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+tf2s_lp20_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
+tf2s_lp5_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*5);
+tf2s_notch50_test = no.noise : fi.tf2s(1, 0, 1, 0.1, 1, 2*ma.PI*50);
+tf2s_slider_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
+tf2s_modulated_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tf2s_jump_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 tf2snp_test = src : fi.tf2snp(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
 tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
 tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
@@ -2125,6 +2149,8 @@ src = os.tosc(440);
 resonlp_test = src : fi.resonlp(1000, 2, 0.8);
 resonlp_slider_test = no.noise : fi.resonlp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
 resonlp_modulated_test = no.noise : fi.resonlp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+resonlp_jump_test = no.noise : fi.resonlp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+resonlp_audio_modulated_test = 0.1*no.noise : fi.resonlp(max(20, 1000*(1 + 0.9*os.tosc(500))), 10, 1);
 ```
 
 ----
@@ -2162,6 +2188,7 @@ src = os.tosc(440);
 resonhp_test = fi.resonhp(1000, 2, 0.8, src);
 resonhp_slider_test = no.noise : fi.resonhp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
 resonhp_modulated_test = no.noise : fi.resonhp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+resonhp_jump_test = no.noise : fi.resonhp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -2199,6 +2226,8 @@ src = os.tosc(440);
 resonbp_test = src : fi.resonbp(1000, 2, 0.8);
 resonbp_slider_test = no.noise : fi.resonbp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
 resonbp_modulated_test = no.noise : fi.resonbp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+resonbp_jump_test = no.noise : fi.resonbp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+resonbp_audio_modulated_test = 0.1*no.noise : fi.resonbp(max(20, 1000*(1 + 0.9*os.tosc(500))), 10, 1);
 ```
 
 ## Butterworth Lowpass/Highpass Filters
@@ -2364,6 +2393,7 @@ ma = library("maths.lib");
 highpass_plus_lowpass_test = os.tosc(440) : fi.highpass_plus_lowpass(3, 1000);
 highpass_plus_lowpass_slider_test = no.noise : fi.highpass_plus_lowpass(3, hslider("fc", 1000, 20, 20000, 1));
 highpass_plus_lowpass_modulated_test = no.noise : fi.highpass_plus_lowpass(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass_plus_lowpass_jump_test = no.noise : fi.highpass_plus_lowpass(3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -2648,6 +2678,7 @@ src = os.tosc(440);
 highpass3e_test = src : fi.highpass3e(1000);
 highpass3e_slider_test = no.noise : fi.highpass3e(hslider("fc", 1000, 20, 20000, 1));
 highpass3e_modulated_test = no.noise : fi.highpass3e(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass3e_jump_test = no.noise : fi.highpass3e(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -2680,6 +2711,7 @@ src = os.tosc(440);
 highpass6e_test = src : fi.highpass6e(1000);
 highpass6e_slider_test = no.noise : fi.highpass6e(hslider("fc", 1000, 20, 20000, 1));
 highpass6e_modulated_test = no.noise : fi.highpass6e(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass6e_jump_test = no.noise : fi.highpass6e(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ## Butterworth Bandpass/Bandstop Filters
@@ -3428,6 +3460,7 @@ src = os.tosc(440);
 peak_eq_test = src : fi.peak_eq(6, 1000, 200);
 peak_eq_slider_test = no.noise : fi.peak_eq(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), hslider("B", 200, 1, 5000, 1));
 peak_eq_modulated_test = no.noise : fi.peak_eq(6, fx, fx/5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = 20*pow(250, tri); };
+peak_eq_jump_test = no.noise : fi.peak_eq(6, fx, fx/5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250, sq); };
 ```
 
 #### References
@@ -3463,6 +3496,7 @@ src = os.tosc(440);
 peak_eq_cq_test = src : fi.peak_eq_cq(6, 1000, 4);
 peak_eq_cq_slider_test = no.noise : fi.peak_eq_cq(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), hslider("Q", 4, 0.5, 20, 0.01));
 peak_eq_cq_modulated_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, tri), 4) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+peak_eq_cq_jump_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, sq), 4) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
