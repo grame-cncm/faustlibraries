@@ -58,6 +58,7 @@ adsre_test = no.noise * en.adsre(0.2, 0.1, 0.6, 0.4, gate);
 adsre_slider_test = no.noise * en.adsre(hslider("adsre:attT60", 0.2, 0, 5, 0.001), hslider("adsre:decT60", 0.1, 0, 5, 0.001), hslider("adsre:susLvl", 0.6, 0, 1, 0.01), hslider("adsre:relT60", 0.4, 0, 5, 0.001), gate);
 ahdsre_test = no.noise * en.ahdsre(0.2, 0.05, 0.1, 0.6, 0.4, gate);
 ahdsre_slider_test = no.noise * en.ahdsre(hslider("ahdsre:attT60", 0.2, 0, 5, 0.001), hslider("ahdsre:htT60", 0.05, 0, 5, 0.001), hslider("ahdsre:decT60", 0.1, 0, 5, 0.001), hslider("ahdsre:susLvl", 0.6, 0, 1, 0.01), hslider("ahdsre:relT60", 0.4, 0, 5, 0.001), gate);
+ahdsre_zero_attack_test = en.ahdsre(0, 0, 0.1, 0.6, 0.4, gate);
 dx7envelope_test = os.tosc(440) * en.dx7envelope(
   0.05, 0.1, 0.1, 0.2,
   1, 0.8, 0.6, 0,

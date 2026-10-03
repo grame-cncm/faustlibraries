@@ -381,17 +381,15 @@ _,_ : stereo_reverb_tester(gui_group) : _,_
 
 Where:
 
-* `gui_group`: GUI grouping function for the tester controls, or `!` to suppress them
-
-For suppressing the `gui_group` input, pass it as `!`.
-(See `(dm.)fdnrev0_demo` for an example of its use).
+* `gui_group`: GUI grouping function for the tester controls, or `_` for none
+  (see `(dm.)fdnrev0_demo` for an example of its use)
 
 #### Test
 ```
 dm = library("demos.lib");
 no = library("noises.lib");
 stereoNoise = no.noise, no.noise;
-stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(!);
+stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(_);
 ```
 
 ----
@@ -471,6 +469,10 @@ zita_light_test = stereoOsc(440, 442) : dm.zita_light;
 ### `(dm.)zita_rev1`
 
 Example GUI for `zita_rev1_stereo` (mostly following the Linux `zita-rev1` GUI).
+The Wet/Dry Mix follows the `zita-rev1` mix law: with m = (1 - mix)/2,
+the dry gain is 1 - m^2 and the wet gain 0.7 m (2-m)/sqrt(`t60m`).
+The defaults are those of `zita-rev1`; as there, the equalizer
+bandwidths are fixed (no Q control).
 
 Only the dry/wet and output level parameters are "dezippered" here. If
 parameters are to be varied in real time, use `smooth(0.999)` or the like

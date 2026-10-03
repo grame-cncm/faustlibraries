@@ -120,6 +120,11 @@ sdelay_jump_test = no.noise : de.sdelay(4096, 1024, select2(sq, 1000, 3000)) wit
 
 Prime Power Delay Line Lengths: outputs N constant delay lengths in samples,
 each one a power of a distinct prime.
+Delay line `i` is a power of the `i`th prime, chosen closest (in the log domain)
+to a length spaced geometrically between the travel times of `pathmin` and
+`pathmax` at the speed of sound. Each power is capped at the largest one that does
+not exceed 8192 samples, so that a delay line of 8192 samples holds all of them
+(8192 samples is 63.7 m at 44.1 kHz; at higher sampling rates, longer paths are capped).
 
 #### Usage
 
@@ -133,10 +138,14 @@ Where:
 * `pathmin`: minimum acoustic ray length in the reverberator (in meters)
 * `pathmax`: maximum acoustic ray length (meters) - think "room size"
 
+The `N` outputs are the delay-line lengths in samples, all at most 8192.
+
 #### Test
 ```
 de = library("delays.lib");
 prime_power_delays_test = de.prime_power_delays(4, 1, 10);
+prime_power_delays_capped_test = de.prime_power_delays(16, 46, 63);
+prime_power_delays_N1_test = de.prime_power_delays(1, 1, 10);
 ```
 
 #### References
@@ -185,6 +194,7 @@ fdelaylti_slider_test = os.tosc(440) : de.fdelaylti(3, 44100, hslider("fdelaylti
 fdelaylti_modulated_test = no.noise : de.fdelaylti(3, 256, 2 + 62*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fdelayltv_slider_test = os.tosc(440) : de.fdelayltv(3, 44100, hslider("fdelayltv:d", 22050.5, 1, 44100, 0.1));
 fdelayltv_modulated_test = no.noise : de.fdelayltv(3, 256, 2 + 62*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fdelayltv_max_test = no.noise : de.fdelayltv(3, 64, 63.3);
 ```
 
 #### References
@@ -214,7 +224,7 @@ _ : fdelay5(maxdel,d) : _
 
 Where:
 
-* `maxdel`: maximum delay in samples (a power of 2)
+* `maxdel`: maximum delay in samples
 * `d`: current (float) delay in samples; must satisfy `d > (N-1)/2` for
   order-`N` Lagrange interpolation (see `de.fdelayltv`)
 
