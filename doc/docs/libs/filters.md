@@ -3678,6 +3678,7 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 sig = os.tosc(440);
 mth_octave_filterbank_alt_test = sig : fi.mth_octave_filterbank_alt(3, 2, 8000, 2);
+mth_octave_filterbank_alt_bands_test = sig : fi.mth_octave_filterbank_alt(3, 2, 8000, 5);
 ```
 
 ----
@@ -3703,6 +3704,7 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 sig = os.tosc(440);
 mth_octave_filterbank3_test = sig : fi.mth_octave_filterbank3(2, 8000, 2);
+mth_octave_filterbank3_bands_test = sig : fi.mth_octave_filterbank3(2, 8000, 5);
 ```
 
 ----

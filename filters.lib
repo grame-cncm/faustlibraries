@@ -4511,9 +4511,10 @@ declare mth_octave_filterbank_alt license "LicenseRef-STK-4.3";
 // os = library("oscillators.lib");
 // sig = os.tosc(440);
 // mth_octave_filterbank_alt_test = sig : fi.mth_octave_filterbank_alt(3, 2, 8000, 2);
+// mth_octave_filterbank_alt_bands_test = sig : fi.mth_octave_filterbank_alt(3, 2, 8000, 5);
 // ```
 //----------------------------------------------------------
-mth_octave_filterbank_alt(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(O,N)
+mth_octave_filterbank_alt(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(N)
 with {
     fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
     ap(n) = highpass_minus_lowpass(O,fc(n)); // half the order of 'plus' case
@@ -4547,6 +4548,7 @@ declare mth_octave_filterbank3 license "LicenseRef-STK-4.3";
 // os = library("oscillators.lib");
 // sig = os.tosc(440);
 // mth_octave_filterbank3_test = sig : fi.mth_octave_filterbank3(2, 8000, 2);
+// mth_octave_filterbank3_bands_test = sig : fi.mth_octave_filterbank3(2, 8000, 5);
 // ```
 //----------------------------------------------------------
 mth_octave_filterbank3(M,ftop,N) = mth_octave_filterbank_alt(3,M,ftop,N);
