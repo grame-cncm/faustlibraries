@@ -367,7 +367,12 @@ def add(args):
         if fn + "_test" in in_dsp:
             path = in_dsp[fn + "_test"]
         else:
-            homes = sorted(p for t, p in in_dsp.items() if owner(t, symbols) == fn)
+            # The library's own test file first: a test of another library
+            # can carry the function's name (demos_tests.dsp has
+            # twin_osc_demo_test, a test of dm.twin_osc_demo).
+            own = os.path.splitext(os.path.basename(args.lib))[0] + "_tests.dsp"
+            homes = sorted({p for t, p in in_dsp.items() if owner(t, symbols) == fn},
+                           key=lambda p: (os.path.basename(p) != own, p))
             path = homes[0] if homes else args.tests_file
         if path is None:
             sys.exit(f"{name}: `{fn}` has no test in tests/*.dsp yet: give --tests-file")
