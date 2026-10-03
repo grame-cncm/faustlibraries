@@ -83,7 +83,7 @@ process = mo.shockTrigger(50, 0.75, 75, accX);
 ```
 mo = library("motion.lib");
 os = library("oscillators.lib");
-shockTrigger_test = mo.shockTrigger(50, 0.5, 50, os.pulsetrain(2, 0.5));
+shockTrigger_test = mo.shockTrigger(50, 0.5, 50, os.lf_pulsetrain(2, 0.5));
 ```
 
 ## Inclination and Gravity Projection
@@ -189,7 +189,7 @@ process = mo.inclineSymmetric(1.5, accPosX, accNegX);
 mo = library("motion.lib");
 os = library("oscillators.lib");
 inclineSymmetric_test =
-  mo.inclineSymmetric(1.5, os.triangle(0.3) * 0.5 + 0.5, os.triangle(0.3) * (-0.5));
+  mo.inclineSymmetric(1.5, os.lf_triangle(0.3) * 0.5 + 0.5, os.lf_triangle(0.3) * (-0.5));
 ```
 
 ----
@@ -224,7 +224,7 @@ process = mo.projectedGravity(1.5, 0.08, accX);
 ```
 mo = library("motion.lib");
 os = library("oscillators.lib");
-projectedGravity_test = mo.projectedGravity(2, 0.05, os.triangle(0.1));
+projectedGravity_test = mo.projectedGravity(2, 0.05, os.lf_triangle(0.1));
 ```
 
 ## Envelopes Helpers
@@ -343,7 +343,7 @@ process = mo.motionEnvelopeUD(0.05, 1.25, 670, 0, accX);
 mo = library("motion.lib");
 os = library("oscillators.lib");
 motionEnvelopeUD_test =
-  mo.motionEnvelopeUD(0.05, 1.25, 120, 40, os.triangle(0.4) * 0.5 + 0.5);
+  mo.motionEnvelopeUD(0.05, 1.25, 120, 40, os.lf_triangle(0.4) * 0.5 + 0.5);
 ```
 
 ----
@@ -510,7 +510,7 @@ process = mo.accelEnvelopePos(0.05, 1.35, 10, 10, accX);
 mo = library("motion.lib");
 os = library("oscillators.lib");
 accelEnvelopePos_test =
-  mo.accelEnvelopePos(0.05, 1.35, 10, 10, os.triangle(2) * 0.8);
+  mo.accelEnvelopePos(0.05, 1.35, 10, 10, os.lf_triangle(2) * 0.8);
 ```
 
 ----
@@ -547,7 +547,7 @@ process = mo.accelEnvelopeNeg(0.05, 1.35, 10, 10, accX);
 mo = library("motion.lib");
 os = library("oscillators.lib");
 accelEnvelopeNeg_test =
-  mo.accelEnvelopeNeg(0.05, 1.35, 10, 10, os.triangle(2) * (-0.8));
+  mo.accelEnvelopeNeg(0.05, 1.35, 10, 10, os.lf_triangle(2) * (-0.8));
 ```
 
 ----
@@ -590,7 +590,7 @@ os = library("oscillators.lib");
 totalAccel_test =
   mo.totalAccel(0.05, 1.2, 8, 12,
     os.sawtooth(0.2) * 0.2,
-    os.triangle(0.15) * 0.1,
+    os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
 ```
 
@@ -636,7 +636,7 @@ os = library("oscillators.lib");
 totalAccelRange_test =
   mo.totalAccelRange(0.1, 0.4, 8, 12,
     os.sawtooth(0.2) * 0.2,
-    os.triangle(0.15) * 0.1,
+    os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
 ```
 
@@ -683,7 +683,7 @@ os = library("oscillators.lib");
 totalAccelUD_test =
   mo.totalAccelUD(0.05, 1.2, 120, 40,
     os.sawtooth(0.2) * 0.2,
-    os.triangle(0.15) * 0.1,
+    os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
 ```
 
@@ -761,7 +761,7 @@ process = mo.gyroEnvelopePos(0.01, 0.8, 50, 50, gx);
 mo = library("motion.lib");
 os = library("oscillators.lib");
 gyroEnvelopePos_test =
-  mo.gyroEnvelopePos(0.02, 0.9, 25, 30, os.triangle(3) * 0.8);
+  mo.gyroEnvelopePos(0.02, 0.9, 25, 30, os.lf_triangle(3) * 0.8);
 ```
 
 ----
@@ -798,7 +798,7 @@ process = mo.gyroEnvelopeNeg(0.01, 0.8, 50, 50, gx);
 mo = library("motion.lib");
 os = library("oscillators.lib");
 gyroEnvelopeNeg_test =
-  mo.gyroEnvelopeNeg(0.02, 0.9, 25, 30, os.triangle(3) * (-0.8));
+  mo.gyroEnvelopeNeg(0.02, 0.9, 25, 30, os.lf_triangle(3) * (-0.8));
 ```
 
 ----
@@ -839,7 +839,7 @@ os = library("oscillators.lib");
 totalGyro_test =
   mo.totalGyro(0.02, 0.9, 25, 30,
     os.sawtooth(0.2) * 0.2,
-    os.triangle(0.15) * 0.1,
+    os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
 ```
 
@@ -928,9 +928,9 @@ mo = library("motion.lib");
 os = library("oscillators.lib");
 orientation6_test =
   mo.orientation6(
-    os.triangle(0.05),
+    os.lf_triangle(0.05),
     os.sawtooth(0.08),
-    os.triangle(0.03),
+    os.lf_triangle(0.03),
     1, 1, 1, 1, 1, 1,
     10);
 ```
