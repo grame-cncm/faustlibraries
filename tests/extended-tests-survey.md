@@ -213,8 +213,8 @@ The plan was:
 
 ### 4.2 Blocked by existing precision debt
 
-These need a better realization first, as the ten `tf2s` jump tests of
-`filters.lib` do (rule 9: no new baseline entry). The tests below were
+These need a better realization first, as `peak_eq_rm_jump_test` and
+`wgr_jump_test` of `filters.lib` do (rule 9: no new baseline entry). The tests below were
 written and run through `check_precision.py` at the six rates on
 2026-10-02; section 5 gives their text.
 
@@ -234,6 +234,8 @@ written and run through `check_precision.py` at the six rates on
   - `pm.modeFilter`, jump: 0.12. It is behind every bell, the marimba and
     the djembe.
   - `ve.moog_vcf_2b`, jump: 0.27. Two direct-form `tf2s` sections.
+    **Reactivated** with #273 (`tf2s` as two trapezoidal integrators), with
+    its modulated test.
   - `os.oscq`, modulated: 8.9e-3. It is `fi.wgr`, as is `wgr_jump_test`.
   - `an.goertzel`, slider at 50 Hz with n = 4096: 1.3e-3.
 - **Pass today, contrary to the first reading: they move to 4.1.**
@@ -282,41 +284,29 @@ test, under the procedure below, and removes it from this list.
    from the paragraph on the excluded jump tests in `contributing.md`
    (section *Constant, slider, modulated and jump tests*).
 
-### 5.1 filters.lib: the ten `_jump_test` left out of the filters.lib jump tests
+### 5.1 filters.lib: the two `_jump_test` left out of the filters.lib jump tests
 
 They are generated from each function's `_modulated_test`: the triangle is
-replaced by the square `sq`. All but `wgr` are built on the direct-form
-`fi.tf2s`. Expect them to pass with the TPT `tf2s` of #273, stacked on #272.
-The level gap is the worst float/double gap over the six rates, measured
-2026-10-02.
+replaced by the square `sq`. Ten were left out at first. The eight built on
+the direct-form `fi.tf2s` (`resonlp`, `resonhp`, `resonbp`, `peak_eq`,
+`peak_eq_cq`, `highpass3e`, `highpass6e`, `highpass_plus_lowpass`) were
+reactivated by #273, where `tf2s` is two trapezoidal integrators: their
+worst float/double gap fell to 2.9e-7 at most. The two left are not built on
+`tf2s`: `peak_eq_rm` is a direct-form `fi.tf2` allpass, and `wgr` a
+second-order waveguide resonator. The level gap is the worst float/double
+gap over the six rates, measured 2026-10-02.
 
 | Test | Test file | Level gap (rate) |
 |---|---|---|
-| `resonlp_jump_test` | `filters_resonator_tests.dsp` | 1.1e-01 (96 kHz) |
-| `resonhp_jump_test` | `filters_resonator_tests.dsp` | 1.1e-01 (96 kHz) |
-| `resonbp_jump_test` | `filters_resonator_tests.dsp` | 1.1e-01 (96 kHz) |
-| `peak_eq_jump_test` | `filters_parametric_eq_tests.dsp` | 2.9e-01 (96 kHz) |
-| `peak_eq_cq_jump_test` | `filters_parametric_eq_tests.dsp` | 3.0e-01 (96 kHz) |
 | `peak_eq_rm_jump_test` | `filters_parametric_eq_tests.dsp` | 1.5e-01 (192 kHz) |
-| `highpass3e_jump_test` | `filters_elliptic_tests.dsp` | 4.7e-01 (176.4 kHz) |
-| `highpass6e_jump_test` | `filters_elliptic_tests.dsp` | 5.3e-01 (192 kHz) |
-| `highpass_plus_lowpass_jump_test` | `filters_delay_equalizing_allpass_tests.dsp` | 4.3e-02 (96 kHz) |
 | `wgr_jump_test` | `filters_useful_special_tests.dsp` | 1.1e-03 (176.4 kHz) |
 
-At constant settings, at either end of the range, these filters stay
-within 1.7e-4. The two exceptions are `resonlp` at 20 Hz (3.1e-2, the #263
-weakness) and `wgr` at 100 Hz (1.3e-3). The jump is what breaks them.
+At constant settings, at either end of the range, the ten stayed within
+1.7e-4. The two exceptions were `resonlp` at 20 Hz (3.1e-2 before #273, the
+#263 weakness) and `wgr` at 100 Hz (1.3e-3). The jump is what breaks them.
 
 ```
-resonlp_jump_test = no.noise : fi.resonlp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
-resonhp_jump_test = no.noise : fi.resonhp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
-resonbp_jump_test = no.noise : fi.resonbp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
-peak_eq_jump_test = no.noise : fi.peak_eq(6, fx, fx/5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250, sq); };
-peak_eq_cq_jump_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, sq), 4) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 peak_eq_rm_jump_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250, sq); };
-highpass3e_jump_test = no.noise : fi.highpass3e(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
-highpass6e_jump_test = no.noise : fi.highpass6e(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
-highpass_plus_lowpass_jump_test = no.noise : fi.highpass_plus_lowpass(3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 wgr_jump_test = fi.wgr(100*pow(20, sq), 0.995, no.noise) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
@@ -336,8 +326,6 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 | `peaking2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in single, every rate | #271, to be checked |
 | `lowshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
 | `highshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
-| `moog_vcf_2b_jump_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | 0.27 | a TPT `tf2s` (#273) |
-| `moog_vcf_2b_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | 2.1e-3 | a TPT `tf2s` (#273) |
 | `bandpass2Matched_slider_test`, `autowah_slider_test`, `crybaby_slider_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | the debt of their `_test` (non-finite at 176.4 kHz, 2.3e-3, 3.1e-2) | #271, #270 |
 | `modeFilter_jump_test` | `physmodels.lib`, `physmodels_tests.dsp` | 0.12 | #269 (modeFilter as a Chamberlin state-variable section) |
 | `oscq_modulated_test` | `oscillators.lib`, `oscillators_tests.dsp` | 8.9e-3 | a better `fi.wgr` (with `wgr_jump_test`) |
@@ -358,8 +346,6 @@ bandpass2Matched_modulated_test = no.noise : ve.bandpass2Matched(20*pow(250, tri
 peaking2Matched_modulated_test = no.noise : ve.peaking2Matched(2, 20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 lowshelf2Matched_modulated_test = no.noise : ve.lowshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 highshelf2Matched_modulated_test = no.noise : ve.highshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-moog_vcf_2b_jump_test = no.noise : ve.moog_vcf_2b(0.95, 20*pow(500, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
-moog_vcf_2b_modulated_test = no.noise : ve.moog_vcf_2b(0.95, 20*pow(500, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 modeFilter_jump_test = 0.01*no.noise : pm.modeFilter(50*pow(100, sq), 1, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 oscq_modulated_test = os.oscq(20*pow(500, tri)) : _, ! with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 goertzel_slider_test = an.goertzel(hslider("freq", 50, 20, 1000, 1), 4096, no.noise);
