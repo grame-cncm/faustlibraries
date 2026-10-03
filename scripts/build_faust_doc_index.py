@@ -646,7 +646,7 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
             continue
 
         if section == "usage":
-            if trimmed:
+            if trimmed and not is_separator_line(trimmed):
                 usage_buffer.append(trimmed)
             continue
 
