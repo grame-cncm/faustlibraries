@@ -135,13 +135,21 @@ def symbol_re(symbol):
 
 
 def owner(test, symbols):
-    """The documented function a test belongs to: the longest symbol prefix."""
+    """The documented function a test belongs to: the longest symbol prefix.
+
+    The length is the one of the name the prefix stands for, so that
+    `mth_octave_filterbank3_bands_test` goes to `mth_octave_filterbank3`
+    and not to the generic `mth_octave_filterbank[n]`, which covers the same
+    name: at equal length, an exact symbol wins over a generic one.
+    """
     stem = test[:-len("_test")]
-    best = None
+    best, best_key = None, None
     for s in symbols:
-        if re.match(r"^" + symbol_re(s) + r"(_|$)", stem):
-            if best is None or len(s) > len(best):
-                best = s
+        m = re.match(r"^(" + symbol_re(s) + r")(_|$)", stem)
+        if m:
+            key = (len(m.group(1)), "[" not in s)
+            if best is None or key > best_key:
+                best, best_key = s, key
     return best
 
 
@@ -378,8 +386,14 @@ def add(args):
             # The library's own test file first: a test of another library
             # can carry the function's name (demos_tests.dsp has
             # twin_osc_demo_test, a test of dm.twin_osc_demo).
+            # The tests of the other functions of the same doc block count
+            # too: spectral_level_test goes next to
+            # mth_octave_spectral_level6e_test in analyzers_tests.dsp, not
+            # next to spectral_level_demo_test, a test of dm., in
+            # demos_tests.dsp.
             own = os.path.splitext(os.path.basename(args.lib))[0] + "_tests.dsp"
-            homes = sorted({p for t, p in in_dsp.items() if owner_a(t) == fn},
+            block = set(by_symbol[fn].symbols)
+            homes = sorted({p for t, p in in_dsp.items() if owner_a(t) in block},
                            key=lambda p: (os.path.basename(p) != own, p))
             path = homes[0] if homes else args.tests_file
         if path is None:
