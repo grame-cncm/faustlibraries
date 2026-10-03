@@ -23,6 +23,7 @@ or later.
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
 | **Documentation checks** | | |
 | [`checkdoc.py`](#checkdocpy) | documentation and license gate, against a baseline | `make checkdoc` |
+| [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters | `make check-usage`, `checkdoc.py` (`--changed`) |
 | [`audit2.py`](#audit2py) | documentation coverage per library | `checkdoc.py` |
 | [`audit.py`](#auditpy) | naive coverage audit, kept for comparison | — |
 | [`build_standard_functions.py`](#build_standard_functionspy) | generates `doc/docs/standardFunctions.md` | `checkdoc.py` (`--check`) |
@@ -43,6 +44,7 @@ are run by `doc/Makefile`.
 **Prerequisites**, by use:
 
 - tests: `faust` and a C++17 compiler; `check_precision.py` also needs `numpy`;
+- `check_usage.py`: `faust` (`checkdoc.py` skips that check without it);
 - figures: `faust`, `g++`, `numpy` and `matplotlib`;
 - certification: `faust-rs` and `lean` (4.31);
 - everything else: the Python standard library only.
@@ -364,10 +366,55 @@ The gate to pass before every commit. It fails on:
 4. a non-canonical license string (`normalize_licenses.py --check`);
 5. a drop in the number of symbols of the JSON export
    (`build_faust_doc_index.py`), which means the doc-block format drifted away
-   from what the exporter understands.
+   from what the exporter understands;
+6. a `#### Usage` section, in a library that differs from `HEAD`, that
+   `check_usage.py --changed` rejects (when `faust` is installed).
 
 `--update-baseline` records the current debt as accepted. Never use it to hide a
 gap you introduced. Exit status 1 on any regression.
+
+### `check_usage.py`
+
+```
+scripts/check_usage.py [--lib xx.lib] [--symbol xx.name] [--changed] [-v] [-j JOBS]
+scripts/check_usage.py --update-baseline
+make check-usage [USAGE_ARGS="..."]
+```
+
+Compiles the `#### Usage` section of every symbol of the JSON export. A
+Usage line such as `_ : lowpass(N,fc) : _` is a Faust expression: once `N`
+and `fc` have values, `faust -e` evaluates it, and its sequential
+compositions fail when the buses do not match the arity of the call. Each
+Usage line that names the symbol becomes `process = <line>;`, where:
+
+- `(fi.)lowpass` and the bare names of the symbol's library are qualified
+  (`fi.lowpass`), and `hslider(...)` reads as a control input `_`;
+- the parameters of the library's calls take the values of the same calls in
+  the `#### Test` section, whose definitions are in scope; a definition line
+  of the Usage (`index = 1.69;`) is kept;
+- a name still without a value reads as a signal `_` on a bus
+  (`excitation : bowTable(offset,slope) : _`) and as an arbitrary value, 2,
+  in an argument (`isnan(x)`); a failure after such an arbitrary value is
+  reported as `unbound`, since the value may be the cause;
+- a bus written with `...` (`_,_, ... : f(N) : _,_, ...`) states a variable
+  channel count: it is dropped, and only the call is checked;
+- prose lines are skipped, but the `` `code` `` they quote is checked; a
+  statement may continue over several lines, and `-> result` ends it.
+
+It then checks that the arguments of the call and the bullets of `Where:`
+name the same parameters. A symbol fails as `arity`, `unbound` (a name with
+no value: a parameter the Test section does not exercise, or an unqualified
+name such as `bus` for `si.bus`), `syntax`, `pseudo` (a `...` placeholder in
+an argument list), `missing` (no Usage line names it), `params` (Usage and
+`Where:` disagree) or `error`. The accepted debt is pinned symbol by symbol,
+with its kind of failure, in `tests/usage-baseline.json`: a symbol that is not
+there must pass, an entry must still fail the same way, and an entry that
+passes is reported, to be removed in the commit that fixes it.
+
+`--symbol` prints the programs it compiled. A full run takes about a minute
+(`dx.algorithms` alone, 50 s); `checkdoc.py` runs it with `--changed`, on the
+libraries that differ from `HEAD` or are new. Exit status 1 on any
+regression.
 
 ### `audit2.py`
 

@@ -11,7 +11,10 @@
 # `make check-cpu`  - measure the CPU cost of the tests (ns/frame, % of a core), and with
 #                     CPU_ARGS="--base REV" the ratio new / base against the libraries of REV.
 # `make check-cpu-matrix` - the same with C++ -O3 -ffast-math, -O3, and Faust -vec in turn.
-# `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses.
+# `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses,
+#                     and compile the Usage sections of the libraries changed since HEAD.
+# `make check-usage` - compile the #### Usage section of every documented symbol
+#                     (arity, parameters) against tests/usage-baseline.json.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
@@ -68,7 +71,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix checkdoc check-usage plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -163,6 +166,9 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 
 checkdoc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.json)
 	@$(PYTHON) scripts/checkdoc.py
+
+check-usage: ## Compile every #### Usage section (baseline: tests/usage-baseline.json); USAGE_ARGS="--lib xx.lib"
+	@$(PYTHON) scripts/check_usage.py $(USAGE_ARGS)
 
 plots: ## Regenerate the SVG plots, then rebuild the doc pages that embed them
 	@$(PYTHON) scripts/plot_lib.py

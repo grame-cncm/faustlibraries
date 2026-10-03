@@ -10,6 +10,7 @@ file is the operational summary.
 
 ```bash
 make checkdoc    # documentation & license gate - run before every commit
+make check-usage # compile every #### Usage section (checkdoc does the changed libraries)
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
@@ -25,7 +26,12 @@ Every script behind these targets is described in `scripts/README.md`.
   `#### Test`), a stale `doc/docs/standardFunctions.md`, and any
   non-canonical license string. Accepted historical debt is pinned in
   `tests/doc-baseline.json`; never regenerate that baseline to silence a
-  failure you caused.
+  failure you caused. With `faust` installed, it also compiles the
+  `#### Usage` sections of the libraries changed since `HEAD`
+  (`scripts/check_usage.py --changed`): the buses must match the arity of
+  the call, and its parameters the `Where:` bullets. The debt is pinned in
+  `tests/usage-baseline.json`, under the same rule; a fix that makes an
+  entry pass removes it in the same commit.
 - The test references (`tests/reference/`, ~1.4 GB) are local build
   artifacts: generate them with `make reference`, never commit them. Same
   for the built site (`site/`) and `tests/build|output`; `.gitignore`
@@ -44,7 +50,9 @@ Every script behind these targets is described in `scripts/README.md`.
 
 1. **Every new public function** needs, in the same commit:
    - a full documentation block (description, `#### Usage` showing the
-     input/output shape, `Where:` for each parameter, `#### Test`);
+     input/output shape as a Faust expression that compiles, like
+     `_ : wgr(f,r) : _,_`, `Where:` for each parameter of that call,
+     `#### Test`);
    - a `functionName_test` entry in the matching `tests/*.dsp` file, copied
      from the block's `#### Test` (rule 8), and its reference generated with
      `make reference`;

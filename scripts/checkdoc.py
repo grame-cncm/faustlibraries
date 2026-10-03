@@ -17,7 +17,11 @@ regression, without requiring the historical debt to be paid first:
   5. the LLM-facing JSON export (scripts/build_faust_doc_index.py) must
      still parse every documented symbol: its symbol count may only grow
      against the recorded baseline (a drop means the doc-block format
-     drifted away from what the exporter understands).
+     drifted away from what the exporter understands);
+  6. the #### Usage sections of the libraries changed since HEAD must
+     compile, with the arity of the call and the parameters of their
+     Where: section (scripts/check_usage.py --changed, against
+     tests/usage-baseline.json); skipped when faust is not installed.
 
 Usage:
     scripts/checkdoc.py                    # verify, exit 1 on regression
@@ -27,6 +31,7 @@ Run it before committing library changes; `make checkdoc` is an alias.
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -138,17 +143,36 @@ def main():
         for line in (r.stdout.strip() or r.stderr.strip()).splitlines():
             errors.append(line)
 
-    if errors:
-        for e in errors:
+    # 6. the Usage sections of the changed libraries compile
+    usage_note, usage_errors = "", []
+    if shutil.which("faust"):
+        r = subprocess.run([PYTHON, "scripts/check_usage.py", "--changed"],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            usage_errors = [line for line in r.stdout.strip().splitlines()
+                            if line.startswith("check_usage: ")
+                            and not line.startswith("check_usage: FAILED")]
+            if r.stderr.strip():
+                usage_errors.append(r.stderr.strip())
+    else:
+        usage_note = " Usage sections not compiled: faust not found."
+
+    if errors or usage_errors:
+        for e in errors + usage_errors:
             print("checkdoc: %s" % e)
-        print("checkdoc: FAILED (%d problem(s))." % len(errors))
-        print("If a reported symbol is deliberate accepted debt, rerun with"
-              " --update-baseline and commit %s." % BASELINE)
+        print("checkdoc: FAILED (%d problem(s))." % len(errors + usage_errors))
+        if errors:
+            print("If a reported symbol is deliberate accepted debt, rerun with"
+                  " --update-baseline and commit %s." % BASELINE)
+        if usage_errors:
+            print("A failing Usage is fixed in the Usage (or in the Test section that"
+                  " gives its parameters values); scripts/check_usage.py --symbol"
+                  " xx.name prints the program it compiles.")
         sys.exit(1)
     n_undoc = sum(len(v["undocumented"]) for k, v in debt.items()
                   if not k.startswith("_"))
     print("checkdoc: OK (accepted debt: %d undocumented symbols, no new gaps,"
-          " %d exported symbols)." % (n_undoc, n_index))
+          " %d exported symbols).%s" % (n_undoc, n_index, usage_note))
 
 
 if __name__ == "__main__":
