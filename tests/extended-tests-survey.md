@@ -42,7 +42,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 - **Feature never exercised.**
   - The `limiter_lad_*` tests never limit: a sine at 1 against a ceiling of 1 (`limiter_lad_N_modulated_test` and `_jump_test` now do).
   - The gate tests never close the gate (the `gate_gain_mono` modulated and jump tests now do).
-  - `tapeStop_test` never stops: its `button` is at 0 (`tapeStop_jump_test` now stops).
+  - `tapeStop_test` held its `stop` button down for the whole run, like every button of every test (#281, below): the tape stopped at the start and never resumed. The harnesses now release it halfway, and `tapeStop_jump_test` stops and resumes every 0.25 s.
   - No compressor or expander test used `prePost = 1` (`peak_compression_gain_mono_db_post_test` now does).
   - Every compressor test uses a steady sine, so release is hardly exercised (the modulated and jump tests now move it on noise bursts).
 - **Near-silent references.**
@@ -72,6 +72,11 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
   - The generic `[N]` symbols (`fdelay[N]`) are not listed.
   - The `genericNode_Vout`/`Iout` tests sit inside `genericNode`'s block.
   - A stray `#### Test` in the oscillators section header repeats `sawNp_test`.
+
+**Buttons and checkboxes (#281).** Both harnesses (`arch/print_arch.cpp` for `make check`, `arch/precision_arch.cpp` for `make check-precision`) held every button and checkbox at 1 for the whole run: a checkbox was registered as a button, and the "OFF" step called `buttonON()`. Bypassed effects were never tested, nor a release, a note-off or the other state of a checkbox. **Fixed**: every button and checkbox is ON for the first half of the render and OFF for the second half. 115 references change, all in their second half only. `check-precision` then found:
+- `crybaby_demo_test`, 4.6e-3: the demo now runs `ve.crybaby`, whose float debt is pinned for `crybaby_test` (0.0306). Pinned the same way, to be removed with #270.
+- `hammer_test` and `hammer_slider_test`, 9.3e-3 and 2.6e-2: once released, the nearly undamped hammer (`sigma0 = 0.01`) bounces freely on the string, and each contact crosses the `(uh - u) > 0` threshold one sample apart in float and double. The tests now use `sigma0 = 10`, at which the released hammer settles (8.2e-6).
+- `orientation6_demo_test` no longer needs its baseline entry.
 
 ## 4. Where the extended tests belong
 

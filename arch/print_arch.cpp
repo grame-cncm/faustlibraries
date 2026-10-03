@@ -43,7 +43,12 @@ struct ControlUI : public GenericUI {
     }
     virtual void addCheckButton(const char* label, FAUSTFLOAT* zone)
     {
-        fButtons.push_back(Control(label, zone));
+        fCheckbox.push_back(Control(label, zone));
+    }
+
+    bool hasControls() const
+    {
+        return !fButtons.empty() || !fCheckbox.empty();
     }
     
     void buttonON()
@@ -124,37 +129,52 @@ int main(int argc, char* argv[])
     FAUSTFLOAT** inputBuffer = numInputs ? inputPtrs.data() : nullptr;
     FAUSTFLOAT** outputBuffer = numOutputs ? outputPtrs.data() : nullptr;
     
-    // Button and checkbox ON on the first buffer
+    // Control schedule, shared with precision_arch.cpp: every button and
+    // checkbox is ON (1) for the first half of the printed frames and OFF (0)
+    // for the second half, so that a gate is pressed then released and a
+    // checkbox (a bypass, a mode) is rendered in both states, with the
+    // transition between them. The run is cut at the release only when the
+    // program has a button or a checkbox: the length of each compute() call
+    // is the block size (ma.BS), which some functions read.
     control.buttonON();
     control.checkboxON();
-    
+
     std::cout << std::setprecision(10);
-    
+
+    // Print `count` frames of the last compute(), the first one being frame `start`.
+    auto print = [&](int start, int count) {
+        for (int frame = 0; frame < count; ++frame) {
+            std::cout << start + frame;
+            for (int ch = 0; ch < numOutputs; ++ch) {
+                std::cout << '\t' << outputs[ch][frame];
+            }
+            std::cout << '\n';
+        }
+    };
+
     dsp->compute(kWarmup, inputBuffer, outputBuffer);
-    
     // Print at most what was asked for: a short run stops inside the warm-up.
-    for (int frame = 0; frame < std::min(frames, kWarmup); ++frame) {
-        std::cout << frame;
-        for (int ch = 0; ch < numOutputs; ++ch) {
-            std::cout << '\t' << outputs[ch][frame];
+    print(0, std::min(frames, kWarmup));
+
+    if (control.hasControls()) {
+        const int release = std::max(frames / 2, kWarmup);
+        const int pressed = std::max(std::min(release, frames) - kWarmup, 0);
+        if (pressed > 0) {
+            dsp->compute(pressed, inputBuffer, outputBuffer);
+            print(kWarmup, pressed);
         }
-        std::cout << '\n';
-    }
-    
-    // Button and checkbox OFF
-    control.buttonON();
-    control.checkboxOFF();
-    
-    // Then regular computation
-    dsp->compute(frames, inputBuffer, outputBuffer);
-    
-    for (int frame = 0; frame < frames - kWarmup; ++frame) {
-        std::cout << frame + kWarmup;
-        for (int ch = 0; ch < numOutputs; ++ch) {
-            std::cout << '\t' << outputs[ch][frame];
+        control.buttonOFF();
+        control.checkboxOFF();
+        const int released = std::max(frames - kWarmup - pressed, 0);
+        if (released > 0) {
+            dsp->compute(released, inputBuffer, outputBuffer);
+            print(kWarmup + pressed, released);
         }
-        std::cout << '\n';
+    } else {
+        // Then regular computation
+        dsp->compute(frames, inputBuffer, outputBuffer);
+        print(kWarmup, std::max(frames - kWarmup, 0));
     }
-     
+
     return 0;
 }

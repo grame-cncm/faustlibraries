@@ -68,14 +68,14 @@ hammer_test = os.tosc(5)
   : fd.hammer(
       0.1,
       1000,
-      0.01,
+      10,
       1e5,
       2.0,
       1.0/48000,
       0.001,
       button("hammer:trigger")
     );
-hammer_slider_test = os.tosc(5) : fd.hammer(hslider("hammer:coeff", 0.1, 0, 1, 0.001), hslider("hammer:omega0Sqr", 1000, 0, 100000, 1), hslider("hammer:sigma0", 0.01, 0, 1, 0.001), hslider("hammer:kH", 100000.0, 0, 1000000.0, 1), hslider("hammer:alpha", 2.0, 1, 4, 0.01), 1.0/48000, hslider("hammer:offset", 0.001, 0, 0.01, 0.0001), button("hammer:trigger"));
+hammer_slider_test = os.tosc(5) : fd.hammer(hslider("hammer:coeff", 0.1, 0, 1, 0.001), hslider("hammer:omega0Sqr", 1000, 0, 100000, 1), hslider("hammer:sigma0", 10, 0, 100, 0.01), hslider("hammer:kH", 100000.0, 0, 1000000.0, 1), hslider("hammer:alpha", 2.0, 1, 4, 0.01), 1.0/48000, hslider("hammer:offset", 0.001, 0, 0.01, 0.0001), button("hammer:trigger"));
 
 bow_test = os.tosc(5)
   : fd.bow(0.05, 2.0, 1.0/48000, 0.1);

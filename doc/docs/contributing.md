@@ -312,6 +312,7 @@ Before preparing a pull-request, the new library must be carefully tested:
 - finally, `make checkdoc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted.
 - new code must also be checked in single and double precision, from 44.1 to 192 kHz, as described below: `make check` covers neither, `make check-precision` does.
 - a function whose parameters are meant to vary at run time is tested with constant, slider and modulated parameters, as described below: the three run different code.
+- buttons and checkboxes are driven by the harnesses (`arch/print_arch.cpp` for `make check`, `arch/precision_arch.cpp` for `make check-precision`): every button and checkbox is ON (1) for the first half of the rendered frames and OFF (0) for the second half. A gate is pressed then released, so a release, a note-off or a retrigger is exercised; a checkbox, a bypass for example, is rendered in both states, with the transition between them. Sliders and number entries keep their default value for the whole run. (Until October 2026 the buttons and checkboxes stayed ON for the whole run, so bypassed effects and releases were never tested, #281.)
 
 ### Constant, slider, modulated and jump tests
 

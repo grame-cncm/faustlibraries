@@ -163,8 +163,9 @@ it is.
   (`flasharch_footer.cpp`, copied with its MIT license into `arch/cpu_arch.cpp`):
   noise on the inputs, 512-frame blocks, a spin that gets the process onto a
   performance core before anything is timed, warm-up, and the minimum over
-  repetitions. Buttons are pressed, as in `print_arch.cpp`, so that an
-  instrument test is not timed on silence.
+  repetitions. Buttons and checkboxes are held pressed for the whole timing,
+  so that an instrument test is not timed on silence (`print_arch.cpp` and
+  `precision_arch.cpp` release them halfway through the render instead).
 - **The protocol** around it: builds in parallel, timing strictly sequential;
   no timing on battery power (macOS, `--allow-battery` to override); a pause
   after the builds; then each test in turn, over `--rounds` rounds (3) in which
