@@ -42,7 +42,9 @@ lf_rawsaw_test = os.lf_rawsaw(128);
 lf_sawpos_test = os.lf_sawpos(3);
 lf_sawpos_slider_test = os.lf_sawpos(hslider("lf_sawpos:freq", 3, 0.01, 100, 0.01));
 lf_sawpos_modulated_test = os.lf_sawpos(0.01*pow(10000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lf_sawpos_negfreq_test = os.lf_sawpos(-0.1);
 lf_sawpos_phase_test = os.lf_sawpos_phase(3, 0.25);
+lf_sawpos_phase_lowfreq_test = os.lf_sawpos_phase(0.1, 0.5);
 lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(10000));
 lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, ba.pulse(10000));
 lf_saw_test = os.lf_saw(3);
@@ -165,6 +167,7 @@ polyblep_square_modulated_test = os.polyblep_square(20*pow(1000, tri)) with { P 
 polyblep_triangle_test = os.polyblep_triangle(220);
 polyblep_triangle_modulated_test = os.polyblep_triangle(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 polyblep_triangle_jump_test = os.polyblep_triangle(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+polyblep_triangle_5k_test = os.polyblep_triangle(5000);
 oscrp_test = os.oscrp(440, 0.5);
 oscr_test = os.oscr(440);
 SAFE_test = os.SAFE, os[SAFE=1;].phasor(1.0, -.001);
