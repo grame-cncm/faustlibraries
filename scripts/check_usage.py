@@ -591,7 +591,10 @@ def evaluate(sym, expr, bindings, defs, prefixes, workdir, programs, wrap=None):
     while True:
         src = program(sym, wrap(expr) if wrap else expr, bindings, defs, prefixes)
         programs.append(src)
-        path = Path(workdir) / (sym["qname"].replace(".", "_") + f"_{len(programs)}.dsp")
+        # one directory per call: fi.tf2 and fi.TF2 are the same file name
+        # on a case-insensitive file system (macOS), and the threads would
+        # overwrite each other's program
+        path = Path(tempfile.mkdtemp(dir=workdir)) / (sym["qname"].replace(".", "_") + ".dsp")
         path.write_text(src, encoding="utf-8")
         try:
             # -e stops after the evaluation, which checks names and arities;
