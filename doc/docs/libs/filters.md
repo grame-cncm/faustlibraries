@@ -3512,7 +3512,8 @@ _ : levelfilter(L,freq) : _
 
 Where:
 
-* `L`: desired level (in dB) at Nyquist limit (SR/2), e.g., -60
+* `L`: level, linear between 0 and 1 (not in dB: a negative value gives NaN):
+  1 passes the input unchanged, smaller values lowpass it more
 * `freq`: corner frequency (-3dB point) usually set to fundamental freq
 
 See `levelfilterN` for N such filters in series.
@@ -3526,7 +3527,7 @@ no = library("noises.lib");
 ma = library("maths.lib");
 src = os.tosc(440);
 levelfilter_test = fi.levelfilter(0.1, 200, src);
-levelfilter_slider_test = fi.levelfilter(hslider("L", 0.1, -60, 20, 0.1), hslider("fc", 200, 20, 20000, 1), no.noise);
+levelfilter_slider_test = fi.levelfilter(hslider("L", 0.1, 0, 1, 0.01), hslider("fc", 200, 20, 20000, 1), no.noise);
 levelfilter_modulated_test = fi.levelfilter(0.1, 20*pow(250, tri), no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 levelfilter_jump_test = fi.levelfilter(0.1, 20*pow(250, sq), no.noise) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
@@ -3549,9 +3550,9 @@ _ : levelfilterN(N,freq,L) : _
 
 Where:
 
-* `N`: Number of filters in series where L = L/N, a constant numerical expression
+* `N`: number of `levelfilter` in series, each with the level `L/N`, a constant numerical expression
 * `freq`: corner frequency (-3dB point) usually set to fundamental freq
-* `L`: desired level (in dB) at Nyquist limit (SR/2), e.g., -60
+* `L`: level, linear between 0 and 1 (see `levelfilter`)
 
 #### Test
 ```
@@ -3562,7 +3563,7 @@ no = library("noises.lib");
 ma = library("maths.lib");
 src = os.tosc(440);
 levelfilterN_test = src : fi.levelfilterN(3, 200, 0.1);
-levelfilterN_slider_test = no.noise : fi.levelfilterN(3, hslider("fc", 200, 20, 20000, 1), hslider("L", 0.1, -60, 20, 0.1));
+levelfilterN_slider_test = no.noise : fi.levelfilterN(3, hslider("fc", 200, 20, 20000, 1), hslider("L", 0.1, 0, 1, 0.01));
 levelfilterN_modulated_test = no.noise : fi.levelfilterN(3, 20*pow(250, tri), 0.1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 levelfilterN_jump_test = no.noise : fi.levelfilterN(3, 20*pow(250, sq), 0.1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```

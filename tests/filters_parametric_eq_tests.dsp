@@ -69,10 +69,10 @@ spectral_tilt_modulated_test = no.noise : fi.spectral_tilt(4, 200, 2000, -1 + 2*
 spectral_tilt_jump_test = no.noise : fi.spectral_tilt(4, 200, 2000, -1 + 2*sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 
 levelfilter_test = fi.levelfilter(0.1, 200, src);
-levelfilter_slider_test = fi.levelfilter(hslider("L", 0.1, -60, 20, 0.1), hslider("fc", 200, 20, 20000, 1), no.noise);
+levelfilter_slider_test = fi.levelfilter(hslider("L", 0.1, 0, 1, 0.01), hslider("fc", 200, 20, 20000, 1), no.noise);
 levelfilter_modulated_test = fi.levelfilter(0.1, 20*pow(250, tri), no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 levelfilter_jump_test = fi.levelfilter(0.1, 20*pow(250, sq), no.noise) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 levelfilterN_test = src : fi.levelfilterN(3, 200, 0.1);
-levelfilterN_slider_test = no.noise : fi.levelfilterN(3, hslider("fc", 200, 20, 20000, 1), hslider("L", 0.1, -60, 20, 0.1));
+levelfilterN_slider_test = no.noise : fi.levelfilterN(3, hslider("fc", 200, 20, 20000, 1), hslider("L", 0.1, 0, 1, 0.01));
 levelfilterN_modulated_test = no.noise : fi.levelfilterN(3, 20*pow(250, tri), 0.1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 levelfilterN_jump_test = no.noise : fi.levelfilterN(3, 20*pow(250, sq), 0.1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
