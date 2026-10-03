@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.11.14";
+declare version "1.11.15";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2192,7 +2192,8 @@ with {
   // states: integrators of u = (s/w)^2*V and (s/w)*V, with V = X/A(s)
   tick(s1, s0, x) = 2*v1 - s1, 2*v0 - s0, y
   with {
-    u  = (x - a1/w*s1 - a0/w2*(g*s1 + s0))/(1 + g*(a1/w + g*a0/w2));
+    // times the reciprocal, kept off the states' critical path (see svf)
+    u  = (x - a1/w*s1 - a0/w2*(g*s1 + s0))*(1/(1 + g*(a1/w + g*a0/w2)) : min(ma.MAX));
     v1 = g*u + s1;
     v0 = g*v1 + s0;
     y  = b2*u + b1/w*v1 + b0/w2*v0;
@@ -5081,7 +5082,11 @@ svf = environment {
             v2 + g*v1,
             v0, v1, v2
         with {
-            hp = (v0 - (g+k)*ic1eq - ic2eq)/(1 + g*(g+k));
+            // multiplied by the reciprocal, which min(ma.MAX) (a no-op) keeps
+            // the normalizer from turning back into a division: computed from
+            // the coefficients only, it stays off the states' critical path
+            // (a division there costs about 30 % with a modulated cutoff)
+            hp = (v0 - (g+k)*ic1eq - ic2eq)*(1/(1 + g*(g+k)) : min(ma.MAX));
             v1 = g*hp + ic1eq;
             v2 = g*v1 + ic2eq;
         };
