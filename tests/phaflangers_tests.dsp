@@ -7,6 +7,7 @@ ma = library("maths.lib");
 no = library("noises.lib");
 
 flanger_mono_test = os.tosc(440) : pf.flanger_mono(4096, 1024, 0.7, 0.25, 0);
+flanger_mono_impulse_test = (1-1') : pf.flanger_mono(64, 5, 1, 0.5, 0);
 flanger_mono_slider_test = os.tosc(440) : pf.flanger_mono(4096, hslider("flanger_mono:curdel", 1024, 1, 4095, 1), hslider("flanger_mono:depth", 0.7, 0, 1, 0.01), hslider("flanger_mono:fb", 0.25, 0, 0.99, 0.01), 0);
 flanger_mono_modulated_test = no.noise : pf.flanger_mono(512, 1 + 255*tri, 1, 0.7, 0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 flanger_mono_jump_test = no.noise : pf.flanger_mono(512, 1 + 255*sq, 1, 0.7, 0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };

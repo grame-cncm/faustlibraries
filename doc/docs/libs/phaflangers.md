@@ -33,10 +33,15 @@ _ : flanger_mono(dmax,curdel,depth,fb,invert) : _
 Where:
 
 * `dmax`: maximum delay-line length (power of 2) - 10 ms typical
-* `curdel`: current dynamic delay (not to exceed dmax)
+* `curdel`: current dynamic delay in samples, between 1 and dmax (values below 1 act as 1)
 * `depth`: effect strength between 0 and 1 (1 typical)
 * `fb`: feedback gain between 0 and 1 (0 typical)
 * `invert`: 0 for normal, 1 to invert sign of flanging sum
+
+The output is `0.5*(x + depth*v[n-curdel])` (minus with `invert=1`),
+where `v[n] = x[n] + fb*v[n-curdel]`: the feedback loop and the
+feedforward path have the same delay, so the feedback reinforces the
+comb peaks at every frequency.
 
 #### Test
 ```
@@ -46,6 +51,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
 flanger_mono_test = os.tosc(440) : pf.flanger_mono(4096, 1024, 0.7, 0.25, 0);
+flanger_mono_impulse_test = (1-1') : pf.flanger_mono(64, 5, 1, 0.5, 0);
 flanger_mono_slider_test = os.tosc(440) : pf.flanger_mono(4096, hslider("flanger_mono:curdel", 1024, 1, 4095, 1), hslider("flanger_mono:depth", 0.7, 0, 1, 0.01), hslider("flanger_mono:fb", 0.25, 0, 0.99, 0.01), 0);
 flanger_mono_modulated_test = no.noise : pf.flanger_mono(512, 1 + 255*tri, 1, 0.7, 0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 flanger_mono_jump_test = no.noise : pf.flanger_mono(512, 1 + 255*sq, 1, 0.7, 0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
@@ -71,8 +77,8 @@ _,_ : flanger_stereo(dmax,curdel1,curdel2,depth,fb,invert) : _,_
 Where:
 
 * `dmax`: maximum delay-line length (power of 2) - 10 ms typical
-* `curdel1`: current dynamic delay for the left channel (not to exceed dmax)
-* `curdel2`: current dynamic delay for the right channel (not to exceed dmax)
+* `curdel1`: current dynamic delay in samples for the left channel, between 1 and dmax
+* `curdel2`: current dynamic delay in samples for the right channel, between 1 and dmax
 * `depth`: effect strength between 0 and 1 (1 typical)
 * `fb`: feedback gain between 0 and 1 (0 typical)
 * `invert`: 0 for normal, 1 to invert sign of flanging sum

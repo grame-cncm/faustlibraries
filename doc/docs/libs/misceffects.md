@@ -262,8 +262,6 @@ flat near f1. Implemented using two dc blockers in series.
 High-frequency model = -24 dB/octave slope implemented using a
 fourth-order Butterworth lowpass.
 
-
-
 #### Usage
 ```
 _ : speakerbp(f1,f2) : _
@@ -367,7 +365,9 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 stereo_width_test = os.tosc(440), os.tosc(550) : ef.stereo_width(0.5);
+stereo_width_mono_test = no.noise <: _, *(0.5) : ef.stereo_width(0);
 ```
 
 At `w=0`, the output signal is mono ((left+right)/2 in both channels).
@@ -555,9 +555,9 @@ illustrating these orderings is `process = mesh_square(2);`.
 Reflectively terminated mesh impulsed at one corner:
 
 ```
-mesh_square_test(N,x) = mesh_square(N)~(busi(4*N,x)) // input to corner
-with { 
-    busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); 
+mesh_square_test(N,x) = ef.mesh_square(N)~(busi(4*N,x)) // input to corner
+with {
+    busi(N,x) = si.bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x);
 };
 process = 1-1' : mesh_square_test(4); // all modes excited forever
 ```
@@ -824,7 +824,7 @@ reverseEchoN_test = os.tosc(440) : ef.reverseEchoN(2, 32);
 #### Demo
 
 ```
-_ : dm.reverseEchoN(N) : _,_
+_ : dm.reverse_echo_demo(N) : _,_
 ```
 
 #### Description
@@ -859,7 +859,7 @@ reverseDelayRamped_test = os.tosc(440) : ef.reverseDelayRamped(32, 0.6);
 #### Demo
 
 ```
-_ : ef.reverseDelayRamped(32,0.6) : _,_
+_ : ef.reverseDelayRamped(32,0.6) : _
 ```
 
 
@@ -877,7 +877,11 @@ si.bus(N) : uniformPanToStereo(N) : _,_
 
 Where:
 
-* `N`: Number of input channels to pan down to stereo, a constant numerical expression
+* `N`: Number of input channels to pan down to stereo, a constant numerical expression (N >= 2)
+
+Channel `i` gets gain `1-i/(N-1)` on the left (first) output and
+`i/(N-1)` on the right (second): channel 0 is hard left, channel N-1
+hard right.
 
 #### Test
 ```
