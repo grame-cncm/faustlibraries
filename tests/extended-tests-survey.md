@@ -157,7 +157,7 @@ The plan was:
 - `os.phasor`, `os.osc`, `os.oscsin`: through zero (`2000*(2*tri - 1)`); `os.lf_sawpos`: exp 0.01..100.
 - `os.sawN(3)`: exp 50..20000, not 20..20000. At 20 Hz and 192 kHz its level gap is 8e-2: the DPW method differentiates a cubic of the ramp twice and scales by `(SR/freq)^2`, which cancels in float at low frequencies (the doc already warns about orders 5 and 6). `sawN(2)` passes from 20 Hz.
 - `os.dsf`: `oscc`, `oscs` and `osccN` with `a = 0.95*tri`; `os.rpm`: `sawtooth` and `square`, modulated and jumping.
-- Left as they are: `os.polyblep_triangle` jumping between 20 Hz and 20 kHz reaches 0.17 at 48 kHz, where 20 kHz is a period of 2.4 samples; and `ma.frac` of a negative phase above about -3e-8 is exactly 1 in float, so `os.osc` through zero can index `tablesize`. Faust's default table check (`-ct 1`) clamps the index, which reads the last entry (about -1e-4) instead of the first (0); with `-ct 0` it reads one past the table.
+- Left as they are: `os.polyblep_triangle` jumping between 20 Hz and 20 kHz reaches 0.17 at 48 kHz, where 20 kHz is a period of 2.4 samples; and `ma.frac` of a negative phase above about -3e-8 is exactly 1 in float, so `os.osc` through zero could index `tablesize`. Faust's default table check (`-ct 1`) clamps the index, which reads the last entry (about -1e-4) instead of the first (0); with `-ct 0` it reads one past the table. Since #294, the single-precision phasor is fixed point and its output is a multiple of 2^-24 below 1, so this no longer happens in float; in double, it takes a phase less than 2^-54 (5.6e-17) below 0.
 
 The plan was:
 - `os.phasor`, `os.lf_sawpos`: freq exp 0.01..100, and a through-zero sweep `2000*(2*tri - 1)`. They cover the whole `_phasor_imp` family.
