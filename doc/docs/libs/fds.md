@@ -218,8 +218,11 @@ Where:
 ```
 fd = library("fds.lib");
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 linInterp1D_test = (1, 0.5, -0.5, -1)
   : fd.linInterp1D(4, 1.25);
+linInterp1D_modulated_test = (1, 0.5, -0.5, -1) : fd.linInterp1D(4, 3*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -325,8 +328,11 @@ Where:
 ```
 fd = library("fds.lib");
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 linInterp1DOut_test = (1, 0.25, 0.5, 0.75)
   : fd.linInterp1DOut(4, 1.5);
+linInterp1DOut_modulated_test = (1, 0.25, 0.5, 0.75) : fd.linInterp1DOut(4, 3*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----

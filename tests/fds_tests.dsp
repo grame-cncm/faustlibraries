@@ -6,6 +6,8 @@
 fd = library("fds.lib");
 si = library("signals.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 
 scheme1D = 1, 0.5;
 model1D_test = (1, 0.5)
@@ -25,6 +27,7 @@ stairsInterp2D_test = (1, 0.5, -0.5, -1)
 
 linInterp1D_test = (1, 0.5, -0.5, -1)
   : fd.linInterp1D(4, 1.25);
+linInterp1D_modulated_test = (1, 0.5, -0.5, -1) : fd.linInterp1D(4, 3*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 linInterp2D_test = (1, 0.5, -0.5, -1)
   : fd.linInterp2D(2, 2, 0.6, 1.2);
@@ -37,6 +40,7 @@ stairsInterp2DOut_test = (1, 0.5, -0.5, -1)
 
 linInterp1DOut_test = (1, 0.25, 0.5, 0.75)
   : fd.linInterp1DOut(4, 1.5);
+linInterp1DOut_modulated_test = (1, 0.25, 0.5, 0.75) : fd.linInterp1DOut(4, 3*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 linInterp2DOut_test = (1, 0.5, -0.5, -1)
   : fd.linInterp2DOut(2, 2, 0.6, 1.2);
