@@ -75,6 +75,7 @@ window_flattop_test = an.window_flattop(os.lf_sawpos(100));
 window_bartlett_test = an.window_bartlett(os.lf_sawpos(100));
 window_cosN_test = an.window_cosN((0.5, -0.5), os.lf_sawpos(100));
 window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
+window_tukey_rect_test = an.window_tukey(0, os.lf_sawpos(100));
 window_kaiser_test = an.window_kaiser(8.6, os.lf_sawpos(100));
 rtocv_test = an.rtocv(8, os.tosc(220));
 
