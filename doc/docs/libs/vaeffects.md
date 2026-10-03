@@ -45,7 +45,9 @@ Where:
 
 * `res`: normalized amount of corner-resonance between 0 and 1 
 (0 is no resonance, 1 is maximum)
-* `fr`: corner-resonance frequency in Hz (less than SR/6.3 or so)
+* `fr`: corner-resonance frequency in Hz. The filter is stable for `fr` below
+SR/6.28 at `res` <= 0.25, SR/6.88 at 0.5, SR/7.34 at 0.8 and SR/7.58 as `res`
+approaches 1, so keep `fr` below about SR/7.6
 
 #### Test
 ```
