@@ -804,7 +804,12 @@ with {
     lbcf(dt, fb, damp) = (+ : @ (max(0, (dt - 1)))) ~ (*(1-damp) : (+ ~ *(damp)) : *(fb)) : mem;
      
     origSR = 44100;
-    adaptSR(val) = val*ma.SR/origSR : int;
+    // floor(val*SR/origSR), exact: written val*SR/origSR : int, the Faust
+    // normalizer folds val/origSR into a rounded constant, and int truncates
+    // an exact quotient (1617 at 44.1 kHz, 1760 at 48 kHz) to one sample less
+    // in single precision, sometimes in double. Here the dividend is an exact
+    // multiple of origSR, so the quotient is within a few ulps of an integer.
+    adaptSR(val) = int((m - m % origSR)/origSR + 0.5) with { m = val*int(ma.SR); };
 
 };
 
