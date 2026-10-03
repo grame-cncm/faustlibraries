@@ -4,6 +4,7 @@ pm = library("physmodels.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
 ba = library("basics.lib");
+no = library("noises.lib");
 
 f2l_test = pm.f2l(440);
 l2f_test = pm.l2f(0.75);
@@ -29,6 +30,7 @@ waveguideFd4_test = 0.25, -0.15, 0.05 : pm.waveguideFd4(512, 32);
 waveguide_test = 0.25, -0.15, 0.05 : pm.waveguide(512, 32);
 bridgeFilter_test = os.tosc(110) : pm.bridgeFilter(0.6, 0.4);
 modeFilter_test = os.tosc(110) : pm.modeFilter(440, 1.5, 0.8);
+modeFilter_modulated_test = 0.01*no.noise : pm.modeFilter(50*pow(100, tri), 1, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 stringSegment_test = 0.25, -0.15, 0.05 : pm.stringSegment(1.0, 0.5);
 openString_test = 0.25, -0.15, 0.05 : pm.openString(0.8, 0.5, 0.2, pm.impulseExcitation(ba.pulse(64)));
 nylonString_test = 0.25, -0.15, 0.05 : pm.nylonString(0.8, 0.3, pm.impulseExcitation(ba.pulse(64)));

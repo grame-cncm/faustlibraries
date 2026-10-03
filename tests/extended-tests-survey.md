@@ -187,8 +187,8 @@ The plan was:
 - dx7 `env`, `pitchenv`: slider tests.
 
 **Other libraries**:
-- `webaudio.lib`: the 8 filters, slider, modulated and jump (f0 exp 20..5000). Measured: `lowpass2` modulated, and `lowpass2` and `peaking2` jumps, pass.
-- `instruments.lib`: `bandPass`/`bandPassH` (resonance 50..5000, radius 0.99); `onePole`, `poleZero`, `oneZero0` (coefficient −0.5..−0.999, jump); `asympT60` slider.
+- `webaudio.lib`: the 8 filters, slider, modulated and jump (f0 exp 20..5000). **Done**: 24 tests, all passing. The jumps peak at 11 to 49 on noise: the transient of a direct-form biquad whose coefficients jump, exact in float.
+- `instruments.lib`: `bandPass`/`bandPassH` (resonance 50..5000, radius 0.99); `onePole`, `poleZero`, `oneZero0` (coefficient −0.5..−0.999, jump); `asympT60` slider. **Done**: 16 tests (named `inst_*`), all passing.
 - `hysteresis.lib`: `ja_hysteresis` (k or Ms), `ja_processor` (drive).
 - `mi.lib`: `oscil` (k, z, with an impulse excitation and more damping; at the threshold today); `springDamper`.
 - `spats.lib`: `binauralModel` (az −90..90, jump; probed, passes); `wfs` (source position).
@@ -200,8 +200,8 @@ The plan was:
 - `interpolators.lib`: slider tests for the `interpolate_*` (all their tests are constant-folded today); `lagrangeCoeffs` with a moving x; `interpolate_exponential` after its fix.
 - `fds.lib`: moving `point` for the `linInterp*` functions; `hammer` slider.
 - `pinktrombone.lib`: `tract`/`tract2` tongue parameters. Redo the two existing tests with the integer triangle.
-- `tonestacks.lib`: a constant, a modulated and a jump test on a representative model, for example `ts.bassman(0.5, 0.5, tri)` on `no.noise`. All three were measured and pass. The library has no test at all today.
-- Also passing: `pm.modeFilter` modulated (freq exp 50..5000), `os.oscrs` modulated and jump; `pf.vibrato2_mono` jump on fb (done).
+- `tonestacks.lib`: a constant, a modulated and a jump test on a representative model, for example `ts.bassman(0.5, 0.5, tri)` on `no.noise`. **Done**: `bassman` constant, slider, modulated and jump tests, in its doc block and in a new `tests/tonestacks_tests.dsp`; the jump test passes at 7.3e-4, close to the threshold (the third-order direct form of `tonestack`).
+- Also passing: `pm.modeFilter` modulated (freq exp 50..5000; done, 7.3e-4, close to the threshold), `os.oscrs` modulated (done) and jump (it fails today at 1.7e-3, the `os.oscr*` debt: deferred, 5.2); `pf.vibrato2_mono` jump on fb (done).
 - `hoa.lib`: `encoder3D` elevation; the decorrelation functions, slider.
 
 ### 4.2 Blocked by existing precision debt
@@ -231,7 +231,7 @@ written and run through `check_precision.py` at the six rates on
   - `an.goertzel`, slider at 50 Hz with n = 4096: 1.3e-3.
 - **Pass today, contrary to the first reading: they move to 4.1.**
   - `pm.modeFilter` modulated.
-  - `os.oscrs` modulated and jump.
+  - `os.oscrs` modulated (its jump fails since the triangle is tied to the rate: 1.7e-3).
   - The `webaudio.lib` jumps (`lowpass2`, `peaking2` tried).
   - `pf.vibrato2_mono` jump on fb.
   - `ts.bassman` (`tonestacks.lib`), as a constant test, a modulated test on
@@ -336,6 +336,7 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 | `oscq_modulated_test` | `oscillators.lib`, `oscillators_tests.dsp` | 8.9e-3 | a better `fi.wgr` (with `wgr_jump_test`) |
 | `goertzel_slider_test` | `analyzers.lib`, `analyzers_tests.dsp` | 1.3e-3 | a Goertzel recursion accurate in float at low frequency, or a smaller n |
 | `lfnoise0_slider_test`, `lfnoise0_jump_test`, `lfnoiseN_jump_test`, `lfnoise_jump_test` (and their modulated and slider siblings, which pass by chance) | `noises.lib`, `noises_tests.dsp` | 3.9e-3; 0.24, 0.20, 0.19 | a trigger exact in both precisions: the zero crossings of `os.oscrs` move by one sample between float and double, and each latches another noise value |
+| `oscrs_jump_test` | `oscillators.lib`, `oscillators_tests.dsp` | 1.7e-3 | the `os.oscr*` debt (`oscrs_test` carries 2.05e-3 in the baseline) |
 | `vital_rev_slider_test` | `reverbs.lib`, `reverbs_tests.dsp` | 3.1e-3, the debt of `vital_rev_test` | a chorus LFO whose phase does not drift in float (its `m_lfo_sine` accumulates `freq/SR`, and the chorus moves the delays by up to 2500 samples) |
 | `jpverb_size_modulated_test`, `greyhole_size_modulated_test` | `reverbs.lib`, `reverbs_tests.dsp` | 4.6e-3, 7.1e-3 (a jump of size between 1 and 2: 3.8e-3, 5.2e-3) | delay lengths smoothed accurately in float: `smooth_init(0.9999)` and `(0.995)` glide each prime length to the next, and a 2e-4 relative difference of `1 - s` between float and double moves the fractional delays of the whole network |
 | `greyhole_dt_jump_test` | `reverbs.lib`, `reverbs_tests.dsp` | 1.7e-3 at 176.4 kHz (0.25 to 0.5 s; 8.7e-4 from 0.125 to 0.25 s) | a `de.sdelay` crossfade exact in float: it steps by 1/22050 |
@@ -363,6 +364,7 @@ lfnoise_modulated_test = no.lfnoise(pow(100, tri)) with { P = int(ma.SR/10); tri
 lfnoise_jump_test = no.lfnoise(pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 lfnoiseN_modulated_test = no.lfnoiseN(3, pow(100, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 lfnoiseN_jump_test = no.lfnoiseN(3, pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+oscrs_jump_test = os.oscrs(20*pow(1000, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 vital_rev_slider_test = (os.tosc(330), os.tosc(440)) : re.vital_rev(hslider("vital_rev:prelow", 0.2, 0, 1, 0.01), hslider("vital_rev:prehigh", 0.8, 0, 1, 0.01), hslider("vital_rev:lowcutoff", 0.5, 0, 1, 0.01), hslider("vital_rev:highcutoff", 0.7, 0, 1, 0.01), hslider("vital_rev:lowgain", 0.4, 0, 1, 0.01), hslider("vital_rev:highgain", 0.6, 0, 1, 0.01), hslider("vital_rev:chorus_amt", 0.3, 0, 1, 0.01), hslider("vital_rev:chorus_freq", 0.2, 0, 1, 0.01), hslider("vital_rev:predelay", 0.1, 0, 1, 0.01), hslider("vital_rev:time", 0.7, 0, 1, 0.01), hslider("vital_rev:size", 0.5, 0, 1, 0.01), hslider("vital_rev:mix", 0.4, 0, 1, 0.01));
 jpverb_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.jpverb(3.0, 0.2, 0.5 + 2.5*tri, 0.8, 0, 0.4, 0.9, 0.8, 0.7, 500, 4000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 greyhole_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(2.0, 0.3, 0.5 + 2.5*tri, 0.6, 0.5, 0, 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };

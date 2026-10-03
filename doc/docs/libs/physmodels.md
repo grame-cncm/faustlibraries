@@ -615,7 +615,11 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 modeFilter_test = os.tosc(110) : pm.modeFilter(440, 1.5, 0.8);
+modeFilter_modulated_test = 0.01*no.noise : pm.modeFilter(50*pow(100, tri), 1, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## String Instruments

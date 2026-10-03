@@ -1517,7 +1517,10 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 oscrs_test = os.oscrs(440);
+oscrs_modulated_test = os.oscrs(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 #### References
 

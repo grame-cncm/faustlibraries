@@ -76,6 +76,7 @@ impulse_test = os.impulse;
 oscb_test = os.oscb(440);
 oscrq_test = os.oscrq(440);
 oscrs_test = os.oscrs(440);
+oscrs_modulated_test = os.oscrs(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 oscrc_test = os.oscrc(440);
 oscs_test = os.oscs(440);
 oscs_slider_test = os.oscs(hslider("oscs:freq", 440, 20, 14000, 1));
