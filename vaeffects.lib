@@ -28,7 +28,7 @@ wd = library("wdmodels.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.6.3";
+declare version "1.6.5";
 
 //########################################################################################
 /************************************************************************
@@ -1634,7 +1634,8 @@ highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
 //
 // Where:
 //
-// * `fr`: resonance frequency in Hz
+// * `fr`: resonance frequency in Hz, between 0 and SR/7.34 (about 6 kHz at
+//   44.1 kHz). Above, or below 0, the filter is unstable.
 //
 // #### Test
 // ```
@@ -1658,7 +1659,9 @@ highshelf2Matched(G, CF, x) =  biquad(b0, b1, b2, a1, a2, x)
 wah4(fr) = 4*moog_vcf((3.2/4),fr:si.smooth(0.999));
 
 //------------------------`(ve.)autowah`-----------------------------
-// Auto-wah effect.
+// Auto-wah effect: `crybaby` with its `wah` parameter driven by the
+// input's amplitude envelope (`an.amp_follower`). Input peaks above 1
+// hold the pedal fully forward (`crybaby` clamps `wah` to [0,1]).
 // `autowah` is a standard Faust function.
 //
 // #### Usage
@@ -1675,10 +1678,13 @@ wah4(fr) = 4*moog_vcf((3.2/4),fr:si.smooth(0.999));
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
-// autowah_test = os.tosc(220)
+// no = library("noises.lib");
+// autowah_test = os.tosc(220) : ve.autowah(0.7);
+// autowah_slider_test = os.tosc(220)
 //   : ve.autowah(
 //       hslider("autowah:level", 0.7, 0, 1, 0.01)
 //     );
+// autowah_hot_test = 4*no.noise : ve.autowah(1);
 // ```
 //------------------------------------------------------------
 autowah(level,x) = level * crybaby(an.amp_follower(0.1,x),x) + (1.0-level)*x;
@@ -1695,42 +1701,68 @@ autowah(level,x) = level * crybaby(an.amp_follower(0.1,x),x) + (1.0-level)*x;
 //
 // Where:
 //
-// * `wah`: "pedal angle" from 0 to 1
+// * `wah`: "pedal angle" from 0 to 1. Values outside are clamped to
+//   this range: without the clamp, the poles leave the unit circle
+//   above about 2.08 at 44.1 kHz (2.58 at 192 kHz).
 //
 // #### Test
 // ```
 // ve = library("vaeffects.lib");
 // os = library("oscillators.lib");
-// crybaby_test = os.tosc(220)
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// crybaby_test = os.tosc(220) : ve.crybaby(0.3);
+// crybaby_slider_test = os.tosc(220)
 //   : ve.crybaby(
 //       hslider("crybaby:wah", 0.3, 0, 1, 0.01)
 //     );
+// crybaby_modulated_test = no.noise : ve.crybaby(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// crybaby_jump_test = no.noise : ve.crybaby(sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// crybaby_noise_test = no.noise : ve.crybaby(0);
+// crybaby_clamp_test = no.noise <: ve.crybaby(-1), ve.crybaby(3);
 // ```
 //
 // #### References
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/vegf.html>
 //------------------------------------------------------------
-crybaby(wah) = *(gs) : fi.tf2(1,-1,0,a1s,a2s)
+crybaby(wah,x) = tick ~ (_,_) : !,_
 with {
-  Q  = pow(2.0,(2.0*(1.0-wah)+1.0)); // Resonance "quality factor"
-  fr = 450.0*pow(2.0,2.3*wah);       // Resonance tuning
-  g  = 0.1*pow(4.0,wah);             // gain (optional)
+  // Documented range. Above it the pole radius 1 - d goes below -1,
+  // d = ma.PI*450*2^(4.3*wah)/(8*ma.SR) = 2 at wah = 2.08 (44.1 kHz).
+  wc = max(0.0, min(1.0, wah));
+  Q  = pow(2.0,(2.0*(1.0-wc)+1.0)); // Resonance "quality factor"
+  fr = 450.0*pow(2.0,2.3*wc);       // Resonance tuning
+  g  = 0.1*pow(4.0,wc);             // gain (optional)
 
   // Biquad fit using z = exp(s T) ~ 1 + sT for low frequencies:
   frn = fr/ma.SR; // Normalized pole frequency (cycles per sample)
-  R = 1 - ma.PI*frn/Q; // pole radius
-  theta = 2*ma.PI*frn; // pole angle
-  a1 = 0-2.0*R*cos(theta); // biquad coeff
-  a2 = R*R;                // biquad coeff
+  // pole radius R = 1 - d, pole angle theta = 2*ma.PI*frn, and the biquad
+  // (1 - z^-1)/(1 + a1*z^-1 + a2*z^-2), a1 = -2*R*cos(theta), a2 = R*R,
+  // written with the two small quantities it depends on, so that nothing
+  // cancels in single precision:
+  d  = ma.PI*frn/Q;
+  f2 = d*d + 4.0*(1.0-d)*sin(ma.PI*frn)^2; // 1 + a1 + a2 = |1 - pole|^2
+  fq = d*(2.0-d);                          // 1 - a2 = 1 - R^2
 
-  // dezippering of slider-driven signals:
+  // dezippering of slider-driven signals: smoothing a1 and a2 themselves
+  // stalls in single precision up to 4e-5 away from their targets, as much
+  // as a few percent of f2. Smoothing f2 and fq instead gives the same a1s
+  // and a2s, since smooth(1) = 1 - e with e = s^(n+1).
   s = 0.999; // smoothing parameter (one-pole pole location)
-  a1s = a1 : si.smooth(s);
-  a2s = a2 : si.smooth(s);
+  e = (1.0-1.0') : (+ : *(s)) ~ _ : ma.FTZ;
+  f2s = (f2 : si.smooth(s)) + e;
+  fqs = (fq : si.smooth(s)) + e;
   gs =  g  : si.smooth(s);
 
-  //tf2 = component("filters.lib").tf2;
+  // Direct form II, a1s = f2s + fqs - 2, a2s = 1 - fqs, written on its
+  // state w and its output v = w - w' so that a1s is never formed.
+  tick(w,v) = wn, vn
+  with {
+    vn = v + (gs*x - f2s*w - fqs*v);
+    wn = w + vn;
+  };
 };
 
 // end jos section
