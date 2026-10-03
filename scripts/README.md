@@ -408,7 +408,13 @@ name the same parameters. A symbol fails as `arity`, `unbound` (a name with
 no value: a parameter the Test section does not exercise, or an unqualified
 name such as `bus` for `si.bus`), `syntax`, `pseudo` (a `...` placeholder in
 an argument list), `missing` (no Usage line names it), `params` (Usage and
-`Where:` disagree) or `error`. The accepted debt is pinned symbol by symbol,
+`Where:` disagree), `prefix` (a name of the symbol's own library written
+with its prefix, `si.bus` in `signals.lib`) or `error`. A bullet may belong
+to another function of the same block. The values of a Test call come with
+the definitions of the `with { }` around it, and when a call does not give
+the values (`par(i, 3, f(0.5 + i))`), the next call of the Test section is
+tried. A `params` failure on a bullet that documents an input is fixed by
+naming the input in the call (`expm1(x) : _`), not by deleting the bullet. The accepted debt is pinned symbol by symbol,
 with its kind of failure, in `tests/usage-baseline.json`: a symbol that is not
 there must pass, an entry must still fail the same way, and an entry that
 passes is reported, to be removed in the commit that fixes it.

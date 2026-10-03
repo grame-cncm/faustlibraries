@@ -52,7 +52,9 @@ Every script behind these targets is described in `scripts/README.md`.
    - a full documentation block (description, `#### Usage` showing the
      input/output shape as a Faust expression that compiles, like
      `_ : wgr(f,r) : _,_`, `Where:` for each parameter of that call,
-     `#### Test`);
+     `#### Test`). In the Usage, the library's own names have no prefix,
+     and inputs that have a meaning are named and documented:
+     `expm1(x) : _` with a bullet for `x`, not `_ : expm1 : _`;
    - a `functionName_test` entry in the matching `tests/*.dsp` file, copied
      from the block's `#### Test` (rule 8), and its reference generated with
      `make reference`;

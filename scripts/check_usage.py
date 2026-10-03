@@ -41,7 +41,8 @@ same 1194 symbols as the documentation):
      applies the functions and checks every composition, without generating
      code (fast: about 15 ms for most symbols).
   7. When it evaluates, the arguments of the symbol's call and the bullets
-     of its `Where:` section must name the same parameters.
+     of its `Where:` section must name the same parameters (a bullet may
+     belong to another function of the same block).
 
 For fi.wgr, `scripts/check_usage.py --symbol fi.wgr` prints the program:
 
@@ -61,6 +62,10 @@ Kinds of failure
 ----------------
   arity    a composition of the statement does not match the arity of the
            call: the Usage states the wrong buses;
+  prefix   the statement writes a name of the symbol's own library with
+           its prefix, `ef.reverseEchoN` in misceffects.lib, `si.bus` in
+           signals.lib: write it bare, as the title gives the prefix
+           (another library's names keep theirs, `si.bus` in filters.lib);
   params   the call and `Where:` disagree: a parameter of the call is not
            documented, or a documented one does not appear in the Usage;
   unbound  a name has no value: a parameter the Test section does not give
@@ -94,8 +99,15 @@ Fixing a failure
 Usage, not the program: write the buses the call really has
 (`_ : f : _,_`, `si.bus(N) : f(N) : si.bus(N)`, `_ : bank(N) : par(i,N,_)`),
 name the parameters as in `Where:`, and give the Test section a call that
-values every parameter of the Usage. Conventions: doc/docs/contributing.md,
-section "New Functions".
+values every parameter of the Usage.
+
+Name the inputs that have a meaning, and document them: `expm1(x) : _`
+with a bullet for `x`, `hypot(x,y) : _`, `ADAA1(EPS, f, F1, x) : _`, are
+more explicit than `_ : expm1 : _`. The anonymous `_` is for the audio
+input of an effect (`_ : lowpass(N,fc) : _`) and for buses. A `params`
+failure on a bullet that documents an input is fixed by naming the input
+in the call, never by deleting the bullet. Conventions:
+doc/docs/contributing.md, section "New Functions".
 
 Arity of the JSON export
 ------------------------
@@ -375,18 +387,84 @@ def prepare(sym):
     return defs, statements
 
 
-def rewrite(sym, code, defs):
+def top_level_definitions(body):
+    """Split `a = 1; f(x) = x*2;` on its top-level semicolons."""
+    out, depth, cur = [], 0, ""
+    for ch in body:
+        depth += {"(": 1, ")": -1, "[": 1, "]": -1, "{": 1, "}": -1}.get(ch, 0)
+        if ch == ";" and depth == 0:
+            if cur.strip():
+                out.append(cur.strip())
+            cur = ""
+        else:
+            cur += ch
+    if cur.strip():
+        out.append(cur.strip())
+    return out
+
+
+def enclosing_with(text, pos):
+    """The definitions of the `with { }` of the Test definition around pos.
+
+    `ADAA1_test = aa.ADAA1(0.001, f, F1, sig) with { f(x) = ...; F1(x) = ...; };`
+    gives ["f(x) = ...", "F1(x) = ..."]: the values of `f` and `F1` live
+    there, not at the top level of the Test section. The Test definitions
+    start at column 0 (the export removes the `// ` of the comment).
+    """
+    starts = [m.start() for m in re.finditer(rf"^{IDENT}\s*(?:\([^()]*\))?\s*=", text, re.M)
+              if m.start() <= pos]
+    if not starts:
+        return []
+    start, depth, end = starts[-1], 0, len(text)
+    for k in range(start, len(text)):
+        depth += {"(": 1, ")": -1, "[": 1, "]": -1, "{": 1, "}": -1}.get(text[k], 0)
+        if text[k] == ";" and depth == 0:
+            end = k
+            break
+    definition, depth = text[start:end], 0
+    for k, ch in enumerate(definition):
+        if depth == 0 and re.match(r"with\s*\{", definition[k:]) \
+                and (k == 0 or not re.match(r"\w", definition[k - 1])):
+            body_start = definition.index("{", k) + 1
+            inner = 1
+            for e in range(body_start, len(definition)):
+                inner += {"{": 1, "}": -1}.get(definition[e], 0)
+                if inner == 0:
+                    return top_level_definitions(definition[body_start:e])
+            return []
+        depth += {"(": 1, ")": -1, "[": 1, "]": -1, "{": 1, "}": -1}.get(ch, 0)
+    return []
+
+
+def test_calls(test, name):
+    """Each call of name in a Test section: (arguments, local definitions)."""
+    out = []
+    for m in re.finditer(rf"(?<![\w.])(?:{IDENT}\.)?{re.escape(name)}\s*\(", test):
+        args = call_args(test[m.start():], name)
+        if args is not None:
+            out.append((args, enclosing_with(test, m.start())))
+    return out
+
+
+def rewrite(sym, code, defs, choice=0):
     """Turn a statement into the expression compiled for it.
 
-    Returns (expr, bindings), bindings being the `with` definitions that
-    value the parameters, or (None, "pseudo") for a `...` that is not a
-    variable bus. The steps:
+    Returns (expr, bindings, local, more): bindings are the `with`
+    definitions that value the parameters, local the definitions of the
+    Test's own `with` that these values need, more whether the Test section
+    has another call to try (choice + 1). For a `...` that is not a
+    variable bus, returns (None, "pseudo", [], False). The steps:
 
     1. `(fi.)name` -> `fi.name`; `hslider(...)` -> `_`;
     2. drop an input or output bus written with `...`;
     3. for each call of a library symbol in the statement, its arguments
        that are identifiers take the values of the same call in the Test
-       section: the symbol's own Test section first, else the callee's;
+       section: the symbol's own Test section first, else the callee's.
+       `choice` selects which call of the Test section, the first one by
+       default: `pt.lfWaveform` is first called in `par(i, 3, ...)` with
+       values that depend on `i`, the next call has plain values. A call
+       inside `... with { gen = ...; }` brings the definitions of that
+       `with`, which its values may use;
     4. the bare names of the library get its prefix, except the names
        just bound, so that a parameter called like a symbol (`ar` in
        `smoothEnvelope(ar,t)`, not `en.ar`) keeps its value.
@@ -400,31 +478,37 @@ def rewrite(sym, code, defs):
         parts = parts[:-2]
     code = "".join(parts).strip()
     if "..." in code:
-        return None, "pseudo"
+        return None, "pseudo", [], False
     # parameters of the library's calls, valued from their Test sections;
     # longest names first, so that `lowpass6e` is matched before `lowpass`
-    bindings = {}
+    bindings, local, more = {}, [], False
     defined = {d.split("=")[0].strip() for d in defs}
     for callee in sorted(sym["siblings"], key=len, reverse=True):
         args = call_args(code, callee)
         if args is None:
             continue
-        test = sym["test"] if call_args(sym["test"], callee) is not None \
-            else sym["sibling_tests"].get(callee, "")
-        values = call_args(test, callee) or []
+        calls = test_calls(sym["test"], callee) or test_calls(sym["sibling_tests"].get(callee, ""), callee)
+        if not calls:
+            continue
+        more = more or choice + 1 < len(calls)
+        values, with_defs = calls[min(choice, len(calls) - 1)]
         for a, v in zip(args, values):
             # a parameter may share its name with a symbol (`ar` in
             # smoothEnvelope(ar,t)): the binding takes precedence
             if re.fullmatch(IDENT, a) and a != "_" and a != v \
                     and a not in bindings and a not in defined:
                 bindings[a] = v
+        local += [d for d in with_defs if d not in local]
+    # a local definition may not redefine a bound name (Faust refuses it)
+    local = [d for d in local
+             if re.match(IDENT, d).group(0) not in set(bindings) | defined]
     # bare names of the symbol's own library
     for n in sorted(sym["siblings"], key=len, reverse=True):
         if n in bindings or n in defined:
             continue
         # (not `SAFE` in `os[SAFE=1;]`, a definition)
         code = re.sub(rf"(?<![\w.]){re.escape(n)}(?![\w])(?!\s*=(?!=))", f"{sym['prefix']}.{n}", code)
-    return code, bindings
+    return code, bindings, local, more
 
 
 def in_call(expr, pos):
@@ -555,16 +639,47 @@ def check(sym, prefixes, workdir):
         return "missing", "no Usage line names it", []
     programs = []
     for line, code in statements:
-        expr, bindings = rewrite(sym, code, defs)
-        if expr is None:
-            return bindings, f"`{line}`: `...` is not Faust", programs
-        _, failure = evaluate(sym, expr, bindings, defs, prefixes, workdir, programs)
-        if failure:
-            return failure[0], f"`{line}`: {failure[1]}", programs
+        first, choice = None, 0
+        while True:
+            expr, bindings, local, more = rewrite(sym, code, defs, choice)
+            if expr is None:
+                return bindings, f"`{line}`: `...` is not Faust", programs
+            _, failure = evaluate(sym, expr, bindings, defs + local, prefixes, workdir, programs)
+            if not failure:
+                break
+            first = first or failure
+            if failure[0] == "unbound" and more:
+                choice += 1  # the next call of the Test section
+                continue
+            return first[0], f"`{line}`: {first[1]}", programs
+    detail = check_prefix(sym, statements)
+    if detail:
+        return "prefix", detail, programs
     detail = check_params(sym, statements, defs)
     if detail:
         return "params", detail, programs
     return "ok", "", programs
+
+
+def check_prefix(sym, statements):
+    """The names of the symbol's own library are written without prefix.
+
+    In filters.lib the Usage reads `_ : lowpass(N,fc) : _`, not
+    `fi.lowpass` or `(fi.)lowpass`: the title already gives the prefix,
+    and the other blocks of the library are written so. A function of
+    another library keeps its prefix (`si.bus(N)` in analyzers.lib, but
+    `bus(N)` in signals.lib). Returns "" or the names written with it.
+    """
+    found = []
+    for line, _ in statements:
+        code = re.sub(r"//.*$", "", line)
+        for m in re.finditer(rf"(?<![\w.])(\(?{re.escape(sym['prefix'])}\.\)?)({IDENT})", code):
+            if m.group(2) in sym["siblings"] and m.group(0) not in found:
+                found.append(m.group(0))
+    if not found:
+        return ""
+    return (f"written with the prefix of its own library: {', '.join(found)}"
+            f" (write {', '.join(re.sub(r'^.*[.)]', '', f) for f in found)})")
 
 
 def symbol_call(expr, sym):
@@ -615,20 +730,28 @@ def measure_io(sym, prefixes, workdir):
         return None
     defs, statements = prepare(sym)
     for _, code in statements:
-        expr, bindings = rewrite(sym, code, defs)
-        call = symbol_call(expr, sym) if expr is not None else None
-        if call is None:
+        choice, more = 0, True
+        while more:
+            expr, bindings, local, more = rewrite(sym, code, defs, choice)
+            call = symbol_call(expr, sym) if expr is not None else None
+            if call is None:
+                break
+            documented = set(bindings)
+            out, failure = evaluate(sym, call, bindings, defs + local, prefixes, workdir, [],
+                                    wrap=lambda c: f"inputs({c}), outputs({c})")
+            counts = re.findall(r"^(?:ID_\d+|process)\s*=\s*(\d+)\s*,\s*(\d+)\s*;",
+                                out or "", re.M)
+            if not failure and counts:
+                break
+            choice += 1
+        else:
             continue
-        documented = set(bindings)
-        out, failure = evaluate(sym, call, bindings, defs, prefixes, workdir, [],
-                                wrap=lambda c: f"inputs({c}), outputs({c})")
-        counts = re.findall(r"^(?:ID_\d+|process)\s*=\s*(\d+)\s*,\s*(\d+)\s*;", out or "", re.M)
-        if failure or not counts:
+        if call is None:
             continue
         def in_the_call(name):
             return re.search(rf"(?<![\w.]){re.escape(name)}(?!\w)", call)
         values = {k: v for k, v in bindings.items() if k in documented and in_the_call(k)}
-        values.update({d.split("=")[0].strip(): d.split("=", 1)[1].strip() for d in defs
+        values.update({d.split("=")[0].strip(): d.split("=", 1)[1].strip() for d in defs + local
                        if in_the_call(d.split("=")[0].strip())})
         assumed = {k: v for k, v in bindings.items() if k not in documented and in_the_call(k)}
         return {"inSignals": int(counts[-1][0]), "outSignals": int(counts[-1][1]),
@@ -673,23 +796,31 @@ def check_params(sym, statements, defs):
     - each identifier argument of the symbol's call must have a bullet,
       except the names defined in the Usage and the library's symbols
       (`quantize(rf, ionian)`: `ionian` is a function, not a parameter);
-    - each bullet must appear somewhere in the statements, in the call or
+    - each bullet must appear somewhere in the Usage section, in a call or
       on a bus (`si.bus(N) : f(N)`): `* `x`: input` with a Usage
-      `_ : cosh : _` documents a parameter the Usage does not have.
+      `_ : cosh : _` documents a parameter the Usage does not have. The
+      whole section counts, not only the statements of this symbol: in a
+      block documenting several functions, `Where:` describes them all
+      (`N` of `convN(N,kv)` in the block of `conv(kv)`).
     """
     used = " ".join(code for _, code in statements)
+    section = " ".join(logical_lines(sym["usage"]))
     args = call_args(used, sym["name"]) or []
     defined = {d.split("=")[0].strip() for d in defs}
     names = [a for a in args if re.fullmatch(IDENT, a) and a != "_"
              and a not in defined and a not in sym["siblings"]]
     undocumented = [a for a in names if a not in sym["params"]]
     unused = [w for w in sym["params"]
-              if not re.search(rf"(?<![\w.]){re.escape(w)}(?!\w)", used)]
+              if not re.search(rf"(?<![\w.]){re.escape(w)}(?!\w)", section)]
     problems = []
     if undocumented:
         problems.append(f"not in `Where:`: {', '.join(undocumented)}")
     if unused:
-        problems.append(f"in `Where:`, not in the Usage: {', '.join(unused)}")
+        # the usual case: a bullet for the input of `_ : f : _`; the fix is
+        # to name that input in the call, not to delete what documents it
+        problems.append(f"in `Where:`, not in the Usage: {', '.join(unused)} (an input?"
+                        f" name it in the call, `{sym['name']}({', '.join(unused)}) : _`,"
+                        f" rather than deleting its bullet)")
     return "; ".join(problems)
 
 
