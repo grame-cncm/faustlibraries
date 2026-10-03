@@ -232,7 +232,8 @@ written and run through `check_precision.py` at the six rates on
     PR #271 (Vicanek's matched filters accurate in float, and in double at a
     low CF) is the place to check them.
   - `pm.modeFilter`, jump: 0.12. It is behind every bell, the marimba and
-    the djembe.
+    the djembe. Reactivated with #269 (a Chamberlin state-variable
+    section): 8.2e-6.
   - `ve.moog_vcf_2b`, jump: 0.27. Two direct-form `tf2s` sections.
     **Reactivated** with #273 (`tf2s` as two trapezoidal integrators), with
     its modulated test.
@@ -326,7 +327,6 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 | `lowshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
 | `highshelf2Matched_modulated_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | non-finite in double, 48–192 kHz | #271, to be checked |
 | `bandpass2Matched_slider_test`, `autowah_slider_test`, `crybaby_slider_test` | `vaeffects.lib`, `vaeffects_tests.dsp` | the debt of their `_test` (non-finite at 176.4 kHz, 2.3e-3, 3.1e-2) | #271, #270 |
-| `modeFilter_jump_test` | `physmodels.lib`, `physmodels_tests.dsp` | 0.12 | #269 (modeFilter as a Chamberlin state-variable section) |
 | `oscq_modulated_test` | `oscillators.lib`, `oscillators_tests.dsp` | 8.9e-3 | a better `fi.wgr` (with `wgr_jump_test`) |
 | `goertzel_slider_test` | `analyzers.lib`, `analyzers_tests.dsp` | 1.3e-3 | a Goertzel recursion accurate in float at low frequency, or a smaller n |
 | `lfnoise0_slider_test`, `lfnoise0_jump_test`, `lfnoiseN_jump_test`, `lfnoise_jump_test` (and their modulated and slider siblings, which pass by chance) | `noises.lib`, `noises_tests.dsp` | 3.9e-3; 0.24, 0.20, 0.19 | a trigger exact in both precisions: the zero crossings of `os.oscrs` move by one sample between float and double, and each latches another noise value |
@@ -345,7 +345,6 @@ bandpass2Matched_modulated_test = no.noise : ve.bandpass2Matched(20*pow(250, tri
 peaking2Matched_modulated_test = no.noise : ve.peaking2Matched(2, 20*pow(250, tri), 5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 lowshelf2Matched_modulated_test = no.noise : ve.lowshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 highshelf2Matched_modulated_test = no.noise : ve.highshelf2Matched(0.25*pow(16, tri), 1000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-modeFilter_jump_test = 0.01*no.noise : pm.modeFilter(50*pow(100, sq), 1, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 oscq_modulated_test = os.oscq(20*pow(500, tri)) : _, ! with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 goertzel_slider_test = an.goertzel(hslider("freq", 50, 20, 1000, 1), 4096, no.noise);
 lfnoise0_slider_test = no.lfnoise0(hslider("lfnoise0:freq", 10.1, 0.1, 1000, 0.1));
