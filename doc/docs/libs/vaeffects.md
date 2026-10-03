@@ -78,8 +78,8 @@ of the ideal Moog VCF transfer function factored into second-order
 sections. As a result, it is more accurate than `moog_vcf` above, but
 its coefficient formulas are more complex when one or both parameters
 are varied.  Here, res is the fourth root of that in `moog_vcf`, so, as
-the sampling rate approaches infinity, `moog_vcf(res,fr)` becomes equivalent
-to `moog_vcf_2b[n](res^4,fr)` (when res and fr are constant).
+the sampling rate approaches infinity, `moog_vcf(res^4,fr)` becomes equivalent
+to `moog_vcf_2b[n](res,fr)` (when res and fr are constant).
 `moog_vcf_2b` uses two direct-form biquads (`tf2`).
 `moog_vcf_2bn` uses two protected normalized-ladder biquads (`tf2np`).
 
