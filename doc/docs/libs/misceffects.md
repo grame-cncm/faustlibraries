@@ -999,7 +999,7 @@ _ : granular(P, dur, ratio, pos, jit) : _
 Where:
 
 * `P`: number of overlapping grain voices, 2 or more (a constant numerical expression)
-* `dur`: grain duration in seconds
+* `dur`: grain duration in seconds, rounded to a whole number of samples
 * `ratio`: playback speed inside each grain (1 = unchanged pitch)
 * `pos`: read position in seconds behind the write head
 * `jit`: random position jitter in seconds, latched per grain

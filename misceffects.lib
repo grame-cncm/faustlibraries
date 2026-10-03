@@ -1414,7 +1414,7 @@ with {
 // Where:
 //
 // * `P`: number of overlapping grain voices, 2 or more (a constant numerical expression)
-// * `dur`: grain duration in seconds
+// * `dur`: grain duration in seconds, rounded to a whole number of samples
 // * `ratio`: playback speed inside each grain (1 = unchanged pitch)
 // * `pos`: read position in seconds behind the write head
 // * `jit`: random position jitter in seconds, latched per grain
@@ -1433,13 +1433,15 @@ declare granular license "MIT";
 granular(P, dur, ratio, pos, jit, sig) = sum(i, P, voice(i)) * (2.0/float(P))
 with {
     maxDelay = 65536;
-    durSamp = max(1.0, dur*ma.SR);
-    ph = (+(1.0/durSamp) ~ ma.frac);           // one grain per dur
-    phi(i) = ma.frac(ph + float(i)/float(P));
-    trig(i) = phi(i) < phi(i)';                // wrap = new grain
+    // one grain per dur, of N samples: an integer phase, so that the grains
+    // start at the same sample in single and double precision
+    N = max(1, int(dur*ma.SR + 0.5));
+    k(i) = (ba.period(N) + 1 + int(i*N/P)) % N; // phase of voice i, 0..N-1
+    phi(i) = float(k(i))/float(N);            // in [0,1)
+    trig(i) = k(i) < k(i)';                   // wrap = new grain
     // per-grain latched start offset, in samples
     start(i) = ba.sAndH(trig(i), (pos + jit*abs(no.noises(P, i)))*ma.SR);
-    dly(i) = start(i) + (1.0 - ratio)*phi(i)*durSamp;
+    dly(i) = start(i) + (1.0 - ratio)*phi(i)*float(N);
     voice(i) = de.fdelay(maxDelay, max(0.0, min(float(maxDelay-1), dly(i))), sig)
                * an.window_hann(phi(i));
 };
