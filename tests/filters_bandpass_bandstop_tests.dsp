@@ -13,6 +13,7 @@ src = os.tosc(440);
 
 bandpass_test = src : fi.bandpass(2, 500, 1500);
 bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);
+bandpass_narrowlow_test = no.noise : fi.bandpass(2, 20, 22);
 bandpass_slider_test = no.noise : fi.bandpass(2, hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
 bandpass_modulated_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 bandpass_jump_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fl = 20*pow(250, sq); };

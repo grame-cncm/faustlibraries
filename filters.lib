@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.11.10";
+declare version "1.11.13";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -860,6 +860,13 @@ allpass_fcomb1a(maxdel,N,aN) = (+ <: de.fdelay1a(maxdel,N-1),*(aN)) ~ *(-aN) : m
 
 
 //========================Direct-Form Digital Filter Sections=============================
+// Filters specified by transfer-function polynomials `B(z)/A(z)`, computed
+// directly from their coefficients. A direct form loses precision when its
+// poles come close to z = 1, that is, for frequencies low relative to the
+// sample rate, and it behaves badly when its coefficients change while it
+// runs. For an analog prototype, prefer the functions of the section
+// [Digital Filter Sections Specified as Analog Filter Sections](#digital-filter-sections-specified-as-analog-filter-sections),
+// whose references explain why.
 //========================================================================================
 
 // Specified by transfer-function polynomials B(z)/A(z) as in matlab
@@ -2045,15 +2052,36 @@ allpassn1m(n,sv) = _ <: _,_ : ((+:*(s) <: _,_),_ : _,+ : cross
 with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 
 //===========Digital Filter Sections Specified as Analog Filter Sections==================
+// The functions of this section take an analog transfer function `B(s)/A(s)`
+// and digitize it with the bilinear transform. How the digital filter is then
+// computed matters as much as its transfer function: two realizations of the
+// same filter can differ by orders of magnitude in single precision, and when
+// their coefficients change. `tf2s` and `tf3slf` use trapezoidal integrators
+// in the analog block diagram (a topology-preserving realization), `tf2sb`
+// and `tf1sb` trapezoidal state-variable sections, and `tf2snp` and `tf1snp`
+// protected normalized ladders.
+//
+// For an online tutorial deriving a state-variable filter with trapezoidal
+// integrators, see the first reference below.
+//
+// #### References
+//
+// * Julius O. Smith III, "Digital State-Variable Filters" (including the
+//   trapezoidal state-variable filter used here):
+//   <https://ccrma.stanford.edu/~jos/svf/>
+// * Vadim Zavalishin, "The Art of VA Filter Design", revision 2.1.2, 2020:
+//   <https://www.discodsp.net/VAFilterDesign_2.1.2.pdf>
+// * <https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html>
+// * <https://ccrma.stanford.edu/~jos/filters/Four_Direct_Forms.html>
+// * <https://github.com/grame-cncm/faustlibraries/issues/263>
 //========================================================================================
 
 //-------------------------`(fi.)tf2s`, `(fi.)tf2snp`--------------------------------
-// Second-order direct-form digital filter,
+// Second-order digital filter,
 // specified by ANALOG transfer-function polynomials B(s)/A(s),
 // and a frequency-scaling parameter. Digitization via the
 // bilinear transform is built in. `tf2snp` computes the same filter as a
-// protected normalized ladder, which stays accurate in single precision when
-// `w1` is small relative to the sample rate. The analog transfer function is:
+// protected normalized ladder. The analog transfer function is:
 //
 // ```
 //         b2 s^2 + b1 s + b0
@@ -2093,16 +2121,41 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 //
 // #### Method
 //
-// Bilinear transform scaled for exact mapping of w1.
+// Bilinear transform scaled for exact mapping of w1. `tf2s` realizes it
+// with two trapezoidal integrators (the bilinear transform is trapezoidal
+// integration) of gain `tan(w1*T/2)`, in controllable canonical form: the
+// integrators compute `V = X/A(s)` and its derivative, the delay-free loop
+// is solved in closed form for `u = s^2*V`, and the output taps
+// `y = b2*u + b1*s*V + b0*V` follow, as in the direct form (poles first,
+// numerator last: a gain common to the `b`s, such as `resonbp`'s, multiplies
+// the output exactly, even when it varies). The transfer function is the
+// same as that of the direct-form biquad, but the poles stay accurate in
+// single precision when `w1` is small relative to the sample rate, where
+// the direct form's cluster near z = 1 and lose their digits (a 20 Hz
+// Butterworth lowpass had a 16 % RMS error at 192 kHz, and a 5 Hz one
+// diverged: issue #263). Near Nyquist its errors stay close to the direct
+// form's: at 44.1 kHz with `w1` at 21 kHz, an RMS error of 1.9e-6 instead of
+// 9.5e-7, and a magnitude-response error of 3e-4 dB instead of 5e-3 dB.
+// The integrators act on `s/w`, where `w = max(|a1|, sqrt(|a0|))` is
+// a frequency scale of the denominator, so that every state stays at the
+// output level when the coefficients change: `a1` and `a0` must not both
+// be zero.
 //
 // #### Test
 // ```
+// ba = library("basics.lib");
 // fi = library("filters.lib");
 // os = library("oscillators.lib");
 // ma = library("maths.lib");
 // no = library("noises.lib");
 // src = os.tosc(440);
 // tf2s_test = src : fi.tf2s(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+// tf2s_lp20_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
+// tf2s_lp5_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*5);
+// tf2s_notch50_test = no.noise : fi.tf2s(1, 0, 1, 0.1, 1, 2*ma.PI*50);
+// tf2s_slider_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
+// tf2s_modulated_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// tf2s_jump_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // tf2snp_test = src : fi.tf2snp(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
 // tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
 // tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
@@ -2115,16 +2168,19 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 declare tf2s author "Julius O. Smith III";
 declare tf2s copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf2s license "LicenseRef-STK-4.3";
-tf2s(b2,b1,b0,a1,a0,w1) = tf2(b0d,b1d,b2d,a1d,a2d)
+tf2s(b2,b1,b0,a1,a0,w1) = tick ~ (_,_) : !,!,_
 with {
-  c   = 1/tan(w1*0.5/ma.SR); // bilinear-transform scale-factor
-  csq = c*c;
-  d   = a0 + a1 * c + csq;
-  b0d = (b0 + b1 * c + b2 * csq)/d;
-  b1d = 2 * (b0 - b2 * csq)/d;
-  b2d = (b0 - b1 * c + b2 * csq)/d;
-  a1d = 2 * (a0 - csq)/d;
-  a2d = (a0 - a1*c + csq)/d;
+  w  = max(abs(a1), sqrt(abs(a0))); // frequency scale of the denominator
+  w2 = w*w;
+  g  = w*tan(w1*0.5/ma.SR); // trapezoidal integrators of s/w, prewarped at w1
+  // states: integrators of u = (s/w)^2*V and (s/w)*V, with V = X/A(s)
+  tick(s1, s0, x) = 2*v1 - s1, 2*v0 - s0, y
+  with {
+    u  = (x - a1/w*s1 - a0/w2*(g*s1 + s0))/(1 + g*(a1/w + g*a0/w2));
+    v1 = g*u + s1;
+    v0 = g*v1 + s0;
+    y  = b2*u + b1/w*v1 + b0/w2*v0;
+  };
 };
 
 // tf2snp = tf2s but using a protected normalized ladder filter for tf2.
@@ -2137,7 +2193,7 @@ with {
 // the digital coefficients over D = a0*t^2 + a1*t + 1. The ladder itself still
 // needs 1+s1 = 2*a0*t^2/(1+a0*t^2) to be representable next to 1: in single
 // precision that holds while a0*t^2 is well above ma.EPSILON (for a0 = 1, down to
-// about 20 Hz at 192 kHz). For lower w1/ma.SR, fi.svf keeps its accuracy.
+// about 20 Hz at 192 kHz). For lower w1/ma.SR, tf2s keeps its accuracy.
 tf2snp(b2,b1,b0,a1,a0,w1) = _allpassnnltc(2,(s1,s2),(c1,c2)) : sum(i,3,*(tghr(i)))
 with {
   smax = 1.0-ma.EPSILON; // maximum reflection-coefficient magnitude allowed, as in tf2np
@@ -2248,35 +2304,71 @@ with {
 // * `b2`: analog numerator coefficient of `s^2`
 // * `b1`: analog numerator coefficient of `s`
 // * `b0`: analog numerator constant term
-// * `a3`: analog denominator coefficient of `s^3`
+// * `a3`: analog denominator coefficient of `s^3` (nonzero: for a
+//   second-order section, use `tf2s`)
 // * `a2`: analog denominator coefficient of `s^2`
 // * `a1`: analog denominator coefficient of `s`
 // * `a0`: analog denominator constant term
 //
+// #### Method
+//
+// The bilinear transform is trapezoidal integration, so the analog section
+// is realized with three trapezoidal integrators (`g = T/2`), in controllable
+// canonical form: the integrators compute `V = X/A(s)` and its derivatives,
+// the delay-free loop is solved in closed form for the highest one,
+// `u = s^3*V`, and the output taps `y = b3*u + b2*s^2*V + b1*s*V + b0*V` follow,
+// as in the direct form (poles first, numerator last: a gain common to the
+// `b`s multiplies the output exactly, even when it varies). The transfer
+// function is the same as that of a third-order direct form with `c = 2*SR`,
+// but the coefficients enter as they are rather than as sums of `a_k*c^k`,
+// so the poles stay accurate in single precision when they are close to
+// z = 1 (cutoffs low relative to the sample rate), where the direct form's
+// become non-finite (a 20 Hz Butterworth section at 44.1 kHz, for example:
+// issue #263). The integrators act on `s/w`, where
+// `w = max(|a2/a3|, sqrt(|a1/a3|), cbrt(|a0/a3|))` is a frequency scale of
+// the denominator (its largest pole magnitude lies between `w/3` and `2*w`),
+// so that every state stays at the output level: when the coefficients jump
+// (a cutoff switching between 50 Hz and 5 kHz), the output stays at the
+// level of `lowpass(3, fc)`'s, where an unnormalized realization peaks
+// thousands of times higher.
+//
 // #### Test
 // ```
+// ba = library("basics.lib");
 // fi = library("filters.lib");
+// ma = library("maths.lib");
+// no = library("noises.lib");
 // os = library("oscillators.lib");
 // src = os.tosc(440);
 // tf3slf_test = src : fi.tf3slf(0, 0, 0, 1, 1, 2, 2, 1);
+// tf3slf_lp20_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*20; };
+// tf3slf_hp20_test = no.noise : fi.tf3slf(1, 0, 0, 0, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*20; };
+// tf3slf_lp1k_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*1000; };
+// tf3slf_slider_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { w = 2*ma.PI*hslider("fc", 1000, 20, 20000, 1); };
+// tf3slf_modulated_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); w = 2*ma.PI*20*pow(250, tri); };
+// tf3slf_jump_test = no.noise : fi.tf3slf(0, 0, 0, w^3, 1, 2*w, 2*w^2, w^3) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; w = 2*ma.PI*20*pow(250, sq); };
 // ```
 //----------------------------------------------
 declare tf3slf author "Julius O. Smith III";
 declare tf3slf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf3slf license "LicenseRef-STK-4.3";
-tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tf3(b0d,b1d,b2d,b3d,a1d,a2d,a3d) with {
-  c   = 2.0 * ma.SR; // bilinear-transform scale-factor ("lf" case)
-  csq = c*c;
-  cc  = csq*c;
-  // Thank you maxima:
-  b3d = (b3*c^3-b2*c^2+b1*c-b0)/d;
-  b2d = (-3*b3*c^3+b2*c^2+b1*c-3*b0)/d;
-  b1d = (3*b3*c^3+b2*c^2-b1*c-3*b0)/d;
-  b0d = (-b3*c^3-b2*c^2-b1*c-b0)/d;
-  a3d = (a3*c^3-a2*c^2+a1*c-a0)/d;
-  a2d = (-3*a3*c^3+a2*c^2+a1*c-3*a0)/d;
-  a1d = (3*a3*c^3+a2*c^2-a1*c-3*a0)/d;
-  d = (-a3*c^3-a2*c^2-a1*c-a0);
+tf3slf(b3,b2,b1,b0,a3,a2,a1,a0) = tick ~ (_,_,_) : !,!,!,_
+with {
+  // frequency scale of the denominator: its largest pole magnitude is between w/3 and 2*w
+  w  = max(abs(a2/a3), max(sqrt(abs(a1/a3)), pow(abs(a0/a3), 1.0/3)));
+  g  = w*0.5/ma.SR; // trapezoidal integrators of s/w = bilinear transform with c = 2*SR
+  w2 = w*w;
+  w3 = w2*w;
+  // states: integrators of u = (s/w)^3*V, (s/w)^2*V, (s/w)*V, with V = X/A(s)
+  tick(s2, s1, s0, x) = 2*v2 - s2, 2*v1 - s1, 2*v0 - s0, y
+  with {
+    u  = (x - a2/w*s2 - a1/w2*(g*s2 + s1) - a0/w3*(g*(g*s2 + s1) + s0))
+       / (a3 + g*(a2/w + g*(a1/w2 + g*a0/w3)));
+    v2 = g*u + s2;
+    v1 = g*v2 + s1;
+    v0 = g*v1 + s0;
+    y  = b3*u + b2/w*v2 + b1/w2*v1 + b0/w3*v0;
+  };
 };
 
 //-----------------------------`(fi.)tf1s`--------------------------------
@@ -2468,10 +2560,13 @@ with {
 // D = s^2 + k*w*s + w^2, bilinear transform with g = w*T/2 (for tf2sb, tf1sb).
 _svfbl(g,k) = tick ~ (_,_) : !,!,_,_,_
 with {
-  tick(ic1eq, ic2eq, v0) = 2*v1 - ic1eq, 2*v2 - ic2eq, v2, v1, v0 - k*v1 - v2
+  // solved for the highpass first, each state updated by a small increment
+  // (see svf below)
+  tick(ic1eq, ic2eq, v0) = v1 + g*hp, v2 + g*v1, v2, v1, hp
   with {
-    v1 = (ic1eq + g*(v0 - ic2eq))/(1 + g*(g + k));
-    v2 = ic2eq + g*v1;
+    hp = (v0 - (g + k)*ic1eq - ic2eq)/(1 + g*(g + k));
+    v1 = g*hp + ic1eq;
+    v2 = g*v1 + ic2eq;
   };
 };
 
@@ -2552,6 +2647,8 @@ tf1sb(b1,b0,a0,w1,wc) = _ <: *(b1), (_svfbl(wc*0.5/ma.SR, a0*w1/wc) : !,*((b0 - 
 // resonlp_test = src : fi.resonlp(1000, 2, 0.8);
 // resonlp_slider_test = no.noise : fi.resonlp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
 // resonlp_modulated_test = no.noise : fi.resonlp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// resonlp_jump_test = no.noise : fi.resonlp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// resonlp_audio_modulated_test = 0.1*no.noise : fi.resonlp(max(20, 1000*(1 + 0.9*os.tosc(500))), 10, 1);
 // ```
 //---------------------------------------------------------------------
 // resonlp = 2nd-order lowpass with corner resonance:
@@ -2600,6 +2697,7 @@ with {
 // resonhp_test = fi.resonhp(1000, 2, 0.8, src);
 // resonhp_slider_test = no.noise : fi.resonhp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
 // resonhp_modulated_test = no.noise : fi.resonhp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// resonhp_jump_test = no.noise : fi.resonhp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //---------------------------------------------------------------------
 // resonhp = 2nd-order highpass with corner resonance:
@@ -2640,6 +2738,8 @@ resonhp(fc,Q,gain,x) = gain*x-resonlp(fc,Q,gain,x);
 // resonbp_test = src : fi.resonbp(1000, 2, 0.8);
 // resonbp_slider_test = no.noise : fi.resonbp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
 // resonbp_modulated_test = no.noise : fi.resonbp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// resonbp_jump_test = no.noise : fi.resonbp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// resonbp_audio_modulated_test = 0.1*no.noise : fi.resonbp(max(20, 1000*(1 + 0.9*os.tosc(500))), 10, 1);
 // ```
 //---------------------------------------------------------------------
 // resonbp = 2nd-order bandpass
@@ -2839,6 +2939,7 @@ with {
 // highpass_plus_lowpass_test = os.tosc(440) : fi.highpass_plus_lowpass(3, 1000);
 // highpass_plus_lowpass_slider_test = no.noise : fi.highpass_plus_lowpass(3, hslider("fc", 1000, 20, 20000, 1));
 // highpass_plus_lowpass_modulated_test = no.noise : fi.highpass_plus_lowpass(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highpass_plus_lowpass_jump_test = no.noise : fi.highpass_plus_lowpass(3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //------------------------------
 declare highpass_plus_lowpass author "Julius O. Smith III";
@@ -3195,6 +3296,7 @@ with {
 // highpass3e_test = src : fi.highpass3e(1000);
 // highpass3e_slider_test = no.noise : fi.highpass3e(hslider("fc", 1000, 20, 20000, 1));
 // highpass3e_modulated_test = no.noise : fi.highpass3e(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highpass3e_jump_test = no.noise : fi.highpass3e(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //-------------------------------------------------------------------------
 declare highpass3e author "Julius O. Smith III";
@@ -3237,6 +3339,7 @@ with {
 // highpass6e_test = src : fi.highpass6e(1000);
 // highpass6e_slider_test = no.noise : fi.highpass6e(hslider("fc", 1000, 20, 20000, 1));
 // highpass6e_modulated_test = no.noise : fi.highpass6e(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highpass6e_jump_test = no.noise : fi.highpass6e(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //-------------------------------------------------------------------------
 declare highpass6e author "Julius O. Smith III";
@@ -3304,6 +3407,7 @@ with {
 // src = os.tosc(440);
 // bandpass_test = src : fi.bandpass(2, 500, 1500);
 // bandpass_lowband_test = no.noise : fi.bandpass(2, 100, 200);
+// bandpass_narrowlow_test = no.noise : fi.bandpass(2, 20, 22);
 // bandpass_slider_test = no.noise : fi.bandpass(2, hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
 // bandpass_modulated_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 // bandpass_jump_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fl = 20*pow(250, sq); };
@@ -4131,6 +4235,7 @@ highshelf_other_freq(N, Lpi, fx) = ba.db2linear(ba.linear2db(fx) - Lpi/N);
 // peak_eq_test = src : fi.peak_eq(6, 1000, 200);
 // peak_eq_slider_test = no.noise : fi.peak_eq(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), hslider("B", 200, 1, 5000, 1));
 // peak_eq_modulated_test = no.noise : fi.peak_eq(6, fx, fx/5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = 20*pow(250, tri); };
+// peak_eq_jump_test = no.noise : fi.peak_eq(6, fx, fx/5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250, sq); };
 // ```
 //
 // #### References
@@ -4177,6 +4282,7 @@ peak_eq(Lfx,fx,B) = tf2s(1,b1s,1,a1s,1,wx) with {
 // peak_eq_cq_test = src : fi.peak_eq_cq(6, 1000, 4);
 // peak_eq_cq_slider_test = no.noise : fi.peak_eq_cq(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), hslider("Q", 4, 0.5, 20, 0.01));
 // peak_eq_cq_modulated_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, tri), 4) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// peak_eq_cq_jump_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, sq), 4) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //
 // #### References
@@ -4751,6 +4857,20 @@ with {
 // * `Q`: quality factor
 // * `gain`: gain in dB (`bell`, `ls` and `hs` only)
 //
+// #### Method
+//
+// Andrew Simper's trapezoidal state-variable filter: the bilinear transform
+// of the analog state-variable filter, prewarped at `freq`, whose outputs
+// are mixed into the nine responses. The delay-free loop is solved for the
+// highpass first, so that each state is updated by adding a small
+// increment. Solving it for the bandpass first, as in Simper's listings,
+// multiplies a state by `1/(1 + g*(g+k))`, close to 1 at a low cutoff, and
+// loses more than two digits of the damping in single precision: a 20 Hz
+// lowpass with `Q` = 10 at 192 kHz was 8.8e-4 off its double-precision
+// output, and is now 3.7e-6 off. See the section
+// [Digital Filter Sections Specified as Analog Filter Sections](#digital-filter-sections-specified-as-analog-filter-sections)
+// and <https://ccrma.stanford.edu/~jos/svf/Numerical_Precision_Low_Corner.html>.
+//
 // #### Test
 // ```
 // fi = library("filters.lib");
@@ -4760,6 +4880,8 @@ with {
 // ma = library("maths.lib");
 // sig = os.tosc(440);
 // svf_lp_test = fi.svf.lp(1000, 0.707, sig);
+// svf_lp_lowfc_test = no.noise : fi.svf.lp(5, 10);
+// svf_bp_lowfc_test = no.noise : fi.svf.bp(20, 30);
 // svf_slider_test = no.noise : fi.svf.bell(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), hslider("gain", 6, -24, 24, 0.1));
 // svf_modulated_test = no.noise : fi.svf.lp(20*pow(250, tri), 0.707) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // svf_jump_test = no.noise : fi.svf.lp(20*pow(250, sq), 0.707) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
@@ -4782,13 +4904,19 @@ svf = environment {
     // Internal implementation
     svf(T,F,Q,G) = tick ~ (_,_) : !,!,si.dot(3, mix)
     with {
+        // The delay-free loop is solved for the highpass v0 - k*v1 - v2 first,
+        // so that each state is updated by adding a small increment: solving
+        // it for v1 first multiplies ic1eq by 1/(1 + g*(g+k)), close to 1 at
+        // a low cutoff, and loses the damping in single precision (see
+        // "Digital Filter Sections Specified as Analog Filter Sections").
         tick(ic1eq, ic2eq, v0) =
-            2*v1 - ic1eq,
-            2*v2 - ic2eq,
+            v1 + g*hp,
+            v2 + g*v1,
             v0, v1, v2
         with {
-            v1 = ic1eq + g *(v0-ic2eq) : /(1 + g*(g+k));
-            v2 = ic2eq + g * v1;
+            hp = (v0 - (g+k)*ic1eq - ic2eq)/(1 + g*(g+k));
+            v1 = g*hp + ic1eq;
+            v2 = g*v1 + ic2eq;
         };
 
         A = pow(10.0, G/40.0);
