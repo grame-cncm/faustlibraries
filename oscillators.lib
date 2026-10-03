@@ -66,7 +66,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "1.9.2";
+declare version "1.9.3";
 
 // This library contains platform specific constants
 pl = library("platform.lib");
@@ -208,25 +208,35 @@ with {
 // -ffast-math can reorder them. Integer wraparound is exact for both signs of
 // freq, every frequency advances, and freq = 0 freezes the phase.
 // The output keeps the top 24 bits, so it is exact in float and never reaches 1.
-_phasor_fix(freq, reset, phase) = (((freq : counts) <: whole, sub), hard_reset, (phase : start))
+_phasor_fix(freq, reset, phase) = (((freq : counts) : _fixpt.split), hard_reset, (phase : start))
     : loop ~ (_,_) : (_,!) : out
 with {
-    Q = 1073741824.0; // 2^30 counts per cycle
-    mask = 1073741823; // 2^30 - 1
+    Q = _fixpt.Q;
+    mask = _fixpt.mask;
     // increment in counts, |x| <= 2^29, so that the phase sum never overflows
     counts(f) = (inc - rint(inc)) * Q with { inc = f/ma.SR; };
-    whole(x) = int(floor(x));
-    sub(x) = int((x - floor(x)) * 16777216.0); // exact for |x| >= 1
     start(ph) = int(ma.decimal(ph) * Q) & mask;
-    // p: phase in counts, s: fraction of a count in 2^-24 steps
-    loop(p, s, xi, xs, hr, p0) = select2(hr, (p + xi + (t >> 24)) & mask, p0),
-                                 select2(hr, t & 16777215, 0)
-    with {
-        t = s + xs;
-    };
+    loop(p, s, xi, xs, hr, p0) = _fixpt.add(p, s, xi, xs)
+        : \(q, t).(select2(hr, q & mask, p0), select2(hr, t & 16777215, 0));
     out(p) = float(p >> 6) * (1.0/16777216.0);
     // To correctly start at `phase` at the first sample
     hard_reset = (1-1')|reset;
+};
+
+// Fixed-point phase arithmetic shared by `_phasor_fix` and `saw2ptr`.
+// A phase is an integer count p of 2^-30 cycle (0 <= p < 2^30) plus an integer
+// fraction s of a count in 2^-24 steps (0 <= s < 2^24).
+_fixpt = environment {
+    Q = 1073741824.0; // 2^30 counts per cycle
+    mask = 1073741823; // 2^30 - 1
+    // split an increment x in counts into its whole and fractional counts
+    split(x) = int(floor(x)), int((x - floor(x)) * 16777216.0); // exact for |x| >= 1
+    // add the increment (xi, xs) to the phase (p, s): returns the count sum q,
+    // before the wrap (q & mask), and the fraction sum t (carry in bit 24)
+    add(p, s, xi, xs) = p + xi + (t >> 24), t
+    with {
+        t = s + xs;
+    };
 };
 
 // Floating-point phasor (double precision and above)
@@ -1285,15 +1295,24 @@ saw4 = sawN(4); // only choice available right now
 // saw2ptr_test = os.saw2ptr(220);
 // saw2ptr_slider_test = os.saw2ptr(hslider("saw2ptr:freq", 220, 20, 20000, 1));
 // saw2ptr_modulated_test = os.saw2ptr(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// saw2ptr_lowfreq_test = os.saw2ptr(1);
+// saw2ptr_zero_test = os.saw2ptr(220*(ba.period(9600) >= 4800));
 // ```
 // ##### Implementation
 //
 // Polynomial Transition Regions (PTR) method for aliasing suppression,
 // order 2 (transition region one sample wide), following Eq. (8) and Table I
 // (W = 1) of the reference below: the trivial sawtooth `2*phi-1` offset by
-// the phase increment `T = freq/ma.SR` (which makes it zero-mean), and
+// the phase increment `T = |freq|/ma.SR` (which makes it zero-mean), and
 // `1 + 2*phi - 2*phi/T - T` on the first sample of each period.
 // `saw2dpw` outputs the same samples one sample later.
+//
+// In single precision, the phase is accumulated in fixed point, like the phasor of
+// the Wave-Table-Based Oscillators section: the frequency is exact to the float
+// rounding of `T` (below 1e-7 relative), without drift, and `freq` = 0 freezes the
+// phase. Accumulating the phase in float instead (as up to version 1.9.2) made the
+// frequency 0.1 % sharp at 2 Hz and 192 kHz, and off by up to 8 % at 0.01 Hz.
+// Double precision keeps the floating-point accumulator.
 //
 // ##### Notes
 //
@@ -1311,12 +1330,40 @@ saw4 = sawN(4); // only choice available right now
 declare saw2ptr author "Julius O. Smith III";
 declare saw2ptr license "LicenseRef-STK-4.3";
 // specialized reimplementation:
-saw2ptr(freq) = y with { // newer PTR version (stateless - freq can vary at any speed)
+// newer PTR version (stateless - freq can vary at any speed).
+// Single precision accumulates the phase in fixed point (`_saw2ptr_fix`); double (and
+// quad, fixed-point) precision keeps the float accumulator `_saw2ptr_flt`, unchanged.
+saw2ptr = _saw2ptr_by_precision(ma.EPSILON > 1e-10)
+with {
+  _saw2ptr_by_precision(0) = _saw2ptr_flt;
+  _saw2ptr_by_precision(1) = _saw2ptr_fix;
+};
+
+// Floating-point phase accumulator (double precision and above)
+_saw2ptr_flt(freq) = y with {
   p0 = float(ma.SR)/float(max(ma.EPSILON,abs(freq))); // period in samples
   t0 = 1.0/p0; // phase increment
   p = ((_<:(-(1)<:_,_),_) <: selector1,selector2) ~(+(t0)):!,_;
   selector1 = select2(<(0)); // for feedback
   selector2 = select2(<(0), *(1-p0):+(1), _); // for output: 1+phi-phi/T in the transition
+  y = 2*p-1-t0; // dc offset T: Kleimola and Valimaki (2012), Eq. (8)
+};
+
+// Fixed-point phase accumulator (single precision), as in `_phasor_fix`: the phase
+// advances by exactly the float increment T = |freq|/SR (reduced mod 1 for freq >= SR,
+// so that the integer sum never overflows). The integer count sum before the wrap, q,
+// gives both the transition flag (q >= 2^30) and the wrapped phase phi = q & mask,
+// which is exact in float on the transition (phi < T) when freq < SR/64, and rounded
+// to 24 bits otherwise; freq = 0 freezes the phase.
+_saw2ptr_fix(freq) = y with {
+  a = abs(freq);
+  p0 = float(ma.SR)/float(max(ma.EPSILON,a)); // period in samples (transition only)
+  t0 = a/ma.SR; // phase increment
+  q = (ma.decimal(t0) * _fixpt.Q : _fixpt.split) : loop ~ (_,_) : (!,!,_);
+  loop(p, s, xi, xs) = _fixpt.add(p, s, xi, xs)
+      : \(qq, t).(qq & _fixpt.mask, t & 16777215, qq);
+  phi = float(q & _fixpt.mask) * (1.0/_fixpt.Q);
+  p = select2(q > _fixpt.mask, phi, phi*(1-p0) + 1); // 1+phi-phi/T in the transition
   y = 2*p-1-t0; // dc offset T: Kleimola and Valimaki (2012), Eq. (8)
 };
 
