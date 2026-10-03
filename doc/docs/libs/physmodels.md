@@ -659,6 +659,25 @@ Where:
 * `t60`: mode resonance duration (in seconds)
 * `gain`: mode gain (0-1)
 
+#### Method
+
+The filter is the biquad `(1 - z^-2)/(1 - 2*r*cos(w)*z^-1 + r^2*z^-2)`,
+poles at radius `r = 0.001^(1/(t60*SR))` and angle `w = 2*pi*freq/SR`,
+scaled by `gain`. With a long `t60` or a high sample rate, the poles come
+very close to z = 1, and a direct-form realization loses them in float:
+its coefficients round to within one ulp of 2 and 1, and a bell or marimba
+mode drifted by up to 5 % from its double output at 192 kHz. The same
+transfer function is computed instead by a Chamberlin state-variable
+filter, whose coefficients are the distance of the pole to z = 1,
+`f^2 = |1 - p|^2`, and the damping `f*q = 1 - r^2`: both are small numbers
+kept with full relative precision, from `t = tanh(ln(1000)/(2*t60*SR))` and
+`sin(w/2)^2`, where `1 - r = 2*t/(1 + t)`. Its bandpass output gives the
+biquad once the input goes through `1 + z^-1`, and its lowpass state is
+kept divided by `f`. Each state is updated by adding a small increment,
+never multiplied by a coefficient close to 1, which is what keeps the
+poles in float. It costs three multiplications per sample, `gain`
+included; the float output stays within 1e-5 of the double one.
+
 #### Test
 ```
 pm = library("physmodels.lib");
@@ -668,6 +687,8 @@ ma = library("maths.lib");
 no = library("noises.lib");
 modeFilter_test = os.tosc(110) : pm.modeFilter(440, 1.5, 0.8);
 modeFilter_modulated_test = 0.01*no.noise : pm.modeFilter(50*pow(100, tri), 1, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+modeFilter_jump_test = 0.01*no.noise : pm.modeFilter(50*pow(100, sq), 1, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+modeFilter_long_test = no.noise : pm.modeFilter(80, 8, 0.1);
 ```
 
 ## String Instruments
