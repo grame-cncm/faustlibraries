@@ -28,7 +28,8 @@ Every script behind these targets is described in `scripts/README.md`.
   failure you caused.
 - The test references (`tests/reference/`, ~1.4 GB) are local build
   artifacts: generate them with `make reference`, never commit them. Same
-  for the built site (`site/`) and `tests/build|output`.
+  for the built site (`site/`) and `tests/build|output`; `.gitignore`
+  covers them all.
 - A test failure means the change altered audible output. That is either a
   bug in the change or a deliberate fix; in the second case say so
   explicitly and regenerate only the affected references.
@@ -206,14 +207,15 @@ changed" depends on it.
   commits have not been pushed. Once they are on `origin`, they are frozen:
   fix forward with a new commit.
 - Do not commit build artifacts even when they sit in the working tree.
-  `.gitignore` covers `site/` and `tests/build-cpu/` but not `tests/reference/`, `tests/output/`,
-  `tests/build/`, `tests/build-precision/` or the doc index exports (`tests/faust-doc-index.json`,
-  `tests/faust-doc/`), so never stage with `git add -A` or `git commit -a` —
-  name the files you mean. Naming files explicitly is not enough by
-  itself: after `make reference` regenerates a `.ref` you touched, it is
-  sitting right there next to the source and test files you actually mean
-  to commit, and an explicit `git add lib.lib tests/foo_tests.dsp
-  tests/reference/foo_test.ref` stages it just as surely as `-A` would
-  (done once, 2026-09-04, caught before push). Treat every path under
-  `tests/reference/` as excluded from every `git add`, independently of
-  how the rest of the command is written.
+  `.gitignore` covers them: the built site (`site/`), the test references
+  (`tests/reference/`), the test outputs and builds (`tests/output/`,
+  `tests/build/`, `tests/build-precision/`, `tests/build-cpu/`) and the
+  doc index exports (`tests/faust-doc-index.json`, `tests/faust-doc/`).
+  Git then refuses to stage them even when named explicitly (`git add
+  tests/reference/foo_test.ref` stops on "paths are ignored"): never
+  force it with `git add -f`. Before these paths were ignored, a reference
+  was staged by an explicit `git add` once (2026-09-04, caught before
+  push), and another stayed in the index from 2026-08-26 to 2026-10-03.
+  Still never stage with `git add -A` or `git commit -a`: the working tree
+  also holds untracked files that are not artifacts (scratch DSP files,
+  logs, patches) — name the files you mean.
