@@ -8,7 +8,6 @@ os = library("oscillators.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
-ma = library("maths.lib");
 
 sig = os.tosc(440);
 
