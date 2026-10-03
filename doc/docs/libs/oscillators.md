@@ -140,7 +140,11 @@ so `phasor(1.0, freq)` can be used to generate a phasor output in the range [0, 
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 phasor_test = os.phasor(1024, 440);
+phasor_slider_test = os.phasor(1024, hslider("phasor:freq", 440, -20000, 20000, 1));
+phasor_modulated_test = os.phasor(1024, 2000*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -213,7 +217,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 oscsin_test = os.oscsin(440);
+oscsin_slider_test = os.oscsin(hslider("oscsin:freq", 440, -20000, 20000, 1));
+oscsin_modulated_test = os.oscsin(2000*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -353,7 +361,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 osc_test = os.osc(440);
+osc_slider_test = os.osc(hslider("osc:freq", 440, -20000, 20000, 1));
+osc_modulated_test = os.osc(2000*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -727,7 +739,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 lf_sawpos_test = os.lf_sawpos(3);
+lf_sawpos_slider_test = os.lf_sawpos(hslider("lf_sawpos:freq", 3, 0.01, 100, 0.01));
+lf_sawpos_modulated_test = os.lf_sawpos(0.01*pow(10000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -869,7 +885,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 sawN_test = os.sawN(3, 440);
+sawN_slider_test = os.sawN(3, hslider("sawN:freq", 440, 20, 20000, 1));
+sawN_modulated_test = os.sawN(3, 50*pow(400, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 #### Method
 Differentiated Polynomial Wave (DPW).
@@ -1028,7 +1048,11 @@ where
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 saw2ptr_test = os.saw2ptr(220);
+saw2ptr_slider_test = os.saw2ptr(hslider("saw2ptr:freq", 220, 20, 20000, 1));
+saw2ptr_modulated_test = os.saw2ptr(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 ##### Implementation
 
@@ -1071,7 +1095,11 @@ is now available as `saw2dwp`.
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 saw2dpw_test = os.saw2dpw(220);
+saw2dpw_slider_test = os.saw2dpw(hslider("saw2dpw:freq", 220, 20, 20000, 1));
+saw2dpw_modulated_test = os.saw2dpw(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -1222,7 +1250,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
+pulsetrainN_slider_test = os.pulsetrainN(3, hslider("pulsetrainN:freq", 220, 20, 20000, 1), hslider("pulsetrainN:duty", 0.25, 0, 1, 0.01));
+pulsetrainN_modulated_test = os.pulsetrainN(3, 220, 0.05 + 0.9*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 
@@ -1569,6 +1601,7 @@ Where:
 ```
 os = library("oscillators.lib");
 oscs_test = os.oscs(440);
+oscs_slider_test = os.oscs(hslider("oscs:freq", 440, 20, 14000, 1));
 ```
 
 ----
@@ -1590,7 +1623,11 @@ where
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 quadosc_test = os.quadosc(440);
+quadosc_slider_test = os.quadosc(hslider("quadosc:freq", 440, 20, 20000, 1));
+quadosc_modulated_test = os.quadosc(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 #### References
 
@@ -1738,12 +1775,19 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 dsf_oscc_test = os.dsf.oscc(220, 110, 0.6);
 dsf_oscs_test = os.dsf.oscs(220, 110, 0.6);
 dsf_osccN_test = os.dsf.osccN(220, 110, 0.6, 4);
 dsf_oscsN_test = os.dsf.oscsN(220, 110, 0.6, 4);
 dsf_osccNq_test = os.dsf.osccNq(220, 110, 0.6);
 dsf_oscsNq_test = os.dsf.oscsNq(220, 110, 0.6);
+dsf_oscc_slider_test = os.dsf.oscc(hslider("dsf_oscc:f0", 220, 20, 5000, 1), hslider("dsf_oscc:df", 110, 1, 5000, 1), hslider("dsf_oscc:a", 0.6, 0, 0.95, 0.01));
+dsf_oscc_modulated_test = os.dsf.oscc(220, 110, 0.95*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+dsf_oscs_slider_test = os.dsf.oscs(hslider("dsf_oscs:f0", 220, 20, 5000, 1), hslider("dsf_oscs:df", 110, 1, 5000, 1), hslider("dsf_oscs:a", 0.6, 0, 0.95, 0.01));
+dsf_oscs_modulated_test = os.dsf.oscs(220, 110, 0.95*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+dsf_osccN_modulated_test = os.dsf.osccN(220, 110, 0.95*tri, 4) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 #### Variants
 
@@ -1815,9 +1859,13 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 twin_osc_pwm_test = os.twin_osc(220, 0.5, 0, 0);
 twin_osc_morph_test = os.twin_osc(220, 0.75, 0, 1);
 twin_osc_detune_test = os.twin_osc(220, 0.5, 0, 2);
+twin_osc_slider_test = os.twin_osc(hslider("twin_osc:freq", 220, 20, 5000, 1), hslider("twin_osc:amt", 0.5, 0, 1, 0.01), hslider("twin_osc:detune", 0, 0, 100, 0.1), hslider("twin_osc:mode", 0, 0, 2, 1));
+twin_osc_modulated_test = os.twin_osc(220, 0.05 + 0.9*tri, 0, 0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -1848,8 +1896,16 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 rpm_sawtooth_test = os.rpm.sawtooth(220, 1.0);
 rpm_square_test = os.rpm.square(220, 1.0);
+rpm_sawtooth_slider_test = os.rpm.sawtooth(hslider("rpm_sawtooth:freq", 220, 20, 5000, 1), hslider("rpm_sawtooth:beta", 1.0, 0, 1.5, 0.01));
+rpm_sawtooth_modulated_test = os.rpm.sawtooth(220, 1.5*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+rpm_sawtooth_jump_test = os.rpm.sawtooth(220, 1.5*sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+rpm_square_slider_test = os.rpm.square(hslider("rpm_square:freq", 220, 20, 5000, 1), hslider("rpm_square:beta", 1.0, 0, 1.5, 0.01));
+rpm_square_modulated_test = os.rpm.square(220, 1.5*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+rpm_square_jump_test = os.rpm.square(220, 1.5*sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### Variants
@@ -2014,7 +2070,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZsaw_test = os.CZsaw(os.lf_sawpos(110), 0.5);
+CZsaw_slider_test = os.CZsaw(os.lf_sawpos(110), hslider("CZsaw:index", 0.5, 0, 1, 0.01));
+CZsaw_modulated_test = os.CZsaw(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2039,7 +2099,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZsawP_test = os.CZsawP(os.lf_sawpos(110), 0.5);
+CZsawP_slider_test = os.CZsawP(os.lf_sawpos(110), hslider("CZsawP:index", 0.5, 0, 1, 0.01));
+CZsawP_modulated_test = os.CZsawP(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2065,7 +2129,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZsquare_test = os.CZsquare(os.lf_sawpos(110), 0.5);
+CZsquare_slider_test = os.CZsquare(os.lf_sawpos(110), hslider("CZsquare:index", 0.5, 0, 1, 0.01));
+CZsquare_modulated_test = os.CZsquare(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2090,7 +2158,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZsquareP_test = os.CZsquareP(os.lf_sawpos(110), 0.5);
+CZsquareP_slider_test = os.CZsquareP(os.lf_sawpos(110), hslider("CZsquareP:index", 0.5, 0, 1, 0.01));
+CZsquareP_modulated_test = os.CZsquareP(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2114,7 +2186,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZpulse_test = os.CZpulse(os.lf_sawpos(110), 0.5);
+CZpulse_slider_test = os.CZpulse(os.lf_sawpos(110), hslider("CZpulse:index", 0.5, 0, 1, 0.01));
+CZpulse_modulated_test = os.CZpulse(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2139,7 +2215,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZpulseP_test = os.CZpulseP(os.lf_sawpos(110), 0.5);
+CZpulseP_slider_test = os.CZpulseP(os.lf_sawpos(110), hslider("CZpulseP:index", 0.5, 0, 1, 0.01));
+CZpulseP_modulated_test = os.CZpulseP(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2163,7 +2243,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZsinePulse_test = os.CZsinePulse(os.lf_sawpos(110), 0.5);
+CZsinePulse_slider_test = os.CZsinePulse(os.lf_sawpos(110), hslider("CZsinePulse:index", 0.5, 0, 1, 0.01));
+CZsinePulse_modulated_test = os.CZsinePulse(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2188,7 +2272,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZsinePulseP_test = os.CZsinePulseP(os.lf_sawpos(110), 0.5);
+CZsinePulseP_slider_test = os.CZsinePulseP(os.lf_sawpos(110), hslider("CZsinePulseP:index", 0.5, 0, 1, 0.01));
+CZsinePulseP_modulated_test = os.CZsinePulseP(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2212,7 +2300,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZhalfSine_test = os.CZhalfSine(os.lf_sawpos(110), 0.5);
+CZhalfSine_slider_test = os.CZhalfSine(os.lf_sawpos(110), hslider("CZhalfSine:index", 0.5, 0, 1, 0.01));
+CZhalfSine_modulated_test = os.CZhalfSine(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2237,7 +2329,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZhalfSineP_test = os.CZhalfSineP(os.lf_sawpos(110), 0.5);
+CZhalfSineP_slider_test = os.CZhalfSineP(os.lf_sawpos(110), hslider("CZhalfSineP:index", 0.5, 0, 1, 0.01));
+CZhalfSineP_modulated_test = os.CZhalfSineP(float(os.tphase(N, 1100))/N, tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2263,7 +2359,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZresSaw_test = os.CZresSaw(os.lf_sawpos(110), 2.5);
+CZresSaw_slider_test = os.CZresSaw(os.lf_sawpos(110), hslider("CZresSaw:res", 2.5, 1, 16, 0.1));
+CZresSaw_modulated_test = os.CZresSaw(float(os.tphase(N, 1100))/N, 1 + 15*tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2287,7 +2387,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZresTriangle_test = os.CZresTriangle(os.lf_sawpos(110), 2.5);
+CZresTriangle_slider_test = os.CZresTriangle(os.lf_sawpos(110), hslider("CZresTriangle:res", 2.5, 1, 16, 0.1));
+CZresTriangle_modulated_test = os.CZresTriangle(float(os.tphase(N, 1100))/N, 1 + 15*tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2311,7 +2415,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 CZresTrap_test = os.CZresTrap(os.lf_sawpos(110), 2.5);
+CZresTrap_slider_test = os.CZresTrap(os.lf_sawpos(110), hslider("CZresTrap:res", 2.5, 1, 16, 0.1));
+CZresTrap_modulated_test = os.CZresTrap(float(os.tphase(N, 1100))/N, 1 + 15*tri) with { N = 10*int(ma.SR); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## PolyBLEP-Based Oscillators
@@ -2361,7 +2469,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 polyblep_saw_test = os.polyblep_saw(220);
+polyblep_saw_slider_test = os.polyblep_saw(hslider("polyblep_saw:freq", 220, 20, 20000, 1));
+polyblep_saw_modulated_test = os.polyblep_saw(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -2385,7 +2497,11 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 polyblep_square_test = os.polyblep_square(220);
+polyblep_square_slider_test = os.polyblep_square(hslider("polyblep_square:freq", 220, 20, 20000, 1));
+polyblep_square_modulated_test = os.polyblep_square(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
