@@ -38,6 +38,12 @@ which was recovered from an old SAIL DART backup tape.
 John Chowning thinks this might be the one that became the
 well known and often copied JCREV.
 
+The delay-line lengths are the sample counts of the listing, fixed in
+samples, so the decay time and the apparent room size scale with 1/SR.
+The decay time is about 49,900 samples (T60 measured on the energy decay of
+the impulse response): 1.13 s at 44.1 kHz, 1.04 s at 48 kHz, 0.52 s at
+96 kHz, and 0.26 s at 192 kHz.
+
 `jcrev` is a standard Faust function.
 
 #### Usage
@@ -69,6 +75,11 @@ which was recovered from an old SAIL DART backup tape.
 John Chowning thinks this might be the one used on his
 often-heard brass canon sound examples, one of which can be found at
 [https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav](https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav).
+
+As in `jcrev`, the delay-line lengths are fixed in samples, so the decay
+time and the apparent room size scale with 1/SR. The decay time is about
+28,600 samples (T60 measured on the energy decay of the impulse response):
+0.65 s at 44.1 kHz, 0.60 s at 48 kHz, 0.30 s at 96 kHz, and 0.15 s at 192 kHz.
 
 #### Usage
 
