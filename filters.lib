@@ -54,7 +54,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.11.13";
+declare version "1.11.14";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2517,7 +2517,8 @@ _tanhalf(w) = tan(max(0, min(w*0.5/ma.SR, 0.499*ma.PI)));
 //
 // * `b2`, `b1`, `b0`: analog lowpass numerator coefficients
 // * `a1`, `a0`: analog lowpass denominator coefficients
-// * `w1`: desired passband width in radians/second (distance between the band edges), >= 0
+// * `w1`: desired passband width in radians/second (distance between the band edges), >= 0;
+//   floored at `5e-4*wc` (see Method)
 // * `wc`: desired center frequency in radians/second, >= 0 (0 gives the
 //   lowpass prototype at `w1`)
 //
@@ -2538,18 +2539,24 @@ _tanhalf(w) = tan(max(0, min(w*0.5/ma.SR, 0.499*ma.PI)));
 // single precision when the band is low or narrow relative to the sample
 // rate, where the direct form's poles cluster near z = 1 (issue #261).
 //
-// Every state stays at the level of the output when `wc` changes, so `wc`
-// (from the lower band edge `fl` of `bandpass`) can be swept down to 0 or
-// jump to and from it: at `wc` = 0 the second section is a DC blocker at
-// 0 Hz and the first one the lowpass prototype at `w1`. The previous
-// version fed the second section with the bandpass output and scaled its
-// outputs by `(w1/wc)^2`: `bandpass(2, fl, 2000)` peaked at 9e12 times its
-// input when `fl` swept from 1 kHz to 0 and back in 2 s (now 1), and at 735
-// times its static output when `fl` jumped from 1 kHz to 1 Hz (now 2.3; the
-// direct form before it, 693). After a jump of `wc` to 0, the DC held in
-// the second section stays in the output, as in any DC blocker at 0 Hz.
-// `w1` = 0 (a zero-width band) leaves the sections undamped, the output is
-// `b2*x`, and the energy they keep comes out when `w1` grows again.
+// Each section's input is scaled by `w1/W1`, so that its states stay at the
+// level of the output for any band, narrow or low: `wc` (from the lower band
+// edge `fl` of `bandpass`) can be swept down to 0 or jump to and from it, and
+// a band can close and reopen, without a spike. At `wc` = 0 the second
+// section is a DC blocker at 0 Hz and the first one the lowpass prototype at
+// `w1`. `w1` is floored at `5e-4*wc` (a band Q of at most 2000): a narrower
+// band, down to `w1` = 0 (`fl` = `fu`), acts as one of width `5e-4*wc`, so
+// that the sections are never lossless; after the band closes, what they
+// hold decays with a time constant of about `0.75*1000/fc` seconds for a
+// center frequency `fc` in Hz (`bandpass(2)`). Measured with
+// `bandpass(2, fl, 2000)`: a sweep of `fl` from 1 kHz to 0 and back in 2 s
+// peaks at 1.0 times the input (the previous version, which fed the second
+// section with the bandpass output and scaled its outputs by `(w1/wc)^2`,
+// at 9e12); a jump of `fl` from 1 kHz to 1 Hz peaks at 1.23 times the static
+// output (previously 735; the direct form before it, 693); an octave band
+// at 1 kHz closed for 0.1 s and reopened peaks at 0.89 (previously 210; the
+// direct form, 1060). After a jump of `wc` to 0, the DC held in the second
+// section stays in the output, as in any DC blocker at 0 Hz.
 //
 // When `w1` or `wc` jump abruptly, the state-variable sections release a
 // little more of their internal state than the direct form would: the
@@ -2577,29 +2584,37 @@ _tanhalf(w) = tan(max(0, min(w*0.5/ma.SR, 0.499*ma.PI)));
 declare tf2sb author "Julius O. Smith III";
 declare tf2sb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf2sb license "LicenseRef-STK-4.3";
-tf2sb(b2,b1,b0,a1,a0,w1,wc) = _ <: *(b2), select2(real, cplx, rl) :> _
+tf2sb(b2,b1,b0,a1,a0,w1in,wc) = _ <: *(b2), select2(real, cplx, rl) :> _
 with {
+  // bandwidth floor: w1 >= 5e-4*wc, so that the sections are never lossless
+  w1 = max(w1in, 5e-4*wc);
   real = a1*a1 >= 4*a0;
   c1 = b1 - b2*a1; // H(p) = b2 + (c1*p + c0)/(p^2 + a1*p + a0)
   c0 = b0 - b2*a0;
   // unwarped bilinear transform, as in the direct form: g = w/(2*SR)
   sec(G1,G2,k) = _svfg(G1*0.5/ma.SR, G2*0.5/ma.SR, k);
 
-  // Complex prototype poles: sections D1 at W1 and D2 at W2 = wc^2/W1, same
-  // damping R, with w1^2*s^2*D(p) = D1*D2. Section 2 is fed by lp1 = W1^2/D1,
-  // so that, with rho1 = w1/W1 and r = W2/W1 (both bounded):
-  //   1/D(p) = w1^2*s^2/(D1*D2) = rho1^2*hp2
-  //   p/D(p) = w1*s*(s^2 + W1*W2)/(D1*D2) = rho1*(hp2[bp1] + bp2)
-  // and hp2[bp1] = (s/W1)*hp2 = bp1 - 2*R*r*hp2 - r*bp2 (the section
-  // equations hp + k*bp + lp = in, s*lp = W*bp, s*bp = W*hp). Every tap stays
-  // bounded when wc goes to 0 (section 2 becomes a DC blocker at W2 -> 0).
+  // Complex prototype poles: sections D1 at W1 = |U| and D2 at W2 = wc^2/W1,
+  // same damping R, with w1^2*s^2*D(p) = D1*D2, where U and wc^2/U are the
+  // roots of U^2 - q*w1*U + wc^2 for a prototype pole q. With rho1 = w1/W1
+  // and r = W2/W1:
+  //   1/D(p) = w1^2*s^2/(D1*D2) = rho1^2*hp2[lp1]
+  //   p/D(p) = w1*s*(s^2 + W1*W2)/(D1*D2) = rho1*(hp2[bp1] + bp2[lp1])
+  // and hp2[bp1] = (s/W1)*hp2[lp1] = bp1 - 2*R*r*hp2 - r*bp2 (from the section
+  // equations hp + k*bp + lp = in, s*lp = W*bp, s*bp = W*hp). Each section's
+  // input is scaled by rho1, so that its states stay at the level of the
+  // output even for a narrow band (whose sections have Q ~ 1/rho1), and the
+  // remaining factors are bounded closed forms: from U + wc^2/U = q*w1,
+  // R = (a1/2)*rho1/(1 + r) and (1 - r)/rho1 = Im(q)*|U|/Im(U).
   W1  = _tf2sbpoles(a1,a0,w1,wc) : _,! : max(ma.MIN); // 0 only if w1 = wc = 0
-  R   = _tf2sbpoles(a1,a0,w1,wc) : !,_;
+  tq  = _tf2sbpoles(a1,a0,w1,wc) : !,_;               // |U|/Im(U)
   rho1 = w1/W1 : min(ma.MAX); // barrier: rho1*rho1 must not become w1^2/W1^2
   r   = (wc/W1 : min(1))^2; // W1 >= wc
   W2  = W1*r;
-  cplx = sec(W1, W1, 2*R) : (sec(W2, W2, 2*R), _, !) : ctaps;
-  ctaps(lp2, bp2, hp2, bp1) = rho1*(c0*rho1*hp2 + c1*(bp1 - 2*R*r*hp2 + (1 - r)*bp2));
+  R   = a1*0.5*rho1/(1 + r);
+  qi0 = sqrt(max(0, a0 - a1*a1*0.25)); // Im(q)
+  cplx = *(rho1) : sec(W1, W1, 2*R) : (*(rho1) : sec(W2, W2, 2*R)), _, ! : ctaps;
+  ctaps(lp2, bp2, hp2, bp1) = c1*bp1 + (c0 - c1*a1*r/(1 + r))*hp2 + c1*qi0*tq*bp2;
 
   // Real prototype poles q1, q2 < 0: sections D_i = s^2 + p_i*s + wc^2,
   // p_i = -q_i*w1, in cascade (section B fed by section A's band output
@@ -2621,8 +2636,8 @@ with {
 // R = -Re(U)/|U|; wc^2/U and its conjugate a section at wc^2/W1, same R.
 // Computed after normalizing w1 and wc by their maximum S (no overflow),
 // with a complex square root that does not cancel.
-// Returns (W1, R).
-_tf2sbpoles(a1,a0,w1,wc) = S*m, R
+// Returns (W1, |U|/Im(U)).
+_tf2sbpoles(a1,a0,w1,wc) = S*m, m/max(ui, ma.MIN)
 with {
   S  = max(w1, wc) : max(ma.MIN);
   // min(1) (a no-op) keeps the Faust normalizer from factoring S out of the
@@ -2641,7 +2656,6 @@ with {
   ur = (qr + sg*dr)*0.5;
   ui = (qi + sg*di)*0.5;
   m = sqrt(ur*ur + ui*ui) : max(ma.MIN);
-  R = max(0, 0 - ur/m);
 };
 
 // Trapezoidal state-variable section with integrator gains g1 and g2 and
@@ -2674,7 +2688,8 @@ with {
 //
 // * `b1`, `b0`: analog numerator coefficients
 // * `a0`: analog denominator constant coefficient
-// * `w1`: desired passband width in radians/second (distance between the band edges), >= 0
+// * `w1`: desired passband width in radians/second (distance between the band edges), >= 0;
+//   floored at `5e-4*wc` (see Method)
 // * `wc`: desired center frequency in radians/second, >= 0 (0 gives the
 //   lowpass prototype at `w1`)
 //
@@ -2687,7 +2702,9 @@ with {
 // gains are `G = max(wc, a0*w1)` and `wc^2/G`: for a narrow band
 // (`a0*w1 <= wc`) the usual section at `wc`, and gains that stay bounded
 // when `wc` goes to 0, where the section becomes the lowpass
-// `w1/(s + a0*w1)` (see `tf2sb`).
+// `w1/(s + a0*w1)` (see `tf2sb`). As in `tf2sb`, the input is scaled so that
+// the states stay at the level of the output, and `w1` is floored at
+// `5e-4*wc`.
 //
 // #### Test
 // ```
@@ -2707,11 +2724,14 @@ with {
 declare tf1sb author "Julius O. Smith III";
 declare tf1sb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf1sb license "LicenseRef-STK-4.3";
-tf1sb(b1,b0,a0,w1,wc) = _ <: *(b1), (_svfg(G1*0.5/ma.SR, G2*0.5/ma.SR, p/G1) : !,*((b0 - b1*a0)*w1/G1),!) :> _
+tf1sb(b1,b0,a0,w1in,wc) = _ <: *(b1), (*(w1/G1) : _svfg(G1*0.5/ma.SR, G2*0.5/ma.SR, p/G1) : !,*(b0 - b1*a0),!) :> _
 with {
   // D = s^2 + p*s + wc^2 with integrator gains G1 = max(wc, p), G2 = wc^2/G1:
   // the usual state-variable section at wc for a narrow band (p <= wc), and
-  // gains that stay bounded when wc goes to 0 (fl = 0 in bandpass)
+  // gains that stay bounded when wc goes to 0 (fl = 0 in bandpass). The input
+  // is scaled by w1/G1 so that the states stay at the level of the output,
+  // and w1 >= 5e-4*wc (as in tf2sb) keeps the section from being lossless.
+  w1 = max(w1in, 5e-4*wc);
   p  = a0*w1;
   G1 = max(wc, p) : max(ma.MIN);
   G2 = wc*(wc/G1);
@@ -3508,7 +3528,9 @@ with {
 // the bilinear transform: `sqrt(fl*fu)` well below Nyquist, somewhat higher
 // near it. `fu` is clamped to [0, 0.499*SR] and `fl` to [0, `fu`]: `fl` = 0
 // gives `lowpass(Nh, fu)`, and `fl` can be swept to 0 or jump to and from it
-// without a click or a spike (see `tf2sb`); `fl` = `fu` gives no output.
+// without a click or a spike (see `tf2sb`). The passband width is floored
+// at 5e-4 times the center frequency (a Q of at most 2000), so `fl` = `fu`
+// gives that narrowest band, and a band can close and reopen without a spike.
 //
 // #### Test
 // ```
@@ -3524,6 +3546,8 @@ with {
 // bandpass_zero_freq_test = no.noise : fi.bandpass(2, 1000*max(0, 1 - ba.time/12000) + 1000*(ba.time >= 24000), 2000);
 // bandpass3_zero_freq_test = no.noise : fi.bandpass(3, 1000*max(0, 1 - ba.time/12000) + 1000*(ba.time >= 24000), 2000);
 // bandpass_nyquist_test = no.noise : fi.bandpass(2, 1000, 0.6*ma.SR);
+// bandpass_zero_width_test = no.noise : fi.bandpass(2, select2(z, 707.1, 1000), select2(z, 1414.2, 1000)) with { z = (ba.time >= 4800) & (ba.time < 9600); };
+// bandpass3_zero_width_test = no.noise : fi.bandpass(3, select2(z, 707.1, 1000), select2(z, 1414.2, 1000)) with { z = (ba.time >= 4800) & (ba.time < 9600); };
 // bandpass_slider_test = no.noise : fi.bandpass(2, hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
 // bandpass_modulated_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 // bandpass_jump_test = no.noise : fi.bandpass(2, fl, 3*fl) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fl = 20*pow(250, sq); };
@@ -3557,7 +3581,8 @@ bandpass(Nh,fl,fu) = bandpass0_bandstop1(0,Nh,fl,fu);
 // somewhat higher near it. `fu` is clamped to [0, 0.499*SR] and `fl` to
 // [0, `fu`]: `fl` = 0 gives `highpass(Nh, fu)`, and `fl` can be swept to 0
 // or jump to and from it without a click or a spike (see `tf2sb`); `fl` =
-// `fu` passes the input unchanged.
+// `fu` gives the narrowest stopband: the width is floored at 5e-4 times the
+// center frequency, as in `bandpass`.
 //
 // #### Test
 // ```
@@ -3570,6 +3595,7 @@ bandpass(Nh,fl,fu) = bandpass0_bandstop1(0,Nh,fl,fu);
 // bandstop_test = src : fi.bandstop(2, 500, 1500);
 // bandstop_wide_test = no.noise : fi.bandstop(2, 5000, 8000);
 // bandstop_zero_freq_test = no.noise : fi.bandstop(2, 1000*max(0, 1 - ba.time/12000) + 1000*(ba.time >= 24000), 2000);
+// bandstop_zero_width_test = no.noise : fi.bandstop(2, select2(z, 707.1, 1000), select2(z, 1414.2, 1000)) with { z = (ba.time >= 4800) & (ba.time < 9600); };
 // bandstop_slider_test = no.noise : fi.bandstop(2, hslider("fl", 500, 20, 20000, 1), hslider("fu", 1500, 20, 20000, 1));
 // bandstop_modulated_test = no.noise : fi.bandstop(2, fl, 3*fl) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fl = 20*pow(250, tri); };
 // bandstop_jump_test = no.noise : fi.bandstop(2, fl, 3*fl) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fl = 20*pow(250, sq); };
@@ -3665,7 +3691,8 @@ with {
 // Where:
 //
 // * `fl`: lower passband edge frequency in Hz (-0.2 dB), clamped to [0, `fu`]
-//   (0 gives the elliptic lowpass at `fu`, see `bandpass`)
+//   (0 gives the elliptic lowpass at `fu`; the width is floored at 5e-4 times
+//   the center frequency; see `bandpass`)
 // * `fu`: upper passband edge frequency in Hz (-0.2 dB), clamped to [0, 0.499*SR]
 //
 // #### Test
@@ -3714,7 +3741,8 @@ with {
 // Where:
 //
 // * `fl`: lower passband edge frequency in Hz (-0.2 dB), clamped to [0, `fu`]
-//   (0 gives the elliptic lowpass at `fu`, see `bandpass`)
+//   (0 gives the elliptic lowpass at `fu`; the width is floored at 5e-4 times
+//   the center frequency; see `bandpass`)
 // * `fu`: upper passband edge frequency in Hz (-0.2 dB), clamped to [0, 0.499*SR]
 //
 // #### Test
