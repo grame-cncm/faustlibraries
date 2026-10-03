@@ -521,7 +521,12 @@ and 1 violet/azure noise.
 #### Test
 ```
 no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 colored_noise_test = no.colored_noise(4, 0.0);
+colored_noise_slider_test = no.colored_noise(4, hslider("colored_noise:alpha", 0.0, -1, 1, 0.01));
+colored_noise_modulated_test = no.colored_noise(4, 2*tri - 1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+colored_noise_jump_test = no.colored_noise(4, 2*sq - 1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### Examples
@@ -631,8 +636,13 @@ Where:
 
 #### Test
 ```
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 import("stdfaust.lib");
 simplex1_lf_test = no.simplex1_lf(12345, 4.07);
+simplex1_lf_slider_test = no.simplex1_lf(12345, hslider("simplex1_lf:rate", 4.07, -100, 100, 0.01));
+simplex1_lf_modulated_test = no.simplex1_lf(12345, 20*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References

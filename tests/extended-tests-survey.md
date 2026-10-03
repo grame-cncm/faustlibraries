@@ -48,7 +48,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 - **Near-silent references.**
   - `dx` `env_test` peaks at 6.4e-5, and `operator_test` at 3.2e-5 (its L1..L4 are all 0).
   - `violin_ui_test` tests `violinModel`, not `violin_ui`.
-- **No real constant test.** The `_test`s of `vaeffects.lib` and `synths.lib` already use unsmoothed `hslider`s: they are slider tests under the `_test` name. Choose between:
+- **No real constant test.** The `_test`s of `vaeffects.lib` and `synths.lib` already used unsmoothed `hslider`s: they were slider tests under the `_test` name (both libraries now split them). Choose between:
   - adding `_slider_test` copies;
   - converting the `_test`s to constants, which changes their references.
 - **No test at all.**
@@ -167,7 +167,15 @@ The plan was:
 - `os.dsf`: a `0.95*tri`.
 - The CZ family: index `tri`, res `1 + 15*tri`. Build their phase from `os.tphase`.
 
-**noises.lib, envelopes.lib, synths.lib, dx7**:
+**noises.lib, envelopes.lib, synths.lib, dx7**: **Done**: 33 tests, all passing without a baseline entry. The `_test`s of `synths.lib` that took sliders are split, as in `vaeffects.lib`, into a constant `_test` and a `_slider_test`. Changes to the plan below:
+- `no.lfnoise0`, `lfnoiseN`, `lfnoise`: deferred (5.2). They latch white noise at the zero crossings of `os.oscrs`: a crossing one sample apart in float and double latches another noise value, and at a low rate a few values make the whole level. A rate jumping between 1 and 100 Hz gives level gaps of 0.19 to 0.24, `lfnoise0` from a slider 3.9e-3; their modulated tests pass, by chance.
+- `no.colored_noise`: alpha from a slider, modulated and jumping over [-1, 1]. `no.simplex1_lf`: rate from a slider, and through zero (`20*(2*tri - 1)`).
+- Envelopes: slider tests for the 10 planned; `en.asrfe` with its attack and release T60s modulated from 10 ms to 1 s in opposite directions; `en.adsrf_bias` and `en.ahdsrf_bias` with their three bias parameters modulated.
+- `sy.fm`: the modulation index from 0 to 1000 Hz on a 440 Hz carrier, through zero. `sy.combString`: freq from 220 to 880 Hz (within its 1024-sample line up to 192 kHz), modulated and jumping. `sy.dubDub`: cutoff from 100 Hz to 6 kHz.
+- dx7: `operator_modulated_test` with its envelope levels at 99 (audible, unlike `operator_test`) and phaseMod over [-1, 1]; `env` and `pitchenv` slider tests.
+- Left as they are, found with the controls at their extremes: `en.smoothEnvelope` at 5 s reaches 2.5e-2 at 192 kHz, `en.asrfe` and `en.adsre` with 5 s T60s 2e-3 (the float limit of a slow one-pole, as in signals.lib); `sy.dubDub` at q = 10, 5.8e-3, from `fi.resonlp` (the direct-form debt of 4.2).
+
+The plan was:
 - `no.lfnoise0`/`lfnoiseN`/`lfnoise`: rate exp 1..100, jump.
 - `no.colored_noise`: alpha −1..1, jump.
 - `no.simplex1_lf`: rate through zero.
@@ -327,6 +335,7 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 | `modeFilter_jump_test` | `physmodels.lib`, `physmodels_tests.dsp` | 0.12 | #269 (modeFilter as a Chamberlin state-variable section) |
 | `oscq_modulated_test` | `oscillators.lib`, `oscillators_tests.dsp` | 8.9e-3 | a better `fi.wgr` (with `wgr_jump_test`) |
 | `goertzel_slider_test` | `analyzers.lib`, `analyzers_tests.dsp` | 1.3e-3 | a Goertzel recursion accurate in float at low frequency, or a smaller n |
+| `lfnoise0_slider_test`, `lfnoise0_jump_test`, `lfnoiseN_jump_test`, `lfnoise_jump_test` (and their modulated and slider siblings, which pass by chance) | `noises.lib`, `noises_tests.dsp` | 3.9e-3; 0.24, 0.20, 0.19 | a trigger exact in both precisions: the zero crossings of `os.oscrs` move by one sample between float and double, and each latches another noise value |
 | `vital_rev_slider_test` | `reverbs.lib`, `reverbs_tests.dsp` | 3.1e-3, the debt of `vital_rev_test` | a chorus LFO whose phase does not drift in float (its `m_lfo_sine` accumulates `freq/SR`, and the chorus moves the delays by up to 2500 samples) |
 | `jpverb_size_modulated_test`, `greyhole_size_modulated_test` | `reverbs.lib`, `reverbs_tests.dsp` | 4.6e-3, 7.1e-3 (a jump of size between 1 and 2: 3.8e-3, 5.2e-3) | delay lengths smoothed accurately in float: `smooth_init(0.9999)` and `(0.995)` glide each prime length to the next, and a 2e-4 relative difference of `1 - s` between float and double moves the fractional delays of the whole network |
 | `greyhole_dt_jump_test` | `reverbs.lib`, `reverbs_tests.dsp` | 1.7e-3 at 176.4 kHz (0.25 to 0.5 s; 8.7e-4 from 0.125 to 0.25 s) | a `de.sdelay` crossfade exact in float: it steps by 1/22050 |
@@ -345,6 +354,15 @@ moog_vcf_2b_modulated_test = no.noise : ve.moog_vcf_2b(0.95, 20*pow(500, tri)) w
 modeFilter_jump_test = 0.01*no.noise : pm.modeFilter(50*pow(100, sq), 1, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 oscq_modulated_test = os.oscq(20*pow(500, tri)) : _, ! with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 goertzel_slider_test = an.goertzel(hslider("freq", 50, 20, 1000, 1), 4096, no.noise);
+lfnoise0_slider_test = no.lfnoise0(hslider("lfnoise0:freq", 10.1, 0.1, 1000, 0.1));
+lfnoiseN_slider_test = no.lfnoiseN(3, hslider("lfnoiseN:freq", 10.1, 0.1, 1000, 0.1));
+lfnoise_slider_test = no.lfnoise(hslider("lfnoise:freq", 10.1, 0.1, 1000, 0.1));
+lfnoise0_modulated_test = no.lfnoise0(pow(100, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lfnoise0_jump_test = no.lfnoise0(pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+lfnoise_modulated_test = no.lfnoise(pow(100, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lfnoise_jump_test = no.lfnoise(pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+lfnoiseN_modulated_test = no.lfnoiseN(3, pow(100, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lfnoiseN_jump_test = no.lfnoiseN(3, pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 vital_rev_slider_test = (os.tosc(330), os.tosc(440)) : re.vital_rev(hslider("vital_rev:prelow", 0.2, 0, 1, 0.01), hslider("vital_rev:prehigh", 0.8, 0, 1, 0.01), hslider("vital_rev:lowcutoff", 0.5, 0, 1, 0.01), hslider("vital_rev:highcutoff", 0.7, 0, 1, 0.01), hslider("vital_rev:lowgain", 0.4, 0, 1, 0.01), hslider("vital_rev:highgain", 0.6, 0, 1, 0.01), hslider("vital_rev:chorus_amt", 0.3, 0, 1, 0.01), hslider("vital_rev:chorus_freq", 0.2, 0, 1, 0.01), hslider("vital_rev:predelay", 0.1, 0, 1, 0.01), hslider("vital_rev:time", 0.7, 0, 1, 0.01), hslider("vital_rev:size", 0.5, 0, 1, 0.01), hslider("vital_rev:mix", 0.4, 0, 1, 0.01));
 jpverb_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.jpverb(3.0, 0.2, 0.5 + 2.5*tri, 0.8, 0, 0.4, 0.9, 0.8, 0.7, 500, 4000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 greyhole_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(2.0, 0.3, 0.5 + 2.5*tri, 0.6, 0.5, 0, 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
