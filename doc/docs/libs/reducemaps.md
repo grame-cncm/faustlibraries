@@ -189,7 +189,11 @@ Block-wise statistics of the input signal, built on `reduce` and
 #### Usage
 
 ```
-_ : sumn(n) : _ // and likewise maxn, minn, mean, RMS
+_ : sumn(n) : _
+_ : maxn(n) : _
+_ : minn(n) : _
+_ : mean(n) : _
+_ : RMS(n) : _
 ```
 
 Where:

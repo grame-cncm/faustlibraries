@@ -403,7 +403,7 @@ A reverb application using `fdnrev0`.
 #### Usage
 
 ```
-_,_,_,_ : fdnrev0_demo(N,NB,BBSO) : _,_
+_,_ : fdnrev0_demo(N,NB,BBSO) : _,_
 ```
 
 Where:
@@ -428,15 +428,14 @@ fdnrev0_demo_test = stereoNoise : dm.fdnrev0_demo(16, 5, 3);
 
 ### `(dm.)zita_rev_fdn_demo`
 
-Reverb demo application based on `zita_rev_fdn`.
+Reverb demo application based on `zita_rev_fdn`, with an 8-channel input
+bus and an 8-channel output bus.
 
 #### Usage
 
 ```
-fdnIn : zita_rev_fdn_demo : fdnOut
+si.bus(8) : zita_rev_fdn_demo : si.bus(8)
 ```
-
-Typical use is an 8-channel input bus and an 8-channel output bus.
 
 #### Test
 ```
@@ -761,13 +760,16 @@ velvet_noise_demo_test = dm.velvet_noise_demo;
 
 ### `(dm.)latch_demo`
 
-Illustrate latch operation.
+Illustrate latch operation. The three outputs are a sine signal, the
+latch control signal, and the sine sampled and held by the latch.
 
 #### Usage
 
 ```
-latch_demo : _
+latch_demo : _,_,_
 ```
+
+#### Example
 
 One way to visualize it is:
 
@@ -789,12 +791,16 @@ latch_demo_test = dm.latch_demo;
 ### `(dm.)envelopes_demo`
 
 Illustrate various envelopes overlaid, including their gate * 1.1.
+The eight outputs are the gate * 1.1, then the `smoothEnvelope`, `ar`,
+`arfe`, `are`, `asr`, `adsr` and `adsre` envelopes.
 
 #### Usage
 
 ```
-envelopes_demo : envelopeBus
+envelopes_demo : si.bus(8)
 ```
+
+#### Example
 
 One way to visualize it is:
 
@@ -816,12 +822,23 @@ envelopes_demo_test = dm.envelopes_demo;
 ### `(dm.)fft_spectral_level_demo`
 
 Make a real-time spectrum analyzer using FFT from analyzers.lib.
+The input signal is passed through, its spectrum is displayed in bargraphs.
 
 #### Usage
 
 ```
+_ : fft_spectral_level_demo(N) : _
+```
+
+Where:
+
+* `N`: FFT size (must be a power of 2 known at compile time)
+
+#### Example
+
+```
 echo 'import("stdfaust.lib");' > fft_spectral_level_demo.dsp
-echo 'process = dm.fft_spectral_level_demo;' >> fft_spectral_level_demo.dsp
+echo 'process = dm.fft_spectral_level_demo(256);' >> fft_spectral_level_demo.dsp
 Mac:
   faust2caqt fft_spectral_level_demo.dsp
   open fft_spectral_level_demo.app
@@ -844,9 +861,20 @@ fft_spectral_level_demo_test = no.noise : dm.fft_spectral_level_demo(256);
 
 ### `(dm.)reverse_echo_demo`
 
-Multichannel echo effect with reverse delays.
+Multichannel echo effect with reverse delays, the nChans echo channels
+being panned to stereo.
 
 #### Usage
+
+```
+_ : reverse_echo_demo(nChans) : _,_
+```
+
+Where:
+
+* `nChans`: number of echo channels, an integer > 1 known at compile time
+
+#### Example
 
 ```
 echo 'import("stdfaust.lib");' > reverse_echo_demo.dsp
@@ -889,6 +917,12 @@ Very small frequency shifts give interesting chirp effects when
 there is feedback around the frequency shifter.
 
 #### Usage
+
+```
+_ : pospass_demo : _,_
+```
+
+#### Example
 
 ```
 echo 'import("stdfaust.lib");' > pospass_demo.dsp
@@ -942,14 +976,14 @@ exciter_test = no.noise : dm.exciter;
 ### `(dm.)vocoder_demo`
 
 Use example of the vocoder function where an impulse train is used
-as excitation.
+as excitation. The vocoder output is duplicated on two outputs.
 
 #### Usage
 
 ```
-_ : vocoder_demo : _
-
+_ : vocoder_demo : _,_
 ```
+
 #### Test
 ```
 dm = library("demos.lib");
@@ -1085,16 +1119,15 @@ End-to-end motion feature monitor built on motion.lib:
   six-face orientation weights per sensor, and raw/scaled axis taps.
 - Exposes 92 UI-gated outputs matching the motion.lib signal names.
 
+The 18 inputs are, in order: `leftArm_x`, `leftArm_y`, `leftArm_z`,
+`feet_x`, `feet_y`, `feet_z`, `back_x`, `back_y`, `back_z`,
+`rightArm_x`, `rightArm_y`, `rightArm_z`, `head_x`, `head_y`, `head_z`,
+`stomach_x`, `stomach_y`, `stomach_z`.
+
 #### Usage
 
 ```
-motion_wrapper_demo :
-  (leftArm_x,  leftArm_y,  leftArm_z,
-   feet_x,     feet_y,     feet_z,
-   back_x,     back_y,     back_z,
-   rightArm_x, rightArm_y, rightArm_z,
-   head_x,     head_y,     head_z,
-   stomach_x,  stomach_y,  stomach_z) -> 92 outputs
+si.bus(18) : motion_wrapper_demo : si.bus(92)
 ```
 
 #### Test

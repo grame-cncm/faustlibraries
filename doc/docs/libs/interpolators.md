@@ -540,7 +540,7 @@ choice of the interpolation enum).
 #### Usage
 
 ```
-interpolator_null(gen, idv) : _
+interpolator_null(gen, idv) : si.bus(outputs(gen))
 ```
 
 Where:
@@ -637,6 +637,16 @@ soundfiles `play_interp` players): `linear` (0), `cosine` (1), `cubic`
 #### Usage
 
 ```
+linear : _
+cosine : _
+cubic : _
+nointerp : _
+MAX_INTER : _
+```
+
+#### Example
+
+```
 sample.play_interp(length, freq, gain, trig, it.cubic)
 ```
 
@@ -655,7 +665,7 @@ Generic configurable interpolator (with selector between in [0..3]). The value 3
 #### Usage
 
 ```
-interpolator_select(gen, idv, sel) : _,_... (equal to N = outputs(gen))
+interpolator_select(gen, idv, sel) : si.bus(outputs(gen))
 ```
 
 Where:
@@ -757,6 +767,7 @@ basis polynomial with arbitrary spacing of the points.
 
 ```
 lagrangeCoeffs(N, xCoordsList, x) : si.bus(N + 1)
+lagrange_h(N, x) : si.bus(N + 1)
 ```
 
 Where:
@@ -789,11 +800,16 @@ Nth-order Lagrange interpolation of a value `x` between input points.
 (points at 0,1,...,N), kept for back-compatibility.
 
 Nth-order Lagrange interpolator to interpolate between a set of arbitrarily spaced N + 1 points.
+The N + 1 inputs are the y-values of the interpolation points (`yCoords`).
+The position `x` can also be given as a first input signal, by partial
+application: `x, yCoords : lagrangeInterpolation(N, xCoordsList) : _`
+(as in the examples below).
 
 #### Usage
 
 ```
-x , yCoords : lagrangeInterpolation(N, xCoordsList) : _
+si.bus(N + 1) : lagrangeInterpolation(N, xCoordsList, x) : _
+si.bus(N + 1) : lagrangeN(N, x) : _
 ```
 
 Where:
@@ -801,7 +817,6 @@ Where:
 * `N`: order of the interpolator, known at compile-time
 * `xCoordsList`: a list of N + 1 elements determining the x-axis spacing of the points, known at compile-time
 * `x`: an x-axis position to interpolate between the y-values
-* `yCoords`: N + 1 elements determining the values of the interpolation points
 
 Example: find the centre position of a four-point set using an order-3
 Lagrange function fitting the equally-spaced points [2, 5, -1, 3]:

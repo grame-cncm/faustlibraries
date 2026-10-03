@@ -292,13 +292,14 @@ speakerbp(130,5000)
 
 ### `(ef.)piano_dispersion_filter`
 
-Piano dispersion allpass filter in closed form.
+Piano dispersion allpass filter in closed form. The first output is
+MINUS the estimated delay of the allpass chain at `f0`, the second one
+the filtered signal (see Outputs below).
 
 #### Usage
 
 ```
-piano_dispersion_filter(M,B,f0)
-_ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : fdelay(maxDelay) : _
+_ : piano_dispersion_filter(M,B,f0) : _,_
 ```
 
 Where:
@@ -319,6 +320,14 @@ piano_dispersion_filter_test = os.tosc(110) : ef.piano_dispersion_filter(4, 0.00
 piano_dispersion_filter_slider_test = os.tosc(110) : ef.piano_dispersion_filter(4, hslider("piano_dispersion_filter:B", 0.0001, 0.000001, 0.01, 0.000001), hslider("piano_dispersion_filter:f0", 110, 27.5, 4186, 0.1));
 piano_dispersion_filter_modulated_test = no.noise : ef.piano_dispersion_filter(4, 0.0001, 27.5*pow(4186/27.5, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 piano_dispersion_filter_jump_test = no.noise : ef.piano_dispersion_filter(4, 0.0001, 27.5*pow(4186/27.5, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+#### Example
+
+The delay output compensates the delay of a string loop:
+
+```
+_ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : de.fdelay(maxDelay) : _
 ```
 
 #### Outputs
@@ -489,7 +498,7 @@ Square Rectangular Digital Waveguide Mesh.
 #### Usage
 
 ```
-bus(4*N) : mesh_square(N) : bus(4*N)
+si.bus(4*N) : mesh_square(N) : si.bus(4*N)
 ```
 
 Where:
@@ -797,7 +806,7 @@ Reverse echo effect.
 #### Usage
 
 ```
-_ : ef.reverseEchoN(N,delay) : si.bus(N)
+_ : reverseEchoN(N,delay) : si.bus(N)
 ```
 
 Where:
@@ -832,7 +841,7 @@ Reverse delay with amplitude ramp.
 #### Usage
 
 ```
-_ : ef.reverseDelayRamped(delay,phase) : _
+_ : reverseDelayRamped(delay,phase) : _
 ```
 
 Where:
@@ -863,7 +872,7 @@ Pan nChans channels to the stereo field, spread uniformly left to right.
 #### Usage
 
 ```
-si.bus(N) : ef.uniformPanToStereo(N) : _,_
+si.bus(N) : uniformPanToStereo(N) : _,_
 ```
 
 Where:
@@ -893,13 +902,8 @@ A tape-stop effect, like putting a finger on a vinyl record player.
 #### Usage:
 
 ```
-_,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, 
-              crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
-```
-
-```
-_ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP, 
-             crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
+si.bus(C) : tapeStop(C, LAGRANGE_ORDER, MAX_TIME_SAMP,
+                     crossfade, gainAlpha, stopAlpha, stopTime, stop) : si.bus(C)
 ```
 
 Where:
@@ -912,6 +916,15 @@ Where:
 * `stopAlpha`: `stopAlpha==1` represents a linear deceleration (constant force). `stopAlpha<1` represents an initially weaker, then stronger force. `stopAlpha>1` represents an initially stronger, then weaker force. Safe values are in the range [.01,2].
 * `stopTime`: Desired duration of the stop time, in samples.
 * `stop`: When `stop` becomes positive, the tape-stop effect will start. When `stop` becomes zero, normal audio will resume via crossfade.
+
+#### Example
+
+```
+_,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP,
+              crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
+_ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP,
+             crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
+```
 
 #### Test
 ```
@@ -1090,8 +1103,12 @@ Quadratic softclip nonlinearity.
 #### Usage
 
 ```
-_ : softclipQuadratic : _
+softclipQuadratic(x) : _
 ```
+
+Where:
+
+* `x`: input signal
 
 #### Test
 ```

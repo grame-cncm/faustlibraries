@@ -399,7 +399,7 @@ Can be used for either DC (constant) or AC (signal) voltage sources.
 #### Usage
 
 ```
-v1(i) = u_Voltage(i, ein);
+v1(i) = u_voltage(i, ein);
 buildtree( v1 : B );
 ```
 
@@ -721,7 +721,7 @@ It should be used as the root/top element of the connection tree
 #### Usage
 
 ```
-s1(i) = u_resCurrent(i, lambda);
+s1(i) = u_switch(i, lambda);
 buildtree( s1 : B );
 ```
 
@@ -1050,12 +1050,13 @@ It should be used as the root/top element of the connection tree.
 #### Usage
 
 ```
-buildtree( u_idealDiode : B );
+diode(i) = u_idealDiode(i);
+buildtree( diode : B );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `diode(i) = wd.u_idealDiode(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: only usable as the root of a tree.
 Correct implementation is shown above.
@@ -1347,12 +1348,13 @@ Elements connected to this adaptor will behave as if connected in parallel in ci
 #### Usage
 
 ```
-buildtree( u_parallel2Port : (A, B) );
+root(i) = u_parallel2Port(i);
+buildtree( root : (A, B) );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `root(i) = wd.u_parallel2Port(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: only usable as the root of a tree.
 This adaptor has no user-accessible parameters. 
@@ -1387,12 +1389,13 @@ Elements connected to this adaptor will behave as if connected in parallel in ci
 #### Usage
 
 ```
-buildtree( A : parallel2Port : B );
+connector(i) = parallel2Port(i);
+buildtree( A : connector : B );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `connector(i) = wd.parallel2Port(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and one forward adaptor.
@@ -1427,12 +1430,13 @@ Elements connected to this adaptor will behave as if connected in series in circ
 #### Usage
 
 ```
-buildtree( u_series2Port : (A, B) );
+root(i) = u_series2Port(i);
+buildtree( root : (A, B) );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `root(i) = wd.u_series2Port(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: only usable as the root of a tree.
 This adaptor has no user-accessible parameters. 
@@ -1467,12 +1471,13 @@ Elements connected to this adaptor will behave as if connected in series in circ
 #### Usage
 
 ```
-buildtree( A : series2Port : B );
+connector(i) = series2Port(i);
+buildtree( A : connector : B );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `connector(i) = wd.series2Port(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and one forward adaptor.
@@ -1759,12 +1764,13 @@ This adaptor is used to connect adaptors simulating components connected in para
 #### Usage
 
 ```
-buildtree( A : parallel : (B, C) );
+junction(i) = parallel(i);
+buildtree( A : junction : (B, C) );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `junction(i) = wd.parallel(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.
@@ -1799,9 +1805,13 @@ This adaptor is used to connect adaptors simulating components connected in seri
 #### Usage
 
 ```
-
-tree = A : (series : (B, C));
+junction(i) = series(i);
+buildtree( A : junction : (B, C) );
 ```
+
+Where:
+
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.
@@ -1840,9 +1850,13 @@ It implements the simplest possible rigid connection found in the Fender Bassman
 #### Usage
 
 ```
-
-tree = u_sixportPassive : (A, B, C, D, E, F));
+rtype(i) = u_sixportPassive(i);
+buildtree( rtype : (A, B, C, D, E, F) );
 ```
+
+Where:
+
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with six forward adaptors.
@@ -1920,6 +1934,8 @@ It also calculates the voltage across the element and gives it as a model output
 #### Usage
 
 ```
+scatter = *(-0.4);
+upRes = 1600;
 n1(i) = genericNode_Vout(i, scatter, upRes);
 ```
 
@@ -1963,6 +1979,8 @@ It also calculates the current through the element and gives it as a model outpu
 #### Usage
 
 ```
+scatter = *(-0.3);
+upRes = 1400;
 n1(i) = genericNode_Iout(i, scatter, upRes);
 ```
 
@@ -2044,11 +2062,13 @@ It is used in conjunction with the buildup() function to create a model.
 #### Usage
 
 ```
-builddown(A : B)~buildup(A : B);
+builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 ```
 
-Where: 
- `(A : B)` : is a connection tree composed of WD adaptors
+Where:
+
+* `tree`: a connection tree composed of WD adaptors, such as
+  `vsrc : (branch : (res_leaf, probe))`
 
 #### Test
 ```
@@ -2077,11 +2097,13 @@ It is used in conjunction with the builddown() function to create a full structu
 #### Usage
 
 ```
-builddown(A : B)~buildup(A : B);
+builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 ```
 
-Where: 
-`(A : B)` : is a connection tree composed of WD adaptors
+Where:
+
+* `tree`: a connection tree composed of WD adaptors, such as
+  `vsrc : (branch : (res_leaf, probe))`
 
 #### Test
 ```
@@ -2110,11 +2132,13 @@ It is used by the buildup and builddown functions but is also helpful in testing
 #### Usage
 
 ```
-getres(A : B)~getres(A : B);
+getres(subtree) : _
 ```
 
-Where: 
-`(A : B)` : is a partial connection tree composed of WD adaptors
+Where:
+
+* `subtree`: a partial connection tree composed of WD adaptors, such as
+  `branch : (res_leaf, probe)`
 
 #### Test
 ```
@@ -2147,11 +2171,12 @@ This function is a parallelized version of `getres`.
 #### Usage
 
 ```
-parres((A , B))~parres((A , B));
+parres((subtree_left, subtree_right)) : _,_
 ```
 
-Where: 
-`(A , B)` : is a partial connection tree composed of WD adaptors
+Where:
+
+* `subtree_left`, `subtree_right`: partial connection trees composed of WD adaptors
 
 #### Test
 ```
@@ -2185,11 +2210,13 @@ It recursively steps through the given tree and creates an output matrix passing
 #### Usage
 
 ```
-buildout( A : B );
+builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 ```
 
-Where: 
-`(A : B)` : is a connection tree composed of WD adaptors
+Where:
+
+* `tree`: a connection tree composed of WD adaptors, such as
+  `vsrc : (branch : (res_leaf, probe))`
 
 #### Test
 ```
@@ -2218,11 +2245,15 @@ It recursively steps through the given tree, parametrizes the adaptors, and buil
 #### Usage
 
 ```
-buildtree(A : B);
+buildtree(tree) : _, ...
 ```
 
-Where: 
-`(A : B)` : a connection tree composed of WD adaptors
+Where:
+
+* `tree`: a connection tree composed of WD adaptors, such as
+  `vsrc : (branch : (res_leaf, probe))`
+
+The outputs are those of the output adaptors of the tree (`_Vout`, `_Iout`), one each.
 
 #### Test
 ```

@@ -528,11 +528,12 @@ ahdsrf_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato
 //------------------------`(en.)ahdsr_bias`---------------------------
 // AHDSR (Attack, Hold, Decay, Sustain, Release) envelope generator
 // with control over bias on each segment, and toggle for legato.
+// The release segment ends at 0 (see `ahdsrf_bias` for a final level).
 //
 // #### Usage
 //
 // ```
-// ahdsr_bias(at,ht,dt,sl,rt,final,b_att,b_dec,b_rel,legato,t) : _
+// ahdsr_bias(at,ht,dt,sl,rt,b_att,b_dec,b_rel,legato,t) : _
 // ```
 //
 // Where:
@@ -542,7 +543,6 @@ ahdsrf_bias(att, hol, dec, sus, rel, final, bias_att, bias_dec, bias_rel, legato
 // * `dt`: decay time (sec)
 // * `sl`: sustain level (between 0..1)
 // * `rt`: release time (sec)
-// * `final`: final level (between 0..1) but less than or equal to `sl`
 // * `b_att`: bias during attack (between 0..1) where 0.5 is no bias.
 // * `b_dec`: bias during decay (between 0..1) where 0.5 is no bias.
 // * `b_rel`: bias during release (between 0..1) where 0.5 is no bias.
@@ -842,13 +842,13 @@ with {
 // #### Usage
 //
 // ```
-// dx7_envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) : _
+// dx7envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) : _
 // ```
 //
 // Where:
 //
-// * `RN`: rates in seconds
-// * `LN`: levels (0-1)
+// * `R1`, `R2`, `R3`, `R4`: rates in seconds
+// * `L1`, `L2`, `L3`, `L4`: levels (0-1)
 // * `t`: trigger signal
 //
 // #### Test

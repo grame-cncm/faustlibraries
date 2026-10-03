@@ -74,12 +74,13 @@ declare copyright "2012-2013 Guillot, Paris, Colafrancesco, CICM labex art H2H, 
 
 //----------------------`(ho.)encoder`---------------------------------
 // Ambisonic encoder. Encodes a signal in the circular harmonics domain
-// depending on an order of decomposition and an angle.
+// depending on an order of decomposition and an angle. Produces the
+// 2*N+1 circular harmonics.
 //
 // #### Usage
 //
 // ```
-// encoder(N, x, a) : _
+// encoder(N, x, a) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -218,7 +219,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : decoder(N, P) : _
+// si.bus(2*N+1) : decoder(N, P) : si.bus(P)
 // ```
 //
 // Where:
@@ -254,7 +255,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : decoderStereo(N) : _
+// si.bus(2*N+1) : decoderStereo(N) : _,_
 // ```
 //
 // Where:
@@ -423,7 +424,7 @@ with {
 // #### Usage
 //
 // ```
-// _,_, ... : iDecoder(N, la, direct, st, g) : _,_, ...
+// si.bus(2*N+1) : iDecoder(N, la, direct, shift, st, g) : si.bus(outputs(la))
 // ```
 //
 // Where:
@@ -477,7 +478,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : optimBasic(N) : _
+// si.bus(2*N+1) : optimBasic(N) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -503,7 +504,7 @@ optimBasic(N) = par(i, 2*N+1, _);
 // #### Usage
 //
 // ```
-// _ : optimMaxRe(N) : _
+// si.bus(2*N+1) : optimMaxRe(N) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -536,7 +537,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : optimInPhase(N) : _
+// si.bus(2*N+1) : optimInPhase(N) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -604,7 +605,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : wider(N,w) : _
+// si.bus(2*N+1) : wider(N, w) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -701,7 +702,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : rotate(N, a) : _
+// si.bus(2*N+1) : rotate(N, a) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -734,11 +735,14 @@ with {
 
 //-------`(ho.)scope`----------
 // Produces an XY pair of signals representing the ambisonic sound field.
+// The 2*N+1 inputs are the circular harmonics; the outputs are the X and Y
+// coordinates, followed by a third signal equal to 1 when the field is in
+// phase with the scanning direction (positive), 0 otherwise.
 //
 // #### Usage
 //
 // ```
-// _,_, ... : scope(N, rt) : _,_
+// si.bus(2*N+1) : scope(N, rt) : _,_,_
 // ```
 //
 // Where:
@@ -1097,11 +1101,12 @@ _th(21, i, p) = sqrt(1 - ((i+1) / p - 1)^2);
 //----------------------`(ho.)encoder3D`---------------------------------
 // Ambisonic encoder. Encodes a signal in the circular harmonics domain
 // depending on an order of decomposition, an angle and an elevation.
+// Produces the (N+1)*(N+1) spherical harmonics.
 //
 // #### Usage
 //
 // ```
-// encoder3D(N, x, a, e) : _
+// encoder3D(N, x, a, e) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1236,7 +1241,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : optimBasic3D(N) : _
+// si.bus((N+1)*(N+1)) : optimBasic3D(N) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1262,7 +1267,7 @@ optimBasic3D(N) = par(i, (N+1) * (N+1), _);
 // #### Usage
 //
 // ```
-// _ : optimMaxRe3D(N) : _
+// si.bus((N+1)*(N+1)) : optimMaxRe3D(N) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1293,7 +1298,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : optimInPhase3D(N) : _
+// si.bus((N+1)*(N+1)) : optimInPhase3D(N) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:

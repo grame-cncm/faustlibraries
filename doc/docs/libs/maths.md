@@ -119,12 +119,12 @@ Convert degrees to radians.
 #### Usage
 
 ```
-45. : deg2rad
+deg2rad(x) : _
 ```
 
 Where:
 
-* input: angle in degrees to convert
+* `x`: angle in degrees to convert
 
 #### Test
 ```
@@ -141,12 +141,12 @@ Convert radians to degrees.
 #### Usage
 
 ```
-ma.PI : rad2deg
+rad2deg(x) : _
 ```
 
 Where:
 
-* input: angle in radians to convert
+* `x`: angle in radians to convert
 
 #### Test
 ```
@@ -275,7 +275,7 @@ file take care of this, but can be useful in JavaScript for instance.
 #### Usage
 
 ```
-_ : FTZ : _
+FTZ(x) : _
 ```
 
 Where:
@@ -301,7 +301,7 @@ Changes the sign of x (first input) to that of y (second input).
 #### Usage
 
 ```
-_,_ : copysign : _
+copysign(x,y) : _
 ```
 
 Where:
@@ -324,7 +324,7 @@ Invert the sign (-x) of a signal.
 #### Usage
 
 ```
-_ : neg : _
+neg(x) : _
 ```
 
 Where:
@@ -341,13 +341,13 @@ neg_test = 3.5 : ma.neg;
 
 ### `(ma.)not`
 
-Bitwise `not` implemented with [xor](https://faustdoc.grame.fr/manual/syntax/#xor-primitive) as `not(x) = x xor -1;`.
+Bitwise `not` of an integer input signal, implemented with [xor](https://faustdoc.grame.fr/manual/syntax/#xor-primitive) as `not(x) = x xor -1;`.
 So working regardless of the size of the integer, assuming negative numbers in two's complement.
 
 #### Usage
 
 ```
-_ : not : _
+not(x) : _
 ```
 
 Where:
@@ -364,12 +364,12 @@ not_test = 5 : ma.not;
 
 ### `(ma.)sub`
 
-Subtract `x` and `y`.
+Subtracts the first input `x` from the second input `y`: the output is `y - x`.
 
 #### Usage
 
 ```
-_,_ : sub : _
+sub(x,y) : _
 ```
 
 Where:
@@ -387,12 +387,12 @@ sub_test = (3, 10) : ma.sub;
 
 ### `(ma.)inv`
 
-Compute the inverse (1/x) of the input signal.
+Compute the inverse (1/x) of the input signal x (non-zero).
 
 #### Usage
 
 ```
-_ : inv : _
+inv(x) : _
 ```
 
 Where:
@@ -414,7 +414,7 @@ Computes the cube root of of the input signal.
 #### Usage
 
 ```
-_ : cbrt : _
+cbrt(x) : _
 ```
 
 Where:
@@ -431,13 +431,13 @@ cbrt_test = 8.0 : ma.cbrt;
 
 ### `(ma.)hypot`
 
-Computes the euclidian distance of the two input signals
-sqrt(x*x+y*y) without undue overflow or underflow.
+Computes the euclidian distance of the two input signals x and y,
+sqrt(x*x+y*y), without undue overflow or underflow.
 
 #### Usage
 
 ```
-_,_ : hypot : _
+hypot(x,y) : _
 ```
 
 Where:
@@ -455,12 +455,13 @@ hypot_test = (3.0, 4.0) : ma.hypot;
 
 ### `(ma.)ldexp`
 
-Takes two input signals: x and n, and multiplies x by 2 to the power n.
+Takes two input signals: x and n (an integer), and multiplies x by 2 to
+the power n.
 
 #### Usage
 
 ```
-_,_ : ldexp : _
+ldexp(x,n) : _
 ```
 
 Where:
@@ -478,12 +479,13 @@ ldexp_test = (1.5, 3) : ma.ldexp;
 
 ### `(ma.)scalb`
 
-Takes two input signals: x and n, and multiplies x by 2 to the power n.
+Takes two input signals: x and n (an integer), and multiplies x by 2 to
+the power n.
 
 #### Usage
 
 ```
-_,_ : scalb : _
+scalb(x,n) : _
 ```
 
 Where:
@@ -501,12 +503,13 @@ scalb_test = (2.0, -1) : ma.scalb;
 
 ### `(ma.)log1p`
 
-Computes log(1 + x) without undue loss of accuracy when x is nearly zero.
+Computes log(1 + x) of the input signal x (greater than -1) without undue
+loss of accuracy when x is nearly zero.
 
 #### Usage
 
 ```
-_ : log1p : _
+log1p(x) : _
 ```
 
 Where:
@@ -523,12 +526,12 @@ log1p_test = 0.5 : ma.log1p;
 
 ### `(ma.)logb`
 
-Return exponent of the input signal as a floating-point number.
+Return exponent of the (positive) input signal as a floating-point number.
 
 #### Usage
 
 ```
-_ : logb : _
+logb(x) : _
 ```
 
 Where:
@@ -545,12 +548,12 @@ logb_test = 8.0 : ma.logb;
 
 ### `(ma.)ilogb`
 
-Return exponent of the input signal as an integer number.
+Return exponent of the (positive) input signal as an integer number.
 
 #### Usage
 
 ```
-_ : ilogb : _
+ilogb(x) : _
 ```
 
 Where:
@@ -567,12 +570,12 @@ ilogb_test = 8.0 : ma.ilogb;
 
 ### `(ma.)log2`
 
-Returns the base 2 logarithm of x.
+Returns the base 2 logarithm of the positive input signal x.
 
 #### Usage
 
 ```
-_ : log2 : _
+log2(x) : _
 ```
 
 Where:
@@ -589,12 +592,13 @@ log2_test = 8.0 : ma.log2;
 
 ### `(ma.)expm1`
 
-Return exponent of the input signal minus 1 with better precision.
+Return exponent of the input signal x minus 1, `exp(x) - 1`, with better
+precision.
 
 #### Usage
 
 ```
-_ : expm1 : _
+expm1(x) : _
 ```
 
 Where:
@@ -612,12 +616,12 @@ expm1_test = 0.5 : ma.expm1;
 ### `(ma.)acosh`
 
 Computes the principle value of the inverse hyperbolic cosine
-of the input signal.
+of the input signal (greater than or equal to 1).
 
 #### Usage
 
 ```
-_ : acosh : _
+acosh(x) : _
 ```
 
 Where:
@@ -639,7 +643,7 @@ Computes the inverse hyperbolic sine of the input signal.
 #### Usage
 
 ```
-_ : asinh : _
+asinh(x) : _
 ```
 
 Where:
@@ -656,12 +660,12 @@ asinh_test = 0.5 : ma.asinh;
 
 ### `(ma.)atanh`
 
-Computes the inverse hyperbolic tangent of the input signal.
+Computes the inverse hyperbolic tangent of the input signal, in (-1, 1).
 
 #### Usage
 
 ```
-_ : atanh : _
+atanh(x) : _
 ```
 
 Where:
@@ -683,7 +687,7 @@ Computes the hyperbolic sine of the input signal.
 #### Usage
 
 ```
-_ : sinh : _
+sinh(x) : _
 ```
 
 Where:
@@ -705,7 +709,7 @@ Computes the hyperbolic cosine of the input signal.
 #### Usage
 
 ```
-_ : cosh : _
+cosh(x) : _
 ```
 
 Where:
@@ -727,7 +731,7 @@ Computes the hyperbolic tangent of the input signal.
 #### Usage
 
 ```
-_ : tanh : _
+tanh(x) : _
 ```
 
 Where:
@@ -749,7 +753,7 @@ Computes the error function of the input signal.
 #### Usage
 
 ```
-_ : erf : _
+erf(x) : _
 ```
 
 Where:
@@ -771,7 +775,7 @@ Computes the complementary error function of the input signal.
 #### Usage
 
 ```
-_ : erfc : _
+erfc(x) : _
 ```
 
 Where:
@@ -788,12 +792,12 @@ erfc_test = 0.5 : ma.erfc;
 
 ### `(ma.)gamma`
 
-Computes the gamma function of the input signal.
+Computes the gamma function of the positive input signal.
 
 #### Usage
 
 ```
-_ : gamma : _
+gamma(x) : _
 ```
 
 Where:
@@ -811,12 +815,12 @@ gamma_test = 3.0 : ma.gamma;
 ### `(ma.)lgamma`
 
 Calculates the natural logorithm of the absolute value of
-the gamma function of the input signal.
+the gamma function of the positive input signal.
 
 #### Usage
 
 ```
-_ : lgamma : _
+lgamma(x) : _
 ```
 
 Where:
@@ -839,7 +843,7 @@ of the input signal.
 #### Usage
 
 ```
-_ : J0 : _
+J0(x) : _
 ```
 
 Where:
@@ -862,7 +866,7 @@ of the input signal.
 #### Usage
 
 ```
-_ : J1 : _
+J1(x) : _
 ```
 
 Where:
@@ -880,12 +884,12 @@ J1_test = 1.0 : ma.J1;
 ### `(ma.)Jn`
 
 Computes the Bessel function of the first kind of order n
-(first input signal) of the second input signal.
+(first input signal, an integer) of the second input signal x.
 
 #### Usage
 
 ```
-_,_ : Jn : _
+Jn(n,x) : _
 ```
 
 Where:
@@ -904,12 +908,12 @@ Jn_test = (2, 1.0) : ma.Jn;
 ### `(ma.)Y0`
 
 Computes the linearly independent Bessel function of the second kind
-of order 0 of the input signal.
+of order 0 of the positive input signal.
 
 #### Usage
 
 ```
-_ : Y0 : _
+Y0(x) : _
 ```
 
 Where:
@@ -927,12 +931,12 @@ Y0_test = 1.0 : ma.Y0;
 ### `(ma.)Y1`
 
 Computes the linearly independent Bessel function of the second kind
-of order 1 of the input signal.
+of order 1 of the positive input signal.
 
 #### Usage
 
 ```
-_ : Y0 : _
+Y1(x) : _
 ```
 
 Where:
@@ -950,12 +954,13 @@ Y1_test = 1.0 : ma.Y1;
 ### `(ma.)Yn`
 
 Computes the linearly independent Bessel function of the second kind
-of order n (first input signal) of the second input signal.
+of order n (first input signal, an integer) of the second input signal x
+(positive).
 
 #### Usage
 
 ```
-_,_ : Yn : _
+Yn(n,x) : _
 ```
 
 Where:
@@ -974,23 +979,19 @@ Yn_test = (2, 1.0) : ma.Yn;
 ### `(ma.)fabs`, `(ma.)fmax`, `(ma.)fmin`
 
 Aliases of the `abs`, `max` and `min` primitives, for compatibility with
-the C math library naming.
+the C math library naming: `fabs = abs`, `fmax = max`, `fmin = min`.
 
 #### Usage
 
 ```
-_ : fabs : _
-_,_ : fmax : _
-_,_ : fmin : _
+fabs(x) : _
+fmax(x,y) : _
+fmin(x,y) : _
 ```
 
 Where:
 
-```
-fabs = abs
-fmax = max
-fmin = min
-```
+* `x`, `y`: input signals
 
 ----
 
@@ -1092,8 +1093,7 @@ Return non-zero if x is a NaN.
 #### Usage
 
 ```
-isnan(x)
-_ : isnan : _
+isnan(x) : _
 ```
 
 Where:
@@ -1116,8 +1116,7 @@ Return non-zero if x is a positive or negative infinity.
 #### Usage
 
 ```
-isinf(x)
-_ : isinf : _
+isinf(x) : _
 ```
 
 Where:
@@ -1135,13 +1134,13 @@ isinf_test = (os.impulse - os.impulse) : log : ma.isinf;
 
 ### `(ma.)nextafter`
 
-Gives the next representable floating-point value after `x` in the
-direction of `y` (the C `nextafter` function of math.h).
+Gives the next representable floating-point value after `x` (first input)
+in the direction of `y` (second input) (the C `nextafter` function of math.h).
 
 #### Usage
 
 ```
-_,_ : nextafter : _
+nextafter(x,y) : _
 ```
 
 Where:
@@ -1198,13 +1197,20 @@ Linear combination of the first Chebyshev polynomials.
 #### Usage
 
 ```
-_ : chebychevpoly((c0,c1,...,cn)) : _
+_ : chebychevpoly(lcoef) : _
 ```
 
 Where:
 
-* `cn`: the different Chebychevs polynomials such that:
-chebychevpoly((c0,c1,...,cn)) = Sum of chebychev(i)*ci
+* `lcoef`: the list of coefficients `(c0,c1,...,cn)` of the Chebychev
+  polynomials, such that `chebychevpoly((c0,c1,...,cn))` is the sum of
+  `chebychev(i)*ci`
+
+#### Example
+
+```
+_ : chebychevpoly((1, 0, 1)) : _   // T[0](x) + T[2](x)
+```
 
 #### Test
 ```
@@ -1220,12 +1226,12 @@ chebychevpoly_test = 0.5 : ma.chebychevpoly((1, 0, 1));
 
 ### `(ma.)diffn`
 
-Negated first-order difference.
+Negated first-order difference of the input signal x: `x' - x`.
 
 #### Usage
 
 ```
-_ : diffn : _
+diffn(x) : _
 ```
 
 Where:
@@ -1249,7 +1255,7 @@ The signum function signum(x) is defined as
 #### Usage
 
 ```
-_ : signum : _
+signum(x) : _
 ```
 
 Where:
@@ -1272,16 +1278,21 @@ The nextpow2(x) returns the lowest integer m such that
 #### Usage
 
 ```
-2^nextpow2(n) : _
-```
-Useful for allocating delay lines, e.g., 
-```
-delay(2^nextpow2(maxDelayNeeded), currentDelay);
+nextpow2(n) : _
 ```
 
 Where:
 
 * `n`: positive value whose next power-of-two exponent is computed
+
+#### Example
+
+Useful for allocating delay lines, `2^nextpow2(n)` being the power of
+two greater than or equal to `n`:
+
+```
+de.delay(2^nextpow2(maxDelayNeeded), currentDelay)
+```
 
 #### Test
 ```
@@ -1293,13 +1304,13 @@ nextpow2_test = 10.0 : ma.nextpow2;
 
 ### `(ma.)zc`
 
-Indicator function for zero-crossing: it returns 1 if a zero-crossing
-occurs, 0 otherwise.
+Indicator function for zero-crossing of the input signal: it returns 1
+if a zero-crossing occurs, 0 otherwise.
 
 #### Usage
 
 ```
-_ : zc : _
+zc(x) : _
 ```
 
 Where:
@@ -1350,14 +1361,15 @@ process = 0 - os.oscrc(1000)          // the true phase is either -PI or +PI
 
 ### `(ma.)primes`
 
-Return the n-th prime using a waveform primitive. Note that primes(0) is 2,
+Return the n-th prime using a waveform primitive, n being the (0-based)
+input signal. Note that primes(0) is 2,
 primes(1) is 3, and so on. The waveform is length 2048, so the largest
 precomputed prime is primes(2047) which is 17863.
 
 #### Usage
 
 ```
-_ : primes : _
+primes(x) : _
 ```
 
 Where:

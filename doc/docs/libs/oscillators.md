@@ -833,6 +833,7 @@ Simple sawtooth waveform oscillator between -1 and 1.
 
 ```
 lf_saw(freq) : _
+saw1(freq) : _
 ```
 
 Where:
@@ -865,7 +866,7 @@ orders 5 and 6 have noise at low fundamentals).
 
 ```
 sawN(N,freq) : _        // Nth-order aliasing-suppressed sawtooth using DPW method (see below)
-sawNp(N,freq,phase) : _ // sawN with phase offset feature
+sawNp(N,freq,phase) : _ // sawN with phase offset feature (phase between 0 and 1)
 saw2dpw(freq) : _       // saw2 using DPW
 saw2ptr(freq) : _       // saw2 using the faster, stateless PTR method
 saw2(freq) : _          // DPW method, but subject to change if a better method emerges
@@ -874,13 +875,13 @@ saw4(freq) : _          // sawN(4)
 sawtooth(freq) : _      // saw2
 saw2f2(freq) : _        // saw2dpw with 2nd-order droop-correction filtering
 saw2f4(freq) : _        // saw2dpw with 4th-order droop-correction filtering
+MAX_SAW_ORDER : _
 ```
 
 Where:
 
-* `N`: polynomial order, a constant numerical expression between 1 and 4
+* `N`: polynomial order, a constant numerical expression between 1 and `MAX_SAW_ORDER`
 * `freq`: frequency in Hz
-* `phase`: phase between 0 and 1
 
 #### Test
 ```
@@ -1765,7 +1766,12 @@ harmonics based on direct summation formula.
 #### Usage
 
 ```
-dsf.xxx(f0, df, a, [n]) : _
+dsf.oscc(f0,df,a) : _
+dsf.oscs(f0,df,a) : _
+dsf.osccN(f0,df,a,n) : _
+dsf.oscsN(f0,df,a,n) : _
+dsf.osccNq(f0,df,a) : _
+dsf.oscsNq(f0,df,a) : _
 ```
 
 Where:

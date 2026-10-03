@@ -1214,11 +1214,14 @@ crybaby_test = os.tosc(220)
 A very simple vocoder where the spectrum of the modulation signal
 is analyzed using a filter bank.
 `vocoder` is a standard Faust function.
+The two signals can also be given as inputs, by partial application
+(second form below, as in the Test section).
 
 #### Usage
 
 ```
-_ : vocoder(nBands,att,rel,BWRatio,source,excitation) : _
+vocoder(nBands,att,rel,BWRatio,source,excitation) : _
+source, excitation : vocoder(nBands,att,rel,BWRatio) : _
 ```
 
 Where:

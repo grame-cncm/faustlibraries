@@ -125,7 +125,7 @@ Cross `bus(1)` and `bus(N)`.
 #### Usage
 
 ```
-(_,si.bus(N)) : crossn1(N) : (si.bus(N),_)
+(_,si.bus(N)) : cross1n(N) : (si.bus(N),_)
 ```
 
 Where:

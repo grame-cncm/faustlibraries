@@ -897,7 +897,7 @@ Front +Y, Down -Z, Up +Z).
 ```
 orientation6(xs, ys, zs,
              shapeCour, shapeRear, shapeJardin, shapeFront, shapeDown, shapeUp,
-             smoothMs) : _
+             smoothMs) : _,_,_,_,_,_
 ```
 
 Where:

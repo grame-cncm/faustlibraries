@@ -114,7 +114,7 @@ with{
 // #### Usage
 //
 // ```
-// mass(m, grav, x0, xr0),_ : _
+// _ : mass(m, grav, x0, xr0) : _
 // ```
 //
 // Where:
@@ -149,7 +149,7 @@ with{
 // #### Usage
 //
 // ```
-// oscil(m, k, z, grav, x0, xr0),_ : _
+// _ : oscil(m, k, z, grav, x0, xr0) : _
 // ```
 //
 // Where:
@@ -192,7 +192,7 @@ with{
 // #### Usage
 //
 // ```
-// ground(x0),_ : _
+// _ : ground(x0) : _
 // ```
 //
 // Where:
@@ -224,7 +224,7 @@ with{
 // #### Usage
 //
 // ```
-// posInput(x0),_,_ : _
+// _,_ : posInput(x0) : _
 // ```
 //
 // Where:
@@ -253,10 +253,14 @@ posInput(init) = _,_ : !,_ : initState(init);
 //------------------------`(mi.)spring`----------------------
 // Implementation of a linear elastic spring interaction.
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 // #### Usage
 //
 // ```
-// spring(k, x1r, x2r),_,_ : _,_
+// _,_ : spring(k, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -283,10 +287,14 @@ with{
 // Beware: in 32bit precision mode, damping forces can become
 // truncated if position values are not centered around zero!
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 // #### Usage
 //
 // ```
-// damper(z, x1r, x2r),_,_ : _,_
+// _,_ : damper(z, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -312,10 +320,14 @@ with{
 // Implementation of a linear viscoelastic spring-damper interaction
 // (a combination of the spring and damper modules).
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 // #### Usage
 //
 // ```
-// springDamper(k, z, x1r, x2r),_,_ : _,_
+// _,_ : springDamper(k, z, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -350,10 +362,14 @@ with{
 // Beware: at high displacements, this interaction will break numerical
 // stability conditions ! The `nlSpringDamperClipped` is a safer option.
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 // #### Usage
 //
 // ```
-// nlSpringDamper2(k, q, z, x1r, x2r),_,_ : _,_
+// _,_ : nlSpringDamper2(k, q, z, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -385,10 +401,14 @@ with{
 // Beware: at high displacements, this interaction will break numerical
 // stability conditions ! The `nlSpringDamperClipped` is a safer option.
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 // #### Usage
 //
 // ```
-// nlSpringDamper3(k, q, z, x1r, x2r),_,_ : _,_
+// _,_ : nlSpringDamper3(k, q, z, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -427,10 +447,14 @@ with{
 // So far the interaction clips "hard" (with no soft-knee spline
 // interpolation, etc.)
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 // #### Usage
 //
 // ```
-// nlSpringDamperClipped(s, c, k, z, x1r, x2r),_,_ : _,_
+// _,_ : nlSpringDamperClipped(s, c, k, z, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -476,11 +500,15 @@ with{
 // The tipping point depends both on the stiffness and the distance scaling
 // of the interaction.
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 //
 // #### Usage
 //
 // ```
-// nlPluck(knl, scale, z, x1r, x2r),_,_ : _,_
+// _,_ : nlPluck(knl, scale, z, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -525,11 +553,15 @@ with{
 // similar to the `nlPluck`) or a mathematical approximation (see
 // Stefan Bilbao's book, Numerical Sound Synthesis).
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 //
 // #### Usage
 //
 // ```
-// nlBow(znl, scale, type, x1r, x2r),_,_ : _,_
+// _,_ : nlBow(znl, scale, type, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -571,11 +603,15 @@ with{
 // Implementation of a collision interaction, producing linear visco-elastic
 // repulsion forces when two mass elements are interpenetrating.
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 //
 // #### Usage
 //
 // ```
-// collision(k, z, thres, x1r, x2r),_,_ : _,_
+// _,_ : collision(k, z, thres, x1r, x2r) : _,_
 // ```
 //
 // Where:
@@ -606,10 +642,14 @@ with{
 // This interaction is particularly useful for more realistic contact dynamics
 // (greater difference in velocity provides sharper contacts, and reciprocally).
 //
+// Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+// the two equal and opposite forces, the one applied to mass 1 first, to be
+// routed back to the force inputs of the masses.
+//
 // #### Usage
 //
 // ```
-// nlCollisionClipped(s, c, k, z, thres, x1r, x2r),_,_ : _,_
+// _,_ : nlCollisionClipped(s, c, k, z, thres, x1r, x2r) : _,_
 // ```
 //
 // Where:

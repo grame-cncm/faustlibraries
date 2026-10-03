@@ -343,7 +343,6 @@ Where:
 
 * `maxdel`: maximum delay (a power of 2)
 * `intdel`: current (integer) comb-filter delay between 0 and maxdel
-* `del`: current (float) comb-filter delay between 0 and maxdel
 * `b0`: gain applied to delay-line input
 * `bM`: gain applied to delay-line output and then summed with input
 
@@ -597,15 +596,16 @@ Other special cases of Feed-Back Comb Filter.
 #### Usage
 
 ```
-_ : fbcombfilter(maxdel,intdel,g) : _
+_ : fbcombfilter(maxdel,del,g) : _
 _ : ffbcombfilter(maxdel,del,g) : _
 ```
 
 Where:
 
 * `maxdel`: maximum delay (a power of 2)
-* `intdel`: current (integer) comb-filter delay between 0 and maxdel
-* `del`: current (float) comb-filter delay between 0 and maxdel
+* `del`: current comb-filter delay between 0 and maxdel: an integer for
+  `fbcombfilter` (uses `de.delay`), a float for `ffbcombfilter` (uses
+  `de.fdelay`)
 * `g`: feedback gain
 
 #### Test
@@ -652,7 +652,6 @@ Where:
 
 * `maxdel`: maximum delay (a power of 2)
 * `intdel`: current (integer) comb-filter delay between 0 and maxdel
-* `del`: current (float) comb-filter delay between 0 and maxdel
 * `aN`: minus the feedback gain
 
 #### Test
@@ -694,14 +693,12 @@ The implementation here is direct-form-2 requiring only one delay line.
 #### Usage
 
 ```
-_ : allpass_comb(maxdel,intdel,aN) : _
 _ : allpass_fcomb(maxdel,del,aN) : _
 ```
 
 Where:
 
 * `maxdel`: maximum delay (a power of 2)
-* `intdel`: current (float) comb-filter delay between 0 and maxdel
 * `del`: current (float) comb-filter delay between 0 and maxdel
 * `aN`: minus the feedback gain
 
@@ -890,9 +887,22 @@ copies first to convolve it with the first N coefficients.
 #### Usage
 
 ```
-_ : conv((k1,k2,k3,...,kN)) : _ // Argument = one signal bank
-si.bus(N) : convN(N,(k1,k2,k3,...)) : _ // Useful when N < count((k1,...))
-_ <: si.bus(N) : convN(N,(k1,k2,k3,...)) : _ // one signal, N coefficients
+_ : conv(kv) : _
+si.bus(N) : convN(N,kv) : _ // Useful when N < ba.count(kv)
+_ <: si.bus(N) : convN(N,kv) : _ // one signal, N coefficients
+```
+
+Where:
+
+* `kv`: the list of coefficients `(k1,k2,k3,...)`, one signal bank
+* `N`: number of input signals of `convN`, at most the number of
+  coefficients (a constant numerical expression)
+
+#### Example
+
+```
+_ : conv((0.25,0.25,0.25,0.25)) : _
+_ <: si.bus(3) : convN(3,(0.3,0.2,0.1,0.05)) : _
 ```
 
 #### Test
@@ -922,8 +932,10 @@ _ : tf3(b0,b1,b2,b3,a1,a2,a3) : _
 
 Where:
 
-* `b`: transfer-function numerator
-* `a`: transfer-function denominator (monic)
+* `b0`, `b1`, `b2`, `b3`: transfer-function numerator coefficients
+  (`b0..bN` for `tfN`)
+* `a1`, `a2`, `a3`: transfer-function denominator coefficients, the
+  denominator being monic (`a0 = 1`; `a1..aN` for `tfN`)
 
 #### Test
 ```
@@ -1035,8 +1047,9 @@ _ : tf21t(b0,b1,b2,a1,a2) : _
 
 Where:
 
-* `b`: transfer-function numerator
-* `a`: transfer-function denominator (monic)
+* `b0`, `b1`, `b2`: transfer-function numerator coefficients
+* `a1`, `a2`: transfer-function denominator coefficients (monic
+  denominator, `a0 = 1`)
 
 #### Test
 ```
@@ -1070,21 +1083,19 @@ from digital waveguide filters, which gives them a physical interpretation.
 ### `(fi.)av2sv`
 
 Compute reflection coefficients sv from transfer-function denominator av.
+The output `sv` is the parallel signal bank `s1,...,sN`, where `si` is
+the i'th reflection coefficient.
 
 #### Usage
 
 ```
-sv = av2sv(av)
+av2sv(av) : si.bus(ba.count(av))
 ```
 
 Where:
 
-* `av`: parallel signal bank `a1,...,aN`
-* `sv`: parallel signal bank `s1,...,sN`
-
-where `ro = ith` reflection coefficient, and
-      `ai` = coefficient of `z^(-i)` in the filter
-         transfer-function denominator `A(z)`.
+* `av`: parallel signal bank `a1,...,aN`, where `ai` is the coefficient
+  of `z^(-i)` in the filter transfer-function denominator `A(z)`
 
 #### Test
 ```
@@ -1103,22 +1114,21 @@ av2sv_test = fi.av2sv((-0.4, 0.1)) : si.bus(2);
 ### `(fi.)bvav2nuv`
 
 Compute lattice tap coefficients from transfer-function coefficients.
+The output `nuv` is the parallel signal bank `nu0,nu1,...,nuN` (N+1
+signals), where `nui` is the i'th tap coefficient.
 
 #### Usage
 
 ```
-nuv = bvav2nuv(bv,av)
+bvav2nuv(bv,av) : si.bus(ba.count(av)+1)
 ```
 
 Where:
 
-* `av`: parallel signal bank `a1,...,aN`
-* `bv`: parallel signal bank `b0,b1,...,aN`
-* `nuv`: parallel signal bank  `nu1,...,nuN`
-
-where `nui` is the i'th tap coefficient,
-      `bi` is the coefficient of `z^(-i)` in the filter numerator,
-      `ai` is the coefficient of `z^(-i)` in the filter denominator
+* `bv`: parallel signal bank `b0,b1,...,bN`, where `bi` is the
+  coefficient of `z^(-i)` in the filter numerator
+* `av`: parallel signal bank `a1,...,aN`, where `ai` is the coefficient
+  of `z^(-i)` in the filter denominator
 
 #### Test
 ```
@@ -1212,12 +1222,14 @@ iir_kl_test = src : fi.iir_kl((0.1, 0.2, 0.3), (-0.4, 0.1));
 
 ### `(fi.)allpassnklt`
 
-Kelly-Lochbaum ladder allpass.
+Kelly-Lochbaum ladder allpass. Its n+1 outputs are the allpass output
+followed by the n tap signals of the ladder (used by `iir_kl` to form
+a general transfer function).
 
 #### Usage:
 
 ```
-_ : allpassnklt(n,sv) : _
+_ : allpassnklt(n,sv) : si.bus(n+1)
 ```
 
 Where:
@@ -1263,12 +1275,14 @@ iir_lat1_test = src : fi.iir_lat1((0.1, 0.2, 0.3), (-0.4, 0.1));
 
 ### `(fi.)allpassn1mt`
 
-One-multiply lattice allpass with tap lines.
+One-multiply lattice allpass with tap lines. Its N+1 outputs are the
+allpass output followed by the N tap signals of the lattice (used by
+`iir_lat1` to form a general transfer function).
 
 #### Usage
 
 ```
-_ : allpassn1mt(N,sv) : _
+_ : allpassn1mt(N,sv) : si.bus(N+1)
 ```
 
 Where:
@@ -1319,12 +1333,14 @@ iir_nl_test = src : fi.iir_nl((0.1, 0.2, 0.3), (-0.4, 0.1));
 
 ### `(fi.)allpassnnlt`
 
-Normalized ladder allpass filter of arbitrary order.
+Normalized ladder allpass filter of arbitrary order. Its N+1 outputs are
+the allpass output followed by the N tap signals of the ladder (used by
+`iir_nl` to form a general transfer function).
 
 #### Usage:
 
 ```
-_ : allpassnnlt(N,sv) : _
+_ : allpassnnlt(N,sv) : si.bus(N+1)
 ```
 
 Where:
@@ -1364,8 +1380,9 @@ _ : tf2np(b0,b1,b2,a1,a2) : _
 
 Where:
 
-* `b`: transfer-function numerator
-* `a`: transfer-function denominator (monic)
+* `b0`, `b1`, `b2`: transfer-function numerator coefficients
+* `a1`, `a2`: transfer-function denominator coefficients (monic
+  denominator, `a0 = 1`)
 
 #### Test
 ```
@@ -1380,11 +1397,13 @@ tf2np_test = src : fi.tf2np(0.6, 0.3, 0.2, -0.5, 0.2);
 ### `(fi.)wgr`
 
 Second-order transformer-normalized digital waveguide resonator.
+Its two outputs are in phase quadrature: the first is the cosine-phase
+output, the second the sine-phase output (see `os.oscwc`, `os.oscws`).
 
 #### Usage
 
 ```
-_ : wgr(f,r) : _
+_ : wgr(f,r) : _,_
 ```
 
 Where:
@@ -1415,11 +1434,13 @@ wgr_modulated_test = fi.wgr(100*pow(20, tri), 0.995, no.noise) with { P = int(ma
 ### `(fi.)nlf2`
 
 Second order normalized digital waveguide resonator.
+Its two outputs are in phase quadrature: the first is the sine-phase
+output, the second the cosine-phase output (see `os.oscrs`, `os.oscrc`).
 
 #### Usage
 
 ```
-_ : nlf2(f,r) : _
+_ : nlf2(f,r) : _,_
 ```
 
 Where:
@@ -1704,15 +1725,7 @@ specified by ANALOG transfer-function polynomials B(s)/A(s),
 and a frequency-scaling parameter. Digitization via the
 bilinear transform is built in. `tf2snp` computes the same filter as a
 protected normalized ladder, which stays accurate in single precision when
-`w1` is small relative to the sample rate.
-
-#### Usage
-
-```
-_ : tf2s(b2,b1,b0,a1,a0,w1) : _
-_ : tf2snp(b2,b1,b0,a1,a0,w1) : _
-```
-Where:
+`w1` is small relative to the sample rate. The analog transfer function is:
 
 ```
         b2 s^2 + b1 s + b0
@@ -1720,8 +1733,20 @@ H(s) = --------------------
            s^2 + a1 s + a0
 ```
 
-and `w1` is the desired digital frequency (in radians/second)
-corresponding to analog frequency 1 rad/sec (i.e., `s = j`).
+#### Usage
+
+```
+_ : tf2s(b2,b1,b0,a1,a0,w1) : _
+_ : tf2snp(b2,b1,b0,a1,a0,w1) : _
+```
+
+Where:
+
+* `b2`, `b1`, `b0`: numerator coefficients of the analog transfer function `H(s)`
+* `a1`, `a0`: denominator coefficients of `H(s)` (monic denominator, the
+  `s^2` coefficient being 1)
+* `w1`: the desired digital frequency (in radians/second)
+  corresponding to analog frequency 1 rad/sec (i.e., `s = j`)
 
 #### Example test program
 
@@ -3489,7 +3514,8 @@ Where:
 
 * `L`: desired level (in dB) at Nyquist limit (SR/2), e.g., -60
 * `freq`: corner frequency (-3dB point) usually set to fundamental freq
-* `N`: Number of filters in series where L = L/N
+
+See `levelfilterN` for N such filters in series.
 
 #### Test
 ```
@@ -3748,14 +3774,15 @@ Filter bank.
 #### Usage
 
 ```
-_ : filterbank (O,freqs) : par(i,N,_) // Butterworth band-splits
+_ : filterbank(O,freqs) : par(i,ba.count(freqs)+1,_) // Butterworth band-splits
 ```
+
 Where:
 
 * `O`: band-split filter order (odd integer required for filterbank[i], a constant numerical expression)
 * `freqs`: (fc1,fc2,...,fcNs) [in numerically ascending order], where
           Ns=N-1 is the number of octave band-splits
-          (total number of bands N=Ns+1).
+          (total number of bands N=Ns+1, the number of outputs).
 
 If frequencies are listed explicitly as arguments, enclose them in parens:
 
@@ -3780,7 +3807,7 @@ Inverted-dc filter bank.
 #### Usage
 
 ```
-_ : filterbanki(O,freqs) : par(i,N,_) // Inverted-dc version
+_ : filterbanki(O,freqs) : par(i,ba.count(freqs)+1,_) // Inverted-dc version
 ```
 
 Where:
@@ -3788,7 +3815,7 @@ Where:
 * `O`: band-split filter order (odd integer required for `filterbank[i]`, a constant numerical expression)
 * `freqs`: (fc1,fc2,...,fcNs) [in numerically ascending order], where
           Ns=N-1 is the number of octave band-splits
-          (total number of bands N=Ns+1).
+          (total number of bands N=Ns+1, the number of outputs).
 
 If frequencies are listed explicitly as arguments, enclose them in parens:
 
@@ -3821,14 +3848,22 @@ All filters have `freq` and `Q` parameters, the `bell`, `ls`, `hs` ones also hav
 #### Usage
 
 ```
-_ : svf.xx(freq, Q, [gain]) : _
+_ : svf.lp(freq, Q) : _
+_ : svf.bp(freq, Q) : _
+_ : svf.hp(freq, Q) : _
+_ : svf.notch(freq, Q) : _
+_ : svf.peak(freq, Q) : _
+_ : svf.ap(freq, Q) : _
+_ : svf.bell(freq, Q, gain) : _
+_ : svf.ls(freq, Q, gain) : _
+_ : svf.hs(freq, Q, gain) : _
 ```
 
 Where:
 
 * `freq`: cut frequency
 * `Q`: quality factor
-* `[gain]`: gain in dB
+* `gain`: gain in dB (`bell`, `ls` and `hs` only)
 
 #### Test
 ```
@@ -3970,12 +4005,18 @@ filter are comparable to those of the `svf` environment in this library.
 #### Usage:
 
 ```
-_ : SVFTPT.xxx(CF, Q) : _
+_ : SVFTPT.SVF(CF, Q) : si.bus(7)
+_ : SVFTPT.LP2(CF, Q) : _
+_ : SVFTPT.HP2(CF, Q) : _
+_ : SVFTPT.BP2(CF, Q) : _
+_ : SVFTPT.BP2Norm(CF, Q) : _
+_ : SVFTPT.Notch2(CF, Q) : _
+_ : SVFTPT.AP2(CF, Q) : _
+_ : SVFTPT.Peaking2(CF, Q) : _
 ```
 
 Where:
 
-* `xxx` can be one of the following: `LP2`, `HP2`, `BP2`, `BP2Norm`, `Notch2`, `AP2`, `Peaking2`
 * `CF`: cutoff in Hz
 * `Q`: resonance
 

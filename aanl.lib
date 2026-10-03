@@ -58,55 +58,157 @@ declare version "1.5.1";
 _clip(l, h, x) = max(l, min(h, x));
 
 //-------`(aa.)Rsqrt`----------
-// Real-valued sqrt().
+// Real-valued sqrt(): a negative input is clamped to 0, so that the output
+// is never NaN.
+//
+// #### Usage
+//
+// ```
+// Rsqrt(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //-----------------------------
 Rsqrt(x) = sqrt(max(0.0, x));
 
 
 //-------`(aa.)Rlog`-----------
-// Real-valued log().
+// Real-valued log(): the input is clamped to `ma.EPSILON` from below, so
+// that the output stays finite.
+//
+// #### Usage
+//
+// ```
+// Rlog(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //-----------------------------
 Rlog(x) = log(max(ma.EPSILON, x));
 
 
 //-------`(aa.)Rtan`-----------
-// Real-valued tan().
+// Real-valued tan(): the input is clipped to [-ma.MAX, ma.MAX].
+//
+// #### Usage
+//
+// ```
+// Rtan(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //-----------------------------
 Rtan(x) = tan(_clip(0-ma.MAX, ma.MAX, x));
 
 
 //-------`(aa.)Racos`----------
-// Real-valued acos().
+// Real-valued acos(): the input is clipped to [-1, 1].
+//
+// #### Usage
+//
+// ```
+// Racos(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //-----------------------------
 Racos(x) = acos(_clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Rasin`----------
-// Real-valued asin().
+// Real-valued asin(): the input is clipped to [-1, 1].
+//
+// #### Usage
+//
+// ```
+// Rasin(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //-----------------------------
 Rasin(x) = asin(_clip(-1.0, 1.0, x));
 
 
 //-------`(aa.)Racosh`----------
-// Real-valued acosh()
+// Real-valued acosh(): the input is clipped to [1, ma.MAX].
+//
+// #### Usage
+//
+// ```
+// Racosh(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //------------------------------
 Racosh(x) = ma.acosh(_clip(1.0, ma.MAX, x));
 
 
 //-------`(aa.)Rcosh`----------
-// Real-valued cosh().
+// Real-valued cosh(): the output is limited to `ma.MAX`.
+//
+// #### Usage
+//
+// ```
+// Rcosh(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //-----------------------------
 Rcosh(x) = min(ma.MAX, ma.cosh(x));
 
 
 //-------`(aa.)Rsinh`-----------
-// Real-valued sinh().
+// Real-valued sinh(): the output is clipped to [-ma.MAX, ma.MAX].
+//
+// #### Usage
+//
+// ```
+// Rsinh(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //------------------------------
 Rsinh(x) = _clip(0-ma.MAX, ma.MAX, ma.sinh(x));
 
 
 //-------`(aa.)Ratanh`----------
-// Real-valued atanh().
+// Real-valued atanh(): the input is clipped to
+// [-1 + ma.EPSILON, 1 - ma.EPSILON].
+//
+// #### Usage
+//
+// ```
+// Ratanh(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 //------------------------------
 Ratanh(x) = ma.atanh(_clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 
@@ -120,7 +222,7 @@ Ratanh(x) = ma.atanh(_clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 // #### Usage
 //
 // ```
-// _ : ADAA1(EPS, f, F1) : _
+// ADAA1(EPS, f, F1, x) : _
 // ```
 // 
 // Where:
@@ -128,6 +230,7 @@ Ratanh(x) = ma.atanh(_clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));
 // * `EPS`: a threshold for switching between safe and ill-conditioned paths
 // * `f`: a function that we want to process with ADAA
 // * `F1`: f's first antiderivative
+// * `x`: input signal
 //
 // #### Test
 // ```
@@ -167,7 +270,7 @@ ADAA1(EPS, f, F1, x) = D1q
 // #### Usage
 //
 // ```
-// _ : ADAA2(EPS, f, F1, F2) : _
+// ADAA2(EPS, f, F1, F2, x) : _
 // ```
 //
 // Where:
@@ -176,6 +279,7 @@ ADAA1(EPS, f, F1, x) = D1q
 // * `f`: a function that we want to process with ADAA
 // * `F1`: f's first antiderivative
 // * `F2`: f's second antiderivative
+// * `x`: input signal
 //
 // #### Test
 // ```
@@ -235,8 +339,13 @@ ADAA2(EPS, f, F1, F2, x) = T1 + T2
 //
 // #### Usage
 // ```
-// _ : aa.hardclip : _
+// hardclip(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -267,8 +376,13 @@ hardclip(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.hardclip2 : _
+// hardclip2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -304,8 +418,13 @@ hardclip2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.cubic1 : _
+// cubic1(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -340,8 +459,13 @@ cubic1(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.parabolic : _
+// parabolic(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -375,8 +499,13 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.parabolic2 : _
+// parabolic2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -414,8 +543,13 @@ parabolic2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.hyperbolic : _
+// hyperbolic(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -444,8 +578,13 @@ hyperbolic(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.hyperbolic2 : _
+// hyperbolic2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -476,8 +615,13 @@ hyperbolic2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.sinarctan : _
+// sinarctan(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -509,8 +653,13 @@ sinarctan(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.sinarctan2 : _
+// sinarctan2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -580,8 +729,13 @@ softclipEnv = environment {
 //
 // #### Usage
 // ```
-// _ : aa.softclipQuadratic1 : _
+// softclipQuadratic1(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -605,8 +759,13 @@ softclipQuadratic1 = softclipEnv.softclipQuadratic1;
 //
 // #### Usage
 // ```
-// _ : aa.softclipQuadratic2 : _
+// softclipQuadratic2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -630,8 +789,13 @@ softclipQuadratic2 = softclipEnv.softclipQuadratic2;
 //
 // #### Usage
 // ```
-// _ : aa.tanh1 : _
+// tanh1(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -660,8 +824,13 @@ tanh1(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.arctan : _
+// arctan(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -690,8 +859,13 @@ arctan(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.arctan2 : _
+// arctan2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -721,8 +895,13 @@ arctan2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.asinh1 : _
+// asinh1(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -754,8 +933,13 @@ asinh1(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.asinh2 : _
+// asinh2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -793,8 +977,13 @@ asinh2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.cosine1 : _
+// cosine1(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -823,8 +1012,13 @@ cosine1(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.cosine2 : _
+// cosine2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -855,8 +1049,13 @@ cosine2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.arccos : _
+// arccos(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -892,8 +1091,13 @@ arccos(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.arccos2 : _
+// arccos2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -927,8 +1131,13 @@ arccos2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.acosh1 : _
+// acosh1(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -961,8 +1170,13 @@ acosh1(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.acosh2 : _
+// acosh2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -995,8 +1209,13 @@ acosh2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.sine : _
+// sine(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -1025,8 +1244,13 @@ sine(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.sine2 : _
+// sine2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -1057,8 +1281,13 @@ sine2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.arcsin : _
+// arcsin(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -1094,8 +1323,13 @@ arcsin(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.arcsin2 : _
+// arcsin2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -1129,8 +1363,13 @@ arcsin2(x) = ADAA2(EPS, f, F1, F2, x)
 //
 // #### Usage
 // ```
-// _ : aa.tangent : _
+// tangent(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -1161,8 +1400,13 @@ tangent(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.atanh1 : _
+// atanh1(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");
@@ -1192,8 +1436,13 @@ atanh1(x) = ADAA1(EPS, f, F1, x)
 //
 // #### Usage
 // ```
-// _ : aa.atanh2 : _
+// atanh2(x) : _
 // ```
+//
+// Where:
+//
+// * `x`: input signal
+//
 // #### Test
 // ```
 // aa = library("aanl.lib");

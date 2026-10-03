@@ -151,17 +151,21 @@ satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
 // Pure Feedback Delay Network Reverberator (generalized for easy scaling).
 // `fdnrev0` is a standard Faust function.
 //
+// It has N inputs, one per delay line (added to the feedback signals), and
+// N outputs, the delay-line outputs. Any number of signals among 1, 2, 4,
+// ..., N is usually spread over the inputs with `<:` and the outputs mixed
+// down with `:>` (see the Example below).
+//
 // #### Usage
 //
 // ```
-// <1,2,4,...,N signals> <:
-// fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) :>
-// <1,2,4,...,N signals>
+// N = ba.count(delays);
+// si.bus(N) : fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) : si.bus(N)
 // ```
 //
 // Where:
 //
-// * `N`: 2, 4, 8, ...  (power of 2)
+// * `N`: the number of delay lines, 2, 4, 8, ...  (power of 2)
 // * `MAXDELAY`: power of 2 at least as large as longest delay-line length
 // * `delays`: N delay lines, N a power of 2, lengths preferably coprime
 // * `BBSO`: odd positive integer = order of bandsplit desired at freqs
@@ -169,6 +173,12 @@ satrev = *(0.2) <: comb_bank :> allpass_chain <: _,*(-1) with {
 // * `durs`: NB decay times (t60) desired for the various bands
 // * `loopgainmax`: scalar gain between 0 and 1 used to "squelch" the reverb
 // * `nonl`: nonlinearity (0 to 0.999..., 0 being linear)
+//
+// #### Example
+//
+// ```
+// _,_ <: fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) :> _,_
+// ```
 //
 // #### Test
 // ```

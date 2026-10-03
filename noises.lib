@@ -264,7 +264,7 @@ rnoise = _noise_env(randomseed).noise;
 //
 // #### Usage
 // ```
-// rmultirandom(N) : _
+// rmultirandom(N) : si.bus(N)
 // ```
 //
 // Where:
@@ -288,7 +288,7 @@ rmultirandom(N) = _noise_env(randomseed).multirandom(N);
 // #### Usage
 //
 // ```
-// rmultinoise(N) : _
+// rmultinoise(N) : si.bus(N)
 // ```
 //
 // Where:
@@ -353,6 +353,7 @@ Michon and/or Julius O. Smith III, and are released under the
 // #### Usage
 // ```
 // pink_noise : _
+// pink_noise_m : _
 // ```
 //
 // Where:
@@ -467,8 +468,13 @@ with {
 // ```
 // lfnoise0(rate) : _   // new random number every int(ma.SR/rate) samples or so
 // lfnoiseN(N,rate) : _ // same as "lfnoise0(rate) : fi.lowpass(N,rate)" [see filters.lib]
-// lfnoise(rate) : _    // same as "lfnoise0(rate) : seq(i,5,fi.lowpass(N,rate))" (no overshoot)
+// lfnoise(rate) : _    // same as "lfnoise0(rate) : seq(i,5,fi.lowpass(1,rate))" (no overshoot)
 // ```
+//
+// Where:
+//
+// * `N`: order of the Butterworth lowpass smoothing `lfnoiseN`, a constant numerical expression
+// * `rate`: rate of the new random values (Hz), also the cutoff frequency of the smoothing lowpass
 //
 // #### Example
 //
@@ -575,6 +581,7 @@ with {
 //
 // ```
 // gnoise(N) : _
+// gnoisem(N) : _
 // ```
 //
 // Where:

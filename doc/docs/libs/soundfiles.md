@@ -24,10 +24,14 @@ The Soundfiles library is organized into 1 section:
 Play a soundfile in a loop taking into account its sampling rate.
 `loop` is a standard Faust function.
 
+A soundfile `sf` with C channels has 2 + C outputs (the length and the
+sampling rate of the part, then the C channels): the player outputs the C
+channels, `si.bus(outputs(sf) - 2)`.
+
 #### Usage
 
 ```
-loop(sf, part) : si.bus(outputs(sf))
+loop(sf, part) : si.bus(outputs(sf) - 2)
 ```
 
 Where:
@@ -50,10 +54,14 @@ loop_test = so.loop(sf, 0) + os.tosc(110) * 0.001;
 Play a soundfile in a loop taking into account its sampling rate, with speed control.
 `loop_speed` is a standard Faust function.
 
+A soundfile `sf` with C channels has 2 + C outputs (the length and the
+sampling rate of the part, then the C channels): the player outputs the C
+channels, `si.bus(outputs(sf) - 2)`.
+
 #### Usage
 
 ```
-loop_speed(sf, part, speed) : si.bus(outputs(sf))
+loop_speed(sf, part, speed) : si.bus(outputs(sf) - 2)
 ```
 
 Where:
@@ -77,10 +85,14 @@ loop_speed_test = so.loop_speed(sf, 0, hslider("loop_speed:speed", 1, 0, 2, 0.01
 Play a soundfile in a loop taking into account its sampling rate, with speed and level controls.
 `loop_speed_level` is a standard Faust function.
 
+A soundfile `sf` with C channels has 2 + C outputs (the length and the
+sampling rate of the part, then the C channels): the player outputs the C
+channels, `si.bus(outputs(sf) - 2)`.
+
 #### Usage
 
 ```
-loop_speed_level(sf, part, speed, level) : si.bus(outputs(sf))
+loop_speed_level(sf, part, speed, level) : si.bus(outputs(sf) - 2)
 ```
 
 Where:
@@ -113,16 +125,24 @@ primitive and a part number once, and exposes the players as methods
 `.play(level, gate)`, `.play_rev(level, gate)`,
 `.play_interp(ref, freq, level, gate, selector)`,
 `.play_alt(level, gate, ctrl)`) — see the commented example at the end
-of this file.
+of this file. A soundfile `sf` with C channels has 2 + C outputs, the
+players output the C channels, `si.bus(outputs(sf) - 2)`.
 
 #### Usage
 
 ```
-sample = sound(soundfile("[url:{'foo.wav'}]", 2), 0);
-process = sample.loop;
+sf = soundfile("[url:{'foo.wav'}]", 2);
+sound(sf, part).loop : si.bus(outputs(sf) - 2)
 ```
 
 Where:
 
 * `sf`: a `soundfile` primitive
 * `part`: the part number in the soundfile list
+
+#### Example
+
+```
+sample = so.sound(soundfile("[url:{'foo.wav'}]", 2), 0);
+process = sample.loop;
+```

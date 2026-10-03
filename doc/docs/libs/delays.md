@@ -118,12 +118,13 @@ sdelay_jump_test = no.noise : de.sdelay(4096, 1024, select2(sq, 1000, 3000)) wit
 
 ### `(de.)prime_power_delays`
 
-Prime Power Delay Line Lengths.
+Prime Power Delay Line Lengths: outputs N constant delay lengths in samples,
+each one a power of a distinct prime.
 
 #### Usage
 
 ```
-si.bus(N) : prime_power_delays(N,pathmin,pathmax) : si.bus(N);
+prime_power_delays(N,pathmin,pathmax) : si.bus(N)
 ```
 
 Where:
@@ -156,12 +157,13 @@ Fractional delay line using Lagrange interpolation.
 #### Usage
 
 ```
-_ : fdelaylt[i|v](N, n, d) : _
+_ : fdelaylti(N, n, d) : _
+_ : fdelayltv(N, n, d) : _
 ```
 
 Where:
 
-* `N=1,2,3,...` is the order of the Lagrange interpolation polynomial (constant numerical expression)
+* `N`: the order of the Lagrange interpolation polynomial (1, 2, 3, ...), a constant numerical expression
 * `n`: the max delay length in samples
 * `d`: the delay length in samples
 

@@ -198,7 +198,7 @@ WARNING: using the foreign function `arc4random`, so only available in C/C++ and
 
 #### Usage
 ```
-rmultirandom(N) : _
+rmultirandom(N) : si.bus(N)
 ```
 
 Where:
@@ -222,7 +222,7 @@ WARNING: using the foreign function `arc4random`, so only available in C/C++ and
 #### Usage
 
 ```
-rmultinoise(N) : _
+rmultinoise(N) : si.bus(N)
 ```
 
 Where:
@@ -274,6 +274,7 @@ clipping).
 #### Usage
 ```
 pink_noise : _
+pink_noise_m : _
 ```
 
 Where:
@@ -383,8 +384,13 @@ Low-frequency noise generators (Butterworth-filtered downsampled white noise).
 ```
 lfnoise0(rate) : _   // new random number every int(ma.SR/rate) samples or so
 lfnoiseN(N,rate) : _ // same as "lfnoise0(rate) : fi.lowpass(N,rate)" [see filters.lib]
-lfnoise(rate) : _    // same as "lfnoise0(rate) : seq(i,5,fi.lowpass(N,rate))" (no overshoot)
+lfnoise(rate) : _    // same as "lfnoise0(rate) : seq(i,5,fi.lowpass(1,rate))" (no overshoot)
 ```
+
+Where:
+
+* `N`: order of the Butterworth lowpass smoothing `lfnoiseN`, a constant numerical expression
+* `rate`: rate of the new random values (Hz), also the cutoff frequency of the smoothing lowpass
 
 #### Example
 
@@ -476,6 +482,7 @@ Approximate zero-mean, unit-variance Gaussian white noise generator.
 
 ```
 gnoise(N) : _
+gnoisem(N) : _
 ```
 
 Where:

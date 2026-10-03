@@ -26,12 +26,13 @@ The HOA library is organized into 4 sections:
 ### `(ho.)encoder`
 
 Ambisonic encoder. Encodes a signal in the circular harmonics domain
-depending on an order of decomposition and an angle.
+depending on an order of decomposition and an angle. Produces the
+2*N+1 circular harmonics.
 
 #### Usage
 
 ```
-encoder(N, x, a) : _
+encoder(N, x, a) : si.bus(2*N+1)
 ```
 
 Where:
@@ -139,7 +140,7 @@ Decodes an ambisonics sound field for a circular array of loudspeakers.
 #### Usage
 
 ```
-_ : decoder(N, P) : _
+si.bus(2*N+1) : decoder(N, P) : si.bus(P)
 ```
 
 Where:
@@ -172,7 +173,7 @@ use `inPhase` optimization with ponctual sources.
 #### Usage
 
 ```
-_ : decoderStereo(N) : _
+si.bus(2*N+1) : decoderStereo(N) : _,_
 ```
 
 Where:
@@ -282,7 +283,7 @@ and to switch between multi-channel and stereo.
 #### Usage
 
 ```
-_,_, ... : iDecoder(N, la, direct, st, g) : _,_, ...
+si.bus(2*N+1) : iDecoder(N, la, direct, shift, st, g) : si.bus(outputs(la))
 ```
 
 Where:
@@ -320,7 +321,7 @@ array.
 #### Usage
 
 ```
-_ : optimBasic(N) : _
+si.bus(2*N+1) : optimBasic(N) : si.bus(2*N+1)
 ```
 
 Where:
@@ -346,7 +347,7 @@ auditory confined in the center of the loudspeakers array.
 #### Usage
 
 ```
-_ : optimMaxRe(N) : _
+si.bus(2*N+1) : optimMaxRe(N) : si.bus(2*N+1)
 ```
 
 Where:
@@ -372,7 +373,7 @@ in phase. It should be used for an auditory.
 #### Usage
 
 ```
-_ : optimInPhase(N) : _
+si.bus(2*N+1) : optimInPhase(N) : si.bus(2*N+1)
 ```
 
 Where:
@@ -426,7 +427,7 @@ have linear changes.
 #### Usage
 
 ```
-_ : wider(N,w) : _
+si.bus(2*N+1) : wider(N, w) : si.bus(2*N+1)
 ```
 
 Where:
@@ -506,7 +507,7 @@ Rotates the sound field.
 #### Usage
 
 ```
-_ : rotate(N, a) : _
+si.bus(2*N+1) : rotate(N, a) : si.bus(2*N+1)
 ```
 
 Where:
@@ -528,11 +529,14 @@ rotate_test = encoder_bus : ho.rotate(1, 0.78);
 ### `(ho.)scope`
 
 Produces an XY pair of signals representing the ambisonic sound field.
+The 2*N+1 inputs are the circular harmonics; the outputs are the X and Y
+coordinates, followed by a third signal equal to 1 when the field is in
+phase with the scanning direction (positive), 0 otherwise.
 
 #### Usage
 
 ```
-_,_, ... : scope(N, rt) : _,_
+si.bus(2*N+1) : scope(N, rt) : _,_,_
 ```
 
 Where:
@@ -740,11 +744,12 @@ synRingMod_test = monoSignal(440) : ho.synRingMod(1, 200, 0.5, 0);
 
 Ambisonic encoder. Encodes a signal in the circular harmonics domain
 depending on an order of decomposition, an angle and an elevation.
+Produces the (N+1)*(N+1) spherical harmonics.
 
 #### Usage
 
 ```
-encoder3D(N, x, a, e) : _
+encoder3D(N, x, a, e) : si.bus((N+1)*(N+1))
 ```
 
 Where:
@@ -809,7 +814,7 @@ array.
 #### Usage
 
 ```
-_ : optimBasic3D(N) : _
+si.bus((N+1)*(N+1)) : optimBasic3D(N) : si.bus((N+1)*(N+1))
 ```
 
 Where:
@@ -835,7 +840,7 @@ auditory confined in the center of the loudspeakers array.
 #### Usage
 
 ```
-_ : optimMaxRe3D(N) : _
+si.bus((N+1)*(N+1)) : optimMaxRe3D(N) : si.bus((N+1)*(N+1))
 ```
 
 Where:
@@ -861,7 +866,7 @@ in phase. It should be used for an auditory.
 #### Usage
 
 ```
-_ : optimInPhase3D(N) : _
+si.bus((N+1)*(N+1)) : optimInPhase3D(N) : si.bus((N+1)*(N+1))
 ```
 
 Where:

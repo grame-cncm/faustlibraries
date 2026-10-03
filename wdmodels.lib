@@ -443,7 +443,7 @@ case{
 // #### Usage
 //
 // ```
-// v1(i) = u_Voltage(i, ein);
+// v1(i) = u_voltage(i, ein);
 // buildtree( v1 : B );
 // ```
 //
@@ -856,7 +856,7 @@ case {
 // #### Usage
 //
 // ```
-// s1(i) = u_resCurrent(i, lambda);
+// s1(i) = u_switch(i, lambda);
 // buildtree( s1 : B );
 // ```
 //
@@ -1280,12 +1280,13 @@ case{
 // #### Usage
 //
 // ```
-// buildtree( u_idealDiode : B );
+// diode(i) = u_idealDiode(i);
+// buildtree( diode : B );
 // ```
 //
 // Where:
 //
-// * `i`: index used by model-building functions when the adaptor is declared as `diode(i) = wd.u_idealDiode(i)`
+// * `i`: index used by model-building functions. Should never be user declared.
 //
 // Note: only usable as the root of a tree.
 // Correct implementation is shown above.
@@ -1716,12 +1717,13 @@ case{
 // #### Usage
 //
 // ```
-// buildtree( u_parallel2Port : (A, B) );
+// root(i) = u_parallel2Port(i);
+// buildtree( root : (A, B) );
 // ```
 //
 // Where:
 //
-// * `i`: index used by model-building functions when the adaptor is declared as `root(i) = wd.u_parallel2Port(i)`
+// * `i`: index used by model-building functions. Should never be user declared.
 //
 // Note: only usable as the root of a tree.
 // This adaptor has no user-accessible parameters. 
@@ -1771,12 +1773,13 @@ case{
 // #### Usage
 //
 // ```
-// buildtree( A : parallel2Port : B );
+// connector(i) = parallel2Port(i);
+// buildtree( A : connector : B );
 // ```
 //
 // Where:
 //
-// * `i`: index used by model-building functions when the adaptor is declared as `connector(i) = wd.parallel2Port(i)`
+// * `i`: index used by model-building functions. Should never be user declared.
 //
 // Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and one forward adaptor.
@@ -1829,12 +1832,13 @@ case{
 // #### Usage
 //
 // ```
-// buildtree( u_series2Port : (A, B) );
+// root(i) = u_series2Port(i);
+// buildtree( root : (A, B) );
 // ```
 //
 // Where:
 //
-// * `i`: index used by model-building functions when the adaptor is declared as `root(i) = wd.u_series2Port(i)`
+// * `i`: index used by model-building functions. Should never be user declared.
 //
 // Note: only usable as the root of a tree.
 // This adaptor has no user-accessible parameters. 
@@ -1884,12 +1888,13 @@ case{
 // #### Usage
 //
 // ```
-// buildtree( A : series2Port : B );
+// connector(i) = series2Port(i);
+// buildtree( A : connector : B );
 // ```
 //
 // Where:
 //
-// * `i`: index used by model-building functions when the adaptor is declared as `connector(i) = wd.series2Port(i)`
+// * `i`: index used by model-building functions. Should never be user declared.
 //
 // Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and one forward adaptor.
@@ -2312,12 +2317,13 @@ with{
 // #### Usage
 //
 // ```
-// buildtree( A : parallel : (B, C) );
+// junction(i) = parallel(i);
+// buildtree( A : junction : (B, C) );
 // ```
 //
 // Where:
 //
-// * `i`: index used by model-building functions when the adaptor is declared as `junction(i) = wd.parallel(i)`
+// * `i`: index used by model-building functions. Should never be user declared.
 //
 // Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and two forward adaptors.
@@ -2373,9 +2379,13 @@ case{
 // #### Usage
 //
 // ```
-//
-// tree = A : (series : (B, C));
+// junction(i) = series(i);
+// buildtree( A : junction : (B, C) );
 // ```
+//
+// Where:
+//
+// * `i`: index used by model-building functions. Should never be user declared.
 //
 // Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with one previous and two forward adaptors.
@@ -2435,9 +2445,13 @@ case{
 // #### Usage
 //
 // ```
-//
-// tree = u_sixportPassive : (A, B, C, D, E, F));
+// rtype(i) = u_sixportPassive(i);
+// buildtree( rtype : (A, B, C, D, E, F) );
 // ```
+//
+// Where:
+//
+// * `i`: index used by model-building functions. Should never be user declared.
 //
 // Note: this adaptor has no user-accessible parameters. 
 // It should be used within the connection tree with six forward adaptors.
@@ -2585,6 +2599,8 @@ with{
 // #### Usage
 //
 // ```
+// scatter = *(-0.4);
+// upRes = 1600;
 // n1(i) = genericNode_Vout(i, scatter, upRes);
 // ```
 //
@@ -2639,6 +2655,8 @@ case{
 // #### Usage
 //
 // ```
+// scatter = *(-0.3);
+// upRes = 1400;
 // n1(i) = genericNode_Iout(i, scatter, upRes);
 // ```
 //
@@ -2745,11 +2763,13 @@ with{
 // #### Usage
 //
 // ```
-// builddown(A : B)~buildup(A : B);
+// builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 // ```
 //
-// Where: 
-//  `(A : B)` : is a connection tree composed of WD adaptors
+// Where:
+//
+// * `tree`: a connection tree composed of WD adaptors, such as
+//   `vsrc : (branch : (res_leaf, probe))`
 //
 // #### Test
 // ```
@@ -2831,11 +2851,13 @@ builddown(A) = A(0);
 // #### Usage
 //
 // ```
-// builddown(A : B)~buildup(A : B);
+// builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 // ```
 //
-// Where: 
-// `(A : B)` : is a connection tree composed of WD adaptors
+// Where:
+//
+// * `tree`: a connection tree composed of WD adaptors, such as
+//   `vsrc : (branch : (res_leaf, probe))`
 //
 // #### Test
 // ```
@@ -2926,11 +2948,13 @@ buildup(A) = A(1);
 // #### Usage
 //
 // ```
-// getres(A : B)~getres(A : B);
+// getres(subtree) : _
 // ```
 //
-// Where: 
-// `(A : B)` : is a partial connection tree composed of WD adaptors
+// Where:
+//
+// * `subtree`: a partial connection tree composed of WD adaptors, such as
+//   `branch : (res_leaf, probe)`
 //
 // #### Test
 // ```
@@ -2967,11 +2991,12 @@ getres(A) = A(2);
 // #### Usage
 //
 // ```
-// parres((A , B))~parres((A , B));
+// parres((subtree_left, subtree_right)) : _,_
 // ```
 //
-// Where: 
-// `(A , B)` : is a partial connection tree composed of WD adaptors
+// Where:
+//
+// * `subtree_left`, `subtree_right`: partial connection trees composed of WD adaptors
 //
 // #### Test
 // ```
@@ -3009,11 +3034,13 @@ parres(Ap) = getres(Ap);
 // #### Usage
 //
 // ```
-// buildout( A : B );
+// builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 // ```
 //
-// Where: 
-// `(A : B)` : is a connection tree composed of WD adaptors
+// Where:
+//
+// * `tree`: a connection tree composed of WD adaptors, such as
+//   `vsrc : (branch : (res_leaf, probe))`
 //
 // #### Test
 // ```
@@ -3054,11 +3081,15 @@ with{
 // #### Usage
 //
 // ```
-// buildtree(A : B);
+// buildtree(tree) : _, ...
 // ```
 //
-// Where: 
-// `(A : B)` : a connection tree composed of WD adaptors
+// Where:
+//
+// * `tree`: a connection tree composed of WD adaptors, such as
+//   `vsrc : (branch : (res_leaf, probe))`
+//
+// The outputs are those of the output adaptors of the tree (`_Vout`, `_Iout`), one each.
 //
 // #### Test
 // ```

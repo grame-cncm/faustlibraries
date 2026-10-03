@@ -262,6 +262,18 @@ This is a convenience wrapper around `spcap` for interactive control of the
 virtual source azimuth, the panning sharpness, and the physical azimuth of
 each loudspeaker.
 
+UI controls: `SPCAP/pan_sharpness` is the panning sharpness parameter
+`alpha` (higher values make the virtual source more focused around the
+closest speakers); `SPCAP/source_angle` is the virtual source azimuth in
+degrees, converted to radians before calling `spcap`;
+`SPCAP/Speaker%2i/angle` is the physical azimuth of speaker `i` in degrees
+(the default layout is a regular circular distribution centered in each
+speaker sector, and can be edited from the UI).
+
+Use `spcap` directly when the source angle, speaker angles, or sharpness
+parameter must be supplied by an existing DSP expression instead of UI
+controls.
+
 #### Usage
 
 ```
@@ -272,20 +284,6 @@ Where:
 
 * `N`: number of speakers (a constant numerical expression). The function has one
   input signal and produces `N` output signals, one per speaker
-
-UI controls:
-
-* `SPCAP/pan_sharpness`: panning sharpness parameter `alpha`. Higher values
-  make the virtual source more focused around the closest speakers.
-* `SPCAP/source_angle`: virtual source azimuth in degrees. The value is
-  converted to radians before calling `spcap`.
-* `SPCAP/Speaker%2i/angle`: physical azimuth of speaker `i` in degrees. The
-  default layout is a regular circular distribution centered in each speaker
-  sector, and can be edited from the UI.
-
-Use `spcap` directly when the source angle, speaker angles, or sharpness
-parameter must be supplied by an existing DSP expression instead of UI
-controls.
 
 #### Test
 
@@ -385,13 +383,19 @@ for the desired direction as two constant lists.
 #### Usage
 
 ```
-_ : binauralFir((l0, l1, ...), (r0, r1, ...)) : _,_ // left, right
+_ : binauralFir(hL, hR) : _,_ // left, right
 ```
 
 Where:
 
-* `(l0, l1, ...)`: left-ear HRIR taps (constant numerical expressions)
-* `(r0, r1, ...)`: right-ear HRIR taps
+* `hL`: left-ear HRIR taps, a list `(l0, l1, ...)` of constant numerical expressions
+* `hR`: right-ear HRIR taps, a list `(r0, r1, ...)` of constant numerical expressions
+
+#### Example
+
+```
+_ : binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1)) : _,_
+```
 
 #### Test
 ```

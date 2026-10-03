@@ -172,7 +172,7 @@ Note that t60 (time to decay 60 dB) is ~6.91 time constants.
 #### Usage
 
 ```
-_ : smooth(tau2pole(tau)) : _
+_ : si.smooth(tau2pole(tau)) : _
 ```
 
 Where:
@@ -1179,11 +1179,16 @@ with {
 
 Tabulate a 1D function over the range [r0, r1] for access via nearest-value, linear, cubic interpolation.
 In other words, the uniformly tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).
+`tabulate(C, FX, S, r0, r1, x).val` uses the value in the table closest to x,
+`.lin` evaluates at x using linear interpolation between the closest stored values,
+and `.cub` evaluates at x using cubic interpolation between the closest stored values.
 
 #### Usage
 
 ```
-tabulate(C, FX, S, r0, r1, x).(val|lin|cub) : _
+tabulate(C, FX, S, r0, r1, x).val : _
+tabulate(C, FX, S, r0, r1, x).lin : _
+tabulate(C, FX, S, r0, r1, x).cub : _
 ```
 
 Where:
@@ -1194,18 +1199,6 @@ Where:
 * `r0`: minimum value of argument x
 * `r1`: maximum value of argument x
 * `x`: input value used to read the tabulated function
-
-```
-tabulate(C, FX, S, r0, r1, x).val uses the value in the table closest to x
-```
-
-```
-tabulate(C, FX, S, r0, r1, x).lin evaluates at x using linear interpolation between the closest stored values
-```
-
-```
-tabulate(C, FX, S, r0, r1, x).cub evaluates at x using cubic interpolation between the closest stored values
-```
 
 #### Example test program
 
@@ -1239,7 +1232,7 @@ or use `C = 1`.
 #### Usage
 
 ```
-_ : tabulate_chebychev(C, FX, NX, CD, r0, r1) : _
+tabulate_chebychev(C, FX, NX, CD, r0, r1, x) : _
 ```
 
 Where:
@@ -1277,17 +1270,23 @@ The number of dimensions is deduced from the number of parameters you give, see 
 
 Note that processing the last point in each interval is not safe. So either be sure the inputs stay in their respective ranges, or use `C = 1`. Similarly for the first point when doing cubic interpolation.
 
+The user facing functions are `tabulateNd(C, function, parameters).val`, which uses the value in the table closest to x,
+`.lin`, which evaluates at x using linear interpolation between the closest stored values,
+and `.cub`, which evaluates at x using cubic interpolation between the closest stored values.
+
 #### Usage
 
 ```
-tabulateNd(C, function, (parameters) ).(val|lin|cub) : _
+tabulateNd(C, function, parameters).val : _
+tabulateNd(C, function, parameters).lin : _
+tabulateNd(C, function, parameters).cub : _
 ```
 
 Where:
 
 * `C`: whether to dynamically force the parameter values for each dimension to the ranges specified in parameters: 1 forces the check, 0 deactivates it (constant numerical expression)
 * `function`: the function we want to tabulate. Can have any number of inputs, but needs to have just one output.
-* `(parameters)`: sizes, ranges and read values. Note: these need to be in brackets, to make them one entity.  
+* `parameters`: sizes, ranges and read values. Note: these need to be in parentheses, to make them one entity.  
 
   If N is the number of dimensions, we need:
 
@@ -1297,20 +1296,6 @@ Where:
   * N times `x`: read value of this dimension
 
 By providing these parameters, you indirectly specify the number of dimensions; it's the number of parameters divided by 4.
-
-The user facing functions are:
-```
-tabulateNd(C, function, S, parameters).val
-```
- - Uses the value in the table closest to x.
-```
-tabulateNd(C, function, S, parameters).lin
-```
- - Evaluates at x using linear interpolation between the closest stored values.
-```
-tabulateNd(C, function, S, parameters).cub
-```
- - Evaluates at x using cubic interpolation between the closest stored values.
 
 
 #### Example test program
@@ -1600,22 +1585,23 @@ if_test = ba.if(1, 0.5, -0.5);
 
 if-then-elseif-then-...elsif-then-else implemented on top of `ba.if`.
 
+The branches are given as one list, `(cond1,then1, cond2,then2, ..., condN,thenN, else)`,
+where `condX` is a condition, `thenX` the signal selected if `condX` is the
+1st true condition, and `else` the signal selected if all the cond1-condN
+conditions are false; the number of branches/conditions `Nc` is deduced
+from the list. They can also be given as arguments, `ifNc(Nc, cond1,then1, ..., else)`,
+or as the 2*Nc+1 inputs of `ifNc(Nc)`, `Nc` being then a constant numerical
+expression (see the example).
+
 #### Usage
 
 ```
-   ifNc((cond1,then1, cond2,then2, ... condN,thenN, else)) : _
-or
-   ifNc(Nc, cond1,then1, cond2,then2, ... condN,thenN, else) : _
-or
-   cond1,then1, cond2,then2, ... condN,thenN, else : ifNc(Nc) : _
+ifNc(branches) : _
 ```
 
 Where:
 
-* `Nc` : number of branches/conditions (constant numerical expression)
-* `condX`: condition
-* `thenX`: signal selected if condX is the 1st true condition
-* `else`: signal selected if all the cond1-condN conditions are false
+* `branches`: the list `(cond1,then1, cond2,then2, ..., condN,thenN, else)`, in parentheses
 
 #### Example test program
 
@@ -1641,19 +1627,22 @@ ifNc_test = ba.ifNc((1, 10, 0, 20, 30));
 
 `ifNcNo(Nc,No)` is similar to `ifNc(Nc)` above but then/else branches have `No` outputs.
 
+`ifNcNo(Nc,No)` has Nc*(No+1)+No inputs: `cond1,then1, cond2,then2, ..., condN,thenN, else`,
+where `condX` is a condition, `thenX` a list of No signals selected if `condX`
+is the 1st true condition, and `else` a list of No signals selected if all the
+cond1-condN conditions are false. They can also be given as arguments,
+`ifNcNo(Nc,No, cond1,then1, ..., else)` (see the example).
+
 #### Usage
 
 ```
-   ifNcNo(Nc,No, cond1,then1, cond2,then2, ... condN,thenN, else) : sig.bus(No)
+si.bus(Nc*(No+1)+No) : ifNcNo(Nc,No) : si.bus(No)
 ```
 
 Where:
 
 * `Nc` : number of branches/conditions (constant numerical expression)
 * `No` : number of outputs (constant numerical expression)
-* `condX`: condition
-* `thenX`: list of No signals selected if condX is the 1st true condition
-* `else`: list of No signals selected if all the cond1-condN conditions are false
 
 #### Example test program
 
@@ -1838,7 +1827,7 @@ technique than `ba.selectmulti`.
 #### Usage
 
 ```
-process = si.bus(BUS_SIZE*NUM_BUSES) : selectbus(BUS_SIZE, NUM_BUSES, FADE, id) : si.bus(BUS_SIZE);
+process = si.bus(BUS_SIZE*NUM_BUSES) : selectxbus(BUS_SIZE, NUM_BUSES, fade, id) : si.bus(BUS_SIZE);
 ```
 
 Where:
@@ -2213,12 +2202,8 @@ f = bpf.start(x0,y0) : bpf.point(x1,y1) : bpf.point(x2,y2) : bpf.end(x3,y3);
 ```
 
 In any case the `x_{i}` must be in increasing order (for all `i`, `x_{i} < x_{i+1}`).
-For example the following definition:
-
-```
-f = bpf.start(x0,y0) : ... : bpf.point(xi,yi) : ... : bpf.end(xn,yn);
-```
-
+For example, a definition `f` made of a `start` at `(x_{0},y_{0})`, a `point`
+at each `(x_{i},y_{i})`, and an `end` at `(x_{n},y_{n})`,
 implements a break-point function f such that:
 
 * `f(x) = y_{0}` when `x < x_{0}`
@@ -2377,9 +2362,7 @@ Bypassed circuits can be chained.
 #### Usage
 
 ```
-_ : bypass_fade(n,b,e) : _
-or
-_,_ : bypass_fade(n,b,e) : _,_
+si.bus(inputs(e)) : bypass_fade(n,b,e) : si.bus(outputs(e))
 ```
 
 Where:
@@ -2436,8 +2419,13 @@ The first channel set the output to 1, the second channel to 0.
 #### Usage
 
 ```
-_,_ : on_and_off : _
+on_and_off(a, b) : _
 ```
+
+Where:
+
+* `a`: trigger that sets the output to 1, on its rising edges (0 to 1)
+* `b`: trigger that sets the output to 0, on its rising edges (0 to 1)
 
 #### Example test program
 

@@ -56,7 +56,7 @@ Block - terminate N signals.
 #### Usage
 
 ```
-si.bus(N) : block(N)
+bus(N) : block(N)
 ```
 
 Where:
@@ -109,7 +109,7 @@ intermediate buses.
 #### Usage
 
 ```
-si.bus(inputs(FX)) : repeat(N, FX) : si.bus(outputs(FX))
+bus(inputs(FX)) : repeat(N, FX) : bus(outputs(FX))
 ```
 
 Where:
@@ -246,7 +246,7 @@ Dot product for two vectors of size N.
 #### Usage
 
 ```
-si.bus(N), si.bus(N) : dot(N) : _
+bus(N), bus(N) : dot(N) : _
 ```
 
 Where:
@@ -268,20 +268,15 @@ dot_test = (
 ### `(si.)smooth`
 
 Exponential smoothing by a unity-dc-gain one-pole lowpass.
-`smooth` is a standard Faust function.
+`smooth` is a standard Faust function. The input is typically a control
+signal (`hslider(...) : smooth(s)`). The pole `s` is usually computed
+from a smoothing time constant `tau` in seconds with `ba.tau2pole(tau)`
+(see the example).
 
-#### Usage:
-
-```
-_ : si.smooth(ba.tau2pole(tau)) : _
-```
-
-Where:
-
-* `tau`: desired smoothing time constant in seconds, or
+#### Usage
 
 ```
-hslider(...) : smooth(s) : _
+_ : smooth(s) : _
 ```
 
 Where:
@@ -290,6 +285,12 @@ Where:
 s>1 is unstable, and s=1 yields the zero signal for all inputs.
 The exponential time-constant is approximately 1/(1-s) samples, when s is close to
 (but less than) 1.
+
+#### Example
+
+```
+_ : smooth(ba.tau2pole(tau)) : _   // tau: smoothing time constant in seconds
+```
 
 #### Test
 ```
@@ -374,6 +375,8 @@ cbus_test = (
 
 Multiply two complex signals pointwise.
 `cmul` is a standard Faust function.
+Each complex number is represented by two real signals as (real,imag):
+the inputs `(r1,i1)` are the real and imaginary parts of signal 1.
 
 #### Usage
 
@@ -383,9 +386,7 @@ Multiply two complex signals pointwise.
 
 Where:
 
-* Each complex number is represented by two real signals as (real,imag), so
-- `(r1,i1)` = real and imaginary parts of signal 1
-- `(r2,i2)` = real and imaginary parts of signal 2
+* `r2`, `i2`: real and imaginary parts of signal 2
 
 #### Test
 ```
@@ -526,7 +527,7 @@ that is greater or equal to one.
 #### Usage
 
 ```
-     si.bus(inputs(vectorsList)) : vecOp((vectorsList), op) : si.bus(outputs(ba.take(1, vectorsList)));
+bus(inputs(vectorsList)) : vecOp(vectorsList, op) : bus(outputs(ba.take(1, vectorsList)))
 ```
 
 Where:
@@ -621,7 +622,7 @@ doesn't search for the variable. This can be much faster than `par` to compile.
 #### Usage
 
 ```
-si.bus(N * inputs(f)) : bpar(N, f) : si.bus(N * outputs(f))
+bus(N * inputs(f)) : bpar(N, f) : bus(N * outputs(f))
 ```
 
 Where:
@@ -652,7 +653,7 @@ Balanced `sum`, see `si.bpar`.
 #### Usage
 
 ```
-si.bus(N * inputs(f)) : bsum(N, f) : _
+bus(N * inputs(f)) : bsum(N, f) : _
 ```
 
 Where:
@@ -682,7 +683,7 @@ Balanced `prod`, see `si.bpar`.
 #### Usage
 
 ```
-si.bus(N * inputs(f)) : bprod(N, f) : _
+bus(N * inputs(f)) : bprod(N, f) : _
 ```
 
 Where:

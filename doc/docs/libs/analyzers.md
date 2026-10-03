@@ -142,11 +142,14 @@ the absolute value going up, but then floats down exponentially.
 
 ```
 _ : amp_follower(rel) : _
+_ : peak_envelope(rel) : _
 ```
 
 Where:
 
 * `rel`: release time = amplitude-envelope time-constant (sec) going down
+
+`peak_envelope` is a synonym of `amp_follower`, for more standard naming.
 
 #### Test
 ```
@@ -610,7 +613,7 @@ Also for convenience:
 ```
 _ : mth_octave_analyzer3(M,ftop,N) : par(i,N,_) // 3d-order Butterworth
 _ : mth_octave_analyzer5(M,ftop,N) : par(i,N,_) // 5th-order Butterworth
-mth_octave_analyzer_default = mth_octave_analyzer6e;
+_ : mth_octave_analyzer_default(M,ftop,N) : par(i,N,_) // = mth_octave_analyzer6e
 ```
 
 Where:
@@ -642,6 +645,7 @@ Spectral level display.
 
 ```
 _ : mth_octave_spectral_level6e(M,ftop,NBands,tau,dB_offset) : _
+_ : mth_octave_spectral_level_default(M,ftop,NBands,tau,dB_offset) : _
 ```
 
 Where:
@@ -684,7 +688,18 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 
 #### Usage
 
-See `mth_octave_spectral_level_demo` in `demos.lib`.
+```
+_ : octave_analyzer(N) : par(i,N,_)
+_ : half_octave_analyzer(N) : par(i,N,_)
+_ : third_octave_analyzer(N) : par(i,N,_)
+```
+
+Where:
+
+* `N`: total number of bands (including dc and Nyquist)
+
+The `*_filterbank(N)` variants have the same shape, `_ : octave_filterbank(N) : par(i,N,_)`.
+See `mth_octave_spectral_level_demo` in `demos.lib` for an example.
 
 ## Arbitrary-Crossover Filter-Banks and Spectrum Analyzers
 
@@ -700,7 +715,7 @@ Analyzer.
 #### Usage
 
 ```
-_ : analyzer(O,freqs) : par(i,N,_) // No delay equalizer
+_ : analyzer(O,freqs) : par(i,ba.count(freqs)+1,_) // No delay equalizer
 ```
 
 Where:
@@ -708,7 +723,7 @@ Where:
 * `O`: band-split filter order (ODD integer required for filterbank[i])
 * `freqs`: (fc1,fc2,...,fcNs) [in numerically ascending order], where
           Ns=N-1 is the number of octave band-splits
-          (total number of bands N=Ns+1).
+          (total number of bands N=Ns+1, the number of outputs).
 
 If frequencies are listed explicitly as arguments, enclose them in parens:
 
@@ -935,7 +950,14 @@ The classic fixed window functions:
 #### Usage
 
 ```
+window_rect(x) : _
 window_hann(x) : _
+window_hamming(x) : _
+window_blackman(x) : _
+window_blackman_harris(x) : _
+window_nuttall(x) : _
+window_flattop(x) : _
+window_bartlett(x) : _
 ```
 
 Where:
@@ -977,14 +999,21 @@ directly for custom sidelobe trade-offs.
 #### Usage
 
 ```
-window_cosN((a0, a1, ..., aK), x) : _
+window_cosN(coeffs, x) : _
 ```
 
 Where:
 
-* `(a0, ..., aK)`: cosine-series coefficients, alternating in sign for the
-  usual windows (peak value at x = 1/2 is a0 - a1 + a2 - ...)
+* `coeffs`: the list `(a0, a1, ..., aK)` of cosine-series coefficients,
+  alternating in sign for the usual windows (peak value at x = 1/2 is
+  a0 - a1 + a2 - ...)
 * `x`: normalized abscissa in [0,1]
+
+#### Example
+
+```
+window_cosN((0.42, -0.50, 0.08), x) : _ // the Blackman window
+```
 
 #### Test
 ```
@@ -1171,18 +1200,22 @@ rtocv_test = an.rtocv(8, os.tosc(220));
 Bit-reversal permutation of a vector signal, as performed on the input of a
 decimation-in-time radix-2 FFT. `bit_reverse_shuffle(N)` permutes a real
 vector, `c_bit_reverse_shuffle(N)` a complex vector. Used internally by
-`an.fft` and `an.ifft`.
+`an.fft` and `an.ifft`. `bit_reverse_selector(N,i)` is the constant index
+(in 0..N-1) of the channel that the permutation sends to channel `i`:
+`i` with its log2(N) bits reversed, e.g. `bit_reverse_selector(8,1)` is 4.
 
 #### Usage
 
 ```
 si.bus(N) : bit_reverse_shuffle(N) : si.bus(N)
 si.cbus(N) : c_bit_reverse_shuffle(N) : si.cbus(N)
+bit_reverse_selector(N,i) : _
 ```
 
 Where:
 
 * `N`: vector size (must be a power of 2)
+* `i`: a channel index in 0..N-1, known at compile time
 
 ----
 
@@ -1190,21 +1223,24 @@ Where:
 
 Fast Fourier Transform (FFT).
 
+`fft(N)` is a length-`N` FFT for complex signals (radix 2). Its input,
+`si.cbus(N)`, is a bus of N complex signals, each specified by real and
+imaginary parts: (r0,i0), (r1,i1), (r2,i2), ... Its output is a bank of N
+complex signals containing the complex spectrum over time: (R0, I0),
+(R1,I1), ... The dc component is (R0,I0), where I0=0 for real input signals.
+`fftb(N)` is the butterfly core of `fft(N)`: same buses, but it expects its
+input already in bit-reversed order (see the implementation notes).
+
 #### Usage
 
 ```
 si.cbus(N) : fft(N) : si.cbus(N)
+si.cbus(N) : fftb(N) : si.cbus(N)
 ```
 
 Where:
 
-* `si.cbus(N)`: a bus of N complex signals, each specified by real and imaginary parts:
-  (r0,i0), (r1,i1), (r2,i2), ...
 * `N`: FFT size (must be a power of 2: 2,4,8,16,... known at compile time)
-* `fft(N)`: a length-`N` FFT for complex signals (radix 2)
-* `output`: a bank of N complex signals containing the complex spectrum over time:
-  (R0, I0), (R1,I1), ...
-  - The dc component is (R0,I0), where I0=0 for real input signals.
 
 FFTs of Real Signals:
 
@@ -1242,11 +1278,14 @@ butterfly core, which expects its input already in bit-reversed order.
 ### `(an.)ifft`, `(an.)ifftb`
 
 Inverse Fast Fourier Transform (IFFT).
+`ifftb(N)` is the butterfly core of `ifft(N)`: same buses, but it expects
+its input already in bit-reversed order (see the implementation notes).
 
 #### Usage
 
 ```
 si.cbus(N) : ifft(N) : si.cbus(N)
+si.cbus(N) : ifftb(N) : si.cbus(N)
 ```
 
 Where:
@@ -1386,7 +1425,19 @@ epsilon-guarded denominator.
 _ : band_powers(O,M,ftop,N,T) : si.bus(N)
 band_center(M,ftop,N,i) : _
 si.bus(N) : moment(M,ftop,N,K) : _
+safe_div(num, den) : _
 ```
+
+Where:
+
+* `O`: band-split filter order (a constant numerical expression)
+* `M`: bands per octave (a constant numerical expression)
+* `ftop`: highest band-split crossover frequency in Hz
+* `N`: total number of bands, including dc and top (a constant numerical expression)
+* `T`: power averaging time in seconds
+* `i`: band index, from 0 (top band) to N-1 (dc band)
+* `K`: exponent of the band center frequencies in the moment
+* `num`, `den`: numerator and denominator signals of `safe_div`
 
 ----
 
@@ -1475,6 +1526,7 @@ calls the sum of `G_i z_i`), and `meansquare2lufs` converts it to LUFS
 ```
 si.bus(N) : loudness_meansquare(T,N) : _
 _ : meansquare2lufs : _
+si.bus(N) : loudness_meansquare(T,N) : meansquare2lufs : _ // loudness in LUFS
 ```
 
 Where:
