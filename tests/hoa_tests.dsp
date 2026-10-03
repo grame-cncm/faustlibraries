@@ -31,7 +31,7 @@ circularScaledVBAP_test = monoSignal(440) : ho.circularScaledVBAP((0, 120, 240),
 
 imlsDecoder_test = encoder_bus : ho.imlsDecoder(1, (0, 90, 180, 270), 1, 0);
 
-iDecoder_test = (encoder_bus, 0.0) : ho.iDecoder(1, (0, 120, 240), 1, 0, 0.8);
+iDecoder_test = encoder_bus : ho.iDecoder(1, (0, 120, 240), 1, 0, 0, 0.8);
 
 optimBasic_test = encoder_bus : ho.optimBasic(1);
 
