@@ -130,6 +130,7 @@ standardBellModel_test = os.impulse : pm.standardBellModel(50, 0, 30, 1, 2.5);
 standardBell_test = pm.standardBell(0.4, 2000, 0.5, 0.8, button("pm.standardBell/gate"));
 standardBell_ui_test = pm.standardBell_ui;
 formantValues_test = pm.formantValues.f(0);
+formantValues_tenor_test = ba.take(23, pm.formantValues.g(0)), ba.take(23, pm.formantValues.f(0));
 voiceGender_test = pm.voiceGender(0);
 skirtWidthMultiplier_test = pm.skirtWidthMultiplier(0, 220, 0);
 autobendFreq_test = 440 : pm.autobendFreq(0, 220, 0);

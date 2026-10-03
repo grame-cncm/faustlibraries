@@ -3451,7 +3451,9 @@ soprano, 4: tenor)
 #### Test
 ```
 pm = library("physmodels.lib");
+ba = library("basics.lib");
 formantValues_test = pm.formantValues.f(0);
+formantValues_tenor_test = ba.take(23, pm.formantValues.g(0)), ba.take(23, pm.formantValues.f(0));
 ```
 
 ----
