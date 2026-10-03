@@ -331,7 +331,11 @@ lpt19_jump_test = no.noise : fi.lpt19(0.001*pow(1000, sq)) with { P = int(ma.SR/
 
 Feed-Forward Comb Filter. Note that `ff_comb` requires integer delays
 (uses `delay`  internally).
-`ff_comb` is a standard Faust function.
+`ff_comb` is a standard Faust function. It computes
+
+```
+y[n] = b0 x[n] + bM x[n - intdel]
+```
 
 #### Usage
 
@@ -343,8 +347,9 @@ Where:
 
 * `maxdel`: maximum delay (a power of 2)
 * `intdel`: current (integer) comb-filter delay between 0 and maxdel
-* `b0`: gain applied to delay-line input
-* `bM`: gain applied to delay-line output and then summed with input
+  (a non-integer value is truncated)
+* `b0`: gain applied to the direct (undelayed) input
+* `bM`: gain applied to delay-line output and then summed with the direct path
 
 #### Test
 ```
@@ -369,7 +374,8 @@ ff_comb_modulated_test = no.noise : fi.ff_comb(2048, d, 1, 0.7) with { P = int(m
 
 Feed-Forward Comb Filter. Note that `ff_fcomb` takes floating-point delays
 (uses `fdelay` internally).
-`ff_fcomb` is a standard Faust function.
+`ff_fcomb` is a standard Faust function. It computes
+`y[n] = b0 x[n] + bM x[n - del]`, where `x[n - del]` is linearly interpolated.
 
 #### Usage
 
@@ -381,8 +387,8 @@ Where:
 
 * `maxdel`: maximum delay (a power of 2)
 * `del`: current (float) comb-filter delay between 0 and maxdel
-* `b0`: gain applied to delay-line input
-* `bM`: gain applied to delay-line output and then summed with input
+* `b0`: gain applied to the direct (undelayed) input
+* `bM`: gain applied to delay-line output and then summed with the direct path
 
 #### Test
 ```
@@ -417,7 +423,8 @@ _ : ffcombfilter(maxdel,del,g) : _
 Where:
 
 * `maxdel`: maximum delay (a power of 2)
-* `del`: current (float) comb-filter delay between 0 and maxdel
+* `del`: current integer comb-filter delay between 0 and maxdel
+  (a non-integer value is truncated, as in `ff_comb`)
 * `g`: gain applied to the delayed tap
 
 #### Test
@@ -482,7 +489,14 @@ fb_comb_common_modulated_test = no.noise : fi.fb_comb_common(@, d, 0.8, 0.6) wit
 
 ### `(fi.)fb_comb`
 
-Feed-Back Comb Filter (integer delay).
+Feed-Back Comb Filter (integer delay). It computes
+
+```
+y[n] = b0 x[n-1] - aN y[n-del]
+```
+
+The output is delayed by one sample (the `mem` at the end of the definition):
+the transfer function is b0 z^(-1)/(1 + aN z^(-del)), not b0/(1 + aN z^(-del)).
 
 #### Usage
 
@@ -493,8 +507,9 @@ _ : fb_comb(maxdel,del,b0,aN) : _
 Where:
 
 * `maxdel`: maximum delay (a power of 2)
-* `del`: current (float) comb-filter delay between 0 and maxdel
-* `b0`: gain applied to delay-line input and forwarded to output
+* `del`: current integer comb-filter delay (the feedback loop length), between 1 and maxdel
+  (a non-integer value is truncated)
+* `b0`: input gain
 * `aN`: minus the gain applied to delay-line output before summing with the input
     and feeding to the delay line
 
@@ -520,7 +535,9 @@ fb_comb_modulated_test = no.noise : fi.fb_comb(2048, d, 0.7, 0.6) with { P = int
 ### `(fi.)fb_fcomb`
 
 Feed-Back Comb Filter (floating point delay).
-`fb_fcomb` is a standard Faust function.
+`fb_fcomb` is a standard Faust function. As `fb_comb`, it computes
+`y[n] = b0 x[n-1] - aN y[n-del]` (the output is delayed by one sample),
+where `y[n-del]` is linearly interpolated.
 
 #### Usage
 
@@ -531,8 +548,8 @@ _ : fb_fcomb(maxdel,del,b0,aN) : _
 Where:
 
 * `maxdel`: maximum delay (a power of 2)
-* `del`: current (float) comb-filter delay between 0 and maxdel
-* `b0`: gain applied to delay-line input and forwarded to output
+* `del`: current (float) comb-filter delay (the feedback loop length), between 1 and maxdel
+* `b0`: input gain
 * `aN`: minus the gain applied to delay-line output before summing with the input
     and feeding to the delay line
 
@@ -558,9 +575,14 @@ fb_fcomb_jump_test = no.noise : fi.fb_fcomb(2048, 16 + 112*sq, 0.7, 0.6) with { 
 
 ### `(fi.)rev1`
 
-Special case of `fb_comb` (`rev1(maxdel,N,g)`).
+Special case of `fb_comb` (`rev1(maxdel,N,g)` is `fb_comb(maxdel,N,1,-g)`):
+
+```
+y[n] = x[n-1] + g y[n-N]
+```
+
 The "rev1 section" dates back to the 1960s in computer-music reverberation.
-See the `jcrev` and `brassrev` in `reverbs.lib` for usage examples.
+See `jcrev` and `satrev` in `reverbs.lib` for usage examples.
 
 #### Usage
 
@@ -571,8 +593,8 @@ _ : rev1(maxdel,N,g) : _
 Where:
 
 * `maxdel`: maximum delay (a power of 2)
-* `N`: current feedback comb-filter delay in samples
-* `g`: feedback gain (its sign is negated internally)
+* `N`: current feedback comb-filter delay in samples (the loop length, an integer)
+* `g`: feedback gain
 
 #### Test
 ```
@@ -591,7 +613,14 @@ rev1_modulated_test = no.noise : fi.rev1(2048, d, 0.6) with { P = int(ma.SR/10);
 
 ### `(fi.)fbcombfilter`, `(fi.)ffbcombfilter`
 
-Other special cases of Feed-Back Comb Filter.
+Other special cases of Feed-Back Comb Filter. Their output is the
+delay-line output, and the feedback loop is one sample longer than the delay:
+
+```
+y[n] = x[n-intdel] + g y[n-intdel-1]
+```
+
+(with `del` in place of `intdel`, linearly interpolated, for `ffbcombfilter`).
 
 #### Usage
 
@@ -604,8 +633,8 @@ Where:
 
 * `maxdel`: maximum delay (a power of 2)
 * `del`: current comb-filter delay between 0 and maxdel: an integer for
-  `fbcombfilter` (uses `de.delay`), a float for `ffbcombfilter` (uses
-  `de.fdelay`)
+  `fbcombfilter` (uses `de.delay`; a non-integer value is truncated), a
+  float for `ffbcombfilter` (uses `de.fdelay`); the loop length is `del+1`
 * `g`: feedback gain
 
 #### Test
@@ -652,7 +681,8 @@ _ : allpass_comb(maxdel,intdel,aN) : _
 Where:
 
 * `maxdel`: maximum delay (a power of 2)
-* `intdel`: current (integer) comb-filter delay between 0 and maxdel
+* `intdel`: current (integer) comb-filter delay between 1 and maxdel
+  (a non-integer value is truncated)
 * `aN`: minus the feedback gain
 
 #### Test
@@ -683,13 +713,19 @@ Schroeder Allpass Comb Filter.
 Note that:
 
 ```
-allpass_comb(maxlen,len,aN) = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len-1,1,aN);
+allpass_fcomb(maxlen,len,aN) : mem = ff_fcomb(maxlen,len,aN,1) : fb_fcomb(maxlen,len,1,aN);
 ```
 
+(`fb_fcomb` delays its output by one sample, hence the `mem`),
 which is a direct-form-1 implementation, requiring two delay lines.
 The implementation here is direct-form-2 requiring only one delay line.
 
-`allpass_fcomb` is a standard Faust library.
+The delay line is linearly interpolated (`de.fdelay`), and linear
+interpolation is a lowpass filter at fractional delays, so the response is
+allpass only for an integer `del`. With `del` = 1000.5 and `aN` = 0.6, the
+impulse response keeps 64% of its energy, and the gain drops by
+1.6 dB (8-12 kHz) to 4.3 dB (20-24 kHz) at 48 kHz on average.
+`allpass_fcomb1a` stays allpass at every delay.
 
 #### Usage
 
@@ -700,7 +736,7 @@ _ : allpass_fcomb(maxdel,del,aN) : _
 Where:
 
 * `maxdel`: maximum delay (a power of 2)
-* `del`: current (float) comb-filter delay between 0 and maxdel
+* `del`: current (float) comb-filter delay between 1 and maxdel
 * `aN`: minus the feedback gain
 
 #### Test
@@ -729,7 +765,7 @@ allpass_fcomb_jump_test = no.noise : fi.allpass_fcomb(2048, 16 + 112*sq, 0.6) wi
 
 Special case of `allpass_comb` (`rev2(maxlen,len,g)`).
 The "rev2 section" dates back to the 1960s in computer-music reverberation.
-See the `jcrev` and `brassrev` in `reverbs.lib` for usage examples.
+See `jcrev` and `satrev` in `reverbs.lib` for usage examples.
 
 #### Usage
 
@@ -763,6 +799,17 @@ rev2_modulated_test = no.noise : fi.rev2(2048, d, 0.6) with { P = int(ma.SR/10);
 Same as `allpass_fcomb` but use `fdelay5` and `fdelay1a` internally
 (Interpolation helps - look at an fft of faust2octave on:
 `1-1' <: allpass_fcomb(1024,10.5,0.95), allpass_fcomb5(1024,10.5,0.95);`)
+
+`allpass_fcomb1a` (first-order Thiran allpass interpolation) is allpass at
+every delay `N` from 1.5 to maxdel. `allpass_fcomb5` (fifth-order Lagrange
+interpolation) is allpass only for an integer `N`: at fractional delays the
+interpolator is a lowpass filter, worst at a fractional part of 0.5. With
+`N` = 1000.5 and `aN` = 0.6, the impulse response keeps 79% of its energy:
+the gain is within 0.2 dB of unity up to SR/4 on average, and drops by
+2.5 dB (16-20 kHz) to 4 dB (20-24 kHz) at 48 kHz.
+`allpass_fcomb5` needs `N` from 3 to maxdel-1: above maxdel-1 the top
+interpolator tap is clamped by the delay line, and the gain exceeds unity
+(by up to 0.28 dB at `N` = 2047.5 with maxdel = 2048).
 
 #### Usage
 
@@ -1667,7 +1714,11 @@ _ : allpassnn(n,tv) : _
 Where:
 
 * `n`: the order of the filter
-* `tv`: the reflection coefficients (-PI PI)
+* `tv`: the `n` section angles in radians (not reflection coefficients):
+  section `i` has reflection coefficient sin(t_i) and uses cos(t_i) as its
+  tap gain, so that `allpassnn(n,tv)` has the transfer function of
+  `allpassn(n,sv)` with sv_i = sin(t_i). Any real angle gives a stable
+  filter; angles in (-PI/2, PI/2) cover every reflection coefficient in (-1, 1).
 
 #### Test
 ```
@@ -2996,7 +3047,7 @@ Parametric Equalizers (Shelf, Peaking).
 
 ### `(fi.)lowshelf`
 
-First-order "low shelf" filter (gain boost|cut between dc and some frequency)
+Order-`N` "low shelf" filter (gain boost|cut between dc and some frequency)
 `low_shelf` is a standard Faust function.
 
 #### Usage
@@ -3192,7 +3243,7 @@ lowshelf_other_freq_jump_test = fi.lowshelf_other_freq(3, 6, 20*pow(250, sq)) wi
 
 ### `(fi.)highshelf`
 
-First-order "high shelf" filter (gain boost|cut above some frequency).
+Order-`N` "high shelf" filter (gain boost|cut above some frequency).
 `high_shelf` is a standard Faust function.
 
 #### Usage
