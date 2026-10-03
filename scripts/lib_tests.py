@@ -297,10 +297,18 @@ def add(args):
     lib_prefix = next((env for env, text in spec_imports.items()
                        if os.path.basename(args.lib) in text), None)
 
+    # A test may carry the library's alias as a prefix (inst_bandPass_test,
+    # when bandPass_test is taken elsewhere): resolve it without the prefix.
+    def owner_a(test):
+        fn = owner(test, symbols)
+        if fn is None and lib_prefix and test.startswith(lib_prefix + "_"):
+            fn = owner(test[len(lib_prefix) + 1:], symbols)
+        return fn
+
     # 1. Resolve every test to its function, and check names.
     plan = []
     for name, code in spec_tests:
-        fn = owner(name, symbols)
+        fn = owner_a(name)
         if fn is None:
             sys.exit(f"{name}: no documented function of {os.path.basename(args.lib)} "
                      "is a prefix of this name")
@@ -358,7 +366,7 @@ def add(args):
     files = {}
     for name, code, fn in plan:
         if name in in_dsp:
-            if owner(name, symbols) != fn:
+            if owner_a(name) != fn:
                 sys.exit(f"{name}: already used in {in_dsp[name]}")
             continue
         # The file of the function's base test; otherwise of another of its
@@ -371,7 +379,7 @@ def add(args):
             # can carry the function's name (demos_tests.dsp has
             # twin_osc_demo_test, a test of dm.twin_osc_demo).
             own = os.path.splitext(os.path.basename(args.lib))[0] + "_tests.dsp"
-            homes = sorted({p for t, p in in_dsp.items() if owner(t, symbols) == fn},
+            homes = sorted({p for t, p in in_dsp.items() if owner_a(t) == fn},
                            key=lambda p: (os.path.basename(p) != own, p))
             path = homes[0] if homes else args.tests_file
         if path is None:
@@ -394,7 +402,7 @@ def add(args):
         imports, defs = section_defs(flines, 0, len(flines), False)
         for name, code, fn in items:
             anchor = max([k for k, l in enumerate(flines)
-                          if (m := TEST_RE.match(l)) and owner(m.group(1), symbols) == fn],
+                          if (m := TEST_RE.match(l)) and owner_a(m.group(1)) == fn],
                          default=None)
             block = []
             for h in needed(code, spec_helpers):
