@@ -22,10 +22,10 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 
 | Function | Problem | Status |
 |---|---|---|
-| `it.interpolate_exponential` | NaN in single precision when `k` is 0, which is the natural default of a slider. The `1e-9` floor on `abs(k)` does not help in float, since `exp(1e-9) - 1` is 0 there. A floor around 1e-3, or a series expansion for small `abs(k)`, is needed. | **fixed** in eb4bebc0: Kahan's `expm1`, exact at k = 0 |
-| `ef.wavefold` | Width 0 is inside the documented range [0, 1]. With a slider at 0 and `abs(x) > 1`, the output is NaN. With a constant 0, the code does not compile ("division by 0"). | **fixed** in 0ab3b798: at width 0 it clips at ±1 |
-| `co.peak_expansion_gain_mono_db` and the other expander tests | With `range = +20`, `max(range)` forces a constant +20 dB gain whatever the input, so the tests do not test expansion. With `range = -20` the function expands. Either the tests or the doc of `range` needs a sign. A constant `knee = 0` also fails to compile here (`min(ma.EPSILON, knee*-2)`). | **fixed** in 0f039f3a: the sign of `range` is ignored, the knee guard is negative, and the tests now expand |
-| `pm.fof`, `fofSH`, `fofSmooth`, `fofCycle` tests | The tests feed the process input, which the harness sets to zero, so fof outputs 0. The references only hold the added `os.tosc(110)*0.001`. They also pass `fc = 0.3` as the first argument, which looks like a swap. | **fixed** in 8cc9538b: the tests excite fof, whose filter is now two one-poles, accurate in float (five baseline entries removed) |
+| `it.interpolate_exponential` | NaN in single precision when `k` is 0, which is the natural default of a slider. The `1e-9` floor on `abs(k)` does not help in float, since `exp(1e-9) - 1` is 0 there. A floor around 1e-3, or a series expansion for small `abs(k)`, is needed. | **fixed**: `exp(x) - 1` by its Taylor series below `abs(x)` = 0.1, exact at k = 0 (Kahan's `expm1` was tried first: the Faust normalizer simplifies its `log(exp(x))` to `x`) |
+| `ef.wavefold` | Width 0 is inside the documented range [0, 1]. With a slider at 0 and `abs(x) > 1`, the output is NaN. With a constant 0, the code does not compile ("division by 0"). | **fixed**: at width 0 it clips at ±1 |
+| `co.peak_expansion_gain_mono_db` and the other expander tests | With `range = +20`, `max(range)` forces a constant +20 dB gain whatever the input, so the tests do not test expansion. With `range = -20` the function expands. Either the tests or the doc of `range` needs a sign. A constant `knee = 0` also fails to compile here (`min(ma.EPSILON, knee*-2)`). | **fixed**: the sign of `range` is ignored, the knee guard is negative, and the tests now expand |
+| `pm.fof`, `fofSH`, `fofSmooth`, `fofCycle` tests | The tests feed the process input, which the harness sets to zero, so fof outputs 0. The references only hold the added `os.tosc(110)*0.001`. They also pass `fc = 0.3` as the first argument, which looks like a swap. | **fixed**: the tests excite fof, whose filter is now two one-poles, accurate in float (five baseline entries removed) |
 | `ef.gate_gain_mono` | The integer hold counter decrements forever and wraps after 2^31 samples (12.4 h at 48 kHz). | reported, not checked |
 | `re.springreverb` | Its diffusion calls `de.delay(length, max)` with the two arguments swapped. The first taps are clamped. | reported, not checked |
 | `os.oscs` | Blows up above SR/π, for example 15.3 kHz at 48 kHz (the magic circle needs `wn < 2`). Not documented. | reported, not checked |
@@ -59,7 +59,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 
 ## 3. Tooling and rule 8
 
-**Fixed** in ab3dec00 (the cut doc blocks, all twelve of them, the genericNode tests and the stray section) and 1b3ba475 (`lib_tests.py inventory`: titles without prefix, generic `[N]` symbols, alias-prefixed and disabled tests). The JSON export leaves out tubes.lib, tonestacks.lib, instruments.lib and maxmsp.lib by design: it follows the libraries that stdfaust.lib imports, which these are not.
+**Fixed** (the cut doc blocks, all twelve of them, the genericNode tests and the stray section; `lib_tests.py inventory`: titles without prefix, generic `[N]` symbols, alias-prefixed and disabled tests). The JSON export leaves out tubes.lib, tonestacks.lib, instruments.lib and maxmsp.lib by design: it follows the libraries that stdfaust.lib imports, which these are not.
 
 - **Doc blocks cut by an empty line that is not a comment.** The Test section, and possibly the Usage section, becomes invisible to `lib_tests.py`, to the documentation and to the JSON export (rule 7). Affected:
   - `de.delay`;
@@ -78,7 +78,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 
 ### 4.1 Likely to pass now (high value)
 
-**vaeffects.lib**: TPT and ladder filters, modulated and jump tests. **Done** (f1629aa8, and the commit after it): 12 modulated and 12 jump tests, and every `_test` that took sliders split into a constant `_test` and a `_slider_test`. The jump test found a real bug, fixed in f1629aa8: `ve.moog_vcf` output 2.6e6 after a jump of its frequency.
+**vaeffects.lib**: TPT and ladder filters, modulated and jump tests. **Done**: 13 modulated and 12 jump tests, and every `_test` that took sliders split into a constant `_test` and a `_slider_test`. The jump test found a real bug, fixed: `ve.moog_vcf` output 2.6e6 after a jump of its frequency.
 - `moogLadder`, `moogHalfLadder`, `diodeLadder`, `korg35LPF`/`HPF`, `oberheim`, `sallenKeyOnePole`, `sallenKey2ndOrder`: normFreq `0.8*tri` (20 Hz–5 kHz), Q high (about 20, or 9.5 for korg35).
 - `lowpassLadder4`: CF exp 20..5000, k = 3.9.
 - `moog_vcf`: fr exp 50..5000, res 0.9.
@@ -86,14 +86,17 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 - `klonCentaur`: gain `0.1 + 0.9*tri`, jump 0.1↔1. Its 50 ms ramp only runs when a control moves.
 - `lowshelf2Matched`/`highshelf2Matched`: G crossing 1, where the `safeG` branch is almost 0/0. Measured: non-finite, even in double. Deferred, see 5.2.
 
-**signals.lib, analyzers.lib**: the smoothers and followers everything else uses.
-- `si.smooth`: slider, modulated (s 0.9..0.9999), jump.
-- `si.onePoleSwitching`: att exp 0.001..1; probed, passes.
-- `si.smoothq`: time 0.001..1, with a square target.
-- `an.amp_follower`: rel exp 0.001..1, jump.
-- `an.amp_follower_ud`: att.
+**signals.lib, analyzers.lib**: the smoothers and followers everything else uses. **Done**: 5 slider, 3 modulated and 3 jump tests in analyzers.lib, 3 of each in signals.lib, all passing without a baseline entry.
+- `si.smooth`: slider, modulated (s 0.9..0.9999), jump, on `no.noise`.
+- `si.onePoleSwitching`: att and rel exp 0.001..1, in opposite directions.
+- `si.smoothq`: time 0.001..1, on a random target that steps 30 times a second. The controls at their extremes found a real bug, fixed: in float, `1 - coef` was rounded coarsely for long times, a linear glide (q = 1, 1 s) 11% too fast at 192 kHz. `smoothq_linear_test` pins it.
+- `an.amp_follower`: rel exp 0.001..1; `an.amp_follower_ud`: att 0.5..10 ms. Their input is noise bursts decaying 60 dB in 0.25 s, so that the release is measured.
 - `an.resonator`: f exp 20..5000, magnitude only.
-- Slider only: `an.pitchTracker`, `an.spectralCentroid` (t).
+- Slider only: `an.pitchTracker`, `an.spectralCentroid` (tau).
+- Left as they are, found with the controls at their extremes:
+  - a one-pole from `ba.tau2pole` with a long time constant (`si.smooth(ba.tau2pole(1))`, `si.onePoleSwitching` with att 1 s, `an.pitchTracker` with tau 1 s): level gap 3.4e-3 at 192 kHz. The pole, 1 - 5e-6, cannot be represented more closely in float; a fix would pass `1 - p` instead of `p`, an interface change for every user of `tau2pole`.
+  - `si.smoothq` after its fix, at time 1 s and q = 1: 6.7e-3. The float accumulator itself, which adds an increment of a few tens of ulps per sample.
+  - `an.spectralCentroid(0, 0.001)` diverges; its doc already says to use the nonlinearity for such short times.
 
 **delays.lib, phaflangers.lib, misceffects.lib**: fractional and moving delays.
 - `de.fdelay`: slider and modulated d `16 + 112*tri`.
@@ -242,7 +245,7 @@ test, under the procedure below, and removes it from this list.
    from the paragraph on the excluded jump tests in `contributing.md`
    (section *Constant, slider, modulated and jump tests*).
 
-### 5.1 filters.lib: the ten `_jump_test` left out of bfba8892
+### 5.1 filters.lib: the ten `_jump_test` left out of the filters.lib jump tests
 
 They are generated from each function's `_modulated_test`: the triangle is
 replaced by the square `sq`. All but `wgr` are built on the direct-form
