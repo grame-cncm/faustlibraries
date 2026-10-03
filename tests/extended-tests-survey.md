@@ -35,6 +35,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 | `pm.bridgeFilter` | The doc of `absorption` is inverted: 1 gives 0 s, not 20 s. | reported, not checked |
 | `sy.combString` | `maxDel = 1024` clamps the pitch below SR/1024 (188 Hz at 192 kHz), although its slider goes down to 55 Hz. `res` is documented as a T60 but is used as a time constant. | reported, not checked |
 | `os.pulsetrainN`, `os.twin_osc`, `re.zita_in_delay`, `ef.doppler_shift` | Hard-coded maximum delays that clip their behavior at 176.4–192 kHz. | reported, not checked |
+| `re.greyhole` | `dt` is documented from 0.1 to 60 s, but its `de.sdelay` holds 65533 samples: 1.36 s at 48 kHz, 0.34 s at 192 kHz. Its crossfade is a fixed 22050 samples, 0.5 s at 44.1 kHz and 0.11 s at 192 kHz. | reported, not checked |
 
 ## 2. Tests that check little today
 
@@ -117,7 +118,15 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 - `ef.piano_dispersion_filter`: f0 exp 27.5..4186.
 - `ef.tapeStop`: stop = `sq`.
 
-**reverbs.lib**:
+**reverbs.lib**: **Done**: 9 slider, 8 modulated and 8 jump tests, all passing without a baseline entry. `re.mono_freeverb` failed in all three (1e-2): its Freeverb lengths, scaled from 44.1 kHz and truncated, lost one sample in single precision where the quotient is an integer (1617 at 44.1 kHz, 1760 at 48 kHz). Fixed with an exact integer scaling, which also removes three baseline entries (`mono_freeverb_test`, `stereo_freeverb_test`, `freeverb_demo_test`). Changes to the plan below:
+- `re.zita_rev_fdn`: t60m from 1 to 20 s, modulated and jumping. `re.fdnrev0`: the mid t60 from 0.5 to 5 s.
+- `re.jpverb`: t60 from 0.5 to 10 s modulated, damp jumping; `re.greyhole`: feedback from 0.2 to 0.9, modulated and jumping. Their `size` is deferred, as is greyhole's `dt` (5.2).
+- `re.vital_rev`: size modulated, time jumping, chorus at 0. Its slider test is deferred (5.2).
+- `re.springreverb`: tone modulated and jumping.
+- Slider tests for every function with run-time parameters, except `re.vital_rev`.
+- Left as they are, found with the controls at their extremes: `re.jpverb` and `re.greyhole` with mod_depth 1 at 10 Hz reach 8.7e-3 and 1.7e-3, from their `os.oscrs`/`os.oscrc` LFOs (the `os.oscr*` debt of 4.2).
+
+The plan was:
 - `re.zita_rev_fdn`: t60m exp 1..20 s, jump. Highest value: `special_lowpass` computes `mbo2 - sqrt(mbo2^2 - 1)` in the FDN loop.
 - `re.mono_freeverb`: damp, jump on fb1.
 - `re.jpverb`: size or t60, jump on damp; `mod_depth = 0`.
@@ -291,8 +300,8 @@ wgr_jump_test = fi.wgr(100*pow(20, sq), 0.995, no.noise) with { P = int(ma.SR/10
 ### 5.2 Other libraries
 
 These are new tests: the functions have none of the kind. The imports they
-need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `no`, `ba`,
-`ma`). The level gaps and non-finite outputs were measured on 2026-10-02.
+need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
+`ba`, `ma`). The level gaps and non-finite outputs were measured on 2026-10-02 and 2026-10-03.
 
 | Test | Library and test file | Fails today with | Unblocked by |
 |---|---|---|---|
@@ -310,6 +319,9 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `no`, `ba`,
 | `modeFilter_jump_test` | `physmodels.lib`, `physmodels_tests.dsp` | 0.12 | #269 (modeFilter as a Chamberlin state-variable section) |
 | `oscq_modulated_test` | `oscillators.lib`, `oscillators_tests.dsp` | 8.9e-3 | a better `fi.wgr` (with `wgr_jump_test`) |
 | `goertzel_slider_test` | `analyzers.lib`, `analyzers_tests.dsp` | 1.3e-3 | a Goertzel recursion accurate in float at low frequency, or a smaller n |
+| `vital_rev_slider_test` | `reverbs.lib`, `reverbs_tests.dsp` | 3.1e-3, the debt of `vital_rev_test` | a chorus LFO whose phase does not drift in float (its `m_lfo_sine` accumulates `freq/SR`, and the chorus moves the delays by up to 2500 samples) |
+| `jpverb_size_modulated_test`, `greyhole_size_modulated_test` | `reverbs.lib`, `reverbs_tests.dsp` | 4.6e-3, 7.1e-3 (a jump of size between 1 and 2: 3.8e-3, 5.2e-3) | delay lengths smoothed accurately in float: `smooth_init(0.9999)` and `(0.995)` glide each prime length to the next, and a 2e-4 relative difference of `1 - s` between float and double moves the fractional delays of the whole network |
+| `greyhole_dt_jump_test` | `reverbs.lib`, `reverbs_tests.dsp` | 1.7e-3 at 176.4 kHz (0.25 to 0.5 s; 8.7e-4 from 0.125 to 0.25 s) | a `de.sdelay` crossfade exact in float: it steps by 1/22050 |
 
 ```
 crybaby_modulated_test = no.noise : ve.crybaby(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
@@ -325,6 +337,10 @@ moog_vcf_2b_modulated_test = no.noise : ve.moog_vcf_2b(0.95, 20*pow(500, tri)) w
 modeFilter_jump_test = 0.01*no.noise : pm.modeFilter(50*pow(100, sq), 1, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 oscq_modulated_test = os.oscq(20*pow(500, tri)) : _, ! with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 goertzel_slider_test = an.goertzel(hslider("freq", 50, 20, 1000, 1), 4096, no.noise);
+vital_rev_slider_test = (os.tosc(330), os.tosc(440)) : re.vital_rev(hslider("vital_rev:prelow", 0.2, 0, 1, 0.01), hslider("vital_rev:prehigh", 0.8, 0, 1, 0.01), hslider("vital_rev:lowcutoff", 0.5, 0, 1, 0.01), hslider("vital_rev:highcutoff", 0.7, 0, 1, 0.01), hslider("vital_rev:lowgain", 0.4, 0, 1, 0.01), hslider("vital_rev:highgain", 0.6, 0, 1, 0.01), hslider("vital_rev:chorus_amt", 0.3, 0, 1, 0.01), hslider("vital_rev:chorus_freq", 0.2, 0, 1, 0.01), hslider("vital_rev:predelay", 0.1, 0, 1, 0.01), hslider("vital_rev:time", 0.7, 0, 1, 0.01), hslider("vital_rev:size", 0.5, 0, 1, 0.01), hslider("vital_rev:mix", 0.4, 0, 1, 0.01));
+jpverb_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.jpverb(3.0, 0.2, 0.5 + 2.5*tri, 0.8, 0, 0.4, 0.9, 0.8, 0.7, 500, 4000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+greyhole_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(2.0, 0.3, 0.5 + 2.5*tri, 0.6, 0.5, 0, 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+greyhole_dt_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(0.25 + 0.25*sq, 0.3, 1.0, 0.6, 0.5, 0, 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 `bandpass2Matched_test`, `autowah_test` and `crybaby_test` still take their
