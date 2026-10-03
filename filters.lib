@@ -2584,7 +2584,13 @@ _tanhalf(w) = tan(max(0, min(w*0.5/ma.SR, 0.499*ma.PI)));
 declare tf2sb author "Julius O. Smith III";
 declare tf2sb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf2sb license "LicenseRef-STK-4.3";
-tf2sb(b2,b1,b0,a1,a0,w1in,wc) = _ <: *(b2), select2(real, cplx, rl) :> _
+tf2sb(b2,b1,b0,a1,a0,w1in,wc) = (w1in, wc, _) : _tf2sbr(b2,b1,b0,a1,a0);
+
+// tf2sb with w1 and wc on inputs, so that the expressions given for them
+// appear once in the evaluated program (faust -e) instead of once per use:
+// otherwise faust -e of bandpass12e printed 7 GB, and timed out in
+// scripts/check_usage.py. The generated code is the same.
+_tf2sbr(b2,b1,b0,a1,a0,w1in,wc,x) = b2*x + (x <: (cplx, rl) : select2(real))
 with {
   // bandwidth floor: w1 >= 5e-4*wc, so that the sections are never lossless
   w1 = max(w1in, 5e-4*wc);
@@ -2724,7 +2730,10 @@ with {
 declare tf1sb author "Julius O. Smith III";
 declare tf1sb copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare tf1sb license "LicenseRef-STK-4.3";
-tf1sb(b1,b0,a0,w1in,wc) = _ <: *(b1), (*(w1/G1) : _svfg(G1*0.5/ma.SR, G2*0.5/ma.SR, p/G1) : !,*(b0 - b1*a0),!) :> _
+tf1sb(b1,b0,a0,w1in,wc) = (w1in, wc, _) : _tf1sbr(b1,b0,a0);
+
+// tf1sb with its frequencies on inputs (see _tf2sbr).
+_tf1sbr(b1,b0,a0,w1in,wc,x) = b1*x + (x*(w1/G1) : _svfg(G1*0.5/ma.SR, G2*0.5/ma.SR, p/G1) : !,*(b0 - b1*a0),!)
 with {
   // D = s^2 + p*s + wc^2 with integrator gains G1 = max(wc, p), G2 = wc^2/G1:
   // the usual state-variable section at wc for a narrow band (p <= wc), and
