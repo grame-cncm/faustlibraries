@@ -97,6 +97,13 @@ name the parameters as in `Where:`, and give the Test section a call that
 values every parameter of the Usage. Conventions: doc/docs/contributing.md,
 section "New Functions".
 
+Arity of the JSON export
+------------------------
+The same machinery measures the arity the export publishes:
+`build_faust_doc_index.py --measure-io` (the `make doc-index*` targets) calls
+`measure_index_io`, which compiles the symbol's call alone as
+`process = inputs(call), outputs(call);` (see `measure_io`).
+
 Usage:
     scripts/check_usage.py                    # check, exit 1 on a regression
     scripts/check_usage.py -v                 # also list the accepted debt
@@ -147,8 +154,11 @@ def stdfaust_prefixes():
     return {m.group(1): m.group(2) for m in bfdi.LIBRARY_DIRECTIVE_RE.finditer(text)}
 
 
-def load_symbols():
+def load_symbols(index=None):
     """The documented symbols of the export, with their raw Usage lines.
+
+    index is an export index already built (measure_index_io), else it is
+    built here.
 
     The export joins the lines of a Usage into one string; the statements
     are needed one by one, so the Usage lines are read again from the
@@ -156,8 +166,9 @@ def load_symbols():
     the names of its library (`siblings`) and their Test sections: a Usage
     may call a sibling, `_ : quantize(rf,ionian) : _` for qu.ionian.
     """
-    bfdi.warn = lambda message: None
-    index = bfdi.build_index(ROOT, ROOT / "stdfaust.lib")
+    if index is None:
+        bfdi.warn = lambda message: None
+        index = bfdi.build_index(ROOT, ROOT / "stdfaust.lib")
     names_by_file = {}
     for sym in index["symbols"]:
         names_by_file.setdefault(sym["source"]["path"], set()).add(sym["name"])
@@ -478,15 +489,64 @@ def classify(stderr):
     return "error", msg
 
 
+def evaluate(sym, expr, bindings, defs, prefixes, workdir, programs, wrap=None):
+    """Evaluate `process = expr` with `faust -e`, valuing its unbound names.
+
+    Returns (stdout, None) when the program evaluates, else (None, (kind,
+    message)). wrap, when given, turns expr into the process expression
+    (`inputs(c), outputs(c)` for measure_io); the names are still looked
+    for in expr. bindings is completed in place, and each source compiled
+    is appended to programs.
+
+    The program is compiled again each time an unbound name gets a value
+    (step 4 of the module docstring), until it evaluates or fails on
+    something else. A failure after an arbitrary value is reported as
+    `unbound`: the value itself may be its cause.
+    """
+    given = []  # the names given a value by the retries, `x = 2`
+    while True:
+        src = program(sym, wrap(expr) if wrap else expr, bindings, defs, prefixes)
+        programs.append(src)
+        path = Path(workdir) / (sym["qname"].replace(".", "_") + f"_{len(programs)}.dsp")
+        path.write_text(src, encoding="utf-8")
+        try:
+            # -e stops after the evaluation, which checks names and arities;
+            # the evaluated program goes to stdout, where measure_io reads it
+            r = subprocess.run(["faust", "-e", "-I", str(ROOT), str(path), "-o", "/dev/stdout"],
+                               capture_output=True, text=True, cwd=ROOT, timeout=120)
+        except subprocess.TimeoutExpired:
+            return None, ("error", "compilation timed out")
+        if r.returncode == 0 or "has no output signal" in r.stderr:
+            # (a sink like si.block(N) evaluates fine and outputs nothing)
+            return r.stdout, None
+        kind, msg = classify(r.stderr)
+        name = msg.split(":")[-1].strip() if kind == "unbound" else ""
+        # A name the Test section gives no value, used as a value (not
+        # called): on a bus, a signal (`excitation : bowTable(...)`); as an
+        # argument, a value (`isnan(x)`, `envelopeAbs(..., sig)`). A called
+        # name (`smooth(...)` for si.smooth) stays unbound.
+        use = re.search(rf"(?<![\w.]){name}(?!\w)(?!\s*\()", expr) \
+            if re.fullmatch(IDENT, name) and name not in bindings else None
+        if use:
+            bindings[name] = ARBITRARY_VALUE if in_call(expr, use.start()) else "_"
+            given.append(name)
+            continue
+        if given:
+            msg += f" (with {', '.join(f'{n} = {bindings[n]}' for n in given)})"
+        if any(bindings[n] == ARBITRARY_VALUE for n in given):
+            # the Usage needs a parameter value, in the Usage or the Test section
+            kind = "unbound"
+        return None, (kind, msg)
+
+
 def check(sym, prefixes, workdir):
     """Check one symbol: (kind, detail, programs).
 
     kind is "ok" or a kind of failure (see the module docstring), detail
     the statement and the compiler's message, programs the sources
     compiled, printed by --symbol. Every statement naming the symbol must
-    evaluate; the first failure is reported. A statement is compiled again
-    each time an unbound name gets a value (step 4 of the docstring), until
-    it evaluates or fails on something else.
+    evaluate; the first failure is reported; then the parameters are
+    compared with `Where:`.
     """
     if "[" in sym["name"]:
         return "ok", "generic name, not checked", []
@@ -498,44 +558,111 @@ def check(sym, prefixes, workdir):
         expr, bindings = rewrite(sym, code, defs)
         if expr is None:
             return bindings, f"`{line}`: `...` is not Faust", programs
-        signals = []  # the names given a value by the retries, `x = 2`
-        while True:
-            src = program(sym, expr, bindings, defs, prefixes)
-            programs.append(src)
-            path = Path(workdir) / (sym["qname"].replace(".", "_") + f"_{len(programs)}.dsp")
-            path.write_text(src, encoding="utf-8")
-            try:
-                # -e stops after the evaluation, which checks names and arities
-                r = subprocess.run(["faust", "-e", "-I", str(ROOT), str(path), "-o", os.devnull],
-                                   capture_output=True, text=True, cwd=ROOT, timeout=120)
-            except subprocess.TimeoutExpired:
-                return "error", f"`{line}`: compilation timed out", programs
-            if r.returncode == 0 or "has no output signal" in r.stderr:
-                # (a sink like si.block(N) evaluates fine and outputs nothing)
-                break
-            kind, msg = classify(r.stderr)
-            name = msg.split(":")[-1].strip() if kind == "unbound" else ""
-            # A name the Test section gives no value, used as a value (not
-            # called): on a bus, a signal (`excitation : bowTable(...)`); as
-            # an argument, a value (`isnan(x)`, `envelopeAbs(..., sig)`).
-            # A called name (`smooth(...)` for si.smooth) stays unbound.
-            use = re.search(rf"(?<![\w.]){name}(?!\w)(?!\s*\()", expr) \
-                if re.fullmatch(IDENT, name) and name not in bindings else None
-            if use:
-                bindings[name] = ARBITRARY_VALUE if in_call(expr, use.start()) else "_"
-                signals.append(f"{name} = {bindings[name]}")
-                continue
-            if signals:
-                msg += f" (with {', '.join(signals)})"
-            if any(v == ARBITRARY_VALUE for v in (bindings[n.split(" = ")[0]] for n in signals)):
-                # the failure may come from the arbitrary value: the Usage
-                # needs a parameter value, in the Usage or the Test section
-                kind = "unbound"
-            return kind, f"`{line}`: {msg}", programs
+        _, failure = evaluate(sym, expr, bindings, defs, prefixes, workdir, programs)
+        if failure:
+            return failure[0], f"`{line}`: {failure[1]}", programs
     detail = check_params(sym, statements, defs)
     if detail:
         return "params", detail, programs
     return "ok", "", programs
+
+
+def symbol_call(expr, sym):
+    """The symbol's call in expr, with its arguments.
+
+    `_ : fi.wgr(f,r) : _` -> `fi.wgr(f,r)`; a member of an environment
+    keeps its access, `os.rpm.sawtooth(freq, beta)`; a constant or a list
+    is its name, `ma.PI`. None when expr does not use the qualified name.
+    """
+    m = re.search(rf"(?<![\w.]){re.escape(sym['prefix'])}\.{re.escape(sym['name'])}(?!\w)", expr)
+    if not m:
+        return None
+    j = m.end()
+    while True:
+        k = j
+        while k < len(expr) and expr[k] == " ":
+            k += 1  # `filterbank (O,freqs)`
+        if k < len(expr) and expr[k] == "(":
+            depth = 0
+            for k in range(k, len(expr)):
+                depth += {"(": 1, ")": -1}.get(expr[k], 0)
+                if depth == 0:
+                    break
+            if depth:
+                return None
+            j = k + 1
+            continue
+        member = re.match(rf"\.{IDENT}", expr[j:])
+        if not member:
+            return expr[m.start():j]
+        j += member.end()
+
+
+def measure_io(sym, prefixes, workdir):
+    """The arity of the symbol's call in its Usage, computed by Faust.
+
+    The first Usage statement whose call evaluates gives it: the call,
+    with the parameter values check() would give it, is compiled as
+    `process = inputs(call), outputs(call);`, two constants that `faust -e`
+    prints. Returns {"inSignals", "outSignals", "parameterValues",
+    "assumedValues"}, or None when no call evaluates (a pseudo-code Usage,
+    an environment `fi.svf`). An arity may depend on the parameters
+    (`an.ifft(N)` has 2N inputs): parameterValues holds the values of the
+    call's parameters taken from the Test section or the Usage, and
+    assumedValues those that neither gives, set to ARBITRARY_VALUE.
+    """
+    if "[" in sym["name"]:
+        return None
+    defs, statements = prepare(sym)
+    for _, code in statements:
+        expr, bindings = rewrite(sym, code, defs)
+        call = symbol_call(expr, sym) if expr is not None else None
+        if call is None:
+            continue
+        documented = set(bindings)
+        out, failure = evaluate(sym, call, bindings, defs, prefixes, workdir, [],
+                                wrap=lambda c: f"inputs({c}), outputs({c})")
+        counts = re.findall(r"^(?:ID_\d+|process)\s*=\s*(\d+)\s*,\s*(\d+)\s*;", out or "", re.M)
+        if failure or not counts:
+            continue
+        def in_the_call(name):
+            return re.search(rf"(?<![\w.]){re.escape(name)}(?!\w)", call)
+        values = {k: v for k, v in bindings.items() if k in documented and in_the_call(k)}
+        values.update({d.split("=")[0].strip(): d.split("=", 1)[1].strip() for d in defs
+                       if in_the_call(d.split("=")[0].strip())})
+        assumed = {k: v for k, v in bindings.items() if k not in documented and in_the_call(k)}
+        return {"inSignals": int(counts[-1][0]), "outSignals": int(counts[-1][1]),
+                "parameterValues": values, "assumedValues": assumed}
+    return None
+
+
+def measure_index_io(index, jobs=None):
+    """Replace the io of the symbols of an export index by measure_io's.
+
+    Used by `build_faust_doc_index.py --measure-io`. A measured io gets
+    `"source": "faust"`, its `parameterValues` and `assumedValues`; the
+    others keep the counts guessed from the Usage text, with `"source":
+    "usage"`. The libraries measured are those of this checkout. Returns
+    the number of symbols measured.
+    """
+    if not shutil.which("faust"):
+        raise RuntimeError("faust not found in PATH")
+    prefixes = stdfaust_prefixes()
+    symbols = load_symbols(index)
+    with tempfile.TemporaryDirectory() as workdir, \
+            cf.ThreadPoolExecutor(max_workers=jobs or os.cpu_count() or 4) as pool:
+        measured = dict(zip((s["qname"] for s in symbols),
+                            pool.map(lambda s: measure_io(s, prefixes, workdir), symbols)))
+    count = 0
+    for sym in index["symbols"]:
+        io = measured.get(sym["qualifiedName"])
+        if io:
+            sym["io"] = {"inSignals": io["inSignals"], "outSignals": io["outSignals"],
+                         "raw": sym["io"].get("raw"), "source": "faust",
+                         "parameterValues": io["parameterValues"],
+                         "assumedValues": io["assumedValues"]}
+            count += 1
+    return count
 
 
 def check_params(sym, statements, defs):

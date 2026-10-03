@@ -117,7 +117,11 @@ Every script behind these targets is described in `scripts/README.md`.
    that the touched symbols still come out with their summary, usage,
    params and license (`scripts/faust_doc_api.py get_faust_symbol xx.name`).
    `make checkdoc` guards the floor — the exported symbol count may only
-   grow — but it cannot see a field that silently comes out empty.
+   grow — but it cannot see a field that silently comes out empty. The
+   make targets compute each symbol's `io` (inputs, outputs) with faust,
+   from the Usage call valued by the Test section (`"source": "faust"`):
+   a new function whose `io` comes out `"source": "usage"` has a Usage
+   that does not evaluate.
 
 8. **Tests are written in the library first.** Every test added — for a
    new function, or to pin a bug fix or a behavior change of an existing

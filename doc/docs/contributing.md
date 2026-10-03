@@ -569,7 +569,12 @@ extracts for each documented symbol:
 - `usage`
 - `params`
 - `notes`
-- `io` with `inSignals` / `outSignals` when derivable
+- `io` with `inSignals` / `outSignals`: computed by the Faust compiler from the
+  call of the Usage, its parameters valued by the `#### Test` section
+  (`"source": "faust"`, with the `parameterValues` the counts hold for, and
+  the `assumedValues` neither section gave), else guessed from the usage text
+  (`"source": "usage"`). The make targets compute them, which needs `faust`;
+  `make doc-index DOC_INDEX_IO=` guesses them without it.
 - `testCode`
 - `references`
 - `license` when a per-symbol `declare ... license|licence "..."` is present

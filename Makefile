@@ -24,7 +24,8 @@
 # `make certify-reference` - regenerate and re-check tests/lean/certified.lean in place.
 # `make build`      - build the documentation.
 # `make serve`      - serve the documentation.
-# `make doc-index`  - build the Faust library documentation JSON index.
+# `make doc-index`  - build the Faust library documentation JSON index, its io counts
+#                     computed by faust (DOC_INDEX_IO= to guess them without faust).
 # `make doc-index-split` - build a compact index plus one detailed JSON per module.
 # `make doc-index-commercial` - build a JSON index filtered to commercially compatible symbols.
 
@@ -41,6 +42,8 @@ FLOATDIFF ?= ./scripts/floatdiff.py
 PYTHON ?= python3
 DOC_INDEX_SCRIPT ?= ./scripts/build_faust_doc_index.py
 DOC_INDEX_OUTPUT ?= tests/faust-doc-index.json
+# io counts computed by faust (empty: guessed from the Usage text, no faust needed)
+DOC_INDEX_IO ?= --measure-io
 DOC_INDEX_SPLIT_DIR ?= tests/faust-doc
 DOC_INDEX_LICENSE_ALLOWLIST_FILE ?=
 DOC_INDEX_LICENSE_DENYLIST_FILE ?=
@@ -248,17 +251,17 @@ certify-deep: ## Build the optional mathlib proofs discharging the certify oblig
 doc-index: ## Build the Faust library documentation JSON index
 	@set -e; \
 	printf '[doc-index] writing %s\n' '$(DOC_INDEX_OUTPUT)'; \
-	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --pretty
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) $(DOC_INDEX_IO) --pretty
 
 doc-index-split: ## Build a compact JSON index and one detailed JSON per library module
 	@set -e; \
 	printf '[doc-index-split] writing %s and %s\n' '$(DOC_INDEX_OUTPUT)' '$(DOC_INDEX_SPLIT_DIR)'; \
-	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --pretty
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) $(DOC_INDEX_IO) --pretty
 
 doc-index-commercial: ## Build a JSON index filtered to commercially compatible symbols
 	@set -e; \
 	printf '[doc-index-commercial] writing %s and %s\n' '$(DOC_INDEX_OUTPUT)' '$(DOC_INDEX_SPLIT_DIR)'; \
-	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --license-policy commercial-compatible $(if $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),--license-allowlist-file $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),) $(if $(DOC_INDEX_LICENSE_DENYLIST_FILE),--license-denylist-file $(DOC_INDEX_LICENSE_DENYLIST_FILE),) --pretty
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --license-policy commercial-compatible $(if $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),--license-allowlist-file $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),) $(if $(DOC_INDEX_LICENSE_DENYLIST_FILE),--license-denylist-file $(DOC_INDEX_LICENSE_DENYLIST_FILE),) $(DOC_INDEX_IO) --pretty
 
 build: ## Build the documentation
 	$(MAKE) -C doc build

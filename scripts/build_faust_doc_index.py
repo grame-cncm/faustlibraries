@@ -31,7 +31,9 @@ amount of syntax-aware inference, notably for:
 
 - resolving imported library files in the repository tree
 - inferring a fallback `usage` string when the docs omit `#### Usage`
-- deriving rough `inSignals` / `outSignals` counts from the `usage` string
+- deriving rough `inSignals` / `outSignals` counts from the `usage` string,
+  or, with --measure-io, the exact counts computed by the Faust compiler
+  (scripts/check_usage.py, `measure_index_io`)
 """
 
 from __future__ import annotations
@@ -709,11 +711,14 @@ def parse_usage_io(usage: str | None) -> dict[str, int | str | None]:
     - `!` -> zero signals
     - comma-separated expressions -> number of comma-separated signals
 
-    If the usage is absent or ambiguous, the counts remain `None`.
+    If the usage is absent or ambiguous, the counts remain `None`. The
+    result says where the counts come from, `"source": "usage"`; with
+    --measure-io, check_usage.measure_index_io replaces them by the arity
+    Faust computes, `"source": "faust"`.
     """
 
     if not usage:
-        return {"inSignals": None, "outSignals": None, "raw": None}
+        return {"inSignals": None, "outSignals": None, "raw": None, "source": "usage"}
 
     parts = [part.strip() for part in usage.split(":")]
     if len(parts) >= 3:
@@ -734,7 +739,8 @@ def parse_usage_io(usage: str | None) -> dict[str, int | str | None]:
             return len([part for part in expr.split(",") if part.strip()])
         return 1
 
-    return {"inSignals": count_signals(lhs), "outSignals": count_signals(rhs), "raw": usage}
+    return {"inSignals": count_signals(lhs), "outSignals": count_signals(rhs), "raw": usage,
+            "source": "usage"}
 
 
 def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
@@ -1084,6 +1090,21 @@ def parse_args() -> argparse.Namespace:
             "used by --license-policy commercial-compatible."
         ),
     )
+    parser.add_argument(
+        "--measure-io",
+        action="store_true",
+        help=(
+            "Compute io.inSignals / io.outSignals with the Faust compiler, from the "
+            "call of each Usage valued by its Test section (needs faust; about a "
+            "minute). Without it, the counts are guessed from the usage text."
+        ),
+    )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=None,
+        help="Parallel compilations for --measure-io (default: the number of CPUs).",
+    )
     return parser.parse_args()
 
 
@@ -1093,7 +1114,7 @@ def main() -> int:
     This function:
 
     1. parses CLI arguments
-    2. builds the full index
+    2. builds the full index, and measures its io with --measure-io
     3. writes the monolithic JSON output
     4. optionally writes the split layout
     5. prints a compact machine-readable summary to stdout
@@ -1112,6 +1133,20 @@ def main() -> int:
         deny_tokens = deny_tokens + load_license_token_file(args.license_denylist_file.resolve())
 
     index = build_index(repo_root=repo_root, stdlib=stdlib)
+    measured = None
+    if args.measure_io:
+        if repo_root != Path(__file__).resolve().parents[1]:
+            print("error: --measure-io measures the libraries of the checkout this"
+                  " script belongs to; run that checkout's script", file=sys.stderr)
+            return 2
+        # imported here: check_usage imports this module, and only
+        # --measure-io needs it (and faust)
+        from check_usage import measure_index_io
+        try:
+            measured = measure_index_io(index, args.jobs)
+        except RuntimeError as e:
+            print(f"error: --measure-io: {e}", file=sys.stderr)
+            return 2
     index = filter_index_for_license_policy(
         index,
         args.license_policy,
@@ -1131,6 +1166,8 @@ def main() -> int:
         "symbolsCount": len(index["symbols"]),
         "licensePolicy": args.license_policy,
     }
+    if measured is not None:
+        summary["ioMeasuredCount"] = measured
     if args.license_allowlist_file is not None:
         summary["licenseAllowlistFile"] = normalize_posix_path(args.license_allowlist_file.resolve())
     if args.license_denylist_file is not None:

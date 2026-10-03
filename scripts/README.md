@@ -23,13 +23,13 @@ or later.
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
 | **Documentation checks** | | |
 | [`checkdoc.py`](#checkdocpy) | documentation and license gate, against a baseline | `make checkdoc` |
-| [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters | `make check-usage`, `checkdoc.py` (`--changed`) |
+| [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters; measures the io of the export | `make check-usage`, `checkdoc.py` (`--changed`), `build_faust_doc_index.py` (`--measure-io`) |
 | [`audit2.py`](#audit2py) | documentation coverage per library | `checkdoc.py` |
 | [`audit.py`](#auditpy) | naive coverage audit, kept for comparison | — |
 | [`build_standard_functions.py`](#build_standard_functionspy) | generates `doc/docs/standardFunctions.md` | `checkdoc.py` (`--check`) |
 | [`normalize_licenses.py`](#normalize_licensespy) | canonical SPDX license strings | `checkdoc.py` (`--check`) |
 | **JSON export** | | |
-| [`build_faust_doc_index.py`](#build_faust_doc_indexpy) | builds the JSON documentation index | `make doc-index*`, `checkdoc.py` |
+| [`build_faust_doc_index.py`](#build_faust_doc_indexpy) | builds the JSON documentation index, io counts computed by faust | `make doc-index*`, `checkdoc.py` |
 | [`faust_doc_api.py`](#faust_doc_apipy) | queries that index | — |
 | **Figures** | | |
 | [`plot_lib.py`](#plot_libpy) | `aanl.lib` figures | `make plots` |
@@ -44,7 +44,9 @@ are run by `doc/Makefile`.
 **Prerequisites**, by use:
 
 - tests: `faust` and a C++17 compiler; `check_precision.py` also needs `numpy`;
-- `check_usage.py`: `faust` (`checkdoc.py` skips that check without it);
+- `check_usage.py`, and `build_faust_doc_index.py --measure-io` (the
+  `make doc-index*` targets): `faust` (`checkdoc.py` skips the Usage check
+  without it);
 - figures: `faust`, `g++`, `numpy` and `matplotlib`;
 - certification: `faust-rs` and `lean` (4.31);
 - everything else: the Python standard library only.
@@ -474,7 +476,8 @@ scripts/build_faust_doc_index.py [--repo-root DIR] [--stdlib FILE] [--output FIL
                                  [--split-output-dir DIR] [--pretty]
                                  [--license-policy all|commercial-compatible]
                                  [--license-allowlist-file F] [--license-denylist-file F]
-make doc-index | doc-index-split | doc-index-commercial
+                                 [--measure-io [--jobs N]]
+make doc-index | doc-index-split | doc-index-commercial [DOC_INDEX_IO=]
 ```
 
 Extracts the documentation from the `.lib` sources, not from the generated
@@ -492,6 +495,21 @@ the libraries.
 - `--license-policy commercial-compatible` keeps only the symbols whose license
   matches a conservative allow-list; the allow and deny lists can be extended
   with newline-separated files.
+- `--measure-io` computes each symbol's `io` with the Faust compiler instead
+  of guessing it from the Usage text. The call of the Usage, valued as
+  `check_usage.py` values it (from the `#### Test` section), is compiled as
+  `process = inputs(call), outputs(call);`, which `faust -e` reduces to two
+  constants: `fi.wgr(440,0.995)` gives 1 input and 2 outputs where the text
+  `_ : wgr(f,r) : _` said 1 and 1, `an.ifft(8)` 16 and 16 where it said 1
+  and 1. A measured `io` has `"source": "faust"`, the parameter values the
+  arity holds for (`parameterValues`, from the Test section or the Usage) and
+  those neither gave (`assumedValues`, set to 2); the others keep the guess,
+  `"source": "usage"` (a pseudo-code Usage, an environment like `fi.svf`).
+  About 1050 of the 1194 symbols are measured, in about a minute. It needs
+  `faust`, and measures the libraries of the checkout the script belongs to.
+  The make targets pass it; `DOC_INDEX_IO=` builds the export without
+  `faust`, with guessed counts. `checkdoc.py` does not measure (it only
+  counts the symbols).
 
 The last line printed is a JSON summary, including `symbolsCount`, which
 `checkdoc.py` compares with its baseline. After a change to the doc-block
