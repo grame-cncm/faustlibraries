@@ -31,6 +31,7 @@ linInterp1D_modulated_test = (1, 0.5, -0.5, -1) : fd.linInterp1D(4, 3*tri) with 
 
 linInterp2D_test = (1, 0.5, -0.5, -1)
   : fd.linInterp2D(2, 2, 0.6, 1.2);
+linInterp2D_modulated_test = (1, 0.5, -0.5, -1) : fd.linInterp2D(2, 2, tri, 1 - tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 stairsInterp1DOut_test = (1, 0.5, -0.5, -1)
   : fd.stairsInterp1DOut(4, 2);
@@ -44,6 +45,7 @@ linInterp1DOut_modulated_test = (1, 0.25, 0.5, 0.75) : fd.linInterp1DOut(4, 3*tr
 
 linInterp2DOut_test = (1, 0.5, -0.5, -1)
   : fd.linInterp2DOut(2, 2, 0.6, 1.2);
+linInterp2DOut_modulated_test = (1, 0.5, -0.5, -1) : fd.linInterp2DOut(2, 2, tri, 1 - tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 route1D_test = (1, 0.5, -0.25)
   : fd.route1D(1, 0, 0)
@@ -73,6 +75,7 @@ hammer_test = os.tosc(5)
       0.001,
       button("hammer:trigger")
     );
+hammer_slider_test = os.tosc(5) : fd.hammer(hslider("hammer:coeff", 0.1, 0, 1, 0.001), hslider("hammer:omega0Sqr", 1000, 0, 100000, 1), hslider("hammer:sigma0", 0.01, 0, 1, 0.001), hslider("hammer:kH", 100000.0, 0, 1000000.0, 1), hslider("hammer:alpha", 2.0, 1, 4, 0.01), 1.0/48000, hslider("hammer:offset", 0.001, 0, 0.01, 0.0001), button("hammer:trigger"));
 
 bow_test = os.tosc(5)
   : fd.bow(0.05, 2.0, 1.0/48000, 0.1);

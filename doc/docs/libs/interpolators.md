@@ -140,7 +140,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_linear_test = it.interpolate_linear(0.5, 0.0, 1.0);
+interpolate_linear_slider_test = it.interpolate_linear(hslider("interpolate_linear:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_linear_modulated_test = it.interpolate_linear(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -168,7 +172,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_cosine_test = it.interpolate_cosine(0.5, 0.0, 1.0);
+interpolate_cosine_slider_test = it.interpolate_cosine(hslider("interpolate_cosine:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_cosine_modulated_test = it.interpolate_cosine(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -201,7 +209,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_logarithmic_test = it.interpolate_logarithmic(0.5, 100.0, 10000.0);
+interpolate_logarithmic_slider_test = it.interpolate_logarithmic(hslider("interpolate_logarithmic:dv", 0.5, 0, 1, 0.01), 100.0, 10000.0);
+interpolate_logarithmic_modulated_test = it.interpolate_logarithmic(tri, 100.0, 10000.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -233,7 +245,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_power_test = it.interpolate_power(2.0, 0.5, 0.0, 1.0);
+interpolate_power_slider_test = it.interpolate_power(hslider("interpolate_power:p", 2.0, 0.1, 10, 0.01), hslider("interpolate_power:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_power_modulated_test = it.interpolate_power(2.0, tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -306,7 +322,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_smoothstep_test = it.interpolate_smoothstep(0.5, 0.0, 1.0);
+interpolate_smoothstep_slider_test = it.interpolate_smoothstep(hslider("interpolate_smoothstep:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_smoothstep_modulated_test = it.interpolate_smoothstep(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -336,7 +356,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_smootherstep_test = it.interpolate_smootherstep(0.5, 0.0, 1.0);
+interpolate_smootherstep_slider_test = it.interpolate_smootherstep(hslider("interpolate_smootherstep:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_smootherstep_modulated_test = it.interpolate_smootherstep(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -367,7 +391,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_mel_test = it.interpolate_mel(0.5, 100.0, 8000.0);
+interpolate_mel_slider_test = it.interpolate_mel(hslider("interpolate_mel:dv", 0.5, 0, 1, 0.01), 100.0, 8000.0);
+interpolate_mel_modulated_test = it.interpolate_mel(tri, 100.0, 8000.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Four points interpolation functions
@@ -396,7 +424,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_cubic_test = it.interpolate_cubic(0.5, -1.0, 2.0, 1.0, 4.0);
+interpolate_cubic_slider_test = it.interpolate_cubic(hslider("interpolate_cubic:dv", 0.5, 0, 1, 0.01), -1.0, 2.0, 1.0, 4.0);
+interpolate_cubic_modulated_test = it.interpolate_cubic(tri, -1.0, 2.0, 1.0, 4.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -736,7 +768,10 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 lagrangeCoeffs_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), 0.25);
+lagrangeCoeffs_modulated_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References

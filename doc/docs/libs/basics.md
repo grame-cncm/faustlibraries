@@ -610,6 +610,7 @@ ba = library("basics.lib");
 os = library("oscillators.lib");
 line_test = os.tosc(1) : ba.line(256);
 line_frac_test = os.lf_squarewavepos(100) : ba.line(4.8);
+line_slider_test = os.tosc(1) : ba.line(hslider("line:n", 256, 1, 4096, 1));
 ```
 
 ----
@@ -1216,7 +1217,10 @@ process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 #### Test
 ```
 ba = library("basics.lib");
+ma = library("maths.lib");
 tabulate_test = ba.tabulate(1, ba.midikey2hz, 128, 0, 127, 60).lin;
+tabulate_modulated_test = ba.tabulate(1, ba.midikey2hz, 128, 0, 127, 127*tri).lin with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tabulate_cub_modulated_test = ba.tabulate(1, ba.midikey2hz, 128, 0, 127, 127*tri).cub with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -1556,8 +1560,11 @@ In the interest of brevity, we'll stop explaining here. If you have any more que
 #### Test
 ```
 ba = library("basics.lib");
+ma = library("maths.lib");
 powSin(x,y) = sin(pow(x,y));
 tabulateNd_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 3.0,4.0)).lin;
+tabulateNd_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).lin with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tabulateNd_cub_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).cub with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Selectors (Conditions)
@@ -2046,6 +2053,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 downSampleCV_test = os.tosc(440) : ba.downSampleCV(0.5);
+downSampleCV_slider_test = os.tosc(440) : ba.downSampleCV(hslider("downSampleCV:amt", 0.5, 0, 1, 0.01));
 ```
 
 ----
@@ -2712,7 +2720,10 @@ minimum, we need to give `ma.MAX` as `disabledVal`.
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
+no = library("noises.lib");
 slidingReduce_test = os.tosc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
+slidingReduce_slider_test = os.tosc(440) : ba.slidingReduce(max, hslider("slidingReduce:n", 64, 1, 64, 1), 64, 0 - ma.MAX);
+slidingReduce_modulated_test = no.noise : ba.slidingReduce(max, n, 128, 0 - ma.MAX) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2738,7 +2749,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 slidingSum_test = os.tosc(440) : ba.slidingSum(64);
+slidingSum_slider_test = os.tosc(440) : ba.slidingSum(hslider("slidingSum:n", 64, 1, 128, 1));
+slidingSum_modulated_test = no.noise : ba.slidingSum(n) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2764,7 +2779,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 slidingSump_test = os.tosc(440) : ba.slidingSump(64, 128);
+slidingSump_slider_test = os.tosc(440) : ba.slidingSump(hslider("slidingSump:n", 64, 1, 128, 1), 128);
+slidingSump_modulated_test = no.noise : ba.slidingSump(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2789,7 +2808,10 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
+no = library("noises.lib");
 slidingMax_test = os.tosc(440) : ba.slidingMax(64, 128);
+slidingMax_slider_test = os.tosc(440) : ba.slidingMax(hslider("slidingMax:n", 64, 1, 128, 1), 128);
+slidingMax_modulated_test = no.noise : ba.slidingMax(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2814,7 +2836,10 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
+no = library("noises.lib");
 slidingMin_test = os.tosc(440) : ba.slidingMin(64, 128);
+slidingMin_slider_test = os.tosc(440) : ba.slidingMin(hslider("slidingMin:n", 64, 1, 128, 1), 128);
+slidingMin_modulated_test = no.noise : ba.slidingMin(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2840,7 +2865,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 slidingMean_test = os.tosc(440) : ba.slidingMean(64);
+slidingMean_slider_test = os.tosc(440) : ba.slidingMean(hslider("slidingMean:n", 64, 1, 128, 1));
+slidingMean_modulated_test = no.noise : ba.slidingMean(n) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2866,7 +2895,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 slidingMeanp_test = os.tosc(440) : ba.slidingMeanp(64, 128);
+slidingMeanp_slider_test = os.tosc(440) : ba.slidingMeanp(hslider("slidingMeanp:n", 64, 1, 128, 1), 128);
+slidingMeanp_modulated_test = no.noise : ba.slidingMeanp(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2893,7 +2926,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 slidingRMS_test = os.tosc(440) : ba.slidingRMS(64);
+slidingRMS_slider_test = os.tosc(440) : ba.slidingRMS(hslider("slidingRMS:n", 64, 1, 128, 1));
+slidingRMS_modulated_test = no.noise : ba.slidingRMS(n) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2919,7 +2956,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 slidingRMSp_test = os.tosc(440) : ba.slidingRMSp(64, 128);
+slidingRMSp_slider_test = os.tosc(440) : ba.slidingRMSp(hslider("slidingRMSp:n", 64, 1, 128, 1), 128);
+slidingRMSp_modulated_test = no.noise : ba.slidingRMSp(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ## Parallel Operators

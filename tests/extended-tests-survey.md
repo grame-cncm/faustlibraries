@@ -197,9 +197,11 @@ The plan was:
   - `tabulate`/`tabulateNd` `.lin`/`.cub` with a moving index;
   - the `sliding*` functions, slider on n, and modulated with an exact integer n;
   - `line`, `downSampleCV`, slider.
-- `interpolators.lib`: slider tests for the `interpolate_*` (all their tests are constant-folded today); `lagrangeCoeffs` with a moving x; `interpolate_exponential` after its fix.
-- `fds.lib`: moving `point` for the `linInterp*` functions; `hammer` slider.
-- `pinktrombone.lib`: `tract`/`tract2` tongue parameters. Redo the two existing tests with the integer triangle.
+
+  **Done**: 24 tests. The modulated `sliding*` tests take n = 16..128 exact, with an explicit `: max(16) : min(128)` (the interval analysis loses the bound otherwise). `tabulateNd` is swept where its test function `sin(pow(x, y))` is well conditioned (x 2..3, y 3..2): at the corner (8, 8) of its table, `sin(8^8)` has no meaning in float.
+- `interpolators.lib`: slider tests for the `interpolate_*` (all their tests are constant-folded today); `lagrangeCoeffs` with a moving x; `interpolate_exponential` after its fix. **Done**: 17 tests, slider and modulated dv for the eight `interpolate_*`, and `lagrangeCoeffs` modulated.
+- `fds.lib`: moving `point` for the `linInterp*` functions; `hammer` slider. **Done**: 5 tests. `fd.linInterp1D` dropped an output to 0 for one sample when the point crossed an integer from below in float (`int(point+1)`, with point+1 rounded up): fixed, `int(point)+1`, as `linInterp2D` already wrote.
+- `pinktrombone.lib`: `tract`/`tract2` tongue parameters. Redo the two existing tests with the integer triangle. **Done**: `lfWaveform_modulated_test` and `glottis_modulated_test` redone on the triangle (same ranges); `tract` with its tongue index (12..29) and diameter (2.05..3.5) modulated, no constriction. With an active constriction the tongue sweep fails (`tract` 4.0e-3, `tract2` 1.4e-3): the turbulence noise is gated by area thresholds, and a decision one sample apart in float and double injects another noise. `tract2_modulated_test` is deferred (5.2).
 - `tonestacks.lib`: a constant, a modulated and a jump test on a representative model, for example `ts.bassman(0.5, 0.5, tri)` on `no.noise`. **Done**: `bassman` constant, slider, modulated and jump tests, in its doc block and in a new `tests/tonestacks_tests.dsp`; the jump test passes at 7.3e-4, close to the threshold (the third-order direct form of `tonestack`).
 - Also passing: `pm.modeFilter` modulated (freq exp 50..5000; done, 7.3e-4, close to the threshold), `os.oscrs` modulated (done) and jump (it fails today at 1.7e-3, the `os.oscr*` debt: deferred, 5.2); `pf.vibrato2_mono` jump on fb (done).
 - `hoa.lib`: `encoder3D` elevation; the decorrelation functions, slider.
@@ -317,7 +319,7 @@ wgr_jump_test = fi.wgr(100*pow(20, sq), 0.995, no.noise) with { P = int(ma.SR/10
 
 These are new tests: the functions have none of the kind. The imports they
 need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
-`ba`, `ma`). The level gaps and non-finite outputs were measured on 2026-10-02 and 2026-10-03.
+`pt`, `ba`, `ma`). The level gaps and non-finite outputs were measured on 2026-10-02 and 2026-10-03.
 
 | Test | Library and test file | Fails today with | Unblocked by |
 |---|---|---|---|
@@ -337,6 +339,7 @@ need are the libraries' usual prefixes (`ve`, `pm`, `os`, `an`, `re`, `no`,
 | `goertzel_slider_test` | `analyzers.lib`, `analyzers_tests.dsp` | 1.3e-3 | a Goertzel recursion accurate in float at low frequency, or a smaller n |
 | `lfnoise0_slider_test`, `lfnoise0_jump_test`, `lfnoiseN_jump_test`, `lfnoise_jump_test` (and their modulated and slider siblings, which pass by chance) | `noises.lib`, `noises_tests.dsp` | 3.9e-3; 0.24, 0.20, 0.19 | a trigger exact in both precisions: the zero crossings of `os.oscrs` move by one sample between float and double, and each latches another noise value |
 | `oscrs_jump_test` | `oscillators.lib`, `oscillators_tests.dsp` | 1.7e-3 | the `os.oscr*` debt (`oscrs_test` carries 2.05e-3 in the baseline) |
+| `tract2_modulated_test` | `pinktrombone.lib`, `pinktrombone_tests.dsp` | 1.4e-3 | a turbulence source whose gating does not depend on the precision (constriction area thresholds) |
 | `vital_rev_slider_test` | `reverbs.lib`, `reverbs_tests.dsp` | 3.1e-3, the debt of `vital_rev_test` | a chorus LFO whose phase does not drift in float (its `m_lfo_sine` accumulates `freq/SR`, and the chorus moves the delays by up to 2500 samples) |
 | `jpverb_size_modulated_test`, `greyhole_size_modulated_test` | `reverbs.lib`, `reverbs_tests.dsp` | 4.6e-3, 7.1e-3 (a jump of size between 1 and 2: 3.8e-3, 5.2e-3) | delay lengths smoothed accurately in float: `smooth_init(0.9999)` and `(0.995)` glide each prime length to the next, and a 2e-4 relative difference of `1 - s` between float and double moves the fractional delays of the whole network |
 | `greyhole_dt_jump_test` | `reverbs.lib`, `reverbs_tests.dsp` | 1.7e-3 at 176.4 kHz (0.25 to 0.5 s; 8.7e-4 from 0.125 to 0.25 s) | a `de.sdelay` crossfade exact in float: it steps by 1/22050 |
@@ -365,6 +368,7 @@ lfnoise_jump_test = no.lfnoise(pow(100, sq)) with { P = int(ma.SR/10); sq = ba.p
 lfnoiseN_modulated_test = no.lfnoiseN(3, pow(100, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 lfnoiseN_jump_test = no.lfnoiseN(3, pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 oscrs_jump_test = os.oscrs(20*pow(1000, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+tract2_modulated_test = (os.lf_imptrain(140), 0.3) : pt.tract2(12 + 17*tri, 2.43, 36.3, 0.5, 1, 20.6, 0.8, 1, 0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 vital_rev_slider_test = (os.tosc(330), os.tosc(440)) : re.vital_rev(hslider("vital_rev:prelow", 0.2, 0, 1, 0.01), hslider("vital_rev:prehigh", 0.8, 0, 1, 0.01), hslider("vital_rev:lowcutoff", 0.5, 0, 1, 0.01), hslider("vital_rev:highcutoff", 0.7, 0, 1, 0.01), hslider("vital_rev:lowgain", 0.4, 0, 1, 0.01), hslider("vital_rev:highgain", 0.6, 0, 1, 0.01), hslider("vital_rev:chorus_amt", 0.3, 0, 1, 0.01), hslider("vital_rev:chorus_freq", 0.2, 0, 1, 0.01), hslider("vital_rev:predelay", 0.1, 0, 1, 0.01), hslider("vital_rev:time", 0.7, 0, 1, 0.01), hslider("vital_rev:size", 0.5, 0, 1, 0.01), hslider("vital_rev:mix", 0.4, 0, 1, 0.01));
 jpverb_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.jpverb(3.0, 0.2, 0.5 + 2.5*tri, 0.8, 0, 0.4, 0.9, 0.8, 0.7, 500, 4000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 greyhole_size_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(2.0, 0.3, 0.5 + 2.5*tri, 0.6, 0.5, 0, 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
