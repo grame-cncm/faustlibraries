@@ -28,26 +28,28 @@ The oscillators library is organized into 9 sections:
 Oscillators using tables. The table size is set by the
 [pl.tablesize](https://github.com/grame-cncm/faustlibraries/blob/master/platform.lib) constant.
 
-Note that there is a numerical problem with several phasor functions built using the internal
-`_phasor_imp`. The reason is that the incremental step is smaller than `ma.EPSILON`, which happens with very small frequencies,
-so it will have no effect when summed to 1, but it will be enough to make the fractional function wrap
-around when summed to 0. An example of this problem can be observed when running the following code:
+The phasors (`phasor`, `hs_phasor`, `hsp_phasor`, and the `lf_sawpos` family, on which
+the table-based, `m_osc` and `lf_` oscillators are built) share the internal `_phasor_imp`.
 
-`process = os.phasor(1.0, -.001);`
+In single precision (`faust -single`, the default), it keeps the phase in fixed point
+(an integer count of 2^-30 cycle plus a 24-bit fraction of a count), advanced by the
+float increment `freq/ma.SR`. The rounding of that increment is the only frequency
+error, below 1e-7 relative, with no accumulated drift, at any frequency and sign;
+the output is truncated to a multiple of 2^-24 in [0, 1[. Accumulating the phase in
+float instead (as up to version 1.9.1) rounds each sum to the float spacing near
+the phase (6e-8 near 1), a large fraction of a low-frequency increment: the frequency
+was off by 0.1 % at 2 Hz and 192 kHz, by up to 8 % at 0.01 Hz, and the phasor stopped
+below `ma.SR`/2^25 (0.0057 Hz at 192 kHz).
 
-The output of this program is the sequence 1, 0, 1, 0, 1... This happens because the negative incremental
-step is greater than `-ma.EPSILON`, which will have no effect when summed to 1, but it will be significant
-enough to make the fractional function  wrap around when summed to 0.
-
-The incremental step can be clipped to guarantee that the phasor will
-always run correctly for its full cycle, otherwise, for increments smaller than `ma.EPSILON`,
-phasor would initially run but it'd eventually get stuck once the output gets big enough.
-
-All functions using `_phasor_imp` are affected by this problem, but a safer
-version is implemented, and can be used alternatively by setting `SAFE=1` in the environment using
-[explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution) syntax.
-
-For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer implementation of `_phasor_imp`.
+In double precision, the phase is accumulated in floating point, with a relative
+frequency error below 1e-12 from 2 Hz up (3e-10 at 0.01 Hz and 192 kHz). There, an
+incremental step smaller than `ma.EPSILON` (2.2e-16, a frequency below 1e-11 Hz) has
+no effect when summed to 1, but it is enough to make the fractional function wrap
+around when summed to 0, so that the output alternates between 1 and 0. The incremental step can be clipped to guarantee that the phasor will always
+run correctly for its full cycle: this safer version is used when `SAFE=1` is set in
+the environment using
+[explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution) syntax,
+for example `process = os[SAFE=1;].phasor(1.0, -.001);`.
 
 ----
 
@@ -56,7 +58,8 @@ For example: `process = os[SAFE=1;].phasor(1.0, -.001);` will use the safer impl
 Global parameter selecting the safer version of the internal phasor
 implementation (0: faster version, 1: safer version, protecting
 against the small-increment numerical problem described at the top of
-this section). Meant to be overridden through
+this section). It affects double (and higher) precision only: the
+single-precision phasor is fixed point and needs no protection. Meant to be overridden through
 [explicit substitution](https://faustdoc.grame.fr/manual/syntax/#explicit-substitution)
 syntax, and usable by other functions as well.
 
@@ -419,9 +422,10 @@ m_osccos_test = os.m_osccos(440);
 Integer phase accumulator: the phase counter `m(n) = (m(n-1) + p) mod N`,
 computed in integers, so exactly, without drift.
 
-A phasor in floating point (`phasor`, `lf_sawpos`) adds a rounded increment
-at every sample: its rounding error accumulates, and the phase of a
-single-precision render drifts away from that of a double-precision one.
+A phasor (`phasor`, `lf_sawpos`) adds the increment `freq/ma.SR`, rounded
+to the precision of the program, at every sample: its rounding error
+accumulates, and the phase of a single-precision render drifts away from
+that of a double-precision one.
 `tphase` counts in integers instead. Its properties:
 
 * **exact**: `m(n) = ((n+1)·p) mod N`, with no rounding, as long as
@@ -462,8 +466,9 @@ tphase_slider_test = os.tphase(480000, int(hslider("step", 4400, -48000, 48000, 
 Sine wave oscillator on an exact integer phase: the same signal in single
 and double precision, at exactly the requested frequency (to 0.1 Hz).
 
-`osc` and `m_oscsin` accumulate a phase in floating point: after one
-second, the single- and double-precision renders are out of phase, and only
+`osc` and `m_oscsin` add the increment `freq/ma.SR`, rounded differently in
+single and double precision: the two renders drift apart in phase (up to
+1.7e-5 cycle after one second at 440 Hz, 1e-3 after a minute), and only
 their levels can be compared. `tosc` reads the sine of an integer phase
 `m = tphase(N, p)` with `N = 10·SR` and `p = round(10·freq)`. Its
 properties:
@@ -697,6 +702,8 @@ very low fundamental frequencies).  According to Lehtonen et al.
 frequencies below 2 kHz or so, for a 44.1 kHz sampling rate and 60 dB SPL
 presentation level;  fundamentals 415 and below required no aliasing
 suppression (i.e., `saw1` is ok).
+`lf_sawpos` and `saw1` share the phasor of the Wave-Table-Based Oscillators
+section, whose single-precision frequency error is below 1e-7 relative.
 
 ----
 
@@ -712,7 +719,7 @@ lf_rawsaw(periodsamps) : _
 
 Where:
 
-* `periodsamps`: number of periods per samples
+* `periodsamps`: period in samples
 
 #### Test
 ```
@@ -725,6 +732,9 @@ lf_rawsaw_test = os.lf_rawsaw(128);
 ### `(os.)lf_sawpos`
 
 Simple sawtooth waveform oscillator between 0 and 1.
+In single precision, its frequency is exact to the float rounding of `freq/ma.SR`
+(below 1e-7 relative), without drift, down to `freq` = 0 and for negative `freq`
+(see the Wave-Table-Based Oscillators section).
 
 #### Usage
 
@@ -744,6 +754,7 @@ ma = library("maths.lib");
 lf_sawpos_test = os.lf_sawpos(3);
 lf_sawpos_slider_test = os.lf_sawpos(hslider("lf_sawpos:freq", 3, 0.01, 100, 0.01));
 lf_sawpos_modulated_test = os.lf_sawpos(0.01*pow(10000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lf_sawpos_negfreq_test = os.lf_sawpos(-0.1);
 ```
 
 ----
@@ -768,6 +779,7 @@ Where:
 ```
 os = library("oscillators.lib");
 lf_sawpos_phase_test = os.lf_sawpos_phase(3, 0.25);
+lf_sawpos_phase_lowfreq_test = os.lf_sawpos_phase(0.1, 0.5);
 ```
 
 ----
@@ -792,7 +804,7 @@ Where:
 ```
 os = library("oscillators.lib");
 ba = library("basics.lib");
-lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(32));
+lf_sawpos_reset_test = os.lf_sawpos_reset(3, ba.pulse(10000));
 ```
 
 ----
@@ -817,7 +829,8 @@ Where:
 #### Test
 ```
 os = library("oscillators.lib");
-lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, button("reset"));
+ba = library("basics.lib");
+lf_sawpos_phase_reset_test = os.lf_sawpos_phase_reset(3, 0.75, ba.pulse(10000));
 ```
 
 ----
@@ -881,7 +894,8 @@ MAX_SAW_ORDER : _
 Where:
 
 * `N`: polynomial order, a constant numerical expression between 1 and `MAX_SAW_ORDER`
-* `freq`: frequency in Hz
+* `freq`: frequency in Hz; `sawN` and `sawNp` use `max(20, abs(freq))`
+  (use `lf_sawpos` below 20 Hz)
 
 #### Test
 ```
@@ -922,18 +936,22 @@ sawNp(N,freq,phase) : _
 where
 
 * `N`: waveform interpolation polynomial order 1 to 4 (constant integer expression)
-* `freq`: frequency in Hz
-* `phase`: waveform phase as a fraction of one period (rounded to nearest sample)
+* `freq`: frequency in Hz, clipped below at 20 Hz as in `sawN`
+* `phase`: waveform phase as a fraction of one period (rounded to nearest sample).
+  It is a delay, i.e., a phase lag: `sawNp(N,freq,0.25)` is a quarter period
+  behind `sawN(N,freq)`, whereas `lf_sawpos_phase(freq,0.25)` is a quarter
+  period ahead of `lf_sawpos(freq)`.
 
 #### Test
 ```
 os = library("oscillators.lib");
 sawNp_test = os.sawNp(3, 330, 0.5);
+sawNp_lowfreq_test = os.sawNp(2, 10, 0.5);
 ```
 #### Implementation Notes
 
 The phase offset is implemented by delaying `sawN(N,freq)` by
-`round(phase*ma.SR/freq)` samples, for up to 8191 samples.
+`round(phase*ma.SR/max(20,abs(freq)))` samples, for up to 8191 samples.
 The minimum sawtooth frequency that can be delayed a whole period
 is therefore `ma.SR/8191`, which is well below audibility for normal
 audio sampling rates.
@@ -1054,10 +1072,24 @@ ma = library("maths.lib");
 saw2ptr_test = os.saw2ptr(220);
 saw2ptr_slider_test = os.saw2ptr(hslider("saw2ptr:freq", 220, 20, 20000, 1));
 saw2ptr_modulated_test = os.saw2ptr(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+saw2ptr_lowfreq_test = os.saw2ptr(1);
+saw2ptr_zero_test = os.saw2ptr(220*(ba.period(9600) >= 4800));
 ```
 ##### Implementation
 
-Polynomial Transition Regions (PTR) method for aliasing suppression.
+Polynomial Transition Regions (PTR) method for aliasing suppression,
+order 2 (transition region one sample wide), following Eq. (8) and Table I
+(W = 1) of the reference below: the trivial sawtooth `2*phi-1` offset by
+the phase increment `T = |freq|/ma.SR` (which makes it zero-mean), and
+`1 + 2*phi - 2*phi/T - T` on the first sample of each period.
+`saw2dpw` outputs the same samples one sample later.
+
+In single precision, the phase is accumulated in fixed point, like the phasor of
+the Wave-Table-Based Oscillators section: the frequency is exact to the float
+rounding of `T` (below 1e-7 relative), without drift, and `freq` = 0 freezes the
+phase. Accumulating the phase in float instead (as up to version 1.9.2) made the
+frequency 0.1 % sharp at 2 Hz and 192 kHz, and off by up to 8 % at 0.01 Hz.
+Double precision keeps the floating-point accumulator.
 
 ##### Notes
 
@@ -1101,6 +1133,7 @@ ma = library("maths.lib");
 saw2dpw_test = os.saw2dpw(220);
 saw2dpw_slider_test = os.saw2dpw(hslider("saw2dpw:freq", 220, 20, 20000, 1));
 saw2dpw_modulated_test = os.saw2dpw(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+saw2dpw_zero_test = os.saw2dpw(220*(ba.period(9600) >= 4800));
 ```
 
 ----
@@ -1211,6 +1244,8 @@ Where:
 * `N`: polynomial order, a constant numerical expression
 * `freq`: frequency in Hz
 
+Each function below has its own test.
+
 ----
 
 ### `(os.)impulse`
@@ -1245,8 +1280,10 @@ pulsetrainN(N,freq,duty) : _
 Where:
 
 * `N`: order, as a constant numerical expression
-* `freq`: frequency in Hz
-* `duty`: duty cycle between 0 and 1
+* `freq`: frequency in Hz, clipped below at 23.45 Hz
+* `duty`: duty cycle between 0 and 1: fraction of each period
+  spent at the high level `2*(1-duty)`; the low level is `-2*duty`,
+  so the waveform is zero-mean
 
 #### Test
 ```
@@ -1275,7 +1312,7 @@ pulsetrain(freq,duty) : _
 Where:
 
 * `freq`: frequency in Hz
-* `duty`: duty cycle between 0 and 1
+* `duty`: duty cycle between 0 and 1 (see `pulsetrainN`)
 
 #### Test
 ```
@@ -1394,7 +1431,9 @@ triangleN(N,freq) : _
 Where:
 
 * `N`: order, as a constant numerical expression
-* `freq`: frequency in Hz
+* `freq`: frequency in Hz. Below 23.45 Hz, the triangle stays at 23.45 Hz
+  (the lower limit of `pulsetrainN`) and its amplitude falls as `freq/23.45`:
+  use `lf_triangle` for LFOs.
 
 #### Test
 ```
@@ -1599,13 +1638,18 @@ oscs(freq) : _
 
 Where:
 
-* `freq`: frequency in Hz
+* `freq`: frequency in Hz, between 0 and `ma.SR/2`
+
+The frequency is exact. The peak amplitude is `1/cos(ma.PI*freq/ma.SR)`
+(1.0004 at 440 Hz and 48 kHz, 1.056 at 5 kHz), since the two states of the
+magic circle are half a sample apart.
 
 #### Test
 ```
 os = library("oscillators.lib");
 oscs_test = os.oscs(440);
 oscs_slider_test = os.oscs(hslider("oscs:freq", 440, 20, 14000, 1));
+oscs_hf_test = os.oscs(15000);
 ```
 
 ----
@@ -1682,8 +1726,8 @@ is (modulo floating point issues) the same as:
    c = os.quadosc : _,!;
    s = os.quadosc : !,_;
    process =
-       10*c(F) + 20*c(2*F) + 30*c(F),
-       10*s(F) + 20*s(2*F) + 30*s(F);
+       10*c(F) + 20*c(2*F) + 30*c(3*F),
+       10*s(F) + 20*s(2*F) + 30*s(3*F);
 ```
 
 but much more efficient.
@@ -2539,4 +2583,5 @@ ma = library("maths.lib");
 polyblep_triangle_test = os.polyblep_triangle(220);
 polyblep_triangle_modulated_test = os.polyblep_triangle(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 polyblep_triangle_jump_test = os.polyblep_triangle(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+polyblep_triangle_5k_test = os.polyblep_triangle(5000);
 ```
