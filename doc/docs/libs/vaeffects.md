@@ -45,7 +45,9 @@ Where:
 
 * `res`: normalized amount of corner-resonance between 0 and 1 
 (0 is no resonance, 1 is maximum)
-* `fr`: corner-resonance frequency in Hz (less than SR/6.3 or so)
+* `fr`: corner-resonance frequency in Hz. The filter is stable for `fr` below
+SR/6.28 at `res` <= 0.25, SR/6.88 at 0.5, SR/7.34 at 0.8 and SR/7.58 as `res`
+approaches 1, so keep `fr` below about SR/7.6
 
 #### Test
 ```
@@ -78,8 +80,8 @@ of the ideal Moog VCF transfer function factored into second-order
 sections. As a result, it is more accurate than `moog_vcf` above, but
 its coefficient formulas are more complex when one or both parameters
 are varied.  Here, res is the fourth root of that in `moog_vcf`, so, as
-the sampling rate approaches infinity, `moog_vcf(res,fr)` becomes equivalent
-to `moog_vcf_2b[n](res^4,fr)` (when res and fr are constant).
+the sampling rate approaches infinity, `moog_vcf(res^4,fr)` becomes equivalent
+to `moog_vcf_2b[n](res,fr)` (when res and fr are constant).
 `moog_vcf_2b` uses two direct-form biquads (`tf2`).
 `moog_vcf_2bn` uses two protected normalized-ladder biquads (`tf2np`).
 
