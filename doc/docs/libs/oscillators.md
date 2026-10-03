@@ -1072,15 +1072,24 @@ ma = library("maths.lib");
 saw2ptr_test = os.saw2ptr(220);
 saw2ptr_slider_test = os.saw2ptr(hslider("saw2ptr:freq", 220, 20, 20000, 1));
 saw2ptr_modulated_test = os.saw2ptr(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+saw2ptr_lowfreq_test = os.saw2ptr(1);
+saw2ptr_zero_test = os.saw2ptr(220*(ba.period(9600) >= 4800));
 ```
 ##### Implementation
 
 Polynomial Transition Regions (PTR) method for aliasing suppression,
 order 2 (transition region one sample wide), following Eq. (8) and Table I
 (W = 1) of the reference below: the trivial sawtooth `2*phi-1` offset by
-the phase increment `T = freq/ma.SR` (which makes it zero-mean), and
+the phase increment `T = |freq|/ma.SR` (which makes it zero-mean), and
 `1 + 2*phi - 2*phi/T - T` on the first sample of each period.
 `saw2dpw` outputs the same samples one sample later.
+
+In single precision, the phase is accumulated in fixed point, like the phasor of
+the Wave-Table-Based Oscillators section: the frequency is exact to the float
+rounding of `T` (below 1e-7 relative), without drift, and `freq` = 0 freezes the
+phase. Accumulating the phase in float instead (as up to version 1.9.2) made the
+frequency 0.1 % sharp at 2 Hz and 192 kHz, and off by up to 8 % at 0.01 Hz.
+Double precision keeps the floating-point accumulator.
 
 ##### Notes
 

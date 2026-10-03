@@ -59,6 +59,8 @@ saw4_test = os.saw4(220);
 saw2ptr_test = os.saw2ptr(220);
 saw2ptr_slider_test = os.saw2ptr(hslider("saw2ptr:freq", 220, 20, 20000, 1));
 saw2ptr_modulated_test = os.saw2ptr(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+saw2ptr_lowfreq_test = os.saw2ptr(1);
+saw2ptr_zero_test = os.saw2ptr(220*(ba.period(9600) >= 4800));
 saw2dpw_test = os.saw2dpw(220);
 saw2dpw_slider_test = os.saw2dpw(hslider("saw2dpw:freq", 220, 20, 20000, 1));
 saw2dpw_modulated_test = os.saw2dpw(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
