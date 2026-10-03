@@ -111,8 +111,9 @@ Where:
 * `MAXDELAY`: power of 2 at least as large as longest delay-line length
 * `delays`: N delay lines, N a power of 2, lengths preferably coprime
 * `BBSO`: odd positive integer = order of bandsplit desired at freqs
-* `freqs`: NB-1 crossover frequencies separating desired frequency bands
-* `durs`: NB decay times (t60) desired for the various bands
+* `freqs`: NB-1 crossover frequencies separating desired frequency bands, in increasing order
+* `durs`: NB decay times (t60) desired for the various bands, highest band first
+  (the order of the `fi.filterbank` outputs, i.e., the reverse of `freqs`)
 * `loopgainmax`: scalar gain between 0 and 1 used to "squelch" the reverb
 * `nonl`: nonlinearity (0 to 0.999..., 0 being linear)
 
@@ -130,10 +131,10 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
 fdnrev0_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550))
-  <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 2.0, 1.5), 0.8, 0.0);
-fdnrev0_slider_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (hslider("fdnrev0:f1", 800, 50, 5000, 1), hslider("fdnrev0:f2", 4000, 100, 10000, 1)), (hslider("fdnrev0:t60low", 2.5, 0.1, 10, 0.01), hslider("fdnrev0:t60mid", 2.0, 0.1, 10, 0.01), hslider("fdnrev0:t60high", 1.5, 0.1, 10, 0.01)), hslider("fdnrev0:loopgainmax", 0.8, 0, 1, 0.01), hslider("fdnrev0:nonl", 0.0, 0, 0.999, 0.001));
-fdnrev0_modulated_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 0.5*pow(10, tri), 1.5), 0.8, 0.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-fdnrev0_jump_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 0.5*pow(10, sq), 1.5), 0.8, 0.0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+  <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.0);
+fdnrev0_slider_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (hslider("fdnrev0:f1", 800, 50, 5000, 1), hslider("fdnrev0:f2", 4000, 100, 10000, 1)), (hslider("fdnrev0:t60high", 1.5, 0.1, 10, 0.01), hslider("fdnrev0:t60mid", 2.0, 0.1, 10, 0.01), hslider("fdnrev0:t60low", 2.5, 0.1, 10, 0.01)), hslider("fdnrev0:loopgainmax", 0.8, 0, 1, 0.01), hslider("fdnrev0:nonl", 0.0, 0, 0.999, 0.001));
+fdnrev0_modulated_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, tri), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fdnrev0_jump_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, sq), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -161,7 +162,9 @@ Where:
 * `f2`: frequency (Hz) above f1 where T60 = t60m/2 (see below)
 * `t60dc`: desired decay time (t60) at frequency 0 (sec)
 * `t60m`: desired decay time (t60) at midrange frequencies (sec)
-* `fsmax`: maximum sampling rate to be used (Hz)
+* `fsmax`: maximum sampling rate to be used (Hz), which sizes the delay lines:
+  above it, the longer delays are clamped and the decay times come out short.
+  192000 (the highest `ma.SR`) covers every rate.
 
 #### Test
 ```
@@ -171,10 +174,10 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
 zita_rev_fdn_test = par(i, 8, os.tosc(110 * (i + 1)))
-  <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 48000);
-zita_rev_fdn_slider_test = par(i, 8, os.tosc(110 * (i + 1))) <: re.zita_rev_fdn(hslider("zita_rev_fdn:f1", 200, 50, 1000, 1), hslider("zita_rev_fdn:f2", 2000, 1500, 20000, 1), hslider("zita_rev_fdn:t60dc", 3.0, 1, 8, 0.1), hslider("zita_rev_fdn:t60m", 2.0, 1, 8, 0.1), 48000);
-zita_rev_fdn_modulated_test = par(i, 8, no.noises(8, i)) : re.zita_rev_fdn(200, 2000, 3.0, pow(20, tri), 48000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-zita_rev_fdn_jump_test = par(i, 8, no.noises(8, i)) : re.zita_rev_fdn(200, 2000, 3.0, pow(20, sq), 48000) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+  <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 192000);
+zita_rev_fdn_slider_test = par(i, 8, os.tosc(110 * (i + 1))) <: re.zita_rev_fdn(hslider("zita_rev_fdn:f1", 200, 50, 1000, 1), hslider("zita_rev_fdn:f2", 2000, 1500, 20000, 1), hslider("zita_rev_fdn:t60dc", 3.0, 1, 8, 0.1), hslider("zita_rev_fdn:t60m", 2.0, 1, 8, 0.1), 192000);
+zita_rev_fdn_modulated_test = par(i, 8, no.noises(8, i)) : re.zita_rev_fdn(200, 2000, 3.0, pow(20, tri), 192000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+zita_rev_fdn_jump_test = par(i, 8, no.noises(8, i)) : re.zita_rev_fdn(200, 2000, 3.0, pow(20, sq), 192000) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -197,13 +200,15 @@ _,_ : zita_in_delay(rdel) : _,_
 
 Where:
 
-* `rdel`: delay (ms) before reverberation begins (e.g., 0 to ~100 ms)
+* `rdel`: delay (ms) before reverberation begins (e.g., 0 to ~100 ms; at most 170 ms at 192 kHz)
 
 #### Test
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 zita_in_delay_test = os.tosc(440), os.tosc(660) : re.zita_in_delay(60);
+zita_in_delay_long_test = no.noise, no.noise : re.zita_in_delay(200);
 ```
 
 ----
@@ -212,7 +217,10 @@ zita_in_delay_test = os.tosc(440), os.tosc(660) : re.zita_in_delay(60);
 
 Stereo input mapping used by `zita_rev1` in both stereo and ambisonics
 mode: fans the two input channels out to the `N` delay lines of the
-feedback delay network, flipping the sign of half of them.
+feedback delay network, flipping the sign of half of them. As in
+`zita-rev1` (`reverb.cc`), the left input feeds the first `N/2` lines and
+the right input the last `N/2`, each with signs `+` on the first half and
+`-` on the second (for `N=8`: `L,L,-L,-L,R,R,-R,-R`).
 
 #### Usage
 
@@ -253,15 +261,15 @@ Where:
 * `f2`: crossover frequency between mid and high decay regions
 * `t60dc`: low-frequency decay time in seconds
 * `t60m`: mid-band decay time in seconds
-* `fsmax`: maximum supported sample rate
+* `fsmax`: maximum supported sample rate (Hz), which sizes the delay lines (192000 covers every rate)
 
 #### Test
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
 zita_rev1_stereo_test = (os.tosc(440), os.tosc(550))
-  : re.zita_rev1_stereo(20, 200, 2000, 3.0, 2.0, 48000);
-zita_rev1_stereo_slider_test = (os.tosc(440), os.tosc(550)) : re.zita_rev1_stereo(hslider("zita_rev1_stereo:rdel", 20, 0, 100, 1), hslider("zita_rev1_stereo:f1", 200, 50, 1000, 1), hslider("zita_rev1_stereo:f2", 2000, 1500, 20000, 1), hslider("zita_rev1_stereo:t60dc", 3.0, 1, 8, 0.1), hslider("zita_rev1_stereo:t60m", 2.0, 1, 8, 0.1), 48000);
+  : re.zita_rev1_stereo(20, 200, 2000, 3.0, 2.0, 192000);
+zita_rev1_stereo_slider_test = (os.tosc(440), os.tosc(550)) : re.zita_rev1_stereo(hslider("zita_rev1_stereo:rdel", 20, 0, 100, 1), hslider("zita_rev1_stereo:f1", 200, 50, 1000, 1), hslider("zita_rev1_stereo:f2", 2000, 1500, 20000, 1), hslider("zita_rev1_stereo:t60dc", 3.0, 1, 8, 0.1), hslider("zita_rev1_stereo:t60m", 2.0, 1, 8, 0.1), 192000);
 ```
 
 ----
@@ -285,14 +293,14 @@ Where:
 * `f2`: crossover frequency between mid and high decay regions
 * `t60dc`: low-frequency decay time in seconds
 * `t60m`: mid-band decay time in seconds
-* `fsmax`: maximum supported sample rate
+* `fsmax`: maximum supported sample rate (Hz), which sizes the delay lines (192000 covers every rate)
 
 #### Test
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
 zita_rev1_ambi_test = (os.tosc(330), os.tosc(550))
-  : re.zita_rev1_ambi(0.0, 25, 200, 2000, 3.0, 2.0, 48000);
+  : re.zita_rev1_ambi(0.0, 25, 200, 2000, 3.0, 2.0, 192000);
 ```
 
 ----
