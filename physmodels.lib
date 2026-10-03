@@ -2188,7 +2188,9 @@ with {
 
 
 //-------`(pm.)violin_ui`----------
-// Ready-to-use violin physical model with built-in UI.
+// Ready-to-use violin physical model with built-in UI. The bow velocity
+// defaults to 0.6, the velocity `violin_ui_MIDI` bows with at its default
+// gain: the model sounds as soon as it runs, 0 silences it.
 //
 // #### Usage
 //
@@ -2199,13 +2201,13 @@ with {
 // #### Test
 // ```
 // pm = library("physmodels.lib");
-// violin_ui_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
+// violin_ui_test = pm.violin_ui;
 // ```
 //----------------------------------
 violin_ui = violinModel(stringLength,bowPress,bowVel,bowPos)*outGain
 with {
     stringLength = hslider("v:violin/v:[0]string/[0]length",0.75,0,2,0.01) : si.smoo;
-    bowVel = hslider("v:violin/v:[1]bow/[0]velocity",0,0,1,0.01) : si.smoo;
+    bowVel = hslider("v:violin/v:[1]bow/[0]velocity",0.6,0,1,0.01) : si.smoo;
     bowPress = hslider("v:violin/v:[1]bow/[1]pressure",0.5,0,1,0.01) : si.smoo;
     bowPos = hslider("v:violin/v:[1]bow/[2]position",0.7,0,1,0.01) : si.smoo;
     outGain = hslider("v:violin/outGain",0.5,0,1,0.01);

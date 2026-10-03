@@ -1820,7 +1820,9 @@ violinModel_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
 
 ### `(pm.)violin_ui`
 
-Ready-to-use violin physical model with built-in UI.
+Ready-to-use violin physical model with built-in UI. The bow velocity
+defaults to 0.6, the velocity `violin_ui_MIDI` bows with at its default
+gain: the model sounds as soon as it runs, 0 silences it.
 
 #### Usage
 
@@ -1831,7 +1833,7 @@ violin_ui : _
 #### Test
 ```
 pm = library("physmodels.lib");
-violin_ui_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
+violin_ui_test = pm.violin_ui;
 ```
 
 ----
