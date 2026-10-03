@@ -60,6 +60,9 @@ resonator_jump_test = no.noise : an.resonator(2, 20*pow(250, sq)) : _, ! with { 
 fft_test = an.rtocv(8, mono) : an.fft(8);
 ifft_test = (an.rtocv(8, mono) : an.fft(8)) : an.ifft(8);
 rfft_analyzer_db_test = 2 * ba.pulse(8) + 0.5 * ba.pulse(4) : an.rfft_analyzer_db(8); // bins of 3 and 2: 9.54 and 6.02 dB
+rfft_analyzer_c_test = no.noise : an.rfft_analyzer_c(8);
+rfft_analyzer_magsq_test = no.noise : an.rfft_analyzer_magsq(8);
+rfft_analyzer_c_chrono_test = no.noise : an.rfft_analyzer_c_chrono(8);
 
 logsweep_test = an.logsweep(20, 2000, 5);
 linsweep_test = an.linsweep(20, 2000, 5);
@@ -75,8 +78,13 @@ window_flattop_test = an.window_flattop(os.lf_sawpos(100));
 window_bartlett_test = an.window_bartlett(os.lf_sawpos(100));
 window_cosN_test = an.window_cosN((0.5, -0.5), os.lf_sawpos(100));
 window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
+window_tukey_rect_test = an.window_tukey(0, os.lf_sawpos(100));
 window_kaiser_test = an.window_kaiser(8.6, os.lf_sawpos(100));
 rtocv_test = an.rtocv(8, os.tosc(220));
+rtorv_test = an.rtorv(4, no.noise);
+rtorv_chrono_test = an.rtorv_chrono(4, no.noise);
+rtocv_chrono_test = an.rtocv_chrono(8, no.noise);
+rtocv_chrono_ifft_test = an.rtocv_chrono(8, no.noise) : an.fft(8) : an.ifft(8) : par(i, 8, (_, !));
 
 // Loudness metering (EBU R128 / ITU-R BS.1770)
 loudness_momentary_test = os.tosc(997), os.tosc(997) : an.loudness_momentary(2);

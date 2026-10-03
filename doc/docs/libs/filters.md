@@ -636,9 +636,10 @@ ffbcombfilter_jump_test = no.noise : fi.ffbcombfilter(2048, 16 + 112*sq, 0.6) wi
 Schroeder Allpass Comb Filter. Note that:
 
 ```
-allpass_comb(maxlen,len,aN) = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len-1,1,aN);
+allpass_comb(maxlen,len,aN) : mem = ff_comb(maxlen,len,aN,1) : fb_comb(maxlen,len,1,aN);
 ```
 
+(`fb_comb` delays its output by one sample, hence the `mem`),
 which is a direct-form-1 implementation, requiring two delay lines.
 The implementation here is direct-form-2 requiring only one delay line.
 
@@ -774,7 +775,7 @@ Where:
 
 * `maxdel`: maximum delay (a power of 2)
 * `N`: current (float) allpass comb-filter delay between 0 and maxdel
-* `aN`: coefficient of z^(-N) in the transfer function numerator
+* `aN`: allpass coefficient: the transfer function is (aN + z^(-N))/(1 + aN z^(-N))
 
 #### Test
 ```
@@ -1353,8 +1354,10 @@ Where:
 fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
+no = library("noises.lib");
 src = os.tosc(440);
 allpassnnlt_test = src : fi.allpassnnlt(2, (0.3, -0.2)) : si.bus(3);
+allpassnnlt_product_test = no.noise : fi.allpassnnlt(1, 0.5*hslider("s", 0.6, -1, 1, 0.01)) : si.bus(2);
 ```
 
 #### References
@@ -1408,8 +1411,12 @@ _ : wgr(f,r) : _,_
 
 Where:
 
-* `f`: resonance frequency (Hz)
+* `f`: resonance frequency (Hz), between 0 and SR/2 (excluded: the frequency is
+  kept a hair inside that range so that the amplitude compensation stays finite)
 * `r`: loss factor for exponential decay (set to 1 to make a numerically stable oscillator)
+
+The two outputs are the resonator states, in phase quadrature
+(`os.oscwc` uses the first, `os.oscws` the second).
 
 #### Test
 ```
@@ -1422,6 +1429,7 @@ src = os.tosc(440);
 wgr_test = fi.wgr(440, 0.995, src);
 wgr_slider_test = fi.wgr(hslider("freq", 440, 20, 5000, 1), hslider("r", 0.995, 0.9, 1, 0.001), no.noise);
 wgr_modulated_test = fi.wgr(100*pow(20, tri), 0.995, no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+wgr_zero_freq_test = fi.wgr(1000*(ba.time >= 100), 0.995, no.noise);
 ```
 
 #### References
@@ -1448,6 +1456,9 @@ Where:
 * `f`: resonance frequency (Hz)
 * `r`: loss factor for exponential decay (set to 1 to make a sinusoidal oscillator)
 
+The two outputs are the resonator states, in phase quadrature
+(`os.oscrs` uses the first, `os.oscrc` the second).
+
 #### Test
 ```
 fi = library("filters.lib");
@@ -1472,6 +1483,10 @@ nlf2_jump_test = fi.nlf2(100*pow(20, sq), 0.995, no.noise) with { P = int(ma.SR/
 
 Passive Nonlinear Allpass based on Pierce switching springs idea.
 Switch between allpass coefficient `a1` and `a2` at signal zero crossings.
+The first-order allpass is realized in normalized (rotation) form, which is
+lossless at every sample, so that switching the coefficient can never add
+energy; with a constant coefficient its output is that of the usual
+first-order allpass (a + z^(-1))/(1 + a z^(-1)).
 
 #### Usage
 
@@ -1481,15 +1496,17 @@ _ : apnl(a1,a2) : _
 
 Where:
 
-* `a1`: first allpass coefficient
-* `a2`: second allpass coefficient
+* `a1`: allpass coefficient used while the filter state is positive (-1 < a1 < 1)
+* `a2`: allpass coefficient used otherwise (-1 < a2 < 1)
 
 #### Test
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 src = os.tosc(440);
 apnl_test = fi.apnl(0.5, -0.5, src);
+apnl_noise_test = fi.apnl(0.9, 0.1, no.noise);
 ```
 
 #### References
@@ -1540,7 +1557,7 @@ to alpha parameters \(1\pm\rho\).
 #### Example: Whacky echo chamber made of 16 lossless "acoustic tubes":
 
 ```
-process = _ : *(1.0/sqrt(N)) <: daisyRev(16,2,0.9999) :> _,_ with { 
+process = _ : *(1.0/sqrt(16)) <: daisyRev(16,2,0.9999) :> _,_ with {
   daisyRev(N,Dp2,G) = si.bus(N) : (si.bus(2*N) :> si.bus(N)
     : fi.scatN(N, par(i,N,2*G/float(N)), fi.lowpass(1,5000.0))
     : par(i,N,de.delay(DS(i),DS(i)-1))) ~ si.bus(N) with { DS(i) = 2^(Dp2+i); };
@@ -1581,8 +1598,8 @@ Where:
 #### Example: the following program should produce all zeros:
 
 ```
-process = fi.allpassn(3,(.3,.2,.1)), fi.scat(.1, fi.scat(.2, fi.scat(.3, _)))
-          :> - : ^(2) : +~_;
+process = _ <: fi.allpassn(3,(.3,.2,.1)), fi.scat(.1, fi.scat(.2, fi.scat(.3, _)))
+          : - : ^(2) : +~_;
 ```
 
 #### Test
@@ -1917,6 +1934,7 @@ tf1s_test = src : fi.tf1s(0, 1, 1, ma.PI*ma.SR/2);
 tf1s_slider_test = no.noise : fi.tf1s(0, 1, 1, 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
 tf1s_modulated_test = no.noise : fi.tf1s(0, 1, 1, 2*ma.PI*20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 tf1s_jump_test = no.noise : fi.tf1s(0, 1, 1, 2*ma.PI*20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+tf1s_zero_freq_test = no.noise : fi.tf1s(1, 0, 1, 2*ma.PI*1000*(ba.time >= 100));
 ```
 
 #### References
@@ -2073,7 +2091,9 @@ resonlp_modulated_test = no.noise : fi.resonlp(20*pow(250, tri), 2, 0.8) with { 
 ![resonhp — response plots](../img/fi_resonhp.svg)
 
 Simple resonant highpass filters based on `tf2s` (virtual analog).
-`resonhp` is a standard Faust function.
+`resonhp` is a standard Faust function. It is the second-order highpass
+gain*s^2/(s^2 + s/Q + 1), with s normalized by 2*PI*fc: it rolls off at
+12 dB per octave below fc, and its gain is `gain` well above fc.
 
 #### Usage
 
@@ -2110,7 +2130,9 @@ resonhp_modulated_test = no.noise : fi.resonhp(20*pow(250, tri), 2, 0.8) with { 
 ![resonbp — response plots](../img/fi_resonbp.svg)
 
 Simple resonant bandpass filters based on `tf2s` (virtual analog).
-`resonbp` is a standard Faust function.
+`resonbp` is a standard Faust function. It is
+gain*s/(s^2 + s/Q + 1), with s normalized by 2*PI*fc, so its peak gain,
+at fc, is gain*Q.
 
 #### Usage
 
@@ -2268,8 +2290,10 @@ lowpass0_highpass1_jump_test = no.noise : fi.lowpass0_highpass1(0, 2, 20*pow(250
 ## Special Filter-Bank Delay-Equalizing Allpass Filters
 
 These special allpass filters are needed by filterbank et al. below.
-They are equivalent to (`lowpass(N,fc)` +|- `highpass(N,fc))/2`, but with
-canceling pole-zero pairs removed (which occurs for odd N).
+They are equivalent to `highpass(N,fc)` +|- `lowpass(N,fc)`, but with
+canceling pole-zero pairs removed (which occurs for odd N). Both the sum
+and the difference are allpass for odd N only, the order the filter banks
+require.
 
 ----
 
@@ -2278,9 +2302,10 @@ canceling pole-zero pairs removed (which occurs for odd N).
 ![highpass_plus_lowpass — response plots](../img/fi_highpass_plus_lowpass.svg)
 
 Sum of the order-`N` Butterworth highpass and lowpass responses at the same
-cutoff: an allpass used as delay equalizer by `fi.filterbank` and the
-filter banks below. For odd orders 1, 3 and 5, canceling pole-zero pairs
-are removed.
+cutoff: for odd `N`, an allpass used as delay equalizer by `fi.filterbank`
+and the filter banks below. For odd orders 1, 3 and 5, canceling pole-zero
+pairs are removed. For even `N` the sum is not allpass: it has a notch at
+`fc` for N=2, and +3 dB at `fc` for N=4.
 
 #### Usage
 
@@ -2493,7 +2518,8 @@ _ : lowpass3e(fc) : _
 
 Where:
 
-* `fc`: -3dB frequency in Hz
+* `fc`: passband edge frequency in Hz, where the gain is -0.2 dB (the
+  -3 dB point is near 1.28*fc)
 
 #### Test
 ```
@@ -2532,7 +2558,8 @@ _ : lowpass6e(fc) : _
 
 Where:
 
-* `fc`: -3dB frequency in Hz
+* `fc`: passband edge frequency in Hz, where the gain is -0.2 dB (the
+  -3 dB point is near 1.06*fc)
 
 #### Test
 ```
@@ -2574,7 +2601,8 @@ _ : highpass3e(fc) : _
 
 Where:
 
-* `fc`: -3dB frequency in Hz
+* `fc`: passband edge frequency in Hz, where the gain is -0.2 dB (the
+  -3 dB point is near fc/1.28)
 
 #### Test
 ```
@@ -2595,7 +2623,7 @@ highpass3e_modulated_test = no.noise : fi.highpass3e(20*pow(250, tri)) with { P 
 
 ![highpass6e — response plots](../img/fi_highpass6e.svg)
 
-Sixth-order Elliptic/Cauer highpass filter. Inversion of `lowpass3e` wrt unit
+Sixth-order Elliptic/Cauer highpass filter. Inversion of `lowpass6e` wrt unit
 circle in s plane (s <- 1/s).
 
 #### Usage
@@ -2606,7 +2634,8 @@ _ : highpass6e(fc) : _
 
 Where:
 
-* `fc`: -3dB frequency in Hz
+* `fc`: passband edge frequency in Hz, where the gain is -0.2 dB (the
+  -3 dB point is near fc/1.06)
 
 #### Test
 ```
@@ -3354,7 +3383,9 @@ Where:
 
 * `Lfx`: level (dB) at fx (boost Lfx>0 or cut Lfx<0)
 * `fx`: peak frequency (Hz)
-* `B`: bandwidth (B) of peak in Hz
+* `B`: bandwidth of the peak in Hz (B = fx/Q): the bandwidth of the
+  resonance (boost) or anti-resonance (cut), which is the -3 dB bandwidth
+  about fx when |Lfx| is large
 
 #### Test
 ```
@@ -3471,7 +3502,7 @@ _ : spectral_tilt(N,f0,bw,alpha) : _
 ```
 Where:
 
-* `N`: desired integer filter order (fixed at compile time)
+* `N`: desired integer filter order, at least 2 (fixed at compile time)
 * `f0`: lower frequency limit for desired roll-off band > 0
 * `bw`: bandwidth of desired roll-off band
 * `alpha`: slope of roll-off desired in nepers per neper,
@@ -3517,8 +3548,9 @@ _ : levelfilter(L,freq) : _
 Where:
 
 * `L`: level, linear between 0 and 1 (not in dB: a negative value gives NaN):
-  1 passes the input unchanged, smaller values lowpass it more
-* `freq`: corner frequency (-3dB point) usually set to fundamental freq
+  1 passes the input unchanged, smaller values lowpass it more. The gain is
+  L^(4/3) at the Nyquist limit (SR/2), and 1 - L + L^(4/3) (within 1 dB of unity) at dc
+* `freq`: corner frequency (-3dB point when L = 0) usually set to fundamental freq
 
 See `levelfilterN` for N such filters in series.
 
@@ -3534,6 +3566,7 @@ levelfilter_test = fi.levelfilter(0.1, 200, src);
 levelfilter_slider_test = fi.levelfilter(hslider("L", 0.1, 0, 1, 0.01), hslider("fc", 200, 20, 20000, 1), no.noise);
 levelfilter_modulated_test = fi.levelfilter(0.1, 20*pow(250, tri), no.noise) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 levelfilter_jump_test = fi.levelfilter(0.1, 20*pow(250, sq), no.noise) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+levelfilter_dc_test = fi.levelfilter(0.1, 200, 1);
 ```
 
 #### References
@@ -3554,9 +3587,10 @@ _ : levelfilterN(N,freq,L) : _
 
 Where:
 
-* `N`: number of `levelfilter` in series, each with the level `L/N`, a constant numerical expression
-* `freq`: corner frequency (-3dB point) usually set to fundamental freq
-* `L`: level, linear between 0 and 1 (see `levelfilter`)
+* `N`: number of `levelfilter` in series, each with the level `L^(1/N)`, a constant numerical expression
+* `freq`: corner frequency of each `levelfilter`, usually set to fundamental freq
+* `L`: level, linear between 0 and 1 (see `levelfilter`); the cascade has the
+  same gain at the Nyquist limit as one `levelfilter`
 
 #### Test
 ```
@@ -3570,6 +3604,7 @@ levelfilterN_test = src : fi.levelfilterN(3, 200, 0.1);
 levelfilterN_slider_test = no.noise : fi.levelfilterN(3, hslider("fc", 200, 20, 20000, 1), hslider("L", 0.1, 0, 1, 0.01));
 levelfilterN_modulated_test = no.noise : fi.levelfilterN(3, 20*pow(250, tri), 0.1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 levelfilterN_jump_test = no.noise : fi.levelfilterN(3, 20*pow(250, sq), 0.1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+levelfilterN_nyquist_test = 1 - 2*ba.period(2) : fi.levelfilterN(3, 200, 0.1);
 ```
 
 #### References
@@ -3584,7 +3619,7 @@ for each spectral band. They are related to the Mth-Octave Spectrum-Analyzers in
 The documentation of this library contains more details about the implementation.
 The parameters are:
 
-* `M`: number of band-slices per octave (>1), a constant numerical expression
+* `M`: number of band-slices per octave (>=1), a constant numerical expression
 * `N`: total number of bands (>2), a constant numerical expression
 * `ftop`: upper bandlimit of the Mth-octave bands (<SR/2)
 
@@ -3594,7 +3629,7 @@ containing frequencies from 0 (dc) up to the start of the Mth-octave bands.
 Thus, the N output signals are
 
 ```
-highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-M*(N-1)))
+highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-(N-2)/M))
 ```
 
 A Filter-Bank is defined here as a signal bandsplitter having the
@@ -3681,9 +3716,11 @@ Where:
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 sig = os.tosc(440);
 mth_octave_filterbank_alt_test = sig : fi.mth_octave_filterbank_alt(3, 2, 8000, 2);
 mth_octave_filterbank_alt_bands_test = sig : fi.mth_octave_filterbank_alt(3, 2, 8000, 5);
+mth_octave_filterbank_alt_o5_sum_test = no.noise : fi.mth_octave_filterbank_alt(5, 2, 8000, 5) :> _;
 ```
 
 ----
@@ -3834,8 +3871,10 @@ _ : filterbanki(3,(fc1,fc2)) : _,_,_
 ```
 fi = library("filters.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 src = os.tosc(440);
 filterbanki_test = src : fi.filterbanki(3, (500, 2000));
+filterbanki_o5_sum_test = no.noise : fi.filterbanki(5, (500, 1000, 2000)) :> _;
 ```
 
 ## State Variable Filters

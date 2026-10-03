@@ -564,7 +564,7 @@ each spectral band. They are related to the Mth-Octave Filter-Banks in `filters.
 The documentation of this library contains more details about the implementation.
 The parameters are:
 
-* `M`: number of band-slices per octave (>1)
+* `M`: number of band-slices per octave (>=1)
 * `N`: total number of bands (>2)
 * `ftop` = upper bandlimit of the Mth-octave bands (<SR/2)
 
@@ -573,7 +573,7 @@ containing frequencies from ftop to SR/2, and a "dc band" lowpass signal
 containing frequencies from 0 (dc) up to the start of the Mth-octave bands.
 Thus, the N output signals are:
 ```
-highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-M*(N-1)))
+highpass(ftop), MthOctaveBands(M,N-2,ftop), dcBand(ftop*2^(-(N-2)/M))
 ```
 
 A Spectrum-Analyzer is defined here as any band-split whose bands span
@@ -773,7 +773,7 @@ _ : goertzelOpt(freq,n) : _
 
 Where:
 
-* `freq`: frequency to be analyzed
+* `freq`: frequency to be analyzed (rounded to the nearest DFT bin, `freq*n/SR`)
 * `n`: the Goertzel block size
 
 #### Test
@@ -801,7 +801,7 @@ _ : goertzelComp(freq,n) : _
 
 Where:
 
-* `freq`: frequency to be analyzed
+* `freq`: frequency to be analyzed (rounded to the nearest DFT bin, `freq*n/SR`)
 * `n`: the Goertzel block size
 
 #### Test
@@ -956,7 +956,8 @@ The classic fixed window functions:
 * `window_rect`: rectangular (boxcar) window, 1 inside [0,1], 0 outside
 * `window_hann`: Hann (raised cosine), -31.5 dB first sidelobe
 * `window_hamming`: Hamming (0.54/0.46), -42.7 dB first sidelobe
-* `window_blackman`: Blackman (3-term, exact 0.42/0.50/0.08), -58 dB
+* `window_blackman`: classic Blackman (3-term, 0.42/0.50/0.08), -58 dB
+  (not Harris's "exact Blackman", 7938/9240/1430 over 18608)
 * `window_blackman_harris`: minimum 4-term Blackman-Harris, -92 dB
 * `window_nuttall`: Nuttall's continuous-first-derivative 4-term, -93 dB
 * `window_flattop`: 5-term flat-top (amplitude-accurate spectral peaks,
@@ -1065,6 +1066,7 @@ Where:
 an = library("analyzers.lib");
 os = library("oscillators.lib");
 window_tukey_test = an.window_tukey(0.5, os.lf_sawpos(100));
+window_tukey_rect_test = an.window_tukey(0, os.lf_sawpos(100));
 ```
 
 ----
@@ -1183,11 +1185,21 @@ Where:
 Convert a real signal to the vector formats used by `an.fft`:
 
 * `rtorv(N,x)`: real scalar signal to length-`N` real vector holding the last
-  `N` samples of `x`: `(x, x@1, ..., x@(N-1))`
+  `N` samples of `x`, newest first: `(x, x@1, ..., x@(N-1))`
 * `rtocv(N,x)`: real scalar signal to length-`N` complex vector holding the
-  last `N` samples of `x` with zero imaginary parts: `(x,0), (x@1,0), ...`
+  last `N` samples of `x`, newest first, with zero imaginary parts:
+  `(x,0), (x@1,0), ..., (x@(N-1),0)`
 * `rvtocv(N)`: length-`N` real vector to length-`N` complex vector with zero
   imaginary parts
+
+Because the newest sample comes first, `rtocv(N) : an.fft(N)` is the DFT of the
+time-reversed window, `V(k,n) = sum(i=0..N-1) x(n-i) exp(-j*2*pi*k*i/N)`, and
+for a real `x` it equals `exp(j*2*pi*k/N) * conj(X(k,n))`, where
+`X(k,n) = sum(m=0..N-1) x(n-N+1+m) exp(-j*2*pi*k*m/N)` is the standard sliding
+DFT (`numpy.fft.fft(x[n-N+1:n+1])`). Magnitudes are those of `X(k,n)`; phases
+are conjugated and offset by `2*pi*k/N`, so a sinusoid's phase turns backwards.
+For the chronological (oldest-first) order and the standard sliding DFT, use
+`an.rtorv_chrono` and `an.rtocv_chrono`.
 
 #### Usage
 
@@ -1206,7 +1218,69 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 rtocv_test = an.rtocv(8, os.tosc(220));
+rtorv_test = an.rtorv(4, no.noise);
+```
+
+----
+
+### `(an.)rtorv_chrono`
+
+Real scalar signal to length-`N` real vector holding the last `N` samples of
+`x` in chronological order, oldest first: `(x@(N-1), ..., x@1, x)`.
+Element `m` is `x(n-N+1+m)` at time `n`, the order a DFT expects.
+`an.rtorv` holds the same samples newest first.
+
+#### Usage
+
+```
+rtorv_chrono(N,x) : si.bus(N)
+```
+
+Where:
+
+* `N`: vector size (power of 2 in FFT contexts, known at compile time)
+* `x`: a real (scalar) input signal
+
+#### Test
+```
+an = library("analyzers.lib");
+no = library("noises.lib");
+rtorv_chrono_test = an.rtorv_chrono(4, no.noise);
+```
+
+----
+
+### `(an.)rtocv_chrono`
+
+Real scalar signal to length-`N` complex vector holding the last `N` samples
+of `x` in chronological order, oldest first, with zero imaginary parts:
+`(x@(N-1),0), ..., (x@1,0), (x,0)`.
+`rtocv_chrono(N) : an.fft(N)` is the standard sliding DFT
+`X(k,n) = sum(m=0..N-1) x(n-N+1+m) exp(-j*2*pi*k*m/N)`, i.e.,
+`numpy.fft.fft(x[n-N+1:n+1])`, its phase referred to the oldest sample of the
+window, and `rtocv_chrono(N) : an.fft(N) : an.ifft(N)` returns the window,
+oldest first (the test keeps its real parts: the imaginary parts are rounding
+noise). `an.rtocv` holds the same samples newest first.
+
+#### Usage
+
+```
+rtocv_chrono(N,x) : si.cbus(N)
+```
+
+Where:
+
+* `N`: vector size (power of 2 in FFT contexts, known at compile time)
+* `x`: a real (scalar) input signal
+
+#### Test
+```
+an = library("analyzers.lib");
+no = library("noises.lib");
+rtocv_chrono_test = an.rtocv_chrono(8, no.noise);
+rtocv_chrono_ifft_test = an.rtocv_chrono(8, no.noise) : an.fft(8) : an.ifft(8) : par(i, 8, (_, !));
 ```
 
 ----
@@ -1265,6 +1339,12 @@ FFTs of Real Signals:
 process = signal : an.rtocv(N) : an.fft(N);
 ```
 where `an.rtocv` converts a real (scalar) signal to a complex vector signal having a zero imaginary part.
+  `an.rtocv` puts the newest sample first, so this is the DFT of the time-reversed window:
+  for real input it equals `exp(j*2*pi*k/N) * conj(X(k,n))`, where `X(k,n)` is the standard
+  sliding DFT (same magnitudes; see `an.rtocv`).
+
+  * For the standard sliding DFT `X(k,n) = sum(m=0..N-1) x(n-N+1+m) exp(-j*2*pi*k*m/N)`,
+    i.e., `numpy.fft.fft(x[n-N+1:n+1])`, say `process = signal : an.rtocv_chrono(N) : an.fft(N);`
 
   * See `an.rfft_analyzer_c` (in `analyzers.lib`) and related functions for more detailed usage examples.
 
@@ -1311,6 +1391,8 @@ Where:
   (R0, I0), (R1,I1), (R2,I2), ...
 * Output is a bank of N complex signals giving the complex signal in the time domain:
   (r0, i0), (r1,i1), (r2,i2), ...
+  - `an.fft(N) : an.ifft(N)` is the identity, so the round trip keeps the order of the
+    window: newest sample first after `an.rtocv(N,x)`, oldest first after `an.rtocv_chrono(N,x)`.
 
 #### Test
 ```
@@ -1339,6 +1421,14 @@ Sliding FFT analyzers for a real input signal, built from `an.fft`:
 "Sliding" means the `N`-point FFT is recomputed every sample over the last
 `N` input samples, with no windowing (rectangular window) and no hop.
 
+The window is built by `an.rtocv`, newest sample first, so `rfft_analyzer_c(N)`
+returns the DFT of the time-reversed window: for bin `k` at time `n`,
+`exp(j*2*pi*k/N) * conj(X(k,n))`, where
+`X(k,n) = sum(m=0..N-1) x(n-N+1+m) exp(-j*2*pi*k*m/N)` is the standard sliding
+DFT. Its magnitudes are those of `X(k,n)`, so `rfft_analyzer_db` and
+`rfft_analyzer_magsq` give the sliding-DFT power spectrum; its phases are
+conjugated and offset. `an.rfft_analyzer_c_chrono` returns `X(k,n)` itself.
+
 #### Usage
 
 ```
@@ -1358,7 +1448,43 @@ Where:
 ```
 an = library("analyzers.lib");
 ba = library("basics.lib");
+no = library("noises.lib");
 rfft_analyzer_db_test = 2 * ba.pulse(8) + 0.5 * ba.pulse(4) : an.rfft_analyzer_db(8); // bins of 3 and 2: 9.54 and 6.02 dB
+rfft_analyzer_c_test = no.noise : an.rfft_analyzer_c(8);
+rfft_analyzer_magsq_test = no.noise : an.rfft_analyzer_magsq(8);
+```
+
+----
+
+### `(an.)rfft_analyzer_c_chrono`
+
+Standard sliding DFT of a real signal, bins 0 to N/2 (dc to Nyquist):
+`X(k,n) = sum(m=0..N-1) x(n-N+1+m) exp(-j*2*pi*k*m/N)`, i.e.,
+`numpy.fft.fft(x[n-N+1:n+1])[0:N/2+1]`, recomputed every sample over the last
+`N` samples (rectangular window, no hop). The phase is referred to the oldest
+sample of the window: a sinusoid at the bin frequency `2*pi*k/N` advances it
+by `2*pi*k/N` per sample. Built from `an.rtocv_chrono`, it is the chronological
+counterpart of `an.rfft_analyzer_c`, which returns
+`exp(j*2*pi*k/N) * conj(X(k,n))`; the magnitudes of the two are the same.
+
+#### Usage
+
+```
+_ : rfft_analyzer_c_chrono(N) : si.cbus(N/2+1)
+```
+
+Where:
+
+* `N`: FFT size (must be a power of 2 known at compile time)
+* input: a real (scalar) signal
+* output: the `N/2+1` non-negative-frequency bins as interleaved
+  (real, imaginary) pairs
+
+#### Test
+```
+an = library("analyzers.lib");
+no = library("noises.lib");
+rfft_analyzer_c_chrono_test = no.noise : an.rfft_analyzer_c_chrono(8);
 ```
 
 ----
