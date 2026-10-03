@@ -40,8 +40,8 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 
 - **Feature never exercised.**
   - The `limiter_lad_*` tests never limit: a sine at 1 against a ceiling of 1.
-  - The gate tests never close the gate.
-  - `tapeStop_test` never stops: its `button` is at 0.
+  - The gate tests never close the gate (the `gate_gain_mono` modulated and jump tests now do).
+  - `tapeStop_test` never stops: its `button` is at 0 (`tapeStop_jump_test` now stops).
   - No compressor or expander test uses `prePost = 1`.
   - Every compressor test uses a steady sine, so release is hardly exercised.
 - **Near-silent references.**
@@ -52,8 +52,6 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
   - converting the `_test`s to constants, which changes their references.
 - **No test at all.**
   - `tonestacks.lib` has no Test section and no `tests/tonestacks_tests.dsp`.
-  - `de.fdelay[N]` has no Test section.
-  - Of the `fdelay[N]a`, only `fdelay2a` is tested.
   - In `motion.lib`, `motionEnvelope`, `envelopeAbs`, `envelopePos`, `envelopeNeg`, `pita3` and `totalEnvelope` have none.
 - **Modulators that drift in float.** `pinktrombone.lib`'s two `_modulated_test` use `os.tosc` as their modulator, not the integer triangle.
 
@@ -98,7 +96,14 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
   - `si.smoothq` after its fix, at time 1 s and q = 1: 6.7e-3. The float accumulator itself, which adds an increment of a few tens of ulps per sample.
   - `an.spectralCentroid(0, 0.001)` diverges; its doc already says to use the nonlinearity for such short times.
 
-**delays.lib, phaflangers.lib, misceffects.lib**: fractional and moving delays.
+**delays.lib, phaflangers.lib, misceffects.lib**: fractional and moving delays. **Done**: 16 slider, 16 modulated and 12 jump tests, plus the constant tests that were missing (`fdelay1`..`fdelay5`, `fdelay1a`, `fdelay3a`, `fdelay4a`) and `multiTapSincDelay_near_test` (tau2 = tau1 + 0.001); all pass without a baseline entry. `ef.granular` failed (3.9e-2): its float grain phase wrapped one sample apart in float and double, latching another jitter. Fixed with an integer phase, which also removes the baseline entry of `granular_test`. As planned below, except:
+- `pf.flanger_stereo`, `pf.phaser2_mono`: slider tests too; `pf.vibrato2_mono`: slider, and jump on fb (-0.9 to 0.9).
+- `ef.gate_gain_mono`: the modulated and jump tests close the gate (noise bursts decaying 60 dB in 0.25 s, threshold -30 dB).
+- `ef.tapeStop`: its jump test stops and resumes every 0.25 s.
+- Left as they are, found with the controls at their extremes:
+  - `pf.vibrato2_mono` with fb 0.99 and 50 Hz notches: level gap 2.4e-2 (9.4e-2 at fb -0.99). Without its LFO (speed 0) the gap is 4e-6: the cause is the recursive float LFO (`os.oscrc`/`os.oscrs`, the `os.oscr*` debt of 4.2), amplified by the feedback.
+  - `ef.doppler_shift` at 2 kHz, ratio 0.5: 1.6e-3, its `os.phasor` drifting in float.
+  - `de.multiTapSincDelay` at alpha 0.5 with K = 2 has a gain of 1.10, the sum of its truncated sincs, for any tau2 - tau1 above `ma.EPSILON` (1 below). A property of the method, not of the precision.
 - `de.fdelay`: slider and modulated d `16 + 112*tri`.
 - `de.fdelaylti`/`fdelayltv`: d `2 + 62*tri`. The modulated test is what separates the two.
 - `de.fdelay[N]a` (Thiran, recursive): d `1.5 + 30*tri`, jump 1.6↔40.
@@ -171,7 +176,7 @@ Fix these first. Each fix comes with a test that the old code gets wrong.
 - `fds.lib`: moving `point` for the `linInterp*` functions; `hammer` slider.
 - `pinktrombone.lib`: `tract`/`tract2` tongue parameters. Redo the two existing tests with the integer triangle.
 - `tonestacks.lib`: a constant, a modulated and a jump test on a representative model, for example `ts.bassman(0.5, 0.5, tri)` on `no.noise`. All three were measured and pass. The library has no test at all today.
-- Also passing: `pm.modeFilter` modulated (freq exp 50..5000), `os.oscrs` modulated and jump, `pf.vibrato2_mono` jump on fb.
+- Also passing: `pm.modeFilter` modulated (freq exp 50..5000), `os.oscrs` modulated and jump; `pf.vibrato2_mono` jump on fb (done).
 - `hoa.lib`: `encoder3D` elevation; the decorrelation functions, slider.
 
 ### 4.2 Blocked by existing precision debt
