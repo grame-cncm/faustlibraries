@@ -52,3 +52,13 @@ tf1sb_zero_freq_test = no.noise : fi.tf1sb(0, 1, 1, 2*ma.PI*2000, 2*ma.PI*(1000*
 tf1sb_slider_test = no.noise : fi.tf1sb(0, 1, 1, 2*ma.PI*hslider("bw", 800, 10, 10000, 1), 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
 tf1sb_modulated_test = no.noise : fi.tf1sb(0, 1, 1, 2*ma.PI*fc/5, 2*ma.PI*fc) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fc = 20*pow(250, tri); };
 tf1sb_jump_test = no.noise : fi.tf1sb(0, 1, 1, 2*ma.PI*fc/5, 2*ma.PI*fc) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fc = 20*pow(250, sq); };
+tf2s_df_test = src : fi.tf2s_df(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+tf2s_df_lp1k_test = no.noise : fi.tf2s_df(0, 0, 1, sqrt(2), 1, 2*ma.PI*1000);
+tf2s_df_slider_test = no.noise : fi.tf2s_df(0, 0, 1, sqrt(2), 1, 2*ma.PI*hslider("fc", 2000, 2000, 20000, 1));
+tf2s_df_modulated_test = no.noise : fi.tf2s_df(0, 0, 1, sqrt(2), 1, 2*ma.PI*2000*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tf2s_df_jump_test = no.noise : fi.tf2s_df(0, 0, 1, sqrt(2), 1, 2*ma.PI*2000*pow(8, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+tf1s_df_test = src : fi.tf1s_df(0, 1, 1, ma.PI*ma.SR/2);
+tf1s_df_hp_test = no.noise : fi.tf1s_df(1, 0, 1, 2*ma.PI*100);
+tf1s_df_slider_test = no.noise : fi.tf1s_df(0, 1, 1, 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
+tf1s_df_modulated_test = no.noise : fi.tf1s_df(0, 1, 1, 2*ma.PI*20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tf1s_df_jump_test = no.noise : fi.tf1s_df(0, 1, 1, 2*ma.PI*20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };

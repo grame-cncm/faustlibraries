@@ -2107,6 +2107,84 @@ tf1s_jump_test = no.noise : fi.tf1s(0, 1, 1, 2*ma.PI*20*pow(250, sq)) with { P =
 
 ----
 
+### `(fi.)tf2s_df`, `(fi.)tf1s_df`
+
+Direct-form versions of `tf2s` and `tf1s`: the same bilinear transform of
+B(s)/A(s), prewarped at `w1`, realized as the direct-form biquad `tf2` and
+first-order section `tf1`. They are cheaper than `tf2s` and `tf1s` (about
+1.6x for a fixed `tf2s_df`), and parallel banks of them vectorize better
+with `faust -vec`, but they are only for FIXED cutoffs that stay well above
+the low end of the band: use `tf2s` and `tf1s` everywhere else.
+
+#### Usage
+
+```
+_ : tf2s_df(b2,b1,b0,a1,a0,w1) : _
+_ : tf1s_df(b1,b0,a0,w1) : _
+```
+
+Where:
+
+* `b2`, `b1`, `b0`, `a1`, `a0`: analog coefficients, as for `tf2s` and `tf1s`
+* `w1`: the digital frequency (in radians/second) corresponding to analog
+  frequency 1 rad/sec, which must be greater than 0 (`w1` = 0 divides by
+  zero); above `0.998*PI*SR` (0.499*SR in Hz) it acts as that value
+
+#### Method
+
+The direct form stores output-level states whose poles cluster near
+z = 1 when `w1` is small relative to the sample rate, and loses their
+digits in single precision. Relative RMS error of a float render against
+double, 2 s impulse response, second-order Butterworth lowpass
+(`tf2s_df(0,0,1,sqrt(2),1,2*PI*fc)`), against `tf2s`:
+
+| SR | `fc` | 5 Hz | 20 Hz | 50 Hz | 200 Hz | 1 kHz | 10 kHz |
+| :-- | :-- | --: | --: | --: | --: | --: | --: |
+| 48 kHz | `tf2s_df` | -25 dB | -36 dB | -50 dB | -91 dB | -104 dB | -138 dB |
+| 48 kHz | `tf2s` | -109 dB | -125 dB | -128 dB | -136 dB | -134 dB | -135 dB |
+| 192 kHz | `tf2s_df` | diverges | -25 dB | -31 dB | -50 dB | -80 dB | -117 dB |
+| 192 kHz | `tf2s` | -108 dB | -109 dB | -119 dB | -128 dB | -130 dB | -143 dB |
+
+A resonant section is worse: with Q = 10 at 192 kHz, `tf2s_df` is -30 dB
+(3 %) off at 200 Hz and still -70 dB at 1 kHz. In float, keep a
+second-order `w1` above about 1 % of the highest sample rate in use (for
+example `fc` above 2 kHz at 192 kHz). The first-order `tf1s_df` is much
+less sensitive: -66 dB at 2 Hz and below -80 dB from 10 Hz up at
+192 kHz.
+
+The direct form also behaves worse than `tf2s` when `w1` varies: a
+downward jump of the cutoff multiplies its ringing by up to the jump
+ratio, and modulation at audio rates can make it diverge even in double
+precision. Its cost advantage also shrinks there (about 1.1x for a
+modulated `w1`), since recomputing the coefficients dominates.
+
+#### Test
+```
+fi = library("filters.lib");
+os = library("oscillators.lib");
+ma = library("maths.lib");
+ba = library("basics.lib");
+no = library("noises.lib");
+src = os.tosc(440);
+tf2s_df_test = src : fi.tf2s_df(0, 0, 1, sqrt(2), 1, ma.PI*ma.SR/2);
+tf2s_df_lp1k_test = no.noise : fi.tf2s_df(0, 0, 1, sqrt(2), 1, 2*ma.PI*1000);
+tf2s_df_slider_test = no.noise : fi.tf2s_df(0, 0, 1, sqrt(2), 1, 2*ma.PI*hslider("fc", 2000, 2000, 20000, 1));
+tf2s_df_modulated_test = no.noise : fi.tf2s_df(0, 0, 1, sqrt(2), 1, 2*ma.PI*2000*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tf2s_df_jump_test = no.noise : fi.tf2s_df(0, 0, 1, sqrt(2), 1, 2*ma.PI*2000*pow(8, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+tf1s_df_test = src : fi.tf1s_df(0, 1, 1, ma.PI*ma.SR/2);
+tf1s_df_hp_test = no.noise : fi.tf1s_df(1, 0, 1, 2*ma.PI*100);
+tf1s_df_slider_test = no.noise : fi.tf1s_df(0, 1, 1, 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));
+tf1s_df_modulated_test = no.noise : fi.tf1s_df(0, 1, 1, 2*ma.PI*20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tf1s_df_jump_test = no.noise : fi.tf1s_df(0, 1, 1, 2*ma.PI*20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+#### References
+
+* [https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html](https://ccrma.stanford.edu/~jos/pasp/Bilinear_Transformation.html)
+* [https://github.com/grame-cncm/faustlibraries/issues/263](https://github.com/grame-cncm/faustlibraries/issues/263)
+
+----
+
 ### `(fi.)tf2sb`
 
 Bandpass mapping of `tf2s`: In addition to a frequency-scaling parameter

@@ -443,6 +443,7 @@
 [(fi.)tf1snp](filters.md#fitf1snp)
 [(fi.)tf3slf](filters.md#fitf3slf)
 [(fi.)tf1s](filters.md#fitf1s)
+[(fi.)tf2s_df, (fi.)tf1s_df](filters.md#fitf2s_df,-fitf1s_df)
 [(fi.)tf2sb](filters.md#fitf2sb)
 [(fi.)tf1sb](filters.md#fitf1sb)
 [(fi.)resonlp](filters.md#firesonlp)
