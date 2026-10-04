@@ -55,9 +55,9 @@ orientationWeight_test =
 
 orientation6_test =
   mo.orientation6(
-    os.lf_triangle(0.05),
-    os.sawtooth(0.08),
-    os.lf_triangle(0.03),
+    os.lf_triangle(1.5),
+    os.sawtooth(2.5),
+    os.lf_triangle(3.5),
     1, 1, 1, 1, 1, 1,
     10);
 
