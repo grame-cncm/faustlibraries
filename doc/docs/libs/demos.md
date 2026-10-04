@@ -381,8 +381,11 @@ _,_ : stereo_reverb_tester(gui_group) : _,_
 
 Where:
 
-* `gui_group`: GUI grouping function for the tester controls, or `_` for none
-  (see `(dm.)fdnrev0_demo` for an example of its use)
+* `gui_group`: accepted for compatibility and ignored: the tester controls
+  appear at the top level of the GUI, and every older call compiles,
+  including `stereo_reverb_tester(!)` and the bare
+  `process = dm.stereo_reverb_tester;` (three inputs, the first unused).
+  `(dm.)fdnrev0_demo` puts the same controls in its own group.
 
 #### Test
 ```
