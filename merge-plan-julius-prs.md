@@ -141,3 +141,149 @@ History stays linear (AGENTS.md, *Git history*): no merge commits.
 The references are regenerated for the tests whose output each PR changes
 on purpose. A test failure outside the scope of the PR means a resolution
 error.
+
+## Execution record (2026-10-04)
+
+The merge was done on `master-merge-julius` in the order above, PR by PR,
+with `git rebase --onto <current head> <original head of the parent PR>
+<branch>`. Each rebased branch is kept locally as `mj/<branch>`. Julius
+confirmed the three resolutions and the version numbers in #263
+beforehand, and did not push to the 22 branches meanwhile.
+
+### Rebased heads
+
+| PR | Branch | Original head | Rebased head (`mj/<branch>`) |
+|---|---|---|---|
+| #272 | `tf3slf-tpt` | `9d6a3282` | `15f13da1` |
+| #273 | `tf2s-tpt` | `ed44a5ef` | `85079fe9` |
+| #277 | `svf-hpfirst` | `9c1798d3` | `4b137a66` |
+| #292 | `w1-zero-safe` | `df80c2b8` | `631c240c` |
+| #293 | `svf-tf2s-speedup` | `71b9f913` | `06985a1d` |
+| #282 | `jos-fixes-filters` | `2520cf6a` | `ea760b08` |
+| #290 | `rtocv-order` | `2a0c097b` | `81cfe8b6` |
+| #283 | `jos-fixes-oscillators` | `d5a37e32` | `b137daed` |
+| #294 | `lf-sawpos-float` | `b3a7e89e` | `ba96bc50` |
+| #297 | `saw2ptr-float` | `95763a0f` | `31369386` |
+| #299 | `saw4-float` | `90108b25` | `5f75048f` |
+| #284 | `jos-fixes-delays-reverbs` | `12311ebc` | `18b2bdce` |
+| #289 | `fdnrev0-nonl` | `500ab88a` | `59c15088` |
+| #291 | `zita-match-rev1` | `81ecac3e` | `b54a282f` |
+| #269 | `modefilter-float` | `46ddf145` | `15be6acc` |
+| #270 | `crybaby-float` | `5fc2a56d` | `ab3a45ab` |
+| #288 | `autowah-clamp` | `172b5f02` | `f541c0c0` |
+| #271 | `bandpass2matched-float` | `438fd5d3` | `efbcd9fb` |
+| #285 | `jos-fixes-phaflangers` | `a1ee2cb7` | `c575fdd1` |
+| #286 | `jos-fixes-moog-doc` | `1191c6a3` | `f75aa595` |
+| #287 | `jos-doc-batch` | `02e4a5ef` | `7968a3f7` |
+| #295 | `motion-lf-oscillators` | `29959eff` | `164521d8` (one commit added, below) |
+
+`master-merge-julius` ends with one more commit, `version.lib` 2.76.0 →
+2.77.0: the batch adds functions (the `_chrono` analyzers of #290), so
+MINOR.
+
+### Conflicts as they came, and their resolution
+
+The replay stopped on 8 commits, all of them predicted above.
+
+- **#282**, commit `filters.lib: filter-bank delay equalizers, ...`:
+  - version: 1.11.16;
+  - `tf1s`: #292's TPT body kept, #282's multiply-through-by-`t` body
+    dropped. The commit message says so. #282's other `tf1s`-related
+    content merged without conflict: both PRs had added the same
+    `tf1s_zero_freq_test` line to the doc block and to
+    `tests/filters_analog_sections_tests.dsp`. Git kept both copies, so one
+    of each was removed;
+  - `peak_eq` `Where:`: #292's `fx` bullet (the clamp, and the shelf as
+    `fx` goes to 0) followed by #282's `B` bullet (B = fx/Q);
+  - `doc/docs/libs/filters.md`: regenerated (`make -C doc md index`).
+- **#269**: survey and baseline. The resolution keeps every removal made
+  by either side: the `modeFilter_jump_test` row and its deferred test go
+  (#269 reactivates it), and the `moog_vcf_2b` ones stay gone (#273). The
+  18 bell, marimba and djembe level entries go; so do `saw4_test`,
+  `scope_test` and `simplex1_test`, which the oscillators stack had
+  removed.
+- **#270**: survey and baseline, same rule. The deferred-test row becomes
+  #270's `bandpass2Matched_slider_test` row. `autowah_test`,
+  `crybaby_test` and `crybaby_demo_test` leave the baseline.
+- **#271**, by hand:
+  - the six `*2Matched_modulated_test` rows and deferred tests go (#271),
+    and so do both slider-test rows: #270 fixed the `autowah`/`crybaby`
+    ones and #271 the `bandpass2Matched` one;
+  - the paragraph that said which `_test`s still take sliders now reads:
+    "`autowah_test` and `crybaby_test` were split into a constant `_test`
+    and a `_slider_test` with #270, and `bandpass2Matched_test` with
+    #271.";
+  - `tests/precision-baseline.json`: `"nonfinite": {}` (#272 removed
+    `tf3slf_test`, #271 `bandpass2Matched_test`);
+  - vaeffects.lib: 1.6.7.
+- **#286**: vaeffects.lib 1.6.8.
+- **#287**: filters.lib 1.11.17; `tf2snp`: #273's comment ("tf2s keeps its
+  accuracy") followed by #287's three `declare tf2snp` lines;
+  reverbs.lib 1.5.7.
+
+The version numbers that git merged silently were set by amending the
+commit that raises them in the original PR: reverbs.lib 1.5.6 (#291),
+vaeffects.lib 1.6.5 (#270) and 1.6.6 (#288). Final versions:
+filters.lib 1.11.17, vaeffects.lib 1.6.8, reverbs.lib 1.5.7,
+analyzers.lib 1.5.0, oscillators.lib 1.9.4, demos.lib 1.6.3,
+physmodels.lib 1.2.3, motion.lib 0.10.2.
+
+### Checks at each step
+
+`make check` was run in full after `rm -rf tests/output`, against
+references that each step brings up to date. The references were rebuilt
+at `bf9f71af` (1945 tests, no difference) before step 1. At each step, the
+tests that differed were compared with the list in the PR description.
+Only those references, and those of the new tests, were regenerated, and
+all of them were checked to be finite and nonzero. `make check-precision`
+was run on the touched test files and on the files whose baseline
+entries the step removes.
+
+| Steps | Differ | Matches the PRs | New tests | check-precision |
+|---|---|---|---|---|
+| 1 (#272-#293) | 59 | #292 reports 60 (#273's 11 and 49 of its own); the 59 here all belong to the families it lists (`tf2s`, `tf1s` and band-section callers under modulation or jumps, the three slow-start demos) | 47 | 336 tests, 0 failed |
+| 2-3 (#282, #290) | 29 | the 25 of #282, plus the jump/zero-freq tests of `peak_eq`, `peak_eq_cq` and `resonhp` that step 1 added | 15 | 189, 0 failed |
+| 4 (#283-#299) | 38 | exactly #283's 38 | 21 | 182 + 127 (files of the removed baseline entries), 0 failed |
+| 5-7 (#284, #289, #291) | 20 | exactly the 20 of #291 (#284's 15 and the `zita_rev_fdn` loop length) | 11 | 169 + 33 (instruments), 0 failed |
+| 8-10 (#269, #270, #288, #271) | 1 | `modeFilter_modulated_test`, as #269 says | 24 | 324, 0 failed |
+| 11-13 (#285, #286, #287, #295) | 30 | #285's 17 and #295's 13; none for #286 and #287 | 2 | 186, 0 failed |
+
+On the final head: `make check`, 2065 tests, 0 differences, 0 missing
+references; `make checkdoc` OK; `scripts/check_usage.py` on every
+library: 1197 symbols, 0 debt; `scripts/normalize_licenses.py --check`
+OK; `import("all.lib"); process = _;` compiles; the regenerated docs
+(`make -C doc md index`) are identical to the committed ones.
+
+### #295: `orientation6_test` was silent
+
+The check of the new references found one all-zero output:
+`orientation6_test`, on all six channels, already on #295's own head. In
+#295, the test's inputs became `os.lf_triangle(0.05)`, `os.sawtooth(0.08)`
+and `os.lf_triangle(0.03)`. `os.lf_triangle` starts at -1, and at these
+frequencies the three inputs stay near (-1, -1, -1) for the whole second
+the test renders (still -0.80, -0.84, -0.88 at its end). That point is at
+least 1.41 from every axis, while a lobe only reaches 1/`shape` = 1, so
+every weight is 0. The previous `os.triangle(0.05)` stayed near 0 and
+put the vector in the Rear lobe.
+
+The fix, a commit added to the PR (`164521d8`), drives the test at 1.5,
+2.5 and 3.5 Hz, in the doc block and in `tests/motion_tests.dsp`. Among
+the frequencies tried, it is the one whose vector crosses all six lobes
+within the second: every output is nonzero, with peaks from 0.49 to 0.71.
+`check-precision` on `tests/motion_tests.dsp`: 21 tests, 0 failed.
+
+### Publishing
+
+Still to do, in this order:
+
+1. Push each rebased branch over its PR branch, guarded by its original
+   head:
+
+   ```bash
+   git push --force-with-lease=<branch>:<original head> origin mj/<branch>:<branch>
+   ```
+
+2. Push `master-merge-julius`, then fast-forward `master` to it. GitHub
+   then marks the 22 PRs as merged.
+3. Tell Julius in #263 that the merge is done, and that his branches are
+   free again.
