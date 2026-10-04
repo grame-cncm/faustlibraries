@@ -78,7 +78,7 @@ hy = library("hysteresis.lib");
 pt = library("pinktrombone.lib");
 
 declare name "Faust Demos Library";
-declare version "1.6.3";
+declare version "1.6.4";
 
 //########################################################################################
 /************************************************************************
@@ -826,8 +826,11 @@ with {
 //
 // Where:
 //
-// * `gui_group`: GUI grouping function for the tester controls, or `_` for none
-//   (see `(dm.)fdnrev0_demo` for an example of its use)
+// * `gui_group`: accepted for compatibility and ignored: the tester controls
+//   appear at the top level of the GUI, and every older call compiles,
+//   including `stereo_reverb_tester(!)` and the bare
+//   `process = dm.stereo_reverb_tester;` (three inputs, the first unused).
+//   `(dm.)fdnrev0_demo` puts the same controls in its own group.
 //
 // #### Test
 // ```
@@ -840,7 +843,10 @@ with {
 declare stereo_reverb_tester author "Julius O. Smith III";
 declare stereo_reverb_tester licence "MIT";
 
-stereo_reverb_tester(revin_group,x,y) = reverb_tester(revin_group,x,y)
+stereo_reverb_tester(gui_group,x,y) = _stereo_reverb_tester(_,x,y);
+
+// stereo_reverb_tester with its controls in revin_group, for fdnrev0_demo
+_stereo_reverb_tester(revin_group,x,y) = reverb_tester(revin_group,x,y)
 with {
     reverb_tester(revin_group,x,y) = inx,iny with {
         ck_group(x) = revin_group(vgroup("[1] Input Config",x));
@@ -896,7 +902,7 @@ with {
 declare fdnrev0_demo author "Julius O. Smith III";
 declare fdnrev0_demo licence "MIT";
 
-fdnrev0_demo(N,NB,BBSO) = stereo_reverb_tester(revin_group)
+fdnrev0_demo(N,NB,BBSO) = _stereo_reverb_tester(revin_group)
       <: re.fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl)
       :> *(gain),*(gain)
 with{
