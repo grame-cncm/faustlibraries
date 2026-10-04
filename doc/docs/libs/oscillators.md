@@ -921,6 +921,21 @@ The polynomial order `N` is limited to 4 because noise has been
 observed at very low `freq` values.  (LFO sawtooths should of course
 be generated using `lf_sawpos` instead.)
 
+The N-1 differences cancel as `freq/ma.SR` falls: computed as such in single
+precision, the RMS level of `saw4` at 20 Hz was 19 (44.1 kHz) to 1900 (192 kHz)
+times too high and 34 % off at 220 Hz and 192 kHz, and that of `saw3` at 20 Hz
+22 % off at 192 kHz (up to version 1.9.3). In single precision, orders 3
+and 4 therefore compute the same samples in closed form: the delayed ramp plus, on
+the N-1 samples after each wrap, the polynomial transition, with the phase of the
+fixed-point phasor of `lf_sawpos` at full precision. Their single- and double-precision
+outputs then differ by the float rounding of the phase increment `freq/ma.SR` only,
+at every frequency and when `freq` changes. Double precision keeps the differences.
+
+Since each difference is scaled by the current period, a jump of `freq` makes a
+spike, in either precision: `saw4` jumping from 2 kHz down to 20 Hz reaches 1.2e4
+at 44.1 kHz and 7.3e4 at 192 kHz, `saw3` 44 to 49. Prefer `saw2ptr` (stateless)
+when `freq` jumps.
+
 ----
 
 ### `(os.)sawNp`
@@ -947,6 +962,7 @@ where
 os = library("oscillators.lib");
 sawNp_test = os.sawNp(3, 330, 0.5);
 sawNp_lowfreq_test = os.sawNp(2, 10, 0.5);
+sawNp_order4_test = os.sawNp(4, 20, 0.5);
 ```
 #### Implementation Notes
 
@@ -1006,7 +1022,13 @@ where
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 saw3_test = os.saw3(220);
+saw3_lowfreq_test = os.saw3(20);
+saw3_slider_test = os.saw3(hslider("saw3:freq", 220, 20, 20000, 1));
+saw3_modulated_test = os.saw3(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+saw3_jump_test = os.saw3(20*pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### Implementation Notes
@@ -1036,7 +1058,13 @@ where
 #### Test
 ```
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 saw4_test = os.saw4(220);
+saw4_lowfreq_test = os.saw4(20);
+saw4_slider_test = os.saw4(hslider("saw4:freq", 220, 20, 20000, 1));
+saw4_modulated_test = os.saw4(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+saw4_jump_test = os.saw4(20*pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### Implementation Notes
@@ -1293,6 +1321,7 @@ ma = library("maths.lib");
 pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
 pulsetrainN_slider_test = os.pulsetrainN(3, hslider("pulsetrainN:freq", 220, 20, 20000, 1), hslider("pulsetrainN:duty", 0.25, 0, 1, 0.01));
 pulsetrainN_modulated_test = os.pulsetrainN(3, 220, 0.05 + 0.9*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+pulsetrainN_order4_test = os.pulsetrainN(4, 25, 0.25);
 ```
 
 
@@ -1343,6 +1372,7 @@ Where:
 ```
 os = library("oscillators.lib");
 squareN_test = os.squareN(3, 220);
+squareN_order4_test = os.squareN(4, 220);
 ```
 
 ----
@@ -1389,6 +1419,7 @@ Where:
 ```
 os = library("oscillators.lib");
 imptrainN_test = os.imptrainN(3, 220);
+imptrainN_order4_test = os.imptrainN(4, 220);
 ```
 
 ----
@@ -1439,6 +1470,7 @@ Where:
 ```
 os = library("oscillators.lib");
 triangleN_test = os.triangleN(3, 220);
+triangleN_order4_test = os.triangleN(4, 25);
 ```
 
 ----

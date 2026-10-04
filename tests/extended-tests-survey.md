@@ -155,7 +155,7 @@ The plan was:
 
 **oscillators.lib**: **Done**: 30 slider and 30 modulated tests, 2 jump tests (`rpm`), all passing without a baseline entry. `os.polyblep_triangle` peaked at 84 under a frequency sweep and 165 after a jump: it scaled its leaky integrator by `4*freq/SR` at the output. Fixed by scaling at the input; its modulated and jump tests pin it. Changes to the plan below:
 - `os.phasor`, `os.osc`, `os.oscsin`: through zero (`2000*(2*tri - 1)`); `os.lf_sawpos`: exp 0.01..100.
-- `os.sawN(3)`: exp 50..20000, not 20..20000. At 20 Hz and 192 kHz its level gap is 8e-2: the DPW method differentiates a cubic of the ramp twice and scales by `(SR/freq)^2`, which cancels in float at low frequencies (the doc already warns about orders 5 and 6). `sawN(2)` passes from 20 Hz.
+- `os.sawN(3)`: exp 50..20000, not 20..20000. At 20 Hz and 192 kHz its level gap is 8e-2: the DPW method differentiates a cubic of the ramp twice and scales by `(SR/freq)^2`, which cancels in float at low frequencies (the doc already warns about orders 5 and 6). `sawN(2)` passes from 20 Hz. Since oscillators.lib 1.9.4, single precision computes orders 3 and 4 in closed form: `saw3_modulated_test` and `saw4_modulated_test` sweep 20..20000 and pass (4.3e-6 and 3.0e-6); `sawN_modulated_test` keeps its range. Their jump tests jump between 20 Hz and 2 kHz (2.6e-5 and 2.3e-4): between 20 Hz and 20 kHz they fail in float (1.6e-3, 3.4e-3), since the spike that a downward jump makes depends on the phase at the jump, and that phase moves with the float rounding of `freq/SR` (with increments exact in both precisions, `ma.SR/2048` to `ma.SR/4`, the gap is 1e-7).
 - `os.dsf`: `oscc`, `oscs` and `osccN` with `a = 0.95*tri`; `os.rpm`: `sawtooth` and `square`, modulated and jumping.
 - Left as they are: `os.polyblep_triangle` jumping between 20 Hz and 20 kHz reaches 0.17 at 48 kHz, where 20 kHz is a period of 2.4 samples; and `ma.frac` of a negative phase above about -3e-8 is exactly 1 in float, so `os.osc` through zero could index `tablesize`. Faust's default table check (`-ct 1`) clamps the index, which reads the last entry (about -1e-4) instead of the first (0); with `-ct 0` it reads one past the table. Since #294, the single-precision phasor is fixed point and its output is a multiple of 2^-24 below 1, so this no longer happens in float; in double, it takes a phase less than 2^-54 (5.6e-17) below 0.
 
@@ -246,7 +246,6 @@ written and run through `check_precision.py` at the six rates on
 - **Not tried, since their constant tests already exceed the threshold.**
   Extended tests would only fail the same way:
   - `os.oscr*` (2.05e-3);
-  - `os.saw4` (0.193);
   - `os.imptrain*` and `os.lf_imptrain` (0.225);
   - `no.sparse_noise` (0.393);
   - dx7 `lfo` (4.25e-3);

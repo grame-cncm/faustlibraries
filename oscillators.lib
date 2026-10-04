@@ -66,7 +66,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "1.9.3";
+declare version "1.9.4";
 
 // This library contains platform specific constants
 pl = library("platform.lib");
@@ -208,8 +208,14 @@ with {
 // -ffast-math can reorder them. Integer wraparound is exact for both signs of
 // freq, every frequency advances, and freq = 0 freezes the phase.
 // The output keeps the top 24 bits, so it is exact in float and never reaches 1.
-_phasor_fix(freq, reset, phase) = (((freq : counts) : _fixpt.split), hard_reset, (phase : start))
-    : loop ~ (_,_) : (_,!) : out
+_phasor_fix(freq, reset, phase) = _phasor_fix_counts(freq, reset, phase) : (_,!) : out
+with {
+    out(p) = float(p >> 6) * (1.0/16777216.0);
+};
+
+// The state (p, s) of `_phasor_fix`: the phase is (p + s/2^24)/2^30 cycle.
+_phasor_fix_counts(freq, reset, phase) = (((freq : counts) : _fixpt.split), hard_reset, (phase : start))
+    : loop ~ (_,_)
 with {
     Q = _fixpt.Q;
     mask = _fixpt.mask;
@@ -218,7 +224,6 @@ with {
     start(ph) = int(ma.decimal(ph) * Q) & mask;
     loop(p, s, xi, xs, hr, p0) = _fixpt.add(p, s, xi, xs)
         : \(q, t).(select2(hr, q & mask, p0), select2(hr, t & 16777215, 0));
-    out(p) = float(p >> 6) * (1.0/16777216.0);
     // To correctly start at `phase` at the first sample
     hard_reset = (1-1')|reset;
 };
@@ -1118,6 +1123,21 @@ lf_saw(freq) = saw1(freq);
 // The polynomial order `N` is limited to 4 because noise has been
 // observed at very low `freq` values.  (LFO sawtooths should of course
 // be generated using `lf_sawpos` instead.)
+//
+// The N-1 differences cancel as `freq/ma.SR` falls: computed as such in single
+// precision, the RMS level of `saw4` at 20 Hz was 19 (44.1 kHz) to 1900 (192 kHz)
+// times too high and 34 % off at 220 Hz and 192 kHz, and that of `saw3` at 20 Hz
+// 22 % off at 192 kHz (up to version 1.9.3). In single precision, orders 3
+// and 4 therefore compute the same samples in closed form: the delayed ramp plus, on
+// the N-1 samples after each wrap, the polynomial transition, with the phase of the
+// fixed-point phasor of `lf_sawpos` at full precision. Their single- and double-precision
+// outputs then differ by the float rounding of the phase increment `freq/ma.SR` only,
+// at every frequency and when `freq` changes. Double precision keeps the differences.
+//
+// Since each difference is scaled by the current period, a jump of `freq` makes a
+// spike, in either precision: `saw4` jumping from 2 kHz down to 20 Hz reaches 1.2e4
+// at 44.1 kHz and 7.3e4 at 192 kHz, `saw3` 44 to 49. Prefer `saw2ptr` (stateless)
+// when `freq` jumps.
 //-----------------------------------------------------------------
 declare sawN author "Julius O. Smith III";
 declare sawN license "LicenseRef-STK-4.3";
@@ -1125,17 +1145,21 @@ declare sawN license "LicenseRef-STK-4.3";
 // Orders 5 and 6 have noise at low fundamentals: MAX_SAW_ORDER = 6; _MAX_SAW_ORDER_NEXTPOW2 = 8;
 MAX_SAW_ORDER = 4;
 _MAX_SAW_ORDER_NEXTPOW2 = 8; // par cannot handle the case of 0 elements
-sawN(N,freq) = saw1l : poly(Nc) : D(Nc-1) : gate(Nc-1)
+sawN(N,freq) = _sawN_by_precision(ma.EPSILON > 1e-10)
+with {
+  Nc = max(1,min(N,MAX_SAW_ORDER));
+  _sawN_by_precision(0) = _sawN_flt(Nc,freq);
+  _sawN_by_precision(1) = _sawN_fix(Nc,freq);
+};
+
+// Differentiated polynomial waveform (double precision and above): the polynomial
+// of the ramp, then N-1 differences, each scaled by the period in samples.
+_sawN_flt(N,freq) = saw1l : poly(Nc) : D(Nc-1) : gate(Nc-1)
 with {
   Nc = max(1,min(N,MAX_SAW_ORDER));
   clippedFreq = max(20.0,abs(freq)); // use lf_sawpos(freq) for LFOs (freq < 20 Hz)
   saw1l = 2*lf_sawpos(clippedFreq) - 1; // zero-mean, amplitude +/- 1
-  poly(1,x) = x;
-  poly(2,x) = x*x;
-  poly(3,x) = x*x*x - x;
-  poly(4,x) = x*x*(x*x - 2.0);
-  poly(5,x) = x*(7.0/3 + x*x*(-10.0/3.0 + x*x));
-  poly(6,x) = x*x*(7.0 + x*x*(-5.0 + x*x));
+  poly(n,x) = _sawN_poly(n,x);
   p0n = float(ma.SR)/clippedFreq; // period in samples
   diff1(x) = (x - x')/(2.0/p0n);
   diff(N) = seq(n,N,diff1); // N diff1s in series
@@ -1145,6 +1169,63 @@ with {
   D(i) = diff(i)/factorial(i+1);
   gate(N) = *(1@(N)); // delayed step for blanking startup glitch
 };
+
+// The same samples in single precision, where the N-1 differences of `_sawN_flt` cancel
+// as freq/SR falls. The polynomial of order N is 2^N B_N(t) plus a constant, with B_N
+// the Bernoulli polynomial of the phase t = (x+1)/2 of the ramp x, so the cascade has
+// a closed form, a function of the current phase and of the last N-1 phase increments
+// T = freq/SR (the cascade scales each difference by the current period 1/T):
+// * `lin`: the ramp delayed by (N-1)/2 samples, plus, for N = 4, a term in the
+//   change of T from sample to sample, exactly 0 at a constant frequency;
+// * `wrap`: on the N-1 samples after each wrap of the phase, the jump of the
+//   polynomial across the wrap, B_N(t+1) - B_N(t) = N t^(N-1), which is small near
+//   the wrap and computed as such (`S`, one term per wrap, from the phase unwrapped
+//   backwards, `z`).
+// The phase comes from `_phasor_fix_counts` at full precision, and T is the increment
+// it accumulates, so these are the samples of the cascade, at any frequency, also when
+// freq changes at every sample. Orders 1 and 2 have at most one difference: they keep
+// `_sawN_flt`.
+_sawN_fix(1,freq) = _sawN_flt(1,freq);
+_sawN_fix(2,freq) = _sawN_flt(2,freq);
+_sawN_fix(N,freq) = (lin(N) + wrap(N)) * (1@(N-1))
+with {
+  f = max(20.0,abs(freq));
+  T0 = f/ma.SR; // phase increment (as in _phasor_fix)
+  R0 = float(ma.SR)/f : min(ma.MAX); // period in samples (min: one division, kept as such)
+  T1 = T0'; T2 = T0''; R1 = R0'; R2 = R0'';
+  phi = _phasor_fix_counts(f, 0, 0)
+      : \(p, s).((float(p) + float(s)*(1.0/16777216.0)) * (1.0/_fixpt.Q));
+  x = 2*phi - 1;
+  // the phase 1, 2, 3 samples ago, unwrapped backwards: it wrapped -floor(z) times since
+  z1 = phi - T0; z2 = z1 - T1; z3 = z2 - T2;
+  // sum of (z+k)^(N-1) over the wraps since, k = 0 .. -floor(z)-1: at most j
+  // wraps in j samples below SR; beyond, the rest in closed form (Faulhaber)
+  S(j,z) = sum(k, j, min(z + k, 0.0)^(N-1)) + rest
+  with {
+    rest = select2(z + j < 0, 0.0,
+                   (_sawN_poly(N, 2*ma.decimal(z) - 1) - _sawN_poly(N, 2*(z + j) - 1)) / (N << N));
+  };
+  S1 = S(1,z1); S2 = S(2,z2); S3 = S(3,z3);
+  lin(3) = (3*x - 4*T0 - 2*T1) * (1 + T1*R0) / 6;
+  lin(4) = ((T0 + T1)*(T0 + T1 + T2)*R0*R0*(4*x - 6*T0 - 4*T1 - 2*T2)
+            + (g - g')*R0*0.5*Q2) / 24
+  with {
+    g = (T1 - T0)*R0; // relative change of the increment, exactly 0 at a constant freq
+    // second divided difference of the polynomial at the three previous phases
+    u1 = x - 2*T0; u2 = u1 - 2*T1; u3 = u2 - 2*T2;
+    Q2 = u1*u1 + u2*u2 + u3*u3 + u1*u2 + u1*u3 + u2*u3 - 2;
+  };
+  wrap(3) = R0*(R1*S2 - (R0 + R1)*S1);
+  wrap(4) = R0*(R1*((R0 + R1 + R2)*S2 - R2*S3) - (R0*R0 + R0*R1 + R1*R1)*S1) / 3;
+};
+
+// The DPW polynomials of the ramp x, orders 1 to 6.
+_sawN_poly(1,x) = x;
+_sawN_poly(2,x) = x*x;
+_sawN_poly(3,x) = x*x*x - x;
+_sawN_poly(4,x) = x*x*(x*x - 2.0);
+_sawN_poly(5,x) = x*(7.0/3 + x*x*(-10.0/3.0 + x*x));
+_sawN_poly(6,x) = x*x*(7.0 + x*x*(-5.0 + x*x));
 
 //------------------`(os.)sawNp`--------------------------------
 // Same as `(os.)sawN` but with a controllable waveform phase.
@@ -1169,6 +1250,7 @@ with {
 // os = library("oscillators.lib");
 // sawNp_test = os.sawNp(3, 330, 0.5);
 // sawNp_lowfreq_test = os.sawNp(2, 10, 0.5);
+// sawNp_order4_test = os.sawNp(4, 20, 0.5);
 // ```
 // #### Implementation Notes
 //
@@ -1231,7 +1313,13 @@ with {
 // #### Test
 // ```
 // os = library("oscillators.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // saw3_test = os.saw3(220);
+// saw3_lowfreq_test = os.saw3(20);
+// saw3_slider_test = os.saw3(hslider("saw3:freq", 220, 20, 20000, 1));
+// saw3_modulated_test = os.saw3(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// saw3_jump_test = os.saw3(20*pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //
 // #### Implementation Notes
@@ -1258,7 +1346,13 @@ with {
 // #### Test
 // ```
 // os = library("oscillators.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // saw4_test = os.saw4(220);
+// saw4_lowfreq_test = os.saw4(20);
+// saw4_slider_test = os.saw4(hslider("saw4:freq", 220, 20, 20000, 1));
+// saw4_modulated_test = os.saw4(20*pow(1000, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// saw4_jump_test = os.saw4(20*pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //
 // #### Implementation Notes
@@ -1567,6 +1661,7 @@ impulse = 1-1';
 // pulsetrainN_test = os.pulsetrainN(3, 220, 0.25);
 // pulsetrainN_slider_test = os.pulsetrainN(3, hslider("pulsetrainN:freq", 220, 20, 20000, 1), hslider("pulsetrainN:duty", 0.25, 0, 1, 0.01));
 // pulsetrainN_modulated_test = os.pulsetrainN(3, 220, 0.05 + 0.9*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// pulsetrainN_order4_test = os.pulsetrainN(4, 25, 0.25);
 // ```
 //
 //--------------------------------------------------------
@@ -1630,6 +1725,7 @@ pulsetrain = pulsetrainN(2);
 // ```
 // os = library("oscillators.lib");
 // squareN_test = os.squareN(3, 220);
+// squareN_order4_test = os.squareN(4, 220);
 // ```
 //--------------------------------------------------------
 squareN(N,freq) = pulsetrainN(N,freq,0.5);
@@ -1676,6 +1772,7 @@ square = squareN(2);
 // ```
 // os = library("oscillators.lib");
 // imptrainN_test = os.imptrainN(3, 220);
+// imptrainN_order4_test = os.imptrainN(4, 220);
 // ```
 //--------------------------------------------------------
 // impulse stands for the first saw reset; 1@N blanks the step of sawN's startup gate:
@@ -1725,6 +1822,7 @@ imptrain = imptrainN(2); // default based on saw2
 // ```
 // os = library("oscillators.lib");
 // triangleN_test = os.triangleN(3, 220);
+// triangleN_order4_test = os.triangleN(4, 25);
 // ```
 //--------------------------------------------------------
 triangleN(N,freq) = squareN(N,freq) : fi.pole(p) : *(gain) with {
