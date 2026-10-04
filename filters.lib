@@ -262,7 +262,7 @@ dcblocker = zero(1) : pole(0.995);
 //----------------------------------------------------------
 declare lptN author "Dario Sanfilippo";
 declare lptN copyright "Copyright (C) 2020 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare lptN license "LicenseRef-STK-4.3";
+declare lptN license "MIT";
 lptN(N, tN, x) = x : si.smooth(ba.tau2pole(tN / log(10.0^(float(N)/20.0))));
 // Special cases of lptN
 //------------------------`(fi.)lptau`--------------------------
@@ -294,7 +294,7 @@ lptN(N, tN, x) = x : si.smooth(ba.tau2pole(tN / log(10.0^(float(N)/20.0))));
 //------------------------------------------------------------
 declare lptau author "Dario Sanfilippo";
 declare lptau copyright "Copyright (C) 2020 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare lptau license "LicenseRef-STK-4.3";
+declare lptau license "MIT";
 lptau(tN, x) = lptN(8.6858896381, tN, x); // Tau time constant, i.e., 1/e atten. after tN secs
 
 //------------------------`(fi.)lpt60`--------------------------
@@ -326,7 +326,7 @@ lptau(tN, x) = lptN(8.6858896381, tN, x); // Tau time constant, i.e., 1/e atten.
 //------------------------------------------------------------
 declare lpt60 author "Dario Sanfilippo";
 declare lpt60 copyright "Copyright (C) 2020 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare lpt60 license "LicenseRef-STK-4.3";
+declare lpt60 license "MIT";
 lpt60(tN, x) = lptN(60, tN, x); // T60 constant, i.e., 1/1000 atten. after tN secs
 
 //------------------------`(fi.)lpt19`--------------------------
@@ -358,7 +358,7 @@ lpt60(tN, x) = lptN(60, tN, x); // T60 constant, i.e., 1/1000 atten. after tN se
 //------------------------------------------------------------
 declare lpt19 author "Dario Sanfilippo";
 declare lpt19 copyright "Copyright (C) 2020 Dario Sanfilippo <sanfilippo.dario@gmail.com>";
-declare lpt19 license "LicenseRef-STK-4.3";
+declare lpt19 license "MIT";
 lpt19(tN, x) = lptN(19, tN, x); // T19 constant, i.e., 1/e^2.2 atten. after tN secs
 
 //=======================================Comb Filters=====================================
