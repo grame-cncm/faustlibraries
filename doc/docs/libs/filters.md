@@ -2185,6 +2185,55 @@ tf1s_df_jump_test = no.noise : fi.tf1s_df(0, 1, 1, 2*ma.PI*20*pow(250, sq)) with
 
 ----
 
+### `(fi.)tpt_df_fmin`
+
+The lowest cutoff, in Hz, at which the `*_tpt_df` functions below switch
+from trapezoidal (TPT) sections to the cheaper direct-form ones
+(`tf2s_df`, `tf1s_df`) in the precision being compiled: 2304 Hz in single
+precision, 0 (direct form everywhere) in double, quad and fixed-point
+precision.
+The filter banks and analyzers (`filterbank`, `mth_octave_filterbank`,
+`an.mth_octave_analyzer`, ...) use it as their default limit:
+`filterbank(O,freqs)` is `filterbank_tpt_df(tpt_df_fmin,O,freqs)`.
+
+#### Usage
+
+```
+tpt_df_fmin : _
+```
+
+#### Method
+
+The float error of a direct-form section grows as the inverse square of
+`fc/SR` (12 dB per octave down), so the lowest safe `fc/SR` scales as the
+square root of the machine epsilon. In single precision, Butterworth
+sections up to order 8 and the 6th-order elliptic `lowpass6e` and
+`highpass6e` stay within -80 dB (relative RMS error, float against double)
+above `fc/SR` = 0.012, which is 2304 Hz at 192 kHz, the highest rate
+`ma.SR` reports. Scaled by the square root of the epsilon ratio, the same
+accuracy would need 0.1 Hz in double precision and 0.002 Hz in quad, below
+any useful cutoff: the limit is 0 there. Each precision gets its value
+from a precision-qualified definition (`singleprecision tpt_df_fmin =
+2304.0;`, and 0 for `doubleprecision`, `quadprecision` and
+`fixedpointprecision`), the mechanism `ma.EPSILON` uses, so the value is a
+constant of the program and the switch costs nothing: each section is
+compiled in one form only, when its cutoff is a constant. Fixed-point
+compilation, like double, uses the direct form.
+
+Single- and double-precision builds therefore realize the sections
+below 2304 Hz in different forms. Their outputs agree for constant or
+slowly varying cutoffs, but not under fast modulation or abrupt jumps of
+a cutoff, where the direct form rings more (see `tf2s_df`).
+
+#### Test
+```
+fi = library("filters.lib");
+os = library("oscillators.lib");
+tpt_df_fmin_test = os.tosc(440) * (fi.tpt_df_fmin <= 2304);
+```
+
+----
+
 ### `(fi.)tf2sb`
 
 Bandpass mapping of `tf2s`: In addition to a frequency-scaling parameter
@@ -2577,6 +2626,50 @@ lowpass0_highpass1_modulated_test = no.noise : fi.lowpass0_highpass1(0, 2, 20*po
 lowpass0_highpass1_jump_test = no.noise : fi.lowpass0_highpass1(0, 2, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
+----
+
+### `(fi.)lowpass_tpt_df`, `(fi.)highpass_tpt_df`
+
+`lowpass` and `highpass` (order-`N` Butterworth) in trapezoidal sections
+below the cutoff limit `L` and in direct-form sections (`tf2s_df`,
+`tf1s_df`) at and above it. With a constant `fc`, only one of the two is
+compiled. With a varying `fc`, both run (more CPU than either), the
+direct form at `max(fc, L)` so that it stays accurate, and the output
+switches between them where `fc` crosses `L`: pass `L = ma.MAX`
+(trapezoidal) or `L = 0` (direct form) to compile one form only.
+
+#### Usage
+
+```
+_ : lowpass_tpt_df(L,N,fc) : _
+_ : highpass_tpt_df(L,N,fc) : _
+```
+
+Where:
+
+* `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+  direct form and `L >= ma.MAX` the trapezoidal form for every `fc`
+* `N`: filter order (number of poles), a constant numerical expression
+* `fc`: cutoff frequency in Hz
+
+#### Test
+```
+fi = library("filters.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+lowpass_tpt_df_test = no.noise : fi.lowpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+lowpass_tpt_df_low_test = no.noise : fi.lowpass_tpt_df(fi.tpt_df_fmin, 5, 50);
+lowpass_tpt_df_slider_test = no.noise : fi.lowpass_tpt_df(fi.tpt_df_fmin, 3, hslider("fc", 1000, 20, 20000, 1));
+lowpass_tpt_df_modulated_test = no.noise : fi.lowpass_tpt_df(0, 3, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lowpass_tpt_df_jump_test = no.noise : fi.lowpass_tpt_df(ma.MAX, 3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+highpass_tpt_df_test = no.noise : fi.highpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+highpass_tpt_df_low_test = no.noise : fi.highpass_tpt_df(fi.tpt_df_fmin, 5, 50);
+highpass_tpt_df_slider_test = no.noise : fi.highpass_tpt_df(fi.tpt_df_fmin, 3, hslider("fc", 1000, 20, 20000, 1));
+highpass_tpt_df_modulated_test = no.noise : fi.highpass_tpt_df(0, 3, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass_tpt_df_jump_test = no.noise : fi.highpass_tpt_df(ma.MAX, 3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 ## Special Filter-Bank Delay-Equalizing Allpass Filters
 
 These special allpass filters are needed by filterbank et al. below.
@@ -2652,6 +2745,47 @@ highpass_minus_lowpass_test = os.tosc(440) : fi.highpass_minus_lowpass(3, 1000);
 highpass_minus_lowpass_slider_test = no.noise : fi.highpass_minus_lowpass(3, hslider("fc", 1000, 20, 20000, 1));
 highpass_minus_lowpass_modulated_test = no.noise : fi.highpass_minus_lowpass(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 highpass_minus_lowpass_jump_test = no.noise : fi.highpass_minus_lowpass(3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+----
+
+### `(fi.)highpass_plus_lowpass_tpt_df`, `(fi.)highpass_minus_lowpass_tpt_df`
+
+`highpass_plus_lowpass` and `highpass_minus_lowpass` in trapezoidal
+sections below the cutoff limit `L` and in direct-form sections
+(`tf2s_df`, `tf1s_df`) at and above it, as in `lowpass_tpt_df`: the delay
+equalizers of the `*_tpt_df` filter banks.
+
+#### Usage
+
+```
+_ : highpass_plus_lowpass_tpt_df(L,N,fc) : _
+_ : highpass_minus_lowpass_tpt_df(L,N,fc) : _
+```
+
+Where:
+
+* `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+  direct form and `L >= ma.MAX` the trapezoidal form for every `fc`
+* `N`: filter order (a constant numerical expression)
+* `fc`: crossover frequency in Hz
+
+#### Test
+```
+fi = library("filters.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+highpass_plus_lowpass_tpt_df_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+highpass_plus_lowpass_tpt_df_low_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 3, 50);
+highpass_plus_lowpass_tpt_df_slider_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 5, hslider("fc", 1000, 20, 20000, 1));
+highpass_plus_lowpass_tpt_df_modulated_test = no.noise : fi.highpass_plus_lowpass_tpt_df(0, 5, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass_plus_lowpass_tpt_df_jump_test = no.noise : fi.highpass_plus_lowpass_tpt_df(ma.MAX, 5, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+highpass_minus_lowpass_tpt_df_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+highpass_minus_lowpass_tpt_df_low_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 3, 50);
+highpass_minus_lowpass_tpt_df_slider_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 5, hslider("fc", 1000, 20, 20000, 1));
+highpass_minus_lowpass_tpt_df_modulated_test = no.noise : fi.highpass_minus_lowpass_tpt_df(0, 5, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass_minus_lowpass_tpt_df_jump_test = no.noise : fi.highpass_minus_lowpass_tpt_df(ma.MAX, 5, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -2941,6 +3075,45 @@ highpass6e_test = src : fi.highpass6e(1000);
 highpass6e_slider_test = no.noise : fi.highpass6e(hslider("fc", 1000, 20, 20000, 1));
 highpass6e_modulated_test = no.noise : fi.highpass6e(20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 highpass6e_jump_test = no.noise : fi.highpass6e(20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+----
+
+### `(fi.)lowpass6e_tpt_df`, `(fi.)highpass6e_tpt_df`
+
+`lowpass6e` and `highpass6e` in trapezoidal sections below the cutoff
+limit `L` and in direct-form sections (`tf2s_df`) at and above it, as in
+`lowpass_tpt_df`: the band splits of `an.mth_octave_analyzer6e_tpt_df`.
+
+#### Usage
+
+```
+_ : lowpass6e_tpt_df(L,fc) : _
+_ : highpass6e_tpt_df(L,fc) : _
+```
+
+Where:
+
+* `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+  direct form and `L >= ma.MAX` the trapezoidal form for every `fc`
+* `fc`: -3dB frequency in Hz
+
+#### Test
+```
+fi = library("filters.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+lowpass6e_tpt_df_test = no.noise : fi.lowpass6e_tpt_df(fi.tpt_df_fmin, 4000);
+lowpass6e_tpt_df_low_test = no.noise : fi.lowpass6e_tpt_df(fi.tpt_df_fmin, 50);
+lowpass6e_tpt_df_slider_test = no.noise : fi.lowpass6e_tpt_df(fi.tpt_df_fmin, hslider("fc", 1000, 20, 20000, 1));
+lowpass6e_tpt_df_modulated_test = no.noise : fi.lowpass6e_tpt_df(0, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+lowpass6e_tpt_df_jump_test = no.noise : fi.lowpass6e_tpt_df(ma.MAX, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+highpass6e_tpt_df_test = no.noise : fi.highpass6e_tpt_df(fi.tpt_df_fmin, 4000);
+highpass6e_tpt_df_low_test = no.noise : fi.highpass6e_tpt_df(fi.tpt_df_fmin, 50);
+highpass6e_tpt_df_slider_test = no.noise : fi.highpass6e_tpt_df(fi.tpt_df_fmin, hslider("fc", 1000, 20, 20000, 1));
+highpass6e_tpt_df_modulated_test = no.noise : fi.highpass6e_tpt_df(0, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass6e_tpt_df_jump_test = no.noise : fi.highpass6e_tpt_df(ma.MAX, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ## Butterworth Bandpass/Bandstop Filters
@@ -3983,6 +4156,9 @@ filter-banks using elliptic or Chebyshev prototype filters.
 
 Allpass-complementary filter banks based on Butterworth band-splitting.
 For Butterworth band-splits, the needed delay equalizer is easily found.
+Sections whose crossover is at or above `tpt_df_fmin` (2304 Hz in single
+precision, 0 in double) are direct form, the others trapezoidal: see
+`mth_octave_filterbank_tpt_df`.
 
 #### Usage
 
@@ -4012,6 +4188,40 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 sig = os.tosc(440);
 mth_octave_filterbank_test = sig : fi.mth_octave_filterbank(3, 2, 8000, 2);
+```
+
+----
+
+### `(fi.)mth_octave_filterbank_tpt_df`, `(fi.)mth_octave_filterbank_alt_tpt_df`
+
+`mth_octave_filterbank` and `mth_octave_filterbank_alt` with an explicit
+cutoff limit `L`, as `filterbank_tpt_df` is to `filterbank`:
+`mth_octave_filterbank(O,M,ftop,N)` is
+`mth_octave_filterbank_tpt_df(tpt_df_fmin,O,M,ftop,N)`, and likewise for
+the `_alt` version (and so for `mth_octave_filterbank3`, `5` and
+`_default`).
+
+#### Usage
+
+```
+_ : mth_octave_filterbank_tpt_df(L,O,M,ftop,N) : par(i,N,_)
+_ : mth_octave_filterbank_alt_tpt_df(L,O,M,ftop,N) : par(i,N,_)
+```
+
+Where:
+
+* `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+  direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+* `O`, `M`, `ftop`, `N`: as for `mth_octave_filterbank`
+
+#### Test
+```
+fi = library("filters.lib");
+no = library("noises.lib");
+mth_octave_filterbank_tpt_df_test = no.noise : fi.mth_octave_filterbank_tpt_df(fi.tpt_df_fmin, 5, 1, 10000, 10);
+mth_octave_filterbank_tpt_df_sum_test = no.noise : fi.mth_octave_filterbank_tpt_df(fi.tpt_df_fmin, 5, 1, 10000, 10) :> _;
+mth_octave_filterbank_alt_tpt_df_test = no.noise : fi.mth_octave_filterbank_alt_tpt_df(fi.tpt_df_fmin, 3, 2, 8000, 10);
+mth_octave_filterbank_alt_tpt_df_sum_test = no.noise : fi.mth_octave_filterbank_alt_tpt_df(fi.tpt_df_fmin, 5, 2, 8000, 10) :> _;
 ```
 
 ----
@@ -4134,6 +4344,9 @@ band-split frequencies are passed explicitly as arguments.
 
 Filter bank.
 `filterbank` is a standard Faust function.
+Sections whose crossover is at or above `tpt_df_fmin` (2304 Hz in single
+precision, 0 in double) are direct form, the others trapezoidal: see
+`filterbank_tpt_df`.
 
 #### Usage
 
@@ -4164,9 +4377,51 @@ filterbank_test = src : fi.filterbank(3, (500, 2000));
 
 ----
 
+### `(fi.)filterbank_tpt_df`
+
+`filterbank` with an explicit cutoff limit `L`: the band splits and delay
+equalizers whose crossover is below `L` use trapezoidal sections, the
+others the cheaper direct-form sections (`lowpass_tpt_df`,
+`highpass_plus_lowpass_tpt_df`). `filterbank(O,freqs)` is
+`filterbank_tpt_df(tpt_df_fmin,O,freqs)`: trapezoidal below 2304 Hz in
+single precision, direct form everywhere in double precision. Each
+section is compiled in one form only when its crossover is a constant;
+for crossovers that vary (sliders), pass `L = ma.MAX` (trapezoidal) or
+`L = 0` (direct form), or both forms run.
+
+#### Usage
+
+```
+_ : filterbank_tpt_df(L,O,freqs) : par(i,ba.count(freqs)+1,_)
+```
+
+Where:
+
+* `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+  direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+* `O`, `freqs`: as for `filterbank`
+
+#### Test
+```
+fi = library("filters.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+filterbank_tpt_df_test = no.noise : fi.filterbank_tpt_df(fi.tpt_df_fmin, 3, (50, 500, 4000));
+filterbank_tpt_df_o5_sum_test = no.noise : fi.filterbank_tpt_df(fi.tpt_df_fmin, 5, (50, 500, 4000)) :> _;
+filterbank_tpt_df_slider_test = no.noise : fi.filterbank_tpt_df(fi.tpt_df_fmin, 3, (hslider("f1", 500, 20, 10000, 1), hslider("f2", 4000, 20, 20000, 1)));
+filterbank_tpt_df_modulated_test = no.noise : fi.filterbank_tpt_df(0, 3, (f1, 4*f1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); f1 = 2500*pow(2, tri); };
+filterbank_tpt_df_jump_test = no.noise : fi.filterbank_tpt_df(ma.MAX, 3, (f1, 4*f1)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f1 = 100*pow(10, sq); };
+```
+
+----
+
 ### `(fi.)filterbanki`
 
 Inverted-dc filter bank.
+Sections whose crossover is at or above `tpt_df_fmin` (2304 Hz in single
+precision, 0 in double) are direct form, the others trapezoidal: see
+`filterbanki_tpt_df`.
 
 #### Usage
 
@@ -4195,6 +4450,39 @@ no = library("noises.lib");
 src = os.tosc(440);
 filterbanki_test = src : fi.filterbanki(3, (500, 2000));
 filterbanki_o5_sum_test = no.noise : fi.filterbanki(5, (500, 1000, 2000)) :> _;
+```
+
+----
+
+### `(fi.)filterbanki_tpt_df`
+
+`filterbanki` with an explicit cutoff limit `L`, as `filterbank_tpt_df`
+is to `filterbank`: `filterbanki(O,freqs)` is
+`filterbanki_tpt_df(tpt_df_fmin,O,freqs)`.
+
+#### Usage
+
+```
+_ : filterbanki_tpt_df(L,O,freqs) : par(i,ba.count(freqs)+1,_)
+```
+
+Where:
+
+* `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+  direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+* `O`, `freqs`: as for `filterbanki`
+
+#### Test
+```
+fi = library("filters.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+filterbanki_tpt_df_test = no.noise : fi.filterbanki_tpt_df(fi.tpt_df_fmin, 3, (50, 500, 4000));
+filterbanki_tpt_df_o5_sum_test = no.noise : fi.filterbanki_tpt_df(fi.tpt_df_fmin, 5, (50, 500, 4000)) :> _;
+filterbanki_tpt_df_slider_test = no.noise : fi.filterbanki_tpt_df(fi.tpt_df_fmin, 3, (hslider("f1", 500, 20, 10000, 1), hslider("f2", 4000, 20, 20000, 1)));
+filterbanki_tpt_df_modulated_test = no.noise : fi.filterbanki_tpt_df(0, 3, (f1, 4*f1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); f1 = 2500*pow(2, tri); };
+filterbanki_tpt_df_jump_test = no.noise : fi.filterbanki_tpt_df(ma.MAX, 3, (f1, 4*f1)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f1 = 100*pow(10, sq); };
 ```
 
 ## State Variable Filters

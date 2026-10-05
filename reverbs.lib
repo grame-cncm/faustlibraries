@@ -33,7 +33,7 @@ sp = library("spats.lib");
 aa = library("aanl.lib");
 
 declare name "Faust Reverb Library";
-declare version "1.5.7";
+declare version "1.5.8";
 
 //########################################################################################
 /************************************************************************
@@ -257,7 +257,10 @@ with {
   // removed at the outputs when nonl != 0:
   dcblock(x) = select2(nonl != 0, x, x : fi.dcblockerat(5));
 
-  filter(i,freqs,durs) = fi.filterbank(BBSO,freqs) : par(j,NB,*(g(j,i)))
+  // trapezoidal sections in every precision (L = ma.MAX): freqs usually
+  // come from sliders, and the direct form responds differently when they
+  // move, so a double-precision build would not sound like a float one
+  filter(i,freqs,durs) = fi.filterbank_tpt_df(ma.MAX,BBSO,freqs) : par(j,NB,*(g(j,i)))
                          :> *(loopgainmax) / sqrt(N)
   with {
     dur(j) = ba.take(j+1,durs);
@@ -1113,7 +1116,8 @@ jp_gh_rev = environment {
             : par(i,2,de.fdelay4(8192, depth + (-1^i)*depth*os.oscrs(mod_freq)+5)
             : de.fdelay1a(8192,(ma.primes(size*(134-100*i))
             : smooth_init(0.995,ma.primes(size*(134-100*i)))) -1))
-            : par(i,2,fi.filterbank(5,(low_cutoff,high_cutoff)):(_*(high),_*(mid),_*(low)) :> _)
+            // trapezoidal sections in every precision, as in fdnrev0:
+            : par(i,2,fi.filterbank_tpt_df(ma.MAX,5,(low_cutoff,high_cutoff)):(_*(high),_*(mid),_*(low)) :> _)
             : par(i,2,*(fb))))
         with {
             depth = 50*mod_depth;

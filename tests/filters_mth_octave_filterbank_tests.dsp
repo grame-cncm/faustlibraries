@@ -17,3 +17,7 @@ mth_octave_filterbank3_test = sig : fi.mth_octave_filterbank3(2, 8000, 2);
 mth_octave_filterbank3_bands_test = sig : fi.mth_octave_filterbank3(2, 8000, 5);
 mth_octave_filterbank5_test = sig : fi.mth_octave_filterbank5(2, 8000, 2);
 mth_octave_filterbank_default_test = sig : fi.mth_octave_filterbank_default(2, 8000, 2);
+mth_octave_filterbank_tpt_df_test = no.noise : fi.mth_octave_filterbank_tpt_df(fi.tpt_df_fmin, 5, 1, 10000, 10);
+mth_octave_filterbank_tpt_df_sum_test = no.noise : fi.mth_octave_filterbank_tpt_df(fi.tpt_df_fmin, 5, 1, 10000, 10) :> _;
+mth_octave_filterbank_alt_tpt_df_test = no.noise : fi.mth_octave_filterbank_alt_tpt_df(fi.tpt_df_fmin, 3, 2, 8000, 10);
+mth_octave_filterbank_alt_tpt_df_sum_test = no.noise : fi.mth_octave_filterbank_alt_tpt_df(fi.tpt_df_fmin, 5, 2, 8000, 10) :> _;

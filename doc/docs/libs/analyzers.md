@@ -601,6 +601,9 @@ filter-banks using elliptic or Chebyshev prototype filters.
 
 Octave analyzer.
 `mth_octave_analyzer[N]` are standard Faust functions.
+Splits whose crossover is at or above `fi.tpt_df_fmin` (2304 Hz in single
+precision, 0 in double) are direct form, the others trapezoidal: see
+`mth_octave_analyzer_tpt_df`.
 
 #### Usage
 ```
@@ -629,6 +632,41 @@ an = library("analyzers.lib");
 os = library("oscillators.lib");
 mono = os.tosc(220);
 mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
+```
+
+----
+
+### `(an.)mth_octave_analyzer_tpt_df`, `(an.)mth_octave_analyzer6e_tpt_df`
+
+`mth_octave_analyzer` and `mth_octave_analyzer6e` with an explicit cutoff
+limit `L`: the band splits whose crossover is below `L` use trapezoidal
+sections, the others the cheaper direct-form sections
+(`fi.lowpass_tpt_df`, `fi.lowpass6e_tpt_df`). The analyzers above are
+these with `L = fi.tpt_df_fmin`: trapezoidal below 2304 Hz in single
+precision, direct form everywhere in double precision. Each split is
+compiled in one form only when its crossover is a constant; for a varying
+`ftop`, pass `L = ma.MAX` (trapezoidal) or `L = 0` (direct form), or both
+forms run.
+
+#### Usage
+```
+_ : mth_octave_analyzer_tpt_df(L,O,M,ftop,N) : par(i,N,_)
+_ : mth_octave_analyzer6e_tpt_df(L,M,ftop,N) : par(i,N,_)
+```
+
+Where:
+
+* `L`: cutoff limit in Hz, usually `fi.tpt_df_fmin`; `L <= 0` selects
+  the direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+* `O`, `M`, `ftop`, `N`: as for `mth_octave_analyzer`
+
+#### Test
+```
+an = library("analyzers.lib");
+fi = library("filters.lib");
+no = library("noises.lib");
+mth_octave_analyzer_tpt_df_test = no.noise : an.mth_octave_analyzer_tpt_df(fi.tpt_df_fmin, 5, 2, 10000, 12);
+mth_octave_analyzer6e_tpt_df_test = no.noise : an.mth_octave_analyzer6e_tpt_df(fi.tpt_df_fmin, 2, 10000, 12);
 ```
 
 ## Mth-Octave Spectral Level
@@ -727,6 +765,9 @@ band-split frequencies are passed explicitly as arguments.
 ### `(an.)analyzer`
 
 Analyzer.
+Splits whose crossover is at or above `fi.tpt_df_fmin` (2304 Hz in single
+precision, 0 in double) are direct form, the others trapezoidal: see
+`analyzer_tpt_df`.
 
 #### Usage
 
@@ -753,6 +794,41 @@ an = library("analyzers.lib");
 os = library("oscillators.lib");
 mono = os.tosc(220);
 analyzer_test = mono : an.analyzer(3, (500, 2000));
+```
+
+----
+
+### `(an.)analyzer_tpt_df`
+
+`analyzer` with an explicit cutoff limit `L`, as
+`mth_octave_analyzer_tpt_df` is to `mth_octave_analyzer`:
+`analyzer(O,freqs)` is `analyzer_tpt_df(fi.tpt_df_fmin,O,freqs)`. For
+crossovers that vary (sliders), pass `L = ma.MAX` (trapezoidal) or
+`L = 0` (direct form), or both forms run.
+
+#### Usage
+
+```
+_ : analyzer_tpt_df(L,O,freqs) : par(i,ba.count(freqs)+1,_)
+```
+
+Where:
+
+* `L`: cutoff limit in Hz, usually `fi.tpt_df_fmin`; `L <= 0` selects
+  the direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+* `O`, `freqs`: as for `analyzer`
+
+#### Test
+```
+an = library("analyzers.lib");
+fi = library("filters.lib");
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+analyzer_tpt_df_test = no.noise : an.analyzer_tpt_df(fi.tpt_df_fmin, 3, (50, 500, 4000));
+analyzer_tpt_df_slider_test = no.noise : an.analyzer_tpt_df(fi.tpt_df_fmin, 3, (hslider("f1", 500, 20, 10000, 1), hslider("f2", 4000, 20, 20000, 1)));
+analyzer_tpt_df_modulated_test = no.noise : an.analyzer_tpt_df(0, 3, (f1, 4*f1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); f1 = 2500*pow(2, tri); };
+analyzer_tpt_df_jump_test = no.noise : an.analyzer_tpt_df(ma.MAX, 3, (f1, 4*f1)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f1 = 100*pow(10, sq); };
 ```
 
 ##  Fast Fourier Transform (fft) and its Inverse (ifft) 

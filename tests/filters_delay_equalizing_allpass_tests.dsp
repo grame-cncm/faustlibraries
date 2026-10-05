@@ -33,3 +33,13 @@ highpass_minus_lowpass_odd_test = os.tosc(440), os.tosc(440) : fi.highpass_minus
 highpass_minus_lowpass_odd_slider_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_odd(3, hslider("fc", 1000, 20, 20000, 1));
 highpass_minus_lowpass_odd_modulated_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_odd(3, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 highpass_minus_lowpass_odd_jump_test = (no.noise <: _, _) : fi.highpass_minus_lowpass_odd(3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+highpass_plus_lowpass_tpt_df_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+highpass_plus_lowpass_tpt_df_low_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 3, 50);
+highpass_plus_lowpass_tpt_df_slider_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 5, hslider("fc", 1000, 20, 20000, 1));
+highpass_plus_lowpass_tpt_df_modulated_test = no.noise : fi.highpass_plus_lowpass_tpt_df(0, 5, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass_plus_lowpass_tpt_df_jump_test = no.noise : fi.highpass_plus_lowpass_tpt_df(ma.MAX, 5, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+highpass_minus_lowpass_tpt_df_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+highpass_minus_lowpass_tpt_df_low_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 3, 50);
+highpass_minus_lowpass_tpt_df_slider_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 5, hslider("fc", 1000, 20, 20000, 1));
+highpass_minus_lowpass_tpt_df_modulated_test = no.noise : fi.highpass_minus_lowpass_tpt_df(0, 5, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+highpass_minus_lowpass_tpt_df_jump_test = no.noise : fi.highpass_minus_lowpass_tpt_df(ma.MAX, 5, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };

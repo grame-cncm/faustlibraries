@@ -36,7 +36,7 @@ os = library("oscillators.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "1.5.0";
+declare version "1.6.0";
 
 /************************************************************************
 FAUST library file, jos section
@@ -730,6 +730,9 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
 //---`(an.)mth_octave_analyzer`, `(an.)mth_octave_analyzer3`, `(an.)mth_octave_analyzer5`, `(an.)mth_octave_analyzer6e`, `(an.)mth_octave_analyzer_default`---
 // Octave analyzer.
 // `mth_octave_analyzer[N]` are standard Faust functions.
+// Splits whose crossover is at or above `fi.tpt_df_fmin` (2304 Hz in single
+// precision, 0 in double) are direct form, the others trapezoidal: see
+// `mth_octave_analyzer_tpt_df`.
 //
 // #### Usage
 // ```
@@ -760,27 +763,67 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
 // mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
 // ```
 //------------------------------------------------------------
-mth_octave_analyzer6e(M,ftop,N) = _ <: bsplit(N-1) with {
-  fc(n) = ftop * 2^(float(n-N+1)/float(M)); // crossovers (-0.2 dB passband edges)
-  lp(n) = fi.lowpass6e(fc(n));  // 6th-order elliptic - see other choices above
-  hp(n) = fi.highpass6e(fc(n)); //   (search for lowpass* and highpass*)
-  bsplit(0)  = _;
-  bsplit(i) = hp(i), (lp(i) <: bsplit(i-1));
-};
+mth_octave_analyzer6e(M,ftop,N) = mth_octave_analyzer6e_tpt_df(fi.tpt_df_fmin,M,ftop,N);
 
 // Butterworth analyzers may be cascaded with allpass
 // delay-equalizers to make (allpass-complementary) filter banks:
-mth_octave_analyzer(O,M,ftop,N) = _ <: bsplit(N-1) with {
-  fc(n) = ftop * 2^(float(n-N+1)/float(M));
-  lp(n) = fi.lowpass(O,fc(n)); // Order O Butterworth
-  hp(n) = fi.highpass(O,fc(n));
-  bsplit(0)  = _;
-  bsplit(i) = hp(i), (lp(i) <: bsplit(i-1));
-};
+mth_octave_analyzer(O,M,ftop,N) = mth_octave_analyzer_tpt_df(fi.tpt_df_fmin,O,M,ftop,N);
 
 mth_octave_analyzer3(M,ftop,N) = mth_octave_analyzer(3,M,ftop,N);
 mth_octave_analyzer5(M,ftop,N) = mth_octave_analyzer(5,M,ftop,N);
 mth_octave_analyzer_default = mth_octave_analyzer6e; // default analyzer
+
+//---`(an.)mth_octave_analyzer_tpt_df`, `(an.)mth_octave_analyzer6e_tpt_df`---
+// `mth_octave_analyzer` and `mth_octave_analyzer6e` with an explicit cutoff
+// limit `L`: the band splits whose crossover is below `L` use trapezoidal
+// sections, the others the cheaper direct-form sections
+// (`fi.lowpass_tpt_df`, `fi.lowpass6e_tpt_df`). The analyzers above are
+// these with `L = fi.tpt_df_fmin`: trapezoidal below 2304 Hz in single
+// precision, direct form everywhere in double precision. Each split is
+// compiled in one form only when its crossover is a constant; for a varying
+// `ftop`, pass `L = ma.MAX` (trapezoidal) or `L = 0` (direct form), or both
+// forms run.
+//
+// #### Usage
+// ```
+// _ : mth_octave_analyzer_tpt_df(L,O,M,ftop,N) : par(i,N,_)
+// _ : mth_octave_analyzer6e_tpt_df(L,M,ftop,N) : par(i,N,_)
+// ```
+//
+// Where:
+//
+// * `L`: cutoff limit in Hz, usually `fi.tpt_df_fmin`; `L <= 0` selects
+//   the direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+// * `O`, `M`, `ftop`, `N`: as for `mth_octave_analyzer`
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// fi = library("filters.lib");
+// no = library("noises.lib");
+// mth_octave_analyzer_tpt_df_test = no.noise : an.mth_octave_analyzer_tpt_df(fi.tpt_df_fmin, 5, 2, 10000, 12);
+// mth_octave_analyzer6e_tpt_df_test = no.noise : an.mth_octave_analyzer6e_tpt_df(fi.tpt_df_fmin, 2, 10000, 12);
+// ```
+//------------------------------------------------------------
+declare mth_octave_analyzer_tpt_df author "Julius O. Smith III";
+declare mth_octave_analyzer_tpt_df license "MIT";
+mth_octave_analyzer_tpt_df(L,O,M,ftop,N) = _ <: bsplit(N-1) with {
+  fc(n) = ftop * 2^(float(n-N+1)/float(M));
+  lp(n) = fi.lowpass_tpt_df(L,O,fc(n)); // Order O Butterworth
+  hp(n) = fi.highpass_tpt_df(L,O,fc(n));
+  bsplit(0)  = _;
+  bsplit(i) = hp(i), (lp(i) <: bsplit(i-1));
+};
+
+declare mth_octave_analyzer6e_tpt_df author "Julius O. Smith III";
+declare mth_octave_analyzer6e_tpt_df license "MIT";
+mth_octave_analyzer6e_tpt_df(L,M,ftop,N) = _ <: bsplit(N-1) with {
+  fc(n) = ftop * 2^(float(n-N+1)/float(M)); // crossovers (-0.2 dB passband edges)
+  lp(n) = fi.lowpass6e_tpt_df(L,fc(n));  // 6th-order elliptic - see other choices above
+  hp(n) = fi.highpass6e_tpt_df(L,fc(n)); //   (search for lowpass* and highpass*)
+  bsplit(0)  = _;
+  bsplit(i) = hp(i), (lp(i) <: bsplit(i-1));
+};
 
 
 //============================Mth-Octave Spectral Level===================================
@@ -910,6 +953,9 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 
 //---------------`(an.)analyzer`--------------------------
 // Analyzer.
+// Splits whose crossover is at or above `fi.tpt_df_fmin` (2304 Hz in single
+// precision, 0 in double) are direct form, the others trapezoidal: see
+// `analyzer_tpt_df`.
 //
 // #### Usage
 //
@@ -938,12 +984,48 @@ octave_analyzer(N) = mth_octave_analyzer_default(1,10000,N);
 // analyzer_test = mono : an.analyzer(3, (500, 2000));
 // ```
 //------------------------------------------------------------
-analyzer(O,lfreqs) = _ <: bsplit(nb) 
+analyzer(O,lfreqs) = analyzer_tpt_df(fi.tpt_df_fmin,O,lfreqs);
+
+//---------------`(an.)analyzer_tpt_df`--------------------------
+// `analyzer` with an explicit cutoff limit `L`, as
+// `mth_octave_analyzer_tpt_df` is to `mth_octave_analyzer`:
+// `analyzer(O,freqs)` is `analyzer_tpt_df(fi.tpt_df_fmin,O,freqs)`. For
+// crossovers that vary (sliders), pass `L = ma.MAX` (trapezoidal) or
+// `L = 0` (direct form), or both forms run.
+//
+// #### Usage
+//
+// ```
+// _ : analyzer_tpt_df(L,O,freqs) : par(i,ba.count(freqs)+1,_)
+// ```
+//
+// Where:
+//
+// * `L`: cutoff limit in Hz, usually `fi.tpt_df_fmin`; `L <= 0` selects
+//   the direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+// * `O`, `freqs`: as for `analyzer`
+//
+// #### Test
+// ```
+// an = library("analyzers.lib");
+// fi = library("filters.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// analyzer_tpt_df_test = no.noise : an.analyzer_tpt_df(fi.tpt_df_fmin, 3, (50, 500, 4000));
+// analyzer_tpt_df_slider_test = no.noise : an.analyzer_tpt_df(fi.tpt_df_fmin, 3, (hslider("f1", 500, 20, 10000, 1), hslider("f2", 4000, 20, 20000, 1)));
+// analyzer_tpt_df_modulated_test = no.noise : an.analyzer_tpt_df(0, 3, (f1, 4*f1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); f1 = 2500*pow(2, tri); };
+// analyzer_tpt_df_jump_test = no.noise : an.analyzer_tpt_df(ma.MAX, 3, (f1, 4*f1)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f1 = 100*pow(10, sq); };
+// ```
+//------------------------------------------------------------
+declare analyzer_tpt_df author "Julius O. Smith III";
+declare analyzer_tpt_df license "MIT";
+analyzer_tpt_df(L,O,lfreqs) = _ <: bsplit(nb)
 with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
-   lp(n) = fi.lowpass(O,fc(n));
-   hp(n) = fi.highpass(O,fc(n));
+   lp(n) = fi.lowpass_tpt_df(L,O,fc(n));
+   hp(n) = fi.highpass_tpt_df(L,O,fc(n));
    bsplit(0) = _;
    bsplit(i) = hp(i), (lp(i) <: bsplit(i-1));
 };

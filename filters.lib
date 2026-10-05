@@ -2687,6 +2687,70 @@ with {
   a1d = (a0 - c)/d;
 };
 
+//-------------------------`(fi.)tpt_df_fmin`--------------------------------
+// The lowest cutoff, in Hz, at which the `*_tpt_df` functions below switch
+// from trapezoidal (TPT) sections to the cheaper direct-form ones
+// (`tf2s_df`, `tf1s_df`) in the precision being compiled: 2304 Hz in single
+// precision, 0 (direct form everywhere) in double, quad and fixed-point
+// precision.
+// The filter banks and analyzers (`filterbank`, `mth_octave_filterbank`,
+// `an.mth_octave_analyzer`, ...) use it as their default limit:
+// `filterbank(O,freqs)` is `filterbank_tpt_df(tpt_df_fmin,O,freqs)`.
+//
+// #### Usage
+//
+// ```
+// tpt_df_fmin : _
+// ```
+//
+// #### Method
+//
+// The float error of a direct-form section grows as the inverse square of
+// `fc/SR` (12 dB per octave down), so the lowest safe `fc/SR` scales as the
+// square root of the machine epsilon. In single precision, Butterworth
+// sections up to order 8 and the 6th-order elliptic `lowpass6e` and
+// `highpass6e` stay within -80 dB (relative RMS error, float against double)
+// above `fc/SR` = 0.012, which is 2304 Hz at 192 kHz, the highest rate
+// `ma.SR` reports. Scaled by the square root of the epsilon ratio, the same
+// accuracy would need 0.1 Hz in double precision and 0.002 Hz in quad, below
+// any useful cutoff: the limit is 0 there. Each precision gets its value
+// from a precision-qualified definition (`singleprecision tpt_df_fmin =
+// 2304.0;`, and 0 for `doubleprecision`, `quadprecision` and
+// `fixedpointprecision`), the mechanism `ma.EPSILON` uses, so the value is a
+// constant of the program and the switch costs nothing: each section is
+// compiled in one form only, when its cutoff is a constant. Fixed-point
+// compilation, like double, uses the direct form.
+//
+// Single- and double-precision builds therefore realize the sections
+// below 2304 Hz in different forms. Their outputs agree for constant or
+// slowly varying cutoffs, but not under fast modulation or abrupt jumps of
+// a cutoff, where the direct form rings more (see `tf2s_df`).
+//
+// #### Test
+// ```
+// fi = library("filters.lib");
+// os = library("oscillators.lib");
+// tpt_df_fmin_test = os.tosc(440) * (fi.tpt_df_fmin <= 2304);
+// ```
+//----------------------------------------------
+declare tpt_df_fmin author "Julius O. Smith III";
+declare tpt_df_fmin license "MIT";
+singleprecision     tpt_df_fmin = 2304.0; // 0.012*192000: TPT below, direct form above
+doubleprecision     tpt_df_fmin = 0.0;    // direct form everywhere
+quadprecision       tpt_df_fmin = 0.0;
+fixedpointprecision tpt_df_fmin = 0.0;
+
+// The section tpt below the cutoff limit L, and df(fc) at and above it:
+// L <= 0 selects df and L >= ma.MAX selects tpt for every fc, and a
+// constant L and fc compile one of the two only. Otherwise both run, and
+// the direct form runs at max(fc, L), never below the limit, where it
+// would lose its accuracy (or diverge) in single precision before fc
+// comes back up: the output then switches between two filters that track
+// nearly the same cutoff when fc crosses L.
+_tpt_df(L, fc, tpt, df) = _ <: dfL, (_ <: tpt, (_ <: tpt, dfL : select2(fc >= L))
+                          : select2(L < ma.MAX)) : select2(L > 0)
+with { dfL = df(max(fc, L)); };
+
 //-----------------------------`(fi.)tf2sb`--------------------------------
 // Bandpass mapping of `tf2s`: In addition to a frequency-scaling parameter
 // `w1` (set to the desired passband width in rad/sec: the prototype's
@@ -3249,6 +3313,68 @@ with {
   };
 };
 
+// lowpass0_highpass1 in direct form (tf2s_df, tf1s_df), for the *_tpt_df
+// functions above their cutoff limit
+_lowpass0_highpass1_df(s,N,fc) = lphpr(s,N,N,fc)
+with {
+  lphpr(s,0,N,fc) = _;
+  lphpr(s,1,N,fc) = tf1s_df(s,1-s,1,2*ma.PI*fc);
+  lphpr(s,O,N,fc) = lphpr(s,(O-2),N,fc) : tf2s_df(s,0,1-s,a1s,1,2*ma.PI*fc) with {
+    parity = N % 2;
+    S = (O-parity)/2; // current section number
+    a1s = -2*cos((ma.PI)*-1 + (1-parity)*ma.PI/(2*N) + (S-1+parity)*ma.PI/N);
+  };
+};
+
+//------------`(fi.)lowpass_tpt_df`, `(fi.)highpass_tpt_df`--------------
+// `lowpass` and `highpass` (order-`N` Butterworth) in trapezoidal sections
+// below the cutoff limit `L` and in direct-form sections (`tf2s_df`,
+// `tf1s_df`) at and above it. With a constant `fc`, only one of the two is
+// compiled. With a varying `fc`, both run (more CPU than either), the
+// direct form at `max(fc, L)` so that it stays accurate, and the output
+// switches between them where `fc` crosses `L`: pass `L = ma.MAX`
+// (trapezoidal) or `L = 0` (direct form) to compile one form only.
+//
+// #### Usage
+//
+// ```
+// _ : lowpass_tpt_df(L,N,fc) : _
+// _ : highpass_tpt_df(L,N,fc) : _
+// ```
+//
+// Where:
+//
+// * `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+//   direct form and `L >= ma.MAX` the trapezoidal form for every `fc`
+// * `N`: filter order (number of poles), a constant numerical expression
+// * `fc`: cutoff frequency in Hz
+//
+// #### Test
+// ```
+// fi = library("filters.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// lowpass_tpt_df_test = no.noise : fi.lowpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+// lowpass_tpt_df_low_test = no.noise : fi.lowpass_tpt_df(fi.tpt_df_fmin, 5, 50);
+// lowpass_tpt_df_slider_test = no.noise : fi.lowpass_tpt_df(fi.tpt_df_fmin, 3, hslider("fc", 1000, 20, 20000, 1));
+// lowpass_tpt_df_modulated_test = no.noise : fi.lowpass_tpt_df(0, 3, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// lowpass_tpt_df_jump_test = no.noise : fi.lowpass_tpt_df(ma.MAX, 3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// highpass_tpt_df_test = no.noise : fi.highpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+// highpass_tpt_df_low_test = no.noise : fi.highpass_tpt_df(fi.tpt_df_fmin, 5, 50);
+// highpass_tpt_df_slider_test = no.noise : fi.highpass_tpt_df(fi.tpt_df_fmin, 3, hslider("fc", 1000, 20, 20000, 1));
+// highpass_tpt_df_modulated_test = no.noise : fi.highpass_tpt_df(0, 3, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highpass_tpt_df_jump_test = no.noise : fi.highpass_tpt_df(ma.MAX, 3, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// ```
+//------------------------------------------------------------
+declare lowpass_tpt_df author "Julius O. Smith III";
+declare lowpass_tpt_df license "MIT";
+lowpass_tpt_df(L,N,fc) = _tpt_df(L, fc, lowpass(N,fc), \(f).(_lowpass0_highpass1_df(0,N,f)));
+
+declare highpass_tpt_df author "Julius O. Smith III";
+declare highpass_tpt_df license "MIT";
+highpass_tpt_df(L,N,fc) = _tpt_df(L, fc, highpass(N,fc), \(f).(_lowpass0_highpass1_df(1,N,f)));
+
 
 //================Special Filter-Bank Delay-Equalizing Allpass Filters====================
 // These special allpass filters are needed by filterbank et al. below.
@@ -3293,19 +3419,20 @@ declare highpass_plus_lowpass author "Julius O. Smith III";
 declare highpass_plus_lowpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare highpass_plus_lowpass license "LicenseRef-STK-4.3";
 
-highpass_plus_lowpass(1,fc) = _;
-highpass_plus_lowpass(3,fc) = tf2s(1,-1,1,1,1,w1) with { w1 = 2*ma.PI*fc; };
-highpass_plus_lowpass(5,fc) = tf2s(1,-a11,1,a11,1,w1)
+highpass_plus_lowpass(N,fc) = _highpass_plus_lowpass(tf2s, lowpass0_highpass1, N, fc);
+
+// highpass_plus_lowpass built from the second-order section t2 and the
+// Butterworth lowpass0_highpass1-style function lphp, so that the
+// trapezoidal and direct-form versions share their coefficients:
+_highpass_plus_lowpass(t2, lphp, 1, fc) = _;
+_highpass_plus_lowpass(t2, lphp, 3, fc) = t2(1,-1,1,1,1,w1) with { w1 = 2*ma.PI*fc; };
+_highpass_plus_lowpass(t2, lphp, 5, fc) = t2(1,-a11,1,a11,1,w1)
 with {
   a11 = 1.618033988749895;
   w1 = 2*ma.PI*fc;
 };
-
-// Catch-all definitions for generality - even order is done:
-highpass_plus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
-  switch_odd_even(0,N,fc) = highpass_plus_lowpass_even(N,fc);
-  switch_odd_even(1,N,fc) = highpass_plus_lowpass_odd(N,fc);
-};
+// Catch-all definition for generality (canceling pole-zero pairs not removed):
+_highpass_plus_lowpass(t2, lphp, N, fc) = _ <: lphp(1,N,fc), lphp(0,N,fc) :> _;
 
 //--------------------`(fi.)highpass_minus_lowpass`----------------
 // Difference between the order-`N` Butterworth highpass and lowpass responses
@@ -3340,18 +3467,66 @@ highpass_plus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
 declare highpass_minus_lowpass author "Julius O. Smith III";
 declare highpass_minus_lowpass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare highpass_minus_lowpass license "LicenseRef-STK-4.3";
-highpass_minus_lowpass(3,fc) = tf1s(1,-1,1,w1) with { w1 = 2*ma.PI*fc; };
-highpass_minus_lowpass(5,fc) = tf1s(1,-1,1,w1) : tf2s(1,-a12,1,a12,1,w1)
+highpass_minus_lowpass(N,fc) = _highpass_minus_lowpass(tf2s, tf1s, lowpass0_highpass1, N, fc);
+
+// highpass_minus_lowpass from the sections t2, t1 and lphp (see
+// _highpass_plus_lowpass):
+_highpass_minus_lowpass(t2, t1, lphp, 3, fc) = t1(1,-1,1,w1) with { w1 = 2*ma.PI*fc; };
+_highpass_minus_lowpass(t2, t1, lphp, 5, fc) = t1(1,-1,1,w1) : t2(1,-a12,1,a12,1,w1)
 with {
   a12 = 0.618033988749895;
   w1 = 2*ma.PI*fc;
 };
+// Catch-all definition for generality (canceling pole-zero pairs not removed):
+_highpass_minus_lowpass(t2, t1, lphp, N, fc) = _ <: lphp(1,N,fc), lphp(0,N,fc) : -;
 
-// Catch-all definitions for generality - even order is done:
-highpass_minus_lowpass(N,fc) = _ <: switch_odd_even(N%2,N,fc) with {
-  switch_odd_even(0,N,fc) = highpass_minus_lowpass_even(N,fc);
-  switch_odd_even(1,N,fc) = highpass_minus_lowpass_odd(N,fc);
-};
+//---`(fi.)highpass_plus_lowpass_tpt_df`, `(fi.)highpass_minus_lowpass_tpt_df`---
+// `highpass_plus_lowpass` and `highpass_minus_lowpass` in trapezoidal
+// sections below the cutoff limit `L` and in direct-form sections
+// (`tf2s_df`, `tf1s_df`) at and above it, as in `lowpass_tpt_df`: the delay
+// equalizers of the `*_tpt_df` filter banks.
+//
+// #### Usage
+//
+// ```
+// _ : highpass_plus_lowpass_tpt_df(L,N,fc) : _
+// _ : highpass_minus_lowpass_tpt_df(L,N,fc) : _
+// ```
+//
+// Where:
+//
+// * `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+//   direct form and `L >= ma.MAX` the trapezoidal form for every `fc`
+// * `N`: filter order (a constant numerical expression)
+// * `fc`: crossover frequency in Hz
+//
+// #### Test
+// ```
+// fi = library("filters.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// highpass_plus_lowpass_tpt_df_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+// highpass_plus_lowpass_tpt_df_low_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 3, 50);
+// highpass_plus_lowpass_tpt_df_slider_test = no.noise : fi.highpass_plus_lowpass_tpt_df(fi.tpt_df_fmin, 5, hslider("fc", 1000, 20, 20000, 1));
+// highpass_plus_lowpass_tpt_df_modulated_test = no.noise : fi.highpass_plus_lowpass_tpt_df(0, 5, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highpass_plus_lowpass_tpt_df_jump_test = no.noise : fi.highpass_plus_lowpass_tpt_df(ma.MAX, 5, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// highpass_minus_lowpass_tpt_df_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 5, 4000);
+// highpass_minus_lowpass_tpt_df_low_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 3, 50);
+// highpass_minus_lowpass_tpt_df_slider_test = no.noise : fi.highpass_minus_lowpass_tpt_df(fi.tpt_df_fmin, 5, hslider("fc", 1000, 20, 20000, 1));
+// highpass_minus_lowpass_tpt_df_modulated_test = no.noise : fi.highpass_minus_lowpass_tpt_df(0, 5, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highpass_minus_lowpass_tpt_df_jump_test = no.noise : fi.highpass_minus_lowpass_tpt_df(ma.MAX, 5, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// ```
+//------------------------------------------------------------
+declare highpass_plus_lowpass_tpt_df author "Julius O. Smith III";
+declare highpass_plus_lowpass_tpt_df license "MIT";
+highpass_plus_lowpass_tpt_df(L,N,fc) = _tpt_df(L, fc, highpass_plus_lowpass(N,fc),
+    \(f).(_highpass_plus_lowpass(tf2s_df, _lowpass0_highpass1_df, N, f)));
+
+declare highpass_minus_lowpass_tpt_df author "Julius O. Smith III";
+declare highpass_minus_lowpass_tpt_df license "MIT";
+highpass_minus_lowpass_tpt_df(L,N,fc) = _tpt_df(L, fc, highpass_minus_lowpass(N,fc),
+    \(f).(_highpass_minus_lowpass(tf2s_df, tf1s_df, _lowpass0_highpass1_df, N, f)));
 
 //--------------------`(fi.)highpass_plus_lowpass_even`----------------
 // Sum of the even-order Butterworth highpass and lowpass responses,
@@ -3590,10 +3765,13 @@ declare lowpass6e author "Julius O. Smith III";
 declare lowpass6e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare lowpass6e license "LicenseRef-STK-4.3";
 
-lowpass6e(fc) =
-              tf2s(b21,b11,b01,a11,a01,w1) :
-              tf2s(b22,b12,b02,a12,a02,w1) :
-              tf2s(b23,b13,b03,a13,a03,w1)
+lowpass6e(fc) = _lowpass6e(tf2s, fc);
+
+// lowpass6e from the second-order section t2 (tf2s or tf2s_df)
+_lowpass6e(t2, fc) =
+              t2(b21,b11,b01,a11,a01,w1) :
+              t2(b22,b12,b02,a12,a02,w1) :
+              t2(b23,b13,b03,a13,a03,w1)
 with {
   b21 = 0.000099999997055;
   a21 = 1;
@@ -3696,10 +3874,13 @@ with {
 declare highpass6e author "Julius O. Smith III";
 declare highpass6e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare highpass6e license "LicenseRef-STK-4.3";
-highpass6e(fc) =
-              tf2s(b01/a01,b11/a01,b21/a01,a11/a01,1/a01,w1) :
-              tf2s(b02/a02,b12/a02,b22/a02,a12/a02,1/a02,w1) :
-              tf2s(b03/a03,b13/a03,b23/a03,a13/a03,1/a03,w1)
+highpass6e(fc) = _highpass6e(tf2s, fc);
+
+// highpass6e from the second-order section t2 (tf2s or tf2s_df)
+_highpass6e(t2, fc) =
+              t2(b01/a01,b11/a01,b21/a01,a11/a01,1/a01,w1) :
+              t2(b02/a02,b12/a02,b22/a02,a12/a02,1/a02,w1) :
+              t2(b03/a03,b13/a03,b23/a03,a13/a03,1/a03,w1)
 with {
   b21 = 0.000099999997055;
   a21 = 1;
@@ -3721,6 +3902,50 @@ with {
   a03 = 1.069358407707312;
   w1 = 2*ma.PI*fc;
 };
+
+//------------`(fi.)lowpass6e_tpt_df`, `(fi.)highpass6e_tpt_df`--------------
+// `lowpass6e` and `highpass6e` in trapezoidal sections below the cutoff
+// limit `L` and in direct-form sections (`tf2s_df`) at and above it, as in
+// `lowpass_tpt_df`: the band splits of `an.mth_octave_analyzer6e_tpt_df`.
+//
+// #### Usage
+//
+// ```
+// _ : lowpass6e_tpt_df(L,fc) : _
+// _ : highpass6e_tpt_df(L,fc) : _
+// ```
+//
+// Where:
+//
+// * `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+//   direct form and `L >= ma.MAX` the trapezoidal form for every `fc`
+// * `fc`: -3dB frequency in Hz
+//
+// #### Test
+// ```
+// fi = library("filters.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// lowpass6e_tpt_df_test = no.noise : fi.lowpass6e_tpt_df(fi.tpt_df_fmin, 4000);
+// lowpass6e_tpt_df_low_test = no.noise : fi.lowpass6e_tpt_df(fi.tpt_df_fmin, 50);
+// lowpass6e_tpt_df_slider_test = no.noise : fi.lowpass6e_tpt_df(fi.tpt_df_fmin, hslider("fc", 1000, 20, 20000, 1));
+// lowpass6e_tpt_df_modulated_test = no.noise : fi.lowpass6e_tpt_df(0, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// lowpass6e_tpt_df_jump_test = no.noise : fi.lowpass6e_tpt_df(ma.MAX, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// highpass6e_tpt_df_test = no.noise : fi.highpass6e_tpt_df(fi.tpt_df_fmin, 4000);
+// highpass6e_tpt_df_low_test = no.noise : fi.highpass6e_tpt_df(fi.tpt_df_fmin, 50);
+// highpass6e_tpt_df_slider_test = no.noise : fi.highpass6e_tpt_df(fi.tpt_df_fmin, hslider("fc", 1000, 20, 20000, 1));
+// highpass6e_tpt_df_modulated_test = no.noise : fi.highpass6e_tpt_df(0, 2500*pow(8, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// highpass6e_tpt_df_jump_test = no.noise : fi.highpass6e_tpt_df(ma.MAX, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// ```
+//------------------------------------------------------------
+declare lowpass6e_tpt_df author "Julius O. Smith III";
+declare lowpass6e_tpt_df license "MIT";
+lowpass6e_tpt_df(L,fc) = _tpt_df(L, fc, lowpass6e(fc), \(f).(_lowpass6e(tf2s_df, f)));
+
+declare highpass6e_tpt_df author "Julius O. Smith III";
+declare highpass6e_tpt_df license "MIT";
+highpass6e_tpt_df(L,fc) = _tpt_df(L, fc, highpass6e(fc), \(f).(_highpass6e(tf2s_df, f)));
 
 
 //========================Butterworth Bandpass/Bandstop Filters===========================
@@ -4246,7 +4471,9 @@ hilbert(N,fc) = fi.pospass(N,fc) : !,*(2.0);
 declare lowshelf author "Julius O. Smith III";
 declare lowshelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare lowshelf license "LicenseRef-STK-4.3";
-lowshelf(N,L0,fx) = filterbank(N,(fx)) : _, *(ba.db2linear(L0)) :> _;
+// trapezoidal sections in every precision (L = ma.MAX): a shelf cutoff is
+// usually a control that moves, where the direct form rings more
+lowshelf(N,L0,fx) = filterbank_tpt_df(ma.MAX,N,(fx)) : _, *(ba.db2linear(L0)) :> _;
 
 // Special cases and optimization:
 
@@ -4435,7 +4662,8 @@ lowshelf_other_freq(N, L0, fx) = ba.db2linear(ba.linear2db(fx) + L0/N); // conve
 declare highshelf author "Julius O. Smith III";
 declare highshelf copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare highshelf license "LicenseRef-STK-4.3";
-highshelf(N,Lpi,fx) = filterbank(N,(fx)) : *(ba.db2linear(Lpi)), _ :> _;
+// trapezoidal sections in every precision, as for lowshelf
+highshelf(N,Lpi,fx) = filterbank_tpt_df(ma.MAX,N,(fx)) : *(ba.db2linear(Lpi)), _ :> _;
 
 // Special cases and optimization:
 
@@ -4936,6 +5164,9 @@ levelfilterN(N,freq,L) = seq(i,N,levelfilter(pow(L,1.0/N),freq));
 //------------------------`(fi.)mth_octave_filterbank[n]`, `(fi.)mth_octave_filterbank`-------------------------
 // Allpass-complementary filter banks based on Butterworth band-splitting.
 // For Butterworth band-splits, the needed delay equalizer is easily found.
+// Sections whose crossover is at or above `tpt_df_fmin` (2304 Hz in single
+// precision, 0 in double) are direct form, the others trapezoidal: see
+// `mth_octave_filterbank_tpt_df`.
 //
 // #### Usage
 //
@@ -4971,12 +5202,58 @@ declare mth_octave_filterbank author "Julius O. Smith III";
 declare mth_octave_filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare mth_octave_filterbank license "LicenseRef-STK-4.3";
 
-mth_octave_filterbank(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeq(N)
+mth_octave_filterbank(O,M,ftop,N) = mth_octave_filterbank_tpt_df(tpt_df_fmin,O,M,ftop,N);
+
+//------------------------`(fi.)mth_octave_filterbank_tpt_df`, `(fi.)mth_octave_filterbank_alt_tpt_df`-------------------------
+// `mth_octave_filterbank` and `mth_octave_filterbank_alt` with an explicit
+// cutoff limit `L`, as `filterbank_tpt_df` is to `filterbank`:
+// `mth_octave_filterbank(O,M,ftop,N)` is
+// `mth_octave_filterbank_tpt_df(tpt_df_fmin,O,M,ftop,N)`, and likewise for
+// the `_alt` version (and so for `mth_octave_filterbank3`, `5` and
+// `_default`).
+//
+// #### Usage
+//
+// ```
+// _ : mth_octave_filterbank_tpt_df(L,O,M,ftop,N) : par(i,N,_)
+// _ : mth_octave_filterbank_alt_tpt_df(L,O,M,ftop,N) : par(i,N,_)
+// ```
+//
+// Where:
+//
+// * `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+//   direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+// * `O`, `M`, `ftop`, `N`: as for `mth_octave_filterbank`
+//
+// #### Test
+// ```
+// fi = library("filters.lib");
+// no = library("noises.lib");
+// mth_octave_filterbank_tpt_df_test = no.noise : fi.mth_octave_filterbank_tpt_df(fi.tpt_df_fmin, 5, 1, 10000, 10);
+// mth_octave_filterbank_tpt_df_sum_test = no.noise : fi.mth_octave_filterbank_tpt_df(fi.tpt_df_fmin, 5, 1, 10000, 10) :> _;
+// mth_octave_filterbank_alt_tpt_df_test = no.noise : fi.mth_octave_filterbank_alt_tpt_df(fi.tpt_df_fmin, 3, 2, 8000, 10);
+// mth_octave_filterbank_alt_tpt_df_sum_test = no.noise : fi.mth_octave_filterbank_alt_tpt_df(fi.tpt_df_fmin, 5, 2, 8000, 10) :> _;
+// ```
+//------------------------------------------------------------
+declare mth_octave_filterbank_tpt_df author "Julius O. Smith III";
+declare mth_octave_filterbank_tpt_df license "MIT";
+mth_octave_filterbank_tpt_df(L,O,M,ftop,N) = an.mth_octave_analyzer_tpt_df(L,O,M,ftop,N) : delayeq(N)
 with {
    fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
-   ap(n) = highpass_plus_lowpass(O,fc(n));   // delay-equalizing allpass
+   ap(n) = highpass_plus_lowpass_tpt_df(L,O,fc(n)); // delay-equalizing allpass
    delayeq(N) = par(i,N-2,apchain(i+1)), _, _;
    apchain(i) = seq(j,N-1-i,ap(j+1));
+};
+
+declare mth_octave_filterbank_alt_tpt_df author "Julius O. Smith III";
+declare mth_octave_filterbank_alt_tpt_df license "MIT";
+mth_octave_filterbank_alt_tpt_df(L,O,M,ftop,N) = an.mth_octave_analyzer_tpt_df(L,O,M,ftop,N) : delayeqi(N)
+with {
+    fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
+    // lowpass minus highpass: half the order of the 'plus' case
+    ap(n) = highpass_minus_lowpass_tpt_df(L,O,fc(n)) : *(-1.0);
+    delayeqi(N) = par(i,N-2,apchain(i+1)), _, *(-1.0);
+    apchain(i) = seq(j,N-1-i,ap(j+1));
 };
 
 // dc-inverted version. This reduces the delay-equalizer order for odd O.
@@ -5012,14 +5289,7 @@ declare mth_octave_filterbank_alt license "LicenseRef-STK-4.3";
 // mth_octave_filterbank_alt_o5_sum_test = no.noise : fi.mth_octave_filterbank_alt(5, 2, 8000, 5) :> _;
 // ```
 //----------------------------------------------------------
-mth_octave_filterbank_alt(O,M,ftop,N) = an.mth_octave_analyzer(O,M,ftop,N) : delayeqi(N)
-with {
-    fc(n) = ftop * 2^(float(n-N+1)/float(M)); // -3dB crossover frequencies
-    // lowpass minus highpass: half the order of the 'plus' case
-    ap(n) = highpass_minus_lowpass(O,fc(n)) : *(-1.0);
-    delayeqi(N) = par(i,N-2,apchain(i+1)), _, *(-1.0);
-    apchain(i) = seq(j,N-1-i,ap(j+1));
-};
+mth_octave_filterbank_alt(O,M,ftop,N) = mth_octave_filterbank_alt_tpt_df(tpt_df_fmin,O,M,ftop,N);
 
 // Note that even-order cases require complex coefficients.
 // See Vaidyanathan 1993 and papers cited there for more info.
@@ -5125,6 +5395,9 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 //---------------`(fi.)filterbank`--------------------------
 // Filter bank.
 // `filterbank` is a standard Faust function.
+// Sections whose crossover is at or above `tpt_df_fmin` (2304 Hz in single
+// precision, 0 in double) are direct form, the others trapezoidal: see
+// `filterbank_tpt_df`.
 //
 // #### Usage
 //
@@ -5156,11 +5429,51 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 declare filterbank author "Julius O. Smith III";
 declare filterbank copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare filterbank license "LicenseRef-STK-4.3";
-filterbank(O,lfreqs) = an.analyzer(O,lfreqs) : delayeq(nb)
+filterbank(O,lfreqs) = filterbank_tpt_df(tpt_df_fmin,O,lfreqs);
+
+//---------------`(fi.)filterbank_tpt_df`--------------------------
+// `filterbank` with an explicit cutoff limit `L`: the band splits and delay
+// equalizers whose crossover is below `L` use trapezoidal sections, the
+// others the cheaper direct-form sections (`lowpass_tpt_df`,
+// `highpass_plus_lowpass_tpt_df`). `filterbank(O,freqs)` is
+// `filterbank_tpt_df(tpt_df_fmin,O,freqs)`: trapezoidal below 2304 Hz in
+// single precision, direct form everywhere in double precision. Each
+// section is compiled in one form only when its crossover is a constant;
+// for crossovers that vary (sliders), pass `L = ma.MAX` (trapezoidal) or
+// `L = 0` (direct form), or both forms run.
+//
+// #### Usage
+//
+// ```
+// _ : filterbank_tpt_df(L,O,freqs) : par(i,ba.count(freqs)+1,_)
+// ```
+//
+// Where:
+//
+// * `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+//   direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+// * `O`, `freqs`: as for `filterbank`
+//
+// #### Test
+// ```
+// fi = library("filters.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// filterbank_tpt_df_test = no.noise : fi.filterbank_tpt_df(fi.tpt_df_fmin, 3, (50, 500, 4000));
+// filterbank_tpt_df_o5_sum_test = no.noise : fi.filterbank_tpt_df(fi.tpt_df_fmin, 5, (50, 500, 4000)) :> _;
+// filterbank_tpt_df_slider_test = no.noise : fi.filterbank_tpt_df(fi.tpt_df_fmin, 3, (hslider("f1", 500, 20, 10000, 1), hslider("f2", 4000, 20, 20000, 1)));
+// filterbank_tpt_df_modulated_test = no.noise : fi.filterbank_tpt_df(0, 3, (f1, 4*f1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); f1 = 2500*pow(2, tri); };
+// filterbank_tpt_df_jump_test = no.noise : fi.filterbank_tpt_df(ma.MAX, 3, (f1, 4*f1)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f1 = 100*pow(10, sq); };
+// ```
+//---------------------------------------------------
+declare filterbank_tpt_df author "Julius O. Smith III";
+declare filterbank_tpt_df license "MIT";
+filterbank_tpt_df(L,O,lfreqs) = an.analyzer_tpt_df(L,O,lfreqs) : delayeq(nb)
 with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
-   ap(n) = highpass_plus_lowpass(O,fc(n));
+   ap(n) = highpass_plus_lowpass_tpt_df(L,O,fc(n));
    delayeq(1) = _,_; // par(i,0,...) does not fly
    delayeq(nb) = par(i,nb-1,apchain(nb-1-i)),_,_;
    apchain(0) = _;
@@ -5169,6 +5482,9 @@ with {
 
 //-----------------`(fi.)filterbanki`----------------------
 // Inverted-dc filter bank.
+// Sections whose crossover is at or above `tpt_df_fmin` (2304 Hz in single
+// precision, 0 in double) are direct form, the others trapezoidal: see
+// `filterbanki_tpt_df`.
 //
 // #### Usage
 //
@@ -5202,15 +5518,49 @@ with {
 declare filterbanki author "Julius O. Smith III";
 declare filterbanki copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare filterbanki license "LicenseRef-STK-4.3";
-filterbanki(O,lfreqs) = _ <: bsplit(nb)
+filterbanki(O,lfreqs) = filterbanki_tpt_df(tpt_df_fmin,O,lfreqs);
+
+//-----------------`(fi.)filterbanki_tpt_df`----------------------
+// `filterbanki` with an explicit cutoff limit `L`, as `filterbank_tpt_df`
+// is to `filterbank`: `filterbanki(O,freqs)` is
+// `filterbanki_tpt_df(tpt_df_fmin,O,freqs)`.
+//
+// #### Usage
+//
+// ```
+// _ : filterbanki_tpt_df(L,O,freqs) : par(i,ba.count(freqs)+1,_)
+// ```
+//
+// Where:
+//
+// * `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
+//   direct form and `L >= ma.MAX` the trapezoidal form for every crossover
+// * `O`, `freqs`: as for `filterbanki`
+//
+// #### Test
+// ```
+// fi = library("filters.lib");
+// no = library("noises.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// filterbanki_tpt_df_test = no.noise : fi.filterbanki_tpt_df(fi.tpt_df_fmin, 3, (50, 500, 4000));
+// filterbanki_tpt_df_o5_sum_test = no.noise : fi.filterbanki_tpt_df(fi.tpt_df_fmin, 5, (50, 500, 4000)) :> _;
+// filterbanki_tpt_df_slider_test = no.noise : fi.filterbanki_tpt_df(fi.tpt_df_fmin, 3, (hslider("f1", 500, 20, 10000, 1), hslider("f2", 4000, 20, 20000, 1)));
+// filterbanki_tpt_df_modulated_test = no.noise : fi.filterbanki_tpt_df(0, 3, (f1, 4*f1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); f1 = 2500*pow(2, tri); };
+// filterbanki_tpt_df_jump_test = no.noise : fi.filterbanki_tpt_df(ma.MAX, 3, (f1, 4*f1)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f1 = 100*pow(10, sq); };
+// ```
+//---------------------------------------------------
+declare filterbanki_tpt_df author "Julius O. Smith III";
+declare filterbanki_tpt_df license "MIT";
+filterbanki_tpt_df(L,O,lfreqs) = _ <: bsplit(nb)
 with {
    nb = ba.count(lfreqs);
    fc(n) = ba.take(n, lfreqs);
-   lp(n) = lowpass(O,fc(n));
-   hp(n) = highpass(O,fc(n));
+   lp(n) = lowpass_tpt_df(L,O,fc(n));
+   hp(n) = highpass_tpt_df(L,O,fc(n));
    // lowpass minus highpass, so that each band sum hp*ap + lp*(sum below)
    // factors as (lp - hp)*(sum below), an allpass:
-   ap(n) = highpass_minus_lowpass(O,fc(n)) : *(-1.0);
+   ap(n) = highpass_minus_lowpass_tpt_df(L,O,fc(n)) : *(-1.0);
    bsplit(0) = *(-1.0);
    bsplit(i) = (hp(i) : delayeq(i-1)), (lp(i) <: bsplit(i-1));
    delayeq(0) = _; // moving the *(-1) here inverts all outputs BUT dc
