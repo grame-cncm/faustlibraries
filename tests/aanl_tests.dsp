@@ -41,6 +41,8 @@ hyperbolic_test = aa.hyperbolic(sig);
 hyperbolic2_test = aa.hyperbolic2(sig);
 sinarctan_test = aa.sinarctan(sig);
 sinarctan2_test = aa.sinarctan2(sig);
+sinarctanStable_test = aa.sinarctanStable(5.0 * sig);
+sinarctanTransparent_test = aa.sinarctanTransparent(5.0 * sig);
 softclipQuadratic1_test = aa.softclipQuadratic1(sig);
 softclipQuadratic2_test = aa.softclipQuadratic2(sig);
 
