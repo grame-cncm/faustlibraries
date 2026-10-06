@@ -50,7 +50,8 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-cubicnl_test = os.osc(440) : ef.cubicnl(0.5, 0.0);
+cubicnl_test = os.tosc(440) : ef.cubicnl(0.5, 0.0);
+cubicnl_nodc_test = os.tosc(440) : ef.cubicnl_nodc(0.5, 0.0);
 ```
 
 #### References
@@ -82,7 +83,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-gate_mono_test = os.osc(440) : ef.gate_mono(-60, 0.0001, 0.1, 0.02);
+gate_mono_test = os.tosc(440) : ef.gate_mono(-60, 0.0001, 0.1, 0.02);
 ```
 
 #### References
@@ -115,7 +116,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-gate_stereo_test = os.osc(440), os.osc(441) : ef.gate_stereo(-60, 0.0001, 0.1, 0.02);
+gate_stereo_test = os.tosc(440), os.tosc(441) : ef.gate_stereo(-60, 0.0001, 0.1, 0.02);
 ```
 
 #### References
@@ -149,7 +150,13 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-gate_gain_mono_test = os.osc(440) : ef.gate_gain_mono(-60, 0.0001, 0.1, 0.02);
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+gate_gain_mono_test = os.tosc(440) : ef.gate_gain_mono(-60, 0.0001, 0.1, 0.02);
+gate_gain_mono_slider_test = os.tosc(440) : ef.gate_gain_mono(hslider("gate_gain_mono:thresh", -60, -120, 0, 0.1), hslider("gate_gain_mono:att", 0.0001, 0.0001, 0.1, 0.0001), hslider("gate_gain_mono:hold", 0.1, 0, 1, 0.001), hslider("gate_gain_mono:rel", 0.02, 0.001, 1, 0.001));
+gate_gain_mono_modulated_test = no.noise*pow(0.001, float(ba.period(Q))/Q) : ef.gate_gain_mono(-30, 0.0001, 0.02, 0.001*pow(100, tri)) with { Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+gate_gain_mono_jump_test = no.noise*pow(0.001, float(ba.period(Q))/Q) : ef.gate_gain_mono(-30, 0.0001, 0.02, 0.001*pow(100, sq)) with { Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ## Fibonacci
@@ -255,7 +262,6 @@ flat near f1. Implemented using two dc blockers in series.
 High-frequency model = -24 dB/octave slope implemented using a
 fourth-order Butterworth lowpass.
 
-
 #### Usage
 ```
 _ : speakerbp(f1,f2) : _
@@ -270,7 +276,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-speakerbp_test = os.osc(440) : ef.speakerbp(100.0, 5000.0);
+speakerbp_test = os.tosc(440) : ef.speakerbp(100.0, 5000.0);
 ```
 
 #### Example
@@ -284,13 +290,14 @@ speakerbp(130,5000)
 
 ### `(ef.)piano_dispersion_filter`
 
-Piano dispersion allpass filter in closed form.
+Piano dispersion allpass filter in closed form. The first output is
+MINUS the estimated delay of the allpass chain at `f0`, the second one
+the filtered signal (see Outputs below).
 
 #### Usage
 
 ```
-piano_dispersion_filter(M,B,f0)
-_ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : fdelay(maxDelay) : _
+_ : piano_dispersion_filter(M,B,f0) : _,_
 ```
 
 Where:
@@ -304,7 +311,21 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-piano_dispersion_filter_test = os.osc(110) : ef.piano_dispersion_filter(4, 0.0001, 110);
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+piano_dispersion_filter_test = os.tosc(110) : ef.piano_dispersion_filter(4, 0.0001, 110);
+piano_dispersion_filter_slider_test = os.tosc(110) : ef.piano_dispersion_filter(4, hslider("piano_dispersion_filter:B", 0.0001, 0.000001, 0.01, 0.000001), hslider("piano_dispersion_filter:f0", 110, 27.5, 4186, 0.1));
+piano_dispersion_filter_modulated_test = no.noise : ef.piano_dispersion_filter(4, 0.0001, 27.5*pow(4186/27.5, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+piano_dispersion_filter_jump_test = no.noise : ef.piano_dispersion_filter(4, 0.0001, 27.5*pow(4186/27.5, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+#### Example
+
+The delay output compensates the delay of a string loop:
+
+```
+_ : piano_dispersion_filter(1,B,f0) : +(totalDelay),_ : de.fdelay(maxDelay) : _
 ```
 
 #### Outputs
@@ -344,7 +365,9 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-stereo_width_test = os.osc(440), os.osc(550) : ef.stereo_width(0.5);
+no = library("noises.lib");
+stereo_width_test = os.tosc(440), os.tosc(550) : ef.stereo_width(0.5);
+stereo_width_mono_test = no.noise <: _, *(0.5) : ef.stereo_width(0);
 ```
 
 At `w=0`, the output signal is mono ((left+right)/2 in both channels).
@@ -377,8 +400,8 @@ _,_ : ms_dec : _,_ // (m,s) to (l,r)
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-ms_enc_test = os.osc(440), os.osc(550) : ef.ms_enc;
-ms_dec_test = os.osc(440), os.osc(550) : ef.ms_enc : ef.ms_dec;
+ms_enc_test = os.tosc(440), os.tosc(550) : ef.ms_enc;
+ms_dec_test = os.tosc(440), os.tosc(550) : ef.ms_enc : ef.ms_dec;
 ```
 
 ## Dither and Noise Shaping
@@ -416,7 +439,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-dither_test = os.osc(440)*0.001 : ef.dither(16);
+dither_test = os.tosc(440)*0.001 : ef.dither(16);
 ```
 
 #### References
@@ -453,7 +476,7 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-dither_shaped_test = os.osc(440)*0.001 : ef.dither_shaped(2, 16);
+dither_shaped_test = os.tosc(440)*0.001 : ef.dither_shaped(2, 16);
 ```
 
 #### References
@@ -475,7 +498,7 @@ Square Rectangular Digital Waveguide Mesh.
 #### Usage
 
 ```
-bus(4*N) : mesh_square(N) : bus(4*N)
+si.bus(4*N) : mesh_square(N) : si.bus(4*N)
 ```
 
 Where:
@@ -532,9 +555,9 @@ illustrating these orderings is `process = mesh_square(2);`.
 Reflectively terminated mesh impulsed at one corner:
 
 ```
-mesh_square_test(N,x) = mesh_square(N)~(busi(4*N,x)) // input to corner
-with { 
-    busi(N,x) = bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x); 
+mesh_square_test(N,x) = ef.mesh_square(N)~(busi(4*N,x)) // input to corner
+with {
+    busi(N,x) = si.bus(N) : par(i,N,*(-1)) : par(i,N-1,_), +(x);
 };
 process = 1-1' : mesh_square_test(4); // all modes excited forever
 ```
@@ -584,7 +607,7 @@ Where:
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
 fi = library("filters.lib");
-dryWetMixer_test = os.osc(440) : ef.dryWetMixer(0.5, fi.dcblocker);
+dryWetMixer_test = os.tosc(440) : ef.dryWetMixer(0.5, fi.dcblocker);
 ```
 
 ----
@@ -634,7 +657,7 @@ Where:
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
 fi = library("filters.lib");
-dryWetMixerConstantPower_test = os.osc(440) : ef.dryWetMixerConstantPower(0.5, fi.dcblocker);
+dryWetMixerConstantPower_test = os.tosc(440) : ef.dryWetMixerConstantPower(0.5, fi.dcblocker);
 ```
 
 ----
@@ -766,11 +789,12 @@ Where:
 * `maxDuration`: the max echo duration in seconds
 * `duration`: the echo duration in seconds
 * `feedback`: the feedback coefficient
+
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-echo_test = os.osc(440) : ef.echo(0.5, 0.25, 0.4);
+echo_test = os.tosc(440) : ef.echo(0.5, 0.25, 0.4);
 ```
 
 ----
@@ -782,7 +806,7 @@ Reverse echo effect.
 #### Usage
 
 ```
-_ : ef.reverseEchoN(N,delay) : si.bus(N)
+_ : reverseEchoN(N,delay) : si.bus(N)
 ```
 
 Where:
@@ -794,13 +818,13 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-reverseEchoN_test = os.osc(440) : ef.reverseEchoN(2, 32);
+reverseEchoN_test = os.tosc(440) : ef.reverseEchoN(2, 32);
 ```
 
 #### Demo
 
 ```
-_ : dm.reverseEchoN(N) : _,_
+_ : dm.reverse_echo_demo(N) : _,_
 ```
 
 #### Description
@@ -817,7 +841,7 @@ Reverse delay with amplitude ramp.
 #### Usage
 
 ```
-_ : ef.reverseDelayRamped(delay,phase) : _
+_ : reverseDelayRamped(delay,phase) : _
 ```
 
 Where:
@@ -829,13 +853,13 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-reverseDelayRamped_test = os.osc(440) : ef.reverseDelayRamped(32, 0.6);
+reverseDelayRamped_test = os.tosc(440) : ef.reverseDelayRamped(32, 0.6);
 ```
 
 #### Demo
 
 ```
-_ : ef.reverseDelayRamped(32,0.6) : _,_
+_ : ef.reverseDelayRamped(32,0.6) : _
 ```
 
 
@@ -848,18 +872,22 @@ Pan nChans channels to the stereo field, spread uniformly left to right.
 #### Usage
 
 ```
-si.bus(N) : ef.uniformPanToStereo(N) : _,_
+si.bus(N) : uniformPanToStereo(N) : _,_
 ```
 
 Where:
 
-* `N`: Number of input channels to pan down to stereo, a constant numerical expression
+* `N`: Number of input channels to pan down to stereo, a constant numerical expression (N >= 2)
+
+Channel `i` gets gain `1-i/(N-1)` on the left (first) output and
+`i/(N-1)` on the right (second): channel 0 is hard left, channel N-1
+hard right.
 
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-uniformPanToStereo_test = os.osc(440), os.osc(550), os.osc(660) : ef.uniformPanToStereo(3);
+uniformPanToStereo_test = os.tosc(440), os.tosc(550), os.tosc(660) : ef.uniformPanToStereo(3);
 ```
 
 #### Demo
@@ -878,13 +906,8 @@ A tape-stop effect, like putting a finger on a vinyl record player.
 #### Usage:
 
 ```
-_,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP, 
-              crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
-```
-
-```
-_ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP, 
-             crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
+si.bus(C) : tapeStop(C, LAGRANGE_ORDER, MAX_TIME_SAMP,
+                     crossfade, gainAlpha, stopAlpha, stopTime, stop) : si.bus(C)
 ```
 
 Where:
@@ -897,11 +920,24 @@ Where:
 * `stopAlpha`: `stopAlpha==1` represents a linear deceleration (constant force). `stopAlpha<1` represents an initially weaker, then stronger force. `stopAlpha>1` represents an initially stronger, then weaker force. Safe values are in the range [.01,2].
 * `stopTime`: Desired duration of the stop time, in samples.
 * `stop`: When `stop` becomes positive, the tape-stop effect will start. When `stop` becomes zero, normal audio will resume via crossfade.
+
+#### Example
+
+```
+_,_ : tapeStop(2, LAGRANGE_ORDER, MAX_TIME_SAMP,
+              crossfade, gainAlpha, stopAlpha, stopTime, stop) : _,_
+_ : tapeStop(1, LAGRANGE_ORDER, MAX_TIME_SAMP,
+             crossfade, gainAlpha, stopAlpha, stopTime, stop) : _
+```
+
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-tapeStop_test = os.osc(440), os.osc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, button("stop"));
+ba = library("basics.lib");
+ma = library("maths.lib");
+tapeStop_test = os.tosc(440), os.tosc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, button("stop"));
+tapeStop_jump_test = os.tosc(440), os.tosc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, sq) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; };
 ```
 
 ## Pitch Shifting
@@ -925,11 +961,17 @@ Where:
 * `w`: the window length (samples)
 * `x`: crossfade duration duration (samples)
 * `s`: shift (semitones)
+
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-transpose_test = os.osc(440) : ef.transpose(1024, 512, 7);
+ba = library("basics.lib");
+ma = library("maths.lib");
+transpose_test = os.tosc(440) : ef.transpose(1024, 512, 7);
+transpose_slider_test = os.tosc(440) : ef.transpose(hslider("transpose:w", 1024, 16, 4096, 1), hslider("transpose:x", 512, 1, 4096, 1), hslider("transpose:s", 7, -12, 12, 0.1));
+transpose_modulated_test = os.tosc(440) : ef.transpose(1024, 512, 24*tri - 12) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+transpose_jump_test = os.tosc(440) : ef.transpose(1024, 512, 24*sq - 12) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -961,7 +1003,12 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-transpose_windowed_test = os.osc(440) : ef.transpose_windowed(2, 1024, 7);
+ba = library("basics.lib");
+ma = library("maths.lib");
+transpose_windowed_test = os.tosc(440) : ef.transpose_windowed(2, 1024, 7);
+transpose_windowed_slider_test = os.tosc(440) : ef.transpose_windowed(2, hslider("transpose_windowed:w", 1024, 16, 4096, 1), hslider("transpose_windowed:s", 7, -12, 12, 0.1));
+transpose_windowed_modulated_test = os.tosc(440) : ef.transpose_windowed(2, 1024, 24*tri - 12) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+transpose_windowed_jump_test = os.tosc(440) : ef.transpose_windowed(2, 1024, 24*sq - 12) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -994,7 +1041,7 @@ _ : granular(P, dur, ratio, pos, jit) : _
 Where:
 
 * `P`: number of overlapping grain voices, 2 or more (a constant numerical expression)
-* `dur`: grain duration in seconds
+* `dur`: grain duration in seconds, rounded to a whole number of samples
 * `ratio`: playback speed inside each grain (1 = unchanged pitch)
 * `pos`: read position in seconds behind the write head
 * `jit`: random position jitter in seconds, latched per grain
@@ -1006,7 +1053,11 @@ The latched read offset `pos + jit + (ratio-1)*dur` must stay within the
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-granular_test = os.osc(440) : ef.granular(4, 0.05, 1.5, 0.2, 0.1);
+ba = library("basics.lib");
+ma = library("maths.lib");
+granular_test = os.tosc(440) : ef.granular(2, 0.05, 1.5, 0.2, 0.1);
+granular_slider_test = os.tosc(440) : ef.granular(2, hslider("granular:dur", 0.05, 0.005, 1, 0.001), hslider("granular:ratio", 1.5, 0.25, 4, 0.01), hslider("granular:pos", 0.2, 0, 1, 0.001), hslider("granular:jit", 0.1, 0, 1, 0.001));
+granular_modulated_test = os.tosc(440) : ef.granular(2, 0.05, 0.5 + tri, 0.05 + 0.3*tri, 0.1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -1033,7 +1084,11 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 doppler_shift_test = os.sawtooth(220) : ef.doppler_shift(220, 1.5);
+doppler_shift_slider_test = os.sawtooth(220) : ef.doppler_shift(hslider("doppler_shift:freq", 220, 20, 2000, 1), hslider("doppler_shift:ratio", 1.5, 0.5, 2, 0.01));
+doppler_shift_modulated_test = os.tosc(220) : ef.doppler_shift(220, 0.5 + tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -1052,14 +1107,18 @@ Quadratic softclip nonlinearity.
 #### Usage
 
 ```
-_ : softclipQuadratic : _
+softclipQuadratic(x) : _
 ```
+
+Where:
+
+* `x`: input signal
 
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-softclipQuadratic_test = os.osc(440) : ef.softclipQuadratic;
+softclipQuadratic_test = os.tosc(440) : ef.softclipQuadratic;
 ```
 
 #### References
@@ -1080,11 +1139,17 @@ _ : wavefold(width) : _
 
 Where:
 
-* `width`: The width of the folded section [0..1] (float).
+* `width`: The width of the folded section [0..1] (float). At 0 nothing is folded:
+  the signal is clipped at ±1.
 
 #### Test
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-wavefold_test = os.osc(440) : ef.wavefold(0.5);
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+wavefold_test = os.tosc(440) : ef.wavefold(0.5);
+wavefold_slider_test = 2*no.noise : ef.wavefold(hslider("width", 0, 0, 1, 0.01));
+wavefold_modulated_test = 2*no.noise : ef.wavefold(tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```

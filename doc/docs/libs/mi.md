@@ -101,7 +101,7 @@ Takes an input force and produces output position.
 #### Usage
 
 ```
-mass(m, grav, x0, xr0),_ : _
+_ : mass(m, grav, x0, xr0) : _
 ```
 
 Where:
@@ -127,7 +127,7 @@ Takes an input force and produces output position.
 #### Usage
 
 ```
-oscil(m, k, z, grav, x0, xr0),_ : _
+_ : oscil(m, k, z, grav, x0, xr0) : _
 ```
 
 Where:
@@ -142,7 +142,11 @@ Where:
 #### Test
 ```
 mi = library("mi.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 oscil_test = 0.1 : mi.oscil(1.0, 0.5, 0.1, 0.0, 0.1, 0.0);
+oscil_slider_test = 0.1 : mi.oscil(hslider("oscil:m", 1.0, 0.1, 10, 0.01), hslider("oscil:k", 0.5, 0, 2, 0.001), hslider("oscil:z", 0.1, 0, 1, 0.001), 0.0, 0.1, 0.0);
+oscil_modulated_test = 0.1*ba.pulse(P) : mi.oscil(1.0, 0.05 + 0.45*tri, 0.02, 0.0, 0.0, 0.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -157,7 +161,7 @@ rules).
 #### Usage
 
 ```
-ground(x0),_ : _
+_ : ground(x0) : _
 ```
 
 Where:
@@ -181,7 +185,7 @@ affect position) and the driving position signal.
 #### Usage
 
 ```
-posInput(x0),_,_ : _
+_,_ : posInput(x0) : _
 ```
 
 Where:
@@ -192,7 +196,7 @@ Where:
 ```
 mi = library("mi.lib");
 os = library("oscillators.lib");
-posInput_test = 0, os.osc(1.0) : mi.posInput(0.0);
+posInput_test = 0, os.tosc(1.0) : mi.posInput(0.0);
 ```
 
 ## Interaction Algorithms
@@ -209,10 +213,14 @@ All physical parameters are expressed in sample-rate dependant values.
 
 Implementation of a linear elastic spring interaction.
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 #### Usage
 
 ```
-spring(k, x1r, x2r),_,_ : _,_
+_,_ : spring(k, x1r, x2r) : _,_
 ```
 
 Where:
@@ -235,10 +243,14 @@ Implementation of a linear damper interaction.
 Beware: in 32bit precision mode, damping forces can become
 truncated if position values are not centered around zero!
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 #### Usage
 
 ```
-damper(z, x1r, x2r),_,_ : _,_
+_,_ : damper(z, x1r, x2r) : _,_
 ```
 
 Where:
@@ -260,10 +272,14 @@ damper_test = mi.damper(0.5, 0.0, 0.0, 0.2, -0.2);
 Implementation of a linear viscoelastic spring-damper interaction
 (a combination of the spring and damper modules).
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 #### Usage
 
 ```
-springDamper(k, z, x1r, x2r),_,_ : _,_
+_,_ : springDamper(k, z, x1r, x2r) : _,_
 ```
 
 Where:
@@ -276,7 +292,11 @@ Where:
 #### Test
 ```
 mi = library("mi.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 springDamper_test = mi.springDamper(5.0, 0.3, 0.0, 0.0, 0.1, -0.1);
+springDamper_slider_test = mi.springDamper(hslider("springDamper:k", 5.0, 0, 20, 0.01), hslider("springDamper:z", 0.3, 0, 2, 0.01), 0.0, 0.0, 0.1, -0.1);
+springDamper_modulated_test = mi.springDamper(1 + 9*tri, 0.3, 0.0, 0.0, 0.1, -0.1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -288,10 +308,14 @@ containing a quadratic term (function of squared distance).
 Beware: at high displacements, this interaction will break numerical
 stability conditions ! The `nlSpringDamperClipped` is a safer option.
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 #### Usage
 
 ```
-nlSpringDamper2(k, q, z, x1r, x2r),_,_ : _,_
+_,_ : nlSpringDamper2(k, q, z, x1r, x2r) : _,_
 ```
 
 Where:
@@ -317,10 +341,14 @@ containing a cubic term (function of distance^3).
 Beware: at high displacements, this interaction will break numerical
 stability conditions ! The `nlSpringDamperClipped` is a safer option.
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 #### Usage
 
 ```
-nlSpringDamper3(k, q, z, x1r, x2r),_,_ : _,_
+_,_ : nlSpringDamper3(k, q, z, x1r, x2r) : _,_
 ```
 
 Where:
@@ -353,10 +381,14 @@ from becoming unstable.
 So far the interaction clips "hard" (with no soft-knee spline
 interpolation, etc.)
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 #### Usage
 
 ```
-nlSpringDamperClipped(s, c, k, z, x1r, x2r),_,_ : _,_
+_,_ : nlSpringDamperClipped(s, c, k, z, x1r, x2r) : _,_
 ```
 
 Where:
@@ -384,11 +416,15 @@ upon contact, until a tipping point is reached (when the plucking occurs).
 The tipping point depends both on the stiffness and the distance scaling
 of the interaction.
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 
 #### Usage
 
 ```
-nlPluck(knl, scale, z, x1r, x2r),_,_ : _,_
+_,_ : nlPluck(knl, scale, z, x1r, x2r) : _,_
 ```
 
 Where:
@@ -403,7 +439,7 @@ Where:
 ```
 mi = library("mi.lib");
 os = library("oscillators.lib");
-nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.osc(110) * 0.001;
+nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.tosc(110) * 0.001;
 ```
 
 ----
@@ -416,11 +452,15 @@ Two versions are proposed : a piecewise linear function (very
 similar to the `nlPluck`) or a mathematical approximation (see
 Stefan Bilbao's book, Numerical Sound Synthesis).
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 
 #### Usage
 
 ```
-nlBow(znl, scale, type, x1r, x2r),_,_ : _,_
+_,_ : nlBow(znl, scale, type, x1r, x2r) : _,_
 ```
 
 Where:
@@ -444,11 +484,15 @@ nlBow_test = mi.nlBow(0.5, 0.1, 1.0, 0.0, 0.0, 0.05, -0.05);
 Implementation of a collision interaction, producing linear visco-elastic
 repulsion forces when two mass elements are interpenetrating.
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 
 #### Usage
 
 ```
-collision(k, z, thres, x1r, x2r),_,_ : _,_
+_,_ : collision(k, z, thres, x1r, x2r) : _,_
 ```
 
 Where:
@@ -475,10 +519,14 @@ Bound by an upper stiffness value to maintain stability.
 This interaction is particularly useful for more realistic contact dynamics
 (greater difference in velocity provides sharper contacts, and reciprocally).
 
+Inputs: the positions `x1` and `x2` of the two connected masses. Outputs:
+the two equal and opposite forces, the one applied to mass 1 first, to be
+routed back to the force inputs of the masses.
+
 #### Usage
 
 ```
-nlCollisionClipped(s, c, k, z, thres, x1r, x2r),_,_ : _,_
+_,_ : nlCollisionClipped(s, c, k, z, thres, x1r, x2r) : _,_
 ```
 
 Where:

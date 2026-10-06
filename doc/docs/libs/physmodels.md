@@ -155,17 +155,20 @@ algorithm.
 ### `(pm.)basicBlock`
 
 Empty bidirectional block to be used with [`chain`](#chain): 3 signals ins
-and 3 signals out.
+and 3 signals out. Any bidirectional block with 3 inputs and 3 outputs can
+take its place in a [`chain`](#chain).
 
 #### Usage
 
 ```
-chain(basicBlock : basicBlock : etc.)
+_,_,_ : basicBlock : _,_,_
 ```
 
-Where:
+#### Example
 
-* `basicBlock`: any bidirectional block with 3 inputs and 3 outputs
+```
+chain(basicBlock : basicBlock : basicBlock)
+```
 
 #### Test
 ```
@@ -188,17 +191,15 @@ will add an `n` samples delay to both left and right going waves.
 #### Usage
 
 ```
-leftGoingWaves,rightGoingWaves,mixedOutput : chain( A : B ) : leftGoingWaves,rightGoingWaves,mixedOutput
-with {
-   A = _,_,_;
-   B = _,_,_;
-};
+A = _,_,_;
+B = _,_,_;
+_,_,_ : chain(A : B) : _,_,_
 ```
 
 Where:
 
-* `A`: first bidirectional block in the chain
-* `B`: next bidirectional block in the chain
+* `A`: first bidirectional block in the chain (3 inputs, 3 outputs)
+* `B`: next bidirectional block in the chain (3 inputs, 3 outputs)
 
 #### Test
 ```
@@ -215,14 +216,18 @@ Adds a signal to left going waves anywhere in a [`chain`](#chain) of blocks.
 #### Usage
 
 ```
-model(x) = chain(A : inLeftWave(x) : B)
+_,_,_ : inLeftWave(x) : _,_,_
 ```
 
 Where:
 
-* `A`: preceding bidirectional block
 * `x`: signal added to the left-going wave
-* `B`: following bidirectional block
+
+#### Example
+
+```
+model(x) = chain(A : inLeftWave(x) : B);
+```
 
 #### Test
 ```
@@ -239,14 +244,18 @@ Adds a signal to right going waves anywhere in a [`chain`](#chain) of blocks.
 #### Usage
 
 ```
-model(x) = chain(A : inRightWave(x) : B)
+_,_,_ : inRightWave(x) : _,_,_
 ```
 
 Where:
 
-* `A`: preceding bidirectional block
 * `x`: signal added to the right-going wave
-* `B`: following bidirectional block
+
+#### Example
+
+```
+model(x) = chain(A : inRightWave(x) : B);
+```
 
 #### Test
 ```
@@ -264,14 +273,18 @@ of blocks.
 #### Usage
 
 ```
-model(x) = chain(A : in(x) : B)
+_,_,_ : in(x) : _,_,_
 ```
 
 Where:
 
-* `A`: preceding bidirectional block
 * `x`: signal added to both left- and right-going waves
-* `B`: following bidirectional block
+
+#### Example
+
+```
+model(x) = chain(A : in(x) : B);
+```
 
 #### Test
 ```
@@ -288,13 +301,14 @@ Sends the signal of left going waves to the output channel of the [`chain`](#cha
 #### Usage
 
 ```
-chain(A : outLeftWave : B)
+_,_,_ : outLeftWave : _,_,_
 ```
 
-Where:
+#### Example
 
-* `A`: preceding bidirectional block
-* `B`: following bidirectional block
+```
+chain(A : outLeftWave : B)
+```
 
 #### Test
 ```
@@ -311,13 +325,14 @@ Sends the signal of right going waves to the output channel of the [`chain`](#ch
 #### Usage
 
 ```
-chain(A : outRightWave : B)
+_,_,_ : outRightWave : _,_,_
 ```
 
-Where:
+#### Example
 
-* `A`: preceding bidirectional block
-* `B`: following bidirectional block
+```
+chain(A : outRightWave : B)
+```
 
 #### Test
 ```
@@ -335,13 +350,14 @@ Sends the signal of right and left going waves to the output channel of the
 #### Usage
 
 ```
-chain(A : out : B)
+_,_,_ : out : _,_,_
 ```
 
-Where:
+#### Example
 
-* `A`: preceding bidirectional block
-* `B`: following bidirectional block
+```
+chain(A : out : B)
+```
 
 #### Test
 ```
@@ -453,7 +469,12 @@ Closes the inputs of a bidirectional chain in all directions.
 ```
 closeIns : _,_,_
 ```
-Typical use: `closeIns : chain(...) : _,_,_`
+
+#### Example
+
+```
+closeIns : chain(A : B) : _,_,_
+```
 
 #### Test
 ```
@@ -471,7 +492,13 @@ main signal output (3d output).
 #### Usage
 
 ```
-_,_,_ : chain(...) : _
+_,_,_ : closeOuts : _
+```
+
+#### Example
+
+```
+_,_,_ : chain(A : B) : closeOuts : _
 ```
 
 #### Test
@@ -490,12 +517,18 @@ except for the main signal output (3d output).
 #### Usage
 
 ```
-endChain(chain(...)) : _
+endChain(b) : _
 ```
 
 Where:
 
-* `b`: bidirectional chain to close on all non-audio ports
+* `b`: bidirectional chain to close on all non-audio ports (3 inputs, 3 outputs)
+
+#### Example
+
+```
+endChain(chain(A : B)) : _
+```
 
 #### Test
 ```
@@ -525,13 +558,22 @@ A series of waveguide functions based on various types of delays (see
 #### Usage
 
 ```
-chain(A : waveguideUd(nMax,n) : B)
+_,_,_ : waveguideUd(nMax,n) : _,_,_
+_,_,_ : waveguideFd(nMax,n) : _,_,_
+_,_,_ : waveguideFd2(nMax,n) : _,_,_
+_,_,_ : waveguideFd4(nMax,n) : _,_,_
 ```
 
 Where:
 
 * `nMax`: the maximum length of the delays in the waveguide
 * `n`: the length of the delay lines in samples.
+
+#### Example
+
+```
+chain(A : waveguideUd(nMax,n) : B)
+```
 
 #### Test
 ```
@@ -551,13 +593,19 @@ Standard `pm.lib` waveguide (based on `waveguideFd4` above).
 #### Usage
 
 ```
-chain(A : waveguide(nMax,n) : B)
+_,_,_ : waveguide(nMax,n) : _,_,_
 ```
 
 Where:
 
 * `nMax`: the maximum length of the delays in the waveguide
 * `n`: the length of the delay lines in samples.
+
+#### Example
+
+```
+chain(A : waveguide(nMax,n) : B)
+```
 
 #### Test
 ```
@@ -589,7 +637,7 @@ the string connected to it (0-1) (1 = 20 seconds)
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-bridgeFilter_test = os.osc(110) : pm.bridgeFilter(0.6, 0.4);
+bridgeFilter_test = os.tosc(110) : pm.bridgeFilter(0.6, 0.4);
 ```
 
 ----
@@ -611,11 +659,36 @@ Where:
 * `t60`: mode resonance duration (in seconds)
 * `gain`: mode gain (0-1)
 
+#### Method
+
+The filter is the biquad `(1 - z^-2)/(1 - 2*r*cos(w)*z^-1 + r^2*z^-2)`,
+poles at radius `r = 0.001^(1/(t60*SR))` and angle `w = 2*pi*freq/SR`,
+scaled by `gain`. With a long `t60` or a high sample rate, the poles come
+very close to z = 1, and a direct-form realization loses them in float:
+its coefficients round to within one ulp of 2 and 1, and a bell or marimba
+mode drifted by up to 5 % from its double output at 192 kHz. The same
+transfer function is computed instead by a Chamberlin state-variable
+filter, whose coefficients are the distance of the pole to z = 1,
+`f^2 = |1 - p|^2`, and the damping `f*q = 1 - r^2`: both are small numbers
+kept with full relative precision, from `t = tanh(ln(1000)/(2*t60*SR))` and
+`sin(w/2)^2`, where `1 - r = 2*t/(1 + t)`. Its bandpass output gives the
+biquad once the input goes through `1 + z^-1`, and its lowpass state is
+kept divided by `f`. Each state is updated by adding a small increment,
+never multiplied by a coefficient close to 1, which is what keeps the
+poles in float. It costs three multiplications per sample, `gain`
+included; the float output stays within 1e-5 of the double one.
+
 #### Test
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-modeFilter_test = os.osc(110) : pm.modeFilter(440, 1.5, 0.8);
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+modeFilter_test = os.tosc(110) : pm.modeFilter(440, 1.5, 0.8);
+modeFilter_modulated_test = 0.01*no.noise : pm.modeFilter(50*pow(100, tri), 1, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+modeFilter_jump_test = 0.01*no.noise : pm.modeFilter(50*pow(100, sq), 1, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+modeFilter_long_test = no.noise : pm.modeFilter(80, 8, 0.1);
 ```
 
 ## String Instruments
@@ -632,13 +705,19 @@ A string segment without terminations (just a simple waveguide).
 #### Usage
 
 ```
-chain(A : stringSegment(maxLength,length) : B)
+_,_,_ : stringSegment(maxLength,length) : _,_,_
 ```
 
 Where:
 
 * `maxLength`: the maximum length of the string in meters (should be static)
 * `length`: the length of the string in meters
+
+#### Example
+
+```
+chain(A : stringSegment(maxLength,length) : B)
+```
 
 #### Test
 ```
@@ -658,7 +737,7 @@ to change the "stiffness" of the string.
 #### Usage
 
 ```
-chain(... : openString(length,stiffness,pluckPosition,excitation) : ...)
+_,_,_ : openString(length,stiffness,pluckPosition,excitation) : _,_,_
 ```
 
 Where:
@@ -667,6 +746,12 @@ Where:
 * `stiffness`: the stiffness of the string (0-1) (1 for max stiffness)
 * `pluckPosition`: excitation position (0-1) (1 is bottom)
 * `excitation`: the excitation signal
+
+#### Example
+
+```
+chain(A : openString(length,stiffness,pluckPosition,excitation) : B)
+```
 
 #### Test
 ```
@@ -686,7 +771,7 @@ and has a fix stiffness corresponding to that of a nylon string.
 #### Usage
 
 ```
-chain(... : nylonString(length,pluckPosition,excitation) : ...)
+_,_,_ : nylonString(length,pluckPosition,excitation) : _,_,_
 ```
 
 Where:
@@ -694,6 +779,12 @@ Where:
 * `length`: the length of the string in meters
 * `pluckPosition`: excitation position (0-1) (1 is bottom)
 * `excitation`: the excitation signal
+
+#### Example
+
+```
+chain(A : nylonString(length,pluckPosition,excitation) : B)
+```
 
 #### Test
 ```
@@ -713,7 +804,7 @@ and has a fix stiffness corresponding to that of a steel string.
 #### Usage
 
 ```
-chain(... : steelString(length,pluckPosition,excitation) : ...)
+_,_,_ : steelString(length,pluckPosition,excitation) : _,_,_
 ```
 
 Where:
@@ -721,6 +812,12 @@ Where:
 * `length`: the length of the string in meters
 * `pluckPosition`: excitation position (0-1) (1 is bottom)
 * `excitation`: the excitation signal
+
+#### Example
+
+```
+chain(A : steelString(length,pluckPosition,excitation) : B)
+```
 
 #### Test
 ```
@@ -741,7 +838,7 @@ will also move the pickup.
 #### Usage
 
 ```
-chain(... : openStringPick(length,stiffness,pluckPosition,excitation) : ...)
+_,_,_ : openStringPick(length,stiffness,pluckPosition,excitation) : _,_,_
 ```
 
 Where:
@@ -750,6 +847,12 @@ Where:
 * `stiffness`: the stiffness of the string (0-1) (1 for max stiffness)
 * `pluckPosition`: excitation position (0-1) (1 is bottom)
 * `excitation`: the excitation signal
+
+#### Example
+
+```
+chain(A : openStringPick(length,stiffness,pluckPosition,excitation) : B)
+```
 
 #### Test
 ```
@@ -769,7 +872,7 @@ pickup has to be placed after the excitation position.
 #### Usage
 
 ```
-chain(... : openStringPickUp(length,stiffness,pluckPosition,pickupPosition,excitation) : ...)
+_,_,_ : openStringPickUp(length,stiffness,pluckPosition,pickupPosition,excitation) : _,_,_
 ```
 
 Where:
@@ -780,6 +883,12 @@ Where:
 pickup (0-1) (1 for same as pickup position)
 * `pickupPosition`: position of the pickup on the string (0-1) (1 is bottom)
 * `excitation`: the excitation signal
+
+#### Example
+
+```
+chain(A : openStringPickUp(length,stiffness,pluckPosition,pickupPosition,excitation) : B)
+```
 
 #### Test
 ```
@@ -799,7 +908,7 @@ pickup has to be placed before the excitation position.
 #### Usage
 
 ```
-chain(... : openStringPickDown(length,stiffness,pluckPosition,pickupPosition,excitation) : ...)
+_,_,_ : openStringPickDown(length,stiffness,pluckPosition,pickupPosition,excitation) : _,_,_
 ```
 
 Where:
@@ -810,6 +919,12 @@ Where:
 * `pickupPosition`: position of the pickup between the top of the string
 and the excitation position (0-1) (1 is excitation position)
 * `excitation`: the excitation signal
+
+#### Example
+
+```
+chain(A : openStringPickDown(length,stiffness,pluckPosition,pickupPosition,excitation) : B)
+```
 
 #### Test
 ```
@@ -829,13 +944,18 @@ filter will be typically used in a termination (see below).
 ```
 _ : ksReflexionFilter : _
 ```
-Typical use: `terminations(_,chain(...),ksReflexionFilter)`
+
+#### Example
+
+```
+terminations(_,chain(A : B),ksReflexionFilter)
+```
 
 #### Test
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-ksReflexionFilter_test = os.osc(220) : pm.ksReflexionFilter;
+ksReflexionFilter_test = os.tosc(220) : pm.ksReflexionFilter;
 ```
 
 ----
@@ -848,9 +968,14 @@ just phase inversion).
 #### Usage
 
 ```
-_,_,_ : rStringRigidTermination
+_,_,_ : rStringRigidTermination : _,_,_
 ```
-Typical use: `chain(rStringRigidTermination : stringSegment : ...)`
+
+#### Example
+
+```
+chain(A : stringSegment(maxLength,length) : rStringRigidTermination)
+```
 
 #### Test
 ```
@@ -868,9 +993,14 @@ just phase inversion).
 #### Usage
 
 ```
-_,_,_ : lStringRigidTermination
+_,_,_ : lStringRigidTermination : _,_,_
 ```
-Typical use: `chain(... : stringSegment : lStringRigidTermination)`
+
+#### Example
+
+```
+chain(lStringRigidTermination : stringSegment(maxLength,length) : B)
+```
 
 #### Test
 ```
@@ -891,9 +1021,14 @@ duration of the string with the nuts used on the other side.
 #### Usage
 
 ```
-_,_,_ : elecGuitarBridge
+_,_,_ : elecGuitarBridge : _,_,_
 ```
-Typical use: `chain(... : stringSegment : elecGuitarBridge)`
+
+#### Example
+
+```
+chain(A : stringSegment(maxLength,length) : elecGuitarBridge)
+```
 
 #### Test
 ```
@@ -914,9 +1049,14 @@ the string with the bridge used on the other side.
 #### Usage
 
 ```
-_,_,_ : elecGuitarNuts
+_,_,_ : elecGuitarNuts : _,_,_
 ```
-Typical use: `chain(elecGuitarNuts : stringSegment : ...)`
+
+#### Example
+
+```
+chain(elecGuitarNuts : stringSegment(maxLength,length) : B)
+```
 
 #### Test
 ```
@@ -937,9 +1077,14 @@ the nuts used on the other side.
 #### Usage
 
 ```
-_,_,_ : guitarBridge
+_,_,_ : guitarBridge : _,_,_
 ```
-Typical use: `chain(... : stringSegment : guitarBridge)`
+
+#### Example
+
+```
+chain(A : stringSegment(maxLength,length) : guitarBridge)
+```
 
 #### Test
 ```
@@ -960,7 +1105,13 @@ the bridge used on the other side.
 #### Usage
 
 ```
-chain(guitarNuts : stringSegment : ...)
+_,_,_ : guitarNuts : _,_,_
+```
+
+#### Example
+
+```
+chain(guitarNuts : stringSegment(maxLength,length) : B)
 ```
 
 #### Test
@@ -980,7 +1131,7 @@ string will ring forever.
 #### Usage
 
 ```
-_ : idealString(length,pluckPosition,excitation) : _
+_,_,_ : idealString(length,pluckPosition,excitation) : _,_,_
 ```
 
 Where:
@@ -988,6 +1139,12 @@ Where:
 * `length`: the length of the string in meters
 * `pluckPosition`: the plucking position (0.001-0.999)
 * `excitation`: the excitation signal
+
+#### Example
+
+```
+endChain(idealString(length,pluckPosition,excitation)) : _
+```
 
 #### Test
 ```
@@ -1125,7 +1282,13 @@ Bidirectional block implementing a simple acoustic guitar body.
 #### Usage
 
 ```
-chain(... : guitarBody)
+_,_,_ : guitarBody : _,_,_
+```
+
+#### Example
+
+```
+chain(A : guitarBridge : guitarBody)
 ```
 
 #### Test
@@ -1312,7 +1475,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-modeInterpRes_test = os.osc(110) : pm.modeInterpRes(20, 1.0, 1.5);
+modeInterpRes_test = os.tosc(110) : pm.modeInterpRes(20, 1.0, 1.5);
 ```
 
 ----
@@ -1325,7 +1488,7 @@ Bidirectional block implementing a modular string instrument resonator
 #### Usage
 
 ```
-chain(... : modularInterpBody(nModes,shape,scale) : ...)
+_,_,_ : modularInterpBody(nModes,shape,scale) : _,_,_
 ```
 
 Where:
@@ -1333,6 +1496,12 @@ Where:
 * `nModes`: number of modeled modes (40 max)
 * `shape`: shape of the resonator (0: square, 1: square with rounded corners, 2: round)
 * `scale`: scale of the resonator (0: small, 1: medium, 2: large)
+
+#### Example
+
+```
+chain(A : guitarBridge : modularInterpBody(nModes,shape,scale) : out)
+```
 
 #### Test
 ```
@@ -1351,7 +1520,7 @@ String instrument model with a modular body (see
 #### Usage
 
 ```
-modularInterpStringModel(length,pluckPosition,shape,scale,bodyExcitation,stringExcitation) : _
+modularInterpStringModel(stringLength,pluckPosition,shape,scale,bodyExcitation,stringExcitation) : _
 ```
 
 Where:
@@ -1483,12 +1652,19 @@ Bidirectional block implementing the interaction of a bow in a
 #### Usage
 
 ```
-chain(... : stringSegment : bowInteraction(bowTable) : stringSegment : ...)
+_,_,_ : bowInteraction(bowTable) : _,_,_
 ```
 
 Where:
 
-* `bowTable`: the bow table
+* `bowTable`: the bow table: a block with 2 inputs (the left- and right-going
+waves) and 2 outputs (added back to them)
+
+#### Example
+
+```
+chain(A : stringSegment(maxLength,length) : bowInteraction(bowTable) : stringSegment(maxLength,length) : B)
+```
 
 #### Test
 ```
@@ -1506,13 +1682,19 @@ a string.
 #### Usage
 
 ```
-chain(... : stringSegment : violinBow(bowPressure,bowVelocity) : stringSegment : ...)
+_,_,_ : violinBow(bowPressure,bowVelocity) : _,_,_
 ```
 
 Where:
 
 * `bowVelocity`: velocity of the bow / excitation signal (0-1)
 * `bowPressure`: bow pressure on the string (0-1)
+
+#### Example
+
+```
+chain(A : stringSegment(maxLength,length) : violinBow(bowPressure,bowVelocity) : stringSegment(maxLength,length) : B)
+```
 
 #### Test
 ```
@@ -1530,7 +1712,7 @@ Terminations are not implemented in this model.
 #### Usage
 
 ```
-chain(nuts : violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) : bridge)
+_,_,_ : violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) : _,_,_
 ```
 
 Where:
@@ -1539,6 +1721,12 @@ Where:
 * `bowVelocity`: velocity of the bow / excitation signal (0-1)
 * `bowPressure`: bow pressure on the string (0-1)
 * `bowPosition`: the position of the bow on the string (0-1)
+
+#### Example
+
+```
+chain(violinNuts : violinBowedString(stringLength,bowPressure,bowVelocity,bowPosition) : violinBridge)
+```
 
 #### Test
 ```
@@ -1556,9 +1744,14 @@ based on [`bridgeFilter`](#bridgefilter).
 #### Usage
 
 ```
-_,_,_ : violinNuts
+_,_,_ : violinNuts : _,_,_
 ```
-Typical use: `chain(violinNuts : stringSegment : ...)`
+
+#### Example
+
+```
+chain(violinNuts : stringSegment(maxLength,length) : B)
+```
 
 #### Test
 ```
@@ -1576,7 +1769,13 @@ based on [`bridgeFilter`](#bridgefilter).
 #### Usage
 
 ```
-chain(... : stringSegment : violinBridge
+_,_,_ : violinBridge : _,_,_
+```
+
+#### Example
+
+```
+chain(A : stringSegment(maxLength,length) : violinBridge)
 ```
 
 #### Test
@@ -1595,7 +1794,13 @@ resonant lowpass filter).
 #### Usage
 
 ```
-chain(... : stringSegment : violinBridge : violinBody)
+_,_,_ : violinBody : _,_,_
+```
+
+#### Example
+
+```
+chain(A : stringSegment(maxLength,length) : violinBridge : violinBody)
 ```
 
 #### Test
@@ -1636,18 +1841,20 @@ violinModel_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
 
 ### `(pm.)violin_ui`
 
-Ready-to-use violin physical model with built-in UI.
+Ready-to-use violin physical model with built-in UI. The bow velocity
+defaults to 0.6, the velocity `violin_ui_MIDI` bows with at its default
+gain: the model sounds as soon as it runs, 0 silences it.
 
 #### Usage
 
 ```
-violinModel_ui : _
+violin_ui : _
 ```
 
 #### Test
 ```
 pm = library("physmodels.lib");
-violin_ui_test = pm.violinModel(0.82, 0.4, 0.05, 0.15);
+violin_ui_test = pm.violin_ui;
 ```
 
 ----
@@ -1682,13 +1889,19 @@ A tube segment without terminations (same as [`stringSegment`](#stringsegment)).
 #### Usage
 
 ```
-chain(A : openTube(maxLength,length) : B)
+_,_,_ : openTube(maxLength,length) : _,_,_
 ```
 
 Where:
 
 * `maxLength`: the maximum length of the tube in meters (should be static)
 * `length`: the length of the tube in meters
+
+#### Example
+
+```
+chain(A : openTube(maxLength,length) : B)
+```
 
 #### Test
 ```
@@ -1719,7 +1932,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-reedTable_test = os.osc(220) : pm.reedTable(0.4, 0.2);
+reedTable_test = os.tosc(220) : pm.reedTable(0.4, 0.2);
 ```
 
 ----
@@ -1742,7 +1955,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-fluteJetTable_test = os.osc(220) : pm.fluteJetTable;
+fluteJetTable_test = os.tosc(220) : pm.fluteJetTable;
 ```
 
 ----
@@ -1769,7 +1982,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-brassLipsTable_test = os.osc(220) : pm.brassLipsTable(0.3, 0.2);
+brassLipsTable_test = os.tosc(220) : pm.brassLipsTable(0.3, 0.2);
 ```
 
 ----
@@ -1794,7 +2007,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-clarinetReed_test = os.osc(440) : pm.clarinetReed(0.6);
+clarinetReed_test = os.tosc(440) : pm.clarinetReed(0.6);
 ```
 
 ----
@@ -1808,7 +2021,7 @@ plugged to a tube...
 #### Usage
 
 ```
-chain(clarinetMouthPiece(reedStiffness,pressure) : tube : etc.)
+_,_,_ : clarinetMouthPiece(reedStiffness,pressure) : _,_,_
 ```
 
 Where:
@@ -1817,6 +2030,12 @@ Where:
 This can also be any kind of signal that will directly injected in the mouthpiece
 (e.g., breath noise, etc.).
 * `reedStiffness`: reed stiffness (0-1)
+
+#### Example
+
+```
+chain(clarinetMouthPiece(reedStiffness,pressure) : openTube(maxLength,length) : wBell(opening))
+```
 
 #### Test
 ```
@@ -1835,7 +2054,7 @@ plugged to a tube...
 #### Usage
 
 ```
-chain(brassLips(tubeLength,lipsTension,pressure) : tube : etc.)
+_,_,_ : brassLips(tubeLength,lipsTension,pressure) : _,_,_
 ```
 
 Where:
@@ -1845,6 +2064,12 @@ Where:
 * `pressure`: the pressure of the air flow (DC) created by the virtual performer (0-1).
 This can also be any kind of signal that will directly injected in the mouthpiece
 (e.g., breath noise, etc.).
+
+#### Example
+
+```
+chain(brassLips(tubeLength,lipsTension,pressure) : openTube(maxLength,tubeLength) : wBell(opening))
+```
 
 #### Test
 ```
@@ -1863,7 +2088,7 @@ plugged between tubes segments...
 #### Usage
 
 ```
-chain(... : tube : fluteEmbouchure(pressure) : tube : etc.)
+_,_,_ : fluteEmbouchure(pressure) : _,_,_
 ```
 
 Where:
@@ -1872,6 +2097,12 @@ Where:
 performer (0-1).
 This can also be any kind of signal that will directly injected in the
 mouthpiece (e.g., breath noise, etc.).
+
+#### Example
+
+```
+chain(fluteHead : openTube(maxLength,length1) : fluteEmbouchure(pressure) : openTube(maxLength,length2) : fluteFoot)
+```
 
 #### Test
 ```
@@ -1889,12 +2120,18 @@ the end of a [`chain`](#chain).
 #### Usage
 
 ```
-chain(... : wBell(opening))
+_,_,_ : wBell(opening) : _,_,_
 ```
 
 Where:
 
 * `opening`: the "opening" of bell (0-1)
+
+#### Example
+
+```
+chain(A : openTube(maxLength,length) : wBell(opening))
+```
 
 #### Test
 ```
@@ -1911,9 +2148,14 @@ Simple flute head implementing waves reflexion.
 #### Usage
 
 ```
-_,_,_ : fluteHead
+_,_,_ : fluteHead : _,_,_
 ```
-Typical use: `chain(fluteHead : tube : ...)`
+
+#### Example
+
+```
+chain(fluteHead : openTube(maxLength,length) : B)
+```
 
 #### Test
 ```
@@ -1930,7 +2172,13 @@ Simple flute foot implementing waves reflexion and dispersion.
 #### Usage
 
 ```
-chain(... : tube : fluteFoot)
+_,_,_ : fluteFoot : _,_,_
+```
+
+#### Example
+
+```
+chain(A : openTube(maxLength,length) : fluteFoot)
 ```
 
 #### Test
@@ -2223,13 +2471,19 @@ Creates an impulse excitation of one sample.
 #### Usage
 
 ```
-gate = button('gate');
-impulseExcitation(gate) : chain;
+impulseExcitation(gate) : _
 ```
 
 Where:
 
 * `gate`: a gate button
+
+#### Example
+
+```
+gate = button("gate");
+excitation = impulseExcitation(gate);
+```
 
 #### Test
 ```
@@ -2246,8 +2500,7 @@ Creates a filtered noise excitation.
 #### Usage
 
 ```
-gate = button('gate');
-strikeModel(LPcutoff,HPcutoff,sharpness,gain,gate) : chain;
+strikeModel(HPcutoff,LPcutoff,sharpness,gain,gate) : _
 ```
 
 Where:
@@ -2257,6 +2510,13 @@ Where:
 * `sharpness`: sharpness of the attack and release (0-1)
 * `gain`: gain of the excitation
 * `gate`: a gate button/trigger signal (0/1)
+
+#### Example
+
+```
+gate = button("gate");
+excitation = strikeModel(HPcutoff,LPcutoff,sharpness,gain,gate);
+```
 
 #### Test
 ```
@@ -2273,8 +2533,7 @@ Strikes generator with controllable excitation position.
 #### Usage
 
 ```
-gate = button('gate');
-strike(exPos,sharpness,gain,gate) : chain;
+strike(exPos,sharpness,gain,gate) : _
 ```
 
 Where:
@@ -2284,6 +2543,13 @@ freqs. So, on membrane for example, 0 would be the middle and 1 the edge
 * `sharpness`: sharpness of the attack and release (0-1)
 * `gain`: gain of the excitation
 * `gate`: a gate button/trigger signal (0/1)
+
+#### Example
+
+```
+gate = button("gate");
+excitation = strike(exPos,sharpness,gain,gate);
+```
 
 #### Test
 ```
@@ -2300,8 +2566,7 @@ Creates a plucking excitation signal.
 #### Usage
 
 ```
-trigger = button('gate');
-pluckString(stringLength,cutoff,maxFreq,sharpness,gain,trigger)
+pluckString(stringLength,cutoff,maxFreq,sharpness,gain,trigger) : _
 ```
 
 Where:
@@ -2312,6 +2577,13 @@ Where:
 * `sharpness`: sharpness of the attack and release (1 for default)
 * `gain`: gain of the excitation (0-1)
 * `trigger`: trigger signal (1 for on, 0 for off)
+
+#### Example
+
+```
+trigger = button("gate");
+excitation = pluckString(stringLength,cutoff,maxFreq,sharpness,gain,trigger);
+```
 
 #### Test
 ```
@@ -2354,7 +2626,13 @@ Same as [`blower`](#blower) but with a built-in UI.
 #### Usage
 
 ```
-blower : somethingToBeBlown
+blower_ui : _
+```
+
+#### Example
+
+```
+blower_ui : clarinetModel_ui
 ```
 
 #### Test
@@ -3134,7 +3412,7 @@ Where:
 * `strikeCutoff`: cutoff frequency of the strike generator (recommended: ~7000 Hz)
 * `strikeSharpness`: sharpness of the strike (recommended: ~0.25)
 * `gain`: gain of the strike (0-1)
-* `trigger` signal (0: off, 1: on)
+* `trigger`: trigger signal (0: off, 1: on)
 
 #### Test
 ```
@@ -3174,18 +3452,21 @@ Formant data values in an environment.
 The formant data used here come from the CSOUND manual
 [http://www.csounds.com/manual/html/](http://www.csounds.com/manual/html/).
 
+`formantValues.f(i)`, `formantValues.g(i)` and `formantValues.bw(i)` are
+lists of 25 values (frequency in Hz, linear gain, bandwidth in Hz of
+formant `i`), indexed by `voiceType*5 + vowel` (5 vowels per voice type).
+
 #### Usage
 
 ```
-ba.take(j+1,formantValues.f(i)) : _
-ba.take(j+1,formantValues.g(i)) : _
-ba.take(j+1,formantValues.bw(i)) : _
+ba.take(voiceType*5 + vowel + 1, formantValues.f(i)) : _
+ba.take(voiceType*5 + vowel + 1, formantValues.g(i)) : _
+ba.take(voiceType*5 + vowel + 1, formantValues.bw(i)) : _
 ```
 
 Where:
 
-* `i`: formant number
-* `j`: (voiceType*nFormants)+vowel
+* `i`: formant number (0-4)
 * `voiceType`: the voice type (0: alto, 1: bass, 2: countertenor, 3:
 soprano, 4: tenor)
 * `vowel`: the vowel (0: a, 1: e, 2: i, 3: o, 4: u)
@@ -3193,7 +3474,9 @@ soprano, 4: tenor)
 #### Test
 ```
 pm = library("physmodels.lib");
+ba = library("basics.lib");
 formantValues_test = pm.formantValues.f(0);
+formantValues_tenor_test = ba.take(23, pm.formantValues.g(0)), ba.take(23, pm.formantValues.f(0));
 ```
 
 ----
@@ -3209,9 +3492,18 @@ tests.
 #### Usage
 
 ```
+bwMultMins : si.bus(10)
+bwMultMaxes : si.bus(10)
+```
+
+#### Example
+
+```
 ba.take(gender*5 + vowel + 1, bwMultMins) : _
 ba.take(gender*5 + vowel + 1, bwMultMaxes) : _
 ```
+
+with `gender` 0 (male) or 1 (female) and `vowel` from 0 (a) to 4 (u).
 
 #### Test
 ```
@@ -3234,9 +3526,18 @@ voices.
 #### Usage
 
 ```
+minGenderFreq : _,_
+maxGenderFreq : _,_
+```
+
+#### Example
+
+```
 ba.take(gender + 1, minGenderFreq) : _
 ba.take(gender + 1, maxGenderFreq) : _
 ```
+
+with `gender` 0 (male) or 1 (female).
 
 #### Test
 ```
@@ -3376,11 +3677,19 @@ Where:
 * `g`: linear scale factor (g=1 gives 0dB amplitude response at fc)
 * input is an impulse signal to excite filter
 
+The envelope filter has two real poles, `exp(-sw*pi/SR)` (rise) and
+`exp(-bw*pi/SR)` (decay), both close to 1. It is computed as two one-pole
+sections in cascade: a direct-form biquad with the same poles drifts in single
+precision, with float/double level gaps up to 1.3e-2 at 192 kHz for a 800 Hz
+formant of 80 Hz bandwidth, against 2.3e-6 for the cascade. Its gain at DC,
+`(1-u1)(1-u2)`, is computed as that product rather than as `1+a1+a2`.
+
 #### Test
 ```
 pm = library("physmodels.lib");
-os = library("oscillators.lib");
-fof_test = pm.fof(0.3, 440, 880, 0.5) + os.osc(110) * 0.001;
+ba = library("basics.lib");
+ma = library("maths.lib");
+fof_test = ba.pulse(int(ma.SR/110)) : pm.fof(800, 80, 200, 0.5);
 ```
 
 #### References
@@ -3410,8 +3719,9 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-os = library("oscillators.lib");
-fofSH_test = pm.fofSH(0.3, 440, 880, 0.5) + os.osc(110) * 0.001;
+ba = library("basics.lib");
+ma = library("maths.lib");
+fofSH_test = ba.pulse(int(ma.SR/110)) : pm.fofSH(800, 80, 200, 0.5);
 ```
 
 #### References
@@ -3442,8 +3752,9 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-os = library("oscillators.lib");
-fofCycle_test = pm.fofCycle(0.3, 440, 880, 0.5, 3) + os.osc(110) * 0.001;
+ba = library("basics.lib");
+ma = library("maths.lib");
+fofCycle_test = ba.pulse(int(ma.SR/110)) : pm.fofCycle(800, 80, 200, 0.5, 3);
 ```
 
 #### References
@@ -3475,8 +3786,9 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-os = library("oscillators.lib");
-fofSmooth_test = pm.fofSmooth(0.3, 440, 880, 0.5, 0.2) + os.osc(110) * 0.001;
+ba = library("basics.lib");
+ma = library("maths.lib");
+fofSmooth_test = ba.pulse(int(ma.SR/110)) : pm.fofSmooth(800, 80, 200, 0.5, 0.2);
 ```
 
 ----
@@ -3512,7 +3824,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterFofCycle_test = (os.osc(110) : pm.formantFilterFofCycle(1, 1, 5, 1, 200)) + os.osc(55) * 0.001;
+formantFilterFofCycle_test = (os.tosc(110) : pm.formantFilterFofCycle(1, 1, 5, 1, 200)) + os.tosc(55) * 0.001;
 ```
 
 ----
@@ -3546,7 +3858,7 @@ rise time of envelope
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterFofSmooth_test = os.osc(110) : pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
+formantFilterFofSmooth_test = os.tosc(110) : pm.formantFilterFofSmooth(0, 0, 5, 0, 200);
 ```
 
 ----
@@ -3576,7 +3888,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterBP_test = os.osc(110) : pm.formantFilterBP(0, 0, 5, 0, 200);
+formantFilterBP_test = os.tosc(110) : pm.formantFilterBP(0, 0, 5, 0, 200);
 ```
 
 ----
@@ -3608,7 +3920,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterbank_test = os.osc(110) : pm.formantFilterbank(0, 0, pm.formantFilterBP, 200);
+formantFilterbank_test = os.tosc(110) : pm.formantFilterbank(0, 0, pm.formantFilterBP, 200);
 ```
 
 ----
@@ -3637,7 +3949,7 @@ of the FOF envelopes and for the autobendFreq and vocalEffort functions
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterbankFofCycle_test = (os.osc(110) : pm.formantFilterbankFofCycle(1, 1, 200)) + os.osc(55) * 0.001;
+formantFilterbankFofCycle_test = (os.tosc(110) : pm.formantFilterbankFofCycle(1, 1, 200)) + os.tosc(55) * 0.001;
 ```
 
 ----
@@ -3667,7 +3979,7 @@ autobendFreq and vocalEffort functions
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterbankFofSmooth_test = os.osc(110) : pm.formantFilterbankFofSmooth(0, 0, 200);
+formantFilterbankFofSmooth_test = os.tosc(110) : pm.formantFilterbankFofSmooth(0, 0, 200);
 ```
 
 ----
@@ -3695,7 +4007,7 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
-formantFilterbankBP_test = os.osc(110) : pm.formantFilterbankBP(0, 0, 200);
+formantFilterbankBP_test = os.tosc(110) : pm.formantFilterbankBP(0, 0, 200);
 ```
 
 ----
@@ -3951,12 +4263,18 @@ allpass filter by the signal it is processing.
 #### Usage
 
 ```
-chain(... : allpassNL(nonlinearity) : ...)
+_,_,_ : allpassNL(nonlinearity) : _,_,_
 ```
 
 Where:
 
 * `nonlinearity`: amount of nonlinearity to be added (0-1)
+
+#### Example
+
+```
+chain(A : allpassNL(nonlinearity) : B)
+```
 
 #### Test
 ```
@@ -4010,30 +4328,39 @@ Faust](https://raw.githubusercontent.com/grame-cncm/faust/master-dev/tools/physi
 ### `(pm.)rk_solve`, `(pm.)rk_solve_1`, `(pm.)rk_solve_2`, `(pm.)rk_solve_3`, `(pm.)rk_solve_4`
 
 Solves the system of ordinary differential equations of any order using
-the explicit Runge-Kutta methods.
+the explicit Runge-Kutta methods. The solver has no input and one output
+per equation: the solution at the current tick. In the Usage below, `eq`
+is the one-equation system dx/dt = -x.
 
-#### Usage
-
-```
-rk_solve(ts,ks, ni,h, eq,iv) : si.bus(outputs(eq))
-```
-
-Where:
-
-* `ts,ks` : the Butcher tableau (see below)
-* `ni` : number of iterations at each tick, compile time constant
-         ni > 1 can improve accuracy but will degrade performance
-* `h`  : time step, run time constant, e.g. 1/ma.SR
-* `eq` : list of derivative functions
-* `iv` : list of initial values
-
-`rk_solve()` with the "standard" 1-4 tableaux and ni = 1:
+`rk_solve_1` to `rk_solve_4` are `rk_solve()` with the "standard" 1-4
+tableaux and ni = 1:
 ```
 rk_solve_1 = rk_solve((0), (1), 1);
 rk_solve_2 = rk_solve((0,1/2), (1/2, 0,1), 1);
 rk_solve_3 = rk_solve((0,1/2,1), (1/2,-1,2, 1/6,2/3,1/6), 1);
 rk_solve_4 = rk_solve((0,1/2,1/2,1), (1/2,0,1/2,0,0,1, 1/6,1/3,1/3,1/6), 1);
 ```
+
+#### Usage
+
+```
+eq = \(t,x).(-x);
+rk_solve(ts,ks, ni,h, eq,iv) : si.bus(outputs(eq))
+rk_solve_1(h, eq,iv) : si.bus(outputs(eq))
+rk_solve_2(h, eq,iv) : si.bus(outputs(eq))
+rk_solve_3(h, eq,iv) : si.bus(outputs(eq))
+rk_solve_4(h, eq,iv) : si.bus(outputs(eq))
+```
+
+Where:
+
+* `ts`, `ks`: the Butcher tableau (see below)
+* `ni`: number of iterations at each tick, compile time constant
+         ni > 1 can improve accuracy but will degrade performance
+* `h`: time step, run time constant, e.g. 1/ma.SR
+* `eq`: the derivative function `eq(t,x1,...,xN)`, with N outputs
+  (dx1/dt, ..., dxN/dt)
+* `iv`: list of the N initial values
 
 #### Test
 ```

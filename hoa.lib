@@ -60,7 +60,7 @@ ro = library("routes.lib");
 de = library("delays.lib");
 
 declare name "High Order Ambisonics library";
-declare version "1.5.1";
+declare version "1.5.2";
 declare author "Pierre Guillot";
 declare author "Eliott Paris";
 declare author "Julien Colafrancesco";
@@ -74,12 +74,13 @@ declare copyright "2012-2013 Guillot, Paris, Colafrancesco, CICM labex art H2H, 
 
 //----------------------`(ho.)encoder`---------------------------------
 // Ambisonic encoder. Encodes a signal in the circular harmonics domain
-// depending on an order of decomposition and an angle.
+// depending on an order of decomposition and an angle. Produces the
+// 2*N+1 circular harmonics.
 //
 // #### Usage
 //
 // ```
-// encoder(N, x, a) : _
+// encoder(N, x, a) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -92,7 +93,7 @@ declare copyright "2012-2013 Guillot, Paris, Colafrancesco, CICM labex art H2H, 
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // encoder_test = ho.encoder(1, monoSignal(440), 0.0);
 // ```
 //----------------------------------------------------------------
@@ -121,7 +122,7 @@ encoder(N, x, a) = encoder(N-1, x, a), x*sin(N*a), x*cos(N*a);
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // rEncoder_test = monoSignal(440) : ho.rEncoder(1, 0.5, 0.0, 0.05);
 // ```
 //-----------------------------
@@ -159,7 +160,7 @@ with {
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
 // stereoSignal(f1, f2) = monoSignal(f1), monoSignal(f2);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // stereoEncoder_test = stereoSignal(440, 660) : ho.stereoEncoder(1, 1.0);
 // ```
 //-----------------------------
@@ -192,7 +193,7 @@ with {
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
 // stereoSignal(f1, f2) = monoSignal(f1), monoSignal(f2);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // multiEncoder_test = stereoSignal(440, 660) : ho.multiEncoder(1, (0.0, 0.0), (0.0, 1.57), 0.05);
 // ```
 //-----------------------------
@@ -218,7 +219,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : decoder(N, P) : _
+// si.bus(2*N+1) : decoder(N, P) : si.bus(P)
 // ```
 //
 // Where:
@@ -230,9 +231,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // decoder_test = encoder_bus : ho.decoder(1, 4);
 // ```
 //
@@ -255,7 +255,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : decoderStereo(N) : _
+// si.bus(2*N+1) : decoderStereo(N) : _,_
 // ```
 //
 // Where:
@@ -266,9 +266,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // decoderStereo_test = encoder_bus : ho.decoderStereo(1);
 // ```
 //--------------------------------------------------------------
@@ -313,9 +312,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // iBasicDecoder_test = encoder_bus : ho.iBasicDecoder(1, (0, 120, 240), 1, 0);
 // ```
 //-----------------------------
@@ -345,7 +343,7 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // circularScaledVBAP_test = monoSignal(440) : ho.circularScaledVBAP((0, 120, 240), 60);
 // ```
 //-----------------------------
@@ -405,9 +403,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // imlsDecoder_test = encoder_bus : ho.imlsDecoder(1, (0, 90, 180, 270), 1, 0);
 // ```
 //-----------------------------
@@ -427,7 +424,7 @@ with {
 // #### Usage
 //
 // ```
-// _,_, ... : iDecoder(N, la, direct, st, g) : _,_, ...
+// si.bus(2*N+1) : iDecoder(N, la, direct, shift, st, g) : si.bus(outputs(la))
 // ```
 //
 // Where:
@@ -443,10 +440,9 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
-// iDecoder_test = (encoder_bus, 0.0) : ho.iDecoder(1, (0, 120, 240), 1, 0, 0.8);
+// monoSignal(freq) = os.tosc(freq);
+// iDecoder_test = encoder_bus : ho.iDecoder(1, (0, 120, 240), 1, 0, 0, 0.8);
 // ```
 //-----------------------------
 iDecoder(N, la, direct, shift, st, g) = thisDecoder
@@ -482,7 +478,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : optimBasic(N) : _
+// si.bus(2*N+1) : optimBasic(N) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -493,9 +489,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // optimBasic_test = encoder_bus : ho.optimBasic(1);
 // ```
 //-----------------------------------------------------
@@ -509,7 +504,7 @@ optimBasic(N) = par(i, 2*N+1, _);
 // #### Usage
 //
 // ```
-// _ : optimMaxRe(N) : _
+// si.bus(2*N+1) : optimMaxRe(N) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -520,9 +515,8 @@ optimBasic(N) = par(i, 2*N+1, _);
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // optimMaxRe_test = encoder_bus : ho.optimMaxRe(1);
 // ```
 //-----------------------------------------------------
@@ -543,7 +537,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : optimInPhase(N) : _
+// si.bus(2*N+1) : optimInPhase(N) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -554,9 +548,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // optimInPhase_test = encoder_bus : ho.optimInPhase(1);
 // ```
 //-----------------------------------------------------
@@ -590,9 +583,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // optim_test = encoder_bus : ho.optim(1, 1);
 // ```
 //-----------------------------
@@ -613,7 +605,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : wider(N,w) : _
+// si.bus(2*N+1) : wider(N, w) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -625,9 +617,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // wider_test = encoder_bus : ho.wider(1, 0.5);
 // ```
 //-----------------------------------------------------
@@ -665,9 +656,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi = ho.encoder(1, os.osc(440), 0.0);
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // mirror_test = encoder_bus : ho.mirror(1, -1);
 // ```
 //-----------------------------
@@ -695,7 +685,7 @@ mirror(N, fa) = (*(1), par(i, N, (*(fa), *(1))));
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // map_test = ho.map(1, monoSignal(440), 0.5, 0.0);
 // ```
 //-----------------------------------------------------
@@ -712,7 +702,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : rotate(N, a) : _
+// si.bus(2*N+1) : rotate(N, a) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -725,7 +715,7 @@ with {
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // rotate_test = encoder_bus : ho.rotate(1, 0.78);
 // ```
 //-----------------------------------------------------
@@ -745,11 +735,14 @@ with {
 
 //-------`(ho.)scope`----------
 // Produces an XY pair of signals representing the ambisonic sound field.
+// The 2*N+1 inputs are the circular harmonics; the outputs are the X and Y
+// coordinates, followed by a third signal equal to 1 when the field is in
+// phase with the scanning direction (positive), 0 otherwise.
 //
 // #### Usage
 //
 // ```
-// _,_, ... : scope(N, rt) : _,_
+// si.bus(2*N+1) : scope(N, rt) : _,_,_
 // ```
 //
 // Where:
@@ -762,7 +755,7 @@ with {
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // scope_test = encoder_bus : ho.scope(1, 0.1);
 // ```
 //-----------------------------
@@ -841,8 +834,9 @@ with {
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // fxDecorrelation_test = encoder_bus : ho.fxDecorrelation(1, 64, 5, 0.5, 0.2, 0);
+// fxDecorrelation_slider_test = ho.encoder(1, os.tosc(440), 0.0) : ho.fxDecorrelation(1, 64, hslider("fxDecorrelation:wf", 5, 0.1, 50, 0.1), hslider("fxDecorrelation:fa", 0.5, 0, 1, 0.01), hslider("fxDecorrelation:fd", 0.2, 0, 1, 0.01), hslider("fxDecorrelation:tf", 0, 0, 21, 1));
 // ```
 //-----------------------------
 fxDecorrelation(N, d, wf, fa, fd, tf) = par(i, 2*N+1, gate(d, i, 2*N+1, fa, tf, wf, fd))
@@ -913,8 +907,9 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // synDecorrelation_test = monoSignal(440) : ho.synDecorrelation(1, 64, 5, 0.5, 0.2, 0);
+// synDecorrelation_slider_test = os.tosc(440) : ho.synDecorrelation(1, 64, hslider("synDecorrelation:wf", 5, 0.1, 50, 0.1), hslider("synDecorrelation:fa", 0.5, 0, 1, 0.01), hslider("synDecorrelation:fd", 0.2, 0, 1, 0.01), hslider("synDecorrelation:tf", 0, 0, 21, 1));
 // ```
 //-----------------------------
 synDecorrelation(N, d, wf, fa, fd, tf) =  _ <: par(i, 2*N+1, crossFade(d, i, 2*N+1, fa, tf, wf, fd))
@@ -981,7 +976,7 @@ with {
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
 // encoder_bus = ho.encoder(1, monoSignal(440), 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // fxRingMod_test = encoder_bus : ho.fxRingMod(1, 200, 0.5, 0);
 // ```
 //-----------------------------
@@ -1048,7 +1043,7 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // synRingMod_test = monoSignal(440) : ho.synRingMod(1, 200, 0.5, 0);
 // ```
 //-----------------------------
@@ -1106,11 +1101,12 @@ _th(21, i, p) = sqrt(1 - ((i+1) / p - 1)^2);
 //----------------------`(ho.)encoder3D`---------------------------------
 // Ambisonic encoder. Encodes a signal in the circular harmonics domain
 // depending on an order of decomposition, an angle and an elevation.
+// Produces the (N+1)*(N+1) spherical harmonics.
 //
 // #### Usage
 //
 // ```
-// encoder3D(N, x, a, e) : _
+// encoder3D(N, x, a, e) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1124,9 +1120,12 @@ _th(21, i, p) = sqrt(1 - ((i+1) / p - 1)^2);
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // encoder3D_test = encoder3D_base;
+// encoder3D_modulated_test = ho.encoder3D(1, os.tosc(440), ma.PI*tri, ma.PI*(tri - 0.5)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // ```
 //----------------------------------------------------------------
 encoder3D(N, x, theta, phi) = par(i, (N+1) * (N+1), x * y(degree(i), order(i), theta, phi))
@@ -1215,7 +1214,7 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // rEncoder3D_test = monoSignal(440) : ho.rEncoder3D(1, 0.5, 0.3, 0.0, 0.0, 0.05);
 // ```
 //-----------------------------
@@ -1242,7 +1241,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : optimBasic3D(N) : _
+// si.bus((N+1)*(N+1)) : optimBasic3D(N) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1253,9 +1252,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
 // encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // optimBasic3D_test = encoder3D_base : ho.optimBasic3D(1);
 // ```
 //-----------------------------------------------------
@@ -1269,7 +1267,7 @@ optimBasic3D(N) = par(i, (N+1) * (N+1), _);
 // #### Usage
 //
 // ```
-// _ : optimMaxRe3D(N) : _
+// si.bus((N+1)*(N+1)) : optimMaxRe3D(N) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1280,9 +1278,8 @@ optimBasic3D(N) = par(i, (N+1) * (N+1), _);
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
 // encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // optimMaxRe3D_test = encoder3D_base : ho.optimMaxRe3D(1);
 // ```
 //-----------------------------------------------------
@@ -1301,7 +1298,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : optimInPhase3D(N) : _
+// si.bus((N+1)*(N+1)) : optimInPhase3D(N) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1312,9 +1309,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
 // encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // optimInPhase3D_test = encoder3D_base : ho.optimInPhase3D(1);
 // ```
 //-----------------------------------------------------
@@ -1349,9 +1345,8 @@ with {
 // ```
 // ho = library("hoa.lib");
 // os = library("oscillators.lib");
-// ambi3D = ho.encoder3D(1, os.osc(440), 0.0, 0.0);
 // encoder3D_base = ho.encoder3D(1, monoSignal(440), 0.0, 0.0);
-// monoSignal(freq) = os.osc(freq);
+// monoSignal(freq) = os.tosc(freq);
 // optim3D_test = encoder3D_base : ho.optim3D(1, 2);
 // ```
 //-----------------------------

@@ -8,8 +8,9 @@ fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
 
-src = os.osc(440);
+src = os.tosc(440);
 
 iir_test = src : fi.iir((0.5, 0.5), (0.3));
 fir_test = src : fi.fir((0.2, 0.2, 0.2, 0.2, 0.2));
@@ -21,7 +22,8 @@ tf2_test = src : fi.tf2(0.1, 0.2, 0.1, -0.5, 0.06);
 tf3_test = src : fi.tf3(0.1, 0.3, 0.3, 0.1, -0.9, 0.26, -0.024);
 notchw_test = src : fi.notchw(200, 1000);
 notchw_slider_test = no.noise : fi.notchw(hslider("width", 200, 10, 2000, 1), hslider("freq", 1000, 20, 20000, 1));
-notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { tri = 1 - abs(2*ba.period(4800)/4800 - 1); };
+notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+notchw_jump_test = no.noise : fi.notchw(100, 200*pow(25, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 
 tf21_test = src : fi.tf21(0.1, 0.2, 0.1, -0.5, 0.06);
 tf22_test = src : fi.tf22(0.1, 0.2, 0.1, -0.5, 0.06);
@@ -39,4 +41,5 @@ iir_lat1_test = src : fi.iir_lat1((0.1, 0.2, 0.3), (-0.4, 0.1));
 allpassn1mt_test = src : fi.allpassn1mt(2, (0.3, -0.2)) : si.bus(3);
 iir_nl_test = src : fi.iir_nl((0.1, 0.2, 0.3), (-0.4, 0.1));
 allpassnnlt_test = src : fi.allpassnnlt(2, (0.3, -0.2)) : si.bus(3);
-TF2_legacy_test = src : fi.TF2(0.2, 0.4, 0.2, -0.5, 0.3);
+allpassnnlt_product_test = no.noise : fi.allpassnnlt(1, 0.5*hslider("s", 0.6, -1, 1, 0.01)) : si.bus(2);
+TF2_legacy_test = os.tosc(440) : fi.TF2(0.2, 0.4, 0.2, -0.5, 0.3);

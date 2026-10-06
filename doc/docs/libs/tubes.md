@@ -59,7 +59,7 @@ _ : inverse : _
 ```
 tu = library("tubes.lib");
 os = library("oscillators.lib");
-tu_inverse_test = os.osc(440) : tu.inverse;
+tu_inverse_test = os.tosc(440) : tu.inverse;
 ```
 
 ----
@@ -84,7 +84,7 @@ Where:
 ```
 tu = library("tubes.lib");
 os = library("oscillators.lib");
-tu_ccopysign_test = tu.ccopysign(0.5, os.osc(440));
+tu_ccopysign_test = tu.ccopysign(0.5, os.tosc(440));
 ```
 
 ----
@@ -105,8 +105,8 @@ _ : invsign : _
 ```
 tu = library("tubes.lib");
 os = library("oscillators.lib");
-tu_sign_test = os.osc(440) : tu.sign;
-tu_invsign_test = os.osc(440) : tu.invsign;
+tu_sign_test = os.tosc(440) : tu.sign;
+tu_invsign_test = os.tosc(440) : tu.invsign;
 ```
 
 ----
@@ -206,7 +206,7 @@ Where:
 ```
 tu = library("tubes.lib");
 os = library("oscillators.lib");
-tu_tubeF_test = os.osc(440) : tu.tubeF(tu.tubetable_12AX7_0, -5, 5, 200, 2000);
+tu_tubeF_test = os.tosc(440) : tu.tubeF(tu.tubetable_12AX7_0, -5, 5, 200, 2000);
 ```
 
 ----
@@ -226,7 +226,7 @@ getFactor(low, step, size, x) : _
 ```
 tu = library("tubes.lib");
 os = library("oscillators.lib");
-tu_getFactor_test = tu.getFactor(-5, 200, 2000, os.osc(440));
+tu_getFactor_test = tu.getFactor(-5, 200, 2000, os.tosc(440));
 ```
 
 ----
@@ -262,9 +262,9 @@ Where:
 ```
 tu = library("tubes.lib");
 os = library("oscillators.lib");
-tubestage_test = os.osc(440) : tu.tubestage(tu.tubetable_12AX7_0, 86.0, 2700.0, 1.581656);
-tubestage130_20_test = os.osc(440) : tu.tubestage130_20(tu.tubetable_6DJ8_0, 86.0, 2700.0, 1.863946);
-tubestageF_test = os.osc(440) : tu.tubestageF(tu.tubetable_12AX7_0, 250.0, 40.0, 86.0, 2700.0, 1.581656);
+tubestage_test = os.tosc(440) : tu.tubestage(tu.tubetable_12AX7_0, 86.0, 2700.0, 1.581656);
+tubestage130_20_test = os.tosc(440) : tu.tubestage130_20(tu.tubetable_6DJ8_0, 86.0, 2700.0, 1.863946);
+tubestageF_test = os.tosc(440) : tu.tubestageF(tu.tubetable_12AX7_0, 250.0, 40.0, 86.0, 2700.0, 1.581656);
 ```
 
 ----
@@ -282,6 +282,15 @@ with the bias values used by the Guitarix amplifiers.
 _ : T1_12AX7 : _
 ```
 
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+T1_12AX7_test = os.tosc(440) : tu.T1_12AX7;
+T2_12AX7_test = os.tosc(440) : tu.T2_12AX7;
+T3_12AX7_test = os.tosc(440) : tu.T3_12AX7;
+```
+
 ----
 
 ### `T1_12AT7`, `T2_12AT7`, `T3_12AT7`
@@ -295,6 +304,15 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_12AT7 : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+T1_12AT7_test = os.tosc(440) : tu.T1_12AT7;
+T2_12AT7_test = os.tosc(440) : tu.T2_12AT7;
+T3_12AT7_test = os.tosc(440) : tu.T3_12AT7;
 ```
 
 ----
@@ -312,6 +330,15 @@ with the bias values used by the Guitarix amplifiers.
 _ : T1_12AU7 : _
 ```
 
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+T1_12AU7_test = os.tosc(440) : tu.T1_12AU7;
+T2_12AU7_test = os.tosc(440) : tu.T2_12AU7;
+T3_12AU7_test = os.tosc(440) : tu.T3_12AU7;
+```
+
 ----
 
 ### `T1_6V6`, `T2_6V6`, `T3_6V6`
@@ -325,6 +352,15 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_6V6 : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+T1_6V6_test = os.tosc(440) : tu.T1_6V6;
+T2_6V6_test = os.tosc(440) : tu.T2_6V6;
+T3_6V6_test = os.tosc(440) : tu.T3_6V6;
 ```
 
 ----
@@ -342,6 +378,15 @@ with the bias values used by the Guitarix amplifiers.
 _ : T1_6DJ8 : _
 ```
 
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+T1_6DJ8_test = os.tosc(440) : tu.T1_6DJ8;
+T2_6DJ8_test = os.tosc(440) : tu.T2_6DJ8;
+T3_6DJ8_test = os.tosc(440) : tu.T3_6DJ8;
+```
+
 ----
 
 ### `T1_6C16`, `T2_6C16`, `T3_6C16`
@@ -355,6 +400,15 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_6C16 : _
+```
+
+#### Test
+```
+tu = library("tubes.lib");
+os = library("oscillators.lib");
+T1_6C16_test = os.tosc(440) : tu.T1_6C16;
+T2_6C16_test = os.tosc(440) : tu.T2_6C16;
+T3_6C16_test = os.tosc(440) : tu.T3_6C16;
 ```
 
 ----

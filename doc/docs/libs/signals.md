@@ -56,7 +56,7 @@ Block - terminate N signals.
 #### Usage
 
 ```
-si.bus(N) : block(N)
+bus(N) : block(N)
 ```
 
 Where:
@@ -94,8 +94,8 @@ si = library("signals.lib");
 os = library("oscillators.lib");
 interpolate_test = si.interpolate(
     hslider("interpolate:mix", 0.5, 0, 1, 0.01),
-    os.osc(220),
-    os.osc(440)
+    os.tosc(220),
+    os.tosc(440)
 );
 ```
 
@@ -109,7 +109,7 @@ intermediate buses.
 #### Usage
 
 ```
-si.bus(inputs(FX)) : repeat(N, FX) : si.bus(outputs(FX))
+bus(inputs(FX)) : repeat(N, FX) : bus(outputs(FX))
 ```
 
 Where:
@@ -246,7 +246,7 @@ Dot product for two vectors of size N.
 #### Usage
 
 ```
-si.bus(N), si.bus(N) : dot(N) : _
+bus(N), bus(N) : dot(N) : _
 ```
 
 Where:
@@ -258,8 +258,8 @@ Where:
 si = library("signals.lib");
 os = library("oscillators.lib");
 dot_test = (
-    os.osc(100), os.osc(200), os.osc(300),
-    os.osc(400), os.osc(500), os.osc(600)
+    os.tosc(100), os.tosc(200), os.tosc(300),
+    os.tosc(400), os.tosc(500), os.tosc(600)
 ) : si.dot(3);
 ```
 
@@ -268,20 +268,15 @@ dot_test = (
 ### `(si.)smooth`
 
 Exponential smoothing by a unity-dc-gain one-pole lowpass.
-`smooth` is a standard Faust function.
+`smooth` is a standard Faust function. The input is typically a control
+signal (`hslider(...) : smooth(s)`). The pole `s` is usually computed
+from a smoothing time constant `tau` in seconds with `ba.tau2pole(tau)`
+(see the example).
 
-#### Usage:
-
-```
-_ : si.smooth(ba.tau2pole(tau)) : _
-```
-
-Where:
-
-* `tau`: desired smoothing time constant in seconds, or
+#### Usage
 
 ```
-hslider(...) : smooth(s) : _
+_ : smooth(s) : _
 ```
 
 Where:
@@ -291,10 +286,22 @@ s>1 is unstable, and s=1 yields the zero signal for all inputs.
 The exponential time-constant is approximately 1/(1-s) samples, when s is close to
 (but less than) 1.
 
+#### Example
+
+```
+_ : smooth(ba.tau2pole(tau)) : _   // tau: smoothing time constant in seconds
+```
+
 #### Test
 ```
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 smooth_test = hslider("smooth:input", 0.5, -1, 1, 0.01) : si.smooth(0.9);
+smooth_slider_test = no.noise : si.smooth(hslider("smooth:s", 0.999, 0, 0.9999, 0.0001));
+smooth_modulated_test = no.noise : si.smooth(1 - 0.1*pow(0.001, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+smooth_jump_test = no.noise : si.smooth(1 - 0.1*pow(0.001, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -322,7 +329,15 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 smoothq_test = hslider("smoothq:input", 0.5, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+smoothq_linear_test = select2(ba.period(2*P) < P, -1, 1) : si.smoothq(0.25, 1)
+with { P = int(ma.SR/4); };
+smoothq_slider_test = no.noise : ba.sAndH(ba.period(Q) == 0) : si.smoothq(hslider("smoothq:time", 0.25, 0.001, 1, 0.001), hslider("smoothq:q", 0.5, 0, 1, 0.01)) with { Q = int(ma.SR/30); };
+smoothq_modulated_test = no.noise : ba.sAndH(ba.period(Q) == 0) : si.smoothq(0.001*pow(1000, tri), 0.5) with { Q = int(ma.SR/30); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+smoothq_jump_test = no.noise : ba.sAndH(ba.period(Q) == 0) : si.smoothq(0.001*pow(1000, sq), 0.5) with { Q = int(ma.SR/30); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -349,8 +364,8 @@ Where:
 si = library("signals.lib");
 os = library("oscillators.lib");
 cbus_test = (
-    os.osc(100), os.osc(150),
-    os.osc(200), os.osc(250)
+    os.tosc(100), os.tosc(150),
+    os.tosc(200), os.tosc(250)
 ) : si.cbus(2);
 ```
 
@@ -360,6 +375,8 @@ cbus_test = (
 
 Multiply two complex signals pointwise.
 `cmul` is a standard Faust function.
+Each complex number is represented by two real signals as (real,imag):
+the inputs `(r1,i1)` are the real and imaginary parts of signal 1.
 
 #### Usage
 
@@ -369,17 +386,15 @@ Multiply two complex signals pointwise.
 
 Where:
 
-* Each complex number is represented by two real signals as (real,imag), so
-- `(r1,i1)` = real and imaginary parts of signal 1
-- `(r2,i2)` = real and imaginary parts of signal 2
+* `r2`, `i2`: real and imaginary parts of signal 2
 
 #### Test
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
 cmul_test = si.cmul(
-    os.osc(110), os.osc(220),
-    os.osc(330), os.osc(440)
+    os.tosc(110), os.tosc(220),
+    os.tosc(330), os.tosc(440)
 );
 ```
 
@@ -406,7 +421,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-cconj_test = (os.osc(210), os.osc(310)) : si.cconj;
+cconj_test = (os.tosc(210), os.tosc(310)) : si.cconj;
 ```
 
 ----
@@ -429,8 +444,14 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 onePoleSwitching_test = hslider("onePoleSwitching:input", 0.5, -1, 1, 0.01)
   : si.onePoleSwitching(0.05, 0.2);
+onePoleSwitching_slider_test = no.noise : si.onePoleSwitching(hslider("onePoleSwitching:att", 0.05, 0.001, 1, 0.001), hslider("onePoleSwitching:rel", 0.2, 0.001, 1, 0.001));
+onePoleSwitching_modulated_test = no.noise : si.onePoleSwitching(0.001*pow(1000, tri), 0.001*pow(1000, 1 - tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+onePoleSwitching_jump_test = no.noise : si.onePoleSwitching(0.001*pow(1000, sq), 0.001*pow(1000, 1 - sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
@@ -478,7 +499,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-rev_test = os.osc(440) : si.rev(32);
+rev_test = os.tosc(440) : si.rev(32);
 ```
 
 ----
@@ -506,7 +527,7 @@ that is greater or equal to one.
 #### Usage
 
 ```
-     si.bus(inputs(vectorsList)) : vecOp((vectorsList), op) : si.bus(outputs(ba.take(1, vectorsList)));
+bus(inputs(vectorsList)) : vecOp(vectorsList, op) : bus(outputs(ba.take(1, vectorsList)))
 ```
 
 Where:
@@ -601,7 +622,7 @@ doesn't search for the variable. This can be much faster than `par` to compile.
 #### Usage
 
 ```
-si.bus(N * inputs(f)) : bpar(N, f) : si.bus(N * outputs(f))
+bus(N * inputs(f)) : bpar(N, f) : bus(N * outputs(f))
 ```
 
 Where:
@@ -613,7 +634,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-bpar_test = (os.osc(120), os.osc(240), os.osc(360)) : si.bpar(3, *(0.5));
+bpar_test = (os.tosc(120), os.tosc(240), os.tosc(360)) : si.bpar(3, *(0.5));
 ```
 
 Example:
@@ -632,7 +653,7 @@ Balanced `sum`, see `si.bpar`.
 #### Usage
 
 ```
-si.bus(N * inputs(f)) : bsum(N, f) : _
+bus(N * inputs(f)) : bsum(N, f) : _
 ```
 
 Where:
@@ -644,7 +665,7 @@ Where:
 ```
 si = library("signals.lib");
 os = library("oscillators.lib");
-bsum_test = (os.osc(100), os.osc(200), os.osc(300)) : si.bsum(3, *(0.5));
+bsum_test = (os.tosc(100), os.tosc(200), os.tosc(300)) : si.bsum(3, *(0.5));
 ```
 
 Example:
@@ -662,7 +683,7 @@ Balanced `prod`, see `si.bpar`.
 #### Usage
 
 ```
-si.bus(N * inputs(f)) : bprod(N, f) : _
+bus(N * inputs(f)) : bprod(N, f) : _
 ```
 
 Where:

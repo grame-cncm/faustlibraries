@@ -10,10 +10,11 @@ file is the operational summary.
 
 ```bash
 make checkdoc    # documentation & license gate - run before every commit
+make check-usage # compile every #### Usage section (checkdoc does the changed libraries)
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
-make check-cpu   # CPU cost of the tests; CPU_ARGS="--base origin/master" for new/base ratios
+make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # regenerate the documentation SVG figures (needs matplotlib)
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
@@ -25,10 +26,16 @@ Every script behind these targets is described in `scripts/README.md`.
   `#### Test`), a stale `doc/docs/standardFunctions.md`, and any
   non-canonical license string. Accepted historical debt is pinned in
   `tests/doc-baseline.json`; never regenerate that baseline to silence a
-  failure you caused.
+  failure you caused. With `faust` installed, it also compiles the
+  `#### Usage` sections of the libraries changed since `HEAD`
+  (`scripts/check_usage.py --changed`): the buses must match the arity of
+  the call, and its parameters the `Where:` bullets. The debt is pinned in
+  `tests/usage-baseline.json`, under the same rule; a fix that makes an
+  entry pass removes it in the same commit.
 - The test references (`tests/reference/`, ~1.4 GB) are local build
   artifacts: generate them with `make reference`, never commit them. Same
-  for the built site (`site/`) and `tests/build|output`.
+  for the built site (`site/`) and `tests/build|output`; `.gitignore`
+  covers them all.
 - A test failure means the change altered audible output. That is either a
   bug in the change or a deliberate fix; in the second case say so
   explicitly and regenerate only the affected references.
@@ -43,7 +50,11 @@ Every script behind these targets is described in `scripts/README.md`.
 
 1. **Every new public function** needs, in the same commit:
    - a full documentation block (description, `#### Usage` showing the
-     input/output shape, `Where:` for each parameter, `#### Test`);
+     input/output shape as a Faust expression that compiles, like
+     `_ : wgr(f,r) : _,_`, `Where:` for each parameter of that call,
+     `#### Test`). In the Usage, the library's own names have no prefix,
+     and inputs that have a meaning are named and documented:
+     `expm1(x) : _` with a bullet for `x`, not `_ : expm1 : _`;
    - a `functionName_test` entry in the matching `tests/*.dsp` file, copied
      from the block's `#### Test` (rule 8), and its reference generated with
      `make reference`;
@@ -108,7 +119,11 @@ Every script behind these targets is described in `scripts/README.md`.
    that the touched symbols still come out with their summary, usage,
    params and license (`scripts/faust_doc_api.py get_faust_symbol xx.name`).
    `make checkdoc` guards the floor — the exported symbol count may only
-   grow — but it cannot see a field that silently comes out empty.
+   grow — but it cannot see a field that silently comes out empty. The
+   make targets compute each symbol's `io` (inputs, outputs) with faust,
+   from the Usage call valued by the Test section (`"source": "faust"`):
+   a new function whose `io` comes out `"source": "usage"` has a Usage
+   that does not evaluate.
 
 8. **Tests are written in the library first.** Every test added — for a
    new function, or to pin a bug fix or a behavior change of an existing
@@ -123,10 +138,14 @@ Every script behind these targets is described in `scripts/README.md`.
    frequency, a gain, a delay) also gets a `functionName_slider_test`
    (parameters from sliders: coefficients computed per block, in the
    program's precision) and a `functionName_modulated_test` (a parameter
-   modulated at every sample): the three run different code. Drive the
+   modulated at every sample): the three run different code. A recursive
+   filter also gets a `functionName_jump_test` (the parameter jumping
+   between the two ends of its range, as a moved slider does). Drive the
    modulation with an integer counter (`ba.period`), not `os.osc`, which
-   drifts in float. Details: `doc/docs/contributing.md`, section
-   *Constant, slider and modulated tests*. `scripts/lib_tests.py
+   drifts in float, and tie its period to the sample rate
+   (`P = int(ma.SR/10)`, 10 Hz at every rate). Details:
+   `doc/docs/contributing.md`, section *Constant, slider, modulated and
+   jump tests*. `scripts/lib_tests.py
    inventory xx.lib` shows which tests exist where; `scripts/lib_tests.py
    add xx.lib new_tests.dsp` inserts new ones in both places at once.
 
@@ -139,8 +158,9 @@ Every script behind these targets is described in `scripts/README.md`.
    (`PRECISION_ARGS="tests/xx_tests.dsp"`); a new test must pass without
    a baseline entry, and a fix that makes an entry unnecessary removes it
    in the same commit. Never add or loosen an entry to silence a failure.
-   Prefer `no.noise` to `os.osc` as test input: `os.osc` drifts in phase
-   in float. The check uses default control values only: also try the
+   Prefer `no.noise` or `os.tosc` to `os.osc` as test input: `os.osc`
+   drifts in phase in float, `os.tosc` reads the sine of an exact integer
+   phase (`os.tphase`) and does not. The check uses default control values only: also try the
    controls at their extremes, and check that what should not depend on
    the rate does not. A fix that relies on a precise evaluation order (a
    rewrite against cancellation, a workaround of the Faust normalizer) is
@@ -158,9 +178,12 @@ Every script behind these targets is described in `scripts/README.md`.
     tests you touched and on those of the callers that multiply it (a
     filter bank, `dm.vocoder_demo`). Report at least the `fast-math` and
     `strict` compilations, since `-ffast-math` alone can move a ratio from
-    1.2 to 1.44, and the identity lines of the run. Timings from separate
-    runs are not comparable, and a ratio within 3% (or within its
-    spread) is noise. The `ops` column counts the per-sample divisions,
+    1.2 to 1.44, and the identity lines of the run. Measure on an idle
+    machine (AC power, no build or test suite in parallel): the tool
+    cannot correct a loaded one, it only warns on a high load average and
+    marks `?` a ratio whose spread stays above 20%, which is not quoted
+    but measured again. Timings from separate runs are not comparable,
+    and a ratio within 3% (or within its spread) is noise. The `ops` column counts the per-sample divisions,
     square roots and transcendental calls, which embedded cores pay far
     more for than the desktop the ratio is measured on: report an
     increase (`!`) even when the ratio is small. A test time flagged `NaN` measures NaN arithmetic. A slower function can be the right trade-off: say what it
@@ -198,14 +221,15 @@ changed" depends on it.
   commits have not been pushed. Once they are on `origin`, they are frozen:
   fix forward with a new commit.
 - Do not commit build artifacts even when they sit in the working tree.
-  `.gitignore` covers `site/` and `tests/build-cpu/` but not `tests/reference/`, `tests/output/`,
-  `tests/build/`, `tests/build-precision/` or the doc index exports (`tests/faust-doc-index.json`,
-  `tests/faust-doc/`), so never stage with `git add -A` or `git commit -a` —
-  name the files you mean. Naming files explicitly is not enough by
-  itself: after `make reference` regenerates a `.ref` you touched, it is
-  sitting right there next to the source and test files you actually mean
-  to commit, and an explicit `git add lib.lib tests/foo_tests.dsp
-  tests/reference/foo_test.ref` stages it just as surely as `-A` would
-  (done once, 2026-09-04, caught before push). Treat every path under
-  `tests/reference/` as excluded from every `git add`, independently of
-  how the rest of the command is written.
+  `.gitignore` covers them: the built site (`site/`), the test references
+  (`tests/reference/`), the test outputs and builds (`tests/output/`,
+  `tests/build/`, `tests/build-precision/`, `tests/build-cpu/`) and the
+  doc index exports (`tests/faust-doc-index.json`, `tests/faust-doc/`).
+  Git then refuses to stage them even when named explicitly (`git add
+  tests/reference/foo_test.ref` stops on "paths are ignored"): never
+  force it with `git add -f`. Before these paths were ignored, a reference
+  was staged by an explicit `git add` once (2026-09-04, caught before
+  push), and another stayed in the index from 2026-08-26 to 2026-10-03.
+  Still never stage with `git add -A` or `git commit -a`: the working tree
+  also holds untracked files that are not artifacts (scratch DSP files,
+  logs, patches) — name the files you mean.

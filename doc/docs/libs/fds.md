@@ -218,8 +218,11 @@ Where:
 ```
 fd = library("fds.lib");
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 linInterp1D_test = (1, 0.5, -0.5, -1)
   : fd.linInterp1D(4, 1.25);
+linInterp1D_modulated_test = (1, 0.5, -0.5, -1) : fd.linInterp1D(4, 3*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -246,8 +249,11 @@ Where:
 ```
 fd = library("fds.lib");
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 linInterp2D_test = (1, 0.5, -0.5, -1)
   : fd.linInterp2D(2, 2, 0.6, 1.2);
+linInterp2D_modulated_test = (1, 0.5, -0.5, -1) : fd.linInterp2D(2, 2, tri, 1 - tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -325,8 +331,11 @@ Where:
 ```
 fd = library("fds.lib");
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 linInterp1DOut_test = (1, 0.25, 0.5, 0.75)
   : fd.linInterp1DOut(4, 1.5);
+linInterp1DOut_modulated_test = (1, 0.25, 0.5, 0.75) : fd.linInterp1DOut(4, 3*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -352,8 +361,11 @@ Where:
 ```
 fd = library("fds.lib");
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 linInterp2DOut_test = (1, 0.5, -0.5, -1)
   : fd.linInterp2DOut(2, 2, 0.6, 1.2);
+linInterp2DOut_modulated_test = (1, 0.5, -0.5, -1) : fd.linInterp2DOut(2, 2, tri, 1 - tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Routing
@@ -557,17 +569,18 @@ Where:
 ```
 fd = library("fds.lib");
 os = library("oscillators.lib");
-hammer_test = os.osc(5)
+hammer_test = os.tosc(5)
   : fd.hammer(
       0.1,
       1000,
-      0.01,
+      10,
       1e5,
       2.0,
       1.0/48000,
       0.001,
       button("hammer:trigger")
     );
+hammer_slider_test = os.tosc(5) : fd.hammer(hslider("hammer:coeff", 0.1, 0, 1, 0.001), hslider("hammer:omega0Sqr", 1000, 0, 100000, 1), hslider("hammer:sigma0", 10, 0, 100, 0.01), hslider("hammer:kH", 100000.0, 0, 1000000.0, 1), hslider("hammer:alpha", 2.0, 1, 4, 0.01), 1.0/48000, hslider("hammer:offset", 0.001, 0, 0.01, 0.0001), button("hammer:trigger"));
 ```
 
 ----
@@ -594,6 +607,6 @@ Where:
 ```
 fd = library("fds.lib");
 os = library("oscillators.lib");
-bow_test = os.osc(5)
+bow_test = os.tosc(5)
   : fd.bow(0.05, 2.0, 1.0/48000, 0.1);
 ```

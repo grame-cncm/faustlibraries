@@ -21,14 +21,16 @@ or later.
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
+| [`verify_matched2.py`](#verify_matched2py) | proves the rewrites of Vicanek's matched filters and checks their coefficients at 60 digits | `make verify-matched` |
 | **Documentation checks** | | |
 | [`checkdoc.py`](#checkdocpy) | documentation and license gate, against a baseline | `make checkdoc` |
+| [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters; measures the io of the export | `make check-usage`, `checkdoc.py` (`--changed`), `build_faust_doc_index.py` (`--measure-io`) |
 | [`audit2.py`](#audit2py) | documentation coverage per library | `checkdoc.py` |
 | [`audit.py`](#auditpy) | naive coverage audit, kept for comparison | — |
 | [`build_standard_functions.py`](#build_standard_functionspy) | generates `doc/docs/standardFunctions.md` | `checkdoc.py` (`--check`) |
 | [`normalize_licenses.py`](#normalize_licensespy) | canonical SPDX license strings | `checkdoc.py` (`--check`) |
 | **JSON export** | | |
-| [`build_faust_doc_index.py`](#build_faust_doc_indexpy) | builds the JSON documentation index | `make doc-index*`, `checkdoc.py` |
+| [`build_faust_doc_index.py`](#build_faust_doc_indexpy) | builds the JSON documentation index, io counts computed by faust | `make doc-index*`, `checkdoc.py` |
 | [`faust_doc_api.py`](#faust_doc_apipy) | queries that index | — |
 | **Figures** | | |
 | [`plot_lib.py`](#plot_libpy) | `aanl.lib` figures | `make plots` |
@@ -42,7 +44,12 @@ are run by `doc/Makefile`.
 
 **Prerequisites**, by use:
 
-- tests: `faust` and a C++17 compiler; `check_precision.py` also needs `numpy`;
+- tests: `faust` and a C++17 compiler; `check_precision.py` also needs `numpy`,
+  and `verify_matched2.py` needs `numpy`, `sympy` and `mpmath`
+  (`pip install sympy mpmath`);
+- `check_usage.py`, and `build_faust_doc_index.py --measure-io` (the
+  `make doc-index*` targets): `faust` (`checkdoc.py` skips the Usage check
+  without it);
 - figures: `faust`, `g++`, `numpy` and `matplotlib`;
 - certification: `faust-rs` and `lean` (4.31);
 - everything else: the Python standard library only.
@@ -102,7 +109,9 @@ needs no stored reference.
 A test fails when an output is not finite, or when its **level gap** (relative
 difference of the single and double RMS levels) exceeds 1e-3, unless
 `tests/precision-baseline.json` accepts it. The sample-by-sample gap is only
-reported, because `os.osc`, the input of many tests, drifts in phase in float.
+reported, because `os.osc` drifts in phase in float: the tests use `os.tosc`,
+whose integer phase is the same in both precisions, except those of the
+oscillators themselves.
 The script also reports baseline entries that a fix made unnecessary; a level
 entry is reported only once its gap is below threshold / margin (5e-4), since
 the last bits of a float result vary between compilers.
@@ -161,8 +170,9 @@ it is.
   (`flasharch_footer.cpp`, copied with its MIT license into `arch/cpu_arch.cpp`):
   noise on the inputs, 512-frame blocks, a spin that gets the process onto a
   performance core before anything is timed, warm-up, and the minimum over
-  repetitions. Buttons are pressed, as in `print_arch.cpp`, so that an
-  instrument test is not timed on silence.
+  repetitions. Buttons and checkboxes are held pressed for the whole timing,
+  so that an instrument test is not timed on silence (`print_arch.cpp` and
+  `precision_arch.cpp` release them halfway through the render instead).
 - **The protocol** around it: builds in parallel, timing strictly sequential;
   no timing on battery power (macOS, `--allow-battery` to override); a pause
   after the builds; then each test in turn, over `--rounds` rounds (3) in which
@@ -174,6 +184,28 @@ it is.
   1.27). The `spread` column, (max - min) / min over the rounds, is the noise a
   ratio is to be read against; a test whose spread exceeds 5% is re-raced once
   with as many rounds again (marked `*`), as `fcautotool` does.
+- **An idle machine.** The measurements are meant for a machine that does
+  nothing else: on AC power, with no build, test suite (`make check`,
+  `check-precision`) or other heavy job in parallel. The tool cannot make a
+  timing on a loaded machine reliable. It only reports what it sees:
+  - **The load average** is printed with the identity lines, with a warning
+    when, at the start, it exceeds the number of performance cores. It is also
+    recorded before and after the timing, without a warning: those one-minute
+    averages still hold the run's own parallel builds (a run of 756 builds
+    showed 34 just before timing). It is information, not a guarantee: a one-minute average misses a
+    burst of a few seconds, and on Apple Silicon a load on the efficiency
+    cores does not disturb a test timed on a performance core.
+  - **A ratio whose spread is still above 20% after the re-race** was timed
+    while the machine was disturbed. It is marked `?`, left out of the summary
+    line, and listed at the end, to be measured again (with `-k`). In two
+    full runs of the suite (848 ratios), this flagged 6. Among them were the
+    only two ratios that differed between the runs by more than 9%: a
+    `lowshelf_modulated_test` timed at 0.81 in one run and at 1.04 in the
+    other, while a few seconds of another load tripled its rounds.
+  - **Two runs agree.** Between two full runs on an idle machine, the median
+    change of a ratio was 0.2% to 0.5%, and 90% of them moved by less than
+    2.5%. A ratio quoted in a pull request comes from a run where it is not
+    marked `?`, and preferably from two runs that agree.
 - **The noise floor**, measured by A/A comparisons (the same libraries on both
   sides) of 61 tests spread over the suite: ratios from 0.98 to 1.02 on a quiet
   machine, 0.96 to 1.04 on a busy one. Read a ratio within 3%, or within its
@@ -253,16 +285,28 @@ scripts/lib_tests.py add LIB SPEC.dsp [--tests-file FILE] [--dry-run]
 Every test lives in two places (`AGENTS.md`, rule 8): in the `#### Test` section
 of the function's doc block, then, verbatim and under the same name, in a
 `tests/*.dsp` file. A function whose parameters are meant to vary at run time has
-three tests: `name_test`, `name_slider_test` and `name_modulated_test` (see
-`doc/docs/contributing.md`, section *Constant, slider and modulated tests*). This
-script checks and maintains both places.
+three tests, `name_test`, `name_slider_test` and `name_modulated_test`, and a
+recursive filter a fourth, `name_jump_test` (see `doc/docs/contributing.md`,
+section *Constant, slider, modulated and jump tests*). This script checks and
+maintains both places.
 
 **`inventory LIB`** lists, for every symbol documented in LIB, where each of the
-three tests exists: `both`, `lib` or `dsp` (one side only), or `-`. The tests
+four tests exists: `both`, `lib` or `dsp` (one side only), or `-`. The tests
 present on one side only break rule 8 and are listed first; the exit status is
-then 1. `--missing` hides the symbols that have all three. Whether a function
-needs the slider and modulated variants is a judgement, which the inventory
-leaves to you: its parameters must be meant to vary at run time.
+then 1. `--missing` hides the symbols that have the first three; a missing
+`_jump_test` does not count, since only recursive filters need one. Whether a
+function needs the slider, modulated and jump variants is a judgement, which the
+inventory leaves to you: its parameters must be meant to vary at run time.
+
+The inventory reads the titles with or without a prefix (`(tu.)name` or
+`name`, as in tubes.lib, tonestacks.lib, instruments.lib and maxmsp.lib),
+counts the tests of a generic `name[N]` or `name[N]suffix` from any of its
+instances (`fdelay2a_test` for `fdelay[N]a`), and accepts a test named after
+the library's alias when the natural name is taken (`tu_inverse_test`, rule
+1 of `AGENTS.md`); a test found only in `tests/*.dsp` counts for the library
+only if it calls the function through that alias. A test commented out in
+`tests/*.dsp` on purpose, such as the nondeterministic `no.rnoise`, shows as
+`off`.
 
 ```bash
 scripts/lib_tests.py inventory filters.lib --missing
@@ -271,7 +315,7 @@ scripts/lib_tests.py inventory filters.lib --missing
 **`add LIB SPEC.dsp`** inserts the tests of SPEC.dsp wherever they are missing.
 SPEC.dsp is an ordinary Faust file, with one definition per line: `xx =
 library("...");` imports, `*_test` definitions (a `with { }` on the same line
-is fine), and the helper definitions the tests use (`src = os.osc(440);`). It
+is fine), and the helper definitions the tests use (`src = os.tosc(440);`). It
 compiles as it is, so write it, check it, then add it:
 
 ```bash
@@ -308,6 +352,39 @@ After `add`, the usual steps of a test change apply:
   page with `make -C doc md`;
 - run `make checkdoc`.
 
+### `verify_matched2.py`
+
+```
+scripts/verify_matched2.py [identities|coefficients] [--quick] [--old] [--json FILE]
+                           [--faust-options=OPTS] [--cxx-options=OPTS]
+make verify-matched [VERIFY_ARGS="..."]
+```
+
+The six matched filters of `vaeffects.lib` (`lowpass2Matched`,
+`highpass2Matched`, `bandpass2Matched`, `peaking2Matched`, `lowshelf2Matched`,
+`highshelf2Matched`) compute Vicanek's coefficients through rewritten formulas
+that avoid cancellation, so that they stay accurate in single precision when the
+poles come close to z = 1. This script backs every claim made about them, and
+fails (exit status 1) if one no longer holds:
+
+- `identities`: the algebraic identities the rewrites rely on, proved with
+  `sympy`, and the trigonometric and hyperbolic ones, evaluated with `mpmath`
+  at 120 digits at random points, where they must agree to 40 digits.
+- `coefficients`: the coefficient environments of the actual Faust code
+  (`_lowpass2MatchedCoefs`, ..., `_shelf2Matched`), compiled in `-single` and
+  `-double` and rendered at the six rates, against Vicanek's original formulas
+  evaluated at 60 digits, over 8 CF (20 Hz to 20 kHz), 9 Q (0.1 to 30) and
+  4 to 9 G. It fails above 2e-5 in float and 1e-8 in double. Each filter is
+  compared in the form that matters when the poles are close to z = 1:
+  `P = 1 + a1 + a2`, `fq = 1 - a2`, and its numerator.
+- `--old` adds the same table for the original code, emulated with `numpy` in
+  float32 and float64. `--quick` runs a small grid.
+  `--faust-options` and `--cxx-options` check other compilations
+  (`--cxx-options="-O3 -ffast-math"`, `--faust-options=-vec`).
+
+Run it after any change to these filters or to `_matched2`, `_shelf2Matched`
+or `_matchedRun`. It takes a few seconds.
+
 ## Documentation checks
 
 ### `checkdoc.py`
@@ -327,10 +404,61 @@ The gate to pass before every commit. It fails on:
 4. a non-canonical license string (`normalize_licenses.py --check`);
 5. a drop in the number of symbols of the JSON export
    (`build_faust_doc_index.py`), which means the doc-block format drifted away
-   from what the exporter understands.
+   from what the exporter understands;
+6. a `#### Usage` section, in a library that differs from `HEAD`, that
+   `check_usage.py --changed` rejects (when `faust` is installed).
 
 `--update-baseline` records the current debt as accepted. Never use it to hide a
 gap you introduced. Exit status 1 on any regression.
+
+### `check_usage.py`
+
+```
+scripts/check_usage.py [--lib xx.lib] [--symbol xx.name] [--changed] [-v] [-j JOBS]
+scripts/check_usage.py --update-baseline
+make check-usage [USAGE_ARGS="..."]
+```
+
+Compiles the `#### Usage` section of every symbol of the JSON export. A
+Usage line such as `_ : lowpass(N,fc) : _` is a Faust expression: once `N`
+and `fc` have values, `faust -e` evaluates it, and its sequential
+compositions fail when the buses do not match the arity of the call. Each
+Usage line that names the symbol becomes `process = <line>;`, where:
+
+- `(fi.)lowpass` and the bare names of the symbol's library are qualified
+  (`fi.lowpass`), and `hslider(...)` reads as a control input `_`;
+- the parameters of the library's calls take the values of the same calls in
+  the `#### Test` section, whose definitions are in scope; a definition line
+  of the Usage (`index = 1.69;`) is kept;
+- a name still without a value reads as a signal `_` on a bus
+  (`excitation : bowTable(offset,slope) : _`) and as an arbitrary value, 2,
+  in an argument (`isnan(x)`); a failure after such an arbitrary value is
+  reported as `unbound`, since the value may be the cause;
+- a bus written with `...` (`_,_, ... : f(N) : _,_, ...`) states a variable
+  channel count: it is dropped, and only the call is checked;
+- prose lines are skipped, but the `` `code` `` they quote is checked; a
+  statement may continue over several lines, and `-> result` ends it.
+
+It then checks that the arguments of the call and the bullets of `Where:`
+name the same parameters. A symbol fails as `arity`, `unbound` (a name with
+no value: a parameter the Test section does not exercise, or an unqualified
+name such as `bus` for `si.bus`), `syntax`, `pseudo` (a `...` placeholder in
+an argument list), `missing` (no Usage line names it), `params` (Usage and
+`Where:` disagree), `prefix` (a name of the symbol's own library written
+with its prefix, `si.bus` in `signals.lib`) or `error`. A bullet may belong
+to another function of the same block. The values of a Test call come with
+the definitions of the `with { }` around it, and when a call does not give
+the values (`par(i, 3, f(0.5 + i))`), the next call of the Test section is
+tried. A `params` failure on a bullet that documents an input is fixed by
+naming the input in the call (`expm1(x) : _`), not by deleting the bullet. The accepted debt is pinned symbol by symbol,
+with its kind of failure, in `tests/usage-baseline.json`: a symbol that is not
+there must pass, an entry must still fail the same way, and an entry that
+passes is reported, to be removed in the commit that fixes it.
+
+`--symbol` prints the programs it compiled. A full run takes about a minute
+(`dx.algorithms` alone, 50 s); `checkdoc.py` runs it with `--changed`, on the
+libraries that differ from `HEAD` or are new. Exit status 1 on any
+regression.
 
 ### `audit2.py`
 
@@ -390,7 +518,8 @@ scripts/build_faust_doc_index.py [--repo-root DIR] [--stdlib FILE] [--output FIL
                                  [--split-output-dir DIR] [--pretty]
                                  [--license-policy all|commercial-compatible]
                                  [--license-allowlist-file F] [--license-denylist-file F]
-make doc-index | doc-index-split | doc-index-commercial
+                                 [--measure-io [--jobs N]]
+make doc-index | doc-index-split | doc-index-commercial [DOC_INDEX_IO=]
 ```
 
 Extracts the documentation from the `.lib` sources, not from the generated
@@ -408,6 +537,21 @@ the libraries.
 - `--license-policy commercial-compatible` keeps only the symbols whose license
   matches a conservative allow-list; the allow and deny lists can be extended
   with newline-separated files.
+- `--measure-io` computes each symbol's `io` with the Faust compiler instead
+  of guessing it from the Usage text. The call of the Usage, valued as
+  `check_usage.py` values it (from the `#### Test` section), is compiled as
+  `process = inputs(call), outputs(call);`, which `faust -e` reduces to two
+  constants: `fi.wgr(440,0.995)` gives 1 input and 2 outputs where the text
+  `_ : wgr(f,r) : _` said 1 and 1, `an.ifft(8)` 16 and 16 where it said 1
+  and 1. A measured `io` has `"source": "faust"`, the parameter values the
+  arity holds for (`parameterValues`, from the Test section or the Usage) and
+  those neither gave (`assumedValues`, set to 2); the others keep the guess,
+  `"source": "usage"` (a pseudo-code Usage, an environment like `fi.svf`).
+  About 1050 of the 1194 symbols are measured, in about a minute. It needs
+  `faust`, and measures the libraries of the checkout the script belongs to.
+  The make targets pass it; `DOC_INDEX_IO=` builds the export without
+  `faust`, with guessed counts. `checkdoc.py` does not measure (it only
+  counts the symbols).
 
 The last line printed is a JSON summary, including `symbolsCount`, which
 `checkdoc.py` compares with its baseline. After a change to the doc-block

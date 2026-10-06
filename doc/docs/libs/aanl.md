@@ -53,7 +53,19 @@ The Antialiased Nonlinearities library is organized into 3 sections:
 
 ![Rsqrt — response plots](../img/aa_Rsqrt.svg)
 
-Real-valued sqrt().
+Real-valued sqrt(): a negative input is clamped to 0, so that the output
+is never NaN.
+
+#### Usage
+
+```
+Rsqrt(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -61,7 +73,19 @@ Real-valued sqrt().
 
 ![Rlog — response plots](../img/aa_Rlog.svg)
 
-Real-valued log().
+Real-valued log(): the input is clamped to `ma.EPSILON` from below, so
+that the output stays finite.
+
+#### Usage
+
+```
+Rlog(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -69,7 +93,18 @@ Real-valued log().
 
 ![Rtan — response plots](../img/aa_Rtan.svg)
 
-Real-valued tan().
+Real-valued tan(): the input is clipped to [-ma.MAX, ma.MAX].
+
+#### Usage
+
+```
+Rtan(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -77,7 +112,18 @@ Real-valued tan().
 
 ![Racos — response plots](../img/aa_Racos.svg)
 
-Real-valued acos().
+Real-valued acos(): the input is clipped to [-1, 1].
+
+#### Usage
+
+```
+Racos(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -85,7 +131,18 @@ Real-valued acos().
 
 ![Rasin — response plots](../img/aa_Rasin.svg)
 
-Real-valued asin().
+Real-valued asin(): the input is clipped to [-1, 1].
+
+#### Usage
+
+```
+Rasin(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -93,7 +150,18 @@ Real-valued asin().
 
 ![Racosh — response plots](../img/aa_Racosh.svg)
 
-Real-valued acosh()
+Real-valued acosh(): the input is clipped to [1, ma.MAX].
+
+#### Usage
+
+```
+Racosh(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -101,7 +169,18 @@ Real-valued acosh()
 
 ![Rcosh — response plots](../img/aa_Rcosh.svg)
 
-Real-valued cosh().
+Real-valued cosh(): the output is limited to `ma.MAX`.
+
+#### Usage
+
+```
+Rcosh(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -109,7 +188,18 @@ Real-valued cosh().
 
 ![Rsinh — response plots](../img/aa_Rsinh.svg)
 
-Real-valued sinh().
+Real-valued sinh(): the output is clipped to [-ma.MAX, ma.MAX].
+
+#### Usage
+
+```
+Rsinh(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -117,7 +207,19 @@ Real-valued sinh().
 
 ![Ratanh — response plots](../img/aa_Ratanh.svg)
 
-Real-valued atanh().
+Real-valued atanh(): the input is clipped to
+[-1 + ma.EPSILON, 1 - ma.EPSILON].
+
+#### Usage
+
+```
+Ratanh(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
 
 ----
 
@@ -131,7 +233,7 @@ in nonlinear audio processing.
 #### Usage
 
 ```
-_ : ADAA1(EPS, f, F1) : _
+ADAA1(EPS, f, F1, x) : _
 ```
 
 Where:
@@ -139,13 +241,15 @@ Where:
 * `EPS`: a threshold for switching between safe and ill-conditioned paths
 * `f`: a function that we want to process with ADAA
 * `F1`: f's first antiderivative
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 ADAA1_test = aa.ADAA1(0.001, f, F1, sig)
     with {
         f(x) = max(-1.0, min(1.0, x));
@@ -161,10 +265,11 @@ Generalised second-order Antiderivative Anti-Aliasing (ADAA) function.
 
 Implements a second-order ADAA approximation for even better aliasing reduction
 at the cost of additional computation.
+
 #### Usage
 
 ```
-_ : ADAA2(EPS, f, F1, F2) : _
+ADAA2(EPS, f, F1, F2, x) : _
 ```
 
 Where:
@@ -174,13 +279,15 @@ Where:
 * `F1`: f's first antiderivative
 * `F2`: the antiderivative of x * f(x), as in `aa.hardclip2` (not the second
   antiderivative of f)
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 ADAA2_test = aa.ADAA2(0.001, f, F1, F2, sig)
     with {
         f(x) = max(-1.0, min(1.0, x));
@@ -216,13 +323,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.hardclip : _
+hardclip(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 hardclip_test = aa.hardclip(sig);
 ```
 
@@ -239,13 +351,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.hardclip2 : _
+hardclip2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 hardclip2_test = aa.hardclip2(sig);
 ```
 
@@ -263,13 +380,18 @@ The domain of this function is ℝ; its theoretical range is
 
 #### Usage
 ```
-_ : aa.cubic1 : _
+cubic1(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 cubic1_test = aa.cubic1(sig);
 cubic1_noise_test = aa.cubic1(2.0 * no.noise)
     with { no = library("noises.lib"); };
@@ -288,13 +410,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.parabolic : _
+parabolic(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 parabolic_test = aa.parabolic(sig);
 parabolic_noise_test = aa.parabolic(4.0 * no.noise)
     with { no = library("noises.lib"); };
@@ -313,13 +440,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.parabolic2 : _
+parabolic2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 parabolic2_test = aa.parabolic2(sig);
 parabolic2_noise_test = aa.parabolic2(4.0 * no.noise)
     with { no = library("noises.lib"); };
@@ -338,13 +470,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.hyperbolic : _
+hyperbolic(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 hyperbolic_test = aa.hyperbolic(sig);
 ```
 
@@ -361,13 +498,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.hyperbolic2 : _
+hyperbolic2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 hyperbolic2_test = aa.hyperbolic2(sig);
 ```
 
@@ -384,13 +526,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.sinarctan : _
+sinarctan(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 sinarctan_test = aa.sinarctan(sig);
 ```
 
@@ -407,13 +554,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.sinarctan2 : _
+sinarctan2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 sinarctan2_test = aa.sinarctan2(sig);
 ```
 
@@ -430,13 +582,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.softclipQuadratic1 : _
+softclipQuadratic1(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 softclipQuadratic1_test = aa.softclipQuadratic1(sig);
 ```
 
@@ -453,13 +610,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.softclipQuadratic2 : _
+softclipQuadratic2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 softclipQuadratic2_test = aa.softclipQuadratic2(sig);
 ```
 
@@ -476,13 +638,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.tanh1 : _
+tanh1(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 tanh1_test = aa.tanh1(sig);
 ```
 
@@ -499,13 +666,18 @@ The domain of this function is ℝ; its theoretical range is [-π/2.0; π/2.0].
 
 #### Usage
 ```
-_ : aa.arctan : _
+arctan(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 arctan_test = aa.arctan(sig);
 ```
 
@@ -522,13 +694,18 @@ The domain of this function is ℝ; its theoretical range is ]-π/2.0; π/2.0[.
 
 #### Usage
 ```
-_ : aa.arctan2 : _
+arctan2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 arctan2_test = aa.arctan2(sig);
 ```
 
@@ -545,13 +722,18 @@ The domain of this function is ℝ; its theoretical range is ℝ.
 
 #### Usage
 ```
-_ : aa.asinh1 : _
+asinh1(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 asinh1_test = aa.asinh1(sig);
 ```
 
@@ -568,13 +750,18 @@ The domain of this function is ℝ; its theoretical range is ℝ.
 
 #### Usage
 ```
-_ : aa.asinh2 : _
+asinh2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 asinh2_test = aa.asinh2(sig);
 ```
 
@@ -595,13 +782,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.cosine1 : _
+cosine1(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 cosine1_test = aa.cosine1(sig);
 ```
 
@@ -618,13 +810,18 @@ The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
 
 #### Usage
 ```
-_ : aa.cosine2 : _
+cosine2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 cosine2_test = aa.cosine2(sig);
 ```
 
@@ -642,13 +839,18 @@ The domain of this function is [-1.0; 1.0]; its theoretical range is
 
 #### Usage
 ```
-_ : aa.arccos : _
+arccos(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 arccos_test = aa.arccos(sig);
 ```
 
@@ -669,13 +871,18 @@ input signals. In that case, the first-order ADAA arccos() can be used.
 
 #### Usage
 ```
-_ : aa.arccos2 : _
+arccos2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 arccos2_test = aa.arccos2(sig);
 arccos2_noise_test = aa.arccos2(no.noise)
     with { no = library("noises.lib"); };
@@ -694,14 +901,19 @@ The domain of this function is ℝ >= 1.0; its theoretical range is ℝ >= 0.0.
 
 #### Usage
 ```
-_ : aa.acosh1 : _
+acosh1(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
 acoshDomainSig = 1.0 + abs(sig);
-sig = os.osc(110);
+sig = os.tosc(110);
 acosh1_test = aa.acosh1(acoshDomainSig);
 ```
 
@@ -721,14 +933,19 @@ In that case, the first-order ADAA acosh() can be used.
 
 #### Usage
 ```
-_ : aa.acosh2 : _
+acosh2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
 acoshDomainSig = 1.0 + abs(sig);
-sig = os.osc(110);
+sig = os.tosc(110);
 acosh2_test = aa.acosh2(acoshDomainSig);
 ```
 
@@ -745,13 +962,18 @@ The domain of this function is ℝ; its theoretical range is ℝ.
 
 #### Usage
 ```
-_ : aa.sine : _
+sine(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 sine_test = aa.sine(sig);
 ```
 
@@ -768,13 +990,18 @@ The domain of this function is ℝ; its theoretical range is ℝ.
 
 #### Usage
 ```
-_ : aa.sine2 : _
+sine2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 sine2_test = aa.sine2(sig);
 ```
 
@@ -792,13 +1019,18 @@ The domain of this function is [-1.0, 1.0]; its theoretical range is
 
 #### Usage
 ```
-_ : aa.arcsin : _
+arcsin(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 arcsin_test = aa.arcsin(sig);
 ```
 
@@ -819,13 +1051,18 @@ In that case, the first-order ADAA asin() can be used.
 
 #### Usage
 ```
-_ : aa.arcsin2 : _
+arcsin2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-sig = os.osc(110);
+sig = os.tosc(110);
 arcsin2_test = aa.arcsin2(sig);
 ```
 
@@ -842,15 +1079,20 @@ The domain of this function is [-π/2.0; π/2.0]; its theoretical range is ℝ.
 
 #### Usage
 ```
-_ : aa.tangent : _
+tangent(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 ma = library("maths.lib");
 os = library("oscillators.lib");
 tanDomainSig = 0.25 * ma.PI * sig;
-sig = os.osc(110);
+sig = os.tosc(110);
 tangent_test = aa.tangent(tanDomainSig);
 ```
 
@@ -867,14 +1109,19 @@ The domain of this function is [-1.0; 1.0]; its theoretical range is ℝ.
 
 #### Usage
 ```
-_ : aa.atanh1 : _
+atanh1(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
 atanhDomainSig = 0.8 * sig;
-sig = os.osc(110);
+sig = os.tosc(110);
 atanh1_test = aa.atanh1(atanhDomainSig);
 ```
 
@@ -891,13 +1138,18 @@ The domain of this function is [-1.0; 1.0]; its theoretical range is ℝ.
 
 #### Usage
 ```
-_ : aa.atanh2 : _
+atanh2(x) : _
 ```
+
+Where:
+
+* `x`: input signal
+
 #### Test
 ```
 aa = library("aanl.lib");
 os = library("oscillators.lib");
 atanhDomainSig = 0.8 * sig;
-sig = os.osc(110);
+sig = os.tosc(110);
 atanh2_test = aa.atanh2(atanhDomainSig);
 ```

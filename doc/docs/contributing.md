@@ -44,7 +44,10 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * The `functionName` must be prefixed by the `libraryName` name prefix, like `(pr)` in the example.
 * The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on [Library Import](#library-import)).
 * Try to reuse existing functions as much as possible.
-* The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen: _` for a mono generator, `_ : filter : _` for a mono effect, etc. The `Where:` section then allows each parameter to be described individually, using the appropriate surrounding quotes.
+* The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen : _` for a mono generator, `_ : filter : _` for a mono effect, etc. The `Where:` section then allows each parameter to be described individually, using the appropriate surrounding quotes.
+* The `Usage` line is compiled (`make check-usage`, and `make checkdoc` for the libraries you changed): it must be a Faust expression `inputs : call : outputs` whose buses match the arity of the call, `_ : wgr(f,r) : _,_` and not `_ : wgr(f,r) : _` for a filter with two outputs. Its parameters take the values of the same call in the `#### Test` section, so name them as in the call, and document each of them, under the same name, in `Where:`. A parameter that sets a channel count belongs in the buses: `si.bus(N) : f(N) : si.bus(N)`, `_ : bank(N) : par(i,N,_)`. Write a variable channel count with `...` on a bus only (`_,_, ... : f(N) : _,_, ...`); a `...` in an argument list, `etc.`, a shell command or a sentence is not Faust: put it in the description or in `#### Example`. `scripts/check_usage.py --symbol pr.functionName` prints what is compiled.
+* In the `Usage` line, write the names of the function's own library without their prefix (`_ : lowpass(N,fc) : _` in `filters.lib`, `bus(N)` in `signals.lib`): the title already gives it. Names of other libraries keep theirs (`si.bus(N)` in `filters.lib`). `make check-usage` rejects a Usage that writes its own prefix.
+* Name the inputs that have a meaning, and document each of them in `Where:`: `expm1(x) : _`, `hypot(x,y) : _`, `ADAA1(EPS, f, F1, x) : _` say more than `_ : expm1 : _`, and Faust accepts the call form for any function (`f(x)` is `x : f`). Keep the anonymous `_` for the audio input of an effect (`_ : lowpass(N,fc) : _`) and for buses (`si.bus(N)`). When `make check-usage` reports a `Where:` bullet that the Usage does not use, and the bullet documents an input, name that input in the call: do not delete the bullet.
 * The `Example` line can be used to provide additional examples.
 * The `Test` line should used to add a DSP program to test the function. The test name must be `functionName_test`. The actual code can be extracted and independantly tested using the `-pn` compiler option (to specify the name of the dsp entry-point instead of process). The test code must import all the needed libraries, like `an = library("analyzers.lib");` if a function from analyzers.lib is used in the test code. The `functionName_test` test should be added in the relevant file in the *tests* folder.
 * The `References` line can be used to add links to references.
@@ -309,11 +312,12 @@ Before preparing a pull-request, the new library must be carefully tested:
 - the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program: `import("all.lib"); process = _;`
 - reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified. `make check` fails on the first divergence; use `make -k check` to run the whole suite and collect every failure.
 - every new function therefore ships with **both** its `#### Test` section and the corresponding `functionName_test` entry in the *tests* folder, and its reference is generated with `make reference` in the same change.
-- finally, `make checkdoc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted.
+- finally, `make checkdoc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted. It also compiles the `#### Usage` sections of the libraries changed since the last commit (when `faust` is installed): a Usage whose buses do not match the arity of the call, or whose parameters differ from its `Where:` section, fails unless it is recorded in `tests/usage-baseline.json`. `make check-usage` checks every library.
 - new code must also be checked in single and double precision, from 44.1 to 192 kHz, as described below: `make check` covers neither, `make check-precision` does.
 - a function whose parameters are meant to vary at run time is tested with constant, slider and modulated parameters, as described below: the three run different code.
+- buttons and checkboxes are driven by the harnesses (`arch/print_arch.cpp` for `make check`, `arch/precision_arch.cpp` for `make check-precision`): every button and checkbox is ON (1) for the first half of the rendered frames and OFF (0) for the second half. A gate is pressed then released, so a release, a note-off or a retrigger is exercised; a checkbox, a bypass for example, is rendered in both states, with the transition between them. Sliders and number entries keep their default value for the whole run. (Until October 2026 the buttons and checkboxes stayed ON for the whole run, so bypassed effects and releases were never tested, #281.)
 
-### Constant, slider and modulated tests
+### Constant, slider, modulated and jump tests
 
 The Faust compiler generates different code for a parameter depending on what it is:
 
@@ -325,27 +329,55 @@ The Faust compiler generates different code for a parameter depending on what it
 
 Precision, stability and CPU cost can differ between the three. A function that is correct with constants can lose precision when its coefficients are computed at run time in float. It can also blow up when they change at every sample, since a recursive structure that is stable for each frozen setting is not necessarily stable when that setting moves. And its cost per sample can double. The harnesses (`make check`, `make check-precision`, `make check-cpu`) render the tests as written, with the controls at their default values: they cannot turn a constant into a control or a signal. The test has to do it.
 
-A function whose parameters are meant to vary at run time therefore has three tests, written first in its `#### Test` section like any other (rule 8 of `AGENTS.md`). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
+A function whose parameters are meant to vary at run time therefore has three tests, a recursive filter four, written first in its `#### Test` section like any other (rule 8 of `AGENTS.md`). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
 
 1. **`functionName_test`, constant parameters.** This is the usual test.
 2. **`functionName_slider_test`, parameters from sliders** (`hslider`, `vslider`, `nentry`), without smoothing, with realistic default values. It checks that the function accepts run-time controls: a parameter that must be a constant makes it fail to compile. It checks the coefficients computed at run time in the program's precision: for `fi.resonlp`, the float/double level gap is 6.4e-5 with sliders against 1.8e-5 with constants. And it checks that they stay at control rate: its cost should match the constant test's. When it is clearly slower, the normalizer has moved part of the coefficient computation into the per-sample loop, which is what the `min(x, ma.MAX)` workarounds in the libraries prevent.
 3. **`functionName_modulated_test`, a parameter modulated at every sample**, over the part of its range where the function is under stress (low cutoffs, high resonance...). It checks the stability and the precision of the time-varying structure, and the cost of computing the coefficients at every sample: 6.32 ns/frame for `fi.resonlp` against 3.48 with constants. A slider followed by `si.smoo` is a signal too, so a `_ui` wrapper that smooths its controls belongs to this case, not the previous one.
 
-Drive the modulation with an integer counter, not with `os.osc` or `os.lf_*`. Those accumulate their phase in the program's precision and drift in float: the precision check then measures the modulator, not the function. With a sine modulator, the level gap of the test below is 9 times larger (4.8e-4) and its sample gap 43 times larger (2.2e-2). `ba.period` counts in integers and gives a triangle that is the same in both precisions:
+Drive the modulation with an integer counter, not with `os.osc` or `os.lf_*`. Those accumulate their phase in the program's precision and drift in float: the precision check then measures the modulator, not the function. With a sine modulator, the level gap of the test below is 9 times larger (4.8e-4) and its sample gap 43 times larger (2.2e-2). `ba.period` counts in integers and gives a triangle that is the same in both precisions. Give it a period tied to the sample rate, `P = int(ma.SR/10)`, so that the triangle runs at 10 Hz at every rate the precision check uses (with a fixed `ba.period(4800)` it would run at 40 Hz at 192 kHz). `P` and `1/P` are computed once at init: the period adds no per-sample division.
 
 ```
 resonlp_test = no.noise : fi.resonlp(1000, 2, 1);
 resonlp_slider_test = no.noise : fi.resonlp(hslider("fc", 1000, 50, 5000, 1), hslider("Q", 2, 0.5, 20, 0.01), 1);
 resonlp_modulated_test = no.noise : fi.resonlp(fc, 2, 1)
 with {
-  tri = 1 - abs(2*ba.period(4800)/4800 - 1); // 0 to 1 and back in 4800 samples, exact
-  fc = 50*pow(100, tri);                     // exponential sweep from 50 Hz to 5 kHz
+  P = int(ma.SR/10);                     // a tenth of a second, in samples, at every rate
+  tri = 1 - abs(2*ba.period(P)/P - 1);    // 0 to 1 and back at 10 Hz, exact
+  fc = 50*pow(100, tri);                  // exponential sweep from 50 Hz to 5 kHz
 };
 ```
 
-To test abrupt changes as well (a cutoff switching between two values, where some realizations leave their states at the wrong level), replace the sweep by `select2(ba.period(9600) < 4800, 50, 5000)`.
+4. **`functionName_jump_test`, a parameter jumping between the two ends of its range**, for recursive filters. It is what a user produces by moving a slider: the harnesses never move one, so the `_slider_test` never jumps. A jump is where realizations differ most. A state-variable section leaks on an attenuated input after an abrupt cutoff change (#264); a direct form can leave its states far from the level the new coefficients expect, and its float and double outputs then diverge. The jump test is the `_modulated_test` with its triangle replaced by a square wave at 5 Hz, `sq = ba.period(2*P) < P`, so that the parameter holds each end of the sweep for 0.1 s:
 
-Parameters that must be known at compile time (in capital letters by convention: an order, a number of voices or bands, a maximum delay) need neither variant. `scripts/lib_tests.py inventory xx.lib` lists which of the three tests each documented function has, in the doc blocks and in `tests/*.dsp`. `scripts/lib_tests.py add xx.lib new_tests.dsp` inserts tests written in an ordinary Faust file into both places; `scripts/README.md` describes it. The three costs can be compared in one run:
+   ```
+   resonlp_jump_test = no.noise : fi.resonlp(50*pow(100, sq), 2, 1)
+   with {
+     P = int(ma.SR/10);
+     sq = ba.period(2*P) < P; // 0 or 1, switching every 0.1 s, exact
+   };
+   ```
+
+   Delay lines with an integer length need none: a jump of length is the same discontinuity whatever the realization.
+
+   When it was introduced, every filter of `filters.lib` that has a `_modulated_test` got one, except ten that failed `make check-precision`, with level gaps of 1.1e-3 to 0.53. Eight of them, built on the direct-form `fi.tf2s` (`resonlp`, `resonhp`, `resonbp`, `peak_eq`, `peak_eq_cq`, `highpass3e`, `highpass6e`, `highpass_plus_lowpass`), got their jump tests when `tf2s` became two trapezoidal integrators (#273). Two still fail: `peak_eq_rm`, a direct-form `fi.tf2` allpass, and `wgr`, which is already at the threshold with a constant 100 Hz. Every state-variable or TPT filter passes. These two will get their jump tests with a realization that passes them.
+
+Two more precautions:
+
+- **An integer parameter driven by the triangle**, such as a delay length, must come out the same in both precisions. `int(16 + 112*tri)` does not: float and double `tri` can differ in the last bit, and near an integer boundary `int()` then picks a different delay, so the two outputs diverge by whole samples and the sample gap checks nothing. Compute the integer exactly, with an integer remainder, since Faust's `/` is always a float division:
+
+  ```
+  fb_comb_modulated_test = no.noise : fi.fb_comb(2048, d, 0.7, 0.6)
+  with {
+    P = int(ma.SR/10);
+    m = 112*(P - abs(2*ba.period(P) - P)); // 112*tri*P, an integer
+    d = 16 + int((m - m % P)/P + 0.5);     // 16 + floor(112*tri), the same integer in float and double
+  };
+  ```
+
+- **The interval analysis of the compiler** does not see that `ba.period(P)/P` stays below 1 when `P` is not a constant: a parameter that needs bounds, such as a delay that is read directly with `@` or a window length, gets them explicitly (`: max(16) : min(128)`, `tri : max(0) : min(1)`).
+
+Parameters that must be known at compile time (in capital letters by convention: an order, a number of voices or bands, a maximum delay) need neither variant. `scripts/lib_tests.py inventory xx.lib` lists which of the four tests each documented function has, in the doc blocks and in `tests/*.dsp`. `scripts/lib_tests.py add xx.lib new_tests.dsp` inserts tests written in an ordinary Faust file into both places; `scripts/README.md` describes it. The three costs can be compared in one run:
 
 ```bash
 make check-cpu CPU_ARGS="-k '^resonlp(_slider|_modulated)?_test'"
@@ -360,7 +392,7 @@ The regression tests run in double precision at 48 kHz only (`-double`, `SAMPLE_
 - an output is not finite, in either precision, at any rate;
 - its **level gap** exceeds 1e-3: for some output and rate, the RMS of the single-precision render differs from that of the double-precision render by more than 1e-3 in relative terms.
 
-The level gap is the criterion, not the sample-by-sample gap, because `os.osc`, which drives many tests, drifts in phase in single precision (see below): the sample gap of such a test exceeds 1e-3 whether the code under test is accurate or not. The sample gap is still measured and written to the `--json` report. For a new test, prefer `no.noise` as input: both measurements are then meaningful.
+The level gap is the criterion, not the sample-by-sample gap, because `os.osc` drifts in phase in single precision (see below): the sample gap of a test it drives exceeds 1e-3 whether the code under test is accurate or not. The sample gap is still measured and written to the `--json` report. For a new test, prefer `no.noise` as input, or `os.tosc` when a sine is needed: both measurements are then meaningful. `os.tosc` is the sine of an integer phase (`os.tphase`): its phase is exact at every sample, the same in both precisions and at every rate, and it plays its frequency to 0.1 Hz; the tests use it in place of `os.osc`, except those of the oscillators themselves.
 
 The debt accepted when the check was introduced is pinned in `tests/precision-baseline.json`, the way `tests/doc-baseline.json` pins the documentation debt: `nonfinite` lists the rates at which a test may be non-finite in single precision, `level` the worst level gap it may reach (within a factor `margin` of 2, since the last bits of a single-precision result depend on the compiler and its math library), and `expected` the few tests whose outputs differ between precisions by definition (`ma.EPSILON`, `ma.MIN`). A new test is never in the baseline, so it must pass outright. When a fix removes the need for an entry, the check says so: remove the entry in the same commit. For a `level` entry, it says so only once the gap is below the threshold divided by the margin (5e-4): a gap just under 1e-3 on your machine may still be above it on another platform, so do not remove an entry the check does not report. Never add or loosen an entry to silence a failure you caused; the baseline is regenerated as a whole (`scripts/check_precision.py --write-baseline`) only when the rates, the threshold or the harness change.
 
@@ -382,9 +414,10 @@ make check-precision PRECISION_ARGS="-k Matched --faust-options=-vec"
 `make check-precision` renders each test as written, at its default control values. The points below go further; check them by hand for new code, with the controls at their extremes and with the input levels the function is meant for:
 
 - **Stability.** At every rate and in both precisions the output must stay finite and bounded, with the controls at their extremes and with the input levels the function is meant for.
-- **Float against double.** At each rate, compare the single and double precision renders of the same program. A well-conditioned structure stays within about 1e-5 to 1e-4 of the peak. A larger gap, or one that grows with the sample rate, points to a structure that loses precision in float. Recursive filters whose poles come close to z = 1 are the usual cause, that is, frequencies low relative to the sample rate. For example, `no.noise : fi.lowpass(4, 50)` differs by 0.3 % of its peak at 44.1 kHz and by 8 % at 192 kHz. Prefer a structure that stays accurate there, or document the limitation. A state-variable filter is one such structure: in the same conditions, `fi.svf.lp(50, 0.707)` stays within 4e-5.
-- **Compare on an input that is the same in both precisions**, such as `no.noise`, which is an integer generator. `os.osc` accumulates its phase in the program's precision, so a sine input already differs between float and double by 0.1 % at 44.1 kHz and 1 % at 192 kHz, and hides the behavior of the code under test.
+- **Float against double.** At each rate, compare the single and double precision renders of the same program. A well-conditioned structure stays within about 1e-5 to 1e-4 of the peak. A larger gap, or one that grows with the sample rate, points to a structure that loses precision in float. Recursive filters whose poles come close to z = 1 are the usual cause, that is, frequencies low relative to the sample rate. For example, a direct-form biquad (`fi.tf2`) with the coefficients of a 50 Hz second-order Butterworth lowpass differs by 0.2 % of its peak at 44.1 kHz and by 2.5 % at 192 kHz. Prefer a structure that stays accurate there, or document the limitation. A state-variable filter is one such structure: in the same conditions, `fi.svf.lp(50, 0.707)` stays within 2e-6.
+- **Compare on an input that is the same in both precisions**, such as `no.noise`, which is an integer generator, or `os.tosc`, a sine of an integer phase. `os.osc` accumulates its phase in the program's precision, so a sine input already differs between float and double by 0.1 % at 44.1 kHz and 1 % at 192 kHz, and hides the behavior of the code under test.
 - **Behavior across rates.** What should not depend on the sample rate must not: cutoff and resonance frequencies, formants, time constants, levels. Compute coefficients from `ma.SR`, and watch for anything set in samples (delay lengths, waveguide sections, block sizes) and for pre-warping or oversampling filters close to Nyquist at the lowest rates. When a model is only valid at some rates, say so in its documentation and, if possible, give a way to adapt it (see `pt.ticksPerSample`). `ma.SR` is clamped to 192 kHz (see `pl.SR`), so behavior above that rate is not guaranteed.
+- **Modulation.** When a parameter can change while the function runs, check two cases: a parameter that jumps between two distant values (for example a cutoff switching between 100 Hz and 5 kHz on an integer sample count, so that both precisions switch at the same sample), and a parameter modulated at audio rate. Compare the output peak with the static filter's. A structure whose states do not scale with the parameter can peak many times above it, or diverge: a direct-form resonant lowpass peaked about 2000 times above its static level in the first case and diverged in the second, in double precision too. The section [Digital Filter Sections Specified as Analog Filter Sections](libs/filters.md#digital-filter-sections-specified-as-analog-filter-sections) of the filters library describes a structure that does not.
 - **Long runs.** A recursive state decaying towards zero must not linger in the subnormal range, which float reaches much earlier than double: flush it or check that the structure does not produce it. Integer counters such as `ba.time` wrap after 2^31 samples, that is 12.4 hours at 48 kHz: do not use them to detect the first sample, use `1'` or `1 - 1'`.
 
 For such hand checks, the `arch/print_arch.cpp` architecture used by `make check` takes the number of frames and the sample rate as arguments. For a program `probe.dsp` built around the new function, for instance `process = no.noise : fi.lowpass(4, 50);`, the following commands render one second at each rate in both precisions and print, for each rate, whether the output is finite, its peak, and the largest float/double difference relative to that peak:
@@ -414,11 +447,13 @@ make check-cpu-matrix CPU_ARGS="--base origin/master -k 'resonlp|vocoder_demo'"
 scripts/check_cpu.py --base origin/master --new origin/some-branch -k tf2s
 ```
 
+**Measure on an idle machine**, on AC power, with nothing else running: no build, no `make check` or `check-precision`, no other heavy job. A few seconds of another load can triple the rounds of the test being timed, and no tool can correct a timing made on a loaded machine. `check-cpu` warns when the load average exceeds the performance cores at the start, but it cannot see a short burst. What it does see is the spread of the rounds: a ratio whose spread is still above 20% after the re-race is marked `?`, left out of the summary, and listed at the end, to be measured again. Quote no ratio marked `?`. For the figures of a pull request, two runs that agree are better than one. On an idle machine, two full runs of the suite differed by 0.2% to 0.5% per ratio (median).
+
 For each test, the table gives the best time per frame in the two versions, their ratio new / base, the share of one core at 48 kHz, and the spread of the rounds, which is the noise the ratio should be read against. Comparisons of identical code put that noise at about 3%: a ratio within 3%, or within its spread, is no difference. The measurement and the protocol come from Yann Orlarey's [faustcompilerbenchtool](https://github.com/orlarey/faustcompilerbenchtool), and are described in `scripts/README.md`. A time is flagged `NaN` when the output was not finite: that time measures NaN arithmetic, not the code.
 
 - **Measure the tests you touched, and the callers that matter.** A function used inside a bank of filters, such as the 32 bands of `dm.vocoder_demo`, costs its ratio times the number of instances. Select these tests by file or with `-k`, or run the whole suite with `--changed-only`, which times only the tests whose generated code the change alters, wherever they are.
 - **Measure with more than one compilation.** The default one is what faust2xx scripts use (`c++ -O3 -ffast-math`). A ratio depends on the compilation, and not only the times do. `-ffast-math` turns divisions into multiplications and reassociates sums: a direct-form filter profits from that more than a state-variable one. Faust `-vec` can change a ratio even more. `make check-cpu-matrix` runs `fast-math`, `strict` (`-O3`) and `vec` in turn. Report at least `fast-math` and `strict`.
-- **Measure the three regimes.** A test with constant parameters computes its coefficients once. The `_slider_test` and `_modulated_test` variants (see *Constant, slider and modulated tests* above) measure the cost per block and per sample. A rewrite can be cheap in the first regime and twice as slow in the last one: a state-variable realization of `fi.tf3slf` measured 1.22 times the direct form's cost with constants, and 1.97 times with its cutoff modulated at every sample.
+- **Measure the three regimes.** A test with constant parameters computes its coefficients once. The `_slider_test` and `_modulated_test` variants (see *Constant, slider, modulated and jump tests* above) measure the cost per block and per sample. A rewrite can be cheap in the first regime and twice as slow in the last one: a state-variable realization of `fi.tf3slf` measured 1.22 times the direct form's cost with constants, and 1.97 times with its cutoff modulated at every sample.
 - **Look at the `ops` column, not only at the ratio.** It counts the divisions, square roots and transcendental calls (`pow`, `tan`...) that each sample executes, and marks with `!` a change that adds any. A desktop core hides much of their cost; an embedded core such as a Cortex-M7 does not, since a division costs it 14 cycles and a `pow` tens to hundreds. A new per-sample `pow` or `tan` deserves a mention in the pull request even when the measured ratio looks harmless.
 - **Quote ratios from one run.** Times vary between machines, compilers and runs. The identity lines printed first name the machine, the compilers (with their paths) and the revisions, so include them with the table.
 
@@ -537,7 +572,12 @@ extracts for each documented symbol:
 - `usage`
 - `params`
 - `notes`
-- `io` with `inSignals` / `outSignals` when derivable
+- `io` with `inSignals` / `outSignals`: computed by the Faust compiler from the
+  call of the Usage, its parameters valued by the `#### Test` section
+  (`"source": "faust"`, with the `parameterValues` the counts hold for, and
+  the `assumedValues` neither section gave), else guessed from the usage text
+  (`"source": "usage"`). The make targets compute them, which needs `faust`;
+  `make doc-index DOC_INDEX_IO=` guesses them without it.
 - `testCode`
 - `references`
 - `license` when a per-symbol `declare ... license|licence "..."` is present

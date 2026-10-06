@@ -8,7 +8,7 @@ os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
 
-shockTrigger_test = mo.shockTrigger(50, 0.5, 50, os.pulsetrain(2, 0.5));
+shockTrigger_test = mo.shockTrigger(50, 0.5, 50, os.lf_pulsetrain(2, 0.5));
 
 inclinometer_test = mo.inclinometer(2, os.sawtooth(1));
 
@@ -16,38 +16,38 @@ inclineBalance_test =
   mo.inclineBalance(1.5, os.sawtooth(0.2) * 0.5 + 0.5, os.sawtooth(0.2) * (-0.5));
 
 inclineSymmetric_test =
-  mo.inclineSymmetric(1.5, os.triangle(0.3) * 0.5 + 0.5, os.triangle(0.3) * (-0.5));
+  mo.inclineSymmetric(1.5, os.lf_triangle(0.3) * 0.5 + 0.5, os.lf_triangle(0.3) * (-0.5));
 
-projectedGravity_test = mo.projectedGravity(2, 0.05, os.triangle(0.1));
+projectedGravity_test = mo.projectedGravity(2, 0.05, os.lf_triangle(0.1));
 
 accelEnvelopeAbs_test =
   mo.accelEnvelopeAbs(0.1, 1.2, 10, 12, os.sawtooth(0.5));
 
 accelEnvelopePos_test =
-  mo.accelEnvelopePos(0.05, 1.35, 10, 10, os.triangle(2) * 0.8);
+  mo.accelEnvelopePos(0.05, 1.35, 10, 10, os.lf_triangle(2) * 0.8);
 
 accelEnvelopeNeg_test =
-  mo.accelEnvelopeNeg(0.05, 1.35, 10, 10, os.triangle(2) * (-0.8));
+  mo.accelEnvelopeNeg(0.05, 1.35, 10, 10, os.lf_triangle(2) * (-0.8));
 
 totalAccel_test =
   mo.totalAccel(0.05, 1.2, 8, 12,
     os.sawtooth(0.2) * 0.2,
-    os.triangle(0.15) * 0.1,
+    os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
 
 gyroEnvelopeAbs_test =
   mo.gyroEnvelopeAbs(0.02, 0.9, 25, 30, os.sawtooth(0.5) * 0.2);
 
 gyroEnvelopePos_test =
-  mo.gyroEnvelopePos(0.02, 0.9, 25, 30, os.triangle(3) * 0.8);
+  mo.gyroEnvelopePos(0.02, 0.9, 25, 30, os.lf_triangle(3) * 0.8);
 
 gyroEnvelopeNeg_test =
-  mo.gyroEnvelopeNeg(0.02, 0.9, 25, 30, os.triangle(3) * (-0.8));
+  mo.gyroEnvelopeNeg(0.02, 0.9, 25, 30, os.lf_triangle(3) * (-0.8));
 
 totalGyro_test =
   mo.totalGyro(0.02, 0.9, 25, 30,
     os.sawtooth(0.2) * 0.2,
-    os.triangle(0.15) * 0.1,
+    os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
 
 orientationWeight_test =
@@ -55,9 +55,9 @@ orientationWeight_test =
 
 orientation6_test =
   mo.orientation6(
-    os.triangle(0.05),
-    os.sawtooth(0.08),
-    os.triangle(0.03),
+    os.lf_triangle(1.5),
+    os.sawtooth(2.5),
+    os.lf_triangle(3.5),
     1, 1, 1, 1, 1, 1,
     10);
 
@@ -72,16 +72,16 @@ motionEnvelopeRange_test =
   mo.motionEnvelopeRange(0.2, 0.5, 15, 25, os.sawtooth(0.5) * 0.5 + 0.5);
 
 motionEnvelopeUD_test =
-  mo.motionEnvelopeUD(0.05, 1.25, 120, 40, os.triangle(0.4) * 0.5 + 0.5);
+  mo.motionEnvelopeUD(0.05, 1.25, 120, 40, os.lf_triangle(0.4) * 0.5 + 0.5);
 
 totalAccelRange_test =
   mo.totalAccelRange(0.1, 0.4, 8, 12,
     os.sawtooth(0.2) * 0.2,
-    os.triangle(0.15) * 0.1,
+    os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
 
 totalAccelUD_test =
   mo.totalAccelUD(0.05, 1.2, 120, 40,
     os.sawtooth(0.2) * 0.2,
-    os.triangle(0.15) * 0.1,
+    os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);

@@ -37,7 +37,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-panner_test = os.osc(220) : sp.panner(hslider("panner:pan", 0.3, 0, 1, 0.01));
+panner_test = os.tosc(220) : sp.panner(hslider("panner:pan", 0.3, 0, 1, 0.01));
 ```
 
 ----
@@ -85,7 +85,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-constantPowerPan_test = (os.osc(110), os.osc(220))
+constantPowerPan_test = (os.tosc(110), os.tosc(220))
   : sp.constantPowerPan(hslider("constantPowerPan:pan", 0.4, 0, 1, 0.01));
 ```
 
@@ -112,7 +112,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-spat_test = os.osc(330)
+spat_test = os.tosc(330)
   : sp.spat(4,
       hslider("spat:rotation", 0.25, 0, 1, 0.01),
       hslider("spat:distance", 0.5, 0, 1, 0.01));
@@ -148,12 +148,15 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 wfs_proc(i) = *(0.5); // Simple gain processor
 wfs_xs(i) = 0.0;
 wfs_ys(i) = 1.0;
 wfs_zs(i) = 0.0;
-wfs_test = os.osc(440)
+wfs_test = os.tosc(440)
   : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
+wfs_modulated_test = os.tosc(440) : sp.wfs(0, 1, 0, 0.5, 1, 2, proc, xs, ys, zs) with { proc(i) = *(0.5); xs(i) = 2*tri - 1; ys(i) = 1.0; zs(i) = 0.0; P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -181,7 +184,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-wfs_ui_test = os.osc(550)
+wfs_ui_test = os.tosc(550)
   : sp.wfs_ui(0, 1, 0, 0.5, 1, 2);
 ```
 
@@ -234,16 +237,15 @@ Where:
 #### Test
 
 ```
-N = 4;
-alpha = 2.0;
-theta_s = 0.0;
-spk_deg(0) = -135;
-spk_deg(1) =  -45;
-spk_deg(2) =   45;
-spk_deg(3) =  135;
-spk_angle(i) = spk_deg(i) * ma.PI / 180.0;
-
-spcap_test = os.osc(440) : sp.spcap(N, alpha, spk_angle, theta_s);
+sp = library("spats.lib");
+ma = library("maths.lib");
+os = library("oscillators.lib");
+spcap_spk_deg(0) = -135;
+spcap_spk_deg(1) = -45;
+spcap_spk_deg(2) = 45;
+spcap_spk_deg(3) = 135;
+spcap_spk_angle(i) = spcap_spk_deg(i) : ma.deg2rad;
+spcap_test = os.tosc(440) : sp.spcap(4, 2.0, spcap_spk_angle, 0.0);
 ```
 
 #### References
@@ -260,6 +262,18 @@ This is a convenience wrapper around `spcap` for interactive control of the
 virtual source azimuth, the panning sharpness, and the physical azimuth of
 each loudspeaker.
 
+UI controls: `SPCAP/pan_sharpness` is the panning sharpness parameter
+`alpha` (higher values make the virtual source more focused around the
+closest speakers); `SPCAP/source_angle` is the virtual source azimuth in
+degrees, converted to radians before calling `spcap`;
+`SPCAP/Speaker%2i/angle` is the physical azimuth of speaker `i` in degrees
+(the default layout is a regular circular distribution centered in each
+speaker sector, and can be edited from the UI).
+
+Use `spcap` directly when the source angle, speaker angles, or sharpness
+parameter must be supplied by an existing DSP expression instead of UI
+controls.
+
 #### Usage
 
 ```
@@ -271,26 +285,12 @@ Where:
 * `N`: number of speakers (a constant numerical expression). The function has one
   input signal and produces `N` output signals, one per speaker
 
-UI controls:
-
-* `SPCAP/pan_sharpness`: panning sharpness parameter `alpha`. Higher values
-  make the virtual source more focused around the closest speakers.
-* `SPCAP/source_angle`: virtual source azimuth in degrees. The value is
-  converted to radians before calling `spcap`.
-* `SPCAP/Speaker%2i/angle`: physical azimuth of speaker `i` in degrees. The
-  default layout is a regular circular distribution centered in each speaker
-  sector, and can be edited from the UI.
-
-Use `spcap` directly when the source angle, speaker angles, or sharpness
-parameter must be supplied by an existing DSP expression instead of UI
-controls.
-
 #### Test
 
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-spcap_ui_test = os.osc(440) : sp.spcap_ui(4);
+spcap_ui_test = os.tosc(440) : sp.spcap_ui(4);
 ```
 
 #### Example test program
@@ -322,7 +322,7 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-stereoize_test = (os.osc(660), os.osc(770))
+stereoize_test = (os.tosc(660), os.tosc(770))
   : sp.stereoize(+);
 ```
 
@@ -357,7 +357,11 @@ Where:
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-binauralModel_test = os.osc(440) : sp.binauralModel(45);
+ba = library("basics.lib");
+ma = library("maths.lib");
+binauralModel_test = os.tosc(440) : sp.binauralModel(45);
+binauralModel_modulated_test = os.tosc(440) : sp.binauralModel(180*tri - 90) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+binauralModel_jump_test = os.tosc(440) : sp.binauralModel(180*sq - 90) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -379,17 +383,23 @@ for the desired direction as two constant lists.
 #### Usage
 
 ```
-_ : binauralFir((l0, l1, ...), (r0, r1, ...)) : _,_ // left, right
+_ : binauralFir(hL, hR) : _,_ // left, right
 ```
 
 Where:
 
-* `(l0, l1, ...)`: left-ear HRIR taps (constant numerical expressions)
-* `(r0, r1, ...)`: right-ear HRIR taps
+* `hL`: left-ear HRIR taps, a list `(l0, l1, ...)` of constant numerical expressions
+* `hR`: right-ear HRIR taps, a list `(r0, r1, ...)` of constant numerical expressions
+
+#### Example
+
+```
+_ : binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1)) : _,_
+```
 
 #### Test
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-binauralFir_test = os.osc(440) : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));
+binauralFir_test = os.tosc(440) : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));
 ```

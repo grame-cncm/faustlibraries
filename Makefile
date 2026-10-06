@@ -11,7 +11,12 @@
 # `make check-cpu`  - measure the CPU cost of the tests (ns/frame, % of a core), and with
 #                     CPU_ARGS="--base REV" the ratio new / base against the libraries of REV.
 # `make check-cpu-matrix` - the same with C++ -O3 -ffast-math, -O3, and Faust -vec in turn.
-# `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses.
+# `make verify-matched` - prove the rewrites of vaeffects.lib's matched filters and check
+#                     their coefficients against Vicanek's formulas at 60 digits.
+# `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses,
+#                     and compile the Usage sections of the libraries changed since HEAD.
+# `make check-usage` - compile the #### Usage section of every documented symbol
+#                     (arity, parameters) against tests/usage-baseline.json.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
@@ -21,7 +26,8 @@
 # `make certify-reference` - regenerate and re-check tests/lean/certified.lean in place.
 # `make build`      - build the documentation.
 # `make serve`      - serve the documentation.
-# `make doc-index`  - build the Faust library documentation JSON index.
+# `make doc-index`  - build the Faust library documentation JSON index, its io counts
+#                     computed by faust (DOC_INDEX_IO= to guess them without faust).
 # `make doc-index-split` - build a compact index plus one detailed JSON per module.
 # `make doc-index-commercial` - build a JSON index filtered to commercially compatible symbols.
 
@@ -38,6 +44,8 @@ FLOATDIFF ?= ./scripts/floatdiff.py
 PYTHON ?= python3
 DOC_INDEX_SCRIPT ?= ./scripts/build_faust_doc_index.py
 DOC_INDEX_OUTPUT ?= tests/faust-doc-index.json
+# io counts computed by faust (empty: guessed from the Usage text, no faust needed)
+DOC_INDEX_IO ?= --measure-io
 DOC_INDEX_SPLIT_DIR ?= tests/faust-doc
 DOC_INDEX_LICENSE_ALLOWLIST_FILE ?=
 DOC_INDEX_LICENSE_DENYLIST_FILE ?=
@@ -64,11 +72,14 @@ CPU_BUILD_DIR := tests/build-cpu
 # Extra arguments for check-cpu, e.g. CPU_ARGS="--base origin/master tests/filters_resonator_tests.dsp"
 # or CPU_ARGS="--base origin/master -k resonlp" (see scripts/check_cpu.py -h).
 CPU_ARGS ?=
+# Arguments for verify-matched, e.g. VERIFY_ARGS="--old" or VERIFY_ARGS="--quick"
+# (see scripts/verify_matched2.py -h).
+VERIFY_ARGS ?=
 DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix checkdoc plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix verify-matched checkdoc check-usage plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -139,6 +150,9 @@ check-cpu: ## Measure the CPU cost of the tests; CPU_ARGS="--base REV" adds the 
 check-cpu-matrix: ## check-cpu with C++ -O3 -ffast-math, -O3, and Faust -vec in turn
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_cpu.py --build-dir $(CPU_BUILD_DIR) --matrix all $(CPU_ARGS)
 
+verify-matched: ## Prove the rewrites of vaeffects.lib's matched filters, check their coefficients at 60 digits
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/verify_matched2.py $(VERIFY_ARGS)
+
 # Build a single output and immediately compare with its reference
 $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 	@set -e; \
@@ -163,6 +177,9 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 
 checkdoc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.json)
 	@$(PYTHON) scripts/checkdoc.py
+
+check-usage: ## Compile every #### Usage section (baseline: tests/usage-baseline.json); USAGE_ARGS="--lib xx.lib"
+	@$(PYTHON) scripts/check_usage.py $(USAGE_ARGS)
 
 plots: ## Regenerate the SVG plots, then rebuild the doc pages that embed them
 	@$(PYTHON) scripts/plot_lib.py
@@ -242,17 +259,17 @@ certify-deep: ## Build the optional mathlib proofs discharging the certify oblig
 doc-index: ## Build the Faust library documentation JSON index
 	@set -e; \
 	printf '[doc-index] writing %s\n' '$(DOC_INDEX_OUTPUT)'; \
-	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --pretty
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) $(DOC_INDEX_IO) --pretty
 
 doc-index-split: ## Build a compact JSON index and one detailed JSON per library module
 	@set -e; \
 	printf '[doc-index-split] writing %s and %s\n' '$(DOC_INDEX_OUTPUT)' '$(DOC_INDEX_SPLIT_DIR)'; \
-	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --pretty
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) $(DOC_INDEX_IO) --pretty
 
 doc-index-commercial: ## Build a JSON index filtered to commercially compatible symbols
 	@set -e; \
 	printf '[doc-index-commercial] writing %s and %s\n' '$(DOC_INDEX_OUTPUT)' '$(DOC_INDEX_SPLIT_DIR)'; \
-	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --license-policy commercial-compatible $(if $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),--license-allowlist-file $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),) $(if $(DOC_INDEX_LICENSE_DENYLIST_FILE),--license-denylist-file $(DOC_INDEX_LICENSE_DENYLIST_FILE),) --pretty
+	$(PYTHON) $(DOC_INDEX_SCRIPT) --repo-root . --output $(DOC_INDEX_OUTPUT) --split-output-dir $(DOC_INDEX_SPLIT_DIR) --license-policy commercial-compatible $(if $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),--license-allowlist-file $(DOC_INDEX_LICENSE_ALLOWLIST_FILE),) $(if $(DOC_INDEX_LICENSE_DENYLIST_FILE),--license-denylist-file $(DOC_INDEX_LICENSE_DENYLIST_FILE),) $(DOC_INDEX_IO) --pretty
 
 build: ## Build the documentation
 	$(MAKE) -C doc build

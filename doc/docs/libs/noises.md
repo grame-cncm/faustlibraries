@@ -198,7 +198,7 @@ WARNING: using the foreign function `arc4random`, so only available in C/C++ and
 
 #### Usage
 ```
-rmultirandom(N) : _
+rmultirandom(N) : si.bus(N)
 ```
 
 Where:
@@ -222,7 +222,7 @@ WARNING: using the foreign function `arc4random`, so only available in C/C++ and
 #### Usage
 
 ```
-rmultinoise(N) : _
+rmultinoise(N) : si.bus(N)
 ```
 
 Where:
@@ -274,6 +274,7 @@ clipping).
 #### Usage
 ```
 pink_noise : _
+pink_noise_m : _
 ```
 
 Where:
@@ -284,6 +285,7 @@ Where:
 ```
 no = library("noises.lib");
 pink_noise_test = no.pink_noise;
+pink_noise_m_test = no.pink_noise_m;
 ```
 
 #### Alternatives
@@ -382,8 +384,13 @@ Low-frequency noise generators (Butterworth-filtered downsampled white noise).
 ```
 lfnoise0(rate) : _   // new random number every int(ma.SR/rate) samples or so
 lfnoiseN(N,rate) : _ // same as "lfnoise0(rate) : fi.lowpass(N,rate)" [see filters.lib]
-lfnoise(rate) : _    // same as "lfnoise0(rate) : seq(i,5,fi.lowpass(N,rate))" (no overshoot)
+lfnoise(rate) : _    // same as "lfnoise0(rate) : seq(i,5,fi.lowpass(1,rate))" (no overshoot)
 ```
+
+Where:
+
+* `N`: order of the Butterworth lowpass smoothing `lfnoiseN`, a constant numerical expression
+* `rate`: rate of the new random values (Hz), also the cutoff frequency of the smoothing lowpass
 
 #### Example
 
@@ -475,6 +482,7 @@ Approximate zero-mean, unit-variance Gaussian white noise generator.
 
 ```
 gnoise(N) : _
+gnoisem(N) : _
 ```
 
 Where:
@@ -485,6 +493,7 @@ Where:
 ```
 no = library("noises.lib");
 gnoise_test = no.gnoise(8);
+gnoisem_test = no.gnoisem(8);
 ```
 
 #### References
@@ -519,7 +528,12 @@ and 1 violet/azure noise.
 #### Test
 ```
 no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 colored_noise_test = no.colored_noise(4, 0.0);
+colored_noise_slider_test = no.colored_noise(4, hslider("colored_noise:alpha", 0.0, -1, 1, 0.01));
+colored_noise_modulated_test = no.colored_noise(4, 2*tri - 1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+colored_noise_jump_test = no.colored_noise(4, 2*sq - 1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### Examples
@@ -629,8 +643,13 @@ Where:
 
 #### Test
 ```
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 import("stdfaust.lib");
 simplex1_lf_test = no.simplex1_lf(12345, 4.07);
+simplex1_lf_slider_test = no.simplex1_lf(12345, hslider("simplex1_lf:rate", 4.07, -100, 100, 0.01));
+simplex1_lf_modulated_test = no.simplex1_lf(12345, 20*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References

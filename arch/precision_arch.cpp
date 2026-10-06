@@ -31,19 +31,20 @@
 <<includeclass>>
 
 // Same control handling as print_arch.cpp, so that both harnesses test the
-// same thing: checkboxes are registered with the buttons, and all of them are
-// set to 1 for the whole run.
+// same thing: every button and checkbox is set to 1, then to 0 (see main).
 struct ControlUI : public GenericUI {
 
-    std::vector<FAUSTFLOAT*> fButtons;
+    std::vector<FAUSTFLOAT*> fControls;
 
-    virtual void addButton(const char* label, FAUSTFLOAT* zone) { fButtons.push_back(zone); }
-    virtual void addCheckButton(const char* label, FAUSTFLOAT* zone) { fButtons.push_back(zone); }
+    virtual void addButton(const char* label, FAUSTFLOAT* zone) { fControls.push_back(zone); }
+    virtual void addCheckButton(const char* label, FAUSTFLOAT* zone) { fControls.push_back(zone); }
 
-    void buttonON()
+    bool hasControls() const { return !fControls.empty(); }
+
+    void set(FAUSTFLOAT value)
     {
-        for (auto zone : fButtons) {
-            *zone = FAUSTFLOAT(1.0);
+        for (auto zone : fControls) {
+            *zone = value;
         }
     }
 };
@@ -97,14 +98,30 @@ int main(int argc, char* argv[])
         }
     };
 
-    // Same schedule as print_arch.cpp: a 32-frame warm-up, then FRAMES more,
-    // of which the first FRAMES - 32 are kept.
-    control.buttonON();
+    // Same schedule as print_arch.cpp: every button and checkbox is ON for
+    // the first half of the FRAMES written and OFF for the second half; the
+    // run is cut at the release only when the program has a button or a
+    // checkbox (the length of each compute() call is the block size, ma.BS).
+    control.set(FAUSTFLOAT(1.0));
     dsp->compute(kWarmup, inputBuffer, outputBuffer);
     write(std::min(frames, kWarmup));
-    control.buttonON();
-    dsp->compute(frames, inputBuffer, outputBuffer);
-    write(std::max(frames - kWarmup, 0));
+    if (control.hasControls()) {
+        const int release = std::max(frames / 2, kWarmup);
+        const int pressed = std::max(std::min(release, frames) - kWarmup, 0);
+        if (pressed > 0) {
+            dsp->compute(pressed, inputBuffer, outputBuffer);
+            write(pressed);
+        }
+        control.set(FAUSTFLOAT(0.0));
+        const int released = std::max(frames - kWarmup - pressed, 0);
+        if (released > 0) {
+            dsp->compute(released, inputBuffer, outputBuffer);
+            write(released);
+        }
+    } else {
+        dsp->compute(frames, inputBuffer, outputBuffer);
+        write(std::max(frames - kWarmup, 0));
+    }
 
     std::fclose(out);
     return 0;

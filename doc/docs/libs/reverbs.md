@@ -38,6 +38,12 @@ which was recovered from an old SAIL DART backup tape.
 John Chowning thinks this might be the one that became the
 well known and often copied JCREV.
 
+The delay-line lengths are the sample counts of the listing, fixed in
+samples, so the decay time and the apparent room size scale with 1/SR.
+The decay time is about 49,900 samples (T60 measured on the energy decay of
+the impulse response): 1.13 s at 44.1 kHz, 1.04 s at 48 kHz, 0.52 s at
+96 kHz, and 0.26 s at 192 kHz.
+
 `jcrev` is a standard Faust function.
 
 #### Usage
@@ -50,7 +56,7 @@ _ : jcrev : _,_,_,_
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-jcrev_test = os.osc(440) : re.jcrev;
+jcrev_test = os.tosc(440) : re.jcrev;
 ```
 
 ----
@@ -70,6 +76,11 @@ John Chowning thinks this might be the one used on his
 often-heard brass canon sound examples, one of which can be found at
 [https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav](https://ccrma.stanford.edu/~jos/wav/FM-BrassCanon2.wav).
 
+As in `jcrev`, the delay-line lengths are fixed in samples, so the decay
+time and the apparent room size scale with 1/SR. The decay time is about
+28,600 samples (T60 measured on the energy decay of the impulse response):
+0.65 s at 44.1 kHz, 0.60 s at 48 kHz, 0.30 s at 96 kHz, and 0.15 s at 192 kHz.
+
 #### Usage
 
 ```
@@ -80,7 +91,7 @@ _ : satrev : _,_
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-satrev_test = os.osc(330) : re.satrev;
+satrev_test = os.tosc(330) : re.satrev;
 ```
 
 ## Feedback Delay Network (FDN) Reverberators
@@ -93,36 +104,70 @@ satrev_test = os.osc(330) : re.satrev;
 Pure Feedback Delay Network Reverberator (generalized for easy scaling).
 `fdnrev0` is a standard Faust function.
 
+It has N inputs, one per delay line (added to the feedback signals), and
+N outputs, the delay-line outputs. Any number of signals among 1, 2, 4,
+..., N is usually spread over the inputs with `<:` and the outputs mixed
+down with `:>` (see the Example below).
+
 #### Usage
 
 ```
-<1,2,4,...,N signals> <:
-fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) :>
-<1,2,4,...,N signals>
+N = ba.count(delays);
+si.bus(N) : fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) : si.bus(N)
 ```
 
 Where:
 
-* `N`: 2, 4, 8, ...  (power of 2)
+* `N`: the number of delay lines, 2, 4, 8, ...  (power of 2)
 * `MAXDELAY`: power of 2 at least as large as longest delay-line length
-* `delays`: N delay lines, N a power of 2, lengths preferably coprime
+* `delays`: N delay lines, N a power of 2, lengths (in samples, at least 2) preferably coprime
 * `BBSO`: odd positive integer = order of bandsplit desired at freqs
-* `freqs`: NB-1 crossover frequencies separating desired frequency bands
-* `durs`: NB decay times (t60) desired for the various bands
+* `freqs`: NB-1 crossover frequencies separating desired frequency bands, in increasing order
+* `durs`: NB decay times (t60) desired for the various bands, highest band first
+  (the order of the `fi.filterbank` outputs, i.e., the reverse of `freqs`)
 * `loopgainmax`: scalar gain between 0 and 1 used to "squelch" the reverb
-* `nonl`: nonlinearity (0 to 0.999..., 0 being linear)
+* `nonl`: nonlinearity, between -1 and 1 exclusive (0 is linear): the input of each
+  delay line goes through `fi.apnl(nonl,-nonl)`, a lossless first-order allpass whose
+  coefficient switches between `nonl` and `-nonl` with the sign of its state
+  (Pierce and Van Duyne's switching spring). The network stays passive, but the
+  switching couples its modes and moves energy across frequency: the tail gets
+  brighter and the band decay times somewhat shorter. The switching being
+  asymmetric, part of the energy goes to DC, which stays in the loop and is
+  removed at the outputs by a 5 Hz DC blocker. With `nonl = 0`, `fi.apnl` is
+  exactly a unit delay, which the delay lines absorb, and the DC blocker is
+  bypassed, so that the output is that of the linear network, sample for sample
+
+#### Example
+
+```
+_,_ <: fdnrev0(MAXDELAY,delays,BBSO,freqs,durs,loopgainmax,nonl) :> _,_
+```
 
 #### Test
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-fdnrev0_test = (os.osc(220), os.osc(330), os.osc(440), os.osc(550))
-  <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (2.5, 2.0, 1.5), 0.8, 0.0);
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+fdnrev0_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550))
+  <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.0);
+fdnrev0_slider_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (hslider("fdnrev0:f1", 800, 50, 5000, 1), hslider("fdnrev0:f2", 4000, 100, 10000, 1)), (hslider("fdnrev0:t60high", 1.5, 0.1, 10, 0.01), hslider("fdnrev0:t60mid", 2.0, 0.1, 10, 0.01), hslider("fdnrev0:t60low", 2.5, 0.1, 10, 0.01)), hslider("fdnrev0:loopgainmax", 0.8, 0, 1, 0.01), hslider("fdnrev0:nonl", 0.0, 0, 0.999, 0.001));
+fdnrev0_modulated_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, tri), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fdnrev0_jump_test = par(i, 4, no.noises(4, i)) <: re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 0.5*pow(10, sq), 2.5), 0.8, 0.0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+fdnrev0_nonl_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.2);
+fdnrev0_nonl_slider_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, hslider("fdnrev0:nonl", 0.2, -0.999, 0.999, 0.001));
+fdnrev0_nonl_modulated_test = no.multinoise(4)
+  : re.fdnrev0(4096, (149, 211, 263, 293), 1, (800, 4000), (1.5, 2.0, 2.5), 0.8, 0.4*tri - 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
 
 * [https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html](https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html)
+* "Nonlinear Allpass Ladder Filters in FAUST" by Julius O. Smith and Romain Michon,
+  Proc. DAFx-11, Paris, 2011 (section 4.3, nonlinear FDN)
 
 ----
 
@@ -133,6 +178,15 @@ by Fons Adriaensen <fons@linuxaudio.org>.  This is an FDN reverb with
 allpass comb filters in each feedback delay in addition to the
 damping filters.
 
+As in `zita-rev1` (`reverb.cc`), each loop (allpass comb plus delay line)
+is exactly `floor(0.5 + SR*t)` samples long for the eight loop times `t`
+from 125 to 257 ms, and an `f2` above 0.49 `SR` places the T60 = t60m/2
+point at Nyquist. One deliberate difference: the low shelf crossing
+over at `f1` uses a bilinear-transform one-pole lowpass (`fi.lowpass(1,f1)`),
+where `zita-rev1` uses y += w(x-y) with w = 2 pi f1/SR. The bilinear
+version does not depend on the sampling rate; the two decay times differ
+by under 1% at `f1` = 200 Hz and by up to 3% at `f1` = 1 kHz at 44.1 kHz.
+
 #### Usage
 
 ```
@@ -142,17 +196,28 @@ si.bus(8) : zita_rev_fdn(f1,f2,t60dc,t60m,fsmax) : si.bus(8)
 Where:
 
 * `f1`: crossover frequency (Hz) separating dc and midrange frequencies
-* `f2`: frequency (Hz) above f1 where T60 = t60m/2 (see below)
+* `f2`: frequency (Hz) above f1 where T60 = t60m/2 (see below);
+  above 0.49 `SR`, Nyquist
 * `t60dc`: desired decay time (t60) at frequency 0 (sec)
 * `t60m`: desired decay time (t60) at midrange frequencies (sec)
-* `fsmax`: maximum sampling rate to be used (Hz)
+* `fsmax`: maximum sampling rate to be used (Hz), which sizes the delay lines:
+  above it, the longer delays are clamped and the decay times come out short.
+  192000 (the highest `ma.SR`) covers every rate.
 
 #### Test
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_rev_fdn_test = par(i, 8, os.osc(110 * (i + 1)))
-  <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 48000);
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+zita_rev_fdn_test = par(i, 8, os.tosc(110 * (i + 1)))
+  <: re.zita_rev_fdn(200, 2000, 3.0, 2.0, 192000);
+zita_rev_fdn_slider_test = par(i, 8, os.tosc(110 * (i + 1))) <: re.zita_rev_fdn(hslider("zita_rev_fdn:f1", 200, 50, 1000, 1), hslider("zita_rev_fdn:f2", 2000, 1500, 20000, 1), hslider("zita_rev_fdn:t60dc", 3.0, 1, 8, 0.1), hslider("zita_rev_fdn:t60m", 2.0, 1, 8, 0.1), 192000);
+zita_rev_fdn_modulated_test = par(i, 8, no.noises(8, i)) : re.zita_rev_fdn(200, 2000, 3.0, pow(20, tri), 192000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+zita_rev_fdn_jump_test = par(i, 8, no.noises(8, i)) : re.zita_rev_fdn(200, 2000, 3.0, pow(20, sq), 192000) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+zita_rev_fdn_f2_test = no.multinoise(8)
+  : re.zita_rev_fdn(200, 30000, 3.0, 2.0, 192000);
 ```
 
 #### References
@@ -165,7 +230,9 @@ zita_rev_fdn_test = par(i, 8, os.osc(110 * (i + 1)))
 ### `(re.)zita_in_delay`
 
 Stereo input delay used by `zita_rev1` in both stereo and ambisonics
-mode: delays both channels by `rdel` milliseconds and scales them by 0.3.
+mode: delays both channels by `rdel` milliseconds (rounded to the nearest
+sample) and scales them by 0.3. `zita_rev1_stereo` and `zita_rev1_ambi`
+pass their own `rdel` minus 20 ms, as `zita-rev1` does.
 
 #### Usage
 
@@ -175,13 +242,15 @@ _,_ : zita_in_delay(rdel) : _,_
 
 Where:
 
-* `rdel`: delay (ms) before reverberation begins (e.g., 0 to ~100 ms)
+* `rdel`: input delay (ms), e.g., 0 to ~100 ms; at most 170 ms at 192 kHz
 
 #### Test
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_in_delay_test = os.osc(440), os.osc(660) : re.zita_in_delay(60);
+no = library("noises.lib");
+zita_in_delay_test = os.tosc(440), os.tosc(660) : re.zita_in_delay(60);
+zita_in_delay_long_test = no.noise, no.noise : re.zita_in_delay(200);
 ```
 
 ----
@@ -190,7 +259,10 @@ zita_in_delay_test = os.osc(440), os.osc(660) : re.zita_in_delay(60);
 
 Stereo input mapping used by `zita_rev1` in both stereo and ambisonics
 mode: fans the two input channels out to the `N` delay lines of the
-feedback delay network, flipping the sign of half of them.
+feedback delay network, flipping the sign of half of them. As in
+`zita-rev1` (`reverb.cc`), the left input feeds the first `N/2` lines and
+the right input the last `N/2`, each with signs `+` on the first half and
+`-` on the second (for `N=8`: `L,L,-L,-L,R,R,-R,-R`).
 
 #### Usage
 
@@ -206,7 +278,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_distrib2_test = os.osc(440), os.osc(660) : re.zita_distrib2(8);
+zita_distrib2_test = os.tosc(440), os.tosc(660) : re.zita_distrib2(8);
 ```
 
 ----
@@ -218,6 +290,16 @@ zita_distrib2_test = os.osc(440), os.osc(660) : re.zita_distrib2(8);
 Extend `zita_rev_fdn` to include `zita_rev1` input/output mapping in stereo mode.
 `zita_rev1_stereo` is a standard Faust function.
 
+The output is the reverberation only (no dry signal). As in `zita-rev1`
+(`reverb.cc`), the input delay is `rdel` - 20 ms, so that the first
+echoes of the diffusion allpasses (13 to 32 ms) arrive about `rdel` ms
+after the input, and the output gain is 0.525/sqrt(`t60m`), which offsets
+the growth of the reverberant energy with the decay time (white noise in,
+`t60dc` = `t60m`, `f2` = 23 kHz, at 48 kHz: the level falls 3.6 dB from
+`t60m` = 1 to 8 s, where a fixed gain would rise 5.4 dB). 0.525 is the
+`zita-rev1` wet gain 0.7 m (2-m) at its default dry/wet mix m = 0.5;
+`dm.zita_rev1` applies the rest of that mix law.
+
 #### Usage
 
 ```
@@ -226,19 +308,24 @@ _,_ : zita_rev1_stereo(rdel,f1,f2,t60dc,t60m,fsmax) : _,_
 
 Where:
 
-* `rdel`: delay in milliseconds before reverberation begins (for example, 0 to about 100 ms)
+* `rdel`: delay in milliseconds before reverberation begins, 20 to 100 ms in `zita-rev1`
+  (below 20 ms, as 20 ms; at most 190 ms at 192 kHz)
 * `f1`: crossover frequency between low and mid decay regions
 * `f2`: crossover frequency between mid and high decay regions
 * `t60dc`: low-frequency decay time in seconds
 * `t60m`: mid-band decay time in seconds
-* `fsmax`: maximum supported sample rate
+* `fsmax`: maximum supported sample rate (Hz), which sizes the delay lines (192000 covers every rate)
 
 #### Test
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_rev1_stereo_test = (os.osc(440), os.osc(550))
-  : re.zita_rev1_stereo(20, 200, 2000, 3.0, 2.0, 48000);
+no = library("noises.lib");
+zita_rev1_stereo_test = (os.tosc(440), os.tosc(550))
+  : re.zita_rev1_stereo(20, 200, 2000, 3.0, 2.0, 192000);
+zita_rev1_stereo_slider_test = (os.tosc(440), os.tosc(550)) : re.zita_rev1_stereo(hslider("zita_rev1_stereo:rdel", 20, 0, 100, 1), hslider("zita_rev1_stereo:f1", 200, 50, 1000, 1), hslider("zita_rev1_stereo:f2", 2000, 1500, 20000, 1), hslider("zita_rev1_stereo:t60dc", 3.0, 1, 8, 0.1), hslider("zita_rev1_stereo:t60m", 2.0, 1, 8, 0.1), 192000);
+zita_rev1_stereo_t60m_test = no.multinoise(2)
+  : re.zita_rev1_stereo(60, 200, 6000, 3.0, 4.0, 192000);
 ```
 
 ----
@@ -247,6 +334,10 @@ zita_rev1_stereo_test = (os.osc(440), os.osc(550))
 
 Extend `zita_rev_fdn` to include `zita_rev1` input/output mapping in
 "ambisonics mode", as provided in the Linux C++ version.
+
+As in `zita-rev1` (`reverb.cc`), the input delay is `rdel` - 20 ms (see
+`zita_rev1_stereo`), and the gain of the first output (W) is
+1/sqrt(`t60m`), that of the other three (X, Y, Z) `rgxyz` dB more.
 
 #### Usage
 
@@ -257,19 +348,23 @@ _,_ : zita_rev1_ambi(rgxyz,rdel,f1,f2,t60dc,t60m,fsmax) : _,_,_,_
 Where:
 
 * `rgxyz`: relative gain of lanes 1, 4, and 2 compared to lane 0 in the output (for example, -9 to 9 dB)
-* `rdel`: delay in milliseconds before reverberation begins
+* `rdel`: delay in milliseconds before reverberation begins, 20 to 100 ms in `zita-rev1`
+  (below 20 ms, as 20 ms; at most 190 ms at 192 kHz)
 * `f1`: crossover frequency between low and mid decay regions
 * `f2`: crossover frequency between mid and high decay regions
 * `t60dc`: low-frequency decay time in seconds
 * `t60m`: mid-band decay time in seconds
-* `fsmax`: maximum supported sample rate
+* `fsmax`: maximum supported sample rate (Hz), which sizes the delay lines (192000 covers every rate)
 
 #### Test
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-zita_rev1_ambi_test = (os.osc(330), os.osc(550))
-  : re.zita_rev1_ambi(0.0, 25, 200, 2000, 3.0, 2.0, 48000);
+no = library("noises.lib");
+zita_rev1_ambi_test = (os.tosc(330), os.tosc(550))
+  : re.zita_rev1_ambi(0.0, 25, 200, 2000, 3.0, 2.0, 192000);
+zita_rev1_ambi_t60m_test = no.multinoise(2)
+  : re.zita_rev1_ambi(6.0, 60, 200, 6000, 3.0, 4.0, 192000);
 ```
 
 ----
@@ -305,8 +400,13 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-vital_rev_test = (os.osc(330), os.osc(440))
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+vital_rev_test = (os.tosc(330), os.tosc(440))
   : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0.3, 0.2, 0.1, 0.7, 0.5, 0.4);
+vital_rev_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0.1, 0.7, tri, 0.4) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+vital_rev_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0.1, 0.3 + 0.6*sq, 0.5, 0.4) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ## Freeverb
@@ -342,7 +442,13 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-mono_freeverb_test = os.osc(440) : re.mono_freeverb(0.7, 0.5, 0.3, 30);
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+mono_freeverb_test = os.tosc(440) : re.mono_freeverb(0.7, 0.5, 0.3, 30);
+mono_freeverb_slider_test = os.tosc(440) : re.mono_freeverb(hslider("mono_freeverb:fb1", 0.7, 0, 0.99, 0.01), hslider("mono_freeverb:fb2", 0.5, 0, 0.99, 0.01), hslider("mono_freeverb:damp", 0.3, 0, 1, 0.01), 30);
+mono_freeverb_modulated_test = no.noise : re.mono_freeverb(0.7, 0.5, tri, 30) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+mono_freeverb_jump_test = no.noise : re.mono_freeverb(0.5 + 0.45*sq, 0.5, 0.3, 30) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### License
@@ -379,7 +485,7 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-stereo_freeverb_test = (os.osc(330), os.osc(550))
+stereo_freeverb_test = (os.tosc(330), os.tosc(550))
   : re.stereo_freeverb(0.7, 0.5, 0.3, 30);
 ```
 
@@ -416,8 +522,14 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-dattorro_rev_test = (os.osc(330), os.osc(550))
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+dattorro_rev_test = (os.tosc(330), os.tosc(550))
   : re.dattorro_rev(200, 0.5, 0.7, 0.6, 0.5, 0.7, 0.5, 0.2);
+dattorro_rev_slider_test = (os.tosc(330), os.tosc(550)) : re.dattorro_rev(200, hslider("dattorro_rev:bw", 0.5, 0, 1, 0.01), hslider("dattorro_rev:i_diff1", 0.7, 0, 1, 0.01), hslider("dattorro_rev:i_diff2", 0.6, 0, 1, 0.01), hslider("dattorro_rev:decay", 0.5, 0, 0.99, 0.01), hslider("dattorro_rev:d_diff1", 0.7, 0, 1, 0.01), hslider("dattorro_rev:d_diff2", 0.5, 0, 1, 0.01), hslider("dattorro_rev:damping", 0.2, 0, 1, 0.01));
+dattorro_rev_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.dattorro_rev(200, 0.5, 0.7, 0.6, 0.5, 0.7, 0.5, tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+dattorro_rev_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.dattorro_rev(200, 0.5, 0.7, 0.6, 0.3 + 0.6*sq, 0.7, 0.5, 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -443,7 +555,7 @@ _,_ : dattorro_rev_default : _,_
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-dattorro_rev_default_test = (os.osc(330), os.osc(550))
+dattorro_rev_default_test = (os.tosc(330), os.tosc(550))
   : re.dattorro_rev_default;
 ```
 
@@ -486,8 +598,14 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-jpverb_test = (os.osc(330), os.osc(440))
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+jpverb_test = (os.tosc(330), os.tosc(440))
   : re.jpverb(3.0, 0.2, 1.0, 0.8, 0.3, 0.4, 0.9, 0.8, 0.7, 500, 4000);
+jpverb_slider_test = (os.tosc(330), os.tosc(440)) : re.jpverb(hslider("jpverb:t60", 3.0, 0.1, 60, 0.1), hslider("jpverb:damp", 0.2, 0, 0.999, 0.001), hslider("jpverb:size", 1.0, 0.5, 5, 0.01), hslider("jpverb:early_diff", 0.8, 0, 0.99, 0.001), hslider("jpverb:mod_depth", 0.3, 0, 1, 0.01), hslider("jpverb:mod_freq", 0.4, 0, 10, 0.01), hslider("jpverb:low", 0.9, 0, 1, 0.01), hslider("jpverb:mid", 0.8, 0, 1, 0.01), hslider("jpverb:high", 0.7, 0, 1, 0.01), hslider("jpverb:low_cutoff", 500, 100, 6000, 1), hslider("jpverb:high_cutoff", 4000, 1000, 10000, 1));
+jpverb_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.jpverb(0.5*pow(20, tri), 0.2, 1.0, 0.8, 0, 0.4, 0.9, 0.8, 0.7, 500, 4000) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+jpverb_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.jpverb(3.0, 0.9*sq, 1.0, 0.8, 0, 0.4, 0.9, 0.8, 0.7, 500, 4000) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -523,8 +641,14 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-greyhole_test = (os.osc(220), os.osc(440))
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+greyhole_test = (os.tosc(220), os.tosc(440))
   : re.greyhole(2.0, 0.3, 1.0, 0.6, 0.5, 0.4, 0.2);
+greyhole_slider_test = (os.tosc(220), os.tosc(440)) : re.greyhole(hslider("greyhole:dt", 2.0, 0.1, 60, 0.1), hslider("greyhole:damp", 0.3, 0, 0.99, 0.001), hslider("greyhole:size", 1.0, 0.5, 3, 0.01), hslider("greyhole:early_diff", 0.6, 0, 0.99, 0.001), hslider("greyhole:feedback", 0.5, 0, 1, 0.01), hslider("greyhole:mod_depth", 0.4, 0, 1, 0.01), hslider("greyhole:mod_freq", 0.2, 0, 10, 0.01));
+greyhole_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(2.0, 0.3, 1.0, 0.6, 0.2 + 0.7*tri, 0, 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+greyhole_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.greyhole(2.0, 0.3, 1.0, 0.6, 0.2 + 0.7*sq, 0, 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
@@ -561,8 +685,9 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-kb_rom_rev1_test = (os.osc(330), os.osc(660))
+kb_rom_rev1_test = (os.tosc(330), os.tosc(660))
   : re.kb_rom_rev1(0.7, 0.3);
+kb_rom_rev1_slider_test = (os.tosc(330), os.tosc(660)) : re.kb_rom_rev1(hslider("kb_rom_rev1:rt", 0.7, 0, 0.99, 0.01), hslider("kb_rom_rev1:damp", 0.3, 0, 1, 0.01));
 ```
 
 #### References
@@ -601,6 +726,12 @@ Where:
 ```
 re = library("reverbs.lib");
 os = library("oscillators.lib");
-springreverb_test = os.osc(330)
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+springreverb_test = os.tosc(330)
   : re.springreverb(0.5, 0.5, 0.5, 0.5, 1);
+springreverb_slider_test = os.tosc(330) : re.springreverb(hslider("springreverb:dwell", 0.5, 0, 1, 0.01), hslider("springreverb:blend", 0.5, 0, 1, 0.01), hslider("springreverb:tone", 0.5, 0, 1, 0.01), hslider("springreverb:tension", 0.5, 0, 1, 0.01), 1);
+springreverb_modulated_test = no.noise : re.springreverb(0.5, 0.5, tri, 0.5, 1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+springreverb_jump_test = no.noise : re.springreverb(0.5, 0.5, sq, 0.5, 1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```

@@ -6,13 +6,16 @@ section of the function's doc block in the .lib, then, copied verbatim and
 under the same name, in the matching tests/*.dsp. A function whose parameters
 are meant to vary at run time has three tests: `name_test` (constant
 parameters), `name_slider_test` (parameters from sliders) and
-`name_modulated_test` (a parameter modulated at every sample); see
-doc/docs/contributing.md, section "Constant, slider and modulated tests".
+`name_modulated_test` (a parameter modulated at every sample), and a
+recursive filter a fourth, `name_jump_test` (a parameter jumping between the
+two ends of its range); see doc/docs/contributing.md, section "Constant,
+slider, modulated and jump tests".
 
 inventory LIB
-    For every documented symbol of LIB, which of the three tests exist, in
+    For every documented symbol of LIB, which of the four tests exist, in
     the .lib and in tests/*.dsp. A test present on one side only breaks rule
-    8; the inventory lists those first. Whether a function needs the slider
+    8; the inventory lists those first. A test commented out in tests/*.dsp
+    on purpose (a nondeterministic output) shows as `off`, not as a breach. Whether a function needs the slider
     and modulated variants is a judgement (its parameters must be meant to
     vary at run time): the inventory only reports.
 
@@ -58,8 +61,12 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMPORT_RE = re.compile(r'^\s*([A-Za-z]\w*)\s*=\s*(library|import)\("([^"]+)"\)\s*;')
 DEF_RE = re.compile(r"^\s*([A-Za-z_]\w*)\s*=")
 TEST_RE = re.compile(r"^\s*([A-Za-z0-9_]+_test)\s*=")
-TITLE_RE = re.compile(r"^//[-=]*\s*((?:`\([A-Za-z]+\.\)[A-Za-z0-9_\[\]]+`[,\s]*)+)[-=]*\s*$")
-SYMBOL_RE = re.compile(r"`\([A-Za-z]+\.\)([A-Za-z0-9_]+)(?:\[n\])?`")
+# A doc-block title: `(pp.)name`, several of them separated by commas, or bare
+# `name`s (tubes.lib, tonestacks.lib, instruments.lib and maxmsp.lib have no
+# prefix in their titles, as scripts/audit2.py accepts); the rule of dashes may
+# hold spaces. A generic `name[N]` or `name[N]suffix` documents name1, name2...
+TITLE_RE = re.compile(r"^//[-=]*\s*((?:`(?:\([A-Za-z0-9]+\.\))?[A-Za-z0-9_\[\]]+`[,\s]*)+)[-=\s]*$")
+SYMBOL_RE = re.compile(r"`(?:\([A-Za-z0-9]+\.\))?([A-Za-z0-9_]+(?:\[[nN]\][A-Za-z0-9_]*)?)`")
 BLOCK_END_RE = re.compile(r"^//\s*[-=]{5,}\s*$")
 FENCE_RE = re.compile(r"^//\s*```\s*$")
 
@@ -120,14 +127,29 @@ def section_defs(lines, start, end, strip_comment):
     return imports, defs
 
 
+def symbol_re(symbol):
+    """The names a documented symbol stands for: itself, or, for a generic
+    `name[N]suffix`, name1suffix, name2suffix..."""
+    m = re.match(r"^(.*)\[[nN]\](.*)$", symbol)
+    return re.escape(symbol) if not m else re.escape(m.group(1)) + r"\d+" + re.escape(m.group(2))
+
+
 def owner(test, symbols):
-    """The documented function a test belongs to: the longest symbol prefix."""
+    """The documented function a test belongs to: the longest symbol prefix.
+
+    The length is the one of the name the prefix stands for, so that
+    `mth_octave_filterbank3_bands_test` goes to `mth_octave_filterbank3`
+    and not to the generic `mth_octave_filterbank[n]`, which covers the same
+    name: at equal length, an exact symbol wins over a generic one.
+    """
     stem = test[:-len("_test")]
-    best = None
+    best, best_key = None, None
     for s in symbols:
-        if stem == s or stem.startswith(s + "_"):
-            if best is None or len(s) > len(best):
-                best = s
+        m = re.match(r"^(" + symbol_re(s) + r")(_|$)", stem)
+        if m:
+            key = (len(m.group(1)), "[" not in s)
+            if best is None or key > best_key:
+                best, best_key = s, key
     return best
 
 
@@ -177,6 +199,21 @@ def dsp_tests():
     return found
 
 
+DISABLED_RE = re.compile(r"^\s*//\s*([A-Za-z0-9_]+_test)\s*=")
+
+
+def dsp_disabled_tests():
+    """Tests commented out on purpose in tests/*.dsp (a nondeterministic output,
+    such as no.rnoise's, or a program too large to render): copied, but off."""
+    found = set()
+    for path in dsp_files():
+        for line in open(path):
+            m = DISABLED_RE.match(line)
+            if m:
+                found.add(m.group(1))
+    return found
+
+
 # ---------------------------------------------------------------- inventory
 
 def inventory(args):
@@ -191,31 +228,57 @@ def inventory(args):
                 if m:
                     lib_tests.add(m.group(1))
     in_dsp = dsp_tests()
+    disabled = dsp_disabled_tests() - set(in_dsp)
+    # The library's own prefix, from the imports of its Test sections (`tu =
+    # library("tubes.lib")`): a test may be named alias_name_test when name_test
+    # is taken by another library (AGENTS.md, rule 1), and a test found only in
+    # tests/*.dsp belongs to this library only if it calls alias.name.
+    base = os.path.basename(args.lib)
+    aliases = {m.group(1) for line in lines if (m := IMPORT_RE.match(line[2:].strip()))
+               and os.path.basename(m.group(3)) == base}
+    alias_re = "(?:" + "|".join(re.escape(a) + "_" for a in sorted(aliases)) + ")?" if aliases else ""
+
+    def calls(test, symbol):
+        text = next((l for l in open(in_dsp[test]) if TEST_RE.match(l) and TEST_RE.match(l).group(1) == test), "")
+        return any(re.search(r"(?<![\w.])" + re.escape(a) + r"\." + symbol_re(symbol) + r"\b", text)
+                   for a in aliases)
+
     one_side, rows = [], []
     for b in blocks:
         for s in b.symbols:
             cells = []
-            for suffix in ("_test", "_slider_test", "_modulated_test"):
-                name = s + suffix
-                lib, dsp = name in lib_tests, name in in_dsp
-                cells.append("both" if lib and dsp else "lib" if lib else "dsp" if dsp else "-")
-                if lib != dsp:
-                    one_side.append(f"{name}: only in {'the .lib' if lib else os.path.relpath(in_dsp[name], ROOT)}")
+            for suffix in ("_test", "_slider_test", "_modulated_test", "_jump_test"):
+                # a generic symbol has the test of any of its instances
+                pattern = re.compile(r"^" + alias_re + symbol_re(s) + re.escape(suffix) + r"$")
+                names = sorted({t for t in lib_tests | set(in_dsp) if pattern.match(t)
+                                and (t in lib_tests or calls(t, s))})
+                lib = any(t in lib_tests for t in names)
+                dsp = any(t in in_dsp for t in names)
+                off = lib and not dsp and all(t in disabled for t in names)
+                cells.append("both" if lib and dsp else "off" if off else "lib" if lib else "dsp" if dsp else "-")
+                for name in names:
+                    if (name in lib_tests) != (name in in_dsp) and name not in disabled:
+                        one_side.append(f"{name}: only in "
+                                        f"{'the .lib' if name in lib_tests else os.path.relpath(in_dsp[name], ROOT)}")
             rows.append((b.title + 1, s, cells))
     if one_side:
         print("Tests on one side only (rule 8):")
         for line in one_side:
             print("  " + line)
         print()
+    if not rows:
+        print(f"no documented symbol found in {args.lib}")
+        return 0
     width = max(len(s) for _, s, _ in rows)
-    print(f"{'line':>5}  {'symbol':<{width}}  {'_test':>6}  {'_slider':>7}  {'_modulated':>10}")
-    for line, s, (t, sl, mo) in rows:
+    print(f"{'line':>5}  {'symbol':<{width}}  {'_test':>6}  {'_slider':>7}  {'_modulated':>10}  {'_jump':>5}")
+    for line, s, (t, sl, mo, ju) in rows:
+        # _jump_test is for recursive filters only: it does not make a symbol "missing"
         if args.missing and "-" not in (t, sl, mo):
             continue
-        print(f"{line:>5}  {s:<{width}}  {t:>6}  {sl:>7}  {mo:>10}")
-    counts = [sum(1 for _, _, c in rows if c[k] == "both") for k in range(3)]
+        print(f"{line:>5}  {s:<{width}}  {t:>6}  {sl:>7}  {mo:>10}  {ju:>5}")
+    counts = [sum(1 for _, _, c in rows if c[k] == "both") for k in range(4)]
     print(f"\n{len(rows)} symbols; in both places: {counts[0]} _test, {counts[1]} _slider_test, "
-          f"{counts[2]} _modulated_test; {len(one_side)} tests on one side only")
+          f"{counts[2]} _modulated_test, {counts[3]} _jump_test; {len(one_side)} tests on one side only")
     return 1 if one_side else 0
 
 
@@ -242,10 +305,18 @@ def add(args):
     lib_prefix = next((env for env, text in spec_imports.items()
                        if os.path.basename(args.lib) in text), None)
 
+    # A test may carry the library's alias as a prefix (inst_bandPass_test,
+    # when bandPass_test is taken elsewhere): resolve it without the prefix.
+    def owner_a(test):
+        fn = owner(test, symbols)
+        if fn is None and lib_prefix and test.startswith(lib_prefix + "_"):
+            fn = owner(test[len(lib_prefix) + 1:], symbols)
+        return fn
+
     # 1. Resolve every test to its function, and check names.
     plan = []
     for name, code in spec_tests:
-        fn = owner(name, symbols)
+        fn = owner_a(name)
         if fn is None:
             sys.exit(f"{name}: no documented function of {os.path.basename(args.lib)} "
                      "is a prefix of this name")
@@ -303,7 +374,7 @@ def add(args):
     files = {}
     for name, code, fn in plan:
         if name in in_dsp:
-            if owner(name, symbols) != fn:
+            if owner_a(name) != fn:
                 sys.exit(f"{name}: already used in {in_dsp[name]}")
             continue
         # The file of the function's base test; otherwise of another of its
@@ -312,7 +383,18 @@ def add(args):
         if fn + "_test" in in_dsp:
             path = in_dsp[fn + "_test"]
         else:
-            homes = sorted(p for t, p in in_dsp.items() if owner(t, symbols) == fn)
+            # The library's own test file first: a test of another library
+            # can carry the function's name (demos_tests.dsp has
+            # twin_osc_demo_test, a test of dm.twin_osc_demo).
+            # The tests of the other functions of the same doc block count
+            # too: spectral_level_test goes next to
+            # mth_octave_spectral_level6e_test in analyzers_tests.dsp, not
+            # next to spectral_level_demo_test, a test of dm., in
+            # demos_tests.dsp.
+            own = os.path.splitext(os.path.basename(args.lib))[0] + "_tests.dsp"
+            block = set(by_symbol[fn].symbols)
+            homes = sorted({p for t, p in in_dsp.items() if owner_a(t) in block},
+                           key=lambda p: (os.path.basename(p) != own, p))
             path = homes[0] if homes else args.tests_file
         if path is None:
             sys.exit(f"{name}: `{fn}` has no test in tests/*.dsp yet: give --tests-file")
@@ -334,7 +416,7 @@ def add(args):
         imports, defs = section_defs(flines, 0, len(flines), False)
         for name, code, fn in items:
             anchor = max([k for k, l in enumerate(flines)
-                          if (m := TEST_RE.match(l)) and owner(m.group(1), symbols) == fn],
+                          if (m := TEST_RE.match(l)) and owner_a(m.group(1)) == fn],
                          default=None)
             block = []
             for h in needed(code, spec_helpers):
@@ -348,7 +430,17 @@ def add(args):
                     flines.pop()
                 flines += block + [""]
             else:
-                flines[anchor + 1:anchor + 1] = block
+                # After the end of that test, which may span several lines and
+                # hold a with { ... } whose own definitions end with `;`: the
+                # end is the first `;` at which parentheses and braces balance.
+                end, depth = anchor, 0
+                while True:
+                    code = flines[end].split("//")[0]
+                    depth += code.count("(") + code.count("{") - code.count(")") - code.count("}")
+                    if (depth <= 0 and code.rstrip().endswith(";")) or end + 1 >= len(flines):
+                        break
+                    end += 1
+                flines[end + 1:end + 1] = block
             for env in sorted(envs_used(" ".join(block))):
                 if env not in imports and env in spec_imports:
                     last_import = max([k for k, l in enumerate(flines) if IMPORT_RE.match(l)],

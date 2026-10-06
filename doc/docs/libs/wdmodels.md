@@ -276,20 +276,18 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 
-drive = os.osc(220);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-res_leaf(i) = wd.resistor(i, 1000);
-probe(i) = wd.resistor_Vout(i, 1000);
 resistor_test = wd.buildtree(vsrc : (series_node : (res_leaf, probe)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   series_node(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1000);
   probe(i) = wd.resistor_Vout(i, 1000);
 };
+resistor_modulated_test = wd.buildtree(vsrc : (series_node : (res_leaf, probe))) with { vsrc(i) = wd.u_voltage(i, no.noise); series_node(i) = wd.series(i); res_leaf(i) = wd.resistor(i, 100*pow(1000, tri)); probe(i) = wd.resistor_Vout(i, 1000); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 Note: the adaptor must be declared as a separate function before integration into the connection tree.
@@ -327,15 +325,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(220);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-res_probe(i) = wd.resistor_Vout(i, 820);
-res_load(i) = wd.resistor(i, 1800);
 resistor_Vout_test = wd.buildtree(vsrc : (series_node : (res_probe, res_load)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   series_node(i) = wd.series(i);
   res_probe(i) = wd.resistor_Vout(i, 820);
   res_load(i) = wd.resistor(i, 1800);
@@ -377,15 +369,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(220);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-current_probe(i) = wd.resistor_Iout(i, 1000);
-load(i) = wd.resistor_Vout(i, 1500);
 resistor_Iout_test = wd.buildtree(vsrc : (series_node : (current_probe, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   series_node(i) = wd.series(i);
   current_probe(i) = wd.resistor_Iout(i, 1000);
   load(i) = wd.resistor_Vout(i, 1500);
@@ -413,7 +399,7 @@ Can be used for either DC (constant) or AC (signal) voltage sources.
 #### Usage
 
 ```
-v1(i) = u_Voltage(i, ein);
+v1(i) = u_voltage(i, ein);
 buildtree( v1 : B );
 ```
 
@@ -427,15 +413,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(330);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-branch_a(i) = wd.resistor(i, 1200);
-branch_b(i) = wd.resistor_Vout(i, 2200);
 u_voltage_test = wd.buildtree(vsrc : (series_node : (branch_a, branch_b)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(330));
+  vsrc(i) = wd.u_voltage(i, os.tosc(330));
   series_node(i) = wd.series(i);
   branch_a(i) = wd.resistor(i, 1200);
   branch_b(i) = wd.resistor_Vout(i, 2200);
@@ -478,15 +458,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(110);
-
-isrc(i) = wd.u_current(i, drive);
-parallel_node(i) = wd.parallel(i);
-branch_a(i) = wd.resistor(i, 560);
-branch_b(i) = wd.resistor_Vout(i, 2200);
 u_current_test = wd.buildtree(isrc : (parallel_node : (branch_a, branch_b)))
 with {
-  isrc(i) = wd.u_current(i, os.osc(110));
+  isrc(i) = wd.u_current(i, os.tosc(110));
   parallel_node(i) = wd.parallel(i);
   branch_a(i) = wd.resistor(i, 560);
   branch_b(i) = wd.resistor_Vout(i, 2200);
@@ -531,15 +505,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(440);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-branch_source(i) = wd.resVoltage(i, 1000, 0.5);
-probe(i) = wd.resistor_Vout(i, 1800);
 resVoltage_test = wd.buildtree(vsrc : (series_node : (branch_source, probe)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(440));
+  vsrc(i) = wd.u_voltage(i, os.tosc(440));
   series_node(i) = wd.series(i);
   branch_source(i) = wd.resVoltage(i, 1000, 0.5);
   probe(i) = wd.resistor_Vout(i, 1800);
@@ -584,15 +552,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(330);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-branch_source(i) = wd.resVoltage_Vout(i, 1500, 0.3);
-load(i) = wd.resistor(i, 2200);
 resVoltage_Vout_test = wd.buildtree(vsrc : (series_node : (branch_source, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(330));
+  vsrc(i) = wd.u_voltage(i, os.tosc(330));
   series_node(i) = wd.series(i);
   branch_source(i) = wd.resVoltage_Vout(i, 1500, 0.3);
   load(i) = wd.resistor(i, 2200);
@@ -636,15 +598,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(220);
-
-root(i) = wd.u_resVoltage(i, 1800, drive);
-series_node(i) = wd.series(i);
-branch_a(i) = wd.resistor(i, 1500);
-branch_b(i) = wd.resistor_Vout(i, 2200);
 u_resVoltage_test = wd.buildtree(root : (series_node : (branch_a, branch_b)))
 with {
-  root(i) = wd.u_resVoltage(i, 1800, os.osc(220));
+  root(i) = wd.u_resVoltage(i, 1800, os.tosc(220));
   series_node(i) = wd.series(i);
   branch_a(i) = wd.resistor(i, 1500);
   branch_b(i) = wd.resistor_Vout(i, 2200);
@@ -689,15 +645,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(110);
-
-root(i) = wd.u_current(i, drive);
-parallel_node(i) = wd.parallel(i);
-source_branch(i) = wd.resCurrent(i, 2200, 0.15);
-probe(i) = wd.resistor_Vout(i, 1500);
 resCurrent_test = wd.buildtree(root : (parallel_node : (source_branch, probe)))
 with {
-  root(i) = wd.u_current(i, os.osc(110));
+  root(i) = wd.u_current(i, os.tosc(110));
   parallel_node(i) = wd.parallel(i);
   source_branch(i) = wd.resCurrent(i, 2200, 0.15);
   probe(i) = wd.resistor_Vout(i, 1500);
@@ -741,15 +691,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(150);
-
-root(i) = wd.u_resCurrent(i, 2000, drive);
-parallel_node(i) = wd.parallel(i);
-branch_a(i) = wd.resistor(i, 1200);
-branch_b(i) = wd.resistor_Vout(i, 1800);
 u_resCurrent_test = wd.buildtree(root : (parallel_node : (branch_a, branch_b)))
 with {
-  root(i) = wd.u_resCurrent(i, 2000, os.osc(150));
+  root(i) = wd.u_resCurrent(i, 2000, os.tosc(150));
   parallel_node(i) = wd.parallel(i);
   branch_a(i) = wd.resistor(i, 1200);
   branch_b(i) = wd.resistor_Vout(i, 1800);
@@ -777,7 +721,7 @@ It should be used as the root/top element of the connection tree
 #### Usage
 
 ```
-s1(i) = u_resCurrent(i, lambda);
+s1(i) = u_switch(i, lambda);
 buildtree( s1 : B );
 ```
 
@@ -791,16 +735,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(330);
-lambda = hslider("u_switch:lambda", -1, -1, 1, 0.01);
-
-root(i) = wd.u_switch(i, lambda);
-series_node(i) = wd.series(i);
-branch_a(i) = wd.resistor(i, 1000);
-branch_b(i) = wd.resistor_Vout(i, 2200);
-u_switch_test = wd.buildtree(root : (series_node : (branch_a, branch_b))) + os.osc(110) * 0.001
+u_switch_test = wd.buildtree(root : (series_node : (branch_a, branch_b))) + os.tosc(110) * 0.001
 with {
-  drive = os.osc(330);
+  drive = os.tosc(330);
   lambda = hslider("u_switch:lambda", -1, -1, 1, 0.01);
   root(i) = wd.u_switch(i, lambda);
   series_node(i) = wd.series(i);
@@ -847,20 +784,19 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 
-drive = os.osc(440);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-cap_branch(i) = wd.capacitor(i, 1e-7);
-probe(i) = wd.resistor_Vout(i, 1800);
 capacitor_test = wd.buildtree(vsrc : (series_node : (cap_branch, probe)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(440));
+  vsrc(i) = wd.u_voltage(i, os.tosc(440));
   series_node(i) = wd.series(i);
   cap_branch(i) = wd.capacitor(i, 1e-7);
   probe(i) = wd.resistor_Vout(i, 1800);
 };
+capacitor_modulated_test = wd.buildtree(vsrc : (series_node : (cap_branch, probe))) with { vsrc(i) = wd.u_voltage(i, no.noise); series_node(i) = wd.series(i); cap_branch(i) = wd.capacitor(i, 1e-9*pow(1000, tri)); probe(i) = wd.resistor_Vout(i, 1800); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+capacitor_jump_test = wd.buildtree(vsrc : (series_node : (cap_branch, probe))) with { vsrc(i) = wd.u_voltage(i, no.noise); series_node(i) = wd.series(i); cap_branch(i) = wd.capacitor(i, 1e-9*pow(1000, sq)); probe(i) = wd.resistor_Vout(i, 1800); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 Note: the adaptor must be declared as a separate function before integration into the connection tree.
@@ -899,15 +835,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(330);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-cap_branch(i) = wd.capacitor_Vout(i, 2e-7);
-load(i) = wd.resistor(i, 1500);
 capacitor_Vout_test = wd.buildtree(vsrc : (series_node : (cap_branch, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(330));
+  vsrc(i) = wd.u_voltage(i, os.tosc(330));
   series_node(i) = wd.series(i);
   cap_branch(i) = wd.capacitor_Vout(i, 2e-7);
   load(i) = wd.resistor(i, 1500);
@@ -950,15 +880,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(440);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-cap_branch(i) = wd.capacitor_Iout(i, 1e-6);
-load(i) = wd.resistor(i, 1000);
 capacitor_Iout_test = wd.buildtree(vsrc : (series_node : (cap_branch, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(440));
+  vsrc(i) = wd.u_voltage(i, os.tosc(440));
   series_node(i) = wd.series(i);
   cap_branch(i) = wd.capacitor_Iout(i, 1e-6);
   load(i) = wd.resistor(i, 1000);
@@ -999,20 +923,18 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 
-drive = os.osc(260);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-inductive_branch(i) = wd.inductor(i, 0.01);
-probe(i) = wd.resistor_Vout(i, 2200);
 inductor_test = wd.buildtree(vsrc : (series_node : (inductive_branch, probe)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(260));
+  vsrc(i) = wd.u_voltage(i, os.tosc(260));
   series_node(i) = wd.series(i);
   inductive_branch(i) = wd.inductor(i, 0.01);
   probe(i) = wd.resistor_Vout(i, 2200);
 };
+inductor_modulated_test = wd.buildtree(vsrc : (series_node : (inductive_branch, probe))) with { vsrc(i) = wd.u_voltage(i, no.noise); series_node(i) = wd.series(i); inductive_branch(i) = wd.inductor(i, 1e-3*pow(100, tri)); probe(i) = wd.resistor_Vout(i, 1000); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 Note: the adaptor must be declared as a separate function before integration into the connection tree.
@@ -1051,15 +973,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(280);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-inductive_branch(i) = wd.inductor_Vout(i, 0.02);
-load(i) = wd.resistor(i, 1500);
 inductor_Vout_test = wd.buildtree(vsrc : (series_node : (inductive_branch, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(280));
+  vsrc(i) = wd.u_voltage(i, os.tosc(280));
   series_node(i) = wd.series(i);
   inductive_branch(i) = wd.inductor_Vout(i, 0.02);
   load(i) = wd.resistor(i, 1500);
@@ -1102,15 +1018,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-drive = os.osc(280);
-
-vsrc(i) = wd.u_voltage(i, drive);
-series_node(i) = wd.series(i);
-inductive_branch(i) = wd.inductor_Iout(i, 0.02);
-load(i) = wd.resistor(i, 1500);
 inductor_Iout_test = wd.buildtree(vsrc : (series_node : (inductive_branch, load)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(280));
+  vsrc(i) = wd.u_voltage(i, os.tosc(280));
   series_node(i) = wd.series(i);
   inductive_branch(i) = wd.inductor_Iout(i, 0.02);
   load(i) = wd.resistor(i, 1500);
@@ -1140,12 +1050,13 @@ It should be used as the root/top element of the connection tree.
 #### Usage
 
 ```
-buildtree( u_idealDiode : B );
+diode(i) = u_idealDiode(i);
+buildtree( diode : B );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `diode(i) = wd.u_idealDiode(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: only usable as the root of a tree.
 Correct implementation is shown above.
@@ -1155,11 +1066,7 @@ Correct implementation is shown above.
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-diode(i) = wd.u_idealDiode(i);
-series_node(i) = wd.series(i);
-branch_a(i) = wd.resistor(i, 1200);
-branch_b(i) = wd.resistor_Vout(i, 1800);
-u_idealDiode_test = wd.buildtree(diode : (series_node : (branch_a, branch_b))) + os.osc(110) * 0.001
+u_idealDiode_test = wd.buildtree(diode : (series_node : (branch_a, branch_b))) + os.tosc(110) * 0.001
 with {
   diode(i) = wd.u_idealDiode(i);
   series_node(i) = wd.series(i);
@@ -1201,11 +1108,7 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-chua_node(i) = wd.u_chua(i, 1e-3, 5e-4, 0.2);
-series_node(i) = wd.series(i);
-branch_a(i) = wd.resistor(i, 1500);
-branch_b(i) = wd.resistor_Vout(i, 2200);
-u_chua_test = wd.buildtree(chua_node : (series_node : (branch_a, branch_b))) + os.osc(110) * 0.001
+u_chua_test = wd.buildtree(chua_node : (series_node : (branch_a, branch_b))) + os.tosc(110) * 0.001
 with {
   chua_node(i) = wd.u_chua(i, 1e-3, 5e-4, 0.2);
   series_node(i) = wd.series(i);
@@ -1246,8 +1149,7 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-lambert_gain = wd.lambert(0.5, 6);
-lambert_test = os.osc(220) * wd.lambert(0.5, 6);
+lambert_test = os.tosc(220) * wd.lambert(0.5, 6);
 ```
 
 ----
@@ -1276,7 +1178,7 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
-u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025) + os.osc(110) * 0.001;
+u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025) + os.tosc(110) * 0.001;
 ```
 
 Note: only usable as the root of a tree.
@@ -1312,7 +1214,7 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
-u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026) + os.osc(110) * 0.001;
+u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026) + os.tosc(110) * 0.001;
 ```
 
 Note: only usable as the root of a tree.
@@ -1348,7 +1250,7 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
-u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2) + os.osc(110) * 0.001;
+u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2) + os.tosc(110) * 0.001;
 ```
 
 Note: only usable as the root of a tree.
@@ -1417,7 +1319,7 @@ Where:
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
-u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1) + os.osc(110) * 0.001;
+u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1) + os.tosc(110) * 0.001;
 ```
 
 Note: only usable as the root of a tree.
@@ -1446,12 +1348,13 @@ Elements connected to this adaptor will behave as if connected in parallel in ci
 #### Usage
 
 ```
-buildtree( u_parallel2Port : (A, B) );
+root(i) = u_parallel2Port(i);
+buildtree( root : (A, B) );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `root(i) = wd.u_parallel2Port(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: only usable as the root of a tree.
 This adaptor has no user-accessible parameters. 
@@ -1462,13 +1365,10 @@ Correct implementation is shown above.
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-root(i) = wd.u_parallel2Port(i);
-branch_source(i) = wd.resVoltage_Vout(i, 1500, 0.2 * os.osc(220));
-branch_load(i) = wd.resistor(i, 1800);
 u_parallel2Port_test = wd.buildtree(root : (branch_source, branch_load))
 with {
   root(i) = wd.u_parallel2Port(i);
-  branch_source(i) = wd.resVoltage_Vout(i, 1500, 0.2 * os.osc(220));
+  branch_source(i) = wd.resVoltage_Vout(i, 1500, 0.2 * os.tosc(220));
   branch_load(i) = wd.resistor(i, 1800);
 };
 ```
@@ -1489,12 +1389,13 @@ Elements connected to this adaptor will behave as if connected in parallel in ci
 #### Usage
 
 ```
-buildtree( A : parallel2Port : B );
+connector(i) = parallel2Port(i);
+buildtree( A : connector : B );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `connector(i) = wd.parallel2Port(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and one forward adaptor.
@@ -1505,12 +1406,9 @@ Correct implementation is shown above.
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(260));
-connector(i) = wd.parallel2Port(i);
-load(i) = wd.resistor_Vout(i, 1800);
 parallel2Port_test = wd.buildtree(vsrc : (connector : load))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(260));
+  vsrc(i) = wd.u_voltage(i, os.tosc(260));
   connector(i) = wd.parallel2Port(i);
   load(i) = wd.resistor_Vout(i, 2200);
 };
@@ -1532,12 +1430,13 @@ Elements connected to this adaptor will behave as if connected in series in circ
 #### Usage
 
 ```
-buildtree( u_series2Port : (A, B) );
+root(i) = u_series2Port(i);
+buildtree( root : (A, B) );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `root(i) = wd.u_series2Port(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: only usable as the root of a tree.
 This adaptor has no user-accessible parameters. 
@@ -1548,13 +1447,10 @@ Correct implementation is shown above.
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-root(i) = wd.u_series2Port(i);
-branch_source(i) = wd.resVoltage_Vout(i, 1200, 0.25 * os.osc(180));
-branch_load(i) = wd.resistor(i, 1800);
 u_series2Port_test = wd.buildtree(root : (branch_source, branch_load))
 with {
   root(i) = wd.u_series2Port(i);
-  branch_source(i) = wd.resVoltage_Vout(i, 1200, 0.25 * os.osc(180));
+  branch_source(i) = wd.resVoltage_Vout(i, 1200, 0.25 * os.tosc(180));
   branch_load(i) = wd.resistor(i, 1800);
 };
 ```
@@ -1575,12 +1471,13 @@ Elements connected to this adaptor will behave as if connected in series in circ
 #### Usage
 
 ```
-buildtree( A : series2Port : B );
+connector(i) = series2Port(i);
+buildtree( A : connector : B );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `connector(i) = wd.series2Port(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and one forward adaptor.
@@ -1591,12 +1488,9 @@ Correct implementation is shown above.
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(200));
-connector(i) = wd.series2Port(i);
-load(i) = wd.resistor_Vout(i, 2200);
 series2Port_test = wd.buildtree(vsrc : (connector : load))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(200));
+  vsrc(i) = wd.u_voltage(i, os.tosc(200));
   connector(i) = wd.series2Port(i);
   load(i) = wd.resistor_Vout(i, 2200);
 };
@@ -1632,12 +1526,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(240));
-connector(i) = wd.parallelCurrent(i, 0.1);
-load(i) = wd.resistor_Vout(i, 1500);
 parallelCurrent_test = wd.buildtree(vsrc : (connector : load))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(240));
+  vsrc(i) = wd.u_voltage(i, os.tosc(240));
   connector(i) = wd.parallelCurrent(i, 0.1);
   load(i) = wd.resistor_Vout(i, 1500);
 };
@@ -1677,12 +1568,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(210));
-connector(i) = wd.seriesVoltage(i, 0.3);
-load(i) = wd.resistor_Vout(i, 1500);
 seriesVoltage_test = wd.buildtree(vsrc : (connector : load))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(210));
+  vsrc(i) = wd.u_voltage(i, os.tosc(210));
   connector(i) = wd.seriesVoltage(i, 0.3);
   load(i) = wd.resistor_Vout(i, 1500);
 };
@@ -1721,13 +1609,10 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-root(i) = wd.u_transformer(i, 2.0);
-primary(i) = wd.resVoltage_Vout(i, 1500, 0.2 * os.osc(220));
-secondary(i) = wd.resistor_Vout(i, 2200);
 u_transformer_test = wd.buildtree(root : (primary, secondary))
 with {
   root(i) = wd.u_transformer(i, 2.0);
-  primary(i) = wd.resVoltage_Vout(i, 1500, 0.2 * os.osc(220));
+  primary(i) = wd.resVoltage_Vout(i, 1500, 0.2 * os.tosc(220));
   secondary(i) = wd.resistor_Vout(i, 2200);
 };
 ```
@@ -1765,12 +1650,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(180));
-xfmr(i) = wd.transformer(i, 2.5);
-load(i) = wd.resistor_Vout(i, 2200);
 transformer_test = wd.buildtree(vsrc : (xfmr : load))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(180));
+  vsrc(i) = wd.u_voltage(i, os.tosc(180));
   xfmr(i) = wd.transformer(i, 2.5);
   load(i) = wd.resistor_Vout(i, 2200);
 };
@@ -1810,13 +1692,10 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-root(i) = wd.u_transformerActive(i, 0.9, 0.8);
-primary(i) = wd.resVoltage_Vout(i, 1200, 0.18 * os.osc(190));
-secondary(i) = wd.resistor_Vout(i, 2200);
 u_transformerActive_test = wd.buildtree(root : (primary, secondary))
 with {
   root(i) = wd.u_transformerActive(i, 0.9, 0.8);
-  primary(i) = wd.resVoltage_Vout(i, 1200, 0.18 * os.osc(190));
+  primary(i) = wd.resVoltage_Vout(i, 1200, 0.18 * os.tosc(190));
   secondary(i) = wd.resistor_Vout(i, 2200);
 };
 ```
@@ -1855,12 +1734,9 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(175));
-xfmr(i) = wd.transformerActive(i, 0.9, 0.8);
-load(i) = wd.resistor_Vout(i, 2200);
 transformerActive_test = wd.buildtree(vsrc : (xfmr : load))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(175));
+  vsrc(i) = wd.u_voltage(i, os.tosc(175));
   xfmr(i) = wd.transformerActive(i, 0.9, 0.8);
   load(i) = wd.resistor_Vout(i, 2200);
 };
@@ -1888,12 +1764,13 @@ This adaptor is used to connect adaptors simulating components connected in para
 #### Usage
 
 ```
-buildtree( A : parallel : (B, C) );
+junction(i) = parallel(i);
+buildtree( A : junction : (B, C) );
 ```
 
 Where:
 
-* `i`: index used by model-building functions when the adaptor is declared as `junction(i) = wd.parallel(i)`
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.
@@ -1903,13 +1780,9 @@ It should be used within the connection tree with one previous and two forward a
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(220));
-junction(i) = wd.parallel(i);
-branch_a(i) = wd.resistor(i, 1200);
-branch_b(i) = wd.resistor_Vout(i, 1800);
 parallel_test = wd.buildtree(vsrc : (junction : (branch_a, branch_b)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   junction(i) = wd.parallel(i);
   branch_a(i) = wd.resistor(i, 1200);
   branch_b(i) = wd.resistor_Vout(i, 1800);
@@ -1932,9 +1805,13 @@ This adaptor is used to connect adaptors simulating components connected in seri
 #### Usage
 
 ```
-
-tree = A : (series : (B, C));
+junction(i) = series(i);
+buildtree( A : junction : (B, C) );
 ```
+
+Where:
+
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with one previous and two forward adaptors.
@@ -1944,13 +1821,9 @@ It should be used within the connection tree with one previous and two forward a
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(260));
-junction(i) = wd.series(i);
-branch_a(i) = wd.resistor(i, 1000);
-branch_b(i) = wd.resistor_Vout(i, 2200);
 series_test = wd.buildtree(vsrc : (junction : (branch_a, branch_b)))
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(260));
+  vsrc(i) = wd.u_voltage(i, os.tosc(260));
   junction(i) = wd.series(i);
   branch_a(i) = wd.resistor(i, 1000);
   branch_b(i) = wd.resistor_Vout(i, 2200);
@@ -1977,9 +1850,13 @@ It implements the simplest possible rigid connection found in the Fender Bassman
 #### Usage
 
 ```
-
-tree = u_sixportPassive : (A, B, C, D, E, F));
+rtype(i) = u_sixportPassive(i);
+buildtree( rtype : (A, B, C, D, E, F) );
 ```
+
+Where:
+
+* `i`: index used by model-building functions. Should never be user declared.
 
 Note: this adaptor has no user-accessible parameters. 
 It should be used within the connection tree with six forward adaptors.
@@ -1988,8 +1865,8 @@ It should be used within the connection tree with six forward adaptors.
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
-u_sixportPassive_test = ((1000, 1200, 1400, 1600, 1800, 2000, os.osc(220), 0, 0, 0, 0, 0, 0)
-  : wd.u_sixportPassive(0) : _, !, !, !, !), os.osc(110) * 0.001;
+u_sixportPassive_test = ((1000, 1200, 1400, 1600, 1800, 2000, os.tosc(220), 0, 0, 0, 0, 0, 0)
+  : wd.u_sixportPassive(0) : _, !, !, !, !), os.tosc(110) * 0.001;
 ```
 
 #### References
@@ -2025,52 +1902,7 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-scatter(a) = -a * 0.3;
-upRes = 1400;
-
-node_iout(i) = wd.genericNode_Iout(i, scatter, upRes);
-vsrc(i) = wd.u_voltage(i, os.osc(230));
-branch(i) = wd.series(i);
-load(i) = wd.resistor(i, 1800);
-genericNode_Iout_test = wd.genericNode_Iout(0, scatter, upRes)(os.osc(230)) : _, !
-with {
-  scatter(a) = -a * 0.3;
-  upRes = 1400;
-};
-```
-
-#### Test
-```
-wd = library("wdmodels.lib");
-os = library("oscillators.lib");
-
-scatter(a) = -a * 0.4;
-upRes = 1600;
-
-node_vout(i) = wd.genericNode_Vout(i, scatter, upRes);
-vsrc(i) = wd.u_voltage(i, os.osc(200));
-branch(i) = wd.series(i);
-load(i) = wd.resistor(i, 1800);
-genericNode_Vout_test = wd.genericNode_Vout(0, scatter, upRes)(os.osc(200)) : _, !
-with {
-  scatter(a) = -a * 0.4;
-  upRes = 1600;
-};
-```
-
-#### Test
-```
-wd = library("wdmodels.lib");
-os = library("oscillators.lib");
-
-scatter(a) = -a * 0.5;
-upRes = 1200;
-
-node(i) = wd.genericNode(i, scatter, upRes);
-vsrc(i) = wd.u_voltage(i, os.osc(220));
-branch(i) = wd.series(i);
-probe(i) = wd.resistor_Vout(i, 1800);
-genericNode_test = wd.genericNode(0, scatter, upRes)(os.osc(220))
+genericNode_test = wd.genericNode(0, scatter, upRes)(os.tosc(220))
 with {
   scatter(a) = -a * 0.5;
   upRes = 1200;
@@ -2102,6 +1934,8 @@ It also calculates the voltage across the element and gives it as a model output
 #### Usage
 
 ```
+scatter = *(-0.4);
+upRes = 1600;
 n1(i) = genericNode_Vout(i, scatter, upRes);
 ```
 
@@ -2121,6 +1955,18 @@ Note: `scatter` must be a function with 1 input and 1 output.
 `upRes` must be a function with no inputs and 1 output.
  The output should give the upward-facing port resistance of the node.
 
+#### Test
+```
+wd = library("wdmodels.lib");
+os = library("oscillators.lib");
+
+genericNode_Vout_test = wd.genericNode_Vout(0, scatter, upRes)(os.tosc(200)) : _, !
+with {
+  scatter(a) = -a * 0.4;
+  upRes = 1600;
+};
+```
+
 ----
 
 ### `(wd.)genericNode_Iout`
@@ -2133,6 +1979,8 @@ It also calculates the current through the element and gives it as a model outpu
 #### Usage
 
 ```
+scatter = *(-0.3);
+upRes = 1400;
 n1(i) = genericNode_Iout(i, scatter, upRes);
 ```
 
@@ -2151,6 +1999,18 @@ Note: `scatter` must be a function with 1 input and 1 output.
 
 `upRes` must be a function with no inputs and 1 output.
  The output should give the upward-facing port resistance of the node.
+
+#### Test
+```
+wd = library("wdmodels.lib");
+os = library("oscillators.lib");
+
+genericNode_Iout_test = wd.genericNode_Iout(0, scatter, upRes)(os.tosc(230)) : _, !
+with {
+  scatter(a) = -a * 0.3;
+  upRes = 1400;
+};
+```
 
 ----
 
@@ -2176,13 +2036,7 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-scatter(a) = -a * 0.5;
-
-root(i) = wd.u_genericNode(i, scatter);
-branch(i) = wd.series(i);
-load_a(i) = wd.resistor(i, 1500);
-load_b(i) = wd.resistor_Vout(i, 2200);
-u_genericNode_test = wd.u_genericNode(0, scatter)(os.osc(220))
+u_genericNode_test = wd.u_genericNode(0, scatter)(os.tosc(220))
 with {
   scatter(a) = -a * 0.5;
 };
@@ -2208,25 +2062,22 @@ It is used in conjunction with the buildup() function to create a model.
 #### Usage
 
 ```
-builddown(A : B)~buildup(A : B);
+builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 ```
 
-Where: 
- `(A : B)` : is a connection tree composed of WD adaptors
+Where:
+
+* `tree`: a connection tree composed of WD adaptors, such as
+  `vsrc : (branch : (res_leaf, probe))`
 
 #### Test
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(220));
-branch(i) = wd.series(i);
-res_leaf(i) = wd.resistor(i, 1200);
-probe(i) = wd.resistor_Vout(i, 1800);
-tree = vsrc : (branch : (res_leaf, probe));
 builddown_test = wd.builddown(tree) ~ wd.buildup(tree) : wd.buildout(tree)
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
   probe(i) = wd.resistor_Vout(i, 1800);
@@ -2246,25 +2097,22 @@ It is used in conjunction with the builddown() function to create a full structu
 #### Usage
 
 ```
-builddown(A : B)~buildup(A : B);
+builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 ```
 
-Where: 
-`(A : B)` : is a connection tree composed of WD adaptors
+Where:
+
+* `tree`: a connection tree composed of WD adaptors, such as
+  `vsrc : (branch : (res_leaf, probe))`
 
 #### Test
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(220));
-branch(i) = wd.series(i);
-res_leaf(i) = wd.resistor(i, 1200);
-probe(i) = wd.resistor_Vout(i, 1800);
-tree = vsrc : (branch : (res_leaf, probe));
 buildup_test = wd.builddown(tree) ~ wd.buildup(tree) : wd.buildout(tree)
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
   probe(i) = wd.resistor_Vout(i, 1800);
@@ -2284,24 +2132,20 @@ It is used by the buildup and builddown functions but is also helpful in testing
 #### Usage
 
 ```
-getres(A : B)~getres(A : B);
+getres(subtree) : _
 ```
 
-Where: 
-`(A : B)` : is a partial connection tree composed of WD adaptors
+Where:
+
+* `subtree`: a partial connection tree composed of WD adaptors, such as
+  `branch : (res_leaf, probe)`
 
 #### Test
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-branch(i) = wd.series(i);
-res_leaf(i) = wd.resistor(i, 1200);
-probe(i) = wd.resistor_Vout(i, 1800);
-subtree = branch : (res_leaf, probe);
-
-getres_value = wd.getres(subtree);
-getres_test = os.osc(110) * (1.0/(1.0 + getres_value))
+getres_test = os.tosc(110) * (1.0/(1.0 + getres_value))
 with {
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
@@ -2327,26 +2171,18 @@ This function is a parallelized version of `getres`.
 #### Usage
 
 ```
-parres((A , B))~parres((A , B));
+parres((subtree_left, subtree_right)) : _,_
 ```
 
-Where: 
-`(A , B)` : is a partial connection tree composed of WD adaptors
+Where:
+
+* `subtree_left`, `subtree_right`: partial connection trees composed of WD adaptors
 
 #### Test
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-branchLeft(i) = wd.series(i);
-res_left(i) = wd.resistor(i, 1200);
-probe_left(i) = wd.resistor(i, 1800);
-subtree_left = branchLeft : (res_left, probe_left);
-
-branchRight(i) = wd.parallel(i);
-res_right(i) = wd.resistor(i, 1500);
-probe_right(i) = wd.resistor(i, 2200);
-subtree_right = branchRight : (res_right, probe_right);
 parres_test = wd.parres((subtree_left, subtree_right)) : _, !
 with {
   left_branch(i) = wd.series(i);
@@ -2374,27 +2210,22 @@ It recursively steps through the given tree and creates an output matrix passing
 #### Usage
 
 ```
-buildout( A : B );
+builddown(tree) ~ buildup(tree) : buildout(tree) : _, ...
 ```
 
-Where: 
-`(A : B)` : is a connection tree composed of WD adaptors
+Where:
+
+* `tree`: a connection tree composed of WD adaptors, such as
+  `vsrc : (branch : (res_leaf, probe))`
 
 #### Test
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(240));
-branch(i) = wd.series(i);
-res_leaf(i) = wd.resistor(i, 1200);
-probe(i) = wd.resistor_Vout(i, 1800);
-tree = vsrc : (branch : (res_leaf, probe));
-
-buildout_matrix = wd.buildout(tree);
 buildout_test = wd.builddown(tree) ~ wd.buildup(tree) : buildout_matrix
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(240));
+  vsrc(i) = wd.u_voltage(i, os.tosc(240));
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
   probe(i) = wd.resistor_Vout(i, 1800);
@@ -2414,25 +2245,24 @@ It recursively steps through the given tree, parametrizes the adaptors, and buil
 #### Usage
 
 ```
-buildtree(A : B);
+buildtree(tree) : _, ...
 ```
 
-Where: 
-`(A : B)` : a connection tree composed of WD adaptors
+Where:
+
+* `tree`: a connection tree composed of WD adaptors, such as
+  `vsrc : (branch : (res_leaf, probe))`
+
+The outputs are those of the output adaptors of the tree (`_Vout`, `_Iout`), one each.
 
 #### Test
 ```
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 
-vsrc(i) = wd.u_voltage(i, os.osc(220));
-branch(i) = wd.series(i);
-res_leaf(i) = wd.resistor(i, 1200);
-probe(i) = wd.resistor_Vout(i, 1800);
-tree = vsrc : (branch : (res_leaf, probe));
 buildtree_test = wd.buildtree(tree)
 with {
-  vsrc(i) = wd.u_voltage(i, os.osc(220));
+  vsrc(i) = wd.u_voltage(i, os.tosc(220));
   branch(i) = wd.series(i);
   res_leaf(i) = wd.resistor(i, 1200);
   probe(i) = wd.resistor_Vout(i, 1800);

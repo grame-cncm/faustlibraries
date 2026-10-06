@@ -6,8 +6,8 @@
 fi = library("filters.lib");
 os = library("oscillators.lib");
 
-src = os.osc(440);
-dual_src = os.osc(440), os.osc(660);
+src = os.tosc(440);
+dual_src = os.tosc(440), os.tosc(660);
 
 scatN_test = dual_src : fi.scatN(2, (1, 1), _);
 scat_test = src : fi.scat(0.5, _);

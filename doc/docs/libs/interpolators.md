@@ -140,7 +140,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_linear_test = it.interpolate_linear(0.5, 0.0, 1.0);
+interpolate_linear_slider_test = it.interpolate_linear(hslider("interpolate_linear:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_linear_modulated_test = it.interpolate_linear(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -168,7 +172,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_cosine_test = it.interpolate_cosine(0.5, 0.0, 1.0);
+interpolate_cosine_slider_test = it.interpolate_cosine(hslider("interpolate_cosine:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_cosine_modulated_test = it.interpolate_cosine(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -201,7 +209,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_logarithmic_test = it.interpolate_logarithmic(0.5, 100.0, 10000.0);
+interpolate_logarithmic_slider_test = it.interpolate_logarithmic(hslider("interpolate_logarithmic:dv", 0.5, 0, 1, 0.01), 100.0, 10000.0);
+interpolate_logarithmic_modulated_test = it.interpolate_logarithmic(tri, 100.0, 10000.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -233,7 +245,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_power_test = it.interpolate_power(2.0, 0.5, 0.0, 1.0);
+interpolate_power_slider_test = it.interpolate_power(hslider("interpolate_power:p", 2.0, 0.1, 10, 0.01), hslider("interpolate_power:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_power_modulated_test = it.interpolate_power(2.0, tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -244,8 +260,12 @@ Exponential (constant-rate) interpolation between 2 values.
 Shapes the fraction through `(exp(k*dv)-1)/(exp(k)-1)` and then interpolates
 linearly between `v0` and `v1` by that shaped fraction. `k` sets the curvature:
 `k > 0` clusters the values near `v0`, `k < 0` clusters them near `v1`, and as
-`k -> 0` the curve approaches `interpolate_linear` (guarded so exactly 0 does not
-divide by 0). Because it shapes the fraction rather than the ratio, the bounds may
+`k -> 0` the curve approaches `interpolate_linear`, which it is at `k = 0`.
+Both `exp(x)-1` are computed by their Taylor series for `|x| < 0.1`, which keeps
+all the digits of `exp(x)-1` for a small `x` using only arithmetic (available on
+every backend, unlike `expm1`): in single precision, `exp(x)-1` is 0 for any `|x|`
+below about 6e-8, and the quotient would be 0/0 (NaN) for a `k` near 0, the
+natural default of a slider. Because it shapes the fraction rather than the ratio, the bounds may
 be any values (including 0 and opposite signs), unlike `interpolate_logarithmic`.
 `k` is the first argument so it can be partially applied to obtain a `(dv,v0,v1)`
 interpolator.
@@ -268,7 +288,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_exponential_test = it.interpolate_exponential(3.0, 0.5, 0.0, 1.0);
+interpolate_exponential_slider_test = it.interpolate_exponential(hslider("k", 0, -5, 5, 0.01), hslider("dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_exponential_modulated_test = it.interpolate_exponential(-5 + 10*tri, 0.5, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -298,7 +322,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_smoothstep_test = it.interpolate_smoothstep(0.5, 0.0, 1.0);
+interpolate_smoothstep_slider_test = it.interpolate_smoothstep(hslider("interpolate_smoothstep:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_smoothstep_modulated_test = it.interpolate_smoothstep(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -328,7 +356,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_smootherstep_test = it.interpolate_smootherstep(0.5, 0.0, 1.0);
+interpolate_smootherstep_slider_test = it.interpolate_smootherstep(hslider("interpolate_smootherstep:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
+interpolate_smootherstep_modulated_test = it.interpolate_smootherstep(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -359,7 +391,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_mel_test = it.interpolate_mel(0.5, 100.0, 8000.0);
+interpolate_mel_slider_test = it.interpolate_mel(hslider("interpolate_mel:dv", 0.5, 0, 1, 0.01), 100.0, 8000.0);
+interpolate_mel_modulated_test = it.interpolate_mel(tri, 100.0, 8000.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Four points interpolation functions
@@ -388,7 +424,11 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 interpolate_cubic_test = it.interpolate_cubic(0.5, -1.0, 2.0, 1.0, 4.0);
+interpolate_cubic_slider_test = it.interpolate_cubic(hslider("interpolate_cubic:dv", 0.5, 0, 1, 0.01), -1.0, 2.0, 1.0, 4.0);
+interpolate_cubic_modulated_test = it.interpolate_cubic(tri, -1.0, 2.0, 1.0, 4.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -500,7 +540,7 @@ choice of the interpolation enum).
 #### Usage
 
 ```
-interpolator_null(gen, idv) : _
+interpolator_null(gen, idv) : si.bus(outputs(gen))
 ```
 
 Where:
@@ -597,6 +637,16 @@ soundfiles `play_interp` players): `linear` (0), `cosine` (1), `cubic`
 #### Usage
 
 ```
+linear : _
+cosine : _
+cubic : _
+nointerp : _
+MAX_INTER : _
+```
+
+#### Example
+
+```
 sample.play_interp(length, freq, gain, trig, it.cubic)
 ```
 
@@ -615,7 +665,7 @@ Generic configurable interpolator (with selector between in [0..3]). The value 3
 #### Usage
 
 ```
-interpolator_select(gen, idv, sel) : _,_... (equal to N = outputs(gen))
+interpolator_select(gen, idv, sel) : si.bus(outputs(gen))
 ```
 
 Where:
@@ -697,7 +747,7 @@ process = it.piecewise((-5, -3, 0, 3, 5), (2, 0, 3, -3, -2), x);
 ```
 it = library("interpolators.lib");
 os = library("oscillators.lib");
-piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.osc(0.1));
+piecewise_test = it.piecewise((-5, -2, 0, 3), (1, 0, 4, -1), os.tosc(0.1));
 ```
 
 ## Lagrange based interpolators
@@ -717,6 +767,7 @@ basis polynomial with arbitrary spacing of the points.
 
 ```
 lagrangeCoeffs(N, xCoordsList, x) : si.bus(N + 1)
+lagrange_h(N, x) : si.bus(N + 1)
 ```
 
 Where:
@@ -728,7 +779,10 @@ Where:
 #### Test
 ```
 it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 lagrangeCoeffs_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), 0.25);
+lagrangeCoeffs_modulated_test = it.lagrangeCoeffs(2, (0.0, 0.5, 1.0), tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References
@@ -746,11 +800,16 @@ Nth-order Lagrange interpolation of a value `x` between input points.
 (points at 0,1,...,N), kept for back-compatibility.
 
 Nth-order Lagrange interpolator to interpolate between a set of arbitrarily spaced N + 1 points.
+The N + 1 inputs are the y-values of the interpolation points (`yCoords`).
+The position `x` can also be given as a first input signal, by partial
+application: `x, yCoords : lagrangeInterpolation(N, xCoordsList) : _`
+(as in the examples below).
 
 #### Usage
 
 ```
-x , yCoords : lagrangeInterpolation(N, xCoordsList) : _
+si.bus(N + 1) : lagrangeInterpolation(N, xCoordsList, x) : _
+si.bus(N + 1) : lagrangeN(N, x) : _
 ```
 
 Where:
@@ -758,7 +817,6 @@ Where:
 * `N`: order of the interpolator, known at compile-time
 * `xCoordsList`: a list of N + 1 elements determining the x-axis spacing of the points, known at compile-time
 * `x`: an x-axis position to interpolate between the y-values
-* `yCoords`: N + 1 elements determining the values of the interpolation points
 
 Example: find the centre position of a four-point set using an order-3
 Lagrange function fitting the equally-spaced points [2, 5, -1, 3]:
@@ -889,7 +947,7 @@ process = rwtable(S, os.sinwaveform(S), wIdx, os.sinwaveform(S), int(rIdx)) ,
 it = library("interpolators.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
-frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.osc(220), os.phasor(16, 150));
+frwtable_test = it.frwtable(3, 16, os.sinwaveform(16), ba.period(16), os.tosc(220), os.phasor(16, 150));
 ```
 
 ## Misc functions
@@ -926,5 +984,5 @@ os.osc(440) : it.remap(-1., 1., 100., 1000.)
 ```
 it = library("interpolators.lib");
 os = library("oscillators.lib");
-remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.osc(0.5));
+remap_test = it.remap(-1.0, 1.0, 100.0, 1000.0, os.tosc(0.5));
 ```

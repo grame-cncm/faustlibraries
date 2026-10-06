@@ -60,5 +60,8 @@ Where:
 #### Test
 ```
 op = library("operator.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 operator_test = op.operator(0,1,0,0,99,99,99,99,99,0,0,0,0,0,0,0,4,35,0,0,0,1,3,99,99,99,99,0,0,0,0,50,0,0,0,0,0,-12,0,440.0,1.0,button("gate"));
+operator_modulated_test = op.operator(0,1,0,0,99,99,99,99,99,99,99,99,99,0,0,0,4,35,0,0,0,1,3,99,99,99,99,0,0,0,0,50,0,0,0,0,0,-12,2*tri - 1,440.0,1.0,button("gate")) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```

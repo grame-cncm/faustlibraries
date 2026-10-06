@@ -7,7 +7,7 @@ db = library("debug.lib");
 os = library("oscillators.lib");
 fi = library("filters.lib");
 
-mono = os.osc(220);
+mono = os.tosc(220);
 
 probe_rms_db_test = db.probe_rms_db(0, 1, mono);
 probe_rms_lin_test = db.probe_rms_lin(1, 1, mono);
@@ -80,8 +80,8 @@ probe_disabled_sample_count_test = db[DEBUG=0;].probe_sample_count(144, 1, mono)
 probe_disabled_time_ms_test = db[DEBUG=0;].probe_time_ms(145, 1, mono);
 
 // Example pulled from debug.lib documentation.
-left = os.osc(220) : fi.lowpass(2, 1200);
-right = os.osc(330) : fi.highpass(2, 400);
+left = os.tosc(220) : fi.lowpass(2, 1200);
+right = os.tosc(330) : fi.highpass(2, 400);
 stereo = (left, right)
   : (fi.lowpass(2, 2000), fi.highpass(2, 700));
 probe_tap_n_example = stereo

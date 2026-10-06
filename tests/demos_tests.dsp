@@ -7,7 +7,7 @@ dm = library("demos.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 
-monoOsc(freq) = os.osc(freq);
+monoOsc(freq) = os.tosc(freq);
 stereoOsc(f1, f2) = monoOsc(f1), monoOsc(f2);
 stereoNoise = no.noise, no.noise;
 
@@ -28,7 +28,7 @@ phaser2_demo_test = stereoOsc(440, 442) : dm.phaser2_demo;
 tapeStop_demo_test = stereoOsc(440, 442) : dm.tapeStop_demo;
 freeverb_demo_test = stereoOsc(440, 442) : dm.freeverb_demo;
 springreverb_demo_test = monoOsc(220) : dm.springreverb_demo;
-stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(!);
+stereo_reverb_tester_test = stereoNoise : dm.stereo_reverb_tester(_);
 fdnrev0_demo_test = stereoNoise : dm.fdnrev0_demo(16, 5, 3);
 zita_rev_fdn_demo_test = par(i, 8, monoOsc(440 + i)) : dm.zita_rev_fdn_demo;
 zita_light_test = stereoOsc(440, 442) : dm.zita_light;
@@ -43,6 +43,7 @@ sawtooth_demo_test = dm.sawtooth_demo + monoOsc(110) * 0.001;
 virtual_analog_oscillator_demo_test = dm.virtual_analog_oscillator_demo;
 twin_osc_demo_test = dm.twin_osc_demo;
 oscrs_demo_test = dm.oscrs_demo;
+oscr_demo_test = dm.oscr_demo;
 velvet_noise_demo_test = dm.velvet_noise_demo;
 latch_demo_test = dm.latch_demo;
 envelopes_demo_test = dm.envelopes_demo;

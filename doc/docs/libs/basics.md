@@ -172,7 +172,7 @@ Note that t60 (time to decay 60 dB) is ~6.91 time constants.
 #### Usage
 
 ```
-_ : smooth(tau2pole(tau)) : _
+_ : si.smooth(tau2pole(tau)) : _
 ```
 
 Where:
@@ -580,7 +580,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-ramp_test = os.osc(1) : ba.ramp(256);
+ramp_test = os.tosc(1) : ba.ramp(256);
 ```
 
 ----
@@ -608,8 +608,9 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-line_test = os.osc(1) : ba.line(256);
+line_test = os.tosc(1) : ba.line(256);
 line_frac_test = os.lf_squarewavepos(100) : ba.line(4.8);
+line_slider_test = os.tosc(1) : ba.line(hslider("line:n", 256, 1, 4096, 1));
 ```
 
 ----
@@ -1178,11 +1179,16 @@ with {
 
 Tabulate a 1D function over the range [r0, r1] for access via nearest-value, linear, cubic interpolation.
 In other words, the uniformly tabulated function can be evaluated using interpolation of order 0 (none), 1 (linear), or 3 (cubic).
+`tabulate(C, FX, S, r0, r1, x).val` uses the value in the table closest to x,
+`.lin` evaluates at x using linear interpolation between the closest stored values,
+and `.cub` evaluates at x using cubic interpolation between the closest stored values.
 
 #### Usage
 
 ```
-tabulate(C, FX, S, r0, r1, x).(val|lin|cub) : _
+tabulate(C, FX, S, r0, r1, x).val : _
+tabulate(C, FX, S, r0, r1, x).lin : _
+tabulate(C, FX, S, r0, r1, x).cub : _
 ```
 
 Where:
@@ -1194,18 +1200,6 @@ Where:
 * `r1`: maximum value of argument x
 * `x`: input value used to read the tabulated function
 
-```
-tabulate(C, FX, S, r0, r1, x).val uses the value in the table closest to x
-```
-
-```
-tabulate(C, FX, S, r0, r1, x).lin evaluates at x using linear interpolation between the closest stored values
-```
-
-```
-tabulate(C, FX, S, r0, r1, x).cub evaluates at x using cubic interpolation between the closest stored values
-```
-
 #### Example test program
 
 ```
@@ -1216,7 +1210,10 @@ process = midikey2hz(ba.time), ba.midikey2hz(ba.time);
 #### Test
 ```
 ba = library("basics.lib");
+ma = library("maths.lib");
 tabulate_test = ba.tabulate(1, ba.midikey2hz, 128, 0, 127, 60).lin;
+tabulate_modulated_test = ba.tabulate(1, ba.midikey2hz, 128, 0, 127, 127*tri).lin with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tabulate_cub_modulated_test = ba.tabulate(1, ba.midikey2hz, 128, 0, 127, 127*tri).cub with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
@@ -1235,7 +1232,7 @@ or use `C = 1`.
 #### Usage
 
 ```
-_ : tabulate_chebychev(C, FX, NX, CD, r0, r1) : _
+tabulate_chebychev(C, FX, NX, CD, r0, r1, x) : _
 ```
 
 Where:
@@ -1273,17 +1270,23 @@ The number of dimensions is deduced from the number of parameters you give, see 
 
 Note that processing the last point in each interval is not safe. So either be sure the inputs stay in their respective ranges, or use `C = 1`. Similarly for the first point when doing cubic interpolation.
 
+The user facing functions are `tabulateNd(C, function, parameters).val`, which uses the value in the table closest to x,
+`.lin`, which evaluates at x using linear interpolation between the closest stored values,
+and `.cub`, which evaluates at x using cubic interpolation between the closest stored values.
+
 #### Usage
 
 ```
-tabulateNd(C, function, (parameters) ).(val|lin|cub) : _
+tabulateNd(C, function, parameters).val : _
+tabulateNd(C, function, parameters).lin : _
+tabulateNd(C, function, parameters).cub : _
 ```
 
 Where:
 
 * `C`: whether to dynamically force the parameter values for each dimension to the ranges specified in parameters: 1 forces the check, 0 deactivates it (constant numerical expression)
 * `function`: the function we want to tabulate. Can have any number of inputs, but needs to have just one output.
-* `(parameters)`: sizes, ranges and read values. Note: these need to be in brackets, to make them one entity.  
+* `parameters`: sizes, ranges and read values. Note: these need to be in parentheses, to make them one entity.  
 
   If N is the number of dimensions, we need:
 
@@ -1293,20 +1296,6 @@ Where:
   * N times `x`: read value of this dimension
 
 By providing these parameters, you indirectly specify the number of dimensions; it's the number of parameters divided by 4.
-
-The user facing functions are:
-```
-tabulateNd(C, function, S, parameters).val
-```
- - Uses the value in the table closest to x.
-```
-tabulateNd(C, function, S, parameters).lin
-```
- - Evaluates at x using linear interpolation between the closest stored values.
-```
-tabulateNd(C, function, S, parameters).cub
-```
- - Evaluates at x using cubic interpolation between the closest stored values.
 
 
 #### Example test program
@@ -1556,8 +1545,11 @@ In the interest of brevity, we'll stop explaining here. If you have any more que
 #### Test
 ```
 ba = library("basics.lib");
+ma = library("maths.lib");
 powSin(x,y) = sin(pow(x,y));
 tabulateNd_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 3.0,4.0)).lin;
+tabulateNd_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).lin with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tabulateNd_cub_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).cub with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ## Selectors (Conditions)
@@ -1593,22 +1585,23 @@ if_test = ba.if(1, 0.5, -0.5);
 
 if-then-elseif-then-...elsif-then-else implemented on top of `ba.if`.
 
+The branches are given as one list, `(cond1,then1, cond2,then2, ..., condN,thenN, else)`,
+where `condX` is a condition, `thenX` the signal selected if `condX` is the
+1st true condition, and `else` the signal selected if all the cond1-condN
+conditions are false; the number of branches/conditions `Nc` is deduced
+from the list. They can also be given as arguments, `ifNc(Nc, cond1,then1, ..., else)`,
+or as the 2*Nc+1 inputs of `ifNc(Nc)`, `Nc` being then a constant numerical
+expression (see the example).
+
 #### Usage
 
 ```
-   ifNc((cond1,then1, cond2,then2, ... condN,thenN, else)) : _
-or
-   ifNc(Nc, cond1,then1, cond2,then2, ... condN,thenN, else) : _
-or
-   cond1,then1, cond2,then2, ... condN,thenN, else : ifNc(Nc) : _
+ifNc(branches) : _
 ```
 
 Where:
 
-* `Nc` : number of branches/conditions (constant numerical expression)
-* `condX`: condition
-* `thenX`: signal selected if condX is the 1st true condition
-* `else`: signal selected if all the cond1-condN conditions are false
+* `branches`: the list `(cond1,then1, cond2,then2, ..., condN,thenN, else)`, in parentheses
 
 #### Example test program
 
@@ -1634,19 +1627,22 @@ ifNc_test = ba.ifNc((1, 10, 0, 20, 30));
 
 `ifNcNo(Nc,No)` is similar to `ifNc(Nc)` above but then/else branches have `No` outputs.
 
+`ifNcNo(Nc,No)` has Nc*(No+1)+No inputs: `cond1,then1, cond2,then2, ..., condN,thenN, else`,
+where `condX` is a condition, `thenX` a list of No signals selected if `condX`
+is the 1st true condition, and `else` a list of No signals selected if all the
+cond1-condN conditions are false. They can also be given as arguments,
+`ifNcNo(Nc,No, cond1,then1, ..., else)` (see the example).
+
 #### Usage
 
 ```
-   ifNcNo(Nc,No, cond1,then1, cond2,then2, ... condN,thenN, else) : sig.bus(No)
+si.bus(Nc*(No+1)+No) : ifNcNo(Nc,No) : si.bus(No)
 ```
 
 Where:
 
 * `Nc` : number of branches/conditions (constant numerical expression)
 * `No` : number of outputs (constant numerical expression)
-* `condX`: condition
-* `thenX`: list of No signals selected if condX is the 1st true condition
-* `else`: list of No signals selected if all the cond1-condN conditions are false
 
 #### Example test program
 
@@ -1831,7 +1827,7 @@ technique than `ba.selectmulti`.
 #### Usage
 
 ```
-process = si.bus(BUS_SIZE*NUM_BUSES) : selectbus(BUS_SIZE, NUM_BUSES, FADE, id) : si.bus(BUS_SIZE);
+process = si.bus(BUS_SIZE*NUM_BUSES) : selectxbus(BUS_SIZE, NUM_BUSES, fade, id) : si.bus(BUS_SIZE);
 ```
 
 Where:
@@ -1880,7 +1876,7 @@ os = library("oscillators.lib");
 ma = library("maths.lib");
 effects = ((_*0.5,_*0.5),(_*0.25,_*0.25));
 choice = int(checkbox("choice"));
-selectmulti_test = (os.osc(440), os.osc(660)) : ba.selectmulti(ma.SR/100, effects, choice);
+selectmulti_test = (os.tosc(440), os.tosc(660)) : ba.selectmulti(ma.SR/100, effects, choice);
 ```
 
 ----
@@ -1939,7 +1935,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-latch_test = os.osc(2) : ba.latch(ba.pulse(32));
+latch_test = os.tosc(2) : ba.latch(ba.pulse(32));
 latch_inf_test = (1 / (ba.time - 3)) : ba.latch(ba.time == 1);
 ```
 
@@ -1964,7 +1960,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-sAndH_test = os.osc(2) : ba.sAndH(ba.pulse(32));
+sAndH_test = os.tosc(2) : ba.sAndH(ba.pulse(32));
 ```
 
 ----
@@ -1988,7 +1984,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 isPositive(x) = x > 0.0;
-tAndH_test = os.osc(2) : ba.tAndH(isPositive);
+tAndH_test = os.tosc(2) : ba.tAndH(isPositive);
 ```
 
 ----
@@ -2020,7 +2016,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-downSample_test = os.osc(440) : ba.downSample(11025);
+downSample_test = os.tosc(440) : ba.downSample(11025);
 ```
 
 ----
@@ -2045,7 +2041,8 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-downSampleCV_test = os.osc(440) : ba.downSampleCV(0.5);
+downSampleCV_test = os.tosc(440) : ba.downSampleCV(0.5);
+downSampleCV_slider_test = os.tosc(440) : ba.downSampleCV(hslider("downSampleCV:amt", 0.5, 0, 1, 0.01));
 ```
 
 ----
@@ -2070,7 +2067,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-peakhold_test = os.osc(440) : ba.peakhold(1);
+peakhold_test = os.tosc(440) : ba.peakhold(1);
 ```
 
 ----
@@ -2101,7 +2098,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-peakholder_test = os.osc(440) : ba.peakholder(ba.sec2samp(0.1));
+peakholder_test = os.tosc(440) : ba.peakholder(ba.sec2samp(0.1));
 ```
 
 ----
@@ -2150,7 +2147,7 @@ button("gate") : impulsify;
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-impulsify_test = os.osc(440) : ba.impulsify;
+impulsify_test = os.tosc(440) : ba.impulsify;
 ```
 
 ----
@@ -2205,12 +2202,8 @@ f = bpf.start(x0,y0) : bpf.point(x1,y1) : bpf.point(x2,y2) : bpf.end(x3,y3);
 ```
 
 In any case the `x_{i}` must be in increasing order (for all `i`, `x_{i} < x_{i+1}`).
-For example the following definition:
-
-```
-f = bpf.start(x0,y0) : ... : bpf.point(xi,yi) : ... : bpf.end(xn,yn);
-```
-
+For example, a definition `f` made of a `start` at `(x_{0},y_{0})`, a `point`
+at each `(x_{i},y_{i})`, and an `end` at `(x_{n},y_{n})`,
 implements a break-point function f such that:
 
 * `f(x) = y_{0}` when `x < x_{0}`
@@ -2299,7 +2292,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-bypass1_test = os.osc(440) : ba.bypass1(button("bypass"), *(0.5));
+bypass1_test = os.tosc(440) : ba.bypass1(button("bypass"), *(0.5));
 ```
 
 ----
@@ -2325,7 +2318,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-bypass2_test = (os.osc(440), os.osc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
+bypass2_test = (os.tosc(440), os.tosc(660)) : ba.bypass2(button("bypass"), par(i,2, *(0.5)));
 ```
 
 ----
@@ -2353,7 +2346,7 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 monoToStereo(x) = (x*0.5, x*0.25);
-bypass1to2_test = os.osc(440) : ba.bypass1to2(button("bypass"), monoToStereo);
+bypass1to2_test = os.tosc(440) : ba.bypass1to2(button("bypass"), monoToStereo);
 ```
 
 ----
@@ -2369,9 +2362,7 @@ Bypassed circuits can be chained.
 #### Usage
 
 ```
-_ : bypass_fade(n,b,e) : _
-or
-_,_ : bypass_fade(n,b,e) : _,_
+si.bus(inputs(e)) : bypass_fade(n,b,e) : si.bus(outputs(e))
 ```
 
 Where:
@@ -2391,7 +2382,7 @@ process = bypass_fade(ma.SR/10, checkbox("bypass reverb"), freeverb);
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-bypass_fade_test = (os.osc(440), os.osc(660)) : ba.bypass_fade(128, button("bypass"), par(i,2, *(0.5)));
+bypass_fade_test = (os.tosc(440), os.tosc(660)) : ba.bypass_fade(128, button("bypass"), par(i,2, *(0.5)));
 ```
 
 ----
@@ -2428,8 +2419,13 @@ The first channel set the output to 1, the second channel to 0.
 #### Usage
 
 ```
-_,_ : on_and_off : _
+on_and_off(a, b) : _
 ```
+
+Where:
+
+* `a`: trigger that sets the output to 1, on its rising edges (0 to 1)
+* `b`: trigger that sets the output to 0, on its rising edges (0 to 1)
 
 #### Example test program
 
@@ -2463,7 +2459,7 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-bitcrusher_test = os.osc(440) : ba.bitcrusher(8);
+bitcrusher_test = os.tosc(440) : ba.bitcrusher(8);
 ```
 
 ----
@@ -2519,7 +2515,7 @@ parameter `mu` of 255 and 8-bit quantization. This creates a distorted, "lo-fi" 
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-mulaw_bitcrusher_test = os.osc(440) : ba.mulaw_bitcrusher(2.0, 8);
+mulaw_bitcrusher_test = os.tosc(440) : ba.mulaw_bitcrusher(2.0, 8);
 ```
 #### References
 
@@ -2712,7 +2708,10 @@ minimum, we need to give `ma.MAX` as `disabledVal`.
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-slidingReduce_test = os.osc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
+no = library("noises.lib");
+slidingReduce_test = os.tosc(440) : ba.slidingReduce(max, 64, 64, 0 - ma.MAX);
+slidingReduce_slider_test = os.tosc(440) : ba.slidingReduce(max, hslider("slidingReduce:n", 64, 1, 64, 1), 64, 0 - ma.MAX);
+slidingReduce_modulated_test = no.noise : ba.slidingReduce(max, n, 128, 0 - ma.MAX) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2738,7 +2737,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingSum_test = os.osc(440) : ba.slidingSum(64);
+ma = library("maths.lib");
+no = library("noises.lib");
+slidingSum_test = os.tosc(440) : ba.slidingSum(64);
+slidingSum_slider_test = os.tosc(440) : ba.slidingSum(hslider("slidingSum:n", 64, 1, 128, 1));
+slidingSum_modulated_test = no.noise : ba.slidingSum(n) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2764,7 +2767,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingSump_test = os.osc(440) : ba.slidingSump(64, 128);
+ma = library("maths.lib");
+no = library("noises.lib");
+slidingSump_test = os.tosc(440) : ba.slidingSump(64, 128);
+slidingSump_slider_test = os.tosc(440) : ba.slidingSump(hslider("slidingSump:n", 64, 1, 128, 1), 128);
+slidingSump_modulated_test = no.noise : ba.slidingSump(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2789,7 +2796,10 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-slidingMax_test = os.osc(440) : ba.slidingMax(64, 128);
+no = library("noises.lib");
+slidingMax_test = os.tosc(440) : ba.slidingMax(64, 128);
+slidingMax_slider_test = os.tosc(440) : ba.slidingMax(hslider("slidingMax:n", 64, 1, 128, 1), 128);
+slidingMax_modulated_test = no.noise : ba.slidingMax(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2814,7 +2824,10 @@ Where:
 ba = library("basics.lib");
 os = library("oscillators.lib");
 ma = library("maths.lib");
-slidingMin_test = os.osc(440) : ba.slidingMin(64, 128);
+no = library("noises.lib");
+slidingMin_test = os.tosc(440) : ba.slidingMin(64, 128);
+slidingMin_slider_test = os.tosc(440) : ba.slidingMin(hslider("slidingMin:n", 64, 1, 128, 1), 128);
+slidingMin_modulated_test = no.noise : ba.slidingMin(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2840,7 +2853,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingMean_test = os.osc(440) : ba.slidingMean(64);
+ma = library("maths.lib");
+no = library("noises.lib");
+slidingMean_test = os.tosc(440) : ba.slidingMean(64);
+slidingMean_slider_test = os.tosc(440) : ba.slidingMean(hslider("slidingMean:n", 64, 1, 128, 1));
+slidingMean_modulated_test = no.noise : ba.slidingMean(n) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2866,7 +2883,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingMeanp_test = os.osc(440) : ba.slidingMeanp(64, 128);
+ma = library("maths.lib");
+no = library("noises.lib");
+slidingMeanp_test = os.tosc(440) : ba.slidingMeanp(64, 128);
+slidingMeanp_slider_test = os.tosc(440) : ba.slidingMeanp(hslider("slidingMeanp:n", 64, 1, 128, 1), 128);
+slidingMeanp_modulated_test = no.noise : ba.slidingMeanp(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2877,6 +2898,7 @@ The root mean square of the last n input samples.
 
 It will eventually run into numerical trouble when there is a persistent dc component.
 If that matters in your application, use the more CPU-intensive `ba.slidingRMSp`.
+
 
 #### Usage
 
@@ -2892,7 +2914,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingRMS_test = os.osc(440) : ba.slidingRMS(64);
+ma = library("maths.lib");
+no = library("noises.lib");
+slidingRMS_test = os.tosc(440) : ba.slidingRMS(64);
+slidingRMS_slider_test = os.tosc(440) : ba.slidingRMS(hslider("slidingRMS:n", 64, 1, 128, 1));
+slidingRMS_modulated_test = no.noise : ba.slidingRMS(n) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ----
@@ -2918,7 +2944,11 @@ Where:
 ```
 ba = library("basics.lib");
 os = library("oscillators.lib");
-slidingRMSp_test = os.osc(440) : ba.slidingRMSp(64, 128);
+ma = library("maths.lib");
+no = library("noises.lib");
+slidingRMSp_test = os.tosc(440) : ba.slidingRMSp(64, 128);
+slidingRMSp_slider_test = os.tosc(440) : ba.slidingRMSp(hslider("slidingRMSp:n", 64, 1, 128, 1), 128);
+slidingRMSp_modulated_test = no.noise : ba.slidingRMSp(n, 128) with { P = int(ma.SR/10); m = 112*(P - abs(2*ba.period(P) - P)); n = 16 + int((m - m % P)/P + 0.5) : max(16) : min(128); };
 ```
 
 ## Parallel Operators

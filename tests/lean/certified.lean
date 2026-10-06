@@ -2,6 +2,8 @@
   Lean 4 specification for:
 
     faustlibraries-code-doc-audit-2026-08-15-en.md, §10.3 architecture B
+    (no longer in the tree; read it with
+     git show 189de85a:faustlibraries-code-doc-audit-2026-08-15-en.md)
 
   Scope
   -----
