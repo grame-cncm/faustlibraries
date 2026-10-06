@@ -188,7 +188,11 @@ def measure(s, d, sr):
         elif a > 1e-12:
             level = float("inf")
     m["level"] = float(level)
-    m.update(error_profile(s, d, sr))
+    # The profile squares the samples: for outputs near the largest finite
+    # number (MAX_test is ma.MAX, 1.8e308 in double) that overflows. Its figures
+    # are diagnostics only, the verdict rests on the scaled level above.
+    with np.errstate(over="ignore", invalid="ignore"):
+        m.update(error_profile(s, d, sr))
     # onset_bits[k] : the first sample where |s - d| reaches 2^-k (any channel), None if
     # never -- the precision in bits along time : k bits hold until onset_bits[k]
     ea = np.maximum.accumulate(np.abs(s - d).max(axis=1)) if d.shape[0] else np.zeros(0)
