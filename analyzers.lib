@@ -36,7 +36,7 @@ os = library("oscillators.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "1.5.1";
+declare version "1.5.0";
 
 /************************************************************************
 FAUST library file, jos section
@@ -1266,15 +1266,9 @@ window_bartlett(x) = max(0.0, 1.0 - abs(2.0*x - 1.0)) * ((x >= 0.0) & (x <= 1.0)
 // window_cosN_test = an.window_cosN((0.5, -0.5), os.lf_sawpos(100));
 // ```
 //---------------------------------------------------
-window_cosN(coeffs, x) = (ba.take(1, coeffs) + higher(ba.count(coeffs)))
+window_cosN(coeffs, x) = sum(k, K, ba.take(k+1, coeffs) * cos(k*ma.PI*2.0*x))
                          * ((x >= 0.0) & (x <= 1.0))
-with {
-    // a0 is added as a constant rather than as a0*cos(0*x): Faust folds
-    // 0*x to 0 only when x is known finite, so cos(0*x) would otherwise be
-    // computed every sample unless the C++ compiler runs with -ffast-math
-    higher(1) = 0;
-    higher(K) = sum(k, K-1, ba.take(k+2, coeffs) * cos((k+1)*ma.PI*2.0*x));
-};
+with { K = ba.count(coeffs); };
 window_cosN(a0, x) = a0 * ((x >= 0.0) & (x <= 1.0));
 
 //---------------`(an.)window_tukey`--------------------------
