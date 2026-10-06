@@ -1122,7 +1122,8 @@ End-to-end motion feature monitor built on motion.lib:
 - Ingests six 3-axis IMUs (left arm, feet, back, right arm, head, stomach).
 - Derives shock triggers, inclinometers, projected gravity, accel/gyro envelopes,
   six-face orientation weights per sensor, and raw/scaled axis taps.
-- Exposes 92 UI-gated outputs matching the motion.lib signal names.
+- Exposes 92 outputs matching the motion.lib signal names, each gated by
+  its own checkbox: an output whose checkbox is off is 0.
 
 The 18 inputs are, in order: `leftArm_x`, `leftArm_y`, `leftArm_z`,
 `feet_x`, `feet_y`, `feet_z`, `back_x`, `back_y`, `back_z`,
