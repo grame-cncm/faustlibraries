@@ -26,7 +26,8 @@ utilities.
 
 ### `(ma.)SR`
 
-Current sampling rate given at init time. Constant during program execution.
+Current sampling rate given at init time, between 50 and 192000 Hz
+(see `pl.SR`). Constant during program execution.
 
 #### Usage
 
