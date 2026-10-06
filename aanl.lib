@@ -49,7 +49,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Antialiased Nonlinearities";
-declare version "1.5.1";
+declare version "1.6.0";
 
 //==============================Auxiliary Functions=======================================
 //========================================================================================
@@ -681,6 +681,108 @@ sinarctan2(x) = ADAA2(EPS, f, F1, F2, x)
                    const = -1.0; // for F1(0) = 0 to minimise precision loss
                };
            F2(x_F2) = .5 * x_F2 * sqrt(x_F2 ^ 2.0 + 1.0) - .5 * ma.asinh(x_F2);
+      };
+
+
+//-------`(aa.)sinarctanStable`---------------------
+//
+// First-order ADAA sin(atan()) saturator, x / sqrt(1 + x^2), evaluated without a
+// threshold or fallback branch.
+//
+// With F(x) = sqrt(1 + x^2), the difference quotient of `aa.sinarctan` is
+// rewritten as (x[n] + x[n-1]) / (F(x[n]) + F(x[n-1])), which has no
+// cancellation when x[n] is close to x[n-1] and is exact for any pair of
+// samples. The output is delayed by half a sample, and at Nyquist the linear
+// response is zero, as for any first-order ADAA with a one-sample rectangular
+// kernel. See `aa.sinarctanTransparent` for a version with a flat linear response.
+//
+// The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
+//
+// #### Usage
+// ```
+// sinarctanStable(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// os = library("oscillators.lib");
+// sig = os.tosc(110);
+// sinarctanStable_test = aa.sinarctanStable(5.0 * sig);
+// ```
+//
+// #### References
+//
+// * M. Vicanek, "Note on Alias Suppression in Digital Distortion", 2023
+//   (revised 2024), eq. (9), <https://vicanek.de/articles/AADistortion.pdf>
+//----------------------------------------------
+declare sinarctanStable author "David Braun";
+declare sinarctanStable copyright "Copyright (C) 2026 David Braun";
+declare sinarctanStable license "MIT";
+sinarctanStable(x) = (x + x') / (F(x) + F(x'))
+      with {
+           F(x_F) = sqrt(1.0 + x_F ^ 2.0);
+      };
+
+
+//-------`(aa.)sinarctanTransparent`---------------------
+//
+// First-order ADAA sin(atan()) saturator, x / sqrt(1 + x^2), with a flat
+// magnitude response in the linear regime.
+//
+// The rectangular kernel of the antiderivative method is delayed by half a
+// sample, which gives a lowpass of -6 dB at Nyquist (y = (x[n] + 6 x[n-1] +
+// x[n-2]) / 8 for f(x) = x) instead of the zero of the undelayed kernel. The
+// two zeros of that filter are at z = -1 / (3 + sqrt(8)) and its reciprocal, so
+// two identical one-pole filters, y[n] = (1 + a) x[n] - a y[n-1] with
+// a = 1 / (3 + sqrt(8)), one before and one after the shaper, cancel it. Each
+// has unit gain at DC. The output is delayed by one sample.
+//
+// The domain of this function is ℝ; because of the post filter its output can
+// exceed [-1.0; 1.0] by up to about 7 % (a full-scale step peaks at 1.071).
+//
+// #### Usage
+// ```
+// sinarctanTransparent(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: input signal
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// os = library("oscillators.lib");
+// sig = os.tosc(110);
+// sinarctanTransparent_test = aa.sinarctanTransparent(5.0 * sig);
+// ```
+//
+// #### References
+//
+// * M. Vicanek, "Note on Alias Suppression in Digital Distortion", 2023
+//   (revised 2024), eqs. (4), (6) and (10),
+//   <https://vicanek.de/articles/AADistortion.pdf>
+//----------------------------------------------
+declare sinarctanTransparent author "David Braun";
+declare sinarctanTransparent copyright "Copyright (C) 2026 David Braun";
+declare sinarctanTransparent license "MIT";
+sinarctanTransparent(x) = x : comp : shaper : comp
+      with {
+           a = 1.0 / (3.0 + sqrt(8.0));
+           b = 1.0 + a;
+           comp = *(b) : (+ ~ *(0.0 - a));
+           shaper(v) = 0.25 * ((v + 3.0 * v1) / (F(0.5 * (v + v1)) + F(v1))
+                             + (3.0 * v1 + v2) / (F(v1) + F(0.5 * (v1 + v2))))
+               with {
+                   v1 = v';
+                   v2 = v1';
+                   F(x_F) = sqrt(1.0 + x_F ^ 2.0);
+               };
       };
 
 

@@ -25,6 +25,8 @@
 [(aa.)hyperbolic2](aanl.md#aahyperbolic2)
 [(aa.)sinarctan](aanl.md#aasinarctan)
 [(aa.)sinarctan2](aanl.md#aasinarctan2)
+[(aa.)sinarctanStable](aanl.md#aasinarctanstable)
+[(aa.)sinarctanTransparent](aanl.md#aasinarctantransparent)
 [(aa.)softclipQuadratic1](aanl.md#aasoftclipquadratic1)
 [(aa.)softclipQuadratic2](aanl.md#aasoftclipquadratic2)
 [(aa.)tanh1](aanl.md#aatanh1)

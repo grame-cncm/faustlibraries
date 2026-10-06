@@ -564,6 +564,91 @@ sinarctan2_test = aa.sinarctan2(sig);
 
 ----
 
+### `(aa.)sinarctanStable`
+
+![sinarctanStable — response plots](../img/aa_sinarctanStable.svg)
+
+
+First-order ADAA sin(atan()) saturator, x / sqrt(1 + x^2), evaluated without a
+threshold or fallback branch.
+
+With F(x) = sqrt(1 + x^2), the difference quotient of `aa.sinarctan` is
+rewritten as (x[n] + x[n-1]) / (F(x[n]) + F(x[n-1])), which has no
+cancellation when x[n] is close to x[n-1] and is exact for any pair of
+samples. The output is delayed by half a sample, and at Nyquist the linear
+response is zero, as for any first-order ADAA with a one-sample rectangular
+kernel. See `aa.sinarctanTransparent` for a version with a flat linear response.
+
+The domain of this function is ℝ; its theoretical range is [-1.0; 1.0].
+
+#### Usage
+```
+sinarctanStable(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
+#### Test
+```
+aa = library("aanl.lib");
+os = library("oscillators.lib");
+sig = os.tosc(110);
+sinarctanStable_test = aa.sinarctanStable(5.0 * sig);
+```
+
+#### References
+
+* M. Vicanek, "Note on Alias Suppression in Digital Distortion", 2023
+  (revised 2024), eq. (9), [https://vicanek.de/articles/AADistortion.pdf](https://vicanek.de/articles/AADistortion.pdf)
+
+----
+
+### `(aa.)sinarctanTransparent`
+
+![sinarctanTransparent — response plots](../img/aa_sinarctanTransparent.svg)
+
+
+First-order ADAA sin(atan()) saturator, x / sqrt(1 + x^2), with a flat
+magnitude response in the linear regime.
+
+The rectangular kernel of the antiderivative method is delayed by half a
+sample, which gives a lowpass of -6 dB at Nyquist (y = (x[n] + 6 x[n-1] +
+x[n-2]) / 8 for f(x) = x) instead of the zero of the undelayed kernel. The
+two zeros of that filter are at z = -1 / (3 + sqrt(8)) and its reciprocal, so
+two identical one-pole filters, y[n] = (1 + a) x[n] - a y[n-1] with
+a = 1 / (3 + sqrt(8)), one before and one after the shaper, cancel it. Each
+has unit gain at DC. The output is delayed by one sample.
+
+The domain of this function is ℝ; because of the post filter its output can
+exceed [-1.0; 1.0] by up to about 7 % (a full-scale step peaks at 1.071).
+
+#### Usage
+```
+sinarctanTransparent(x) : _
+```
+
+Where:
+
+* `x`: input signal
+
+#### Test
+```
+aa = library("aanl.lib");
+os = library("oscillators.lib");
+sig = os.tosc(110);
+sinarctanTransparent_test = aa.sinarctanTransparent(5.0 * sig);
+```
+
+#### References
+
+* M. Vicanek, "Note on Alias Suppression in Digital Distortion", 2023
+  (revised 2024), eqs. (4), (6) and (10),
+  [https://vicanek.de/articles/AADistortion.pdf](https://vicanek.de/articles/AADistortion.pdf)
+
+----
+
 ### `(aa.)softclipQuadratic1`
 
 ![softclipQuadratic1 — response plots](../img/aa_softclipQuadratic1.svg)
