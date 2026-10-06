@@ -1013,6 +1013,75 @@ transpose_windowed_jump_test = os.tosc(440) : ef.transpose_windowed(2, 1024, 24*
 
 ----
 
+### `(ef.)transpose_correlated`
+
+Time-domain pitch shifter with correlation-aligned delay-tap splices.
+A sparse normalized cross-correlation search matches waveform sections
+before a four-point Hermite interpolator and correlation-normalized
+crossfade combine the two read taps. An onset detector uses shorter fades
+at attacks. Searches are distributed over samples, with at most one full
+correlation candidate every two samples rather than a burst of work.
+
+Processes a mixed/polyphonic signal without detecting individual notes.
+Correlation alignment can reduce splice artifacts on periodic material;
+polyphonic material can still have coloration, weak partials or detuning,
+including at the recommended 30 ms window. This does not guarantee the
+pitch accuracy of every chord voice. Start with 30 or 40 ms; short windows
+can worsen these artifacts.
+It does not preserve formants or remove aliasing during upward shifts.
+Latency varies with the read taps (approximately 2 ms to the window
+length). Startup primes the history, then blends dry to wet over 25 ms.
+When initialized at zero shift, the settled output is the input delayed
+by floor(0.002*SR) samples. Switching to zero retains the current tap delay.
+Use external dry/wet mixing or bypass when needed.
+
+The matching history spans approximately 25 ms, using 138 points with
+a sample-rate-scaled stride. The onset history and bounded scheduling
+clock support long sessions at sample rates from 44.1 through 192 kHz.
+Hold the window steady during a search. Abrupt changes or audio-rate
+modulation can interrupt matching and create transition artifacts;
+smoothing pitch controls is recommended. Independent channel instances
+do not share splice choices, so this is not a linked stereo shifter.
+The guarded correlation search uses the control primitive. Supported code
+generators are scalar C++ and WebAssembly (the default scheduling mode).
+Faust's -vec mode and the legacy -lang ocpp generator are not supported.
+
+#### Usage
+
+```
+_ : transpose_correlated(w, s) : _
+```
+
+Where:
+
+* `w`: maximum tap delay/window length in samples, may vary at run time;
+  clamped to floor(0.020*SR)..floor(0.040*SR). Use 0.030*SR to start.
+* `s`: pitch shift in semitones, may vary at run time; clamped to -12..12.
+  Positive values shift up, negative values shift down, fractions are allowed.
+
+#### Test
+```
+ef = library("misceffects.lib");
+os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+transpose_correlated_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, -12);
+transpose_correlated_slider_test = os.tosc(440) : ef.transpose_correlated(hslider("transpose_correlated:w", 0.030, 0.020, 0.040, 0.001)*ma.SR, hslider("transpose_correlated:s", -12, -12, 12, 0.1));
+transpose_correlated_modulated_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 24*tri - 12) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+transpose_correlated_jump_test = os.tosc(440) : ef.transpose_correlated((0.020 + 0.020*sq)*ma.SR, 24*sq - 12) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+transpose_correlated_up_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 12);
+transpose_correlated_unison_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 0);
+transpose_correlated_chord_test = 0.25*(os.tosc(110) + os.tosc(146.8323839587) + os.tosc(164.8137784564)) : ef.transpose_correlated(0.030*ma.SR, -12);
+```
+
+#### References
+
+* Adapted from the MIT-licensed TONE3000 time-domain pitch shifter:
+  [https://github.com/tone-3000/tone3000-plugin/blob/ef6f178/plugin/src/PitchShift.cpp](https://github.com/tone-3000/tone3000-plugin/blob/ef6f178/plugin/src/PitchShift.cpp)
+* FAUST implementation and scheduling optimizations: Chaos Audio.
+
+----
+
 ### `(ef.)granular`
 
 Live granulator on an internal delay line: `P` voices continuously replay

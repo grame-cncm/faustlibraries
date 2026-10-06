@@ -67,7 +67,7 @@ aa = library("aanl.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.6.2";
+declare version "2.7.0";
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -1425,6 +1425,327 @@ with {
     ph = (+(f) ~ ma.frac);                     // master phase in [0,1)
     phi(i) = ma.frac(ph + float(i)/float(P));
     tap(i) = de.fdelay(maxDelay, w*phi(i), sig) * an.window_hann(phi(i));
+};
+
+/*
+FAUST implementation and optimizations developed for Chaos Audio.
+Copyright (c) 2026 Chaos Audio, for original contributions.
+These original contributions are licensed under the MIT terms below.
+
+Upstream MIT notice retained for material adapted from TONE3000:
+The following upstream notice does not attribute Chaos Audio's original
+FAUST implementation work or optimizations to TONE3000. This project began
+as a source-guided adaptation of the TONE3000 C++ pitch-shifting engine.
+Its upstream MIT notice is reproduced below.
+
+MIT License
+
+Copyright (c) 2026 TONE3000.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+//--------------`(ef.)transpose_correlated`----------------
+// Time-domain pitch shifter with correlation-aligned delay-tap splices.
+// A sparse normalized cross-correlation search matches waveform sections
+// before a four-point Hermite interpolator and correlation-normalized
+// crossfade combine the two read taps. An onset detector uses shorter fades
+// at attacks. Searches are distributed over samples, with at most one full
+// correlation candidate every two samples rather than a burst of work.
+//
+// Processes a mixed/polyphonic signal without detecting individual notes.
+// Correlation alignment can reduce splice artifacts on periodic material;
+// polyphonic material can still have coloration, weak partials or detuning,
+// including at the recommended 30 ms window. This does not guarantee the
+// pitch accuracy of every chord voice. Start with 30 or 40 ms; short windows
+// can worsen these artifacts.
+// It does not preserve formants or remove aliasing during upward shifts.
+// Latency varies with the read taps (approximately 2 ms to the window
+// length). Startup primes the history, then blends dry to wet over 25 ms.
+// When initialized at zero shift, the settled output is the input delayed
+// by floor(0.002*SR) samples. Switching to zero retains the current tap delay.
+// Use external dry/wet mixing or bypass when needed.
+//
+// The matching history spans approximately 25 ms, using 138 points with
+// a sample-rate-scaled stride. The onset history and bounded scheduling
+// clock support long sessions at sample rates from 44.1 through 192 kHz.
+// Hold the window steady during a search. Abrupt changes or audio-rate
+// modulation can interrupt matching and create transition artifacts;
+// smoothing pitch controls is recommended. Independent channel instances
+// do not share splice choices, so this is not a linked stereo shifter.
+// The guarded correlation search uses the control primitive. Supported code
+// generators are scalar C++ and WebAssembly (the default scheduling mode).
+// Faust's -vec mode and the legacy -lang ocpp generator are not supported.
+//
+// #### Usage
+//
+// ```
+// _ : transpose_correlated(w, s) : _
+// ```
+//
+// Where:
+//
+// * `w`: maximum tap delay/window length in samples, may vary at run time;
+//   clamped to floor(0.020*SR)..floor(0.040*SR). Use 0.030*SR to start.
+// * `s`: pitch shift in semitones, may vary at run time; clamped to -12..12.
+//   Positive values shift up, negative values shift down, fractions are allowed.
+//
+// #### Test
+// ```
+// ef = library("misceffects.lib");
+// os = library("oscillators.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// transpose_correlated_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, -12);
+// transpose_correlated_slider_test = os.tosc(440) : ef.transpose_correlated(hslider("transpose_correlated:w", 0.030, 0.020, 0.040, 0.001)*ma.SR, hslider("transpose_correlated:s", -12, -12, 12, 0.1));
+// transpose_correlated_modulated_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 24*tri - 12) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// transpose_correlated_jump_test = os.tosc(440) : ef.transpose_correlated((0.020 + 0.020*sq)*ma.SR, 24*sq - 12) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// transpose_correlated_up_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 12);
+// transpose_correlated_unison_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 0);
+// transpose_correlated_chord_test = 0.25*(os.tosc(110) + os.tosc(146.8323839587) + os.tosc(164.8137784564)) : ef.transpose_correlated(0.030*ma.SR, -12);
+// ```
+//
+// #### References
+//
+// * Adapted from the MIT-licensed TONE3000 time-domain pitch shifter:
+//   <https://github.com/tone-3000/tone3000-plugin/blob/ef6f178/plugin/src/PitchShift.cpp>
+// * FAUST implementation and scheduling optimizations: Chaos Audio.
+//------------------------------------------------------------
+declare transpose_correlated author "Chaos Audio";
+declare transpose_correlated license "MIT";
+transpose_correlated(w, s, x) = pitchShift(138, max(1,int(8*ma.SR/44100.0+0.5)), s, w, x)
+with {
+    pick(c, yes, no) = select2(c, no, yes);
+    clip(lo, hi, x) = max(lo, min(hi, x));
+    reduceMin(1) = _;
+    reduceMin(n) = (_,reduceMin(n-1)) : min;
+    reduceMax(1) = _;
+    reduceMax(n) = (_,reduceMax(n-1)) : max;
+    // A balanced sum keeps compiler recursion shallow for browser libfaust.
+    reduceSum(1) = _;
+    reduceSum(n) = (reduceSum(int(n/2)),reduceSum(n-int(n/2))) : +;
+
+    // Four-point Hermite interpolation of fractional tap positions.
+    hermite(delay, x) = ((a*t-b)*t+c)*t+x0 with {
+        // floor(now-delay) == now-ceil(delay), so t is the read-position fraction.
+        // Preserve circular history semantics during startup or late searches.
+        // Clamp neither the age nor its fraction: Hermite must interpolate in [0,1).
+        age = int(ceil(delay));
+        t = float(age)-delay;
+        xm1 = x@((age+1)&16383);
+        x0 = x@(age&16383);
+        x1 = x@((age-1)&16383);
+        x2 = x@((age-2)&16383);
+        c = 0.5*(x1-xm1);
+        v = x0-x1;
+        w = c+v;
+        a = w+v+0.5*(x2-x0);
+        b = w+a;
+    };
+
+    // Frozen reference ages grow together with the write head during a search.
+    // Reference samples share the continuously written input history ring.
+    correlation(N, STRIDE, refAge, nowAge, candidate, refEnergy, x) =
+        xy / (sqrt(max(0.0,xx*yy)) + 1.0e-9) with {
+        refBase = int(clip(0,16382-N*STRIDE,refAge));
+        destBase = int(clip(0,16382-N*STRIDE,nowAge+candidate));
+        ref(j) = x@(refBase+j*STRIDE+1);
+        dest(j) = x@(destBase+j*STRIDE+1);
+        xx = refEnergy;
+        xy = par(j,N,ref(j)*dest(j)) : reduceSum(N);
+        yy = par(j,N,dest(j)*dest(j)) : reduceSum(N);
+    };
+
+    pitchShift(N, STRIDE, semitones, windowSamples, x) =
+        (step ~ si.bus(25)) : (par(i,25,!),_) with {
+        sr = ma.SR;
+        ratio = pow(2.0, clip(-12.0,12.0,semitones)/12.0);
+        drift = abs(1.0-ratio);
+        direction = pick(ratio>1.0,1,pick(ratio<1.0,-1,0));
+        dMin = max(4,int(sr*0.002));
+        dMax = int(clip(int(sr*0.020),int(sr*0.040),windowSamples));
+        fadeDefault = max(8,int(sr*0.030));
+        fadeMaximum = max(fadeDefault,int(sr*0.120));
+        fadeMinimum = max(8,int(sr*0.006));
+        // Reserve two samples per coarse/fine job, including phase and setup.
+        // Coarse spacing doubles; fine refinement still checks every offset.
+        leadDefault = max(1,max(int(sr*0.008),
+            2*(int(ceil(float(dMax-dMin)/float(coarse)))+2*coarse+4)));
+        coarse = 2*max(1,int(sr/12000.0+0.5));
+        onsetSpan = int(sr*0.004);
+        onsetFade = max(8,int(sr*0.002));
+        refractory = int(sr*0.040);
+        hi0 = pick(ratio>1.0,max(float(fadeMinimum),
+            min(float(fadeMaximum),float(dMax-dMin)/(6.0*max(0.00001,drift)))),float(fadeMaximum));
+        cost = drift*(2.0*hi0+leadDefault+4.0)+6.0;
+        budget = dMax*0.5;
+        scale = pick((ratio>1.0)&(cost>budget),budget/max(1.0,cost),1.0);
+        fadeHi = max(pick(scale<1.0,8,fadeMinimum),int(hi0*scale));
+        fadeLo = min(fadeDefault,fadeHi);
+        lead = max(1,int(leadDefault*scale));
+        leadDrift = drift*(lead+4);
+        leadI = int(ceil(leadDrift));
+        fadeDrift = int(ceil(drift*pick(ratio>1.0,fadeHi,fadeMinimum)));
+        guard = max(dMin,int(max(0.0,ratio-1.0)*fadeHi)+4);
+        landLo = pick(ratio>1.0,min(guard+fadeDrift+leadI+2,dMax),dMin);
+        landHi = pick(ratio<1.0,max(dMin,dMax-fadeDrift-leadI-2),dMax);
+
+        // Onset detector: 600 Hz one-pole HPF and 2 ms squared-energy smoother.
+        hp = (x-x') : (+ ~ *(exp(-2.0*ma.PI*600.0/sr)));
+        smoothA = exp(-1.0/(sr*0.002));
+        energy = (hp*hp*(1.0-smoothA)) : (+ ~ *(smoothA));
+        cell = max(1,int(sr*0.001));
+        // A bounded clock preserves cell and search-job phase during long sessions.
+        clockStep(v) = pick(int(v)>=2*cell-1,0,int(v)+1);
+        tick = (clockStep ~ _)';
+        cellPhase = pick(tick>=cell,tick-cell,tick);
+        commit = cellPhase==0;
+
+        // State: tap ages, fade, search, held snapshot, refractory and detector reset.
+        step(a,b,phase,inc,fadeNcc,mode,next,lo,hi,bestD,bestS,bestN,
+             refAge,nowAge,jump,kind,wait,warm,oldRatio,fineCenter,
+             resetAge,resetEnergy,resetPulse,oldWindow,fadeLength) =
+            outA,outB,outPhase,outInc,outFadeNcc,outMode,outNext,outLo,outHi,
+            outBestD,outBestS,outBestN,outRefAge,outNowAge,outJump,outKind,
+            outWait,outWarm,ratio,outCenter,outResetAge,outResetEnergy,onsetStart,dMax,outLength,
+            audio with {
+            first = warm==0;
+            curA = pick(first,float(dMin),a);
+            curB = pick(first,float(dMin),b);
+            // Count fade samples exactly instead of accumulating a float phase.
+            fading = (int(phase)<int(fadeLength)) & (inc>0.0);
+            endFade = fading & ((int(phase)+1)>=int(fadeLength));
+            moved = (pick(oldRatio>1.0,1,pick(oldRatio<1.0,-1,0))!=direction)
+                | (abs(ratio-oldRatio)>0.1);
+            m = int(pick(first|moved|(dMax!=oldWindow),0,mode));
+            // The accepted-onset pulse resets the partial history cell on the
+            // following sample; virtual history replacement is immediate.
+            accMin(v) = pick(commit,energy,pick(resetPulse,min(resetEnergy,energy),min(v,energy)));
+            accMax(v) = pick(commit,energy,pick(resetPulse,max(resetEnergy,energy),max(v,energy)));
+            cellMin = ba.sAndH(commit,pick(resetPulse,resetEnergy,(accMin~_)'));
+            cellMax = ba.sAndH(commit,pick(resetPulse,resetEnergy,(accMax~_)'));
+
+            elapsedCells = int((resetAge+cell-cellPhase)/cell);
+            hmin(j) = pick(elapsedCells < (j+5),resetEnergy,
+                de.delay(16383,(j+4)*cell,cellMin));
+            hmax(j) = pick(elapsedCells < (j+5),resetEnergy,
+                de.delay(16383,(j+4)*cell,cellMax));
+            // Cache only the history scan. The energy/partial-cell updates and
+            // both sample-rate history rings continue running through attach below.
+            // Histories change at a cell boundary or the first post-onset sample.
+            historyRefresh = commit|resetPulse|first|(elapsedCells!=elapsedCells');
+            recentMin = control((par(j,45,hmin(j)) : reduceMin(45)),historyRefresh);
+            recentMax = control((par(j,45,hmax(j)) : reduceMax(45)),historyRefresh);
+            onset = (energy>1.0e-7)&(energy>recentMin*7.94)&(energy>recentMax*3.98);
+            onsetStart = (first==0)&(fading==0)&onset&(wait<=0)&(curA>landLo+onsetSpan);
+            driftStart = (first==0)&(fading==0)&(m==0)&
+                (((ratio<1.0)&(curA>=dMax-leadDrift))|
+                 ((ratio>1.0)&(curA<=guard+leadDrift)));
+            begin = onsetStart|driftStart;
+            startLo = pick(onsetStart,landLo,pick(ratio<1.0,
+                max(4,landLo-leadI),landLo+leadI));
+            startHi = pick(onsetStart,min(landLo+onsetSpan,dMax),pick(ratio<1.0,
+                max(startLo,landHi-leadI),landHi+leadI));
+            searchLo = pick(begin,startLo,lo);
+            searchHi = pick(begin,startHi,hi);
+            currentMode = int(pick(begin,1,m));
+            rAge = pick(begin,float(int(ceil(curA))),refAge);
+            nAge = pick(begin,0.0,nowAge);
+            currentNext = int(pick(begin,searchLo,next));
+            currentBestD = pick(begin,searchLo,bestD);
+            currentBestS = pick(begin,-1.0e9,bestS);
+            currentBestN = pick(begin,0.0,bestN);
+            currentCenter = pick(begin,0,fineCenter);
+            work = (currentMode==1)|(currentMode==2);
+            // At most one complete correlation every two samples. Reference energy
+            // is initialized separately; score and search position hold between jobs.
+            job = work&((tick&1)==0)&(begin==0);
+            strideNow = pick(currentMode==1,coarse,1);
+            endNow = pick(currentMode==1,searchHi,min(searchHi,currentCenter+coarse-1));
+            d0 = pick((currentMode==2)&(currentNext==currentCenter),currentNext+1,currentNext);
+            // XX only refreshes on begin, when rAge == ceil(curA). Keep its
+            // address expression independent so FAUST groups begin/job guards.
+            refBase = int(clip(0,16382-N*STRIDE,float(int(ceil(curA)))));
+            refSample(j) = x@(refBase+j*STRIDE+1);
+            refEnergy = control((par(j,N,refSample(j)*refSample(j)) : reduceSum(N)),begin);
+            ncc0 = control(correlation(N,STRIDE,rAge,nAge,d0,refEnergy,x),job&(d0<=endNow));
+            score0 = (ncc0-1.0)/max(1.0,abs(rAge-nAge-d0));
+            wins0 = job&(d0<=endNow)&(score0>currentBestS);
+            bs = pick(wins0,score0,currentBestS);
+            bd = pick(wins0,d0,currentBestD);
+            bn = pick(wins0,ncc0,currentBestN);
+            advanced = d0+strideNow;
+            finishedStage = job&(advanced>endNow);
+            needFine = finishedStage&(currentMode==1)&(coarse>1);
+            searchDone = finishedStage&(needFine==0);
+            j = rAge-nAge-bd;
+            ready = (currentMode==3)|searchDone;
+            useJump = pick(searchDone,j,jump);
+            useNcc = pick(searchDone,bn,bestN);
+            useKind = pick(begin,onsetStart,kind);
+            trigger = (fading==0)&ready&
+                (useKind|((ratio<1.0)&(curA>=dMax))|((ratio>1.0)&(curA<=guard)));
+            destDelay = curA-useJump;
+            valid = (destDelay>=2.0)&(destDelay<=16376.0);
+            startFade = trigger&valid;
+            room = pick(ratio<1.0,(dMax-destDelay-leadDrift-2.0)/max(0.00001,drift),float(fadeHi));
+            badMatch = clip(0.0,1.0,(0.95-useNcc)/(0.95-0.6));
+            fadeSamples = pick(useKind,onsetFade,max(8,int(min(fadeLo+badMatch*(fadeHi-fadeLo),room))));
+            readB = pick(startFade,destDelay,curB);
+            p = pick(startFade,0.0,float(int(phase))*inc);
+            fadeActive = fading|startFade;
+            gainB0 = pick(fadeActive,0.5-0.5*cos(ma.PI*clip(0.0,1.0,p)),0.0);
+            gainA0 = 1.0-gainB0;
+            fNcc = pick(startFade,clip(0.0,1.0,useNcc),fadeNcc);
+            norm = sqrt(max(0.00001,gainA0*gainA0+gainB0*gainB0+2*gainA0*gainB0*fNcc));
+            wet = (gainA0*hermite(curA,x)+gainB0*hermite(readB,x))/norm;
+            // Initial 2 ms prime followed by a 25 ms dry-to-wet blend-in.
+            mix = clip(0.0,1.0,(warm-dMin-6)/max(1,int(sr*0.025)));
+            // Anchor the setup reduction outside the controlled correlation graph.
+            // Otherwise nested control propagation would also gate it on job.
+            audio = attach(attach(attach(attach(x+mix*(wet-x),refEnergy),x@16383),
+                cellMin@16383),cellMax@16383);
+
+            outA = pick(endFade,readB,curA)+(1.0-ratio);
+            outB = readB+(1.0-ratio);
+            outInc = pick(startFade,1.0/float(fadeSamples),pick(endFade,0.0,inc));
+            outPhase = int(pick(startFade,1,pick(endFade,fadeLength,pick(fading,int(phase)+1,fadeLength))));
+            outLength = int(pick(startFade,fadeSamples,fadeLength));
+            outFadeNcc = fNcc;
+            outMode = pick(startFade|trigger,0,pick(searchDone,3,pick(needFine,2,currentMode)));
+            outNext = pick(needFine,max(searchLo,bd-coarse+1),pick(job,advanced,currentNext));
+            outLo = searchLo;
+            outHi = searchHi;
+            outBestD = bd;
+            outBestS = bs;
+            outBestN = bn;
+            outRefAge = rAge+1.0;
+            outNowAge = nAge+1.0;
+            outJump = pick(searchDone,j,jump);
+            outKind = useKind;
+            outWait = pick(onsetStart,refractory,max(0,wait-1));
+            outWarm = min(1000000,warm+1);
+            outCenter = pick(needFine,bd,currentCenter);
+            outResetAge = pick(first,1000000,pick(onsetStart,0,min(1000000,resetAge+1)));
+            outResetEnergy = pick(onsetStart,energy,resetEnergy);
+        };
+    };
 };
 
 //--------------`(ef.)granular`----------------

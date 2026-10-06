@@ -698,6 +698,7 @@
 [(ef.)tapeStop](misceffects.md#eftapestop)
 [(ef.)transpose](misceffects.md#eftranspose)
 [(ef.)transpose_windowed](misceffects.md#eftranspose_windowed)
+[(ef.)transpose_correlated](misceffects.md#eftranspose_correlated)
 [(ef.)granular](misceffects.md#efgranular)
 [(ef.)doppler_shift](misceffects.md#efdoppler_shift)
 [(ef.)softclipQuadratic](misceffects.md#efsoftclipquadratic)
