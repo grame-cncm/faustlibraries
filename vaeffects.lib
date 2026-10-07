@@ -2784,11 +2784,14 @@ declare klonCentaur license "BSD-3-Clause";
 // ±1 being treated as ±1 V as in the reference model.
 //
 // Output level: the op-amps are ideal, so nothing limits the output to the
-// ±4.5 V a 9 V pedal can swing. At `volume` = 1 the
-// output peaks at about 6 to 9 V for a 1 V input (HP), and a guitar signal
-// peaking at 0.3 V is raised by about 17 dB (Drive 0) to 37 dB (Drive 1) in HP,
-// 11 to 31 dB in LP. `volume` around 0.14 (Drive 0) down to 0.014 (Drive 1)
-// gives roughly unity gain in HP, twice that in LP.
+// ±4.5 V a 9 V pedal can swing. At `volume` = 1 and `tone` = 0.5, in HP, a
+// 330 Hz sine of 1 V peak comes out at about 6.3 V peak (Drive 0) to 9 V
+// (Drive 1). On a 10.7 s guitar DI recording scaled to 0.3 V peak, the RMS
+// level rises by 17 dB (Drive 0), 32 dB (Drive 0.5) and 37 dB (Drive 1) in HP,
+// and by 11, 26 and 31 dB in LP; the peak level rises less (16, 24 and 27 dB
+// in HP), since the clipping flattens the peaks. `volume` around 0.14
+// (Drive 0) down to 0.014 (Drive 1) thus gives roughly unity RMS gain in HP,
+// twice that in LP.
 //
 // Latency: the 4x oversampling of the clipping node delays the output by
 // 11 samples, at every sample rate.
