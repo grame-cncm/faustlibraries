@@ -930,7 +930,7 @@ smooth bend, `si.smoo` a quick chirp).
 #### Usage
 
 ```
-_,_ : ef.xferDimensionExpander(size, wet) : _,_
+_,_ : xferDimensionExpander(size, wet) : _,_
 ```
 
 Where:
@@ -944,9 +944,12 @@ Where:
 ```
 ef = library("misceffects.lib");
 os = library("oscillators.lib");
-xferDimensionExpander_test = os.osc(440), os.osc(550)
+ba = library("basics.lib");
+ma = library("maths.lib");
+xferDimensionExpander_test = os.tosc(440), os.tosc(550)
    : ef.xferDimensionExpander(hslider("xferDimensionExpander:size", 0.5, 0, 1, 0.01),
                               hslider("xferDimensionExpander:wet", 0.5, 0, 1, 0.01));
+xferDimensionExpander_modulated_test = os.tosc(440), os.tosc(550) : ef.xferDimensionExpander(tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----
