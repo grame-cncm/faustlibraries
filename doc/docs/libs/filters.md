@@ -1836,6 +1836,16 @@ targets are scaled toward 0 instead. The filter starts with the target
 coefficients. Only the allpass output is bounded: a structure that mixes it
 with its input (a phaser, a Regalia-Mitra equalizer) can still exceed M.
 
+Precision: each limiting decision is a comparison, which can go one way in
+single precision and the other in double. The two outputs then differ until
+the difference decays at the rate of the poles, so with poles near the unit
+circle and long stretches of limiting they can differ by up to 2M sample by
+sample, both staying within [-M, M]. With noise in and (c0, c1) alternating
+every 50 ms between (0.98, -1.96) and (-0.98, 0.01) (pole radius 0.99), the
+RMS levels of the single- and double-precision outputs differ by up to 2.1e-3
+at full-scale input and 9e-3 at 0.3, from 44.1 to 192 kHz. With pairs of pole
+radius 0.9 (`allpass2_noclip_jump_test`), the outputs differ by less than 2e-5.
+
 #### Usage
 
 ```
