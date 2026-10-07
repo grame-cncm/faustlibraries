@@ -894,7 +894,8 @@ triangleFold1(t, r, x) : _
 
 Where:
 
-* `t`: the threshold, > 0; the output stays within [-t; t]
+* `t`: the threshold, > 0; the output stays within [-t; t] (in single
+  precision, within 1.004 t for inputs up to 20000 t)
 * `r`: the decay factor of the excess at each reflection, in (0; 1];
   1 for periodic folding
 * `x`: input signal
@@ -929,7 +930,10 @@ triangleFold2(t, r, x) : _
 
 Where:
 
-* `t`: the threshold, > 0; the output stays within [-t; t]
+* `t`: the threshold, > 0; the output stays within [-t; t] in double
+  precision; in single precision it can exceed t once |x| reaches a few
+  thousand times t (up to 1.2 t at 6000 t and 8 t at 20000 t, with t = 0.05
+  and r = 0.5), by cancellation in the ADAA2 formula
 * `r`: the decay factor of the excess at each reflection, in (0; 1];
   1 for periodic folding
 * `x`: input signal
@@ -958,8 +962,9 @@ The input passes unchanged between `-t` and `t`. Beyond, each fold is a
 half-period of a cosine that goes from one threshold to the other, so the
 slope is 1 inside and 0 at the turning points. With `r = 1` the output for
 `|x| > t` is `t * sin(pi * x / (2t))`. With `r < 1` each fold is `1/r`
-times wider than the previous one, as for `aa.triangleFold1`: the output
-is that of the triangle folder `y` passed through `t * sin(pi * y / (2t))`.
+times wider than the previous one, as for `aa.triangleFold1`: for
+`|x| > t` the output is that of the triangle folder `y` passed through
+`t * sin(pi * y / (2t))`.
 
 The domain of this function is ℝ; its theoretical range is [-t; t].
 
@@ -970,7 +975,8 @@ sineFold1(t, r, x) : _
 
 Where:
 
-* `t`: the threshold, > 0; the output stays within [-t; t]
+* `t`: the threshold, > 0; the output stays within [-t; t] (in single
+  precision, within 1.004 t for inputs up to 20000 t)
 * `r`: the decay factor of the fold width, in (0; 1]; 1 for periodic folding
 * `x`: input signal
 
@@ -1004,7 +1010,10 @@ sineFold2(t, r, x) : _
 
 Where:
 
-* `t`: the threshold, > 0; the output stays within [-t; t]
+* `t`: the threshold, > 0; the output stays within [-t; t] in double
+  precision; in single precision it can exceed t once |x| reaches a few
+  thousand times t (up to 1.2 t at 6000 t and 8 t at 20000 t, with t = 0.05
+  and r = 0.5), by cancellation in the ADAA2 formula
 * `r`: the decay factor of the fold width, in (0; 1]; 1 for periodic folding
 * `x`: input signal
 
