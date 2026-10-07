@@ -281,7 +281,8 @@ vocoder_slider_test = (no.noise, os.tosc(220))
       hslider("vocoder:BWRatio", 1.0, 0.5, 1.5, 0.01)
     );
 
-mxrPhase90_test = os.tosc(440) * 0.3
+mxrPhase90_test = os.tosc(440) * 0.3 : ve.mxrPhase90(1.5);
+mxrPhase90_slider_test = os.tosc(440) * 0.3
    : ve.mxrPhase90(hslider("mxrPhase90:rate", 1.5, 0.1, 10, 0.01));
 
 mxrPhase90_modulated_test = 0.3*no.noise : ve.mxrPhase90(0.1 + 9.9*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
@@ -299,7 +300,8 @@ klonCentaur_jump_test = 0.5*no.noise : ve.klonCentaur(0.1 + 0.9*sq, 0.5, 0.5) wi
 
 klonCentaur_hot_test = os.tosc(110)*0.5 : ve.klonCentaur(1, 0, 1);
 
-fulltoneOCD_test = os.tosc(330)
+fulltoneOCD_test = os.tosc(330) : ve.fulltoneOCD(0.4, 0.5, 0.35, 1);
+fulltoneOCD_slider_test = os.tosc(330)
    : ve.fulltoneOCD(
        hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
        hslider("fulltoneOCD:tone", 0.5, 0, 1, 0.01),
