@@ -194,11 +194,10 @@ declare phasor_env author "Pierre Mascarade Relano, Maxime Sirbu, Stéphane Letz
 // Generic phasor with `reset` and `phase` parameters to be specialised in concrete use-cases.
 // Single precision accumulates the phase in fixed point (`_phasor_fix`); double (and
 // quad, fixed-point) precision keeps the float accumulator `_phasor_flt`, unchanged.
-_phasor_imp = _phasor_by_precision(ma.EPSILON > 1e-10)
-with {
-    _phasor_by_precision(0) = _phasor_flt;
-    _phasor_by_precision(1) = _phasor_fix;
-};
+singleprecision     _phasor_imp = _phasor_fix;
+doubleprecision     _phasor_imp = _phasor_flt;
+quadprecision       _phasor_imp = _phasor_flt;
+fixedpointprecision _phasor_imp = _phasor_flt;
 
 // Fixed-point phasor: the phase is an integer count of 2^-30 cycle plus an
 // integer fraction of a count in 2^-24 steps (54 bits in all), so the phase
@@ -1145,12 +1144,13 @@ declare sawN license "LicenseRef-STK-4.3";
 // Orders 5 and 6 have noise at low fundamentals: MAX_SAW_ORDER = 6; _MAX_SAW_ORDER_NEXTPOW2 = 8;
 MAX_SAW_ORDER = 4;
 _MAX_SAW_ORDER_NEXTPOW2 = 8; // par cannot handle the case of 0 elements
-sawN(N,freq) = _sawN_by_precision(ma.EPSILON > 1e-10)
-with {
-  Nc = max(1,min(N,MAX_SAW_ORDER));
-  _sawN_by_precision(0) = _sawN_flt(Nc,freq);
-  _sawN_by_precision(1) = _sawN_fix(Nc,freq);
-};
+sawN(N,freq) = _sawN_imp(max(1,min(N,MAX_SAW_ORDER)),freq);
+// Single precision computes the closed form (`_sawN_fix`); double (and quad, fixed-point)
+// precision keeps the differentiated polynomial waveform `_sawN_flt`, unchanged.
+singleprecision     _sawN_imp = _sawN_fix;
+doubleprecision     _sawN_imp = _sawN_flt;
+quadprecision       _sawN_imp = _sawN_flt;
+fixedpointprecision _sawN_imp = _sawN_flt;
 
 // Differentiated polynomial waveform (double precision and above): the polynomial
 // of the ramp, then N-1 differences, each scaled by the period in samples.
@@ -1427,11 +1427,10 @@ declare saw2ptr license "LicenseRef-STK-4.3";
 // newer PTR version (stateless - freq can vary at any speed).
 // Single precision accumulates the phase in fixed point (`_saw2ptr_fix`); double (and
 // quad, fixed-point) precision keeps the float accumulator `_saw2ptr_flt`, unchanged.
-saw2ptr = _saw2ptr_by_precision(ma.EPSILON > 1e-10)
-with {
-  _saw2ptr_by_precision(0) = _saw2ptr_flt;
-  _saw2ptr_by_precision(1) = _saw2ptr_fix;
-};
+singleprecision     saw2ptr = _saw2ptr_fix;
+doubleprecision     saw2ptr = _saw2ptr_flt;
+quadprecision       saw2ptr = _saw2ptr_flt;
+fixedpointprecision saw2ptr = _saw2ptr_flt;
 
 // Floating-point phase accumulator (double precision and above)
 _saw2ptr_flt(freq) = y with {
