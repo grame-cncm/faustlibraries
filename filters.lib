@@ -2228,12 +2228,13 @@ with { s = ba.take(n,sv); cross = _,_ <: !,_,_,!; };
 //   c0 = hslider("c0", 0.81, -0.99, 0.99, 0.01);
 //   c1 = hslider("c1", -1.27, -1.98, 1.98, 0.01);
 // };
-// // full-scale noise, coefficients jumping every 24 samples
+// // full-scale noise, coefficients jumping every 0.5 ms (24 samples at 48 kHz)
 // allpass1_noclip_modulated_test = no.noise : fi.allpass1_noclip(1, c)
-// with { c = select2(ba.pulsen(24, 48), 0.99, -0.99); };
+// with { P = int(ma.SR/2000); c = select2(ba.pulsen(P, 2*P), 0.99, -0.99); };
 // allpass2_noclip_modulated_test = no.noise : fi.allpass2_noclip(1, c0, c1)
 // with {
-//   jump = ba.pulsen(24, 48);
+//   P = int(ma.SR/2000);
+//   jump = ba.pulsen(P, 2*P);
 //   c0 = select2(jump, 0.98, -0.98);
 //   c1 = select2(jump, -1.96, 0.01);
 // };
