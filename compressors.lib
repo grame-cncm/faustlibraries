@@ -1796,8 +1796,10 @@ with {
         with {
             en = e + ba.if(x2 > e, ca, cr) * (x2 - e);
         };
-        ca = 1.0 - exp(-1.0 / (max(1e-5, ta) * ma.SR));
-        cr = 1.0 - exp(-1.0 / (max(1e-4, tr) * ma.SR));
+        // -expm1(-x) = 1 - exp(-x) without its cancellation in single precision
+        // (x is down to 2e-5 for a 300 ms release at 192 kHz)
+        ca = 0.0 - ma.expm1(-1.0 / (max(1e-5, ta) * ma.SR));
+        cr = 0.0 - ma.expm1(-1.0 / (max(1e-4, tr) * ma.SR));
     };
 
     // One band: K = 0 (low), 1 (mid), 2 (high).
