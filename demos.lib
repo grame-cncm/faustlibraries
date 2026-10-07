@@ -2239,7 +2239,9 @@ pospass_demo(x) = analytic_signal, modulator : si.cmul with {
   input = select2(in_select, sine_tone, x);
   analytic_signal = input : fi.pospass6e(fc); // filter out neg freqs
   //analytic_signal = os.oscrs(f0) : fi.pospass(N,fc); // Butterworth case
-  modulator = os.oscrq(df) : si.cconj; // complex modulation sinusoid
+  // complex modulation sinusoid, on a phasor: the rotation of os.oscrq(df)
+  // drifts in amplitude in single precision (+0.23 % after 1 s at 192 kHz)
+  modulator = 2.0 * ma.PI * os.lf_sawpos(df) <: sin, cos : si.cconj;
   // modulator(n) = exp(sqrt(-1) * 2 * ma.PI * df * n / ma.SR) // if complex ok
 };
 
