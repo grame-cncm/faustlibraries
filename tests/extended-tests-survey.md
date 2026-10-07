@@ -213,8 +213,8 @@ The plan was:
 
 ### 4.2 Blocked by existing precision debt
 
-These need a better realization first, as `peak_eq_rm_jump_test` and
-`wgr_jump_test` of `filters.lib` do (rule 9: no new baseline entry). The tests below were
+These need a better realization first, as `wgr_jump_test` of `filters.lib`
+does (rule 9: no new baseline entry). The tests below were
 written and run through `check_precision.py` at the six rates on
 2026-10-02; section 5 gives their text.
 
@@ -286,21 +286,21 @@ test, under the procedure below, and removes it from this list.
    from the paragraph on the excluded jump tests in `contributing.md`
    (section *Constant, slider, modulated and jump tests*).
 
-### 5.1 filters.lib: the two `_jump_test` left out of the filters.lib jump tests
+### 5.1 filters.lib: the `_jump_test` left out of the filters.lib jump tests
 
 They are generated from each function's `_modulated_test`: the triangle is
 replaced by the square `sq`. Ten were left out at first. The eight built on
 the direct-form `fi.tf2s` (`resonlp`, `resonhp`, `resonbp`, `peak_eq`,
 `peak_eq_cq`, `highpass3e`, `highpass6e`, `highpass_plus_lowpass`) were
 reactivated by #273, where `tf2s` is two trapezoidal integrators: their
-worst float/double gap fell to 2.9e-7 at most. The two left are not built on
-`tf2s`: `peak_eq_rm` is a direct-form `fi.tf2` allpass, and `wgr` a
-second-order waveguide resonator. The level gap is the worst float/double
-gap over the six rates, measured 2026-10-02.
+worst float/double gap fell to 2.9e-7 at most. The two left were not built
+on `tf2s`. `peak_eq_rm`, a direct-form `fi.tf2` allpass, got its jump test
+when it became a trapezoidal state-variable filter (level gap 1.5e-1 before,
+4e-9 after). `wgr`, a second-order waveguide resonator, is left. The level gap
+is the worst float/double gap over the six rates, measured 2026-10-02.
 
 | Test | Test file | Level gap (rate) |
 |---|---|---|
-| `peak_eq_rm_jump_test` | `filters_parametric_eq_tests.dsp` | 1.5e-01 (192 kHz) |
 | `wgr_jump_test` | `filters_useful_special_tests.dsp` | 1.1e-03 (176.4 kHz) |
 
 At constant settings, at either end of the range, the ten stayed within
@@ -308,7 +308,6 @@ At constant settings, at either end of the range, the ten stayed within
 #263 weakness) and `wgr` at 100 Hz (1.3e-3). The jump is what breaks them.
 
 ```
-peak_eq_rm_jump_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250, sq); };
 wgr_jump_test = fi.wgr(100*pow(20, sq), 0.995, no.noise) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
