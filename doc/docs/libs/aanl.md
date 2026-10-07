@@ -889,7 +889,7 @@ The domain of this function is ℝ; its theoretical range is [-t; t].
 
 #### Usage
 ```
-_ : triangleFold1(t, r) : _
+triangleFold1(t, r, x) : _
 ```
 
 Where:
@@ -897,6 +897,7 @@ Where:
 * `t`: the threshold, > 0; the output stays within [-t; t]
 * `r`: the decay factor of the excess at each reflection, in (0; 1];
   1 for periodic folding
+* `x`: input signal
 
 #### Test
 ```
@@ -923,7 +924,7 @@ The domain of this function is ℝ; its theoretical range is [-t; t].
 
 #### Usage
 ```
-_ : triangleFold2(t, r) : _
+triangleFold2(t, r, x) : _
 ```
 
 Where:
@@ -931,6 +932,7 @@ Where:
 * `t`: the threshold, > 0; the output stays within [-t; t]
 * `r`: the decay factor of the excess at each reflection, in (0; 1];
   1 for periodic folding
+* `x`: input signal
 
 #### Test
 ```
@@ -963,13 +965,14 @@ The domain of this function is ℝ; its theoretical range is [-t; t].
 
 #### Usage
 ```
-_ : sineFold1(t, r) : _
+sineFold1(t, r, x) : _
 ```
 
 Where:
 
 * `t`: the threshold, > 0; the output stays within [-t; t]
 * `r`: the decay factor of the fold width, in (0; 1]; 1 for periodic folding
+* `x`: input signal
 
 #### Test
 ```
@@ -996,13 +999,14 @@ The domain of this function is ℝ; its theoretical range is [-t; t].
 
 #### Usage
 ```
-_ : sineFold2(t, r) : _
+sineFold2(t, r, x) : _
 ```
 
 Where:
 
 * `t`: the threshold, > 0; the output stays within [-t; t]
 * `r`: the decay factor of the fold width, in (0; 1]; 1 for periodic folding
+* `x`: input signal
 
 #### Test
 ```

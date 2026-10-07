@@ -1175,7 +1175,7 @@ _wavefold(t0, r0) = environment {
 //
 // #### Usage
 // ```
-// _ : triangleFold1(t, r) : _
+// triangleFold1(t, r, x) : _
 // ```
 //
 // Where:
@@ -1183,6 +1183,7 @@ _wavefold(t0, r0) = environment {
 // * `t`: the threshold, > 0; the output stays within [-t; t]
 // * `r`: the decay factor of the excess at each reflection, in (0; 1];
 //   1 for periodic folding
+// * `x`: input signal
 //
 // #### Test
 // ```
@@ -1216,7 +1217,7 @@ triangleFold1(t, r, x) = ADAA1(EPS, fold.triF, fold.triF1, x)
 //
 // #### Usage
 // ```
-// _ : triangleFold2(t, r) : _
+// triangleFold2(t, r, x) : _
 // ```
 //
 // Where:
@@ -1224,6 +1225,7 @@ triangleFold1(t, r, x) = ADAA1(EPS, fold.triF, fold.triF1, x)
 // * `t`: the threshold, > 0; the output stays within [-t; t]
 // * `r`: the decay factor of the excess at each reflection, in (0; 1];
 //   1 for periodic folding
+// * `x`: input signal
 //
 // #### Test
 // ```
@@ -1263,13 +1265,14 @@ triangleFold2(t, r, x) = ADAA2(EPS, fold.triF, fold.triF1, fold.triF2, x)
 //
 // #### Usage
 // ```
-// _ : sineFold1(t, r) : _
+// sineFold1(t, r, x) : _
 // ```
 //
 // Where:
 //
 // * `t`: the threshold, > 0; the output stays within [-t; t]
 // * `r`: the decay factor of the fold width, in (0; 1]; 1 for periodic folding
+// * `x`: input signal
 //
 // #### Test
 // ```
@@ -1303,13 +1306,14 @@ sineFold1(t, r, x) = ADAA1(EPS, fold.sinF, fold.sinF1, x)
 //
 // #### Usage
 // ```
-// _ : sineFold2(t, r) : _
+// sineFold2(t, r, x) : _
 // ```
 //
 // Where:
 //
 // * `t`: the threshold, > 0; the output stays within [-t; t]
 // * `r`: the decay factor of the fold width, in (0; 1]; 1 for periodic folding
+// * `x`: input signal
 //
 // #### Test
 // ```
