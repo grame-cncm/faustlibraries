@@ -1854,6 +1854,7 @@ Where:
 ```
 ba = library("basics.lib");
 fi = library("filters.lib");
+ma = library("maths.lib");
 no = library("noises.lib");
 // constant coefficients, input low enough that the output never reaches M:
 // same output as fi.tf1(0.5, 1, 0.5) and fi.tf2(0.81, -1.27, 1, -1.27, 0.81)
@@ -1879,6 +1880,17 @@ with {
   jump = ba.pulsen(24, 48);
   c0 = select2(jump, 0.98, -0.98);
   c1 = select2(jump, -1.96, 0.01);
+};
+// coefficients jumping at 10 Hz: c between the ends of its range, and (c0, c1)
+// between two stable pairs of pole radius 0.9
+allpass1_noclip_jump_test = no.noise : fi.allpass1_noclip(1, c)
+with { P = int(ma.SR/10); c = select2(ba.period(2*P) < P, -0.99, 0.99); };
+allpass2_noclip_jump_test = no.noise : fi.allpass2_noclip(1, c0, c1)
+with {
+  P = int(ma.SR/10);
+  jump = ba.period(2*P) < P;
+  c0 = select2(jump, 0.81, -0.81);
+  c1 = select2(jump, -1.27, 0.01);
 };
 ```
 
