@@ -83,12 +83,19 @@ limiter_lad_quad_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550))
 limiter_lad_quad_slider_test = (os.tosc(220), os.tosc(330), os.tosc(440), os.tosc(550)) : co.limiter_lad_quad(hslider("limiter_lad_quad:LD", 0.01, 0, 0.1, 0.001), hslider("limiter_lad_quad:ceiling", 1, 0, 2, 0.01), hslider("limiter_lad_quad:attack", 0.01, 0, 1, 0.001), hslider("limiter_lad_quad:hold", 0.05, 0, 1, 0.001), hslider("limiter_lad_quad:release", 0.2, 0, 1, 0.001));
 limiter_lad_bw_test = os.tosc(440) : co.limiter_lad_bw;
 
-xfer_ott_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
+xfer_ott_test = (os.tosc(220)*0.3, os.tosc(3000)*0.03)
    : co.xfer_ott(1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-xfer_ott_slow_test = (os.osc(220)*0.3, os.osc(3000)*0.03)
+xfer_ott_slow_test = (os.tosc(220)*0.3, os.tosc(3000)*0.03)
    : co.xfer_ott(0.5, 2.8, 3, -3, 1.5, 0.5, 0.8, 1.2, 1, 1, 0, -2, 0, 1, 0, 0, 0, 1);
 
 // 3 Hz bursts, gated by a sample counter so that float and double switch together
-xfer_ott_burst_test = (os.osc(220)*0.3*g, os.osc(3000)*0.03*(1 - g))
+xfer_ott_burst_test = (os.tosc(220)*0.3*g, os.tosc(3000)*0.03*(1 - g))
    : co.xfer_ott(1, 2.8, 0, 0, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 with { g = (ba.time % int(ma.SR / 3)) < int(ma.SR / 6); };
+
+xfer_ott_slider_test = (os.tosc(220)*0.3, os.tosc(3000)*0.03)
+   : co.xfer_ott(hslider("xfer_ott:depth", 1, 0, 1, 0.01), hslider("xfer_ott:time", 1, 0, 10, 0.01), 0, 0,
+                 hslider("xfer_ott:upward", 1, 0, 2, 0.01), hslider("xfer_ott:downward", 1, 0, 2, 0.01),
+                 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+xfer_ott_modulated_test = (os.tosc(220)*0.3, os.tosc(3000)*0.03) : co.xfer_ott(tri, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+xfer_ott_jump_test = (os.tosc(220)*0.3*g, os.tosc(3000)*0.03*(1 - g)) : co.xfer_ott(1, 10*sq, 0, 0, 1, 1.5, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; g = (ba.time % int(ma.SR / 3)) < int(ma.SR / 6); };
