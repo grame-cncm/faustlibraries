@@ -419,6 +419,7 @@
 [(fi.)conv, (fi.)convN](filters.md#ficonv,-ficonvn)
 [(fi.)tf1, (fi.)tf2, (fi.)tf3](filters.md#fitf1,-fitf2,-fitf3)
 [(fi.)TF2](filters.md#fitf2)
+[(fi.)tf2_tpt](filters.md#fitf2_tpt)
 [(fi.)notchw](filters.md#finotchw)
 [(fi.)tf21, (fi.)tf22, (fi.)tf22t, (fi.)tf21t](filters.md#fitf21,-fitf22,-fitf22t,-fitf21t)
 [(fi.)av2sv](filters.md#fiav2sv)

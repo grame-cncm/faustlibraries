@@ -850,7 +850,9 @@ poles come close to z = 1, that is, for frequencies low relative to the
 sample rate, and it behaves badly when its coefficients change while it
 runs. For an analog prototype, prefer the functions of the section
 [Digital Filter Sections Specified as Analog Filter Sections](#digital-filter-sections-specified-as-analog-filter-sections),
-whose references explain why.
+whose references explain why. For a second-order z-domain design whose
+coefficients move, `tf2_tpt` realizes the same `B(z)/A(z)` as a
+state-variable filter.
 
 ----
 
@@ -1036,11 +1038,84 @@ TF2_legacy_test = os.tosc(440) : fi.TF2(0.2, 0.4, 0.2, -0.5, 0.3);
 
 ----
 
+### `(fi.)tf2_tpt`
+
+Second-order digital filter `N(z)/A(z)`, with `A(z) = 1 + a1 z^-1 + a2 z^-2`
+and `N(z) = n0 + n1 z^-1 + n2 z^-2`, realized as a trapezoidal
+(topology-preserving) state-variable filter with exactly the same poles and
+zeros. It is for z-domain designs whose parameters move (a pole radius and
+angle, a notch or allpass frequency): the same filter as `tf2`, but it stays
+accurate in single precision when the poles approach z = 1, and its output
+stays continuous when the coefficients jump or move at audio rate, where a
+direct form rings or diverges. For an analog prototype, use `tf2s`.
+
+The coefficients are passed in a form the caller computes without
+cancellation from its design parameters, never from rounded `a1` and `a2`
+(see the method below).
+
+#### Usage
+
+```
+_ : tf2_tpt(P,S,fq,Np,Nm,nd) : _
+```
+
+Where:
+
+* `P`: `A(1) = 1 + a1 + a2`, positive
+* `S`: `A(-1) = 1 - a1 + a2`, positive
+* `fq`: `1 - a2`, positive (`P + S + 2*fq = 4`)
+* `Np`: `N(1) = n0 + n1 + n2`, the gain at DC is `Np/P`
+* `Nm`: `N(-1) = n0 - n1 + n2`, the gain at Nyquist is `Nm/S`
+* `nd`: `n0 - n2`
+
+#### Method
+
+For complex poles `r*exp(+-j*th)`, with `om = 1 - r` computed directly
+(for example `0 - ma.expm1(-PI*B/SR)` for a bandwidth `B`):
+`P = om^2 + 4*r*sin(th/2)^2`, `S = om^2 + 4*r*cos(th/2)^2` and
+`fq = om*(2 - om)`. For example, a resonator of unity peak gain,
+`(1 - r^2)/2*(1 - z^-2)/A(z)`, is `tf2_tpt(P,S,fq,0,0,fq)`, and the notch
+`(1 + A_ap(z))/2` of an allpass `A_ap` with these poles is
+`tf2_tpt(P,S,fq,P,S,0)` (see `notchw`).
+
+The state-variable filter has `g = sqrt(P/S)`, `k*g = 2*fq/S` and
+`1 + k*g + g^2 = 4/S`, and its highpass, bandpass and lowpass outputs map
+onto the numerator with the taps `cH = Nm/S`, `cB = 2*nd/(g*S)` and
+`cL = Np/P`. Since `hp + k*bp + lp = x`, the output is computed as
+`cH*x + (cB - k*cH)*bp + (cL - cH)*lp`, and the state-variable filter runs
+on `x` scaled by the larger of the last two taps, so that its states hold the
+dominant part of the output at the output level. Each coefficient update
+costs four divisions and one square root; none per sample when the
+coefficients are constant.
+
+#### Test
+```
+fi = library("filters.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+os = library("oscillators.lib");
+tf2_tpt_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { fc = 1000; om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
+tf2_tpt_slider_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { fc = hslider("fc", 1000, 20, 20000, 1); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
+tf2_tpt_modulated_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); tri = 1 - abs(2*ba.period(Pd)/Pd - 1); fc = 20*pow(250, tri); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
+tf2_tpt_jump_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); sq = ba.period(2*Pd) < Pd; fc = 20*pow(250.0, sq); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
+tf2_tpt_audio_modulated_test = 0.1*no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
+```
+
+#### References
+
+* Julius O. Smith III, "Digital State-Variable Filters":
+  [https://ccrma.stanford.edu/~jos/svf/](https://ccrma.stanford.edu/~jos/svf/)
+* Vadim Zavalishin, "The Art of VA Filter Design", revision 2.1.2, 2020:
+  [https://www.discodsp.net/VAFilterDesign_2.1.2.pdf](https://www.discodsp.net/VAFilterDesign_2.1.2.pdf)
+
+----
+
 ### `(fi.)notchw`
 
 ![notchw — response plots](../img/fi_notchw.svg)
 
-Simple notch filter based on a biquad (`tf2`).
+Simple notch filter based on a biquad, realized with `tf2_tpt`.
 `notchw` is a standard Faust function.
 
 #### Usage:
@@ -1066,6 +1141,7 @@ notchw_test = src : fi.notchw(200, 1000);
 notchw_slider_test = no.noise : fi.notchw(hslider("width", 200, 10, 2000, 1), hslider("freq", 1000, 20, 20000, 1));
 notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 notchw_jump_test = no.noise : fi.notchw(100, 200*pow(25, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+notchw_audio_modulated_test = 0.1*no.noise : fi.notchw(fc/10, fc) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 ```
 
 #### References
@@ -3954,7 +4030,9 @@ peak_eq_cq_jump_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, sq), 4) with { P 
 Regalia-Mitra second order peaking equalizer section:
 `H(z) = (1 + A(z))/2 + K (1 - A(z))/2`, with `A(z)` the second order
 allpass centered at `fx` and `K = 10^(Lfx/20)`. At `Lfx = 0` (K = 1) the
-section is the identity.
+section is the identity. It is realized as a trapezoidal state-variable
+filter, `x + (K - 1)*k*bp`, which stays accurate in single precision at low
+`fx` and continuous when `fx` jumps or moves at audio rate.
 
 #### Usage
 
@@ -3980,7 +4058,9 @@ src = os.tosc(440);
 peak_eq_rm_test = src : fi.peak_eq_rm(6, 1000, tan(ma.PI*200/ma.SR));
 peak_eq_rm_slider_test = no.noise : fi.peak_eq_rm(hslider("Lfx", 6, -24, 24, 0.1), hslider("fc", 1000, 20, 20000, 1), tan(ma.PI*hslider("B", 200, 1, 5000, 1)/ma.SR));
 peak_eq_rm_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = 20*pow(250, tri); };
+peak_eq_rm_jump_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250.0, sq); };
 peak_eq_rm_unity_test = no.noise : fi.peak_eq_rm(0, 1000, tan(ma.PI*200/ma.SR));
+peak_eq_rm_audio_modulated_test = 0.1*no.noise : fi.peak_eq_rm(6, fc, tan(ma.PI*fc/10/ma.SR)) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 ```
 
 #### References
