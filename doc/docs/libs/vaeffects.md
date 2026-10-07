@@ -64,6 +64,7 @@ moog_vcf_slider_test = os.tosc(440)
     );
 moog_vcf_modulated_test = no.noise : ve.moog_vcf(0.9, 50*pow(100, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 moog_vcf_jump_test = no.noise : ve.moog_vcf(0.9, 50*pow(100, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+moog_vcf_audio_modulated_test = 0.1*no.noise : ve.moog_vcf(0.9, max(20, 1000*(1 + 0.9*os.tosc(500))));
 ```
 
 #### References
@@ -121,6 +122,8 @@ moog_vcf_2bn_slider_test = os.tosc(330)
     );
 moog_vcf_2bn_modulated_test = no.noise : ve.moog_vcf_2bn(0.95, 20*pow(500, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 moog_vcf_2bn_jump_test = no.noise : ve.moog_vcf_2bn(0.95, 20*pow(500, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+moog_vcf_2b_audio_modulated_test = 0.1*no.noise : ve.moog_vcf_2b(0.95, max(20, 1000*(1 + 0.9*os.tosc(500))));
+moog_vcf_2bn_audio_modulated_test = 0.1*no.noise : ve.moog_vcf_2bn(0.95, max(20, 1000*(1 + 0.9*os.tosc(500))));
 ```
 
 ----
@@ -160,6 +163,7 @@ moogLadder_slider_test = os.tosc(220)
     );
 moogLadder_modulated_test = no.noise : ve.moogLadder(0.8*tri, 20) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 moogLadder_jump_test = no.noise : ve.moogLadder(0.8*sq, 20) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+moogLadder_audio_modulated_test = 0.1*no.noise : ve.moogLadder(log10(max(20, 1000*(1 + 0.9*os.tosc(500)))/20)/3, 10);
 ```
 
 #### References
@@ -204,6 +208,7 @@ lowpassLadder4_slider_test = os.tosc(110)
     );
 lowpassLadder4_modulated_test = no.noise : ve.lowpassLadder4(3.9, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 lowpassLadder4_jump_test = no.noise : ve.lowpassLadder4(3.9, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+lowpassLadder4_audio_modulated_test = 0.1*no.noise : ve.lowpassLadder4(3.9, max(20, 1000*(1 + 0.9*os.tosc(500))));
 ```
 
 Notes:
@@ -260,6 +265,7 @@ moogHalfLadder_slider_test = os.tosc(220)
     );
 moogHalfLadder_modulated_test = no.noise : ve.moogHalfLadder(0.8*tri, 20) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 moogHalfLadder_jump_test = no.noise : ve.moogHalfLadder(0.8*sq, 20) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+moogHalfLadder_audio_modulated_test = 0.1*no.noise : ve.moogHalfLadder(log10(max(20, 1000*(1 + 0.9*os.tosc(500)))/20)/3, 10);
 ```
 
 #### References
@@ -309,6 +315,7 @@ diodeLadder_slider_test = os.tosc(220)
     );
 diodeLadder_modulated_test = no.noise : ve.diodeLadder(0.8*tri, 20) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 diodeLadder_jump_test = no.noise : ve.diodeLadder(0.8*sq, 20) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+diodeLadder_audio_modulated_test = 0.1*no.noise : ve.diodeLadder(log10(max(20, 1000*(1 + 0.9*os.tosc(500)))/20)/3, 10);
 ```
 
 #### References
@@ -366,6 +373,7 @@ korg35LPF_slider_test = os.tosc(220)
     );
 korg35LPF_modulated_test = no.noise : ve.korg35LPF(0.8*tri, 9.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 korg35LPF_jump_test = no.noise : ve.korg35LPF(0.8*sq, 9.5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+korg35LPF_audio_modulated_test = 0.1*no.noise : ve.korg35LPF(log10(max(20, 1000*(1 + 0.9*os.tosc(500)))/20)/3, 9.5);
 ```
 
 ----
@@ -403,6 +411,7 @@ korg35HPF_slider_test = os.tosc(330)
     );
 korg35HPF_modulated_test = no.noise : ve.korg35HPF(0.8*tri, 9.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 korg35HPF_jump_test = no.noise : ve.korg35HPF(0.8*sq, 9.5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+korg35HPF_audio_modulated_test = 0.1*no.noise : ve.korg35HPF(log10(max(20, 1000*(1 + 0.9*os.tosc(500)))/20)/3, 9.5);
 ```
 
 ## Oberheim Filters
@@ -450,6 +459,7 @@ oberheim_slider_test = os.tosc(220)
     );
 oberheim_modulated_test = no.noise : ve.oberheim(0.8*tri, 10) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 oberheim_jump_test = no.noise : ve.oberheim(0.8*sq, 10) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+oberheim_audio_modulated_test = 0.1*no.noise : ve.oberheim(log10(max(20, 1000*(1 + 0.9*os.tosc(500)))/20)/3, 10);
 ```
 
 ----
@@ -770,6 +780,7 @@ sallenKey2ndOrder_slider_test = os.tosc(330)
     );
 sallenKey2ndOrder_modulated_test = no.noise : ve.sallenKey2ndOrder(0.8*tri, 10) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 sallenKey2ndOrder_jump_test = no.noise : ve.sallenKey2ndOrder(0.8*sq, 10) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+sallenKey2ndOrder_audio_modulated_test = 0.1*no.noise : ve.sallenKey2ndOrder(log10(max(20, 1000*(1 + 0.9*os.tosc(500)))/20)/3, 10);
 ```
 
 ----

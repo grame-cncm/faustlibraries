@@ -23,6 +23,7 @@ tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
 tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
 tf2s_nyquist_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*0.6*ma.SR);
 tf2s_zero_freq_test = no.noise : fi.tf2s(1, 0, 0, sqrt(2), 1, 2*ma.PI*(1000*max(0, 1 - ba.time/12000) + 1000*(ba.time >= 24000)));
+tf2s_audio_modulated_test = 0.1*no.noise : fi.tf2s(1, 1, 1, 0.1, 1, 2*ma.PI*max(20, 1000*(1 + 0.9*os.tosc(500))));
 tf1snp_test = src : fi.tf1snp(0, 1, 1, ma.PI*ma.SR/2);
 tf1snp_lowfc_test = no.noise : fi.tf1snp(0, 1, 1, 2*ma.PI*10.1);
 tf1snp_slider_test = no.noise : fi.tf1snp(0, 1, 1, 2*ma.PI*hslider("fc", 1000, 20, 20000, 1));

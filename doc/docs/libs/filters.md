@@ -1915,6 +1915,7 @@ tf2snp_lowfc_test = no.noise : fi.tf2snp(0, 0, 1, sqrt(2), 1, 2*ma.PI*20);
 tf2snp_hp_lowfc_test = no.noise : fi.tf2snp(1, 0, 0, sqrt(2), 1, 2*ma.PI*10.1);
 tf2s_nyquist_test = no.noise : fi.tf2s(0, 0, 1, sqrt(2), 1, 2*ma.PI*0.6*ma.SR);
 tf2s_zero_freq_test = no.noise : fi.tf2s(1, 0, 0, sqrt(2), 1, 2*ma.PI*(1000*max(0, 1 - ba.time/12000) + 1000*(ba.time >= 24000)));
+tf2s_audio_modulated_test = 0.1*no.noise : fi.tf2s(1, 1, 1, 0.1, 1, 2*ma.PI*max(20, 1000*(1 + 0.9*os.tosc(500))));
 ```
 
 #### References
@@ -2157,6 +2158,17 @@ downward jump of the cutoff multiplies its ringing by up to the jump
 ratio, and modulation at audio rates can make it diverge even in double
 precision. Its cost advantage also shrinks there (about 1.1x for a
 modulated `w1`), since recomputing the coefficients dominates.
+Under the audio-rate modulation of the `_audio_modulated_test`s (`w1`
+swept by +-90 % around 1 kHz at 500 Hz, see `resonlp`), a `tf2s_df`
+section with Q = 10 diverges at every rate from 44.1 to 192 kHz, in
+double precision too (its output passes 1e38 within 0.42 s), and a
+Butterworth section peaks 3.5 to 4.2 times higher than `tf2s`, which
+stays within 0.9 to 1.05 times its static peak. `tf2s_df` therefore has
+no `_audio_modulated_test`. Those of `tf2s`, `resonlp`, `resonhp` and
+`resonbp` (Q = 10) fail `make check-precision` (non-finite) if their
+section is moved to it, and in direct form the third-order Butterworth
+`lowpass` peaks 4.4 to 5.0 times higher than in TPT (`highpass` 1.2 to
+1.4 times).
 
 #### Test
 ```
@@ -2451,6 +2463,7 @@ resonhp_test = fi.resonhp(1000, 2, 0.8, src);
 resonhp_slider_test = no.noise : fi.resonhp(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 2, 0.5, 20, 0.01), hslider("gain", 0.8, 0, 1, 0.01));
 resonhp_modulated_test = no.noise : fi.resonhp(20*pow(250, tri), 2, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 resonhp_jump_test = no.noise : fi.resonhp(20*pow(250, sq), 2, 0.8) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+resonhp_audio_modulated_test = 0.1*no.noise : fi.resonhp(max(20, 1000*(1 + 0.9*os.tosc(500))), 10, 1);
 ```
 
 ----
@@ -2533,6 +2546,7 @@ lowpass_zero_freq_test = no.noise : fi.lowpass(3, 1000*max(0, 1 - ba.time/12000)
 lowpass_slider_test = no.noise : fi.lowpass(4, hslider("fc", 2000, 20, 20000, 1));
 lowpass_modulated_test = no.noise : fi.lowpass(4, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 lowpass_jump_test = no.noise : fi.lowpass(4, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+lowpass_audio_modulated_test = 0.1*no.noise : fi.lowpass(3, max(20, 1000*(1 + 0.9*os.tosc(500))));
 ```
 
 #### References
@@ -2577,6 +2591,7 @@ highpass_zero_freq_test = no.noise : fi.highpass(3, 1000*max(0, 1 - ba.time/1200
 highpass_slider_test = no.noise : fi.highpass(4, hslider("fc", 500, 20, 20000, 1));
 highpass_modulated_test = no.noise : fi.highpass(4, 20*pow(250, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 highpass_jump_test = no.noise : fi.highpass(4, 20*pow(250, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+highpass_audio_modulated_test = 0.1*no.noise : fi.highpass(3, max(20, 1000*(1 + 0.9*os.tosc(500))));
 ```
 
 #### References
@@ -4558,6 +4573,7 @@ svf_ap_test = fi.svf.ap(1000, 0.707, sig);
 svf_bell_test = fi.svf.bell(1000, 0.707, 6, sig);
 svf_ls_test = fi.svf.ls(500, 0.707, 6, sig);
 svf_hs_test = fi.svf.hs(3000, 0.707, 6, sig);
+svf_audio_modulated_test = 0.1*no.noise <: fi.svf.lp(fc, 10), fi.svf.bp(fc, 10), fi.svf.hp(fc, 10) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 ```
 
 ----

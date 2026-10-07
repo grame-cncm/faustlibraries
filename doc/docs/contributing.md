@@ -329,7 +329,7 @@ The Faust compiler generates different code for a parameter depending on what it
 
 Precision, stability and CPU cost can differ between the three. A function that is correct with constants can lose precision when its coefficients are computed at run time in float. It can also blow up when they change at every sample, since a recursive structure that is stable for each frozen setting is not necessarily stable when that setting moves. And its cost per sample can double. The harnesses (`make check`, `make check-precision`, `make check-cpu`) render the tests as written, with the controls at their default values: they cannot turn a constant into a control or a signal. The test has to do it.
 
-A function whose parameters are meant to vary at run time therefore has three tests, a recursive filter four, written first in its `#### Test` section like any other (rule 8 of `AGENTS.md`). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
+A function whose parameters are meant to vary at run time therefore has three tests, a recursive filter four, and a filter whose cutoff is modulated in synthesis five, written first in its `#### Test` section like any other (rule 8 of `AGENTS.md`). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
 
 1. **`functionName_test`, constant parameters.** This is the usual test.
 2. **`functionName_slider_test`, parameters from sliders** (`hslider`, `vslider`, `nentry`), without smoothing, with realistic default values. It checks that the function accepts run-time controls: a parameter that must be a constant makes it fail to compile. It checks the coefficients computed at run time in the program's precision: for `fi.resonlp`, the float/double level gap is 6.4e-5 with sliders against 1.8e-5 with constants. And it checks that they stay at control rate: its cost should match the constant test's. When it is clearly slower, the normalizer has moved part of the coefficient computation into the per-sample loop, which is what the `min(x, ma.MAX)` workarounds in the libraries prevent.
@@ -361,6 +361,30 @@ with {
    Delay lines with an integer length need none: a jump of length is the same discontinuity whatever the realization.
 
    When it was introduced, every filter of `filters.lib` that has a `_modulated_test` got one, except ten that failed `make check-precision`, with level gaps of 1.1e-3 to 0.53. Eight of them, built on the direct-form `fi.tf2s` (`resonlp`, `resonhp`, `resonbp`, `peak_eq`, `peak_eq_cq`, `highpass3e`, `highpass6e`, `highpass_plus_lowpass`), got their jump tests when `tf2s` became two trapezoidal integrators (#273). Two still fail: `peak_eq_rm`, a direct-form `fi.tf2` allpass, and `wgr`, which is already at the threshold with a constant 100 Hz. Every state-variable or TPT filter passes. These two will get their jump tests with a realization that passes them.
+
+5. **`functionName_audio_modulated_test`, the cutoff modulated at audio rate**, for the filters whose cutoff is modulated in synthesis: a VCF whose cutoff follows an oscillator (filter FM) or a fast envelope. The 10 Hz `_modulated_test` cannot see what goes wrong there. A recursive structure that is stable for every frozen cutoff, and under slow sweeps, can grow without bound when its coefficients change by a large fraction within a period of its resonance: a direct-form section with Q = 10 does, in double precision too. One convention serves every such filter, so that their results compare:
+
+   ```
+   resonlp_audio_modulated_test = 0.1*no.noise : fi.resonlp(max(20, 1000*(1 + 0.9*os.tosc(500))), 10, 1);
+   ```
+
+   - The input is `0.1*no.noise`, so that a resonance at Q = 10 stays well below full scale.
+   - The cutoff is swept by ±90 % around 1 kHz, from 100 Hz to 1.9 kHz, by a 500 Hz sine. `os.tosc` is exact in both precisions; `max(20, ...)` keeps the cutoff positive if the depth is changed.
+   - Q = 10 where the filter has a Q. A resonance on another scale keeps the value of the function's `_modulated_test` (`ve.moog_vcf(0.9, ...)`, `ve.lowpassLadder4(3.9, ...)`). Where Q = 10 is the self-oscillation threshold, the test stays below it: `ve.korg35LPF` and `korg35HPF` use 9.5, since at Q = 10 (K = 2) even the static filter at 1 kHz rings 7 to 18 times above its input level, and the test would measure an oscillator rather than the modulation.
+   - The `ve` filters with a normalized frequency (`moogLadder`, `moogHalfLadder`, `diodeLadder`, `korg35LPF`, `korg35HPF`, `oberheim`, `sallenKey2ndOrder`) map `normFreq` in [0, 1] to 20 Hz-20 kHz as `2*10^(3*normFreq + 1)`. They get the same cutoff through `log10(fc/20)/3`; `fc/20000` would sweep them between 21 and 38 Hz.
+
+   ```
+   moogLadder_audio_modulated_test = 0.1*no.noise : ve.moogLadder(log10(max(20, 1000*(1 + 0.9*os.tosc(500)))/20)/3, 10);
+   ```
+
+   Besides passing `make check-precision`, compare the output peak with that of the same filter at a constant 1 kHz: a structure whose states follow the cutoff stays close to it. The tests in place, all within 0.9 to 1.41 times the static peak at 48 and 192 kHz, are those of `fi.tf2s` (a Q = 10 peaking section, so that every numerator tap is used), `resonlp`, `resonhp`, `resonbp`, the third-order Butterworth `lowpass` and `highpass`, and `svf` (its `lp`, `bp` and `hp` outputs); `ve.moog_vcf`, `moog_vcf_2b`, `moog_vcf_2bn`, `moogLadder`, `lowpassLadder4`, `moogHalfLadder`, `diodeLadder`, `korg35LPF`, `korg35HPF`, `oberheim` (its four outputs) and `sallenKey2ndOrder` (its three outputs). The wrappers are covered by the function they call (`oberheimLPF`, `sallenKey2ndOrderLPF`, `svf_morph`...).
+
+   The others do not get one:
+
+   - `fi.tf2s_df` and the `*_tpt_df` functions with a direct-form section are for fixed cutoffs only: under this modulation a Q = 10 `tf2s_df` section diverges at every rate, in double precision too, and in direct form the third-order Butterworth `lowpass` peaks 4.4 to 5 times higher than in TPT. The audio-rate tests of `tf2s`, `resonlp`, `lowpass`... are what keeps them in TPT form.
+   - `ve.wah4`, `crybaby` and `autowah` smooth their control with `si.smooth(0.999)`, which attenuates a 500 Hz modulation by 37 dB at 44.1 kHz and 24 dB at 192 kHz: their test would render a nearly static filter. `moog_vcf` covers the filter of `wah4`.
+   - Vicanek's matched filters, `ve.lowpass2Matched`, `highpass2Matched` and `bandpass2Matched`, run a direct-form recurrence (`_matchedRun`) and diverge under this modulation from Q = 6 on (peaks of 1e5 to 1e7 from the 0.1 input at Q = 6, beyond 1e38 within 0.42 s at Q = 10, in double precision too). At Q = 5 they pass, already 4 to 7 times above their static peak. They will get their tests with a realization that passes them.
+   - Filters whose cutoff is not modulated in synthesis (equalizers, crossovers, elliptic anti-aliasing filters) need none.
 
 Two more precautions:
 

@@ -26,6 +26,7 @@ svf_hs_test = fi.svf.hs(3000, 0.707, 6, sig);
 svf_slider_test = no.noise : fi.svf.bell(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), hslider("gain", 6, -24, 24, 0.1));
 svf_modulated_test = no.noise : fi.svf.lp(20*pow(250, tri), 0.707) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 svf_jump_test = no.noise : fi.svf.lp(20*pow(250, sq), 0.707) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+svf_audio_modulated_test = 0.1*no.noise <: fi.svf.lp(fc, 10), fi.svf.bp(fc, 10), fi.svf.hp(fc, 10) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 
 svf_morph_test = fi.svf_morph(1000, 0.707, 1, sig);
 svf_morph_slider_test = fi.svf_morph(hslider("fc", 1000, 20, 20000, 1), hslider("Q", 0.707, 0.5, 20, 0.01), hslider("blend", 1, 0, 2, 0.01), no.noise);

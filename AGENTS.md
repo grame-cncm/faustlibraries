@@ -143,7 +143,12 @@ Every script behind these targets is described in `scripts/README.md`.
    between the two ends of its range, as a moved slider does). Drive the
    modulation with an integer counter (`ba.period`), not `os.osc`, which
    drifts in float, and tie its period to the sample rate
-   (`P = int(ma.SR/10)`, 10 Hz at every rate). Details:
+   (`P = int(ma.SR/10)`, 10 Hz at every rate). A filter whose cutoff is
+   modulated in synthesis (a VCF: `fi.resonlp`, `fi.svf`, the `ve`
+   ladders) also gets a `functionName_audio_modulated_test`, with one
+   convention for all: `0.1*no.noise` in, the cutoff
+   `max(20, 1000*(1 + 0.9*os.tosc(500)))` (100 Hz to 1.9 kHz at a 500 Hz
+   rate), Q = 10 where there is one. Details:
    `doc/docs/contributing.md`, section *Constant, slider, modulated and
    jump tests*. `scripts/lib_tests.py
    inventory xx.lib` shows which tests exist where; `scripts/lib_tests.py
