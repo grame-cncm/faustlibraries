@@ -26,6 +26,7 @@ fi = library("filters.lib");
 ef = library("misceffects.lib");
 wd = library("wdmodels.lib");
 it = library("interpolators.lib");
+os = library("oscillators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
 declare version "1.7.0";
@@ -2194,6 +2195,10 @@ time constant (24k || R_JFET) * 47n.
   sample rate so the update stays passive whatever the signal level.
 - LFO: asymmetric triangle (65 % rising), 3.25 V +- 0.15 V on the gates, as
   in the reference model; the corners sweep from about 330 Hz to 3.3 kHz.
+  Its phase is os.lf_sawpos(rate), whose fixed-point phasor keeps the
+  frequency exact in single precision: a float phase accumulator drifts,
+  and made the float output differ from the double one by up to 1.8 %
+  of the peak at 176.4 kHz (4e-6 with os.lf_sawpos).
 - The output-stage gain was measured by simulating the reference LTspice
   schematic (with the 2N4125 PNP stage) in ngspice; the PNP stage itself adds
   no measurable distortion there, as the reference paper states.
@@ -2222,8 +2227,9 @@ with {
     inbuf = fi.tf1s(R14 / (R3 + R14), 0.0, 1.0, w1)
     with { w1 = 1.0 / (C5 * (R3 + R14)); };
 
-    // LFO: asymmetric triangle, gate-source voltage.
-    phase = (+(rate / ma.SR) : ma.frac) ~ _;
+    // LFO: asymmetric triangle, gate-source voltage. The phase is
+    // os.lf_sawpos, exact in single precision (fixed-point phasor).
+    phase = os.lf_sawpos(rate);
     tri(p) = ba.if(p < 0.65, -1.0 + 2.0 * p / 0.65, 1.0 - 2.0 * (p - 0.65) / 0.35);
     vgs = 3.25 + 0.15 * tri(phase) - VREF;
 
