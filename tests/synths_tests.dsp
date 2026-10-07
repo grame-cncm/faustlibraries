@@ -50,17 +50,17 @@ fm_modulated_test = sy.fm((220, 440), (1000*tri)) with { P = int(ma.SR/10); tri 
 
 logicEFM1_test = sy.logicEFM1(1, 2, 0, 0, 0, 0.3, 2.5, 0.5, 0.2, 0.3, 10, 0,
                               -0.3, 2, 0.3, 1, 10, 500, 0.7, 300, 0, 800, 0.2, 200,
-                              261.63, ba.time < 36000, 0.8);
+                              261.63, ba.time < int(0.75*ma.SR), 0.8);
 
 logicEFM1_unison_test = sy.logicEFM1(3, 4, 0, 0, 1, 0.35, 8.9, 0.7, 0, 0.2, 35, 1,
                                      0.8, 1, 0.8, 1, 5, 1200, 0.3, 500, 0, 2000, 0.1, 400,
-                                     261.63, ba.time < 36000, 0.8);
+                                     261.63, ba.time < int(0.75*ma.SR), 0.8);
 
 logicEFM1_slider_test = sy.logicEFM1(1, 2, 0, 0, 0,
                               hslider("logicEFM1:fmInt", 0.3, 0, 1, 0.01), hslider("logicEFM1:modWave", 2.5, 0, 9, 0.01),
                               0.5, 0.2, 0.3, 10, 0, -0.3, 2, 0.3, 1, 10, 500, 0.7, 300, 0, 800, 0.2, 200,
-                              hslider("logicEFM1:freq", 261.63, 20, 2000, 0.01), ba.time < 36000, 0.8);
-logicEFM1_modulated_test = sy.logicEFM1(1, 2, 0, 0, 0, 0.3, 9*tri, 0.5, 0.2, 0.3, 10, 0, -0.3, 2, 0.3, 1, 10, 500, 0.7, 300, 0, 800, 0.2, 200, 261.63, ba.time < 36000, 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+                              hslider("logicEFM1:freq", 261.63, 20, 2000, 0.01), ba.time < int(0.75*ma.SR), 0.8);
+logicEFM1_modulated_test = sy.logicEFM1(1, 2, 0, 0, 0, 0.3, 9*tri, 0.5, 0.2, 0.3, 10, 0, -0.3, 2, 0.3, 1, 10, 500, 0.7, 300, 0, 800, 0.2, 200, 261.63, ba.time < int(0.75*ma.SR), 0.8) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 kick_test = sy.kick(60, 0.2, 0.01, 0.5, 3, button("kick:gate"));
 kick_slider_test = sy.kick(
