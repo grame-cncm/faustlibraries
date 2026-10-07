@@ -63,7 +63,7 @@ atanh2_test = aa.atanh2(atanhDomainSig);
 
 no = library("noises.lib");
 foldSig = 4.0 * no.noise;
-foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+foldTri = 1.0 - abs(2.0 * ba.period(P) / P - 1.0) with { P = int(ma.SR / 10); };
 
 triangleFold1_test = aa.triangleFold1(0.5, 0.9, foldSig);
 triangleFold1_slider_test = aa.triangleFold1(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.9, 0.5, 1.0, 0.001), foldSig);

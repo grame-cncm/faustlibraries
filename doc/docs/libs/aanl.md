@@ -794,7 +794,7 @@ The domain of this function is ℝ; its theoretical range is [-t; t].
 
 #### Usage
 ```
-_ : aa.triangleFold1(t, r) : _
+_ : triangleFold1(t, r) : _
 ```
 
 Where:
@@ -807,9 +807,10 @@ Where:
 ```
 aa = library("aanl.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 no = library("noises.lib");
 foldSig = 4.0 * no.noise;
-foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+foldTri = 1.0 - abs(2.0 * ba.period(P) / P - 1.0) with { P = int(ma.SR / 10); };
 triangleFold1_test = aa.triangleFold1(0.5, 0.9, foldSig);
 triangleFold1_slider_test = aa.triangleFold1(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.9, 0.5, 1.0, 0.001), foldSig);
 triangleFold1_modulated_test = aa.triangleFold1(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
@@ -827,7 +828,7 @@ The domain of this function is ℝ; its theoretical range is [-t; t].
 
 #### Usage
 ```
-_ : aa.triangleFold2(t, r) : _
+_ : triangleFold2(t, r) : _
 ```
 
 Where:
@@ -840,9 +841,10 @@ Where:
 ```
 aa = library("aanl.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 no = library("noises.lib");
 foldSig = 4.0 * no.noise;
-foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+foldTri = 1.0 - abs(2.0 * ba.period(P) / P - 1.0) with { P = int(ma.SR / 10); };
 triangleFold2_test = aa.triangleFold2(0.5, 0.9, foldSig);
 triangleFold2_slider_test = aa.triangleFold2(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.9, 0.5, 1.0, 0.001), foldSig);
 triangleFold2_modulated_test = aa.triangleFold2(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
@@ -866,7 +868,7 @@ The domain of this function is ℝ; its theoretical range is [-t; t].
 
 #### Usage
 ```
-_ : aa.sineFold1(t, r) : _
+_ : sineFold1(t, r) : _
 ```
 
 Where:
@@ -878,9 +880,10 @@ Where:
 ```
 aa = library("aanl.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 no = library("noises.lib");
 foldSig = 4.0 * no.noise;
-foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+foldTri = 1.0 - abs(2.0 * ba.period(P) / P - 1.0) with { P = int(ma.SR / 10); };
 sineFold1_test = aa.sineFold1(0.5, 0.8, foldSig);
 sineFold1_slider_test = aa.sineFold1(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.8, 0.5, 1.0, 0.001), foldSig);
 sineFold1_modulated_test = aa.sineFold1(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
@@ -898,7 +901,7 @@ The domain of this function is ℝ; its theoretical range is [-t; t].
 
 #### Usage
 ```
-_ : aa.sineFold2(t, r) : _
+_ : sineFold2(t, r) : _
 ```
 
 Where:
@@ -910,9 +913,10 @@ Where:
 ```
 aa = library("aanl.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 no = library("noises.lib");
 foldSig = 4.0 * no.noise;
-foldTri = 1.0 - abs(2.0 * ba.period(4800) / 4800.0 - 1.0);
+foldTri = 1.0 - abs(2.0 * ba.period(P) / P - 1.0) with { P = int(ma.SR / 10); };
 sineFold2_test = aa.sineFold2(0.5, 0.8, foldSig);
 sineFold2_slider_test = aa.sineFold2(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.8, 0.5, 1.0, 0.001), foldSig);
 sineFold2_modulated_test = aa.sineFold2(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
