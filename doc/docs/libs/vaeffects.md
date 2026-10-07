@@ -1350,6 +1350,11 @@ at guitar levels, most strongly at the bottom of the sweep. Mono.
 Input and output are in volts, a sample of ±1 being treated as ±1 V. Like
 the pedal, the model inverts the polarity of the signal.
 
+Accuracy: relative to an ngspice simulation of the reference schematic, on
+guitar DI at 48 kHz, the error is 1 % at 10 mV peak, 2 % at 0.1 V, 5 % at
+0.3 V and 9 % at 1 V, and it halves with each doubling of the sample rate.
+Tested from 8 kHz to 192 kHz.
+
 #### Usage
 
 ```
