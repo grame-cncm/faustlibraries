@@ -1377,17 +1377,28 @@ with {
 // ```
 // re = library("reverbs.lib");
 // os = library("oscillators.lib");
-// valhallaSupermassive_test = (os.osc(330), os.osc(440))
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// valhallaSupermassive_test = (os.tosc(330), os.tosc(440))
 //    : re.valhallaSupermassive(6, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
-// valhallaSupermassive_gemini_test = (os.osc(330), os.osc(440))
+// valhallaSupermassive_slider_test = (os.tosc(330), os.tosc(440))
+//    : re.valhallaSupermassive(6, 0.5,
+//        hslider("valhallaSupermassive:delay", 200, 0, 2000, 1),
+//        hslider("valhallaSupermassive:warp", 0.3, 0, 1, 0.01),
+//        hslider("valhallaSupermassive:feedback", 0.6, 0, 1, 0.01),
+//        hslider("valhallaSupermassive:density", 0.3, 0, 1, 0.01),
+//        1, 10, 20000, 0.5, 0.2);
+// valhallaSupermassive_modulated_test = (os.tosc(330), os.tosc(440)) : re.valhallaSupermassive(6, 0.5, 100 + 200*tri, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// valhallaSupermassive_jump_test = (os.tosc(330), os.tosc(440)) : re.valhallaSupermassive(6, 0.5, 200, 0.3, sq, 0.3, 1, 10, 20000, 0.5, 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// valhallaSupermassive_gemini_test = (os.tosc(330), os.tosc(440))
 //    : re.valhallaSupermassive(0, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
-// valhallaSupermassive_centaurus_test = (os.osc(330), os.osc(440))
+// valhallaSupermassive_centaurus_test = (os.tosc(330), os.tosc(440))
 //    : re.valhallaSupermassive(2, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
-// valhallaSupermassive_sagittarius_test = (os.osc(330), os.osc(440))
+// valhallaSupermassive_sagittarius_test = (os.tosc(330), os.tosc(440))
 //    : re.valhallaSupermassive(3, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
-// valhallaSupermassive_annihilator_test = (os.osc(330), os.osc(440))
+// valhallaSupermassive_annihilator_test = (os.tosc(330), os.tosc(440))
 //    : re.valhallaSupermassive(4, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
-// valhallaSupermassive_virgo_test = (os.osc(330), os.osc(440))
+// valhallaSupermassive_virgo_test = (os.tosc(330), os.tosc(440))
 //    : re.valhallaSupermassive(19, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
 // ```
 //
