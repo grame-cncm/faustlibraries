@@ -47,12 +47,11 @@
  **/
 
 ma = library("maths.lib");
-fi = library("filters.lib");
 
 declare name      "Faust Tonestack Emulation Library";
 declare author    "Guitarix project (<http://guitarix.sourceforge.net/>)";
 declare copyright "Guitarix project";
-declare version   "1.28.1";
+declare version   "1.28.2";
 declare license   "LGPL-2.1-or-later";
 
 /****************************************************************
@@ -84,7 +83,10 @@ declare license   "LGPL-2.1-or-later";
 // Generic tone stack: computes the bilinear-transformed transfer function
 // of the classic passive treble/middle/bass network from its schematic
 // component values. All the amplifier models below are instances of this
-// function with measured component values.
+// function with measured component values. The filter is realized with
+// trapezoidal integrators in observable canonical form, which stays accurate
+// in single precision up to 192 kHz and keeps the output continuous when the
+// controls move.
 //
 // #### Usage
 //
@@ -100,8 +102,7 @@ declare license   "LGPL-2.1-or-later";
 // * `m`: middle control, between 0 and 1
 // * `l`: bass control, between 0 and 1
 //----------------------------------------------------------
-tonestack(C1,C2,C3,R1,R2,R3,R4,t,m,L) = 
-    1/A0*fi.iir((B0,B1,B2,B3),(A1/A0,A2/A0,A3/A0)) 
+tonestack(C1,C2,C3,R1,R2,R3,R4,t,m,L) = tick ~ (_,_,_) : !,!,!,_
     with {
     
     l = L : (_-1)*3.4 : exp;
@@ -137,16 +138,30 @@ tonestack(C1,C2,C3,R1,R2,R3,R4,t,m,L) =
          + l*C1*C2*C3*R1*R2*R4
          + C1*C2*C3*R1*R3*R4;
 
-    c = 2*float(ma.SR);
-
-    B0 = -b1*c - b2*pow(c,2) - b3*pow(c,3);
-    B1 = -b1*c + b2*pow(c,2) + 3*b3*pow(c,3);
-    B2 = b1*c + b2*pow(c,2) - 3*b3*pow(c,3);
-    B3 = b1*c - b2*pow(c,2) + b3*pow(c,3);
-    A0 = -a0 - a1*c - a2*pow(c,2) - a3*pow(c,3);
-    A1 = -3*a0 - a1*c + a2*pow(c,2) + 3*a3*pow(c,3);
-    A2 = -3*a0 + a1*c + a2*pow(c,2) - 3*a3*pow(c,3);
-    A3 = -a0 + a1*c - a2*pow(c,2) + a3*pow(c,3);
+    // H(s) = (b3*s^3 + b2*s^2 + b1*s)/(a3*s^3 + a2*s^2 + a1*s + a0), discretized by the
+    // bilinear transform (c = 2*SR) as trapezoidal integrators I[] in observable canonical
+    // form: y = b3/a3*x + z1, z1 = I[(b2*x - a2*y)/a3 + z2], z2 = I[(b1*x - a1*y)/a3 + z3],
+    // z3 = I[-a0*y/a3], with the integrators normalized by w. The first state follows the
+    // output, so the output stays continuous when the knobs move the numerator and the
+    // denominator together. A direct form (fi.iir) clusters its poles near z = 1 and
+    // fails in single precision at high sampling rates.
+    // An RC network has real negative poles, so w = a2/a3 = |p1| + |p2| + |p3| is between
+    // the largest pole magnitude and 3 times it: the frequency scale of the integrators.
+    r2 = 1/a2 : min(ma.MAX); // reciprocals (min keeps Faust from turning x*r back into x/c)
+    r3 = 1/a3 : min(ma.MAX);
+    rw = a3*r2; // 1/w
+    g  = a2*r3*0.5/ma.SR; // w/(2*SR): trapezoidal integrators of s/w
+    al1 = a1*r2*rw; al0 = a0*r2*rw*rw; // a1/(a3*w^2), a0/(a3*w^3); a2/(a3*w) = 1
+    be3 = b3*r3; be2 = b2*r2; be1 = b1*r2*rw;
+    dn = 1/(1 + g*(1 + g*(al1 + g*al0))) : min(ma.MAX);
+    nx = be3 + g*(be2 + g*be1);
+    tick(s1, s2, s3, x) = 2*z1 - s1, 2*z2 - s2, 2*z3 - s3, y
+    with {
+        y  = (nx*x + s1 + g*(s2 + g*s3))*dn;
+        z3 = s3 - g*al0*y;
+        z2 = g*(be1*x - al1*y + z3) + s2;
+        z1 = g*(be2*x - y + z2) + s1;
+    };
 };
 
 ts = environment {
@@ -441,6 +456,7 @@ ts = environment {
 // bassman_slider_test = no.noise : ts.bassman(hslider("bassman:t", 0.5, 0, 1, 0.01), hslider("bassman:m", 0.5, 0, 1, 0.01), hslider("bassman:l", 0.5, 0, 1, 0.01));
 // bassman_modulated_test = no.noise : ts.bassman(0.5, 0.5, tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // bassman_jump_test = no.noise : ts.bassman(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// bassman_middle_jump_test = no.noise : ts.bassman(0, sq, 1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //
 //----------------------------------------------------------
@@ -460,6 +476,14 @@ bassman(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L)
 // * `t`: treble control, between 0 and 1
 // * `m`: middle control, between 0 and 1
 // * `l`: bass control, between 0 and 1
+//
+// #### Test
+// ```
+// ts = library("tonestacks.lib");
+// no = library("noises.lib");
+// mesa_test = no.noise : ts.mesa(0.5, 0.5, 0.5);
+// ```
+//
 //----------------------------------------------------------
 mesa(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.mesa;};
@@ -613,6 +637,19 @@ ac30(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L)
 // * `t`: treble control, between 0 and 1
 // * `m`: middle control, between 0 and 1
 // * `l`: bass control, between 0 and 1
+//
+// #### Test
+// ```
+// ts = library("tonestacks.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// no = library("noises.lib");
+// ac15_test = no.noise : ts.ac15(0.5, 0.5, 0.5);
+// ac15_slider_test = no.noise : ts.ac15(hslider("ac15:t", 0.5, 0, 1, 0.01), hslider("ac15:m", 0.5, 0, 1, 0.01), hslider("ac15:l", 0.5, 0, 1, 0.01));
+// ac15_modulated_test = no.noise : ts.ac15(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// ac15_jump_test = no.noise : ts.ac15(0.5, sq, 0.5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// ```
+//
 //----------------------------------------------------------
 ac15(T,M,L) = tonestack(t.C1,t.C2,t.C3,t.R1,t.R2,t.R3,t.R4,T,M,L) 
                     with {t = ts.ac15;};

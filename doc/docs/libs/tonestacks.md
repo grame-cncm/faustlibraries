@@ -26,7 +26,10 @@ process = ts.jcm2000(t,m,l);
 Generic tone stack: computes the bilinear-transformed transfer function
 of the classic passive treble/middle/bass network from its schematic
 component values. All the amplifier models below are instances of this
-function with measured component values.
+function with measured component values. The filter is realized with
+trapezoidal integrators in observable canonical form, which stays accurate
+in single precision up to 192 kHz and keeps the output continuous when the
+controls move.
 
 #### Usage
 
@@ -72,6 +75,7 @@ bassman_test = no.noise : ts.bassman(0.5, 0.5, 0.5);
 bassman_slider_test = no.noise : ts.bassman(hslider("bassman:t", 0.5, 0, 1, 0.01), hslider("bassman:m", 0.5, 0, 1, 0.01), hslider("bassman:l", 0.5, 0, 1, 0.01));
 bassman_modulated_test = no.noise : ts.bassman(0.5, 0.5, tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 bassman_jump_test = no.noise : ts.bassman(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+bassman_middle_jump_test = no.noise : ts.bassman(0, sq, 1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 
@@ -94,6 +98,14 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+no = library("noises.lib");
+mesa_test = no.noise : ts.mesa(0.5, 0.5, 0.5);
+```
+
 
 ----
 
@@ -274,6 +286,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+ac15_test = no.noise : ts.ac15(0.5, 0.5, 0.5);
+ac15_slider_test = no.noise : ts.ac15(hslider("ac15:t", 0.5, 0, 1, 0.01), hslider("ac15:m", 0.5, 0, 1, 0.01), hslider("ac15:l", 0.5, 0, 1, 0.01));
+ac15_modulated_test = no.noise : ts.ac15(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+ac15_jump_test = no.noise : ts.ac15(0.5, sq, 0.5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
