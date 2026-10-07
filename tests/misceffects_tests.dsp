@@ -45,7 +45,8 @@ echo_test = os.tosc(440) : ef.echo(0.5, 0.25, 0.4);
 reverseEchoN_test = os.tosc(440) : ef.reverseEchoN(2, 32);
 reverseDelayRamped_test = os.tosc(440) : ef.reverseDelayRamped(32, 0.6);
 uniformPanToStereo_test = os.tosc(440), os.tosc(550), os.tosc(660) : ef.uniformPanToStereo(3);
-xferDimensionExpander_test = os.tosc(440), os.tosc(550)
+xferDimensionExpander_test = os.tosc(440), os.tosc(550) : ef.xferDimensionExpander(0.5, 0.5);
+xferDimensionExpander_slider_test = os.tosc(440), os.tosc(550)
    : ef.xferDimensionExpander(hslider("xferDimensionExpander:size", 0.5, 0, 1, 0.01),
                               hslider("xferDimensionExpander:wet", 0.5, 0, 1, 0.01));
 xferDimensionExpander_modulated_test = os.tosc(440), os.tosc(550) : ef.xferDimensionExpander(tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
