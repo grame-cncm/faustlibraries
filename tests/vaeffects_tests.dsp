@@ -293,7 +293,7 @@ klonCentaur_jump_test = 0.5*no.noise : ve.klonCentaur(0.1 + 0.9*sq, 0.5, 0.5) wi
 
 klonCentaur_hot_test = os.tosc(110)*0.5 : ve.klonCentaur(1, 0, 1);
 
-fulltoneOCD_test = os.osc(330)
+fulltoneOCD_test = os.tosc(330)
    : ve.fulltoneOCD(
        hslider("fulltoneOCD:drive", 0.4, 0, 1, 0.01),
        hslider("fulltoneOCD:tone", 0.5, 0, 1, 0.01),
@@ -301,6 +301,9 @@ fulltoneOCD_test = os.osc(330)
        checkbox("fulltoneOCD:hp")
      );
 
-fulltoneOCD_lp_test = os.osc(110)*0.5 : ve.fulltoneOCD(1, 0, 0.1, 0);
+fulltoneOCD_lp_test = os.tosc(110)*0.5 : ve.fulltoneOCD(1, 0, 0.1, 0);
 
 fulltoneOCD_bright_test = no.noise*0.05 : ve.fulltoneOCD(0.7, 1, 0.1, 1);
+
+fulltoneOCD_modulated_test = 0.1*no.noise : ve.fulltoneOCD(0.1 + 0.9*tri, 0.5, 0.35, 1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fulltoneOCD_jump_test = 0.1*no.noise : ve.fulltoneOCD(0.1 + 0.9*sq, 0.5, 0.35, 1) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
