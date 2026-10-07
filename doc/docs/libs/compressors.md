@@ -1455,9 +1455,9 @@ Where:
 * `outgain`: output gain in dB (up to +19.1)
 * `upward`: upward-compression strength (0-2, 1 = 100 %); it scales the upward slope in proportion
 * `downward`: downward-compression strength (0-2, 1 = 100 %); above 1 the downward ratio keeps steepening until it is infinite, which at depth 1 is already the case at 1
-* `threshL`: low-band threshold (0-2, 1 = 100 %; higher compresses more); 0 and 2 shift the band's knees by -23.0 and +23.0 dB
-* `threshM`: mid-band threshold (0-2, 1 = 100 %; higher compresses more); 0 and 2 shift the band's knees by -23.7 and +23.7 dB
-* `threshH`: high-band threshold (0-2, 1 = 100 %; higher compresses more); 0 and 2 shift the band's knees by -24.0 and +24.0 dB
+* `threshL`: low-band threshold (0-2, 1 = 100 %); 0 and 2 shift both of the band's knees by -23.0 and +23.0 dB. Raising it raises quiet signals more and lowers loud ones less, so at every input level the band's gain rises or holds, as on the plug-in
+* `threshM`: mid-band threshold (0-2, 1 = 100 %); 0 and 2 shift both of the band's knees by -23.7 and +23.7 dB. Raising it raises quiet signals more and lowers loud ones less, so at every input level the band's gain rises or holds, as on the plug-in
+* `threshH`: high-band threshold (0-2, 1 = 100 %); 0 and 2 shift both of the band's knees by -24.0 and +24.0 dB. Raising it raises quiet signals more and lowers loud ones less, so at every input level the band's gain rises or holds, as on the plug-in
 * `gainL`: low-band output gain in dB (up to +6)
 * `gainM`: mid-band output gain in dB (up to +6)
 * `gainH`: high-band output gain in dB (up to +6)
