@@ -508,7 +508,7 @@ with {
 
     // The same four controls in each band's group (distinct paths per band).
     thresh(k) = band_group(k, vslider("[0] Thresh [unit:%] [style:knob]
-        [tooltip: Band threshold; higher compresses more]",
+        [tooltip: Band threshold; higher raises quiet parts more and lowers loud parts less]",
         100, 0, 200, 1)) / 100 : si.smoo;
     gain(k) = band_group(k, vslider("[1] Gain [unit:dB] [style:knob]",
         0, -24, 6, 0.1)) : si.smoo;
