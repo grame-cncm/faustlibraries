@@ -281,8 +281,11 @@ vocoder_slider_test = (no.noise, os.tosc(220))
       hslider("vocoder:BWRatio", 1.0, 0.5, 1.5, 0.01)
     );
 
-mxrPhase90_test = os.osc(440) * 0.3
+mxrPhase90_test = os.tosc(440) * 0.3
    : ve.mxrPhase90(hslider("mxrPhase90:rate", 1.5, 0.1, 10, 0.01));
+
+mxrPhase90_modulated_test = 0.3*no.noise : ve.mxrPhase90(0.1 + 9.9*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+mxrPhase90_jump_test = 0.3*no.noise : ve.mxrPhase90(0.1 + 9.9*sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 
 klonCentaur_test = os.tosc(330) : ve.klonCentaur(0.5, 0.5, 0.5);
 klonCentaur_slider_test = os.tosc(330)

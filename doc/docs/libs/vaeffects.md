@@ -1364,8 +1364,13 @@ Where:
 ```
 ve = library("vaeffects.lib");
 os = library("oscillators.lib");
-mxrPhase90_test = os.osc(440) * 0.3
+no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+mxrPhase90_test = os.tosc(440) * 0.3
    : ve.mxrPhase90(hslider("mxrPhase90:rate", 1.5, 0.1, 10, 0.01));
+mxrPhase90_modulated_test = 0.3*no.noise : ve.mxrPhase90(0.1 + 9.9*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+mxrPhase90_jump_test = 0.3*no.noise : ve.mxrPhase90(0.1 + 9.9*sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 #### References
