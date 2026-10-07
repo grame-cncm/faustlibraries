@@ -394,8 +394,10 @@ Measured laws (Logic Pro renders at 48 kHz; control values as Logic displays the
 - Modulator: ten tables, each a sine series of up to 128 harmonics (all sine
   terms, signed), peak-normalized to 1; table 1 is a triangle wave (1.092/k^2 on
   odd k, up to k = 31). modWave blends adjacent tables linearly. Harmonic k is
-  played only while k*freq stays below about 17 kHz: 128 harmonics at C2 and
-  below, 64 at C4, 16 at C6. Harmonics 1-64 were read at C4 and 65-128 at C2.
+  played only while k times the modulator frequency stays below about 17 kHz
+  (and below Nyquist): with a modulator ratio of 1, 128 harmonics at C2 and
+  below, 64 at C4, 16 at C6, as measured; other ratios were not measured.
+  Harmonics 1-64 were read at C4 and 65-128 at C2.
   Logic's own tables also show faint lookup images (about -70 dB, at harmonics
   385-640), which are not modeled.
 - Envelopes: the attack follows (1 - exp(-2.4*t/T))/(1 - exp(-2.4)) and reaches 1
@@ -403,7 +405,8 @@ Measured laws (Logic Pro renders at 48 kHz; control values as Logic displays the
   displayed time. The modulator pitch envelope follows only the decaying part of
   the modulation envelope, (modEnv - sustain), up to +-27.5 semitones.
 - LFO: a triangle, key-synced to start at its peak. Negative amounts give vibrato
-  of the whole voice, up to +-36.07 semitones; the vibrato and the modulator pitch
+  of the carriers and modulators, up to +-36.07 semitones (the model does not
+  apply it to the sub oscillator; not measured); the vibrato and the modulator pitch
   amount share one taper, a break-point curve measured at eight amounts.
 - Level: output gain 0.3776*mainLevel*(1 + velAmt*(gain - 1)); sub oscillator
   amplitude subLevel^2 before that gain.
@@ -516,7 +519,7 @@ with {
     vibCents = 3606.5 * amtCurve(max(0.0, 0 - lfoAmt));
     fmLfo = pow(max(0.0, lfoAmt), 2.0);
 
-    // Frequencies: vibrato (whole voice) and the modulator pitch envelope, which
+    // Frequencies: vibrato (carriers and modulators) and the modulator pitch envelope, which
     // follows only the decaying part of the modulation envelope (modEnv - sustain)
     // with up to +-27.5 semitones; Fixed Carrier ignores freq and vibrato.
     vibMod = pow(2.0, vibCents*lfoTri/1200.0);
