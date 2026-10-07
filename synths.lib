@@ -434,12 +434,15 @@ Goodness of fit against 94 renders, level-matched relative RMS waveform error ov
 
 For vibrato (amounts 0.12-1, 8 renders) and the full-scale modulator pitch envelope
 (3 renders) the pitch is compared instead: median error 0.03-3.1 cents, largest
-8.5 cents at full vibrato depth. Part of each waveform error comes from the
-single-precision phase accumulator, which is off by 0.002 cents at C4 and
-0.016 cents at C2 (far below audibility, but the phase drift adds up over a
-second): at FM 1.0 an exact double-precision rendering of the model differs from
-Logic by 2.7 %, against 4.2 % for the model as compiled, and for the C2 wave 8
-readout 0.7 % against 5.2 %.
+8.5 cents at full vibrato depth. These figures were measured with the model
+compiled in single precision and float phase accumulators, which were off by
+0.002 cents at C4 and 0.016 cents at C2 (far below audibility, but the phase
+drift adds up over a second): at FM 1.0 a double-precision rendering of the
+model differed from Logic by 2.7 %, against 4.2 % in single precision, and for
+the C2 wave 8 readout 0.7 % against 5.2 %. The phases now come from
+os.lf_sawpos_phase_reset, which does not drift in single precision, and the
+decay and release coefficients from expm1; the double-precision output is
+unchanged (to 1e-10). The comparison with Logic was not redone.
 
 Not measured, or measured at only a few settings:
 
@@ -479,13 +482,20 @@ with {
     modEnv = adsr(mA, mD, mS, mR);
     adsr(aMs, dMs, sus, rMs) = (step ~ (_, _)) : (_, !)
     with {
+        // Per-sample coefficient 1 - exp(-x), x = n/(t*SR). Decay and release use
+        // -expm1(-x): x is small (6e-5 for an 800 ms decay at 48 kHz), and
+        // 1 - exp(-x) is off by about 1e-3 there in single precision. The attack
+        // keeps 1 - exp(-x): its end is the sample where the level reaches 1,
+        // which it does at exactly the attack time, so that sample depends on
+        // the last bit of the coefficient.
         rate(t, n) = 1.0 - exp(0 - n/max(1.0, t*ma.SR));
+        rateSmall(t, n) = 0.0 - ma.expm1(0 - n/max(1.0, t*ma.SR));
         step(yp, dp) = y, done
         with {
             done = select2(noteOn, max(dp, yp >= 1.0) * (gate > 0), 0);
             attack = (gate > 0) * (done == 0);
-            k = select2(gate > 0, rate(rMs*0.003, 6.9078),
-                select2(attack, rate(dMs*0.003, 6.9078), rate(aMs*0.001, 2.4)));
+            k = select2(gate > 0, rateSmall(rMs*0.003, 6.9078),
+                select2(attack, rateSmall(dMs*0.003, 6.9078), rate(aMs*0.001, 2.4)));
             target = select2(gate > 0, 0.0, select2(attack, sus, 1.0/(1.0 - exp(-2.4))));
             yn = yp + (target - yp)*k;
             y = select2(attack, yn, min(yn, 1.0)) * (yn > 1e-20); // flush denormals
@@ -501,7 +511,7 @@ with {
     // Key-synced triangle LFO starting at its peak. The two sides of the amount
     // knob have different laws: vibrato up to +-3606.5 cents through amtCurve, and
     // an FM depth of amount^2.
-    lfoPh = (+(lfoRate/ma.SR) : ma.frac) ~ (*(1.0 - noteOn));
+    lfoPh = phasor(lfoRate);
     lfoTri = 1.0 - 4.0*abs(ma.frac(lfoPh + 0.5) - 0.5);
     vibCents = 3606.5 * amtCurve(max(0.0, 0 - lfoAmt));
     fmLfo = pow(max(0.0, lfoAmt), 2.0);
@@ -521,8 +531,12 @@ with {
     beta = betaCurve(fmInt + fmLfo*lfoTri + 0.764*modEnvFM*modEnv);
 
     // Every oscillator restarts at phase 0 on each note-on (measured for single
-    // notes; where sidebands fold, the relative phase sets their balance).
-    phasor(f) = (+(f/ma.SR) : ma.decimal) ~ (*(1.0 - noteOn));
+    // notes; where sidebands fold, the relative phase sets their balance): the
+    // phase is f/SR on the note-on sample and advances by f/SR. In single
+    // precision os.lf_sawpos_phase_reset accumulates it in fixed point, without
+    // the drift of a float accumulator; in double it is the float accumulator
+    // (+(f/ma.SR) : ma.decimal) ~ (*(1.0 - noteOn)).
+    phasor(f) = os.lf_sawpos_phase_reset(f, f/ma.SR, noteOn);
 
     // Modulator: a sine series. Its 128 coefficients are blended linearly between
     // the two measured tables adjacent to modWave (see the implementation notes),
