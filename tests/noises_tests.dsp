@@ -56,11 +56,17 @@ simplex1_lf_slider_test = no.simplex1_lf(12345, hslider("simplex1_lf:rate", 4.07
 simplex1_lf_modulated_test = no.simplex1_lf(12345, 20*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 sample_pmf_test = no.sample_pmf((no.noise + 1)/2, (1, 2, 3), (0.5, 0.2, 0.3));
+sample_pmf_slider_test = no.sample_pmf((no.noise + 1)/2, (1, 2, 3), (hslider("sample_pmf:w0", 0.5, 0, 1, 0.01), hslider("sample_pmf:w1", 0.2, 0, 1, 0.01), hslider("sample_pmf:w2", 0.3, 0, 1, 0.01)));
+sample_pmf_modulated_test = no.sample_pmf((no.noise + 1)/2, (1, 2, 3), (tri, 0.2, 1 - tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 markov_step_test = no.markov_step((0.1, 0.9, 0.9, 0.1), (no.noise + 1)/2, 1);
-markov_chain_test = no.markov_chain(P, (no.noise + 1)/2, ba.pulse(48))
+markov_chain_test = no.markov_chain(P, (no.noise + 1)/2, ba.pulse(int(ma.SR/1000)))
 with {
   P = (0, 1, 0,
        0, 0.5, 0.5,
        0.8, 0, 0.2);
 };
+markov_step_slider_test = no.markov_step((hslider("markov_step:p00", 0.1, 0, 1, 0.01), hslider("markov_step:p01", 0.9, 0, 1, 0.01), hslider("markov_step:p10", 0.9, 0, 1, 0.01), hslider("markov_step:p11", 0.1, 0, 1, 0.01)), (no.noise + 1)/2, int(hslider("markov_step:state", 1, 0, 1, 1)));
+markov_step_modulated_test = no.markov_step((tri, 1 - tri, 1 - tri, tri), (no.noise + 1)/2, ba.period(2)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+markov_chain_slider_test = no.markov_chain((0, 1, 0, 0, a, 1 - a, 0.8, 0, 0.2), (no.noise + 1)/2, ba.pulse(int(ma.SR/1000))) with { a = hslider("markov_chain:a", 0.5, 0, 1, 0.01); };
+markov_chain_modulated_test = no.markov_chain((0, 1, 0, 0, tri, 1 - tri, 0.8, 0, 0.2), (no.noise + 1)/2, ba.pulse(int(ma.SR/1000))) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
