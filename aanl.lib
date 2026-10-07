@@ -748,7 +748,10 @@ sinarctanStable(x) = (x + x') / (F(x) + F(x'))
 // two zeros of that filter are at z = -1 / (3 + sqrt(8)) and its reciprocal, so
 // two identical one-pole filters, y[n] = (1 + a) x[n] - a y[n-1] with
 // a = 1 / (3 + sqrt(8)), one before and one after the shaper, cancel it. Each
-// has unit gain at DC. The output is delayed by one sample.
+// has unit gain at DC. In the linear regime the whole chain is then the
+// first-order allpass (a + z^-1) / (1 + a z^-1): its magnitude is flat, and
+// its delay is (1 - a) / (1 + a) = 0.71 samples at DC, rising to
+// (1 + a) / (1 - a) = 1.41 samples at Nyquist.
 //
 // The domain of this function is ℝ; because of the post filter its output can
 // exceed [-1.0; 1.0] by up to about 7 % (a full-scale step peaks at 1.071).
