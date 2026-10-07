@@ -717,7 +717,7 @@ first (`si.normalizeL1`).
 #### Usage
 
 ```
-si.bus(N) : cumsum(N) : si.bus(N)
+bus(N) : cumsum(N) : bus(N)
 ```
 
 Where:
@@ -743,8 +743,8 @@ not finite when all the inputs are 0.
 #### Usage
 
 ```
-si.bus(N) : normalizeL1(N) : si.bus(N)
-si.bus(N) : normalizeL2(N) : si.bus(N)
+bus(N) : normalizeL1(N) : bus(N)
+bus(N) : normalizeL2(N) : bus(N)
 ```
 
 Where:
@@ -771,7 +771,7 @@ finite input.
 #### Usage
 
 ```
-si.bus(N) : softmax(N, temp) : si.bus(N)
+bus(N) : softmax(N, temp) : bus(N)
 ```
 
 Where:
@@ -782,7 +782,11 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 softmax_test = (-0.1, 0.2, 0.3, -0.2) : si.softmax(4, 0.5);
+softmax_slider_test = (-0.1, 0.2, 0.3, -0.2) : si.softmax(4, hslider("softmax:temp", 0.5, 0.01, 10, 0.01));
+softmax_modulated_test = (-0.1, 0.2, 0.3, -0.2) : si.softmax(4, 0.01 + tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 #### References

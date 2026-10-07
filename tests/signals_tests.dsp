@@ -92,3 +92,5 @@ normalizeL1_test = (0.1, -0.2, 0.4) : si.normalizeL1(3);
 normalizeL2_test = (0.1, -0.2, 0.4) : si.normalizeL2(3);
 
 softmax_test = (-0.1, 0.2, 0.3, -0.2) : si.softmax(4, 0.5);
+softmax_slider_test = (-0.1, 0.2, 0.3, -0.2) : si.softmax(4, hslider("softmax:temp", 0.5, 0.01, 10, 0.01));
+softmax_modulated_test = (-0.1, 0.2, 0.3, -0.2) : si.softmax(4, 0.01 + tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
