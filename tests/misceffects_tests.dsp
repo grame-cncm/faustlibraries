@@ -50,6 +50,7 @@ xferDimensionExpander_slider_test = os.tosc(440), os.tosc(550)
    : ef.xferDimensionExpander(hslider("xferDimensionExpander:size", 0.5, 0, 1, 0.01),
                               hslider("xferDimensionExpander:wet", 0.5, 0, 1, 0.01));
 xferDimensionExpander_modulated_test = os.tosc(440), os.tosc(550) : ef.xferDimensionExpander(tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+xferDimensionExpander_wet_modulated_test = os.tosc(440), os.tosc(550) : ef.xferDimensionExpander(0.5, tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 tapeStop_test = os.tosc(440), os.tosc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, button("stop"));
 tapeStop_jump_test = os.tosc(440), os.tosc(441) : ef.tapeStop(2, 3, 44100, 128, 1.0, 1.0, 22050, sq) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; };
