@@ -41,10 +41,14 @@ inst_bandPass_test = os.tosc(440) : inst.bandPass(1000, 0.95);
 inst_bandPass_slider_test = os.tosc(440) : inst.bandPass(hslider("bandPass:resonance", 1000, 20, 20000, 1), hslider("bandPass:radius", 0.95, 0, 0.999, 0.001));
 inst_bandPass_modulated_test = no.noise : inst.bandPass(50*pow(100, tri), 0.99) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 inst_bandPass_jump_test = no.noise : inst.bandPass(50*pow(100, sq), 0.99) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+inst_bandPass_low_test = no.noise : inst.bandPass(20, 0.999);
+inst_bandPass_audio_modulated_test = 0.1*no.noise : inst.bandPass(fc, 0.99) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 inst_bandPassH_test = os.tosc(440) : inst.bandPassH(1000, 0.95);
 inst_bandPassH_slider_test = os.tosc(440) : inst.bandPassH(hslider("bandPassH:resonance", 1000, 20, 20000, 1), hslider("bandPassH:radius", 0.95, 0, 0.999, 0.001));
 inst_bandPassH_modulated_test = no.noise : inst.bandPassH(50*pow(100, tri), 0.99) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 inst_bandPassH_jump_test = no.noise : inst.bandPassH(50*pow(100, sq), 0.99) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+inst_bandPassH_low_test = no.noise : inst.bandPassH(20, 0.999);
+inst_bandPassH_audio_modulated_test = 0.1*no.noise : inst.bandPassH(fc, 0.99) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 inst_jetTable_test = os.tosc(440) : inst.jetTable;
 inst_nonLinearModulator_test = os.tosc(440) : inst.nonLinearModulator(0.5, 1, 440, 0, 100, 3);
 

@@ -28,7 +28,7 @@ re = library("reverbs.lib");
 declare name "Faust-STK Tools Library";
 declare author "Romain Michon (rmichon@ccrma.stanford.edu)";
 declare copyright "Romain Michon";
-declare version "1.0.2";
+declare version "1.0.3";
 declare licence "LicenseRef-STK-4.3"; // Synthesis Tool Kit 4.3 (MIT style license);
 
 
@@ -325,8 +325,9 @@ oneZero0(b0,b1,x) = (*(b1) + x*b0)~_;
 oneZero1(b0,b1,x) = (x'*b1 + x*b0);
 
 //-----------------------`bandPass`----------------------------
-// Bandpass filter with constant unity peak gain based on a biquad
-// (`fi.TF2`).
+// Bandpass filter with constant unity peak gain based on a biquad, realized
+// with `fi.tf2_tpt`, which stays accurate in single precision at low
+// frequencies and finite when the resonance or the radius moves.
 //
 // #### Usage
 //
@@ -350,20 +351,27 @@ oneZero1(b0,b1,x) = (x'*b1 + x*b0);
 // inst_bandPass_slider_test = os.tosc(440) : inst.bandPass(hslider("bandPass:resonance", 1000, 20, 20000, 1), hslider("bandPass:radius", 0.95, 0, 0.999, 0.001));
 // inst_bandPass_modulated_test = no.noise : inst.bandPass(50*pow(100, tri), 0.99) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // inst_bandPass_jump_test = no.noise : inst.bandPass(50*pow(100, sq), 0.99) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// inst_bandPass_low_test = no.noise : inst.bandPass(20, 0.999);
+// inst_bandPass_audio_modulated_test = 0.1*no.noise : inst.bandPass(fc, 0.99) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 // ```
 //----------------------------------------------------------
 
-bandPass(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
+bandPass(resonance,radius) = fi.tf2_tpt(P, S, fq, 0, 0, fq)
     with {
-        a2 = radius*radius;
-        a1 = -2*radius*cos(ma.PI*2*resonance/ma.SR);
-        b0 = 0.5-0.5*a2;
-        b1 = 0;
-        b2 = -b0;
+        // (1 - R^2)/2*(1 - z^-2)/(1 - 2R*cos(th)*z^-1 + R^2*z^-2), R = radius
+        om = 1 - radius;
+        th = ma.PI*2*resonance/ma.SR;
+        P = om*om + 4*radius*sin(0.5*th)^2;
+        S = om*om + 4*radius*cos(0.5*th)^2;
+        fq = om*(1 + radius); // 1 - R^2
     };
 
 //-----------------------`bandPassH`----------------------------
-// Bandpass filter based on a biquad (`fi.TF2`), with unity gain at DC.
+// Two-pole resonator `1/A(z)` based on a biquad: numerator 1 and no gain
+// normalization, so its gain is `1/A(1)` at DC and grows as the poles approach
+// the unit circle. It is realized with `fi.tf2_tpt`, which stays accurate in
+// single precision at low frequencies and finite when the resonance or the
+// radius moves.
 //
 // #### Usage
 //
@@ -387,16 +395,19 @@ bandPass(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
 // inst_bandPassH_slider_test = os.tosc(440) : inst.bandPassH(hslider("bandPassH:resonance", 1000, 20, 20000, 1), hslider("bandPassH:radius", 0.95, 0, 0.999, 0.001));
 // inst_bandPassH_modulated_test = no.noise : inst.bandPassH(50*pow(100, tri), 0.99) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // inst_bandPassH_jump_test = no.noise : inst.bandPassH(50*pow(100, sq), 0.99) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// inst_bandPassH_low_test = no.noise : inst.bandPassH(20, 0.999);
+// inst_bandPassH_audio_modulated_test = 0.1*no.noise : inst.bandPassH(fc, 0.99) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 // ```
 //----------------------------------------------------------
 
-bandPassH(resonance,radius) = fi.TF2(b0,b1,b2,a1,a2)
+bandPassH(resonance,radius) = fi.tf2_tpt(P, S, fq, 1, 1, 1)
     with {
-        a2 = radius*radius;
-        a1 = -2*radius*cos(ma.PI*2*resonance/ma.SR);
-        b0 = 1;
-        b1 = 0;
-        b2 = 0;
+        // 1/(1 - 2R*cos(th)*z^-1 + R^2*z^-2), R = radius
+        om = 1 - radius;
+        th = ma.PI*2*resonance/ma.SR;
+        P = om*om + 4*radius*sin(0.5*th)^2;
+        S = om*om + 4*radius*cos(0.5*th)^2;
+        fq = om*(1 + radius); // 1 - R^2
     };
 
 //-----------------------`jetTable`----------------------------
