@@ -20,7 +20,7 @@ os = library("oscillators.lib");
 pf = library("phaflangers.lib");
 
 declare name "Faust Phaser and Flanger Library";
-declare version "1.1.2";
+declare version "1.1.3";
 
 //########################################################################################
 /************************************************************************
@@ -127,6 +127,10 @@ flanger_stereo(dmax,curdel1,curdel2,depth,fb,invert)
 // Sweeping second-order resonant allpass chain with feedback, the core
 // used by `phaser2_mono`: `sections` allpass sections whose notch
 // frequencies are swept between `frqmin` and `frqmax` by a sinusoidal LFO.
+// The allpass sections are realized as TPT state-variable filters (the allpass
+// case of `fi.tf2_tpt`, `x - bp(2k*x)`), which stay accurate in single
+// precision at low frequencies and finite however fast the notches move, and
+// the LFO is computed from a phasor (`os.lf_sawpos`), so it does not drift.
 //
 // #### Usage
 //
@@ -155,6 +159,9 @@ flanger_stereo(dmax,curdel1,curdel2,depth,fb,invert)
 // vibrato2_mono_test = os.tosc(440) : pf.vibrato2_mono(4, 0, 0.5, 1000, 100, 1.5, 4800, 0.5);
 // vibrato2_mono_slider_test = os.tosc(440) : pf.vibrato2_mono(4, hslider("vibrato2_mono:phase01", 0, 0, 1, 0.01), hslider("vibrato2_mono:fb", 0.5, -0.99, 0.99, 0.01), hslider("vibrato2_mono:width", 1000, 10, 5000, 1), hslider("vibrato2_mono:frqmin", 100, 20, 5000, 1), hslider("vibrato2_mono:fratio", 1.5, 1, 4, 0.01), hslider("vibrato2_mono:frqmax", 4800, 20, 10000, 1), hslider("vibrato2_mono:speed", 0.5, 0, 10, 0.01));
 // vibrato2_mono_jump_test = no.noise : pf.vibrato2_mono(4, 0, 1.8*sq - 0.9, 1000, 100, 1.5, 4800, 0.5) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// vibrato2_mono_modulated_test = no.noise : pf.vibrato2_mono(4, 0, 0.5, 10*pow(100.0, tri), 100, 1.5, 4800, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// vibrato2_mono_freq_jump_test = no.noise : pf.vibrato2_mono(4, 0, 0, 50, f, 1.5, f, 0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f = 100*pow(48.0, sq); };
+// vibrato2_mono_audio_modulated_test = 0.1*no.noise : pf.vibrato2_mono(4, 0, 0.5, 100, 100, 1.5, 1900, 500);
 // ```
 //
 // #### References
@@ -162,22 +169,31 @@ flanger_stereo(dmax,curdel1,curdel2,depth,fb,invert)
 // * <https://ccrma.stanford.edu/~jos/pasp/Phasing.html>
 //------------------------------------------------------------
 vibrato2_mono(sections,phase01,fb,width,frqmin,fratio,frqmax,speed) =
- (+ : seq(i,sections,ap2p(R,th(i)))) ~ *(fb)
+ (+ : seq(i,sections,ap2p(th(i)))) ~ *(fb)
 with {
-     //tf2 = component("filters.lib").tf2;
-     // second-order resonant digital allpass given pole radius and angle:
-     ap2p(R,th) = fi.tf2(a2,a1,1,a1,a2) with {
-       a2 = R^2;
-       a1 = -2*R*cos(th);
+     // second-order resonant digital allpass given its pole angle th, pole radius
+     // R = exp(-pi*width/SR): (R^2 - 2R*cos(th)*z^-1 + z^-2)/(1 - 2R*cos(th)*z^-1 + R^2*z^-2),
+     // realized as fi.tf2_tpt(P, S, 1 - R^2, P, S, R^2 - 1) does, in its allpass
+     // form: the SVF runs on 2k*x, and the output is x minus its bandpass
+     ap2p(th, x) = x - (x*k2 : svf) with {
+       P = om*om + 4*(1 - om)*sin(0.5*th)^2; // A(1)
+       S = om*om + 4*(1 - om)*cos(0.5*th)^2; // A(-1)
+       iS = 1/S : min(ma.MAX); // min keeps Faust from turning x*r back into x/c
+       g = sqrt(P*iS); ig = 1/g : min(ma.MAX);
+       k2 = 4*fq*ig*iS; // 2k
+       kpg = (2*fq + P)*ig*iS; // k + g
+       d = 0.25*S; // 1/(1 + k*g + g^2)
+       svf = tick ~ (_,_) : !,!,_
+       with { tick(s1, s2, u) = bp + g*hp, lp + g*bp, bp
+         with { hp = (u - kpg*s1 - s2)*d; bp = g*hp + s1; lp = g*bp + s2; }; };
      };
-     R = exp(-pi*width/ma.SR);
-     cososc = os.oscrc; // oscillators.lib
-     sinosc = os.oscrs; // oscillators.lib
-     osc = cososc(speed) * phase01 + sinosc(speed) * (1-phase01);
+     om = 0 - ma.expm1(0 - ma.PI*width/ma.SR); // 1 - R
+     fq = om*(2 - om); // 1 - R^2
+     ph = 2*ma.PI*os.lf_sawpos(speed); // drift-free LFO phase
+     osc = cos(ph) * phase01 + sin(ph) * (1-phase01);
      lfo = (1-osc)/2; // in [0,1]
-     pi = 4*atan(1);
-     thmin = 2*pi*frqmin/ma.SR;
-     thmax = 2*pi*frqmax/ma.SR;
+     thmin = 2*ma.PI*frqmin/ma.SR;
+     thmax = 2*ma.PI*frqmax/ma.SR;
      th1 = thmin + (thmax-thmin)*lfo;
      th(i) = (fratio^i)*th1; // first notch (i=0) at th1, between thmin and thmax
 };
@@ -212,6 +228,7 @@ with {
 // os = library("oscillators.lib");
 // phaser2_mono_test = os.tosc(330) : pf.phaser2_mono(4, 0.0, 50, 200, 1.5, 4000, 0.5, 0.8, 0.2, 0);
 // phaser2_mono_slider_test = os.tosc(330) : pf.phaser2_mono(4, hslider("phaser2_mono:phase01", 0, 0, 1, 0.01), hslider("phaser2_mono:width", 50, 10, 5000, 1), hslider("phaser2_mono:frqmin", 200, 20, 5000, 1), hslider("phaser2_mono:fratio", 1.5, 1, 4, 0.01), hslider("phaser2_mono:frqmax", 4000, 20, 10000, 1), hslider("phaser2_mono:speed", 0.5, 0, 10, 0.01), hslider("phaser2_mono:depth", 0.8, 0, 2, 0.01), hslider("phaser2_mono:fb", 0.2, -0.99, 0.99, 0.01), 0);
+// phaser2_mono_low_test = os.tosc(30) : pf.phaser2_mono(4, 0, 20, 20, 1.5, 20, 0, 1, 0, 0);
 // ```
 //
 // #### References
