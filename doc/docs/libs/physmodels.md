@@ -1964,7 +1964,9 @@ fluteJetTable_test = os.tosc(220) : pm.fluteJetTable;
 
 Simple brass lips/mouthpiece table. Since this implementation is very basic
 and that the lips and tube of the instrument are coupled to each other, the
-length of that tube must be provided here.
+length of that tube must be provided here. The lip resonance is realized
+with `fi.tf2_tpt`, which stays accurate in single precision at low
+frequencies and finite when the tube length or the lip tension moves.
 
 #### Usage
 
@@ -1982,7 +1984,15 @@ Where:
 ```
 pm = library("physmodels.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
 brassLipsTable_test = os.tosc(220) : pm.brassLipsTable(0.3, 0.2);
+brassLipsTable_slider_test = 0.02*os.tosc(220) : pm.brassLipsTable(hslider("tubeLength", 0.3, 0.01, 2.5, 0.01), hslider("lipsTension", 0.2, 0, 1, 0.01));
+brassLipsTable_low_test = 0.003*no.noise : pm.brassLipsTable(2.5, 0);
+brassLipsTable_modulated_test = 0.02*os.tosc(220) : pm.brassLipsTable(0.1*pow(25.0, tri), 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+brassLipsTable_jump_test = 0.02*os.tosc(220) : pm.brassLipsTable(0.1*pow(25.0, sq), 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+brassLipsTable_audio_modulated_test = 0.1*no.noise : pm.brassLipsTable(340/fc, 0.5) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 ```
 
 ----
