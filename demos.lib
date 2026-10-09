@@ -2232,7 +2232,7 @@ pospass_demo(x) = analytic_signal, modulator : si.cmul with {
   octavesShift = hslider("Frequency Shift in octaves away from SR/16",
          -2,-7,3,0.001) : si.smooth(0.999);
   in_select = checkbox("Use Mic");
-  sine_tone = os.oscrs(f0);
+  sine_tone = os.tosc(f0);
   f0 = ma.SR/16.0;   // original frequency to be shifted
   fn = f0 * 2.0^octavesShift; // modulated frequency
   df = fn - f0; // frequency-shift as a difference
