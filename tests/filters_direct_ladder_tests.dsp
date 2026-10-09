@@ -25,6 +25,8 @@ notchw_slider_test = no.noise : fi.notchw(hslider("width", 200, 10, 2000, 1), hs
 notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 notchw_jump_test = no.noise : fi.notchw(100, 200*pow(25, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 notchw_audio_modulated_test = 0.1*no.noise : fi.notchw(fc/10, fc) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
+notchw_dc_test = no.noise : fi.notchw(100, 0);
+notchw_nyquist_test = no.noise : fi.notchw(100, ma.SR/2);
 
 tf21_test = src : fi.tf21(0.1, 0.2, 0.1, -0.5, 0.06);
 tf22_test = src : fi.tf22(0.1, 0.2, 0.1, -0.5, 0.06);

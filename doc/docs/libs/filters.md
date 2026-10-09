@@ -1061,8 +1061,11 @@ _ : tf2_tpt(P,S,fq,Np,Nm,nd) : _
 
 Where:
 
-* `P`: `A(1) = 1 + a1 + a2`, positive
-* `S`: `A(-1) = 1 - a1 + a2`, positive
+* `P`: `A(1) = 1 + a1 + a2`, positive, or 0 together with `Np` (a pole and a
+  zero at z = 1 that cancel, as in `notchw` at 0 Hz)
+* `S`: `A(-1) = 1 - a1 + a2`, positive. A pole very close to z = -1 can
+  leave the unit circle in single precision: a design that reaches Nyquist
+  bounds its frequency, as `notchw` does
 * `fq`: `1 - a2`, positive (`P + S + 2*fq = 4`)
 * `Np`: `N(1) = n0 + n1 + n2`, the gain at DC is `Np/P`
 * `Nm`: `N(-1) = n0 - n1 + n2`, the gain at Nyquist is `Nm/S`
@@ -1127,7 +1130,8 @@ _ : notchw(width,freq) : _
 Where:
 
 * `width`: "notch width" in Hz (approximate)
-* `freq`: "notch frequency" in Hz
+* `freq`: "notch frequency" in Hz, from 0 (a first-order DC notch) to
+  `0.499*ma.SR`; a higher frequency acts as `0.499*ma.SR`, as in `svf`
 
 #### Test
 ```
@@ -1142,6 +1146,8 @@ notchw_slider_test = no.noise : fi.notchw(hslider("width", 200, 10, 2000, 1), hs
 notchw_modulated_test = no.noise : fi.notchw(100, 200*pow(25, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 notchw_jump_test = no.noise : fi.notchw(100, 200*pow(25, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 notchw_audio_modulated_test = 0.1*no.noise : fi.notchw(fc/10, fc) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
+notchw_dc_test = no.noise : fi.notchw(100, 0);
+notchw_nyquist_test = no.noise : fi.notchw(100, ma.SR/2);
 ```
 
 #### References
@@ -4043,7 +4049,9 @@ _ : peak_eq_rm(Lfx,fx,tanPiBT) : _
 Where:
 
 * `Lfx`: level (dB) at fx
-* `fx`: boost or cut frequency (Hz)
+* `fx`: boost or cut frequency (Hz), from 0 (where the section becomes a
+  first-order shelf) to `0.499*ma.SR`; a higher frequency acts as
+  `0.499*ma.SR`, as in `svf`
 * `tanPiBT`: `tan(PI*B/SR)`, where B = -3dB bandwidth (Hz) when 10^(Lfx/20) = 0
         ~ PI*B/SR for narrow bandwidths B
 
@@ -4061,6 +4069,8 @@ peak_eq_rm_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR
 peak_eq_rm_jump_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250.0, sq); };
 peak_eq_rm_unity_test = no.noise : fi.peak_eq_rm(0, 1000, tan(ma.PI*200/ma.SR));
 peak_eq_rm_audio_modulated_test = 0.1*no.noise : fi.peak_eq_rm(6, fc, tan(ma.PI*fc/10/ma.SR)) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
+peak_eq_rm_dc_test = no.noise : fi.peak_eq_rm(6, 0, tan(ma.PI*200/ma.SR));
+peak_eq_rm_nyquist_test = no.noise : fi.peak_eq_rm(6, ma.SR/2, tan(ma.PI*200/ma.SR));
 ```
 
 #### References

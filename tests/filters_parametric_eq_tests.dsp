@@ -68,6 +68,8 @@ peak_eq_rm_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR
 peak_eq_rm_jump_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*fx/5/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = 20*pow(250.0, sq); };
 peak_eq_rm_unity_test = no.noise : fi.peak_eq_rm(0, 1000, tan(ma.PI*200/ma.SR));
 peak_eq_rm_audio_modulated_test = 0.1*no.noise : fi.peak_eq_rm(6, fc, tan(ma.PI*fc/10/ma.SR)) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
+peak_eq_rm_dc_test = no.noise : fi.peak_eq_rm(6, 0, tan(ma.PI*200/ma.SR));
+peak_eq_rm_nyquist_test = no.noise : fi.peak_eq_rm(6, ma.SR/2, tan(ma.PI*200/ma.SR));
 
 spectral_tilt_test = src : fi.spectral_tilt(4, 200, 2000, -0.5);
 spectral_tilt_slider_test = no.noise : fi.spectral_tilt(4, hslider("f0", 200, 20, 2000, 1), hslider("bw", 2000, 100, 10000, 1), hslider("alpha", -0.5, -1, 1, 0.01));
