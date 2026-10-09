@@ -37,7 +37,9 @@ same 1194 symbols as the documentation):
      arbitrary value, 2, when it is an argument (`isnan(x)`).
   5. A bus made of wires and a `...` (`_,_, ... : f(N) : _,_, ...`) states a
      variable channel count: it is dropped, and only the call is checked.
-  6. The program is evaluated with `faust -e`, which resolves the names,
+  6. The program's `inputs` and `outputs` are evaluated with `faust -e`,
+     avoiding a potentially enormous printout of its expanded DSP graph.
+     This resolves the names,
      applies the functions and checks every composition, without generating
      code (fast: about 15 ms for most symbols).
   7. When it evaluates, the arguments of the symbol's call and the bullets
@@ -52,7 +54,8 @@ For fi.wgr, `scripts/check_usage.py --symbol fi.wgr` prints the program:
     ...
     src = os.tosc(440);
     wgr_test = fi.wgr(440, 0.995, src);
-    process = _ : fi.wgr(f,r) : _ with { f = 440; r = 0.995; };
+    process = inputs(_ : fi.wgr(f,r) : _), outputs(_ : fi.wgr(f,r) : _)
+              with { f = 440; r = 0.995; };
                                         // the Usage, valued by wgr_test
 
 and the failure: `The number of outputs [2] of wgr(440)(0.995f) must be
@@ -574,11 +577,11 @@ def classify(stderr):
 
 
 def evaluate(sym, expr, bindings, defs, prefixes, workdir, programs, wrap=None):
-    """Evaluate `process = expr` with `faust -e`, valuing its unbound names.
+    """Evaluate expr's arity with `faust -e`, valuing its unbound names.
 
     Returns (stdout, None) when the program evaluates, else (None, (kind,
     message)). wrap, when given, turns expr into the process expression
-    (`inputs(c), outputs(c)` for measure_io); the names are still looked
+    (by default `inputs(c), outputs(c)`); the names are still looked
     for in expr. bindings is completed in place, and each source compiled
     is appended to programs.
 
@@ -587,6 +590,8 @@ def evaluate(sym, expr, bindings, defs, prefixes, workdir, programs, wrap=None):
     something else. A failure after an arbitrary value is reported as
     `unbound`: the value itself may be its cause.
     """
+    if wrap is None:
+        wrap = lambda c: f"inputs({c}), outputs({c})"
     given = []  # the names given a value by the retries, `x = 2`
     while True:
         src = program(sym, wrap(expr) if wrap else expr, bindings, defs, prefixes)
