@@ -108,19 +108,46 @@ def save(fig, out: Path) -> None:
     print(f"  {out.name}  ({out.stat().st_size // 1024} kB)")
 
 
+def matches_design(designs, tol_db: float, floor_db: float = -40.0):
+    """A freq_response `custom` check: curve k must follow the exact
+    second-order transfer function B(z)/A(z) given by designs[k] = (b, a),
+    within `tol_db` wherever the exact response is above `floor_db` (near a
+    zero both are ~ -inf dB). The exact impulse response is truncated like the
+    probe's, so that a slowly decaying pole (one near z = -1 at 0.499*SR)
+    is not counted as an error."""
+    def run(stem, freq, curves):
+        nfft = 2 * (len(freq) - 1)
+        for k, (b, a) in enumerate(designs):
+            h = np.zeros(nfft)
+            y1 = y2 = 0.0
+            for n in range(nfft):  # direct form II impulse response, double
+                w = (1.0 if n == 0 else 0.0) - a[1] * y1 - a[2] * y2
+                h[n] = b[0] * w + b[1] * y1 + b[2] * y2
+                y1, y2 = w, y1
+            exact = 20 * np.log10(np.abs(np.fft.rfft(h)) + 1e-12)
+            use = exact > floor_db
+            err = float(np.max(np.abs(curves[k][use] - exact[use])))
+            check(err <= tol_db,
+                  f"{stem}: variant {k} is {err:.2g} dB from the exact design, "
+                  f"expected <= {tol_db}")
+    return run
+
+
 # ---------------------------------------------------------------------------
 # figure types
 # ---------------------------------------------------------------------------
 
 def freq_response(out: Path, stem: str, title: str, variants, checks=(),
                   nfft: int = 16384, ylim=(-80, 20), amp: float = 1.0,
-                  custom=None) -> None:
+                  custom=None, xscale: str = "log") -> None:
     """Impulse response -> FFT magnitude, one curve per (label, expr).
 
     `amp` scales the probe impulse; a small value keeps a saturating filter
     (tanh ladder, diode) in its linear region, and the magnitude is
     normalized back. `custom(stem, freq, curves)` may run extra cross-curve
-    assertions through check().
+    assertions through check(). `xscale="linear"` plots 0 Hz to Nyquist in
+    kHz, for a parameter swept uniformly up to Nyquist; more variants than
+    COLORS are then drawn in a color gradient, with the legend outside.
     """
     body = ",\n          ".join(f"(imp : {expr})" for _, expr in variants)
     src = LIBS + f"imp = {amp} - {amp}';\nprocess = {body};\n"
@@ -131,13 +158,20 @@ def freq_response(out: Path, stem: str, title: str, variants, checks=(),
         return
     freq = np.fft.rfftfreq(nfft, 1 / SR)
     fig, ax = new_axes(title)
+    linear = xscale == "linear"
+    xs = 1e-3 if linear else 1.0  # plotted frequency unit: kHz or Hz
+    gradient = len(variants) > len(COLORS)
     curves = []
     for i, (label, _) in enumerate(variants):
         mag = np.abs(np.fft.rfft(data[:nfft, i])) / amp
         db = 20 * np.log10(mag + 1e-12)
         curves.append(db)
-        ax.semilogx(freq[1:], db[1:], lw=1.3, label=label,
-                    color=COLORS[i % len(COLORS)])
+        color = (plt.cm.viridis(0.9 * i / (len(variants) - 1)) if gradient
+                 else COLORS[i % len(COLORS)])
+        if linear:
+            ax.plot(freq * xs, db, lw=1.3, label=label, color=color)
+        else:
+            ax.semilogx(freq[1:], db[1:], lw=1.3, label=label, color=color)
     for i, f, expected, tol in checks:
         got = db_at(freq, curves[i], f)
         if tol is None:  # one-sided: expected is an upper bound (attenuation)
@@ -148,17 +182,22 @@ def freq_response(out: Path, stem: str, title: str, variants, checks=(),
             check(abs(got - expected) <= tol,
                   f"{stem}: variant {i} at {f:.0f} Hz is {got:+.2f} dB, "
                   f"expected {expected:+.1f} +/- {tol} dB")
-            ax.plot([f], [expected], "o", ms=4, mfc="none", color="#333",
+            ax.plot([f * xs], [expected], "o", ms=4, mfc="none", color="#333",
                     zorder=5)
     if custom is not None:
         custom(stem, freq, curves)
-    ax.set_xlim(20, SR / 2)
+    if linear:
+        ax.set_xlim(0, SR / 2 * xs)
+    else:
+        ax.set_xlim(20, SR / 2)
     # never clip a resonance peak: extend the top when a curve exceeds it
     top = max(ylim[1], max(c[1:].max() for c in curves) + 4.0)
     ax.set_ylim(ylim[0], top)
-    ax.set_xlabel("Hz")
+    ax.set_xlabel("kHz" if linear else "Hz")
     ax.set_ylabel("dB")
-    if len(variants) > 1:
+    if gradient:
+        ax.legend(fontsize=7, loc="center left", bbox_to_anchor=(1.01, 0.5))
+    elif len(variants) > 1:
         ax.legend(fontsize=8, loc="lower left")
     save(fig, out)
 
@@ -661,13 +700,48 @@ def build_all(out_dir: Path, wanted: set[str]) -> None:
                       checks=[(0, 20000.0, 12.0, 1.5), (1, 20000.0, -12.0, 1.5),
                               (0, 30.0, 0.0, 1.0)],
                       ylim=(-20, 20))
+    # notchw and peak_eq_rm: frequency swept from 0 (where the section
+    # becomes first order) to Nyquist (where it acts as 0.499*SR), each curve
+    # checked against the exact design: notchw is (1 + A(z))/2 and peak_eq_rm
+    # (1 + A(z))/2 + K*(1 - A(z))/2, A the second-order allpass
+    # (a2 + a1/z + 1/z^2)/(1 + a1/z + a2/z^2).
+    sweep = [k * SR / 20 for k in range(11)]
+    swept = [min(f, 0.499 * SR) for f in sweep]
+
+    def allpass_parts(a1, a2):
+        a = np.array([1.0, a1, a2])
+        return a, a[::-1]  # denominator, allpass numerator
+
     if go("fi_notchw"):
+        wn = np.pi * 500.0 / SR  # dcblockerat(width/2)
+        p = (1 - wn) / (1 + wn)
+        designs = []
+        for f in swept:
+            a, an = allpass_parts(-(1 + p * p) * np.cos(2 * np.pi * f / SR), p * p)
+            designs.append(((a + an) / 2, a))
         freq_response(out_dir / "fi_notchw.svg", "fi_notchw",
-                      "fi.notchw(width, 1000)",
-                      [("width=50", "fi.notchw(50.0, 1000.0)"),
-                       ("width=400", "fi.notchw(400.0, 1000.0)")],
-                      checks=[(0, 1000.0, -30.0, 15.0), (0, 100.0, 0.0, 1.0)],
-                      ylim=(-90, 10))
+                      "fi.notchw(1000, f), f = 0 to SR/2",
+                      [(f"{f / 1000:.1f} kHz", f"fi.notchw(1000.0, {f})")
+                       for f in sweep],
+                      checks=[(k, f, -30.0, None) for k, f in enumerate(swept)],
+                      ylim=(-80, 5), xscale="linear",
+                      custom=matches_design(designs, 0.01))
+    if go("fi_peak_eq_rm"):
+        t = np.tan(np.pi * 1000.0 / SR)
+        k2 = (1 - t) / (1 + t)
+        gain = 10 ** (12 / 20)
+        designs = []
+        for f in swept:
+            a, an = allpass_parts(-np.cos(2 * np.pi * f / SR) * (1 + k2), k2)
+            designs.append(((a + an) / 2 + gain * (a - an) / 2, a))
+        freq_response(out_dir / "fi_peak_eq_rm.svg", "fi_peak_eq_rm",
+                      "fi.peak_eq_rm(12, f, tan(PI*1000/SR)), f = 0 to SR/2",
+                      [(f"{f / 1000:.1f} kHz",
+                        f"fi.peak_eq_rm(12.0, {f}, tan(ma.PI*1000.0/ma.SR))")
+                       for f in sweep],
+                      checks=[(k, f, 12.0, 0.1) for k, f in enumerate(swept)],
+                      ylim=(-3, 15), xscale="linear",
+                      custom=matches_design(designs, 0.01))
     if go("fi_dcblocker"):
         freq_response(out_dir / "fi_dcblocker.svg", "fi_dcblocker",
                       "fi.dcblocker — -3 dB near 35 Hz at 44.1/48 kHz",

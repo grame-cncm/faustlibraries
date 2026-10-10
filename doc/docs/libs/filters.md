@@ -4033,6 +4033,8 @@ peak_eq_cq_jump_test = no.noise : fi.peak_eq_cq(6, 20*pow(250, sq), 4) with { P 
 
 ### `(fi.)peak_eq_rm`
 
+![peak_eq_rm — response plots](../img/fi_peak_eq_rm.svg)
+
 Regalia-Mitra second order peaking equalizer section:
 `H(z) = (1 + A(z))/2 + K (1 - A(z))/2`, with `A(z)` the second order
 allpass centered at `fx` and `K = 10^(Lfx/20)`. At `Lfx = 0` (K = 1) the
