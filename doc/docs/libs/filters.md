@@ -1133,7 +1133,7 @@ Where:
 * `freq`: "notch frequency" in Hz, from 0 (a first-order DC notch) to
   `0.499*ma.SR`; a higher frequency acts as `0.499*ma.SR`, as in `svf`.
   At `ma.SR/2` the notch therefore sits at `0.499*ma.SR`, and the Nyquist
-  frequency itself passes at 0 dB
+  limit itself passes at 0 dB
 
 #### Test
 ```
@@ -4056,7 +4056,7 @@ Where:
 * `fx`: boost or cut frequency (Hz), from 0 (where the section becomes a
   first-order shelf) to `0.499*ma.SR`; a higher frequency acts as
   `0.499*ma.SR`, as in `svf`. At `ma.SR/2` the peak therefore sits at
-  `0.499*ma.SR`, and the Nyquist frequency itself passes at 0 dB
+  `0.499*ma.SR`, and the Nyquist limit itself passes at 0 dB
 * `tanPiBT`: `tan(PI*B/SR)`, where B = -3dB bandwidth (Hz) when 10^(Lfx/20) = 0
         ~ PI*B/SR for narrow bandwidths B
 
