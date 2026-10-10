@@ -619,7 +619,10 @@ def build_all(out_dir: Path, wanted: set[str]) -> None:
         freq_response(out_dir / "fi_bandstop.svg", "fi_bandstop",
                       "fi.bandstop(Nh, 500, 2000)",
                       [(f"Nh={n}", f"fi.bandstop({n}, 500.0, 2000.0)") for n in (1, 2, 4)],
-                      checks=[(2, 50.0, 0.0, 1.0), (2, 1000.0, -70.0, 25.0)],
+                      # Nh zeros at the prewarped geometric center (1001.6 Hz at
+                      # 48 kHz): -53 dB at 1 kHz for Nh=1, -213 dB for Nh=4.
+                      checks=[(2, 50.0, 0.0, 1.0), (0, 1000.0, -40.0, None),
+                              (2, 1000.0, -100.0, None)],
                       ylim=(-90, 20))
     if go("fi_resonlp"):
         freq_response(out_dir / "fi_resonlp.svg", "fi_resonlp",
@@ -994,11 +997,14 @@ def build_all(out_dir: Path, wanted: set[str]) -> None:
                       "pf.flanger_mono(512, 48, 1, 0, invert) — 1 ms comb",
                       [("invert=0", "pf.flanger_mono(512, 48.0, 1.0, 0.0, 0.0)"),
                        ("invert=1", "pf.flanger_mono(512, 48.0, 1.0, 0.0, 1.0)")],
-                      checks=[(0, 1000.0, -30.0, None),
-                              (0, 2000.0, -30.0, None),
-                              (0, 500.0, 0.0, 1.5),
-                              (1, 500.0, -30.0, None),
-                              (1, 1500.0, -30.0, None)],
+                      # invert=0 is (x + x(n-48))/2: notches at 500, 1500 Hz;
+                      # invert=1 is (x - x(n-48))/2: notches at 0, 1, 2 kHz.
+                      checks=[(0, 500.0, -30.0, None),
+                              (0, 1500.0, -30.0, None),
+                              (0, 1000.0, 0.0, 1.5),
+                              (1, 1000.0, -30.0, None),
+                              (1, 2000.0, -30.0, None),
+                              (1, 500.0, 0.0, 1.5)],
                       ylim=(-60, 12))
     if go("pf_phaser2_mono"):
         def has_notches(stem, freq, curves):
