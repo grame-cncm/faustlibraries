@@ -24,6 +24,8 @@ or later.
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
 | [`verify_matched2.py`](#verify_matched2py) | proves the rewrites of Vicanek's matched filters and checks their coefficients at 60 digits | `make verify-matched` |
+| [`fit_fastmath.py`](#fit_fastmathpy) | fits the coefficients of `fastmath.lib`, in single and double precision | — |
+| [`fastmath_accuracy.py`](#fastmath_accuracypy) | measures the error of every `fastmath.lib` function, in single and double precision | — |
 | **Documentation checks** | | |
 | [`checkdoc.py`](#checkdocpy) | documentation and license gate, against a baseline | `make checkdoc` |
 | [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters; measures the io of the export | `make check-usage`, `checkdoc.py` (`--changed`), `build_faust_doc_index.py` (`--measure-io`) |
@@ -438,6 +440,36 @@ fails (exit status 1) if one no longer holds:
 
 Run it after any change to these filters or to `_matched2`, `_shelf2Matched`
 or `_matchedRun`. It takes a few seconds.
+
+### `fit_fastmath.py`
+
+```
+scripts/fit_fastmath.py
+```
+
+Prints, as Faust definitions, the coefficients of the polynomials and rational
+functions of `fastmath.lib`, with the error of each fit. Single precision and
+the `faster` tier: minimax by Lawson's algorithm in float64 (rational functions
+by Loeb's linearization). Double precision: Chebyshev interpolation in `mpmath`
+at 50 digits, of a degree that brings the error below 1e-17, checked on 2001
+points with the coefficients rounded to double. The errors are those of the
+exact formulas; `fastmath_accuracy.py` measures the compiled code. A few
+seconds.
+
+### `fastmath_accuracy.py`
+
+```
+scripts/fastmath_accuracy.py [--precision single|double|both] [-k REGEX] [--json FILE]
+```
+
+Compiles every function of `fastmath.lib` over a sweep of 2^20 points of its
+domain (the build and the architecture of `check_precision.py`), and prints its
+largest relative or absolute error against `numpy`'s float64 function, in
+`-single` and `-double`: the figures of the doc blocks. The references reduce
+their argument exactly where `numpy` would round it (`sin(2 pi x)` from
+`x - round(x)`, `tan(pi x)` near its pole from `1/2 - |x|`), and in double
+precision numpy's own error (half an ulp) is part of what is measured. Run it
+after a change of `fastmath.lib`, and update the doc blocks. About 20 s.
 
 ## Documentation checks
 

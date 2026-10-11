@@ -379,6 +379,35 @@
 [(en.)ahdsre](envelopes.md#enahdsre)
 [(en.)dx7envelope](envelopes.md#endx7envelope)
 
+## fastmath
+
+[(fa.)fexp2](fastmath.md#fafexp2)
+[(fa.)fexp2_faster](fastmath.md#fafexp2_faster)
+[(fa.)fexp](fastmath.md#fafexp)
+[(fa.)fexp_faster](fastmath.md#fafexp_faster)
+[(fa.)fexp10](fastmath.md#fafexp10)
+[(fa.)fdb2linear](fastmath.md#fafdb2linear)
+[(fa.)fdb2linear_faster](fastmath.md#fafdb2linear_faster)
+[(fa.)flog2](fastmath.md#faflog2)
+[(fa.)flog2_faster](fastmath.md#faflog2_faster)
+[(fa.)flog2_sqrt](fastmath.md#faflog2_sqrt)
+[(fa.)flog](fastmath.md#faflog)
+[(fa.)flog10](fastmath.md#faflog10)
+[(fa.)flinear2db](fastmath.md#faflinear2db)
+[(fa.)flinear2db_faster](fastmath.md#faflinear2db_faster)
+[(fa.)flinear2db_sqrt](fastmath.md#faflinear2db_sqrt)
+[(fa.)fpow](fastmath.md#fafpow)
+[(fa.)fsin2pi](fastmath.md#fafsin2pi)
+[(fa.)fsin2pi_faster](fastmath.md#fafsin2pi_faster)
+[(fa.)fcos2pi](fastmath.md#fafcos2pi)
+[(fa.)fsin](fastmath.md#fafsin)
+[(fa.)fsin_faster](fastmath.md#fafsin_faster)
+[(fa.)fcos](fastmath.md#fafcos)
+[(fa.)ftanpi](fastmath.md#faftanpi)
+[(fa.)ftan](fastmath.md#faftan)
+[(fa.)ftanh](fastmath.md#faftanh)
+[(fa.)ftanh_faster](fastmath.md#faftanh_faster)
+
 ## fds
 
 [(fd.)model1D](fds.md#fdmodel1d)
