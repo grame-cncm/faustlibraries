@@ -461,6 +461,27 @@ done
 
 Report in the pull request what was checked and what was found, including any limitation left in the documentation.
 
+### Backends and foreign functions
+
+The regression tests compile and run C++ only, but the libraries are used through every Faust backend: WebAssembly first (the Faust IDE, `faustwasm`), then Cmajor, Julia, Codebox, C#, Java and the interpreter. Those backends refuse a foreign function outside a short whitelist, at compile time:
+
+```
+ERROR : calling foreign function 'cbrtf' is not allowed in this compilation mode
+```
+
+| Foreign functions | Backends that accept them |
+|---|---|
+| `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh`, `isnan`, `isinf`, `copysign` | all |
+| every other `ffunction` of `maths.lib` (`cbrt`, `hypot`, `ldexp`, `scalb`, `logb`, `ilogb`, `erf`, `erfc`, `gamma`, `lgamma`, `J0`, `J1`, `Jn`, `Y0`, `Y1`, `Yn`, `nextafter`), `no.randomseed` (`arc4random`) | C, C++, Rust and LLVM only |
+
+The whitelisted functions are not free on the web either: the WebAssembly module imports them from its JavaScript host, so extending the list takes a compiler change and the matching import in every runtime in use.
+
+So library code uses Faust primitives and the whitelisted functions only, however deep the call: `aa.sineFold1` stopped compiling for the web when it called the C `log1p` two levels down. The precise forms rule 9 asks for have portable tools: `ma.expm1` and `ma.log1p` are built on `sinh` and `atanh` (exact identities, 1.6e-7 in single precision), not on the C functions.
+
+`make checkdoc` compiles every test for WebAssembly when a library or a test file differs from `HEAD` (about 15 s), and `make check-backends` does it for the six backends (about a minute; `BACKENDS_ARGS="--lang wasm"` to restrict it). Both compare the failures with `tests/backend-baseline.json`, the accepted debt: the tests of the non-portable functions themselves, `ma.BS` and `si.bsmooth` (the foreign variable `count`) on Cmajor and Codebox, and the `soundfile` tests on Cmajor, Codebox and Julia (the primitive is not supported) and Java (a compiler assertion). A test that fails and is not listed is a regression; a listed test that compiles again is removed from the list in the same commit. The error names the foreign function, and the test names the library function that calls it.
+
+faust looks for libraries in the current directory before the `-I` ones. To scan another checkout (a worktree, the head of a pull request), run the script of that checkout: it compiles from its own root, while a `faust` run by hand from this repository would test this repository's libraries.
+
 ### CPU cost
 
 A change that alters the structure of a computation, such as a rewrite against cancellation, a filter realized in another form, or a workaround of the normalizer, also changes what it costs. That cost is a trade-off to state in the pull request, with numbers a reviewer can reproduce. `make check-cpu` measures it on the tests. The `--base REV` argument compares the libraries of the working tree, or of `--new REV`, with those of REV:

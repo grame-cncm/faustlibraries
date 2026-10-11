@@ -217,7 +217,8 @@ dnoise(t,sx) = _noise_env(12345).dnoise(t,sx);
 // (see man arc4random). Used in `rnoise`, `rmultirandom`, etc. to 
 // avoid having the same pseudo random sequence at each run.
 //
-// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+// WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+// generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -241,7 +242,8 @@ randomseed = ffunction(int arc4random(), <stdlib.h>, ""), 12345 : select2(1');
 //-----------------------`(no.)rnoise`-----------------------
 // A randomized white noise generator (outputs random number between -1 and 1).
 //
-// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+// WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+// generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -261,7 +263,8 @@ rnoise = _noise_env(randomseed).noise;
 //---------------------`(no.)rmultirandom`--------------------------
 // Generates multiple decorrelated random numbers in parallel.
 //
-// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+// WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+// generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 // ```
@@ -284,7 +287,8 @@ rmultirandom(N) = _noise_env(randomseed).multirandom(N);
 //-----------------------`(no.)rmultinoise`------------------------
 // Generates multiple decorrelated noises in parallel.
 //
-// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+// WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+// generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -308,7 +312,8 @@ rmultinoise(N) = _noise_env(randomseed).multinoise(N);
 //-----------------------`(no.)rnoises`------------------------
 // A convenient wrapper around rmultinoise.
 //
-// WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+// WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+// generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //

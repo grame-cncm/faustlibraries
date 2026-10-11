@@ -150,7 +150,8 @@ A random seed based on the foreign function `arc4random`
 (see man arc4random). Used in `rnoise`, `rmultirandom`, etc. to 
 avoid having the same pseudo random sequence at each run.
 
-WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -174,7 +175,8 @@ randomseed_test = no.randomseed;
 
 A randomized white noise generator (outputs random number between -1 and 1).
 
-WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -194,7 +196,8 @@ rnoise_test = no.rnoise;
 
 Generates multiple decorrelated random numbers in parallel.
 
-WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 ```
@@ -217,7 +220,8 @@ rmultirandom_test = no.rmultirandom(3);
 
 Generates multiple decorrelated noises in parallel.
 
-WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -241,7 +245,8 @@ rmultinoise_test = no.rmultinoise(3);
 
 A convenient wrapper around rmultinoise.
 
-WARNING: using the foreign function `arc4random`, so only available in C/C++ and LLVM backends.
+WARNING: built on the foreign function `arc4random`, so it compiles only for the backends that
+generate C, C++, Rust or LLVM code, not for WebAssembly, the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 

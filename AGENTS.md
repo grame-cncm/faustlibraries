@@ -14,6 +14,7 @@ make check-usage # compile every #### Usage section (checkdoc does the changed l
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
+make check-backends   # every test compiled for WebAssembly, Cmajor, Julia, ... (checkdoc does WebAssembly)
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions
@@ -212,6 +213,27 @@ Every script behind these targets is described in `scripts/README.md`.
     to the fixed behavior in the same commit, and checked to fail on the
     code before the fix. `make check-plots` also passes before every
     `version.lib` bump. Details: `scripts/README.md`, section *Figures*.
+
+12. **Library code compiles on every backend.** The libraries are used
+    through WebAssembly first (the Faust IDE, `faustwasm`), and through
+    Cmajor, Julia, Codebox, C#, Java and the interpreter, which accept only
+    the foreign functions `acosh`, `asinh`, `atanh`, `cosh`, `sinh`,
+    `tanh`, `isnan`, `isinf` and `copysign`. The other `ffunction`s of
+    `maths.lib` (`ma.cbrt`, `ma.hypot`, `ma.erf`, `ma.gamma`, the Bessel
+    functions, `ma.nextafter`, ...; their doc blocks say so) and
+    `no.randomseed` compile only for C, C++, Rust and LLVM: a library
+    function never calls them, however deep the call, and a new
+    `ffunction` stays within the whitelist. `ma.expm1` and `ma.log1p` are built on `sinh` and
+    `atanh` and are portable: they are the tools for the cancellation-free
+    forms rule 9 asks for. `make checkdoc` compiles every test for
+    WebAssembly when a library or a test file changed, and fails on a new
+    failure; `make check-backends` checks all six backends (about a
+    minute). The accepted debt is pinned in `tests/backend-baseline.json`
+    (the tests of the non-portable functions themselves, `ma.BS` and
+    `si.bsmooth` on Cmajor and Codebox, `soundfile` on four backends);
+    as with the other baselines, an entry that starts to compile is removed
+    in the same commit. Details: `doc/docs/contributing.md`, section
+    *Backends and foreign functions*.
 
 ## Git history
 

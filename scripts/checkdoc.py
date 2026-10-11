@@ -21,7 +21,11 @@ regression, without requiring the historical debt to be paid first:
   6. the #### Usage sections of the libraries changed since HEAD must
      compile, with the arity of the call and the parameters of their
      Where: section (scripts/check_usage.py --changed, against
-     tests/usage-baseline.json); skipped when faust is not installed.
+     tests/usage-baseline.json); skipped when faust is not installed;
+  7. when a library or a test file differs from HEAD, every test still
+     compiles for WebAssembly, beyond the debt of
+     tests/backend-baseline.json (scripts/check_backends.py --changed
+     --lang wasm, about 15 s); skipped when faust is not installed.
 
 Usage:
     scripts/checkdoc.py                    # verify, exit 1 on regression
@@ -157,6 +161,17 @@ def main():
     else:
         usage_note = " Usage sections not compiled: faust not found."
 
+    # 7. the tests still compile for WebAssembly
+    if shutil.which("faust"):
+        r = subprocess.run([PYTHON, "scripts/check_backends.py", "--changed", "--lang", "wasm"],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            usage_errors += [line for line in r.stdout.strip().splitlines()
+                             if line.startswith("check_backends: ")
+                             and not line.startswith("check_backends: FAILED")]
+            if r.stderr.strip():
+                usage_errors.append(r.stderr.strip())
+
     if errors or usage_errors:
         for e in errors + usage_errors:
             print("checkdoc: %s" % e)
@@ -167,7 +182,9 @@ def main():
         if usage_errors:
             print("A failing Usage is fixed in the Usage (or in the Test section that"
                   " gives its parameters values); scripts/check_usage.py --symbol"
-                  " xx.name prints the program it compiles.")
+                  " xx.name prints the program it compiles. A test that no longer"
+                  " compiles for WebAssembly calls a foreign function the web rejects:"
+                  " see AGENTS.md, rule 12.")
         sys.exit(1)
     n_undoc = sum(len(v["undocumented"]) for k, v in debt.items()
                   if not k.startswith("_"))

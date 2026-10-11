@@ -412,6 +412,10 @@ inv_test = 4.0 : ma.inv;
 
 Computes the cube root of of the input signal.
 
+`cbrt` calls the C `cbrt`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
+
 #### Usage
 
 ```
@@ -434,6 +438,10 @@ cbrt_test = 8.0 : ma.cbrt;
 
 Computes the euclidian distance of the two input signals x and y,
 sqrt(x*x+y*y), without undue overflow or underflow.
+
+`hypot` calls the C `hypot`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -459,6 +467,10 @@ hypot_test = (3.0, 4.0) : ma.hypot;
 Takes two input signals: x and n (an integer), and multiplies x by 2 to
 the power n.
 
+`ldexp` calls the C `ldexp`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
+
 #### Usage
 
 ```
@@ -482,6 +494,10 @@ ldexp_test = (1.5, 3) : ma.ldexp;
 
 Takes two input signals: x and n (an integer), and multiplies x by 2 to
 the power n.
+
+`scalb` calls the C `scalbn`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -520,7 +536,7 @@ double, against 6e-8 and 1.3e-16 for the C `log1p`.
 Built on `atanh` and `log` rather than on the C `log1p` (a foreign
 function), it compiles with every backend that provides `atanh`:
 C++, C, Rust, LLVM, WebAssembly, the interpreter, Cmajor, Codebox,
-Julia, C# (not Java). The slider test reads, at run time, values where a
+Julia, C# and Java. The slider test reads, at run time, values where a
 simpler form fails: near -1, around 0 (+-2^-30), and large (1e7, 1e30).
 
 #### Usage
@@ -548,6 +564,10 @@ log1p_modulated_test = ma.log1p(1000.999*tri*tri*tri - 0.999) with { P = int(ma.
 
 Return exponent of the (positive) input signal as a floating-point number.
 
+`logb` calls the C `logb`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
+
 #### Usage
 
 ```
@@ -569,6 +589,10 @@ logb_test = 8.0 : ma.logb;
 ### `(ma.)ilogb`
 
 Return exponent of the (positive) input signal as an integer number.
+
+`ilogb` calls the C `ilogb`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -627,7 +651,7 @@ error: 1.6e-7 in single precision, 3.2e-16 in double, against 6e-8 and
 Built on `exp` and `sinh` rather than on the C `expm1` (a foreign
 function), it compiles with every backend that provides `sinh`:
 C++, C, Rust, LLVM, WebAssembly, the interpreter, Cmajor, Codebox,
-Julia, C# (not Java). The slider test reads, at run time, values where a
+Julia, C# and Java. The slider test reads, at run time, values where a
 simpler form fails: below the clamp (-1e5, -200) and around 0 (+-2^-30).
 
 #### Usage
@@ -788,6 +812,10 @@ tanh_test = 0.5 : ma.tanh;
 
 Computes the error function of the input signal.
 
+`erf` calls the C `erf`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
+
 #### Usage
 
 ```
@@ -810,6 +838,10 @@ erf_test = 0.5 : ma.erf;
 
 Computes the complementary error function of the input signal.
 
+`erfc` calls the C `erfc`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
+
 #### Usage
 
 ```
@@ -831,6 +863,10 @@ erfc_test = 0.5 : ma.erfc;
 ### `(ma.)gamma`
 
 Computes the gamma function of the positive input signal.
+
+`gamma` calls the C `tgamma`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -855,6 +891,10 @@ gamma_test = 3.0 : ma.gamma;
 Calculates the natural logorithm of the absolute value of
 the gamma function of the positive input signal.
 
+`lgamma` calls the C `lgamma`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
+
 #### Usage
 
 ```
@@ -877,6 +917,10 @@ lgamma_test = 3.0 : ma.lgamma;
 
 Computes the Bessel function of the first kind of order 0
 of the input signal.
+
+`J0` calls the C `j0`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -901,6 +945,10 @@ J0_test = 1.0 : ma.J0;
 Computes the Bessel function of the first kind of order 1
 of the input signal.
 
+`J1` calls the C `j1`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
+
 #### Usage
 
 ```
@@ -923,6 +971,10 @@ J1_test = 1.0 : ma.J1;
 
 Computes the Bessel function of the first kind of order n
 (first input signal, an integer) of the second input signal x.
+
+`Jn` calls the C `jn`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -948,6 +1000,10 @@ Jn_test = (2, 1.0) : ma.Jn;
 Computes the linearly independent Bessel function of the second kind
 of order 0 of the positive input signal.
 
+`Y0` calls the C `y0`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
+
 #### Usage
 
 ```
@@ -970,6 +1026,10 @@ Y0_test = 1.0 : ma.Y0;
 
 Computes the linearly independent Bessel function of the second kind
 of order 1 of the positive input signal.
+
+`Y1` calls the C `y1`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -994,6 +1054,10 @@ Y1_test = 1.0 : ma.Y1;
 Computes the linearly independent Bessel function of the second kind
 of order n (first input signal, an integer) of the second input signal x
 (positive).
+
+`Yn` calls the C `yn`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 
@@ -1174,6 +1238,10 @@ isinf_test = (os.impulse - os.impulse) : log : ma.isinf;
 
 Gives the next representable floating-point value after `x` (first input)
 in the direction of `y` (second input) (the C `nextafter` function of math.h).
+
+`nextafter` calls the C `nextafter`, a foreign function: it compiles only for the
+backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+the interpreter, Cmajor, Codebox, Julia, C# or Java.
 
 #### Usage
 

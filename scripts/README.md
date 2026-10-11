@@ -19,6 +19,7 @@ or later.
 | [`extract_tests.sh`](#extract_testssh) | lists the `*_test` definitions of test files | `make reference`, `check`, `bench` |
 | [`floatdiff.py`](#floatdiffpy) | compares a test output with its reference, within a tolerance | `make check` |
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
+| [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java | `make check-backends`, `checkdoc.py` (`--changed --lang wasm`) |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
 | [`verify_matched2.py`](#verify_matched2py) | proves the rewrites of Vicanek's matched filters and checks their coefficients at 60 digits | `make verify-matched` |
@@ -143,6 +144,30 @@ the last bits of a float result vary between compilers.
 Exit status 0 when every test passes, 1 otherwise. See
 `doc/docs/contributing.md`, section *Precision and sample rate*, and
 `AGENTS.md`, rule 9.
+
+### `check_backends.py`
+
+```
+scripts/check_backends.py [--lang L,L] [--changed] [--update-baseline] [-j N] [FILE.dsp ...]
+make check-backends [BACKENDS_ARGS="--lang wasm"]
+```
+
+Compiles every test with `faust -lang L` for the restricted backends, without
+compiling or running the generated code: about 15 s per backend, a minute for
+the six of the baseline (`wasm`, `cmajor`, `julia`, `codebox`, `csharp`,
+`java`). These accept only the whitelisted foreign functions, so a library
+function that calls `ma.cbrt` anywhere below it fails here although it passes
+every C++ check. The failures are compared with `tests/backend-baseline.json`,
+the accepted debt per backend (the test and faust's error): an unlisted failure
+is a regression, and a listed test that compiles again must be removed. A
+backend the baseline does not list is reported, not checked; one this faust is
+built without (the interpreter, LLVM) is skipped with a note. `--changed` does
+nothing unless a tracked `.lib` or `tests/*.dsp` differs from `HEAD`:
+`checkdoc.py` runs it that way on WebAssembly. Exit status: 0, 1 on a
+regression, 2 without faust. Compilations run from the repository root, since
+faust looks for libraries in the current directory first. `AGENTS.md`, rule 12,
+and `doc/docs/contributing.md`, section *Backends and foreign functions*, say
+why.
 
 ### `check_cpu.py`
 

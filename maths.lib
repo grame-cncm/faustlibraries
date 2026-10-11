@@ -466,6 +466,10 @@ inv(x) = 1/x;
 //---------------------------------`(ma.)cbrt`--------------------------------------
 // Computes the cube root of of the input signal.
 //
+// `cbrt` calls the C `cbrt`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
+//
 // #### Usage
 //
 // ```
@@ -488,6 +492,10 @@ cbrt = ffunction(float cbrtf|cbrt|cbrtl (float), <math.h>,"");
 //---------------------------------`(ma.)hypot`-------------------------------------
 // Computes the euclidian distance of the two input signals x and y,
 // sqrt(x*x+y*y), without undue overflow or underflow.
+//
+// `hypot` calls the C `hypot`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -513,6 +521,10 @@ hypot = ffunction(float hypotf|hypot|hypotl (float, float), <math.h>,"");
 // Takes two input signals: x and n (an integer), and multiplies x by 2 to
 // the power n.
 //
+// `ldexp` calls the C `ldexp`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
+//
 // #### Usage
 //
 // ```
@@ -536,6 +548,10 @@ ldexp = ffunction(float ldexpf|ldexp|ldexpl (float, int), <math.h>,"");
 //---------------------------------`(ma.)scalb`-------------------------------------
 // Takes two input signals: x and n (an integer), and multiplies x by 2 to
 // the power n.
+//
+// `scalb` calls the C `scalbn`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -574,7 +590,7 @@ scalb = ffunction(float scalbnf|scalbn|scalbnl (float, int), <math.h>,"");
 // Built on `atanh` and `log` rather than on the C `log1p` (a foreign
 // function), it compiles with every backend that provides `atanh`:
 // C++, C, Rust, LLVM, WebAssembly, the interpreter, Cmajor, Codebox,
-// Julia, C# (not Java). The slider test reads, at run time, values where a
+// Julia, C# and Java. The slider test reads, at run time, values where a
 // simpler form fails: near -1, around 0 (+-2^-30), and large (1e7, 1e30).
 //
 // #### Usage
@@ -602,6 +618,10 @@ log1p(x) = select2(abs(x) < 0.5, log(1.0 + x), 2.0*atanh(x/(2.0 + x)));
 //---------------------------------`(ma.)logb`---------------------------------------
 // Return exponent of the (positive) input signal as a floating-point number.
 //
+// `logb` calls the C `logb`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
+//
 // #### Usage
 //
 // ```
@@ -623,6 +643,10 @@ logb = ffunction(float logbf|logb|logbl (float), <math.h>,"");
 
 //---------------------------------`(ma.)ilogb`-------------------------------------
 // Return exponent of the (positive) input signal as an integer number.
+//
+// `ilogb` calls the C `ilogb`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -681,7 +705,7 @@ log2(x) = log(x)/log(2.0);
 // Built on `exp` and `sinh` rather than on the C `expm1` (a foreign
 // function), it compiles with every backend that provides `sinh`:
 // C++, C, Rust, LLVM, WebAssembly, the interpreter, Cmajor, Codebox,
-// Julia, C# (not Java). The slider test reads, at run time, values where a
+// Julia, C# and Java. The slider test reads, at run time, values where a
 // simpler form fails: below the clamp (-1e5, -200) and around 0 (+-2^-30).
 //
 // #### Usage
@@ -842,6 +866,10 @@ tanh = ffunction(float tanhf|tanh|tanhl (float), <math.h>,"");
 //---------------------------------`(ma.)erf`---------------------------------------
 // Computes the error function of the input signal.
 //
+// `erf` calls the C `erf`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
+//
 // #### Usage
 //
 // ```
@@ -864,6 +892,10 @@ erf = ffunction(float erff|erf|erfl(float), <math.h>,"");
 //---------------------------------`(ma.)erfc`---------------------------------------
 // Computes the complementary error function of the input signal.
 //
+// `erfc` calls the C `erfc`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
+//
 // #### Usage
 //
 // ```
@@ -885,6 +917,10 @@ erfc = ffunction(float erfcf|erfc|erfcl(float), <math.h>,"");
 
 //---------------------------------`(ma.)gamma`-------------------------------------
 // Computes the gamma function of the positive input signal.
+//
+// `gamma` calls the C `tgamma`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -909,6 +945,10 @@ gamma = ffunction(float tgammaf|tgamma|tgammal(float), <math.h>,"");
 // Calculates the natural logorithm of the absolute value of
 // the gamma function of the positive input signal.
 //
+// `lgamma` calls the C `lgamma`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
+//
 // #### Usage
 //
 // ```
@@ -931,6 +971,10 @@ lgamma = ffunction(float lgammaf|lgamma|lgammal(float), <math.h>,"");
 //----------------------------------`(ma.)J0`---------------------------------------
 // Computes the Bessel function of the first kind of order 0
 // of the input signal.
+//
+// `J0` calls the C `j0`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -955,6 +999,10 @@ J0 = ffunction(float j0(float), <math.h>,"");
 // Computes the Bessel function of the first kind of order 1
 // of the input signal.
 //
+// `J1` calls the C `j1`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
+//
 // #### Usage
 //
 // ```
@@ -977,6 +1025,10 @@ J1 = ffunction(float j1(float), <math.h>,"");
 //----------------------------------`(ma.)Jn`---------------------------------------
 // Computes the Bessel function of the first kind of order n
 // (first input signal, an integer) of the second input signal x.
+//
+// `Jn` calls the C `jn`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -1002,6 +1054,10 @@ Jn = ffunction(float jn(int, float), <math.h>,"");
 // Computes the linearly independent Bessel function of the second kind
 // of order 0 of the positive input signal.
 //
+// `Y0` calls the C `y0`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
+//
 // #### Usage
 //
 // ```
@@ -1024,6 +1080,10 @@ Y0 = ffunction(float y0(float), <math.h>,"");
 //----------------------------------`(ma.)Y1`---------------------------------------
 // Computes the linearly independent Bessel function of the second kind
 // of order 1 of the positive input signal.
+//
+// `Y1` calls the C `y1`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -1048,6 +1108,10 @@ Y1 = ffunction(float y1(float), <math.h>,"");
 // Computes the linearly independent Bessel function of the second kind
 // of order n (first input signal, an integer) of the second input signal x
 // (positive).
+//
+// `Yn` calls the C `yn`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //
@@ -1227,6 +1291,10 @@ isinf = ffunction(int isinff|isinf|isinfl (float),<math.h>,"");
 //---------------------------`(ma.)nextafter`-------------------------------
 // Gives the next representable floating-point value after `x` (first input)
 // in the direction of `y` (second input) (the C `nextafter` function of math.h).
+//
+// `nextafter` calls the C `nextafter`, a foreign function: it compiles only for the
+// backends that generate C, C++, Rust or LLVM code, not for WebAssembly,
+// the interpreter, Cmajor, Codebox, Julia, C# or Java.
 //
 // #### Usage
 //

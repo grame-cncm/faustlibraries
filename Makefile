@@ -79,7 +79,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix verify-matched checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -143,6 +143,9 @@ check-precision: ## Check every test in float and double at 44.1-192 kHz against
 
 check-precision-matrix: ## check-precision with C++ -O2 and -O3 -ffast-math, Faust -vec and -lang ocpp in turn
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) --matrix all $(PRECISION_ARGS)
+
+check-backends: ## Compile every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java (baseline: tests/backend-baseline.json); BACKENDS_ARGS="--lang wasm"
+	@FAUST="$(FAUST)" $(PYTHON) scripts/check_backends.py $(BACKENDS_ARGS)
 
 check-cpu: ## Measure the CPU cost of the tests; CPU_ARGS="--base REV" adds the ratio new / base
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_cpu.py --build-dir $(CPU_BUILD_DIR) $(CPU_ARGS)
