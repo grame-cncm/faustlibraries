@@ -15,6 +15,7 @@ make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
 make check-backends   # every test compiled for WebAssembly, Cmajor, Julia, ... (checkdoc does WebAssembly)
+make check-sanitize   # every test under ASan and UBSan, table guards off (about 30 min; DSP_FILES= to restrict)
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions

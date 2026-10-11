@@ -461,6 +461,12 @@ done
 
 Report in the pull request what was checked and what was found, including any limitation left in the documentation.
 
+### Memory errors
+
+An out-of-bounds read of a table or a delay line produces plausible numbers and passes every other check. `make check-sanitize` builds every test with the address and undefined-behavior sanitizers (`-fsanitize=address,undefined`), in single and double precision, renders one second at 44.1 and 192 kHz (indices depend on the rate), and fails on the first report. Faust's table guards are turned off (`-ct 0`): by default the compiler clamps every `rdtable`/`rwtable` index, which hides a library function whose index leaves the table, so the check reports those reads too. UBSan's array-bounds check is the one that matters here: the tables and delay lines are fixed-size arrays inside the DSP object, where an index past one array lands in the next and ASan, which only guards the whole object, sees nothing.
+
+The whole suite takes about 30 minutes; restrict it to the test files you touched with `make -k check-sanitize DSP_FILES="tests/xx_tests.dsp"`. Like `make check`, it skips the tests whose stamp in `tests/output-sanitize/` exists: delete the directory for a full run. Its first full run found `ba.tabulateNd(...).cub` reading outside its dimensions at the edges of the grid (fixed in basics.lib 1.23.6).
+
 ### Backends and foreign functions
 
 The regression tests compile and run C++ only, but the libraries are used through every Faust backend: WebAssembly first (the Faust IDE, `faustwasm`), then Cmajor, Julia, Codebox, C#, Java and the interpreter. Those backends refuse a foreign function outside a short whitelist, at compile time:

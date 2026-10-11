@@ -8,6 +8,8 @@
 #                     beyond tests/precision-baseline.json (no reference needed).
 # `make check-precision-matrix` - the same with several compilations in turn: C++ -O2
 #                     and -O3 -ffast-math, Faust -vec and -lang ocpp.
+# `make check-sanitize` - run every test under the address and undefined-behavior
+#                     sanitizers, without Faust's table guards (-ct 0).
 # `make check-cpu`  - measure the CPU cost of the tests (ns/frame, % of a core), and with
 #                     CPU_ARGS="--base REV" the ratio new / base against the libraries of REV.
 # `make check-cpu-matrix` - the same with C++ -O3 -ffast-math, -O3, and Faust -vec in turn.
@@ -79,7 +81,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-sanitize check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -98,6 +100,17 @@ TESTS := $(foreach s,$(TEST_SPECS),$(word 2,$(subst :, ,$(s))))
 # Build lists of reference/output files
 REFS := $(addprefix $(REFERENCE_DIR)/,$(addsuffix .ref,$(TESTS)))
 OUTS := $(addprefix $(OUTPUT_DIR)/,$(addsuffix .out,$(TESTS)))
+# check-sanitize: every test built with the address and undefined-behavior
+# sanitizers, in each precision, rendered one second at each rate. Faust's
+# table guards are off (-ct 0): a library read that only stays in range
+# because the compiler clamps the index is reported too.
+SANITIZE_PRECISIONS ?= single double
+SANITIZE_RATES ?= 44100 192000
+SANITIZE_FAUST_OPT ?= -t 0 -ct 0
+SANITIZE_CXXFLAGS ?= -O1 -g -std=c++17 -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer
+SANITIZE_BUILD_DIR := tests/build-sanitize
+SANITIZE_OUTPUT_DIR := tests/output-sanitize
+SANITIZE_OUTS := $(addprefix $(SANITIZE_OUTPUT_DIR)/,$(addsuffix .ok,$(TESTS)))
 
 # Map a test name ($1) back to its source DSP file using the TEST_SPECS list
 define file_for
@@ -133,6 +146,8 @@ $(REFERENCE_DIR)/%.ref: | $(REFERENCE_DIR) $(BUILD_DIR)
 	$(BUILD_DIR)/$* $(NUM_SAMPLES) $(SAMPLE_RATE) > $@
 
 check: $(OUTS) ## Run tests and diff against references (fails on first divergence; use -k to run all)
+
+check-sanitize: $(SANITIZE_OUTS) ## Run every test under ASan and UBSan, -single and -double, at 44.1 and 192 kHz, without Faust's table guards (-k to run all)
 
 check-vec: ## Run all regression tests with Faust's vectorized code generator
 	@rm -rf $(BUILD_DIR) $(OUTPUT_DIR)
@@ -177,6 +192,38 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 		echo "[fail] output for $* differs from reference"; \
 		exit 1; \
 	fi
+
+# A test under the sanitizers: an out-of-bounds read of a table or a delay
+# line produces plausible numbers and passes every other check. UBSan's
+# array-bounds check sees an index past a member array of the DSP class,
+# where ASan, which only guards the whole object, does not. No reference:
+# the run fails on the first report.
+$(SANITIZE_OUTPUT_DIR)/%.ok: | $(SANITIZE_OUTPUT_DIR) $(SANITIZE_BUILD_DIR)
+	@set -e; \
+	file='$(call file_for,$*)'; \
+	if [ -z "$$file" ]; then echo "No source file found for test '$*'"; exit 1; fi; \
+	printf '[sanitize] %s from %s\n' '$*' "$$file"; \
+	for p in $(SANITIZE_PRECISIONS); do \
+		exe=$(SANITIZE_BUILD_DIR)/$*.$$p; \
+		if ! $(FAUST) -$$p $(SANITIZE_FAUST_OPT) -a $(ARCH) -pn $* $$file -o $$exe.cpp; then \
+			echo "[fail] faust failed for $* (-$$p)"; \
+			exit 1; \
+		fi; \
+		if ! $(CXX) $(SANITIZE_CXXFLAGS) $$exe.cpp -o $$exe; then \
+			echo "[fail] sanitized build failed for $* (-$$p)"; \
+			exit 1; \
+		fi; \
+		for sr in $(SANITIZE_RATES); do \
+			log=$(SANITIZE_OUTPUT_DIR)/$*.$$p.$$sr.log; \
+			if ! ASAN_OPTIONS=detect_leaks=0 UBSAN_OPTIONS=print_stacktrace=1 $$exe $$sr $$sr > /dev/null 2> $$log \
+				|| grep -q 'runtime error\|Sanitizer' $$log; then \
+				echo "[fail] $* (-$$p, $$sr Hz): $$(grep -m1 'runtime error\|ERROR' $$log || echo 'exit status')"; \
+				exit 1; \
+			fi; \
+			rm -f $$log; \
+		done; \
+	done; \
+	touch $@
 
 checkdoc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.json)
 	@$(PYTHON) scripts/checkdoc.py
@@ -291,5 +338,5 @@ clean: ## Remove build artefacts and generated outputs (keeps references)
 distclean: clean ## Additionally remove the stored reference outputs
 	rm -rf $(REFERENCE_DIR)
 
-$(BUILD_DIR) $(REFERENCE_DIR) $(OUTPUT_DIR):
+$(BUILD_DIR) $(REFERENCE_DIR) $(OUTPUT_DIR) $(SANITIZE_BUILD_DIR) $(SANITIZE_OUTPUT_DIR):
 	@mkdir -p $@
