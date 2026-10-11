@@ -168,14 +168,21 @@ minutes for the whole suite once they are built.
 ### `check_backends.py`
 
 ```
-scripts/check_backends.py [--lang L,L] [--changed] [--update-baseline] [-j N] [FILE.dsp ...]
+scripts/check_backends.py [--lang L,L] [--changed] [--update-baseline] [--no-validate] [-j N]
+                          [FILE.dsp ...]
 make check-backends [BACKENDS_ARGS="--lang wasm"]
 ```
 
 Compiles every test with `faust -lang L` for the restricted backends, without
 compiling or running the generated code: about 15 s per backend, a minute for
 the six of the baseline (`wasm`, `cmajor`, `julia`, `codebox`, `csharp`,
-`java`). These accept only the whitelisted foreign functions, so a library
+`java`). The WebAssembly modules are also validated with Node
+(`WebAssembly.validate`, the check of a browser before it runs one), in the
+same 15 s: a compilation that succeeds can still emit a module that does not
+validate (107 tests in October 2026, a pow of two integers with a variable
+exponent in single precision), a bug of faust that the output points to.
+`--no-validate` compiles only; without `node` the validation is skipped with
+a note. These accept only the whitelisted foreign functions, so a library
 function that calls `ma.cbrt` anywhere below it fails here although it passes
 every C++ check. The failures are compared with `tests/backend-baseline.json`,
 the accepted debt per backend (the test and faust's error): an unlisted failure
