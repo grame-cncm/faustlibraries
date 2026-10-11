@@ -170,9 +170,11 @@ def config_dir(faust_options, cxx_options):
     return "cfg_" + slug.strip("_")
 
 
-def render(exe, sr, frames, path):
-    r = subprocess.run([exe, str(frames), str(sr), path], capture_output=True, text=True,
-                       timeout=600)
+def render(exe, sr, frames, path, controls=None):
+    """Render FRAMES at SR into PATH and read it back; CONTROLS is the
+    harness's optional slider setting (min, max, min:I, max:I)."""
+    r = subprocess.run([exe, str(frames), str(sr), path] + ([controls] if controls else []),
+                       capture_output=True, text=True, timeout=600)
     if r.returncode != 0:
         raise RuntimeError(f"{os.path.basename(exe)} exited with {r.returncode} at {sr} Hz")
     with open(path, "rb") as f:

@@ -16,6 +16,7 @@ make check       # run the regression tests against the references (-k to run al
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
 make check-backends   # every test compiled for WebAssembly, Cmajor, Julia, ... (checkdoc does WebAssembly)
 make check-sanitize   # every test under ASan and UBSan, table guards off (about 30 min; DSP_FILES= to restrict)
+make check-extremes   # every test with its sliders at their extremes, all and one by one (about 2 min)
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions
@@ -168,9 +169,12 @@ Every script behind these targets is described in `scripts/README.md`.
    in the same commit. Never add or loosen an entry to silence a failure.
    Prefer `no.noise` or `os.tosc` to `os.osc` as test input: `os.osc`
    drifts in phase in float, `os.tosc` reads the sine of an exact integer
-   phase (`os.tphase`) and does not. The check uses default control values only: also try the
-   controls at their extremes, and check that what should not depend on
-   the rate does not. A fix that relies on a precise evaluation order (a
+   phase (`os.tphase`) and does not. The check uses default control values only:
+   `make check-extremes` renders every test with its sliders at their
+   extremes, all of them and one by one, and fails on a non-finite output
+   or a peak beyond 100 times the default one, beyond the reasoned entries
+   of `tests/extremes-baseline.json` (same rule as the other baselines).
+   Also check that what should not depend on the rate does not. A fix that relies on a precise evaluation order (a
    rewrite against cancellation, a workaround of the Faust normalizer) is
    also checked with other compilations: `make check-precision-matrix`
    (C++ `-O3 -ffast-math`, Faust `-vec` and `-lang ocpp`). Procedure and

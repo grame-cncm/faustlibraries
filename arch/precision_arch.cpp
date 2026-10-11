@@ -3,9 +3,15 @@
 // resolution, so that a -single and a -double build of the same test can be
 // compared sample by sample.
 //
-// Usage: <binary> FRAMES SAMPLE_RATE OUTPUT_FILE
+// Usage: <binary> FRAMES SAMPLE_RATE OUTPUT_FILE [CONTROLS]
 // OUTPUT_FILE receives an int32 channel count, then FRAMES frames of
 // interleaved float64 samples.
+//
+// CONTROLS (scripts/check_extremes.py) sets the sliders and number entries
+// before the run instead of leaving them at their default: `min` or `max`
+// for all of them, `min:I` or `max:I` for the I-th one alone (from 0, in the
+// order of buildUserInterface). `list` prints them, one per line
+// (index, min, max, init, label, tab-separated), and renders nothing.
 
 // Inputs, outputs and controls are exchanged in double in both builds: the
 // precision under test is the one the generated code computes in.
@@ -36,8 +42,31 @@ struct ControlUI : public GenericUI {
 
     std::vector<FAUSTFLOAT*> fControls;
 
+    // The sliders and number entries, for CONTROLS.
+    struct Range {
+        FAUSTFLOAT* zone;
+        FAUSTFLOAT init, min, max;
+        std::string label;
+    };
+    std::vector<Range> fRanges;
+
     virtual void addButton(const char* label, FAUSTFLOAT* zone) { fControls.push_back(zone); }
     virtual void addCheckButton(const char* label, FAUSTFLOAT* zone) { fControls.push_back(zone); }
+    virtual void addHorizontalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init,
+                                     FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT step)
+    {
+        fRanges.push_back({zone, init, min, max, label});
+    }
+    virtual void addVerticalSlider(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init,
+                                   FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT step)
+    {
+        fRanges.push_back({zone, init, min, max, label});
+    }
+    virtual void addNumEntry(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT init,
+                             FAUSTFLOAT min, FAUSTFLOAT max, FAUSTFLOAT step)
+    {
+        fRanges.push_back({zone, init, min, max, label});
+    }
 
     bool hasControls() const { return !fControls.empty(); }
 
@@ -52,7 +81,7 @@ struct ControlUI : public GenericUI {
 int main(int argc, char* argv[])
 {
     if (argc < 4) {
-        std::fprintf(stderr, "usage: %s FRAMES SAMPLE_RATE OUTPUT_FILE\n", argv[0]);
+        std::fprintf(stderr, "usage: %s FRAMES SAMPLE_RATE OUTPUT_FILE [CONTROLS]\n", argv[0]);
         return 2;
     }
     int frames = std::max(std::atoi(argv[1]), 1);
@@ -66,6 +95,30 @@ int main(int argc, char* argv[])
 
     SoundUI sound;
     dsp->buildUserInterface(&sound);
+
+    if (argc > 4) {
+        const std::string mode = argv[4];
+        if (mode == "list") {
+            for (size_t i = 0; i < control.fRanges.size(); ++i) {
+                const auto& r = control.fRanges[i];
+                std::printf("%zu\t%.17g\t%.17g\t%.17g\t%s\n", i, double(r.min), double(r.max),
+                            double(r.init), r.label.c_str());
+            }
+            return 0;
+        }
+        const bool toMax = mode.compare(0, 3, "max") == 0;
+        if (!toMax && mode.compare(0, 3, "min") != 0) {
+            std::fprintf(stderr, "unknown CONTROLS %s\n", argv[4]);
+            return 2;
+        }
+        const size_t colon = mode.find(':');
+        for (size_t i = 0; i < control.fRanges.size(); ++i) {
+            if (colon == std::string::npos || std::stoul(mode.substr(colon + 1)) == i) {
+                auto& r = control.fRanges[i];
+                *r.zone = toMax ? r.max : r.min;
+            }
+        }
+    }
 
     const int numInputs = dsp->getNumInputs();
     const int numOutputs = dsp->getNumOutputs();

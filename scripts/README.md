@@ -19,6 +19,7 @@ or later.
 | [`extract_tests.sh`](#extract_testssh) | lists the `*_test` definitions of test files | `make reference`, `check`, `bench` |
 | [`floatdiff.py`](#floatdiffpy) | compares a test output with its reference, within a tolerance | `make check` |
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
+| [`check_extremes.py`](#check_extremespy) | renders every test with its sliders at their extremes, all and one by one | `make check-extremes` |
 | [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java | `make check-backends`, `checkdoc.py` (`--changed --lang wasm`) |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
@@ -144,6 +145,25 @@ the last bits of a float result vary between compilers.
 Exit status 0 when every test passes, 1 otherwise. See
 `doc/docs/contributing.md`, section *Precision and sample rate*, and
 `AGENTS.md`, rule 9.
+
+### `check_extremes.py`
+
+```
+scripts/check_extremes.py [-k REGEX] [--rates 44100,192000] [--precision single|double]
+                          [--growth 100] [--write-baseline] [--json FILE] [FILE.dsp ...]
+make check-extremes [EXTREMES_ARGS="tests/xx_tests.dsp"]
+```
+
+Renders every test that has sliders or number entries with them at their
+extremes: all at their minimum, all at their maximum, then each one alone at
+each end, the others at their default. `arch/precision_arch.cpp` takes the
+setting as a fourth argument (`min`, `max`, `min:I`, `max:I`; `list` prints
+the controls). A run fails when its output is not finite or when its peak
+exceeds `--growth` (100) times the larger of 1 and the default render's peak,
+unless `tests/extremes-baseline.json` accepts that test and setting, with a
+reason; an entry that no longer fails is reported. It uses the `-single`
+builds of `check_precision.py`, in the same build directory: about two
+minutes for the whole suite once they are built.
 
 ### `check_backends.py`
 
