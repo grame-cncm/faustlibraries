@@ -21,7 +21,10 @@ existing `arch/print_arch.cpp` (silence in, samples out) drives everything.
 Every function documented in aanl.lib is plotted to <out>/aa_<name>.svg;
 `--only` restricts the run to the listed aanl names (e.g. `--only
 hardclip,tanh1`). A function whose probe does not compile is skipped and
-listed at the end; the exit status is 0 in both cases.
+listed at the end; the exit status is 0 in both cases. The probe feeds the
+function through `_ :`, so a function that takes parameters (`sineFold1(t, r,
+x)`) does not compile and is skipped, rather than plotted with the ramp on all
+of its inputs.
 
 Each probe is compiled with `faust -double -I <repo>` and `g++ -O2`, and
 rendered at 48 kHz; it needs faust, g++, numpy and matplotlib. `run_probe`,
@@ -79,13 +82,13 @@ PROBE_TRANSFER = """\
 aa = library("aanl.lib");
 ba = library("basics.lib");
 ramp = float(ba.time) / {n} * {span2} - {span};
-process = ramp <: _, aa.{name};
+process = ramp <: _, (_ : aa.{name});
 """
 
 PROBE_SPECTRUM = """\
 aa = library("aanl.lib");
 os = library("oscillators.lib");
-process = {drive} * os.osc({f0}) <: _, aa.{name};
+process = {drive} * os.osc({f0}) <: _, (_ : aa.{name});
 """
 
 
@@ -110,10 +113,12 @@ def run_probe(source: str, frames: int) -> np.ndarray | None:
         d = Path(tmp)
         (d / "p.dsp").write_text(source)
         cpp, exe = d / "p.cpp", d / "p"
+        # faust looks for libraries in the current directory before the -I ones:
+        # compile from ROOT so that the libraries plotted are this checkout's.
         faust = subprocess.run(
             ["faust", "-I", str(ROOT), "-double", "-a", str(ARCH),
              str(d / "p.dsp"), "-o", str(cpp)],
-            capture_output=True, text=True)
+            capture_output=True, text=True, cwd=ROOT)
         if faust.returncode != 0:
             return None
         cxx = subprocess.run(["g++", "-O2", "-std=c++17", str(cpp), "-o", str(exe)],
