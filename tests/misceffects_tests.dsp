@@ -81,6 +81,16 @@ transpose_windowed_test = os.tosc(440) : ef.transpose_windowed(2, 1024, 7);
 transpose_windowed_slider_test = os.tosc(440) : ef.transpose_windowed(2, hslider("transpose_windowed:w", 1024, 16, 4096, 1), hslider("transpose_windowed:s", 7, -12, 12, 0.1));
 transpose_windowed_modulated_test = os.tosc(440) : ef.transpose_windowed(2, 1024, 24*tri - 12) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 transpose_windowed_jump_test = os.tosc(440) : ef.transpose_windowed(2, 1024, 24*sq - 12) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+
+// Correlation-aligned transposer
+transpose_correlated_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, -12);
+transpose_correlated_slider_test = os.tosc(440) : ef.transpose_correlated(hslider("transpose_correlated:w", 0.030, 0.020, 0.040, 0.001)*ma.SR, hslider("transpose_correlated:s", -12, -12, 12, 0.1));
+transpose_correlated_modulated_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 24*tri - 12) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+transpose_correlated_jump_test = os.tosc(440) : ef.transpose_correlated((0.020 + 0.020*sq)*ma.SR, 24*sq - 12) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+transpose_correlated_up_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 12);
+transpose_correlated_unison_test = os.tosc(440) : ef.transpose_correlated(0.030*ma.SR, 0);
+transpose_correlated_chord_test = 0.25*(os.tosc(110) + os.tosc(146.8323839587) + os.tosc(164.8137784564)) : ef.transpose_correlated(0.030*ma.SR, -12);
+
 granular_test = os.tosc(440) : ef.granular(2, 0.05, 1.5, 0.2, 0.1);
 granular_slider_test = os.tosc(440) : ef.granular(2, hslider("granular:dur", 0.05, 0.005, 1, 0.001), hslider("granular:ratio", 1.5, 0.25, 4, 0.01), hslider("granular:pos", 0.2, 0, 1, 0.001), hslider("granular:jit", 0.1, 0, 1, 0.001));
 granular_modulated_test = os.tosc(440) : ef.granular(2, 0.05, 0.5 + tri, 0.05 + 0.3*tri, 0.1) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };

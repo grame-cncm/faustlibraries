@@ -421,9 +421,11 @@ make check-usage [USAGE_ARGS="..."]
 
 Compiles the `#### Usage` section of every symbol of the JSON export. A
 Usage line such as `_ : lowpass(N,fc) : _` is a Faust expression: once `N`
-and `fc` have values, `faust -e` evaluates it, and its sequential
-compositions fail when the buses do not match the arity of the call. Each
-Usage line that names the symbol becomes `process = <line>;`, where:
+and `fc` have values, `faust -e` evaluates its input/output counts, and its
+sequential compositions fail when the buses do not match the arity of the
+call. Each Usage line that names the symbol becomes
+`process = inputs(<line>), outputs(<line>);`. This avoids printing the
+expanded graph of large DSPs. In that expression:
 
 - `(fi.)lowpass` and the bare names of the symbol's library are qualified
   (`fi.lowpass`), and `hslider(...)` reads as a control input `_`;
@@ -438,6 +440,9 @@ Usage line that names the symbol becomes `process = <line>;`, where:
   channel count: it is dropped, and only the call is checked;
 - prose lines are skipped, but the `` `code` `` they quote is checked; a
   statement may continue over several lines, and `-> result` ends it.
+
+Run the evaluator regression tests with `python3 tests/test_check_usage.py`
+(requires `faust` on PATH).
 
 It then checks that the arguments of the call and the bullets of `Where:`
 name the same parameters. A symbol fails as `arity`, `unbound` (a name with
