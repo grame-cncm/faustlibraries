@@ -15,7 +15,7 @@ make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
-make plots       # regenerate the documentation SVG figures (needs matplotlib)
+make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
@@ -207,13 +207,11 @@ Every script behind these targets is described in `scripts/README.md`.
     whole check, not `--only` the function you changed: the seven `tu_*`
     figures depend on a table-interpolation helper, nothing in their names
     says so. Regenerate the stale figures in the same commit with
-    `make check-plots PLOTS_ARGS="--update"`, which copies only those (a
-    full `make plots` rewrites all of them with new matplotlib metadata);
-    a new figure also needs `make -C doc build`, which embeds it. An
-    assertion that fails after a deliberate fix is updated to the fixed
-    behavior in the same commit, and checked to fail on the code before
-    the fix. `make check-plots` also passes before every `version.lib`
-    bump. Details: `scripts/README.md`, section *Figures*.
+    `make plots`, which rewrites only those, then rebuilds the pages that
+    embed them. An assertion that fails after a deliberate fix is updated
+    to the fixed behavior in the same commit, and checked to fail on the
+    code before the fix. `make check-plots` also passes before every
+    `version.lib` bump. Details: `scripts/README.md`, section *Figures*.
 
 ## Git history
 

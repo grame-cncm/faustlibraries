@@ -24,7 +24,8 @@ with "all figures generated, all property assertions hold" and exit status
 0, or with the number of failed assertions (a probe that does not compile
 counts as one) and exit status 1. A figure whose assertion fails is still
 written, so that it can be inspected.
-`make plots` runs it after plot_lib.py and rebuilds the documentation.
+`make plots` runs it with plot_lib.py (through check_plots.py, which keeps
+only the figures whose rendering changed) and rebuilds the documentation.
 """
 from __future__ import annotations
 

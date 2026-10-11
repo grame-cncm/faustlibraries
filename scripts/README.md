@@ -35,7 +35,7 @@ or later.
 | **Figures** | | |
 | [`plot_lib.py`](#plot_libpy) | `aanl.lib` figures | `make plots` |
 | [`plot_families.py`](#plot_familiespy) | figures of the other libraries, with property assertions | `make plots` |
-| [`check_plots.py`](#check_plotspy) | regenerates every figure aside: stale figures, failed assertions | `make check-plots` |
+| [`check_plots.py`](#check_plotspy) | regenerates every figure aside: stale figures, failed assertions | `make check-plots`, `make plots` (`--update`) |
 | **Formal certification** | | |
 | [`sig2lean.py`](#sig2leanpy) | Faust signals to Lean 4 theorems | `make certify`, `certify-reference` |
 
@@ -591,7 +591,9 @@ scripts/faust_doc_api.py --pretty get_faust_symbol fi.lowpass
 
 Both scripts write SVG files to `doc/docs/img/` (`--out` to change it), where
 `doc/scripts/inject_plots.py` embeds each one in its function's page by naming
-convention. `make plots` runs both, then rebuilds the documentation. The figures
+convention. `make plots` runs both through `check_plots.py --update`, which
+rewrites only the figures whose rendering changed, then rebuilds the
+documentation. The figures
 are generated files: regenerate them, do not edit them (`AGENTS.md`, rule 6).
 
 ### `plot_lib.py`
@@ -627,7 +629,7 @@ property assertions hold". `--only` takes figure stems: the file name without
 
 ```
 scripts/check_plots.py [--only STEM,STEM] [--update] [--keep DIR]
-make check-plots [PLOTS_ARGS="--update"]
+make check-plots | plots   [PLOTS_ARGS="--only STEM,STEM"]
 ```
 
 Regenerates every figure with both scripts (side by side, about 2 minutes)
@@ -644,7 +646,8 @@ generator writes any more. The functions `plot_lib.py` skips by design
 
 `--update` copies the stale and new figures into `doc/docs/img/` and leaves
 the others untouched, so that only figures whose rendering changed show in
-the diff; it updates nothing while an assertion fails. `--keep DIR` keeps
+the diff; it updates nothing while an assertion fails. `make plots` is
+`--update` followed by the documentation build. `--keep DIR` keeps
 the regenerated figures for inspection. `AGENTS.md`, rule 11, says when to
 run it.
 

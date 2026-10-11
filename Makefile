@@ -181,12 +181,11 @@ checkdoc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.js
 check-usage: ## Compile every #### Usage section (baseline: tests/usage-baseline.json); USAGE_ARGS="--lib xx.lib"
 	@$(PYTHON) scripts/check_usage.py $(USAGE_ARGS)
 
-check-plots: ## Regenerate every figure aside and fail on a stale one or a failed assertion; PLOTS_ARGS="--update" to refresh the stale ones
+check-plots: ## Regenerate every figure aside and fail on a stale one or a failed assertion (make plots refreshes them)
 	@$(PYTHON) scripts/check_plots.py $(PLOTS_ARGS)
 
-plots: ## Regenerate the SVG plots, then rebuild the doc pages that embed them
-	@$(PYTHON) scripts/plot_lib.py
-	@$(PYTHON) scripts/plot_families.py
+plots: ## Rewrite the figures whose rendering changed, then rebuild the doc pages that embed them; PLOTS_ARGS="--only fi_lowpass"
+	@$(PYTHON) scripts/check_plots.py --update $(PLOTS_ARGS)
 	$(MAKE) -C doc clean
 	$(MAKE) -C doc build
 

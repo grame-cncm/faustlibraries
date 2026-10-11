@@ -29,7 +29,8 @@ of its inputs.
 Each probe is compiled with `faust -double -I <repo>` and `g++ -O2`, and
 rendered at 48 kHz; it needs faust, g++, numpy and matplotlib. `run_probe`,
 the compile-and-render helper, is also used by plot_families.py.
-`make plots` runs both scripts and then rebuilds the documentation, where
+`make plots` runs both scripts (through check_plots.py, which keeps only the
+figures whose rendering changed) and then rebuilds the documentation, where
 doc/scripts/inject_plots.py embeds each figure in its function's page.
 """
 from __future__ import annotations
