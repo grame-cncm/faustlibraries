@@ -14,7 +14,10 @@ measures, over all output channels:
 - gap:    max |single - double| / peak of double (the metric of
           doc/docs/contributing.md, section "Precision and sample rate");
 - level:  max over channels of |rms single - rms double| / rms double, which
-          ignores a slow phase drift (os.osc in float) that `gap` does not;
+          ignores a slow phase drift (os.osc in float) that `gap` does not; a
+          channel more than 120 dB below the loudest one is measured against
+          the loudest, so that a rounding residue over a silent channel does
+          not read as an infinite gap;
 - growth: peak at this rate / peak at the lowest rate (a blow-up at high
           rates shows here).
 - onset_bits: for k = 0..15, the first sample where |single - double| reaches
@@ -177,14 +180,22 @@ def measure(s, d, sr):
     diff = float(np.abs(s - d).max())
     m["peak"] = peak
     m["gap"] = diff / peak if peak > 1e-12 else (0.0 if diff <= 1e-12 else float("inf"))
-    # Scaled by each channel's peak so that large signals do not overflow.
-    scale = np.maximum(np.abs(d).max(axis=0), 1e-300)
+    # Scaled by each channel's larger peak of the two builds, so that neither a
+    # large signal nor a residue over a silent channel overflows.
+    scale = np.maximum(np.maximum(np.abs(d).max(axis=0), np.abs(s).max(axis=0)), 1e-300)
     rms_s = scale * np.sqrt(((s / scale) ** 2).mean(axis=0))
     rms_d = scale * np.sqrt(((d / scale) ** 2).mean(axis=0))
+    # A channel more than 120 dB below the loudest one is judged at the scale
+    # of the loudest: relative to itself, a rounding residue reads as a huge or
+    # infinite gap (ifft_test's imaginary parts are 1e-18 in double and 3e-10
+    # in single, beside real parts at 0.7). Only when every channel is silent
+    # in double does a residue count as an infinite gap.
+    loudest = float(rms_d.max())
     level = 0.0
     for a, b in zip(rms_s, rms_d):
-        if b > 1e-12:
-            level = max(level, abs(a - b) / b)
+        ref = b if b >= 1e-6 * loudest else loudest
+        if ref > 1e-12:
+            level = max(level, abs(a - b) / ref)
         elif a > 1e-12:
             level = float("inf")
     m["level"] = float(level)
@@ -354,7 +365,10 @@ def make_baseline(results, old, args):
         if bad:
             nonfinite[r["test"]] = sorted(int(sr) for sr in bad)
         lv = worst(r, "level")
-        if lv is not None and lv > args.threshold:
+        # An infinite gap (a residue where every channel of the double build is
+        # silent) is never recorded: `inf x margin` would accept any gap, and
+        # stop checking the test at all.
+        if lv is not None and args.threshold < lv < float("inf"):
             level[r["test"]] = float(f"{lv:.2e}")
     return {
         "comment": "Accepted single/double precision debt, see scripts/check_precision.py.",
