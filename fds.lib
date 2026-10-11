@@ -87,7 +87,7 @@ si = library("signals.lib");
 ma = library("maths.lib");
 
 declare name "Faust Finite Difference Schemes Library";
-declare version "1.1.1";
+declare version "1.1.2";
 declare author "Riccardo Russo";
 declare author "Romain Michon";
 
@@ -708,7 +708,7 @@ with
     hammerModel(in,k,offset) =
         (_,_,_*forceCoeff,in :> _) ~ (_ <: A*_,B*_') :_-offset;
     hammerForce(uh,u)=select2((uh-u)>0,0,((uh-u)^alpha)*(-kH));
-    A = (2-omega0Sqr^2*k^2)/(1+sigma0*k);
+    A = (2-omega0Sqr*k^2)/(1+sigma0*k);
     B = (-1)*(1-sigma0*k)/(1+sigma0*k);
     forceCoeff = k^2/(1+sigma0*k);
 };
