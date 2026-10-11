@@ -66,6 +66,7 @@ powSin(x,y) = sin(pow(x,y));
 tabulateNd_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 3.0,4.0)).lin;
 tabulateNd_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).lin with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 tabulateNd_cub_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).cub with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tabulateNd_cub_edge_test = T(0.05,1.5), T(1.5,0.05), T(2.97,1.5), T(1.5,2.97) with { f(x,y) = sin(x) + cos(y); T(x,y) = ba.tabulateNd(1, f, (32,32, 0.0,0.0, 3.0,3.0, x,y)).cub; };
 if_test = ba.if(1, 0.5, -0.5);
 ifNc_test = ba.ifNc((1, 10, 0, 20, 30));
 ifNcNo_test = (1, 10, 0, 20, 30) : ba.ifNcNo(2, 1);

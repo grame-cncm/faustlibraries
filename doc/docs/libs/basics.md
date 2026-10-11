@@ -1268,7 +1268,7 @@ The table size and parameter range of each dimension can and must be separately 
 
 The number of dimensions is deduced from the number of parameters you give, see below.
 
-Note that processing the last point in each interval is not safe. So either be sure the inputs stay in their respective ranges, or use `C = 1`. Similarly for the first point when doing cubic interpolation.
+Note that with `.val` and `.lin`, processing the last point in each interval is not safe. So either be sure the inputs stay in their respective ranges, or use `C = 1`. `.cub` keeps the four points it interpolates inside each dimension, repeating the edge value, so it reads inside the table whatever the inputs.
 
 The user facing functions are `tabulateNd(C, function, parameters).val`, which uses the value in the table closest to x,
 `.lin`, which evaluates at x using linear interpolation between the closest stored values,
@@ -1550,6 +1550,7 @@ powSin(x,y) = sin(pow(x,y));
 tabulateNd_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 3.0,4.0)).lin;
 tabulateNd_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).lin with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 tabulateNd_cub_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).cub with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+tabulateNd_cub_edge_test = T(0.05,1.5), T(1.5,0.05), T(2.97,1.5), T(1.5,2.97) with { f(x,y) = sin(x) + cos(y); T(x,y) = ba.tabulateNd(1, f, (32,32, 0.0,0.0, 3.0,3.0, x,y)).cub; };
 ```
 
 ## Selectors (Conditions)

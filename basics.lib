@@ -66,7 +66,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.23.5";
+declare version "1.23.6";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -1514,7 +1514,7 @@ declare tabulate_chebychev license "LicenseRef-STK-4.3";
 //
 // The number of dimensions is deduced from the number of parameters you give, see below.
 //
-// Note that processing the last point in each interval is not safe. So either be sure the inputs stay in their respective ranges, or use `C = 1`. Similarly for the first point when doing cubic interpolation.
+// Note that with `.val` and `.lin`, processing the last point in each interval is not safe. So either be sure the inputs stay in their respective ranges, or use `C = 1`. `.cub` keeps the four points it interpolates inside each dimension, repeating the edge value, so it reads inside the table whatever the inputs.
 //
 // The user facing functions are `tabulateNd(C, function, parameters).val`, which uses the value in the table closest to x,
 // `.lin`, which evaluates at x using linear interpolation between the closest stored values,
@@ -1796,6 +1796,7 @@ declare tabulate_chebychev license "LicenseRef-STK-4.3";
 // tabulateNd_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 3.0,4.0)).lin;
 // tabulateNd_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).lin with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // tabulateNd_cub_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).cub with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// tabulateNd_cub_edge_test = T(0.05,1.5), T(1.5,0.05), T(2.97,1.5), T(1.5,2.97) with { f(x,y) = sin(x) + cos(y); T(x,y) = ba.tabulateNd(1, f, (32,32, 0.0,0.0, 3.0,3.0, x,y)).cub; };
 // ```
 //----------------------------
 tabulateNd(C,function,parameters) =
@@ -1860,35 +1861,53 @@ tabulateNd(C,function,parameters) =
         with {
             readIndexes =
                 si.bus(nParams) <:
-                ((stepSizes:ro.cross(N))
+                // the 4 offsets of each dimension, last dimension first
+                ((cubOffsets : ro.cross(4*N) : par(i, N, ro.cross(4)))
                 , readIndex(sizesIds))
-                // calculate the offsets for each interpolation read index and add them to the "base" readindex
+                // add the offsets of each interpolation read index to the "base" readindex
                 :cubifiers;
             // since each interpolator has 4 inputs
             nrReadIndexes = pow(4,N);
-            // calculate the offsets and add them to the "base" readindex
+            // the offsets of the 4 points of each dimension, from the "base" readindex.
+            // The points are the same as in ``ba.tabulate`` (-1, 0, 1 and 2 steps), but
+            // each one is kept inside its dimension, the edge value being repeated: in
+            // the first cell of a dimension the -1 point was the last value of the
+            // previous row, or outside the table, and in the last two cells the +1 and
+            // +2 points were in the next row, or outside the table.
+            cubOffsets =
+                si.bus(nParams)
+                <: (stepSizes, sizes, bases)
+                : ro.interleave(N,3)
+                : par(i, N, dimOffsets)
+            with {
+                sizes = bs, par(i, 3*N, !);
+                // the read index in each dimension, as in ``riN``
+                bases = si.bus(nParams) <: (ids, sizes) : ro.interleave(N,2)
+                      : par(i, N, base);
+                base(idX,sizeX) = rid(int(idX),(sizeX-int(1)),C);
+                dimOffsets(stepSize,sizeX,b) = par(k, 4, stepSize*(point(C,k) - b))
+                with {
+                    // with C = 1, b is already in [0, sizeX-1]: one bound per point is enough
+                    point(1,0) = max(int(0), b-int(1));
+                    point(1,1) = b;
+                    point(1,k) = min(b+(k-1), sizeX-int(1));
+                    point(0,k) = max(int(0), min(b+(k-1), sizeX-int(1)));
+                };
+            };
+            // add the offsets to the "base" readindex
             // we do this by creating a tree, where each branch has 4 sub-branches
             // there are N splits, so we end up with nrReadIndexes "leaves"
             cubifiers =
                 // iterate trough the dimensions, each feeding into the next
                 seq(i, N,
-                    si.bus(N-i-1),cubifier(pow(4,i)));
-            // take a step size and ``len`` input indexes and create 4*len output indexes
-            // offset the input index(es) with the amount needed for that dimension
+                    si.bus(4*(N-i-1)),cubifier(pow(4,i)));
+            // take the 4 offsets of a dimension and ``len`` input indexes and create
+            // 4*len output indexes: each input index plus each offset
             cubifier(len) =
-                ((_<:si.bus(len*4))
+                (par(k, 4, _<:si.bus(len))
                 , (si.bus(len)<:si.bus(len*4)))
                 : ro.interleave(len*4,2)
-                :par(i, 4,
-                     par(j, len, off(i)+_))
-            with {
-                // the hardcoded numbers are the same offsets as in ``ba.tabulate``
-                // but they get multiplied by the step size of the current dimension
-                off(0,stepSize) = -1*stepSize;
-                off(1,stepSize) = 0;
-                off(2,stepSize) = 1*stepSize;
-                off(3,stepSize) = 2*stepSize;
-            };
+                : par(i, len*4, +);
         };
 
         // how many parameters have we been given?
