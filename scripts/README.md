@@ -35,6 +35,7 @@ or later.
 | **Figures** | | |
 | [`plot_lib.py`](#plot_libpy) | `aanl.lib` figures | `make plots` |
 | [`plot_families.py`](#plot_familiespy) | figures of the other libraries, with property assertions | `make plots` |
+| [`check_plots.py`](#check_plotspy) | regenerates every figure aside: stale figures, failed assertions | `make check-plots` |
 | **Formal certification** | | |
 | [`sig2lean.py`](#sig2leanpy) | Faust signals to Lean 4 theorems | `make certify`, `certify-reference` |
 
@@ -50,7 +51,8 @@ are run by `doc/Makefile`.
 - `check_usage.py`, and `build_faust_doc_index.py --measure-io` (the
   `make doc-index*` targets): `faust` (`checkdoc.py` skips the Usage check
   without it);
-- figures: `faust`, `g++`, `numpy` and `matplotlib`;
+- figures: `faust`, `g++`, `numpy` and `matplotlib`; `check_plots.py` also
+  needs `rsvg-convert` (librsvg) or the `cairosvg` module;
 - certification: `faust-rs` and `lean` (4.31);
 - everything else: the Python standard library only.
 
@@ -620,6 +622,35 @@ written, for inspection, but the script ends with the number of failed
 assertions and exit status 1. Success ends with "all figures generated, all
 property assertions hold". `--only` takes figure stems: the file name without
 `.svg` (`fi_lowpass,co_compressor_mono`).
+
+### `check_plots.py`
+
+```
+scripts/check_plots.py [--only STEM,STEM] [--update] [--keep DIR]
+make check-plots [PLOTS_ARGS="--update"]
+```
+
+Regenerates every figure with both scripts (side by side, about 2 minutes)
+in a temporary directory and compares each one with its copy in
+`doc/docs/img/`. Their text cannot decide it: matplotlib writes the date,
+its version and random ids into every SVG, and the last digits of a
+coordinate move with the platform. The two files are therefore rasterized
+at 96 dpi and compared pixel by pixel; a figure is stale when a pixel moves
+by more than 0.25 (renderings of the same data by two matplotlib versions
+stay below 0.05). It fails on a failed property assertion, a stale figure,
+a figure generated but not in `doc/docs/img/`, and a committed figure no
+generator writes any more. The functions `plot_lib.py` skips by design
+(`aa.ADAA1`, the folders with parameters) are listed, not counted.
+
+`--update` copies the stale and new figures into `doc/docs/img/` and leaves
+the others untouched, so that only figures whose rendering changed show in
+the diff; it updates nothing while an assertion fails. `--keep DIR` keeps
+the regenerated figures for inspection. `AGENTS.md`, rule 11, says when to
+run it.
+
+Both generators compile their probes from the repository root: faust looks
+for libraries in the current directory before the `-I` ones, so a probe
+compiled elsewhere would plot the libraries found there.
 
 ## Formal certification
 

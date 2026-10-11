@@ -16,6 +16,7 @@ make check       # run the regression tests against the references (-k to run al
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # regenerate the documentation SVG figures (needs matplotlib)
+make check-plots # regenerate every figure aside: stale figures, failed assertions
 make build       # build the mkdocs site (doc pages + figure injection)
 ```
 
@@ -193,6 +194,26 @@ Every script behind these targets is described in `scripts/README.md`.
     more for than the desktop the ratio is measured on: report an
     increase (`!`) even when the ratio is small. A test time flagged `NaN` measures NaN arithmetic. A slower function can be the right trade-off: say what it
     buys. Details: `doc/docs/contributing.md`, section *CPU cost*.
+
+11. **Keep the figures in step with the library.** The figures in
+    `doc/docs/img/` are measured from the libraries, and nothing
+    regenerates them on its own: in October 2026, 13 of them still showed
+    behavior fixed weeks before (tube tables read by truncation, the
+    flanger's sign, the bandstop's zeros), and six property assertions of
+    `plot_families.py` had been failing since. A change that alters a
+    function's output runs `make check-plots` (about 2 minutes) before
+    committing: it regenerates every figure aside, fails on a failed
+    assertion, and lists the figures whose rendering changed. Run the
+    whole check, not `--only` the function you changed: the seven `tu_*`
+    figures depend on a table-interpolation helper, nothing in their names
+    says so. Regenerate the stale figures in the same commit with
+    `make check-plots PLOTS_ARGS="--update"`, which copies only those (a
+    full `make plots` rewrites all of them with new matplotlib metadata);
+    a new figure also needs `make -C doc build`, which embeds it. An
+    assertion that fails after a deliberate fix is updated to the fixed
+    behavior in the same commit, and checked to fail on the code before
+    the fix. `make check-plots` also passes before every `version.lib`
+    bump. Details: `scripts/README.md`, section *Figures*.
 
 ## Git history
 

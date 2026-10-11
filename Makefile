@@ -79,7 +79,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix verify-matched checkdoc check-usage plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-vec check-precision check-precision-matrix check-cpu check-cpu-matrix verify-matched checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -180,6 +180,9 @@ checkdoc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.js
 
 check-usage: ## Compile every #### Usage section (baseline: tests/usage-baseline.json); USAGE_ARGS="--lib xx.lib"
 	@$(PYTHON) scripts/check_usage.py $(USAGE_ARGS)
+
+check-plots: ## Regenerate every figure aside and fail on a stale one or a failed assertion; PLOTS_ARGS="--update" to refresh the stale ones
+	@$(PYTHON) scripts/check_plots.py $(PLOTS_ARGS)
 
 plots: ## Regenerate the SVG plots, then rebuild the doc pages that embed them
 	@$(PYTHON) scripts/plot_lib.py
