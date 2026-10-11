@@ -55,7 +55,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.13.0";
+declare version "1.13.1";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -1156,9 +1156,10 @@ with {
 // (topology-preserving) state-variable filter with exactly the same poles and
 // zeros. It is for z-domain designs whose parameters move (a pole radius and
 // angle, a notch or allpass frequency): the same filter as `tf2`, but it stays
-// accurate in single precision when the poles approach z = 1, and its output
-// stays continuous when the coefficients jump or move at audio rate, where a
-// direct form rings or diverges. For an analog prototype, use `tf2s`.
+// accurate in single precision when the poles approach z = 1 or z = -1, and
+// its output stays continuous when the coefficients jump or move at audio
+// rate, where a direct form rings or diverges. For an analog prototype, use
+// `tf2s`.
 //
 // The coefficients are passed in a form the caller computes without
 // cancellation from its design parameters, never from rounded `a1` and `a2`
@@ -1174,9 +1175,8 @@ with {
 //
 // * `P`: `A(1) = 1 + a1 + a2`, positive, or 0 together with `Np` (a pole and a
 //   zero at z = 1 that cancel, as in `notchw` at 0 Hz)
-// * `S`: `A(-1) = 1 - a1 + a2`, positive. A pole very close to z = -1 can
-//   leave the unit circle in single precision: a design that reaches Nyquist
-//   bounds its frequency, as `notchw` does
+// * `S`: `A(-1) = 1 - a1 + a2`, positive, or 0 together with `Nm` (a pole and
+//   a zero at z = -1 that cancel, as in `notchw` at the Nyquist limit)
 // * `fq`: `1 - a2`, positive (`P + S + 2*fq = 4`)
 // * `Np`: `N(1) = n0 + n1 + n2`, the gain at DC is `Np/P`
 // * `Nm`: `N(-1) = n0 - n1 + n2`, the gain at Nyquist is `Nm/S`
@@ -1187,7 +1187,9 @@ with {
 // For complex poles `r*exp(+-j*th)`, with `om = 1 - r` computed directly
 // (for example `0 - ma.expm1(-PI*B/SR)` for a bandwidth `B`):
 // `P = om^2 + 4*r*sin(th/2)^2`, `S = om^2 + 4*r*cos(th/2)^2` and
-// `fq = om*(2 - om)`. For example, a resonator of unity peak gain,
+// `fq = om*(2 - om)`. Near the Nyquist limit, compute `cos(th/2)` as
+// `sin(PI*(SR/2 - f)/SR)` for a frequency `f`, so that `S` is as accurate as
+// `P`. For example, a resonator of unity peak gain,
 // `(1 - r^2)/2*(1 - z^-2)/A(z)`, is `tf2_tpt(P,S,fq,0,0,fq)`, and the notch
 // `(1 + A_ap(z))/2` of an allpass `A_ap` with these poles is
 // `tf2_tpt(P,S,fq,P,S,0)` (see `notchw`).
@@ -1202,6 +1204,14 @@ with {
 // costs four divisions and one square root; none per sample when the
 // coefficients are constant.
 //
+// When `P > S` (poles with Re z < 0: a resonance above `SR/4`), the section
+// is mirrored: it realizes `H(z) = H'(-z)`, where `H'` has `P` and `S`, and
+// `Np` and `Nm`, exchanged, by replacing each state delay `z^-1` with `-z^-1`
+// (under the bilinear transform, z -> -z is s -> 1/s). The poles of `H'` have
+// Re z > 0 and `g <= 1`, so a pole near z = -1 is as accurate as one near
+// z = 1. When the coefficients cross `P = S`, the states are mapped to those
+// of the other form that give the same output.
+//
 // #### Test
 // ```
 // fi = library("filters.lib");
@@ -1214,6 +1224,9 @@ with {
 // tf2_tpt_modulated_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); tri = 1 - abs(2*ba.period(Pd)/Pd - 1); fc = 20*pow(250, tri); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
 // tf2_tpt_jump_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); sq = ba.period(2*Pd) < Pd; fc = 20*pow(250.0, sq); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
 // tf2_tpt_audio_modulated_test = 0.1*no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
+// tf2_tpt_high_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { fc = ma.SR/2 - 200; om = 0 - ma.expm1(0 - ma.PI*100/ma.SR); r = 1 - om; P = om*om + 4*r*sin(ma.PI*fc/ma.SR)^2; S = om*om + 4*r*sin(ma.PI*(0.5*ma.SR - fc)/ma.SR)^2; fq = om*(2 - om); };
+// tf2_tpt_mirror_modulated_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); tri = 1 - abs(2*ba.period(Pd)/Pd - 1); fc = ma.SR*(0.1 + 0.35*tri); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; P = om*om + 4*r*sin(ma.PI*fc/ma.SR)^2; S = om*om + 4*r*sin(ma.PI*(0.5*ma.SR - fc)/ma.SR)^2; fq = om*(2 - om); };
+// tf2_tpt_mirror_jump_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); sq = ba.period(2*Pd) < Pd; fc = ma.SR*select2(sq, 0.1, 0.45); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; P = om*om + 4*r*sin(ma.PI*fc/ma.SR)^2; S = om*om + 4*r*sin(ma.PI*(0.5*ma.SR - fc)/ma.SR)^2; fq = om*(2 - om); };
 // ```
 //
 // #### References
@@ -1227,11 +1240,20 @@ declare tf2_tpt author "Julius O. Smith III";
 declare tf2_tpt license "MIT";
 tf2_tpt(P,S,fq,Np,Nm,nd,x) = cH*x + (x*sig : svf)
 with {
-  // P and S at least EPSILON^2: at P = 0 (a pole on z = 1, as in notchw at
-  // 0 Hz) the section computes the limit of the filter, and at S = 0 it does
-  // not divide by 0
-  Pc  = max(P, ma.EPSILON*ma.EPSILON);
-  Sc  = max(S, ma.EPSILON*ma.EPSILON);
+  // Poles with Re z < 0 (P > S): the mirrored section H'(-z), where H' has
+  // P and S, and Np and Nm, exchanged (its poles have Re z > 0) and its
+  // state delays z^-1 become -z^-1. Then g is at most 1, and a
+  // pole near z = -1 is as accurate as one near z = 1.
+  mir = P > S;
+  ms  = 1 - 2*mir; // -1: the state delays are -z^-1
+  Pm  = select2(mir, P, S);
+  Sm  = select2(mir, S, P);
+  Npm = select2(mir, Np, Nm);
+  Nmm = select2(mir, Nm, Np);
+  // Pm and Sm at least EPSILON^2: at P = 0 (a pole on z = 1, as in notchw at
+  // 0 Hz) the section computes the limit of the filter, and likewise at S = 0
+  Pc  = max(Pm, ma.EPSILON*ma.EPSILON);
+  Sc  = max(Sm, ma.EPSILON*ma.EPSILON);
   // four reciprocals (min(ma.MAX) keeps Faust from turning the products
   // back into divisions) and one square root per coefficient update
   iS  = 1/Sc : min(ma.MAX);
@@ -1239,17 +1261,24 @@ with {
   g   = sqrt(Pc*iS);
   ig  = 1/g : min(ma.MAX);
   k   = 2*fq*ig*iS;
-  cH  = Nm*iS;
+  cH  = Nmm*iS;
   cB  = 2*nd*ig*iS - k*cH; // bp tap of the output written as cH*x + cB*bp + cL*lp
-  cL  = Np*iP - cH;
+  cL  = Npm*iP - cH;
   sig = max(abs(cB), abs(cL)) : max(ma.MIN); // the SVF runs on sig*x
   isg = 1/sig : min(ma.MAX);
   kpg = (2*fq + Pc)*ig*iS; // k + g
   d   = 0.25*Sc;           // 1/(1 + k*g + g^2)
+  // When the section changes form, the states map to those of the other form
+  // that give the same output: s <- -g*(sig/sig')*swap(s), with g and sig
+  // of the form now in use and sig' of the previous one
+  chg = mir != mir';
+  cf  = 0 - g*sig*isg';
   svf = tick ~ (_,_) : !,!,_
   with {
-    tick(s1, s2, u) = bp + g*hp, lp + g*bp, (cB*bp + cL*lp)*isg
+    tick(s1i, s2i, u) = ms*(bp + g*hp), ms*(lp + g*bp), (cB*bp + cL*lp)*isg
     with {
+      s1 = select2(chg, s1i, cf*s2i);
+      s2 = select2(chg, s2i, cf*s1i);
       hp = (u - kpg*s1 - s2)*d;
       bp = g*hp + s1;
       lp = g*bp + s2;
@@ -1271,9 +1300,9 @@ with {
 //
 // * `width`: "notch width" in Hz (approximate)
 // * `freq`: "notch frequency" in Hz, from 0 (a first-order DC notch) to
-//   `0.499*ma.SR`; a higher frequency acts as `0.499*ma.SR`, as in `svf`.
-//   At `ma.SR/2` the notch therefore sits at `0.499*ma.SR`, and the Nyquist
-//   limit itself passes at 0 dB
+//   `ma.SR/2` (a first-order notch at the Nyquist limit). Above `ma.SR/4` the
+//   section runs mirrored (see `tf2_tpt`), so that a notch near the Nyquist
+//   limit is as accurate as one near 0 Hz
 //
 // #### Test
 // ```
@@ -1290,11 +1319,17 @@ with {
 // notchw_audio_modulated_test = 0.1*no.noise : fi.notchw(fc/10, fc) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 // notchw_dc_test = no.noise : fi.notchw(100, 0);
 // notchw_nyquist_test = no.noise : fi.notchw(100, ma.SR/2);
+// notchw_high_test = no.noise : fi.notchw(100, ma.SR/2 - 100);
+// notchw_mirror_modulated_test = no.noise : fi.notchw(1000, ma.SR*(0.1 + 0.35*tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// notchw_mirror_jump_test = no.noise : fi.notchw(1000, ma.SR*select2(sq, 0.1, 0.45)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //
 // #### References
 //
-// <https://ccrma.stanford.edu/~jos/pasp/Phasing_2nd_Order_Allpass_Filters.html>
+// * <https://ccrma.stanford.edu/~jos/pasp/Phasing_2nd_Order_Allpass_Filters.html>
+// * Julius O. Smith III, "Digital State-Variable Filters", for the trapezoidal
+//   (TPT) state-variable filter that `tf2_tpt` runs on:
+//   <https://ccrma.stanford.edu/~jos/svf/>
 //------------------------------------------------------------
 declare notchw author "Julius O. Smith III";
 declare notchw copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
@@ -1306,13 +1341,11 @@ with {
   om = 2*wn/(1 + wn); // 1 - p, with p = (1 - wn)/(1 + wn) our pole radius
   q = 1 + (1 - om)^2; // 1 + p^2
   // Now place unit-circle zeros at desired angles: (1 + A(z))/2, A the
-  // allpass a1 = -(1 + p^2)*cos(tn), a2 = p^2
-  // freq at most 0.499*SR, as in svf: closer to Nyquist, the pole near
-  // z = -1 leaves the unit circle in single precision
-  tn = 2*ma.PI*min(freq, 0.499*ma.SR)/ma.SR;
-  P = 2*q*sin(0.5*tn)^2; // 1 + a1 + a2
-  S = 2*q*cos(0.5*tn)^2; // 1 - a1 + a2
-  fq = om*(2 - om);      // 1 - a2
+  // allpass a1 = -(1 + p^2)*cos(tn), a2 = p^2, tn = 2*PI*fc/SR
+  fc = max(0, min(freq, 0.5*ma.SR));
+  P = 2*q*sin(ma.PI*fc/ma.SR)^2;              // 1 + a1 + a2 = 2q sin(tn/2)^2
+  S = 2*q*sin(ma.PI*(0.5*ma.SR - fc)/ma.SR)^2; // 1 - a1 + a2 = 2q cos(tn/2)^2, accurate near SR/2
+  fq = om*(2 - om);                            // 1 - a2
 };
 
 //======================Direct-Form Second-Order Biquad Sections==========================
@@ -5216,7 +5249,8 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 // allpass centered at `fx` and `K = 10^(Lfx/20)`. At `Lfx = 0` (K = 1) the
 // section is the identity. It is realized as a trapezoidal state-variable
 // filter, `x + (K - 1)*k*bp`, which stays accurate in single precision at low
-// `fx` and continuous when `fx` jumps or moves at audio rate.
+// `fx` and near the Nyquist limit, and continuous when `fx` jumps or moves at
+// audio rate: its states hold `k*bp`, at the output level.
 //
 // #### Usage
 //
@@ -5228,9 +5262,10 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 //
 // * `Lfx`: level (dB) at fx
 // * `fx`: boost or cut frequency (Hz), from 0 (where the section becomes a
-//   first-order shelf) to `0.499*ma.SR`; a higher frequency acts as
-//   `0.499*ma.SR`, as in `svf`. At `ma.SR/2` the peak therefore sits at
-//   `0.499*ma.SR`, and the Nyquist limit itself passes at 0 dB
+//   first-order shelf) to `ma.SR/2` (the mirror image of that shelf, at the
+//   Nyquist limit). Above `ma.SR/4` the section runs mirrored, as in
+//   `tf2_tpt`, so that a peak near the Nyquist limit is as accurate as one
+//   near 0 Hz
 // * `tanPiBT`: `tan(PI*B/SR)`, where B = -3dB bandwidth (Hz) when 10^(Lfx/20) = 0
 //         ~ PI*B/SR for narrow bandwidths B
 //
@@ -5250,6 +5285,10 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 // peak_eq_rm_audio_modulated_test = 0.1*no.noise : fi.peak_eq_rm(6, fc, tan(ma.PI*fc/10/ma.SR)) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 // peak_eq_rm_dc_test = no.noise : fi.peak_eq_rm(6, 0, tan(ma.PI*200/ma.SR));
 // peak_eq_rm_nyquist_test = no.noise : fi.peak_eq_rm(6, ma.SR/2, tan(ma.PI*200/ma.SR));
+// peak_eq_rm_high_test = no.noise : fi.peak_eq_rm(6, ma.SR/2 - 100, tan(ma.PI*200/ma.SR));
+// peak_eq_rm_mirror_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*1000/ma.SR)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = ma.SR*(0.1 + 0.35*tri); };
+// peak_eq_rm_mirror_jump_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*1000/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = ma.SR*select2(sq, 0.1, 0.45); };
+// peak_eq_rm_low_jump_test = no.noise : fi.peak_eq_rm(12, fx, tan(ma.PI*1000/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = select2(sq, 2400, 24); };
 // ```
 //
 // #### References
@@ -5259,32 +5298,47 @@ peak_eq_cq(Lfx,fx,Q) = peak_eq(Lfx,fx,fx/Q);
 // Proceedings of the IEEE, 76(1):19-37, Jan. 1988.  (See pp. 29-30.)
 // See also "Parametric Equalizers" above for references on shelf
 // and peaking equalizers in general.
+//
+// Julius O. Smith III, "Digital State-Variable Filters", for the trapezoidal
+// (TPT) state-variable filter this section runs on, and its bell output:
+// <https://ccrma.stanford.edu/~jos/svf/Output_Mixing_Nine_Filter.html>
 //------------------------------------------------------------
 declare peak_eq_rm author "Julius O. Smith III";
 declare peak_eq_rm copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare peak_eq_rm license "LicenseRef-STK-4.3";
-peak_eq_rm(Lfx,fx,tanPiBT) = tick ~ (_,_) : !,!,_
+peak_eq_rm(Lfx,fx,tanPiBT,x) = x + (K - 1.0)*(x*k : tick ~ (_,_) : !,!,_)
 with {
   // The allpass A(z) (a1 = -cos(2*th)*(1+k2), a2 = k2 = (1-tanPiBT)/(1+tanPiBT),
   // th = PI*fx/SR) is the trapezoidal state-variable allpass x - 2*k*bp with
   // g = tan(th) and k = 2*tanPiBT/sin(2*th), so that
-  // (1 + A)/2 + K*(1 - A)/2 = x + (K - 1)*k*bp.
-  // sn at least EPSILON: at fx = 0 the section computes the limit of the
-  // filter, a first-order shelf, instead of dividing by 0. fx at most
-  // 0.499*SR, as in svf: closer to Nyquist, the pole near z = -1 leaves the
-  // unit circle in single precision.
-  th  = min(ma.PI*fx/ma.SR, 0.499*ma.PI);
-  sn  = max(sin(th), ma.EPSILON);
-  cs  = cos(th);
+  // (1 + A)/2 + K*(1 - A)/2 = x + (K - 1)*k*bp. The SVF runs on k*x, so that
+  // its states hold k*bp at the output level when k jumps.
+  // Above SR/4 the section is mirrored, as in tf2_tpt: th becomes PI/2 - th
+  // (sin and cos exchanged, g becomes 1/g, k is unchanged) and the state
+  // delays z^-1 become -z^-1, so the pole near z = -1 is as accurate as the
+  // one near z = 1 below SR/4.
+  fc  = max(0, min(fx, 0.5*ma.SR));
+  mir = fc > 0.25*ma.SR;
+  ms  = 1 - 2*mir;                          // -1: the state delays are -z^-1
+  s0  = sin(ma.PI*fc/ma.SR);                // sin(th)
+  c0  = sin(ma.PI*(0.5*ma.SR - fc)/ma.SR);  // cos(th), accurate near SR/2
+  // sn at least EPSILON: at fx = 0 or SR/2 the section computes the limit of
+  // the filter, a first-order shelf, instead of dividing by 0
+  sn  = max(select2(mir, s0, c0), ma.EPSILON);
+  cs  = select2(mir, c0, s0);
   isc = 1.0/(sn*cs) : min(ma.MAX);
   g   = sn*sn*isc;                    // tan(th)
   k   = tanPiBT*isc;
   kpg = (tanPiBT + sn*sn)*isc;        // k + g
   d   = cs*cs/(1.0 + tanPiBT);        // 1/(1 + k*g + g^2)
   K   = ba.db2linear(Lfx);
-  tick(s1, s2, x) = bp + g*hp, lp + g*bp, x + (K - 1.0)*k*bp
+  // When the section changes form, s <- -g*swap(s), g of the form now in use
+  chg = mir != mir';
+  tick(s1i, s2i, u) = ms*(bp + g*hp), ms*(lp + g*bp), bp
   with {
-    hp = (x - kpg*s1 - s2)*d;
+    s1 = select2(chg, s1i, (0 - g)*s2i);
+    s2 = select2(chg, s2i, (0 - g)*s1i);
+    hp = (u - kpg*s1 - s2)*d;
     bp = g*hp + s1;
     lp = g*bp + s2;
   };

@@ -27,6 +27,9 @@ notchw_jump_test = no.noise : fi.notchw(100, 200*pow(25, sq)) with { P = int(ma.
 notchw_audio_modulated_test = 0.1*no.noise : fi.notchw(fc/10, fc) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 notchw_dc_test = no.noise : fi.notchw(100, 0);
 notchw_nyquist_test = no.noise : fi.notchw(100, ma.SR/2);
+notchw_high_test = no.noise : fi.notchw(100, ma.SR/2 - 100);
+notchw_mirror_modulated_test = no.noise : fi.notchw(1000, ma.SR*(0.1 + 0.35*tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+notchw_mirror_jump_test = no.noise : fi.notchw(1000, ma.SR*select2(sq, 0.1, 0.45)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 
 tf21_test = src : fi.tf21(0.1, 0.2, 0.1, -0.5, 0.06);
 tf22_test = src : fi.tf22(0.1, 0.2, 0.1, -0.5, 0.06);
@@ -51,3 +54,6 @@ tf2_tpt_slider_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { fc = hsli
 tf2_tpt_modulated_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); tri = 1 - abs(2*ba.period(Pd)/Pd - 1); fc = 20*pow(250, tri); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
 tf2_tpt_jump_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); sq = ba.period(2*Pd) < Pd; fc = 20*pow(250.0, sq); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
 tf2_tpt_audio_modulated_test = 0.1*no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; th = 2*ma.PI*fc/ma.SR; P = om*om + 4*r*sin(0.5*th)^2; S = om*om + 4*r*cos(0.5*th)^2; fq = om*(2 - om); };
+tf2_tpt_high_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { fc = ma.SR/2 - 200; om = 0 - ma.expm1(0 - ma.PI*100/ma.SR); r = 1 - om; P = om*om + 4*r*sin(ma.PI*fc/ma.SR)^2; S = om*om + 4*r*sin(ma.PI*(0.5*ma.SR - fc)/ma.SR)^2; fq = om*(2 - om); };
+tf2_tpt_mirror_modulated_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); tri = 1 - abs(2*ba.period(Pd)/Pd - 1); fc = ma.SR*(0.1 + 0.35*tri); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; P = om*om + 4*r*sin(ma.PI*fc/ma.SR)^2; S = om*om + 4*r*sin(ma.PI*(0.5*ma.SR - fc)/ma.SR)^2; fq = om*(2 - om); };
+tf2_tpt_mirror_jump_test = no.noise : fi.tf2_tpt(P, S, fq, 0, 0, fq) with { Pd = int(ma.SR/10); sq = ba.period(2*Pd) < Pd; fc = ma.SR*select2(sq, 0.1, 0.45); om = 0 - ma.expm1(0 - ma.PI*fc/10/ma.SR); r = 1 - om; P = om*om + 4*r*sin(ma.PI*fc/ma.SR)^2; S = om*om + 4*r*sin(ma.PI*(0.5*ma.SR - fc)/ma.SR)^2; fq = om*(2 - om); };

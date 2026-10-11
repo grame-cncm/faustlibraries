@@ -704,13 +704,13 @@ def build_all(out_dir: Path, wanted: set[str]) -> None:
                       checks=[(0, 20000.0, 12.0, 1.5), (1, 20000.0, -12.0, 1.5),
                               (0, 30.0, 0.0, 1.0)],
                       ylim=(-20, 20))
-    # notchw and peak_eq_rm: frequency swept from 0 (where the section
-    # becomes first order) to Nyquist (where it acts as 0.499*SR), each curve
-    # checked against the exact design: notchw is (1 + A(z))/2 and peak_eq_rm
+    # notchw and peak_eq_rm: frequency swept from 0 to the Nyquist limit
+    # (where the section becomes first order, as at 0), each curve checked
+    # against the exact design: notchw is (1 + A(z))/2 and peak_eq_rm
     # (1 + A(z))/2 + K*(1 - A(z))/2, A the second-order allpass
     # (a2 + a1/z + 1/z^2)/(1 + a1/z + a2/z^2).
     sweep = [k * SR / 20 for k in range(11)]
-    swept = [min(f, 0.499 * SR) for f in sweep]
+    swept = sweep
 
     def allpass_parts(a1, a2):
         a = np.array([1.0, a1, a2])

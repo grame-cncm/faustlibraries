@@ -70,6 +70,10 @@ peak_eq_rm_unity_test = no.noise : fi.peak_eq_rm(0, 1000, tan(ma.PI*200/ma.SR));
 peak_eq_rm_audio_modulated_test = 0.1*no.noise : fi.peak_eq_rm(6, fc, tan(ma.PI*fc/10/ma.SR)) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 peak_eq_rm_dc_test = no.noise : fi.peak_eq_rm(6, 0, tan(ma.PI*200/ma.SR));
 peak_eq_rm_nyquist_test = no.noise : fi.peak_eq_rm(6, ma.SR/2, tan(ma.PI*200/ma.SR));
+peak_eq_rm_high_test = no.noise : fi.peak_eq_rm(6, ma.SR/2 - 100, tan(ma.PI*200/ma.SR));
+peak_eq_rm_mirror_modulated_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*1000/ma.SR)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); fx = ma.SR*(0.1 + 0.35*tri); };
+peak_eq_rm_mirror_jump_test = no.noise : fi.peak_eq_rm(6, fx, tan(ma.PI*1000/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = ma.SR*select2(sq, 0.1, 0.45); };
+peak_eq_rm_low_jump_test = no.noise : fi.peak_eq_rm(12, fx, tan(ma.PI*1000/ma.SR)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; fx = select2(sq, 2400, 24); };
 
 spectral_tilt_test = src : fi.spectral_tilt(4, 200, 2000, -0.5);
 spectral_tilt_slider_test = no.noise : fi.spectral_tilt(4, hslider("f0", 200, 20, 2000, 1), hslider("bw", 2000, 100, 10000, 1), hslider("alpha", -0.5, -1, 1, 0.01));
