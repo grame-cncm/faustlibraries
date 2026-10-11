@@ -57,11 +57,12 @@ other compilations:
 
 Each configuration builds in its own subdirectory of the build directory
 (the default one directly in it), and a build is also redone when its
-compiler command changes.
+compiler command, or the version of faust or of the C++ compiler, changes.
 """
 
 import argparse
 import concurrent.futures as cf
+import functools
 import glob
 import json
 import os
@@ -125,16 +126,28 @@ class Config:
                 f"c++ {' '.join(self.cxx_options)}")
 
 
+@functools.lru_cache(maxsize=None)
+def compiler_version(compiler):
+    """The first line of `compiler --version`, part of a build's stamp."""
+    try:
+        r = subprocess.run([compiler, "--version"], capture_output=True, text=True)
+        return (r.stdout.strip().splitlines() or [""])[0]
+    except OSError:
+        return ""
+
+
 def build(dsp, name, precision, cfg, args):
     exe = os.path.join(cfg.build_dir, f"{name}.{precision}")
     cpp = exe + ".cpp"
     faust_cmd = [args.faust, *cfg.faust_options, f"-{precision}", "-t", "0", "-I", ROOT,
                  "-a", ARCH, "-pn", name, dsp, "-o", cpp]
     cxx_cmd = [args.cxx, *cfg.cxx_options, "-std=c++17", cpp, "-o", exe]
-    # The commands are stored next to the build: a build made with other
-    # options is redone, not silently reused.
+    # The commands and the compiler versions are stored next to the build: a
+    # build made with other options, or by another faust or C++ compiler, is
+    # redone, not silently reused.
     stamp = exe + ".cmd"
-    stamp_text = json.dumps([faust_cmd, cxx_cmd])
+    stamp_text = json.dumps([faust_cmd, cxx_cmd,
+                             compiler_version(args.faust), compiler_version(args.cxx)])
     if (os.path.exists(exe) and os.path.getmtime(exe) >= newest_source(dsp)
             and os.path.exists(stamp) and open(stamp).read() == stamp_text):
         return exe, None
@@ -401,7 +414,7 @@ def main():
     p.add_argument("--build-dir", default=os.path.join(ROOT, "tests", "build-precision"),
                    help="where the builds are cached; a build is redone when a .lib, its "
                         "test file or the architecture is newer, or when its compiler "
-                        "command changed (default: tests/build-precision)")
+                        "command or a compiler version changed (default: tests/build-precision)")
     p.add_argument("--json", help="write every measurement to this file")
     p.add_argument("--faust", default=os.environ.get("FAUST", "faust"),
                    help="Faust compiler (default: $FAUST, else faust)")
