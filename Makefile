@@ -162,7 +162,7 @@ check-extremes: ## Render every test with its sliders at their extremes, all and
 check-precision-matrix: ## check-precision with C++ -O2 and -O3 -ffast-math, Faust -vec and -lang ocpp in turn
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) --matrix all $(PRECISION_ARGS)
 
-check-backends: ## Compile every test for WebAssembly (modules validated and run with node), Cmajor, Julia, Codebox, C#, Java (baseline: tests/backend-baseline.json); BACKENDS_ARGS="--lang wasm"
+check-backends: ## Compile every test for WebAssembly (modules validated and run with node), Cmajor (rendered by cmaj), Julia, Codebox, C#, Java (baseline: tests/backend-baseline.json); BACKENDS_ARGS="--lang wasm"
 	@FAUST="$(FAUST)" $(PYTHON) scripts/check_backends.py $(BACKENDS_ARGS)
 
 check-cpu: ## Measure the CPU cost of the tests; CPU_ARGS="--base REV" adds the ratio new / base

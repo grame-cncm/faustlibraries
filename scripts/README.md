@@ -170,15 +170,15 @@ minutes for the whole suite once they are built.
 ### `check_backends.py`
 
 ```
-scripts/check_backends.py [--lang L,L] [--changed] [--update-baseline] [--no-validate] [--no-run] [-j N]
+scripts/check_backends.py [--lang L,L] [--changed] [--update-baseline] [--no-validate] [--no-run] [--run-julia] [-j N]
                           [FILE.dsp ...]
 make check-backends [BACKENDS_ARGS="--lang wasm"]
 ```
 
-Compiles every test with `faust -lang L` for the restricted backends, without
-compiling or running the generated code: about 15 s per backend, a minute for
-the six of the baseline (`wasm`, `cmajor`, `julia`, `codebox`, `csharp`,
-`java`). The WebAssembly modules are also validated with Node
+Compiles every test with `faust -lang L` for the restricted backends: about
+15 s per backend, a minute for the six of the baseline (`wasm`, `cmajor`,
+`julia`, `codebox`, `csharp`, `java`), then runs what it can run (below).
+The WebAssembly modules are also validated with Node
 (`WebAssembly.validate`, the check of a browser before it runs one), in the
 same 15 s: a compilation that succeeds can still emit a module that does not
 validate (107 tests in October 2026, a pow of two integers with a variable
@@ -190,7 +190,16 @@ first half, the math functions from JavaScript's `Math`): a module that stops
 sample fails, with the error and the frame; a module that imports its memory
 (a `soundfile` test) is validated, not run. This adds about 15 s, run in
 parallel. `--no-run` validates without running, `--no-validate` compiles only;
-without `node` both are skipped with a note. These accept only the whitelisted foreign functions, so a library
+without `node` both are skipped with a note. The Cmajor patches are compiled
+and rendered by Cmajor itself (`cmaj render`, one second at 48 kHz after the
+20000 frames of silence it starts with, cmajor-lang/cmajor#140; the controls
+at their default values, since `cmaj render` cannot press a button): a patch
+that Cmajor rejects (the error comes from `cmaj play --dry-run`, `cmaj render`
+gives none), that stops or writes a non-finite sample fails; about a minute,
+skipped with a note without `cmaj`. `--run-julia` also loads and runs the
+Julia code, as for WebAssembly (about a minute: Julia compiles each program).
+A failure recorded by a run is only expected from a run: with `--no-run`, or
+Julia without `--run-julia`, its baseline entry is not reported as stale. These accept only the whitelisted foreign functions, so a library
 function that calls `ma.cbrt` anywhere below it fails here although it passes
 every C++ check. The failures are compared with `tests/backend-baseline.json`,
 the accepted debt per backend (the test and faust's error): an unlisted failure

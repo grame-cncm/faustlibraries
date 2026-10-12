@@ -36,12 +36,28 @@ stopped on `int()` of a NaN, which only an execution shows. Without node (or
 with --no-validate) the modules are neither validated nor run, and
 --no-run validates them without running them; the output says so.
 
+For Cmajor, the code faust generates is also compiled and run by Cmajor
+itself, with `cmaj render` (one second at 48 kHz after the silence `cmaj
+render` starts with, the controls at their default values: `cmaj render`
+cannot press a button): `faust -lang cmajor` succeeding does not mean that
+Cmajor accepts the code. A patch that Cmajor rejects, that stops, or that
+writes a non-finite sample fails. Without `cmaj` the patches are only
+generated, which the output says.
+
+With --run-julia, the Julia code is also loaded and run (one second at 48 kHz,
+as for WebAssembly, buttons included), in a few Julia processes run in
+parallel: Julia compiles each program, 0.3 to 3 s, so this takes minutes and
+is not done by default. A program that does not load (an undefined name: in
+October 2026 the constant INFINITY), that throws (InexactError: the
+conversion of a NaN to an integer) or that writes a non-finite sample fails.
+
     scripts/check_backends.py                    # the backends of the baseline
     scripts/check_backends.py --lang wasm,java   # these backends
     scripts/check_backends.py --changed          # only if a .lib or test differs from HEAD
     scripts/check_backends.py --update-baseline  # record the current debt
     scripts/check_backends.py --no-validate      # compile only, do not validate wasm modules
-    scripts/check_backends.py --no-run           # validate the wasm modules, do not run them
+    scripts/check_backends.py --no-run           # validate the wasm modules, run nothing
+    scripts/check_backends.py --run-julia        # also load and run the Julia code
     scripts/check_backends.py tests/aanl_tests.dsp ...
 
 It fails (exit status 1) on a test that fails on a backend of the baseline
@@ -56,8 +72,10 @@ every compilation runs from the repository root, with -I on it: the
 libraries tested are this checkout's.
 """
 import argparse
+import array
 import concurrent.futures as cf
 import json
+import math
 import os
 import re
 import shutil
@@ -70,6 +88,12 @@ ROOT = Path(__file__).resolve().parent.parent
 BASELINE = ROOT / "tests" / "backend-baseline.json"
 FAUST = os.environ.get("FAUST", "faust")
 NODE = os.environ.get("NODE", "node")
+CMAJ = os.environ.get("CMAJ", "cmaj")
+JULIA = os.environ.get("JULIA", "julia")
+SR = 48000
+# cmaj render writes this many frames of silence before the patch's output (measured with
+# Cmajor 1.0: 20480 at a block size of 512); the render is that much longer
+CMAJ_SILENCE = 20480
 # A top-level definition `name_test = ...` at the start of a line, as in
 # scripts/extract_tests.sh and check_precision.py.
 TEST_RE = re.compile(r"^[ \t]*([A-Za-z_][A-Za-z0-9_]*_test)[ \t]*=", re.M)
@@ -218,6 +242,172 @@ def wasm_errors(specs, pool, run):
                   else None) for o, e in zip(outs, errors)], skipped
 
 
+def wav_samples(path):
+    """(channels, float32 samples interleaved) of the WAV file cmaj render writes."""
+    data = Path(path).read_bytes()
+    i, channels, samples = 12, 0, b""
+    while i + 8 <= len(data):
+        cid, size = data[i:i + 4], int.from_bytes(data[i + 4:i + 8], "little")
+        if cid == b"fmt ":
+            channels = int.from_bytes(data[i + 10:i + 12], "little")
+        elif cid == b"data":
+            samples = data[i + 8:i + 8 + size]
+        i += 8 + size + (size & 1)
+    a = array.array("f")
+    a.frombytes(samples[:len(samples) // 4 * 4])
+    return channels, a
+
+
+def cmajor_run_error(code):
+    """None when Cmajor compiles and renders the generated patch with finite samples."""
+    outs = len(re.findall(r"^\s*output stream ", code.read_text(), re.M))
+    if outs == 0:
+        return None
+    patch = code.with_suffix(".cmajorpatch")
+    patch.write_text(json.dumps({"CmajorVersion": 1, "ID": "dev.faust.check", "version": "1.0",
+                                 "name": code.stem, "source": code.name}))
+    wav = code.with_suffix(".wav")
+    r = subprocess.run([CMAJ, "render", f"--length={SR + CMAJ_SILENCE}", f"--rate={SR}",
+                        f"--channels={outs}", "--blockSize=512", f"--output={wav}", str(patch)],
+                       capture_output=True, text=True, timeout=300)
+    if r.returncode != 0 or not wav.exists():
+        # cmaj render exits with 1 without saying why: building the patch alone prints the error
+        d = subprocess.run([CMAJ, "play", "--dry-run", str(patch)], capture_output=True,
+                           text=True, timeout=300)
+        lines = [re.sub(r"^.*?:\d+:\d+: ", "", line.strip())
+                 for line in (r.stdout + r.stderr + d.stdout + d.stderr).splitlines()
+                 if "error" in line.lower()]
+        return "Cmajor rejects the code: " + (lines or ["cmaj render failed"])[0]
+    channels, a = wav_samples(wav)
+    for k, v in enumerate(a):
+        if not math.isfinite(v):
+            return (f"the patch fails when run: non-finite output {v} on channel"
+                    f" {k % channels} at frame {k // channels - CMAJ_SILENCE}")
+    return None
+
+
+def cmajor_errors(specs, pool, run):
+    """compile_error for cmajor, plus, with run, the compilation and the render by Cmajor."""
+    with tempfile.TemporaryDirectory() as tmp:
+        outs = [Path(tmp) / f"t{i}.cmajor" for i in range(len(specs))]
+        errors = list(pool.map(lambda s, o: compile_error("cmajor", *s, o), specs, outs))
+        if run:
+            ran = list(pool.map(lambda o, e: None if e else cmajor_run_error(o), outs, errors))
+            errors = [e or r for e, r in zip(errors, ran)]
+    return errors
+
+
+# Reads the paths of the generated files in ARGS, prints one line per file: its path, a tab,
+# then "ok" or the error. Each program is loaded in a module of its own, with the base types
+# and UI functions of architecture/julia defined there, then run as WASM_JS runs a module.
+JULIA_JS = r"""
+function run_one(path)
+    m = Module(:FaustCheck)
+    Core.eval(m, quote
+        const FAUSTFLOAT = Float32
+        abstract type dsp end
+        abstract type FMeta end
+        abstract type UI end
+        openTabBox!(ui::UI, label) = nothing
+        openHorizontalBox!(ui::UI, label) = nothing
+        openVerticalBox!(ui::UI, label) = nothing
+        closeBox!(ui::UI) = nothing
+        declare!(x, args...) = nothing
+        addButton!(ui::UI, args...) = nothing
+        addCheckButton!(ui::UI, args...) = nothing
+        addHorizontalSlider!(ui::UI, args...) = nothing
+        addVerticalSlider!(ui::UI, args...) = nothing
+        addNumEntry!(ui::UI, args...) = nothing
+        addHorizontalBargraph!(ui::UI, args...) = nothing
+        addVerticalBargraph!(ui::UI, args...) = nothing
+        addSoundfile!(ui::UI, args...) = nothing
+    end)
+    try
+        Base.include(m, path)
+        Core.eval(m, quote
+            mutable struct SwitchUI <: UI; zones::Vector{Symbol}; end
+            addButton!(ui::SwitchUI, label, p::Symbol) = push!(ui.zones, p)
+            addCheckButton!(ui::SwitchUI, label, p::Symbol) = push!(ui.zones, p)
+            function faust_check_run(SR, BLOCK)
+                d = mydsp{REAL}()
+                init!(d, Int32(SR))
+                ui = SwitchUI(Symbol[])
+                buildUserInterface!(d, ui)
+                set(v) = for z in ui.zones; setproperty!(d, z, FAUSTFLOAT(v)); end
+                set(1)
+                ins = zeros(FAUSTFLOAT, BLOCK, getNumInputs(d))
+                outs = zeros(FAUSTFLOAT, BLOCK, getNumOutputs(d))
+                done = 0
+                while done < SR
+                    (!isempty(ui.zones) && done == SR ÷ 2) && set(0)
+                    n = min(BLOCK, SR - done)
+                    compute!(d, Int32(n), ins, outs)
+                    for c in 1:size(outs, 2), k in 1:n
+                        isfinite(outs[k, c]) || return "non-finite output $(outs[k, c]) on channel $(c - 1) at frame $(done + k - 1)"
+                    end
+                    done += n
+                end
+                "ok"
+            end
+        end)
+        return Base.invokelatest(m.faust_check_run, SR_VALUE, 512)
+    catch e
+        return first(split(sprint(showerror, e), '
+'))
+    end
+end
+for p in ARGS
+    r = run_one(p)
+    println(p, "	", replace(r, '
+' => ' '))
+    flush(stdout)
+end
+""".replace("SR_VALUE", str(SR))
+
+
+def julia_errors(specs, pool, run):
+    """compile_error for julia, plus, with run, the loading and the run of the code by Julia,
+    in chunks run by Julia processes in parallel."""
+    with tempfile.TemporaryDirectory() as tmp:
+        outs = [Path(tmp) / f"t{i}.jl" for i in range(len(specs))]
+        errors = list(pool.map(lambda s, o: compile_error("julia", *s, o), specs, outs))
+        if run:
+            runner = Path(tmp) / "faust_check_runner.jl"
+            runner.write_text(JULIA_JS)
+            ok = [o for o, e in zip(outs, errors) if e is None]
+            n = os.cpu_count() or 1
+            chunks = [ok[i::n] for i in range(n)]
+
+            def run_chunk(chunk):
+                if not chunk:
+                    return {}
+                r = subprocess.run([JULIA, "--startup-file=no", "--depwarn=no", str(runner),
+                                    *map(str, chunk)], capture_output=True, text=True)
+                res = {}
+                for line in r.stdout.splitlines():
+                    path, _, verdict = line.partition("\t")
+                    res[Path(path)] = verdict
+                for o in chunk:  # a file the process did not reach: it died on the one before
+                    res.setdefault(o, "julia stopped: " + ((r.stderr.strip().splitlines()
+                                                            or ["no output"])[-1]))
+                return res
+
+            bad = {}
+            for part in pool.map(run_chunk, chunks):
+                bad.update(part)
+            errors = [e or (None if bad.get(o) == "ok" else f"the code fails when run: {bad[o]}")
+                      for o, e in zip(outs, errors)]
+    return errors
+
+
+RUN_FAILURES = ("fails when run", "rejects the code", "invalid module")
+
+
+def is_run_failure(error):
+    """True for a failure that only the toolchain of the backend sees: a validation or a run."""
+    return any(k in error for k in RUN_FAILURES)
+
+
 def backend_built(lang):
     with tempfile.TemporaryDirectory() as tmp:
         dsp = Path(tmp) / "p.dsp"
@@ -245,7 +435,9 @@ def main():
     p.add_argument("--no-validate", action="store_true",
                    help="do not validate (nor run) the WebAssembly modules with node")
     p.add_argument("--no-run", action="store_true",
-                   help="validate the WebAssembly modules, do not run them")
+                   help="validate the WebAssembly modules, run nothing (nor Cmajor's render)")
+    p.add_argument("--run-julia", action="store_true",
+                   help="also load and run the Julia code (minutes: Julia compiles each test)")
     p.add_argument("-j", "--jobs", type=int, default=os.cpu_count())
     args = p.parse_args()
     if not shutil.which(FAUST):
@@ -262,7 +454,7 @@ def main():
     covered = {name for _, name in specs}
 
     validate = not args.no_validate and shutil.which(NODE)
-    failures, notes = {}, []
+    failures, notes, ran = {}, [], set()
     with cf.ThreadPoolExecutor(args.jobs) as pool:
         for lang in langs:
             if not backend_built(lang):
@@ -270,11 +462,26 @@ def main():
                 continue
             if lang == "wasm" and validate:
                 errors, skipped = wasm_errors(specs, pool, not args.no_run)
+                ran.update(["wasm"] if not args.no_run else [])
                 if args.no_run:
                     notes.append("wasm: modules validated, not run")
                 elif skipped:
                     notes.append(f"wasm: {len(skipped)} module(s) validated, not run: they import"
                                  f" their memory, as a soundfile does ({', '.join(skipped)})")
+            elif lang == "cmajor":
+                run = not args.no_run and shutil.which(CMAJ)
+                if not run:
+                    notes.append("cmajor: patches generated, not compiled nor run by Cmajor"
+                                 + ("" if args.no_run else f" ({CMAJ} not found)"))
+                errors = cmajor_errors(specs, pool, run)
+                ran.update(["cmajor"] if run else [])
+            elif lang == "julia":
+                run = args.run_julia and not args.no_run and shutil.which(JULIA)
+                if args.run_julia and not run:
+                    notes.append("julia: code generated, not run"
+                                 + ("" if args.no_run else f" ({JULIA} not found)"))
+                errors = julia_errors(specs, pool, run)
+                ran.update(["julia"] if run else [])
             else:
                 if lang == "wasm":
                     notes.append("wasm: modules compiled, neither validated nor run"
@@ -301,8 +508,11 @@ def main():
         accepted = baseline[lang]
         problems += [f"{lang}: {name}: {e}" for name, e in sorted(failed.items())
                      if name not in accepted]
+        # an entry recorded by a run (or by the backend's own compiler) is only expected
+        # when this run did it
+        expected = {name for name, e in accepted.items() if lang in ran or not is_run_failure(e)}
         problems += [f"{lang}: {name} now compiles: remove it from {BASELINE.name}"
-                     for name in sorted(accepted) if name in covered and name not in failed]
+                     for name in sorted(expected) if name in covered and name not in failed]
 
     for line in notes + problems:
         print(f"check_backends: {line}")
@@ -314,13 +524,15 @@ def main():
         print("A test that no longer compiles for a backend calls something it rejects"
               " (the error names it): use a portable form, or record deliberate debt"
               f" with --update-baseline in {BASELINE.name}.")
-        if any("invalid module" in line or "fails when run" in line for line in problems):
-            print("A WebAssembly module that does not validate, or that stops or writes a"
-                  " non-finite sample where the C++ build in single precision does not, is a"
-                  f" bug of faust, not of the libraries ({shutil.which(FAUST)}): check with the"
-                  " current faust (FAUST=...), and report it if it persists. A non-finite"
-                  " sample that the C++ build in -single gives too (ma.MIN * 1e307) is the"
-                  f" test's: record it in {BASELINE.name}.")
+        if any(k in line for line in problems
+               for k in ("invalid module", "fails when run", "rejects the code")):
+            print("Code that compiles but that the backend's own toolchain rejects (a WebAssembly"
+                  " module that does not validate, Cmajor or Julia code that does not load), or"
+                  " that stops or writes a non-finite sample where the C++ build in single"
+                  f" precision does not, is a bug of faust, not of the libraries"
+                  f" ({shutil.which(FAUST)}): check with the current faust (FAUST=...), and"
+                  " report it if it persists. A non-finite sample that the C++ build in -single"
+                  f" gives too (ma.MIN * 1e307) is the test's: record it in {BASELINE.name}.")
         return 1
     accepted = sum(len(baseline[lang]) for lang in failures if lang in baseline)
     print(f"check_backends: OK ({len(specs)} tests: {summary}; accepted debt: {accepted})")
