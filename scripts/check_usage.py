@@ -403,6 +403,14 @@ def top_level_definitions(body):
     return out
 
 
+def blank_comments(text):
+    """text with its Faust comments (// to the end of the line, /* */) replaced by spaces of
+    the same length: the positions stay valid, and a parenthesis or a ; in a comment no
+    longer counts."""
+    return re.sub(r"//[^\n]*|/\*.*?\*/", lambda m: re.sub(r"[^\n]", " ", m.group(0)), text,
+                  flags=re.S)
+
+
 def enclosing_with(text, pos):
     """The definitions of the `with { }` of the Test definition around pos.
 
@@ -411,6 +419,7 @@ def enclosing_with(text, pos):
     there, not at the top level of the Test section. The Test definitions
     start at column 0 (the export removes the `// ` of the comment).
     """
+    text = blank_comments(text)
     starts = [m.start() for m in re.finditer(rf"^{IDENT}\s*(?:\([^()]*\))?\s*=", text, re.M)
               if m.start() <= pos]
     if not starts:
