@@ -142,7 +142,7 @@ def compiler_version(compiler):
 def build(dsp, name, precision, cfg, args):
     exe = os.path.join(cfg.build_dir, f"{name}.{precision}")
     cpp = exe + ".cpp"
-    faust_cmd = [args.faust, *cfg.faust_options, f"-{precision}", "-t", "0", "-I", ROOT,
+    faust_cmd = [args.faust, *cfg.faust_options, f"-{precision}", "-t", "0", "-I", ROOT, "-I", os.path.join(ROOT, "dx7"),
                  "-a", ARCH, "-pn", name, dsp, "-o", cpp]
     cxx_cmd = [args.cxx, *cfg.cxx_options, "-std=c++17", cpp, "-o", exe]
     # The commands and the compiler versions are stored next to the build: a
