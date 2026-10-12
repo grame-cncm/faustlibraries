@@ -87,7 +87,7 @@ si = library("signals.lib");
 ma = library("maths.lib");
 
 declare name "Faust Finite Difference Schemes Library";
-declare version "1.1.2";
+declare version "1.1.3";
 declare author "Riccardo Russo";
 declare author "Romain Michon";
 
@@ -705,11 +705,23 @@ hammer(coeff,omega0Sqr,sigma0,kH,alpha,k,offset,fIn) =
     (hammerForce<:hammerModel(fIn,k,offset,_),_)~_:!,_*coeff
 with
 {
-    hammerModel(in,k,offset) =
-        (_,_,_*forceCoeff,in :> _) ~ (_ <: A*_,B*_') :_-offset;
+    // u[n+1] = A*u[n] + B*u[n-1] + forceCoeff*F + in, computed with the step v = u - u':
+    // v[n+1] = C*v[n] - D*u[n] + forceCoeff*F + in, u[n+1] = u[n] + v[n+1], since A + B =
+    // 1 - D and -B = C. In single precision, A and B rounded near 2 and -1 lose part of the
+    // small stiffness term D (10% at omega0Sqr = 1000, k = 1/48000), and the force, added to
+    // u, is only an ulp or two of it; added to the small step v, both keep their precision.
+    // min(ma.MAX), a no-op, keeps the step a unit: the Faust normalizer would otherwise expand
+    // u + vn, fold u - D*u back into (1 - D)*u and add the force terms to u.
+    hammerModel(in,k,offset,f) = step ~ (_,_) : !,_ : _-offset
+    with {
+        step(v, u) = vn, u + (vn : min(ma.MAX))
+        with {
+            vn = C*v - D*u + forceCoeff*f + in;
+        };
+    };
     hammerForce(uh,u)=select2((uh-u)>0,0,((uh-u)^alpha)*(-kH));
-    A = (2-omega0Sqr*k^2)/(1+sigma0*k);
-    B = (-1)*(1-sigma0*k)/(1+sigma0*k);
+    C = (1-sigma0*k)/(1+sigma0*k);
+    D = omega0Sqr*k^2/(1+sigma0*k);
     forceCoeff = k^2/(1+sigma0*k);
 };
 
