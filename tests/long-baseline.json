@@ -239,12 +239,6 @@
   ],
   "reason": "subnormal: a decay to zero without flushing the denormals (faust -ftz 0)"
  },
- "flute_ui_MIDI_test": {
-  "kinds": [
-   "drift"
-  ],
-  "reason": "drift: the si.smoo of mouthPosition stalls 1.3e-4 short of 0.5 in single precision; the self-oscillation's phase at release decorrelates"
- },
  "gate_gain_mono_jump_test": {
   "kinds": [
    "subnormal"
@@ -457,10 +451,9 @@
  },
  "sawtooth_demo_test": {
   "kinds": [
-   "drift",
    "growth"
   ],
-  "reason": "drift: the portamento si.smooth stalls ~0.3 Hz short of 440 Hz in single precision at 192 kHz, and the beat pattern of the three saws drifts; growth: its switches select the noise input during the hold, the -20 dB sawtooth plays after the release"
+  "reason": "growth: its switches select the noise input during the hold, the -20 dB sawtooth plays after the release"
  },
  "shock_trigger_demo_test": {
   "kinds": [
@@ -509,17 +502,5 @@
    "subnormal"
   ],
   "reason": "subnormal: a decay to zero without flushing the denormals (faust -ftz 0)"
- },
- "violin_ui_MIDI_test": {
-  "kinds": [
-   "subnormal"
-  ],
-  "reason": "subnormal: a decay to zero without flushing the denormals (faust -ftz 0)"
- },
- "virtual_analog_oscillator_demo_test": {
-  "kinds": [
-   "drift"
-  ],
-  "reason": "drift: the portamento si.smooth stalls ~0.3 Hz short of 440 Hz in single precision at 192 kHz, and the beat pattern of the three saws drifts"
  }
 }
