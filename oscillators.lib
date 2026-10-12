@@ -66,7 +66,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "1.9.4";
+declare version "1.9.5";
 
 // This library contains platform specific constants
 pl = library("platform.lib");
@@ -292,7 +292,14 @@ _phasor_table(tablesize, freq, reset, phase) = _phasor_imp(freq, reset, phase) :
 // ma = library("maths.lib");
 // phasor_test = os.phasor(1024, 440);
 // phasor_slider_test = os.phasor(1024, hslider("phasor:freq", 440, -20000, 20000, 1));
-// phasor_modulated_test = os.phasor(1024, 2000*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// phasor_modulated_test = os.phasor(1024, 2000.0*k/P)
+// with {
+//     P = int(ma.SR/10);
+//     // the triangle 2*tri - 1 of the other modulated tests, as k/P with k an integer: its values
+//     // come in opposite pairs, whose float increments cancel exactly over a period, so that the
+//     // phase comes back to the same offset at every period, in single precision as in double
+//     k = P - 2*abs(2*ba.period(P) - P);
+// };
 // ```
 //------------------------------------------------------------
 phasor(tablesize, freq) = _phasor_table(tablesize, freq, 0, 0);
