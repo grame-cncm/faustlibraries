@@ -17,6 +17,7 @@ make check-precision  # every test in -single/-double at 44.1-192 kHz (no refere
 make check-backends   # every test compiled for WebAssembly (modules validated and run), Cmajor (rendered), Julia, ... (checkdoc does WebAssembly)
 make check-sanitize   # every test under ASan and UBSan, table guards off (about 30 min; DSP_FILES= to restrict)
 make check-extremes   # every test with its sliders at their extremes, all and one by one (about 2 min)
+make check-long       # every test rendered 2 min at 192 kHz, -single and -double: non-finite, growth, subnormals, drift
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions

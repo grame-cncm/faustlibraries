@@ -167,6 +167,39 @@ reason; an entry that no longer fails is reported. It uses the `-single`
 builds of `check_precision.py`, in the same build directory: about two
 minutes for the whole suite once they are built.
 
+
+### `check_long.py`
+
+```
+scripts/check_long.py [-k REGEX] [--rate 192000] [--seconds 120] [--warmup 2] [--growth 100]
+                      [--drift 1e-2] [--write-baseline] [--json FILE] [FILE.dsp ...]
+make check-long [LONG_ARGS="tests/xx_tests.dsp"]
+```
+
+Renders every test for minutes, without references: what `make check` (one
+second) never reaches. Each test is compiled in `-single` and `-double` with
+`arch/long_arch.cpp`, which writes no samples (two minutes at 192 kHz would be
+92 MB per channel) but prints, per second, the peak, the RMS, the non-finite
+samples and the subnormal ones, with the control schedule of the other
+harnesses (buttons pressed for the first half). The single-precision render
+fails on a non-finite sample, on a peak beyond `--growth` (100) times the peak
+of the first `--warmup` (2) seconds, and on subnormal output samples after
+them (counted, not timed: a timing is noisy, and Apple Silicon computes
+subnormals at little or no cost); a decay is not a failure. Its RMS is
+compared, second by second after the warm-up, with the double render's: a
+relative gap beyond `--drift` (1e-2) that is also more than 10 times the gap of
+the `--early` (8) seconds after the warm-up, the seconds below `--floor`
+(1e-5) left out, is a computation that degrades in single precision: a float
+counter that stops at 2^24 (87 s at 192 kHz, 349 s at 48 kHz), a sliding sum
+accumulating its rounding, an undamped rotation losing its amplitude, which
+give finite samples and no growth; a gap that does not grow is the
+float/double difference `check_precision.py` measures. The wrap of an `int32`
+counter, 3.1 h away at 192 kHz, is out of reach. Failures are compared with
+`tests/long-baseline.json` (`{test: {"kinds": [...], "reason": ...}}`, the
+kinds `nonfinite`, `growth`, `subnormal`, `drift`): a new kind fails, an entry
+that no longer happens is reported stale. Its builds are its own, in
+`tests/build-long`, and cached.
+
 ### `check_backends.py`
 
 ```

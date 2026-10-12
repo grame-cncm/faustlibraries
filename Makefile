@@ -81,7 +81,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-sanitize check-extremes check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-sanitize check-extremes check-long check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -158,6 +158,9 @@ check-precision: ## Check every test in float and double at 44.1-192 kHz against
 
 check-extremes: ## Render every test with its sliders at their extremes, all and one by one (baseline: tests/extremes-baseline.json); EXTREMES_ARGS="tests/xx_tests.dsp"
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_extremes.py --build-dir $(PRECISION_BUILD_DIR) $(EXTREMES_ARGS)
+
+check-long: ## Render every test for 2 min at 192 kHz in -single and -double: non-finite, growth, subnormals, single/double drift (baseline: tests/long-baseline.json); LONG_ARGS="tests/xx_tests.dsp"
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_long.py $(LONG_ARGS)
 
 check-precision-matrix: ## check-precision with C++ -O2 and -O3 -ffast-math, Faust -vec and -lang ocpp in turn
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) --matrix all $(PRECISION_ARGS)
