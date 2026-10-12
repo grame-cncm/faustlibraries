@@ -108,7 +108,10 @@ def default_dsp_files():
 
 
 def newest_source(dsp):
-    libs = glob.glob(os.path.join(ROOT, "*.lib"))
+    """The newest input of a build: a library, the test file or the architecture."""
+    # The libraries and their subdirectories (dx7/...), as check_cpu.py does: a
+    # change in dx7/operator.lib must rebuild the dx7 tests.
+    libs = glob.glob(os.path.join(ROOT, "*.lib")) + glob.glob(os.path.join(ROOT, "*", "*.lib"))
     return max(os.path.getmtime(p) for p in libs + [dsp, ARCH])
 
 
