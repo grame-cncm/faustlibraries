@@ -78,7 +78,7 @@ hy = library("hysteresis.lib");
 pt = library("pinktrombone.lib");
 
 declare name "Faust Demos Library";
-declare version "1.7.0";
+declare version "1.8.0";
 
 //########################################################################################
 /************************************************************************
@@ -293,6 +293,83 @@ with{
 };
 
 filterbank_demo = mth_octave_filterbank_demo(1); // octave-bands = default
+
+//--------------------------`(dm.)tf2_tpt_demo`------------------------------
+// A resonator swept by a sinusoid, realized with `fi.tf2_tpt`. Pink noise
+// (or the input) drives a second-order resonator of unity peak gain whose
+// resonance frequency is modulated by up to 4 octaves either way, at rates
+// up to 2 kHz, with Q from 0.1 to 100. The topology-preserving realization
+// stays stable and accurate under this audio-rate modulation, and runs
+// mirrored above SR/4, so the resonance can reach the Nyquist limit.
+//
+// With the pink-noise source, Level is the output RMS in dBFS: pink noise has
+// the same power in every octave, so a constant-Q band passes about the same
+// power at every frequency, and a table of the measured level versus Q
+// normalizes it (within 1.5 dB from 100 Hz to 15 kHz at 44.1 to 192 kHz,
+// 1 dB for Q >= 1).
+// With the input as source, Level is the gain at the resonance peak.
+//
+// #### Usage
+//
+// ```
+// _ : tf2_tpt_demo : _
+// ```
+//
+// #### Test
+// ```
+// dm = library("demos.lib");
+// no = library("noises.lib");
+// tf2_tpt_demo_test = no.noise : dm.tf2_tpt_demo;
+// ```
+//
+// #### References
+//
+// * Julius O. Smith III, "Digital State-Variable Filters", on the trapezoidal
+//   (TPT) state-variable filter and its time-varying behavior:
+//   <https://ccrma.stanford.edu/~jos/svf/>
+//------------------------------------------------------------
+declare tf2_tpt_demo author "Julius O. Smith III";
+declare tf2_tpt_demo licence "MIT";
+
+tf2_tpt_demo(x) = select2(src, no.pink_noise*norm, x) : resonator : *(level)
+with {
+    tpt_group(w) = vgroup("MODULATED RESONATOR [tooltip: A second-order resonator
+        realized with fi.tf2_tpt, its resonance frequency modulated by a sinusoid.
+        See Faust's filters.lib for documentation and references]", w);
+    src = tpt_group(nentry("[0] Source [style:menu{'Pink noise':0;'Input':1}]
+        [tooltip: Pink noise, normalized to the Level; or the input]", 0, 0, 1, 1));
+    level = tpt_group(hslider("[1] Level [unit:dB] [tooltip: Output RMS level with
+        the pink-noise source; gain at the resonance peak with the input]",
+        -20, -60, 0, 0.1)) : ba.db2linear : si.smoo;
+    freq = tpt_group(hslider("[2] Resonance Frequency [unit:Hz] [scale:log]
+        [tooltip: Center of the modulation]", 1000, 20, 20000, 1)) : si.smoo;
+    logQ = tpt_group(hslider("[3] log10(Q) [tooltip: Q = 0.1 to 100; the bandwidth
+        is the resonance frequency divided by Q]", 1, -1, 2, 0.01)) : si.smoo;
+    modfreq = tpt_group(hslider("[4] Modulation Frequency [unit:Hz] [scale:log]
+        [tooltip: Rate of the sinusoidal modulation]", 1, 0.1, 2000, 0.1));
+    depth = tpt_group(hslider("[5] Modulation Amplitude [unit:octaves] [tooltip:
+        Peak deviation of the resonance frequency]", 1, 0, 4, 0.01)) : si.smoo;
+
+    Q = pow(10, logQ);
+    // minus the output level (dB) of the unit-peak resonator on no.pink_noise
+    // at log10(Q) = -1, -0.75, ..., 2 (mean over 100 Hz to 10 kHz at 48 and
+    // 96 kHz): about 1/Q in power above Q = 3, flattening below Q = 1
+    norm = ba.listInterp((33.01, 32.90, 33.03, 33.62, 34.84, 36.59, 38.67,
+        40.95, 43.34, 45.78, 48.26, 50.76, 53.31), 4*(logQ + 1)) : ba.db2linear;
+    fc = max(10, min(freq*pow(2, depth*os.tosc(modfreq)), 0.5*ma.SR));
+
+    // (1 - r^2)/2 (1 - z^-2)/A(z), poles r*exp(+-j*2*PI*fc/SR), om = 1 - r
+    // computed without cancellation, S from the complementary angle so that
+    // it stays accurate near SR/2
+    resonator = fi.tf2_tpt(P, S, fq, 0, 0, fq)
+    with {
+        om = 0 - ma.expm1(0 - ma.PI*fc/Q/ma.SR);
+        r = 1 - om;
+        P = om*om + 4*r*sin(ma.PI*fc/ma.SR)^2;
+        S = om*om + 4*r*sin(ma.PI*(0.5*ma.SR - fc)/ma.SR)^2;
+        fq = om*(2 - om);
+    };
+};
 
 
 //======================================Effects===========================================

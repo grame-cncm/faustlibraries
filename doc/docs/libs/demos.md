@@ -138,6 +138,43 @@ mth_octave_filterbank_demo_test = no.noise : dm.mth_octave_filterbank_demo(1);
 filterbank_demo_test = no.noise : dm.filterbank_demo;
 ```
 
+----
+
+### `(dm.)tf2_tpt_demo`
+
+A resonator swept by a sinusoid, realized with `fi.tf2_tpt`. Pink noise
+(or the input) drives a second-order resonator of unity peak gain whose
+resonance frequency is modulated by up to 4 octaves either way, at rates
+up to 2 kHz, with Q from 0.1 to 100. The topology-preserving realization
+stays stable and accurate under this audio-rate modulation, and runs
+mirrored above SR/4, so the resonance can reach the Nyquist limit.
+
+With the pink-noise source, Level is the output RMS in dBFS: pink noise has
+the same power in every octave, so a constant-Q band passes about the same
+power at every frequency, and a table of the measured level versus Q
+normalizes it (within 1.5 dB from 100 Hz to 15 kHz at 44.1 to 192 kHz,
+1 dB for Q >= 1).
+With the input as source, Level is the gain at the resonance peak.
+
+#### Usage
+
+```
+_ : tf2_tpt_demo : _
+```
+
+#### Test
+```
+dm = library("demos.lib");
+no = library("noises.lib");
+tf2_tpt_demo_test = no.noise : dm.tf2_tpt_demo;
+```
+
+#### References
+
+* Julius O. Smith III, "Digital State-Variable Filters", on the trapezoidal
+  (TPT) state-variable filter and its time-varying behavior:
+  [https://ccrma.stanford.edu/~jos/svf/](https://ccrma.stanford.edu/~jos/svf/)
+
 ## Effects
 
 
