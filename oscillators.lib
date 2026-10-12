@@ -66,7 +66,7 @@ fi = library("filters.lib");
 si = library("signals.lib");
 
 declare name "Faust Oscillator Library";
-declare version "1.9.5";
+declare version "1.9.6";
 
 // This library contains platform specific constants
 pl = library("platform.lib");
@@ -1912,6 +1912,9 @@ with {
 // Sinusoidal (sine and cosine) oscillator based on 2D vector rotation,
 //  = undamped "coupled-form" resonator
 //  = lossless 2nd-order normalized ladder filter.
+// The amplitude is held at 1 by a first-order correction at each step: the
+// rotation alone (`fi.nlf2(f,1)`) drifts in single precision. `oscrs`,
+// `oscrc`, `oscrp` and `oscr` share it.
 //
 // #### Usage
 //
@@ -1933,7 +1936,26 @@ with {
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
 //------------------------------------------------------------
-oscrq(f) = impulse : fi.nlf2(f,1); // sine and cosine outputs
+oscrq(f) = impulse : loop // sine and cosine outputs
+with {
+  th = 2*ma.PI*f/ma.SR;
+  c = cos(th);
+  s = sin(th);
+  // the rotation of fi.nlf2(f,1), whose rounded c and s have c^2 + s^2 - 1 about +-2e-8 in
+  // single precision: its amplitude grew or decayed exponentially (by 20 % after two minutes
+  // at 192 kHz). Each step is scaled by g = 1.5 - 0.5*(y0^2 + y1^2), the first-order
+  // correction of the amplitude to 1, which keeps it there in float and is 1 to the double's
+  // precision.
+  loop(x) = step ~ (_,_)
+  with {
+    step(y0, y1) = g*u0, g*u1
+    with {
+      u0 = s*y1 + c*y0;
+      u1 = c*y1 - s*y0 + x;
+      g = 1.5 - 0.5*(u0*u0 + u1*u1);
+    };
+  };
+};
 
 //--------------------------`(os.)oscrs`---------------------------
 // Sinusoidal (sine) oscillator based on 2D vector rotation,
@@ -1962,7 +1984,7 @@ oscrq(f) = impulse : fi.nlf2(f,1); // sine and cosine outputs
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
 //------------------------------------------------------------
-oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
+oscrs(f) = oscrq(f) : _,!; // sine
 
 //--------------------------`(os.)oscrc`---------------------------
 // Sinusoidal (cosine) oscillator based on 2D vector rotation,
@@ -1988,7 +2010,7 @@ oscrs(f) = impulse : fi.nlf2(f,1) : _,!; // sine
 //
 // * <https://ccrma.stanford.edu/~jos/pasp/Normalized_Scattering_Junctions.html>
 //------------------------------------------------------------
-oscrc(f) = impulse : fi.nlf2(f,1) : !,_; // cosine
+oscrc(f) = oscrq(f) : !,_; // cosine
 
 //--------------------------`(os.)oscrp`, `(os.)oscr`--------------------------------
 // Sinusoidal oscillators based on 2D vector rotation like `oscrs` and
