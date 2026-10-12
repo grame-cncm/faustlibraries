@@ -14,7 +14,7 @@ make check-usage # compile every #### Usage section (checkdoc does the changed l
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
-make check-backends   # every test compiled for WebAssembly (modules validated), Cmajor, Julia, ... (checkdoc does WebAssembly)
+make check-backends   # every test compiled for WebAssembly (modules validated and run), Cmajor, Julia, ... (checkdoc does WebAssembly)
 make check-sanitize   # every test under ASan and UBSan, table guards off (about 30 min; DSP_FILES= to restrict)
 make check-extremes   # every test with its sliders at their extremes, all and one by one (about 2 min)
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
@@ -232,9 +232,12 @@ Every script behind these targets is described in `scripts/README.md`.
     `atanh` and are portable: they are the tools for the cancellation-free
     forms rule 9 asks for. `make checkdoc` compiles every test for
     WebAssembly when a library or a test file changed, validates the
-    modules with Node, and fails on a new failure; `make check-backends`
+    modules with Node and runs them (one second at 48 kHz, as `make check`
+    runs the C++), and fails on a new failure; `make check-backends`
     checks all six backends (about a minute). A module that does not
-    validate is a faust bug: report it, do not pin it as debt. The accepted debt is pinned in `tests/backend-baseline.json`
+    validate, or that stops or writes a non-finite sample where the C++
+    build in `-single` does not, is a faust bug: report it, do not pin it
+    as debt. The accepted debt is pinned in `tests/backend-baseline.json`
     (the tests of the non-portable functions themselves, `ma.BS` and
     `si.bsmooth` on Cmajor and Codebox, `soundfile` on four backends);
     as with the other baselines, an entry that starts to compile is removed
