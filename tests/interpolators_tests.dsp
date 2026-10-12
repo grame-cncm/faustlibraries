@@ -48,7 +48,9 @@ interpolator_two_points_test = it.interpolator_two_points(gen, idv, it.interpola
 with {
     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
     step = 0.25;
-    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+    // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+    idxFloat = ((+(step) : ma.modulo(_, 4.0)) ~ _) : mem;
     idv = it.make_idv(idxFloat);
 };
 
@@ -56,7 +58,9 @@ interpolator_linear_test = it.interpolator_linear(gen, idv)
 with {
     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
     step = 0.25;
-    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+    // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+    idxFloat = ((+(step) : ma.modulo(_, 4.0)) ~ _) : mem;
     idv = it.make_idv(idxFloat);
 };
 
@@ -64,7 +68,9 @@ interpolator_cosine_test = it.interpolator_cosine(gen, idv)
 with {
     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
     step = 0.25;
-    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+    // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+    idxFloat = ((+(step) : ma.modulo(_, 4.0)) ~ _) : mem;
     idv = it.make_idv(idxFloat);
 };
 
@@ -72,7 +78,9 @@ interpolator_four_points_test = it.interpolator_four_points(gen, idv, it.interpo
 with {
     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
     step = 0.25;
-    idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+    // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+    // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+    idxFloat = ((+(step) : ma.modulo(_, 5.0)) ~ _) : mem;
     idv = it.make_idv(idxFloat);
 };
 
@@ -80,7 +88,9 @@ interpolator_cubic_test = it.interpolator_cubic(gen, idv)
 with {
     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
     step = 0.25;
-    idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+    // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+    // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+    idxFloat = ((+(step) : ma.modulo(_, 5.0)) ~ _) : mem;
     idv = it.make_idv(idxFloat);
 };
 
@@ -88,7 +98,9 @@ interpolator_select_test = it.interpolator_select(gen, idv, 2)
 with {
     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
     step = 0.25;
-    idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+    // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+    // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+    idxFloat = ((+(step) : ma.modulo(_, 5.0)) ~ _) : mem;
     idv = it.make_idv(idxFloat);
 };
 
@@ -119,7 +131,9 @@ interpolator_null_test = it.interpolator_null(gen, idv)
 with {
     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
     step = 0.25;
-    idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+    // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+    // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+    idxFloat = ((+(step) : ma.modulo(_, 4.0)) ~ _) : mem;
     idv = it.make_idv(idxFloat);
 };
 linear_test = it.linear, it.cosine, it.cubic, it.nointerp, it.MAX_INTER;

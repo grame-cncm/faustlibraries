@@ -61,6 +61,12 @@
 // };
 // ```
 // 
+// The index above grows without bound, which is harmless here: `gen` clamps it to
+// the last sample of the waveform. To loop over the waveform instead, wrap the index
+// inside the recursion, `index = ((+(step) : ma.modulo(_, size)) ~ _) : mem;`, not
+// after it: in single precision the sum `(+(step)~_)` stops being exact after 2^24
+// frames (87 s at 192 kHz, 349 s at 48 kHz), and an index wrapped afterwards drifts.
+// 
 // Some tests here:
 // 
 // ```
@@ -154,7 +160,7 @@ ma = library("maths.lib");
 si = library("signals.lib");
 
 declare name "Faust Interpolator Library";
-declare version "1.6.1";
+declare version "1.6.2";
 
 // Produces 0 until the first trig, then 1 until the next trig (which outputs a 0 sample to reset), and so on
 _reset(trig) = hold * (trig <= trig')
@@ -595,7 +601,9 @@ interpolate_cubic(dv,v0,v1,v2,v3)
 // with {
 //     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
 //     step = 0.25;
-//     idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+//     // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+//     // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+//     idxFloat = ((+(step) : ma.modulo(_, 4.0)) ~ _) : mem;
 //     idv = it.make_idv(idxFloat);
 // };
 // ```
@@ -635,7 +643,9 @@ with {
 // with {
 //     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
 //     step = 0.25;
-//     idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+//     // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+//     // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+//     idxFloat = ((+(step) : ma.modulo(_, 4.0)) ~ _) : mem;
 //     idv = it.make_idv(idxFloat);
 // };
 // ```
@@ -668,7 +678,9 @@ interpolator_linear(gen, idv) = interpolator_two_points(gen, idv, interpolate_li
 // with {
 //     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
 //     step = 0.25;
-//     idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+//     // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+//     // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+//     idxFloat = ((+(step) : ma.modulo(_, 4.0)) ~ _) : mem;
 //     idv = it.make_idv(idxFloat);
 // };
 // ```
@@ -703,7 +715,9 @@ interpolator_cosine(gen, idv) = interpolator_two_points(gen, idv, interpolate_co
 // with {
 //     gen(idx) = waveform {0.0, 1.0, 4.0, 9.0, 16.0}, int(ma.modulo(idx, 5)) : rdtable;
 //     step = 0.25;
-//     idxFloat = ma.modulo((+(step)~_) - step, 4.0);
+//     // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+//     // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+//     idxFloat = ((+(step) : ma.modulo(_, 4.0)) ~ _) : mem;
 //     idv = it.make_idv(idxFloat);
 // };
 // ```
@@ -737,7 +751,9 @@ interpolator_null(gen, idv) = interpolator_two_points(gen, idv, \(dv,v0,v1).(v0)
 // with {
 //     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
 //     step = 0.25;
-//     idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+//     // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+//     // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+//     idxFloat = ((+(step) : ma.modulo(_, 5.0)) ~ _) : mem;
 //     idv = it.make_idv(idxFloat);
 // };
 // ```
@@ -779,7 +795,9 @@ with {
 // with {
 //     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
 //     step = 0.25;
-//     idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+//     // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+//     // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+//     idxFloat = ((+(step) : ma.modulo(_, 5.0)) ~ _) : mem;
 //     idv = it.make_idv(idxFloat);
 // };
 // ```
@@ -848,7 +866,9 @@ nointerp = MAX_INTER-1;
 // with {
 //     gen(idx) = waveform {-1.0, 2.0, 1.0, 4.0, 7.0, 3.0}, int(ma.modulo(idx, 6)) : rdtable;
 //     step = 0.25;
-//     idxFloat = ma.modulo((+(step)~_) - step, 5.0);
+//     // wrapped inside the recursion: the sum (+(step)~_), wrapped afterwards, grows
+//     // without bound and is no longer exact in single precision after 2^24 frames (87 s at 192 kHz)
+//     idxFloat = ((+(step) : ma.modulo(_, 5.0)) ~ _) : mem;
 //     idv = it.make_idv(idxFloat);
 // };
 // ```
