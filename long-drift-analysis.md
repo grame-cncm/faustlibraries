@@ -1,7 +1,8 @@
 # Long-render drifts: why 45 tests drift in single precision
 
-Status: analysis, 2026-10-12. Nothing in the repository was changed; the
-experiments below were run on scratch copies of the libraries.
+Status: analysis, 2026-10-12, with the fixes made on the branch `long-drift`
+(see [What the branch changed](#what-the-branch-changed)). The experiments
+were run on scratch copies of the libraries.
 
 ## Context
 
@@ -41,7 +42,7 @@ All 45 now have an identified cause.
 | [2. Undamped rotation of `fi.nlf2`](#2-the-undamped-rotation-of-finlf2) | 4: `greyhole_demo`, `logsweep`, `latch_demo`, `unwrap` | `filters.lib:1938`, through `os.oscr*` | library defect (`logsweep`, the reverb LFOs); test excitation (`unwrap`, `latch_demo`) |
 | [3. Dead band of `si.smooth`](#3-the-dead-band-of-sismooth--sismoo) | 3: `virtual_analog_oscillator_demo`, `sawtooth_demo`, `flute_ui_MIDI` | `signals.lib:381` | library defect, wide reach |
 | [4. `f/SR` rounding shown by an exactly periodic excitation](#4-the-rounding-of-fsr-made-visible-by-an-exactly-periodic-excitation) | 3: `phasor_modulated`, `saw4_jump`, `lf_imptrain` | the tests | test artifact; the phasor is exact |
-| [5. Cancellation at release](#5-hammer-cancellation-at-release-not-a-drift) | 2: `hammer`, `hammer_slider` | the test excitation | test artifact, independent of time |
+| [5. Hammer oscillator coefficients in float](#5-hammer-the-oscillators-coefficients-lose-its-stiffness-in-float) | 2: `hammer`, `hammer_slider` | `fds.lib:705` | library defect (first taken for a cancellation at release) |
 | [6. Program change at release](#6-sawtooth_demo-growth-the-excitation-not-a-drift) | the `growth` of `sawtooth_demo` | the test's switches | expected |
 
 **What they have in common.** No failure comes from a float time counter
@@ -292,36 +293,39 @@ smoo = si.smooth(1 - 44.1/ma.SR);
   puts the flute in a different steady state (RMS 0.395) than a constant
   0.5 does (0.316), in both precisions.
 
-**Fix (tested on the three tests).** Smooth the error rather than the
-value. A decay toward 0 cannot stall in float:
+**Fix.** Smooth the error rather than the value. A decay toward 0 cannot
+stall in float:
 
 ```faust
-smoothe(s, x) = x + ((_ + x' - x) * s ~ _);
+// signals.lib, si.smooth = imp(3)
+(3,s) => \(x).(x + (fb ~ _ with { fb(e) = s * (e + (x' - x : min(ma.MAX))); }));
 ```
 
 - It equals `y[n] = (1 − s)·x[n] + s·y[n−1]` from the first sample, and
-  converges exactly to `x`. It costs one more subtraction.
-- Release gaps, before → after:
+  converges exactly to `x`. Its recursion is as short as the former one's
+  (an addition and a multiplication); it adds a subtraction and an
+  addition outside it.
+- Release gaps, before → after (first measured on scratch copies):
 
   | test | before | after |
   |---|---|---|
   | `flute_ui_MIDI` | 3e-2 | 1.7e-6 (2 s hold), 1.1e-4 (60 s hold) |
   | `sawtooth_demo` | 4.4e-2 | 8.7e-4 (60 s) |
 
-**Before adopting it.**
-
-- The reach is wide: `si.smooth` / `si.smoo` appear in 16 libraries,
-  including 49 uses in `demos.lib`, 45 in `physmodels.lib`, 17 in
-  `signals.lib` and 16 in `hoa.lib`. Many double references would change
-  slightly.
-- The error state decays toward subnormals: check with `make check-long`
-  (subnormal kind) and on a non-FTZ target.
-- The rewrite relies on an evaluation order that the Faust normalizer did
-  not undo here: it must go through `make check-precision-matrix`
-  (`-ffast-math`, `-vec`, `-lang ocpp`).
-- Its CPU cost follows rule 10.
-- It could be adopted as `si.smooth` itself, or first as a variant used for
-  frequencies in the demos.
+- **`-ffast-math` undid the first version**, `s * (e + x' - x)`: clang
+  reassociated `(x' − x) + e'` into `(x' + e') − x`, whose sum rounds at the
+  scale of `x` again, and the dead band came back (the smoother stalled at
+  0.69998568 for a target of 0.7). `min(ma.MAX)`, a no-op that the
+  compiler does not reassociate across, keeps `x' − x` computed first. It
+  sits outside the recursion.
+- **Pinned** by `smooth_deadband_test`: its second output is 1 where the
+  smoother is still more than 1e-15 from a constant target after 0.9 s. It
+  is 0 with the new form, in both precisions and under `-ffast-math`; the
+  former form stalls a few ulps short of the target, in double as in
+  single, and gives 1 for the whole last 0.1 s.
+- **Reach.** `si.smooth` / `si.smoo` appear in 16 libraries (49 uses in
+  `demos.lib`, 45 in `physmodels.lib`). No double reference of the 2325
+  tests changes beyond 1e-5.
 
 ---
 
@@ -354,12 +358,12 @@ smoothe(s, x) = x + ((_ + x' - x) * s ~ _);
   instead of 0, i.e. −0.0058 cycles over 1200 periods. In a double
   simulation, an offset of −0.005 to −0.0075 cycles gives an RMS of 596 to
   600.6, as observed.
-- **Fix (test):** build the frequency from integers, so that the values ±k
-  occur equally often and round symmetrically. The per-period sum is then
-  exactly 0:
+- **Fix (test, done):** build the frequency from integers, so that the
+  values ±k occur equally often and round symmetrically. The per-period sum
+  is then exactly 0, and the gap stays at 1.5e-4 over two minutes:
 
   ```faust
-  m = ba.period(P); k = 4*(P/2 - abs(m - P/2)) - P; freq = (2000.0/P)*k;
+  freq = 2000.0*k/P with { k = P - 2*abs(2*ba.period(P) - P); };
   ```
 
 **`saw4_jump_test`** (`tests/oscillators_tests.dsp:67`; the frequency jumps
@@ -377,8 +381,13 @@ between 20 and 2000 Hz every 0.1 s)
   differentiated cascade, that gives about the 2.2 % observed.
 - The 7e4 peaks are the genuine response to a 100:1 jump; double shows the
   same peaks.
-- **Fix (test):** frequencies whose cycle count per period is not an
-  integer.
+- **Fix (test): tried, does not work.** With 20.3 / 2030 Hz (205.03 cycles
+  per period) or with a period of `P + 7` samples, the gap still reaches
+  1.3 %: the phases at the jumps vary, but each still moves with the
+  accumulated rounding of `f/SR` (0.012 cycle in two minutes at 2000 Hz),
+  and the transients stay as sensitive to it. The entry stays in the
+  baseline: it is the float rounding of a frequency, made audible by a
+  100:1 jump.
 
 **`lf_imptrain_test` = `os.lf_imptrain(3)`** (`oscillators.lib:741`)
 
@@ -392,7 +401,11 @@ between 20 and 2000 Hz every 0.1 s)
 - The onset scales as 1/rate: second 219 at 96 kHz, as predicted.
 - **Verdict:** an artifact of measuring per second. A one-sample shift of a
   3.00000014 Hz pulse train is not a defect.
-- **Fix (test):** a frequency that does not divide the rate, e.g. 3.1 Hz.
+- **Fix (test): none.** 3.1 Hz, first proposed, would not help: an impulse
+  lands exactly on a second boundary whenever `m·f` is an integer for a
+  whole second `m`, every 10 s at 3.1 Hz. Only a frequency with a
+  denominator above the render's length in seconds avoids it. The entry
+  stays in the baseline, as a measurement artifact.
 
 **Possible library-side fix, not tested.**
 
@@ -406,19 +419,36 @@ between 20 and 2000 Hz every 0.1 s)
 
 ---
 
-## 5. `hammer`: cancellation at release, not a drift
+## 5. `hammer`: the oscillator's coefficients lose its stiffness in float
 
 **Entries:** `hammer_test`, `hammer_slider_test` (`tests/fds_tests.dsp:67, 78`).
 
-- With the trigger held, the output is a constant 2.3e8. At release, a
-  residual of about 45 remains.
-- In float the rounding step at 2.3e8 is 16, so the residual is mostly
-  rounding noise: 43.9 in single against 45.5 in double.
-- The gap is the same after a 2 s hold as after a 60 s one (3.5e-2). It is
-  cancellation, caused by the very large internal state of the test's
-  excitation, not by elapsed time.
-- **Fix (test):** scale the excitation so the state stays near the output's
-  magnitude. Otherwise, keep the entry with this reason.
+The first analysis took this for a cancellation at release from the 2.3e8
+state of the held trigger. A test where the hammer is struck instead
+(`button : ba.impulsify`, as the faust examples do) shows the same 3.5 %
+gap from the first second, with a state of only a few units: the state's
+size is not the cause.
+
+```faust
+// fds.lib, before
+hammerModel(in,k,offset) = (_,_,_*forceCoeff,in :> _) ~ (_ <: A*_,B*_') : _-offset;
+A = (2-omega0Sqr*k^2)/(1+sigma0*k);
+B = (-1)*(1-sigma0*k)/(1+sigma0*k);
+```
+
+- The oscillator's stiffness is the small `1 − A − B =
+  omega0Sqr·k²/(1 + sigma0·k)`: 4.34e-7 for the tests' `omega0Sqr = 1000`
+  and `k = 1/48000`. Rounded near 2 and −1 in float, `A` and `B` give
+  4.77e-7: a spring 10 % too stiff.
+- The force term, `forceCoeff·F ≈ 4.3e-10·F`, is added to `u`, of which it
+  is only one or two ulps.
+- **Fix (done):** run the recursion on the step `v = u − u'`:
+  `v[n+1] = C·v[n] − D·u[n] + forceCoeff·F + in`, `u[n+1] = u[n] + v[n+1]`,
+  with `C = −B` and `D = 1 − A − B` computed directly. The Faust normalizer
+  folded `u − D·u` back into `0.9999996f·u`, which loses `D` again: a
+  `min(ma.MAX)` on the step keeps it a unit (see
+  [faust-normalizer-issues.md](faust-normalizer-issues.md), mechanism 3).
+  The gap to double falls from 3.5e-2 to 1.2e-7.
 
 ## 6. `sawtooth_demo` growth: the excitation, not a drift
 
@@ -451,45 +481,125 @@ between 20 and 2000 Hz every 0.1 s)
   gone from the tested code. The `interpolators` tests, fixed in
   `ebc8f294`, were the last.
 
-## Proposed baseline reasons
+## What the branch changed
 
-These replace "cause not analysed":
+The branch `long-drift` fixes every library defect above and the test
+excitations that could be fixed. It removes 50 of the 134 entries of
+`tests/long-baseline.json` (47 of the 49 drifts, and one `subnormal`), and
+3 of the 26 `level` entries of `tests/precision-baseline.json`
+(`latch_demo`, `reverbTank_demo`, `vital_rev_demo`).
 
-| entries | reason |
-|---|---|
-| `algorithm1..32`, `operator_modulated` | drift: the DX7 operator phasor (`m_hsp_phasor`) accumulates `freq/SR` in plain float; its frequency error becomes a phase offset at release (`operator_modulated`: a 13.75 Hz carrier, pitch-envelope levels 0) |
-| `greyhole_demo` | drift: the LFOs (`os.oscrc`/`os.oscrs`, `fi.nlf2`) keep no unit amplitude in single precision, so the chorus depth drifts |
-| `logsweep` | drift: `os.oscrs` (`fi.nlf2`) keeps no unit amplitude in single precision |
-| `latch_demo`, `unwrap` | drift: the test's `os.oscr*` source keeps no unit amplitude in single precision (the function under test is not involved) |
-| `virtual_analog_oscillator_demo`, `sawtooth_demo` | drift: the portamento `si.smooth` stalls ~0.3 Hz short of 440 Hz in single precision at 192 kHz, and the beat pattern drifts (`sawtooth_demo` growth: its switches select the noise input during the hold) |
-| `flute_ui_MIDI` | drift: the `si.smoo` of `mouthPosition` stalls 1.3e-4 short of 0.5 in single precision; the self-oscillation's phase at release decorrelates |
-| `phasor_modulated`, `saw4_jump` | drift: the float rounding of `f/SR` shifts the phase that the test's exactly periodic excitation pins (the phasor is exact) |
-| `lf_imptrain` | drift: one impulse moves one frame, across a second boundary, at 109.66 s (3 Hz divides 192 kHz) |
-| `hammer`, `hammer_slider` | drift: cancellation at release from a 2.3e8 state; the same gap after 2 s and 60 s |
+### Library and test fixes
 
-## Next steps, by increasing risk
+| commit | change | entries removed | references |
+|---|---|---|---|
+| `bf22335d` | DX7: `m_hsp_phasor` is `os.lf_sawpos_phase_reset`, which accumulates in fixed point in single precision (mechanism 1) | 33: `algorithm1..32`, `operator_modulated` | `operator_modulated_test` (3e-5) |
+| `5c76078f` | `fd.hammer`: the recursion runs on the step `v = u − u'`, with a `min(ma.MAX)` barrier on the step (mechanism 5) | 2: `hammer`, `hammer_slider` | `hammer*` |
+| `d7123142` | `phasor_modulated_test`: its frequency is built from integers (mechanism 4) | 1 | the test's |
+| `0f481310` | `unwrap_test` unwraps a wrapped phase, `4*os.tosc(100)`, instead of an `os.oscr*` source (mechanism 2) | 1 | the test's |
+| `3b52f5e0` | `dm.latch_demo`: sine sources from `os.osc`, not `os.oscr`/`os.oscrs` (mechanism 2) | 1 | the test's |
+| `6a1f00ce` | `no.lfnoise0` triggers on the phase of `os.lf_sawpos`, not on the sign of its float sine: otherwise the next commit makes `lfnoise0_test` fail `check-precision` | 0 | `lfnoise0*` |
+| `63a86268` | `os.oscrq` (hence `oscrs`, `oscrc`, `oscrp`, `oscr`): amplitude correction `g = 1.5 − 0.5·(y0² + y1²)` at every step, one Newton step towards a unit radius (mechanism 2) | 9: `greyhole_demo`, `logsweep`, `oscr*` | `oscr*` and their callers |
+| `bd8f5ae0` | `si.smooth` is `imp(3)`, the error-state form, with a `min(ma.MAX)` barrier against `-ffast-math` reassociation; `smooth_deadband_test` pins it (mechanism 3) | 4: `flute_ui_MIDI`, `virtual_analog_oscillator_demo`, the `drift` of `sawtooth_demo`, and the `subnormal` of `violin_ui_MIDI` (11.2 million subnormal output samples after the release before, none now; measured, not analysed) | none in double |
 
-1. **Baseline reasons.** Replace the 45 reasons as above. No output changes.
-2. **DX7 phasor.** `m_hsp_phasor` → `os.lf_sawpos_phase_reset`: localized
-   and tested. It removes 33 entries and changes the dx7 references
-   (`make reference` after deleting them), with a test pinning the fix
-   (rule 8). Optionally, give `operator_modulated_test` neutral
-   pitch-envelope levels.
-3. **Test excitations.**
-   - `unwrap` and `latch_demo`: `os.tosc` instead of `os.oscr*`.
-   - `phasor_modulated`: an integer-built frequency.
-   - `saw4_jump`: non-commensurate frequencies.
-   - `lf_imptrain`: 3.1 Hz.
-   - `hammer*`: scale the excitation.
+The `oscr*` entries were not among the 45: they had been pinned with
+"`fi.nlf2` undamped rotation" from the start.
 
-   The changed tests get new references; each entry that stops failing
-   leaves the baseline in the same commit.
-4. **The `nlf2` rotation.** Amplitude correction in `os.oscrq`, or a phase
-   accumulator in the reverb LFOs and `logsweep`. This is a behavior change
-   for every `oscr*` user and needs measuring under rule 10.
-5. **`si.smooth`.** The error-state form. It has the widest reach, so it
-   gets its own study: subnormals, the precision matrix, CPU, the number of
-   references touched, and whether it becomes the default or a variant.
+### Harness defects found on the way
+
+- **The DX7 libraries tested were the installed ones.** No harness passed
+  `-I dx7`, so every check compiled the `algorithm*` and `operator*` tests
+  against `/usr/local/share/faust/dx7`, not the tree's. `d9d06e1a` adds it
+  to the Makefile (`FAUST_INCLUDES`), `check_precision.py`,
+  `check_cpu.py`, `check_backends.py` and `check_usage.py`.
+- **A change in `dx7/` did not rebuild the tests.** `newest_source` in
+  `check_precision.py` only looked at the root `*.lib`; `9be9f344` adds the
+  subdirectories.
+- `check_long.py` was not executable (`3eaba53e`).
+
+### Normalizer workarounds
+
+Two fixes (`fd.hammer`, `si.smooth`) need a `min(ma.MAX)` barrier against a
+rewrite that undoes them: the Faust normalizer for the first, clang
+`-ffast-math` for the second. The rewrites the libraries work around are
+collected in [faust-normalizer-issues.md](faust-normalizer-issues.md)
+(`b754ce6e`).
+
+### What stays in the baseline
+
+- `saw4_jump`: the float rounding of `f/SR`, made audible by a 100:1 jump.
+  Two other sets of frequencies were tried, without effect.
+- `lf_imptrain`: a measurement artifact, one impulse moving across a second
+  boundary. 3.1 Hz would not have helped.
+- `sawtooth_demo` `growth`: its switches select the noise input during the
+  hold; expected.
+- The RMS compressors and the other sliding or cumulative sums (12
+  entries), the 67 remaining `subnormal` and `FTZ_test`/`MIN_test`: explained before
+  the branch.
+
+### Checks
+
+Run on the whole branch, `si.smooth` included:
+
+- `make check`: 2325 tests; the references
+  that change are those listed above, regenerated in their commits.
+- `make check-precision`, `make check-extremes`, `make check-backends`:
+  no new failure.
+- `scripts/check_precision.py --matrix all` (C++ `-O3 -ffast-math`,
+  Faust `-vec`, `-lang ocpp`) on `signals`, `demos` and `physmodels`: 256
+  tests, the only failure is `fdnrev0_demo_test` under `-ffast-math`,
+  already on `origin/master`. Not run on the other test files.
+- `make check-long` (`-j 6`): 2325 tests, 0 new failure.
+- `make check-plots`: 160 figures up to date, all property assertions
+  hold.
+- `make checkdoc` before each commit.
+
+**The ocpp column of the matrix needs faust with grame-cncm/faust#1347.**
+`y = x + e` reads `x` twice, and the ocpp backend inlined the block-rate
+tail of a bargraph with no sharing: on `an.mth_octave_spectral_level6e`,
+whose band levels feed bargraphs through `si.smooth`, the text grew
+eightfold per band and faust past 100 GB on `spectral_level_demo_test`.
+With #1347 the test compiles in under 90 MB.
+
+### CPU cost
+
+`scripts/check_cpu.py --matrix all --base origin/master` on the touched
+tests and on the callers that multiply them. Ratios new / base, Apple
+M5, 48 kHz, `-single`, 3 rounds; load 4.6 at the start (the desktop, no
+build), spreads mostly under 5%. No test computes more divisions, square
+roots or transcendental calls per sample (`ops` column).
+
+| change | test | fast-math | strict | vec |
+|---|---|---|---|---|
+| `os.oscrq` | `oscrq_test` (3.1 → 6.1 ns) | 1.97 | 1.82 | 2.32 |
+| | `oscrs_test` | 1.81 | 1.40 | 2.33 |
+| | `logsweep_test` | 1.92 | 1.67 | 1.45 |
+| | `greyhole_demo_test` | 1.04 | 1.06 | 1.04 |
+| DX7 phasor | `algorithm1_test` | 1.13 | 1.12 | 1.06 |
+| | `operator_modulated_test` | 1.13 (spread 12%) | 1.23 | 1.22 |
+| `fd.hammer` | `hammer_test` | 1.12 | 1.12 | 1.27 |
+| | `hammer_slider_test` | 1.01 | 1.05 | 1.04 |
+| `si.smooth` | `smooth_test` (2.5 → 3.0 ns) | 1.18 (spread 10%) | 1.18 | 1.62 |
+| | `smooth_slider_test` | 0.33 | 0.81 | 0.88 |
+| | `smooth_modulated_test` | 0.76 | 0.86 | 1.10 |
+| | `smoo_test` | 1.00 | 0.99 | 1.58 |
+| | `spectral_level_demo_test` (15 smoothers) | 1.02 | 1.03 | 1.01 |
+| | `vocoder_demo_test` | 1.01 | 1.01 | 0.99 |
+| | `virtual_analog_oscillator_demo_test` | 1.14 | 1.08 | 1.06 |
+| | `flute_ui_MIDI_test` | 1.13 | 1.06 | 1.06 |
+| `no.lfnoise0` | `lfnoise0_test` | 1.05 | 1.06 | 0.98 |
+
+- **`os.oscrq`** pays three multiplications and two additions for its
+  amplitude correction, on an oscillator that had only its rotation:
+  about 3 ns per sample, ×1.4 to ×2.3 on the bare oscillator, 4 to 6%
+  in `greyhole_demo`. What it buys: a unit amplitude in single precision,
+  where the rotation's amplitude drifted by several percent over a
+  long render (1.093 after 90 s at 48 kHz, ×0.825 for the 2 Hz reverb
+  LFOs after 120 s).
+- **`si.smooth`** costs at most 0.5 ns per smoother, and is faster with
+  a coefficient from a slider. Its callers move by 1 to 14%.
+- **The DX7 phasor and `fd.hammer`** cost 6 to 27% on their tests, for a
+  phase and a stiffness exact in single precision.
 
 ## Reproducing
 
