@@ -293,6 +293,7 @@
 [(dm.)parametric_eq_demo](demos.md#dmparametric_eq_demo)
 [(dm.)spectral_tilt_demo](demos.md#dmspectral_tilt_demo)
 [(dm.)mth_octave_filterbank_demo, (dm.)filterbank_demo](demos.md#dmmth_octave_filterbank_demo,-dmfilterbank_demo)
+[(dm.)tf2_tpt_demo](demos.md#dmtf2_tpt_demo)
 [(dm.)cubicnl_demo](demos.md#dmcubicnl_demo)
 [(dm.)gate_demo](demos.md#dmgate_demo)
 [(dm.)compressor_demo](demos.md#dmcompressor_demo)
