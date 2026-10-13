@@ -20,6 +20,8 @@ vibrato2_mono_jump_test = no.noise : pf.vibrato2_mono(4, 0, 1.8*sq - 0.9, 1000, 
 vibrato2_mono_modulated_test = no.noise : pf.vibrato2_mono(4, 0, 0.5, 10*pow(100.0, tri), 100, 1.5, 4800, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 vibrato2_mono_freq_jump_test = no.noise : pf.vibrato2_mono(4, 0, 0, 50, f, 1.5, f, 0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f = 100*pow(48.0, sq); };
 vibrato2_mono_audio_modulated_test = 0.1*no.noise : pf.vibrato2_mono(4, 0, 0.5, 100, 100, 1.5, 1900, 500);
+vibrato2_mono_nyquist_test = no.noise : pf.vibrato2_mono(4, 0, 0.9, 10, 5000, 4, 10000, 0.5);
+vibrato2_mono_wrap_test = no.noise : pf.vibrato2_mono(1, 0, 0, 10, 320000, 1, 640000, 0.5);
 
 phaser2_mono_test = os.tosc(330) : pf.phaser2_mono(4, 0.0, 50, 200, 1.5, 4000, 0.5, 0.8, 0.2, 0);
 phaser2_mono_slider_test = os.tosc(330) : pf.phaser2_mono(4, hslider("phaser2_mono:phase01", 0, 0, 1, 0.01), hslider("phaser2_mono:width", 50, 10, 5000, 1), hslider("phaser2_mono:frqmin", 200, 20, 5000, 1), hslider("phaser2_mono:fratio", 1.5, 1, 4, 0.01), hslider("phaser2_mono:frqmax", 4000, 20, 10000, 1), hslider("phaser2_mono:speed", 0.5, 0, 10, 0.01), hslider("phaser2_mono:depth", 0.8, 0, 2, 0.01), hslider("phaser2_mono:fb", 0.2, -0.99, 0.99, 0.01), 0);

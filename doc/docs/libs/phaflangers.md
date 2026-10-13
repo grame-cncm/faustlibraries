@@ -106,6 +106,10 @@ The allpass sections are realized as TPT state-variable filters (the allpass
 case of `fi.tf2_tpt`, `x - bp(2k*x)`), which stay accurate in single
 precision at low frequencies and finite however fast the notches move, and
 the LFO is computed from a phasor (`os.lf_sawpos`), so it does not drift.
+A notch whose frequency would pass 0.475*SR (e.g. a high notch, at
+`frqmax*fratio^(sections-1)`) stays at 0.475*SR instead of aliasing back
+down: a section with poles near z = -1 swept past the Nyquist limit
+overshoots in this realization.
 
 #### Usage
 
@@ -137,6 +141,8 @@ vibrato2_mono_jump_test = no.noise : pf.vibrato2_mono(4, 0, 1.8*sq - 0.9, 1000, 
 vibrato2_mono_modulated_test = no.noise : pf.vibrato2_mono(4, 0, 0.5, 10*pow(100.0, tri), 100, 1.5, 4800, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 vibrato2_mono_freq_jump_test = no.noise : pf.vibrato2_mono(4, 0, 0, 50, f, 1.5, f, 0) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; f = 100*pow(48.0, sq); };
 vibrato2_mono_audio_modulated_test = 0.1*no.noise : pf.vibrato2_mono(4, 0, 0.5, 100, 100, 1.5, 1900, 500);
+vibrato2_mono_nyquist_test = no.noise : pf.vibrato2_mono(4, 0, 0.9, 10, 5000, 4, 10000, 0.5);
+vibrato2_mono_wrap_test = no.noise : pf.vibrato2_mono(1, 0, 0, 10, 320000, 1, 640000, 0.5);
 ```
 
 #### References
