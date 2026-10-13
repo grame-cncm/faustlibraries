@@ -142,6 +142,9 @@ vibrato2_mono_audio_modulated_test = 0.1*no.noise : pf.vibrato2_mono(4, 0, 0.5, 
 #### References
 
 * [https://ccrma.stanford.edu/~jos/pasp/Phasing.html](https://ccrma.stanford.edu/~jos/pasp/Phasing.html)
+* Julius O. Smith III, "Digital State-Variable Filters", on the trapezoidal
+  (TPT) state-variable filter and its time-varying behavior:
+  [https://ccrma.stanford.edu/~jos/svf/](https://ccrma.stanford.edu/~jos/svf/)
 
 ----
 
