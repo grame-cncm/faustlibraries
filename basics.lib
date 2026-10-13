@@ -66,7 +66,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.23.6";
+declare version "1.23.7";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -1613,7 +1613,7 @@ declare tabulate_chebychev license "LicenseRef-STK-4.3";
 //
 // The same principle applies to the cubic interpolation in nD. The only difference is that there would be 4^(n-1) parallel interpolators in the first group, compared to 2^(n-1) for linear interpolation.
 //
-// This is what the ``mixers`` function does.
+// This is what the ``linear`` and ``cubic`` functions do: each level of their recursion interpolates one dimension, from the last one down to the first.
 //
 // Besides the values, each interpolator also needs to know the weight of each value in it's output.  
 // Let's call this `d`, like in ``ba.interpolate``. It is the same for each group of interpolators, since it correlates to a dimension.  
@@ -1624,7 +1624,7 @@ declare tabulate_chebychev license "LicenseRef-STK-4.3";
 // * Then we ``int`` the float index to get the value we have stored that is closest to, but lower than the input value; the actual index for that dimension.
 // Our ``d`` is the difference between the float index and the actual index.
 //
-// The ``ids`` function calculates the ``id`` for each dimension and inside the ``mixer`` function they get turned into ``d``s.
+// The ``id(d)`` function calculates the ``id`` of dimension ``d``, and ``frac(d)`` turns it into its ``d``.
 //
 // ##### Storage method
 //
@@ -1668,8 +1668,7 @@ declare tabulate_chebychev license "LicenseRef-STK-4.3";
 // 
 // If we want to read the value belonging to ``x=0.5`` and ``y=2/3``, things get more complicated. The ``id`` for ``y`` is now ``2``, the third value. For each step in the ``y`` direction, we need to increase the index by ``3``, the number of values that are stored for ``x``. So the influence of the ``y`` is:  the size of ``x`` times the rounded ``id`` of ``y``. The final read index is the rounded ``id`` of ``x`` plus the influence of ``y``.
 //
-// For the general nD case, we need to do the same operation N times, each feeding into the next. This operation is the ``riN`` function. We take four parameters: the size of the dimension before it ``prevSize``, the index of the previous dimension ``prevIX``, the current size ``sizeX`` and the current id ``idX``.  ``riN`` has 2 outputs, the size, for feeding into the next dimension's ``prevSize``, and the read index feeding into the next dimension's ``prevIX``.  
-// The size is the ``sizeX`` times ``prevSize``. The read index is the rounded ``idX`` times ``prevSize`` added to the ``prevIX``. Our final ``readIndex`` is the read index output of the last dimension.
+// For the general nD case, each dimension ``d`` contributes its rounded ``id`` times ``stride(d)``, the distance in the table between two neighbours in that dimension: 1 for the first dimension, the size of the first dimension for the second, the product of the first two sizes for the third, and so on. ``offset`` sums these contributions and ``readIndex`` limits the sum to the table.
 //
 // To get the read values for the  interpolators need a pattern of offsets in each dimension, since we are looking for the read indexes surrounding the point of interest. These offsets are best explained by looking at the code of ``tabulate2d``, the hardcoded 2D version:
 //
@@ -1797,274 +1796,126 @@ declare tabulate_chebychev license "LicenseRef-STK-4.3";
 // tabulateNd_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).lin with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // tabulateNd_cub_modulated_test = ba.tabulateNd(1, powSin, (8,8, 2.0,2.0, 8.0,8.0, 2.0 + tri, 3.0 - tri)).cub with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // tabulateNd_cub_edge_test = T(0.05,1.5), T(1.5,0.05), T(2.97,1.5), T(1.5,2.97) with { f(x,y) = sin(x) + cos(y); T(x,y) = ba.tabulateNd(1, f, (32,32, 0.0,0.0, 3.0,3.0, x,y)).cub; };
+// tabulateNd_1d_test = T.lin, T.cub with { f(x) = sin(x)*x; P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); T = ba.tabulateNd(1, f, (16, -1.0, 3.0, -1.0 + 4*tri)); };
 // ```
 //----------------------------
 tabulateNd(C,function,parameters) =
     environment {
-        val =
-            parameters
-            // our sizes can be int, should be faster to calculate
-            : (par(i, N, int),si.bus(N*3))
-              // table size, waveform, read index
-              <: (tableSize,wf,readIndex(idsGetRoundedNotFloored))
-            : rdtable
-        with {
-        // for val we want the rounded version of id, the interpolators need the rounded down version
-        // see: https://github.com/grame-cncm/faustlibraries/pull/152
-        idsGetRoundedNotFloored =
-            // table sizes and ids for each dimension
-            sizesIds:
-            (bs,par(i, N, _+0.5));
-        };
+        // The three readers, written as functions of the parameters
+        // (`fromParameters` keeps read values that are inputs (`_`) inputs).
 
-        lin =
-            parameters
-            // our sizes can be int, should be faster to calculate
-            : (par(i, N, int),si.bus(N*3))
-              // the mixers need the float indexes and the values read from the tables
-              <: (ids,tables(nrReadIndexes,readIndexes))
-                 // the actual interpolation
-            :mixers(0,nrReadIndexes)
-        with {
-            // the read indexes to form the closest points in the grid surrounding the point of interest.
-            readIndexes =
-                // for cleaner block diagrams
-                si.bus(nParams) <:
-                // the closest stored value at or below the point of interest
-                ((readIndex(sizesIds) <:si.bus(nrReadIndexes))
-                 // the offsets to get to the points around it
-                , offsets)
-                // add them up
-                : ro.interleave(nrReadIndexes,2) : par(i, nrReadIndexes, +) ;
-            offsets =
-                // the size of a step for each dimension
-                stepSizes
-                // for each read index
-                <: par(i, nrReadIndexes,
-                       // sum up the N components that determine the final offset
-                       par(j, N, switch(i,j)):>_)
-            with {
-                // the truth table of which step size to use is a binary counting table
-                // so we use a variant on a function I wrote for slidingReduce
-                switch(i,j) = _*int2bin(j,i,nrReadIndexes);
-            };
-            // since each interpolator has 2 inputs
-            nrReadIndexes = pow(2,N);
-        };
+        // the stored value closest to the point of interest
+        // (rounded, not floored: see https://github.com/grame-cncm/faustlibraries/pull/152)
+        val = fromParameters(read(readIndex(nearest)));
 
-        cub =
-            // same as .lin so far
-            parameters
-            : (par(i, N, int),si.bus(N*3))
-              <: (ids,tables(nrReadIndexes,readIndexes))
-            :mixers(1,nrReadIndexes)
-        with {
-            readIndexes =
-                si.bus(nParams) <:
-                // the 4 offsets of each dimension, last dimension first
-                ((cubOffsets : ro.cross(4*N) : par(i, N, ro.cross(4)))
-                , readIndex(sizesIds))
-                // add the offsets of each interpolation read index to the "base" readindex
-                :cubifiers;
-            // since each interpolator has 4 inputs
-            nrReadIndexes = pow(4,N);
-            // the offsets of the 4 points of each dimension, from the "base" readindex.
-            // The points are the same as in ``ba.tabulate`` (-1, 0, 1 and 2 steps), but
-            // each one is kept inside its dimension, the edge value being repeated: in
-            // the first cell of a dimension the -1 point was the last value of the
-            // previous row, or outside the table, and in the last two cells the +1 and
-            // +2 points were in the next row, or outside the table.
-            cubOffsets =
-                si.bus(nParams)
-                <: (stepSizes, sizes, bases)
-                : ro.interleave(N,3)
-                : par(i, N, dimOffsets)
-            with {
-                sizes = bs, par(i, 3*N, !);
-                // the read index in each dimension, as in ``riN``
-                bases = si.bus(nParams) <: (ids, sizes) : ro.interleave(N,2)
-                      : par(i, N, base);
-                base(idX,sizeX) = rid(int(idX),(sizeX-int(1)),C);
-                dimOffsets(stepSize,sizeX,b) = par(k, 4, stepSize*(point(C,k) - b))
-                with {
-                    // with C = 1, b is already in [0, sizeX-1]: one bound per point is enough
-                    point(1,0) = max(int(0), b-int(1));
-                    point(1,1) = b;
-                    point(1,k) = min(b+(k-1), sizeX-int(1));
-                    point(0,k) = max(int(0), min(b+(k-1), sizeX-int(1)));
-                };
-            };
-            // add the offsets to the "base" readindex
-            // we do this by creating a tree, where each branch has 4 sub-branches
-            // there are N splits, so we end up with nrReadIndexes "leaves"
-            cubifiers =
-                // iterate trough the dimensions, each feeding into the next
-                seq(i, N,
-                    si.bus(4*(N-i-1)),cubifier(pow(4,i)));
-            // take the 4 offsets of a dimension and ``len`` input indexes and create
-            // 4*len output indexes: each input index plus each offset
-            cubifier(len) =
-                (par(k, 4, _<:si.bus(len))
-                , (si.bus(len)<:si.bus(len*4)))
-                : ro.interleave(len*4,2)
-                : par(i, len*4, +);
-        };
+        // linear interpolation between the 2^N stored values around the point
+        lin = fromParameters(linear(N, 0));
 
-        // how many parameters have we been given?
+        // cubic interpolation between the 4^N stored values around the point
+        cub = fromParameters(cubic(N, 0));
+
+        //------------------------------------------------------------------
+        // Parameters: N sizes, N minimums, N maximums, N read values
+        //------------------------------------------------------------------
         nParams = outputs(parameters);
-        // the number of dimensions
         N = int(nParams/4);
-        // the values we read from the tables
-        tables(nrReadIndexes,readIndexes) =
-            si.bus(nParams)<:
-            // table size, waveform, read index for each table
-            ((tableSize<:si.bus(nrReadIndexes))
-            , (wf<:si.bus(nrReadIndexes))
-            , readIndexes)
-            :ro.interleave(nrReadIndexes,3)
-             // the actual tables
-            :par(i, nrReadIndexes, rdtable);
 
-        // the interpolators
-        mixers(linCub,nrReadIndexes)=
-            (ro.cross(N),si.bus(nrReadIndexes))
-            : seq(i, N, mixer(linCub,i));
-
-        // the interpolator for a single dimension
-        // linear version
-        mixer(0,i) =
-            mixerUniversal(i,2,(_,!,_),it.interpolate_linear) ;
-        // cubic version
-        mixer(1,i) =
-            mixerUniversal(i,4,(_,!,_,!,_,!,_),it.interpolate_cubic) ;
-
-        // i is the current dimension
-        // mult is the number of inputs of each interpolator
-        // sieve tells us which outputs to let trough and which to block, more on this soon
-        mixerUniversal(i,mult,sieve,it) =
-            // bypass the weights needed for the next dimension
-            si.bus(N-i-1),
-            // split our own weight
-            // in the end we need one weight per interpolator
-            // but since we need to interleave these with nrInterpolators*mult read values, we split it into as many busses as we have read values
-            (((_<:si.bus(nrInterpolators(i)*mult))
-              // the read values bypass this step
-             , (si.bus(nrInterpolators(i)*mult)))
-             // interleave the weights with the read values
-             : ro.interleave(nrInterpolators(i)*mult,2)
-               // the actual interpolators
-             : par(i, nrInterpolators(i),
-                   // take the id and turn it into the weight for this dimension
-                   ((_<:(_-int(_)))
-                    // throw away the extra weights we created for the interleave
-                   ,sieve)
-                   // a single interpolator
-                   :it))
+        // the k-th parameter. Parameters without inputs (the usual case) are
+        // read where they are needed. Read values that are inputs (`_`) must
+        // be shared: then every leaf of the body is `selector(k, nParams)`,
+        // with the nParams inputs, and `<:` hands the parameters to all.
+        withInputs = inputs(parameters) > 0;
+        param(k) = paramOf(withInputs)
         with {
-            // the number of interpolators for this dimension
-            nrInterpolators(i) = pow(mult,N-i-1);
+            paramOf(0) = parameters : selector(k, nParams);
+            paramOf(1) = selector(k, nParams);
+        };
+        fromParameters(body) = wrap(withInputs)
+        with {
+            wrap(0) = body;
+            wrap(1) = parameters <: body;
         };
 
-        // total size of the table: s(0) * s(1)  ...  * s(N-2) * s(N-1)
-        // N in, 1 out
-        size(1) = _;
-        size(N) = _*size(N-1);
-        tableSize = size(N),par(i, N*3, !);
-        // the size of a step for each dimension.
-        // the first is 1, the second is the size of the first dimension times one
-        // the third is the second number, times the size of the second dimension
-        stepSizes =
-            (int(1),si.bus(N-1),par(i, 3*N+1, !))
-            : seq(i, N-1,
-                  ((si.bus(i),(_<:(_,_)), si.bus(N-i-1))
-                   :(si.bus(i+1),*,si.bus(N-i-2))));
-        // Prepare the 'float' table read index for one parameter
-        id(sizeX,r0,r1,x) = (x-r0)/(r1-r0)*(sizeX-1);
-        // Prepare the 'float' table read index for all parameters
-        ids =
-            ro.interleave(N,4)
-            : par(i, N, id) ;
+        // the parameters of dimension d (0 <= d < N)
+        S(d)  = int(param(d));      // number of stored values (int: cheaper index arithmetic)
+        r0(d) = param(N + d);       // minimum of the range
+        r1(d) = param(2*N + d);     // maximum of the range
+        x(d)  = param(3*N + d);     // read value
 
-        // one waveform parameter write value:
-        wfp(prevSize,sizeX,r0,r1) =
-            r0+
-            ((float(int(ba.time%(prevSize*sizeX)/prevSize))*(r1-r0))
-            /float(sizeX-1))
-           ,(prevSize*sizeX);
+        //------------------------------------------------------------------
+        // Storage: one table, dimension 0 varying fastest
+        //------------------------------------------------------------------
+        // the read-index step of one point in dimension d: S(0)*...*S(d-1)
+        stride(0) = 1;
+        stride(d) = stride(d-1)*S(d-1);
+        // total size of the table: S(0)*...*S(N-1)
+        tableSize = stride(N);
 
-        // all waveform parameters write values:
-        wfps =
-            ro.interleave(N,3)
-            : (1,si.bus(3*N))
-            : seq(i, N, si.bus(i),wfp, si.bus(3*N-(3*(i+1))))
-            : (si.bus(N),!);
+        // the value of dimension d stored at write position `ba.time`
+        coord(d) = r0(d)
+            + ((float(int(ba.time%(stride(d)*S(d))/stride(d)))*(r1(d)-r0(d)))/float(S(d)-1));
+        // the table: the function evaluated on the grid
+        wf = par(d, N, coord(d)) : function;
+        read(i) = rdtable(tableSize, wf, i);
 
-        // Create the table
-        wf = (wfps,par(i, N, !)):function;
+        //------------------------------------------------------------------
+        // Reading
+        //------------------------------------------------------------------
+        // the 'float' read index of dimension d, and its fractional part,
+        // the weight of the interpolators of that dimension
+        id(d) = (x(d)-r0(d))/(r1(d)-r0(d))*(S(d)-1);
+        frac(d) = id(d) - int(id(d));
 
-        // Limit the table read index in [0, mid] if C = 1
-        // we do this both for the total table and per dimension
-        rid(x,mid, 0) = int(x);
-        rid(x,mid, 1) = max(int(0), min(int(x), mid));
+        // limit an index to [0, mid] when C = 1
+        clip(i, mid) = rid(C, i, mid)
+        with {
+            rid(0, i, mid) = int(i);
+            rid(1, i, mid) = max(int(0), min(int(i), mid));
+        };
 
-        // for ``.val`` this is the stored value closest to the point of interest
-        // for  ``.lin`` and ``cub`` it's the closest stored value at or below the point of interest
-        readIndex(sizesIds) =
-            // table sizes and ids for each dimension
-            sizesIds
-            // get the raw read index
-            : ri
-              // limit it and make it an int
-            : riPost ;
-        // helper function to route the arguments of rid
-        riPost(size,ri) =
-            rid(ri,size-int(1),C);
-        // the raw read index
-        ri =
-            // interleave the sizes and the ids
-            ro.interleave(N,2)
-            // the first iteration gets:
-            // 1 as the size of the previous dimension and 0 as the read index of the previous dimension
-            : (1,0
-                 // pass trough the sizes and ids
-               ,si.bus(2*N))
-              // for each dimension
-            : seq(i, N,
-                  // get the step size and the partial index for the next dimension
-                  riN
-                  // pass trough the sizes and ids for the next dimensions
-                  , si.bus(2*(N-i-1))) ;
+        // the stored point of dimension d nearest to x(d), and the one at or below it
+        nearest(d) = clip(int(id(d)+0.5), S(d)-int(1));
+        below(d)   = clip(int(id(d)), S(d)-int(1));
 
-        // get the step size and the partial index for the next dimension
-        riN(prevSize,prevIX,sizeX,idX) =
-            // each step size is the previous step size times the current
-            (prevSize*sizeX)
-            // but the step we actually take in this dimension is the stepsize we calculated in the previous dimension
-          , ( (prevSize*
-               // round down and limit the id for this dimension to get the number of steps
-               rid(int(idX),(sizeX-int(1)),C))
-              // add the result of that to the one we calculated in the previous dimension
-              +prevIX) ;
+        // the read index of the grid point whose coordinates are cell(0), ..., cell(N-1)
+        readIndex(cell) = clip(offset(cell, N), tableSize-int(1));
+        // the read-index offset of cell(0), ..., cell(n-1): stride(d)*cell(d) summed over d < n
+        offset(cell, 0) = 0;
+        offset(cell, n) = stride(n-1)*cell(n-1) + offset(cell, n-1);
+        // the grid point at or below the point of interest: the interpolators read around it
+        base = readIndex(below);
 
-        // table sizes and ids for each dimension
-        // just a helper function to simplify routing
-        sizesIds =
-            (
-                // from sizes
-                ( bs<:si.bus(N*2) )
-                // from r0s,r1s,xs
-              , si.bus(N*3)
-            ) :
-            // from sizes
-            (si.bus(N)
-             // takes (midX,r0,r1,x)
-            ,ids);
+        // interpolate dimensions 0 .. n-1 linearly, the higher dimensions being
+        // fixed at the read-index offset `off` from `base`
+        linear(0, off) = read(base + off);
+        linear(n, off) = it.interpolate_linear(frac(n-1),
+                                               linear(n-1, off),
+                                               linear(n-1, off + stride(n-1)));
 
-        // the value of a single bit when binary counting
-        int2bin(i,n,maxN) = int(int((n)/(1<<i))%int(2));
-        // shortcut
-        bs = si.bus(N);
-};
+        // same with cubic interpolation, over 4 points per dimension
+        cubic(0, off) = read(base + off);
+        cubic(n, off) = it.interpolate_cubic(frac(n-1), v(0), v(1), v(2), v(3))
+        with {
+            v(k) = cubic(n-1, off + cubOffset(n-1, k));
+        };
+
+        // the read-index offset from `base` of point k (0..3) of dimension d.
+        // The points are the same as in ``ba.tabulate`` (-1, 0, 1 and 2 steps), but
+        // each one is kept inside its dimension, the edge value being repeated: in
+        // the first cell of a dimension the -1 point was the last value of the
+        // previous row, or outside the table, and in the last two cells the +1 and
+        // +2 points were in the next row, or outside the table.
+        cubOffset(d, k) = stride(d)*(point(C, k) - b)
+        with {
+            b = below(d);
+            last = S(d)-int(1);
+            // with C = 1, b is already in [0, last]: one bound per point is enough
+            point(1, 0) = max(int(0), b-int(1));
+            point(1, 1) = b;
+            point(1, k) = min(b+(k-1), last);
+            point(0, k) = max(int(0), min(b+(k-1), last));
+        };
+    };
 
 declare tabulateNd author "Bart Brouns";
 declare tabulateNd copyright "Copyright (C) 2023 Bart Brouns <bart@magnetophon.nl>";
