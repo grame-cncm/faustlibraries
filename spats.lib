@@ -1,12 +1,16 @@
 //#################################### spats.lib ##########################################
 // Spatialization (Spats) library. Its official prefix is `sp`.
 //
-// This library provides spatialization in Faust.
-// It includes panning and wfs algorithms.
+// This library provides spatialization in Faust: stereo and multichannel
+// amplitude panning, wave field synthesis and binaural rendering.
 //
-// The Spats library is organized into 1 section:
+// The Spats library is organized into 5 sections:
 //
-// * [Functions Reference](#functions-reference)
+// * [Stereo Panning](#stereo-panning)
+// * [Multichannel Amplitude Panning](#multichannel-amplitude-panning)
+// * [Wave Field Synthesis](#wave-field-synthesis)
+// * [Binaural Rendering](#binaural-rendering)
+// * [Utilities](#utilities)
 //
 // #### References
 //
@@ -52,9 +56,12 @@ fi = library("filters.lib");
 de = library("delays.lib");
 
 declare name "Faust Spatialization Library";
-declare version "1.3.1";
+declare version "1.3.2";
 
-//=============================Functions Reference========================================
+//=====================================Stereo Panning=====================================
+// Placing a mono source, or balancing a stereo pair, between two loudspeakers
+// by amplitude: with a linear law (`panner`) or a constant-power law
+// (`constantPowerPan`).
 //========================================================================================
 
 //-----------------------`(sp.)panner`------------------------
@@ -139,6 +146,13 @@ with {
 };
 
 
+//=============================Multichannel Amplitude Panning=============================
+// Distributing a mono source over `N` loudspeakers by amplitude, from its
+// direction: `spat` for loudspeakers evenly spaced on a circle, with a source
+// distance, and `spcap` for an arbitrary 2D layout, with a correction for the
+// speaker density.
+//========================================================================================
+
 //-----------------------`(sp.)spat`------------------------
 // GMEM SPAT: n-outputs spatializer.
 // `spat` is a standard Faust function.
@@ -172,6 +186,152 @@ with {
     scaler(i,N,a,d) = (d/2.0+0.5)
     * sqrt(max(0.0, 1.0 - abs(fmod(a+0.5+float(N-i)/N, 1.0) - 0.5) * N * d));
 };
+
+// TODO: need demo function of spat here
+
+
+//-----------------`(sp.)spcap`--------------------
+// Speaker-Placement Correction Amplitude Panning (SPCAP).
+//
+// SPCAP calculates panning gains for an arbitrary 2D loudspeaker 
+// layout by computing the angular distance between the virtual source 
+// and each speaker, and correcting for "speaker density" (groupings 
+// of speakers that would otherwise cause a volume imbalance).
+//
+// Important note on physical distance: this algorithm only handles spatial
+// distribution based on azimuth angles. It does not compensate for volume drops
+// or acoustic delays caused by uneven physical distances of the speakers from
+// the listener. In a complete DSP chain, distance correction must be applied
+// downstream from this algorithm, individually per channel, using a delay line
+// for time alignment and a static gain trim to equalize acoustic pressure.
+//
+// #### Usage
+//
+// ```
+// _ : spcap(N, alpha, th, theta_s) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: number of speakers (a constant numerical expression)
+// * `alpha`: panning sharpness/width (float signal, typical range 1.0 to 10.0)
+// * `th`: a function `th(i)` returning the physical azimuth angle of speaker `i` in radians
+// * `theta_s`: virtual source azimuth angle in radians (float signal)
+//
+// #### Test
+//
+// ```
+// sp = library("spats.lib");
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// spcap_spk_deg(0) = -135;
+// spcap_spk_deg(1) = -45;
+// spcap_spk_deg(2) = 45;
+// spcap_spk_deg(3) = 135;
+// spcap_spk_angle(i) = spcap_spk_deg(i) : ma.deg2rad;
+// spcap_test = os.tosc(440) : sp.spcap(4, 2.0, spcap_spk_angle, 0.0);
+// ```
+//
+// #### References
+//
+// * Ramy Sadek and Chris Kyriakakis, "A Novel Multichannel Panning Method for Standard and Arbitrary Loudspeaker Configurations", 2004. (DTIC Reference: ADA464895)
+// * <https://apps.dtic.mil/sti/tr/pdf/ADA464895.pdf>
+//------------------------------------------------------------
+
+declare spcap author "Gemini, revised by GRAME";
+declare spcap version "0.1";
+declare spcap license "MIT";
+
+spcap(N, alpha, th, theta_s) = _ <: par(i, N, *(g(i)))
+with {
+    // Helper: Wrap phase between -PI and PI
+    wrap_pi(x) = x - 2.0 * ma.PI * floor((x + ma.PI) / (2.0 * ma.PI));
+
+    // 1. Basic Amplitude Panning@
+    P(i) = max(0.0, cos(wrap_pi(theta_s - th(i)) / 2.0)) ^ alpha;
+
+    // 2. Density Factor (Placement Correction)
+    beta(i) = sum(j, N, max(0.0, cos(wrap_pi(th(i) - th(j)) / 2.0)) ^ alpha);
+
+    // 3. Correction Application (Basic Panning / Density)
+    G(i) = P(i) / max(0.0001, beta(i));
+
+    // 4. Power Normalization (Constant Power Rule)
+    total_power = sum(i, N, G(i)^2);
+    norm_factor = sqrt(total_power) + 0.000001;
+
+    // Final gain applied to speaker i
+    g(i) = G(i) / norm_factor;
+};
+
+
+//-----------------`(sp.)spcap_ui`--------------------
+// Speaker-Placement Correction Amplitude Panning with a built-in UI.
+// This is a convenience wrapper around `spcap` for interactive control of the
+// virtual source azimuth, the panning sharpness, and the physical azimuth of
+// each loudspeaker.
+//
+// UI controls: `SPCAP/pan_sharpness` is the panning sharpness parameter
+// `alpha` (higher values make the virtual source more focused around the
+// closest speakers); `SPCAP/source_angle` is the virtual source azimuth in
+// degrees, converted to radians before calling `spcap`;
+// `SPCAP/Speaker%2i/angle` is the physical azimuth of speaker `i` in degrees
+// (the default layout is a regular circular distribution centered in each
+// speaker sector, and can be edited from the UI).
+//
+// Use `spcap` directly when the source angle, speaker angles, or sharpness
+// parameter must be supplied by an existing DSP expression instead of UI
+// controls.
+//
+// #### Usage
+//
+// ```
+// _ : spcap_ui(N) : si.bus(N)
+// ```
+//
+// Where:
+//
+// * `N`: number of speakers (a constant numerical expression). The function has one
+//   input signal and produces `N` output signals, one per speaker
+//
+// #### Test
+//
+// ```
+// sp = library("spats.lib");
+// os = library("oscillators.lib");
+// spcap_ui_test = os.tosc(440) : sp.spcap_ui(4);
+// ```
+//
+// #### Example test program
+//
+// ```
+// import("stdfaust.lib");
+//
+// process = os.osc(440) : sp.spcap_ui(8);
+// ```
+//------------------------------------------------------------
+declare spcap_ui author "Gemini, revised by GRAME";
+declare spcap_ui version "0.1";
+declare spcap_ui license "MIT";
+
+spcap_ui(N) = spcap(N, alpha_ui, th_ui, theta_s_ui)
+with {
+    alpha_ui = hslider("v:SPCAP/pan_sharpness", 2.0, 1.0, 10.0, 0.1);
+    theta_s_ui = hslider("v:SPCAP/source_angle [unit:deg]", 0, -180, 180, 0.1)
+        : ma.deg2rad;
+
+    default_spk_deg(i) = -180.0 + 360.0 * (float(i) + 0.5) / float(N);
+    spk_deg(i) = hslider("v:SPCAP/v:Speaker%2i/angle [unit:deg]",
+                         default_spk_deg(i), -180, 180, 1);
+    th_ui(i) = spk_deg(i) : ma.deg2rad;
+};
+
+
+//==================================Wave Field Synthesis==================================
+// Reconstructing the wave field of several sources over a linear loudspeaker
+// array: each loudspeaker plays every source delayed and attenuated according
+// to its distance from the source.
+//========================================================================================
 
 //-------`(sp.)wfs`-------------------
 // Wave Field Synthesis algorithm for multiple sound sources. 
@@ -249,6 +409,7 @@ with {
 
 };
 
+
 //-------`(sp.)wfs_ui`-------------------
 // Wave Field Synthesis algorithm for multiple sound sources with a built-in UI.
 //
@@ -308,182 +469,11 @@ with {
 };
 
 
-//-----------------`(sp.)spcap`--------------------
-// Speaker-Placement Correction Amplitude Panning (SPCAP).
-//
-// SPCAP calculates panning gains for an arbitrary 2D loudspeaker 
-// layout by computing the angular distance between the virtual source 
-// and each speaker, and correcting for "speaker density" (groupings 
-// of speakers that would otherwise cause a volume imbalance).
-//
-// Important note on physical distance: this algorithm only handles spatial
-// distribution based on azimuth angles. It does not compensate for volume drops
-// or acoustic delays caused by uneven physical distances of the speakers from
-// the listener. In a complete DSP chain, distance correction must be applied
-// downstream from this algorithm, individually per channel, using a delay line
-// for time alignment and a static gain trim to equalize acoustic pressure.
-//
-// #### Usage
-//
-// ```
-// _ : spcap(N, alpha, th, theta_s) : si.bus(N)
-// ```
-//
-// Where:
-//
-// * `N`: number of speakers (a constant numerical expression)
-// * `alpha`: panning sharpness/width (float signal, typical range 1.0 to 10.0)
-// * `th`: a function `th(i)` returning the physical azimuth angle of speaker `i` in radians
-// * `theta_s`: virtual source azimuth angle in radians (float signal)
-//
-// #### Test
-//
-// ```
-// sp = library("spats.lib");
-// ma = library("maths.lib");
-// os = library("oscillators.lib");
-// spcap_spk_deg(0) = -135;
-// spcap_spk_deg(1) = -45;
-// spcap_spk_deg(2) = 45;
-// spcap_spk_deg(3) = 135;
-// spcap_spk_angle(i) = spcap_spk_deg(i) : ma.deg2rad;
-// spcap_test = os.tosc(440) : sp.spcap(4, 2.0, spcap_spk_angle, 0.0);
-// ```
-//
-// #### References
-//
-// * Ramy Sadek and Chris Kyriakakis, "A Novel Multichannel Panning Method for Standard and Arbitrary Loudspeaker Configurations", 2004. (DTIC Reference: ADA464895)
-// * <https://apps.dtic.mil/sti/tr/pdf/ADA464895.pdf>
-//------------------------------------------------------------
-
-declare spcap author "Gemini, revised by GRAME";
-declare spcap version "0.1";
-declare spcap license "MIT";
-
-spcap(N, alpha, th, theta_s) = _ <: par(i, N, *(g(i)))
-with {
-    // Helper: Wrap phase between -PI and PI
-    wrap_pi(x) = x - 2.0 * ma.PI * floor((x + ma.PI) / (2.0 * ma.PI));
-
-    // 1. Basic Amplitude Panning@
-    P(i) = max(0.0, cos(wrap_pi(theta_s - th(i)) / 2.0)) ^ alpha;
-
-    // 2. Density Factor (Placement Correction)
-    beta(i) = sum(j, N, max(0.0, cos(wrap_pi(th(i) - th(j)) / 2.0)) ^ alpha);
-
-    // 3. Correction Application (Basic Panning / Density)
-    G(i) = P(i) / max(0.0001, beta(i));
-
-    // 4. Power Normalization (Constant Power Rule)
-    total_power = sum(i, N, G(i)^2);
-    norm_factor = sqrt(total_power) + 0.000001;
-
-    // Final gain applied to speaker i
-    g(i) = G(i) / norm_factor;
-};
-
-//-----------------`(sp.)spcap_ui`--------------------
-// Speaker-Placement Correction Amplitude Panning with a built-in UI.
-// This is a convenience wrapper around `spcap` for interactive control of the
-// virtual source azimuth, the panning sharpness, and the physical azimuth of
-// each loudspeaker.
-//
-// UI controls: `SPCAP/pan_sharpness` is the panning sharpness parameter
-// `alpha` (higher values make the virtual source more focused around the
-// closest speakers); `SPCAP/source_angle` is the virtual source azimuth in
-// degrees, converted to radians before calling `spcap`;
-// `SPCAP/Speaker%2i/angle` is the physical azimuth of speaker `i` in degrees
-// (the default layout is a regular circular distribution centered in each
-// speaker sector, and can be edited from the UI).
-//
-// Use `spcap` directly when the source angle, speaker angles, or sharpness
-// parameter must be supplied by an existing DSP expression instead of UI
-// controls.
-//
-// #### Usage
-//
-// ```
-// _ : spcap_ui(N) : si.bus(N)
-// ```
-//
-// Where:
-//
-// * `N`: number of speakers (a constant numerical expression). The function has one
-//   input signal and produces `N` output signals, one per speaker
-//
-// #### Test
-//
-// ```
-// sp = library("spats.lib");
-// os = library("oscillators.lib");
-// spcap_ui_test = os.tosc(440) : sp.spcap_ui(4);
-// ```
-//
-// #### Example test program
-//
-// ```
-// import("stdfaust.lib");
-//
-// process = os.osc(440) : sp.spcap_ui(8);
-// ```
-//------------------------------------------------------------
-declare spcap_ui author "Gemini, revised by GRAME";
-declare spcap_ui version "0.1";
-declare spcap_ui license "MIT";
-
-spcap_ui(N) = spcap(N, alpha_ui, th_ui, theta_s_ui)
-with {
-    alpha_ui = hslider("v:SPCAP/pan_sharpness", 2.0, 1.0, 10.0, 0.1);
-    theta_s_ui = hslider("v:SPCAP/source_angle [unit:deg]", 0, -180, 180, 0.1)
-        : ma.deg2rad;
-
-    default_spk_deg(i) = -180.0 + 360.0 * (float(i) + 0.5) / float(N);
-    spk_deg(i) = hslider("v:SPCAP/v:Speaker%2i/angle [unit:deg]",
-                         default_spk_deg(i), -180, 180, 1);
-    th_ui(i) = spk_deg(i) : ma.deg2rad;
-};
-
-//---------------`(sp.)stereoize`-------------
-// Transform an arbitrary processor `p` into a stereo processor with 2 inputs
-// and 2 outputs.
-//
-// #### Usage
-//
-// ```
-// _,_ : stereoize(p) : _,_
-// ```
-//
-// Where:
-//
-// * `p`: the arbitrary processor
-//
-// #### Test
-// ```
-// sp = library("spats.lib");
-// os = library("oscillators.lib");
-// stereoize_test = (os.tosc(660), os.tosc(770))
-//   : sp.stereoize(+);
-// ```
-//----------------------------------------
-stereoize(p) = S(inputs(p), outputs(p))
-with {
-    // degenerated processor with no outputs
-    S(n,0) = !,! : 0,0;           // just in case, probably a rare case
-    // processors with no inputs
-    S(0,1) = !,! : p <: _,_;      // add two fake inputs and split output
-    S(0,2) = !,! : p;
-    S(0,n) = !,! : p,p :> _,_;    // we are sure this will work if n is odd
-    // processors with one input
-    S(1,1) = p,p;                 // add two fake inputs and split output
-    S(1,n) = p,p :> _,_;          // we are sure this will work if n is odd
-    // processors with two inputs
-    S(2,1) = p <: _,_;             // split the output
-    S(2,2) = p;                    // nothing to do, p is already stereo
-    // processors with inputs > 2 and outputs > 2
-    S(n,m) = _,_ <: p,p :> _,_;    // we are sure this works if n or p are odd
-};
-
-// TODO: need demo function of spat here
+//===================================Binaural Rendering===================================
+// Rendering a mono source for headphones as the two signals that reach the
+// ears: from a parametric head model (`binauralModel`) or from measured head
+// related impulse responses (`binauralFir`).
+//========================================================================================
 
 //-----------------------`(sp.)binauralModel`------------------------
 // Parametric (structural) binaural spatializer after Brown and Duda: a mono
@@ -543,6 +533,7 @@ with {
     alpha(side) = 1.0 + side*sin(theta);
 };
 
+
 //-----------------------`(sp.)binauralFir`------------------------
 // Binaural rendering by direct convolution with a measured pair of head
 // related impulse responses. Measured HRIRs are short (128-256 taps at
@@ -576,6 +567,51 @@ with {
 //------------------------------------------------------------
 declare binauralFir license "MIT";
 binauralFir(hL, hR) = _ <: fi.fir(hL), fi.fir(hR);
+
+
+//=======================================Utilities========================================
+// Adapting processors to a stereo signal chain.
+//========================================================================================
+
+//---------------`(sp.)stereoize`-------------
+// Transform an arbitrary processor `p` into a stereo processor with 2 inputs
+// and 2 outputs.
+//
+// #### Usage
+//
+// ```
+// _,_ : stereoize(p) : _,_
+// ```
+//
+// Where:
+//
+// * `p`: the arbitrary processor
+//
+// #### Test
+// ```
+// sp = library("spats.lib");
+// os = library("oscillators.lib");
+// stereoize_test = (os.tosc(660), os.tosc(770))
+//   : sp.stereoize(+);
+// ```
+//----------------------------------------
+stereoize(p) = S(inputs(p), outputs(p))
+with {
+    // degenerated processor with no outputs
+    S(n,0) = !,! : 0,0;           // just in case, probably a rare case
+    // processors with no inputs
+    S(0,1) = !,! : p <: _,_;      // add two fake inputs and split output
+    S(0,2) = !,! : p;
+    S(0,n) = !,! : p,p :> _,_;    // we are sure this will work if n is odd
+    // processors with one input
+    S(1,1) = p,p;                 // add two fake inputs and split output
+    S(1,n) = p,p :> _,_;          // we are sure this will work if n is odd
+    // processors with two inputs
+    S(2,1) = p <: _,_;             // split the output
+    S(2,2) = p;                    // nothing to do, p is already stereo
+    // processors with inputs > 2 and outputs > 2
+    S(n,m) = _,_ <: p,p :> _,_;    // we are sure this works if n or p are odd
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // UNDOCUMENTED/DISMISSED ELEMENTS

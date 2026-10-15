@@ -2,19 +2,26 @@
 
 Spatialization (Spats) library. Its official prefix is `sp`.
 
-This library provides spatialization in Faust.
-It includes panning and wfs algorithms.
+This library provides spatialization in Faust: stereo and multichannel
+amplitude panning, wave field synthesis and binaural rendering.
 
-The Spats library is organized into 1 section:
+The Spats library is organized into 5 sections:
 
-* [Functions Reference](#functions-reference)
+* [Stereo Panning](#stereo-panning)
+* [Multichannel Amplitude Panning](#multichannel-amplitude-panning)
+* [Wave Field Synthesis](#wave-field-synthesis)
+* [Binaural Rendering](#binaural-rendering)
+* [Utilities](#utilities)
 
 #### References
 
 * [https://github.com/grame-cncm/faustlibraries/blob/master/spats.lib](https://github.com/grame-cncm/faustlibraries/blob/master/spats.lib)
 
-## Functions Reference
+## Stereo Panning
 
+Placing a mono source, or balancing a stereo pair, between two loudspeakers
+by amplitude: with a linear law (`panner`) or a constant-power law
+(`constantPowerPan`).
 
 ----
 
@@ -89,6 +96,13 @@ constantPowerPan_test = (os.tosc(110), os.tosc(220))
   : sp.constantPowerPan(hslider("constantPowerPan:pan", 0.4, 0, 1, 0.01));
 ```
 
+## Multichannel Amplitude Panning
+
+Distributing a mono source over `N` loudspeakers by amplitude, from its
+direction: `spat` for loudspeakers evenly spaced on a circle, with a source
+distance, and `spcap` for an arbitrary 2D layout, with a correction for the
+speaker density.
+
 ----
 
 ### `(sp.)spat`
@@ -116,91 +130,6 @@ spat_test = os.tosc(330)
   : sp.spat(4,
       hslider("spat:rotation", 0.25, 0, 1, 0.01),
       hslider("spat:distance", 0.5, 0, 1, 0.01));
-```
-
-----
-
-### `(sp.)wfs`
-
-Wave Field Synthesis algorithm for multiple sound sources. 
-Implementation generalized starting from Pierre Lecomte version. 
-
-#### Usage
-
-```
-wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inProc, xs, ys, zs) : si.bus(nSpeakers)
-```
-
-Where:
-
-* `xref`: x-coordinate of the reference listening point in meters
-* `yref`: y-coordinate of the reference listening point in meters
-* `zref`: z-coordinate of the reference listening point in meters
-* `speakersDist`: distance between speakers in meters (a constant numerical expression)
-* `nSources`: number of sound sources (a constant numerical expression)
-* `nSpeakers`: number of speakers (a constant numerical expression)
-* `inProc`: per-source processor function, as a function of the source index
-* `xs`: x-coordinate of the sound source in meters, as a function of the source index
-* `ys`: y-coordinate of the sound source in meters, as a function of the source index
-* `zs`: z-coordinate of the sound source in meters, as a function of the source index
-
-#### Test
-```
-sp = library("spats.lib");
-os = library("oscillators.lib");
-ba = library("basics.lib");
-ma = library("maths.lib");
-wfs_proc(i) = *(0.5); // Simple gain processor
-wfs_xs(i) = 0.0;
-wfs_ys(i) = 1.0;
-wfs_zs(i) = 0.0;
-wfs_test = os.tosc(440)
-  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
-wfs_modulated_test = os.tosc(440) : sp.wfs(0, 1, 0, 0.5, 1, 2, proc, xs, ys, zs) with { proc(i) = *(0.5); xs(i) = 2*tri - 1; ys(i) = 1.0; zs(i) = 0.0; P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
-```
-
-----
-
-### `(sp.)wfs_ui`
-
-Wave Field Synthesis algorithm for multiple sound sources with a built-in UI.
-
-#### Usage
-
-```
-wfs_ui(xref, yref, zref, speakersDist, nSources, nSpeakers) : si.bus(nSpeakers)
-```
-
-Where:
-
-* `xref`: x-coordinate of the reference listening point in meters
-* `yref`: y-coordinate of the reference listening point in meters
-* `zref`: z-coordinate of the reference listening point in meters
-* `speakersDist`: distance between speakers in meters
-* `nSources`: number of sound sources (a constant numerical expression)
-* `nSpeakers`: number of speakers (a constant numerical expression)
-
-#### Test
-```
-sp = library("spats.lib");
-os = library("oscillators.lib");
-wfs_ui_test = os.tosc(550)
-  : sp.wfs_ui(0, 1, 0, 0.5, 1, 2);
-```
-
-#### Example test program
-
-```
-// Distance between speakers in meters
-speakersDist = 0.0783;  
-
-// Reference listening point (central position for WFS)
-xref = 0;
-yref = 1;
-zref = 0;
-
-Spatialize 4 sound sources on 16 speakers
-process = wfs_ui(xref,yref,zref,speakersDist,4,16);
 ```
 
 ----
@@ -301,30 +230,102 @@ import("stdfaust.lib");
 process = os.osc(440) : sp.spcap_ui(8);
 ```
 
+## Wave Field Synthesis
+
+Reconstructing the wave field of several sources over a linear loudspeaker
+array: each loudspeaker plays every source delayed and attenuated according
+to its distance from the source.
+
 ----
 
-### `(sp.)stereoize`
+### `(sp.)wfs`
 
-Transform an arbitrary processor `p` into a stereo processor with 2 inputs
-and 2 outputs.
+Wave Field Synthesis algorithm for multiple sound sources. 
+Implementation generalized starting from Pierre Lecomte version. 
 
 #### Usage
 
 ```
-_,_ : stereoize(p) : _,_
+wfs(xref, yref, zref, speakersDist, nSources, nSpeakers, inProc, xs, ys, zs) : si.bus(nSpeakers)
 ```
 
 Where:
 
-* `p`: the arbitrary processor
+* `xref`: x-coordinate of the reference listening point in meters
+* `yref`: y-coordinate of the reference listening point in meters
+* `zref`: z-coordinate of the reference listening point in meters
+* `speakersDist`: distance between speakers in meters (a constant numerical expression)
+* `nSources`: number of sound sources (a constant numerical expression)
+* `nSpeakers`: number of speakers (a constant numerical expression)
+* `inProc`: per-source processor function, as a function of the source index
+* `xs`: x-coordinate of the sound source in meters, as a function of the source index
+* `ys`: y-coordinate of the sound source in meters, as a function of the source index
+* `zs`: z-coordinate of the sound source in meters, as a function of the source index
 
 #### Test
 ```
 sp = library("spats.lib");
 os = library("oscillators.lib");
-stereoize_test = (os.tosc(660), os.tosc(770))
-  : sp.stereoize(+);
+ba = library("basics.lib");
+ma = library("maths.lib");
+wfs_proc(i) = *(0.5); // Simple gain processor
+wfs_xs(i) = 0.0;
+wfs_ys(i) = 1.0;
+wfs_zs(i) = 0.0;
+wfs_test = os.tosc(440)
+  : sp.wfs(0, 1, 0, 0.5, 1, 2, wfs_proc, wfs_xs, wfs_ys, wfs_zs);
+wfs_modulated_test = os.tosc(440) : sp.wfs(0, 1, 0, 0.5, 1, 2, proc, xs, ys, zs) with { proc(i) = *(0.5); xs(i) = 2*tri - 1; ys(i) = 1.0; zs(i) = 0.0; P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
+
+----
+
+### `(sp.)wfs_ui`
+
+Wave Field Synthesis algorithm for multiple sound sources with a built-in UI.
+
+#### Usage
+
+```
+wfs_ui(xref, yref, zref, speakersDist, nSources, nSpeakers) : si.bus(nSpeakers)
+```
+
+Where:
+
+* `xref`: x-coordinate of the reference listening point in meters
+* `yref`: y-coordinate of the reference listening point in meters
+* `zref`: z-coordinate of the reference listening point in meters
+* `speakersDist`: distance between speakers in meters
+* `nSources`: number of sound sources (a constant numerical expression)
+* `nSpeakers`: number of speakers (a constant numerical expression)
+
+#### Test
+```
+sp = library("spats.lib");
+os = library("oscillators.lib");
+wfs_ui_test = os.tosc(550)
+  : sp.wfs_ui(0, 1, 0, 0.5, 1, 2);
+```
+
+#### Example test program
+
+```
+// Distance between speakers in meters
+speakersDist = 0.0783;  
+
+// Reference listening point (central position for WFS)
+xref = 0;
+yref = 1;
+zref = 0;
+
+Spatialize 4 sound sources on 16 speakers
+process = wfs_ui(xref,yref,zref,speakersDist,4,16);
+```
+
+## Binaural Rendering
+
+Rendering a mono source for headphones as the two signals that reach the
+ears: from a parametric head model (`binauralModel`) or from measured head
+related impulse responses (`binauralFir`).
 
 ----
 
@@ -402,4 +403,33 @@ _ : binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1)) : _,_
 sp = library("spats.lib");
 os = library("oscillators.lib");
 binauralFir_test = os.tosc(440) : sp.binauralFir((0.9, 0.05, 0.02), (0.4, 0.3, 0.1));
+```
+
+## Utilities
+
+Adapting processors to a stereo signal chain.
+
+----
+
+### `(sp.)stereoize`
+
+Transform an arbitrary processor `p` into a stereo processor with 2 inputs
+and 2 outputs.
+
+#### Usage
+
+```
+_,_ : stereoize(p) : _,_
+```
+
+Where:
+
+* `p`: the arbitrary processor
+
+#### Test
+```
+sp = library("spats.lib");
+os = library("oscillators.lib");
+stereoize_test = (os.tosc(660), os.tosc(770))
+  : sp.stereoize(+);
 ```
