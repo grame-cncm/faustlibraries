@@ -58,7 +58,7 @@ ma = library("maths.lib");
 si = library("signals.lib");
 
 declare name "Faust Routing Library";
-declare version "1.8.0";
+declare version "1.8.1";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -363,6 +363,8 @@ Michon and Julius O. Smith III, and are released under the
 // smooth_slider_test = no.noise : si.smooth(hslider("smooth:s", 0.999, 0, 0.9999, 0.0001));
 // smooth_modulated_test = no.noise : si.smooth(1 - 0.1*pow(0.001, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // smooth_jump_test = no.noise : si.smooth(1 - 0.1*pow(0.001, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// // second output: 1 where the smoother is still more than 1e-15 from its constant target after 0.9 s
+// smooth_deadband_test = x : si.smooth(ba.tau2pole(0.01)) <: _, (ba.time > 0.9*ma.SR) * (abs(_ - x) > 1e-15) with { x = 0.7; };
 // ```
 //
 // #### References
@@ -375,7 +377,12 @@ Michon and Julius O. Smith III, and are released under the
 // Implementation 0 is the best compromise on modern CPUs where two independent
 // multiplications can be done in parallel. The other versions could possibly
 // be faster on embedded devices.
-smooth = imp(0) with {
+// Implementations 0 to 2 store y, and in floating point stop moving once the step
+// (1 - s)*|x - y| is below half an ulp of y: they stall up to ulp(x)/(2*(1 - s)) short
+// of their target, 0.3 Hz short of 440 Hz for a 0.1 s time constant at 192 kHz in
+// single precision. Implementation 3 stores the error e = y - x, which decays to 0
+// and cannot stall; its recursion is as short (an addition and a multiplication).
+smooth = imp(3) with {
   imp = case {
     // y[n] = (1 - s) * x[n] + s * y[n - 1]
     (0,s) => \(x).(fb ~ _ with { fb(y) = (1.0 - s) * x + s * y; });
@@ -385,6 +392,11 @@ smooth = imp(0) with {
 
     // y[n] = y[n - 1] + (1 - s) * (x[n] - y[n - 1])
     (2,s) => \(x).(fb ~ _ with { fb(y) = y + (1.0 - s) * (x - y); });
+
+    // y[n] = x[n] + e[n], e[n] = s * (e[n - 1] + x[n - 1] - x[n]) = s * (y[n - 1] - x[n]).
+    // min(ma.MAX), a no-op, keeps x[n - 1] - x[n] computed first: reassociated (as -ffast-math
+    // does) into (x[n - 1] + e[n - 1]) - x[n], the sum would round at the scale of x again
+    (3,s) => \(x).(x + (fb ~ _ with { fb(e) = s * (e + (x' - x : min(ma.MAX))); }));
   };
 };
 

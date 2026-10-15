@@ -8,7 +8,14 @@ sinwaveform_test = os.sinwaveform(1024);
 coswaveform_test = os.coswaveform(1024);
 phasor_test = os.phasor(1024, 440);
 phasor_slider_test = os.phasor(1024, hslider("phasor:freq", 440, -20000, 20000, 1));
-phasor_modulated_test = os.phasor(1024, 2000*(2*tri - 1)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+phasor_modulated_test = os.phasor(1024, 2000.0*k/P)
+with {
+    P = int(ma.SR/10);
+    // the triangle 2*tri - 1 of the other modulated tests, as k/P with k an integer: its values
+    // come in opposite pairs, whose float increments cancel exactly over a period, so that the
+    // phase comes back to the same offset at every period, in single precision as in double
+    k = P - 2*abs(2*ba.period(P) - P);
+};
 hs_phasor_test = os.hs_phasor(1024, 330, ba.pulse(32));
 hsp_phasor_test = os.hsp_phasor(1024, 330, button("reset"), 0.25);
 oscsin_test = os.oscsin(440);

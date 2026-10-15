@@ -280,6 +280,7 @@ def build(spec, side, cfg, args):
     cpp = exe + ".cpp"
     faust_cmd = [args.faust, *shlex.split(cfg.faust_options),
                  "-double" if args.double else "-single", "-t", "0", "-I", side.lib_dir,
+                 "-I", os.path.join(side.lib_dir, "dx7"),
                  "-a", ARCH, "-pn", name, src, "-o", cpp]
     cxx_cmd = [args.cxx, *shlex.split(cfg.cxx_options), "-std=c++17", cpp, "-o", exe]
     # The stamp holds the test file's content too: the copy above refreshes

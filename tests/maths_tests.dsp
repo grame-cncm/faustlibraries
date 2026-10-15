@@ -66,5 +66,9 @@ diffn_test = os.tosc(440) : ma.diffn;
 signum_test = (-5.0) : ma.signum;
 nextpow2_test = 10.0 : ma.nextpow2;
 zc_test = os.tosc(440) : ma.zc;
-unwrap_test = os.oscrc(100) : ma.unwrap(ma.PI);
+unwrap_test = 4*os.tosc(100) : wrap : ma.unwrap(ma.PI)
+with {
+    // a phase of amplitude 4, wrapped into [-pi, pi]: unwrap gives it back
+    wrap(x) = x - 2*ma.PI*rint(x/(2*ma.PI));
+};
 primes_test = 10 : ma.primes;

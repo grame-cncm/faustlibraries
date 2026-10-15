@@ -108,7 +108,10 @@ def default_dsp_files():
 
 
 def newest_source(dsp):
-    libs = glob.glob(os.path.join(ROOT, "*.lib"))
+    """The newest input of a build: a library, the test file or the architecture."""
+    # The libraries and their subdirectories (dx7/...), as check_cpu.py does: a
+    # change in dx7/operator.lib must rebuild the dx7 tests.
+    libs = glob.glob(os.path.join(ROOT, "*.lib")) + glob.glob(os.path.join(ROOT, "*", "*.lib"))
     return max(os.path.getmtime(p) for p in libs + [dsp, ARCH])
 
 
@@ -139,7 +142,7 @@ def compiler_version(compiler):
 def build(dsp, name, precision, cfg, args):
     exe = os.path.join(cfg.build_dir, f"{name}.{precision}")
     cpp = exe + ".cpp"
-    faust_cmd = [args.faust, *cfg.faust_options, f"-{precision}", "-t", "0", "-I", ROOT,
+    faust_cmd = [args.faust, *cfg.faust_options, f"-{precision}", "-t", "0", "-I", ROOT, "-I", os.path.join(ROOT, "dx7"),
                  "-a", ARCH, "-pn", name, dsp, "-o", cpp]
     cxx_cmd = [args.cxx, *cfg.cxx_options, "-std=c++17", cpp, "-o", exe]
     # The commands and the compiler versions are stored next to the build: a
