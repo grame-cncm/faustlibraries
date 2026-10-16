@@ -17,6 +17,7 @@ parametric_eq_demo_test = no.noise : dm.parametric_eq_demo;
 spectral_tilt_demo_test = no.noise : dm.spectral_tilt_demo(4);
 mth_octave_filterbank_demo_test = no.noise : dm.mth_octave_filterbank_demo(1);
 filterbank_demo_test = no.noise : dm.filterbank_demo;
+tf2_tpt_demo_test = no.noise : dm.tf2_tpt_demo;
 cubicnl_demo_test = no.noise : dm.cubicnl_demo;
 gate_demo_test = stereoNoise : dm.gate_demo;
 compressor_demo_test = stereoNoise : dm.compressor_demo;
