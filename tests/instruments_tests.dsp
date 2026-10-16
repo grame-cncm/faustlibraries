@@ -13,6 +13,7 @@ gate = button("gate");
 
 // Envelope generators
 inst_envVibrato_test = os.tosc(440) * inst.envVibrato(0.05, 0.1, 80, 0.2, gate);
+inst_envVibrato_subnormal_test = os.tosc(440) * inst.envVibrato(0, 1e-44, 80, 1e-44, gate);
 inst_asympT60_test = inst.asympT60(1, 0, 0.5, gate);
 inst_asympT60_slider_test = inst.asympT60(hslider("asympT60:value", 1, 0, 1, 0.01), hslider("asympT60:trgt", 0, 0, 1, 0.01), hslider("asympT60:T60", 0.5, 0.01, 5, 0.01), gate);
 
