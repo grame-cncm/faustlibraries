@@ -118,7 +118,8 @@ delay(n,d,x) = x @ min(n, max(0,d));
 // fdelay_modulated_test = no.noise : de.fdelay(256, 16 + 112*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // ```
 //-----------------------------
-fdelay(n,d,x) = delay(n+1,int(d),x)*(1 - ma.frac(d)) + delay(n+1,int(d)+1,x)*ma.frac(d);
+fdelay(n,d,x) = delay(n+1,id,x)*(1 - ma.frac(d)) + delay(n+1,id+1,x)*ma.frac(d)
+with { id = int(min(n+1, max(-1, d))); }; // bounded before the conversion, the same taps
 
 
 //--------------------------`(de.)sdelay`----------------------------
@@ -320,7 +321,7 @@ fdelaylti(N,n,d,x) = delay(n,id,x) <: seq(i,N,section(i)) : !,_
 with {
   o = (N-1.00001)/2; // offset to ~center FIR interpolator
   dmo = d - o; // assumed nonnegative [d > (N-1)/2]
-  id = int(dmo);
+  id = int(min(n, max(0, dmo))); // bounded before the conversion, the same tap
   fd = o + ma.frac(dmo);
   section(i,x,y) = (x-x') * c(i) <: _,+(y);
   c(i) = (i - fd)/(i+1);
@@ -333,7 +334,7 @@ fdelayltv(N,n,d,x) = sum(i, N+1, delay(n+N,id+i,x) * h(N,fd,i))
 with {
   o = (N-1.00001)/2;  // ~center FIR interpolator
   dmo = d - o; // assumed nonnegative [d > (N-1)/2]
-  id = int(dmo);
+  id = int(min(n+N, max(-N, dmo))); // bounded before the conversion, the same taps
   fd = o + ma.frac(dmo);
   h(N,d,n) = facs1(N,d,n) * facs2(N,d,n);
   facs1(N,d,n) = select2(n,1,prod(k,max(1,n),select2(k<n,1,fac(d,n,k))));
@@ -461,7 +462,7 @@ fdelay1a(n,d,x) = delay(n,id,x) : fi.tf1(eta,1,eta)
 with {
   o = 0.49999; // offset to make life easy for allpass
   dmo = d - o; // assumed nonnegative
-  id = int(dmo);
+  id = int(min(n, max(0, dmo))); // bounded before the conversion, the same tap
   fd = o + ma.frac(dmo);
   eta = (1-fd)/(1+fd); // allpass coefficient
 };
@@ -471,7 +472,7 @@ fdelay2a(n,d,x) = delay(n,id,x) : fi.tf2(a2,a1,1,a1,a2)
 with {
   o = 1.49999;
   dmo = d - o; // delay range is [order-1/2, order+1/2]
-  id = int(dmo);
+  id = int(min(n, max(0, dmo))); // bounded before the conversion, the same tap
   fd = o + ma.frac(dmo);
   a1o2 = (2-fd)/(1+fd); // share some terms (the compiler does this anyway)
   a1 = 2*a1o2;
@@ -483,7 +484,7 @@ fdelay3a(n,d,x) = delay(n,id,x) : fi.iir((a3,a2,a1,1),(a1,a2,a3))
 with {
   o = 2.49999;
   dmo = d - o;
-  id = int(dmo);
+  id = int(min(n, max(0, dmo))); // bounded before the conversion, the same tap
   fd = o + ma.frac(dmo);
   a1o3 = (3-fd)/(1+fd);
   a2o3 = a1o3*(2-fd)/(2+fd);
@@ -497,7 +498,7 @@ fdelay4a(n,d,x) = delay(n,id,x) : fi.iir((a4,a3,a2,a1,1),(a1,a2,a3,a4))
 with {
   o = 3.49999;
   dmo = d - o;
-  id = int(dmo);
+  id = int(min(n, max(0, dmo))); // bounded before the conversion, the same tap
   fd = o + ma.frac(dmo);
   a1o4 = (4-fd)/(1+fd);
   a2o6 = a1o4*(3-fd)/(2+fd);
