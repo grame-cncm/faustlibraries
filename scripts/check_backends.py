@@ -201,7 +201,7 @@ def test_specs(files):
 
 def compile_error(lang, path, name, out=os.devnull):
     """None when the test compiles for `lang` (the code written to `out`), else faust's error line."""
-    r = subprocess.run([FAUST, "-lang", lang, "-I", str(ROOT), "-pn", name, str(path),
+    r = subprocess.run([FAUST, "-lang", lang, "-I", str(ROOT), "-I", str(ROOT / "dx7"), "-pn", name, str(path),
                         "-o", str(out)], cwd=ROOT, capture_output=True, text=True)
     if r.returncode == 0:
         return None

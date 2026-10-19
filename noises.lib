@@ -23,7 +23,7 @@ si = library("signals.lib");
 no = library("noises.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Noise Generator Library";
-declare version "1.9.0";
+declare version "1.9.1";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -501,7 +501,14 @@ with {
 // lfnoise_test = no.lfnoise(10.1);
 // ```
 //------------------------------------------------------------
-lfnoise0(freq) = noise : ba.latch(os.oscrs(freq));
+lfnoise0(freq) = noise : ba.latch(trig)
+with {
+    // the rising edges of os.oscrs(freq), whose sine is positive for a phase in (0, 0.5), read
+    // from the phase, exact in single precision: a crossing of the float sine could move by one
+    // sample, which latches another noise value
+    p = os.lf_sawpos(freq);
+    trig = (p > 0) & (p < 0.5);
+};
 lfnoiseN(N,freq) = lfnoise0(freq) : fi.lowpass(N,freq);       // Nth-order Butterworth lowpass
 lfnoise(freq) = lfnoise0(freq) : seq(i,5,fi.lowpass(1,freq)); // non-overshooting lowpass
 

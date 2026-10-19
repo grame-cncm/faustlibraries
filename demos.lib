@@ -78,7 +78,7 @@ hy = library("hysteresis.lib");
 pt = library("pinktrombone.lib");
 
 declare name "Faust Demos Library";
-declare version "1.7.0";
+declare version "1.7.1";
 
 //########################################################################################
 /************************************************************************
@@ -2028,8 +2028,8 @@ declare latch_demo licence "MIT";
 latch_demo = x, c, ba.latch(c,x) // plot(faustout) after faust2octave
 with{
     f = float(ma.SR)/1000.0;
-    x = os.oscr(f);
-    c = 0.5 * os.oscrs(5*f); // sample 5 times per period
+    x = os.osc(f);
+    c = 0.5 * os.osc(5*f); // sample 5 times per period
 };
 
 

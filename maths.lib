@@ -65,7 +65,7 @@ pl = library("platform.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Math Library";
-declare version "2.9.3";
+declare version "2.9.4";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
@@ -1509,7 +1509,11 @@ zc = ba.tAndH(!=(0)) <: *(mem) < 0;
 // ```
 // ma = library("maths.lib");
 // os = library("oscillators.lib");
-// unwrap_test = os.oscrc(100) : ma.unwrap(ma.PI);
+// unwrap_test = 4*os.tosc(100) : wrap : ma.unwrap(ma.PI)
+// with {
+//     // a phase of amplitude 4, wrapped into [-pi, pi]: unwrap gives it back
+//     wrap(x) = x - 2*ma.PI*rint(x/(2*ma.PI));
+// };
 // ```
 //
 // #### Example test program
