@@ -60,7 +60,7 @@ ro = library("routes.lib");
 de = library("delays.lib");
 
 declare name "High Order Ambisonics library";
-declare version "1.5.2";
+declare version "1.5.3";
 declare author "Pierre Guillot";
 declare author "Eliott Paris";
 declare author "Julien Colafrancesco";
@@ -500,6 +500,8 @@ optimBasic(N) = par(i, 2*N+1, _);
 //----------------`(ho.)optimMaxRe`-------------------------
 // The maxRe optimization optimizes energy vector. It should be used for an
 // auditory confined in the center of the loudspeakers array.
+// The harmonics of order n are weighted by cos(n*PI/(2N+2)), the weights that
+// maximize the energy vector of a regular circular array (J. Daniel, 2000).
 //
 // #### Usage
 //
@@ -522,9 +524,8 @@ optimBasic(N) = par(i, 2*N+1, _);
 //-----------------------------------------------------
 optimMaxRe(N) = par(i, 2*N+1, optim(i, N, _))
 with {
-    optim(i, N, _)= _ * cos(indexabs / (2*N+1) * ma.PI)
+    optim(i, N, _)= _ * cos(indexabs / (2*N+2) * ma.PI)
     with {
-        numberOfharmonics = 2 * N + 1;
         indexabs = (int)((i - 1) / 2 + 1);
     };
 };

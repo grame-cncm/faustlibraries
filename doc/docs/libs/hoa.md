@@ -343,6 +343,8 @@ optimBasic_test = encoder_bus : ho.optimBasic(1);
 
 The maxRe optimization optimizes energy vector. It should be used for an
 auditory confined in the center of the loudspeakers array.
+The harmonics of order n are weighted by cos(n*PI/(2N+2)), the weights that
+maximize the energy vector of a regular circular array (J. Daniel, 2000).
 
 #### Usage
 
