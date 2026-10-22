@@ -787,7 +787,7 @@ _ : echo(maxDuration,duration,feedback) : _
 Where:
 
 * `maxDuration`: the max echo duration in seconds
-* `duration`: the echo duration in seconds; the feedback loop adds one sample, so the echoes come every `duration*ma.SR + 1` samples
+* `duration`: the echo duration in seconds: the echoes come every `int(duration*ma.SR)` samples (at least one)
 * `feedback`: the feedback coefficient
 
 #### Test

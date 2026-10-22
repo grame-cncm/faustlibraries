@@ -67,7 +67,7 @@ aa = library("aanl.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.7.1";
+declare version "2.7.2";
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -1119,7 +1119,7 @@ mixPowerLoop = mixingEnv.mixPowerLoop;
 // Where:
 //
 // * `maxDuration`: the max echo duration in seconds
-// * `duration`: the echo duration in seconds; the feedback loop adds one sample, so the echoes come every `duration*ma.SR + 1` samples
+// * `duration`: the echo duration in seconds: the echoes come every `int(duration*ma.SR)` samples (at least one)
 // * `feedback`: the feedback coefficient
 //
 // #### Test
@@ -1134,7 +1134,9 @@ declare echo author "Romain Michon";
 echo(maxDuration,duration,feedback) = +~de.delay(maxDel,del)*feedback
 with{
   maxDel = ma.SR*maxDuration;
-  del = ma.SR*duration;
+  // the feedback loop adds one sample: delay by one less, as echo1s..echo43s do,
+  // so that the echoes come every int(duration*ma.SR) samples (at least one)
+  del = int(ma.SR*duration) - 1;
 };
 
 // TODO demo function for echo
