@@ -1,0 +1,63 @@
+{
+ "comment": "Accepted deviations of the filters from their documentation, see scripts/check_filter_claims.py; each entry gives the reason.",
+ "accepted": {
+  "fi.filterbank_tpt_df": {
+   "sr": "bilinear frequency warping of the band-split filters near the top crossovers: the same deviation for the plain and _tpt_df variants, about 5 times smaller from 96 to 192 kHz, smaller with a lower ftop"
+  },
+  "fi.filterbanki_tpt_df": {
+   "sr": "bilinear frequency warping of the band-split filters near the top crossovers: the same deviation for the plain and _tpt_df variants, about 5 times smaller from 96 to 192 kHz, smaller with a lower ftop"
+  },
+  "fi.highpass3e": {
+   "-3dB": "fc is the -0.2 dB passband edge; the doc places the -3 dB point near fc/1.28"
+  },
+  "fi.highpass6e": {
+   "-3dB": "fc is the -0.2 dB passband edge; the doc places the -3 dB point near fc/1.06"
+  },
+  "fi.highpass6e_tpt_df": {
+   "-3dB": "fc is the -0.2 dB passband edge; the doc places the -3 dB point near fc/1.06"
+  },
+  "fi.hilbert": {
+   "sr": "built on pospass, whose band runs from fc to SR/2 - fc by construction (documented)"
+  },
+  "fi.lowpass3e": {
+   "-3dB": "fc is the -0.2 dB passband edge; the doc places the -3 dB point near 1.28*fc"
+  },
+  "fi.lowpass6e": {
+   "-3dB": "fc is the -0.2 dB passband edge; the doc places the -3 dB point near 1.06*fc"
+  },
+  "fi.lowpass6e_tpt_df": {
+   "-3dB": "fc is the -0.2 dB passband edge; the doc places the -3 dB point near 1.06*fc"
+  },
+  "fi.mth_octave_filterbank": {
+   "allpass": "allpass-complementary means the bands sum to an allpass (odd O, documented); each band output alone is not allpass"
+  },
+  "fi.mth_octave_filterbank5": {
+   "sr": "bilinear frequency warping of the band-split filters near the top crossovers: the same deviation for the plain and _tpt_df variants, about 5 times smaller from 96 to 192 kHz, smaller with a lower ftop"
+  },
+  "fi.mth_octave_filterbank_alt_tpt_df": {
+   "sr": "bilinear frequency warping of the band-split filters near the top crossovers: the same deviation for the plain and _tpt_df variants, about 5 times smaller from 96 to 192 kHz, smaller with a lower ftop"
+  },
+  "fi.mth_octave_filterbank_default": {
+   "sr": "bilinear frequency warping of the band-split filters near the top crossovers: the same deviation for the plain and _tpt_df variants, about 5 times smaller from 96 to 192 kHz, smaller with a lower ftop"
+  },
+  "fi.mth_octave_filterbank_tpt_df": {
+   "sr": "bilinear frequency warping of the band-split filters near the top crossovers: the same deviation for the plain and _tpt_df variants, about 5 times smaller from 96 to 192 kHz, smaller with a lower ftop"
+  },
+  "fi.nlf2": {
+   "sr": "r is a loss factor per sample (documented): the decay time scales with the sample rate"
+  },
+  "fi.pospass": {
+   "sr": "the band runs from fc to SR/2 - fc by construction (documented); -3.01 dB at fc at every rate"
+  },
+  "fi.pospass6e": {
+   "-3dB": "fc is the -0.2 dB lower passband edge; the doc says the -3 dB point lies below it",
+   "sr": "lowpass6e(SR/4 - fc) shifted by SR/4: the -3 dB point below the -0.2 dB edge fc moves with the sample rate (documented)"
+  },
+  "fi.wgr": {
+   "sr": "r is a loss factor per sample (documented): the decay time scales with the sample rate"
+  },
+  "ve.moog_vcf": {
+   "sr": "the doc says this approximation neglects the one-sample loop delay, which changes the response, mostly at high frequencies"
+  }
+ }
+}

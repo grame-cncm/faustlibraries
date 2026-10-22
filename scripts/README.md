@@ -29,6 +29,7 @@ or later.
 | **Documentation checks** | | |
 | [`check_doc.py`](#check_docpy) | documentation and license gate, against a baseline | `make check-doc` |
 | [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters; measures the io of the export | `make check-usage`, `check_doc.py` (`--changed`), `build_faust_doc_index.py` (`--measure-io`) |
+| [`check_filter_claims.py`](#check_filter_claimspy) | measures the filters of `filters.lib` and `vaeffects.lib` against their documentation with faustprobe: sample-rate independence, -3 dB points, peaks, against a baseline | `make check-filter-claims` |
 | [`audit2.py`](#audit2py) | documentation coverage per library | `check_doc.py` |
 | [`audit.py`](#auditpy) | naive coverage audit, kept for comparison | — |
 | [`build_standard_functions.py`](#build_standard_functionspy) | generates `doc/docs/standardFunctions.md` | `check_doc.py` (`--check`) |
@@ -57,6 +58,9 @@ are run by `doc/Makefile`.
   without it);
 - figures: `faust`, `g++`, `numpy` and `matplotlib`; `check_plots.py` also
   needs `rsvg-convert` (librsvg) or the `cairosvg` module;
+- `check_filter_claims.py`: `faustprobe`, the offline probe of `faust-rs`
+  (`cargo build --release -p cranelift-ffi --bin faustprobe`), and the export
+  with measured io (`make doc-index-split`, which the make target runs first);
 - certification: `faust-rs` and `lean` (4.31);
 - everything else: the Python standard library only.
 
@@ -593,6 +597,36 @@ passes is reported, to be removed in the commit that fixes it.
 (`dx.algorithms` alone, 50 s); `check_doc.py` runs it with `--changed`, on the
 libraries that differ from `HEAD` or are new. Exit status 1 on any
 regression.
+
+### `check_filter_claims.py`
+
+```
+scripts/check_filter_claims.py [--export DIR] [--faustprobe PATH] [--jobs N] [--only fi.xx ...]
+                               [--write-baseline] [--json FILE]
+make check-filter-claims [FILTER_CLAIMS_ARGS="--only fi.lowpass"]
+```
+
+Measures what the documentation of the filters says. For every `fi.*` and
+`ve.*` symbol with a frequency parameter and an input, the Usage call is valued
+with the parameter values of its `#### Test` section (the export's
+`io.parameterValues`) and measured with faustprobe's `--freqresp`, which also
+refuses a nonlinear or time-varying program (such symbols are listed as
+skipped). Two checks:
+
+- sample-rate independence: the magnitude responses at 44.1 and 96 kHz, from
+  20 Hz to 6 kHz, may differ by 0.5 dB below 1.5 kHz and 3 dB above, where
+  both are above -40 dB: a parameter in Hz or seconds must not move with the
+  rate (key `sr`);
+- claims: the filter type is read from the name and summary; the DC and
+  near-Nyquist gains, the gain at the nominal frequency (`normFreq` is
+  `20*1000^normFreq` Hz) and the peak or dip are compared with what the doc
+  states: `-3dB`, `allpass`, `unity`, `peak`, `dip`.
+
+`tests/filter-claims-baseline.json` accepts deviations by symbol and key, each
+with its reason (frequency warping of a filter bank, a -3 dB point the doc
+places away from `fc`...); an entry no longer needed is reported. Exit status
+0, 1 on a deviation the baseline does not accept, 2 without faustprobe or
+export. About 15 s with the export already built.
 
 ### `audit2.py`
 
