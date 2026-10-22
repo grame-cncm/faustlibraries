@@ -1117,7 +1117,7 @@ Where:
 * `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
 mean at most 20 dB of gain reduction (the sign is ignored)
 * `att`: attack time = time constant (sec) coming out of expansion
-* `hold` : hold time
+* `hold` : hold time (sec), at most `maxHold` samples
 * `rel`: release time = time constant (sec) going into expansion
 * `knee`: a gradual increase in gain reduction around the threshold:
 above thresh+(knee/2) there is no gain reduction,
@@ -1162,7 +1162,7 @@ Where:
 * `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
 mean at most 20 dB of gain reduction (the sign is ignored)
 * `att`: attack time = time constant (sec) coming out of expansion
-* `hold` : hold time
+* `hold` : hold time (sec), at most `maxHold` samples
 * `rel`: release time = time constant (sec) going into expansion
 * `knee`: a gradual increase in gain reduction around the threshold:
 above thresh+(knee/2) there is no gain reduction,

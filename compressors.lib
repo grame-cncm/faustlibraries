@@ -61,7 +61,7 @@ it = library("interpolators.lib");
 fi = library("filters.lib");
 
 declare name "Faust Compressor Effect Library";
-declare version "1.7.0";
+declare version "1.7.1";
 
 //================================Conversion Tools=======================================
 // Most compressors have a ratio parameter to define the amount of compression.
@@ -1322,7 +1322,7 @@ with {
 // * `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
 // mean at most 20 dB of gain reduction (the sign is ignored)
 // * `att`: attack time = time constant (sec) coming out of expansion
-// * `hold` : hold time
+// * `hold` : hold time (sec), at most `maxHold` samples
 // * `rel`: release time = time constant (sec) going into expansion
 // * `knee`: a gradual increase in gain reduction around the threshold:
 // above thresh+(knee/2) there is no gain reduction,
@@ -1371,7 +1371,7 @@ expander_N_chan(strength,thresh,range,att,hold,rel,knee,prePost,link,meter,maxHo
 // * `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
 // mean at most 20 dB of gain reduction (the sign is ignored)
 // * `att`: attack time = time constant (sec) coming out of expansion
-// * `hold` : hold time
+// * `hold` : hold time (sec), at most `maxHold` samples
 // * `rel`: release time = time constant (sec) going into expansion
 // * `knee`: a gradual increase in gain reduction around the threshold:
 // above thresh+(knee/2) there is no gain reduction,
