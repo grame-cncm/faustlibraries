@@ -125,7 +125,7 @@ Usage:
     scripts/check_usage.py --update-baseline  # record the current debt
 
 `make check-usage` checks every symbol (about a minute, 50 s of it for
-dx.algorithms alone); `make checkdoc` runs it with --changed when faust is
+dx.algorithms alone); `make check-doc` runs it with --changed when faust is
 installed. Exit status: 0 on success, 1 on a regression, 2 without faust.
 """
 import argparse

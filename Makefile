@@ -15,7 +15,7 @@
 # `make check-cpu-matrix` - the same with C++ -O3 -ffast-math, -O3, and Faust -vec in turn.
 # `make verify-matched` - prove the rewrites of vaeffects.lib's matched filters and check
 #                     their coefficients against Vicanek's formulas at 60 digits.
-# `make checkdoc`   - verify documentation coverage, standardFunctions.md and licenses,
+# `make check-doc`   - verify documentation coverage, standardFunctions.md and licenses,
 #                     and compile the Usage sections of the libraries changed since HEAD.
 # `make check-usage` - compile the #### Usage section of every documented symbol
 #                     (arity, parameters) against tests/usage-baseline.json.
@@ -81,7 +81,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-sanitize check-extremes check-long check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-sanitize check-extremes check-long check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -231,8 +231,11 @@ $(SANITIZE_OUTPUT_DIR)/%.ok: | $(SANITIZE_OUTPUT_DIR) $(SANITIZE_BUILD_DIR)
 	done; \
 	touch $@
 
-checkdoc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.json)
-	@$(PYTHON) scripts/checkdoc.py
+check-doc: ## Fail on any doc/license regression (baseline: tests/doc-baseline.json)
+	@$(PYTHON) scripts/check_doc.py
+
+# former name, kept so that existing habits and scripts keep working
+checkdoc: check-doc
 
 check-usage: ## Compile every #### Usage section (baseline: tests/usage-baseline.json); USAGE_ARGS="--lib xx.lib"
 	@$(PYTHON) scripts/check_usage.py $(USAGE_ARGS)

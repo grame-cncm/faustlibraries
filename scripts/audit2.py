@@ -29,8 +29,8 @@ testOnly), then the blocks that have no description at all (a title and a
                      "undocumented": [names], "no_usage": [first name of
                      each Usage-less block], "test_only": [...]}, ...}
 
-Always exits 0: it measures, it does not judge. scripts/checkdoc.py (`make
-checkdoc`) runs it and compares the JSON with tests/doc-baseline.json.
+Always exits 0: it measures, it does not judge. scripts/check_doc.py (`make
+check-doc`) runs it and compares the JSON with tests/doc-baseline.json.
 """
 import re
 import os

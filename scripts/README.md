@@ -20,21 +20,21 @@ or later.
 | [`floatdiff.py`](#floatdiffpy) | compares a test output with its reference, within a tolerance | `make check` |
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_extremes.py`](#check_extremespy) | renders every test with its sliders at their extremes, all and one by one | `make check-extremes` |
-| [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java | `make check-backends`, `checkdoc.py` (`--changed --lang wasm`) |
+| [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java | `make check-backends`, `check_doc.py` (`--changed --lang wasm`) |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
 | [`verify_matched2.py`](#verify_matched2py) | proves the rewrites of Vicanek's matched filters and checks their coefficients at 60 digits | `make verify-matched` |
 | [`fit_fastmath.py`](#fit_fastmathpy) | fits the coefficients of `fastmath.lib`, in single and double precision | — |
 | [`fastmath_accuracy.py`](#fastmath_accuracypy) | measures the error of every `fastmath.lib` function, in single and double precision | — |
 | **Documentation checks** | | |
-| [`checkdoc.py`](#checkdocpy) | documentation and license gate, against a baseline | `make checkdoc` |
-| [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters; measures the io of the export | `make check-usage`, `checkdoc.py` (`--changed`), `build_faust_doc_index.py` (`--measure-io`) |
-| [`audit2.py`](#audit2py) | documentation coverage per library | `checkdoc.py` |
+| [`check_doc.py`](#check_docpy) | documentation and license gate, against a baseline | `make check-doc` |
+| [`check_usage.py`](#check_usagepy) | compiles the `#### Usage` sections: arity of the call, parameters; measures the io of the export | `make check-usage`, `check_doc.py` (`--changed`), `build_faust_doc_index.py` (`--measure-io`) |
+| [`audit2.py`](#audit2py) | documentation coverage per library | `check_doc.py` |
 | [`audit.py`](#auditpy) | naive coverage audit, kept for comparison | — |
-| [`build_standard_functions.py`](#build_standard_functionspy) | generates `doc/docs/standardFunctions.md` | `checkdoc.py` (`--check`) |
-| [`normalize_licenses.py`](#normalize_licensespy) | canonical SPDX license strings | `checkdoc.py` (`--check`) |
+| [`build_standard_functions.py`](#build_standard_functionspy) | generates `doc/docs/standardFunctions.md` | `check_doc.py` (`--check`) |
+| [`normalize_licenses.py`](#normalize_licensespy) | canonical SPDX license strings | `check_doc.py` (`--check`) |
 | **JSON export** | | |
-| [`build_faust_doc_index.py`](#build_faust_doc_indexpy) | builds the JSON documentation index, io counts computed by faust | `make doc-index*`, `checkdoc.py` |
+| [`build_faust_doc_index.py`](#build_faust_doc_indexpy) | builds the JSON documentation index, io counts computed by faust | `make doc-index*`, `check_doc.py` |
 | [`faust_doc_api.py`](#faust_doc_apipy) | queries that index | — |
 | **Figures** | | |
 | [`plot_lib.py`](#plot_libpy) | `aanl.lib` figures | `make plots` |
@@ -53,7 +53,7 @@ are run by `doc/Makefile`.
   and `verify_matched2.py` needs `numpy`, `sympy` and `mpmath`
   (`pip install sympy mpmath`);
 - `check_usage.py`, and `build_faust_doc_index.py --measure-io` (the
-  `make doc-index*` targets): `faust` (`checkdoc.py` skips the Usage check
+  `make doc-index*` targets): `faust` (`check_doc.py` skips the Usage check
   without it);
 - figures: `faust`, `g++`, `numpy` and `matplotlib`; `check_plots.py` also
   needs `rsvg-convert` (librsvg) or the `cairosvg` module;
@@ -240,7 +240,7 @@ is a regression, and a listed test that compiles again must be removed. A
 backend the baseline does not list is reported, not checked; one this faust is
 built without (the interpreter, LLVM) is skipped with a note. `--changed` does
 nothing unless a tracked `.lib` or `tests/*.dsp` differs from `HEAD`:
-`checkdoc.py` runs it that way on WebAssembly. Exit status: 0, 1 on a
+`check_doc.py` runs it that way on WebAssembly. Exit status: 0, 1 on a
 regression, 2 without faust. Compilations run from the repository root, since
 faust looks for libraries in the current directory first. `AGENTS.md`, rule 12,
 and `doc/docs/contributing.md`, section *Backends and foreign functions*, say
@@ -454,7 +454,7 @@ After `add`, the usual steps of a test change apply:
   without a baseline entry;
 - raise the library's version (a PATCH for tests alone) and regenerate its
   page with `make -C doc md`;
-- run `make checkdoc`.
+- run `make check-doc`.
 
 ### `verify_matched2.py`
 
@@ -521,11 +521,11 @@ after a change of `fastmath.lib`, and update the doc blocks. About 20 s.
 
 ## Documentation checks
 
-### `checkdoc.py`
+### `check_doc.py`
 
 ```
-scripts/checkdoc.py [--update-baseline]
-make checkdoc
+scripts/check_doc.py [--update-baseline]
+make check-doc
 ```
 
 The gate to pass before every commit. It fails on:
@@ -590,7 +590,7 @@ there must pass, an entry must still fail the same way, and an entry that
 passes is reported, to be removed in the commit that fixes it.
 
 `--symbol` prints the programs it compiled. A full run takes about a minute
-(`dx.algorithms` alone, 50 s); `checkdoc.py` runs it with `--changed`, on the
+(`dx.algorithms` alone, 50 s); `check_doc.py` runs it with `--changed`, on the
 libraries that differ from `HEAD` or are new. Exit status 1 on any
 regression.
 
@@ -684,11 +684,11 @@ the libraries.
   About 1050 of the 1194 symbols are measured, in about a minute. It needs
   `faust`, and measures the libraries of the checkout the script belongs to.
   The make targets pass it; `DOC_INDEX_IO=` builds the export without
-  `faust`, with guessed counts. `checkdoc.py` does not measure (it only
+  `faust`, with guessed counts. `check_doc.py` does not measure (it only
   counts the symbols).
 
 The last line printed is a JSON summary, including `symbolsCount`, which
-`checkdoc.py` compares with its baseline. After a change to the doc-block
+`check_doc.py` compares with its baseline. After a change to the doc-block
 format, regenerate the export and check the touched symbols (`AGENTS.md`,
 rule 7).
 

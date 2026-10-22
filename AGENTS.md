@@ -9,12 +9,12 @@ file is the operational summary.
 ## Commands
 
 ```bash
-make checkdoc    # documentation & license gate - run before every commit
-make check-usage # compile every #### Usage section (checkdoc does the changed libraries)
+make check-doc   # documentation & license gate - run before every commit
+make check-usage # compile every #### Usage section (check-doc does the changed libraries)
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
-make check-backends   # every test compiled for WebAssembly (modules validated and run), Cmajor (rendered), Julia, ... (checkdoc does WebAssembly)
+make check-backends   # every test compiled for WebAssembly (modules validated and run), Cmajor (rendered), Julia, ... (check-doc does WebAssembly)
 make check-sanitize   # every test under ASan and UBSan, table guards off (about 30 min; DSP_FILES= to restrict)
 make check-extremes   # every test with its sliders at their extremes, all and one by one (about 2 min)
 make check-long       # every test rendered 2 min at 192 kHz, -single and -double: non-finite, growth, subnormals, drift
@@ -26,7 +26,7 @@ make build       # build the mkdocs site (doc pages + figure injection)
 
 Every script behind these targets is described in `scripts/README.md`.
 
-- `make checkdoc` must pass before committing: it rejects any new
+- `make check-doc` must pass before committing: it rejects any new
   undocumented symbol, any doc block without `#### Usage` (or reduced to a
   `#### Test`), a stale `doc/docs/standardFunctions.md`, and any
   non-canonical license string. Accepted historical debt is pinned in
@@ -123,7 +123,7 @@ Every script behind these targets is described in `scripts/README.md`.
    section names, block structure), regenerate the export and spot-check
    that the touched symbols still come out with their summary, usage,
    params and license (`scripts/faust_doc_api.py get_faust_symbol xx.name`).
-   `make checkdoc` guards the floor — the exported symbol count may only
+   `make check-doc` guards the floor — the exported symbol count may only
    grow — but it cannot see a field that silently comes out empty. The
    make targets compute each symbol's `io` (inputs, outputs) with faust,
    from the Usage call valued by the Test section (`"source": "faust"`):
@@ -231,7 +231,7 @@ Every script behind these targets is described in `scripts/README.md`.
     function never calls them, however deep the call, and a new
     `ffunction` stays within the whitelist. `ma.expm1` and `ma.log1p` are built on `sinh` and
     `atanh` and are portable: they are the tools for the cancellation-free
-    forms rule 9 asks for. `make checkdoc` compiles every test for
+    forms rule 9 asks for. `make check-doc` compiles every test for
     WebAssembly when a library or a test file changed, validates the
     modules with Node and runs them (one second at 48 kHz, as `make check`
     runs the C++), and fails on a new failure; `make check-backends`
@@ -276,7 +276,7 @@ changed" depends on it.
 - Squash the work-in-progress commits of a branch before integrating it. One
   commit per coherent change: a library edit, its tests, its regenerated
   documentation and its version bumps belong together, not spread over five
-  commits that each leave `make checkdoc` or `make check` failing.
+  commits that each leave `make check-doc` or `make check` failing.
 - Rewriting history (`rebase`, `--amend`, squash) is fine as long as the
   commits have not been pushed. Once they are on `origin`, they are frozen:
   fix forward with a new commit.

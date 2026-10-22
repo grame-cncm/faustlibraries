@@ -64,7 +64,7 @@ It fails (exit status 1) on a test that fails on a backend of the baseline
 without being listed there, and on a listed test that now compiles (remove
 its entry in the same commit). A backend the baseline does not list is
 reported, not checked; one this faust was built without is skipped with a
-note. `make checkdoc` runs it with --changed, on WebAssembly only, when
+note. `make check-doc` runs it with --changed, on WebAssembly only, when
 faust is installed. Exit status 2 without faust.
 
 faust looks for libraries in the current directory before the -I ones, so

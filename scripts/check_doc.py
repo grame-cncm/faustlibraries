@@ -28,10 +28,10 @@ regression, without requiring the historical debt to be paid first:
      --lang wasm, about 15 s); skipped when faust is not installed.
 
 Usage:
-    scripts/checkdoc.py                    # verify, exit 1 on regression
-    scripts/checkdoc.py --update-baseline  # record the current debt as accepted
+    scripts/check_doc.py                    # verify, exit 1 on regression
+    scripts/check_doc.py --update-baseline  # record the current debt as accepted
 
-Run it before committing library changes; `make checkdoc` is an alias.
+Run it before committing library changes; `make check-doc` is an alias.
 """
 import json
 import os
@@ -108,7 +108,7 @@ def main():
         with open(BASELINE) as f:
             baseline = json.load(f)
     else:
-        errors.append("%s is missing; run scripts/checkdoc.py --update-baseline"
+        errors.append("%s is missing; run scripts/check_doc.py --update-baseline"
                       % BASELINE)
         baseline = {}
     floor = baseline.get("_doc_index", {}).get("symbols")
@@ -174,8 +174,8 @@ def main():
 
     if errors or usage_errors:
         for e in errors + usage_errors:
-            print("checkdoc: %s" % e)
-        print("checkdoc: FAILED (%d problem(s))." % len(errors + usage_errors))
+            print("check_doc: %s" % e)
+        print("check_doc: FAILED (%d problem(s))." % len(errors + usage_errors))
         if errors:
             print("If a reported symbol is deliberate accepted debt, rerun with"
                   " --update-baseline and commit %s." % BASELINE)
@@ -188,7 +188,7 @@ def main():
         sys.exit(1)
     n_undoc = sum(len(v["undocumented"]) for k, v in debt.items()
                   if not k.startswith("_"))
-    print("checkdoc: OK (accepted debt: %d undocumented symbols, no new gaps,"
+    print("check_doc: OK (accepted debt: %d undocumented symbols, no new gaps,"
           " %d exported symbols).%s" % (n_undoc, n_index, usage_note))
 
 
