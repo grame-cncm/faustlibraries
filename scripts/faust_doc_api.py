@@ -11,6 +11,9 @@ This script is the local counterpart of the Faust-library tools exposed by the
 - `get_faust_examples`
 - `explain_faust_symbol_for_goal`
 
+plus `get_faust_source`, which prints a symbol's doc block and definition from
+its `.lib` file.
+
 Input formats
 -------------
 
@@ -34,11 +37,18 @@ Lookup model
 - Symbol resolution first tries exact `name` / `id` / `qualifiedName`
   equality, then falls back to the same simple ranking heuristic used in
   `faustforge`.
+- `search_faust_lib` ranks first the symbols matched by that heuristic, which
+  looks for the whole query as one substring (`phrase` matches). It then adds
+  the symbols where every word of the query appears, in any order, in the name,
+  summary, usage, parameters or notes (`words` matches): `lowpass butterworth`
+  or `hard clip` find `fi.lowpass` or `aa.hardclip` although neither phrase
+  occurs in their documentation.
 
 Command behavior
 ----------------
 
-- `search_faust_lib` returns compact search results suitable for retrieval.
+- `search_faust_lib` returns compact search results suitable for retrieval,
+  optionally filtered by number of input/output signals and license policy.
 - `get_faust_symbol` returns the full symbol entry and nearby alternatives.
 - `list_faust_module` lists symbols from one module using the same lightweight
   result shape as `faustforge`.
@@ -47,6 +57,11 @@ Command behavior
   valid module selector and a common substring in symbol names.
 - `explain_faust_symbol_for_goal` synthesizes a short action-oriented textual
   recommendation from the stored documentation fields.
+- `get_faust_source` reads the symbol's `.lib` file in the repository
+  (`--repo-root`, by default the checkout this script belongs to).
+
+Every command prints JSON, or with `--format text` a compact text rendering
+meant for LLM context (one line per symbol in searches and lists).
 
 This file intentionally keeps the implementation simple and explicit rather
 than introducing a larger abstraction layer, because the underlying JSON schema
@@ -58,7 +73,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import sys
 from pathlib import Path, PurePosixPath
+
+# The license policy is the one of the export itself; the script's directory is
+# added explicitly so that the import also works under `python3 -I`.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from build_faust_doc_index import is_commercial_compatible_license  # noqa: E402
+
+LICENSE_POLICIES = ("all", "commercial-compatible")
+# What ends a definition: the next symbol's doc header, such as
+# //-------`(de.)fdelay`----------, or a section separator //=====...
+DOC_HEADER_RE = re.compile(r"^\s*//(-+\s*`|={5,})")
 
 
 def load_json(path: Path) -> dict[str, object]:
@@ -126,6 +153,56 @@ def rank_symbol_match(symbol: dict[str, object], query_lower: str) -> int:
         if query_lower in str(haystack).lower():
             score += 20
     return score
+
+
+def symbol_search_text(symbol: dict[str, object]) -> str:
+    """Return the lowercased text a word search looks into.
+
+    It covers the name, qualified name, summary, usage and source file, which
+    compact summaries carry, plus the parameters and notes of full entries.
+    """
+
+    params = symbol.get("params") or []
+    parts = [
+        symbol.get("name", ""),
+        symbol.get("qualifiedName", ""),
+        symbol.get("summary", ""),
+        symbol.get("usage", ""),
+        (symbol.get("source") or {}).get("file", ""),
+        " ".join(f"{p.get('name', '')} {p.get('description', '')}" for p in params if isinstance(p, dict)),
+        " ".join(str(note) for note in symbol.get("notes") or []),
+    ]
+    return " ".join(str(part) for part in parts if part).lower()
+
+
+def rank_word_match(symbol: dict[str, object], words: list[str], text: str) -> int:
+    """Score a symbol where every word of the query occurs in `text`.
+
+    A word equal to the symbol's name weighs most, then words found in the
+    name, then in the summary; every word also counts once for being present.
+    Returns `0` when one word is missing.
+    """
+
+    if not words or not all(word in text for word in words):
+        return 0
+    name = str(symbol.get("name", "")).lower()
+    names = f"{name} {str(symbol.get('qualifiedName', '')).lower()}"
+    summary = str(symbol.get("summary", "")).lower()
+    score = 10 if name in words else 0
+    score += sum(3 for word in words if word in names)
+    score += sum(2 for word in words if word in summary)
+    return score + len(words)
+
+
+def compact_io(symbol: dict[str, object]) -> dict[str, object]:
+    """The input/output counts of a symbol, and whether faust measured them."""
+
+    io = symbol.get("io") or {}
+    return {
+        "inSignals": io.get("inSignals"),
+        "outSignals": io.get("outSignals"),
+        "source": io.get("source"),
+    }
 
 
 def normalize_module_key(module: str) -> str:
@@ -343,8 +420,22 @@ class FaustDocStore:
         return best, alternatives
 
 
-def search_faust_lib(store: FaustDocStore, query: str, limit: int = 10, module: str | None = None) -> dict[str, object]:
-    """Search symbols by name, qualified name, summary, and source file.
+def search_faust_lib(
+    store: FaustDocStore,
+    query: str,
+    limit: int = 10,
+    module: str | None = None,
+    inputs: int | None = None,
+    outputs: int | None = None,
+    license_policy: str = "all",
+) -> dict[str, object]:
+    """Search symbols by name, qualified name, summary, usage, parameters and notes.
+
+    Symbols matched by `rank_symbol_match` (the whole query as one substring of
+    the name, qualified name, summary or source file) come first, in the
+    faustforge order (`"match": "phrase"`). The symbols where every word of
+    the query occurs somewhere in `symbol_search_text` follow, ranked by
+    `rank_word_match` (`"match": "words"`).
 
     Args:
         store: Loaded documentation store.
@@ -352,14 +443,23 @@ def search_faust_lib(store: FaustDocStore, query: str, limit: int = 10, module: 
         limit: Maximum number of hits to return.
         module: Optional module restriction. When set, the search only keeps
             symbols whose source module or qualified-name prefix matches.
+        inputs: Keep only symbols with this number of input signals.
+        outputs: Keep only symbols with this number of output signals.
+        license_policy: `all`, or `commercial-compatible` to drop the symbols
+            whose own license fails the export's policy (GPL, AGPL,
+            non-commercial).
 
     Returns:
-        A compact result payload containing retrieval-friendly symbol summaries.
+        A compact result payload containing retrieval-friendly symbol summaries,
+        and `total`, the number of matches before `limit`.
     """
 
     q = str(query or "").strip().lower()
     if not q:
         raise ValueError("Missing query")
+    if license_policy not in LICENSE_POLICIES:
+        raise ValueError(f"Unsupported license policy: {license_policy}")
+    words = q.split()
 
     module_key = normalize_module_key(module or "")
     ranked = []
@@ -372,10 +472,25 @@ def search_faust_lib(store: FaustDocStore, query: str, limit: int = 10, module: 
             qualified = str(symbol.get("qualifiedName", "")).lower()
             if module_key not in {source_mod, source_path_mod} and not qualified.startswith(f"{module_key}."):
                 continue
-        score = rank_symbol_match(symbol, q)
-        if score <= 0:
+        io = symbol.get("io") or {}
+        if inputs is not None and io.get("inSignals") != inputs:
             continue
-        ranked.append({"symbol": symbol, "score": score})
+        if outputs is not None and io.get("outSignals") != outputs:
+            continue
+        if license_policy == "commercial-compatible" and not is_commercial_compatible_license(symbol.get("license")):
+            continue
+        score = rank_symbol_match(symbol, q)
+        if score > 0:
+            ranked.append({"symbol": symbol, "match": "phrase", "score": (1, score)})
+            continue
+        # Compact summaries lack the parameters and notes: open the full entry
+        # only when the compact text does not already hold every word.
+        text = symbol_search_text(symbol)
+        if not all(word in text for word in words):
+            text = symbol_search_text(store.get_symbol_by_summary(symbol))
+        score = rank_word_match(symbol, words, text)
+        if score > 0:
+            ranked.append({"symbol": symbol, "match": "words", "score": (0, score)})
 
     ranked.sort(key=lambda entry: entry["score"], reverse=True)
     results = []
@@ -387,12 +502,14 @@ def search_faust_lib(store: FaustDocStore, query: str, limit: int = 10, module: 
             "qualifiedName": symbol.get("qualifiedName"),
             "summary": symbol.get("summary"),
             "usage": symbol.get("usage"),
+            "io": compact_io(symbol),
+            "match": entry["match"],
             "source": symbol.get("source"),
         }
         if symbol.get("license"):
             result["license"] = symbol.get("license")
         results.append(result)
-    return {"query": query, "module": module or None, "results": results}
+    return {"query": query, "module": module or None, "total": len(ranked), "results": results}
 
 
 def get_faust_symbol(store: FaustDocStore, symbol: str) -> dict[str, object]:
@@ -437,6 +554,7 @@ def list_faust_module(store: FaustDocStore, module: str, limit: int = 200) -> di
             "qualifiedName": symbol.get("qualifiedName"),
             "summary": symbol.get("summary"),
             "usage": symbol.get("usage"),
+            "io": compact_io(symbol),
             "source": symbol.get("source"),
         }
         if symbol.get("license"):
@@ -549,13 +667,126 @@ def explain_faust_symbol_for_goal(store: FaustDocStore, symbol: str, goal: str) 
     return {"symbol": found.get("qualifiedName"), "goal": goal_text, "recommendation": recommendation}
 
 
+def get_faust_source(store: FaustDocStore, symbol: str, repo_root: Path, max_lines: int = 60) -> dict[str, object]:
+    """Return a symbol's doc block and the definition that follows it.
+
+    The index records where the doc block starts and ends (`source.lineStart`,
+    `source.lineEnd`). The definition is read from the `.lib` file under
+    `repo_root`, up to the next doc header, trailing blank lines dropped, and
+    at most `max_lines` lines after the doc block.
+    """
+
+    found, _ = store.find_symbol(symbol)
+    if found is None:
+        raise ValueError(f"Symbol not found: {symbol}")
+    source = found.get("source") or {}
+    path = repo_root / str(source.get("path", ""))
+    if not path.is_file():
+        raise FileNotFoundError(f"{path} does not exist (see --repo-root)")
+    lines = path.read_text(encoding="utf-8").split("\n")
+    start = int(source.get("lineStart", 1))
+    end = int(source.get("lineEnd", start))
+    stop = min(len(lines), end + max_lines)
+    for i in range(end, stop):
+        if DOC_HEADER_RE.match(lines[i]):
+            stop = i
+            break
+    while stop > end and not lines[stop - 1].strip():
+        stop -= 1
+    return {
+        "symbol": found.get("qualifiedName"),
+        "path": str(source.get("path", "")),
+        "lineStart": start,
+        "lineEnd": stop,
+        "text": "\n".join(lines[start - 1:stop]),
+    }
+
+
+def io_text(io: dict[str, object] | None) -> str:
+    """`in->out`, with `~` when the counts were guessed from the usage text."""
+
+    io = io or {}
+    counts = "->".join("?" if io.get(k) is None else str(io.get(k)) for k in ("inSignals", "outSignals"))
+    return counts if io.get("source") == "faust" else counts + "~"
+
+
+def symbol_line(symbol: dict[str, object], width: int = 28) -> str:
+    """One line per symbol: qualified name, io, usage and own license."""
+
+    license_name = f"  [{symbol['license']}]" if symbol.get("license") else ""
+    return f"{symbol.get('qualifiedName', ''):<{width}} {io_text(symbol.get('io')):<7} {symbol.get('usage') or ''}{license_name}"
+
+
+def shorten(text: object, size: int = 110) -> str:
+    text = str(text or "")
+    return text if len(text) <= size else text[:size - 3] + "..."
+
+
+def format_text(command: str, result: dict[str, object]) -> str:
+    """Render a command result as compact text for LLM context.
+
+    Searches and lists print one line per symbol (`symbol_line`), searches add
+    the summary below it; a `~` after the io counts means they were guessed
+    from the usage text rather than measured by faust, and a symbol without
+    `[license]` falls under its library's default license.
+    """
+
+    out: list[str] = []
+    if command == "search_faust_lib":
+        for symbol in result["results"]:
+            out.append(symbol_line(symbol))
+            out.append(f"    {shorten(symbol.get('summary'))}")
+        if not result["results"]:
+            out.append("no match: try fewer or shorter words")
+        elif result["total"] > len(result["results"]):
+            out.append(f"... {result['total'] - len(result['results'])} more (--limit)")
+    elif command == "list_faust_module":
+        out.append(f"{result['file']}  prefix {', '.join(result['aliasHints'])}  {len(result['symbols'])} symbols")
+        out.extend("  " + symbol_line(symbol, 30) for symbol in result["symbols"])
+    elif command == "get_faust_symbol":
+        symbol = result["symbol"]
+        source = symbol.get("source") or {}
+        io = symbol.get("io") or {}
+        out.append(f"== {symbol.get('qualifiedName')}   ({source.get('path')}:{source.get('lineStart')})")
+        out.append(f"summary: {symbol.get('summary') or ''}")
+        out.append(f"usage:   {symbol.get('usage') or ''}")
+        out.extend(f"  {p.get('name')}: {p.get('description')}" for p in symbol.get("params") or [])
+        line = f"io:      {io_text(io)} ({io.get('source')}"
+        if io.get("parameterValues"):
+            line += ", counted with " + ", ".join(f"{k}={v}" for k, v in io["parameterValues"].items())
+        if io.get("assumedValues"):
+            line += ", assumed " + ", ".join(f"{k}={v}" for k, v in io["assumedValues"].items())
+        out.append(line + ")")
+        out.append(f"license: {symbol.get('license') or 'library default'}")
+        out.extend(f"note:    {note}" for note in symbol.get("notes") or [])
+        out.extend(f"ref:     {ref}" for ref in symbol.get("references") or [])
+        if symbol.get("testCode"):
+            out.append("test:\n    " + str(symbol["testCode"]).replace("\n", "\n    "))
+        if result["alternatives"]:
+            out.append("see also: " + ", ".join(str(alt["qualifiedName"]) for alt in result["alternatives"]))
+    elif command == "get_faust_examples":
+        for example in result["examples"]:
+            source = example.get("source") or {}
+            out.append(f"== {example['symbol']}   ({source.get('path')}:{source.get('lineStart')})")
+            out.append(str(example["code"]))
+        if not result["examples"]:
+            out.append("no test snippet")
+    elif command == "explain_faust_symbol_for_goal":
+        out.append(str(result["recommendation"]))
+    elif command == "get_faust_source":
+        out.append(f"// {result['path']}:{result['lineStart']}-{result['lineEnd']}")
+        out.append(str(result["text"]))
+    return "\n".join(out)
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Create the CLI parser and all faustforge-like subcommands."""
 
     parser = argparse.ArgumentParser(
         description="Query a Faust documentation index built by build_faust_doc_index.py "
-                    "(make doc-index or make doc-index-split). Every command prints JSON.",
-        epilog="Example: scripts/faust_doc_api.py --pretty get_faust_symbol fi.lowpass",
+                    "(make doc-index or make doc-index-split). Every command prints JSON, "
+                    "or compact text with --format text.",
+        epilog="Example: scripts/faust_doc_api.py --format text search_faust_lib lowpass butterworth",
     )
     parser.add_argument(
         "--index",
@@ -564,16 +795,26 @@ def build_parser() -> argparse.ArgumentParser:
         help="Index file or split-index directory. Defaults to tests/faust-doc/index.json, then tests/faust-doc-index.json.",
     )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
+    parser.add_argument("--format", choices=("json", "text"), default="json",
+                        help="json (default), or compact text meant for LLM context")
+    parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parent.parent,
+                        help="faustlibraries checkout read by get_faust_source (default: this script's)")
 
     subparsers = parser.add_subparsers(dest="command", required=True, metavar="COMMAND")
 
     search = subparsers.add_parser(
         "search_faust_lib",
-        help="search symbols by name, qualified name, summary and source file")
-    search.add_argument("query", help="free-text query, e.g. 'lowpass butterworth'")
+        help="search symbols: the whole query as a phrase first, then every word anywhere "
+             "in name, summary, usage, parameters and notes")
+    search.add_argument("query", nargs="+", help="free-text query, e.g. 'lowpass butterworth' or lowpass butterworth")
     search.add_argument("--limit", type=int, default=10, help="maximum number of hits (default: 10)")
     search.add_argument("--module", default=None,
                         help="restrict to one module: file stem, file name or prefix (filters, filters.lib, fi)")
+    search.add_argument("--inputs", type=int, default=None, help="keep symbols with this number of input signals")
+    search.add_argument("--outputs", type=int, default=None, help="keep symbols with this number of output signals")
+    search.add_argument("--license-policy", choices=LICENSE_POLICIES, default="all",
+                        help="commercial-compatible drops symbols whose own license is GPL, AGPL or "
+                             "non-commercial (the export's heuristic, not a legal opinion)")
 
     symbol = subparsers.add_parser(
         "get_faust_symbol",
@@ -598,6 +839,13 @@ def build_parser() -> argparse.ArgumentParser:
     explain.add_argument("symbol", help="name, id or qualified name")
     explain.add_argument("goal", help="what the caller wants to achieve, in free text")
 
+    source = subparsers.add_parser(
+        "get_faust_source",
+        help="doc block and definition of a symbol, read from its .lib file")
+    source.add_argument("symbol", help="name, id or qualified name")
+    source.add_argument("--max-lines", type=int, default=60,
+                        help="maximum number of definition lines after the doc block (default: 60)")
+
     return parser
 
 
@@ -614,7 +862,9 @@ def main() -> int:
     store = FaustDocStore.from_candidate(args.index)
 
     if args.command == "search_faust_lib":
-        result = search_faust_lib(store, args.query, limit=args.limit, module=args.module)
+        result = search_faust_lib(store, " ".join(args.query), limit=args.limit, module=args.module,
+                                  inputs=args.inputs, outputs=args.outputs,
+                                  license_policy=args.license_policy)
     elif args.command == "get_faust_symbol":
         result = get_faust_symbol(store, args.symbol)
     elif args.command == "list_faust_module":
@@ -623,10 +873,15 @@ def main() -> int:
         result = get_faust_examples(store, args.symbol_or_module, limit=args.limit)
     elif args.command == "explain_faust_symbol_for_goal":
         result = explain_faust_symbol_for_goal(store, args.symbol, args.goal)
+    elif args.command == "get_faust_source":
+        result = get_faust_source(store, args.symbol, args.repo_root, max_lines=args.max_lines)
     else:
         raise ValueError(f"Unsupported command: {args.command}")
 
-    print(json.dumps(result, ensure_ascii=True, indent=2 if args.pretty else None))
+    if args.format == "text":
+        print(format_text(args.command, result))
+    else:
+        print(json.dumps(result, ensure_ascii=True, indent=2 if args.pretty else None))
     return 0
 
 

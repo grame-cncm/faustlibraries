@@ -695,28 +695,43 @@ rule 7).
 ### `faust_doc_api.py`
 
 ```
-scripts/faust_doc_api.py [--index PATH] [--pretty] COMMAND ...
+scripts/faust_doc_api.py [--index PATH] [--pretty] [--format json|text] [--repo-root DIR] COMMAND ...
 ```
 
 Queries an index built by `build_faust_doc_index.py`, with the operations of the
 Faust-library MCP tools. `--index` is an index file or a split directory; by
 default `tests/faust-doc/index.json`, then `tests/faust-doc-index.json`. Every
-command prints JSON.
+command prints JSON; `--format text` prints a compact rendering for LLM
+context instead (one line per symbol in searches and lists: qualified name,
+`in->out` signals, usage, own license).
 
 | Command | Result |
 |---|---|
-| `search_faust_lib QUERY [--limit N] [--module M]` | ranked symbols matching a free-text query |
+| `search_faust_lib QUERY... [--limit N] [--module M] [--inputs N] [--outputs N] [--license-policy P]` | ranked symbols matching a free-text query |
 | `get_faust_symbol SYMBOL` | the full entry of a symbol (`lowpass` or `fi.lowpass`) and close alternatives |
 | `list_faust_module MODULE [--limit N]` | the symbols of a module |
 | `get_faust_examples SYMBOL_OR_MODULE [--limit N]` | the `#### Test` snippets of a module, else of a symbol |
 | `explain_faust_symbol_for_goal SYMBOL GOAL` | a short recommendation built from the stored documentation |
+| `get_faust_source SYMBOL [--max-lines N]` | the doc block and the definition, read from the `.lib` file under `--repo-root` (default: this checkout) |
 
 A module is named by its file stem, its file name or its prefix: `physmodels`,
 `physmodels.lib` or `pm`.
 
+`search_faust_lib` first returns the symbols whose name, qualified name,
+summary or source file contains the whole query (`"match": "phrase"`, the
+faustforge ranking), then those where every word of the query appears, in any
+order, in the name, summary, usage, parameters or notes (`"match": "words"`):
+`lowpass butterworth` finds `fi.lowpass`, `hard clip` finds `aa.hardclip`.
+`--inputs` / `--outputs` filter on the exported `io` counts, and
+`--license-policy commercial-compatible` applies the export's license filter at
+query time. Each hit carries its `io` and, after `limit`, `total` says how many
+matched.
+
 ```bash
 make doc-index-split
 scripts/faust_doc_api.py --pretty get_faust_symbol fi.lowpass
+scripts/faust_doc_api.py --format text search_faust_lib reverb --outputs 2 --license-policy commercial-compatible
+scripts/faust_doc_api.py --format text get_faust_source fi.dcblocker
 ```
 
 ## Figures

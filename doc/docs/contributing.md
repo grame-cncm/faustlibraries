@@ -748,6 +748,16 @@ Supported operations:
 - `list_faust_module`
 - `get_faust_examples`
 - `explain_faust_symbol_for_goal`
+- `get_faust_source`, which prints a symbol's doc block and definition from its
+  `.lib` file
+
+`search_faust_lib` returns first the symbols containing the whole query as one
+phrase (the `faustforge` ranking), then those where every word of the query
+appears in the name, summary, usage, parameters or notes: `lowpass butterworth`
+finds `fi.lowpass`. It can filter by number of signals (`--inputs`,
+`--outputs`) and by license (`--license-policy commercial-compatible`, the
+policy of the commercial export). Every command prints JSON, or a compact text
+rendering with `--format text`, meant for LLM context.
 
 The tool can read either:
 
@@ -764,11 +774,14 @@ Examples:
 ```bash
 python3 scripts/faust_doc_api.py --pretty search_faust_lib reverb --limit 5
 python3 scripts/faust_doc_api.py --pretty search_faust_lib filter --module filters --limit 10
+python3 scripts/faust_doc_api.py --format text search_faust_lib lowpass butterworth
+python3 scripts/faust_doc_api.py --format text search_faust_lib reverb --outputs 2 --license-policy commercial-compatible
 
 python3 scripts/faust_doc_api.py --pretty get_faust_symbol de.delay
 python3 scripts/faust_doc_api.py --pretty list_faust_module delays --limit 20
 python3 scripts/faust_doc_api.py --pretty get_faust_examples delay
 python3 scripts/faust_doc_api.py --pretty explain_faust_symbol_for_goal re.springreverb "build a metallic spring reverb"
+python3 scripts/faust_doc_api.py --format text get_faust_source fi.dcblocker
 ```
 
 To force a specific index location:
