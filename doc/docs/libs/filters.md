@@ -4256,8 +4256,8 @@ _ : spectral_tilt(N,f0,bw,alpha) : _
 Where:
 
 * `N`: desired integer filter order, at least 2 (fixed at compile time)
-* `f0`: lower frequency limit for desired roll-off band > 0
-* `bw`: bandwidth of desired roll-off band
+* `f0`: lower frequency limit (Hz) for desired roll-off band, > 0
+* `bw`: bandwidth (Hz) of desired roll-off band
 * `alpha`: slope of roll-off desired in nepers per neper,
         between -1 and 1 (ln mag / ln radian freq)
 
