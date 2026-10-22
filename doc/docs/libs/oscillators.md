@@ -66,6 +66,7 @@ syntax, and usable by other functions as well.
 #### Usage
 
 ```
+SAFE : _
 os[SAFE=1;].phasor(1.0, -.001) : _
 ```
 
