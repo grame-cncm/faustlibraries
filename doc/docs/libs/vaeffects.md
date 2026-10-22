@@ -145,7 +145,7 @@ _ : moogLadder(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: quality factor between .707 (0 feedback coefficient) to 25 (feedback = 4, which is the self-oscillating threshold).
 
 #### Test
@@ -247,7 +247,7 @@ _ : moogHalfLadder(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -297,7 +297,7 @@ _ : diodeLadder(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -355,7 +355,7 @@ _ : korg35LPF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -393,7 +393,7 @@ _ : korg35HPF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -441,7 +441,7 @@ _ : oberheim(normFreq,Q) : _,_,_,_
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -480,7 +480,7 @@ _ : oberheimBSF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -513,7 +513,7 @@ _ : oberheimBPF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -546,7 +546,7 @@ _ : oberheimHPF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -579,7 +579,7 @@ _ : oberheimLPF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: q
 
 #### Test
@@ -655,7 +655,7 @@ _ : sallenKeyOnePole(normFreq) : _,_
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 
 #### Test
 ```
@@ -689,7 +689,7 @@ _ : sallenKeyOnePoleLPF(normFreq) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 
 #### Test
 ```
@@ -720,7 +720,7 @@ _ : sallenKeyOnePoleHPF(normFreq) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 
 #### Test
 ```
@@ -762,7 +762,7 @@ _ : sallenKey2ndOrder(normFreq,Q) : _,_,_
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
 
 #### Test
@@ -801,7 +801,7 @@ _ : sallenKey2ndOrderLPF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
 
 #### Test
@@ -834,7 +834,7 @@ _ : sallenKey2ndOrderBPF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
 
 #### Test
@@ -867,7 +867,7 @@ _ : sallenKey2ndOrderHPF(normFreq,Q) : _
 
 Where:
 
-* `normFreq`: normalized frequency (0-1)
+* `normFreq`: normalized frequency (0-1), mapped logarithmically to `20*1000^normFreq` Hz whatever the sample rate: 20 Hz at 0, 632 Hz at 0.5, 20 kHz at 1 (from a frequency `f` in Hz: `log10(f/20)/3`)
 * `Q`: quality factor controlling the sharpness/resonance of the filter around the center frequency (CF). For bandpass filters, higher Q increases the gain at the center frequency. Must be in the range `[ma.EPSILON, ma.MAX]`
 
 #### Test
