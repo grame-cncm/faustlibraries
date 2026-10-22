@@ -2581,7 +2581,7 @@ pluckString(stringLength,cutoff,maxFreq,sharpness,gain,trigger) : _
 
 Where:
 
-* `stringLength`: length of the string to pluck
+* `stringLength`: length of the string to pluck in meters (its frequency `l2f(stringLength)` sets the excitation's lowpass cutoff and attack time)
 * `cutoff`: cutoff ratio (1 for default)
 * `maxFreq`: max frequency ratio (1 for default)
 * `sharpness`: sharpness of the attack and release (1 for default)
