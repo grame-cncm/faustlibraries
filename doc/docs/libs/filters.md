@@ -1571,7 +1571,9 @@ Where:
 
 * `f`: resonance frequency (Hz), between 0 and SR/2 (excluded: the frequency is
   kept a hair inside that range so that the amplitude compensation stays finite)
-* `r`: loss factor for exponential decay (set to 1 to make a numerically stable oscillator)
+* `r`: loss factor per sample (set to 1 to make a numerically stable oscillator): the
+  amplitude decays by sqrt(r) per sample, a time constant of -2/(ma.SR*log(r)) seconds,
+  so the decay depends on the sample rate (for a time constant t: r = exp(-2/(t*ma.SR)))
 
 The two outputs are the resonator states, in phase quadrature
 (`os.oscwc` uses the first, `os.oscws` the second).
@@ -1612,7 +1614,9 @@ _ : nlf2(f,r) : _,_
 Where:
 
 * `f`: resonance frequency (Hz)
-* `r`: loss factor for exponential decay (set to 1 to make a sinusoidal oscillator)
+* `r`: loss factor per sample (set to 1 to make a sinusoidal oscillator): the
+  amplitude decays by sqrt(r) per sample, a time constant of -2/(ma.SR*log(r)) seconds,
+  so the decay depends on the sample rate (for a time constant t: r = exp(-2/(t*ma.SR)))
 
 The two outputs are the resonator states, in phase quadrature
 (`os.oscrs` uses the first, `os.oscrc` the second).
@@ -3335,7 +3339,8 @@ Where:
 
 * `L`: cutoff limit in Hz, usually `tpt_df_fmin`; `L <= 0` selects the
   direct form and `L >= ma.MAX` the trapezoidal form for every `fc`
-* `fc`: -3dB frequency in Hz
+* `fc`: passband edge frequency in Hz, where the gain is -0.2 dB (the
+  -3 dB point is near 1.06*fc for the lowpass, fc/1.06 for the highpass)
 
 #### Test
 ```
@@ -3642,7 +3647,8 @@ _ : pospass6e(fc) : _,_
 
 Where:
 
-* `fc`: lower cutoff frequency in Hz
+* `fc`: lower passband edge in Hz, where the gain is -0.2 dB; the -3 dB point
+  lies below it and depends on the sample rate
 
 #### Test
 ```
@@ -4437,7 +4443,8 @@ mth_octave_filterbank_default = mth_octave_filterbank5;
 
 Where:
 
-* `O`: order of filter used to split each frequency band into two, a constant numerical expression
+* `O`: order of filter used to split each frequency band into two, a constant numerical
+  expression, odd: with an even order the bands no longer sum to an allpass
 * `M`: number of band-slices per octave, a constant numerical expression
 * `ftop`: highest band-split crossover frequency (e.g., 20 kHz)
 * `N`: total number of bands (including dc and Nyquist), a constant numerical expression
@@ -4497,7 +4504,8 @@ _ : mth_octave_filterbank_alt(O,M,ftop,N) : par(i,N,_)
 
 Where:
 
-* `O`: filter order used to split each band
+* `O`: filter order used to split each band, odd: with an even order the bands no
+  longer sum to an allpass
 * `M`: number of band-slices per octave
 * `ftop`: highest band-split crossover frequency
 * `N`: total number of bands
