@@ -67,7 +67,7 @@ aa = library("aanl.lib");
 ef = library("misceffects.lib"); // for compatible copy/paste out of this file
 
 declare name "Misc Effects Library";
-declare version "2.7.0";
+declare version "2.7.1";
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -1119,7 +1119,7 @@ mixPowerLoop = mixingEnv.mixPowerLoop;
 // Where:
 //
 // * `maxDuration`: the max echo duration in seconds
-// * `duration`: the echo duration in seconds
+// * `duration`: the echo duration in seconds; the feedback loop adds one sample, so the echoes come every `duration*ma.SR + 1` samples
 // * `feedback`: the feedback coefficient
 //
 // #### Test
@@ -1151,7 +1151,7 @@ with{
 // Where:
 //
 // * `N`: Number of output channels desired (1 or more), a constant numerical expression
-// * `delay`: echo delay (integer power of 2)
+// * `delay`: echo delay in samples, an integer power of 2 known at compile time
 //
 // #### Test
 // ```
@@ -1188,7 +1188,7 @@ declare reverseEchoN license "LicenseRef-STK-4.3";
 //
 // Where:
 //
-// * `delay`: echo delay (integer power of 2)
+// * `delay`: echo delay in samples, an integer power of 2 known at compile time
 // * `phase`: float between 0 and 1 giving ramp delay phase*delay
 //
 // #### Test

@@ -787,7 +787,7 @@ _ : echo(maxDuration,duration,feedback) : _
 Where:
 
 * `maxDuration`: the max echo duration in seconds
-* `duration`: the echo duration in seconds
+* `duration`: the echo duration in seconds; the feedback loop adds one sample, so the echoes come every `duration*ma.SR + 1` samples
 * `feedback`: the feedback coefficient
 
 #### Test
@@ -812,7 +812,7 @@ _ : reverseEchoN(N,delay) : si.bus(N)
 Where:
 
 * `N`: Number of output channels desired (1 or more), a constant numerical expression
-* `delay`: echo delay (integer power of 2)
+* `delay`: echo delay in samples, an integer power of 2 known at compile time
 
 #### Test
 ```
@@ -846,7 +846,7 @@ _ : reverseDelayRamped(delay,phase) : _
 
 Where:
 
-* `delay`: echo delay (integer power of 2)
+* `delay`: echo delay in samples, an integer power of 2 known at compile time
 * `phase`: float between 0 and 1 giving ramp delay phase*delay
 
 #### Test
