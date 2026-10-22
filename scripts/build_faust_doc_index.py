@@ -1140,7 +1140,9 @@ def main() -> int:
                   " script belongs to; run that checkout's script", file=sys.stderr)
             return 2
         # imported here: check_usage imports this module, and only
-        # --measure-io needs it (and faust)
+        # --measure-io needs it (and faust). Its directory is not on the
+        # path under `python3 -I`
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
         from check_usage import measure_index_io
         try:
             measured = measure_index_io(index, args.jobs)

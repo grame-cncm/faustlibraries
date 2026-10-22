@@ -503,9 +503,13 @@ def rewrite(sym, code, defs, choice=0):
         values, with_defs = calls[min(choice, len(calls) - 1)]
         for a, v in zip(args, values):
             # a parameter may share its name with a symbol (`ar` in
-            # smoothEnvelope(ar,t)): the binding takes precedence
+            # smoothEnvelope(ar,t)): the binding takes precedence. The
+            # documented symbol itself as an argument (`ionian` in
+            # quantize(rf,ionian), valued `qu.ionian`) is not a parameter:
+            # left to step 4, which prefixes it, so that measure_io finds it
             if re.fullmatch(IDENT, a) and a != "_" and a != v \
-                    and a not in bindings and a not in defined:
+                    and a not in bindings and a not in defined \
+                    and not (a == sym["name"] and v.strip() == f"{sym['prefix']}.{a}"):
                 bindings[a] = v
         local += [d for d in with_defs if d not in local]
     # a local definition may not redefine a bound name (Faust refuses it)
@@ -737,9 +741,14 @@ def measure_io(sym, prefixes, workdir):
     (`an.ifft(N)` has 2N inputs): parameterValues holds the values of the
     call's parameters taken from the Test section or the Usage, and
     assumedValues those that neither gives, set to ARBITRARY_VALUE.
+
+    A generic name `fdelay[N]` is measured through its members, the
+    `fdelay1`, `fdelay2`... its Usage and Test sections call (the
+    `fdelay[N]a` of a Usage reads as each `fdelayNa`): it gets their io
+    when they all agree, else None.
     """
     if "[" in sym["name"]:
-        return None
+        return measure_generic_io(sym, prefixes, workdir)
     defs, statements = prepare(sym)
     for _, code in statements:
         choice, more = 0, True
@@ -769,6 +778,33 @@ def measure_io(sym, prefixes, workdir):
         return {"inSignals": int(counts[-1][0]), "outSignals": int(counts[-1][1]),
                 "parameterValues": values, "assumedValues": assumed}
     return None
+
+
+def measure_generic_io(sym, prefixes, workdir):
+    """measure_io of a generic name `name[N]suffix`, through its members.
+
+    The members are the names `name1suffix`, `name2suffix`... that its
+    Usage and Test sections write (the convention of lib_tests.symbol_re).
+    Each is measured as the symbol, with the generic name of the Usage
+    replaced by the member. The first member's io is returned when every
+    member that evaluates has the same counts, else None.
+    """
+    m = re.match(r"^(.*)\[[nN]\](.*)$", sym["name"])
+    if not m:
+        return None
+    member_re = rf"(?<![\w]){re.escape(m.group(1))}\d+{re.escape(m.group(2))}(?!\w)"
+    text = "\n".join(sym["usage"]) + "\n" + sym["test"]
+    members = sorted(set(re.findall(member_re, text)))
+    results = []
+    for member in members:
+        msym = dict(sym, name=member, siblings=sym["siblings"] | {member},
+                    usage=[line.replace(sym["name"], member) for line in sym["usage"]])
+        io = measure_io(msym, prefixes, workdir)
+        if io:
+            results.append(io)
+    if not results or len({(r["inSignals"], r["outSignals"]) for r in results}) > 1:
+        return None
+    return results[0]
 
 
 def measure_index_io(index, jobs=None):
