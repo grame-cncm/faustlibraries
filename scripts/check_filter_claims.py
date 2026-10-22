@@ -65,7 +65,7 @@ CLAIM_SR = 48000
 
 # A parameter whose description or name says it is a frequency
 FREQ_DESC = re.compile(r"freq|cutoff|hz\b|corner|center", re.I)
-FREQ_NAMES = ("fc", "freq", "normFreq", "f0", "fx", "cf", "fb", "f", "fr")
+FREQ_NAMES = ("fc", "freq", "freqs", "normFreq", "f0", "fx", "cf", "fb", "f", "fr")
 # Test values that cannot be valued in a standalone program
 SIGNAL_VALUE = re.compile(r"^_$|\b(os|no|ba\.time|button|checkbox|sig|src|x)\b")
 NUMBER = re.compile(r"^-?(\d+\.?\d*|\.\d+)(e-?\d+)?$")

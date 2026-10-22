@@ -563,7 +563,8 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
     - `#### Usage` -> usage string or fenced usage block
     - `Where:` -> list of documented parameters
     - general notes that appear inside `Where:` after the parameter bullets
-      -> `notes`
+      -> `notes`; a blank line ends a parameter's description, so a paragraph
+      after the list is a note, not part of the last parameter
     - `#### Test` -> example snippet
     - `#### Reference` / `#### References` -> references list
 
@@ -653,6 +654,13 @@ def parse_doc_body(body_lines: Iterable[str]) -> dict[str, object]:
             continue
 
         if section == "where":
+            if not trimmed or is_separator_line(trimmed):
+                # A blank line (or a separator) ends the parameter or note in
+                # progress: the paragraph after it is a note, not more of the
+                # last description.
+                current_params = []
+                current_note_index = None
+                continue
             match = PARAM_RE.match(trimmed)
             group = PARAM_GROUP_RE.match(trimmed)
             if match or group:
