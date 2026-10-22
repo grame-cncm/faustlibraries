@@ -38,7 +38,7 @@ _ : panner(g) : _,_
 
 Where:
 
-* `g`: the panning (0-1)
+* `g`: the panning (0-1): 0 sends the input to the left (first) output, 1 to the right one; the gains are `1-g` and `g` (each -6 dB at 0.5)
 
 #### Test
 ```
