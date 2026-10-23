@@ -100,7 +100,17 @@ Where:
 
 * `n`: the max delay length in samples
 * `it`: interpolation time (in samples), for example 1024
-* `d`: the delay length in samples (float)
+* `d`: the delay length in samples, rounded down to a whole number of samples
+  (a fractional part is not interpolated: use `fdelay` for that)
+
+Note that `sdelay` starts with both of its delay lines at 0 samples, and
+treats the first value of `d` as a change: it crossfades from a delay of 0
+to `d` over `it` samples. During the first `it` samples after
+initialisation, the input therefore also comes out undelayed, with a gain
+falling from 1 to 0 (with `it` = 1024, an impulse at the first sample comes
+out at once at 0.999, and again at `d`). Where that matters (a delay inside
+a feedback loop, an echo or a pre-delay that must stay silent at first),
+use `delay` or `fdelay` with a smoothed `d` instead.
 
 #### Test
 ```
