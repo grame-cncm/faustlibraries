@@ -55,7 +55,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.13.3";
+declare version "1.13.4";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -2914,6 +2914,8 @@ with {
 // (every integrator holds its state), and w at or above Nyquist, where tan
 // would be infinite or negative (an unstable filter), acts as 0.499*SR,
 // where tan = 318 (see the section introduction).
+declare _tanhalf author "Julius O. Smith III";
+declare _tanhalf license "MIT";
 _tanhalf(w) = tan(max(0, min(w*0.5/ma.SR, 0.499*ma.PI)));
 
 //-------------------------`(fi.)tf2s_df`, `(fi.)tf1s_df`--------------------------------
@@ -3089,6 +3091,8 @@ fixedpointprecision tpt_df_fmin = 0.0;
 // would lose its accuracy (or diverge) in single precision before fc
 // comes back up: the output then switches between two filters that track
 // nearly the same cutoff when fc crosses L.
+declare _tpt_df author "Julius O. Smith III";
+declare _tpt_df license "MIT";
 _tpt_df(L, fc, tpt, df) = _ <: dfL, (_ <: tpt, (_ <: tpt, dfL : select2(fc >= L))
                           : select2(L < ma.MAX)) : select2(L > 0)
 with { dfL = df(max(fc, L)); };
