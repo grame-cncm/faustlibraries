@@ -81,7 +81,7 @@ closed source license or any other license if you decide so.
 import("stdfaust.lib");
 
 declare name "Faust Physical Models Library";
-declare version "1.2.5";
+declare version "1.2.6";
 
 /*
 TODO:
@@ -1281,8 +1281,9 @@ guitarNuts = lTermination(-bridgeFilter(0.4,0.5),basicBlock);
 idealString(length,pluckPosition,excitation) = wg
 with {
     maxStringLength = maxLength;
-    lengthTuning = 0.08; // tuned "by hand"
-    tunedLength = length-lengthTuning;
+    // delay of the loop in samples: 9 from the chain, 2 from its terminations
+    loopDelay = 11;
+    tunedLength = length-loopDelay*speedOfSound/ma.SR;
     nUp = tunedLength*pluckPosition; // upper string segment length
     nDown = tunedLength*(1-pluckPosition); // lower string segment length
     wg = chain(lStringRigidTermination : stringSegment(maxStringLength,nUp) :
@@ -1316,8 +1317,10 @@ with {
 ks(length,damping,excitation) = endChain(ksChain)
 with {
     maxStringLength = maxLength;
-    lengthTuning = 0.05; // tuned "by hand"
-    tunedLength = length-lengthTuning;
+    // delay of the loop in samples: 4 from the chain, 2 from the terminations,
+    // 0.5 from ksReflexionFilter
+    loopDelay = 6.5;
+    tunedLength = length-loopDelay*speedOfSound/ma.SR;
     refCoef = (1-damping)*0.2+0.8;
     refFilter = ksReflexionFilter*refCoef;
     ksChain = terminations(_,chain(in(excitation) :
@@ -1386,8 +1389,10 @@ with {
 elecGuitarModel(length,pluckPosition,mute,excitation) = endChain(egChain)
 with {
     maxStringLength = maxLength;
-    lengthTuning = 0.11; // tuned "by hand"
-    stringL = length-lengthTuning;
+    // delay of the loop in samples: 17 from the chain, its terminations and
+    // the bridge filters, s/(1-s) from each of the two si.smooth(0.05) of the string
+    loopDelay = 17+2*0.05/(1-0.05);
+    stringL = length-loopDelay*speedOfSound/ma.SR;
     muteBlock = *(mute),*(mute),_;
     egChain = chain(
         elecGuitarNuts :
@@ -1520,8 +1525,10 @@ with {
 guitarModel(length,pluckPosition,excitation) = endChain(egChain)
 with {
     maxStringLength = maxLength;
-    lengthTuning = 0.1; // tuned "by hand"
-    stringL = length-lengthTuning;
+    // delay of the loop in samples: 14 from the chain, its terminations and
+    // the bridge filters, s/(1-s) from each of the two si.smooth(0.05) of steelString
+    loopDelay = 14+2*0.05/(1-0.05);
+    stringL = length-loopDelay*speedOfSound/ma.SR;
     egChain = chain(guitarNuts : steelString(stringL,pluckPosition,excitation) :
     guitarBridge : guitarBody : out);
 };
@@ -1619,8 +1626,10 @@ with {
 nylonGuitarModel(length,pluckPosition,excitation) = endChain(egChain)
 with {
     maxStringLength = maxLength; // meters
-    lengthTuning = 0.11;
-    stringL = length-lengthTuning;
+    // delay of the loop in samples: 14 from the chain, its terminations and
+    // the bridge filters, s/(1-s) from each of the two si.smooth(0.4) of nylonString
+    loopDelay = 14+2*0.4/(1-0.4);
+    stringL = length-loopDelay*speedOfSound/ma.SR;
     egChain = chain(guitarNuts : nylonString(stringL,pluckPosition,excitation) :
     guitarBridge : guitarBody : out);
 };
@@ -1847,8 +1856,10 @@ modularInterpBody(nModes,shape,scale) = _,modeInterpRes(nModes,shape,scale),_;
 modularInterpStringModel(stringLength,pluckPosition,shape,scale,bodyExcitation,stringExcitation) = endChain(egChain)*0.5
 with {
     maxStringLength = maxLength;
-    lengthTuning = 0.1; // tuned "by hand"
-    stringL = stringLength-lengthTuning;
+    // delay of the loop in samples: 14 from the chain, its terminations and
+    // the bridge filters, s/(1-s) from each of the two si.smooth(0.05) of steelString
+    loopDelay = 14+2*0.05/(1-0.05);
+    stringL = stringLength-loopDelay*speedOfSound/ma.SR;
     nBodyModes = 40;
     egChain = chain(guitarNuts : steelString(stringL,pluckPosition,stringExcitation) :
     guitarBridge : inRightWave(bodyExcitation) : modularInterpBody(nBodyModes,shape,scale) : out);
@@ -2205,8 +2216,10 @@ with {
 violinModel(stringLength,bowPressure,bowVelocity,bowPosition) =
     endChain(modelChain)
 with {
-    stringTuning = 0.08;
-    stringL = stringLength-stringTuning;
+    // delay of the loop in samples (measured): the chain, its terminations
+    // and the bridge filters
+    loopDelay = 12;
+    stringL = stringLength-loopDelay*speedOfSound/ma.SR;
     modelChain = chain(
         violinNuts :
         violinBowedString(stringL,bowPressure,bowVelocity,bowPosition) :
@@ -2677,9 +2690,12 @@ with {
 //----------------------------------
 clarinetModel(tubeLength,pressure,reedStiffness,bellOpening) = endChain(modelChain)
 with {
-    lengthTuning = 0.05; // empirical adjustment of the tuning of the tube
+    // the reed reflects with inversion, the bell without: a period is two round
+    // trips in the tube, hence tubeLength/2. Delay of a round trip in samples
+    // (measured): the chain, its terminations and the bell filter
+    loopDelay = 6.95;
     maxTubeLength = maxLength;
-    tunedLength = tubeLength/2-lengthTuning; // not really sure why we had to shift octave here
+    tunedLength = tubeLength/2-loopDelay*speedOfSound/ma.SR;
     modelChain =
         chain(
             clarinetMouthPiece(reedStiffness,pressure) :
@@ -3439,9 +3455,23 @@ with {
 marimbaResTube(tubeLength,excitation) = endChain(tubeChain)
 with {
     maxTubeLength = maxLength;
-    lengthTuning = 0.04;
-    tunedLength = tubeLength-lengthTuning;
-    endTubeReflexion = si.smooth(0.95)*0.99;
+    // reflection lowpass: pole 0.95 at 44.1 kHz, the same time constant at every rate
+    pole = pow(0.95, 44100/ma.SR);
+    g = 0.99;
+    endTubeReflexion = si.smooth(pole)*g;
+    // delay of the loop in samples at the tube's frequency f: 2 from the terminations,
+    // the phase delay of the two reflection lowpasses, and the shift that brings the
+    // peak of the damped resonance onto f. The loop gain r falls with the frequency
+    // (slope dr), which pulls the peak of 1/|1 - r*exp(j*phi)| below the frequency where
+    // phi = 0, by (-dr)*(1 - r)/(r*N) radians to first order (N: the period in samples).
+    w = 2*ma.PI*l2f(tubeLength)/ma.SR;
+    lpDelay = atan2(pole*sin(w), 1 - pole*cos(w))/w;
+    D = 1 - 2*pole*cos(w) + pole*pole;
+    r = g*g*(1 - pole)^2/D;
+    dr = 0 - g*g*(1 - pole)^2*2*pole*sin(w)/(D*D);
+    N = 2*ma.PI/w;
+    loopDelay = 2 + 2*lpDelay + (0 - dr)*(1 - r)/(r*N)/w;
+    tunedLength = tubeLength-loopDelay*speedOfSound/ma.SR;
     tubeChain =
         chain(
             in(excitation) :
