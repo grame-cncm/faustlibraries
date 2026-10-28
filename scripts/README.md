@@ -21,6 +21,7 @@ or later.
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_extremes.py`](#check_extremespy) | renders every test with its sliders at their extremes, all and one by one | `make check-extremes` |
 | [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java | `make check-backends`, `check_doc.py` (`--changed --lang wasm`) |
+| [`check_tuning.py`](#check_tuningpy) | measures the pitch of the `physmodels.lib` models and MIDI instruments with faustprobe at 44.1 to 192 kHz, against a baseline | `make check-tuning` |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
 | [`verify_matched2.py`](#verify_matched2py) | proves the rewrites of Vicanek's matched filters and checks their coefficients at 60 digits | `make verify-matched` |
@@ -61,6 +62,7 @@ are run by `doc/Makefile`.
 - `check_filter_claims.py`: `faustprobe`, the offline probe of `faust-rs`
   (`cargo build --release -p cranelift-ffi --bin faustprobe`), and the export
   with measured io (`make doc-index-split`, which the make target runs first);
+- `check_tuning.py`: `faustprobe` and `numpy`;
 - certification: `faust-rs` and `lean` (4.31);
 - everything else: the Python standard library only.
 
@@ -597,6 +599,43 @@ passes is reported, to be removed in the commit that fixes it.
 (`dx.algorithms` alone, 50 s); `check_doc.py` runs it with `--changed`, on the
 libraries that differ from `HEAD` or are new. Exit status 1 on any
 regression.
+
+### `check_tuning.py`
+
+```
+scripts/check_tuning.py [--faustprobe PATH] [--jobs N] [--only pm.xx ...]
+                        [--write-baseline] [--json FILE]
+make check-tuning [TUNING_ARGS="--only pm.ks pm.violin_ui_MIDI"]
+```
+
+Measures what a pitched instrument promises: a model given `f2l(freq)`, or a
+MIDI instrument given its `freq` slider, sounds at `freq`, at every sample
+rate. Neither `make check` (48 kHz, references made by the same code) nor
+`make check-precision` (float against double, at one rate) can see a wrong
+pitch: in 2026, seven models of `physmodels.lib` corrected their loop delay,
+a number of samples, by a length in meters, and played up to 196 cents sharp
+at 192 kHz (issue #323).
+
+The cases are the models of the script's `MODELS` table, plucked by an
+impulse or driven by a constant pressure or bow, and every `*_ui_MIDI` of
+`physmodels.lib`, found in the library, its `freq` slider set and its `gate`
+pressed. Each one is rendered by faustprobe in double precision at the six
+rates of `check-precision`, for 110, 220, 440 and 880 Hz within the slider's
+range, and its fundamental is the spectral peak within six semitones of the
+note (Hann window over one second, zero-padded 8 times, interpolated on the
+log magnitude; 0.02 cent on a Karplus-Strong string). Keys:
+
+- `sr`: one note spreads over more than 1 cent across the rates: something
+  is counted in samples where it should be in seconds, or the reverse;
+- `tune`: a pitch more than 1 cent from the note, or no peak within six
+  semitones;
+- `silent`, `nonfinite`: the analysed second is silent or not finite.
+
+`tests/tuning-baseline.json` accepts deviations by case and key, each with its
+reason; an entry no longer needed is reported. A new pitched instrument is
+covered as soon as it is a `*_ui_MIDI`; a model is added to `MODELS`. Exit
+status 0, 1 on a deviation the baseline does not accept, 2 without
+faustprobe. About a minute.
 
 ### `check_filter_claims.py`
 

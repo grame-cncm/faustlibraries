@@ -22,6 +22,9 @@
 # `make check-filter-claims` - measure the filters of filters.lib and vaeffects.lib with
 #                     faustprobe (faust-rs): SR independence, -3 dB points, peaks...,
 #                     against tests/filter-claims-baseline.json.
+# `make check-tuning` - measure the pitch of the physmodels.lib instruments with
+#                     faustprobe (faust-rs) at 44.1 to 192 kHz, against
+#                     tests/tuning-baseline.json.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
@@ -84,7 +87,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-sanitize check-extremes check-long check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-sanitize check-extremes check-long check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -245,6 +248,9 @@ check-usage: ## Compile every #### Usage section (baseline: tests/usage-baseline
 
 check-filter-claims: doc-index-split ## Measure the filters of filters.lib and vaeffects.lib against their doc with faustprobe (baseline: tests/filter-claims-baseline.json); FILTER_CLAIMS_ARGS="--only fi.lowpass"
 	@$(PYTHON) scripts/check_filter_claims.py --export $(DOC_INDEX_SPLIT_DIR) $(FILTER_CLAIMS_ARGS)
+
+check-tuning: ## Measure the pitch of the physmodels.lib models and MIDI instruments at 44.1-192 kHz with faustprobe (baseline: tests/tuning-baseline.json); TUNING_ARGS="--only pm.ks"
+	@$(PYTHON) scripts/check_tuning.py $(TUNING_ARGS)
 
 check-plots: ## Regenerate every figure aside and fail on a stale one or a failed assertion (make plots refreshes them)
 	@$(PYTHON) scripts/check_plots.py $(PLOTS_ARGS)

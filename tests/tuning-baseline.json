@@ -1,0 +1,24 @@
+{
+ "comment": "Accepted pitch deviations of the physmodels.lib instruments, see scripts/check_tuning.py; each entry gives the reason.",
+ "accepted": {
+  "pm.brassModel": {
+   "silent": "the model does not sound at most notes and rates: silent at 110 and 220 Hz at every rate and above 48 kHz at 440 Hz; its fi.dcblocker is in the loop with a pole fixed in samples (cutoff ~35 Hz at 44.1 kHz, ~150 Hz at 192 kHz), and the lip resonance's bandwidth is fixed in samples too; to repair before tuning",
+   "tune": "when it sounds, the pitch is a compromise between the lip resonance and the tube, 20 to 85 cents sharp; the tube has no loop-delay correction (lengthTuning = 0); to repair with the silences"
+  },
+  "pm.brass_ui_MIDI": {
+   "silent": "the model does not sound at most notes and rates: silent at 110 and 220 Hz at every rate and above 48 kHz at 440 Hz; its fi.dcblocker is in the loop with a pole fixed in samples (cutoff ~35 Hz at 44.1 kHz, ~150 Hz at 192 kHz), and the lip resonance's bandwidth is fixed in samples too; to repair before tuning (with its vibrato at 0, the gate alone does not start it at most notes)",
+   "tune": "when it sounds, the pitch is a compromise between the lip resonance and the tube, 20 to 85 cents sharp; the tube has no loop-delay correction (lengthTuning = 0); to repair with the silences"
+  },
+  "pm.fluteModel": {
+   "sr": "the foot's si.smooth(0.7) has a pole fixed in samples, and the +0.27 m tubeTuning is a length: the pitch moves with the rate",
+   "tune": "the model plays the k=1 mode of its two loops coupled by the jet, a period of about 0.8*(foot round trip + head round trip/2), not the tube's round trip: a constant length correction cannot tune it (+456 cents at 110 Hz, -489 at 880 Hz at 44.1 kHz); the model's own TODO says so; to repair"
+  },
+  "pm.flute_ui_MIDI": {
+   "sr": "the foot's si.smooth(0.7) has a pole fixed in samples, and the +0.27 m tubeTuning is a length: the pitch moves with the rate",
+   "tune": "the model plays the k=1 mode of its two loops coupled by the jet, a period of about 0.8*(foot round trip + head round trip/2), not the tube's round trip: a constant length correction cannot tune it (+456 cents at 110 Hz, -489 at 880 Hz at 44.1 kHz); the model's own TODO says so; to repair"
+  },
+  "pm.marimbaResTube": {
+   "tune": "a damped resonator excited alone: above 330 Hz its reflection lowpass leaves a loop gain under 0.4 and no spectral peak within six semitones; its resonance is tuned (no sr deviation), and marimba_ui_MIDI, where the bar excites it, is within 0.7 cent"
+  }
+ }
+}
