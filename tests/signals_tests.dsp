@@ -42,6 +42,8 @@ smooth_test = hslider("smooth:input", 0.5, -1, 1, 0.01) : si.smooth(0.9);
 smooth_slider_test = no.noise : si.smooth(hslider("smooth:s", 0.999, 0, 0.9999, 0.0001));
 smooth_modulated_test = no.noise : si.smooth(1 - 0.1*pow(0.001, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 smooth_jump_test = no.noise : si.smooth(1 - 0.1*pow(0.001, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+// second output: 1 where the smoother is still more than 1e-15 from its constant target after 0.9 s
+smooth_deadband_test = x : si.smooth(ba.tau2pole(0.01)) <: _, (ba.time > 0.9*ma.SR) * (abs(_ - x) > 1e-15) with { x = 0.7; };
 
 smoothq_test = hslider("smoothq:input", 0.5, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
 smoothq_linear_test = select2(ba.period(2*P) < P, -1, 1) : si.smoothq(0.25, 1)
