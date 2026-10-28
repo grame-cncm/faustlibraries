@@ -81,7 +81,7 @@ closed source license or any other license if you decide so.
 import("stdfaust.lib");
 
 declare name "Faust Physical Models Library";
-declare version "1.2.6";
+declare version "1.2.7";
 
 /*
 TODO:
@@ -2399,7 +2399,9 @@ with {
 // and that the lips and tube of the instrument are coupled to each other, the
 // length of that tube must be provided here. The lip resonance is realized
 // with `fi.tf2_tpt`, which stays accurate in single precision at low
-// frequencies and finite when the tube length or the lip tension moves.
+// frequencies and finite when the tube length or the lip tension moves. It has
+// a constant Q, and the same gain and phase relative to its frequency at every
+// note and sample rate (those of a 440 Hz resonance at 44.1 kHz).
 //
 // #### Usage
 //
@@ -2422,18 +2424,24 @@ with {
 // no = library("noises.lib");
 // brassLipsTable_test = os.tosc(220) : pm.brassLipsTable(0.3, 0.2);
 // brassLipsTable_slider_test = 0.02*os.tosc(220) : pm.brassLipsTable(hslider("tubeLength", 0.3, 0.01, 2.5, 0.01), hslider("lipsTension", 0.2, 0, 1, 0.01));
-// brassLipsTable_low_test = 0.003*no.noise : pm.brassLipsTable(2.5, 0);
+// brassLipsTable_low_test = 0.15*no.noise : pm.brassLipsTable(2.5, 0);
 // brassLipsTable_modulated_test = 0.02*os.tosc(220) : pm.brassLipsTable(0.1*pow(25.0, tri), 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // brassLipsTable_jump_test = 0.02*os.tosc(220) : pm.brassLipsTable(0.1*pow(25.0, sq), 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // brassLipsTable_audio_modulated_test = 0.1*no.noise : pm.brassLipsTable(340/fc, 0.5) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 // ```
 //----------------------------------
-brassLipsTable(tubeLength,lipsTension) = *(0.03) : lipFilter <: * : clipping
+brassLipsTable(tubeLength,lipsTension) = *(0.03*k) : lipFilter : mem <: * : clipping
 with {
     clipping = min(1) : max(-1);
     freq = (tubeLength : l2f)*pow(4,(2*lipsTension)-1);
-    // resonance with same freq as tube: 1/(1 - 2R*cos(th)*z^-1 + R^2*z^-2), R = 0.997
-    om = 0.003; // 1 - R
+    // resonance with same freq as tube: 1/(1 - 2R*cos(th)*z^-1 + R^2*z^-2), with a constant
+    // Q: R = 0.997 at 440 Hz at 44.1 kHz, the bandwidth proportional to freq at every rate.
+    // Its gain, at the resonance as 1/((1 - R)*th) and at DC as 1/((1 - R)^2 + th^2), is
+    // held by k at its value at 440 Hz at 44.1 kHz: the lips have the same response, relative
+    // to their frequency, at every note and rate. Its phase at the resonance is -pi/2 + th,
+    // a lead of one sample that mem takes back
+    om = 0.003*(freq/440)*44100/ma.SR; // 1 - R
+    k = ((freq/440)*44100/ma.SR)^2;
     th = 2*ma.PI*freq/ma.SR;
     P = om*om + 4*(1 - om)*sin(0.5*th)^2;
     S = om*om + 4*(1 - om)*cos(0.5*th)^2;
@@ -2540,8 +2548,10 @@ brassLips(tubeLength,lipsTension,pressure) = lTermination(mpInteraction,basicBlo
 with {
     absorption = *(0.85); // absorption coefficient
     p = pressure*0.3; // scaling pressure
+    // fi.dcblocker at 44.1 kHz, the same cutoff (35 Hz) at every rate
+    dcBlock = fi.zero(1) : fi.pole(pow(0.995, 44100/ma.SR));
     mpInteraction = absorption <:
-    (p-_ : brassLipsTable(tubeLength,lipsTension) <: *(p),1-_),_ : _,* : + : fi.dcblocker;
+    (p-_ : brassLipsTable(tubeLength,lipsTension) <: *(p),1-_),_ : _,* : + : dcBlock;
 };
 
 
@@ -2636,7 +2646,8 @@ with {
 
 
 //-------`(pm.)fluteFoot`----------
-// Simple flute foot implementing waves reflexion and dispersion.
+// Simple flute foot implementing waves reflexion and dispersion. Its lowpass
+// has the same cutoff at every sample rate.
 //
 // #### Usage
 //
@@ -2658,7 +2669,7 @@ with {
 //----------------------------------
 fluteFoot = rTermination(basicBlock,*(absorption) : dispersion)
 with {
-    dispersion = si.smooth(0.7); // just a simple lowpass
+    dispersion = si.smooth(pow(0.7, 44100/ma.SR)); // a simple lowpass, pole 0.7 at 44.1 kHz
     absorption = 0.95;           // same as for head
 };
 
@@ -2819,7 +2830,8 @@ with {
 //
 // Where:
 //
-// * `tubeLength`: the length of the tube in meters
+// * `tubeLength`: the length of the tube in meters; with `lipsTension` and `mute`
+// at 0.5, the instrument sounds at `l2f(tubeLength)` (pass `f2l(freq)` to play `freq`)
 // * `lipsTension`: tension of the lips (0-1) (default: 0.5)
 // * `mute`: mute opening at the end of the instrument (0-1) (default: 0.5)
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
@@ -2834,10 +2846,22 @@ with {
 //----------------------------------
 brassModel(tubeLength,lipsTension,mute,pressure) = endChain(brassChain)
 with {
-    maxTubeLength = maxLength;
-    lengthTuning = 0; // Not that important for that one because of lips tension
-    tunedLength = tubeLength + lengthTuning;
-    brassChain = chain(brassLips(tunedLength,lipsTension,pressure) : openTube(maxTubeLength,tunedLength) : wBell(mute) : out);
+    // the tube holds up to 2*maxTubeLength: 8.4 m at 50 Hz
+    maxTubeLength = 5;
+    // The lips, tuned to l2f(tubeLength), pull the oscillation above the tube's resonance:
+    // the tube is made ratio times longer, ratio = 1.2409 - 1.466*f^-0.78 (a fit, the same
+    // at every rate: within 0.0001 of the ratio that plays f from 110 to 880 Hz, with
+    // lipsTension and mute 0.5 and pressure 0.8). Delay of the loop in samples at the
+    // tube's frequency: 4 from the chain, 2 from its terminations, the phase delay of
+    // wBell's si.smooth(mute), and that of the lips' dcblocker (a lead)
+    f = l2f(tubeLength);
+    ratio = 1.2409 - 1.466*pow(f, -0.78);
+    w = 2*ma.PI*f/(ratio*ma.SR);
+    pdc = pow(0.995, 44100/ma.SR); // the pole of brassLips's dcblocker
+    loopDelay = 6 + atan2(mute*sin(w), 1 - mute*cos(w))/w
+        - (atan2(sin(w), 1 - cos(w)) - atan2(pdc*sin(w), 1 - pdc*cos(w)))/w;
+    tunedLength = tubeLength*ratio-loopDelay*speedOfSound/ma.SR;
+    brassChain = chain(brassLips(tubeLength,lipsTension,pressure) : openTube(maxTubeLength,tunedLength) : wBell(mute) : out);
 };
 
 
@@ -2950,7 +2974,8 @@ with {
 //
 // Where:
 //
-// * `tubeLength`: the length of the tube in meters
+// * `tubeLength`: the length of the tube in meters; the flute sounds at
+// `l2f(tubeLength)` (pass `f2l(freq)` to play `freq`)
 // * `mouthPosition`: position of the mouth on the embouchure (0-1) (default: 0.5)
 // * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 // This can also be any kind of signal that will directly injected in the mouthpiece
@@ -2962,12 +2987,22 @@ with {
 // fluteModel_test = pm.fluteModel(0.9, 0.4, 0.6);
 // ```
 //----------------------------------
-// TODO: this model is out of tune and we're not really sure why
 fluteModel(tubeLength,mouthPosition,pressure) = endChain(fluteChain) : fi.dcblocker
 with {
-    maxTubeLength = maxLength;
-    tubeTuning = 0.27; // set "by hand"
-    tLength = tubeLength+tubeTuning; // global tube length
+    // a segment holds up to 2*maxTubeLength: at 50 Hz the tube is 9.8 m, 7.2 m of it on the foot side
+    maxTubeLength = 4;
+    // The jet couples two loops, embouchure-head-embouchure and embouchure-foot-embouchure,
+    // and the flute plays a period of about 0.8*(foot round trip + head round trip/2), not
+    // the tube's round trip. The global tube length n, in samples, is set from the period
+    // wanted, P = SR/freq, by P = 0.7952*(1 - e/2)*n + 6.418 - 1.659*SR/44100 + 1.381*d,
+    // e the embouchure position and d the phase delay of the foot's lowpass at freq: a fit,
+    // within 0.56 cent from 110 to 880 Hz at 44.1 to 192 kHz with mouthPosition 0.5 and
+    // pressure 0.9 (the pitch moves with the pressure, about 2 cents lower at 0.8)
+    w = 2*ma.PI*l2f(tubeLength)/ma.SR;
+    footPole = pow(0.7, 44100/ma.SR); // the lowpass of fluteFoot
+    d = atan2(footPole*sin(w), 1 - footPole*cos(w))/w;
+    n = (2*ma.PI/w - 6.418 + 1.659*ma.SR/44100 - 1.381*d)/(0.7952*(1 - embouchurePos/2));
+    tLength = n*speedOfSound/ma.SR; // global tube length
     embouchurePos = 0.27 + (mouthPosition-0.5)*0.4; // position of the embouchure on the tube
     tted = tLength*embouchurePos; // head to embouchure distance
     eted = tLength*(1-embouchurePos); // embouchure to foot distance
