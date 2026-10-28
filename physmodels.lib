@@ -81,7 +81,7 @@ closed source license or any other license if you decide so.
 import("stdfaust.lib");
 
 declare name "Faust Physical Models Library";
-declare version "1.2.7";
+declare version "1.2.8";
 
 /*
 TODO:
@@ -2424,14 +2424,17 @@ with {
 // no = library("noises.lib");
 // brassLipsTable_test = os.tosc(220) : pm.brassLipsTable(0.3, 0.2);
 // brassLipsTable_slider_test = 0.02*os.tosc(220) : pm.brassLipsTable(hslider("tubeLength", 0.3, 0.01, 2.5, 0.01), hslider("lipsTension", 0.2, 0, 1, 0.01));
-// brassLipsTable_low_test = 0.15*no.noise : pm.brassLipsTable(2.5, 0);
+// brassLipsTable_low_test = 0.375*no.noise : pm.brassLipsTable(2.5, 0);
 // brassLipsTable_modulated_test = 0.02*os.tosc(220) : pm.brassLipsTable(0.1*pow(25.0, tri), 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 // brassLipsTable_jump_test = 0.02*os.tosc(220) : pm.brassLipsTable(0.1*pow(25.0, sq), 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // brassLipsTable_audio_modulated_test = 0.1*no.noise : pm.brassLipsTable(340/fc, 0.5) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
 // ```
 //----------------------------------
-brassLipsTable(tubeLength,lipsTension) = *(0.03*k) : lipFilter : mem <: * : clipping
+brassLipsTable(tubeLength,lipsTension) = *(0.012*k) : lipFilter : mem <: * : clipping
 with {
+    // 0.012 (STK's Brass: 0.03): with 0.03, from 0.44 of pressure on, the lips' response
+    // to the constant pressure alone saturated their area, a stable state without
+    // oscillation in which the brass stayed once a lip tension or a pressure moved
     clipping = min(1) : max(-1);
     freq = (tubeLength : l2f)*pow(4,(2*lipsTension)-1);
     // resonance with same freq as tube: 1/(1 - 2R*cos(th)*z^-1 + R^2*z^-2), with a constant
@@ -2849,13 +2852,14 @@ with {
     // the tube holds up to 2*maxTubeLength: 8.4 m at 50 Hz
     maxTubeLength = 5;
     // The lips, tuned to l2f(tubeLength), pull the oscillation above the tube's resonance:
-    // the tube is made ratio times longer, ratio = 1.2409 - 1.466*f^-0.78 (a fit, the same
-    // at every rate: within 0.0001 of the ratio that plays f from 110 to 880 Hz, with
-    // lipsTension and mute 0.5 and pressure 0.8). Delay of the loop in samples at the
+    // the tube is made ratio times longer, ratio = 1.2081 - 1.2447*f^-0.9191 (a fit, the
+    // same at every rate: within 0.0008 of the ratio that plays f from 55 to 880 Hz, with
+    // lipsTension and mute 0.5 and pressure 0.5, the default gain of brass_ui_MIDI; the
+    // pitch moves with the pressure, 1 to 6 cents higher at 0.8). Delay of the loop in samples at the
     // tube's frequency: 4 from the chain, 2 from its terminations, the phase delay of
     // wBell's si.smooth(mute), and that of the lips' dcblocker (a lead)
     f = l2f(tubeLength);
-    ratio = 1.2409 - 1.466*pow(f, -0.78);
+    ratio = 1.2081 - 1.2447*pow(f, -0.9191);
     w = 2*ma.PI*f/(ratio*ma.SR);
     pdc = pow(0.995, 44100/ma.SR); // the pole of brassLips's dcblocker
     loopDelay = 6 + atan2(mute*sin(w), 1 - mute*cos(w))/w
@@ -3289,7 +3293,9 @@ with {
 
 
 //-------`(pm.)blower_ui`--------------
-// Same as [`blower`](#blower) but with a built-in UI.
+// Same as [`blower`](#blower) but with a built-in UI. The pressure defaults to
+// 0.9, where `clarinet_ui`, `brass_ui` and `flute_ui` all sound: they play as
+// soon as they run, 0 silences them.
 //
 // #### Usage
 //
@@ -3311,7 +3317,7 @@ with {
 //--------------------------------------
 blower_ui = blower(pressure,breathGain,breathCutoff,vibratoFreq,vibratoGain)
 with {
-    pressure = hslider("v:blower/[0]pressure",0,0,1,0.01) : si.smoo;
+    pressure = hslider("v:blower/[0]pressure",0.9,0,1,0.01) : si.smoo;
     breathGain = hslider("v:blower/[1]breathGain",0.1,0,1,0.01)*0.05;
     breathCutoff = hslider("v:blower/[2]breathCutoff",2000,20,20000,0.1);
     vibratoFreq = hslider("v:blower/[3]vibratoFreq",5,0.1,10,0.1);

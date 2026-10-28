@@ -82,7 +82,9 @@ MODELS = {
     # the flute's pitch moves with the pressure (2 cents lower at 0.8): measured at 0.9,
     # the pressure of flute_ui_MIDI, for which the model is tuned
     "pm.fluteModel": ("pm.fluteModel(L, 0.5, 0.9)", 0.5),
-    "pm.brassModel": ("pm.brassModel(L, 0.5, 0.5, 0.8)", 0.5),
+    # the brass's pitch moves with the pressure too: measured at 0.5, the default gain of
+    # brass_ui_MIDI, for which the model is tuned
+    "pm.brassModel": ("pm.brassModel(L, 0.5, 0.5, 0.5)", 0.5),
 }
 MIDI_SKIP = 0.5         # seconds of attack skipped for a MIDI instrument,
 MIDI_SKIP_OF = {"marimba_ui_MIDI": 0.01}  # except a struck one, silent after 0.5 s
