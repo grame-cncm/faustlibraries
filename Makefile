@@ -43,6 +43,10 @@
 
 FAUST ?= faust
 FAUST_OPT ?= -double -t 0
+# faust finds the libraries of the root in the current directory, not those of dx7/,
+# which tests/dx7_tests.dsp loads by their installed names (library("operator.lib")):
+# without -I dx7 it would compile the copies installed with faust, not this checkout's.
+FAUST_INCLUDES := -I dx7
 FAUSTBENCH ?= faustbench-llvm
 CXX ?= g++
 CXXFLAGS ?= -O2 -std=c++17
@@ -145,7 +149,7 @@ $(REFERENCE_DIR)/%.ref: | $(REFERENCE_DIR) $(BUILD_DIR)
 	file='$(call file_for,$*)'; \
 	if [ -z "$$file" ]; then echo "No source file found for test '$*'"; exit 1; fi; \
 	printf '[reference] %s from %s\n' '$*' "$$file"; \
-	$(FAUST) $(FAUST_OPT) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
+	$(FAUST) $(FAUST_OPT) $(FAUST_INCLUDES) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
 	if ! $(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.cpp -o $(BUILD_DIR)/$*; \
 	then \
 		echo "[fail] build failed for $*"; \
@@ -194,7 +198,7 @@ $(OUTPUT_DIR)/%.out: | $(OUTPUT_DIR) $(BUILD_DIR)
 	file='$(call file_for,$*)'; \
 	if [ -z "$$file" ]; then echo "No source file found for test '$*'"; exit 1; fi; \
 	printf '[check] %s from %s\n' '$*' "$$file"; \
-	$(FAUST) $(FAUST_OPT) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
+	$(FAUST) $(FAUST_OPT) $(FAUST_INCLUDES) -a $(ARCH) -pn $* $$file -o $(BUILD_DIR)/$*.cpp; \
 	if ! $(CXX) $(CXXFLAGS) $(BUILD_DIR)/$*.cpp -o $(BUILD_DIR)/$*; \
 		then \
 			echo "[fail] build failed for $*"; \
@@ -222,7 +226,7 @@ $(SANITIZE_OUTPUT_DIR)/%.ok: | $(SANITIZE_OUTPUT_DIR) $(SANITIZE_BUILD_DIR)
 	printf '[sanitize] %s from %s\n' '$*' "$$file"; \
 	for p in $(SANITIZE_PRECISIONS); do \
 		exe=$(SANITIZE_BUILD_DIR)/$*.$$p; \
-		if ! $(FAUST) -$$p $(SANITIZE_FAUST_OPT) -a $(ARCH) -pn $* $$file -o $$exe.cpp; then \
+		if ! $(FAUST) -$$p $(SANITIZE_FAUST_OPT) $(FAUST_INCLUDES) -a $(ARCH) -pn $* $$file -o $$exe.cpp; then \
 			echo "[fail] faust failed for $* (-$$p)"; \
 			exit 1; \
 		fi; \

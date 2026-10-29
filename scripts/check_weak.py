@@ -75,7 +75,8 @@ def float_tol():
 
 
 def newest_source(dsp):
-    return max(os.path.getmtime(p) for p in glob.glob(os.path.join(ROOT, "*.lib")) + [dsp])
+    libs = glob.glob(os.path.join(ROOT, "*.lib")) + glob.glob(os.path.join(ROOT, "dx7", "*.lib"))
+    return max(os.path.getmtime(p) for p in libs + [dsp])
 
 
 def program(spec, args):
@@ -85,8 +86,8 @@ def program(spec, args):
     if not (os.path.exists(cpp) and os.path.getmtime(cpp) >= newest_source(dsp)):
         # faust looks for libraries in the current directory before the -I ones:
         # compile from ROOT so that the libraries are this checkout's
-        r = subprocess.run([args.faust, "-double", "-t", "0", "-I", ROOT, "-pn", name, dsp,
-                            "-o", cpp], capture_output=True, text=True, cwd=ROOT)
+        r = subprocess.run([args.faust, "-double", "-t", "0", "-I", ROOT, "-I", os.path.join(ROOT, "dx7"),
+                            "-pn", name, dsp, "-o", cpp], capture_output=True, text=True, cwd=ROOT)
         if r.returncode != 0:
             if os.path.exists(cpp):
                 os.remove(cpp)  # not reused as up to date next time

@@ -612,7 +612,8 @@ def evaluate(sym, expr, bindings, defs, prefixes, workdir, programs, wrap=None):
         try:
             # -e stops after the evaluation, which checks names and arities;
             # the evaluated program goes to stdout, where measure_io reads it
-            r = subprocess.run(["faust", "-e", "-I", str(ROOT), str(path), "-o", "/dev/stdout"],
+            r = subprocess.run(["faust", "-e", "-I", str(ROOT), "-I", str(ROOT / "dx7"), str(path),
+                                "-o", "/dev/stdout"],
                                capture_output=True, text=True, cwd=ROOT, timeout=120)
         except subprocess.TimeoutExpired:
             return None, ("error", "compilation timed out")

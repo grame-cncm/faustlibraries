@@ -117,7 +117,7 @@ def run_probe(source: str, frames: int) -> np.ndarray | None:
         # faust looks for libraries in the current directory before the -I ones:
         # compile from ROOT so that the libraries plotted are this checkout's.
         faust = subprocess.run(
-            ["faust", "-I", str(ROOT), "-double", "-a", str(ARCH),
+            ["faust", "-I", str(ROOT), "-I", str(ROOT / "dx7"), "-double", "-a", str(ARCH),
              str(d / "p.dsp"), "-o", str(cpp)],
             capture_output=True, text=True, cwd=ROOT)
         if faust.returncode != 0:
