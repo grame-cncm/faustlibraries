@@ -20,6 +20,7 @@ or later.
 | [`floatdiff.py`](#floatdiffpy) | compares a test output with its reference, within a tolerance | `make check` |
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_extremes.py`](#check_extremespy) | renders every test with its sliders at their extremes, all and one by one | `make check-extremes` |
+| [`check_reinit.py`](#check_reinitpy) | renders every test after a second `init()`, at the same rate and after a rate change: it must equal a fresh instance | `make check-reinit` |
 | [`check_long.py`](#check_longpy) | renders every test for 2 min at 192 kHz in float and double: non-finite, growth, subnormals, drift | `make check-long` |
 | [`check_weak.py`](#check_weakpy) | flags the tests whose reference validates little: silent, below the tolerance, constant, settled, inputs unused | `make check-weak`, `check_doc.py` (`--changed --skip-missing`) |
 | [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java | `make check-backends`, `check_doc.py` (`--changed --lang wasm`) |
@@ -175,6 +176,37 @@ reason; an entry that no longer fails is reported. It uses the `-single`
 builds of `check_precision.py`, in the same build directory: about two
 minutes for the whole suite once they are built.
 
+The harness takes, in the same argument and comma-separated, the options of
+a second schedule, used by the scripts below and by `check_backends.py
+--compare`: `block=N` (compute() in blocks of N frames from frame 0, the
+buttons released at FRAMES/2 exactly, the block split there: the schedule of
+the backend runners), `nopress` (the buttons never pressed, as under `cmaj
+render`), `reinit=SR0` (first initialized at SR0 and run, then initialized
+again at the rate of the run, which only is written) and `jump` or `jump:I`
+(the sliders, or the I-th alone, at default, max, min, max, min, max, min,
+default over the eighths of the run). Without them the schedule is that of
+`print_arch.cpp`, unchanged.
+
+### `check_reinit.py`
+
+```
+scripts/check_reinit.py [-k REGEX] [--precision single|double] [--block 512]
+                        [--write-baseline] [--json FILE] [FILE.dsp ...]
+make check-reinit [REINIT_ARGS="tests/xx_tests.dsp"]
+```
+
+Renders every test after a second `init()`, as a host calls it to reset a
+plugin or when the sample rate changes, and compares it with a fresh
+instance: 48 kHz after 48 kHz, 192 kHz after 44.1 kHz and 44.1 kHz after
+192 kHz, one second each (`reinit=SR0` against the same schedule without it,
+in blocks of 512 frames). Every other check initializes an instance once, so
+a state that `instanceClear()` does not reset, a table filled at the first
+rate only, or a constant computed from it, passes them all. Both renders
+come from the same binary: they must be identical sample for sample
+(non-finite samples at the same places); the first difference is reported
+with its frame and size, unless `tests/reinit-baseline.json` accepts that
+test and pair (`192000after44100`), with a reason. It uses the `-single`
+builds of `check_precision.py`.
 
 ### `check_long.py`
 
