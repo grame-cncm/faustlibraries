@@ -22,6 +22,7 @@ or later.
 | [`check_extremes.py`](#check_extremespy) | renders every test with its sliders at their extremes, all and one by one | `make check-extremes` |
 | [`check_jumps.py`](#check_jumpspy) | renders every test with its sliders jumping between their bounds during the run, all and one by one | `make check-jumps` |
 | [`check_reinit.py`](#check_reinitpy) | renders every test after a second `init()`, at the same rate and after a rate change: it must equal a fresh instance | `make check-reinit` |
+| [`check_sr.py`](#check_srpy) | renders every test at 44.1, 96 and 192 kHz, its noises replaced by a signal that is the same at every rate: the shape of its spectrum, its level, its onset and decay must not move | `make check-sr` |
 | [`check_long.py`](#check_longpy) | renders every test for 2 min at 192 kHz in float and double: non-finite, growth, subnormals, drift | `make check-long` |
 | [`check_weak.py`](#check_weakpy) | flags the tests whose reference validates little: silent, below the tolerance, constant, settled, inputs unused | `make check-weak`, `check_doc.py` (`--changed --skip-missing`) |
 | [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java; with `--compare`, compares their outputs with the C++ build | `make check-backends`, `make check-backend-outputs` (`--compare`), `check_doc.py` (`--changed --lang wasm`) |
@@ -70,6 +71,8 @@ are run by `doc/Makefile`.
 - `check_tuning.py`: `faustprobe` and `numpy`;
 - `check_osc_claims.py`: `faustprobe`, `numpy` and the export with measured
   io (`make doc-index-split`, which the make target runs first);
+- `check_sr.py`: `faust`, a C++ compiler, `numpy` and the split export
+  (`make doc-index-split`, which the make target runs first);
 - certification: `faust-rs` and `lean` (4.31);
 - everything else: the Python standard library only.
 
@@ -235,6 +238,67 @@ come from the same binary: they must be identical sample for sample
 with its frame and size, unless `tests/reinit-baseline.json` accepts that
 test and pair (`192000after44100`), with a reason. It uses the `-single`
 builds of `check_precision.py`.
+
+### `check_sr.py`
+
+```
+scripts/check_sr.py [-k REGEX] [--rates 44100,96000,192000] [--seconds 2] [--export DIR]
+                    [--list-bound] [--write-baseline] [--json FILE] [FILE.dsp ...]
+make check-sr [SR_ARGS="tests/xx_tests.dsp"]
+```
+
+Checks that every test sounds the same at 44.1, 96 and 192 kHz: a parameter
+in Hz or in seconds must not move with the rate. `make check` runs at 48 kHz
+only, `check-precision` compares float with double at each rate, and the
+claims checks measure the filters, the instruments and the oscillators only:
+in 2026, seven `physmodels.lib` models played up to 196 cents sharp at
+192 kHz (issue #323), and `os.polyblep_triangle` leaked through a pole fixed
+at 0.999, both right at 48 kHz.
+
+Digital white noise is another sequence at each rate, and a noise burst
+through a resonator measured on two seconds moves by 2 to 3 dB between rates
+by chance alone. The tests are therefore built (`-double`, in
+`tests/build-sr`) against a copy of the libraries, `tests/build-sr/lib`, where
+`no.noise`, `no.multinoise` and `no.noises` are sums of 128 sines a semitone
+apart from 20 Hz to 20 kHz, with a white density, the RMS level of
+`no.noise` and their own phases per channel: the same signal at every rate.
+Each test is rendered for two seconds per rate with `arch/precision_arch.cpp`
+(inputs at zero, buttons pressed for the first half). For each output loud
+enough, whose octave bands hold most of its power:
+
+- `spectrum`: the power of the octaves from 125 Hz to 4 kHz, against their
+  sum, moves by more than 1 dB (the bands above -30 dB of the sum);
+- `level`: the power of those bands follows none of three laws within 1 dB:
+  unchanged (a signal defined in time), lower by 10 log10(SR/44100) (white
+  noise per sample, `ba.sAndH` of a hash), lower by 20 log10(SR/44100)
+  (impulses of one sample, and a filter's response to them);
+- `onset`, `decay`: the envelope (RMS over 20 ms) reaches -20 dB of its
+  maximum, or stays below -20 or -40 dB of it, at times that differ by more
+  than 40 ms and 10 %.
+
+The periodogram has no window: a window would hide the start of the render,
+where an impulse response lies, and the leakage of the rectangular one is the
+same function of time at every rate. A function whose parameter is a number
+of samples or a coefficient depends on the rate by definition (`ba.pulse(p)`,
+`ba.slidingSum(n)`, `fi.pole(p)`, the comb filters): `tests/sr-baseline.json`
+lists such symbols (`symbols`), each with its reason, and their tests (the
+export's `testCode`) are measured but not judged (`--list-bound`); other tests
+are accepted by test and key (`accepted`). `--write-baseline` proposes the
+symbols whose Usage parameter reads as samples or a coefficient: proposals to
+check against the doc (the `fi.tf*s` coefficients are those of the s-plane,
+independent of the rate). About five minutes for all tests, most of it to
+build them.
+
+The baseline is not written yet. The first run (2026-10-29) finds 471 of the
+2352 tests moving: 127 tied to the rate by a parameter in samples or a
+coefficient, 77 `_jump` tests (the transient a jump leaves, and cutoffs that
+reach 20 kHz, within an octave of Nyquist at 44.1 kHz), 75 physical models,
+33 reverbs and demos with delays in samples, and real faults:
+`ve.crybaby`'s gain grows as the rate (+12.9 dB at 192 kHz, a numerator
+`1 - z^-1` in 1/SR over a bandwidth `d` in 1/SR), the bells and the marimba
+of `physmodels.lib` by as much, `pm.guitar` decays in 0.78 s at 44.1 kHz and
+1.22 s at 192 kHz, `ve.oberheimLPF` loses 3.3 dB at 192 kHz. Until it is
+written, `make check-sr` fails.
 
 ### `check_long.py`
 

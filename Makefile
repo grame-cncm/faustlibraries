@@ -24,6 +24,9 @@
 #                     tests/reinit-baseline.json.
 # `make check-jumps` - render every test with its sliders jumping between their bounds
 #                     during the run: non-finite, blow-up, against tests/jumps-baseline.json.
+# `make check-sr`   - render every test at 44.1, 96 and 192 kHz, the noises made the same
+#                     signal at every rate: spectrum shape, level, onset and decay times,
+#                     against tests/sr-baseline.json.
 # `make check-backend-outputs` - compare the outputs of WebAssembly and Cmajor (Julia with
 #                     BACKEND_OUTPUTS_ARGS="--lang wasm,cmajor,julia --run-julia") with the
 #                     C++ build in -single,
@@ -106,7 +109,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-backend-outputs check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-osc-claims check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-sr check-backend-outputs check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-osc-claims check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -195,6 +198,9 @@ check-reinit: ## Render every test after a second init() at the same rate and af
 
 check-jumps: ## Render every test with its sliders jumping between their bounds, all and one by one (baseline: tests/jumps-baseline.json); JUMPS_ARGS="tests/xx_tests.dsp"
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_jumps.py --build-dir $(PRECISION_BUILD_DIR) $(JUMPS_ARGS)
+
+check-sr: doc-index-split ## Render every test at 44.1, 96 and 192 kHz with rate-independent noises: spectrum shape, level, onset and decay must not move (baseline: tests/sr-baseline.json); SR_ARGS="tests/xx_tests.dsp"
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_sr.py --export $(DOC_INDEX_SPLIT_DIR) $(SR_ARGS)
 
 check-precision-matrix: ## check-precision with C++ -O2 and -O3 -ffast-math, Faust -vec and -lang ocpp in turn
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) --matrix all $(PRECISION_ARGS)
