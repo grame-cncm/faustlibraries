@@ -81,7 +81,7 @@ closed source license or any other license if you decide so.
 import("stdfaust.lib");
 
 declare name "Faust Physical Models Library";
-declare version "1.2.10";
+declare version "1.2.11";
 
 /*
 TODO:
@@ -2634,7 +2634,8 @@ fluteEmbouchure(pressure) =
 //
 // Where:
 //
-// * `opening`: the "opening" of bell (0-1)
+// * `opening`: the "opening" of bell (0-1): the pole of the one-pole lowpass the bell
+// reflects through, at 44.1 kHz; the lowpass has the same cutoff at every sample rate
 //
 // #### Example
 //
@@ -2646,10 +2647,15 @@ fluteEmbouchure(pressure) =
 // ```
 // pm = library("physmodels.lib");
 // no = library("noises.lib");
+// ma = library("maths.lib");
+// ba = library("basics.lib");
 // wBell_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.4);
+// wBell_slider_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(hslider("opening", 0.4, 0, 1, 0.01));
+// wBell_modulated_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.1 + 0.8*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// wBell_jump_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.1 + 0.8*sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 // ```
 //----------------------------------
-wBell(opening) = rTermination(basicBlock,si.smooth(opening));
+wBell(opening) = rTermination(basicBlock,si.smooth(pow(opening, 44100/ma.SR)));
 
 
 //-------`(pm.)fluteHead`----------
@@ -2739,10 +2745,16 @@ clarinetModel(tubeLength,pressure,reedStiffness,bellOpening) = endChain(modelCha
 with {
     // the reed reflects with inversion, the bell without: a period is two round
     // trips in the tube, hence tubeLength/2. Delay of a round trip in samples
-    // (measured): the chain, its terminations and the bell filter
-    loopDelay = 6.95;
+    // (measured): the chain and its terminations, and wBell's lowpass, which counts
+    // 0.964 times its delay at DC, pb/(1 - pb), at every note (a fit within 0.13
+    // sample for bellOpening from 0.1 to 0.7, from 44.1 to 192 kHz)
+    pb = pow(bellOpening, 44100/ma.SR); // the pole of wBell's lowpass
+    loopDelay = 5.99 + 0.964*pb/max(1 - pb, 0.01);
     maxTubeLength = maxLength;
-    tunedLength = tubeLength/2-loopDelay*speedOfSound/ma.SR;
+    // at least 1.5 samples each way, the shortest delay fdelay4 interpolates: below it, a
+    // tube starting from 0 (clarinetModel_ui's si.smoo) left in single precision at 176.4
+    // and 192 kHz a parasitic mode at 0.39*SR, or an onset that depended on the rounding
+    tunedLength = max(3*speedOfSound/ma.SR, tubeLength/2-loopDelay*speedOfSound/ma.SR);
     modelChain =
         chain(
             clarinetMouthPiece(reedStiffness,pressure) :
@@ -2895,7 +2907,8 @@ with {
     ratio = 1.2081 - 1.2447*pow(f, -0.9191);
     w = 2*ma.PI*f/(ratio*ma.SR);
     pdc = pow(0.995, 44100/ma.SR); // the pole of brassLips's dcblocker
-    loopDelay = 6 + atan2(mute*sin(w), 1 - mute*cos(w))/w
+    pb = pow(mute, 44100/ma.SR); // the pole of wBell's lowpass
+    loopDelay = 6 + atan2(pb*sin(w), 1 - pb*cos(w))/w
         - (atan2(sin(w), 1 - cos(w)) - atan2(pdc*sin(w), 1 - pdc*cos(w)))/w;
     tunedLength = tubeLength*ratio-loopDelay*speedOfSound/ma.SR;
     brassChain = chain(brassLips(tubeLength,lipsTension,pressure) : openTube(maxTubeLength,tunedLength) : wBell(mute) : out);

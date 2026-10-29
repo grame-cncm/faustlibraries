@@ -90,6 +90,9 @@ clarinetMouthPiece_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.cla
 brassLips_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.brassLips(0.3, 0.2, 0.1);
 fluteEmbouchure_test = 0.25, -0.15, 0.05 : pm.fluteEmbouchure(0.5);
 wBell_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.4);
+wBell_slider_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(hslider("opening", 0.4, 0, 1, 0.01));
+wBell_modulated_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.1 + 0.8*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+wBell_jump_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.1 + 0.8*sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 fluteHead_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.fluteHead;
 fluteFoot_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.fluteFoot;
 clarinetModel_test = pm.clarinetModel(0.9, 0.4, 0.3, 0.2);

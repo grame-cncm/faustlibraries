@@ -2167,7 +2167,8 @@ _,_,_ : wBell(opening) : _,_,_
 
 Where:
 
-* `opening`: the "opening" of bell (0-1)
+* `opening`: the "opening" of bell (0-1): the pole of the one-pole lowpass the bell
+reflects through, at 44.1 kHz; the lowpass has the same cutoff at every sample rate
 
 #### Example
 
@@ -2179,7 +2180,12 @@ chain(A : openTube(maxLength,length) : wBell(opening))
 ```
 pm = library("physmodels.lib");
 no = library("noises.lib");
+ma = library("maths.lib");
+ba = library("basics.lib");
 wBell_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.4);
+wBell_slider_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(hslider("opening", 0.4, 0, 1, 0.01));
+wBell_modulated_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.1 + 0.8*tri) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+wBell_jump_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.1 + 0.8*sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 ----
