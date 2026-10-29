@@ -3,7 +3,7 @@ ma = library("maths.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
 
-declare version "2.0.2";
+declare version "2.0.3";
 
 // env(rates, levels, outLevel, rateScale, gate) : _
 import("env.lib");
@@ -169,8 +169,17 @@ with {
   freq = Freqlut_lookup(osc_freq + ba.if(mode, pitch_base, pitch_mod));
 
   sineWave(freq) = m_hsp_phasor(freq, oscKeySync & (gate > gate'), 0) + phaseMod : sin(_*2.*ma.PI);
-  // mathematical hard-syncing phasor (see `phasor_imp` in `faustlibraries/oscillators.lib`)
-  m_hsp_phasor(freq, reset, phase) = (select2(reset, +(freq/ma.SR), phase) : ma.decimal) ~ _;
+  // hard-syncing phasor on an integer phase counted modulo N (as `tphase` in
+  // `oscillators.lib`): the step p is rounded at each sample, but no rounding error
+  // accumulates, so the phase does not drift in single precision as a float phase
+  // adding freq/ma.SR does (1.4 cents at 14 Hz at 192 kHz). N = 2^30 gives a frequency
+  // resolution of ma.SR/2^30 (1.8e-4 Hz at 192 kHz), and m + p stays below 2^31 up to
+  // freq = ma.SR.
+  m_hsp_phasor(freq, reset, phase) = (select2(reset, +(p), int(phase*N)) : %(N)) ~ _ : float : /(N)
+  with {
+    N = 1 << 30;
+    p = int(rint(freq/ma.SR*N));
+  };
 
   // ---- PITCH BEND ----
   pitch_base = 0; // TODO:
