@@ -278,27 +278,47 @@ enough, whose octave bands hold most of its power:
 
 The periodogram has no window: a window would hide the start of the render,
 where an impulse response lies, and the leakage of the rectangular one is the
-same function of time at every rate. A function whose parameter is a number
-of samples or a coefficient depends on the rate by definition (`ba.pulse(p)`,
-`ba.slidingSum(n)`, `fi.pole(p)`, the comb filters): `tests/sr-baseline.json`
-lists such symbols (`symbols`), each with its reason, and their tests (the
-export's `testCode`) are measured but not judged (`--list-bound`); other tests
-are accepted by test and key (`accepted`). `--write-baseline` proposes the
-symbols whose Usage parameter reads as samples or a coefficient: proposals to
-check against the doc (the `fi.tf*s` coefficients are those of the s-plane,
-independent of the rate). About five minutes for all tests, most of it to
-build them.
+same function of time at every rate. A constant output (`ma.SR_test`) has
+nothing in the bands and is not judged.
 
-The baseline is not written yet. The first run (2026-10-29) finds 471 of the
-2352 tests moving: 127 tied to the rate by a parameter in samples or a
-coefficient, 77 `_jump` tests (the transient a jump leaves, and cutoffs that
-reach 20 kHz, within an octave of Nyquist at 44.1 kHz), 75 physical models,
-33 reverbs and demos with delays in samples, and real faults:
-`ve.crybaby`'s gain grows as the rate (+12.9 dB at 192 kHz, a numerator
-`1 - z^-1` in 1/SR over a bandwidth `d` in 1/SR), the bells and the marimba
-of `physmodels.lib` by as much, `pm.guitar` decays in 0.78 s at 44.1 kHz and
-1.22 s at 192 kHz, `ve.oberheimLPF` loses 3.3 dB at 192 kHz. Until it is
-written, `make check-sr` fails.
+A `_jump_test` is measured but not judged: the transient a jump leaves in the
+state of a recursive filter depends on the rate, in a TPT form too.
+`fi.highpass(4)` and `fi.SVFTPT` at 20 Hz and at 5 kHz, and a switch between
+their two outputs, do not move; a jump of their cutoff between the two does.
+A function whose parameter is a number of samples or a coefficient depends on
+the rate by definition (`ba.pulse(p)`, `ba.slidingSum(n)`, `fi.pole(p)`, the
+comb filters): `tests/sr-baseline.json` lists such symbols (`symbols`), each
+with its reason, and their tests (the export's `testCode`) are measured but
+not judged (`--list-bound`). Other tests are accepted by test and key
+(`accepted`). `--write-baseline` proposes the symbols whose Usage parameter
+reads as samples or a coefficient: proposals to check against the doc (the
+`fi.tf*s` coefficients are those of the s-plane, independent of the rate).
+About two minutes for all tests once built, five the first time.
+
+The baseline comes from the triage of 2026-10-29, when 471 of the 2352 tests
+moved: 78 symbols, and 209 tests accepted. 47 of them are faults of the
+library, their reason starting with `fault:`:
+
+- `ve.crybaby`'s gain grows as the rate (+12.9 dB at 192 kHz): its
+  numerator `1 - z^-1` and its bandwidth `d` are both in 1/SR, so the peak
+  gain 1/d is in SR; `ve.autowah` inherits it;
+- `webaudio.lib` clamps the normalized cutoff to at least 0.01, which is not
+  in the doc: no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz;
+- `pm.modeFilter`'s peak gain is 1/(1 - r), in t60*SR: the bells, the
+  marimba, the djembe and `pm.modularInterpBody` are 12.8 dB louder at
+  192 kHz;
+- `sy.combString` applies a pole per sample once per period: its decay goes
+  from 0.42 s at 44.1 kHz to 1.96 s at 192 kHz;
+- `fi.oneEuro` takes the derivative of its output, not of its input as the
+  1-euro filter does: a tracking error times SR.
+
+49 are marked `not explained yet:`, with what moved: the winds and the
+violin of `physmodels.lib`, `re.valhallaSupermassive`, `re.vital_rev`,
+`no.colored_noise`, the spectral-centroid analyzers among them. The other
+entries are rate-dependent by construction: string loop filters with fixed
+taps, an approximation for fr << SR (`ve.moog_vcf`), the saturation of
+`ve.oberheim` applied once per sample, the aliasing of a fold of noise up to
+20 kHz at 44.1 kHz, a test schedule in samples (`ba.time`, `ba.pulse(64)`).
 
 ### `check_long.py`
 

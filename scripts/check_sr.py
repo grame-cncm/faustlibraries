@@ -43,7 +43,11 @@ them), what does not depend on the rate in a correct program:
   never stays below: it is not judged).
 
 A test whose output is silent, not finite or does not build at one rate is
-skipped (check_precision.py and check_weak.py report those). A function whose
+skipped (check_precision.py and check_weak.py report those). A `_jump_test`
+is measured but not judged: the transient a jump leaves in the state of a
+recursive filter depends on the rate, in a TPT form too (fi.highpass(4) and
+fi.SVFTPT at 20 Hz and at 5 kHz, and a switch between their two outputs,
+do not move; a jump of their cutoff between the two does). A function whose
 parameter is a number of samples or a coefficient depends on the rate by
 definition (`ba.pulse(p)`, `ba.slidingSum(n)`, `fi.pole(p)`): such symbols
 are listed in `tests/sr-baseline.json` (`symbols`), each with the parameter
@@ -203,18 +207,30 @@ def rate_bound(export):
     return out
 
 
+def sum_db(levels, axis=None):
+    """10 log10 of the sum of the powers given in dB, without overflow (an output of ma.MAX)."""
+    top = np.max(levels, axis=axis, keepdims=True)
+    return np.squeeze(top + 10 * np.log10(np.sum(10 ** ((levels - top) / 10), axis=axis, keepdims=True)))
+
+
 def bands_db(y, sr):
     """Power (dB) of y in each octave band of BANDS, and its total power (dB), from a periodogram
     without window: a window would hide the start of the render, where an impulse response
     lies, and the leakage of the rectangular one is the same function of time at every rate."""
-    x = y - y.mean()
+    peak = float(np.abs(y).max()) or 1.0
+    x = y / peak  # ma.MAX_test outputs 1.8e308: its mean would overflow
+    x = x - x.mean()
     p = np.abs(np.fft.rfft(x)) ** 2 / len(y) ** 2
     hz = np.fft.rfftfreq(len(y), 1 / sr)
     out = []
     for c in BANDS:
         sel = (hz >= c / math.sqrt(2)) & (hz < c * math.sqrt(2))
         out.append(10 * math.log10(p[sel].sum() + 1e-300))
-    return np.array(out), 10 * math.log10(np.mean(x ** 2) + 1e-300)
+    power = np.mean(x ** 2)
+    if power < 1e-20:
+        return None, None  # constant: nothing in the bands (ma.SR_test)
+    gain = 20 * math.log10(peak)
+    return np.array(out) + gain, 10 * math.log10(power) + gain
 
 
 def envelope_times(y, sr):
@@ -235,7 +251,8 @@ def envelope_times(y, sr):
 
 def describe(out, sr):
     """Per output: band levels and envelope times; None for an output too quiet to judge."""
-    rms = np.sqrt(np.mean(out ** 2, axis=0))
+    scale = np.maximum(np.abs(out).max(axis=0), 1e-300)
+    rms = scale * np.sqrt(np.mean((out / scale) ** 2, axis=0))
     loud = rms.max()
     res = []
     for ch in range(out.shape[1]):
@@ -244,7 +261,7 @@ def describe(out, sr):
             continue
         y = out[:, ch]
         bands, total = bands_db(y, sr)
-        if 10 * math.log10(np.sum(10 ** (bands / 10))) < total + OUT_OF_BAND_DB:
+        if bands is None or sum_db(bands) < total + OUT_OF_BAND_DB:
             res.append(None)  # the output lies above or below the bands: tosc(12000), a DC
             continue
         res.append({"bands": bands.round(3).tolist(), "times": envelope_times(y, sr)})
@@ -261,7 +278,7 @@ def compare(desc):
             continue
         tag = f" (output {ch})" if len(desc[rates[0]]) > 1 else ""
         b = np.array([d["bands"] for d in per])               # rates x bands
-        total = 10 * np.log10(np.sum(10 ** (b / 10), axis=1))
+        total = sum_db(b, axis=1)
         shape = b - total[:, None]
         judged = np.all(shape > SHAPE_FLOOR_DB, axis=0)  # against the sum of the bands
         if judged.any():
@@ -311,7 +328,7 @@ def check_test(spec, args):
         if out.shape[1] == 0 or not np.isfinite(out).all():
             res["skip"] = f"no output or not finite at {sr} Hz"
             return res
-        if np.sqrt(np.mean(out ** 2)) < SILENT_RMS:
+        if np.abs(out).max() < SILENT_RMS:
             res["skip"] = f"silent at {sr} Hz"
             return res
         desc[sr] = describe(out, sr)
@@ -368,6 +385,9 @@ def main():
             ok_here = accepted.get(name, {})
             found = res.get("found", {})
             res["symbols"] = owners.get(name, [])
+            if name.endswith("_jump_test"):
+                res["jump"] = True
+                continue
             mine = [q for q in res["symbols"] if q in bound_symbols]
             if mine:
                 res["bound"] = mine[0]
@@ -390,7 +410,7 @@ def main():
         proposals = rate_bound(args.export)
         new, syms = {}, {q: bound_symbols[q] for q in moving_symbols}
         for res in results:
-            if "bound" in res or not res.get("found"):
+            if "bound" in res or "jump" in res or not res.get("found"):
                 continue
             proposed = [q for q in res.get("symbols", []) if q in proposals]
             if proposed:
@@ -417,8 +437,10 @@ def main():
             print("  " + line)
     skipped = sum(1 for r in results if "skip" in r)
     nbound = sum(1 for r in results if "bound" in r)
+    njump = sum(1 for r in results if "jump" in r)
     print(f"\n[sr] {len(specs)} tests at {', '.join(map(str, args.rates))} Hz ({skipped} skipped: no build, "
-          f"silent or not finite; {nbound} not judged: a parameter in samples, --list-bound) in "
+          f"silent or not finite; not judged: {nbound} with a parameter in samples, --list-bound, "
+          f"{njump} _jump tests) in "
           f"{time.time() - t0:.0f} s: {len(set(failures))} failed")
     return 1 if failures and not args.write_baseline else 0
 
