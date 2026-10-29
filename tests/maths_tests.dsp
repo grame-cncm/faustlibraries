@@ -29,13 +29,13 @@ hypot_test = (3.0, 4.0) : ma.hypot;
 ldexp_test = (1.5, 3) : ma.ldexp;
 scalb_test = (2.0, -1) : ma.scalb;
 log1p_test = 0.5 : ma.log1p;
-log1p_slider_test = par(i, 7, ma.log1p(hslider("log1p:x%i", ba.take(i+1, X), -1, 1.0e30, 0.001))) with { X = (-0.9999990463256836, -0.75, -9.313225746154785e-10, 9.313225746154785e-10, 0.25, 1.0e7, 1.0e30); };
+log1p_slider_test = par(i, 7, ma.log1p(xi(i))/ba.take(i+1, (1, 1, d(i), d(i), 1, 1, 1))) with { X = (-0.9999990463256836, -0.75, -9.313225746154785e-10, 9.313225746154785e-10, 0.25, 1.0e7, 1.0e30); xi(i) = hslider("log1p:x%i", ba.take(i+1, X), -1, 1.0e30, 0.001); d(i) = xi(i) + (xi(i) == 0); }; // the points at +-2^-30 divided by their argument, so that make check (tolerance 1e-5) sees them; d(i) is 1 where the argument is 0 (Cmajor snaps a slider's default to its step)
 log1p_modulated_test = ma.log1p(1000.999*tri*tri*tri - 0.999) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 logb_test = 8.0 : ma.logb;
 ilogb_test = 8.0 : ma.ilogb;
 log2_test = 8.0 : ma.log2;
 expm1_test = 0.5 : ma.expm1;
-expm1_slider_test = par(i, 6, ma.expm1(hslider("expm1:x%i", ba.take(i+1, X), -1.0e5, 10, 0.001))) with { X = (-1.0e5, -200.0, -9.313225746154785e-10, 9.313225746154785e-10, 0.5, 10.0); };
+expm1_slider_test = par(i, 6, ma.expm1(xi(i))/ba.take(i+1, (1, 1, d(i), d(i), 1, 1))) with { X = (-1.0e5, -200.0, -9.313225746154785e-10, 9.313225746154785e-10, 0.5, 10.0); xi(i) = hslider("expm1:x%i", ba.take(i+1, X), -1.0e5, 10, 0.001); d(i) = xi(i) + (xi(i) == 0); }; // the points at +-2^-30 divided by their argument, so that make check (tolerance 1e-5) sees them; d(i) is 1 where the argument is 0 (Cmajor snaps a slider's default to its step)
 expm1_modulated_test = ma.expm1(20*tri - 10) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 acosh_test = 1.5 : ma.acosh;
 asinh_test = 0.5 : ma.asinh;
@@ -57,7 +57,7 @@ np2_test = 5 : ma.np2;
 frac_test = 3.75 : ma.frac;
 decimal_test = 3.75 : ma.decimal;
 modulo_test = (-3, 4) : ma.modulo;
-isnan_test = (os.tosc(1) - 2.0) : sqrt : ma.isnan;
+isnan_test = (os.tosc(4) - 0.5) : sqrt : ma.isnan;
 isinf_test = (os.impulse - os.impulse) : log : ma.isinf;
 nextafter_test = (1.0, 2.0) : ma.nextafter;
 chebychev_test = 0.5 : ma.chebychev(3);

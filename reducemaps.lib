@@ -54,7 +54,7 @@ ba = library("basics.lib");
 declare name "Reduce Library";
 declare author "Yann Orlarey";
 declare copyright "Grame and Yann Orlarey";
-declare version "1.2.1";
+declare version "1.2.2";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception"; 
 
 //----------------------------`(rm.)parReduce`--------------------------------
@@ -191,7 +191,8 @@ botReduce(op,n) = par(i,outputs(op),_), botReduce(op,n-1) : op;
 // #### Test
 // ```
 // rm = library("reducemaps.lib");
-// reduce_test = rm.reduce(max, 4, hslider("reduce:input", 0.5, -1, 1, 0.01));
+// os = library("oscillators.lib");
+// reduce_test = os.tosc(440) : rm.reduce(max, 4);
 // ```
 //-----------------------------------------------------------------------------
 reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
@@ -224,7 +225,8 @@ reduce(op, n, x) = compute ~ (_,_,_) : (!,!,_)
 // #### Test
 // ```
 // rm = library("reducemaps.lib");
-// reducemap_test = rm.reducemap(+, /(4), 4, hslider("reducemap:input", 0.5, -1, 1, 0.01));
+// os = library("oscillators.lib");
+// reducemap_test = os.tosc(440) : rm.reducemap(+, /(4), 4);
 // ```
 //-----------------------------------------------------------------------------
 reducemap(op, foo, n, x) = compute ~ (_,_,_) : (!,!,_)

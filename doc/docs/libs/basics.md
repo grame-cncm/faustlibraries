@@ -1141,9 +1141,10 @@ same length.
 ba = library("basics.lib");
 it = library("interpolators.lib");
 si = library("signals.lib");
+os = library("oscillators.lib");
 // 3-input processor, 2 arrays supplied -> 1 N-wide bus input, sliders smoothed:
 processArray_proc(a, b, c) = a + b + c;
-processArray_test = si.bus(4) : ba.processArray(4, processArray_proc, it.interpolate_linear, si.smoo, (0.1, 1.0), (1.0, 10.0));
+processArray_test = par(i, 4, 0.1*os.tosc(110*(i+1))) : ba.processArray(4, processArray_proc, it.interpolate_linear, si.smoo, (0.1, 1.0), (1.0, 10.0));
 ```
 
 ## Function tabulation
@@ -2172,8 +2173,8 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-autoControl = hslider("autoControl", 0.2, 0, 1, 0.01);
-automat_test = autoControl : ba.automat(120, 4, 0.0);
+os = library("oscillators.lib");
+automat_test = os.tosc(3) : ba.automat(1200, 4, 0.0);
 ```
 
 ----
@@ -2437,7 +2438,7 @@ button("on"), button("off") : on_and_off : vbargraph("output", 0, 1)
 #### Test
 ```
 ba = library("basics.lib");
-on_and_off_test = button("on"), button("off") : ba.on_and_off;
+on_and_off_test = ba.pulse(64), ba.pulse(64)@16 : ba.on_and_off;
 ```
 
 ----

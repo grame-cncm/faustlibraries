@@ -15,8 +15,8 @@ cubicnl_nodc_test = os.tosc(440) : ef.cubicnl_nodc(0.5, 0.0);
 
 gate_mono_test = os.tosc(440) : ef.gate_mono(-60, 0.0001, 0.1, 0.02);
 gate_stereo_test = os.tosc(440), os.tosc(441) : ef.gate_stereo(-60, 0.0001, 0.1, 0.02);
-gate_gain_mono_test = os.tosc(440) : ef.gate_gain_mono(-60, 0.0001, 0.1, 0.02);
-gate_gain_mono_slider_test = os.tosc(440) : ef.gate_gain_mono(hslider("gate_gain_mono:thresh", -60, -120, 0, 0.1), hslider("gate_gain_mono:att", 0.0001, 0.0001, 0.1, 0.0001), hslider("gate_gain_mono:hold", 0.1, 0, 1, 0.001), hslider("gate_gain_mono:rel", 0.02, 0.001, 1, 0.001));
+gate_gain_mono_test = os.tosc(440)*pow(1e-6, float(ba.period(Q))/Q) : ef.gate_gain_mono(-60, 0.0001, 0.1, 0.02) with { Q = int(ma.SR/2); };
+gate_gain_mono_slider_test = os.tosc(440)*pow(1e-6, float(ba.period(Q))/Q) : ef.gate_gain_mono(hslider("gate_gain_mono:thresh", -60, -120, 0, 0.1), hslider("gate_gain_mono:att", 0.0001, 0.0001, 0.1, 0.0001), hslider("gate_gain_mono:hold", 0.1, 0, 1, 0.001), hslider("gate_gain_mono:rel", 0.02, 0.001, 1, 0.001)) with { Q = int(ma.SR/2); };
 gate_gain_mono_modulated_test = no.noise*pow(0.001, float(ba.period(Q))/Q) : ef.gate_gain_mono(-30, 0.0001, 0.02, 0.001*pow(100, tri)) with { Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 gate_gain_mono_jump_test = no.noise*pow(0.001, float(ba.period(Q))/Q) : ef.gate_gain_mono(-30, 0.0001, 0.02, 0.001*pow(100, sq)) with { Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 

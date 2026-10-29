@@ -1199,7 +1199,8 @@ si.bus(18) : motion_wrapper_demo : si.bus(92)
 #### Test
 ```
 dm = library("demos.lib");
-motion_wrapper_demo_test = dm.motion_wrapper_demo;
+os = library("oscillators.lib");
+motion_wrapper_demo_test = par(i, 18, 0.5*os.tosc(0.5 + 0.5*i)) : dm.motion_wrapper_demo;
 ```
 
 ## Hysteresis

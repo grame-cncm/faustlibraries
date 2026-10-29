@@ -554,7 +554,7 @@ Where:
 ma = library("maths.lib");
 ba = library("basics.lib");
 log1p_test = 0.5 : ma.log1p;
-log1p_slider_test = par(i, 7, ma.log1p(hslider("log1p:x%i", ba.take(i+1, X), -1, 1.0e30, 0.001))) with { X = (-0.9999990463256836, -0.75, -9.313225746154785e-10, 9.313225746154785e-10, 0.25, 1.0e7, 1.0e30); };
+log1p_slider_test = par(i, 7, ma.log1p(xi(i))/ba.take(i+1, (1, 1, d(i), d(i), 1, 1, 1))) with { X = (-0.9999990463256836, -0.75, -9.313225746154785e-10, 9.313225746154785e-10, 0.25, 1.0e7, 1.0e30); xi(i) = hslider("log1p:x%i", ba.take(i+1, X), -1, 1.0e30, 0.001); d(i) = xi(i) + (xi(i) == 0); }; // the points at +-2^-30 divided by their argument, so that make check (tolerance 1e-5) sees them; d(i) is 1 where the argument is 0 (Cmajor snaps a slider's default to its step)
 log1p_modulated_test = ma.log1p(1000.999*tri*tri*tri - 0.999) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
@@ -669,7 +669,7 @@ Where:
 ma = library("maths.lib");
 ba = library("basics.lib");
 expm1_test = 0.5 : ma.expm1;
-expm1_slider_test = par(i, 6, ma.expm1(hslider("expm1:x%i", ba.take(i+1, X), -1.0e5, 10, 0.001))) with { X = (-1.0e5, -200.0, -9.313225746154785e-10, 9.313225746154785e-10, 0.5, 10.0); };
+expm1_slider_test = par(i, 6, ma.expm1(xi(i))/ba.take(i+1, (1, 1, d(i), d(i), 1, 1))) with { X = (-1.0e5, -200.0, -9.313225746154785e-10, 9.313225746154785e-10, 0.5, 10.0); xi(i) = hslider("expm1:x%i", ba.take(i+1, X), -1.0e5, 10, 0.001); d(i) = xi(i) + (xi(i) == 0); }; // the points at +-2^-30 divided by their argument, so that make check (tolerance 1e-5) sees them; d(i) is 1 where the argument is 0 (Cmajor snaps a slider's default to its step)
 expm1_modulated_test = ma.expm1(20*tri - 10) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
@@ -1206,7 +1206,7 @@ Where:
 ```
 ma = library("maths.lib");
 os = library("oscillators.lib");
-isnan_test = (os.tosc(1) - 2.0) : sqrt : ma.isnan;
+isnan_test = (os.tosc(4) - 0.5) : sqrt : ma.isnan;
 ```
 
 ----

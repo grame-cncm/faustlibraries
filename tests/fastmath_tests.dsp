@@ -8,26 +8,26 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 fexp2_test = fa.fexp2(3.3);
-fexp2_slider_test = par(i, 6, fa.fexp2(hslider("fexp2:x%i", ba.take(i+1, X), -20, 20, 0.001))) with { X = (-20.0, -0.5, 0.0, 0.3, 10.5, 20.0); };
+fexp2_slider_test = par(i, 6, fa.fexp2(xi(i))/pow(2.0, xi(i))) with { X = (-20.0, -0.5, 0.0, 0.3, 10.5, 20.0); xi(i) = hslider("fexp2:x%i", ba.take(i+1, X), -20, 20, 0.001); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fexp2_modulated_test = fa.fexp2(40*tri - 20) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fexp2_nan_test = select2(y < 1e6, 0.0, y) with { i = ba.time % 4; y = fa.fexp2(select2(i == 3, 4*i - 6, (i - 3) * (ma.MAX * 2))); };
 fexp2_faster_test = fa.fexp2_faster(3.3);
-fexp2_faster_slider_test = par(i, 6, fa.fexp2_faster(hslider("fexp2_faster:x%i", ba.take(i+1, X), -20, 20, 0.001))) with { X = (-20.0, -0.5, 0.0, 0.3, 10.5, 20.0); };
+fexp2_faster_slider_test = par(i, 6, fa.fexp2_faster(xi(i))/pow(2.0, xi(i))) with { X = (-20.0, -0.5, 0.0, 0.3, 10.5, 20.0); xi(i) = hslider("fexp2_faster:x%i", ba.take(i+1, X), -20, 20, 0.001); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fexp2_faster_modulated_test = fa.fexp2_faster(40*tri - 20) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fexp_test = fa.fexp(2.3);
-fexp_slider_test = par(i, 6, fa.fexp(hslider("fexp:x%i", ba.take(i+1, X), -14, 14, 0.001))) with { X = (-14.0, -1.0, 0.0, 0.5, 7.3, 14.0); };
+fexp_slider_test = par(i, 6, fa.fexp(xi(i))/exp(xi(i))) with { X = (-14.0, -1.0, 0.0, 0.5, 7.3, 14.0); xi(i) = hslider("fexp:x%i", ba.take(i+1, X), -14, 14, 0.001); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fexp_modulated_test = fa.fexp(28*tri - 14) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fexp_faster_test = fa.fexp_faster(2.3);
-fexp_faster_slider_test = par(i, 6, fa.fexp_faster(hslider("fexp_faster:x%i", ba.take(i+1, X), -14, 14, 0.001))) with { X = (-14.0, -1.0, 0.0, 0.5, 7.3, 14.0); };
+fexp_faster_slider_test = par(i, 6, fa.fexp_faster(xi(i))/exp(xi(i))) with { X = (-14.0, -1.0, 0.0, 0.5, 7.3, 14.0); xi(i) = hslider("fexp_faster:x%i", ba.take(i+1, X), -14, 14, 0.001); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fexp_faster_modulated_test = fa.fexp_faster(28*tri - 14) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fexp10_test = fa.fexp10(1.3);
-fexp10_slider_test = par(i, 6, fa.fexp10(hslider("fexp10:x%i", ba.take(i+1, X), -6, 6, 0.001))) with { X = (-6.0, -0.5, 0.0, 0.3, 3.1, 6.0); };
+fexp10_slider_test = par(i, 6, fa.fexp10(xi(i))/pow(10.0, xi(i))) with { X = (-6.0, -0.5, 0.0, 0.3, 3.1, 6.0); xi(i) = hslider("fexp10:x%i", ba.take(i+1, X), -6, 6, 0.001); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fexp10_modulated_test = fa.fexp10(12*tri - 6) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fdb2linear_test = fa.fdb2linear(-6.0);
-fdb2linear_slider_test = par(i, 6, fa.fdb2linear(hslider("fdb2linear:l%i", ba.take(i+1, X), -120, 24, 0.01))) with { X = (-120.0, -60.0, -6.0, 0.0, 6.0, 24.0); };
+fdb2linear_slider_test = par(i, 6, fa.fdb2linear(xi(i))/pow(10.0, xi(i)/20)) with { X = (-120.0, -60.0, -6.0, 0.0, 6.0, 24.0); xi(i) = hslider("fdb2linear:l%i", ba.take(i+1, X), -120, 24, 0.01); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fdb2linear_modulated_test = fa.fdb2linear(144*tri - 120) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 fdb2linear_faster_test = fa.fdb2linear_faster(-6.0);
-fdb2linear_faster_slider_test = par(i, 6, fa.fdb2linear_faster(hslider("fdb2linear_faster:l%i", ba.take(i+1, X), -120, 24, 0.01))) with { X = (-120.0, -60.0, -6.0, 0.0, 6.0, 24.0); };
+fdb2linear_faster_slider_test = par(i, 6, fa.fdb2linear_faster(xi(i))/pow(10.0, xi(i)/20)) with { X = (-120.0, -60.0, -6.0, 0.0, 6.0, 24.0); xi(i) = hslider("fdb2linear_faster:l%i", ba.take(i+1, X), -120, 24, 0.01); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fdb2linear_faster_modulated_test = fa.fdb2linear_faster(144*tri - 120) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 flog2_test = fa.flog2(7.3);
 flog2_slider_test = par(i, 6, fa.flog2(hslider("flog2:x%i", ba.take(i+1, X), 1e-6, 1000, 1e-6))) with { X = (1e-6, 0.01, 0.5, 1.0, 7.3, 1000.0); };

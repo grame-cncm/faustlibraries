@@ -160,7 +160,9 @@ hslider(...) : smoo;
 #### Test
 ```
 si = library("signals.lib");
-smoo_test = hslider("smoo:input", 0.5, -1, 1, 0.01) : si.smoo;
+ba = library("basics.lib");
+ma = library("maths.lib");
+smoo_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.smoo with { P = int(ma.SR/10); };
 ```
 
 ----
@@ -188,8 +190,9 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
-polySmooth_test = hslider("polySmooth:input", 0.5, -1, 1, 0.01)
-  : si.polySmooth(button("polySmooth:gate"), 0.999, 32);
+ba = library("basics.lib");
+ma = library("maths.lib");
+polySmooth_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.polySmooth(ba.period(2*Q) < Q, 0.999, 32) with { P = int(ma.SR/10); Q = int(ma.SR/4); };
 ```
 
 ----
@@ -215,8 +218,9 @@ Where:
 #### Test
 ```
 si = library("signals.lib");
-smoothAndH_test = hslider("smoothAndH:input", 0.5, -1, 1, 0.01)
-  : si.smoothAndH(button("smoothAndH:hold"), 0.999);
+ba = library("basics.lib");
+ma = library("maths.lib");
+smoothAndH_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.smoothAndH(ba.period(2*Q) < Q, 0.999) with { P = int(ma.SR/10); Q = int(ma.SR/4); };
 ```
 
 ----
@@ -234,7 +238,9 @@ hslider(...) : bsmooth : _
 #### Test
 ```
 si = library("signals.lib");
-bsmooth_test = hslider("bsmooth:input", 0.5, -1, 1, 0.01) : si.bsmooth;
+ba = library("basics.lib");
+ma = library("maths.lib");
+bsmooth_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.bsmooth with { P = int(ma.SR/10); };
 ```
 
 ----
@@ -298,7 +304,7 @@ si = library("signals.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
-smooth_test = hslider("smooth:input", 0.5, -1, 1, 0.01) : si.smooth(0.9);
+smooth_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.smooth(0.9) with { P = int(ma.SR/10); };
 smooth_slider_test = no.noise : si.smooth(hslider("smooth:s", 0.999, 0, 0.9999, 0.0001));
 smooth_modulated_test = no.noise : si.smooth(1 - 0.1*pow(0.001, tri)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 smooth_jump_test = no.noise : si.smooth(1 - 0.1*pow(0.001, sq)) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
@@ -334,7 +340,7 @@ si = library("signals.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 no = library("noises.lib");
-smoothq_test = hslider("smoothq:input", 0.5, -1, 1, 0.01) : si.smoothq(0.25, 0.5);
+smoothq_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.smoothq(0.25, 0.5) with { P = int(ma.SR/4); };
 smoothq_linear_test = select2(ba.period(2*P) < P, -1, 1) : si.smoothq(0.25, 1)
 with { P = int(ma.SR/4); };
 smoothq_slider_test = no.noise : ba.sAndH(ba.period(Q) == 0) : si.smoothq(hslider("smoothq:time", 0.25, 0.001, 1, 0.001), hslider("smoothq:q", 0.5, 0, 1, 0.01)) with { Q = int(ma.SR/30); };

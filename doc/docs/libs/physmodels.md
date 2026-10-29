@@ -425,7 +425,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-lTermination_test = 0.25, -0.15, 0.05 : pm.lTermination(*(-1), pm.basicBlock);
+no = library("noises.lib");
+lTermination_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.lTermination(*(-1), pm.basicBlock);
 ```
 
 ----
@@ -455,7 +456,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-rTermination_test = 0.25, -0.15, 0.05 : pm.rTermination(pm.basicBlock, *(-1));
+no = library("noises.lib");
+rTermination_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.rTermination(pm.basicBlock, *(-1));
 ```
 
 ----
@@ -578,10 +580,11 @@ chain(A : waveguideUd(nMax,n) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-waveguideUd_test = 0.25, -0.15, 0.05 : pm.waveguideUd(512, 32);
-waveguideFd_test = 0.25, -0.15, 0.05 : pm.waveguideFd(512, 32);
-waveguideFd2_test = 0.25, -0.15, 0.05 : pm.waveguideFd2(512, 32);
-waveguideFd4_test = 0.25, -0.15, 0.05 : pm.waveguideFd4(512, 32);
+no = library("noises.lib");
+waveguideUd_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.waveguideUd(512, 32);
+waveguideFd_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.waveguideFd(512, 32);
+waveguideFd2_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.waveguideFd2(512, 32);
+waveguideFd4_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.waveguideFd4(512, 32);
 ```
 
 ----
@@ -610,7 +613,8 @@ chain(A : waveguide(nMax,n) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-waveguide_test = 0.25, -0.15, 0.05 : pm.waveguide(512, 32);
+no = library("noises.lib");
+waveguide_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.waveguide(512, 32);
 ```
 
 ----
@@ -722,7 +726,8 @@ chain(A : stringSegment(maxLength,length) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-stringSegment_test = 0.25, -0.15, 0.05 : pm.stringSegment(1.0, 0.5);
+no = library("noises.lib");
+stringSegment_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.stringSegment(1.0, 0.5);
 ```
 
 ----
@@ -857,7 +862,9 @@ chain(A : openStringPick(length,stiffness,pluckPosition,excitation) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-openStringPick_test = pm.endChain(pm.openStringPick(0.8, 0.4, 0.3, pm.impulseExcitation(button("pm.openStringPick/gate"))));
+no = library("noises.lib");
+ba = library("basics.lib");
+openStringPick_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.openStringPick(0.8, 0.4, 0.3, pm.impulseExcitation(ba.pulse(64)));
 ```
 
 ----
@@ -893,7 +900,9 @@ chain(A : openStringPickUp(length,stiffness,pluckPosition,pickupPosition,excitat
 #### Test
 ```
 pm = library("physmodels.lib");
-openStringPickUp_test = pm.endChain(pm.openStringPickUp(0.8, 0.4, 0.6, 0.7, pm.impulseExcitation(button("pm.openStringPickUp/gate"))));
+no = library("noises.lib");
+ba = library("basics.lib");
+openStringPickUp_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.openStringPickUp(0.8, 0.4, 0.6, 0.7, pm.impulseExcitation(ba.pulse(64)));
 ```
 
 ----
@@ -929,7 +938,9 @@ chain(A : openStringPickDown(length,stiffness,pluckPosition,pickupPosition,excit
 #### Test
 ```
 pm = library("physmodels.lib");
-openStringPickDown_test = pm.endChain(pm.openStringPickDown(0.8, 0.4, 0.6, 0.5, pm.impulseExcitation(button("pm.openStringPickDown/gate"))));
+no = library("noises.lib");
+ba = library("basics.lib");
+openStringPickDown_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.openStringPickDown(0.8, 0.4, 0.6, 0.5, pm.impulseExcitation(ba.pulse(64)));
 ```
 
 ----
@@ -980,7 +991,8 @@ chain(A : stringSegment(maxLength,length) : rStringRigidTermination)
 #### Test
 ```
 pm = library("physmodels.lib");
-rStringRigidTermination_test = 0.25, -0.15, 0.05 : pm.rStringRigidTermination;
+no = library("noises.lib");
+rStringRigidTermination_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.rStringRigidTermination;
 ```
 
 ----
@@ -1005,7 +1017,8 @@ chain(lStringRigidTermination : stringSegment(maxLength,length) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-lStringRigidTermination_test = 0.25, -0.15, 0.05 : pm.lStringRigidTermination;
+no = library("noises.lib");
+lStringRigidTermination_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.lStringRigidTermination;
 ```
 
 ----
@@ -1033,7 +1046,8 @@ chain(A : stringSegment(maxLength,length) : elecGuitarBridge)
 #### Test
 ```
 pm = library("physmodels.lib");
-elecGuitarBridge_test = 0.25, -0.15, 0.05 : pm.elecGuitarBridge;
+no = library("noises.lib");
+elecGuitarBridge_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.elecGuitarBridge;
 ```
 
 ----
@@ -1061,7 +1075,8 @@ chain(elecGuitarNuts : stringSegment(maxLength,length) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-elecGuitarNuts_test = 0.25, -0.15, 0.05 : pm.elecGuitarNuts;
+no = library("noises.lib");
+elecGuitarNuts_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.elecGuitarNuts;
 ```
 
 ----
@@ -1089,7 +1104,8 @@ chain(A : stringSegment(maxLength,length) : guitarBridge)
 #### Test
 ```
 pm = library("physmodels.lib");
-guitarBridge_test = 0.25, -0.15, 0.05 : pm.guitarBridge;
+no = library("noises.lib");
+guitarBridge_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.guitarBridge;
 ```
 
 ----
@@ -1117,7 +1133,8 @@ chain(guitarNuts : stringSegment(maxLength,length) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-guitarNuts_test = 0.25, -0.15, 0.05 : pm.guitarNuts;
+no = library("noises.lib");
+guitarNuts_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.guitarNuts;
 ```
 
 ----
@@ -1251,7 +1268,9 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-elecGuitar_test = pm.elecGuitar(0.9, 0.3, 0.8, 0.6, button("pm.elecGuitar/gate"));
+ba = library("basics.lib");
+ma = library("maths.lib");
+elecGuitar_test = pm.elecGuitar(0.9, 0.3, 0.8, 0.6, ba.pulsen(1, int(ma.SR/4)));
 ```
 
 ----
@@ -1506,7 +1525,8 @@ chain(A : guitarBridge : modularInterpBody(nModes,shape,scale) : out)
 #### Test
 ```
 pm = library("physmodels.lib");
-modularInterpBody_test = 0.25, -0.15, 0.05 : pm.modularInterpBody(20, 1.0, 1.5);
+no = library("noises.lib");
+modularInterpBody_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.modularInterpBody(20, 1.0, 1.5);
 ```
 
 ----
@@ -1616,7 +1636,8 @@ Where:
 #### Test
 ```
 pm = library("physmodels.lib");
-bowTable_test = pm.bowTable(0.4, 0.1);
+os = library("oscillators.lib");
+bowTable_test = os.tosc(220) : pm.bowTable(0.4, 3);
 ```
 
 ----
@@ -1669,7 +1690,8 @@ chain(A : stringSegment(maxLength,length) : bowInteraction(bowTable) : stringSeg
 #### Test
 ```
 pm = library("physmodels.lib");
-bowInteraction_test = pm.bowInteraction((0.4, 0.05));
+no = library("noises.lib");
+bowInteraction_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.bowInteraction((*(0.5), *(-0.5)));
 ```
 
 ----
@@ -1699,7 +1721,8 @@ chain(A : stringSegment(maxLength,length) : violinBow(bowPressure,bowVelocity) :
 #### Test
 ```
 pm = library("physmodels.lib");
-violinBow_test = pm.violinBow(0.4, 0.05);
+no = library("noises.lib");
+violinBow_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.violinBow(0.4, 0.05);
 ```
 
 ----
@@ -1731,7 +1754,8 @@ chain(violinNuts : violinBowedString(stringLength,bowPressure,bowVelocity,bowPos
 #### Test
 ```
 pm = library("physmodels.lib");
-violinBowedString_test = 0.25, -0.15, 0.05 : pm.violinBowedString(0.82, 0.35, 0.2, 0.15);
+no = library("noises.lib");
+violinBowedString_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.violinBowedString(0.82, 0.35, 0.2, 0.15);
 ```
 
 ----
@@ -1756,7 +1780,8 @@ chain(violinNuts : stringSegment(maxLength,length) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-violinNuts_test = 0.25, -0.15, 0.05 : pm.violinNuts;
+no = library("noises.lib");
+violinNuts_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.violinNuts;
 ```
 
 ----
@@ -1781,7 +1806,8 @@ chain(A : stringSegment(maxLength,length) : violinBridge)
 #### Test
 ```
 pm = library("physmodels.lib");
-violinBridge_test = 0.25, -0.15, 0.05 : pm.violinBridge;
+no = library("noises.lib");
+violinBridge_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.violinBridge;
 ```
 
 ----
@@ -1806,7 +1832,8 @@ chain(A : stringSegment(maxLength,length) : violinBridge : violinBody)
 #### Test
 ```
 pm = library("physmodels.lib");
-violinBody_test = 0.25, -0.15, 0.05 : pm.violinBody;
+no = library("noises.lib");
+violinBody_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.violinBody;
 ```
 
 ----
@@ -1906,7 +1933,8 @@ chain(A : openTube(maxLength,length) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-openTube_test = 0.25, -0.15, 0.05 : pm.openTube(pm.maxLength, 0.9);
+no = library("noises.lib");
+openTube_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.openTube(pm.maxLength, 0.9);
 ```
 
 ----
@@ -2052,7 +2080,8 @@ chain(clarinetMouthPiece(reedStiffness,pressure) : openTube(maxLength,length) : 
 #### Test
 ```
 pm = library("physmodels.lib");
-clarinetMouthPiece_test = 0.25, -0.15, 0.05 : pm.clarinetMouthPiece(0.6, 0.4);
+no = library("noises.lib");
+clarinetMouthPiece_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.clarinetMouthPiece(0.6, 0.4);
 ```
 
 ----
@@ -2086,7 +2115,8 @@ chain(brassLips(tubeLength,lipsTension,pressure) : openTube(maxLength,tubeLength
 #### Test
 ```
 pm = library("physmodels.lib");
-brassLips_test = 0.25, -0.15, 0.05 : pm.brassLips(0.3, 0.2, 0.1);
+no = library("noises.lib");
+brassLips_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.brassLips(0.3, 0.2, 0.1);
 ```
 
 ----
@@ -2148,7 +2178,8 @@ chain(A : openTube(maxLength,length) : wBell(opening))
 #### Test
 ```
 pm = library("physmodels.lib");
-wBell_test = 0.25, -0.15, 0.05 : pm.wBell(0.4);
+no = library("noises.lib");
+wBell_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.wBell(0.4);
 ```
 
 ----
@@ -2172,7 +2203,8 @@ chain(fluteHead : openTube(maxLength,length) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteHead_test = 0.25, -0.15, 0.05 : pm.fluteHead;
+no = library("noises.lib");
+fluteHead_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.fluteHead;
 ```
 
 ----
@@ -2197,7 +2229,8 @@ chain(A : openTube(maxLength,length) : fluteFoot)
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteFoot_test = 0.25, -0.15, 0.05 : pm.fluteFoot;
+no = library("noises.lib");
+fluteFoot_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.fluteFoot;
 ```
 
 ----
@@ -2250,7 +2283,7 @@ This can also be any kind of signal that will be directly injected in the mouthp
 #### Test
 ```
 pm = library("physmodels.lib");
-clarinetModel_ui_test = pm.clarinetModel_ui(0.4);
+clarinetModel_ui_test = pm.clarinetModel_ui(0.9);
 ```
 
 ----
@@ -2408,7 +2441,7 @@ This can also be any kind of signal that will directly injected in the mouthpiec
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteModel_test = pm.fluteModel(0.9, 0.4, 0.6);
+fluteModel_test = pm.fluteModel(0.9, 0.5, 0.9);
 ```
 
 ----
@@ -2433,7 +2466,8 @@ This can also be any kind of signal that will be directly injected in the mouthp
 #### Test
 ```
 pm = library("physmodels.lib");
-fluteModel_ui_test = pm.fluteModel_ui(0.4);
+no = library("noises.lib");
+fluteModel_ui_test = pm.fluteModel_ui(0.9 + 0.01*no.noise);
 ```
 
 ----
@@ -4298,7 +4332,8 @@ chain(A : allpassNL(nonlinearity) : B)
 #### Test
 ```
 pm = library("physmodels.lib");
-allpassNL_test = 0.25, -0.15, 0.05 : pm.allpassNL(0.4);
+no = library("noises.lib");
+allpassNL_test = no.multinoise(3) : *(0.25), *(-0.15), *(0.05) : pm.allpassNL(0.4);
 ```
 
 ----

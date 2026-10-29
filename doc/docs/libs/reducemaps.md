@@ -147,7 +147,8 @@ Where:
 #### Test
 ```
 rm = library("reducemaps.lib");
-reduce_test = rm.reduce(max, 4, hslider("reduce:input", 0.5, -1, 1, 0.01));
+os = library("oscillators.lib");
+reduce_test = os.tosc(440) : rm.reduce(max, 4);
 ```
 
 ----
@@ -174,7 +175,8 @@ Where:
 #### Test
 ```
 rm = library("reducemaps.lib");
-reducemap_test = rm.reducemap(+, /(4), 4, hslider("reducemap:input", 0.5, -1, 1, 0.01));
+os = library("oscillators.lib");
+reducemap_test = os.tosc(440) : rm.reducemap(+, /(4), 4);
 ```
 
 ----

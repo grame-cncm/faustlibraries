@@ -753,8 +753,10 @@ and the instrument is loud enough in the room mic when playing loud, but you wan
 ```
 co = library("compressors.lib");
 os = library("oscillators.lib");
-RMS_compression_gain_N_chan_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2);
-RMS_compression_gain_N_chan_slider_test = (os.tosc(330), os.tosc(550)) : co.RMS_compression_gain_N_chan(hslider("RMS_compression_gain_N_chan:strength", 0.5, 0, 1, 0.01), hslider("RMS_compression_gain_N_chan:thresh", -18, -60, 0, 0.1), hslider("RMS_compression_gain_N_chan:att", 0.02, 0, 1, 0.001), hslider("RMS_compression_gain_N_chan:rel", 0.12, 0, 1, 0.001), hslider("RMS_compression_gain_N_chan:knee", 6, 0, 30, 0.1), hslider("RMS_compression_gain_N_chan:prePost", 0, 0, 1, 1), hslider("RMS_compression_gain_N_chan:link", 0.5, 0, 1, 0.01), 2);
+ba = library("basics.lib");
+ma = library("maths.lib");
+RMS_compression_gain_N_chan_test = (os.tosc(330), os.tosc(550)) : par(i, 2, *(pow(0.001, float(ba.period(Q))/Q))) : co.RMS_compression_gain_N_chan(0.5, -18, 0.02, 0.12, 6, 0, 0.5, 2) with { Q = int(ma.SR/4); };
+RMS_compression_gain_N_chan_slider_test = (os.tosc(330), os.tosc(550)) : par(i, 2, *(pow(0.001, float(ba.period(Q))/Q))) : co.RMS_compression_gain_N_chan(hslider("RMS_compression_gain_N_chan:strength", 0.5, 0, 1, 0.01), hslider("RMS_compression_gain_N_chan:thresh", -18, -60, 0, 0.1), hslider("RMS_compression_gain_N_chan:att", 0.02, 0, 1, 0.001), hslider("RMS_compression_gain_N_chan:rel", 0.12, 0, 1, 0.001), hslider("RMS_compression_gain_N_chan:knee", 6, 0, 30, 0.1), hslider("RMS_compression_gain_N_chan:prePost", 0, 0, 1, 1), hslider("RMS_compression_gain_N_chan:link", 0.5, 0, 1, 0.01), 2) with { Q = int(ma.SR/4); };
 ```
 
 #### References

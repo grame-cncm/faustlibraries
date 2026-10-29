@@ -11,18 +11,6 @@
   ],
   "reason": "by definition: ma.EPSILON is 2.2e-16, so make check cannot tell it from 0 (scale it, ma.EPSILON * 2^52)"
  },
- "RMS_compression_gain_N_chan_slider_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: the gain of steady sines, constant once the detector has settled; nothing moves the level"
- },
- "RMS_compression_gain_N_chan_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: the gain of steady sines, constant once the detector has settled; nothing moves the level"
- },
  "abs_envelope_rect_test": {
   "kinds": [
    "settles"
@@ -41,12 +29,6 @@
   ],
   "reason": "decays by design: a percussive note (or an impulse response) that dies out before the release"
  },
- "allpassNL_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
  "ar_slider_test": {
   "kinds": [
    "settles"
@@ -58,54 +40,6 @@
    "settles"
   ],
   "reason": "decays by design: the attack-release envelope ends after at + rt = 0.32 s, whatever the gate"
- },
- "automat_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: a constant slider recorded, so the output takes its value at the first beat (120 BPM: frame 24000) and keeps it"
- },
- "bowInteraction_test": {
-  "kinds": [
-   "dead-input"
-  ],
-  "reason": "weak: the three inputs, fed with zeros, are the string's: only the bow's response at rest is checked"
- },
- "bowTable_test": {
-  "kinds": [
-   "dead-input"
-  ],
-  "reason": "weak: the input, fed with zeros, is the bow velocity: only the table at 0 is checked"
- },
- "brassLips_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "bsmooth_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: the step response from 0 to a constant slider, after which the output is that constant"
- },
- "clarinetModel_ui_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: at pressure 0.4 the model does not self-oscillate, it settles to a DC of 0.018 after 62 ms; clarinet_ui_test covers the oscillating regime"
- },
- "clarinetMouthPiece_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "collision_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
  },
  "colored_noise_demo_test": {
   "kinds": [
@@ -119,53 +53,23 @@
   ],
   "reason": "by design: the output stops at the release of the harness's button or checkbox (frame 24000)"
  },
- "damper_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
- },
- "dnoise_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: a single trigger, so a single random value, held"
- },
- "elecGuitarBridge_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
  "elecGuitarModel_test": {
   "kinds": [
    "settles"
   ],
   "reason": "decays by design: a percussive note (or an impulse response) that dies out before the release"
  },
- "elecGuitarNuts_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "elecGuitar_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: with these arguments (mute 0.8) the note dies in 2857 frames (60 ms), long before the release"
- },
  "env_slider_test": {
   "kinds": [
    "constant"
   ],
-  "reason": "weak: the dx7 envelope at levels 60-63 stays at 6.4e-5, close to the tolerance: neither its attack nor its release is visible"
+  "reason": "weak: a bug of dx7/env.lib, not of the test: the envelope jumps to its key-down level (2^20 in Q24, 6.4e-5) and stays there whatever its rates, levels and gate, so it neither rises to its levels nor releases; operator_test, at 3.2e-5, has the same cause"
  },
  "env_test": {
   "kinds": [
    "constant"
   ],
-  "reason": "weak: the dx7 envelope at levels 60-63 stays at 6.4e-5, close to the tolerance: neither its attack nor its release is visible"
+  "reason": "weak: a bug of dx7/env.lib, not of the test: the envelope jumps to its key-down level (2^20 in Q24, 6.4e-5) and stays there whatever its rates, levels and gate, so it neither rises to its levels nor releases; operator_test, at 3.2e-5, has the same cause"
  },
  "envelopes_demo_test": {
   "kinds": [
@@ -173,113 +77,17 @@
   ],
   "reason": "decays by design: a percussive note (or an impulse response) that dies out before the release"
  },
- "expm1_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the arguments \u00b19.3e-10 give results below the tolerance, so make check does not see the small-argument precision these points are there for"
- },
- "fdb2linear_faster_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the lowest point evaluates to about 1e-6, below the tolerance: make check accepts 0 there"
- },
- "fdb2linear_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the lowest point evaluates to about 1e-6, below the tolerance: make check accepts 0 there"
- },
- "fexp10_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the lowest point evaluates to about 1e-6, below the tolerance: make check accepts 0 there"
- },
- "fexp2_faster_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the lowest point evaluates to about 1e-6, below the tolerance: make check accepts 0 there"
- },
- "fexp2_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the lowest point evaluates to about 1e-6, below the tolerance: make check accepts 0 there"
- },
- "fexp_faster_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the lowest point evaluates to about 1e-6, below the tolerance: make check accepts 0 there"
- },
- "fexp_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the lowest point evaluates to about 1e-6, below the tolerance: make check accepts 0 there"
- },
  "flanger_mono_impulse_test": {
   "kinds": [
    "settles"
   ],
   "reason": "by design: the impulse response of a 64-frame flanger, which ends after 80 frames"
  },
- "fluteFoot_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "fluteHead_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "fluteModel_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: at these arguments the model stops oscillating (zero after 8527 and 2088 frames); flute_ui_test covers the oscillating regime"
- },
- "fluteModel_ui_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: at these arguments the model stops oscillating (zero after 8527 and 2088 frames); flute_ui_test covers the oscillating regime"
- },
- "gate_gain_mono_slider_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: a steady sine above the threshold, so the gate opens and stays open (the modulated and jump tests close it)"
- },
- "gate_gain_mono_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: a steady sine above the threshold, so the gate opens and stays open (the modulated and jump tests close it)"
- },
  "ground_test": {
   "kinds": [
    "constant"
   ],
   "reason": "constant by definition: mi.ground holds its position (its state is the position)"
- },
- "guitarBridge_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "guitarNuts_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
  },
  "hat_slider_test": {
   "kinds": [
@@ -329,12 +137,6 @@
   ],
   "reason": "by design: checks that the envelope ends in zeros, not subnormals, after the release"
  },
- "isnan_test": {
-  "kinds": [
-   "constant"
-  ],
-  "reason": "weak: sqrt of a negative number at every frame, always 1: the 0 case is never seen"
- },
  "kr2ar_test": {
   "kinds": [
    "settles"
@@ -347,18 +149,6 @@
   ],
   "reason": "decays by design: a percussive note (or an impulse response) that dies out before the release"
  },
- "lStringRigidTermination_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "lTermination_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
  "latch_inf_test": {
   "kinds": [
    "settles"
@@ -370,12 +160,6 @@
    "settles"
   ],
   "reason": "by design: the response to a DC input"
- },
- "log1p_slider_test": {
-  "kinds": [
-   "below-tolerance"
-  ],
-  "reason": "weak: the arguments \u00b19.3e-10 give results below the tolerance, so make check does not see the small-argument precision these points are there for"
  },
  "marimbaBarModel_test": {
   "kinds": [
@@ -395,90 +179,17 @@
   ],
   "reason": "decays by design: a percussive note (or an impulse response) that dies out before the release"
  },
- "mm_line_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: the step response from 0 to a constant slider, after which the output is that constant"
- },
- "modularInterpBody_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
  "motion_wrapper_demo_test": {
   "kinds": [
-   "dead-input",
    "settles"
   ],
-  "reason": "weak: the 18 sensor inputs are fed with zeros, and the output stops at the release (frame 24000)"
+  "reason": "by design: each of the 92 outputs is gated by its checkbox, which the harnesses turn off at frame 24000 (the 18 sensor inputs are driven)"
  },
  "ms_envelope_rect_test": {
   "kinds": [
    "settles"
   ],
   "reason": "by design: a measure of a steady input, constant once its window has filled"
- },
- "nlBow_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
- },
- "nlCollisionClipped_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
- },
- "nlSpringDamper2_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
- },
- "nlSpringDamper3_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
- },
- "nlSpringDamperClipped_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
- },
- "on_and_off_test": {
-  "kinds": [
-   "constant"
-  ],
-  "reason": "weak: the harness presses both buttons at once, so the output never changes"
- },
- "openStringPickDown_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: through pm.endChain the output is zero after frame 15, the string does not ring: to investigate"
- },
- "openStringPickUp_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: through pm.endChain the output is zero after frame 15, the string does not ring: to investigate"
- },
- "openStringPick_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: through pm.endChain the output is zero after frame 15, the string does not ring: to investigate"
- },
- "openTube_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
  },
  "orientationWeight_test": {
   "kinds": [
@@ -516,12 +227,6 @@
   ],
   "reason": "by definition: an excitation (a short filtered burst), zero once it has passed"
  },
- "polySmooth_test": {
-  "kinds": [
-   "constant"
-  ],
-  "reason": "weak: smoothing a constant slider, which it outputs from frame 0"
- },
  "popFilterDrum_slider_test": {
   "kinds": [
    "settles"
@@ -533,37 +238,6 @@
    "settles"
   ],
   "reason": "decays by design: a percussive note (or an impulse response) that dies out before the release"
- },
- "processArray_test": {
-  "kinds": [
-   "dead-input",
-   "settles"
-  ],
-  "reason": "weak: si.bus(4) passes the harness's zero inputs: the array processes silence"
- },
- "rStringRigidTermination_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "rTermination_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "reduce_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: a reduction over blocks of 4 of a constant slider, constant from frame 4"
- },
- "reducemap_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: a reduction over blocks of 4 of a constant slider, constant from frame 4"
  },
  "rfft_analyzer_db_test": {
   "kinds": [
@@ -583,35 +257,11 @@
   ],
   "reason": "by design: the demo's input is an external signal it can select, fed with zeros"
  },
- "smoo_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: the step response from 0 to a constant slider, after which the output is that constant"
- },
- "smoothAndH_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: the step response from 0 to a constant slider, after which the output is that constant"
- },
  "smooth_deadband_test": {
   "kinds": [
    "settles"
   ],
   "reason": "by design: checks that the smoother reaches its target exactly (second channel 0 after 0.9 s)"
- },
- "smooth_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: the step response from 0 to a constant slider, after which the output is that constant"
- },
- "smoothq_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: the step response from 0 to a constant slider, after which the output is that constant"
  },
  "spectral_centroid_test": {
   "kinds": [
@@ -624,18 +274,6 @@
    "settles"
   ],
   "reason": "by design: a measure of a steady input, constant once its window has filled"
- },
- "springDamper_slider_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
- },
- "springDamper_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant positions, so the force is constant from frame 1 and the velocity (damping) terms act only on the first frame; moving positions (os.tosc) would exercise them"
  },
  "spulse_test": {
   "kinds": [
@@ -654,12 +292,6 @@
    "settles"
   ],
   "reason": "by definition: an excitation (a short filtered burst), zero once it has passed"
- },
- "stringSegment_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
  },
  "sweep_test": {
   "kinds": [
@@ -691,77 +323,11 @@
   ],
   "reason": "by design: a measure of a steady input, constant once its window has filled"
  },
- "violinBody_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "violinBow_test": {
-  "kinds": [
-   "dead-input"
-  ],
-  "reason": "weak: the three inputs, fed with zeros, are the string's: only the bow's response at rest is checked"
- },
- "violinBowedString_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "violinBridge_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "violinNuts_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
  "virtual_analog_oscillator_demo_test": {
   "kinds": [
    "dead-input"
   ],
   "reason": "by design: the demo's input is an external signal it can select, fed with zeros"
- },
- "wBell_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "waveguideFd2_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "waveguideFd4_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "waveguideFd_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "waveguideUd_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
- },
- "waveguide_test": {
-  "kinds": [
-   "settles"
-  ],
-  "reason": "weak: constant inputs (0.25, -0.15, 0.05), so the block settles to its DC response and its delays and filters show only in the first frames; an impulse or noise input would exercise them"
  },
  "weightsPowerLoop_test": {
   "kinds": [

@@ -131,10 +131,12 @@ Where:
 ```
 no = library("noises.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 dnoise_test = (trigger, seedRange) : no.dnoise
 with {
-  trigger = 1 : ba.impulsify;
-  seedRange = 10.0;
+  P = int(ma.SR/10);
+  trigger = ba.spulse(64, ba.pulse(P));
+  seedRange = select2(ba.period(2*P) < P, 20.0, 10.0);
 };
 ```
 
