@@ -27,8 +27,9 @@ V8's error.
 The modules that validate are then run in Node, as the C++ harness of
 `make check` runs the tests (arch/precision_arch.cpp): one second at 48 kHz,
 the inputs at 0, the controls at their default values, the buttons and
-checkboxes pressed for the first half and released for the second, in blocks
-of 512 frames, the math functions imported from JavaScript's `Math` as in
+checkboxes pressed for the first half and released for the second (the block
+split at the release), in blocks of 512 frames, the math functions imported
+from JavaScript's `Math` as in
 faustwasm. A module that stops (a trap: an integer conversion of a NaN, an
 access out of the memory) or writes a non-finite sample fails, with the
 error and the frame. A validation sees neither: in October 2026 a module
@@ -51,6 +52,20 @@ is not done by default. A program that does not load (an undefined name: in
 October 2026 the constant INFINITY), that throws (InexactError: the
 conversion of a NaN to an integer) or that writes a non-finite sample fails.
 
+With --compare (`make check-backend-outputs`), the outputs of the backends
+that run (WebAssembly, Cmajor, Julia with --run-julia) are also compared with
+the C++ build in -single, rendered by arch/precision_arch.cpp with the same
+schedule (`block=512`, and `nopress` for Cmajor). The other checks only ask
+a backend for finite samples: in October 2026, Cmajor started a slider whose
+default is off its step at the nearest step (Q = 0.707 at 0.71), and computed
+sinh and atanh near 0 with cancelling formulas (expm1 and log1p gave 0),
+which a finite output hides. A test fails when its channels or frames differ,
+when its level gap (check_precision.py's) exceeds --level-max (1e-3), or its
+sample gap (the largest difference relative to the C++ peak) --gap-max
+(1e-2), unless tests/backend-output-baseline.json accepts it, with a reason;
+an entry that matches again is reported. The generated files are kept in
+tests/build-backends during the run.
+
     scripts/check_backends.py                    # the backends of the baseline
     scripts/check_backends.py --lang wasm,java   # these backends
     scripts/check_backends.py --changed          # only if a .lib or test differs from HEAD
@@ -58,6 +73,7 @@ conversion of a NaN to an integer) or that writes a non-finite sample fails.
     scripts/check_backends.py --no-validate      # compile only, do not validate wasm modules
     scripts/check_backends.py --no-run           # validate the wasm modules, run nothing
     scripts/check_backends.py --run-julia        # also load and run the Julia code
+    scripts/check_backends.py --compare --lang wasm,cmajor   # compare the outputs with C++
     scripts/check_backends.py tests/aanl_tests.dsp ...
 
 It fails (exit status 1) on a test that fails on a backend of the baseline
@@ -74,6 +90,7 @@ libraries tested are this checkout's.
 import argparse
 import array
 import concurrent.futures as cf
+import contextlib
 import json
 import math
 import os
@@ -98,12 +115,14 @@ CMAJ_SILENCE = 20480
 # scripts/extract_tests.sh and check_precision.py.
 TEST_RE = re.compile(r"^[ \t]*([A-Za-z_][A-Za-z0-9_]*_test)[ \t]*=", re.M)
 NOT_BUILT = ("not supported since", "cannot find backend")
-# Reads {"run": bool, "paths": [.wasm paths]} on stdin, prints {path: [kind, error]} for the
-# modules that do not validate ("invalid") and, with run, for those that stop or write a
-# non-finite sample ("run"). A module runs as in arch/precision_arch.cpp: SR frames at SR
-# (one second), inputs at 0, default controls, buttons and checkboxes at 1 for the first half
-# and at 0 for the second, in blocks of BLOCK frames. Its JSON (faust writes it next to the
-# module) gives the size of the DSP, the channels and the offsets of the controls.
+# Reads {"run": bool, "dump": bool, "paths": [.wasm paths]} on stdin, prints {path: [kind,
+# error]} for the modules that do not validate ("invalid") and, with run, for those that stop
+# or write a non-finite sample ("run"). A module runs as arch/precision_arch.cpp does with
+# `block=512`: SR frames at SR (one second), inputs at 0, default controls, buttons and
+# checkboxes at 1 for the first half and at 0 for the second, in blocks of BLOCK frames, the
+# block split at the release. With dump, the output is written next to the module (.out: an
+# int32 channel count, then float32 frames). Its JSON (faust writes it next to the module)
+# gives the size of the DSP, the channels and the offsets of the controls.
 WASM_JS = r"""
 const fs = require("fs");
 const SR = 48000, BLOCK = 512;
@@ -133,7 +152,7 @@ function switches(items, out = []) {
     }
     return out;
 }
-function run(path, module) {
+function run(path, module, dump) {
     const json = JSON.parse(fs.readFileSync(path.replace(/\.wasm$/, ".json"), "utf8"));
     const dsp = new WebAssembly.Instance(module, imports(module)).exports;
     const nins = Number(json.inputs), nouts = Number(json.outputs);
@@ -151,10 +170,12 @@ function run(path, module) {
     dsp.init(0, SR);
     const sw = switches(json.ui);
     const set = (v) => { for (const index of sw) dsp.setParamValue(0, index, v); };
+    const half = SR / 2;
+    const frames = dump ? new Float32Array(SR * nouts) : null;
     set(1);
-    for (let done = 0; done < SR; done += BLOCK) {
-        if (sw.length && done === SR / 2) set(0);
-        const n = Math.min(BLOCK, SR - done);
+    for (let done = 0, n = 0; done < SR; done += n) {
+        if (sw.length && done === half) set(0);
+        n = Math.min(BLOCK, SR - done, sw.length && done < half ? half - done : SR);
         new (real === 8 ? Float64Array : Float32Array)(mem.buffer, bufIns, BLOCK * nins).fill(0);
         try { dsp.compute(0, n, ptrIns, ptrOuts); }
         catch (e) { return `${e.message}, in frames ${done} to ${done + n - 1}`; }
@@ -162,11 +183,17 @@ function run(path, module) {
             for (let k = 0; k < n; k++) {
                 const v = out[(bufOuts / real) + c * BLOCK + k];
                 if (!Number.isFinite(v)) return `non-finite output ${v} on channel ${c} at frame ${done + k}`;
+                if (frames) frames[(done + k) * nouts + c] = v;
             }
+    }
+    if (frames) {
+        const head = Buffer.alloc(4);
+        head.writeInt32LE(nouts);
+        fs.writeFileSync(path.replace(/\.wasm$/, ".out"), Buffer.concat([head, Buffer.from(frames.buffer)]));
     }
     return null;
 }
-const { run: doRun, paths } = JSON.parse(fs.readFileSync(0, "utf8"));
+const { run: doRun, dump, paths } = JSON.parse(fs.readFileSync(0, "utf8"));
 const bad = {};
 for (const p of paths) {
     const bytes = fs.readFileSync(p);
@@ -180,7 +207,7 @@ for (const p of paths) {
     // A program with a soundfile imports its memory, which faustwasm's JavaScript glue
     // provides and fills with the sound files: without it, a run means nothing.
     if (WebAssembly.Module.imports(module).some((i) => i.kind === "memory")) { bad[p] = ["skip", "imports its memory"]; continue; }
-    try { const e = run(p, module); if (e) bad[p] = ["run", e]; }
+    try { const e = run(p, module, dump); if (e) bad[p] = ["run", e]; }
     catch (e) { bad[p] = ["run", e.message]; }
 }
 process.stdout.write(JSON.stringify(bad));
@@ -210,12 +237,14 @@ def compile_error(lang, path, name, out=os.devnull):
     return (lines or [r.stderr.strip() or "failed"])[0]
 
 
-def bad_modules(paths, run):
+def bad_modules(paths, run, dump=False):
     """{path: (kind, error)} for the WebAssembly modules that do not validate ("invalid",
     V8's error) and, with run, for those that stop or write a non-finite sample ("run") and
-    those not run because they import their memory ("skip": a soundfile)."""
+    those not run because they import their memory ("skip": a soundfile). With dump, the
+    output of each module run is written next to it (.out)."""
     r = subprocess.run([NODE, "-e", WASM_JS],
-                       input=json.dumps({"run": run, "paths": [str(p) for p in paths]}),
+                       input=json.dumps({"run": run, "dump": dump,
+                                         "paths": [str(p) for p in paths]}),
                        capture_output=True, text=True)
     if r.returncode != 0:
         raise RuntimeError("node: " + (r.stderr.strip().splitlines() or ["failed"])[-1])
@@ -225,16 +254,25 @@ def bad_modules(paths, run):
             for p, (kind, e) in json.loads(r.stdout or "{}").items()}
 
 
-def wasm_errors(specs, pool, run):
+def work_dir(dump_dir):
+    """The directory of the generated files: dump_dir (kept, for --compare), else a temporary one."""
+    if dump_dir:
+        dump_dir.mkdir(parents=True, exist_ok=True)
+        return contextlib.nullcontext(str(dump_dir))
+    return tempfile.TemporaryDirectory()
+
+
+def wasm_errors(specs, pool, run, dump_dir=None):
     """compile_error for wasm, plus the validation and, with run, the execution of the modules
-    that compiled, in chunks run by node in parallel; and the names of the tests not run."""
-    with tempfile.TemporaryDirectory() as tmp:
-        outs = [Path(tmp) / f"{i}.wasm" for i in range(len(specs))]
+    that compiled, in chunks run by node in parallel; and the names of the tests not run.
+    With dump_dir, the files are kept there and each run writes its output (t<i>.out)."""
+    with work_dir(dump_dir) as tmp:
+        outs = [Path(tmp) / f"t{i}.wasm" for i in range(len(specs))]
         errors = list(pool.map(lambda s, o: compile_error("wasm", *s, o), specs, outs))
         ok = [o for o, e in zip(outs, errors) if e is None]
         chunks = [ok[i::os.cpu_count() or 1] for i in range(os.cpu_count() or 1)]
         bad = {}
-        for part in pool.map(lambda c: bad_modules(c, run) if c else {}, chunks):
+        for part in pool.map(lambda c: bad_modules(c, run, bool(dump_dir)) if c else {}, chunks):
             bad.update(part)
     label = {"invalid": "invalid module, a faust bug", "run": "the module fails when run"}
     skipped = [name for (_, name), o in zip(specs, outs) if bad.get(o, ("",))[0] == "skip"]
@@ -258,8 +296,10 @@ def wav_samples(path):
     return channels, a
 
 
-def cmajor_run_error(code):
-    """None when Cmajor compiles and renders the generated patch with finite samples."""
+def cmajor_run_error(code, dump=False):
+    """None when Cmajor compiles and renders the generated patch with finite samples. With
+    dump, the render (after the silence cmaj render starts with) is written next to the code
+    (.out, as the WebAssembly runner writes it)."""
     outs = len(re.findall(r"^\s*output stream ", code.read_text(), re.M))
     if outs == 0:
         return None
@@ -283,16 +323,21 @@ def cmajor_run_error(code):
         if not math.isfinite(v):
             return (f"the patch fails when run: non-finite output {v} on channel"
                     f" {k % channels} at frame {k // channels - CMAJ_SILENCE}")
+    if dump:
+        frames = a[CMAJ_SILENCE * channels:(CMAJ_SILENCE + SR) * channels]
+        code.with_suffix(".out").write_bytes(channels.to_bytes(4, "little") + frames.tobytes())
     return None
 
 
-def cmajor_errors(specs, pool, run):
-    """compile_error for cmajor, plus, with run, the compilation and the render by Cmajor."""
-    with tempfile.TemporaryDirectory() as tmp:
+def cmajor_errors(specs, pool, run, dump_dir=None):
+    """compile_error for cmajor, plus, with run, the compilation and the render by Cmajor.
+    With dump_dir, the files are kept there and each render is written (t<i>.out)."""
+    with work_dir(dump_dir) as tmp:
         outs = [Path(tmp) / f"t{i}.cmajor" for i in range(len(specs))]
         errors = list(pool.map(lambda s, o: compile_error("cmajor", *s, o), specs, outs))
         if run:
-            ran = list(pool.map(lambda o, e: None if e else cmajor_run_error(o), outs, errors))
+            ran = list(pool.map(lambda o, e: None if e else cmajor_run_error(o, bool(dump_dir)),
+                                outs, errors))
             errors = [e or r for e, r in zip(errors, ran)]
     return errors
 
@@ -300,6 +345,8 @@ def cmajor_errors(specs, pool, run):
 # Reads the paths of the generated files in ARGS, prints one line per file: its path, a tab,
 # then "ok" or the error. Each program is loaded in a module of its own, with the base types
 # and UI functions of architecture/julia defined there, then run as WASM_JS runs a module.
+# With the environment variable FAUST_CHECK_DUMP set, the output is written next to the code
+# (.out, as the WebAssembly runner writes it).
 JULIA_JS = r"""
 function run_one(path)
     m = Module(:FaustCheck)
@@ -337,19 +384,31 @@ function run_one(path)
                 set(1)
                 ins = zeros(FAUSTFLOAT, BLOCK, getNumInputs(d))
                 outs = zeros(FAUSTFLOAT, BLOCK, getNumOutputs(d))
+                nouts = getNumOutputs(d)
+                dump = haskey(ENV, "FAUST_CHECK_DUMP") ? zeros(Float32, nouts, SR) : nothing
+                half = SR ÷ 2
                 done = 0
                 while done < SR
-                    (!isempty(ui.zones) && done == SR ÷ 2) && set(0)
+                    (!isempty(ui.zones) && done == half) && set(0)
                     n = min(BLOCK, SR - done)
+                    (!isempty(ui.zones) && done < half) && (n = min(n, half - done))
                     compute!(d, Int32(n), ins, outs)
                     for c in 1:size(outs, 2), k in 1:n
                         isfinite(outs[k, c]) || return "non-finite output $(outs[k, c]) on channel $(c - 1) at frame $(done + k - 1)"
+                        dump === nothing || (dump[c, done + k] = outs[k, c])
                     end
                     done += n
+                end
+                if dump !== nothing
+                    open(FAUST_CHECK_OUT, "w") do io
+                        write(io, Int32(nouts))
+                        write(io, dump)
+                    end
                 end
                 "ok"
             end
         end)
+        Core.eval(m, :(const FAUST_CHECK_OUT = $(replace(path, r"\.jl$" => ".out"))))
         return Base.invokelatest(m.faust_check_run, SR_VALUE, 512)
     catch e
         return first(split(sprint(showerror, e), '
@@ -365,10 +424,11 @@ end
 """.replace("SR_VALUE", str(SR))
 
 
-def julia_errors(specs, pool, run):
+def julia_errors(specs, pool, run, dump_dir=None):
     """compile_error for julia, plus, with run, the loading and the run of the code by Julia,
-    in chunks run by Julia processes in parallel."""
-    with tempfile.TemporaryDirectory() as tmp:
+    in chunks run by Julia processes in parallel. With dump_dir, the files are kept there and
+    each run writes its output (t<i>.out)."""
+    with work_dir(dump_dir) as tmp:
         outs = [Path(tmp) / f"t{i}.jl" for i in range(len(specs))]
         errors = list(pool.map(lambda s, o: compile_error("julia", *s, o), specs, outs))
         if run:
@@ -381,8 +441,9 @@ def julia_errors(specs, pool, run):
             def run_chunk(chunk):
                 if not chunk:
                     return {}
+                env = {**os.environ, **({"FAUST_CHECK_DUMP": "1"} if dump_dir else {})}
                 r = subprocess.run([JULIA, "--startup-file=no", "--depwarn=no", str(runner),
-                                    *map(str, chunk)], capture_output=True, text=True)
+                                    *map(str, chunk)], capture_output=True, text=True, env=env)
                 res = {}
                 for line in r.stdout.splitlines():
                     path, _, verdict = line.partition("\t")
@@ -398,6 +459,70 @@ def julia_errors(specs, pool, run):
             errors = [e or (None if bad.get(o) == "ok" else f"the code fails when run: {bad[o]}")
                       for o, e in zip(outs, errors)]
     return errors
+
+
+COMPARE_BASELINE = ROOT / "tests" / "backend-output-baseline.json"
+DUMP_DIR = ROOT / "tests" / "build-backends"
+
+
+def compare_outputs(lang, specs, dump_dir, errors, pool, level_max, gap_max, build_dir):
+    """{test: problem} for the tests whose output on `lang` (t<i>.out in dump_dir) differs from
+    the C++ build in -single without FMA contraction (-ffp-contract=off, the IEEE operations the
+    backends compute), rendered by arch/precision_arch.cpp with the same schedule
+    (`block=512`; `nopress` for Cmajor, which cannot press a button). A test differs when its
+    channels or frames differ, when its level gap (check_precision.py's: the largest relative
+    difference of the RMS of a channel) exceeds level_max, or when its sample gap (the largest
+    difference relative to the C++ peak) exceeds gap_max. A test the C++ build renders with a
+    non-finite sample is left to check_precision.py; one with no .out was not run."""
+    import numpy as np
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import check_precision as cp
+    cpp = argparse.Namespace(faust=FAUST, cxx=os.environ.get("CXX", "c++"))
+    # Without contraction into fused multiply-adds, which clang does by default on arm64 and
+    # neither WebAssembly nor Cmajor does: with it, greyhole_test's level differs by 4.5e-3.
+    cxx_options = cp.DEFAULT_CXX_OPTIONS + " -ffp-contract=off"
+    cfg = cp.Config("strict", "", cxx_options,
+                    os.path.join(str(build_dir), cp.config_dir("", cxx_options)))
+    os.makedirs(cfg.build_dir, exist_ok=True)
+    controls = "block=512,nopress" if lang == "cmajor" else "block=512"
+
+    def one(i, spec, error):
+        out = dump_dir / f"t{i}.out"
+        if error or not out.exists():
+            return None
+        data = out.read_bytes()
+        out.unlink()
+        channels = int.from_bytes(data[:4], "little")
+        b = np.frombuffer(data[4:], dtype=np.float32).astype(np.float64)
+        b = b.reshape(-1, channels) if channels else np.zeros((SR, 0))
+        exe, err = cp.build(str(spec[0]), spec[1], "single", cfg, cpp)
+        if err:
+            return f"the C++ build fails: {err}"
+        try:
+            c = cp.render(exe, SR, SR, f"{exe}.{lang}.cmp.raw", controls)
+        except (RuntimeError, subprocess.TimeoutExpired) as e:
+            return f"the C++ render fails: {e}"
+        if c.shape != b.shape:
+            return (f"{b.shape[1]} channels x {b.shape[0]} frames, the C++ build"
+                    f" {c.shape[1]} x {c.shape[0]}")
+        if not np.isfinite(c).all() or c.shape[1] == 0:
+            return None
+        m = cp.measure(b, c, SR)
+        if m["level"] > level_max or m["gap"] > gap_max:
+            per = [f"{float(np.sqrt((b[:, k] ** 2).mean())):.4g}/{float(np.sqrt((c[:, k] ** 2).mean())):.4g}"
+                   for k in range(min(c.shape[1], 4))]
+            where = ""
+            if m["gap"] > gap_max:
+                over = np.abs(b - c).max(axis=1) > gap_max * max(m["peak"], 1e-30)
+                where = f" from frame {int(np.argmax(over))}"
+            return (f"output differs from the C++ build in -single: level gap {m['level']:.1e},"
+                    f" sample gap {m['gap']:.1e}{where}; RMS {lang}/C++ per channel"
+                    f" {', '.join(per)}{' ...' if c.shape[1] > 4 else ''}")
+        return None
+
+    present = [i for i in range(len(specs)) if (dump_dir / f"t{i}.out").exists()]
+    found = pool.map(lambda a: one(*a), [(i, s, e) for i, (s, e) in enumerate(zip(specs, errors))])
+    return {name: p for (_, name), p in zip(specs, found) if p}, len(present)
 
 
 RUN_FAILURES = ("fails when run", "rejects the code", "invalid module")
@@ -438,6 +563,16 @@ def main():
                    help="validate the WebAssembly modules, run nothing (nor Cmajor's render)")
     p.add_argument("--run-julia", action="store_true",
                    help="also load and run the Julia code (minutes: Julia compiles each test)")
+    p.add_argument("--compare", action="store_true",
+                   help="also compare the outputs of the backends that run (wasm, cmajor, and"
+                        " julia with --run-julia) with the C++ build in -single")
+    p.add_argument("--level-max", type=float, default=1e-3,
+                   help="largest level gap accepted by --compare (default: %(default)g)")
+    p.add_argument("--gap-max", type=float, default=1e-2,
+                   help="largest sample gap accepted by --compare (default: %(default)g)")
+    p.add_argument("--cpp-build-dir", default=ROOT / "tests" / "build-precision",
+                   help="the C++ builds of --compare, those of check_precision.py (default:"
+                        " tests/build-precision)")
     p.add_argument("-j", "--jobs", type=int, default=os.cpu_count())
     args = p.parse_args()
     if not shutil.which(FAUST):
@@ -455,13 +590,15 @@ def main():
 
     validate = not args.no_validate and shutil.which(NODE)
     failures, notes, ran = {}, [], set()
+    differs, compared = {}, {}
+    dump = (lambda lang: DUMP_DIR / lang) if args.compare else (lambda lang: None)
     with cf.ThreadPoolExecutor(args.jobs) as pool:
         for lang in langs:
             if not backend_built(lang):
                 notes.append(f"{lang}: skipped, this faust is built without that backend")
                 continue
             if lang == "wasm" and validate:
-                errors, skipped = wasm_errors(specs, pool, not args.no_run)
+                errors, skipped = wasm_errors(specs, pool, not args.no_run, dump(lang))
                 ran.update(["wasm"] if not args.no_run else [])
                 if args.no_run:
                     notes.append("wasm: modules validated, not run")
@@ -473,22 +610,42 @@ def main():
                 if not run:
                     notes.append("cmajor: patches generated, not compiled nor run by Cmajor"
                                  + ("" if args.no_run else f" ({CMAJ} not found)"))
-                errors = cmajor_errors(specs, pool, run)
+                errors = cmajor_errors(specs, pool, run, dump(lang))
                 ran.update(["cmajor"] if run else [])
             elif lang == "julia":
                 run = args.run_julia and not args.no_run and shutil.which(JULIA)
                 if args.run_julia and not run:
                     notes.append("julia: code generated, not run"
                                  + ("" if args.no_run else f" ({JULIA} not found)"))
-                errors = julia_errors(specs, pool, run)
+                errors = julia_errors(specs, pool, run, dump(lang))
                 ran.update(["julia"] if run else [])
             else:
                 if lang == "wasm":
                     notes.append("wasm: modules compiled, neither validated nor run"
                                  + ("" if args.no_validate else f" ({NODE} not found)"))
                 errors = pool.map(lambda s, lang=lang: compile_error(lang, *s), specs)
+            errors = list(errors)
             failures[lang] = {name: e for (_, name), e in zip(specs, errors) if e}
+            if args.compare and lang in ran:
+                differs[lang], compared[lang] = compare_outputs(lang, specs, DUMP_DIR / lang, errors, pool,
+                                                args.level_max, args.gap_max, args.cpp_build_dir)
+            elif args.compare and lang in ("wasm", "cmajor", "julia"):
+                notes.append(f"{lang}: outputs not compared (not run)")
 
+    compare_baseline = (json.loads(COMPARE_BASELINE.read_text())
+                        if COMPARE_BASELINE.exists() else {})
+    if args.update_baseline and args.compare:
+        new = {lang: dict(sorted(d.items())) for lang, d in differs.items()}
+        if args.dsp:
+            for lang, old in compare_baseline.items():
+                kept = {t: e for t, e in old.items() if t not in covered}
+                new[lang] = dict(sorted({**kept, **new.get(lang, {})}.items()))
+        # an entry's reason, once written by hand, is kept
+        for lang, entries in new.items():
+            for t in entries:
+                entries[t] = compare_baseline.get(lang, {}).get(t, entries[t])
+        COMPARE_BASELINE.write_text(json.dumps({**compare_baseline, **new}, indent=1) + "\n")
+        print(f"check_backends: output baseline updated ({COMPARE_BASELINE.relative_to(ROOT)})")
     if args.update_baseline:
         new = {lang: dict(sorted(f.items())) for lang, f in failures.items()}
         if args.dsp:  # keep the entries of the files not scanned
@@ -514,9 +671,19 @@ def main():
         problems += [f"{lang}: {name} now compiles: remove it from {BASELINE.name}"
                      for name in sorted(expected) if name in covered and name not in failed]
 
+    for lang, found in differs.items():
+        accepted_out = compare_baseline.get(lang, {})
+        problems += [f"{lang}: {name}: {e}" for name, e in sorted(found.items())
+                     if name not in accepted_out]
+        problems += [f"{lang}: {name} now matches the C++ build: remove it from"
+                     f" {COMPARE_BASELINE.name}"
+                     for name in sorted(accepted_out) if name in covered and name not in found
+                     and name not in failures.get(lang, {})]
+
     for line in notes + problems:
         print(f"check_backends: {line}")
     summary = ", ".join(f"{lang} {len(failures[lang])} failed"
+                        f"{f', {compared[lang]} compared, {len(differs[lang])} differ' if lang in differs else ''}"
                         f"{'' if lang in baseline else ' (not checked)'}"
                         for lang in failures)
     if problems:
@@ -535,6 +702,7 @@ def main():
                   f" gives too (ma.MIN * 1e307) is the test's: record it in {BASELINE.name}.")
         return 1
     accepted = sum(len(baseline[lang]) for lang in failures if lang in baseline)
+    accepted += sum(len(compare_baseline.get(lang, {})) for lang in differs)
     print(f"check_backends: OK ({len(specs)} tests: {summary}; accepted debt: {accepted})")
     return 0
 

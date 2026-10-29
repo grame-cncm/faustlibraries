@@ -1,0 +1,19 @@
+{
+ "cmajor": {
+  "arccos2_noise_test": "Cmajor's acos returns acos(x) - pi for x < 0 (-1.047 at -0.5), in float32 and float64: level gap 5.0e-01, sample gap 1.1e+00",
+  "arccos2_test": "Cmajor's acos returns acos(x) - pi for x < 0 (-1.047 at -0.5), in float32 and float64: level gap 5.0e-01, sample gap 1.0e+00",
+  "arccos_test": "Cmajor's acos returns acos(x) - pi for x < 0 (-1.047 at -0.5), in float32 and float64: level gap 5.0e-01, sample gap 1.0e+00",
+  "expm1_slider_test": "Cmajor's sinh and atanh lose their precision near 0 in float32 and give 0 at 2^-30 (cmajor-lang/cmajor#141): the channels at +-2^-30 give 0 instead of 1; level gap 1.0e+00, sample gap 4.5e-05",
+  "greyhole_demo_test": "the Cmajor host starts delayTime (init 0.2, step 0.0001) at round(init/step)*step computed in float32, 0.19999999 instead of 0.2f, so floor(SR*delayTime) gives a delay of 9599 samples instead of 9600: faust keeps the step of an on-grid default, and Cmajor still moves it by one ulp (faust's cmajorStep leaves such a step out from faust master-dev of 2026-10-29: remove this entry once it is installed); level gap 2.1e-02, sample gap 9.9e-02",
+  "hammer_slider_test": "the Cmajor host starts hammer:offset (init 0.001, step 0.0001) at 10 * 0.0001f = 0.0010000001, in a test that grows without bound at its default controls (faust's cmajorStep leaves such a step out from faust master-dev of 2026-10-29: remove this entry once it is installed); level gap 8.7e-04, sample gap 1.1e-02",
+  "log1p_slider_test": "Cmajor's sinh and atanh lose their precision near 0 in float32 and give 0 at 2^-30 (cmajor-lang/cmajor#141): the channels at +-2^-30 give 0 instead of 1; level gap 1.0e+00, sample gap 1.4e-02",
+  "logicEFM1_modulated_test": "isolated samples differ, the level matches; not investigated: level gap 5.2e-05, sample gap 4.3e-01",
+  "logicEFM1_slider_test": "isolated samples differ, the level matches; not investigated: level gap 1.3e-04, sample gap 2.4e-01",
+  "logicEFM1_test": "isolated samples differ, the level matches; not investigated: level gap 1.3e-04, sample gap 2.4e-01",
+  "velvet_noise_demo_test": "the Cmajor host starts Freq (init 3, step 0.001) at round(init/step)*step computed in float, 3000 * 0.001f = 3.0000002, so the impulses fall elsewhere (faust's cmajorStep leaves such a step out from faust master-dev of 2026-10-29: remove this entry once it is installed); level gap 0.0e+00, sample gap 1.0e+00"
+ },
+ "wasm": {
+  "allpass2_noclip_modulated_test": "isolated samples differ, the level matches; not investigated: level gap 5.0e-07, sample gap 6.8e-02",
+  "dither_shaped_test": "isolated samples differ, the level matches; not investigated: level gap 4.5e-06, sample gap 5.4e-02"
+ }
+}

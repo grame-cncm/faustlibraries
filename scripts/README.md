@@ -24,7 +24,7 @@ or later.
 | [`check_reinit.py`](#check_reinitpy) | renders every test after a second `init()`, at the same rate and after a rate change: it must equal a fresh instance | `make check-reinit` |
 | [`check_long.py`](#check_longpy) | renders every test for 2 min at 192 kHz in float and double: non-finite, growth, subnormals, drift | `make check-long` |
 | [`check_weak.py`](#check_weakpy) | flags the tests whose reference validates little: silent, below the tolerance, constant, settled, inputs unused | `make check-weak`, `check_doc.py` (`--changed --skip-missing`) |
-| [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java | `make check-backends`, `check_doc.py` (`--changed --lang wasm`) |
+| [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java; with `--compare`, compares their outputs with the C++ build | `make check-backends`, `make check-backend-outputs` (`--compare`), `check_doc.py` (`--changed --lang wasm`) |
 | [`check_tuning.py`](#check_tuningpy) | measures the pitch of the `physmodels.lib` models and MIDI instruments with faustprobe at 44.1 to 192 kHz, against a baseline | `make check-tuning` |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
@@ -308,8 +308,9 @@ with `--changed --skip-missing` when faust is installed.
 
 ```
 scripts/check_backends.py [--lang L,L] [--changed] [--update-baseline] [--no-validate] [--no-run] [--run-julia] [-j N]
-                          [FILE.dsp ...]
+                          [--compare [--level-max 1e-3] [--gap-max 1e-2] [--cpp-build-dir DIR]] [FILE.dsp ...]
 make check-backends [BACKENDS_ARGS="--lang wasm"]
+make check-backend-outputs [BACKEND_OUTPUTS_ARGS="tests/xx_tests.dsp"]
 ```
 
 Compiles every test with `faust -lang L` for the restricted backends: about
@@ -322,7 +323,8 @@ validate (107 tests in October 2026, a pow of two integers with a variable
 exponent in single precision), a bug of faust that the output points to.
 The modules that validate are then run in Node, as `make check` runs the C++
 (one second at 48 kHz, inputs at 0, default controls, buttons pressed for the
-first half, the math functions from JavaScript's `Math`): a module that stops
+first half and released at frame 24000 exactly (the block split there), the math
+functions from JavaScript's `Math`): a module that stops
 (a trap, as `int()` of a NaN did in October 2026) or writes a non-finite
 sample fails, with the error and the frame; a module that imports its memory
 (a `soundfile` test) is validated, not run. This adds about 15 s, run in
@@ -349,6 +351,21 @@ regression, 2 without faust. Compilations run from the repository root, since
 faust looks for libraries in the current directory first. `AGENTS.md`, rule 12,
 and `doc/docs/contributing.md`, section *Backends and foreign functions*, say
 why.
+
+With `--compare` (`make check-backend-outputs`, WebAssembly and Cmajor; add
+`--lang wasm,cmajor,julia --run-julia` for Julia), the outputs of the backends
+that run are written (`tests/build-backends/`) and compared with the C++
+build in `-single` without FMA contraction (`-ffp-contract=off`, as the
+backends compute), rendered by `arch/precision_arch.cpp` with the same
+schedule (`block=512`, `nopress` for Cmajor). Everything above only asks a
+backend for finite samples, which hid Cmajor's slider defaults snapped to
+their step and its `sinh`/`atanh` without precision near 0
+(cmajor-lang/cmajor#141). A test fails when its shape differs, its level gap
+(as `check_precision.py` measures it) exceeds `--level-max` (1e-3), or its
+sample gap (the largest difference, relative to the C++ peak) `--gap-max`
+(1e-2), unless `tests/backend-output-baseline.json` accepts it with a
+reason; an entry that matches again is reported. The C++ builds are those of
+`check_precision.py` (`--cpp-build-dir`).
 
 ### `check_cpu.py`
 

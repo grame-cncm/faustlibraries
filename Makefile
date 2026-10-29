@@ -24,6 +24,10 @@
 #                     tests/reinit-baseline.json.
 # `make check-jumps` - render every test with its sliders jumping between their bounds
 #                     during the run: non-finite, blow-up, against tests/jumps-baseline.json.
+# `make check-backend-outputs` - compare the outputs of WebAssembly and Cmajor (Julia with
+#                     BACKEND_OUTPUTS_ARGS="--lang wasm,cmajor,julia --run-julia") with the
+#                     C++ build in -single,
+#                     against tests/backend-output-baseline.json.
 # `make check-usage` - compile the #### Usage section of every documented symbol
 #                     (arity, parameters) against tests/usage-baseline.json.
 # `make check-filter-claims` - measure the filters of filters.lib and vaeffects.lib with
@@ -98,7 +102,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-backend-outputs check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -193,6 +197,9 @@ check-precision-matrix: ## check-precision with C++ -O2 and -O3 -ffast-math, Fau
 
 check-backends: ## Compile every test for WebAssembly (modules validated and run with node), Cmajor (rendered by cmaj), Julia, Codebox, C#, Java (baseline: tests/backend-baseline.json); BACKENDS_ARGS="--lang wasm"
 	@FAUST="$(FAUST)" $(PYTHON) scripts/check_backends.py $(BACKENDS_ARGS)
+
+check-backend-outputs: ## Compare the outputs of WebAssembly and Cmajor (Julia with BACKEND_OUTPUTS_ARGS="--lang wasm,cmajor,julia --run-julia") with the C++ build in -single (baseline: tests/backend-output-baseline.json)
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_backends.py --compare --lang wasm,cmajor $(BACKEND_OUTPUTS_ARGS)
 
 check-cpu: ## Measure the CPU cost of the tests; CPU_ARGS="--base REV" adds the ratio new / base
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_cpu.py --build-dir $(CPU_BUILD_DIR) $(CPU_ARGS)
