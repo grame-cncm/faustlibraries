@@ -461,7 +461,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-counter_test = ba.counter(button("trig"));
+counter_test = ba.counter(ba.pulse(10));
 ```
 
 ----
@@ -793,7 +793,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-pulse_countup_test = ba.pulse_countup(1) + 0.001;
+pulse_countup_test = ba.pulse(2) : ba.pulse_countup(ba.period(100) < 80);
 ```
 
 ----
@@ -816,7 +816,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-pulse_countdown_test = ba.pulse_countdown(1) + 0.001;
+pulse_countdown_test = ba.pulse(2) : ba.pulse_countdown(ba.period(100) < 80);
 ```
 
 ----
@@ -846,7 +846,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-pulse_countup_loop_test = ba.pulse_countup_loop(4, 1) + 0.001;
+pulse_countup_loop_test = ba.pulse(2) : ba.pulse_countup_loop(4, ba.period(100) < 80);
 pulse_countup_loop_pulses_test = ba.pulse(2) : ba.pulse_countup_loop(4, 1);
 ```
 
@@ -878,7 +878,7 @@ Where:
 #### Test
 ```
 ba = library("basics.lib");
-pulse_countdown_loop_test = ba.pulse_countdown_loop(4, 1) + 0.001;
+pulse_countdown_loop_test = ba.pulse(2) : ba.pulse_countdown_loop(4, ba.period(100) < 80);
 pulse_countdown_loop_pulses_test = ba.pulse(2) : ba.pulse_countdown_loop(4, 1);
 ```
 
@@ -2408,7 +2408,7 @@ button("toggle") : toggle : vbargraph("output", 0, 1)
 #### Test
 ```
 ba = library("basics.lib");
-toggle_test = ba.toggle(button("trig"));
+toggle_test = ba.toggle(ba.pulse(10));
 ```
 
 ----

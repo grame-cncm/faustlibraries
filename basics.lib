@@ -66,7 +66,7 @@ it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.23.6";
+declare version "1.23.7";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -534,7 +534,7 @@ FAUST library file, GRAME section 2
 // #### Test
 // ```
 // ba = library("basics.lib");
-// counter_test = ba.counter(button("trig"));
+// counter_test = ba.counter(ba.pulse(10));
 // ```
 //----------------------------
 declare counter author "Stephane Letz";
@@ -890,7 +890,7 @@ beat(t) = pulse(tempo(t));
 // #### Test
 // ```
 // ba = library("basics.lib");
-// pulse_countup_test = ba.pulse_countup(1) + 0.001;
+// pulse_countup_test = ba.pulse(2) : ba.pulse_countup(ba.period(100) < 80);
 // ```
 //----------------------------
 declare pulse_countup author "Vince";
@@ -915,7 +915,7 @@ pulse_countup(trig) = + ~ _ * trig;
 // #### Test
 // ```
 // ba = library("basics.lib");
-// pulse_countdown_test = ba.pulse_countdown(1) + 0.001;
+// pulse_countdown_test = ba.pulse(2) : ba.pulse_countdown(ba.period(100) < 80);
 // ```
 //----------------------------
 declare pulse_countdown author "Vince";
@@ -947,7 +947,7 @@ pulse_countdown(trig) = - ~ _ * trig;
 // #### Test
 // ```
 // ba = library("basics.lib");
-// pulse_countup_loop_test = ba.pulse_countup_loop(4, 1) + 0.001;
+// pulse_countup_loop_test = ba.pulse(2) : ba.pulse_countup_loop(4, ba.period(100) < 80);
 // pulse_countup_loop_pulses_test = ba.pulse(2) : ba.pulse_countup_loop(4, 1);
 // ```
 //----------------------------
@@ -985,7 +985,7 @@ with {
 // #### Test
 // ```
 // ba = library("basics.lib");
-// pulse_countdown_loop_test = ba.pulse_countdown_loop(4, 1) + 0.001;
+// pulse_countdown_loop_test = ba.pulse(2) : ba.pulse_countdown_loop(4, ba.period(100) < 80);
 // pulse_countdown_loop_pulses_test = ba.pulse(2) : ba.pulse_countdown_loop(4, 1);
 // ```
 //----------------------------
@@ -3107,7 +3107,7 @@ with {
 // #### Test
 // ```
 // ba = library("basics.lib");
-// toggle_test = ba.toggle(button("trig"));
+// toggle_test = ba.toggle(ba.pulse(10));
 // ```
 //----------------------------
 declare toggle author "Vince";

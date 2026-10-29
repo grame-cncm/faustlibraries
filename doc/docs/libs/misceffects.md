@@ -739,7 +739,7 @@ Where:
 #### Test
 ```
 ef = library("misceffects.lib");
-mixPowerClamp_test = (1,0,0,0) : ef.mixPowerClamp(4, 1, 1.5);
+mixPowerClamp_test = (1,2,4,8) : ef.mixPowerClamp(4, 1, 1.5);
 ```
 
 ----

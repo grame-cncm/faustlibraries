@@ -1966,7 +1966,9 @@ Simple brass lips/mouthpiece table. Since this implementation is very basic
 and that the lips and tube of the instrument are coupled to each other, the
 length of that tube must be provided here. The lip resonance is realized
 with `fi.tf2_tpt`, which stays accurate in single precision at low
-frequencies and finite when the tube length or the lip tension moves.
+frequencies and finite when the tube length or the lip tension moves. It has
+a constant Q, and the same gain and phase relative to its frequency at every
+note and sample rate (those of a 440 Hz resonance at 44.1 kHz).
 
 #### Usage
 
@@ -1989,7 +1991,7 @@ ma = library("maths.lib");
 no = library("noises.lib");
 brassLipsTable_test = os.tosc(220) : pm.brassLipsTable(0.3, 0.2);
 brassLipsTable_slider_test = 0.02*os.tosc(220) : pm.brassLipsTable(hslider("tubeLength", 0.3, 0.01, 2.5, 0.01), hslider("lipsTension", 0.2, 0, 1, 0.01));
-brassLipsTable_low_test = 0.003*no.noise : pm.brassLipsTable(2.5, 0);
+brassLipsTable_low_test = 0.375*no.noise : pm.brassLipsTable(2.5, 0);
 brassLipsTable_modulated_test = 0.02*os.tosc(220) : pm.brassLipsTable(0.1*pow(25.0, tri), 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 brassLipsTable_jump_test = 0.02*os.tosc(220) : pm.brassLipsTable(0.1*pow(25.0, sq), 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 brassLipsTable_audio_modulated_test = 0.1*no.noise : pm.brassLipsTable(340/fc, 0.5) with { fc = max(20, 1000*(1 + 0.9*os.tosc(500))); };
@@ -2177,7 +2179,8 @@ fluteHead_test = 0.25, -0.15, 0.05 : pm.fluteHead;
 
 ### `(pm.)fluteFoot`
 
-Simple flute foot implementing waves reflexion and dispersion.
+Simple flute foot implementing waves reflexion and dispersion. Its lowpass
+has the same cutoff at every sample rate.
 
 #### Usage
 
@@ -2304,7 +2307,8 @@ brassModel(tubeLength,lipsTension,mute,pressure) : _
 
 Where:
 
-* `tubeLength`: the length of the tube in meters
+* `tubeLength`: the length of the tube in meters; with `lipsTension` and `mute`
+at 0.5, the instrument sounds at `l2f(tubeLength)` (pass `f2l(freq)` to play `freq`)
 * `lipsTension`: tension of the lips (0-1) (default: 0.5)
 * `mute`: mute opening at the end of the instrument (0-1) (default: 0.5)
 * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
@@ -2394,7 +2398,8 @@ fluteModel(tubeLength,mouthPosition,pressure) : _
 
 Where:
 
-* `tubeLength`: the length of the tube in meters
+* `tubeLength`: the length of the tube in meters; the flute sounds at
+`l2f(tubeLength)` (pass `f2l(freq)` to play `freq`)
 * `mouthPosition`: position of the mouth on the embouchure (0-1) (default: 0.5)
 * `pressure`: the pressure of the air flow created by the virtual performer (0-1).
 This can also be any kind of signal that will directly injected in the mouthpiece
@@ -2631,7 +2636,9 @@ blower_test = pm.blower(0.5, 0.05, 2000, 5, 0.2);
 
 ### `(pm.)blower_ui`
 
-Same as [`blower`](#blower) but with a built-in UI.
+Same as [`blower`](#blower) but with a built-in UI. The pressure defaults to
+0.9, where `clarinet_ui`, `brass_ui` and `flute_ui` all sound: they play as
+soon as they run, 0 silences them.
 
 #### Usage
 
@@ -2852,8 +2859,10 @@ Where:
 
 #### Test
 ```
+ba = library("basics.lib");
+ma = library("maths.lib");
 pm = library("physmodels.lib");
-marimba_test = pm.marimba(220, 0.4, 1, 0.5, 0.8, button("pm.marimba/gate"));
+marimba_test = pm.marimba(220, 0.4, 7000, 0.5, 0.8, ba.pulsen(1, int(ma.SR/4)));
 ```
 
 ----

@@ -113,12 +113,6 @@
   ],
   "reason": "by design: the output stops at the release of the harness's button or checkbox (frame 24000)"
  },
- "counter_test": {
-  "kinds": [
-   "constant"
-  ],
-  "reason": "weak: the harness presses the button once, so a single rising edge: constant from frame 0; a trigger train (ba.pulse) would count"
- },
  "cycle_test": {
   "kinds": [
    "settles"
@@ -395,23 +389,11 @@
   ],
   "reason": "decays by design: a percussive note (or an impulse response) that dies out before the release"
  },
- "marimba_test": {
-  "kinds": [
-   "silent"
-  ],
-  "reason": "weak: strikeCutoff = 1 Hz (recommended ~7000 Hz) filters the strike out, peak 9.1e-7"
- },
  "marimba_ui_MIDI_test": {
   "kinds": [
    "settles"
   ],
   "reason": "decays by design: a percussive note (or an impulse response) that dies out before the release"
- },
- "mixPowerClamp_test": {
-  "kinds": [
-   "silent"
-  ],
-  "reason": "weak: the mix index 1.5 selects buses 1 and 2, which the input (1,0,0,0) leaves at 0"
  },
  "mm_line_test": {
   "kinds": [
@@ -559,34 +541,6 @@
   ],
   "reason": "weak: si.bus(4) passes the harness's zero inputs: the array processes silence"
  },
- "pulse_countdown_loop_test": {
-  "kinds": [
-   "constant",
-   "dead-input"
-  ],
-  "reason": "weak: the pulses to count come from the input, which the harness feeds with zeros: the output is the 0.001 added; feed it ba.pulse"
- },
- "pulse_countdown_test": {
-  "kinds": [
-   "constant",
-   "dead-input"
-  ],
-  "reason": "weak: the pulses to count come from the input, which the harness feeds with zeros: the output is the 0.001 added; feed it ba.pulse"
- },
- "pulse_countup_loop_test": {
-  "kinds": [
-   "constant",
-   "dead-input"
-  ],
-  "reason": "weak: the pulses to count come from the input, which the harness feeds with zeros: the output is the 0.001 added; feed it ba.pulse"
- },
- "pulse_countup_test": {
-  "kinds": [
-   "constant",
-   "dead-input"
-  ],
-  "reason": "weak: the pulses to count come from the input, which the harness feeds with zeros: the output is the 0.001 added; feed it ba.pulse"
- },
  "rStringRigidTermination_test": {
   "kinds": [
    "settles"
@@ -712,12 +666,6 @@
    "settles"
   ],
   "reason": "by design: the output stops at the release of the harness's button or checkbox (frame 24000)"
- },
- "toggle_test": {
-  "kinds": [
-   "constant"
-  ],
-  "reason": "weak: the harness presses the button once, so a single rising edge: constant from frame 0; a trigger train (ba.pulse) would count"
  },
  "tractDiameters2_test": {
   "kinds": [

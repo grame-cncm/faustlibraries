@@ -38,7 +38,7 @@ dryWetMixerConstantPower_test = os.tosc(440) : ef.dryWetMixerConstantPower(0.5, 
 
 mixLinearClamp_test = (1,0.5,0,0) : ef.mixLinearClamp(4, 1, 1.2);
 mixLinearLoop_test = (1,0,0,0) : ef.mixLinearLoop(4, 1, -0.3);
-mixPowerClamp_test = (1,0,0,0) : ef.mixPowerClamp(4, 1, 1.5);
+mixPowerClamp_test = (1,2,4,8) : ef.mixPowerClamp(4, 1, 1.5);
 mixPowerLoop_test = (1,0,0,0) : ef.mixPowerLoop(4, 1, -0.5);
 
 echo_test = os.tosc(440) : ef.echo(0.5, 0.25, 0.4);
