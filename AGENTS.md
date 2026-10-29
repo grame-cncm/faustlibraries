@@ -13,6 +13,7 @@ make check-doc   # documentation & license gate - run before every commit
 make check-usage # compile every #### Usage section (check-doc does the changed libraries)
 make check-filter-claims # filters.lib/vaeffects.lib measured against their doc with faustprobe (faust-rs): SR independence, -3 dB, peaks
 make check-tuning # physmodels.lib instruments measured with faustprobe: pitch at 44.1-192 kHz (about 1 min)
+make check-osc-claims # oscillators.lib and aanl.lib measured with faustprobe: pitch, SR independence, aliasing, float noise (about 1 min)
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
 make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)

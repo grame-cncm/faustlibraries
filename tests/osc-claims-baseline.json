@@ -1,0 +1,478 @@
+{
+ "comment": "Accepted deviations of the oscillators of oscillators.lib and the antialiased functions of aanl.lib, see scripts/check_osc_claims.py; each entry gives the reason. `levels`: the aliasing measured, in dB at 44.1 and 96 kHz.",
+ "accepted": {
+  "aa.acosh2": {
+   "noise": "second-order ADAA in float: its divided difference of divided differences cancels as consecutive inputs come closer at a higher rate, a noise floor that hides the suppression: -56.6 dB in -single against -70.4 dB in -double at 192 kHz (first order -67.8 dB in -single)",
+   "order": "the input 3 + 2 sin reaches x = 1, where acosh' is infinite: the second order gains nothing there (-48.6 against -49.2 dB at 44.1 kHz); at 1.2 + 0.2 sin it gains 3.7 dB (-54.6 against -50.9)"
+  },
+  "aa.arctan2": {
+   "noise": "second-order ADAA in float: its divided difference of divided differences cancels as consecutive inputs come closer at a higher rate, a noise floor that hides the suppression: -71.7 dB in -single against -99.5 dB in -double at 192 kHz (first order -96.1 dB in -single)"
+  },
+  "aa.asinh2": {
+   "noise": "second-order ADAA in float: its divided difference of divided differences cancels as consecutive inputs come closer at a higher rate, a noise floor that hides the suppression: -71.2 dB in -single against -84.3 dB in -double at 96 kHz"
+  },
+  "aa.sinarctan2": {
+   "noise": "second-order ADAA in float: its divided difference of divided differences cancels as consecutive inputs come closer at a higher rate, a noise floor that hides the suppression: -75.5 dB in -single against -98.2 dB in -double at 192 kHz (first order -94.8 dB in -single)"
+  },
+  "os.lf_imptrain": {
+   "sr": "by design: one sample of 1 per period, so the mean is f0/SR and every harmonic falls 6 dB per doubling of the rate (an impulse of one sample, not of a duration)"
+  },
+  "os.oscb": {
+   "noise": "the biquad's coefficient -2cos(w) rounded to float: at 55 Hz at 192 kHz, -78 dB of non-harmonic energy (-162 dB in double)",
+   "tune-single": "the biquad's coefficient -2cos(w) rounded to float sets the frequency: +2.6 cents at 55 Hz at 96 kHz (exact in double)"
+  },
+  "os.oscq": {
+   "noise": "the waveguide resonator fi.wgr rounded to float: its coefficient sets the frequency, -4.1 cents at 55 Hz at 192 kHz, and the recursion's rounding puts -69 dB of non-harmonic energy beside the sine (exact and -162 dB in double)",
+   "tune-single": "the waveguide resonator fi.wgr rounded to float: its coefficient sets the frequency, -4.1 cents at 55 Hz at 192 kHz, and the recursion's rounding puts -69 dB of non-harmonic energy beside the sine (exact and -162 dB in double)"
+  },
+  "os.oscw": {
+   "noise": "the waveguide resonator fi.wgr rounded to float: its coefficient sets the frequency, -4.1 cents at 55 Hz at 192 kHz, and the recursion's rounding puts -69 dB of non-harmonic energy beside the sine (exact and -162 dB in double)",
+   "tune-single": "the waveguide resonator fi.wgr rounded to float: its coefficient sets the frequency, -4.1 cents at 55 Hz at 192 kHz, and the recursion's rounding puts -69 dB of non-harmonic energy beside the sine (exact and -162 dB in double)"
+  },
+  "os.oscwc": {
+   "noise": "the waveguide resonator fi.wgr rounded to float: its coefficient sets the frequency, -4.1 cents at 55 Hz at 192 kHz, and the recursion's rounding puts -69 dB of non-harmonic energy beside the sine (exact and -162 dB in double)",
+   "tune-single": "the waveguide resonator fi.wgr rounded to float: its coefficient sets the frequency, -4.1 cents at 55 Hz at 192 kHz, and the recursion's rounding puts -69 dB of non-harmonic energy beside the sine (exact and -162 dB in double)"
+  },
+  "os.oscws": {
+   "noise": "the waveguide resonator fi.wgr rounded to float: its coefficient sets the frequency, -4.1 cents at 55 Hz at 192 kHz, and the recursion's rounding puts -69 dB of non-harmonic energy beside the sine (exact and -162 dB in double)",
+   "tune-single": "the waveguide resonator fi.wgr rounded to float: its coefficient sets the frequency, -4.1 cents at 55 Hz at 192 kHz, and the recursion's rounding puts -69 dB of non-harmonic energy beside the sine (exact and -162 dB in double)"
+  },
+  "os.triangle": {
+   "alias": "triangle is triangleN(2), the integral of squareN(2): -33.1 dB at 3520 Hz at 44.1 kHz, 1.7 dB below the naive lf_triangle, whose harmonics already fall 12 dB per octave; triangleN(3) reaches -40.8 dB, polyblep_triangle -38.2 dB"
+  }
+ },
+ "levels": {
+  "aa.acosh1": {
+   "44100": -49.19,
+   "96000": -59.43
+  },
+  "aa.acosh2": {
+   "44100": -48.62,
+   "96000": -60.26
+  },
+  "aa.arccos": {
+   "44100": -53.21,
+   "96000": -72.85
+  },
+  "aa.arccos2": {
+   "44100": -54.48,
+   "96000": -74.11
+  },
+  "aa.arcsin": {
+   "44100": -53.21,
+   "96000": -72.85
+  },
+  "aa.arcsin2": {
+   "44100": -54.48,
+   "96000": -74.11
+  },
+  "aa.arctan": {
+   "44100": -40.78,
+   "96000": -67.75
+  },
+  "aa.arctan2": {
+   "44100": -45.31,
+   "96000": -72.24
+  },
+  "aa.asinh1": {
+   "44100": -49.87,
+   "96000": -79.87
+  },
+  "aa.asinh2": {
+   "44100": -54.33,
+   "96000": -84.27
+  },
+  "aa.atanh1": {
+   "44100": -49.16,
+   "96000": -81.24
+  },
+  "aa.atanh2": {
+   "44100": -51.49,
+   "96000": -74.21
+  },
+  "aa.cosine1": {
+   "44100": -21.93,
+   "96000": -92.03
+  },
+  "aa.cosine2": {
+   "44100": -25.19,
+   "96000": -92.0
+  },
+  "aa.cubic1": {
+   "44100": -28.33,
+   "96000": -51.04
+  },
+  "aa.hardclip": {
+   "44100": -33.54,
+   "96000": -42.46
+  },
+  "aa.hardclip2": {
+   "44100": -37.85,
+   "96000": -47.18
+  },
+  "aa.hyperbolic": {
+   "44100": -35.39,
+   "96000": -48.7
+  },
+  "aa.hyperbolic2": {
+   "44100": -40.23,
+   "96000": -53.73
+  },
+  "aa.parabolic": {
+   "44100": -42.94,
+   "96000": -57.87
+  },
+  "aa.parabolic2": {
+   "44100": -47.02,
+   "96000": -62.31
+  },
+  "aa.sinarctan": {
+   "44100": -35.71,
+   "96000": -60.04
+  },
+  "aa.sinarctan2": {
+   "44100": -40.3,
+   "96000": -64.57
+  },
+  "aa.sinarctanStable": {
+   "44100": -32.62,
+   "96000": -52.69
+  },
+  "aa.sinarctanTransparent": {
+   "44100": -29.65,
+   "96000": -49.73
+  },
+  "aa.sine": {
+   "44100": -16.42,
+   "96000": -93.06
+  },
+  "aa.sine2": {
+   "44100": -19.63,
+   "96000": -93.08
+  },
+  "aa.sineFold1": {
+   "44100": -8.65,
+   "96000": -40.16
+  },
+  "aa.sineFold2": {
+   "44100": -12.83,
+   "96000": -46.58
+  },
+  "aa.softclipQuadratic1": {
+   "44100": -25.2,
+   "96000": -41.11
+  },
+  "aa.softclipQuadratic2": {
+   "44100": -30.13,
+   "96000": -45.62
+  },
+  "aa.tangent": {
+   "44100": -40.46,
+   "96000": -79.16
+  },
+  "aa.tanh1": {
+   "44100": -37.2,
+   "96000": -69.78
+  },
+  "aa.triangleFold1": {
+   "44100": -3.75,
+   "96000": -30.22
+  },
+  "aa.triangleFold2": {
+   "44100": -7.89,
+   "96000": -36.59
+  },
+  "os.CZhalfSine": {
+   "44100": -42.65,
+   "96000": -60.52
+  },
+  "os.CZhalfSineP": {
+   "44100": -42.65,
+   "96000": -60.52
+  },
+  "os.CZpulse": {
+   "44100": -40.69,
+   "96000": -59.17
+  },
+  "os.CZpulseP": {
+   "44100": -40.69,
+   "96000": -59.17
+  },
+  "os.CZresSaw": {
+   "44100": -36.68,
+   "96000": -51.53
+  },
+  "os.CZresTrap": {
+   "44100": -28.1,
+   "96000": -38.75
+  },
+  "os.CZresTriangle": {
+   "44100": -35.24,
+   "96000": -46.76
+  },
+  "os.CZsaw": {
+   "44100": -42.28,
+   "96000": -60.33
+  },
+  "os.CZsawP": {
+   "44100": -42.28,
+   "96000": -60.33
+  },
+  "os.CZsinePulse": {
+   "44100": -30.55,
+   "96000": -46.64
+  },
+  "os.CZsinePulseP": {
+   "44100": -30.55,
+   "96000": -46.64
+  },
+  "os.CZsquare": {
+   "44100": -17.94,
+   "96000": -37.94
+  },
+  "os.CZsquareP": {
+   "44100": -17.94,
+   "96000": -37.94
+  },
+  "os.hs_osccos": {
+   "44100": -88.23,
+   "96000": -88.23
+  },
+  "os.hs_oscsin": {
+   "44100": -88.23,
+   "96000": -88.23
+  },
+  "os.hs_phasor": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.hsp_phasor": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.imptrain": {
+   "44100": -13.15,
+   "96000": -12.31
+  },
+  "os.imptrainN": {
+   "44100": -18.44,
+   "96000": -17.1
+  },
+  "os.lf_imptrain": {
+   "44100": -5.27,
+   "96000": -5.03
+  },
+  "os.lf_pulsetrain": {
+   "44100": -10.96,
+   "96000": -14.86
+  },
+  "os.lf_pulsetrainpos": {
+   "44100": -10.96,
+   "96000": -14.86
+  },
+  "os.lf_saw": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.lf_sawpos": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.lf_sawpos_phase": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.lf_sawpos_phase_reset": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.lf_sawpos_reset": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.lf_squarewave": {
+   "44100": -11.44,
+   "96000": -15.26
+  },
+  "os.lf_squarewavepos": {
+   "44100": -11.44,
+   "96000": -15.26
+  },
+  "os.lf_triangle": {
+   "44100": -31.41,
+   "96000": -42.27
+  },
+  "os.lf_trianglepos": {
+   "44100": -31.41,
+   "96000": -42.27
+  },
+  "os.m_osccos": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.m_oscsin": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.osc": {
+   "44100": -88.23,
+   "96000": -88.23
+  },
+  "os.oscb": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.osccos": {
+   "44100": -88.23,
+   "96000": -88.23
+  },
+  "os.osci": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscp": {
+   "44100": -88.23,
+   "96000": -88.23
+  },
+  "os.oscq": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscr": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscrc": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscrp": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscrq": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscrs": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscs": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscsin": {
+   "44100": -88.23,
+   "96000": -88.23
+  },
+  "os.oscw": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscwc": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.oscws": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.phasor": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.polyblep_saw": {
+   "44100": -26.5,
+   "96000": -28.9
+  },
+  "os.polyblep_square": {
+   "44100": -26.78,
+   "96000": -32.01
+  },
+  "os.polyblep_triangle": {
+   "44100": -38.16,
+   "96000": -49.68
+  },
+  "os.pulsetrain": {
+   "44100": -23.01,
+   "96000": -26.03
+  },
+  "os.pulsetrainN": {
+   "44100": -29.98,
+   "96000": -32.09
+  },
+  "os.quadosc": {
+   "44100": -91.32,
+   "96000": -91.32
+  },
+  "os.saw1": {
+   "44100": -9.87,
+   "96000": -13.27
+  },
+  "os.saw2": {
+   "44100": -20.31,
+   "96000": -23.17
+  },
+  "os.saw2dpw": {
+   "44100": -20.31,
+   "96000": -23.17
+  },
+  "os.saw2f2": {
+   "44100": -18.26,
+   "96000": -20.61
+  },
+  "os.saw2f4": {
+   "44100": -18.28,
+   "96000": -20.61
+  },
+  "os.saw2ptr": {
+   "44100": -20.31,
+   "96000": -23.17
+  },
+  "os.saw3": {
+   "44100": -26.5,
+   "96000": -28.9
+  },
+  "os.saw4": {
+   "44100": -31.94,
+   "96000": -33.88
+  },
+  "os.sawN": {
+   "44100": -26.5,
+   "96000": -28.9
+  },
+  "os.sawNp": {
+   "44100": -26.5,
+   "96000": -28.9
+  },
+  "os.sawtooth": {
+   "44100": -20.31,
+   "96000": -23.17
+  },
+  "os.square": {
+   "44100": -23.29,
+   "96000": -27.3
+  },
+  "os.squareN": {
+   "44100": -29.5,
+   "96000": -33.4
+  },
+  "os.tosc": {
+   "44100": -91.01,
+   "96000": -91.01
+  },
+  "os.triangle": {
+   "44100": -33.15,
+   "96000": -43.58
+  },
+  "os.triangleN": {
+   "44100": -40.77,
+   "96000": -51.14
+  },
+  "os.twin_osc": {
+   "44100": -20.91,
+   "96000": -23.69
+  }
+ }
+}

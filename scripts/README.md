@@ -26,6 +26,7 @@ or later.
 | [`check_weak.py`](#check_weakpy) | flags the tests whose reference validates little: silent, below the tolerance, constant, settled, inputs unused | `make check-weak`, `check_doc.py` (`--changed --skip-missing`) |
 | [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java; with `--compare`, compares their outputs with the C++ build | `make check-backends`, `make check-backend-outputs` (`--compare`), `check_doc.py` (`--changed --lang wasm`) |
 | [`check_tuning.py`](#check_tuningpy) | measures the pitch of the `physmodels.lib` models and MIDI instruments with faustprobe at 44.1 to 192 kHz, against a baseline | `make check-tuning` |
+| [`check_osc_claims.py`](#check_osc_claimspy) | measures the oscillators of `oscillators.lib` and the antialiased functions of `aanl.lib` with faustprobe: pitch and waveform at 44.1 to 192 kHz, aliasing, float noise, against a baseline | `make check-osc-claims` |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
 | [`lib_tests.py`](#lib_testspy) | inventory of a library's tests; adds tests to its doc blocks and to `tests/*.dsp` | — |
 | [`verify_matched2.py`](#verify_matched2py) | proves the rewrites of Vicanek's matched filters and checks their coefficients at 60 digits | `make verify-matched` |
@@ -67,6 +68,8 @@ are run by `doc/Makefile`.
   (`cargo build --release -p cranelift-ffi --bin faustprobe`), and the export
   with measured io (`make doc-index-split`, which the make target runs first);
 - `check_tuning.py`: `faustprobe` and `numpy`;
+- `check_osc_claims.py`: `faustprobe`, `numpy` and the export with measured
+  io (`make doc-index-split`, which the make target runs first);
 - certification: `faust-rs` and `lean` (4.31);
 - everything else: the Python standard library only.
 
@@ -751,6 +754,67 @@ reason; an entry no longer needed is reported. A new pitched instrument is
 covered as soon as it is a `*_ui_MIDI`; a model is added to `MODELS`. Exit
 status 0, 1 on a deviation the baseline does not accept, 2 without
 faustprobe. About a minute.
+
+### `check_osc_claims.py`
+
+```
+scripts/check_osc_claims.py [--export DIR] [--faustprobe PATH] [--jobs N] [--only os.xx aa.xx ...]
+                            [--table] [--write-baseline] [--json FILE]
+make check-osc-claims [OSC_CLAIMS_ARGS="--only os.sawN aa.tanh1"]
+```
+
+Measures what an oscillator promises: given `freq`, it sounds at `freq` with
+the same waveform at every sample rate, and an aliasing-suppressed one
+aliases less than the naive waveform it replaces. The tests of
+`oscillators.lib` play at 220 or 440 Hz at 48 kHz, where aliasing is too low
+to see, and their references come from the same code: in October 2026,
+`os.polyblep_triangle` leaked through a pole fixed at 0.999 (7 Hz at
+44.1 kHz, 31 Hz at 192 kHz), identical to the fixed version at 48 kHz, and its
+triangle at 20 Hz had a peak of 0.91 at 44.1 kHz and 0.41 at 192 kHz.
+
+The oscillators are found in the export: every symbol of `oscillators.lib`
+whose Usage is a call without input with a `freq` parameter (or `fund`, given
+`lf_sawpos(freq)`), valued by its Test section (a `reset` held at 0). They
+are rendered by faustprobe in double precision at the six rates of
+`check-precision`, at 55, 220, 880 and 3520.37 Hz, one second after 0.25 s.
+The antialiased functions of `aanl.lib` are those of the script's
+`NONLINEAR` table, each driven by a sine at 2637.13 Hz scaled into its domain
+and past its knee, with its naive static function where the table gives it.
+The aliasing of a render is the energy outside the harmonics of its
+fundamental against the energy in them (Blackman-Harris window, 8 bins each
+side of every harmonic: the floor is -91 dB, a pure sine). Keys:
+
+- `tune`: a pitch more than 1 cent from the note;
+- `sr`: a harmonic below 4 kHz spreads over more than 0.5 dB across the
+  rates, or the mean moves with the rate; weak harmonics, buried in the
+  aliasing of a naive waveform, and the mean of a naive waveform sampled on
+  another grid are given their margin;
+- `alias`: a symbol whose summary says it suppresses aliasing gains less than
+  6 dB on the naive `lf_` waveform of its family at 3520.37 Hz at 44.1 kHz
+  (an `aanl.lib` function, less than 3 dB on its static function at
+  2637.13 Hz);
+- `order`: order N+1 of an `N` family (`sawN`, `squareN`, `triangleN`,
+  `pulsetrainN`, `imptrainN`, N = 1 to 4), or the second order of an
+  `aanl.lib` function, gains less than 1 dB on the order below;
+- `level`: the aliasing at 44.1 or 96 kHz is 1 dB worse than the level
+  recorded in the baseline (`levels`); a level that improved by as much is
+  listed, to be recorded with `--write-baseline` once the change is known to
+  be deliberate;
+- `noise`: in `-single`, at 44.1, 96 or 192 kHz, the aliasing stands above
+  -80 dB and 6 dB above the `-double` render: rounding takes the suppression
+  away (the second-order ADAA, whose divided differences cancel as
+  consecutive inputs come closer; the recursive sine oscillators);
+- `tune-single`: an oscillator more than 1 cent off in `-single` (the
+  coefficient of a recursive oscillator, rounded to float, sets its
+  frequency: `os.oscw` is 4 cents flat at 55 Hz at 192 kHz);
+- `silent`, `nonfinite`, `error`.
+
+`--table` prints every measurement. `tests/osc-claims-baseline.json` accepts
+deviations by case and key, each with its reason, and records the aliasing
+levels; an entry no longer needed is reported. A new oscillator is covered as
+soon as its Usage and Test give a call with `freq`; a new `aanl.lib` function
+is added to `NONLINEAR`. Exit status 0, 1 on a deviation the baseline does
+not accept, 2 without faustprobe or the export. About a minute.
 
 ### `check_filter_claims.py`
 

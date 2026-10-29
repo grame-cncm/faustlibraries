@@ -36,6 +36,10 @@
 # `make check-tuning` - measure the pitch of the physmodels.lib instruments with
 #                     faustprobe (faust-rs) at 44.1 to 192 kHz, against
 #                     tests/tuning-baseline.json.
+# `make check-osc-claims` - measure the oscillators of oscillators.lib and the
+#                     antialiased functions of aanl.lib with faustprobe: pitch and
+#                     waveform at 44.1 to 192 kHz, aliasing against the naive waveform
+#                     and between orders, float noise, against tests/osc-claims-baseline.json.
 # `make clean`      - remove build artefacts and generated outputs (references are kept).
 # `make distclean`  - additionally remove the stored reference outputs.
 # `make bench`      - use faustbench-llvm to benchmark all test specs.
@@ -102,7 +106,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-backend-outputs check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-backend-outputs check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-osc-claims check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -278,6 +282,9 @@ check-filter-claims: doc-index-split ## Measure the filters of filters.lib and v
 
 check-tuning: ## Measure the pitch of the physmodels.lib models and MIDI instruments at 44.1-192 kHz with faustprobe (baseline: tests/tuning-baseline.json); TUNING_ARGS="--only pm.ks"
 	@$(PYTHON) scripts/check_tuning.py $(TUNING_ARGS)
+
+check-osc-claims: doc-index-split ## Measure the oscillators of oscillators.lib and the antialiased functions of aanl.lib with faustprobe: pitch, SR independence, aliasing, float noise (baseline: tests/osc-claims-baseline.json); OSC_CLAIMS_ARGS="--only os.sawN"
+	@$(PYTHON) scripts/check_osc_claims.py --export $(DOC_INDEX_SPLIT_DIR) $(OSC_CLAIMS_ARGS)
 
 check-plots: ## Regenerate every figure aside and fail on a stale one or a failed assertion (make plots refreshes them)
 	@$(PYTHON) scripts/check_plots.py $(PLOTS_ARGS)
