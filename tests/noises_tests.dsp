@@ -7,6 +7,7 @@ no = library("noises.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 os = library("oscillators.lib");
+fi = library("filters.lib");
 
 noise_test = no.noise;
 multirandom_test = no.multirandom(3);
@@ -39,7 +40,11 @@ lfnoiseN_test = no.lfnoiseN(3, 10.1);
 lfnoise_test = no.lfnoise(10.1);
 
 sparse_noise_test = no.sparse_noise(5.0);
+// Dense impulses averaged by a 1 Hz lowpass: close to zero, not a DC offset
+sparse_noise_dc_test = no.sparse_noise(20000.0) : fi.lowpass(1, 1.0);
 velvet_noise_test = no.velvet_noise(0.5, 5.0);
+// Dense impulses averaged by a 1 Hz lowpass: close to zero, not a DC offset
+velvet_noise_dc_test = no.velvet_noise(1.0, 20000.0) : fi.lowpass(1, 1.0);
 
 gnoise_test = no.gnoise(8);
 colored_noise_test = no.colored_noise(4, 0.0);
