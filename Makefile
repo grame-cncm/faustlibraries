@@ -22,6 +22,8 @@
 # `make check-reinit` - render every test after a second init() (the same rate, and a
 #                     rate change both ways): it must equal a fresh instance, against
 #                     tests/reinit-baseline.json.
+# `make check-jumps` - render every test with its sliders jumping between their bounds
+#                     during the run: non-finite, blow-up, against tests/jumps-baseline.json.
 # `make check-usage` - compile the #### Usage section of every documented symbol
 #                     (arity, parameters) against tests/usage-baseline.json.
 # `make check-filter-claims` - measure the filters of filters.lib and vaeffects.lib with
@@ -96,7 +98,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: reference check check-sanitize check-extremes check-long check-weak check-reinit check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: reference check check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -182,6 +184,9 @@ check-weak: ## Flag the tests whose reference validates little: silent, below th
 
 check-reinit: ## Render every test after a second init() at the same rate and after a rate change: it must equal a fresh instance (baseline: tests/reinit-baseline.json); REINIT_ARGS="tests/xx_tests.dsp"
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_reinit.py --build-dir $(PRECISION_BUILD_DIR) $(REINIT_ARGS)
+
+check-jumps: ## Render every test with its sliders jumping between their bounds, all and one by one (baseline: tests/jumps-baseline.json); JUMPS_ARGS="tests/xx_tests.dsp"
+	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_jumps.py --build-dir $(PRECISION_BUILD_DIR) $(JUMPS_ARGS)
 
 check-precision-matrix: ## check-precision with C++ -O2 and -O3 -ffast-math, Faust -vec and -lang ocpp in turn
 	@FAUST="$(FAUST)" CXX="$(CXX)" $(PYTHON) scripts/check_precision.py --build-dir $(PRECISION_BUILD_DIR) --matrix all $(PRECISION_ARGS)

@@ -20,6 +20,7 @@ or later.
 | [`floatdiff.py`](#floatdiffpy) | compares a test output with its reference, within a tolerance | `make check` |
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_extremes.py`](#check_extremespy) | renders every test with its sliders at their extremes, all and one by one | `make check-extremes` |
+| [`check_jumps.py`](#check_jumpspy) | renders every test with its sliders jumping between their bounds during the run, all and one by one | `make check-jumps` |
 | [`check_reinit.py`](#check_reinitpy) | renders every test after a second `init()`, at the same rate and after a rate change: it must equal a fresh instance | `make check-reinit` |
 | [`check_long.py`](#check_longpy) | renders every test for 2 min at 192 kHz in float and double: non-finite, growth, subnormals, drift | `make check-long` |
 | [`check_weak.py`](#check_weakpy) | flags the tests whose reference validates little: silent, below the tolerance, constant, settled, inputs unused | `make check-weak`, `check_doc.py` (`--changed --skip-missing`) |
@@ -186,6 +187,30 @@ again at the rate of the run, which only is written) and `jump` or `jump:I`
 (the sliders, or the I-th alone, at default, max, min, max, min, max, min,
 default over the eighths of the run). Without them the schedule is that of
 `print_arch.cpp`, unchanged.
+
+### `check_jumps.py`
+
+```
+scripts/check_jumps.py [-k REGEX] [--rates 44100,192000] [--precision single|double]
+                       [--growth 100] [--block 512] [--write-baseline] [--json FILE] [FILE.dsp ...]
+make check-jumps [JUMPS_ARGS="tests/xx_tests.dsp"]
+```
+
+Renders every test that has sliders or number entries with them jumping
+between their bounds while the program runs (`jump`): default, max, min, max,
+min, max, min, default, one eighth of a second each at 44.1 and 192 kHz; all
+of them together, then each one alone, the others at their default.
+`check_extremes.py` holds a bound for the whole run, and only the tests named
+`_jump_test` move a parameter during it: a recursive filter, an interpolated
+delay or a smoother can be stable at every fixed setting and blow up when the
+setting moves. A run fails when its output is not finite, or when its peak
+exceeds `--growth` (100) times the largest of 1, the default render's peak and
+the peaks of the renders held at the same bounds (a jump to a gain at its
+maximum raises the level as much as the held maximum), unless
+`tests/jumps-baseline.json` accepts that test and setting, with a reason. A
+run whose held bound is already not finite is not judged:
+`check_extremes.py` reports it. It uses the `-single` builds of
+`check_precision.py`.
 
 ### `check_reinit.py`
 

@@ -22,6 +22,7 @@ make check-extremes   # every test with its sliders at their extremes, all and o
 make check-long       # every test rendered 2 min at 192 kHz, -single and -double: non-finite, growth, subnormals, drift
 make check-weak       # every reference read: silent, below the tolerance, constant, settled, inputs unused (3 s)
 make check-reinit     # every test after a second init(), same rate and rate change: equal to a fresh instance
+make check-jumps      # every test with its sliders jumping between their bounds during the run
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions
