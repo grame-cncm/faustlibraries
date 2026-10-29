@@ -599,6 +599,12 @@
   ],
   "reason": "drift: the DX7 operator phasor (m_hsp_phasor) accumulates freq/SR in plain float; its frequency error becomes a phase offset at release (a 13.75 Hz carrier: pitch-envelope levels 0)"
  },
+ "operator_test": {
+  "kinds": [
+   "drift"
+  ],
+  "reason": "drift: the operator's phasor (m_hsp_phasor in dx7/operator.lib) accumulates its phase in float with ma.decimal; at the test's pitch (pitch EG levels 0, about 14 Hz) the -single phase is off the -double one after 60 s, where the release falls, so the RMS of that second differs"
+ },
  "orientation6_demo_test": {
   "kinds": [
    "subnormal"

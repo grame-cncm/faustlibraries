@@ -11,12 +11,12 @@ pi = library("pitchenv.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
 
-env_test = env.env((60,61,62,63), (60,61,62,63), 80, 90, button("gate")) : env.q24_to_linear;
-env_slider_test = env.env((hslider("env:R1", 60, 0, 99, 1), hslider("env:R2", 61, 0, 99, 1), hslider("env:R3", 62, 0, 99, 1), hslider("env:R4", 63, 0, 99, 1)), (hslider("env:L1", 60, 0, 99, 1), hslider("env:L2", 61, 0, 99, 1), hslider("env:L3", 62, 0, 99, 1), hslider("env:L4", 63, 0, 99, 1)), hslider("env:outlevel", 80, 0, 99, 1), hslider("env:rate_scaling", 90, 0, 99, 1), button("gate")) : env.q24_to_linear;
+env_test = env.env((60,61,62,63), (99,90,70,0), env.scaleoutlevel(80) << 5, 0, button("gate")) : env.q24_to_linear;
+env_slider_test = env.env((hslider("env:R1", 60, 0, 99, 1), hslider("env:R2", 61, 0, 99, 1), hslider("env:R3", 62, 0, 99, 1), hslider("env:R4", 63, 0, 99, 1)), (hslider("env:L1", 99, 0, 99, 1), hslider("env:L2", 90, 0, 99, 1), hslider("env:L3", 70, 0, 99, 1), hslider("env:L4", 0, 0, 99, 1)), int(env.scaleoutlevel(hslider("env:outlevel", 80, 0, 99, 1))) << 5, hslider("env:rate_scaling", 0, 0, 27, 1), button("gate")) : env.q24_to_linear;
 
 lfo_test = lfo.lfo(1, 50, checkbox("Sync"),35, button("gate"));
 
-operator_test = op.operator(0,1,0,0,99,99,99,99,99,0,0,0,0,0,0,0,4,35,0,0,0,1,3,99,99,99,99,0,0,0,0,50,0,0,0,0,0,-12,0,440.0,1.0,button("gate"));
+operator_test = op.operator(0,1,0,0,99,99,99,99,99,99,90,70,0,0,0,0,4,35,0,0,0,1,3,99,99,99,99,0,0,0,0,50,0,0,0,0,0,-12,0,440.0,1.0,button("gate"));
 operator_modulated_test = op.operator(0,1,0,0,99,99,99,99,99,99,99,99,99,0,0,0,4,35,0,0,0,1,3,99,99,99,99,0,0,0,0,50,0,0,0,0,0,-12,2*tri - 1,440.0,1.0,button("gate")) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 
 pitchenv_test = pi.pitchenv((60,61,62,63), (60,61,62,63), button("gate"));
