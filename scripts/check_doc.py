@@ -25,7 +25,14 @@ regression, without requiring the historical debt to be paid first:
   7. when a library or a test file differs from HEAD, every test still
      compiles for WebAssembly, beyond the debt of
      tests/backend-baseline.json (scripts/check_backends.py --changed
-     --lang wasm, about 15 s); skipped when faust is not installed.
+     --lang wasm, about 15 s); skipped when faust is not installed;
+  8. when a library, a test file or tests/weak-baseline.json differs from
+     HEAD, no reference of tests/reference/ is weak (silent, below the
+     tolerance of make check, constant, settled before the second half,
+     inputs unused) beyond tests/weak-baseline.json (scripts/check_weak.py
+     --changed --skip-missing, 3 s, 15 s after a library change); a test
+     without reference is not checked (make reference); skipped when faust
+     is not installed or there is no reference.
 
 Usage:
     scripts/check_doc.py                    # verify, exit 1 on regression
@@ -172,6 +179,18 @@ def main():
             if r.stderr.strip():
                 usage_errors.append(r.stderr.strip())
 
+    # 8. the references are not weak
+    if shutil.which("faust"):
+        r = subprocess.run([PYTHON, "scripts/check_weak.py", "--changed", "--skip-missing"],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            usage_errors += [line for line in r.stdout.strip().splitlines()
+                             if line.startswith("[weak] ") and not line.startswith(
+                                 ("[weak] FAILED", "[weak] note", "[weak] skipped"))
+                             and "tests, tolerance" not in line]
+            if r.stderr.strip():
+                usage_errors.append(r.stderr.strip())
+
     if errors or usage_errors:
         for e in errors + usage_errors:
             print("check_doc: %s" % e)
@@ -184,7 +203,9 @@ def main():
                   " gives its parameters values); scripts/check_usage.py --symbol"
                   " xx.name prints the program it compiles. A test that no longer"
                   " compiles for WebAssembly calls a foreign function the web rejects:"
-                  " see AGENTS.md, rule 12.")
+                  " see AGENTS.md, rule 12. A weak test ([weak]) is made to check"
+                  " something (AGENTS.md, rule 1), or accepted with its reason in"
+                  " tests/weak-baseline.json.")
         sys.exit(1)
     n_undoc = sum(len(v["undocumented"]) for k, v in debt.items()
                   if not k.startswith("_"))

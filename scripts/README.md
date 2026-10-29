@@ -20,6 +20,8 @@ or later.
 | [`floatdiff.py`](#floatdiffpy) | compares a test output with its reference, within a tolerance | `make check` |
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_extremes.py`](#check_extremespy) | renders every test with its sliders at their extremes, all and one by one | `make check-extremes` |
+| [`check_long.py`](#check_longpy) | renders every test for 2 min at 192 kHz in float and double: non-finite, growth, subnormals, drift | `make check-long` |
+| [`check_weak.py`](#check_weakpy) | flags the tests whose reference validates little: silent, below the tolerance, constant, settled, inputs unused | `make check-weak`, `check_doc.py` (`--changed --skip-missing`) |
 | [`check_backends.py`](#check_backendspy) | compiles every test for WebAssembly, Cmajor, Julia, Codebox, C#, Java | `make check-backends`, `check_doc.py` (`--changed --lang wasm`) |
 | [`check_tuning.py`](#check_tuningpy) | measures the pitch of the `physmodels.lib` models and MIDI instruments with faustprobe at 44.1 to 192 kHz, against a baseline | `make check-tuning` |
 | [`check_cpu.py`](#check_cpupy) | CPU cost of the tests, new / base ratio between two versions | `make check-cpu` |
@@ -205,6 +207,45 @@ counter, 3.1 h away at 192 kHz, is out of reach. Failures are compared with
 kinds `nonfinite`, `growth`, `subnormal`, `drift`): a new kind fails, an entry
 that no longer happens is reported stale. Its builds are its own, in
 `tests/build-long`, and cached.
+
+### `check_weak.py`
+
+```
+scripts/check_weak.py [-k REGEX] [--tol 1e-5] [--changed] [--skip-missing]
+                      [--write-baseline] [--json FILE] [FILE.dsp ...]
+make check-weak [WEAK_ARGS="tests/xx_tests.dsp"]
+```
+
+Reads the references of `tests/reference/` and flags the tests that `make check`
+validates little. `floatdiff.py` compares within `FLOAT_TOL` (1e-5), absolute
+below 1 in magnitude: what stays within it of zero, or of a constant, is not
+checked. Per test, over its channels (a channel with a non-finite sample is left
+to `check_precision.py`):
+
+- `silent`: every channel within the tolerance of zero, so `make check`
+  accepts a silent output;
+- `below-tolerance`: a channel with values, all within the tolerance of zero,
+  the others not: `make check` sees 0 there (a precision point at 1e-9);
+- `constant`: every channel constant within the tolerance although the program
+  has state (`fRec`, `fVec`, `IOTA` members of `mydsp`): a counter pressed once,
+  a smoothed constant. A program without state and inputs is constant by
+  definition (`ma.PI`, a function at constant arguments) and is not flagged;
+- `settles`: every channel within the tolerance of its last value before the
+  middle of the render: an envelope or an impulse response that ends early, an
+  output that stops at the release of the harness's buttons;
+- `dead-input`: the test has inputs, which the harnesses feed with zeros.
+
+The number of inputs and the state are read from the C++ that `faust -double`
+generates for each test, cached in `tests/build-weak/` while it is newer than the
+test file and the libraries (12 s for the whole suite, then 3 s). Findings are
+compared with `tests/weak-baseline.json` (`{test: {"kinds": [...], "reason":
+...}}`): a new kind fails, an entry that no longer happens is reported stale.
+The reasons say `by definition` or `by design` for what is meant (an impulse, a
+measure of a steady input) and `weak:` for a test that would check more with
+another input or other arguments: those are to fix, the baseline only records
+them. A test without reference fails (`--skip-missing` counts it instead), and
+the references of tests that no longer exist are listed. `check_doc.py` runs it
+with `--changed --skip-missing` when faust is installed.
 
 ### `check_backends.py`
 

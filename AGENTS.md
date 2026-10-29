@@ -20,6 +20,7 @@ make check-backends   # every test compiled for WebAssembly (modules validated a
 make check-sanitize   # every test under ASan and UBSan, table guards off (about 30 min; DSP_FILES= to restrict)
 make check-extremes   # every test with its sliders at their extremes, all and one by one (about 2 min)
 make check-long       # every test rendered 2 min at 192 kHz, -single and -double: non-finite, growth, subnormals, drift
+make check-weak       # every reference read: silent, below the tolerance, constant, settled, inputs unused (3 s)
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions
@@ -84,7 +85,13 @@ Every script behind these targets is described in `scripts/README.md`.
    `tu_`, `inst_`) when the natural name is taken. Every test must produce
    a **nonzero output signal**: a gate defaulting to 0 or a slider
    defaulting to silence turns the reference into all zeros, which
-   validates nothing. Check the generated `.ref` before committing it.
+   validates nothing. Check the generated `.ref` before committing it:
+   `make check-weak` (which `make check-doc` runs when a library or a
+   test changed) flags a reference that stays within the tolerance of
+   `make check` (1e-5) of zero, or of a constant, or that stops changing
+   before the middle of the render, and a test whose inputs the harnesses
+   feed with zeros. A new test passes it without an entry in
+   `tests/weak-baseline.json`.
 2. **Internal helpers** that cannot live in a `with { }` /
    `environment { }` block are prefixed `_name`. They need no doc block and
    are excluded from coverage; never use another library's `_` symbols.
