@@ -21,6 +21,7 @@ or later.
 | [`check_precision.py`](#check_precisionpy) | renders every test in float and double at 44.1 to 192 kHz | `make check-precision` |
 | [`check_extremes.py`](#check_extremespy) | renders every test with its sliders at their extremes, all and one by one | `make check-extremes` |
 | [`check_jumps.py`](#check_jumpspy) | renders every test with its sliders jumping between their bounds during the run, all and one by one | `make check-jumps` |
+| [`check_mutation.py`](#check_mutationpy) | injects small faults in a copy of the libraries and reports which ones the tests detect; a measure, no baseline | `make check-mutation` |
 | [`check_reinit.py`](#check_reinitpy) | renders every test after a second `init()`, at the same rate and after a rate change: it must equal a fresh instance | `make check-reinit` |
 | [`check_sr.py`](#check_srpy) | renders every test at 44.1, 96 and 192 kHz, its noises replaced by a signal that is the same at every rate: the shape of its spectrum, its level, its onset and decay must not move | `make check-sr` |
 | [`check_long.py`](#check_longpy) | renders every test for 2 min at 192 kHz in float and double: non-finite, growth, subnormals, drift | `make check-long` |
@@ -217,6 +218,39 @@ maximum raises the level as much as the held maximum), unless
 run whose held bound is already not finite is not judged:
 `check_extremes.py` reports it. It uses the `-single` builds of
 `check_precision.py`.
+
+### `check_mutation.py`
+
+```
+scripts/check_mutation.py [--lib xx.lib] [--def NAME] [--op OP] [-n PER_LIB] [--seed S]
+                          [--jobs J] [--max-compare N] [--max-render N] [--timeout S]
+                          [--list] [--list-survivors] [--uncovered] [--self-check N] [--json FILE]
+make check-mutation [MUTATION_ARGS="--lib filters.lib -n 50 --list-survivors"]
+```
+
+Measures what the tests detect. `make check` says that nothing moved and
+`check-weak` that a reference holds information; neither says whether the suite
+would see a bug. The script writes small faults into a copy of a library, one
+at a time: a number moved (`0.7` to `0.707`, `3` to `4`), `+` and `-` or `*` and
+`/` swapped, `<` to `<=`, `min` to `max`, `x'` to `x`, `@(d)` to `@(1+d)`. The
+sample is drawn per library with a fixed seed.
+
+For each mutant, the tests that may reach it (a call graph by names) are
+compiled and compared with the C++ of the intact libraries, and only those whose
+code changed are rendered against `tests/reference/`, as `make check` does. The
+mutant is `killed` when a test fails, `survived` when the code of a test changed
+and no test saw it, `unreached` when no test compiles to other code (code
+without a test, or a change without effect), and `invalid` when faust refuses
+it. The score is killed / (killed + survived + unreached).
+
+The working tree is never touched: everything runs from mirrors in
+`tests/build-mutation/`. `--uncovered` prints the documented symbols no test
+reaches in the call graph, which a Test section in a multi-symbol block can
+hide. `make check` runs in `-double` at 48 kHz, so what only shows in `-single`,
+at another rate or at the extremes of a slider counts as not detected, and
+`singleprecision`, `quadprecision` and `fixedpointprecision` definitions are
+not mutated. A survivor is not always a gap: `<` to `<=` on a value a signal
+never reaches is the same program.
 
 ### `check_reinit.py`
 

@@ -26,6 +26,7 @@ make check-reinit     # every test after a second init(), same rate and rate cha
 make check-jumps      # every test with its sliders jumping between their bounds during the run
 make check-sr         # every test at 44.1, 96 and 192 kHz, noises made rate-independent: spectrum, level, decay must not move
 make check-backend-outputs # WebAssembly and Cmajor outputs compared with the C++ build in -single
+make check-mutation  # small faults injected in a copy of the libraries: what do the tests detect? (a sample, about 1 h; MUTATION_ARGS="--lib xx.lib -n 50")
 make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
 make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions
