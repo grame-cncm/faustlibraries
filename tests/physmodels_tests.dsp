@@ -177,3 +177,5 @@ bwMultMins_test = ba.take(3, pm.bwMultMins);
 bwMultMaxes_test = ba.take(3, pm.bwMultMaxes);
 minGenderFreq_test = ba.take(1, pm.minGenderFreq);
 maxGenderFreq_test = ba.take(2, pm.maxGenderFreq);
+speedOfSound_test = pm.speedOfSound;
+maxLength_test = pm.maxLength;

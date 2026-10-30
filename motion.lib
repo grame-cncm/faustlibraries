@@ -49,7 +49,7 @@
 //########################################################################################
 
 declare name "Faust Motion Library";
-declare version "0.10.2";
+declare version "0.10.3";
 
 an = library("analyzers.lib");
 ba = library("basics.lib");
@@ -290,6 +290,18 @@ declare projectedGravity author "Christophe Lebreton";
 // mo = library("motion.lib");
 // process = mo.motionEnvelope(0.05, 1.25, 15, 25, accX);
 // ```
+//
+// #### Test
+// ```
+// mo = library("motion.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// motionEnvelope_test = mo.motionEnvelope(0.05, 1.25, 15, 25, os.tosc(2));
+// motionEnvelope_slider_test = mo.motionEnvelope(hslider("motionEnvelope:thr", 0.05, 0, 1, 0.01), hslider("motionEnvelope:gain", 1.25, 0, 4, 0.01), hslider("motionEnvelope:up", 15, 0, 100, 1), hslider("motionEnvelope:down", 25, 0, 100, 1), os.tosc(2));
+// motionEnvelope_modulated_test = mo.motionEnvelope(0.5 * tri, 1.25, 15, 25, os.tosc(2)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// ```
+//
 //-------------------------------------------------
 motionEnvelope(thr, gain, envUpMs, envDownMs, sig) =
   sig:-(thr):max(0):*(gain):_clamp01:an.amp_follower_ar(envUpMs * 0.001, envDownMs * 0.001);
@@ -397,6 +409,14 @@ declare motionEnvelopeUD license "MIT";
 // * `sig`: input signal
 //
 // Absolute value is taken before envelope detection.
+//
+// #### Test
+// ```
+// mo = library("motion.lib");
+// os = library("oscillators.lib");
+// envelopeAbs_test = mo.envelopeAbs(0.05, 1.25, 15, 25, os.tosc(2));
+// ```
+//
 //-------------------------------------------------
 envelopeAbs(thr, gain, envUpMs, envDownMs, sig) = sig:abs:motionEnvelope(thr, gain, envUpMs, envDownMs);
 
@@ -413,6 +433,14 @@ envelopeAbs(thr, gain, envUpMs, envDownMs, sig) = sig:abs:motionEnvelope(thr, ga
 // * `sig`: input signal
 //
 // Negative values are ignored by the thresholding stage.
+//
+// #### Test
+// ```
+// mo = library("motion.lib");
+// os = library("oscillators.lib");
+// envelopePos_test = mo.envelopePos(0.05, 1.25, 15, 25, os.tosc(2));
+// ```
+//
 //-------------------------------------------------
 envelopePos(thr, gain, envUpMs, envDownMs, sig) = motionEnvelope(thr, gain, envUpMs, envDownMs, sig);
 
@@ -429,6 +457,14 @@ envelopePos(thr, gain, envUpMs, envDownMs, sig) = motionEnvelope(thr, gain, envU
 // * `sig`: input signal
 //
 // The signal is negated before the shared positive-only detector.
+//
+// #### Test
+// ```
+// mo = library("motion.lib");
+// os = library("oscillators.lib");
+// envelopeNeg_test = mo.envelopeNeg(0.05, 1.25, 15, 25, os.tosc(2));
+// ```
+//
 //-------------------------------------------------
 envelopeNeg(thr, gain, envUpMs, envDownMs, sig) = sig * (-1):motionEnvelope(thr, gain, envUpMs, envDownMs);
 
@@ -445,6 +481,14 @@ envelopeNeg(thr, gain, envUpMs, envDownMs, sig) = sig * (-1):motionEnvelope(thr,
 // * `x`: first axis or signal component
 // * `y`: second axis or signal component
 // * `z`: third axis or signal component
+//
+// #### Test
+// ```
+// mo = library("motion.lib");
+// os = library("oscillators.lib");
+// pita3_test = mo.pita3(os.tosc(220), os.tosc(330), 0.5);
+// ```
+//
 //-------------------------------------------------
 pita3(x, y, z) = (x * x), (y * y), (z * z) :> sqrt;
 
@@ -466,6 +510,14 @@ pita3(x, y, z) = (x * x), (y * y), (z * z) :> sqrt;
 // * `z`: normalized Z-axis signal
 //
 // The three-axis magnitude is computed with `pita3` before applying `motionEnvelope`.
+//
+// #### Test
+// ```
+// mo = library("motion.lib");
+// os = library("oscillators.lib");
+// totalEnvelope_test = mo.totalEnvelope(0.05, 1.25, 15, 25, os.tosc(2), os.tosc(3), 0.1 * os.tosc(5));
+// ```
+//
 //-------------------------------------------------
 totalEnvelope(thr, gain, envUpMs, envDownMs, x, y, z) =
   pita3(x, y, z):motionEnvelope(thr, gain, envUpMs, envDownMs);

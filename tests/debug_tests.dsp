@@ -90,3 +90,4 @@ probe_tap_n_example = stereo
 probe_tap_n_disabled_example = stereo
   : db[DEBUG=0;].probe_tap_n(2, + : db.probe_rms_db(101, 1))
   : (fi.lowpass(2, 8000), fi.lowpass(2, 8000));
+DEBUG_test = db.DEBUG, db[DEBUG = 0;].DEBUG;

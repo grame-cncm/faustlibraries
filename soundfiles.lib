@@ -53,7 +53,7 @@ ro = library("routes.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Soundfile Library";
-declare version "1.7.1";
+declare version "1.7.2";
 
 //=======================================================================
 // Utility functions added in a 'super' environment (to test the idea...)
@@ -228,6 +228,15 @@ loop_speed_level(sf, part, speed, level) = super.loop_speed_level(sf, part, spee
 // sample = so.sound(soundfile("[url:{'foo.wav'}]", 2), 0);
 // process = sample.loop;
 // ```
+//
+// #### Test
+// ```
+// so = library("soundfiles.lib");
+// os = library("oscillators.lib");
+// sf = soundfile("sound[url:{'tests/assets/silence.wav'}]", 1);
+// sound_test = so.sound(sf, 0).loop + os.tosc(110) * 0.001;
+// ```
+//
 //----------------------------------------------------------
 sound(sf, part) = environment {
 

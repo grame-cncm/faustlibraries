@@ -65,7 +65,7 @@ pl = library("platform.lib");
 ma = library("maths.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Math Library";
-declare version "2.9.4";
+declare version "2.9.5";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
@@ -1148,6 +1148,16 @@ Yn = ffunction(float yn(int, float), <math.h>,"");
 // Where:
 //
 // * `x`, `y`: input signals
+//
+// #### Test
+// ```
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// fabs_test = ma.fabs(os.tosc(220));
+// fmax_test = ma.fmax(os.tosc(220), os.tosc(330));
+// fmin_test = ma.fmin(os.tosc(220), os.tosc(330));
+// ```
+//
 //-----------------------------------------------------------------------------
 fabs = abs;
 fmax = max;

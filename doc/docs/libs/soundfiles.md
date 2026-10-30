@@ -146,3 +146,12 @@ Where:
 sample = so.sound(soundfile("[url:{'foo.wav'}]", 2), 0);
 process = sample.loop;
 ```
+
+#### Test
+```
+so = library("soundfiles.lib");
+os = library("oscillators.lib");
+sf = soundfile("sound[url:{'tests/assets/silence.wav'}]", 1);
+sound_test = so.sound(sf, 0).loop + os.tosc(110) * 0.001;
+```
+

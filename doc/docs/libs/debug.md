@@ -61,6 +61,13 @@ with an explicit substitution: `db[DEBUG = 0;].probe_rms_db(...)`.
 DEBUG : _
 ```
 
+#### Test
+```
+db = library("debug.lib");
+DEBUG_test = db.DEBUG, db[DEBUG = 0;].DEBUG;
+```
+
+
 ## Level Probes
 
 Level meters for quick signal magnitude checks (RMS/peak).

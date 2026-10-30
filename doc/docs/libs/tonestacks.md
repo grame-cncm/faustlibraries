@@ -45,6 +45,14 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+no = library("noises.lib");
+tonestack_test = no.noise : ts.tonestack(250e-12, 20e-9, 20e-9, 250e3, 1e6, 25e3, 56e3, 0.5, 0.5, 0.5);
+```
+
+
 ----
 
 ### `bassman`
@@ -103,7 +111,12 @@ Where:
 ```
 ts = library("tonestacks.lib");
 no = library("noises.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 mesa_test = no.noise : ts.mesa(0.5, 0.5, 0.5);
+mesa_slider_test = no.noise : ts.mesa(hslider("mesa:t", 0.5, 0, 1, 0.01), hslider("mesa:m", 0.5, 0, 1, 0.01), hslider("mesa:l", 0.5, 0, 1, 0.01));
+mesa_modulated_test = no.noise : ts.mesa(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+mesa_jump_test = no.noise : ts.mesa(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 ```
 
 
@@ -127,6 +140,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+twin_test = no.noise : ts.twin(0.5, 0.5, 0.5);
+twin_slider_test = no.noise : ts.twin(hslider("twin:t", 0.5, 0, 1, 0.01), hslider("twin:m", 0.5, 0, 1, 0.01), hslider("twin:l", 0.5, 0, 1, 0.01));
+twin_modulated_test = no.noise : ts.twin(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+twin_jump_test = no.noise : ts.twin(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `princeton`
@@ -146,6 +172,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+princeton_test = no.noise : ts.princeton(0.5, 0.5, 0.5);
+princeton_slider_test = no.noise : ts.princeton(hslider("princeton:t", 0.5, 0, 1, 0.01), hslider("princeton:m", 0.5, 0, 1, 0.01), hslider("princeton:l", 0.5, 0, 1, 0.01));
+princeton_modulated_test = no.noise : ts.princeton(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+princeton_jump_test = no.noise : ts.princeton(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -167,6 +206,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+jcm800_test = no.noise : ts.jcm800(0.5, 0.5, 0.5);
+jcm800_slider_test = no.noise : ts.jcm800(hslider("jcm800:t", 0.5, 0, 1, 0.01), hslider("jcm800:m", 0.5, 0, 1, 0.01), hslider("jcm800:l", 0.5, 0, 1, 0.01));
+jcm800_modulated_test = no.noise : ts.jcm800(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+jcm800_jump_test = no.noise : ts.jcm800(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `jcm2000`
@@ -186,6 +238,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+jcm2000_test = no.noise : ts.jcm2000(0.5, 0.5, 0.5);
+jcm2000_slider_test = no.noise : ts.jcm2000(hslider("jcm2000:t", 0.5, 0, 1, 0.01), hslider("jcm2000:m", 0.5, 0, 1, 0.01), hslider("jcm2000:l", 0.5, 0, 1, 0.01));
+jcm2000_modulated_test = no.noise : ts.jcm2000(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+jcm2000_jump_test = no.noise : ts.jcm2000(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -207,6 +272,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+jtm45_test = no.noise : ts.jtm45(0.5, 0.5, 0.5);
+jtm45_slider_test = no.noise : ts.jtm45(hslider("jtm45:t", 0.5, 0, 1, 0.01), hslider("jtm45:m", 0.5, 0, 1, 0.01), hslider("jtm45:l", 0.5, 0, 1, 0.01));
+jtm45_modulated_test = no.noise : ts.jtm45(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+jtm45_jump_test = no.noise : ts.jtm45(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `mlead`
@@ -226,6 +304,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+mlead_test = no.noise : ts.mlead(0.5, 0.5, 0.5);
+mlead_slider_test = no.noise : ts.mlead(hslider("mlead:t", 0.5, 0, 1, 0.01), hslider("mlead:m", 0.5, 0, 1, 0.01), hslider("mlead:l", 0.5, 0, 1, 0.01));
+mlead_modulated_test = no.noise : ts.mlead(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+mlead_jump_test = no.noise : ts.mlead(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -247,6 +338,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+m2199_test = no.noise : ts.m2199(0.5, 0.5, 0.5);
+m2199_slider_test = no.noise : ts.m2199(hslider("m2199:t", 0.5, 0, 1, 0.01), hslider("m2199:m", 0.5, 0, 1, 0.01), hslider("m2199:l", 0.5, 0, 1, 0.01));
+m2199_modulated_test = no.noise : ts.m2199(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+m2199_jump_test = no.noise : ts.m2199(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `ac30`
@@ -266,6 +370,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+ac30_test = no.noise : ts.ac30(0.5, 0.5, 0.5);
+ac30_slider_test = no.noise : ts.ac30(hslider("ac30:t", 0.5, 0, 1, 0.01), hslider("ac30:m", 0.5, 0, 1, 0.01), hslider("ac30:l", 0.5, 0, 1, 0.01));
+ac30_modulated_test = no.noise : ts.ac30(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+ac30_jump_test = no.noise : ts.ac30(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -320,6 +437,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+soldano_test = no.noise : ts.soldano(0.5, 0.5, 0.5);
+soldano_slider_test = no.noise : ts.soldano(hslider("soldano:t", 0.5, 0, 1, 0.01), hslider("soldano:m", 0.5, 0, 1, 0.01), hslider("soldano:l", 0.5, 0, 1, 0.01));
+soldano_modulated_test = no.noise : ts.soldano(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+soldano_jump_test = no.noise : ts.soldano(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `sovtek`
@@ -339,6 +469,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+sovtek_test = no.noise : ts.sovtek(0.5, 0.5, 0.5);
+sovtek_slider_test = no.noise : ts.sovtek(hslider("sovtek:t", 0.5, 0, 1, 0.01), hslider("sovtek:m", 0.5, 0, 1, 0.01), hslider("sovtek:l", 0.5, 0, 1, 0.01));
+sovtek_modulated_test = no.noise : ts.sovtek(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+sovtek_jump_test = no.noise : ts.sovtek(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -360,6 +503,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+peavey_test = no.noise : ts.peavey(0.5, 0.5, 0.5);
+peavey_slider_test = no.noise : ts.peavey(hslider("peavey:t", 0.5, 0, 1, 0.01), hslider("peavey:m", 0.5, 0, 1, 0.01), hslider("peavey:l", 0.5, 0, 1, 0.01));
+peavey_modulated_test = no.noise : ts.peavey(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+peavey_jump_test = no.noise : ts.peavey(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `ibanez`
@@ -379,6 +535,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+ibanez_test = no.noise : ts.ibanez(0.5, 0.5, 0.5);
+ibanez_slider_test = no.noise : ts.ibanez(hslider("ibanez:t", 0.5, 0, 1, 0.01), hslider("ibanez:m", 0.5, 0, 1, 0.01), hslider("ibanez:l", 0.5, 0, 1, 0.01));
+ibanez_modulated_test = no.noise : ts.ibanez(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+ibanez_jump_test = no.noise : ts.ibanez(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -400,6 +569,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+roland_test = no.noise : ts.roland(0.5, 0.5, 0.5);
+roland_slider_test = no.noise : ts.roland(hslider("roland:t", 0.5, 0, 1, 0.01), hslider("roland:m", 0.5, 0, 1, 0.01), hslider("roland:l", 0.5, 0, 1, 0.01));
+roland_modulated_test = no.noise : ts.roland(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+roland_jump_test = no.noise : ts.roland(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `ampeg`
@@ -419,6 +601,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+ampeg_test = no.noise : ts.ampeg(0.5, 0.5, 0.5);
+ampeg_slider_test = no.noise : ts.ampeg(hslider("ampeg:t", 0.5, 0, 1, 0.01), hslider("ampeg:m", 0.5, 0, 1, 0.01), hslider("ampeg:l", 0.5, 0, 1, 0.01));
+ampeg_modulated_test = no.noise : ts.ampeg(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+ampeg_jump_test = no.noise : ts.ampeg(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -440,6 +635,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+ampeg_rev_test = no.noise : ts.ampeg_rev(0.5, 0.5, 0.5);
+ampeg_rev_slider_test = no.noise : ts.ampeg_rev(hslider("ampeg_rev:t", 0.5, 0, 1, 0.01), hslider("ampeg_rev:m", 0.5, 0, 1, 0.01), hslider("ampeg_rev:l", 0.5, 0, 1, 0.01));
+ampeg_rev_modulated_test = no.noise : ts.ampeg_rev(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+ampeg_rev_jump_test = no.noise : ts.ampeg_rev(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `bogner`
@@ -459,6 +667,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+bogner_test = no.noise : ts.bogner(0.5, 0.5, 0.5);
+bogner_slider_test = no.noise : ts.bogner(hslider("bogner:t", 0.5, 0, 1, 0.01), hslider("bogner:m", 0.5, 0, 1, 0.01), hslider("bogner:l", 0.5, 0, 1, 0.01));
+bogner_modulated_test = no.noise : ts.bogner(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+bogner_jump_test = no.noise : ts.bogner(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -480,6 +701,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+groove_test = no.noise : ts.groove(0.5, 0.5, 0.5);
+groove_slider_test = no.noise : ts.groove(hslider("groove:t", 0.5, 0, 1, 0.01), hslider("groove:m", 0.5, 0, 1, 0.01), hslider("groove:l", 0.5, 0, 1, 0.01));
+groove_modulated_test = no.noise : ts.groove(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+groove_jump_test = no.noise : ts.groove(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `crunch`
@@ -499,6 +733,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+crunch_test = no.noise : ts.crunch(0.5, 0.5, 0.5);
+crunch_slider_test = no.noise : ts.crunch(hslider("crunch:t", 0.5, 0, 1, 0.01), hslider("crunch:m", 0.5, 0, 1, 0.01), hslider("crunch:l", 0.5, 0, 1, 0.01));
+crunch_modulated_test = no.noise : ts.crunch(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+crunch_jump_test = no.noise : ts.crunch(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -520,6 +767,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+fender_blues_test = no.noise : ts.fender_blues(0.5, 0.5, 0.5);
+fender_blues_slider_test = no.noise : ts.fender_blues(hslider("fender_blues:t", 0.5, 0, 1, 0.01), hslider("fender_blues:m", 0.5, 0, 1, 0.01), hslider("fender_blues:l", 0.5, 0, 1, 0.01));
+fender_blues_modulated_test = no.noise : ts.fender_blues(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fender_blues_jump_test = no.noise : ts.fender_blues(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `fender_default`
@@ -539,6 +799,19 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+fender_default_test = no.noise : ts.fender_default(0.5, 0.5, 0.5);
+fender_default_slider_test = no.noise : ts.fender_default(hslider("fender_default:t", 0.5, 0, 1, 0.01), hslider("fender_default:m", 0.5, 0, 1, 0.01), hslider("fender_default:l", 0.5, 0, 1, 0.01));
+fender_default_modulated_test = no.noise : ts.fender_default(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fender_default_jump_test = no.noise : ts.fender_default(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
 
 ----
 
@@ -560,6 +833,19 @@ Where:
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
 
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+fender_deville_test = no.noise : ts.fender_deville(0.5, 0.5, 0.5);
+fender_deville_slider_test = no.noise : ts.fender_deville(hslider("fender_deville:t", 0.5, 0, 1, 0.01), hslider("fender_deville:m", 0.5, 0, 1, 0.01), hslider("fender_deville:l", 0.5, 0, 1, 0.01));
+fender_deville_modulated_test = no.noise : ts.fender_deville(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fender_deville_jump_test = no.noise : ts.fender_deville(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+
+
 ----
 
 ### `gibsen`
@@ -579,3 +865,16 @@ Where:
 * `t`: treble control, between 0 and 1
 * `m`: middle control, between 0 and 1
 * `l`: bass control, between 0 and 1
+
+#### Test
+```
+ts = library("tonestacks.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+no = library("noises.lib");
+gibsen_test = no.noise : ts.gibsen(0.5, 0.5, 0.5);
+gibsen_slider_test = no.noise : ts.gibsen(hslider("gibsen:t", 0.5, 0, 1, 0.01), hslider("gibsen:m", 0.5, 0, 1, 0.01), hslider("gibsen:l", 0.5, 0, 1, 0.01));
+gibsen_modulated_test = no.noise : ts.gibsen(0.5, tri, 0.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+gibsen_jump_test = no.noise : ts.gibsen(0.5, 0.5, sq) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+```
+

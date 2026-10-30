@@ -993,8 +993,9 @@ make doc-index | doc-index-split | doc-index-commercial [DOC_INDEX_IO=]
 ```
 
 Extracts the documentation from the `.lib` sources, not from the generated
-pages. Starting from `stdfaust.lib`, it follows `library()` and `import()`,
-finds the doc-block titles, and parses each block into summary, usage,
+pages. Starting from `stdfaust.lib` and the libraries it has no prefix for
+(`STANDALONE_LIBRARIES`: `ts`, `tu`, `inst`, `mm`), it follows `library()` and
+`import()`, finds the doc-block titles, and parses each block into summary, usage,
 parameters (`Where:`), test code, references and license. The result is a JSON
 index that LLM tools (the MCP servers, `faust_doc_api.py`) search without loading
 the libraries.

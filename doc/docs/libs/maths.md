@@ -1095,6 +1095,16 @@ Where:
 
 * `x`, `y`: input signals
 
+#### Test
+```
+ma = library("maths.lib");
+os = library("oscillators.lib");
+fabs_test = ma.fabs(os.tosc(220));
+fmax_test = ma.fmax(os.tosc(220), os.tosc(330));
+fmin_test = ma.fmin(os.tosc(220), os.tosc(330));
+```
+
+
 ----
 
 ### `(ma.)np2`

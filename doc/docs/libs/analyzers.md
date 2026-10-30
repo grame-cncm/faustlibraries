@@ -1213,6 +1213,14 @@ Where:
 * input: `N` complex signals as interleaved (real, imaginary) pairs
 * output: `N` real signals, the `k`-th one being `r(k)^2 + i(k)^2`
 
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+c_magsq_test = (3*os.tosc(220), 4*os.tosc(220)), (os.tosc(330), 0-os.tosc(330)) : an.c_magsq(2);
+```
+
+
 ----
 
 ### `(an.)c_magdb`
@@ -1231,6 +1239,16 @@ Where:
 * `N`: number of complex bins
 * input: `N` complex signals as interleaved (real, imaginary) pairs
 * output: `N` real signals giving the power of each bin in dB
+
+#### Test
+```
+an = library("analyzers.lib");
+ma = library("maths.lib");
+os = library("oscillators.lib");
+c_magdb_test = (3*(2 + os.tosc(220)), 4*(2 + os.tosc(220))), (1, 1) : an.c_magdb(2);
+c_magdb_floor_test = (0, 0) : an.c_magdb(1) : ==(10*log10(ma.EPSILON));
+```
+
 
 ----
 
@@ -1253,6 +1271,16 @@ Where:
 
 * `N`: full spectrum size (power of 2)
 * output: bins `0..N/2` (dc and Nyquist included)
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+c_select_pos_freqs_test = par(i, 8, (i+1)*os.tosc(220)) : an.c_select_pos_freqs(4);
+c_select_pos_freqs_real_test = par(i, 4, (i+1)*os.tosc(220)) : an.select_pos_freqs(4);
+c_select_pos_freqs_two_test = par(i, 4, (i+1)*os.tosc(220)) : an.c_select_pos_freqs(2);
+```
+
 
 ----
 
@@ -1382,6 +1410,16 @@ Where:
 
 * `N`: vector size (must be a power of 2)
 * `i`: a channel index in 0..N-1, known at compile time
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+bit_reverse_shuffle_test = par(i, 8, (i+1)*os.tosc(220)) : an.bit_reverse_shuffle(8);
+c_bit_reverse_shuffle_test = par(i, 8, (i+1)*os.tosc(220)) : an.c_bit_reverse_shuffle(4);
+bit_reverse_selector_test = par(i, 8, an.bit_reverse_selector(8, i));
+```
+
 
 ----
 
@@ -1585,6 +1623,14 @@ Where:
 
 See `dm.fft_spectral_level_demo(N)` in `demos.lib` for an example GUI.
 
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+rfft_spectral_level_test = os.tosc(220) : an.rfft_spectral_level(8, 0.05, 0);
+```
+
+
 ##  Spectral Descriptors (filter-bank based) 
 
 Low-level MIR descriptors computed on the constant-Q filter banks of this
@@ -1656,6 +1702,20 @@ Where:
 * `i`: band index, from 0 (top band) to N-1 (dc band)
 * `K`: exponent of the band center frequencies in the moment
 * `num`, `den`: numerator and denominator signals of `safe_div`
+
+#### Test
+```
+an = library("analyzers.lib");
+ma = library("maths.lib");
+os = library("oscillators.lib");
+band_powers_test = 0.5*(1 + os.tosc(3))*(os.tosc(300) + os.tosc(700) + os.tosc(1400) + os.tosc(2800) + os.tosc(5600) + os.tosc(12000)) : an.band_powers(3, 1, 8000, 6, 0.01);
+band_center_test = an.band_center(1, 8000, 6, 1), an.band_center(1, 8000, 6, 2), an.band_center(1, 8000, 6, 3), an.band_center(1, 8000, 6, 4), an.band_center(1, 8000, 6, 5);
+band_center_top_test = an.band_center(1, 8000, 6, 0)/sqrt(ma.SR);
+moment_test = 0, par(i, 5, 1 + 0.5*os.tosc(110*(i+1))) : an.moment(1, 8000, 6, 1);
+safe_div_test = an.safe_div(os.tosc(220), 2 + os.tosc(330));
+safe_div_zero_test = an.safe_div(1, 0) == 1/ma.EPSILON;
+```
+
 
 ----
 
@@ -1751,6 +1811,16 @@ Where:
 
 * `T`: averaging window in seconds
 * `N`: number of channels, in BS.1770 order, a constant numerical expression
+
+#### Test
+```
+an = library("analyzers.lib");
+os = library("oscillators.lib");
+loudness_meansquare_test = os.tosc(997), os.tosc(997) : an.loudness_meansquare(0.4, 2);
+meansquare2lufs_test = 0.5 + 0.4*os.tosc(220) : an.meansquare2lufs;
+meansquare2lufs_floor_test = 0 : an.meansquare2lufs;
+```
+
 
 ----
 

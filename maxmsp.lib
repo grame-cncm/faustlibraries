@@ -43,7 +43,7 @@ ma = library("maths.lib");
 declare name "MaxMSP compatibility Library";
 declare author "GRAME";
 declare copyright "GRAME";
-declare version "1.1.4";
+declare version "1.1.5";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 
 //---------------------------`atodb`--------------------------------
@@ -218,8 +218,8 @@ filtercoeff(f0, dBgain, Q) = environment
 // Where:
 //
 // * `x`: the input signal
-// * `a0,a1,a2`: feedforward coefficients
-// * `b1,b2`: feedback coefficients
+// * `a0`, `a1`, `a2`: feedforward coefficients
+// * `b1`, `b2`: feedback coefficients
 //
 // #### Test
 // ```
@@ -243,7 +243,11 @@ biquad(x,a0,a1,a2,b1,b2) =  x : + ~ ((-1)*conv2(b1, b2)) : conv3(a0, a1, a2)
 // #### Usage
 //
 // ```
-// LPF(x, f0, gain, Q) : _ // and likewise HPF, BPF, notch, APF
+// LPF(x, f0, gain, Q) : _
+// HPF(x, f0, gain, Q) : _
+// BPF(x, f0, gain, Q) : _
+// notch(x, f0, gain, Q) : _
+// APF(x, f0, gain, Q) : _
 // ```
 //
 // Where:
@@ -278,7 +282,10 @@ APF(x, f0, gain, Q) = x , filtercoeff(f0,gain,Q).APF : biquad;
 // #### Usage
 //
 // ```
-// peakingEQ(x, f0, gain, Q) : _ // and likewise peakNotch, lowShelf, highShelf
+// peakingEQ(x, f0, gain, Q) : _
+// peakNotch(x, f0, gain, Q) : _
+// lowShelf(x, f0, gain, Q) : _
+// highShelf(x, f0, gain, Q) : _
 // ```
 //
 // Where:

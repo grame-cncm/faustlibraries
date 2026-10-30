@@ -68,3 +68,6 @@ nextpow2_test = 10.0 : ma.nextpow2;
 zc_test = os.tosc(440) : ma.zc;
 unwrap_test = os.oscrc(100) : ma.unwrap(ma.PI);
 primes_test = 10 : ma.primes;
+fabs_test = ma.fabs(os.tosc(220));
+fmax_test = ma.fmax(os.tosc(220), os.tosc(330));
+fmin_test = ma.fmin(os.tosc(220), os.tosc(330));

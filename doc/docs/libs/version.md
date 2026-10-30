@@ -18,3 +18,9 @@ Return the version number of the Faust standard libraries as a MAJOR, MINOR, PAT
 version : _,_,_
 ```
 
+#### Test
+```
+vl = library("version.lib");
+version_test = vl.version : >(0), >=(0), >=(0);
+```
+

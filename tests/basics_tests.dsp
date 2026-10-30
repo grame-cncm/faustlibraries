@@ -139,3 +139,6 @@ parallelRMS_test = (0.2, 0.5, 0.1) : ba.parallelRMS(3);
 millisec_test = 10 * ba.millisec; // 10 ms as a number of samples
 processArray_proc(a, b, c) = a + b + c;
 processArray_test = par(i, 4, 0.1*os.tosc(110*(i+1))) : ba.processArray(4, processArray_proc, it.interpolate_linear, si.smoo, (0.1, 1.0), (1.0, 10.0));
+bpf_test = x : ba.bpf.start(0.1, 0.2) : ba.bpf.point(0.5, 1) : ba.bpf.end(0.9, 0.25) with { P = int(ma.SR); x = ba.period(P)/P; };
+bpf_step_test = x : ba.bpf.start(0, 0) : ba.bpf.step(0.2, 0.3) : ba.bpf.step(0.4, 0.6) : ba.bpf.step_end(1, 1) with { P = int(ma.SR); x = 1.1*ba.period(P)/P; };
+bpf_curve_test = x : ba.bpf.start(0, 0) : ba.bpf.curve(0.15, 0.5, 0.5) : ba.bpf.curve_end(0.85, 1, 1) with { P = int(ma.SR); x = ba.period(P)/P; };

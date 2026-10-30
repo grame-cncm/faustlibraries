@@ -46,7 +46,7 @@
 
 fi = library("filters.lib");
 
-declare version "1.1.1";
+declare version "1.1.2";
 
 /*******************************************************************************
   * 1-dimensional function tables for linear interpolation
@@ -172,6 +172,11 @@ interpolation(table, f, i) = rtable(table, i)*(1-f) + rtable(table,i+1)*f;
 // boundIndex(size, index) : _
 // ```
 //
+// Where:
+//
+// * `size`: the table size
+// * `index`: the index to bound
+//
 // #### Test
 // ```
 // tu = library("tubes.lib");
@@ -246,6 +251,13 @@ tubeF(table, low, high, step, size, x) =
 // ```
 // getFactor(low, step, size, x) : _
 // ```
+//
+// Where:
+//
+// * `low`: input value mapped to the first table entry
+// * `step`: number of table entries per input unit
+// * `size`: the table size
+// * `x`: the input value
 //
 // #### Test
 // ```
@@ -325,6 +337,8 @@ tubestage130_20(tb,fck,Rk,Vk0) = tubestageF(tb,130.0,20.0,fck,Rk,Vk0);
 //
 // ```
 // _ : T1_12AX7 : _
+// _ : T2_12AX7 : _
+// _ : T3_12AX7 : _
 // ```
 //
 // #### Test
@@ -347,6 +361,8 @@ T3_12AX7 = tubestage(tubetable_12AX7_1,194.0,820.0,0.840703);
 //
 // ```
 // _ : T1_12AT7 : _
+// _ : T2_12AT7 : _
+// _ : T3_12AT7 : _
 // ```
 //
 // #### Test
@@ -369,6 +385,8 @@ T3_12AT7 = tubestage(tubetable_12AT7_1,194.0,820.0,1.256962);
 //
 // ```
 // _ : T1_12AU7 : _
+// _ : T2_12AU7 : _
+// _ : T3_12AU7 : _
 // ```
 //
 // #### Test
@@ -391,6 +409,8 @@ T3_12AU7 = tubestage(tubetable_12AU7_1,194.0,820.0,1.356567);
 //
 // ```
 // _ : T1_6V6 : _
+// _ : T2_6V6 : _
+// _ : T3_6V6 : _
 // ```
 //
 // #### Test
@@ -413,6 +433,8 @@ T3_6V6   = tubestage(tubetable_6V6_1,194.0,820.0,1.130462);
 //
 // ```
 // _ : T1_6DJ8 : _
+// _ : T2_6DJ8 : _
+// _ : T3_6DJ8 : _
 // ```
 //
 // #### Test
@@ -435,6 +457,8 @@ T3_6DJ8  = tubestage130_20(tubetable_6DJ8_0,194.0,820.0,0.799031);
 //
 // ```
 // _ : T1_6C16 : _
+// _ : T2_6C16 : _
+// _ : T3_6C16 : _
 // ```
 //
 // #### Test
@@ -463,8 +487,15 @@ T3_6C16  = tubestage(tubetable_6C16_1,194.0,820.0,1.378742);
 //
 // ```
 // _ : tubestage(tubetable_6C16_0,fck,Rk,Vk0) : _
+// _ : tubestage(tubetable_6C16_1,fck,Rk,Vk0) : _
 // tubetable_6C16_rtable_0(r) : _
+// tubetable_6C16_rtable_1(r) : _
 // ```
+//
+// Where:
+//
+// * `fck`, `Rk`, `Vk0`: as in `tubestage`
+// * `r`: integer index of the table entry
 //
 // #### Test
 // ```
@@ -1301,8 +1332,15 @@ tubetable_6C16_rtable_1(r) = (tubetable_6C16_1,r):rdtable;
 //
 // ```
 // _ : tubestage130_20(tubetable_6DJ8_0,fck,Rk,Vk0) : _
+// _ : tubestage130_20(tubetable_6DJ8_1,fck,Rk,Vk0) : _
 // tubetable_6DJ8_rtable_0(r) : _
+// tubetable_6DJ8_rtable_1(r) : _
 // ```
+//
+// Where:
+//
+// * `fck`, `Rk`, `Vk0`: as in `tubestage`
+// * `r`: integer index of the table entry
 //
 // #### Test
 // ```
@@ -2141,8 +2179,15 @@ tubetable_6DJ8_rtable_1(r) = (tubetable_6DJ8_1,r):rdtable;
 //
 // ```
 // _ : tubestage(tubetable_6V6_0,fck,Rk,Vk0) : _
+// _ : tubestage(tubetable_6V6_1,fck,Rk,Vk0) : _
 // tubetable_6V6_rtable_0(r) : _
+// tubetable_6V6_rtable_1(r) : _
 // ```
+//
+// Where:
+//
+// * `fck`, `Rk`, `Vk0`: as in `tubestage`
+// * `r`: integer index of the table entry
 //
 // #### Test
 // ```
@@ -2971,8 +3016,15 @@ tubetable_6V6_rtable_1(r) = (tubetable_6V6_1,r):rdtable;
 //
 // ```
 // _ : tubestage(tubetable_12AT7_0,fck,Rk,Vk0) : _
+// _ : tubestage(tubetable_12AT7_1,fck,Rk,Vk0) : _
 // tubetable_12AT7_rtable_0(r) : _
+// tubetable_12AT7_rtable_1(r) : _
 // ```
+//
+// Where:
+//
+// * `fck`, `Rk`, `Vk0`: as in `tubestage`
+// * `r`: integer index of the table entry
 //
 // #### Test
 // ```
@@ -3811,8 +3863,15 @@ tubetable_12AT7_rtable_1(r) = (tubetable_12AT7_1,r):rdtable;
 //
 // ```
 // _ : tubestage(tubetable_12AU7_0,fck,Rk,Vk0) : _
+// _ : tubestage(tubetable_12AU7_1,fck,Rk,Vk0) : _
 // tubetable_12AU7_rtable_0(r) : _
+// tubetable_12AU7_rtable_1(r) : _
 // ```
+//
+// Where:
+//
+// * `fck`, `Rk`, `Vk0`: as in `tubestage`
+// * `r`: integer index of the table entry
 //
 // #### Test
 // ```
@@ -4650,8 +4709,15 @@ tubetable_12AU7_rtable_1(r) = (tubetable_12AU7_1,r):rdtable;
 //
 // ```
 // _ : tubestage(tubetable_12AX7_0,fck,Rk,Vk0) : _
+// _ : tubestage(tubetable_12AX7_1,fck,Rk,Vk0) : _
 // tubetable_12AX7_rtable_0(r) : _
+// tubetable_12AX7_rtable_1(r) : _
 // ```
+//
+// Where:
+//
+// * `fck`, `Rk`, `Vk0`: as in `tubestage`
+// * `r`: integer index of the table entry
 //
 // #### Test
 // ```

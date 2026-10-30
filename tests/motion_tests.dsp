@@ -7,6 +7,7 @@ mo = library("motion.lib");
 os = library("oscillators.lib");
 no = library("noises.lib");
 ba = library("basics.lib");
+ma = library("maths.lib");
 
 shockTrigger_test = mo.shockTrigger(50, 0.5, 50, os.lf_pulsetrain(2, 0.5));
 
@@ -85,3 +86,11 @@ totalAccelUD_test =
     os.sawtooth(0.2) * 0.2,
     os.lf_triangle(0.15) * 0.1,
     os.sawtooth(0.12) * 0.3);
+motionEnvelope_test = mo.motionEnvelope(0.05, 1.25, 15, 25, os.tosc(2));
+motionEnvelope_slider_test = mo.motionEnvelope(hslider("motionEnvelope:thr", 0.05, 0, 1, 0.01), hslider("motionEnvelope:gain", 1.25, 0, 4, 0.01), hslider("motionEnvelope:up", 15, 0, 100, 1), hslider("motionEnvelope:down", 25, 0, 100, 1), os.tosc(2));
+motionEnvelope_modulated_test = mo.motionEnvelope(0.5 * tri, 1.25, 15, 25, os.tosc(2)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+envelopeAbs_test = mo.envelopeAbs(0.05, 1.25, 15, 25, os.tosc(2));
+envelopePos_test = mo.envelopePos(0.05, 1.25, 15, 25, os.tosc(2));
+envelopeNeg_test = mo.envelopeNeg(0.05, 1.25, 15, 25, os.tosc(2));
+pita3_test = mo.pita3(os.tosc(220), os.tosc(330), 0.5);
+totalEnvelope_test = mo.totalEnvelope(0.05, 1.25, 15, 25, os.tosc(2), os.tosc(3), 0.1 * os.tosc(5));

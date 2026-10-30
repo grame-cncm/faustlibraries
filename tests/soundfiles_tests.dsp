@@ -11,3 +11,4 @@ loop_speed_level_test = so.loop_speed_level(
     hslider("loop_speed_level:speed", 1, 0, 2, 0.01),
     hslider("loop_speed_level:level", 0.5, 0, 1, 0.01)
 ) + os.tosc(110) * 0.001;
+sound_test = so.sound(sf, 0).loop + os.tosc(110) * 0.001;

@@ -57,6 +57,13 @@ Speed of sound in meters per second (340m/s).
 speedOfSound : _
 ```
 
+#### Test
+```
+pm = library("physmodels.lib");
+speedOfSound_test = pm.speedOfSound;
+```
+
+
 ----
 
 ### `(pm.)maxLength`
@@ -69,6 +76,13 @@ library. This variable should be overriden to allow longer strings or tubes.
 ```
 maxLength : _
 ```
+
+#### Test
+```
+pm = library("physmodels.lib");
+maxLength_test = pm.maxLength;
+```
+
 
 ## Conversion Tools
 

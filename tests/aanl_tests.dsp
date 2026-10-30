@@ -87,3 +87,16 @@ sineFold1_modulated_test = aa.sineFold1(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5
 sineFold2_test = aa.sineFold2(0.5, 0.8, foldSig);
 sineFold2_slider_test = aa.sineFold2(hslider("t", 0.5, 0.05, 1.0, 0.01), hslider("r", 0.8, 0.5, 1.0, 0.001), foldSig);
 sineFold2_modulated_test = aa.sineFold2(0.05 + 0.95 * (1.0 - foldTri), 0.5 + 0.5 * foldTri, foldSig);
+Rsqrt_test = aa.Rsqrt(os.tosc(220));
+Rlog_test = aa.Rlog(1.5 + os.tosc(220));
+Rlog_floor_test = aa.Rlog(-1) == log(ma.EPSILON);
+Rtan_test = aa.Rtan(os.tosc(220));
+Racos_test = aa.Racos(1.5 * os.tosc(220));
+Rasin_test = aa.Rasin(1.5 * os.tosc(220));
+Racosh_test = aa.Racosh(1.5 + os.tosc(220));
+Rcosh_test = aa.Rcosh(2 * os.tosc(220));
+Rcosh_clamp_test = aa.Rcosh(1000) == ma.MAX;
+Rsinh_test = aa.Rsinh(2 * os.tosc(220));
+Rsinh_clamp_test = (aa.Rsinh(1000) == ma.MAX), (aa.Rsinh(-1000) == 0 - ma.MAX);
+Ratanh_test = aa.Ratanh(0.9 * os.tosc(220));
+Ratanh_clip_test = (aa.Ratanh(2) == ma.atanh(1 - ma.EPSILON)), (aa.Ratanh(-2) == ma.atanh(ma.EPSILON - 1));

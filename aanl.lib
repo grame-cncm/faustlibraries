@@ -50,7 +50,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Antialiased Nonlinearities";
-declare version "1.6.0";
+declare version "1.6.1";
 
 //==============================Auxiliary Functions=======================================
 //========================================================================================
@@ -72,6 +72,13 @@ _clip(l, h, x) = max(l, min(h, x));
 //
 // * `x`: input signal
 //
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// os = library("oscillators.lib");
+// Rsqrt_test = aa.Rsqrt(os.tosc(220));
+// ```
+//
 //-----------------------------
 Rsqrt(x) = sqrt(max(0.0, x));
 
@@ -90,6 +97,15 @@ Rsqrt(x) = sqrt(max(0.0, x));
 //
 // * `x`: input signal
 //
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// Rlog_test = aa.Rlog(1.5 + os.tosc(220));
+// Rlog_floor_test = aa.Rlog(-1) == log(ma.EPSILON);
+// ```
+//
 //-----------------------------
 Rlog(x) = log(max(ma.EPSILON, x));
 
@@ -106,6 +122,13 @@ Rlog(x) = log(max(ma.EPSILON, x));
 // Where:
 //
 // * `x`: input signal
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// os = library("oscillators.lib");
+// Rtan_test = aa.Rtan(os.tosc(220));
+// ```
 //
 //-----------------------------
 Rtan(x) = tan(_clip(0-ma.MAX, ma.MAX, x));
@@ -124,6 +147,13 @@ Rtan(x) = tan(_clip(0-ma.MAX, ma.MAX, x));
 //
 // * `x`: input signal
 //
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// os = library("oscillators.lib");
+// Racos_test = aa.Racos(1.5 * os.tosc(220));
+// ```
+//
 //-----------------------------
 Racos(x) = acos(_clip(-1.0, 1.0, x));
 
@@ -140,6 +170,13 @@ Racos(x) = acos(_clip(-1.0, 1.0, x));
 // Where:
 //
 // * `x`: input signal
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// os = library("oscillators.lib");
+// Rasin_test = aa.Rasin(1.5 * os.tosc(220));
+// ```
 //
 //-----------------------------
 Rasin(x) = asin(_clip(-1.0, 1.0, x));
@@ -158,6 +195,13 @@ Rasin(x) = asin(_clip(-1.0, 1.0, x));
 //
 // * `x`: input signal
 //
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// os = library("oscillators.lib");
+// Racosh_test = aa.Racosh(1.5 + os.tosc(220));
+// ```
+//
 //------------------------------
 Racosh(x) = ma.acosh(_clip(1.0, ma.MAX, x));
 
@@ -174,6 +218,15 @@ Racosh(x) = ma.acosh(_clip(1.0, ma.MAX, x));
 // Where:
 //
 // * `x`: input signal
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// Rcosh_test = aa.Rcosh(2 * os.tosc(220));
+// Rcosh_clamp_test = aa.Rcosh(1000) == ma.MAX;
+// ```
 //
 //-----------------------------
 Rcosh(x) = min(ma.MAX, ma.cosh(x));
@@ -192,6 +245,15 @@ Rcosh(x) = min(ma.MAX, ma.cosh(x));
 //
 // * `x`: input signal
 //
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// Rsinh_test = aa.Rsinh(2 * os.tosc(220));
+// Rsinh_clamp_test = (aa.Rsinh(1000) == ma.MAX), (aa.Rsinh(-1000) == 0 - ma.MAX);
+// ```
+//
 //------------------------------
 Rsinh(x) = _clip(0-ma.MAX, ma.MAX, ma.sinh(x));
 
@@ -209,6 +271,15 @@ Rsinh(x) = _clip(0-ma.MAX, ma.MAX, ma.sinh(x));
 // Where:
 //
 // * `x`: input signal
+//
+// #### Test
+// ```
+// aa = library("aanl.lib");
+// ma = library("maths.lib");
+// os = library("oscillators.lib");
+// Ratanh_test = aa.Ratanh(0.9 * os.tosc(220));
+// Ratanh_clip_test = (aa.Ratanh(2) == ma.atanh(1 - ma.EPSILON)), (aa.Ratanh(-2) == ma.atanh(ma.EPSILON - 1));
+// ```
 //
 //------------------------------
 Ratanh(x) = ma.atanh(_clip(-1.0 + ma.EPSILON, 1.0 - ma.EPSILON, x));

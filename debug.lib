@@ -91,7 +91,7 @@ si = library("signals.lib");
 db = library("debug.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Debug Library";
-declare version "0.4.1";
+declare version "0.4.2";
 
 //------------------`(db.)DEBUG`----------------------------------------
 // Global switch enabling or disabling every probe in this library: 1 makes
@@ -104,6 +104,13 @@ declare version "0.4.1";
 // ```
 // DEBUG : _
 // ```
+//
+// #### Test
+// ```
+// db = library("debug.lib");
+// DEBUG_test = db.DEBUG, db[DEBUG = 0;].DEBUG;
+// ```
+//
 //-----------------------------------------------------------------------------
 DEBUG = 1; // 0: bypass probes (identity), 1: enable probes
 

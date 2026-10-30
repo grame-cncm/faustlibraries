@@ -42,7 +42,7 @@ closed source license or any other license if you decide so.
 ************************************************************************/
 
 declare name "Generic Platform Library";
-declare version "1.3.1";
+declare version "1.3.2";
 
 //---------------------------------`(pl.)SR`-----------------------------------
 // Current sampling rate (between 50 and 192000Hz). Constant during
@@ -59,6 +59,13 @@ declare version "1.3.1";
 // ```
 // SR : _
 // ```
+//
+// #### Test
+// ```
+// pl = library("platform.lib");
+// pl_SR_test = pl.SR;
+// ```
+//
 //-----------------------------------------------------------------------------
 SR = min(192000.0, max(50.0, fconstant(int fSamplingFreq, <math.h>)));
 
@@ -70,6 +77,13 @@ SR = min(192000.0, max(50.0, fconstant(int fSamplingFreq, <math.h>)));
 // ```
 // BS : _
 // ```
+//
+// #### Test
+// ```
+// pl = library("platform.lib");
+// pl_BS_test = pl.BS > 0;
+// ```
+//
 //-----------------------------------------------------------------------------
 BS = min(16384.0, max(1.0, fvariable(int count, <math.h>)));
 
@@ -83,5 +97,12 @@ BS = min(16384.0, max(1.0, fvariable(int count, <math.h>)));
 // ```
 // tablesize : _
 // ```
+//
+// #### Test
+// ```
+// pl = library("platform.lib");
+// tablesize_test = pl.tablesize;
+// ```
+//
 //-----------------------------------------------------------------------------
 tablesize = 1 << 16;

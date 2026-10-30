@@ -146,6 +146,11 @@ Bound an index to the table boundaries [0, size-1].
 boundIndex(size, index) : _
 ```
 
+Where:
+
+* `size`: the table size
+* `index`: the index to bound
+
 #### Test
 ```
 tu = library("tubes.lib");
@@ -222,6 +227,13 @@ fractional part of the table index of `x`, bounded at the table edges.
 getFactor(low, step, size, x) : _
 ```
 
+Where:
+
+* `low`: input value mapped to the first table entry
+* `step`: number of table entries per input unit
+* `size`: the table size
+* `x`: the input value
+
 #### Test
 ```
 tu = library("tubes.lib");
@@ -280,6 +292,8 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_12AX7 : _
+_ : T2_12AX7 : _
+_ : T3_12AX7 : _
 ```
 
 #### Test
@@ -304,6 +318,8 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_12AT7 : _
+_ : T2_12AT7 : _
+_ : T3_12AT7 : _
 ```
 
 #### Test
@@ -328,6 +344,8 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_12AU7 : _
+_ : T2_12AU7 : _
+_ : T3_12AU7 : _
 ```
 
 #### Test
@@ -352,6 +370,8 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_6V6 : _
+_ : T2_6V6 : _
+_ : T3_6V6 : _
 ```
 
 #### Test
@@ -376,6 +396,8 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_6DJ8 : _
+_ : T2_6DJ8 : _
+_ : T3_6DJ8 : _
 ```
 
 #### Test
@@ -400,6 +422,8 @@ with the bias values used by the Guitarix amplifiers.
 
 ```
 _ : T1_6C16 : _
+_ : T2_6C16 : _
+_ : T3_6C16 : _
 ```
 
 #### Test
@@ -423,8 +447,15 @@ two operating points used by the `T1_6C16`..`T3_6C16` stages (`_0` and
 
 ```
 _ : tubestage(tubetable_6C16_0,fck,Rk,Vk0) : _
+_ : tubestage(tubetable_6C16_1,fck,Rk,Vk0) : _
 tubetable_6C16_rtable_0(r) : _
+tubetable_6C16_rtable_1(r) : _
 ```
+
+Where:
+
+* `fck`, `Rk`, `Vk0`: as in `tubestage`
+* `r`: integer index of the table entry
 
 #### Test
 ```
@@ -444,8 +475,15 @@ two operating points used by the `T1_6DJ8`..`T3_6DJ8` stages (`_0` and
 
 ```
 _ : tubestage130_20(tubetable_6DJ8_0,fck,Rk,Vk0) : _
+_ : tubestage130_20(tubetable_6DJ8_1,fck,Rk,Vk0) : _
 tubetable_6DJ8_rtable_0(r) : _
+tubetable_6DJ8_rtable_1(r) : _
 ```
+
+Where:
+
+* `fck`, `Rk`, `Vk0`: as in `tubestage`
+* `r`: integer index of the table entry
 
 #### Test
 ```
@@ -465,8 +503,15 @@ operating points used by the `T1_6V6`..`T3_6V6` stages (`_0` and
 
 ```
 _ : tubestage(tubetable_6V6_0,fck,Rk,Vk0) : _
+_ : tubestage(tubetable_6V6_1,fck,Rk,Vk0) : _
 tubetable_6V6_rtable_0(r) : _
+tubetable_6V6_rtable_1(r) : _
 ```
+
+Where:
+
+* `fck`, `Rk`, `Vk0`: as in `tubestage`
+* `r`: integer index of the table entry
 
 #### Test
 ```
@@ -486,8 +531,15 @@ and `_1`). The `_rtable_*` forms read one raw entry.
 
 ```
 _ : tubestage(tubetable_12AT7_0,fck,Rk,Vk0) : _
+_ : tubestage(tubetable_12AT7_1,fck,Rk,Vk0) : _
 tubetable_12AT7_rtable_0(r) : _
+tubetable_12AT7_rtable_1(r) : _
 ```
+
+Where:
+
+* `fck`, `Rk`, `Vk0`: as in `tubestage`
+* `r`: integer index of the table entry
 
 #### Test
 ```
@@ -507,8 +559,15 @@ and `_1`). The `_rtable_*` forms read one raw entry.
 
 ```
 _ : tubestage(tubetable_12AU7_0,fck,Rk,Vk0) : _
+_ : tubestage(tubetable_12AU7_1,fck,Rk,Vk0) : _
 tubetable_12AU7_rtable_0(r) : _
+tubetable_12AU7_rtable_1(r) : _
 ```
+
+Where:
+
+* `fck`, `Rk`, `Vk0`: as in `tubestage`
+* `r`: integer index of the table entry
 
 #### Test
 ```
@@ -528,8 +587,15 @@ and `_1`). The `_rtable_*` forms read one raw entry.
 
 ```
 _ : tubestage(tubetable_12AX7_0,fck,Rk,Vk0) : _
+_ : tubestage(tubetable_12AX7_1,fck,Rk,Vk0) : _
 tubetable_12AX7_rtable_0(r) : _
+tubetable_12AX7_rtable_1(r) : _
 ```
+
+Where:
+
+* `fck`, `Rk`, `Vk0`: as in `tubestage`
+* `r`: integer index of the table entry
 
 #### Test
 ```

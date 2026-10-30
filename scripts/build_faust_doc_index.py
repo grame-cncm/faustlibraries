@@ -7,7 +7,8 @@ than from the generated Markdown site.
 The extraction model intentionally mirrors how the documentation is authored in
 the Faust libraries repository:
 
-1. Start from `stdfaust.lib` or another explicitly supplied root file.
+1. Start from `stdfaust.lib` or another explicitly supplied root file; from
+   `stdfaust.lib`, add the libraries it does not reach (`STANDALONE_LIBRARIES`).
 2. Recursively follow `library("...")` and `import("...")` directives.
 3. Detect documented symbols from comment headers such as:
    `//-------`(aa.)Rsqrt`----------`
@@ -62,6 +63,15 @@ DEFINITION_NAME_RE = re.compile(r"^(?:declare\s+)?([A-Za-z_][A-Za-z0-9_\[\]]*)\s
 DECLARE_LICENSE_RE = re.compile(
     r'^declare\s+([A-Za-z_][A-Za-z0-9_\[\]]*)\s+(license|licence)\s+"([^"]*)"\s*;'
 )
+# Documented libraries that stdfaust.lib has no prefix for, used through an
+# environment of their own (`ts = library("tonestacks.lib");`): file -> prefix.
+STANDALONE_LIBRARIES = {
+    "instruments.lib": "inst",
+    "maxmsp.lib": "mm",
+    "tonestacks.lib": "ts",
+    "tubes.lib": "tu",
+}
+
 COMMERCIAL_COMPATIBLE_TOKENS = (
     "mit",
     "bsd",
@@ -777,6 +787,11 @@ def build_index(repo_root: Path, stdlib: Path) -> dict[str, object]:
     symbols: list[dict[str, object]] = []
     seen_ids: dict[str, dict[str, object]] = {}
     seen_qualified_names: dict[str, dict[str, object]] = {}
+
+    if stdlib.name == "stdfaust.lib":
+        for file_name, alias in STANDALONE_LIBRARIES.items():
+            queue.append(repo_root / file_name)
+            alias_hints[file_name].add(alias)
 
     while queue:
         file_path = queue.popleft().resolve()
