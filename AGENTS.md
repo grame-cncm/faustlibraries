@@ -52,11 +52,14 @@ Every script behind these targets is described in `scripts/README.md`.
 - A test failure means the change altered audible output. That is either a
   bug in the change or a deliberate fix; in the second case say so
   explicitly and regenerate only the affected references.
-- **`make check` caches**: the `.out`/`.ref` targets do not depend on the
-  `.lib` sources, so after editing a library a plain `make check` re-runs
-  only tests whose outputs are missing and silently skips the rest. For a
-  real full validation, `rm -rf tests/output` first; to regenerate
-  references after a deliberate behavior change, delete the affected
+- **`make check` re-runs what changed**: an output depends on the files its
+  test loaded (`faust -flist`, kept in `tests/output/<name>.d`), its
+  reference, the harness and the build settings (`tests/output/.params`),
+  so after editing a library it re-runs the tests that use that library,
+  and only those. `make check-sanitize` does the same. Nothing needs to be
+  deleted for a real validation, and a missing reference fails instead of
+  being generated. The references do not depend on the sources, on purpose:
+  to regenerate them after a deliberate behavior change, delete the affected
   `.ref` files before `make reference`.
 
 ## Hard rules for library changes
