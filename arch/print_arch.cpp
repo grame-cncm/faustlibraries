@@ -7,6 +7,7 @@
 #include "faust/gui/SoundUI.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -21,6 +22,49 @@
 #ifndef FAUSTFLOAT
 #define FAUSTFLOAT float
 #endif
+
+// A soundfile of the tests is not read from its file: MemoryReader provides
+// SOUND_LENGTH frames of silence, filled here with a decaying sine, one octave
+// apart between the channels, so that soundfiles.lib has something to play.
+struct TestSoundReader : public MemoryReader {
+
+    template <typename REAL>
+    static void fill(void* buffers, int start)
+    {
+        const double kPi = 3.14159265358979323846;
+        for (int chan = 0; chan < SOUND_CHAN; chan++) {
+            for (int sample = 0; sample < SOUND_LENGTH; sample++) {
+                const double envelope = 1.0 - double(sample) / SOUND_LENGTH;
+                static_cast<REAL**>(buffers)[chan][start + sample] =
+                    REAL(envelope * std::sin(2.0 * kPi * (chan + 1) * sample / 64.0));
+            }
+        }
+    }
+
+    virtual void readFile(Soundfile* soundfile, const std::string& path_name, int part, int& offset, int max_chan) override
+    {
+        MemoryReader::readFile(soundfile, path_name, part, offset, max_chan);
+        const int start = offset - SOUND_LENGTH;
+        if (soundfile->fIsDouble) {
+            fill<double>(soundfile->fBuffers, start);
+        } else {
+            fill<float>(soundfile->fBuffers, start);
+        }
+    }
+};
+
+// Whether the program was compiled in -double: its soundfiles then hold doubles.
+struct CompileOptions : public Meta {
+
+    bool fDouble = false;
+
+    virtual void declare(const char* key, const char* value)
+    {
+        if (std::string(key) == "compile_options") {
+            fDouble = std::string(value).find("-double") != std::string::npos;
+        }
+    }
+};
 
 // Allows to set buttons/checkbox state, and to read the bargraphs
 struct ControlUI : public GenericUI {
@@ -109,7 +153,9 @@ int main(int argc, char* argv[])
     ControlUI control;
     dsp->buildUserInterface(&control);
 
-    SoundUI sound;
+    CompileOptions options;
+    dsp->metadata(&options);
+    SoundUI sound("", -1, new TestSoundReader(), options.fDouble);
     dsp->buildUserInterface(&sound);
 
     const int numInputs = dsp->getNumInputs();

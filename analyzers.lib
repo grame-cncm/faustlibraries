@@ -36,7 +36,7 @@ os = library("oscillators.lib");
 an = library("analyzers.lib"); // for compatible copy/paste out of this file
 
 declare name "Faust Analyzer Library";
-declare version "1.6.1";
+declare version "1.6.2";
 
 /************************************************************************
 FAUST library file, jos section
@@ -759,8 +759,12 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
 // mono = os.tosc(220);
 // mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
+// mth_octave_analyzer3_test = no.noise : an.mth_octave_analyzer3(2, 2000, 6);
+// mth_octave_analyzer5_test = no.noise : an.mth_octave_analyzer5(2, 10000, 6);
+// mth_octave_analyzer_default_test = no.noise : an.mth_octave_analyzer_default(2, 10000, 6);
 // ```
 //------------------------------------------------------------
 mth_octave_analyzer6e(M,ftop,N) = mth_octave_analyzer6e_tpt_df(fi.tpt_df_fmin,M,ftop,N);
@@ -919,9 +923,13 @@ spectral_level = mth_octave_spectral_level_default(2,10000,20);  // simple defau
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
+// no = library("noises.lib");
 // octave_filterbank_test = os.tosc(440) : an.octave_filterbank(5);
 // half_octave_filterbank_test = os.tosc(440) : an.half_octave_filterbank(6);
 // third_octave_filterbank_test = os.tosc(440) : an.third_octave_filterbank(8);
+// octave_analyzer_test = no.noise : an.octave_analyzer(6);
+// half_octave_analyzer_test = no.noise : an.half_octave_analyzer(6);
+// third_octave_analyzer_test = no.noise : an.third_octave_analyzer(6);
 // ```
 //
 //------------------------------------------------------------
@@ -1574,6 +1582,7 @@ c_select_pos_freqs(N) = si.cbus(N) : par(i,N/2+1,(_,_)),par(i,N/2-1,(!,!)) : si.
 // no = library("noises.lib");
 // rtocv_test = an.rtocv(8, os.tosc(220));
 // rtorv_test = an.rtorv(4, no.noise);
+// rvtocv_test = par(i, 8, (i+1)*os.tosc(220)) : an.rvtocv(8);
 // ```
 //---------------------------------------------------
 rtorv(N,x) = par(i,N,x@i); // convert real scalar signal to length N real vector

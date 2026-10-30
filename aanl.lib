@@ -50,7 +50,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Antialiased Nonlinearities";
-declare version "1.6.1";
+declare version "1.6.2";
 
 //==============================Auxiliary Functions=======================================
 //========================================================================================
@@ -462,6 +462,7 @@ hardclip(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // hardclip2_test = aa.hardclip2(sig);
+// hardclip2_fast_test = aa.hardclip2(0.9*os.tosc(5000));
 // ```
 //---------------------------------------------
 declare hardclip2 author "Dario Sanfilippo";
@@ -591,6 +592,7 @@ parabolic(x) = ADAA1(EPS, f, F1, x)
 // parabolic2_test = aa.parabolic2(sig);
 // parabolic2_noise_test = aa.parabolic2(4.0 * no.noise)
 //     with { no = library("noises.lib"); };
+// parabolic2_fast_test = aa.parabolic2(0.9*os.tosc(5000));
 // ```
 //---------------------------------------------
 declare parabolic2 author "Dario Sanfilippo";
@@ -670,6 +672,7 @@ hyperbolic(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // hyperbolic2_test = aa.hyperbolic2(sig);
+// hyperbolic2_fast_test = aa.hyperbolic2(0.9*os.tosc(5000));
 // ```
 //----------------------------------------------
 declare hyperbolic2 author "Dario Sanfilippo";
@@ -745,6 +748,7 @@ sinarctan(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // sinarctan2_test = aa.sinarctan2(sig);
+// sinarctan2_fast_test = aa.sinarctan2(0.9*os.tosc(5000));
 // ```
 //----------------------------------------------
 declare sinarctan2 author "Dario Sanfilippo";
@@ -956,6 +960,7 @@ softclipQuadratic1 = softclipEnv.softclipQuadratic1;
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // softclipQuadratic2_test = aa.softclipQuadratic2(sig);
+// softclipQuadratic2_fast_test = aa.softclipQuadratic2(0.9*os.tosc(5000));
 // ```
 //----------------------------------------------
 declare softclipQuadratic2 author "David Braun";
@@ -1056,6 +1061,7 @@ arctan(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // arctan2_test = aa.arctan2(sig);
+// arctan2_fast_test = aa.arctan2(0.9*os.tosc(5000));
 // ```
 //-------------------------------------------
 declare arctan2 author "Dario Sanfilippo";
@@ -1130,6 +1136,7 @@ asinh1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // asinh2_test = aa.asinh2(sig);
+// asinh2_fast_test = aa.asinh2(0.9*os.tosc(5000));
 // ```
 //-------------------------------------------
 declare asinh2 author "Dario Sanfilippo";
@@ -1478,6 +1485,7 @@ cosine1(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // cosine2_test = aa.cosine2(sig);
+// cosine2_fast_test = aa.cosine2(0.9*os.tosc(5000));
 // ```
 //-------------------------------------------
 declare cosine2 author "Dario Sanfilippo";
@@ -1559,6 +1567,7 @@ arccos(x) = ADAA1(EPS, f, F1, x)
 // arccos2_test = aa.arccos2(sig);
 // arccos2_noise_test = aa.arccos2(no.noise)
 //     with { no = library("noises.lib"); };
+// arccos2_fast_test = aa.arccos2(0.9*os.tosc(5000));
 // ```
 //--------------------------------------------
 declare arccos2 author "Dario Sanfilippo";
@@ -1639,6 +1648,7 @@ acosh1(x) = ADAA1(EPS, f, F1, x)
 // acoshDomainSig = 1.0 + abs(sig);
 // sig = os.tosc(110);
 // acosh2_test = aa.acosh2(acoshDomainSig);
+// acosh2_fast_test = aa.acosh2(1.0 + abs(0.9*os.tosc(5000)));
 // ```
 //-------------------------------------------
 declare acosh2 author "Dario Sanfilippo";
@@ -1712,6 +1722,7 @@ sine(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // sine2_test = aa.sine2(sig);
+// sine2_fast_test = aa.sine2(0.9*os.tosc(5000));
 // ```
 //----------------------------------------
 declare sine2 author "Dario Sanfilippo";
@@ -1791,6 +1802,7 @@ arcsin(x) = ADAA1(EPS, f, F1, x)
 // os = library("oscillators.lib");
 // sig = os.tosc(110);
 // arcsin2_test = aa.arcsin2(sig);
+// arcsin2_fast_test = aa.arcsin2(0.9*os.tosc(5000));
 // ```
 //------------------------------------------
 declare arcsin2 author "Dario Sanfilippo";
@@ -1905,6 +1917,7 @@ atanh1(x) = ADAA1(EPS, f, F1, x)
 // atanhDomainSig = 0.8 * sig;
 // sig = os.tosc(110);
 // atanh2_test = aa.atanh2(atanhDomainSig);
+// atanh2_fast_test = aa.atanh2(0.8*os.tosc(5000));
 // ```
 //------------------------------------------
 declare atanh2 author "Dario Sanfilippo";

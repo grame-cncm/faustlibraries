@@ -630,8 +630,12 @@ Where:
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 mono = os.tosc(220);
 mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
+mth_octave_analyzer3_test = no.noise : an.mth_octave_analyzer3(2, 2000, 6);
+mth_octave_analyzer5_test = no.noise : an.mth_octave_analyzer5(2, 10000, 6);
+mth_octave_analyzer_default_test = no.noise : an.mth_octave_analyzer_default(2, 10000, 6);
 ```
 
 ----
@@ -749,9 +753,13 @@ See `mth_octave_spectral_level_demo` in `demos.lib` for an example.
 ```
 an = library("analyzers.lib");
 os = library("oscillators.lib");
+no = library("noises.lib");
 octave_filterbank_test = os.tosc(440) : an.octave_filterbank(5);
 half_octave_filterbank_test = os.tosc(440) : an.half_octave_filterbank(6);
 third_octave_filterbank_test = os.tosc(440) : an.third_octave_filterbank(8);
+octave_analyzer_test = no.noise : an.octave_analyzer(6);
+half_octave_analyzer_test = no.noise : an.half_octave_analyzer(6);
+third_octave_analyzer_test = no.noise : an.third_octave_analyzer(6);
 ```
 
 
@@ -1325,6 +1333,7 @@ os = library("oscillators.lib");
 no = library("noises.lib");
 rtocv_test = an.rtocv(8, os.tosc(220));
 rtorv_test = an.rtorv(4, no.noise);
+rvtocv_test = par(i, 8, (i+1)*os.tosc(220)) : an.rvtocv(8);
 ```
 
 ----

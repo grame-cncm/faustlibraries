@@ -28,6 +28,7 @@ ADAA2_test = aa.ADAA2(0.001, f, F1, F2, sig)
 
 hardclip_test = aa.hardclip(sig);
 hardclip2_test = aa.hardclip2(sig);
+hardclip2_fast_test = aa.hardclip2(0.9*os.tosc(5000));
 cubic1_test = aa.cubic1(sig);
 cubic1_noise_test = aa.cubic1(2.0 * no.noise)
     with { no = library("noises.lib"); };
@@ -37,39 +38,51 @@ parabolic_noise_test = aa.parabolic(4.0 * no.noise)
 parabolic2_test = aa.parabolic2(sig);
 parabolic2_noise_test = aa.parabolic2(4.0 * no.noise)
     with { no = library("noises.lib"); };
+parabolic2_fast_test = aa.parabolic2(0.9*os.tosc(5000));
 hyperbolic_test = aa.hyperbolic(sig);
 hyperbolic2_test = aa.hyperbolic2(sig);
+hyperbolic2_fast_test = aa.hyperbolic2(0.9*os.tosc(5000));
 sinarctan_test = aa.sinarctan(sig);
 sinarctan2_test = aa.sinarctan2(sig);
+sinarctan2_fast_test = aa.sinarctan2(0.9*os.tosc(5000));
 sinarctanStable_test = aa.sinarctanStable(5.0 * sig);
 sinarctanTransparent_test = aa.sinarctanTransparent(5.0 * sig);
 softclipQuadratic1_test = aa.softclipQuadratic1(sig);
 softclipQuadratic2_test = aa.softclipQuadratic2(sig);
+softclipQuadratic2_fast_test = aa.softclipQuadratic2(0.9*os.tosc(5000));
 
 tanh1_test = aa.tanh1(sig);
 arctan_test = aa.arctan(sig);
 arctan2_test = aa.arctan2(sig);
+arctan2_fast_test = aa.arctan2(0.9*os.tosc(5000));
 asinh1_test = aa.asinh1(sig);
 asinh2_test = aa.asinh2(sig);
+asinh2_fast_test = aa.asinh2(0.9*os.tosc(5000));
 
 cosine1_test = aa.cosine1(sig);
 cosine2_test = aa.cosine2(sig);
+cosine2_fast_test = aa.cosine2(0.9*os.tosc(5000));
 arccos_test = aa.arccos(sig);
 arccos2_test = aa.arccos2(sig);
 arccos2_noise_test = aa.arccos2(no.noise)
     with { no = library("noises.lib"); };
+arccos2_fast_test = aa.arccos2(0.9*os.tosc(5000));
 
 acosh1_test = aa.acosh1(acoshDomainSig);
 acosh2_test = aa.acosh2(acoshDomainSig);
+acosh2_fast_test = aa.acosh2(1.0 + abs(0.9*os.tosc(5000)));
 
 sine_test = aa.sine(sig);
 sine2_test = aa.sine2(sig);
+sine2_fast_test = aa.sine2(0.9*os.tosc(5000));
 arcsin_test = aa.arcsin(sig);
 arcsin2_test = aa.arcsin2(sig);
+arcsin2_fast_test = aa.arcsin2(0.9*os.tosc(5000));
 
 tangent_test = aa.tangent(tanDomainSig);
 atanh1_test = aa.atanh1(atanhDomainSig);
 atanh2_test = aa.atanh2(atanhDomainSig);
+atanh2_fast_test = aa.atanh2(0.8*os.tosc(5000));
 
 no = library("noises.lib");
 foldSig = 4.0 * no.noise;

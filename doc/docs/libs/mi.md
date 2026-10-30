@@ -114,6 +114,7 @@ Where:
 #### Test
 ```
 mi = library("mi.lib");
+os = library("oscillators.lib");
 mass_test = 0.1 : mi.mass(1.0, 0.0, 0.1, 0.0);
 ```
 
@@ -171,6 +172,7 @@ Where:
 #### Test
 ```
 mi = library("mi.lib");
+os = library("oscillators.lib");
 ground_test = 0.1 : mi.ground(0.1);
 ```
 
@@ -445,6 +447,7 @@ Where:
 mi = library("mi.lib");
 os = library("oscillators.lib");
 nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.tosc(110) * 0.001;
+nlPluck_moving_test = mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.6*os.tosc(110), 0.6*os.tosc(170));
 ```
 
 ----

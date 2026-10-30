@@ -436,6 +436,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 hardclip2_test = aa.hardclip2(sig);
+hardclip2_fast_test = aa.hardclip2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -527,6 +528,7 @@ sig = os.tosc(110);
 parabolic2_test = aa.parabolic2(sig);
 parabolic2_noise_test = aa.parabolic2(4.0 * no.noise)
     with { no = library("noises.lib"); };
+parabolic2_fast_test = aa.parabolic2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -583,6 +585,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 hyperbolic2_test = aa.hyperbolic2(sig);
+hyperbolic2_fast_test = aa.hyperbolic2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -639,6 +642,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 sinarctan2_test = aa.sinarctan2(sig);
+sinarctan2_fast_test = aa.sinarctan2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -783,6 +787,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 softclipQuadratic2_test = aa.softclipQuadratic2(sig);
+softclipQuadratic2_fast_test = aa.softclipQuadratic2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -867,6 +872,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 arctan2_test = aa.arctan2(sig);
+arctan2_fast_test = aa.arctan2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -923,6 +929,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 asinh2_test = aa.asinh2(sig);
+asinh2_fast_test = aa.asinh2(0.9*os.tosc(5000));
 ```
 
 ##  Wavefolders 
@@ -1159,6 +1166,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 cosine2_test = aa.cosine2(sig);
+cosine2_fast_test = aa.cosine2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -1222,6 +1230,7 @@ sig = os.tosc(110);
 arccos2_test = aa.arccos2(sig);
 arccos2_noise_test = aa.arccos2(no.noise)
     with { no = library("noises.lib"); };
+arccos2_fast_test = aa.arccos2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -1283,6 +1292,7 @@ os = library("oscillators.lib");
 acoshDomainSig = 1.0 + abs(sig);
 sig = os.tosc(110);
 acosh2_test = aa.acosh2(acoshDomainSig);
+acosh2_fast_test = aa.acosh2(1.0 + abs(0.9*os.tosc(5000)));
 ```
 
 ----
@@ -1339,6 +1349,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 sine2_test = aa.sine2(sig);
+sine2_fast_test = aa.sine2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -1400,6 +1411,7 @@ aa = library("aanl.lib");
 os = library("oscillators.lib");
 sig = os.tosc(110);
 arcsin2_test = aa.arcsin2(sig);
+arcsin2_fast_test = aa.arcsin2(0.9*os.tosc(5000));
 ```
 
 ----
@@ -1488,4 +1500,5 @@ os = library("oscillators.lib");
 atanhDomainSig = 0.8 * sig;
 sig = os.tosc(110);
 atanh2_test = aa.atanh2(atanhDomainSig);
+atanh2_fast_test = aa.atanh2(0.8*os.tosc(5000));
 ```

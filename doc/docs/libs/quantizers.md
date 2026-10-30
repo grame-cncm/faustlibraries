@@ -70,7 +70,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 quantizeSmoothed_test = qu.quantizeSmoothed(440, qu.ionian, hslider("input", 450, 100, 1000, 1));
+quantizeSmoothed_sweep_test = qu.quantizeSmoothed(220, qu.ionian, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 #### Example
@@ -96,7 +99,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 ionian_test = qu.quantize(220, qu.ionian, 260);
+ionian_sweep_test = qu.quantize(220, qu.ionian, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -117,7 +123,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 dorian_test = qu.quantize(220, qu.dorian, 260);
+dorian_sweep_test = qu.quantize(220, qu.dorian, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -138,7 +147,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 phrygian_test = qu.quantize(220, qu.phrygian, 260);
+phrygian_sweep_test = qu.quantize(220, qu.phrygian, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -159,7 +171,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 lydian_test = qu.quantize(220, qu.lydian, 260);
+lydian_sweep_test = qu.quantize(220, qu.lydian, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -180,7 +195,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 mixo_test = qu.quantize(220, qu.mixo, 260);
+mixo_sweep_test = qu.quantize(220, qu.mixo, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -201,7 +219,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 eolian_test = qu.quantize(220, qu.eolian, 260);
+eolian_sweep_test = qu.quantize(220, qu.eolian, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -222,7 +243,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 locrian_test = qu.quantize(220, qu.locrian, 260);
+locrian_sweep_test = qu.quantize(220, qu.locrian, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -243,7 +267,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 pentanat_test = qu.quantize(220, qu.pentanat, 260);
+pentanat_sweep_test = qu.quantize(220, qu.pentanat, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -264,7 +291,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 kumoi_test = qu.quantize(220, qu.kumoi, 260);
+kumoi_sweep_test = qu.quantize(220, qu.kumoi, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -285,7 +315,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 natural_test = qu.quantize(220, qu.natural, 260);
+natural_sweep_test = qu.quantize(220, qu.natural, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -306,7 +339,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 dodeca_test = qu.quantize(220, qu.dodeca, 260);
+dodeca_sweep_test = qu.quantize(220, qu.dodeca, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -327,7 +363,10 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 dimin_test = qu.quantize(220, qu.dimin, 260);
+dimin_sweep_test = qu.quantize(220, qu.dimin, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```
 
 ----
@@ -348,5 +387,8 @@ Where:
 #### Test
 ```
 qu = library("quantizers.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 penta_test = qu.quantize(220, qu.penta, 260);
+penta_sweep_test = qu.quantize(220, qu.penta, f) with { P = int(ma.SR); f = 110*2^(2*ba.period(P)/P); };
 ```

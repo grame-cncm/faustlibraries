@@ -1073,6 +1073,7 @@ with {
   branch_a(i) = wd.resistor(i, 1200);
   branch_b(i) = wd.resistor_Vout(i, 1800);
 };
+u_idealDiode_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_idealDiode(i); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
 ```
 
 #### References
@@ -1179,6 +1180,7 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025) + os.tosc(110) * 0.001;
+u_diodePair_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodePair(i, 1e-12, 0.025); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
 ```
 
 Note: only usable as the root of a tree.
@@ -1215,6 +1217,7 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026) + os.tosc(110) * 0.001;
+u_diodeSingle_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodeSingle(i, 8e-13, 0.026); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
 ```
 
 Note: only usable as the root of a tree.
@@ -1251,6 +1254,7 @@ Where:
 wd = library("wdmodels.lib");
 os = library("oscillators.lib");
 u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2) + os.tosc(110) * 0.001;
+u_diodeAntiparallel_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodeAntiparallel(i, 1e-12, 0.025, 2, 2); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
 ```
 
 Note: only usable as the root of a tree.

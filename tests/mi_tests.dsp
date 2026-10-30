@@ -36,6 +36,7 @@ nlSpringDamper3_test = 0.1*os.tosc(220), -0.1*os.tosc(330) : mi.nlSpringDamper3(
 nlSpringDamperClipped_test = 2*os.tosc(220), -2*os.tosc(330) : mi.nlSpringDamperClipped(5.0, 0.5, 8.0, 0.2, 0.0, 0.0);
 
 nlPluck_test = (mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.3, -0.3)), os.tosc(110) * 0.001;
+nlPluck_moving_test = mi.nlPluck(5.0, 0.4, 0.2, 0.2, -0.2, 0.6*os.tosc(110), 0.6*os.tosc(170));
 
 nlBow_test = no.multinoise(2) : *(0.1), *(0.05) : mi.nlBow(0.5, 0.1, 1.0, 0.0, 0.0);
 
