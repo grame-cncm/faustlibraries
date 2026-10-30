@@ -50,6 +50,8 @@ Every script behind these targets is described in `scripts/README.md`.
   artifacts: generate them with `make reference`, never commit them. Same
   for the built site (`site/`) and `tests/build|output`; `.gitignore`
   covers them all.
+- The references hold the bargraphs too, after the outputs: a test of a
+  meter or a probe compares its measure, not only the signal it lets through.
 - A test failure means the change altered audible output. That is either a
   bug in the change or a deliberate fix; in the second case say so
   explicitly and regenerate only the affected references.

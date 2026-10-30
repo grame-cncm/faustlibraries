@@ -4,8 +4,8 @@
 This is the comparator of `make check`: for each test, it compares the
 reference `tests/reference/<name>.ref` with the fresh output
 `tests/output/<name>.out`, both written by `arch/print_arch.cpp` (one line per
-frame: the frame index, then one sample per output channel, separated by
-whitespace).
+frame: the frame index, one sample per output channel, then the bargraphs,
+separated by whitespace).
 
 Two files match when they have the same number of lines, every line has the
 same number of whitespace-separated tokens, and each pair of tokens either

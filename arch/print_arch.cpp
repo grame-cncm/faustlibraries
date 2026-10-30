@@ -22,7 +22,7 @@
 #define FAUSTFLOAT float
 #endif
 
-// Allows to set buttons/checkbox state
+// Allows to set buttons/checkbox state, and to read the bargraphs
 struct ControlUI : public GenericUI {
     
     struct Control {
@@ -36,7 +36,16 @@ struct ControlUI : public GenericUI {
     
     std::vector<Control> fButtons;
     std::vector<Control> fCheckbox;
+    std::vector<Control> fBargraphs;
     
+    virtual void addHorizontalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT, FAUSTFLOAT)
+    {
+        fBargraphs.push_back(Control(label, zone));
+    }
+    virtual void addVerticalBargraph(const char* label, FAUSTFLOAT* zone, FAUSTFLOAT, FAUSTFLOAT)
+    {
+        fBargraphs.push_back(Control(label, zone));
+    }
     virtual void addButton(const char* label, FAUSTFLOAT* zone)
     {
         fButtons.push_back(Control(label, zone));
@@ -141,14 +150,32 @@ int main(int argc, char* argv[])
 
     std::cout << std::setprecision(10);
 
-    // Print `count` frames of the last compute(), the first one being frame `start`.
+    // Print `count` frames of the last compute(), the first one being frame
+    // `start`. The bargraphs follow the outputs, in the order of the interface.
     auto print = [&](int start, int count) {
         for (int frame = 0; frame < count; ++frame) {
             std::cout << start + frame;
             for (int ch = 0; ch < numOutputs; ++ch) {
                 std::cout << '\t' << outputs[ch][frame];
             }
+            for (auto& it: control.fBargraphs) {
+                std::cout << '\t' << *it.fZone;
+            }
             std::cout << '\n';
+        }
+    };
+
+    // A bargraph holds its value at the end of a compute(): a program that has
+    // some runs in blocks of kBargraphBlock frames, to follow them over time.
+    const int kBargraphBlock = 64;
+
+    // Compute and print `count` frames, the first one being frame `start`.
+    auto render = [&](int start, int count) {
+        const int block = control.fBargraphs.empty() ? count : kBargraphBlock;
+        for (int done = 0; done < count; done += block) {
+            const int length = std::min(block, count - done);
+            dsp->compute(length, inputBuffer, outputBuffer);
+            print(start + done, length);
         }
     };
 
@@ -160,20 +187,17 @@ int main(int argc, char* argv[])
         const int release = std::max(frames / 2, kWarmup);
         const int pressed = std::max(std::min(release, frames) - kWarmup, 0);
         if (pressed > 0) {
-            dsp->compute(pressed, inputBuffer, outputBuffer);
-            print(kWarmup, pressed);
+            render(kWarmup, pressed);
         }
         control.buttonOFF();
         control.checkboxOFF();
         const int released = std::max(frames - kWarmup - pressed, 0);
         if (released > 0) {
-            dsp->compute(released, inputBuffer, outputBuffer);
-            print(kWarmup + pressed, released);
+            render(kWarmup + pressed, released);
         }
     } else {
         // Then regular computation
-        dsp->compute(frames, inputBuffer, outputBuffer);
-        print(kWarmup, std::max(frames - kWarmup, 0));
+        render(kWarmup, std::max(frames - kWarmup, 0));
     }
 
     return 0;

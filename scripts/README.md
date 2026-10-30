@@ -108,7 +108,9 @@ scripts/floatdiff.py REFERENCE OUTPUT TOL
 ```
 
 The comparator of `make check`. Both files are written by `arch/print_arch.cpp`:
-one line per frame, the frame index and then one sample per output. They match
+one line per frame, the frame index, one sample per output, then the value of
+each bargraph at the end of its block (a program with bargraphs runs in blocks
+of 64 frames, so that a meter is checked over time). They match
 when they have the same lines and tokens, and each pair of numbers satisfies
 `math.isclose(a, b, rel_tol=TOL, abs_tol=TOL)`: `TOL` is an absolute tolerance
 below 1 in magnitude and a relative one above. `make check` passes `FLOAT_TOL`
