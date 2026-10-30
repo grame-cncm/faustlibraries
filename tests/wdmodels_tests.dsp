@@ -171,9 +171,11 @@ omega_test = wd.omega(0.5);
 
 u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025) + os.tosc(110) * 0.001;
 u_diodePair_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodePair(i, 1e-12, 0.025); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
+u_diodePair_law_test = (abs(d(100, -1) + 0.1108) < 0.002), (abs(d(100, 1) - 0.1108) < 0.002) with { d = wd.u_diodePair(0, 1e-12, 0.025); };
 
 u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026) + os.tosc(110) * 0.001;
 u_diodeSingle_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodeSingle(i, 8e-13, 0.026); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
+u_diodeSingle_law_test = (abs(d(100, -1) + 1.0000) < 0.002), (abs(d(100, 1) - 0.1108) < 0.002) with { d = wd.u_diodeSingle(0, 1e-12, 0.025); };
 
 u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2) + os.tosc(110) * 0.001;
 u_diodeAntiparallel_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodeAntiparallel(i, 1e-12, 0.025, 2, 2); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
