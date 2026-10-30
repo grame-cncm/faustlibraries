@@ -27,8 +27,14 @@ Where:
 #### Test
 ```
 env = library("env.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 env_test = env.env((60,61,62,63), (99,90,70,0), env.scaleoutlevel(80) << 5, 0, button("gate")) : env.q24_to_linear;
 env_slider_test = env.env((hslider("env:R1", 60, 0, 99, 1), hslider("env:R2", 61, 0, 99, 1), hslider("env:R3", 62, 0, 99, 1), hslider("env:R4", 63, 0, 99, 1)), (hslider("env:L1", 99, 0, 99, 1), hslider("env:L2", 90, 0, 99, 1), hslider("env:L3", 70, 0, 99, 1), hslider("env:L4", 0, 0, 99, 1)), int(env.scaleoutlevel(hslider("env:outlevel", 80, 0, 99, 1))) << 5, hslider("env:rate_scaling", 0, 0, 27, 1), button("gate")) : env.q24_to_linear;
+env_scale_level_test = par(c, 4, env.ScaleLevel(note, 39, 50, 70, c, 3 - c)) with { P = int(ma.SR/10); note = int(128*ba.period(P)/P); };
+env_scale_velocity_test = par(s, 8, env.ScaleVelocity(vel, s)) with { P = int(ma.SR/10); vel = 150*ba.period(P)/P - 10; };
+env_scale_rate_test = par(s, 8, env.ScaleRate(note, s)) with { P = int(ma.SR/10); note = int(128*ba.period(P)/P); };
+env_scaleoutlevel_test = env.scaleoutlevel(int(100*ba.period(P)/P)) with { P = int(ma.SR/10); };
 ```
 
 #### Reference

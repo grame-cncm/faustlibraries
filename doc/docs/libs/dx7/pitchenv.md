@@ -24,6 +24,8 @@ Where:
 pi = library("pitchenv.lib");
 pitchenv_test = pi.pitchenv((60,61,62,63), (60,61,62,63), button("gate"));
 pitchenv_slider_test = pi.pitchenv((hslider("pitchenv:R1", 60, 0, 99, 1), hslider("pitchenv:R2", 61, 0, 99, 1), hslider("pitchenv:R3", 62, 0, 99, 1), hslider("pitchenv:R4", 63, 0, 99, 1)), (hslider("pitchenv:L1", 60, 0, 99, 1), hslider("pitchenv:L2", 61, 0, 99, 1), hslider("pitchenv:L3", 62, 0, 99, 1), hslider("pitchenv:L4", 63, 0, 99, 1)), button("gate"));
+pitchenv_falling_test = pi.pitchenv((99, 99, 99, 80), (70, 40, 60, 30), button("gate"));
+pitchenv_rising_test = pi.pitchenv((99, 99, 99, 80), (30, 60, 40, 70), button("gate"));
 ```
 #### Reference
 

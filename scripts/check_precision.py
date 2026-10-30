@@ -108,7 +108,7 @@ def default_dsp_files():
 
 
 def newest_source(dsp):
-    libs = glob.glob(os.path.join(ROOT, "*.lib"))
+    libs = glob.glob(os.path.join(ROOT, "*.lib")) + glob.glob(os.path.join(ROOT, "dx7", "*.lib"))
     return max(os.path.getmtime(p) for p in libs + [dsp, ARCH])
 
 

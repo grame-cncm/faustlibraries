@@ -57,7 +57,14 @@ with {
 // #### Test
 // ```
 // lfo = library("lfo.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
 // lfo_test = lfo.lfo(1, 50, checkbox("Sync"),35, button("gate"));
+// lfo_wave_test = par(w, 6, lfo.lfo(w, 0, 1, 70, button("gate")) : _, !);
+// lfo_speed_test = par(s, 5, lfo.lfo(2, 0, 1, 20*s + 10, button("gate")) : _, !);
+// lfo_delay_test = par(d, 5, lfo.lfo(0, 20*d, 1, 35, button("gate")) : !, _);
+// lfo_sync_test = par(s, 2, lfo.lfo(0, 20, s, 35, gate)) with { P = int(ma.SR/4); gate = ba.period(P) < int(P/2); };
+// lfo_slider_test = lfo.lfo(hslider("lfo:wave", 4, 0, 5, 1), hslider("lfo:delay", 20, 0, 99, 1), hslider("lfo:sync", 1, 0, 1, 1), hslider("lfo:speed", 60, 0, 99, 1), button("gate"));
 // ```
 //
 // #### Reference
@@ -78,7 +85,7 @@ with {
     newdelayState = ba.if(isKeyDown, 0, delaystate_);
   };
 
-  update(phase_, delaystate_, delayinc_, delayinc2_, randstate_) = newphase_, newdelayState, delayinc_bus, newSample, delayVal
+  update(phase_, delaystate_, delayinc_, delayinc2_, randstate_) = newcount, newdelayState, delayinc_bus, newSample, delayVal
   with {
     // Original constant was 1 << 32 / 15.5s / 11
     // Convert from Q32 to floating-point
@@ -98,14 +105,19 @@ with {
       };
     };
 
-    newphase_ = phase_ + delta_ : ma.frac; // TODO: alternatives to ma.frac?
+    // The phase is an integer counted modulo N, as `m_hsp_phasor` in `operator.lib`:
+    // no rounding error accumulates, where a float phase drifts in single precision.
+    N = 1 << 30;
+    step = int(rint(delta_ * N));
+    newcount = (phase_ + step) % N;
+    newphase_ = float(newcount) / N;
 
     getTri = randstate_, x
     with {
       x = ba.if(
         newphase_ < 0.5,
         newphase_ * 2.0,  // Rising 0.0 to 1.0
-        2.0 - phase_ * 2.0  // Falling 1.0 to 0.0
+        2.0 - float(phase_) / N * 2.0  // Falling 1.0 to 0.0
       );
     };
 
@@ -131,7 +143,7 @@ with {
 
     getSandH = newrandstate, x
     with {
-      newrandstate = ba.if(newphase_ < delta_, (randstate_ * 179 + 17) & 255, randstate_);
+      newrandstate = ba.if(newcount < step, (randstate_ * 179 + 17) & 255, randstate_);
       x = newrandstate / 255.0;
     };
 
@@ -139,18 +151,21 @@ with {
 
     // --- get delay to produce 2 channels: `delaystate_, Lfo::getdelay()`
     // see lfo.cc lines~78-90
+    // `delaystate_` counts the samples since the key went down: adding an increment
+    // of 1e-5 to a state near 1 loses a percent of it in single precision.
     delayBus = delayVal1, delayVal2, delayVal3 : ba.selectbus(2, 3, (d <= 2.0)*(2-(d < 1.0)))
     with {
-      d = delaystate_ + delta
-      with {
-        // We use `delayinc_bus` instead of `delayinc_, delayinc2_` because we assume
-        // the order of events in C++ is reset(), keydown(), getsample(), getdelay()
-        delta = (delayinc_bus : ba.if(delaystate_ < 1.0));
-      };
+      n = delaystate_ + 1;
+      // We use `delayinc_bus` instead of `delayinc_, delayinc2_` because we assume
+      // the order of events in C++ is reset(), keydown(), getsample(), getdelay()
+      inc1 = delayinc_bus : _, !;
+      inc2 = delayinc_bus : !, _;
+      n1 = int(ceil(1.0 / inc1));
+      d = ba.if(n < n1, n * inc1, n1 * inc1 + (n - n1) * inc2);
 
       delayVal1 = delaystate_, 1.0; // path if (d > 2.0)
-      delayVal2 = d, 0; // else if (d < 1.0)
-      delayVal3 = d, d - 1.0; // else
+      delayVal2 = n, 0; // else if (d < 1.0)
+      delayVal3 = n, d - 1.0; // else
     };
     newdelayState = delayBus : _,!;
     delayVal = delayBus : !, _;
