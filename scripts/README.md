@@ -338,17 +338,19 @@ The baseline comes from the triage of 2026-10-29, when 471 of the 2352 tests
 moved, updated since: 77 symbols, and 163 tests accepted. A reason starting
 with `fault:` marks a defect of the library to fix; there are none left.
 
-Three were fixed on 2026-10-31. The first two are anchored at 44.1 kHz: their
-output does not change there, and drops by 0.74 dB at 48 kHz:
+Three were fixed on 2026-10-31, all anchored at 44.1 kHz. The output of the
+first two does not change there, and drops by 0.74 dB at 48 kHz:
 
 - `ve.crybaby`'s gain grew as the rate (+12.9 dB at 192 kHz): its numerator
   `1 - z^-1` and its bandwidth `d` are both in 1/SR, so the peak gain 1/d is
   in SR; `ve.autowah` inherited it;
 - `pm.modeFilter`'s peak gain is 1/(1 - r), in t60*SR: the bells, the marimba,
   the djembe and `pm.modularInterpBody` were 12.8 dB louder at 192 kHz;
-- `sy.combString` applied a pole per sample once per period: `res` now is the
-  T60 of the loop at every rate and pitch, which changes its sound at every
-  rate; `maxDel` holds 12 Hz at 192 kHz.
+- `sy.combString` applied a pole per sample once per period, so its decay grew
+  with the rate. The pole is that of 44.1 kHz at every rate: the loop gain per
+  period is fixed, the T60 falls with pitch as for a plucked string, and the
+  doc of `res` says so. `maxDel` holds 12 Hz at 192 kHz. Its sound at 44.1 kHz
+  does not change.
 
 The fourth is documented, not fixed: `webaudio.lib` keeps the normalized cutoff
 at 0.01 or above, so no f0 below 220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz.

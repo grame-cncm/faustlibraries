@@ -127,7 +127,9 @@ combString(freq,res,gate) : _
 Where:
 
 * `freq`: the frequency of the string in Hz
-* `res`: string T60 (resonance time) in second
+* `res`: resonance of the string: it decays by 60 dB in about 305*`res` periods,
+   so its T60 is 305*`res`/`freq` seconds (5.5 s at 220 Hz for `res` = 4) and falls
+   with pitch, as for a plucked string
 * `gate`: trigger signal (0 or 1)
 
 #### Test
