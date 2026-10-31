@@ -73,6 +73,8 @@ def pos (a : Q) : Bool := decide (0 < a.n)
 def inv (a : Q) : Q := if 0 < a.n then ⟨a.d, a.n⟩ else ⟨-a.d, -a.n⟩
 def floor (a : Q) : Int := Int.fdiv a.n a.d
 def ceil (a : Q) : Int := -(Int.fdiv (-a.n) a.d)
+/-- Truncation toward zero. -/
+def trunc (a : Q) : Int := if 0 ≤ a.n then a.floor else a.ceil
 end Q
 
 inductive BinOp where
@@ -162,22 +164,18 @@ def selfDepth : Sig → Option Nat
   | .delay x (.int k) => if 0 ≤ k then (selfDepth x).map (· + k.toNat) else none
   | _                 => none
 
-/-- Flatten an `+`/`-` tree into signed leaves. `true` = positive. -/
-def addends (sign : Bool) : Sig → List (Bool × Sig)
-  | .binop .add a b => addends sign a ++ addends sign b
-  | .binop .sub a b => addends sign a ++ addends (!sign) b
-  | t               => [(sign, t)]
-
-/-- Read one addend as `coefficient · y[n-k]`. -/
-def tapOf : Sig → Option (Nat × Q)
-  | .binop .mul a b =>
-      match selfDepth a, b with
-      | some k, .const q => some (k, q)
-      | _, _ =>
-        match selfDepth b, a with
-        | some k, .const q => some (k, q)
-        | _, _             => none
-  | t => (selfDepth t).map fun k => (k, Q.one)
+/-- Flatten a tree of `+`, `-` and products by a constant into leaves, each with
+    its coefficient: `c · (a ± b) = c · a ± c · b` and `c · (q · a) = (c · q) · a`
+    hold over the rationals, so the leaves weighted by their coefficients sum to
+    `c` times the term. The factor may sit above the sum: `si.smooth` stores its
+    error as `s · (e[n-1] + x[n-1] - x[n])`. A product by anything but a constant
+    stays a leaf, which `scanBody` refuses as soon as it mentions the recursion. -/
+def addends (c : Q) : Sig → List (Q × Sig)
+  | .binop .add a b          => addends c a ++ addends c b
+  | .binop .sub a b          => addends c a ++ addends c.neg b
+  | .binop .mul (.const q) t => addends (c.mul q) t
+  | .binop .mul t (.const q) => addends (c.mul q) t
+  | t                        => [(c, t)]
 
 /-! A real filter does not have its recursion at the root: `fi.tf2` emits the
 numerator applied to the recursive state, so the `SIGREC` sits *below* a sum of
@@ -203,14 +201,14 @@ def collectRecsL : List Sig → List Sig
 end
 
 /-- Accumulate the feedback taps of one recursion body. -/
-def scanBody : List (Bool × Sig) → Q → Q → Option (Q × Q)
+def scanBody : List (Q × Sig) → Q → Q → Option (Q × Q)
   | [], c1, c2 => some (c1, c2)
-  | (s, t) :: rest, c1, c2 =>
+  | (q, t) :: rest, c1, c2 =>
       if !hasRef t then scanBody rest c1 c2
-      else match tapOf t with
-           | some (1, q) => scanBody rest (c1.add (if s then q else q.neg)) c2
-           | some (2, q) => scanBody rest c1 (c2.add (if s then q else q.neg))
-           | _           => none
+      else match selfDepth t with
+           | some 1 => scanBody rest (c1.add q) c2
+           | some 2 => scanBody rest c1 (c2.add q)
+           | _      => none
 
 /-- Feedback coefficients of a second-order (or lower) linear recursion,
     written `y[n] = c₁·y[n-1] + c₂·y[n-2] + (terms free of y)`.
@@ -220,7 +218,7 @@ def scanBody : List (Bool × Sig) → Q → Q → Option (Q × Q)
     mentions it without being exactly such a tap: a nonlinear recursion, a
     delay-free loop (`k = 0`), an order above 2, or an unmodelled node. -/
 def analyseRec : Sig → Option (Q × Q)
-  | .proj 0 (.recur (.cons body .nil)) => scanBody (addends true body) Q.zero Q.zero
+  | .proj 0 (.recur (.cons body .nil)) => scanBody (addends Q.one body) Q.zero Q.zero
   | _ => none
 
 /-- `Sig` is a nested inductive, so `deriving DecidableEq` does not apply and
@@ -357,9 +355,16 @@ def rmax (a b : Range) : Range :=
   ⟨meet Q.max a.lo b.lo, join Q.max a.hi b.hi,
    strictMax a.hi a.hiStrict b.hi b.hiStrict⟩
 
+/-- Either branch may be the value, so a side is known only when both branches
+    bound it, and the strictness of the upper bound follows `strictMax`. -/
+def union (a b : Range) : Range :=
+  ⟨join Q.min a.lo b.lo, join Q.max a.hi b.hi,
+   strictMax a.hi a.hiStrict b.hi b.hiStrict⟩
+
 /-- Truncation toward zero of a value in `[lo, hi]` lands in
-    `[⌊lo⌋, ⌈hi⌉]`. Widening on both sides is what keeps this sound for
-    negative values, where truncation moves *up*.
+    `[⌊lo⌋, trunc hi]`: truncation is monotone, so `v ≤ hi` gives
+    `trunc v ≤ trunc hi`. The lower bound is widened, which keeps it sound
+    for negative values, where truncation moves *up*.
 
     A strict upper bound tightens to `max (⌈hi⌉ - 1) 0`: a non-negative value
     below `hi` truncates to an integer at most `⌈hi⌉ - 1`, and a negative one
@@ -372,8 +377,20 @@ def trunc (r : Range) : Range :=
      if r.hiStrict then
        let c := q.ceil - 1
        Q.ofInt (if c ≤ 0 then 0 else c)
-     else Q.ofInt q.ceil,
+     else Q.ofInt q.trunc,
    false⟩
+
+/-- The same bounds, read as closed: `v < h` implies `v ≤ h`. -/
+def closed (r : Range) : Range := ⟨r.lo, r.hi, false⟩
+
+/-- Arithmetic right shift by `k`, of a value the compiler has converted to
+    `int` (hence `trunc`, the identity on an integer). In two's complement
+    `x >> k = ⌊x / 2ᵏ⌋` for both signs: `-1 >> 2` is `-1`, not `0`. Being monotone,
+    that floor maps each bound of the integer `x` to a bound of the result. -/
+def shiftR (r : Range) (k : Nat) : Range :=
+  let shift := fun q : Q => Q.ofInt (q.mul ⟨1, Int.ofNat (2 ^ k)⟩).floor
+  let t := r.trunc
+  ⟨t.lo.map shift, t.hi.map shift, false⟩
 
 /-- Multiply a range by an exact constant. A positive factor preserves both
     sides and the upper bound's strictness; a negative factor swaps the sides,
@@ -392,6 +409,12 @@ def translate (r : Range) (q : Q) : Range :=
   ⟨r.lo.map (Q.add q), r.hi.map (Q.add q), r.hiStrict⟩
 end Range
 
+/-- The `i`-th output of a recursion group, which is a `cons` list. -/
+def groupBody : Nat → Sig → Option Sig
+  | 0,     .cons b _ => some b
+  | i + 1, .cons _ r => groupBody i r
+  | _,     _         => none
+
 /-- Range of a subterm, when one follows from its structure alone.
 
     Recursion is on an explicit fuel counter rather than on `Sig`: the
@@ -407,6 +430,21 @@ def rangeOfFuel : Nat → Sig → Range
   | n + 1, .opaqueN "SIGINTCAST" [x] => (rangeOfFuel n x).trunc
   | n + 1, .opaqueN "SIGMIN" [a, b]  => Range.rmin (rangeOfFuel n a) (rangeOfFuel n b)
   | n + 1, .opaqueN "SIGMAX" [a, b]  => Range.rmax (rangeOfFuel n a) (rangeOfFuel n b)
+  | n + 1, .opaqueN "SIGSELECT2" [_, a, b] => Range.union (rangeOfFuel n a) (rangeOfFuel n b)
+  | n + 1, .opaqueN "SIGFLOATCAST" [x] =>
+      -- The identity over the rationals. Closing the upper bound loses nothing
+      -- a client needs, and keeps the rule true of the executed cast when the
+      -- bounds are representable: rounding is monotone, but can reach `hi`.
+      (rangeOfFuel n x).closed
+  | _ + 1, .opaqueN "SIGBINOP:and" [_, .int m] =>
+      -- In two's complement `x & m` keeps a subset of the bits of `m`, so for
+      -- `m ≥ 0` it lies in `[0, m]` whatever `x` is, wrapped sum or negative
+      -- value included. That is why the operand need not be looked at: this is
+      -- what bounds an integer phase accumulator.
+      if 0 ≤ m then ⟨some (Q.ofInt 0), some (Q.ofInt m), false⟩ else Range.unknown
+  | n + 1, .opaqueN "SIGBINOP:arsh" [x, .int k] =>
+      -- `0 ≤ k < 32`: outside, the shift of an int is not defined.
+      if 0 ≤ k && k < 32 then (rangeOfFuel n x).shiftR k.toNat else Range.unknown
   | n + 1, .binop .rem a (.int m)    =>
       if 0 < m then
         -- C semantics: `%` truncates toward zero, so a negative dividend gives
@@ -440,14 +478,17 @@ def rangeOfFuel : Nat → Sig → Range
       if q.n == 0 then Range.unknown else (rangeOfFuel n a).scale q.inv
   | n + 1, .binop .div a (.int k)   =>
       if k == 0 then Range.unknown else (rangeOfFuel n a).scale (Q.inv (Q.ofInt k))
-  | n + 1, .proj 0 (.recur (.cons body .nil)) =>
+  | n + 1, .proj (.ofNat i) (.recur g) =>
       -- The recursion invariant, in its state-independent form: `ref`, `delay1`
       -- and `delay` all yield the unknown range, so any bound this returns for
-      -- the body holds for arbitrary values of the recursive state — hence for
-      -- every output of the recursion, with no fixed-point iteration. This is
-      -- what bounds a phasor: its body is `frac(state + inc)`, and the `[0, 1)`
-      -- of the rule above does not depend on the state at all.
-      rangeOfFuel n body
+      -- the `i`-th body holds for arbitrary values of the recursive state, that
+      -- of the other outputs of the group included — hence for every sample of
+      -- that output, with no fixed-point iteration. This is what bounds a
+      -- phasor: its body is `frac(state + inc)` in floating point, `sum & mask`
+      -- in fixed point, and neither `[0, 1)` nor `[0, mask]` depends on the state.
+      match groupBody i g with
+      | some body => rangeOfFuel n body
+      | none      => Range.unknown
   | _ + 1, _ => Range.unknown
 
 /-- Fuel is bounded by the depth of an index expression, not by graph size. -/
@@ -586,7 +627,9 @@ arithmetic. In floating point the subtraction is exact whenever
 `floor(x) ≤ x < 2·floor(x)` (Sterbenz) and rounds otherwise; a rounding that
 reached `1.0` would step outside the certified interval. Auditing the float
 behaviour of `frac` is part of the same floating-point obligation, not a new
-one. -/
+one. The fixed-point phasor needs less: its index `float(p >> 6) / 2²⁴ · N` starts
+from an integer below `2²⁴`, which a float holds exactly, so for a table of `N`
+entries with `N` a power of two, like that of `os.osc`, nothing rounds. -/
 
 end Faust.Signal
 
@@ -622,81 +665,91 @@ process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — output 0 -/
 def fdelay_clamped_out0 : Sig :=
   let n0 : Sig := Sig.input 0
   let n1 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨2000, 1⟩ []
-  let n2 : Sig := Sig.opaqueN "SIGINTCAST" [n1]
-  let n3 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n2]
-  let n4 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n3]
-  let n5 : Sig := Sig.delay n0 n4
-  let n6 : Sig := Sig.opaqueN "SIGFLOOR" [n1]
-  let n7 : Sig := Sig.binop .sub n1 n6
-  let n8 : Sig := Sig.binop .sub (.int 1) n7
-  let n9 : Sig := Sig.binop .mul n5 n8
-  let n10 : Sig := Sig.binop .add n2 (.int 1)
-  let n11 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n10]
-  let n12 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n11]
-  let n13 : Sig := Sig.delay n0 n12
-  let n14 : Sig := Sig.binop .mul n13 n7
-  let n15 : Sig := Sig.binop .add n9 n14
-  n15
+  let n2 : Sig := Sig.opaqueN "SIGMAX" [(.int (-1)), n1]
+  let n3 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n2]
+  let n4 : Sig := Sig.opaqueN "SIGINTCAST" [n3]
+  let n5 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n4]
+  let n6 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n5]
+  let n7 : Sig := Sig.delay n0 n6
+  let n8 : Sig := Sig.opaqueN "SIGFLOOR" [n1]
+  let n9 : Sig := Sig.binop .sub n1 n8
+  let n10 : Sig := Sig.binop .sub (.int 1) n9
+  let n11 : Sig := Sig.binop .mul n7 n10
+  let n12 : Sig := Sig.binop .add n4 (.int 1)
+  let n13 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n12]
+  let n14 : Sig := Sig.opaqueN "SIGMIN" [(.int 1025), n13]
+  let n15 : Sig := Sig.delay n0 n14
+  let n16 : Sig := Sig.binop .mul n15 n9
+  let n17 : Sig := Sig.binop .add n11 n16
+  n17
 
 /-- `import("stdfaust.lib");
 process = fi.lowpass(3, 1000);` — output 0 -/
 def lowpass3_out0 : Sig :=
-  let n0 : Sig := Sig.ref 1
-  let n1 : Sig := Sig.proj 0 n0
-  let n2 : Sig := Sig.delay1 n1
-  let n3 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
-  let n4 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), n3]
-  let n5 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n4]
-  let n6 : Sig := Sig.binop .div (.const ⟨6908435304715273, 2199023255552⟩) n5
-  let n7 : Sig := Sig.opaqueN "SIGTAN" [n6]
-  let n8 : Sig := Sig.binop .div (.int 1) n7
-  let n9 : Sig := Sig.binop .sub (.int 1) n8
-  let n10 : Sig := Sig.binop .add (.int 1) n8
-  let n11 : Sig := Sig.binop .div n9 n10
-  let n12 : Sig := Sig.binop .sub (.int 0) n11
-  let n13 : Sig := Sig.binop .mul n2 n12
-  let n14 : Sig := Sig.input 0
-  let n15 : Sig := Sig.binop .mul (.int 0) n8
-  let n16 : Sig := Sig.binop .add (.int 1) n15
-  let n17 : Sig := Sig.binop .div n16 n10
-  let n18 : Sig := Sig.binop .mul n14 n17
-  let n19 : Sig := Sig.delay1 n14
-  let n20 : Sig := Sig.binop .sub (.int 1) n15
-  let n21 : Sig := Sig.binop .div n20 n10
-  let n22 : Sig := Sig.binop .mul n19 n21
-  let n23 : Sig := Sig.binop .add n18 n22
-  let n24 : Sig := Sig.binop .add n13 n23
-  let n25 : Sig := Sig.cons n24 (.nil)
-  let n26 : Sig := Sig.recur n25
-  let n27 : Sig := Sig.proj 0 n26
-  let n28 : Sig := Sig.binop .mul n8 n8
-  let n29 : Sig := Sig.binop .sub (.int 1) n28
-  let n30 : Sig := Sig.binop .mul (.int 2) n29
-  let n31 : Sig := Sig.binop .mul (.const ⟨2251799813685249, 2251799813685248⟩) n8
-  let n32 : Sig := Sig.binop .add (.int 1) n31
-  let n33 : Sig := Sig.binop .add n32 n28
-  let n34 : Sig := Sig.binop .div n30 n33
-  let n35 : Sig := Sig.binop .mul n2 n34
-  let n36 : Sig := Sig.delay n2 (.int 1)
-  let n37 : Sig := Sig.binop .sub (.int 1) n31
-  let n38 : Sig := Sig.binop .add n37 n28
-  let n39 : Sig := Sig.binop .div n38 n33
-  let n40 : Sig := Sig.binop .mul n36 n39
-  let n41 : Sig := Sig.binop .add n35 n40
-  let n42 : Sig := Sig.binop .sub n27 n41
-  let n43 : Sig := Sig.cons n42 (.nil)
-  let n44 : Sig := Sig.recur n43
-  let n45 : Sig := Sig.proj 0 n44
-  let n46 : Sig := Sig.binop .div (.int 1) n33
-  let n47 : Sig := Sig.binop .mul n45 n46
-  let n48 : Sig := Sig.delay n45 (.int 1)
-  let n49 : Sig := Sig.binop .div (.int 2) n33
-  let n50 : Sig := Sig.binop .mul n48 n49
-  let n51 : Sig := Sig.binop .add n47 n50
-  let n52 : Sig := Sig.delay n45 (.int 2)
-  let n53 : Sig := Sig.binop .mul n52 n46
-  let n54 : Sig := Sig.binop .add n51 n53
-  n54
+  let n0 : Sig := Sig.opaqueN "SIGABS" [(.int 1)]
+  let n1 : Sig := Sig.binop .add n0 (.int 0)
+  let n2 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
+  let n3 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨50, 1⟩), n2]
+  let n4 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n3]
+  let n5 : Sig := Sig.binop .div (.const ⟨6908435304715273, 2199023255552⟩) n4
+  let n6 : Sig := Sig.opaqueN "SIGMIN" [n5, (.const ⟨7060089276524383, 4503599627370496⟩)]
+  let n7 : Sig := Sig.opaqueN "SIGMAX" [(.int 0), n6]
+  let n8 : Sig := Sig.opaqueN "SIGTAN" [n7]
+  let n9 : Sig := Sig.binop .mul n1 n8
+  let n10 : Sig := Sig.input 0
+  let n11 : Sig := Sig.binop .div (.int 1) n1
+  let n12 : Sig := Sig.ref 1
+  let n13 : Sig := Sig.proj 0 n12
+  let n14 : Sig := Sig.delay1 n13
+  let n15 : Sig := Sig.binop .mul n11 n14
+  let n16 : Sig := Sig.binop .sub n10 n15
+  let n17 : Sig := Sig.binop .mul n9 (.int 1)
+  let n18 : Sig := Sig.binop .div n17 n1
+  let n19 : Sig := Sig.binop .add (.int 1) n18
+  let n20 : Sig := Sig.binop .div (.int 1) n19
+  let n21 : Sig := Sig.opaqueN "SIGMIN" [n20, (.const ⟨340282346600000016151267322115014000640, 1⟩)]
+  let n22 : Sig := Sig.binop .mul n16 n21
+  let n23 : Sig := Sig.binop .mul n9 n22
+  let n24 : Sig := Sig.binop .add n23 n14
+  let n25 : Sig := Sig.binop .add n24 n23
+  let n26 : Sig := Sig.binop .mul (.int 0) n22
+  let n27 : Sig := Sig.binop .mul n11 n24
+  let n28 : Sig := Sig.binop .add n26 n27
+  let n29 : Sig := Sig.cons n28 (.nil)
+  let n30 : Sig := Sig.cons n25 n29
+  let n31 : Sig := Sig.recur n30
+  let n32 : Sig := Sig.proj 1 n31
+  let n33 : Sig := Sig.binop .mul (.int 0) n32
+  let n34 : Sig := Sig.binop .add n8 (.const ⟨2251799813685249, 2251799813685248⟩)
+  let n35 : Sig := Sig.binop .mul n34 n14
+  let n36 : Sig := Sig.binop .sub n32 n35
+  let n37 : Sig := Sig.proj 1 n12
+  let n38 : Sig := Sig.delay1 n37
+  let n39 : Sig := Sig.binop .sub n36 n38
+  let n40 : Sig := Sig.binop .mul n8 n34
+  let n41 : Sig := Sig.binop .add (.int 1) n40
+  let n42 : Sig := Sig.binop .div (.int 1) n41
+  let n43 : Sig := Sig.opaqueN "SIGMIN" [n42, (.const ⟨340282346600000016151267322115014000640, 1⟩)]
+  let n44 : Sig := Sig.binop .mul n39 n43
+  let n45 : Sig := Sig.binop .mul n8 n44
+  let n46 : Sig := Sig.binop .add n45 n14
+  let n47 : Sig := Sig.binop .add n46 n45
+  let n48 : Sig := Sig.binop .mul n8 n46
+  let n49 : Sig := Sig.binop .add n48 n38
+  let n50 : Sig := Sig.binop .add n49 n48
+  let n51 : Sig := Sig.cons n49 (.nil)
+  let n52 : Sig := Sig.cons n46 n51
+  let n53 : Sig := Sig.cons n32 n52
+  let n54 : Sig := Sig.cons n50 n53
+  let n55 : Sig := Sig.cons n47 n54
+  let n56 : Sig := Sig.recur n55
+  let n57 : Sig := Sig.proj 3 n56
+  let n58 : Sig := Sig.binop .mul (.int 0) n57
+  let n59 : Sig := Sig.binop .add n33 n58
+  let n60 : Sig := Sig.proj 4 n56
+  let n61 : Sig := Sig.binop .mul (.int 1) n60
+  let n62 : Sig := Sig.binop .add n59 n61
+  n62
 
 /-- `// no.noise — the LCG recursion x = 1103515245*x' + 12345 at the heart of
 // noises.lib. The generator is only bounded by wrapping int32 semantics,
@@ -756,7 +809,11 @@ def onepole_out0 : Sig :=
   let n9 : Sig := Sig.proj 0 n8
   n9
 
-/-- `os = library("oscillators.lib");
+/-- `// os.osc: a sine table read through the fixed-point phasor, certify compiling
+// in single precision. The phase is masked to [0, 2^30), and the index shifted
+// and scaled from it stays below the table size: IN RANGE. In double precision
+// os.osc takes the form of phasor_float.dsp.
+os = library("oscillators.lib");
 process = os.osc(440);` — output 0 -/
 def osc_out0 : Sig :=
   let n0 : Sig := Sig.ref 1
@@ -777,20 +834,78 @@ def osc_out0 : Sig :=
   let n15 : Sig := Sig.binop .sub (.int 1) n3
   let n16 : Sig := Sig.opaqueN "SIGBINOP:or" [n15, (.int 0)]
   let n17 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
-  let n18 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨1, 1⟩), n17]
+  let n18 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨50, 1⟩), n17]
   let n19 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n18]
   let n20 : Sig := Sig.binop .div (.int 440) n19
-  let n21 : Sig := Sig.binop .add n2 n20
-  let n22 : Sig := Sig.opaqueN "SIGSELECT2" [n16, n21, (.int 0)]
-  let n23 : Sig := Sig.opaqueN "SIGFLOOR" [n22]
-  let n24 : Sig := Sig.binop .sub n22 n23
-  let n25 : Sig := Sig.cons n24 (.nil)
-  let n26 : Sig := Sig.recur n25
-  let n27 : Sig := Sig.proj 0 n26
-  let n28 : Sig := Sig.binop .mul n27 (.const ⟨65536, 1⟩)
-  let n29 : Sig := Sig.opaqueN "SIGINTCAST" [n28]
-  let n30 : Sig := Sig.opaqueN "SIGRDTBL" [n14, n29]
-  n30
+  let n21 : Sig := Sig.opaqueN "SIGRINT" [n20]
+  let n22 : Sig := Sig.binop .sub n20 n21
+  let n23 : Sig := Sig.binop .mul n22 (.const ⟨1073741824, 1⟩)
+  let n24 : Sig := Sig.opaqueN "SIGFLOOR" [n23]
+  let n25 : Sig := Sig.opaqueN "SIGINTCAST" [n24]
+  let n26 : Sig := Sig.binop .add n2 n25
+  let n27 : Sig := Sig.proj 1 n0
+  let n28 : Sig := Sig.delay1 n27
+  let n29 : Sig := Sig.binop .sub n23 n24
+  let n30 : Sig := Sig.binop .mul n29 (.const ⟨16777216, 1⟩)
+  let n31 : Sig := Sig.opaqueN "SIGINTCAST" [n30]
+  let n32 : Sig := Sig.binop .add n28 n31
+  let n33 : Sig := Sig.opaqueN "SIGBINOP:arsh" [n32, (.int 24)]
+  let n34 : Sig := Sig.binop .add n26 n33
+  let n35 : Sig := Sig.opaqueN "SIGBINOP:and" [n34, (.int 1073741823)]
+  let n36 : Sig := Sig.opaqueN "SIGFLOOR" [(.int 0)]
+  let n37 : Sig := Sig.binop .sub (.int 0) n36
+  let n38 : Sig := Sig.binop .mul n37 (.const ⟨1073741824, 1⟩)
+  let n39 : Sig := Sig.opaqueN "SIGINTCAST" [n38]
+  let n40 : Sig := Sig.opaqueN "SIGBINOP:and" [n39, (.int 1073741823)]
+  let n41 : Sig := Sig.opaqueN "SIGSELECT2" [n16, n35, n40]
+  let n42 : Sig := Sig.opaqueN "SIGBINOP:and" [n32, (.int 16777215)]
+  let n43 : Sig := Sig.opaqueN "SIGSELECT2" [n16, n42, (.int 0)]
+  let n44 : Sig := Sig.cons n43 (.nil)
+  let n45 : Sig := Sig.cons n41 n44
+  let n46 : Sig := Sig.recur n45
+  let n47 : Sig := Sig.proj 0 n46
+  let n48 : Sig := Sig.opaqueN "SIGBINOP:arsh" [n47, (.int 6)]
+  let n49 : Sig := Sig.opaqueN "SIGFLOATCAST" [n48]
+  let n50 : Sig := Sig.binop .mul n49 (.const ⟨1, 16777216⟩)
+  let n51 : Sig := Sig.binop .mul n50 (.const ⟨65536, 1⟩)
+  let n52 : Sig := Sig.opaqueN "SIGINTCAST" [n51]
+  let n53 : Sig := Sig.opaqueN "SIGRDTBL" [n14, n52]
+  n53
+
+/-- `// A floating-point phasor indexing a sine table: the form of os.osc in double
+// precision. os.osc itself goes through the fixed-point phasor here, certify
+// compiling in single (see osc.dsp). Pins the strict bound x - floor(x) in
+// [0, 1), without which int(frac*N) would reach N: IN RANGE.
+ma = library("maths.lib");
+os = library("oscillators.lib");
+process = rdtable(65536, os.sinwaveform(65536), int(phase * 65536))
+with { phase = (+(0.01) : ma.decimal) ~ _; };` — output 0 -/
+def phasor_float_out0 : Sig :=
+  let n0 : Sig := Sig.ref 1
+  let n1 : Sig := Sig.proj 0 n0
+  let n2 : Sig := Sig.delay1 n1
+  let n3 : Sig := Sig.delay1 (.int 1)
+  let n4 : Sig := Sig.binop .add n2 n3
+  let n5 : Sig := Sig.binop .rem n4 (.int 65536)
+  let n6 : Sig := Sig.cons n5 (.nil)
+  let n7 : Sig := Sig.recur n6
+  let n8 : Sig := Sig.proj 0 n7
+  let n9 : Sig := Sig.opaqueN "SIGFLOATCAST" [n8]
+  let n10 : Sig := Sig.binop .mul n9 (.const ⟨884279719003555, 140737488355328⟩)
+  let n11 : Sig := Sig.binop .div n10 (.const ⟨65536, 1⟩)
+  let n12 : Sig := Sig.opaqueN "SIGSIN" [n11]
+  let n13 : Sig := Sig.opaqueN "SIGGEN" [n12]
+  let n14 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 65536), n13, (.nil), (.nil)]
+  let n15 : Sig := Sig.binop .add n2 (.const ⟨5764607523034235, 576460752303423488⟩)
+  let n16 : Sig := Sig.opaqueN "SIGFLOOR" [n15]
+  let n17 : Sig := Sig.binop .sub n15 n16
+  let n18 : Sig := Sig.cons n17 (.nil)
+  let n19 : Sig := Sig.recur n18
+  let n20 : Sig := Sig.proj 0 n19
+  let n21 : Sig := Sig.binop .mul n20 (.int 65536)
+  let n22 : Sig := Sig.opaqueN "SIGINTCAST" [n21]
+  let n23 : Sig := Sig.opaqueN "SIGRDTBL" [n14, n22]
+  n23
 
 /-- `// si.smooth with a constant coefficient — the most used smoothing idiom in
 // the libraries (si.smoo is the same recursion with an SR-dependent pole).
@@ -799,16 +914,60 @@ si = library("signals.lib");
 process = hslider("g", 0, 0, 1, 0.01) : si.smooth(0.999);` — output 0 -/
 def smooth_stable_out0 : Sig :=
   let n0 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨1, 1⟩ []
-  let n1 : Sig := Sig.binop .mul (.const ⟨9007199254741, 9007199254740992⟩) n0
+  let n1 : Sig := Sig.ref 1
+  let n2 : Sig := Sig.proj 0 n1
+  let n3 : Sig := Sig.delay1 n2
+  let n4 : Sig := Sig.delay1 n0
+  let n5 : Sig := Sig.binop .sub n4 n0
+  let n6 : Sig := Sig.opaqueN "SIGMIN" [n5, (.const ⟨340282346600000016151267322115014000640, 1⟩)]
+  let n7 : Sig := Sig.binop .add n3 n6
+  let n8 : Sig := Sig.binop .mul (.const ⟨8998192055486251, 9007199254740992⟩) n7
+  let n9 : Sig := Sig.cons n8 (.nil)
+  let n10 : Sig := Sig.recur n9
+  let n11 : Sig := Sig.proj 0 n10
+  let n12 : Sig := Sig.binop .add n0 n11
+  n12
+
+/-- `// si.smooth with a pole outside the unit circle: the coefficient above the sum
+// is read, not assumed. Pins: a1 = -3/2, Jury => NOT STABLE.
+si = library("signals.lib");
+process = hslider("g", 0, 0, 1, 0.01) : si.smooth(1.5);` — output 0 -/
+def smooth_unstable_out0 : Sig :=
+  let n0 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨1, 1⟩ []
+  let n1 : Sig := Sig.ref 1
+  let n2 : Sig := Sig.proj 0 n1
+  let n3 : Sig := Sig.delay1 n2
+  let n4 : Sig := Sig.delay1 n0
+  let n5 : Sig := Sig.binop .sub n4 n0
+  let n6 : Sig := Sig.opaqueN "SIGMIN" [n5, (.const ⟨340282346600000016151267322115014000640, 1⟩)]
+  let n7 : Sig := Sig.binop .add n3 n6
+  let n8 : Sig := Sig.binop .mul (.const ⟨3, 2⟩) n7
+  let n9 : Sig := Sig.cons n8 (.nil)
+  let n10 : Sig := Sig.recur n9
+  let n11 : Sig := Sig.proj 0 n10
+  let n12 : Sig := Sig.binop .add n0 n11
+  n12
+
+/-- `// si.smooth with a pole from a slider: a product by a non-constant is not
+// distributed over the sum, and the recursion is refused.
+si = library("signals.lib");
+process = hslider("g", 0, 0, 1, 0.01) : si.smooth(hslider("s", 0.9, 0, 0.99, 0.01));` — output 0 -/
+def smooth_varying_out0 : Sig :=
+  let n0 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨1, 1⟩ []
+  let n1 : Sig := Sig.control "SIGHSLIDER" 1 ⟨0, 1⟩ ⟨99, 100⟩ []
   let n2 : Sig := Sig.ref 1
   let n3 : Sig := Sig.proj 0 n2
   let n4 : Sig := Sig.delay1 n3
-  let n5 : Sig := Sig.binop .mul (.const ⟨8998192055486251, 9007199254740992⟩) n4
-  let n6 : Sig := Sig.binop .add n1 n5
-  let n7 : Sig := Sig.cons n6 (.nil)
-  let n8 : Sig := Sig.recur n7
-  let n9 : Sig := Sig.proj 0 n8
-  n9
+  let n5 : Sig := Sig.delay1 n0
+  let n6 : Sig := Sig.binop .sub n5 n0
+  let n7 : Sig := Sig.opaqueN "SIGMIN" [n6, (.const ⟨340282346600000016151267322115014000640, 1⟩)]
+  let n8 : Sig := Sig.binop .add n4 n7
+  let n9 : Sig := Sig.binop .mul n1 n8
+  let n10 : Sig := Sig.cons n9 (.nil)
+  let n11 : Sig := Sig.recur n10
+  let n12 : Sig := Sig.proj 0 n11
+  let n13 : Sig := Sig.binop .add n0 n12
+  n13
 
 /-- `process = rdtable(16, 1.0, min(100, max(0, int(hslider("i",0,0,100,1)))));` — output 0 -/
 def table_bad_clamp_out0 : Sig :=
@@ -829,6 +988,79 @@ def table_good_clamp_out0 : Sig :=
   let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
   let n4 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n3]
   n4
+
+/-- `// A two-output recursion whose first output is masked and whose second is an
+// unbounded counter. The table reads the second: not proven. Pins that the
+// range of an output is that of its own body in the group.
+loop = (\(a, b).((a + 1) & 15, b + 1)) ~ (_, _);
+process = rdtable(16, 1.0, loop : (!, _));` — output 0 -/
+def table_group_out0 : Sig :=
+  let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
+  let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
+  let n2 : Sig := Sig.ref 1
+  let n3 : Sig := Sig.proj 0 n2
+  let n4 : Sig := Sig.delay1 n3
+  let n5 : Sig := Sig.binop .add n4 (.int 1)
+  let n6 : Sig := Sig.opaqueN "SIGBINOP:and" [n5, (.int 15)]
+  let n7 : Sig := Sig.proj 1 n2
+  let n8 : Sig := Sig.delay1 n7
+  let n9 : Sig := Sig.binop .add n8 (.int 1)
+  let n10 : Sig := Sig.cons n9 (.nil)
+  let n11 : Sig := Sig.cons n6 n10
+  let n12 : Sig := Sig.recur n11
+  let n13 : Sig := Sig.proj 1 n12
+  let n14 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n13]
+  n14
+
+/-- `// An index masked to the table, whatever the slider range: x & 15 lies in
+// [0, 15] for every int x. IN RANGE.
+process = rdtable(16, 1.0, int(hslider("i", 0, 0, 1000, 1)) & 15);` — output 0 -/
+def table_mask_out0 : Sig :=
+  let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
+  let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
+  let n2 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨1000, 1⟩ []
+  let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
+  let n4 : Sig := Sig.opaqueN "SIGBINOP:and" [n3, (.int 15)]
+  let n5 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n4]
+  n5
+
+/-- `// The same mask, one bit too wide for the table: CLAMP REQUIRED.
+process = rdtable(16, 1.0, int(hslider("i", 0, 0, 1000, 1)) & 31);` — output 0 -/
+def table_mask_short_out0 : Sig :=
+  let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
+  let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
+  let n2 : Sig := Sig.control "SIGHSLIDER" 0 ⟨0, 1⟩ ⟨1000, 1⟩ []
+  let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
+  let n4 : Sig := Sig.opaqueN "SIGBINOP:and" [n3, (.int 31)]
+  let n5 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n4]
+  n5
+
+/-- `// select2 between two indices, one past the table: the range is their union,
+// whichever the selector. CLAMP REQUIRED.
+process = rdtable(16, 1.0, select2(button("b"), int(hslider("i", 0, 0, 15, 1)), int(hslider("j", 0, 0, 100, 1))));` — output 0 -/
+def table_select_out0 : Sig :=
+  let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
+  let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
+  let n2 : Sig := Sig.opaqueN "SIGBUTTON" [(.int 0)]
+  let n3 : Sig := Sig.control "SIGHSLIDER" 1 ⟨0, 1⟩ ⟨15, 1⟩ []
+  let n4 : Sig := Sig.opaqueN "SIGINTCAST" [n3]
+  let n5 : Sig := Sig.control "SIGHSLIDER" 2 ⟨0, 1⟩ ⟨100, 1⟩ []
+  let n6 : Sig := Sig.opaqueN "SIGINTCAST" [n5]
+  let n7 : Sig := Sig.opaqueN "SIGSELECT2" [n2, n4, n6]
+  let n8 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n7]
+  n8
+
+/-- `// >> rounds down, also below zero: -1 >> 2 is -1, not 0, so the index can be -1.
+// A truncating shift would read [0, 3]. CLAMP REQUIRED.
+process = rdtable(16, 1.0, int(hslider("i", 0, -1, 15, 1)) >> 2);` — output 0 -/
+def table_shift_negative_out0 : Sig :=
+  let n0 : Sig := Sig.opaqueN "SIGGEN" [(.const ⟨1, 1⟩)]
+  let n1 : Sig := Sig.opaqueN "SIGWRTBL" [(.int 16), n0, (.nil), (.nil)]
+  let n2 : Sig := Sig.control "SIGHSLIDER" 0 ⟨(-1), 1⟩ ⟨15, 1⟩ []
+  let n3 : Sig := Sig.opaqueN "SIGINTCAST" [n2]
+  let n4 : Sig := Sig.opaqueN "SIGBINOP:arsh" [n3, (.int 2)]
+  let n5 : Sig := Sig.opaqueN "SIGRDTBL" [n1, n4]
+  n5
 
 /-- `process = rdtable(16, 1.0, int(hslider("i",0,0,100,1)));` — output 0 -/
 def table_unclamped_out0 : Sig :=
@@ -1004,9 +1236,17 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"nonlinear_out0: " ++ certifyReport nonlinear_out0
 #eval s!"onepole_out0: " ++ certifyReport onepole_out0
 #eval s!"osc_out0: " ++ certifyReport osc_out0
+#eval s!"phasor_float_out0: " ++ certifyReport phasor_float_out0
 #eval s!"smooth_stable_out0: " ++ certifyReport smooth_stable_out0
+#eval s!"smooth_unstable_out0: " ++ certifyReport smooth_unstable_out0
+#eval s!"smooth_varying_out0: " ++ certifyReport smooth_varying_out0
 #eval s!"table_bad_clamp_out0: " ++ certifyReport table_bad_clamp_out0
 #eval s!"table_good_clamp_out0: " ++ certifyReport table_good_clamp_out0
+#eval s!"table_group_out0: " ++ certifyReport table_group_out0
+#eval s!"table_mask_out0: " ++ certifyReport table_mask_out0
+#eval s!"table_mask_short_out0: " ++ certifyReport table_mask_short_out0
+#eval s!"table_select_out0: " ++ certifyReport table_select_out0
+#eval s!"table_shift_negative_out0: " ++ certifyReport table_shift_negative_out0
 #eval s!"table_unclamped_out0: " ++ certifyReport table_unclamped_out0
 #eval s!"tabulate_protected_out0: " ++ certifyReport tabulate_protected_out0
 #eval s!"tabulate_unprotected_out0: " ++ certifyReport tabulate_unprotected_out0
@@ -1022,9 +1262,17 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"nonlinear_out0: " ++ indexReport nonlinear_out0
 #eval s!"onepole_out0: " ++ indexReport onepole_out0
 #eval s!"osc_out0: " ++ indexReport osc_out0
+#eval s!"phasor_float_out0: " ++ indexReport phasor_float_out0
 #eval s!"smooth_stable_out0: " ++ indexReport smooth_stable_out0
+#eval s!"smooth_unstable_out0: " ++ indexReport smooth_unstable_out0
+#eval s!"smooth_varying_out0: " ++ indexReport smooth_varying_out0
 #eval s!"table_bad_clamp_out0: " ++ indexReport table_bad_clamp_out0
 #eval s!"table_good_clamp_out0: " ++ indexReport table_good_clamp_out0
+#eval s!"table_group_out0: " ++ indexReport table_group_out0
+#eval s!"table_mask_out0: " ++ indexReport table_mask_out0
+#eval s!"table_mask_short_out0: " ++ indexReport table_mask_short_out0
+#eval s!"table_select_out0: " ++ indexReport table_select_out0
+#eval s!"table_shift_negative_out0: " ++ indexReport table_shift_negative_out0
 #eval s!"table_unclamped_out0: " ++ indexReport table_unclamped_out0
 #eval s!"tabulate_protected_out0: " ++ indexReport tabulate_protected_out0
 #eval s!"tabulate_unprotected_out0: " ++ indexReport tabulate_unprotected_out0
@@ -1040,9 +1288,17 @@ theorem noise_lcg_out0_stability : certifyStableB noise_lcg_out0 = false := by d
 theorem nonlinear_out0_stability : certifyStableB nonlinear_out0 = false := by decide
 theorem onepole_out0_stability : certifyStableB onepole_out0 = true := by decide
 theorem osc_out0_stability : certifyStableB osc_out0 = false := by decide
+theorem phasor_float_out0_stability : certifyStableB phasor_float_out0 = false := by decide
 theorem smooth_stable_out0_stability : certifyStableB smooth_stable_out0 = true := by decide
+theorem smooth_unstable_out0_stability : certifyStableB smooth_unstable_out0 = false := by decide
+theorem smooth_varying_out0_stability : certifyStableB smooth_varying_out0 = false := by decide
 theorem table_bad_clamp_out0_stability : certifyStableB table_bad_clamp_out0 = false := by decide
 theorem table_good_clamp_out0_stability : certifyStableB table_good_clamp_out0 = false := by decide
+theorem table_group_out0_stability : certifyStableB table_group_out0 = false := by decide
+theorem table_mask_out0_stability : certifyStableB table_mask_out0 = false := by decide
+theorem table_mask_short_out0_stability : certifyStableB table_mask_short_out0 = false := by decide
+theorem table_select_out0_stability : certifyStableB table_select_out0 = false := by decide
+theorem table_shift_negative_out0_stability : certifyStableB table_shift_negative_out0 = false := by decide
 theorem table_unclamped_out0_stability : certifyStableB table_unclamped_out0 = false := by decide
 theorem tabulate_protected_out0_stability : certifyStableB tabulate_protected_out0 = false := by decide
 theorem tabulate_unprotected_out0_stability : certifyStableB tabulate_unprotected_out0 = false := by decide
@@ -1058,9 +1314,17 @@ theorem noise_lcg_out0_indices : certifyIndicesB noise_lcg_out0 = true := by dec
 theorem nonlinear_out0_indices : certifyIndicesB nonlinear_out0 = true := by decide
 theorem onepole_out0_indices : certifyIndicesB onepole_out0 = true := by decide
 theorem osc_out0_indices : certifyIndicesB osc_out0 = true := by decide
+theorem phasor_float_out0_indices : certifyIndicesB phasor_float_out0 = true := by decide
 theorem smooth_stable_out0_indices : certifyIndicesB smooth_stable_out0 = true := by decide
+theorem smooth_unstable_out0_indices : certifyIndicesB smooth_unstable_out0 = true := by decide
+theorem smooth_varying_out0_indices : certifyIndicesB smooth_varying_out0 = true := by decide
 theorem table_bad_clamp_out0_indices : certifyIndicesB table_bad_clamp_out0 = false := by decide
 theorem table_good_clamp_out0_indices : certifyIndicesB table_good_clamp_out0 = true := by decide
+theorem table_group_out0_indices : certifyIndicesB table_group_out0 = false := by decide
+theorem table_mask_out0_indices : certifyIndicesB table_mask_out0 = true := by decide
+theorem table_mask_short_out0_indices : certifyIndicesB table_mask_short_out0 = false := by decide
+theorem table_select_out0_indices : certifyIndicesB table_select_out0 = false := by decide
+theorem table_shift_negative_out0_indices : certifyIndicesB table_shift_negative_out0 = false := by decide
 theorem table_unclamped_out0_indices : certifyIndicesB table_unclamped_out0 = false := by decide
 theorem tabulate_protected_out0_indices : certifyIndicesB tabulate_protected_out0 = true := by decide
 theorem tabulate_unprotected_out0_indices : certifyIndicesB tabulate_unprotected_out0 = false := by decide
@@ -1084,9 +1348,17 @@ noise_lcg.dsp: no table site
 nonlinear.dsp: no table site
 onepole.dsp: no table site
 osc.dsp: missed optimisation: compiler clamps table[65536] though Lean proves it in range
+phasor_float.dsp: missed optimisation: compiler clamps table[65536] though Lean proves it in range
 smooth_stable.dsp: no table site
+smooth_unstable.dsp: no table site
+smooth_varying.dsp: no table site
 table_bad_clamp.dsp: agree on table[16]
 table_good_clamp.dsp: agree on table[16]
+table_group.dsp: table[16] not proven by Lean — compiler clamps it
+table_mask.dsp: agree on table[16]
+table_mask_short.dsp: agree on table[16]
+table_select.dsp: agree on table[16]
+table_shift_negative.dsp: agree on table[16]
 table_unclamped.dsp: agree on table[16]
 tabulate_protected.dsp: agree on table[128]
 tabulate_unprotected.dsp: agree on table[128]

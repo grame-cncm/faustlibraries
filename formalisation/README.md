@@ -109,7 +109,8 @@ children (so the analyses can still traverse *through* it where sound) but
 that no analysis can ever read as a linear term or a known-range value.
 Unmapped binary ops keep their opcode in the name (`"SIGBINOP:or"`), so
 comparisons and bit operations do not collapse onto one indistinguishable
-node. This is what makes "adding a tag can only make the certifier accept
+node; the range analysis reads `SIGBINOP:and` and `SIGBINOP:arsh` by that name.
+This is what makes "adding a tag can only make the certifier accept
 more, never accept something wrong" true by construction.
 
 ### 2.4 Emission: one `let`-chain per output
@@ -123,7 +124,7 @@ def osc_out0 : Sig :=
   let n1 : Sig := Sig.proj 0 n0
   let n2 : Sig := Sig.delay1 n1
   ...
-  n30
+  n53
 ```
 
 Sharing survives as `let`-sharing, so the generated file stays proportional
@@ -176,17 +177,27 @@ coefficients are recognized syntactically and checked against the Jury /
 Schur-Cohn criterion in exact rational arithmetic — every IEEE-754 double is
 exactly `m/2ᵏ`, so no rounding enters the statement. This covers `fi.tf2`
 instances, biquads, and (through the DAG import, which keeps shared structure
-shared) cascades of second-order sections.
+shared) cascades of second-order sections. A constant factor is read above a
+sum as well as on a single tap, which is the form `si.smooth` takes:
+`e[n] = s·(e[n-1] + x[n-1] - x[n])`.
 
 **Index bounds.** Every table read and delay tap is checked to stay in range
 *as written* — a three-valued verdict distinguishing `IN RANGE` (safe by
 construction), `CLAMP REQUIRED` (safe only because the backend inserts a
 clamp: a named dependency, not a defect report), and `not proven`. The
-interval analysis understands control ranges, `min`/`max`/`int` casts, `%`,
-multiplication by constants, and — through a *recursion invariant* — bounds
-that hold independently of the recursive state: the phasor identity
-`x - floor(x) ∈ [0, 1)` bounds every wrap-around oscillator, so a
-phasor-driven `rdtable` sine oscillator is certified in range end to end.
+interval analysis understands control ranges, `min`/`max`/`int` casts,
+`select2`, `%`, `&` by a non-negative mask, `>>`, affine arithmetic with
+constants, and — through a *recursion invariant* — bounds that hold
+independently of the recursive state. Both forms of the library's wrap-around
+phasor are read that way, each by its own bound on the recursion body: the
+floating-point one by the identity `x - floor(x) ∈ [0, 1)`, the fixed-point one
+by `x & mask ∈ [0, mask]`. A phasor-driven `rdtable` sine oscillator is
+therefore certified in range end to end, in either form.
+
+The certified graph is the one `faust-rs` builds by default, in single
+precision, so `osc.dsp` holds the fixed-point phasor of `os.osc`, and only
+[phasor_float.dsp](../tests/lean/phasor_float.dsp) the form that `os.osc`
+compiles to in double precision.
 
 The example set lives in [../tests/lean/](../tests/lean/): one small `.dsp`
 per certified instantiation, plus deliberate counter-examples whose *refusal*
@@ -261,10 +272,10 @@ it, per table size, with Lean's `tableSiteVerdictsB`. The defect direction
 missed-optimization direction is recorded, not fatal. The per-program
 outcome is pinned in a "Compiler clamp oracle" section of `certified.lean`,
 so it drifts — and is reviewed — like any other verdict. The first run
-already earned its keep: on `osc.dsp`, Lean's strict phasor bound
-`x - ⌊x⌋ ∈ [0, 1)` proves the 65536-entry table read in range, while the
-compiler's own interval analysis does not and clamps it — a recorded missed
-optimization in faust-rs (and reference C++, which shares the behavior).
+already earned its keep: on `osc.dsp`, the bound of the phasor proves the
+65536-entry table read in range, while the compiler's own interval analysis
+does not and clamps it — a recorded missed optimization in faust-rs (and
+reference C++, which shares the behavior).
 
 ## 5. The trust story
 
@@ -360,8 +371,7 @@ with different economics:
 - **Index bounds, near-universally.** The property is meaningful for any
   function that reads a table or a delay line, and the interval analysis
   grows rule by rule with a comment-level soundness argument each time.
-  Natural next steps: `select2` as range union, division by constants,
-  ranges for `delay1`/`delay` outputs (state range ∪ {0}).
+  Natural next step: ranges for `delay1`/`delay` outputs (state range ∪ {0}).
 - **Stability, for the linear filter family.** The main missing step is
   symbolic coefficients: treating the `1/tan(w)` subterm as an opaque
   positive atom would let the import pipeline certify `fi.lowpass`,

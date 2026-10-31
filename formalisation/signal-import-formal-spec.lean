@@ -73,6 +73,8 @@ def pos (a : Q) : Bool := decide (0 < a.n)
 def inv (a : Q) : Q := if 0 < a.n then ⟨a.d, a.n⟩ else ⟨-a.d, -a.n⟩
 def floor (a : Q) : Int := Int.fdiv a.n a.d
 def ceil (a : Q) : Int := -(Int.fdiv (-a.n) a.d)
+/-- Truncation toward zero. -/
+def trunc (a : Q) : Int := if 0 ≤ a.n then a.floor else a.ceil
 end Q
 
 inductive BinOp where
@@ -162,22 +164,18 @@ def selfDepth : Sig → Option Nat
   | .delay x (.int k) => if 0 ≤ k then (selfDepth x).map (· + k.toNat) else none
   | _                 => none
 
-/-- Flatten an `+`/`-` tree into signed leaves. `true` = positive. -/
-def addends (sign : Bool) : Sig → List (Bool × Sig)
-  | .binop .add a b => addends sign a ++ addends sign b
-  | .binop .sub a b => addends sign a ++ addends (!sign) b
-  | t               => [(sign, t)]
-
-/-- Read one addend as `coefficient · y[n-k]`. -/
-def tapOf : Sig → Option (Nat × Q)
-  | .binop .mul a b =>
-      match selfDepth a, b with
-      | some k, .const q => some (k, q)
-      | _, _ =>
-        match selfDepth b, a with
-        | some k, .const q => some (k, q)
-        | _, _             => none
-  | t => (selfDepth t).map fun k => (k, Q.one)
+/-- Flatten a tree of `+`, `-` and products by a constant into leaves, each with
+    its coefficient: `c · (a ± b) = c · a ± c · b` and `c · (q · a) = (c · q) · a`
+    hold over the rationals, so the leaves weighted by their coefficients sum to
+    `c` times the term. The factor may sit above the sum: `si.smooth` stores its
+    error as `s · (e[n-1] + x[n-1] - x[n])`. A product by anything but a constant
+    stays a leaf, which `scanBody` refuses as soon as it mentions the recursion. -/
+def addends (c : Q) : Sig → List (Q × Sig)
+  | .binop .add a b          => addends c a ++ addends c b
+  | .binop .sub a b          => addends c a ++ addends c.neg b
+  | .binop .mul (.const q) t => addends (c.mul q) t
+  | .binop .mul t (.const q) => addends (c.mul q) t
+  | t                        => [(c, t)]
 
 /-! A real filter does not have its recursion at the root: `fi.tf2` emits the
 numerator applied to the recursive state, so the `SIGREC` sits *below* a sum of
@@ -203,14 +201,14 @@ def collectRecsL : List Sig → List Sig
 end
 
 /-- Accumulate the feedback taps of one recursion body. -/
-def scanBody : List (Bool × Sig) → Q → Q → Option (Q × Q)
+def scanBody : List (Q × Sig) → Q → Q → Option (Q × Q)
   | [], c1, c2 => some (c1, c2)
-  | (s, t) :: rest, c1, c2 =>
+  | (q, t) :: rest, c1, c2 =>
       if !hasRef t then scanBody rest c1 c2
-      else match tapOf t with
-           | some (1, q) => scanBody rest (c1.add (if s then q else q.neg)) c2
-           | some (2, q) => scanBody rest c1 (c2.add (if s then q else q.neg))
-           | _           => none
+      else match selfDepth t with
+           | some 1 => scanBody rest (c1.add q) c2
+           | some 2 => scanBody rest c1 (c2.add q)
+           | _      => none
 
 /-- Feedback coefficients of a second-order (or lower) linear recursion,
     written `y[n] = c₁·y[n-1] + c₂·y[n-2] + (terms free of y)`.
@@ -220,7 +218,7 @@ def scanBody : List (Bool × Sig) → Q → Q → Option (Q × Q)
     mentions it without being exactly such a tap: a nonlinear recursion, a
     delay-free loop (`k = 0`), an order above 2, or an unmodelled node. -/
 def analyseRec : Sig → Option (Q × Q)
-  | .proj 0 (.recur (.cons body .nil)) => scanBody (addends true body) Q.zero Q.zero
+  | .proj 0 (.recur (.cons body .nil)) => scanBody (addends Q.one body) Q.zero Q.zero
   | _ => none
 
 /-- `Sig` is a nested inductive, so `deriving DecidableEq` does not apply and
@@ -357,9 +355,16 @@ def rmax (a b : Range) : Range :=
   ⟨meet Q.max a.lo b.lo, join Q.max a.hi b.hi,
    strictMax a.hi a.hiStrict b.hi b.hiStrict⟩
 
+/-- Either branch may be the value, so a side is known only when both branches
+    bound it, and the strictness of the upper bound follows `strictMax`. -/
+def union (a b : Range) : Range :=
+  ⟨join Q.min a.lo b.lo, join Q.max a.hi b.hi,
+   strictMax a.hi a.hiStrict b.hi b.hiStrict⟩
+
 /-- Truncation toward zero of a value in `[lo, hi]` lands in
-    `[⌊lo⌋, ⌈hi⌉]`. Widening on both sides is what keeps this sound for
-    negative values, where truncation moves *up*.
+    `[⌊lo⌋, trunc hi]`: truncation is monotone, so `v ≤ hi` gives
+    `trunc v ≤ trunc hi`. The lower bound is widened, which keeps it sound
+    for negative values, where truncation moves *up*.
 
     A strict upper bound tightens to `max (⌈hi⌉ - 1) 0`: a non-negative value
     below `hi` truncates to an integer at most `⌈hi⌉ - 1`, and a negative one
@@ -372,8 +377,20 @@ def trunc (r : Range) : Range :=
      if r.hiStrict then
        let c := q.ceil - 1
        Q.ofInt (if c ≤ 0 then 0 else c)
-     else Q.ofInt q.ceil,
+     else Q.ofInt q.trunc,
    false⟩
+
+/-- The same bounds, read as closed: `v < h` implies `v ≤ h`. -/
+def closed (r : Range) : Range := ⟨r.lo, r.hi, false⟩
+
+/-- Arithmetic right shift by `k`, of a value the compiler has converted to
+    `int` (hence `trunc`, the identity on an integer). In two's complement
+    `x >> k = ⌊x / 2ᵏ⌋` for both signs: `-1 >> 2` is `-1`, not `0`. Being monotone,
+    that floor maps each bound of the integer `x` to a bound of the result. -/
+def shiftR (r : Range) (k : Nat) : Range :=
+  let shift := fun q : Q => Q.ofInt (q.mul ⟨1, Int.ofNat (2 ^ k)⟩).floor
+  let t := r.trunc
+  ⟨t.lo.map shift, t.hi.map shift, false⟩
 
 /-- Multiply a range by an exact constant. A positive factor preserves both
     sides and the upper bound's strictness; a negative factor swaps the sides,
@@ -392,6 +409,12 @@ def translate (r : Range) (q : Q) : Range :=
   ⟨r.lo.map (Q.add q), r.hi.map (Q.add q), r.hiStrict⟩
 end Range
 
+/-- The `i`-th output of a recursion group, which is a `cons` list. -/
+def groupBody : Nat → Sig → Option Sig
+  | 0,     .cons b _ => some b
+  | i + 1, .cons _ r => groupBody i r
+  | _,     _         => none
+
 /-- Range of a subterm, when one follows from its structure alone.
 
     Recursion is on an explicit fuel counter rather than on `Sig`: the
@@ -407,6 +430,21 @@ def rangeOfFuel : Nat → Sig → Range
   | n + 1, .opaqueN "SIGINTCAST" [x] => (rangeOfFuel n x).trunc
   | n + 1, .opaqueN "SIGMIN" [a, b]  => Range.rmin (rangeOfFuel n a) (rangeOfFuel n b)
   | n + 1, .opaqueN "SIGMAX" [a, b]  => Range.rmax (rangeOfFuel n a) (rangeOfFuel n b)
+  | n + 1, .opaqueN "SIGSELECT2" [_, a, b] => Range.union (rangeOfFuel n a) (rangeOfFuel n b)
+  | n + 1, .opaqueN "SIGFLOATCAST" [x] =>
+      -- The identity over the rationals. Closing the upper bound loses nothing
+      -- a client needs, and keeps the rule true of the executed cast when the
+      -- bounds are representable: rounding is monotone, but can reach `hi`.
+      (rangeOfFuel n x).closed
+  | _ + 1, .opaqueN "SIGBINOP:and" [_, .int m] =>
+      -- In two's complement `x & m` keeps a subset of the bits of `m`, so for
+      -- `m ≥ 0` it lies in `[0, m]` whatever `x` is, wrapped sum or negative
+      -- value included. That is why the operand need not be looked at: this is
+      -- what bounds an integer phase accumulator.
+      if 0 ≤ m then ⟨some (Q.ofInt 0), some (Q.ofInt m), false⟩ else Range.unknown
+  | n + 1, .opaqueN "SIGBINOP:arsh" [x, .int k] =>
+      -- `0 ≤ k < 32`: outside, the shift of an int is not defined.
+      if 0 ≤ k && k < 32 then (rangeOfFuel n x).shiftR k.toNat else Range.unknown
   | n + 1, .binop .rem a (.int m)    =>
       if 0 < m then
         -- C semantics: `%` truncates toward zero, so a negative dividend gives
@@ -440,14 +478,17 @@ def rangeOfFuel : Nat → Sig → Range
       if q.n == 0 then Range.unknown else (rangeOfFuel n a).scale q.inv
   | n + 1, .binop .div a (.int k)   =>
       if k == 0 then Range.unknown else (rangeOfFuel n a).scale (Q.inv (Q.ofInt k))
-  | n + 1, .proj 0 (.recur (.cons body .nil)) =>
+  | n + 1, .proj (.ofNat i) (.recur g) =>
       -- The recursion invariant, in its state-independent form: `ref`, `delay1`
       -- and `delay` all yield the unknown range, so any bound this returns for
-      -- the body holds for arbitrary values of the recursive state — hence for
-      -- every output of the recursion, with no fixed-point iteration. This is
-      -- what bounds a phasor: its body is `frac(state + inc)`, and the `[0, 1)`
-      -- of the rule above does not depend on the state at all.
-      rangeOfFuel n body
+      -- the `i`-th body holds for arbitrary values of the recursive state, that
+      -- of the other outputs of the group included — hence for every sample of
+      -- that output, with no fixed-point iteration. This is what bounds a
+      -- phasor: its body is `frac(state + inc)` in floating point, `sum & mask`
+      -- in fixed point, and neither `[0, 1)` nor `[0, mask]` depends on the state.
+      match groupBody i g with
+      | some body => rangeOfFuel n body
+      | none      => Range.unknown
   | _ + 1, _ => Range.unknown
 
 /-- Fuel is bounded by the depth of an index expression, not by graph size. -/
@@ -586,6 +627,8 @@ arithmetic. In floating point the subtraction is exact whenever
 `floor(x) ≤ x < 2·floor(x)` (Sterbenz) and rounds otherwise; a rounding that
 reached `1.0` would step outside the certified interval. Auditing the float
 behaviour of `frac` is part of the same floating-point obligation, not a new
-one. -/
+one. The fixed-point phasor needs less: its index `float(p >> 6) / 2²⁴ · N` starts
+from an integer below `2²⁴`, which a float holds exactly, so for a table of `N`
+entries with `N` a power of two, like that of `os.osc`, nothing rounds. -/
 
 end Faust.Signal
