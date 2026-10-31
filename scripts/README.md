@@ -332,7 +332,7 @@ reads as samples or a coefficient: proposals to check against the doc (the
 About two minutes for all tests once built, five the first time.
 
 The baseline comes from the triage of 2026-10-29, when 471 of the 2352 tests
-moved: 78 symbols, and 209 tests accepted. 47 of them are faults of the
+moved: 78 symbols, and 209 tests accepted. 44 of them are faults of the
 library, their reason starting with `fault:`:
 
 - `ve.crybaby`'s gain grows as the rate (+12.9 dB at 192 kHz): its
@@ -344,9 +344,11 @@ library, their reason starting with `fault:`:
   marimba, the djembe and `pm.modularInterpBody` are 12.8 dB louder at
   192 kHz;
 - `sy.combString` applies a pole per sample once per period: its decay goes
-  from 0.42 s at 44.1 kHz to 1.96 s at 192 kHz;
-- `fi.oneEuro` takes the derivative of its output, not of its input as the
-  1-euro filter does: a tracking error times SR.
+  from 0.42 s at 44.1 kHz to 1.96 s at 192 kHz.
+
+`fi.oneEuro` moves too, but it is not a fault of the library: it follows the
+published algorithm, whose derivative uses the previous filtered value, a
+tracking error times SR. Its entries say so.
 
 49 are marked `not explained yet:`, with what moved: the winds and the
 violin of `physmodels.lib`, `re.valhallaSupermassive`, `re.vital_rev`,
