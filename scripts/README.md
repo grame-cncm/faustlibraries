@@ -335,7 +335,7 @@ reads as samples or a coefficient: proposals to check against the doc (the
 About two minutes for all tests once built, five the first time.
 
 The baseline comes from the triage of 2026-10-29, when 471 of the 2352 tests
-moved, updated since: 77 symbols, and 163 tests accepted. A reason starting
+moved, updated since: 77 symbols, and 164 tests accepted. A reason starting
 with `fault:` marks a defect of the library to fix; there are none left.
 
 Three were fixed on 2026-10-31, all anchored at 44.1 kHz. The output of the

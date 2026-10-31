@@ -126,7 +126,7 @@ safe_div_zero_test = an.safe_div(1, 0) == 1/ma.EPSILON;
 loudness_meansquare_test = os.tosc(997), os.tosc(997) : an.loudness_meansquare(0.4, 2);
 meansquare2lufs_test = 0.5 + 0.4*os.tosc(220) : an.meansquare2lufs;
 meansquare2lufs_floor_test = 0 : an.meansquare2lufs;
-mth_octave_analyzer3_test = no.noise : an.mth_octave_analyzer3(2, 2000, 6);
+mth_octave_analyzer3_test = no.noise : an.mth_octave_analyzer3(2, 10000, 6);
 mth_octave_analyzer5_test = no.noise : an.mth_octave_analyzer5(2, 10000, 6);
 mth_octave_analyzer_default_test = no.noise : an.mth_octave_analyzer_default(2, 10000, 6);
 octave_analyzer_test = no.noise : an.octave_analyzer(6);

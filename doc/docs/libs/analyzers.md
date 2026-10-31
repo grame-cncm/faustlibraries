@@ -633,7 +633,7 @@ os = library("oscillators.lib");
 no = library("noises.lib");
 mono = os.tosc(220);
 mth_octave_analyzer_test = mono : an.mth_octave_analyzer(3, 3, 8000, 5);
-mth_octave_analyzer3_test = no.noise : an.mth_octave_analyzer3(2, 2000, 6);
+mth_octave_analyzer3_test = no.noise : an.mth_octave_analyzer3(2, 10000, 6);
 mth_octave_analyzer5_test = no.noise : an.mth_octave_analyzer5(2, 10000, 6);
 mth_octave_analyzer_default_test = no.noise : an.mth_octave_analyzer_default(2, 10000, 6);
 ```
