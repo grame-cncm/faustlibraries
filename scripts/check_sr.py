@@ -16,7 +16,8 @@ noise burst through a resonator, measured on two seconds, moves by 2 to 3 dB
 from one rate to another by chance alone. So the tests are built against a
 copy of the libraries (tests/build-sr/lib) where `no.noise`, `no.multinoise`
 and `no.noises` (and their `r` variants) are sums of TONES sines at fixed
-frequencies, a semitone apart from 20 Hz to 20 kHz, with the amplitudes of a
+frequencies, a semitone apart from 20 Hz to 19.3 kHz, under Nyquist at every
+rate of the check, so that none folds at 44.1 kHz, with the amplitudes of a
 white density and the RMS level of `no.noise`, each channel with its own
 phases: the same signal at every rate. The other generators of noises.lib
 are built on these.
@@ -96,7 +97,7 @@ IN_SAMPLES = re.compile(r"\bin samples\b|\bnumber of (samples|values)\b|\bper sa
                         r"\b(feedback|feedforward|allpass|reflection|numerator|denominator)\s+coefficients?\b|"
                         r"\bcoefficients? of (the |`?z)|\bpole location|location of zero|z-plane", re.I)
 MAXIMUM = re.compile(r"^\s*(the\s+)?max(imum)?\b", re.I)
-TONES = 128
+TONES = 120
 NOISE_CHANNELS = 33  # the patterns _sr_noise(0) .. _sr_noise(32): noise, then multinoise(N <= 32)
 RATES = (44100, 96000, 192000)
 SECONDS = 2.0
@@ -164,7 +165,9 @@ def build(dsp, name, args):
     cxx_cmd = [args.cxx, *shlex.split(cp.DEFAULT_CXX_OPTIONS), "-std=c++17", cpp, "-o", exe]
     stamp = exe + ".cmd"
     stamp_text = json.dumps([faust_cmd, cxx_cmd, cp.compiler_version(args.faust), cp.compiler_version(args.cxx)])
-    if (os.path.exists(exe) and os.path.getmtime(exe) >= cp.newest_source(dsp)
+    # noise_libs rewrites the copy of noises.lib only when the multisine changes
+    newest = max(cp.newest_source(dsp), os.path.getmtime(os.path.join(args.lib_dir, "noises.lib")))
+    if (os.path.exists(exe) and os.path.getmtime(exe) >= newest
             and os.path.exists(stamp) and open(stamp).read() == stamp_text):
         return exe, None
     r = subprocess.run(faust_cmd, capture_output=True, text=True, cwd=args.lib_dir)

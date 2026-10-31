@@ -4,6 +4,12 @@
 // This library implement WebAudio filters, using their C++ version as a starting point, 
 // taken from Mozilla Firefox implementation.
 //
+// The cutoff, detune included, is kept between 0.01 and 0.99 times the Nyquist
+// frequency, a limit the Web Audio API does not have: no `f0` below 220.5 Hz at
+// 44.1 kHz, 240 Hz at 48 kHz, 960 Hz at 192 kHz. Below it `fi.tf2`, which realizes
+// these filters, loses its precision in single precision. A sweep or a modulation
+// of `f0` stops at that frequency, which moves with the sample rate.
+//
 // #### References
 //
 // * <https://github.com/grame-cncm/faustlibraries/blob/master/webaudio.lib>
@@ -47,7 +53,7 @@ fi = library("filters.lib");
 declare name "Faust WebAudio Filters Library";
 declare author "GRAME";
 declare copyright "GRAME";
-declare version "1.1.2";
+declare version "1.1.3";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 
 //---------------------------`BiquadFilter`--------------------------------
@@ -64,7 +70,7 @@ declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 //
 // Where:
 //
-// * `f0`: center/cutoff frequency in Hz
+// * `f0`: center/cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `dBgain`: gain in dB (used by the peaking and shelving filters)
 // * `Q`: quality factor
 // * `aDetune`: detune amount in cents
@@ -245,7 +251,7 @@ BiquadFilter(f0, dBgain, Q, aDetune) = environment
 //
 // Where:
 //
-// * `f0`: cutoff frequency in Hz
+// * `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
@@ -281,7 +287,7 @@ lowpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).lowpass2, x : fi.tf2;
 //
 // Where:
 //
-// * `f0`: cutoff frequency in Hz
+// * `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
@@ -317,7 +323,7 @@ highpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).highpass2, x : fi.tf2
 //
 // Where:
 //
-// * `f0`: cutoff frequency in Hz
+// * `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
@@ -354,7 +360,7 @@ bandpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).bandpass2, x : fi.tf2
 //
 // Where:
 //
-// * `f0`: cutoff frequency in Hz
+// * `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
@@ -390,7 +396,7 @@ notch2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).notch2, x : fi.tf2;
 //
 // Where:
 //
-// * `f0`: cutoff frequency in Hz
+// * `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
 //
@@ -425,7 +431,7 @@ allpass2(f0, Q, dtune, x) = BiquadFilter(f0, 1, Q, dtune).allpass2, x : fi.tf2;
 //
 // Where:
 //
-// * `f0`: cutoff frequency in Hz
+// * `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `gain`: the gain in dB
 // * `Q`: the quality factor
 // * `dtune`: detuning of the frequency in cents
@@ -462,7 +468,7 @@ peaking2(f0, gain, Q, dtune, x) = BiquadFilter(f0, gain, Q, dtune).peaking2, x :
 //
 // Where:
 //
-// * `f0`: cutoff frequency in Hz
+// * `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `gain`: the gain in dB
 // * `dtune`: detuning of the frequency in cents
 //
@@ -498,7 +504,7 @@ lowshelf2(f0, gain, dtune, x) = BiquadFilter(f0, gain, 1, dtune).lowshelf2, x : 
 //
 // Where:
 //
-// * `f0`: cutoff frequency in Hz
+// * `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 // * `gain`: the gain in dB
 // * `dtune`: detuning of the frequency in cents
 //

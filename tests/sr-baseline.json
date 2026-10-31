@@ -33,7 +33,6 @@
   "ef.transpose_windowed": "`w`: window length in samples (up to 65536)",
   "fi.adaptFIR": "`step`: adaptation step, as a signal evaluated at every sample",
   "fi.allpass1_noclip": "`c`: coefficient of the first-order allpass (target, may change at any time)",
-  "fi.apnl": "`a1`: allpass coefficient used while the filter state is positive (-1 < a1 < 1)",
   "fi.fb_comb": "`del`: current integer comb-filter delay (the feedback loop length), between 1 and maxdel (a non-integer value is truncated)",
   "fi.fb_comb_common": "`N`: the comb delay, in samples (`dop(N-1)`)",
   "fi.fb_fcomb": "`del`: current (float) comb-filter delay (the feedback loop length), between 1 and maxdel",
@@ -81,21 +80,12 @@
   "si.smooth": "`s`: the pole of the one-pole lowpass, a coefficient applied at every sample"
  },
  "accepted": {
-  "autowah_hot_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR (`autowah` is `crybaby` driven by an envelope)"
-  },
-  "autowah_slider_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR (`autowah` is `crybaby` driven by an envelope)"
-  },
-  "autowah_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR (`autowah` is `crybaby` driven by an envelope)"
-  },
   "bandpass12e_zero_freq_test": {
    "spectrum": "the test schedules its input or a parameter in samples (ba.time/12000)"
   },
   "bandpass2_modulated_test": {
-   "level": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz",
-   "spectrum": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "level": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)",
+   "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "bandpass3_zero_freq_test": {
    "spectrum": "the test schedules its input or a parameter in samples (ba.time/12000)"
@@ -116,12 +106,6 @@
   "brassModel_ui_test": {
    "spectrum": "not explained yet: 125 Hz octave -27.72 -28.97 -29.27 dB (44.1, 96, 192 kHz)"
   },
-  "churchBell_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "churchBell_ui_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
   "clarinetModel_test": {
    "spectrum": "not explained yet: 2000 Hz octave -19.22 -20.25 -20.48 dB (44.1, 96, 192 kHz)"
   },
@@ -138,41 +122,25 @@
    "spectrum": "not explained yet: 125 Hz octave -18.34 -19.33 -21.66 dB (44.1, 96, 192 kHz)"
   },
   "combString_modulated_test": {
-   "decay": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)",
-   "level": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)",
-   "spectrum": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)"
+   "decay": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate",
+   "level": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate",
+   "spectrum": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate"
   },
   "combString_slider_test": {
-   "decay": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)",
-   "level": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)",
-   "spectrum": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)"
+   "level": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate",
+   "spectrum": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate",
+   "decay": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate"
   },
   "combString_test": {
-   "decay": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)",
-   "level": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)",
-   "spectrum": "fault: sy.combString's feedback is `ba.tau2pole(res/1000)`, a pole per sample, applied once per period of SR/freq samples: the decay is about res*SR/freq ms (0.42, 0.92, 1.96 s)"
-  },
-  "crybaby_clamp_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR"
-  },
-  "crybaby_demo_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR"
-  },
-  "crybaby_modulated_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR",
-   "spectrum": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR"
-  },
-  "crybaby_noise_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR"
+   "level": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate",
+   "spectrum": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate",
+   "decay": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +10.18 +10.15 dB. The T60 of the loop is `res` at every rate"
   },
   "crybaby_slider_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR"
+   "onset": "by construction: the dezippering term e = s^n starts at 1 and the filter opens when it falls under f2, in 1/SR^2: a start-up that lengthens with the rate, by its logarithm"
   },
   "crybaby_test": {
-   "level": "fault: ve.crybaby's gain grows as the rate (+6.8 dB at 96 kHz, +12.9 dB at 192 kHz): the numerator 1 - z^-1 is about theta, in 1/SR, over a bandwidth d = pi*frn/Q, also in 1/SR, so the peak gain 1/d is in SR"
-  },
-  "cubic1_noise_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
+   "onset": "by construction: the dezippering term e = s^n starts at 1 and the filter opens when it falls under f2, in 1/SR^2: a start-up that lengthens with the rate, by its logarithm"
   },
   "dattorro_rev_default_test": {
    "spectrum": "re.dattorro_rev: delays fixed in samples"
@@ -181,15 +149,8 @@
    "level": "re.dattorro_rev: delays fixed in samples"
   },
   "diodeLadder_modulated_test": {
-   "spectrum": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move"
-  },
-  "djembe_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz",
-   "spectrum": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "djembe_ui_MIDI_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz",
-   "spectrum": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
+   "spectrum": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move",
+   "level": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move"
   },
   "dnoise_test": {
    "level": "not explained yet: level -5.11 -10.27 dB; 500 Hz octave -7.63 -9.85 -11.13 dB (44.1, 96, 192 kHz)",
@@ -203,21 +164,12 @@
    "level": "the cutoff rises by sensitivity*|band|*SR/2 Hz: the sensitivity is scaled by the rate",
    "spectrum": "the cutoff rises by sensitivity*|band|*SR/2 Hz: the sensitivity is scaled by the rate"
   },
-  "elecGuitarNuts_test": {
-   "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz"
-  },
   "elecGuitar_test": {
    "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz"
   },
   "elecGuitar_ui_MIDI_test": {
    "decay": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz",
    "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz"
-  },
-  "englishBell_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "englishBell_ui_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
   },
   "envelopes_demo_test": {
    "level": "not explained yet: level +1.08 +0.07 dB; 250 Hz octave -6.12 -7.37 -3.92 dB (44.1, 96, 192 kHz)",
@@ -242,18 +194,6 @@
   "flute_ui_test": {
    "level": "not explained yet: level -0.52 -1.09 dB; 2000 Hz octave -26.20 -28.47 -29.19 dB (44.1, 96, 192 kHz)",
    "spectrum": "not explained yet: level -0.52 -1.09 dB; 2000 Hz octave -26.20 -28.47 -29.19 dB (44.1, 96, 192 kHz)"
-  },
-  "frenchBell_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "frenchBell_ui_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "germanBell_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "germanBell_ui_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
   },
   "glottis_modulated_test": {
    "onset": "the test schedules its input or a parameter in samples (ba.time % 48000)",
@@ -286,9 +226,6 @@
    "level": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz",
    "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz"
   },
-  "guitarNuts_test": {
-   "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz"
-  },
   "guitar_test": {
    "decay": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz",
    "level": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz",
@@ -306,19 +243,21 @@
    "spectrum": "not explained yet: 1000 Hz octave -0.34 -21.53 -22.88 dB (44.1, 96, 192 kHz)"
   },
   "hat_slider_test": {
-   "spectrum": "not explained yet: 250 Hz octave -14.95 -17.59 -18.18 dB (44.1, 96, 192 kHz)"
+   "spectrum": "not explained yet: 250 Hz octave -14.95 -17.59 -18.18 dB (44.1, 96, 192 kHz)",
+   "level": "not explained yet: level -3.01 -5.38 dB, close to the white noise law (-3.38 -6.39): an FM by a noise, which may fold at 44.1 kHz"
   },
   "hat_test": {
-   "spectrum": "not explained yet: 250 Hz octave -14.95 -17.59 -18.18 dB (44.1, 96, 192 kHz)"
+   "spectrum": "not explained yet: 250 Hz octave -14.95 -17.59 -18.18 dB (44.1, 96, 192 kHz)",
+   "level": "not explained yet: level -3.01 -5.38 dB, close to the white noise law (-3.38 -6.39): an FM by a noise, which may fold at 44.1 kHz"
   },
   "highpass2_modulated_test": {
-   "spectrum": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "highpass_zero_freq_test": {
    "spectrum": "the test schedules its input or a parameter in samples (ba.time/12000)"
   },
   "highshelf2_modulated_test": {
-   "spectrum": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "idealString_test": {
    "level": "excited by a one-sample impulse (pm.impulseExcitation): its level follows the impulse law within 1.2 dB; the change of shape at 4 kHz is not explained yet",
@@ -393,6 +332,10 @@
    "level": "the damping is a one-pole coefficient (`damp`) applied at every sample of the loop, and the delays are rounded to whole samples",
    "spectrum": "the damping is a one-pole coefficient (`damp`) applied at every sample of the loop, and the delays are rounded to whole samples"
   },
+  "kalman_test": {
+   "level": "by construction: the noise variances Q and R of fi.kalman are per update, so its steady gain and its time constant are in samples",
+   "spectrum": "by construction: the noise variances Q and R of fi.kalman are per update, so its steady gain and its time constant are in samples"
+  },
   "klonCentaur_modulated_test": {
    "spectrum": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
   },
@@ -414,53 +357,35 @@
    "spectrum": "not explained yet: 1000 Hz octave -13.86 -18.84 -20.57 dB (44.1, 96, 192 kHz)"
   },
   "lowpass2_modulated_test": {
-   "level": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz",
-   "spectrum": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "level": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)",
+   "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "lowshelf2_modulated_test": {
-   "spectrum": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "lowshelf2_slider_test": {
-   "level": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "level": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "lowshelf2_test": {
-   "level": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "level": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "marimbaResTube_test": {
    "decay": "not explained yet: decay 0.12, 0.10, 0.06 s (44.1, 96, 192 kHz)"
   },
-  "marimba_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "marimba_ui_MIDI_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "modeFilter_modulated_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "modeFilter_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "modeInterpRes_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "modularInterpBody_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
   "modularInterpInstr_test": {
-   "decay": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz",
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz",
-   "spectrum": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
+   "decay": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much",
+   "level": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much",
+   "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much"
   },
   "modularInterpInstr_ui_MIDI_test": {
-   "decay": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz",
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz",
-   "spectrum": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
+   "decay": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much",
+   "level": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much",
+   "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much"
   },
   "modularInterpStringModel_test": {
-   "decay": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz; and the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz (guitarBridge)",
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz; and the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz (guitarBridge)",
-   "spectrum": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz; and the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz (guitarBridge)"
+   "decay": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much; the excitation is a one-sample impulse, so the level also follows the impulse law",
+   "level": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much; the excitation is a one-sample impulse, so the level also follows the impulse law",
+   "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much; the excitation is a one-sample impulse, so the level also follows the impulse law"
   },
   "moog_vcf_audio_modulated_test": {
    "level": "moog_vcf's pole is p = 1 - 2*pi*fr/SR, 'a good approximation for fr << SR': at the top of the sweep the cutoff is off at 44.1 kHz",
@@ -474,7 +399,7 @@
    "spectrum": "not explained yet: 1000 Hz octave -8.89 -9.99 -9.66 dB (44.1, 96, 192 kHz)"
   },
   "notch2_modulated_test": {
-   "spectrum": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "nylonGuitarModel_test": {
    "decay": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz",
@@ -525,7 +450,8 @@
    "spectrum": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move"
   },
   "oberheim_audio_modulated_test": {
-   "spectrum": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move"
+   "spectrum": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move",
+   "level": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move"
   },
   "oberheim_modulated_test": {
    "level": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move"
@@ -543,7 +469,8 @@
    "spectrum": "the test schedules its input or a parameter in samples (ba.pulse(64))"
   },
   "oneEuro_modulated_test": {
-   "level": "by construction: fi.oneEuro follows the published 1-euro algorithm, whose derivative (x - prev)*SR uses the previous filtered value: a tracking error, independent of the rate, times SR. Differentiating the raw input would be a departure from it, see issue #325"
+   "level": "by construction: fi.oneEuro follows the published 1-euro algorithm, whose derivative (x - prev)*SR uses the previous filtered value: a tracking error, independent of the rate, times SR. Differentiating the raw input would be a departure from it, see issue #325",
+   "spectrum": "by construction: fi.oneEuro follows the published 1-euro algorithm, whose derivative (x - prev)*SR uses the previous filtered value: a tracking error, independent of the rate, times SR. Differentiating the raw input would be a departure from it, see issue #325"
   },
   "oneEuro_slider_test": {
    "level": "by construction: fi.oneEuro follows the published 1-euro algorithm, whose derivative (x - prev)*SR uses the previous filtered value: a tracking error, independent of the rate, times SR. Differentiating the raw input would be a departure from it, see issue #325",
@@ -569,14 +496,8 @@
    "level": "the test schedules its input or a parameter in samples (ba.pulse(64))",
    "spectrum": "the test schedules its input or a parameter in samples (ba.pulse(64))"
   },
-  "parabolic2_noise_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "parabolic_noise_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
   "peaking2_modulated_test": {
-   "spectrum": "fault: webaudio.lib clamps the normalized cutoff to at least 0.01 (`cutoff = max(0.01, ...)`, not in the doc): no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz"
+   "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "phasor_modulated_test": {
    "spectrum": "a phasor through zero frequency, a naive ramp whose wraps alias into the bands at 44.1 kHz"
@@ -625,15 +546,6 @@
   "rpm_square_test": {
    "spectrum": "recursive phase modulation, not band-limited: its aliasing folds into the bands at 44.1 kHz"
   },
-  "russianBell_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "russianBell_ui_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "sample_pmf_modulated_test": {
-   "level": "not explained yet: level -0.99 -1.14 dB (44.1, 96, 192 kHz)"
-  },
   "saw2dpw_zero_test": {
    "onset": "the test schedules its input or a parameter in samples (ba.period(9600))",
    "spectrum": "the test schedules its input or a parameter in samples (ba.period(9600))"
@@ -641,27 +553,11 @@
   "saw2ptr_zero_test": {
    "spectrum": "the test schedules its input or a parameter in samples (ba.period(9600))"
   },
-  "sineFold1_modulated_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "sineFold1_slider_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "sineFold1_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "sineFold2_modulated_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "sineFold2_slider_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "sineFold2_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
+  "sparse_noise_dc_test": {
+   "spectrum": "not explained yet: 250 Hz octave -5.06 -6.30 -6.16 dB (44.1, 96, 192 kHz), not monotonic in the rate"
   },
   "sparse_noise_test": {
-   "level": "not explained yet: level -3.80 -8.98 dB; onset 0.12, 0.10, 0.30 s (44.1, 96, 192 kHz)",
-   "onset": "not explained yet: level -3.80 -8.98 dB; onset 0.12, 0.10, 0.30 s (44.1, 96, 192 kHz)"
+   "level": "not explained yet: level -3.80 -8.98 dB; onset 0.12, 0.10, 0.30 s (44.1, 96, 192 kHz)"
   },
   "spectralCentroid_slider_test": {
    "level": "not explained yet: level -1.93 +5.33 dB; 2000 Hz octave -7.42 -6.00 -12.99 dB (44.1, 96, 192 kHz)",
@@ -679,24 +575,12 @@
    "level": "not explained yet: level +8.10 +13.83 dB; 125 Hz octave -16.68 -9.57 -7.79 dB (44.1, 96, 192 kHz)",
    "spectrum": "not explained yet: level +8.10 +13.83 dB; 125 Hz octave -16.68 -9.57 -7.79 dB (44.1, 96, 192 kHz)"
   },
-  "standardBell_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
-  "standardBell_ui_test": {
-   "level": "fault: pm.modeFilter's peak gain is 1/(1 - r), about t60*SR/ln(1000): every mode is 6.8 dB louder at 96 kHz and 12.8 dB at 192 kHz"
-  },
   "steelString_test": {
    "level": "the test schedules its input or a parameter in samples (ba.pulse(64))",
    "spectrum": "the test schedules its input or a parameter in samples (ba.pulse(64))"
   },
   "stereo_reverb_tester_test": {
    "onset": "not explained yet: onset 0.00, 1.00, 1.00 s (44.1, 96, 192 kHz)"
-  },
-  "strikeModel_test": {
-   "spectrum": "not explained yet: 125 Hz octave -16.74 -17.58 -17.90 dB (44.1, 96, 192 kHz)"
-  },
-  "strike_test": {
-   "spectrum": "not explained yet: 125 Hz octave -17.94 -18.69 -18.98 dB (44.1, 96, 192 kHz)"
   },
   "tf1sb_zero_freq_test": {
    "spectrum": "the test schedules its input or a parameter in samples (ba.time/12000)"
@@ -711,21 +595,6 @@
    "spectrum": "the test schedules its input or a parameter in samples (ba.time/12000)"
   },
   "triangleFold1_modulated_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "triangleFold1_slider_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "triangleFold1_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "triangleFold2_modulated_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "triangleFold2_slider_test": {
-   "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
-  },
-  "triangleFold2_test": {
    "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
   },
   "tu_getFactor_test": {
@@ -759,9 +628,6 @@
    "level": "not explained yet: level +2.97 +5.10 dB; 500 Hz octave -10.72 -17.82 -20.90 dB (44.1, 96, 192 kHz)",
    "spectrum": "not explained yet: level +2.97 +5.10 dB; 500 Hz octave -10.72 -17.82 -20.90 dB (44.1, 96, 192 kHz)"
   },
-  "velvet_noise_test": {
-   "onset": "not explained yet: onset 0.12, 0.10, 0.16 s (44.1, 96, 192 kHz)"
-  },
   "vibrato2_mono_nyquist_test": {
    "level": "the test places the notches at 5 and 10 kHz, within an octave of Nyquist at 44.1 kHz",
    "spectrum": "the test places the notches at 5 and 10 kHz, within an octave of Nyquist at 44.1 kHz"
@@ -769,9 +635,6 @@
   "violinModel_test": {
    "level": "not explained yet: level +1.35 +1.85 dB; 2000 Hz octave -25.18 -22.38 -19.49 dB (44.1, 96, 192 kHz)",
    "spectrum": "not explained yet: level +1.35 +1.85 dB; 2000 Hz octave -25.18 -22.38 -19.49 dB (44.1, 96, 192 kHz)"
-  },
-  "violinNuts_test": {
-   "spectrum": "not explained yet: 4000 Hz octave -5.09 -4.34 -3.84 dB (44.1, 96, 192 kHz)"
   },
   "violin_ui_MIDI_test": {
    "onset": "not explained yet: onset 0.06, 0.08, 0.10 s; 2000 Hz octave -25.79 -24.12 -23.94 dB (44.1, 96, 192 kHz)",
@@ -800,11 +663,11 @@
   "zita_in_delay_long_test": {
    "onset": "rdel = 200 ms is beyond what the doc allows at 192 kHz (at most 170 ms, de.delay(32768)): the delay is cut"
   },
-  "zita_rev_fdn_f2_test": {
-   "spectrum": "not explained yet: 4000 Hz octave -7.78 -6.45 -6.60 dB (44.1, 96, 192 kHz)"
+  "zita_rev1_ambi_t60m_test": {
+   "spectrum": "not explained yet: 2000 Hz octave -6.65 -5.25 -5.54 dB (44.1, 96, 192 kHz), not monotonic in the rate"
   },
-  "zita_rev_fdn_modulated_test": {
-   "spectrum": "not explained yet: 4000 Hz octave -7.69 -6.72 -6.62 dB (44.1, 96, 192 kHz)"
+  "zita_rev1_stereo_t60m_test": {
+   "spectrum": "not explained yet: 2000 Hz octave -5.03 -6.13 -6.00 dB (44.1, 96, 192 kHz), not monotonic in the rate"
   }
  }
 }

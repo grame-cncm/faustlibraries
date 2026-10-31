@@ -5,6 +5,12 @@ An implementation of the WebAudio API filters (https://www.w3.org/TR/webaudio/).
 This library implement WebAudio filters, using their C++ version as a starting point, 
 taken from Mozilla Firefox implementation.
 
+The cutoff, detune included, is kept between 0.01 and 0.99 times the Nyquist
+frequency, a limit the Web Audio API does not have: no `f0` below 220.5 Hz at
+44.1 kHz, 240 Hz at 48 kHz, 960 Hz at 192 kHz. Below it `fi.tf2`, which realizes
+these filters, loses its precision in single precision. A sweep or a modulation
+of `f0` stops at that frequency, which moves with the sample rate.
+
 #### References
 
 * [https://github.com/grame-cncm/faustlibraries/blob/master/webaudio.lib](https://github.com/grame-cncm/faustlibraries/blob/master/webaudio.lib)
@@ -26,7 +32,7 @@ BiquadFilter(f0, dBgain, Q, aDetune).lowpass2 // or .highpass2, .bandpass2,
 
 Where:
 
-* `f0`: center/cutoff frequency in Hz
+* `f0`: center/cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `dBgain`: gain in dB (used by the peaking and shelving filters)
 * `Q`: quality factor
 * `aDetune`: detune amount in cents
@@ -54,7 +60,7 @@ _ : lowpass2(f0, Q, dtune) : _
 
 Where:
 
-* `f0`: cutoff frequency in Hz
+* `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `Q`: the quality factor
 * `dtune`: detuning of the frequency in cents
 
@@ -92,7 +98,7 @@ _ : highpass2(f0, Q, dtune) : _
 
 Where:
 
-* `f0`: cutoff frequency in Hz
+* `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `Q`: the quality factor
 * `dtune`: detuning of the frequency in cents
 
@@ -130,7 +136,7 @@ _ : bandpass2(f0, Q, dtune) : _
 
 Where:
 
-* `f0`: cutoff frequency in Hz
+* `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `Q`: the quality factor
 * `dtune`: detuning of the frequency in cents
 
@@ -169,7 +175,7 @@ _ : notch2(f0, Q, dtune) : _
 
 Where:
 
-* `f0`: cutoff frequency in Hz
+* `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `Q`: the quality factor
 * `dtune`: detuning of the frequency in cents
 
@@ -207,7 +213,7 @@ _ : allpass2(f0, Q, dtune) : _
 
 Where:
 
-* `f0`: cutoff frequency in Hz
+* `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `Q`: the quality factor
 * `dtune`: detuning of the frequency in cents
 
@@ -244,7 +250,7 @@ _ : peaking2(f0, gain, Q, dtune) : _
 
 Where:
 
-* `f0`: cutoff frequency in Hz
+* `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `gain`: the gain in dB
 * `Q`: the quality factor
 * `dtune`: detuning of the frequency in cents
@@ -283,7 +289,7 @@ _ : lowshelf2(f0, gain, dtune) : _
 
 Where:
 
-* `f0`: cutoff frequency in Hz
+* `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `gain`: the gain in dB
 * `dtune`: detuning of the frequency in cents
 
@@ -321,7 +327,7 @@ _ : highshelf2(f0, gain, dtune) : _
 
 Where:
 
-* `f0`: cutoff frequency in Hz
+* `f0`: cutoff frequency in Hz, at least 0.005 times the sample rate, at most 0.495
 * `gain`: the gain in dB
 * `dtune`: detuning of the frequency in cents
 

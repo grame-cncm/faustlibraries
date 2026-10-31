@@ -54,7 +54,7 @@ no = library("noises.lib");
 it = library("interpolators.lib");
 
 declare name "Faust Synthesizer Library";
-declare version "1.2.0";
+declare version "1.2.1";
 
 //===============================Synthesizers===================================
 //==============================================================================
@@ -204,10 +204,10 @@ declare combString author "Romain Michon";
 
 combString(freq,res,gate) = excitation : fi.fb_fcomb(maxDel,N,b0,aN)
 with {
-    maxDel = 1024;
+    maxDel = 16384; // 12 Hz at 192 kHz
     N = ma.SR/freq;
     b0 = 1;
-    aN = ba.tau2pole(res*0.001)*-1;
+    aN = 0 - pow(0.001, 1/(res*freq)); // once per period: -60 dB after res seconds
     excitation = no.noise*en.ar(0.001,0.001,gate);
 };
 

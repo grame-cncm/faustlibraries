@@ -29,7 +29,7 @@ it = library("interpolators.lib");
 os = library("oscillators.lib");
 
 declare name "Faust Virtual Analog Filter Effect Library";
-declare version "1.7.1";
+declare version "1.7.2";
 
 //########################################################################################
 /************************************************************************
@@ -1988,7 +1988,9 @@ with {
   wc = max(0.0, min(1.0, wah));
   Q  = pow(2.0,(2.0*(1.0-wc)+1.0)); // Resonance "quality factor"
   fr = 450.0*pow(2.0,2.3*wc);       // Resonance tuning
-  g  = 0.1*pow(4.0,wc);             // gain (optional)
+  // gain (optional): the peak gain of the filter below is in SR, referred
+  // here to 44.1 kHz
+  g  = 0.1*pow(4.0,wc)*44100/ma.SR;
 
   // Biquad fit using z = exp(s T) ~ 1 + sT for low frequencies:
   frn = fr/ma.SR; // Normalized pole frequency (cycles per sample)
@@ -2004,7 +2006,7 @@ with {
   // stalls in single precision up to 4e-5 away from their targets, as much
   // as a few percent of f2. Smoothing f2 and fq instead gives the same a1s
   // and a2s, since smooth(1) = 1 - e with e = s^(n+1).
-  s = 0.999; // smoothing parameter (one-pole pole location)
+  s = pow(0.999, 44100/ma.SR); // smoothing parameter (one-pole pole location)
   e = (1.0-1.0') : (+ : *(s)) ~ _ : ma.FTZ;
   f2s = (f2 : si.smooth(s)) + e;
   fqs = (fq : si.smooth(s)) + e;

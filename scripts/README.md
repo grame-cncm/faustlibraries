@@ -297,9 +297,10 @@ Digital white noise is another sequence at each rate, and a noise burst
 through a resonator measured on two seconds moves by 2 to 3 dB between rates
 by chance alone. The tests are therefore built (`-double`, in
 `tests/build-sr`) against a copy of the libraries, `tests/build-sr/lib`, where
-`no.noise`, `no.multinoise` and `no.noises` are sums of 128 sines a semitone
-apart from 20 Hz to 20 kHz, with a white density, the RMS level of
-`no.noise` and their own phases per channel: the same signal at every rate.
+`no.noise`, `no.multinoise` and `no.noises` are sums of 120 sines a semitone
+apart from 20 Hz to 19.3 kHz, none folding at 44.1 kHz, with a white density,
+the RMS level of `no.noise` and their own phases per channel: the same signal
+at every rate.
 Each test is rendered for two seconds per rate with `arch/precision_arch.cpp`
 (inputs at zero, buttons pressed for the first half). For each output loud
 enough, whose octave bands hold most of its power:
@@ -334,31 +335,38 @@ reads as samples or a coefficient: proposals to check against the doc (the
 About two minutes for all tests once built, five the first time.
 
 The baseline comes from the triage of 2026-10-29, when 471 of the 2352 tests
-moved: 78 symbols, and 209 tests accepted. 44 of them are faults of the
-library, their reason starting with `fault:`:
+moved, updated since: 77 symbols, and 163 tests accepted. A reason starting
+with `fault:` marks a defect of the library to fix; there are none left.
 
-- `ve.crybaby`'s gain grows as the rate (+12.9 dB at 192 kHz): its
-  numerator `1 - z^-1` and its bandwidth `d` are both in 1/SR, so the peak
-  gain 1/d is in SR; `ve.autowah` inherits it;
-- `webaudio.lib` clamps the normalized cutoff to at least 0.01, which is not
-  in the doc: no f0 below 220 Hz at 44.1 kHz, 960 Hz at 192 kHz;
-- `pm.modeFilter`'s peak gain is 1/(1 - r), in t60*SR: the bells, the
-  marimba, the djembe and `pm.modularInterpBody` are 12.8 dB louder at
-  192 kHz;
-- `sy.combString` applies a pole per sample once per period: its decay goes
-  from 0.42 s at 44.1 kHz to 1.96 s at 192 kHz.
+Three were fixed on 2026-10-31. The first two are anchored at 44.1 kHz: their
+output does not change there, and drops by 0.74 dB at 48 kHz:
+
+- `ve.crybaby`'s gain grew as the rate (+12.9 dB at 192 kHz): its numerator
+  `1 - z^-1` and its bandwidth `d` are both in 1/SR, so the peak gain 1/d is
+  in SR; `ve.autowah` inherited it;
+- `pm.modeFilter`'s peak gain is 1/(1 - r), in t60*SR: the bells, the marimba,
+  the djembe and `pm.modularInterpBody` were 12.8 dB louder at 192 kHz;
+- `sy.combString` applied a pole per sample once per period: `res` now is the
+  T60 of the loop at every rate and pitch, which changes its sound at every
+  rate; `maxDel` holds 12 Hz at 192 kHz.
+
+The fourth is documented, not fixed: `webaudio.lib` keeps the normalized cutoff
+at 0.01 or above, so no f0 below 220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz.
+Removing the limit alone shows the weakness of `fi.tf2` at low cutoffs in float:
+it needs another realization.
 
 `fi.oneEuro` moves too, but it is not a fault of the library: it follows the
 published algorithm, whose derivative uses the previous filtered value, a
 tracking error times SR. Its entries say so.
 
-49 are marked `not explained yet:`, with what moved: the winds and the
-violin of `physmodels.lib`, `re.valhallaSupermassive`, `re.vital_rev`,
+45 are marked `not explained yet:`, with what moved: the winds and the violin
+of `physmodels.lib`, `re.valhallaSupermassive`, `re.vital_rev`,
 `no.colored_noise`, the spectral-centroid analyzers among them. The other
 entries are rate-dependent by construction: string loop filters with fixed
-taps, an approximation for fr << SR (`ve.moog_vcf`), the saturation of
-`ve.oberheim` applied once per sample, the aliasing of a fold of noise up to
-20 kHz at 44.1 kHz, a test schedule in samples (`ba.time`, `ba.pulse(64)`).
+taps, the linear interpolation of the delay of `sy.combString`, an
+approximation for fr << SR (`ve.moog_vcf`), the saturation of `ve.oberheim`
+applied once per sample, the aliasing of a fold of noise at 44.1 kHz, a test
+schedule in samples (`ba.time`, `ba.pulse(64)`).
 
 ### `check_long.py`
 
