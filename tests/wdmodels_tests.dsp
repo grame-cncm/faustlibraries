@@ -166,19 +166,24 @@ with {
 };
 
 lambert_test = os.tosc(220) * wd.lambert(0.5, 6);
+lambert_domain_test = w, ((z >= -0.37) | (w == -1)) with { z = os.tosc(220) - 1; w = wd.lambert(z, 3); };
 
 omega_test = wd.omega(0.5);
 
 u_diodePair_test = wd.u_diodePair(2, 1e-12, 0.025) + os.tosc(110) * 0.001;
 u_diodePair_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodePair(i, 1e-12, 0.025); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
 u_diodePair_law_test = (abs(d(100, -1) + 0.1108) < 0.002), (abs(d(100, 1) - 0.1108) < 0.002) with { d = wd.u_diodePair(0, 1e-12, 0.025); };
+u_diodePair_overdrive_test = b, ((abs(a) < 1) | (abs((a + b)/2 - Vt*ma.asinh((a - b)/(4*R*Is))) < 1e-5)) with { R = 1000; Is = 1e-12; Vt = 0.025; a = 30*os.tosc(110); b = wd.u_diodePair(0, Is, Vt)(R, a); };
+u_diodePair_highImpedance_test = b, (abs(b + a) < 0.06) with { a = 0.5*os.tosc(110); b = wd.u_diodePair(0, 1e-5, 0.025)(1e7, a); };
 
 u_diodeSingle_test = wd.u_diodeSingle(2, 8e-13, 0.026) + os.tosc(110) * 0.001;
 u_diodeSingle_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodeSingle(i, 8e-13, 0.026); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
 u_diodeSingle_law_test = (abs(d(100, -1) + 1.0000) < 0.002), (abs(d(100, 1) - 0.1108) < 0.002) with { d = wd.u_diodeSingle(0, 1e-12, 0.025); };
+u_diodeSingle_overdrive_test = b, ((a < 1) | (abs((a + b)/2 - Vt*log(1 + (a - b)/(2*R*Is))) < 1e-5)) with { R = 1000; Is = 1e-12; Vt = 0.025; a = 30*os.tosc(110); b = wd.u_diodeSingle(0, Is, Vt)(R, a); };
 
 u_diodeAntiparallel_test = wd.u_diodeAntiparallel(2, 1e-12, 0.025, 2, 2) + os.tosc(110) * 0.001;
 u_diodeAntiparallel_circuit_test = wd.buildtree(diode : (series_node : (source, load))) with { diode(i) = wd.u_diodeAntiparallel(i, 1e-12, 0.025, 2, 2); series_node(i) = wd.series(i); source(i) = wd.resVoltage(i, 100, 0.5*os.tosc(220)); load(i) = wd.resistor_Vout(i, 1800); };
+u_diodeAntiparallel_overdrive_test = b, ((abs(a) < 1) | (abs(abs(a + b)/2 - mu*Vt*log(abs(a - b)/(2*R*Is))) < 1e-5)) with { R = 1000; Is = 1e-12; Vt = 0.025; a = 30*os.tosc(110); mu = ba.if(a > 0, 2, 3); b = wd.u_diodeAntiparallel(0, Is, Vt, 2, 3)(R, a); };
 
 u_diodeAntiparallel_omega_test = wd.u_diodeAntiparallel_omega(2, 2.52e-9, 0.02585, 1, 1) + os.tosc(110) * 0.001;
 
