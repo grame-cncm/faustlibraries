@@ -336,7 +336,10 @@ About two minutes for all tests once built, five the first time.
 
 The baseline comes from the triage of 2026-10-29, when 471 of the 2352 tests
 moved, updated since: 77 symbols, and 164 tests accepted. A reason starting
-with `fault:` marks a defect of the library to fix; there are none left.
+with `fault:` marks a defect of the library to fix: 21 tests, 10 causes, listed
+below. One test is still marked `not explained yet:`: the spectrum of
+`pm.violinModel`, a harmonic next to the notch of the bow position, whose regime
+changes with the rate.
 
 Three were fixed on 2026-10-31, all anchored at 44.1 kHz. The output of the
 first two does not change there, and drops by 0.74 dB at 48 kHz:
@@ -361,14 +364,37 @@ it needs another realization.
 published algorithm, whose derivative uses the previous filtered value, a
 tracking error times SR. Its entries say so.
 
-45 are marked `not explained yet:`, with what moved: the winds and the violin
-of `physmodels.lib`, `re.valhallaSupermassive`, `re.vital_rev`,
-`no.colored_noise`, the spectral-centroid analyzers among them. The other
-entries are rate-dependent by construction: string loop filters with fixed
-taps, the linear interpolation of the delay of `sy.combString`, an
-approximation for fr << SR (`ve.moog_vcf`), the saturation of `ve.oberheim`
-applied once per sample, the aliasing of a fold of noise at 44.1 kHz, a test
-schedule in samples (`ba.time`, `ba.pulse(64)`).
+The triage of 2026-10-31 gave a cause to the other 44 tests marked `not explained
+yet:`, each measured with a variant that removes it, or a calculation that gives
+the figures. Those of `fault:`, each with a fix that leaves 44.1 kHz unchanged
+unless said:
+
+- `re.vital_rev`: the allpass delays are in samples, the feedback lines in time;
+- `an.spectralCentroid`: the integrator is scaled by SR/2, so its loop gain
+  grows with the rate; the settled value does not move;
+- `an.band_center(M,ftop,N,0)`: the top band's center follows the rate, which
+  moves `an.spectral_spread` (2659, 3476, 4641 Hz) and the onset of
+  `an.spectral_centroid`;
+- `dm.envelopes_demo`: a gate schedule in samples;
+- `fi.dcblocker`: its pole is 0.995 per sample, a highpass from 35 to 153 Hz,
+  seen in `no.colored_noise` and `pm.fluteModel`;
+- `pm.fluteModel`: the two jet loops take their sample delays out of one fit;
+- `pm.wBell`: `pow(p,44100/SR)` keeps the time constant, not the magnitude;
+- `pm.violinModel`: the bow position moves with the rate;
+- the granular delay: its 65536-sample line is too short at 192 kHz, and four
+  times the memory fixes it;
+- `fd.hammer`: `fIn` enters the displacement unscaled, a fix that changes the
+  output at 44.1 kHz for callers with k = 1/SR.
+
+The other entries are rate-dependent by construction, or come from the test:
+string loop filters with fixed taps, the linear interpolation of the delay of
+`sy.combString`, the constant 33 samples of `re.valhallaSupermassive` (those of
+the plug-in), an approximation for fr << SR (`ve.moog_vcf`), the saturation of
+`ve.oberheim` applied once per sample, the aliasing of a fold of noise or of an
+FM at 44.1 kHz, a fixed k in the `fds.lib` tests, a test schedule in samples
+(`ba.time`, `ba.pulse(64)`), a burst too short for its statistics
+(`no.dnoise`, `no.sparse_noise`), and a chance hit of the modes of a long tail
+on the tones of the multisine (the `t60m` tests of `re.zita_rev1`).
 
 ### `check_long.py`
 

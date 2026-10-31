@@ -100,26 +100,26 @@
    "spectrum": "the test schedules its input or a parameter in samples (ba.time >= 4800)"
   },
   "bow_test": {
-   "level": "not explained yet: level +2.90 +3.01 dB; 250 Hz octave -4.44 -3.08 -14.71 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +2.90 +3.01 dB; 250 Hz octave -4.44 -3.08 -14.71 dB (44.1, 96, 192 kHz)"
+   "level": "the test fixes k at 1/48000, so the velocity (x - x')/k scales with 48000/SR. With k = 1.0/ma.SR the bands are equal to 3 decimals at the three rates",
+   "spectrum": "the test fixes k at 1/48000, so the velocity (x - x')/k scales with 48000/SR. With k = 1.0/ma.SR the bands are equal to 3 decimals at the three rates"
   },
   "brassModel_ui_test": {
-   "spectrum": "not explained yet: 125 Hz octave -27.72 -28.97 -29.27 dB (44.1, 96, 192 kHz)"
+   "spectrum": "si.smoo brings the tube up from 0: at first it is shorter than the loop of 6 samples, so this transient is in samples. With a constant tube the octave stays 28 dB under the sum, and the steady harmonics hold within 0.03 dB"
   },
   "clarinetModel_test": {
-   "spectrum": "not explained yet: 2000 Hz octave -19.22 -20.25 -20.48 dB (44.1, 96, 192 kHz)"
+   "spectrum": "fault: pm.wBell: pow(p,44100/SR) keeps the time constant of the bell, not its magnitude: the low-frequency cutoff goes 12555, 11555, 11361 Hz. With a matched pole the 2 kHz octave holds within 0.13 dB"
   },
   "colored_noise_demo_test": {
-   "spectrum": "not explained yet: 125 Hz octave -18.40 -19.37 -21.75 dB (44.1, 96, 192 kHz)"
+   "spectrum": "fault: fi.dcblocker has its pole at 0.995 per sample: the highpass goes from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz. Same in fluteModel and ef.cubicnl_nodc. With pow(0.995,44100/SR) 44.1 kHz does not change"
   },
   "colored_noise_modulated_test": {
-   "spectrum": "not explained yet: 125 Hz octave -10.96 -11.73 -14.03 dB (44.1, 96, 192 kHz)"
+   "spectrum": "fault: fi.dcblocker has its pole at 0.995 per sample: the highpass goes from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz. Same in fluteModel and ef.cubicnl_nodc. With pow(0.995,44100/SR) 44.1 kHz does not change"
   },
   "colored_noise_slider_test": {
-   "spectrum": "not explained yet: 125 Hz octave -18.34 -19.33 -21.66 dB (44.1, 96, 192 kHz)"
+   "spectrum": "fault: fi.dcblocker has its pole at 0.995 per sample: the highpass goes from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz. Same in fluteModel and ef.cubicnl_nodc. With pow(0.995,44100/SR) 44.1 kHz does not change"
   },
   "colored_noise_test": {
-   "spectrum": "not explained yet: 125 Hz octave -18.34 -19.33 -21.66 dB (44.1, 96, 192 kHz)"
+   "spectrum": "fault: fi.dcblocker has its pole at 0.995 per sample: the highpass goes from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz. Same in fluteModel and ef.cubicnl_nodc. With pow(0.995,44100/SR) 44.1 kHz does not change"
   },
   "combString_modulated_test": {
    "decay": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +5.19 +5.17 dB. The loop gain per period does not depend on the rate",
@@ -153,8 +153,8 @@
    "level": "the cubic saturation (ef.cubicnl) of its states, applied once per sample, acts differently at each rate: at an input of 0.01 the filter does not move"
   },
   "dnoise_test": {
-   "level": "not explained yet: level -5.11 -10.27 dB; 500 Hz octave -7.63 -9.85 -11.13 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level -5.11 -10.27 dB; 500 Hz octave -7.63 -9.85 -11.13 dB (44.1, 96, 192 kHz)"
+   "level": "a burst of 64 samples: the same two generator patterns at every rate, stretched, about one degree of freedom per octave. Rebuilt from them in Python, the bands match to 0.01 dB; over 300 seed pairs the mean is -6.92, -12.95 dB, the impulse law, with a standard deviation of 1.2, 1.8",
+   "spectrum": "a burst of 64 samples: the same two generator patterns at every rate, stretched, about one degree of freedom per octave. Rebuilt from them in Python, the bands match to 0.01 dB; over 300 seed pairs the mean is -6.92, -12.95 dB, the impulse law, with a standard deviation of 1.2, 1.8"
   },
   "dynamicSmoothing_modulated_test": {
    "level": "the cutoff rises by sensitivity*|band|*SR/2 Hz: the sensitivity is scaled by the rate",
@@ -172,28 +172,28 @@
    "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz"
   },
   "envelopes_demo_test": {
-   "level": "not explained yet: level +1.08 +0.07 dB; 250 Hz octave -6.12 -7.37 -3.92 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +1.08 +0.07 dB; 250 Hz octave -6.12 -7.37 -3.92 dB (44.1, 96, 192 kHz)"
+   "level": "fault: dm.envelopes_demo: the gate schedule is in samples and the times of the envelopes in seconds: the first pulse lasts 11.3, 5.2, 2.6 ms and the ADSR reaches 0.813, 0.936, 0.988 at the end of the gate. With a schedule in seconds it passes",
+   "spectrum": "fault: dm.envelopes_demo: the gate schedule is in samples and the times of the envelopes in seconds: the first pulse lasts 11.3, 5.2, 2.6 ms and the ADSR reaches 0.813, 0.936, 0.988 at the end of the gate. With a schedule in seconds it passes"
   },
   "fdnrev0_demo_test": {
    "level": "re.fdnrev0: delay lengths in samples",
    "spectrum": "re.fdnrev0: delay lengths in samples"
   },
   "fluteModel_test": {
-   "level": "not explained yet: level -0.49 -1.13 dB; 2000 Hz octave -26.17 -28.07 -28.51 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level -0.49 -1.13 dB; 2000 Hz octave -26.17 -28.07 -28.51 dB (44.1, 96, 192 kHz)"
+   "level": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate",
+   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
   },
   "fluteModel_ui_test": {
-   "level": "not explained yet: level -0.55 -1.13 dB; 2000 Hz octave -26.17 -28.38 -28.96 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level -0.55 -1.13 dB; 2000 Hz octave -26.17 -28.38 -28.96 dB (44.1, 96, 192 kHz)"
+   "level": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate",
+   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
   },
   "flute_ui_MIDI_test": {
-   "level": "not explained yet: level -0.58 -1.17 dB; 1000 Hz octave -13.62 -13.23 -12.42 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level -0.58 -1.17 dB; 1000 Hz octave -13.62 -13.23 -12.42 dB (44.1, 96, 192 kHz)"
+   "level": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate",
+   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
   },
   "flute_ui_test": {
-   "level": "not explained yet: level -0.52 -1.09 dB; 2000 Hz octave -26.20 -28.47 -29.19 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level -0.52 -1.09 dB; 2000 Hz octave -26.20 -28.47 -29.19 dB (44.1, 96, 192 kHz)"
+   "level": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate",
+   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
   },
   "glottis_modulated_test": {
    "onset": "the test schedules its input or a parameter in samples (ba.time % 48000)",
@@ -204,7 +204,7 @@
    "spectrum": "the test schedules its input or a parameter in samples (ba.time < 24000)"
   },
   "granular_modulated_test": {
-   "spectrum": "not explained yet: 250 Hz octave -6.65 -6.53 -10.06 dB (44.1, 96, 192 kHz)"
+   "spectrum": "fault: the line of 65536 samples lasts 0.34 s at 192 kHz and the test reads up to 0.5 s: the clamp bites only there. With maxDelay = 262144 it passes, and 44.1 and 96 kHz do not change"
   },
   "greyhole_demo_test": {
    "level": "the damping is a one-pole coefficient (`damp`) applied at every sample of the loop, and the delays are rounded to whole samples"
@@ -237,18 +237,18 @@
    "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz"
   },
   "hammer_slider_test": {
-   "spectrum": "not explained yet: 1000 Hz octave -0.34 -21.53 -22.88 dB (44.1, 96, 192 kHz)"
+   "spectrum": "fault: fd.hammer: `fIn` enters the displacement unscaled, a force of fIn/k^2, and the test fixes k = 1/48000 at every rate. With k = 1/SR alone the level moves by 40 log10(SR/44100), with `in*(48000*k)^2` as well the shapes hold within 0.13 dB. The contact resonance, estimated at 840, 1240, 1754 Hz, gives the octaves that move"
   },
   "hammer_test": {
-   "spectrum": "not explained yet: 1000 Hz octave -0.34 -21.53 -22.88 dB (44.1, 96, 192 kHz)"
+   "spectrum": "fault: fd.hammer: `fIn` enters the displacement unscaled, a force of fIn/k^2, and the test fixes k = 1/48000 at every rate. With k = 1/SR alone the level moves by 40 log10(SR/44100), with `in*(48000*k)^2` as well the shapes hold within 0.13 dB. The contact resonance, estimated at 840, 1240, 1754 Hz, gives the octaves that move"
   },
   "hat_slider_test": {
-   "spectrum": "not explained yet: 250 Hz octave -14.95 -17.59 -18.18 dB (44.1, 96, 192 kHz)",
-   "level": "not explained yet: level -3.01 -5.38 dB, close to the white noise law (-3.38 -6.39): an FM by a noise, which may fold at 44.1 kHz"
+   "spectrum": "the double PM by a noise spreads over several MHz and folds at every rate (white noise law without the lines: -3.47, -6.46 dB), plus an 800 Hz line of about J0(4*pi) that does not move. With an index divided by 100 it passes. The 125 Hz octave still moves by 1.69 dB, cause not tested",
+   "level": "the double PM by a noise spreads over several MHz and folds at every rate (white noise law without the lines: -3.47, -6.46 dB), plus an 800 Hz line of about J0(4*pi) that does not move. With an index divided by 100 it passes. The 125 Hz octave still moves by 1.69 dB, cause not tested"
   },
   "hat_test": {
-   "spectrum": "not explained yet: 250 Hz octave -14.95 -17.59 -18.18 dB (44.1, 96, 192 kHz)",
-   "level": "not explained yet: level -3.01 -5.38 dB, close to the white noise law (-3.38 -6.39): an FM by a noise, which may fold at 44.1 kHz"
+   "spectrum": "the double PM by a noise spreads over several MHz and folds at every rate (white noise law without the lines: -3.47, -6.46 dB), plus an 800 Hz line of about J0(4*pi) that does not move. With an index divided by 100 it passes. The 125 Hz octave still moves by 1.69 dB, cause not tested",
+   "level": "the double PM by a noise spreads over several MHz and folds at every rate (white noise law without the lines: -3.47, -6.46 dB), plus an 800 Hz line of about J0(4*pi) that does not move. With an index divided by 100 it passes. The 125 Hz octave still moves by 1.69 dB, cause not tested"
   },
   "highpass2_modulated_test": {
    "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
@@ -295,7 +295,7 @@
    "level": "instruments.lib (STK): `radius` is the pole radius, a coefficient"
   },
   "inst_nonLinearModulator_test": {
-   "spectrum": "not explained yet: 4000 Hz octave -22.05 -20.83 -19.96 dB (44.1, 96, 192 kHz)"
+   "spectrum": "the unit delays of the all-pass ladder are in samples, a structure defined in samples: with round(SR/44100) delays the shape holds within 0.01 dB at 44.1, 88.2, 176.4 kHz"
   },
   "inst_onePole_modulated_test": {
    "level": "instruments.lib (STK): its parameters are filter coefficients (b0, b1, a1)",
@@ -347,14 +347,14 @@
    "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz"
   },
   "latch_demo_test": {
-   "level": "not explained yet: level +9.10 +9.07 dB; 4000 Hz octave -16.55 -22.48 -19.27 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +9.10 +9.07 dB; 4000 Hz octave -16.55 -22.48 -19.27 dB (44.1, 96, 192 kHz)"
+   "level": "the frequencies of the demo are SR/1000 and 5*SR/1000: the same samples play at a rate-scaled pitch, and the fundamental (44.1, 96, 192 Hz) lies below the 88 Hz band edge only at 44.1 kHz. With frequencies in Hz it passes",
+   "spectrum": "the frequencies of the demo are SR/1000 and 5*SR/1000: the same samples play at a rate-scaled pitch, and the fundamental (44.1, 96, 192 Hz) lies below the 88 Hz band edge only at 44.1 kHz. With frequencies in Hz it passes"
   },
   "lf_sawpos_phase_reset_test": {
    "level": "the test schedules its input or a parameter in samples (ba.pulse(10000))"
   },
   "logicEFM1_unison_test": {
-   "spectrum": "not explained yet: 1000 Hz octave -13.86 -18.84 -20.57 dB (44.1, 96, 192 kHz)"
+   "spectrum": "FM with an index up to 40 aliases into the 1 kHz octave, up to 96 kHz included: the octave converges to -20.71 dB at 353-1411 kHz, and the naive decimation of the render at 1411 kHz gives -13.85 at 44.1 kHz (measured -13.86)"
   },
   "lowpass2_modulated_test": {
    "level": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)",
@@ -370,7 +370,7 @@
    "level": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
   },
   "marimbaResTube_test": {
-   "decay": "not explained yet: decay 0.12, 0.10, 0.06 s (44.1, 96, 192 kHz)"
+   "decay": "a one-sample impulse puts content above the audio band into the first frames, more as the rate rises. Lowpassed at 18 kHz offline, the decay is 0.12 s at every rate"
   },
   "modularInterpInstr_test": {
    "decay": "the loop filter of the string has fixed taps (`bridgeFilter`, h0*x' + h1*(x + x''), or `ksReflexionFilter`, (x + x')/2): its cutoff scales with the rate, so the string is brighter and rings longer at 192 kHz; the modes of the body pass, the string alone moves as much",
@@ -399,7 +399,7 @@
    "level": "output 1, the band from 7071 to 10000 Hz, is judged on its skirt, above the measured bands: 3rd-order Butterworth, -13 dB of its power below 5657 Hz. The bilinear transform warps that skirt: r = tan(pi*f/SR)/tan(pi*7071/SR), |H|^2 = r^6/(1 + r^6), averaged from 88 to 5657 Hz, gives +0.89 +1.05 dB. The crossovers hold at every rate. The steeper skirts of mth_octave_analyzer5 and _default leave that output out of the check"
   },
   "mxrPhase90_modulated_test": {
-   "spectrum": "not explained yet: 1000 Hz octave -8.89 -9.99 -9.66 dB (44.1, 96, 192 kHz)"
+   "spectrum": "the JFET uses the v_ds of the previous sample, a first-order error stated in the doc: the linear variant (v_ds = 0) spreads by 0.02 dB, and the lag kept at the duration of 44.1 kHz by 0.03 dB"
   },
   "notch2_modulated_test": {
    "spectrum": "webaudio.lib keeps the normalized cutoff at 0.01 or above, as its doc says (220.5 Hz at 44.1 kHz, 960 Hz at 192 kHz): a low f0 stops at a frequency that moves with the rate. Removing the limit needs another realization: `fi.tf2` in float then misses the response at low cutoffs (gaps up to 16%, jumps, f0 = 0)"
@@ -557,33 +557,33 @@
    "spectrum": "the test schedules its input or a parameter in samples (ba.period(9600))"
   },
   "sparse_noise_dc_test": {
-   "spectrum": "not explained yet: 250 Hz octave -5.06 -6.30 -6.16 dB (44.1, 96, 192 kHz), not monotonic in the rate"
+   "spectrum": "the multisine tone at 9122.8 Hz beats with the line SR*27/128 at 9302.3 Hz, a line at 179.5 Hz at 44.1 kHz only, -88.9 dB, -100.7 dB without that tone"
   },
   "sparse_noise_test": {
-   "level": "not explained yet: level -3.80 -8.98 dB; onset 0.12, 0.10, 0.30 s (44.1, 96, 192 kHz)"
+   "level": "ten impulses in 2 s: the level is the sum of ten squared draws. The impulse law plus the energy ratio (4.13, 3.04, 2.60) gives the measure exactly, and 16 realizations average -6.91, -12.99 dB"
   },
   "spectralCentroid_slider_test": {
-   "level": "not explained yet: level -1.93 +5.33 dB; 2000 Hz octave -7.42 -6.00 -12.99 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level -1.93 +5.33 dB; 2000 Hz octave -7.42 -6.00 -12.99 dB (44.1, 96, 192 kHz)"
+   "level": "fault: an.spectralCentroid: the 0-1 output of the integrator is scaled by SR/2, so the loop gain in Hz/s grows with the rate: 500 Hz is reached in 3.08, 0.115, 0.052 ms. The settled value does not depend on the rate (621 Hz). With the scale at 22050, as a loop gain, both keys pass and 44.1 kHz does not change",
+   "spectrum": "fault: an.spectralCentroid: the 0-1 output of the integrator is scaled by SR/2, so the loop gain in Hz/s grows with the rate: 500 Hz is reached in 3.08, 0.115, 0.052 ms. The settled value does not depend on the rate (621 Hz). With the scale at 22050, as a loop gain, both keys pass and 44.1 kHz does not change"
   },
   "spectralCentroid_test": {
-   "level": "not explained yet: level -1.93 +5.33 dB; 2000 Hz octave -7.42 -6.00 -12.99 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level -1.93 +5.33 dB; 2000 Hz octave -7.42 -6.00 -12.99 dB (44.1, 96, 192 kHz)"
+   "level": "fault: an.spectralCentroid: the 0-1 output of the integrator is scaled by SR/2, so the loop gain in Hz/s grows with the rate: 500 Hz is reached in 3.08, 0.115, 0.052 ms. The settled value does not depend on the rate (621 Hz). With the scale at 22050, as a loop gain, both keys pass and 44.1 kHz does not change",
+   "spectrum": "fault: an.spectralCentroid: the 0-1 output of the integrator is scaled by SR/2, so the loop gain in Hz/s grows with the rate: 500 Hz is reached in 3.08, 0.115, 0.052 ms. The settled value does not depend on the rate (621 Hz). With the scale at 22050, as a loop gain, both keys pass and 44.1 kHz does not change"
   },
   "spectral_centroid_test": {
-   "level": "not explained yet: level +3.03 +5.88 dB; 125 Hz octave -10.13 -11.04 -11.86 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +3.03 +5.88 dB; 125 Hz octave -10.13 -11.04 -11.86 dB (44.1, 96, 192 kHz)"
+   "level": "fault: an.band_center(M,ftop,N,0): the center of the top band, sqrt(ftop*SR/2), follows the rate and weights the onset transient. With a fixed edge at 22050 Hz both keys pass. The settled centroid does not depend on the rate (1085 Hz)",
+   "spectrum": "fault: an.band_center(M,ftop,N,0): the center of the top band, sqrt(ftop*SR/2), follows the rate and weights the onset transient. With a fixed edge at 22050 Hz both keys pass. The settled centroid does not depend on the rate (1085 Hz)"
   },
   "spectral_spread_test": {
-   "level": "not explained yet: level +8.10 +13.83 dB; 125 Hz octave -16.68 -9.57 -7.79 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +8.10 +13.83 dB; 125 Hz octave -16.68 -9.57 -7.79 dB (44.1, 96, 192 kHz)"
+   "level": "fault: an.band_center(M,ftop,N,0): the center of the top band, sqrt(ftop*SR/2), follows the rate and weights the second moment of the 5 kHz leakage into that band: spread 2659, 3476, 4641 Hz, reproduced by a calculation with bilinear Butterworth bands. With a fixed edge it reads 2659, 2786, 2814 Hz, and the spectrum still moves by 3 dB from the warping of the 4-8 kHz crossovers",
+   "spectrum": "fault: an.band_center(M,ftop,N,0): the center of the top band, sqrt(ftop*SR/2), follows the rate and weights the second moment of the 5 kHz leakage into that band: spread 2659, 3476, 4641 Hz, reproduced by a calculation with bilinear Butterworth bands. With a fixed edge it reads 2659, 2786, 2814 Hz, and the spectrum still moves by 3 dB from the warping of the 4-8 kHz crossovers"
   },
   "steelString_test": {
    "level": "the test schedules its input or a parameter in samples (ba.pulse(64))",
    "spectrum": "the test schedules its input or a parameter in samples (ba.pulse(64))"
   },
   "stereo_reverb_tester_test": {
-   "onset": "not explained yet: onset 0.00, 1.00, 1.00 s (44.1, 96, 192 kHz)"
+   "onset": "the pressed buttons give a one-sample impulse of 2, whose 20 ms frame power falls with the rate and crosses -20 dB: calculated -18.77, -22.15, -25.16 dB, measured -18.74, -22.04, -24.77. Impulse scaled by sqrt(SR/44100), or removed, it passes"
   },
   "tf1sb_zero_freq_test": {
    "spectrum": "the test schedules its input or a parameter in samples (ba.time/12000)"
@@ -601,57 +601,57 @@
    "level": "a fold or a saturation of a noise reaching 20 kHz: the harmonics beyond Nyquist fold into the bands at 44.1 kHz, not at 192 kHz"
   },
   "tu_getFactor_test": {
-   "spectrum": "not explained yet: 500 Hz octave -11.72 -15.16 -12.59 dB (44.1, 96, 192 kHz)"
+   "spectrum": "a fractional part of a fast index, not audio: 93% of the power lies above 22.05 kHz and everything in the bands is aliased. numpy frac() reproduces -11.72, -15.16, -12.59. Step 1 passes"
   },
   "valhallaSupermassive_annihilator_test": {
-   "level": "not explained yet: level +4.49 -0.65 dB; 250 Hz octave -19.61 -17.84 -17.01 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +4.49 -0.65 dB; 250 Hz octave -19.61 -17.84 -17.01 dB (44.1, 96, 192 kHz)"
+   "level": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99), plus 32 in the first-stage lines: the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in",
+   "spectrum": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99), plus 32 in the first-stage lines: the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in"
   },
   "valhallaSupermassive_centaurus_test": {
-   "level": "not explained yet: level +5.98 +3.67 dB; 500 Hz octave -12.18 -17.92 -15.02 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +5.98 +3.67 dB; 500 Hz octave -12.18 -17.92 -15.02 dB (44.1, 96, 192 kHz)"
+   "level": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99), plus 32 in the output delay, which moves wet against dry: the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in",
+   "spectrum": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99), plus 32 in the output delay, which moves wet against dry: the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in"
   },
   "valhallaSupermassive_gemini_test": {
-   "level": "not explained yet: level -2.40 -2.03 dB; 500 Hz octave -22.12 -17.93 -18.36 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level -2.40 -2.03 dB; 500 Hz octave -22.12 -17.93 -18.36 dB (44.1, 96, 192 kHz)"
+   "level": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99): the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in",
+   "spectrum": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99): the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in"
   },
   "valhallaSupermassive_sagittarius_test": {
-   "level": "not explained yet: level +3.62 +0.38 dB; 500 Hz octave -11.10 -11.59 -13.48 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +3.62 +0.38 dB; 500 Hz octave -11.10 -11.59 -13.48 dB (44.1, 96, 192 kHz)"
+   "level": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99), plus 32 in the output delay, which moves wet against dry: the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in",
+   "spectrum": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99), plus 32 in the output delay, which moves wet against dry: the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in"
   },
   "valhallaSupermassive_slider_test": {
-   "level": "not explained yet: level +3.63 +6.16 dB; 500 Hz octave -11.90 -22.40 -25.84 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +3.63 +6.16 dB; 500 Hz octave -11.90 -22.40 -25.84 dB (44.1, 96, 192 kHz)"
+   "level": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99): the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in",
+   "spectrum": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99): the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in"
   },
   "valhallaSupermassive_test": {
-   "level": "not explained yet: level +3.63 +6.16 dB; 500 Hz octave -11.90 -22.40 -25.84 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +3.63 +6.16 dB; 500 Hz octave -11.90 -22.40 -25.84 dB (44.1, 96, 192 kHz)"
+   "level": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99): the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in",
+   "spectrum": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99): the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in"
   },
   "valhallaSupermassive_virgo_test": {
-   "level": "not explained yet: level +2.97 +5.10 dB; 500 Hz octave -10.72 -17.82 -20.90 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +2.97 +5.10 dB; 500 Hz octave -10.72 -17.82 -20.90 dB (44.1, 96, 192 kHz)"
+   "level": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99): the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in",
+   "spectrum": "the model keeps the constant latency of the plug-in, 33 samples in each loop (reverbs.lib, commit 81d63c99): the loop time moves by 0.58 ms and the tones land elsewhere on the comb. Scaling these constants by SR/44100 removes the deviation (under 0.1 dB in the bands) but leaves the plug-in"
   },
   "vibrato2_mono_nyquist_test": {
    "level": "the test places the notches at 5 and 10 kHz, within an octave of Nyquist at 44.1 kHz",
    "spectrum": "the test places the notches at 5 and 10 kHz, within an octave of Nyquist at 44.1 kHz"
   },
   "violinModel_test": {
-   "level": "not explained yet: level +1.35 +1.85 dB; 2000 Hz octave -25.18 -22.38 -19.49 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +1.35 +1.85 dB; 2000 Hz octave -25.18 -22.38 -19.49 dB (44.1, 96, 192 kHz)"
+   "level": "fault: pm.violinModel: the 12 samples around the bow are subtracted proportionally, so the position of the bow moves with the rate (0.190, 0.168, 0.159 for 0.15). With both sides of the bow in seconds, minus 6 samples each, with a floor, the level moves by +0.19 +0.38 dB",
+   "spectrum": "not explained yet: one harmonic (H5, 2073 Hz) next to the notch of the bow position, in a period-5 regime at 44.1 kHz, period-1 at 96 and 192 kHz. Fixing the taps, the position and the image leaves the 2 kHz octave at -25.18, -22.05, -17.23 dB. Not chaos: a perturbation of 1e-4 moves it by 0.06 dB at most"
   },
   "violin_ui_MIDI_test": {
-   "onset": "not explained yet: onset 0.06, 0.08, 0.10 s; 2000 Hz octave -25.79 -24.12 -23.94 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: onset 0.06, 0.08, 0.10 s; 2000 Hz octave -25.79 -24.12 -23.94 dB (44.1, 96, 192 kHz)"
+   "onset": "fault: pm.violinModel: the 12 samples around the bow are subtracted proportionally, so the position of the bow moves with the rate and with it the initial level (-37, -43.4, -48.9 dB at 10 ms at 44.1, 88.2, 176.4 kHz), which delays the onset",
+   "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`): its cutoff scales with the rate. With taps spaced at the 44.1 kHz period the spread falls to 0.47 dB"
   },
   "violin_ui_test": {
-   "spectrum": "not explained yet: 2000 Hz octave -26.58 -24.99 -24.69 dB (44.1, 96, 192 kHz)"
+   "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`): its cutoff scales with the rate. With taps spaced at the 44.1 kHz period the spread falls to about 0.6 dB"
   },
   "vital_rev_demo_test": {
-   "level": "not explained yet: level +1.28 -0.72 dB (44.1, 96, 192 kHz)"
+   "level": "fault: re.vital_rev: the allpass delays (1001, 799, ...) are in samples while the feedback lines are scaled by sample_rate_ratio, so the loop time depends on the rate. With `int(min(1002,allpassDelay)*sample_rate_ratio + 0.5)` the level moves by less than 0.1 dB, and the output at 44.1 kHz does not change"
   },
   "vital_rev_test": {
-   "level": "not explained yet: level +0.55 -2.23 dB; 500 Hz octave -18.67 -24.21 -20.94 dB (44.1, 96, 192 kHz)",
-   "spectrum": "not explained yet: level +0.55 -2.23 dB; 500 Hz octave -18.67 -24.21 -20.94 dB (44.1, 96, 192 kHz)"
+   "level": "fault: re.vital_rev: the allpass delays (1001, 799, ...) are in samples while the feedback lines are scaled by sample_rate_ratio, so the loop time depends on the rate. With `int(min(1002,allpassDelay)*sample_rate_ratio + 0.5)` the level moves by less than 0.1 dB, and the output at 44.1 kHz does not change",
+   "spectrum": "fault: re.vital_rev: the allpass delays (1001, 799, ...) are in samples while the feedback lines are scaled by sample_rate_ratio, so the loop time depends on the rate. With `int(min(1002,allpassDelay)*sample_rate_ratio + 0.5)` the level moves by less than 0.1 dB, and the output at 44.1 kHz does not change"
   },
   "wah4_modulated_test": {
    "level": "`fr` is smoothed by si.smooth(0.999), 1000 samples (23 ms at 44.1 kHz, 5 ms at 192 kHz): the start of the sweep from 0 to fr differs; moog_vcf alone at 800 Hz does not move",
@@ -667,10 +667,10 @@
    "onset": "rdel = 200 ms is beyond what the doc allows at 192 kHz (at most 170 ms, de.delay(32768)): the delay is cut"
   },
   "zita_rev1_ambi_t60m_test": {
-   "spectrum": "not explained yet: 2000 Hz octave -6.65 -5.25 -5.54 dB (44.1, 96, 192 kHz), not monotonic in the rate"
+   "spectrum": "the rounding of the delays to samples moves the modes of a long tail against the 12 tones per octave of the multisine, a chance hit: the rounding error reaches 11.3 us at 44.1 kHz, and with the multisine shifted by 1/8 to 7/8 semitone 14 runs of 14 pass, the octave moving both ways"
   },
   "zita_rev1_stereo_t60m_test": {
-   "spectrum": "not explained yet: 2000 Hz octave -5.03 -6.13 -6.00 dB (44.1, 96, 192 kHz), not monotonic in the rate"
+   "spectrum": "the rounding of the delays to samples moves the modes of a long tail against the 12 tones per octave of the multisine, a chance hit: the rounding error reaches 11.3 us at 44.1 kHz, and with the multisine shifted by 1/8 to 7/8 semitone 14 runs of 14 pass, the octave moving both ways"
   }
  }
 }
