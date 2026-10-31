@@ -31,6 +31,8 @@ make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base o
 make plots       # rewrite the figures whose rendering changed, rebuild the site
 make check-plots # regenerate every figure aside: stale figures, failed assertions
 make build       # build the mkdocs site (doc pages + figure injection)
+make check-certify # the Lean theorems regenerated and kernel-checked: a verdict moved? (10 s; check-doc does it when what it reads changed)
+make certify     # the same, stricter: fails on any difference with tests/lean/certified.lean, terms included
 ```
 
 Every script behind these targets is described in `scripts/README.md`.
@@ -45,7 +47,15 @@ Every script behind these targets is described in `scripts/README.md`.
   (`scripts/check_usage.py --changed`): the buses must match the arity of
   the call, and its parameters the `Where:` bullets. The debt is pinned in
   `tests/usage-baseline.json`, under the same rule; a fix that makes an
-  entry pass removes it in the same commit.
+  entry pass removes it in the same commit. With `lean` 4.31 and
+  `faust-rs` installed, it also regenerates the Lean certification when
+  a library, `tests/lean/` or `formalisation/` changed
+  (`scripts/check_certify.py --changed`), and fails on a verdict that
+  moved, not on a term that did: a change that loses a verdict either
+  teaches the prelude the new form, with its correctness argument in a
+  comment, or accepts the refusal, in both cases by
+  `make certify-reference` in the same commit. Never reword a rule to
+  get a verdict back.
 - The test references (`tests/reference/`, ~1.4 GB) are local build
   artifacts: generate them with `make reference`, never commit them. Same
   for the built site (`site/`) and `tests/build|output`; `.gitignore`

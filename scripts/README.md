@@ -51,6 +51,7 @@ or later.
 | [`check_plots.py`](#check_plotspy) | regenerates every figure aside: stale figures, failed assertions | `make check-plots`, `make plots` (`--update`) |
 | **Formal certification** | | |
 | [`sig2lean.py`](#sig2leanpy) | Faust signals to Lean 4 theorems | `make certify`, `certify-reference` |
+| [`check_certify.py`](#check_certifypy) | regenerates the Lean theorems and compares their verdicts with the committed ones | `make check-certify`, `check_doc.py` (`--changed`) |
 
 The scripts that turn the `.lib` files into the documentation pages
 (`faustlib2md.awk`, `inject_plots.py`, `makeindex.awk`) are in `doc/scripts/` and
@@ -74,7 +75,8 @@ are run by `doc/Makefile`.
   io (`make doc-index-split`, which the make target runs first);
 - `check_sr.py`: `faust`, a C++ compiler, `numpy` and the split export
   (`make doc-index-split`, which the make target runs first);
-- certification: `faust-rs` and `lean` (4.31);
+- certification: `faust-rs` and `lean` (4.31); `check_doc.py` skips the check
+  of the verdicts without them;
 - everything else: the Python standard library only.
 
 ---
@@ -1201,3 +1203,24 @@ fails if a table that needs a clamp was left unclamped.
 
 The workflow and the meaning of the verdicts are in `doc/docs/contributing.md`,
 section *Formal certification*.
+
+### `check_certify.py`
+
+```
+scripts/check_certify.py [--changed]
+make check-certify
+```
+
+Regenerates the theorems with `sig2lean.py`, kernel-checks them, and compares
+their verdicts with `tests/lean/certified.lean`: the Boolean of each theorem and
+the lines of the clamp oracle. A verdict that moved, or a program added without
+`make certify-reference`, fails; terms that differ with the same verdicts pass
+with a note, where `make certify` fails on them. About 10 s.
+
+`check_doc.py` runs it with `--changed`: nothing happens unless a library,
+`tests/lean/`, `formalisation/` or the generator differs from HEAD, and it stays
+out of the way (exit 0, one clause in the summary line) when `lean` or `faust-rs`
+is missing, or when `lean` is not the version of
+`formalisation/mathlib/lean-toolchain`.
+
+- Environment: `FAUST_RS` (default `faust-rs`), `LEAN` (default `lean`).

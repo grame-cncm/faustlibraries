@@ -311,6 +311,8 @@ symbolically, once.
 ```bash
 make certify            # regenerate theorems into tests/build/, kernel-check,
                         # diff against the committed tests/lean/certified.lean
+make check-certify      # the same, failing on a verdict only, not on a term;
+                        # make check-doc runs it when what it reads changed
 make certify-reference  # accept: regenerate the committed reference in place
 make certify-deep       # optional: build the mathlib layer discharging the
                         # Jury and tan obligations (downloads a large cache)

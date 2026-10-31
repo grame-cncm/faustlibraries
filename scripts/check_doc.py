@@ -32,7 +32,11 @@ regression, without requiring the historical debt to be paid first:
      inputs unused) beyond tests/weak-baseline.json (scripts/check_weak.py
      --changed --skip-missing, 3 s, 15 s after a library change); a test
      without reference is not checked (make reference); skipped when faust
-     is not installed or there is no reference.
+     is not installed or there is no reference;
+  9. when a library, tests/lean/, formalisation/ or the generator differs
+     from HEAD, the verdicts of the Lean certification still are those of
+     tests/lean/certified.lean (scripts/check_certify.py --changed, about
+     10 s); skipped when lean 4.31 or faust-rs is not installed.
 
 Usage:
     scripts/check_doc.py                    # verify, exit 1 on regression
@@ -191,6 +195,20 @@ def main():
             if r.stderr.strip():
                 usage_errors.append(r.stderr.strip())
 
+    # 9. the certified verdicts have not moved
+    r = subprocess.run([PYTHON, "scripts/check_certify.py", "--changed"],
+                       capture_output=True, text=True)
+    lines = r.stdout.strip().splitlines()
+    if r.returncode != 0:
+        usage_errors += [line for line in lines if line.startswith("[certify] ")
+                         and not line.startswith("[certify] FAILED")]
+        if r.stderr.strip():
+            usage_errors.append(r.stderr.strip())
+    elif any(line.startswith("[certify] not run") for line in lines):
+        usage_note += " Verdicts not certified: lean 4.31 or faust-rs not found."
+    elif any(line.startswith("[certify] note") for line in lines):
+        usage_note += " Certified terms changed, not their verdicts: make certify-reference."
+
     if errors or usage_errors:
         for e in errors + usage_errors:
             print("check_doc: %s" % e)
@@ -205,7 +223,11 @@ def main():
                   " compiles for WebAssembly calls a foreign function the web rejects:"
                   " see AGENTS.md, rule 12. A weak test ([weak]) is made to check"
                   " something (AGENTS.md, rule 1), or accepted with its reason in"
-                  " tests/weak-baseline.json.")
+                  " tests/weak-baseline.json. A moved verdict ([certify]) is a property"
+                  " the graph no longer shows: teach the prelude the new form if a"
+                  " correctness argument holds, or accept the refusal, then"
+                  " make certify-reference (doc/docs/contributing.md, Formal"
+                  " certification).")
         sys.exit(1)
     n_undoc = sum(len(v["undocumented"]) for k, v in debt.items()
                   if not k.startswith("_"))

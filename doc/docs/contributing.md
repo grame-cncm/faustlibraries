@@ -593,6 +593,14 @@ From then on, every `make certify` re-proves the theorems and turns any
 verdict drift — from a compiler or specification change — into a loud failure,
 exactly as `make check` does for numerical outputs.
 
+`make check-doc` does the same when a library, `tests/lean/`, `formalisation/`
+or the generator changed, if `lean` 4.31 and `faust-rs` are installed
+(`scripts/check_certify.py --changed`, about 10 s; `make check-certify` always
+runs it). It fails on a verdict that moved, and only notes a term that changed
+with its verdict intact, which `make certify` still refuses until
+`make certify-reference`. It does not see a new compiler, which changes no
+file: run `make certify` after updating `faust-rs`.
+
 Two standing limits are worth knowing: certification applies to the exported
 signal graph (not to the generated C++/Rust code), and to the exact rationals
 denoted by the coefficients (not to floating-point execution). Both are

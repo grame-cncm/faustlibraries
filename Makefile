@@ -53,6 +53,8 @@
 # `make certify`    - regenerate the Lean certification theorems into tests/build/,
 #                     kernel-check them, and fail if any verdict drifted from the
 #                     committed tests/lean/certified.lean.
+# `make check-certify` - the same regeneration, failing on a verdict only, not on a
+#                     term; check-doc runs it when what it reads changed.
 # `make certify-reference` - regenerate and re-check tests/lean/certified.lean in place.
 # `make build`      - build the documentation.
 # `make serve`      - serve the documentation.
@@ -113,7 +115,7 @@ DSP_TEST_DIR := tests
 DSP_FILES := $(shell find $(DSP_TEST_DIR) -maxdepth 1 -name '*.dsp' | sort)
 BENCH_LOG := tests/bench.log
 
-.PHONY: FORCE reference check check-mutation check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-sr check-backend-outputs check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-osc-claims check-plots plots clean distclean help bench certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
+.PHONY: FORCE reference check check-mutation check-sanitize check-extremes check-long check-weak check-reinit check-jumps check-sr check-backend-outputs check-vec check-precision check-precision-matrix check-backends check-cpu check-cpu-matrix verify-matched check-doc checkdoc check-usage check-filter-claims check-tuning check-osc-claims check-plots plots clean distclean help bench certify check-certify certify-reference certify-deep doc-index doc-index-split doc-index-commercial
 
 # Remove a target whose recipe failed, so a failed test is re-run next time
 # instead of being considered up to date.
@@ -415,6 +417,9 @@ certify: ## Regenerate the Lean certification theorems, kernel-check them, and f
 		exit 1; \
 	fi; \
 	printf '[certify] all theorems check; verdicts match %s\n' '$(LEAN_CERTIFIED)'
+
+check-certify: ## Regenerate the Lean theorems and fail on a moved verdict, not on a term (make check-doc runs it with --changed)
+	@FAUST_RS=$(FAUST_RS) LEAN=$(LEAN) $(PYTHON) scripts/check_certify.py
 
 certify-reference: ## Regenerate tests/lean/certified.lean in place and kernel-check it
 	@set -e; \
