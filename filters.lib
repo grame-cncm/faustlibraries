@@ -55,7 +55,7 @@ fi = library("filters.lib"); // for compatible copy/paste out of this file
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.13.4";
+declare version "1.13.5";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -1021,6 +1021,11 @@ fir(b0) = *(b0);
 // signal with all the coefficients. `convN` takes N signals and sums the i-th,
 // delayed by i samples, times the i-th coefficient: split one signal to N
 // copies first to convolve it with the first N coefficients.
+//
+// Both are direct convolutions: one multiplication per coefficient and per
+// sample, in a single expression. Thousands of coefficients cost far more than
+// a partitioned FFT convolution, which these libraries do not have, and their
+// generated code can exceed the limits of a C++ compiler.
 //
 // #### Usage
 //

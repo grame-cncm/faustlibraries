@@ -942,6 +942,11 @@ signal with all the coefficients. `convN` takes N signals and sums the i-th,
 delayed by i samples, times the i-th coefficient: split one signal to N
 copies first to convolve it with the first N coefficients.
 
+Both are direct convolutions: one multiplication per coefficient and per
+sample, in a single expression. Thousands of coefficients cost far more than
+a partitioned FFT convolution, which these libraries do not have, and their
+generated code can exceed the limits of a C++ compiler.
+
 #### Usage
 
 ```

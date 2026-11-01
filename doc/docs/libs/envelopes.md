@@ -27,7 +27,9 @@ The Envelopes library is organized into 3 sections:
 ![ar — response plots](../img/en_ar.svg)
 
 AR (Attack, Release) envelope generator (useful to create percussion envelopes).
-`ar` is a standard Faust function.
+`ar` is a standard Faust function. It does not hold while its trigger stays
+high: it releases by itself as soon as it reaches 1, even with `t` still on.
+For an envelope that stays at 1 while a gate is on, use `asr(at, 1, rt, gate)`.
 
 #### Usage
 
