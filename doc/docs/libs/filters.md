@@ -178,8 +178,10 @@ dcblockerat_jump_test = no.noise : fi.dcblockerat(5*pow(40, sq)) with { P = int(
 
 ![dcblocker — response plots](../img/fi_dcblocker.svg)
 
-DC blocker. Default dc blocker has -3dB point near 35 Hz (at 44.1 kHz)
-and high-frequency gain near 1.0025 (due to no scaling).
+DC blocker. Default dc blocker has -3dB point near 35 Hz at every rate:
+its pole is 0.995 at 44.1 kHz, `pow(0.995,44100/ma.SR)` at the others.
+Its high-frequency gain is 2/(1 + pole), near 1.0025 at 44.1 kHz and
+1.0006 at 192 kHz (due to no scaling).
 `dcblocker` is a standard Faust function.
 
 #### Usage

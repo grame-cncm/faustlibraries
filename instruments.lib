@@ -28,7 +28,7 @@ re = library("reverbs.lib");
 declare name "Faust-STK Tools Library";
 declare author "Romain Michon (rmichon@ccrma.stanford.edu)";
 declare copyright "Romain Michon";
-declare version "1.0.4";
+declare version "1.0.5";
 declare licence "LicenseRef-STK-4.3"; // Synthesis Tool Kit 4.3 (MIT style license);
 
 
@@ -436,6 +436,9 @@ jetTable(x) = x <: _*(_*_-1) : saturationPos : saturationNeg;
 // with waveguide instruments (see the corresponding DAFx paper,
 // Faust-STK: a Set of Linear and Nonlinear Physical Models for the
 // Faust Programming Language, for more details).
+//
+// `nonLinearModulator` is defined in samples: at sample rate SR it does to a
+// frequency f what it does to f*44100/SR at 44.1 kHz.
 //
 // #### Usage
 //

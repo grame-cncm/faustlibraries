@@ -641,24 +641,31 @@ Everything below is produced by `scripts/sig2lean.py` from
 namespace Faust.Signal.Generated
 open Faust.Signal
 
-/-- `// fi.dcblocker = zero(1) : pole(0.995) — a classic constant-coefficient
-// one-pole from filters.lib. Pins: STABLE through the zero/pole composition.
+/-- `// fi.dcblocker = zero(1) : pole(pow(0.995, 44100/ma.SR)) — a one-pole from
+// filters.lib whose pole follows the rate (35 Hz at every rate since 2026-11-02;
+// it was the constant 0.995). Pins: NOT CERTIFIED, the pole is not a constant
+// (the analyser reads constant coefficients only, as for si.smoo).
 fi = library("filters.lib");
 process = fi.dcblocker;` — output 0 -/
 def dcblocker_out0 : Sig :=
   let n0 : Sig := Sig.ref 1
   let n1 : Sig := Sig.proj 0 n0
   let n2 : Sig := Sig.delay1 n1
-  let n3 : Sig := Sig.binop .mul n2 (.const ⟨8962163258467287, 9007199254740992⟩)
-  let n4 : Sig := Sig.input 0
-  let n5 : Sig := Sig.delay1 n4
-  let n6 : Sig := Sig.binop .mul n5 (.int 1)
-  let n7 : Sig := Sig.binop .sub n4 n6
-  let n8 : Sig := Sig.binop .add n3 n7
-  let n9 : Sig := Sig.cons n8 (.nil)
-  let n10 : Sig := Sig.recur n9
-  let n11 : Sig := Sig.proj 0 n10
-  n11
+  let n3 : Sig := Sig.opaqueN "SIGFCONST" [(.int 0), (.opaque "fSamplingFreq"), (.opaque "<math.h>")]
+  let n4 : Sig := Sig.opaqueN "SIGMAX" [(.const ⟨50, 1⟩), n3]
+  let n5 : Sig := Sig.opaqueN "SIGMIN" [(.const ⟨192000, 1⟩), n4]
+  let n6 : Sig := Sig.binop .div (.int 44100) n5
+  let n7 : Sig := Sig.opaqueN "SIGPOW" [(.const ⟨8962163258467287, 9007199254740992⟩), n6]
+  let n8 : Sig := Sig.binop .mul n2 n7
+  let n9 : Sig := Sig.input 0
+  let n10 : Sig := Sig.delay1 n9
+  let n11 : Sig := Sig.binop .mul n10 (.int 1)
+  let n12 : Sig := Sig.binop .sub n9 n11
+  let n13 : Sig := Sig.binop .add n8 n12
+  let n14 : Sig := Sig.cons n13 (.nil)
+  let n15 : Sig := Sig.recur n14
+  let n16 : Sig := Sig.proj 0 n15
+  n16
 
 /-- `de = library("delays.lib");
 process = de.fdelay(1024, hslider("d", 100, 0, 2000, 1));` — output 0 -/
@@ -1281,7 +1288,7 @@ delay tap whose range follows from the graph structure alone;
 #eval s!"time_marginal_out0: " ++ indexReport time_marginal_out0
 #eval s!"unstable_out0: " ++ indexReport unstable_out0
 
-theorem dcblocker_out0_stability : certifyStableB dcblocker_out0 = true := by decide
+theorem dcblocker_out0_stability : certifyStableB dcblocker_out0 = false := by decide
 theorem fdelay_clamped_out0_stability : certifyStableB fdelay_clamped_out0 = false := by decide
 theorem lowpass3_out0_stability : certifyStableB lowpass3_out0 = false := by decide
 theorem noise_lcg_out0_stability : certifyStableB noise_lcg_out0 = false := by decide

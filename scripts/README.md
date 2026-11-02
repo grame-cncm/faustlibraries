@@ -335,8 +335,8 @@ reads as samples or a coefficient: proposals to check against the doc (the
 About two minutes for all tests once built, five the first time.
 
 The baseline comes from the triage of 2026-10-29, when 471 of the 2352 tests
-moved, updated since: 77 symbols, and 164 tests accepted. A reason starting
-with `fault:` marks a defect of the library to fix: 21 tests, 10 causes, listed
+moved, updated since: 77 symbols, and 160 tests accepted. A reason starting
+with `fault:` marks a defect of the library to fix: 17 tests, 9 causes, listed
 below. One test is still marked `not explained yet:`: the spectrum of
 `pm.violinModel`, a harmonic next to the notch of the bow position, whose regime
 changes with the rate.
@@ -376,8 +376,6 @@ unless said:
   moves `an.spectral_spread` (2659, 3476, 4641 Hz) and the onset of
   `an.spectral_centroid`;
 - `dm.envelopes_demo`: a gate schedule in samples;
-- `fi.dcblocker`: its pole is 0.995 per sample, a highpass from 35 to 153 Hz,
-  seen in `no.colored_noise` and `pm.fluteModel`;
 - `pm.fluteModel`: the two jet loops take their sample delays out of one fit;
 - `pm.wBell`: `pow(p,44100/SR)` keeps the time constant, not the magnitude;
 - `pm.violinModel`: the bow position moves with the rate;
@@ -386,10 +384,16 @@ unless said:
 - `fd.hammer`: `fIn` enters the displacement unscaled, a fix that changes the
   output at 44.1 kHz for callers with k = 1/SR.
 
+`fi.dcblocker` was fixed on 2026-11-02 (Julius Smith, issue #326): its pole,
+0.995 per sample, made a highpass from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz.
+It is `pow(0.995,44100/SR)`, 35 Hz at every rate, and 44.1 kHz does not change;
+`no.colored_noise` passes, and the level of `pm.fluteModel`.
+
 The other entries are rate-dependent by construction, or come from the test:
 string loop filters with fixed taps, the linear interpolation of the delay of
 `sy.combString`, the constant 33 samples of `re.valhallaSupermassive` (those of
-the plug-in), an approximation for fr << SR (`ve.moog_vcf`), the saturation of
+the plug-in), an approximation for fr << SR (`ve.moog_vcf`), the all-pass ladder of
+`inst.nonLinearModulator`, defined in samples, which its doc now says, the saturation of
 `ve.oberheim` applied once per sample, the aliasing of a fold of noise or of an
 FM at 44.1 kHz, a fixed k in the `fds.lib` tests, a test schedule in samples
 (`ba.time`, `ba.pulse(64)`), a burst too short for its statistics

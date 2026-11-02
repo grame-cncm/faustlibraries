@@ -109,18 +109,6 @@
   "clarinetModel_test": {
    "spectrum": "fault: pm.wBell: pow(p,44100/SR) keeps the time constant of the bell, not its magnitude: the low-frequency cutoff goes 12555, 11555, 11361 Hz. With a matched pole the 2 kHz octave holds within 0.13 dB"
   },
-  "colored_noise_demo_test": {
-   "spectrum": "fault: fi.dcblocker has its pole at 0.995 per sample: the highpass goes from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz. Same in fluteModel and ef.cubicnl_nodc. With pow(0.995,44100/SR) 44.1 kHz does not change"
-  },
-  "colored_noise_modulated_test": {
-   "spectrum": "fault: fi.dcblocker has its pole at 0.995 per sample: the highpass goes from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz. Same in fluteModel and ef.cubicnl_nodc. With pow(0.995,44100/SR) 44.1 kHz does not change"
-  },
-  "colored_noise_slider_test": {
-   "spectrum": "fault: fi.dcblocker has its pole at 0.995 per sample: the highpass goes from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz. Same in fluteModel and ef.cubicnl_nodc. With pow(0.995,44100/SR) 44.1 kHz does not change"
-  },
-  "colored_noise_test": {
-   "spectrum": "fault: fi.dcblocker has its pole at 0.995 per sample: the highpass goes from 35 Hz at 44.1 kHz to 153 Hz at 192 kHz. Same in fluteModel and ef.cubicnl_nodc. With pow(0.995,44100/SR) 44.1 kHz does not change"
-  },
   "combString_modulated_test": {
    "decay": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +5.19 +5.17 dB. The loop gain per period does not depend on the rate",
    "level": "the delay of `fi.fb_fcomb` is read by linear interpolation: its loss depends on the fractional part of SR/freq, not on the rate as such (200.45, 436.36, 872.73 samples at 220 Hz). At 300 Hz, an integer delay at the three rates, level and decay pass; at 1500 Hz (29.4, 64, 128 samples) the level moves by +5.19 +5.17 dB. The loop gain per period does not depend on the rate",
@@ -180,20 +168,16 @@
    "spectrum": "re.fdnrev0: delay lengths in samples"
   },
   "fluteModel_test": {
-   "level": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate",
-   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
+   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms). With them in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
   },
   "fluteModel_ui_test": {
-   "level": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate",
-   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
+   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms). With them in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
   },
   "flute_ui_MIDI_test": {
-   "level": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate",
-   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
+   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms). With them in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
   },
   "flute_ui_test": {
-   "level": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate",
-   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms), and the output fi.dcblocker scales with the rate. With both in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
+   "spectrum": "fault: pm.fluteModel: the two jet loops take their sample delays out of one global fit (head 1.082 to 1.034 ms, foot 2.784 to 2.811 ms). With them in seconds, the 1 and 2 kHz octaves hold within 0.03 dB and the level within 0.04 dB, f0 377.81 Hz at every rate"
   },
   "glottis_modulated_test": {
    "onset": "the test schedules its input or a parameter in samples (ba.time % 48000)",
@@ -295,7 +279,7 @@
    "level": "instruments.lib (STK): `radius` is the pole radius, a coefficient"
   },
   "inst_nonLinearModulator_test": {
-   "spectrum": "the unit delays of the all-pass ladder are in samples, a structure defined in samples: with round(SR/44100) delays the shape holds within 0.01 dB at 44.1, 88.2, 176.4 kHz"
+   "spectrum": "the all-pass ladder fi.allpassnn is defined in samples: at SR it does to f what it does to f*44100/SR at 44.1 kHz, as its doc says (Julius Smith, issue #326). round(SR/44100) delays would only trade this for two families of rates"
   },
   "inst_onePole_modulated_test": {
    "level": "instruments.lib (STK): its parameters are filter coefficients (b0, b1, a1)",
