@@ -630,13 +630,6 @@
   "violin_ui_test": {
    "spectrum": "the loop filter of the string has fixed taps (`bridgeFilter`): its cutoff scales with the rate. With taps spaced at the 44.1 kHz period the spread falls to about 0.6 dB"
   },
-  "vital_rev_demo_test": {
-   "level": "fault: re.vital_rev: the allpass delays (1001, 799, ...) are in samples while the feedback lines are scaled by sample_rate_ratio, so the loop time depends on the rate. With `int(min(1002,allpassDelay)*sample_rate_ratio + 0.5)` the level moves by less than 0.1 dB, and the output at 44.1 kHz does not change"
-  },
-  "vital_rev_test": {
-   "level": "fault: re.vital_rev: the allpass delays (1001, 799, ...) are in samples while the feedback lines are scaled by sample_rate_ratio, so the loop time depends on the rate. With `int(min(1002,allpassDelay)*sample_rate_ratio + 0.5)` the level moves by less than 0.1 dB, and the output at 44.1 kHz does not change",
-   "spectrum": "fault: re.vital_rev: the allpass delays (1001, 799, ...) are in samples while the feedback lines are scaled by sample_rate_ratio, so the loop time depends on the rate. With `int(min(1002,allpassDelay)*sample_rate_ratio + 0.5)` the level moves by less than 0.1 dB, and the output at 44.1 kHz does not change"
-  },
   "wah4_modulated_test": {
    "level": "`fr` is smoothed by si.smooth(0.999), 1000 samples (23 ms at 44.1 kHz, 5 ms at 192 kHz): the start of the sweep from 0 to fr differs; moog_vcf alone at 800 Hz does not move",
    "spectrum": "`fr` is smoothed by si.smooth(0.999), 1000 samples (23 ms at 44.1 kHz, 5 ms at 192 kHz): the start of the sweep from 0 to fr differs; moog_vcf alone at 800 Hz does not move"

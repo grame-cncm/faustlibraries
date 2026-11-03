@@ -78,7 +78,7 @@ hy = library("hysteresis.lib");
 pt = library("pinktrombone.lib");
 
 declare name "Faust Demos Library";
-declare version "1.8.1";
+declare version "1.8.2";
 
 //########################################################################################
 /************************************************************************
@@ -1305,7 +1305,7 @@ with{
 
 
 //----------------------------------`(dm.)vital_rev_demo`------------------------------
-// Example GUI for `vital_rev` with all parameters exposed.
+// Example GUI for `vital_rev` with smoothed controls, except for size.
 //
 // #### Usage
 //
@@ -1324,13 +1324,10 @@ with{
 //------------------------------------------------------------
 vital_rev_demo = hgroup("Reverb", re.vital_rev(prelow, prehigh, lowcutoff, highcutoff, lowgain, highgain, chorus_amt, chorus_freq, predelay, time, size, mix))
 with {
-    // SMOO = _; 
-    SMOO = si.smoo; // optionally turn on smoo of hsliders
-
-    Prefilter(x) = hgroup("[0] Pre-filter", x:SMOO);
-    Filter(x) = hgroup("[1] Filter", x:SMOO);
-    Chorus(x) = hgroup("[2] Chorus", x:SMOO);
-    Space(x) = hgroup("[3] Space", x:SMOO);
+    Prefilter(x) = hgroup("[0] Pre-filter", x : si.smoo);
+    Filter(x) = hgroup("[1] Filter", x : si.smoo);
+    Chorus(x) = hgroup("[2] Chorus", x : si.smoo);
+    Space(x) = hgroup("[3] Space", x);
 
     prelow = Prefilter(hslider("[0] Low Cutoff [style:knob]", it.remap(16,135,0,1,16), 0, 1, .01));
     prehigh = Prefilter(hslider("[1] High Cutoff [style:knob]", it.remap(16,135,0,1,110), 0, 1, .01));
@@ -1344,11 +1341,11 @@ with {
     chorus_amt = Chorus(hslider("[0] Amount [style:knob]", .01, 0, 1, .01));
     chorus_freq = Chorus(hslider("[1] Rate [style:knob]", 0.1, 0, 1, .01));
 
-    predelay = Space(hslider("[0] Pre-Delay [style:knob]", 0, 0, 1, .01));
-    time = Space(hslider("[1] Decay Time [style:knob]", 0.5, 0, 1, .01));
+    predelay = Space(hslider("[0] Pre-Delay [style:knob]", 0, 0, 1, .01) : si.smoo);
+    time = Space(hslider("[1] Decay Time [style:knob]", 0.5, 0, 1, .01) : si.smoo);
     size = Space(hslider("[2] Size [style:knob]", .5, 0, 1, .01)) : aa.clip(0, 1);
 
-    mix = hslider("[4] Mix [style:knob]",  1, 0, 1, .01) : SMOO : aa.clip(0, 1);
+    mix = hslider("[4] Mix [style:knob]",  1, 0, 1, .01) : si.smoo : aa.clip(0, 1);
 };
 declare vital_rev_demo author "David Braun";
 declare vital_rev_demo license "GPL-3.0-only";

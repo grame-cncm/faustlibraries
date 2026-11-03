@@ -40,6 +40,12 @@ vital_rev_test = (os.tosc(330), os.tosc(440))
   : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0.3, 0.2, 0.1, 0.7, 0.5, 0.4);
 vital_rev_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0.1, 0.7, tri, 0.4) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 vital_rev_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0.1, 0.3 + 0.6*sq, 0.5, 0.4) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+vital_rev_prefilter_test = (os.tosc(330), os.tosc(440)) : re.vital_rev(0.3, 0.6, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0, 0.5, 0.5, 1);
+vital_rev_size_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0.1, 0.7, 0.375 + 0.5*sq, 0.4) with { P = int(ma.SR); sq = ba.period(P) < P/2; };
+vital_rev_cutoff_test = (0.1*no.noises(2, 0), 0.1*no.noises(2, 1)) : re.vital_rev(0.2, 1, 1, 1, 0.4, 0.6, 0, 0.2, 0, 0.7, 0.5, 1);
+vital_rev_slider_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(hslider("vital_rev:prelow", 0.2, 0, 1, 0.001), hslider("vital_rev:prehigh", 0.8, 0, 1, 0.001), hslider("vital_rev:lowcutoff", 0.5, 0, 1, 0.001), hslider("vital_rev:highcutoff", 0.7, 0, 1, 0.001), hslider("vital_rev:lowgain", 0.4, 0, 1, 0.001), hslider("vital_rev:highgain", 0.6, 0, 1, 0.001), hslider("vital_rev:chorus_amt", 0.3, 0, 1, 0.001), hslider("vital_rev:chorus_freq", 0.2, 0, 1, 0.001), hslider("vital_rev:predelay", 0.1, 0, 1, 0.001), hslider("vital_rev:time", 0.7, 0, 1, 0.001), hslider("vital_rev:size", 0.5, 0, 1, 0.001), hslider("vital_rev:mix", 0.4, 0, 1, 0.001));
+vital_rev_audio_modulated_test = (0.1*no.noises(2, 0), 0.1*no.noises(2, 1)) : re.vital_rev(0.2, 0.7 + 0.2*os.tosc(500), 0.5, 0.7, 0.4, 0.6, 0.3, 0.2, 0.1, 0.7, 0.5, 0.4);
+vital_rev_mix_modulated_test = (os.tosc(330), os.tosc(440)) : re.vital_rev(0.3, 0.6, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0, 0.5, 0.5, 0.5 + 0.5*os.tosc(500));
 mono_freeverb_test = os.tosc(440) : re.mono_freeverb(0.7, 0.5, 0.3, 30);
 mono_freeverb_slider_test = os.tosc(440) : re.mono_freeverb(hslider("mono_freeverb:fb1", 0.7, 0, 0.99, 0.01), hslider("mono_freeverb:fb2", 0.5, 0, 0.99, 0.01), hslider("mono_freeverb:damp", 0.3, 0, 1, 0.01), 30);
 mono_freeverb_modulated_test = no.noise : re.mono_freeverb(0.7, 0.5, tri, 30) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };

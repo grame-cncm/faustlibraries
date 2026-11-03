@@ -375,6 +375,12 @@ A port of the reverb from the Vital synthesizer. All input parameters
 have been normalized to a continuous [0,1] range, making them easy to modulate.
 The scaling of the parameters happens inside the function.
 
+Feedback and diffuser delay durations are preserved across sample rates.
+Parameters accept audio-rate signals. Predelay motion uses a time-based
+second-order response (4.2 Hz, Q = 1/sqrt(2)); the other controls act directly.
+The frozen C++-parity version and its comparison harness are hosted in
+[DBraun's reference repository](https://github.com/DBraun/faustlibraries/tree/research/vital-reverb-reference/tests/vital_reverb).
+
 #### Usage
 
 ```
@@ -396,6 +402,58 @@ Where:
 * `size`: The size of the room
 * `mix`: A wetness value to use in a final dry/wet mixer
 
+#### Feedback matrix
+
+Analysis by David Braun:
+This technique is an example of a Feedback Delay Network (FDN) (https://ccrma.stanford.edu/~jos/pasp/FDN_Reverberation.html).
+Specifically, the feedback matrix is a 16x16 Hadamard matrix that has been efficiently implemented.
+
+This matrix is the sum of three matrices:
+* an identity matrix
+* other_feedback
+* adjacent_feedback
+
+Although other_feedback and adjacent_feedback are not orthogonal,
+when all three matrices are summed together, they are orthogonal and form a Hadamard matrix (ignoring a gain factor).
+The orthogonality makes it a valid FDN matrix.
+
+Note that other_feedback and adjacent_feedback are both 16x16 matrices.
+Each is cleverly factorized into the product of a 16x4 matrix and a 4x16 matrix,
+resulting in a 16x16 matrix.
+
+Let's use numpy to explain the matrices and eventually show that the final result is Hadamard:
+
+```python
+import numpy as np
+from scipy.linalg import block_diag
+
+# Make identity matrix
+identity = np.eye(16)
+
+# Make adjacent_matrix matrix
+x = np.ones((4,))
+A = block_diag(x,x,x,x)
+assert A.shape == (4,16)
+adjacent_matrix = (A.T @ A)*-.5
+assert adjacent_matrix.shape == (16,16)
+
+# Make other_feedback
+A = np.eye(4)
+A = np.concatenate([A,A,A,A], axis=1)
+assert A.shape == (4,16)
+other_feedback = (A.T @ A)*-.5 + np.full((16,16), 1/4)
+assert other_feedback.shape == (16,16)
+
+final_matrix = identity + adjacent_matrix + other_feedback
+
+# assert that final_matrix is orthogonal
+assert ((final_matrix @ final_matrix.T) == identity).all()
+
+# assert that (final_matrix*4) is a Hadamard matrix (see Wikipedia)
+N = 16
+assert np.round(np.linalg.det(final_matrix*4)) == N**(N/2)
+```
+
 #### Test
 ```
 re = library("reverbs.lib");
@@ -407,7 +465,18 @@ vital_rev_test = (os.tosc(330), os.tosc(440))
   : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0.3, 0.2, 0.1, 0.7, 0.5, 0.4);
 vital_rev_modulated_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0.1, 0.7, tri, 0.4) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 vital_rev_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0.1, 0.3 + 0.6*sq, 0.5, 0.4) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+vital_rev_prefilter_test = (os.tosc(330), os.tosc(440)) : re.vital_rev(0.3, 0.6, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0, 0.5, 0.5, 1);
+vital_rev_size_jump_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(0.2, 0.8, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0.1, 0.7, 0.375 + 0.5*sq, 0.4) with { P = int(ma.SR); sq = ba.period(P) < P/2; };
+vital_rev_cutoff_test = (0.1*no.noises(2, 0), 0.1*no.noises(2, 1)) : re.vital_rev(0.2, 1, 1, 1, 0.4, 0.6, 0, 0.2, 0, 0.7, 0.5, 1);
+vital_rev_slider_test = (no.noises(2, 0), no.noises(2, 1)) : re.vital_rev(hslider("vital_rev:prelow", 0.2, 0, 1, 0.001), hslider("vital_rev:prehigh", 0.8, 0, 1, 0.001), hslider("vital_rev:lowcutoff", 0.5, 0, 1, 0.001), hslider("vital_rev:highcutoff", 0.7, 0, 1, 0.001), hslider("vital_rev:lowgain", 0.4, 0, 1, 0.001), hslider("vital_rev:highgain", 0.6, 0, 1, 0.001), hslider("vital_rev:chorus_amt", 0.3, 0, 1, 0.001), hslider("vital_rev:chorus_freq", 0.2, 0, 1, 0.001), hslider("vital_rev:predelay", 0.1, 0, 1, 0.001), hslider("vital_rev:time", 0.7, 0, 1, 0.001), hslider("vital_rev:size", 0.5, 0, 1, 0.001), hslider("vital_rev:mix", 0.4, 0, 1, 0.001));
+vital_rev_audio_modulated_test = (0.1*no.noises(2, 0), 0.1*no.noises(2, 1)) : re.vital_rev(0.2, 0.7 + 0.2*os.tosc(500), 0.5, 0.7, 0.4, 0.6, 0.3, 0.2, 0.1, 0.7, 0.5, 0.4);
+vital_rev_mix_modulated_test = (os.tosc(330), os.tosc(440)) : re.vital_rev(0.3, 0.6, 0.5, 0.7, 0.4, 0.6, 0, 0.2, 0, 0.5, 0.5, 0.5 + 0.5*os.tosc(500));
 ```
+
+#### References
+
+* Matt Tytel, Vital reverb implementation:
+  [https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/effects/reverb.cpp](https://github.com/mtytel/vital/blob/636ca0ef517a4db087a6a08a6a8a5e704e21f836/src/synthesis/effects/reverb.cpp)
 
 ## Freeverb
 
