@@ -585,8 +585,11 @@ fpow_modulated_test = fa.fpow(10.0^(4*tri - 2), 6*tri - 3) with { P = int(ma.SR/
 and `ftan`, and the `_faster` variants of the sines. The argument in turns is
 reduced by `x - rint(x)`, which is exact, and folded into a quarter of a
 period, where the sine is an odd polynomial: in turns, the error does not
-grow with the argument, which an oscillator's phase in turns benefits from;
-in radians, the division by 2 pi rounds to the precision of the argument.
+grow with the argument, which an oscillator's phase in turns benefits from.
+In radians, `x - k*pi` is computed without rounding by a Cody-Waite
+reduction (pi in three parts, the first two short enough for their products
+by `k` to be exact), so that the error does not grow either, up to
+|x| = 10^5 in single precision.
 
 ----
 
@@ -682,12 +685,16 @@ fcos2pi_modulated_test = fa.fcos2pi(200*tri - 100) with { P = int(ma.SR/10); tri
 
 Sine of `x`, `x` in radians, computed in Faust: a fast replacement of `sin`.
 
-It computes `fsin2pi(x / (2 pi))`. Measured maximum absolute error: 2.2e-7 in
-single precision, 4.4e-16 in double, for |x| up to pi; 8.8e-5 and 1.5e-13 up
-to 1000; for a large `x`, the rounding of `x / (2 pi)` adds about `|x| *
-2^-24` in single precision (9e-5 at 1000), which `fsin2pi` avoids. About 7.7x
-faster than `sin` in a C++ loop that it lets the compiler vectorize, 2.2x in
-a scalar loop, 11x in WebAssembly.
+`x = k*pi + r`, `k = rint(x/pi)`, `r` in [-pi/2, pi/2] computed exactly
+(Cody-Waite), then `sin(x) = (-1)^k sin(r)`, `sin(r)` the polynomial of
+`fsin2pi` in radians. Measured maximum absolute error: 1.5e-7 in single
+precision, 2.2e-16 in double, for any |x| up to 10^5 (single) or 10^7
+(double); beyond, the reduction loses its exactness and the error grows
+slowly (6.6e-5 at 10^7 in single precision). Before version 1.0.2, `fsin`
+divided `x` by 2 pi, whose rounding gave 8.8e-5 at 1000 and 7.1e-3 at 10^5.
+About 5x faster than `sin` in a C++ loop that it lets the compiler
+vectorize, 1.5x in a scalar loop, 6x in WebAssembly; the exact reduction
+costs 15% to 50% more than the division of the old version.
 
 #### Usage
 
@@ -707,6 +714,7 @@ ma = library("maths.lib");
 fsin_test = fa.fsin(0.7);
 fsin_slider_test = par(i, 6, fa.fsin(hslider("fsin:x%i", ba.take(i+1, X), -1000, 1000, 0.001))) with { X = (-1000.0, -3.0, -0.1, 0.5, 3.0, 1000.0); };
 fsin_modulated_test = fa.fsin(20*tri - 10) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fsin_large_test = par(i, 6, fa.fsin(hslider("fsin_large:x%i", ba.take(i+1, X), -100000.5, 100000.5, 0.125))) with { X = (-100000.5, -65536.25, -1000.125, 1000.375, 65536.75, 99999.875); };
 ```
 
 ----
@@ -741,8 +749,9 @@ fsin_faster_modulated_test = fa.fsin_faster(20*tri - 10) with { P = int(ma.SR/10
 ### `(fa.)fcos`
 
 Cosine of `x`, `x` in radians, computed in Faust: a fast replacement of
-`cos`. It computes `fcos2pi(x / (2 pi))` (measured maximum absolute error:
-2.1e-7 in single precision, 3.9e-16 in double, for |x| up to pi).
+`cos`. As `fsin`, with `x = (k + 1/2)*pi + r` and `cos(x) = -(-1)^k sin(r)`
+(measured maximum absolute error: 1.7e-7 in single precision, 2.2e-16 in
+double, for any |x| up to 10^5 (single) or 10^7 (double)).
 
 #### Usage
 
@@ -762,6 +771,7 @@ ma = library("maths.lib");
 fcos_test = fa.fcos(0.7);
 fcos_slider_test = par(i, 6, fa.fcos(hslider("fcos:x%i", ba.take(i+1, X), -1000, 1000, 0.001))) with { X = (-1000.0, -3.0, -0.1, 0.5, 3.0, 1000.0); };
 fcos_modulated_test = fa.fcos(20*tri - 10) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fcos_large_test = par(i, 6, fa.fcos(hslider("fcos_large:x%i", ba.take(i+1, X), -100000.5, 100000.5, 0.125))) with { X = (-100000.5, -65536.25, -1000.125, 1000.375, 65536.75, 99999.875); };
 ```
 
 ----
@@ -803,10 +813,16 @@ ftanpi_modulated_test = fa.ftanpi(0.98*tri - 0.49) with { P = int(ma.SR/10); tri
 ### `(fa.)ftan`
 
 Tangent of `x`, `x` in radians, computed in Faust: a fast replacement of
-`tan`. It computes `ftanpi(x / pi)` (measured maximum relative error: 1.6e-6
-in single precision, 2.7e-15 in double, for |x| up to 1.5 (the rounding of
-x/pi grows near the poles)). About 6.6x faster than `tan` in a C++ loop that
-it lets the compiler vectorize, 1.8x in a scalar loop, 8x in WebAssembly.
+`tan`. It computes `ftanpi(r / pi)`, `r = x - k*pi` in [-pi/2, pi/2] by the
+reduction of `fsin` (measured maximum relative error: 1.6e-6 in single
+precision, 2.7e-15 in double, for |x| up to 1.5 (the rounding of r/pi grows
+near the poles); 1.9e-6 and 4.5e-15 at any |x| up to 10^5, at the same
+distance from a pole, where dividing `x` by pi before version 1.0.2 gave a
+relative error of 1.7 at 318 pi in single precision). About 3.5x faster
+than `tan` in a C++ loop that it lets the compiler vectorize, 5.6x in
+WebAssembly; as fast as `tan` in a scalar C++ loop, where the reduction
+costs 60% (`ftanpi(x/pi)` is the cheaper choice for an argument known to
+lie in (-pi/2, pi/2), the same output there).
 
 #### Usage
 
@@ -826,6 +842,7 @@ ma = library("maths.lib");
 ftan_test = fa.ftan(0.7);
 ftan_slider_test = par(i, 6, fa.ftan(hslider("ftan:x%i", ba.take(i+1, X), -1.5, 1.5, 0.001))) with { X = (-1.5, -0.7, 0.0, 0.3, 1.0, 1.5); };
 ftan_modulated_test = fa.ftan(3*tri - 1.5) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+ftan_large_test = par(i, 6, fa.ftan(hslider("ftan_large:x%i", ba.take(i+1, X), -100000.5, 100000.5, 0.125))) with { X = (-100000.5, -65536.25, -1000.125, 1000.375, 65536.75, 99999.875); };
 ```
 
 ## Hyperbolic tangent

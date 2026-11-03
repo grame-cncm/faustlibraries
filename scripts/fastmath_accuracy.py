@@ -64,9 +64,17 @@ FUNCTIONS = [
     ("fsin", "fa.fsin", ("lin", -3.14159265, 3.14159265), "abs", np.sin),
     ("fsin_big", "fa.fsin", ("lin", -1000, 1000), "abs", np.sin),
     ("fsin_faster", "fa.fsin_faster", ("lin", -3.14159265, 3.14159265), "abs", np.sin),
+    ("fsin_1e5", "fa.fsin", ("lin", -1e5, 1e5), "abs", np.sin),
+    ("fsin_1e7", "fa.fsin", ("lin", -1e7, 1e7), "abs", np.sin),
     ("fcos", "fa.fcos", ("lin", -3.14159265, 3.14159265), "abs", np.cos),
+    ("fcos_big", "fa.fcos", ("lin", -1000, 1000), "abs", np.cos),
+    ("fcos_1e5", "fa.fcos", ("lin", -1e5, 1e5), "abs", np.cos),
+    ("fcos_1e7", "fa.fcos", ("lin", -1e7, 1e7), "abs", np.cos),
     ("ftanpi", "fa.ftanpi", ("lin", -0.49, 0.49), "rel", tanpi),
     ("ftan", "fa.ftan", ("lin", -1.5, 1.5), "rel", np.tan),
+    # 318 pi +- 1.5, and 31831 pi +- 1.5: the same distance from the poles as [-1.5, 1.5]
+    ("ftan_big", "fa.ftan", ("lin", 997.52654, 1000.52654), "rel", np.tan),
+    ("ftan_1e5", "fa.ftan", ("lin", 99998.536, 100001.536), "rel", np.tan),
     ("ftanh", "fa.ftanh", ("lin", -20, 20), "abs", np.tanh),
     ("ftanh_faster", "fa.ftanh_faster", ("lin", -20, 20), "abs", np.tanh),
 ]

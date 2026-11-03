@@ -153,6 +153,25 @@ def dtanh():
     return c, e * 0.25
 
 
+def sinr(cs):
+    """sin(r) = r p(r^2), r in [-pi/2, pi/2]: the sin2pi polynomial in s = r/(2 pi), rescaled
+    (the same absolute error)."""
+    return [float(mp.mpf(c) / (2 * mp.pi) ** (2 * k + 1)) for k, c in enumerate(cs)]
+
+
+def pi_parts(bits, last):
+    """pi = P1 + P2 + P3, P1 and P2 rounded to bits[0] and bits[1] significant bits (so that
+    k P1 and k P2 are exact for a k of up to 24 - bits bits in single precision, 53 - bits in
+    double), P3 the rest rounded to `last` bits; and the residual pi - P1 - P2 - P3."""
+    parts, rem = [], +mp.pi
+    for b in bits + (last,):
+        e = int(mp.floor(mp.log(abs(rem), 2)))
+        q = mp.nint(rem * mp.mpf(2) ** (b - 1 - e)) / mp.mpf(2) ** (b - 1 - e)
+        parts.append(float(q))
+        rem -= q
+    return parts, float(rem)
+
+
 def faust(name, cs):
     body = ", ".join(f"{c:.17g}" for c in cs)
     return f"{name} = ({body});"
@@ -178,6 +197,13 @@ def main():
     print(f"// sin2pi, faster: absolute error {e:.2g}\n{faust('_FM_SIN2PI_FASTER', c)}")
     c, e = dsin2pi()
     print(f"// sin2pi, double, in s^2: absolute error {e:.2g}\n{faust('_FM_SIN2PI', c)}")
+    c, e = sin2pi(9)
+    print(f"// sin(r), single, in r^2: absolute error {e:.2g}\n{faust('_FA_SINR', sinr(c))}")
+    c, e = dsin2pi()
+    print(f"// sin(r), double, in r^2: absolute error {e:.2g}\n{faust('_FA_SINR', sinr(c))}")
+    for prec, bits, last in (("single", (8, 8), 24), ("double", (29, 29), 53)):
+        p, rem = pi_parts(bits, last)
+        print(f"// pi in three parts, {prec}: residual {rem:.2g}\n{faust('_FA_PI3', p)}")
     (p, q), e = tanpi_rational()
     print(f"// tanpi, single, rational: relative error {e:.2g}\n{faust('_FM_TANPI_P', p)}\n"
           f"{faust('_FM_TANPI_Q', q)}")
