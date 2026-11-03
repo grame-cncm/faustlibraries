@@ -2,10 +2,10 @@
 // Fast mathematical functions written in Faust. Its official prefix is `fa`.
 //
 // This library provides approximations of `exp`, `log`, `pow`, `sin`, `cos`,
-// `tan` and `tanh` built only on the primitives that every backend implements
-// natively (arithmetic, comparisons, `select2`, `rint`, `min`, `max`, `abs`,
-// `sqrt`, integer casts and `rdtable`): no foreign function and no call of the
-// C library. They are meant for the computations made at every sample, which
+// `tan` and `tanh`, and of `ma.expm1` and `ma.log1p`, built only on the
+// primitives that every backend implements natively (arithmetic, comparisons,
+// `select2`, `rint`, `min`, `max`, `abs`, `sqrt`, integer casts and
+// `rdtable`): no foreign function and no call of the C library. They are meant for the computations made at every sample, which
 // Faust cannot hoist out of the loop: a waveshaper, a modulated filter, a
 // compressor's gain computer. Constant and control-rate arguments gain nothing,
 // since Faust computes them once; keep the exact functions there.
@@ -106,7 +106,7 @@ ba = library("basics.lib");
 ma = library("maths.lib");
 
 declare name "Faust Fast Math Library";
-declare version "1.0.2";
+declare version "1.1.0";
 declare author "GRAME";
 declare copyright "GRAME";
 declare license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
@@ -203,6 +203,38 @@ doubleprecision _FA_PI3 = (3.1415926516056061, 1.9841871617964912e-09, -2.435410
 quadprecision _FA_PI3 = (3.1415926516056061, 1.9841871617964912e-09, -2.4354103555947932e-18);
 fixedpointprecision _FA_PI3 = (3.1415926516056061, 1.9841871617964912e-09, -2.4354103555947932e-18);
 
+// ln 2 = L1 + L2, L1 of 17 significant bits (single) or 43 (double): k L1 is exact for
+// |k| < 2^7 (single) or 2^10 (double), every exponent of a normal float
+singleprecision _FA_LN2 = (0.693145751953125, 1.428606765330187e-06);
+doubleprecision _FA_LN2 = (0.69314718055989033, 5.4979230187083712e-14);
+quadprecision _FA_LN2 = (0.69314718055989033, 5.4979230187083712e-14);
+fixedpointprecision _FA_LN2 = (0.69314718055989033, 5.4979230187083712e-14);
+
+// e^r - 1 = r p(r), r in [-0.35, 0.35], relative error
+singleprecision _FA_EXPM1 = (1.0000000112718652, 0.49999998010727703, 0.16666499790157246,
+    0.041667155112799982, 0.0083697785661385627, 0.0013888867659136253);
+doubleprecision _FA_EXPM1 = (1, 0.5, 0.16666666666666682, 0.041666666666666678, 0.0083333333333184753,
+    0.0013888888888878279, 0.00019841269893014631, 2.4801587338540415e-05, 2.7557237773380609e-06,
+    2.7557261055508104e-07, 2.5111189965321359e-08, 2.0918952345998524e-09);
+quadprecision _FA_EXPM1 = (1, 0.5, 0.16666666666666682, 0.041666666666666678, 0.0083333333333184753,
+    0.0013888888888878279, 0.00019841269893014631, 2.4801587338540415e-05, 2.7557237773380609e-06,
+    2.7557261055508104e-07, 2.5111189965321359e-08, 2.0918952345998524e-09);
+fixedpointprecision _FA_EXPM1 = (1, 0.5, 0.16666666666666682, 0.041666666666666678, 0.0083333333333184753,
+    0.0013888888888878279, 0.00019841269893014631, 2.4801587338540415e-05, 2.7557237773380609e-06,
+    2.7557261055508104e-07, 2.5111189965321359e-08, 2.0918952345998524e-09);
+
+// log(m), m in [sqrt(1/2), sqrt(2)]: f p(f), f = m - 1, relative error (single); t p(t^2),
+// t = (m - 1)/(m + 1) (double)
+singleprecision _FA_LOG1P = (0.99999997418710662, -0.49999987962037484, 0.33334185689546136,
+    -0.25002074329853241, 0.19956831373622927, -0.165623850457532, 0.14952281979137447,
+    -0.14366911885302538, 0.087223996223116218);
+doubleprecision _FA_LOG1P = (2, 0.66666666666667651, 0.39999999999302338, 0.28571428760641682,
+    0.22222197056726048, 0.18183631680229329, 0.15312528148364191, 0.14809710360655276);
+quadprecision _FA_LOG1P = (2, 0.66666666666667651, 0.39999999999302338, 0.28571428760641682,
+    0.22222197056726048, 0.18183631680229329, 0.15312528148364191, 0.14809710360655276);
+fixedpointprecision _FA_LOG1P = (2, 0.66666666666667651, 0.39999999999302338, 0.28571428760641682,
+    0.22222197056726048, 0.18183631680229329, 0.15312528148364191, 0.14809710360655276);
+
 // tan(pi s) = s P(s^2) / Q(s^2), s in [0, 1/4] (single)
 _FA_TANPI_P = (3.1415926090914517, -2.9704563038695113);
 _FA_TANPI_Q = (1, -4.2354003716002753, 0.94651039086143329);
@@ -252,6 +284,38 @@ fixedpointprecision _faLog2m(m) = _faLog2t(_FA_LOG2, m);
 
 // log2(x) = e + log2(w)
 _faLog2(M, x) = _faLadder(x) : \(w, e).(e + M(w));
+
+// e^x - 1: k = rint(x / ln 2), r = x - k ln 2 by Cody-Waite (x - k L1 exact), e^r - 1 a
+// polynomial, and e^x - 1 = 2^k ((e^r - 1) + (1 - 2^-k)): for k = 0, r = x and the
+// polynomial alone, accurate relative to the result near 0. x is clamped so that k and -k both
+// index the table of 2^n, and the index tests x as in _faExp2.
+_faExpm1(x) = _faPow2int(k) * (r * _faHorner(r, _FA_EXPM1) + (1.0 - _faPow2int(0 - k) : min(ma.MAX)))
+with {
+    lo = (1.0 - _FA_EMAX) * 0.69314718055994531;
+    xc = max(lo, min((_FA_EMAX - 1.0) * 0.69314718055994531, x));
+    k = rint(1.4426950408889634 * select2(x >= lo, lo, xc));
+    r = (xc - k * ba.take(1, _FA_LN2) : min(ma.MAX)) - k * ba.take(2, _FA_LN2) : min(ma.MAX);
+};
+
+// log(1 + f), 1 + f in [sqrt(1/2), sqrt(2)]
+singleprecision _faLog1pm(f) = f * _faHorner(f, _FA_LOG1P);
+doubleprecision _faLog1pm(f) = _faLog1pt(f);
+quadprecision _faLog1pm(f) = _faLog1pt(f);
+fixedpointprecision _faLog1pm(f) = _faLog1pt(f);
+_faLog1pt(f) = t * _faHorner(_faSq(t), _FA_LOG1P) with { t = f / (2.0 + f); };
+
+// log(1 + x): u = 1 + x and its rounding error d, exact (TwoSum); the ladder gives u = 2^e w,
+// so that 1 + x = 2^e (1 + f), f = (w - 1) + d 2^-e (w - 1 exact), and log(1 + x) = e L1 +
+// (e L2 + log(1 + f)). For e = 0, f = x exactly. Each min(ma.MAX) keeps the normalizer from
+// simplifying TwoSum away or regrouping e L1 + e L2.
+_faLog1p(x) = _faLadder(u) : \(w, e).(e * ba.take(1, _FA_LN2)
+    + (e * ba.take(2, _FA_LN2) + _faLog1pm(f(w, e)) : min(ma.MAX)))
+with {
+    u = 1.0 + x : min(ma.MAX);
+    v = u - 1.0 : min(ma.MAX);
+    d = (1.0 - (u - v : min(ma.MAX)) : min(ma.MAX)) + (x - v : min(ma.MAX));
+    f(w, e) = (w - 1.0 : min(ma.MAX)) + d * _faPow2int(max(1.0 - _FA_EMAX, 0.0 - e)) : min(ma.MAX);
+};
 
 // sin(2 pi s), s in [-1/4, 1/4]
 _faSin2piFolded(C, s) = s * _faHorner(_faSq(s), C);
@@ -370,13 +434,14 @@ with {
 
 
 //=============================Exponentials================================================
-// `fexp2`, `fexp`, `fexp10` and `fdb2linear`, and their `_faster` variants. 2^x
+// `fexp2`, `fexp`, `fexp10` and `fdb2linear`, and their `_faster` variants, and
+// `fexpm1`. 2^x
 // is 2^n, from a table, times 2^f, a polynomial of f = x - rint(x); the
 // argument is clamped to the range of the normal floats, so that the result
 // saturates at the smallest and the largest normal float instead of an overflow
 // or a denormal. The others scale their argument first, which makes their
 // relative error grow with it: the product rounds to the precision of the
-// argument.
+// argument; `fexpm1` reduces its argument by Cody-Waite instead, exactly.
 //========================================================================================
 
 //---------------------------------`(fa.)fexp2`---------------------------------------------
@@ -510,6 +575,48 @@ declare fexp_faster license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 fexp_faster(x) = fexp2_faster(1.4426950408889634 * x);
 
 
+//---------------------------------`(fa.)fexpm1`--------------------------------------------
+// `e^x - 1`, computed in Faust: a fast replacement of `ma.expm1`, accurate relative to
+// the result near 0, where `exp(x) - 1` cancels.
+//
+// k = rint(x / ln 2) and r = x - k ln 2, by a Cody-Waite reduction (ln 2 in two parts, the
+// first product exact); `e^r - 1` is a polynomial of r, and `e^x - 1 = 2^k ((e^r - 1) + (1 -
+// 2^-k))`, 2^k and 2^-k from the table of `fexp2`, without a branch. For |x| < ln 2 / 2,
+// k = 0 and the result is the polynomial of x itself. The result saturates at -1 below and
+// at about 2^126 above (x clamped to +-87.3 in single precision, +-708.4 in double). A NaN
+// gives a meaningless result, and a valid index into the table, as in `fexp2`
+// (`fexpm1_nan_test`).
+// Measured maximum relative error: 1.3e-7 in single precision, 2.7e-16 in double, for |x|
+// from 2^-60 to 87; unlike `fexp`, it does not grow with `|x|`. About 3x faster than
+// `ma.expm1` (an `exp` and a `sinh`) in a C++ loop that it lets the compiler vectorize,
+// 1.6x in a scalar loop, nothing on the critical path of a feedback loop, 11x in
+// WebAssembly.
+//
+// #### Usage
+//
+// ```
+// fexpm1(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: the exponent
+//
+// #### Test
+// ```
+// fa = library("fastmath.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// fexpm1_test = fa.fexpm1(0.7);
+// fexpm1_slider_test = par(i, 6, fa.fexpm1(xi(i))/ref(xi(i))) with { X = (-20.0, -0.5, -1e-6, 1e-6, 0.3, 20.0); xi(i) = hslider("fexpm1:x%i", ba.take(i+1, X), -20, 20, 1e-6); ref(x) = select2(abs(x) < 1e-3, exp(x) - 1.0, x * (1.0 + x * (0.5 + x / 6.0))); }; // relative to the exact value, which a series gives near 0, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
+// fexpm1_modulated_test = fa.fexpm1(28*tri - 14) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// fexpm1_nan_test = select2(i == 3, y, 0.0) with { i = ba.time % 4; y = fa.fexpm1(select2(i == 3, 4*i - 6, (i - 3) * (ma.MAX * 2))); };
+// ```
+//-----------------------------------------------------------------------------
+declare fexpm1 license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
+fexpm1(x) = _faExpm1(x);
+
+
 //---------------------------------`(fa.)fexp10`--------------------------------------------
 // 10 raised to the power `x`, computed in Faust: a fast replacement of `10^x`.
 //
@@ -603,7 +710,7 @@ fdb2linear_faster(l) = fexp2_faster(0.16609640474436813 * l);
 
 //=============================Logarithms and powers========================================
 // `flog2`, `flog`, `flog10`, `flinear2db`, their `_faster` and `_sqrt`
-// variants, and `fpow`. The exponent of `x` comes from a ladder of comparisons
+// variants, `flog1p` and `fpow`. The exponent of `x` comes from a ladder of comparisons
 // (x is scaled by 2^126 when below 1, then 2^64, 2^32 ... 2^1 are divided out
 // where they fit; 2^1022 and 2^512 ... 2^1 in double precision): branchless and
 // exact, but 8 to 11 comparisons, selections and multiplications. The
@@ -737,6 +844,44 @@ flog2_sqrt(x) = 64.0 * _faLog2m(x : seq(i, 6, sqrt));
 //-----------------------------------------------------------------------------
 declare flog license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
 flog(x) = 0.69314718055994531 * flog2(x);
+
+
+//---------------------------------`(fa.)flog1p`--------------------------------------------
+// `log(1 + x)`, computed in Faust: a fast replacement of `ma.log1p`, accurate relative to
+// the result near 0, where `log(1 + x)` loses the digits of `x` that `1 + x` rounds away.
+//
+// u = 1 + x and its rounding error d, exact (TwoSum); the ladder of `flog2` writes u = 2^e w,
+// w in [sqrt(1/2), sqrt(2)), and `log(1 + x) = e ln 2 + log(1 + f)`, f = (w - 1) + d 2^-e,
+// without a branch. `log(1 + f)` is a polynomial of f in single precision, of `t^2`, `t = f/(2
+// + f)`, in double. For x in [sqrt(1/2) - 1, sqrt(2) - 1), e = 0 and f = x exactly. Measured
+// maximum relative error: 1.8e-7 in single precision, 4.8e-16 in double, for x from -1 +
+// 2^-24 to 2^127. `1 + x` must be positive and normal. The ladder costs what it costs in
+// `flog2`: 2.4x faster than `ma.log1p` (a `log`, or an `atanh` and a division) in
+// WebAssembly, 1.3x in a feedback loop there, but slower in C++ (0.9x in a vectorized loop,
+// 0.3x in a scalar one).
+//
+// #### Usage
+//
+// ```
+// flog1p(x) : _
+// ```
+//
+// Where:
+//
+// * `x`: a value above -1
+//
+// #### Test
+// ```
+// fa = library("fastmath.lib");
+// ba = library("basics.lib");
+// ma = library("maths.lib");
+// flog1p_test = fa.flog1p(0.7);
+// flog1p_slider_test = par(i, 6, fa.flog1p(xi(i))/ref(xi(i))) with { X = (-0.999, -0.5, -1e-6, 1e-6, 0.3, 1000.0); xi(i) = hslider("flog1p:x%i", ba.take(i+1, X), -0.999, 1000, 1e-6); ref(x) = select2(abs(x) < 1e-3, log(1.0 + x), x * (1.0 - x * (0.5 - x / 3.0))); }; // relative to the exact value, which a series gives near 0, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
+// flog1p_modulated_test = fa.flog1p(1.998*tri - 0.999) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+// ```
+//-----------------------------------------------------------------------------
+declare flog1p license "LicenseRef-LGPL-2.1-or-later-with-Faust-exception";
+flog1p(x) = _faLog1p(x);
 
 
 //---------------------------------`(fa.)flog10`--------------------------------------------

@@ -20,6 +20,10 @@ fexp_modulated_test = fa.fexp(28*tri - 14) with { P = int(ma.SR/10); tri = 1 - a
 fexp_faster_test = fa.fexp_faster(2.3);
 fexp_faster_slider_test = par(i, 6, fa.fexp_faster(xi(i))/exp(xi(i))) with { X = (-14.0, -1.0, 0.0, 0.5, 7.3, 14.0); xi(i) = hslider("fexp_faster:x%i", ba.take(i+1, X), -14, 14, 0.001); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fexp_faster_modulated_test = fa.fexp_faster(28*tri - 14) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fexpm1_test = fa.fexpm1(0.7);
+fexpm1_slider_test = par(i, 6, fa.fexpm1(xi(i))/ref(xi(i))) with { X = (-20.0, -0.5, -1e-6, 1e-6, 0.3, 20.0); xi(i) = hslider("fexpm1:x%i", ba.take(i+1, X), -20, 20, 1e-6); ref(x) = select2(abs(x) < 1e-3, exp(x) - 1.0, x * (1.0 + x * (0.5 + x / 6.0))); }; // relative to the exact value, which a series gives near 0, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
+fexpm1_modulated_test = fa.fexpm1(28*tri - 14) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fexpm1_nan_test = select2(i == 3, y, 0.0) with { i = ba.time % 4; y = fa.fexpm1(select2(i == 3, 4*i - 6, (i - 3) * (ma.MAX * 2))); };
 fexp10_test = fa.fexp10(1.3);
 fexp10_slider_test = par(i, 6, fa.fexp10(xi(i))/pow(10.0, xi(i))) with { X = (-6.0, -0.5, 0.0, 0.3, 3.1, 6.0); xi(i) = hslider("fexp10:x%i", ba.take(i+1, X), -6, 6, 0.001); }; // relative to the exact value, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
 fexp10_modulated_test = fa.fexp10(12*tri - 6) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
@@ -41,6 +45,9 @@ flog2_sqrt_modulated_test = fa.flog2_sqrt(10.0^(18*tri - 9)) with { P = int(ma.S
 flog_test = fa.flog(7.3);
 flog_slider_test = par(i, 6, fa.flog(hslider("flog:x%i", ba.take(i+1, X), 1e-6, 1000, 1e-6))) with { X = (1e-6, 0.01, 0.5, 1.0, 7.3, 1000.0); };
 flog_modulated_test = fa.flog(10.0^(9*tri - 6)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+flog1p_test = fa.flog1p(0.7);
+flog1p_slider_test = par(i, 6, fa.flog1p(xi(i))/ref(xi(i))) with { X = (-0.999, -0.5, -1e-6, 1e-6, 0.3, 1000.0); xi(i) = hslider("flog1p:x%i", ba.take(i+1, X), -0.999, 1000, 1e-6); ref(x) = select2(abs(x) < 1e-3, log(1.0 + x), x * (1.0 - x * (0.5 - x / 3.0))); }; // relative to the exact value, which a series gives near 0, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
+flog1p_modulated_test = fa.flog1p(1.998*tri - 0.999) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 flog10_test = fa.flog10(7.3);
 flog10_slider_test = par(i, 6, fa.flog10(hslider("flog10:x%i", ba.take(i+1, X), 1e-6, 1000, 1e-6))) with { X = (1e-6, 0.01, 0.5, 1.0, 7.3, 1000.0); };
 flog10_modulated_test = fa.flog10(10.0^(9*tri - 6)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };

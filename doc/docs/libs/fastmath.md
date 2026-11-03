@@ -3,10 +3,10 @@
 Fast mathematical functions written in Faust. Its official prefix is `fa`.
 
 This library provides approximations of `exp`, `log`, `pow`, `sin`, `cos`,
-`tan` and `tanh` built only on the primitives that every backend implements
-natively (arithmetic, comparisons, `select2`, `rint`, `min`, `max`, `abs`,
-`sqrt`, integer casts and `rdtable`): no foreign function and no call of the
-C library. They are meant for the computations made at every sample, which
+`tan` and `tanh`, and of `ma.expm1` and `ma.log1p`, built only on the
+primitives that every backend implements natively (arithmetic, comparisons,
+`select2`, `rint`, `min`, `max`, `abs`, `sqrt`, integer casts and
+`rdtable`): no foreign function and no call of the C library. They are meant for the computations made at every sample, which
 Faust cannot hoist out of the loop: a waveshaper, a modulated filter, a
 compressor's gain computer. Constant and control-rate arguments gain nothing,
 since Faust computes them once; keep the exact functions there.
@@ -68,13 +68,14 @@ calls as `Math.pow`.
 
 ## Exponentials
 
-`fexp2`, `fexp`, `fexp10` and `fdb2linear`, and their `_faster` variants. 2^x
+`fexp2`, `fexp`, `fexp10` and `fdb2linear`, and their `_faster` variants, and
+`fexpm1`. 2^x
 is 2^n, from a table, times 2^f, a polynomial of f = x - rint(x); the
 argument is clamped to the range of the normal floats, so that the result
 saturates at the smallest and the largest normal float instead of an overflow
 or a denormal. The others scale their argument first, which makes their
 relative error grow with it: the product rounds to the precision of the
-argument.
+argument; `fexpm1` reduces its argument by Cody-Waite instead, exactly.
 
 ----
 
@@ -205,6 +206,47 @@ fexp_faster_modulated_test = fa.fexp_faster(28*tri - 14) with { P = int(ma.SR/10
 
 ----
 
+### `(fa.)fexpm1`
+
+`e^x - 1`, computed in Faust: a fast replacement of `ma.expm1`, accurate relative to
+the result near 0, where `exp(x) - 1` cancels.
+
+k = rint(x / ln 2) and r = x - k ln 2, by a Cody-Waite reduction (ln 2 in two parts, the
+first product exact); `e^r - 1` is a polynomial of r, and `e^x - 1 = 2^k ((e^r - 1) + (1 -
+2^-k))`, 2^k and 2^-k from the table of `fexp2`, without a branch. For |x| < ln 2 / 2,
+k = 0 and the result is the polynomial of x itself. The result saturates at -1 below and
+at about 2^126 above (x clamped to +-87.3 in single precision, +-708.4 in double). A NaN
+gives a meaningless result, and a valid index into the table, as in `fexp2`
+(`fexpm1_nan_test`).
+Measured maximum relative error: 1.3e-7 in single precision, 2.7e-16 in double, for |x|
+from 2^-60 to 87; unlike `fexp`, it does not grow with `|x|`. About 3x faster than
+`ma.expm1` (an `exp` and a `sinh`) in a C++ loop that it lets the compiler vectorize,
+1.6x in a scalar loop, nothing on the critical path of a feedback loop, 11x in
+WebAssembly.
+
+#### Usage
+
+```
+fexpm1(x) : _
+```
+
+Where:
+
+* `x`: the exponent
+
+#### Test
+```
+fa = library("fastmath.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+fexpm1_test = fa.fexpm1(0.7);
+fexpm1_slider_test = par(i, 6, fa.fexpm1(xi(i))/ref(xi(i))) with { X = (-20.0, -0.5, -1e-6, 1e-6, 0.3, 20.0); xi(i) = hslider("fexpm1:x%i", ba.take(i+1, X), -20, 20, 1e-6); ref(x) = select2(abs(x) < 1e-3, exp(x) - 1.0, x * (1.0 + x * (0.5 + x / 6.0))); }; // relative to the exact value, which a series gives near 0, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
+fexpm1_modulated_test = fa.fexpm1(28*tri - 14) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+fexpm1_nan_test = select2(i == 3, y, 0.0) with { i = ba.time % 4; y = fa.fexpm1(select2(i == 3, 4*i - 6, (i - 3) * (ma.MAX * 2))); };
+```
+
+----
+
 ### `(fa.)fexp10`
 
 10 raised to the power `x`, computed in Faust: a fast replacement of `10^x`.
@@ -294,7 +336,7 @@ fdb2linear_faster_modulated_test = fa.fdb2linear_faster(144*tri - 120) with { P 
 ## Logarithms and powers
 
 `flog2`, `flog`, `flog10`, `flinear2db`, their `_faster` and `_sqrt`
-variants, and `fpow`. The exponent of `x` comes from a ladder of comparisons
+variants, `flog1p` and `fpow`. The exponent of `x` comes from a ladder of comparisons
 (x is scaled by 2^126 when below 1, then 2^64, 2^32 ... 2^1 are divided out
 where they fit; 2^1022 and 2^512 ... 2^1 in double precision): branchless and
 exact, but 8 to 11 comparisons, selections and multiplications. The
@@ -423,6 +465,43 @@ ma = library("maths.lib");
 flog_test = fa.flog(7.3);
 flog_slider_test = par(i, 6, fa.flog(hslider("flog:x%i", ba.take(i+1, X), 1e-6, 1000, 1e-6))) with { X = (1e-6, 0.01, 0.5, 1.0, 7.3, 1000.0); };
 flog_modulated_test = fa.flog(10.0^(9*tri - 6)) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+```
+
+----
+
+### `(fa.)flog1p`
+
+`log(1 + x)`, computed in Faust: a fast replacement of `ma.log1p`, accurate relative to
+the result near 0, where `log(1 + x)` loses the digits of `x` that `1 + x` rounds away.
+
+u = 1 + x and its rounding error d, exact (TwoSum); the ladder of `flog2` writes u = 2^e w,
+w in [sqrt(1/2), sqrt(2)), and `log(1 + x) = e ln 2 + log(1 + f)`, f = (w - 1) + d 2^-e,
+without a branch. `log(1 + f)` is a polynomial of f in single precision, of `t^2`, `t = f/(2
++ f)`, in double. For x in [sqrt(1/2) - 1, sqrt(2) - 1), e = 0 and f = x exactly. Measured
+maximum relative error: 1.8e-7 in single precision, 4.8e-16 in double, for x from -1 +
+2^-24 to 2^127. `1 + x` must be positive and normal. The ladder costs what it costs in
+`flog2`: 2.4x faster than `ma.log1p` (a `log`, or an `atanh` and a division) in
+WebAssembly, 1.3x in a feedback loop there, but slower in C++ (0.9x in a vectorized loop,
+0.3x in a scalar one).
+
+#### Usage
+
+```
+flog1p(x) : _
+```
+
+Where:
+
+* `x`: a value above -1
+
+#### Test
+```
+fa = library("fastmath.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+flog1p_test = fa.flog1p(0.7);
+flog1p_slider_test = par(i, 6, fa.flog1p(xi(i))/ref(xi(i))) with { X = (-0.999, -0.5, -1e-6, 1e-6, 0.3, 1000.0); xi(i) = hslider("flog1p:x%i", ba.take(i+1, X), -0.999, 1000, 1e-6); ref(x) = select2(abs(x) < 1e-3, log(1.0 + x), x * (1.0 - x * (0.5 - x / 3.0))); }; // relative to the exact value, which a series gives near 0, so that make check (tolerance 1e-5) compares every point, whatever its magnitude
+flog1p_modulated_test = fa.flog1p(1.998*tri - 0.999) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 ```
 
 ----

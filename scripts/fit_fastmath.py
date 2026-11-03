@@ -64,6 +64,26 @@ def log2_mant(deg):
     return list(c), err
 
 
+def expm1_red(deg):
+    """e^r - 1 = r p(r), r in [-0.35, 0.35] (ln 2 / 2 and a margin), relative error: p is fitted
+    to (e^r - 1)/r with the weight r/(e^r - 1)."""
+    r = np.linspace(-0.35, 0.35, GRID)
+    t = np.where(r == 0, 1.0, np.expm1(r) / np.where(r == 0, 1.0, r))
+    basis = np.stack([r ** k for k in range(deg)], axis=1)
+    c, err = lawson(basis, t, 1.0 / t)
+    return list(c), err
+
+
+def log1p_mant(deg):
+    """log(1 + f) = f p(f), 1 + f in [sqrt(1/2), sqrt(2)], relative error: p is fitted to
+    log(1 + f)/f with the weight f/log(1 + f)."""
+    f = np.linspace(np.sqrt(0.5) - 1.0, np.sqrt(2.0) - 1.0, GRID)
+    t = np.where(f == 0, 1.0, np.log1p(f) / np.where(f == 0, 1.0, f))
+    basis = np.stack([f ** k for k in range(deg)], axis=1)
+    c, err = lawson(basis, t, 1.0 / t)
+    return list(c), err
+
+
 def sin2pi(deg):
     """sin(2 pi s) = s p(s^2), s in [-1/4, 1/4], absolute error (odd degree deg)."""
     s = np.linspace(0.0, 0.25, GRID)
@@ -139,6 +159,22 @@ def dlog2():
     return c, e * float(tmax)
 
 
+def dexpm1():
+    """e^r - 1 = r E(r), r in [-0.35, 0.35]."""
+    E = lambda r: mp.mpf(1) if r == 0 else mp.expm1(r) / r
+    c, e = chebyfit(E, mp.mpf(-0.35), mp.mpf(0.35), 11)
+    return c, e
+
+
+def dlog1p():
+    """log(m) = t L(t^2), t = (m - 1)/(m + 1), m in [sqrt(1/2), sqrt(2)]: dlog2 in natural
+    units."""
+    tmax = (mp.sqrt(2) - 1) / (mp.sqrt(2) + 1)
+    L = lambda z: mp.mpf(2) if z == 0 else mp.log((1 + mp.sqrt(z)) / (1 - mp.sqrt(z))) / mp.sqrt(z)
+    c, e = chebyfit(L, mp.mpf(0), tmax ** 2, 7)
+    return c, e * float(tmax)
+
+
 def dsin2pi():
     """sin(2 pi s) = s S(s^2), s in [0, 1/4]."""
     S = lambda z: 2 * mp.pi if z == 0 else mp.sin(2 * mp.pi * mp.sqrt(z)) / mp.sqrt(z)
@@ -159,11 +195,12 @@ def sinr(cs):
     return [float(mp.mpf(c) / (2 * mp.pi) ** (2 * k + 1)) for k, c in enumerate(cs)]
 
 
-def pi_parts(bits, last):
+def pi_parts(bits, last, value=None):
     """pi = P1 + P2 + P3, P1 and P2 rounded to bits[0] and bits[1] significant bits (so that
     k P1 and k P2 are exact for a k of up to 24 - bits bits in single precision, 53 - bits in
-    double), P3 the rest rounded to `last` bits; and the residual pi - P1 - P2 - P3."""
-    parts, rem = [], +mp.pi
+    double), P3 the rest rounded to `last` bits; and the residual pi - P1 - P2 - P3. Another
+    `value` (ln 2) is split the same way, in len(bits) + 1 parts."""
+    parts, rem = [], +(mp.pi if value is None else value)
     for b in bits + (last,):
         e = int(mp.floor(mp.log(abs(rem), 2)))
         q = mp.nint(rem * mp.mpf(2) ** (b - 1 - e)) / mp.mpf(2) ** (b - 1 - e)
@@ -204,6 +241,18 @@ def main():
     for prec, bits, last in (("single", (8, 8), 24), ("double", (29, 29), 53)):
         p, rem = pi_parts(bits, last)
         print(f"// pi in three parts, {prec}: residual {rem:.2g}\n{faust('_FA_PI3', p)}")
+    for prec, bits, last in (("single", (17,), 24), ("double", (43,), 53)):
+        p, rem = pi_parts(bits, last, mp.log(2))
+        print(f"// ln 2 in two parts, {prec}: residual {rem:.2g}\n{faust('_FA_LN2', p)}")
+    c, e = expm1_red(6)
+    print(f"// expm1, single, in r: relative error {e:.2g}\n{faust('_FA_EXPM1', c)}")
+    c, e = dexpm1()
+    print(f"// expm1, double, in r: relative error {e:.2g}\n{faust('_FA_EXPM1', c)}")
+    c, e = log1p_mant(9)
+    print(f"// log1p mantissa, single, in f = m - 1: relative error {e:.2g}\n{faust('_FA_LOG1P', c)}")
+    c, e = dlog1p()
+    print(f"// log1p mantissa, double, t = (m - 1)/(m + 1), in t^2: absolute error {e:.2g}\n"
+          f"{faust('_FA_LOG1P', c)}")
     (p, q), e = tanpi_rational()
     print(f"// tanpi, single, rational: relative error {e:.2g}\n{faust('_FM_TANPI_P', p)}\n"
           f"{faust('_FM_TANPI_Q', q)}")
