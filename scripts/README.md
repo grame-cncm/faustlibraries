@@ -498,7 +498,8 @@ sample fails, with the error and the frame; a module that imports its memory
 parallel. `--no-run` validates without running, `--no-validate` compiles only;
 without `node` both are skipped with a note. The Cmajor patches are compiled
 and rendered by Cmajor itself (`cmaj render`, one second at 48 kHz after the
-20000 frames of silence it starts with, cmajor-lang/cmajor#140; the controls
+silence it starts with, cmajor-lang/cmajor#140: 20480 frames up to its build of
+September 2026, none in that of November 2026, so measured once per run; the controls
 at their default values, since `cmaj render` cannot press a button): a patch
 that Cmajor rejects (the error comes from `cmaj play --dry-run`, `cmaj render`
 gives none), that stops or writes a non-finite sample fails; about a minute,
@@ -527,7 +528,7 @@ backends compute), rendered by `arch/precision_arch.cpp` with the same
 schedule (`block=512`, `nopress` for Cmajor). Everything above only asks a
 backend for finite samples, which hid Cmajor's slider defaults snapped to
 their step and its `sinh`/`atanh` without precision near 0
-(cmajor-lang/cmajor#141). A test fails when its shape differs, its level gap
+(cmajor-lang/cmajor#141, fixed in November 2026 with its `acos`). A test fails when its shape differs, its level gap
 (as `check_precision.py` measures it) exceeds `--level-max` (1e-3), or its
 sample gap (the largest difference, relative to the C++ peak) `--gap-max`
 (1e-2), unless `tests/backend-output-baseline.json` accepts it with a

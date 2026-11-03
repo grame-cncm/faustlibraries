@@ -39,7 +39,8 @@ with --no-validate) the modules are neither validated nor run, and
 
 For Cmajor, the code faust generates is also compiled and run by Cmajor
 itself, with `cmaj render` (one second at 48 kHz after the silence `cmaj
-render` starts with, the controls at their default values: `cmaj render`
+render` starts with, measured once per run since it depends on the version of
+Cmajor, the controls at their default values: `cmaj render`
 cannot press a button): `faust -lang cmajor` succeeding does not mean that
 Cmajor accepts the code. A patch that Cmajor rejects, that stops, or that
 writes a non-finite sample fails. Without `cmaj` the patches are only
@@ -91,6 +92,7 @@ import argparse
 import array
 import concurrent.futures as cf
 import contextlib
+import functools
 import json
 import math
 import os
@@ -108,8 +110,9 @@ NODE = os.environ.get("NODE", "node")
 CMAJ = os.environ.get("CMAJ", "cmaj")
 JULIA = os.environ.get("JULIA", "julia")
 SR = 48000
-# cmaj render writes this many frames of silence before the patch's output (measured with
-# Cmajor 1.0: 20480 at a block size of 512); the render is that much longer
+# cmaj render writes frames of silence before the patch's output: 20480 at a block size of
+# 512 up to Cmajor 1.0.3209 of September 2026, none in its build of November 2026.
+# cmaj_silence() measures it; this is the fallback when the measure fails.
 CMAJ_SILENCE = 20480
 # A top-level definition `name_test = ...` at the start of a line, as in
 # scripts/extract_tests.sh and check_precision.py.
@@ -296,6 +299,28 @@ def wav_samples(path):
     return channels, a
 
 
+@functools.lru_cache(maxsize=None)
+def cmaj_silence():
+    """The frames of silence cmaj render writes before the output of a patch: the index of the
+    first nonzero frame of a processor that writes 1 at every frame, rendered as the tests are
+    (CMAJ_SILENCE when that render fails)."""
+    with tempfile.TemporaryDirectory(prefix="cmaj_silence_") as d:
+        code = Path(d) / "one.cmajor"
+        code.write_text("processor One\n{\n    output stream float32 out;\n"
+                        "    void main() { loop { out <- 1.0f; advance(); } }\n}\n")
+        patch = code.with_suffix(".cmajorpatch")
+        patch.write_text(json.dumps({"CmajorVersion": 1, "ID": "dev.faust.silence",
+                                     "version": "1.0", "name": "one", "source": code.name}))
+        wav = code.with_suffix(".wav")
+        r = subprocess.run([CMAJ, "render", f"--length={2 * CMAJ_SILENCE}", f"--rate={SR}",
+                            "--channels=1", "--blockSize=512", f"--output={wav}", str(patch)],
+                           capture_output=True, text=True, timeout=300)
+        if r.returncode != 0 or not wav.exists():
+            return CMAJ_SILENCE
+        _, a = wav_samples(wav)
+        return next((k for k, v in enumerate(a) if v != 0), CMAJ_SILENCE)
+
+
 def cmajor_run_error(code, dump=False):
     """None when Cmajor compiles and renders the generated patch with finite samples. With
     dump, the render (after the silence cmaj render starts with) is written next to the code
@@ -307,7 +332,8 @@ def cmajor_run_error(code, dump=False):
     patch.write_text(json.dumps({"CmajorVersion": 1, "ID": "dev.faust.check", "version": "1.0",
                                  "name": code.stem, "source": code.name}))
     wav = code.with_suffix(".wav")
-    r = subprocess.run([CMAJ, "render", f"--length={SR + CMAJ_SILENCE}", f"--rate={SR}",
+    silence = cmaj_silence()
+    r = subprocess.run([CMAJ, "render", f"--length={SR + silence}", f"--rate={SR}",
                         f"--channels={outs}", "--blockSize=512", f"--output={wav}", str(patch)],
                        capture_output=True, text=True, timeout=300)
     if r.returncode != 0 or not wav.exists():
@@ -322,9 +348,9 @@ def cmajor_run_error(code, dump=False):
     for k, v in enumerate(a):
         if not math.isfinite(v):
             return (f"the patch fails when run: non-finite output {v} on channel"
-                    f" {k % channels} at frame {k // channels - CMAJ_SILENCE}")
+                    f" {k % channels} at frame {k // channels - silence}")
     if dump:
-        frames = a[CMAJ_SILENCE * channels:(CMAJ_SILENCE + SR) * channels]
+        frames = a[silence * channels:(silence + SR) * channels]
         code.with_suffix(".out").write_bytes(channels.to_bytes(4, "little") + frames.tobytes())
     return None
 
