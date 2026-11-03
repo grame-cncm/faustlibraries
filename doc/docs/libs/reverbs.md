@@ -788,6 +788,12 @@ up to 2 s, modulated by a shared quadrature LFO.
 The mode numbers are the plug-in's own. The structures follow the diagrams
 Sean Costello presented at DAFx26; delay, gain, modulation and filter laws
 were matched to the plug-in (v5.0.0). Stereo in, stereo out.
+Parameters act directly. The plug-in's control smoothing and finite-precision
+settling are not reproduced, so timing and modulation can differ, especially
+at higher sample rates.
+
+The measured 33- and 32-sample offsets remain fixed at every sample rate,
+matching the plug-in.
 
 #### Usage
 
@@ -817,6 +823,8 @@ re = library("reverbs.lib");
 os = library("oscillators.lib");
 ba = library("basics.lib");
 ma = library("maths.lib");
+// Tone probes sample comb peaks; impulse and sweep probes cover timing and broad response.
+_supermassive_sweep = (gate*sin(2*ma.PI*(60*t + 4970*t*t)), gate*sin(2*ma.PI*(80*t + 4960*t*t))) with { t = min(ba.time/ma.SR, 1); gate = ba.time < ma.SR; };
 valhallaSupermassive_test = (os.tosc(330), os.tosc(440))
    : re.valhallaSupermassive(6, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
 valhallaSupermassive_slider_test = (os.tosc(330), os.tosc(440))
@@ -826,7 +834,7 @@ valhallaSupermassive_slider_test = (os.tosc(330), os.tosc(440))
        hslider("valhallaSupermassive:feedback", 0.6, 0, 1, 0.01),
        hslider("valhallaSupermassive:density", 0.3, 0, 1, 0.01),
        1, 10, 20000, 0.5, 0.2);
-valhallaSupermassive_modulated_test = (os.tosc(330), os.tosc(440)) : re.valhallaSupermassive(6, 0.5, 100 + 200*tri, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
+valhallaSupermassive_modulated_test = _supermassive_sweep : re.valhallaSupermassive(6, 0.5, 100 + 200*tri, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 valhallaSupermassive_jump_test = (os.tosc(330), os.tosc(440)) : re.valhallaSupermassive(6, 0.5, 200, 0.3, sq, 0.3, 1, 10, 20000, 0.5, 0.2) with { P = int(ma.SR/10); sq = ba.period(2*P) < P; };
 valhallaSupermassive_gemini_test = (os.tosc(330), os.tosc(440))
    : re.valhallaSupermassive(0, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
@@ -838,6 +846,17 @@ valhallaSupermassive_annihilator_test = (os.tosc(330), os.tosc(440))
    : re.valhallaSupermassive(4, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
 valhallaSupermassive_virgo_test = (os.tosc(330), os.tosc(440))
    : re.valhallaSupermassive(19, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_cutrange_test = (os.tosc(330), os.tosc(440)) : re.valhallaSupermassive(6, 1, 12, 0, 0, 0, 1, 3000, 100, 0.5, 0);
+valhallaSupermassive_highcut_test = (os.tosc(9000), os.tosc(18000)) : re.valhallaSupermassive(6, 1, 12, 0, 0, 0, 1, 10, 20000, 0.5, 0);
+valhallaSupermassive_lyra_delay_test = (pulse, 0) : re.valhallaSupermassive(6, 1, 300, 0, 0.5, 0, 1, 10, 20000, 0.5, 0) with { pulse = 1 - 1'; };
+valhallaSupermassive_gemini_delay_test = (pulse, 0) : re.valhallaSupermassive(0, 1, 300, 0, 0.5, 0, 1, 10, 20000, 0.5, 0) with { pulse = 1 - 1'; };
+valhallaSupermassive_annihilator_delay_test = (pulse, 0) : re.valhallaSupermassive(4, 1, 300, 0, 0.5, 0, 1, 10, 20000, 0.5, 0) with { pulse = 1 - 1'; };
+valhallaSupermassive_lyra_sweep_test = _supermassive_sweep : re.valhallaSupermassive(6, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_gemini_sweep_test = _supermassive_sweep : re.valhallaSupermassive(0, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_centaurus_sweep_test = _supermassive_sweep : re.valhallaSupermassive(2, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_sagittarius_sweep_test = _supermassive_sweep : re.valhallaSupermassive(3, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_annihilator_sweep_test = _supermassive_sweep : re.valhallaSupermassive(4, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
+valhallaSupermassive_virgo_sweep_test = _supermassive_sweep : re.valhallaSupermassive(19, 0.5, 200, 0.3, 0.6, 0.3, 1, 10, 20000, 0.5, 0.2);
 ```
 
 #### References
