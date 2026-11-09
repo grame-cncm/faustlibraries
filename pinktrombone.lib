@@ -116,7 +116,7 @@
 //########################################################################################
 
 declare name "pinktrombone.lib";
-declare version "1.0.1";
+declare version "1.0.2";
 declare author "David Braun (Faust port), Neil Thapen (original algorithm)";
 declare license "MIT";
 
@@ -539,8 +539,9 @@ with {
     inReflRight = _NSTATE+2+_n;
     inReflNose = _NSTATE+3+_n;
     // Block input offsets (number of inputs consumed before each block):
-    // glottalEnd(2), junction(1..16)(3 each), noseJunction(6), junction(18..43)(3 each),
-    // lipEnd(1), noseJunction(1..27)(2 each), noseEnd(1).
+    // glottalEnd(2), junction(1.._noseStart-1)(3 each), noseJunction(6),
+    // junction(_noseStart+1.._n-1)(3 each),
+    // lipEnd(1), noseJunction(1.._noseLength-1)(2 each), noseEnd(1).
     offR(i) = _cif(i <= _noseStart, 3*i-1, 3*i+2);        // i >= 1
     offLipL = 3*_n+2;                                    // 134
     offNJ(i) = offLipL+1 + 2*(i-1);                     // i >= 1
@@ -553,9 +554,10 @@ with {
         par(j, _noseLength-1, (inNR(j), offNJ(j+1)+1), (inNL(j+1), offNJ(j+1)+2)),
         (inNR(_noseLength-1), offNoseL+1))
     with {
-        jr(17) = (inReflLeft, offR(17)+1), (inReflRight, offR(17)+2), (inReflNose, offR(17)+3),
-                 (inR(16), offR(17)+4), (inL(17), offR(17)+5), (inNL(0), offR(17)+6);  // _noseStart
-        jr(i)  = (inRefl(i), offR(i)+1), (inR(i-1), offR(i)+2), (inL(i), offR(i)+3);
+        jr(i) = jrAt(i - _noseStart, i);
+        jrAt(0, i) = (inReflLeft, offR(i)+1), (inReflRight, offR(i)+2), (inReflNose, offR(i)+3),
+                     (inR(i-1), offR(i)+4), (inL(i), offR(i)+5), (inNL(0), offR(i)+6);
+        jrAt(d, i) = (inRefl(i), offR(i)+1), (inR(i-1), offR(i)+2), (inL(i), offR(i)+3);
     };
     // scattering blocks
     glottalEnd(l0, g) = l0*_glottalReflection + g;                     // -> jR[0]
@@ -566,8 +568,10 @@ with {
         rn*c + (1+rn)*(b + a);                                        // nJR[0]
     lipEnd = *(_lipReflection);
     blockR(0)  = glottalEnd;
-    blockR(17) = noseJunction;                                        // _noseStart
-    blockR(i)  = junction;
+    // the nose junction at _noseStart, whatever the tract length
+    blockR(i)  = blockAt(i - _noseStart);
+    blockAt(0) = noseJunction;
+    blockAt(d) = junction;
     junctions = par(i, _n, blockR(i)), lipEnd,
                 par(j, _noseLength-1, junction(_noseReflection(j+1))), lipEnd;
 
