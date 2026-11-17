@@ -62,6 +62,10 @@ probe_dc_precise_test = db.probe_dc_precise(56, 1, mono);
 probe_silence_test = db.probe_silence(57, 1, -60, mono);
 probe_sample_count_test = db.probe_sample_count(58, 1, mono);
 probe_time_ms_test = db.probe_time_ms(59, 1, mono);
+probe_view_test = db.probe_view(60, 1, 0, mono),
+  db.probe_view(61, 1, 1, mono),
+  db.probe_view(62, 1, 2, mono);
+probe_xy_test = db.probe_xy(63, 1, mono, os.tosc(330));
 
 probe_disabled_freq_lin_test = db[DEBUG=0;].probe_freq_lin(120, 1, 440, 10, mono);
 probe_disabled_freq_db_test = db[DEBUG=0;].probe_freq_db(121, 1, 440, 10, mono);
@@ -78,6 +82,8 @@ probe_disabled_dc_precise_test = db[DEBUG=0;].probe_dc_precise(142, 1, mono);
 probe_disabled_silence_test = db[DEBUG=0;].probe_silence(143, 1, -60, mono);
 probe_disabled_sample_count_test = db[DEBUG=0;].probe_sample_count(144, 1, mono);
 probe_disabled_time_ms_test = db[DEBUG=0;].probe_time_ms(145, 1, mono);
+probe_disabled_view_test = db[DEBUG=0;].probe_view(146, 1, 0, mono);
+probe_disabled_xy_test = db[DEBUG=0;].probe_xy(147, 1, mono, os.tosc(330));
 
 // Example pulled from debug.lib documentation.
 left = os.tosc(220) : fi.lowpass(2, 1200);

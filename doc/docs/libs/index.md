@@ -254,6 +254,8 @@
 [(db.)probe_zcr](debug.md#dbprobe_zcr)
 [(db.)probe_value](debug.md#dbprobe_value)
 [(db.)probe_bool](debug.md#dbprobe_bool)
+[(db.)probe_view](debug.md#dbprobe_view)
+[(db.)probe_xy](debug.md#dbprobe_xy)
 [(db.)probe_band_lo](debug.md#dbprobe_band_lo)
 [(db.)probe_band_mid](debug.md#dbprobe_band_mid)
 [(db.)probe_band_hi](debug.md#dbprobe_band_hi)

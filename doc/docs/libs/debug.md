@@ -8,9 +8,10 @@ probes (crest factor and envelope tracking), signal-quality probes (DC
 offset, slew rate, zero-crossing rate, silence detection), control-signal
 probes, spectral probes, decay/attack helpers, time stamps, and tap utilities.
 
-Each probe is a one-input/one-output processor that analyzes the passing
-signal while leaving it unchanged. The measured value is exposed through
-an output bargraph that can be regularly retrieved for metering purposes.
+Each probe is a one-input/one-output processor (two-input/two-output for
+`probe_xy`) that analyzes the passing signal while leaving it unchanged.
+The measured value is exposed through an output bargraph that can be
+regularly retrieved for metering purposes.
 
 Most probes take an `ID` argument and a `HIDE` argument. `ID` is embedded in
 the `[probe:ID]` metadata tag so host applications can identify and collect
@@ -26,14 +27,36 @@ Debug probes can be compiled out by setting the `DEBUG` global to 0 via
 explicit substitution (e.g. `db[DEBUG=0;].probe_rms_db(...)`).
 CNE means constant numerical expression (known at compile time).
 Some probes create several bargraphs from a base `ID`, such as
-`probe_multiband`, which uses IDs `ID` through `ID+7`.
+`probe_multiband`, which uses IDs `ID` through `ID+7`, or `probe_xy`,
+which uses `ID` and `ID+1`.
 
-The Debug library is organized into 11 sections:
+#### Reading a probe
+
+The library decides *which* signal a probe exposes (the signal itself or a
+measure computed in Faust); the host decides *how often* it reads it. Every
+bargraph is written at every sample, and a host can read it in two ways:
+
+* once per block: the host reads the bargraph zones after each `compute`
+  call and gets the value of the last sample of the block. This works with
+  every architecture, and suits meters and automated analysis;
+* as a stream: the host renders the block frame by frame and reads the
+  zones after each frame, which gives every value of the block. This suits
+  oscilloscopes, spectra, spectrograms and recordings.
+
+Every probe works with both readings: a level probe read as a stream gives
+its envelope at the sample. Rendering frame by frame makes the block size
+`ma.BS` equal to 1, which changes the behavior of the code that uses it,
+such as `si.bsmooth`. The `[probe_view:...]` metadata set by `probe_view`
+and `probe_xy` is a display hint for streaming hosts, without effect on
+the computation.
+
+The Debug library is organized into 12 sections:
 
 * [Level Probes](#level-probes)
 * [Dynamics Probes](#dynamics-probes)
 * [Signal Quality Probes](#signal-quality-probes)
 * [Control Signal Probes](#control-signal-probes)
+* [View Probes](#view-probes)
 * [Spectral Probes](#spectral-probes)
 * [Analysis Probes](#analysis-probes)
 * [Decay Probes](#decay-probes)
@@ -424,6 +447,80 @@ os = library("oscillators.lib");
 mono = os.tosc(220);
 probe_bool_test = db.probe_bool(12, 1, mono > 0);
 probe_disabled_bool_test = db[DEBUG=0;].probe_bool(29, 1, mono > 0);
+```
+
+## View Probes
+
+Raw signal probes carrying a display hint, for hosts that read the probes
+sample by sample (see "Reading a probe" above).
+The `[probe_view:...]` metadata tells such a host how to draw the stream:
+oscilloscope, spectrum, spectrogram, or phase portrait. It has no effect on
+the computation, and a host that reads the probes once per block shows the
+last value of the block, as with `probe_value`.
+
+----
+
+### `(db.)probe_view`
+
+Raw value probe with a display hint, given by its `[probe_view:...]`
+metadata. The signal itself goes to the bargraph, as in `probe_value`.
+For a phase portrait, which needs two signals, use `probe_xy`.
+
+#### Usage
+
+```
+_ : probe_view(ID, HIDE, VIEW) : _
+```
+
+Where:
+
+* `ID`: (CNE) probe id integer used in `[probe:ID]`
+* `HIDE`: (CNE) 0 to show, 1 to hide in UI
+* `VIEW`: (CNE) display hint: 0 for `[probe_view:scope]` (oscilloscope),
+  1 for `[probe_view:fft]` (spectrum), 2 for `[probe_view:spectrogram]`;
+  any other value is a compilation error
+
+#### Test
+```
+db = library("debug.lib");
+os = library("oscillators.lib");
+mono = os.tosc(220);
+probe_view_test = db.probe_view(60, 1, 0, mono),
+  db.probe_view(61, 1, 1, mono),
+  db.probe_view(62, 1, 2, mono);
+probe_disabled_view_test = db[DEBUG=0;].probe_view(146, 1, 0, mono);
+```
+
+----
+
+### `(db.)probe_xy`
+
+Phase portrait (x/y) probe: two raw value probes, `x` at `ID` and `y` at
+`ID+1`, both tagged `[probe_view:xy]`, and `[probe_axis:x]` or
+`[probe_axis:y]`. A host that reads them sample by sample draws `y`
+against `x` (a Lissajous figure, the correlation of a stereo pair, the
+trajectory of a two-state system). Both signals pass unchanged.
+
+#### Usage
+
+```
+probe_xy(ID, HIDE, x, y) : _,_
+```
+
+Where:
+
+* `ID`: (CNE) base probe id: `x` uses `[probe:ID]`, `y` uses `[probe:ID+1]`
+* `HIDE`: (CNE) 0 to show, 1 to hide in UI
+* `x`: signal drawn on the horizontal axis
+* `y`: signal drawn on the vertical axis
+
+#### Test
+```
+db = library("debug.lib");
+os = library("oscillators.lib");
+mono = os.tosc(220);
+probe_xy_test = db.probe_xy(63, 1, mono, os.tosc(330));
+probe_disabled_xy_test = db[DEBUG=0;].probe_xy(147, 1, mono, os.tosc(330));
 ```
 
 ## Spectral Probes
