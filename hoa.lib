@@ -60,21 +60,27 @@ ro = library("routes.lib");
 de = library("delays.lib");
 
 declare name "High Order Ambisonics library";
-declare version "1.5.3";
+declare version "1.6.0";
 declare author "Pierre Guillot";
 declare author "Eliott Paris";
 declare author "Julien Colafrancesco";
 declare author "Wargreen";
 declare author "Alain Bonardi";
 declare author "Paul Goutmann";
-declare copyright "2012-2013 Guillot, Paris, Colafrancesco, CICM labex art H2H, U. Paris 8, 2019 Wargreen, 2022 Bonardi, Goutmann";
+declare copyright "2012-2013 Guillot, Paris, Colafrancesco, CICM labex art H2H, U. Paris 8, 2019 Wargreen, 2022-2026 Bonardi, Goutmann";
 
-//============================Encoding/decoding Functions=================================
+
+//========================================================================================
+//==================================2D Functions==========================================
+//========================================================================================
+//========================================================================================
+
+//=========================2D Encoding/decoding Functions=================================
 //========================================================================================
 
 //----------------------`(ho.)encoder`---------------------------------
 // Ambisonic encoder. Encodes a signal in the circular harmonics domain
-// depending on an order of decomposition and an angle. Produces the
+// depending on an order of decomposition and an angle (ACN SN2D). Produces the
 // 2*N+1 circular harmonics.
 //
 // #### Usage
@@ -102,7 +108,7 @@ encoder(N, x, a) = encoder(N-1, x, a), x*sin(N*a), x*cos(N*a);
 
 
 //-------`(ho.)rEncoder`----------
-// Ambisonic encoder in 2D including source rotation. A mono signal is encoded at a certain ambisonic order
+// Ambisonic encoder in 2D including source rotation (ACN SN2D). A mono signal is encoded at a certain ambisonic order
 // with two possible modes: either rotation with an angular speed, or static with a fixed angle (when speed is zero).
 //
 // #### Usage
@@ -138,6 +144,39 @@ with {
         vn = (sp == 0) : si.smooth(ba.tau2pole(it));
         x = (os.phasor(1, sp), an, 1) : (+, _) : fmod;
     };
+};
+
+
+//-------`(ho.)aleaEncoder`----------
+// Ambisonic aleatory encoder in 2D (ACN SN2D). A mono signal is encoded at an ambisonic order
+// with a random position of the source around an angle inside an angular range.
+//
+// #### Usage
+//
+// ```
+// _ : aleaEncoder(N, freq, angle, deltaAngle, index) : _,_, ...
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `freq`: the frequency in Herz of update of the random position of the source
+// * `angle`: the angle in degrees on which the source is centered
+// * `deltaAngle` : the range of angular variation of the source in degrees
+// * `index` : the index of the random decoder, used when there are several random decoders, but can be left to 0 when there is only one.
+//-----------------------------
+aleaEncoder(N, freq, angle, deltaAngle, index) = thisAleaEncoder
+		with {
+			ramp = os.phasor(1, freq);
+			th = (ramp > 0.001) * (ramp@1 <= 0.001);
+			temporalFilter = ba.sAndH(th);
+			//computes the temporal interval taking into account the case when f=0 and when f<0
+			dt = (ma.SR, max(0.00001, freq)) : / : ma.fabs ;
+			randomValue = + (90000 + index * 20) ~ *(1410065407);
+			noiseValue = randomValue / 2147483647.0;
+			randomAngle = noiseValue : *(deltaAngle / 2) : +(angle) : temporalFilter : ba.line(dt) : *(ma.PI) : /(180);
+			basicEncoder(sig, angle) = encoder(N, sig, angle);
+    		thisAleaEncoder = (_, randomAngle) : basicEncoder;
 };
 
 
@@ -184,8 +223,8 @@ with {
 // Where:
 //
 // * `N`: the ambisonic order (constant numerical expression)
-// * `lspeed` : a list of P speeds in turns by second (one speed per input signal, positive or negative)
-// * `langle` : a list of P angles in radians on the unit circle to localize the sources (one angle per input signal)
+// * `lSpeed` : a list of P speeds in turns by second (one speed per input signal, positive or negative)
+// * `lAngle` : a list of P angles in radians on the unit circle to localize the sources (one angle per input signal)
 // * `it` : interpolation time (in milliseconds) between the rotation and the fixed modes.
 //
 // #### Test
@@ -197,19 +236,33 @@ with {
 // multiEncoder_test = stereoSignal(440, 660) : ho.multiEncoder(1, (0.0, 0.0), (0.0, 1.57), 0.05);
 // ```
 //-----------------------------
-multiEncoder(N, lspeed, langle, it) = par(i, P, thisEncoder(ba.take(i+1, lspeed), ba.take(i+1, langle), it)) :> si.bus(2*N+1)
+multiEncoder(N, lSpeed, lAngle, it) = par(i, P, rEncoder(N, ba.take(i+1, lSpeed), ba.take(i+1, lAngle), it)) :> si.bus(2*N+1)
 with {
-    P = outputs(langle); //supposed to be the same as outputs(lspeed)
-    basicEncoder(sig, angle) = ho.encoder(N, sig, angle);
-    thisEncoder(sp, a, it) = (_, rotationOrStaticAngle) : basicEncoder
-    with {
-        //converting the static angle from radians to [0; 1]
-        an = (a / (2 * ma.PI), 1) : fmod;
-        rotationOrStaticAngle = ((1-vn) * x + vn * an) * 2 * ma.PI;
-        //to manage the case where frequency is zero, smoothly switches from one mode to another//
-        vn = (sp == 0) : si.smooth(ba.tau2pole(it));
-        x = (os.phasor(1, sp), an, 1) : (+, _) : fmod;
-    };
+    P = outputs(lSpeed); //supposed to be the same as the number of angles in lAngle
+};
+
+
+//-------`(ho.)multiAleaEncoder`----------
+// Aleatory encoding of a set of P signals.
+// The signals are distributed on the unit circle.
+// Each of them is centered around an angle, within an angular range and updated at a certain frequency.
+//
+// #### Usage
+//
+// ```
+// _,_, ... : multiAleaEncoder(N, lFreq, lAngle, lDeltaAngle) : _,_, ...
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `lFreq` : a list of frequencies in Herz of update of the random position of each source
+// * `lAngle` : a list of angles in degrees on which each source is centered
+// * `lDeltaAngle` : a list of ranges of angular variation of each source in degrees
+//-----------------------------
+multiAleaEncoder(N, lFreq, lAngle, lDeltaAngle) = par(i, P, aleaEncoder(N, ba.take(i+1, lFreq), ba.take(i+1, lAngle), ba.take(i+1, lDeltaAngle), i)) :> si.bus(2*N+1)
+with {
+	P = outputs(lFreq); 
 };
 
 
@@ -349,36 +402,52 @@ with {
 //-----------------------------
 circularScaledVBAP(l, t) = thisCircularVbap
 with {
-    //modulo indexes between 1 and the number of elements of the list
-    modIndex(i, l) = ma.modulo(i, outputs(l)) + 1;
-    //
-    //pick up the ith angle with a 360 degree modulo
-    getElt(i, l) = ma.modulo(ba.take(modIndex(i, l), l), 360);
-    //
-    //function to compute the sinus of the difference between angles expressed in degrees
-    diffSin(u, v) = sin((v - u) * ma.PI / 180.);
-    //
-    //permutations to be used to compute scaledVBAPGain
-    p1(a, b, c, d) = (b, c, d, a);
-    p2(a, b, c, d) = (a, c, b, d);
-    //
-    //computation of the scaled VBAP gain of a pair
-    scaledVBAPGain(t1, t2, t) = ((diffSin(t2, t) <:(_, _, _)), (ma.signum(diffSin(t2, t1)) <: (_, _)), (diffSin(t, t1) <:(_, _, _))) : (*, *, *, *) : p1 : (_, _, (+ : sqrt <: (_, _))) : p2 : (/, /);
-    sVBAPGain(i, l, t) = scaledVBAPGain(getElt(i, l), getElt(i+1, l), t);
-    //
-    //computes the left and the right gains using the matrix inversion (VBAP)
-    leftGain(i, l, t) = sVBAPGain(i, l, t) : (_, !);
-    rightGain(i, l, t) = sVBAPGain(i, l, t) : (!, _);
-    //computation of boolean activePair that determines whether the pair of LS is active or not
-    //we have to distinguish leftGain >0 and rightGain >= 0
-    //if we put >=0 for both, two pairs will be simultaneously active when theta is one of the loudspeaker angles in the list
-    //if we put > 0 for both, all the pairs will be inactive when theta is one of the loudspeaker angles in the list
-    activePair(i, l, t) = (leftGain(i, l, t) > 0) * (rightGain(i, l, t) >= 0);
-    //
-    //computes the total gain for each loudspeaker
-    cumulatedGain(i, l, t) = rightGain(outputs(l)+i-1, l, t) * activePair(outputs(l)+i-1, l, t) + leftGain(i, l, t) * activePair(i, l, t);
-    //
-    thisCircularVbap = _ <: par(i, outputs(l), *(cumulatedGain(i, l, t)));
+        //modulo indexes between 1 and the number of elements of the list
+    	modIndex(i, l) = ma.modulo(i, outputs(l)) + 1;
+    	//picks up the ith angle
+    	getAngle(i, l) = ba.take(modIndex(i, l), l); 
+		//computes the cross product between two points on the unit circle set by their polar angles u and v
+        diffSin(u, v) = sin(ma.deg2rad(v-u));
+		//computation of the scaled VBAP gain of a pair
+		normalizedVBAPGain(t1, t2, t) = ((diffSin(t2, t) <:(_, _, _)), (ma.signum(diffSin(t2, t1)) <: (_, _)), (diffSin(t, t1) <:(_, _, _))) : (*, *, *, *) : p1 : (_, _, (+ : sqrt : avoidZero <: (_, _))) : p2 : (/, /)
+		with {
+				//function to avoid division by zero (for the normalization of the vector of gains)
+                avoidZero = _ <:(_, (_ == 0)) : +;
+				//permutations to be used to compute normalizedVBAPGain
+				p1(a, b, c, d) = (b, c, d, a);
+				p2(a, b, c, d) = (a, c, b, d);
+				//
+		};
+        //tests if the virtual source (at t angle) is between the ith and the (i+1)th loudspeakers of the l list
+        //the ith source is named as A, the (i+1)th source is named as B, the virtual source is named as C
+        isBetween(i, l, t) = betweenTest
+        with {
+            //computes the cross product between the ith and (i+1)th loudspeakers (respectively points A and B)
+            ab_cp = diffSin(getAngle(i, l), getAngle(i+1, l));
+            //computes the cross product between the ith loudspeaker and the virtual source (respectively points A and C)
+            ac_cp = diffSin(getAngle(i, l), t);
+            //computes the cross product between the virtual source and the (i+1)th loudspeaker (respectively points C and B)
+            cb_cp = diffSin(t, getAngle(i+1, l));
+            //the test returns true if all cross products have the same sign
+            betweenTest = ((ab_cp > 0)*(ac_cp >= 0)*(cb_cp > 0) + (ab_cp < 0)*(ac_cp <= 0)*(cb_cp < 0)) > 0;
+        };
+		//number of loudspeakers
+		p = outputs(l);
+		//
+        //tests all successive pairs of loudspeakers to check is the virtual source is inside this pair
+	    pairCondition = par(i, p, isBetween(i, l, t));
+	    //angle of the closest lower loudspeaker
+	    angle1 = sum(i, p, getAngle(i, l) * ba.take(i+1, pairCondition));
+        //angle of the closest superior loudspeaker
+	    angle2 = sum(i, p, getAngle(i+1, l) * ba.take(i+1, pairCondition));
+		//index of the loudspeaker corresponding to the closest lower angle
+		thisPairInd1 = pairCondition : sum(i, p, *(i));
+		//index of the loudspeaker corresponding to the closest superior angle
+		thisPairInd2 = ma.modulo(thisPairInd1 + 1, p);
+		//amplitudes of the p loudspeakers: the value is computed thanks to scaledVBAPGain function for the two loudspeakers of the active pair, and set to 0 for the other ones
+		amps = (angle1, angle2, t) : normalizedVBAPGain : ((_ <: par(i, p, *(i == thisPairInd1))), (_ <: par(i, p, *(i == thisPairInd2)))) : ro.interleave(p, 2) : par(i, p, +);
+		//the set of p amplitudes is applied to the virtual source input
+		thisCircularVbap = (amps, (_<:si.bus(p))) : ro.interleave(p, 2) : par(i, p, *);
 };
 
 
@@ -413,7 +482,7 @@ with {
     P = outputs(la);
     //The VBAP decoder uses VBAP compensation: it balances the regular decoder output enabling to use irregular angular setup.
     Q = max(2*N+2, P);
-    iVBAPDecoder = ho.decoder(N, Q) : par(i, Q, circularScaledVBAP(la, (i * 360 / Q - direct * shift) * direct)) :> si.bus(P);
+    iVBAPDecoder = ho.decoder(N, Q) : par(i, Q, ho.circularScaledVBAP(la, (i * 360 / Q - direct * shift) * direct)) :> si.bus(P);
 };
 
 
@@ -459,16 +528,61 @@ with {
         gDecoderStereo = ho.decoderStereo(N) : (*(g), *(g)) : (leftDispatcher, rightDispatcher) :> (_,_);
     };
     //
-    thisDecoder = si.bus(2*N+1) <: (si.bus(2*N+1), si.bus(2*N+1)) : (imlsDecoder(N, la, direct, shift), paddedStereoDecoder(N, P)) : (par(i, P, *(ambi)), *(st), *(st), si.bus(P-2))  :> si.bus(P) : par(i, P, *(g));
+    thisDecoder = si.bus(2*N+1) <: (si.bus(2*N+1), si.bus(2*N+1)) : (ho.imlsDecoder(N, la, direct, shift), paddedStereoDecoder(N, P)) : (par(i, P, *(ambi)), *(st), *(st), si.bus(P-2))  :> si.bus(P) : par(i, P, *(g));
 };
 
 
-//============================Optimization Functions======================================
-// Functions to weight the circular harmonics signals depending to the
-// ambisonics optimization.
-// It can be `basic` for no optimization, `maxRe` or `inPhase`.
+//============================Analysis Functions======================================
+//In order to apprehend or anticipate the localization accuracy of an ambisonic reproduction, 
+//two indices have been theorized by Gerzon based on Makita's theory of perception: 
+//the energy vector and the velocity vector. 
 //========================================================================================
 
+
+//-------`(ho.)vectorVE`----------
+// The velocity vector is valid for frequencies below 700 Hz, its direction corresponds 
+//to the apparent direction of the source and its norm corresponds to the precision (or blur) 
+//of the rendering. The energy vector is the analog of the velocity vector for frequencies 
+//from 500 Hz to 5 kHz. These localization indices, calculated on the signals sent to the loudspeakers, 
+//enable ambisonic signals to be optimized for the best possible rendering in a given situation. 
+//The function receives post-decodage signals and gives the coordinate of the two vectors.
+//
+// #### Usage
+//
+// ```
+// _,_, ... : vectorVE(la) : _,_,_,_,
+// ```
+//
+// Where:
+//
+// * `laz`: the list of azimuth in degrees
+//-----------------------------
+
+vectorVE(laz) = thisVectorVE
+with{
+    p = outputs(laz);
+    ang(i) = ba.take(i+1, laz);
+    //Polar to cartesian coordinates
+    lx(p) = par(i, p, * (cos((ang(i) + 90) / 180 * ma.PI)));
+    ly(p) = par(i, p, * (sin((ang(i) + 90) / 180 * ma.PI)));
+    
+    clip(mini,maxi) = min(maxi, max(mini, _));
+    parSquare(p) = par(i, p, ^(2));
+    sumOfSquare(p) = par(i, p, _ <: (*)) :> _ ;
+    simpleSum(p) = si.bus(p) :> _ ;
+    zeroException =  _ <: (_ == (0)) * ma.MIN, _  : + ;
+
+    vx(p) = si.bus(2*p+2) : par(i, 2, (lx(p):simpleSum(p))), si.bus(2):route(4,4, 1, 1, 2, 3, 3, 4, 4, 2) : /, / : clip(-1, 1), clip(-1,1);
+    vy(p) = si.bus(2*p+2) : par(i, 2, (ly(p):simpleSum(p))), si.bus(2):route(4,4, 1, 1, 2, 3, 3, 4, 4, 2) : /, / : clip(-1, 1), clip(-1,1);
+
+thisVectorVE = si.bus(p) <: si.bus(p), (parSquare(p)<:si.bus(p), (simpleSum(p):zeroException)), (simpleSum(p):zeroException) <: vx(p), vy(p) : ro.interleave(2, 2);
+};
+
+
+//=========================2D Optimization Functions======================================
+// Functions to weight the circular harmonics signals depending on the ambisonic optimization.
+// It can be `basic`for no optimization, `maxRe` or `inPhase`.
+//========================================================================================
 
 //----------------`(ho.)optimBasic`-------------------------
 // The basic optimization has no effect and should be used for a perfect
@@ -690,7 +804,7 @@ mirror(N, fa) = (*(1), par(i, N, (*(fa), *(1))));
 // map_test = ho.map(1, monoSignal(440), 0.5, 0.0);
 // ```
 //-----------------------------------------------------
-map(N, x, r, a) = encoder(N, x * volume(r), a) : wider(N, ouverture(r))
+map(N, x, r, a) = ho.encoder(N, x * volume(r), a) : ho.wider(N, ouverture(r))
 with {
     volume(r) = 1. / (r * r * (r > 1) + (r <= 1));
     ouverture(r) = r * (r < 1) + (r >= 1);
@@ -720,36 +834,33 @@ with {
 // rotate_test = encoder_bus : ho.rotate(1, 0.78);
 // ```
 //-----------------------------------------------------
-// The zeroth-order component is unchanged; each higher-order sine/cosine
-// pair is rotated independently.  Expressing these sparse 2x2 rotations
-// directly keeps the graph O(N), rather than building an O(N^2) matrix of
-// gains that are almost all zero.
-rotate(N, a) = _, par(i, N, rotation(i+1))
+rotate(N, a) = par(i, 2*N+1, _) <: par(i, 2*N+1, rotation(i, a))
 with {
-    rotation(i) = _,_ <: (*(c), *(s) : +), (*(-1*s), *(c) : +)
+    rotation(i, a) = (par(j, 2*N+1, gain1(i, j, a)), par(j, 2*N+1, gain2(i, j, a)), par(j, 2*N+1, gain3(i, j, a)) :> _)
     with {
-        c = cos(a*i);
-        s = sin(a*i);
+        indexabs = (int)((i - 1) / 2 + 1);
+        gain1(i, j, a) = _ * cos(a * indexabs) * (j == i);
+        gain2(i, j, a) = _ * sin(a * indexabs) * (j-1 == i) * (j != 0) * (i%2 == 1);
+        gain3(i, j, a) = (_ * sin(a * indexabs)) * (j+1 == i) * (j != 0) * (i%2 == 0) * (-1);
     };
 };
 
 
 //-------`(ho.)scope`----------
-// Produces an XY pair of signals representing the ambisonic sound field.
-// The 2*N+1 inputs are the circular harmonics; the outputs are the X and Y
-// coordinates, followed by a third signal equal to 1 when the field is in
-// phase with the scanning direction (positive), 0 otherwise.
+// Produces an XY pair of signals representing the ambisonic sound field in 2D, and a third information that is its sign (0 / 1).
 //
 // #### Usage
 //
 // ```
-// si.bus(2*N+1) : scope(N, rt) : _,_,_
+// si.bus(2*N+1) : scope(N, rt, normalize) : _,_
 // ```
 //
 // Where:
 //
 // * `N`: the ambisonic order (constant numerical expression)
 // * `rt` : refreshment time in milliseconds
+// * 'normalize' : applying normalization (1) or not (0)
+//-----------------------------
 //
 // #### Test
 // ```
@@ -760,25 +871,74 @@ with {
 // scope_test = encoder_bus : ho.scope(1, 0.1);
 // ```
 //-----------------------------
-scope(N, rt) = thisScope
+scope(N, rt, normalize) = thisScope
 with {
     //Angle sweeping at a speed corresponding to refresh period between 0 and 2*PI
     theta = os.phasor(1, 1/rt) * 2 * ma.PI;
     //we get the vector of harmonic functions thanks to the encoding function//
     harmonicsVector = ho.encoder(N, 1, theta);
+	//
+	nn = (normalize == 1);
     //
-    normalizedVector(N) = si.bus(N) <: (si.bus(N), norm) : ro.interleave(N, 2) : par(i, N, /)
+    normalizedVector(N, cmp) = si.bus(N) <: (si.bus(N), norm) : ro.interleave(N, 2) : par(i, N, /)
     with {
-        norm = par(i, N, _ <:(_,_) : *) :> _ : sqrt <: ((_ == 0), (_ > 0), _) : (_,*) : + <: si.bus(N);
+        norm = par(i, N, _ <:(_,_) : *) :> *(cmp) : +(1-cmp) : sqrt <: ((_ == 0), (_ > 0), _) : (_,*) : + <: si.bus(N);
     };
     //building (2N+1) normalized vectors
-    inputVector = (*(0.5), par(i, (2*N), _)) : normalizedVector(2*N+1);
-    normalizedHarmonics = harmonicsVector : normalizedVector(2*N+1);
+    inputVector = (*(0.5), par(i, (2*N), _)) : normalizedVector(2*N+1, nn);
+    normalizedHarmonics = harmonicsVector : normalizedVector(2*N+1, nn);
     //
     rho = (inputVector, normalizedHarmonics) : si.dot(2*N+1) ;
     thisScope = (rho <: (ma.fabs, (_ >= 0))) : ((_ <: (_,_)), _) : (*(sin(theta)), *(cos(theta)), _) : (*(-1), _,_);
 };
 
+//-------`(ho.)scope3D`----------
+// Produces an XY pair of signals representing the ambisonic sound field in 3D, and a third information that is its sign (0 / 1).
+//
+// #### Usage
+//
+// ```
+// _,_, ... : scope3D(N, rt, elevationFactor, normalize) : _,_
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `rt` : refreshment time in milliseconds
+// * 'elevationFactor' : the factor setting the ratio between azimuth and elevation scanning
+// * 'normalize' : applying normalization (1) or not (0)
+//-----------------------------
+scope3D(N, rt, elevationFactor, normalize) = thisScope
+with {
+    f1 = 1 / rt;
+    f2 = f1 / elevationFactor;
+    step = abs(f1) / ma.SR;
+    sig1 = os.phasor(1, f1);
+    //removed the sample and hold to provide continuous variation of the elevation
+    //th_trigger = (sig1 > step) * (sig1@1 <= step);
+    sig2 = os.phasor(1, -f2); //: ba.sAndH((th_trigger));
+    //azimuth angle sweeping at a speed corresponding to refresh period between 0 and 2*PI
+    az = sig1 * 2 * ma.PI;
+    //elevation sweeping elevationFactor times slower
+    el = sig2 * ma.PI - 0.5 * ma.PI;
+    
+    //we get the vector of harmonic functions thanks to the encoding function//
+    harmonicsVector = encoder3D(N, 1, az, el);
+    //
+    nn = (normalize == 1);
+    //
+    normalizedVector(N, cmp) = si.bus(N) <: (si.bus(N), norm) : ro.interleave(N, 2) : par(i, N, /)
+    with {
+        norm = par(i, N, _ <:(_,_) : *) :> *(cmp) : +(1-cmp) : sqrt <: ((_ == 0), (_ > 0), _) : (_,*) : + <: si.bus(N);
+    };
+	//
+    //building (2N+1) normalized vectors
+    inputVector = (*(0.5), par(i, ((N+1)^2-1), _)) : normalizedVector((N+1)^2, nn);
+    normalizedHarmonics = harmonicsVector : normalizedVector((N+1)^2, nn);
+    //
+    rho = (inputVector, normalizedHarmonics) : si.dot((N+1)^2) ;
+    thisScope = (rho <: (ma.fabs, (_ >= 0))) : ((_ <: (_,_, _)), _) : (*(sin(az)*cos(el)), *(cos(az)*cos(el)), *(sin(el)), _) : (*(-1), _,_,_);
+};
 
 //============================Spatial Sound Processes ====================================
 // We propose implementations of processes intricated to the ambisonic model.
@@ -818,7 +978,7 @@ with {
 // #### Usage
 //
 // ```
-// _,_, ... : fxDecorrelation(N, d, wf, fa, fd, tf) : _,_, ...
+// si.bus(2*N+1) : fxDecorrelation(N, d, wf, fa, fd, tf) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -840,14 +1000,17 @@ with {
 // fxDecorrelation_slider_test = ho.encoder(1, os.tosc(440), 0.0) : ho.fxDecorrelation(1, 64, hslider("fxDecorrelation:wf", 5, 0.1, 50, 0.1), hslider("fxDecorrelation:fa", 0.5, 0, 1, 0.01), hslider("fxDecorrelation:fd", 0.2, 0, 1, 0.01), hslider("fxDecorrelation:tf", 0, 0, 21, 1));
 // ```
 //-----------------------------
-fxDecorrelation(N, d, wf, fa, fd, tf) = par(i, 2*N+1, gate(d, i, 2*N+1, fa, tf, wf, fd))
+fxDecorrelation(N, d, wf, fa, fd, tf) = ho.fxDelay(N, ld, wf, lf)
 with {
-    gate(d, i, N, fa, tf, wf, fd) = _ <: fdOverlappedDelay(dur(d, i, N, fa, tf), 262144, wf, fd) * env1(fa, i, N), _ * env1c(fa, i, N) : +;
+    //number of components
+    P = 2*N+1 ; 
+    //list of delay time - I THINK THAT WE CAN DELETE P HERE
+    ld = par(i, P, dur(d, i, P, fa, tf));
+    //list of feedback level
+    lf = par(i, P, (fd*fa*env(fa,i,P)));
     //
-    fdOverlappedDelay(nsamp, nmax, freq, fdbk) = (+ : de.sdelay(nmax, int(ma.SR / freq), nsamp)) ~ (*(fdbk));
-    //
-    env1(fa, i, N) = (fa > ((N-i-1)/N)) : si.smooth(ba.tau2pole(0.005));
-    env1c(fa, i, N) = 1 - env1(fa, i, N);
+    //actives the feedback amount when the factor is upper the threshold of the spatial component
+    env(fa, i, P) = (fa > ((P-i-1)/P)) : si.smooth(ba.tau2pole(0.005));
     //
     //computes the ith duration of the ith delay in samples with twenty two possibilities of distribution
     elemdur(d, i, p, fa, tf, ind) = (tf == ind) * (fa > (1 - x)) * d * x * fa
@@ -892,7 +1055,7 @@ with {
 // #### Usage
 //
 // ```
-// _,_, ... : synDecorrelation(N, d, wf, fa, fd, tf) : _,_, ...
+// _ : synDecorrelation(N, d, wf, fa, fd, tf) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -913,23 +1076,28 @@ with {
 // synDecorrelation_slider_test = os.tosc(440) : ho.synDecorrelation(1, 64, hslider("synDecorrelation:wf", 5, 0.1, 50, 0.1), hslider("synDecorrelation:fa", 0.5, 0, 1, 0.01), hslider("synDecorrelation:fd", 0.2, 0, 1, 0.01), hslider("synDecorrelation:tf", 0, 0, 21, 1));
 // ```
 //-----------------------------
-synDecorrelation(N, d, wf, fa, fd, tf) =  _ <: par(i, 2*N+1, crossFade(d, i, 2*N+1, fa, tf, wf, fd))
+synDecorrelation(N, d, wf, fa, fd, tf) = thisSynDecorrelation 
 with {
-    crossFade(d, i, N, fa, tf, wf, fd) = _ <: fdOverlappedDelay(dur(d, i, N, fa, tf), 262144, wf, fd) * env1(fa, i, N), _ * env1c(fa, i, N) :> _ * env2(fa, i, N);
+    P = 2*N+1 ; 
+    //list of delay time - I THINK THAT WE CAN DELETE P HERE
+    ld = par(i, P, dur(d, i, P, fa, tf));
+    //list of feedback level 
+    lf = par(i, P, (fd * fa * env(fa,i,P)));
+    //list of gain
+    lg = par(i, P, gain(fa, i, P));
     //
-    fdOverlappedDelay(nsamp, nmax, freq, fdbk) = (+ : de.sdelay(nmax, int(ma.SR / freq), nsamp)) ~ (*(fdbk));
-    //
-    env1(fa, i, N) = (fa > ((N-i-1)/N)) : si.smooth(ba.tau2pole(0.005));
-    env1c(fa, i, N) = 1 - env1(fa, i, N) ;
-    env2(fa, i, N) = ((i > 0) * N * min(fa, 1/N)) + ((i == 0) * (sqrt(N) * (1 - (N - sqrt(N)) * min(fa, 1/N)))) : si.smooth(ba.tau2pole(0.005));
-    //
+    //actives the feedback amount when the factor is upper the threshold of the spatial component
+    env(fa, i, P) = (fa > ((P-i-1)/P)) : si.smooth(ba.tau2pole(0.005));
+    //computes the ith gain to avoid directional sources when 0<fa<1/P
+    gain(fa, i, P) = ((i > 0) * P * min(fa, 1/P)) + ((i == 0) * (sqrt(P) * (1 - (P - sqrt(P)) * min(fa, 1/P)))) : si.smooth(ba.tau2pole(0.005));
     //computes the ith duration of the ith delay in samples with twenty two possibilities of distribution
-    elemdur(d, i, p, fa, tf, ind) = (tf == ind) * fa * d * x
+    elemdur(d, i, p, fa, tf, ind) = (tf == ind) * (fa > (1 - x)) * d * x * fa
     with {
         x = _th(ind, i, p);
     };
     //duration in samples computed as a sum of the 22 cases//
     dur(d, i, p, fa, tf) = sum(ind, 22, elemdur(d, i, p, fa, tf, ind)) : int;
+    thisSynDecorrelation = ho.synDelay(N, ld, wf, lf) : ho.fxGain(N, lg) ;
 };
 
 //-----------`(ho.)fxRingMod`-----------
@@ -962,7 +1130,7 @@ with {
 // #### Usage
 //
 // ```
-// _,_, ... : fxRingMod(N, f0, fa, tf) : _,_, ...
+// si.bus(2*N+1) : fxRingMod(N, f0, fa, tf) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -1030,7 +1198,7 @@ with {
 // #### Usage
 //
 // ```
-// _,_, ... : synRingMod(N, f0, fa, tf) : _,_, ...
+// _ : synRingMod(N, f0, fa, tf) : si.bus(2*N+1)
 // ```
 //
 // Where:
@@ -1067,6 +1235,95 @@ with {
 };
 
 
+//-------`(ho.)fxDelay`----------
+// Spatial ambisonic delay in fx mode.
+//
+// `fxDelay` applies delay lines to spatial components already created.
+// The delay time is defined for each spatial component among P=2\*n+1 at the ambisonic order `N`.
+//
+//
+// #### Usage
+//
+// ```
+// si.bus(2*N+1) : fxDelay(N, ld, wf, lf) : si.bus(2*N+1)
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `ld`: list of delay time (in sample)
+// * `wf`: window frequency (in Hz) for the overlapped delay
+// * `lf`: list of feedback amont
+//-----------------------------
+fxDelay(N, ld, wf, lf) = par(i, 2*N+1, fdOverlappedDelay(ba.take(i+1, ld), 262144, wf, ba.take(i+1, lf)))
+with{
+    fdOverlappedDelay(nsamp, nmax, freq, fdbk) = (+ : de.sdelay(nmax, int(ma.SR / freq), nsamp)) ~ (*(fdbk));
+    };
+
+
+//-------`(ho.)synDelay`----------
+// Spatial ambisonic delay in syn mode.
+//
+// `synDelay` generates spatial components in ambisonics from one mono signal thanks to ambisonic delay.
+// The delay time is defined for each spatial component among P=2\*n+1 at the ambisonic order `N`.
+//
+//
+// #### Usage
+//
+// ```
+// _ : synDelay(N, ld, wf, lf) : si.bus(2*N+1).
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `ld`: list of delay time (in sample)
+// * `wf`: window frequency (in Hz) for the overlapped delay
+// * `lf`: list of feedback amont
+//-----------------------------
+synDelay(N, ld, wf, lf) = _ <: si.bus(2*N+1) : ho.fxDelay(N, ld, wf, lf);
+
+
+//-------`(ho.)fxGain`----------
+// Gain controller for ambisonic component in fx mode.
+//
+// `fxGain` applies a gain to spatial components already created.
+// The gain is defined for each spatial component among P=2\*n+1 at the ambisonic order `N`.
+//
+//
+// #### Usage
+//
+// ```
+// si.bus(2*N+1) : fxGain(N, lg) : si.bus(2*N+1)
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `lg`: list of gains
+//-----------------------------
+fxGain(N, lg) = par(i, 2*N+1, (_ * ba.take(i+1, lg)));
+
+//-------`(ho.)synGain`----------
+// Gain controller for ambisonic component in syn mode.
+//
+// `fxGain` generates spatial components in ambisonics from one mono signal.
+// The gain is defined for each spatial component among P=2\*n+1 at the ambisonic order `N`.
+//
+//
+// #### Usage
+//
+// ```
+// _ : synGain(N, lg) : si.bus(2*N+1)
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `lg`: list of gains
+//-----------------------------
+synGain(N, lg) = _ <: si.bus(2*N+1) : ho.fxGain(N, lg);
+
 //TYPES OF DISTRIBUTIONS: 22 EASING FUNCTIONS FROM [0, 1] to [0,1]
 //(i+1)/p belongs to [0, 1] and its image by any function in the list also belongs to the interval
 
@@ -1099,15 +1356,18 @@ _th(21, i, p) = sqrt(1 - ((i+1) / p - 1)^2);
 //========================================================================================
 //========================================================================================
 
+//=============================3D Encoding Functions======================================
+//========================================================================================
+
 //----------------------`(ho.)encoder3D`---------------------------------
-// Ambisonic encoder. Encodes a signal in the circular harmonics domain
-// depending on an order of decomposition, an angle and an elevation.
-// Produces the (N+1)*(N+1) spherical harmonics.
+// Ambisonic encoder. Encodes a signal in the spherical harmonics domain
+// depending on an order of decomposition, an angle and an elevation. This decoder uses 
+// SN3D norm and ACN channel ordering. Produces the (N+1)*(N+1) spherical harmonics.
 //
 // #### Usage
 //
 // ```
-// encoder3D(N, x, a, e) : si.bus((N+1)*(N+1))
+// _ : encoder3D(N, x, a, e) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1137,8 +1397,10 @@ with {
     order(index) = int(index - int(degree(index) * int(degree(index) + 1)));
 
     // The spherical harmonics
-    y(l, m, theta, phi) =  e(m, theta2) * k(l, m) * p(l, m, cos(phi + ma.PI * 0.5))
+    //y(l, m, theta, phi) =  e(m, theta2) * k(l, m) * p(l, m, cos(phi + ma.PI * 0.5))
+    y(l, m, theta, phi) =  cordon_coef(m) * e(m, theta2) * k(l, m) * p(l, m, sin(phi))
     with {
+        cordon_coef(m) = -1^abs(m);
         //theta2 enables a continuous movement of elevation (when phi becomes greater than Pi/2)
         theta2 = theta + (1 - int(fmod(fmod(phi / ma.PI - 0.5, 2) + 2, 2))) * ma.PI;
         //
@@ -1199,7 +1461,7 @@ with {
 // #### Usage
 //
 // ```
-// _ : rEncoder3D(N, azsp, elsp, az, el, it) : _,_, ...
+// _ : rEncoder3D(N, azsp, elsp, az, el, it) : si.bus((N+1)*(N+1))
 // ```
 //
 // Where:
@@ -1221,7 +1483,7 @@ with {
 //-----------------------------
 rEncoder3D(N, azsp, elsp, az, el, it) = this3DEncoder
 with {
-    basic3DEncoder(sig, ang1, ang2) = encoder3D(N, sig, ang1, ang2);
+    basic3DEncoder(sig, ang1, ang2) = ho.encoder3D(N, sig, ang1, ang2);
     this3DEncoder = (_, rotationOrStaticAzim, rotationOrStaticElev) : basic3DEncoder
     with {
         x1 = (os.phasor(1, azsp), az, 1) : (+, _) : fmod : *(2 * ma.PI);
@@ -1233,6 +1495,128 @@ with {
     };
 };
 
+
+//-------`(ho.)aleaEncoder3D`----------
+// Ambisonic aleatory encoder in 3D. A mono signal is encoded at an ambisonic order
+// with a random position of the source around an azimuth and an elevation inside an azimuth range and an elevation range.
+//
+// #### Usage
+//
+// ```
+// _ : aleaEncoder3D(N, freq, azimuth, elevation, deltaAzimuth, deltaElevation, indA, indE) : si.bus((N+1)*(N+1))
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `freq`: the frequency in Herz of update of the random position of the source
+// * `azimuth`: the azimuth in degrees on which the source is centered
+// * `elevation`: the elevation in degrees on which the source is centered
+// * `deltaAzimuth` : the range of azimuth variation of the source in degrees
+// * `deltaElevation` : the range of elevation variation of the source in degrees
+// * `indA` : the index of the random azimuth generator, used when there are several random decoders, but can be left to 0 when there is only one.
+// * `indE` : the index of the random elevation generator, used when there are several random decoders, but can be left to 1 when there is only one.
+//-----------------------------
+aleaEncoder3D(N, freq, azimuth, elevation, deltaAzimuth, deltaElevation, indA, indE) = thisAleaEncoder3D
+		with {
+			ramp = os.phasor(1, freq);
+			th = (ramp > 0.001) * (ramp@1 <= 0.001);
+			temporalFilter = ba.sAndH(th);
+			//computes the temporal interval taking into account the case when f=0 and when f<0
+			dt = (ma.SR, max(0.00001, freq)) : / : ma.fabs ;
+			rndValA = + (90000 + indA * 20) ~ *(1410065407);
+            rndValE = + (90000 + indE * 20) ~ *(1410065407);
+			noiseValA = rndValA / 2147483647.0;
+            noiseValE = rndValE / 2147483647.0;
+			randomAzimuth = noiseValA : *(deltaAzimuth / 2) : +(azimuth) : temporalFilter : ba.line(dt) : *(ma.PI) : /(180);
+            randomElevation = noiseValE : *(deltaElevation / 2) : +(elevation) : temporalFilter : ba.line(dt) : *(ma.PI) : /(180);
+            basic3DEncoder(sig, ang1, ang2) = ho.encoder3D(N, sig, ang1, ang2);
+            thisAleaEncoder3D = (_, randomAzimuth, randomElevation) : basic3DEncoder;
+};
+
+
+//-------`(ho.)multiEncoder3D`----------
+// 3D Encoding of a set of P signals distributed on the unit sphere according to lists of azimuth and elevation lists of speeds and angles
+//
+// #### Usage
+//
+// ```
+// si.bus(P) : multiEncoder(N, lspeed, langle, it) : si.bus((N+1)*(N+1))
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `lAzSpeed` : a list of azimuth speeds in turns by second (one speed per input signal, positive or negative)
+// * `lElSpeed` : a list of elevation speeds in turns by second (one speed per input signal, positive or negative)
+// * `lAz` : a list of azimuth angles in radians on the unit circle to localize the sources (one angle per input signal) when their azimuth speed is 0
+// * `lEl` : a list of elevation angles in radians on the unit circle to localize the sources (one angle per input signal) when their elevation speed is 0
+// * `it` : interpolation time (in milliseconds) between the rotation and the fixed modes.
+//-----------------------------
+multiEncoder3D(N, lAzSpeed, lElSpeed, lAz, lEl, it) = par(i, P, ho.rEncoder3D(N, ba.take(i+1, lAzSpeed), ba.take(i+1, lElSpeed), ba.take(i+1, lAz), ba.take(i+1, lEl), it)) :> si.bus((N+1)*(N+1))
+with {
+    P = outputs(lAzSpeed); //all lists are supposed to have the same length
+};
+
+
+//-------`(ho.)multiAleaEncoder3D`----------
+// 3D aleatory encoding of a set of P signals.
+// The signals are distributed on the unit sphere.
+// Each of them is centered around an azimuth and an elevation,
+// within an azimuth range, an elevation range, and updated at certain frequencies.
+//
+// #### Usage
+//
+// ```
+// si.bus(P) : multiAleaEncoder(N, lFreq, lAngle, lDeltaAngle) : si.bus((N+1)*(N+1))
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `lFreq` : a list of frequencies in Herz of update of the random position of each source
+// * `lAz` : a list of azimuths in degrees on which each source is centered
+// * `lEl` : a list of elevations in degrees on which each source is centered
+// * `lDeltaAz` : a list of ranges of azimuth variation of each source in degrees
+// * `lDeltaEl` : a list of ranges of elevation variation of each source in degrees
+//-----------------------------
+multiAleaEncoder3D(N, lFreq, lAz, lEl, lDeltaAz, lDeltaEl) = par(i, P, ho.aleaEncoder3D(N, ba.take(i+1, lFreq), ba.take(i+1, lAz), ba.take(i+1, lEl), ba.take(i+1, lDeltaAz), ba.take(i+1, lDeltaEl), 2*i, 2*i+1)) :> si.bus((N+1)*(N+1))
+with {
+    P = outputs(lFreq); //all lists are supposed to have the same length
+};
+
+//----------------------`(ho.)decoder3D`---------------------------------
+// Regular ambisonic 3D decoder. Decodes an ambisonics sound field for a spherical
+// array of loudspeakers using a direct decoding technic. This decoder uses 
+// SN3D norm and ACN channel ordering. The lenght of the list determines the 
+// number of loudspeakers. 
+//
+// #### Usage
+//
+// ```
+// decoder3D(N, la, le, g) : _,_,...
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `la`: the list of loudspeaker azimut
+// * `le`: the list of loudspeaker elevation
+// * `g` : gain between 0 and 1
+//----------------------------------------------------------------
+decoder3D(N, la, le, g) = par(i, (N+1)^2, _) <: par(i, P, speaker(N, azim(i), elev(i))) : par(i, P, *(g)) 
+with {
+    P = outputs(la);
+    azim(i) = ba.take(i+1, la) * ma.PI / 180. ; 
+    elev(i) = ba.take(i+1, le) * ma.PI / 180. ; 
+    speaker(N,theta,phi) = _/(2), si.bus(((N+1)^2)-1), ho.encoder3D(N, 2/P, theta, phi) : si.dot((N+1)^2);
+};
+
+
+//=========================3D Optimization Functions======================================
+// Functions to weight the circular harmonics signals depending on the ambisonic optimization.
+// It can be `basic`for no optimization, `maxRe` or `inPhase`.
+//========================================================================================
 
 //----------------`(ho.)optimBasic3D`-------------------------
 // The basic optimization has no effect and should be used for a perfect
@@ -1360,6 +1744,302 @@ with {
     thisOptimizer = ((bus3D  <: ((bus3D:ho.optimBasic3D(N)), (bus3D:ho.optimMaxRe3D(N)), (bus3D:ho.optimInPhase3D(N)))), ((optb <: bus3D), (optm <: bus3D), (opti <: bus3D))) : ro.interleave(3*(N+1)*(N+1), 2) : par(i, 3*(N+1)*(N+1), *) :> bus3D;
 };
 
+
+//-------`(ho.)vectorVE3D`----------
+// The velocity vector is valid for frequencies below 700 Hz, its direction corresponds 
+//to the apparent direction of the source and its norm corresponds to the precision (or blur) 
+//of the rendering. The energy vector is the analog of the velocity vector for frequencies 
+//from 500 Hz to 5 kHz. These localization indices, calculated on the signals sent to the loudspeakers, 
+//enable ambisonic signals to be optimized for the best possible rendering in a given situation. 
+//The function receives post-decodage signals and gives the cartesian coordinate of the two vectors.
+//
+// #### Usage
+//
+// ```
+// si.bus((N+1)*(N+1)) : vectorVE3D(laz, lel) : _,_,_,_,_,_
+// ```
+//
+// Where:
+//
+// * `laz`: the list of azimuth in degrees
+// * `lel`: the list of elevation in degrees
+//-----------------------------
+vectorVE3D(laz, lel) = thisVectorVE3D
+with{
+    p = outputs(laz);
+    azim(i) = ba.take(i+1, laz);
+    elev(i) = ba.take(i+1, lel);
+    //Polar to cartesian coordinates
+    lx(p) = par(i, p, * (cos((azim(i) + 90) / 180 * ma.PI)));
+    ly(p) = par(i, p, * (sin((azim(i) + 90) / 180 * ma.PI)));
+    lz(p) = par(i, p, * (cos((elev(i) + 90) / 180 * ma.PI)));
+    
+    clip(mini,maxi) = min(maxi, max(mini, _));
+    parSquare(p) = par(i, p, ^(2));
+    sumOfSquare(p) = par(i, p, _ <: (*)) :> _ ;
+    simpleSum(p) = si.bus(p) :> _ ;
+    zeroException =  _ <: (_ == (0)) * ma.MIN, _  : + ;
+
+    vx(p) = si.bus(2*p+2) : par(i, 2, (lx(p):simpleSum(p))), si.bus(2):route(4,4, 1, 1, 2, 3, 3, 4, 4, 2) : /, / : clip(-1, 1), clip(-1,1);
+    vy(p) = si.bus(2*p+2) : par(i, 2, (ly(p):simpleSum(p))), si.bus(2):route(4,4, 1, 1, 2, 3, 3, 4, 4, 2) : /, / : clip(-1, 1), clip(-1,1);
+    vz(p) = si.bus(2*p+2) : par(i, 2, (lz(p):simpleSum(p))), si.bus(2):route(4,4, 1, 1, 2, 3, 3, 4, 4, 2) : /, / : clip(-1, 1), clip(-1,1);
+
+thisVectorVE3D = si.bus(p) <: si.bus(p), (parSquare(p)<:si.bus(p), (simpleSum(p):zeroException)), (simpleSum(p):zeroException) <: vx(p), vy(p), vz(p) : route(6,6, 1, 1, 2, 4, 3, 2, 4, 5, 5, 3, 6, 6);
+};
+
+//----------------`(ho.)wider3D`-------------------------
+// Can be used to wide the diffusion of a localized sound. The order
+// depending signals are weighted and appear in a pow way to
+// have linear changes.
+//
+// #### Usage
+//
+// ```
+// si.bus((N+1)*(N+1)) : wider3D(N,w) : si.bus((N+1)*(N+1))
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `w`: the width value between 0 - 1
+wider3D(N, w) = par(l, N+1, processDegree(l))
+with {
+    nharmo(l) = 2 * l + 1;
+    coeff(l) = pow(w, l) * ((1 - w) * (N - l) + 1);
+    processDegree(l) = par(j, nharmo(l), _ * coeff(l));
+};
+
+//-------`(ho.)fxDecorrelation3D`----------
+// Spatial ambisonic decorrelation in fx mode.
+//
+// `fxDecorrelation3D` applies decorrelations to spatial components already created.
+// The decorrelation is defined for each #i spatial component among P=(N+1)^2 in 3D as a delay of 0 
+// if factor `fa` is under a certain value 1-(i+1)/P and d\*F((i+1)/p) in the contrary case,
+// where `d` is the maximum delay applied (in samples) and F is a distribution function for durations.
+// The user can choose this delay time distribution among 22 different ones.
+// The delay increases according to the index of ambisonic components.
+// But it increases at each step and it is modulated by a threshold.
+// For the 3D decorrelation, the user can choose the increment order among 3 different ones. 
+// Therefore, delays are progressively revealed when the factor increases:
+//
+// * when the factor is close to 0, only upper components are delayed;
+// * when the factor increases, more and more components are delayed.
+//
+//
+//H mode 0  H mode 1  H mode 2             THRESHOLD            DELAY
+//0         0         0                    1-(1/P)              0 OR DELAY*F(1/P)
+//-1, 1     0, 1     -1, 1                 1-(2/P)              0 OR DELAY*F(2/P)
+//0, 1     -1, 1      1, 1                 1-(3/P)              0 OR DELAY*F(3/P) 
+//1, 1      1, 1      0, 1                 1-(4/P)              0 OR DELAY*F(4/P)
+//-2, 2     0, 2     -2, 2                 1-(5/P)              0 OR DELAY*F(5/P)
+//-1, 2    -1, 2      2, 2                 1-(6/P)              0 OR DELAY*F(6/P)
+//0, 2      1, 2     -1, 2                 1-(7/P)              0 OR DELAY*F(7/P)
+//1, 2     -2, 2      1, 2                 1-(8/P)              0 OR DELAY*F(8/P)
+//2, 2      2, 2      0, 2                 1-(9/P)              0 OR DELAY*F(9/P)
+//...
+//
+// #### Usage
+//
+// ```
+// si.bus((N+1)*(N+1)) : fxDecorrelation3D(N, d, wf, fa, fd, tf, md) : si.bus((N+1)*(N+1))
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `d`: the maximum delay applied (in samples)
+// * `wf`: window frequency (in Hz) for the overlapped delay
+// * `fa`: decorrelation factor (between 0 and 1)
+// * `fd`: feedback / level of reinjection (between 0 and 1)
+// * `tf`: type of function of delay distribution (integer, between 0 and 21)
+// * `md`: type of distribution ordering (integer between 0 and 2)
+//-----------------------------
+fxDecorrelation3D(N, d, wf, fa, fd, tf, mode) = par(i, N+1, par(j, 2*i+1,fdOverlappedDelay(dur(d, i, j, (N+1)^2, fa, tf, mode), 262144, wf, fd, fa, i, j, (N+1)^2, mode)))
+with {
+    //
+    fdOverlappedDelay(nsamp, nmax, freq, fdbk, fa, i, j, p, mode) = (+ : de.sdelay(nmax, int(ma.SR / freq), nsamp)) ~ ( * (fdbk * fa * env(fa, index(mode, i, j), p)));
+    //
+    //actives the feedback amount when the factor is upper the threshold of the spatial component
+    env(fa, k, p) = (fa > ((p-k-1)/p)) : si.smooth(ba.tau2pole(0.005));
+    //
+    //computes the ith duration of the ith delay in samples with twenty two possibilities of distribution in three types of channel ordering
+    elemdur(d, i, j, p, fa, tf, ind, ind2, mode) = (mode == ind2) * (tf == ind) * (fa > (1 - x)) * d * x * fa
+    with {
+        x = _th(ind, index(ind2, i, j), p);
+    };
+    //duration in samples computed as a sum of the 66 cases, the twenty two possibilities of distribution and the three types of channel ordering//
+    dur(d, i, j, p, fa, tf, mode) = sum(ind2, 3, sum(ind, 22, elemdur(d, i, j, p, fa, tf, ind, ind2, mode))) : int;
+};
+
+
+//-------`(ho.)synDecorrelation3D`----------
+// Spatial ambisonic decorrelation in syn mode.
+//
+// `synDecorrelation3D` creates decorrelated spatial components from one mono source.
+// The decorrelation is defined for each #i spatial component among P=(N+1)^2 in 3D as a delay of 0 
+// if factor `fa` is under a certain value 1-(i+1)/P and d\*F((i+1)/p) in the contrary case,
+// where `d` is the maximum delay applied (in samples) and F is a distribution function for durations.
+// The user can choose this delay time distribution among 22 different ones.
+// The delay increases according to the index of ambisonic components.
+// But it increases at each step and it is modulated by a threshold.
+// For the 2D decorrelation, the increment order follows the Ambisonics Channel Number. 
+// For the 3D decorrelation, the user can choose the increment order among 3 different ones. 
+// Therefore, delays are progressively revealed when the factor increases:
+//
+// * when the factor is close to 0, only upper components are delayed;
+// * when the factor increases, more and more components are delayed.
+//
+//H mode 0  H mode 1  H mode 2             THRESHOLD            DELAY
+//0         0         0                    1-(1/P)              0 OR DELAY*F(1/P)
+//-1, 1     0, 1     -1, 1                 1-(2/P)              0 OR DELAY*F(2/P)
+//0, 1     -1, 1      1, 1                 1-(3/P)              0 OR DELAY*F(3/P) 
+//1, 1      1, 1      0, 1                 1-(4/P)              0 OR DELAY*F(4/P)
+//-2, 2     0, 2     -2, 2                 1-(5/P)              0 OR DELAY*F(5/P)
+//-1, 2    -1, 2      2, 2                 1-(6/P)              0 OR DELAY*F(6/P)
+//0, 2      1, 2     -1, 2                 1-(7/P)              0 OR DELAY*F(7/P)
+//1, 2     -2, 2      1, 2                 1-(8/P)              0 OR DELAY*F(8/P)
+//2, 2      2, 2      0, 2                 1-(9/P)              0 OR DELAY*F(9/P)
+//...
+//
+// #### Usage
+//
+// ```
+// _ : synDecorrelation3dD(N, d, wf, fa, fd, tf, md) : si.bus((N+1)*(N+1))
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `d`: the maximum delay applied (in samples)
+// * `wf`: window frequency (in Hz) for the overlapped delay
+// * `fa`: decorrelation factor (between 0 and 1)
+// * `fd`: feedback / level of reinjection (between 0 and 1)
+// * `tf`: type of function of delay distribution (integer, between 0 and 21)
+// * `md`: type of distribution ordering (integer between 0 and 2)
+//-----------------------------
+synDecorrelation3D(N, d, wf, fa, fd, tf, mode) = _ <: ho.fxDecorrelation3D(N, d, wf, fa, fd, tf, mode); 
+
+
+//-------`(ho.)fxRingMod3D`----------
+// Spatial ring modulation in fx mode.
+//
+// `fxRingMod3D` applies ring modulation to spatial components already created.
+// The ring modulation is defined for each spatial component among P=(N+1)^2 at the ambisonic order `N` in 3D.
+// For each spatial component #i, the result is either the original signal or a ring modulated signal
+// according to a threshold that is i/P.
+//
+// The general process is drive by a factor `fa` between 0 and 1 and a modulation frequency `f0`.
+// If `fa` is greater than theshold (P-i-1)/P, the ith ring modulator is on with carrier frequency of f0\*(i+1)/P.
+// On the contrary, it provides the original signal.
+//
+//
+//H mode 0  H mode 1  H mode 2             THRESHOLD            FREQUENCY
+//0         0         0                    1-(1/P)              ORIGINAL OR RING MODULATION BY F0*F(1/P)
+//-1, 1     0, 1     -1, 1                 1-(2/P)              ORIGINAL OR RING MODULATION BY F0*F(2/P)
+//0, 1     -1, 1      1, 1                 1-(3/P)              ORIGINAL OR RING MODULATION BY F0*F(3/P) 
+//1, 1      1, 1      0, 1                 1-(4/P)              ORIGINAL OR RING MODULATION BY F0*F(4/P)
+//-2, 2     0, 2     -2, 2                 1-(5/P)              ORIGINAL OR RING MODULATION BY F0*F(5/P)
+//-1, 2    -1, 2      2, 2                 1-(6/P)              ORIGINAL OR RING MODULATION BY F0*F(6/P)
+//0, 2      1, 2     -1, 2                 1-(7/P)              ORIGINAL OR RING MODULATION BY F0*F(7/P)
+//1, 2     -2, 2      1, 2                 1-(8/P)              ORIGINAL OR RING MODULATION BY F0*F(8/P)
+//2, 2      2, 2      0, 2                 1-(9/P)              ORIGINAL OR RING MODULATION BY F0*F(9/P)
+//...
+//
+// #### Usage
+//
+// ```
+// si.bus((N+1)*(N+1)) : fxRingMod3D(N, f0, fa, tf, md) : si.bus((N+1)*(N+1))
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `f0`: the maximum frequency of modulation applied (in Hz)
+// * `fa`: modulation factor (between 0 and 1)
+// * `tf`: type of function of modulation distribution (integer, between 0 and 21)
+// * `md`: type of distribution ordering (integer between 0 and 2)
+//-----------------------------
+
+fxRingMod3D(N, f0, fa, tf, mode) = par(i, N+1, par(j, 2*i+1, gate_ringmod(f0, mode, i, j, (N+1)^2, fa, tf)))
+with {
+    //
+    env1(fa, mode, i, j, P) = (fa > ((P-index(mode, i, j)-1)/P)) : si.smooth(ba.tau2pole(0.005));
+    env1c(fa, mode, i, j, P) = 1 - env1(fa, mode, i, j, P);
+    //
+    gate_ringmod(f, mode, i, j, P, fa, tf) = _ <: _ * os.osccos(freq(f, mode, i, j, P, tf)) * env1(fa, mode, i, j, P), _ * env1c(fa, mode, i, j, P) : +;
+    //
+    ringmodfreq(f, mode, i, j, P, tf, ind, ind2) = (mode == ind2) * (tf == ind) * f * x * coef
+    with {
+        x = _th(ind, index(ind2, i, j), P);
+        coef = min(1, max(P * (fa - (P - index(ind2, i, j) - 1) / P), 0));
+    };
+    //
+    freq(f, mode, i, j, P, tf) = sum(ind2, 3, sum(ind, 22, ringmodfreq(f, mode, i, j, P, tf, ind, ind2)));
+};
+
+
+//-------`(ho.)synRingMod3D`----------
+// Spatial ring modulation in syn mode.
+//
+// `synRingMod3D` generates modulated spatial components from one mono source.
+// The ring modulation is defined for each spatial component among P=(N+1)^2 at the ambisonic order `N` in 3D.
+// For each spatial component #i, the result is either the original signal or a ring modulated signal
+// according to a threshold that is i/P.
+//
+// The general process is drive by a factor `fa` between 0 and 1 and a modulation frequency `f0`.
+// If `fa` is greater than theshold (P-i-1)/P, the ith ring modulator is on with carrier frequency of f0\*(i+1)/P.
+// On the contrary, it provides the original signal.
+//
+//
+//H mode 0  H mode 1  H mode 2             THRESHOLD            FREQUENCY
+//0         0         0                    1-(1/P)              ORIGINAL OR RING MODULATION BY F0*F(1/P)
+//-1, 1     0, 1     -1, 1                 1-(2/P)              ORIGINAL OR RING MODULATION BY F0*F(2/P)
+//0, 1     -1, 1      1, 1                 1-(3/P)              ORIGINAL OR RING MODULATION BY F0*F(3/P) 
+//1, 1      1, 1      0, 1                 1-(4/P)              ORIGINAL OR RING MODULATION BY F0*F(4/P)
+//-2, 2     0, 2     -2, 2                 1-(5/P)              ORIGINAL OR RING MODULATION BY F0*F(5/P)
+//-1, 2    -1, 2      2, 2                 1-(6/P)              ORIGINAL OR RING MODULATION BY F0*F(6/P)
+//0, 2      1, 2     -1, 2                 1-(7/P)              ORIGINAL OR RING MODULATION BY F0*F(7/P)
+//1, 2     -2, 2      1, 2                 1-(8/P)              ORIGINAL OR RING MODULATION BY F0*F(8/P)
+//2, 2      2, 2      0, 2                 1-(9/P)              ORIGINAL OR RING MODULATION BY F0*F(9/P)
+//...
+//
+// #### Usage
+//
+// ```
+// _ : synRingMod3D(N, f0, fa, tf, md) : si.bus((N+1)*(N+1))
+// ```
+//
+// Where:
+//
+// * `N`: the ambisonic order (constant numerical expression)
+// * `f0`: the maximum frequency of modulation applied (in Hz)
+// * `fa`: modulation factor (between 0 and 1)
+// * `tf`: type of function of modulation distribution (integer, between 0 and 21)
+// * `md`: type of distribution ordering (integer between 0 and 2)
+//-----------------------------
+synRingMod3D(N, f0, fa, tf, mode) = _ <: ho.fxRingMod3D(N, f0, fa, tf, mode);
+
+
+//MODES OF SPATIAL COMPONENT SORTING
+//computes index of the ith spatial component function of channel ordering type
+//H mode 0  H mode 1  H mode 2
+//0         0         0   
+//-1, 1     0, 1     -1, 1
+//0, 1     -1, 1      1, 1
+//1, 1      1, 1      0, 1
+//-2, 2     0, 2     -2, 2
+//-1, 2    -1, 2      2, 2
+//0, 2      1, 2     -1, 2
+//1, 2     -2, 2      1, 2
+//2, 2      2, 2      0, 2
+index(mode, x, y) = (mode==0) * (x^2 + y) + (mode==1) * ((y <= x) * (x^2 + 2 * y) + (y > x) * lastMinus1or2(x, y)) + (mode==2) * ((x != 0) * (((y < x) * lastMinus2(x, y)) + (y >= x) * lastPlus2(x, y))) 
+with {
+    
+lastMinus1or2(x, y) = x^2 + 2 * (y - (y - x)) - (2 * (y - x) - 1);
+lastMinus2(x, y) = x^2 + x + (x-1) - 2 * y;
+lastPlus2(x, y) = x^2 + 2 * (y - x);
+
+};
 
 // Deprecated backward-compatibility alias, kept for one version and
 // scheduled for removal: the canonical name now carries the internal
