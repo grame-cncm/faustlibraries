@@ -20,10 +20,10 @@ ba = library("basics.lib");
 fi = library("filters.lib");
 os = library("oscillators.lib");
 si = library("signals.lib");
-no = library("noises.lib"); // for compatible copy/paste out of this file
+no = library("noises.lib"); // only for programs that import this file; its own code uses bare names
 
 declare name "Faust Noise Generator Library";
-declare version "1.9.2";
+declare version "1.9.3";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -546,14 +546,14 @@ sparse_noise(f0) = sn
 with {
     saw = os.lf_sawpos(f0);
     sawdiff = saw - saw';
-    e = float(no.noise); // float() keeps 4.656613e-10f scaling here instead of later
+    e = float(noise); // float() keeps 4.656613e-10f scaling here instead of later
     eHeld = e : ba.latch(sawdiff);
     eHeldPos = 0.5 + 0.5 * eHeld;
     crossed = (saw >= eHeldPos) * (saw' < eHeldPos);
     // The amplitude comes from a stream independent of e: e' is the latched sample
     // (or next to it), so at short periods it would tie each impulse's sign to its
     // position and give the output a DC offset.
-    sn = no.noises(2, 1) * float(crossed);
+    sn = noises(2, 1) * float(crossed);
 };
 
 
@@ -592,7 +592,7 @@ with {
 //------------------------------------------------------------
 velvet_noise(amp, f0) = vn
 with {
-    sn = no.sparse_noise(f0);
+    sn = sparse_noise(f0);
     vn = amp * ma.signum(sn);
 };
 
@@ -626,7 +626,7 @@ with {
 //------------------------------------------------------------
 gnoise(N) = uvgwn
 with {
-    uwn = no.multinoise(N); // uniform white noise in [-1,1] on N channels
+    uwn = multinoise(N); // uniform white noise in [-1,1] on N channels
     gwn = uwn :> _;         // sum of uniform approaches Gaussian by centeral limit thm
     sigma = sqrt(N/3.0);    // rms of each uwn channel
     uvgwn = gwn / sigma;    // approaches zero-mean, unit-variance Gaussian white noise, for large N
@@ -688,7 +688,7 @@ declare colored_noise author "Constantinos Odysseas Economou";
 declare colored_noise copyright "Copyright (C) 2022 Constantinos Odysseas Economou <c.economou@sirenfx.io>";
 declare colored_noise license "LicenseRef-STK-4.3";
 
-colored_noise(N,alpha) = no.noise : fi.dcblocker : fi.spectral_tilt(N,fmin,bw,alpha) : *(uniNorm(alpha * 2)) : max(-1.0) : min(1.0)
+colored_noise(N,alpha) = noise : fi.dcblocker : fi.spectral_tilt(N,fmin,bw,alpha) : *(uniNorm(alpha * 2)) : max(-1.0) : min(1.0)
 with {
     fmin = 20.0;
     fmax = 20000.0;

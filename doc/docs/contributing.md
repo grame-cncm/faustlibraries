@@ -111,6 +111,35 @@ from the documentation coverage accounting (`scripts/audit2.py`,
 `make check-doc`), and may change or disappear without notice. Do not use
 underscore-prefixed symbols from another library.
 
+Inside a library, call its own functions by their **bare name**, never
+through the library's own prefix (`lowpass(N,fc)` in `filters.lib`, not
+`fi.lowpass(N,fc)`). Functions of other libraries keep their prefix
+(`ma.PI` in `filters.lib`). Two reasons:
+
+* `fi.lowpass` written in `filters.lib` does not point to the
+  definition of the same file: it reloads the library as a new
+  environment. That copy ignores a substitution made by the user, a
+  documented mechanism (`os[SAFE=1;].phasor`). With a library `zz.lib`
+  holding `GAIN = 1; bare = _ * GAIN; prefixed = _ * zz.GAIN;`, the
+  program `library("zz.lib")[GAIN = 2;]` gets 2 for `bare` and 1 for
+  `prefixed`.
+* The reloaded copy is the first `filters.lib` faust finds, in the
+  current directory before the `-I` ones: when a modified copy of the
+  library is tested outside the repository, or when several versions are
+  installed, the function can call another version of itself.
+
+The prefix stays required where the code is a standalone program: the
+`#### Test` sections, the examples and `tests/*.dsp` (`ho.encoder(1, x, a)`),
+which is also where code gets copied. A parameter or a local definition
+must not reuse the name of a public function of the library it lives in,
+since it would hide that function from the bare calls. Ten libraries
+still define their own prefix (`fi = library("filters.lib");` in
+`filters.lib`, and likewise in `analyzers`, `basics`, `debug`, `hoa`,
+`maths`, `misceffects`, `noises`, `phaflangers` and `signals`). Their code
+no longer uses it since November 2026; the line stays for the programs
+that `import("filters.lib")` and write `fi.lowpass`, which removing it
+would break. Do not use it in library code.
+
 ## New Libraries
 
 * Any new "standard" library should be declared in `stdfaust.lib` with its own environment (2 letters - see `stdfaust.lib`) and in `all.lib`.

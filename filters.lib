@@ -51,11 +51,11 @@ de = library("delays.lib");
 an = library("analyzers.lib");
 ef = library("misceffects.lib");
 si = library("signals.lib");
-fi = library("filters.lib"); // for compatible copy/paste out of this file
+fi = library("filters.lib"); // only for programs that import this file; its own code uses bare names
 la = library("linearalgebra.lib");
 
 declare name "Faust Filters Library";
-declare version "1.13.6";
+declare version "1.13.7";
 
 //===============================Basic Filters============================================
 //========================================================================================
@@ -4653,9 +4653,9 @@ with { // octave script output:
 declare pospass author "Julius O. Smith III";
 declare pospass copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare pospass license "LicenseRef-STK-4.3";
-pospass(N,fc) = fi._pospass0(lpf) with {
+pospass(N,fc) = _pospass0(lpf) with {
   fcs = ma.SR/4 - fc; // Upper lowpass cutoff = (SR/2 - fc) - SR/4
-  lpf = fi.lowpass(N,fcs); // Butterworth lowpass
+  lpf = lowpass(N,fcs); // Butterworth lowpass
 };
 
 //-----------------------------`(fi.)pospass6e`--------------------------------
@@ -4690,8 +4690,8 @@ pospass(N,fc) = fi._pospass0(lpf) with {
 declare pospass6e author "Julius O. Smith III";
 declare pospass6e copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare pospass6e license "LicenseRef-STK-4.3";
-pospass6e(fc) = fi._pospass0(lpf) with {
-  lpf = fi.lowpass6e(ma.SR/4 - fc); // Elliptic lowpass, order 6
+pospass6e(fc) = _pospass0(lpf) with {
+  lpf = lowpass6e(ma.SR/4 - fc); // Elliptic lowpass, order 6
 };
 
 _pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
@@ -4749,7 +4749,7 @@ _pospass0(lpf) = unmodulate : lpf, lpf : modulate with {
 declare hilbert author "Julius O. Smith III";
 declare hilbert copyright "Copyright (C) 2003-2019 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare hilbert license "LicenseRef-STK-4.3";
-hilbert(N,fc) = fi.pospass(N,fc) : !,*(2.0);
+hilbert(N,fc) = pospass(N,fc) : !,*(2.0);
 
 
 //=================Parametric Equalizers (Shelf, Peaking)=================================
@@ -6846,7 +6846,7 @@ declare avg_tau copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_tau license "LicenseRef-STK-4.3";
-avg_tau(period, x) = fi.lptau(period, x);
+avg_tau(period, x) = lptau(period, x);
 
 
 //----------------------------`(fi.)avg_t60`-------------------------------------
@@ -6886,7 +6886,7 @@ declare avg_t60 copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_t60 license "LicenseRef-STK-4.3";
-avg_t60(period, x) = fi.lpt60(period, x);
+avg_t60(period, x) = lpt60(period, x);
 
 
 //----------------------------`(fi.)avg_t19`-------------------------------------
@@ -6927,7 +6927,7 @@ declare avg_t19 copyright "Copyright (C) 2020 Dario Sanfilippo
       <sanfilippo.dario@gmail.com> and
        2003-2020 by Julius O. Smith III <jos@ccrma.stanford.edu>";
 declare avg_t19 license "LicenseRef-STK-4.3";
-avg_t19(period, x) = fi.lpt19(period, x);
+avg_t19(period, x) = lpt19(period, x);
 
 
 //============================Kalman Filters===================================

@@ -135,6 +135,18 @@ Every script behind these targets is described in `scripts/README.md`.
 5. **Cross-library calls** go through the environment prefixes
    (`ma = library("maths.lib"); ... ma.PI`), never bare names. Check name
    collisions with `import("all.lib"); process = _;`.
+   **Calls inside a library** use the bare names of its own functions,
+   never its own prefix: `fi.lowpass` written in `filters.lib` reloads an
+   unmodified copy of the library, which escapes the
+   `xx[NAME = value;]` substitution (`os[SAFE=1;]`) and can be another
+   `filters.lib` than the file itself, the first one faust finds. The
+   prefix stays required in `#### Test` sections, examples and
+   `tests/*.dsp`, which are standalone programs. The self-imports kept
+   in ten libraries serve only the programs that `import()` them (a
+   program may write `import("filters.lib"); ... fi.lowpass`): library
+   code does not use them.
+   Details: `doc/docs/contributing.md`, section *Variables and
+   identifiers scoping*.
 6. Do not edit generated files by hand: `doc/docs/libs/*.md` (regenerate
    with `make -C doc md`), `doc/docs/libs/index.md` — the symbol index
    linking every documented name to its page, rebuilt from those pages by

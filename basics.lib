@@ -60,13 +60,13 @@ closed source license or any other license if you decide so.
 
 ma = library("maths.lib");
 ro = library("routes.lib");
-ba = library("basics.lib"); // for compatible copy/paste out of this file
+ba = library("basics.lib"); // only for programs that import this file; its own code uses bare names
 fi = library("filters.lib");
 it = library("interpolators.lib");
 si = library("signals.lib");
 
 declare name "Faust Basic Element Library";
-declare version "1.23.9";
+declare version "1.23.10";
 
 //=============================Conversion Tools===========================================
 //========================================================================================
@@ -246,10 +246,10 @@ Michon and Julius O. Smith III, and are released under the
 // tau2pole_test = ba.tau2pole(0.01);
 // ```
 //----------------------------
-tau2pole(tau) = ba.if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR))))
+tau2pole(tau) = if(clipCond, 0.0, exp(-1.0/(tauCenterClipped*float(ma.SR))))
 with {
     clipCond = abs(tau)<ma.EPSILON;
-    tauCenterClipped = ba.if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
+    tauCenterClipped = if(clipCond, 1.0, tau); // 1.0 can be any nonzero value (not used)
 };
 
 
@@ -699,8 +699,8 @@ with {
     with {
         // rint: with a fractional count, the last step would divide by a
         // number below 1 and overshoot the target
-        nt = ba.if(x != x', rint(n), t-1);
-        nc = ba.if(nt > 0, c + (x - c)/nt, x);
+        nt = if(x != x', rint(n), t-1);
+        nc = if(nt > 0, c + (x - c)/nt, x);
     };
 };
 
@@ -774,7 +774,7 @@ spulse(n, trig) = trig : trigger(n)
 with {
     upfront(x) = x > x';    // detect rising edge
     reset = upfront(trig);  // reset signal
-    decay(n, x) = ba.if(reset, 0, x - (x>0.0)/n);   // decay the pulse, possibly using reset to restart the pulse
+    decay(n, x) = if(reset, 0, x - (x>0.0)/n);   // decay the pulse, possibly using reset to restart the pulse
     release(n) = + ~ decay(n);                      
     trigger(n) = upfront : release(n) : >(0.0);    
 };
@@ -1299,7 +1299,7 @@ processArray(N, processor, interp, smoother, loBounds, hiBounds) = build(nSignal
         // every high bound. interleave(nArray, 2) zips them back into nArray (lo, hi)
         // pairs — one per array. oneArray then expands each pair into its own N-wide
         // bus of interpolated values, then applies that parameter's smoother to all N.
-        allArrays = (loBounds, hiBounds):ro.interleave(nArray, 2):par(i, nArray, oneArray(ba.take(i+1, interps), ba.take(i+1, smoothers)));
+        allArrays = (loBounds, hiBounds):ro.interleave(nArray, 2):par(i, nArray, oneArray(take(i+1, interps), take(i+1, smoothers)));
         // allArrays lays its output out parameter-by-parameter: all N values of
         // parameter 0, then all N values of parameter 1, and so on. The processor
         // instances need the opposite grouping — each instance wants one value from
@@ -1393,7 +1393,7 @@ tabulate(C, FX, S, r0, r1, x) = environment {
     mid = S-1;
 
     // Create the table
-    wf = r0 + float(rid(ba.time, 1))*(r1-r0)/float(mid) : FX;
+    wf = r0 + float(rid(time, 1))*(r1-r0)/float(mid) : FX;
 
     // Prepare the 'float' table read index
     id = (x-r0)/(r1-r0)*mid;
@@ -1500,7 +1500,7 @@ tabulate_chebychev(C, FX, NX, CD, r0, r1, x) = y with {
         mapfx(nx, cos(ma.PI*(k+1/2)/NC)) * cos(ma.PI*nc*(k+1/2)/NC));
 
     // record gench(nx, nc) in rdtable() to avoid the run-time calculations
-    chtab = rdtable(NX*NC, (ba.time <: int(/(NC)), %(NC) : gench));
+    chtab = rdtable(NX*NC, (time <: int(/(NC)), %(NC) : gench));
 };
 
 declare tabulate_chebychev author "Oleg Nesterov";
@@ -1989,7 +1989,7 @@ tabulateNd(C,function,parameters) =
         // one waveform parameter write value:
         wfp(prevSize,sizeX,r0,r1) =
             r0+
-            ((float(int(ba.time%(prevSize*sizeX)/prevSize))*(r1-r0))
+            ((float(int(time%(prevSize*sizeX)/prevSize))*(r1-r0))
             /float(sizeX-1))
            ,(prevSize*sizeX);
 
@@ -2698,8 +2698,8 @@ peakholder(holdTime, x) = loop ~ si.bus(2) : ! , _
                 isNewPeak = abs(x) >= outState;
                 isTimeOut = timerState >= holdTime;
                 bypass = isNewPeak | isTimeOut;
-                timer = ba.if(bypass, 0, timerState + 1);
-                output = ba.if(bypass, abs(x), outState);
+                timer = if(bypass, 0, timerState + 1);
+                output = if(bypass, abs(x), outState);
             };
     };
 
@@ -3466,7 +3466,7 @@ slidingReduce(op,n,maxN,disabledVal) =
 
         // The sum of all the sizes of the previous blocks
         sumOfPrevBlockSizes(0) = 0;
-        sumOfPrevBlockSizes(i) = (ba.subseq((allBlockSizes),0,i):>_);
+        sumOfPrevBlockSizes(i) = (subseq((allBlockSizes),0,i):>_);
 
         allBlockSizes = par(i, maxNrBits(maxN-1), (pow2(i)) * isUsed(i));
         maxNrBits(n) = int2nrOfBits(n);
@@ -3474,7 +3474,7 @@ slidingReduce(op,n,maxN,disabledVal) =
         // Decide wether or not to use a certain value, based on n
         useVal(i) = select2(isUsed(i), disabledVal, _);
 
-        isUsed(i) = ba.take(i+1, (int2bin(n,(maxN-1)*2+1)));
+        isUsed(i) = take(i+1, (int2bin(n,(maxN-1)*2+1)));
         pow2(i) = 1<<i;
         // same as:
         // pow2(i) = int(pow(2,i));

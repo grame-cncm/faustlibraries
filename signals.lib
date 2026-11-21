@@ -55,10 +55,10 @@ closed source license or any other license if you decide so.
 ba = library("basics.lib");
 ro = library("routes.lib");
 ma = library("maths.lib");
-si = library("signals.lib");
+si = library("signals.lib"); // only for programs that import this file; its own code uses bare names
 
 declare name "Faust Routing Library";
-declare version "1.8.2";
+declare version "1.8.3";
 
 //=============================Functions Reference========================================
 //========================================================================================
@@ -185,7 +185,7 @@ interpolate(i,x,y) = x + i*(y-x);
 declare repeat author "Yann Orlarey and Stéphane Letz, revised by David Braun";
 
 repeat(1, FX) = FX;
-repeat(n, FX) = FX <: si.bus(N), repeat(n-1, FX) :> si.bus(N)
+repeat(n, FX) = FX <: bus(N), repeat(n-1, FX) :> bus(N)
 with {
     N = outputs(FX);
 };
@@ -212,7 +212,7 @@ with {
 // smoo_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.smoo with { P = int(ma.SR/10); };
 // ```
 //---------------------------------------------------------------------
-smoo = si.smooth(1 - 44.1/ma.SR);
+smoo = smooth(1 - 44.1/ma.SR);
 
 //-----------------------`(si.)polySmooth`--------------------------------
 // A smoothing function based on `smooth` that doesn't smooth when a
@@ -241,7 +241,7 @@ smoo = si.smooth(1 - 44.1/ma.SR);
 // polySmooth_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.polySmooth(ba.period(2*Q) < Q, 0.999, 32) with { P = int(ma.SR/10); Q = int(ma.SR/4); };
 // ```
 //-------------------------------------------------------------------
-polySmooth(g,s,d) = si.smooth(s*((g==(g@d)) | (g == 0)));
+polySmooth(g,s,d) = smooth(s*((g==(g@d)) | (g == 0)));
 
 //-----------------------`(si.)smoothAndH`--------------------------------
 // A smoothing function based on `smooth` that holds its output
@@ -268,7 +268,7 @@ polySmooth(g,s,d) = si.smooth(s*((g==(g@d)) | (g == 0)));
 // smoothAndH_test = select2(ba.period(2*P) < P, -0.5, 0.5) : si.smoothAndH(ba.period(2*Q) < Q, 0.999) with { P = int(ma.SR/10); Q = int(ma.SR/4); };
 // ```
 //-------------------------------------------------------------------
-smoothAndH(t,s) = si.smooth(s*t) : ba.sAndH(t);
+smoothAndH(t,s) = smooth(s*t) : ba.sAndH(t);
 
 //-----------------------------`(si.)bsmooth`------------------------------
 // Block smooth linear interpolation during a block of samples (given by the `ma.BS` value).
@@ -784,7 +784,7 @@ vecOp(vectorsList, op) =
     vectorsList : seq(i, vecDim - 1, vecOp2D , vecBus(vecDim - 2 - i))
     with {
         vecBus(0) = par(i, vecLen, 0 : !);
-        vecBus(dim) = par(i, dim, si.bus(vecLen));
+        vecBus(dim) = par(i, dim, bus(vecLen));
         vecOp2D = ro.interleave(vecLen, 2) : par(i, vecLen, op);
         vecDim = outputs(vectorsList) / vecLen;
         vecLen = outputs(ba.take(1, vectorsList));

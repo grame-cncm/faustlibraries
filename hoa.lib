@@ -55,12 +55,12 @@ ma = library("maths.lib");
 si = library("signals.lib");
 ba = library("basics.lib");
 os = library("oscillators.lib");
-ho = library("hoa.lib");
+ho = library("hoa.lib"); // only for programs that import this file; its own code uses bare names
 ro = library("routes.lib");
 de = library("delays.lib");
 
 declare name "High Order Ambisonics library";
-declare version "1.5.3";
+declare version "1.5.4";
 declare author "Pierre Guillot";
 declare author "Eliott Paris";
 declare author "Julien Colafrancesco";
@@ -128,7 +128,7 @@ encoder(N, x, a) = encoder(N-1, x, a), x*sin(N*a), x*cos(N*a);
 //-----------------------------
 rEncoder(N, sp, a, it) = thisEncoder
 with {
-    basicEncoder(sig, angle) = ho.encoder(N, sig, angle);
+    basicEncoder(sig, angle) = encoder(N, sig, angle);
     thisEncoder = (_, rotationOrStaticAngle) : basicEncoder
     with {
         //converting the static angle from radians to [0; 1]
@@ -166,7 +166,7 @@ with {
 //-----------------------------
 stereoEncoder(N, a) = (leftEncoder, rightEncoder) :> si.bus(2*N+1)
 with {
-    basicEncoder(sig, angle) = ho.encoder(N, sig, angle);
+    basicEncoder(sig, angle) = encoder(N, sig, angle);
     leftEncoder = (_, a / 2) : basicEncoder;
     rightEncoder = (_, -a /2) : basicEncoder;
 };
@@ -200,7 +200,7 @@ with {
 multiEncoder(N, lspeed, langle, it) = par(i, P, thisEncoder(ba.take(i+1, lspeed), ba.take(i+1, langle), it)) :> si.bus(2*N+1)
 with {
     P = outputs(langle); //supposed to be the same as outputs(lspeed)
-    basicEncoder(sig, angle) = ho.encoder(N, sig, angle);
+    basicEncoder(sig, angle) = encoder(N, sig, angle);
     thisEncoder(sp, a, it) = (_, rotationOrStaticAngle) : basicEncoder
     with {
         //converting the static angle from radians to [0; 1]
@@ -321,7 +321,7 @@ iBasicDecoder(N, la, direct, shift) = (par(i, 2*N+1, _) <: par(i, P, speaker(N, 
 with {
     P = outputs(la);
     ang(i) = (ba.take(i+1, la)  - direct * shift) * direct * ma.PI / 180.;
-    speaker(N,alpha) = /(2), par(i, 2*N, _), ho.encoder(N,2/P,alpha) : si.dot(2*N+1);
+    speaker(N,alpha) = /(2), par(i, 2*N, _), encoder(N,2/P,alpha) : si.dot(2*N+1);
 };
 
 
@@ -413,7 +413,7 @@ with {
     P = outputs(la);
     //The VBAP decoder uses VBAP compensation: it balances the regular decoder output enabling to use irregular angular setup.
     Q = max(2*N+2, P);
-    iVBAPDecoder = ho.decoder(N, Q) : par(i, Q, circularScaledVBAP(la, (i * 360 / Q - direct * shift) * direct)) :> si.bus(P);
+    iVBAPDecoder = decoder(N, Q) : par(i, Q, circularScaledVBAP(la, (i * 360 / Q - direct * shift) * direct)) :> si.bus(P);
 };
 
 
@@ -456,7 +456,7 @@ with {
     with {
         leftDispatcher = _<:(*(1-direct), *(direct));
         rightDispatcher = _<:(*(direct), *(1-direct));
-        gDecoderStereo = ho.decoderStereo(N) : (*(g), *(g)) : (leftDispatcher, rightDispatcher) :> (_,_);
+        gDecoderStereo = decoderStereo(N) : (*(g), *(g)) : (leftDispatcher, rightDispatcher) :> (_,_);
     };
     //
     thisDecoder = si.bus(2*N+1) <: (si.bus(2*N+1), si.bus(2*N+1)) : (imlsDecoder(N, la, direct, shift), paddedStereoDecoder(N, P)) : (par(i, P, *(ambi)), *(st), *(st), si.bus(P-2))  :> si.bus(P) : par(i, P, *(g));
@@ -594,7 +594,7 @@ with {
     optb = (ot == 0) : si.smoo;
     optm = (ot == 1) : si.smoo;
     opti = (ot == 2) : si.smoo;
-    thisOptimizer = ((si.bus(2*N+1) <: ((si.bus(2*N+1):ho.optimBasic(N)), (si.bus(2*N+1):ho.optimMaxRe(N)), (si.bus(2*N+1):ho.optimInPhase(N)))), ((optb <: si.bus(2*N+1)), (optm <: si.bus(2*N+1)), (opti <: si.bus(2*N+1)))) : ro.interleave(6*N+3, 2) : par(i, 6*N+3, *) :> si.bus(2*N+1);
+    thisOptimizer = ((si.bus(2*N+1) <: ((si.bus(2*N+1):optimBasic(N)), (si.bus(2*N+1):optimMaxRe(N)), (si.bus(2*N+1):optimInPhase(N)))), ((optb <: si.bus(2*N+1)), (optm <: si.bus(2*N+1)), (opti <: si.bus(2*N+1)))) : ro.interleave(6*N+3, 2) : par(i, 6*N+3, *) :> si.bus(2*N+1);
 };
 
 
@@ -765,7 +765,7 @@ with {
     //Angle sweeping at a speed corresponding to refresh period between 0 and 2*PI
     theta = os.phasor(1, 1/rt) * 2 * ma.PI;
     //we get the vector of harmonic functions thanks to the encoding function//
-    harmonicsVector = ho.encoder(N, 1, theta);
+    harmonicsVector = encoder(N, 1, theta);
     //
     normalizedVector(N) = si.bus(N) <: (si.bus(N), norm) : ro.interleave(N, 2) : par(i, N, /)
     with {
@@ -1357,7 +1357,7 @@ with {
     optm = (ot == 1) : si.smoo;
     opti = (ot == 2) : si.smoo;
     bus3D = si.bus((N+1)*(N+1));
-    thisOptimizer = ((bus3D  <: ((bus3D:ho.optimBasic3D(N)), (bus3D:ho.optimMaxRe3D(N)), (bus3D:ho.optimInPhase3D(N)))), ((optb <: bus3D), (optm <: bus3D), (opti <: bus3D))) : ro.interleave(3*(N+1)*(N+1), 2) : par(i, 3*(N+1)*(N+1), *) :> bus3D;
+    thisOptimizer = ((bus3D  <: ((bus3D:optimBasic3D(N)), (bus3D:optimMaxRe3D(N)), (bus3D:optimInPhase3D(N)))), ((optb <: bus3D), (optm <: bus3D), (opti <: bus3D))) : ro.interleave(3*(N+1)*(N+1), 2) : par(i, 3*(N+1)*(N+1), *) :> bus3D;
 };
 
 

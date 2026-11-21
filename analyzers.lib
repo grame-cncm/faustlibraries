@@ -33,10 +33,10 @@ si = library("signals.lib");
 fi = library("filters.lib");
 os = library("oscillators.lib");
 
-an = library("analyzers.lib"); // for compatible copy/paste out of this file
+an = library("analyzers.lib"); // only for programs that import this file; its own code uses bare names
 
 declare name "Faust Analyzer Library";
-declare version "1.6.3";
+declare version "1.6.4";
 
 /************************************************************************
 FAUST library file, jos section
@@ -608,7 +608,7 @@ declare pitchTracker license "MIT";
 pitchTracker(N, t, x) = loop ~ _
     with {
         xHighpassed = fi.highpass(1, 20.0, x);
-        loop(y) = an.zcr(t, fi.lowpass(N, max(20.0, y) : si.smoo, xHighpassed)) * ma.SR * .5;
+        loop(y) = zcr(t, fi.lowpass(N, max(20.0, y) : si.smoo, xHighpassed)) * ma.SR * .5;
     };
 
 
@@ -677,9 +677,9 @@ spectralCentroid(nonlinearity, t, x) = loop ~ _
                         G = tan(w(cf) / 2.0) / (1.0 + tan(w(cf) / 2.0));
                     };
                 highpass(cf, x) = x - lowpass(cf, x);
-                xRMS = an.rms_envelope_tau(t, x);
-                xLRMS = an.rms_envelope_tau(t, lowpass(fb, x));
-                xHRMS = an.rms_envelope_tau(t, highpass(fb, x));
+                xRMS = rms_envelope_tau(t, x);
+                xLRMS = rms_envelope_tau(t, lowpass(fb, x));
+                xHRMS = rms_envelope_tau(t, highpass(fb, x));
                 diffRMS = (xHRMS - xLRMS) / max(ma.EPSILON, xRMS);
                 nonlinearIntegration = ba.if(nonlinearity, pow(diffRMS, 3), diffRMS);
                 diffInt = max(.0, min(1.0, integrator(t, nonlinearIntegration)));
@@ -1506,7 +1506,7 @@ c_magsq(N) = si.cbus(N) : par(i,N,(par(j,2,abs<:_*_):>_)) :> si.bus(N);
 // ```
 //
 //---------------------------------------------------
-c_magdb(N) = si.cbus(N) : an.c_magsq(N) : par(i,N,(max(ma.EPSILON):log10:*(10.0)));
+c_magdb(N) = si.cbus(N) : c_magsq(N) : par(i,N,(max(ma.EPSILON):log10:*(10.0)));
 
 //---------------`(an.)c_select_pos_freqs`--------------------------
 // Select the `N/2+1` non-negative-frequency bins (dc up to and including
@@ -1753,7 +1753,7 @@ c_bit_reverse_shuffle(N) = route(2*N, 2*N,
 // `fft(N)` is `c_bit_reverse_shuffle(N)` followed by `fftb(N)`, the radix-2
 // butterfly core, which expects its input already in bit-reversed order.
 //---------------------------------------------------
-fft(N) = si.cbus(N) : an.c_bit_reverse_shuffle(N) : an.fftb(N); // shuffle off to the butterflies:
+fft(N) = si.cbus(N) : c_bit_reverse_shuffle(N) : fftb(N); // shuffle off to the butterflies:
 fftb(1) = _,_; // each complex number is represented as (real,imag)
 fftb(N) = si.cbus(N) : (fftb(No2) <: (si.cbus(No2), si.cbus(No2))), (fftb(No2)
       <: (si.cbus(N):twiddleOdd(N))) :> si.cbus(N)
@@ -1807,7 +1807,7 @@ with {
 // conjugate butterfly core (which also applies the `1/N` scaling), so that
 // `an.fft(N) : an.ifft(N)` is the identity.
 //---------------------------------------------------
-ifft(N) = si.cbus(N) : an.c_bit_reverse_shuffle(N) : an.ifftb(N); // input is shuffled off to the butterflies:
+ifft(N) = si.cbus(N) : c_bit_reverse_shuffle(N) : ifftb(N); // input is shuffled off to the butterflies:
 ifftb(1) = _,_;
 ifftb(N) = si.cbus(N) : (ifftb(No2) <: (si.cbus(No2), si.cbus(No2))), (ifftb(No2)
     <: (si.cbus(N):twiddleOddConj(N))) :> si.cbus(N) : par(i,2*N,/(2.0))
@@ -1866,9 +1866,9 @@ with {
 // rfft_analyzer_magsq_test = no.noise : an.rfft_analyzer_magsq(8);
 // ```
 //---------------------------------------------------
-rfft_analyzer_c(N) = an.rtocv(N) : an.fft(N) : an.c_select_pos_freqs(N); // complex spectral bins 0 to N/2
-rfft_analyzer_db(N) = an.rfft_analyzer_c(N) : an.c_magdb(N/2+1); // assumes real input
-rfft_analyzer_magsq(N) = an.rfft_analyzer_c(N) : an.c_magsq(N/2+1); // assumes real input
+rfft_analyzer_c(N) = rtocv(N) : fft(N) : c_select_pos_freqs(N); // complex spectral bins 0 to N/2
+rfft_analyzer_db(N) = rfft_analyzer_c(N) : c_magdb(N/2+1); // assumes real input
+rfft_analyzer_magsq(N) = rfft_analyzer_c(N) : c_magsq(N/2+1); // assumes real input
 
 //---------------`(an.)rfft_analyzer_c_chrono`--------------------------
 // Standard sliding DFT of a real signal, bins 0 to N/2 (dc to Nyquist):
@@ -1901,7 +1901,7 @@ rfft_analyzer_magsq(N) = an.rfft_analyzer_c(N) : an.c_magsq(N/2+1); // assumes r
 // ```
 //---------------------------------------------------
 declare rfft_analyzer_c_chrono license "LicenseRef-STK-4.3";
-rfft_analyzer_c_chrono(N) = an.rtocv_chrono(N) : an.fft(N) : an.c_select_pos_freqs(N);
+rfft_analyzer_c_chrono(N) = rtocv_chrono(N) : fft(N) : c_select_pos_freqs(N);
 
 //---------------`(an.)rfft_spectral_level`--------------------------
 // Real-signal FFT power spectrum display: passes the signal through unchanged
@@ -1930,7 +1930,7 @@ rfft_analyzer_c_chrono(N) = an.rtocv_chrono(N) : an.fft(N) : an.c_select_pos_fre
 // ```
 //
 //---------------------------------------------------
-rfft_spectral_level(N,tau,dB_offset) = _<: _, an.rfft_analyzer_db(N) : _,(display:>_):attach with {
+rfft_spectral_level(N,tau,dB_offset) = _<: _, rfft_analyzer_db(N) : _,(display:>_):attach with {
   display = par(i,N/2+1,dbmeter(i));
   dbmeter(i) = si.smooth(ba.tau2pole(tau)) : +(dB_offset) : meter(i);
     meter(i) = speclevel_group(vbargraph("[%2i] [unit:dB]
@@ -2030,7 +2030,7 @@ spectral_spread(O,M,ftop,N,T) = band_powers(O,M,ftop,N,T) <:
 //
 //---------------------------------------------------
 // smoothed band powers (highest band first, like the analyzer itself)
-band_powers(O,M,ftop,N,T) = an.mth_octave_analyzer(O,M,ftop,N) : par(i, N, (_ <: *) : fi.avg_rect(T));
+band_powers(O,M,ftop,N,T) = mth_octave_analyzer(O,M,ftop,N) : par(i, N, (_ <: *) : fi.avg_rect(T));
 // geometric center frequency of band i (top and dc bands use their edges)
 band_center(M,ftop,N,0) = sqrt(ftop * ma.SR/2.0);
 band_center(M,ftop,N,i) = ba.if(i == N-1,
@@ -2067,7 +2067,7 @@ safe_div(num, den) = num / max(den, ma.EPSILON);
 // ```
 //---------------------------------------------------
 declare spectral_flux license "MIT";
-spectral_flux(O,M,ftop,N,hop) = an.mth_octave_analyzer(O,M,ftop,N)
+spectral_flux(O,M,ftop,N,hop) = mth_octave_analyzer(O,M,ftop,N)
     : par(i, N, abs : fi.avg_rect(hop) <: (_ - _@D) : max(0.0)) :> _
 with { D = int(hop * ma.SR); };
 
@@ -2234,7 +2234,7 @@ true_peak(x) = max(max(ph(0, x), ph(1, x)), max(ph(2, x), ph(3, x)))
 with {
     L = 12;                          // taps per phase
     sinc(z) = sin(ma.PI*z) / (ma.PI*z);   // z is never 0 here (offsets are half-integer)
-    hh(j) = an.window_kaiser(10.0, j/47.0) * sinc((j - 23.5)/4.0);
+    hh(j) = window_kaiser(10.0, j/47.0) * sinc((j - 23.5)/4.0);
     psum(p) = sum(k, L, hh(4*k+p));
     ph(p, x) = abs(sum(k, L, x@k * (hh(4*k+p)/psum(p))));
 };

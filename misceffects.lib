@@ -64,10 +64,10 @@ an = library("analyzers.lib");
 fi = library("filters.lib");
 ro = library("routes.lib");
 aa = library("aanl.lib");
-ef = library("misceffects.lib"); // for compatible copy/paste out of this file
+ef = library("misceffects.lib"); // only for programs that import this file; its own code uses bare names
 
 declare name "Misc Effects Library";
-declare version "2.7.4";
+declare version "2.7.5";
 
 //======================================Dynamic===========================================
 //========================================================================================
@@ -1173,7 +1173,7 @@ with{
 // The effect uses N instances of `reverseDelayRamped` at different phases.
 //
 //------------------------------------------------------------
-reverseEchoN(N,delMax) = _<: par(i,N,ef.reverseDelayRamped(delMax,i/N));
+reverseEchoN(N,delMax) = _<: par(i,N,reverseDelayRamped(delMax,i/N));
 
 declare reverseEchoN author "Julius O. Smith III";
 declare reverseEchoN license "LicenseRef-STK-4.3";
