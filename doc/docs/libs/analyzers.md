@@ -847,7 +847,11 @@ Sliding FFTs that compute a rectangularly windowed FFT each sample.
 
 ### `(an.)goertzelOpt` 
 
-Optimized Goertzel filter. 
+Optimized Goertzel filter: the magnitude of one DFT bin, computed over
+consecutive blocks of `n` samples. The output is updated on the last
+sample of each block and held until the end of the next one (0 until the
+first block completes). A sine of amplitude `A` centred on the bin gives
+`A*n/2`.
 
 #### Usage
 
@@ -875,7 +879,10 @@ goertzelOpt_test = an.goertzelOpt(440, 128, os.tosc(440));
 
 ### `(an.)goertzelComp` 
 
-Complex Goertzel filter. 
+Complex Goertzel filter: the same magnitude as [`goertzelOpt`](#goertzelopt),
+computed from the real and imaginary parts of the bin. The output is
+updated on the last sample of each block of `n` samples and held until
+the end of the next one (0 until the first block completes).
 
 #### Usage
 

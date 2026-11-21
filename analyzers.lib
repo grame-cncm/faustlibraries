@@ -36,7 +36,7 @@ os = library("oscillators.lib");
 an = library("analyzers.lib"); // only for programs that import this file; its own code uses bare names
 
 declare name "Faust Analyzer Library";
-declare version "1.6.4";
+declare version "1.6.5";
 
 /************************************************************************
 FAUST library file, jos section
@@ -1043,7 +1043,11 @@ with {
 //========================================================================================
 
 //---------------`(an.)goertzelOpt` --------------------------
-// Optimized Goertzel filter. 
+// Optimized Goertzel filter: the magnitude of one DFT bin, computed over
+// consecutive blocks of `n` samples. The output is updated on the last
+// sample of each block and held until the end of the next one (0 until the
+// first block completes). A sine of amplitude `A` centred on the bin gives
+// `A*n/2`.
 //
 // #### Usage
 //
@@ -1085,7 +1089,10 @@ with {
 };
 
 //---------------`(an.)goertzelComp` --------------------------
-// Complex Goertzel filter. 
+// Complex Goertzel filter: the same magnitude as [`goertzelOpt`](#goertzelopt),
+// computed from the real and imaginary parts of the bin. The output is
+// updated on the last sample of each block of `n` samples and held until
+// the end of the next one (0 until the first block completes).
 //
 // #### Usage
 //
@@ -1111,7 +1118,7 @@ with {
 //---------------------------------------------------
 goertzelComp(freq,n,x) = mg 
 with {
-  mg = sqrt(real^2 + imag^2); // magnitude
+  mg = sqrt(real^2 + imag^2) : ba.sAndH(reset0); // magnitude, held per block
   cnt = ba.time%n; // counter for windowing
   reset0 = cnt == (n-1); // reset when end of window
   reset1 = 1-(cnt == 0); // reset when beginning of window
