@@ -51,6 +51,7 @@ analyzer_test = mono : an.analyzer(3, (500, 2000));
 
 goertzelOpt_test = an.goertzelOpt(440, 128, os.tosc(440));
 goertzelComp_test = an.goertzelComp(440, 128, os.tosc(440));
+goertzelComp_hold_test = an.goertzelComp(1000, 480, (1 + int(ba.time/480)%4)*0.1*os.tosc(1000));
 goertzel_test = an.goertzel(440, 128, os.tosc(440));
 
 resonator_test = mono : an.resonator(2, 440);

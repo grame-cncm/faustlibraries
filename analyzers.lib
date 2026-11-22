@@ -36,7 +36,7 @@ os = library("oscillators.lib");
 an = library("analyzers.lib"); // only for programs that import this file; its own code uses bare names
 
 declare name "Faust Analyzer Library";
-declare version "1.6.4";
+declare version "1.6.5";
 
 /************************************************************************
 FAUST library file, jos section
@@ -1102,7 +1102,9 @@ with {
 // ```
 // an = library("analyzers.lib");
 // os = library("oscillators.lib");
+// ba = library("basics.lib");
 // goertzelComp_test = an.goertzelComp(440, 128, os.tosc(440));
+// goertzelComp_hold_test = an.goertzelComp(1000, 480, (1 + int(ba.time/480)%4)*0.1*os.tosc(1000));
 // ```
 //
 // #### References
@@ -1111,7 +1113,7 @@ with {
 //---------------------------------------------------
 goertzelComp(freq,n,x) = mg 
 with {
-  mg = sqrt(real^2 + imag^2); // magnitude
+  mg = sqrt(real^2 + imag^2) : ba.sAndH(reset0); // magnitude, held until the next window ends
   cnt = ba.time%n; // counter for windowing
   reset0 = cnt == (n-1); // reset when end of window
   reset1 = 1-(cnt == 0); // reset when beginning of window
