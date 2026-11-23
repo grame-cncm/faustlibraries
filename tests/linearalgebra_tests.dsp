@@ -17,6 +17,9 @@ inverse_test = (4, 7,
                 2, 6) : la.inverse(2);
 inverse_3_test = (2, 0, 1, 1, 3, 2, 1, 1, 4) : la.inverse(3);
 inverse_4_test = (2, 0, 1, 3, 1, 3, 2, 0, 1, 1, 4, 2, 0, 5, 1, 1) : la.inverse(4);
+inverse_solve_test = (A : la.inverse(3)), (A, (1, 2, 3) : la.matMul(3, 3, 3, 1))
+    : la.matMul(3, 3, 3, 1)
+with { A = (2, 0, 1, 1, 3, 2, 1, 1, 4); };
 
 transpose2_test = (1, 2, 3,
                    4, 5, 6) : la.transpose2(2, 3);

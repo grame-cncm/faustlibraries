@@ -83,7 +83,7 @@ si = library("signals.lib");
 ro = library("routes.lib");
 
 declare name "Faust Linear Algebra Library";
-declare version "0.1.1";
+declare version "0.1.2";
 
 
 //-----------`(la.)determinant`-------------------------
@@ -178,6 +178,9 @@ declare minor copyright "MIT License";
 //                 2, 6) : la.inverse(2);
 // inverse_3_test = (2, 0, 1, 1, 3, 2, 1, 1, 4) : la.inverse(3);
 // inverse_4_test = (2, 0, 1, 3, 1, 3, 2, 0, 1, 1, 4, 2, 0, 5, 1, 1) : la.inverse(4);
+// inverse_solve_test = (A : la.inverse(3)), (A, (1, 2, 3) : la.matMul(3, 3, 3, 1))
+//     : la.matMul(3, 3, 3, 1)
+// with { A = (2, 0, 1, 1, 3, 2, 1, 1, 4); };
 // ```
 //---------------------------------------------------------------------
 inverse(1) = 1/_;
@@ -192,9 +195,11 @@ inverse(N) = si.bus(N*N) <: si.vecOp((adjugate(N), detBus), /)
 with {
     detBus = determinant(N) <: si.bus(N*N);
     adjugate(N) = si.bus(N*N) <: par(i, N * N, cofactorTranspose(N, i));
-    cofactorTranspose(N, i) = (-1)^(ROW + COL) * minor(N, ROW, COL)
+    // The adjugate is the transpose of the cofactor matrix: its entry at
+    // row ROW, column COL is the cofactor C[COL][ROW].
+    cofactorTranspose(N, i) = (-1)^(ROW + COL) * minor(N, COL, ROW)
     with {
-        ROW = floor(i / N);
+        ROW = int(i / N);
         COL = i % N;
     };
 };
