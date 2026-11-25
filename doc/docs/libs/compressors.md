@@ -1033,7 +1033,7 @@ Where:
 * `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
 mean at most 20 dB of gain reduction (the sign is ignored)
 * `att`: attack time = time constant (sec) coming out of expansion
-* `hold` : hold time (sec)
+* `hold` : hold time (sec); 0 (or less than one sample) holds nothing: the level is the current peak
 * `rel`: release time = time constant (sec) going into expansion
 * `knee`: a gradual increase in gain reduction around the threshold:
 above thresh+(knee/2) there is no gain reduction,
@@ -1076,7 +1076,7 @@ Where:
 * `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
 mean at most 20 dB of gain reduction (the sign is ignored)
 * `attack`: attack time = time constant (sec) coming out of expansion
-* `hold`: hold time (sec)
+* `hold`: hold time (sec); 0 (or less than one sample) holds nothing: the level is the current peak
 * `release`: release time = time constant (sec) going into expansion
 * `knee`: a gradual increase in gain reduction around the threshold:
 above thresh+(knee/2) there is no gain reduction,
@@ -1097,6 +1097,7 @@ peak_expansion_gain_mono_db_hardknee_test = os.tosc(220)*lv : co.peak_expansion_
 peak_expansion_gain_mono_db_slider_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, hslider("peak_expansion_gain_mono_db:strength", 0.5, 0, 1, 0.01), hslider("peak_expansion_gain_mono_db:thresh", -40, -60, 0, 0.1), hslider("peak_expansion_gain_mono_db:range", 20, 0, 60, 0.1), hslider("peak_expansion_gain_mono_db:attack", 0.05, 0, 1, 0.001), hslider("peak_expansion_gain_mono_db:hold", 0.01, 0, 1, 0.001), hslider("peak_expansion_gain_mono_db:release", 0.02, 0, 1, 0.001), hslider("peak_expansion_gain_mono_db:knee", 6, 0, 30, 0.1), hslider("peak_expansion_gain_mono_db:prePost", 0, 0, 1, 1)) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 peak_expansion_gain_mono_db_modulated_test = no.noise*e : co.peak_expansion_gain_mono_db(2048, 0.5, -40, -40, 0.001, 0.01, 0.001*pow(1000, tri), 6, 0) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };
 peak_expansion_gain_mono_db_jump_test = no.noise*e : co.peak_expansion_gain_mono_db(2048, 0.5, -40, -40, 0.001, 0.01, 0.001*pow(1000, sq), 6, 0) with { e = pow(0.001, float(ba.period(Q))/Q); Q = int(ma.SR/4); P = int(ma.SR/10); sq = ba.period(2*P) < P; };
+peak_expansion_gain_mono_db_hold0_test = os.tosc(220)*lv : co.peak_expansion_gain_mono_db(2048, 0.5, -40, 20, 0.05, 0, 0.02, 6, 0) with { P = int(ma.SR/4); sq = ba.period(2*P) < P; lv = select2(sq, 0.001, 1); };
 ```
 
 ----
@@ -1119,7 +1120,7 @@ Where:
 * `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
 mean at most 20 dB of gain reduction (the sign is ignored)
 * `att`: attack time = time constant (sec) coming out of expansion
-* `hold` : hold time (sec), at most `maxHold` samples
+* `hold` : hold time (sec), at most `maxHold` samples; 0 (or less than one sample) holds nothing
 * `rel`: release time = time constant (sec) going into expansion
 * `knee`: a gradual increase in gain reduction around the threshold:
 above thresh+(knee/2) there is no gain reduction,
@@ -1164,7 +1165,7 @@ Where:
 * `range`: maximum amount of expansion in dB, as an attenuation: 20 and -20 both
 mean at most 20 dB of gain reduction (the sign is ignored)
 * `att`: attack time = time constant (sec) coming out of expansion
-* `hold` : hold time (sec), at most `maxHold` samples
+* `hold` : hold time (sec), at most `maxHold` samples; 0 (or less than one sample) holds nothing
 * `rel`: release time = time constant (sec) going into expansion
 * `knee`: a gradual increase in gain reduction around the threshold:
 above thresh+(knee/2) there is no gain reduction,
