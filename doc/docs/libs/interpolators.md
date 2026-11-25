@@ -6,8 +6,9 @@ This library provides interpolation algorithms for signal and control
 processing. It includes linear, polynomial, spline, and higher-order interpolation
 methods used in delay lines, envelope shaping, resampling, and parameter smoothing.
 
-The Interpolators library is organized into 7 sections:
+The Interpolators library is organized into 8 sections:
 
+* [Read index signals](#read-index-signals)
 * [Two points interpolation functions](#two-points-interpolation-functions)
 * [Four points interpolation functions](#four-points-interpolation-functions)
 * [Two points interpolators](#two-points-interpolators)
@@ -23,7 +24,7 @@ by a `idv` read index signal. Two points and four points interpolations are impl
 The `idv` parameter is to be used as a read index. In `-single` (= singleprecision) mode, 
 a technique based on 2 signals with the pure integer index and a fractional part in the [0,1] 
 range is used to avoid accumulating errors. In `-double` (= doubleprecision) or `-quad` (= quadprecision) modes, 
-a standard implementation with a single fractional index signal is used. Three functions `int_part`, `frac_part` and `mak_idv` are available to manipulate the read index signal.
+a standard implementation with a single fractional index signal is used. The functions of the [Read index signals](#read-index-signals) section build and read the read index signal: `make_idv`, `int_part` and `frac_part`, and the index generators `raise`, `raise_modulo`, `decrease` and `decrease_modulo`.
 
 Here is a use-case with `waveform`. Here the signal given to `interpolator_XXX` uses the `idv` model.
 
@@ -121,6 +122,125 @@ with {
 #### References
 
 * [https://github.com/grame-cncm/faustlibraries/blob/master/interpolators.lib](https://github.com/grame-cncm/faustlibraries/blob/master/interpolators.lib)
+
+## Read index signals
+
+
+----
+
+### `(it.)make_idv`, `(it.)int_part`, `(it.)frac_part`
+
+Build and read an `idv` read index signal, the index the interpolators of this library
+take. In single precision, `idv` is two signals, the integer part of the index and its
+fractional part in [0,1), so that an index advanced by fractional steps keeps its
+fraction as it grows; in double and quad precision, it is the index itself, one signal.
+`make_idv` builds `idv` from an index, `int_part` reads its integer part (the largest
+integer not above the index, as an int) and `frac_part` its fractional part, in [0,1).
+The two parts add up to the index, a negative one included: the integer part of -0.25
+is -1 and its fractional part 0.75.
+
+#### Usage
+
+```
+make_idv(index)
+int_part(idv) : _
+frac_part(idv) : _
+```
+
+Where:
+
+* `index`: a read index (a float)
+* `idv`: a read index signal, built by `make_idv`, `raise`, `raise_modulo`, `decrease` or `decrease_modulo`
+
+#### Test
+```
+it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+// a ramp from -75 to 75 at 120 Hz at every rate, n + f with n = floor(k/P) exact (the quotient
+// of a multiple of P, rounded) and f in [0,1): 1/P is inexact, and k*(1/P) may round an integer down
+it_ramp = n - 75 + (k % P)/P with { P = int(ma.SR/120); k = ba.period(P)*150; n = int(rint((k - k % P)/P)); };
+make_idv_test = it.int_part(idv), it.frac_part(idv) with { idv = it.make_idv(it_ramp); };
+int_part_test = it.int_part(it.make_idv(it_ramp));
+frac_part_test = it.frac_part(it.make_idv(it_ramp));
+```
+
+----
+
+### `(it.)raise`, `(it.)raise_modulo`
+
+`idv` read index signals (see `make_idv`) that advance by `step` at each sample:
+`raise` without bound, `raise_modulo` wrapped modulo `length`, in [0, length) for a
+positive `step` and in (-length, 0] for a negative one. The index restarts from 0 at
+each rising edge of `trig`, and stays at 0 before the first one. `step` may be
+fractional and negative: `soundfiles.lib` reads a soundfile at `srate/ma.SR` frames per
+sample with them. In single precision, the integer part of the index is exact up to
+2^24 and its fractional part rounds `ma.frac(step)` at each sample: with a step of
+-1.234, it is 1e-3 away from the double-precision index after 10000 samples, while a
+step in multiples of a power of 2 (-1.25) accumulates exactly.
+
+#### Usage
+
+```
+idv = raise(trig, step, length);
+idv = raise_modulo(trig, step, length);
+```
+
+Where:
+
+* `trig`: restarts the index from 0 on its rising edges (0 or 1)
+* `step`: the increment of the index per sample, possibly fractional or negative
+* `length`: the modulo of `raise_modulo`, a positive integer (not used by `raise`)
+
+#### Test
+```
+it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+raise_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); idv = it.raise(gate, -1.25, 100); };
+raise_slider_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); idv = it.raise(gate, hslider("raise:step", -1.25, -4, 4, 0.25), 100); };
+raise_modulated_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); s = int(ba.period(P)*8/P)/8; idv = it.raise(gate, -1 - s, 100); };
+raise_modulo_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); idv = it.raise_modulo(gate, -0.75, L); };
+raise_modulo_slider_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); idv = it.raise_modulo(gate, hslider("raise_modulo:step", -0.75, -4, 4, 0.25), L); };
+raise_modulo_modulated_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); s = int(ba.period(P)*8/P)/8; idv = it.raise_modulo(gate, -0.25 - s, L); };
+```
+
+----
+
+### `(it.)decrease`, `(it.)decrease_modulo`
+
+`idv` read index signals (see `make_idv`) that start at `length` and decrease by `step`
+at each sample: `decrease` without bound, `decrease_modulo` wrapped into (0, length]
+for a positive `step`. They are `length` plus `raise` and `raise_modulo` with the step
+`-step`: the index restarts from `length` at each rising edge of `trig`, and stays there
+before the first one. `step` may be fractional: `so.sound(...).play_rev` reads a
+soundfile backwards with `decrease`, at `srate/ma.SR` frames per sample.
+
+#### Usage
+
+```
+idv = decrease(trig, step, length);
+idv = decrease_modulo(trig, step, length);
+```
+
+Where:
+
+* `trig`: restarts the index from `length` on its rising edges (0 or 1)
+* `step`: the decrement of the index per sample, possibly fractional or negative
+* `length`: the starting index, and the modulo of `decrease_modulo`, a positive integer
+
+#### Test
+```
+it = library("interpolators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
+decrease_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); idv = it.decrease(gate, 0.75, 100); };
+decrease_slider_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); idv = it.decrease(gate, hslider("decrease:step", 0.75, -4, 4, 0.25), 100); };
+decrease_modulated_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); s = int(ba.period(P)*8/P)/8; idv = it.decrease(gate, 0.25 + s, 100); };
+decrease_modulo_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); idv = it.decrease_modulo(gate, 1.75, L); };
+decrease_modulo_slider_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); idv = it.decrease_modulo(gate, hslider("decrease_modulo:step", 1.75, -4, 4, 0.25), L); };
+decrease_modulo_modulated_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); s = int(ba.period(P)*8/P)/8; idv = it.decrease_modulo(gate, 1 + s, L); };
+```
 
 ## Two points interpolation functions
 

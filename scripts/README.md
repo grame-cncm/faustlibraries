@@ -131,7 +131,11 @@ make check-precision-matrix [PRECISION_ARGS="..."]
 `make check` runs in double precision at 48 kHz only. This script compiles every
 test in `-single` and `-double` with `arch/precision_arch.cpp`, renders one
 second at 44.1, 48, 88.2, 96, 176.4 and 192 kHz, and compares the two builds. It
-needs no stored reference.
+needs no stored reference. A soundfile of a test holds the decaying sine of
+`print_arch.cpp` (4096 frames at 44.1 kHz, so that a player reads it with a
+fractional step at every other rate), not silence: with silence, a player gives
+0 in both precisions whatever index it reads, and `it.decrease` going the wrong
+way in `-single` (issue #335) passed. `arch/long_arch.cpp` holds the same reader.
 
 A test fails when an output is not finite, or when its **level gap** (relative
 difference of the single and double RMS levels) exceeds 1e-3, unless
@@ -1020,7 +1024,9 @@ scripts/audit2.py [OUTPUT.json]
 Documentation coverage of the git-tracked `.lib` files at the root. It
 understands the conventions of the doc blocks: multi-symbol titles, generic
 patterns (`fdelay[N]`), `library()` and `environment` aliases, `/* */`
-comments, and `_name` internals. It prints one row per library (lines,
+comments, `_name` internals, and definitions selected by precision
+(`singleprecision raise(...) = ...`), which count as definitions of their name.
+It prints one row per library (lines,
 definitions, doc blocks, undocumented symbols, coverage, blocks without
 `#### Usage`, blocks with a test only), and writes the details as JSON when
 given a file. Always exits 0.

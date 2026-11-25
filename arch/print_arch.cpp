@@ -26,6 +26,7 @@
 // A soundfile of the tests is not read from its file: MemoryReader provides
 // SOUND_LENGTH frames of silence, filled here with a decaying sine, one octave
 // apart between the channels, so that soundfiles.lib has something to play.
+// precision_arch.cpp and long_arch.cpp hold the same reader: keep them in step.
 struct TestSoundReader : public MemoryReader {
 
     template <typename REAL>

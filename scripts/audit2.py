@@ -14,6 +14,10 @@ libraries actually use:
   * code inside `/* ... */` block comments (commented-out examples, license
     headers) is not scanned for definitions
   * `_name` definitions are internal by convention and are excluded
+  * a definition selected by precision (`singleprecision raise(...) = ...`,
+    `doubleprecision quadprecision raise(...) = ...`) is a definition of its
+    name: the keywords are skipped before matching (they once hid seven
+    public functions of interpolators.lib, issue #335)
 
 Reports, per library: line count, number of definitions, number of doc blocks,
 undocumented symbols, coverage, and blocks missing a `#### Usage` section.
@@ -48,6 +52,7 @@ marker_re = re.compile(r'^//-{3,}[^-].*')                       # doc header lin
 name_re = re.compile(r'`\(?([a-zA-Z0-9_]+)\.\)?([a-zA-Z0-9_\[\]]+)`')  # `(fi.)name`
 bare_re = re.compile(r'`([a-zA-Z0-9_\[\]]+)`')                  # `name`
 def_re = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*(\([^)]*\))?\s*=')
+precision_re = re.compile(r'^(?:(?:single|double|quad|fixedpoint)precision\s+)+')  # selectors
 alias_re = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(library|environment|component)\b')
 alias_pair_re = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*;')
 
@@ -90,6 +95,7 @@ for lib in libs:
     alias_pairs = []
     doc_starts = []
     for i, l in enumerate(lines):
+        l = precision_re.sub('', l)
         if marker_re.match(l):
             ns = name_re.findall(l)
             got = [n for _, n in ns] or bare_re.findall(l)

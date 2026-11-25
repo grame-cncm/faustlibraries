@@ -8,6 +8,27 @@ os = library("oscillators.lib");
 ma = library("maths.lib");
 ba = library("basics.lib");
 
+// a ramp from -75 to 75 at 120 Hz at every rate, n + f with n = floor(k/P) exact (the quotient
+// of a multiple of P, rounded) and f in [0,1): 1/P is inexact, and k*(1/P) may round an integer down
+it_ramp = n - 75 + (k % P)/P with { P = int(ma.SR/120); k = ba.period(P)*150; n = int(rint((k - k % P)/P)); };
+make_idv_test = it.int_part(idv), it.frac_part(idv) with { idv = it.make_idv(it_ramp); };
+int_part_test = it.int_part(it.make_idv(it_ramp));
+frac_part_test = it.frac_part(it.make_idv(it_ramp));
+
+raise_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); idv = it.raise(gate, -1.25, 100); };
+raise_slider_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); idv = it.raise(gate, hslider("raise:step", -1.25, -4, 4, 0.25), 100); };
+raise_modulated_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); s = int(ba.period(P)*8/P)/8; idv = it.raise(gate, -1 - s, 100); };
+raise_modulo_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); idv = it.raise_modulo(gate, -0.75, L); };
+raise_modulo_slider_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); idv = it.raise_modulo(gate, hslider("raise_modulo:step", -0.75, -4, 4, 0.25), L); };
+raise_modulo_modulated_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); s = int(ba.period(P)*8/P)/8; idv = it.raise_modulo(gate, -0.25 - s, L); };
+
+decrease_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); idv = it.decrease(gate, 0.75, 100); };
+decrease_slider_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); idv = it.decrease(gate, hslider("decrease:step", 0.75, -4, 4, 0.25), 100); };
+decrease_modulated_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); s = int(ba.period(P)*8/P)/8; idv = it.decrease(gate, 0.25 + s, 100); };
+decrease_modulo_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); idv = it.decrease_modulo(gate, 1.75, L); };
+decrease_modulo_slider_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); idv = it.decrease_modulo(gate, hslider("decrease_modulo:step", 1.75, -4, 4, 0.25), L); };
+decrease_modulo_modulated_test = it.int_part(idv), it.frac_part(idv) with { P = int(ma.SR/10); gate = ba.period(P) < int(P/2); L = int(ma.SR/16); s = int(ba.period(P)*8/P)/8; idv = it.decrease_modulo(gate, 1 + s, L); };
+
 interpolate_linear_test = it.interpolate_linear(0.5, 0.0, 1.0);
 interpolate_linear_slider_test = it.interpolate_linear(hslider("interpolate_linear:dv", 0.5, 0, 1, 0.01), 0.0, 1.0);
 interpolate_linear_modulated_test = it.interpolate_linear(tri, 0.0, 1.0) with { P = int(ma.SR/10); tri = 1 - abs(2*ba.period(P)/P - 1); };

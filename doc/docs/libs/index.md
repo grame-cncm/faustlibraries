@@ -609,6 +609,9 @@
 
 ## interpolators
 
+[(it.)make_idv, (it.)int_part, (it.)frac_part](interpolators.md#itmake_idv,-itint_part,-itfrac_part)
+[(it.)raise, (it.)raise_modulo](interpolators.md#itraise,-itraise_modulo)
+[(it.)decrease, (it.)decrease_modulo](interpolators.md#itdecrease,-itdecrease_modulo)
 [(it.)interpolate_linear](interpolators.md#itinterpolate_linear)
 [(it.)interpolate_cosine](interpolators.md#itinterpolate_cosine)
 [(it.)interpolate_logarithmic](interpolators.md#itinterpolate_logarithmic)

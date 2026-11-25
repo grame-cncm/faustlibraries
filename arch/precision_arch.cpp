@@ -42,6 +42,7 @@
 #include "faust/gui/SoundUI.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -52,6 +53,52 @@
 <<includeIntrinsic>>
 
 <<includeclass>>
+
+// A soundfile of the tests is not read from its file: MemoryReader provides
+// SOUND_LENGTH frames of silence (at SOUND_SR, 44.1 kHz), filled here with a
+// decaying sine, one octave apart between the channels, so that soundfiles.lib
+// has something to play. The same reader as print_arch.cpp (keep them in step):
+// with silence, a soundfile player gives 0 in both precisions whatever it reads,
+// and it.decrease going the wrong way in -single (issue #335) went unseen.
+struct TestSoundReader : public MemoryReader {
+
+    template <typename REAL>
+    static void fill(void* buffers, int start)
+    {
+        const double kPi = 3.14159265358979323846;
+        for (int chan = 0; chan < SOUND_CHAN; chan++) {
+            for (int sample = 0; sample < SOUND_LENGTH; sample++) {
+                const double envelope = 1.0 - double(sample) / SOUND_LENGTH;
+                static_cast<REAL**>(buffers)[chan][start + sample] =
+                    REAL(envelope * std::sin(2.0 * kPi * (chan + 1) * sample / 64.0));
+            }
+        }
+    }
+
+    virtual void readFile(Soundfile* soundfile, const std::string& path_name, int part, int& offset, int max_chan) override
+    {
+        MemoryReader::readFile(soundfile, path_name, part, offset, max_chan);
+        const int start = offset - SOUND_LENGTH;
+        if (soundfile->fIsDouble) {
+            fill<double>(soundfile->fBuffers, start);
+        } else {
+            fill<float>(soundfile->fBuffers, start);
+        }
+    }
+};
+
+// Whether the program was compiled in -double: its soundfiles then hold doubles.
+struct CompileOptions : public Meta {
+
+    bool fDouble = false;
+
+    virtual void declare(const char* key, const char* value)
+    {
+        if (std::string(key) == "compile_options") {
+            fDouble = std::string(value).find("-double") != std::string::npos;
+        }
+    }
+};
 
 // Same control handling as print_arch.cpp, so that both harnesses test the
 // same thing: every button and checkbox is set to 1, then to 0 (see main).
@@ -110,7 +157,9 @@ int main(int argc, char* argv[])
     ControlUI control;
     dsp->buildUserInterface(&control);
 
-    SoundUI sound;
+    CompileOptions options;
+    dsp->metadata(&options);
+    SoundUI sound("", -1, new TestSoundReader(), options.fDouble);
     dsp->buildUserInterface(&sound);
 
     // CONTROLS: a setting (min, max, min:I, max:I) and the options of the
