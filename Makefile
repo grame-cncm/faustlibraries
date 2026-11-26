@@ -463,7 +463,7 @@ pdf: ## Create the PDF documentation
 	$(MAKE) -C doc pdf
 
 clean: ## Remove build artefacts and generated outputs (keeps references)
-	rm -rf $(BUILD_DIR) tests/build-mutation $(PRECISION_BUILD_DIR) $(CPU_BUILD_DIR) $(OUTPUT_DIR) $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
+	rm -rf $(BUILD_DIR) tests/build-mutation $(PRECISION_BUILD_DIR) $(CPU_BUILD_DIR) $(OUTPUT_DIR) $(SANITIZE_BUILD_DIR) $(SANITIZE_OUTPUT_DIR) tests/build-backends tests/build-long tests/build-sr tests/build-weak $(DOC_INDEX_OUTPUT) $(DOC_INDEX_SPLIT_DIR)
 
 distclean: clean ## Additionally remove the stored reference outputs
 	rm -rf $(REFERENCE_DIR)
