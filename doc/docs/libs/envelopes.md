@@ -533,7 +533,7 @@ dx7envelope(R1,R2,R3,R4,L1,L2,L3,L4,t) : _
 
 Where:
 
-* `R1`, `R2`, `R3`, `R4`: rates in seconds
+* `R1`, `R2`, `R3`, `R4`: rates in seconds (the durations of the segments); a rate shorter than one sample, 0 included, lasts one sample
 * `L1`, `L2`, `L3`, `L4`: levels (0-1)
 * `t`: trigger signal
 
@@ -541,6 +541,8 @@ Where:
 ```
 en = library("envelopes.lib");
 os = library("oscillators.lib");
+ba = library("basics.lib");
+ma = library("maths.lib");
 gate = button("gate");
 dx7envelope_test = os.tosc(440) * en.dx7envelope(
   0.05, 0.1, 0.1, 0.2,
@@ -548,4 +550,5 @@ dx7envelope_test = os.tosc(440) * en.dx7envelope(
   gate
 );
 dx7envelope_slider_test = os.tosc(440) * en.dx7envelope(hslider("dx7envelope:R1", 0.05, 0, 5, 0.001), hslider("dx7envelope:R2", 0.1, 0, 5, 0.001), hslider("dx7envelope:R3", 0.1, 0, 5, 0.001), hslider("dx7envelope:R4", 0.2, 0, 5, 0.001), hslider("dx7envelope:L1", 1, 0, 1, 0.01), hslider("dx7envelope:L2", 0.8, 0, 1, 0.01), hslider("dx7envelope:L3", 0.6, 0, 1, 0.01), hslider("dx7envelope:L4", 0, 0, 1, 0.01), gate);
+dx7envelope_zero_rates_test = os.tosc(440) * en.dx7envelope(0, 0.1, 0, hslider("dx7envelope_zero_rates:R4", 0, 0, 5, 0.001), 1, 0.8, 0.6, 0, g) with { P = int(ma.SR/4); g = ba.period(P) < int(0.8*P); };
 ```

@@ -65,3 +65,4 @@ dx7envelope_test = os.tosc(440) * en.dx7envelope(
   gate
 );
 dx7envelope_slider_test = os.tosc(440) * en.dx7envelope(hslider("dx7envelope:R1", 0.05, 0, 5, 0.001), hslider("dx7envelope:R2", 0.1, 0, 5, 0.001), hslider("dx7envelope:R3", 0.1, 0, 5, 0.001), hslider("dx7envelope:R4", 0.2, 0, 5, 0.001), hslider("dx7envelope:L1", 1, 0, 1, 0.01), hslider("dx7envelope:L2", 0.8, 0, 1, 0.01), hslider("dx7envelope:L3", 0.6, 0, 1, 0.01), hslider("dx7envelope:L4", 0, 0, 1, 0.01), gate);
+dx7envelope_zero_rates_test = os.tosc(440) * en.dx7envelope(0, 0.1, 0, hslider("dx7envelope_zero_rates:R4", 0, 0, 5, 0.001), 1, 0.8, 0.6, 0, g) with { P = int(ma.SR/4); g = ba.period(P) < int(0.8*P); };
