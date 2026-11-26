@@ -100,7 +100,7 @@ such as the `#### Test` sections of the `.lib` files, are not listed. The
 Makefile runs it on `tests/*.dsp` to build `TEST_SPECS`: each pair becomes
 `tests/reference/<name>.ref` and `tests/output/<name>.out`, and
 `faust -pn <name> <file>` compiles that test alone. Test names must therefore be
-unique across all test files (`AGENTS.md`, rule 1).
+unique across all test files (`doc/docs/contributing.md`, section *New Functions*).
 
 ### `floatdiff.py`
 
@@ -170,8 +170,7 @@ the last bits of a float result vary between compilers.
   a change of rates, threshold or harness, never to silence a failure.
 
 Exit status 0 when every test passes, 1 otherwise. See
-`doc/docs/contributing.md`, section *Precision and sample rate*, and
-`AGENTS.md`, rule 9.
+`doc/docs/contributing.md`, section *Precision and sample rate*.
 
 ### `check_extremes.py`
 
@@ -520,8 +519,8 @@ built without (the interpreter, LLVM) is skipped with a note. `--changed` does
 nothing unless a tracked `.lib` or `tests/*.dsp` differs from `HEAD`:
 `check_doc.py` runs it that way on WebAssembly. Exit status: 0, 1 on a
 regression, 2 without faust. Compilations run from the repository root, since
-faust looks for libraries in the current directory first. `AGENTS.md`, rule 12,
-and `doc/docs/contributing.md`, section *Backends and foreign functions*, say
+faust looks for libraries in the current directory first.
+`doc/docs/contributing.md`, section *Backends and foreign functions*, says
 why.
 
 With `--compare` (`make check-backend-outputs`, WebAssembly and Cmajor; add
@@ -670,7 +669,7 @@ remains for an overview of the whole suite through the LLVM JIT; it compares
 nothing.
 
 Exit status 0, or 1 with `--fail-above` when a ratio exceeds it. See
-`doc/docs/contributing.md`, section *CPU cost*, and `AGENTS.md`, rule 10.
+`doc/docs/contributing.md`, section *CPU cost*.
 
 ### `lib_tests.py`
 
@@ -679,7 +678,8 @@ scripts/lib_tests.py inventory LIB [--missing]
 scripts/lib_tests.py add LIB SPEC.dsp [--tests-file FILE] [--dry-run]
 ```
 
-Every test lives in two places (`AGENTS.md`, rule 8): in the `#### Test` section
+Every test lives in two places (`doc/docs/contributing.md`, section *New
+Functions*): in the `#### Test` section
 of the function's doc block, then, verbatim and under the same name, in a
 `tests/*.dsp` file. A function whose parameters are meant to vary at run time has
 three tests, `name_test`, `name_slider_test` and `name_modulated_test`, and a
@@ -689,7 +689,7 @@ maintains both places.
 
 **`inventory LIB`** lists, for every symbol documented in LIB, where each of the
 four tests exists: `both`, `lib` or `dsp` (one side only), or `-`. The tests
-present on one side only break rule 8 and are listed first; the exit status is
+present on one side only break that rule and are listed first; the exit status is
 then 1. `--missing` hides the symbols that have the first three; a missing
 `_jump_test` does not count, since only recursive filters need one. Whether a
 function needs the slider, modulated and jump variants is a judgement, which the
@@ -699,8 +699,8 @@ The inventory reads the titles with or without a prefix (`(tu.)name` or
 `name`, as in tubes.lib, tonestacks.lib, instruments.lib and maxmsp.lib),
 counts the tests of a generic `name[N]` or `name[N]suffix` from any of its
 instances (`fdelay2a_test` for `fdelay[N]a`), and accepts a test named after
-the library's alias when the natural name is taken (`tu_inverse_test`, rule
-1 of `AGENTS.md`); a test found only in `tests/*.dsp` counts for the library
+the library's alias when the natural name is taken (`tu_inverse_test`, see
+`doc/docs/contributing.md`, section *New Functions*); a test found only in `tests/*.dsp` counts for the library
 only if it calls the function through that alias. A test commented out in
 `tests/*.dsp` on purpose, such as the nondeterministic `no.rnoise`, shows as
 `off`.
@@ -833,7 +833,20 @@ The gate to pass before every commit. It fails on:
    (`build_faust_doc_index.py`), which means the doc-block format drifted away
    from what the exporter understands;
 6. a `#### Usage` section, in a library that differs from `HEAD`, that
-   `check_usage.py --changed` rejects (when `faust` is installed).
+   `check_usage.py --changed` rejects (when `faust` is installed);
+7. a test that no longer compiles, validates or runs for WebAssembly, when a
+   library or a test file differs from `HEAD` (`check_backends.py --changed
+   --lang wasm`, when `faust` is installed);
+8. a weak reference, when a library, a test file or the weak baseline differs
+   from `HEAD` (`check_weak.py --changed --skip-missing`);
+9. a certified verdict that moved, when a library, `tests/lean/`,
+   `formalisation/` or the generator differs from `HEAD`
+   (`check_certify.py --changed`, when `lean` 4.31 and `faust-rs` are
+   installed);
+10. a reference to a section of `doc/docs/contributing.md` that the page does
+    not have: a section name in italics in `AGENTS.md`, a section that this
+    file names after `contributing.md`, or a `[link](#anchor)` of the page
+    itself.
 
 `--update-baseline` records the current debt as accepted. Never use it to hide a
 gap you introduced. Exit status 1 on any regression.
@@ -1093,8 +1106,18 @@ the libraries.
   detailed `DIR/modules/<module>.json` per library, which suits retrieval (the
   make targets use `tests/faust-doc/`).
 - `--license-policy commercial-compatible` keeps only the symbols whose license
-  matches a conservative allow-list; the allow and deny lists can be extended
-  with newline-separated files.
+  matches a conservative allow-list (the default, `all`, keeps every
+  documented symbol). A symbol without a license of its own falls back to its
+  library's and is kept. Permissive and weak-copyleft markers are accepted
+  (`MIT`, `BSD`, `Apache`, `LGPL`, `LGPL with exception`, `MPL`, `ISC`,
+  `zlib`, `Boost`, `Unlicense`, `public domain`, `STK-4.3`); `GPL`, `AGPL` and
+  non-commercial terms are rejected. It is a practical filter for tooling,
+  not a legal opinion.
+- `--license-allowlist-file` and `--license-denylist-file` extend the two
+  lists with a file holding one token per line, matched case-insensitively as
+  a substring of the license; empty lines and lines starting with `#` are
+  ignored. `make doc-index-commercial` passes them from
+  `DOC_INDEX_LICENSE_ALLOWLIST_FILE` and `DOC_INDEX_LICENSE_DENYLIST_FILE`.
 - `--measure-io` computes each symbol's `io` with the Faust compiler instead
   of guessing it from the Usage text. The call of the Usage, valued as
   `check_usage.py` values it (from the `#### Test` section), is compiled as
@@ -1111,10 +1134,25 @@ the libraries.
   `faust`, with guessed counts. `check_doc.py` does not measure (it only
   counts the symbols).
 
+The make targets write to `tests/` (`DOC_INDEX_OUTPUT` and
+`DOC_INDEX_SPLIT_DIR` to change it; `make clean` removes them):
+
+| Target | Writes |
+|---|---|
+| `make doc-index` | `tests/faust-doc-index.json` |
+| `make doc-index-split` | the same, plus `tests/faust-doc/index.json` and `tests/faust-doc/modules/*.json` |
+| `make doc-index-commercial` | the same paths as `doc-index-split`, filtered by the `commercial-compatible` policy |
+
+```bash
+make doc-index-split DOC_INDEX_OUTPUT=/tmp/faust-doc-index.json DOC_INDEX_SPLIT_DIR=/tmp/faust-doc
+make doc-index-commercial DOC_INDEX_LICENSE_ALLOWLIST_FILE=my-allowlist.txt
+python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --split-output-dir tests/faust-doc --pretty
+```
+
 The last line printed is a JSON summary, including `symbolsCount`, which
 `check_doc.py` compares with its baseline. After a change to the doc-block
-format, regenerate the export and check the touched symbols (`AGENTS.md`,
-rule 7).
+format, regenerate the export and check the touched symbols (`doc/docs/contributing.md`,
+section *Faust Library JSON Exports*).
 
 ### `faust_doc_api.py`
 
@@ -1156,6 +1194,8 @@ make doc-index-split
 scripts/faust_doc_api.py --pretty get_faust_symbol fi.lowpass
 scripts/faust_doc_api.py --format text search_faust_lib reverb --outputs 2 --license-policy commercial-compatible
 scripts/faust_doc_api.py --format text get_faust_source fi.dcblocker
+scripts/faust_doc_api.py --pretty explain_faust_symbol_for_goal re.springreverb "build a metallic spring reverb"
+scripts/faust_doc_api.py --index tests/faust-doc --pretty list_faust_module filters --limit 10
 ```
 
 ## Figures
@@ -1165,7 +1205,8 @@ Both scripts write SVG files to `doc/docs/img/` (`--out` to change it), where
 convention. `make plots` runs both through `check_plots.py --update`, which
 rewrites only the figures whose rendering changed, then rebuilds the
 documentation. The figures
-are generated files: regenerate them, do not edit them (`AGENTS.md`, rule 6).
+are generated files: regenerate them, do not edit them (`doc/docs/contributing.md`, section
+*Documentation*).
 
 ### `plot_lib.py`
 
@@ -1219,8 +1260,8 @@ generator writes any more. The functions `plot_lib.py` skips by design
 the others untouched, so that only figures whose rendering changed show in
 the diff; it updates nothing while an assertion fails. `make plots` is
 `--update` followed by the documentation build. `--keep DIR` keeps
-the regenerated figures for inspection. `AGENTS.md`, rule 11, says when to
-run it.
+the regenerated figures for inspection. `doc/docs/contributing.md`, section
+*Figures*, says when to run it.
 
 Both generators compile their probes from the repository root: faust looks
 for libraries in the current directory before the `-I` ones, so a probe

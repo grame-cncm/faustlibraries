@@ -3,339 +3,141 @@
 This repository is the Faust DSP standard library set: the `*.lib` files at
 the root are the product. The online documentation is generated from their
 comment blocks (`doc/`), and the regression tests are extracted from those
-same blocks. Detailed conventions live in `doc/docs/contributing.md` — this
-file is the operational summary.
+same blocks.
+
+This file is the operational summary: the commands and the rules, stated
+briefly. The reasons, the examples and the procedures live in
+`doc/docs/contributing.md` (the section named at the end of each rule), and every
+script is described in `scripts/README.md`. Read the section before working
+in its area; when the two files disagree, fix the one that is wrong.
 
 ## Commands
 
 ```bash
 make check-doc   # documentation & license gate - run before every commit
 make check-usage # compile every #### Usage section (check-doc does the changed libraries)
-make check-filter-claims # filters.lib/vaeffects.lib measured against their doc with faustprobe (faust-rs): SR independence, -3 dB, peaks
-make check-tuning # physmodels.lib instruments measured with faustprobe: pitch at 44.1-192 kHz (about 1 min)
-make check-osc-claims # oscillators.lib and aanl.lib measured with faustprobe: pitch, SR independence, aliasing, float noise (about 1 min)
 make reference   # build the test references (needs faust + a C++ compiler)
 make check       # run the regression tests against the references (-k to run all)
-make check-precision  # every test in -single/-double at 44.1-192 kHz (no references)
-make check-backends   # every test compiled for WebAssembly (modules validated and run), Cmajor (rendered), Julia, ... (check-doc does WebAssembly)
-make check-sanitize   # every test under ASan and UBSan, table guards off (about 30 min; DSP_FILES= to restrict)
+make check-vec   # the same with Faust's vectorized code generator
+make check-precision  # every test in -single/-double at 44.1-192 kHz (no references); PRECISION_ARGS="tests/xx_tests.dsp"
+make check-precision-matrix # the same with -O3 -ffast-math, Faust -vec and -lang ocpp
 make check-extremes   # every test with its sliders at their extremes, all and one by one (about 2 min)
+make check-jumps      # every test with its sliders jumping between their bounds during the run
+make check-reinit     # every test after a second init(), same rate and rate change: equal to a fresh instance
+make check-sr         # every test at 44.1, 96 and 192 kHz, noises made rate-independent: spectrum, level, decay must not move
 make check-long       # every test rendered 2 min at 192 kHz, -single and -double: non-finite, growth, subnormals, drift
 make check-weak       # every reference read: silent, below the tolerance, constant, settled, inputs unused (3 s)
-make check-reinit     # every test after a second init(), same rate and rate change: equal to a fresh instance
-make check-jumps      # every test with its sliders jumping between their bounds during the run
-make check-sr         # every test at 44.1, 96 and 192 kHz, noises made rate-independent: spectrum, level, decay must not move
+make check-sanitize   # every test under ASan and UBSan, table guards off (about 30 min; DSP_FILES= to restrict)
+make check-backends   # every test compiled for WebAssembly (validated and run), Cmajor (rendered), Julia, ... (check-doc does WebAssembly)
 make check-backend-outputs # WebAssembly and Cmajor outputs compared with the C++ build in -single
-make check-mutation  # small faults injected in a copy of the libraries: what do the tests detect? (a sample, about 1 h; MUTATION_ARGS="--lib xx.lib -n 50")
-make check-cpu   # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
-make plots       # rewrite the figures whose rendering changed, rebuild the site
-make check-plots # regenerate every figure aside: stale figures, failed assertions
-make build       # build the mkdocs site (doc pages + figure injection)
-make check-certify # the Lean theorems regenerated and kernel-checked: a verdict moved? (10 s; check-doc does it when what it reads changed)
-make certify     # the same, stricter: fails on any difference with tests/lean/certified.lean, terms included
+make check-filter-claims # filters.lib/vaeffects.lib measured against their doc with faustprobe (faust-rs)
+make check-tuning     # physmodels.lib instruments measured with faustprobe: pitch at 44.1-192 kHz (about 1 min)
+make check-osc-claims # oscillators.lib and aanl.lib measured with faustprobe (about 1 min)
+make verify-matched   # vaeffects.lib's matched filters: rewrites proved, coefficients at 60 digits
+make check-mutation   # faults injected in a copy of the libraries: what do the tests detect? (about 1 h; MUTATION_ARGS="--lib xx.lib -n 50")
+make check-cpu        # CPU cost of the tests, on an idle machine; CPU_ARGS="--base origin/master" for new/base ratios
+make check-cpu-matrix # the same with the fast-math, strict and vec compilations
+make check-plots      # regenerate every figure aside: stale figures, failed assertions (about 2 min)
+make plots            # rewrite the figures whose rendering changed, rebuild the site
+make build            # build the mkdocs site (doc pages + figure injection)
+make doc-index-split  # the JSON export of the documentation (tests/faust-doc/)
+make check-certify    # the Lean theorems regenerated and kernel-checked: a verdict moved? (10 s; check-doc does it when what it reads changed)
+make certify          # the same, stricter: fails on any difference with tests/lean/certified.lean
+make clean            # remove every test build and output, keep the references (distclean removes them too)
 ```
 
-Every script behind these targets is described in `scripts/README.md`.
+## Checks and references
 
-- `make check-doc` must pass before committing: it rejects any new
-  undocumented symbol, any doc block without `#### Usage` (or reduced to a
-  `#### Test`), a stale `doc/docs/standardFunctions.md`, and any
-  non-canonical license string. Accepted historical debt is pinned in
-  `tests/doc-baseline.json`; never regenerate that baseline to silence a
-  failure you caused. With `faust` installed, it also compiles the
-  `#### Usage` sections of the libraries changed since `HEAD`
-  (`scripts/check_usage.py --changed`): the buses must match the arity of
-  the call, and its parameters the `Where:` bullets. The debt is pinned in
-  `tests/usage-baseline.json`, under the same rule; a fix that makes an
-  entry pass removes it in the same commit. With `lean` 4.31 and
-  `faust-rs` installed, it also regenerates the Lean certification when
-  a library, `tests/lean/` or `formalisation/` changed
-  (`scripts/check_certify.py --changed`), and fails on a verdict that
-  moved, not on a term that did: a change that loses a verdict either
-  teaches the prelude the new form, with its correctness argument in a
-  comment, or accepts the refusal, in both cases by
-  `make certify-reference` in the same commit. Never reword a rule to
-  get a verdict back.
-- The test references (`tests/reference/`, ~1.4 GB) are local build
-  artifacts: generate them with `make reference`, never commit them. Same
-  for the built site (`site/`) and `tests/build|output`; `.gitignore`
-  covers them all.
-- The references hold the bargraphs too, after the outputs: a test of a
-  meter or a probe compares its measure, not only the signal it lets through.
-- A test failure means the change altered audible output. That is either a
-  bug in the change or a deliberate fix; in the second case say so
-  explicitly and regenerate only the affected references.
-- **`make check` re-runs what changed**: an output depends on the files its
-  test loaded (`faust -flist`, kept in `tests/output/<name>.d`), its
-  reference, the harness and the build settings (`tests/output/.params`),
-  so after editing a library it re-runs the tests that use that library,
-  and only those. `make check-sanitize` does the same. Nothing needs to be
-  deleted for a real validation, and a missing reference fails instead of
-  being generated. The references do not depend on the sources, on purpose:
-  to regenerate them after a deliberate behavior change, delete the affected
-  `.ref` files before `make reference`.
+- `make check-doc` must pass before committing. It rejects a new
+  undocumented symbol, a doc block without `#### Usage` or reduced to a
+  `#### Test`, a stale `doc/docs/standardFunctions.md` and a non-canonical
+  license; with the tools installed, it also compiles the Usage sections,
+  the tests for WebAssembly, reads the references (`check-weak`) and
+  re-checks the Lean verdicts of what changed. *Testing the library*,
+  *Formal certification*.
+- **Baselines** (`tests/*-baseline.json`) pin accepted debt. A new test
+  passes without an entry; a fix that makes an entry unnecessary removes it
+  in the same commit; never add, loosen or regenerate an entry to silence a
+  failure you caused. A lost Lean verdict is handled by
+  `make certify-reference` in the same commit, never by rewording a rule.
+- The references (`tests/reference/`) are local artifacts, never
+  committed. They hold the bargraphs too. `make check` re-runs only the
+  tests a change reaches, and a missing reference fails.
+- A test failure means the change altered the output: a bug, or a
+  deliberate fix. In the second case say so, delete only the affected
+  `.ref` files and run `make reference`.
 
 ## Hard rules for library changes
 
-1. **Every new public function** needs, in the same commit:
-   - a full documentation block (description, `#### Usage` showing the
-     input/output shape as a Faust expression that compiles, like
-     `_ : wgr(f,r) : _,_`, `Where:` for each parameter of that call,
-     `#### Test`). In the Usage, the library's own names have no prefix,
-     and inputs that have a meaning are named and documented:
-     `expm1(x) : _` with a bullet for `x`, not `_ : expm1 : _`;
-   - a `functionName_test` entry in the matching `tests/*.dsp` file, copied
-     from the block's `#### Test` (rule 8), and its reference generated with
-     `make reference`;
-   - a `declare functionName license "ID";` with a canonical SPDX
-     identifier (check with `scripts/normalize_licenses.py --check`).
-
-   The doc-block **title must name every symbol the block documents,
-   exactly**, each in its own backquotes: `` `(pp.)name` `` or
-   `` `(pp.)name1`, `(pp.)name2` `` for multi-function blocks. The tooling
-   does not recognize a title with a trailing space inside the backquotes,
-   an argument list appended to the name, or a sibling only mentioned in
-   the prose — all three make the symbol count as undocumented. The
-   generic pattern `` `name[N]` `` matches digit suffixes only
-   (`name1`..`name9`), not letter variants.
-
-   Test names must be **unique across all of `tests/*.dsp`** (each becomes
-   one `tests/reference/<name>.ref`), and must not differ from an existing
-   name only by letter case — the `.ref` files collide on case-insensitive
-   filesystems (macOS). Prefix with the library's short name (`mm_`,
-   `tu_`, `inst_`) when the natural name is taken. Every test must produce
-   a **nonzero output signal**: a gate defaulting to 0 or a slider
-   defaulting to silence turns the reference into all zeros, which
-   validates nothing. Check the generated `.ref` before committing it:
-   `make check-weak` (which `make check-doc` runs when a library or a
-   test changed) flags a reference that stays within the tolerance of
-   `make check` (1e-5) of zero, or of a constant, or that stops changing
-   before the middle of the render, and a test whose inputs the harnesses
-   feed with zeros. A new test passes it without an entry in
-   `tests/weak-baseline.json`.
-2. **Internal helpers** that cannot live in a `with { }` /
-   `environment { }` block are prefixed `_name`. They need no doc block and
-   are excluded from coverage; never use another library's `_` symbols.
-   When hiding or renaming an existing public-by-accident symbol, the old
-   name survives one published release as a deprecated alias grouped at
-   the end of the file (`declare oldname deprecated "...renamed _name";`
-   `oldname = _name;` — or a frozen copy of the body when the definition
-   moved into a `with`). Before hiding anything, check it is not used by
-   another library, a documented example, or an explicit-substitution
-   switch (`os[SAFE=1;]`) — any of those makes it de facto public: document
-   it instead.
+1. **A new public function** comes, in the same commit, with a full doc
+   block (description, `#### Usage` as a Faust expression that compiles,
+   `_ : wgr(f,r) : _,_`, with the library's own names unprefixed and the
+   meaningful inputs named, `Where:` for each parameter, `#### Test`), its
+   tests in `tests/*.dsp` with their references, and a
+   `declare name license "ID";` with a canonical SPDX id. The block title
+   names every documented symbol exactly, each in its own backquotes. Test
+   names are unique across `tests/*.dsp`, also ignoring case, and every test
+   has a nonzero output. *New Functions*, *Documentation*.
+2. **Internal helpers** that cannot live in a `with`/`environment` are
+   prefixed `_name`; never use another library's `_` symbols. A symbol
+   hidden or renamed keeps its old name as a deprecated alias for one
+   published release; check first that nothing uses it (another library, an
+   example, `os[SAFE=1;]`). *Variables and identifiers scoping*.
 3. **Naming**: existing symbols keep their names; new code follows the
-   dominant style of the file (or section) it lands in.
+   dominant style of the file or section. *Function Naming*.
 4. **Versioning**: raise the library's `declare version` in the same commit
-   (MAJOR = breaking, MINOR = additions or newly documented symbols,
-   PATCH = fixes and `_`-internal work), and `version.lib` per batch. Full
-   policy: `doc/docs/contributing.md`, section *Versioning*. Removing a
-   `declare ... deprecated` alias is a MAJOR change and must wait one
-   published release.
-5. **Cross-library calls** go through the environment prefixes
-   (`ma = library("maths.lib"); ... ma.PI`), never bare names. Check name
-   collisions with `import("all.lib"); process = _;`.
-   **Calls inside a library** use the bare names of its own functions,
-   never its own prefix: `fi.lowpass` written in `filters.lib` reloads an
-   unmodified copy of the library, which escapes the
-   `xx[NAME = value;]` substitution (`os[SAFE=1;]`) and can be another
-   `filters.lib` than the file itself, the first one faust finds. The
-   prefix stays required in `#### Test` sections, examples and
-   `tests/*.dsp`, which are standalone programs. The self-imports kept
-   in ten libraries serve only the programs that `import()` them (a
-   program may write `import("filters.lib"); ... fi.lowpass`): library
-   code does not use them.
-   Details: `doc/docs/contributing.md`, section *Variables and
-   identifiers scoping*.
-6. Do not edit generated files by hand: `doc/docs/libs/*.md` (regenerate
-   with `make -C doc md`), `doc/docs/libs/index.md` — the symbol index
-   linking every documented name to its page, rebuilt from those pages by
-   `make -C doc index`, so it is stale until the `md` step has run and a
-   new public function is missing from it until both have —
-   `doc/docs/standardFunctions.md` (regenerate with
-   `scripts/build_standard_functions.py`) and the figures in
-   `doc/docs/img/` (regenerate with `make plots` — the generator embeds
-   property assertions and must end with "all property assertions hold").
-   `make -C doc build` chains `md` and `index` before building the site;
-   prefer it over `md` alone, which silently leaves the index behind.
-7. **Keep the LLM-facing JSON exports working.** `make doc-index-split`
-   (`scripts/build_faust_doc_index.py`) parses the same doc blocks into the
-   machine-readable index that MCP tools and `scripts/faust_doc_api.py`
-   consume. After any change to documentation *format* (header shapes,
-   section names, block structure), regenerate the export and spot-check
-   that the touched symbols still come out with their summary, usage,
-   params and license (`scripts/faust_doc_api.py get_faust_symbol xx.name`).
-   `make check-doc` guards the floor — the exported symbol count may only
-   grow — but it cannot see a field that silently comes out empty. The
-   make targets compute each symbol's `io` (inputs, outputs) with faust,
-   from the Usage call valued by the Test section (`"source": "faust"`):
-   a new function whose `io` comes out `"source": "usage"` has a Usage
-   that does not evaluate.
-
-8. **Tests are written in the library first.** Every test added — for a
-   new function, or to pin a bug fix or a behavior change of an existing
-   one — goes first into the `#### Test` section of the function's doc block
-   in the `.lib`, then is copied verbatim, same name, into the matching
-   `tests/*.dsp`. `tests/*.dsp` mirrors the `.lib` Test entries, never the
-   other way around: a test that exists only in `tests/*.dsp` is invisible
-   in the documentation and the JSON export, and drifts from them. A fix
-   that changes behavior comes with such a test, one whose output the old
-   definition gets wrong.
-   A function whose parameters are meant to vary at run time (a cutoff, a
-   frequency, a gain, a delay) also gets a `functionName_slider_test`
-   (parameters from sliders: coefficients computed per block, in the
-   program's precision) and a `functionName_modulated_test` (a parameter
-   modulated at every sample): the three run different code. A recursive
-   filter also gets a `functionName_jump_test` (the parameter jumping
-   between the two ends of its range, as a moved slider does). Drive the
-   modulation with an integer counter (`ba.period`), not `os.osc`, which
-   drifts in float, and tie its period to the sample rate
-   (`P = int(ma.SR/10)`, 10 Hz at every rate). A filter whose cutoff is
-   modulated in synthesis (a VCF: `fi.resonlp`, `fi.svf`, the `ve`
-   ladders) also gets a `functionName_audio_modulated_test`, with one
-   convention for all: `0.1*no.noise` in, the cutoff
-   `max(20, 1000*(1 + 0.9*os.tosc(500)))` (100 Hz to 1.9 kHz at a 500 Hz
-   rate), Q = 10 where there is one. Details:
-   `doc/docs/contributing.md`, section *Constant, slider, modulated and
-   jump tests*. `scripts/lib_tests.py
-   inventory xx.lib` shows which tests exist where; `scripts/lib_tests.py
-   add xx.lib new_tests.dsp` inserts new ones in both places at once.
-
-9. **Check float and double, from 44.1 to 192 kHz.** `make check` runs
-   in double precision at 48 kHz only. `make check-precision` renders
-   every test in `-single` and `-double` at 44.1, 48, 88.2, 96, 176.4
-   and 192 kHz and fails on a non-finite output or a float/double RMS
-   level gap above 1e-3, beyond the debt pinned in
-   `tests/precision-baseline.json`. Run it on the test files you touched
-   (`PRECISION_ARGS="tests/xx_tests.dsp"`); a new test must pass without
-   a baseline entry, and a fix that makes an entry unnecessary removes it
-   in the same commit. Never add or loosen an entry to silence a failure.
-   Prefer `no.noise` or `os.tosc` to `os.osc` as test input: `os.osc`
-   drifts in phase in float, `os.tosc` reads the sine of an exact integer
-   phase (`os.tphase`) and does not. The check uses default control values only:
-   `make check-extremes` renders every test with its sliders at their
-   extremes, all of them and one by one, and fails on a non-finite output
-   or a peak beyond 100 times the default one, beyond the reasoned entries
-   of `tests/extremes-baseline.json` (same rule as the other baselines).
-   Also check that what should not depend on the rate does not. A fix that relies on a precise evaluation order (a
-   rewrite against cancellation, a workaround of the Faust normalizer) is
-   also checked with other compilations: `make check-precision-matrix`
-   (C++ `-O3 -ffast-math`, Faust `-vec` and `-lang ocpp`). Procedure and
-   pitfalls: `doc/docs/contributing.md`, section *Precision and sample
-   rate*. Report what was checked in the
-   pull request.
-
-10. **Measure what a structural change costs.** A change that alters the
-    structure of a computation (a rewrite against cancellation, a filter
-    realized in another form, a normalizer workaround) reports its CPU
-    cost as ratios new / base measured side by side:
-    `make check-cpu-matrix CPU_ARGS="--base origin/master ..."` on the
-    tests you touched and on those of the callers that multiply it (a
-    filter bank, `dm.vocoder_demo`). Report at least the `fast-math` and
-    `strict` compilations, since `-ffast-math` alone can move a ratio from
-    1.2 to 1.44, and the identity lines of the run. Measure on an idle
-    machine (AC power, no build or test suite in parallel): the tool
-    cannot correct a loaded one, it only warns on a high load average and
-    marks `?` a ratio whose spread stays above 20%, which is not quoted
-    but measured again. Timings from separate runs are not comparable,
-    and a ratio within 3% (or within its spread) is noise. The `ops` column counts the per-sample divisions,
-    square roots and transcendental calls, which embedded cores pay far
-    more for than the desktop the ratio is measured on: report an
-    increase (`!`) even when the ratio is small. A test time flagged `NaN` measures NaN arithmetic. A slower function can be the right trade-off: say what it
-    buys. Details: `doc/docs/contributing.md`, section *CPU cost*.
-
-11. **Keep the figures in step with the library.** The figures in
-    `doc/docs/img/` are measured from the libraries, and nothing
-    regenerates them on its own: in October 2026, 13 of them still showed
-    behavior fixed weeks before (tube tables read by truncation, the
-    flanger's sign, the bandstop's zeros), and six property assertions of
-    `plot_families.py` had been failing since. A change that alters a
-    function's output runs `make check-plots` (about 2 minutes) before
-    committing: it regenerates every figure aside, fails on a failed
-    assertion, and lists the figures whose rendering changed. Run the
-    whole check, not `--only` the function you changed: the seven `tu_*`
-    figures depend on a table-interpolation helper, nothing in their names
-    says so. Regenerate the stale figures in the same commit with
-    `make plots`, which rewrites only those, then rebuilds the pages that
-    embed them. An assertion that fails after a deliberate fix is updated
-    to the fixed behavior in the same commit, and checked to fail on the
-    code before the fix. `make check-plots` also passes before every
-    `version.lib` bump. Details: `scripts/README.md`, section *Figures*.
-
-12. **Library code compiles on every backend.** The libraries are used
-    through WebAssembly first (the Faust IDE, `faustwasm`), and through
-    Cmajor, Julia, Codebox, C#, Java and the interpreter, which accept only
-    the foreign functions `acosh`, `asinh`, `atanh`, `cosh`, `sinh`,
-    `tanh`, `isnan`, `isinf` and `copysign`. The other `ffunction`s of
-    `maths.lib` (`ma.cbrt`, `ma.hypot`, `ma.erf`, `ma.gamma`, the Bessel
-    functions, `ma.nextafter`, ...; their doc blocks say so) and
-    `no.randomseed` compile only for C, C++, Rust and LLVM: a library
-    function never calls them, however deep the call, and a new
-    `ffunction` stays within the whitelist. `ma.expm1` and `ma.log1p` are built on `sinh` and
-    `atanh` and are portable: they are the tools for the cancellation-free
-    forms rule 9 asks for. `make check-doc` compiles every test for
-    WebAssembly when a library or a test file changed, validates the
-    modules with Node and runs them (one second at 48 kHz, as `make check`
-    runs the C++), and fails on a new failure; `make check-backends`
-    checks all six backends (about two minutes), Cmajor's patches also
-    compiled and rendered by `cmaj render`, and with
-    `BACKENDS_ARGS=--run-julia` the Julia code loaded and run (about a
-    minute more). Code that the backend's own toolchain rejects (a module
-    that does not validate, a patch Cmajor refuses, Julia code that does
-    not load), or that stops or writes a non-finite sample where the C++
-    build in `-single` does not, is a faust bug: report it, do not pin it
-    as debt. The accepted debt is pinned in `tests/backend-baseline.json`
-    (the tests of the non-portable functions themselves, `ma.BS` and
-    `si.bsmooth` on Cmajor and Codebox, `soundfile` on four backends);
-    as with the other baselines, an entry that starts to compile is removed
-    in the same commit. A finite output is not a correct one:
-    `make check-backend-outputs` compares the WebAssembly and Cmajor outputs
-    with the C++ build in `-single` (without FMA contraction), beyond
-    `tests/backend-output-baseline.json`; a difference that Cmajor's or the
-    browser's math library causes is reported to it, not hidden in the test. Details: `doc/docs/contributing.md`, section
+   (MAJOR breaking, MINOR additions, PATCH fixes and `_` work), and
+   `version.lib` per batch. Removing a deprecated alias is MAJOR and waits
+   one published release. *Versioning*.
+5. **Calls**: another library's functions through its prefix (`ma.PI`), the
+   library's own by their bare name, never its own prefix; the prefix stays
+   in Test sections, examples and `tests/*.dsp`. Check collisions with
+   `import("all.lib"); process = _;`. *Variables and identifiers scoping*,
+   *Library Import*.
+6. **Generated files are regenerated, never edited**: `doc/docs/libs/*.md`
+   and `index.md` (`make -C doc build`, not `md` alone),
+   `doc/docs/standardFunctions.md` (`scripts/build_standard_functions.py`),
+   the figures (`make plots`). *Documentation*.
+7. **Keep the JSON exports working**: after a change of documentation
+   format, regenerate them and check the touched symbols with
+   `scripts/faust_doc_api.py get_faust_symbol xx.name`; a new function's
+   `io` must come out with `"source": "faust"`. *Faust Library JSON Exports*.
+8. **Tests are written in the library first**, in the `#### Test` section,
+   then copied verbatim into `tests/*.dsp` (`scripts/lib_tests.py add`). A
+   behavior fix comes with a test the old code fails. A parameter meant to
+   vary at run time gets `_slider_test` and `_modulated_test` variants, a
+   recursive filter a `_jump_test`, a VCF an `_audio_modulated_test`;
+   modulate with `ba.period`, not `os.osc`. *Constant, slider, modulated and
+   jump tests*.
+9. **Check float and double, from 44.1 to 192 kHz**: `make check-precision`
+   on the test files you touched, `make check-extremes`, and
+   `make check-precision-matrix` for a fix that relies on an evaluation
+   order. Prefer `no.noise` or `os.tosc` as test input. Report what was
+   checked in the pull request. *Precision and sample rate*.
+10. **Measure what a structural change costs**: `make check-cpu-matrix
+    CPU_ARGS="--base origin/master ..."` on an idle machine, on the tests
+    touched and their costly callers; report `fast-math` and `strict`, the
+    identity lines, and any `!` in the `ops` column. *CPU cost*.
+11. **Keep the figures in step**: a change of output runs the whole
+    `make check-plots` before committing and regenerates the stale figures
+    with `make plots` in the same commit; also before every `version.lib`
+    bump. *Figures*.
+12. **Library code compiles on every backend**: the only foreign functions
+    allowed are `acosh`, `asinh`, `atanh`, `cosh`, `sinh`, `tanh`, `isnan`,
+    `isinf` and `copysign`, however deep the call (`ma.expm1`, `ma.log1p`
+    are portable). A backend that rejects valid code or diverges from the
+    C++ `-single` build is a faust or runtime bug to report, not debt.
     *Backends and foreign functions*.
 
 ## Git history
 
-The history is linear and must stay that way: no merge commits. The last one
-dates from December 2020, and every commit since sits on a single strand.
-Bisecting a 1400-commit library where a regression means "an audible output
-changed" depends on it.
+The history is linear: no merge commits since December 2020. *Git history*.
 
-- **Never** `git merge` a branch that has diverged. Rebase the branch onto its
-  target, then fast-forward:
-
-  ```bash
-  git rebase master my-branch      # replay, resolve conflicts here
-  git checkout master
-  git merge --ff-only my-branch    # refuses rather than creating a merge commit
-  ```
-
-- Update from the remote with `git pull --rebase`, never a plain `git pull`.
-  Configure it once so a stray pull cannot create a merge:
-
-  ```bash
-  git config pull.rebase true
-  git config merge.ff only
-  ```
-
-- Squash the work-in-progress commits of a branch before integrating it. One
-  commit per coherent change: a library edit, its tests, its regenerated
-  documentation and its version bumps belong together, not spread over five
-  commits that each leave `make check-doc` or `make check` failing.
-- Rewriting history (`rebase`, `--amend`, squash) is fine as long as the
-  commits have not been pushed. Once they are on `origin`, they are frozen:
-  fix forward with a new commit.
-- Do not commit build artifacts even when they sit in the working tree.
-  `.gitignore` covers them: the built site (`site/`), the test references
-  (`tests/reference/`), the test outputs and builds (`tests/output/`,
-  `tests/build/`, `tests/build-precision/`, `tests/build-cpu/`) and the
-  doc index exports (`tests/faust-doc-index.json`, `tests/faust-doc/`).
-  Git then refuses to stage them even when named explicitly (`git add
-  tests/reference/foo_test.ref` stops on "paths are ignored"): never
-  force it with `git add -f`. Before these paths were ignored, a reference
-  was staged by an explicit `git add` once (2026-09-04, caught before
-  push), and another stayed in the index from 2026-08-26 to 2026-10-03.
-  Still never stage with `git add -A` or `git commit -a`: the working tree
-  also holds untracked files that are not artifacts (scratch DSP files,
-  logs, patches) — name the files you mean.
+- Never `git merge` a diverged branch: `git rebase master my-branch`, then
+  `git merge --ff-only my-branch`. Pull with `git pull --rebase`.
+- One commit per coherent change (library edit, tests, regenerated
+  documentation, version bumps); squash work in progress. Rewrite only what
+  is not pushed.
+- Never commit build artifacts (`.gitignore` covers them; never `git add -f`),
+  and never stage with `git add -A` or `git commit -a`: the working tree
+  holds untracked scratch files. Name the files you mean.

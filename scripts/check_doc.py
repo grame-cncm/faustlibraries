@@ -36,7 +36,12 @@ regression, without requiring the historical debt to be paid first:
   9. when a library, tests/lean/, formalisation/ or the generator differs
      from HEAD, the verdicts of the Lean certification still are those of
      tests/lean/certified.lean (scripts/check_certify.py --changed, about
-     10 s); skipped when lean 4.31 or faust-rs is not installed.
+     10 s); skipped when lean 4.31 or faust-rs is not installed;
+ 10. the sections of doc/docs/contributing.md that other documents name
+     exist: every *Section* in italics in AGENTS.md, every
+     "contributing.md`, section *Section*" in scripts/README.md, and every
+     [link](#anchor) inside contributing.md itself. A renamed section
+     otherwise leaves the references to it pointing nowhere.
 
 Usage:
     scripts/check_doc.py                    # verify, exit 1 on regression
@@ -46,6 +51,7 @@ Run it before committing library changes; `make check-doc` is an alias.
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -91,6 +97,58 @@ def current_debt(audit):
         for lib, entry in sorted(audit.items())
         if entry.get("undocumented") or entry.get("no_usage")
     }
+
+
+CONTRIBUTING = "doc/docs/contributing.md"
+
+
+def _slug(title):
+    """The anchor mkdocs gives a heading (toc's default slugify)."""
+    s = re.sub(r"[^\w\s-]", "", title).strip().lower()
+    return re.sub(r"[-\s]+", "-", s)
+
+
+def section_reference_errors():
+    """Check 10: the sections of contributing.md named elsewhere exist."""
+    try:
+        text = open(CONTRIBUTING).read()
+    except OSError:
+        return ["%s is missing" % CONTRIBUTING]
+    titles = [m.group(1).strip() for m in
+              re.finditer(r"^#{1,6}\s+(.+?)\s*#*$", text, re.M)]
+
+    def known(name):
+        # A section may be named without the parenthesis of its title:
+        # *Formal certification* for "Formal certification (experimental, ...)".
+        return any(t == name or t.startswith(name + " (") for t in titles)
+
+    def italics(chunk):
+        # Code is no prose: `tests/*.dsp` holds two asterisks, not italics.
+        chunk = re.sub(r"```.*?```", "", chunk, flags=re.S)
+        chunk = re.sub(r"`[^`]*`", "", chunk)
+        return [" ".join(m.group(1).split())
+                for m in re.finditer(r"(?<![*\w])\*([^*\s][^*]*?)\*(?![*\w])", chunk)]
+
+    errors = []
+    refs = []
+    if os.path.exists("AGENTS.md"):
+        refs += [("AGENTS.md", n) for n in italics(open("AGENTS.md").read())]
+    readme = "scripts/README.md"
+    if os.path.exists(readme):
+        for m in re.finditer(r"contributing\.md`?,\s+sections?\s+((?:\*[^*]+\*"
+                             r"(?:,\s*|\s+and\s+)?)+)", open(readme).read()):
+            refs += [(readme, n) for n in italics(m.group(1))]
+    for where, name in refs:
+        if not known(name):
+            errors.append("%s names the section *%s*, which %s does not have"
+                          % (where, name, CONTRIBUTING))
+    slugs = {_slug(t) for t in titles}
+    for m in re.finditer(r"\]\(#([^)\s]+)\)", text):
+        if m.group(1) not in slugs:
+            line = text.count("\n", 0, m.start()) + 1
+            errors.append("%s:%d links to #%s, which is no heading of the page"
+                          % (CONTRIBUTING, line, m.group(1)))
+    return errors
 
 
 def main():
@@ -209,10 +267,18 @@ def main():
     elif any(line.startswith("[certify] note") for line in lines):
         usage_note += " Certified terms changed, not their verdicts: make certify-reference."
 
-    if errors or usage_errors:
-        for e in errors + usage_errors:
+    # 10. the sections of contributing.md that other documents name exist
+    ref_errors = section_reference_errors()
+
+    if errors or usage_errors or ref_errors:
+        problems = errors + usage_errors + ref_errors
+        for e in problems:
             print("check_doc: %s" % e)
-        print("check_doc: FAILED (%d problem(s))." % len(errors + usage_errors))
+        print("check_doc: FAILED (%d problem(s))." % len(problems))
+        if ref_errors:
+            print("A section of %s was renamed or removed: update the references"
+                  " to it (AGENTS.md, scripts/README.md, the page's own links), or"
+                  " give the section back its name." % CONTRIBUTING)
         if errors:
             print("If a reported symbol is deliberate accepted debt, rerun with"
                   " --update-baseline and commit %s." % BASELINE)
@@ -221,8 +287,9 @@ def main():
                   " gives its parameters values); scripts/check_usage.py --symbol"
                   " xx.name prints the program it compiles. A test that no longer"
                   " compiles for WebAssembly calls a foreign function the web rejects:"
-                  " see AGENTS.md, rule 12. A weak test ([weak]) is made to check"
-                  " something (AGENTS.md, rule 1), or accepted with its reason in"
+                  " see doc/docs/contributing.md, Backends and foreign functions. A weak test"
+                  " ([weak]) is made to check something (doc/docs/contributing.md,"
+                  " Testing the library), or accepted with its reason in"
                   " tests/weak-baseline.json. A moved verdict ([certify]) is a property"
                   " the graph no longer shows: teach the prelude the new form if a"
                   " correctness argument holds, or accept the refusal, then"

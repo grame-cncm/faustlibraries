@@ -1,6 +1,6 @@
 # Contributing
 
-In general, libraries are organised in a *stacked manner*: the base ones define functions or constants without any dependancies, and additional ones are gradually built on top of simpler ones, layer by layer. **Dependency loops must be avoided as much as possible**. The *resources* folder contains tools to build and visualise the libraries dependencies graphs.
+In general, libraries are organised in a *stacked manner*: the base ones define functions or constants without any dependencies, and additional ones are gradually built on top of simpler ones, layer by layer. **Dependency loops must be avoided as much as possible**. The *resources* folder contains tools to build and visualise the libraries dependencies graphs.
 
 If you wish to add a function to any of these libraries or if you plan to add a new library, make sure that you observe the following conventions:
 
@@ -42,6 +42,7 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 ```
 
 * The `functionName` must be prefixed by the `libraryName` name prefix, like `(pr)` in the example.
+* The title must name every symbol the block documents, exactly, each in its own backquotes: `` `(pr).name` ``, or `` `(pr).name1`, `(pr).name2` `` for a block that documents several functions. The tooling does not recognize a title with a space inside the backquotes, an argument list after the name, or a sibling only mentioned in the description: each of them leaves the symbol undocumented for `make check-doc`. The generic form `` `(pr).name[N]` `` matches digit suffixes only (`name1` to `name9`), not letter variants.
 * The environment system (e.g. `os.osc`) should be used when calling a function declared in another library (see the section on [Library Import](#library-import)).
 * Try to reuse existing functions as much as possible.
 * The `Usage` line must show the *input/output shape* (the number of inputs and outputs) of the function, like `gen : _` for a mono generator, `_ : filter : _` for a mono effect, etc. The `Where:` section then allows each parameter to be described individually, using the appropriate surrounding quotes.
@@ -49,11 +50,14 @@ If you wish to add a function to any of these libraries or if you plan to add a 
 * In the `Usage` line, write the names of the function's own library without their prefix (`_ : lowpass(N,fc) : _` in `filters.lib`, `bus(N)` in `signals.lib`): the title already gives it. Names of other libraries keep theirs (`si.bus(N)` in `filters.lib`). `make check-usage` rejects a Usage that writes its own prefix.
 * Name the inputs that have a meaning, and document each of them in `Where:`: `expm1(x) : _`, `hypot(x,y) : _`, `ADAA1(EPS, f, F1, x) : _` say more than `_ : expm1 : _`, and Faust accepts the call form for any function (`f(x)` is `x : f`). Keep the anonymous `_` for the audio input of an effect (`_ : lowpass(N,fc) : _`) and for buses (`si.bus(N)`). When `make check-usage` reports a `Where:` bullet that the Usage does not use, and the bullet documents an input, name that input in the call: do not delete the bullet.
 * The `Example` line can be used to provide additional examples.
-* The `Test` line should used to add a DSP program to test the function. The test name must be `functionName_test`. The actual code can be extracted and independantly tested using the `-pn` compiler option (to specify the name of the dsp entry-point instead of process). The test code must import all the needed libraries, like `an = library("analyzers.lib");` if a function from analyzers.lib is used in the test code. The `functionName_test` test should be added in the relevant file in the *tests* folder.
+* The `Test` line is used to add a DSP program to test the function. The test name must be `functionName_test`. The actual code can be extracted and independently tested using the `-pn` compiler option (to specify the name of the dsp entry-point instead of process). The test code is a standalone program: it uses the library prefixes (`fi.lowpass`, not `lowpass`) and imports all the needed libraries, like `an = library("analyzers.lib");` if a function from analyzers.lib is used in the test code.
+* Tests are written in the library first. Every test, for a new function or to pin a bug fix or a behavior change, goes into the `#### Test` section of the function's block, then is copied verbatim, under the same name, into the matching `tests/*.dsp` file. `tests/*.dsp` mirrors the `.lib` files, never the other way around: a test that exists only there is invisible in the documentation and the JSON export, and drifts from them. A fix that changes behavior comes with a test whose output the old definition gets wrong. `scripts/lib_tests.py add xx.lib new_tests.dsp` inserts new tests in both places at once.
+* Test names must be unique across all of `tests/*.dsp`, since each one becomes `tests/reference/<name>.ref`, and must not differ from an existing name only by letter case: the `.ref` files would collide on a case-insensitive filesystem (macOS). Prefix with the library's short name (`mm_`, `tu_`, `inst_`) when the natural name is taken.
+* A test must produce a nonzero output: a gate defaulting to 0 or a slider defaulting to silence makes an all-zero reference, which validates nothing (see `make check-weak` below).
 * The `References` line can be used to add links to references.
 * Some functions use parameters that are [constant numerical expressions](https://faustdoc.grame.fr/manual/syntax/#constant-numerical-expressions). The convention is to label them in *capital letters* and document them preferably to be *constant numerical expressions* (or *known at compile time* in existing libraries).
 * Functions with several parameters should better be written by putting the *more constant parameters* (like control, setup...) at the beginning of the parameter list, and *audio signals to be processed* at the end. This allows to do partial-application. So prefer the following  `clip(low, high, x) = min(max(x, low), high);` form where `clip(-1, 1)` partially applied version can be used later on in different contexts, better than `clip(x, low, high) = min(max(x, low), high);` version.
-* Every time a new function is added, the documentation should be updated simply by running `make doclib`. <!-- TODO -->
+* Every time a function is added or its documentation changes, regenerate the documentation pages with `make -C doc build`, which rebuilds `doc/docs/libs/*.md` from the doc blocks, then the symbol index `doc/docs/libs/index.md`, then the site (see [Documentation](#documentation)).
 
 ### Layering UI-ready variants
 
@@ -111,6 +115,15 @@ from the documentation coverage accounting (`scripts/audit2.py`,
 `make check-doc`), and may change or disappear without notice. Do not use
 underscore-prefixed symbols from another library.
 
+Hiding or renaming a symbol that is public by accident (undocumented, but
+reachable) does not remove the old name at once: it survives one published
+release as a deprecated alias, grouped at the end of the file
+(`declare oldname deprecated "...renamed _name";` then `oldname = _name;`, or
+a frozen copy of the old body when the definition moved into a `with`). Before
+hiding anything, check that no other library, no documented example and no
+explicit substitution (`os[SAFE=1;]`) uses it: any of those makes the symbol
+public in practice, and it should be documented instead.
+
 Inside a library, call its own functions by their **bare name**, never
 through the library's own prefix (`lowpass(N,fc)` in `filters.lib`, not
 `fi.lowpass(N,fc)`). Functions of other libraries keep their prefix
@@ -144,11 +157,11 @@ would break. Do not use it in library code.
 
 * Any new "standard" library should be declared in `stdfaust.lib` with its own environment (2 letters - see `stdfaust.lib`) and in `all.lib`.
 * Some of the new library functions should be demonstrated in [demos.lib](#demo-functions).
-* Any new "standard" library must be added to `generateDoc`.
+* Any new "standard" library must be added to `doc.lib`, the list of files from which `doc/Makefile` generates the documentation pages.
 * Functions must be organized by sections.
 * Any new library should at least `declare` a `name` and a `version`.
 * Any new library has to use a prefix declared in the header section with the following kind of syntax: `Its official prefix is 'qu'` (look at an existing library to follow the exact syntax).
-* Be sure to add the appropriate kind of `ma = library("maths.lib");` import library line, for each external library function used in the new library (for instance `ma.foo` that would be used somewhre in the code).
+* Be sure to add the appropriate kind of `ma = library("maths.lib");` import library line, for each external library function used in the new library (for instance `ma.foo` that would be used somewhere in the code).
 * The comment based markdown documentation of each library must respect the following format (open the source code of any of the libraries for an example):
 
 ```
@@ -219,7 +232,10 @@ Thus functions expecting a variable number of arguments can use this mechanism, 
 * We used the `faust2md` "standards" for each library: `//###` for main title (library name - equivalent to `#` in markdown), `//===` for section declarations (equivalent to `##` in markdown) and `//---` for function declarations (equivalent to `####` in markdown - see `basics.lib` for an example).
 * Sections in function documentation should be declared as `####` markdown title.
 * Each function documentation provides a "Usage" section (see `basics.lib`). 
-* The full documentation can be generated using the doc/Makefile script. Use `make help` to see all possible commands. If you plan to create a pull-request, *do not commit the full generated code* but only the modified .lib files.
+* The full documentation is generated by `doc/Makefile` (`make -C doc help` lists its commands). Commit the regenerated files with the library change that caused them, but never edit them by hand:
+    * `doc/docs/libs/*.md`, the library pages, and `doc/docs/libs/index.md`, the symbol index built from those pages: `make -C doc build` regenerates both, in that order, then the site. `make -C doc md` alone leaves the index behind, so a new function is missing from it;
+    * `doc/docs/standardFunctions.md`: `scripts/build_standard_functions.py`;
+    * the figures of `doc/docs/img/`: `make plots` (see [Figures](#figures)).
 * Each function can have `declare author "name";` and `declare copyright "XXX";` declarations.
 * Every **new** function must carry a `declare functionName license "ID";` line
   whose `ID` is a canonical [SPDX identifier](https://spdx.org/licenses/) --
@@ -271,7 +287,7 @@ edit their code, it is MAJOR.
 
 ### Library Import
 
-To prevent cross-references between libraries, we generalized the use of the `library("")` system for function calls in all the libraries. This means that everytime a function declared in another library is called, the environment corresponding to this library needs to be called too. To make things easier, a `stdfaust.lib` library was created and is imported by all the libraries:
+To prevent cross-references between libraries, we generalized the use of the `library("")` system for function calls in all the libraries. This means that every time a function declared in another library is called, the environment corresponding to this library needs to be called too. Each library declares at its top the environments it uses (`ma = library("maths.lib");`), with the prefixes that `stdfaust.lib` defines for programs:
 
 ```
 aa = library("aanl.lib");
@@ -284,6 +300,7 @@ de = library("delays.lib");
 dm = library("demos.lib");
 dx = library("dx7.lib");
 en = library("envelopes.lib");
+fa = library("fastmath.lib");
 fd = library("fds.lib");
 fi = library("filters.lib");
 ho = library("hoa.lib");
@@ -299,6 +316,7 @@ os = library("oscillators.lib");
 pf = library("phaflangers.lib");
 pl = library("platform.lib");
 pm = library("physmodels.lib");
+pt = library("pinktrombone.lib");
 qu = library("quantizers.lib");
 rm = library("reducemaps.lib");
 re = library("reverbs.lib");
@@ -321,7 +339,7 @@ import("stdfaust.lib");
 process = si.smooth(0.999);
 ```
 
-This standard is only used within the libraries: nothing prevents coders to still import `signals.lib` directly and call `smooth` without `ro.`, etc. It means symbols and function names defined within a library **have to be unique to not collide with symbols of any other libraries**.  
+This standard is only used within the libraries: nothing prevents coders to still import `signals.lib` directly and call `smooth` without `si.`, etc. It means symbols and function names defined within a library **have to be unique to not collide with symbols of any other libraries**.  
 
 ### "Demo" Functions
 
@@ -331,7 +349,7 @@ Any function containing UI elements should be placed in this library and respect
 
 ### "Standard" Functions
 
-"Standard" functions are here to simplify the life of new (or not so new) Faust coders. They are declared in `/libraries/doc/standardFunctions.md` and allow to point programmers to preferred functions to carry out a specific task. For example, there are many different types of lowpass filters declared in `filters.lib` and only one of them is considered to be standard, etc.
+"Standard" functions are here to simplify the life of new (or not so new) Faust coders. They are listed in `doc/docs/standardFunctions.md`, generated from the libraries by `scripts/build_standard_functions.py` (`make check-doc` fails when it is stale), and allow to point programmers to preferred functions to carry out a specific task. For example, there are many different types of lowpass filters declared in `filters.lib` and only one of them is considered to be standard, etc.
 
 ## Testing the library
 
@@ -339,10 +357,10 @@ Before preparing a pull-request, the new library must be carefully tested:
 
 - all functions defined in the library must be tested by preparing a DSP test program, to be added using the `#### Test` syntax 
 - the compatibility library `all.lib` imports all libraries in a same namespace, so check functions names collisions using the following test program: `import("all.lib"); process = _;`
-- reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified. `make check` fails on the first divergence; use `make -k check` to run the whole suite and collect every failure. It re-runs a test when a file the test loaded changed (its `.dsp` and the libraries `faust -flist` lists), or its reference, the harness or a build setting: there is no need to delete `tests/output` after editing a library, and tests that do not use that library are not run again. A missing reference fails: `make check` never generates one, since the code under test would then be compared with itself.
+- reference files for all tests can be generated using the `make reference` command and then verified with the `make check` command, which compares the generated samples against the reference files within a specified tolerance. A good practice for developers is therefore to generate the reference files and re-run the checks whenever the code is modified. `make check` fails on the first divergence; use `make -k check` to run the whole suite and collect every failure. It re-runs a test when a file the test loaded changed (its `.dsp` and the libraries `faust -flist` lists), or its reference, the harness or a build setting: there is no need to delete `tests/output` after editing a library, and tests that do not use that library are not run again. A missing reference fails: `make check` never generates one, since the code under test would then be compared with itself. A failure means that the change altered the output: either a bug in the change or a deliberate fix. In the second case, say so explicitly and regenerate only the affected references: the references do not depend on the sources, on purpose, so delete the affected `.ref` files, then run `make reference`.
 - every new function therefore ships with **both** its `#### Test` section and the corresponding `functionName_test` entry in the *tests* folder, and its reference is generated with `make reference` in the same change.
-- finally, `make check-doc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted. It also compiles the `#### Usage` sections of the libraries changed since the last commit (when `faust` is installed): a Usage whose buses do not match the arity of the call, or whose parameters differ from its `Where:` section, fails unless it is recorded in `tests/usage-baseline.json`. `make check-usage` checks every library.
-- a reference must check something. `make check` compares within 1e-5, an absolute tolerance below 1: a channel that stays that close to zero passes against a silent output, and frames that stay that close to a constant pass against that constant. `make check-weak` reads every reference and flags a test whose channels all stay within the tolerance of zero (`silent`), a channel whose values all do (`below-tolerance`), a program with state whose output never changes (`constant`), an output that stops changing before the middle of the render (`settles`), and a test that has inputs (`dead-input`): the harnesses feed them with zeros, so drive the function from inside the test (`no.noise : fn`, not `fn`). Its first run, in October 2026, found 138 such tests among 2347, recorded with their reason in `tests/weak-baseline.json`: a marimba whose strike cutoff of 1 Hz filters the excitation out, waveguide blocks fed with constants, a counter whose trigger is pressed once, mass-interaction links at constant positions. `make check-doc` runs it when a library or a test changed.
+- finally, `make check-doc` must pass: it rejects any new undocumented symbol, any documentation block without a `#### Usage` section, any block reduced to a `#### Test` section, a stale `doc/docs/standardFunctions.md`, and any non-canonical license string, while the historical debt recorded in `tests/doc-baseline.json` stays accepted. It also compiles the `#### Usage` sections of the libraries changed since the last commit (when `faust` is installed): a Usage whose buses do not match the arity of the call, or whose parameters differ from its `Where:` section, fails unless it is recorded in `tests/usage-baseline.json`; a fix that makes an entry pass removes it in the same commit. Never regenerate a baseline to silence a failure you caused. `make check-usage` checks every library.
+- a reference must check something. `make check` compares within 1e-5, an absolute tolerance below 1: a channel that stays that close to zero passes against a silent output, and frames that stay that close to a constant pass against that constant. `make check-weak` reads every reference and flags a test whose channels all stay within the tolerance of zero (`silent`), a channel whose values all do (`below-tolerance`), a program with state whose output never changes (`constant`), an output that stops changing before the middle of the render (`settles`), and a test that has inputs (`dead-input`): the harnesses feed them with zeros, so drive the function from inside the test (`no.noise : fn`, not `fn`). Its first run, in October 2026, found 138 such tests among 2347, recorded with their reason in `tests/weak-baseline.json`: a marimba whose strike cutoff of 1 Hz filters the excitation out, waveguide blocks fed with constants, a counter whose trigger is pressed once, mass-interaction links at constant positions. `make check-doc` runs it when a library or a test changed. Check a new reference before committing it: a new test passes `make check-weak` without an entry in the baseline.
 - new code must also be checked in single and double precision, from 44.1 to 192 kHz, as described below: `make check` covers neither, `make check-precision` does.
 - a function whose parameters are meant to vary at run time is tested with constant, slider and modulated parameters, as described below: the three run different code.
 - bargraphs are part of the reference: `arch/print_arch.cpp` prints each of them after the outputs, on every line, and a program that has some runs in blocks of 64 frames, since a bargraph holds its value at the end of a block. A function that only measures (`db.probe_*`, a meter) is therefore checked like any other, by `make check` only: the other harnesses read the audio outputs.
@@ -360,7 +378,7 @@ The Faust compiler generates different code for a parameter depending on what it
 
 Precision, stability and CPU cost can differ between the three. A function that is correct with constants can lose precision when its coefficients are computed at run time in float. It can also blow up when they change at every sample, since a recursive structure that is stable for each frozen setting is not necessarily stable when that setting moves. And its cost per sample can double. The harnesses (`make check`, `make check-precision`, `make check-cpu`) render the tests as written, with the controls at their default values: they cannot turn a constant into a control or a signal. The test has to do it.
 
-A function whose parameters are meant to vary at run time therefore has three tests, a recursive filter four, and a filter whose cutoff is modulated in synthesis five, written first in its `#### Test` section like any other (rule 8 of `AGENTS.md`). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
+A function whose parameters are meant to vary at run time therefore has three tests, a recursive filter four, and a filter whose cutoff is modulated in synthesis five, written first in its `#### Test` section like any other (see [New Functions](#new-functions)). Typical parameters are a cutoff or center frequency, a resonance, a gain, an oscillator frequency, a delay length or a time constant.
 
 1. **`functionName_test`, constant parameters.** This is the usual test.
 2. **`functionName_slider_test`, parameters from sliders** (`hslider`, `vslider`, `nentry`), without smoothing, with realistic default values. It checks that the function accepts run-time controls: a parameter that must be a constant makes it fail to compile. It checks the coefficients computed at run time in the program's precision: for `fi.resonlp`, the float/double level gap is 6.4e-5 with sliders against 1.8e-5 with constants. And it checks that they stay at control rate: its cost should match the constant test's. When it is clearly slower, the normalizer has moved part of the coefficient computation into the per-sample loop, which is what the `min(x, ma.MAX)` workarounds in the libraries prevent.
@@ -473,10 +491,10 @@ make check-precision PRECISION_ARGS="-k Matched --faust-options=-vec"
 - **A second `init()`.** A host initializes an instance again to reset it or when the sample rate changes. `make check-reinit` renders every test after a second `init()` (48 kHz after 48 kHz, 192 kHz after 44.1 kHz, 44.1 kHz after 192 kHz) and requires the output of a fresh instance, sample for sample: a state `instanceClear()` does not reset, or a table or constant computed from the first rate, fails it. Its first run, in October 2026, found none among the 2349 tests.
 - **Float against double.** At each rate, compare the single and double precision renders of the same program. A well-conditioned structure stays within about 1e-5 to 1e-4 of the peak. A larger gap, or one that grows with the sample rate, points to a structure that loses precision in float. Recursive filters whose poles come close to z = 1 are the usual cause, that is, frequencies low relative to the sample rate. For example, a direct-form biquad (`fi.tf2`) with the coefficients of a 50 Hz second-order Butterworth lowpass differs by 0.2 % of its peak at 44.1 kHz and by 2.5 % at 192 kHz. Prefer a structure that stays accurate there, or document the limitation. A state-variable filter is one such structure: in the same conditions, `fi.svf.lp(50, 0.707)` stays within 2e-6.
 - **Compare on an input that is the same in both precisions**, such as `no.noise`, which is an integer generator, or `os.tosc`, a sine of an integer phase. `os.osc` accumulates its phase in the program's precision, so a sine input already differs between float and double by 0.1 % at 44.1 kHz and 1 % at 192 kHz, and hides the behavior of the code under test.
-- **Behavior across rates.** What should not depend on the sample rate must not: cutoff and resonance frequencies, formants, time constants, levels. Compute coefficients from `ma.SR`, and watch for anything set in samples (delay lengths, waveguide sections, block sizes) and for pre-warping or oversampling filters close to Nyquist at the lowest rates. When a model is only valid at some rates, say so in its documentation and, if possible, give a way to adapt it (see `pt.ticksPerSample`). `ma.SR` is clamped to 192 kHz (see `pl.SR`), so behavior above that rate is not guaranteed.
+- **Behavior across rates.** What should not depend on the sample rate must not: cutoff and resonance frequencies, formants, time constants, levels. Compute coefficients from `ma.SR`, and watch for anything set in samples (delay lengths, waveguide sections, block sizes) and for pre-warping or oversampling filters close to Nyquist at the lowest rates. When a model is only valid at some rates, say so in its documentation and, if possible, give a way to adapt it (see `pt.ticksPerSample`). `ma.SR` is clamped to 192 kHz (see `pl.SR`), so behavior above that rate is not guaranteed. `make check-sr` renders every test at 44.1, 96 and 192 kHz, with the noises made rate-independent, and fails when the shape of the spectrum, the level, the onset or the decay moves beyond `tests/sr-baseline.json` (`SR_ARGS="tests/xx_tests.dsp"` to restrict it); the claims checks below measure the cutoffs, pitches and aliasing of the filters, instruments and oscillators at each rate.
 - **Modulation.** When a parameter can change while the function runs, check two cases: a parameter that jumps between two distant values (for example a cutoff switching between 100 Hz and 5 kHz on an integer sample count, so that both precisions switch at the same sample), and a parameter modulated at audio rate. Compare the output peak with the static filter's. A structure whose states do not scale with the parameter can peak many times above it, or diverge: a direct-form resonant lowpass peaked about 2000 times above its static level in the first case and diverged in the second, in double precision too. The section [Digital Filter Sections Specified as Analog Filter Sections](libs/filters.md#digital-filter-sections-specified-as-analog-filter-sections) of the filters library describes a structure that does not.
 - **The domain of a new realization.** When a change replaces one realization by another (a direct form by `fi.tf2_tpt`, a filter by its state-variable form), check that what the new one receives stays within the domain its documentation states, over the full parameter ranges of every caller, the sliders of the demos included, and not only at the values of the tests. In October 2026, a pull request realized the allpass sections of `pf.vibrato2_mono` with `tf2_tpt`, whose documentation asks a design that reaches Nyquist to bound its frequency. The phaser places its notch `i` at `fratio^i` times the first one, so `dm.phaser2_demo`'s ranges put the fourth one at 640 kHz, aliasing across Nyquist many times per second: it peaked at 37.6 where the direct form peaked at 5.0 (noise in, feedback 0.9, width 10 Hz, at 44.1 kHz), and every test passed. Bound what the domain requires, as `fi.notchw` does and `pf.vibrato2_mono` now does at 0.95*PI, and pin the bound with a test at the edge of the domain (`vibrato2_mono_nyquist_test`). `make check-extremes` does not replace this check: it moves the controls of a test one at a time or all together, on the test's own input, and fails only on a hundredfold growth.
-- **Long runs.** A recursive state decaying towards zero must not linger in the subnormal range, which float reaches much earlier than double: flush it or check that the structure does not produce it. Integer counters such as `ba.time` wrap after 2^31 samples, that is 12.4 hours at 48 kHz: do not use them to detect the first sample, use `1'` or `1 - 1'`.
+- **Long runs.** A recursive state decaying towards zero must not linger in the subnormal range, which float reaches much earlier than double: flush it or check that the structure does not produce it. Integer counters such as `ba.time` wrap after 2^31 samples, that is 12.4 hours at 48 kHz: do not use them to detect the first sample, use `1'` or `1 - 1'`. `make check-long` renders every test for two minutes at 192 kHz in `-single` and `-double`, and fails on a non-finite output, a growing level, subnormal samples or a single/double drift beyond `tests/long-baseline.json` (`LONG_ARGS="tests/xx_tests.dsp"` to restrict it).
 
 For such hand checks, the `arch/print_arch.cpp` architecture used by `make check` takes the number of frames and the sample rate as arguments. For a program `probe.dsp` built around the new function, for instance `process = no.noise : fi.lowpass(4, 50);`, the following commands render one second at each rate in both precisions and print, for each rate, whether the output is finite, its peak, and the largest float/double difference relative to that peak:
 
@@ -516,11 +534,11 @@ ERROR : calling foreign function 'cbrtf' is not allowed in this compilation mode
 
 The whitelisted functions are not free on the web either: the WebAssembly module imports them from its JavaScript host, so extending the list takes a compiler change and the matching import in every runtime in use.
 
-So library code uses Faust primitives and the whitelisted functions only, however deep the call: `aa.sineFold1` stopped compiling for the web when it called the C `log1p` two levels down. The precise forms rule 9 asks for have portable tools: `ma.expm1` and `ma.log1p` are built on `sinh` and `atanh` (exact identities, 1.6e-7 in single precision), not on the C functions.
+So library code uses Faust primitives and the whitelisted functions only, however deep the call: `aa.sineFold1` stopped compiling for the web when it called the C `log1p` two levels down. The precise forms that [Precision and sample rate](#precision-and-sample-rate) asks for have portable tools: `ma.expm1` and `ma.log1p` are built on `sinh` and `atanh` (exact identities, 1.6e-7 in single precision), not on the C functions.
 
-`make check-doc` compiles every test for WebAssembly when a library or a test file differs from `HEAD` (about 15 s), and `make check-backends` does it for the six backends (about a minute; `BACKENDS_ARGS="--lang wasm"` to restrict it). Both also validate the WebAssembly modules with Node, as a browser does before running one, and run them: one second at 48 kHz, the inputs at 0, the controls at their default values and the buttons pressed for the first half, as `make check` runs the C++. A module can compile and still be rejected there, or stop when it runs (a trap: in October 2026, `int()` of a NaN did), or write a non-finite sample: a bug of faust to report, not a debt of the libraries, unless the C++ build in single precision gives the same value (`ma.MIN * 1e307` is infinite in single precision). The modules of the `soundfile` tests import their memory, which faustwasm's JavaScript glue provides with the sound files: they are validated, not run. `make check-backends` also has Cmajor compile and render every patch (`cmaj render`, one second at 48 kHz; it cannot press a button), and with `BACKENDS_ARGS=--run-julia` loads and runs the Julia code, buttons included: `faust -lang cmajor` or `-lang julia` succeeding does not mean that the target accepts the code, as Cmajor's `isinf` returning a `bool` and Julia's `sqrt` throwing on a negative number showed in October 2026. A Cmajor host starts an input at its default snapped to the slider's step, `round(init / step) * step` computed in float, which moves even a default on the grid by one float (0.2 with a step of 0.0001 starts at 0.19999999, a delay of `SR * 0.2` samples one sample short): faust leaves the step annotation out when that computation does not give the default back exactly (faust 2.90.20, 29 October 2026). Both compare the failures with `tests/backend-baseline.json`, the accepted debt: the tests of the non-portable functions themselves, `ma.BS` and `si.bsmooth` (the foreign variable `count`) on Cmajor and Codebox, and the `soundfile` tests on Cmajor, Codebox and Julia (the primitive is not supported) and Java (a compiler assertion). A test that fails and is not listed is a regression; a listed test that compiles again is removed from the list in the same commit. The error names the foreign function, and the test names the library function that calls it.
+`make check-doc` compiles every test for WebAssembly when a library or a test file differs from `HEAD` (about 15 s), and `make check-backends` does it for the six backends (a minute of compilation, about two with Cmajor's rendering; `BACKENDS_ARGS="--lang wasm"` to restrict it). Both also validate the WebAssembly modules with Node, as a browser does before running one, and run them: one second at 48 kHz, the inputs at 0, the controls at their default values and the buttons pressed for the first half, as `make check` runs the C++. A module can compile and still be rejected there, or stop when it runs (a trap: in October 2026, `int()` of a NaN did), or write a non-finite sample: a bug of faust to report, not a debt of the libraries, unless the C++ build in single precision gives the same value (`ma.MIN * 1e307` is infinite in single precision). The modules of the `soundfile` tests import their memory, which faustwasm's JavaScript glue provides with the sound files: they are validated, not run. `make check-backends` also has Cmajor compile and render every patch (`cmaj render`, one second at 48 kHz; it cannot press a button), and with `BACKENDS_ARGS=--run-julia` loads and runs the Julia code, buttons included: `faust -lang cmajor` or `-lang julia` succeeding does not mean that the target accepts the code, as Cmajor's `isinf` returning a `bool` and Julia's `sqrt` throwing on a negative number showed in October 2026. A Cmajor host starts an input at its default snapped to the slider's step, `round(init / step) * step` computed in float, which moves even a default on the grid by one float (0.2 with a step of 0.0001 starts at 0.19999999, a delay of `SR * 0.2` samples one sample short): faust leaves the step annotation out when that computation does not give the default back exactly (faust 2.90.20, 29 October 2026). Both compare the failures with `tests/backend-baseline.json`, the accepted debt: the tests of the non-portable functions themselves, `ma.BS` and `si.bsmooth` (the foreign variable `count`) on Cmajor and Codebox, and the `soundfile` tests on Cmajor, Codebox and Julia (the primitive is not supported) and Java (a compiler assertion). A test that fails and is not listed is a regression; a listed test that compiles again is removed from the list in the same commit. The error names the foreign function, and the test names the library function that calls it.
 
-A finite output is not a correct one. `make check-backend-outputs` (`check_backends.py --compare`) writes the outputs of WebAssembly and Cmajor (and Julia with `BACKEND_OUTPUTS_ARGS="--lang wasm,cmajor,julia --run-julia"`) and compares them with the C++ build in single precision, rendered with the same schedule, in blocks of 512 frames (buttons never pressed for Cmajor), compiled with `-ffp-contract=off`: clang contracts multiply-adds into fused ones on arm64 by default, which neither backend does, and that alone moves the level of `greyhole_test` by 4.5e-3. A test fails when its shape differs, when the RMS of a channel differs by more than 1e-3 (relative), or a sample by more than 1e-2 of the C++ peak, beyond `tests/backend-output-baseline.json`. Its first run, in October 2026, found two bugs of Cmajor's standard library behind finite outputs: `acos(x)` returns `acos(x) - pi` for negative `x` (the `aa.arccos` tests), and `sinh` and `atanh` give 0 near 0 in float32 (`expm1_slider_test`, `log1p_slider_test`, cmajor-lang/cmajor#141). Cmajor fixed both in November 2026, with its `asinh`, and the eleven Cmajor entries of the baseline were removed. WebAssembly matched the C++ build on every test but two, where isolated samples differ.
+A finite output is not a correct one. `make check-backend-outputs` (`check_backends.py --compare`) writes the outputs of WebAssembly and Cmajor (and Julia with `BACKEND_OUTPUTS_ARGS="--lang wasm,cmajor,julia --run-julia"`) and compares them with the C++ build in single precision, rendered with the same schedule, in blocks of 512 frames (buttons never pressed for Cmajor), compiled with `-ffp-contract=off`: clang contracts multiply-adds into fused ones on arm64 by default, which neither backend does, and that alone moves the level of `greyhole_test` by 4.5e-3. A test fails when its shape differs, when the RMS of a channel differs by more than 1e-3 (relative), or a sample by more than 1e-2 of the C++ peak, beyond `tests/backend-output-baseline.json`. Its first run, in October 2026, found two bugs of Cmajor's standard library behind finite outputs: `acos(x)` returns `acos(x) - pi` for negative `x` (the `aa.arccos` tests), and `sinh` and `atanh` give 0 near 0 in float32 (`expm1_slider_test`, `log1p_slider_test`, cmajor-lang/cmajor#141). Cmajor fixed both in November 2026, with its `asinh`, and the eleven Cmajor entries of the baseline were removed. WebAssembly matched the C++ build on every test but two, where isolated samples differ. A difference that Cmajor's or the browser's math library causes is reported to it, not hidden in the test or the baseline.
 
 faust looks for libraries in the current directory before the `-I` ones. To scan another checkout (a worktree, the head of a pull request), run the script of that checkout: it compiles from its own root, while a `faust` run by hand from this repository would test this repository's libraries.
 
@@ -545,6 +563,24 @@ For each test, the table gives the best time per frame in the two versions, thei
 - **Quote ratios from one run.** Times vary between machines, compilers and runs. The identity lines printed first name the machine, the compilers (with their paths) and the revisions, so include them with the table.
 
 Report the ratios, the compilations, and the absolute cost (% of a core) in the pull request. A slower function is acceptable when what it buys (precision, stability, a correct behavior) is worth it: say so explicitly.
+
+### Measured claims
+
+The references of `make check` are made by the code they test: they say that an output did not move, not that it is right. Three checks measure what the documentation promises, with `faustprobe` (from `faust-rs`), each against its own baseline:
+
+- `make check-filter-claims`: the filters of `filters.lib` and `vaeffects.lib`, their -3 dB points, peaks and independence from the sample rate (`tests/filter-claims-baseline.json`; `FILTER_CLAIMS_ARGS="--only fi.lowpass"`);
+- `make check-tuning`: the pitch of the `physmodels.lib` models and MIDI instruments from 44.1 to 192 kHz, about a minute (`tests/tuning-baseline.json`; `TUNING_ARGS="--only pm.ks"`);
+- `make check-osc-claims`: the oscillators of `oscillators.lib` and the antialiased functions of `aanl.lib`, their pitch, independence from the sample rate, aliasing and float noise, about a minute (`tests/osc-claims-baseline.json`; `OSC_CLAIMS_ARGS="--only os.sawN"`).
+
+Run the one that covers a function you change. `make verify-matched` proves the rewrites of the matched filters of `vaeffects.lib` and checks their coefficients at 60 digits.
+
+### What the tests detect
+
+`make check-mutation` writes small faults into a copy of the libraries, one at a time (a constant moved, an operator swapped, `x'` turned into `x`), and reports which ones the tests detect. It runs on a sample drawn with a fixed seed, in about an hour, and never touches the working tree; `MUTATION_ARGS="--lib filters.lib -n 50 --list-survivors"` restricts it to one library and lists the faults no test saw. A surviving fault in code you wrote is a test to add. `make check-vec` runs the whole regression suite with Faust's vectorized code generator (`-vec`).
+
+### Figures
+
+The figures in `doc/docs/img/` are measured from the libraries, and nothing regenerates them on its own: in October 2026, 13 of them still showed behavior fixed weeks before, and six property assertions of `scripts/plot_families.py` had been failing since. A change that alters a function's output runs `make check-plots` (about two minutes) before committing: it regenerates every figure aside, fails on a failed assertion, and lists the figures whose rendering changed. Run the whole check, not `--only` the function you changed: the seven `tu_*` figures depend on a table-interpolation helper that nothing in their names reveals. Regenerate the stale figures in the same commit with `make plots`, which rewrites only those, then rebuilds the pages that embed them; it must end with "all property assertions hold". An assertion that fails after a deliberate fix is updated to the fixed behavior in the same commit, and checked to fail on the code before the fix. `scripts/README.md`, section *Figures*, describes the generators.
 
 ## Formal certification (experimental, work in progress)
 
@@ -628,7 +664,10 @@ or the generator changed, if `lean` 4.31 and `faust-rs` are installed
 runs it). It fails on a verdict that moved, and only notes a term that changed
 with its verdict intact, which `make certify` still refuses until
 `make certify-reference`. It does not see a new compiler, which changes no
-file: run `make certify` after updating `faust-rs`.
+file: run `make certify` after updating `faust-rs`. A change that loses a
+verdict either teaches the prelude the new form, with its correctness argument
+in a comment, or accepts the refusal; in both cases `make certify-reference`
+runs in the same commit. Never reword a rule to get a verdict back.
 
 Two standing limits are worth knowing: certification applies to the exported
 signal graph (not to the generated C++/Rust code), and to the exact rationals
@@ -650,194 +689,44 @@ The site exposes an `llms.txt` file generated from `doc/docs/llms.txt` and publi
 
 ### Faust Library JSON Exports
 
-This repository can also generate machine-readable JSON exports of the Faust
-library documentation directly from the `.lib` sources.
+`scripts/build_faust_doc_index.py` parses the doc blocks of the `.lib` sources
+into a machine-readable index that LLM tools (the MCP servers,
+`scripts/faust_doc_api.py`) search without loading the libraries: for each
+documented symbol, its summary, usage, parameters, notes, test code,
+references, license and source, and its `io` (numbers of inputs and outputs),
+computed by the Faust compiler from the call of the Usage valued by the
+`#### Test` section. `make doc-index-split` writes it to `tests/faust-doc/` and
+`tests/faust-doc-index.json`, in one compact index plus one file per module,
+the layout suited to retrieval; `make doc-index-commercial` keeps only the
+symbols whose license passes a conservative `commercial-compatible` filter.
+`scripts/README.md`, section *JSON export*, describes the options, the license
+policy and the output paths.
 
-The generator is:
-
-```bash
-scripts/build_faust_doc_index.py
-```
-
-It parses documentation blocks from the library sources, starting from
-`stdfaust.lib`, follows `library("...")` and `import("...")` directives, and
-extracts for each documented symbol:
-
-- `summary`
-- `usage`
-- `params`
-- `notes`
-- `io` with `inSignals` / `outSignals`: computed by the Faust compiler from the
-  call of the Usage, its parameters valued by the `#### Test` section
-  (`"source": "faust"`, with the `parameterValues` the counts hold for, and
-  the `assumedValues` neither section gave), else guessed from the usage text
-  (`"source": "usage"`). The make targets compute them, which needs `faust`;
-  `make doc-index DOC_INDEX_IO=` guesses them without it.
-- `testCode`
-- `references`
-- `license` when a per-symbol `declare ... license|licence "..."` is present
-- `source`
-
-Two JSON layouts are supported:
-
-- monolithic: one full JSON file containing all libraries and symbols
-- split: one compact global index plus one detailed JSON file per module
-
-Default Make targets:
-
-```bash
-make doc-index
-make doc-index-split
-make doc-index-commercial
-```
-
-Default output locations:
-
-- `make doc-index` writes `tests/faust-doc-index.json`
-- `make doc-index-split` writes:
-  - `tests/faust-doc-index.json`
-  - `tests/faust-doc/index.json`
-  - `tests/faust-doc/modules/*.json`
-- `make doc-index-commercial` writes the same paths as `make doc-index-split`,
-  but filters the exported symbols using the `commercial-compatible` license
-  policy
-
-You can override the output paths:
-
-```bash
-make doc-index DOC_INDEX_OUTPUT=/tmp/faust-doc-index.json
-make doc-index-split DOC_INDEX_OUTPUT=/tmp/faust-doc-index.json DOC_INDEX_SPLIT_DIR=/tmp/faust-doc
-```
-
-You can also run the generator directly:
-
-```bash
-python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --pretty
-python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --split-output-dir tests/faust-doc --pretty
-python3 scripts/build_faust_doc_index.py --repo-root . --output tests/faust-doc-index.json --split-output-dir tests/faust-doc --license-policy commercial-compatible --pretty
-```
-
-License-policy filtering is optional. The supported values are:
-
-- `all`: export every documented symbol
-- `commercial-compatible`: keep only symbols that pass a conservative
-  per-symbol license heuristic
-
-The current `commercial-compatible` heuristic:
-
-- accepts missing per-symbol licenses and treats them as falling back to the
-  library default
-- accepts common permissive or weak-copyleft markers such as `MIT`, `BSD`,
-  `Apache`, `LGPL`, `LGPL with exception`, `MPL`, `ISC`, `zlib`, `Boost`,
-  `Unlicense`, `public domain`, and `STK-4.3`
-- rejects markers such as `GPL`, `AGPL`, and explicitly non-commercial terms
-
-This is a practical export filter for tooling, not a legal opinion.
-
-The policy can also be customized with external allowlist/denylist files:
-
-```bash
-python3 scripts/build_faust_doc_index.py \
-  --repo-root . \
-  --output tests/faust-doc-index.json \
-  --split-output-dir tests/faust-doc \
-  --license-policy commercial-compatible \
-  --license-allowlist-file /path/to/license-allowlist.txt \
-  --license-denylist-file /path/to/license-denylist.txt \
-  --pretty
-```
-
-These files use a simple newline-based format:
-
-- one token or pattern per line
-- matching is case-insensitive and based on substring inclusion
-- empty lines are ignored
-- lines starting with `#` are treated as comments
-
-Example:
-
-```text
-# Allow permissive licenses and a specific local marker
-mit
-bsd
-apache
-my-company-approved-license
-```
-
-The Make target also supports these overrides:
-
-```bash
-make doc-index-commercial \
-  DOC_INDEX_LICENSE_ALLOWLIST_FILE=/path/to/license-allowlist.txt \
-  DOC_INDEX_LICENSE_DENYLIST_FILE=/path/to/license-denylist.txt
-```
-
-The split layout is recommended for LLM or retrieval-based use because it avoids
-loading the whole documentation into context for every request.
+Keep these exports working. After a change to the documentation *format*
+(header shapes, section names, block structure), regenerate them
+(`make doc-index-split`) and check that the symbols you touched still come out
+with their summary, usage, parameters and license
+(`scripts/faust_doc_api.py get_faust_symbol xx.name`). `make check-doc` only
+guards the count of exported symbols, which may only grow: it cannot see a
+field that silently comes out empty. A new function whose `io` comes out with
+`"source": "usage"` instead of `"faust"` has a Usage that does not evaluate.
 
 ### Local Documentation Query API
 
-The repository also ships with a local query tool that reproduces the Faust
-library documentation operations used in `faustforge`:
+`scripts/faust_doc_api.py` queries that index with the operations of the
+Faust-library MCP tools used in `faustforge`: search by words, signal counts or
+license, a symbol's entry, a module's symbols, examples, and a symbol's doc
+block and definition read from its `.lib` file. Every command prints JSON, or
+a compact text rendering for LLM context with `--format text`:
 
 ```bash
-scripts/faust_doc_api.py
+make doc-index-split
+scripts/faust_doc_api.py --format text search_faust_lib lowpass butterworth
+scripts/faust_doc_api.py --pretty get_faust_symbol fi.lowpass
 ```
 
-Supported operations:
-
-- `search_faust_lib`
-- `get_faust_symbol`
-- `list_faust_module`
-- `get_faust_examples`
-- `explain_faust_symbol_for_goal`
-- `get_faust_source`, which prints a symbol's doc block and definition from its
-  `.lib` file
-
-`search_faust_lib` returns first the symbols containing the whole query as one
-phrase (the `faustforge` ranking), then those where every word of the query
-appears in the name, summary, usage, parameters or notes: `lowpass butterworth`
-finds `fi.lowpass`. It can filter by number of signals (`--inputs`,
-`--outputs`) and by license (`--license-policy commercial-compatible`, the
-policy of the commercial export). Every command prints JSON, or a compact text
-rendering with `--format text`, meant for LLM context.
-
-The tool can read either:
-
-- the monolithic export `tests/faust-doc-index.json`
-- the split export `tests/faust-doc/index.json`
-
-If `--index` is omitted, it tries these defaults in that order:
-
-1. `tests/faust-doc/index.json`
-2. `tests/faust-doc-index.json`
-
-Examples:
-
-```bash
-python3 scripts/faust_doc_api.py --pretty search_faust_lib reverb --limit 5
-python3 scripts/faust_doc_api.py --pretty search_faust_lib filter --module filters --limit 10
-python3 scripts/faust_doc_api.py --format text search_faust_lib lowpass butterworth
-python3 scripts/faust_doc_api.py --format text search_faust_lib reverb --outputs 2 --license-policy commercial-compatible
-
-python3 scripts/faust_doc_api.py --pretty get_faust_symbol de.delay
-python3 scripts/faust_doc_api.py --pretty list_faust_module delays --limit 20
-python3 scripts/faust_doc_api.py --pretty get_faust_examples delay
-python3 scripts/faust_doc_api.py --pretty explain_faust_symbol_for_goal re.springreverb "build a metallic spring reverb"
-python3 scripts/faust_doc_api.py --format text get_faust_source fi.dcblocker
-```
-
-To force a specific index location:
-
-```bash
-python3 scripts/faust_doc_api.py --index tests/faust-doc-index.json --pretty get_faust_symbol aa.Rsqrt
-python3 scripts/faust_doc_api.py --index tests/faust-doc --pretty list_faust_module filters --limit 10
-```
-
-The `make clean` target removes the generated JSON artifacts by default:
-
-- `tests/faust-doc-index.json`
-- `tests/faust-doc/`
+`scripts/README.md`, section *JSON export*, lists its commands and the
+ranking of the search.
 
 ### Licensing issue
 
@@ -859,13 +748,38 @@ When exposing Faust library data to LLM tools or retrieval systems:
 The local JSON export and query tooling can expose this information, so **license
 checks can be integrated into higher-level assistants and generation pipelines**.
 
+## Git history
+
+The history is linear and must stay that way: no merge commits since
+December 2020. Bisecting a library where a regression means "an audible
+output changed" depends on it.
+
+- Never `git merge` a branch that has diverged: rebase it onto its target,
+  then fast-forward (`git rebase master my-branch`, `git checkout master`,
+  `git merge --ff-only my-branch`).
+- Update from the remote with `git pull --rebase`. `git config pull.rebase true`
+  and `git config merge.ff only` make a stray pull refuse to create a merge.
+- One commit per coherent change: a library edit, its tests, its regenerated
+  documentation and its version bumps belong together, not spread over
+  commits that each leave `make check-doc` or `make check` failing. Squash the
+  work-in-progress commits of a branch before integrating it.
+- Rewrite history (`rebase`, `--amend`, squash) only before the commits are
+  pushed. Once they are on `origin`, fix forward with a new commit.
+- Do not commit build artifacts: the built site (`site/`), the test references
+  (`tests/reference/`), the test outputs and builds (`tests/output/`,
+  `tests/build*/`, `tests/output-sanitize/`) and the JSON exports
+  (`tests/faust-doc-index.json`, `tests/faust-doc/`). `.gitignore` covers
+  them, and `make clean` removes all but the references (`make distclean`
+  removes those too). Never force one in with `git add -f`, and never stage
+  with `git add -A` or `git commit -a`: name the files you mean.
 
 ## Library test and deployment
 
 For GRAME maintainers:
 
-- global tests can be done using the `make reference` and `make check` at rool level
-- regenerate the PDF documentation using `make pdf` target at rool level
+- global tests can be done using the `make reference` and `make check` at root level
+- run `make check-plots` before every `version.lib` bump (see [Figures](#figures))
+- regenerate the PDF documentation using `make pdf` target at root level
 - update the library submodule in [faust](https://github.com/grame-cncm/faust), recompile and deploy WebAssembly libfaust in [fausteditor](https://github.com/grame-cncm/fausteditor), [faustplayground](https://github.com/grame-cncm/faustplayground) and [faustide](https://github.com/grame-cncm/faustide)
 - update the library submodule in [faustlive](https://github.com/grame-cncm/faustlive) 
 - update the library list in this [fausteditor](https://github.com/grame-cncm/fausteditor/blob/master/src/faustlive.js) page as well as the [snippets](https://github.com/grame-cncm/fausteditor/blob/master/src/codemirror/mode/faust/faustsnippets.js) (using the `faust2atomsnippets -s *.lib` command at root level).
